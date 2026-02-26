@@ -16,6 +16,7 @@
 
 import type { Color } from './operators/color.js';
 import type { Angle } from './operators/state.js';
+import type { BlendMode } from './enums.js';
 import {
   beginText,
   endText,
@@ -162,6 +163,8 @@ export interface DrawTextOptions {
   lineHeight?: number | undefined;
   /** Opacity `[0, 1]`. */
   opacity?: number | undefined;
+  /** Blend mode for compositing. */
+  blendMode?: BlendMode | undefined;
   /**
    * Maximum width in points before text is automatically wrapped.
    *
@@ -189,6 +192,8 @@ export interface DrawImageOptions {
   rotate?: Angle | undefined;
   /** Opacity `[0, 1]`. */
   opacity?: number | undefined;
+  /** Blend mode for compositing. */
+  blendMode?: BlendMode | undefined;
 }
 
 /** Options for {@link PdfPage.drawRectangle}. */
@@ -211,6 +216,8 @@ export interface DrawRectangleOptions {
   rotate?: Angle | undefined;
   /** Opacity `[0, 1]`. */
   opacity?: number | undefined;
+  /** Blend mode for compositing. */
+  blendMode?: BlendMode | undefined;
 }
 
 /** Options for {@link PdfPage.drawLine}. */
@@ -229,6 +236,8 @@ export interface DrawLineOptions {
   dashPhase?: number | undefined;
   /** Opacity `[0, 1]`. */
   opacity?: number | undefined;
+  /** Blend mode for compositing. */
+  blendMode?: BlendMode | undefined;
 }
 
 /** Options for {@link PdfPage.drawCircle}. */
@@ -252,6 +261,8 @@ export interface DrawCircleOptions {
   borderWidth?: number | undefined;
   /** Opacity. */
   opacity?: number | undefined;
+  /** Blend mode for compositing. */
+  blendMode?: BlendMode | undefined;
 }
 
 /** Options for {@link PdfPage.drawEllipse}. */
@@ -272,6 +283,8 @@ export interface DrawEllipseOptions {
   borderWidth?: number | undefined;
   /** Opacity `[0, 1]`. */
   opacity?: number | undefined;
+  /** Blend mode for compositing. */
+  blendMode?: BlendMode | undefined;
 }
 
 /** Options for {@link PdfPage.drawSvgPath}. */
@@ -290,6 +303,30 @@ export interface DrawSvgPathOptions {
   borderWidth?: number | undefined;
   /** Opacity `[0, 1]`. */
   opacity?: number | undefined;
+  /** Blend mode for compositing. */
+  blendMode?: BlendMode | undefined;
+}
+
+/** Options for {@link PdfPage.drawSquare}. */
+export interface DrawSquareOptions {
+  /** X coordinate. */
+  x?: number | undefined;
+  /** Y coordinate. */
+  y?: number | undefined;
+  /** Side length of the square.  Defaults to `100`. */
+  size?: number | undefined;
+  /** Fill colour. */
+  color?: Color | undefined;
+  /** Border (stroke) colour. */
+  borderColor?: Color | undefined;
+  /** Border width in points. */
+  borderWidth?: number | undefined;
+  /** Rotation angle. */
+  rotate?: Angle | undefined;
+  /** Opacity `[0, 1]`. */
+  opacity?: number | undefined;
+  /** Blend mode for compositing. */
+  blendMode?: BlendMode | undefined;
 }
 
 // ---------------------------------------------------------------------------
@@ -508,10 +545,11 @@ export class PdfPage {
   private extGStateCounter = 0;
 
   /**
-   * Cache mapping opacity values to their ExtGState resource names,
-   * so the same opacity value reuses the same graphics state dictionary.
+   * Cache mapping composite keys (opacity + blend mode) to their ExtGState
+   * resource names, so the same combination reuses the same graphics state
+   * dictionary.
    */
-  private readonly opacityToGSName = new Map<number, string>();
+  private readonly extGStateCache = new Map<string, string>();
 
   // -----------------------------------------------------------------------
   // Page-level drawing defaults
@@ -741,20 +779,24 @@ export class PdfPage {
   // -----------------------------------------------------------------------
 
   /**
-   * Get or create an ExtGState resource for the given opacity value.
+   * Get or create an ExtGState resource for the given opacity and/or
+   * blend mode.
    *
-   * Creates a PDF ExtGState dictionary with both `/ca` (fill opacity) and
-   * `/CA` (stroke opacity) set to the provided value.  The dictionary is
-   * registered in the object registry and cached so that repeated use of
-   * the same opacity value shares a single resource.
+   * Creates a PDF ExtGState dictionary with `/ca` + `/CA` (when opacity
+   * is less than 1) and `/BM` (when a non-Normal blend mode is specified).
+   * The dictionary is registered in the object registry and cached so that
+   * the same combination of parameters shares a single resource.
    *
-   * @param opacity  Opacity value in the range `[0, 1]`.
+   * @param opacity    Opacity value in the range `[0, 1]` (optional).
+   * @param blendMode  A PDF blend mode name (optional).
    * @returns The resource name (e.g. `GS1`) to use in content stream operators.
    * @internal
    */
-  private getOrCreateExtGState(opacity: number): string {
-    // Reuse existing graphics state for this opacity value
-    const existing = this.opacityToGSName.get(opacity);
+  private getOrCreateExtGState(opacity?: number, blendMode?: string): string {
+    const cacheKey = `${opacity ?? 1}:${blendMode ?? 'Normal'}`;
+
+    // Reuse existing graphics state for this combination
+    const existing = this.extGStateCache.get(cacheKey);
     if (existing) return existing;
 
     this.extGStateCounter++;
@@ -763,13 +805,20 @@ export class PdfPage {
     // Build the ExtGState dictionary
     const gsDict = new PdfDict();
     gsDict.set('/Type', PdfName.of('ExtGState'));
-    gsDict.set('/ca', PdfNumber.of(opacity));  // Fill opacity
-    gsDict.set('/CA', PdfNumber.of(opacity));  // Stroke opacity
+
+    if (opacity !== undefined && opacity < 1) {
+      gsDict.set('/ca', PdfNumber.of(opacity));  // Fill opacity
+      gsDict.set('/CA', PdfNumber.of(opacity));  // Stroke opacity
+    }
+
+    if (blendMode !== undefined && blendMode !== 'Normal') {
+      gsDict.set('/BM', PdfName.of(blendMode));
+    }
 
     // Register in the object registry and store the reference
     const gsRef = this.registry.register(gsDict);
     this.extGStates.set(gsName, gsRef);
-    this.opacityToGSName.set(opacity, gsName);
+    this.extGStateCache.set(cacheKey, gsName);
 
     return gsName;
   }
@@ -820,9 +869,11 @@ export class PdfPage {
 
     this.ops += saveState();
 
-    // Opacity (via ExtGState)
-    if (options.opacity !== undefined && options.opacity < 1) {
-      const gsName = this.getOrCreateExtGState(options.opacity);
+    // Opacity and/or blend mode (via ExtGState)
+    const needsGS = (options.opacity !== undefined && options.opacity < 1) ||
+                    (options.blendMode !== undefined && options.blendMode !== 'Normal');
+    if (needsGS) {
+      const gsName = this.getOrCreateExtGState(options.opacity, options.blendMode);
       this.ops += setGraphicsState(gsName);
     }
 
@@ -900,11 +951,14 @@ export class PdfPage {
     // Ensure the image is registered on this page
     this.registerXObject(image.name, image.ref);
 
+    const needsGS = (options.opacity !== undefined && options.opacity < 1) ||
+                    (options.blendMode !== undefined && options.blendMode !== 'Normal');
+
     if (options.rotate) {
       this.ops += saveState();
-      // Opacity (via ExtGState)
-      if (options.opacity !== undefined && options.opacity < 1) {
-        const gsName = this.getOrCreateExtGState(options.opacity);
+      // Opacity and/or blend mode (via ExtGState)
+      if (needsGS) {
+        const gsName = this.getOrCreateExtGState(options.opacity, options.blendMode);
         this.ops += setGraphicsState(gsName);
       }
       const rad = toRadians(options.rotate);
@@ -921,9 +975,9 @@ export class PdfPage {
       );
       this.ops += drawXObject(image.name);
       this.ops += restoreState();
-    } else if (options.opacity !== undefined && options.opacity < 1) {
+    } else if (needsGS) {
       this.ops += saveState();
-      const gsName = this.getOrCreateExtGState(options.opacity);
+      const gsName = this.getOrCreateExtGState(options.opacity, options.blendMode);
       this.ops += setGraphicsState(gsName);
       this.ops += drawImageXObject(image.name, x, y, width, height);
       this.ops += restoreState();
@@ -969,9 +1023,11 @@ export class PdfPage {
 
     this.ops += saveState();
 
-    // Opacity (via ExtGState)
-    if (options.opacity !== undefined && options.opacity < 1) {
-      const gsName = this.getOrCreateExtGState(options.opacity);
+    // Opacity and/or blend mode (via ExtGState)
+    const needsGS = (options.opacity !== undefined && options.opacity < 1) ||
+                    (options.blendMode !== undefined && options.blendMode !== 'Normal');
+    if (needsGS) {
+      const gsName = this.getOrCreateExtGState(options.opacity, options.blendMode);
       this.ops += setGraphicsState(gsName);
     }
 
@@ -1017,9 +1073,11 @@ export class PdfPage {
 
     this.ops += saveState();
 
-    // Opacity (via ExtGState)
-    if (options.opacity !== undefined && options.opacity < 1) {
-      const gsName = this.getOrCreateExtGState(options.opacity);
+    // Opacity and/or blend mode (via ExtGState)
+    const needsGS = (options.opacity !== undefined && options.opacity < 1) ||
+                    (options.blendMode !== undefined && options.blendMode !== 'Normal');
+    if (needsGS) {
+      const gsName = this.getOrCreateExtGState(options.opacity, options.blendMode);
       this.ops += setGraphicsState(gsName);
     }
 
@@ -1062,14 +1120,37 @@ export class PdfPage {
   }
 
   /**
+   * Draw a square (convenience wrapper around {@link drawRectangle}).
+   *
+   * @param options  Position, size, colours, rotation, opacity, blend mode.
+   */
+  drawSquare(options: DrawSquareOptions = {}): void {
+    const s = options.size ?? 100;
+    this.drawRectangle({
+      x: options.x,
+      y: options.y,
+      width: s,
+      height: s,
+      color: options.color,
+      borderColor: options.borderColor,
+      borderWidth: options.borderWidth,
+      rotate: options.rotate,
+      opacity: options.opacity,
+      blendMode: options.blendMode,
+    });
+  }
+
+  /**
    * Draw a straight line.
    */
   drawLine(options: DrawLineOptions): void {
     this.ops += saveState();
 
-    // Opacity (via ExtGState)
-    if (options.opacity !== undefined && options.opacity < 1) {
-      const gsName = this.getOrCreateExtGState(options.opacity);
+    // Opacity and/or blend mode (via ExtGState)
+    const needsGS = (options.opacity !== undefined && options.opacity < 1) ||
+                    (options.blendMode !== undefined && options.blendMode !== 'Normal');
+    if (needsGS) {
+      const gsName = this.getOrCreateExtGState(options.opacity, options.blendMode);
       this.ops += setGraphicsState(gsName);
     }
 
@@ -1102,9 +1183,11 @@ export class PdfPage {
 
     this.ops += saveState();
 
-    // Opacity (via ExtGState)
-    if (options.opacity !== undefined && options.opacity < 1) {
-      const gsName = this.getOrCreateExtGState(options.opacity);
+    // Opacity and/or blend mode (via ExtGState)
+    const needsGS = (options.opacity !== undefined && options.opacity < 1) ||
+                    (options.blendMode !== undefined && options.blendMode !== 'Normal');
+    if (needsGS) {
+      const gsName = this.getOrCreateExtGState(options.opacity, options.blendMode);
       this.ops += setGraphicsState(gsName);
     }
 
@@ -1146,9 +1229,11 @@ export class PdfPage {
 
     this.ops += saveState();
 
-    // Opacity (via ExtGState)
-    if (options.opacity !== undefined && options.opacity < 1) {
-      const gsName = this.getOrCreateExtGState(options.opacity);
+    // Opacity and/or blend mode (via ExtGState)
+    const needsGS = (options.opacity !== undefined && options.opacity < 1) ||
+                    (options.blendMode !== undefined && options.blendMode !== 'Normal');
+    if (needsGS) {
+      const gsName = this.getOrCreateExtGState(options.opacity, options.blendMode);
       this.ops += setGraphicsState(gsName);
     }
 
@@ -1574,9 +1659,11 @@ export class PdfPage {
 
     this.ops += saveState();
 
-    // Opacity (via ExtGState)
-    if (options.opacity !== undefined && options.opacity < 1) {
-      const gsName = this.getOrCreateExtGState(options.opacity);
+    // Opacity and/or blend mode (via ExtGState)
+    const needsGS = (options.opacity !== undefined && options.opacity < 1) ||
+                    (options.blendMode !== undefined && options.blendMode !== 'Normal');
+    if (needsGS) {
+      const gsName = this.getOrCreateExtGState(options.opacity, options.blendMode);
       this.ops += setGraphicsState(gsName);
     }
 

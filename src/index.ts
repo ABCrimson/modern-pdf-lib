@@ -36,6 +36,7 @@ export type {
   DrawTextOptions,
   DrawImageOptions,
   DrawRectangleOptions,
+  DrawSquareOptions,
   DrawLineOptions,
   DrawCircleOptions,
   DrawEllipseOptions,
