@@ -574,6 +574,16 @@ export class PdfPage {
   /** Default line height used by `drawText()` when no `lineHeight` option is provided. */
   private _defaultLineHeight?: number;
 
+  // -----------------------------------------------------------------------
+  // Cursor position
+  // -----------------------------------------------------------------------
+
+  /** Current cursor X coordinate (used as fallback when x is not specified). */
+  private _cursorX = 0;
+
+  /** Current cursor Y coordinate (used as fallback when y is not specified). */
+  private _cursorY = 0;
+
   /** Pre-allocated indirect reference for this page's /Page dictionary. */
   readonly pageRef: PdfRef;
 
@@ -782,6 +792,95 @@ export class PdfPage {
   }
 
   // -----------------------------------------------------------------------
+  // Cursor position
+  // -----------------------------------------------------------------------
+
+  /**
+   * Get the current cursor position.
+   *
+   * @returns An object with `x` and `y` properties (in points).
+   */
+  getPosition(): { x: number; y: number } {
+    return { x: this._cursorX, y: this._cursorY };
+  }
+
+  /**
+   * Get the current cursor X coordinate.
+   *
+   * @returns The X coordinate in points.
+   */
+  getX(): number {
+    return this._cursorX;
+  }
+
+  /**
+   * Get the current cursor Y coordinate.
+   *
+   * @returns The Y coordinate in points.
+   */
+  getY(): number {
+    return this._cursorY;
+  }
+
+  /**
+   * Move the cursor to an absolute position.
+   *
+   * Drawing methods that accept optional `x` / `y` parameters will use the
+   * cursor position as a fallback when those parameters are omitted.
+   *
+   * @param x  The X coordinate in points.
+   * @param y  The Y coordinate in points.
+   */
+  moveTo(x: number, y: number): void {
+    this._cursorX = x;
+    this._cursorY = y;
+  }
+
+  /**
+   * Move the cursor upward by the given amount (increases Y).
+   *
+   * @param amount  Distance in points.
+   */
+  moveUp(amount: number): void {
+    this._cursorY += amount;
+  }
+
+  /**
+   * Move the cursor downward by the given amount (decreases Y).
+   *
+   * @param amount  Distance in points.
+   */
+  moveDown(amount: number): void {
+    this._cursorY -= amount;
+  }
+
+  /**
+   * Move the cursor to the right by the given amount (increases X).
+   *
+   * @param amount  Distance in points.
+   */
+  moveRight(amount: number): void {
+    this._cursorX += amount;
+  }
+
+  /**
+   * Move the cursor to the left by the given amount (decreases X).
+   *
+   * @param amount  Distance in points.
+   */
+  moveLeft(amount: number): void {
+    this._cursorX -= amount;
+  }
+
+  /**
+   * Reset the cursor position to `(0, 0)`.
+   */
+  resetPosition(): void {
+    this._cursorX = 0;
+    this._cursorY = 0;
+  }
+
+  // -----------------------------------------------------------------------
   // ExtGState management (opacity)
   // -----------------------------------------------------------------------
 
@@ -841,8 +940,8 @@ export class PdfPage {
    * @param options  Position, font, size, colour, rotation.
    */
   drawText(text: string, options: DrawTextOptions = {}): void {
-    const x = options.x ?? 0;
-    const y = options.y ?? 0;
+    const x = options.x ?? this._cursorX;
+    const y = options.y ?? this._cursorY;
     const size = options.size ?? this._defaultFontSize ?? 12;
 
     // Resolve the effective font: explicit option -> page default -> fallback 'F1'
@@ -973,8 +1072,8 @@ export class PdfPage {
    * @param options  Position, dimensions, rotation.
    */
   drawImage(image: ImageRef, options: DrawImageOptions = {}): void {
-    const x = options.x ?? 0;
-    const y = options.y ?? 0;
+    const x = options.x ?? this._cursorX;
+    const y = options.y ?? this._cursorY;
     const width = options.width ?? image.width;
     const height = options.height ?? image.height;
 
@@ -1038,8 +1137,8 @@ export class PdfPage {
    * ```
    */
   drawPage(embeddedPage: EmbeddedPdfPage, options: DrawPageOptions = {}): void {
-    const x = options.x ?? 0;
-    const y = options.y ?? 0;
+    const x = options.x ?? this._cursorX;
+    const y = options.y ?? this._cursorY;
     const width = options.width ?? embeddedPage.width;
     const height = options.height ?? embeddedPage.height;
 
@@ -1094,8 +1193,8 @@ export class PdfPage {
    * `undefined` and provide `borderColor` for stroke-only.
    */
   drawRectangle(options: DrawRectangleOptions = {}): void {
-    const x = options.x ?? 0;
-    const y = options.y ?? 0;
+    const x = options.x ?? this._cursorX;
+    const y = options.y ?? this._cursorY;
     const w = options.width ?? 150;
     const h = options.height ?? 100;
     const hasFill = options.color !== undefined;
@@ -1205,8 +1304,8 @@ export class PdfPage {
    * Draw a circle.
    */
   drawCircle(options: DrawCircleOptions = {}): void {
-    const cx = options.x ?? 0;
-    const cy = options.y ?? 0;
+    const cx = options.x ?? this._cursorX;
+    const cy = options.y ?? this._cursorY;
     const r = options.radius ?? options.size ?? 50;
     const hasFill = options.color !== undefined;
     const hasStroke = options.borderColor !== undefined;
@@ -1250,8 +1349,8 @@ export class PdfPage {
    * Draw an ellipse.
    */
   drawEllipse(options: DrawEllipseOptions = {}): void {
-    const cx = options.x ?? 0;
-    const cy = options.y ?? 0;
+    const cx = options.x ?? this._cursorX;
+    const cy = options.y ?? this._cursorY;
     const rx = options.xScale ?? 100;
     const ry = options.yScale ?? 50;
     const hasFill = options.color !== undefined;
@@ -1681,8 +1780,8 @@ export class PdfPage {
     const commands = parseSvgPath(pathData);
     if (commands.length === 0) return;
 
-    const x = options.x ?? 0;
-    const y = options.y ?? 0;
+    const x = options.x ?? this._cursorX;
+    const y = options.y ?? this._cursorY;
     const scaleFactor = options.scale ?? 1;
     const hasFill = options.color !== undefined;
     const hasStroke = options.borderColor !== undefined;
