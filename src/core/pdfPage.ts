@@ -637,6 +637,11 @@ export class PdfPage {
   /** @internal */
   private mediaHeight: number;
 
+  /** Original page width from construction time (used by resetSize). */
+  private readonly _originalWidth: number;
+  /** Original page height from construction time (used by resetSize). */
+  private readonly _originalHeight: number;
+
   // -----------------------------------------------------------------------
   // Content preservation for loaded (parsed) PDFs
   // -----------------------------------------------------------------------
@@ -671,6 +676,8 @@ export class PdfPage {
     this.mediaY = 0;
     this.mediaWidth = w;
     this.mediaHeight = h;
+    this._originalWidth = w;
+    this._originalHeight = h;
     this.pageRef = registry.allocate();
     this.contentStreamRef = registry.allocate();
   }
@@ -1500,6 +1507,48 @@ export class PdfPage {
   /** Get the page width and height as an object. */
   getSize(): { width: number; height: number } {
     return { width: this.mediaWidth, height: this.mediaHeight };
+  }
+
+  // -----------------------------------------------------------------------
+  // Page transforms
+  // -----------------------------------------------------------------------
+
+  /** Reset page dimensions to their original values from creation time. */
+  resetSize(): void {
+    this.mediaWidth = this._originalWidth;
+    this.mediaHeight = this._originalHeight;
+  }
+
+  /** Translate all page content by (x, y) points. Prepends a cm operator. */
+  translateContent(x: number, y: number): void {
+    this.ops = concatMatrix(1, 0, 0, 1, x, y) + this.ops;
+  }
+
+  /** Scale page content by the given factors. Prepends a cm operator. */
+  scaleContent(xFactor: number, yFactor: number): void {
+    this.ops = concatMatrix(xFactor, 0, 0, yFactor, 0, 0) + this.ops;
+  }
+
+  /** Scale annotation rectangles by the given factors. */
+  scaleAnnotations(xFactor: number, yFactor: number): void {
+    for (const annot of this.annotations) {
+      const rect = annot.getRect();
+      if (rect) {
+        annot.setRect([
+          rect[0] * xFactor,
+          rect[1] * yFactor,
+          rect[2] * xFactor,
+          rect[3] * yFactor,
+        ]);
+      }
+    }
+  }
+
+  /** Scale page dimensions, content, and annotations together. */
+  scale(xFactor: number, yFactor: number): void {
+    this.setSize(this.mediaWidth * xFactor, this.mediaHeight * yFactor);
+    this.scaleContent(xFactor, yFactor);
+    this.scaleAnnotations(xFactor, yFactor);
   }
 
   // -----------------------------------------------------------------------
