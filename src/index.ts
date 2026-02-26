@@ -280,6 +280,7 @@ export {
   createXmpStream,
   buildViewerPreferencesDict,
   parseViewerPreferences,
+  PdfViewerPreferences,
 } from './metadata/index.js';
 export type { ViewerPreferences } from './metadata/index.js';
 

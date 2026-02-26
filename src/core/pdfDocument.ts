@@ -53,6 +53,7 @@ import type { PdfOutlineItem, OutlineDestination, OutlineItemOptions } from '../
 import { buildXmpMetadata, parseXmpMetadata, createXmpStream } from '../metadata/xmpMetadata.js';
 import { buildViewerPreferencesDict, parseViewerPreferences } from '../metadata/viewerPreferences.js';
 import type { ViewerPreferences } from '../metadata/viewerPreferences.js';
+import { PdfViewerPreferences } from '../metadata/pdfViewerPreferences.js';
 import { PdfStructureTree } from '../accessibility/structureTree.js';
 import type { AccessibilityIssue } from '../accessibility/structureTree.js';
 import { checkAccessibility } from '../accessibility/accessibilityChecker.js';
@@ -1535,13 +1536,22 @@ export class PdfDocument {
   /** Viewer preferences, if set. */
   private viewerPrefs: ViewerPreferences | undefined;
 
+  /** Cached PdfViewerPreferences instance. */
+  private _viewerPrefsInstance?: PdfViewerPreferences;
+
   /**
-   * Get the viewer preferences for this document.
+   * Get the viewer preferences for this document as a
+   * {@link PdfViewerPreferences} instance with getter/setter pairs.
    *
-   * Returns an empty object if no preferences have been set.
+   * If no preferences have been set, a default (empty) instance is
+   * returned.  The instance is cached so that repeated calls return
+   * the same object and mutations are preserved.
    */
-  getViewerPreferences(): ViewerPreferences {
-    return this.viewerPrefs ?? {};
+  getViewerPreferences(): PdfViewerPreferences {
+    if (!this._viewerPrefsInstance) {
+      this._viewerPrefsInstance = new PdfViewerPreferences(this.viewerPrefs ?? {});
+    }
+    return this._viewerPrefsInstance;
   }
 
   /**
@@ -1550,10 +1560,19 @@ export class PdfDocument {
    * Controls how the document is displayed when opened in a PDF viewer
    * (toolbar visibility, window sizing, print options, etc.).
    *
+   * Accepts either a plain {@link ViewerPreferences} object or a
+   * {@link PdfViewerPreferences} class instance.
+   *
    * @param prefs  The viewer preferences to set.
    */
-  setViewerPreferences(prefs: ViewerPreferences): void {
-    this.viewerPrefs = prefs;
+  setViewerPreferences(prefs: ViewerPreferences | PdfViewerPreferences): void {
+    if (prefs instanceof PdfViewerPreferences) {
+      this._viewerPrefsInstance = prefs;
+      this.viewerPrefs = prefs.toObject();
+    } else {
+      this.viewerPrefs = prefs;
+      this._viewerPrefsInstance = undefined;
+    }
   }
 
   // -----------------------------------------------------------------------
@@ -1909,8 +1928,11 @@ export class PdfDocument {
         catalogObj.set('/Metadata', metaRef);
       }
 
-      // Viewer Preferences
-      if (this.viewerPrefs !== undefined) {
+      // Viewer Preferences — sync from the class instance if it exists
+      if (this._viewerPrefsInstance) {
+        this.viewerPrefs = this._viewerPrefsInstance.toObject();
+      }
+      if (this.viewerPrefs !== undefined && Object.keys(this.viewerPrefs).length > 0) {
         const prefsDict = buildViewerPreferencesDict(this.viewerPrefs);
         catalogObj.set('/ViewerPreferences', prefsDict);
       }
