@@ -183,6 +183,17 @@ export interface DrawTextOptions {
    * option is ignored.
    */
   maxWidth?: number | undefined;
+  /**
+   * Characters at which text may be broken when wrapping.
+   *
+   * Defaults to `[' ']` (space only).  Pass additional characters such as
+   * `[' ', '-', '/']` to allow breaks at hyphens, slashes, etc.
+   *
+   * The break character is kept at the **end** of the preceding line
+   * (e.g. `'hello-'` / `'world'`), except for space which is consumed
+   * as in the default behaviour.
+   */
+  wordBreaks?: string[] | undefined;
 }
 
 /** Options for {@link PdfPage.drawImage}. */
@@ -414,6 +425,7 @@ export function wrapText(
   maxWidth: number,
   font: FontRef | string,
   size: number,
+  wordBreaks?: string[],
 ): string[] {
   // If font is a string, we have no measurement capability — return as-is
   if (typeof font === 'string') {
@@ -425,41 +437,80 @@ export function wrapText(
     return [text];
   }
 
-  const words = text.split(' ');
+  const breaks = wordBreaks ?? [' '];
+
+  // Build a regex that splits text into segments (word + trailing break char).
+  // Using a capturing group in split keeps the separators in the result array.
+  const escaped = breaks.map(c => c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+  const pattern = new RegExp(`(${escaped.join('|')})`);
+  const parts = text.split(pattern);
+
+  // Reassemble into "tokens" where each token is a word plus its trailing
+  // separator (if any).  For space breaks the separator is consumed (not
+  // appended to the token), matching the traditional behaviour.
+  const tokens: string[] = [];
+  let i = 0;
+  while (i < parts.length) {
+    const segment = parts[i]!;
+    const sep = i + 1 < parts.length ? parts[i + 1]! : '';
+    if (sep === ' ') {
+      // Space separator: token is just the word (space is consumed)
+      tokens.push(segment);
+      i += 2;
+    } else if (sep !== '' && breaks.includes(sep)) {
+      // Non-space separator: attach it to the end of the token
+      tokens.push(segment + sep);
+      i += 2;
+    } else {
+      // No separator (last segment)
+      tokens.push(segment);
+      i += 1;
+    }
+  }
+
   const lines: string[] = [];
   let currentLine = '';
 
-  for (const word of words) {
+  for (const token of tokens) {
+    // Skip empty tokens that can result from consecutive separators
+    if (token === '') continue;
+
     if (currentLine === '') {
-      // Starting a new line.  Check if the word itself fits.
-      if (font.widthOfTextAtSize(word, size) <= maxWidth) {
-        currentLine = word;
+      // Starting a new line.  Check if the token itself fits.
+      if (font.widthOfTextAtSize(token, size) <= maxWidth) {
+        currentLine = token;
       } else {
-        // Word exceeds maxWidth — break at character level
-        const charLines = breakWord(word, maxWidth, font, size);
-        // All but the last fragment become full lines
-        for (let i = 0; i < charLines.length - 1; i++) {
-          lines.push(charLines[i]!);
+        // Token exceeds maxWidth — break at character level
+        const charLines = breakWord(token, maxWidth, font, size);
+        for (let j = 0; j < charLines.length - 1; j++) {
+          lines.push(charLines[j]!);
         }
         currentLine = charLines.at(-1)!;
       }
     } else {
-      // Try appending the word to the current line
-      const candidate = currentLine + ' ' + word;
+      // Determine the glue between the current line and the next token.
+      // If the current line already ends with a non-space break character,
+      // no extra space is needed.  Otherwise join with a space (when space
+      // is a break character) or directly concatenate.
+      const lastChar = currentLine[currentLine.length - 1]!;
+      const glue = breaks.includes(' ') && !breaks.some(b => b !== ' ' && lastChar === b)
+        ? ' '
+        : '';
+      const candidate = currentLine + glue + token;
       if (font.widthOfTextAtSize(candidate, size) <= maxWidth) {
         currentLine = candidate;
       } else {
         // Current line is full — push it and start a new line
         lines.push(currentLine);
 
-        // Check if the word itself fits on a fresh line
-        if (font.widthOfTextAtSize(word, size) <= maxWidth) {
-          currentLine = word;
+        // Check if the token itself fits on a fresh line
+        if (font.widthOfTextAtSize(token, size) <= maxWidth) {
+          currentLine = token;
         } else {
-          // Word exceeds maxWidth — break at character level
-          const charLines = breakWord(word, maxWidth, font, size);
-          for (let i = 0; i < charLines.length - 1; i++) {
-            lines.push(charLines[i]!);
+          // Token exceeds maxWidth — break at character level
+          const charLines = breakWord(token, maxWidth, font, size);
+          for (let j = 0; j < charLines.length - 1; j++) {
+            lines.push(charLines[j]!);
           }
           currentLine = charLines.at(-1)!;
         }
@@ -1044,7 +1095,7 @@ export class PdfPage {
         ? effectiveFont as FontRef
         : fontName;
       for (const rawLine of rawLines) {
-        const wrapped = wrapText(rawLine, options.maxWidth, fontForWrapping, size);
+        const wrapped = wrapText(rawLine, options.maxWidth, fontForWrapping, size, options.wordBreaks);
         lines.push(...wrapped);
       }
     } else {
