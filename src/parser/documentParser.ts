@@ -57,6 +57,12 @@ export interface LoadPdfOptions {
    * current time when saving. Defaults to true.
    */
   updateMetadata?: boolean;
+  /**
+   * Number of objects to process per event-loop tick during parsing.
+   * Lower values keep the main thread more responsive in browsers.
+   * Defaults to `Infinity` (no throttling).
+   */
+  objectsPerTick?: number;
 }
 
 // ---------------------------------------------------------------------------
@@ -228,7 +234,7 @@ export class PdfDocumentParser {
     }
 
     // Step 7: Build the PdfDocument
-    const doc = this.buildDocument(options);
+    const doc = await this.buildDocument(options);
 
     return doc;
   }
@@ -1056,9 +1062,12 @@ export class PdfDocumentParser {
    * pages and metadata. The resulting document can be modified and
    * saved back to bytes.
    */
-  private buildDocument(options?: LoadPdfOptions): PdfDocument {
+  private async buildDocument(options?: LoadPdfOptions): Promise<PdfDocument> {
     // Register all resolved objects in the parser's registry so they
     // can be serialized when the document is saved.
+    const objectsPerTick = options?.objectsPerTick ?? Infinity;
+    let objectsThisTick = 0;
+
     for (const [objNum, entry] of this.xrefEntries) {
       if (entry.type === 'in-use' || entry.type === 'compressed') {
         try {
@@ -1069,6 +1078,12 @@ export class PdfDocumentParser {
           }
         } catch {
           // Skip objects that fail to resolve
+        }
+
+        objectsThisTick++;
+        if (objectsThisTick >= objectsPerTick) {
+          await new Promise<void>((r) => setTimeout(r, 0));
+          objectsThisTick = 0;
         }
       }
     }
