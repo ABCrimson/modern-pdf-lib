@@ -22,7 +22,7 @@
 // ---------------------------------------------------------------------------
 
 export { createPdf, PdfDocument, StandardFonts } from './core/pdfDocument.js';
-export type { StandardFontName } from './core/pdfDocument.js';
+export type { StandardFontName, EmbedFontOptions } from './core/pdfDocument.js';
 
 // ---------------------------------------------------------------------------
 // Page API

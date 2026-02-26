@@ -100,6 +100,16 @@ export const StandardFonts = {
 
 export type StandardFontName = (typeof StandardFonts)[keyof typeof StandardFonts];
 
+/**
+ * Options for font embedding.
+ */
+export interface EmbedFontOptions {
+  /** Whether to subset the font to reduce file size. Default: true. */
+  subset?: boolean | undefined;
+  /** OpenType feature flags. e.g., { kern: true, liga: true }. */
+  features?: Record<string, boolean> | undefined;
+}
+
 // ---------------------------------------------------------------------------
 // PdfDocument
 // ---------------------------------------------------------------------------
@@ -486,9 +496,13 @@ export class PdfDocument {
    * `heightAtSize()` methods for text measurement.
    *
    * @param fontNameOrData  Base font name string or raw TTF/OTF bytes.
+   * @param options         Optional embedding options (subset, OpenType features).
    * @returns               A {@link FontRef} to pass to drawing methods.
    */
-  async embedFont(fontNameOrData: string | Uint8Array): Promise<FontRef> {
+  async embedFont(
+    fontNameOrData: string | Uint8Array,
+    options?: EmbedFontOptions,
+  ): Promise<FontRef> {
     if (typeof fontNameOrData === 'string') {
       return this.embedStandardFont(fontNameOrData);
     }
