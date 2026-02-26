@@ -102,6 +102,18 @@ export {
 export type { PageRange } from './core/documentMerge.js';
 
 // ---------------------------------------------------------------------------
+// Text layout helpers
+// ---------------------------------------------------------------------------
+
+export { layoutMultilineText, layoutCombedText, computeFontSize } from './core/layout.js';
+export type {
+  LayoutMultilineOptions,
+  LayoutMultilineResult,
+  LayoutCombedOptions,
+  ComputeFontSizeOptions,
+} from './core/layout.js';
+
+// ---------------------------------------------------------------------------
 // Incremental save
 // ---------------------------------------------------------------------------
 
