@@ -227,6 +227,7 @@ export async function initWasm(options?: string | URL | InitWasmOptions): Promis
 export { EmbeddedFont } from './assets/font/fontEmbed.js';
 export { extractMetrics } from './assets/font/fontMetrics.js';
 export type { FontMetrics } from './assets/font/fontMetrics.js';
+export { isOpenTypeCFF, isTrueType } from './assets/font/otfDetect.js';
 
 // ---------------------------------------------------------------------------
 // Low-level re-exports (for advanced users / plugins)
