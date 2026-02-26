@@ -16,7 +16,7 @@
 
 import type { Color } from './operators/color.js';
 import type { Angle } from './operators/state.js';
-import type { BlendMode } from './enums.js';
+import type { BlendMode, TextRenderingMode } from './enums.js';
 import {
   beginText,
   endText,
@@ -27,6 +27,7 @@ import {
   setLeading,
   nextLine,
   setTextMatrix,
+  setTextRenderingMode,
   showTextArray,
 } from './operators/text.js';
 import {
@@ -165,6 +166,12 @@ export interface DrawTextOptions {
   opacity?: number | undefined;
   /** Blend mode for compositing. */
   blendMode?: BlendMode | undefined;
+  /** Text rendering mode (fill, stroke, invisible, clip, etc.). */
+  renderingMode?: TextRenderingMode | undefined;
+  /** Horizontal skew angle (italic-like effect). */
+  xSkew?: Angle | undefined;
+  /** Vertical skew angle. */
+  ySkew?: Angle | undefined;
   /**
    * Maximum width in points before text is automatically wrapped.
    *
@@ -885,11 +892,34 @@ export class PdfPage {
     this.ops += beginText();
     this.ops += setFont(fontName, size);
 
-    if (options.rotate) {
-      const rad = toRadians(options.rotate);
-      const cos = Math.cos(rad);
-      const sin = Math.sin(rad);
-      this.ops += setTextMatrix(cos, sin, -sin, cos, x, y);
+    if (options.renderingMode !== undefined) {
+      this.ops += setTextRenderingMode(options.renderingMode);
+    }
+
+    const hasRotate = options.rotate !== undefined;
+    const hasXSkew = options.xSkew !== undefined;
+    const hasYSkew = options.ySkew !== undefined;
+
+    if (hasRotate || hasXSkew || hasYSkew) {
+      const rotRad = hasRotate ? toRadians(options.rotate!) : 0;
+      const xSkewRad = hasXSkew ? toRadians(options.xSkew!) : 0;
+      const ySkewRad = hasYSkew ? toRadians(options.ySkew!) : 0;
+
+      const cosR = Math.cos(rotRad);
+      const sinR = Math.sin(rotRad);
+      const tanX = Math.tan(xSkewRad);
+      const tanY = Math.tan(ySkewRad);
+
+      // Combined matrix: Rotation * Skew
+      // Rotation: [cos, sin, -sin, cos, 0, 0]
+      // Skew: [1, tan(ySkew), tan(xSkew), 1, 0, 0]
+      // Product: Skew * Rotation gives:
+      const a = cosR + sinR * tanX;
+      const b = sinR + cosR * tanY;
+      const c = -sinR + cosR * tanX;
+      const d = cosR - sinR * tanY;
+
+      this.ops += setTextMatrix(a, b, c, d, x, y);
     } else {
       this.ops += moveText(x, y);
     }
