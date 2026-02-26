@@ -1609,7 +1609,7 @@ export class PdfDocument {
    * ```
    */
   async copy(): Promise<PdfDocument> {
-    const bytes = await this.save();
+    const bytes = await this.save({ addDefaultPage: false });
     return PdfDocument.load(bytes);
   }
 
@@ -1624,6 +1624,14 @@ export class PdfDocument {
    * @returns        The complete PDF file as bytes.
    */
   async save(options?: PdfSaveOptions): Promise<Uint8Array> {
+    if ((options?.addDefaultPage ?? true) && this.getPageCount() === 0) {
+      this.addPage();
+    }
+    if ((options?.updateFieldAppearances ?? true) && this.form) {
+      for (const field of this.form.getFields()) {
+        field.generateAppearance();
+      }
+    }
     const structure = this.buildStructure();
     return serializePdf(this.registry, structure, options);
   }
@@ -1636,6 +1644,14 @@ export class PdfDocument {
    * @param options  Compression and serialization options.
    */
   saveAsStream(options?: PdfSaveOptions): ReadableStream<Uint8Array> {
+    if ((options?.addDefaultPage ?? true) && this.getPageCount() === 0) {
+      this.addPage();
+    }
+    if ((options?.updateFieldAppearances ?? true) && this.form) {
+      for (const field of this.form.getFields()) {
+        field.generateAppearance();
+      }
+    }
     const structure = this.buildStructure();
     const writer = new PdfStreamWriter(this.registry, structure, options);
     return writer.toReadableStream();
