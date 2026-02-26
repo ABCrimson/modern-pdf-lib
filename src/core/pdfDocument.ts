@@ -40,6 +40,8 @@ import type { StandardFontName as StdFontName } from '../assets/font/standardFon
 import type { EmbeddedFont } from '../assets/font/fontEmbed.js';
 import { embedFont as embedTtfFont } from '../assets/font/fontEmbed.js';
 import { subsetFont, buildSubsetCmap, computeSubsetTag } from '../assets/font/fontSubset.js';
+import { isOpenTypeCFF } from '../assets/font/otfDetect.js';
+import { findTable } from '../assets/font/cffEmbed.js';
 import { embedPng as decodePng } from '../assets/image/pngEmbed.js';
 import type { LoadPdfOptions } from '../parser/documentParser.js';
 import { loadPdf } from '../parser/documentParser.js';
@@ -490,6 +492,9 @@ export class PdfDocument {
     if (typeof fontNameOrData === 'string') {
       return this.embedStandardFont(fontNameOrData);
     }
+    if (isOpenTypeCFF(fontNameOrData)) {
+      return this.embedCffFont(fontNameOrData);
+    }
     return this.embedTrueTypeFont(fontNameOrData);
   }
 
@@ -666,6 +671,146 @@ export class PdfDocument {
     };
 
     this.embeddedFonts.set(`__ttf__${psName}`, fontRef);
+    this.ttfFonts.set(resourceName, {
+      embeddedFont,
+      fontRef,
+      fontFileStream,
+      fontFileDict,
+      toUnicodeStream,
+      cidFontDict,
+    });
+
+    // Register font and CID encoder on all existing pages
+    for (const page of this.pages) {
+      page.registerFont(resourceName, type0Ref);
+      page.registerCIDFont(resourceName, (text: string) => embeddedFont.encodeText(text));
+    }
+
+    return fontRef;
+  }
+
+  /**
+   * Embed a CFF-based OpenType font from raw bytes as a CIDFont Type 0.
+   *
+   * CFF fonts use /CIDFontType0 (instead of /CIDFontType2 for TrueType),
+   * /FontFile3 with /Subtype /CIDFontType0C (instead of /FontFile2),
+   * and embed only the raw CFF table data (not the full OTF wrapper).
+   * No /CIDToGIDMap is needed since CFF fonts map CIDs directly.
+   *
+   * @internal
+   */
+  private async embedCffFont(fontData: Uint8Array): Promise<FontRef> {
+    // Parse metrics using the same embedFont pipeline (works for both TTF and OTF)
+    const embeddedFont = await embedTtfFont(fontData);
+    const metrics = embeddedFont.metrics;
+    const psName = metrics.postScriptName || metrics.familyName || 'CFFFont';
+
+    // De-duplicate by PostScript name
+    const existing = this.embeddedFonts.get(`__cff__${psName}`);
+    if (existing) return existing;
+
+    this.fontCounter++;
+    this.ttfCounter++;
+    const resourceName = `F${this.fontCounter}`;
+
+    // Extract the raw CFF table from the OTF file
+    const cffTable = findTable(fontData, 'CFF ');
+    if (!cffTable) {
+      throw new Error('No CFF table found in font data. Is this a CFF-based OpenType font?');
+    }
+    const cffData = fontData.slice(cffTable.offset, cffTable.offset + cffTable.length);
+
+    // 1. Font file stream (CFF data as /FontFile3 with /Subtype /CIDFontType0C)
+    const fontFileDict = new PdfDict();
+    fontFileDict.set('/Subtype', PdfName.of('CIDFontType0C'));
+    const fontFileStream = PdfStream.fromBytes(new Uint8Array(cffData), fontFileDict);
+    const fontFileRef = this.registry.register(fontFileStream);
+
+    // 2. FontDescriptor (same as TrueType except /FontFile3 instead of /FontFile2)
+    const unitsPerEm = metrics.unitsPerEm;
+    const fontDescDict = new PdfDict();
+    fontDescDict.set('/Type', PdfName.of('FontDescriptor'));
+    fontDescDict.set('/FontName', PdfName.of(psName));
+    fontDescDict.set('/Flags', PdfNumber.of(metrics.flags));
+    fontDescDict.set('/FontBBox', PdfArray.fromNumbers([
+      Math.round((metrics.bbox[0] * 1000) / unitsPerEm),
+      Math.round((metrics.bbox[1] * 1000) / unitsPerEm),
+      Math.round((metrics.bbox[2] * 1000) / unitsPerEm),
+      Math.round((metrics.bbox[3] * 1000) / unitsPerEm),
+    ]));
+    fontDescDict.set('/ItalicAngle', PdfNumber.of(metrics.italicAngle));
+    fontDescDict.set('/Ascent', PdfNumber.of(Math.round((metrics.ascender * 1000) / unitsPerEm)));
+    fontDescDict.set('/Descent', PdfNumber.of(Math.round((metrics.descender * 1000) / unitsPerEm)));
+    fontDescDict.set('/CapHeight', PdfNumber.of(Math.round((metrics.capHeight * 1000) / unitsPerEm)));
+    fontDescDict.set('/StemV', PdfNumber.of(metrics.stemV));
+    fontDescDict.set('/FontFile3', fontFileRef);  // CFF uses FontFile3
+    const fontDescRef = this.registry.register(fontDescDict);
+
+    // 3. CIDSystemInfo dictionary
+    const cidSysInfoDict = new PdfDict();
+    cidSysInfoDict.set('/Registry', PdfString.literal('Adobe'));
+    cidSysInfoDict.set('/Ordering', PdfString.literal('Identity'));
+    cidSysInfoDict.set('/Supplement', PdfNumber.of(0));
+
+    // 4. Build /W (widths) array for CIDFont — same as TrueType
+    const scale = 1000 / unitsPerEm;
+    const wArrayItems: (PdfNumber | PdfArray)[] = [];
+    const numGlyphs = metrics.numGlyphs;
+    const CHUNK = 256;
+    for (let start = 0; start < numGlyphs; start += CHUNK) {
+      const end = Math.min(start + CHUNK, numGlyphs);
+      const widths: PdfNumber[] = [];
+      for (let gid = start; gid < end; gid++) {
+        const rawWidth = metrics.glyphWidths.get(gid) ?? metrics.defaultWidth;
+        widths.push(PdfNumber.of(Math.round(rawWidth * scale)));
+      }
+      wArrayItems.push(PdfNumber.of(start));
+      wArrayItems.push(PdfArray.of(widths));
+    }
+    const wArray = new PdfArray(wArrayItems);
+
+    // 5. CIDFont Type 0 (DescendantFont) — CIDFontType0 for CFF
+    const cidFontDict = new PdfDict();
+    cidFontDict.set('/Type', PdfName.of('Font'));
+    cidFontDict.set('/Subtype', PdfName.of('CIDFontType0'));  // Type0 for CFF
+    cidFontDict.set('/BaseFont', PdfName.of(psName));
+    cidFontDict.set('/CIDSystemInfo', cidSysInfoDict);
+    cidFontDict.set('/FontDescriptor', fontDescRef);
+    cidFontDict.set('/W', wArray);
+    cidFontDict.set('/DW', PdfNumber.of(Math.round(metrics.defaultWidth * scale)));
+    // No /CIDToGIDMap for CFF fonts (CID maps directly)
+    const cidFontRef = this.registry.register(cidFontDict);
+
+    // 6. ToUnicode CMap stream (same as TrueType)
+    const toUnicodeCmapStr = this.buildToUnicodeCmap(metrics.cmapTable);
+    const toUnicodeStream = PdfStream.fromString(toUnicodeCmapStr);
+    const toUnicodeRef = this.registry.register(toUnicodeStream);
+
+    // 7. Top-level Type 0 composite font
+    const type0Dict = new PdfDict();
+    type0Dict.set('/Type', PdfName.of('Font'));
+    type0Dict.set('/Subtype', PdfName.of('Type0'));
+    type0Dict.set('/BaseFont', PdfName.of(psName));
+    type0Dict.set('/Encoding', PdfName.of('Identity-H'));
+    type0Dict.set('/DescendantFonts', PdfArray.of([cidFontRef]));
+    type0Dict.set('/ToUnicode', toUnicodeRef);
+    const type0Ref = this.registry.register(type0Dict);
+
+    // Build the FontRef with measurement methods and CID encoding
+    const fontRef: FontRef = {
+      name: resourceName,
+      ref: type0Ref,
+      _isCIDFont: true,
+      _encodeText: (text: string) => embeddedFont.encodeText(text),
+      widthOfTextAtSize(text: string, size: number): number {
+        return embeddedFont.widthOfTextAtSize(text, size);
+      },
+      heightAtSize(size: number): number {
+        return embeddedFont.heightAtSize(size);
+      },
+    };
+
+    this.embeddedFonts.set(`__cff__${psName}`, fontRef);
     this.ttfFonts.set(resourceName, {
       embeddedFont,
       fontRef,
