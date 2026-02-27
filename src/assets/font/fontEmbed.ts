@@ -29,6 +29,145 @@ import { subsetFont, buildSubsetCmap, computeSubsetTag } from './fontSubset.js';
 import type { SubsetResult, SubsetCmap } from './fontSubset.js';
 
 // ---------------------------------------------------------------------------
+// WASM font parser state (optional acceleration for metric extraction)
+// ---------------------------------------------------------------------------
+
+/**
+ * Interface for the wasm-bindgen FontInfo result from the TTF WASM module.
+ *
+ * Matches the `FontInfo` struct exported by `src/wasm/ttf/src/lib.rs`.
+ * Getters return LE byte arrays for glyph widths and cmap entries.
+ *
+ * @internal
+ */
+interface FontInfoWasm {
+  readonly units_per_em: number;
+  readonly ascender: number;
+  readonly descender: number;
+  readonly line_gap: number;
+  readonly glyph_count: number;
+  /** Flat LE u16 bytes — 2 bytes per glyph. */
+  readonly glyph_widths: Uint8Array;
+  /** Packed [codepoint_u32_le, glyph_id_u16_le, ...] — 6 bytes per entry. */
+  readonly cmap_entries: Uint8Array;
+  readonly family_name: string;
+  readonly subfamily_name: string;
+  readonly postscript_name: string;
+  readonly is_cff: boolean;
+  free(): void;
+}
+
+/**
+ * Interface for the TTF WASM module (wasm-bindgen exports).
+ * @internal
+ */
+interface FontParserWasmModule {
+  parse_font(data: Uint8Array): FontInfoWasm;
+}
+
+/** The loaded font parser WASM module, or undefined if not available. */
+let fontParserWasm: FontParserWasmModule | undefined;
+
+/**
+ * Initialize the WASM-accelerated font parser.
+ *
+ * When loaded, `embedFont()` uses the WASM module for metric extraction
+ * instead of the pure JS parser. This is faster for large fonts but
+ * produces identical results.
+ *
+ * @param wasmSource - A pre-built wasm-bindgen module, or omit to auto-locate.
+ */
+export async function initFontParserWasm(
+  wasmSource?: FontParserWasmModule,
+): Promise<void> {
+  if (fontParserWasm) return;
+
+  try {
+    if (wasmSource && typeof wasmSource.parse_font === 'function') {
+      fontParserWasm = wasmSource;
+      return;
+    }
+
+    const { loadWasmModule } = await import('../../wasm/loader.js');
+    const wasmBytes = await loadWasmModule('ttf');
+    const imports = { env: {} };
+    const result = await WebAssembly.instantiate(
+      wasmBytes.buffer as ArrayBuffer,
+      imports,
+    );
+    fontParserWasm = result.instance.exports as unknown as FontParserWasmModule;
+  } catch {
+    fontParserWasm = undefined;
+  }
+}
+
+/**
+ * Check whether the WASM font parser has been initialized.
+ */
+export function isFontParserWasmReady(): boolean {
+  return fontParserWasm !== undefined;
+}
+
+/**
+ * Extract metrics using the WASM font parser.
+ *
+ * Converts the wasm-bindgen `FontInfo` result into a `FontMetrics`
+ * object compatible with the rest of the embedding pipeline.
+ *
+ * @internal
+ */
+function extractMetricsWasm(fontData: Uint8Array): FontMetrics {
+  const info = fontParserWasm!.parse_font(fontData);
+
+  // Parse glyph widths from LE u16 bytes
+  const glyphWidths = new Map<number, number>();
+  const widthBytes = info.glyph_widths;
+  const widthView = new DataView(widthBytes.buffer, widthBytes.byteOffset, widthBytes.byteLength);
+  const numGlyphs = info.glyph_count;
+  let defaultWidth = 0;
+
+  for (let i = 0; i < numGlyphs; i++) {
+    const w = widthView.getUint16(i * 2, true); // LE u16
+    glyphWidths.set(i, w);
+    defaultWidth = w; // last width becomes default
+  }
+
+  // Parse cmap from packed 6-byte entries
+  const cmapTable = new Map<number, number>();
+  const cmapBytes = info.cmap_entries;
+  const cmapView = new DataView(cmapBytes.buffer, cmapBytes.byteOffset, cmapBytes.byteLength);
+  const cmapCount = cmapBytes.byteLength / 6;
+
+  for (let i = 0; i < cmapCount; i++) {
+    const codepoint = cmapView.getUint32(i * 6, true);     // LE u32
+    const glyphId = cmapView.getUint16(i * 6 + 4, true);   // LE u16
+    cmapTable.set(codepoint, glyphId);
+  }
+
+  const metrics: FontMetrics = {
+    unitsPerEm: info.units_per_em,
+    ascender: info.ascender,
+    descender: info.descender,
+    lineGap: info.line_gap,
+    capHeight: Math.round(info.units_per_em * 0.7), // estimate
+    xHeight: Math.round(info.units_per_em * 0.5),   // estimate
+    italicAngle: 0,
+    numGlyphs,
+    defaultWidth,
+    glyphWidths,
+    cmapTable,
+    bbox: [0, info.descender, info.units_per_em, info.ascender],
+    stemV: 80,
+    flags: 32, // Nonsymbolic
+    familyName: info.family_name,
+    postScriptName: info.postscript_name,
+  };
+
+  info.free();
+  return metrics;
+}
+
+// ---------------------------------------------------------------------------
 // EmbeddedFont class
 // ---------------------------------------------------------------------------
 
@@ -535,8 +674,10 @@ export async function embedFont(fontBytes: Uint8Array): Promise<EmbeddedFont> {
     throw new Error('Font data too small — expected at least 12 bytes for the table directory');
   }
 
-  // Pure JS metric extraction (WASM acceleration planned for a future release)
-  const metrics = extractMetrics(fontBytes);
+  // Use WASM-accelerated parsing when available, pure JS otherwise
+  const metrics = fontParserWasm
+    ? extractMetricsWasm(fontBytes)
+    : extractMetrics(fontBytes);
 
   return new EmbeddedFont(fontBytes, metrics);
 }

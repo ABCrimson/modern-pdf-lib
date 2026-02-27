@@ -20,6 +20,7 @@
 //! containing the image dimensions, color metadata, and raw pixel data
 //! in the decoded color format.
 
+use std::io::Cursor;
 use wasm_bindgen::prelude::*;
 
 // ---------------------------------------------------------------------------
@@ -138,7 +139,60 @@ fn color_type_to_u8(ct: png::ColorType) -> u8 {
 }
 
 // ---------------------------------------------------------------------------
-// Decoder
+// Decoder (core logic, testable without WASM)
+// ---------------------------------------------------------------------------
+
+/// Internal decoding logic that returns a standard Rust `Result`.
+/// Used by the wasm-bindgen wrapper and by native tests.
+fn decode_png_impl(data: &[u8]) -> Result<PngDecodeResult, String> {
+    let cursor = Cursor::new(data);
+    let decoder = png::Decoder::new(cursor);
+    let mut reader = decoder.read_info().map_err(|e| format!("modern-pdf-png: {}", e))?;
+
+    let info = reader.info();
+    let width = info.width;
+    let height = info.height;
+    let color_type = color_type_to_u8(info.color_type);
+    let bit_depth = info.bit_depth as u8;
+
+    // Extract palette (for indexed images)
+    let palette: Vec<u8> = info
+        .palette
+        .as_ref()
+        .map(|p| p.to_vec())
+        .unwrap_or_default();
+
+    // Extract transparency chunk
+    let transparency: Vec<u8> = match &info.trns {
+        Some(trns) => trns.to_vec(),
+        None => Vec::new(),
+    };
+
+    // Allocate output buffer for pixel data
+    let output_size = reader.output_buffer_size()
+        .ok_or_else(|| "modern-pdf-png: could not determine output buffer size".to_string())?;
+    let mut pixel_data = vec![0u8; output_size];
+
+    // Read the image frame
+    let frame_info = reader.next_frame(&mut pixel_data)
+        .map_err(|e| format!("modern-pdf-png: {}", e))?;
+
+    // Trim the pixel data to the actual frame size
+    pixel_data.truncate(frame_info.buffer_size());
+
+    Ok(PngDecodeResult {
+        width,
+        height,
+        color_type,
+        bit_depth,
+        pixel_data,
+        palette,
+        transparency,
+    })
+}
+
+// ---------------------------------------------------------------------------
+// WASM entry point
 // ---------------------------------------------------------------------------
 
 /// Decode a PNG image from raw bytes.
@@ -172,47 +226,7 @@ fn color_type_to_u8(ct: png::ColorType) -> u8 {
 /// PDF color space.
 #[wasm_bindgen]
 pub fn decode_png(data: &[u8]) -> Result<PngDecodeResult, JsValue> {
-    let decoder = png::Decoder::new(data);
-    let mut reader = decoder.read_info().map_err(to_js_err)?;
-
-    let info = reader.info();
-    let width = info.width;
-    let height = info.height;
-    let color_type = color_type_to_u8(info.color_type);
-    let bit_depth = info.bit_depth as u8;
-
-    // Extract palette (for indexed images)
-    let palette = info
-        .palette
-        .as_ref()
-        .map(|p| p.to_vec())
-        .unwrap_or_default();
-
-    // Extract transparency chunk
-    let transparency = match &info.trns {
-        Some(trns) => trns.to_vec(),
-        None => Vec::new(),
-    };
-
-    // Allocate output buffer for pixel data
-    let output_size = reader.output_buffer_size();
-    let mut pixel_data = vec![0u8; output_size];
-
-    // Read the image frame
-    let frame_info = reader.next_frame(&mut pixel_data).map_err(to_js_err)?;
-
-    // Trim the pixel data to the actual frame size
-    pixel_data.truncate(frame_info.buffer_size());
-
-    Ok(PngDecodeResult {
-        width,
-        height,
-        color_type,
-        bit_depth,
-        pixel_data,
-        palette,
-        transparency,
-    })
+    decode_png_impl(data).map_err(|e| JsValue::from_str(&e))
 }
 
 // ---------------------------------------------------------------------------
@@ -221,22 +235,106 @@ pub fn decode_png(data: &[u8]) -> Result<PngDecodeResult, JsValue> {
 
 #[cfg(test)]
 mod tests {
-    // TODO: Add tests with embedded minimal PNG test fixtures.
-    //
-    // Test cases to cover:
-    // 1. 1x1 grayscale PNG
-    // 2. 1x1 RGB PNG
-    // 3. 1x1 RGBA PNG
-    // 4. Small indexed PNG with palette
-    // 5. PNG with tRNS chunk
-    // 6. 16-bit depth PNG
-    // 7. Interlaced PNG
-    // 8. Invalid/corrupt PNG (error case)
-    // 9. Empty data (error case)
+    use super::*;
+
+    /// Create a minimal valid PNG file programmatically.
+    /// Uses the `png` crate's encoder to create test data.
+    fn build_png(width: u32, height: u32, color_type: png::ColorType, bit_depth: png::BitDepth, pixels: &[u8]) -> Vec<u8> {
+        let mut buf = Vec::new();
+        {
+            let mut encoder = png::Encoder::new(&mut buf, width, height);
+            encoder.set_color(color_type);
+            encoder.set_depth(bit_depth);
+            let mut writer = encoder.write_header().expect("write PNG header");
+            writer.write_image_data(pixels).expect("write PNG data");
+        }
+        buf
+    }
 
     #[test]
-    fn placeholder() {
-        // TODO: Replace with real PNG test fixtures
-        assert!(true, "PNG decoder tests need real PNG fixtures");
+    fn decode_1x1_rgb() {
+        let pixels = [255u8, 0, 0]; // Single red pixel
+        let png_data = build_png(1, 1, png::ColorType::Rgb, png::BitDepth::Eight, &pixels);
+
+        let result = decode_png_impl(&png_data).expect("should decode RGB PNG");
+        assert_eq!(result.width, 1);
+        assert_eq!(result.height, 1);
+        assert_eq!(result.color_type, 2); // RGB
+        assert_eq!(result.bit_depth, 8);
+        assert_eq!(result.pixel_data, vec![255, 0, 0]);
+        assert!(result.palette.is_empty());
+        assert!(result.transparency.is_empty());
+    }
+
+    #[test]
+    fn decode_1x1_rgba() {
+        let pixels = [0u8, 255, 0, 128]; // Green with 50% alpha
+        let png_data = build_png(1, 1, png::ColorType::Rgba, png::BitDepth::Eight, &pixels);
+
+        let result = decode_png_impl(&png_data).expect("should decode RGBA PNG");
+        assert_eq!(result.width, 1);
+        assert_eq!(result.height, 1);
+        assert_eq!(result.color_type, 6); // RGBA
+        assert_eq!(result.bit_depth, 8);
+        assert_eq!(result.pixel_data, vec![0, 255, 0, 128]);
+    }
+
+    #[test]
+    fn decode_1x1_grayscale() {
+        let pixels = [127u8]; // Mid-gray
+        let png_data = build_png(1, 1, png::ColorType::Grayscale, png::BitDepth::Eight, &pixels);
+
+        let result = decode_png_impl(&png_data).expect("should decode grayscale PNG");
+        assert_eq!(result.width, 1);
+        assert_eq!(result.height, 1);
+        assert_eq!(result.color_type, 0); // Grayscale
+        assert_eq!(result.bit_depth, 8);
+        assert_eq!(result.pixel_data, vec![127]);
+    }
+
+    #[test]
+    fn decode_2x2_rgb() {
+        // 2x2 image: red, green, blue, white
+        let pixels = [
+            255, 0, 0,    0, 255, 0,     // row 1
+            0, 0, 255,    255, 255, 255,  // row 2
+        ];
+        let png_data = build_png(2, 2, png::ColorType::Rgb, png::BitDepth::Eight, &pixels);
+
+        let result = decode_png_impl(&png_data).expect("should decode 2x2 RGB PNG");
+        assert_eq!(result.width, 2);
+        assert_eq!(result.height, 2);
+        assert_eq!(result.pixel_data.len(), 12); // 2*2*3
+        // Verify first pixel is red
+        assert_eq!(&result.pixel_data[0..3], &[255, 0, 0]);
+    }
+
+    #[test]
+    fn decode_grayscale_alpha() {
+        let pixels = [200u8, 128]; // Gray with alpha
+        let png_data = build_png(1, 1, png::ColorType::GrayscaleAlpha, png::BitDepth::Eight, &pixels);
+
+        let result = decode_png_impl(&png_data).expect("should decode grayscale+alpha PNG");
+        assert_eq!(result.color_type, 4); // GrayscaleAlpha
+        assert_eq!(result.pixel_data, vec![200, 128]);
+    }
+
+    #[test]
+    fn decode_empty_data_fails() {
+        let result = decode_png_impl(&[]);
+        assert!(result.is_err(), "empty data should fail");
+    }
+
+    #[test]
+    fn decode_invalid_data_fails() {
+        let result = decode_png_impl(&[0xDE, 0xAD, 0xBE, 0xEF]);
+        assert!(result.is_err(), "invalid data should fail");
+    }
+
+    #[test]
+    fn decode_truncated_png_fails() {
+        // Valid PNG signature but truncated
+        let result = decode_png_impl(&[0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]);
+        assert!(result.is_err(), "truncated PNG should fail");
     }
 }

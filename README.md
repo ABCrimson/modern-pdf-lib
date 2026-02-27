@@ -15,7 +15,7 @@ Create, parse, fill, merge, sign, and manipulate PDF documents<br />in Node, Den
 
 [![npm version](https://img.shields.io/npm/v/modern-pdf-lib?style=flat-square&color=cb3837)](https://www.npmjs.com/package/modern-pdf-lib)
 [![bundle size](https://img.shields.io/badge/gzip-36kb_core-blue?style=flat-square)](https://bundlephobia.com/package/modern-pdf-lib)
-[![tests](https://img.shields.io/badge/tests-1%2C952_passing-brightgreen?style=flat-square)](#)
+[![tests](https://img.shields.io/badge/tests-1%2C973_passing-brightgreen?style=flat-square)](#)
 [![TypeScript](https://img.shields.io/badge/TypeScript-6.0-3178c6?style=flat-square&logo=typescript&logoColor=white)](#)
 [![License: MIT](https://img.shields.io/badge/license-MIT-yellow?style=flat-square)](LICENSE)
 
@@ -429,7 +429,7 @@ modern-pdf-lib/
     outline/        Bookmarks / document outline
     metadata/       XMP metadata, viewer preferences
     wasm/           Rust crate sources (4 modules)
-  tests/            1,952 tests across 90 suites
+  tests/            1,973 tests across 91 suites
   docs/             VitePress documentation
 ```
 
@@ -441,7 +441,7 @@ modern-pdf-lib/
 git clone https://github.com/ABCrimson/modern-pdf-lib.git
 cd modern-pdf-lib
 npm install
-npm test          # 1,952 tests
+npm test          # 1,973 tests
 npm run typecheck # TypeScript 6.0 strict
 npm run build     # ESM + CJS + declarations
 ```

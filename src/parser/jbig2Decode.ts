@@ -131,6 +131,32 @@ interface SegmentHeader {
 }
 
 // ---------------------------------------------------------------------------
+// Decoded segment result types
+// ---------------------------------------------------------------------------
+
+interface SymbolBitmap {
+  readonly data: Uint8Array;
+  readonly width: number;
+  readonly height: number;
+}
+
+interface DecodedSymbolDict {
+  readonly symbols: SymbolBitmap[];
+}
+
+interface DecodedPatternDict {
+  readonly patterns: SymbolBitmap[];
+  readonly patternWidth: number;
+  readonly patternHeight: number;
+}
+
+interface DecodedBitmap {
+  readonly data: Uint8Array;
+  readonly width: number;
+  readonly height: number;
+}
+
+// ---------------------------------------------------------------------------
 // JBIG2 Decoder
 // ---------------------------------------------------------------------------
 
@@ -143,6 +169,12 @@ class JBIG2Decoder {
 
   /** Global segments indexed by segment number. */
   private globalSegments = new Map<number, { header: SegmentHeader; data: Uint8Array }>();
+
+  /** Decoded segment results (symbol dicts, pattern dicts, intermediate bitmaps). */
+  private decodedSegments = new Map<
+    number,
+    { symbolDict?: DecodedSymbolDict; patternDict?: DecodedPatternDict; bitmap?: DecodedBitmap }
+  >();
 
   /**
    * Parse a chunk of JBIG2 data (either globals or the main stream).
@@ -203,6 +235,9 @@ class JBIG2Decoder {
       if (isGlobals) {
         // Store for later reference
         this.globalSegments.set(header.segmentNumber, { header, data: segData });
+        // Also decode symbol/pattern dictionaries so they're available
+        // when the main stream references them.
+        this.processSegment(header, segData);
       } else {
         this.processSegment(header, segData);
       }
@@ -319,6 +354,41 @@ class JBIG2Decoder {
         break;
 
       case 51: // End of File
+        break;
+
+      case 0: // Symbol Dictionary
+        this.processSymbolDictionary(header, data);
+        break;
+
+      case 4: // Intermediate Text Region
+        this.processTextRegion(header, data, false);
+        break;
+
+      case 6: // Immediate Text Region
+      case 7: // Immediate Lossless Text Region
+        this.processTextRegion(header, data, true);
+        break;
+
+      case 16: // Pattern Dictionary
+        this.processPatternDictionary(header, data);
+        break;
+
+      case 20: // Intermediate Halftone Region
+        this.processHalftoneRegion(header, data, false);
+        break;
+
+      case 22: // Immediate Halftone Region
+      case 23: // Immediate Lossless Halftone Region
+        this.processHalftoneRegion(header, data, true);
+        break;
+
+      case 40: // Intermediate Generic Refinement Region
+        this.processGenericRefinementRegion(header, data, false);
+        break;
+
+      case 42: // Immediate Generic Refinement Region
+      case 43: // Immediate Lossless Generic Refinement Region
+        this.processGenericRefinementRegion(header, data, true);
         break;
 
       case 52: // Profiles
@@ -501,6 +571,688 @@ class JBIG2Decoder {
           this.pageBitmap[pageByteIdx] = this.pageBitmap[pageByteIdx]! & ~(1 << pageBitIdx) & 0xff;
         }
       }
+    }
+  }
+
+  // -------------------------------------------------------------------------
+  // Symbol Dictionary (segment type 0)
+  // -------------------------------------------------------------------------
+
+  /**
+   * Process a Symbol Dictionary segment.
+   *
+   * Decodes symbol bitmaps using arithmetic coding and stores them
+   * in `decodedSegments` for use by text region segments.
+   *
+   * Only the arithmetic-coded path is implemented (most common in PDFs).
+   * Huffman-coded symbol dictionaries throw.
+   */
+  private processSymbolDictionary(header: SegmentHeader, data: Uint8Array): void {
+    if (data.length < 10) {
+      throw new Error('JBIG2Decode: Symbol Dictionary segment too short');
+    }
+
+    let offset = 0;
+
+    // SD flags (2 bytes, big-endian)
+    const sdFlags = readUint16BE(data, offset);
+    offset += 2;
+
+    const sdHuff = sdFlags & 1;
+    const sdRefAgg = (sdFlags >>> 1) & 1;
+    const sdTemplate = (sdFlags >>> 10) & 3;
+    const sdrTemplate = (sdFlags >>> 12) & 1;
+
+    if (sdHuff) {
+      throw new Error('JBIG2Decode: Huffman-coded symbol dictionary not supported');
+    }
+
+    // Adaptive template (AT) pixels for arithmetic generic region
+    if (sdTemplate === 0) {
+      offset += 8; // 4 AT pixels × 2 bytes each
+    } else {
+      offset += 2; // 1 AT pixel × 2 bytes
+    }
+
+    // Refinement AT pixels (if refinement aggregate)
+    if (sdRefAgg) {
+      if (sdrTemplate === 0) {
+        offset += 4; // 2 AT pixels × 2 bytes
+      } else {
+        offset += 2; // 1 AT pixel × 2 bytes
+      }
+    }
+
+    // Number of exported symbols (4 bytes)
+    const numExported = readUint32BE(data, offset);
+    offset += 4;
+
+    // Number of new symbols (4 bytes)
+    const numNew = readUint32BE(data, offset);
+    offset += 4;
+
+    // Collect input symbols from referred-to symbol dictionaries
+    const inputSymbols: SymbolBitmap[] = [];
+    for (const refSegNum of header.referredToSegments) {
+      const refSeg = this.decodedSegments.get(refSegNum);
+      if (refSeg?.symbolDict) {
+        inputSymbols.push(...refSeg.symbolDict.symbols);
+      }
+    }
+
+    // Decode new symbols using arithmetic coding
+    const arithData = data.subarray(offset);
+    const decoder = new ArithmeticDecoder(arithData);
+    const iadhDecoder = new IntegerDecoder();
+    const iadwDecoder = new IntegerDecoder();
+
+    const newSymbols: SymbolBitmap[] = [];
+    let heightClassHeight = 0;
+    let symbolsDecoded = 0;
+
+    while (symbolsDecoded < numNew) {
+      // Decode height class delta
+      const deltaH = iadhDecoder.decode(decoder);
+      if (deltaH === null) break; // OOB
+      heightClassHeight += deltaH;
+      if (heightClassHeight < 0) break;
+
+      let symbolWidth = 0;
+
+      // Decode symbols in this height class
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        const deltaW = iadwDecoder.decode(decoder);
+        if (deltaW === null) break; // OOB = end of height class
+        symbolWidth += deltaW;
+
+        if (symbolsDecoded >= numNew) break;
+        if (symbolWidth <= 0 || heightClassHeight <= 0) {
+          symbolsDecoded++;
+          continue;
+        }
+
+        if (sdRefAgg) {
+          // Refinement aggregate: skip for now, decode as plain bitmap
+          const bitmap = decodeGenericBitmap(
+            decoder,
+            symbolWidth,
+            heightClassHeight,
+            sdTemplate,
+          );
+          newSymbols.push({ data: bitmap, width: symbolWidth, height: heightClassHeight });
+        } else {
+          // Standard: decode each symbol as a generic bitmap
+          const bitmap = decodeGenericBitmap(
+            decoder,
+            symbolWidth,
+            heightClassHeight,
+            sdTemplate,
+          );
+          newSymbols.push({ data: bitmap, width: symbolWidth, height: heightClassHeight });
+        }
+
+        symbolsDecoded++;
+      }
+    }
+
+    // Build exported symbols list
+    const allSymbols = [...inputSymbols, ...newSymbols];
+
+    // Decode export flags using IAEX
+    const iaexDecoder = new IntegerDecoder();
+    const exported: SymbolBitmap[] = [];
+    let currentExport = false;
+    let i = 0;
+
+    while (i < allSymbols.length && exported.length < numExported) {
+      const run = iaexDecoder.decode(decoder);
+      if (run === null) break;
+      if (currentExport) {
+        for (let j = 0; j < run && i + j < allSymbols.length; j++) {
+          exported.push(allSymbols[i + j]!);
+        }
+      }
+      i += Math.max(run, 0);
+      currentExport = !currentExport;
+    }
+
+    // Fallback: if export decoding didn't produce results, export all new symbols
+    if (exported.length === 0) {
+      exported.push(...allSymbols);
+    }
+
+    this.decodedSegments.set(header.segmentNumber, {
+      symbolDict: { symbols: exported },
+    });
+  }
+
+  // -------------------------------------------------------------------------
+  // Text Region (segment types 4, 6, 7)
+  // -------------------------------------------------------------------------
+
+  /**
+   * Process a Text Region segment.
+   *
+   * Collects symbols from referred symbol dictionaries, then decodes
+   * symbol instance positions and IDs using arithmetic integer coding.
+   * Each symbol is placed on a region bitmap which is then composed
+   * onto the page (for immediate types) or stored (intermediate).
+   */
+  private processTextRegion(header: SegmentHeader, data: Uint8Array, immediate: boolean): void {
+    if (data.length < 19) {
+      throw new Error('JBIG2Decode: Text Region segment too short');
+    }
+
+    let offset = 0;
+
+    // Region segment information (17 bytes)
+    const regionWidth = readUint32BE(data, offset);
+    const regionHeight = readUint32BE(data, offset + 4);
+    const regionX = readUint32BE(data, offset + 8);
+    const regionY = readUint32BE(data, offset + 12);
+    const regionFlags = data[offset + 16]!;
+    const combinationOperator = regionFlags & 0x07;
+    offset += 17;
+
+    if (offset + 2 > data.length) {
+      throw new Error('JBIG2Decode: Text Region segment too short for flags');
+    }
+
+    // Text region segment flags (2 bytes)
+    const trFlags = readUint16BE(data, offset);
+    offset += 2;
+
+    const sbHuff = trFlags & 1;
+    const sbRefine = (trFlags >>> 1) & 1;
+    const logStripSize = (trFlags >>> 2) & 3;
+    const stripSize = 1 << logStripSize;
+    const refCorner = (trFlags >>> 4) & 3;
+    const transposed = (trFlags >>> 6) & 1;
+    const sbCombOp = (trFlags >>> 7) & 3;
+    const sbDefPixel = (trFlags >>> 9) & 1;
+    const sbDsOffset = signExtend((trFlags >>> 10) & 0x1f, 5);
+    const sbrTemplate = (trFlags >>> 15) & 1;
+
+    if (sbHuff) {
+      throw new Error('JBIG2Decode: Huffman-coded text region not supported');
+    }
+
+    // Huffman table selection (if Huffman, skip)
+    // For arithmetic: skip refinement AT pixels if refinement is on
+    if (sbRefine && !sbHuff) {
+      if (sbrTemplate === 0) {
+        offset += 4; // 2 refinement AT pixels × 2 bytes
+      } else {
+        offset += 2; // 1 refinement AT pixel × 2 bytes
+      }
+    }
+
+    // Number of symbol instances (4 bytes)
+    if (offset + 4 > data.length) {
+      throw new Error('JBIG2Decode: Text Region segment too short for instance count');
+    }
+    const numInstances = readUint32BE(data, offset);
+    offset += 4;
+
+    // Collect all symbols from referred-to symbol dictionaries
+    const symbols: SymbolBitmap[] = [];
+    for (const refSegNum of header.referredToSegments) {
+      const refSeg = this.decodedSegments.get(refSegNum);
+      if (refSeg?.symbolDict) {
+        symbols.push(...refSeg.symbolDict.symbols);
+      }
+    }
+
+    const numSymbols = symbols.length;
+    if (numSymbols === 0) {
+      // No symbols available — create empty region
+      const rowBytes = Math.ceil(regionWidth / 8);
+      const bitmap = new Uint8Array(rowBytes * regionHeight);
+      if (sbDefPixel) bitmap.fill(0xff);
+      if (immediate) {
+        this.composeRegion(bitmap, regionWidth, regionHeight, regionX, regionY, combinationOperator);
+      } else {
+        this.decodedSegments.set(header.segmentNumber, {
+          bitmap: { data: bitmap, width: regionWidth, height: regionHeight },
+        });
+      }
+      return;
+    }
+
+    // IAID code length = ceil(log2(numSymbols))
+    const symCodeLen = Math.max(1, Math.ceil(Math.log2(numSymbols + 1)));
+
+    // Create region bitmap
+    const rowBytes = Math.ceil(regionWidth / 8);
+    const regionBitmap = new Uint8Array(rowBytes * regionHeight);
+    if (sbDefPixel) regionBitmap.fill(0xff);
+
+    // Create arithmetic decoder and integer decoders
+    const arithData = data.subarray(offset);
+    const decoder = new ArithmeticDecoder(arithData);
+    const iadtDecoder = new IntegerDecoder();
+    const iafsDecoder = new IntegerDecoder();
+    const iadsDecoder = new IntegerDecoder();
+    const iaitDecoder = new IntegerDecoder();
+    const iaidDecoder = new IAIDDecoder(symCodeLen);
+
+    // Decode symbol instances
+    let stripT = -stripSize; // initial strip T
+    let instancesDecoded = 0;
+    let firstS = 0;
+
+    while (instancesDecoded < numInstances) {
+      // Decode strip delta T
+      const dt = iadtDecoder.decode(decoder);
+      if (dt === null) break;
+      stripT += dt * stripSize;
+
+      // Decode first symbol S coordinate
+      const dfs = iafsDecoder.decode(decoder);
+      if (dfs === null) break;
+      firstS += dfs;
+      let curS = firstS;
+
+      // Decode symbols in this strip
+      let firstInStrip = true;
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        if (!firstInStrip) {
+          const ds = iadsDecoder.decode(decoder);
+          if (ds === null) break; // OOB = end of strip
+          curS += ds + sbDsOffset;
+        }
+        firstInStrip = false;
+
+        if (instancesDecoded >= numInstances) break;
+
+        // Decode instance T delta (within strip)
+        let curT = 0;
+        if (stripSize > 1) {
+          const dit = iaitDecoder.decode(decoder);
+          curT = dit ?? 0;
+        }
+        const t = stripT + curT;
+
+        // Decode symbol ID
+        const symbolId = iaidDecoder.decode(decoder);
+        if (symbolId < 0 || symbolId >= numSymbols) {
+          instancesDecoded++;
+          continue;
+        }
+
+        const sym = symbols[symbolId]!;
+
+        // Place symbol on region bitmap
+        let si: number, ti: number;
+        if (transposed) {
+          // Transposed: S is vertical, T is horizontal
+          switch (refCorner) {
+            case 0: si = curS; ti = t; break;                     // TOPLEFT
+            case 1: si = curS; ti = t - sym.width + 1; break;     // TOPRIGHT
+            case 2: si = curS - sym.height + 1; ti = t; break;    // BOTTOMLEFT
+            case 3: si = curS - sym.height + 1; ti = t - sym.width + 1; break; // BOTTOMRIGHT
+            default: si = curS; ti = t; break;
+          }
+          composeBitmapOnto(regionBitmap, regionWidth, regionHeight, sym.data, sym.width, sym.height, ti, si, sbCombOp);
+          curS += sym.height - 1;
+        } else {
+          // Normal: S is horizontal, T is vertical
+          switch (refCorner) {
+            case 0: ti = t; si = curS; break;                       // TOPLEFT
+            case 1: ti = t; si = curS - sym.width + 1; break;       // TOPRIGHT
+            case 2: ti = t - sym.height + 1; si = curS; break;      // BOTTOMLEFT
+            case 3: ti = t - sym.height + 1; si = curS - sym.width + 1; break; // BOTTOMRIGHT
+            default: ti = t; si = curS; break;
+          }
+          composeBitmapOnto(regionBitmap, regionWidth, regionHeight, sym.data, sym.width, sym.height, si, ti, sbCombOp);
+          curS += sym.width - 1;
+        }
+
+        instancesDecoded++;
+      }
+    }
+
+    if (immediate) {
+      this.composeRegion(regionBitmap, regionWidth, regionHeight, regionX, regionY, combinationOperator);
+    } else {
+      this.decodedSegments.set(header.segmentNumber, {
+        bitmap: { data: regionBitmap, width: regionWidth, height: regionHeight },
+      });
+    }
+  }
+
+  // -------------------------------------------------------------------------
+  // Pattern Dictionary (segment type 16)
+  // -------------------------------------------------------------------------
+
+  /**
+   * Process a Pattern Dictionary segment.
+   *
+   * Decodes a collective bitmap containing all patterns side by side,
+   * then splits it into individual pattern bitmaps.
+   */
+  private processPatternDictionary(header: SegmentHeader, data: Uint8Array): void {
+    if (data.length < 9) {
+      throw new Error('JBIG2Decode: Pattern Dictionary segment too short');
+    }
+
+    let offset = 0;
+
+    // PD flags (1 byte)
+    const pdFlags = data[offset]!;
+    offset++;
+
+    const pdMMR = pdFlags & 1;
+    const pdTemplate = (pdFlags >>> 1) & 3;
+
+    // Pattern width (1 byte)
+    const patternWidth = data[offset]!;
+    offset++;
+
+    // Pattern height (1 byte)
+    const patternHeight = data[offset]!;
+    offset++;
+
+    // Gray max (4 bytes)
+    const grayMax = readUint32BE(data, offset);
+    offset += 4;
+
+    const numPatterns = grayMax + 1;
+
+    // AT pixels for arithmetic coding
+    if (!pdMMR) {
+      if (pdTemplate === 0) {
+        offset += 8;
+      } else {
+        offset += 2;
+      }
+    }
+
+    // Decode collective bitmap (all patterns side by side)
+    const collectiveWidth = patternWidth * numPatterns;
+    const collectiveHeight = patternHeight;
+    const regionData = data.subarray(offset);
+
+    let collectiveBitmap: Uint8Array;
+    if (pdMMR) {
+      collectiveBitmap = decodeMMRBitmap(regionData, collectiveWidth, collectiveHeight);
+    } else {
+      collectiveBitmap = decodeArithmeticGenericRegion(
+        regionData,
+        collectiveWidth,
+        collectiveHeight,
+        pdTemplate,
+        false,
+      );
+    }
+
+    // Split into individual patterns
+    const patterns: SymbolBitmap[] = [];
+    const collectiveRowBytes = Math.ceil(collectiveWidth / 8);
+
+    for (let i = 0; i < numPatterns; i++) {
+      const patRowBytes = Math.ceil(patternWidth / 8);
+      const patBitmap = new Uint8Array(patRowBytes * patternHeight);
+      const xOffset = i * patternWidth;
+
+      for (let row = 0; row < patternHeight; row++) {
+        for (let col = 0; col < patternWidth; col++) {
+          const srcCol = xOffset + col;
+          const srcByteIdx = row * collectiveRowBytes + (srcCol >>> 3);
+          const srcBitIdx = 7 - (srcCol & 7);
+          const pixel = (collectiveBitmap[srcByteIdx]! >>> srcBitIdx) & 1;
+
+          if (pixel) {
+            const dstByteIdx = row * patRowBytes + (col >>> 3);
+            const dstBitIdx = 7 - (col & 7);
+            patBitmap[dstByteIdx] = (patBitmap[dstByteIdx]! | (1 << dstBitIdx)) & 0xff;
+          }
+        }
+      }
+
+      patterns.push({ data: patBitmap, width: patternWidth, height: patternHeight });
+    }
+
+    this.decodedSegments.set(header.segmentNumber, {
+      patternDict: { patterns, patternWidth, patternHeight },
+    });
+  }
+
+  // -------------------------------------------------------------------------
+  // Halftone Region (segment types 20, 22, 23)
+  // -------------------------------------------------------------------------
+
+  /**
+   * Process a Halftone Region segment.
+   *
+   * Uses a pattern dictionary to tile patterns into a region bitmap
+   * based on gray-level values decoded from the data.
+   */
+  private processHalftoneRegion(header: SegmentHeader, data: Uint8Array, immediate: boolean): void {
+    if (data.length < 22) {
+      throw new Error('JBIG2Decode: Halftone Region segment too short');
+    }
+
+    let offset = 0;
+
+    // Region segment information (17 bytes)
+    const regionWidth = readUint32BE(data, offset);
+    const regionHeight = readUint32BE(data, offset + 4);
+    const regionX = readUint32BE(data, offset + 8);
+    const regionY = readUint32BE(data, offset + 12);
+    const regionFlags = data[offset + 16]!;
+    const combinationOperator = regionFlags & 0x07;
+    offset += 17;
+
+    // Halftone region flags (1 byte)
+    const htFlags = data[offset]!;
+    offset++;
+
+    const htMMR = htFlags & 1;
+    const htTemplate = (htFlags >>> 1) & 3;
+    const enableSkip = (htFlags >>> 3) & 1;
+    const htCombOp = (htFlags >>> 4) & 7;
+    const htDefPixel = (htFlags >>> 7) & 1;
+
+    // Grid dimensions
+    const gridW = readUint32BE(data, offset);
+    offset += 4;
+    const gridH = readUint32BE(data, offset);
+    offset += 4;
+
+    // Grid origin offset
+    const gridX = readInt32BE(data, offset);
+    offset += 4;
+    const gridY = readInt32BE(data, offset);
+    offset += 4;
+
+    // Grid vector
+    const gridStepX = readUint16BE(data, offset);
+    offset += 2;
+    const gridStepY = readUint16BE(data, offset);
+    offset += 2;
+
+    // Collect pattern dictionary from referred segments
+    let patDict: DecodedPatternDict | undefined;
+    for (const refSegNum of header.referredToSegments) {
+      const refSeg = this.decodedSegments.get(refSegNum);
+      if (refSeg?.patternDict) {
+        patDict = refSeg.patternDict;
+        break;
+      }
+    }
+
+    // Create region bitmap
+    const rowBytes = Math.ceil(regionWidth / 8);
+    const regionBitmap = new Uint8Array(rowBytes * regionHeight);
+    if (htDefPixel) regionBitmap.fill(0xff);
+
+    if (!patDict || patDict.patterns.length === 0) {
+      // No patterns — just use default bitmap
+      if (immediate) {
+        this.composeRegion(regionBitmap, regionWidth, regionHeight, regionX, regionY, combinationOperator);
+      } else {
+        this.decodedSegments.set(header.segmentNumber, {
+          bitmap: { data: regionBitmap, width: regionWidth, height: regionHeight },
+        });
+      }
+      return;
+    }
+
+    // Decode gray-level values for each grid cell
+    const numPatterns = patDict.patterns.length;
+    const bitsPerGray = Math.max(1, Math.ceil(Math.log2(numPatterns)));
+    const regionData = data.subarray(offset);
+
+    // Decode gray bitmaps (one bit-plane per bit of the gray value)
+    const grayBitmaps: Uint8Array[] = [];
+    const planeWidth = gridW;
+    const planeHeight = gridH;
+
+    if (htMMR) {
+      let planeOffset = 0;
+      for (let bit = 0; bit < bitsPerGray; bit++) {
+        const planeBitmap = decodeMMRBitmap(
+          regionData.subarray(planeOffset),
+          planeWidth,
+          planeHeight,
+        );
+        grayBitmaps.push(planeBitmap);
+        planeOffset += Math.ceil(planeWidth / 8) * planeHeight + 2; // approximate
+      }
+    } else {
+      const decoder = new ArithmeticDecoder(regionData);
+      for (let bit = 0; bit < bitsPerGray; bit++) {
+        const planeBitmap = decodeGenericBitmap(decoder, planeWidth, planeHeight, htTemplate);
+        grayBitmaps.push(planeBitmap);
+      }
+    }
+
+    // Compose gray values into pattern indices and place patterns
+    const planeRowBytes = Math.ceil(planeWidth / 8);
+
+    for (let gy = 0; gy < gridH; gy++) {
+      for (let gx = 0; gx < gridW; gx++) {
+        // Compute gray value from bit planes
+        let grayValue = 0;
+        for (let bit = bitsPerGray - 1; bit >= 0; bit--) {
+          const plane = grayBitmaps[bit];
+          if (plane) {
+            const byteIdx = gy * planeRowBytes + (gx >>> 3);
+            const bitIdx = 7 - (gx & 7);
+            grayValue = (grayValue << 1) | ((plane[byteIdx]! >>> bitIdx) & 1);
+          }
+        }
+
+        // Map to pattern index (gray inversion)
+        const patIdx = Math.min(grayValue, numPatterns - 1);
+        const pat = patDict.patterns[patIdx]!;
+
+        // Compute pattern position on region
+        const px = gridX + gy * gridStepY + gx * gridStepX;
+        const py = gridY + gy * gridStepX - gx * gridStepY;
+
+        composeBitmapOnto(
+          regionBitmap,
+          regionWidth,
+          regionHeight,
+          pat.data,
+          pat.width,
+          pat.height,
+          px,
+          py,
+          htCombOp,
+        );
+      }
+    }
+
+    if (immediate) {
+      this.composeRegion(regionBitmap, regionWidth, regionHeight, regionX, regionY, combinationOperator);
+    } else {
+      this.decodedSegments.set(header.segmentNumber, {
+        bitmap: { data: regionBitmap, width: regionWidth, height: regionHeight },
+      });
+    }
+  }
+
+  // -------------------------------------------------------------------------
+  // Generic Refinement Region (segment types 40, 42, 43)
+  // -------------------------------------------------------------------------
+
+  /**
+   * Process a Generic Refinement Region segment.
+   *
+   * Refines a reference bitmap using arithmetic coding with a template
+   * that considers pixels from both the reference and current bitmap.
+   */
+  private processGenericRefinementRegion(
+    header: SegmentHeader,
+    data: Uint8Array,
+    immediate: boolean,
+  ): void {
+    if (data.length < 18) {
+      throw new Error('JBIG2Decode: Generic Refinement Region segment too short');
+    }
+
+    let offset = 0;
+
+    // Region segment information (17 bytes)
+    const regionWidth = readUint32BE(data, offset);
+    const regionHeight = readUint32BE(data, offset + 4);
+    const regionX = readUint32BE(data, offset + 8);
+    const regionY = readUint32BE(data, offset + 12);
+    const regionFlags = data[offset + 16]!;
+    const combinationOperator = regionFlags & 0x07;
+    offset += 17;
+
+    // Refinement flags (1 byte)
+    const refFlags = data[offset]!;
+    offset++;
+
+    const grTemplate = refFlags & 1;
+
+    // AT pixels
+    if (grTemplate === 0) {
+      offset += 4; // 2 AT pixels × 2 bytes
+    }
+
+    // Get reference bitmap from referred-to segment
+    let refBitmap: DecodedBitmap | undefined;
+    for (const refSegNum of header.referredToSegments) {
+      const refSeg = this.decodedSegments.get(refSegNum);
+      if (refSeg?.bitmap) {
+        refBitmap = refSeg.bitmap;
+        break;
+      }
+    }
+
+    const arithData = data.subarray(offset);
+    const rowBytes = Math.ceil(regionWidth / 8);
+    let bitmap: Uint8Array;
+
+    if (refBitmap) {
+      bitmap = decodeRefinementBitmap(
+        arithData,
+        regionWidth,
+        regionHeight,
+        grTemplate,
+        refBitmap.data,
+        refBitmap.width,
+        refBitmap.height,
+      );
+    } else {
+      // No reference — decode as generic bitmap
+      bitmap = decodeArithmeticGenericRegion(arithData, regionWidth, regionHeight, grTemplate, false);
+    }
+
+    if (immediate) {
+      this.composeRegion(bitmap, regionWidth, regionHeight, regionX, regionY, combinationOperator);
+    } else {
+      this.decodedSegments.set(header.segmentNumber, {
+        bitmap: { data: bitmap, width: regionWidth, height: regionHeight },
+      });
     }
   }
 
@@ -1213,6 +1965,286 @@ class ArithmeticDecoder {
 }
 
 // ---------------------------------------------------------------------------
+// Integer Arithmetic Decoder (JBIG2 Annex A)
+// ---------------------------------------------------------------------------
+
+/**
+ * Decodes signed integers using the JBIG2 arithmetic integer procedure.
+ *
+ * The procedure uses a 9-bit context model (512 entries) with a
+ * unary-coded magnitude prefix followed by fixed-width magnitude bits.
+ *
+ * Returns `null` for OOB (out-of-band), which signals the end of a
+ * data structure (e.g. end of a height class in a symbol dictionary).
+ *
+ * @internal
+ */
+class IntegerDecoder {
+  private readonly stats = new Uint8Array(512);
+
+  decode(decoder: ArithmeticDecoder): number | null {
+    let prev = 1;
+
+    const readBits = (n: number): number => {
+      let v = 0;
+      for (let i = 0; i < n; i++) {
+        const bit = decoder.decodeBit(this.stats, prev);
+        prev = prev < 256 ? (prev << 1) | bit : (((prev << 1) | bit) & 511) | 256;
+        v = (v << 1) | bit;
+      }
+      return v;
+    };
+
+    const sign = readBits(1);
+
+    let value: number;
+    if (readBits(1) === 0) {
+      value = readBits(2);                  // [0, 3]
+    } else if (readBits(1) === 0) {
+      value = readBits(2) + 4;              // [4, 7]
+    } else if (readBits(1) === 0) {
+      value = readBits(4) + 20;             // [20, 35]
+    } else if (readBits(1) === 0) {
+      value = readBits(8) + 84;             // [84, 339]
+    } else if (readBits(1) === 0) {
+      value = readBits(12) + 340;           // [340, 4435]
+    } else {
+      value = readBits(32) + 4436;          // [4436, ...]
+    }
+
+    if (sign) {
+      return value > 0 ? -value : null;     // null = OOB
+    }
+    return value;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// IAID Decoder (Integer Arithmetic ID)
+// ---------------------------------------------------------------------------
+
+/**
+ * Decodes symbol IDs using a fixed-width binary arithmetic code.
+ *
+ * The number of bits is `ceil(log2(numSymbols))` and determines
+ * the context size (2^(codeLen+1) entries).
+ *
+ * @internal
+ */
+class IAIDDecoder {
+  private readonly stats: Uint8Array;
+  private readonly codeLen: number;
+
+  constructor(codeLen: number) {
+    this.codeLen = codeLen;
+    this.stats = new Uint8Array(1 << (codeLen + 1));
+  }
+
+  decode(decoder: ArithmeticDecoder): number {
+    let prev = 1;
+    for (let i = 0; i < this.codeLen; i++) {
+      const bit = decoder.decodeBit(this.stats, prev);
+      prev = (prev << 1) | bit;
+    }
+    // Remove the leading 1 that was used as the initial context
+    return prev - (1 << this.codeLen);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Generic bitmap decoder (shared ArithmeticDecoder variant)
+// ---------------------------------------------------------------------------
+
+/**
+ * Decode a bitmap using an existing ArithmeticDecoder.
+ *
+ * Unlike `decodeArithmeticGenericRegion` which creates its own decoder
+ * from raw bytes, this function shares a decoder with the calling
+ * context (e.g. symbol dictionary decoding where all symbols share
+ * one arithmetic stream).
+ *
+ * @internal
+ */
+function decodeGenericBitmap(
+  decoder: ArithmeticDecoder,
+  width: number,
+  height: number,
+  templateId: number,
+): Uint8Array {
+  const rowBytes = Math.ceil(width / 8);
+  const output = new Uint8Array(rowBytes * height);
+
+  const contextSize = templateId === 0 ? 16 : templateId === 1 ? 13 : 10;
+  const stats = new Uint8Array(1 << contextSize);
+
+  for (let row = 0; row < height; row++) {
+    for (let col = 0; col < width; col++) {
+      const cx = buildGenericContext(output, rowBytes, width, row, col, templateId);
+      const pixel = decoder.decodeBit(stats, cx);
+
+      if (pixel) {
+        const byteIdx = row * rowBytes + (col >>> 3);
+        const bitIdx = 7 - (col & 7);
+        output[byteIdx] = (output[byteIdx]! | (1 << bitIdx)) & 0xff;
+      }
+    }
+  }
+
+  return output;
+}
+
+// ---------------------------------------------------------------------------
+// Bitmap composition helper
+// ---------------------------------------------------------------------------
+
+/**
+ * Compose a source bitmap onto a destination bitmap at position (x, y).
+ *
+ * This is a standalone version of the JBIG2Decoder.composeRegion method
+ * for composing symbol bitmaps onto region bitmaps during text region
+ * decoding.
+ *
+ * @internal
+ */
+function composeBitmapOnto(
+  dstBitmap: Uint8Array,
+  dstWidth: number,
+  dstHeight: number,
+  srcBitmap: Uint8Array,
+  srcWidth: number,
+  srcHeight: number,
+  x: number,
+  y: number,
+  operator: number,
+): void {
+  const dstRowBytes = Math.ceil(dstWidth / 8);
+  const srcRowBytes = Math.ceil(srcWidth / 8);
+
+  for (let row = 0; row < srcHeight; row++) {
+    const dstY = y + row;
+    if (dstY < 0 || dstY >= dstHeight) continue;
+
+    for (let col = 0; col < srcWidth; col++) {
+      const dstX = x + col;
+      if (dstX < 0 || dstX >= dstWidth) continue;
+
+      // Get source pixel
+      const srcByteIdx = row * srcRowBytes + (col >>> 3);
+      const srcBitIdx = 7 - (col & 7);
+      const srcPixel = (srcBitmap[srcByteIdx]! >>> srcBitIdx) & 1;
+
+      // Get destination pixel
+      const dstByteIdx = dstY * dstRowBytes + (dstX >>> 3);
+      const dstBitIdx = 7 - (dstX & 7);
+      const dstPixel = (dstBitmap[dstByteIdx]! >>> dstBitIdx) & 1;
+
+      // Apply combination operator
+      let result: number;
+      switch (operator) {
+        case 0: result = dstPixel | srcPixel; break;        // OR
+        case 1: result = dstPixel & srcPixel; break;        // AND
+        case 2: result = dstPixel ^ srcPixel; break;        // XOR
+        case 3: result = (dstPixel ^ srcPixel) ^ 1; break;  // XNOR
+        case 4: default: result = srcPixel; break;           // REPLACE
+      }
+
+      if (result) {
+        dstBitmap[dstByteIdx] = (dstBitmap[dstByteIdx]! | (1 << dstBitIdx)) & 0xff;
+      } else {
+        dstBitmap[dstByteIdx] = dstBitmap[dstByteIdx]! & ~(1 << dstBitIdx) & 0xff;
+      }
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Generic Refinement bitmap decoder
+// ---------------------------------------------------------------------------
+
+/**
+ * Decode a refinement region bitmap.
+ *
+ * The refinement procedure uses pixels from both the reference bitmap
+ * and the current (being-decoded) bitmap to build the context for
+ * arithmetic coding.
+ *
+ * @internal
+ */
+function decodeRefinementBitmap(
+  data: Uint8Array,
+  width: number,
+  height: number,
+  templateId: number,
+  refBitmap: Uint8Array,
+  refWidth: number,
+  refHeight: number,
+): Uint8Array {
+  const rowBytes = Math.ceil(width / 8);
+  const refRowBytes = Math.ceil(refWidth / 8);
+  const output = new Uint8Array(rowBytes * height);
+
+  const decoder = new ArithmeticDecoder(data);
+
+  // Context size: template 0 = 13 bits, template 1 = 10 bits
+  const contextSize = templateId === 0 ? 13 : 10;
+  const stats = new Uint8Array(1 << contextSize);
+
+  function getPixel(bitmap: Uint8Array, rBytes: number, r: number, c: number, w: number, h: number): number {
+    if (r < 0 || c < 0 || r >= h || c >= w) return 0;
+    return (bitmap[r * rBytes + (c >>> 3)]! >>> (7 - (c & 7))) & 1;
+  }
+
+  for (let row = 0; row < height; row++) {
+    for (let col = 0; col < width; col++) {
+      // Build refinement context from reference + current bitmaps
+      let cx = 0;
+
+      if (templateId === 0) {
+        // Template 0: 13-bit context
+        // Reference bitmap pixels (6 bits)
+        cx |= getPixel(refBitmap, refRowBytes, row - 1, col - 1, refWidth, refHeight) << 12;
+        cx |= getPixel(refBitmap, refRowBytes, row - 1, col, refWidth, refHeight) << 11;
+        cx |= getPixel(refBitmap, refRowBytes, row - 1, col + 1, refWidth, refHeight) << 10;
+        cx |= getPixel(refBitmap, refRowBytes, row, col - 1, refWidth, refHeight) << 9;
+        cx |= getPixel(refBitmap, refRowBytes, row, col, refWidth, refHeight) << 8;
+        cx |= getPixel(refBitmap, refRowBytes, row, col + 1, refWidth, refHeight) << 7;
+        cx |= getPixel(refBitmap, refRowBytes, row + 1, col, refWidth, refHeight) << 6;
+        // Current bitmap pixels (6 bits)
+        cx |= getPixel(output, rowBytes, row - 1, col - 1, width, height) << 5;
+        cx |= getPixel(output, rowBytes, row - 1, col, width, height) << 4;
+        cx |= getPixel(output, rowBytes, row - 1, col + 1, width, height) << 3;
+        cx |= getPixel(output, rowBytes, row, col - 1, width, height) << 2;
+        // AT pixels (default positions)
+        cx |= getPixel(refBitmap, refRowBytes, row + 1, col - 1, refWidth, refHeight) << 1;
+        cx |= getPixel(refBitmap, refRowBytes, row + 1, col + 1, refWidth, refHeight);
+      } else {
+        // Template 1: 10-bit context
+        cx |= getPixel(refBitmap, refRowBytes, row - 1, col, refWidth, refHeight) << 9;
+        cx |= getPixel(refBitmap, refRowBytes, row - 1, col + 1, refWidth, refHeight) << 8;
+        cx |= getPixel(refBitmap, refRowBytes, row, col - 1, refWidth, refHeight) << 7;
+        cx |= getPixel(refBitmap, refRowBytes, row, col, refWidth, refHeight) << 6;
+        cx |= getPixel(refBitmap, refRowBytes, row, col + 1, refWidth, refHeight) << 5;
+        cx |= getPixel(refBitmap, refRowBytes, row + 1, col, refWidth, refHeight) << 4;
+        cx |= getPixel(output, rowBytes, row - 1, col, width, height) << 3;
+        cx |= getPixel(output, rowBytes, row - 1, col + 1, width, height) << 2;
+        cx |= getPixel(output, rowBytes, row, col - 1, width, height) << 1;
+        cx |= getPixel(refBitmap, refRowBytes, row + 1, col - 1, refWidth, refHeight);
+      }
+
+      const pixel = decoder.decodeBit(stats, cx);
+
+      if (pixel) {
+        const byteIdx = row * rowBytes + (col >>> 3);
+        const bitIdx = 7 - (col & 7);
+        output[byteIdx] = (output[byteIdx]! | (1 << bitIdx)) & 0xff;
+      }
+    }
+  }
+
+  return output;
+}
+
+// ---------------------------------------------------------------------------
 // Utility: big-endian readers
 // ---------------------------------------------------------------------------
 
@@ -1226,6 +2258,24 @@ function readUint32BE(data: Uint8Array, offset: number): number {
   );
 }
 
+function readInt32BE(data: Uint8Array, offset: number): number {
+  return (
+    (data[offset]! << 24) |
+    (data[offset + 1]! << 16) |
+    (data[offset + 2]! << 8) |
+    data[offset + 3]!
+  );
+}
+
 function readUint16BE(data: Uint8Array, offset: number): number {
   return ((data[offset]! << 8) | data[offset + 1]!) >>> 0;
+}
+
+/**
+ * Sign-extend a value from a given bit width to a signed 32-bit integer.
+ * @internal
+ */
+function signExtend(value: number, bits: number): number {
+  const sign = 1 << (bits - 1);
+  return (value ^ sign) - sign;
 }

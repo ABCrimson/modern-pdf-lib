@@ -2,8 +2,14 @@
  * @module assets/font/fontSubset
  *
  * Font subsetting — removes unused glyphs from a TrueType font to
- * reduce file size.  Offers WASM-accelerated subsetting with a JS
- * fallback that copies the whole font if WASM is unavailable.
+ * reduce file size.  Offers WASM-accelerated subsetting with a pure
+ * JS subsetter as the default.
+ *
+ * The JS subsetter replaces unused glyph outlines with zero-length
+ * entries in the `glyf` table, preserving all glyph ID slots so that
+ * `CIDToGIDMap /Identity` continues to work without changes to the
+ * PDF embedding pipeline.  Composite glyph dependencies are resolved
+ * automatically.
  *
  * Also builds CMap streams for the subset encoding, mapping CIDs to
  * Unicode codepoints (required for PDF text extraction / copy-paste).
@@ -12,6 +18,8 @@
  * No fs — no file system access.
  * No require() — ESM import only.
  */
+
+import { subsetTtf } from './ttfSubset.js';
 
 // ---------------------------------------------------------------------------
 // Public interfaces
@@ -58,36 +66,15 @@ export interface SubsetCmap {
 // ---------------------------------------------------------------------------
 
 /**
- * Holds the subsetting WASM instance after initialization.
- * `undefined` means WASM is not loaded (fallback mode).
+ * WASM subsetter is not available — the TTF WASM module (`src/wasm/ttf`)
+ * provides `parse_font()` for metric extraction but does NOT include a
+ * `subset_font()` export. The pure JS subsetter (`ttfSubset.ts`) is
+ * the primary subsetting path for all runtimes.
+ *
+ * This flag exists for forward-compatibility: a dedicated subsetting
+ * WASM module could be added in the future.
  */
-let wasmInstance: SubsetWasm | undefined;
-
-/** @internal */
-interface SubsetWasm {
-  alloc(size: number): number;
-  free(ptr: number, size: number): void;
-  /**
-   * Subset a TrueType font.
-   *
-   * @param fontPtr    Pointer to font data in WASM memory.
-   * @param fontLen    Length of font data.
-   * @param glyphsPtr  Pointer to uint16 array of glyph IDs to retain.
-   * @param glyphsLen  Number of glyph IDs.
-   * @param outPtr     Pointer to output buffer.
-   * @param outMaxLen  Maximum output buffer size.
-   * @returns Actual output size in bytes, or -1 on error.
-   */
-  subset_font(
-    fontPtr: number,
-    fontLen: number,
-    glyphsPtr: number,
-    glyphsLen: number,
-    outPtr: number,
-    outMaxLen: number,
-  ): number;
-  memory: WebAssembly.Memory;
-}
+let wasmSubsetReady = false;
 
 // ---------------------------------------------------------------------------
 // WASM initialization
@@ -96,48 +83,29 @@ interface SubsetWasm {
 /**
  * Initialize the font subsetting WASM module.
  *
- * Call this once if you want WASM-accelerated subsetting.  If not
- * called, {@link subsetFont} falls back to returning the entire font
- * file (no size reduction, but still functional).
+ * **Note:** No WASM subsetter currently exists — the TTF WASM module
+ * only parses fonts, it does not subset them. The pure JS subsetter
+ * (`subsetTtf`) handles all subsetting. This function is a no-op
+ * placeholder for forward-compatibility.
  *
- * @param wasmSource - The `.wasm` binary, a URL, or a fetch Response.
+ * @param _wasmSource - Unused. Reserved for a future WASM subsetter.
  */
 export async function initSubsetWasm(
-  wasmSource?: Uint8Array | URL | string | Response,
+  _wasmSource?: Uint8Array | URL | string | Response,
 ): Promise<void> {
-  // Already initialized -- no-op
-  if (wasmInstance) return;
-
-  const imports = { env: {} };
-  let result: WebAssembly.WebAssemblyInstantiatedSource;
-
-  try {
-    if (wasmSource instanceof Uint8Array) {
-      result = await WebAssembly.instantiate(wasmSource.buffer as ArrayBuffer, imports);
-    } else if (typeof Response !== 'undefined' && wasmSource instanceof Response) {
-      result = await WebAssembly.instantiateStreaming(wasmSource, imports);
-    } else if (typeof wasmSource === 'string' || wasmSource instanceof URL) {
-      const resp = await fetch(String(wasmSource));
-      result = await WebAssembly.instantiateStreaming(resp, imports);
-    } else {
-      // No explicit source -- try the universal WASM loader
-      const { loadWasmModule } = await import('../../wasm/loader.js');
-      const bytes = await loadWasmModule('ttf');
-      result = await WebAssembly.instantiate(bytes.buffer as ArrayBuffer, imports);
-    }
-
-    wasmInstance = result.instance.exports as unknown as SubsetWasm;
-  } catch {
-    // WASM unavailable -- fall back to JS subsetting (full font copy)
-    wasmInstance = undefined;
-  }
+  // No WASM subsetter exists yet. The pure JS subsetter (subsetTtf)
+  // handles all subsetting for all runtimes.
+  wasmSubsetReady = false;
 }
 
 /**
  * Check whether the WASM subsetter has been initialized.
+ *
+ * Currently always returns `false` because no WASM subsetter exists.
+ * The pure JS subsetter is used for all font subsetting.
  */
 export function isSubsetWasmReady(): boolean {
-  return wasmInstance !== undefined;
+  return wasmSubsetReady;
 }
 
 // ---------------------------------------------------------------------------
@@ -145,41 +113,46 @@ export function isSubsetWasmReady(): boolean {
 // ---------------------------------------------------------------------------
 
 /**
- * Subset a font using the WASM module.
+ * Subset a font using a WASM module.
+ *
+ * Currently no WASM subsetter exists — this delegates to the JS subsetter.
+ * Reserved for forward-compatibility with a future WASM subsetting module.
+ *
  * @internal
  */
 function subsetWithWasm(
-  _fontData: Uint8Array,
-  _usedGlyphIds: Set<number>,
+  fontData: Uint8Array,
+  usedGlyphIds: Set<number>,
 ): SubsetResult {
-  // WASM-based subsetting planned for a future release; JS fallback is used instead.
-  throw new Error('WASM subsetting not yet available — use JS fallback');
+  return subsetJs(fontData, usedGlyphIds);
 }
 
 // ---------------------------------------------------------------------------
-// JS fallback subsetting (returns full font)
+// JS subsetting (real glyf table reduction)
 // ---------------------------------------------------------------------------
 
 /**
- * Fallback "subsetting" that returns the full font unchanged.
+ * Subset a TrueType font using the pure JS subsetter.
  *
- * Since the full font data is returned unmodified, glyph IDs do not
- * change.  The mappings are therefore **true identity** for each used
- * glyph: `oldGID === newGID`.  This is functionally correct — PDF
- * viewers render the font normally via `CIDToGIDMap /Identity` — but
- * does not reduce file size.
+ * Replaces unused glyph outline data with zero-length entries in the
+ * `glyf` table while preserving all glyph ID slots.  This keeps
+ * `CIDToGIDMap /Identity` working (CID = GID) while dramatically
+ * reducing the font program size.
  *
- * The `newToOldGid` array contains the used glyph IDs in sorted
- * order.  Because the font is not actually subsetted, each "new" GID
- * equals the original GID (identity mapping).
+ * Composite glyph dependencies are resolved automatically — if a used
+ * glyph references component glyphs, those components are retained too.
+ *
+ * The `newToOldGid` array contains the used glyph IDs in sorted order.
+ * Since glyph IDs are not renumbered, each "new" GID equals the
+ * original GID (identity mapping for the used glyphs).
  *
  * @param fontData      The raw TTF font file bytes.
  * @param usedGlyphIds  Set of glyph IDs that are actually used.
- * @returns A {@link SubsetResult} with the original font bytes and
+ * @returns A {@link SubsetResult} with the subsetted font bytes and
  *          identity glyph-ID mappings for the used glyphs.
  * @internal
  */
-function subsetFallback(
+function subsetJs(
   fontData: Uint8Array,
   usedGlyphIds: Set<number>,
 ): SubsetResult {
@@ -187,13 +160,14 @@ function subsetFallback(
   const allGids = new Set(usedGlyphIds);
   allGids.add(0);
 
+  // Run the actual TrueType subsetter
+  const subsetFontData = subsetTtf(fontData, allGids);
+
   // Sort glyph IDs for deterministic ordering
   const sortedGids = allGids.values().toArray().sort((a, b) => a - b);
 
-  // Build identity mappings: old GID === new GID (no remapping).
-  // Since the full font is returned, glyph IDs are unchanged.
-  // newToOldGid[i] = sortedGids[i] (the i-th used glyph's original GID)
-  // oldToNewGid: originalGID → originalGID (true identity for each used glyph)
+  // Build identity mappings: old GID === new GID (no renumbering).
+  // GID slots are preserved in the font, so glyph IDs are unchanged.
   const newToOldGid: number[] = sortedGids;
   const oldToNewGid = new Map<number, number>();
   for (const gid of sortedGids) {
@@ -201,8 +175,7 @@ function subsetFallback(
   }
 
   return {
-    // Return a copy to avoid mutations
-    fontData: new Uint8Array(fontData),
+    fontData: subsetFontData,
     newToOldGid,
     oldToNewGid,
   };
@@ -232,14 +205,14 @@ export function subsetFont(
 ): SubsetResult {
   if (usedGlyphIds.size === 0) {
     // Nothing to subset — just include .notdef
-    return subsetFallback(fontData, new Set([0]));
+    return subsetJs(fontData, new Set([0]));
   }
 
-  if (wasmInstance) {
+  if (wasmSubsetReady) {
     return subsetWithWasm(fontData, usedGlyphIds);
   }
 
-  return subsetFallback(fontData, usedGlyphIds);
+  return subsetJs(fontData, usedGlyphIds);
 }
 
 // ---------------------------------------------------------------------------

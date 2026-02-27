@@ -139,16 +139,57 @@ describe('compression ratio comparison', () => {
 });
 
 // ---------------------------------------------------------------------------
-// TODO: libdeflate WASM benchmarks
+// libdeflate WASM benchmarks (skip if WASM not available)
 // ---------------------------------------------------------------------------
 
-describe.todo('libdeflate WASM compress', () => {
-  // bench('10KB text, level 6', async () => { ... });
-  // bench('10KB text, level 12', async () => { ... });
-  // bench('100KB text, level 6', async () => { ... });
+import { LibdeflateWasm } from '../../src/compression/libdeflateWasm.js';
+
+// Check if WASM is available by trying to create the engine.
+// If not initialized, the constructor or methods will throw.
+let wasmEngine: InstanceType<typeof LibdeflateWasm> | null = null;
+let wasmDeflateReady = false;
+try {
+  wasmEngine = new LibdeflateWasm();
+  // Test that it actually works (throws if WASM not initialized)
+  wasmEngine.compressSync(new Uint8Array([0]), 1);
+  wasmDeflateReady = true;
+} catch {
+  wasmDeflateReady = false;
+  wasmEngine = null;
+}
+
+describe.skipIf(!wasmDeflateReady)('libdeflate WASM compress', () => {
+  bench('1KB text, level 6', () => {
+    wasmEngine!.compressSync(text1KB, 6);
+  });
+
+  bench('10KB text, level 6', () => {
+    wasmEngine!.compressSync(text10KB, 6);
+  });
+
+  bench('10KB text, level 12', () => {
+    wasmEngine!.compressSync(text10KB, 12);
+  });
+
+  bench('100KB text, level 6', () => {
+    wasmEngine!.compressSync(text100KB, 6);
+  });
+
+  bench('10KB random data, level 6', () => {
+    wasmEngine!.compressSync(random10KB, 6);
+  });
 });
 
-describe.todo('libdeflate WASM decompress', () => {
-  // bench('10KB text', async () => { ... });
-  // bench('100KB text', async () => { ... });
+describe.skipIf(!wasmDeflateReady)('libdeflate WASM decompress', () => {
+  bench('1KB text', () => {
+    wasmEngine!.decompressSync(compressed1KB, text1KB.length);
+  });
+
+  bench('10KB text', () => {
+    wasmEngine!.decompressSync(compressed10KB, text10KB.length);
+  });
+
+  bench('100KB text', () => {
+    wasmEngine!.decompressSync(compressed100KB, text100KB.length);
+  });
 });

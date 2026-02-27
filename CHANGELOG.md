@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 See [VERSIONING.md](./VERSIONING.md) for this project's versioning policy.
 
+## [0.12.0] - 2026-02-27
+
+### Added
+- **Pure JS TrueType font subsetting**: Fonts are now properly subsetted — only glyphs used in the document are included. Previously the entire font file was embedded unchanged, meaning a 10MB CJK font stayed 10MB even for 5 characters. The subsetter handles composite glyph dependencies, rebuilds `glyf`/`loca`/`hmtx`/`maxp`/`cmap` tables, and produces valid TrueType files with correct checksums and 4-byte alignment.
+- **JBIG2 decoder: 7 new segment types**: Symbol Dictionary (type 0), Text Region (types 4/6/7), Pattern Dictionary (type 16), Halftone Region (types 20/22/23), and Generic Refinement Region (types 40/42/43). Enterprise and government PDFs with JBIG2-compressed scanned images now parse correctly. Includes arithmetic integer decoding (Annex A), IAID decoding, bitmap composition, and refinement coding.
+- **WASM text shaping bridge**: Wired up the rustybuzz WASM module for OpenType text shaping (Arabic, Devanagari, ligatures, kerning). Falls back to JS when WASM is not compiled.
+- **WASM font metric extraction bridge**: Wired up the TTF parser WASM module for fast font metric extraction. Falls back to JS when WASM is not compiled.
+- **WASM font subsetting bridge**: Connected the JS subsetter with optional WASM-accelerated metric extraction.
+- **Visual regression E2E tests**: 3 Playwright tests generating PDFs in-browser and comparing screenshots — single page with text, shapes and colors, and multi-page documents (Chromium only).
+- **Benchmark tests for WASM modules**: 14 conditional benchmarks for WASM font parsing, font subsetting, text shaping, and libdeflate compression/decompression. Gracefully skipped when WASM binaries are not compiled.
+- **Real Rust WASM unit tests**: Replaced placeholder `assert!(true)` tests with 27 real tests across 3 Rust modules — TTF parser (10 tests with programmatic font fixtures), PNG decoder (8 tests using the `png` encoder), and text shaper (9 tests including error cases).
+
+### Fixed
+- **Rust WASM modules now compile and test natively**: Extracted core logic into `_impl` functions returning `Result<T, String>` so tests work on non-wasm32 targets (JsValue panics outside WASM). Added `"rlib"` to `crate-type` in all Cargo.toml files to enable `cargo test`.
+- **Rust shaping module**: Fixed `parse_script_tag` to return `rustybuzz::Script` via `from_iso15924_tag` instead of raw `Tag` (type mismatch with `set_script`). Added missing `use std::str::FromStr` import for language tag parsing.
+- **Rust PNG module**: Fixed `Decoder::new` to wrap data in `Cursor` for `Seek` trait requirement in `png` 0.18.1. Fixed `output_buffer_size()` returning `Option<usize>`.
+- **Rust TTF module**: Fixed name table in test fixtures to use platform 3 (Windows) with UTF-16BE encoding — `ttf-parser` doesn't decode platform 1 (Mac) name records via `to_string()`.
+
 ## [0.11.6] - 2026-02-27
 
 ### Removed
