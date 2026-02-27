@@ -2,8 +2,25 @@
 
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+See [VERSIONING.md](./VERSIONING.md) for this project's versioning policy.
+
+## [0.11.6] - 2026-02-27
+
+### Removed
+- **`docs/plans/` directory**: 4 historical planning documents (~3,200 lines) from the initial design phase. Internal scaffolding that should not ship with a public release.
+- **`src/compression/zstdCache.ts`**: Unused Zstd compression cache stub (336 lines). Every function was a TODO with zero imports anywhere in the codebase. Optional WASM acceleration feature that had no consumers.
+
+### Added
+- **`VERSIONING.md`**: Documents the project's versioning policy — `MAJOR.MINOR.PATCH` format with max 9 per digit position (e.g., `0.11.9` → `0.12.0`), what each position means, and rollover rules.
+- **Deno install snippet**: Getting Started guide now includes `deno add npm:modern-pdf-lib` in the code-group tabs alongside npm/pnpm/bun.
+- **Supported runtimes table**: Collapsible runtimes table in Getting Started showing Node.js, Deno, Bun, Cloudflare Workers, and Browsers with version requirements.
+
+### Changed
+- **Cleaned up aspirational TODO comments**: Replaced 4 open-ended WASM TODO blocks in `fontEmbed.ts`, `fontSubset.ts`, and `textShaper.ts` with concise notes that JS fallbacks are in use and WASM acceleration is planned for a future release.
+
+### Fixed
+- **Migration guide checklist**: Changed `Remove any PDFDocument.load() calls (not supported)` to `Replace PDFDocument.load() with loadPdf()` — the library supports loading existing PDFs via `loadPdf()`.
 
 ## [0.11.5] - 2026-02-27
 

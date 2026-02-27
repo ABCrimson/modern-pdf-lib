@@ -358,7 +358,7 @@ Use this checklist when migrating a project:
 - [ ] Update all imports from `pdf-lib` to `modern-pdf-lib`
 - [ ] Replace `PDFDocument.create()` with `createPdf()`
 - [ ] Replace `Buffer` usage with `Uint8Array`
-- [ ] Remove any `PDFDocument.load()` calls (not supported)
+- [ ] Replace `PDFDocument.load()` with `loadPdf()`
 - [ ] Update standard font usage (no embedding required)
 - [ ] Replace `image.scale()` with manual width/height calculation
 - [ ] Update file writing from `fs.writeFileSync` to `await writeFile`

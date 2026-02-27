@@ -152,20 +152,8 @@ function subsetWithWasm(
   _fontData: Uint8Array,
   _usedGlyphIds: Set<number>,
 ): SubsetResult {
-  // TODO: Implement WASM-based font subsetting
-  //
-  // Implementation outline:
-  // 1. Ensure glyph ID 0 (.notdef) is always included
-  // 2. Sort glyph IDs and write them into a Uint16Array
-  // 3. Allocate WASM memory for font data + glyph ID array + output buffer
-  // 4. Copy font data and glyph IDs into WASM memory
-  // 5. Call wasmInstance!.subset_font(...)
-  // 6. Read the output buffer
-  // 7. Build the oldToNewGid and newToOldGid mappings
-  // 8. Free WASM memory
-  // 9. Return SubsetResult
-
-  throw new Error('WASM subsetting not yet implemented');
+  // WASM-based subsetting planned for a future release; JS fallback is used instead.
+  throw new Error('WASM subsetting not yet available — use JS fallback');
 }
 
 // ---------------------------------------------------------------------------

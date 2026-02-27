@@ -173,9 +173,8 @@ export async function initShapingWasm(
       result = await WebAssembly.instantiate(bytes.buffer as ArrayBuffer, imports);
     }
 
-    // TODO: actual WASM instance creation remains pending until the
-    // compiled rustybuzz binary is available. For now, store the
-    // exports if the binary loaded successfully.
+    // Store the WASM exports if the binary loaded successfully.
+    // Full rustybuzz integration is planned for a future release.
     wasmInstance = result.instance.exports as unknown as RustybuzzWasm;
   } catch {
     // WASM unavailable -- fall back to simple cmap-based shaping
@@ -206,26 +205,8 @@ function shapeWithWasm(
   _text: string,
   _options: ShapingOptions,
 ): ShapingResult {
-  // TODO: Implement WASM-based shaping
-  //
-  // Implementation outline:
-  // 1. Copy fontData into WASM linear memory
-  // 2. Encode text as UTF-8 and copy into WASM memory
-  // 3. Encode direction (0=LTR, 1=RTL), script tag, language tag
-  // 4. Encode feature list as packed bytes
-  // 5. Allocate output buffer (maxGlyphs * 24 bytes per glyph record)
-  // 6. Call wasmInstance!.shape(...)
-  // 7. Read output buffer: for each glyph, extract:
-  //    - glyphId (uint16)
-  //    - cluster (uint32)
-  //    - xAdvance (int16)
-  //    - yAdvance (int16)
-  //    - xOffset (int16)
-  //    - yOffset (int16)
-  // 8. Free all WASM allocations
-  // 9. Return ShapingResult
-
-  throw new Error('WASM shaping not yet implemented');
+  // WASM-based shaping planned for a future release; JS fallback is used instead.
+  throw new Error('WASM shaping not yet available — use JS fallback');
 }
 
 // ---------------------------------------------------------------------------

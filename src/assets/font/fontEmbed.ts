@@ -535,14 +535,7 @@ export async function embedFont(fontBytes: Uint8Array): Promise<EmbeddedFont> {
     throw new Error('Font data too small — expected at least 12 bytes for the table directory');
   }
 
-  // TODO: When ttf-parser WASM is available, use it for faster metric extraction:
-  //
-  // if (isTtfParserWasmReady()) {
-  //   const wasmMetrics = extractMetricsViaWasm(fontBytes);
-  //   return new EmbeddedFont(fontBytes, wasmMetrics);
-  // }
-
-  // Pure JS metric extraction (fallback / default)
+  // Pure JS metric extraction (WASM acceleration planned for a future release)
   const metrics = extractMetrics(fontBytes);
 
   return new EmbeddedFont(fontBytes, metrics);

@@ -73,7 +73,8 @@ page.drawText('Line one\nLine two\nLine three', {
 });
 ```
 
-When `lineHeight` is omitted, a default of `size * 1.2` is used.
+> [!TIP]
+> When `lineHeight` is omitted, a default of `size * 1.2` is used — this works well for most body text.
 
 ## Text Measurement
 
@@ -191,8 +192,7 @@ See the [Fonts guide](/guide/fonts) for details on subsetting, complex script sh
 
 ## Options Reference
 
-The full set of options accepted by `page.drawText()`:
-
+::: details Full `drawText()` Options
 | Option | Type | Default | Description |
 |---|---|---|---|
 | `x` | `number` | Required | Horizontal position in points |
@@ -203,3 +203,4 @@ The full set of options accepted by `page.drawText()`:
 | `rotate` | `Angle` | `degrees(0)` | Rotation angle |
 | `lineHeight` | `number` | `size * 1.2` | Vertical spacing for multi-line text |
 | `opacity` | `number` | `1` | Text opacity (0 to 1) |
+:::
