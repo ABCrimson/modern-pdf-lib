@@ -301,11 +301,11 @@ jobs:
           echo "" >> "$GITHUB_STEP_SUMMARY"
 
           # Measure raw size
-          RAW_SIZE=$(wc -c < dist/index.js)
+          RAW_SIZE=$(wc -c < dist/index.mjs)
           echo "Raw ESM bundle: ${RAW_SIZE} bytes" >> "$GITHUB_STEP_SUMMARY"
 
           # Measure gzipped size
-          GZIP_SIZE=$(gzip -c dist/index.js | wc -c)
+          GZIP_SIZE=$(gzip -c dist/index.mjs | wc -c)
           echo "Gzipped ESM bundle: ${GZIP_SIZE} bytes" >> "$GITHUB_STEP_SUMMARY"
 
           # Budget check: 50 KB gzipped max for core bundle
