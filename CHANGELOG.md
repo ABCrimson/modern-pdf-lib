@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.1] - 2026-02-27
+
+### Changed
+- **Documentation site redesign**: Complete visual overhaul of the VitePress docs site with custom theme — deep navy dark mode, violet/cyan gradient palette, glassmorphic feature cards, Inter + JetBrains Mono fonts, SVG gradient icons, animated hero section, benchmark stats showcase, and runtime badges
+- **Improved meta tags**: Added OG title, URL, Twitter card meta, Google Fonts preconnect headers
+- **Navbar**: Added version dropdown with Changelog and npm links, added npm social link
+- **Fixed homepage GitHub link**: Was pointing to wrong repository URL
+
 ## [0.11.0] - 2026-02-27
 
 ### Performance
