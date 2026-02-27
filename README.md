@@ -1,179 +1,455 @@
-# modern-pdf
+<div align="center">
 
-[![CI](https://github.com/user/modern-pdf/actions/workflows/ci.yml/badge.svg)](https://github.com/user/modern-pdf/actions/workflows/ci.yml)
-[![npm version](https://img.shields.io/npm/v/modern-pdf)](https://www.npmjs.com/package/modern-pdf)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+<br />
 
-A modern, WASM-accelerated PDF creation engine for every JavaScript runtime.
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://img.shields.io/badge/modern--pdf--lib-fff?style=for-the-badge&labelColor=000&color=000&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTQgMkg2YTIgMiAwIDAgMC0yIDJ2MTZhMiAyIDAgMCAwIDIgMmgxMmEyIDIgMCAwIDAgMi0yVjhsLTYtNloiLz48cG9seWxpbmUgcG9pbnRzPSIxNCAyIDE0IDggMjAgOCIvPjxsaW5lIHgxPSIxNiIgeTE9IjEzIiB4Mj0iOCIgeTI9IjEzIi8+PGxpbmUgeDE9IjE2IiB5MT0iMTciIHgyPSI4IiB5Mj0iMTciLz48bGluZSB4MT0iMTAiIHkxPSI5IiB4Mj0iOCIgeTI9IjkiLz48L3N2Zz4" />
+  <img src="https://img.shields.io/badge/modern--pdf--lib-000?style=for-the-badge&labelColor=fff&color=fff&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTQgMkg2YTIgMiAwIDAgMC0yIDJ2MTZhMiAyIDAgMCAwIDIgMmgxMmEyIDIgMCAwIDAgMi0yVjhsLTYtNloiLz48cG9seWxpbmUgcG9pbnRzPSIxNCAyIDE0IDggMjAgOCIvPjxsaW5lIHgxPSIxNiIgeTE9IjEzIiB4Mj0iOCIgeTI9IjEzIi8+PGxpbmUgeDE9IjE2IiB5MT0iMTciIHgyPSI4IiB5Mj0iMTciLz48bGluZSB4MT0iMTAiIHkxPSI5IiB4Mj0iOCIgeTI9IjkiLz48L3N2Zz4" alt="modern-pdf-lib" />
+</picture>
 
-`modern-pdf` is an ESM-only, TypeScript-first library for generating PDF documents from scratch. It runs in Node 22+, Deno, Bun, Cloudflare Workers, and all modern browsers. Optional WebAssembly modules provide hardware-speed compression, PNG decoding, font parsing, and text shaping.
+### The PDF engine for modern JavaScript
 
-## Features
+Create, parse, fill, merge, sign, and manipulate PDF documents<br />in Node, Deno, Bun, Cloudflare Workers, and every browser.
 
-- **Universal runtime** — Node 22+, Deno, Bun, Cloudflare Workers, browsers
-- **WASM-accelerated** — Optional WebAssembly modules for 5-10x faster compression, PNG decoding, font parsing, and text shaping
-- **Streaming output** — Generate PDFs as a `ReadableStream` for low-memory server workloads
-- **Tree-shakable** — ESM-only, zero side effects. Core bundle under 20 KB gzipped
-- **TypeScript-first** — Written in TypeScript 6.0 with strict types and full IntelliSense
-- **PDF/A support** — Generate archival-grade PDF/A-2b documents
-- **No dependencies on Node APIs** — Uses `Uint8Array` everywhere, no `Buffer` or `fs` required
-- **Font subsetting** — Automatic subsetting for TrueType and OpenType fonts
-- **Complex script support** — Arabic, Hebrew, Devanagari, Thai, and other complex scripts via rustybuzz
+<br />
+
+[![npm version](https://img.shields.io/npm/v/modern-pdf-lib?style=flat-square&color=cb3837)](https://www.npmjs.com/package/modern-pdf-lib)
+[![bundle size](https://img.shields.io/badge/gzip-36kb_core-blue?style=flat-square)](https://bundlephobia.com/package/modern-pdf-lib)
+[![tests](https://img.shields.io/badge/tests-1%2C952_passing-brightgreen?style=flat-square)](#)
+[![TypeScript](https://img.shields.io/badge/TypeScript-6.0-3178c6?style=flat-square&logo=typescript&logoColor=white)](#)
+[![License: MIT](https://img.shields.io/badge/license-MIT-yellow?style=flat-square)](LICENSE)
+
+<br />
+
+[Get Started](#quick-start) · [Features](#features) · [API](#api-surface) · [Why This?](#why-modern-pdf-lib)
+
+<br />
+
+</div>
+
+---
+
+<br />
 
 ## Quick Start
 
 ```sh
-npm install modern-pdf
+npm install modern-pdf-lib
 ```
 
 ```ts
-import { createPdf, PageSizes, rgb } from 'modern-pdf';
+import { createPdf, PageSizes, rgb } from 'modern-pdf-lib';
 
-const pdf = createPdf();
-const page = pdf.addPage(PageSizes.A4);
+const doc = createPdf();
+const page = doc.addPage(PageSizes.A4);
 
-page.drawText('Hello, Modern PDF!', {
+page.drawText('Hello from modern-pdf-lib', {
   x: 50,
-  y: 700,
-  size: 24,
-  color: rgb(0.1, 0.1, 0.1),
+  y: 750,
+  size: 28,
+  color: rgb(0.13, 0.13, 0.13),
 });
 
-// Full buffer
-const bytes = await pdf.save();
-
-// Streaming (low memory)
-const stream = pdf.saveAsStream();
-
-// Browser blob
-const blob = await pdf.saveAsBlob();
+const bytes = await doc.save();          // Uint8Array
+const stream = doc.saveAsStream();       // ReadableStream
+const blob = await doc.saveAsBlob();     // Blob (browsers)
 ```
 
-## Architecture
+<br />
 
-`modern-pdf` uses a multi-stage pipeline to transform high-level drawing commands into a compliant PDF byte stream:
+## Features
 
-```
-  Authoring          Asset Resolution       Compilation         Output
- ───────────       ──────────────────     ─────────────       ──────────
- createPdf()  ──►  Font embedding    ──►  PDF objects   ──►  Uint8Array
- addPage()         Image embedding        Cross-ref          ReadableStream
- drawText()        Font subsetting        Compression        Blob
- drawImage()       Text shaping           Serialization
- drawRect()
-```
+<table>
+<tr>
+<td width="50%" valign="top">
 
-| Stage | Description |
-|---|---|
-| **Authoring** | High-level API calls build an in-memory document model |
-| **Asset Resolution** | Fonts are parsed and subsetted, images are decoded and compressed |
-| **Compilation** | The document model is serialized into PDF objects, cross-reference tables, and trailer |
-| **Output** | The byte stream is emitted as a buffer, stream, or blob |
+**Create & Draw**
+- Pages, text, images, shapes, SVG paths
+- TrueType & OpenType font embedding
+- Automatic font subsetting
+- JPEG / PNG image embedding
+- RGB, CMYK, grayscale colors
+- Text layout (multiline, combed, auto-size)
 
-## Runtime Support
+</td>
+<td width="50%" valign="top">
+
+**Parse & Modify**
+- Load existing PDFs (encrypted too)
+- Extract text with positions
+- Fill & flatten AcroForm fields
+- Merge, split, copy pages
+- Add / remove / reorder pages
+- Incremental saves
+
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
+
+**Secure & Compliant**
+- AES-256 / RC4 encryption & decryption
+- Digital signatures (PKCS#7, timestamps)
+- PDF/A-1b through PDF/A-3u validation
+- Tagged PDF / PDF/UA accessibility
+- Structure tree & marked content
+- Redaction with content removal
+
+</td>
+<td width="50%" valign="top">
+
+**Advanced**
+- Outlines / bookmarks
+- Optional content layers (OCGs)
+- File attachments
+- Watermarks
+- Linearization (fast web view)
+- 60+ low-level PDF operators
+- Custom appearance providers
+
+</td>
+</tr>
+</table>
+
+<br />
+
+## Why modern-pdf-lib?
+
+<table>
+<tr>
+<th></th>
+<th align="center"><strong>modern-pdf-lib</strong></th>
+<th align="center">pdf-lib</th>
+</tr>
+
+<tr><td><strong>Runtime</strong></td>
+<td align="center">Node, Deno, Bun, CF Workers, browsers</td>
+<td align="center">Node, browsers</td></tr>
+
+<tr><td><strong>Module format</strong></td>
+<td align="center">ESM + CJS</td>
+<td align="center">CJS (with ESM wrapper)</td></tr>
+
+<tr><td><strong>TypeScript</strong></td>
+<td align="center">6.0 strict</td>
+<td align="center">3.x</td></tr>
+
+<tr><td><strong>Parse existing PDFs</strong></td>
+<td align="center">Yes (with decryption)</td>
+<td align="center">Yes</td></tr>
+
+<tr><td><strong>Text extraction</strong></td>
+<td align="center">Yes (with positions)</td>
+<td align="center">No</td></tr>
+
+<tr><td><strong>Encryption</strong></td>
+<td align="center">AES-256 + RC4</td>
+<td align="center">No</td></tr>
+
+<tr><td><strong>Digital signatures</strong></td>
+<td align="center">PKCS#7, timestamps</td>
+<td align="center">No</td></tr>
+
+<tr><td><strong>Forms</strong></td>
+<td align="center">Full (7 field types)</td>
+<td align="center">Full</td></tr>
+
+<tr><td><strong>PDF/A compliance</strong></td>
+<td align="center">1a/1b through 3a/3b/3u</td>
+<td align="center">No</td></tr>
+
+<tr><td><strong>Accessibility (PDF/UA)</strong></td>
+<td align="center">Structure tree, checker</td>
+<td align="center">No</td></tr>
+
+<tr><td><strong>Merge & split</strong></td>
+<td align="center">Built-in</td>
+<td align="center">Copy pages only</td></tr>
+
+<tr><td><strong>Annotations</strong></td>
+<td align="center">16 types + appearances</td>
+<td align="center">No</td></tr>
+
+<tr><td><strong>Streaming output</strong></td>
+<td align="center">ReadableStream</td>
+<td align="center">No</td></tr>
+
+<tr><td><strong>Layers (OCG)</strong></td>
+<td align="center">Yes</td>
+<td align="center">No</td></tr>
+
+<tr><td><strong>Outlines</strong></td>
+<td align="center">Yes</td>
+<td align="center">No</td></tr>
+
+<tr><td><strong>Watermarks</strong></td>
+<td align="center">Yes</td>
+<td align="center">No</td></tr>
+
+<tr><td><strong>Redaction</strong></td>
+<td align="center">Yes</td>
+<td align="center">No</td></tr>
+
+<tr><td><strong>Linearization</strong></td>
+<td align="center">Yes</td>
+<td align="center">No</td></tr>
+
+<tr><td><strong>WASM acceleration</strong></td>
+<td align="center">Optional (compression, PNG, fonts)</td>
+<td align="center">No</td></tr>
+
+<tr><td><strong>Dependencies</strong></td>
+<td align="center">1 (fflate)</td>
+<td align="center">0</td></tr>
+
+<tr><td><strong>Maintained</strong></td>
+<td align="center">Active</td>
+<td align="center">Inactive since 2021</td></tr>
+
+</table>
+
+<br />
+
+## Runtimes
 
 | Runtime | Version | Status |
-|---|---|---|
-| Node.js | 22+ | Fully supported |
-| Deno | 1.40+ | Fully supported |
-| Bun | 1.0+ | Fully supported |
-| Cloudflare Workers | — | Fully supported |
-| Chrome / Edge | 109+ | Fully supported |
-| Firefox | 115+ | Fully supported |
-| Safari | 16.4+ | Fully supported |
+|:---|:---|:---:|
+| **Node.js** | 22+ | Fully supported |
+| **Deno** | 1.40+ | Fully supported |
+| **Bun** | 1.0+ | Fully supported |
+| **Cloudflare Workers** | &mdash; | Fully supported |
+| **Chrome / Edge** | 109+ | Fully supported |
+| **Firefox** | 115+ | Fully supported |
+| **Safari** | 16.4+ | Fully supported |
 
-## Performance Targets
+<br />
 
-| Operation | Target | WASM Boost |
-|---|---|---|
-| Hello World PDF | < 1 ms | — |
-| 100-page text document | < 50 ms | 2x faster compression |
-| Embed 5 MB PNG | < 15 ms | 5x faster decode |
-| Embed 50 KB TTF + subset | < 5 ms | 3x faster parsing |
-| Complex script shaping (1000 chars) | < 10 ms | 10x faster shaping |
+## API Surface
 
-## WASM Modules
-
-All WASM modules are optional. Without them, `modern-pdf` falls back to pure-JavaScript implementations that produce identical output.
-
-| Module | Crate | Purpose |
-|---|---|---|
-| `libdeflate` | libdeflate (via flate2) | Deflate compression for PDF streams |
-| `png` | png | PNG image decoding with alpha support |
-| `ttf` | ttf-parser | TrueType/OpenType font parsing and subsetting |
-| `shaping` | rustybuzz | OpenType text shaping for complex scripts |
-
-Initialize WASM explicitly for best performance:
+<details>
+<summary><strong>Document</strong> &mdash; create, load, save, metadata</summary>
 
 ```ts
-import { initWasm } from 'modern-pdf';
-await initWasm();
+import { createPdf, loadPdf, PageSizes } from 'modern-pdf-lib';
+
+// Create from scratch
+const doc = createPdf();
+doc.setTitle('Invoice #1042');
+doc.setLanguage('en');
+
+// Load existing
+const existing = await loadPdf(pdfBytes, { password: 'secret' });
+
+// Save
+const bytes = await doc.save();
+const stream = doc.saveAsStream();
 ```
+</details>
 
-## Installation
+<details>
+<summary><strong>Pages</strong> &mdash; draw text, images, shapes, SVG</summary>
 
-### npm / pnpm / bun
+```ts
+const page = doc.addPage(PageSizes.LETTER);
+
+page.drawText('Hello', { x: 50, y: 700, size: 24 });
+page.drawImage(imageRef, { x: 50, y: 400, width: 200, height: 200 });
+page.drawRectangle({ x: 50, y: 300, width: 100, height: 50, color: rgb(0, 0.5, 1) });
+page.drawCircle({ x: 200, y: 325, radius: 25 });
+page.drawSvgPath('M 0 0 L 100 0 L 50 80 Z', { x: 300, y: 300 });
+```
+</details>
+
+<details>
+<summary><strong>Fonts</strong> &mdash; embed, subset, standard 14</summary>
+
+```ts
+// Standard fonts (no embedding needed)
+const helvetica = doc.embedStandardFont('Helvetica');
+
+// Custom TrueType / OpenType
+const fontBytes = await readFile('Inter.ttf');
+const inter = await doc.embedFont(fontBytes, { subset: true });
+
+page.drawText('Custom font', { x: 50, y: 500, font: inter, size: 18 });
+```
+</details>
+
+<details>
+<summary><strong>Forms</strong> &mdash; fill, create, flatten</summary>
+
+```ts
+const form = doc.getForm();
+
+form.getTextField('name').setText('Jane Doe');
+form.getCheckbox('agree').check();
+form.getDropdown('country').select('Canada');
+
+form.flatten(); // Burn values into page content
+```
+</details>
+
+<details>
+<summary><strong>Merge & Split</strong></summary>
+
+```ts
+import { mergePdfs, splitPdf, copyPages } from 'modern-pdf-lib';
+
+const merged = await mergePdfs([pdf1Bytes, pdf2Bytes]);
+const pages = await splitPdf(pdfBytes, [
+  { start: 0, end: 4 },   // Pages 1-5
+  { start: 5, end: 9 },   // Pages 6-10
+]);
+```
+</details>
+
+<details>
+<summary><strong>Encryption</strong> &mdash; AES-256, RC4, permissions</summary>
+
+```ts
+const bytes = await doc.save({
+  userPassword: 'reader',
+  ownerPassword: 'admin',
+  permissions: { printing: true, copying: false },
+});
+```
+</details>
+
+<details>
+<summary><strong>Digital Signatures</strong></summary>
+
+```ts
+import { signPdf, verifySignatures } from 'modern-pdf-lib';
+
+const signed = await signPdf(pdfBytes, {
+  certificate: certPem,
+  privateKey: keyPem,
+  reason: 'Approved',
+});
+
+const results = await verifySignatures(signed);
+```
+</details>
+
+<details>
+<summary><strong>Text Extraction</strong></summary>
+
+```ts
+import { loadPdf, extractTextWithPositions } from 'modern-pdf-lib';
+
+const doc = await loadPdf(pdfBytes);
+const page = doc.getPage(0);
+const items = extractTextWithPositions(page.getOperators(), page.getResources());
+
+for (const item of items) {
+  console.log(`"${item.text}" at (${item.x}, ${item.y})`);
+}
+```
+</details>
+
+<details>
+<summary><strong>PDF/A & Accessibility</strong></summary>
+
+```ts
+import { enforcePdfA, checkAccessibility } from 'modern-pdf-lib';
+
+// Enforce PDF/A-2b compliance
+const archival = enforcePdfA(pdfBytes, '2b');
+
+// Check accessibility
+const issues = checkAccessibility(doc);
+for (const issue of issues) {
+  console.log(`[${issue.severity}] ${issue.code}: ${issue.message}`);
+}
+```
+</details>
+
+<br />
+
+## Install
 
 ```sh
-npm install modern-pdf
-pnpm add modern-pdf
-bun add modern-pdf
+# npm
+npm install modern-pdf-lib
+
+# pnpm
+pnpm add modern-pdf-lib
+
+# yarn
+yarn add modern-pdf-lib
+
+# bun
+bun add modern-pdf-lib
+
+# deno
+import { createPdf } from 'npm:modern-pdf-lib';
 ```
 
-### CDN (ESM)
+<br />
+
+## WASM Acceleration
+
+All WASM modules are **optional**. Without them, identical output is produced using pure-JS fallbacks.
 
 ```ts
-import { createPdf, PageSizes, rgb } from 'https://esm.sh/modern-pdf';
+import { initWasm } from 'modern-pdf-lib';
+
+await initWasm({
+  deflate: true,   // Faster compression
+  png: true,       // Faster PNG decoding
+  fonts: true,     // Faster font subsetting
+});
 ```
 
-## Documentation
+| Module | Purpose | Speedup |
+|:---|:---|:---:|
+| libdeflate | Stream compression | ~2x |
+| png | PNG image decoding | ~5x |
+| ttf | Font parsing & subsetting | ~3x |
+| shaping | Complex script layout | ~10x |
 
-- [Getting Started](https://user.github.io/modern-pdf/getting-started)
-- [Text Drawing](https://user.github.io/modern-pdf/guide/text)
-- [Images](https://user.github.io/modern-pdf/guide/images)
-- [Fonts](https://user.github.io/modern-pdf/guide/fonts)
-- [Shapes](https://user.github.io/modern-pdf/guide/shapes)
-- [Streaming](https://user.github.io/modern-pdf/guide/streaming)
-- [API Reference](https://user.github.io/modern-pdf/api/)
-- [Migration from pdf-lib](https://user.github.io/modern-pdf/migration/from-pdf-lib)
+<br />
+
+## Project Structure
+
+```
+modern-pdf-lib/
+  src/
+    core/           PDF document model, objects, writer, pages
+    parser/         PDF loading, text extraction, content streams
+    form/           AcroForm fields (7 types) + appearances
+    annotation/     16 annotation types + appearance generators
+    accessibility/  Structure tree, marked content, PDF/UA checker
+    compliance/     PDF/A validation & enforcement
+    signature/      PKCS#7 signatures, timestamps, verification
+    crypto/         AES-256, RC4, MD5, SHA-256/384/512
+    compression/    Deflate (fflate + optional WASM)
+    assets/         Font metrics/embed/subset, image embed, SVG
+    layers/         Optional content groups (OCG)
+    outline/        Bookmarks / document outline
+    metadata/       XMP metadata, viewer preferences
+    wasm/           Rust crate sources (4 modules)
+  tests/            1,952 tests across 90 suites
+  docs/             VitePress documentation
+```
+
+<br />
 
 ## Contributing
 
-Contributions are welcome. Please follow these steps:
-
-1. **Fork** the repository and create your branch from `main`.
-2. **Install dependencies**: `npm install`
-3. **Build WASM modules** (requires Rust and wasm-pack): `npm run build:wasm`
-4. **Build TypeScript**: `npm run build`
-5. **Run tests**: `npm test`
-6. **Run linting**: `npm run lint`
-7. **Submit a pull request** with a clear description of your changes.
-
-### Development Prerequisites
-
-- Node.js 22+
-- Rust stable toolchain with the `wasm32-unknown-unknown` target
-- wasm-pack 0.14+
-
-### Project Structure
-
+```sh
+git clone https://github.com/ABCrimson/modern-pdf-lib.git
+cd modern-pdf-lib
+npm install
+npm test          # 1,952 tests
+npm run typecheck # TypeScript 6.0 strict
+npm run build     # ESM + CJS + declarations
 ```
-modern-pdf/
-  src/
-    core/           # PDF document model, objects, writer, page
-    compression/    # Compression adapters (WASM + JS fallback)
-    runtime/        # Runtime detection and adapters
-    wasm/           # WASM crate source (Rust)
-      libdeflate/   #   Deflate compression
-      png/          #   PNG decoding
-      ttf/          #   Font parsing
-      shaping/      #   Text shaping
-    index.ts        # Public API entry point
-  tests/            # Unit and integration tests
-  docs/             # VitePress documentation site
-  scripts/          # Build and utility scripts
-```
+
+<br />
 
 ## License
 
-[MIT](LICENSE)
+[MIT](LICENSE) &copy; 2026
+
+</div>
