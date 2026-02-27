@@ -1,13 +1,13 @@
 # Fonts
 
-This guide covers font handling in `modern-pdf`, including standard fonts, custom font embedding, subsetting, and complex script support.
+This guide covers font handling in `modern-pdf-lib`, including standard fonts, custom font embedding, subsetting, and complex script support.
 
 ## Standard 14 PDF Fonts
 
 The PDF specification defines 14 standard fonts that every PDF viewer must support. These fonts can be used without embedding any font data, keeping file sizes small:
 
 ```ts
-import { createPdf, PageSizes, StandardFonts, rgb } from 'modern-pdf';
+import { createPdf, PageSizes, StandardFonts, rgb } from 'modern-pdf-lib';
 
 const pdf = createPdf();
 const page = pdf.addPage(PageSizes.A4);
@@ -103,7 +103,7 @@ page.drawText('This is italic text.', {
 
 ## Font Subsetting
 
-By default, `modern-pdf` embeds only the glyphs that are actually used in the document. This dramatically reduces file size when working with large fonts (CJK fonts can be 10+ MB).
+By default, `modern-pdf-lib` embeds only the glyphs that are actually used in the document. This dramatically reduces file size when working with large fonts (CJK fonts can be 10+ MB).
 
 ```ts
 // Only the glyphs for "Hello" are included in the PDF
@@ -126,7 +126,7 @@ const font = await pdf.embedFont(fontBytes, { subset: false });
 
 ## Text Shaping for Complex Scripts
 
-For scripts that require ligatures, contextual forms, or right-to-left layout (Arabic, Hebrew, Devanagari, Thai, etc.), `modern-pdf` uses the `rustybuzz` WASM module for text shaping.
+For scripts that require ligatures, contextual forms, or right-to-left layout (Arabic, Hebrew, Devanagari, Thai, etc.), `modern-pdf-lib` uses the `rustybuzz` WASM module for text shaping.
 
 Text shaping handles:
 
@@ -213,7 +213,7 @@ function centerText(
 For documents with many custom fonts or complex scripts, initializing WASM before embedding fonts can improve performance:
 
 ```ts
-import { initWasm } from 'modern-pdf';
+import { initWasm } from 'modern-pdf-lib';
 await initWasm();
 
 // Font operations are now WASM-accelerated

@@ -4,7 +4,7 @@ This guide covers the different ways to save a PDF document and how to use strea
 
 ## Output Methods
 
-`modern-pdf` provides three methods for saving a PDF document:
+`modern-pdf-lib` provides three methods for saving a PDF document:
 
 | Method | Return Type | Best For |
 |---|---|---|

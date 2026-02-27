@@ -7,7 +7,7 @@
  * first-class wrapper for advanced use cases.
  *
  * ```ts
- * import { pushGraphicsState, popGraphicsState, moveTo, lineTo, stroke } from 'modern-pdf/operators';
+ * import { pushGraphicsState, popGraphicsState, moveTo, lineTo, stroke } from 'modern-pdf-lib/operators';
  * ```
  */
 

@@ -7,7 +7,7 @@
  * can import them for annotation purposes:
  *
  * ```ts
- * import type { PdfSaveOptions, DrawTextOptions } from 'modern-pdf';
+ * import type { PdfSaveOptions, DrawTextOptions } from 'modern-pdf-lib';
  * ```
  *
  * Every optional field uses the `T | undefined` union with

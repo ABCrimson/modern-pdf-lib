@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.5] - 2026-02-27
+
+### Fixed
+- **Wrong package name in all docs**: Every guide, code example, and import statement referenced `modern-pdf` instead of the correct package name `modern-pdf-lib` (renamed in v0.9.0 but docs were never updated)
+- **Outdated info in migration guide**: Removed "creation-only" claim (library now supports full read/write/modify), updated Node version from 22+ to 25.7+, updated scope comparison, replaced "No PDFDocument.load()" section with `loadPdf()` migration example
+- **Wrong package name in source JSDoc**: All `@example` import statements in source code referenced `'modern-pdf'` — fixed to `'modern-pdf-lib'` so TypeDoc generates correct API docs
+- **Default producer string**: PDF metadata producer field defaulted to `"modern-pdf"` — fixed to `"modern-pdf-lib"` in `pdfCatalog.ts`, `pdfDocument.ts`, and `pdfA.ts` XMP metadata
+
 ## [0.11.4] - 2026-02-27
 
 ### Fixed

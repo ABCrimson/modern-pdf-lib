@@ -136,7 +136,7 @@ export interface CropBox {
  *
  * @example
  * ```ts
- * import { createPdf, insertPage, PageSizes } from 'modern-pdf';
+ * import { createPdf, insertPage, PageSizes } from 'modern-pdf-lib';
  *
  * const doc = createPdf();
  * doc.addPage();

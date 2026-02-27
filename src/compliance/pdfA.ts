@@ -374,7 +374,7 @@ function addPdfAXmpMetadata(
     '      xmlns:xmp="http://ns.adobe.com/xap/1.0/">',
     `      <pdfaid:part>${part}</pdfaid:part>`,
     `      <pdfaid:conformance>${conformanceUpper}</pdfaid:conformance>`,
-    '      <xmp:CreatorTool>modern-pdf</xmp:CreatorTool>',
+    '      <xmp:CreatorTool>modern-pdf-lib</xmp:CreatorTool>',
     '    </rdf:Description>',
     '  </rdf:RDF>',
     '</x:xmpmeta>',

@@ -1525,7 +1525,7 @@ function undoPngPredictorSync(data: Uint8Array, columns: number): Uint8Array {
  *
  * @example
  * ```ts
- * import { loadPdf } from 'modern-pdf';
+ * import { loadPdf } from 'modern-pdf-lib';
  *
  * // From fetch (ArrayBuffer)
  * const pdfBytes = await fetch('document.pdf').then(r => r.arrayBuffer());

@@ -1,13 +1,13 @@
 # Shapes
 
-This guide covers drawing shapes, lines, and graphics primitives on PDF pages with `modern-pdf`.
+This guide covers drawing shapes, lines, and graphics primitives on PDF pages with `modern-pdf-lib`.
 
 ## Rectangles
 
 Draw filled and/or outlined rectangles with `page.drawRectangle()`:
 
 ```ts
-import { createPdf, PageSizes, rgb } from 'modern-pdf';
+import { createPdf, PageSizes, rgb } from 'modern-pdf-lib';
 
 const pdf = createPdf();
 const page = pdf.addPage(PageSizes.A4);
@@ -139,14 +139,14 @@ page.drawEllipse({
 
 ## Colors
 
-`modern-pdf` supports three color spaces: RGB, CMYK, and Grayscale.
+`modern-pdf-lib` supports three color spaces: RGB, CMYK, and Grayscale.
 
 ### RGB
 
 Use `rgb()` for screen-optimized colors. Values range from 0 to 1:
 
 ```ts
-import { rgb } from 'modern-pdf';
+import { rgb } from 'modern-pdf-lib';
 
 const red = rgb(1, 0, 0);
 const green = rgb(0, 1, 0);
@@ -161,7 +161,7 @@ const black = rgb(0, 0, 0);
 Use `cmyk()` for print-optimized colors. Values range from 0 to 1:
 
 ```ts
-import { cmyk } from 'modern-pdf';
+import { cmyk } from 'modern-pdf-lib';
 
 const cyan = cmyk(1, 0, 0, 0);
 const magenta = cmyk(0, 1, 0, 0);
@@ -177,7 +177,7 @@ const richBlack = cmyk(0.75, 0.68, 0.67, 0.90);
 Use `grayscale()` for black-and-white content. The value ranges from 0 (black) to 1 (white):
 
 ```ts
-import { grayscale } from 'modern-pdf';
+import { grayscale } from 'modern-pdf-lib';
 
 const black = grayscale(0);
 const darkGray = grayscale(0.3);

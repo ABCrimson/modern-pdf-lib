@@ -7,7 +7,7 @@
  *
  * Usage:
  * ```ts
- * import { createPdf, PageSizes, rgb } from 'modern-pdf';
+ * import { createPdf, PageSizes, rgb } from 'modern-pdf-lib';
  *
  * const doc = createPdf();
  * const page = doc.addPage(PageSizes.A4);
@@ -191,7 +191,7 @@ export class PdfDocument {
 
   /** Metadata fields. */
   private readonly meta: DocumentMetadata = {
-    producer: 'modern-pdf',
+    producer: 'modern-pdf-lib',
     creationDate: new Date(),
   };
 

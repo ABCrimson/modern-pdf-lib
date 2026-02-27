@@ -1,13 +1,13 @@
 # Text Drawing
 
-This guide covers everything you need to know about drawing text on a PDF page with `modern-pdf`.
+This guide covers everything you need to know about drawing text on a PDF page with `modern-pdf-lib`.
 
 ## Basic Text Drawing
 
 Use `page.drawText()` to place a string at a specific position. Coordinates are in PDF points (1 point = 1/72 inch), with the origin at the bottom-left corner of the page.
 
 ```ts
-import { createPdf, PageSizes, rgb } from 'modern-pdf';
+import { createPdf, PageSizes, rgb } from 'modern-pdf-lib';
 
 const pdf = createPdf();
 const page = pdf.addPage(PageSizes.A4);
@@ -47,7 +47,7 @@ page.drawText('Please read the following terms carefully.', {
 Colors can be specified in RGB, CMYK, or grayscale:
 
 ```ts
-import { rgb, cmyk, grayscale } from 'modern-pdf';
+import { rgb, cmyk, grayscale } from 'modern-pdf-lib';
 
 // RGB (values 0–1)
 const red = rgb(1, 0, 0);
@@ -107,7 +107,7 @@ const { ascent, descent, lineGap } = font.metricsAtSize(fontSize);
 Rotate text around its anchor point using the `rotate` option:
 
 ```ts
-import { degrees } from 'modern-pdf';
+import { degrees } from 'modern-pdf-lib';
 
 // Draw text at a 45-degree angle
 page.drawText('Rotated!', {
@@ -137,7 +137,7 @@ The rotation is counter-clockwise, following the standard PDF coordinate system.
 Every PDF viewer includes 14 built-in standard fonts. You can use them without embedding any font data:
 
 ```ts
-import { StandardFonts } from 'modern-pdf';
+import { StandardFonts } from 'modern-pdf-lib';
 
 page.drawText('Standard font text', {
   x: 50,

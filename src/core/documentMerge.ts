@@ -407,7 +407,7 @@ export function copyPages(
  *
  * @example
  * ```ts
- * import { PdfDocument, mergePdfs } from 'modern-pdf';
+ * import { PdfDocument, mergePdfs } from 'modern-pdf-lib';
  *
  * const doc1 = await PdfDocument.load(bytes1);
  * const doc2 = await PdfDocument.load(bytes2);
@@ -480,7 +480,7 @@ export type PageRange = [start: number, end: number];
  *
  * @example
  * ```ts
- * import { PdfDocument, splitPdf } from 'modern-pdf';
+ * import { PdfDocument, splitPdf } from 'modern-pdf-lib';
  *
  * const doc = await PdfDocument.load(bytes);
  * // Split into first 3 pages and remaining pages

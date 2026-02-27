@@ -1,10 +1,10 @@
 # Images
 
-This guide covers embedding and drawing images in PDF documents with `modern-pdf`.
+This guide covers embedding and drawing images in PDF documents with `modern-pdf-lib`.
 
 ## Overview
 
-`modern-pdf` supports two image formats:
+`modern-pdf-lib` supports two image formats:
 
 - **PNG** — Full support including alpha transparency. Decoded using a WASM-accelerated PNG decoder (with a pure-JS fallback).
 - **JPEG** — Passed through directly to the PDF without re-encoding, making JPEG embedding extremely fast.
@@ -14,7 +14,7 @@ This guide covers embedding and drawing images in PDF documents with `modern-pdf
 Load the image data as a `Uint8Array` and pass it to `pdf.embedPng()`:
 
 ```ts
-import { createPdf, PageSizes } from 'modern-pdf';
+import { createPdf, PageSizes } from 'modern-pdf-lib';
 
 const pdf = createPdf();
 const page = pdf.addPage(PageSizes.A4);
@@ -145,7 +145,7 @@ page.drawImage(image, {
 When saving the PDF, PNG image data is compressed using the same deflate compression as the rest of the PDF. The WASM-accelerated compressor (libdeflate) provides significantly better compression ratios and speed:
 
 ```ts
-import { initWasm } from 'modern-pdf';
+import { initWasm } from 'modern-pdf-lib';
 
 // Enable WASM for better PNG compression
 await initWasm();

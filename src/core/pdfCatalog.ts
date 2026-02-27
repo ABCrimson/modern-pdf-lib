@@ -93,7 +93,7 @@ export function buildInfoDict(
   }
 
   // Producer — always set a default if not provided
-  const producer = meta.producer ?? 'modern-pdf';
+  const producer = meta.producer ?? 'modern-pdf-lib';
   dict.set('/Producer', PdfString.literal(producer));
 
   if (meta.creationDate !== undefined) {

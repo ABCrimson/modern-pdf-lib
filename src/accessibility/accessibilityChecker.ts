@@ -49,8 +49,8 @@ export type { AccessibilityIssue } from './structureTree.js';
  *
  * @example
  * ```ts
- * import { createPdf } from 'modern-pdf';
- * import { checkAccessibility } from 'modern-pdf/accessibility';
+ * import { createPdf } from 'modern-pdf-lib';
+ * import { checkAccessibility } from 'modern-pdf-lib/accessibility';
  *
  * const doc = createPdf();
  * const issues = checkAccessibility(doc);

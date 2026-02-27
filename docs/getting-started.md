@@ -2,33 +2,33 @@
 
 ## Installation
 
-Install `modern-pdf` with your preferred package manager:
+Install `modern-pdf-lib` with your preferred package manager:
 
 ::: code-group
 
 ```sh [npm]
-npm install modern-pdf
+npm install modern-pdf-lib
 ```
 
 ```sh [pnpm]
-pnpm add modern-pdf
+pnpm add modern-pdf-lib
 ```
 
 ```sh [bun]
-bun add modern-pdf
+bun add modern-pdf-lib
 ```
 
 :::
 
 > [!NOTE]
-> `modern-pdf` is ESM-only. It requires Node 22 or later, or any runtime with native ES module support.
+> `modern-pdf-lib` is ESM-only. It requires Node 25.7 or later, or any runtime with native ES module support.
 
 ## Your First PDF
 
 Create a simple "Hello World" PDF in just a few lines:
 
 ```ts
-import { createPdf, PageSizes, rgb } from 'modern-pdf';
+import { createPdf, PageSizes, rgb } from 'modern-pdf-lib';
 
 const pdf = createPdf();
 const page = pdf.addPage(PageSizes.A4);
@@ -51,7 +51,7 @@ Write the PDF to a file using the Node `fs` module:
 
 ```ts
 import { writeFile } from 'node:fs/promises';
-import { createPdf, PageSizes, rgb } from 'modern-pdf';
+import { createPdf, PageSizes, rgb } from 'modern-pdf-lib';
 
 const pdf = createPdf();
 const page = pdf.addPage(PageSizes.A4);
@@ -85,7 +85,7 @@ await stream.pipeTo(Writable.toWeb(fileStream));
 In a browser context you can trigger a download or display the PDF in an iframe:
 
 ```ts
-import { createPdf, PageSizes, rgb } from 'modern-pdf';
+import { createPdf, PageSizes, rgb } from 'modern-pdf-lib';
 
 const pdf = createPdf();
 const page = pdf.addPage(PageSizes.A4);
@@ -115,7 +115,7 @@ URL.revokeObjectURL(url);
 Return the PDF as a streaming HTTP response:
 
 ```ts
-import { createPdf, PageSizes, rgb } from 'modern-pdf';
+import { createPdf, PageSizes, rgb } from 'modern-pdf-lib';
 
 export default {
   async fetch(): Promise<Response> {
@@ -143,7 +143,7 @@ export default {
 
 ## WASM Initialization
 
-`modern-pdf` ships with optional WebAssembly modules that accelerate compression, PNG decoding, font parsing, and text shaping. Without WASM, the library falls back to pure-JavaScript implementations.
+`modern-pdf-lib` ships with optional WebAssembly modules that accelerate compression, PNG decoding, font parsing, and text shaping. Without WASM, the library falls back to pure-JavaScript implementations.
 
 ### Automatic Initialization
 
@@ -159,7 +159,7 @@ const bytes = await pdf.save();
 If you want to control when the WASM binary is loaded (for example, during application startup), call `initWasm()` explicitly:
 
 ```ts
-import { initWasm } from 'modern-pdf';
+import { initWasm } from 'modern-pdf-lib';
 
 // Load WASM during app startup
 await initWasm();
