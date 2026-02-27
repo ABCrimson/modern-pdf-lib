@@ -89,6 +89,37 @@ export interface DrawPageOptions {
   opacity?: number | undefined;
   /** Blend mode for compositing. */
   blendMode?: import('./enums.js').BlendMode | undefined;
+  /** Horizontal skew angle. */
+  xSkew?: { type: 'degrees' | 'radians'; value: number } | undefined;
+  /** Vertical skew angle. */
+  ySkew?: { type: 'degrees' | 'radians'; value: number } | undefined;
+}
+
+// ---------------------------------------------------------------------------
+// Options for embedPage / embedPdf
+// ---------------------------------------------------------------------------
+
+/**
+ * Options for embedding a page as a Form XObject.
+ */
+export interface EmbedPageOptions {
+  /**
+   * Clip the embedded page to a sub-region (bounding box).
+   * Coordinates are in the source page's coordinate system.
+   */
+  boundingBox?: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  } | undefined;
+
+  /**
+   * Apply an affine transformation matrix to the Form XObject.
+   * The six values correspond to `[a, b, c, d, tx, ty]` in the
+   * standard 3x3 PDF transformation matrix.
+   */
+  transformationMatrix?: [number, number, number, number, number, number] | undefined;
 }
 
 // ---------------------------------------------------------------------------
@@ -235,6 +266,7 @@ export function embedPageAsFormXObject(
   sourceRegistry: PdfObjectRegistry,
   targetRegistry: PdfObjectRegistry,
   xObjectName: string,
+  options?: EmbedPageOptions,
 ): EmbeddedPdfPage {
   const pageWidth = page.width;
   const pageHeight = page.height;
@@ -296,27 +328,46 @@ export function embedPageAsFormXObject(
   const formDict = new PdfDict();
   formDict.set('/Type', PdfName.of('XObject'));
   formDict.set('/Subtype', PdfName.of('Form'));
-  formDict.set('/BBox', PdfArray.fromNumbers([0, 0, pageWidth, pageHeight]));
+
+  // BBox: use bounding box if provided, otherwise full page
+  const bb = options?.boundingBox;
+  const bboxX = bb ? bb.x : 0;
+  const bboxY = bb ? bb.y : 0;
+  const bboxW = bb ? bb.width : pageWidth;
+  const bboxH = bb ? bb.height : pageHeight;
+  formDict.set('/BBox', PdfArray.fromNumbers([bboxX, bboxY, bboxX + bboxW, bboxY + bboxH]));
+
   formDict.set('/Resources', clonedResources);
-  formDict.set('/Matrix', PdfArray.fromNumbers([1, 0, 0, 1, 0, 0]));
+
+  // Matrix: use transformation matrix if provided, otherwise identity
+  const tm = options?.transformationMatrix;
+  if (tm) {
+    formDict.set('/Matrix', PdfArray.fromNumbers(tm));
+  } else {
+    formDict.set('/Matrix', PdfArray.fromNumbers([1, 0, 0, 1, 0, 0]));
+  }
 
   const formStream = PdfStream.fromBytes(concatenated, formDict);
   const formRef = targetRegistry.register(formStream);
+
+  // The effective dimensions for the handle use the bounding box if provided
+  const effectiveWidth = bb ? bboxW : pageWidth;
+  const effectiveHeight = bb ? bboxH : pageHeight;
 
   // --- 4. Return the handle ---
   return {
     name: xObjectName,
     ref: formRef,
-    width: pageWidth,
-    height: pageHeight,
+    width: effectiveWidth,
+    height: effectiveHeight,
     scale(factor: number) {
-      return { width: pageWidth * factor, height: pageHeight * factor };
+      return { width: effectiveWidth * factor, height: effectiveHeight * factor };
     },
     scaleToFit(maxW: number, maxH: number) {
-      const scaleW = maxW / pageWidth;
-      const scaleH = maxH / pageHeight;
+      const scaleW = maxW / effectiveWidth;
+      const scaleH = maxH / effectiveHeight;
       const factor = Math.min(scaleW, scaleH);
-      return { width: pageWidth * factor, height: pageHeight * factor };
+      return { width: effectiveWidth * factor, height: effectiveHeight * factor };
     },
   };
 }

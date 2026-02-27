@@ -1,0 +1,187 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+env:
+  NODE_VERSION: '22'
+  RUST_TOOLCHAIN: 'stable'
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Full build (WASM + TypeScript)
+  # ---------------------------------------------------------------------------
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - name: Cache Cargo registry
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+          key: cargo-release-${{ runner.os }}-${{ hashFiles('src/wasm/*/Cargo.toml') }}
+          restore-keys: |
+            cargo-release-${{ runner.os }}-
+
+      - name: Install wasm-pack
+        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          registry-url: https://registry.npmjs.org
+
+      - run: npm ci
+
+      - name: Build WASM crates
+        run: bash scripts/build-wasm.sh --release
+
+      - name: Build TypeScript
+        run: npm run build
+
+      - name: Run tests
+        run: npx vitest run
+
+      - name: Upload dist
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+      - name: Upload WASM modules
+        uses: actions/upload-artifact@v4
+        with:
+          name: wasm-modules
+          path: src/wasm/*/pkg
+
+  # ---------------------------------------------------------------------------
+  # Publish to npm
+  # ---------------------------------------------------------------------------
+  publish:
+    name: Publish to npm
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          registry-url: https://registry.npmjs.org
+
+      - run: npm ci
+
+      - name: Download dist
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+      - name: Download WASM modules
+        uses: actions/download-artifact@v4
+        with:
+          name: wasm-modules
+          path: src/wasm
+
+      - name: Publish to npm
+        run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  # ---------------------------------------------------------------------------
+  # GitHub Release with WASM binaries
+  # ---------------------------------------------------------------------------
+  github-release:
+    name: GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download WASM modules
+        uses: actions/download-artifact@v4
+        with:
+          name: wasm-modules
+          path: wasm-artifacts
+
+      - name: Package WASM binaries
+        run: |
+          cd wasm-artifacts
+          for dir in */pkg; do
+            crate=$(dirname "$dir")
+            tar -czf "../modern-pdf-wasm-${crate}.tar.gz" -C "$dir" .
+          done
+          cd ..
+
+      - name: Extract changelog for this version
+        id: changelog
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          # Extract the section for this version from CHANGELOG.md
+          BODY=$(sed -n "/^## \[${VERSION}\]/,/^## \[/p" CHANGELOG.md | sed '1d;$d' || echo "Release ${GITHUB_REF_NAME}")
+          echo "body<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$BODY" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          body: ${{ steps.changelog.outputs.body }}
+          files: modern-pdf-wasm-*.tar.gz
+          generate_release_notes: true
+
+  # ---------------------------------------------------------------------------
+  # Deploy docs to GitHub Pages
+  # ---------------------------------------------------------------------------
+  docs:
+    name: Deploy Docs
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - run: npm ci
+
+      - name: Generate API docs
+        run: npm run docs:api
+
+      - name: Build VitePress site
+        run: npm run docs:build
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/.vitepress/dist
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

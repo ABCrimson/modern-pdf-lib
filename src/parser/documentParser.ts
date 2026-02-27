@@ -63,6 +63,20 @@ export interface LoadPdfOptions {
    * Defaults to `Infinity` (no throttling).
    */
   objectsPerTick?: number;
+  /**
+   * When `true`, throw an error if a malformed or invalid PDF object
+   * is encountered during parsing. When `false` (default), malformed
+   * objects are silently skipped.
+   */
+  throwOnInvalidObject?: boolean | undefined;
+  /**
+   * When `true`, clamp extreme floating-point values (very large or
+   * very small numbers) to safe ranges during parsing. This prevents
+   * numeric overflows from producing garbage output.
+   *
+   * Default: `false`.
+   */
+  capNumbers?: boolean | undefined;
 }
 
 // ---------------------------------------------------------------------------
@@ -180,6 +194,12 @@ export class PdfDocumentParser {
   /** Object number of the /Encrypt dictionary (excluded from decryption). */
   private encryptDictObjNum?: number | undefined;
 
+  /** When true, throw on malformed objects instead of silently skipping. */
+  private throwOnInvalidObject = false;
+
+  /** When true, clamp extreme numbers to single-precision float range. */
+  private capNumbers = false;
+
   /**
    * Create a new PdfDocumentParser.
    *
@@ -206,11 +226,18 @@ export class PdfDocumentParser {
    * @throws         If the PDF is malformed or cannot be parsed.
    */
   async parse(options?: LoadPdfOptions): Promise<PdfDocument> {
+    // Store load options for use in downstream methods
+    this.throwOnInvalidObject = options?.throwOnInvalidObject === true;
+    this.capNumbers = options?.capNumbers === true;
+
     // Step 1: Validate PDF header
     this.validateHeader();
 
     // Step 2: Initialize lexer and object parser
     this.lexer = new PdfLexer(this.data);
+    if (this.capNumbers) {
+      this.lexer.capNumbers = true;
+    }
     this.objectParser = new PdfObjectParser(this.lexer, this.registry);
     this.xrefParser = new XrefParser(this.data, this.objectParser);
 
@@ -277,10 +304,10 @@ export class PdfDocumentParser {
         const { object } = this.objectParser.parseIndirectObjectAt(entry.offset);
         resolved = object;
       } catch (err) {
-        const msg = err instanceof Error ? err.message : String(err);
         throw new Error(
           `Failed to parse indirect object ${objNum} ${entry.generationNumber} at ` +
-          `offset ${entry.offset}: ${msg}`,
+          `offset ${entry.offset}`,
+          { cause: err },
         );
       }
     }
@@ -498,10 +525,7 @@ export class PdfDocumentParser {
     if (str.hex) {
       // Hex string: decode hex pairs to bytes
       const clean = str.value.replace(/\s/g, '');
-      encrypted = new Uint8Array(Math.ceil(clean.length / 2));
-      for (let i = 0; i < encrypted.length; i++) {
-        encrypted[i] = parseInt(clean.substring(i * 2, i * 2 + 2), 16);
-      }
+      encrypted = Uint8Array.fromHex(clean.length % 2 === 0 ? clean : clean + '0');
     } else {
       // Literal string: character codes as bytes (Latin-1)
       encrypted = new Uint8Array(str.value.length);
@@ -820,10 +844,10 @@ export class PdfDocumentParser {
       const { object } = this.objectParser.parseIndirectObjectAt(containerEntry.offset);
       containerObj = object;
     } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
       throw new Error(
         `Failed to parse object stream ${containerNum} at offset ` +
-        `${containerEntry.offset}: ${msg}`,
+        `${containerEntry.offset}`,
+        { cause: err },
       );
     }
 
@@ -894,6 +918,9 @@ export class PdfDocumentParser {
         // Create a sub-lexer for this object's data
         const subData = decompressedData.subarray(dataStart, dataEnd);
         const subLexer = new PdfLexer(subData);
+        if (this.capNumbers) {
+          subLexer.capNumbers = true;
+        }
         const subParser = new PdfObjectParser(subLexer, this.registry);
         const parsedObj = subParser.parseObject();
 
@@ -901,7 +928,10 @@ export class PdfDocumentParser {
 
         // Also cache by object number for direct lookup
         this.objectCache.set(objEntry.objNum, parsedObj);
-      } catch {
+      } catch (err) {
+        if (this.throwOnInvalidObject) {
+          throw err instanceof Error ? err : new Error(String(err));
+        }
         // Skip unparseable objects within the stream
         streamObjects.set(i, PdfNull.instance);
       }
@@ -1002,7 +1032,10 @@ export class PdfDocumentParser {
     let infoObj: PdfObject;
     try {
       infoObj = this.resolveRef(this.trailer.infoRef);
-    } catch {
+    } catch (err) {
+      if (this.throwOnInvalidObject) {
+        throw err instanceof Error ? err : new Error(String(err));
+      }
       return metadata; // Info dict not parseable
     }
 
@@ -1076,7 +1109,10 @@ export class PdfDocumentParser {
             const ref = PdfRef.of(objNum, entry.generationNumber);
             this.registry.registerWithRef(ref, obj);
           }
-        } catch {
+        } catch (err) {
+          if (this.throwOnInvalidObject) {
+            throw err instanceof Error ? err : new Error(String(err));
+          }
           // Skip objects that fail to resolve
         }
 

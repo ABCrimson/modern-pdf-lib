@@ -127,6 +127,30 @@ export const PageSizes = {
   Ledger: [1224, 792] as const,
   Executive: [521.86, 756] as const,
   Folio: [612, 936] as const,
+  // ISO C series (envelope sizes)
+  C0: [2599.37, 3676.54] as const,
+  C1: [1836.85, 2599.37] as const,
+  C2: [1298.27, 1836.85] as const,
+  C3: [918.43, 1298.27] as const,
+  C4: [649.13, 918.43] as const,
+  C5: [459.21, 649.13] as const,
+  C6: [323.15, 459.21] as const,
+  C7: [229.61, 323.15] as const,
+  C8: [161.57, 229.61] as const,
+  C9: [113.39, 161.57] as const,
+  C10: [79.37, 113.39] as const,
+  // RA series (untrimmed raw format A)
+  RA0: [2437.80, 3458.27] as const,
+  RA1: [1729.13, 2437.80] as const,
+  RA2: [1218.90, 1729.13] as const,
+  RA3: [864.57, 1218.90] as const,
+  RA4: [609.45, 864.57] as const,
+  // SRA series (supplementary raw format A)
+  SRA0: [2551.18, 3628.35] as const,
+  SRA1: [1814.17, 2551.18] as const,
+  SRA2: [1275.59, 1814.17] as const,
+  SRA3: [907.09, 1275.59] as const,
+  SRA4: [637.80, 907.09] as const,
 } as const satisfies Record<string, readonly [number, number]>;
 
 /** Type for a page-size input: a `[width, height]` tuple or `{ width, height }` object. */
@@ -212,6 +236,10 @@ export interface DrawImageOptions {
   opacity?: number | undefined;
   /** Blend mode for compositing. */
   blendMode?: BlendMode | undefined;
+  /** Horizontal skew angle. */
+  xSkew?: Angle | undefined;
+  /** Vertical skew angle. */
+  ySkew?: Angle | undefined;
 }
 
 /** Options for {@link PdfPage.drawRectangle}. */
@@ -236,6 +264,18 @@ export interface DrawRectangleOptions {
   opacity?: number | undefined;
   /** Blend mode for compositing. */
   blendMode?: BlendMode | undefined;
+  /** Horizontal skew angle. */
+  xSkew?: Angle | undefined;
+  /** Vertical skew angle. */
+  ySkew?: Angle | undefined;
+  /** Dash pattern for border `[dashLen, gapLen, ...]`. */
+  borderDashArray?: number[] | undefined;
+  /** Dash phase offset for border. */
+  borderDashPhase?: number | undefined;
+  /** Line cap style for border (0 = butt, 1 = round, 2 = projecting square). */
+  borderLineCap?: 0 | 1 | 2 | undefined;
+  /** Border stroke opacity `[0, 1]`, separate from fill opacity. */
+  borderOpacity?: number | undefined;
 }
 
 /** Options for {@link PdfPage.drawLine}. */
@@ -281,6 +321,14 @@ export interface DrawCircleOptions {
   opacity?: number | undefined;
   /** Blend mode for compositing. */
   blendMode?: BlendMode | undefined;
+  /** Dash pattern for border. */
+  borderDashArray?: number[] | undefined;
+  /** Dash phase offset for border. */
+  borderDashPhase?: number | undefined;
+  /** Line cap style for border. */
+  borderLineCap?: 0 | 1 | 2 | undefined;
+  /** Border stroke opacity `[0, 1]`. */
+  borderOpacity?: number | undefined;
 }
 
 /** Options for {@link PdfPage.drawEllipse}. */
@@ -303,6 +351,14 @@ export interface DrawEllipseOptions {
   opacity?: number | undefined;
   /** Blend mode for compositing. */
   blendMode?: BlendMode | undefined;
+  /** Dash pattern for border. */
+  borderDashArray?: number[] | undefined;
+  /** Dash phase offset for border. */
+  borderDashPhase?: number | undefined;
+  /** Line cap style for border. */
+  borderLineCap?: 0 | 1 | 2 | undefined;
+  /** Border stroke opacity `[0, 1]`. */
+  borderOpacity?: number | undefined;
 }
 
 /** Options for {@link PdfPage.drawSvgPath}. */
@@ -323,6 +379,14 @@ export interface DrawSvgPathOptions {
   opacity?: number | undefined;
   /** Blend mode for compositing. */
   blendMode?: BlendMode | undefined;
+  /** Dash pattern for border. */
+  borderDashArray?: number[] | undefined;
+  /** Dash phase offset for border. */
+  borderDashPhase?: number | undefined;
+  /** Line cap style for border. */
+  borderLineCap?: 0 | 1 | 2 | undefined;
+  /** Border stroke opacity `[0, 1]`. */
+  borderOpacity?: number | undefined;
 }
 
 /** Options for {@link PdfPage.drawSquare}. */
@@ -345,6 +409,18 @@ export interface DrawSquareOptions {
   opacity?: number | undefined;
   /** Blend mode for compositing. */
   blendMode?: BlendMode | undefined;
+  /** Horizontal skew angle. */
+  xSkew?: Angle | undefined;
+  /** Vertical skew angle. */
+  ySkew?: Angle | undefined;
+  /** Dash pattern for border. */
+  borderDashArray?: number[] | undefined;
+  /** Dash phase offset for border. */
+  borderDashPhase?: number | undefined;
+  /** Line cap style for border. */
+  borderLineCap?: 0 | 1 | 2 | undefined;
+  /** Border stroke opacity `[0, 1]`. */
+  borderOpacity?: number | undefined;
 }
 
 // ---------------------------------------------------------------------------
@@ -379,6 +455,23 @@ export interface FontRef {
    * @internal
    */
   _encodeText?(text: string): string;
+  /**
+   * Compute the font size needed to achieve a given height (ascender - descender).
+   * This is the inverse of `heightAtSize()`.
+   *
+   * @param height  Desired height in points.
+   * @returns       Font size in points.
+   */
+  sizeAtHeight?(height: number): number;
+  /**
+   * Return the set of Unicode codepoints supported by this font.
+   *
+   * For standard fonts, returns the WinAnsi character set.
+   * For embedded fonts, returns all codepoints in the cmap table.
+   *
+   * @returns  Array of Unicode codepoint numbers.
+   */
+  getCharacterSet?(): number[];
 }
 
 /** Opaque handle for an image that has been embedded in the document. */
@@ -492,7 +585,7 @@ export function wrapText(
       // If the current line already ends with a non-space break character,
       // no extra space is needed.  Otherwise join with a space (when space
       // is a break character) or directly concatenate.
-      const lastChar = currentLine[currentLine.length - 1]!;
+      const lastChar = currentLine.at(-1)!;
       const glue = breaks.includes(' ') && !breaks.some(b => b !== ' ' && lastChar === b)
         ? ' '
         : '';
@@ -1140,26 +1233,26 @@ export class PdfPage {
 
     const needsGS = (options.opacity !== undefined && options.opacity < 1) ||
                     (options.blendMode !== undefined && options.blendMode !== 'Normal');
+    const hasRotate = !!options.rotate;
+    const hasSkew = options.xSkew !== undefined || options.ySkew !== undefined;
 
-    if (options.rotate) {
+    if (hasRotate || hasSkew) {
       this.ops += saveState();
-      // Opacity and/or blend mode (via ExtGState)
       if (needsGS) {
         const gsName = this.getOrCreateExtGState(options.opacity, options.blendMode);
         this.ops += setGraphicsState(gsName);
       }
-      const rad = toRadians(options.rotate);
+      const rad = hasRotate ? toRadians(options.rotate!) : 0;
       const cos = Math.cos(rad);
       const sin = Math.sin(rad);
-      // Translate to position, rotate, then scale
-      this.ops += concatMatrix(
-        cos * width,
-        sin * width,
-        -sin * height,
-        cos * height,
-        x,
-        y,
-      );
+      const tanX = options.xSkew ? Math.tan(toRadians(options.xSkew)) : 0;
+      const tanY = options.ySkew ? Math.tan(toRadians(options.ySkew)) : 0;
+      // Translate(x,y) * Skew(tanX, tanY) * Rotate(rad) * Scale(w, h)
+      const a = (cos - tanY * sin) * width;
+      const b = (sin + tanY * cos) * width;
+      const c = (tanX * cos - sin) * height;
+      const d = (tanX * sin + cos) * height;
+      this.ops += concatMatrix(a, b, c, d, x, y);
       this.ops += drawXObject(image.name);
       this.ops += restoreState();
     } else if (needsGS) {
@@ -1218,19 +1311,21 @@ export class PdfPage {
       this.ops += setGraphicsState(gsName);
     }
 
-    if (options.rotate) {
-      const rad = toRadians(options.rotate);
+    const hasRotate = !!options.rotate;
+    const hasSkew = options.xSkew !== undefined || options.ySkew !== undefined;
+
+    if (hasRotate || hasSkew) {
+      const rad = hasRotate ? toRadians(options.rotate!) : 0;
       const cos = Math.cos(rad);
       const sin = Math.sin(rad);
-      // Combined matrix: translate(x,y) * rotate * scale
-      this.ops += concatMatrix(
-        cos * scaleX,
-        sin * scaleX,
-        -sin * scaleY,
-        cos * scaleY,
-        x,
-        y,
-      );
+      const tanX = options.xSkew ? Math.tan(toRadians(options.xSkew)) : 0;
+      const tanY = options.ySkew ? Math.tan(toRadians(options.ySkew)) : 0;
+      // Translate(x,y) * Skew * Rotate * Scale
+      const a = (cos - tanY * sin) * scaleX;
+      const b = (sin + tanY * cos) * scaleX;
+      const c = (tanX * cos - sin) * scaleY;
+      const d = (tanX * sin + cos) * scaleY;
+      this.ops += concatMatrix(a, b, c, d, x, y);
     } else {
       // Simple translate + scale
       this.ops += concatMatrix(scaleX, 0, 0, scaleY, x, y);
@@ -1271,6 +1366,12 @@ export class PdfPage {
     if (options.borderWidth !== undefined) {
       this.ops += setLineWidth(options.borderWidth);
     }
+    if (options.borderDashArray) {
+      this.ops += setDashPattern(options.borderDashArray, options.borderDashPhase ?? 0);
+    }
+    if (options.borderLineCap !== undefined) {
+      this.ops += setLineCap(options.borderLineCap);
+    }
     if (hasFill) {
       this.ops += applyFillColor(options.color!);
     }
@@ -1278,28 +1379,43 @@ export class PdfPage {
       this.ops += applyStrokeColor(options.borderColor!);
     }
 
-    if (options.rotate) {
-      // Rotate about the rectangle's centre
+    if (options.rotate || options.xSkew !== undefined || options.ySkew !== undefined) {
       const cx = x + w / 2;
       const cy = y + h / 2;
-      const rad = toRadians(options.rotate);
+      const rad = options.rotate ? toRadians(options.rotate) : 0;
       const cos = Math.cos(rad);
       const sin = Math.sin(rad);
-      const tx = cx - cos * cx + sin * cy;
-      const ty = cy - sin * cx - cos * cy;
-      this.ops += concatMatrix(cos, sin, -sin, cos, tx, ty);
+      const tanX = options.xSkew ? Math.tan(toRadians(options.xSkew)) : 0;
+      const tanY = options.ySkew ? Math.tan(toRadians(options.ySkew)) : 0;
+      // Skew * Rotate about centre
+      const a = cos - tanY * sin;
+      const b = sin + tanY * cos;
+      const c = tanX * cos - sin;
+      const d = tanX * sin + cos;
+      const tx = cx - a * cx - c * cy;
+      const ty = cy - b * cx - d * cy;
+      this.ops += concatMatrix(a, b, c, d, tx, ty);
     }
 
-    this.ops += rectangle(x, y, w, h);
-
-    if (hasFill && hasStroke) {
+    if (hasFill && hasStroke && options.borderOpacity !== undefined && options.borderOpacity !== options.opacity) {
+      // Separate fill and stroke passes for different opacities
+      this.ops += rectangle(x, y, w, h);
+      this.ops += fill();
+      const borderGsName = this.getOrCreateExtGState(options.borderOpacity, options.blendMode);
+      this.ops += setGraphicsState(borderGsName);
+      this.ops += rectangle(x, y, w, h);
+      this.ops += stroke();
+    } else if (hasFill && hasStroke) {
+      this.ops += rectangle(x, y, w, h);
       this.ops += fillAndStroke();
     } else if (hasFill) {
+      this.ops += rectangle(x, y, w, h);
       this.ops += fill();
     } else if (hasStroke) {
+      this.ops += rectangle(x, y, w, h);
       this.ops += stroke();
     } else {
-      // Default: fill with current colour
+      this.ops += rectangle(x, y, w, h);
       this.ops += fill();
     }
 
@@ -1324,6 +1440,12 @@ export class PdfPage {
       rotate: options.rotate,
       opacity: options.opacity,
       blendMode: options.blendMode,
+      xSkew: options.xSkew,
+      ySkew: options.ySkew,
+      borderDashArray: options.borderDashArray,
+      borderDashPhase: options.borderDashPhase,
+      borderLineCap: options.borderLineCap,
+      borderOpacity: options.borderOpacity,
     });
   }
 
@@ -1381,6 +1503,12 @@ export class PdfPage {
     if (options.borderWidth !== undefined) {
       this.ops += setLineWidth(options.borderWidth);
     }
+    if (options.borderDashArray) {
+      this.ops += setDashPattern(options.borderDashArray, options.borderDashPhase ?? 0);
+    }
+    if (options.borderLineCap !== undefined) {
+      this.ops += setLineCap(options.borderLineCap);
+    }
     if (hasFill) {
       this.ops += applyFillColor(options.color!);
     }
@@ -1390,7 +1518,13 @@ export class PdfPage {
 
     this.ops += circlePath(cx, cy, r);
 
-    if (hasFill && hasStroke) {
+    if (hasFill && hasStroke && options.borderOpacity !== undefined && options.borderOpacity !== options.opacity) {
+      this.ops += fill();
+      const borderGsName = this.getOrCreateExtGState(options.borderOpacity, options.blendMode);
+      this.ops += setGraphicsState(borderGsName);
+      this.ops += circlePath(cx, cy, r);
+      this.ops += stroke();
+    } else if (hasFill && hasStroke) {
       this.ops += fillAndStroke();
     } else if (hasFill) {
       this.ops += fill();
@@ -1427,6 +1561,12 @@ export class PdfPage {
     if (options.borderWidth !== undefined) {
       this.ops += setLineWidth(options.borderWidth);
     }
+    if (options.borderDashArray) {
+      this.ops += setDashPattern(options.borderDashArray, options.borderDashPhase ?? 0);
+    }
+    if (options.borderLineCap !== undefined) {
+      this.ops += setLineCap(options.borderLineCap);
+    }
     if (hasFill) {
       this.ops += applyFillColor(options.color!);
     }
@@ -1436,7 +1576,13 @@ export class PdfPage {
 
     this.ops += ellipsePath(cx, cy, rx, ry);
 
-    if (hasFill && hasStroke) {
+    if (hasFill && hasStroke && options.borderOpacity !== undefined && options.borderOpacity !== options.opacity) {
+      this.ops += fill();
+      const borderGsName = this.getOrCreateExtGState(options.borderOpacity, options.blendMode);
+      this.ops += setGraphicsState(borderGsName);
+      this.ops += ellipsePath(cx, cy, rx, ry);
+      this.ops += stroke();
+    } else if (hasFill && hasStroke) {
       this.ops += fillAndStroke();
     } else if (hasFill) {
       this.ops += fill();
@@ -1755,6 +1901,9 @@ export class PdfPage {
    */
   private readonly annotations: PdfAnnotation[] = [];
 
+  /** Raw widget annotation dicts added via addWidgetAnnotation. */
+  private readonly widgetDicts: PdfDict[] = [];
+
   /**
    * Get all annotations on this page.
    *
@@ -1801,6 +1950,18 @@ export class PdfPage {
   }
 
   /**
+   * Add a raw widget annotation dictionary to this page.
+   *
+   * Used by form fields' `addToPage()` to register their widget
+   * annotation without wrapping in a `PdfAnnotation` instance.
+   *
+   * @param widgetDict  The widget annotation dictionary.
+   */
+  addWidgetAnnotation(widgetDict: PdfDict): void {
+    this.widgetDicts.push(widgetDict);
+  }
+
+  /**
    * Flatten all annotations into the page content stream.
    *
    * After flattening, annotations are rendered as part of the page
@@ -1843,6 +2004,12 @@ export class PdfPage {
       // Set page reference on annotation
       dict.set('/P', this.pageRef);
       const ref = registry.register(dict);
+      refs.push(ref);
+    }
+    // Include raw widget annotation dicts from form fields
+    for (const widgetDict of this.widgetDicts) {
+      widgetDict.set('/P', this.pageRef);
+      const ref = registry.register(widgetDict);
       refs.push(ref);
     }
     return refs;
@@ -1905,6 +2072,12 @@ export class PdfPage {
     if (options.borderWidth !== undefined) {
       this.ops += setLineWidth(options.borderWidth);
     }
+    if (options.borderDashArray) {
+      this.ops += setDashPattern(options.borderDashArray, options.borderDashPhase ?? 0);
+    }
+    if (options.borderLineCap !== undefined) {
+      this.ops += setLineCap(options.borderLineCap);
+    }
     if (hasFill) {
       this.ops += applyFillColor(options.color!);
     }
@@ -1916,7 +2089,13 @@ export class PdfPage {
     this.ops += svgCommandsToPdfOps(commands);
 
     // Painting operator
-    if (hasFill && hasStroke) {
+    if (hasFill && hasStroke && options.borderOpacity !== undefined && options.borderOpacity !== options.opacity) {
+      this.ops += fill();
+      const borderGsName = this.getOrCreateExtGState(options.borderOpacity, options.blendMode);
+      this.ops += setGraphicsState(borderGsName);
+      this.ops += svgCommandsToPdfOps(commands);
+      this.ops += stroke();
+    } else if (hasFill && hasStroke) {
       this.ops += fillAndStroke();
     } else if (hasStroke) {
       this.ops += stroke();

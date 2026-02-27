@@ -71,7 +71,7 @@ import type { RedactionOptions } from './redaction.js';
 import { markForRedaction, applyRedactions as applyRedactionsImpl } from './redaction.js';
 import type { SignatureVerificationResult } from '../signature/signatureVerifier.js';
 import { PdfForm } from '../form/pdfForm.js';
-import type { EmbeddedPdfPage } from './pdfEmbed.js';
+import type { EmbeddedPdfPage, EmbedPageOptions } from './pdfEmbed.js';
 import { embedPageAsFormXObject } from './pdfEmbed.js';
 
 // ---------------------------------------------------------------------------
@@ -109,6 +109,16 @@ export interface EmbedFontOptions {
   subset?: boolean | undefined;
   /** OpenType feature flags. e.g., { kern: true, liga: true }. */
   features?: Record<string, boolean> | undefined;
+  /** Custom name to use in the font dictionary's /BaseFont instead of the font's PostScript name. */
+  customName?: string | undefined;
+}
+
+/**
+ * Options for {@link PdfDocument.setTitle}.
+ */
+export interface SetTitleOptions {
+  /** When `true`, tell PDF viewers to display the document title in the window title bar. */
+  showInWindowTitleBar?: boolean | undefined;
 }
 
 // ---------------------------------------------------------------------------
@@ -508,9 +518,9 @@ export class PdfDocument {
       return this.embedStandardFont(fontNameOrData);
     }
     if (isOpenTypeCFF(fontNameOrData)) {
-      return this.embedCffFont(fontNameOrData);
+      return this.embedCffFont(fontNameOrData, options);
     }
-    return this.embedTrueTypeFont(fontNameOrData);
+    return this.embedTrueTypeFont(fontNameOrData, options);
   }
 
   /**
@@ -558,6 +568,25 @@ export class PdfDocument {
         }
         return size;
       },
+      sizeAtHeight(height: number): number {
+        if (stdFont) {
+          const testSize = 1;
+          const heightAt1 = standardFontHeight(stdFontName, testSize);
+          return heightAt1 > 0 ? height / heightAt1 : height;
+        }
+        return height;
+      },
+      getCharacterSet(): number[] {
+        // WinAnsi encoding covers codepoints 32-126 and 128-255 (with some gaps)
+        const codepoints: number[] = [];
+        for (let i = 32; i <= 255; i++) {
+          // Skip undefined positions in WinAnsi
+          if (i !== 127 && i !== 129 && i !== 141 && i !== 143 && i !== 144) {
+            codepoints.push(i);
+          }
+        }
+        return codepoints;
+      },
     };
 
     this.embeddedFonts.set(fontName, fontRef);
@@ -574,11 +603,11 @@ export class PdfDocument {
    * Embed a TrueType font from raw bytes as a CIDFont Type 2.
    * @internal
    */
-  private async embedTrueTypeFont(fontData: Uint8Array): Promise<FontRef> {
+  private async embedTrueTypeFont(fontData: Uint8Array, options?: EmbedFontOptions): Promise<FontRef> {
     // Parse metrics and create EmbeddedFont
     const embeddedFont = await embedTtfFont(fontData);
     const metrics = embeddedFont.metrics;
-    const psName = metrics.postScriptName || metrics.familyName || 'CustomFont';
+    const psName = options?.customName || metrics.postScriptName || metrics.familyName || 'CustomFont';
 
     // De-duplicate by PostScript name
     const existing = this.embeddedFonts.get(`__ttf__${psName}`);
@@ -683,6 +712,14 @@ export class PdfDocument {
       heightAtSize(size: number): number {
         return embeddedFont.heightAtSize(size);
       },
+      sizeAtHeight(height: number): number {
+        const testSize = 1;
+        const heightAt1 = embeddedFont.heightAtSize(testSize);
+        return heightAt1 > 0 ? height / heightAt1 : height;
+      },
+      getCharacterSet(): number[] {
+        return metrics.cmapTable.keys().toArray();
+      },
     };
 
     this.embeddedFonts.set(`__ttf__${psName}`, fontRef);
@@ -714,11 +751,11 @@ export class PdfDocument {
    *
    * @internal
    */
-  private async embedCffFont(fontData: Uint8Array): Promise<FontRef> {
+  private async embedCffFont(fontData: Uint8Array, options?: EmbedFontOptions): Promise<FontRef> {
     // Parse metrics using the same embedFont pipeline (works for both TTF and OTF)
     const embeddedFont = await embedTtfFont(fontData);
     const metrics = embeddedFont.metrics;
-    const psName = metrics.postScriptName || metrics.familyName || 'CFFFont';
+    const psName = options?.customName || metrics.postScriptName || metrics.familyName || 'CFFFont';
 
     // De-duplicate by PostScript name
     const existing = this.embeddedFonts.get(`__cff__${psName}`);
@@ -822,6 +859,14 @@ export class PdfDocument {
       },
       heightAtSize(size: number): number {
         return embeddedFont.heightAtSize(size);
+      },
+      sizeAtHeight(height: number): number {
+        const testSize = 1;
+        const heightAt1 = embeddedFont.heightAtSize(testSize);
+        return heightAt1 > 0 ? height / heightAt1 : height;
+      },
+      getCharacterSet(): number[] {
+        return metrics.cmapTable.keys().toArray();
       },
     };
 
@@ -1061,6 +1106,7 @@ export class PdfDocument {
   async embedPdf(
     data: Uint8Array | ArrayBuffer,
     pageIndices?: number[],
+    options?: EmbedPageOptions,
   ): Promise<EmbeddedPdfPage[]> {
     const bytes = data instanceof Uint8Array ? data : new Uint8Array(data);
     const sourceDoc = await loadPdf(bytes);
@@ -1090,6 +1136,7 @@ export class PdfDocument {
         sourceRegistry,
         this.registry,
         xObjectName,
+        options,
       );
       results.push(embedded);
     }
@@ -1103,10 +1150,11 @@ export class PdfDocument {
    * This is useful when you have an already-parsed PdfPage and want to
    * stamp it onto other pages as a form XObject.
    *
-   * @param page  The PdfPage to embed.
-   * @returns     An {@link EmbeddedPdfPage} handle.
+   * @param page     The PdfPage to embed.
+   * @param options  Optional bounding box / transformation matrix.
+   * @returns        An {@link EmbeddedPdfPage} handle.
    */
-  embedPage(page: PdfPage): EmbeddedPdfPage {
+  embedPage(page: PdfPage, options?: EmbedPageOptions): EmbeddedPdfPage {
     const sourceRegistry = page.getRegistry();
     this.formXObjectCounter++;
     const xObjectName = `XF${this.formXObjectCounter}`;
@@ -1116,6 +1164,7 @@ export class PdfDocument {
       sourceRegistry,
       this.registry,
       xObjectName,
+      options,
     );
   }
 
@@ -1135,8 +1184,11 @@ export class PdfDocument {
   // -----------------------------------------------------------------------
 
   /** Set the document title. */
-  setTitle(title: string): void {
+  setTitle(title: string, options?: SetTitleOptions): void {
     this.meta.title = title;
+    if (options?.showInWindowTitleBar) {
+      this.getViewerPreferences().setDisplayDocTitle(true);
+    }
   }
 
   /** Set the document author. */
@@ -1537,7 +1589,7 @@ export class PdfDocument {
   private viewerPrefs: ViewerPreferences | undefined;
 
   /** Cached PdfViewerPreferences instance. */
-  private _viewerPrefsInstance?: PdfViewerPreferences;
+  private _viewerPrefsInstance?: PdfViewerPreferences | undefined;
 
   /**
    * Get the viewer preferences for this document as a

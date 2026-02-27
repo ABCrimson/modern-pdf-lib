@@ -1,0 +1,94 @@
+{
+  "name": "modern-pdf-lib",
+  "version": "0.9.0",
+  "description": "A modern, WASM-accelerated PDF creation engine for every JavaScript runtime",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs",
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./wasm/*": "./dist/wasm/*"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
+  "files": [
+    "dist/**/*.mjs",
+    "dist/**/*.cjs",
+    "dist/**/*.d.mts",
+    "dist/**/*.d.cts",
+    "dist/**/*.d.mts.map",
+    "dist/**/*.d.cts.map",
+    "LICENSE",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsdown",
+    "build:wasm": "bash scripts/build-wasm.sh",
+    "build:all": "npm run build:wasm && npm run build",
+    "dev": "vite",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:integration": "vitest run tests/integration",
+    "test:e2e": "playwright test",
+    "test:bench": "vitest bench",
+    "lint": "eslint src/ tests/",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run typecheck && npm test && npm run build",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:api": "typedoc",
+    "validate-pdf": "tsx scripts/validate-pdf.ts",
+    "clean": "rm -rf dist coverage"
+  },
+  "dependencies": {
+    "fflate": "0.8.2"
+  },
+  "devDependencies": {
+    "typescript": "6.0.0-dev.20260227",
+    "tsdown": "0.21.0-beta.2",
+    "esbuild": "0.27.3",
+    "rollup": "4.59.0",
+    "vite": "8.0.0-beta.16",
+    "vitest": "4.1.0-beta.5",
+    "miniflare": "4.20260305.0",
+    "@playwright/test": "1.59.0-alpha-2026-02-27",
+    "vitepress": "2.0.0-alpha.16",
+    "typedoc": "0.28.17",
+    "typedoc-plugin-markdown": "4.10.0",
+    "eslint": "10.0.2",
+    "@eslint/js": "10.0.1",
+    "typescript-eslint": "8.56.2-alpha.1",
+    "prettier": "3.8.1",
+    "fast-png": "8.0.0",
+    "tsx": "4.21.0",
+    "wasm-pack": "0.14.0"
+  },
+  "keywords": [
+    "pdf",
+    "pdf-generation",
+    "wasm",
+    "typescript",
+    "esm",
+    "cloudflare-workers",
+    "streaming"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ABCrimson/modern-pdf-lib.git"
+  },
+  "homepage": "https://github.com/ABCrimson/modern-pdf-lib#readme",
+  "bugs": {
+    "url": "https://github.com/ABCrimson/modern-pdf-lib/issues"
+  }
+}

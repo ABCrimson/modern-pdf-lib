@@ -1,0 +1,49 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# WASM build output
+src/wasm/*/pkg/
+
+# Test coverage
+coverage/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# Playwright
+test-results/
+playwright-report/
+
+# VitePress
+.vitepress/cache/
+docs/.vitepress/dist/
+docs/.vitepress/cache/
+
+# Showcase PDFs (generated)
+showcase*.pdf
+
+# Rust / Cargo
+target/
+
+# TypeDoc output (regenerated)
+docs/api/generated/

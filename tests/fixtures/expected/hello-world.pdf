@@ -1,0 +1,88 @@
+%PDF-1.7
+%‚„œ”
+3 0 obj
+<<
+/Type /Font
+/Subtype /Type1
+/BaseFont /Helvetica
+/Encoding /WinAnsiEncoding
+>>
+endobj
+2 0 obj
+<<
+/Length 100
+>>
+stream
+q
+0 0 0 rg
+BT
+/F1 24 Tf
+50 750 Td
+(Hello, World!) Tj
+ET
+Q
+q
+1 0 0 RG
+2 w
+50 745 m
+187.352 745 l
+S
+Q
+
+endstream
+endobj
+1 0 obj
+<<
+/Type /Page
+/Parent 4 0 R
+/MediaBox [0 0 595.28 841.89]
+/Contents 2 0 R
+/Resources <<
+/Font <<
+/F1 3 0 R
+>>
+/ProcSet [/PDF /Text /ImageB /ImageC /ImageI]
+>>
+>>
+endobj
+4 0 obj
+<<
+/Type /Pages
+/Kids [1 0 R]
+/Count 1
+>>
+endobj
+5 0 obj
+<<
+/Type /Catalog
+/Pages 4 0 R
+>>
+endobj
+6 0 obj
+<<
+/Title (Hello World Reference)
+/Author (modern-pdf)
+/Creator (gen-reference-pdf.ts)
+/Producer (modern-pdf)
+/CreationDate (D:20260101000000Z)
+/ModDate (D:20260225074253Z)
+>>
+endobj
+xref
+0 7
+0000000000 65535 f 
+0000000263 00000 n 
+0000000112 00000 n 
+0000000015 00000 n 
+0000000441 00000 n 
+0000000498 00000 n 
+0000000547 00000 n 
+trailer
+<<
+/Size 7
+/Root 5 0 R
+/Info 6 0 R
+>>
+startxref
+738
+%%EOF

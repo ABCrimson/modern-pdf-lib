@@ -1,12 +1,12 @@
 /**
- * @module modern-pdf
+ * @module modern-pdf-lib
  *
- * Public API for the `modern-pdf` library — a modern, ESM-only PDF
+ * Public API for the `modern-pdf-lib` library — a modern, ESM-only PDF
  * creation engine that runs in every JavaScript runtime (Node, Deno,
  * Bun, Cloudflare Workers, browsers).
  *
  * ```ts
- * import { createPdf, PageSizes, rgb } from 'modern-pdf';
+ * import { createPdf, PageSizes, rgb } from 'modern-pdf-lib';
  *
  * const doc = createPdf();
  * const page = doc.addPage(PageSizes.A4);
@@ -22,7 +22,7 @@
 // ---------------------------------------------------------------------------
 
 export { createPdf, PdfDocument, StandardFonts } from './core/pdfDocument.js';
-export type { StandardFontName, EmbedFontOptions } from './core/pdfDocument.js';
+export type { StandardFontName, EmbedFontOptions, SetTitleOptions } from './core/pdfDocument.js';
 
 // ---------------------------------------------------------------------------
 // Page API
@@ -48,27 +48,33 @@ export type {
 // ---------------------------------------------------------------------------
 
 export { embedPageAsFormXObject } from './core/pdfEmbed.js';
-export type { EmbeddedPdfPage, DrawPageOptions } from './core/pdfEmbed.js';
+export type { EmbeddedPdfPage, DrawPageOptions, EmbedPageOptions } from './core/pdfEmbed.js';
 
 // ---------------------------------------------------------------------------
 // Colour helpers
 // ---------------------------------------------------------------------------
 
-export { rgb, cmyk, grayscale } from './core/operators/color.js';
+export { rgb, cmyk, grayscale, componentsToColor, colorToComponents, setFillingColor, setStrokingColor } from './core/operators/color.js';
 export type { RgbColor, CmykColor, GrayscaleColor, Color } from './core/operators/color.js';
 
 // ---------------------------------------------------------------------------
 // Angle helpers
 // ---------------------------------------------------------------------------
 
-export { degrees, radians } from './core/operators/state.js';
+export { degrees, radians, degreesToRadians, radiansToDegrees } from './core/operators/state.js';
 export type { Degrees, Radians, Angle } from './core/operators/state.js';
+
+// ---------------------------------------------------------------------------
+// PDF value helpers
+// ---------------------------------------------------------------------------
+
+export { asPDFName, asPDFNumber, asNumber } from './utils/pdfValueHelpers.js';
 
 // ---------------------------------------------------------------------------
 // Enums
 // ---------------------------------------------------------------------------
 
-export { BlendMode, TextRenderingMode } from './core/enums.js';
+export { BlendMode, TextRenderingMode, LineCapStyle, LineJoinStyle, TextAlignment, ImageAlignment, ParseSpeeds } from './core/enums.js';
 
 // ---------------------------------------------------------------------------
 // Save options
@@ -105,12 +111,14 @@ export type { PageRange } from './core/documentMerge.js';
 // Text layout helpers
 // ---------------------------------------------------------------------------
 
-export { layoutMultilineText, layoutCombedText, computeFontSize } from './core/layout.js';
+export { layoutMultilineText, layoutCombedText, computeFontSize, layoutSinglelineText } from './core/layout.js';
 export type {
   LayoutMultilineOptions,
   LayoutMultilineResult,
   LayoutCombedOptions,
   ComputeFontSizeOptions,
+  LayoutSinglelineOptions,
+  LayoutSinglelineResult,
 } from './core/layout.js';
 
 // ---------------------------------------------------------------------------
@@ -228,6 +236,95 @@ export { EmbeddedFont } from './assets/font/fontEmbed.js';
 export { extractMetrics } from './assets/font/fontMetrics.js';
 export type { FontMetrics } from './assets/font/fontMetrics.js';
 export { isOpenTypeCFF, isTrueType } from './assets/font/otfDetect.js';
+
+// ---------------------------------------------------------------------------
+// Low-level operator API (60+ functions + PDFOperator class)
+// ---------------------------------------------------------------------------
+
+export {
+  // Graphics — path construction & painting
+  rectangle as rectangleOp,
+  moveTo as moveToOp,
+  lineTo as lineToOp,
+  curveTo as curveToOp,
+  curveToInitial,
+  curveToFinal,
+  closePath as closePathOp,
+  stroke as strokeOp,
+  closeAndStroke,
+  fill as fillOp,
+  fillEvenOdd,
+  fillAndStroke as fillAndStrokeOp,
+  fillEvenOddAndStroke,
+  closeFillAndStroke,
+  closeFillEvenOddAndStroke,
+  endPath as endPathOp,
+  clip as clipOp,
+  clipEvenOdd,
+  setLineWidth as setLineWidthOp,
+  setLineCap as setLineCapOp,
+  setLineJoin as setLineJoinOp,
+  setMiterLimit,
+  setDashPattern as setDashPatternOp,
+  setFlatness,
+  circlePath,
+  ellipsePath,
+  // Color
+  setFillColorRgb,
+  setFillColorCmyk,
+  setFillColorGray,
+  setStrokeColorRgb,
+  setStrokeColorCmyk,
+  setStrokeColorGray,
+  setColorSpace,
+  setStrokeColorSpace,
+  setFillColor,
+  setStrokeColor,
+  applyFillColor,
+  applyStrokeColor,
+  // State & transforms
+  saveState,
+  restoreState,
+  concatMatrix,
+  translate as translateOp,
+  scale as scaleOp,
+  rotate as rotateOp,
+  skew as skewOp,
+  rotationMatrix,
+  setGraphicsState as setGraphicsStateOp,
+  pushGraphicsState,
+  popGraphicsState,
+  concatTransformationMatrix,
+  // Text
+  beginText,
+  endText,
+  setFont as setFontOp,
+  setFontAndSize,
+  setLeading as setLeadingOp,
+  setCharacterSpacing as setCharacterSpacingOp,
+  setWordSpacing as setWordSpacingOp,
+  setTextRise as setTextRiseOp,
+  setTextRenderingMode as setTextRenderingModeOp,
+  setTextMatrix as setTextMatrixOp,
+  moveText as moveTextOp,
+  moveTextSetLeading,
+  nextLine as nextLineOp,
+  showText as showTextOp,
+  showTextHex,
+  showTextArray,
+  showTextNextLine,
+  showTextWithSpacing,
+  setFontSize as setFontSizeOp,
+  setLineHeight,
+  setCharacterSqueeze,
+  // XObject
+  drawXObject,
+  drawImageXObject,
+  drawImageWithMatrix,
+  drawObject,
+  // First-class operator wrapper
+  PDFOperator,
+} from './core/operators/index.js';
 
 // ---------------------------------------------------------------------------
 // Low-level re-exports (for advanced users / plugins)
@@ -363,7 +460,9 @@ export {
 } from './form/index.js';
 export type {
   FieldType,
+  WidgetAnnotationHost,
   RefResolver,
+  AppearanceProviderFor,
   TextAppearanceOptions,
   CheckboxAppearanceOptions,
   RadioAppearanceOptions,
@@ -543,3 +642,23 @@ export type { RedactionOptions } from './core/redaction.js';
 // ---------------------------------------------------------------------------
 
 export { base64Encode, base64Decode } from './utils/base64.js';
+
+// ---------------------------------------------------------------------------
+// Typed error classes
+// ---------------------------------------------------------------------------
+
+export {
+  EncryptedPdfError,
+  FontNotEmbeddedError,
+  ForeignPageError,
+  RemovePageFromEmptyDocumentError,
+  NoSuchFieldError,
+  UnexpectedFieldTypeError,
+  MissingOnValueCheckError,
+  FieldAlreadyExistsError,
+  InvalidFieldNamePartError,
+  FieldExistsAsNonTerminalError,
+  RichTextFieldReadError,
+  CombedTextLayoutError,
+  ExceededMaxLengthError,
+} from './errors.js';

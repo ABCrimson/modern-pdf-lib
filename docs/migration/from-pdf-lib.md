@@ -1,0 +1,369 @@
+# Migrating from pdf-lib
+
+This guide helps you migrate existing projects from `pdf-lib` to `modern-pdf`. The API has been redesigned from the ground up, but the core concepts remain familiar.
+
+## Key Differences
+
+| Aspect | pdf-lib | modern-pdf |
+|---|---|---|
+| Module format | CJS + ESM | ESM-only |
+| TypeScript | 4.x | 6.0 with strict types |
+| Target | ES2017 | ES2024 |
+| Buffer usage | `Buffer` in Node APIs | `Uint8Array` everywhere |
+| Async model | Mixed sync/async | Async-first |
+| Scope | Read + Create + Modify | Creation-only |
+| Compression | Pure JS (pako) | WASM-accelerated (libdeflate) + JS fallback |
+| Font shaping | None | WASM text shaping (rustybuzz) |
+| Streaming | Not supported | `ReadableStream` output |
+| Node version | 10+ | 22+ |
+| PDF modification | Supported | Not supported |
+
+> [!IMPORTANT]
+> `modern-pdf` is a **creation-only** library. It does not support reading, parsing, or modifying existing PDF files. If you need to modify existing PDFs, continue using `pdf-lib` for that purpose.
+
+## API Comparison
+
+### Creating a Document
+
+```ts
+// pdf-lib
+import { PDFDocument } from 'pdf-lib';
+const pdfDoc = await PDFDocument.create();
+
+// modern-pdf
+import { createPdf } from 'modern-pdf';
+const pdf = createPdf();
+```
+
+### Adding a Page
+
+```ts
+// pdf-lib
+import { PDFDocument } from 'pdf-lib';
+const page = pdfDoc.addPage([595.28, 841.89]); // A4
+
+// modern-pdf
+import { createPdf, PageSizes } from 'modern-pdf';
+const page = pdf.addPage(PageSizes.A4);
+```
+
+### Drawing Text
+
+```ts
+// pdf-lib
+import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
+const pdfDoc = await PDFDocument.create();
+const page = pdfDoc.addPage();
+const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+page.drawText('Hello!', {
+  x: 50,
+  y: 700,
+  size: 24,
+  font,
+  color: rgb(0, 0, 0),
+});
+
+// modern-pdf
+import { createPdf, PageSizes, StandardFonts, rgb } from 'modern-pdf';
+const pdf = createPdf();
+const page = pdf.addPage(PageSizes.A4);
+page.drawText('Hello!', {
+  x: 50,
+  y: 700,
+  size: 24,
+  font: StandardFonts.Helvetica,
+  color: rgb(0, 0, 0),
+});
+```
+
+### Embedding Custom Fonts
+
+```ts
+// pdf-lib
+const fontBytes = fs.readFileSync('font.ttf');
+const font = await pdfDoc.embedFont(fontBytes);
+
+// modern-pdf
+const fontBytes = new Uint8Array(await readFile('font.ttf'));
+const font = await pdf.embedFont(fontBytes);
+```
+
+### Embedding Images
+
+```ts
+// pdf-lib
+const pngBytes = fs.readFileSync('image.png');
+const image = await pdfDoc.embedPng(pngBytes);
+const dims = image.scale(0.5);
+page.drawImage(image, {
+  x: 50,
+  y: 500,
+  width: dims.width,
+  height: dims.height,
+});
+
+// modern-pdf
+const pngBytes = new Uint8Array(await readFile('image.png'));
+const image = await pdf.embedPng(pngBytes);
+page.drawImage(image, {
+  x: 50,
+  y: 500,
+  width: image.width * 0.5,
+  height: image.height * 0.5,
+});
+```
+
+### Drawing Shapes
+
+```ts
+// pdf-lib
+page.drawRectangle({
+  x: 50,
+  y: 400,
+  width: 200,
+  height: 100,
+  color: rgb(0, 0.5, 1),
+  borderColor: rgb(0, 0, 0),
+  borderWidth: 2,
+});
+
+// modern-pdf — identical API
+page.drawRectangle({
+  x: 50,
+  y: 400,
+  width: 200,
+  height: 100,
+  color: rgb(0, 0.5, 1),
+  borderColor: rgb(0, 0, 0),
+  borderWidth: 2,
+});
+```
+
+### Saving the Document
+
+```ts
+// pdf-lib
+const pdfBytes = await pdfDoc.save();
+fs.writeFileSync('output.pdf', pdfBytes);
+
+// modern-pdf — save() returns Uint8Array
+const bytes = await pdf.save();
+await writeFile('output.pdf', bytes);
+
+// modern-pdf — or stream it
+const stream = pdf.saveAsStream();
+await stream.pipeTo(Writable.toWeb(createWriteStream('output.pdf')));
+```
+
+### Colors
+
+```ts
+// pdf-lib
+import { rgb, cmyk, grayscale } from 'pdf-lib';
+const color = rgb(0.5, 0.5, 0.5);
+
+// modern-pdf — identical API
+import { rgb, cmyk, grayscale } from 'modern-pdf';
+const color = rgb(0.5, 0.5, 0.5);
+```
+
+### Rotation
+
+```ts
+// pdf-lib
+import { degrees, radians } from 'pdf-lib';
+page.drawText('Rotated', { rotate: degrees(45) });
+
+// modern-pdf — identical API
+import { degrees, radians } from 'modern-pdf';
+page.drawText('Rotated', { rotate: degrees(45) });
+```
+
+## Common Patterns Translated
+
+### Multi-page Document with Header/Footer
+
+```ts
+// pdf-lib
+const pdfDoc = await PDFDocument.create();
+const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+for (let i = 0; i < 10; i++) {
+  const page = pdfDoc.addPage();
+  const { width, height } = page.getSize();
+  page.drawText(`Page ${i + 1}`, {
+    x: width / 2 - 20,
+    y: 30,
+    size: 10,
+    font,
+  });
+}
+
+// modern-pdf
+const pdf = createPdf();
+for (let i = 0; i < 10; i++) {
+  const page = pdf.addPage(PageSizes.A4);
+  const [width] = PageSizes.A4;
+  page.drawText(`Page ${i + 1}`, {
+    x: width / 2 - 20,
+    y: 30,
+    size: 10,
+    font: StandardFonts.Helvetica,
+  });
+}
+```
+
+### Generating an Invoice
+
+```ts
+// modern-pdf
+import { createPdf, PageSizes, rgb, StandardFonts } from 'modern-pdf';
+
+const pdf = createPdf();
+const page = pdf.addPage(PageSizes.A4);
+
+// Header
+page.drawText('INVOICE', {
+  x: 50, y: 780, size: 28,
+  font: StandardFonts.HelveticaBold,
+  color: rgb(0.1, 0.1, 0.1),
+});
+
+// Table header line
+page.drawLine({
+  start: { x: 50, y: 700 },
+  end: { x: 545, y: 700 },
+  thickness: 1,
+  color: rgb(0, 0, 0),
+});
+
+// Line items
+const items = [
+  { desc: 'Widget A', qty: 10, price: 9.99 },
+  { desc: 'Widget B', qty: 5, price: 24.99 },
+];
+
+let y = 680;
+for (const item of items) {
+  page.drawText(item.desc, { x: 50, y, size: 11 });
+  page.drawText(String(item.qty), { x: 350, y, size: 11 });
+  page.drawText(`$${(item.qty * item.price).toFixed(2)}`, { x: 450, y, size: 11 });
+  y -= 20;
+}
+
+const bytes = await pdf.save();
+```
+
+## Breaking Changes from pdf-lib
+
+### 1. No `PDFDocument.load()`
+
+`modern-pdf` cannot load or modify existing PDFs:
+
+```ts
+// pdf-lib — this was supported
+const pdfDoc = await PDFDocument.load(existingPdfBytes);
+
+// modern-pdf — NOT supported
+// Use pdf-lib or another library for PDF modification
+```
+
+### 2. No `Buffer` Support
+
+All binary data uses `Uint8Array`. If you have a `Buffer`, convert it:
+
+```ts
+// pdf-lib accepted Buffer directly
+const font = await pdfDoc.embedFont(bufferData);
+
+// modern-pdf requires Uint8Array
+const font = await pdf.embedFont(new Uint8Array(bufferData));
+```
+
+### 3. ESM-Only
+
+`modern-pdf` cannot be loaded with `require()`:
+
+```ts
+// This will NOT work
+const { createPdf } = require('modern-pdf');
+
+// Use ESM import instead
+import { createPdf } from 'modern-pdf';
+```
+
+### 4. No `PDFDocument.create()` — Use `createPdf()`
+
+The factory function is a plain function, not a static class method:
+
+```ts
+// pdf-lib
+const doc = await PDFDocument.create();
+
+// modern-pdf
+const doc = createPdf(); // synchronous, no await needed
+```
+
+### 5. Standard Fonts Without Embedding
+
+In `pdf-lib`, standard fonts had to be embedded via `embedFont()`. In `modern-pdf`, standard fonts can be used directly:
+
+```ts
+// pdf-lib
+const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+page.drawText('Hello', { font, size: 16, x: 50, y: 700 });
+
+// modern-pdf
+page.drawText('Hello', {
+  font: StandardFonts.Helvetica,
+  size: 16,
+  x: 50,
+  y: 700,
+});
+```
+
+### 6. Image `scale()` Removed
+
+Use the image's `width` and `height` properties directly:
+
+```ts
+// pdf-lib
+const dims = image.scale(0.5);
+page.drawImage(image, { ...dims });
+
+// modern-pdf
+page.drawImage(image, {
+  width: image.width * 0.5,
+  height: image.height * 0.5,
+});
+```
+
+### 7. No Page Getters on PDFDocument
+
+In `pdf-lib`, `pdfDoc.getPages()` returned all pages. In `modern-pdf`, pages are returned by `addPage()` and should be stored by the caller:
+
+```ts
+// pdf-lib
+const pages = pdfDoc.getPages();
+const firstPage = pages[0];
+
+// modern-pdf — keep your own references
+const pages: PdfPage[] = [];
+pages.push(pdf.addPage(PageSizes.A4));
+pages.push(pdf.addPage(PageSizes.A4));
+```
+
+## Checklist
+
+Use this checklist when migrating a project:
+
+- [ ] Replace `pdf-lib` with `modern-pdf` in `package.json`
+- [ ] Update all imports from `pdf-lib` to `modern-pdf`
+- [ ] Replace `PDFDocument.create()` with `createPdf()`
+- [ ] Replace `Buffer` usage with `Uint8Array`
+- [ ] Remove any `PDFDocument.load()` calls (not supported)
+- [ ] Update standard font usage (no embedding required)
+- [ ] Replace `image.scale()` with manual width/height calculation
+- [ ] Update file writing from `fs.writeFileSync` to `await writeFile`
+- [ ] Ensure your project uses ESM (`"type": "module"` in `package.json`)
+- [ ] Ensure Node 22+ or a compatible runtime
+- [ ] Test all generated PDFs for visual correctness

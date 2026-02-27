@@ -6,9 +6,10 @@
  * they are side-effect-free and can be used for pre-layout before
  * drawing or for form-field appearance generation.
  *
- * - {@link layoutMultilineText} — break text into measured lines
- * - {@link layoutCombedText}    — position characters in fixed-width cells
- * - {@link computeFontSize}     — find the largest size that fits bounds
+ * - {@link layoutMultilineText}   — break text into measured lines
+ * - {@link layoutCombedText}     — position characters in fixed-width cells
+ * - {@link computeFontSize}      — find the largest size that fits bounds
+ * - {@link layoutSinglelineText} — measure and align a single line of text
  */
 
 import type { FontRef } from './pdfPage.js';
@@ -162,4 +163,82 @@ export function computeFontSize(
   }
 
   return Math.floor(lo * 10) / 10;
+}
+
+// ---------------------------------------------------------------------------
+// Single-line text layout
+// ---------------------------------------------------------------------------
+
+/**
+ * Options for {@link layoutSinglelineText}.
+ */
+export interface LayoutSinglelineOptions {
+  /** The font to use for measurement. */
+  font: FontRef;
+  /** Font size in points. */
+  fontSize: number;
+  /** Bounds width for alignment (optional). */
+  bounds?: { width: number; height: number } | undefined;
+  /** Text alignment within bounds. Default: 'left'. */
+  alignment?: 0 | 1 | 2 | undefined;
+}
+
+/**
+ * Result of {@link layoutSinglelineText}.
+ */
+export interface LayoutSinglelineResult {
+  /** The text line with its measured width. */
+  line: { text: string; width: number; height: number };
+  /** The x offset after alignment (0 for left-aligned). */
+  x: number;
+  /** The y offset for the text baseline. */
+  y: number;
+}
+
+/**
+ * Layout a single line of text with optional alignment within bounds.
+ *
+ * Unlike {@link layoutMultilineText}, this does not perform any wrapping.
+ * It simply measures the text, computes alignment offsets, and returns
+ * the positioned line.
+ *
+ * @param text     The text to lay out (single line, no newlines).
+ * @param options  Font, size, bounds, alignment.
+ * @returns        The measured line and its position offsets.
+ */
+export function layoutSinglelineText(
+  text: string,
+  options: LayoutSinglelineOptions,
+): LayoutSinglelineResult {
+  const { font, fontSize, bounds, alignment } = options;
+
+  const width = font.widthOfTextAtSize(text, fontSize);
+  const height = font.heightAtSize(fontSize);
+
+  let x = 0;
+  let y = 0;
+
+  if (bounds) {
+    // Vertical centering
+    y = (bounds.height - height) / 2;
+
+    // Horizontal alignment
+    switch (alignment) {
+      case 1: // Center
+        x = (bounds.width - width) / 2;
+        break;
+      case 2: // Right
+        x = bounds.width - width;
+        break;
+      default: // Left (0 or undefined)
+        x = 0;
+        break;
+    }
+  }
+
+  return {
+    line: { text, width, height },
+    x,
+    y,
+  };
 }
