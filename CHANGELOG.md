@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 See [VERSIONING.md](./VERSIONING.md) for this project's versioning policy.
 
+## [0.12.1] - 2026-02-27
+
+### Fixed
+- Converted dynamic import of `documentMerge` to static import (eliminates `INEFFECTIVE_DYNAMIC_IMPORT` bundler warning — module was already in the main bundle via `index.ts` re-export).
+- Migrated tsdown config from deprecated `external` to `deps.neverBundle`.
+- Normalized `repository.url` in package.json per npm spec.
+
 ## [0.12.0] - 2026-02-27
 
 ### Added
