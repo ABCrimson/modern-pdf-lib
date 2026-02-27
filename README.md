@@ -214,7 +214,7 @@ const blob = await doc.saveAsBlob();     // Blob (browsers)
 
 | Runtime | Version | Status |
 |:---|:---|:---:|
-| **Node.js** | 22+ | Fully supported |
+| **Node.js** | 25.7+ | Fully supported |
 | **Deno** | 1.40+ | Fully supported |
 | **Bun** | 1.0+ | Fully supported |
 | **Cloudflare Workers** | &mdash; | Fully supported |

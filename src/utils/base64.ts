@@ -3,7 +3,7 @@
  *
  * Base64 encoding and decoding utilities using native `Uint8Array` methods.
  *
- * These functions work in all modern JavaScript runtimes (Node 22+, Deno,
+ * These functions work in all modern JavaScript runtimes (Node 25+, Deno,
  * Bun, Cloudflare Workers, modern browsers) using the native
  * `Uint8Array.prototype.toBase64()` and `Uint8Array.fromBase64()` APIs.
  *
