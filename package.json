@@ -1,6 +1,6 @@
 {
   "name": "modern-pdf-lib",
-  "version": "0.11.3",
+  "version": "0.11.4",
   "description": "A modern, WASM-accelerated PDF creation engine for every JavaScript runtime",
   "type": "module",
   "exports": {
