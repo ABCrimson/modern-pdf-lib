@@ -60,11 +60,11 @@ export default defineConfig({
       { text: 'API', link: '/api/' },
       { text: 'Migration', link: '/migration/from-pdf-lib' },
       {
-        text: 'v0.11.0',
+        text: 'v0.11.3',
         items: [
           {
             text: 'Changelog',
-            link: 'https://github.com/ABCrimson/modern-pdf-lib/blob/main/CHANGELOG.md',
+            link: 'https://github.com/ABCrimson/modern-pdf-lib/blob/master/CHANGELOG.md',
           },
           {
             text: 'npm',
@@ -123,7 +123,7 @@ export default defineConfig({
 
     editLink: {
       pattern:
-        'https://github.com/ABCrimson/modern-pdf-lib/edit/main/docs/:path',
+        'https://github.com/ABCrimson/modern-pdf-lib/edit/master/docs/:path',
       text: 'Edit this page on GitHub',
     },
 
