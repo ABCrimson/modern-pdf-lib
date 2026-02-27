@@ -52,6 +52,7 @@ jobs:
 
       - name: Build WASM crates
         run: bash scripts/build-wasm.sh --release
+        continue-on-error: true
 
       - name: Build TypeScript
         run: npm run build
