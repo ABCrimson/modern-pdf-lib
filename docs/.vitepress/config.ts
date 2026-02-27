@@ -4,6 +4,7 @@ export default defineConfig({
   title: 'Modern PDF',
   description:
     'A modern, WASM-accelerated PDF creation engine for every JavaScript runtime',
+  base: '/modern-pdf-lib/',
 
   head: [
     ['link', { rel: 'icon', type: 'image/svg+xml', href: '/logo.svg' }],
