@@ -153,14 +153,14 @@ describe('PNG embedding', () => {
     // The parsePngDimensions function throws on bad signature
     const { createPdf } = await import('../../../src/index.js');
     const doc = createPdf();
-    await expect(doc.embedPng(notPng)).rejects.toThrow(/[Ii]nvalid PNG|bad signature/);
+    expect(() => doc.embedPng(notPng)).toThrow(/[Ii]nvalid PNG|bad signature/);
   });
 
   it('rejects data that is too short', async () => {
     const { createPdf } = await import('../../../src/index.js');
     const doc = createPdf();
     const tooShort = new Uint8Array([0x89, 0x50, 0x4e, 0x47]);
-    await expect(doc.embedPng(tooShort)).rejects.toThrow(/too short|too small|Invalid/);
+    expect(() => doc.embedPng(tooShort)).toThrow(/too short|too small|Invalid/);
   });
 
   it('parses IHDR chunk for dimensions', () => {

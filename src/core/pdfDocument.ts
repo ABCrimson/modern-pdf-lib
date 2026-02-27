@@ -957,10 +957,10 @@ export class PdfDocument {
    * @param pngData  Raw PNG file bytes as a `Uint8Array` or `ArrayBuffer`.
    * @returns        An {@link ImageRef} to pass to `page.drawImage()`.
    */
-  async embedPng(pngData: Uint8Array | ArrayBuffer): Promise<ImageRef> {
+  embedPng(pngData: Uint8Array | ArrayBuffer): ImageRef {
     const data = pngData instanceof ArrayBuffer ? new Uint8Array(pngData) : pngData;
     // Decode PNG: decompress IDAT, reconstruct filters, separate alpha
-    const result = await decodePng(data);
+    const result = decodePng(data);
 
     this.imageCounter++;
     const resourceName = `Im${this.imageCounter}`;
@@ -992,6 +992,16 @@ export class PdfDocument {
 
     dict.set('/Filter', PdfName.of('FlateDecode'));
     dict.set('/Length', PdfNumber.of(result.imageData.length));
+
+    // Set DecodeParms for IDAT passthrough (PNG predictor)
+    if (result.decodeParms) {
+      const dp = new PdfDict();
+      dp.set('/Predictor', PdfNumber.of(result.decodeParms.predictor));
+      dp.set('/Columns', PdfNumber.of(result.decodeParms.columns));
+      dp.set('/Colors', PdfNumber.of(result.decodeParms.colors));
+      dp.set('/BitsPerComponent', PdfNumber.of(result.decodeParms.bitsPerComponent));
+      dict.set('/DecodeParms', dp);
+    }
 
     // Handle SMask (alpha channel) — create a separate XObject
     if (result.smaskData) {
@@ -1942,7 +1952,9 @@ export class PdfDocument {
     // Subset TrueType fonts before finalizing pages — this updates the
     // font file streams, /W arrays, and /ToUnicode CMaps in-place to
     // only include glyphs that were actually used in drawText calls.
-    this.subsetTtfFonts();
+    if (this.ttfFonts.size > 0) {
+      this.subsetTtfFonts();
+    }
 
     // Finalize each page → produces content streams and page dicts
     const pageEntries: PageEntry[] = this.pages.map((p) => p.finalize());
@@ -2061,20 +2073,21 @@ export class PdfDocument {
     // objects become unreachable orphans that would otherwise bloat the
     // output.
     //
-    // We include all known root refs: the catalog, info dict, plus any
-    // embedded resources (images, fonts) that may have been registered
-    // but not yet placed on a page.
-    const rootRefs: PdfRef[] = [structure.catalogRef, structure.infoRef];
-    for (const img of this.embeddedImages) {
-      rootRefs.push(img.ref);
+    // Skip for brand-new documents (no originalBytes) since there are no
+    // pre-existing objects that could become orphans.
+    if (this.originalBytes !== undefined) {
+      const rootRefs: PdfRef[] = [structure.catalogRef, structure.infoRef];
+      for (const img of this.embeddedImages) {
+        rootRefs.push(img.ref);
+      }
+      for (const [, fontRef] of this.embeddedFonts) {
+        rootRefs.push(fontRef.ref);
+      }
+      for (const file of this.attachedFiles) {
+        rootRefs.push(file.ref);
+      }
+      this.registry.filterReachable(rootRefs);
     }
-    for (const [, fontRef] of this.embeddedFonts) {
-      rootRefs.push(fontRef.ref);
-    }
-    for (const file of this.attachedFiles) {
-      rootRefs.push(file.ref);
-    }
-    this.registry.filterReachable(rootRefs);
 
     return structure;
   }

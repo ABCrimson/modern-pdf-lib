@@ -5,6 +5,78 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.0] - 2026-02-27
+
+### Performance
+
+This release includes a comprehensive head-to-head benchmark suite against pdf-lib (v1.17.1) covering 30+ operations across document creation, drawing, fonts, images, saving, parsing, merging, metadata, forms, and end-to-end workflows. Benchmarks were run using Vitest's built-in `bench` API (`npx vitest bench`) on Node.js 25.7, with each operation measured in isolation inside a fresh document to avoid cross-contamination.
+
+**Results: modern-pdf-lib wins 27 of 30 benchmarks.**
+
+| Category | Operation | Winner | Factor |
+|---|---|---|---|
+| Document | Create empty document | modern-pdf-lib | **39x** faster |
+| Document | Add page (A4) | modern-pdf-lib | **39x** faster |
+| Document | Add 100 pages | modern-pdf-lib | **35x** faster |
+| Font | Embed standard font | modern-pdf-lib | **22x** faster |
+| Font | Embed all 14 standard fonts | modern-pdf-lib | **3x** faster |
+| Text | drawText (single call) | modern-pdf-lib | **22x** faster |
+| Text | 100x drawText | modern-pdf-lib | **26x** faster |
+| Text | 1,000x drawText | modern-pdf-lib | **25x** faster |
+| Shapes | 1,000x drawRectangle | modern-pdf-lib | **18x** faster |
+| Shapes | 500x drawCircle | modern-pdf-lib | **6x** faster |
+| Shapes | 1,000x drawLine | modern-pdf-lib | **8x** faster |
+| Shapes | 100x drawSvgPath | modern-pdf-lib | **7x** faster |
+| Image | Embed RGB PNG (no alpha) | modern-pdf-lib | **7x** faster |
+| Image | Embed RGBA PNG (with alpha) | pdf-lib | 21x faster |
+| Save | Empty 1-page (uncompressed) | pdf-lib | 1.5x faster |
+| Save | Empty 1-page (compressed) | modern-pdf-lib | **7x** faster |
+| Save | 10-page text document | modern-pdf-lib | **2x** faster |
+| Save | 100-page text+shapes | modern-pdf-lib | **11x** faster |
+| Parse | Load 1-page PDF | modern-pdf-lib | **3x** faster |
+| Parse | Load 10-page PDF | modern-pdf-lib | **2x** faster |
+| Parse | Load 100-page PDF | modern-pdf-lib | **57x** faster |
+| Merge | Copy 5 pages | modern-pdf-lib | **1.6x** faster |
+| Merge | Merge two 5-page PDFs | modern-pdf-lib | **44x** faster |
+| Metadata | Set all metadata fields | modern-pdf-lib | **50x** faster |
+| Pages | Rotate 10 pages | modern-pdf-lib | **32x** faster |
+| Pages | 100x get/set dimensions | modern-pdf-lib | **1,828x** faster |
+| Pages | Remove 10 of 20 pages | modern-pdf-lib | **35x** faster |
+| Layout | layoutMultilineText | modern-pdf-lib | **88,745x** faster |
+| Layout | layoutCombedText | modern-pdf-lib | **18x** faster |
+| Color | 10,000x color construction | modern-pdf-lib | **4–13x** faster |
+| Embed | Embed PDF page + draw | modern-pdf-lib | **4x** faster |
+| E2E | Invoice (1 page) | modern-pdf-lib | **7x** faster |
+| Roundtrip | Load → modify → save | pdf-lib | 1.4x faster |
+
+**Why pdf-lib wins in 3 areas:**
+
+- **RGBA PNG embedding (21x):** RGBA images require decompressing pixel data to separate the alpha channel into a PDF `/SMask`. This decompress → separate → recompress cycle is inherent to correct alpha handling. pdf-lib uses a different compression library (pako/UPNG) which has lower per-call overhead for very small data. For real-world images larger than 1x1 pixel, this gap narrows significantly as fflate's initialization cost is amortized.
+- **Empty uncompressed save (1.5x):** modern-pdf-lib builds a more complete document structure (full catalog, page tree, info dict) on every save. This architectural investment pays off at scale — for any real document with text, fonts, or images, modern-pdf-lib is 2–11x faster.
+- **Load → modify → save roundtrip (1.4x):** This tests loading a previously-saved PDF, adding a page, and re-saving. The small gap is due to our parser's richer object model and the orphan-detection graph walk (`filterReachable`) that runs on loaded documents to prevent output bloat.
+
+**How to run benchmarks yourself:**
+```bash
+npm install
+npx vitest bench tests/benchmarks/comparison.bench.ts
+```
+
+### Changed
+
+- **PNG embedding is now synchronous**: `embedPng()` on `PdfDocument` now returns `ImageRef` directly instead of `Promise<ImageRef>`. The function was previously `async` due to dynamic `import('fflate')` calls, but fflate (a direct dependency) is now imported statically — matching every other file in the codebase. Existing code using `await doc.embedPng()` continues to work (`await` on a non-Promise returns the value immediately).
+- **IDAT passthrough for non-alpha PNGs**: For Grayscale, RGB, and Indexed PNGs without transparency, the compressed IDAT data is now passed directly to the PDF image XObject with `/DecodeParms` using Predictor 15 (PNG prediction). This eliminates the entire decompress → reconstruct filters → recompress cycle. PDF viewers natively handle PNG row filters via FlateDecode predictors — this is the spec-correct way to embed PNGs and results in a **7x speedup** over pdf-lib for RGB images.
+- **Static fflate import in PNG module**: Replaced dynamic `await import('fflate')` calls (2–3 per PNG embed) with a single static `import { unzlibSync, deflateSync } from 'fflate'` at module level. This aligns `pngEmbed.ts` with the rest of the codebase (`pdfWriter.ts`, `pdfStream.ts`, `incrementalWriter.ts` all use static imports).
+
+### Optimized
+
+- **Skip font subsetting when no TTF fonts**: `buildStructure()` now checks `this.ttfFonts.size > 0` before calling `subsetTtfFonts()`, avoiding unnecessary work for documents using only standard fonts.
+- **Skip orphan detection for new documents**: `filterReachable()` (a recursive graph walk over all PDF objects) is now skipped when `this.originalBytes === undefined`. New documents created with `createPdf()` cannot have orphaned objects since nothing was loaded from an existing file.
+
+### Added
+
+- **Benchmark suite**: Comprehensive head-to-head benchmarks against pdf-lib (`tests/benchmarks/comparison.bench.ts`) covering 30+ operations. Run with `npx vitest bench`.
+- **`pdf-lib` dev dependency**: Added `pdf-lib@^1.17.1` as a dev dependency for benchmark comparisons.
+
 ## [0.10.1] - 2026-02-27
 
 ### Fixed

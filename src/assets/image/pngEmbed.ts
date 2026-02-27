@@ -25,6 +25,8 @@
  * No require() — ESM import only.
  */
 
+import { unzlibSync, deflateSync } from 'fflate';
+
 // ---------------------------------------------------------------------------
 // Public interfaces
 // ---------------------------------------------------------------------------
@@ -82,6 +84,18 @@ export interface PngEmbedResult {
    * alpha values in smaskData.
    */
   readonly hasTransparency: boolean;
+  /**
+   * Optional decode parameters for the FlateDecode filter.
+   * When set, the PDF image XObject should include a /DecodeParms
+   * dictionary with PNG predictor settings, enabling IDAT passthrough
+   * (no decompression/recompression needed).
+   */
+  readonly decodeParms?: {
+    readonly predictor: number;
+    readonly columns: number;
+    readonly colors: number;
+    readonly bitsPerComponent: number;
+  } | undefined;
 }
 
 // ---------------------------------------------------------------------------
@@ -310,45 +324,8 @@ export function isPngWasmReady(): boolean {
  *
  * @internal
  */
-async function decompressZlib(compressed: Uint8Array): Promise<Uint8Array> {
-  // Use fflate (already a dependency) for reliable zlib decompression.
-  // PNG IDAT data is zlib-wrapped deflate. fflate's inflateSync handles
-  // raw deflate; we need to strip the 2-byte zlib header and 4-byte
-  // Adler-32 checksum first, or use unzlibSync which handles zlib format.
-  try {
-    const { unzlibSync } = await import('fflate');
-    return unzlibSync(compressed);
-  } catch {
-    // Fallback: try DecompressionStream('deflate') which handles zlib format.
-    if (typeof DecompressionStream !== 'undefined') {
-      const ds = new DecompressionStream('deflate');
-      const writer = ds.writable.getWriter();
-      const reader = ds.readable.getReader();
-
-      writer.write(new Uint8Array(compressed) as Uint8Array<ArrayBuffer>).catch(() => { /* handled by reader */ });
-      writer.close().catch(() => { /* handled by reader */ });
-
-      const chunks: Uint8Array[] = [];
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        chunks.push(value);
-      }
-
-      const totalLength = chunks.reduce((sum, c) => sum + c.length, 0);
-      const result = new Uint8Array(totalLength);
-      let pos = 0;
-      for (const chunk of chunks) {
-        result.set(chunk, pos);
-        pos += chunk.length;
-      }
-      return result;
-    }
-
-    throw new Error(
-      'PNG decompression requires fflate library or DecompressionStream API',
-    );
-  }
+function decompressZlib(compressed: Uint8Array): Uint8Array {
+  return unzlibSync(compressed);
 }
 
 /**
@@ -511,11 +488,7 @@ function separateGrayscaleAlpha(
  * Compress data using deflate for FlateDecode.
  * @internal
  */
-async function compressForPdf(data: Uint8Array): Promise<Uint8Array> {
-  // Use fflate (already a dependency) for raw deflate compression.
-  // This matches the PdfWriter's compression format (deflateSync).
-  // The resulting data is used with /Filter /FlateDecode in the PDF.
-  const { deflateSync } = await import('fflate');
+function compressForPdf(data: Uint8Array): Uint8Array {
   return deflateSync(data, { level: 6 });
 }
 
@@ -531,12 +504,12 @@ async function compressForPdf(data: Uint8Array): Promise<Uint8Array> {
  * dictionary.
  *
  * @param pngData - The raw PNG file as a Uint8Array.
- * @returns A promise resolving to the embedding result.
+ * @returns The embedding result with all data needed for a PDF image XObject.
  *
  * @example
  * ```ts
  * const pngBytes = await readFile('photo.png');
- * const result = await embedPng(pngBytes);
+ * const result = embedPng(pngBytes);
  *
  * // Create image XObject with:
  * //   /Width result.width
@@ -549,7 +522,7 @@ async function compressForPdf(data: Uint8Array): Promise<Uint8Array> {
  * // If result.smaskData is defined, create a second XObject for the SMask.
  * ```
  */
-export async function embedPng(pngData: Uint8Array): Promise<PngEmbedResult> {
+export function embedPng(pngData: Uint8Array): PngEmbedResult {
   // 1. Validate signature
   validatePngSignature(pngData);
 
@@ -605,38 +578,50 @@ export async function embedPng(pngData: Uint8Array): Promise<PngEmbedResult> {
  * Embed an indexed (palette-based) PNG.
  * @internal
  */
-async function embedIndexedPng(
+function embedIndexedPng(
   ihdr: IhdrData,
   idatData: Uint8Array,
   palette: Uint8Array | undefined,
   transparency: Uint8Array | undefined,
-): Promise<PngEmbedResult> {
+): PngEmbedResult {
   if (!palette) {
     throw new Error('Invalid PNG: indexed color type requires PLTE chunk');
   }
 
-  // Decompress IDAT to get raw scanlines (with filter bytes)
-  const decompressed = await decompressZlib(idatData);
+  // Fast path: no transparency — pass IDAT data directly to PDF.
+  if (!transparency || transparency.length === 0) {
+    return {
+      width: ihdr.width,
+      height: ihdr.height,
+      bitsPerComponent: 8,
+      colorSpace: 'Indexed',
+      palette,
+      imageData: idatData,
+      filter: 'FlateDecode',
+      hasTransparency: false,
+      decodeParms: {
+        predictor: 15,
+        columns: ihdr.width,
+        colors: 1,
+        bitsPerComponent: 8,
+      },
+    };
+  }
 
-  // Reconstruct filters to get raw pixel indices
+  // Slow path: transparency requires decompression to build SMask
+  const decompressed = decompressZlib(idatData);
   const bpp = bytesPerPixel(ihdr.colorType, ihdr.bitDepth);
   const pixels = reconstructFilters(decompressed, ihdr.width, ihdr.height, bpp);
+  const imageData = compressForPdf(pixels);
 
-  // Re-compress for PDF
-  const imageData = await compressForPdf(pixels);
-
-  // Handle tRNS chunk for indexed transparency
-  let smaskData: Uint8Array | undefined;
-  if (transparency && transparency.length > 0) {
-    // tRNS for indexed images: one alpha byte per palette entry
-    const pixelCount = ihdr.width * ihdr.height;
-    const alpha = new Uint8Array(pixelCount);
-    for (let i = 0; i < pixelCount; i++) {
-      const paletteIndex = pixels[i]!;
-      alpha[i] = paletteIndex < transparency.length ? transparency[paletteIndex]! : 255;
-    }
-    smaskData = await compressForPdf(alpha);
+  // tRNS for indexed images: one alpha byte per palette entry
+  const pixelCount = ihdr.width * ihdr.height;
+  const alpha = new Uint8Array(pixelCount);
+  for (let i = 0; i < pixelCount; i++) {
+    const paletteIndex = pixels[i]!;
+    alpha[i] = paletteIndex < transparency.length ? transparency[paletteIndex]! : 255;
   }
+  const smaskData = compressForPdf(alpha);
 
   return {
     width: ihdr.width,
@@ -647,8 +632,8 @@ async function embedIndexedPng(
     imageData,
     filter: 'FlateDecode',
     smaskData,
-    smaskBitsPerComponent: smaskData ? 8 : undefined,
-    hasTransparency: transparency !== undefined && transparency.length > 0,
+    smaskBitsPerComponent: 8,
+    hasTransparency: true,
   };
 }
 
@@ -660,57 +645,71 @@ async function embedIndexedPng(
  * Embed a direct (Grayscale or RGB) PNG without alpha.
  * @internal
  */
-async function embedDirectPng(
+function embedDirectPng(
   ihdr: IhdrData,
   idatData: Uint8Array,
   transparency: Uint8Array | undefined,
-): Promise<PngEmbedResult> {
-  // Decompress IDAT
-  const decompressed = await decompressZlib(idatData);
-
-  // Reconstruct filters
-  const bpp = bytesPerPixel(ihdr.colorType, ihdr.bitDepth);
-  const pixels = reconstructFilters(decompressed, ihdr.width, ihdr.height, bpp);
-
-  // Re-compress for PDF
-  const imageData = await compressForPdf(pixels);
-
+): PngEmbedResult {
   const colorSpace =
     ihdr.colorType === PngColorType.Grayscale ? 'DeviceGray' : 'DeviceRGB';
+  const colors = ihdr.colorType === PngColorType.Grayscale ? 1 : 3;
+
+  // Fast path: no transparency — pass IDAT data directly to PDF.
+  // PDF FlateDecode with Predictor 15 handles PNG row filters natively,
+  // so we skip the entire decompress → reconstruct → recompress cycle.
+  if (!transparency || transparency.length === 0) {
+    return {
+      width: ihdr.width,
+      height: ihdr.height,
+      bitsPerComponent: ihdr.bitDepth,
+      colorSpace,
+      imageData: idatData,
+      filter: 'FlateDecode',
+      hasTransparency: false,
+      decodeParms: {
+        predictor: 15,
+        columns: ihdr.width,
+        colors,
+        bitsPerComponent: ihdr.bitDepth,
+      },
+    };
+  }
+
+  // Slow path: transparency requires decompression to build SMask
+  const decompressed = decompressZlib(idatData);
+  const bpp = bytesPerPixel(ihdr.colorType, ihdr.bitDepth);
+  const pixels = reconstructFilters(decompressed, ihdr.width, ihdr.height, bpp);
+  const imageData = compressForPdf(pixels);
 
   // Handle tRNS chunk for simple transparency (key-based)
   let smaskData: Uint8Array | undefined;
-  if (transparency && transparency.length > 0) {
-    const pixelCount = ihdr.width * ihdr.height;
-    const alpha = new Uint8Array(pixelCount);
-    alpha.fill(255);
+  const pixelCount = ihdr.width * ihdr.height;
+  const alpha = new Uint8Array(pixelCount);
+  alpha.fill(255);
 
-    if (ihdr.colorType === PngColorType.Grayscale && transparency.length >= 2) {
-      // tRNS for grayscale: 2 bytes = gray value to make transparent
-      const trnsGray = (transparency[0]! << 8) | transparency[1]!;
-      for (let i = 0; i < pixelCount; i++) {
-        if (pixels[i] === trnsGray) {
-          alpha[i] = 0;
-        }
+  if (ihdr.colorType === PngColorType.Grayscale && transparency.length >= 2) {
+    const trnsGray = (transparency[0]! << 8) | transparency[1]!;
+    for (let i = 0; i < pixelCount; i++) {
+      if (pixels[i] === trnsGray) {
+        alpha[i] = 0;
       }
-      smaskData = await compressForPdf(alpha);
-    } else if (ihdr.colorType === PngColorType.RGB && transparency.length >= 6) {
-      // tRNS for RGB: 6 bytes = R,G,B values (2 bytes each) to make transparent
-      const trnsR = (transparency[0]! << 8) | transparency[1]!;
-      const trnsG = (transparency[2]! << 8) | transparency[3]!;
-      const trnsB = (transparency[4]! << 8) | transparency[5]!;
-      for (let i = 0; i < pixelCount; i++) {
-        const idx = i * 3;
-        if (
-          pixels[idx] === trnsR &&
-          pixels[idx + 1] === trnsG &&
-          pixels[idx + 2] === trnsB
-        ) {
-          alpha[i] = 0;
-        }
-      }
-      smaskData = await compressForPdf(alpha);
     }
+    smaskData = compressForPdf(alpha);
+  } else if (ihdr.colorType === PngColorType.RGB && transparency.length >= 6) {
+    const trnsR = (transparency[0]! << 8) | transparency[1]!;
+    const trnsG = (transparency[2]! << 8) | transparency[3]!;
+    const trnsB = (transparency[4]! << 8) | transparency[5]!;
+    for (let i = 0; i < pixelCount; i++) {
+      const idx = i * 3;
+      if (
+        pixels[idx] === trnsR &&
+        pixels[idx + 1] === trnsG &&
+        pixels[idx + 2] === trnsB
+      ) {
+        alpha[i] = 0;
+      }
+    }
+    smaskData = compressForPdf(alpha);
   }
 
   return {
@@ -722,7 +721,7 @@ async function embedDirectPng(
     filter: 'FlateDecode',
     smaskData,
     smaskBitsPerComponent: smaskData ? 8 : undefined,
-    hasTransparency: transparency !== undefined && transparency.length > 0,
+    hasTransparency: true,
   };
 }
 
@@ -735,14 +734,14 @@ async function embedDirectPng(
  * de-interlacing, or bit-depth normalization.
  * @internal
  */
-async function embedComplexPng(
+function embedComplexPng(
   ihdr: IhdrData,
   idatData: Uint8Array,
   palette: Uint8Array | undefined,
   transparency: Uint8Array | undefined,
-): Promise<PngEmbedResult> {
+): PngEmbedResult {
   // Decompress IDAT
-  const decompressed = await decompressZlib(idatData);
+  const decompressed = decompressZlib(idatData);
 
   const bpp = bytesPerPixel(ihdr.colorType, ihdr.bitDepth);
 
@@ -815,8 +814,8 @@ async function embedComplexPng(
   switch (ihdr.colorType) {
     case PngColorType.RGBA: {
       const { rgb, alpha } = separateRgba(pixels, ihdr.width, ihdr.height);
-      imageData = await compressForPdf(rgb);
-      smaskData = await compressForPdf(alpha);
+      imageData = compressForPdf(rgb);
+      smaskData = compressForPdf(alpha);
       colorSpace = 'DeviceRGB';
       bitsPerComponent = 8;
       break;
@@ -824,21 +823,21 @@ async function embedComplexPng(
 
     case PngColorType.GrayscaleAlpha: {
       const { gray, alpha } = separateGrayscaleAlpha(pixels, ihdr.width, ihdr.height);
-      imageData = await compressForPdf(gray);
-      smaskData = await compressForPdf(alpha);
+      imageData = compressForPdf(gray);
+      smaskData = compressForPdf(alpha);
       colorSpace = 'DeviceGray';
       bitsPerComponent = 8;
       break;
     }
 
     case PngColorType.Grayscale: {
-      imageData = await compressForPdf(pixels);
+      imageData = compressForPdf(pixels);
       colorSpace = 'DeviceGray';
       break;
     }
 
     case PngColorType.RGB: {
-      imageData = await compressForPdf(pixels);
+      imageData = compressForPdf(pixels);
       colorSpace = 'DeviceRGB';
       break;
     }
@@ -847,7 +846,7 @@ async function embedComplexPng(
       if (!palette) {
         throw new Error('Invalid PNG: indexed color type requires PLTE chunk');
       }
-      imageData = await compressForPdf(pixels);
+      imageData = compressForPdf(pixels);
       colorSpace = 'Indexed';
       bitsPerComponent = ihdr.bitDepth;
       break;
