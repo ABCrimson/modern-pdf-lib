@@ -20,6 +20,7 @@ export default defineConfig({
 
   lastUpdated: true,
   cleanUrls: true,
+  ignoreDeadLinks: [/\/api\//],
 
   themeConfig: {
     logo: '/logo.svg',
@@ -69,7 +70,7 @@ export default defineConfig({
     },
 
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/user/modern-pdf' },
+      { icon: 'github', link: 'https://github.com/ABCrimson/modern-pdf-lib' },
     ],
 
     search: {
@@ -77,13 +78,13 @@ export default defineConfig({
     },
 
     editLink: {
-      pattern: 'https://github.com/user/modern-pdf/edit/main/docs/:path',
+      pattern: 'https://github.com/ABCrimson/modern-pdf-lib/edit/main/docs/:path',
       text: 'Edit this page on GitHub',
     },
 
     footer: {
       message: 'Released under the MIT License.',
-      copyright: 'Copyright 2024-present Modern PDF Contributors',
+      copyright: 'Copyright 2026-present Modern PDF Contributors',
     },
   },
 });
