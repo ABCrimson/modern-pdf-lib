@@ -48,7 +48,7 @@ jobs:
           cache: npm
           registry-url: https://registry.npmjs.org
 
-      - run: npm ci
+      - run: npm ci --legacy-peer-deps --legacy-peer-deps
 
       - name: Build WASM crates
         run: bash scripts/build-wasm.sh --release
@@ -90,7 +90,7 @@ jobs:
           cache: npm
           registry-url: https://registry.npmjs.org
 
-      - run: npm ci
+      - run: npm ci --legacy-peer-deps
 
       - name: Download dist
         uses: actions/download-artifact@v4
@@ -170,7 +170,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
 
-      - run: npm ci
+      - run: npm ci --legacy-peer-deps
 
       - name: Generate API docs
         run: npm run docs:api

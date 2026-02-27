@@ -30,7 +30,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
 
-      - run: npm ci
+      - run: npm ci --legacy-peer-deps
 
       - name: TypeScript type-check
         run: npx tsc --noEmit
@@ -99,7 +99,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
 
-      - run: npm ci
+      - run: npm ci --legacy-peer-deps
 
       - name: Download WASM artifacts
         uses: actions/download-artifact@v4
@@ -132,7 +132,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
 
-      - run: npm ci
+      - run: npm ci --legacy-peer-deps
 
       - name: Download dist
         uses: actions/download-artifact@v4
@@ -172,7 +172,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
 
-      - run: npm ci
+      - run: npm ci --legacy-peer-deps
 
       - name: Download dist
         uses: actions/download-artifact@v4
@@ -204,7 +204,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
 
-      - run: npm ci
+      - run: npm ci --legacy-peer-deps
 
       - name: Download dist
         uses: actions/download-artifact@v4
@@ -248,7 +248,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
 
-      - run: npm ci
+      - run: npm ci --legacy-peer-deps
 
       - name: Download dist
         uses: actions/download-artifact@v4
@@ -287,7 +287,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
 
-      - run: npm ci
+      - run: npm ci --legacy-peer-deps
 
       - name: Download dist
         uses: actions/download-artifact@v4
