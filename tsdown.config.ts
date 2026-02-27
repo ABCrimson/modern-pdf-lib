@@ -9,7 +9,9 @@ export default defineConfig({
   splitting: true,
   treeshake: true,
   sourcemap: true,
-  external: ['node:fs/promises', 'node:path', 'node:worker_threads'],
+  deps: {
+    neverBundle: ['node:fs/promises', 'node:path', 'node:worker_threads'],
+  },
   esbuildOptions: {
     platform: 'neutral',
   },

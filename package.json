@@ -86,7 +86,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ABCrimson/modern-pdf-lib.git"
+    "url": "git+https://github.com/ABCrimson/modern-pdf-lib.git"
   },
   "homepage": "https://github.com/ABCrimson/modern-pdf-lib#readme",
   "bugs": {

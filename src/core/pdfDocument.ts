@@ -57,6 +57,7 @@ import { PdfViewerPreferences } from '../metadata/pdfViewerPreferences.js';
 import { PdfStructureTree } from '../accessibility/structureTree.js';
 import type { AccessibilityIssue } from '../accessibility/structureTree.js';
 import { checkAccessibility } from '../accessibility/accessibilityChecker.js';
+import { copyPagesToTarget } from './documentMerge.js';
 import { signPdf, getSignatures } from '../signature/signatureHandler.js';
 import type { SignOptions, PdfSignatureInfo } from '../signature/signatureHandler.js';
 import { verifySignatures } from '../signature/signatureVerifier.js';
@@ -465,7 +466,6 @@ export class PdfDocument {
     sourceDoc: PdfDocument,
     indices: number[],
   ): Promise<PdfPage[]> {
-    const { copyPagesToTarget } = await import('./documentMerge.js');
     return copyPagesToTarget(sourceDoc, this, indices);
   }
 
