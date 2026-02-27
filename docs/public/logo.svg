@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none">
+  <defs>
+    <linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7C3AED"/>
+      <stop offset="100%" stop-color="#06B6D4"/>
+    </linearGradient>
+    <linearGradient id="g2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#A855F7"/>
+      <stop offset="100%" stop-color="#22D3EE"/>
+    </linearGradient>
+  </defs>
+  <!-- Document body -->
+  <path d="M28 12h50l22 22v82a8 8 0 0 1-8 8H28a8 8 0 0 1-8-8V20a8 8 0 0 1 8-8z" fill="url(#g1)" opacity="0.9"/>
+  <!-- Folded corner -->
+  <path d="M78 12v22h22" fill="none" stroke="white" stroke-width="2" stroke-opacity="0.4"/>
+  <path d="M78 12l22 22H86a8 8 0 0 1-8-8V12z" fill="white" fill-opacity="0.15"/>
+  <!-- Speed lines -->
+  <rect x="36" y="52" width="40" height="3" rx="1.5" fill="white" fill-opacity="0.8"/>
+  <rect x="36" y="62" width="32" height="3" rx="1.5" fill="white" fill-opacity="0.5"/>
+  <rect x="36" y="72" width="36" height="3" rx="1.5" fill="white" fill-opacity="0.35"/>
+  <!-- Lightning bolt (WASM speed) -->
+  <path d="M72 44l-8 14h6l-2 14 10-16h-6l4-12z" fill="url(#g2)" stroke="white" stroke-width="0.5" stroke-opacity="0.3"/>
+</svg>

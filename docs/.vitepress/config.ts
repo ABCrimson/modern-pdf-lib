@@ -2,20 +2,48 @@ import { defineConfig } from 'vitepress';
 
 export default defineConfig({
   title: 'Modern PDF',
-  description: 'A modern, WASM-accelerated PDF creation engine',
+  description:
+    'A modern, WASM-accelerated PDF creation engine for every JavaScript runtime',
 
   head: [
     ['link', { rel: 'icon', type: 'image/svg+xml', href: '/logo.svg' }],
-    ['meta', { name: 'theme-color', content: '#3451b2' }],
+    ['meta', { name: 'theme-color', content: '#7C3AED' }],
     [
       'meta',
       {
-        name: 'og:description',
+        property: 'og:title',
+        content: 'Modern PDF — WASM-Accelerated PDF Creation',
+      },
+    ],
+    [
+      'meta',
+      {
+        property: 'og:description',
         content:
           'A modern, WASM-accelerated PDF creation engine for every JavaScript runtime',
       },
     ],
-    ['meta', { name: 'og:type', content: 'website' }],
+    ['meta', { property: 'og:type', content: 'website' }],
+    [
+      'meta',
+      {
+        property: 'og:url',
+        content: 'https://abcrimson.github.io/modern-pdf-lib/',
+      },
+    ],
+    ['meta', { name: 'twitter:card', content: 'summary_large_image' }],
+    [
+      'link',
+      { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
+    ],
+    [
+      'link',
+      {
+        rel: 'preconnect',
+        href: 'https://fonts.gstatic.com',
+        crossorigin: '',
+      },
+    ],
   ],
 
   lastUpdated: true,
@@ -24,12 +52,25 @@ export default defineConfig({
 
   themeConfig: {
     logo: '/logo.svg',
+    siteTitle: 'Modern PDF',
 
     nav: [
-      { text: 'Home', link: '/' },
       { text: 'Guide', link: '/getting-started' },
-      { text: 'API Reference', link: '/api/' },
+      { text: 'API', link: '/api/' },
       { text: 'Migration', link: '/migration/from-pdf-lib' },
+      {
+        text: 'v0.11.0',
+        items: [
+          {
+            text: 'Changelog',
+            link: 'https://github.com/ABCrimson/modern-pdf-lib/blob/main/CHANGELOG.md',
+          },
+          {
+            text: 'npm',
+            link: 'https://www.npmjs.com/package/modern-pdf-lib',
+          },
+        ],
+      },
     ],
 
     sidebar: {
@@ -54,9 +95,7 @@ export default defineConfig({
       '/api/': [
         {
           text: 'API Reference',
-          items: [
-            { text: 'Overview', link: '/api/' },
-          ],
+          items: [{ text: 'Overview', link: '/api/' }],
         },
       ],
       '/migration/': [
@@ -70,7 +109,11 @@ export default defineConfig({
     },
 
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/ABCrimson/modern-pdf-lib' },
+      {
+        icon: 'github',
+        link: 'https://github.com/ABCrimson/modern-pdf-lib',
+      },
+      { icon: 'npm', link: 'https://www.npmjs.com/package/modern-pdf-lib' },
     ],
 
     search: {
@@ -78,7 +121,8 @@ export default defineConfig({
     },
 
     editLink: {
-      pattern: 'https://github.com/ABCrimson/modern-pdf-lib/edit/main/docs/:path',
+      pattern:
+        'https://github.com/ABCrimson/modern-pdf-lib/edit/main/docs/:path',
       text: 'Edit this page on GitHub',
     },
 
