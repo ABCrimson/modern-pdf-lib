@@ -8,6 +8,6 @@
 
 > **PdfALevel** = `"1b"` \| `"2b"` \| `"3b"` \| `"1a"` \| `"2a"` \| `"3a"` \| `"2u"` \| `"3u"`
 
-Defined in: [src/compliance/pdfA.ts:30](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/compliance/pdfA.ts#L30)
+Defined in: [src/compliance/pdfA.ts:30](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/compliance/pdfA.ts#L30)
 
 PDF/A conformance level.

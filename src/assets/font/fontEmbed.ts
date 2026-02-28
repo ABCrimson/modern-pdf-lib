@@ -178,7 +178,7 @@ function extractMetricsWasm(fontData: Uint8Array): FontMetrics {
  * Tracks which glyphs have been used so that subsetting can be
  * performed at save time, and provides text measurement methods.
  *
- * Create via {@link embedFont}.
+ * Create via `PdfDocument.embedFont()`.
  */
 export class EmbeddedFont {
   /** The raw font file bytes. */

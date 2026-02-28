@@ -8,7 +8,7 @@
 
 > **layoutSinglelineText**(`text`, `options`): [`LayoutSinglelineResult`](../interfaces/LayoutSinglelineResult.md)
 
-Defined in: [src/core/layout.ts:209](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/layout.ts#L209)
+Defined in: [src/core/layout.ts:209](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/layout.ts#L209)
 
 Layout a single line of text with optional alignment within bounds.
 

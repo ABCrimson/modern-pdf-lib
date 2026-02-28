@@ -6,7 +6,7 @@
 
 # Interface: DrawPageOptions
 
-Defined in: [src/core/pdfEmbed.ts:77](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/pdfEmbed.ts#L77)
+Defined in: [src/core/pdfEmbed.ts:77](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/pdfEmbed.ts#L77)
 
 Options for [PdfPage.drawPage](../classes/PdfPage.md#drawpage).
 
@@ -16,7 +16,7 @@ Options for [PdfPage.drawPage](../classes/PdfPage.md#drawpage).
 
 > `optional` **blendMode**: [`BlendMode`](../type-aliases/BlendMode.md)
 
-Defined in: [src/core/pdfEmbed.ts:91](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/pdfEmbed.ts#L91)
+Defined in: [src/core/pdfEmbed.ts:91](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/pdfEmbed.ts#L91)
 
 Blend mode for compositing.
 
@@ -26,7 +26,7 @@ Blend mode for compositing.
 
 > `optional` **height**: `number`
 
-Defined in: [src/core/pdfEmbed.ts:85](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/pdfEmbed.ts#L85)
+Defined in: [src/core/pdfEmbed.ts:85](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/pdfEmbed.ts#L85)
 
 Rendered height (defaults to the embedded page's original height).
 
@@ -36,7 +36,7 @@ Rendered height (defaults to the embedded page's original height).
 
 > `optional` **opacity**: `number`
 
-Defined in: [src/core/pdfEmbed.ts:89](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/pdfEmbed.ts#L89)
+Defined in: [src/core/pdfEmbed.ts:89](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/pdfEmbed.ts#L89)
 
 Opacity `[0, 1]`.
 
@@ -46,7 +46,7 @@ Opacity `[0, 1]`.
 
 > `optional` **rotate**: `object`
 
-Defined in: [src/core/pdfEmbed.ts:87](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/pdfEmbed.ts#L87)
+Defined in: [src/core/pdfEmbed.ts:87](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/pdfEmbed.ts#L87)
 
 Rotation angle.
 
@@ -64,7 +64,7 @@ Rotation angle.
 
 > `optional` **width**: `number`
 
-Defined in: [src/core/pdfEmbed.ts:83](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/pdfEmbed.ts#L83)
+Defined in: [src/core/pdfEmbed.ts:83](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/pdfEmbed.ts#L83)
 
 Rendered width (defaults to the embedded page's original width).
 
@@ -74,7 +74,7 @@ Rendered width (defaults to the embedded page's original width).
 
 > `optional` **x**: `number`
 
-Defined in: [src/core/pdfEmbed.ts:79](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/pdfEmbed.ts#L79)
+Defined in: [src/core/pdfEmbed.ts:79](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/pdfEmbed.ts#L79)
 
 X coordinate of the lower-left corner.
 
@@ -84,7 +84,7 @@ X coordinate of the lower-left corner.
 
 > `optional` **xSkew**: `object`
 
-Defined in: [src/core/pdfEmbed.ts:93](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/pdfEmbed.ts#L93)
+Defined in: [src/core/pdfEmbed.ts:93](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/pdfEmbed.ts#L93)
 
 Horizontal skew angle.
 
@@ -102,7 +102,7 @@ Horizontal skew angle.
 
 > `optional` **y**: `number`
 
-Defined in: [src/core/pdfEmbed.ts:81](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/pdfEmbed.ts#L81)
+Defined in: [src/core/pdfEmbed.ts:81](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/pdfEmbed.ts#L81)
 
 Y coordinate of the lower-left corner.
 
@@ -112,7 +112,7 @@ Y coordinate of the lower-left corner.
 
 > `optional` **ySkew**: `object`
 
-Defined in: [src/core/pdfEmbed.ts:95](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/pdfEmbed.ts#L95)
+Defined in: [src/core/pdfEmbed.ts:95](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/pdfEmbed.ts#L95)
 
 Vertical skew angle.
 

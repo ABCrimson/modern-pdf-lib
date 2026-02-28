@@ -6,7 +6,7 @@
 
 # Interface: ImageRef
 
-Defined in: [src/core/pdfPage.ts:478](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/pdfPage.ts#L478)
+Defined in: [src/core/pdfPage.ts:478](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/pdfPage.ts#L478)
 
 Opaque handle for an image that has been embedded in the document.
 
@@ -16,7 +16,7 @@ Opaque handle for an image that has been embedded in the document.
 
 > `readonly` **height**: `number`
 
-Defined in: [src/core/pdfPage.ts:486](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/pdfPage.ts#L486)
+Defined in: [src/core/pdfPage.ts:486](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/pdfPage.ts#L486)
 
 Intrinsic height in pixels.
 
@@ -26,7 +26,7 @@ Intrinsic height in pixels.
 
 > `readonly` **name**: `string`
 
-Defined in: [src/core/pdfPage.ts:480](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/pdfPage.ts#L480)
+Defined in: [src/core/pdfPage.ts:480](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/pdfPage.ts#L480)
 
 Resource name used in content-stream operators (e.g. `Im1`).
 
@@ -36,7 +36,7 @@ Resource name used in content-stream operators (e.g. `Im1`).
 
 > `readonly` **ref**: [`PdfRef`](../classes/PdfRef.md)
 
-Defined in: [src/core/pdfPage.ts:482](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/pdfPage.ts#L482)
+Defined in: [src/core/pdfPage.ts:482](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/pdfPage.ts#L482)
 
 Indirect reference to the image XObject.
 
@@ -46,7 +46,7 @@ Indirect reference to the image XObject.
 
 > `readonly` **width**: `number`
 
-Defined in: [src/core/pdfPage.ts:484](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/pdfPage.ts#L484)
+Defined in: [src/core/pdfPage.ts:484](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/pdfPage.ts#L484)
 
 Intrinsic width in pixels.
 
@@ -56,7 +56,7 @@ Intrinsic width in pixels.
 
 > **scale**(`factor`): `object`
 
-Defined in: [src/core/pdfPage.ts:492](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/pdfPage.ts#L492)
+Defined in: [src/core/pdfPage.ts:492](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/pdfPage.ts#L492)
 
 Return a new `{ width, height }` scaled by the given factor.
 
@@ -86,7 +86,7 @@ Scale multiplier (e.g. `0.5` for half size).
 
 > **scaleToFit**(`maxWidth`, `maxHeight`): `object`
 
-Defined in: [src/core/pdfPage.ts:500](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/pdfPage.ts#L500)
+Defined in: [src/core/pdfPage.ts:500](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/pdfPage.ts#L500)
 
 Return a new `{ width, height }` that fits within the given bounds
 while preserving the aspect ratio.

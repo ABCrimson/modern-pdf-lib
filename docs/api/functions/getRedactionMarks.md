@@ -6,9 +6,9 @@
 
 # Function: getRedactionMarks()
 
-> **getRedactionMarks**(`page`): readonly `RedactionMark`[]
+> **getRedactionMarks**(`page`): readonly [`RedactionMark`](../interfaces/RedactionMark.md)[]
 
-Defined in: [src/core/redaction.ts:158](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/redaction.ts#L158)
+Defined in: [src/core/redaction.ts:158](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/redaction.ts#L158)
 
 Get the pending redaction marks for a page.
 
@@ -22,6 +22,6 @@ The page to query.
 
 ## Returns
 
-readonly `RedactionMark`[]
+readonly [`RedactionMark`](../interfaces/RedactionMark.md)[]
 
 An array of redaction marks, or an empty array.

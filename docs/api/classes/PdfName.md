@@ -6,7 +6,7 @@
 
 # Class: PdfName
 
-Defined in: [src/core/pdfObjects.ts:180](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/pdfObjects.ts#L180)
+Defined in: [src/core/pdfObjects.ts:180](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/pdfObjects.ts#L180)
 
 A PDF name object — e.g. `/Type`, `/Page`.
 
@@ -19,7 +19,7 @@ printable ASCII range (33–126) and `#` are encoded as `#XX`.
 
 > `readonly` **value**: `string`
 
-Defined in: [src/core/pdfObjects.ts:189](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/pdfObjects.ts#L189)
+Defined in: [src/core/pdfObjects.ts:189](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/pdfObjects.ts#L189)
 
 The name value *including* the leading `/`.
 
@@ -29,7 +29,7 @@ The name value *including* the leading `/`.
 
 > **serialize**(`writer`): `void`
 
-Defined in: [src/core/pdfObjects.ts:204](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/pdfObjects.ts#L204)
+Defined in: [src/core/pdfObjects.ts:204](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/pdfObjects.ts#L204)
 
 #### Parameters
 
@@ -47,7 +47,7 @@ Defined in: [src/core/pdfObjects.ts:204](https://github.com/ABCrimson/modern-pdf
 
 > `static` **of**(`name`): `PdfName`
 
-Defined in: [src/core/pdfObjects.ts:193](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/pdfObjects.ts#L193)
+Defined in: [src/core/pdfObjects.ts:193](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/pdfObjects.ts#L193)
 
 Create or retrieve a cached `PdfName`.
 

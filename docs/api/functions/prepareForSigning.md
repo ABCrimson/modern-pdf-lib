@@ -8,7 +8,7 @@
 
 > **prepareForSigning**(`pdfBytes`, `signatureFieldName`, `placeholderSize?`): `object`
 
-Defined in: [src/signature/byteRange.ts:184](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/signature/byteRange.ts#L184)
+Defined in: [src/signature/byteRange.ts:184](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/signature/byteRange.ts#L184)
 
 Prepare a PDF for signing by appending a signature dictionary
 via incremental update.

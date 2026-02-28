@@ -6,7 +6,7 @@
 
 # Class: PdfDropdownField
 
-Defined in: [src/form/fields/dropdownField.ts:31](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/form/fields/dropdownField.ts#L31)
+Defined in: [src/form/fields/dropdownField.ts:31](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/form/fields/dropdownField.ts#L31)
 
 A PDF dropdown (combo box) field (/FT /Ch with Combo flag).
 
@@ -23,7 +23,7 @@ Optionally editable (bit 18 of /Ff).
 
 > **new PdfDropdownField**(`name`, `dict`, `widgetDict`, `parentNames?`): `PdfDropdownField`
 
-Defined in: [src/form/pdfField.ts:175](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/form/pdfField.ts#L175)
+Defined in: [src/form/pdfField.ts:175](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/form/pdfField.ts#L175)
 
 #### Parameters
 
@@ -57,7 +57,7 @@ Defined in: [src/form/pdfField.ts:175](https://github.com/ABCrimson/modern-pdf-l
 
 > `protected` `readonly` **dict**: [`PdfDict`](PdfDict.md)
 
-Defined in: [src/form/pdfField.ts:164](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/form/pdfField.ts#L164)
+Defined in: [src/form/pdfField.ts:164](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/form/pdfField.ts#L164)
 
 The underlying field dictionary (may contain both field and widget
 entries for simple one-widget fields).
@@ -72,7 +72,7 @@ entries for simple one-widget fields).
 
 > `readonly` **fieldType**: [`FieldType`](../type-aliases/FieldType.md) = `'dropdown'`
 
-Defined in: [src/form/fields/dropdownField.ts:32](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/form/fields/dropdownField.ts#L32)
+Defined in: [src/form/fields/dropdownField.ts:32](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/form/fields/dropdownField.ts#L32)
 
 Discriminator for the concrete field type.
 
@@ -86,7 +86,7 @@ Discriminator for the concrete field type.
 
 > `readonly` **name**: `string`
 
-Defined in: [src/form/pdfField.ts:158](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/form/pdfField.ts#L158)
+Defined in: [src/form/pdfField.ts:158](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/form/pdfField.ts#L158)
 
 The fully-qualified field name.
 
@@ -100,7 +100,7 @@ The fully-qualified field name.
 
 > `protected` `readonly` **parentNames**: `string`[]
 
-Defined in: [src/form/pdfField.ts:173](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/form/pdfField.ts#L173)
+Defined in: [src/form/pdfField.ts:173](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/form/pdfField.ts#L173)
 
 Parent field dictionary chain for building full names.
 
@@ -114,7 +114,7 @@ Parent field dictionary chain for building full names.
 
 > `protected` `readonly` **widgetDict**: [`PdfDict`](PdfDict.md)
 
-Defined in: [src/form/pdfField.ts:170](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/form/pdfField.ts#L170)
+Defined in: [src/form/pdfField.ts:170](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/form/pdfField.ts#L170)
 
 The widget annotation dictionary. For merged field+widget dicts,
 this is the same object as `dict`.
@@ -129,7 +129,7 @@ this is the same object as `dict`.
 
 > **addToPage**(`page`): `void`
 
-Defined in: [src/form/pdfField.ts:309](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/form/pdfField.ts#L309)
+Defined in: [src/form/pdfField.ts:309](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/form/pdfField.ts#L309)
 
 Add this field's widget annotation to a page.
 
@@ -159,7 +159,7 @@ A page that implements [WidgetAnnotationHost](../interfaces/WidgetAnnotationHost
 
 > **disableExporting**(): `void`
 
-Defined in: [src/form/pdfField.ts:271](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/form/pdfField.ts#L271)
+Defined in: [src/form/pdfField.ts:271](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/form/pdfField.ts#L271)
 
 Disable exporting this field (set the NoExport flag).
 
@@ -177,7 +177,7 @@ Disable exporting this field (set the NoExport flag).
 
 > **enableExporting**(): `void`
 
-Defined in: [src/form/pdfField.ts:266](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/form/pdfField.ts#L266)
+Defined in: [src/form/pdfField.ts:266](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/form/pdfField.ts#L266)
 
 Enable exporting this field (clear the NoExport flag).
 
@@ -195,7 +195,7 @@ Enable exporting this field (clear the NoExport flag).
 
 > **generateAppearance**(): [`PdfStream`](PdfStream.md)
 
-Defined in: [src/form/fields/dropdownField.ts:119](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/form/fields/dropdownField.ts#L119)
+Defined in: [src/form/fields/dropdownField.ts:119](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/form/fields/dropdownField.ts#L119)
 
 Generate the appearance stream for this dropdown.
 
@@ -213,7 +213,7 @@ Generate the appearance stream for this dropdown.
 
 > `protected` **getFieldFlags**(): `number`
 
-Defined in: [src/form/pdfField.ts:211](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/form/pdfField.ts#L211)
+Defined in: [src/form/pdfField.ts:211](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/form/pdfField.ts#L211)
 
 Get the raw /Ff (field flags) integer value.
 
@@ -231,7 +231,7 @@ Get the raw /Ff (field flags) integer value.
 
 > **getFullName**(): `string`
 
-Defined in: [src/form/pdfField.ts:201](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/form/pdfField.ts#L201)
+Defined in: [src/form/pdfField.ts:201](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/form/pdfField.ts#L201)
 
 Get the fully qualified field name (Parent.Child.Name format).
 Per PDF spec SS12.7.3.2, the full name is formed by concatenating
@@ -251,7 +251,7 @@ ancestor /T values with periods.
 
 > **getName**(): `string`
 
-Defined in: [src/form/pdfField.ts:192](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/form/pdfField.ts#L192)
+Defined in: [src/form/pdfField.ts:192](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/form/pdfField.ts#L192)
 
 Get the partial field name (/T entry).
 
@@ -269,7 +269,7 @@ Get the partial field name (/T entry).
 
 > **getOptions**(): `string`[]
 
-Defined in: [src/form/fields/dropdownField.ts:70](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/form/fields/dropdownField.ts#L70)
+Defined in: [src/form/fields/dropdownField.ts:70](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/form/fields/dropdownField.ts#L70)
 
 Get the list of options.
 
@@ -287,7 +287,7 @@ value. We return the display values (or export values if no display).
 
 > **getRect**(): \[`number`, `number`, `number`, `number`\]
 
-Defined in: [src/form/pdfField.ts:283](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/form/pdfField.ts#L283)
+Defined in: [src/form/pdfField.ts:283](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/form/pdfField.ts#L283)
 
 Get the field's widget rectangle as `[x1, y1, x2, y2]`.
 The /Rect entry comes from the widget annotation dictionary.
@@ -306,7 +306,7 @@ The /Rect entry comes from the widget annotation dictionary.
 
 > **getSelected**(): `string`
 
-Defined in: [src/form/fields/dropdownField.ts:39](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/form/fields/dropdownField.ts#L39)
+Defined in: [src/form/fields/dropdownField.ts:39](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/form/fields/dropdownField.ts#L39)
 
 Get the currently selected value.
 
@@ -320,7 +320,7 @@ Get the currently selected value.
 
 > **getValue**(): `string`
 
-Defined in: [src/form/fields/dropdownField.ts:50](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/form/fields/dropdownField.ts#L50)
+Defined in: [src/form/fields/dropdownField.ts:50](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/form/fields/dropdownField.ts#L50)
 
 Alias for getSelected().
 
@@ -338,7 +338,7 @@ Alias for getSelected().
 
 > `protected` **hasFlag**(`flag`): `boolean`
 
-Defined in: [src/form/pdfField.ts:221](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/form/pdfField.ts#L221)
+Defined in: [src/form/pdfField.ts:221](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/form/pdfField.ts#L221)
 
 Check if a specific flag bit is set.
 
@@ -362,7 +362,7 @@ Check if a specific flag bit is set.
 
 > **isEditable**(): `boolean`
 
-Defined in: [src/form/fields/dropdownField.ts:105](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/form/fields/dropdownField.ts#L105)
+Defined in: [src/form/fields/dropdownField.ts:105](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/form/fields/dropdownField.ts#L105)
 
 Whether the dropdown allows manual text entry.
 
@@ -376,7 +376,7 @@ Whether the dropdown allows manual text entry.
 
 > **isExported**(): `boolean`
 
-Defined in: [src/form/pdfField.ts:261](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/form/pdfField.ts#L261)
+Defined in: [src/form/pdfField.ts:261](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/form/pdfField.ts#L261)
 
 Whether the field is exported (inverse of NoExport flag).
 
@@ -394,7 +394,7 @@ Whether the field is exported (inverse of NoExport flag).
 
 > **isNoExport**(): `boolean`
 
-Defined in: [src/form/pdfField.ts:256](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/form/pdfField.ts#L256)
+Defined in: [src/form/pdfField.ts:256](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/form/pdfField.ts#L256)
 
 Whether the field should not be exported.
 
@@ -412,7 +412,7 @@ Whether the field should not be exported.
 
 > **isReadOnly**(): `boolean`
 
-Defined in: [src/form/pdfField.ts:236](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/form/pdfField.ts#L236)
+Defined in: [src/form/pdfField.ts:236](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/form/pdfField.ts#L236)
 
 Whether the field is read-only.
 
@@ -430,7 +430,7 @@ Whether the field is read-only.
 
 > **isRequired**(): `boolean`
 
-Defined in: [src/form/pdfField.ts:246](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/form/pdfField.ts#L246)
+Defined in: [src/form/pdfField.ts:246](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/form/pdfField.ts#L246)
 
 Whether the field is required.
 
@@ -448,7 +448,7 @@ Whether the field is required.
 
 > **select**(`value`): `void`
 
-Defined in: [src/form/fields/dropdownField.ts:44](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/form/fields/dropdownField.ts#L44)
+Defined in: [src/form/fields/dropdownField.ts:44](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/form/fields/dropdownField.ts#L44)
 
 Select a value from the options.
 
@@ -468,7 +468,7 @@ Select a value from the options.
 
 > **setEditable**(`editable`): `void`
 
-Defined in: [src/form/fields/dropdownField.ts:110](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/form/fields/dropdownField.ts#L110)
+Defined in: [src/form/fields/dropdownField.ts:110](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/form/fields/dropdownField.ts#L110)
 
 Set whether the dropdown allows manual text entry.
 
@@ -488,7 +488,7 @@ Set whether the dropdown allows manual text entry.
 
 > `protected` **setFieldFlags**(`flags`): `void`
 
-Defined in: [src/form/pdfField.ts:216](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/form/pdfField.ts#L216)
+Defined in: [src/form/pdfField.ts:216](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/form/pdfField.ts#L216)
 
 Set the raw /Ff (field flags) integer value.
 
@@ -512,7 +512,7 @@ Set the raw /Ff (field flags) integer value.
 
 > `protected` **setFlag**(`flag`, `on`): `void`
 
-Defined in: [src/form/pdfField.ts:226](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/form/pdfField.ts#L226)
+Defined in: [src/form/pdfField.ts:226](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/form/pdfField.ts#L226)
 
 Set or clear a specific flag bit.
 
@@ -540,7 +540,7 @@ Set or clear a specific flag bit.
 
 > **setOptions**(`options`): `void`
 
-Defined in: [src/form/fields/dropdownField.ts:94](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/form/fields/dropdownField.ts#L94)
+Defined in: [src/form/fields/dropdownField.ts:94](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/form/fields/dropdownField.ts#L94)
 
 Set the list of options.
 
@@ -560,7 +560,7 @@ Set the list of options.
 
 > **setReadOnly**(`readOnly`): `void`
 
-Defined in: [src/form/pdfField.ts:241](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/form/pdfField.ts#L241)
+Defined in: [src/form/pdfField.ts:241](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/form/pdfField.ts#L241)
 
 Set the read-only flag.
 
@@ -584,7 +584,7 @@ Set the read-only flag.
 
 > **setRequired**(`required`): `void`
 
-Defined in: [src/form/pdfField.ts:251](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/form/pdfField.ts#L251)
+Defined in: [src/form/pdfField.ts:251](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/form/pdfField.ts#L251)
 
 Set the required flag.
 
@@ -608,7 +608,7 @@ Set the required flag.
 
 > **setValue**(`value`): `void`
 
-Defined in: [src/form/fields/dropdownField.ts:55](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/form/fields/dropdownField.ts#L55)
+Defined in: [src/form/fields/dropdownField.ts:55](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/form/fields/dropdownField.ts#L55)
 
 Alias for select().
 

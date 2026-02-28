@@ -8,7 +8,7 @@
 
 > `const` **PageSizes**: `object`
 
-Defined in: [src/core/pdfPage.ts:96](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/pdfPage.ts#L96)
+Defined in: [src/core/pdfPage.ts:96](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/pdfPage.ts#L96)
 
 Pre-defined page sizes as `[width, height]` tuples in PDF points.
 

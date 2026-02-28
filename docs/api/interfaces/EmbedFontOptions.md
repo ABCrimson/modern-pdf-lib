@@ -6,7 +6,7 @@
 
 # Interface: EmbedFontOptions
 
-Defined in: [src/core/pdfDocument.ts:108](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/pdfDocument.ts#L108)
+Defined in: [src/core/pdfDocument.ts:108](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/pdfDocument.ts#L108)
 
 Options for font embedding.
 
@@ -16,7 +16,7 @@ Options for font embedding.
 
 > `optional` **customName**: `string`
 
-Defined in: [src/core/pdfDocument.ts:114](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/pdfDocument.ts#L114)
+Defined in: [src/core/pdfDocument.ts:114](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/pdfDocument.ts#L114)
 
 Custom name to use in the font dictionary's /BaseFont instead of the font's PostScript name.
 
@@ -26,7 +26,7 @@ Custom name to use in the font dictionary's /BaseFont instead of the font's Post
 
 > `optional` **features**: `Record`\<`string`, `boolean`\>
 
-Defined in: [src/core/pdfDocument.ts:112](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/pdfDocument.ts#L112)
+Defined in: [src/core/pdfDocument.ts:112](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/pdfDocument.ts#L112)
 
 OpenType feature flags. e.g., { kern: true, liga: true }.
 
@@ -36,6 +36,6 @@ OpenType feature flags. e.g., { kern: true, liga: true }.
 
 > `optional` **subset**: `boolean`
 
-Defined in: [src/core/pdfDocument.ts:110](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/pdfDocument.ts#L110)
+Defined in: [src/core/pdfDocument.ts:110](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/pdfDocument.ts#L110)
 
 Whether to subset the font to reduce file size. Default: true.

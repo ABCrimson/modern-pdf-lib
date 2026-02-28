@@ -8,7 +8,7 @@
 
 > **buildCatalog**(`pagesRef`, `registry`, `options?`): [`PdfRef`](../classes/PdfRef.md)
 
-Defined in: [src/core/pdfCatalog.ts:273](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/pdfCatalog.ts#L273)
+Defined in: [src/core/pdfCatalog.ts:273](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/pdfCatalog.ts#L273)
 
 Build the `/Catalog` dictionary.
 

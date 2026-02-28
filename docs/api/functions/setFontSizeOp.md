@@ -8,7 +8,7 @@
 
 > **setFontSizeOp**(`fontName`, `size`): `string`
 
-Defined in: [src/core/operators/text.ts:83](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/operators/text.ts#L83)
+Defined in: [src/core/operators/text.ts:83](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/operators/text.ts#L83)
 
 Set the font size only — alias for `setFont` when the font has already
 been selected.

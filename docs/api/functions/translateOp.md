@@ -8,7 +8,7 @@
 
 > **translateOp**(`tx`, `ty`): `string`
 
-Defined in: [src/core/operators/state.ts:130](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/operators/state.ts#L130)
+Defined in: [src/core/operators/state.ts:130](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/operators/state.ts#L130)
 
 Produce a `cm` operator that applies a **translation**.
 

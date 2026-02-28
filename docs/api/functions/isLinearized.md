@@ -8,7 +8,7 @@
 
 > **isLinearized**(`pdfBytes`): `boolean`
 
-Defined in: [src/core/linearization.ts:58](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/linearization.ts#L58)
+Defined in: [src/core/linearization.ts:58](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/linearization.ts#L58)
 
 Check if a PDF is linearized.
 

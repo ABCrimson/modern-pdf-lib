@@ -23,7 +23,7 @@ export type { LoadPdfOptions } from './documentParser.js';
 // ---------------------------------------------------------------------------
 
 export { extractText, extractTextWithPositions } from './textExtractor.js';
-export type { TextItem } from './textExtractor.js';
+export type { TextItem, TextExtractionOptions } from './textExtractor.js';
 
 // ---------------------------------------------------------------------------
 // Content stream parsing

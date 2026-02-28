@@ -1515,7 +1515,7 @@ function undoPngPredictorSync(data: Uint8Array, columns: number): Uint8Array {
  * string.
  *
  * This is the primary entry point for parsing existing PDFs. It creates
- * a {@link PdfDocumentParser}, runs the full parse pipeline, and returns
+ * a `PdfDocumentParser`, runs the full parse pipeline, and returns
  * a populated {@link PdfDocument}.
  *
  * @param data     The PDF data as a `Uint8Array`, `ArrayBuffer`, or a

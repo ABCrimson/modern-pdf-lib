@@ -6,7 +6,7 @@
 
 # Class: PdfSignatureField
 
-Defined in: [src/form/fields/signatureField.ts:29](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/form/fields/signatureField.ts#L29)
+Defined in: [src/form/fields/signatureField.ts:29](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/form/fields/signatureField.ts#L29)
 
 A PDF signature form field (/FT /Sig).
 
@@ -24,7 +24,7 @@ field is signed, but does not implement signing (see Phase 6).
 
 > **new PdfSignatureField**(`name`, `dict`, `widgetDict`, `parentNames?`): `PdfSignatureField`
 
-Defined in: [src/form/pdfField.ts:175](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/form/pdfField.ts#L175)
+Defined in: [src/form/pdfField.ts:175](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/form/pdfField.ts#L175)
 
 #### Parameters
 
@@ -58,7 +58,7 @@ Defined in: [src/form/pdfField.ts:175](https://github.com/ABCrimson/modern-pdf-l
 
 > `protected` `readonly` **dict**: [`PdfDict`](PdfDict.md)
 
-Defined in: [src/form/pdfField.ts:164](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/form/pdfField.ts#L164)
+Defined in: [src/form/pdfField.ts:164](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/form/pdfField.ts#L164)
 
 The underlying field dictionary (may contain both field and widget
 entries for simple one-widget fields).
@@ -73,7 +73,7 @@ entries for simple one-widget fields).
 
 > `readonly` **fieldType**: [`FieldType`](../type-aliases/FieldType.md) = `'signature'`
 
-Defined in: [src/form/fields/signatureField.ts:30](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/form/fields/signatureField.ts#L30)
+Defined in: [src/form/fields/signatureField.ts:30](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/form/fields/signatureField.ts#L30)
 
 Discriminator for the concrete field type.
 
@@ -87,7 +87,7 @@ Discriminator for the concrete field type.
 
 > `readonly` **name**: `string`
 
-Defined in: [src/form/pdfField.ts:158](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/form/pdfField.ts#L158)
+Defined in: [src/form/pdfField.ts:158](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/form/pdfField.ts#L158)
 
 The fully-qualified field name.
 
@@ -101,7 +101,7 @@ The fully-qualified field name.
 
 > `protected` `readonly` **parentNames**: `string`[]
 
-Defined in: [src/form/pdfField.ts:173](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/form/pdfField.ts#L173)
+Defined in: [src/form/pdfField.ts:173](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/form/pdfField.ts#L173)
 
 Parent field dictionary chain for building full names.
 
@@ -115,7 +115,7 @@ Parent field dictionary chain for building full names.
 
 > `protected` `readonly` **widgetDict**: [`PdfDict`](PdfDict.md)
 
-Defined in: [src/form/pdfField.ts:170](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/form/pdfField.ts#L170)
+Defined in: [src/form/pdfField.ts:170](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/form/pdfField.ts#L170)
 
 The widget annotation dictionary. For merged field+widget dicts,
 this is the same object as `dict`.
@@ -130,7 +130,7 @@ this is the same object as `dict`.
 
 > **addToPage**(`page`): `void`
 
-Defined in: [src/form/pdfField.ts:309](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/form/pdfField.ts#L309)
+Defined in: [src/form/pdfField.ts:309](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/form/pdfField.ts#L309)
 
 Add this field's widget annotation to a page.
 
@@ -160,7 +160,7 @@ A page that implements [WidgetAnnotationHost](../interfaces/WidgetAnnotationHost
 
 > **disableExporting**(): `void`
 
-Defined in: [src/form/pdfField.ts:271](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/form/pdfField.ts#L271)
+Defined in: [src/form/pdfField.ts:271](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/form/pdfField.ts#L271)
 
 Disable exporting this field (set the NoExport flag).
 
@@ -178,7 +178,7 @@ Disable exporting this field (set the NoExport flag).
 
 > **enableExporting**(): `void`
 
-Defined in: [src/form/pdfField.ts:266](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/form/pdfField.ts#L266)
+Defined in: [src/form/pdfField.ts:266](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/form/pdfField.ts#L266)
 
 Enable exporting this field (clear the NoExport flag).
 
@@ -196,7 +196,7 @@ Enable exporting this field (clear the NoExport flag).
 
 > **generateAppearance**(): [`PdfStream`](PdfStream.md)
 
-Defined in: [src/form/fields/signatureField.ts:76](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/form/fields/signatureField.ts#L76)
+Defined in: [src/form/fields/signatureField.ts:76](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/form/fields/signatureField.ts#L76)
 
 Generate the appearance stream for this signature field.
 
@@ -214,7 +214,7 @@ Generate the appearance stream for this signature field.
 
 > `protected` **getFieldFlags**(): `number`
 
-Defined in: [src/form/pdfField.ts:211](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/form/pdfField.ts#L211)
+Defined in: [src/form/pdfField.ts:211](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/form/pdfField.ts#L211)
 
 Get the raw /Ff (field flags) integer value.
 
@@ -232,7 +232,7 @@ Get the raw /Ff (field flags) integer value.
 
 > **getFullName**(): `string`
 
-Defined in: [src/form/pdfField.ts:201](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/form/pdfField.ts#L201)
+Defined in: [src/form/pdfField.ts:201](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/form/pdfField.ts#L201)
 
 Get the fully qualified field name (Parent.Child.Name format).
 Per PDF spec SS12.7.3.2, the full name is formed by concatenating
@@ -252,7 +252,7 @@ ancestor /T values with periods.
 
 > **getName**(): `string`
 
-Defined in: [src/form/pdfField.ts:192](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/form/pdfField.ts#L192)
+Defined in: [src/form/pdfField.ts:192](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/form/pdfField.ts#L192)
 
 Get the partial field name (/T entry).
 
@@ -270,7 +270,7 @@ Get the partial field name (/T entry).
 
 > **getRect**(): \[`number`, `number`, `number`, `number`\]
 
-Defined in: [src/form/pdfField.ts:283](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/form/pdfField.ts#L283)
+Defined in: [src/form/pdfField.ts:283](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/form/pdfField.ts#L283)
 
 Get the field's widget rectangle as `[x1, y1, x2, y2]`.
 The /Rect entry comes from the widget annotation dictionary.
@@ -289,7 +289,7 @@ The /Rect entry comes from the widget annotation dictionary.
 
 > **getSignatureValue**(): [`PdfDict`](PdfDict.md) \| `undefined`
 
-Defined in: [src/form/fields/signatureField.ts:49](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/form/fields/signatureField.ts#L49)
+Defined in: [src/form/fields/signatureField.ts:49](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/form/fields/signatureField.ts#L49)
 
 Get the signature dictionary, if signed.
 Returns undefined if the field has not been signed.
@@ -304,7 +304,7 @@ Returns undefined if the field has not been signed.
 
 > **getValue**(): `string`
 
-Defined in: [src/form/fields/signatureField.ts:62](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/form/fields/signatureField.ts#L62)
+Defined in: [src/form/fields/signatureField.ts:62](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/form/fields/signatureField.ts#L62)
 
 Get value: returns "signed" or "unsigned".
 
@@ -322,7 +322,7 @@ Get value: returns "signed" or "unsigned".
 
 > `protected` **hasFlag**(`flag`): `boolean`
 
-Defined in: [src/form/pdfField.ts:221](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/form/pdfField.ts#L221)
+Defined in: [src/form/pdfField.ts:221](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/form/pdfField.ts#L221)
 
 Check if a specific flag bit is set.
 
@@ -346,7 +346,7 @@ Check if a specific flag bit is set.
 
 > **isExported**(): `boolean`
 
-Defined in: [src/form/pdfField.ts:261](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/form/pdfField.ts#L261)
+Defined in: [src/form/pdfField.ts:261](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/form/pdfField.ts#L261)
 
 Whether the field is exported (inverse of NoExport flag).
 
@@ -364,7 +364,7 @@ Whether the field is exported (inverse of NoExport flag).
 
 > **isNoExport**(): `boolean`
 
-Defined in: [src/form/pdfField.ts:256](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/form/pdfField.ts#L256)
+Defined in: [src/form/pdfField.ts:256](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/form/pdfField.ts#L256)
 
 Whether the field should not be exported.
 
@@ -382,7 +382,7 @@ Whether the field should not be exported.
 
 > **isReadOnly**(): `boolean`
 
-Defined in: [src/form/pdfField.ts:236](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/form/pdfField.ts#L236)
+Defined in: [src/form/pdfField.ts:236](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/form/pdfField.ts#L236)
 
 Whether the field is read-only.
 
@@ -400,7 +400,7 @@ Whether the field is read-only.
 
 > **isRequired**(): `boolean`
 
-Defined in: [src/form/pdfField.ts:246](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/form/pdfField.ts#L246)
+Defined in: [src/form/pdfField.ts:246](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/form/pdfField.ts#L246)
 
 Whether the field is required.
 
@@ -418,7 +418,7 @@ Whether the field is required.
 
 > **isSigned**(): `boolean`
 
-Defined in: [src/form/fields/signatureField.ts:40](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/form/fields/signatureField.ts#L40)
+Defined in: [src/form/fields/signatureField.ts:40](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/form/fields/signatureField.ts#L40)
 
 Whether this signature field has been signed.
 A signed field has a /V entry that is a dictionary.
@@ -433,7 +433,7 @@ A signed field has a /V entry that is a dictionary.
 
 > `protected` **setFieldFlags**(`flags`): `void`
 
-Defined in: [src/form/pdfField.ts:216](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/form/pdfField.ts#L216)
+Defined in: [src/form/pdfField.ts:216](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/form/pdfField.ts#L216)
 
 Set the raw /Ff (field flags) integer value.
 
@@ -457,7 +457,7 @@ Set the raw /Ff (field flags) integer value.
 
 > `protected` **setFlag**(`flag`, `on`): `void`
 
-Defined in: [src/form/pdfField.ts:226](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/form/pdfField.ts#L226)
+Defined in: [src/form/pdfField.ts:226](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/form/pdfField.ts#L226)
 
 Set or clear a specific flag bit.
 
@@ -485,7 +485,7 @@ Set or clear a specific flag bit.
 
 > **setReadOnly**(`readOnly`): `void`
 
-Defined in: [src/form/pdfField.ts:241](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/form/pdfField.ts#L241)
+Defined in: [src/form/pdfField.ts:241](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/form/pdfField.ts#L241)
 
 Set the read-only flag.
 
@@ -509,7 +509,7 @@ Set the read-only flag.
 
 > **setRequired**(`required`): `void`
 
-Defined in: [src/form/pdfField.ts:251](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/form/pdfField.ts#L251)
+Defined in: [src/form/pdfField.ts:251](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/form/pdfField.ts#L251)
 
 Set the required flag.
 
@@ -533,7 +533,7 @@ Set the required flag.
 
 > **setValue**(`_value`): `void`
 
-Defined in: [src/form/fields/signatureField.ts:67](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/form/fields/signatureField.ts#L67)
+Defined in: [src/form/fields/signatureField.ts:67](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/form/fields/signatureField.ts#L67)
 
 Signature fields cannot be set via setValue.
 

@@ -8,7 +8,7 @@
 
 > **checkAccessibility**(`doc`): [`AccessibilityIssue`](../interfaces/AccessibilityIssue.md)[]
 
-Defined in: [src/accessibility/accessibilityChecker.ts:62](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/accessibility/accessibilityChecker.ts#L62)
+Defined in: [src/accessibility/accessibilityChecker.ts:62](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/accessibility/accessibilityChecker.ts#L62)
 
 Check a PDF document for accessibility issues.
 

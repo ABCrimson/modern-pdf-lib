@@ -6,7 +6,7 @@
 
 # Interface: DrawTextOptions
 
-Defined in: [src/core/pdfPage.ts:166](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/pdfPage.ts#L166)
+Defined in: [src/core/pdfPage.ts:166](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/pdfPage.ts#L166)
 
 Options for [PdfPage.drawText](../classes/PdfPage.md#drawtext).
 
@@ -16,7 +16,7 @@ Options for [PdfPage.drawText](../classes/PdfPage.md#drawtext).
 
 > `optional` **blendMode**: [`BlendMode`](../type-aliases/BlendMode.md)
 
-Defined in: [src/core/pdfPage.ts:192](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/pdfPage.ts#L192)
+Defined in: [src/core/pdfPage.ts:192](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/pdfPage.ts#L192)
 
 Blend mode for compositing.
 
@@ -26,7 +26,7 @@ Blend mode for compositing.
 
 > `optional` **color**: [`Color`](../type-aliases/Color.md)
 
-Defined in: [src/core/pdfPage.ts:184](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/pdfPage.ts#L184)
+Defined in: [src/core/pdfPage.ts:184](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/pdfPage.ts#L184)
 
 Text colour.  Defaults to black.
 
@@ -36,7 +36,7 @@ Text colour.  Defaults to black.
 
 > `optional` **font**: `string` \| [`FontRef`](FontRef.md)
 
-Defined in: [src/core/pdfPage.ts:180](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/pdfPage.ts#L180)
+Defined in: [src/core/pdfPage.ts:180](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/pdfPage.ts#L180)
 
 Font to use for rendering.
 
@@ -52,7 +52,7 @@ resource name and its CID encoder (if any) is used automatically.
 
 > `optional` **lineHeight**: `number`
 
-Defined in: [src/core/pdfPage.ts:188](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/pdfPage.ts#L188)
+Defined in: [src/core/pdfPage.ts:188](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/pdfPage.ts#L188)
 
 Line height for multi-line text.
 
@@ -62,7 +62,7 @@ Line height for multi-line text.
 
 > `optional` **maxWidth**: `number`
 
-Defined in: [src/core/pdfPage.ts:209](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/pdfPage.ts#L209)
+Defined in: [src/core/pdfPage.ts:209](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/pdfPage.ts#L209)
 
 Maximum width in points before text is automatically wrapped.
 
@@ -79,7 +79,7 @@ option is ignored.
 
 > `optional` **opacity**: `number`
 
-Defined in: [src/core/pdfPage.ts:190](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/pdfPage.ts#L190)
+Defined in: [src/core/pdfPage.ts:190](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/pdfPage.ts#L190)
 
 Opacity `[0, 1]`.
 
@@ -89,7 +89,7 @@ Opacity `[0, 1]`.
 
 > `optional` **renderingMode**: [`TextRenderingMode`](../type-aliases/TextRenderingMode.md)
 
-Defined in: [src/core/pdfPage.ts:194](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/pdfPage.ts#L194)
+Defined in: [src/core/pdfPage.ts:194](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/pdfPage.ts#L194)
 
 Text rendering mode (fill, stroke, invisible, clip, etc.).
 
@@ -99,7 +99,7 @@ Text rendering mode (fill, stroke, invisible, clip, etc.).
 
 > `optional` **rotate**: [`Angle`](../type-aliases/Angle.md)
 
-Defined in: [src/core/pdfPage.ts:186](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/pdfPage.ts#L186)
+Defined in: [src/core/pdfPage.ts:186](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/pdfPage.ts#L186)
 
 Rotation angle.
 
@@ -109,7 +109,7 @@ Rotation angle.
 
 > `optional` **size**: `number`
 
-Defined in: [src/core/pdfPage.ts:182](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/pdfPage.ts#L182)
+Defined in: [src/core/pdfPage.ts:182](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/pdfPage.ts#L182)
 
 Font size in points.
 
@@ -119,7 +119,7 @@ Font size in points.
 
 > `optional` **wordBreaks**: `string`[]
 
-Defined in: [src/core/pdfPage.ts:220](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/pdfPage.ts#L220)
+Defined in: [src/core/pdfPage.ts:220](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/pdfPage.ts#L220)
 
 Characters at which text may be broken when wrapping.
 
@@ -136,7 +136,7 @@ as in the default behaviour.
 
 > `optional` **x**: `number`
 
-Defined in: [src/core/pdfPage.ts:168](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/pdfPage.ts#L168)
+Defined in: [src/core/pdfPage.ts:168](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/pdfPage.ts#L168)
 
 X coordinate.
 
@@ -146,7 +146,7 @@ X coordinate.
 
 > `optional` **xSkew**: [`Angle`](../type-aliases/Angle.md)
 
-Defined in: [src/core/pdfPage.ts:196](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/pdfPage.ts#L196)
+Defined in: [src/core/pdfPage.ts:196](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/pdfPage.ts#L196)
 
 Horizontal skew angle (italic-like effect).
 
@@ -156,7 +156,7 @@ Horizontal skew angle (italic-like effect).
 
 > `optional` **y**: `number`
 
-Defined in: [src/core/pdfPage.ts:170](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/pdfPage.ts#L170)
+Defined in: [src/core/pdfPage.ts:170](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/pdfPage.ts#L170)
 
 Y coordinate.
 
@@ -166,6 +166,6 @@ Y coordinate.
 
 > `optional` **ySkew**: [`Angle`](../type-aliases/Angle.md)
 
-Defined in: [src/core/pdfPage.ts:198](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/pdfPage.ts#L198)
+Defined in: [src/core/pdfPage.ts:198](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/pdfPage.ts#L198)
 
 Vertical skew angle.

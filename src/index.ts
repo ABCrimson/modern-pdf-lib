@@ -233,6 +233,15 @@ export async function initWasm(options?: string | URL | InitWasmOptions): Promis
 // ---------------------------------------------------------------------------
 
 export { EmbeddedFont } from './assets/font/fontEmbed.js';
+export type {
+  FontEmbeddingResult,
+  CIDFontData,
+  CIDSystemInfoData,
+  FontDescriptorData,
+  Type0FontData,
+  WidthEntry,
+} from './assets/font/fontEmbed.js';
+export type { SubsetResult, SubsetCmap } from './assets/font/fontSubset.js';
 export { extractMetrics } from './assets/font/fontMetrics.js';
 export type { FontMetrics } from './assets/font/fontMetrics.js';
 export { isOpenTypeCFF, isTrueType } from './assets/font/otfDetect.js';
@@ -531,6 +540,7 @@ export {
 export type {
   LoadPdfOptions,
   TextItem,
+  TextExtractionOptions,
   ContentStreamOperator,
   Operand,
 } from './parser/index.js';
@@ -635,7 +645,7 @@ export type { WatermarkOptions } from './core/watermark.js';
 // ---------------------------------------------------------------------------
 
 export { markForRedaction, applyRedactions, getRedactionMarks } from './core/redaction.js';
-export type { RedactionOptions } from './core/redaction.js';
+export type { RedactionOptions, RedactionMark } from './core/redaction.js';
 
 // ---------------------------------------------------------------------------
 // Base64 utilities

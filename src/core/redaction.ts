@@ -36,8 +36,8 @@ export interface RedactionOptions {
   color?: { r: number; g: number; b: number } | undefined;
 }
 
-/** Internal redaction mark stored on a page. */
-interface RedactionMark {
+/** Redaction mark stored on a page. */
+export interface RedactionMark {
   rect: [number, number, number, number];
   overlayText?: string | undefined;
   color: { r: number; g: number; b: number };

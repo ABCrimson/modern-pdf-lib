@@ -6,7 +6,7 @@
 
 # Interface: PdfAIssue
 
-Defined in: [src/compliance/pdfA.ts:40](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/compliance/pdfA.ts#L40)
+Defined in: [src/compliance/pdfA.ts:40](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/compliance/pdfA.ts#L40)
 
 A single PDF/A compliance issue.
 
@@ -16,7 +16,7 @@ A single PDF/A compliance issue.
 
 > **code**: `string`
 
-Defined in: [src/compliance/pdfA.ts:41](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/compliance/pdfA.ts#L41)
+Defined in: [src/compliance/pdfA.ts:41](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/compliance/pdfA.ts#L41)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [src/compliance/pdfA.ts:41](https://github.com/ABCrimson/modern-pdf-
 
 > **message**: `string`
 
-Defined in: [src/compliance/pdfA.ts:42](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/compliance/pdfA.ts#L42)
+Defined in: [src/compliance/pdfA.ts:42](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/compliance/pdfA.ts#L42)
 
 ***
 
@@ -32,4 +32,4 @@ Defined in: [src/compliance/pdfA.ts:42](https://github.com/ABCrimson/modern-pdf-
 
 > **severity**: `"error"` \| `"warning"`
 
-Defined in: [src/compliance/pdfA.ts:43](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/compliance/pdfA.ts#L43)
+Defined in: [src/compliance/pdfA.ts:43](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/compliance/pdfA.ts#L43)

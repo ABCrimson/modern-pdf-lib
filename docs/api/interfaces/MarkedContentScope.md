@@ -6,7 +6,7 @@
 
 # Interface: MarkedContentScope
 
-Defined in: [src/accessibility/markedContent.ts:31](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/accessibility/markedContent.ts#L31)
+Defined in: [src/accessibility/markedContent.ts:31](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/accessibility/markedContent.ts#L31)
 
 Represents a marked-content scope — provides the operator strings
 needed to open and close the scope in a content stream.
@@ -17,7 +17,7 @@ needed to open and close the scope in a content stream.
 
 > `readonly` **mcid**: `number`
 
-Defined in: [src/accessibility/markedContent.ts:33](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/accessibility/markedContent.ts#L33)
+Defined in: [src/accessibility/markedContent.ts:33](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/accessibility/markedContent.ts#L33)
 
 The marked-content ID linking to the structure tree.
 
@@ -27,7 +27,7 @@ The marked-content ID linking to the structure tree.
 
 > `readonly` **tag**: `string`
 
-Defined in: [src/accessibility/markedContent.ts:35](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/accessibility/markedContent.ts#L35)
+Defined in: [src/accessibility/markedContent.ts:35](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/accessibility/markedContent.ts#L35)
 
 The structure type tag.
 
@@ -37,7 +37,7 @@ The structure type tag.
 
 > **begin**(): `string`
 
-Defined in: [src/accessibility/markedContent.ts:41](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/accessibility/markedContent.ts#L41)
+Defined in: [src/accessibility/markedContent.ts:41](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/accessibility/markedContent.ts#L41)
 
 Return the PDF operator string that begins this marked-content
 sequence.  For tagged content with an MCID, this produces a
@@ -53,7 +53,7 @@ sequence.  For tagged content with an MCID, this produces a
 
 > **end**(): `string`
 
-Defined in: [src/accessibility/markedContent.ts:46](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/accessibility/markedContent.ts#L46)
+Defined in: [src/accessibility/markedContent.ts:46](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/accessibility/markedContent.ts#L46)
 
 Return the PDF operator string that ends this marked-content
 sequence (`EMC`).

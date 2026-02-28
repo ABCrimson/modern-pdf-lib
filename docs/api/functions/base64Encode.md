@@ -8,7 +8,7 @@
 
 > **base64Encode**(`data`): `string`
 
-Defined in: [src/utils/base64.ts:19](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/utils/base64.ts#L19)
+Defined in: [src/utils/base64.ts:19](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/utils/base64.ts#L19)
 
 Encode a `Uint8Array` to a standard Base64 string.
 
