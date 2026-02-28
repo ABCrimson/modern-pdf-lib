@@ -6,7 +6,7 @@
 
 # Interface: SetTitleOptions
 
-Defined in: [src/core/pdfDocument.ts:119](https://github.com/ABCrimson/modern-pdf-lib/blob/86f43cf3bcfc43d27d02f37979dfabd9921b66bc/src/core/pdfDocument.ts#L119)
+Defined in: [src/core/pdfDocument.ts:120](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/pdfDocument.ts#L120)
 
 Options for [PdfDocument.setTitle](../classes/PdfDocument.md#settitle).
 
@@ -16,6 +16,6 @@ Options for [PdfDocument.setTitle](../classes/PdfDocument.md#settitle).
 
 > `optional` **showInWindowTitleBar**: `boolean`
 
-Defined in: [src/core/pdfDocument.ts:121](https://github.com/ABCrimson/modern-pdf-lib/blob/86f43cf3bcfc43d27d02f37979dfabd9921b66bc/src/core/pdfDocument.ts#L121)
+Defined in: [src/core/pdfDocument.ts:122](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/pdfDocument.ts#L122)
 
 When `true`, tell PDF viewers to display the document title in the window title bar.

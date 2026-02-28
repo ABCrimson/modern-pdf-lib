@@ -8,7 +8,7 @@
 
 > **splitPdf**(`document`, `ranges`): `Promise`\<[`PdfDocument`](../classes/PdfDocument.md)[]\>
 
-Defined in: [src/core/documentMerge.ts:490](https://github.com/ABCrimson/modern-pdf-lib/blob/86f43cf3bcfc43d27d02f37979dfabd9921b66bc/src/core/documentMerge.ts#L490)
+Defined in: [src/core/documentMerge.ts:490](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/documentMerge.ts#L490)
 
 Split a PDF document into multiple documents by page ranges.
 

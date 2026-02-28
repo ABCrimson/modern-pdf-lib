@@ -8,7 +8,7 @@
 
 > **encodeInteger**(`data`): `Uint8Array`
 
-Defined in: [src/signature/pkcs7.ts:249](https://github.com/ABCrimson/modern-pdf-lib/blob/86f43cf3bcfc43d27d02f37979dfabd9921b66bc/src/signature/pkcs7.ts#L249)
+Defined in: [src/signature/pkcs7.ts:249](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/signature/pkcs7.ts#L249)
 
 Encode an INTEGER.
 

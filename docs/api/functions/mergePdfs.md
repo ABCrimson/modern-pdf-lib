@@ -8,7 +8,7 @@
 
 > **mergePdfs**(`documents`): `Promise`\<[`PdfDocument`](../classes/PdfDocument.md)\>
 
-Defined in: [src/core/documentMerge.ts:418](https://github.com/ABCrimson/modern-pdf-lib/blob/86f43cf3bcfc43d27d02f37979dfabd9921b66bc/src/core/documentMerge.ts#L418)
+Defined in: [src/core/documentMerge.ts:418](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/documentMerge.ts#L418)
 
 Merge multiple PDF documents into a single document.
 

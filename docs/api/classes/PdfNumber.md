@@ -6,7 +6,7 @@
 
 # Class: PdfNumber
 
-Defined in: [src/core/pdfObjects.ts:103](https://github.com/ABCrimson/modern-pdf-lib/blob/86f43cf3bcfc43d27d02f37979dfabd9921b66bc/src/core/pdfObjects.ts#L103)
+Defined in: [src/core/pdfObjects.ts:103](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/pdfObjects.ts#L103)
 
 A PDF numeric object (integer or real).
 
@@ -16,7 +16,7 @@ A PDF numeric object (integer or real).
 
 > **new PdfNumber**(`value`): `PdfNumber`
 
-Defined in: [src/core/pdfObjects.ts:107](https://github.com/ABCrimson/modern-pdf-lib/blob/86f43cf3bcfc43d27d02f37979dfabd9921b66bc/src/core/pdfObjects.ts#L107)
+Defined in: [src/core/pdfObjects.ts:107](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/pdfObjects.ts#L107)
 
 #### Parameters
 
@@ -34,7 +34,7 @@ Defined in: [src/core/pdfObjects.ts:107](https://github.com/ABCrimson/modern-pdf
 
 > `readonly` **value**: `number`
 
-Defined in: [src/core/pdfObjects.ts:107](https://github.com/ABCrimson/modern-pdf-lib/blob/86f43cf3bcfc43d27d02f37979dfabd9921b66bc/src/core/pdfObjects.ts#L107)
+Defined in: [src/core/pdfObjects.ts:107](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/pdfObjects.ts#L107)
 
 ## Methods
 
@@ -42,7 +42,7 @@ Defined in: [src/core/pdfObjects.ts:107](https://github.com/ABCrimson/modern-pdf
 
 > **serialize**(`writer`): `void`
 
-Defined in: [src/core/pdfObjects.ts:113](https://github.com/ABCrimson/modern-pdf-lib/blob/86f43cf3bcfc43d27d02f37979dfabd9921b66bc/src/core/pdfObjects.ts#L113)
+Defined in: [src/core/pdfObjects.ts:113](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/pdfObjects.ts#L113)
 
 #### Parameters
 
@@ -60,7 +60,7 @@ Defined in: [src/core/pdfObjects.ts:113](https://github.com/ABCrimson/modern-pdf
 
 > `static` **of**(`value`): `PdfNumber`
 
-Defined in: [src/core/pdfObjects.ts:109](https://github.com/ABCrimson/modern-pdf-lib/blob/86f43cf3bcfc43d27d02f37979dfabd9921b66bc/src/core/pdfObjects.ts#L109)
+Defined in: [src/core/pdfObjects.ts:109](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/pdfObjects.ts#L109)
 
 #### Parameters
 

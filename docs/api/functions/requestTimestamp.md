@@ -8,7 +8,7 @@
 
 > **requestTimestamp**(`dataHash`, `tsaUrl`, `hashAlgorithm?`): `Promise`\<[`TimestampResult`](../interfaces/TimestampResult.md)\>
 
-Defined in: [src/signature/timestamp.ts:318](https://github.com/ABCrimson/modern-pdf-lib/blob/86f43cf3bcfc43d27d02f37979dfabd9921b66bc/src/signature/timestamp.ts#L318)
+Defined in: [src/signature/timestamp.ts:318](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/signature/timestamp.ts#L318)
 
 Request a timestamp from an RFC 3161 TSA.
 

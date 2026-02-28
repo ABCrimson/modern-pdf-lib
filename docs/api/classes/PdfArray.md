@@ -6,7 +6,7 @@
 
 # Class: PdfArray
 
-Defined in: [src/core/pdfObjects.ts:225](https://github.com/ABCrimson/modern-pdf-lib/blob/86f43cf3bcfc43d27d02f37979dfabd9921b66bc/src/core/pdfObjects.ts#L225)
+Defined in: [src/core/pdfObjects.ts:225](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/pdfObjects.ts#L225)
 
 A PDF array `[…]`.
 
@@ -16,7 +16,7 @@ A PDF array `[…]`.
 
 > **new PdfArray**(`items?`): `PdfArray`
 
-Defined in: [src/core/pdfObjects.ts:229](https://github.com/ABCrimson/modern-pdf-lib/blob/86f43cf3bcfc43d27d02f37979dfabd9921b66bc/src/core/pdfObjects.ts#L229)
+Defined in: [src/core/pdfObjects.ts:229](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/pdfObjects.ts#L229)
 
 #### Parameters
 
@@ -34,7 +34,7 @@ Defined in: [src/core/pdfObjects.ts:229](https://github.com/ABCrimson/modern-pdf
 
 > `readonly` **items**: [`PdfObject`](../type-aliases/PdfObject.md)[] = `[]`
 
-Defined in: [src/core/pdfObjects.ts:229](https://github.com/ABCrimson/modern-pdf-lib/blob/86f43cf3bcfc43d27d02f37979dfabd9921b66bc/src/core/pdfObjects.ts#L229)
+Defined in: [src/core/pdfObjects.ts:229](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/pdfObjects.ts#L229)
 
 ## Accessors
 
@@ -44,7 +44,7 @@ Defined in: [src/core/pdfObjects.ts:229](https://github.com/ABCrimson/modern-pdf
 
 > **get** **length**(): `number`
 
-Defined in: [src/core/pdfObjects.ts:246](https://github.com/ABCrimson/modern-pdf-lib/blob/86f43cf3bcfc43d27d02f37979dfabd9921b66bc/src/core/pdfObjects.ts#L246)
+Defined in: [src/core/pdfObjects.ts:246](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/pdfObjects.ts#L246)
 
 Number of items.
 
@@ -58,7 +58,7 @@ Number of items.
 
 > **push**(`item`): `void`
 
-Defined in: [src/core/pdfObjects.ts:241](https://github.com/ABCrimson/modern-pdf-lib/blob/86f43cf3bcfc43d27d02f37979dfabd9921b66bc/src/core/pdfObjects.ts#L241)
+Defined in: [src/core/pdfObjects.ts:241](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/pdfObjects.ts#L241)
 
 Add an item.
 
@@ -78,7 +78,7 @@ Add an item.
 
 > **serialize**(`writer`): `void`
 
-Defined in: [src/core/pdfObjects.ts:250](https://github.com/ABCrimson/modern-pdf-lib/blob/86f43cf3bcfc43d27d02f37979dfabd9921b66bc/src/core/pdfObjects.ts#L250)
+Defined in: [src/core/pdfObjects.ts:250](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/pdfObjects.ts#L250)
 
 #### Parameters
 
@@ -96,7 +96,7 @@ Defined in: [src/core/pdfObjects.ts:250](https://github.com/ABCrimson/modern-pdf
 
 > `static` **fromNumbers**(`values`): `PdfArray`
 
-Defined in: [src/core/pdfObjects.ts:236](https://github.com/ABCrimson/modern-pdf-lib/blob/86f43cf3bcfc43d27d02f37979dfabd9921b66bc/src/core/pdfObjects.ts#L236)
+Defined in: [src/core/pdfObjects.ts:236](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/pdfObjects.ts#L236)
 
 Convenience: create an array of PdfNumbers.
 
@@ -116,7 +116,7 @@ Convenience: create an array of PdfNumbers.
 
 > `static` **of**(`items`): `PdfArray`
 
-Defined in: [src/core/pdfObjects.ts:231](https://github.com/ABCrimson/modern-pdf-lib/blob/86f43cf3bcfc43d27d02f37979dfabd9921b66bc/src/core/pdfObjects.ts#L231)
+Defined in: [src/core/pdfObjects.ts:231](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/pdfObjects.ts#L231)
 
 #### Parameters
 

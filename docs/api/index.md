@@ -1,96 +1,446 @@
-# API Reference
+**modern-pdf-lib**
 
-This section contains the complete API reference for `modern-pdf`, auto-generated from the TypeScript source code using [TypeDoc](https://typedoc.org/).
+***
 
-## Overview
+# modern-pdf-lib
 
-The `modern-pdf` API is organized into the following categories:
+## Classes
 
-### Core
+- [ChangeTracker](classes/ChangeTracker.md)
+- [CombedTextLayoutError](classes/CombedTextLayoutError.md)
+- [EmbeddedFont](classes/EmbeddedFont.md)
+- [EncryptedPdfError](classes/EncryptedPdfError.md)
+- [ExceededMaxLengthError](classes/ExceededMaxLengthError.md)
+- [FieldAlreadyExistsError](classes/FieldAlreadyExistsError.md)
+- [FieldExistsAsNonTerminalError](classes/FieldExistsAsNonTerminalError.md)
+- [FontNotEmbeddedError](classes/FontNotEmbeddedError.md)
+- [ForeignPageError](classes/ForeignPageError.md)
+- [InvalidFieldNamePartError](classes/InvalidFieldNamePartError.md)
+- [MissingOnValueCheckError](classes/MissingOnValueCheckError.md)
+- [NoSuchFieldError](classes/NoSuchFieldError.md)
+- [PdfAnnotation](classes/PdfAnnotation.md)
+- [PdfArray](classes/PdfArray.md)
+- [PdfBool](classes/PdfBool.md)
+- [PdfButtonField](classes/PdfButtonField.md)
+- [PdfCheckboxField](classes/PdfCheckboxField.md)
+- [PdfCircleAnnotation](classes/PdfCircleAnnotation.md)
+- [PdfDict](classes/PdfDict.md)
+- [PdfDocument](classes/PdfDocument.md)
+- [PdfDropdownField](classes/PdfDropdownField.md)
+- [PdfEncryptionHandler](classes/PdfEncryptionHandler.md)
+- [PdfField](classes/PdfField.md)
+- [PdfForm](classes/PdfForm.md)
+- [PdfFreeTextAnnotation](classes/PdfFreeTextAnnotation.md)
+- [PdfHighlightAnnotation](classes/PdfHighlightAnnotation.md)
+- [PdfInkAnnotation](classes/PdfInkAnnotation.md)
+- [PdfLayer](classes/PdfLayer.md)
+- [PdfLayerManager](classes/PdfLayerManager.md)
+- [PdfLineAnnotation](classes/PdfLineAnnotation.md)
+- [PdfLinkAnnotation](classes/PdfLinkAnnotation.md)
+- [PdfListboxField](classes/PdfListboxField.md)
+- [PdfName](classes/PdfName.md)
+- [PdfNull](classes/PdfNull.md)
+- [PdfNumber](classes/PdfNumber.md)
+- [PdfObjectRegistry](classes/PdfObjectRegistry.md)
+- [PDFOperator](classes/PDFOperator.md)
+- [PdfOutlineItem](classes/PdfOutlineItem.md)
+- [PdfOutlineTree](classes/PdfOutlineTree.md)
+- [PdfPage](classes/PdfPage.md)
+- [PdfPolygonAnnotation](classes/PdfPolygonAnnotation.md)
+- [PdfPolyLineAnnotation](classes/PdfPolyLineAnnotation.md)
+- [PdfRadioGroup](classes/PdfRadioGroup.md)
+- [PdfRedactAnnotation](classes/PdfRedactAnnotation.md)
+- [PdfRef](classes/PdfRef.md)
+- [PdfSignatureField](classes/PdfSignatureField.md)
+- [PdfSquareAnnotation](classes/PdfSquareAnnotation.md)
+- [PdfSquigglyAnnotation](classes/PdfSquigglyAnnotation.md)
+- [PdfStampAnnotation](classes/PdfStampAnnotation.md)
+- [PdfStream](classes/PdfStream.md)
+- [PdfStreamWriter](classes/PdfStreamWriter.md)
+- [PdfStrikeOutAnnotation](classes/PdfStrikeOutAnnotation.md)
+- [PdfString](classes/PdfString.md)
+- [PdfStructureElement](classes/PdfStructureElement.md)
+- [PdfStructureTree](classes/PdfStructureTree.md)
+- [PdfTextAnnotation](classes/PdfTextAnnotation.md)
+- [PdfTextField](classes/PdfTextField.md)
+- [PdfUnderlineAnnotation](classes/PdfUnderlineAnnotation.md)
+- [PdfViewerPreferences](classes/PdfViewerPreferences.md)
+- [PdfWriter](classes/PdfWriter.md)
+- [RemovePageFromEmptyDocumentError](classes/RemovePageFromEmptyDocumentError.md)
+- [RichTextFieldReadError](classes/RichTextFieldReadError.md)
+- [UnexpectedFieldTypeError](classes/UnexpectedFieldTypeError.md)
 
-- **`createPdf()`** — Factory function to create a new `PdfDocument`
-- **`PdfDocument`** — The main document class for adding pages, embedding fonts, embedding images, and saving
-- **`PdfPage`** — Represents a single page with methods for drawing text, images, and shapes
+## Interfaces
 
-### Colors
+- [AccessibilityIssue](interfaces/AccessibilityIssue.md)
+- [AnnotationOptions](interfaces/AnnotationOptions.md)
+- [ButtonAppearanceOptions](interfaces/ButtonAppearanceOptions.md)
+- [ByteRangeResult](interfaces/ByteRangeResult.md)
+- [ByteWriter](interfaces/ByteWriter.md)
+- [CatalogOptions](interfaces/CatalogOptions.md)
+- [CheckboxAppearanceOptions](interfaces/CheckboxAppearanceOptions.md)
+- [CmykColor](interfaces/CmykColor.md)
+- [ComputeFontSizeOptions](interfaces/ComputeFontSizeOptions.md)
+- [ContentStreamOperator](interfaces/ContentStreamOperator.md)
+- [CropBox](interfaces/CropBox.md)
+- [Degrees](interfaces/Degrees.md)
+- [DocumentMetadata](interfaces/DocumentMetadata.md)
+- [DocumentStructure](interfaces/DocumentStructure.md)
+- [DrawCircleOptions](interfaces/DrawCircleOptions.md)
+- [DrawEllipseOptions](interfaces/DrawEllipseOptions.md)
+- [DrawImageOptions](interfaces/DrawImageOptions.md)
+- [DrawLineOptions](interfaces/DrawLineOptions.md)
+- [DrawPageOptions](interfaces/DrawPageOptions.md)
+- [DrawRectangleOptions](interfaces/DrawRectangleOptions.md)
+- [DrawSquareOptions](interfaces/DrawSquareOptions.md)
+- [DrawSvgPathOptions](interfaces/DrawSvgPathOptions.md)
+- [DrawTextOptions](interfaces/DrawTextOptions.md)
+- [DropdownAppearanceOptions](interfaces/DropdownAppearanceOptions.md)
+- [EmbeddedFile](interfaces/EmbeddedFile.md)
+- [EmbeddedPdfPage](interfaces/EmbeddedPdfPage.md)
+- [EmbedFontOptions](interfaces/EmbedFontOptions.md)
+- [EmbedPageOptions](interfaces/EmbedPageOptions.md)
+- [EncryptDictValues](interfaces/EncryptDictValues.md)
+- [EncryptOptions](interfaces/EncryptOptions.md)
+- [FontMetrics](interfaces/FontMetrics.md)
+- [FontRef](interfaces/FontRef.md)
+- [GrayscaleColor](interfaces/GrayscaleColor.md)
+- [ImageRef](interfaces/ImageRef.md)
+- [IncrementalSaveResult](interfaces/IncrementalSaveResult.md)
+- [InitWasmOptions](interfaces/InitWasmOptions.md)
+- [LayoutCombedOptions](interfaces/LayoutCombedOptions.md)
+- [LayoutMultilineOptions](interfaces/LayoutMultilineOptions.md)
+- [LayoutMultilineResult](interfaces/LayoutMultilineResult.md)
+- [LayoutSinglelineOptions](interfaces/LayoutSinglelineOptions.md)
+- [LayoutSinglelineResult](interfaces/LayoutSinglelineResult.md)
+- [LinearizationOptions](interfaces/LinearizationOptions.md)
+- [ListboxAppearanceOptions](interfaces/ListboxAppearanceOptions.md)
+- [LoadPdfOptions](interfaces/LoadPdfOptions.md)
+- [MarkedContentScope](interfaces/MarkedContentScope.md)
+- [OutlineDestination](interfaces/OutlineDestination.md)
+- [OutlineItemOptions](interfaces/OutlineItemOptions.md)
+- [PageEntry](interfaces/PageEntry.md)
+- [PdfAIssue](interfaces/PdfAIssue.md)
+- [PdfAValidationResult](interfaces/PdfAValidationResult.md)
+- [PdfPermissionFlags](interfaces/PdfPermissionFlags.md)
+- [PdfSaveOptions](interfaces/PdfSaveOptions.md)
+- [PdfSignatureInfo](interfaces/PdfSignatureInfo.md)
+- [Radians](interfaces/Radians.md)
+- [RadioAppearanceOptions](interfaces/RadioAppearanceOptions.md)
+- [RedactionOptions](interfaces/RedactionOptions.md)
+- [RegistryEntry](interfaces/RegistryEntry.md)
+- [RgbColor](interfaces/RgbColor.md)
+- [SetTitleOptions](interfaces/SetTitleOptions.md)
+- [SignatureAppearanceOptions](interfaces/SignatureAppearanceOptions.md)
+- [SignatureOptions](interfaces/SignatureOptions.md)
+- [SignatureVerificationResult](interfaces/SignatureVerificationResult.md)
+- [SignerInfo](interfaces/SignerInfo.md)
+- [SignOptions](interfaces/SignOptions.md)
+- [StructureElementOptions](interfaces/StructureElementOptions.md)
+- [SvgDrawCommand](interfaces/SvgDrawCommand.md)
+- [SvgElement](interfaces/SvgElement.md)
+- [SvgRenderOptions](interfaces/SvgRenderOptions.md)
+- [TextAppearanceOptions](interfaces/TextAppearanceOptions.md)
+- [TextItem](interfaces/TextItem.md)
+- [TimestampResult](interfaces/TimestampResult.md)
+- [ViewerPreferences](interfaces/ViewerPreferences.md)
+- [WatermarkOptions](interfaces/WatermarkOptions.md)
+- [WidgetAnnotationHost](interfaces/WidgetAnnotationHost.md)
 
-- **`rgb(r, g, b)`** — Create an RGB color (values 0 to 1)
-- **`cmyk(c, m, y, k)`** — Create a CMYK color (values 0 to 1)
-- **`grayscale(g)`** — Create a grayscale color (0 = black, 1 = white)
+## Type Aliases
 
-### Angles
+- [Angle](type-aliases/Angle.md)
+- [AnnotationType](type-aliases/AnnotationType.md)
+- [AppearanceProviderFor](type-aliases/AppearanceProviderFor.md)
+- [BlendMode](type-aliases/BlendMode.md)
+- [Color](type-aliases/Color.md)
+- [EncryptAlgorithm](type-aliases/EncryptAlgorithm.md)
+- [FieldType](type-aliases/FieldType.md)
+- [FreeTextAlignment](type-aliases/FreeTextAlignment.md)
+- [ImageAlignment](type-aliases/ImageAlignment.md)
+- [LineCapStyle](type-aliases/LineCapStyle.md)
+- [LineEndingStyle](type-aliases/LineEndingStyle.md)
+- [LineJoinStyle](type-aliases/LineJoinStyle.md)
+- [LinkHighlightMode](type-aliases/LinkHighlightMode.md)
+- [Operand](type-aliases/Operand.md)
+- [PageRange](type-aliases/PageRange.md)
+- [PageSize](type-aliases/PageSize.md)
+- [ParseSpeeds](type-aliases/ParseSpeeds.md)
+- [PdfALevel](type-aliases/PdfALevel.md)
+- [PdfObject](type-aliases/PdfObject.md)
+- [RefResolver](type-aliases/RefResolver.md)
+- [StandardFontName](type-aliases/StandardFontName.md)
+- [StandardStampName](type-aliases/StandardStampName.md)
+- [StructureType](type-aliases/StructureType.md)
+- [TextAlignment](type-aliases/TextAlignment.md)
+- [TextAnnotationIcon](type-aliases/TextAnnotationIcon.md)
+- [TextRenderingMode](type-aliases/TextRenderingMode.md)
 
-- **`degrees(n)`** — Create an angle from degrees
-- **`radians(n)`** — Create an angle from radians
+## Variables
 
-### Constants
+- [AnnotationFlags](variables/AnnotationFlags.md)
+- [BlendMode](variables/BlendMode.md)
+- [FieldFlags](variables/FieldFlags.md)
+- [ImageAlignment](variables/ImageAlignment.md)
+- [LineCapStyle](variables/LineCapStyle.md)
+- [LineJoinStyle](variables/LineJoinStyle.md)
+- [PageSizes](variables/PageSizes.md)
+- [ParseSpeeds](variables/ParseSpeeds.md)
+- [setFillingColor](variables/setFillingColor.md)
+- [setStrokingColor](variables/setStrokingColor.md)
+- [StandardFonts](variables/StandardFonts.md)
+- [TextAlignment](variables/TextAlignment.md)
+- [TextRenderingMode](variables/TextRenderingMode.md)
 
-- **`PageSizes`** — Standard page dimensions (A4, Letter, Legal, etc.)
-- **`StandardFonts`** — The 14 standard PDF fonts
+## Functions
 
-### WASM Initialization
+- [addWatermark](functions/addWatermark.md)
+- [addWatermarkToPage](functions/addWatermarkToPage.md)
+- [aesDecryptCBC](functions/aesDecryptCBC.md)
+- [aesEncryptCBC](functions/aesEncryptCBC.md)
+- [annotationFromDict](functions/annotationFromDict.md)
+- [applyFillColor](functions/applyFillColor.md)
+- [applyRedactions](functions/applyRedactions.md)
+- [applyStrokeColor](functions/applyStrokeColor.md)
+- [asNumber](functions/asNumber.md)
+- [asPDFName](functions/asPDFName.md)
+- [asPDFNumber](functions/asPDFNumber.md)
+- [attachFile](functions/attachFile.md)
+- [base64Decode](functions/base64Decode.md)
+- [base64Encode](functions/base64Encode.md)
+- [beginArtifact](functions/beginArtifact.md)
+- [beginArtifactWithType](functions/beginArtifactWithType.md)
+- [beginLayerContent](functions/beginLayerContent.md)
+- [beginMarkedContent](functions/beginMarkedContent.md)
+- [beginMarkedContentSequence](functions/beginMarkedContentSequence.md)
+- [beginMarkedContentWithProperties](functions/beginMarkedContentWithProperties.md)
+- [beginText](functions/beginText.md)
+- [buildAnnotationDict](functions/buildAnnotationDict.md)
+- [buildCatalog](functions/buildCatalog.md)
+- [buildDocumentStructure](functions/buildDocumentStructure.md)
+- [buildEmbeddedFilesNameTree](functions/buildEmbeddedFilesNameTree.md)
+- [buildInfoDict](functions/buildInfoDict.md)
+- [buildPageTree](functions/buildPageTree.md)
+- [buildPkcs7Signature](functions/buildPkcs7Signature.md)
+- [buildTimestampRequest](functions/buildTimestampRequest.md)
+- [buildViewerPreferencesDict](functions/buildViewerPreferencesDict.md)
+- [buildXmpMetadata](functions/buildXmpMetadata.md)
+- [checkAccessibility](functions/checkAccessibility.md)
+- [circlePath](functions/circlePath.md)
+- [clipEvenOdd](functions/clipEvenOdd.md)
+- [clipOp](functions/clipOp.md)
+- [closeAndStroke](functions/closeAndStroke.md)
+- [closeFillAndStroke](functions/closeFillAndStroke.md)
+- [closeFillEvenOddAndStroke](functions/closeFillEvenOddAndStroke.md)
+- [closePathOp](functions/closePathOp.md)
+- [cmyk](functions/cmyk.md)
+- [colorToComponents](functions/colorToComponents.md)
+- [componentsToColor](functions/componentsToColor.md)
+- [computeFileEncryptionKey](functions/computeFileEncryptionKey.md)
+- [computeFontSize](functions/computeFontSize.md)
+- [computeSignatureHash](functions/computeSignatureHash.md)
+- [concatMatrix](functions/concatMatrix.md)
+- [copyPages](functions/copyPages.md)
+- [createAnnotation](functions/createAnnotation.md)
+- [createMarkedContentScope](functions/createMarkedContentScope.md)
+- [createPdf](functions/createPdf.md)
+- [createXmpStream](functions/createXmpStream.md)
+- [cropPage](functions/cropPage.md)
+- [curveToFinal](functions/curveToFinal.md)
+- [curveToInitial](functions/curveToInitial.md)
+- [curveToOp](functions/curveToOp.md)
+- [decodePermissions](functions/decodePermissions.md)
+- [decodeStream](functions/decodeStream.md)
+- [degrees](functions/degrees.md)
+- [degreesToRadians](functions/degreesToRadians.md)
+- [drawImageWithMatrix](functions/drawImageWithMatrix.md)
+- [drawImageXObject](functions/drawImageXObject.md)
+- [drawSvgOnPage](functions/drawSvgOnPage.md)
+- [drawXObject](functions/drawXObject.md)
+- [ellipsePath](functions/ellipsePath.md)
+- [embedPageAsFormXObject](functions/embedPageAsFormXObject.md)
+- [embedSignature](functions/embedSignature.md)
+- [encodeContextTag](functions/encodeContextTag.md)
+- [encodeInteger](functions/encodeInteger.md)
+- [encodeLength](functions/encodeLength.md)
+- [encodeOctetString](functions/encodeOctetString.md)
+- [encodeOID](functions/encodeOID.md)
+- [encodePermissions](functions/encodePermissions.md)
+- [encodePrintableString](functions/encodePrintableString.md)
+- [encodeSequence](functions/encodeSequence.md)
+- [encodeSet](functions/encodeSet.md)
+- [encodeUTCTime](functions/encodeUTCTime.md)
+- [encodeUtf8String](functions/encodeUtf8String.md)
+- [endArtifact](functions/endArtifact.md)
+- [endLayerContent](functions/endLayerContent.md)
+- [endMarkedContent](functions/endMarkedContent.md)
+- [endPathOp](functions/endPathOp.md)
+- [endText](functions/endText.md)
+- [enforcePdfA](functions/enforcePdfA.md)
+- [extractMetrics](functions/extractMetrics.md)
+- [extractText](functions/extractText.md)
+- [extractTextWithPositions](functions/extractTextWithPositions.md)
+- [fillAndStrokeOp](functions/fillAndStrokeOp.md)
+- [fillEvenOdd](functions/fillEvenOdd.md)
+- [fillEvenOddAndStroke](functions/fillEvenOddAndStroke.md)
+- [fillOp](functions/fillOp.md)
+- [findSignatures](functions/findSignatures.md)
+- [formatPdfDate](functions/formatPdfDate.md)
+- [generateButtonAppearance](functions/generateButtonAppearance.md)
+- [generateCheckboxAppearance](functions/generateCheckboxAppearance.md)
+- [generateCircleAppearance](functions/generateCircleAppearance.md)
+- [generateDropdownAppearance](functions/generateDropdownAppearance.md)
+- [generateFreeTextAppearance](functions/generateFreeTextAppearance.md)
+- [generateHighlightAppearance](functions/generateHighlightAppearance.md)
+- [generateInkAppearance](functions/generateInkAppearance.md)
+- [generateLineAppearance](functions/generateLineAppearance.md)
+- [generateListboxAppearance](functions/generateListboxAppearance.md)
+- [generateRadioAppearance](functions/generateRadioAppearance.md)
+- [generateSignatureAppearance](functions/generateSignatureAppearance.md)
+- [generateSquareAppearance](functions/generateSquareAppearance.md)
+- [generateSquigglyAppearance](functions/generateSquigglyAppearance.md)
+- [generateStrikeOutAppearance](functions/generateStrikeOutAppearance.md)
+- [generateTextAppearance](functions/generateTextAppearance.md)
+- [generateUnderlineAppearance](functions/generateUnderlineAppearance.md)
+- [getAttachments](functions/getAttachments.md)
+- [getPageSize](functions/getPageSize.md)
+- [getRedactionMarks](functions/getRedactionMarks.md)
+- [getSignatures](functions/getSignatures.md)
+- [grayscale](functions/grayscale.md)
+- [initWasm](functions/initWasm.md)
+- [insertPage](functions/insertPage.md)
+- [isAccessible](functions/isAccessible.md)
+- [isLinearized](functions/isLinearized.md)
+- [isOpenTypeCFF](functions/isOpenTypeCFF.md)
+- [isTrueType](functions/isTrueType.md)
+- [layoutCombedText](functions/layoutCombedText.md)
+- [layoutMultilineText](functions/layoutMultilineText.md)
+- [layoutSinglelineText](functions/layoutSinglelineText.md)
+- [linearizePdf](functions/linearizePdf.md)
+- [lineToOp](functions/lineToOp.md)
+- [loadPdf](functions/loadPdf.md)
+- [markForRedaction](functions/markForRedaction.md)
+- [md5](functions/md5.md)
+- [mergePdfs](functions/mergePdfs.md)
+- [movePage](functions/movePage.md)
+- [moveTextOp](functions/moveTextOp.md)
+- [moveTextSetLeading](functions/moveTextSetLeading.md)
+- [moveToOp](functions/moveToOp.md)
+- [nextLineOp](functions/nextLineOp.md)
+- [parseContentStream](functions/parseContentStream.md)
+- [parseSvg](functions/parseSvg.md)
+- [parseSvgColor](functions/parseSvgColor.md)
+- [parseSvgPath](functions/parseSvgPath.md)
+- [parseSvgTransform](functions/parseSvgTransform.md)
+- [parseTimestampResponse](functions/parseTimestampResponse.md)
+- [parseViewerPreferences](functions/parseViewerPreferences.md)
+- [parseXmpMetadata](functions/parseXmpMetadata.md)
+- [prepareForSigning](functions/prepareForSigning.md)
+- [radians](functions/radians.md)
+- [radiansToDegrees](functions/radiansToDegrees.md)
+- [rc4](functions/rc4.md)
+- [rectangleOp](functions/rectangleOp.md)
+- [removePage](functions/removePage.md)
+- [removePages](functions/removePages.md)
+- [requestTimestamp](functions/requestTimestamp.md)
+- [resizePage](functions/resizePage.md)
+- [restoreState](functions/restoreState.md)
+- [reversePages](functions/reversePages.md)
+- [rgb](functions/rgb.md)
+- [rotateAllPages](functions/rotateAllPages.md)
+- [rotateOp](functions/rotateOp.md)
+- [rotatePage](functions/rotatePage.md)
+- [rotationMatrix](functions/rotationMatrix.md)
+- [saveDocumentIncremental](functions/saveDocumentIncremental.md)
+- [saveIncremental](functions/saveIncremental.md)
+- [saveState](functions/saveState.md)
+- [scaleOp](functions/scaleOp.md)
+- [serializePdf](functions/serializePdf.md)
+- [setCharacterSpacingOp](functions/setCharacterSpacingOp.md)
+- [setColorSpace](functions/setColorSpace.md)
+- [setDashPatternOp](functions/setDashPatternOp.md)
+- [setFillColor](functions/setFillColor.md)
+- [setFillColorCmyk](functions/setFillColorCmyk.md)
+- [setFillColorGray](functions/setFillColorGray.md)
+- [setFillColorRgb](functions/setFillColorRgb.md)
+- [setFlatness](functions/setFlatness.md)
+- [setFontOp](functions/setFontOp.md)
+- [setFontSizeOp](functions/setFontSizeOp.md)
+- [setGraphicsStateOp](functions/setGraphicsStateOp.md)
+- [setLeadingOp](functions/setLeadingOp.md)
+- [setLineCapOp](functions/setLineCapOp.md)
+- [setLineJoinOp](functions/setLineJoinOp.md)
+- [setLineWidthOp](functions/setLineWidthOp.md)
+- [setMiterLimit](functions/setMiterLimit.md)
+- [setStrokeColor](functions/setStrokeColor.md)
+- [setStrokeColorCmyk](functions/setStrokeColorCmyk.md)
+- [setStrokeColorGray](functions/setStrokeColorGray.md)
+- [setStrokeColorRgb](functions/setStrokeColorRgb.md)
+- [setStrokeColorSpace](functions/setStrokeColorSpace.md)
+- [setTextMatrixOp](functions/setTextMatrixOp.md)
+- [setTextRenderingModeOp](functions/setTextRenderingModeOp.md)
+- [setTextRiseOp](functions/setTextRiseOp.md)
+- [setWordSpacingOp](functions/setWordSpacingOp.md)
+- [sha256](functions/sha256.md)
+- [sha384](functions/sha384.md)
+- [sha512](functions/sha512.md)
+- [showTextArray](functions/showTextArray.md)
+- [showTextHex](functions/showTextHex.md)
+- [showTextNextLine](functions/showTextNextLine.md)
+- [showTextOp](functions/showTextOp.md)
+- [showTextWithSpacing](functions/showTextWithSpacing.md)
+- [signPdf](functions/signPdf.md)
+- [skewOp](functions/skewOp.md)
+- [splitPdf](functions/splitPdf.md)
+- [strokeOp](functions/strokeOp.md)
+- [summarizeIssues](functions/summarizeIssues.md)
+- [svgToPdfOperators](functions/svgToPdfOperators.md)
+- [translateOp](functions/translateOp.md)
+- [validatePdfA](functions/validatePdfA.md)
+- [verifyOwnerPassword](functions/verifyOwnerPassword.md)
+- [verifySignature](functions/verifySignature.md)
+- [verifySignatures](functions/verifySignatures.md)
+- [verifyUserPassword](functions/verifyUserPassword.md)
+- [wrapInMarkedContent](functions/wrapInMarkedContent.md)
 
-- **`initWasm(url?)`** — Pre-load the optional WASM acceleration module
+## References
 
-### Low-Level API
+### concatTransformationMatrix
 
-For advanced users building custom PDF structures:
+Renames and re-exports [concatMatrix](functions/concatMatrix.md)
 
-- **`PdfWriter`** / **`PdfStreamWriter`** — Low-level PDF serialization
-- **`PdfNull`**, **`PdfBool`**, **`PdfNumber`**, **`PdfString`**, **`PdfName`** — PDF primitive objects
-- **`PdfArray`**, **`PdfDict`**, **`PdfStream`**, **`PdfRef`** — PDF composite objects
-- **`PdfObjectRegistry`** — Object reference management
-- **`buildCatalog()`**, **`buildPageTree()`** — Document structure helpers
+***
 
-## Generated Documentation
+### drawObject
 
-The detailed API documentation for each export is generated by TypeDoc and placed in this section during the build process. Run the following command to regenerate it:
+Renames and re-exports [drawXObject](functions/drawXObject.md)
 
-```sh
-npm run docs:api
-```
+***
 
-This reads the TypeDoc configuration from `typedoc.json` and outputs Markdown files into the `docs/api/` directory, which VitePress then renders as part of this documentation site.
+### popGraphicsState
 
-## Type Exports
+Renames and re-exports [restoreState](functions/restoreState.md)
 
-`modern-pdf` exports the following TypeScript types for use in your application code:
+***
 
-```ts
-import type {
-  // Page and document
-  PageSize,
-  FontRef,
-  ImageRef,
-  StandardFontName,
-  PdfSaveOptions,
-  DocumentMetadata,
+### pushGraphicsState
 
-  // Drawing options
-  DrawTextOptions,
-  DrawImageOptions,
-  DrawRectangleOptions,
-  DrawLineOptions,
-  DrawCircleOptions,
-  DrawEllipseOptions,
+Renames and re-exports [saveState](functions/saveState.md)
 
-  // Colors
-  RgbColor,
-  CmykColor,
-  GrayscaleColor,
-  Color,
+***
 
-  // Angles
-  Degrees,
-  Radians,
-  Angle,
+### setCharacterSqueeze
 
-  // Low-level
-  PdfObject,
-  ByteWriter,
-  RegistryEntry,
-  PageEntry,
-  CatalogOptions,
-  DocumentStructure,
-} from 'modern-pdf';
-```
+Renames and re-exports [setCharacterSpacingOp](functions/setCharacterSpacingOp.md)
+
+***
+
+### setFontAndSize
+
+Renames and re-exports [setFontOp](functions/setFontOp.md)
+
+***
+
+### setLineHeight
+
+Renames and re-exports [setLeadingOp](functions/setLeadingOp.md)

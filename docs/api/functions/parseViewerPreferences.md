@@ -8,7 +8,7 @@
 
 > **parseViewerPreferences**(`dict`): [`ViewerPreferences`](../interfaces/ViewerPreferences.md)
 
-Defined in: [src/metadata/viewerPreferences.ts:149](https://github.com/ABCrimson/modern-pdf-lib/blob/86f43cf3bcfc43d27d02f37979dfabd9921b66bc/src/metadata/viewerPreferences.ts#L149)
+Defined in: [src/metadata/viewerPreferences.ts:149](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/metadata/viewerPreferences.ts#L149)
 
 Parse a `/ViewerPreferences` dictionary into a ViewerPreferences object.
 

@@ -8,7 +8,7 @@
 
 > **extractMetrics**(`fontData`): [`FontMetrics`](../interfaces/FontMetrics.md)
 
-Defined in: [src/assets/font/fontMetrics.ts:629](https://github.com/ABCrimson/modern-pdf-lib/blob/86f43cf3bcfc43d27d02f37979dfabd9921b66bc/src/assets/font/fontMetrics.ts#L629)
+Defined in: [src/assets/font/fontMetrics.ts:629](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/assets/font/fontMetrics.ts#L629)
 
 Extract font metrics from raw TrueType / OpenType font bytes.
 

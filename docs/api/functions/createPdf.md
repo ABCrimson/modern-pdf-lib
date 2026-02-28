@@ -8,7 +8,7 @@
 
 > **createPdf**(): [`PdfDocument`](../classes/PdfDocument.md)
 
-Defined in: [src/core/pdfDocument.ts:2178](https://github.com/ABCrimson/modern-pdf-lib/blob/86f43cf3bcfc43d27d02f37979dfabd9921b66bc/src/core/pdfDocument.ts#L2178)
+Defined in: [src/core/pdfDocument.ts:2178](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/pdfDocument.ts#L2178)
 
 Create a new, empty PDF document.
 

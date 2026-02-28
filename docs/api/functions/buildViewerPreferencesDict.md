@@ -8,7 +8,7 @@
 
 > **buildViewerPreferencesDict**(`prefs`): [`PdfDict`](../classes/PdfDict.md)
 
-Defined in: [src/metadata/viewerPreferences.ts:88](https://github.com/ABCrimson/modern-pdf-lib/blob/86f43cf3bcfc43d27d02f37979dfabd9921b66bc/src/metadata/viewerPreferences.ts#L88)
+Defined in: [src/metadata/viewerPreferences.ts:88](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/metadata/viewerPreferences.ts#L88)
 
 Build a `/ViewerPreferences` dictionary from preferences.
 

@@ -8,7 +8,7 @@
 
 > **rotatePage**(`doc`, `index`, `angle`): `void`
 
-Defined in: [src/core/pageManipulation.ts:246](https://github.com/ABCrimson/modern-pdf-lib/blob/86f43cf3bcfc43d27d02f37979dfabd9921b66bc/src/core/pageManipulation.ts#L246)
+Defined in: [src/core/pageManipulation.ts:246](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/pageManipulation.ts#L246)
 
 Rotate a page by the specified angle.
 

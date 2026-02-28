@@ -8,7 +8,7 @@
 
 > **addWatermark**(`doc`, `options`): `void`
 
-Defined in: [src/core/watermark.ts:170](https://github.com/ABCrimson/modern-pdf-lib/blob/86f43cf3bcfc43d27d02f37979dfabd9921b66bc/src/core/watermark.ts#L170)
+Defined in: [src/core/watermark.ts:170](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/watermark.ts#L170)
 
 Add a watermark to all pages in a document.
 

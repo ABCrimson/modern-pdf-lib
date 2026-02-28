@@ -8,7 +8,7 @@
 
 > **parseXmpMetadata**(`xmpString`): `Partial`\<[`DocumentMetadata`](../interfaces/DocumentMetadata.md)\>
 
-Defined in: [src/metadata/xmpMetadata.ts:198](https://github.com/ABCrimson/modern-pdf-lib/blob/86f43cf3bcfc43d27d02f37979dfabd9921b66bc/src/metadata/xmpMetadata.ts#L198)
+Defined in: [src/metadata/xmpMetadata.ts:198](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/metadata/xmpMetadata.ts#L198)
 
 Parse XMP metadata XML string into document metadata fields.
 

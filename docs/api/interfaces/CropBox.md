@@ -6,7 +6,7 @@
 
 # Interface: CropBox
 
-Defined in: [src/core/pageManipulation.ts:111](https://github.com/ABCrimson/modern-pdf-lib/blob/86f43cf3bcfc43d27d02f37979dfabd9921b66bc/src/core/pageManipulation.ts#L111)
+Defined in: [src/core/pageManipulation.ts:111](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/pageManipulation.ts#L111)
 
 A rectangular crop box defined by its coordinates.
 
@@ -18,7 +18,7 @@ All values are in PDF points (1/72 of an inch).
 
 > `readonly` **height**: `number`
 
-Defined in: [src/core/pageManipulation.ts:119](https://github.com/ABCrimson/modern-pdf-lib/blob/86f43cf3bcfc43d27d02f37979dfabd9921b66bc/src/core/pageManipulation.ts#L119)
+Defined in: [src/core/pageManipulation.ts:119](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/pageManipulation.ts#L119)
 
 Height of the crop box.
 
@@ -28,7 +28,7 @@ Height of the crop box.
 
 > `readonly` **width**: `number`
 
-Defined in: [src/core/pageManipulation.ts:117](https://github.com/ABCrimson/modern-pdf-lib/blob/86f43cf3bcfc43d27d02f37979dfabd9921b66bc/src/core/pageManipulation.ts#L117)
+Defined in: [src/core/pageManipulation.ts:117](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/pageManipulation.ts#L117)
 
 Width of the crop box.
 
@@ -38,7 +38,7 @@ Width of the crop box.
 
 > `readonly` **x**: `number`
 
-Defined in: [src/core/pageManipulation.ts:113](https://github.com/ABCrimson/modern-pdf-lib/blob/86f43cf3bcfc43d27d02f37979dfabd9921b66bc/src/core/pageManipulation.ts#L113)
+Defined in: [src/core/pageManipulation.ts:113](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/pageManipulation.ts#L113)
 
 Lower-left x coordinate.
 
@@ -48,6 +48,6 @@ Lower-left x coordinate.
 
 > `readonly` **y**: `number`
 
-Defined in: [src/core/pageManipulation.ts:115](https://github.com/ABCrimson/modern-pdf-lib/blob/86f43cf3bcfc43d27d02f37979dfabd9921b66bc/src/core/pageManipulation.ts#L115)
+Defined in: [src/core/pageManipulation.ts:115](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/pageManipulation.ts#L115)
 
 Lower-left y coordinate.

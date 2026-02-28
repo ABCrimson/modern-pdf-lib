@@ -6,7 +6,7 @@
 
 # Class: PDFOperator
 
-Defined in: [src/core/operators/index.ts:171](https://github.com/ABCrimson/modern-pdf-lib/blob/86f43cf3bcfc43d27d02f37979dfabd9921b66bc/src/core/operators/index.ts#L171)
+Defined in: [src/core/operators/index.ts:171](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/operators/index.ts#L171)
 
 A first-class representation of a single PDF content-stream operator.
 
@@ -25,7 +25,7 @@ page.pushOperators(op.toString());
 
 > `readonly` **name**: `string`
 
-Defined in: [src/core/operators/index.ts:184](https://github.com/ABCrimson/modern-pdf-lib/blob/86f43cf3bcfc43d27d02f37979dfabd9921b66bc/src/core/operators/index.ts#L184)
+Defined in: [src/core/operators/index.ts:184](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/operators/index.ts#L184)
 
 The PDF operator name.
 
@@ -35,7 +35,7 @@ The PDF operator name.
 
 > `readonly` **operands**: readonly (`string` \| `number`)[]
 
-Defined in: [src/core/operators/index.ts:186](https://github.com/ABCrimson/modern-pdf-lib/blob/86f43cf3bcfc43d27d02f37979dfabd9921b66bc/src/core/operators/index.ts#L186)
+Defined in: [src/core/operators/index.ts:186](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/operators/index.ts#L186)
 
 The operands for this operator.
 
@@ -45,7 +45,7 @@ The operands for this operator.
 
 > **toString**(): `string`
 
-Defined in: [src/core/operators/index.ts:194](https://github.com/ABCrimson/modern-pdf-lib/blob/86f43cf3bcfc43d27d02f37979dfabd9921b66bc/src/core/operators/index.ts#L194)
+Defined in: [src/core/operators/index.ts:194](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/operators/index.ts#L194)
 
 Serialize this operator to its PDF content-stream representation.
 
@@ -61,7 +61,7 @@ A string like `"100 200 m\n"`.
 
 > `static` **of**(`name`, ...`operands`): `PDFOperator`
 
-Defined in: [src/core/operators/index.ts:178](https://github.com/ABCrimson/modern-pdf-lib/blob/86f43cf3bcfc43d27d02f37979dfabd9921b66bc/src/core/operators/index.ts#L178)
+Defined in: [src/core/operators/index.ts:178](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/operators/index.ts#L178)
 
 Create a new operator.
 

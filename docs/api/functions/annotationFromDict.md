@@ -8,7 +8,7 @@
 
 > **annotationFromDict**(`dict`, `resolver?`): [`PdfAnnotation`](../classes/PdfAnnotation.md)
 
-Defined in: [src/annotation/pdfAnnotation.ts:120](https://github.com/ABCrimson/modern-pdf-lib/blob/86f43cf3bcfc43d27d02f37979dfabd9921b66bc/src/annotation/pdfAnnotation.ts#L120)
+Defined in: [src/annotation/pdfAnnotation.ts:120](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/annotation/pdfAnnotation.ts#L120)
 
 Create a PdfAnnotation from an existing dictionary.
 

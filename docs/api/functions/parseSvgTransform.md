@@ -8,7 +8,7 @@
 
 > **parseSvgTransform**(`transformStr`): \[`number`, `number`, `number`, `number`, `number`, `number`\]
 
-Defined in: [src/assets/svg/svgParser.ts:182](https://github.com/ABCrimson/modern-pdf-lib/blob/86f43cf3bcfc43d27d02f37979dfabd9921b66bc/src/assets/svg/svgParser.ts#L182)
+Defined in: [src/assets/svg/svgParser.ts:182](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/assets/svg/svgParser.ts#L182)
 
 Parse an SVG `transform` attribute into a 2D affine matrix.
 

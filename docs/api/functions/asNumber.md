@@ -8,7 +8,7 @@
 
 > **asNumber**(`obj`): `number` \| `undefined`
 
-Defined in: [src/utils/pdfValueHelpers.ts:36](https://github.com/ABCrimson/modern-pdf-lib/blob/86f43cf3bcfc43d27d02f37979dfabd9921b66bc/src/utils/pdfValueHelpers.ts#L36)
+Defined in: [src/utils/pdfValueHelpers.ts:36](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/utils/pdfValueHelpers.ts#L36)
 
 Extract a numeric value from a [PdfObject](../type-aliases/PdfObject.md).
 

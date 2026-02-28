@@ -8,7 +8,7 @@
 
 > **beginMarkedContent**(`tag`): `string`
 
-Defined in: [src/accessibility/markedContent.ts:62](https://github.com/ABCrimson/modern-pdf-lib/blob/86f43cf3bcfc43d27d02f37979dfabd9921b66bc/src/accessibility/markedContent.ts#L62)
+Defined in: [src/accessibility/markedContent.ts:62](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/accessibility/markedContent.ts#L62)
 
 Generate a `BMC` (begin marked content) operator with just a tag.
 

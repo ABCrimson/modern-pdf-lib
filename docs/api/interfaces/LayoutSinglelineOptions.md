@@ -6,7 +6,7 @@
 
 # Interface: LayoutSinglelineOptions
 
-Defined in: [src/core/layout.ts:175](https://github.com/ABCrimson/modern-pdf-lib/blob/86f43cf3bcfc43d27d02f37979dfabd9921b66bc/src/core/layout.ts#L175)
+Defined in: [src/core/layout.ts:175](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/layout.ts#L175)
 
 Options for [layoutSinglelineText](../functions/layoutSinglelineText.md).
 
@@ -16,7 +16,7 @@ Options for [layoutSinglelineText](../functions/layoutSinglelineText.md).
 
 > `optional` **alignment**: `0` \| `1` \| `2`
 
-Defined in: [src/core/layout.ts:183](https://github.com/ABCrimson/modern-pdf-lib/blob/86f43cf3bcfc43d27d02f37979dfabd9921b66bc/src/core/layout.ts#L183)
+Defined in: [src/core/layout.ts:183](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/layout.ts#L183)
 
 Text alignment within bounds. Default: 'left'.
 
@@ -26,7 +26,7 @@ Text alignment within bounds. Default: 'left'.
 
 > `optional` **bounds**: `object`
 
-Defined in: [src/core/layout.ts:181](https://github.com/ABCrimson/modern-pdf-lib/blob/86f43cf3bcfc43d27d02f37979dfabd9921b66bc/src/core/layout.ts#L181)
+Defined in: [src/core/layout.ts:181](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/layout.ts#L181)
 
 Bounds width for alignment (optional).
 
@@ -44,7 +44,7 @@ Bounds width for alignment (optional).
 
 > **font**: [`FontRef`](FontRef.md)
 
-Defined in: [src/core/layout.ts:177](https://github.com/ABCrimson/modern-pdf-lib/blob/86f43cf3bcfc43d27d02f37979dfabd9921b66bc/src/core/layout.ts#L177)
+Defined in: [src/core/layout.ts:177](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/layout.ts#L177)
 
 The font to use for measurement.
 
@@ -54,6 +54,6 @@ The font to use for measurement.
 
 > **fontSize**: `number`
 
-Defined in: [src/core/layout.ts:179](https://github.com/ABCrimson/modern-pdf-lib/blob/86f43cf3bcfc43d27d02f37979dfabd9921b66bc/src/core/layout.ts#L179)
+Defined in: [src/core/layout.ts:179](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/layout.ts#L179)
 
 Font size in points.

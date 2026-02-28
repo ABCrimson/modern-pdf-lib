@@ -8,7 +8,7 @@
 
 > **drawImageXObject**(`name`, `x`, `y`, `width`, `height`): `string`
 
-Defined in: [src/core/operators/image.ts:59](https://github.com/ABCrimson/modern-pdf-lib/blob/86f43cf3bcfc43d27d02f37979dfabd9921b66bc/src/core/operators/image.ts#L59)
+Defined in: [src/core/operators/image.ts:59](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/operators/image.ts#L59)
 
 Produce the full operator sequence to draw an image XObject at the
 given position and dimensions.

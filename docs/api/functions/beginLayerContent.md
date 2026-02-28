@@ -8,7 +8,7 @@
 
 > **beginLayerContent**(`layer`): `string`
 
-Defined in: [src/layers/optionalContent.ts:292](https://github.com/ABCrimson/modern-pdf-lib/blob/86f43cf3bcfc43d27d02f37979dfabd9921b66bc/src/layers/optionalContent.ts#L292)
+Defined in: [src/layers/optionalContent.ts:292](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/layers/optionalContent.ts#L292)
 
 Generate the PDF operator to begin optional content for a layer.
 

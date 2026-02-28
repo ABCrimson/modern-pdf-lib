@@ -111,7 +111,19 @@ const font = await pdf.embedFont(fontBytes);
 page.drawText('Hello', { x: 50, y: 700, font, size: 16 });
 ```
 
-Subsetting is powered by the `ttf-parser` WASM module, which parses the font's glyph tables and extracts only the necessary data.
+The subsetter operates at the binary TrueType level — it rebuilds `glyf`, `loca`, `hmtx`, `maxp`, and `cmap` tables from scratch, resolves composite glyph dependencies, and produces a valid TrueType file with correct checksums and 4-byte alignment. This is a pure-JS implementation that works in every runtime without WASM.
+
+### What Gets Subsetted
+
+| Table | Action |
+|---|---|
+| `glyf` | Only referenced glyphs (including composites) |
+| `loca` | Rebuilt with new offsets |
+| `hmtx` | Only metrics for included glyphs |
+| `maxp` | Updated glyph count |
+| `cmap` | Minimal Format 4 subtable for the subset |
+| `head` | Checksum recalculated |
+| `name`, `post`, `OS/2`, `hhea` | Copied from original |
 
 ### Disabling Subsetting
 
@@ -122,7 +134,7 @@ const font = await pdf.embedFont(fontBytes, { subset: false });
 ```
 
 > [!TIP]
-> Keep subsetting enabled for document generation. It typically reduces font data by 90% or more.
+> Keep subsetting enabled for document generation. It typically reduces font data by 90% or more — a 10 MB CJK font embedding just 5 characters can drop to under 50 KB.
 
 ## Text Shaping for Complex Scripts
 
@@ -147,7 +159,12 @@ page.drawText('مرحبا بالعالم', {
 });
 ```
 
-Text shaping is activated automatically when a custom font is embedded. The `rustybuzz` WASM module is loaded on demand.
+Basic text shaping (Latin ligatures, CJK mapping) works out of the box with pure JS. For full OpenType shaping of complex scripts (Arabic contextual forms, Devanagari conjuncts, Thai word breaking), initialize the rustybuzz WASM module:
+
+```ts
+import { initWasm } from 'modern-pdf-lib';
+await initWasm({ shaping: true });
+```
 
 ## Font Metrics and Measurement
 
@@ -203,19 +220,20 @@ function centerText(
 
 ## Performance Considerations
 
-| Operation | WASM Acceleration | Notes |
-|---|---|---|
-| Font parsing | Yes (ttf-parser) | Parsing glyph tables from large fonts |
-| Subsetting | Yes (ttf-parser) | Extracting used glyphs |
-| Text shaping | Yes (rustybuzz) | Complex script layout |
-| Width measurement | No | Computed from cached glyph metrics |
+| Operation | Pure JS | WASM (optional) | Notes |
+|---|---|---|---|
+| Font parsing | Built-in | ttf-parser | Metric extraction from large fonts |
+| Subsetting | Built-in | — | Pure JS handles all TrueType subsetting |
+| Text shaping | Latin/CJK | rustybuzz | WASM needed for Arabic, Devanagari, etc. |
+| Width measurement | Built-in | — | Computed from cached glyph metrics |
 
-For documents with many custom fonts or complex scripts, initializing WASM before embedding fonts can improve performance:
+The pure-JS subsetter and metric extractor work in every runtime. WASM modules are optional accelerators — they produce identical results, just faster for large fonts and complex scripts.
 
 ```ts
 import { initWasm } from 'modern-pdf-lib';
-await initWasm();
 
-// Font operations are now WASM-accelerated
+// Optionally load WASM for faster font parsing + complex script shaping
+await initWasm({ fonts: true, shaping: true });
+
 const font = await pdf.embedFont(largeCjkFontBytes);
 ```

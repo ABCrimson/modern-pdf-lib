@@ -8,6 +8,6 @@
 
 > **TextAnnotationIcon** = `"Comment"` \| `"Key"` \| `"Note"` \| `"Help"` \| `"NewParagraph"` \| `"Paragraph"` \| `"Insert"`
 
-Defined in: [src/annotation/types/textAnnotation.ts:25](https://github.com/ABCrimson/modern-pdf-lib/blob/86f43cf3bcfc43d27d02f37979dfabd9921b66bc/src/annotation/types/textAnnotation.ts#L25)
+Defined in: [src/annotation/types/textAnnotation.ts:25](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/annotation/types/textAnnotation.ts#L25)
 
 Standard icon names for text annotations.

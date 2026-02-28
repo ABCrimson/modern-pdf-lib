@@ -6,7 +6,7 @@
 
 # Interface: PdfSignatureInfo
 
-Defined in: [src/signature/signatureHandler.ts:45](https://github.com/ABCrimson/modern-pdf-lib/blob/86f43cf3bcfc43d27d02f37979dfabd9921b66bc/src/signature/signatureHandler.ts#L45)
+Defined in: [src/signature/signatureHandler.ts:45](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/signature/signatureHandler.ts#L45)
 
 Information about an existing signature in a PDF.
 
@@ -16,7 +16,7 @@ Information about an existing signature in a PDF.
 
 > **byteRange**: \[`number`, `number`, `number`, `number`\]
 
-Defined in: [src/signature/signatureHandler.ts:59](https://github.com/ABCrimson/modern-pdf-lib/blob/86f43cf3bcfc43d27d02f37979dfabd9921b66bc/src/signature/signatureHandler.ts#L59)
+Defined in: [src/signature/signatureHandler.ts:59](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/signature/signatureHandler.ts#L59)
 
 The ByteRange covering this signature.
 
@@ -26,7 +26,7 @@ The ByteRange covering this signature.
 
 > `optional` **contactInfo**: `string`
 
-Defined in: [src/signature/signatureHandler.ts:55](https://github.com/ABCrimson/modern-pdf-lib/blob/86f43cf3bcfc43d27d02f37979dfabd9921b66bc/src/signature/signatureHandler.ts#L55)
+Defined in: [src/signature/signatureHandler.ts:55](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/signature/signatureHandler.ts#L55)
 
 Contact information.
 
@@ -36,7 +36,7 @@ Contact information.
 
 > **fieldName**: `string`
 
-Defined in: [src/signature/signatureHandler.ts:47](https://github.com/ABCrimson/modern-pdf-lib/blob/86f43cf3bcfc43d27d02f37979dfabd9921b66bc/src/signature/signatureHandler.ts#L47)
+Defined in: [src/signature/signatureHandler.ts:47](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/signature/signatureHandler.ts#L47)
 
 The signature field name.
 
@@ -46,7 +46,7 @@ The signature field name.
 
 > `optional` **location**: `string`
 
-Defined in: [src/signature/signatureHandler.ts:53](https://github.com/ABCrimson/modern-pdf-lib/blob/86f43cf3bcfc43d27d02f37979dfabd9921b66bc/src/signature/signatureHandler.ts#L53)
+Defined in: [src/signature/signatureHandler.ts:53](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/signature/signatureHandler.ts#L53)
 
 Location of signing.
 
@@ -56,7 +56,7 @@ Location of signing.
 
 > `optional` **reason**: `string`
 
-Defined in: [src/signature/signatureHandler.ts:51](https://github.com/ABCrimson/modern-pdf-lib/blob/86f43cf3bcfc43d27d02f37979dfabd9921b66bc/src/signature/signatureHandler.ts#L51)
+Defined in: [src/signature/signatureHandler.ts:51](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/signature/signatureHandler.ts#L51)
 
 Reason for signing.
 
@@ -66,7 +66,7 @@ Reason for signing.
 
 > `optional` **signatureValid**: `boolean`
 
-Defined in: [src/signature/signatureHandler.ts:61](https://github.com/ABCrimson/modern-pdf-lib/blob/86f43cf3bcfc43d27d02f37979dfabd9921b66bc/src/signature/signatureHandler.ts#L61)
+Defined in: [src/signature/signatureHandler.ts:61](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/signature/signatureHandler.ts#L61)
 
 Whether the signature is valid (set during verification).
 
@@ -76,7 +76,7 @@ Whether the signature is valid (set during verification).
 
 > **signedBy**: `string`
 
-Defined in: [src/signature/signatureHandler.ts:49](https://github.com/ABCrimson/modern-pdf-lib/blob/86f43cf3bcfc43d27d02f37979dfabd9921b66bc/src/signature/signatureHandler.ts#L49)
+Defined in: [src/signature/signatureHandler.ts:49](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/signature/signatureHandler.ts#L49)
 
 Subject CN from the certificate.
 
@@ -86,6 +86,6 @@ Subject CN from the certificate.
 
 > `optional` **signingDate**: `Date`
 
-Defined in: [src/signature/signatureHandler.ts:57](https://github.com/ABCrimson/modern-pdf-lib/blob/86f43cf3bcfc43d27d02f37979dfabd9921b66bc/src/signature/signatureHandler.ts#L57)
+Defined in: [src/signature/signatureHandler.ts:57](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/signature/signatureHandler.ts#L57)
 
 Signing date/time.

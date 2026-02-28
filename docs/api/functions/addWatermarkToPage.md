@@ -8,7 +8,7 @@
 
 > **addWatermarkToPage**(`page`, `options`, `registry`): `void`
 
-Defined in: [src/core/watermark.ts:66](https://github.com/ABCrimson/modern-pdf-lib/blob/86f43cf3bcfc43d27d02f37979dfabd9921b66bc/src/core/watermark.ts#L66)
+Defined in: [src/core/watermark.ts:66](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/watermark.ts#L66)
 
 Add a watermark to a single page.
 

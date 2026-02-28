@@ -8,7 +8,7 @@
 
 > **linearizePdf**(`pdfBytes`, `options?`): `Promise`\<`Uint8Array`\<`ArrayBufferLike`\>\>
 
-Defined in: [src/core/linearization.ts:221](https://github.com/ABCrimson/modern-pdf-lib/blob/86f43cf3bcfc43d27d02f37979dfabd9921b66bc/src/core/linearization.ts#L221)
+Defined in: [src/core/linearization.ts:221](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/linearization.ts#L221)
 
 Linearize a PDF document for fast web viewing.
 

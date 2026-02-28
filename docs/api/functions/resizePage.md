@@ -8,7 +8,7 @@
 
 > **resizePage**(`doc`, `index`, `size`): `void`
 
-Defined in: [src/core/pageManipulation.ts:324](https://github.com/ABCrimson/modern-pdf-lib/blob/86f43cf3bcfc43d27d02f37979dfabd9921b66bc/src/core/pageManipulation.ts#L324)
+Defined in: [src/core/pageManipulation.ts:324](https://github.com/ABCrimson/modern-pdf-lib/blob/dc35af75ebbef66c07ef507cafc3a644f376c837/src/core/pageManipulation.ts#L324)
 
 Resize a page by setting its media box.
 
