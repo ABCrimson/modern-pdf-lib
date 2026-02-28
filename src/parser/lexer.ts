@@ -11,6 +11,8 @@
  * Reference: PDF 1.7 specification, SS 7.2 (Lexical Conventions).
  */
 
+import { PdfParseError } from './parseError.js';
+
 // ---------------------------------------------------------------------------
 // Token types
 // ---------------------------------------------------------------------------
@@ -196,7 +198,7 @@ const hexVal: Int8Array = /* @__PURE__ */ (() => {
  */
 export class PdfLexer {
   /** The raw PDF bytes being tokenized. */
-  private readonly data: Uint8Array;
+  private readonly _data: Uint8Array;
 
   /** Total length of the input (cached for hot loops). */
   private readonly len: number;
@@ -224,9 +226,19 @@ export class PdfLexer {
    *              must not mutate it while the lexer is in use.
    */
   constructor(data: Uint8Array) {
-    this.data = data;
+    this._data = data;
     this.len = data.length;
     this.position = 0;
+  }
+
+  /**
+   * Public accessor for the raw PDF byte buffer.
+   *
+   * This allows other parsers (e.g. object parser, xref parser) to
+   * include hex-context dumps in structured error messages.
+   */
+  get rawData(): Uint8Array {
+    return this._data;
   }
 
   // -----------------------------------------------------------------------
@@ -272,12 +284,17 @@ export class PdfLexer {
    */
   readStreamData(length: number): Uint8Array {
     if (this.position + length > this.len) {
-      throw new Error(
-        `PdfLexer.readStreamData: requested ${length} bytes at offset ` +
-        `${this.position}, but only ${this.len - this.position} remain`,
-      );
+      throw new PdfParseError({
+        message:
+          `PdfLexer.readStreamData: requested ${length} bytes at offset ` +
+          `${this.position}, but only ${this.len - this.position} remain`,
+        offset: this.position,
+        expected: `${length} bytes available`,
+        actual: `${this.len - this.position} bytes remaining`,
+        data: this._data,
+      });
     }
-    const slice = this.data.subarray(this.position, this.position + length);
+    const slice = this._data.subarray(this.position, this.position + length);
     this.position += length;
     return slice;
   }
@@ -292,9 +309,13 @@ export class PdfLexer {
    */
   seek(offset: number): void {
     if (offset < 0 || offset > this.len) {
-      throw new RangeError(
-        `PdfLexer.seek: offset ${offset} is outside [0, ${this.len}]`,
-      );
+      throw new PdfParseError({
+        message: `PdfLexer.seek: offset ${offset} is outside [0, ${this.len}]`,
+        offset,
+        expected: `offset in range [0, ${this.len}]`,
+        actual: `${offset}`,
+        data: this._data,
+      });
     }
     this.position = offset;
     this.peeked = null;
@@ -309,7 +330,7 @@ export class PdfLexer {
    */
   byteAt(offset: number): number {
     if (offset < 0 || offset >= this.len) return -1;
-    return this.data[offset]!;
+    return this._data[offset]!;
   }
 
   /**
@@ -327,7 +348,7 @@ export class PdfLexer {
    * extracting stream data.
    */
   skipWhitespace(): void {
-    const d = this.data;
+    const d = this._data;
     let pos = this.position;
     while (pos < this.len) {
       const b = d[pos]!;
@@ -367,7 +388,7 @@ export class PdfLexer {
       return { type: TokenType.EOF, value: null, offset: this.position };
     }
 
-    const d = this.data;
+    const d = this._data;
     const startPos = this.position;
     const b = d[startPos]!;
 
@@ -401,9 +422,13 @@ export class PdfLexer {
       // Lone '>' — could occur with malformed input. Consume and treat as
       // an error, but be lenient: advance past it.
       this.position++;
-      throw new Error(
-        `PdfLexer: unexpected '>' at offset ${startPos} (expected '>>' for dict end)`,
-      );
+      throw new PdfParseError({
+        message: `PdfLexer: unexpected '>' at offset ${startPos} (expected '>>' for dict end)`,
+        offset: startPos,
+        expected: "'>>' (dict end delimiter)",
+        actual: "'>' (lone angle bracket)",
+        data: this._data,
+      });
     }
 
     // (literal string)
@@ -450,7 +475,7 @@ export class PdfLexer {
    * `-.002`, `+.5`). Scientific notation is **not** permitted.
    */
   private readNumber(startPos: number): Token {
-    const d = this.data;
+    const d = this._data;
     let pos = startPos;
     let hasSign = false;
     let hasDot = false;
@@ -509,7 +534,7 @@ export class PdfLexer {
    * parentheses.
    */
   private readLiteralString(startPos: number): Token {
-    const d = this.data;
+    const d = this._data;
     let pos = startPos + 1; // skip opening '('
     let depth = 1;
     let result = '';
@@ -616,9 +641,13 @@ export class PdfLexer {
     }
 
     if (depth !== 0) {
-      throw new Error(
-        `PdfLexer: unterminated literal string starting at offset ${startPos}`,
-      );
+      throw new PdfParseError({
+        message: `PdfLexer: unterminated literal string starting at offset ${startPos}`,
+        offset: startPos,
+        expected: "closing ')' for literal string",
+        actual: 'end of input',
+        data: this._data,
+      });
     }
 
     this.position = pos;
@@ -632,7 +661,7 @@ export class PdfLexer {
    * odd, a trailing `0` is assumed (per spec SS 7.3.4.3).
    */
   private readHexString(startPos: number): Token {
-    const d = this.data;
+    const d = this._data;
     let pos = startPos + 1; // skip opening '<'
     let hex = '';
 
@@ -651,10 +680,15 @@ export class PdfLexer {
 
       const v = hexVal[c]!;
       if (v === -1) {
-        throw new Error(
-          `PdfLexer: invalid hex digit 0x${c.toString(16).padStart(2, '0')} ` +
-          `at offset ${pos} in hex string starting at ${startPos}`,
-        );
+        throw new PdfParseError({
+          message:
+            `PdfLexer: invalid hex digit 0x${c.toString(16).padStart(2, '0')} ` +
+            `at offset ${pos} in hex string starting at ${startPos}`,
+          offset: pos,
+          expected: 'hex digit (0-9, a-f, A-F)',
+          actual: `0x${c.toString(16).padStart(2, '0')}`,
+          data: this._data,
+        });
       }
 
       hex += String.fromCharCode(c);
@@ -685,7 +719,7 @@ export class PdfLexer {
    * **includes** the leading `/`.
    */
   private readName(startPos: number): Token {
-    const d = this.data;
+    const d = this._data;
     let pos = startPos + 1; // skip the '/'
     let name = '/';
 
@@ -698,16 +732,24 @@ export class PdfLexer {
       // #XX hex escape
       if (c === CH_HASH) {
         if (pos + 2 >= this.len) {
-          throw new Error(
-            `PdfLexer: incomplete #XX escape in name at offset ${pos}`,
-          );
+          throw new PdfParseError({
+            message: `PdfLexer: incomplete #XX escape in name at offset ${pos}`,
+            offset: pos,
+            expected: 'two hex digits after # in name',
+            actual: 'end of input',
+            data: this._data,
+          });
         }
         const hi = hexVal[d[pos + 1]!]!;
         const lo = hexVal[d[pos + 2]!]!;
         if (hi === -1 || lo === -1) {
-          throw new Error(
-            `PdfLexer: invalid #XX escape in name at offset ${pos}`,
-          );
+          throw new PdfParseError({
+            message: `PdfLexer: invalid #XX escape in name at offset ${pos}`,
+            offset: pos,
+            expected: 'valid hex digits after # in name',
+            actual: `#${String.fromCharCode(d[pos + 1]!)}${String.fromCharCode(d[pos + 2]!)}`,
+            data: this._data,
+          });
         }
         name += String.fromCharCode((hi << 4) | lo);
         pos += 3;
@@ -729,7 +771,7 @@ export class PdfLexer {
    * available for callers that want to preserve them.
    */
   private readComment(startPos: number): Token {
-    const d = this.data;
+    const d = this._data;
     let pos = startPos + 1; // skip '%'
     const begin = pos;
 
@@ -753,7 +795,7 @@ export class PdfLexer {
    * handle them.
    */
   private readKeyword(startPos: number): Token {
-    const d = this.data;
+    const d = this._data;
     let pos = startPos;
 
     // Consume until whitespace or delimiter
@@ -809,7 +851,7 @@ export class PdfLexer {
    * because it avoids the per-call overhead of the streaming decoder.
    */
   private bytesToAscii(from: number, to: number): string {
-    const d = this.data;
+    const d = this._data;
     let s = '';
     for (let i = from; i < to; i++) {
       s += String.fromCharCode(d[i]!);

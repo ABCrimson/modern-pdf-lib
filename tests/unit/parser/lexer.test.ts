@@ -11,6 +11,7 @@
 import { describe, it, expect } from 'vitest';
 import { PdfLexer, TokenType } from '../../../src/parser/lexer.js';
 import type { Token } from '../../../src/parser/lexer.js';
+import { PdfParseError } from '../../../src/parser/parseError.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -789,12 +790,12 @@ describe('PdfLexer - seek() and position', () => {
 
   it('throws on negative offset', () => {
     const lex = lexer('42');
-    expect(() => lex.seek(-1)).toThrow(RangeError);
+    expect(() => lex.seek(-1)).toThrow(PdfParseError);
   });
 
   it('throws on offset past length', () => {
     const lex = lexer('42');
-    expect(() => lex.seek(3)).toThrow(RangeError);
+    expect(() => lex.seek(3)).toThrow(PdfParseError);
   });
 
   it('position reflects token consumption', () => {

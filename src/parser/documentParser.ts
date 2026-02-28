@@ -39,6 +39,7 @@ import type { XrefEntry, ParsedTrailer } from './xrefParser.js';
 import { decompressSync as inflateSync } from '../compression/fflateAdapter.js';
 import { base64Decode } from '../utils/base64.js';
 import { PdfEncryptionHandler } from '../crypto/encryptionHandler.js';
+import { PdfParseError } from './parseError.js';
 
 // ---------------------------------------------------------------------------
 // Public interfaces
@@ -207,9 +208,13 @@ export class PdfDocumentParser {
    */
   constructor(data: Uint8Array) {
     if (data.length < 8) {
-      throw new Error(
-        'Invalid PDF: file is too short to contain a valid PDF header.',
-      );
+      throw new PdfParseError({
+        message: 'Invalid PDF: file is too short to contain a valid PDF header.',
+        offset: 0,
+        expected: 'at least 8 bytes for a valid PDF header',
+        actual: `${data.length} bytes`,
+        data,
+      });
     }
     this.data = data;
   }
@@ -304,11 +309,16 @@ export class PdfDocumentParser {
         const { object } = this.objectParser.parseIndirectObjectAt(entry.offset);
         resolved = object;
       } catch (err) {
-        throw new Error(
-          `Failed to parse indirect object ${objNum} ${entry.generationNumber} at ` +
-          `offset ${entry.offset}`,
-          { cause: err },
-        );
+        throw new PdfParseError({
+          message:
+            `Failed to parse indirect object ${objNum} ${entry.generationNumber} at ` +
+            `offset ${entry.offset}`,
+          offset: entry.offset,
+          expected: `valid indirect object ${objNum} ${entry.generationNumber}`,
+          actual: 'parse failure',
+          data: this.data,
+          cause: err instanceof Error ? err : undefined,
+        });
       }
     }
 
@@ -346,9 +356,13 @@ export class PdfDocumentParser {
     // Resolve the /Encrypt dictionary
     const encryptObj = this.resolveRef(encryptRef);
     if (encryptObj.kind !== 'dict') {
-      throw new Error(
-        'Invalid PDF: /Encrypt entry is not a dictionary.',
-      );
+      throw new PdfParseError({
+        message: 'Invalid PDF: /Encrypt entry is not a dictionary.',
+        offset: 0,
+        expected: 'dictionary for /Encrypt entry',
+        actual: `${encryptObj.kind}`,
+        data: this.data,
+      });
     }
     const encryptDict = encryptObj as PdfDict;
 
@@ -385,14 +399,24 @@ export class PdfDocumentParser {
 
     // All password attempts failed
     if (password !== undefined) {
-      throw new Error(
-        `Failed to decrypt PDF: the provided password is incorrect. ${lastError?.message ?? ''}`,
-      );
+      throw new PdfParseError({
+        message: `Failed to decrypt PDF: the provided password is incorrect. ${lastError?.message ?? ''}`,
+        offset: 0,
+        expected: 'valid decryption password',
+        actual: 'incorrect password',
+        data: this.data,
+        cause: lastError,
+      });
     } else {
-      throw new Error(
-        'This PDF is encrypted and requires a password. ' +
-        'Pass { password: "..." } in the options to decrypt it.',
-      );
+      throw new PdfParseError({
+        message:
+          'This PDF is encrypted and requires a password. ' +
+          'Pass { password: "..." } in the options to decrypt it.',
+        offset: 0,
+        expected: 'unencrypted PDF or password option',
+        actual: 'encrypted PDF without password',
+        data: this.data,
+      });
     }
   }
 
@@ -555,10 +579,14 @@ export class PdfDocumentParser {
    */
   getPageDict(pageIndex: number): PdfDict {
     if (pageIndex < 0 || pageIndex >= this.flattenedPages.length) {
-      throw new Error(
-        `Page index ${pageIndex} is out of range. ` +
-        `The document has ${this.flattenedPages.length} page(s).`,
-      );
+      throw new PdfParseError({
+        message:
+          `Page index ${pageIndex} is out of range. ` +
+          `The document has ${this.flattenedPages.length} page(s).`,
+        offset: 0,
+        expected: `page index in range [0, ${this.flattenedPages.length})`,
+        actual: `${pageIndex}`,
+      });
     }
     return this.flattenedPages[pageIndex]!.dict;
   }
@@ -590,18 +618,27 @@ export class PdfDocumentParser {
     // but it must appear very early.
     const pdfIdx = header.indexOf('%PDF-');
     if (pdfIdx === -1 || pdfIdx > 1024) {
-      throw new Error(
-        'Invalid PDF: file does not start with "%PDF-" header. ' +
-        'This may not be a PDF file.',
-      );
+      throw new PdfParseError({
+        message:
+          'Invalid PDF: file does not start with "%PDF-" header. ' +
+          'This may not be a PDF file.',
+        offset: 0,
+        expected: '"%PDF-" header near start of file',
+        actual: 'no "%PDF-" marker found',
+        data: this.data,
+      });
     }
 
     // Extract version string
     const versionMatch = header.substring(pdfIdx).match(/%PDF-(\d+\.\d+)/);
     if (!versionMatch) {
-      throw new Error(
-        'Invalid PDF: could not parse version from header.',
-      );
+      throw new PdfParseError({
+        message: 'Invalid PDF: could not parse version from header.',
+        offset: pdfIdx,
+        expected: '"%PDF-X.Y" version string',
+        actual: `"${header.substring(pdfIdx, pdfIdx + 10)}"`,
+        data: this.data,
+      });
     }
 
     this.pdfVersion = versionMatch[1]!;
@@ -618,10 +655,15 @@ export class PdfDocumentParser {
       return; // PDF 2.0+
     }
 
-    throw new Error(
-      `Unsupported PDF version: ${this.pdfVersion}. ` +
-      'Expected PDF 1.0-1.9 or 2.0+.',
-    );
+    throw new PdfParseError({
+      message:
+        `Unsupported PDF version: ${this.pdfVersion}. ` +
+        'Expected PDF 1.0-1.9 or 2.0+.',
+      offset: 0,
+      expected: 'PDF version 1.0-1.9 or 2.0+',
+      actual: `PDF version ${this.pdfVersion}`,
+      data: this.data,
+    });
   }
 
   // -----------------------------------------------------------------------
@@ -636,10 +678,15 @@ export class PdfDocumentParser {
     const rootObj = this.resolveRef(this.trailer.rootRef);
 
     if (rootObj.kind !== 'dict') {
-      throw new Error(
-        `Invalid PDF: /Root (catalog) at object ${this.trailer.rootRef.objectNumber} ` +
-        `is not a dictionary (got ${rootObj.kind}).`,
-      );
+      throw new PdfParseError({
+        message:
+          `Invalid PDF: /Root (catalog) at object ${this.trailer.rootRef.objectNumber} ` +
+          `is not a dictionary (got ${rootObj.kind}).`,
+        offset: 0,
+        expected: 'dictionary for /Root (catalog)',
+        actual: `${rootObj.kind}`,
+        data: this.data,
+      });
     }
 
     const catalog = rootObj as PdfDict;
@@ -649,9 +696,13 @@ export class PdfDocumentParser {
     if (typeObj !== undefined && typeObj.kind === 'name') {
       const typeName = (typeObj as PdfName).value;
       if (typeName !== '/Catalog') {
-        throw new Error(
-          `Invalid PDF: /Root dictionary has /Type "${typeName}", expected "/Catalog".`,
-        );
+        throw new PdfParseError({
+          message: `Invalid PDF: /Root dictionary has /Type "${typeName}", expected "/Catalog".`,
+          offset: 0,
+          expected: '/Type /Catalog in /Root dictionary',
+          actual: `/Type "${typeName}"`,
+          data: this.data,
+        });
       }
     }
 
@@ -673,16 +724,24 @@ export class PdfDocumentParser {
   private resolvePageTree(catalog: PdfDict): FlattenedPage[] {
     const pagesRef = catalog.get('/Pages');
     if (pagesRef === undefined) {
-      throw new Error(
-        'Invalid PDF: catalog dictionary missing /Pages entry.',
-      );
+      throw new PdfParseError({
+        message: 'Invalid PDF: catalog dictionary missing /Pages entry.',
+        offset: 0,
+        expected: '/Pages entry in catalog dictionary',
+        actual: 'no /Pages entry',
+        data: this.data,
+      });
     }
 
     const pagesObj = this.resolveObject(pagesRef);
     if (pagesObj.kind !== 'dict') {
-      throw new Error(
-        `Invalid PDF: /Pages entry is not a dictionary (got ${pagesObj.kind}).`,
-      );
+      throw new PdfParseError({
+        message: `Invalid PDF: /Pages entry is not a dictionary (got ${pagesObj.kind}).`,
+        offset: 0,
+        expected: 'dictionary for /Pages entry',
+        actual: `${pagesObj.kind}`,
+        data: this.data,
+      });
     }
 
     const pages: FlattenedPage[] = [];
@@ -751,9 +810,13 @@ export class PdfDocumentParser {
       // Leaf node -- this is an actual page
       const mediaBox = currentInherited.mediaBox;
       if (mediaBox === undefined) {
-        throw new Error(
-          'Invalid PDF: /Page node has no /MediaBox (not even inherited).',
-        );
+        throw new PdfParseError({
+          message: 'Invalid PDF: /Page node has no /MediaBox (not even inherited).',
+          offset: 0,
+          expected: '/MediaBox on page node or inherited from parent',
+          actual: 'no /MediaBox found',
+          data: this.data,
+        });
       }
 
       result.push({
@@ -774,9 +837,13 @@ export class PdfDocumentParser {
 
     const kids = this.resolveObject(kidsObj);
     if (kids.kind !== 'array') {
-      throw new Error(
-        `Invalid PDF: /Pages /Kids is not an array (got ${kids.kind}).`,
-      );
+      throw new PdfParseError({
+        message: `Invalid PDF: /Pages /Kids is not an array (got ${kids.kind}).`,
+        offset: 0,
+        expected: 'array for /Pages /Kids',
+        actual: `${kids.kind}`,
+        data: this.data,
+      });
     }
 
     const kidsArr = kids as PdfArray;
@@ -833,10 +900,15 @@ export class PdfDocumentParser {
     // Parse the container object stream
     const containerEntry = this.xrefEntries.get(containerNum);
     if (containerEntry === undefined || containerEntry.type !== 'in-use') {
-      throw new Error(
-        `Invalid PDF: object stream ${containerNum} referenced by ` +
-        `compressed object ${entry.objectNumber} not found in xref table.`,
-      );
+      throw new PdfParseError({
+        message:
+          `Invalid PDF: object stream ${containerNum} referenced by ` +
+          `compressed object ${entry.objectNumber} not found in xref table.`,
+        offset: 0,
+        expected: `in-use xref entry for object stream ${containerNum}`,
+        actual: containerEntry ? `${containerEntry.type} entry` : 'no entry',
+        data: this.data,
+      });
     }
 
     let containerObj: PdfObject;
@@ -844,18 +916,28 @@ export class PdfDocumentParser {
       const { object } = this.objectParser.parseIndirectObjectAt(containerEntry.offset);
       containerObj = object;
     } catch (err) {
-      throw new Error(
-        `Failed to parse object stream ${containerNum} at offset ` +
-        `${containerEntry.offset}`,
-        { cause: err },
-      );
+      throw new PdfParseError({
+        message:
+          `Failed to parse object stream ${containerNum} at offset ` +
+          `${containerEntry.offset}`,
+        offset: containerEntry.offset,
+        expected: `valid object stream ${containerNum}`,
+        actual: 'parse failure',
+        data: this.data,
+        cause: err instanceof Error ? err : undefined,
+      });
     }
 
     if (containerObj.kind !== 'stream') {
-      throw new Error(
-        `Invalid PDF: object ${containerNum} expected to be an object stream ` +
-        `but is ${containerObj.kind}.`,
-      );
+      throw new PdfParseError({
+        message:
+          `Invalid PDF: object ${containerNum} expected to be an object stream ` +
+          `but is ${containerObj.kind}.`,
+        offset: containerEntry.offset,
+        expected: 'stream object for object stream',
+        actual: `${containerObj.kind}`,
+        data: this.data,
+      });
     }
 
     const containerStream = containerObj as PdfStream;
@@ -868,9 +950,13 @@ export class PdfDocumentParser {
       typeObj.kind !== 'name' ||
       (typeObj as PdfName).value !== '/ObjStm'
     ) {
-      throw new Error(
-        `Invalid PDF: object ${containerNum} is not an object stream (/Type /ObjStm).`,
-      );
+      throw new PdfParseError({
+        message: `Invalid PDF: object ${containerNum} is not an object stream (/Type /ObjStm).`,
+        offset: containerEntry.offset,
+        expected: '/Type /ObjStm in object stream dictionary',
+        actual: typeObj ? `${typeObj.kind}` : 'no /Type entry',
+        data: this.data,
+      });
     }
 
     // Get /N (number of objects) and /First (byte offset to first object data)
@@ -878,9 +964,13 @@ export class PdfDocumentParser {
     const first = numVal(containerDict.get('/First'));
 
     if (n === undefined || first === undefined) {
-      throw new Error(
-        `Invalid PDF: object stream ${containerNum} missing /N or /First entries.`,
-      );
+      throw new PdfParseError({
+        message: `Invalid PDF: object stream ${containerNum} missing /N or /First entries.`,
+        offset: containerEntry.offset,
+        expected: '/N and /First entries in object stream',
+        actual: `${n === undefined ? 'no /N' : '/N present'}, ${first === undefined ? 'no /First' : '/First present'}`,
+        data: this.data,
+      });
     }
 
     // Decompress the stream data

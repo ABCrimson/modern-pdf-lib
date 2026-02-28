@@ -37,3 +37,9 @@ export type { ContentStreamOperator, Operand } from './contentStreamParser.js';
 // ---------------------------------------------------------------------------
 
 export { decodeStream } from './streamDecode.js';
+
+// ---------------------------------------------------------------------------
+// Parse errors
+// ---------------------------------------------------------------------------
+
+export { PdfParseError, formatHexContext } from './parseError.js';

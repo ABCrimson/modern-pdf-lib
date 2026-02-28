@@ -13,6 +13,7 @@
 
 import type { PdfLexer, Token } from './lexer.js';
 import { TokenType } from './lexer.js';
+import { PdfParseError } from './parseError.js';
 import {
   type PdfObject,
   PdfNull,
@@ -106,33 +107,48 @@ export class PdfObjectParser {
     // N
     const objNumToken = this.lexer.nextToken();
     if (objNumToken.type !== TokenType.Number || !Number.isInteger(objNumToken.value as number)) {
-      throw new Error(
-        `PdfObjectParser.parseIndirectObject: expected integer object number ` +
-        `at offset ${objNumToken.offset}, got ${TokenType[objNumToken.type]} ` +
-        `(${String(objNumToken.value)})`,
-      );
+      throw new PdfParseError({
+        message:
+          `PdfObjectParser.parseIndirectObject: expected integer object number ` +
+          `at offset ${objNumToken.offset}, got ${TokenType[objNumToken.type]} ` +
+          `(${String(objNumToken.value)})`,
+        offset: objNumToken.offset,
+        expected: 'integer object number',
+        actual: `${TokenType[objNumToken.type]} (${String(objNumToken.value)})`,
+        data: this.lexer.rawData,
+      });
     }
     const objNum = objNumToken.value as number;
 
     // G
     const genNumToken = this.lexer.nextToken();
     if (genNumToken.type !== TokenType.Number || !Number.isInteger(genNumToken.value as number)) {
-      throw new Error(
-        `PdfObjectParser.parseIndirectObject: expected integer generation ` +
-        `number at offset ${genNumToken.offset}, got ` +
-        `${TokenType[genNumToken.type]} (${String(genNumToken.value)})`,
-      );
+      throw new PdfParseError({
+        message:
+          `PdfObjectParser.parseIndirectObject: expected integer generation ` +
+          `number at offset ${genNumToken.offset}, got ` +
+          `${TokenType[genNumToken.type]} (${String(genNumToken.value)})`,
+        offset: genNumToken.offset,
+        expected: 'integer generation number',
+        actual: `${TokenType[genNumToken.type]} (${String(genNumToken.value)})`,
+        data: this.lexer.rawData,
+      });
     }
     const genNum = genNumToken.value as number;
 
     // obj
     const objKw = this.lexer.nextToken();
     if (objKw.type !== TokenType.ObjKeyword) {
-      throw new Error(
-        `PdfObjectParser.parseIndirectObject: expected 'obj' keyword at ` +
-        `offset ${objKw.offset}, got ${TokenType[objKw.type]} ` +
-        `(${String(objKw.value)})`,
-      );
+      throw new PdfParseError({
+        message:
+          `PdfObjectParser.parseIndirectObject: expected 'obj' keyword at ` +
+          `offset ${objKw.offset}, got ${TokenType[objKw.type]} ` +
+          `(${String(objKw.value)})`,
+        offset: objKw.offset,
+        expected: "'obj' keyword",
+        actual: `${TokenType[objKw.type]} (${String(objKw.value)})`,
+        data: this.lexer.rawData,
+      });
     }
 
     return this.parseIndirectObjectBody(objNum, genNum);
@@ -203,15 +219,24 @@ export class PdfObjectParser {
         return this.parseDictOrStream();
 
       case TokenType.EOF:
-        throw new Error(
-          `PdfObjectParser: unexpected end of input at offset ${token.offset}`,
-        );
+        throw new PdfParseError({
+          message: `PdfObjectParser: unexpected end of input at offset ${token.offset}`,
+          offset: token.offset,
+          expected: 'a PDF object (number, string, name, array, dict, etc.)',
+          actual: 'end of input',
+          data: this.lexer.rawData,
+        });
 
       default:
-        throw new Error(
-          `PdfObjectParser: unexpected token ${TokenType[token.type]} ` +
-          `(${String(token.value)}) at offset ${token.offset}`,
-        );
+        throw new PdfParseError({
+          message:
+            `PdfObjectParser: unexpected token ${TokenType[token.type]} ` +
+            `(${String(token.value)}) at offset ${token.offset}`,
+          offset: token.offset,
+          expected: 'a PDF object (number, string, name, array, dict, etc.)',
+          actual: `${TokenType[token.type]} (${String(token.value)})`,
+          data: this.lexer.rawData,
+        });
     }
   }
 
@@ -314,11 +339,16 @@ export class PdfObjectParser {
       // Be lenient: some producers omit endobj or place garbage between
       // the object and endobj. Log but do not throw.
       // For strictness we still throw.
-      throw new Error(
-        `PdfObjectParser: expected 'endobj' for object ${objNum} ${genNum} ` +
-        `at offset ${endToken.offset}, got ${TokenType[endToken.type]} ` +
-        `(${String(endToken.value)})`,
-      );
+      throw new PdfParseError({
+        message:
+          `PdfObjectParser: expected 'endobj' for object ${objNum} ${genNum} ` +
+          `at offset ${endToken.offset}, got ${TokenType[endToken.type]} ` +
+          `(${String(endToken.value)})`,
+        offset: endToken.offset,
+        expected: `'endobj' keyword for object ${objNum} ${genNum}`,
+        actual: `${TokenType[endToken.type]} (${String(endToken.value)})`,
+        data: this.lexer.rawData,
+      });
     }
 
     // Register in the object registry
@@ -348,9 +378,13 @@ export class PdfObjectParser {
       }
 
       if (peek.type === TokenType.EOF) {
-        throw new Error(
-          `PdfObjectParser: unterminated array at offset ${peek.offset}`,
-        );
+        throw new PdfParseError({
+          message: `PdfObjectParser: unterminated array at offset ${peek.offset}`,
+          offset: peek.offset,
+          expected: "']' to close array",
+          actual: 'end of input',
+          data: this.lexer.rawData,
+        });
       }
 
       items.push(this.parseObject());
@@ -398,19 +432,28 @@ export class PdfObjectParser {
       }
 
       if (peek.type === TokenType.EOF) {
-        throw new Error(
-          `PdfObjectParser: unterminated dictionary at offset ${peek.offset}`,
-        );
+        throw new PdfParseError({
+          message: `PdfObjectParser: unterminated dictionary at offset ${peek.offset}`,
+          offset: peek.offset,
+          expected: "'>>' to close dictionary",
+          actual: 'end of input',
+          data: this.lexer.rawData,
+        });
       }
 
       // Key: must be a Name
       const keyToken = this.lexer.nextToken();
       if (keyToken.type !== TokenType.Name) {
-        throw new Error(
-          `PdfObjectParser: expected name as dictionary key at offset ` +
-          `${keyToken.offset}, got ${TokenType[keyToken.type]} ` +
-          `(${String(keyToken.value)})`,
-        );
+        throw new PdfParseError({
+          message:
+            `PdfObjectParser: expected name as dictionary key at offset ` +
+            `${keyToken.offset}, got ${TokenType[keyToken.type]} ` +
+            `(${String(keyToken.value)})`,
+          offset: keyToken.offset,
+          expected: 'name token as dictionary key',
+          actual: `${TokenType[keyToken.type]} (${String(keyToken.value)})`,
+          data: this.lexer.rawData,
+        });
       }
       const key = keyToken.value as string;
 
@@ -441,10 +484,15 @@ export class PdfObjectParser {
     // Consume 'stream' keyword
     const streamKw = this.lexer.nextToken();
     if (streamKw.type !== TokenType.StreamKeyword) {
-      throw new Error(
-        `PdfObjectParser.readStream: expected 'stream' keyword at offset ` +
-        `${streamKw.offset}, got ${TokenType[streamKw.type]}`,
-      );
+      throw new PdfParseError({
+        message:
+          `PdfObjectParser.readStream: expected 'stream' keyword at offset ` +
+          `${streamKw.offset}, got ${TokenType[streamKw.type]}`,
+        offset: streamKw.offset,
+        expected: "'stream' keyword",
+        actual: `${TokenType[streamKw.type]}`,
+        data: this.lexer.rawData,
+      });
     }
 
     // After the "stream" keyword, skip the mandatory end-of-line marker.
@@ -465,11 +513,16 @@ export class PdfObjectParser {
     // Consume 'endstream'
     const endKw = this.lexer.nextToken();
     if (endKw.type !== TokenType.EndStreamKeyword) {
-      throw new Error(
-        `PdfObjectParser.readStream: expected 'endstream' keyword at offset ` +
-        `${endKw.offset}, got ${TokenType[endKw.type]} ` +
-        `(${String(endKw.value)})`,
-      );
+      throw new PdfParseError({
+        message:
+          `PdfObjectParser.readStream: expected 'endstream' keyword at offset ` +
+          `${endKw.offset}, got ${TokenType[endKw.type]} ` +
+          `(${String(endKw.value)})`,
+        offset: endKw.offset,
+        expected: "'endstream' keyword",
+        actual: `${TokenType[endKw.type]} (${String(endKw.value)})`,
+        data: this.lexer.rawData,
+      });
     }
 
     return new PdfStream(dict, data);
@@ -527,9 +580,13 @@ export class PdfObjectParser {
   private resolveStreamLength(dict: PdfDict): number {
     const lengthObj = dict.get('/Length');
     if (lengthObj === undefined) {
-      throw new Error(
-        'PdfObjectParser.resolveStreamLength: stream dictionary is missing /Length',
-      );
+      throw new PdfParseError({
+        message: 'PdfObjectParser.resolveStreamLength: stream dictionary is missing /Length',
+        offset: this.lexer.position,
+        expected: '/Length entry in stream dictionary',
+        actual: 'no /Length entry',
+        data: this.lexer.rawData,
+      });
     }
 
     // Direct integer
@@ -545,11 +602,16 @@ export class PdfObjectParser {
       const resolved = this.registry.resolve(ref);
       if (resolved !== undefined) {
         if (resolved.kind !== 'number') {
-          throw new Error(
-            `PdfObjectParser.resolveStreamLength: /Length reference ` +
-            `${ref.objectNumber} ${ref.generationNumber} R resolved to ` +
-            `${resolved.kind}, expected number`,
-          );
+          throw new PdfParseError({
+            message:
+              `PdfObjectParser.resolveStreamLength: /Length reference ` +
+              `${ref.objectNumber} ${ref.generationNumber} R resolved to ` +
+              `${resolved.kind}, expected number`,
+            offset: this.lexer.position,
+            expected: 'number for /Length reference',
+            actual: `${resolved.kind}`,
+            data: this.lexer.rawData,
+          });
         }
         return (resolved as PdfNumber).value;
       }
@@ -558,17 +620,27 @@ export class PdfObjectParser {
       // when parsing objects in file order and the /Length object appears
       // after the stream. For now, throw — the caller should ensure
       // /Length objects are parsed first (e.g. via xref table order).
-      throw new Error(
-        `PdfObjectParser.resolveStreamLength: /Length reference ` +
-        `${ref.objectNumber} ${ref.generationNumber} R is not yet ` +
-        `resolved in the registry. Parse the referenced object first.`,
-      );
+      throw new PdfParseError({
+        message:
+          `PdfObjectParser.resolveStreamLength: /Length reference ` +
+          `${ref.objectNumber} ${ref.generationNumber} R is not yet ` +
+          `resolved in the registry. Parse the referenced object first.`,
+        offset: this.lexer.position,
+        expected: 'resolved /Length reference',
+        actual: `unresolved reference ${ref.objectNumber} ${ref.generationNumber} R`,
+        data: this.lexer.rawData,
+      });
     }
 
-    throw new Error(
-      `PdfObjectParser.resolveStreamLength: /Length must be a number or ` +
-      `indirect reference, got ${lengthObj.kind}`,
-    );
+    throw new PdfParseError({
+      message:
+        `PdfObjectParser.resolveStreamLength: /Length must be a number or ` +
+        `indirect reference, got ${lengthObj.kind}`,
+      offset: this.lexer.position,
+      expected: 'number or indirect reference for /Length',
+      actual: `${lengthObj.kind}`,
+      data: this.lexer.rawData,
+    });
   }
 
 }

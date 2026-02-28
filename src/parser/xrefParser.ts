@@ -27,6 +27,7 @@ import {
 } from '../core/pdfObjects.js';
 import type { PdfObjectParser } from './objectParser.js';
 import { decompress } from '../compression/deflate.js';
+import { PdfParseError } from './parseError.js';
 
 // ---------------------------------------------------------------------------
 // Public interfaces
@@ -140,12 +141,22 @@ function stringToLatin1Bytes(str: string): Uint8Array {
 function extractTrailer(dict: PdfDict): ParsedTrailer {
   const sizeVal = numVal(dict.get('/Size'));
   if (sizeVal === undefined) {
-    throw new Error('Invalid PDF: trailer dictionary missing /Size entry');
+    throw new PdfParseError({
+      message: 'Invalid PDF: trailer dictionary missing /Size entry',
+      offset: 0,
+      expected: '/Size entry in trailer dictionary',
+      actual: 'no /Size entry',
+    });
   }
 
   const rootRef = refVal(dict.get('/Root'));
   if (rootRef === undefined) {
-    throw new Error('Invalid PDF: trailer dictionary missing /Root entry');
+    throw new PdfParseError({
+      message: 'Invalid PDF: trailer dictionary missing /Root entry',
+      offset: 0,
+      expected: '/Root entry in trailer dictionary',
+      actual: 'no /Root entry',
+    });
   }
 
   const trailer: ParsedTrailer = {
@@ -214,10 +225,14 @@ async function decodeStream(
   }
 
   if (filterName !== '/FlateDecode') {
-    throw new Error(
-      `Unsupported xref stream filter: ${filterName ?? 'unknown'}. ` +
-      'Only /FlateDecode is supported for cross-reference streams.',
-    );
+    throw new PdfParseError({
+      message:
+        `Unsupported xref stream filter: ${filterName ?? 'unknown'}. ` +
+        'Only /FlateDecode is supported for cross-reference streams.',
+      offset: 0,
+      expected: '/FlateDecode filter',
+      actual: `${filterName ?? 'unknown'} filter`,
+    });
   }
 
   // Decompress using the library's deflate engine
@@ -408,27 +423,41 @@ export class XrefParser {
     const keyword = 'startxref';
     const idx = tail.lastIndexOf(keyword);
     if (idx === -1) {
-      throw new Error(
-        'Invalid PDF: could not find "startxref" marker in the last 2048 bytes. ' +
-        'The file may be truncated or corrupt.',
-      );
+      throw new PdfParseError({
+        message:
+          'Invalid PDF: could not find "startxref" marker in the last 2048 bytes. ' +
+          'The file may be truncated or corrupt.',
+        offset: startPos,
+        expected: '"startxref" marker near end of file',
+        actual: 'no "startxref" found',
+        data: this.data,
+      });
     }
 
     // After "startxref" there should be whitespace then a decimal number
     const afterKeyword = tail.substring(idx + keyword.length).trim();
     const match = afterKeyword.match(/^(\d+)/);
     if (!match) {
-      throw new Error(
-        'Invalid PDF: "startxref" found but no valid offset follows it.',
-      );
+      throw new PdfParseError({
+        message: 'Invalid PDF: "startxref" found but no valid offset follows it.',
+        offset: startPos + idx,
+        expected: 'decimal offset after "startxref"',
+        actual: `"${afterKeyword.substring(0, 20)}"`,
+        data: this.data,
+      });
     }
 
     const offset = parseInt(match[1]!, 10);
     if (offset < 0 || offset >= this.data.length) {
-      throw new Error(
-        `Invalid PDF: startxref offset ${offset} is out of range ` +
-        `(file size: ${this.data.length}).`,
-      );
+      throw new PdfParseError({
+        message:
+          `Invalid PDF: startxref offset ${offset} is out of range ` +
+          `(file size: ${this.data.length}).`,
+        offset: startPos + idx,
+        expected: `offset in range [0, ${this.data.length})`,
+        actual: `${offset}`,
+        data: this.data,
+      });
     }
 
     return offset;
@@ -517,9 +546,13 @@ export class XrefParser {
     }
 
     if (primaryTrailer === undefined) {
-      throw new Error(
-        'Invalid PDF: could not extract a valid trailer from the cross-reference structure.',
-      );
+      throw new PdfParseError({
+        message: 'Invalid PDF: could not extract a valid trailer from the cross-reference structure.',
+        offset: startOffset,
+        expected: 'valid trailer dictionary in cross-reference structure',
+        actual: 'no valid trailer found',
+        data: this.data,
+      });
     }
 
     return { entries, trailer: primaryTrailer };
@@ -550,10 +583,13 @@ export class XrefParser {
     let pos = offset;
     const xrefTag = TEXT_DECODER.decode(this.data.subarray(pos, pos + 4));
     if (xrefTag !== 'xref') {
-      throw new Error(
-        `Invalid PDF: expected "xref" keyword at offset ${offset}, ` +
-        `found "${xrefTag}".`,
-      );
+      throw new PdfParseError({
+        message: `Invalid PDF: expected "xref" keyword at offset ${offset}, found "${xrefTag}".`,
+        offset,
+        expected: '"xref" keyword',
+        actual: `"${xrefTag}"`,
+        data: this.data,
+      });
     }
     pos += 4;
 
@@ -572,9 +608,13 @@ export class XrefParser {
       const headerLine = this.readLineAt(pos);
       const headerMatch = headerLine.text.trim().match(/^(\d+)\s+(\d+)/);
       if (!headerMatch) {
-        throw new Error(
-          `Invalid PDF: malformed xref subsection header at offset ${pos}: "${headerLine.text.trim()}"`,
-        );
+        throw new PdfParseError({
+          message: `Invalid PDF: malformed xref subsection header at offset ${pos}: "${headerLine.text.trim()}"`,
+          offset: pos,
+          expected: 'xref subsection header "firstObjNum count"',
+          actual: `"${headerLine.text.trim()}"`,
+          data: this.data,
+        });
       }
 
       const firstObjNum = parseInt(headerMatch[1]!, 10);
@@ -594,10 +634,15 @@ export class XrefParser {
         );
 
         if (!entryMatch) {
-          throw new Error(
-            `Invalid PDF: malformed xref entry at offset ${pos} for object ${objectNumber}: ` +
-            `"${entryText.text.trim()}"`,
-          );
+          throw new PdfParseError({
+            message:
+              `Invalid PDF: malformed xref entry at offset ${pos} for object ${objectNumber}: ` +
+              `"${entryText.text.trim()}"`,
+            offset: pos,
+            expected: 'xref entry "OOOOOOOOOO GGGGG f/n"',
+            actual: `"${entryText.text.trim()}"`,
+            data: this.data,
+          });
         }
 
         const entryOffset = parseInt(entryMatch[1]!, 10);
@@ -619,20 +664,26 @@ export class XrefParser {
     // Advance past "trailer" keyword
     const trailerTag = TEXT_DECODER.decode(this.data.subarray(pos, pos + 7));
     if (trailerTag !== 'trailer') {
-      throw new Error(
-        `Invalid PDF: expected "trailer" keyword at offset ${pos}, ` +
-        `found "${trailerTag}".`,
-      );
+      throw new PdfParseError({
+        message: `Invalid PDF: expected "trailer" keyword at offset ${pos}, found "${trailerTag}".`,
+        offset: pos,
+        expected: '"trailer" keyword',
+        actual: `"${trailerTag}"`,
+        data: this.data,
+      });
     }
     pos += 7;
 
     // Use the object parser to read the trailer dictionary
     const trailerObj = this.objectParser.parseObjectAt(pos);
     if (trailerObj.kind !== 'dict') {
-      throw new Error(
-        `Invalid PDF: expected dictionary after "trailer" keyword at offset ${pos}, ` +
-        `got ${trailerObj.kind}.`,
-      );
+      throw new PdfParseError({
+        message: `Invalid PDF: expected dictionary after "trailer" keyword at offset ${pos}, got ${trailerObj.kind}.`,
+        offset: pos,
+        expected: 'dictionary after "trailer" keyword',
+        actual: `${trailerObj.kind}`,
+        data: this.data,
+      });
     }
 
     return { entries, trailerDict: trailerObj as PdfDict };
@@ -654,10 +705,13 @@ export class XrefParser {
     const { object } = this.objectParser.parseIndirectObjectAt(offset);
 
     if (object.kind !== 'stream') {
-      throw new Error(
-        `Invalid PDF: expected stream object at offset ${offset} for xref stream, ` +
-        `got ${object.kind}.`,
-      );
+      throw new PdfParseError({
+        message: `Invalid PDF: expected stream object at offset ${offset} for xref stream, got ${object.kind}.`,
+        offset,
+        expected: 'stream object for xref stream',
+        actual: `${object.kind}`,
+        data: this.data,
+      });
     }
 
     const stream = object as PdfStream;
@@ -666,24 +720,35 @@ export class XrefParser {
     // Verify /Type /XRef
     const typeObj = dict.get('/Type');
     if (typeObj === undefined || typeObj.kind !== 'name' || (typeObj as PdfName).value !== '/XRef') {
-      throw new Error(
-        `Invalid PDF: cross-reference stream at offset ${offset} ` +
-        `does not have /Type /XRef.`,
-      );
+      throw new PdfParseError({
+        message: `Invalid PDF: cross-reference stream at offset ${offset} does not have /Type /XRef.`,
+        offset,
+        expected: '/Type /XRef in cross-reference stream dictionary',
+        actual: typeObj ? `${typeObj.kind}` : 'no /Type entry',
+        data: this.data,
+      });
     }
 
     // Get /W (width) array -- required
     const wObj = dict.get('/W');
     if (wObj === undefined || wObj.kind !== 'array') {
-      throw new Error(
-        'Invalid PDF: cross-reference stream missing /W (field widths) array.',
-      );
+      throw new PdfParseError({
+        message: 'Invalid PDF: cross-reference stream missing /W (field widths) array.',
+        offset,
+        expected: '/W array in cross-reference stream',
+        actual: wObj ? `${wObj.kind}` : 'no /W entry',
+        data: this.data,
+      });
     }
     const wArr = wObj as PdfArray;
     if (wArr.length < 3) {
-      throw new Error(
-        'Invalid PDF: cross-reference stream /W array must have at least 3 elements.',
-      );
+      throw new PdfParseError({
+        message: 'Invalid PDF: cross-reference stream /W array must have at least 3 elements.',
+        offset,
+        expected: '/W array with at least 3 elements',
+        actual: `/W array with ${wArr.length} element(s)`,
+        data: this.data,
+      });
     }
 
     const w0 = numVal(wArr.items[0]) ?? 0;
@@ -692,15 +757,25 @@ export class XrefParser {
     const entryWidth = w0 + w1 + w2;
 
     if (entryWidth === 0) {
-      throw new Error(
-        'Invalid PDF: cross-reference stream /W widths sum to 0.',
-      );
+      throw new PdfParseError({
+        message: 'Invalid PDF: cross-reference stream /W widths sum to 0.',
+        offset,
+        expected: 'non-zero sum of /W widths',
+        actual: '0',
+        data: this.data,
+      });
     }
 
     // Get /Size -- required
     const size = numVal(dict.get('/Size'));
     if (size === undefined) {
-      throw new Error('Invalid PDF: cross-reference stream missing /Size.');
+      throw new PdfParseError({
+        message: 'Invalid PDF: cross-reference stream missing /Size.',
+        offset,
+        expected: '/Size entry in cross-reference stream',
+        actual: 'no /Size entry',
+        data: this.data,
+      });
     }
 
     // Get /Index array -- defaults to [0 Size]
@@ -824,10 +899,15 @@ export class XrefParser {
     }
 
     if (entries.size === 0) {
-      throw new Error(
-        'Invalid PDF: could not find any indirect objects during recovery scan. ' +
-        'The file may not be a valid PDF.',
-      );
+      throw new PdfParseError({
+        message:
+          'Invalid PDF: could not find any indirect objects during recovery scan. ' +
+          'The file may not be a valid PDF.',
+        offset: 0,
+        expected: 'at least one "N G obj" pattern in file',
+        actual: 'no indirect objects found',
+        data: this.data,
+      });
     }
 
     // Find /Root reference by scanning trailer-like dictionaries
@@ -877,10 +957,15 @@ export class XrefParser {
     }
 
     if (rootRef === undefined) {
-      throw new Error(
-        'Invalid PDF: recovery scan could not locate the document catalog (/Root). ' +
-        'The file appears to be severely corrupt.',
-      );
+      throw new PdfParseError({
+        message:
+          'Invalid PDF: recovery scan could not locate the document catalog (/Root). ' +
+          'The file appears to be severely corrupt.',
+        offset: 0,
+        expected: 'document catalog (/Type /Catalog) in recovery scan',
+        actual: 'no /Root or /Catalog found',
+        data: this.data,
+      });
     }
 
     // Compute /Size as max object number + 1

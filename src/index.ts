@@ -536,6 +536,8 @@ export {
   extractTextWithPositions,
   parseContentStream,
   decodeStream,
+  PdfParseError,
+  formatHexContext,
 } from './parser/index.js';
 export type {
   LoadPdfOptions,
