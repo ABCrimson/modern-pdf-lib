@@ -12,12 +12,41 @@
  */
 
 import { prepareForSigning, computeSignatureHash, embedSignature, findSignatures } from './byteRange.js';
+import type { PrepareAppearanceOptions } from './byteRange.js';
 import { buildPkcs7Signature, extractIssuerAndSerial, parseDerTlv } from './pkcs7.js';
 import type { SignatureOptions } from './pkcs7.js';
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
+
+/**
+ * Options for a visible signature appearance on the page.
+ */
+export interface VisibleSignatureOptions {
+  /** Zero-based page index where the signature should appear. Default: 0. */
+  pageIndex?: number | undefined;
+  /** Rectangle [x, y, width, height] in PDF points from the bottom-left corner. */
+  rect: [number, number, number, number];
+  /**
+   * Text lines to display in the signature box.
+   * Each string becomes a separate line. If omitted, auto-generates
+   * from the signer name, reason, location, and date.
+   */
+  text?: string[] | undefined;
+  /** Font size for the text. Default: 10. */
+  fontSize?: number | undefined;
+  /**
+   * Background color as [r, g, b] values (0–1). Default: transparent.
+   */
+  backgroundColor?: [number, number, number] | undefined;
+  /**
+   * Border color as [r, g, b] values (0–1). Default: [0, 0, 0] (black).
+   */
+  borderColor?: [number, number, number] | undefined;
+  /** Border width in points. Default: 1. Set to 0 for no border. */
+  borderWidth?: number | undefined;
+}
 
 /**
  * Options for signing a PDF.
@@ -37,6 +66,12 @@ export interface SignOptions {
   contactInfo?: string | undefined;
   /** RFC 3161 TSA URL for timestamping (optional). */
   timestampUrl?: string | undefined;
+  /**
+   * Visible signature appearance options. When provided, the signature
+   * field is rendered visibly on the specified page with text and
+   * optional styling. When omitted, the signature is invisible.
+   */
+  appearance?: VisibleSignatureOptions | undefined;
 }
 
 /**
@@ -246,11 +281,42 @@ export async function signPdf(
 ): Promise<Uint8Array> {
   const hashAlgorithm = options.hashAlgorithm ?? 'SHA-256';
 
+  // Build appearance options if visible signature requested
+  let prepareAppearance: PrepareAppearanceOptions | undefined;
+  if (options.appearance) {
+    const ap = options.appearance;
+    // Auto-generate text lines if not provided
+    let textLines = ap.text;
+    if (!textLines) {
+      textLines = [];
+      // Extract signer name from certificate (best effort)
+      try {
+        const { subjectCN } = extractIssuerAndSerial(options.certificate);
+        if (subjectCN) textLines.push(`Signed by: ${subjectCN}`);
+      } catch {
+        textLines.push('Digitally Signed');
+      }
+      if (options.reason) textLines.push(`Reason: ${options.reason}`);
+      if (options.location) textLines.push(`Location: ${options.location}`);
+      textLines.push(`Date: ${new Date().toISOString().substring(0, 10)}`);
+    }
+
+    prepareAppearance = {
+      rect: ap.rect,
+      textLines,
+      fontSize: ap.fontSize,
+      backgroundColor: ap.backgroundColor,
+      borderColor: ap.borderColor,
+      borderWidth: ap.borderWidth,
+    };
+  }
+
   // Step 1: Prepare the PDF with a signature placeholder
   const { preparedPdf, byteRange } = prepareForSigning(
     pdfBytes,
     fieldName,
     8192, // 8 KB placeholder for PKCS#7 signature
+    prepareAppearance,
   );
 
   // Step 2: Hash the PDF content (excluding the placeholder)

@@ -8,12 +8,15 @@
 
 > **computeFileEncryptionKey**(`password`, `dict`, `fileId`): `Promise`\<`Uint8Array`\<`ArrayBufferLike`\>\>
 
-Defined in: [src/crypto/keyDerivation.ts:608](https://github.com/ABCrimson/modern-pdf-lib/blob/6ce8fea7ba62114c9bdeda1f601086d76e1fe5d2/src/crypto/keyDerivation.ts#L608)
+Defined in: [src/crypto/keyDerivation.ts:774](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/crypto/keyDerivation.ts#L774)
 
 Compute the file encryption key from a password and encryption dict.
 
 Tries the password as both user and owner password. Returns the key
 on the first successful match, or throws if neither works.
+
+Results are cached so that re-opening the same PDF with the same
+password skips the expensive key derivation.
 
 ## Parameters
 

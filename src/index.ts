@@ -516,6 +516,9 @@ export {
   PdfStampAnnotation,
   PdfInkAnnotation,
   PdfRedactAnnotation,
+  PdfPopupAnnotation,
+  PdfCaretAnnotation,
+  PdfFileAttachmentAnnotation,
   generateSquareAppearance,
   generateCircleAppearance,
   generateLineAppearance,
@@ -534,6 +537,8 @@ export type {
   FreeTextAlignment,
   LineEndingStyle,
   StandardStampName,
+  CaretSymbol,
+  FileAttachmentIcon,
 } from './annotation/index.js';
 
 // ---------------------------------------------------------------------------
@@ -587,6 +592,7 @@ export {
 } from './signature/index.js';
 export type {
   SignOptions,
+  VisibleSignatureOptions,
   PdfSignatureInfo,
   SignatureVerificationResult,
   ByteRangeResult,
@@ -658,6 +664,23 @@ export type { WatermarkOptions } from './core/watermark.js';
 
 export { markForRedaction, applyRedactions, getRedactionMarks } from './core/redaction.js';
 export type { RedactionOptions, RedactionMark } from './core/redaction.js';
+
+// ---------------------------------------------------------------------------
+// Image optimization
+// ---------------------------------------------------------------------------
+
+export {
+  downscaleImage,
+  recompressImage,
+  optimizeImage,
+} from './assets/image/imageOptimize.js';
+export type {
+  DownscaleOptions,
+  RecompressOptions,
+  ImageOptimizeOptions,
+  RawImageData,
+  OptimizeResult,
+} from './assets/image/imageOptimize.js';
 
 // ---------------------------------------------------------------------------
 // Base64 utilities

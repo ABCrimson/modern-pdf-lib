@@ -1037,6 +1037,45 @@ export class PdfDocument {
     return imageRef;
   }
 
+  /**
+   * Embed an image, auto-detecting the format from file headers.
+   *
+   * Inspects the first bytes to determine whether the data is PNG or JPEG,
+   * then delegates to {@link embedPng} or {@link embedJpeg} accordingly.
+   *
+   * @param imageData  Raw image file bytes (PNG or JPEG).
+   * @returns          An {@link ImageRef} to pass to `page.drawImage()`.
+   * @throws           If the image format cannot be detected.
+   *
+   * @example
+   * ```ts
+   * const bytes = new Uint8Array(await readFile('photo.jpg'));
+   * const image = await pdf.embedImage(bytes);
+   * page.drawImage(image, { x: 50, y: 400, width: 200, height: 150 });
+   * ```
+   */
+  async embedImage(imageData: Uint8Array | ArrayBuffer): Promise<ImageRef> {
+    const data = imageData instanceof ArrayBuffer ? new Uint8Array(imageData) : imageData;
+    if (data.length < 4) {
+      throw new Error('Image data too short to detect format');
+    }
+
+    // PNG: 89 50 4E 47 (.PNG)
+    if (data[0] === 0x89 && data[1] === 0x50 && data[2] === 0x4E && data[3] === 0x47) {
+      return this.embedPng(data);
+    }
+
+    // JPEG: FF D8 FF
+    if (data[0] === 0xFF && data[1] === 0xD8 && data[2] === 0xFF) {
+      return this.embedJpeg(data);
+    }
+
+    throw new Error(
+      'Unsupported image format. Expected PNG (89 50 4E 47) or JPEG (FF D8 FF), ' +
+      `got ${Array.from(data.subarray(0, 4)).map(b => b.toString(16).padStart(2, '0')).join(' ')}.`,
+    );
+  }
+
   // -----------------------------------------------------------------------
   // PDF page embedding (Form XObjects)
   // -----------------------------------------------------------------------

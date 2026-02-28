@@ -6,7 +6,7 @@
 
 # Interface: DocumentStructure
 
-Defined in: [src/core/pdfCatalog.ts:303](https://github.com/ABCrimson/modern-pdf-lib/blob/6ce8fea7ba62114c9bdeda1f601086d76e1fe5d2/src/core/pdfCatalog.ts#L303)
+Defined in: [src/core/pdfCatalog.ts:303](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfCatalog.ts#L303)
 
 High-level helper that wires together the catalog, page tree, and info
 dict, returning all the references the writer needs.
@@ -17,7 +17,7 @@ dict, returning all the references the writer needs.
 
 > **catalogRef**: [`PdfRef`](../classes/PdfRef.md)
 
-Defined in: [src/core/pdfCatalog.ts:305](https://github.com/ABCrimson/modern-pdf-lib/blob/6ce8fea7ba62114c9bdeda1f601086d76e1fe5d2/src/core/pdfCatalog.ts#L305)
+Defined in: [src/core/pdfCatalog.ts:305](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfCatalog.ts#L305)
 
 Reference to the /Catalog.
 
@@ -27,7 +27,7 @@ Reference to the /Catalog.
 
 > **infoRef**: [`PdfRef`](../classes/PdfRef.md)
 
-Defined in: [src/core/pdfCatalog.ts:307](https://github.com/ABCrimson/modern-pdf-lib/blob/6ce8fea7ba62114c9bdeda1f601086d76e1fe5d2/src/core/pdfCatalog.ts#L307)
+Defined in: [src/core/pdfCatalog.ts:307](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfCatalog.ts#L307)
 
 Reference to the /Info dict.
 
@@ -37,6 +37,6 @@ Reference to the /Info dict.
 
 > **pagesRef**: [`PdfRef`](../classes/PdfRef.md)
 
-Defined in: [src/core/pdfCatalog.ts:309](https://github.com/ABCrimson/modern-pdf-lib/blob/6ce8fea7ba62114c9bdeda1f601086d76e1fe5d2/src/core/pdfCatalog.ts#L309)
+Defined in: [src/core/pdfCatalog.ts:309](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfCatalog.ts#L309)
 
 Reference to the /Pages node.

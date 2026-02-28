@@ -160,6 +160,91 @@ function findStringForward(
   return -1;
 }
 
+/**
+ * Build a PDF content stream for a visible signature appearance.
+ *
+ * Renders a bordered rectangle with optional background color and
+ * text lines rendered in Helvetica.
+ *
+ * @internal
+ */
+function buildSignatureAppearanceStream(options: PrepareAppearanceOptions): string {
+  const [, , w, h] = options.rect;
+  const fontSize = options.fontSize ?? 10;
+  const borderWidth = options.borderWidth ?? 1;
+  const borderColor = options.borderColor ?? [0, 0, 0];
+  const bgColor = options.backgroundColor;
+  const lines = options.textLines;
+
+  const ops: string[] = [];
+
+  // Save graphics state
+  ops.push('q');
+
+  // Background fill
+  if (bgColor) {
+    ops.push(`${n(bgColor[0])} ${n(bgColor[1])} ${n(bgColor[2])} rg`);
+    ops.push(`0 0 ${n(w)} ${n(h)} re`);
+    ops.push('f');
+  }
+
+  // Border stroke
+  if (borderWidth > 0) {
+    ops.push(`${n(borderColor[0])} ${n(borderColor[1])} ${n(borderColor[2])} RG`);
+    ops.push(`${n(borderWidth)} w`);
+    const bw2 = borderWidth / 2;
+    ops.push(`${n(bw2)} ${n(bw2)} ${n(w - borderWidth)} ${n(h - borderWidth)} re`);
+    ops.push('S');
+  }
+
+  // Text
+  if (lines.length > 0) {
+    const margin = borderWidth + 4;
+    const lineHeight = fontSize * 1.2;
+
+    ops.push('BT');
+    ops.push(`/F1 ${n(fontSize)} Tf`);
+    ops.push('0 0 0 rg');
+
+    // Start from top-left, descending
+    const startY = h - margin - fontSize;
+    for (let i = 0; i < lines.length; i++) {
+      const y = startY - i * lineHeight;
+      if (y < margin) break; // Don't overflow the box
+      ops.push(`${n(margin)} ${n(y)} Td`);
+      ops.push(`(${escapePdfString(lines[i]!)}) Tj`);
+      // Reset position for absolute positioning on next line
+      ops.push(`${n(-margin)} ${n(-y)} Td`);
+    }
+    ops.push('ET');
+  }
+
+  // Restore graphics state
+  ops.push('Q');
+
+  return ops.join('\n');
+}
+
+/**
+ * Escape a string for use inside a PDF literal string `(...)`.
+ * @internal
+ */
+function escapePdfString(str: string): string {
+  return str
+    .replace(/\\/g, '\\\\')
+    .replace(/\(/g, '\\(')
+    .replace(/\)/g, '\\)');
+}
+
+/**
+ * Format a number for PDF operators (max 6 decimal places, no trailing zeros).
+ * @internal
+ */
+function n(value: number): string {
+  if (Number.isInteger(value)) return value.toString();
+  return value.toFixed(6).replace(/\.?0+$/, '');
+}
+
 // ---------------------------------------------------------------------------
 // Public API
 // ---------------------------------------------------------------------------
@@ -181,10 +266,30 @@ function findStringForward(
  * @param placeholderSize    Size in bytes for the signature. Default 8192.
  * @returns                  The prepared PDF and ByteRange info.
  */
+/**
+ * Options for visible signature appearance within the byte-range preparation.
+ * @internal
+ */
+export interface PrepareAppearanceOptions {
+  /** Page rectangle [x, y, width, height]. */
+  rect: [number, number, number, number];
+  /** Lines of text to render inside the signature box. */
+  textLines: string[];
+  /** Font size. Default: 10. */
+  fontSize?: number | undefined;
+  /** Background [r,g,b]. Default: none. */
+  backgroundColor?: [number, number, number] | undefined;
+  /** Border [r,g,b]. Default: [0,0,0]. */
+  borderColor?: [number, number, number] | undefined;
+  /** Border width. Default: 1. */
+  borderWidth?: number | undefined;
+}
+
 export function prepareForSigning(
   pdfBytes: Uint8Array,
   signatureFieldName: string,
   placeholderSize: number = 8192,
+  appearance?: PrepareAppearanceOptions | undefined,
 ): { preparedPdf: Uint8Array; byteRange: ByteRangeResult } {
   // Step 1: Find the original trailer/xref info
   const pdfStr = decoder.decode(pdfBytes);
@@ -223,13 +328,34 @@ export function prepareForSigning(
   // Allocate new object numbers
   const sigValueObjNum = originalSize;     // Signature value dict
   const sigFieldObjNum = originalSize + 1; // Signature field (Widget)
-  const newSize = originalSize + 2;
+  let apStreamObjNum = -1;
+  let newSize = originalSize + 2;
+
+  // If we have a visible appearance, allocate an object for the appearance stream
+  if (appearance) {
+    apStreamObjNum = newSize;
+    newSize++;
+  }
 
   // Step 2: Build the incremental update
   const sigDictStr = buildSignatureDictString(placeholderSize, signatureFieldName);
-  const sigFieldDict =
+
+  // Build rect string
+  let rectStr = '0 0 0 0';
+  if (appearance) {
+    const [x, y, w, h] = appearance.rect;
+    rectStr = `${x} ${y} ${x + w} ${y + h}`;
+  }
+
+  // Build field dict
+  let sigFieldDict =
     `<< /Type /Annot /Subtype /Widget /FT /Sig /T (${signatureFieldName})` +
-    ` /V ${sigValueObjNum} 0 R /F 132 /Rect [0 0 0 0] >>`;
+    ` /V ${sigValueObjNum} 0 R /F 132 /Rect [${rectStr}]`;
+
+  if (appearance && apStreamObjNum >= 0) {
+    sigFieldDict += ` /AP << /N ${apStreamObjNum} 0 R >>`;
+  }
+  sigFieldDict += ' >>';
 
   // Build the appendix
   let appendix = '\n';
@@ -249,12 +375,34 @@ export function prepareForSigning(
   appendix += sigFieldDict;
   appendix += `\nendobj\n`;
 
+  // Write appearance stream object (if visible)
+  let apStreamStart = -1;
+  if (appearance && apStreamObjNum >= 0) {
+    apStreamStart = pdfBytes.length + encoder.encode(appendix).length;
+    objOffsets.set(apStreamObjNum, apStreamStart);
+
+    const apContent = buildSignatureAppearanceStream(appearance);
+    const [, , w, h] = appearance.rect;
+    appendix += `${apStreamObjNum} 0 obj\n`;
+    appendix += `<< /Type /XObject /Subtype /Form /BBox [0 0 ${w} ${h}]`;
+    appendix += ` /Resources << /Font << /F1 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >> >> >>`;
+    appendix += ` /Length ${apContent.length} >>\n`;
+    appendix += `stream\n`;
+    appendix += apContent;
+    appendix += `\nendstream\n`;
+    appendix += `endobj\n`;
+  }
+
   // Write xref
   const xrefOffset = pdfBytes.length + encoder.encode(appendix).length;
+  const objCount = appearance ? 3 : 2;
   appendix += 'xref\n';
-  appendix += `${sigValueObjNum} 2\n`;
+  appendix += `${sigValueObjNum} ${objCount}\n`;
   appendix += `${sigValueStart.toString().padStart(10, '0')} 00000 n \n`;
   appendix += `${sigFieldStart.toString().padStart(10, '0')} 00000 n \n`;
+  if (appearance && apStreamStart >= 0) {
+    appendix += `${apStreamStart.toString().padStart(10, '0')} 00000 n \n`;
+  }
 
   // Write trailer
   appendix += 'trailer\n';

@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 See [VERSIONING.md](./VERSIONING.md) for this project's versioning policy.
 
+## [0.14.1] - 2026-02-28
+
+### Added
+
+- **Unified `embedImage()` method**: Auto-detects PNG (magic bytes `89 50 4E 47`) vs JPEG (`FF D8 FF`) from the raw file data — no need to call `embedPng()` or `embedJpeg()` separately. Accepts `Uint8Array` or `ArrayBuffer`, throws descriptive errors for unsupported formats.
+- **Image optimization API exports**: `downscaleImage()`, `recompressImage()`, and `optimizeImage()` are now exported from the main entry point along with their option types (`DownscaleOptions`, `RecompressOptions`, `ImageOptimizeOptions`, `RawImageData`, `OptimizeResult`).
+- **SASLprep password normalization (RFC 4013)**: V=5/R=6 (AES-256) password preparation now follows the full SASLprep profile — B.1 "mapped to nothing" characters are stripped, non-ASCII spaces are normalized to U+0020, NFKC normalization is applied, and prohibited characters (control chars, private use, surrogates, tagging) are rejected. This ensures correct password handling for internationalized passwords per ISO 32000-2.
+- **Visible signature appearances**: `signPdf()` now accepts an `appearance` option with `rect`, `text`, `fontSize`, `backgroundColor`, `borderColor`, and `borderWidth`. When provided, the signature renders as a visible box on the page with auto-generated text (signer name from certificate CN, reason, location, date) or custom text lines. Uses a PDF Form XObject appearance stream with Helvetica.
+- **Popup annotation type** (`PdfPopupAnnotation`): Floating window annotation that displays parent annotation text. Supports `isOpen()`/`setOpen()` and `setParent()`/`getParent()` for linking to parent annotations. Reference: PDF 1.7 §12.5.6.14.
+- **Caret annotation type** (`PdfCaretAnnotation`): Marks text insertion points in review workflows. Supports `getSymbol()`/`setSymbol()` (`'None'` | `'P'` for paragraph) and `getCaretRect()`/`setCaretRect()` for inner rectangle (RD) insets. Reference: PDF 1.7 §12.5.6.11.
+- **File attachment annotation type** (`PdfFileAttachmentAnnotation`): Embeds a file as a clickable icon on a page. Supports `getIcon()`/`setIcon()` (`'GraphPushPin'` | `'PaperclipTag'` | `'Paperclip'` | `'Tag'`), `getFileName()`, and `buildFileSpec(registry)` for building the embedded file stream, EF dictionary, and file specification. Reference: PDF 1.7 §12.5.6.15.
+- **Digital signatures guide** (`docs/guide/signatures.md`): Comprehensive guide covering invisible and visible signing, verification, low-level ByteRange API, external signers, RFC 3161 timestamping, and key preparation with OpenSSL.
+- **Accessibility & tagged PDF guide** (`docs/guide/accessibility.md`): Guide covering document language, title metadata, font embedding for Unicode, color contrast, multilingual content, PDF/UA compliance checklist, and XMP metadata.
+- **Annotations guide** (`docs/guide/annotations.md`): Complete reference for all 18 annotation types with code examples — Text, Link, FreeText, Highlight, Underline, Squiggly, StrikeOut, Line, Square, Circle, Polygon, PolyLine, Stamp, Ink, Redact, Popup, Caret, FileAttachment. Includes annotation flags, appearance generation, and parsing from existing PDFs.
+
+### Performance
+
+- **Per-object encryption key caching**: `deriveObjectKey()` in `PdfEncryptionHandler` now caches computed keys in a `Map<number, Uint8Array>` keyed on `(objNum << 16) | genNum`. For V=1-4 encrypted PDFs, this eliminates redundant MD5 computations when decrypting multiple strings/streams in the same object.
+- **File-level encryption key caching**: `computeFileEncryptionKey()` now maintains an LRU cache (max 32 entries) keyed on password + encryption dictionary parameters. Re-opening the same PDF with the same password skips the expensive key derivation (especially Algorithm 2.B for R=6 which runs 64+ rounds of AES+SHA).
+
+### Changed
+
+- **Annotation count**: 15 → 18 annotation types (added Popup, Caret, FileAttachment).
+- **Test count**: 2,199 → 2,243 across 103 test suites (was 100).
+
 ## [0.14.0] - 2026-02-28
 
 ### Performance

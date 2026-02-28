@@ -57,6 +57,17 @@ export { PdfInkAnnotation } from './types/inkAnnotation.js';
 // Redact
 export { PdfRedactAnnotation } from './types/redactAnnotation.js';
 
+// Popup
+export { PdfPopupAnnotation } from './types/popupAnnotation.js';
+
+// Caret
+export { PdfCaretAnnotation } from './types/caretAnnotation.js';
+export type { CaretSymbol } from './types/caretAnnotation.js';
+
+// File attachment
+export { PdfFileAttachmentAnnotation } from './types/fileAttachmentAnnotation.js';
+export type { FileAttachmentIcon } from './types/fileAttachmentAnnotation.js';
+
 // Appearance generator
 export {
   generateSquareAppearance,

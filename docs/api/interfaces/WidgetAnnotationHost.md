@@ -6,7 +6,7 @@
 
 # Interface: WidgetAnnotationHost
 
-Defined in: [src/form/pdfField.ts:31](https://github.com/ABCrimson/modern-pdf-lib/blob/6ce8fea7ba62114c9bdeda1f601086d76e1fe5d2/src/form/pdfField.ts#L31)
+Defined in: [src/form/pdfField.ts:31](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/form/pdfField.ts#L31)
 
 Minimal interface for a PDF page that can receive widget annotations.
 Used by [PdfField.addToPage](../classes/PdfField.md#addtopage) to avoid importing PdfPage directly.
@@ -17,7 +17,7 @@ Used by [PdfField.addToPage](../classes/PdfField.md#addtopage) to avoid importin
 
 > **addWidgetAnnotation**(`widgetDict`): `void`
 
-Defined in: [src/form/pdfField.ts:33](https://github.com/ABCrimson/modern-pdf-lib/blob/6ce8fea7ba62114c9bdeda1f601086d76e1fe5d2/src/form/pdfField.ts#L33)
+Defined in: [src/form/pdfField.ts:33](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/form/pdfField.ts#L33)
 
 Add a raw widget annotation dictionary to this page.
 

@@ -6,7 +6,7 @@
 
 # Interface: RadioAppearanceOptions
 
-Defined in: [src/form/fieldAppearance.ts:248](https://github.com/ABCrimson/modern-pdf-lib/blob/6ce8fea7ba62114c9bdeda1f601086d76e1fe5d2/src/form/fieldAppearance.ts#L248)
+Defined in: [src/form/fieldAppearance.ts:248](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/form/fieldAppearance.ts#L248)
 
 Options for generating a radio button appearance.
 
@@ -16,7 +16,7 @@ Options for generating a radio button appearance.
 
 > **rect**: \[`number`, `number`, `number`, `number`\]
 
-Defined in: [src/form/fieldAppearance.ts:252](https://github.com/ABCrimson/modern-pdf-lib/blob/6ce8fea7ba62114c9bdeda1f601086d76e1fe5d2/src/form/fieldAppearance.ts#L252)
+Defined in: [src/form/fieldAppearance.ts:252](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/form/fieldAppearance.ts#L252)
 
 The widget rectangle [x1, y1, x2, y2].
 
@@ -26,6 +26,6 @@ The widget rectangle [x1, y1, x2, y2].
 
 > **selected**: `boolean`
 
-Defined in: [src/form/fieldAppearance.ts:250](https://github.com/ABCrimson/modern-pdf-lib/blob/6ce8fea7ba62114c9bdeda1f601086d76e1fe5d2/src/form/fieldAppearance.ts#L250)
+Defined in: [src/form/fieldAppearance.ts:250](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/form/fieldAppearance.ts#L250)
 
 Whether this radio option is selected.

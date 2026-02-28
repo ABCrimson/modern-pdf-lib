@@ -263,4 +263,61 @@ describe('findSignatures', () => {
     expect(sig.byteRange).toHaveLength(4);
     expect(sig.contentsHex).toBeTruthy();
   });
+
+  // -------------------------------------------------------------------------
+  // Visible signature appearance
+  // -------------------------------------------------------------------------
+
+  it('should create visible signature with non-zero rect and appearance stream', () => {
+    const pdfBytes = createMinimalPdf();
+    const { preparedPdf } = prepareForSigning(pdfBytes, 'Signature1', 8192, {
+      rect: [50, 50, 200, 80],
+      textLines: ['Signed by: Test User', 'Date: 2026-02-28'],
+      fontSize: 12,
+      borderColor: [0, 0, 0],
+      borderWidth: 1,
+    });
+
+    const decoder = new TextDecoder('latin1');
+    const text = decoder.decode(preparedPdf);
+
+    // Should have non-zero Rect
+    expect(text).toContain('/Rect [50 50 250 130]');
+
+    // Should have an appearance dictionary referencing a Form XObject
+    expect(text).toContain('/AP <<');
+
+    // Should have the Form XObject with BBox
+    expect(text).toContain('/BBox [0 0 200 80]');
+
+    // Should have the text content in the appearance stream
+    expect(text).toContain('Signed by: Test User');
+    expect(text).toContain('Date: 2026-02-28');
+  });
+
+  it('should create invisible signature when no appearance is provided', () => {
+    const pdfBytes = createMinimalPdf();
+    const { preparedPdf } = prepareForSigning(pdfBytes, 'Signature1');
+
+    const decoder = new TextDecoder('latin1');
+    const text = decoder.decode(preparedPdf);
+
+    // Should have zero Rect (invisible)
+    expect(text).toContain('/Rect [0 0 0 0]');
+
+    // Should NOT have appearance dictionary
+    expect(text).not.toContain('/AP <<');
+  });
+
+  it('should render background color when specified', () => {
+    const pdfBytes = createMinimalPdf();
+    const { preparedPdf } = prepareForSigning(pdfBytes, 'Sig1', 8192, {
+      rect: [100, 100, 150, 60],
+      textLines: ['Test'],
+      backgroundColor: [0.95, 0.95, 0.95],
+    });
+
+    const text = new TextDecoder('latin1').decode(preparedPdf);
+    expect(text).toContain('0.95 0.95 0.95 rg');
+  });
 });

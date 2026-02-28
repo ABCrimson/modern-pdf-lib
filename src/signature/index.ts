@@ -19,6 +19,7 @@ export {
 } from './signatureHandler.js';
 export type {
   SignOptions,
+  VisibleSignatureOptions,
   PdfSignatureInfo,
 } from './signatureHandler.js';
 

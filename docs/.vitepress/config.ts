@@ -60,7 +60,7 @@ export default defineConfig({
       { text: 'API', link: '/api/' },
       { text: 'Migration', link: '/migration/from-pdf-lib' },
       {
-        text: 'v0.14.0',
+        text: 'v0.14.1',
         items: [
           {
             text: 'Changelog',
@@ -92,6 +92,9 @@ export default defineConfig({
             { text: 'Coordinates', link: '/guide/coordinates' },
             { text: 'Streaming', link: '/guide/streaming' },
             { text: 'Performance', link: '/guide/performance' },
+            { text: 'Annotations', link: '/guide/annotations' },
+            { text: 'Signatures', link: '/guide/signatures' },
+            { text: 'Accessibility', link: '/guide/accessibility' },
             { text: 'Cookbook', link: '/guide/cookbook' },
             { text: 'Troubleshooting', link: '/guide/troubleshooting' },
           ],

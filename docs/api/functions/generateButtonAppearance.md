@@ -8,7 +8,7 @@
 
 > **generateButtonAppearance**(`options`): [`PdfStream`](../classes/PdfStream.md)
 
-Defined in: [src/form/fieldAppearance.ts:418](https://github.com/ABCrimson/modern-pdf-lib/blob/6ce8fea7ba62114c9bdeda1f601086d76e1fe5d2/src/form/fieldAppearance.ts#L418)
+Defined in: [src/form/fieldAppearance.ts:418](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/form/fieldAppearance.ts#L418)
 
 Generate the appearance stream for a pushbutton.
 Renders a 3D-ish raised button with centered caption text.

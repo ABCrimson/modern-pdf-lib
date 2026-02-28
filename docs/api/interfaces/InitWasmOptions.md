@@ -6,7 +6,7 @@
 
 # Interface: InitWasmOptions
 
-Defined in: [src/index.ts:155](https://github.com/ABCrimson/modern-pdf-lib/blob/6ce8fea7ba62114c9bdeda1f601086d76e1fe5d2/src/index.ts#L155)
+Defined in: [src/index.ts:155](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/index.ts#L155)
 
 Options for WASM module initialization.
 
@@ -16,7 +16,7 @@ Options for WASM module initialization.
 
 > `optional` **deflate**: `boolean`
 
-Defined in: [src/index.ts:157](https://github.com/ABCrimson/modern-pdf-lib/blob/6ce8fea7ba62114c9bdeda1f601086d76e1fe5d2/src/index.ts#L157)
+Defined in: [src/index.ts:157](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/index.ts#L157)
 
 Initialize the deflate/inflate WASM module. Default: `false`.
 
@@ -26,7 +26,7 @@ Initialize the deflate/inflate WASM module. Default: `false`.
 
 > `optional` **deflateWasm**: `Uint8Array`\<`ArrayBufferLike`\>
 
-Defined in: [src/index.ts:166](https://github.com/ABCrimson/modern-pdf-lib/blob/6ce8fea7ba62114c9bdeda1f601086d76e1fe5d2/src/index.ts#L166)
+Defined in: [src/index.ts:166](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/index.ts#L166)
 
 Pre-loaded WASM bytes for the deflate module.
 When provided, the module is instantiated directly from these bytes.
@@ -37,7 +37,7 @@ When provided, the module is instantiated directly from these bytes.
 
 > `optional` **fonts**: `boolean`
 
-Defined in: [src/index.ts:161](https://github.com/ABCrimson/modern-pdf-lib/blob/6ce8fea7ba62114c9bdeda1f601086d76e1fe5d2/src/index.ts#L161)
+Defined in: [src/index.ts:161](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/index.ts#L161)
 
 Initialize the font subsetting WASM module. Default: `false`.
 
@@ -47,7 +47,7 @@ Initialize the font subsetting WASM module. Default: `false`.
 
 > `optional` **fontWasm**: `Uint8Array`\<`ArrayBufferLike`\>
 
-Defined in: [src/index.ts:174](https://github.com/ABCrimson/modern-pdf-lib/blob/6ce8fea7ba62114c9bdeda1f601086d76e1fe5d2/src/index.ts#L174)
+Defined in: [src/index.ts:174](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/index.ts#L174)
 
 Pre-loaded WASM bytes for the font subsetting module.
 
@@ -57,7 +57,7 @@ Pre-loaded WASM bytes for the font subsetting module.
 
 > `optional` **png**: `boolean`
 
-Defined in: [src/index.ts:159](https://github.com/ABCrimson/modern-pdf-lib/blob/6ce8fea7ba62114c9bdeda1f601086d76e1fe5d2/src/index.ts#L159)
+Defined in: [src/index.ts:159](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/index.ts#L159)
 
 Initialize the PNG decoding WASM module. Default: `false`.
 
@@ -67,6 +67,6 @@ Initialize the PNG decoding WASM module. Default: `false`.
 
 > `optional` **pngWasm**: `Uint8Array`\<`ArrayBufferLike`\>
 
-Defined in: [src/index.ts:170](https://github.com/ABCrimson/modern-pdf-lib/blob/6ce8fea7ba62114c9bdeda1f601086d76e1fe5d2/src/index.ts#L170)
+Defined in: [src/index.ts:170](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/index.ts#L170)
 
 Pre-loaded WASM bytes for the PNG decoding module.

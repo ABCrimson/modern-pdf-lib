@@ -145,6 +145,16 @@ export class PdfEncryptionHandler {
   /** The file ID (first element of /ID array). */
   private readonly fileId: Uint8Array;
 
+  /**
+   * Cache for per-object derived keys (V=1-4 only).
+   * Key: `(objNum << 16) | genNum` — unique integer per object.
+   * Value: the derived encryption key.
+   *
+   * Avoids recomputing MD5(fileKey + objNum + genNum [+ sAlT]) for
+   * every string and stream in the same object.
+   */
+  private readonly objectKeyCache = new Map<number, Uint8Array>();
+
   private constructor(params: {
     fileKey: Uint8Array;
     version: number;
@@ -405,6 +415,11 @@ export class PdfEncryptionHandler {
       return this.fileKey;
     }
 
+    // Check cache first — same (objNum, genNum) always yields the same key
+    const cacheKey = (objNum << 16) | genNum;
+    const cached = this.objectKeyCache.get(cacheKey);
+    if (cached) return cached;
+
     // Build input: fileKey + objNum(3 bytes LE) + genNum(2 bytes LE)
     const extra = this.useAes ? 4 : 0; // "sAlT" for AES
     const input = new Uint8Array(this.fileKey.length + 5 + extra);
@@ -429,7 +444,11 @@ export class PdfEncryptionHandler {
 
     // Truncate to min(keyLength/8 + 5, 16)
     const keyLen = Math.min(this.keyLengthBits / 8 + 5, 16);
-    return hash.subarray(0, keyLen);
+    const key = hash.subarray(0, keyLen);
+
+    // Cache for subsequent calls with the same object
+    this.objectKeyCache.set(cacheKey, key);
+    return key;
   }
 
   // -----------------------------------------------------------------------

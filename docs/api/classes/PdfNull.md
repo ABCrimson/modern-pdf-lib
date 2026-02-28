@@ -6,7 +6,7 @@
 
 # Class: PdfNull
 
-Defined in: [src/core/pdfObjects.ts:71](https://github.com/ABCrimson/modern-pdf-lib/blob/6ce8fea7ba62114c9bdeda1f601086d76e1fe5d2/src/core/pdfObjects.ts#L71)
+Defined in: [src/core/pdfObjects.ts:71](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfObjects.ts#L71)
 
 The PDF `null` object.
 
@@ -16,7 +16,7 @@ The PDF `null` object.
 
 > `readonly` `static` **instance**: `PdfNull`
 
-Defined in: [src/core/pdfObjects.ts:72](https://github.com/ABCrimson/modern-pdf-lib/blob/6ce8fea7ba62114c9bdeda1f601086d76e1fe5d2/src/core/pdfObjects.ts#L72)
+Defined in: [src/core/pdfObjects.ts:72](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfObjects.ts#L72)
 
 ## Methods
 
@@ -24,7 +24,7 @@ Defined in: [src/core/pdfObjects.ts:72](https://github.com/ABCrimson/modern-pdf-
 
 > **serialize**(`writer`): `void`
 
-Defined in: [src/core/pdfObjects.ts:80](https://github.com/ABCrimson/modern-pdf-lib/blob/6ce8fea7ba62114c9bdeda1f601086d76e1fe5d2/src/core/pdfObjects.ts#L80)
+Defined in: [src/core/pdfObjects.ts:80](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfObjects.ts#L80)
 
 Serialize as `null`.
 

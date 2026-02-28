@@ -6,7 +6,7 @@
 
 # Class: ForeignPageError
 
-Defined in: [src/errors.ts:60](https://github.com/ABCrimson/modern-pdf-lib/blob/6ce8fea7ba62114c9bdeda1f601086d76e1fe5d2/src/errors.ts#L60)
+Defined in: [src/errors.ts:60](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/errors.ts#L60)
 
 Thrown when attempting to use a page from a different document without
 first copying it.
@@ -21,7 +21,7 @@ first copying it.
 
 > **new ForeignPageError**(`options?`): `ForeignPageError`
 
-Defined in: [src/errors.ts:62](https://github.com/ABCrimson/modern-pdf-lib/blob/6ce8fea7ba62114c9bdeda1f601086d76e1fe5d2/src/errors.ts#L62)
+Defined in: [src/errors.ts:62](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/errors.ts#L62)
 
 #### Parameters
 
@@ -67,7 +67,7 @@ Defined in: node\_modules/typescript/lib/lib.es5.d.ts:1075
 
 > `readonly` **name**: `"ForeignPageError"` = `'ForeignPageError'`
 
-Defined in: [src/errors.ts:61](https://github.com/ABCrimson/modern-pdf-lib/blob/6ce8fea7ba62114c9bdeda1f601086d76e1fe5d2/src/errors.ts#L61)
+Defined in: [src/errors.ts:61](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/errors.ts#L61)
 
 #### Overrides
 

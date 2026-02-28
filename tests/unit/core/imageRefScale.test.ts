@@ -233,3 +233,48 @@ describe('ImageRef.scaleToFit()', () => {
     expect(fitted.height).toBeCloseTo(img.height * 50, 1);
   });
 });
+
+// ---------------------------------------------------------------------------
+// embedImage() auto-detection
+// ---------------------------------------------------------------------------
+
+describe('PdfDocument.embedImage()', () => {
+  it('auto-detects PNG and embeds correctly', async () => {
+    const doc = createPdf();
+    const png = makeMinimalPng(1, 1);
+    const img = await doc.embedImage(png);
+
+    expect(img.width).toBe(1);
+    expect(img.height).toBe(1);
+    expect(img.name).toMatch(/^Im\d+$/);
+  });
+
+  it('auto-detects JPEG and embeds correctly', async () => {
+    const doc = createPdf();
+    const jpeg = makeMinimalJpeg(200, 100);
+    const img = await doc.embedImage(jpeg);
+
+    expect(img.width).toBe(200);
+    expect(img.height).toBe(100);
+  });
+
+  it('throws for unsupported format (GIF header)', async () => {
+    const doc = createPdf();
+    const gif = new Uint8Array([0x47, 0x49, 0x46, 0x38]); // "GIF8"
+    await expect(doc.embedImage(gif)).rejects.toThrow('Unsupported image format');
+  });
+
+  it('throws for data too short', async () => {
+    const doc = createPdf();
+    await expect(doc.embedImage(new Uint8Array([0x89, 0x50]))).rejects.toThrow('too short');
+  });
+
+  it('accepts ArrayBuffer input', async () => {
+    const doc = createPdf();
+    const png = makeMinimalPng(1, 1);
+    const img = await doc.embedImage(png.buffer as ArrayBuffer);
+
+    expect(img.width).toBe(1);
+    expect(img.height).toBe(1);
+  });
+});

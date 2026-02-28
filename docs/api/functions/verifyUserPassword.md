@@ -8,7 +8,7 @@
 
 > **verifyUserPassword**(`password`, `dict`, `fileId`): `Promise`\<`boolean`\>
 
-Defined in: [src/crypto/keyDerivation.ts:726](https://github.com/ABCrimson/modern-pdf-lib/blob/6ce8fea7ba62114c9bdeda1f601086d76e1fe5d2/src/crypto/keyDerivation.ts#L726)
+Defined in: [src/crypto/keyDerivation.ts:907](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/crypto/keyDerivation.ts#L907)
 
 Verify a user password against the /U value in the encryption dict.
 

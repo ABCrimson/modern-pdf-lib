@@ -13,6 +13,7 @@ import {
   verifyUserPassword,
   verifyOwnerPassword,
   computeFileEncryptionKey,
+  saslprep,
 } from '../../../src/crypto/keyDerivation.js';
 import type { EncryptDictValues } from '../../../src/crypto/keyDerivation.js';
 import { encodePermissions } from '../../../src/crypto/permissions.js';
@@ -369,5 +370,69 @@ describe('computeFileEncryptionKey', () => {
     // Empty password should work
     const key = await computeFileEncryptionKey('', dict, fileId);
     expect(key.length).toBe(16);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// SASLprep (RFC 4013) tests
+// ---------------------------------------------------------------------------
+
+describe('saslprep', () => {
+  it('passes through ASCII passwords unchanged', () => {
+    expect(saslprep('password123')).toBe('password123');
+    expect(saslprep('Hello World')).toBe('Hello World');
+  });
+
+  it('maps non-ASCII spaces to U+0020', () => {
+    // NO-BREAK SPACE (U+00A0) → ASCII space
+    expect(saslprep('hello\u00A0world')).toBe('hello world');
+    // IDEOGRAPHIC SPACE (U+3000) → ASCII space
+    expect(saslprep('hello\u3000world')).toBe('hello world');
+    // EM SPACE (U+2003) → ASCII space
+    expect(saslprep('hello\u2003world')).toBe('hello world');
+  });
+
+  it('removes commonly mapped to nothing characters (B.1)', () => {
+    // SOFT HYPHEN (U+00AD) → removed
+    expect(saslprep('pass\u00ADword')).toBe('password');
+    // ZERO WIDTH SPACE (U+200B) → removed
+    expect(saslprep('pass\u200Bword')).toBe('password');
+    // WORD JOINER (U+2060) → removed
+    expect(saslprep('pass\u2060word')).toBe('password');
+    // BOM (U+FEFF) → removed
+    expect(saslprep('\uFEFFpassword')).toBe('password');
+  });
+
+  it('applies NFKC normalization', () => {
+    // LATIN SMALL LETTER A WITH RING ABOVE (U+00E5) decomposed → composed
+    // "a" + combining ring = "å" (NFC)
+    expect(saslprep('a\u030A')).toBe('\u00E5');
+    // Full-width digits (U+FF10..FF19) → ASCII digits via NFKC
+    expect(saslprep('\uFF11\uFF12\uFF13')).toBe('123');
+  });
+
+  it('handles CJK passwords correctly', () => {
+    expect(saslprep('密码测试')).toBe('密码测试');
+  });
+
+  it('handles Arabic passwords correctly', () => {
+    expect(saslprep('كلمة السر')).toBe('كلمة السر');
+  });
+
+  it('handles emoji in passwords', () => {
+    expect(saslprep('pass🔑word')).toBe('pass🔑word');
+  });
+
+  it('throws for ASCII control characters', () => {
+    expect(() => saslprep('pass\x00word')).toThrow('prohibited');
+    expect(() => saslprep('pass\x07word')).toThrow('prohibited');
+  });
+
+  it('handles empty string', () => {
+    expect(saslprep('')).toBe('');
+  });
+
+  it('handles mixed script password', () => {
+    expect(saslprep('пароль123')).toBe('пароль123');
   });
 });

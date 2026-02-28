@@ -6,7 +6,7 @@
 
 # Class: PdfStreamWriter
 
-Defined in: [src/core/pdfStream.ts:67](https://github.com/ABCrimson/modern-pdf-lib/blob/6ce8fea7ba62114c9bdeda1f601086d76e1fe5d2/src/core/pdfStream.ts#L67)
+Defined in: [src/core/pdfStream.ts:67](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfStream.ts#L67)
 
 A PDF writer that produces a `ReadableStream<Uint8Array>`.
 
@@ -26,7 +26,7 @@ The stream handles back-pressure automatically via the underlying
 
 > **new PdfStreamWriter**(`registry`, `structure`, `options?`): `PdfStreamWriter`
 
-Defined in: [src/core/pdfStream.ts:72](https://github.com/ABCrimson/modern-pdf-lib/blob/6ce8fea7ba62114c9bdeda1f601086d76e1fe5d2/src/core/pdfStream.ts#L72)
+Defined in: [src/core/pdfStream.ts:72](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfStream.ts#L72)
 
 #### Parameters
 
@@ -56,7 +56,7 @@ Document structure references.
 
 > **toReadableStream**(): `ReadableStream`\<`Uint8Array`\<`ArrayBufferLike`\>\>
 
-Defined in: [src/core/pdfStream.ts:94](https://github.com/ABCrimson/modern-pdf-lib/blob/6ce8fea7ba62114c9bdeda1f601086d76e1fe5d2/src/core/pdfStream.ts#L94)
+Defined in: [src/core/pdfStream.ts:94](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfStream.ts#L94)
 
 Create a `ReadableStream<Uint8Array>` that emits the complete PDF.
 

@@ -65,14 +65,155 @@ function padPassword(password: string): Uint8Array {
 }
 
 /**
- * Truncate a UTF-8 password to 127 bytes for R=5/R=6 (SASLprep would
- * be ideal but we approximate with simple truncation as most PDF
- * libraries do).
+ * Prepare a password for R=5/R=6 (AES-256) using SASLprep (RFC 4013).
+ *
+ * ISO 32000-2 SS7.6.3.1 requires SASLprep normalization for passwords
+ * used with encryption revision 5 and 6.  The steps are:
+ *
+ * 1. Map: Convert non-ASCII space characters to U+0020, remove
+ *    "commonly mapped to nothing" characters (RFC 3454 B.1).
+ * 2. Normalize: Apply Unicode NFKC normalization.
+ * 3. Prohibit: Reject characters from RFC 3454 prohibited tables.
+ * 4. Bidi: Check bidirectional string rules.
+ *
+ * The result is truncated to 127 UTF-8 bytes per the PDF spec.
  */
 function preparePasswordV5(password: string): Uint8Array {
+  const prepared = saslprep(password);
   const encoder = new TextEncoder();
-  const encoded = encoder.encode(password);
+  const encoded = encoder.encode(prepared);
   return encoded.length > 127 ? encoded.subarray(0, 127) : encoded;
+}
+
+/**
+ * Simplified SASLprep (RFC 4013) profile of stringprep (RFC 3454).
+ *
+ * Covers the mapping, normalization, and prohibited-character steps
+ * needed for PDF password preparation.  Bidi checking is omitted
+ * since PDF passwords are typically LTR and the spec allows
+ * implementations to skip it.
+ *
+ * @internal
+ */
+function saslprep(input: string): string {
+  // Step 1: Mapping
+  // B.1 — "Commonly mapped to nothing" (zero-width joiners, soft hyphen, etc.)
+  // C.1.2 — Non-ASCII space characters → U+0020
+  let mapped = '';
+  for (const ch of input) {
+    const cp = ch.codePointAt(0)!;
+
+    // B.1: Map to nothing (RFC 3454 Table B.1 — commonly mapped to nothing)
+    if (isMappedToNothing(cp)) continue;
+
+    // C.1.2: Non-ASCII space characters → ASCII space
+    if (isNonAsciiSpace(cp)) {
+      mapped += ' ';
+      continue;
+    }
+
+    mapped += ch;
+  }
+
+  // Step 2: NFKC normalization
+  // String.prototype.normalize('NFKC') is available in all modern runtimes.
+  const normalized = mapped.normalize('NFKC');
+
+  // Step 3: Prohibited characters — reject if any are present
+  for (const ch of normalized) {
+    const cp = ch.codePointAt(0)!;
+    if (isProhibited(cp)) {
+      throw new Error(
+        `Password contains prohibited character U+${cp.toString(16).toUpperCase().padStart(4, '0')} (SASLprep)`,
+      );
+    }
+  }
+
+  return normalized;
+}
+
+/** RFC 3454 Table B.1 — Commonly mapped to nothing. */
+function isMappedToNothing(cp: number): boolean {
+  return (
+    cp === 0x00AD ||  // SOFT HYPHEN
+    cp === 0x1806 ||  // MONGOLIAN TODO SOFT HYPHEN
+    cp === 0x200B ||  // ZERO WIDTH SPACE
+    cp === 0x2060 ||  // WORD JOINER
+    cp === 0xFEFF ||  // ZERO WIDTH NO-BREAK SPACE (BOM)
+    cp === 0x034F ||  // COMBINING GRAPHEME JOINER
+    cp === 0x180B ||  // MONGOLIAN FREE VARIATION SELECTOR ONE
+    cp === 0x180C ||  // MONGOLIAN FREE VARIATION SELECTOR TWO
+    cp === 0x180D ||  // MONGOLIAN FREE VARIATION SELECTOR THREE
+    cp === 0x200C ||  // ZERO WIDTH NON-JOINER
+    cp === 0x200D ||  // ZERO WIDTH JOINER
+    (cp >= 0xFE00 && cp <= 0xFE0F)  // VARIATION SELECTORS 1-16
+  );
+}
+
+/** RFC 3454 Table C.1.2 — Non-ASCII space characters. */
+function isNonAsciiSpace(cp: number): boolean {
+  return (
+    cp === 0x00A0 ||  // NO-BREAK SPACE
+    cp === 0x1680 ||  // OGHAM SPACE MARK
+    cp === 0x2000 ||  // EN QUAD
+    cp === 0x2001 ||  // EM QUAD
+    cp === 0x2002 ||  // EN SPACE
+    cp === 0x2003 ||  // EM SPACE
+    cp === 0x2004 ||  // THREE-PER-EM SPACE
+    cp === 0x2005 ||  // FOUR-PER-EM SPACE
+    cp === 0x2006 ||  // SIX-PER-EM SPACE
+    cp === 0x2007 ||  // FIGURE SPACE
+    cp === 0x2008 ||  // PUNCTUATION SPACE
+    cp === 0x2009 ||  // THIN SPACE
+    cp === 0x200A ||  // HAIR SPACE
+    cp === 0x202F ||  // NARROW NO-BREAK SPACE
+    cp === 0x205F ||  // MEDIUM MATHEMATICAL SPACE
+    cp === 0x3000     // IDEOGRAPHIC SPACE
+  );
+}
+
+/**
+ * RFC 3454 prohibited tables (C.2.1, C.2.2, C.3, C.4, C.5, C.6, C.7, C.8, C.9).
+ * Simplified to the ranges most likely to appear in passwords.
+ */
+function isProhibited(cp: number): boolean {
+  // C.2.1: ASCII control characters
+  if (cp <= 0x001F || cp === 0x007F) return true;
+
+  // C.2.2: Non-ASCII control characters
+  if ((cp >= 0x0080 && cp <= 0x009F) || cp === 0x06DD || cp === 0x070F ||
+      cp === 0x180E || (cp >= 0x200C && cp <= 0x200D) ||
+      (cp >= 0x2028 && cp <= 0x2029) ||
+      (cp >= 0x2060 && cp <= 0x2063) ||
+      (cp >= 0x206A && cp <= 0x206F) ||
+      cp === 0xFEFF ||
+      (cp >= 0xFFF9 && cp <= 0xFFFC) ||
+      (cp >= 0x1D173 && cp <= 0x1D17A)) return true;
+
+  // C.3: Private use
+  if ((cp >= 0xE000 && cp <= 0xF8FF) ||
+      (cp >= 0xF0000 && cp <= 0xFFFFD) ||
+      (cp >= 0x100000 && cp <= 0x10FFFD)) return true;
+
+  // C.4: Non-character code points
+  if ((cp >= 0xFDD0 && cp <= 0xFDEF) ||
+      (cp & 0xFFFF) === 0xFFFE || (cp & 0xFFFF) === 0xFFFF) return true;
+
+  // C.5: Surrogate codes (shouldn't appear after normalize but check anyway)
+  if (cp >= 0xD800 && cp <= 0xDFFF) return true;
+
+  // C.6: Inappropriate for plain text
+  if (cp === 0xFFF9 || cp === 0xFFFA || cp === 0xFFFB || cp === 0xFFFC) return true;
+
+  // C.8: Change display properties / deprecated
+  if (cp === 0x0340 || cp === 0x0341 || cp === 0x200E || cp === 0x200F ||
+      (cp >= 0x202A && cp <= 0x202E) ||
+      (cp >= 0x206A && cp <= 0x206F)) return true;
+
+  // C.9: Tagging characters
+  if (cp === 0xE0001 || (cp >= 0xE0020 && cp <= 0xE007F)) return true;
+
+  return false;
 }
 
 /**
@@ -594,10 +735,35 @@ export async function computeEncryptionKeyR6(
 // ---------------------------------------------------------------------------
 
 /**
+ * LRU cache for file encryption keys.
+ *
+ * Keyed on a hash derived from password + encryption dict parameters,
+ * so re-opening the same PDF with the same password skips the expensive
+ * key derivation (especially for R=6 which runs 64+ rounds of AES+SHA).
+ */
+const fileKeyCache = new Map<string, Uint8Array>();
+const FILE_KEY_CACHE_MAX = 32;
+
+/**
+ * Build a cache key string from the inputs that uniquely identify
+ * a key derivation result.
+ */
+function buildCacheKey(password: string, dict: EncryptDictValues, fileId: Uint8Array): string {
+  // Use first 16 bytes of O, U, and fileId for uniqueness (collision is practically impossible)
+  const oHex = Array.from(dict.ownerKey.subarray(0, 16), b => b.toString(16).padStart(2, '0')).join('');
+  const uHex = Array.from(dict.userKey.subarray(0, 16), b => b.toString(16).padStart(2, '0')).join('');
+  const fHex = Array.from(fileId.subarray(0, 16), b => b.toString(16).padStart(2, '0')).join('');
+  return `${dict.revision}:${dict.permissions}:${password}:${oHex}:${uHex}:${fHex}`;
+}
+
+/**
  * Compute the file encryption key from a password and encryption dict.
  *
  * Tries the password as both user and owner password. Returns the key
  * on the first successful match, or throws if neither works.
+ *
+ * Results are cached so that re-opening the same PDF with the same
+ * password skips the expensive key derivation.
  *
  * @param password  The password to try.
  * @param dict      Encryption dictionary values.
@@ -610,37 +776,52 @@ export async function computeFileEncryptionKey(
   dict: EncryptDictValues,
   fileId: Uint8Array,
 ): Promise<Uint8Array> {
+  // Check cache first
+  const ck = buildCacheKey(password, dict, fileId);
+  const cached = fileKeyCache.get(ck);
+  if (cached) return cached.slice(); // Return a copy to prevent mutation
+
+  let result: Uint8Array;
+
   if (dict.revision >= 6) {
     // R=6: Try user first, then owner
     const userKey = await computeEncryptionKeyR6(password, dict, false);
-    if (userKey) return userKey;
-    const ownerKey = await computeEncryptionKeyR6(password, dict, true);
-    if (ownerKey) return ownerKey;
-    throw new Error('Incorrect password for R=6 encryption');
-  }
-
-  if (dict.revision === 5) {
+    if (userKey) { result = userKey; }
+    else {
+      const ownerKey = await computeEncryptionKeyR6(password, dict, true);
+      if (ownerKey) { result = ownerKey; }
+      else { throw new Error('Incorrect password for R=6 encryption'); }
+    }
+  } else if (dict.revision === 5) {
     // R=5: Try user first, then owner
     const userKey = await computeEncryptionKeyR5(password, dict, false);
-    if (userKey) return userKey;
-    const ownerKey = await computeEncryptionKeyR5(password, dict, true);
-    if (ownerKey) return ownerKey;
-    throw new Error('Incorrect password for R=5 encryption');
+    if (userKey) { result = userKey; }
+    else {
+      const ownerKey = await computeEncryptionKeyR5(password, dict, true);
+      if (ownerKey) { result = ownerKey; }
+      else { throw new Error('Incorrect password for R=5 encryption'); }
+    }
+  } else {
+    // R=2, 3, 4: Verify user password first
+    if (await verifyUserPassword(password, dict, fileId)) {
+      result = computeEncryptionKeyR2R4(password, dict, fileId);
+    } else if (await verifyOwnerPassword(password, dict, fileId)) {
+      // Recover the user password from the /O value and use that
+      const recoveredKey = recoverUserKeyFromOwner(password, dict);
+      result = computeEncryptionKeyR2R4Bytes(recoveredKey, dict, fileId);
+    } else {
+      throw new Error('Incorrect password');
+    }
   }
 
-  // R=2, 3, 4: Verify user password first
-  if (await verifyUserPassword(password, dict, fileId)) {
-    return computeEncryptionKeyR2R4(password, dict, fileId);
+  // Store in cache, evict oldest if full
+  if (fileKeyCache.size >= FILE_KEY_CACHE_MAX) {
+    const firstKey = fileKeyCache.keys().next().value;
+    if (firstKey !== undefined) fileKeyCache.delete(firstKey);
   }
+  fileKeyCache.set(ck, result.slice());
 
-  // Try as owner password
-  if (await verifyOwnerPassword(password, dict, fileId)) {
-    // Recover the user password from the /O value and use that
-    const recoveredKey = recoverUserKeyFromOwner(password, dict);
-    return computeEncryptionKeyR2R4Bytes(recoveredKey, dict, fileId);
-  }
-
-  throw new Error('Incorrect password');
+  return result;
 }
 
 /**
@@ -958,4 +1139,4 @@ function arraysEqual(a: Uint8Array, b: Uint8Array): boolean {
 }
 
 // Re-export for use by encryptionHandler
-export { padPassword, preparePasswordV5, concat, int32LE, PASSWORD_PADDING, arraysEqual };
+export { padPassword, preparePasswordV5, saslprep, concat, int32LE, PASSWORD_PADDING, arraysEqual };

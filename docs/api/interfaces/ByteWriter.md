@@ -6,7 +6,7 @@
 
 # Interface: ByteWriter
 
-Defined in: [src/core/pdfObjects.ts:21](https://github.com/ABCrimson/modern-pdf-lib/blob/6ce8fea7ba62114c9bdeda1f601086d76e1fe5d2/src/core/pdfObjects.ts#L21)
+Defined in: [src/core/pdfObjects.ts:21](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfObjects.ts#L21)
 
 Minimal interface consumed by every `serialize()` method.
 Implementations may write to a growing `Uint8Array`, a `WritableStream`,
@@ -18,7 +18,7 @@ etc.
 
 > **write**(`data`): `void`
 
-Defined in: [src/core/pdfObjects.ts:23](https://github.com/ABCrimson/modern-pdf-lib/blob/6ce8fea7ba62114c9bdeda1f601086d76e1fe5d2/src/core/pdfObjects.ts#L23)
+Defined in: [src/core/pdfObjects.ts:23](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfObjects.ts#L23)
 
 Append raw bytes.
 
@@ -38,7 +38,7 @@ Append raw bytes.
 
 > **writeString**(`str`): `void`
 
-Defined in: [src/core/pdfObjects.ts:25](https://github.com/ABCrimson/modern-pdf-lib/blob/6ce8fea7ba62114c9bdeda1f601086d76e1fe5d2/src/core/pdfObjects.ts#L25)
+Defined in: [src/core/pdfObjects.ts:25](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfObjects.ts#L25)
 
 Append an ASCII / Latin-1 string — callers guarantee all chars < 0x100.
 

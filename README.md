@@ -15,7 +15,7 @@ Create, parse, fill, merge, sign, and manipulate PDF documents<br />in Node, Den
 
 [![npm version](https://img.shields.io/npm/v/modern-pdf-lib?style=flat-square&color=cb3837)](https://www.npmjs.com/package/modern-pdf-lib)
 [![bundle size](https://img.shields.io/badge/gzip-36kb_core-blue?style=flat-square)](https://bundlephobia.com/package/modern-pdf-lib)
-[![tests](https://img.shields.io/badge/tests-2%2C199_passing-brightgreen?style=flat-square)](#)
+[![tests](https://img.shields.io/badge/tests-2%2C243_passing-brightgreen?style=flat-square)](#)
 [![TypeScript](https://img.shields.io/badge/TypeScript-6.0-3178c6?style=flat-square&logo=typescript&logoColor=white)](#)
 [![License: MIT](https://img.shields.io/badge/license-MIT-yellow?style=flat-square)](LICENSE)
 
@@ -90,7 +90,7 @@ const blob = await doc.saveAsBlob();     // Blob (browsers)
 
 **Secure & Compliant**
 - AES-256 / RC4 encryption & decryption
-- Digital signatures (PKCS#7, timestamps)
+- Digital signatures (PKCS#7, visible/invisible, timestamps)
 - PDF/A-1b through PDF/A-3u validation
 - Tagged PDF / PDF/UA accessibility
 - Structure tree & marked content
@@ -168,7 +168,7 @@ const blob = await doc.saveAsBlob();     // Blob (browsers)
 <td align="center">Copy pages only</td></tr>
 
 <tr><td><strong>Annotations</strong></td>
-<td align="center">16 types + appearances</td>
+<td align="center">18 types + appearances</td>
 <td align="center">No</td></tr>
 
 <tr><td><strong>Streaming output</strong></td>
@@ -322,10 +322,14 @@ const bytes = await doc.save({
 ```ts
 import { signPdf, verifySignatures } from 'modern-pdf-lib';
 
-const signed = await signPdf(pdfBytes, {
-  certificate: certPem,
-  privateKey: keyPem,
+const signed = await signPdf(pdfBytes, 'Signature1', {
+  certificate: certDer,
+  privateKey: keyDer,
   reason: 'Approved',
+  appearance: {                    // optional visible signature
+    rect: [50, 50, 200, 80],
+    fontSize: 10,
+  },
 });
 
 const results = await verifySignatures(signed);
@@ -420,7 +424,7 @@ modern-pdf-lib/
     core/           PDF document model, objects, writer, pages
     parser/         PDF loading, text extraction, content streams
     form/           AcroForm fields (7 types) + appearances
-    annotation/     16 annotation types + appearance generators
+    annotation/     18 annotation types + appearance generators
     accessibility/  Structure tree, marked content, PDF/UA checker
     compliance/     PDF/A validation & enforcement
     signature/      PKCS#7 signatures, timestamps, verification
@@ -431,7 +435,7 @@ modern-pdf-lib/
     outline/        Bookmarks / document outline
     metadata/       XMP metadata, viewer preferences
     wasm/           Rust crate sources (5 modules)
-  tests/            2,199 tests across 100 suites
+  tests/            2,243 tests across 103 suites
   docs/             VitePress documentation
 ```
 
@@ -443,7 +447,7 @@ modern-pdf-lib/
 git clone https://github.com/ABCrimson/modern-pdf-lib.git
 cd modern-pdf-lib
 npm install
-npm test          # 2,199 tests
+npm test          # 2,243 tests
 npm run typecheck # TypeScript 6.0 strict
 npm run build     # ESM + CJS + declarations
 ```
