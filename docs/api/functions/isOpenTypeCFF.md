@@ -8,7 +8,7 @@
 
 > **isOpenTypeCFF**(`data`): `boolean`
 
-Defined in: [src/assets/font/otfDetect.ts:19](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/assets/font/otfDetect.ts#L19)
+Defined in: [src/assets/font/otfDetect.ts:19](https://github.com/ABCrimson/modern-pdf-lib/blob/6ce8fea7ba62114c9bdeda1f601086d76e1fe5d2/src/assets/font/otfDetect.ts#L19)
 
 Detect whether font data is an OpenType font with CFF outlines.
 CFF-based OpenType fonts start with the ASCII bytes "OTTO".

@@ -694,21 +694,14 @@ function read2DMode(reader: BitReader): Mode2D {
     // 01x
     bit = reader.readBit();
     if (bit < 0) return Mode2D.EOL;
-    if (bit === 1) return Mode2D.HORIZONTAL; // 011 -> wait, horizontal is 001
-    // Actually let me re-check the codes:
     // V(0):  1
     // VL(1): 010
     // VR(1): 011
     // H:     001
     // P:     0001
-    // VR(2): 000011
-    // VL(2): 000010
-    // VR(3): 0000011
-    // VL(3): 0000010
-    //
-    // So after reading "01":
-    // next bit 0 -> 010 -> VL(1) -> VERTICAL_MINUS_1
-    // next bit 1 -> 011 -> VR(1) -> VERTICAL_PLUS_1
+    // After reading "01":
+    //   next bit 0 -> 010 -> VL(1) -> VERTICAL_MINUS_1
+    //   next bit 1 -> 011 -> VR(1) -> VERTICAL_PLUS_1
     if (bit === 0) return Mode2D.VERTICAL_MINUS_1;
     return Mode2D.VERTICAL_PLUS_1;
   }

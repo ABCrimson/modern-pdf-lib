@@ -6,7 +6,7 @@
 
 # Interface: FontRef
 
-Defined in: [src/core/pdfPage.ts:438](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/core/pdfPage.ts#L438)
+Defined in: [src/core/pdfPage.ts:438](https://github.com/ABCrimson/modern-pdf-lib/blob/6ce8fea7ba62114c9bdeda1f601086d76e1fe5d2/src/core/pdfPage.ts#L438)
 
 Opaque handle for a font that has been embedded in the document.
 
@@ -16,7 +16,7 @@ Opaque handle for a font that has been embedded in the document.
 
 > `readonly` **name**: `string`
 
-Defined in: [src/core/pdfPage.ts:440](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/core/pdfPage.ts#L440)
+Defined in: [src/core/pdfPage.ts:440](https://github.com/ABCrimson/modern-pdf-lib/blob/6ce8fea7ba62114c9bdeda1f601086d76e1fe5d2/src/core/pdfPage.ts#L440)
 
 Resource name used in content-stream operators (e.g. `F1`).
 
@@ -26,7 +26,7 @@ Resource name used in content-stream operators (e.g. `F1`).
 
 > `readonly` **ref**: [`PdfRef`](../classes/PdfRef.md)
 
-Defined in: [src/core/pdfPage.ts:442](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/core/pdfPage.ts#L442)
+Defined in: [src/core/pdfPage.ts:442](https://github.com/ABCrimson/modern-pdf-lib/blob/6ce8fea7ba62114c9bdeda1f601086d76e1fe5d2/src/core/pdfPage.ts#L442)
 
 Indirect reference to the font dictionary.
 
@@ -36,7 +36,7 @@ Indirect reference to the font dictionary.
 
 > `optional` **getCharacterSet**(): `number`[]
 
-Defined in: [src/core/pdfPage.ts:481](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/core/pdfPage.ts#L481)
+Defined in: [src/core/pdfPage.ts:481](https://github.com/ABCrimson/modern-pdf-lib/blob/6ce8fea7ba62114c9bdeda1f601086d76e1fe5d2/src/core/pdfPage.ts#L481)
 
 Return the set of Unicode codepoints supported by this font.
 
@@ -55,7 +55,7 @@ Array of Unicode codepoint numbers.
 
 > **heightAtSize**(`size`): `number`
 
-Defined in: [src/core/pdfPage.ts:452](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/core/pdfPage.ts#L452)
+Defined in: [src/core/pdfPage.ts:452](https://github.com/ABCrimson/modern-pdf-lib/blob/6ce8fea7ba62114c9bdeda1f601086d76e1fe5d2/src/core/pdfPage.ts#L452)
 
 Compute the height of the font at the given size (ascender - descender).
 Available for both standard and TrueType fonts.
@@ -76,7 +76,7 @@ Available for both standard and TrueType fonts.
 
 > `optional` **sizeAtHeight**(`height`): `number`
 
-Defined in: [src/core/pdfPage.ts:472](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/core/pdfPage.ts#L472)
+Defined in: [src/core/pdfPage.ts:472](https://github.com/ABCrimson/modern-pdf-lib/blob/6ce8fea7ba62114c9bdeda1f601086d76e1fe5d2/src/core/pdfPage.ts#L472)
 
 Compute the font size needed to achieve a given height (ascender - descender).
 This is the inverse of `heightAtSize()`.
@@ -101,7 +101,7 @@ Font size in points.
 
 > **widthOfTextAtSize**(`text`, `size`): `number`
 
-Defined in: [src/core/pdfPage.ts:447](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/core/pdfPage.ts#L447)
+Defined in: [src/core/pdfPage.ts:447](https://github.com/ABCrimson/modern-pdf-lib/blob/6ce8fea7ba62114c9bdeda1f601086d76e1fe5d2/src/core/pdfPage.ts#L447)
 
 Compute the width of a text string at the given font size (in points).
 Available for both standard and TrueType fonts.

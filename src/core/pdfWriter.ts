@@ -18,7 +18,7 @@
 import { deflateSync as fflateDeflateSync } from 'fflate';
 import { isAvailable as isWasmDeflateAvailable, deflateSync as wasmDeflateSync } from '../compression/libdeflateWasm.js';
 import type { PdfRef, PdfObject, PdfStream, ByteWriter } from './pdfObjects.js';
-import { PdfObjectRegistry, PdfNumber, PdfName, PdfArray as PdfArr, PdfDict, PdfArray } from './pdfObjects.js';
+import { PdfObjectRegistry, PdfNumber, PdfName, PdfDict, PdfArray } from './pdfObjects.js';
 import type { RegistryEntry } from './pdfObjects.js';
 import type { DocumentStructure } from './pdfCatalog.js';
 
@@ -367,7 +367,6 @@ export class PdfWriter {
 
     // First, serialize each object to find its bytes
     const serializedObjects: Uint8Array[] = [];
-    const objectBuf = new StringByteWriter();
 
     for (const entry of entries) {
       const objWriter = new StringByteWriter();
@@ -376,17 +375,17 @@ export class PdfWriter {
     }
 
     // Build header string: "objNum1 offset1 objNum2 offset2 ..."
-    let headerStr = '';
+    const headerParts: string[] = [];
     let dataOffset = 0;
     for (let i = 0; i < entries.length; i++) {
-      if (i > 0) headerStr += ' ';
-      headerStr += `${entries[i]!.ref.objectNumber} ${dataOffset}`;
+      headerParts.push(`${entries[i]!.ref.objectNumber} ${dataOffset}`);
       dataOffset += serializedObjects[i]!.length;
       // Add a space separator between objects in the data section
       if (i < entries.length - 1) {
         dataOffset += 1; // for the space between serialized objects
       }
     }
+    const headerStr = headerParts.join(' ');
 
     // Encode header
     const headerBytes = encoder.encode(headerStr + ' ');

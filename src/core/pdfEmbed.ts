@@ -273,7 +273,6 @@ export function embedPageAsFormXObject(
 
   // --- 1. Collect and decode content streams ---
   const contentChunks: Uint8Array[] = [];
-  const textDecoder = new TextDecoder();
 
   // Original content streams from parsed PDF
   const originalRefs = page.getOriginalContentRefs();

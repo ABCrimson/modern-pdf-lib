@@ -537,7 +537,7 @@ export class PdfLexer {
     const d = this._data;
     let pos = startPos + 1; // skip opening '('
     let depth = 1;
-    let result = '';
+    const parts: string[] = [];
 
     while (pos < this.len && depth > 0) {
       const c = d[pos]!;
@@ -548,35 +548,35 @@ export class PdfLexer {
         const esc = d[pos]!;
         switch (esc) {
           case 0x6e: // 'n'
-            result += '\n';
+            parts.push('\n');
             pos++;
             break;
           case 0x72: // 'r'
-            result += '\r';
+            parts.push('\r');
             pos++;
             break;
           case 0x74: // 't'
-            result += '\t';
+            parts.push('\t');
             pos++;
             break;
           case 0x62: // 'b'
-            result += '\b';
+            parts.push('\b');
             pos++;
             break;
           case 0x66: // 'f'
-            result += '\f';
+            parts.push('\f');
             pos++;
             break;
           case CH_LPAREN:
-            result += '(';
+            parts.push('(');
             pos++;
             break;
           case CH_RPAREN:
-            result += ')';
+            parts.push(')');
             pos++;
             break;
           case CH_BACKSLASH:
-            result += '\\';
+            parts.push('\\');
             pos++;
             break;
           case WS_LF:
@@ -601,10 +601,10 @@ export class PdfLexer {
                   pos++;
                 }
               }
-              result += String.fromCharCode(octal & 0xff);
+              parts.push(String.fromCharCode(octal & 0xff));
             } else {
               // Unknown escape — the backslash is ignored per spec
-              result += String.fromCharCode(esc);
+              parts.push(String.fromCharCode(esc));
               pos++;
             }
             break;
@@ -614,7 +614,7 @@ export class PdfLexer {
 
       if (c === CH_LPAREN) {
         depth++;
-        result += '(';
+        parts.push('(');
         pos++;
         continue;
       }
@@ -622,7 +622,7 @@ export class PdfLexer {
       if (c === CH_RPAREN) {
         depth--;
         if (depth > 0) {
-          result += ')';
+          parts.push(')');
         }
         pos++;
         continue;
@@ -630,13 +630,13 @@ export class PdfLexer {
 
       // CR or CRLF normalised to LF per spec SS 7.3.4.2
       if (c === WS_CR) {
-        result += '\n';
+        parts.push('\n');
         pos++;
         if (pos < this.len && d[pos] === WS_LF) pos++;
         continue;
       }
 
-      result += String.fromCharCode(c);
+      parts.push(String.fromCharCode(c));
       pos++;
     }
 
@@ -651,7 +651,7 @@ export class PdfLexer {
     }
 
     this.position = pos;
-    return { type: TokenType.LiteralString, value: result, offset: startPos };
+    return { type: TokenType.LiteralString, value: parts.join(''), offset: startPos };
   }
 
   /**
@@ -663,7 +663,8 @@ export class PdfLexer {
   private readHexString(startPos: number): Token {
     const d = this._data;
     let pos = startPos + 1; // skip opening '<'
-    let hex = '';
+    const bytes: number[] = [];
+    let hi = -1;
 
     while (pos < this.len) {
       const c = d[pos]!;
@@ -691,25 +692,26 @@ export class PdfLexer {
         });
       }
 
-      hex += String.fromCharCode(c);
+      if (hi === -1) {
+        hi = v;
+      } else {
+        bytes.push((hi << 4) | v);
+        hi = -1;
+      }
       pos++;
     }
 
-    // Odd number of hex digits: append implicit 0
-    if (hex.length % 2 !== 0) {
-      hex += '0';
-    }
-
-    // Decode hex pairs to a raw string (each pair -> char code)
-    let result = '';
-    for (let i = 0; i < hex.length; i += 2) {
-      const hi = hexVal[hex.charCodeAt(i)]!;
-      const lo = hexVal[hex.charCodeAt(i + 1)]!;
-      result += String.fromCharCode((hi << 4) | lo);
+    // Odd number of hex digits: pad last nibble with 0
+    if (hi !== -1) {
+      bytes.push(hi << 4);
     }
 
     this.position = pos;
-    return { type: TokenType.HexString, value: result, offset: startPos };
+    return {
+      type: TokenType.HexString,
+      value: String.fromCharCode.apply(null, bytes),
+      offset: startPos,
+    };
   }
 
   /**
@@ -721,7 +723,7 @@ export class PdfLexer {
   private readName(startPos: number): Token {
     const d = this._data;
     let pos = startPos + 1; // skip the '/'
-    let name = '/';
+    const parts: string[] = ['/'];
 
     while (pos < this.len) {
       const c = d[pos]!;
@@ -751,17 +753,17 @@ export class PdfLexer {
             data: this._data,
           });
         }
-        name += String.fromCharCode((hi << 4) | lo);
+        parts.push(String.fromCharCode((hi << 4) | lo));
         pos += 3;
         continue;
       }
 
-      name += String.fromCharCode(c);
+      parts.push(String.fromCharCode(c));
       pos++;
     }
 
     this.position = pos;
-    return { type: TokenType.Name, value: name, offset: startPos };
+    return { type: TokenType.Name, value: parts.join(''), offset: startPos };
   }
 
   /**
@@ -851,11 +853,9 @@ export class PdfLexer {
    * because it avoids the per-call overhead of the streaming decoder.
    */
   private bytesToAscii(from: number, to: number): string {
-    const d = this._data;
-    let s = '';
-    for (let i = from; i < to; i++) {
-      s += String.fromCharCode(d[i]!);
-    }
-    return s;
+    return String.fromCharCode.apply(
+      null,
+      this._data.subarray(from, to) as unknown as number[],
+    );
   }
 }

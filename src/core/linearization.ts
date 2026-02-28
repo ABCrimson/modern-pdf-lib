@@ -191,13 +191,6 @@ function extractObject(data: Uint8Array, offset: number): Uint8Array {
   return data.subarray(offset, endIdx + 6);
 }
 
-/** Check if an object contains a reference to a specific page (simplified). */
-function objectContainsPageRef(objBytes: Uint8Array, pageObjNum: number): boolean {
-  const str = decoder.decode(objBytes);
-  // Check if this object references the page object number
-  return str.includes(`${pageObjNum} 0 R`);
-}
-
 // ---------------------------------------------------------------------------
 // Linearization
 // ---------------------------------------------------------------------------

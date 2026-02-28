@@ -6,7 +6,7 @@
 
 # Class: PdfBool
 
-Defined in: [src/core/pdfObjects.ts:80](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/core/pdfObjects.ts#L80)
+Defined in: [src/core/pdfObjects.ts:90](https://github.com/ABCrimson/modern-pdf-lib/blob/6ce8fea7ba62114c9bdeda1f601086d76e1fe5d2/src/core/pdfObjects.ts#L90)
 
 A PDF boolean — `true` or `false`.
 
@@ -16,7 +16,7 @@ A PDF boolean — `true` or `false`.
 
 > `readonly` **value**: `boolean`
 
-Defined in: [src/core/pdfObjects.ts:87](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/core/pdfObjects.ts#L87)
+Defined in: [src/core/pdfObjects.ts:97](https://github.com/ABCrimson/modern-pdf-lib/blob/6ce8fea7ba62114c9bdeda1f601086d76e1fe5d2/src/core/pdfObjects.ts#L97)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [src/core/pdfObjects.ts:87](https://github.com/ABCrimson/modern-pdf-
 
 > `readonly` `static` **FALSE**: `PdfBool`
 
-Defined in: [src/core/pdfObjects.ts:82](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/core/pdfObjects.ts#L82)
+Defined in: [src/core/pdfObjects.ts:92](https://github.com/ABCrimson/modern-pdf-lib/blob/6ce8fea7ba62114c9bdeda1f601086d76e1fe5d2/src/core/pdfObjects.ts#L92)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [src/core/pdfObjects.ts:82](https://github.com/ABCrimson/modern-pdf-
 
 > `readonly` `static` **TRUE**: `PdfBool`
 
-Defined in: [src/core/pdfObjects.ts:81](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/core/pdfObjects.ts#L81)
+Defined in: [src/core/pdfObjects.ts:91](https://github.com/ABCrimson/modern-pdf-lib/blob/6ce8fea7ba62114c9bdeda1f601086d76e1fe5d2/src/core/pdfObjects.ts#L91)
 
 ## Methods
 
@@ -40,7 +40,7 @@ Defined in: [src/core/pdfObjects.ts:81](https://github.com/ABCrimson/modern-pdf-
 
 > **serialize**(`writer`): `void`
 
-Defined in: [src/core/pdfObjects.ts:93](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/core/pdfObjects.ts#L93)
+Defined in: [src/core/pdfObjects.ts:103](https://github.com/ABCrimson/modern-pdf-lib/blob/6ce8fea7ba62114c9bdeda1f601086d76e1fe5d2/src/core/pdfObjects.ts#L103)
 
 #### Parameters
 
@@ -58,7 +58,7 @@ Defined in: [src/core/pdfObjects.ts:93](https://github.com/ABCrimson/modern-pdf-
 
 > `static` **of**(`value`): `PdfBool`
 
-Defined in: [src/core/pdfObjects.ts:89](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/core/pdfObjects.ts#L89)
+Defined in: [src/core/pdfObjects.ts:99](https://github.com/ABCrimson/modern-pdf-lib/blob/6ce8fea7ba62114c9bdeda1f601086d76e1fe5d2/src/core/pdfObjects.ts#L99)
 
 #### Parameters
 

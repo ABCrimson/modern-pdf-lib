@@ -8,7 +8,7 @@
 
 > **generateCheckboxAppearance**(`options`): [`PdfStream`](../classes/PdfStream.md)
 
-Defined in: [src/form/fieldAppearance.ts:211](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/form/fieldAppearance.ts#L211)
+Defined in: [src/form/fieldAppearance.ts:211](https://github.com/ABCrimson/modern-pdf-lib/blob/6ce8fea7ba62114c9bdeda1f601086d76e1fe5d2/src/form/fieldAppearance.ts#L211)
 
 Generate the appearance stream for a checkbox — checked state.
 

@@ -8,7 +8,7 @@
 
 > **validatePdfA**(`pdfBytes`, `level`): [`PdfAValidationResult`](../interfaces/PdfAValidationResult.md)
 
-Defined in: [src/compliance/pdfA.ts:95](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/compliance/pdfA.ts#L95)
+Defined in: [src/compliance/pdfA.ts:95](https://github.com/ABCrimson/modern-pdf-lib/blob/6ce8fea7ba62114c9bdeda1f601086d76e1fe5d2/src/compliance/pdfA.ts#L95)
 
 Validate a PDF against a specific PDF/A conformance level.
 

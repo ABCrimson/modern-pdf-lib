@@ -6,7 +6,7 @@
 
 # Interface: DropdownAppearanceOptions
 
-Defined in: [src/form/fieldAppearance.ts:298](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/form/fieldAppearance.ts#L298)
+Defined in: [src/form/fieldAppearance.ts:298](https://github.com/ABCrimson/modern-pdf-lib/blob/6ce8fea7ba62114c9bdeda1f601086d76e1fe5d2/src/form/fieldAppearance.ts#L298)
 
 Options for generating a dropdown field appearance.
 
@@ -16,7 +16,7 @@ Options for generating a dropdown field appearance.
 
 > `optional` **fontName**: `string`
 
-Defined in: [src/form/fieldAppearance.ts:304](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/form/fieldAppearance.ts#L304)
+Defined in: [src/form/fieldAppearance.ts:304](https://github.com/ABCrimson/modern-pdf-lib/blob/6ce8fea7ba62114c9bdeda1f601086d76e1fe5d2/src/form/fieldAppearance.ts#L304)
 
 Font name. Default: "Helv".
 
@@ -26,7 +26,7 @@ Font name. Default: "Helv".
 
 > `optional` **fontSize**: `number`
 
-Defined in: [src/form/fieldAppearance.ts:306](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/form/fieldAppearance.ts#L306)
+Defined in: [src/form/fieldAppearance.ts:306](https://github.com/ABCrimson/modern-pdf-lib/blob/6ce8fea7ba62114c9bdeda1f601086d76e1fe5d2/src/form/fieldAppearance.ts#L306)
 
 Font size. 0 means auto. Default: 0.
 
@@ -36,7 +36,7 @@ Font size. 0 means auto. Default: 0.
 
 > **rect**: \[`number`, `number`, `number`, `number`\]
 
-Defined in: [src/form/fieldAppearance.ts:302](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/form/fieldAppearance.ts#L302)
+Defined in: [src/form/fieldAppearance.ts:302](https://github.com/ABCrimson/modern-pdf-lib/blob/6ce8fea7ba62114c9bdeda1f601086d76e1fe5d2/src/form/fieldAppearance.ts#L302)
 
 The widget rectangle [x1, y1, x2, y2].
 
@@ -46,6 +46,6 @@ The widget rectangle [x1, y1, x2, y2].
 
 > **value**: `string`
 
-Defined in: [src/form/fieldAppearance.ts:300](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/form/fieldAppearance.ts#L300)
+Defined in: [src/form/fieldAppearance.ts:300](https://github.com/ABCrimson/modern-pdf-lib/blob/6ce8fea7ba62114c9bdeda1f601086d76e1fe5d2/src/form/fieldAppearance.ts#L300)
 
 The selected value text.

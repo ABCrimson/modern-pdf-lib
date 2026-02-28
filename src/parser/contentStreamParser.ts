@@ -94,6 +94,24 @@ interface Token {
 }
 
 // ---------------------------------------------------------------------------
+// Lookup tables (built once at module load)
+// ---------------------------------------------------------------------------
+
+/**
+ * `hexVal[b]` is the numeric value (0-15) of a hex character, or -1 if
+ * the byte is not a valid hex digit.
+ */
+const hexVal: Int8Array = /* @__PURE__ */ (() => {
+  const t = new Int8Array(256).fill(-1);
+  for (let i = 0; i <= 9; i++) t[0x30 + i] = i;
+  for (let i = 0; i < 6; i++) {
+    t[0x41 + i] = 10 + i;
+    t[0x61 + i] = 10 + i;
+  }
+  return t;
+})();
+
+// ---------------------------------------------------------------------------
 // Lexer / parser
 // ---------------------------------------------------------------------------
 
@@ -268,31 +286,31 @@ class ContentStreamLexer {
       }
     }
 
-    // Read binary data until EI preceded by whitespace
+    // Read binary data until EI preceded by whitespace.
+    // Use indexOf to jump to 'E' candidates instead of scanning every byte.
     const dataStart = this.pos;
     let dataEnd = this.pos;
+    let searchFrom = this.pos;
 
-    while (this.pos < this.data.length) {
-      // Look for whitespace + 'E' + 'I' + (whitespace or EOF)
-      if (this.isWhitespace(this.data[this.pos]!)) {
-        const wsPos = this.pos;
-        // Skip whitespace
-        let probe = wsPos + 1;
-        if (
-          probe + 1 < this.data.length &&
-          this.data[probe] === 0x45 /* E */ &&
-          this.data[probe + 1] === 0x49 /* I */
-        ) {
-          // Check that after EI there is whitespace or EOF
-          const afterEI = probe + 2;
-          if (afterEI >= this.data.length || this.isWhitespace(this.data[afterEI]!)) {
-            dataEnd = wsPos;
-            this.pos = afterEI;
-            break;
-          }
+    while (searchFrom < this.data.length) {
+      const eIdx = this.data.indexOf(0x45 /* E */, searchFrom);
+      if (eIdx === -1 || eIdx + 1 >= this.data.length) {
+        this.pos = this.data.length;
+        break;
+      }
+
+      // Check pattern: whitespace before E, 'I' after E, whitespace/EOF after EI
+      if (eIdx > dataStart && this.isWhitespace(this.data[eIdx - 1]!) &&
+          this.data[eIdx + 1] === 0x49 /* I */) {
+        const afterEI = eIdx + 2;
+        if (afterEI >= this.data.length || this.isWhitespace(this.data[afterEI]!)) {
+          dataEnd = eIdx - 1;
+          this.pos = afterEI;
+          break;
         }
       }
-      this.pos++;
+
+      searchFrom = eIdx + 1;
     }
 
     const imgData = this.data.slice(dataStart, dataEnd);
@@ -395,7 +413,7 @@ class ContentStreamLexer {
    */
   private readLiteralString(): Token {
     this.pos++; // skip opening '('
-    let result = '';
+    const parts: string[] = [];
     let depth = 1;
 
     while (this.pos < this.data.length && depth > 0) {
@@ -408,14 +426,14 @@ class ContentStreamLexer {
         const esc = this.data[this.pos]!;
 
         switch (esc) {
-          case 0x6e: result += '\n'; this.pos++; break; // \n
-          case 0x72: result += '\r'; this.pos++; break; // \r
-          case 0x74: result += '\t'; this.pos++; break; // \t
-          case 0x62: result += '\b'; this.pos++; break; // \b
-          case 0x66: result += '\f'; this.pos++; break; // \f
-          case 0x28: result += '('; this.pos++; break;  // \(
-          case 0x29: result += ')'; this.pos++; break;  // \)
-          case 0x5c: result += '\\'; this.pos++; break; // \\
+          case 0x6e: parts.push('\n'); this.pos++; break; // \n
+          case 0x72: parts.push('\r'); this.pos++; break; // \r
+          case 0x74: parts.push('\t'); this.pos++; break; // \t
+          case 0x62: parts.push('\b'); this.pos++; break; // \b
+          case 0x66: parts.push('\f'); this.pos++; break; // \f
+          case 0x28: parts.push('('); this.pos++; break;  // \(
+          case 0x29: parts.push(')'); this.pos++; break;  // \)
+          case 0x5c: parts.push('\\'); this.pos++; break; // \\
           case 0x0a: // \<LF> — line continuation
             this.pos++;
             break;
@@ -444,31 +462,31 @@ class ContentStreamLexer {
                   }
                 }
               }
-              result += String.fromCharCode(octal & 0xff);
+              parts.push(String.fromCharCode(octal & 0xff));
             } else {
               // Unknown escape — treat as literal
-              result += String.fromCharCode(esc);
+              parts.push(String.fromCharCode(esc));
               this.pos++;
             }
             break;
         }
       } else if (ch === 0x28 /* ( */) {
         depth++;
-        result += '(';
+        parts.push('(');
         this.pos++;
       } else if (ch === 0x29 /* ) */) {
         depth--;
         if (depth > 0) {
-          result += ')';
+          parts.push(')');
         }
         this.pos++;
       } else {
-        result += String.fromCharCode(ch);
+        parts.push(String.fromCharCode(ch));
         this.pos++;
       }
     }
 
-    return { type: TokenType.String, value: result };
+    return { type: TokenType.String, value: parts.join('') };
   }
 
   /**
@@ -476,7 +494,8 @@ class ContentStreamLexer {
    */
   private readHexString(): Token {
     this.pos++; // skip opening '<'
-    let hex = '';
+    const bytes: number[] = [];
+    let hi = -1;
 
     while (this.pos < this.data.length) {
       const ch = this.data[this.pos]!;
@@ -489,25 +508,30 @@ class ContentStreamLexer {
         this.pos++;
         continue;
       }
-      hex += String.fromCharCode(ch);
+      const v = hexVal[ch]!;
+      if (v === -1) {
+        // Invalid hex digit — skip
+        this.pos++;
+        continue;
+      }
+      if (hi === -1) {
+        hi = v;
+      } else {
+        bytes.push((hi << 4) | v);
+        hi = -1;
+      }
       this.pos++;
     }
 
-    // Decode hex pairs into a string
-    // Odd length: pad with 0 on the right
-    if (hex.length % 2 !== 0) {
-      hex += '0';
+    // Odd number of hex digits: pad last nibble with 0
+    if (hi !== -1) {
+      bytes.push(hi << 4);
     }
 
-    let result = '';
-    for (let i = 0; i < hex.length; i += 2) {
-      const byte = parseInt(hex.substring(i, i + 2), 16);
-      if (!isNaN(byte)) {
-        result += String.fromCharCode(byte);
-      }
-    }
-
-    return { type: TokenType.HexString, value: result };
+    return {
+      type: TokenType.HexString,
+      value: String.fromCharCode.apply(null, bytes),
+    };
   }
 
   /**
@@ -515,7 +539,7 @@ class ContentStreamLexer {
    */
   private readName(): Token {
     this.pos++; // skip '/'
-    let name = '/';
+    const parts: string[] = ['/'];
 
     while (this.pos < this.data.length) {
       const ch = this.data[this.pos]!;
@@ -523,22 +547,20 @@ class ContentStreamLexer {
 
       if (ch === 0x23 /* # */ && this.pos + 2 < this.data.length) {
         // Hex-encoded character #XX
-        const hi = this.data[this.pos + 1]!;
-        const lo = this.data[this.pos + 2]!;
-        const hex = String.fromCharCode(hi) + String.fromCharCode(lo);
-        const code = parseInt(hex, 16);
-        if (!isNaN(code)) {
-          name += String.fromCharCode(code);
+        const hi = hexVal[this.data[this.pos + 1]!]!;
+        const lo = hexVal[this.data[this.pos + 2]!]!;
+        if (hi !== -1 && lo !== -1) {
+          parts.push(String.fromCharCode((hi << 4) | lo));
           this.pos += 3;
           continue;
         }
       }
 
-      name += String.fromCharCode(ch);
+      parts.push(String.fromCharCode(ch));
       this.pos++;
     }
 
-    return { type: TokenType.Name, value: PdfName.of(name) };
+    return { type: TokenType.Name, value: PdfName.of(parts.join('')) };
   }
 
   /**
@@ -680,10 +702,9 @@ class ContentStreamLexer {
    * Decode a slice of the data as ASCII text.
    */
   private decodeAscii(start: number, end: number): string {
-    let s = '';
-    for (let i = start; i < end; i++) {
-      s += String.fromCharCode(this.data[i]!);
-    }
-    return s;
+    return String.fromCharCode.apply(
+      null,
+      this.data.subarray(start, end) as unknown as number[],
+    );
   }
 }

@@ -23,7 +23,7 @@ import {
   PdfBool,
   PdfNull,
 } from './pdfObjects.js';
-import type { PdfObject, PdfObjectRegistry, ByteWriter } from './pdfObjects.js';
+import type { PdfObject, PdfObjectRegistry } from './pdfObjects.js';
 import { PdfPage, PageSizes } from './pdfPage.js';
 import type { PageSize } from './pdfPage.js';
 import { PdfDocument, createPdf } from './pdfDocument.js';
@@ -50,40 +50,6 @@ function hashBytes(data: Uint8Array): string {
   }
   // Convert to unsigned 32-bit and then hex
   return (hash >>> 0).toString(16).padStart(8, '0');
-}
-
-/**
- * Serialize a PdfObject to bytes for hashing purposes.
- *
- * @param obj  The PDF object to serialize.
- * @returns    The serialized bytes.
- */
-function serializeForHash(obj: PdfObject): Uint8Array {
-  const encoder = new TextEncoder();
-  const chunks: Uint8Array[] = [];
-  let totalLen = 0;
-
-  const writer: ByteWriter = {
-    write(data: Uint8Array): void {
-      chunks.push(data);
-      totalLen += data.length;
-    },
-    writeString(str: string): void {
-      const bytes = encoder.encode(str);
-      chunks.push(bytes);
-      totalLen += bytes.length;
-    },
-  };
-
-  obj.serialize(writer);
-
-  const result = new Uint8Array(totalLen);
-  let pos = 0;
-  for (const chunk of chunks) {
-    result.set(chunk, pos);
-    pos += chunk.length;
-  }
-  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -212,10 +178,11 @@ function remapRef(sourceRef: PdfRef, context: CopyContext): PdfRef {
   }
 
   // For streams, try deduplication via content hash
+  let streamHash: string | undefined;
   if (sourceObj.kind === 'stream') {
     const stream = sourceObj as PdfStream;
-    const hash = hashBytes(stream.data);
-    const dedup = context.hashMap.get(hash);
+    streamHash = hashBytes(stream.data);
+    const dedup = context.hashMap.get(streamHash);
     if (dedup) {
       context.refMap.set(sourceRef.objectNumber, dedup);
       return dedup;
@@ -232,11 +199,9 @@ function remapRef(sourceRef: PdfRef, context: CopyContext): PdfRef {
   // Register in the target
   context.targetRegistry.assign(targetRef, clonedObj);
 
-  // Record hash for streams
-  if (sourceObj.kind === 'stream') {
-    const stream = sourceObj as PdfStream;
-    const hash = hashBytes(stream.data);
-    context.hashMap.set(hash, targetRef);
+  // Record hash for streams (reuse hash computed above)
+  if (streamHash !== undefined) {
+    context.hashMap.set(streamHash, targetRef);
   }
 
   return targetRef;

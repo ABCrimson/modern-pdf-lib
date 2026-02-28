@@ -47,12 +47,17 @@ const NS_PDFAID = 'http://www.aiim.org/pdfa/ns/id/';
  * @internal
  */
 function escapeXml(str: string): string {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&apos;');
+  const parts: string[] = [];
+  for (let i = 0; i < str.length; i++) {
+    const c = str.charCodeAt(i);
+    if (c === 0x26) parts.push('&amp;');
+    else if (c === 0x3C) parts.push('&lt;');
+    else if (c === 0x3E) parts.push('&gt;');
+    else if (c === 0x22) parts.push('&quot;');
+    else if (c === 0x27) parts.push('&apos;');
+    else parts.push(str[i]!);
+  }
+  return parts.join('');
 }
 
 /**

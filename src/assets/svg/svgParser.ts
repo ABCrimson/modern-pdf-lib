@@ -112,14 +112,22 @@ const NAMED_COLORS: Record<string, [number, number, number]> = {
  *
  * @returns  RGB values (0-255) or `undefined` if not parseable.
  */
+/** Cache for parsed SVG colors — high hit rate since SVGs reuse colors. */
+const colorCache = new Map<string, { r: number; g: number; b: number; a?: number | undefined } | undefined>();
+
 export function parseSvgColor(
   colorStr: string,
 ): { r: number; g: number; b: number; a?: number | undefined } | undefined {
   if (!colorStr) return undefined;
 
+  const cached = colorCache.get(colorStr);
+  if (cached !== undefined) return cached;
+  if (colorCache.has(colorStr)) return undefined; // Cached as undefined
+
   const s = colorStr.trim().toLowerCase();
 
   if (s === 'none' || s === 'transparent') {
+    colorCache.set(colorStr, undefined);
     return undefined;
   }
 
@@ -129,7 +137,9 @@ export function parseSvgColor(
     const g = parseInt(s.slice(3, 5), 16);
     const b = parseInt(s.slice(5, 7), 16);
     if (!isNaN(r) && !isNaN(g) && !isNaN(b)) {
-      return { r, g, b };
+      const result = { r, g, b };
+      colorCache.set(colorStr, result);
+      return result;
     }
   }
 
@@ -139,7 +149,9 @@ export function parseSvgColor(
     const g = parseInt(s[2]! + s[2]!, 16);
     const b = parseInt(s[3]! + s[3]!, 16);
     if (!isNaN(r) && !isNaN(g) && !isNaN(b)) {
-      return { r, g, b };
+      const result = { r, g, b };
+      colorCache.set(colorStr, result);
+      return result;
     }
   }
 
@@ -150,15 +162,20 @@ export function parseSvgColor(
     const g = Math.round(parseFloat(rgbaMatch[2]!));
     const b = Math.round(parseFloat(rgbaMatch[3]!));
     const a = rgbaMatch[4] !== undefined ? parseFloat(rgbaMatch[4]) : undefined;
-    return { r, g, b, ...(a !== undefined ? { a } : {}) };
+    const result = { r, g, b, ...(a !== undefined ? { a } : {}) };
+    colorCache.set(colorStr, result);
+    return result;
   }
 
   // Named colour
   const named = NAMED_COLORS[s];
   if (named) {
-    return { r: named[0], g: named[1], b: named[2] };
+    const result = { r: named[0], g: named[1], b: named[2] };
+    colorCache.set(colorStr, result);
+    return result;
   }
 
+  colorCache.set(colorStr, undefined);
   return undefined;
 }
 

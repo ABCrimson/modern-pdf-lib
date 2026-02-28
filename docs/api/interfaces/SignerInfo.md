@@ -6,7 +6,7 @@
 
 # Interface: SignerInfo
 
-Defined in: [src/signature/pkcs7.ts:48](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/signature/pkcs7.ts#L48)
+Defined in: [src/signature/pkcs7.ts:48](https://github.com/ABCrimson/modern-pdf-lib/blob/6ce8fea7ba62114c9bdeda1f601086d76e1fe5d2/src/signature/pkcs7.ts#L48)
 
 Information needed to sign a hash.
 
@@ -16,7 +16,7 @@ Information needed to sign a hash.
 
 > **certificate**: `Uint8Array`
 
-Defined in: [src/signature/pkcs7.ts:50](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/signature/pkcs7.ts#L50)
+Defined in: [src/signature/pkcs7.ts:50](https://github.com/ABCrimson/modern-pdf-lib/blob/6ce8fea7ba62114c9bdeda1f601086d76e1fe5d2/src/signature/pkcs7.ts#L50)
 
 DER-encoded X.509 certificate.
 
@@ -26,7 +26,7 @@ DER-encoded X.509 certificate.
 
 > **hashAlgorithm**: `"SHA-256"` \| `"SHA-384"` \| `"SHA-512"`
 
-Defined in: [src/signature/pkcs7.ts:54](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/signature/pkcs7.ts#L54)
+Defined in: [src/signature/pkcs7.ts:54](https://github.com/ABCrimson/modern-pdf-lib/blob/6ce8fea7ba62114c9bdeda1f601086d76e1fe5d2/src/signature/pkcs7.ts#L54)
 
 Hash algorithm.
 
@@ -36,6 +36,6 @@ Hash algorithm.
 
 > **privateKey**: `Uint8Array`
 
-Defined in: [src/signature/pkcs7.ts:52](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/signature/pkcs7.ts#L52)
+Defined in: [src/signature/pkcs7.ts:52](https://github.com/ABCrimson/modern-pdf-lib/blob/6ce8fea7ba62114c9bdeda1f601086d76e1fe5d2/src/signature/pkcs7.ts#L52)
 
 PKCS#8 DER-encoded private key.

@@ -581,8 +581,8 @@ export class XrefParser {
 
     // Locate the "xref" keyword
     let pos = offset;
-    const xrefTag = TEXT_DECODER.decode(this.data.subarray(pos, pos + 4));
-    if (xrefTag !== 'xref') {
+    if (!this.isTraditionalXref(pos)) {
+      const xrefTag = TEXT_DECODER.decode(this.data.subarray(pos, pos + 4));
       throw new PdfParseError({
         message: `Invalid PDF: expected "xref" keyword at offset ${offset}, found "${xrefTag}".`,
         offset,
@@ -598,9 +598,8 @@ export class XrefParser {
 
     // Parse subsections until we hit "trailer"
     while (pos < this.data.length) {
-      // Check for "trailer" keyword
-      const peek = TEXT_DECODER.decode(this.data.subarray(pos, Math.min(pos + 7, this.data.length)));
-      if (peek.startsWith('trailer')) {
+      // Check for "trailer" keyword (byte comparison)
+      if (this.matchesBytes(pos, 0x74, 0x72, 0x61, 0x69, 0x6C, 0x65, 0x72)) {
         break;
       }
 
@@ -627,43 +626,48 @@ export class XrefParser {
       // other variations. We parse flexibly.
       for (let i = 0; i < count; i++) {
         const objectNumber = firstObjNum + i;
-        const entryText = this.readXrefEntryAt(pos);
+        const parsed = this.parseXrefEntryDirect(pos);
 
-        const entryMatch = entryText.text.trim().match(
-          /^(\d{10})\s+(\d{5})\s+([fn])/,
-        );
-
-        if (!entryMatch) {
-          throw new PdfParseError({
-            message:
-              `Invalid PDF: malformed xref entry at offset ${pos} for object ${objectNumber}: ` +
-              `"${entryText.text.trim()}"`,
-            offset: pos,
-            expected: 'xref entry "OOOOOOOOOO GGGGG f/n"',
-            actual: `"${entryText.text.trim()}"`,
-            data: this.data,
+        if (parsed) {
+          entries.push({
+            objectNumber,
+            generationNumber: parsed.gen,
+            offset: parsed.offset,
+            type: parsed.type,
           });
+          pos = parsed.nextPos;
+        } else {
+          // Fallback: use text-based parsing for non-standard entries
+          const entryText = this.readXrefEntryAt(pos);
+          const entryMatch = entryText.text.trim().match(
+            /^(\d{10})\s+(\d{5})\s+([fn])/,
+          );
+          if (!entryMatch) {
+            throw new PdfParseError({
+              message:
+                `Invalid PDF: malformed xref entry at offset ${pos} for object ${objectNumber}: ` +
+                `"${entryText.text.trim()}"`,
+              offset: pos,
+              expected: 'xref entry "OOOOOOOOOO GGGGG f/n"',
+              actual: `"${entryText.text.trim()}"`,
+              data: this.data,
+            });
+          }
+          entries.push({
+            objectNumber,
+            generationNumber: parseInt(entryMatch[2]!, 10),
+            offset: parseInt(entryMatch[1]!, 10),
+            type: entryMatch[3] === 'n' ? 'in-use' : 'free',
+          });
+          pos = entryText.nextPos;
         }
-
-        const entryOffset = parseInt(entryMatch[1]!, 10);
-        const gen = parseInt(entryMatch[2]!, 10);
-        const marker = entryMatch[3]!;
-
-        entries.push({
-          objectNumber,
-          generationNumber: gen,
-          offset: entryOffset,
-          type: marker === 'n' ? 'in-use' : 'free',
-        });
-
-        pos = entryText.nextPos;
       }
     }
 
     // Parse the trailer dictionary
     // Advance past "trailer" keyword
-    const trailerTag = TEXT_DECODER.decode(this.data.subarray(pos, pos + 7));
-    if (trailerTag !== 'trailer') {
+    if (!this.matchesBytes(pos, 0x74, 0x72, 0x61, 0x69, 0x6C, 0x65, 0x72)) {
+      const trailerTag = TEXT_DECODER.decode(this.data.subarray(pos, pos + 7));
       throw new PdfParseError({
         message: `Invalid PDF: expected "trailer" keyword at offset ${pos}, found "${trailerTag}".`,
         offset: pos,
@@ -877,23 +881,57 @@ export class XrefParser {
    */
   private rebuildXrefFromScan(): { entries: Map<number, XrefEntry>; trailer: ParsedTrailer } {
     const entries = new Map<number, XrefEntry>();
-    const fileText = TEXT_DECODER.decode(this.data);
+    const d = this.data;
+    const len = d.length;
 
-    // Scan for "N G obj" patterns
-    const objPattern = /(\d+)\s+(\d+)\s+obj\b/g;
-    let match: RegExpExecArray | null;
+    // Scan for "N G obj" patterns directly on bytes (avoids full-file TextDecoder)
+    for (let i = 0; i < len - 2; i++) {
+      // Match 'obj' (0x6F 0x62 0x6A)
+      if (d[i] !== 0x6F || d[i + 1] !== 0x62 || d[i + 2] !== 0x6A) continue;
 
-    // eslint-disable-next-line no-cond-assign
-    while ((match = objPattern.exec(fileText)) !== null) {
-      const objectNumber = parseInt(match[1]!, 10);
-      const gen = parseInt(match[2]!, 10);
-      const offset = match.index;
+      // Must be followed by whitespace, delimiter, or EOF
+      if (i + 3 < len) {
+        const after = d[i + 3]!;
+        if (after > 0x20 && after !== 0x25 && after !== 0x28 && after !== 0x29 &&
+            after !== 0x2F && after !== 0x3C && after !== 0x3E &&
+            after !== 0x5B && after !== 0x5D && after !== 0x7B && after !== 0x7D) {
+          continue;
+        }
+      }
 
-      // Only keep the last occurrence of each object number
+      // Scan backwards: skip whitespace before 'obj'
+      let j = i - 1;
+      while (j >= 0 && (d[j] === 0x20 || d[j] === 0x0A || d[j] === 0x0D || d[j] === 0x09 || d[j] === 0x00)) {
+        j--;
+      }
+
+      // Read generation number (digits backwards)
+      const genEnd = j + 1;
+      while (j >= 0 && d[j]! >= 0x30 && d[j]! <= 0x39) j--;
+      const genStart = j + 1;
+      if (genStart >= genEnd) continue;
+
+      // Skip whitespace between object number and generation number
+      while (j >= 0 && (d[j] === 0x20 || d[j] === 0x0A || d[j] === 0x0D || d[j] === 0x09 || d[j] === 0x00)) {
+        j--;
+      }
+
+      // Read object number (digits backwards)
+      const objEnd = j + 1;
+      while (j >= 0 && d[j]! >= 0x30 && d[j]! <= 0x39) j--;
+      const objStart = j + 1;
+      if (objStart >= objEnd) continue;
+
+      // Parse numbers from bytes
+      let objectNumber = 0;
+      for (let k = objStart; k < objEnd; k++) objectNumber = objectNumber * 10 + (d[k]! - 0x30);
+      let gen = 0;
+      for (let k = genStart; k < genEnd; k++) gen = gen * 10 + (d[k]! - 0x30);
+
       entries.set(objectNumber, {
         objectNumber,
         generationNumber: gen,
-        offset,
+        offset: objStart,
         type: 'in-use',
       });
     }
@@ -915,8 +953,15 @@ export class XrefParser {
     let rootRef: PdfRef | undefined;
     let infoRef: PdfRef | undefined;
 
-    // First try: look for "trailer" keyword and parse dictionary
-    const trailerIdx = fileText.lastIndexOf('trailer');
+    // First try: look for "trailer" keyword (byte scan, backwards)
+    let trailerIdx = -1;
+    for (let i = len - 7; i >= 0; i--) {
+      if (d[i] === 0x74 && d[i + 1] === 0x72 && d[i + 2] === 0x61 &&
+          d[i + 3] === 0x69 && d[i + 4] === 0x6C && d[i + 5] === 0x65 && d[i + 6] === 0x72) {
+        trailerIdx = i;
+        break;
+      }
+    }
     if (trailerIdx !== -1) {
       try {
         const trailerObj = this.objectParser.parseObjectAt(trailerIdx + 7);
@@ -992,6 +1037,62 @@ export class XrefParser {
    * Determine whether the data at the given offset starts with the
    * "xref" keyword (indicating a traditional xref table).
    */
+  /**
+   * Check if the bytes at `pos` match the given byte values.
+   */
+  private matchesBytes(pos: number, ...bytes: number[]): boolean {
+    if (pos + bytes.length > this.data.length) return false;
+    for (let i = 0; i < bytes.length; i++) {
+      if (this.data[pos + i] !== bytes[i]) return false;
+    }
+    return true;
+  }
+
+  /**
+   * Parse a standard xref entry directly from bytes, avoiding TextDecoder
+   * and regex. Returns null if the bytes don't form a valid entry.
+   *
+   * Standard format: `OOOOOOOOOO GGGGG f/n` (18 significant bytes)
+   */
+  private parseXrefEntryDirect(pos: number): { offset: number; gen: number; type: 'in-use' | 'free'; nextPos: number } | null {
+    const d = this.data;
+    if (pos + 18 > d.length) return null;
+
+    // Parse 10-digit offset
+    let offset = 0;
+    for (let k = 0; k < 10; k++) {
+      const b = d[pos + k]!;
+      if (b < 0x30 || b > 0x39) return null;
+      offset = offset * 10 + (b - 0x30);
+    }
+
+    // Expect space at pos+10
+    if (d[pos + 10] !== 0x20) return null;
+
+    // Parse 5-digit generation number
+    let gen = 0;
+    for (let k = 0; k < 5; k++) {
+      const b = d[pos + 11 + k]!;
+      if (b < 0x30 || b > 0x39) return null;
+      gen = gen * 10 + (b - 0x30);
+    }
+
+    // Expect space at pos+16
+    if (d[pos + 16] !== 0x20) return null;
+
+    // Read f/n marker at pos+17
+    const marker = d[pos + 17]!;
+    if (marker !== 0x6E /* n */ && marker !== 0x66 /* f */) return null;
+
+    // Skip trailing whitespace/line endings
+    let nextPos = pos + 18;
+    while (nextPos < d.length && (d[nextPos] === 0x20 || d[nextPos] === 0x0D || d[nextPos] === 0x0A)) {
+      nextPos++;
+    }
+
+    return { offset, gen, type: marker === 0x6E ? 'in-use' : 'free', nextPos };
+  }
+
   private isTraditionalXref(offset: number): boolean {
     if (offset + 4 > this.data.length) return false;
     return (

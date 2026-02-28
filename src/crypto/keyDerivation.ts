@@ -226,8 +226,8 @@ export function computeOwnerPasswordValue(
 
   // Step f: If R >= 3, do 19 additional RC4 passes
   if (revision >= 3) {
+    const modKey = new Uint8Array(rc4Key.length);
     for (let i = 1; i <= 19; i++) {
-      const modKey = new Uint8Array(rc4Key.length);
       for (let j = 0; j < rc4Key.length; j++) {
         modKey[j] = (rc4Key[j]! ^ i) & 0xff;
       }
@@ -278,12 +278,14 @@ export function computeUserPasswordR3R4(
   let encrypted = rc4(fileKey, hash);
 
   // Step d: 19 additional RC4 passes
-  for (let i = 1; i <= 19; i++) {
+  {
     const modKey = new Uint8Array(fileKey.length);
-    for (let j = 0; j < fileKey.length; j++) {
-      modKey[j] = (fileKey[j]! ^ i) & 0xff;
+    for (let i = 1; i <= 19; i++) {
+      for (let j = 0; j < fileKey.length; j++) {
+        modKey[j] = (fileKey[j]! ^ i) & 0xff;
+      }
+      encrypted = rc4(modKey, encrypted);
     }
-    encrypted = rc4(modKey, encrypted);
   }
 
   // Step e: The result is 16 bytes. Pad to 32 bytes with zeros.
@@ -396,10 +398,16 @@ export async function algorithm2B(
   // eslint-disable-next-line no-constant-condition
   while (true) {
     // Step b.i: Build K1 = password + K + uKey, repeated 64 times
-    const K1block = uKey ? concat(password, K, uKey) : concat(password, K);
-    const K1 = new Uint8Array(K1block.length * 64);
+    const pLen = password.length;
+    const kLen = K.length;
+    const uLen = uKey ? uKey.length : 0;
+    const blockLen = pLen + kLen + uLen;
+    const K1 = new Uint8Array(blockLen * 64);
     for (let i = 0; i < 64; i++) {
-      K1.set(K1block, i * K1block.length);
+      const base = i * blockLen;
+      K1.set(password, base);
+      K1.set(K, base + pLen);
+      if (uKey) K1.set(uKey, base + pLen + kLen);
     }
 
     // Step b.ii: AES-128-CBC encrypt K1 with key=K[0..15], iv=K[16..31]

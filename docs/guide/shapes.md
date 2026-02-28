@@ -43,7 +43,7 @@ page.drawRectangle({
 });
 ```
 
-### Rounded Rectangles
+### Bordered Rectangles
 
 ```ts
 page.drawRectangle({
@@ -54,7 +54,6 @@ page.drawRectangle({
   color: rgb(0.9, 0.9, 0.9),
   borderColor: rgb(0.3, 0.3, 0.3),
   borderWidth: 1,
-  borderRadius: 10,
 });
 ```
 
@@ -285,7 +284,6 @@ function drawCard(page: PdfPage, x: number, y: number): void {
     color: rgb(1, 1, 1),
     borderColor: rgb(0.8, 0.8, 0.8),
     borderWidth: 1,
-    borderRadius: 8,
   });
 
   page.drawText('Card Title', {
@@ -315,7 +313,6 @@ function drawCard(page: PdfPage, x: number, y: number): void {
 | `color` | `Color` | — | Fill color |
 | `borderColor` | `Color` | — | Border color |
 | `borderWidth` | `number` | `1` | Border thickness |
-| `borderRadius` | `number` | `0` | Corner radius |
 | `opacity` | `number` | `1` | Fill opacity |
 | `borderOpacity` | `number` | `1` | Border opacity |
 | `rotate` | `Angle` | `degrees(0)` | Rotation angle |

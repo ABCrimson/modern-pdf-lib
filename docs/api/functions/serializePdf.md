@@ -8,7 +8,7 @@
 
 > **serializePdf**(`registry`, `structure`, `options?`): `Uint8Array`
 
-Defined in: [src/core/pdfWriter.ts:671](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/core/pdfWriter.ts#L671)
+Defined in: [src/core/pdfWriter.ts:670](https://github.com/ABCrimson/modern-pdf-lib/blob/6ce8fea7ba62114c9bdeda1f601086d76e1fe5d2/src/core/pdfWriter.ts#L670)
 
 Serialize a complete PDF from a registry and structure refs.
 

@@ -6,7 +6,7 @@
 
 # Interface: CIDFontData
 
-Defined in: [src/assets/font/fontEmbed.ts:475](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/assets/font/fontEmbed.ts#L475)
+Defined in: [src/assets/font/fontEmbed.ts:475](https://github.com/ABCrimson/modern-pdf-lib/blob/6ce8fea7ba62114c9bdeda1f601086d76e1fe5d2/src/assets/font/fontEmbed.ts#L475)
 
 Data for the CIDFont (DescendantFont) dictionary.
 
@@ -16,7 +16,7 @@ Data for the CIDFont (DescendantFont) dictionary.
 
 > `readonly` **baseFont**: `string`
 
-Defined in: [src/assets/font/fontEmbed.ts:477](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/assets/font/fontEmbed.ts#L477)
+Defined in: [src/assets/font/fontEmbed.ts:477](https://github.com/ABCrimson/modern-pdf-lib/blob/6ce8fea7ba62114c9bdeda1f601086d76e1fe5d2/src/assets/font/fontEmbed.ts#L477)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [src/assets/font/fontEmbed.ts:477](https://github.com/ABCrimson/mode
 
 > `readonly` **cidSystemInfo**: [`CIDSystemInfoData`](CIDSystemInfoData.md)
 
-Defined in: [src/assets/font/fontEmbed.ts:478](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/assets/font/fontEmbed.ts#L478)
+Defined in: [src/assets/font/fontEmbed.ts:478](https://github.com/ABCrimson/modern-pdf-lib/blob/6ce8fea7ba62114c9bdeda1f601086d76e1fe5d2/src/assets/font/fontEmbed.ts#L478)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [src/assets/font/fontEmbed.ts:478](https://github.com/ABCrimson/mode
 
 > `readonly` **defaultWidth**: `number`
 
-Defined in: [src/assets/font/fontEmbed.ts:485](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/assets/font/fontEmbed.ts#L485)
+Defined in: [src/assets/font/fontEmbed.ts:485](https://github.com/ABCrimson/modern-pdf-lib/blob/6ce8fea7ba62114c9bdeda1f601086d76e1fe5d2/src/assets/font/fontEmbed.ts#L485)
 
 ***
 
@@ -40,7 +40,7 @@ Defined in: [src/assets/font/fontEmbed.ts:485](https://github.com/ABCrimson/mode
 
 > `readonly` **subtype**: `"CIDFontType2"`
 
-Defined in: [src/assets/font/fontEmbed.ts:476](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/assets/font/fontEmbed.ts#L476)
+Defined in: [src/assets/font/fontEmbed.ts:476](https://github.com/ABCrimson/modern-pdf-lib/blob/6ce8fea7ba62114c9bdeda1f601086d76e1fe5d2/src/assets/font/fontEmbed.ts#L476)
 
 ***
 
@@ -48,7 +48,7 @@ Defined in: [src/assets/font/fontEmbed.ts:476](https://github.com/ABCrimson/mode
 
 > `readonly` **wArray**: readonly [`WidthEntry`](../type-aliases/WidthEntry.md)[]
 
-Defined in: [src/assets/font/fontEmbed.ts:484](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/assets/font/fontEmbed.ts#L484)
+Defined in: [src/assets/font/fontEmbed.ts:484](https://github.com/ABCrimson/modern-pdf-lib/blob/6ce8fea7ba62114c9bdeda1f601086d76e1fe5d2/src/assets/font/fontEmbed.ts#L484)
 
 The /W (widths) array entries.  Each entry is either:
 - `[cid, [w1, w2, ...]]` — individual widths starting at `cid`

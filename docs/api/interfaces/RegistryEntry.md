@@ -6,7 +6,7 @@
 
 # Interface: RegistryEntry
 
-Defined in: [src/core/pdfObjects.ts:450](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/core/pdfObjects.ts#L450)
+Defined in: [src/core/pdfObjects.ts:460](https://github.com/ABCrimson/modern-pdf-lib/blob/6ce8fea7ba62114c9bdeda1f601086d76e1fe5d2/src/core/pdfObjects.ts#L460)
 
 Entry stored in the registry.
 
@@ -16,7 +16,7 @@ Entry stored in the registry.
 
 > **object**: [`PdfObject`](../type-aliases/PdfObject.md)
 
-Defined in: [src/core/pdfObjects.ts:454](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/core/pdfObjects.ts#L454)
+Defined in: [src/core/pdfObjects.ts:464](https://github.com/ABCrimson/modern-pdf-lib/blob/6ce8fea7ba62114c9bdeda1f601086d76e1fe5d2/src/core/pdfObjects.ts#L464)
 
 The object itself.
 
@@ -26,6 +26,6 @@ The object itself.
 
 > `readonly` **ref**: [`PdfRef`](../classes/PdfRef.md)
 
-Defined in: [src/core/pdfObjects.ts:452](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/core/pdfObjects.ts#L452)
+Defined in: [src/core/pdfObjects.ts:462](https://github.com/ABCrimson/modern-pdf-lib/blob/6ce8fea7ba62114c9bdeda1f601086d76e1fe5d2/src/core/pdfObjects.ts#L462)
 
 Indirect reference (object number + generation).

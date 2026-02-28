@@ -41,22 +41,22 @@ features:
   </p>
   <div class="stat-grid">
     <div class="stat-card">
-      <div class="stat-number">27/30</div>
+      <div class="stat-number">32/35</div>
       <div class="stat-label">Benchmarks Won</div>
       <div class="stat-detail">vs pdf-lib v1.17.1</div>
     </div>
     <div class="stat-card">
-      <div class="stat-number">39x</div>
+      <div class="stat-number">64x</div>
       <div class="stat-label">Faster Creation</div>
       <div class="stat-detail">Empty document + page</div>
     </div>
     <div class="stat-card">
-      <div class="stat-number">57x</div>
+      <div class="stat-number">9x</div>
       <div class="stat-label">Faster Parsing</div>
       <div class="stat-detail">100-page PDF load</div>
     </div>
     <div class="stat-card">
-      <div class="stat-number">25x</div>
+      <div class="stat-number">15x</div>
       <div class="stat-label">Faster Text</div>
       <div class="stat-detail">1,000x drawText calls</div>
     </div>

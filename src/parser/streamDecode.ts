@@ -520,18 +520,43 @@ function hexValue(ch: number): number {
  * `~>` marks end-of-data.
  */
 function decodeASCII85(data: Uint8Array): Uint8Array {
-  const result: number[] = [];
-  const group: number[] = [];
+  // Pre-allocate output (ASCII85 expands 5->4 bytes, so output <= input * 0.8)
+  let out = new Uint8Array(Math.max((data.length * 4 / 5) | 0, 256));
+  let outPos = 0;
+  const group = new Uint8Array(5);
+  let groupLen = 0;
   let i = 0;
+
+  function ensureOut(needed: number): void {
+    if (outPos + needed > out.length) {
+      const newBuf = new Uint8Array(Math.max(out.length * 2, outPos + needed));
+      newBuf.set(out.subarray(0, outPos));
+      out = newBuf;
+    }
+  }
+
+  function decodeGroup(count: number): void {
+    // Pad remaining slots with 84 ('u')
+    for (let k = count; k < 5; k++) group[k] = 84;
+    const val =
+      group[0]! * 85 * 85 * 85 * 85 +
+      group[1]! * 85 * 85 * 85 +
+      group[2]! * 85 * 85 +
+      group[3]! * 85 +
+      group[4]!;
+    const numBytes = count === 5 ? 4 : count - 1;
+    ensureOut(numBytes);
+    if (numBytes >= 1) out[outPos++] = (val >>> 24) & 0xff;
+    if (numBytes >= 2) out[outPos++] = (val >>> 16) & 0xff;
+    if (numBytes >= 3) out[outPos++] = (val >>> 8) & 0xff;
+    if (numBytes >= 4) out[outPos++] = val & 0xff;
+  }
 
   while (i < data.length) {
     const ch = data[i]!;
 
     // End-of-data marker
-    if (ch === 0x7e /* ~ */) {
-      // Expect '>' next
-      break;
-    }
+    if (ch === 0x7e /* ~ */) break;
 
     // Skip whitespace
     if (ch === 0x20 || ch === 0x09 || ch === 0x0a || ch === 0x0d || ch === 0x0c || ch === 0x00) {
@@ -541,10 +566,14 @@ function decodeASCII85(data: Uint8Array): Uint8Array {
 
     // 'z' shorthand for four zero bytes
     if (ch === 0x7a /* z */) {
-      if (group.length > 0) {
+      if (groupLen > 0) {
         throw new Error('ASCII85Decode: "z" inside a group');
       }
-      result.push(0, 0, 0, 0);
+      ensureOut(4);
+      out[outPos++] = 0;
+      out[outPos++] = 0;
+      out[outPos++] = 0;
+      out[outPos++] = 0;
       i++;
       continue;
     }
@@ -552,52 +581,25 @@ function decodeASCII85(data: Uint8Array): Uint8Array {
     // Valid base-85 digit: '!' (33) through 'u' (117)
     if (ch < 0x21 || ch > 0x75) {
       i++;
-      continue; // Skip invalid characters
+      continue;
     }
 
-    group.push(ch - 0x21);
+    group[groupLen++] = ch - 0x21;
 
-    if (group.length === 5) {
-      // Decode 5 chars into 4 bytes
-      const val =
-        group[0]! * 85 * 85 * 85 * 85 +
-        group[1]! * 85 * 85 * 85 +
-        group[2]! * 85 * 85 +
-        group[3]! * 85 +
-        group[4]!;
-      result.push(
-        (val >>> 24) & 0xff,
-        (val >>> 16) & 0xff,
-        (val >>> 8) & 0xff,
-        val & 0xff,
-      );
-      group.length = 0;
+    if (groupLen === 5) {
+      decodeGroup(5);
+      groupLen = 0;
     }
 
     i++;
   }
 
   // Handle final partial group (2-4 chars -> 1-3 bytes)
-  if (group.length >= 2) {
-    const origLen = group.length;
-    // Pad with 'u' (84) to make 5 chars
-    while (group.length < 5) {
-      group.push(84);
-    }
-    const val =
-      group[0]! * 85 * 85 * 85 * 85 +
-      group[1]! * 85 * 85 * 85 +
-      group[2]! * 85 * 85 +
-      group[3]! * 85 +
-      group[4]!;
-    // 2 chars -> 1 byte, 3 chars -> 2 bytes, 4 chars -> 3 bytes
-    const numBytes = origLen - 1;
-    if (numBytes >= 1) result.push((val >>> 24) & 0xff);
-    if (numBytes >= 2) result.push((val >>> 16) & 0xff);
-    if (numBytes >= 3) result.push((val >>> 8) & 0xff);
+  if (groupLen >= 2) {
+    decodeGroup(groupLen);
   }
 
-  return new Uint8Array(result);
+  return out.subarray(0, outPos);
 }
 
 // ---------------------------------------------------------------------------
@@ -625,6 +627,10 @@ function decodeLZW(data: Uint8Array, parms: PdfDict | null): Uint8Array {
 
 /**
  * Core LZW decompression.
+ *
+ * Uses a flat pooled buffer for the code table instead of per-entry
+ * Uint8Array allocations, and a pre-allocated output buffer with
+ * manual growth instead of `number[]` + push.
  */
 function lzwDecompress(data: Uint8Array, earlyChange: number): Uint8Array {
   const CLEAR_TABLE = 256;
@@ -659,27 +665,68 @@ function lzwDecompress(data: Uint8Array, earlyChange: number): Uint8Array {
     return result;
   }
 
-  // Initialize the code table
-  let table: Uint8Array[] = [];
+  // Pooled code table: flat buffer + (offset, length) index pairs.
+  // Eliminates 256+ `new Uint8Array` allocations per resetTable().
+  let tableBuf = new Uint8Array(65536);
+  const tableOff = new Int32Array(4096);
+  const tableLen = new Int32Array(4096);
+  let tableBufUsed = 256;
   let codeSize = 9;
   let nextCode = 258;
 
+  // Initialize identity bytes 0-255 (persists across resets)
+  for (let i = 0; i < 256; i++) {
+    tableBuf[i] = i;
+    tableOff[i] = i;
+    tableLen[i] = 1;
+  }
+
   function resetTable(): void {
-    table = [];
-    for (let i = 0; i < 256; i++) {
-      table[i] = new Uint8Array([i]);
-    }
-    // Entries 256 and 257 are special (clear and EOD)
-    table[256] = new Uint8Array(0);
-    table[257] = new Uint8Array(0);
+    tableBufUsed = 256; // Reclaim space; identity entries 0-255 are preserved
     nextCode = 258;
     codeSize = 9;
   }
 
-  resetTable();
+  // Output buffer with manual growth
+  let out = new Uint8Array(Math.max(data.length * 3, 4096));
+  let outPos = 0;
 
-  const output: number[] = [];
-  let prevEntry: Uint8Array | null = null;
+  function ensureOut(needed: number): void {
+    if (outPos + needed > out.length) {
+      const newBuf = new Uint8Array(Math.max(out.length * 2, outPos + needed));
+      newBuf.set(out.subarray(0, outPos));
+      out = newBuf;
+    }
+  }
+
+  function ensureTable(needed: number): void {
+    if (tableBufUsed + needed > tableBuf.length) {
+      const newBuf = new Uint8Array(Math.max(tableBuf.length * 2, tableBufUsed + needed));
+      newBuf.set(tableBuf.subarray(0, tableBufUsed));
+      tableBuf = newBuf;
+    }
+  }
+
+  function writeEntry(code: number): void {
+    const off = tableOff[code]!;
+    const len = tableLen[code]!;
+    ensureOut(len);
+    out.set(tableBuf.subarray(off, off + len), outPos);
+    outPos += len;
+  }
+
+  function addEntry(prevCode: number, firstByte: number): void {
+    const prevOff = tableOff[prevCode]!;
+    const prevLen = tableLen[prevCode]!;
+    const newLen = prevLen + 1;
+    ensureTable(newLen);
+    tableBuf.set(tableBuf.subarray(prevOff, prevOff + prevLen), tableBufUsed);
+    tableBuf[tableBufUsed + prevLen] = firstByte;
+    tableOff[nextCode] = tableBufUsed;
+    tableLen[nextCode] = newLen;
+    tableBufUsed += newLen;
+    nextCode++;
+  }
 
   // The first code should be a clear-table code
   let code = readBits(codeSize);
@@ -689,15 +736,12 @@ function lzwDecompress(data: Uint8Array, earlyChange: number): Uint8Array {
   }
 
   if (code === EOD) {
-    return new Uint8Array(output);
+    return new Uint8Array(0);
   }
 
   // Output the first code
-  let entry = table[code];
-  if (entry) {
-    for (const b of entry) output.push(b);
-    prevEntry = entry;
-  }
+  writeEntry(code);
+  let prevCode = code;
 
   // Process remaining codes
   while (true) {
@@ -707,49 +751,26 @@ function lzwDecompress(data: Uint8Array, earlyChange: number): Uint8Array {
 
     if (code === CLEAR_TABLE) {
       resetTable();
-      prevEntry = null;
 
       code = readBits(codeSize);
       if (code === EOD) break;
 
-      entry = table[code];
-      if (entry) {
-        for (const b of entry) output.push(b);
-        prevEntry = entry;
-      }
+      writeEntry(code);
+      prevCode = code;
       continue;
     }
 
-    if (code < nextCode && table[code]) {
+    if (code < nextCode) {
       // Code is in the table
-      entry = table[code]!;
-      for (const b of entry) output.push(b);
-
-      // Add new entry: previous entry + first byte of current entry
-      if (prevEntry) {
-        const newEntry = new Uint8Array(prevEntry.length + 1);
-        newEntry.set(prevEntry);
-        newEntry[prevEntry.length] = entry[0]!;
-        table[nextCode] = newEntry;
-        nextCode++;
-      }
+      writeEntry(code);
+      addEntry(prevCode, tableBuf[tableOff[code]!]!);
     } else {
       // Code is not in the table (KwKwK case)
-      if (!prevEntry) {
-        throw new Error('LZWDecode: invalid code sequence');
-      }
-      const newEntry = new Uint8Array(prevEntry.length + 1);
-      newEntry.set(prevEntry);
-      newEntry[prevEntry.length] = prevEntry[0]!;
-
-      for (const b of newEntry) output.push(b);
-
-      table[nextCode] = newEntry;
-      nextCode++;
-      entry = newEntry;
+      addEntry(prevCode, tableBuf[tableOff[prevCode]!]!);
+      writeEntry(nextCode - 1); // Write the entry we just added
     }
 
-    prevEntry = entry;
+    prevCode = code;
 
     // Increase code size when the table grows past the current width
     // EarlyChange = 1 means we increase one code early
@@ -759,7 +780,7 @@ function lzwDecompress(data: Uint8Array, earlyChange: number): Uint8Array {
     }
   }
 
-  return new Uint8Array(output);
+  return out.subarray(0, outPos);
 }
 
 // ---------------------------------------------------------------------------

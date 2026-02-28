@@ -5,6 +5,54 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 See [VERSIONING.md](./VERSIONING.md) for this project's versioning policy.
 
+## [0.14.0] - 2026-02-28
+
+### Performance
+
+Comprehensive internal performance audit across the entire codebase. All changes are internal hot-path optimizations — zero API surface changes.
+
+**Lexer & Content Stream Parser:**
+- String concatenation in `readLiteralString()`, `readHexString()`, `readName()` replaced with `parts[]` + `.join('')` pattern
+- `bytesToAscii()` / `decodeAscii()` replaced with batch `String.fromCharCode.apply()`
+- Hex string parsing rewritten to single-pass direct byte decoding with `hexVal` lookup table (eliminates intermediate string + `parseInt`)
+
+**LZW Decompression:**
+- Complete rewrite with pooled flat buffer (`Uint8Array` + `Int32Array` index pairs) replacing per-entry `Uint8Array[]` allocations
+- Identity entries (0-255) initialized once and persist across table resets
+- Pre-allocated output buffer with manual growth instead of `number[]` + `.push()`
+
+**XRef Recovery & Parsing:**
+- `rebuildXrefFromScan()` rewritten to scan raw `Uint8Array` bytes directly for `obj` pattern instead of `TextDecoder.decode()` + regex on the entire file
+- Standard xref entries parsed directly from bytes (fixed 20-byte format) without TextDecoder
+- Keyword checks (`xref`, `trailer`) replaced with direct byte comparison
+
+**PDF Object Serialization:**
+- `escapeLiteralString()`: 5 chained `.replace()` calls replaced with single-pass character loop
+- `PdfName.serialize()`: String concatenation replaced with array + join
+- `formatNumber()`: Regex trailing-zero trim replaced with manual digit loop
+
+**Cryptographic Key Derivation:**
+- Pre-allocated `modKey` buffer outside 19x RC4 iteration loops in owner/user password verification
+- Direct K1 buffer construction in Algorithm 2.B (eliminates intermediate concatenation)
+
+**Other:**
+- ASCII85 decoder: Fixed-size group buffer + pre-allocated output
+- SVG color parser: Module-level result cache (`Map<string, ParsedColor>`)
+- XMP `escapeXml()`: Single-pass character loop replacing chained `.replace()`
+- Inline image EI scanning: `data.indexOf(0x45)` jump instead of byte-by-byte scan
+- Object stream header: Array + join replacing string concatenation
+
+### Fixed
+- **CCITT Group 3/4 2D decode bug**: `read2DMode()` returned `HORIZONTAL` for bit pattern `011` instead of `VERTICAL_PLUS_1` — correct logic existed but was unreachable due to premature return. This could cause incorrect rendering of CCITT Group 4 and Group 3 2D compressed images (scanned documents).
+- **`customName` font option ignored for empty strings**: `||` operator treated empty string as falsy, falling through to `postScriptName`. Changed to `??` (nullish coalescing).
+- **`embedPages()` unnecessarily async**: Method was declared `async` but contained only synchronous code, wrapping return in an unnecessary `Promise`. Now returns `EmbeddedPdfPage[]` directly.
+- **Duplicate hash computation in document merge**: `hashBytes()` was called twice on the same stream data during cross-document page copy. Now computed once and reused.
+
+### Removed
+- Dead `PdfArr` import alias in `pdfWriter.ts`
+- Unused `objectBuf` variable allocation in object stream serialization
+- Unused `objectContainsPageRef()` function in linearization module
+
 ## [0.13.0] - 2026-02-28
 
 ### Added

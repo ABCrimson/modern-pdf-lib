@@ -8,7 +8,7 @@ This guide helps you migrate existing projects from `pdf-lib` to `modern-pdf-lib
 |---|---|---|
 | Module format | CJS + ESM | ESM-only |
 | TypeScript | 4.x | 6.0 with strict types |
-| Target | ES2017 | ES2024 |
+| Target | ES2017 | ESNext |
 | Buffer usage | `Buffer` in Node APIs | `Uint8Array` everywhere |
 | Async model | Mixed sync/async | Async-first |
 | Scope | Read + Create + Modify | Read + Create + Modify + Forms + Signatures + Accessibility |
@@ -16,7 +16,7 @@ This guide helps you migrate existing projects from `pdf-lib` to `modern-pdf-lib
 | Font shaping | None | WASM text shaping (rustybuzz) |
 | Streaming | Not supported | `ReadableStream` output |
 | Node version | 10+ | 25.7+ |
-| Performance | Baseline | 27/30 benchmarks faster (up to 88,745x) |
+| Performance | Baseline | 32/35 benchmarks faster (up to 97,545x) |
 
 ## API Comparison
 

@@ -7,7 +7,7 @@ import { readFile, writeFile } from 'node:fs/promises';
 
 const pdf = createPdf();
 pdf.setTitle('Modern PDF Engine — Feature Showcase');
-pdf.setAuthor('modern-pdf v0.13.0');
+pdf.setAuthor('modern-pdf v0.14.0');
 pdf.setProducer('modern-pdf');
 pdf.setCreator('gen-showcase-pdf.ts');
 pdf.setCreationDate(new Date('2026-02-25T00:00:00Z'));

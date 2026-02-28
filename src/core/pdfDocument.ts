@@ -608,7 +608,7 @@ export class PdfDocument {
     // Parse metrics and create EmbeddedFont
     const embeddedFont = await embedTtfFont(fontData);
     const metrics = embeddedFont.metrics;
-    const psName = options?.customName || metrics.postScriptName || metrics.familyName || 'CustomFont';
+    const psName = options?.customName ?? metrics.postScriptName ?? metrics.familyName ?? 'CustomFont';
 
     // De-duplicate by PostScript name
     const existing = this.embeddedFonts.get(`__ttf__${psName}`);
@@ -756,7 +756,7 @@ export class PdfDocument {
     // Parse metrics using the same embedFont pipeline (works for both TTF and OTF)
     const embeddedFont = await embedTtfFont(fontData);
     const metrics = embeddedFont.metrics;
-    const psName = options?.customName || metrics.postScriptName || metrics.familyName || 'CFFFont';
+    const psName = options?.customName ?? metrics.postScriptName ?? metrics.familyName ?? 'CFFFont';
 
     // De-duplicate by PostScript name
     const existing = this.embeddedFonts.get(`__cff__${psName}`);
@@ -1133,7 +1133,7 @@ export class PdfDocument {
    * @param pages  Array of PdfPage instances to embed.
    * @returns      Array of {@link EmbeddedPdfPage} handles, one per input page.
    */
-  async embedPages(pages: PdfPage[]): Promise<EmbeddedPdfPage[]> {
+  embedPages(pages: PdfPage[]): EmbeddedPdfPage[] {
     return pages.map((page) => this.embedPage(page));
   }
 

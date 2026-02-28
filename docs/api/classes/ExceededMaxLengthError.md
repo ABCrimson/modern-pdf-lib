@@ -6,7 +6,7 @@
 
 # Class: ExceededMaxLengthError
 
-Defined in: [src/errors.ts:206](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/errors.ts#L206)
+Defined in: [src/errors.ts:206](https://github.com/ABCrimson/modern-pdf-lib/blob/6ce8fea7ba62114c9bdeda1f601086d76e1fe5d2/src/errors.ts#L206)
 
 Thrown when a text field value exceeds the field's declared
 maximum length (/MaxLen).
@@ -21,7 +21,7 @@ maximum length (/MaxLen).
 
 > **new ExceededMaxLengthError**(`textLength`, `maxLength`, `fieldName`, `options?`): `ExceededMaxLengthError`
 
-Defined in: [src/errors.ts:208](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/errors.ts#L208)
+Defined in: [src/errors.ts:208](https://github.com/ABCrimson/modern-pdf-lib/blob/6ce8fea7ba62114c9bdeda1f601086d76e1fe5d2/src/errors.ts#L208)
 
 #### Parameters
 
@@ -79,7 +79,7 @@ Defined in: node\_modules/typescript/lib/lib.es5.d.ts:1075
 
 > `readonly` **name**: `"ExceededMaxLengthError"` = `'ExceededMaxLengthError'`
 
-Defined in: [src/errors.ts:207](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/errors.ts#L207)
+Defined in: [src/errors.ts:207](https://github.com/ABCrimson/modern-pdf-lib/blob/6ce8fea7ba62114c9bdeda1f601086d76e1fe5d2/src/errors.ts#L207)
 
 #### Overrides
 

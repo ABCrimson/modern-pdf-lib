@@ -34,18 +34,28 @@ const encoder = new TextEncoder();
 /** Format a number for PDF output (no trailing zeros). */
 function formatNumber(value: number): string {
   if (Number.isInteger(value)) return value.toString();
-  const s = value.toFixed(10).replace(/\.?0+$/, '');
-  return s === '-0' ? '0' : s;
+  const s = value.toFixed(10);
+  // Trim trailing zeros and optional decimal point manually
+  let end = s.length;
+  while (end > 0 && s.charCodeAt(end - 1) === 0x30 /* '0' */) end--;
+  if (end > 0 && s.charCodeAt(end - 1) === 0x2E /* '.' */) end--;
+  const trimmed = end === s.length ? s : s.slice(0, end);
+  return trimmed === '-0' ? '0' : trimmed;
 }
 
 /** Escape bytes for a PDF literal string `(…)`. */
 function escapeLiteralString(str: string): string {
-  return str
-    .replace(/\\/g, '\\\\')
-    .replace(/\(/g, '\\(')
-    .replace(/\)/g, '\\)')
-    .replace(/\r/g, '\\r')
-    .replace(/\n/g, '\\n');
+  const parts: string[] = [];
+  for (let i = 0; i < str.length; i++) {
+    const c = str.charCodeAt(i);
+    if (c === 0x5c) parts.push('\\\\');
+    else if (c === 0x28) parts.push('\\(');
+    else if (c === 0x29) parts.push('\\)');
+    else if (c === 0x0d) parts.push('\\r');
+    else if (c === 0x0a) parts.push('\\n');
+    else parts.push(str[i]!);
+  }
+  return parts.join('');
 }
 
 /** Convert bytes to hex pairs (delegates to Uint8Array.prototype.toHex). */
@@ -204,16 +214,16 @@ export class PdfName {
   serialize(writer: ByteWriter): void {
     // Encode the name: the leading '/' is literal, then each character
     // is either passed through (printable ASCII except '#') or encoded.
-    let encoded = '/';
+    const parts: string[] = ['/'];
     for (let i = 1; i < this.value.length; i++) {
       const code = this.value.charCodeAt(i);
-      if (code !== undefined && code >= 33 && code <= 126 && code !== 0x23 /* # */) {
-        encoded += this.value.at(i);
+      if (code >= 33 && code <= 126 && code !== 0x23 /* # */) {
+        parts.push(this.value[i]!);
       } else {
-        encoded += '#' + (code ?? 0).toString(16).padStart(2, '0');
+        parts.push('#' + code.toString(16).padStart(2, '0'));
       }
     }
-    writer.writeString(encoded);
+    writer.writeString(parts.join(''));
   }
 }
 
@@ -229,7 +239,7 @@ export class PdfArray {
   constructor(public readonly items: PdfObject[] = []) {}
 
   static of(items: PdfObject[]): PdfArray {
-    return new PdfArray([...items]);
+    return new PdfArray(items.slice());
   }
 
   /** Convenience: create an array of PdfNumbers. */

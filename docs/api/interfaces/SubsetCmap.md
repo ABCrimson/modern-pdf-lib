@@ -6,7 +6,7 @@
 
 # Interface: SubsetCmap
 
-Defined in: [src/assets/font/fontSubset.ts:50](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/assets/font/fontSubset.ts#L50)
+Defined in: [src/assets/font/fontSubset.ts:50](https://github.com/ABCrimson/modern-pdf-lib/blob/6ce8fea7ba62114c9bdeda1f601086d76e1fe5d2/src/assets/font/fontSubset.ts#L50)
 
 A CMap mapping from CIDs (Character IDs, which correspond to new GIDs
 in the subset) to Unicode codepoints.
@@ -17,7 +17,7 @@ in the subset) to Unicode codepoints.
 
 > `readonly` **cidToUnicode**: `ReadonlyMap`\<`number`, `number`[]\>
 
-Defined in: [src/assets/font/fontSubset.ts:61](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/assets/font/fontSubset.ts#L61)
+Defined in: [src/assets/font/fontSubset.ts:61](https://github.com/ABCrimson/modern-pdf-lib/blob/6ce8fea7ba62114c9bdeda1f601086d76e1fe5d2/src/assets/font/fontSubset.ts#L61)
 
 Map from new GID to the Unicode codepoint(s) it represents.
 For most glyphs this is a single codepoint; for ligatures it may
@@ -29,7 +29,7 @@ be multiple.
 
 > `readonly` **cmapStream**: `string`
 
-Defined in: [src/assets/font/fontSubset.ts:55](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/assets/font/fontSubset.ts#L55)
+Defined in: [src/assets/font/fontSubset.ts:55](https://github.com/ABCrimson/modern-pdf-lib/blob/6ce8fea7ba62114c9bdeda1f601086d76e1fe5d2/src/assets/font/fontSubset.ts#L55)
 
 The CMap as a PDF stream body string, ready to be wrapped in a
 `/ToUnicode` stream object.
