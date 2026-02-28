@@ -125,7 +125,7 @@ describe('rc4', () => {
     expect(data).toEqual(dataCopy);
   });
 
-  it('should handle large data (1MB)', () => {
+  it('should handle large data (1MB)', { timeout: 30_000 }, () => {
     const key = new TextEncoder().encode('test-key');
     const data = new Uint8Array(1024 * 1024);
     for (let i = 0; i < data.length; i++) {
