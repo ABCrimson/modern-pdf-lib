@@ -92,6 +92,8 @@ export default defineConfig({
             { text: 'Coordinates', link: '/guide/coordinates' },
             { text: 'Streaming', link: '/guide/streaming' },
             { text: 'Performance', link: '/guide/performance' },
+            { text: 'Cookbook', link: '/guide/cookbook' },
+            { text: 'Troubleshooting', link: '/guide/troubleshooting' },
           ],
         },
       ],
