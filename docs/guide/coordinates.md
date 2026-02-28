@@ -327,10 +327,9 @@ function drawVerticallyCentered(
   fontSize: number,
   x: number,
 ): void {
-  const metrics = font.metricsAtSize(fontSize);
-  const textHeight = metrics.ascent - metrics.descent;
+  const textHeight = font.heightAtSize(fontSize);
   const pageHeight = page.getHeight();
-  const y = (pageHeight - textHeight) / 2 - metrics.descent;
+  const y = (pageHeight - textHeight) / 2;
 
   page.drawText(text, { x, y, font, size: fontSize, color: rgb(0, 0, 0) });
 }

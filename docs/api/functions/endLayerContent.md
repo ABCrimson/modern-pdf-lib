@@ -8,7 +8,7 @@
 
 > **endLayerContent**(): `string`
 
-Defined in: [src/layers/optionalContent.ts:305](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/layers/optionalContent.ts#L305)
+Defined in: [src/layers/optionalContent.ts:305](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/layers/optionalContent.ts#L305)
 
 Generate the PDF operator to end optional content.
 

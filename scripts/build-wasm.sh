@@ -59,6 +59,7 @@ CRATES=(
   "png"
   "ttf"
   "shaping"
+  "jbig2"
 )
 
 PROFILE_LABEL="release"

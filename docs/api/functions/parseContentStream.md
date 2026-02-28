@@ -8,7 +8,7 @@
 
 > **parseContentStream**(`data`): [`ContentStreamOperator`](../interfaces/ContentStreamOperator.md)[]
 
-Defined in: [src/parser/contentStreamParser.ts:68](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/parser/contentStreamParser.ts#L68)
+Defined in: [src/parser/contentStreamParser.ts:68](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/parser/contentStreamParser.ts#L68)
 
 Parse a PDF content stream into an ordered list of operators.
 

@@ -39,6 +39,17 @@ export type { ContentStreamOperator, Operand } from './contentStreamParser.js';
 export { decodeStream } from './streamDecode.js';
 
 // ---------------------------------------------------------------------------
+// JBIG2 WASM acceleration
+// ---------------------------------------------------------------------------
+
+export { decodeJBIG2Async } from './jbig2Decode.js';
+export {
+  initJBIG2Wasm,
+  isJBIG2WasmAvailable,
+  disposeJBIG2Wasm,
+} from './jbig2WasmBridge.js';
+
+// ---------------------------------------------------------------------------
 // Parse errors
 // ---------------------------------------------------------------------------
 

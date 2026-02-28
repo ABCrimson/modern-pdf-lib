@@ -4,7 +4,7 @@ layout: home
 hero:
   name: Modern PDF
   text: WASM-Accelerated PDF Engine
-  tagline: Create, parse, merge, and manipulate PDFs in every JavaScript runtime. ESM-only, zero dependencies, TypeScript-first.
+  tagline: Create, parse, merge, and manipulate PDFs in every JavaScript runtime. ESM-only, one dependency, TypeScript-first.
   actions:
     - theme: brand
       text: Get Started

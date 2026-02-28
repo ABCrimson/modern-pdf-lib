@@ -8,7 +8,7 @@
 
 > **setTextRiseOp**(`rise`): `string`
 
-Defined in: [src/core/operators/text.ts:123](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/operators/text.ts#L123)
+Defined in: [src/core/operators/text.ts:123](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/core/operators/text.ts#L123)
 
 Set the text rise (super / subscript offset) (`Ts`).
 

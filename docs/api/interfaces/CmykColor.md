@@ -6,7 +6,7 @@
 
 # Interface: CmykColor
 
-Defined in: [src/core/operators/color.ts:23](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/operators/color.ts#L23)
+Defined in: [src/core/operators/color.ts:23](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/core/operators/color.ts#L23)
 
 A CMYK colour with components in the range `[0, 1]`.
 
@@ -16,7 +16,7 @@ A CMYK colour with components in the range `[0, 1]`.
 
 > `readonly` **c**: `number`
 
-Defined in: [src/core/operators/color.ts:25](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/operators/color.ts#L25)
+Defined in: [src/core/operators/color.ts:25](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/core/operators/color.ts#L25)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [src/core/operators/color.ts:25](https://github.com/ABCrimson/modern
 
 > `readonly` **k**: `number`
 
-Defined in: [src/core/operators/color.ts:28](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/operators/color.ts#L28)
+Defined in: [src/core/operators/color.ts:28](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/core/operators/color.ts#L28)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [src/core/operators/color.ts:28](https://github.com/ABCrimson/modern
 
 > `readonly` **m**: `number`
 
-Defined in: [src/core/operators/color.ts:26](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/operators/color.ts#L26)
+Defined in: [src/core/operators/color.ts:26](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/core/operators/color.ts#L26)
 
 ***
 
@@ -40,7 +40,7 @@ Defined in: [src/core/operators/color.ts:26](https://github.com/ABCrimson/modern
 
 > `readonly` **type**: `"cmyk"`
 
-Defined in: [src/core/operators/color.ts:24](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/operators/color.ts#L24)
+Defined in: [src/core/operators/color.ts:24](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/core/operators/color.ts#L24)
 
 ***
 
@@ -48,4 +48,4 @@ Defined in: [src/core/operators/color.ts:24](https://github.com/ABCrimson/modern
 
 > `readonly` **y**: `number`
 
-Defined in: [src/core/operators/color.ts:27](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/operators/color.ts#L27)
+Defined in: [src/core/operators/color.ts:27](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/core/operators/color.ts#L27)

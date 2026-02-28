@@ -8,7 +8,7 @@
 
 > **isAccessible**(`issues`): `boolean`
 
-Defined in: [src/accessibility/accessibilityChecker.ts:320](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/accessibility/accessibilityChecker.ts#L320)
+Defined in: [src/accessibility/accessibilityChecker.ts:320](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/accessibility/accessibilityChecker.ts#L320)
 
 Check whether a set of issues contains any errors (severity = "error").
 

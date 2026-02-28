@@ -8,7 +8,7 @@
 
 > **drawSvgOnPage**(`page`, `svgString`, `options?`): `void`
 
-Defined in: [src/assets/svg/svgToPdf.ts:471](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/assets/svg/svgToPdf.ts#L471)
+Defined in: [src/assets/svg/svgToPdf.ts:471](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/assets/svg/svgToPdf.ts#L471)
 
 Draw an SVG string onto a PDF page.
 

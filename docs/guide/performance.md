@@ -92,7 +92,7 @@ export default {
 | `deflate` | Stream compression | 2-4x | Uses libdeflate; supports levels 1-12 |
 | `fonts` | Font subsetting | 3-5x | Largest benefit with CJK fonts |
 | `png` | PNG decoding | ~5x | Decodes PNG alpha and filters in WASM |
-| `shaping` | Text shaping | ~10x | Complex scripts (Arabic, Devanagari) |
+| `jbig2` | JBIG2 image decoding | ~3x | Bilevel image decompression |
 
 > [!TIP]
 > WASM is entirely optional. Every WASM module has a pure-JS fallback that produces identical output. You can ship without WASM and add it later as a performance optimization.
@@ -276,7 +276,7 @@ const fontBytes = new Uint8Array(await readFile('fonts/Inter-Regular.ttf'));
 const font = await pdf.embedFont(fontBytes);
 
 const logoBytes = new Uint8Array(await readFile('images/logo.png'));
-const logo = await pdf.embedImage(logoBytes);
+const logo = pdf.embedPng(logoBytes);
 
 // Reuse across all pages
 for (let i = 0; i < 200; i++) {
@@ -290,7 +290,7 @@ const bytes = await pdf.save();
 ```
 
 > [!WARNING]
-> Do not call `embedFont()` or `embedImage()` inside a loop. Each call parses, subsets, and compresses the data from scratch. Embedding the same font 200 times wastes memory and CPU, and bloats the output file because 200 copies of the font data are written.
+> Do not call `embedFont()` or `embedPng()` / `embedJpeg()` inside a loop. Each call parses, subsets, and compresses the data from scratch. Embedding the same font 200 times wastes memory and CPU, and bloats the output file because 200 copies of the font data are written.
 
 ### Before and After
 
@@ -342,7 +342,7 @@ Image handling varies significantly by format:
 **Recommendations:**
 
 1. **Use JPEG for photographs.** JPEG data is embedded as-is, with no decompression or recompression. This is the fastest and most memory-efficient path.
-2. **Scale images before embedding.** A 4000x3000 photograph displayed at 200x150 points wastes memory and file size. Resize images to the target display size before calling `embedImage()`.
+2. **Scale images before embedding.** A 4000x3000 photograph displayed at 200x150 points wastes memory and file size. Resize images to the target display size before calling `embedPng()` or `embedJpeg()`.
 3. **Enable WASM for PNG-heavy documents.** The WASM PNG decoder uses less memory and runs ~5x faster than the pure-JS fallback.
 4. **Embed each image once.** Reuse the `ImageRef` across pages (see [Batch Operations](#batch-operations)).
 

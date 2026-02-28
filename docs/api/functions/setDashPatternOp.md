@@ -8,7 +8,7 @@
 
 > **setDashPatternOp**(`dashArray`, `dashPhase`): `string`
 
-Defined in: [src/core/operators/graphics.ts:250](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/operators/graphics.ts#L250)
+Defined in: [src/core/operators/graphics.ts:250](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/core/operators/graphics.ts#L250)
 
 Set the line dash pattern (`d`).
 

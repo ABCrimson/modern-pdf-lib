@@ -97,10 +97,10 @@ page.drawText(text, {
 });
 ```
 
-You can also retrieve font metrics for precise vertical alignment:
+You can also retrieve font height for precise vertical alignment:
 
 ```ts
-const { ascent, descent, lineGap } = font.metricsAtSize(fontSize);
+const textHeight = font.heightAtSize(fontSize);
 ```
 
 ## Text Rotation

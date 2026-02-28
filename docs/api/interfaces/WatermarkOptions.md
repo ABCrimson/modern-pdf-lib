@@ -6,7 +6,7 @@
 
 # Interface: WatermarkOptions
 
-Defined in: [src/core/watermark.ts:26](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/watermark.ts#L26)
+Defined in: [src/core/watermark.ts:26](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/core/watermark.ts#L26)
 
 Options for watermark rendering.
 
@@ -16,7 +16,7 @@ Options for watermark rendering.
 
 > `optional` **color**: `object`
 
-Defined in: [src/core/watermark.ts:32](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/watermark.ts#L32)
+Defined in: [src/core/watermark.ts:32](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/core/watermark.ts#L32)
 
 Text colour as RGB (0-1 range, default: light gray).
 
@@ -38,7 +38,7 @@ Text colour as RGB (0-1 range, default: light gray).
 
 > `optional` **fontSize**: `number`
 
-Defined in: [src/core/watermark.ts:30](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/watermark.ts#L30)
+Defined in: [src/core/watermark.ts:30](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/core/watermark.ts#L30)
 
 Font size in points (default: 60).
 
@@ -48,7 +48,7 @@ Font size in points (default: 60).
 
 > `optional` **opacity**: `number`
 
-Defined in: [src/core/watermark.ts:34](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/watermark.ts#L34)
+Defined in: [src/core/watermark.ts:34](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/core/watermark.ts#L34)
 
 Opacity from 0 (invisible) to 1 (opaque), default: 0.3.
 
@@ -58,7 +58,7 @@ Opacity from 0 (invisible) to 1 (opaque), default: 0.3.
 
 > `optional` **position**: `"top"` \| `"center"` \| `"bottom"`
 
-Defined in: [src/core/watermark.ts:38](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/watermark.ts#L38)
+Defined in: [src/core/watermark.ts:38](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/core/watermark.ts#L38)
 
 Position: `'center'`, `'top'`, or `'bottom'` (default: `'center'`).
 
@@ -68,7 +68,7 @@ Position: `'center'`, `'top'`, or `'bottom'` (default: `'center'`).
 
 > `optional` **rotation**: `number`
 
-Defined in: [src/core/watermark.ts:36](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/watermark.ts#L36)
+Defined in: [src/core/watermark.ts:36](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/core/watermark.ts#L36)
 
 Rotation angle in degrees (default: 45).
 
@@ -78,6 +78,6 @@ Rotation angle in degrees (default: 45).
 
 > **text**: `string`
 
-Defined in: [src/core/watermark.ts:28](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/watermark.ts#L28)
+Defined in: [src/core/watermark.ts:28](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/core/watermark.ts#L28)
 
 The watermark text.

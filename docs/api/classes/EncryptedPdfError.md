@@ -6,7 +6,7 @@
 
 # Class: EncryptedPdfError
 
-Defined in: [src/errors.ts:22](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/errors.ts#L22)
+Defined in: [src/errors.ts:22](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/errors.ts#L22)
 
 Thrown when attempting to load or manipulate an encrypted PDF without
 providing the correct password.
@@ -21,7 +21,7 @@ providing the correct password.
 
 > **new EncryptedPdfError**(`message?`, `options?`): `EncryptedPdfError`
 
-Defined in: [src/errors.ts:24](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/errors.ts#L24)
+Defined in: [src/errors.ts:24](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/errors.ts#L24)
 
 #### Parameters
 
@@ -71,7 +71,7 @@ Defined in: node\_modules/typescript/lib/lib.es5.d.ts:1075
 
 > `readonly` **name**: `"EncryptedPdfError"` = `'EncryptedPdfError'`
 
-Defined in: [src/errors.ts:23](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/errors.ts#L23)
+Defined in: [src/errors.ts:23](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/errors.ts#L23)
 
 #### Overrides
 

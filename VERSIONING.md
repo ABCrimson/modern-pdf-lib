@@ -41,4 +41,4 @@ Revolutionary changes that break existing consumer code. Once MAJOR increments, 
 
 ## Current Version
 
-**0.12.1** — See [CHANGELOG.md](./CHANGELOG.md) for the full release history.
+**0.13.0** — See [CHANGELOG.md](./CHANGELOG.md) for the full release history.

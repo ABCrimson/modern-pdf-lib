@@ -8,7 +8,7 @@
 
 > **curveToOp**(`x1`, `y1`, `x2`, `y2`, `x3`, `y3`): `string`
 
-Defined in: [src/core/operators/graphics.ts:63](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/operators/graphics.ts#L63)
+Defined in: [src/core/operators/graphics.ts:63](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/core/operators/graphics.ts#L63)
 
 Append a cubic Bezier curve to the current path (`c`).
 

@@ -8,7 +8,7 @@
 
 > **decodeStream**(`data`, `filters`, `decodeParms?`): `Uint8Array`
 
-Defined in: [src/parser/streamDecode.ts:36](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/parser/streamDecode.ts#L36)
+Defined in: [src/parser/streamDecode.ts:36](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/parser/streamDecode.ts#L36)
 
 Decode (decompress) PDF stream data that may have one or more filters
 applied.  Filters are applied in the order they appear in the array

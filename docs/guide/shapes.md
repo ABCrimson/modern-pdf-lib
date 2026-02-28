@@ -238,15 +238,21 @@ Use `page.pushGraphicsState()` and `page.popGraphicsState()` to save and restore
 // Save current state
 page.pushGraphicsState();
 
-// Apply transformation — all drawing until pop is affected
-page.setFillColor(rgb(1, 0, 0));
-page.setLineWidth(3);
-page.drawRectangle({ x: 50, y: 400, width: 100, height: 60 });
+// Apply a transformation — all drawing until pop is affected
+page.setTransform(
+  Math.cos(0.1), Math.sin(0.1),
+  -Math.sin(0.1), Math.cos(0.1),
+  0, 0,
+);
+page.drawRectangle({
+  x: 50, y: 400, width: 100, height: 60,
+  color: rgb(1, 0, 0), borderWidth: 3, borderColor: rgb(0, 0, 0),
+});
 
-// Restore state — fill color and line width revert
+// Restore state — transformation reverts
 page.popGraphicsState();
 
-// This rectangle uses the original state
+// This rectangle uses the original (untransformed) state
 page.drawRectangle({ x: 200, y: 400, width: 100, height: 60 });
 ```
 
@@ -258,16 +264,14 @@ page.drawRectangle({ x: 200, y: 400, width: 100, height: 60 });
 **Watermark with reduced opacity:**
 
 ```ts
-page.pushGraphicsState();
-page.setFillOpacity(0.15);
 page.drawText('DRAFT', {
   x: 150,
   y: 400,
   size: 72,
   color: rgb(0.5, 0.5, 0.5),
+  opacity: 0.15,
   rotate: degrees(45),
 });
-page.popGraphicsState();
 ```
 
 **Isolated drawing region:**

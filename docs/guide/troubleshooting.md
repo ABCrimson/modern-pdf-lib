@@ -346,15 +346,16 @@ There are three common causes:
 **For encrypted PDFs:** provide the password when loading.
 
 ```ts
-import { loadPdf, extractText, parseContentStream } from 'modern-pdf-lib';
+import { loadPdf, extractTextWithPositions, parseContentStream } from 'modern-pdf-lib';
 import { readFile } from 'node:fs/promises';
 
 const bytes = new Uint8Array(await readFile('encrypted-doc.pdf'));
 const doc = await loadPdf(bytes, { password: 'mypassword' });
 
 const page = doc.getPages()[0];
-const operators = parseContentStream(page.getContentStream());
-const text = extractText(operators, page.getResources());
+const operators = parseContentStream(page.getContentStreamData());
+const items = extractTextWithPositions(operators);
+const text = items.map((item) => item.text).join(' ');
 console.log(text);
 ```
 

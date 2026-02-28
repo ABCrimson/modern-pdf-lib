@@ -99,9 +99,9 @@ page.drawImage(image, {
   height: dims.height,
 });
 
-// modern-pdf-lib
+// modern-pdf-lib (embedPng is synchronous)
 const pngBytes = new Uint8Array(await readFile('image.png'));
-const image = await pdf.embedPng(pngBytes);
+const image = pdf.embedPng(pngBytes);
 page.drawImage(image, {
   x: 50,
   y: 500,
@@ -335,19 +335,18 @@ page.drawImage(image, {
 });
 ```
 
-### 7. No Page Getters on PDFDocument
+### 7. `getPages()` Returns a Readonly Array
 
-In `pdf-lib`, `pdfDoc.getPages()` returned all pages. In `modern-pdf-lib`, pages are returned by `addPage()` and should be stored by the caller:
+In both `pdf-lib` and `modern-pdf-lib`, `getPages()` returns all pages. The main difference is that `modern-pdf-lib` returns a `readonly` array:
 
 ```ts
 // pdf-lib
 const pages = pdfDoc.getPages();
 const firstPage = pages[0];
 
-// modern-pdf-lib — keep your own references
-const pages: PdfPage[] = [];
-pages.push(pdf.addPage(PageSizes.A4));
-pages.push(pdf.addPage(PageSizes.A4));
+// modern-pdf-lib — same pattern, readonly return type
+const pages = pdf.getPages();
+const firstPage = pages[0];
 ```
 
 ## Checklist

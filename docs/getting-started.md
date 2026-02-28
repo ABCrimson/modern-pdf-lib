@@ -159,32 +159,27 @@ export default {
 
 `modern-pdf-lib` ships with optional WebAssembly modules that accelerate compression, PNG decoding, font parsing, and text shaping. Without WASM, the library falls back to pure-JavaScript implementations.
 
-### Automatic Initialization
+### How It Works
 
-In most environments, WASM modules are loaded automatically on first use. No extra configuration is needed:
-
-```ts
-// WASM is loaded lazily when save() needs compression
-const bytes = await pdf.save();
-```
-
-### Explicit Initialization
-
-If you want to control when the WASM binary is loaded (for example, during application startup), call `initWasm()` explicitly:
+WASM modules are **not** loaded automatically — you must explicitly initialize them by passing pre-compiled `WebAssembly.Module` instances or by specifying which modules to load. Without WASM, the library uses pure-JS fallbacks that produce identical output.
 
 ```ts
 import { initWasm } from 'modern-pdf-lib';
 
-// Load WASM during app startup
-await initWasm();
+// Load specific WASM modules during app startup
+await initWasm({ deflate: true, png: true, fonts: true });
 
 // All subsequent operations use WASM-accelerated paths
+const bytes = await pdf.save();
 ```
 
-You can also provide a custom URL to the `.wasm` file if your deployment requires a specific asset path:
+You can also provide custom paths to the `.wasm` files if your deployment requires specific asset locations:
 
 ```ts
-await initWasm(new URL('./wasm/modern_pdf_bg.wasm', import.meta.url));
+await initWasm({
+  deflateWasm: new URL('./wasm/deflate.wasm', import.meta.url),
+  pngWasm: new URL('./wasm/png.wasm', import.meta.url),
+});
 ```
 
 > [!TIP]

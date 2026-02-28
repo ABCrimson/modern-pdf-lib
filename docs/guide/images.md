@@ -26,7 +26,7 @@ const pngBytes = new Uint8Array(await readFile('logo.png'));
 // In the browser
 // const pngBytes = new Uint8Array(await fetch('/logo.png').then(r => r.arrayBuffer()));
 
-const image = await pdf.embedPng(pngBytes);
+const image = pdf.embedPng(pngBytes);
 
 page.drawImage(image, {
   x: 50,
@@ -44,7 +44,7 @@ PNG images with alpha channels are fully supported. The alpha channel is separat
 
 ```ts
 // PNGs with transparency work out of the box
-const transparentLogo = await pdf.embedPng(pngWithAlpha);
+const transparentLogo = pdf.embedPng(pngWithAlpha);
 page.drawImage(transparentLogo, { x: 50, y: 500, width: 150, height: 150 });
 ```
 
@@ -99,7 +99,7 @@ page.drawImage(image, {
 Use the image's intrinsic dimensions to calculate proportional scaling:
 
 ```ts
-const image = await pdf.embedPng(pngBytes);
+const image = pdf.embedPng(pngBytes);
 const { width: origWidth, height: origHeight } = image;
 
 const maxWidth = 400;
@@ -148,7 +148,7 @@ When saving the PDF, PNG image data is compressed using the same deflate compres
 import { initWasm } from 'modern-pdf-lib';
 
 // Enable WASM for better PNG compression
-await initWasm();
+await initWasm({ deflate: true, png: true });
 
 const bytes = await pdf.save();
 ```
@@ -159,7 +159,7 @@ Each call to `embedPng()` or `embedJpeg()` creates a new image object in the PDF
 
 ```ts
 // Embed once
-const logo = await pdf.embedPng(logoBytes);
+const logo = pdf.embedPng(logoBytes);
 
 // Draw on every page
 for (let i = 0; i < 10; i++) {

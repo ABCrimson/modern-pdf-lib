@@ -60,7 +60,7 @@ export default defineConfig({
       { text: 'API', link: '/api/' },
       { text: 'Migration', link: '/migration/from-pdf-lib' },
       {
-        text: 'v0.12.1',
+        text: 'v0.13.0',
         items: [
           {
             text: 'Changelog',

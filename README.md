@@ -15,7 +15,7 @@ Create, parse, fill, merge, sign, and manipulate PDF documents<br />in Node, Den
 
 [![npm version](https://img.shields.io/npm/v/modern-pdf-lib?style=flat-square&color=cb3837)](https://www.npmjs.com/package/modern-pdf-lib)
 [![bundle size](https://img.shields.io/badge/gzip-36kb_core-blue?style=flat-square)](https://bundlephobia.com/package/modern-pdf-lib)
-[![tests](https://img.shields.io/badge/tests-1%2C973_passing-brightgreen?style=flat-square)](#)
+[![tests](https://img.shields.io/badge/tests-2%2C199_passing-brightgreen?style=flat-square)](#)
 [![TypeScript](https://img.shields.io/badge/TypeScript-6.0-3178c6?style=flat-square&logo=typescript&logoColor=white)](#)
 [![License: MIT](https://img.shields.io/badge/license-MIT-yellow?style=flat-square)](LICENSE)
 
@@ -69,6 +69,7 @@ const blob = await doc.saveAsBlob();     // Blob (browsers)
 - Automatic font subsetting
 - JPEG / PNG image embedding
 - RGB, CMYK, grayscale colors
+- Linear & radial gradients, tiling patterns
 - Text layout (multiline, combed, auto-size)
 
 </td>
@@ -195,7 +196,7 @@ const blob = await doc.saveAsBlob();     // Blob (browsers)
 <td align="center">No</td></tr>
 
 <tr><td><strong>WASM acceleration</strong></td>
-<td align="center">Optional (compression, PNG, fonts)</td>
+<td align="center">Optional (compression, PNG, fonts, JBIG2)</td>
 <td align="center">No</td></tr>
 
 <tr><td><strong>Dependencies</strong></td>
@@ -407,6 +408,7 @@ await initWasm({
 | png | PNG image decoding | ~5x |
 | ttf | Font parsing & subsetting | ~3x |
 | shaping | Complex script layout | ~10x |
+| jbig2 | JBIG2 bilevel image decoding | ~3x |
 
 <br />
 
@@ -428,8 +430,8 @@ modern-pdf-lib/
     layers/         Optional content groups (OCG)
     outline/        Bookmarks / document outline
     metadata/       XMP metadata, viewer preferences
-    wasm/           Rust crate sources (4 modules)
-  tests/            1,973 tests across 91 suites
+    wasm/           Rust crate sources (5 modules)
+  tests/            2,199 tests across 100 suites
   docs/             VitePress documentation
 ```
 
@@ -441,7 +443,7 @@ modern-pdf-lib/
 git clone https://github.com/ABCrimson/modern-pdf-lib.git
 cd modern-pdf-lib
 npm install
-npm test          # 1,973 tests
+npm test          # 2,199 tests
 npm run typecheck # TypeScript 6.0 strict
 npm run build     # ESM + CJS + declarations
 ```

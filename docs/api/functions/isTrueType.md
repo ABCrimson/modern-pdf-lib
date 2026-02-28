@@ -8,7 +8,7 @@
 
 > **isTrueType**(`data`): `boolean`
 
-Defined in: [src/assets/font/otfDetect.ts:35](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/assets/font/otfDetect.ts#L35)
+Defined in: [src/assets/font/otfDetect.ts:35](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/assets/font/otfDetect.ts#L35)
 
 Detect whether font data is a TrueType font.
 

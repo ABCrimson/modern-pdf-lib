@@ -8,7 +8,7 @@
 
 > **computeFileEncryptionKey**(`password`, `dict`, `fileId`): `Promise`\<`Uint8Array`\<`ArrayBufferLike`\>\>
 
-Defined in: [src/crypto/keyDerivation.ts:600](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/crypto/keyDerivation.ts#L600)
+Defined in: [src/crypto/keyDerivation.ts:600](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/crypto/keyDerivation.ts#L600)
 
 Compute the file encryption key from a password and encryption dict.
 

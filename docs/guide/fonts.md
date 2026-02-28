@@ -161,10 +161,7 @@ page.drawText('مرحبا بالعالم', {
 
 Basic text shaping (Latin ligatures, CJK mapping) works out of the box with pure JS. For full OpenType shaping of complex scripts (Arabic contextual forms, Devanagari conjuncts, Thai word breaking), initialize the rustybuzz WASM module:
 
-```ts
-import { initWasm } from 'modern-pdf-lib';
-await initWasm({ shaping: true });
-```
+The text shaping WASM module is loaded automatically when complex script rendering is needed. No explicit initialization is required — the library detects when shaping is necessary and uses the WASM accelerator if available, falling back to the pure-JS implementation otherwise.
 
 ## Font Metrics and Measurement
 
@@ -178,27 +175,25 @@ const width = font.widthOfTextAtSize('Hello, world!', 16);
 console.log(`Text width: ${width} points`);
 ```
 
-### Accessing Font Metrics
+### Calculating Text Height
+
+Use `heightAtSize()` to get the total height (ascender - descender) at a given font size:
 
 ```ts
-const metrics = font.metricsAtSize(16);
-
-console.log(`Ascent:   ${metrics.ascent} pt`);   // Above baseline
-console.log(`Descent:  ${metrics.descent} pt`);   // Below baseline (negative)
-console.log(`Line gap: ${metrics.lineGap} pt`);   // Extra space between lines
+const textHeight = font.heightAtSize(16);
+console.log(`Text height: ${textHeight} pt`);
 ```
 
 ### Calculating Line Height
 
 ```ts
 const fontSize = 14;
-const metrics = font.metricsAtSize(fontSize);
 
-// Typographic line height
-const lineHeight = metrics.ascent - metrics.descent + metrics.lineGap;
+// Total text height (ascent - descent)
+const textHeight = font.heightAtSize(fontSize);
 
-// Or use a multiplier (common for body text)
-const lineHeight120 = fontSize * 1.2;
+// Use a multiplier for comfortable line spacing (common for body text)
+const lineHeight = fontSize * 1.2;
 ```
 
 ### Centering Text on a Page
@@ -232,8 +227,8 @@ The pure-JS subsetter and metric extractor work in every runtime. WASM modules a
 ```ts
 import { initWasm } from 'modern-pdf-lib';
 
-// Optionally load WASM for faster font parsing + complex script shaping
-await initWasm({ fonts: true, shaping: true });
+// Optionally load WASM for faster font parsing
+await initWasm({ fonts: true });
 
 const font = await pdf.embedFont(largeCjkFontBytes);
 ```

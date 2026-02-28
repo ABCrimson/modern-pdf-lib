@@ -6,7 +6,7 @@
 
 # Interface: DrawEllipseOptions
 
-Defined in: [src/core/pdfPage.ts:335](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/pdfPage.ts#L335)
+Defined in: [src/core/pdfPage.ts:342](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/core/pdfPage.ts#L342)
 
 Options for [PdfPage.drawEllipse](../classes/PdfPage.md#drawellipse).
 
@@ -16,7 +16,7 @@ Options for [PdfPage.drawEllipse](../classes/PdfPage.md#drawellipse).
 
 > `optional` **blendMode**: [`BlendMode`](../type-aliases/BlendMode.md)
 
-Defined in: [src/core/pdfPage.ts:353](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/pdfPage.ts#L353)
+Defined in: [src/core/pdfPage.ts:360](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/core/pdfPage.ts#L360)
 
 Blend mode for compositing.
 
@@ -26,7 +26,7 @@ Blend mode for compositing.
 
 > `optional` **borderColor**: [`Color`](../type-aliases/Color.md)
 
-Defined in: [src/core/pdfPage.ts:347](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/pdfPage.ts#L347)
+Defined in: [src/core/pdfPage.ts:354](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/core/pdfPage.ts#L354)
 
 Border colour.
 
@@ -36,7 +36,7 @@ Border colour.
 
 > `optional` **borderDashArray**: `number`[]
 
-Defined in: [src/core/pdfPage.ts:355](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/pdfPage.ts#L355)
+Defined in: [src/core/pdfPage.ts:362](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/core/pdfPage.ts#L362)
 
 Dash pattern for border.
 
@@ -46,7 +46,7 @@ Dash pattern for border.
 
 > `optional` **borderDashPhase**: `number`
 
-Defined in: [src/core/pdfPage.ts:357](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/pdfPage.ts#L357)
+Defined in: [src/core/pdfPage.ts:364](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/core/pdfPage.ts#L364)
 
 Dash phase offset for border.
 
@@ -56,7 +56,7 @@ Dash phase offset for border.
 
 > `optional` **borderLineCap**: `0` \| `1` \| `2`
 
-Defined in: [src/core/pdfPage.ts:359](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/pdfPage.ts#L359)
+Defined in: [src/core/pdfPage.ts:366](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/core/pdfPage.ts#L366)
 
 Line cap style for border.
 
@@ -66,7 +66,7 @@ Line cap style for border.
 
 > `optional` **borderOpacity**: `number`
 
-Defined in: [src/core/pdfPage.ts:361](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/pdfPage.ts#L361)
+Defined in: [src/core/pdfPage.ts:368](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/core/pdfPage.ts#L368)
 
 Border stroke opacity `[0, 1]`.
 
@@ -76,7 +76,7 @@ Border stroke opacity `[0, 1]`.
 
 > `optional` **borderWidth**: `number`
 
-Defined in: [src/core/pdfPage.ts:349](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/pdfPage.ts#L349)
+Defined in: [src/core/pdfPage.ts:356](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/core/pdfPage.ts#L356)
 
 Border width.
 
@@ -86,7 +86,7 @@ Border width.
 
 > `optional` **color**: [`Color`](../type-aliases/Color.md)
 
-Defined in: [src/core/pdfPage.ts:345](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/pdfPage.ts#L345)
+Defined in: [src/core/pdfPage.ts:352](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/core/pdfPage.ts#L352)
 
 Fill colour.
 
@@ -96,7 +96,7 @@ Fill colour.
 
 > `optional` **opacity**: `number`
 
-Defined in: [src/core/pdfPage.ts:351](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/pdfPage.ts#L351)
+Defined in: [src/core/pdfPage.ts:358](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/core/pdfPage.ts#L358)
 
 Opacity `[0, 1]`.
 
@@ -106,7 +106,7 @@ Opacity `[0, 1]`.
 
 > `optional` **x**: `number`
 
-Defined in: [src/core/pdfPage.ts:337](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/pdfPage.ts#L337)
+Defined in: [src/core/pdfPage.ts:344](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/core/pdfPage.ts#L344)
 
 Centre x.
 
@@ -116,7 +116,7 @@ Centre x.
 
 > `optional` **xScale**: `number`
 
-Defined in: [src/core/pdfPage.ts:341](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/pdfPage.ts#L341)
+Defined in: [src/core/pdfPage.ts:348](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/core/pdfPage.ts#L348)
 
 Horizontal radius.
 
@@ -126,7 +126,7 @@ Horizontal radius.
 
 > `optional` **y**: `number`
 
-Defined in: [src/core/pdfPage.ts:339](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/pdfPage.ts#L339)
+Defined in: [src/core/pdfPage.ts:346](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/core/pdfPage.ts#L346)
 
 Centre y.
 
@@ -136,6 +136,6 @@ Centre y.
 
 > `optional` **yScale**: `number`
 
-Defined in: [src/core/pdfPage.ts:343](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/pdfPage.ts#L343)
+Defined in: [src/core/pdfPage.ts:350](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/core/pdfPage.ts#L350)
 
 Vertical radius.

@@ -8,7 +8,7 @@
 
 > **createXmpStream**(`meta`, `registry`): [`PdfRef`](../classes/PdfRef.md)
 
-Defined in: [src/metadata/xmpMetadata.ts:275](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/metadata/xmpMetadata.ts#L275)
+Defined in: [src/metadata/xmpMetadata.ts:275](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/metadata/xmpMetadata.ts#L275)
 
 Create an XMP metadata stream suitable for embedding in a PDF
 catalog's `/Metadata` entry.

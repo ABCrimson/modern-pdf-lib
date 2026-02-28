@@ -8,7 +8,7 @@
 
 > **moveToOp**(`x`, `y`): `string`
 
-Defined in: [src/core/operators/graphics.ts:43](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/operators/graphics.ts#L43)
+Defined in: [src/core/operators/graphics.ts:43](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/core/operators/graphics.ts#L43)
 
 Begin a new sub-path by moving the current point (`m`).
 

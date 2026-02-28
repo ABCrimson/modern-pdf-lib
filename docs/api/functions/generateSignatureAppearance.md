@@ -8,7 +8,7 @@
 
 > **generateSignatureAppearance**(`options`): [`PdfStream`](../classes/PdfStream.md)
 
-Defined in: [src/form/fieldAppearance.ts:476](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/form/fieldAppearance.ts#L476)
+Defined in: [src/form/fieldAppearance.ts:476](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/form/fieldAppearance.ts#L476)
 
 Generate the appearance stream for a signature field.
 

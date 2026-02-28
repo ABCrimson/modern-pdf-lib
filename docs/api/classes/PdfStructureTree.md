@@ -6,7 +6,7 @@
 
 # Class: PdfStructureTree
 
-Defined in: [src/accessibility/structureTree.ts:378](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/accessibility/structureTree.ts#L378)
+Defined in: [src/accessibility/structureTree.ts:378](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/accessibility/structureTree.ts#L378)
 
 The structure tree for a tagged PDF document.
 
@@ -29,7 +29,7 @@ tree.assignMcid(para, 0);
 
 > **new PdfStructureTree**(): `PdfStructureTree`
 
-Defined in: [src/accessibility/structureTree.ts:385](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/accessibility/structureTree.ts#L385)
+Defined in: [src/accessibility/structureTree.ts:385](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/accessibility/structureTree.ts#L385)
 
 #### Returns
 
@@ -41,7 +41,7 @@ Defined in: [src/accessibility/structureTree.ts:385](https://github.com/ABCrimso
 
 > `readonly` **root**: [`PdfStructureElement`](PdfStructureElement.md)
 
-Defined in: [src/accessibility/structureTree.ts:380](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/accessibility/structureTree.ts#L380)
+Defined in: [src/accessibility/structureTree.ts:380](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/accessibility/structureTree.ts#L380)
 
 The root `Document` structure element.
 
@@ -51,7 +51,7 @@ The root `Document` structure element.
 
 > **addElement**(`parent`, `type`, `options?`): [`PdfStructureElement`](PdfStructureElement.md)
 
-Defined in: [src/accessibility/structureTree.ts:398](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/accessibility/structureTree.ts#L398)
+Defined in: [src/accessibility/structureTree.ts:398](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/accessibility/structureTree.ts#L398)
 
 Add an element to the structure tree.
 
@@ -88,7 +88,7 @@ The newly created element.
 
 > **assignMcid**(`element`, `pageIndex`): `number`
 
-Defined in: [src/accessibility/structureTree.ts:432](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/accessibility/structureTree.ts#L432)
+Defined in: [src/accessibility/structureTree.ts:432](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/accessibility/structureTree.ts#L432)
 
 Assign a marked-content ID to an element and associate it with a
 page.  The MCID links the structure element to the actual content
@@ -120,7 +120,7 @@ The assigned MCID.
 
 > **getAllElements**(): [`PdfStructureElement`](PdfStructureElement.md)[]
 
-Defined in: [src/accessibility/structureTree.ts:442](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/accessibility/structureTree.ts#L442)
+Defined in: [src/accessibility/structureTree.ts:442](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/accessibility/structureTree.ts#L442)
 
 Return all elements in the tree (depth-first traversal from root).
 
@@ -134,7 +134,7 @@ Return all elements in the tree (depth-first traversal from root).
 
 > **getNextMcid**(): `number`
 
-Defined in: [src/accessibility/structureTree.ts:449](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/accessibility/structureTree.ts#L449)
+Defined in: [src/accessibility/structureTree.ts:449](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/accessibility/structureTree.ts#L449)
 
 Return the current MCID counter value (useful for testing).
 
@@ -148,7 +148,7 @@ Return the current MCID counter value (useful for testing).
 
 > **removeElement**(`element`): `void`
 
-Defined in: [src/accessibility/structureTree.ts:413](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/accessibility/structureTree.ts#L413)
+Defined in: [src/accessibility/structureTree.ts:413](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/accessibility/structureTree.ts#L413)
 
 Remove an element from the tree.
 
@@ -174,7 +174,7 @@ If the element is the root or has no parent.
 
 > **toDict**(`registry`, `pageRefs`): `object`
 
-Defined in: [src/accessibility/structureTree.ts:463](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/accessibility/structureTree.ts#L463)
+Defined in: [src/accessibility/structureTree.ts:463](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/accessibility/structureTree.ts#L463)
 
 Serialize the structure tree to a `/StructTreeRoot` dictionary.
 
@@ -215,7 +215,7 @@ An object containing the StructTreeRoot ref and dict.
 
 > **validate**(): [`AccessibilityIssue`](../interfaces/AccessibilityIssue.md)[]
 
-Defined in: [src/accessibility/structureTree.ts:736](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/accessibility/structureTree.ts#L736)
+Defined in: [src/accessibility/structureTree.ts:736](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/accessibility/structureTree.ts#L736)
 
 Validate the structure tree for common accessibility issues.
 
@@ -237,7 +237,7 @@ An array of [AccessibilityIssue](../interfaces/AccessibilityIssue.md) objects.
 
 > `static` **fromDict**(`dict`, `resolver`): `PdfStructureTree`
 
-Defined in: [src/accessibility/structureTree.ts:607](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/accessibility/structureTree.ts#L607)
+Defined in: [src/accessibility/structureTree.ts:607](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/accessibility/structureTree.ts#L607)
 
 Reconstruct a structure tree from a `/StructTreeRoot` dictionary.
 

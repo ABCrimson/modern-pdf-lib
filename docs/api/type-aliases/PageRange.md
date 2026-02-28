@@ -8,7 +8,7 @@
 
 > **PageRange** = \[`number`, `number`\]
 
-Defined in: [src/core/documentMerge.ts:468](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/documentMerge.ts#L468)
+Defined in: [src/core/documentMerge.ts:468](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/core/documentMerge.ts#L468)
 
 A page range for splitting, specified as `[startIndex, endIndex]`.
 Both indices are zero-based and inclusive.

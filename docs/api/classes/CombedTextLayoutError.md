@@ -6,7 +6,7 @@
 
 # Class: CombedTextLayoutError
 
-Defined in: [src/errors.ts:191](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/errors.ts#L191)
+Defined in: [src/errors.ts:191](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/errors.ts#L191)
 
 Thrown when a combed text field receives more characters than its
 maximum length allows.
@@ -21,7 +21,7 @@ maximum length allows.
 
 > **new CombedTextLayoutError**(`textLength`, `maxLength`, `options?`): `CombedTextLayoutError`
 
-Defined in: [src/errors.ts:193](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/errors.ts#L193)
+Defined in: [src/errors.ts:193](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/errors.ts#L193)
 
 #### Parameters
 
@@ -75,7 +75,7 @@ Defined in: node\_modules/typescript/lib/lib.es5.d.ts:1075
 
 > `readonly` **name**: `"CombedTextLayoutError"` = `'CombedTextLayoutError'`
 
-Defined in: [src/errors.ts:192](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/errors.ts#L192)
+Defined in: [src/errors.ts:192](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/errors.ts#L192)
 
 #### Overrides
 

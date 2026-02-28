@@ -66,6 +66,7 @@ const DEFAULT_FILENAMES: Record<string, string> = {
   png: 'modern_pdf_png_bg.wasm',
   ttf: 'modern_pdf_ttf_bg.wasm',
   shaping: 'modern_pdf_shaping_bg.wasm',
+  jbig2: 'modern_pdf_jbig2_bg.wasm',
 };
 
 // ---------------------------------------------------------------------------
@@ -296,7 +297,7 @@ function resolveModulePath(
  * Results are cached -- subsequent calls for the same module name
  * return the cached bytes without re-fetching.
  *
- * @param name - Module name. One of: `'libdeflate'`, `'png'`, `'ttf'`, `'shaping'`.
+ * @param name - Module name. One of: `'libdeflate'`, `'png'`, `'ttf'`, `'shaping'`, `'jbig2'`.
  * @returns      The raw WASM bytes.
  * @throws If the module cannot be loaded in the current runtime.
  *

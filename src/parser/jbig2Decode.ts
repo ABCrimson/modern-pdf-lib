@@ -26,11 +26,49 @@ import type { PdfDict } from '../core/pdfObjects.js';
 import { PdfNumber } from '../core/pdfObjects.js';
 
 // ---------------------------------------------------------------------------
+// WASM bridge (optional acceleration)
+// ---------------------------------------------------------------------------
+
+/** Cached WASM bridge state — avoids repeated dynamic imports. */
+let wasmAttempted = false;
+let wasmAvailable = false;
+
+/**
+ * Try to load the JBIG2 WASM bridge.  Returns `true` if WASM is ready.
+ * On failure, silently falls back to the pure-JS decoder.
+ */
+async function tryLoadJBIG2Wasm(): Promise<boolean> {
+  if (wasmAttempted) return wasmAvailable;
+  wasmAttempted = true;
+
+  try {
+    const { initJBIG2Wasm, isJBIG2WasmAvailable } = await import('./jbig2WasmBridge.js');
+    await initJBIG2Wasm();
+    wasmAvailable = isJBIG2WasmAvailable();
+    return wasmAvailable;
+  } catch {
+    wasmAvailable = false;
+    return false;
+  }
+}
+
+/**
+ * Reset WASM bridge state.  Primarily useful for testing.
+ */
+export function resetJBIG2WasmBridge(): void {
+  wasmAttempted = false;
+  wasmAvailable = false;
+}
+
+// ---------------------------------------------------------------------------
 // Public API
 // ---------------------------------------------------------------------------
 
 /**
  * Decode JBIG2Decode stream data.
+ *
+ * Uses the pure-JS decoder (synchronous).  For optional WASM
+ * acceleration, use {@link decodeJBIG2Async}.
  *
  * @param data  - The JBIG2-encoded content stream bytes.
  * @param parms - Optional `/DecodeParms` dictionary.  May contain a
@@ -51,6 +89,37 @@ export function decodeJBIG2(data: Uint8Array, parms: PdfDict | null): Uint8Array
   decoder.parseChunk(data, false);
 
   return decoder.getPageBitmap();
+}
+
+/**
+ * Decode JBIG2Decode stream data with optional WASM acceleration.
+ *
+ * Attempts to use the WASM-based decoder for better performance.
+ * Falls back to the pure-JS decoder if WASM is not available.
+ *
+ * @param data  - The JBIG2-encoded content stream bytes.
+ * @param parms - Optional `/DecodeParms` dictionary.
+ * @returns The decoded bilevel image data.
+ */
+export async function decodeJBIG2Async(
+  data: Uint8Array,
+  parms: PdfDict | null,
+): Promise<Uint8Array> {
+  const globalsData = extractGlobals(parms);
+
+  // Try WASM first
+  if (await tryLoadJBIG2Wasm()) {
+    try {
+      const { decodeJBIG2Wasm } = await import('./jbig2WasmBridge.js');
+      const result = decodeJBIG2Wasm(data, globalsData);
+      return result.bitmapData;
+    } catch {
+      // WASM decode failed — fall through to JS
+    }
+  }
+
+  // Fall back to pure-JS decoder
+  return decodeJBIG2(data, parms);
 }
 
 // ---------------------------------------------------------------------------

@@ -6,7 +6,7 @@
 
 # Class: PdfRef
 
-Defined in: [src/core/pdfObjects.ts:391](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/pdfObjects.ts#L391)
+Defined in: [src/core/pdfObjects.ts:391](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/core/pdfObjects.ts#L391)
 
 An indirect reference `N G R`.
 
@@ -16,7 +16,7 @@ An indirect reference `N G R`.
 
 > **new PdfRef**(`objectNumber`, `generationNumber?`): `PdfRef`
 
-Defined in: [src/core/pdfObjects.ts:395](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/pdfObjects.ts#L395)
+Defined in: [src/core/pdfObjects.ts:395](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/core/pdfObjects.ts#L395)
 
 #### Parameters
 
@@ -42,7 +42,7 @@ Generation number (usually 0).
 
 > `readonly` **generationNumber**: `number` = `0`
 
-Defined in: [src/core/pdfObjects.ts:399](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/pdfObjects.ts#L399)
+Defined in: [src/core/pdfObjects.ts:399](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/core/pdfObjects.ts#L399)
 
 Generation number (usually 0).
 
@@ -52,7 +52,7 @@ Generation number (usually 0).
 
 > `readonly` **objectNumber**: `number`
 
-Defined in: [src/core/pdfObjects.ts:397](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/pdfObjects.ts#L397)
+Defined in: [src/core/pdfObjects.ts:397](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/core/pdfObjects.ts#L397)
 
 Object number (≥ 1).
 
@@ -62,7 +62,7 @@ Object number (≥ 1).
 
 > **serialize**(`writer`): `void`
 
-Defined in: [src/core/pdfObjects.ts:407](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/pdfObjects.ts#L407)
+Defined in: [src/core/pdfObjects.ts:407](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/core/pdfObjects.ts#L407)
 
 The string form used inside PDF bodies: `N G R`.
 
@@ -82,7 +82,7 @@ The string form used inside PDF bodies: `N G R`.
 
 > **toObjectFooter**(): `string`
 
-Defined in: [src/core/pdfObjects.ts:417](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/pdfObjects.ts#L417)
+Defined in: [src/core/pdfObjects.ts:417](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/core/pdfObjects.ts#L417)
 
 Return `endobj`.
 
@@ -96,7 +96,7 @@ Return `endobj`.
 
 > **toObjectHeader**(): `string`
 
-Defined in: [src/core/pdfObjects.ts:412](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/pdfObjects.ts#L412)
+Defined in: [src/core/pdfObjects.ts:412](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/core/pdfObjects.ts#L412)
 
 Return the `N G obj` header for an indirect-object definition.
 
@@ -110,7 +110,7 @@ Return the `N G obj` header for an indirect-object definition.
 
 > **toString**(): `string`
 
-Defined in: [src/core/pdfObjects.ts:421](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/pdfObjects.ts#L421)
+Defined in: [src/core/pdfObjects.ts:421](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/core/pdfObjects.ts#L421)
 
 #### Returns
 
@@ -122,7 +122,7 @@ Defined in: [src/core/pdfObjects.ts:421](https://github.com/ABCrimson/modern-pdf
 
 > `static` **of**(`objectNumber`, `generationNumber?`): `PdfRef`
 
-Defined in: [src/core/pdfObjects.ts:402](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/pdfObjects.ts#L402)
+Defined in: [src/core/pdfObjects.ts:402](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/core/pdfObjects.ts#L402)
 
 #### Parameters
 

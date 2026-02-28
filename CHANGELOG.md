@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 See [VERSIONING.md](./VERSIONING.md) for this project's versioning policy.
 
+## [0.13.0] - 2026-02-28
+
+### Added
+- **Linear & radial gradient support**: `drawLinearGradient()` and `drawRadialGradient()` on pages with full PDF shading dictionary generation. Supports arbitrary color stops with positions.
+- **Tiling pattern support**: `createTilingPattern()` for repeating pattern fills on shapes and text. Configurable tile size, spacing, and painting type.
+- **JBIG2 WASM bridge**: Optional WASM-accelerated JBIG2 bilevel image decoder compiled from Rust. Includes QM arithmetic coding, MMR/Group 4 fax decoding, generic region decoding (templates 0-3), and symbol dictionary support. Pure-JS fallback when WASM is unavailable. New async API: `decodeJBIG2Async()`.
+- **All 5 WASM binaries compiled**: libdeflate (62KB), PNG (119KB), TTF (91KB), shaping (529KB), and JBIG2 (29KB) — all built with wasm-pack and optimized with `opt-level = "z"`.
+- **`PdfParseError` with hex context**: Parser errors now include a hex dump of surrounding bytes via `formatHexContext()`, making it easier to diagnose malformed PDFs.
+- **Coordinate system guide**: New doc (`docs/guide/coordinates.md`) explaining PDF's bottom-left origin, unit system, page boxes, and transformation matrices.
+- **Performance tuning guide**: New doc (`docs/guide/performance.md`) covering font subsetting, image optimization, streaming output, and WASM acceleration.
+- **Troubleshooting & cookbook guides**: New docs (`docs/guide/troubleshooting.md`, `docs/guide/cookbook.md`) with common issues, solutions, and real-world recipes.
+- **Expanded test suites**: Pattern fills (532 lines), transparency/soft masks (749 lines), and multilingual text extraction (1,325 lines covering CJK, Arabic, Hebrew, Thai, Devanagari, emoji). Stress tests for large documents (1,000+ pages, 10,000+ objects).
+
+### Changed
+- **Refactored `pdfPage.ts` and `pdfDocument.ts`**: Split monolithic files into focused modules for better maintainability and tree-shaking.
+- **WASM module count**: 4 → 5 (added JBIG2).
+- **Test count**: 1,973 → 2,199 across 100 test suites.
+
 ## [0.12.1] - 2026-02-27
 
 ### Fixed

@@ -8,7 +8,7 @@
 
 > **rotateAllPages**(`doc`, `angle`): `void`
 
-Defined in: [src/core/pageManipulation.ts:381](https://github.com/ABCrimson/modern-pdf-lib/blob/1107c69291c62f8be5758332cc1e4fd66930b306/src/core/pageManipulation.ts#L381)
+Defined in: [src/core/pageManipulation.ts:381](https://github.com/ABCrimson/modern-pdf-lib/blob/6d920621b7c9811412316f53a974cac86961b992/src/core/pageManipulation.ts#L381)
 
 Rotate all pages in the document by the specified angle.
 
