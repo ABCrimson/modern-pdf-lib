@@ -45,6 +45,8 @@ import {
   setDashPattern,
   circlePath,
   ellipsePath,
+  clip,
+  endPath,
 } from './operators/graphics.js';
 import { drawXObject, drawImageXObject } from './operators/image.js';
 import {
@@ -52,6 +54,8 @@ import {
   applyStrokeColor,
   setFillColorRgb,
   setStrokeColorRgb,
+  setColorSpace,
+  setFillColor,
 } from './operators/color.js';
 import {
   saveState,
@@ -65,6 +69,7 @@ import {
   PdfName,
   PdfNumber,
   PdfArray,
+  PdfBool,
   PdfRef,
   PdfStream,
   PdfString,
@@ -87,6 +92,8 @@ import { beginLayerContent, endLayerContent } from '../layers/optionalContent.js
 import type { RedactionOptions } from './redaction.js';
 import { markForRedaction } from './redaction.js';
 import type { EmbeddedPdfPage, DrawPageOptions } from './pdfEmbed.js';
+import type { GradientFill, PatternFill } from './patterns.js';
+import { buildGradientObjects, buildPatternObjects } from './patterns.js';
 
 // ---------------------------------------------------------------------------
 // Common page sizes (width × height in points, portrait orientation)
@@ -508,6 +515,66 @@ export { wrapText, breakWord } from './pdfPageText.js';
 import { wrapText } from './pdfPageText.js';
 
 // ---------------------------------------------------------------------------
+// Transparency types
+// ---------------------------------------------------------------------------
+
+/**
+ * Options for transparency groups.
+ *
+ * Transparency groups allow a set of drawing operations to be composited
+ * as a single unit before being blended with the page content.
+ */
+export interface TransparencyGroupOptions {
+  /**
+   * When `true`, the group is composited against a fully transparent
+   * backdrop rather than the existing page content.  Default: `true`.
+   */
+  isolated?: boolean;
+  /**
+   * When `true`, earlier objects in the group are knocked out (replaced)
+   * by later objects, rather than composited on top.  Default: `false`.
+   */
+  knockout?: boolean;
+  /**
+   * Color space for the transparency group.  Default: `'DeviceRGB'`.
+   */
+  colorSpace?: 'DeviceRGB' | 'DeviceCMYK' | 'DeviceGray';
+}
+
+/**
+ * Builder interface for constructing soft mask content.
+ *
+ * All drawing is in grayscale: `1` = fully opaque, `0` = fully transparent.
+ */
+export interface SoftMaskBuilder {
+  /**
+   * Draw a filled rectangle at the given position with the specified
+   * grayscale value (`0` = black/transparent, `1` = white/opaque).
+   */
+  drawRectangle(x: number, y: number, width: number, height: number, gray: number): void;
+  /**
+   * Draw a filled circle at the given center with the specified radius
+   * and grayscale value.
+   */
+  drawCircle(cx: number, cy: number, radius: number, gray: number): void;
+  /**
+   * Append raw PDF content-stream operators to the mask.
+   */
+  pushRawOperators(ops: string): void;
+}
+
+/**
+ * Opaque reference to a soft mask Form XObject.
+ *
+ * Created by {@link PdfDocument.createSoftMask} and consumed by
+ * {@link PdfPage.applySoftMask}.
+ */
+export interface SoftMaskRef {
+  readonly _tag: 'softMask';
+  readonly ref: PdfRef;
+}
+
+// ---------------------------------------------------------------------------
 // PdfPage
 // ---------------------------------------------------------------------------
 
@@ -543,9 +610,30 @@ export class PdfPage {
   private readonly extGStates = new Map<string, PdfRef>();
 
   /**
+   * Pattern resources referenced by this page.
+   * Maps a resource name (e.g. `Pat5`) to its indirect reference.
+   * Used for gradient fills and tiling patterns.
+   */
+  private readonly patterns = new Map<string, PdfRef>();
+
+  /**
    * Counter for ExtGState resource names (`GS1`, `GS2`, ...).
    */
   private extGStateCounter = 0;
+
+  /**
+   * Counter for transparency group XObject resource names (`TG1`, `TG2`, ...).
+   */
+  private transparencyGroupCounter = 0;
+
+  /**
+   * Stack of transparency group state.  Each entry records the ops length
+   * at the time `beginTransparencyGroup()` was called, plus the options.
+   */
+  private readonly transparencyGroupStack: Array<{
+    opsStart: number;
+    options: TransparencyGroupOptions;
+  }> = [];
 
   /**
    * Cache mapping composite keys (opacity + blend mode) to their ExtGState
@@ -748,6 +836,11 @@ export class PdfPage {
   /** @internal Register an ExtGState resource on this page. */
   registerExtGState(name: string, ref: PdfRef): void {
     this.extGStates.set(name, ref);
+  }
+
+  /** @internal Register a Pattern resource on this page. */
+  registerPattern(name: string, ref: PdfRef): void {
+    this.patterns.set(name, ref);
   }
 
   // -----------------------------------------------------------------------
@@ -1960,6 +2053,77 @@ export class PdfPage {
   }
 
   // -----------------------------------------------------------------------
+  // Drawing: Gradients & Patterns
+  // -----------------------------------------------------------------------
+
+  /**
+   * Draw a gradient fill (linear or radial) clipped to a rectangle.
+   *
+   * The gradient is registered as a `/Pattern` resource on this page
+   * and painted within the specified rectangular region.
+   *
+   * @param gradient  A gradient descriptor from {@link linearGradient}
+   *                  or {@link radialGradient}.
+   * @param rect      The rectangle to fill.
+   */
+  drawGradient(
+    gradient: GradientFill,
+    rect: { x: number; y: number; width: number; height: number },
+  ): void {
+    const { patternRef, patternName } = buildGradientObjects(
+      gradient,
+      this.registry,
+    );
+    this.patterns.set(patternName, patternRef);
+
+    this.ops += saveState();
+    // Clip to the rectangle
+    this.ops += rectangle(rect.x, rect.y, rect.width, rect.height);
+    this.ops += clip();
+    this.ops += endPath();
+    // Set Pattern colour space and select the pattern
+    this.ops += setColorSpace('Pattern');
+    this.ops += `/${patternName} scn\n`;
+    // Fill the clipping area
+    this.ops += rectangle(rect.x, rect.y, rect.width, rect.height);
+    this.ops += fill();
+    this.ops += restoreState();
+  }
+
+  /**
+   * Draw a tiling pattern fill clipped to a rectangle.
+   *
+   * The pattern is registered as a `/Pattern` resource on this page
+   * and painted within the specified rectangular region.
+   *
+   * @param pattern  A pattern descriptor from {@link tilingPattern}.
+   * @param rect     The rectangle to fill.
+   */
+  drawPattern(
+    pattern: PatternFill,
+    rect: { x: number; y: number; width: number; height: number },
+  ): void {
+    const { patternRef, patternName } = buildPatternObjects(
+      pattern,
+      this.registry,
+    );
+    this.patterns.set(patternName, patternRef);
+
+    this.ops += saveState();
+    // Clip to the rectangle
+    this.ops += rectangle(rect.x, rect.y, rect.width, rect.height);
+    this.ops += clip();
+    this.ops += endPath();
+    // Set Pattern colour space and select the pattern
+    this.ops += setColorSpace('Pattern');
+    this.ops += `/${patternName} scn\n`;
+    // Fill the clipping area
+    this.ops += rectangle(rect.x, rect.y, rect.width, rect.height);
+    this.ops += fill();
+    this.ops += restoreState();
+  }
+
+  // -----------------------------------------------------------------------
   // Layers (Optional Content)
   // -----------------------------------------------------------------------
 
@@ -1983,6 +2147,148 @@ export class PdfPage {
    */
   endLayer(): void {
     this.ops += endLayerContent();
+  }
+
+  // -----------------------------------------------------------------------
+  // Transparency groups & soft masks
+  // -----------------------------------------------------------------------
+
+  /**
+   * Begin a transparency group.  All drawing operations until
+   * {@link endTransparencyGroup} will be captured and composited as a
+   * single Form XObject with a `/Group` transparency dictionary.
+   *
+   * Transparency groups enable isolated and knockout compositing effects
+   * that are not possible with simple opacity settings.
+   *
+   * Groups can be nested — each call must be paired with a matching
+   * {@link endTransparencyGroup}.
+   *
+   * @param options  Isolation, knockout, and color-space settings.
+   *
+   * @example
+   * ```ts
+   * page.beginTransparencyGroup({ isolated: true });
+   * page.drawRectangle({ x: 50, y: 50, width: 100, height: 100, opacity: 0.5 });
+   * page.drawCircle({ x: 100, y: 100, size: 60, opacity: 0.5 });
+   * page.endTransparencyGroup();
+   * ```
+   */
+  beginTransparencyGroup(options?: TransparencyGroupOptions): void {
+    this.transparencyGroupStack.push({
+      opsStart: this.ops.length,
+      options: options ?? {},
+    });
+  }
+
+  /**
+   * End the current transparency group and composite it onto the page
+   * as a Form XObject.
+   *
+   * @throws {Error} If there is no matching {@link beginTransparencyGroup}.
+   */
+  endTransparencyGroup(): void {
+    const group = this.transparencyGroupStack.pop();
+    if (!group) {
+      throw new Error('No transparency group to end — call beginTransparencyGroup() first');
+    }
+
+    // Extract the operators generated within the group
+    const groupOps = this.ops.slice(group.opsStart);
+    // Revert the ops buffer to the state before the group began
+    this.ops = this.ops.slice(0, group.opsStart);
+
+    const colorSpace = group.options.colorSpace ?? 'DeviceRGB';
+
+    // Build the /Group transparency dictionary
+    const groupDict = new PdfDict();
+    groupDict.set('/S', PdfName.of('Transparency'));
+    groupDict.set('/I', PdfBool.of(group.options.isolated ?? true));
+    groupDict.set('/K', PdfBool.of(group.options.knockout ?? false));
+    groupDict.set('/CS', PdfName.of(colorSpace));
+
+    // Build a Form XObject stream containing the captured operators
+    const bbox = PdfArray.fromNumbers([
+      this.mediaX,
+      this.mediaY,
+      this.mediaX + this.mediaWidth,
+      this.mediaY + this.mediaHeight,
+    ]);
+
+    const formDict = new PdfDict();
+    formDict.set('/Type', PdfName.of('XObject'));
+    formDict.set('/Subtype', PdfName.of('Form'));
+    formDict.set('/BBox', bbox);
+    formDict.set('/Group', groupDict);
+
+    // Collect any resources that were created during the group ops
+    // (fonts, images, extgstates are already registered on the page)
+    const formStream = PdfStream.fromString(groupOps, formDict);
+    const formRef = this.registry.register(formStream);
+
+    // Register as an XObject and draw it
+    this.transparencyGroupCounter++;
+    const name = `TG${this.transparencyGroupCounter}`;
+    this.registerXObject(name, formRef);
+    this.ops += saveState();
+    this.ops += drawXObject(name);
+    this.ops += restoreState();
+  }
+
+  /**
+   * Apply a soft mask (luminosity-based) for subsequent drawing operations.
+   *
+   * White regions in the mask are fully opaque; black regions are fully
+   * transparent.  The mask stays active until {@link clearSoftMask} is
+   * called or the graphics state is restored.
+   *
+   * @param mask  A soft mask reference created by
+   *              {@link PdfDocument.createSoftMask}.
+   *
+   * @example
+   * ```ts
+   * const mask = doc.createSoftMask(200, 200, (b) => {
+   *   b.drawRectangle(0, 0, 200, 200, 1);   // white = opaque
+   *   b.drawCircle(100, 100, 80, 0);         // black = transparent
+   * });
+   * page.applySoftMask(mask);
+   * page.drawImage(image, { x: 50, y: 50, width: 200, height: 200 });
+   * page.clearSoftMask();
+   * ```
+   */
+  applySoftMask(mask: SoftMaskRef): void {
+    // Create an ExtGState with an /SMask dictionary
+    const smaskDict = new PdfDict();
+    smaskDict.set('/S', PdfName.of('Luminosity'));
+    smaskDict.set('/G', mask.ref);
+
+    const gsDict = new PdfDict();
+    gsDict.set('/Type', PdfName.of('ExtGState'));
+    gsDict.set('/SMask', smaskDict);
+
+    const gsRef = this.registry.register(gsDict);
+    this.extGStateCounter++;
+    const gsName = `GS${this.extGStateCounter}`;
+    this.extGStates.set(gsName, gsRef);
+    this.ops += setGraphicsState(gsName);
+  }
+
+  /**
+   * Clear the current soft mask, resetting to no masking.
+   *
+   * This emits an ExtGState with `/SMask /None`, which removes any
+   * previously applied soft mask for subsequent drawing operations.
+   */
+  clearSoftMask(): void {
+    const gsDict = new PdfDict();
+    gsDict.set('/Type', PdfName.of('ExtGState'));
+    gsDict.set('/SMask', PdfName.of('None'));
+
+    const gsRef = this.registry.register(gsDict);
+    this.extGStateCounter++;
+    const gsName = `GS${this.extGStateCounter}`;
+    this.extGStates.set(gsName, gsRef);
+    this.ops += setGraphicsState(gsName);
   }
 
   // -----------------------------------------------------------------------
@@ -2073,6 +2379,15 @@ export class PdfPage {
       resources.set('/ExtGState', gsDict);
     }
 
+    // Pattern resources (gradients / tiling patterns)
+    if (this.patterns.size > 0) {
+      const patDict = new PdfDict();
+      for (const [name, ref] of this.patterns) {
+        patDict.set(name, ref);
+      }
+      resources.set('/Pattern', patDict);
+    }
+
     // ProcSet — recommended for compatibility
     resources.set(
       '/ProcSet',
@@ -2137,6 +2452,19 @@ export class PdfPage {
       const gsDict = gsObj as PdfDict;
       for (const [name, ref] of this.extGStates) {
         gsDict.set(name, ref);
+      }
+    }
+
+    // Merge new Pattern resources
+    if (this.patterns.size > 0) {
+      let patObj = resources.get('/Pattern');
+      if (patObj === undefined || patObj.kind !== 'dict') {
+        patObj = new PdfDict();
+        resources.set('/Pattern', patObj);
+      }
+      const patDict = patObj as PdfDict;
+      for (const [name, ref] of this.patterns) {
+        patDict.set(name, ref);
       }
     }
 

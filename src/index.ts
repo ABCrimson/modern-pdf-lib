@@ -41,6 +41,9 @@ export type {
   DrawCircleOptions,
   DrawEllipseOptions,
   DrawSvgPathOptions,
+  TransparencyGroupOptions,
+  SoftMaskBuilder,
+  SoftMaskRef,
 } from './core/pdfPage.js';
 
 // ---------------------------------------------------------------------------
@@ -56,6 +59,13 @@ export type { EmbeddedPdfPage, DrawPageOptions, EmbedPageOptions } from './core/
 
 export { rgb, cmyk, grayscale, componentsToColor, colorToComponents, setFillingColor, setStrokingColor } from './core/operators/color.js';
 export type { RgbColor, CmykColor, GrayscaleColor, Color } from './core/operators/color.js';
+
+// ---------------------------------------------------------------------------
+// Gradients & Patterns
+// ---------------------------------------------------------------------------
+
+export { linearGradient, radialGradient, tilingPattern, buildGradientObjects, buildPatternObjects } from './core/patterns.js';
+export type { ColorStop, LinearGradientOptions, RadialGradientOptions, TilingPatternOptions, GradientFill, PatternFill, RadialGradientFill, NormalizedStop } from './core/patterns.js';
 
 // ---------------------------------------------------------------------------
 // Angle helpers

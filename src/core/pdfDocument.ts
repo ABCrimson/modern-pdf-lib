@@ -17,7 +17,7 @@
  * ```
  */
 
-import type { PageSize, FontRef, ImageRef } from './pdfPage.js';
+import type { PageSize, FontRef, ImageRef, SoftMaskRef, SoftMaskBuilder } from './pdfPage.js';
 import { PdfPage, PageSizes } from './pdfPage.js';
 import {
   PdfObjectRegistry,
@@ -1757,6 +1757,92 @@ export class PdfDocument {
    */
   addWatermark(options: WatermarkOptions): void {
     addWatermarkImpl(this, options);
+  }
+
+  // -----------------------------------------------------------------------
+  // Soft masks
+  // -----------------------------------------------------------------------
+
+  /**
+   * Create a soft mask Form XObject that can be used with
+   * {@link PdfPage.applySoftMask}.
+   *
+   * The builder callback receives a {@link SoftMaskBuilder} with methods
+   * for generating grayscale content where white (`1`) represents fully
+   * opaque regions and black (`0`) represents fully transparent regions.
+   *
+   * The returned {@link SoftMaskRef} is passed to
+   * {@link PdfPage.applySoftMask} to activate the mask for subsequent
+   * drawing operations on that page.
+   *
+   * @param width    Width of the mask in points.
+   * @param height   Height of the mask in points.
+   * @param builder  Callback that draws the mask content.
+   * @returns        A reference to the soft mask Form XObject.
+   *
+   * @example
+   * ```ts
+   * const mask = doc.createSoftMask(200, 200, (b) => {
+   *   // White background = fully opaque
+   *   b.drawRectangle(0, 0, 200, 200, 1);
+   *   // Black circle = fully transparent hole
+   *   b.drawCircle(100, 100, 80, 0);
+   * });
+   * page.applySoftMask(mask);
+   * page.drawRectangle({ x: 50, y: 50, width: 200, height: 200, color: rgb(1, 0, 0) });
+   * page.clearSoftMask();
+   * ```
+   */
+  createSoftMask(
+    width: number,
+    height: number,
+    builder: (ops: SoftMaskBuilder) => void,
+  ): SoftMaskRef {
+    const maskOps: string[] = [];
+
+    // Bezier constant for circle approximation: 4/3 * (sqrt(2) - 1)
+    const kappa = 0.5522847498;
+
+    const builderApi: SoftMaskBuilder = {
+      drawRectangle(x: number, y: number, w: number, h: number, gray: number): void {
+        maskOps.push(`${gray} g`);
+        maskOps.push(`${x} ${y} ${w} ${h} re`);
+        maskOps.push('f');
+      },
+      drawCircle(cx: number, cy: number, r: number, gray: number): void {
+        maskOps.push(`${gray} g`);
+        // Circle path using four cubic Bezier curves
+        const ox = r * kappa; // horizontal control point offset
+        const oy = r * kappa; // vertical control point offset
+        maskOps.push(`${cx - r} ${cy} m`);
+        maskOps.push(`${cx - r} ${cy + oy} ${cx - ox} ${cy + r} ${cx} ${cy + r} c`);
+        maskOps.push(`${cx + ox} ${cy + r} ${cx + r} ${cy + oy} ${cx + r} ${cy} c`);
+        maskOps.push(`${cx + r} ${cy - oy} ${cx + ox} ${cy - r} ${cx} ${cy - r} c`);
+        maskOps.push(`${cx - ox} ${cy - r} ${cx - r} ${cy - oy} ${cx - r} ${cy} c`);
+        maskOps.push('f');
+      },
+      pushRawOperators(ops: string): void {
+        maskOps.push(ops);
+      },
+    };
+
+    builder(builderApi);
+
+    // Build the Form XObject with a /DeviceGray transparency group
+    const groupDict = new PdfDict();
+    groupDict.set('/S', PdfName.of('Transparency'));
+    groupDict.set('/CS', PdfName.of('DeviceGray'));
+
+    const formDict = new PdfDict();
+    formDict.set('/Type', PdfName.of('XObject'));
+    formDict.set('/Subtype', PdfName.of('Form'));
+    formDict.set('/BBox', PdfArray.fromNumbers([0, 0, width, height]));
+    formDict.set('/Group', groupDict);
+
+    const stream = PdfStream.fromString(maskOps.join('\n'), formDict);
+    const ref = this.registry.register(stream);
+
+    return { _tag: 'softMask' as const, ref };
   }
 
   // -----------------------------------------------------------------------
