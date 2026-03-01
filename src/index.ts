@@ -172,6 +172,12 @@ export interface InitWasmOptions {
    * Pre-loaded WASM bytes for the font subsetting module.
    */
   fontWasm?: Uint8Array | undefined;
+  /** Initialize the JPEG encoding/decoding WASM module. Default: `false`. */
+  jpeg?: boolean | undefined;
+  /**
+   * Pre-loaded WASM bytes for the JPEG encoding/decoding module.
+   */
+  jpegWasm?: Uint8Array | undefined;
 }
 
 /**
@@ -228,6 +234,15 @@ export async function initWasm(options?: string | URL | InitWasmOptions): Promis
     inits.push(
       import('./assets/font/fontSubset.js').then(async ({ initSubsetWasm }) => {
         await initSubsetWasm(options.fontWasm);
+      }),
+    );
+  }
+
+  // JPEG WASM (encoding/decoding)
+  if (options.jpeg || options.jpegWasm) {
+    inits.push(
+      import('./wasm/jpeg/bridge.js').then(async ({ initJpegWasm }) => {
+        await initJpegWasm(options.jpegWasm);
       }),
     );
   }
@@ -673,6 +688,7 @@ export {
   downscaleImage,
   recompressImage,
   optimizeImage,
+  estimateJpegQuality,
 } from './assets/image/imageOptimize.js';
 export type {
   DownscaleOptions,
@@ -681,6 +697,41 @@ export type {
   RawImageData,
   OptimizeResult,
 } from './assets/image/imageOptimize.js';
+
+export {
+  initJpegWasm,
+  isJpegWasmReady,
+  encodeJpegWasm,
+  decodeJpegWasm,
+} from './wasm/jpeg/bridge.js';
+export type {
+  ChromaSubsampling,
+  JpegDecodeResult,
+} from './wasm/jpeg/bridge.js';
+
+export { extractImages, decodeImageStream } from './assets/image/imageExtract.js';
+export type { ImageInfo } from './assets/image/imageExtract.js';
+
+export { optimizeAllImages } from './assets/image/batchOptimize.js';
+export type {
+  BatchOptimizeOptions,
+  ImageOptimizeEntry,
+  OptimizationReport,
+} from './assets/image/batchOptimize.js';
+
+export { deduplicateImages } from './assets/image/deduplicateImages.js';
+export type { DeduplicationReport } from './assets/image/deduplicateImages.js';
+
+export {
+  isGrayscaleImage,
+  convertToGrayscale,
+} from './assets/image/grayscaleDetect.js';
+
+export {
+  computeImageDpi,
+  computeTargetDimensions,
+} from './assets/image/dpiAnalyze.js';
+export type { ImageDpi } from './assets/image/dpiAnalyze.js';
 
 // ---------------------------------------------------------------------------
 // Base64 utilities

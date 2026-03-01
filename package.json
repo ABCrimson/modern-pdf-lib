@@ -1,6 +1,6 @@
 {
   "name": "modern-pdf-lib",
-  "version": "0.14.1",
+  "version": "0.15.0",
   "description": "A modern, WASM-accelerated PDF creation engine for every JavaScript runtime",
   "type": "module",
   "exports": {
@@ -13,6 +13,9 @@
       }
     },
     "./wasm/*": "./dist/wasm/*"
+  },
+  "bin": {
+    "modern-pdf": "./dist/cli/index.mjs"
   },
   "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",

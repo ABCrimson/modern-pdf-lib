@@ -15,7 +15,7 @@ Create, parse, fill, merge, sign, and manipulate PDF documents<br />in Node, Den
 
 [![npm version](https://img.shields.io/npm/v/modern-pdf-lib?style=flat-square&color=cb3837)](https://www.npmjs.com/package/modern-pdf-lib)
 [![bundle size](https://img.shields.io/badge/gzip-36kb_core-blue?style=flat-square)](https://bundlephobia.com/package/modern-pdf-lib)
-[![tests](https://img.shields.io/badge/tests-2%2C243_passing-brightgreen?style=flat-square)](#)
+[![tests](https://img.shields.io/badge/tests-2%2C323_passing-brightgreen?style=flat-square)](#)
 [![TypeScript](https://img.shields.io/badge/TypeScript-6.0-3178c6?style=flat-square&logo=typescript&logoColor=white)](#)
 [![License: MIT](https://img.shields.io/badge/license-MIT-yellow?style=flat-square)](LICENSE)
 
@@ -68,6 +68,7 @@ const blob = await doc.saveAsBlob();     // Blob (browsers)
 - TrueType & OpenType font embedding
 - Automatic font subsetting
 - JPEG / PNG image embedding
+- Image optimization (JPEG recompression, dedup, grayscale)
 - RGB, CMYK, grayscale colors
 - Linear & radial gradients, tiling patterns
 - Text layout (multiline, combed, auto-size)
@@ -107,6 +108,7 @@ const blob = await doc.saveAsBlob();     // Blob (browsers)
 - Linearization (fast web view)
 - 60+ low-level PDF operators
 - Custom appearance providers
+- CLI: `npx modern-pdf optimize`
 
 </td>
 </tr>
@@ -195,8 +197,12 @@ const blob = await doc.saveAsBlob();     // Blob (browsers)
 <td align="center">Yes</td>
 <td align="center">No</td></tr>
 
+<tr><td><strong>Image optimization</strong></td>
+<td align="center">JPEG recompress, dedup, grayscale</td>
+<td align="center">No</td></tr>
+
 <tr><td><strong>WASM acceleration</strong></td>
-<td align="center">Optional (compression, PNG, fonts, JBIG2)</td>
+<td align="center">Optional (compression, PNG, fonts, JBIG2, JPEG)</td>
 <td align="center">No</td></tr>
 
 <tr><td><strong>Dependencies</strong></td>
@@ -353,6 +359,38 @@ for (const item of items) {
 </details>
 
 <details>
+<summary><strong>Image Optimization</strong> &mdash; batch compress, deduplicate, CLI</summary>
+
+```ts
+import { loadPdf, initWasm, optimizeAllImages, deduplicateImages } from 'modern-pdf-lib';
+
+await initWasm({ jpeg: true });
+
+const doc = await loadPdf(pdfBytes);
+
+// Deduplicate identical images
+const dedupReport = deduplicateImages(doc);
+
+// Optimize all images (JPEG recompression)
+const report = await optimizeAllImages(doc, {
+  quality: 75,
+  progressive: true,
+  autoGrayscale: true,
+});
+
+console.log(`${report.optimizedImages}/${report.totalImages} images optimized`);
+console.log(`Savings: ${report.savings.toFixed(1)}%`);
+
+const optimized = await doc.save();
+```
+
+**CLI:**
+```sh
+npx modern-pdf optimize report.pdf report-opt.pdf --quality 60 --grayscale --dedup -v
+```
+</details>
+
+<details>
 <summary><strong>PDF/A & Accessibility</strong></summary>
 
 ```ts
@@ -403,6 +441,7 @@ await initWasm({
   deflate: true,   // Faster compression
   png: true,       // Faster PNG decoding
   fonts: true,     // Faster font subsetting
+  jpeg: true,      // JPEG encode/decode for image optimization
 });
 ```
 
@@ -413,6 +452,7 @@ await initWasm({
 | ttf | Font parsing & subsetting | ~3x |
 | shaping | Complex script layout | ~10x |
 | jbig2 | JBIG2 bilevel image decoding | ~3x |
+| jpeg | JPEG encode/decode for image optimization | Required |
 
 <br />
 
@@ -434,8 +474,9 @@ modern-pdf-lib/
     layers/         Optional content groups (OCG)
     outline/        Bookmarks / document outline
     metadata/       XMP metadata, viewer preferences
-    wasm/           Rust crate sources (5 modules)
-  tests/            2,243 tests across 103 suites
+    wasm/           Rust crate sources (6 modules)
+    cli/            CLI tool (modern-pdf optimize)
+  tests/            2,323 tests across 110 suites
   docs/             VitePress documentation
 ```
 
@@ -447,7 +488,7 @@ modern-pdf-lib/
 git clone https://github.com/ABCrimson/modern-pdf-lib.git
 cd modern-pdf-lib
 npm install
-npm test          # 2,243 tests
+npm test          # 2,323 tests
 npm run typecheck # TypeScript 6.0 strict
 npm run build     # ESM + CJS + declarations
 ```

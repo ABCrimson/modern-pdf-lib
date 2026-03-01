@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 See [VERSIONING.md](./VERSIONING.md) for this project's versioning policy.
 
+## [0.15.0] - 2026-02-28
+
+### Added
+
+- **JPEG WASM module**: New Rust WASM crate (`src/wasm/jpeg/`) using `jpeg-encoder` 0.7 + `jpeg-decoder` 0.3 for high-performance JPEG encoding and decoding. TypeScript bridge (`initJpegWasm()`, `encodeJpegWasm()`, `decodeJpegWasm()`) with graceful JS fallback when WASM is unavailable.
+- **JPEG quality auto-detection**: `estimateJpegQuality(jpegBytes)` analyzes DQT (quantization table) markers to reverse-engineer the original JPEG quality level (1–100). Pure TypeScript — no WASM required.
+- **Progressive JPEG support**: `progressive` option for JPEG encoding produces progressive scan-order JPEGs (better for web delivery).
+- **Chroma subsampling control**: `chromaSubsampling` option (`'4:4:4'` | `'4:2:2'` | `'4:2:0'`) for JPEG encoding. Default `'4:2:0'` matches industry standard for smallest files.
+- **CMYK JPEG handling**: Automatic CMYK→RGB conversion before JPEG encoding using the standard formula `R = 255 × (1 − C/255) × (1 − K/255)`.
+- **Batch image optimization API**: `optimizeAllImages(doc, options)` walks all image XObjects in a parsed PDF, recompresses them as JPEG, and replaces stream data in-place. Returns detailed `OptimizationReport` with per-image breakdown. Options: `quality`, `maxDpi`, `progressive`, `chromaSubsampling`, `skipSmallImages`, `minSavingsPercent`, `autoGrayscale`.
+- **Image extraction API**: `extractImages(doc)` collects metadata for all image XObjects across all pages. `decodeImageStream(imageInfo)` decodes stream data for further processing.
+- **Image deduplication**: `deduplicateImages(doc)` detects identical images by FNV-1a hashing and replaces duplicate references with a single canonical copy. Returns `DeduplicationReport` with bytes-saved statistics.
+- **Grayscale auto-detection**: `isGrayscaleImage()` detects RGB images where all pixels are effectively grayscale (R ≈ G ≈ B within tolerance). `convertToGrayscale()` converts using ITU-R BT.601 luma formula, saving ~66% for RGB→grayscale.
+- **DPI-aware downscaling**: `computeImageDpi()` and `computeTargetDimensions()` calculate effective DPI from pixel dimensions and display size in points. Used by batch optimizer for automatic DPI-based downscaling.
+- **CLI tool**: `npx modern-pdf optimize input.pdf output.pdf [options]` — command-line interface for image optimization with `--quality`, `--progressive`, `--grayscale`, `--dedup`, `--chroma`, `--verbose` options.
+- **Image optimization VitePress guide** (`docs/guide/image-optimization.md`): Comprehensive guide covering the full image optimization API, CLI usage, and options reference.
+
+### Changed
+
+- **WASM modules**: 5 → 6 (added `jpeg` for JPEG encode/decode).
+- **Test count**: 2,243 → 2,323 across 110 test suites (was 103).
+- **package.json**: Added `"bin": { "modern-pdf": "./dist/cli/index.mjs" }` for CLI support.
+
 ## [0.14.1] - 2026-02-28
 
 ### Added

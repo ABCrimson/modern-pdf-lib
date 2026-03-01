@@ -67,6 +67,7 @@ const DEFAULT_FILENAMES: Record<string, string> = {
   ttf: 'modern_pdf_ttf_bg.wasm',
   shaping: 'modern_pdf_shaping_bg.wasm',
   jbig2: 'modern_pdf_jbig2_bg.wasm',
+  jpeg: 'modern_pdf_jpeg_bg.wasm',
 };
 
 // ---------------------------------------------------------------------------
