@@ -8,7 +8,7 @@
 
 > **buildPageTree**(`pages`, `registry`): [`PdfRef`](../classes/PdfRef.md)
 
-Defined in: [src/core/pdfCatalog.ts:158](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfCatalog.ts#L158)
+Defined in: [src/core/pdfCatalog.ts:158](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfCatalog.ts#L158)
 
 Build the `/Pages` tree and individual `/Page` dictionaries.
 

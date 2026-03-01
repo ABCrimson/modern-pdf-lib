@@ -8,7 +8,7 @@
 
 > `const` **StandardFonts**: `object`
 
-Defined in: [src/core/pdfDocument.ts:87](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfDocument.ts#L87)
+Defined in: [src/core/pdfDocument.ts:87](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfDocument.ts#L87)
 
 The 14 standard PDF fonts guaranteed to be available in every PDF
 viewer.  These can be used without embedding font data.

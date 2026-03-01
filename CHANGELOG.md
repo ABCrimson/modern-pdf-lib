@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 See [VERSIONING.md](./VERSIONING.md) for this project's versioning policy.
 
+## [0.15.1] - 2026-02-28
+
+### Fixed
+
+- **CLI build**: Added `src/cli/index.ts` as a tsdown entry point so `dist/cli/index.mjs` is produced during build. Previously, `npx modern-pdf optimize` would fail because the CLI file was never emitted.
+- **CJS compatibility**: Replaced top-level `await` in CLI entry with an `async main()` wrapper to avoid `Top-level await is not supported with CJS output` build errors.
+
 ## [0.15.0] - 2026-02-28
 
 ### Added

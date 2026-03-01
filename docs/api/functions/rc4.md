@@ -8,7 +8,7 @@
 
 > **rc4**(`key`, `data`): `Uint8Array`
 
-Defined in: [src/crypto/rc4.ts:29](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/crypto/rc4.ts#L29)
+Defined in: [src/crypto/rc4.ts:29](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/crypto/rc4.ts#L29)
 
 Encrypt or decrypt data using the RC4 stream cipher.
 

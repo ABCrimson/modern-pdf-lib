@@ -8,7 +8,7 @@
 
 > **formatHexContext**(`data`, `offset`, `windowSize?`): `string`
 
-Defined in: [src/parser/parseError.ts:37](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/parser/parseError.ts#L37)
+Defined in: [src/parser/parseError.ts:37](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/parser/parseError.ts#L37)
 
 ## Parameters
 

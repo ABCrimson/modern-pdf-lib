@@ -8,7 +8,7 @@
 
 > **enforcePdfA**(`pdfBytes`, `level`): `Promise`\<`Uint8Array`\<`ArrayBufferLike`\>\>
 
-Defined in: [src/compliance/pdfA.ts:316](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/compliance/pdfA.ts#L316)
+Defined in: [src/compliance/pdfA.ts:316](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/compliance/pdfA.ts#L316)
 
 Attempt to make a PDF conform to PDF/A.
 

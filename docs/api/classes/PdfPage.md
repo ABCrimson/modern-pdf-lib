@@ -6,7 +6,7 @@
 
 # Class: PdfPage
 
-Defined in: [src/core/pdfPage.ts:588](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L588)
+Defined in: [src/core/pdfPage.ts:588](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L588)
 
 A single page in a PDF document.
 
@@ -20,7 +20,7 @@ when the document is saved.
 
 > **new PdfPage**(`w`, `h`, `registry`): `PdfPage`
 
-Defined in: [src/core/pdfPage.ts:751](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L751)
+Defined in: [src/core/pdfPage.ts:751](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L751)
 
 #### Parameters
 
@@ -52,7 +52,7 @@ Object registry for allocating refs.
 
 > `readonly` **contentStreamRef**: [`PdfRef`](PdfRef.md)
 
-Defined in: [src/core/pdfPage.ts:675](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L675)
+Defined in: [src/core/pdfPage.ts:675](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L675)
 
 Pre-allocated indirect reference for this page's content stream.
 
@@ -62,7 +62,7 @@ Pre-allocated indirect reference for this page's content stream.
 
 > `readonly` **pageRef**: [`PdfRef`](PdfRef.md)
 
-Defined in: [src/core/pdfPage.ts:672](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L672)
+Defined in: [src/core/pdfPage.ts:672](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L672)
 
 Pre-allocated indirect reference for this page's /Page dictionary.
 
@@ -74,7 +74,7 @@ Pre-allocated indirect reference for this page's /Page dictionary.
 
 > **get** **height**(): `number`
 
-Defined in: [src/core/pdfPage.ts:809](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L809)
+Defined in: [src/core/pdfPage.ts:809](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L809)
 
 Page height in points.
 
@@ -90,7 +90,7 @@ Page height in points.
 
 > **get** **width**(): `number`
 
-Defined in: [src/core/pdfPage.ts:804](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L804)
+Defined in: [src/core/pdfPage.ts:804](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L804)
 
 Page width in points.
 
@@ -104,7 +104,7 @@ Page width in points.
 
 > **addAltText**(`imageRef`, `altText`): `void`
 
-Defined in: [src/core/pdfPage.ts:1825](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L1825)
+Defined in: [src/core/pdfPage.ts:1825](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L1825)
 
 Associate alt text with an image reference on this page.
 
@@ -136,7 +136,7 @@ The alternative text describing the image.
 
 > **addAnnotation**(`type`, `options`): [`PdfAnnotation`](PdfAnnotation.md)
 
-Defined in: [src/core/pdfPage.ts:1868](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L1868)
+Defined in: [src/core/pdfPage.ts:1868](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L1868)
 
 Add an annotation to this page.
 
@@ -166,7 +166,7 @@ The created PdfAnnotation.
 
 > **addWidgetAnnotation**(`widgetDict`): `void`
 
-Defined in: [src/core/pdfPage.ts:1905](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L1905)
+Defined in: [src/core/pdfPage.ts:1905](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L1905)
 
 Add a raw widget annotation dictionary to this page.
 
@@ -191,7 +191,7 @@ The widget annotation dictionary.
 
 > **applySoftMask**(`mask`): `void`
 
-Defined in: [src/core/pdfPage.ts:2259](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L2259)
+Defined in: [src/core/pdfPage.ts:2259](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L2259)
 
 Apply a soft mask (luminosity-based) for subsequent drawing operations.
 
@@ -230,7 +230,7 @@ page.clearSoftMask();
 
 > **beginLayer**(`layer`): `void`
 
-Defined in: [src/core/pdfPage.ts:2139](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L2139)
+Defined in: [src/core/pdfPage.ts:2139](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L2139)
 
 Begin layer-specific content.
 
@@ -256,7 +256,7 @@ The layer to begin.
 
 > **beginMarkedContent**(`tag`, `mcid`): `void`
 
-Defined in: [src/core/pdfPage.ts:1802](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L1802)
+Defined in: [src/core/pdfPage.ts:1802](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L1802)
 
 Begin a marked-content sequence in the content stream.
 
@@ -288,7 +288,7 @@ The marked-content ID.
 
 > **beginTransparencyGroup**(`options?`): `void`
 
-Defined in: [src/core/pdfPage.ts:2177](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L2177)
+Defined in: [src/core/pdfPage.ts:2177](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L2177)
 
 Begin a transparency group.  All drawing operations until
 [endTransparencyGroup](#endtransparencygroup) will be captured and composited as a
@@ -327,7 +327,7 @@ page.endTransparencyGroup();
 
 > **clearSoftMask**(): `void`
 
-Defined in: [src/core/pdfPage.ts:2282](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L2282)
+Defined in: [src/core/pdfPage.ts:2282](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L2282)
 
 Clear the current soft mask, resetting to no masking.
 
@@ -344,7 +344,7 @@ previously applied soft mask for subsequent drawing operations.
 
 > **drawCircle**(`options?`): `void`
 
-Defined in: [src/core/pdfPage.ts:1431](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L1431)
+Defined in: [src/core/pdfPage.ts:1431](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L1431)
 
 Draw a circle.
 
@@ -364,7 +364,7 @@ Draw a circle.
 
 > **drawEllipse**(`options?`): `void`
 
-Defined in: [src/core/pdfPage.ts:1488](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L1488)
+Defined in: [src/core/pdfPage.ts:1488](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L1488)
 
 Draw an ellipse.
 
@@ -384,7 +384,7 @@ Draw an ellipse.
 
 > **drawGradient**(`gradient`, `rect`): `void`
 
-Defined in: [src/core/pdfPage.ts:2069](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L2069)
+Defined in: [src/core/pdfPage.ts:2069](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L2069)
 
 Draw a gradient fill (linear or radial) clipped to a rectangle.
 
@@ -430,7 +430,7 @@ The rectangle to fill.
 
 > **drawImage**(`image`, `options?`): `void`
 
-Defined in: [src/core/pdfPage.ts:1170](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L1170)
+Defined in: [src/core/pdfPage.ts:1170](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L1170)
 
 Draw an embedded image on this page.
 
@@ -459,7 +459,7 @@ Position, dimensions, rotation.
 
 > **drawLine**(`options`): `void`
 
-Defined in: [src/core/pdfPage.ts:1400](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L1400)
+Defined in: [src/core/pdfPage.ts:1400](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L1400)
 
 Draw a straight line.
 
@@ -479,7 +479,7 @@ Draw a straight line.
 
 > **drawPage**(`embeddedPage`, `options?`): `void`
 
-Defined in: [src/core/pdfPage.ts:1235](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L1235)
+Defined in: [src/core/pdfPage.ts:1235](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L1235)
 
 Draw an embedded PDF page (Form XObject) on this page.
 
@@ -519,7 +519,7 @@ page.drawPage(embedded, { x: 50, y: 50, width: 300, height: 400 });
 
 > **drawPattern**(`pattern`, `rect`): `void`
 
-Defined in: [src/core/pdfPage.ts:2102](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L2102)
+Defined in: [src/core/pdfPage.ts:2102](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L2102)
 
 Draw a tiling pattern fill clipped to a rectangle.
 
@@ -564,7 +564,7 @@ The rectangle to fill.
 
 > **drawRectangle**(`options?`): `void`
 
-Defined in: [src/core/pdfPage.ts:1293](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L1293)
+Defined in: [src/core/pdfPage.ts:1293](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L1293)
 
 Draw a rectangle.
 
@@ -587,7 +587,7 @@ By default the rectangle is filled with black.  Set `color` to
 
 > **drawSquare**(`options?`): `void`
 
-Defined in: [src/core/pdfPage.ts:1375](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L1375)
+Defined in: [src/core/pdfPage.ts:1375](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L1375)
 
 Draw a square (convenience wrapper around [drawRectangle](#drawrectangle)).
 
@@ -609,7 +609,7 @@ Position, size, colours, rotation, opacity, blend mode.
 
 > **drawSvg**(`svgString`, `options?`): `void`
 
-Defined in: [src/core/pdfPage.ts:1973](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L1973)
+Defined in: [src/core/pdfPage.ts:1973](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L1973)
 
 Draw an SVG image onto this page.
 
@@ -637,7 +637,7 @@ Rendering options (position, size).
 
 > **drawSvgPath**(`pathData`, `options?`): `void`
 
-Defined in: [src/core/pdfPage.ts:1991](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L1991)
+Defined in: [src/core/pdfPage.ts:1991](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L1991)
 
 Draw an SVG path data string onto this page.
 
@@ -673,7 +673,7 @@ Drawing options (position, scale, colours).
 
 > **drawText**(`text`, `options?`): `void`
 
-Defined in: [src/core/pdfPage.ts:1038](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L1038)
+Defined in: [src/core/pdfPage.ts:1038](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L1038)
 
 Draw a text string at the specified position.
 
@@ -701,7 +701,7 @@ Position, font, size, colour, rotation.
 
 > **endLayer**(): `void`
 
-Defined in: [src/core/pdfPage.ts:2148](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L2148)
+Defined in: [src/core/pdfPage.ts:2148](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L2148)
 
 End layer-specific content.
 
@@ -717,7 +717,7 @@ Must be preceded by a call to [beginLayer](#beginlayer).
 
 > **endMarkedContentSequence**(): `void`
 
-Defined in: [src/core/pdfPage.ts:1811](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L1811)
+Defined in: [src/core/pdfPage.ts:1811](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L1811)
 
 End a marked-content sequence in the content stream.
 
@@ -733,7 +733,7 @@ Must be preceded by a call to [beginMarkedContent](#beginmarkedcontent).
 
 > **endTransparencyGroup**(): `void`
 
-Defined in: [src/core/pdfPage.ts:2190](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L2190)
+Defined in: [src/core/pdfPage.ts:2190](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L2190)
 
 End the current transparency group and composite it onto the page
 as a Form XObject.
@@ -752,7 +752,7 @@ If there is no matching [beginTransparencyGroup](#begintransparencygroup).
 
 > **flattenAnnotations**(): `void`
 
-Defined in: [src/core/pdfPage.ts:1916](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L1916)
+Defined in: [src/core/pdfPage.ts:1916](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L1916)
 
 Flatten all annotations into the page content stream.
 
@@ -770,7 +770,7 @@ removed from the page's annotation list.
 
 > **getAltText**(`imageRef`): `string` \| `undefined`
 
-Defined in: [src/core/pdfPage.ts:1835](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L1835)
+Defined in: [src/core/pdfPage.ts:1835](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L1835)
 
 Get the alt text for an image, if set.
 
@@ -794,7 +794,7 @@ The alt text, or `undefined`.
 
 > **getAnnotations**(): [`PdfAnnotation`](PdfAnnotation.md)[]
 
-Defined in: [src/core/pdfPage.ts:1857](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L1857)
+Defined in: [src/core/pdfPage.ts:1857](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L1857)
 
 Get all annotations on this page.
 
@@ -810,7 +810,7 @@ An array of PdfAnnotation instances.
 
 > **getArtBox**(): \{ `height`: `number`; `width`: `number`; `x`: `number`; `y`: `number`; \} \| `undefined`
 
-Defined in: [src/core/pdfPage.ts:1750](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L1750)
+Defined in: [src/core/pdfPage.ts:1750](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L1750)
 
 Get the art box if set, or undefined.
 
@@ -824,7 +824,7 @@ Get the art box if set, or undefined.
 
 > **getBleedBox**(): \{ `height`: `number`; `width`: `number`; `x`: `number`; `y`: `number`; \} \| `undefined`
 
-Defined in: [src/core/pdfPage.ts:1726](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L1726)
+Defined in: [src/core/pdfPage.ts:1726](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L1726)
 
 Get the bleed box if set, or undefined.
 
@@ -838,7 +838,7 @@ Get the bleed box if set, or undefined.
 
 > **getCropBox**(): \{ `height`: `number`; `width`: `number`; `x`: `number`; `y`: `number`; \} \| `undefined`
 
-Defined in: [src/core/pdfPage.ts:1714](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L1714)
+Defined in: [src/core/pdfPage.ts:1714](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L1714)
 
 Get the crop box if set, or undefined.
 
@@ -852,7 +852,7 @@ Get the crop box if set, or undefined.
 
 > **getHeight**(): `number`
 
-Defined in: [src/core/pdfPage.ts:1629](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L1629)
+Defined in: [src/core/pdfPage.ts:1629](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L1629)
 
 Get the page height in points. Alias for the `height` getter.
 
@@ -866,7 +866,7 @@ Get the page height in points. Alias for the `height` getter.
 
 > **getMediaBox**(): `object`
 
-Defined in: [src/core/pdfPage.ts:1701](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L1701)
+Defined in: [src/core/pdfPage.ts:1701](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L1701)
 
 Get the media box for this page.
 
@@ -896,7 +896,7 @@ Get the media box for this page.
 
 > **getPosition**(): `object`
 
-Defined in: [src/core/pdfPage.ts:899](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L899)
+Defined in: [src/core/pdfPage.ts:899](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L899)
 
 Get the current cursor position.
 
@@ -920,7 +920,7 @@ An object with `x` and `y` properties (in points).
 
 > **getRotation**(): `number`
 
-Defined in: [src/core/pdfPage.ts:1605](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L1605)
+Defined in: [src/core/pdfPage.ts:1605](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L1605)
 
 Get the current page rotation in degrees.
 
@@ -936,7 +936,7 @@ The rotation angle (0, 90, 180, or 270).
 
 > **getSize**(): `object`
 
-Defined in: [src/core/pdfPage.ts:1650](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L1650)
+Defined in: [src/core/pdfPage.ts:1650](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L1650)
 
 Get the page width and height as an object.
 
@@ -958,7 +958,7 @@ Get the page width and height as an object.
 
 > **getTrimBox**(): \{ `height`: `number`; `width`: `number`; `x`: `number`; `y`: `number`; \} \| `undefined`
 
-Defined in: [src/core/pdfPage.ts:1738](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L1738)
+Defined in: [src/core/pdfPage.ts:1738](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L1738)
 
 Get the trim box if set, or undefined.
 
@@ -972,7 +972,7 @@ Get the trim box if set, or undefined.
 
 > **getWidth**(): `number`
 
-Defined in: [src/core/pdfPage.ts:1624](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L1624)
+Defined in: [src/core/pdfPage.ts:1624](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L1624)
 
 Get the page width in points. Alias for the `width` getter.
 
@@ -986,7 +986,7 @@ Get the page width in points. Alias for the `width` getter.
 
 > **getX**(): `number`
 
-Defined in: [src/core/pdfPage.ts:908](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L908)
+Defined in: [src/core/pdfPage.ts:908](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L908)
 
 Get the current cursor X coordinate.
 
@@ -1002,7 +1002,7 @@ The X coordinate in points.
 
 > **getY**(): `number`
 
-Defined in: [src/core/pdfPage.ts:917](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L917)
+Defined in: [src/core/pdfPage.ts:917](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L917)
 
 Get the current cursor Y coordinate.
 
@@ -1018,7 +1018,7 @@ The Y coordinate in points.
 
 > **markContent**(`tag`, `mcid`): `void`
 
-Defined in: [src/core/pdfPage.ts:1787](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L1787)
+Defined in: [src/core/pdfPage.ts:1787](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L1787)
 
 Wrap the current content-stream operators in a marked-content
 sequence.
@@ -1055,7 +1055,7 @@ The marked-content ID assigned by the structure tree.
 
 > **markForRedaction**(`rect`, `options?`): `void`
 
-Defined in: [src/core/pdfPage.ts:2307](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L2307)
+Defined in: [src/core/pdfPage.ts:2307](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L2307)
 
 Mark a rectangular region on this page for redaction.
 
@@ -1086,7 +1086,7 @@ Additional redaction options (overlay text, colour).
 
 > **moveDown**(`amount`): `void`
 
-Defined in: [src/core/pdfPage.ts:949](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L949)
+Defined in: [src/core/pdfPage.ts:949](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L949)
 
 Move the cursor downward by the given amount (decreases Y).
 
@@ -1108,7 +1108,7 @@ Distance in points.
 
 > **moveLeft**(`amount`): `void`
 
-Defined in: [src/core/pdfPage.ts:967](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L967)
+Defined in: [src/core/pdfPage.ts:967](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L967)
 
 Move the cursor to the left by the given amount (decreases X).
 
@@ -1130,7 +1130,7 @@ Distance in points.
 
 > **moveRight**(`amount`): `void`
 
-Defined in: [src/core/pdfPage.ts:958](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L958)
+Defined in: [src/core/pdfPage.ts:958](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L958)
 
 Move the cursor to the right by the given amount (increases X).
 
@@ -1152,7 +1152,7 @@ Distance in points.
 
 > **moveTo**(`x`, `y`): `void`
 
-Defined in: [src/core/pdfPage.ts:930](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L930)
+Defined in: [src/core/pdfPage.ts:930](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L930)
 
 Move the cursor to an absolute position.
 
@@ -1183,7 +1183,7 @@ The Y coordinate in points.
 
 > **moveUp**(`amount`): `void`
 
-Defined in: [src/core/pdfPage.ts:940](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L940)
+Defined in: [src/core/pdfPage.ts:940](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L940)
 
 Move the cursor upward by the given amount (increases Y).
 
@@ -1205,7 +1205,7 @@ Distance in points.
 
 > **popGraphicsState**(): `void`
 
-Defined in: [src/core/pdfPage.ts:1559](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L1559)
+Defined in: [src/core/pdfPage.ts:1559](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L1559)
 
 Pop the most recently saved graphics state (`Q`).
 
@@ -1219,7 +1219,7 @@ Pop the most recently saved graphics state (`Q`).
 
 > **pushGraphicsState**(): `void`
 
-Defined in: [src/core/pdfPage.ts:1552](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L1552)
+Defined in: [src/core/pdfPage.ts:1552](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L1552)
 
 Push the current graphics state onto the stack (`q`).
 
@@ -1235,7 +1235,7 @@ Must be balanced with a matching [popGraphicsState](#popgraphicsstate) call.
 
 > **pushOperators**(`operators`): `void`
 
-Defined in: [src/core/pdfPage.ts:1593](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L1593)
+Defined in: [src/core/pdfPage.ts:1593](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L1593)
 
 Append raw PDF operator string(s) to the content stream.
 
@@ -1257,7 +1257,7 @@ Use with caution — no validation is performed.
 
 > **removeAnnotation**(`annotation`): `void`
 
-Defined in: [src/core/pdfPage.ts:1889](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L1889)
+Defined in: [src/core/pdfPage.ts:1889](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L1889)
 
 Remove an annotation from this page.
 
@@ -1279,7 +1279,7 @@ The annotation to remove.
 
 > **resetPosition**(): `void`
 
-Defined in: [src/core/pdfPage.ts:974](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L974)
+Defined in: [src/core/pdfPage.ts:974](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L974)
 
 Reset the cursor position to `(0, 0)`.
 
@@ -1293,7 +1293,7 @@ Reset the cursor position to `(0, 0)`.
 
 > **resetSize**(): `void`
 
-Defined in: [src/core/pdfPage.ts:1659](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L1659)
+Defined in: [src/core/pdfPage.ts:1659](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L1659)
 
 Reset page dimensions to their original values from creation time.
 
@@ -1307,7 +1307,7 @@ Reset page dimensions to their original values from creation time.
 
 > **scale**(`xFactor`, `yFactor`): `void`
 
-Defined in: [src/core/pdfPage.ts:1690](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L1690)
+Defined in: [src/core/pdfPage.ts:1690](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L1690)
 
 Scale page dimensions, content, and annotations together.
 
@@ -1331,7 +1331,7 @@ Scale page dimensions, content, and annotations together.
 
 > **scaleAnnotations**(`xFactor`, `yFactor`): `void`
 
-Defined in: [src/core/pdfPage.ts:1675](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L1675)
+Defined in: [src/core/pdfPage.ts:1675](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L1675)
 
 Scale annotation rectangles by the given factors.
 
@@ -1355,7 +1355,7 @@ Scale annotation rectangles by the given factors.
 
 > **scaleContent**(`xFactor`, `yFactor`): `void`
 
-Defined in: [src/core/pdfPage.ts:1670](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L1670)
+Defined in: [src/core/pdfPage.ts:1670](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L1670)
 
 Scale page content by the given factors. Prepends a cm operator.
 
@@ -1379,7 +1379,7 @@ Scale page content by the given factors. Prepends a cm operator.
 
 > **setArtBox**(`x`, `y`, `width`, `height`): `void`
 
-Defined in: [src/core/pdfPage.ts:1757](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L1757)
+Defined in: [src/core/pdfPage.ts:1757](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L1757)
 
 Set the art box for this page.
 
@@ -1411,7 +1411,7 @@ Set the art box for this page.
 
 > **setBleedBox**(`x`, `y`, `width`, `height`): `void`
 
-Defined in: [src/core/pdfPage.ts:1733](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L1733)
+Defined in: [src/core/pdfPage.ts:1733](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L1733)
 
 Set the bleed box for this page.
 
@@ -1443,7 +1443,7 @@ Set the bleed box for this page.
 
 > **setCropBox**(`x`, `y`, `width`, `height`): `void`
 
-Defined in: [src/core/pdfPage.ts:1721](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L1721)
+Defined in: [src/core/pdfPage.ts:1721](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L1721)
 
 Set the crop box for this page.
 
@@ -1475,7 +1475,7 @@ Set the crop box for this page.
 
 > **setFont**(`font`): `void`
 
-Defined in: [src/core/pdfPage.ts:856](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L856)
+Defined in: [src/core/pdfPage.ts:856](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L856)
 
 Set the default font used by [drawText](#drawtext) when the `font` option
 is not provided.
@@ -1498,7 +1498,7 @@ A [FontRef](../interfaces/FontRef.md) returned by `doc.embedFont()`.
 
 > **setFontColor**(`color`): `void`
 
-Defined in: [src/core/pdfPage.ts:876](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L876)
+Defined in: [src/core/pdfPage.ts:876](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L876)
 
 Set the default font colour used by [drawText](#drawtext) when the `color`
 option is not provided.
@@ -1521,7 +1521,7 @@ A [Color](../type-aliases/Color.md) value (e.g. from `rgb()`, `cmyk()`, etc.).
 
 > **setFontSize**(`size`): `void`
 
-Defined in: [src/core/pdfPage.ts:866](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L866)
+Defined in: [src/core/pdfPage.ts:866](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L866)
 
 Set the default font size (in points) used by [drawText](#drawtext) when
 the `size` option is not provided.
@@ -1544,7 +1544,7 @@ Font size in points.
 
 > **setHeight**(`h`): `void`
 
-Defined in: [src/core/pdfPage.ts:1639](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L1639)
+Defined in: [src/core/pdfPage.ts:1639](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L1639)
 
 Set the page height in points.
 
@@ -1564,7 +1564,7 @@ Set the page height in points.
 
 > **setLineHeight**(`height`): `void`
 
-Defined in: [src/core/pdfPage.ts:886](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L886)
+Defined in: [src/core/pdfPage.ts:886](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L886)
 
 Set the default line height used by [drawText](#drawtext) when the
 `lineHeight` option is not provided.
@@ -1587,7 +1587,7 @@ Line height in points.
 
 > **setMediaBox**(`x`, `y`, `width`, `height`): `void`
 
-Defined in: [src/core/pdfPage.ts:1706](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L1706)
+Defined in: [src/core/pdfPage.ts:1706](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L1706)
 
 Set the media box (page dimensions) for this page.
 
@@ -1619,7 +1619,7 @@ Set the media box (page dimensions) for this page.
 
 > **setSize**(`w`, `h`): `void`
 
-Defined in: [src/core/pdfPage.ts:1644](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L1644)
+Defined in: [src/core/pdfPage.ts:1644](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L1644)
 
 Set both page width and height in points.
 
@@ -1643,7 +1643,7 @@ Set both page width and height in points.
 
 > **setTransform**(`a`, `b`, `c`, `d`, `tx`, `ty`): `void`
 
-Defined in: [src/core/pdfPage.ts:1573](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L1573)
+Defined in: [src/core/pdfPage.ts:1573](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L1573)
 
 Concatenate an arbitrary transformation matrix with the CTM (`cm`).
 
@@ -1695,7 +1695,7 @@ Vertical translation.
 
 > **setTrimBox**(`x`, `y`, `width`, `height`): `void`
 
-Defined in: [src/core/pdfPage.ts:1745](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L1745)
+Defined in: [src/core/pdfPage.ts:1745](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L1745)
 
 Set the trim box for this page.
 
@@ -1727,7 +1727,7 @@ Set the trim box for this page.
 
 > **setWidth**(`w`): `void`
 
-Defined in: [src/core/pdfPage.ts:1634](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L1634)
+Defined in: [src/core/pdfPage.ts:1634](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L1634)
 
 Set the page width in points.
 
@@ -1747,7 +1747,7 @@ Set the page width in points.
 
 > **translateContent**(`x`, `y`): `void`
 
-Defined in: [src/core/pdfPage.ts:1665](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pdfPage.ts#L1665)
+Defined in: [src/core/pdfPage.ts:1665](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfPage.ts#L1665)
 
 Translate all page content by (x, y) points. Prepends a cm operator.
 

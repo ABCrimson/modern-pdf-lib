@@ -8,7 +8,7 @@
 
 > **removePage**(`doc`, `index`): `void`
 
-Defined in: [src/core/pageManipulation.ts:180](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/pageManipulation.ts#L180)
+Defined in: [src/core/pageManipulation.ts:180](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pageManipulation.ts#L180)
 
 Remove a page from the document by its zero-based index.
 

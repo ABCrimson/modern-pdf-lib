@@ -8,7 +8,7 @@
 
 > **parseTimestampResponse**(`response`): [`TimestampResult`](../interfaces/TimestampResult.md)
 
-Defined in: [src/signature/timestamp.ts:200](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/signature/timestamp.ts#L200)
+Defined in: [src/signature/timestamp.ts:200](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/signature/timestamp.ts#L200)
 
 Parse a DER-encoded TimeStampResp (RFC 3161 SS2.4.2).
 

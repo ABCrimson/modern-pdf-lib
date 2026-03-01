@@ -6,7 +6,7 @@
 
 # Interface: ImageOptimizeOptions
 
-Defined in: [src/assets/image/imageOptimize.ts:91](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/assets/image/imageOptimize.ts#L91)
+Defined in: [src/assets/image/imageOptimize.ts:114](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/assets/image/imageOptimize.ts#L114)
 
 Combined options for the full optimization pipeline.
 
@@ -20,7 +20,7 @@ Combined options for the full optimization pipeline.
 
 > `readonly` `optional` **algorithm**: `"nearest"` \| `"bilinear"` \| `"lanczos"`
 
-Defined in: [src/assets/image/imageOptimize.ts:57](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/assets/image/imageOptimize.ts#L57)
+Defined in: [src/assets/image/imageOptimize.ts:56](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/assets/image/imageOptimize.ts#L56)
 
 Resampling algorithm.
 - `'nearest'`: Nearest-neighbor (fast, blocky)
@@ -35,11 +35,33 @@ Default: `'bilinear'`.
 
 ***
 
+### chromaSubsampling?
+
+> `readonly` `optional` **chromaSubsampling**: [`ChromaSubsampling`](../type-aliases/ChromaSubsampling.md)
+
+Defined in: [src/assets/image/imageOptimize.ts:108](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/assets/image/imageOptimize.ts#L108)
+
+Chroma subsampling mode.  Only used when `format` is `'jpeg'`.
+
+- `'4:4:4'`: No subsampling — best color fidelity, largest file.
+- `'4:2:2'`: Horizontal subsampling — good balance.
+- `'4:2:0'`: Both horizontal and vertical — smallest file.
+
+Requires the JPEG WASM module to be initialized.
+
+Default: `'4:2:0'`.
+
+#### Inherited from
+
+[`RecompressOptions`](RecompressOptions.md).[`chromaSubsampling`](RecompressOptions.md#chromasubsampling)
+
+***
+
 ### compressionLevel?
 
 > `readonly` `optional` **compressionLevel**: `1` \| `6` \| `3` \| `2` \| `4` \| `5` \| `7` \| `8` \| `9`
 
-Defined in: [src/assets/image/imageOptimize.ts:85](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/assets/image/imageOptimize.ts#L85)
+Defined in: [src/assets/image/imageOptimize.ts:84](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/assets/image/imageOptimize.ts#L84)
 
 Deflate compression level (1–9).  Only used when `format` is `'deflate'`.
 Higher values produce smaller files but take longer.
@@ -54,9 +76,9 @@ Default: `6`.
 
 ### format?
 
-> `readonly` `optional` **format**: `"deflate"` \| `"jpeg"`
+> `readonly` `optional` **format**: `"jpeg"` \| `"deflate"`
 
-Defined in: [src/assets/image/imageOptimize.ts:71](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/assets/image/imageOptimize.ts#L71)
+Defined in: [src/assets/image/imageOptimize.ts:70](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/assets/image/imageOptimize.ts#L70)
 
 Output format.
 - `'jpeg'`: JPEG compression (lossy, good for photographs)
@@ -74,7 +96,7 @@ Default: `'deflate'`.
 
 > `readonly` `optional` **maxHeight**: `number`
 
-Defined in: [src/assets/image/imageOptimize.ts:29](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/assets/image/imageOptimize.ts#L29)
+Defined in: [src/assets/image/imageOptimize.ts:28](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/assets/image/imageOptimize.ts#L28)
 
 Target maximum height in pixels.  The image is scaled proportionally.
 
@@ -88,7 +110,7 @@ Target maximum height in pixels.  The image is scaled proportionally.
 
 > `readonly` `optional` **maxWidth**: `number`
 
-Defined in: [src/assets/image/imageOptimize.ts:27](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/assets/image/imageOptimize.ts#L27)
+Defined in: [src/assets/image/imageOptimize.ts:26](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/assets/image/imageOptimize.ts#L26)
 
 Target maximum width in pixels.  The image is scaled proportionally.
 
@@ -102,7 +124,7 @@ Target maximum width in pixels.  The image is scaled proportionally.
 
 > `readonly` `optional` **printHeight**: `number`
 
-Defined in: [src/assets/image/imageOptimize.ts:48](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/assets/image/imageOptimize.ts#L48)
+Defined in: [src/assets/image/imageOptimize.ts:47](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/assets/image/imageOptimize.ts#L47)
 
 Intended print height in points (1/72 inch).
 Used together with `targetDpi` to compute the target pixel dimensions.
@@ -117,7 +139,7 @@ Used together with `targetDpi` to compute the target pixel dimensions.
 
 > `readonly` `optional` **printWidth**: `number`
 
-Defined in: [src/assets/image/imageOptimize.ts:43](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/assets/image/imageOptimize.ts#L43)
+Defined in: [src/assets/image/imageOptimize.ts:42](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/assets/image/imageOptimize.ts#L42)
 
 Intended print width in points (1/72 inch).
 Used together with `targetDpi` to compute the target pixel dimensions.
@@ -128,11 +150,33 @@ Used together with `targetDpi` to compute the target pixel dimensions.
 
 ***
 
+### progressive?
+
+> `readonly` `optional` **progressive**: `boolean`
+
+Defined in: [src/assets/image/imageOptimize.ts:96](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/assets/image/imageOptimize.ts#L96)
+
+Encode as progressive JPEG.  Only used when `format` is `'jpeg'`.
+
+Progressive JPEGs render in multiple passes (low-res → full-res)
+which improves perceived loading speed on slow connections.
+They are also often slightly smaller than baseline JPEGs.
+
+Requires the JPEG WASM module to be initialized.
+
+Default: `false`.
+
+#### Inherited from
+
+[`RecompressOptions`](RecompressOptions.md).[`progressive`](RecompressOptions.md#progressive)
+
+***
+
 ### quality?
 
 > `readonly` `optional` **quality**: `number`
 
-Defined in: [src/assets/image/imageOptimize.ts:78](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/assets/image/imageOptimize.ts#L78)
+Defined in: [src/assets/image/imageOptimize.ts:77](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/assets/image/imageOptimize.ts#L77)
 
 JPEG quality (1–100).  Only used when `format` is `'jpeg'`.
 Higher values produce larger files with better quality.
@@ -149,7 +193,7 @@ Default: `85`.
 
 > `readonly` `optional` **skipBelowBytes**: `number`
 
-Defined in: [src/assets/image/imageOptimize.ts:98](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/assets/image/imageOptimize.ts#L98)
+Defined in: [src/assets/image/imageOptimize.ts:121](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/assets/image/imageOptimize.ts#L121)
 
 Skip optimization if the input data is already smaller than this
 threshold (in bytes).
@@ -162,7 +206,7 @@ Default: `0` (always optimize).
 
 > `readonly` `optional` **targetDpi**: `number`
 
-Defined in: [src/assets/image/imageOptimize.ts:38](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/assets/image/imageOptimize.ts#L38)
+Defined in: [src/assets/image/imageOptimize.ts:37](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/assets/image/imageOptimize.ts#L37)
 
 Target DPI for the image at its intended print size.  If specified
 along with `printWidth` / `printHeight`, the image is downscaled

@@ -8,7 +8,7 @@
 
 > **verifySignature**(`pdfBytes`, `byteRange`, `signatureBytes`, `certificateBytes`): `Promise`\<`boolean`\>
 
-Defined in: [src/signature/signatureVerifier.ts:434](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/signature/signatureVerifier.ts#L434)
+Defined in: [src/signature/signatureVerifier.ts:434](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/signature/signatureVerifier.ts#L434)
 
 Verify a single signature.
 

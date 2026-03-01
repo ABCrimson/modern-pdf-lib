@@ -8,7 +8,7 @@
 
 > **md5**(`data`): `Uint8Array`
 
-Defined in: [src/crypto/md5.ts:91](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/crypto/md5.ts#L91)
+Defined in: [src/crypto/md5.ts:91](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/crypto/md5.ts#L91)
 
 Compute the MD5 hash of the given data.
 

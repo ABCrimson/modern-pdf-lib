@@ -8,7 +8,7 @@
 
 > **encodePermissions**(`flags`): `number`
 
-Defined in: [src/crypto/permissions.ts:102](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/crypto/permissions.ts#L102)
+Defined in: [src/crypto/permissions.ts:102](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/crypto/permissions.ts#L102)
 
 Encode human-friendly permission flags into the 32-bit /P integer
 used in the PDF encryption dictionary.

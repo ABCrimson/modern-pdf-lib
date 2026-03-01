@@ -8,7 +8,7 @@
 
 > **buildXmpMetadata**(`meta`): `string`
 
-Defined in: [src/metadata/xmpMetadata.ts:89](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/metadata/xmpMetadata.ts#L89)
+Defined in: [src/metadata/xmpMetadata.ts:89](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/metadata/xmpMetadata.ts#L89)
 
 Build an XMP metadata XML string from document metadata.
 

@@ -8,7 +8,7 @@
 
 > **concatMatrix**(`a`, `b`, `c`, `d`, `tx`, `ty`): `string`
 
-Defined in: [src/core/operators/state.ts:109](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/operators/state.ts#L109)
+Defined in: [src/core/operators/state.ts:109](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/operators/state.ts#L109)
 
 Concatenate the given matrix with the current transformation matrix
 (`cm`).

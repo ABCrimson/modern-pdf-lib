@@ -6,7 +6,7 @@
 
 # Class: PdfOutlineItem
 
-Defined in: [src/outline/pdfOutline.ts:85](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/outline/pdfOutline.ts#L85)
+Defined in: [src/outline/pdfOutline.ts:85](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/outline/pdfOutline.ts#L85)
 
 A single node in the outline tree.  Each item has a title, a
 destination, and zero or more child items.
@@ -17,7 +17,7 @@ destination, and zero or more child items.
 
 > **new PdfOutlineItem**(`title`, `destination`, `options?`): `PdfOutlineItem`
 
-Defined in: [src/outline/pdfOutline.ts:114](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/outline/pdfOutline.ts#L114)
+Defined in: [src/outline/pdfOutline.ts:114](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/outline/pdfOutline.ts#L114)
 
 Create a new outline item.
 
@@ -51,7 +51,7 @@ Visual style options.
 
 > `optional` **bold**: `boolean`
 
-Defined in: [src/outline/pdfOutline.ts:102](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/outline/pdfOutline.ts#L102)
+Defined in: [src/outline/pdfOutline.ts:102](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/outline/pdfOutline.ts#L102)
 
 Whether the title is displayed in bold.
 
@@ -61,7 +61,7 @@ Whether the title is displayed in bold.
 
 > **children**: `PdfOutlineItem`[]
 
-Defined in: [src/outline/pdfOutline.ts:93](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/outline/pdfOutline.ts#L93)
+Defined in: [src/outline/pdfOutline.ts:93](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/outline/pdfOutline.ts#L93)
 
 Child outline items.
 
@@ -71,7 +71,7 @@ Child outline items.
 
 > `optional` **color**: `object`
 
-Defined in: [src/outline/pdfOutline.ts:99](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/outline/pdfOutline.ts#L99)
+Defined in: [src/outline/pdfOutline.ts:99](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/outline/pdfOutline.ts#L99)
 
 Optional colour for the outline text (RGB, 0-1 range).
 
@@ -93,7 +93,7 @@ Optional colour for the outline text (RGB, 0-1 range).
 
 > **destination**: [`OutlineDestination`](../interfaces/OutlineDestination.md)
 
-Defined in: [src/outline/pdfOutline.ts:90](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/outline/pdfOutline.ts#L90)
+Defined in: [src/outline/pdfOutline.ts:90](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/outline/pdfOutline.ts#L90)
 
 Where clicking this bookmark navigates.
 
@@ -103,7 +103,7 @@ Where clicking this bookmark navigates.
 
 > **isOpen**: `boolean`
 
-Defined in: [src/outline/pdfOutline.ts:96](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/outline/pdfOutline.ts#L96)
+Defined in: [src/outline/pdfOutline.ts:96](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/outline/pdfOutline.ts#L96)
 
 Whether children are initially expanded.
 
@@ -113,7 +113,7 @@ Whether children are initially expanded.
 
 > `optional` **italic**: `boolean`
 
-Defined in: [src/outline/pdfOutline.ts:105](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/outline/pdfOutline.ts#L105)
+Defined in: [src/outline/pdfOutline.ts:105](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/outline/pdfOutline.ts#L105)
 
 Whether the title is displayed in italic.
 
@@ -123,7 +123,7 @@ Whether the title is displayed in italic.
 
 > **title**: `string`
 
-Defined in: [src/outline/pdfOutline.ts:87](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/outline/pdfOutline.ts#L87)
+Defined in: [src/outline/pdfOutline.ts:87](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/outline/pdfOutline.ts#L87)
 
 The displayed bookmark title.
 
@@ -133,7 +133,7 @@ The displayed bookmark title.
 
 > **addChild**(`title`, `destination`, `options?`): `PdfOutlineItem`
 
-Defined in: [src/outline/pdfOutline.ts:142](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/outline/pdfOutline.ts#L142)
+Defined in: [src/outline/pdfOutline.ts:142](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/outline/pdfOutline.ts#L142)
 
 Add a child outline item.
 
@@ -169,7 +169,7 @@ The newly created child item.
 
 > **getVisibleDescendantCount**(): `number`
 
-Defined in: [src/outline/pdfOutline.ts:177](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/outline/pdfOutline.ts#L177)
+Defined in: [src/outline/pdfOutline.ts:177](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/outline/pdfOutline.ts#L177)
 
 Count all visible descendants (for the /Count entry).
 
@@ -191,7 +191,7 @@ The count value for the /Count entry.
 
 > **removeChild**(`item`): `void`
 
-Defined in: [src/outline/pdfOutline.ts:158](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/outline/pdfOutline.ts#L158)
+Defined in: [src/outline/pdfOutline.ts:158](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/outline/pdfOutline.ts#L158)
 
 Remove a child outline item.
 

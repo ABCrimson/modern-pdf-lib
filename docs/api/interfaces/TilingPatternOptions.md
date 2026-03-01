@@ -6,7 +6,7 @@
 
 # Interface: TilingPatternOptions
 
-Defined in: [src/core/patterns.ts:102](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/patterns.ts#L102)
+Defined in: [src/core/patterns.ts:102](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/patterns.ts#L102)
 
 Options for creating a tiling pattern (PatternType 1).
 
@@ -16,7 +16,7 @@ Options for creating a tiling pattern (PatternType 1).
 
 > `readonly` **height**: `number`
 
-Defined in: [src/core/patterns.ts:106](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/patterns.ts#L106)
+Defined in: [src/core/patterns.ts:106](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/patterns.ts#L106)
 
 Height of one tile in user-space units.
 
@@ -26,7 +26,7 @@ Height of one tile in user-space units.
 
 > `readonly` **ops**: `string`
 
-Defined in: [src/core/patterns.ts:122](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/patterns.ts#L122)
+Defined in: [src/core/patterns.ts:122](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/patterns.ts#L122)
 
 Raw PDF content-stream operators that paint one tile.
 
@@ -36,7 +36,7 @@ Raw PDF content-stream operators that paint one tile.
 
 > `readonly` `optional` **paintType**: `1` \| `2`
 
-Defined in: [src/core/patterns.ts:113](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/patterns.ts#L113)
+Defined in: [src/core/patterns.ts:113](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/patterns.ts#L113)
 
 Paint type.
 - `1` (default) — coloured: the pattern's content stream specifies
@@ -49,7 +49,7 @@ Paint type.
 
 > `readonly` `optional` **tilingType**: `1` \| `3` \| `2`
 
-Defined in: [src/core/patterns.ts:120](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/patterns.ts#L120)
+Defined in: [src/core/patterns.ts:120](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/patterns.ts#L120)
 
 Tiling type.
 - `1` (default) — constant spacing.
@@ -62,6 +62,6 @@ Tiling type.
 
 > `readonly` **width**: `number`
 
-Defined in: [src/core/patterns.ts:104](https://github.com/ABCrimson/modern-pdf-lib/blob/eaf6da317b4ede08cfb64242ea1db66c2fb5d945/src/core/patterns.ts#L104)
+Defined in: [src/core/patterns.ts:104](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/patterns.ts#L104)
 
 Width of one tile in user-space units.
