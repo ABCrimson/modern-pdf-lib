@@ -11,29 +11,35 @@
 
 import { optimizeCommand } from './optimize.js';
 
-const args = process.argv.slice(2);
-const command = args[0];
+async function main(): Promise<void> {
+  const args = process.argv.slice(2);
+  const command = args[0];
 
-if (!command || command === '--help' || command === '-h') {
-  printHelp();
-  process.exit(0);
+  if (!command || command === '--help' || command === '-h') {
+    printHelp();
+    process.exit(0);
+  }
+
+  if (command === '--version' || command === '-v') {
+    console.log('modern-pdf-lib CLI');
+    process.exit(0);
+  }
+
+  switch (command) {
+    case 'optimize':
+      await optimizeCommand(args.slice(1));
+      break;
+    default:
+      console.error(`Unknown command: ${command}`);
+      console.error('Run "modern-pdf --help" for usage information.');
+      process.exit(1);
+  }
 }
 
-if (command === '--version' || command === '-v') {
-  // Read version from package.json at runtime
-  console.log('modern-pdf-lib CLI');
-  process.exit(0);
-}
-
-switch (command) {
-  case 'optimize':
-    await optimizeCommand(args.slice(1));
-    break;
-  default:
-    console.error(`Unknown command: ${command}`);
-    console.error('Run "modern-pdf --help" for usage information.');
-    process.exit(1);
-}
+main().catch((err: unknown) => {
+  console.error(err);
+  process.exit(1);
+});
 
 function printHelp(): void {
   console.log(`
