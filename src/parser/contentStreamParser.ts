@@ -530,7 +530,7 @@ class ContentStreamLexer {
 
     return {
       type: TokenType.HexString,
-      value: String.fromCharCode.apply(null, bytes),
+      value: String.fromCharCode(...bytes),
     };
   }
 
@@ -702,9 +702,6 @@ class ContentStreamLexer {
    * Decode a slice of the data as ASCII text.
    */
   private decodeAscii(start: number, end: number): string {
-    return String.fromCharCode.apply(
-      null,
-      this.data.subarray(start, end) as unknown as number[],
-    );
+    return String.fromCharCode(...this.data.subarray(start, end));
   }
 }

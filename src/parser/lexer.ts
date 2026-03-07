@@ -709,7 +709,7 @@ export class PdfLexer {
     this.position = pos;
     return {
       type: TokenType.HexString,
-      value: String.fromCharCode.apply(null, bytes),
+      value: String.fromCharCode(...bytes),
       offset: startPos,
     };
   }
@@ -853,9 +853,6 @@ export class PdfLexer {
    * because it avoids the per-call overhead of the streaming decoder.
    */
   private bytesToAscii(from: number, to: number): string {
-    return String.fromCharCode.apply(
-      null,
-      this._data.subarray(from, to) as unknown as number[],
-    );
+    return String.fromCharCode(...this._data.subarray(from, to));
   }
 }

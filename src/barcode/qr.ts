@@ -429,14 +429,14 @@ function encodeData(data: string, mode: EncodingMode, buf: BitBuffer): void {
 function encodeNumeric(data: string, buf: BitBuffer): void {
   let i = 0;
   while (i + 2 < data.length) {
-    const group = parseInt(data.substring(i, i + 3), 10);
+    const group = parseInt(data.slice(i, i + 3), 10);
     buf.put(group, 10);
     i += 3;
   }
   if (data.length - i === 2) {
-    buf.put(parseInt(data.substring(i, i + 2), 10), 7);
+    buf.put(parseInt(data.slice(i, i + 2), 10), 7);
   } else if (data.length - i === 1) {
-    buf.put(parseInt(data.substring(i, i + 1), 10), 4);
+    buf.put(parseInt(data.slice(i, i + 1), 10), 4);
   }
 }
 

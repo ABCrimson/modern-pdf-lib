@@ -284,7 +284,7 @@ export function encodeCode128Values(data: string): readonly number[] {
     if (currentSet === 'C') {
       if (digitsAhead >= 2) {
         // Encode a digit pair
-        const pair = parseInt(data.substring(pos, pos + 2), 10);
+        const pair = parseInt(data.slice(pos, pos + 2), 10);
         values.push(pair);
         pos += 2;
         continue;

@@ -81,7 +81,7 @@ function hexToBytes(hex: string): Uint8Array {
     if (endIdx < 2) endIdx = clean.length;
   }
 
-  return Uint8Array.fromHex(clean.substring(0, endIdx));
+  return Uint8Array.fromHex(clean.slice(0, endIdx));
 }
 
 /**
@@ -246,12 +246,12 @@ function extractSigningTime(signedAttrs: Uint8Array[]): Date | undefined {
  */
 function parseUtcTime(utcTime: string): Date {
   const clean = utcTime.replace('Z', '');
-  const year = parseInt(clean.substring(0, 2), 10);
-  const month = parseInt(clean.substring(2, 4), 10) - 1;
-  const day = parseInt(clean.substring(4, 6), 10);
-  const hours = parseInt(clean.substring(6, 8), 10);
-  const minutes = parseInt(clean.substring(8, 10), 10);
-  const seconds = parseInt(clean.substring(10, 12), 10);
+  const year = parseInt(clean.slice(0, 2), 10);
+  const month = parseInt(clean.slice(2, 4), 10) - 1;
+  const day = parseInt(clean.slice(4, 6), 10);
+  const hours = parseInt(clean.slice(6, 8), 10);
+  const minutes = parseInt(clean.slice(8, 10), 10);
+  const seconds = parseInt(clean.slice(10, 12), 10);
 
   // Two-digit year: 00-49 = 2000-2049, 50-99 = 1950-1999
   const fullYear = year < 50 ? 2000 + year : 1900 + year;
@@ -269,7 +269,7 @@ function extractFieldInfo(
 ): { fieldName: string; reason?: string; location?: string; contactInfo?: string } {
   const searchStart = Math.max(0, contentsOffset - 3000);
   const searchEnd = Math.min(pdfStr.length, contentsOffset + 2000);
-  const region = pdfStr.substring(searchStart, searchEnd);
+  const region = pdfStr.slice(searchStart, searchEnd);
 
   let fieldName = 'Signature';
   const tMatch = region.match(/\/T\s*\(([^)]*)\)/);

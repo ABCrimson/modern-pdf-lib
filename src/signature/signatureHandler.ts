@@ -108,7 +108,7 @@ const decoder = new TextDecoder('latin1');
 function extractFieldName(pdfStr: string, sigDictOffset: number): string {
   // Look backward from the signature dict for a /T entry
   const searchStart = Math.max(0, sigDictOffset - 2000);
-  const searchRegion = pdfStr.substring(searchStart, sigDictOffset + 1000);
+  const searchRegion = pdfStr.slice(searchStart, sigDictOffset + 1000);
 
   const tMatch = searchRegion.match(/\/T\s*\(([^)]*)\)/);
   if (tMatch) return tMatch[1]!;
@@ -127,7 +127,7 @@ function extractSigDictStrings(
   // Search around the ByteRange location
   const searchStart = Math.max(0, byteRangeOffset - 1000);
   const searchEnd = Math.min(pdfStr.length, byteRangeOffset + 2000);
-  const region = pdfStr.substring(searchStart, searchEnd);
+  const region = pdfStr.slice(searchStart, searchEnd);
 
   const result: { reason?: string; location?: string; contactInfo?: string; signingDate?: Date } = {};
 
@@ -195,7 +195,7 @@ function hexToBytes(hex: string): Uint8Array {
       // Keep at least the non-zero portion
       const nonZeroEnd = cleanHex.length - trimLen;
       if (nonZeroEnd > 0 && nonZeroEnd % 2 === 0) {
-        cleanHex = cleanHex.substring(0, nonZeroEnd);
+        cleanHex = cleanHex.slice(0, nonZeroEnd);
       }
     }
   }
@@ -298,7 +298,7 @@ export async function signPdf(
       }
       if (options.reason) textLines.push(`Reason: ${options.reason}`);
       if (options.location) textLines.push(`Location: ${options.location}`);
-      textLines.push(`Date: ${new Date().toISOString().substring(0, 10)}`);
+      textLines.push(`Date: ${new Date().toISOString().slice(0, 10)}`);
     }
 
     prepareAppearance = {

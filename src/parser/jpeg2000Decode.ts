@@ -1966,7 +1966,7 @@ function dequantize(
 
     // Step size = (1 + mu/2^11) * 2^(epsilon - bpc)
     const delta =
-      (1 + stepSize.mu / 2048) * Math.pow(2, stepSize.epsilon - bpc);
+      (1 + stepSize.mu / 2048) * 2 ** (stepSize.epsilon - bpc);
 
     for (let i = 0; i < sb.coefficients.length; i++) {
       sb.coefficients[i]! *= delta;

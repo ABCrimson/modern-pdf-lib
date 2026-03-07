@@ -128,12 +128,12 @@ function toHex(data: Uint8Array): string {
  */
 function parseGeneralizedTime(timeStr: string): Date {
   const clean = timeStr.replace('Z', '').replace(/\..*$/, '');
-  const year = parseInt(clean.substring(0, 4), 10);
-  const month = parseInt(clean.substring(4, 6), 10) - 1;
-  const day = parseInt(clean.substring(6, 8), 10);
-  const hours = parseInt(clean.substring(8, 10), 10);
-  const minutes = parseInt(clean.substring(10, 12), 10) || 0;
-  const seconds = parseInt(clean.substring(12, 14), 10) || 0;
+  const year = parseInt(clean.slice(0, 4), 10);
+  const month = parseInt(clean.slice(4, 6), 10) - 1;
+  const day = parseInt(clean.slice(6, 8), 10);
+  const hours = parseInt(clean.slice(8, 10), 10);
+  const minutes = parseInt(clean.slice(10, 12), 10) || 0;
+  const seconds = parseInt(clean.slice(12, 14), 10) || 0;
   return new Date(Date.UTC(year, month, day, hours, minutes, seconds));
 }
 
@@ -142,12 +142,12 @@ function parseGeneralizedTime(timeStr: string): Date {
  */
 function parseUtcTime(timeStr: string): Date {
   const clean = timeStr.replace('Z', '');
-  const year = parseInt(clean.substring(0, 2), 10);
-  const month = parseInt(clean.substring(2, 4), 10) - 1;
-  const day = parseInt(clean.substring(4, 6), 10);
-  const hours = parseInt(clean.substring(6, 8), 10);
-  const minutes = parseInt(clean.substring(8, 10), 10) || 0;
-  const seconds = parseInt(clean.substring(10, 12), 10) || 0;
+  const year = parseInt(clean.slice(0, 2), 10);
+  const month = parseInt(clean.slice(2, 4), 10) - 1;
+  const day = parseInt(clean.slice(4, 6), 10);
+  const hours = parseInt(clean.slice(6, 8), 10);
+  const minutes = parseInt(clean.slice(8, 10), 10) || 0;
+  const seconds = parseInt(clean.slice(10, 12), 10) || 0;
   const fullYear = year < 50 ? 2000 + year : 1900 + year;
   return new Date(Date.UTC(fullYear, month, day, hours, minutes, seconds));
 }

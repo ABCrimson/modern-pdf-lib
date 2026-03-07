@@ -67,7 +67,7 @@ export function extractXmpMetadata(pdfBytes: Uint8Array): string | undefined {
   if (start < 0) return undefined;
   const end = text.indexOf('</x:xmpmeta>', start);
   if (end < 0) return undefined;
-  return text.substring(start, end + '</x:xmpmeta>'.length);
+  return text.slice(start, end + '</x:xmpmeta>'.length);
 }
 
 // ---------------------------------------------------------------------------

@@ -435,14 +435,14 @@ export class XrefParser {
     }
 
     // After "startxref" there should be whitespace then a decimal number
-    const afterKeyword = tail.substring(idx + keyword.length).trim();
+    const afterKeyword = tail.slice(idx + keyword.length).trim();
     const match = afterKeyword.match(/^(\d+)/);
     if (!match) {
       throw new PdfParseError({
         message: 'Invalid PDF: "startxref" found but no valid offset follows it.',
         offset: startPos + idx,
         expected: 'decimal offset after "startxref"',
-        actual: `"${afterKeyword.substring(0, 20)}"`,
+        actual: `"${afterKeyword.slice(0, 20)}"`,
         data: this.data,
       });
     }

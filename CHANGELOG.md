@@ -5,6 +5,50 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 See [VERSIONING.md](./VERSIONING.md) for this project's versioning policy.
 
+## [0.22.9] - 2026-03-07
+
+### Added
+
+- **CRL/OCSP revocation checking** (`src/signature/`):
+  - OCSP request building, response parsing, and certificate status checking
+  - CRL parsing, download, and revocation checking with distribution points
+  - Certificate chain building and validation with Web Crypto signature verification
+  - TTL-based OCSP/CRL response caching with automatic expiry
+  - OCSP stapling — embed/extract OCSP responses in PKCS#7 signatures
+  - Delta CRL parsing and merging with base CRLs (RFC 5280)
+  - Enhanced verification with structured results (chain, revocation, timestamps)
+  - Offline revocation data extraction and verification without network
+  - Custom trust store class for enterprise PKI certificate management
+  - Key usage, extended key usage, and certificate policy validation
+  - New guide: `docs/guide/verification.md`
+
+- **JPEG2000 (JPXDecode) decoder** (`src/parser/`):
+  - Full JP2/J2K decoder with MQ arithmetic coder and discrete wavelet transform
+  - JPXDecode filter integration in the stream decoder pipeline
+  - JP2 container vs J2K codestream detection and parsing
+  - Alpha channel detection, separation, and premultiplication
+  - JP2-to-JPEG transcoding for downstream JPEG workflows
+  - 16-bit to 8-bit bit depth normalization
+  - Tiled and region-of-interest decoding for large images
+  - WASM bridge with automatic JS fallback
+  - New guide: `docs/guide/jpeg2000.md`
+
+- **Form field JavaScript evaluation** (`src/form/`):
+  - Arithmetic expression evaluator and AFSimple_Calculate parser
+  - Field calculation order with dependency graphs and topological sort
+  - AFNumber_Format/Keystroke and AFDate_FormatEx/KeystrokeEx builtins
+  - Field validation: email, phone, range, regex, and length constraints
+  - AFPercent_Format, AFSpecial_Format (ZIP, SSN, phone number)
+  - Field visibility toggle with condition-based show/hide
+  - getField() cross-field references with field proxy objects
+  - Document-level scripts: open, close, print, and save actions
+  - Sandboxed script execution with reserved word filtering and strict mode
+  - New guide: `docs/guide/form-scripts.md`
+
+### Changed
+
+- **Test count**: 3,260 → 3,997 across 184 test suites (was 158).
+
 ## [0.19.9] - 2026-03-07
 
 ### Added

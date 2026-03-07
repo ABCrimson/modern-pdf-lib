@@ -300,7 +300,7 @@ export function prepareForSigning(
     throw new Error('Cannot find startxref in PDF — file may be corrupted');
   }
 
-  const afterStartxref = pdfStr.substring(startxrefIdx + 9).trim();
+  const afterStartxref = pdfStr.slice(startxrefIdx + 9).trim();
   const xrefOffsetMatch = afterStartxref.match(/^(\d+)/);
   if (!xrefOffsetMatch) {
     throw new Error('Cannot parse xref offset from startxref');
@@ -618,7 +618,7 @@ export function findSignatures(
     // scan forward for the closing ">".
     const searchStart = Math.max(0, match.index - 2000);
     const searchEnd = Math.min(text.length, match.index + 2000);
-    const searchRegion = text.substring(searchStart, searchEnd);
+    const searchRegion = text.slice(searchStart, searchEnd);
 
     const contentsKeyIdx = searchRegion.indexOf('/Contents <');
     if (contentsKeyIdx !== -1) {
@@ -629,7 +629,7 @@ export function findSignatures(
       const closingBracket = text.indexOf('>', absoluteHexStart + 1);
       if (closingBracket !== -1) {
         // Extract the hex string (between `<` and `>`)
-        const hexStr = text.substring(absoluteHexStart + 1, closingBracket);
+        const hexStr = text.slice(absoluteHexStart + 1, closingBracket);
         const contentsLen = closingBracket - absoluteHexStart + 1; // includes `<` and `>`
 
         results.push({

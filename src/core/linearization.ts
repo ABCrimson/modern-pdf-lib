@@ -444,7 +444,7 @@ function buildSimpleHintStream(
 ): Uint8Array {
   // Simplified: just store page offset data as a series of 4-byte big-endian
   // integers giving the offset of each page's objects.
-  const allObjNums = firstPageObjs.concat(remainingObjs);
+  const allObjNums = [...firstPageObjs, ...remainingObjs];
   const data = new Uint8Array(allObjNums.length * 4);
   for (let i = 0; i < allObjNums.length; i++) {
     const off = offsets.get(allObjNums[i]!) ?? 0;

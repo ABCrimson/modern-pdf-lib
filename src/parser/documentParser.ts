@@ -630,13 +630,13 @@ export class PdfDocumentParser {
     }
 
     // Extract version string
-    const versionMatch = header.substring(pdfIdx).match(/%PDF-(\d+\.\d+)/);
+    const versionMatch = header.slice(pdfIdx).match(/%PDF-(\d+\.\d+)/);
     if (!versionMatch) {
       throw new PdfParseError({
         message: 'Invalid PDF: could not parse version from header.',
         offset: pdfIdx,
         expected: '"%PDF-X.Y" version string',
-        actual: `"${header.substring(pdfIdx, pdfIdx + 10)}"`,
+        actual: `"${header.slice(pdfIdx, pdfIdx + 10)}"`,
         data: this.data,
       });
     }
@@ -1441,9 +1441,9 @@ export class PdfDocumentParser {
     return Iterator.from(subDict)
       .map(([key]) => {
         // Keys are stored with '/' prefix: "/F1", "/Im2", etc.
-        const name = key.startsWith('/') ? key.substring(1) : key;
+        const name = key.startsWith('/') ? key.slice(1) : key;
         if (name.startsWith(prefix)) {
-          const num = parseInt(name.substring(prefix.length), 10);
+          const num = parseInt(name.slice(prefix.length), 10);
           return isNaN(num) ? 0 : num;
         }
         return 0;
@@ -1479,7 +1479,7 @@ function parsePdfDate(dateStr: string): Date | undefined {
   // Strip the "D:" prefix if present
   let s = dateStr;
   if (s.startsWith('D:')) {
-    s = s.substring(2);
+    s = s.slice(2);
   }
 
   // Match the components:

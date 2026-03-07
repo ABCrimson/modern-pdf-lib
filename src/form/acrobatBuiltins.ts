@@ -330,7 +330,7 @@ export function AFNumber_Keystroke(
     const decIdx = s.indexOf(seps.decimal);
     if (decIdx > -1) {
       // Only one decimal separator allowed
-      if (s.indexOf(seps.decimal, decIdx + 1) > -1) return false;
+      if (s.includes(seps.decimal, decIdx + 1)) return false;
 
       // Check max decimal places
       const afterDec = s.slice(decIdx + 1);
