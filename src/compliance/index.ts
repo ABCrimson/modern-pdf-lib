@@ -13,3 +13,10 @@ export type { TransparencyInfo, TransparencyFinding } from './transparencyFlatte
 export { generateSrgbIccProfile, SRGB_ICC_PROFILE } from './srgbIccProfile.js';
 export { buildOutputIntent } from './outputIntent.js';
 export type { OutputIntentOptions } from './outputIntent.js';
+
+export {
+  generateWinAnsiToUnicodeCmap,
+  generateSymbolToUnicodeCmap,
+  generateZapfDingbatsToUnicodeCmap,
+  getToUnicodeCmap,
+} from './toUnicodeCmap.js';
