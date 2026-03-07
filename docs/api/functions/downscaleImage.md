@@ -8,7 +8,7 @@
 
 > **downscaleImage**(`image`, `options?`): [`RawImageData`](../interfaces/RawImageData.md)
 
-Defined in: [src/assets/image/imageOptimize.ts:198](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/assets/image/imageOptimize.ts#L198)
+Defined in: [src/assets/image/imageOptimize.ts:198](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/assets/image/imageOptimize.ts#L198)
 
 Downscale an image to fit within the specified dimensions.
 
@@ -41,6 +41,6 @@ The downscaled image, or the original if no scaling needed.
 const result = downscaleImage(rawImage, {
   maxWidth: 1024,
   maxHeight: 768,
-  algorithm: 'bilinear',
+  algorithm: 'lanczos',
 });
 ```

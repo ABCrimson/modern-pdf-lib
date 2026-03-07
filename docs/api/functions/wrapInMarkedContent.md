@@ -8,7 +8,7 @@
 
 > **wrapInMarkedContent**(`operators`, `tag`, `mcid`): `string`
 
-Defined in: [src/accessibility/markedContent.ts:128](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/accessibility/markedContent.ts#L128)
+Defined in: [src/accessibility/markedContent.ts:128](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/accessibility/markedContent.ts#L128)
 
 Wrap existing content-stream operators in a marked-content sequence.
 

@@ -8,7 +8,7 @@
 
 > **initJpegWasm**(`wasmSource?`): `Promise`\<`void`\>
 
-Defined in: [src/wasm/jpeg/bridge.ts:86](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/wasm/jpeg/bridge.ts#L86)
+Defined in: [src/wasm/jpeg/bridge.ts:86](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/wasm/jpeg/bridge.ts#L86)
 
 Initialize the JPEG WASM module.
 
@@ -20,7 +20,7 @@ The WASM binary as `Uint8Array`, URL, `Response`,
                     or a pre-built wasm-bindgen module.  When omitted,
                     the function uses the universal WASM loader.
 
-`string` | `Uint8Array`\<`ArrayBufferLike`\> | `URL` | `Response` | `JpegWasmModule`
+`string` | `URL` | `Uint8Array`\<`ArrayBufferLike`\> | `JpegWasmModule` | `Response`
 
 ## Returns
 

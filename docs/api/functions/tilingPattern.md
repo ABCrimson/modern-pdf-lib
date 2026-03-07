@@ -8,7 +8,7 @@
 
 > **tilingPattern**(`options`): [`PatternFill`](../interfaces/PatternFill.md)
 
-Defined in: [src/core/patterns.ts:286](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/patterns.ts#L286)
+Defined in: [src/core/patterns.ts:286](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/core/patterns.ts#L286)
 
 Create a tiling pattern descriptor.
 

@@ -8,7 +8,7 @@
 
 > **buildInfoDict**(`meta`, `registry`): [`PdfRef`](../classes/PdfRef.md)
 
-Defined in: [src/core/pdfCatalog.ts:73](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pdfCatalog.ts#L73)
+Defined in: [src/core/pdfCatalog.ts:73](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/core/pdfCatalog.ts#L73)
 
 Build the `/Info` dictionary from metadata.
 

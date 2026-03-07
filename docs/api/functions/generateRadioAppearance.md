@@ -8,7 +8,7 @@
 
 > **generateRadioAppearance**(`options`): [`PdfStream`](../classes/PdfStream.md)
 
-Defined in: [src/form/fieldAppearance.ts:261](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/form/fieldAppearance.ts#L261)
+Defined in: [src/form/fieldAppearance.ts:261](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/form/fieldAppearance.ts#L261)
 
 Generate the appearance stream for a radio button option.
 

@@ -8,7 +8,7 @@
 
 > **componentsToColor**(`components`): [`Color`](../type-aliases/Color.md)
 
-Defined in: [src/core/operators/color.ts:252](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/operators/color.ts#L252)
+Defined in: [src/core/operators/color.ts:252](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/core/operators/color.ts#L252)
 
 Convert a numeric component array to a typed [Color](../type-aliases/Color.md).
 

@@ -215,36 +215,40 @@ export async function initWasm(options?: string | URL | InitWasmOptions): Promis
   // Deflate WASM
   if (options.deflate || options.deflateWasm) {
     inits.push(
-      import('./compression/libdeflateWasm.js').then(async ({ initDeflateWasm }) => {
+      (async () => {
+        const { initDeflateWasm } = await import('./compression/libdeflateWasm.js');
         await initDeflateWasm(options.deflateWasm);
-      }),
+      })(),
     );
   }
 
   // PNG WASM
   if (options.png || options.pngWasm) {
     inits.push(
-      import('./assets/image/pngEmbed.js').then(async ({ initPngWasm }) => {
+      (async () => {
+        const { initPngWasm } = await import('./assets/image/pngEmbed.js');
         await initPngWasm(options.pngWasm);
-      }),
+      })(),
     );
   }
 
   // Font WASM (subsetting)
   if (options.fonts || options.fontWasm) {
     inits.push(
-      import('./assets/font/fontSubset.js').then(async ({ initSubsetWasm }) => {
+      (async () => {
+        const { initSubsetWasm } = await import('./assets/font/fontSubset.js');
         await initSubsetWasm(options.fontWasm);
-      }),
+      })(),
     );
   }
 
   // JPEG WASM (encoding/decoding)
   if (options.jpeg || options.jpegWasm) {
     inits.push(
-      import('./wasm/jpeg/bridge.js').then(async ({ initJpegWasm }) => {
+      (async () => {
+        const { initJpegWasm } = await import('./wasm/jpeg/bridge.js');
         await initJpegWasm(options.jpegWasm);
-      }),
+      })(),
     );
   }
 

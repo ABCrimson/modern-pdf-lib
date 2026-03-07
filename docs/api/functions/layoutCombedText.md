@@ -8,7 +8,7 @@
 
 > **layoutCombedText**(`text`, `options`): `object`[]
 
-Defined in: [src/core/layout.ts:94](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/layout.ts#L94)
+Defined in: [src/core/layout.ts:94](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/core/layout.ts#L94)
 
 Layout text into evenly-spaced cells for combed text fields.
 

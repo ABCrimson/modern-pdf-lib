@@ -8,7 +8,7 @@
 
 > **createMarkedContentScope**(`tag`, `mcid`): [`MarkedContentScope`](../interfaces/MarkedContentScope.md)
 
-Defined in: [src/accessibility/markedContent.ts:147](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/accessibility/markedContent.ts#L147)
+Defined in: [src/accessibility/markedContent.ts:147](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/accessibility/markedContent.ts#L147)
 
 Create a [MarkedContentScope](../interfaces/MarkedContentScope.md) object for a given tag and MCID.
 

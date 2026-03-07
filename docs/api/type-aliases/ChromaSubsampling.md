@@ -8,7 +8,7 @@
 
 > **ChromaSubsampling** = `"4:4:4"` \| `"4:2:2"` \| `"4:2:0"`
 
-Defined in: [src/wasm/jpeg/bridge.ts:61](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/wasm/jpeg/bridge.ts#L61)
+Defined in: [src/wasm/jpeg/bridge.ts:61](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/wasm/jpeg/bridge.ts#L61)
 
 Chroma subsampling modes for JPEG encoding.
 

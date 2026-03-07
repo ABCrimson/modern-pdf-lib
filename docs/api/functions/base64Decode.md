@@ -8,7 +8,7 @@
 
 > **base64Decode**(`str`): `Uint8Array`
 
-Defined in: [src/utils/base64.ts:33](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/utils/base64.ts#L33)
+Defined in: [src/utils/base64.ts:33](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/utils/base64.ts#L33)
 
 Decode a standard Base64 string to a `Uint8Array`.
 

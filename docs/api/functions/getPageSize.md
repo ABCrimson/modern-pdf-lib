@@ -8,7 +8,7 @@
 
 > **getPageSize**(`doc`, `index`): `object`
 
-Defined in: [src/core/pageManipulation.ts:303](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pageManipulation.ts#L303)
+Defined in: [src/core/pageManipulation.ts:303](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/core/pageManipulation.ts#L303)
 
 Get the size of a page.
 

@@ -6,7 +6,7 @@
 
 # Interface: OptimizeResult
 
-Defined in: [src/assets/image/imageOptimize.ts:160](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/assets/image/imageOptimize.ts#L160)
+Defined in: [src/assets/image/imageOptimize.ts:160](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/assets/image/imageOptimize.ts#L160)
 
 The result of an optimization operation.
 
@@ -16,7 +16,7 @@ The result of an optimization operation.
 
 > `readonly` **channels**: `number`
 
-Defined in: [src/assets/image/imageOptimize.ts:168](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/assets/image/imageOptimize.ts#L168)
+Defined in: [src/assets/image/imageOptimize.ts:168](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/assets/image/imageOptimize.ts#L168)
 
 Number of channels in the output.
 
@@ -26,7 +26,7 @@ Number of channels in the output.
 
 > `readonly` **data**: `Uint8Array`
 
-Defined in: [src/assets/image/imageOptimize.ts:162](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/assets/image/imageOptimize.ts#L162)
+Defined in: [src/assets/image/imageOptimize.ts:162](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/assets/image/imageOptimize.ts#L162)
 
 The optimized pixel data (or compressed data if recompressed).
 
@@ -36,7 +36,7 @@ The optimized pixel data (or compressed data if recompressed).
 
 > `readonly` **format**: `"jpeg"` \| `"deflate"` \| `"raw"`
 
-Defined in: [src/assets/image/imageOptimize.ts:170](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/assets/image/imageOptimize.ts#L170)
+Defined in: [src/assets/image/imageOptimize.ts:170](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/assets/image/imageOptimize.ts#L170)
 
 The compression format applied, if any.
 
@@ -46,7 +46,7 @@ The compression format applied, if any.
 
 > `readonly` **height**: `number`
 
-Defined in: [src/assets/image/imageOptimize.ts:166](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/assets/image/imageOptimize.ts#L166)
+Defined in: [src/assets/image/imageOptimize.ts:166](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/assets/image/imageOptimize.ts#L166)
 
 Output height in pixels.
 
@@ -56,7 +56,7 @@ Output height in pixels.
 
 > `readonly` **wasOptimized**: `boolean`
 
-Defined in: [src/assets/image/imageOptimize.ts:172](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/assets/image/imageOptimize.ts#L172)
+Defined in: [src/assets/image/imageOptimize.ts:172](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/assets/image/imageOptimize.ts#L172)
 
 Whether any actual optimization was performed.
 
@@ -66,6 +66,6 @@ Whether any actual optimization was performed.
 
 > `readonly` **width**: `number`
 
-Defined in: [src/assets/image/imageOptimize.ts:164](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/assets/image/imageOptimize.ts#L164)
+Defined in: [src/assets/image/imageOptimize.ts:164](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/assets/image/imageOptimize.ts#L164)
 
 Output width in pixels.

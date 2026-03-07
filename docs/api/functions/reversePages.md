@@ -8,7 +8,7 @@
 
 > **reversePages**(`doc`): `void`
 
-Defined in: [src/core/pageManipulation.ts:346](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/core/pageManipulation.ts#L346)
+Defined in: [src/core/pageManipulation.ts:346](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/core/pageManipulation.ts#L346)
 
 Reverse the page order of the entire document.
 

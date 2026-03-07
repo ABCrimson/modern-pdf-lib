@@ -6,7 +6,7 @@
 
 # Interface: StructureElementOptions
 
-Defined in: [src/accessibility/structureTree.ts:77](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/accessibility/structureTree.ts#L77)
+Defined in: [src/accessibility/structureTree.ts:77](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/accessibility/structureTree.ts#L77)
 
 Optional attributes for a structure element.
 
@@ -16,7 +16,7 @@ Optional attributes for a structure element.
 
 > `optional` **actualText**: `string`
 
-Defined in: [src/accessibility/structureTree.ts:83](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/accessibility/structureTree.ts#L83)
+Defined in: [src/accessibility/structureTree.ts:83](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/accessibility/structureTree.ts#L83)
 
 Replacement text that may be used instead of the element's content.
 
@@ -26,7 +26,7 @@ Replacement text that may be used instead of the element's content.
 
 > `optional` **altText**: `string`
 
-Defined in: [src/accessibility/structureTree.ts:81](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/accessibility/structureTree.ts#L81)
+Defined in: [src/accessibility/structureTree.ts:81](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/accessibility/structureTree.ts#L81)
 
 Alternative text for the element (required for images by PDF/UA).
 
@@ -36,7 +36,7 @@ Alternative text for the element (required for images by PDF/UA).
 
 > `optional` **id**: `string`
 
-Defined in: [src/accessibility/structureTree.ts:87](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/accessibility/structureTree.ts#L87)
+Defined in: [src/accessibility/structureTree.ts:87](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/accessibility/structureTree.ts#L87)
 
 An optional unique identifier for the element.
 
@@ -46,7 +46,7 @@ An optional unique identifier for the element.
 
 > `optional` **language**: `string`
 
-Defined in: [src/accessibility/structureTree.ts:85](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/accessibility/structureTree.ts#L85)
+Defined in: [src/accessibility/structureTree.ts:85](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/accessibility/structureTree.ts#L85)
 
 The natural language for this element (BCP 47, e.g. `"en-US"`).
 
@@ -56,6 +56,6 @@ The natural language for this element (BCP 47, e.g. `"en-US"`).
 
 > `optional` **title**: `string`
 
-Defined in: [src/accessibility/structureTree.ts:79](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/accessibility/structureTree.ts#L79)
+Defined in: [src/accessibility/structureTree.ts:79](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/accessibility/structureTree.ts#L79)
 
 The element title (a human-readable label).

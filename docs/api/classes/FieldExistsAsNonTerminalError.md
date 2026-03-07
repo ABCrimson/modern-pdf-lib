@@ -6,7 +6,7 @@
 
 # Class: FieldExistsAsNonTerminalError
 
-Defined in: [src/errors.ts:153](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/errors.ts#L153)
+Defined in: [src/errors.ts:153](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/errors.ts#L153)
 
 Thrown when attempting to create a terminal field but a non-terminal
 node (a field with /Kids but no /FT) already uses the same name.
@@ -21,7 +21,7 @@ node (a field with /Kids but no /FT) already uses the same name.
 
 > **new FieldExistsAsNonTerminalError**(`fieldName`, `options?`): `FieldExistsAsNonTerminalError`
 
-Defined in: [src/errors.ts:155](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/errors.ts#L155)
+Defined in: [src/errors.ts:155](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/errors.ts#L155)
 
 #### Parameters
 
@@ -71,7 +71,7 @@ Defined in: node\_modules/typescript/lib/lib.es5.d.ts:1075
 
 > `readonly` **name**: `"FieldExistsAsNonTerminalError"` = `'FieldExistsAsNonTerminalError'`
 
-Defined in: [src/errors.ts:154](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/errors.ts#L154)
+Defined in: [src/errors.ts:154](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/errors.ts#L154)
 
 #### Overrides
 

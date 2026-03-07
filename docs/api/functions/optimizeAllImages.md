@@ -8,7 +8,7 @@
 
 > **optimizeAllImages**(`doc`, `options?`): `Promise`\<[`OptimizationReport`](../interfaces/OptimizationReport.md)\>
 
-Defined in: [src/assets/image/batchOptimize.ts:152](https://github.com/ABCrimson/modern-pdf-lib/blob/98bb568db730e691bd6ad27e896102c9bb79cd1c/src/assets/image/batchOptimize.ts#L152)
+Defined in: [src/assets/image/batchOptimize.ts:249](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/assets/image/batchOptimize.ts#L249)
 
 Optimize all images in a PDF document by recompressing them as JPEG.
 
