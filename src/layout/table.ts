@@ -8,13 +8,27 @@
  * raw PDF content-stream operators that can be appended directly
  * to a page's operator buffer.
  *
- * Supports colspan, rowspan, and automatic page breaks with
- * header-row repetition.
+ * Supports colspan, rowspan, rich cell content (styled text runs),
+ * text overflow modes (wrap, truncate, ellipsis, shrink), and
+ * automatic page breaks with header-row repetition.
  */
 
 import { saveState, restoreState } from '../core/operators/state.js';
-import { rectangle, fill, stroke, setLineWidth } from '../core/operators/graphics.js';
-import { beginText, endText, setFont, moveText, showText } from '../core/operators/text.js';
+import {
+  rectangle,
+  fill,
+  stroke,
+  setLineWidth,
+  clip,
+  endPath,
+} from '../core/operators/graphics.js';
+import {
+  beginText,
+  endText,
+  setFont,
+  moveText,
+  showText,
+} from '../core/operators/text.js';
 import { applyFillColor, applyStrokeColor } from '../core/operators/color.js';
 import type { Color } from '../core/operators/color.js';
 
@@ -22,8 +36,16 @@ import type { Color } from '../core/operators/color.js';
 // Public types
 // ---------------------------------------------------------------------------
 
-/** Content that can appear in a cell: plain text or a nested table. */
-export type CellContent = string | NestedTableContent;
+/** A styled text run within a cell -- allows inline style variation. */
+export interface TextRun {
+  readonly text: string;
+  readonly fontSize?: number;
+  readonly color?: Color;
+  readonly fontName?: string;
+}
+
+/** Content that can appear in a cell: plain text, styled text runs, or a nested table. */
+export type CellContent = string | TextRun[] | NestedTableContent;
 
 /** A nested table definition used as cell content. */
 export interface NestedTableContent {
@@ -49,6 +71,8 @@ export interface TableCell {
         bottom?: number;
         left?: number;
       };
+  /** Text overflow mode. Default: 'truncate'. */
+  readonly overflow?: 'wrap' | 'truncate' | 'ellipsis' | 'shrink';
 }
 
 /** Table row. */
@@ -80,17 +104,17 @@ export interface DrawTableOptions {
   readonly width: number;
   readonly rows: readonly TableRow[];
   readonly columns?: readonly TableColumn[];
-  /** PDF font resource name, default `'Helvetica'`. */
+  /** PDF font resource name, default 'Helvetica'. */
   readonly fontName?: string;
-  /** Default font size in points, default `12`. */
+  /** Default font size in points, default 12. */
   readonly fontSize?: number;
   readonly textColor?: Color;
   readonly borderColor?: Color;
-  /** Border line width in points, default `0.5`. */
+  /** Border line width in points, default 0.5. */
   readonly borderWidth?: number;
   /** Number of header rows (reserved for future page-break support). */
   readonly headerRows?: number;
-  /** Default cell padding in points, default `4`. */
+  /** Default cell padding in points, default 4. */
   readonly padding?: number;
   /** Alternating row background colors [even, odd]. */
   readonly alternateRowColors?: readonly [Color, Color];
@@ -125,16 +149,9 @@ export interface MultiPageTableResult {
 // Internal types
 // ---------------------------------------------------------------------------
 
-/**
- * Entry in the occupation grid. Stores the cell data and its origin
- * position so that spanning cells can be rendered only once.
- */
 interface OccupationEntry {
-  /** The normalized cell for this position. */
   cell: TableCell;
-  /** Row index where the span originates. */
   originRow: number;
-  /** Column index where the span originates. */
   originCol: number;
 }
 
@@ -142,32 +159,47 @@ interface OccupationEntry {
 // Internal helpers
 // ---------------------------------------------------------------------------
 
-/**
- * Check whether a cell content value is a nested table.
- */
 function isNestedTable(content: CellContent): content is NestedTableContent {
-  return typeof content === 'object' && content !== null && content.type === 'table';
+  return (
+    typeof content === 'object' &&
+    content !== null &&
+    !Array.isArray(content) &&
+    (content as NestedTableContent).type === 'table'
+  );
 }
 
-/**
- * Return the text string from cell content, or '' if it is a nested table.
- */
+function isTextRunArray(content: CellContent): content is TextRun[] {
+  return Array.isArray(content);
+}
+
 function cellText(content: CellContent): string {
-  return typeof content === 'string' ? content : '';
+  if (typeof content === 'string') return content;
+  if (isTextRunArray(content)) {
+    return content.map((r) => r.text).join('');
+  }
+  return '';
 }
 
-/**
- * Normalize a cell value to a {@link TableCell} object.
- */
+function estimateContentWidth(content: CellContent, defaultFontSize: number): number {
+  if (typeof content === 'string') {
+    return content.length * defaultFontSize * 0.5;
+  }
+  if (isTextRunArray(content)) {
+    let total = 0;
+    for (const run of content) {
+      total += run.text.length * (run.fontSize ?? defaultFontSize) * 0.5;
+    }
+    return total;
+  }
+  return 0;
+}
+
 function normalizeCell(cell: TableCell | string | undefined): TableCell {
   if (cell === undefined) return { content: '' };
   if (typeof cell === 'string') return { content: cell };
   return cell;
 }
 
-/**
- * Resolve cell padding to a four-sided object.
- */
 export function resolvePadding(
   padding:
     | number
@@ -176,12 +208,7 @@ export function resolvePadding(
   defaultPadding: number,
 ): { top: number; right: number; bottom: number; left: number } {
   if (padding === undefined) {
-    return {
-      top: defaultPadding,
-      right: defaultPadding,
-      bottom: defaultPadding,
-      left: defaultPadding,
-    };
+    return { top: defaultPadding, right: defaultPadding, bottom: defaultPadding, left: defaultPadding };
   }
   if (typeof padding === 'number') {
     return { top: padding, right: padding, bottom: padding, left: padding };
@@ -194,9 +221,6 @@ export function resolvePadding(
   };
 }
 
-/**
- * Determine the number of columns from the table definition.
- */
 function resolveColumnCount(options: DrawTableOptions): number {
   let maxCols = 0;
   for (const row of options.rows) {
@@ -210,10 +234,6 @@ function resolveColumnCount(options: DrawTableOptions): number {
   return Math.max(maxCols, 1);
 }
 
-/**
- * Parse a percentage string (e.g. '30%') to a fraction (0.3).
- * Returns `NaN` if the string is not a valid percentage.
- */
 function parsePercentage(value: string): number {
   const trimmed = value.trim();
   if (!trimmed.endsWith('%')) return NaN;
@@ -222,10 +242,6 @@ function parsePercentage(value: string): number {
   return num / 100;
 }
 
-/**
- * Estimate the width needed to fit a column's content across all rows.
- * Uses the approximation: charCount * fontSize * 0.5 + horizontal padding.
- */
 function estimateAutoFitWidth(
   colIndex: number,
   options: DrawTableOptions,
@@ -233,9 +249,7 @@ function estimateAutoFitWidth(
   defaultPadding: number,
 ): number {
   let maxWidth = 0;
-
   for (const row of options.rows) {
-    // Walk through cells respecting colSpan to find the cell at colIndex
     let ci = 0;
     for (const rawCell of row.cells) {
       const cell = normalizeCell(rawCell);
@@ -243,8 +257,7 @@ function estimateAutoFitWidth(
       if (ci === colIndex && span === 1) {
         const p = resolvePadding(cell.padding, defaultPadding);
         const cellFontSize = cell.fontSize ?? fontSize;
-        const text = cellText(cell.content);
-        const textWidth = text.length * cellFontSize * 0.5;
+        const textWidth = estimateContentWidth(cell.content, cellFontSize);
         const needed = textWidth + p.left + p.right;
         if (needed > maxWidth) maxWidth = needed;
       }
@@ -252,17 +265,9 @@ function estimateAutoFitWidth(
       if (ci > colIndex) break;
     }
   }
-
   return maxWidth || defaultPadding * 2;
 }
 
-/**
- * Calculate column widths from the table width and optional column
- * definitions.
- *
- * Resolution order: fixed → percentage → auto-fit → flex (remaining space).
- * After initial calculation, `minWidth`/`maxWidth` constraints are applied.
- */
 export function resolveColumnWidths(options: DrawTableOptions): number[] {
   const numCols = resolveColumnCount(options);
   const tableWidth = options.width;
@@ -270,17 +275,14 @@ export function resolveColumnWidths(options: DrawTableOptions): number[] {
   const defaultPadding = options.padding ?? 4;
 
   if (!options.columns || options.columns.length === 0) {
-    // Equal widths when no column definitions provided
     const colWidth = tableWidth / numCols;
     return Array.from({ length: numCols }, () => colWidth);
   }
 
   const widths: number[] = new Array<number>(numCols).fill(-1);
-  // Track which mode each column uses: 'fixed' | 'percentage' | 'autofit' | 'flex'
   const modes: string[] = new Array<string>(numCols).fill('flex');
   let consumed = 0;
 
-  // --- Pass 1: Fixed width columns ---
   for (let i = 0; i < numCols; i++) {
     const col = options.columns[i];
     if (col?.width != null && col.width > 0) {
@@ -290,7 +292,6 @@ export function resolveColumnWidths(options: DrawTableOptions): number[] {
     }
   }
 
-  // --- Pass 2: Percentage columns ---
   for (let i = 0; i < numCols; i++) {
     if (modes[i] !== 'flex') continue;
     const col = options.columns[i];
@@ -304,7 +305,6 @@ export function resolveColumnWidths(options: DrawTableOptions): number[] {
     }
   }
 
-  // --- Pass 3: Auto-fit columns ---
   for (let i = 0; i < numCols; i++) {
     if (modes[i] !== 'flex') continue;
     const col = options.columns[i];
@@ -315,7 +315,6 @@ export function resolveColumnWidths(options: DrawTableOptions): number[] {
     }
   }
 
-  // --- Pass 4: Flex columns — distribute remaining space by weight ---
   const flexIndices: number[] = [];
   let totalFlex = 0;
   for (let i = 0; i < numCols; i++) {
@@ -334,7 +333,6 @@ export function resolveColumnWidths(options: DrawTableOptions): number[] {
     widths[idx] = totalFlex > 0 ? (weight / totalFlex) * remaining : 0;
   }
 
-  // --- Pass 5: Apply minWidth / maxWidth constraints ---
   for (let i = 0; i < numCols; i++) {
     const col = options.columns[i];
     if (col?.minWidth != null && widths[i]! < col.minWidth) {
@@ -348,20 +346,50 @@ export function resolveColumnWidths(options: DrawTableOptions): number[] {
   return widths;
 }
 
-/**
- * Compute the rendered height of a nested table definition.
- * This calls `renderTable` with dummy coordinates to measure the result.
- */
 function computeNestedTableHeight(nested: NestedTableContent, width: number): number {
   const { result } = renderTable({ ...nested.table, x: 0, y: 0, width });
   return result.height;
 }
 
-/**
- * Calculate row heights based on explicit values or font metrics.
- * When a cell contains a nested table, the row height grows to
- * accommodate the nested table's rendered height plus padding.
- */
+// ---------------------------------------------------------------------------
+// Text overflow helpers
+// ---------------------------------------------------------------------------
+
+function wrapTextInternal(text: string, maxWidth: number, fontSize: number): string[] {
+  const charWidth = fontSize * 0.5;
+  const maxChars = Math.max(1, Math.floor(maxWidth / charWidth));
+  const lines: string[] = [];
+  const words = text.split(' ');
+  let currentLine = '';
+
+  for (const word of words) {
+    const candidate = currentLine ? currentLine + ' ' + word : word;
+    if (candidate.length > maxChars && currentLine) {
+      lines.push(currentLine);
+      currentLine = word;
+    } else {
+      currentLine = candidate;
+    }
+  }
+  if (currentLine) lines.push(currentLine);
+  return lines.length > 0 ? lines : [''];
+}
+
+function truncateWithEllipsis(text: string, maxWidth: number, fontSize: number): string {
+  const charWidth = fontSize * 0.5;
+  const maxChars = Math.max(1, Math.floor(maxWidth / charWidth));
+  if (text.length <= maxChars) return text;
+  const cutoff = Math.max(0, maxChars - 3);
+  return text.slice(0, cutoff) + '...';
+}
+
+function shrinkFontSize(text: string, maxWidth: number, fontSize: number): number {
+  const textWidth = text.length * fontSize * 0.5;
+  if (textWidth <= maxWidth || text.length === 0) return fontSize;
+  const needed = maxWidth / (text.length * 0.5);
+  return Math.max(4, Math.min(fontSize, needed));
+}
+
 function resolveRowHeights(
   options: DrawTableOptions,
   fontSize: number,
@@ -370,8 +398,6 @@ function resolveRowHeights(
 ): number[] {
   return options.rows.map((row) => {
     if (row.height) return row.height;
-
-    // Default: fontSize + top padding + bottom padding
     let maxHeight = defaultPadding * 2 + fontSize;
 
     let colIdx = 0;
@@ -380,7 +406,6 @@ function resolveRowHeights(
       const p = resolvePadding(c.padding, defaultPadding);
       const span = c.colSpan ?? 1;
 
-      // Compute spanned cell width
       let cellWidth = 0;
       for (let s = 0; s < span && colIdx + s < colWidths.length; s++) {
         cellWidth += colWidths[colIdx + s]!;
@@ -393,8 +418,18 @@ function resolveRowHeights(
         if (h > maxHeight) maxHeight = h;
       } else {
         const cellFontSize = c.fontSize ?? fontSize;
-        const h = p.top + p.bottom + cellFontSize;
-        if (h > maxHeight) maxHeight = h;
+        const contentText = cellText(c.content);
+
+        if (c.overflow === 'wrap' && contentText) {
+          const contentWidth = cellWidth - p.left - p.right;
+          const lines = wrapTextInternal(contentText, contentWidth, cellFontSize);
+          const lineHeight = cellFontSize * 1.2;
+          const h = p.top + p.bottom + lines.length * lineHeight;
+          if (h > maxHeight) maxHeight = h;
+        } else {
+          const h = p.top + p.bottom + cellFontSize;
+          if (h > maxHeight) maxHeight = h;
+        }
       }
 
       colIdx += span;
@@ -404,14 +439,6 @@ function resolveRowHeights(
   });
 }
 
-/**
- * Build a 2D occupation grid that maps every `[row][col]` position to
- * the cell that owns it (including its origin row/col). Positions
- * covered by a colspan/rowspan point back to the origin cell.
- *
- * Returns `null` for unoccupied positions (should not happen in a
- * well-formed table, but is handled gracefully).
- */
 function buildOccupationGrid(
   rows: readonly TableRow[],
   numCols: number,
@@ -423,26 +450,15 @@ function buildOccupationGrid(
 
   for (let r = 0; r < rows.length; r++) {
     let logicalCol = 0;
-
     for (const rawCell of rows[r]!.cells) {
-      // Skip columns already occupied by a previous row's rowspan
       while (logicalCol < numCols && grid[r]![logicalCol] !== null) {
         logicalCol++;
       }
-
       if (logicalCol >= numCols) break;
-
       const cell = normalizeCell(rawCell);
       const cs = Math.max(1, cell.colSpan ?? 1);
       const rs = Math.max(1, cell.rowSpan ?? 1);
-
-      const entry: OccupationEntry = {
-        cell,
-        originRow: r,
-        originCol: logicalCol,
-      };
-
-      // Mark all positions covered by this cell
+      const entry: OccupationEntry = { cell, originRow: r, originCol: logicalCol };
       for (let dr = 0; dr < rs; dr++) {
         for (let dc = 0; dc < cs; dc++) {
           const tr = r + dr;
@@ -452,7 +468,6 @@ function buildOccupationGrid(
           }
         }
       }
-
       logicalCol += cs;
     }
   }
@@ -460,9 +475,6 @@ function buildOccupationGrid(
   return grid;
 }
 
-/**
- * Compute the combined width of columns `startCol` to `startCol + span - 1`.
- */
 function spanWidth(colWidths: readonly number[], startCol: number, span: number): number {
   let w = 0;
   for (let i = 0; i < span && startCol + i < colWidths.length; i++) {
@@ -471,9 +483,6 @@ function spanWidth(colWidths: readonly number[], startCol: number, span: number)
   return w;
 }
 
-/**
- * Compute the combined height of rows `startRow` to `startRow + span - 1`.
- */
 function spanHeight(rowHeights: readonly number[], startRow: number, span: number): number {
   let h = 0;
   for (let i = 0; i < span && startRow + i < rowHeights.length; i++) {
@@ -482,9 +491,6 @@ function spanHeight(rowHeights: readonly number[], startRow: number, span: numbe
   return h;
 }
 
-/**
- * Compute the X offset for a column index.
- */
 function columnX(baseX: number, colWidths: readonly number[], col: number): number {
   let x = baseX;
   for (let i = 0; i < col; i++) {
@@ -493,9 +499,111 @@ function columnX(baseX: number, colWidths: readonly number[], col: number): numb
   return x;
 }
 
-/**
- * Render a single cell's background, border, and text.
- */
+function renderPlainTextOps(
+  cell: TableCell,
+  text: string,
+  cellX: number,
+  cellY: number,
+  cellWidth: number,
+  cellHeight: number,
+  fontName: string,
+  fontSize: number,
+  padding: { top: number; right: number; bottom: number; left: number },
+  textColor: Color,
+  colDef?: TableColumn,
+): string {
+  let ops = '';
+  const cellTextColor = cell.textColor ?? textColor;
+  let cellFontSize = cell.fontSize ?? fontSize;
+  const align = cell.align ?? colDef?.align ?? 'left';
+  const verticalAlign = cell.verticalAlign ?? 'top';
+  const contentWidth = cellWidth - padding.left - padding.right;
+  const overflow = cell.overflow ?? 'truncate';
+
+  if (overflow === 'wrap') {
+    const lines = wrapTextInternal(text, contentWidth, cellFontSize);
+    const lineHeight = cellFontSize * 1.2;
+
+    let startY: number;
+    if (verticalAlign === 'middle') {
+      const totalTextHeight = lines.length * lineHeight;
+      startY = cellY - cellHeight / 2 + totalTextHeight / 2 - cellFontSize;
+    } else if (verticalAlign === 'bottom') {
+      startY = cellY - cellHeight + padding.bottom + (lines.length - 1) * lineHeight;
+    } else {
+      startY = cellY - padding.top - cellFontSize;
+    }
+
+    ops += saveState();
+    ops += applyFillColor(cellTextColor);
+    for (let li = 0; li < lines.length; li++) {
+      const line = lines[li]!;
+      const approxLineWidth = line.length * cellFontSize * 0.5;
+      let textX: number;
+      if (align === 'center') {
+        textX = cellX + padding.left + Math.max(0, contentWidth - approxLineWidth) / 2;
+      } else if (align === 'right') {
+        textX = cellX + cellWidth - padding.right - approxLineWidth;
+      } else {
+        textX = cellX + padding.left;
+      }
+      const textY = startY - li * lineHeight;
+      ops += beginText();
+      ops += setFont(fontName, cellFontSize);
+      ops += moveText(textX, textY);
+      ops += showText(line);
+      ops += endText();
+    }
+    ops += restoreState();
+  } else {
+    let displayText = text;
+
+    if (overflow === 'ellipsis') {
+      displayText = truncateWithEllipsis(text, contentWidth, cellFontSize);
+    } else if (overflow === 'shrink') {
+      cellFontSize = shrinkFontSize(text, contentWidth, cellFontSize);
+    }
+
+    const approxTextWidth = displayText.length * cellFontSize * 0.5;
+
+    let textX: number;
+    if (align === 'center') {
+      textX = cellX + padding.left + Math.max(0, contentWidth - approxTextWidth) / 2;
+    } else if (align === 'right') {
+      textX = cellX + cellWidth - padding.right - approxTextWidth;
+    } else {
+      textX = cellX + padding.left;
+    }
+
+    let textY: number;
+    if (verticalAlign === 'middle') {
+      textY = cellY - cellHeight / 2 - cellFontSize / 2 + cellFontSize * 0.2;
+    } else if (verticalAlign === 'bottom') {
+      textY = cellY - cellHeight + padding.bottom;
+    } else {
+      textY = cellY - padding.top - cellFontSize;
+    }
+
+    ops += saveState();
+
+    if (overflow === 'truncate') {
+      ops += rectangle(cellX, cellY - cellHeight, cellWidth, cellHeight);
+      ops += clip();
+      ops += endPath();
+    }
+
+    ops += applyFillColor(cellTextColor);
+    ops += beginText();
+    ops += setFont(fontName, cellFontSize);
+    ops += moveText(textX, textY);
+    ops += showText(displayText);
+    ops += endText();
+    ops += restoreState();
+  }
+
+  return ops;
+}
+
 function renderCellOps(
   cell: TableCell,
   cellX: number,
@@ -513,7 +621,6 @@ function renderCellOps(
   let ops = '';
   const padding = resolvePadding(cell.padding, defaultPadding);
 
-  // Cell background
   if (cell.backgroundColor) {
     ops += saveState();
     ops += applyFillColor(cell.backgroundColor);
@@ -522,7 +629,6 @@ function renderCellOps(
     ops += restoreState();
   }
 
-  // Cell border
   if (borderWidth > 0) {
     ops += saveState();
     ops += applyStrokeColor(borderColor);
@@ -532,61 +638,64 @@ function renderCellOps(
     ops += restoreState();
   }
 
-  // Cell content
-  const text = cellText(cell.content);
-  if (isNestedTable(cell.content)) {
-    // Render nested table inside the cell
+  const content = cell.content;
+  if (isNestedTable(content)) {
     const nestedWidth = cellWidth - padding.left - padding.right;
     const nestedX = cellX + padding.left;
     const nestedY = cellY - padding.top;
     const { ops: nestedOps } = renderTable({
-      ...cell.content.table,
+      ...content.table,
       x: nestedX,
       y: nestedY,
       width: Math.max(0, nestedWidth),
     });
     ops += nestedOps;
-  } else if (text) {
-    const cellTextColor = cell.textColor ?? textColor;
-    const cellFontSize = cell.fontSize ?? fontSize;
-    const align = cell.align ?? colDef?.align ?? 'left';
-    const verticalAlign = cell.verticalAlign ?? 'top';
+  } else if (isTextRunArray(content)) {
+    if (content.length > 0) {
+      const cellTextColor = cell.textColor ?? textColor;
+      const cellFontSize = cell.fontSize ?? fontSize;
+      const align = cell.align ?? colDef?.align ?? 'left';
+      const verticalAlign = cell.verticalAlign ?? 'top';
+      const approxTextWidth = estimateContentWidth(content, cellFontSize);
+      const contentWidth = cellWidth - padding.left - padding.right;
 
-    // Approximate text width: char count * fontSize * 0.5
-    const approxTextWidth = text.length * cellFontSize * 0.5;
+      let textXPos: number;
+      if (align === 'center') {
+        textXPos = cellX + padding.left + Math.max(0, contentWidth - approxTextWidth) / 2;
+      } else if (align === 'right') {
+        textXPos = cellX + cellWidth - padding.right - approxTextWidth;
+      } else {
+        textXPos = cellX + padding.left;
+      }
 
-    // Available content area within padding
-    const contentWidth = cellWidth - padding.left - padding.right;
+      let textYPos: number;
+      if (verticalAlign === 'middle') {
+        textYPos = cellY - cellHeight / 2 - cellFontSize / 2 + cellFontSize * 0.2;
+      } else if (verticalAlign === 'bottom') {
+        textYPos = cellY - cellHeight + padding.bottom;
+      } else {
+        textYPos = cellY - padding.top - cellFontSize;
+      }
 
-    // Horizontal alignment
-    let textX: number;
-    if (align === 'center') {
-      textX = cellX + padding.left + Math.max(0, contentWidth - approxTextWidth) / 2;
-    } else if (align === 'right') {
-      textX = cellX + cellWidth - padding.right - approxTextWidth;
-    } else {
-      textX = cellX + padding.left;
+      ops += saveState();
+      ops += beginText();
+      ops += moveText(textXPos, textYPos);
+      for (const run of content) {
+        ops += applyFillColor(run.color ?? cellTextColor);
+        ops += setFont(run.fontName ?? fontName, run.fontSize ?? cellFontSize);
+        ops += showText(run.text);
+      }
+      ops += endText();
+      ops += restoreState();
     }
-
-    // Vertical alignment
-    let textY: number;
-    if (verticalAlign === 'middle') {
-      textY = cellY - cellHeight / 2 - cellFontSize / 2 + cellFontSize * 0.2;
-    } else if (verticalAlign === 'bottom') {
-      textY = cellY - cellHeight + padding.bottom;
-    } else {
-      // top
-      textY = cellY - padding.top - cellFontSize;
+  } else {
+    const text = typeof content === 'string' ? content : '';
+    if (text) {
+      ops += renderPlainTextOps(
+        cell, text, cellX, cellY, cellWidth, cellHeight,
+        fontName, fontSize, padding, textColor, colDef,
+      );
     }
-
-    ops += saveState();
-    ops += applyFillColor(cellTextColor);
-    ops += beginText();
-    ops += setFont(fontName, cellFontSize);
-    ops += moveText(textX, textY);
-    ops += showText(text);
-    ops += endText();
-    ops += restoreState();
   }
 
   return ops;
@@ -596,17 +705,6 @@ function renderCellOps(
 // Core renderer
 // ---------------------------------------------------------------------------
 
-/**
- * Render a table to PDF content-stream operators.
- *
- * The table is rendered top-down from `(x, y)` — the top-left corner.
- * In PDF coordinate space, y decreases as rows are added downward.
- *
- * @param options  Table configuration including position, size, rows,
- *                 columns, and styling.
- * @returns        An object containing the raw operator string (`ops`)
- *                 and a result summary (`result`).
- */
 export function renderTable(options: DrawTableOptions): {
   ops: string;
   result: TableRenderResult;
@@ -637,7 +735,7 @@ export function renderTable(options: DrawTableOptions): {
     // Determine the effective row background color:
     // 1. Explicit row backgroundColor always wins
     // 2. headerBackgroundColor for header rows
-    // 3. alternateRowColors for data rows (index relative to data rows)
+    // 3. alternateRowColors for data rows
     let effectiveRowBg: Color | undefined = row.backgroundColor;
     if (!effectiveRowBg) {
       if (isHeader && options.headerBackgroundColor) {
@@ -648,7 +746,6 @@ export function renderTable(options: DrawTableOptions): {
       }
     }
 
-    // Row background — spans the full table width
     if (effectiveRowBg) {
       ops += saveState();
       ops += applyFillColor(effectiveRowBg);
@@ -657,16 +754,12 @@ export function renderTable(options: DrawTableOptions): {
       ops += restoreState();
     }
 
-    // Determine effective text color for this row
     const rowTextColor =
       isHeader && options.headerTextColor ? options.headerTextColor : textColor;
 
-    // Render cells using the occupation grid
     for (let colIdx = 0; colIdx < numCols; colIdx++) {
       const entry = grid[rowIdx]![colIdx];
       if (!entry) continue;
-
-      // Only render at the origin position
       if (entry.originRow !== rowIdx || entry.originCol !== colIdx) continue;
 
       const cell = entry.cell;
@@ -676,22 +769,11 @@ export function renderTable(options: DrawTableOptions): {
       const cellX = columnX(options.x, colWidths, colIdx);
       const cellWidth = spanWidth(colWidths, colIdx, cs);
       const cellHeight = spanHeight(rowHeights, rowIdx, rs);
-
       const colDef = options.columns?.[colIdx];
 
       ops += renderCellOps(
-        cell,
-        cellX,
-        currentY,
-        cellWidth,
-        cellHeight,
-        fontName,
-        fontSize,
-        defaultPadding,
-        borderWidth,
-        borderColor,
-        rowTextColor,
-        colDef,
+        cell, cellX, currentY, cellWidth, cellHeight,
+        fontName, fontSize, defaultPadding, borderWidth, borderColor, rowTextColor, colDef,
       );
     }
 
@@ -723,16 +805,7 @@ export function renderTable(options: DrawTableOptions): {
  * would exceed the available vertical space.
  *
  * Header rows (specified by `options.headerRows`) are repeated at the
- * top of each new page. Rows are never split across pages — if a row
- * does not fit, the entire row moves to the next page.
- *
- * @param options         Table configuration.
- * @param bottomMargin    Minimum Y coordinate before triggering a page
- *                        break. When `currentY - rowHeight` would go
- *                        below this value, a new page is started.
- *                        Default: `40`.
- * @returns               An object containing per-page operator strings
- *                        and the overall table result.
+ * top of each new page. Rows are never split across pages.
  */
 export function renderMultiPageTable(
   options: DrawTableOptions,
@@ -758,29 +831,21 @@ export function renderMultiPageTable(
   let currentY = options.y;
   let totalHeight = 0;
 
-  /**
-   * Render header rows into `currentPageOps` and advance `currentY`.
-   */
   function renderHeaders(): void {
     for (let hIdx = 0; hIdx < headerRowCount && hIdx < options.rows.length; hIdx++) {
       const hRow = options.rows[hIdx]!;
       const hRowHeight = rowHeights[hIdx]!;
 
-      // Row background
       if (hRow.backgroundColor) {
         currentPageOps += saveState();
         currentPageOps += applyFillColor(hRow.backgroundColor);
         currentPageOps += rectangle(
-          options.x,
-          currentY - hRowHeight,
-          options.width,
-          hRowHeight,
+          options.x, currentY - hRowHeight, options.width, hRowHeight,
         );
         currentPageOps += fill();
         currentPageOps += restoreState();
       }
 
-      // Render header cells using the grid
       for (let colIdx = 0; colIdx < numCols; colIdx++) {
         const entry = grid[hIdx]![colIdx];
         if (!entry) continue;
@@ -788,28 +853,16 @@ export function renderMultiPageTable(
 
         const cell = entry.cell;
         const cs = Math.max(1, cell.colSpan ?? 1);
-        // For header rows, limit rowspan to header range
         const rs = Math.min(Math.max(1, cell.rowSpan ?? 1), headerRowCount - hIdx);
 
         const cellX = columnX(options.x, colWidths, colIdx);
         const cellWidth = spanWidth(colWidths, colIdx, cs);
         const cellHeight = spanHeight(rowHeights, hIdx, rs);
-
         const colDef = options.columns?.[colIdx];
 
         currentPageOps += renderCellOps(
-          cell,
-          cellX,
-          currentY,
-          cellWidth,
-          cellHeight,
-          fontName,
-          fontSize,
-          defaultPadding,
-          borderWidth,
-          borderColor,
-          textColor,
-          colDef,
+          cell, cellX, currentY, cellWidth, cellHeight,
+          fontName, fontSize, defaultPadding, borderWidth, borderColor, textColor, colDef,
         );
       }
 
@@ -817,50 +870,35 @@ export function renderMultiPageTable(
     }
   }
 
-  /**
-   * Finalize the current page and start a new one.
-   * Re-renders header rows on the new page.
-   */
   function startNewPage(): void {
-    // Close current page
     currentPageOps += restoreState();
     pages.push({ ops: currentPageOps, pageIndex: pages.length });
 
-    // Start fresh page
     currentPageOps = saveState();
     currentY = options.y;
 
-    // Re-render header rows on the new page
     renderHeaders();
   }
 
-  // Render all rows
   for (let rowIdx = 0; rowIdx < options.rows.length; rowIdx++) {
     const row = options.rows[rowIdx]!;
     const rowHeight = rowHeights[rowIdx]!;
 
-    // Check if this row fits on the current page
     if (currentY - rowHeight < bottomMargin && rowIdx > 0) {
       startNewPage();
-      // Header rows are already re-rendered; skip them in normal iteration
       if (rowIdx < headerRowCount) continue;
     }
 
-    // Row background
     if (row.backgroundColor) {
       currentPageOps += saveState();
       currentPageOps += applyFillColor(row.backgroundColor);
       currentPageOps += rectangle(
-        options.x,
-        currentY - rowHeight,
-        options.width,
-        rowHeight,
+        options.x, currentY - rowHeight, options.width, rowHeight,
       );
       currentPageOps += fill();
       currentPageOps += restoreState();
     }
 
-    // Render cells using the occupation grid
     for (let colIdx = 0; colIdx < numCols; colIdx++) {
       const entry = grid[rowIdx]![colIdx];
       if (!entry) continue;
@@ -873,22 +911,11 @@ export function renderMultiPageTable(
       const cellX = columnX(options.x, colWidths, colIdx);
       const cellWidth = spanWidth(colWidths, colIdx, cs);
       const cellHeight = spanHeight(rowHeights, rowIdx, rs);
-
       const colDef = options.columns?.[colIdx];
 
       currentPageOps += renderCellOps(
-        cell,
-        cellX,
-        currentY,
-        cellWidth,
-        cellHeight,
-        fontName,
-        fontSize,
-        defaultPadding,
-        borderWidth,
-        borderColor,
-        textColor,
-        colDef,
+        cell, cellX, currentY, cellWidth, cellHeight,
+        fontName, fontSize, defaultPadding, borderWidth, borderColor, textColor, colDef,
       );
     }
 
@@ -896,7 +923,6 @@ export function renderMultiPageTable(
     totalHeight += rowHeight;
   }
 
-  // Finalize last page
   currentPageOps += restoreState();
   pages.push({ ops: currentPageOps, pageIndex: pages.length });
 
