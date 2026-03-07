@@ -95,6 +95,7 @@ export default defineConfig({
             { text: 'Performance', link: '/guide/performance' },
             { text: 'Image Optimization', link: '/guide/image-optimization' },
             { text: 'Annotations', link: '/guide/annotations' },
+            { text: 'Barcodes & QR Codes', link: '/guide/barcodes' },
             { text: 'Signatures', link: '/guide/signatures' },
             { text: 'Accessibility', link: '/guide/accessibility' },
             { text: 'Cookbook', link: '/guide/cookbook' },
