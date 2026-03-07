@@ -2095,10 +2095,10 @@ export class PdfPage {
 
     const matrix = encodeQrCode(data, ec);
     const ops = qrCodeToOperators(matrix, x, y, {
-      moduleSize: options.moduleSize,
-      quietZone: options.quietZone,
-      color: options.color,
-      backgroundColor: options.backgroundColor,
+      ...(options.moduleSize !== undefined && { moduleSize: options.moduleSize }),
+      ...(options.quietZone !== undefined && { quietZone: options.quietZone }),
+      ...(options.color !== undefined && { color: options.color }),
+      ...(options.backgroundColor !== undefined && { backgroundColor: options.backgroundColor }),
     });
 
     this.ops += ops;

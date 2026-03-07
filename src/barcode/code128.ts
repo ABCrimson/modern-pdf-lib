@@ -320,10 +320,8 @@ export function encodeCode128Values(data: string): readonly number[] {
         continue;
       }
       if (digitsAhead >= 2 && digitsAhead % 2 === 0) {
-        if (currentSet !== 'C') {
-          values.push(CODE_C);
-          currentSet = 'C';
-        }
+        values.push(CODE_C);
+        currentSet = 'C';
         continue;
       }
     }

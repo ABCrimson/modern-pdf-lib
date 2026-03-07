@@ -412,10 +412,10 @@ export function extractJpegMetadata(jpegBytes: Uint8Array): JpegMetadata {
   }
 
   return {
-    orientation,
-    dpiX,
-    dpiY,
-    copyright,
+    ...(orientation !== undefined && { orientation }),
+    ...(dpiX !== undefined && { dpiX }),
+    ...(dpiY !== undefined && { dpiY }),
+    ...(copyright !== undefined && { copyright }),
     appMarkers,
   };
 }

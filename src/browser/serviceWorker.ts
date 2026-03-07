@@ -118,7 +118,7 @@ export function createPdfResponse(
     headers['content-disposition'] = `attachment; filename="${filename}"`;
   }
 
-  return new Response(bytes, {
+  return new Response(bytes as unknown as BodyInit, {
     status: 200,
     headers,
   });

@@ -307,7 +307,7 @@ export function applyOverflow(
     case 'ellipsis': {
       const result = ellipsisText(text, availableWidth, fontSize, {
         avgCharWidth,
-        ellipsisChar: options?.ellipsisChar,
+        ...(options?.ellipsisChar !== undefined && { ellipsisChar: options.ellipsisChar }),
       });
       return {
         lines: [result],
@@ -319,7 +319,7 @@ export function applyOverflow(
     case 'shrink': {
       const newSize = shrinkFontSize(text, availableWidth, fontSize, {
         avgCharWidth,
-        minFontSize: options?.minFontSize,
+        ...(options?.minFontSize !== undefined && { minFontSize: options.minFontSize }),
       });
       return {
         lines: [text],

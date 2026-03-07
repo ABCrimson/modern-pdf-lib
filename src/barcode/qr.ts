@@ -404,7 +404,7 @@ class BitBuffer {
     const bytes = new Uint8Array(byteLen);
     for (let i = 0; i < this.bits.length; i++) {
       if (this.bits[i]) {
-        bytes[i >>> 3] |= 0x80 >>> (i & 7);
+        bytes[i >>> 3]! |= 0x80 >>> (i & 7);
       }
     }
     return bytes;

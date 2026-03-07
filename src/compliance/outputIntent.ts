@@ -135,7 +135,7 @@ export function buildOutputIntent(
   const subtype = options.subtype ?? '/GTS_PDFA1';
   const normalizedSubtype = subtype.startsWith('/') ? subtype : `/${subtype}`;
 
-  const intentDict = new PdfDict(new Map([
+  const intentDict = new PdfDict([
     ['/Type', PdfName.of('/OutputIntent')],
     ['/S', PdfName.of(normalizedSubtype)],
     ['/OutputCondition', PdfString.literal(options.outputCondition ?? 'sRGB')],
@@ -144,7 +144,7 @@ export function buildOutputIntent(
     )],
     ['/RegistryName', PdfString.literal(options.registryName ?? 'http://www.color.org')],
     ['/DestOutputProfile', profileRef],
-  ]));
+  ]);
 
   return registry.register(intentDict);
 }

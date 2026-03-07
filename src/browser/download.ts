@@ -28,7 +28,7 @@
  * ```
  */
 export function saveAsDownload(bytes: Uint8Array, filename: string = 'document.pdf'): void {
-  const blob = new Blob([bytes], { type: 'application/pdf' });
+  const blob = new Blob([bytes as unknown as BlobPart], { type: 'application/pdf' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
@@ -58,7 +58,7 @@ export function saveAsDownload(bytes: Uint8Array, filename: string = 'document.p
  * ```
  */
 export function saveAsBlob(bytes: Uint8Array): Blob {
-  return new Blob([bytes], { type: 'application/pdf' });
+  return new Blob([bytes as unknown as BlobPart], { type: 'application/pdf' });
 }
 
 /**
@@ -82,7 +82,7 @@ export function saveAsBlob(bytes: Uint8Array): Blob {
  * ```
  */
 export function saveAsDataUrl(bytes: Uint8Array): string {
-  return URL.createObjectURL(new Blob([bytes], { type: 'application/pdf' }));
+  return URL.createObjectURL(new Blob([bytes as unknown as BlobPart], { type: 'application/pdf' }));
 }
 
 /**
@@ -98,7 +98,7 @@ export function saveAsDataUrl(bytes: Uint8Array): string {
  * ```
  */
 export function openInNewTab(bytes: Uint8Array, target: string = '_blank'): Window | null {
-  const url = URL.createObjectURL(new Blob([bytes], { type: 'application/pdf' }));
+  const url = URL.createObjectURL(new Blob([bytes as unknown as BlobPart], { type: 'application/pdf' }));
   const win = globalThis.open(url, target);
   // Revoke after a delay to allow the tab to load
   setTimeout(() => URL.revokeObjectURL(url), 60_000);

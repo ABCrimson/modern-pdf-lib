@@ -145,7 +145,7 @@ export function detectRuntime(): RuntimeKind {
   if (
     typeof (globalThis as Record<string, unknown>)['ServiceWorkerGlobalScope'] === 'function' &&
     typeof self !== 'undefined' &&
-    self instanceof (globalThis as Record<string, unknown>)['ServiceWorkerGlobalScope'] as boolean
+    self instanceof ((globalThis as Record<string, unknown>)['ServiceWorkerGlobalScope'] as new (...args: unknown[]) => unknown)
   ) {
     return 'service-worker';
   }
@@ -423,13 +423,13 @@ export async function loadWasmModuleStreaming(name: string): Promise<WebAssembly
 
   // Check if pre-provided bytes are available -- compile directly
   if (globalConfig.moduleBytes?.[name]) {
-    return WebAssembly.compile(globalConfig.moduleBytes[name]!);
+    return WebAssembly.compile(globalConfig.moduleBytes[name]! as BufferSource);
   }
 
   // Check module cache -- compile from cached bytes
   const cached = moduleCache.get(name);
   if (cached) {
-    return WebAssembly.compile(cached);
+    return WebAssembly.compile(cached as BufferSource);
   }
 
   const runtime = detectRuntime();
@@ -446,7 +446,7 @@ export async function loadWasmModuleStreaming(name: string): Promise<WebAssembly
 
   // Fallback: load bytes then compile
   const bytes = await loadWasmModule(name);
-  return WebAssembly.compile(bytes);
+  return WebAssembly.compile(bytes as BufferSource);
 }
 
 /**
@@ -480,15 +480,15 @@ export async function instantiateWasmModuleStreaming(
 
   // Pre-provided bytes
   if (globalConfig.moduleBytes?.[name]) {
-    const { instance } = await WebAssembly.instantiate(globalConfig.moduleBytes[name]!, imports);
-    return instance;
+    const result = await WebAssembly.instantiate(globalConfig.moduleBytes[name]! as BufferSource, imports);
+    return result.instance;
   }
 
   // Cached bytes
   const cached = moduleCache.get(name);
   if (cached) {
-    const { instance } = await WebAssembly.instantiate(cached, imports);
-    return instance;
+    const result = await WebAssembly.instantiate(cached as BufferSource, imports);
+    return result.instance;
   }
 
   const runtime = detectRuntime();
@@ -506,8 +506,8 @@ export async function instantiateWasmModuleStreaming(
 
   // Fallback: load bytes then instantiate
   const bytes = await loadWasmModule(name);
-  const { instance } = await WebAssembly.instantiate(bytes, imports);
-  return instance;
+  const result = await WebAssembly.instantiate(bytes as BufferSource, imports);
+  return result.instance;
 }
 
 /**
