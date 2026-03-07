@@ -641,8 +641,8 @@ export type { LinearizationOptions } from './core/linearization.js';
 // PDF/A compliance
 // ---------------------------------------------------------------------------
 
-export { validatePdfA, enforcePdfA, detectTransparency, flattenTransparency, generateSrgbIccProfile, SRGB_ICC_PROFILE, buildOutputIntent, generateWinAnsiToUnicodeCmap, generateSymbolToUnicodeCmap, generateZapfDingbatsToUnicodeCmap, getToUnicodeCmap } from './compliance/index.js';
-export type { PdfALevel, PdfAValidationResult, PdfAIssue, TransparencyInfo, TransparencyFinding, OutputIntentOptions } from './compliance/index.js';
+export { validatePdfA, enforcePdfA, detectTransparency, flattenTransparency, generateSrgbIccProfile, SRGB_ICC_PROFILE, buildOutputIntent, generateWinAnsiToUnicodeCmap, generateSymbolToUnicodeCmap, generateZapfDingbatsToUnicodeCmap, getToUnicodeCmap, getProfile, getSupportedLevels, isValidLevel, extractXmpMetadata, parseXmpPdfAMetadata, validateXmpMetadata } from './compliance/index.js';
+export type { PdfALevel, PdfAValidationResult, PdfAIssue, TransparencyInfo, TransparencyFinding, OutputIntentOptions, PdfAProfile, XmpValidationResult, XmpIssue, ParsedXmpMetadata } from './compliance/index.js';
 
 // ---------------------------------------------------------------------------
 // Layers (Optional Content Groups)

@@ -20,3 +20,24 @@ export {
   generateZapfDingbatsToUnicodeCmap,
   getToUnicodeCmap,
 } from './toUnicodeCmap.js';
+
+export { getProfile, getSupportedLevels, isValidLevel } from './pdfAProfiles.js';
+export type { PdfAProfile } from './pdfAProfiles.js';
+
+export {
+  extractXmpMetadata,
+  parseXmpMetadata as parseXmpPdfAMetadata,
+  validateXmpMetadata,
+} from './xmpValidator.js';
+export type {
+  XmpValidationResult,
+  XmpIssue,
+  ParsedXmpMetadata,
+} from './xmpValidator.js';
+
+export { createAssociatedFile, buildAfArray } from './associatedFiles.js';
+export type {
+  AFRelationship,
+  AssociatedFileOptions,
+  AssociatedFileResult,
+} from './associatedFiles.js';
