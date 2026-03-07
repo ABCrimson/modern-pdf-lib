@@ -742,6 +742,9 @@ export type { ImageAnalysis, AnalysisReport } from './assets/image/compressionAn
 export { analyzeJpegMarkers } from './assets/image/jpegMarkers.js';
 export type { JpegMarkerInfo } from './assets/image/jpegMarkers.js';
 
+export { extractJpegMetadata, injectJpegMetadata } from './assets/image/imageMetadata.js';
+export type { JpegMetadata } from './assets/image/imageMetadata.js';
+
 // ---------------------------------------------------------------------------
 // Base64 utilities
 // ---------------------------------------------------------------------------
