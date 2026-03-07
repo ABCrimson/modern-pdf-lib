@@ -747,6 +747,24 @@ export { extractJpegMetadata, injectJpegMetadata } from './assets/image/imageMet
 export type { JpegMetadata } from './assets/image/imageMetadata.js';
 
 // ---------------------------------------------------------------------------
+// WASM loader (streaming compilation, runtime detection, configuration)
+// ---------------------------------------------------------------------------
+
+export {
+  loadWasmModule,
+  loadWasmModuleStreaming,
+  instantiateWasmModuleStreaming,
+  configureWasmLoader,
+  provideWasmBytes,
+  isWasmModuleCached,
+  clearWasmCache,
+  resetWasmLoader,
+  detectRuntime,
+  isWasmDisabled,
+} from './wasm/loader.js';
+export type { RuntimeKind, WasmLoaderConfig } from './wasm/loader.js';
+
+// ---------------------------------------------------------------------------
 // Browser utilities (Web Worker API)
 // ---------------------------------------------------------------------------
 

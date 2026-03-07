@@ -11,5 +11,8 @@
 // Re-export everything from the main entry
 export * from './index.js';
 
-// Browser-specific utilities (will be added in v0.16.9)
-// export { saveAsDownload, saveAsBlob, saveAsDataUrl } from './browser/download.js';
+// Service Worker helpers for offline PDF generation
+export { handlePdfRequest, createPdfResponse, isCacheAvailable } from './browser/serviceWorker.js';
+
+// Browser-specific utilities
+export { saveAsDownload, saveAsBlob, saveAsDataUrl, openInNewTab } from './browser/download.js';

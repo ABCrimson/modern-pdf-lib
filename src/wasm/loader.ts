@@ -23,7 +23,7 @@
 // ---------------------------------------------------------------------------
 
 /** Supported runtime environments. */
-export type RuntimeKind = 'browser' | 'node' | 'deno' | 'bun' | 'workerd' | 'unknown';
+export type RuntimeKind = 'browser' | 'node' | 'deno' | 'bun' | 'workerd' | 'service-worker' | 'unknown';
 
 /** Configuration for custom WASM module paths. */
 export interface WasmLoaderConfig {
@@ -58,6 +58,18 @@ export interface WasmLoaderConfig {
    * - Testing
    */
   moduleBytes?: Record<string, Uint8Array> | undefined;
+
+  /**
+   * Disable all WASM loading.
+   *
+   * When set to `true`, all calls to `loadWasmModule()` will throw
+   * an error, forcing the library to use pure-JS fallback
+   * implementations instead.
+   *
+   * This is useful for environments with strict Content Security
+   * Policies that do not allow `wasm-unsafe-eval`.
+   */
+  disableWasm?: boolean | undefined;
 }
 
 /** Map of module names to their default `.wasm` filenames. */
@@ -126,6 +138,16 @@ export function detectRuntime(): RuntimeKind {
     typeof (((globalThis as Record<string, unknown>)['process'] as Record<string, unknown>)?.['versions'] as Record<string, unknown>)?.['node'] === 'string'
   ) {
     return 'node';
+  }
+
+  // Service Worker (must come before the generic browser check —
+  // Service Workers have `self` and `fetch` but NO `document` or `window`)
+  if (
+    typeof (globalThis as Record<string, unknown>)['ServiceWorkerGlobalScope'] === 'function' &&
+    typeof self !== 'undefined' &&
+    self instanceof (globalThis as Record<string, unknown>)['ServiceWorkerGlobalScope'] as boolean
+  ) {
+    return 'service-worker';
   }
 
   // Browser
@@ -249,6 +271,7 @@ function resolveModulePath(
   // 3. Best-effort resolution relative to the package
   switch (runtime) {
     case 'browser':
+    case 'service-worker':
       // Assume WASM files are served from /wasm/ path
       return `/wasm/${filename}`;
 
@@ -313,6 +336,13 @@ function resolveModulePath(
  * ```
  */
 export async function loadWasmModule(name: string): Promise<Uint8Array> {
+  // 0. Check if WASM is globally disabled
+  if (globalConfig.disableWasm) {
+    throw new Error(
+      'WASM loading is disabled via configureWasmLoader({ disableWasm: true }). Using pure-JS fallbacks.',
+    );
+  }
+
   // 1. Check cache
   const cached = moduleCache.get(name);
   if (cached) return cached;
@@ -343,6 +373,7 @@ export async function loadWasmModule(name: string): Promise<Uint8Array> {
     case 'deno':
     case 'bun':
     case 'browser':
+    case 'service-worker':
       // These runtimes support fetch() natively
       bytes = await loadViaFetch(modulePath);
       break;
@@ -363,6 +394,120 @@ export async function loadWasmModule(name: string): Promise<Uint8Array> {
   // 4. Cache and return
   moduleCache.set(name, bytes);
   return bytes;
+}
+
+/**
+ * Load and compile a WASM module using streaming compilation when available.
+ *
+ * In browsers with `WebAssembly.compileStreaming`, this compiles the module
+ * while the response is still downloading, significantly reducing load time.
+ * Falls back to `WebAssembly.compile` on the raw bytes when streaming is
+ * not available (Node.js, older browsers).
+ *
+ * @param name - Module name (e.g., 'libdeflate', 'png').
+ * @returns A compiled WebAssembly.Module ready for instantiation.
+ *
+ * @example
+ * ```ts
+ * const module = await loadWasmModuleStreaming('libdeflate');
+ * const instance = await WebAssembly.instantiate(module, imports);
+ * ```
+ */
+export async function loadWasmModuleStreaming(name: string): Promise<WebAssembly.Module> {
+  // Check if WASM is globally disabled
+  if (globalConfig.disableWasm) {
+    throw new Error(
+      'WASM loading is disabled via configureWasmLoader({ disableWasm: true }). Using pure-JS fallbacks.',
+    );
+  }
+
+  // Check if pre-provided bytes are available -- compile directly
+  if (globalConfig.moduleBytes?.[name]) {
+    return WebAssembly.compile(globalConfig.moduleBytes[name]!);
+  }
+
+  // Check module cache -- compile from cached bytes
+  const cached = moduleCache.get(name);
+  if (cached) {
+    return WebAssembly.compile(cached);
+  }
+
+  const runtime = detectRuntime();
+  const modulePath = resolveModulePath(name, globalConfig, runtime);
+
+  // In browser context with compileStreaming available, use streaming
+  if (
+    (runtime === 'browser' || runtime === 'service-worker') &&
+    typeof WebAssembly.compileStreaming === 'function'
+  ) {
+    const response = fetch(modulePath);
+    return WebAssembly.compileStreaming(response);
+  }
+
+  // Fallback: load bytes then compile
+  const bytes = await loadWasmModule(name);
+  return WebAssembly.compile(bytes);
+}
+
+/**
+ * Load, compile, and instantiate a WASM module with streaming when available.
+ *
+ * In browsers with `WebAssembly.instantiateStreaming`, this compiles and
+ * instantiates the module while the response is still downloading.
+ * Falls back to `WebAssembly.instantiate` on the raw bytes when streaming
+ * is not available (Node.js, older browsers).
+ *
+ * @param name    - Module name (e.g., 'libdeflate', 'png').
+ * @param imports - WebAssembly import object.
+ * @returns An instantiated WebAssembly module.
+ *
+ * @example
+ * ```ts
+ * const instance = await instantiateWasmModuleStreaming('libdeflate', {});
+ * const { compress } = instance.exports;
+ * ```
+ */
+export async function instantiateWasmModuleStreaming(
+  name: string,
+  imports: WebAssembly.Imports = {},
+): Promise<WebAssembly.Instance> {
+  // Check if WASM is globally disabled
+  if (globalConfig.disableWasm) {
+    throw new Error(
+      'WASM loading is disabled via configureWasmLoader({ disableWasm: true }). Using pure-JS fallbacks.',
+    );
+  }
+
+  // Pre-provided bytes
+  if (globalConfig.moduleBytes?.[name]) {
+    const { instance } = await WebAssembly.instantiate(globalConfig.moduleBytes[name]!, imports);
+    return instance;
+  }
+
+  // Cached bytes
+  const cached = moduleCache.get(name);
+  if (cached) {
+    const { instance } = await WebAssembly.instantiate(cached, imports);
+    return instance;
+  }
+
+  const runtime = detectRuntime();
+  const modulePath = resolveModulePath(name, globalConfig, runtime);
+
+  // In browser context with instantiateStreaming available, use streaming
+  if (
+    (runtime === 'browser' || runtime === 'service-worker') &&
+    typeof WebAssembly.instantiateStreaming === 'function'
+  ) {
+    const response = fetch(modulePath);
+    const { instance } = await WebAssembly.instantiateStreaming(response, imports);
+    return instance;
+  }
+
+  // Fallback: load bytes then instantiate
+  const bytes = await loadWasmModule(name);
+  const { instance } = await WebAssembly.instantiate(bytes, imports);
+  return instance;
 }
 
 /**
@@ -405,6 +550,21 @@ export function isWasmModuleCached(name: string): boolean {
  */
 export function clearWasmCache(): void {
   moduleCache.clear();
+}
+
+/**
+ * Check whether WASM loading has been globally disabled.
+ *
+ * @returns `true` if `configureWasmLoader({ disableWasm: true })` was called.
+ *
+ * @example
+ * ```ts
+ * configureWasmLoader({ disableWasm: true });
+ * console.log(isWasmDisabled()); // true
+ * ```
+ */
+export function isWasmDisabled(): boolean {
+  return globalConfig.disableWasm === true;
 }
 
 /**

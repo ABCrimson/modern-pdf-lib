@@ -101,6 +101,12 @@ export default defineConfig({
             { text: 'Troubleshooting', link: '/guide/troubleshooting' },
           ],
         },
+        {
+          text: 'Advanced',
+          items: [
+            { text: 'Content Security Policy', link: '/guide/csp' },
+          ],
+        },
       ],
       '/api/': [
         {
