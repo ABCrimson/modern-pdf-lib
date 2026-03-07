@@ -727,6 +727,9 @@ export {
   convertToGrayscale,
 } from './assets/image/grayscaleDetect.js';
 
+export { extractIccProfile, embedIccProfile, parseIccColorSpace } from './assets/image/iccProfile.js';
+export type { IccProfile } from './assets/image/iccProfile.js';
+
 export {
   computeImageDpi,
   computeTargetDimensions,

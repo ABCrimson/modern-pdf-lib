@@ -11,10 +11,12 @@
  */
 
 import type { PdfDocument } from '../../core/pdfDocument.js';
-import { PdfName } from '../../core/pdfObjects.js';
+import { PdfArray, PdfName } from '../../core/pdfObjects.js';
 import { extractImages, decodeImageStream } from './imageExtract.js';
 import type { ChromaSubsampling } from '../../wasm/jpeg/bridge.js';
 import { isGrayscaleImage, convertToGrayscale } from './grayscaleDetect.js';
+import { extractIccProfile, embedIccProfile } from './iccProfile.js';
+import type { IccProfile } from './iccProfile.js';
 
 // ---------------------------------------------------------------------------
 // Public interfaces
@@ -230,6 +232,16 @@ export async function optimizeAllImages(
       continue;
     }
 
+    // Extract ICC profile before any conversion (may be reattached later)
+    const registry = doc.getRegistry();
+    let iccProfile: IccProfile | undefined;
+    try {
+      iccProfile = extractIccProfile(img.stream, registry);
+    } catch {
+      // Non-fatal: if ICC extraction fails, proceed without it
+      iccProfile = undefined;
+    }
+
     // Decode the stream to get raw pixels
     let pixels: Uint8Array;
     let channels = img.channels as 1 | 3 | 4;
@@ -301,10 +313,12 @@ export async function optimizeAllImages(
     }
 
     // Auto-detect and convert grayscale
+    let convertedToGrayscale = false;
     if (options.autoGrayscale && (channels === 3 || channels === 4)) {
       if (isGrayscaleImage(pixels, img.width, img.height, channels as 3 | 4)) {
         pixels = convertToGrayscale(pixels, img.width, img.height, channels as 3 | 4);
         channels = 1;
+        convertedToGrayscale = true;
       }
     }
 
@@ -359,14 +373,26 @@ export async function optimizeAllImages(
     // Set filter to DCTDecode
     dict.set('/Filter', PdfName.of('/DCTDecode'));
 
-    // Update color space if we converted CMYK→RGB
-    if (img.colorSpace === 'DeviceCMYK' && channels === 3) {
-      dict.set('/ColorSpace', PdfName.of('/DeviceRGB'));
-    }
-
-    // Set color space to match output channels
+    // Determine output color space — preserve ICC profile when possible
     if (channels === 1) {
+      // Grayscale output: don't reattach an RGB/CMYK ICC profile
       dict.set('/ColorSpace', PdfName.of('/DeviceGray'));
+    } else if (
+      iccProfile &&
+      !convertedToGrayscale &&
+      iccProfile.components === channels
+    ) {
+      // Preserve the ICC profile: create a new stream and set
+      // /ColorSpace to [/ICCBased <profile ref>]
+      const profileRef = embedIccProfile(iccProfile, registry);
+      dict.set(
+        '/ColorSpace',
+        PdfArray.of([PdfName.of('/ICCBased'), profileRef]),
+      );
+    } else if (img.colorSpace === 'DeviceCMYK' && channels === 3) {
+      dict.set('/ColorSpace', PdfName.of('/DeviceRGB'));
+    } else if (channels === 3) {
+      dict.set('/ColorSpace', PdfName.of('/DeviceRGB'));
     }
 
     // Remove DecodeParms (JPEG doesn't use PDF-level predictors)
