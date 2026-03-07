@@ -822,6 +822,7 @@ export type { Code128Options, Code39Options, ItfOptions, BarcodeMatrix, BarcodeO
 
 export { renderTable, renderMultiPageTable } from './layout/index.js';
 export type {
+  TextRun,
   CellContent,
   NestedTableContent,
   TableCell,
@@ -839,8 +840,9 @@ export {
   borderedPreset,
   professionalPreset,
   applyPreset,
+  applyTablePreset,
 } from './layout/index.js';
-export type { TablePreset } from './layout/index.js';
+export type { TablePreset, PresetName, PresetOptions } from './layout/index.js';
 
 export { estimateTextWidth, applyOverflow, wrapText, truncateText, ellipsisText, shrinkFontSize } from './layout/index.js';
 export type { OverflowMode, OverflowResult } from './layout/index.js';
