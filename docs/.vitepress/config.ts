@@ -90,6 +90,7 @@ export default defineConfig({
             { text: 'Images', link: '/guide/images' },
             { text: 'Fonts', link: '/guide/fonts' },
             { text: 'Shapes', link: '/guide/shapes' },
+            { text: 'Table Layout', link: '/guide/tables' },
             { text: 'Coordinates', link: '/guide/coordinates' },
             { text: 'Streaming', link: '/guide/streaming' },
             { text: 'Performance', link: '/guide/performance' },
