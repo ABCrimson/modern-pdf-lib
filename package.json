@@ -33,6 +33,7 @@
     "dist/**/*.d.cts",
     "dist/**/*.d.mts.map",
     "dist/**/*.d.cts.map",
+    "dist/modern-pdf-lib.iife.js",
     "LICENSE",
     "README.md"
   ],
@@ -42,6 +43,7 @@
   "sideEffects": false,
   "scripts": {
     "build": "tsdown",
+    "build:iife": "tsx scripts/build-iife.ts",
     "build:wasm": "bash scripts/build-wasm.sh",
     "build:all": "npm run build:wasm && npm run build",
     "dev": "vite",

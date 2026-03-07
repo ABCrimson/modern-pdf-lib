@@ -75,6 +75,24 @@ Also available via:
 - **unpkg:** `https://unpkg.com/modern-pdf-lib/dist/browser.mjs`
 - **esm.sh:** `https://esm.sh/modern-pdf-lib`
 
+### Script Tag (no modules)
+
+For environments without ES module support, use the IIFE bundle which exposes a `window.ModernPdf` global:
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/modern-pdf-lib/dist/modern-pdf-lib.iife.js"></script>
+<script>
+  const { createPdf, PageSizes, rgb } = ModernPdf;
+
+  const doc = createPdf();
+  const page = doc.addPage(PageSizes.A4);
+  page.drawText('Hello from script tag!', { x: 50, y: 750, size: 24, color: rgb(0, 0, 0) });
+  doc.save().then(function (bytes) {
+    console.log('PDF size:', bytes.length, 'bytes');
+  });
+</script>
+```
+
 <br />
 
 ## Features
