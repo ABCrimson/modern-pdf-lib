@@ -13,6 +13,7 @@ import type {
   TableCell,
   TableRow,
   TableRenderResult,
+  NestedTableContent,
 } from '../../src/layout/table.js';
 import { PdfPage, PageSizes } from '../../src/core/pdfPage.js';
 import { PdfObjectRegistry } from '../../src/core/pdfObjects.js';
@@ -365,6 +366,357 @@ describe('renderTable', () => {
     );
     expect(result.rowHeights[0]).toBe(50);
     expect(result.rowHeights[1]).toBe(80);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Task 46 — Row/Column Spanning
+// ---------------------------------------------------------------------------
+
+describe('renderTable – colspan / rowspan', () => {
+  // 31
+  it('colSpan cell gets combined width of spanned columns', () => {
+    const cell: TableCell = { content: 'Wide', colSpan: 2 };
+    const { ops } = renderTable({
+      x: 0,
+      y: 100,
+      width: 300,
+      rows: [{ cells: [cell, 'C'] }],
+      columns: [{ width: 100 }, { width: 100 }, { width: 100 }],
+    });
+    // The "Wide" cell should span 200pt (columns 0+1).
+    // Its border rectangle should be 200pt wide: "0 <y> 200 <h> re"
+    expect(ops).toContain('200 ');
+    expect(ops).toContain('(Wide) Tj');
+  });
+
+  // 32
+  it('rowSpan cell gets combined height of spanned rows', () => {
+    const cell: TableCell = { content: 'Tall', rowSpan: 2 };
+    const { ops, result } = renderTable({
+      x: 0,
+      y: 100,
+      width: 200,
+      rows: [
+        { cells: [cell, 'B'], height: 25 },
+        { cells: ['D'], height: 25 },
+      ],
+    });
+    // "Tall" spans 2 rows of 25pt each = 50pt total height.
+    // Its border rectangle should contain height 50.
+    expect(ops).toContain(' 50 re');
+    expect(ops).toContain('(Tall) Tj');
+    expect(ops).toContain('(B) Tj');
+    expect(ops).toContain('(D) Tj');
+    expect(result.height).toBe(50);
+  });
+
+  // 33
+  it('mixed colspan + rowspan in same table', () => {
+    // Layout (3 cols x 3 rows):
+    //   [A (cs=2)      ] [B]
+    //   [C (rs=2)] [D]   [E]
+    //              [F]   [G]
+    const cellA: TableCell = { content: 'A', colSpan: 2 };
+    const cellC: TableCell = { content: 'C', rowSpan: 2 };
+    const { ops, result } = renderTable({
+      x: 0,
+      y: 300,
+      width: 300,
+      rows: [
+        { cells: [cellA, 'B'] },
+        { cells: [cellC, 'D', 'E'] },
+        { cells: ['F', 'G'] },
+      ],
+    });
+    expect(ops).toContain('(A) Tj');
+    expect(ops).toContain('(B) Tj');
+    expect(ops).toContain('(C) Tj');
+    expect(ops).toContain('(D) Tj');
+    expect(ops).toContain('(E) Tj');
+    expect(ops).toContain('(F) Tj');
+    expect(ops).toContain('(G) Tj');
+    expect(result.rowHeights).toHaveLength(3);
+  });
+
+  // 34
+  it('rowSpan cell is rendered only once (at origin row)', () => {
+    const cell: TableCell = { content: 'Once', rowSpan: 2 };
+    const { ops } = renderTable({
+      x: 0,
+      y: 100,
+      width: 200,
+      rows: [
+        { cells: [cell, 'R0C1'], height: 20 },
+        { cells: ['R1C1'], height: 20 },
+      ],
+    });
+    // "Once" should appear exactly once in the ops
+    const matches = ops.match(/\(Once\) Tj/g);
+    expect(matches).toHaveLength(1);
+  });
+
+  // 35
+  it('colSpan cell border covers full spanned width', () => {
+    const cell: TableCell = { content: 'Span3', colSpan: 3 };
+    const { ops } = renderTable({
+      x: 10,
+      y: 100,
+      width: 300,
+      rows: [{ cells: [cell] }],
+      borderWidth: 1,
+    });
+    // Cell spans entire 300pt width; border rect should be "10 <y> 300 <h> re"
+    expect(ops).toContain('300 ');
+    expect(ops).toContain('(Span3) Tj');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Task 48 — Cell Backgrounds and Stripes
+// ---------------------------------------------------------------------------
+
+describe('renderTable – alternating row colors & header styling', () => {
+  // 36
+  it('alternateRowColors applies even/odd backgrounds to data rows', () => {
+    const even: Color = { type: 'rgb', r: 0.9, g: 0.9, b: 0.9 };
+    const odd: Color = { type: 'rgb', r: 1, g: 1, b: 1 };
+    const { ops } = renderTable({
+      x: 0,
+      y: 200,
+      width: 200,
+      rows: [
+        { cells: ['R0'] },
+        { cells: ['R1'] },
+        { cells: ['R2'] },
+        { cells: ['R3'] },
+      ],
+      alternateRowColors: [even, odd],
+    });
+    // Even rows (0, 2) get 0.9 0.9 0.9 rg, odd rows (1, 3) get 1 1 1 rg
+    expect(ops).toContain('0.9 0.9 0.9 rg');
+    expect(ops).toContain('1 1 1 rg');
+  });
+
+  // 37
+  it('headerBackgroundColor overrides alternateRowColors for header rows', () => {
+    const even: Color = { type: 'rgb', r: 0.9, g: 0.9, b: 0.9 };
+    const odd: Color = { type: 'rgb', r: 1, g: 1, b: 1 };
+    const headerBg: Color = { type: 'rgb', r: 0, g: 0, b: 0.5 };
+    const { ops } = renderTable({
+      x: 0,
+      y: 200,
+      width: 200,
+      rows: [
+        { cells: ['Header'] },
+        { cells: ['Data1'] },
+        { cells: ['Data2'] },
+      ],
+      headerRows: 1,
+      alternateRowColors: [even, odd],
+      headerBackgroundColor: headerBg,
+    });
+    // Header should use 0 0 0.5 rg, NOT the alternating colors
+    expect(ops).toContain('0 0 0.5 rg');
+    // Data rows should still get alternating colors
+    expect(ops).toContain('0.9 0.9 0.9 rg');
+    expect(ops).toContain('1 1 1 rg');
+  });
+
+  // 38
+  it('headerTextColor is applied to header row text', () => {
+    const headerTextCol: Color = { type: 'rgb', r: 1, g: 1, b: 1 };
+    const { ops } = renderTable({
+      x: 0,
+      y: 200,
+      width: 200,
+      rows: [
+        { cells: ['Header'] },
+        { cells: ['Data'] },
+      ],
+      headerRows: 1,
+      headerTextColor: headerTextCol,
+    });
+    // The header text should use 1 1 1 rg (white)
+    expect(ops).toContain('1 1 1 rg');
+    // Data row text should use default black (0 g)
+    expect(ops).toContain('0 g');
+  });
+
+  // 39
+  it('explicit row backgroundColor overrides alternateRowColors', () => {
+    const even: Color = { type: 'rgb', r: 0.9, g: 0.9, b: 0.9 };
+    const odd: Color = { type: 'rgb', r: 1, g: 1, b: 1 };
+    const rowBg: Color = { type: 'rgb', r: 1, g: 0, b: 0 };
+    const { ops } = renderTable({
+      x: 0,
+      y: 200,
+      width: 200,
+      rows: [
+        { cells: ['A'], backgroundColor: rowBg },
+        { cells: ['B'] },
+      ],
+      alternateRowColors: [even, odd],
+    });
+    // Row 0 explicit bg (red) should appear
+    expect(ops).toContain('1 0 0 rg');
+    // Row 1 should get the odd alternating color
+    expect(ops).toContain('1 1 1 rg');
+  });
+
+  // 40
+  it('cell-level backgroundColor overrides row-level background', () => {
+    const rowBg: Color = { type: 'rgb', r: 0.5, g: 0.5, b: 0.5 };
+    const cellBg: Color = { type: 'rgb', r: 0, g: 1, b: 0 };
+    const cell: TableCell = { content: 'Green', backgroundColor: cellBg };
+    const { ops } = renderTable({
+      x: 0,
+      y: 200,
+      width: 200,
+      rows: [{ cells: [cell, 'Normal'], backgroundColor: rowBg }],
+    });
+    // Row background (gray) should be rendered
+    expect(ops).toContain('0.5 0.5 0.5 rg');
+    // Cell background (green) should also be rendered on top
+    expect(ops).toContain('0 1 0 rg');
+  });
+
+  // 41
+  it('alternateRowColors with headerRows counts data rows from 0', () => {
+    const even: Color = { type: 'rgb', r: 0.8, g: 0.8, b: 0.8 };
+    const odd: Color = { type: 'rgb', r: 0.95, g: 0.95, b: 0.95 };
+    const { ops } = renderTable({
+      x: 0,
+      y: 300,
+      width: 200,
+      rows: [
+        { cells: ['H1'] },
+        { cells: ['H2'] },
+        { cells: ['D0'] }, // data row 0 → even
+        { cells: ['D1'] }, // data row 1 → odd
+        { cells: ['D2'] }, // data row 2 → even
+      ],
+      headerRows: 2,
+      alternateRowColors: [even, odd],
+    });
+    // Data rows should have both even and odd colors
+    expect(ops).toContain('0.8 0.8 0.8 rg');
+    expect(ops).toContain('0.95 0.95 0.95 rg');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Task 49 — Nested Tables
+// ---------------------------------------------------------------------------
+
+describe('renderTable – nested tables', () => {
+  // 42
+  it('nested table renders inside a cell', () => {
+    const nested: NestedTableContent = {
+      type: 'table',
+      table: {
+        width: 100,
+        rows: [{ cells: ['Inner1', 'Inner2'] }],
+      },
+    };
+    const cell: TableCell = { content: nested };
+    const { ops } = renderTable({
+      x: 0,
+      y: 200,
+      width: 200,
+      rows: [{ cells: [cell, 'Outer'] }],
+    });
+    // The nested table's text should appear in the output
+    expect(ops).toContain('(Inner1) Tj');
+    expect(ops).toContain('(Inner2) Tj');
+    // The outer cell text should also appear
+    expect(ops).toContain('(Outer) Tj');
+  });
+
+  // 43
+  it('nested table affects row height', () => {
+    const nested: NestedTableContent = {
+      type: 'table',
+      table: {
+        width: 100,
+        rows: [
+          { cells: ['R1'], height: 30 },
+          { cells: ['R2'], height: 30 },
+          { cells: ['R3'], height: 30 },
+        ],
+      },
+    };
+    const cell: TableCell = { content: nested };
+    const { result: withNested } = renderTable({
+      x: 0,
+      y: 300,
+      width: 200,
+      rows: [{ cells: [cell, 'Short'] }],
+    });
+    const { result: withoutNested } = renderTable({
+      x: 0,
+      y: 300,
+      width: 200,
+      rows: [{ cells: ['Plain', 'Short'] }],
+    });
+    // Row with nested table (90pt inner + padding) should be taller
+    expect(withNested.rowHeights[0]!).toBeGreaterThan(withoutNested.rowHeights[0]!);
+  });
+
+  // 44
+  it('nested table has its own borders and text', () => {
+    const nested: NestedTableContent = {
+      type: 'table',
+      table: {
+        width: 80,
+        rows: [{ cells: ['N1'] }, { cells: ['N2'] }],
+        borderWidth: 2,
+        fontName: 'Courier',
+      },
+    };
+    const cell: TableCell = { content: nested };
+    const { ops } = renderTable({
+      x: 0,
+      y: 200,
+      width: 300,
+      rows: [{ cells: [cell, 'OuterText'] }],
+      borderWidth: 1,
+      fontName: 'Helvetica',
+    });
+    // Both the outer and inner table operators should be present
+    expect(ops).toContain('/Courier');
+    expect(ops).toContain('/Helvetica');
+    expect(ops).toContain('2 w');
+    expect(ops).toContain('1 w');
+    expect(ops).toContain('(N1) Tj');
+    expect(ops).toContain('(N2) Tj');
+    expect(ops).toContain('(OuterText) Tj');
+  });
+
+  // 45
+  it('deeply nested table renders correctly', () => {
+    const innerNested: NestedTableContent = {
+      type: 'table',
+      table: {
+        width: 50,
+        rows: [{ cells: ['Deep'] }],
+      },
+    };
+    const outerNested: NestedTableContent = {
+      type: 'table',
+      table: {
+        width: 80,
+        rows: [{ cells: [{ content: innerNested } as TableCell] }],
+      },
+    };
+    const cell: TableCell = { content: outerNested };
+    const { ops } = renderTable({
+      x: 0,
+      y: 200,
+      width: 200,
+      rows: [{ cells: [cell] }],
+    });
+    expect(ops).toContain('(Deep) Tj');
   });
 });
 
