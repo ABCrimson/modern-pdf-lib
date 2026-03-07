@@ -6,8 +6,10 @@
  * @packageDocumentation
  */
 
-export { renderTable } from './table.js';
+export { renderTable, resolveColumnWidths, resolvePadding } from './table.js';
 export type {
+  CellContent,
+  NestedTableContent,
   TableCell,
   TableRow,
   TableColumn,
