@@ -641,8 +641,8 @@ export type { LinearizationOptions } from './core/linearization.js';
 // PDF/A compliance
 // ---------------------------------------------------------------------------
 
-export { validatePdfA, enforcePdfA } from './compliance/index.js';
-export type { PdfALevel, PdfAValidationResult, PdfAIssue } from './compliance/index.js';
+export { validatePdfA, enforcePdfA, detectTransparency, flattenTransparency, generateSrgbIccProfile, SRGB_ICC_PROFILE, buildOutputIntent } from './compliance/index.js';
+export type { PdfALevel, PdfAValidationResult, PdfAIssue, TransparencyInfo, TransparencyFinding, OutputIntentOptions } from './compliance/index.js';
 
 // ---------------------------------------------------------------------------
 // Layers (Optional Content Groups)
