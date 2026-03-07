@@ -747,6 +747,13 @@ export { extractJpegMetadata, injectJpegMetadata } from './assets/image/imageMet
 export type { JpegMetadata } from './assets/image/imageMetadata.js';
 
 // ---------------------------------------------------------------------------
+// Browser utilities (Web Worker API)
+// ---------------------------------------------------------------------------
+
+export { PdfWorker } from './browser/worker.js';
+export type { PdfWorkerOptions } from './browser/worker.js';
+
+// ---------------------------------------------------------------------------
 // Base64 utilities
 // ---------------------------------------------------------------------------
 
