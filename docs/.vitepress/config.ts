@@ -106,6 +106,7 @@ export default defineConfig({
           items: [
             { text: 'Browser Integration', link: '/guide/browser' },
             { text: 'Content Security Policy', link: '/guide/csp' },
+            { text: 'PDF/A Compliance', link: '/guide/pdfa' },
           ],
         },
       ],
