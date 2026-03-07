@@ -778,6 +778,26 @@ export type { PdfWorkerOptions } from './browser/worker.js';
 export { base64Encode, base64Decode } from './utils/base64.js';
 
 // ---------------------------------------------------------------------------
+// Barcode encoding
+// ---------------------------------------------------------------------------
+
+export {
+  encodeCode128,
+  encodeCode128Values,
+  valuesToModules,
+  code128ToOperators,
+  encodeEan13,
+  encodeEan8,
+  calculateEanCheckDigit,
+  ean13ToOperators,
+  ean8ToOperators,
+  encodeUpcA,
+  calculateUpcCheckDigit,
+  upcAToOperators,
+} from './barcode/index.js';
+export type { Code128Options, BarcodeMatrix, BarcodeOptions, EanOptions, UpcOptions } from './barcode/index.js';
+
+// ---------------------------------------------------------------------------
 // Typed error classes
 // ---------------------------------------------------------------------------
 
