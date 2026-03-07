@@ -833,6 +833,18 @@ export type {
   MultiPageTableResult,
 } from './layout/index.js';
 
+export {
+  minimalPreset,
+  stripedPreset,
+  borderedPreset,
+  professionalPreset,
+  applyPreset,
+} from './layout/index.js';
+export type { TablePreset } from './layout/index.js';
+
+export { estimateTextWidth, applyOverflow, wrapText, truncateText, ellipsisText, shrinkFontSize } from './layout/index.js';
+export type { OverflowMode, OverflowResult } from './layout/index.js';
+
 // ---------------------------------------------------------------------------
 // Typed error classes
 // ---------------------------------------------------------------------------
