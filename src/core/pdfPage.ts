@@ -96,6 +96,8 @@ import type { GradientFill, PatternFill } from './patterns.js';
 import { buildGradientObjects, buildPatternObjects } from './patterns.js';
 import { encodeQrCode, qrCodeToOperators } from '../barcode/qr.js';
 import type { ErrorCorrectionLevel } from '../barcode/qr.js';
+import { renderTable } from '../layout/table.js';
+import type { DrawTableOptions, TableRenderResult } from '../layout/table.js';
 
 // ---------------------------------------------------------------------------
 // Common page sizes (width × height in points, portrait orientation)
@@ -2100,6 +2102,42 @@ export class PdfPage {
     });
 
     this.ops += ops;
+  }
+
+  // -----------------------------------------------------------------------
+  // Drawing: Tables
+  // -----------------------------------------------------------------------
+
+  /**
+   * Draw a table on this page.
+   *
+   * The table is rendered as native PDF vector graphics (rectangles,
+   * borders, and text operators).  The top-left corner of the table is
+   * at `(options.x, options.y)` and rows extend downward.
+   *
+   * @param options  Table configuration: position, size, rows, columns,
+   *                 fonts, colours, borders, and padding.
+   * @returns        A {@link TableRenderResult} with the computed
+   *                 dimensions and layout metrics.
+   *
+   * @example
+   * ```ts
+   * const result = page.drawTable({
+   *   x: 50,
+   *   y: 700,
+   *   width: 500,
+   *   rows: [
+   *     { cells: ['Name', 'Age', 'City'] },
+   *     { cells: ['Alice', '30', 'London'] },
+   *     { cells: ['Bob', '25', 'Paris'] },
+   *   ],
+   * });
+   * ```
+   */
+  drawTable(options: DrawTableOptions): TableRenderResult {
+    const { ops, result } = renderTable(options);
+    this.ops += ops;
+    return result;
   }
 
   // -----------------------------------------------------------------------

@@ -817,6 +817,19 @@ export {
 export type { Code128Options, Code39Options, ItfOptions, BarcodeMatrix, BarcodeOptions, EanOptions, UpcOptions, QrCodeOptions, QrCodeMatrix, ErrorCorrectionLevel, DataMatrixOptions, DataMatrixResult, Pdf417Options, Pdf417Matrix, StyledBarcodeOptions, BarcodeReadResult } from './barcode/index.js';
 
 // ---------------------------------------------------------------------------
+// Table layout
+// ---------------------------------------------------------------------------
+
+export { renderTable } from './layout/index.js';
+export type {
+  TableCell,
+  TableRow,
+  TableColumn,
+  DrawTableOptions,
+  TableRenderResult,
+} from './layout/index.js';
+
+// ---------------------------------------------------------------------------
 // Typed error classes
 // ---------------------------------------------------------------------------
 
