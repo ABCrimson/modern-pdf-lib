@@ -802,8 +802,19 @@ export {
   upcAToOperators,
   encodeQrCode,
   qrCodeToOperators,
+  encodeDataMatrix,
+  dataMatrixToOperators,
+  encodePdf417,
+  pdf417ToOperators,
+  renderStyledBarcode,
+  calculateBarcodeDimensions,
+  readCode128,
+  readEan13,
+  readEan8,
+  readCode39,
+  readBarcode,
 } from './barcode/index.js';
-export type { Code128Options, Code39Options, ItfOptions, BarcodeMatrix, BarcodeOptions, EanOptions, UpcOptions, QrCodeOptions, QrCodeMatrix, ErrorCorrectionLevel } from './barcode/index.js';
+export type { Code128Options, Code39Options, ItfOptions, BarcodeMatrix, BarcodeOptions, EanOptions, UpcOptions, QrCodeOptions, QrCodeMatrix, ErrorCorrectionLevel, DataMatrixOptions, DataMatrixResult, Pdf417Options, Pdf417Matrix, StyledBarcodeOptions, BarcodeReadResult } from './barcode/index.js';
 
 // ---------------------------------------------------------------------------
 // Typed error classes

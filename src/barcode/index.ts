@@ -2,7 +2,7 @@
  * @module barcode
  *
  * Barcode encoding and PDF rendering for Code 128, Code 39, ITF,
- * EAN-13, EAN-8, UPC-A, and QR Code.
+ * EAN-13, EAN-8, UPC-A, QR Code, Data Matrix, and PDF417.
  *
  * @packageDocumentation
  */
@@ -62,3 +62,40 @@ export type {
   QrCodeMatrix,
   ErrorCorrectionLevel,
 } from './qr.js';
+
+// Data Matrix (ISO/IEC 16022 ECC200)
+export {
+  encodeDataMatrix,
+  dataMatrixToOperators,
+} from './dataMatrix.js';
+export type {
+  DataMatrixOptions,
+  DataMatrixResult,
+} from './dataMatrix.js';
+
+// PDF417 (ISO/IEC 15438)
+export {
+  encodePdf417,
+  pdf417ToOperators,
+} from './pdf417.js';
+export type {
+  Pdf417Options,
+  Pdf417Matrix,
+} from './pdf417.js';
+
+// Barcode styling
+export {
+  renderStyledBarcode,
+  calculateBarcodeDimensions,
+} from './style.js';
+export type { StyledBarcodeOptions } from './style.js';
+
+// Barcode reader (round-trip verification)
+export {
+  readCode128,
+  readEan13,
+  readEan8,
+  readCode39,
+  readBarcode,
+} from './reader.js';
+export type { BarcodeReadResult } from './reader.js';
