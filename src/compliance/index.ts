@@ -41,3 +41,6 @@ export type {
   AssociatedFileOptions,
   AssociatedFileResult,
 } from './associatedFiles.js';
+
+export { stripProhibitedFeatures, countOccurrences } from './stripProhibited.js';
+export type { StripResult, StrippedFeature, StripOptions } from './stripProhibited.js';
