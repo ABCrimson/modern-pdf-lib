@@ -242,10 +242,141 @@ const belowTable = 700 - result.height - 20; // 20pt gap
 page.drawText('Notes:', { x: 50, y: belowTable, size: 12 });
 ```
 
+## Styling Presets
+
+Apply a preset for instant professional styling:
+
+```typescript
+import { professionalPreset, applyPreset } from 'modern-pdf-lib';
+
+page.drawTable(applyPreset(professionalPreset(), {
+  x: 50, y: 750, width: 495,
+  headerRows: 1,
+  rows: [
+    { cells: ['Product', 'Qty', 'Price'] },
+    { cells: ['Widget A', '10', '$5.00'] },
+    { cells: ['Widget B', '25', '$3.50'] },
+  ],
+}));
+```
+
+| Preset | Description |
+|---|---|
+| `minimalPreset()` | Clean, borderless, subtle header |
+| `stripedPreset()` | Alternating row colors, dark header |
+| `borderedPreset()` | Full grid borders, dark header |
+| `professionalPreset()` | Dark blue header, subtle stripes |
+
+You can also use `applyTablePreset('professional', options)` by name.
+
+## Alternating Row Colors
+
+```typescript
+page.drawTable({
+  // ...
+  alternateRowColors: [rgb(1, 1, 1), rgb(0.95, 0.95, 0.97)],
+  headerBackgroundColor: rgb(0.16, 0.31, 0.52),
+  headerTextColor: rgb(1, 1, 1),
+  headerRows: 1,
+});
+```
+
+## Styled Text Runs
+
+Cells support rich text with per-segment font, size, and color:
+
+```typescript
+{
+  cells: [
+    {
+      content: [
+        { text: 'Bold Title ', fontSize: 14 },
+        { text: '(subtitle)', fontSize: 10, color: grayscale(0.5) },
+      ],
+    },
+    'Normal cell',
+  ],
+}
+```
+
+## Text Overflow
+
+Control how text behaves when it exceeds cell width:
+
+```typescript
+{
+  cells: [
+    { content: 'Very long text...', overflow: 'wrap' },       // Word wrap (default)
+    { content: 'Very long text...', overflow: 'truncate' },    // Hard cut
+    { content: 'Very long text...', overflow: 'ellipsis' },    // Truncate with "..."
+    { content: 'Very long text...', overflow: 'shrink' },      // Reduce font size
+  ]
+}
+```
+
+## Nested Tables
+
+Embed a table inside a cell:
+
+```typescript
+{
+  cells: [
+    'Summary',
+    {
+      content: {
+        type: 'table',
+        table: {
+          rows: [
+            { cells: ['A', 'B'] },
+            { cells: ['1', '2'] },
+          ],
+        },
+      },
+    },
+  ],
+}
+```
+
+## Multi-Page Tables
+
+For tables that span multiple pages with automatic header repetition:
+
+```typescript
+import { renderMultiPageTable } from 'modern-pdf-lib';
+
+const result = renderMultiPageTable({
+  x: 50, y: 750, width: 495,
+  headerRows: 1,
+  fontName: 'Helvetica',
+  fontSize: 10,
+  rows: longDataRows,
+}, 50); // bottom margin
+
+// result.pages: { ops: string, pageIndex: number }[]
+for (const pageContent of result.pages) {
+  const page = doc.addPage(PageSizes.A4);
+  page.pushOperators(pageContent.ops);
+}
+```
+
+## Column Width Modes
+
+```typescript
+columns: [
+  { width: 100 },               // Fixed: 100pt
+  { percentage: '30%' },        // 30% of table width
+  { flex: 2 },                  // Flex weight (2x share of remaining space)
+  { flex: 1 },                  // Flex weight (1x share)
+  { autoFit: true },            // Fit widest content
+  { width: 80, minWidth: 50 },  // Fixed with floor
+]
+```
+
 ## Best Practices
 
-1. **Set column widths explicitly** for consistent layouts
-2. **Use headerRows** for multi-page tables (repeated headers)
-3. **Keep padding consistent** for a clean look
-4. **Right-align numeric columns** for readability
+1. **Use presets** for consistent, professional styling out of the box
+2. **Set column widths explicitly** for predictable layouts
+3. **Use `headerRows`** for multi-page tables (headers repeat automatically)
+4. **Right-align numeric columns** with `columns: [{ align: 'right' }]`
 5. **Use alternating backgrounds** for long tables to improve scannability
+6. **Use `overflow: 'ellipsis'`** for columns with potentially long content

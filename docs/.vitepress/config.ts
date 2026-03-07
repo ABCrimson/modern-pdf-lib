@@ -117,6 +117,57 @@ export default defineConfig({
           text: 'API Reference',
           items: [{ text: 'Overview', link: '/api/' }],
         },
+        {
+          text: 'Core Classes',
+          collapsed: false,
+          items: [
+            { text: 'PdfDocument', link: '/api/classes/PdfDocument' },
+            { text: 'PdfPage', link: '/api/classes/PdfPage' },
+            { text: 'PdfForm', link: '/api/classes/PdfForm' },
+            { text: 'PdfStream', link: '/api/classes/PdfStream' },
+          ],
+        },
+        {
+          text: 'Form Fields',
+          collapsed: true,
+          items: [
+            { text: 'PdfField', link: '/api/classes/PdfField' },
+            { text: 'PdfTextField', link: '/api/classes/PdfTextField' },
+            { text: 'PdfCheckboxField', link: '/api/classes/PdfCheckboxField' },
+            { text: 'PdfDropdownField', link: '/api/classes/PdfDropdownField' },
+            { text: 'PdfRadioGroup', link: '/api/classes/PdfRadioGroup' },
+            { text: 'PdfListboxField', link: '/api/classes/PdfListboxField' },
+            { text: 'PdfButtonField', link: '/api/classes/PdfButtonField' },
+            { text: 'PdfSignatureField', link: '/api/classes/PdfSignatureField' },
+          ],
+        },
+        {
+          text: 'Annotations',
+          collapsed: true,
+          items: [
+            { text: 'PdfAnnotation', link: '/api/classes/PdfAnnotation' },
+            { text: 'PdfTextAnnotation', link: '/api/classes/PdfTextAnnotation' },
+            { text: 'PdfLinkAnnotation', link: '/api/classes/PdfLinkAnnotation' },
+            { text: 'PdfHighlightAnnotation', link: '/api/classes/PdfHighlightAnnotation' },
+            { text: 'PdfFreeTextAnnotation', link: '/api/classes/PdfFreeTextAnnotation' },
+            { text: 'PdfStampAnnotation', link: '/api/classes/PdfStampAnnotation' },
+            { text: 'PdfRedactAnnotation', link: '/api/classes/PdfRedactAnnotation' },
+          ],
+        },
+        {
+          text: 'Key Interfaces',
+          collapsed: true,
+          items: [
+            { text: 'DrawTextOptions', link: '/api/interfaces/DrawTextOptions' },
+            { text: 'DrawImageOptions', link: '/api/interfaces/DrawImageOptions' },
+            { text: 'DrawTableOptions', link: '/api/interfaces/DrawTableOptions' },
+            { text: 'FontRef', link: '/api/interfaces/FontRef' },
+            { text: 'ImageRef', link: '/api/interfaces/ImageRef' },
+            { text: 'PdfSaveOptions', link: '/api/interfaces/PdfSaveOptions' },
+            { text: 'LoadPdfOptions', link: '/api/interfaces/LoadPdfOptions' },
+            { text: 'InitWasmOptions', link: '/api/interfaces/InitWasmOptions' },
+          ],
+        },
       ],
       '/migration/': [
         {

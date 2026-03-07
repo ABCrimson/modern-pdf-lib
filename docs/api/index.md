@@ -1,661 +1,773 @@
-**modern-pdf-lib**
+# API Reference
 
-***
+This page organizes every public export by what you're trying to do. Each section includes quick examples and links to the full TypeDoc reference.
 
-# modern-pdf-lib
+---
 
-## Classes
+## Document Lifecycle
 
-- [ChangeTracker](classes/ChangeTracker.md)
-- [CombedTextLayoutError](classes/CombedTextLayoutError.md)
-- [EmbeddedFont](classes/EmbeddedFont.md)
-- [EncryptedPdfError](classes/EncryptedPdfError.md)
-- [ExceededMaxLengthError](classes/ExceededMaxLengthError.md)
-- [FieldAlreadyExistsError](classes/FieldAlreadyExistsError.md)
-- [FieldExistsAsNonTerminalError](classes/FieldExistsAsNonTerminalError.md)
-- [FontNotEmbeddedError](classes/FontNotEmbeddedError.md)
-- [ForeignPageError](classes/ForeignPageError.md)
-- [InvalidFieldNamePartError](classes/InvalidFieldNamePartError.md)
-- [MissingOnValueCheckError](classes/MissingOnValueCheckError.md)
-- [NoSuchFieldError](classes/NoSuchFieldError.md)
-- [PdfAnnotation](classes/PdfAnnotation.md)
-- [PdfArray](classes/PdfArray.md)
-- [PdfBool](classes/PdfBool.md)
-- [PdfButtonField](classes/PdfButtonField.md)
-- [PdfCaretAnnotation](classes/PdfCaretAnnotation.md)
-- [PdfCheckboxField](classes/PdfCheckboxField.md)
-- [PdfCircleAnnotation](classes/PdfCircleAnnotation.md)
-- [PdfDict](classes/PdfDict.md)
-- [PdfDocument](classes/PdfDocument.md)
-- [PdfDropdownField](classes/PdfDropdownField.md)
-- [PdfEncryptionHandler](classes/PdfEncryptionHandler.md)
-- [PdfField](classes/PdfField.md)
-- [PdfFileAttachmentAnnotation](classes/PdfFileAttachmentAnnotation.md)
-- [PdfForm](classes/PdfForm.md)
-- [PdfFreeTextAnnotation](classes/PdfFreeTextAnnotation.md)
-- [PdfHighlightAnnotation](classes/PdfHighlightAnnotation.md)
-- [PdfInkAnnotation](classes/PdfInkAnnotation.md)
-- [PdfLayer](classes/PdfLayer.md)
-- [PdfLayerManager](classes/PdfLayerManager.md)
-- [PdfLineAnnotation](classes/PdfLineAnnotation.md)
-- [PdfLinkAnnotation](classes/PdfLinkAnnotation.md)
-- [PdfListboxField](classes/PdfListboxField.md)
-- [PdfName](classes/PdfName.md)
-- [PdfNull](classes/PdfNull.md)
-- [PdfNumber](classes/PdfNumber.md)
-- [PdfObjectRegistry](classes/PdfObjectRegistry.md)
-- [PDFOperator](classes/PDFOperator.md)
-- [PdfOutlineItem](classes/PdfOutlineItem.md)
-- [PdfOutlineTree](classes/PdfOutlineTree.md)
-- [PdfPage](classes/PdfPage.md)
-- [PdfParseError](classes/PdfParseError.md)
-- [PdfPolygonAnnotation](classes/PdfPolygonAnnotation.md)
-- [PdfPolyLineAnnotation](classes/PdfPolyLineAnnotation.md)
-- [PdfPopupAnnotation](classes/PdfPopupAnnotation.md)
-- [PdfRadioGroup](classes/PdfRadioGroup.md)
-- [PdfRedactAnnotation](classes/PdfRedactAnnotation.md)
-- [PdfRef](classes/PdfRef.md)
-- [PdfSignatureField](classes/PdfSignatureField.md)
-- [PdfSquareAnnotation](classes/PdfSquareAnnotation.md)
-- [PdfSquigglyAnnotation](classes/PdfSquigglyAnnotation.md)
-- [PdfStampAnnotation](classes/PdfStampAnnotation.md)
-- [PdfStream](classes/PdfStream.md)
-- [PdfStreamWriter](classes/PdfStreamWriter.md)
-- [PdfStrikeOutAnnotation](classes/PdfStrikeOutAnnotation.md)
-- [PdfString](classes/PdfString.md)
-- [PdfStructureElement](classes/PdfStructureElement.md)
-- [PdfStructureTree](classes/PdfStructureTree.md)
-- [PdfTextAnnotation](classes/PdfTextAnnotation.md)
-- [PdfTextField](classes/PdfTextField.md)
-- [PdfUnderlineAnnotation](classes/PdfUnderlineAnnotation.md)
-- [PdfViewerPreferences](classes/PdfViewerPreferences.md)
-- [PdfWorker](classes/PdfWorker.md)
-- [PdfWriter](classes/PdfWriter.md)
-- [RemovePageFromEmptyDocumentError](classes/RemovePageFromEmptyDocumentError.md)
-- [RichTextFieldReadError](classes/RichTextFieldReadError.md)
-- [UnexpectedFieldTypeError](classes/UnexpectedFieldTypeError.md)
+Create, load, save, and configure PDF documents.
 
-## Interfaces
+### Create a New PDF
 
-- [AccessibilityIssue](interfaces/AccessibilityIssue.md)
-- [AnalysisReport](interfaces/AnalysisReport.md)
-- [AnnotationOptions](interfaces/AnnotationOptions.md)
-- [AssociatedFileOptions](interfaces/AssociatedFileOptions.md)
-- [AssociatedFileResult](interfaces/AssociatedFileResult.md)
-- [BarcodeMatrix](interfaces/BarcodeMatrix.md)
-- [BarcodeOptions](interfaces/BarcodeOptions.md)
-- [BarcodeReadResult](interfaces/BarcodeReadResult.md)
-- [BatchOptimizeOptions](interfaces/BatchOptimizeOptions.md)
-- [ButtonAppearanceOptions](interfaces/ButtonAppearanceOptions.md)
-- [ByteRangeResult](interfaces/ByteRangeResult.md)
-- [ByteWriter](interfaces/ByteWriter.md)
-- [CatalogOptions](interfaces/CatalogOptions.md)
-- [CheckboxAppearanceOptions](interfaces/CheckboxAppearanceOptions.md)
-- [CIDFontData](interfaces/CIDFontData.md)
-- [CIDSystemInfoData](interfaces/CIDSystemInfoData.md)
-- [CmykColor](interfaces/CmykColor.md)
-- [Code128Options](interfaces/Code128Options.md)
-- [Code39Options](interfaces/Code39Options.md)
-- [ColorStop](interfaces/ColorStop.md)
-- [ComputeFontSizeOptions](interfaces/ComputeFontSizeOptions.md)
-- [ContentStreamOperator](interfaces/ContentStreamOperator.md)
-- [CropBox](interfaces/CropBox.md)
-- [DataMatrixOptions](interfaces/DataMatrixOptions.md)
-- [DataMatrixResult](interfaces/DataMatrixResult.md)
-- [DeduplicationReport](interfaces/DeduplicationReport.md)
-- [Degrees](interfaces/Degrees.md)
-- [DocumentMetadata](interfaces/DocumentMetadata.md)
-- [DocumentStructure](interfaces/DocumentStructure.md)
-- [DownscaleOptions](interfaces/DownscaleOptions.md)
-- [DrawCircleOptions](interfaces/DrawCircleOptions.md)
-- [DrawEllipseOptions](interfaces/DrawEllipseOptions.md)
-- [DrawImageOptions](interfaces/DrawImageOptions.md)
-- [DrawLineOptions](interfaces/DrawLineOptions.md)
-- [DrawPageOptions](interfaces/DrawPageOptions.md)
-- [DrawQrCodeOptions](interfaces/DrawQrCodeOptions.md)
-- [DrawRectangleOptions](interfaces/DrawRectangleOptions.md)
-- [DrawSquareOptions](interfaces/DrawSquareOptions.md)
-- [DrawSvgPathOptions](interfaces/DrawSvgPathOptions.md)
-- [DrawTableOptions](interfaces/DrawTableOptions.md)
-- [DrawTextOptions](interfaces/DrawTextOptions.md)
-- [DropdownAppearanceOptions](interfaces/DropdownAppearanceOptions.md)
-- [EmbeddedFile](interfaces/EmbeddedFile.md)
-- [EmbeddedPdfPage](interfaces/EmbeddedPdfPage.md)
-- [EmbedFontOptions](interfaces/EmbedFontOptions.md)
-- [EmbedPageOptions](interfaces/EmbedPageOptions.md)
-- [EncryptDictValues](interfaces/EncryptDictValues.md)
-- [EncryptOptions](interfaces/EncryptOptions.md)
-- [EnforcementAction](interfaces/EnforcementAction.md)
-- [EnforcePdfAOptions](interfaces/EnforcePdfAOptions.md)
-- [EnforcePdfAResult](interfaces/EnforcePdfAResult.md)
-- [FontDescriptorData](interfaces/FontDescriptorData.md)
-- [FontEmbeddingResult](interfaces/FontEmbeddingResult.md)
-- [FontMetrics](interfaces/FontMetrics.md)
-- [FontRef](interfaces/FontRef.md)
-- [GradientFill](interfaces/GradientFill.md)
-- [GrayscaleColor](interfaces/GrayscaleColor.md)
-- [IccProfile](interfaces/IccProfile.md)
-- [ImageAnalysis](interfaces/ImageAnalysis.md)
-- [ImageDpi](interfaces/ImageDpi.md)
-- [ImageInfo](interfaces/ImageInfo.md)
-- [ImageOptimizeEntry](interfaces/ImageOptimizeEntry.md)
-- [ImageOptimizeOptions](interfaces/ImageOptimizeOptions.md)
-- [ImageRef](interfaces/ImageRef.md)
-- [IncrementalSaveResult](interfaces/IncrementalSaveResult.md)
-- [InitWasmOptions](interfaces/InitWasmOptions.md)
-- [ItfOptions](interfaces/ItfOptions.md)
-- [JpegDecodeResult](interfaces/JpegDecodeResult.md)
-- [JpegMarkerInfo](interfaces/JpegMarkerInfo.md)
-- [JpegMetadata](interfaces/JpegMetadata.md)
-- [LayoutCombedOptions](interfaces/LayoutCombedOptions.md)
-- [LayoutMultilineOptions](interfaces/LayoutMultilineOptions.md)
-- [LayoutMultilineResult](interfaces/LayoutMultilineResult.md)
-- [LayoutSinglelineOptions](interfaces/LayoutSinglelineOptions.md)
-- [LayoutSinglelineResult](interfaces/LayoutSinglelineResult.md)
-- [LinearGradientOptions](interfaces/LinearGradientOptions.md)
-- [LinearizationOptions](interfaces/LinearizationOptions.md)
-- [ListboxAppearanceOptions](interfaces/ListboxAppearanceOptions.md)
-- [LoadPdfOptions](interfaces/LoadPdfOptions.md)
-- [MarkedContentScope](interfaces/MarkedContentScope.md)
-- [MultiPageTableResult](interfaces/MultiPageTableResult.md)
-- [NestedTableContent](interfaces/NestedTableContent.md)
-- [NormalizedStop](interfaces/NormalizedStop.md)
-- [OptimizationReport](interfaces/OptimizationReport.md)
-- [OptimizeResult](interfaces/OptimizeResult.md)
-- [OutlineDestination](interfaces/OutlineDestination.md)
-- [OutlineItemOptions](interfaces/OutlineItemOptions.md)
-- [OutputIntentOptions](interfaces/OutputIntentOptions.md)
-- [OverflowResult](interfaces/OverflowResult.md)
-- [PageContent](interfaces/PageContent.md)
-- [PageEntry](interfaces/PageEntry.md)
-- [ParsedXmpMetadata](interfaces/ParsedXmpMetadata.md)
-- [PatternFill](interfaces/PatternFill.md)
-- [Pdf417Matrix](interfaces/Pdf417Matrix.md)
-- [Pdf417Options](interfaces/Pdf417Options.md)
-- [PdfAIssue](interfaces/PdfAIssue.md)
-- [PdfAProfile](interfaces/PdfAProfile.md)
-- [PdfAValidationResult](interfaces/PdfAValidationResult.md)
-- [PdfAXmpOptions](interfaces/PdfAXmpOptions.md)
-- [PdfPermissionFlags](interfaces/PdfPermissionFlags.md)
-- [PdfSaveOptions](interfaces/PdfSaveOptions.md)
-- [PdfSignatureInfo](interfaces/PdfSignatureInfo.md)
-- [PdfWorkerOptions](interfaces/PdfWorkerOptions.md)
-- [PresetOptions](interfaces/PresetOptions.md)
-- [ProgressInfo](interfaces/ProgressInfo.md)
-- [QrCodeMatrix](interfaces/QrCodeMatrix.md)
-- [QrCodeOptions](interfaces/QrCodeOptions.md)
-- [RadialGradientOptions](interfaces/RadialGradientOptions.md)
-- [Radians](interfaces/Radians.md)
-- [RadioAppearanceOptions](interfaces/RadioAppearanceOptions.md)
-- [RawImageData](interfaces/RawImageData.md)
-- [RecompressOptions](interfaces/RecompressOptions.md)
-- [RedactionMark](interfaces/RedactionMark.md)
-- [RedactionOptions](interfaces/RedactionOptions.md)
-- [RegistryEntry](interfaces/RegistryEntry.md)
-- [RgbColor](interfaces/RgbColor.md)
-- [SetTitleOptions](interfaces/SetTitleOptions.md)
-- [SignatureAppearanceOptions](interfaces/SignatureAppearanceOptions.md)
-- [SignatureOptions](interfaces/SignatureOptions.md)
-- [SignatureVerificationResult](interfaces/SignatureVerificationResult.md)
-- [SignerInfo](interfaces/SignerInfo.md)
-- [SignOptions](interfaces/SignOptions.md)
-- [SoftMaskBuilder](interfaces/SoftMaskBuilder.md)
-- [SoftMaskRef](interfaces/SoftMaskRef.md)
-- [StripOptions](interfaces/StripOptions.md)
-- [StrippedFeature](interfaces/StrippedFeature.md)
-- [StripResult](interfaces/StripResult.md)
-- [StructureElementOptions](interfaces/StructureElementOptions.md)
-- [StyledBarcodeOptions](interfaces/StyledBarcodeOptions.md)
-- [SubsetCmap](interfaces/SubsetCmap.md)
-- [SubsetResult](interfaces/SubsetResult.md)
-- [SvgDrawCommand](interfaces/SvgDrawCommand.md)
-- [SvgElement](interfaces/SvgElement.md)
-- [SvgRenderOptions](interfaces/SvgRenderOptions.md)
-- [TableCell](interfaces/TableCell.md)
-- [TableColumn](interfaces/TableColumn.md)
-- [TableRenderResult](interfaces/TableRenderResult.md)
-- [TableRow](interfaces/TableRow.md)
-- [TextAppearanceOptions](interfaces/TextAppearanceOptions.md)
-- [TextExtractionOptions](interfaces/TextExtractionOptions.md)
-- [TextItem](interfaces/TextItem.md)
-- [TextRun](interfaces/TextRun.md)
-- [TilingPatternOptions](interfaces/TilingPatternOptions.md)
-- [TimestampResult](interfaces/TimestampResult.md)
-- [TransparencyFinding](interfaces/TransparencyFinding.md)
-- [TransparencyGroupOptions](interfaces/TransparencyGroupOptions.md)
-- [TransparencyInfo](interfaces/TransparencyInfo.md)
-- [Type0FontData](interfaces/Type0FontData.md)
-- [ViewerPreferences](interfaces/ViewerPreferences.md)
-- [VisibleSignatureOptions](interfaces/VisibleSignatureOptions.md)
-- [WasmLoaderConfig](interfaces/WasmLoaderConfig.md)
-- [WatermarkOptions](interfaces/WatermarkOptions.md)
-- [WidgetAnnotationHost](interfaces/WidgetAnnotationHost.md)
-- [XmpIssue](interfaces/XmpIssue.md)
-- [XmpValidationResult](interfaces/XmpValidationResult.md)
+```ts
+import { createPdf } from 'modern-pdf-lib';
 
-## Type Aliases
+const doc = createPdf();
+```
 
-- [AFRelationship](type-aliases/AFRelationship.md)
-- [Angle](type-aliases/Angle.md)
-- [AnnotationType](type-aliases/AnnotationType.md)
-- [AppearanceProviderFor](type-aliases/AppearanceProviderFor.md)
-- [BlendMode](type-aliases/BlendMode.md)
-- [CaretSymbol](type-aliases/CaretSymbol.md)
-- [CellContent](type-aliases/CellContent.md)
-- [ChromaSubsampling](type-aliases/ChromaSubsampling.md)
-- [Color](type-aliases/Color.md)
-- [EncryptAlgorithm](type-aliases/EncryptAlgorithm.md)
-- [ErrorCorrectionLevel](type-aliases/ErrorCorrectionLevel.md)
-- [FieldType](type-aliases/FieldType.md)
-- [FileAttachmentIcon](type-aliases/FileAttachmentIcon.md)
-- [FreeTextAlignment](type-aliases/FreeTextAlignment.md)
-- [ImageAlignment](type-aliases/ImageAlignment.md)
-- [LineCapStyle](type-aliases/LineCapStyle.md)
-- [LineEndingStyle](type-aliases/LineEndingStyle.md)
-- [LineJoinStyle](type-aliases/LineJoinStyle.md)
-- [LinkHighlightMode](type-aliases/LinkHighlightMode.md)
-- [Operand](type-aliases/Operand.md)
-- [OverflowMode](type-aliases/OverflowMode.md)
-- [PageRange](type-aliases/PageRange.md)
-- [PageSize](type-aliases/PageSize.md)
-- [ParseSpeeds](type-aliases/ParseSpeeds.md)
-- [PdfALevel](type-aliases/PdfALevel.md)
-- [PdfObject](type-aliases/PdfObject.md)
-- [PresetName](type-aliases/PresetName.md)
-- [RadialGradientFill](type-aliases/RadialGradientFill.md)
-- [RefResolver](type-aliases/RefResolver.md)
-- [RuntimeKind](type-aliases/RuntimeKind.md)
-- [StandardFontName](type-aliases/StandardFontName.md)
-- [StandardStampName](type-aliases/StandardStampName.md)
-- [StructureType](type-aliases/StructureType.md)
-- [TablePreset](type-aliases/TablePreset.md)
-- [TextAlignment](type-aliases/TextAlignment.md)
-- [TextAnnotationIcon](type-aliases/TextAnnotationIcon.md)
-- [TextRenderingMode](type-aliases/TextRenderingMode.md)
-- [WidthEntry](type-aliases/WidthEntry.md)
+| Function | Description |
+|:---|:---|
+| [`createPdf()`](functions/createPdf.md) | Create a blank PDF document |
+| [`loadPdf(bytes, options?)`](functions/loadPdf.md) | Load an existing PDF from `Uint8Array` |
 
-## Variables
+### Save a PDF
 
-- [AnnotationFlags](variables/AnnotationFlags.md)
-- [BlendMode](variables/BlendMode.md)
-- [FieldFlags](variables/FieldFlags.md)
-- [ImageAlignment](variables/ImageAlignment.md)
-- [LineCapStyle](variables/LineCapStyle.md)
-- [LineJoinStyle](variables/LineJoinStyle.md)
-- [PageSizes](variables/PageSizes.md)
-- [ParseSpeeds](variables/ParseSpeeds.md)
-- [setFillingColor](variables/setFillingColor.md)
-- [setStrokingColor](variables/setStrokingColor.md)
-- [SRGB\_ICC\_PROFILE](variables/SRGB_ICC_PROFILE.md)
-- [StandardFonts](variables/StandardFonts.md)
-- [TextAlignment](variables/TextAlignment.md)
-- [TextRenderingMode](variables/TextRenderingMode.md)
+```ts
+const bytes = await doc.save();                  // Uint8Array
+const stream = doc.saveAsStream();               // ReadableStream
+const blob = await doc.saveAsBlob();             // Blob (browsers)
+```
 
-## Functions
+| Method / Function | Description |
+|:---|:---|
+| [`doc.save(options?)`](classes/PdfDocument.md) | Serialize to `Uint8Array` |
+| [`doc.saveAsStream()`](classes/PdfDocument.md) | Serialize as a `ReadableStream` |
+| [`doc.saveAsBlob()`](classes/PdfDocument.md) | Serialize as a `Blob` (browser) |
+| [`saveIncremental(doc)`](functions/saveIncremental.md) | Append-only incremental save |
+| [`serializePdf(doc)`](functions/serializePdf.md) | Low-level serialization |
 
-- [addWatermark](functions/addWatermark.md)
-- [addWatermarkToPage](functions/addWatermarkToPage.md)
-- [aesDecryptCBC](functions/aesDecryptCBC.md)
-- [aesEncryptCBC](functions/aesEncryptCBC.md)
-- [analyzeImages](functions/analyzeImages.md)
-- [analyzeJpegMarkers](functions/analyzeJpegMarkers.md)
-- [annotationFromDict](functions/annotationFromDict.md)
-- [applyFillColor](functions/applyFillColor.md)
-- [applyOverflow](functions/applyOverflow.md)
-- [applyPreset](functions/applyPreset.md)
-- [applyRedactions](functions/applyRedactions.md)
-- [applyStrokeColor](functions/applyStrokeColor.md)
-- [applyTablePreset](functions/applyTablePreset.md)
-- [asNumber](functions/asNumber.md)
-- [asPDFName](functions/asPDFName.md)
-- [asPDFNumber](functions/asPDFNumber.md)
-- [attachFile](functions/attachFile.md)
-- [base64Decode](functions/base64Decode.md)
-- [base64Encode](functions/base64Encode.md)
-- [beginArtifact](functions/beginArtifact.md)
-- [beginArtifactWithType](functions/beginArtifactWithType.md)
-- [beginLayerContent](functions/beginLayerContent.md)
-- [beginMarkedContent](functions/beginMarkedContent.md)
-- [beginMarkedContentSequence](functions/beginMarkedContentSequence.md)
-- [beginMarkedContentWithProperties](functions/beginMarkedContentWithProperties.md)
-- [beginText](functions/beginText.md)
-- [borderedPreset](functions/borderedPreset.md)
-- [buildAfArray](functions/buildAfArray.md)
-- [buildAnnotationDict](functions/buildAnnotationDict.md)
-- [buildCatalog](functions/buildCatalog.md)
-- [buildDocumentStructure](functions/buildDocumentStructure.md)
-- [buildEmbeddedFilesNameTree](functions/buildEmbeddedFilesNameTree.md)
-- [buildGradientObjects](functions/buildGradientObjects.md)
-- [buildInfoDict](functions/buildInfoDict.md)
-- [buildOutputIntent](functions/buildOutputIntent.md)
-- [buildPageTree](functions/buildPageTree.md)
-- [buildPatternObjects](functions/buildPatternObjects.md)
-- [buildPkcs7Signature](functions/buildPkcs7Signature.md)
-- [buildTimestampRequest](functions/buildTimestampRequest.md)
-- [buildViewerPreferencesDict](functions/buildViewerPreferencesDict.md)
-- [buildXmpMetadata](functions/buildXmpMetadata.md)
-- [calculateBarcodeDimensions](functions/calculateBarcodeDimensions.md)
-- [calculateEanCheckDigit](functions/calculateEanCheckDigit.md)
-- [calculateUpcCheckDigit](functions/calculateUpcCheckDigit.md)
-- [checkAccessibility](functions/checkAccessibility.md)
-- [circlePath](functions/circlePath.md)
-- [clearWasmCache](functions/clearWasmCache.md)
-- [clipEvenOdd](functions/clipEvenOdd.md)
-- [clipOp](functions/clipOp.md)
-- [closeAndStroke](functions/closeAndStroke.md)
-- [closeFillAndStroke](functions/closeFillAndStroke.md)
-- [closeFillEvenOddAndStroke](functions/closeFillEvenOddAndStroke.md)
-- [closePathOp](functions/closePathOp.md)
-- [cmyk](functions/cmyk.md)
-- [code128ToOperators](functions/code128ToOperators.md)
-- [code39ToOperators](functions/code39ToOperators.md)
-- [colorToComponents](functions/colorToComponents.md)
-- [componentsToColor](functions/componentsToColor.md)
-- [computeCode39CheckDigit](functions/computeCode39CheckDigit.md)
-- [computeFileEncryptionKey](functions/computeFileEncryptionKey.md)
-- [computeFontSize](functions/computeFontSize.md)
-- [computeImageDpi](functions/computeImageDpi.md)
-- [computeSignatureHash](functions/computeSignatureHash.md)
-- [computeTargetDimensions](functions/computeTargetDimensions.md)
-- [concatMatrix](functions/concatMatrix.md)
-- [configureWasmLoader](functions/configureWasmLoader.md)
-- [convertToGrayscale](functions/convertToGrayscale.md)
-- [copyPages](functions/copyPages.md)
-- [createAnnotation](functions/createAnnotation.md)
-- [createAssociatedFile](functions/createAssociatedFile.md)
-- [createMarkedContentScope](functions/createMarkedContentScope.md)
-- [createPdf](functions/createPdf.md)
-- [createXmpStream](functions/createXmpStream.md)
-- [cropPage](functions/cropPage.md)
-- [curveToFinal](functions/curveToFinal.md)
-- [curveToInitial](functions/curveToInitial.md)
-- [curveToOp](functions/curveToOp.md)
-- [dataMatrixToOperators](functions/dataMatrixToOperators.md)
-- [decodeImageStream](functions/decodeImageStream.md)
-- [decodeJpegWasm](functions/decodeJpegWasm.md)
-- [decodePermissions](functions/decodePermissions.md)
-- [decodeStream](functions/decodeStream.md)
-- [deduplicateImages](functions/deduplicateImages.md)
-- [degrees](functions/degrees.md)
-- [degreesToRadians](functions/degreesToRadians.md)
-- [detectRuntime](functions/detectRuntime.md)
-- [detectTransparency](functions/detectTransparency.md)
-- [downscaleImage](functions/downscaleImage.md)
-- [drawImageWithMatrix](functions/drawImageWithMatrix.md)
-- [drawImageXObject](functions/drawImageXObject.md)
-- [drawSvgOnPage](functions/drawSvgOnPage.md)
-- [drawXObject](functions/drawXObject.md)
-- [ean13ToOperators](functions/ean13ToOperators.md)
-- [ean8ToOperators](functions/ean8ToOperators.md)
-- [ellipsePath](functions/ellipsePath.md)
-- [ellipsisText](functions/ellipsisText.md)
-- [embedIccProfile](functions/embedIccProfile.md)
-- [embedPageAsFormXObject](functions/embedPageAsFormXObject.md)
-- [embedSignature](functions/embedSignature.md)
-- [encodeCode128](functions/encodeCode128.md)
-- [encodeCode128Values](functions/encodeCode128Values.md)
-- [encodeCode39](functions/encodeCode39.md)
-- [encodeContextTag](functions/encodeContextTag.md)
-- [encodeDataMatrix](functions/encodeDataMatrix.md)
-- [encodeEan13](functions/encodeEan13.md)
-- [encodeEan8](functions/encodeEan8.md)
-- [encodeInteger](functions/encodeInteger.md)
-- [encodeItf](functions/encodeItf.md)
-- [encodeJpegWasm](functions/encodeJpegWasm.md)
-- [encodeLength](functions/encodeLength.md)
-- [encodeOctetString](functions/encodeOctetString.md)
-- [encodeOID](functions/encodeOID.md)
-- [encodePdf417](functions/encodePdf417.md)
-- [encodePermissions](functions/encodePermissions.md)
-- [encodePrintableString](functions/encodePrintableString.md)
-- [encodeQrCode](functions/encodeQrCode.md)
-- [encodeSequence](functions/encodeSequence.md)
-- [encodeSet](functions/encodeSet.md)
-- [encodeUpcA](functions/encodeUpcA.md)
-- [encodeUTCTime](functions/encodeUTCTime.md)
-- [encodeUtf8String](functions/encodeUtf8String.md)
-- [endArtifact](functions/endArtifact.md)
-- [endLayerContent](functions/endLayerContent.md)
-- [endMarkedContent](functions/endMarkedContent.md)
-- [endPathOp](functions/endPathOp.md)
-- [endText](functions/endText.md)
-- [enforcePdfA](functions/enforcePdfA.md)
-- [enforcePdfAFull](functions/enforcePdfAFull.md)
-- [estimateJpegQuality](functions/estimateJpegQuality.md)
-- [estimateTextWidth](functions/estimateTextWidth.md)
-- [extractIccProfile](functions/extractIccProfile.md)
-- [extractImages](functions/extractImages.md)
-- [extractJpegMetadata](functions/extractJpegMetadata.md)
-- [extractMetrics](functions/extractMetrics.md)
-- [extractText](functions/extractText.md)
-- [extractTextWithPositions](functions/extractTextWithPositions.md)
-- [extractXmpMetadata](functions/extractXmpMetadata.md)
-- [fillAndStrokeOp](functions/fillAndStrokeOp.md)
-- [fillEvenOdd](functions/fillEvenOdd.md)
-- [fillEvenOddAndStroke](functions/fillEvenOddAndStroke.md)
-- [fillOp](functions/fillOp.md)
-- [findSignatures](functions/findSignatures.md)
-- [flattenTransparency](functions/flattenTransparency.md)
-- [formatHexContext](functions/formatHexContext.md)
-- [formatPdfDate](functions/formatPdfDate.md)
-- [generateButtonAppearance](functions/generateButtonAppearance.md)
-- [generateCheckboxAppearance](functions/generateCheckboxAppearance.md)
-- [generateCircleAppearance](functions/generateCircleAppearance.md)
-- [generateDropdownAppearance](functions/generateDropdownAppearance.md)
-- [generateFreeTextAppearance](functions/generateFreeTextAppearance.md)
-- [generateHighlightAppearance](functions/generateHighlightAppearance.md)
-- [generateInkAppearance](functions/generateInkAppearance.md)
-- [generateLineAppearance](functions/generateLineAppearance.md)
-- [generateListboxAppearance](functions/generateListboxAppearance.md)
-- [generatePdfAXmp](functions/generatePdfAXmp.md)
-- [generatePdfAXmpBytes](functions/generatePdfAXmpBytes.md)
-- [generateRadioAppearance](functions/generateRadioAppearance.md)
-- [generateSignatureAppearance](functions/generateSignatureAppearance.md)
-- [generateSquareAppearance](functions/generateSquareAppearance.md)
-- [generateSquigglyAppearance](functions/generateSquigglyAppearance.md)
-- [generateSrgbIccProfile](functions/generateSrgbIccProfile.md)
-- [generateStrikeOutAppearance](functions/generateStrikeOutAppearance.md)
-- [generateSymbolToUnicodeCmap](functions/generateSymbolToUnicodeCmap.md)
-- [generateTextAppearance](functions/generateTextAppearance.md)
-- [generateUnderlineAppearance](functions/generateUnderlineAppearance.md)
-- [generateWinAnsiToUnicodeCmap](functions/generateWinAnsiToUnicodeCmap.md)
-- [generateZapfDingbatsToUnicodeCmap](functions/generateZapfDingbatsToUnicodeCmap.md)
-- [getAttachments](functions/getAttachments.md)
-- [getPageSize](functions/getPageSize.md)
-- [getProfile](functions/getProfile.md)
-- [getRedactionMarks](functions/getRedactionMarks.md)
-- [getSignatures](functions/getSignatures.md)
-- [getSupportedLevels](functions/getSupportedLevels.md)
-- [getToUnicodeCmap](functions/getToUnicodeCmap.md)
-- [grayscale](functions/grayscale.md)
-- [initJpegWasm](functions/initJpegWasm.md)
-- [initWasm](functions/initWasm.md)
-- [injectJpegMetadata](functions/injectJpegMetadata.md)
-- [insertPage](functions/insertPage.md)
-- [instantiateWasmModuleStreaming](functions/instantiateWasmModuleStreaming.md)
-- [isAccessible](functions/isAccessible.md)
-- [isGrayscaleImage](functions/isGrayscaleImage.md)
-- [isJpegWasmReady](functions/isJpegWasmReady.md)
-- [isLinearized](functions/isLinearized.md)
-- [isOpenTypeCFF](functions/isOpenTypeCFF.md)
-- [isTrueType](functions/isTrueType.md)
-- [isValidLevel](functions/isValidLevel.md)
-- [isWasmDisabled](functions/isWasmDisabled.md)
-- [isWasmModuleCached](functions/isWasmModuleCached.md)
-- [itfToOperators](functions/itfToOperators.md)
-- [layoutCombedText](functions/layoutCombedText.md)
-- [layoutMultilineText](functions/layoutMultilineText.md)
-- [layoutSinglelineText](functions/layoutSinglelineText.md)
-- [linearGradient](functions/linearGradient.md)
-- [linearizePdf](functions/linearizePdf.md)
-- [lineToOp](functions/lineToOp.md)
-- [loadPdf](functions/loadPdf.md)
-- [loadWasmModule](functions/loadWasmModule.md)
-- [loadWasmModuleStreaming](functions/loadWasmModuleStreaming.md)
-- [markForRedaction](functions/markForRedaction.md)
-- [md5](functions/md5.md)
-- [mergePdfs](functions/mergePdfs.md)
-- [minimalPreset](functions/minimalPreset.md)
-- [movePage](functions/movePage.md)
-- [moveTextOp](functions/moveTextOp.md)
-- [moveTextSetLeading](functions/moveTextSetLeading.md)
-- [moveToOp](functions/moveToOp.md)
-- [nextLineOp](functions/nextLineOp.md)
-- [optimizeAllImages](functions/optimizeAllImages.md)
-- [optimizeImage](functions/optimizeImage.md)
-- [parseContentStream](functions/parseContentStream.md)
-- [parseIccColorSpace](functions/parseIccColorSpace.md)
-- [parseIccDescription](functions/parseIccDescription.md)
-- [parseSvg](functions/parseSvg.md)
-- [parseSvgColor](functions/parseSvgColor.md)
-- [parseSvgPath](functions/parseSvgPath.md)
-- [parseSvgTransform](functions/parseSvgTransform.md)
-- [parseTimestampResponse](functions/parseTimestampResponse.md)
-- [parseViewerPreferences](functions/parseViewerPreferences.md)
-- [parseXmpMetadata](functions/parseXmpMetadata.md)
-- [parseXmpPdfAMetadata](functions/parseXmpPdfAMetadata.md)
-- [pdf417ToOperators](functions/pdf417ToOperators.md)
-- [prepareForSigning](functions/prepareForSigning.md)
-- [professionalPreset](functions/professionalPreset.md)
-- [provideWasmBytes](functions/provideWasmBytes.md)
-- [qrCodeToOperators](functions/qrCodeToOperators.md)
-- [radialGradient](functions/radialGradient.md)
-- [radians](functions/radians.md)
-- [radiansToDegrees](functions/radiansToDegrees.md)
-- [rc4](functions/rc4.md)
-- [readBarcode](functions/readBarcode.md)
-- [readCode128](functions/readCode128.md)
-- [readCode39](functions/readCode39.md)
-- [readEan13](functions/readEan13.md)
-- [readEan8](functions/readEan8.md)
-- [recompressImage](functions/recompressImage.md)
-- [rectangleOp](functions/rectangleOp.md)
-- [removePage](functions/removePage.md)
-- [removePages](functions/removePages.md)
-- [renderMultiPageTable](functions/renderMultiPageTable.md)
-- [renderStyledBarcode](functions/renderStyledBarcode.md)
-- [renderTable](functions/renderTable.md)
-- [requestTimestamp](functions/requestTimestamp.md)
-- [resetWasmLoader](functions/resetWasmLoader.md)
-- [resizePage](functions/resizePage.md)
-- [restoreState](functions/restoreState.md)
-- [reversePages](functions/reversePages.md)
-- [rgb](functions/rgb.md)
-- [rotateAllPages](functions/rotateAllPages.md)
-- [rotateOp](functions/rotateOp.md)
-- [rotatePage](functions/rotatePage.md)
-- [rotationMatrix](functions/rotationMatrix.md)
-- [saveDocumentIncremental](functions/saveDocumentIncremental.md)
-- [saveIncremental](functions/saveIncremental.md)
-- [saveState](functions/saveState.md)
-- [scaleOp](functions/scaleOp.md)
-- [serializePdf](functions/serializePdf.md)
-- [setCharacterSpacingOp](functions/setCharacterSpacingOp.md)
-- [setColorSpace](functions/setColorSpace.md)
-- [setDashPatternOp](functions/setDashPatternOp.md)
-- [setFillColor](functions/setFillColor.md)
-- [setFillColorCmyk](functions/setFillColorCmyk.md)
-- [setFillColorGray](functions/setFillColorGray.md)
-- [setFillColorRgb](functions/setFillColorRgb.md)
-- [setFlatness](functions/setFlatness.md)
-- [setFontOp](functions/setFontOp.md)
-- [setFontSizeOp](functions/setFontSizeOp.md)
-- [setGraphicsStateOp](functions/setGraphicsStateOp.md)
-- [setLeadingOp](functions/setLeadingOp.md)
-- [setLineCapOp](functions/setLineCapOp.md)
-- [setLineJoinOp](functions/setLineJoinOp.md)
-- [setLineWidthOp](functions/setLineWidthOp.md)
-- [setMiterLimit](functions/setMiterLimit.md)
-- [setStrokeColor](functions/setStrokeColor.md)
-- [setStrokeColorCmyk](functions/setStrokeColorCmyk.md)
-- [setStrokeColorGray](functions/setStrokeColorGray.md)
-- [setStrokeColorRgb](functions/setStrokeColorRgb.md)
-- [setStrokeColorSpace](functions/setStrokeColorSpace.md)
-- [setTextMatrixOp](functions/setTextMatrixOp.md)
-- [setTextRenderingModeOp](functions/setTextRenderingModeOp.md)
-- [setTextRiseOp](functions/setTextRiseOp.md)
-- [setWordSpacingOp](functions/setWordSpacingOp.md)
-- [sha256](functions/sha256.md)
-- [sha384](functions/sha384.md)
-- [sha512](functions/sha512.md)
-- [showTextArray](functions/showTextArray.md)
-- [showTextHex](functions/showTextHex.md)
-- [showTextNextLine](functions/showTextNextLine.md)
-- [showTextOp](functions/showTextOp.md)
-- [showTextWithSpacing](functions/showTextWithSpacing.md)
-- [shrinkFontSize](functions/shrinkFontSize.md)
-- [signPdf](functions/signPdf.md)
-- [skewOp](functions/skewOp.md)
-- [splitPdf](functions/splitPdf.md)
-- [stripedPreset](functions/stripedPreset.md)
-- [stripProhibitedFeatures](functions/stripProhibitedFeatures.md)
-- [strokeOp](functions/strokeOp.md)
-- [summarizeIssues](functions/summarizeIssues.md)
-- [svgToPdfOperators](functions/svgToPdfOperators.md)
-- [tilingPattern](functions/tilingPattern.md)
-- [translateOp](functions/translateOp.md)
-- [truncateText](functions/truncateText.md)
-- [upcAToOperators](functions/upcAToOperators.md)
-- [validatePdfA](functions/validatePdfA.md)
-- [validateXmpMetadata](functions/validateXmpMetadata.md)
-- [valuesToModules](functions/valuesToModules.md)
-- [verifyOwnerPassword](functions/verifyOwnerPassword.md)
-- [verifySignature](functions/verifySignature.md)
-- [verifySignatures](functions/verifySignatures.md)
-- [verifyUserPassword](functions/verifyUserPassword.md)
-- [wrapInMarkedContent](functions/wrapInMarkedContent.md)
-- [wrapText](functions/wrapText.md)
+### Document Metadata
 
-## References
+```ts
+doc.setTitle('Invoice #1042', { showInWindowTitleBar: true });
+doc.setAuthor('Jane Doe');
+doc.setLanguage('en');
+doc.setCreationDate(new Date());
+```
 
-### concatTransformationMatrix
+| Interface | Description |
+|:---|:---|
+| [`PdfDocument`](classes/PdfDocument.md) | Full document class — metadata, pages, fonts, images |
+| [`PdfSaveOptions`](interfaces/PdfSaveOptions.md) | Compression, encryption, permissions |
+| [`SetTitleOptions`](interfaces/SetTitleOptions.md) | Window title bar display |
+| [`LoadPdfOptions`](interfaces/LoadPdfOptions.md) | Password, parse speed, validation |
+| [`DocumentMetadata`](interfaces/DocumentMetadata.md) | Title, author, subject, keywords |
+| [`ViewerPreferences`](interfaces/ViewerPreferences.md) | Page layout, toolbar visibility |
 
-Renames and re-exports [concatMatrix](functions/concatMatrix.md)
+---
 
-***
+## Pages
 
-### drawObject
+Add, remove, reorder, and manipulate pages.
 
-Renames and re-exports [drawXObject](functions/drawXObject.md)
+### Basic Page Operations
 
-***
+```ts
+import { PageSizes } from 'modern-pdf-lib';
 
-### EanOptions
+const page = doc.addPage(PageSizes.A4);      // 595 x 842 pt
+const page2 = doc.addPage([600, 400]);       // Custom size
+const pages = doc.getPages();                // readonly PdfPage[]
+```
 
-Renames and re-exports [BarcodeOptions](interfaces/BarcodeOptions.md)
+| Function | Description |
+|:---|:---|
+| [`insertPage(doc, index, page)`](functions/insertPage.md) | Insert at specific position |
+| [`removePage(doc, index)`](functions/removePage.md) | Remove a single page |
+| [`removePages(doc, indices)`](functions/removePages.md) | Remove multiple pages |
+| [`movePage(doc, from, to)`](functions/movePage.md) | Reorder a page |
+| [`reversePages(doc)`](functions/reversePages.md) | Reverse page order |
+| [`rotatePage(doc, index, angle)`](functions/rotatePage.md) | Rotate a page |
+| [`rotateAllPages(doc, angle)`](functions/rotateAllPages.md) | Rotate all pages |
+| [`resizePage(doc, index, size)`](functions/resizePage.md) | Change page dimensions |
+| [`cropPage(doc, index, box)`](functions/cropPage.md) | Set crop box |
 
-***
+| Variable | Description |
+|:---|:---|
+| [`PageSizes`](variables/PageSizes.md) | A0–A10, B0–B10, C, RA, SRA, Letter, Legal, Tabloid, Folio |
 
-### popGraphicsState
+| Class | Description |
+|:---|:---|
+| [`PdfPage`](classes/PdfPage.md) | Page drawing surface — text, images, shapes, SVG |
 
-Renames and re-exports [restoreState](functions/restoreState.md)
+---
 
-***
+## Drawing
 
-### pushGraphicsState
+All drawing methods live on `PdfPage`.
 
-Renames and re-exports [saveState](functions/saveState.md)
+### Text
 
-***
+```ts
+const font = doc.embedStandardFont('Helvetica');
 
-### setCharacterSqueeze
+page.drawText('Hello World', {
+  x: 50, y: 700,
+  size: 24,
+  font,
+  color: rgb(0.13, 0.13, 0.13),
+  maxWidth: 400,
+});
+```
 
-Renames and re-exports [setCharacterSpacingOp](functions/setCharacterSpacingOp.md)
+| Interface | Description |
+|:---|:---|
+| [`DrawTextOptions`](interfaces/DrawTextOptions.md) | Font, size, color, rotation, opacity, maxWidth, lineHeight |
 
-***
+### Images
 
-### setFontAndSize
+```ts
+const png = doc.embedPng(pngBytes);                // sync
+const jpg = await doc.embedJpeg(jpgBytes);         // async
+const img = await doc.embedImage(anyImageBytes);   // auto-detect
 
-Renames and re-exports [setFontOp](functions/setFontOp.md)
+page.drawImage(img, { x: 50, y: 400, width: 200, height: 150 });
+```
 
-***
+| Interface | Description |
+|:---|:---|
+| [`DrawImageOptions`](interfaces/DrawImageOptions.md) | Position, size, rotation, opacity, blend mode |
+| [`ImageRef`](interfaces/ImageRef.md) | Embedded image reference (width, height) |
 
-### setLineHeight
+### Shapes
 
-Renames and re-exports [setLeadingOp](functions/setLeadingOp.md)
+```ts
+page.drawRectangle({ x: 50, y: 300, width: 100, height: 50, color: rgb(0, 0.5, 1) });
+page.drawCircle({ x: 200, y: 325, radius: 25, borderColor: rgb(0, 0, 0) });
+page.drawLine({ start: { x: 50, y: 280 }, end: { x: 300, y: 280 } });
+page.drawSvgPath('M 0 0 L 100 0 L 50 80 Z', { x: 300, y: 300, color: rgb(1, 0, 0) });
+```
 
-***
+| Interface | Description |
+|:---|:---|
+| [`DrawRectangleOptions`](interfaces/DrawRectangleOptions.md) | Position, size, color, border, rotation |
+| [`DrawSquareOptions`](interfaces/DrawSquareOptions.md) | Square shorthand |
+| [`DrawCircleOptions`](interfaces/DrawCircleOptions.md) | Center, radius, color, border |
+| [`DrawEllipseOptions`](interfaces/DrawEllipseOptions.md) | Ellipse with x/y radius |
+| [`DrawLineOptions`](interfaces/DrawLineOptions.md) | Start, end, thickness, color, dash |
+| [`DrawSvgPathOptions`](interfaces/DrawSvgPathOptions.md) | SVG path data, position, color |
+| [`DrawPageOptions`](interfaces/DrawPageOptions.md) | Draw an embedded page |
 
-### UpcOptions
+---
 
-Renames and re-exports [BarcodeOptions](interfaces/BarcodeOptions.md)
+## Fonts
+
+```ts
+// Standard 14 fonts (no embedding needed)
+const helvetica = doc.embedStandardFont('Helvetica');
+
+// Custom TrueType / OpenType
+const inter = await doc.embedFont(fontBytes, { subset: true });
+
+console.log(inter.widthOfTextAtSize('Hello', 12));  // number
+console.log(inter.heightAtSize(12));                 // number
+```
+
+| Interface | Description |
+|:---|:---|
+| [`FontRef`](interfaces/FontRef.md) | Embedded font — `widthOfTextAtSize()`, `heightAtSize()`, `sizeAtHeight()` |
+| [`EmbedFontOptions`](interfaces/EmbedFontOptions.md) | Subset, custom name, features |
+| [`FontMetrics`](interfaces/FontMetrics.md) | Ascent, descent, line gap |
+| [`StandardFontName`](type-aliases/StandardFontName.md) | `'Helvetica'`, `'TimesRoman'`, `'Courier'`, etc. |
+| [`StandardFonts`](variables/StandardFonts.md) | Enum of all 14 standard font names |
+
+---
+
+## Colors
+
+```ts
+import { rgb, cmyk, grayscale } from 'modern-pdf-lib';
+
+const red = rgb(1, 0, 0);
+const blue = rgb(0, 0, 1);
+const gray = grayscale(0.5);
+const cyan = cmyk(1, 0, 0, 0);
+```
+
+| Function | Description |
+|:---|:---|
+| [`rgb(r, g, b)`](functions/rgb.md) | RGB color (0–1 range) |
+| [`cmyk(c, m, y, k)`](functions/cmyk.md) | CMYK color (0–1 range) |
+| [`grayscale(g)`](functions/grayscale.md) | Grayscale (0 = black, 1 = white) |
+| [`colorToComponents(color)`](functions/colorToComponents.md) | Extract numeric components |
+| [`componentsToColor(type, values)`](functions/componentsToColor.md) | Build color from components |
+
+| Type | Description |
+|:---|:---|
+| [`Color`](type-aliases/Color.md) | `RgbColor \| CmykColor \| GrayscaleColor` |
+| [`RgbColor`](interfaces/RgbColor.md) | `{ type: 'RGB', red, green, blue }` |
+| [`CmykColor`](interfaces/CmykColor.md) | `{ type: 'CMYK', cyan, magenta, yellow, key }` |
+| [`GrayscaleColor`](interfaces/GrayscaleColor.md) | `{ type: 'Grayscale', gray }` |
+
+---
+
+## Forms
+
+Fill, create, and flatten AcroForm fields.
+
+```ts
+const form = doc.getForm();
+
+form.getTextField('name').setText('Jane Doe');
+form.getCheckbox('agree').check();
+form.getDropdown('country').select('Canada');
+form.getRadioGroup('size').select('Medium');
+
+form.flatten();  // Burn values into page content
+```
+
+| Class | Description |
+|:---|:---|
+| [`PdfForm`](classes/PdfForm.md) | Form access — `getTextField()`, `getCheckbox()`, `getDropdown()`, etc. |
+| [`PdfTextField`](classes/PdfTextField.md) | Text input — `setText()`, `getText()`, `setMaxLength()` |
+| [`PdfCheckboxField`](classes/PdfCheckboxField.md) | Checkbox — `check()`, `uncheck()`, `isChecked()` |
+| [`PdfDropdownField`](classes/PdfDropdownField.md) | Dropdown select — `select()`, `getOptions()`, `addOptions()` |
+| [`PdfRadioGroup`](classes/PdfRadioGroup.md) | Radio buttons — `select()`, `getOptions()` |
+| [`PdfListboxField`](classes/PdfListboxField.md) | Multi-select list — `select()`, `getSelected()` |
+| [`PdfButtonField`](classes/PdfButtonField.md) | Push button — `setImage()` |
+| [`PdfSignatureField`](classes/PdfSignatureField.md) | Signature field |
+| [`PdfField`](classes/PdfField.md) | Base class — `getName()`, `isReadOnly()`, `addToPage()` |
+
+---
+
+## Merge, Split, Copy
+
+```ts
+import { mergePdfs, splitPdf, copyPages } from 'modern-pdf-lib';
+
+const merged = await mergePdfs([pdf1Bytes, pdf2Bytes]);
+const [part1, part2] = await splitPdf(pdfBytes, [
+  { start: 0, end: 4 },
+  { start: 5, end: 9 },
+]);
+```
+
+| Function | Description |
+|:---|:---|
+| [`mergePdfs(sources)`](functions/mergePdfs.md) | Merge multiple PDFs into one |
+| [`splitPdf(source, ranges)`](functions/splitPdf.md) | Split a PDF by page ranges |
+| [`copyPages(source, dest, indices)`](functions/copyPages.md) | Copy specific pages between documents |
+
+---
+
+## Tables
+
+Render tables with spanning, pagination, presets, and styled text.
+
+```ts
+import { createPdf, PageSizes, professionalPreset, applyPreset, rgb } from 'modern-pdf-lib';
+
+const doc = createPdf();
+const page = doc.addPage(PageSizes.A4);
+
+page.drawTable(applyPreset(professionalPreset(), {
+  x: 50, y: 750, width: 495,
+  headerRows: 1,
+  rows: [
+    { cells: ['Product', 'Qty', 'Price'] },
+    { cells: ['Widget A', '10', '$5.00'] },
+    { cells: [{ content: 'Total', colSpan: 2, align: 'right' }, '$5.00'] },
+  ],
+  columns: [{ flex: 2 }, { width: 60 }, { width: 80, align: 'right' }],
+}));
+```
+
+| Function | Description |
+|:---|:---|
+| [`renderTable(options)`](functions/renderTable.md) | Render a single-page table (returns operator string) |
+| [`renderMultiPageTable(options, bottomMargin?)`](functions/renderMultiPageTable.md) | Auto-paginate with header repetition |
+| [`applyPreset(preset, options)`](functions/applyPreset.md) | Merge a preset with custom options |
+| [`applyTablePreset(name, options)`](functions/applyTablePreset.md) | Apply a preset by name |
+| [`minimalPreset()`](functions/minimalPreset.md) | Clean, borderless styling |
+| [`stripedPreset()`](functions/stripedPreset.md) | Alternating row colors |
+| [`borderedPreset()`](functions/borderedPreset.md) | Full grid borders |
+| [`professionalPreset()`](functions/professionalPreset.md) | Dark header, subtle stripes |
+
+| Interface | Description |
+|:---|:---|
+| [`DrawTableOptions`](interfaces/DrawTableOptions.md) | Full table configuration |
+| [`TableRow`](interfaces/TableRow.md) | Row definition with cells and optional backgroundColor |
+| [`TableCell`](interfaces/TableCell.md) | Cell content, colSpan, rowSpan, align, overflow |
+| [`TableColumn`](interfaces/TableColumn.md) | Width (fixed, percentage, flex, auto-fit), alignment |
+| [`TextRun`](interfaces/TextRun.md) | Styled text segment (font, size, color per run) |
+| [`MultiPageTableResult`](interfaces/MultiPageTableResult.md) | Pages array with operator strings |
+
+### Text Overflow
+
+| Function | Description |
+|:---|:---|
+| [`applyOverflow(text, mode, width, fontSize)`](functions/applyOverflow.md) | Apply overflow strategy |
+| [`wrapText(text, width, fontSize)`](functions/wrapText.md) | Word-wrap text |
+| [`truncateText(text, width, fontSize)`](functions/truncateText.md) | Hard truncate |
+| [`ellipsisText(text, width, fontSize)`](functions/ellipsisText.md) | Truncate with "..." |
+| [`shrinkFontSize(text, width, fontSize)`](functions/shrinkFontSize.md) | Calculate reduced font size |
+| [`estimateTextWidth(text, fontSize)`](functions/estimateTextWidth.md) | Approximate text width |
+
+---
+
+## QR Codes & Barcodes
+
+9 formats: QR, Code 128, EAN-13, EAN-8, UPC-A, Code 39, ITF, PDF417, Data Matrix.
+
+```ts
+// QR code (built-in page method)
+page.drawQrCode('https://example.com', { x: 50, y: 700, size: 120 });
+
+// Barcodes (encode → render)
+import { encodeCode128, renderStyledBarcode } from 'modern-pdf-lib';
+
+const barcode = encodeCode128('ABC-12345');
+const ops = renderStyledBarcode(barcode, { x: 50, y: 500, height: 60 });
+```
+
+### Encoding Functions
+
+| Function | Returns | Description |
+|:---|:---|:---|
+| [`encodeQrCode(text, options?)`](functions/encodeQrCode.md) | `QrCodeMatrix` | QR code (ISO 18004) |
+| [`encodeCode128(data, options?)`](functions/encodeCode128.md) | `number[]` | Code 128 barcode |
+| [`encodeEan13(digits)`](functions/encodeEan13.md) | `number[]` | EAN-13 barcode |
+| [`encodeEan8(digits)`](functions/encodeEan8.md) | `number[]` | EAN-8 barcode |
+| [`encodeUpcA(digits)`](functions/encodeUpcA.md) | `number[]` | UPC-A barcode |
+| [`encodeCode39(text, options?)`](functions/encodeCode39.md) | `number[]` | Code 39 barcode |
+| [`encodeItf(digits, options?)`](functions/encodeItf.md) | `number[]` | Interleaved 2 of 5 |
+| [`encodePdf417(data, options?)`](functions/encodePdf417.md) | `Pdf417Matrix` | PDF417 2D barcode |
+| [`encodeDataMatrix(data, options?)`](functions/encodeDataMatrix.md) | `DataMatrixResult` | Data Matrix 2D |
+
+### Rendering Functions
+
+| Function | Description |
+|:---|:---|
+| [`renderStyledBarcode(modules, options)`](functions/renderStyledBarcode.md) | Render 1D barcode to PDF operators |
+| [`qrCodeToOperators(matrix, options)`](functions/qrCodeToOperators.md) | Render QR matrix to PDF operators |
+| [`pdf417ToOperators(matrix, options)`](functions/pdf417ToOperators.md) | Render PDF417 to PDF operators |
+| [`dataMatrixToOperators(matrix, options)`](functions/dataMatrixToOperators.md) | Render Data Matrix to PDF operators |
+
+---
+
+## Encryption & Signatures
+
+### Encryption
+
+```ts
+const bytes = await doc.save({
+  userPassword: 'reader',
+  ownerPassword: 'admin',
+  permissions: { printing: true, copying: false },
+});
+```
+
+| Interface | Description |
+|:---|:---|
+| [`EncryptOptions`](interfaces/EncryptOptions.md) | Algorithm, passwords, permissions |
+| [`PdfPermissionFlags`](interfaces/PdfPermissionFlags.md) | Print, copy, modify, annotate, fill forms |
+
+### Digital Signatures
+
+```ts
+import { signPdf, verifySignatures } from 'modern-pdf-lib';
+
+const signed = await signPdf(pdfBytes, 'Signature1', {
+  certificate: certDer,
+  privateKey: keyDer,
+  reason: 'Approved',
+});
+const results = await verifySignatures(signed);
+```
+
+| Function | Description |
+|:---|:---|
+| [`signPdf(bytes, fieldName, options)`](functions/signPdf.md) | Sign a PDF |
+| [`verifySignatures(bytes)`](functions/verifySignatures.md) | Verify all signatures |
+| [`verifySignature(bytes, info)`](functions/verifySignature.md) | Verify a single signature |
+| [`findSignatures(bytes)`](functions/findSignatures.md) | List signature fields |
+| [`prepareForSigning(bytes, fieldName, options)`](functions/prepareForSigning.md) | Prepare byte range |
+
+| Interface | Description |
+|:---|:---|
+| [`SignOptions`](interfaces/SignOptions.md) | Certificate, key, reason, location |
+| [`SignatureVerificationResult`](interfaces/SignatureVerificationResult.md) | Valid, signer, timestamp |
+| [`VisibleSignatureOptions`](interfaces/VisibleSignatureOptions.md) | Visible appearance options |
+
+---
+
+## Text Extraction
+
+```ts
+import { loadPdf, extractText, extractTextWithPositions } from 'modern-pdf-lib';
+
+const doc = await loadPdf(pdfBytes);
+const text = extractText(doc.getPage(0));           // plain string
+const items = extractTextWithPositions(              // positioned items
+  doc.getPage(0).getOperators(),
+  doc.getPage(0).getResources(),
+);
+```
+
+| Function | Description |
+|:---|:---|
+| [`extractText(page)`](functions/extractText.md) | Extract plain text from a page |
+| [`extractTextWithPositions(ops, resources)`](functions/extractTextWithPositions.md) | Extract text with x, y, font, size |
+
+---
+
+## Image Optimization
+
+```ts
+import { loadPdf, initWasm, optimizeAllImages, deduplicateImages } from 'modern-pdf-lib';
+
+await initWasm({ jpeg: true });
+const doc = await loadPdf(pdfBytes);
+
+deduplicateImages(doc);
+const report = await optimizeAllImages(doc, { quality: 75, progressive: true });
+```
+
+| Function | Description |
+|:---|:---|
+| [`optimizeAllImages(doc, options)`](functions/optimizeAllImages.md) | Batch optimize all images in a document |
+| [`deduplicateImages(doc)`](functions/deduplicateImages.md) | Remove duplicate images (FNV-1a hash) |
+| [`extractImages(doc)`](functions/extractImages.md) | List all images in a document |
+| [`optimizeImage(data, options)`](functions/optimizeImage.md) | Optimize a single image |
+| [`recompressImage(data, options)`](functions/recompressImage.md) | JPEG recompression |
+| [`downscaleImage(data, options)`](functions/downscaleImage.md) | Reduce image dimensions |
+| [`isGrayscaleImage(data)`](functions/isGrayscaleImage.md) | Detect grayscale images |
+| [`convertToGrayscale(data)`](functions/convertToGrayscale.md) | Convert to grayscale |
+| [`computeImageDpi(image, page)`](functions/computeImageDpi.md) | Calculate effective DPI |
+| [`estimateJpegQuality(bytes)`](functions/estimateJpegQuality.md) | Estimate JPEG quality from DQT |
+
+---
+
+## PDF/A Compliance
+
+```ts
+import { validatePdfA, enforcePdfA } from 'modern-pdf-lib';
+
+const issues = validatePdfA(pdfBytes, '2b');
+const result = enforcePdfA(pdfBytes, '2b');
+```
+
+| Function | Description |
+|:---|:---|
+| [`validatePdfA(bytes, level)`](functions/validatePdfA.md) | Validate against a PDF/A level |
+| [`enforcePdfA(bytes, level, options?)`](functions/enforcePdfA.md) | Auto-fix PDF/A compliance |
+| [`enforcePdfAFull(bytes, level, options?)`](functions/enforcePdfAFull.md) | Full enforcement with report |
+| [`getSupportedLevels()`](functions/getSupportedLevels.md) | List supported PDF/A levels |
+| [`isValidLevel(level)`](functions/isValidLevel.md) | Check if a level string is valid |
+
+---
+
+## Accessibility
+
+```ts
+import { checkAccessibility, isAccessible } from 'modern-pdf-lib';
+
+const issues = checkAccessibility(doc);
+const ok = isAccessible(doc);
+```
+
+| Function | Description |
+|:---|:---|
+| [`checkAccessibility(doc)`](functions/checkAccessibility.md) | Check PDF/UA accessibility |
+| [`isAccessible(doc)`](functions/isAccessible.md) | Quick pass/fail check |
+
+| Class | Description |
+|:---|:---|
+| [`PdfStructureTree`](classes/PdfStructureTree.md) | Document structure tree |
+| [`PdfStructureElement`](classes/PdfStructureElement.md) | Structure elements (headings, paragraphs, etc.) |
+
+---
+
+## Annotations
+
+18 annotation types with appearance generation.
+
+```ts
+import { createAnnotation } from 'modern-pdf-lib';
+
+createAnnotation(page, 'text', {
+  rect: [50, 700, 80, 730],
+  contents: 'Review this section',
+  color: rgb(1, 1, 0),
+});
+```
+
+| Class | Description |
+|:---|:---|
+| [`PdfTextAnnotation`](classes/PdfTextAnnotation.md) | Sticky note |
+| [`PdfLinkAnnotation`](classes/PdfLinkAnnotation.md) | Hyperlink |
+| [`PdfHighlightAnnotation`](classes/PdfHighlightAnnotation.md) | Text highlight |
+| [`PdfUnderlineAnnotation`](classes/PdfUnderlineAnnotation.md) | Text underline |
+| [`PdfStrikeOutAnnotation`](classes/PdfStrikeOutAnnotation.md) | Strikethrough |
+| [`PdfSquigglyAnnotation`](classes/PdfSquigglyAnnotation.md) | Squiggly underline |
+| [`PdfFreeTextAnnotation`](classes/PdfFreeTextAnnotation.md) | Free text box |
+| [`PdfLineAnnotation`](classes/PdfLineAnnotation.md) | Line with endpoints |
+| [`PdfSquareAnnotation`](classes/PdfSquareAnnotation.md) | Rectangle |
+| [`PdfCircleAnnotation`](classes/PdfCircleAnnotation.md) | Ellipse |
+| [`PdfPolygonAnnotation`](classes/PdfPolygonAnnotation.md) | Polygon |
+| [`PdfPolyLineAnnotation`](classes/PdfPolyLineAnnotation.md) | Polyline |
+| [`PdfInkAnnotation`](classes/PdfInkAnnotation.md) | Freehand drawing |
+| [`PdfStampAnnotation`](classes/PdfStampAnnotation.md) | Stamp |
+| [`PdfRedactAnnotation`](classes/PdfRedactAnnotation.md) | Redaction mark |
+| [`PdfPopupAnnotation`](classes/PdfPopupAnnotation.md) | Popup |
+| [`PdfCaretAnnotation`](classes/PdfCaretAnnotation.md) | Caret (insertion point) |
+| [`PdfFileAttachmentAnnotation`](classes/PdfFileAttachmentAnnotation.md) | File attachment |
+
+---
+
+## Outlines & Bookmarks
+
+```ts
+const outline = doc.getOutline();
+outline.addItem('Chapter 1', { pageIndex: 0 });
+outline.addItem('Chapter 2', { pageIndex: 5 });
+```
+
+| Class | Description |
+|:---|:---|
+| [`PdfOutlineTree`](classes/PdfOutlineTree.md) | Document outline (bookmarks) |
+| [`PdfOutlineItem`](classes/PdfOutlineItem.md) | Individual bookmark entry |
+
+---
+
+## Layers (OCG)
+
+```ts
+const layers = doc.getLayerManager();
+const layer = layers.createLayer('Watermark');
+page.drawText('DRAFT', { x: 200, y: 400, size: 72, layer });
+```
+
+| Class | Description |
+|:---|:---|
+| [`PdfLayerManager`](classes/PdfLayerManager.md) | Create, toggle, list layers |
+| [`PdfLayer`](classes/PdfLayer.md) | Individual layer (optional content group) |
+
+---
+
+## Watermarks & Redaction
+
+```ts
+import { addWatermark, markForRedaction, applyRedactions } from 'modern-pdf-lib';
+
+addWatermark(doc, { text: 'CONFIDENTIAL', opacity: 0.3 });
+
+markForRedaction(page, { rect: [100, 700, 300, 720] });
+applyRedactions(doc);
+```
+
+| Function | Description |
+|:---|:---|
+| [`addWatermark(doc, options)`](functions/addWatermark.md) | Add watermark to all pages |
+| [`addWatermarkToPage(page, options)`](functions/addWatermarkToPage.md) | Add watermark to one page |
+| [`markForRedaction(page, mark)`](functions/markForRedaction.md) | Mark area for redaction |
+| [`applyRedactions(doc)`](functions/applyRedactions.md) | Apply all redaction marks |
+
+---
+
+## File Attachments
+
+```ts
+import { attachFile, getAttachments } from 'modern-pdf-lib';
+
+attachFile(doc, {
+  name: 'invoice.csv',
+  data: csvBytes,
+  mimeType: 'text/csv',
+});
+```
+
+| Function | Description |
+|:---|:---|
+| [`attachFile(doc, options)`](functions/attachFile.md) | Attach a file to the document |
+| [`getAttachments(doc)`](functions/getAttachments.md) | List embedded files |
+
+---
+
+## Linearization
+
+```ts
+import { linearizePdf, isLinearized } from 'modern-pdf-lib';
+
+const optimized = linearizePdf(pdfBytes);
+console.log(isLinearized(optimized));  // true
+```
+
+| Function | Description |
+|:---|:---|
+| [`linearizePdf(bytes, options?)`](functions/linearizePdf.md) | Optimize for fast web view |
+| [`isLinearized(bytes)`](functions/isLinearized.md) | Check if PDF is linearized |
+
+---
+
+## WASM Acceleration
+
+All WASM modules are optional — pure-JS fallbacks produce identical output.
+
+```ts
+import { initWasm } from 'modern-pdf-lib';
+
+await initWasm({
+  deflate: true,   // Faster compression
+  png: true,       // Faster PNG decoding
+  fonts: true,     // Faster font subsetting
+  jpeg: true,      // JPEG encode/decode
+});
+```
+
+| Function | Description |
+|:---|:---|
+| [`initWasm(options)`](functions/initWasm.md) | Initialize WASM modules |
+| [`configureWasmLoader(config)`](functions/configureWasmLoader.md) | Custom WASM loading |
+| [`clearWasmCache()`](functions/clearWasmCache.md) | Clear cached WASM modules |
+| [`isWasmModuleCached(name)`](functions/isWasmModuleCached.md) | Check if a module is cached |
+
+| Interface | Description |
+|:---|:---|
+| [`InitWasmOptions`](interfaces/InitWasmOptions.md) | Module selection, custom WASM sources |
+
+---
+
+## Text Layout
+
+Compute text positions before drawing.
+
+```ts
+import { layoutMultilineText, layoutCombedText } from 'modern-pdf-lib';
+
+const layout = layoutMultilineText('Long text...', {
+  font: helvetica,
+  fontSize: 12,
+  bounds: { x: 50, y: 700, width: 400, height: 500 },
+});
+```
+
+| Function | Description |
+|:---|:---|
+| [`layoutMultilineText(text, options)`](functions/layoutMultilineText.md) | Compute multiline text layout |
+| [`layoutSinglelineText(text, options)`](functions/layoutSinglelineText.md) | Compute single-line layout |
+| [`layoutCombedText(text, options)`](functions/layoutCombedText.md) | Compute combed (fixed-width cell) layout |
+| [`computeFontSize(text, options)`](functions/computeFontSize.md) | Auto-size text to fit bounds |
+
+---
+
+## Gradients & Patterns
+
+```ts
+import { linearGradient, radialGradient, tilingPattern, rgb } from 'modern-pdf-lib';
+
+page.drawRectangle({
+  x: 50, y: 600, width: 200, height: 100,
+  color: linearGradient({
+    start: { x: 50, y: 600 }, end: { x: 250, y: 600 },
+    stops: [{ offset: 0, color: rgb(1, 0, 0) }, { offset: 1, color: rgb(0, 0, 1) }],
+  }),
+});
+```
+
+| Function | Description |
+|:---|:---|
+| [`linearGradient(options)`](functions/linearGradient.md) | Linear gradient fill |
+| [`radialGradient(options)`](functions/radialGradient.md) | Radial gradient fill |
+| [`tilingPattern(options)`](functions/tilingPattern.md) | Repeating pattern fill |
+
+---
+
+## Browser Helpers
+
+```ts
+import { saveAsDownload, saveAsBlob, openInNewTab } from 'modern-pdf-lib/browser';
+
+saveAsDownload(pdfBytes, 'document.pdf');
+const blob = saveAsBlob(pdfBytes);
+openInNewTab(pdfBytes);
+```
+
+| Class | Description |
+|:---|:---|
+| [`PdfWorker`](classes/PdfWorker.md) | Web Worker for off-main-thread PDF generation |
+
+---
+
+## Angles & Utilities
+
+```ts
+import { degrees, radians, degreesToRadians, radiansToDegrees } from 'modern-pdf-lib';
+
+const angle = degrees(45);
+const rad = degreesToRadians(45);
+```
+
+| Function | Description |
+|:---|:---|
+| [`degrees(value)`](functions/degrees.md) | Create a `Degrees` angle |
+| [`radians(value)`](functions/radians.md) | Create a `Radians` angle |
+| [`degreesToRadians(deg)`](functions/degreesToRadians.md) | Convert degrees to radians |
+| [`radiansToDegrees(rad)`](functions/radiansToDegrees.md) | Convert radians to degrees |
+
+---
+
+## Low-Level PDF Operators
+
+For advanced use — construct raw PDF content stream operators.
+
+| Variable | Description |
+|:---|:---|
+| [`PDFOperator`](classes/PDFOperator.md) | Raw PDF operator class |
+
+<details>
+<summary><strong>60+ operator functions</strong></summary>
+
+Graphics state: [`saveState`](functions/saveState.md), [`restoreState`](functions/restoreState.md), [`concatMatrix`](functions/concatMatrix.md), [`setLineWidthOp`](functions/setLineWidthOp.md), [`setLineCapOp`](functions/setLineCapOp.md), [`setLineJoinOp`](functions/setLineJoinOp.md), [`setDashPatternOp`](functions/setDashPatternOp.md), [`setGraphicsStateOp`](functions/setGraphicsStateOp.md)
+
+Path construction: [`moveToOp`](functions/moveToOp.md), [`lineToOp`](functions/lineToOp.md), [`curveToOp`](functions/curveToOp.md), [`curveToInitial`](functions/curveToInitial.md), [`curveToFinal`](functions/curveToFinal.md), [`rectangleOp`](functions/rectangleOp.md), [`closePathOp`](functions/closePathOp.md)
+
+Path painting: [`strokeOp`](functions/strokeOp.md), [`fillOp`](functions/fillOp.md), [`fillEvenOdd`](functions/fillEvenOdd.md), [`fillAndStrokeOp`](functions/fillAndStrokeOp.md), [`closeAndStroke`](functions/closeAndStroke.md), [`closeFillAndStroke`](functions/closeFillAndStroke.md), [`endPathOp`](functions/endPathOp.md)
+
+Text: [`beginText`](functions/beginText.md), [`endText`](functions/endText.md), [`setFontOp`](functions/setFontOp.md), [`showTextOp`](functions/showTextOp.md), [`moveTextOp`](functions/moveTextOp.md), [`setTextMatrixOp`](functions/setTextMatrixOp.md), [`setTextRenderingModeOp`](functions/setTextRenderingModeOp.md), [`setCharacterSpacingOp`](functions/setCharacterSpacingOp.md), [`setWordSpacingOp`](functions/setWordSpacingOp.md), [`setLeadingOp`](functions/setLeadingOp.md), [`setTextRiseOp`](functions/setTextRiseOp.md)
+
+Color: [`setFillColorRgb`](functions/setFillColorRgb.md), [`setStrokeColorRgb`](functions/setStrokeColorRgb.md), [`setFillColorCmyk`](functions/setFillColorCmyk.md), [`setStrokeColorCmyk`](functions/setStrokeColorCmyk.md), [`setFillColorGray`](functions/setFillColorGray.md), [`setStrokeColorGray`](functions/setStrokeColorGray.md)
+
+Transform: [`translateOp`](functions/translateOp.md), [`scaleOp`](functions/scaleOp.md), [`rotateOp`](functions/rotateOp.md), [`skewOp`](functions/skewOp.md)
+
+XObject: [`drawXObject`](functions/drawXObject.md), [`drawImageXObject`](functions/drawImageXObject.md)
+
+Marked content: [`beginMarkedContent`](functions/beginMarkedContent.md), [`endMarkedContent`](functions/endMarkedContent.md), [`beginArtifact`](functions/beginArtifact.md), [`endArtifact`](functions/endArtifact.md)
+
+</details>
+
+---
+
+## Enums & Constants
+
+| Variable | Values |
+|:---|:---|
+| [`LineCapStyle`](variables/LineCapStyle.md) | `Butt`, `Round`, `Square` |
+| [`LineJoinStyle`](variables/LineJoinStyle.md) | `Miter`, `Round`, `Bevel` |
+| [`TextAlignment`](variables/TextAlignment.md) | `Left`, `Center`, `Right` |
+| [`ImageAlignment`](variables/ImageAlignment.md) | `Left`, `Center`, `Right` |
+| [`ParseSpeeds`](variables/ParseSpeeds.md) | `Fastest`, `Fast`, `Medium`, `Slow` |
+| [`BlendMode`](variables/BlendMode.md) | `Normal`, `Multiply`, `Screen`, `Overlay`, etc. |
+| [`TextRenderingMode`](variables/TextRenderingMode.md) | `Fill`, `Stroke`, `FillAndStroke`, `Invisible`, etc. |
+| [`AnnotationFlags`](variables/AnnotationFlags.md) | `Invisible`, `Hidden`, `Print`, `NoZoom`, etc. |
+
+---
+
+## Error Classes
+
+All errors extend `Error` with descriptive messages.
+
+| Class | Thrown When |
+|:---|:---|
+| [`EncryptedPdfError`](classes/EncryptedPdfError.md) | Loading encrypted PDF without password |
+| [`PdfParseError`](classes/PdfParseError.md) | Malformed PDF structure |
+| [`FontNotEmbeddedError`](classes/FontNotEmbeddedError.md) | Using a font that hasn't been embedded |
+| [`ForeignPageError`](classes/ForeignPageError.md) | Adding a page from a different document |
+| [`NoSuchFieldError`](classes/NoSuchFieldError.md) | Accessing a non-existent form field |
+| [`FieldAlreadyExistsError`](classes/FieldAlreadyExistsError.md) | Creating a field with a duplicate name |
+| [`UnexpectedFieldTypeError`](classes/UnexpectedFieldTypeError.md) | Wrong field type (e.g. getTextField on a checkbox) |
+| [`ExceededMaxLengthError`](classes/ExceededMaxLengthError.md) | Text exceeds field max length |
+| [`CombedTextLayoutError`](classes/CombedTextLayoutError.md) | Combed text doesn't fit |
+| [`RemovePageFromEmptyDocumentError`](classes/RemovePageFromEmptyDocumentError.md) | Removing from empty document |
+| [`RichTextFieldReadError`](classes/RichTextFieldReadError.md) | Reading rich text field as plain text |
