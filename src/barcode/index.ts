@@ -1,7 +1,7 @@
 /**
  * @module barcode
  *
- * Barcode encoding and PDF rendering for Code 128, Code 39,
+ * Barcode encoding and PDF rendering for Code 128, Code 39, ITF,
  * EAN-13, EAN-8, UPC-A, and QR Code.
  *
  * @packageDocumentation
@@ -26,6 +26,13 @@ export {
   code39ToOperators,
 } from './code39.js';
 export type { Code39Options } from './code39.js';
+
+// ITF (Interleaved 2 of 5)
+export {
+  encodeItf,
+  itfToOperators,
+} from './itf.js';
+export type { ItfOptions } from './itf.js';
 
 // EAN-13 / EAN-8
 export {

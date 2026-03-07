@@ -790,6 +790,8 @@ export {
   encodeCode39,
   computeCode39CheckDigit,
   code39ToOperators,
+  encodeItf,
+  itfToOperators,
   encodeEan13,
   encodeEan8,
   calculateEanCheckDigit,
@@ -801,7 +803,7 @@ export {
   encodeQrCode,
   qrCodeToOperators,
 } from './barcode/index.js';
-export type { Code128Options, Code39Options, BarcodeMatrix, BarcodeOptions, EanOptions, UpcOptions, QrCodeOptions, QrCodeMatrix, ErrorCorrectionLevel } from './barcode/index.js';
+export type { Code128Options, Code39Options, ItfOptions, BarcodeMatrix, BarcodeOptions, EanOptions, UpcOptions, QrCodeOptions, QrCodeMatrix, ErrorCorrectionLevel } from './barcode/index.js';
 
 // ---------------------------------------------------------------------------
 // Typed error classes
