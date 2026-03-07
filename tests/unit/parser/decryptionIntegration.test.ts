@@ -40,11 +40,7 @@ function toBytes(str: string): Uint8Array {
 
 /** Convert a Uint8Array to a hex string. */
 function bytesToHex(data: Uint8Array): string {
-  let hex = '';
-  for (let i = 0; i < data.length; i++) {
-    hex += (data[i]! >>> 0).toString(16).padStart(2, '0');
-  }
-  return hex;
+  return data.toHex();
 }
 
 /**

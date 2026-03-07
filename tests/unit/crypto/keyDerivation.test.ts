@@ -23,18 +23,11 @@ import { encodePermissions } from '../../../src/crypto/permissions.js';
 // ---------------------------------------------------------------------------
 
 function hexToBytes(hex: string): Uint8Array {
-  const clean = hex.replace(/\s/g, '');
-  const bytes = new Uint8Array(clean.length / 2);
-  for (let i = 0; i < bytes.length; i++) {
-    bytes[i] = parseInt(clean.substring(i * 2, i * 2 + 2), 16);
-  }
-  return bytes;
+  return Uint8Array.fromHex(hex.replace(/\s/g, ''));
 }
 
 function bytesToHex(bytes: Uint8Array): string {
-  return Array.from(bytes)
-    .map((b) => b.toString(16).padStart(2, '0'))
-    .join('');
+  return bytes.toHex();
 }
 
 // ---------------------------------------------------------------------------

@@ -479,8 +479,8 @@ describe('buildOcspRequest', () => {
     const req1 = await buildOcspRequest(cert1, issuer.certificate);
     const req2 = await buildOcspRequest(cert2, issuer.certificate);
 
-    const hex1 = Array.from(req1).map((b) => b.toString(16).padStart(2, '0')).join('');
-    const hex2 = Array.from(req2).map((b) => b.toString(16).padStart(2, '0')).join('');
+    const hex1 = new Uint8Array(req1).toHex();
+    const hex2 = new Uint8Array(req2).toHex();
     expect(hex1).not.toBe(hex2);
   });
 });

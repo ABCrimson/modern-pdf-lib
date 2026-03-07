@@ -98,9 +98,7 @@ function extractSerialBytes(certDer: Uint8Array): Uint8Array {
  */
 async function computeSubjectKey(subjectDer: Uint8Array): Promise<string> {
   const hash = await sha256(subjectDer);
-  return Array.from(hash)
-    .map((b) => b.toString(16).padStart(2, '0'))
-    .join('');
+  return hash.toHex();
 }
 
 /**

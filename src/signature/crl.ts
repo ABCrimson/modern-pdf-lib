@@ -82,9 +82,7 @@ const CRL_REASONS: Record<number, string> = {
  * Convert a Uint8Array to a hex string.
  */
 function toHex(data: Uint8Array): string {
-  return Array.from(data)
-    .map((b) => b.toString(16).padStart(2, '0'))
-    .join('');
+  return data.toHex();
 }
 
 /**

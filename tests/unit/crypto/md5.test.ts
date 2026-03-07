@@ -12,9 +12,7 @@ import { md5 } from '../../../src/crypto/md5.js';
 // ---------------------------------------------------------------------------
 
 function hexFromBytes(bytes: Uint8Array): string {
-  return Array.from(bytes)
-    .map((b) => b.toString(16).padStart(2, '0'))
-    .join('');
+  return bytes.toHex();
 }
 
 function stringToBytes(str: string): Uint8Array {

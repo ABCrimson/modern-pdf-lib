@@ -750,9 +750,9 @@ const FILE_KEY_CACHE_MAX = 32;
  */
 function buildCacheKey(password: string, dict: EncryptDictValues, fileId: Uint8Array): string {
   // Use first 16 bytes of O, U, and fileId for uniqueness (collision is practically impossible)
-  const oHex = Array.from(dict.ownerKey.subarray(0, 16), b => b.toString(16).padStart(2, '0')).join('');
-  const uHex = Array.from(dict.userKey.subarray(0, 16), b => b.toString(16).padStart(2, '0')).join('');
-  const fHex = Array.from(fileId.subarray(0, 16), b => b.toString(16).padStart(2, '0')).join('');
+  const oHex = dict.ownerKey.subarray(0, 16).toHex();
+  const uHex = dict.userKey.subarray(0, 16).toHex();
+  const fHex = fileId.subarray(0, 16).toHex();
   return `${dict.revision}:${dict.permissions}:${password}:${oHex}:${uHex}:${fHex}`;
 }
 

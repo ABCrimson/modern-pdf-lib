@@ -226,10 +226,7 @@ function extractCertInfo(certDer: Uint8Array): CertificateInfo {
 
   // serialNumber
   const serialNode = tbsCert.children[idx]!;
-  let serialHex = '';
-  for (let i = 0; i < serialNode.data.length; i++) {
-    serialHex += serialNode.data[i]!.toString(16).padStart(2, '0');
-  }
+  const serialHex = serialNode.data.toHex();
 
   // Skip signature AlgorithmIdentifier
   // issuer Name

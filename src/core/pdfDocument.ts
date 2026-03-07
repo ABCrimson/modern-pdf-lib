@@ -1073,7 +1073,7 @@ export class PdfDocument {
 
     throw new Error(
       'Unsupported image format. Expected PNG (89 50 4E 47) or JPEG (FF D8 FF), ' +
-      `got ${Array.from(data.subarray(0, 4)).map(b => b.toString(16).padStart(2, '0')).join(' ')}.`,
+      `got ${data.subarray(0, 4).toHex().match(/.{2}/g)?.join(' ') ?? ''}.`,
     );
   }
 

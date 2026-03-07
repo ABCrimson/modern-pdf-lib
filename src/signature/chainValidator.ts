@@ -118,9 +118,7 @@ const OID_ECDSA_WITH_SHA1 = '1.2.840.10045.4.1';
  * Convert a Uint8Array to a hex string.
  */
 function toHex(data: Uint8Array): string {
-  return Array.from(data)
-    .map((b) => b.toString(16).padStart(2, '0'))
-    .join('');
+  return data.toHex();
 }
 
 /**

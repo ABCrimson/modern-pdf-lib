@@ -419,8 +419,8 @@ describe('buildPkcs7Signature', () => {
     });
 
     // Different hashes should produce different signatures
-    const hex1 = Array.from(sig1).map((b) => b.toString(16).padStart(2, '0')).join('');
-    const hex2 = Array.from(sig2).map((b) => b.toString(16).padStart(2, '0')).join('');
+    const hex1 = new Uint8Array(sig1).toHex();
+    const hex2 = new Uint8Array(sig2).toHex();
     expect(hex1).not.toBe(hex2);
   });
 });

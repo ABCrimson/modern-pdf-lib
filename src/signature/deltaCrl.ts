@@ -419,9 +419,5 @@ export function mergeCrls(baseCrl: CrlData, deltaCrl: DeltaCrlData): CrlData {
  * @internal
  */
 function serialToHex(serial: Uint8Array): string {
-  let hex = '';
-  for (let i = 0; i < serial.length; i++) {
-    hex += serial[i]!.toString(16).padStart(2, '0');
-  }
-  return hex;
+  return serial.toHex();
 }

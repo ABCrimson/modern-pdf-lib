@@ -137,7 +137,7 @@ describe('XrefParser.findStartXref', () => {
     const offset = parser.findStartXref();
     expect(offset).toBeGreaterThan(0);
     // The offset should point to where "xref" begins in the string
-    expect(pdfStr.substring(offset, offset + 4)).toBe('xref');
+    expect(pdfStr.slice(offset, offset + 4)).toBe('xref');
   });
 
   it('handles startxref with extra whitespace', () => {
@@ -179,8 +179,8 @@ describe('XrefParser.findStartXref', () => {
     const pdfStr = buildMinimalPdf();
     // Insert padding before the xref section
     const xrefIdx = pdfStr.indexOf('xref\n');
-    const beforeXref = pdfStr.substring(0, xrefIdx);
-    const afterXref = pdfStr.substring(xrefIdx);
+    const beforeXref = pdfStr.slice(0, xrefIdx);
+    const afterXref = pdfStr.slice(xrefIdx);
     // Recalculate xref offset
     const newXrefPos = beforeXref.length + padding.length;
     const modifiedAfter = afterXref.replace(
