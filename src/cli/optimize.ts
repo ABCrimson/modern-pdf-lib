@@ -9,6 +9,7 @@
 
 import { readFile, writeFile } from 'node:fs/promises';
 import type { ChromaSubsampling } from '../wasm/jpeg/bridge.js';
+import type { ProgressInfo } from '../assets/image/batchOptimize.js';
 
 /**
  * Parse and execute the optimize command.
@@ -71,7 +72,45 @@ export async function optimizeCommand(args: string[]): Promise<void> {
     }
   }
 
-  // Optimize images
+  // Optimize images with progress reporting
+  const startTime = Date.now();
+
+  const onProgress = (info: ProgressInfo): void => {
+    const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+    const pct = Math.round((info.current / info.total) * 100);
+
+    // Build progress bar (40 chars wide)
+    const barWidth = 40;
+    const filled = Math.round((info.current / info.total) * barWidth);
+    const empty = barWidth - filled;
+    const bar = '\u2588'.repeat(filled) + '\u2591'.repeat(empty);
+
+    const line =
+      `\r ${bar} ${pct}% ${info.current}/${info.total}` +
+      ` ${info.imageName}` +
+      ` saved:${formatBytes(info.totalSavedBytes)}` +
+      ` ${elapsed}s`;
+
+    // Pad to overwrite previous longer lines
+    process.stderr.write(line.padEnd(100) + '\r');
+
+    // In verbose mode, also print a per-image breakdown line
+    if (parsed.verbose) {
+      let detail: string;
+      if (info.skipped) {
+        detail = `  ${info.imageName} (p${info.pageIndex}): SKIP`;
+      } else {
+        const savedSign = info.savedBytes >= 0 ? '-' : '+';
+        detail =
+          `  ${info.imageName} (p${info.pageIndex}): ` +
+          `${savedSign}${formatBytes(Math.abs(info.savedBytes))}`;
+      }
+      // Move to next line for verbose output, then let bar overwrite
+      process.stderr.write('\n');
+      console.log(detail);
+    }
+  };
+
   const report = await optimizeAllImages(doc, {
     quality: parsed.quality,
     progressive: parsed.progressive,
@@ -79,38 +118,44 @@ export async function optimizeCommand(args: string[]): Promise<void> {
     autoGrayscale: parsed.grayscale,
     skipSmallImages: true,
     minSavingsPercent: 10,
+    onProgress,
   });
 
-  if (parsed.verbose) {
-    console.log('');
-    console.log(`Images found:     ${report.totalImages}`);
-    console.log(`Images optimized: ${report.optimizedImages}`);
-    console.log(
-      `Original size:    ${formatBytes(report.originalTotalBytes)}`,
-    );
-    console.log(
-      `Optimized size:   ${formatBytes(report.optimizedTotalBytes)}`,
-    );
-    console.log(`Savings:          ${report.savings.toFixed(1)}%`);
+  // Clear the progress bar line
+  process.stderr.write('\r' + ' '.repeat(100) + '\r');
 
-    if (report.perImage.length > 0) {
-      console.log('');
-      console.log('Per-image details:');
-      for (const entry of report.perImage) {
-        if (entry.skipped) {
-          console.log(
-            `  ${entry.name} (p${entry.pageIndex}): SKIP — ${entry.reason}`,
-          );
-        } else {
-          const pct = (
-            ((entry.originalSize - entry.newSize) / entry.originalSize) *
-            100
-          ).toFixed(1);
-          console.log(
-            `  ${entry.name} (p${entry.pageIndex}): ` +
-              `${formatBytes(entry.originalSize)} → ${formatBytes(entry.newSize)} (−${pct}%)`,
-          );
-        }
+  const elapsedTotal = ((Date.now() - startTime) / 1000).toFixed(1);
+
+  // Print summary
+  console.log('');
+  console.log(`Images found:     ${report.totalImages}`);
+  console.log(`Images optimized: ${report.optimizedImages}`);
+  console.log(
+    `Original size:    ${formatBytes(report.originalTotalBytes)}`,
+  );
+  console.log(
+    `Optimized size:   ${formatBytes(report.optimizedTotalBytes)}`,
+  );
+  console.log(`Savings:          ${report.savings.toFixed(1)}%`);
+  console.log(`Elapsed:          ${elapsedTotal}s`);
+
+  if (parsed.verbose && report.perImage.length > 0) {
+    console.log('');
+    console.log('Per-image details:');
+    for (const entry of report.perImage) {
+      if (entry.skipped) {
+        console.log(
+          `  ${entry.name} (p${entry.pageIndex}): SKIP -- ${entry.reason}`,
+        );
+      } else {
+        const pct = (
+          ((entry.originalSize - entry.newSize) / entry.originalSize) *
+          100
+        ).toFixed(1);
+        console.log(
+          `  ${entry.name} (p${entry.pageIndex}): ` +
+            `${formatBytes(entry.originalSize)} -> ${formatBytes(entry.newSize)} (-${pct}%)`,
+        );
       }
     }
   }

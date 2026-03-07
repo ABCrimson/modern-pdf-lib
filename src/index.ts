@@ -717,6 +717,7 @@ export type {
   BatchOptimizeOptions,
   ImageOptimizeEntry,
   OptimizationReport,
+  ProgressInfo,
 } from './assets/image/batchOptimize.js';
 
 export { deduplicateImages } from './assets/image/deduplicateImages.js';
