@@ -641,8 +641,8 @@ export type { LinearizationOptions } from './core/linearization.js';
 // PDF/A compliance
 // ---------------------------------------------------------------------------
 
-export { validatePdfA, enforcePdfA, detectTransparency, flattenTransparency, generateSrgbIccProfile, SRGB_ICC_PROFILE, buildOutputIntent, generateWinAnsiToUnicodeCmap, generateSymbolToUnicodeCmap, generateZapfDingbatsToUnicodeCmap, getToUnicodeCmap, getProfile, getSupportedLevels, isValidLevel, extractXmpMetadata, parseXmpPdfAMetadata, validateXmpMetadata, createAssociatedFile, buildAfArray, stripProhibitedFeatures, countOccurrences } from './compliance/index.js';
-export type { PdfALevel, PdfAValidationResult, PdfAIssue, TransparencyInfo, TransparencyFinding, OutputIntentOptions, PdfAProfile, XmpValidationResult, XmpIssue, ParsedXmpMetadata, AFRelationship, AssociatedFileOptions, AssociatedFileResult, StripResult, StrippedFeature, StripOptions } from './compliance/index.js';
+export { validatePdfA, enforcePdfA, detectTransparency, flattenTransparency, generateSrgbIccProfile, SRGB_ICC_PROFILE, buildOutputIntent, generateWinAnsiToUnicodeCmap, generateSymbolToUnicodeCmap, generateZapfDingbatsToUnicodeCmap, getToUnicodeCmap, getProfile, getSupportedLevels, isValidLevel, extractXmpMetadata, parseXmpPdfAMetadata, validateXmpMetadata, createAssociatedFile, buildAfArray, stripProhibitedFeatures, countOccurrences, generatePdfAXmp, generatePdfAXmpBytes } from './compliance/index.js';
+export type { PdfALevel, PdfAValidationResult, PdfAIssue, TransparencyInfo, TransparencyFinding, OutputIntentOptions, PdfAProfile, XmpValidationResult, XmpIssue, ParsedXmpMetadata, AFRelationship, AssociatedFileOptions, AssociatedFileResult, StripResult, StrippedFeature, StripOptions, PdfAXmpOptions } from './compliance/index.js';
 
 // ---------------------------------------------------------------------------
 // Layers (Optional Content Groups)

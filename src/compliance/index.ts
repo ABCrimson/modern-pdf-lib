@@ -44,3 +44,13 @@ export type {
 
 export { stripProhibitedFeatures, countOccurrences } from './stripProhibited.js';
 export type { StripResult, StrippedFeature, StripOptions } from './stripProhibited.js';
+
+export { generatePdfAXmp, generatePdfAXmpBytes } from './xmpGenerator.js';
+export type { PdfAXmpOptions } from './xmpGenerator.js';
+
+export { enforcePdfAFull } from './enforcePdfAv2.js';
+export type {
+  EnforcePdfAOptions,
+  EnforcePdfAResult,
+  EnforcementAction,
+} from './enforcePdfAv2.js';
