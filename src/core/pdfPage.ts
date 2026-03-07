@@ -94,6 +94,8 @@ import { markForRedaction } from './redaction.js';
 import type { EmbeddedPdfPage, DrawPageOptions } from './pdfEmbed.js';
 import type { GradientFill, PatternFill } from './patterns.js';
 import { buildGradientObjects, buildPatternObjects } from './patterns.js';
+import { encodeQrCode, qrCodeToOperators } from '../barcode/qr.js';
+import type { ErrorCorrectionLevel } from '../barcode/qr.js';
 
 // ---------------------------------------------------------------------------
 // Common page sizes (width × height in points, portrait orientation)
@@ -394,6 +396,24 @@ export interface DrawSvgPathOptions {
   borderLineCap?: 0 | 1 | 2 | undefined;
   /** Border stroke opacity `[0, 1]`. */
   borderOpacity?: number | undefined;
+}
+
+/** Options for {@link PdfPage.drawQrCode}. */
+export interface DrawQrCodeOptions {
+  /** X coordinate (bottom-left of QR code). */
+  x?: number | undefined;
+  /** Y coordinate (bottom-left of QR code). */
+  y?: number | undefined;
+  /** Error correction level. Default: `'M'`. */
+  errorCorrection?: ErrorCorrectionLevel | undefined;
+  /** Size of each module in PDF points. Default: `2`. */
+  moduleSize?: number | undefined;
+  /** Number of quiet-zone modules around the code. Default: `4`. */
+  quietZone?: number | undefined;
+  /** Foreground (dark module) colour. Default: black. */
+  color?: Color | undefined;
+  /** Background colour. Default: white. */
+  backgroundColor?: Color | undefined;
 }
 
 /** Options for {@link PdfPage.drawSquare}. */
@@ -2050,6 +2070,36 @@ export class PdfPage {
     }
 
     this.ops += restoreState();
+  }
+
+  // -----------------------------------------------------------------------
+  // Drawing: QR Code
+  // -----------------------------------------------------------------------
+
+  /**
+   * Draw a QR code at the specified position.
+   *
+   * The QR code is rendered as native PDF vector graphics (filled
+   * rectangles for each dark module), producing resolution-independent
+   * output.
+   *
+   * @param data     The string to encode in the QR code.
+   * @param options  Position, error correction level, colours, module size.
+   */
+  drawQrCode(data: string, options: DrawQrCodeOptions = {}): void {
+    const x = options.x ?? this._cursorX;
+    const y = options.y ?? this._cursorY;
+    const ec = options.errorCorrection ?? 'M';
+
+    const matrix = encodeQrCode(data, ec);
+    const ops = qrCodeToOperators(matrix, x, y, {
+      moduleSize: options.moduleSize,
+      quietZone: options.quietZone,
+      color: options.color,
+      backgroundColor: options.backgroundColor,
+    });
+
+    this.ops += ops;
   }
 
   // -----------------------------------------------------------------------

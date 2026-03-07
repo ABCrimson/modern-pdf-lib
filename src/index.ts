@@ -41,6 +41,7 @@ export type {
   DrawCircleOptions,
   DrawEllipseOptions,
   DrawSvgPathOptions,
+  DrawQrCodeOptions,
   TransparencyGroupOptions,
   SoftMaskBuilder,
   SoftMaskRef,
@@ -794,8 +795,10 @@ export {
   encodeUpcA,
   calculateUpcCheckDigit,
   upcAToOperators,
+  encodeQrCode,
+  qrCodeToOperators,
 } from './barcode/index.js';
-export type { Code128Options, BarcodeMatrix, BarcodeOptions, EanOptions, UpcOptions } from './barcode/index.js';
+export type { Code128Options, BarcodeMatrix, BarcodeOptions, EanOptions, UpcOptions, QrCodeOptions, QrCodeMatrix, ErrorCorrectionLevel } from './barcode/index.js';
 
 // ---------------------------------------------------------------------------
 // Typed error classes
