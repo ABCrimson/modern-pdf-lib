@@ -559,18 +559,18 @@ function parseBfRangeSections(text: string, map: Map<number, string>): void {
  * string.
  */
 function hexToUnicode(hex: string): string {
-  let result = '';
+  const parts: string[] = [];
   // Process 4 hex chars (2 bytes) at a time for BMP characters
   // If the hex string is shorter, pad or process accordingly
   const step = hex.length <= 4 ? hex.length : 4;
   for (let i = 0; i < hex.length; i += step) {
-    const chunk = hex.substring(i, i + step);
+    const chunk = hex.slice(i, i + step);
     const code = parseInt(chunk, 16);
     if (!isNaN(code)) {
-      result += String.fromCodePoint(code);
+      parts.push(String.fromCodePoint(code));
     }
   }
-  return result;
+  return parts.join('');
 }
 
 /**

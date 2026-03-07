@@ -179,7 +179,7 @@ function findOriginalXrefOffset(data: Uint8Array): number {
   }
 
   // Extract the offset number after "startxref"
-  const afterStartxref = tail.substring(idx + 'startxref'.length).trim();
+  const afterStartxref = tail.slice(idx + 'startxref'.length).trim();
   const match = afterStartxref.match(/^(\d+)/);
 
   if (!match) {

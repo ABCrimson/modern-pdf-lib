@@ -239,7 +239,7 @@ export class PdfArray {
   constructor(public readonly items: PdfObject[] = []) {}
 
   static of(items: PdfObject[]): PdfArray {
-    return new PdfArray(items.slice());
+    return new PdfArray([...items]);
   }
 
   /** Convenience: create an array of PdfNumbers. */
