@@ -72,6 +72,39 @@ export interface BatchOptimizeOptions {
    * Default: `false`.
    */
   readonly autoGrayscale?: boolean;
+
+  // --- Selective filters ---
+
+  /**
+   * Only optimize images on pages within this range (0-indexed, inclusive).
+   *
+   * Images on pages outside this range are skipped and counted as
+   * `skippedByFilter` in the report.
+   */
+  readonly pageRange?: { readonly start: number; readonly end: number };
+
+  /**
+   * Skip images with compressed size below this threshold in bytes.
+   *
+   * Default: `0` (no minimum).
+   */
+  readonly minImageSize?: number;
+
+  /**
+   * Only optimize images in these color spaces
+   * (e.g. `'DeviceRGB'`, `'DeviceCMYK'`, `'ICCBased'`).
+   *
+   * Images in other color spaces are skipped.
+   */
+  readonly colorSpaces?: readonly string[];
+
+  /**
+   * Only optimize images whose resource name matches this pattern.
+   *
+   * For example, `/Im[0-3]/` would only optimize images named
+   * `/Im0` through `/Im3`.
+   */
+  readonly namePattern?: RegExp;
 }
 
 /**
@@ -88,6 +121,8 @@ export interface ImageOptimizeEntry {
   readonly newSize: number;
   /** Whether this image was skipped. */
   readonly skipped: boolean;
+  /** Whether this image was skipped due to a selective filter. */
+  readonly skippedByFilter: boolean;
   /** Reason for skipping, if applicable. */
   readonly reason?: string;
 }
@@ -100,6 +135,8 @@ export interface OptimizationReport {
   readonly totalImages: number;
   /** Number of images that were recompressed. */
   readonly optimizedImages: number;
+  /** Number of images skipped due to selective filters. */
+  readonly skippedByFilter: number;
   /** Total original compressed size (all images). */
   readonly originalTotalBytes: number;
   /** Total new compressed size (all images). */
@@ -161,6 +198,9 @@ export async function optimizeAllImages(
   const progressive = options.progressive ?? false;
   const chromaSubsampling = options.chromaSubsampling ?? '4:2:0';
 
+  // Selective filter options
+  const { pageRange, minImageSize, colorSpaces, namePattern } = options;
+
   // Dynamically import JPEG bridge to avoid circular deps
   const { encodeJpegWasm, isJpegWasmReady } = await import(
     '../../wasm/jpeg/bridge.js'
@@ -172,9 +212,68 @@ export async function optimizeAllImages(
   let totalOriginal = 0;
   let totalNew = 0;
   let optimizedCount = 0;
+  let skippedByFilterCount = 0;
 
   for (const img of images) {
     totalOriginal += img.compressedSize;
+
+    // Apply selective filters
+    if (pageRange && (img.pageIndex < pageRange.start || img.pageIndex > pageRange.end)) {
+      skippedByFilterCount++;
+      perImage.push({
+        name: img.name,
+        pageIndex: img.pageIndex,
+        originalSize: img.compressedSize,
+        newSize: img.compressedSize,
+        skipped: true,
+        skippedByFilter: true,
+        reason: `Page ${img.pageIndex} outside range [${pageRange.start}, ${pageRange.end}]`,
+      });
+      totalNew += img.compressedSize;
+      continue;
+    }
+    if (minImageSize && img.compressedSize < minImageSize) {
+      skippedByFilterCount++;
+      perImage.push({
+        name: img.name,
+        pageIndex: img.pageIndex,
+        originalSize: img.compressedSize,
+        newSize: img.compressedSize,
+        skipped: true,
+        skippedByFilter: true,
+        reason: `Compressed size ${img.compressedSize} below minimum ${minImageSize} bytes`,
+      });
+      totalNew += img.compressedSize;
+      continue;
+    }
+    if (colorSpaces && !colorSpaces.includes(img.colorSpace)) {
+      skippedByFilterCount++;
+      perImage.push({
+        name: img.name,
+        pageIndex: img.pageIndex,
+        originalSize: img.compressedSize,
+        newSize: img.compressedSize,
+        skipped: true,
+        skippedByFilter: true,
+        reason: `Color space '${img.colorSpace}' not in allowed list`,
+      });
+      totalNew += img.compressedSize;
+      continue;
+    }
+    if (namePattern && !namePattern.test(img.name)) {
+      skippedByFilterCount++;
+      perImage.push({
+        name: img.name,
+        pageIndex: img.pageIndex,
+        originalSize: img.compressedSize,
+        newSize: img.compressedSize,
+        skipped: true,
+        skippedByFilter: true,
+        reason: `Name '${img.name}' does not match pattern ${namePattern}`,
+      });
+      totalNew += img.compressedSize;
+      continue;
+    }
 
     // Skip if WASM encoder not available
     if (!isJpegWasmReady()) {
@@ -184,6 +283,7 @@ export async function optimizeAllImages(
         originalSize: img.compressedSize,
         newSize: img.compressedSize,
         skipped: true,
+        skippedByFilter: false,
         reason: 'JPEG WASM encoder not initialized',
       });
       totalNew += img.compressedSize;
@@ -198,6 +298,7 @@ export async function optimizeAllImages(
         originalSize: img.compressedSize,
         newSize: img.compressedSize,
         skipped: true,
+        skippedByFilter: false,
         reason: `Below size threshold (${SMALL_IMAGE_THRESHOLD} bytes)`,
       });
       totalNew += img.compressedSize;
@@ -212,6 +313,7 @@ export async function optimizeAllImages(
         originalSize: img.compressedSize,
         newSize: img.compressedSize,
         skipped: true,
+        skippedByFilter: false,
         reason: `Unsupported bits per component: ${img.bitsPerComponent}`,
       });
       totalNew += img.compressedSize;
@@ -226,6 +328,7 @@ export async function optimizeAllImages(
         originalSize: img.compressedSize,
         newSize: img.compressedSize,
         skipped: true,
+        skippedByFilter: false,
         reason: 'Indexed color space not suitable for JPEG',
       });
       totalNew += img.compressedSize;
@@ -257,6 +360,7 @@ export async function optimizeAllImages(
             originalSize: img.compressedSize,
             newSize: img.compressedSize,
             skipped: true,
+            skippedByFilter: false,
             reason: 'Failed to decode existing JPEG',
           });
           totalNew += img.compressedSize;
@@ -275,6 +379,7 @@ export async function optimizeAllImages(
         originalSize: img.compressedSize,
         newSize: img.compressedSize,
         skipped: true,
+        skippedByFilter: false,
         reason: 'Failed to decode image stream',
       });
       totalNew += img.compressedSize;
@@ -290,6 +395,7 @@ export async function optimizeAllImages(
         originalSize: img.compressedSize,
         newSize: img.compressedSize,
         skipped: true,
+        skippedByFilter: false,
         reason: `Pixel data length mismatch: got ${pixels.length}, expected ${expectedLen}`,
       });
       totalNew += img.compressedSize;
@@ -340,6 +446,7 @@ export async function optimizeAllImages(
         originalSize: img.compressedSize,
         newSize: img.compressedSize,
         skipped: true,
+        skippedByFilter: false,
         reason: 'JPEG encoding failed',
       });
       totalNew += img.compressedSize;
@@ -357,6 +464,7 @@ export async function optimizeAllImages(
         originalSize: img.compressedSize,
         newSize: img.compressedSize,
         skipped: true,
+        skippedByFilter: false,
         reason: `Savings ${savingsPercent.toFixed(1)}% below threshold ${minSavingsPercent}%`,
       });
       totalNew += img.compressedSize;
@@ -410,6 +518,7 @@ export async function optimizeAllImages(
       originalSize: img.compressedSize,
       newSize: jpegBytes.length,
       skipped: false,
+      skippedByFilter: false,
     });
     totalNew += jpegBytes.length;
   }
@@ -422,6 +531,7 @@ export async function optimizeAllImages(
   return {
     totalImages: images.length,
     optimizedImages: optimizedCount,
+    skippedByFilter: skippedByFilterCount,
     originalTotalBytes: totalOriginal,
     optimizedTotalBytes: totalNew,
     savings: overallSavings,
