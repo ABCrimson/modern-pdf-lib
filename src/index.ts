@@ -739,6 +739,9 @@ export type { ImageDpi } from './assets/image/dpiAnalyze.js';
 export { analyzeImages } from './assets/image/compressionAnalysis.js';
 export type { ImageAnalysis, AnalysisReport } from './assets/image/compressionAnalysis.js';
 
+export { analyzeJpegMarkers } from './assets/image/jpegMarkers.js';
+export type { JpegMarkerInfo } from './assets/image/jpegMarkers.js';
+
 // ---------------------------------------------------------------------------
 // Base64 utilities
 // ---------------------------------------------------------------------------
