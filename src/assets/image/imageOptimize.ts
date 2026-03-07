@@ -51,7 +51,7 @@ export interface DownscaleOptions {
    * - `'bilinear'`: Bilinear interpolation (good quality, moderate speed)
    * - `'lanczos'`: Lanczos-3 resampling (best quality, slowest)
    *
-   * Default: `'bilinear'`.
+   * Default: `'lanczos'`.
    */
   readonly algorithm?: 'nearest' | 'bilinear' | 'lanczos';
 }
@@ -191,7 +191,7 @@ export interface OptimizeResult {
  * const result = downscaleImage(rawImage, {
  *   maxWidth: 1024,
  *   maxHeight: 768,
- *   algorithm: 'bilinear',
+ *   algorithm: 'lanczos',
  * });
  * ```
  */
@@ -207,7 +207,7 @@ export function downscaleImage(
     return image;
   }
 
-  const algorithm = options.algorithm ?? 'bilinear';
+  const algorithm = options.algorithm ?? 'lanczos';
 
   switch (algorithm) {
     case 'nearest':
