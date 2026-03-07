@@ -12,6 +12,10 @@
         "default": "./dist/index.cjs"
       }
     },
+    "./browser": {
+      "types": "./dist/browser.d.mts",
+      "import": "./dist/browser.mjs"
+    },
     "./wasm/*": "./dist/wasm/*"
   },
   "bin": {
@@ -19,6 +23,8 @@
   },
   "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",
+  "unpkg": "./dist/browser.mjs",
+  "jsdelivr": "./dist/browser.mjs",
   "types": "./dist/index.d.mts",
   "files": [
     "dist/**/*.mjs",

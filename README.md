@@ -55,6 +55,26 @@ const stream = doc.saveAsStream();       // ReadableStream
 const blob = await doc.saveAsBlob();     // Blob (browsers)
 ```
 
+### CDN (no install)
+
+Use directly in the browser via CDN — no bundler required:
+
+```html
+<script type="module">
+  import { createPdf, PageSizes, rgb } from 'https://cdn.jsdelivr.net/npm/modern-pdf-lib/dist/browser.mjs';
+
+  const doc = createPdf();
+  const page = doc.addPage(PageSizes.A4);
+  page.drawText('Hello from CDN!', { x: 50, y: 750, size: 24, color: rgb(0, 0, 0) });
+  const bytes = await doc.save();
+  console.log('PDF size:', bytes.length, 'bytes');
+</script>
+```
+
+Also available via:
+- **unpkg:** `https://unpkg.com/modern-pdf-lib/dist/browser.mjs`
+- **esm.sh:** `https://esm.sh/modern-pdf-lib`
+
 <br />
 
 ## Features
