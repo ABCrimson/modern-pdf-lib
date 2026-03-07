@@ -736,6 +736,9 @@ export {
 } from './assets/image/dpiAnalyze.js';
 export type { ImageDpi } from './assets/image/dpiAnalyze.js';
 
+export { analyzeImages } from './assets/image/compressionAnalysis.js';
+export type { ImageAnalysis, AnalysisReport } from './assets/image/compressionAnalysis.js';
+
 // ---------------------------------------------------------------------------
 // Base64 utilities
 // ---------------------------------------------------------------------------
