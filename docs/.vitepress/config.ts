@@ -104,6 +104,7 @@ export default defineConfig({
         {
           text: 'Advanced',
           items: [
+            { text: 'Browser Integration', link: '/guide/browser' },
             { text: 'Content Security Policy', link: '/guide/csp' },
           ],
         },
