@@ -59,6 +59,7 @@ export default defineConfig({
       { text: 'Guide', link: '/getting-started' },
       { text: 'API', link: '/api/' },
       { text: 'Migration', link: '/migration/from-pdf-lib' },
+      { text: 'Playground', link: '/playground/' },
       {
         text: 'v0.15.1',
         items: [
