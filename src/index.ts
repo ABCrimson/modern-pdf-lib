@@ -822,6 +822,8 @@ export type { Code128Options, Code39Options, ItfOptions, BarcodeMatrix, BarcodeO
 
 export { renderTable } from './layout/index.js';
 export type {
+  CellContent,
+  NestedTableContent,
   TableCell,
   TableRow,
   TableColumn,
