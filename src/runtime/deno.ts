@@ -37,7 +37,7 @@ interface DenoGlobal {
 function getDenoGlobal(): DenoGlobal | undefined {
   try {
     const d = (globalThis as Record<string, unknown>)['Deno'];
-    if (d !== undefined && d !== null) {
+    if (d != null) {
       return d as DenoGlobal;
     }
   } catch {

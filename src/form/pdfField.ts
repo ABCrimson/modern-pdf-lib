@@ -203,6 +203,11 @@ export abstract class PdfField {
     return [...this.parentNames, this.name].join('.');
   }
 
+  /** Return the underlying field dictionary (for internal use by PdfForm). */
+  getDict(): PdfDict {
+    return this.dict;
+  }
+
   // -----------------------------------------------------------------------
   // Field flags
   // -----------------------------------------------------------------------

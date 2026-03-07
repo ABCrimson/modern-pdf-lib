@@ -5,6 +5,66 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 See [VERSIONING.md](./VERSIONING.md) for this project's versioning policy.
 
+## [0.19.9] - 2026-03-07
+
+### Added
+
+- **Table layout engine** (`src/layout/`): Full-featured table rendering with PDF operators.
+  - `renderTable()` — single-page table rendering to content-stream operators
+  - `renderMultiPageTable()` — automatic page breaks with header row repetition
+  - Column width modes: fixed, percentage, flex (weighted), auto-fit (content-based)
+  - Cell padding (per-cell or table-wide, four-sided or uniform)
+  - Horizontal alignment (left, center, right) and vertical alignment (top, middle, bottom)
+  - Colspan and rowspan with 2D occupation grid tracking
+  - Alternating row colors, header background/text color
+  - Nested tables as cell content (recursive rendering)
+  - Rich cell content with `TextRun[]` (per-run font, color, size)
+  - Text overflow modes: wrap, truncate, ellipsis, shrink-to-fit
+  - Styling presets: `minimalPreset()`, `stripedPreset()`, `borderedPreset()`, `professionalPreset()`
+  - `applyPreset()` and `applyTablePreset()` for named preset selection
+  - `PdfPage.drawTable()` convenience method
+  - Overflow utilities: `estimateTextWidth()`, `wrapText()`, `truncateText()`, `ellipsisText()`, `shrinkFontSize()`
+  - 200 tests across 11 test files
+
+- **QR code & barcode engine** (`src/barcode/`): 9 barcode formats with full encoding.
+  - QR code (ISO 18004): versions 1–40, all EC levels (L/M/Q/H), 8 mask patterns, GF(256) Reed-Solomon
+  - Code 128 (A/B/C auto-switching, mod-103 check digit)
+  - EAN-13 / EAN-8 with L/G/R patterns and parity tables
+  - UPC-A (delegates to EAN-13 with leading zero)
+  - Code 39 with optional mod-43 check digit
+  - ITF (Interleaved 2 of 5) with bearer bars
+  - PDF417 (text/byte compaction, RS over GF(929), clusters 0/3/6)
+  - Data Matrix ECC200 (RS over GF(256), Utah placement algorithm)
+  - `renderStyledBarcode()` for styled rendering with text, borders, colors
+  - `readBarcode()` / `readCode128()` / `readEan13()` for round-trip verification
+  - `PdfPage.drawQrCode()` convenience method
+  - 204 tests across 10 test files
+
+- **Browser utilities** (`src/browser/`):
+  - `saveAsDownload()`, `saveAsBlob()`, `saveAsDataUrl()`, `openInNewTab()`
+  - Service Worker helpers: `handlePdfRequest()`, `createPdfResponse()`, `isCacheAvailable()`
+  - `PdfWorker` class for Web Worker PDF generation
+  - CSP compatibility: `disableWasm` option, `isWasmDisabled()`, runtime detection
+  - WASM streaming: `loadWasmModuleStreaming()`, `instantiateWasmModuleStreaming()`
+
+- **PDF/A full enforcement** (`src/compliance/`):
+  - `enforcePdfAFull()` — complete pipeline chaining all PDF/A fixes
+  - sRGB ICC profile generation (~3KB ICC v2 profile)
+  - OutputIntent builder with OutputIntentOptions
+  - ToUnicode CMap generation (WinAnsi, Symbol, ZapfDingbats)
+  - Transparency detection and flattening
+  - XMP metadata validation and generation for PDF/A conformance
+  - PDF/A profile definitions (1a/1b, 2a/2b/2u, 3a/3b/3u)
+  - Associated files for PDF/A-3 (/AF key)
+  - Prohibited feature stripping (JavaScript, Launch, Sound, Movie, RichMedia)
+  - veraPDF CLI wrapper for CI validation
+
+- **Documentation**: New guides for tables, barcodes, PDF/A, CSP, and browser integration.
+
+### Changed
+
+- **Test count**: 2,323 → 3,260 across 158 test suites (was 110).
+
 ## [0.15.1] - 2026-02-28
 
 ### Fixed

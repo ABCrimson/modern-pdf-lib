@@ -15,7 +15,7 @@ Create, parse, fill, merge, sign, and manipulate PDF documents<br />in Node, Den
 
 [![npm version](https://img.shields.io/npm/v/modern-pdf-lib?style=flat-square&color=cb3837)](https://www.npmjs.com/package/modern-pdf-lib)
 [![bundle size](https://img.shields.io/badge/gzip-36kb_core-blue?style=flat-square)](https://bundlephobia.com/package/modern-pdf-lib)
-[![tests](https://img.shields.io/badge/tests-2%2C323_passing-brightgreen?style=flat-square)](#)
+[![tests](https://img.shields.io/badge/tests-3%2C260_passing-brightgreen?style=flat-square)](#)
 [![TypeScript](https://img.shields.io/badge/TypeScript-6.0-3178c6?style=flat-square&logo=typescript&logoColor=white)](#)
 [![License: MIT](https://img.shields.io/badge/license-MIT-yellow?style=flat-square)](LICENSE)
 
@@ -139,13 +139,14 @@ For environments without ES module support, use the IIFE bundle which exposes a 
 <td width="50%" valign="top">
 
 **Advanced**
+- QR codes & barcodes (9 formats)
+- Table layout engine with pagination
 - Outlines / bookmarks
 - Optional content layers (OCGs)
-- File attachments
-- Watermarks
+- File attachments & watermarks
 - Linearization (fast web view)
-- 60+ low-level PDF operators
-- Custom appearance providers
+- Browser helpers (download, blob, data URL)
+- Service Worker & Web Worker support
 - CLI: `npx modern-pdf optimize`
 
 </td>
@@ -233,6 +234,18 @@ For environments without ES module support, use the IIFE bundle which exposes a 
 
 <tr><td><strong>Linearization</strong></td>
 <td align="center">Yes</td>
+<td align="center">No</td></tr>
+
+<tr><td><strong>QR codes & barcodes</strong></td>
+<td align="center">9 formats (QR, EAN, Code 128, PDF417…)</td>
+<td align="center">No</td></tr>
+
+<tr><td><strong>Table layout</strong></td>
+<td align="center">Spanning, pagination, presets, overflow</td>
+<td align="center">No</td></tr>
+
+<tr><td><strong>Browser utilities</strong></td>
+<td align="center">Download, blob, Web Worker, Service Worker</td>
 <td align="center">No</td></tr>
 
 <tr><td><strong>Image optimization</strong></td>
@@ -429,6 +442,51 @@ npx modern-pdf optimize report.pdf report-opt.pdf --quality 60 --grayscale --ded
 </details>
 
 <details>
+<summary><strong>Tables</strong> &mdash; layout engine with spanning, pagination, presets</summary>
+
+```ts
+import { createPdf, PageSizes, professionalPreset, applyPreset } from 'modern-pdf-lib';
+
+const doc = createPdf();
+const page = doc.addPage(PageSizes.A4);
+
+page.drawTable(applyPreset(professionalPreset(), {
+  x: 50,
+  y: 750,
+  width: 495,
+  headerRows: 1,
+  rows: [
+    { cells: ['Product', 'Qty', 'Price', 'Total'] },
+    { cells: ['Widget A', '10', '$5.00', '$50.00'] },
+    { cells: ['Widget B', '25', '$3.50', '$87.50'] },
+    { cells: [{ content: 'Grand Total', colSpan: 3, align: 'right' }, '$137.50'] },
+  ],
+  columns: [{ flex: 2 }, { width: 60 }, { width: 80 }, { width: 80, align: 'right' }],
+}));
+```
+</details>
+
+<details>
+<summary><strong>QR Codes & Barcodes</strong> &mdash; 9 formats</summary>
+
+```ts
+import { createPdf, PageSizes } from 'modern-pdf-lib';
+
+const doc = createPdf();
+const page = doc.addPage(PageSizes.A4);
+
+// QR code
+page.drawQrCode('https://example.com', { x: 50, y: 700, size: 120 });
+
+// Barcodes (Code 128, EAN-13, UPC-A, Code 39, ITF, PDF417, Data Matrix)
+import { encodeCode128, encodeEan13, renderStyledBarcode } from 'modern-pdf-lib';
+
+const barcode = encodeCode128('ABC-12345');
+const ops = renderStyledBarcode(barcode, { x: 50, y: 500, height: 60 });
+```
+</details>
+
+<details>
 <summary><strong>PDF/A & Accessibility</strong></summary>
 
 ```ts
@@ -509,12 +567,15 @@ modern-pdf-lib/
     crypto/         AES-256, RC4, MD5, SHA-256/384/512
     compression/    Deflate (fflate + optional WASM)
     assets/         Font metrics/embed/subset, image embed, SVG
+    barcode/        QR, Code 128, EAN, UPC, Code 39, ITF, PDF417, Data Matrix
+    layout/         Table engine (spanning, pagination, presets, overflow)
+    browser/        Download helpers, Service Worker, Web Worker
     layers/         Optional content groups (OCG)
     outline/        Bookmarks / document outline
     metadata/       XMP metadata, viewer preferences
     wasm/           Rust crate sources (6 modules)
     cli/            CLI tool (modern-pdf optimize)
-  tests/            2,323 tests across 110 suites
+  tests/            3,260 tests across 158 suites
   docs/             VitePress documentation
 ```
 
@@ -526,7 +587,7 @@ modern-pdf-lib/
 git clone https://github.com/ABCrimson/modern-pdf-lib.git
 cd modern-pdf-lib
 npm install
-npm test          # 2,323 tests
+npm test          # 3,260 tests
 npm run typecheck # TypeScript 6.0 strict
 npm run build     # ESM + CJS + declarations
 ```

@@ -735,7 +735,7 @@ export class PdfForm {
     if (fieldsObj !== undefined && fieldsObj.kind === 'array') {
       const fieldsArr = fieldsObj as PdfArray;
       // Remove items that match the field's underlying dict
-      const fieldDict = (field as any).dict as PdfDict;
+      const fieldDict = field.getDict();
       const newItems = fieldsArr.items.filter((item) => item !== fieldDict);
       // Rebuild the array
       const newArr = new PdfArray(newItems);
