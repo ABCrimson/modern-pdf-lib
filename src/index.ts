@@ -820,7 +820,7 @@ export type { Code128Options, Code39Options, ItfOptions, BarcodeMatrix, BarcodeO
 // Table layout
 // ---------------------------------------------------------------------------
 
-export { renderTable } from './layout/index.js';
+export { renderTable, renderMultiPageTable } from './layout/index.js';
 export type {
   CellContent,
   NestedTableContent,
@@ -829,6 +829,8 @@ export type {
   TableColumn,
   DrawTableOptions,
   TableRenderResult,
+  PageContent,
+  MultiPageTableResult,
 } from './layout/index.js';
 
 // ---------------------------------------------------------------------------

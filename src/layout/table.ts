@@ -622,7 +622,9 @@ export function renderTable(options: DrawTableOptions): {
 
   const headerRows = options.headerRows ?? 0;
   const colWidths = resolveColumnWidths(options);
+  const numCols = colWidths.length;
   const rowHeights = resolveRowHeights(options, fontSize, defaultPadding, colWidths);
+  const grid = buildOccupationGrid(options.rows, numCols);
 
   let ops = saveState();
   let currentY = options.y;
@@ -630,7 +632,6 @@ export function renderTable(options: DrawTableOptions): {
   for (let rowIdx = 0; rowIdx < options.rows.length; rowIdx++) {
     const row = options.rows[rowIdx]!;
     const rowHeight = rowHeights[rowIdx]!;
-    let currentX = options.x;
     const isHeader = rowIdx < headerRows;
 
     // Determine the effective row background color:
@@ -651,7 +652,7 @@ export function renderTable(options: DrawTableOptions): {
     if (effectiveRowBg) {
       ops += saveState();
       ops += applyFillColor(effectiveRowBg);
-      ops += rectangle(currentX, currentY - rowHeight, options.width, rowHeight);
+      ops += rectangle(options.x, currentY - rowHeight, options.width, rowHeight);
       ops += fill();
       ops += restoreState();
     }
@@ -660,101 +661,38 @@ export function renderTable(options: DrawTableOptions): {
     const rowTextColor =
       isHeader && options.headerTextColor ? options.headerTextColor : textColor;
 
-    // Cells
-    let colIdx = 0;
-    for (let cellIdx = 0; cellIdx < row.cells.length && colIdx < colWidths.length; cellIdx++) {
-      const cell = normalizeCell(row.cells[cellIdx]);
-      const span = cell.colSpan ?? 1;
+    // Render cells using the occupation grid
+    for (let colIdx = 0; colIdx < numCols; colIdx++) {
+      const entry = grid[rowIdx]![colIdx];
+      if (!entry) continue;
 
-      // Compute spanned cell width
-      let cellWidth = 0;
-      for (let s = 0; s < span && colIdx + s < colWidths.length; s++) {
-        cellWidth += colWidths[colIdx + s]!;
-      }
+      // Only render at the origin position
+      if (entry.originRow !== rowIdx || entry.originCol !== colIdx) continue;
 
-      const padding = resolvePadding(cell.padding, defaultPadding);
+      const cell = entry.cell;
+      const cs = Math.max(1, cell.colSpan ?? 1);
+      const rs = Math.max(1, cell.rowSpan ?? 1);
 
-      // Cell background
-      if (cell.backgroundColor) {
-        ops += saveState();
-        ops += applyFillColor(cell.backgroundColor);
-        ops += rectangle(currentX, currentY - rowHeight, cellWidth, rowHeight);
-        ops += fill();
-        ops += restoreState();
-      }
+      const cellX = columnX(options.x, colWidths, colIdx);
+      const cellWidth = spanWidth(colWidths, colIdx, cs);
+      const cellHeight = spanHeight(rowHeights, rowIdx, rs);
 
-      // Cell border
-      if (borderWidth > 0) {
-        ops += saveState();
-        ops += applyStrokeColor(borderColor);
-        ops += setLineWidth(borderWidth);
-        ops += rectangle(currentX, currentY - rowHeight, cellWidth, rowHeight);
-        ops += stroke();
-        ops += restoreState();
-      }
+      const colDef = options.columns?.[colIdx];
 
-      // Cell text (skip nested tables — handled below)
-      const text = cellText(cell.content);
-      if (text) {
-        const cellTextColor = cell.textColor ?? rowTextColor;
-        const cellFontSize = cell.fontSize ?? fontSize;
-        // Cell alignment falls back to column-level alignment, then 'left'
-        const colDef = options.columns?.[colIdx];
-        const align = cell.align ?? colDef?.align ?? 'left';
-        const verticalAlign = cell.verticalAlign ?? 'top';
-
-        // Approximate text width: char count * fontSize * 0.5
-        const approxTextWidth = text.length * cellFontSize * 0.5;
-
-        // Available content area within padding
-        const contentWidth = cellWidth - padding.left - padding.right;
-
-        // Horizontal alignment
-        let textX: number;
-        if (align === 'center') {
-          textX =
-            currentX + padding.left + Math.max(0, contentWidth - approxTextWidth) / 2;
-        } else if (align === 'right') {
-          textX = currentX + cellWidth - padding.right - approxTextWidth;
-        } else {
-          textX = currentX + padding.left;
-        }
-
-        // Vertical alignment
-        let textY: number;
-        if (verticalAlign === 'middle') {
-          textY = currentY - rowHeight / 2 - cellFontSize / 2 + cellFontSize * 0.2;
-        } else if (verticalAlign === 'bottom') {
-          textY = currentY - rowHeight + padding.bottom;
-        } else {
-          // top
-          textY = currentY - padding.top - cellFontSize;
-        }
-
-        ops += saveState();
-        ops += applyFillColor(cellTextColor);
-        ops += beginText();
-        ops += setFont(fontName, cellFontSize);
-        ops += moveText(textX, textY);
-        ops += showText(text);
-        ops += endText();
-        ops += restoreState();
-      } else if (isNestedTable(cell.content)) {
-        // Render nested table inside the cell
-        const nestedWidth = cellWidth - padding.left - padding.right;
-        const nestedX = currentX + padding.left;
-        const nestedY = currentY - padding.top;
-        const { ops: nestedOps } = renderTable({
-          ...cell.content.table,
-          x: nestedX,
-          y: nestedY,
-          width: Math.max(0, nestedWidth),
-        });
-        ops += nestedOps;
-      }
-
-      currentX += cellWidth;
-      colIdx += span;
+      ops += renderCellOps(
+        cell,
+        cellX,
+        currentY,
+        cellWidth,
+        cellHeight,
+        fontName,
+        fontSize,
+        defaultPadding,
+        borderWidth,
+        borderColor,
+        rowTextColor,
+        colDef,
+      );
     }
 
     currentY -= rowHeight;
@@ -772,6 +710,204 @@ export function renderTable(options: DrawTableOptions): {
       rowHeights,
       columnWidths: colWidths,
       pagesUsed: 1,
+    },
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Multi-page renderer
+// ---------------------------------------------------------------------------
+
+/**
+ * Render a table across multiple pages, breaking rows when content
+ * would exceed the available vertical space.
+ *
+ * Header rows (specified by `options.headerRows`) are repeated at the
+ * top of each new page. Rows are never split across pages — if a row
+ * does not fit, the entire row moves to the next page.
+ *
+ * @param options         Table configuration.
+ * @param bottomMargin    Minimum Y coordinate before triggering a page
+ *                        break. When `currentY - rowHeight` would go
+ *                        below this value, a new page is started.
+ *                        Default: `40`.
+ * @returns               An object containing per-page operator strings
+ *                        and the overall table result.
+ */
+export function renderMultiPageTable(
+  options: DrawTableOptions,
+  bottomMargin: number = 40,
+): MultiPageTableResult {
+  const fontSize = options.fontSize ?? 12;
+  const defaultPadding = options.padding ?? 4;
+  const borderWidth = options.borderWidth ?? 0.5;
+  const borderColor: Color =
+    options.borderColor ?? ({ type: 'grayscale', gray: 0 } as const);
+  const textColor: Color =
+    options.textColor ?? ({ type: 'grayscale', gray: 0 } as const);
+  const fontName = options.fontName ?? 'Helvetica';
+  const headerRowCount = options.headerRows ?? 0;
+
+  const colWidths = resolveColumnWidths(options);
+  const numCols = colWidths.length;
+  const rowHeights = resolveRowHeights(options, fontSize, defaultPadding, colWidths);
+  const grid = buildOccupationGrid(options.rows, numCols);
+
+  const pages: PageContent[] = [];
+  let currentPageOps = saveState();
+  let currentY = options.y;
+  let totalHeight = 0;
+
+  /**
+   * Render header rows into `currentPageOps` and advance `currentY`.
+   */
+  function renderHeaders(): void {
+    for (let hIdx = 0; hIdx < headerRowCount && hIdx < options.rows.length; hIdx++) {
+      const hRow = options.rows[hIdx]!;
+      const hRowHeight = rowHeights[hIdx]!;
+
+      // Row background
+      if (hRow.backgroundColor) {
+        currentPageOps += saveState();
+        currentPageOps += applyFillColor(hRow.backgroundColor);
+        currentPageOps += rectangle(
+          options.x,
+          currentY - hRowHeight,
+          options.width,
+          hRowHeight,
+        );
+        currentPageOps += fill();
+        currentPageOps += restoreState();
+      }
+
+      // Render header cells using the grid
+      for (let colIdx = 0; colIdx < numCols; colIdx++) {
+        const entry = grid[hIdx]![colIdx];
+        if (!entry) continue;
+        if (entry.originRow !== hIdx || entry.originCol !== colIdx) continue;
+
+        const cell = entry.cell;
+        const cs = Math.max(1, cell.colSpan ?? 1);
+        // For header rows, limit rowspan to header range
+        const rs = Math.min(Math.max(1, cell.rowSpan ?? 1), headerRowCount - hIdx);
+
+        const cellX = columnX(options.x, colWidths, colIdx);
+        const cellWidth = spanWidth(colWidths, colIdx, cs);
+        const cellHeight = spanHeight(rowHeights, hIdx, rs);
+
+        const colDef = options.columns?.[colIdx];
+
+        currentPageOps += renderCellOps(
+          cell,
+          cellX,
+          currentY,
+          cellWidth,
+          cellHeight,
+          fontName,
+          fontSize,
+          defaultPadding,
+          borderWidth,
+          borderColor,
+          textColor,
+          colDef,
+        );
+      }
+
+      currentY -= hRowHeight;
+    }
+  }
+
+  /**
+   * Finalize the current page and start a new one.
+   * Re-renders header rows on the new page.
+   */
+  function startNewPage(): void {
+    // Close current page
+    currentPageOps += restoreState();
+    pages.push({ ops: currentPageOps, pageIndex: pages.length });
+
+    // Start fresh page
+    currentPageOps = saveState();
+    currentY = options.y;
+
+    // Re-render header rows on the new page
+    renderHeaders();
+  }
+
+  // Render all rows
+  for (let rowIdx = 0; rowIdx < options.rows.length; rowIdx++) {
+    const row = options.rows[rowIdx]!;
+    const rowHeight = rowHeights[rowIdx]!;
+
+    // Check if this row fits on the current page
+    if (currentY - rowHeight < bottomMargin && rowIdx > 0) {
+      startNewPage();
+      // Header rows are already re-rendered; skip them in normal iteration
+      if (rowIdx < headerRowCount) continue;
+    }
+
+    // Row background
+    if (row.backgroundColor) {
+      currentPageOps += saveState();
+      currentPageOps += applyFillColor(row.backgroundColor);
+      currentPageOps += rectangle(
+        options.x,
+        currentY - rowHeight,
+        options.width,
+        rowHeight,
+      );
+      currentPageOps += fill();
+      currentPageOps += restoreState();
+    }
+
+    // Render cells using the occupation grid
+    for (let colIdx = 0; colIdx < numCols; colIdx++) {
+      const entry = grid[rowIdx]![colIdx];
+      if (!entry) continue;
+      if (entry.originRow !== rowIdx || entry.originCol !== colIdx) continue;
+
+      const cell = entry.cell;
+      const cs = Math.max(1, cell.colSpan ?? 1);
+      const rs = Math.max(1, cell.rowSpan ?? 1);
+
+      const cellX = columnX(options.x, colWidths, colIdx);
+      const cellWidth = spanWidth(colWidths, colIdx, cs);
+      const cellHeight = spanHeight(rowHeights, rowIdx, rs);
+
+      const colDef = options.columns?.[colIdx];
+
+      currentPageOps += renderCellOps(
+        cell,
+        cellX,
+        currentY,
+        cellWidth,
+        cellHeight,
+        fontName,
+        fontSize,
+        defaultPadding,
+        borderWidth,
+        borderColor,
+        textColor,
+        colDef,
+      );
+    }
+
+    currentY -= rowHeight;
+    totalHeight += rowHeight;
+  }
+
+  // Finalize last page
+  currentPageOps += restoreState();
+  pages.push({ ops: currentPageOps, pageIndex: pages.length });
+
+  return {
+    pages,
+    result: {
+      width: options.width,
+      height: totalHeight,
+      rowHeights,
+      columnWidths: colWidths,
+      pagesUsed: pages.length,
     },
   };
 }

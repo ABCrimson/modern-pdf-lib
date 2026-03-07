@@ -6,7 +6,7 @@
  * @packageDocumentation
  */
 
-export { renderTable, resolveColumnWidths, resolvePadding } from './table.js';
+export { renderTable, renderMultiPageTable, resolveColumnWidths, resolvePadding } from './table.js';
 export type {
   CellContent,
   NestedTableContent,
@@ -15,4 +15,15 @@ export type {
   TableColumn,
   DrawTableOptions,
   TableRenderResult,
+  PageContent,
+  MultiPageTableResult,
 } from './table.js';
+
+export {
+  minimalPreset,
+  stripedPreset,
+  borderedPreset,
+  professionalPreset,
+  applyPreset,
+} from './presets.js';
+export type { TablePreset } from './presets.js';
