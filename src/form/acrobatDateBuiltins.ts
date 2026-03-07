@@ -131,7 +131,7 @@ function isPatternLetter(ch: string): boolean {
  * @internal
  */
 function pad2(n: number): string {
-  return n < 10 ? '0' + n : String(n);
+  return String(n).padStart(2, '0');
 }
 
 // ---------------------------------------------------------------------------
