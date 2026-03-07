@@ -809,10 +809,51 @@ describe('Passthrough filters', () => {
     expect(result).toEqual(data);
   });
 
-  it('JPXDecode returns data unchanged', () => {
-    const data = new Uint8Array([0x00, 0x00, 0x00, 0x0c, 0x6a, 0x50]);
+  it('JPXDecode decodes JPEG2000 data to raw pixels', () => {
+    // JPXDecode now actually decodes JPEG2000 data via decodeJpeg2000().
+    // This test verifies that valid J2K data is decoded to pixel bytes.
+    // Build a minimal 2x2 greyscale J2K codestream:
+    const cs: number[] = [];
+    // SOC
+    cs.push(0xff, 0x4f);
+    // SIZ marker (2x2, 1 component, 8-bit)
+    cs.push(0xff, 0x51);
+    cs.push(0x00, 0x29); // Lsiz = 41
+    cs.push(0x00, 0x00); // Rsiz
+    cs.push(0x00, 0x00, 0x00, 0x02); // Xsiz = 2
+    cs.push(0x00, 0x00, 0x00, 0x02); // Ysiz = 2
+    cs.push(0x00, 0x00, 0x00, 0x00); // XOsiz
+    cs.push(0x00, 0x00, 0x00, 0x00); // YOsiz
+    cs.push(0x00, 0x00, 0x00, 0x02); // XTsiz = 2
+    cs.push(0x00, 0x00, 0x00, 0x02); // YTsiz = 2
+    cs.push(0x00, 0x00, 0x00, 0x00); // XTOsiz
+    cs.push(0x00, 0x00, 0x00, 0x00); // YTOsiz
+    cs.push(0x00, 0x01);             // Csiz = 1
+    cs.push(0x07, 0x01, 0x01);       // Ssiz=7 (8-bit), XRsiz=1, YRsiz=1
+    // COD
+    cs.push(0xff, 0x52);
+    cs.push(0x00, 0x0c); // Lcod = 12
+    cs.push(0x00);       // Scod
+    cs.push(0x00);       // Progression = LRCP
+    cs.push(0x00, 0x01); // Layers = 1
+    cs.push(0x00);       // MCT = 0
+    cs.push(0x01);       // Decomp levels = 1
+    cs.push(0x04, 0x04); // CB width/height exp
+    cs.push(0x00);       // CB style
+    cs.push(0x01);       // Wavelet = 5/3 reversible
+    // QCD
+    cs.push(0xff, 0x5c);
+    cs.push(0x00, 0x07); // Lqcd = 7
+    cs.push(0x20);       // Sqcd: guardBits=1, quantStyle=0
+    cs.push(0x40, 0x40, 0x40, 0x40); // 4 subbands
+    // EOC (no tile data)
+    cs.push(0xff, 0xd9);
+
+    const data = new Uint8Array(cs);
     const result = decodeStream(data, 'JPXDecode');
-    expect(result).toEqual(data);
+    // 2x2 with 1 component = 4 bytes
+    expect(result.length).toBe(4);
+    expect(result).toBeInstanceOf(Uint8Array);
   });
 
   it('Crypt filter returns data unchanged', () => {

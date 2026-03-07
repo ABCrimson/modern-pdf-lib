@@ -83,3 +83,147 @@ export {
 export type {
   TimestampResult,
 } from './timestamp.js';
+
+// ---------------------------------------------------------------------------
+// OCSP (RFC 6960)
+// ---------------------------------------------------------------------------
+
+export {
+  buildOcspRequest,
+  parseOcspResponse,
+  checkCertificateStatus,
+  extractOcspUrl,
+} from './ocsp.js';
+export type {
+  OcspResponse,
+  OcspSingleResponse,
+  OcspResult,
+} from './ocsp.js';
+
+// ---------------------------------------------------------------------------
+// CRL (X.509 v2)
+// ---------------------------------------------------------------------------
+
+export {
+  parseCrl,
+  downloadCrl,
+  isCertificateRevoked,
+  extractCrlUrls,
+} from './crl.js';
+export type {
+  CrlData,
+  CrlEntry,
+} from './crl.js';
+
+// ---------------------------------------------------------------------------
+// Certificate chain validation
+// ---------------------------------------------------------------------------
+
+export {
+  buildCertificateChain,
+  validateCertificateChain,
+} from './chainValidator.js';
+export type {
+  CertificateChainResult,
+  ChainValidationResult,
+  ChainValidationOptions,
+  CertificateStatus,
+} from './chainValidator.js';
+
+// ---------------------------------------------------------------------------
+// Offline revocation checking
+// ---------------------------------------------------------------------------
+
+export {
+  extractEmbeddedRevocationData,
+  verifyOfflineRevocation,
+} from './offlineRevocation.js';
+export type {
+  EmbeddedRevocationData,
+  OfflineRevocationResult,
+} from './offlineRevocation.js';
+
+// ---------------------------------------------------------------------------
+// Custom trust store
+// ---------------------------------------------------------------------------
+
+export {
+  TrustStore,
+} from './trustStore.js';
+export type {
+  TrustStoreOptions,
+} from './trustStore.js';
+
+// ---------------------------------------------------------------------------
+// Certificate policy validation
+// ---------------------------------------------------------------------------
+
+export {
+  validateKeyUsage,
+  validateExtendedKeyUsage,
+  validateCertificatePolicy,
+  EKU_OIDS,
+} from './certPolicy.js';
+export type {
+  KeyUsageFlag,
+  KeyUsageValidationResult,
+  EkuValidationResult,
+  PolicyValidationOptions,
+  PolicyValidationResult,
+} from './certPolicy.js';
+
+// ---------------------------------------------------------------------------
+// Revocation cache
+// ---------------------------------------------------------------------------
+
+export {
+  RevocationCache,
+  deriveCacheKey,
+} from './revocationCache.js';
+export type {
+  OcspCacheEntry,
+  CrlCacheEntry,
+  RevocationCacheOptions,
+} from './revocationCache.js';
+
+// Re-export cache-specific types under qualified names to avoid conflict
+// with the OCSP/CRL module types that share the same base names.
+export type {
+  OcspResult as CachedOcspResult,
+  CrlData as CachedCrlData,
+} from './revocationCache.js';
+
+// ---------------------------------------------------------------------------
+// OCSP stapling
+// ---------------------------------------------------------------------------
+
+export {
+  embedOcspResponse,
+  extractStapledOcsp,
+} from './ocspStaple.js';
+
+// ---------------------------------------------------------------------------
+// Delta CRL
+// ---------------------------------------------------------------------------
+
+export {
+  parseDeltaCrl,
+  mergeCrls,
+  isDeltaCrl,
+} from './deltaCrl.js';
+export type {
+  DeltaCrlData,
+} from './deltaCrl.js';
+
+// ---------------------------------------------------------------------------
+// Detailed verification
+// ---------------------------------------------------------------------------
+
+export {
+  verifySignatureDetailed,
+} from './detailedVerifier.js';
+export type {
+  DetailedVerificationResult,
+  DetailedVerifyOptions,
+  CertificateInfo,
+} from './detailedVerifier.js';

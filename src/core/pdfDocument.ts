@@ -72,6 +72,7 @@ import type { RedactionOptions } from './redaction.js';
 import { markForRedaction, applyRedactions as applyRedactionsImpl } from './redaction.js';
 import type { SignatureVerificationResult } from '../signature/signatureVerifier.js';
 import { PdfForm } from '../form/pdfForm.js';
+import { getDocumentActionState } from '../form/documentScripts.js';
 import type { EmbeddedPdfPage, EmbedPageOptions } from './pdfEmbed.js';
 import { embedPageAsFormXObject } from './pdfEmbed.js';
 import { buildToUnicodeCmap, parseJpegDimensions } from './pdfDocumentEmbed.js';
@@ -2135,6 +2136,75 @@ export class PdfDocument {
           }
 
           catalogObj.set('/Names', namesDict);
+        }
+      }
+
+      // Document-level actions (/OpenAction and /AA) — set by documentScripts.ts
+      const actionState = getDocumentActionState(this);
+      if (actionState) {
+        // /OpenAction — JavaScript action that runs on document open
+        if (actionState.openAction !== undefined) {
+          const openActionDict = new PdfDict();
+          openActionDict.set('/Type', PdfName.of('Action'));
+          openActionDict.set('/S', PdfName.of('JavaScript'));
+          openActionDict.set('/JS', PdfString.literal(actionState.openAction));
+          const openActionRef = this.registry.register(openActionDict);
+          catalogObj.set('/OpenAction', openActionRef);
+        }
+
+        // /AA (Additional Actions) — close, print, save triggers
+        const hasAA =
+          actionState.closeAction !== undefined ||
+          actionState.beforePrint !== undefined ||
+          actionState.afterPrint !== undefined ||
+          actionState.beforeSave !== undefined ||
+          actionState.afterSave !== undefined;
+
+        if (hasAA) {
+          const aaDict = new PdfDict();
+
+          if (actionState.closeAction !== undefined) {
+            const d = new PdfDict();
+            d.set('/Type', PdfName.of('Action'));
+            d.set('/S', PdfName.of('JavaScript'));
+            d.set('/JS', PdfString.literal(actionState.closeAction));
+            const ref = this.registry.register(d);
+            aaDict.set('/WC', ref);
+          }
+          if (actionState.beforePrint !== undefined) {
+            const d = new PdfDict();
+            d.set('/Type', PdfName.of('Action'));
+            d.set('/S', PdfName.of('JavaScript'));
+            d.set('/JS', PdfString.literal(actionState.beforePrint));
+            const ref = this.registry.register(d);
+            aaDict.set('/WP', ref);
+          }
+          if (actionState.afterPrint !== undefined) {
+            const d = new PdfDict();
+            d.set('/Type', PdfName.of('Action'));
+            d.set('/S', PdfName.of('JavaScript'));
+            d.set('/JS', PdfString.literal(actionState.afterPrint));
+            const ref = this.registry.register(d);
+            aaDict.set('/DP', ref);
+          }
+          if (actionState.beforeSave !== undefined) {
+            const d = new PdfDict();
+            d.set('/Type', PdfName.of('Action'));
+            d.set('/S', PdfName.of('JavaScript'));
+            d.set('/JS', PdfString.literal(actionState.beforeSave));
+            const ref = this.registry.register(d);
+            aaDict.set('/WS', ref);
+          }
+          if (actionState.afterSave !== undefined) {
+            const d = new PdfDict();
+            d.set('/Type', PdfName.of('Action'));
+            d.set('/S', PdfName.of('JavaScript'));
+            d.set('/JS', PdfString.literal(actionState.afterSave));
+            const ref = this.registry.register(d);
+            aaDict.set('/DS', ref);
+          }
+
+          catalogObj.set('/AA', aaDict);
         }
       }
     }

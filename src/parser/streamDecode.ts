@@ -15,6 +15,7 @@ import type { PdfObject } from '../core/pdfObjects.js';
 import { PdfDict, PdfName, PdfArray, PdfNumber } from '../core/pdfObjects.js';
 import { decodeCCITT } from './ccittDecode.js';
 import { decodeJBIG2 } from './jbig2Decode.js';
+import { decodeJpeg2000 } from './jpeg2000Decode.js';
 
 // ---------------------------------------------------------------------------
 // Public API
@@ -132,6 +133,7 @@ const FILTER_ABBREVIATIONS: Readonly<Record<string, string>> = {
   RL: 'RunLengthDecode',
   CCF: 'CCITTFaxDecode',
   DCT: 'DCTDecode',
+  JPX: 'JPXDecode',
 };
 
 function normalizeFilterName(name: string): string {
@@ -183,8 +185,7 @@ function applyFilter(
       // JPEG — return as-is; decoded by image handler
       return data;
     case 'JPXDecode':
-      // JPEG2000 — return as-is; decoded by image handler
-      return data;
+      return decodeJPX(data, parms);
     case 'CCITTFaxDecode':
       return decodeCCITT(data, parms);
     case 'JBIG2Decode':
@@ -828,4 +829,20 @@ function decodeRunLength(data: Uint8Array): Uint8Array {
   }
 
   return new Uint8Array(result);
+}
+
+// ---------------------------------------------------------------------------
+// JPXDecode (JPEG2000)
+// ---------------------------------------------------------------------------
+
+/**
+ * Decode a JPXDecode (JPEG2000) stream.
+ *
+ * Calls the JPEG2000 decoder and returns raw pixel bytes.  The
+ * `/DecodeParms` dictionary may specify a color space override, but
+ * the decoded data is always raw interleaved component bytes.
+ */
+function decodeJPX(data: Uint8Array, parms: PdfDict | null): Uint8Array {
+  const decoded = decodeJpeg2000(data);
+  return decoded.data;
 }
