@@ -16,7 +16,7 @@
  * The start and stop character is `*` (asterisk), which is automatically
  * added during encoding.
  *
- * Reference: ISO/IEC 16388:2007, ANSI/AIM BC1-1995
+ * Reference: ISO/IEC 16388:2007
  */
 
 import type { Color } from '../core/operators/color.js';
@@ -28,84 +28,74 @@ export type { BarcodeMatrix };
 // ---------------------------------------------------------------------------
 // Character encoding table
 //
-// Each pattern is a 9-character string of N (narrow) and W (wide) values.
-// The elements alternate: bar-space-bar-space-bar-space-bar-space-bar
-// (B S B S B S B S B), so indices 0,2,4,6,8 are bars and 1,3,5,7 are
-// spaces.  Each character has exactly 3 wide elements and 6 narrow.
+// Each character maps to an array of 9 element widths (1 = narrow,
+// 2 = wide).  The 9 elements alternate bar/space:
+//   bar space bar space bar space bar space bar
 //
-// Source: ISO/IEC 16388 Table 1
+// Every character has exactly 3 wide (2) and 6 narrow (1) elements.
+//
+// When rendering, narrow elements are 1 moduleWidth wide and wide
+// elements are wideToNarrowRatio * moduleWidth wide.
 // ---------------------------------------------------------------------------
 
-/**
- * Character set for Code 39. The index of a character in this string is
- * its value for modulo-43 check digit computation.
- */
-const CODE39_CHARSET = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ-. $/+%';
+const CODE39_CHARSET = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ-. $/+%*';
 
-/**
- * Encoding patterns indexed by {@link CODE39_CHARSET} position, plus
- * the start/stop character `*` at the end.  44 entries total.
- *
- * Each entry: 9-char string of 'N' (narrow) or 'W' (wide).
- * Element positions: B0 S1 B2 S3 B4 S5 B6 S7 B8
- */
-const CODE39_PATTERNS: readonly string[] = [
-  /* 0  '0' */ 'NNNWWNWNN',
-  /* 1  '1' */ 'WNNWNNNNW',
-  /* 2  '2' */ 'NNWWNNNNW',
-  /* 3  '3' */ 'WNWWNNNNN',
-  /* 4  '4' */ 'NNNWWNNNW',
-  /* 5  '5' */ 'WNNWWNNNN',
-  /* 6  '6' */ 'NNWWWNNNN',
-  /* 7  '7' */ 'NNNWNNWNW',
-  /* 8  '8' */ 'WNNWNNWNN',
-  /* 9  '9' */ 'NNWWNNWNN',
-  /* 10 'A' */ 'WNNNNWNNW',
-  /* 11 'B' */ 'NNWNNWNNW',
-  /* 12 'C' */ 'WNWNNWNNN',
-  /* 13 'D' */ 'NNNNWWNNW',
-  /* 14 'E' */ 'WNNNWWNNN',
-  /* 15 'F' */ 'NNWNWWNNN',
-  /* 16 'G' */ 'NNNNNWWNW',
-  /* 17 'H' */ 'WNNNNWWNN',
-  /* 18 'I' */ 'NNWNNWWNN',
-  /* 19 'J' */ 'NNNNWWWNN',
-  /* 20 'K' */ 'WNNNNNNWW',
-  /* 21 'L' */ 'NNWNNNNWW',
-  /* 22 'M' */ 'WNWNNNNWN',
-  /* 23 'N' */ 'NNNNWNNWW',
-  /* 24 'O' */ 'WNNNWNNWN',
-  /* 25 'P' */ 'NNWNWNNWN',
-  /* 26 'Q' */ 'NNNNNNWWW',
-  /* 27 'R' */ 'WNNNNNWWN',
-  /* 28 'S' */ 'NNWNNNWWN',
-  /* 29 'T' */ 'NNNNWNWWN',
-  /* 30 'U' */ 'WWNNNNNNW',
-  /* 31 'V' */ 'NWWNNNNNW',
-  /* 32 'W' */ 'WWWNNNNNN',
-  /* 33 'X' */ 'NWNNWNNNW',
-  /* 34 'Y' */ 'NWNNWNNWN',  // placeholder to be verified
-  /* 35 'Z' */ 'NWNNNNWNW',  // placeholder to be verified
-  /* 36 '-' */ 'NWNNNNNNW',  // placeholder to be verified
-  /* 37 '.' */ 'WWNNNNNWN',
-  /* 38 ' ' */ 'NNWNNNWNW',  // placeholder to be verified
-  /* 39 '$' */ 'NWNWNWNNN',
-  /* 40 '/' */ 'NWNWNNNWN',
-  /* 41 '+' */ 'NWNNNWNWN',
-  /* 42 '%' */ 'NNNWNWNWN',
-  /* 43 '*' */ 'NWNNWNWNN',
+// Element widths: 1 = narrow, 2 = wide
+// [bar, space, bar, space, bar, space, bar, space, bar]
+const WIDTHS: readonly (readonly number[])[] = [
+  [1, 1, 1, 2, 2, 1, 2, 1, 1], //  0
+  [2, 1, 1, 2, 1, 1, 1, 1, 2], //  1
+  [1, 1, 2, 2, 1, 1, 1, 1, 2], //  2
+  [2, 1, 2, 2, 1, 1, 1, 1, 1], //  3
+  [1, 1, 1, 2, 2, 1, 1, 1, 2], //  4
+  [2, 1, 1, 2, 2, 1, 1, 1, 1], //  5
+  [1, 1, 2, 2, 2, 1, 1, 1, 1], //  6
+  [1, 1, 1, 2, 1, 1, 2, 1, 2], //  7
+  [2, 1, 1, 2, 1, 1, 2, 1, 1], //  8
+  [1, 1, 2, 2, 1, 1, 2, 1, 1], //  9
+  [2, 1, 1, 1, 1, 2, 1, 1, 2], // 10 A
+  [1, 1, 2, 1, 1, 2, 1, 1, 2], // 11 B
+  [2, 1, 2, 1, 1, 2, 1, 1, 1], // 12 C
+  [1, 1, 1, 1, 2, 2, 1, 1, 2], // 13 D
+  [2, 1, 1, 1, 2, 2, 1, 1, 1], // 14 E
+  [1, 1, 2, 1, 2, 2, 1, 1, 1], // 15 F
+  [1, 1, 1, 1, 1, 2, 2, 1, 2], // 16 G
+  [2, 1, 1, 1, 1, 2, 2, 1, 1], // 17 H
+  [1, 1, 2, 1, 1, 2, 2, 1, 1], // 18 I
+  [1, 1, 1, 1, 2, 2, 2, 1, 1], // 19 J
+  [2, 1, 1, 1, 1, 1, 1, 2, 2], // 20 K
+  [1, 1, 2, 1, 1, 1, 1, 2, 2], // 21 L
+  [2, 1, 2, 1, 1, 1, 1, 2, 1], // 22 M
+  [1, 1, 1, 1, 2, 1, 1, 2, 2], // 23 N
+  [2, 1, 1, 1, 2, 1, 1, 2, 1], // 24 O
+  [1, 1, 2, 1, 2, 1, 1, 2, 1], // 25 P
+  [1, 1, 1, 1, 1, 1, 2, 2, 2], // 26 Q
+  [2, 1, 1, 1, 1, 1, 2, 2, 1], // 27 R
+  [1, 1, 2, 1, 1, 1, 2, 2, 1], // 28 S
+  [1, 1, 1, 1, 2, 1, 2, 2, 1], // 29 T
+  [2, 2, 1, 1, 1, 1, 1, 1, 2], // 30 U
+  [1, 2, 2, 1, 1, 1, 1, 1, 2], // 31 V
+  [2, 2, 2, 1, 1, 1, 1, 1, 1], // 32 W
+  [1, 2, 1, 1, 2, 1, 1, 1, 2], // 33 X
+  [2, 2, 1, 1, 2, 1, 1, 1, 1], // 34 Y
+  [1, 2, 2, 1, 2, 1, 1, 1, 1], // 35 Z
+  [1, 2, 1, 1, 1, 1, 2, 1, 2], // 36 -
+  [2, 2, 1, 1, 1, 1, 2, 1, 1], // 37 .
+  [1, 2, 2, 1, 1, 1, 2, 1, 1], // 38 (space)
+  [1, 2, 1, 2, 1, 2, 1, 1, 1], // 39 $
+  [1, 2, 1, 2, 1, 1, 1, 2, 1], // 40 /
+  [1, 2, 1, 1, 1, 2, 1, 2, 1], // 41 +
+  [1, 1, 1, 2, 1, 2, 1, 2, 1], // 42 %
+  [1, 2, 1, 1, 2, 1, 2, 1, 1], // 43 *
 ];
 
-// Build a fast lookup map from character to pattern index
-const CHAR_TO_INDEX: ReadonlyMap<string, number> = (() => {
-  const m = new Map<string, number>();
-  for (let i = 0; i < CODE39_CHARSET.length; i++) {
-    m.set(CODE39_CHARSET[i]!, i);
-  }
-  return m;
-})();
+// Build a fast lookup: character -> charset index
+const CHAR_TO_INDEX = new Map<string, number>();
+for (let i = 0; i < CODE39_CHARSET.length; i++) {
+  CHAR_TO_INDEX.set(CODE39_CHARSET[i]!, i);
+}
 
-const STAR_PATTERN = CODE39_PATTERNS[43]!;
+const STAR_INDEX = 43;
 
 // ---------------------------------------------------------------------------
 // Types
@@ -136,33 +126,22 @@ export interface Code39Options {
 // ---------------------------------------------------------------------------
 
 /**
- * Expand a 9-character pattern string (N/W) into an array of booleans
- * using the given wide-to-narrow ratio.
+ * Expand a character's width array into module booleans.
  *
- * @param pattern  9-char string like `'WNNWNNNNW'`.
- * @param ratio    Wide-to-narrow ratio (default 3).
- * @returns        Boolean array: `true` = bar, `false` = space.
+ * @param widths  9-element array where 1 = narrow, 2 = wide.
+ * @param ratio   Wide-to-narrow ratio (applied to wide elements).
+ * @returns       Boolean array: `true` = bar, `false` = space.
  */
-function expandPattern(pattern: string, ratio: number): boolean[] {
+function expandWidths(widths: readonly number[], ratio: number): boolean[] {
   const modules: boolean[] = [];
   for (let i = 0; i < 9; i++) {
-    const isBar = i % 2 === 0;      // even indices = bar, odd = space
-    const isWide = pattern[i] === 'W';
-    const width = isWide ? ratio : 1;
-    for (let w = 0; w < width; w++) {
+    const isBar = i % 2 === 0;
+    const moduleCount = widths[i] === 2 ? ratio : 1;
+    for (let m = 0; m < moduleCount; m++) {
       modules.push(isBar);
     }
   }
   return modules;
-}
-
-/**
- * Compute the total module width of a single Code 39 character
- * (without inter-character gap).
- */
-function charModuleWidth(ratio: number): number {
-  // Each character has 9 elements: 6 narrow + 3 wide
-  return 6 * 1 + 3 * ratio;
 }
 
 // ---------------------------------------------------------------------------
@@ -174,6 +153,7 @@ function charModuleWidth(ratio: number): number {
  *
  * @param data  Uppercase data string (without start/stop `*`).
  * @returns     The check digit character.
+ * @throws      If the data contains characters not in the Code 39 set.
  */
 export function computeCode39CheckDigit(data: string): string {
   let sum = 0;
@@ -182,7 +162,7 @@ export function computeCode39CheckDigit(data: string): string {
     if (idx === undefined) {
       throw new Error(
         `Code 39: invalid character '${data[i]}' at index ${i}. ` +
-        `Valid characters: 0-9, A-Z, space, - . $ / + %`,
+        'Valid characters: 0-9, A-Z, space, - . $ / + %',
       );
     }
     sum += idx;
@@ -213,52 +193,52 @@ export function encodeCode39(
   wideToNarrowRatio: number = 3,
 ): BarcodeMatrix {
   if (wideToNarrowRatio < 2) {
-    throw new Error(`Code 39: wideToNarrowRatio must be >= 2, got ${wideToNarrowRatio}`);
+    throw new Error(
+      `Code 39: wideToNarrowRatio must be >= 2, got ${wideToNarrowRatio}`,
+    );
   }
 
-  // Validate input characters
+  // Validate input
   for (let i = 0; i < data.length; i++) {
     const ch = data[i]!;
     if (ch === '*') {
       throw new Error(
-        `Code 39: asterisk (*) is the start/stop character and must not appear in data (index ${i})`,
+        'Code 39: asterisk (*) is the start/stop character and must not ' +
+        `appear in data (index ${i})`,
       );
     }
     if (!CHAR_TO_INDEX.has(ch)) {
       throw new Error(
         `Code 39: invalid character '${ch}' at index ${i}. ` +
-        `Valid characters: 0-9, A-Z, space, - . $ / + %`,
+        'Valid characters: 0-9, A-Z, space, - . $ / + %',
       );
     }
   }
 
-  // Build the full character sequence: * + data [+ check] + *
-  let encoded = data;
+  // Optionally append check digit
+  let payload = data;
   if (includeCheckDigit) {
-    encoded += computeCode39CheckDigit(data);
+    payload += computeCode39CheckDigit(data);
   }
 
   const ratio = wideToNarrowRatio;
   const modules: boolean[] = [];
 
-  // Start character
-  modules.push(...expandPattern(STAR_PATTERN, ratio));
+  // Start character (*)
+  modules.push(...expandWidths(WIDTHS[STAR_INDEX]!, ratio));
 
-  // Inter-character gap after start
-  modules.push(false); // 1 narrow space
+  // Inter-character gap
+  modules.push(false);
 
-  // Data characters (+ optional check digit)
-  for (let i = 0; i < encoded.length; i++) {
-    const idx = CHAR_TO_INDEX.get(encoded[i]!)!;
-    const pattern = CODE39_PATTERNS[idx]!;
-    modules.push(...expandPattern(pattern, ratio));
-
-    // Inter-character gap (1 narrow space) after each character
-    modules.push(false);
+  // Data characters
+  for (let i = 0; i < payload.length; i++) {
+    const idx = CHAR_TO_INDEX.get(payload[i]!)!;
+    modules.push(...expandWidths(WIDTHS[idx]!, ratio));
+    modules.push(false); // inter-character gap
   }
 
-  // Stop character
-  modules.push(...expandPattern(STAR_PATTERN, ratio));
+  // Stop character (*)
+  modules.push(...expandWidths(WIDTHS[STAR_INDEX]!, ratio));
 
   return { modules, width: modules.length };
 }
@@ -305,19 +285,17 @@ export function code39ToOperators(
   // Set bar colour
   ops += applyFillColor(color);
 
-  // Starting x position (after quiet zone)
+  // Starting x after quiet zone
   const startX = x + quietZone * moduleWidth;
 
-  // Draw bars as filled rectangles (coalesce adjacent bar modules)
+  // Coalesce adjacent bar modules into single rectangles
   let barStart = -1;
-
   for (let i = 0; i <= matrix.modules.length; i++) {
     const isBar = i < matrix.modules.length ? matrix.modules[i] : false;
 
     if (isBar && barStart === -1) {
       barStart = i;
     } else if (!isBar && barStart !== -1) {
-      // End of a bar run — emit rectangle
       const barX = startX + barStart * moduleWidth;
       const barWidth = (i - barStart) * moduleWidth;
       ops += `${n(barX)} ${n(y)} ${n(barWidth)} ${n(height)} re\n`;
@@ -325,7 +303,7 @@ export function code39ToOperators(
     }
   }
 
-  // Fill all bar rectangles at once
+  // Fill all bar rectangles
   ops += 'f\n';
 
   // Restore graphics state

@@ -1,8 +1,8 @@
 /**
  * @module barcode
  *
- * Barcode encoding and PDF rendering for Code 128, EAN-13, EAN-8,
- * and UPC-A.
+ * Barcode encoding and PDF rendering for Code 128, Code 39,
+ * EAN-13, EAN-8, UPC-A, and QR Code.
  *
  * @packageDocumentation
  */
@@ -18,6 +18,14 @@ export {
   code128ToOperators,
 } from './code128.js';
 export type { Code128Options } from './code128.js';
+
+// Code 39
+export {
+  encodeCode39,
+  computeCode39CheckDigit,
+  code39ToOperators,
+} from './code39.js';
+export type { Code39Options } from './code39.js';
 
 // EAN-13 / EAN-8
 export {
