@@ -16,6 +16,30 @@
       "types": "./dist/browser.d.mts",
       "import": "./dist/browser.mjs"
     },
+    "./create": {
+      "types": "./dist/create.d.mts",
+      "import": "./dist/create.mjs",
+      "require": {
+        "types": "./dist/create.d.cts",
+        "default": "./dist/create.cjs"
+      }
+    },
+    "./parse": {
+      "types": "./dist/parse.d.mts",
+      "import": "./dist/parse.mjs",
+      "require": {
+        "types": "./dist/parse.d.cts",
+        "default": "./dist/parse.cjs"
+      }
+    },
+    "./forms": {
+      "types": "./dist/forms.d.mts",
+      "import": "./dist/forms.mjs",
+      "require": {
+        "types": "./dist/forms.d.cts",
+        "default": "./dist/forms.cjs"
+      }
+    },
     "./wasm/*": "./dist/wasm/*"
   },
   "bin": {
