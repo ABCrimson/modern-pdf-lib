@@ -8,7 +8,7 @@
 
 > **computeFontSize**(`text`, `options`): `number`
 
-Defined in: [src/core/layout.ts:130](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/core/layout.ts#L130)
+Defined in: [src/core/layout.ts:130](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/layout.ts#L130)
 
 Compute the largest font size (in points) at which `text` fits within
 the given width (and optionally height) constraints.

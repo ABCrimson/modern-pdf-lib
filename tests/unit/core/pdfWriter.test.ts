@@ -79,25 +79,25 @@ describe('PdfWriter', () => {
   // Header
   // -------------------------------------------------------------------------
 
-  it('produces output starting with %PDF-1.7', () => {
+  it('produces output starting with %PDF-1.7', async () => {
     const { registry, structure } = buildMinimalDocument();
-    const bytes = serializePdf(registry, structure, { compress: false });
+    const bytes = await serializePdf(registry, structure, { compress: false });
     const text = pdfToString(bytes);
 
     expect(text.startsWith('%PDF-1.7')).toBe(true);
   });
 
-  it('produces output ending with %%EOF', () => {
+  it('produces output ending with %%EOF', async () => {
     const { registry, structure } = buildMinimalDocument();
-    const bytes = serializePdf(registry, structure, { compress: false });
+    const bytes = await serializePdf(registry, structure, { compress: false });
     const text = pdfToString(bytes);
 
     expect(text.trimEnd().endsWith('%%EOF')).toBe(true);
   });
 
-  it('includes binary comment after header', () => {
+  it('includes binary comment after header', async () => {
     const { registry, structure } = buildMinimalDocument();
-    const bytes = serializePdf(registry, structure, { compress: false });
+    const bytes = await serializePdf(registry, structure, { compress: false });
 
     // The binary comment follows the %PDF-1.7\n line.
     // It starts at byte offset 10 (after '%PDF-1.7\n')
@@ -114,9 +114,9 @@ describe('PdfWriter', () => {
   // Xref table
   // -------------------------------------------------------------------------
 
-  it('generates valid xref table', () => {
+  it('generates valid xref table', async () => {
     const { registry, structure } = buildMinimalDocument();
-    const bytes = serializePdf(registry, structure, { compress: false });
+    const bytes = await serializePdf(registry, structure, { compress: false });
     const text = pdfToString(bytes);
 
     expect(text).toContain('xref\n');
@@ -126,9 +126,9 @@ describe('PdfWriter', () => {
     expect(text).toContain('0000000000 65535 f ');
   });
 
-  it('xref offsets point to correct byte positions', () => {
+  it('xref offsets point to correct byte positions', async () => {
     const { registry, structure } = buildMinimalDocument();
-    const bytes = serializePdf(registry, structure, { compress: false });
+    const bytes = await serializePdf(registry, structure, { compress: false });
     const text = pdfToString(bytes);
 
     // Parse xref entries
@@ -162,9 +162,9 @@ describe('PdfWriter', () => {
   // Trailer
   // -------------------------------------------------------------------------
 
-  it('trailer contains /Size, /Root, /Info', () => {
+  it('trailer contains /Size, /Root, /Info', async () => {
     const { registry, structure } = buildMinimalDocument();
-    const bytes = serializePdf(registry, structure, { compress: false });
+    const bytes = await serializePdf(registry, structure, { compress: false });
     const text = pdfToString(bytes);
 
     expect(text).toContain('trailer');
@@ -173,9 +173,9 @@ describe('PdfWriter', () => {
     expect(text).toMatch(/\/Info \d+ \d+ R/);
   });
 
-  it('trailer /Root points to catalog', () => {
+  it('trailer /Root points to catalog', async () => {
     const { registry, structure } = buildMinimalDocument();
-    const bytes = serializePdf(registry, structure, { compress: false });
+    const bytes = await serializePdf(registry, structure, { compress: false });
     const text = pdfToString(bytes);
 
     // Extract root reference from trailer
@@ -197,9 +197,9 @@ describe('PdfWriter', () => {
   // Compression
   // -------------------------------------------------------------------------
 
-  it('uncompressed streams are readable', () => {
+  it('uncompressed streams are readable', async () => {
     const { registry, structure } = buildMinimalDocument();
-    const bytes = serializePdf(registry, structure, { compress: false });
+    const bytes = await serializePdf(registry, structure, { compress: false });
     const text = pdfToString(bytes);
 
     // All streams should be readable ASCII (no FlateDecode)
@@ -212,7 +212,7 @@ describe('PdfWriter', () => {
     expect(text).toContain('endstream');
   });
 
-  it('compressed streams use FlateDecode filter', () => {
+  it('compressed streams use FlateDecode filter', async () => {
     const registry = new PdfObjectRegistry();
 
     const pageRef = registry.allocate();
@@ -240,7 +240,7 @@ describe('PdfWriter', () => {
       registry,
     );
 
-    const bytes = serializePdf(registry, structure, { compress: true });
+    const bytes = await serializePdf(registry, structure, { compress: true });
     const text = pdfToString(bytes);
 
     expect(text).toContain('/Filter /FlateDecode');
@@ -250,9 +250,9 @@ describe('PdfWriter', () => {
   // startxref
   // -------------------------------------------------------------------------
 
-  it('includes startxref pointer', () => {
+  it('includes startxref pointer', async () => {
     const { registry, structure } = buildMinimalDocument();
-    const bytes = serializePdf(registry, structure, { compress: false });
+    const bytes = await serializePdf(registry, structure, { compress: false });
     const text = pdfToString(bytes);
 
     expect(text).toContain('startxref\n');
@@ -272,9 +272,9 @@ describe('PdfWriter', () => {
   // Empty single-page PDF
   // -------------------------------------------------------------------------
 
-  it('empty single-page PDF is valid', () => {
+  it('empty single-page PDF is valid', async () => {
     const { registry, structure } = buildMinimalDocument();
-    const bytes = serializePdf(registry, structure, { compress: false });
+    const bytes = await serializePdf(registry, structure, { compress: false });
     const text = pdfToString(bytes);
 
     // Basic structural validation
@@ -298,10 +298,10 @@ describe('PdfWriter', () => {
   // PdfWriter class direct usage
   // -------------------------------------------------------------------------
 
-  it('PdfWriter.write() produces complete PDF', () => {
+  it('PdfWriter.write() produces complete PDF', async () => {
     const { registry, structure } = buildMinimalDocument();
     const writer = new PdfWriter(registry, structure, { compress: false });
-    const bytes = writer.write();
+    const bytes = await writer.write();
 
     expect(bytes).toBeInstanceOf(Uint8Array);
     expect(bytes.length).toBeGreaterThan(0);
@@ -315,11 +315,11 @@ describe('PdfWriter', () => {
   // Object streams
   // -------------------------------------------------------------------------
 
-  it('object streams: small document uses traditional xref', () => {
+  it('object streams: small document uses traditional xref', async () => {
     const { registry, structure } = buildMinimalDocument();
     // The minimal document has only a handful of objects.
     // With threshold = Infinity (default), traditional xref is used.
-    const bytes = serializePdf(registry, structure, {
+    const bytes = await serializePdf(registry, structure, {
       compress: false,
       objectStreamThreshold: Infinity,
     });
@@ -332,10 +332,10 @@ describe('PdfWriter', () => {
     expect(text).not.toContain('/Type /ObjStm');
   });
 
-  it('object streams: below-threshold document uses traditional xref even when enabled', () => {
+  it('object streams: below-threshold document uses traditional xref even when enabled', async () => {
     const { registry, structure } = buildMinimalDocument();
     // Set threshold very high (e.g. 1000) — minimal doc won't meet it
-    const bytes = serializePdf(registry, structure, {
+    const bytes = await serializePdf(registry, structure, {
       compress: false,
       objectStreamThreshold: 1000,
     });
@@ -346,7 +346,7 @@ describe('PdfWriter', () => {
     expect(text).toContain('trailer\n');
   });
 
-  it('object streams: produces /Type /XRef stream when threshold exceeded', () => {
+  it('object streams: produces /Type /XRef stream when threshold exceeded', async () => {
     // Build a document with many small objects to exceed threshold
     const registry = new PdfObjectRegistry();
 
@@ -384,7 +384,7 @@ describe('PdfWriter', () => {
     );
 
     // Use threshold = 1 so even a small doc uses object streams
-    const bytes = serializePdf(registry, structure, {
+    const bytes = await serializePdf(registry, structure, {
       compress: false,
       objectStreamThreshold: 1,
     });

@@ -45,6 +45,30 @@ export interface SvgElement {
   strokeWidth?: number | undefined;
   transform?: [number, number, number, number, number, number] | undefined;
   opacity?: number | undefined;
+  /** `evenodd` or `nonzero` (default). */
+  fillRule?: 'nonzero' | 'evenodd' | undefined;
+  /** SVG `stroke-linecap`: butt | round | square. */
+  strokeLinecap?: 'butt' | 'round' | 'square' | undefined;
+  /** SVG `stroke-linejoin`: miter | round | bevel. */
+  strokeLinejoin?: 'miter' | 'round' | 'bevel' | undefined;
+  /** SVG `stroke-miterlimit`. */
+  strokeMiterlimit?: number | undefined;
+  /** SVG `stroke-dasharray` as numeric array. */
+  strokeDasharray?: number[] | undefined;
+  /** SVG `stroke-dashoffset`. */
+  strokeDashoffset?: number | undefined;
+  /** Text content for `<text>` / `<tspan>` elements. */
+  textContent?: string | undefined;
+  /** Font family name. */
+  fontFamily?: string | undefined;
+  /** Font size in SVG user units. */
+  fontSize?: number | undefined;
+  /** Font weight (e.g. `bold`, `normal`, or numeric). */
+  fontWeight?: string | undefined;
+  /** Font style (e.g. `italic`, `normal`). */
+  fontStyle?: string | undefined;
+  /** Text anchor: start | middle | end. */
+  textAnchor?: 'start' | 'middle' | 'end' | undefined;
 }
 
 // ---------------------------------------------------------------------------
@@ -136,7 +160,7 @@ export function parseSvgColor(
     const r = parseInt(s.slice(1, 3), 16);
     const g = parseInt(s.slice(3, 5), 16);
     const b = parseInt(s.slice(5, 7), 16);
-    if (!isNaN(r) && !isNaN(g) && !isNaN(b)) {
+    if (!Number.isNaN(r) && !Number.isNaN(g) && !Number.isNaN(b)) {
       const result = { r, g, b };
       colorCache.set(colorStr, result);
       return result;
@@ -148,7 +172,7 @@ export function parseSvgColor(
     const r = parseInt(s[1]! + s[1]!, 16);
     const g = parseInt(s[2]! + s[2]!, 16);
     const b = parseInt(s[3]! + s[3]!, 16);
-    if (!isNaN(r) && !isNaN(g) && !isNaN(b)) {
+    if (!Number.isNaN(r) && !Number.isNaN(g) && !Number.isNaN(b)) {
       const result = { r, g, b };
       colorCache.set(colorStr, result);
       return result;
@@ -675,7 +699,7 @@ function numAttr(attrs: Record<string, string>, name: string, defaultVal: number
   const v = attrs[name];
   if (v === undefined) return defaultVal;
   const n = parseFloat(v);
-  return isNaN(n) ? defaultVal : n;
+  return Number.isNaN(n) ? defaultVal : n;
 }
 
 /** Generate drawing commands for a <rect> element. */
@@ -743,7 +767,7 @@ function parseNumberList(str: string): number[] {
     .split(/[\s,]+/)
     .filter(Boolean)
     .map(Number)
-    .filter((n) => !isNaN(n));
+    .filter((n) => !Number.isNaN(n));
 }
 
 /** Generate drawing commands for a <polyline> element. */
@@ -812,7 +836,7 @@ function resolveStyles(el: SvgElement): void {
   const sw = attrs['stroke-width'];
   if (sw !== undefined) {
     const v = parseFloat(sw);
-    if (!isNaN(v)) {
+    if (!Number.isNaN(v)) {
       el.strokeWidth = v;
     }
   }
@@ -821,7 +845,7 @@ function resolveStyles(el: SvgElement): void {
   const opStr = attrs['opacity'];
   if (opStr !== undefined) {
     const v = parseFloat(opStr);
-    if (!isNaN(v)) {
+    if (!Number.isNaN(v)) {
       el.opacity = v;
     }
   }
@@ -830,7 +854,7 @@ function resolveStyles(el: SvgElement): void {
   const fillOpStr = attrs['fill-opacity'];
   if (fillOpStr !== undefined && el.fill) {
     const v = parseFloat(fillOpStr);
-    if (!isNaN(v)) {
+    if (!Number.isNaN(v)) {
       el.fill = { ...el.fill, a: v };
     }
   }
@@ -839,9 +863,90 @@ function resolveStyles(el: SvgElement): void {
   const strokeOpStr = attrs['stroke-opacity'];
   if (strokeOpStr !== undefined && el.stroke) {
     const v = parseFloat(strokeOpStr);
-    if (!isNaN(v)) {
+    if (!Number.isNaN(v)) {
       el.stroke = { ...el.stroke, a: v };
     }
+  }
+
+  // Fill rule
+  const fillRuleStr = attrs['fill-rule'];
+  if (fillRuleStr === 'evenodd') {
+    el.fillRule = 'evenodd';
+  } else if (fillRuleStr === 'nonzero') {
+    el.fillRule = 'nonzero';
+  }
+
+  // Stroke linecap
+  const linecapStr = attrs['stroke-linecap'];
+  if (linecapStr === 'butt' || linecapStr === 'round' || linecapStr === 'square') {
+    el.strokeLinecap = linecapStr;
+  }
+
+  // Stroke linejoin
+  const linejoinStr = attrs['stroke-linejoin'];
+  if (linejoinStr === 'miter' || linejoinStr === 'round' || linejoinStr === 'bevel') {
+    el.strokeLinejoin = linejoinStr;
+  }
+
+  // Stroke miterlimit
+  const miterStr = attrs['stroke-miterlimit'];
+  if (miterStr !== undefined) {
+    const v = parseFloat(miterStr);
+    if (!Number.isNaN(v)) {
+      el.strokeMiterlimit = v;
+    }
+  }
+
+  // Stroke dasharray
+  const dashStr = attrs['stroke-dasharray'];
+  if (dashStr !== undefined && dashStr !== 'none') {
+    const dashes = dashStr.split(/[\s,]+/).filter(Boolean).map(Number).filter((x) => !Number.isNaN(x));
+    if (dashes.length > 0) {
+      el.strokeDasharray = dashes;
+    }
+  }
+
+  // Stroke dashoffset
+  const dashOffStr = attrs['stroke-dashoffset'];
+  if (dashOffStr !== undefined) {
+    const v = parseFloat(dashOffStr);
+    if (!Number.isNaN(v)) {
+      el.strokeDashoffset = v;
+    }
+  }
+
+  // Font family
+  const ffStr = attrs['font-family'];
+  if (ffStr !== undefined) {
+    // Strip quotes around font name
+    el.fontFamily = ffStr.replace(/^['"]|['"]$/g, '');
+  }
+
+  // Font size
+  const fsStr = attrs['font-size'];
+  if (fsStr !== undefined) {
+    const v = parseFloat(fsStr);
+    if (!Number.isNaN(v)) {
+      el.fontSize = v;
+    }
+  }
+
+  // Font weight
+  const fwStr = attrs['font-weight'];
+  if (fwStr !== undefined) {
+    el.fontWeight = fwStr;
+  }
+
+  // Font style
+  const fstStr = attrs['font-style'];
+  if (fstStr !== undefined) {
+    el.fontStyle = fstStr;
+  }
+
+  // Text anchor
+  const taStr = attrs['text-anchor'];
+  if (taStr === 'start' || taStr === 'middle' || taStr === 'end') {
+    el.textAnchor = taStr;
   }
 
   // Transform
@@ -917,7 +1022,9 @@ export function parseSvg(svgString: string): SvgElement {
         if (stack.length > 0) {
           const parent = stack.at(-1)!;
           if (parent.tag === 'text' || parent.tag === 'tspan') {
-            parent.attributes['__text'] = token.text ?? '';
+            const txt = token.text ?? '';
+            parent.attributes['__text'] = txt;
+            parent.textContent = txt;
           }
         }
         break;

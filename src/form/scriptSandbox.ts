@@ -96,7 +96,7 @@ export class FormScriptSandbox {
   private readonly timeout: number;
   private readonly allowedGlobals: string[];
   private fieldValues: Map<string, string>;
-  private builtins: Map<string, (...args: unknown[]) => unknown>;
+  private builtins: Map<string, unknown>;
   private destroyed = false;
 
   constructor(options?: SandboxOptions) {
@@ -204,9 +204,9 @@ export class FormScriptSandbox {
       }
     });
     /* eslint-disable @typescript-eslint/no-empty-function */
-    this.builtins.set('console', { println() {}, show() {}, clear() {} } as unknown as (...a: unknown[]) => unknown);
-    this.builtins.set('app', { alert() {}, beep() {}, response: () => '' } as unknown as (...a: unknown[]) => unknown);
-    this.builtins.set('event', { value: '', target: { name: '' }, targetName: '', rc: true } as unknown as (...a: unknown[]) => unknown);
+    this.builtins.set('console', { println() {}, show() {}, clear() {} });
+    this.builtins.set('app', { alert() {}, beep() {}, response: () => '' });
+    this.builtins.set('event', { value: '', target: { name: '' }, targetName: '', rc: true });
     /* eslint-enable @typescript-eslint/no-empty-function */
   }
 

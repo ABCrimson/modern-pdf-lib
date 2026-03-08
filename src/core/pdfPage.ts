@@ -704,6 +704,18 @@ export class PdfPage {
   private rotation = 0;
 
   /**
+   * Tab order for the page.
+   * - `'S'` — Structure order (follows the logical structure tree)
+   * - `'R'` — Row order
+   * - `'C'` — Column order
+   *
+   * Written to the /Tabs entry in the page dictionary at save time.
+   * PDF/UA requires `'S'` (structure order).
+   * @internal
+   */
+  private tabOrder: 'S' | 'R' | 'C' | undefined;
+
+  /**
    * Optional crop box `[llx, lly, urx, ury]`.
    * When set, written to the /CropBox entry in the page dictionary at save time.
    * @internal
@@ -1636,6 +1648,28 @@ export class PdfPage {
    */
   setRotation(angle: number): void {
     this.rotation = angle;
+  }
+
+  /**
+   * Get the current tab order for this page.
+   *
+   * @returns  `'S'` (structure), `'R'` (row), `'C'` (column), or
+   *           `undefined` if not set.
+   */
+  getTabOrder(): 'S' | 'R' | 'C' | undefined {
+    return this.tabOrder;
+  }
+
+  /**
+   * Set the tab order for this page.
+   *
+   * PDF/UA requires `'S'` (structure order) so that assistive technology
+   * follows the logical structure tree.
+   *
+   * @param order  `'S'` (structure), `'R'` (row), or `'C'` (column).
+   */
+  setTabOrder(order: 'S' | 'R' | 'C'): void {
+    this.tabOrder = order;
   }
 
   // -----------------------------------------------------------------------
@@ -2577,6 +2611,7 @@ export class PdfPage {
     artBox?: readonly [number, number, number, number] | undefined;
     trimBox?: readonly [number, number, number, number] | undefined;
     annotationRefs?: PdfRef[] | undefined;
+    tabOrder?: 'S' | 'R' | 'C' | undefined;
   } {
     // Determine content stream reference(s)
     let contentStreamRefs: PdfRef | readonly PdfRef[];
@@ -2620,6 +2655,7 @@ export class PdfPage {
       artBox: this.artBox,
       trimBox: this.trimBox,
       annotationRefs: annotRefs.length > 0 ? annotRefs : undefined,
+      tabOrder: this.tabOrder,
     };
   }
 }

@@ -8,7 +8,7 @@
 
 > **isWebPLossless**(`data`): `boolean`
 
-Defined in: [src/assets/image/webpDecode.ts:47](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/assets/image/webpDecode.ts#L47)
+Defined in: [src/assets/image/webpDecode.ts:47](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/image/webpDecode.ts#L47)
 
 Check if a WebP file contains a VP8L (lossless) bitstream.
 

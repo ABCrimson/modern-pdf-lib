@@ -81,6 +81,7 @@ import { getDocumentActionState } from '../form/documentScripts.js';
 import type { EmbeddedPdfPage, EmbedPageOptions } from './pdfEmbed.js';
 import { embedPageAsFormXObject } from './pdfEmbed.js';
 import { buildToUnicodeCmap, parseJpegDimensions } from './pdfDocumentEmbed.js';
+import { getPageLabelEntries, styleToPdf } from './pageLabels.js';
 
 // ---------------------------------------------------------------------------
 // Standard 14 fonts
@@ -2183,7 +2184,7 @@ export class PdfDocument {
       }
     }
     const structure = this.buildStructure();
-    return serializePdf(this.registry, structure, options);
+    return serializePdf(this.registry, structure, options, this.encryptionHandler);
   }
 
   /**
@@ -2442,6 +2443,27 @@ export class PdfDocument {
 
           catalogObj.set('/AA', aaDict);
         }
+      }
+
+      // Page labels — number tree in the catalog
+      const pageLabelRanges = getPageLabelEntries(this);
+      if (pageLabelRanges !== undefined && pageLabelRanges.length > 0) {
+        const numsArray = new PdfArray();
+        for (const range of pageLabelRanges) {
+          numsArray.push(PdfNumber.of(range.startPage));
+          const labelDict = new PdfDict();
+          labelDict.set('/S', PdfName.of(styleToPdf(range.style)));
+          if (range.prefix !== undefined) {
+            labelDict.set('/P', PdfString.literal(range.prefix));
+          }
+          if (range.start !== undefined) {
+            labelDict.set('/St', PdfNumber.of(range.start));
+          }
+          numsArray.push(labelDict);
+        }
+        const pageLabelsDict = new PdfDict();
+        pageLabelsDict.set('/Nums', numsArray);
+        catalogObj.set('/PageLabels', pageLabelsDict);
       }
     }
 

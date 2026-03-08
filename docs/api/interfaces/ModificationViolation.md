@@ -6,7 +6,7 @@
 
 # Interface: ModificationViolation
 
-Defined in: [src/signature/modificationDetector.ts:37](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/signature/modificationDetector.ts#L37)
+Defined in: [src/signature/modificationDetector.ts:37](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/signature/modificationDetector.ts#L37)
 
 A single modification violation detected in the document.
 
@@ -16,7 +16,7 @@ A single modification violation detected in the document.
 
 > **affectedSignatureIndex**: `number`
 
-Defined in: [src/signature/modificationDetector.ts:43](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/signature/modificationDetector.ts#L43)
+Defined in: [src/signature/modificationDetector.ts:43](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/signature/modificationDetector.ts#L43)
 
 Index of the signature whose coverage was violated.
 
@@ -26,7 +26,7 @@ Index of the signature whose coverage was violated.
 
 > **description**: `string`
 
-Defined in: [src/signature/modificationDetector.ts:41](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/signature/modificationDetector.ts#L41)
+Defined in: [src/signature/modificationDetector.ts:41](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/signature/modificationDetector.ts#L41)
 
 Human-readable description of the violation.
 
@@ -36,6 +36,6 @@ Human-readable description of the violation.
 
 > **type**: [`ModificationViolationType`](../type-aliases/ModificationViolationType.md)
 
-Defined in: [src/signature/modificationDetector.ts:39](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/signature/modificationDetector.ts#L39)
+Defined in: [src/signature/modificationDetector.ts:39](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/signature/modificationDetector.ts#L39)
 
 The type of modification detected.

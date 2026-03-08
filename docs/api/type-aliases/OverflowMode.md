@@ -8,6 +8,6 @@
 
 > **OverflowMode** = `"visible"` \| `"wrap"` \| `"truncate"` \| `"ellipsis"` \| `"shrink"`
 
-Defined in: [src/layout/overflow.ts:21](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/layout/overflow.ts#L21)
+Defined in: [src/layout/overflow.ts:21](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/layout/overflow.ts#L21)
 
 Controls how text that exceeds a cell's available width is handled.

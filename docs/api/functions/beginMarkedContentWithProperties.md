@@ -8,7 +8,7 @@
 
 > **beginMarkedContentWithProperties**(`tag`, `properties`): `string`
 
-Defined in: [src/accessibility/markedContent.ts:79](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/accessibility/markedContent.ts#L79)
+Defined in: [src/accessibility/markedContent.ts:79](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/accessibility/markedContent.ts#L79)
 
 Generate a `BDC` (begin marked-content with properties) operator.
 

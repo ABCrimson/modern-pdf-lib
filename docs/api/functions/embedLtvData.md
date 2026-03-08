@@ -8,7 +8,7 @@
 
 > **embedLtvData**(`pdf`, `options?`): `Promise`\<`Uint8Array`\<`ArrayBufferLike`\>\>
 
-Defined in: [src/signature/ltvEmbed.ts:200](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/signature/ltvEmbed.ts#L200)
+Defined in: [src/signature/ltvEmbed.ts:200](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/signature/ltvEmbed.ts#L200)
 
 Embed LTV (Long-Term Validation) data into a PDF.
 

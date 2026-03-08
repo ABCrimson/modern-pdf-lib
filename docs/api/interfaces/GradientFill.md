@@ -6,7 +6,7 @@
 
 # Interface: GradientFill
 
-Defined in: [src/core/patterns.ts:134](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/core/patterns.ts#L134)
+Defined in: [src/core/patterns.ts:134](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/patterns.ts#L134)
 
 Descriptor for a gradient fill (linear or radial).
 This is a lightweight value object — actual PDF objects are created
@@ -18,7 +18,7 @@ when [buildGradientObjects](../functions/buildGradientObjects.md) is called.
 
 > `readonly` **coords**: readonly `number`[]
 
-Defined in: [src/core/patterns.ts:137](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/core/patterns.ts#L137)
+Defined in: [src/core/patterns.ts:137](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/patterns.ts#L137)
 
 ***
 
@@ -26,7 +26,7 @@ Defined in: [src/core/patterns.ts:137](https://github.com/ABCrimson/modern-pdf-l
 
 > `readonly` **extend**: `boolean`
 
-Defined in: [src/core/patterns.ts:139](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/core/patterns.ts#L139)
+Defined in: [src/core/patterns.ts:139](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/patterns.ts#L139)
 
 ***
 
@@ -34,7 +34,7 @@ Defined in: [src/core/patterns.ts:139](https://github.com/ABCrimson/modern-pdf-l
 
 > `readonly` **kind**: `"gradient"`
 
-Defined in: [src/core/patterns.ts:135](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/core/patterns.ts#L135)
+Defined in: [src/core/patterns.ts:135](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/patterns.ts#L135)
 
 ***
 
@@ -42,7 +42,7 @@ Defined in: [src/core/patterns.ts:135](https://github.com/ABCrimson/modern-pdf-l
 
 > `readonly` **normalizedStops**: readonly [`NormalizedStop`](NormalizedStop.md)[]
 
-Defined in: [src/core/patterns.ts:138](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/core/patterns.ts#L138)
+Defined in: [src/core/patterns.ts:138](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/patterns.ts#L138)
 
 ***
 
@@ -50,4 +50,4 @@ Defined in: [src/core/patterns.ts:138](https://github.com/ABCrimson/modern-pdf-l
 
 > `readonly` **shadingType**: `2` \| `3`
 
-Defined in: [src/core/patterns.ts:136](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/core/patterns.ts#L136)
+Defined in: [src/core/patterns.ts:136](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/patterns.ts#L136)

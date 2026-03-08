@@ -361,7 +361,7 @@ type EncodingMode = 'numeric' | 'alphanumeric' | 'byte';
 
 function detectMode(data: string): EncodingMode {
   if (/^\d*$/.test(data)) return 'numeric';
-  if (data.split('').every((ch) => ALPHANUMERIC_CHARS.includes(ch))) return 'alphanumeric';
+  if ([...data].every((ch) => ALPHANUMERIC_CHARS.includes(ch))) return 'alphanumeric';
   return 'byte';
 }
 

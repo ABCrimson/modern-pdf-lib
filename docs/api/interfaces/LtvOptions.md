@@ -6,7 +6,7 @@
 
 # Interface: LtvOptions
 
-Defined in: [src/signature/ltvEmbed.ts:37](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/signature/ltvEmbed.ts#L37)
+Defined in: [src/signature/ltvEmbed.ts:37](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/signature/ltvEmbed.ts#L37)
 
 Options for LTV data embedding.
 
@@ -16,7 +16,7 @@ Options for LTV data embedding.
 
 > `optional` **crls**: `Uint8Array`\<`ArrayBufferLike`\>[]
 
-Defined in: [src/signature/ltvEmbed.ts:47](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/signature/ltvEmbed.ts#L47)
+Defined in: [src/signature/ltvEmbed.ts:47](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/signature/ltvEmbed.ts#L47)
 
 Pre-loaded CRLs (DER-encoded).
 
@@ -26,7 +26,7 @@ Pre-loaded CRLs (DER-encoded).
 
 > `optional` **extraCertificates**: `Uint8Array`\<`ArrayBufferLike`\>[]
 
-Defined in: [src/signature/ltvEmbed.ts:49](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/signature/ltvEmbed.ts#L49)
+Defined in: [src/signature/ltvEmbed.ts:49](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/signature/ltvEmbed.ts#L49)
 
 Additional certificates (DER-encoded) for the chain.
 
@@ -36,7 +36,7 @@ Additional certificates (DER-encoded) for the chain.
 
 > `optional` **includeCerts**: `boolean`
 
-Defined in: [src/signature/ltvEmbed.ts:43](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/signature/ltvEmbed.ts#L43)
+Defined in: [src/signature/ltvEmbed.ts:43](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/signature/ltvEmbed.ts#L43)
 
 Include certificate chains in the DSS. Default: true.
 
@@ -46,7 +46,7 @@ Include certificate chains in the DSS. Default: true.
 
 > `optional` **includeCrl**: `boolean`
 
-Defined in: [src/signature/ltvEmbed.ts:41](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/signature/ltvEmbed.ts#L41)
+Defined in: [src/signature/ltvEmbed.ts:41](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/signature/ltvEmbed.ts#L41)
 
 Include CRL data in the DSS. Default: true.
 
@@ -56,7 +56,7 @@ Include CRL data in the DSS. Default: true.
 
 > `optional` **includeOcsp**: `boolean`
 
-Defined in: [src/signature/ltvEmbed.ts:39](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/signature/ltvEmbed.ts#L39)
+Defined in: [src/signature/ltvEmbed.ts:39](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/signature/ltvEmbed.ts#L39)
 
 Include OCSP responses in the DSS. Default: true.
 
@@ -66,6 +66,6 @@ Include OCSP responses in the DSS. Default: true.
 
 > `optional` **ocspResponses**: `Uint8Array`\<`ArrayBufferLike`\>[]
 
-Defined in: [src/signature/ltvEmbed.ts:45](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/signature/ltvEmbed.ts#L45)
+Defined in: [src/signature/ltvEmbed.ts:45](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/signature/ltvEmbed.ts#L45)
 
 Pre-loaded OCSP responses (DER-encoded).

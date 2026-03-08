@@ -6,7 +6,7 @@
 
 # Interface: TextItem
 
-Defined in: [src/parser/textExtractor.ts:31](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/parser/textExtractor.ts#L31)
+Defined in: [src/parser/textExtractor.ts:31](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/parser/textExtractor.ts#L31)
 
 A single extracted text item with position and font information.
 
@@ -16,7 +16,7 @@ A single extracted text item with position and font information.
 
 > **fontName**: `string`
 
-Defined in: [src/parser/textExtractor.ts:45](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/parser/textExtractor.ts#L45)
+Defined in: [src/parser/textExtractor.ts:45](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/parser/textExtractor.ts#L45)
 
 Font resource name (e.g. `"/F1"`).
 
@@ -26,7 +26,7 @@ Font resource name (e.g. `"/F1"`).
 
 > **fontSize**: `number`
 
-Defined in: [src/parser/textExtractor.ts:43](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/parser/textExtractor.ts#L43)
+Defined in: [src/parser/textExtractor.ts:43](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/parser/textExtractor.ts#L43)
 
 Font size in user-space units.
 
@@ -36,7 +36,7 @@ Font size in user-space units.
 
 > **height**: `number`
 
-Defined in: [src/parser/textExtractor.ts:41](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/parser/textExtractor.ts#L41)
+Defined in: [src/parser/textExtractor.ts:41](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/parser/textExtractor.ts#L41)
 
 Approximate height of the text in user-space units (based on font size).
 
@@ -46,7 +46,7 @@ Approximate height of the text in user-space units (based on font size).
 
 > **text**: `string`
 
-Defined in: [src/parser/textExtractor.ts:33](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/parser/textExtractor.ts#L33)
+Defined in: [src/parser/textExtractor.ts:33](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/parser/textExtractor.ts#L33)
 
 The extracted text string.
 
@@ -56,7 +56,7 @@ The extracted text string.
 
 > **width**: `number`
 
-Defined in: [src/parser/textExtractor.ts:39](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/parser/textExtractor.ts#L39)
+Defined in: [src/parser/textExtractor.ts:39](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/parser/textExtractor.ts#L39)
 
 Approximate width of the text in user-space units.
 
@@ -66,7 +66,7 @@ Approximate width of the text in user-space units.
 
 > **x**: `number`
 
-Defined in: [src/parser/textExtractor.ts:35](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/parser/textExtractor.ts#L35)
+Defined in: [src/parser/textExtractor.ts:35](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/parser/textExtractor.ts#L35)
 
 Horizontal position in user-space units.
 
@@ -76,6 +76,6 @@ Horizontal position in user-space units.
 
 > **y**: `number`
 
-Defined in: [src/parser/textExtractor.ts:37](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/parser/textExtractor.ts#L37)
+Defined in: [src/parser/textExtractor.ts:37](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/parser/textExtractor.ts#L37)
 
 Vertical position in user-space units.

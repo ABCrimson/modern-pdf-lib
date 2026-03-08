@@ -243,7 +243,7 @@ export function parseXmpMetadata(xmpString: string): Partial<DocumentMetadata> {
   const createDate = extractSimpleValue(xmpString, 'xmp:CreateDate');
   if (createDate !== undefined) {
     const parsed = new Date(createDate);
-    if (!isNaN(parsed.getTime())) {
+    if (!Number.isNaN(parsed.getTime())) {
       result.creationDate = parsed;
     }
   }
@@ -252,7 +252,7 @@ export function parseXmpMetadata(xmpString: string): Partial<DocumentMetadata> {
   const modifyDate = extractSimpleValue(xmpString, 'xmp:ModifyDate');
   if (modifyDate !== undefined) {
     const parsed = new Date(modifyDate);
-    if (!isNaN(parsed.getTime())) {
+    if (!Number.isNaN(parsed.getTime())) {
       result.modDate = parsed;
     }
   }

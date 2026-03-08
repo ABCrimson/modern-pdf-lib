@@ -6,7 +6,7 @@
 
 # Interface: SvgRenderOptions
 
-Defined in: [src/assets/svg/svgToPdf.ts:20](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/assets/svg/svgToPdf.ts#L20)
+Defined in: [src/assets/svg/svgToPdf.ts:32](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/svg/svgToPdf.ts#L32)
 
 Options for rendering an SVG onto a PDF page.
 
@@ -16,7 +16,7 @@ Options for rendering an SVG onto a PDF page.
 
 > `optional` **height**: `number`
 
-Defined in: [src/assets/svg/svgToPdf.ts:24](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/assets/svg/svgToPdf.ts#L24)
+Defined in: [src/assets/svg/svgToPdf.ts:36](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/svg/svgToPdf.ts#L36)
 
 Rendered height in PDF points.
 
@@ -26,7 +26,7 @@ Rendered height in PDF points.
 
 > `optional` **preserveAspectRatio**: `boolean`
 
-Defined in: [src/assets/svg/svgToPdf.ts:30](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/assets/svg/svgToPdf.ts#L30)
+Defined in: [src/assets/svg/svgToPdf.ts:42](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/svg/svgToPdf.ts#L42)
 
 Whether to preserve the aspect ratio of the SVG.
 
@@ -36,7 +36,7 @@ Whether to preserve the aspect ratio of the SVG.
 
 > `optional` **width**: `number`
 
-Defined in: [src/assets/svg/svgToPdf.ts:22](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/assets/svg/svgToPdf.ts#L22)
+Defined in: [src/assets/svg/svgToPdf.ts:34](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/svg/svgToPdf.ts#L34)
 
 Rendered width in PDF points.
 
@@ -46,7 +46,7 @@ Rendered width in PDF points.
 
 > `optional` **x**: `number`
 
-Defined in: [src/assets/svg/svgToPdf.ts:26](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/assets/svg/svgToPdf.ts#L26)
+Defined in: [src/assets/svg/svgToPdf.ts:38](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/svg/svgToPdf.ts#L38)
 
 X offset in PDF points.
 
@@ -56,6 +56,6 @@ X offset in PDF points.
 
 > `optional` **y**: `number`
 
-Defined in: [src/assets/svg/svgToPdf.ts:28](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/assets/svg/svgToPdf.ts#L28)
+Defined in: [src/assets/svg/svgToPdf.ts:40](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/svg/svgToPdf.ts#L40)
 
 Y offset in PDF points (bottom of the SVG).

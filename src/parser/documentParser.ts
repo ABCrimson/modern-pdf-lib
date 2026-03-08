@@ -987,7 +987,7 @@ export class PdfDocumentParser {
     for (let i = 0; i + 1 < headerTokens.length && objEntries.length < n; i += 2) {
       const objNum = parseInt(headerTokens[i]!, 10);
       const offset = parseInt(headerTokens[i + 1]!, 10);
-      if (!isNaN(objNum) && !isNaN(offset)) {
+      if (!Number.isNaN(objNum) && !Number.isNaN(offset)) {
         objEntries.push({ objNum, offset });
       }
     }
@@ -1444,7 +1444,7 @@ export class PdfDocumentParser {
         const name = key.startsWith('/') ? key.slice(1) : key;
         if (name.startsWith(prefix)) {
           const num = parseInt(name.slice(prefix.length), 10);
-          return isNaN(num) ? 0 : num;
+          return Number.isNaN(num) ? 0 : num;
         }
         return 0;
       })

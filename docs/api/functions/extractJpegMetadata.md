@@ -8,7 +8,7 @@
 
 > **extractJpegMetadata**(`jpegBytes`): [`JpegMetadata`](../interfaces/JpegMetadata.md)
 
-Defined in: [src/assets/image/imageMetadata.ts:330](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/assets/image/imageMetadata.ts#L330)
+Defined in: [src/assets/image/imageMetadata.ts:330](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/image/imageMetadata.ts#L330)
 
 Extract metadata from JPEG APP markers.
 

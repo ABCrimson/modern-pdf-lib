@@ -8,7 +8,7 @@
 
 > **getImageFormatName**(`format`): `string`
 
-Defined in: [src/assets/image/formatDetect.ts:105](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/assets/image/formatDetect.ts#L105)
+Defined in: [src/assets/image/formatDetect.ts:105](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/image/formatDetect.ts#L105)
 
 Get a human-readable name for an image format identifier.
 

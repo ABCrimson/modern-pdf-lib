@@ -157,7 +157,7 @@ function determineRecommendation(
     return 'grayscale';
   }
   // If DPI exceeds the max, recommend downscaling
-  if (effectiveDpi !== undefined && isFinite(effectiveDpi) && effectiveDpi > maxDpi) {
+  if (effectiveDpi !== undefined && Number.isFinite(effectiveDpi) && effectiveDpi > maxDpi) {
     return 'downscale';
   }
   // If savings exceed 10%, recommend recompression

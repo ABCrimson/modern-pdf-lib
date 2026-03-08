@@ -4,8 +4,10 @@
  * Covers:
  * - SVG path `d` attribute parsing (all commands)
  * - Shape elements (rect, circle, ellipse, line, polyline, polygon)
- * - Colour parsing (hex, rgb, named)
+ * - Colour parsing (hex, rgb, rgba, named)
  * - Transform parsing (matrix, translate, scale, rotate, skew)
+ * - Fill-rule, stroke-linecap, stroke-linejoin, stroke-dasharray
+ * - Font/text attribute parsing
  * - Full SVG document parsing
  */
 
@@ -224,6 +226,35 @@ describe('parseSvgPath', () => {
     expect(cmds[1]!.type).toBe('lineTo');
     expect(cmds[2]!.type).toBe('lineTo');
   });
+
+  it('should parse relative arc (a)', () => {
+    const cmds = parseSvgPath('M 10 10 a 20 20 0 0 1 40 0');
+    expect(cmds[1]!.type).toBe('arc');
+    // Relative: target = (10+40, 10+0) = (50, 10)
+    expect(cmds[1]!.params[5]).toBe(50);
+    expect(cmds[1]!.params[6]).toBe(10);
+  });
+
+  it('should parse multiple repeated commands', () => {
+    const cmds = parseSvgPath('M 0 0 L 10 10 20 20 30 30');
+    expect(cmds).toHaveLength(4);
+    expect(cmds[1]!.type).toBe('lineTo');
+    expect(cmds[2]!.type).toBe('lineTo');
+    expect(cmds[3]!.type).toBe('lineTo');
+    expect(cmds[3]!.params).toEqual([30, 30]);
+  });
+
+  it('should handle negative numbers in path data', () => {
+    const cmds = parseSvgPath('M -10 -20 L -30 -40');
+    expect(cmds[0]!.params).toEqual([-10, -20]);
+    expect(cmds[1]!.params).toEqual([-30, -40]);
+  });
+
+  it('should handle scientific notation in path data', () => {
+    const cmds = parseSvgPath('M 1e2 2e1 L 3e0 4');
+    expect(cmds[0]!.params).toEqual([100, 20]);
+    expect(cmds[1]!.params).toEqual([3, 4]);
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -330,5 +361,137 @@ describe('parseSvg', () => {
     const el = parseSvg(svg);
     expect(el.tag).toBe('svg');
     expect(el.children).toHaveLength(1);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// parseSvg — fill-rule, stroke properties, text/font attributes
+// ---------------------------------------------------------------------------
+
+describe('parseSvg — extended attributes', () => {
+  it('should parse fill-rule="evenodd"', () => {
+    const svg = '<svg><path d="M 0 0 L 10 0 L 10 10 Z" fill="red" fill-rule="evenodd"/></svg>';
+    const el = parseSvg(svg);
+    expect(el.children[0]!.fillRule).toBe('evenodd');
+  });
+
+  it('should parse fill-rule="nonzero"', () => {
+    const svg = '<svg><path d="M 0 0 L 10 0 L 10 10 Z" fill="red" fill-rule="nonzero"/></svg>';
+    const el = parseSvg(svg);
+    expect(el.children[0]!.fillRule).toBe('nonzero');
+  });
+
+  it('should default fillRule to undefined when not specified', () => {
+    const svg = '<svg><rect x="0" y="0" width="10" height="10"/></svg>';
+    const el = parseSvg(svg);
+    expect(el.children[0]!.fillRule).toBeUndefined();
+  });
+
+  it('should parse stroke-linecap', () => {
+    const svg = '<svg><line x1="0" y1="0" x2="10" y2="0" stroke="black" stroke-linecap="round"/></svg>';
+    const el = parseSvg(svg);
+    expect(el.children[0]!.strokeLinecap).toBe('round');
+  });
+
+  it('should parse stroke-linecap="square"', () => {
+    const svg = '<svg><line x1="0" y1="0" x2="10" y2="0" stroke="black" stroke-linecap="square"/></svg>';
+    const el = parseSvg(svg);
+    expect(el.children[0]!.strokeLinecap).toBe('square');
+  });
+
+  it('should parse stroke-linejoin', () => {
+    const svg = '<svg><polyline points="0,0 5,10 10,0" stroke="black" stroke-linejoin="bevel"/></svg>';
+    const el = parseSvg(svg);
+    expect(el.children[0]!.strokeLinejoin).toBe('bevel');
+  });
+
+  it('should parse stroke-linejoin="round"', () => {
+    const svg = '<svg><polyline points="0,0 5,10 10,0" stroke="black" stroke-linejoin="round"/></svg>';
+    const el = parseSvg(svg);
+    expect(el.children[0]!.strokeLinejoin).toBe('round');
+  });
+
+  it('should parse stroke-miterlimit', () => {
+    const svg = '<svg><polyline points="0,0 5,10 10,0" stroke="black" stroke-miterlimit="8"/></svg>';
+    const el = parseSvg(svg);
+    expect(el.children[0]!.strokeMiterlimit).toBe(8);
+  });
+
+  it('should parse stroke-dasharray', () => {
+    const svg = '<svg><line x1="0" y1="0" x2="100" y2="0" stroke="black" stroke-dasharray="5 3 2"/></svg>';
+    const el = parseSvg(svg);
+    expect(el.children[0]!.strokeDasharray).toEqual([5, 3, 2]);
+  });
+
+  it('should parse stroke-dashoffset', () => {
+    const svg = '<svg><line x1="0" y1="0" x2="100" y2="0" stroke="black" stroke-dasharray="5 3" stroke-dashoffset="2"/></svg>';
+    const el = parseSvg(svg);
+    expect(el.children[0]!.strokeDashoffset).toBe(2);
+  });
+
+  it('should ignore stroke-dasharray="none"', () => {
+    const svg = '<svg><line x1="0" y1="0" x2="100" y2="0" stroke="black" stroke-dasharray="none"/></svg>';
+    const el = parseSvg(svg);
+    expect(el.children[0]!.strokeDasharray).toBeUndefined();
+  });
+
+  it('should parse font-family', () => {
+    const svg = '<svg><text x="0" y="10" font-family="Arial">Test</text></svg>';
+    const el = parseSvg(svg);
+    expect(el.children[0]!.fontFamily).toBe('Arial');
+  });
+
+  it('should strip quotes from font-family', () => {
+    const svg = `<svg><text x="0" y="10" font-family="'Courier New'">Test</text></svg>`;
+    const el = parseSvg(svg);
+    expect(el.children[0]!.fontFamily).toBe('Courier New');
+  });
+
+  it('should parse font-size', () => {
+    const svg = '<svg><text x="0" y="10" font-size="24">Test</text></svg>';
+    const el = parseSvg(svg);
+    expect(el.children[0]!.fontSize).toBe(24);
+  });
+
+  it('should parse font-weight', () => {
+    const svg = '<svg><text x="0" y="10" font-weight="bold">Bold</text></svg>';
+    const el = parseSvg(svg);
+    expect(el.children[0]!.fontWeight).toBe('bold');
+  });
+
+  it('should parse font-style', () => {
+    const svg = '<svg><text x="0" y="10" font-style="italic">Italic</text></svg>';
+    const el = parseSvg(svg);
+    expect(el.children[0]!.fontStyle).toBe('italic');
+  });
+
+  it('should parse text-anchor', () => {
+    const svg = '<svg><text x="50" y="10" text-anchor="middle">Centered</text></svg>';
+    const el = parseSvg(svg);
+    expect(el.children[0]!.textAnchor).toBe('middle');
+  });
+
+  it('should store text content', () => {
+    const svg = '<svg><text x="0" y="10">Hello World</text></svg>';
+    const el = parseSvg(svg);
+    expect(el.children[0]!.textContent).toBe('Hello World');
+  });
+
+  it('should parse fill-rule from inline style', () => {
+    const svg = '<svg><path d="M 0 0 L 10 0 L 10 10 Z" style="fill: red; fill-rule: evenodd"/></svg>';
+    const el = parseSvg(svg);
+    expect(el.children[0]!.fillRule).toBe('evenodd');
+  });
+
+  it('should parse stroke-dasharray from inline style', () => {
+    const svg = '<svg><line x1="0" y1="0" x2="100" y2="0" style="stroke: black; stroke-dasharray: 10 5"/></svg>';
+    const el = parseSvg(svg);
+    expect(el.children[0]!.strokeDasharray).toEqual([10, 5]);
+  });
+
+  it('should parse stroke-linecap from inline style', () => {
+    const svg = '<svg><line x1="0" y1="0" x2="100" y2="0" style="stroke: black; stroke-linecap: square"/></svg>';
+    const el = parseSvg(svg);
+    expect(el.children[0]!.strokeLinecap).toBe('square');
   });
 });

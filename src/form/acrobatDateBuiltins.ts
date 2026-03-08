@@ -302,13 +302,13 @@ export function parseAcrobatDate(text: string, format: string): Date | null {
       }
       case 'ddd': {
         // Abbreviated weekday — skip but validate
-        const r = readName(text, pos, DAY_NAMES_SHORT as unknown as string[]);
+        const r = readName(text, pos, DAY_NAMES_SHORT);
         if (r === null) return null;
         pos = r.end;
         break;
       }
       case 'dddd': {
-        const r = readName(text, pos, DAY_NAMES_FULL as unknown as string[]);
+        const r = readName(text, pos, DAY_NAMES_FULL);
         if (r === null) return null;
         pos = r.end;
         break;
@@ -329,14 +329,14 @@ export function parseAcrobatDate(text: string, format: string): Date | null {
         break;
       }
       case 'mmm': {
-        const r = readName(text, pos, MONTH_NAMES_SHORT as unknown as string[]);
+        const r = readName(text, pos, MONTH_NAMES_SHORT);
         if (r === null) return null;
         month = r.index;
         pos = r.end;
         break;
       }
       case 'mmmm': {
-        const r = readName(text, pos, MONTH_NAMES_FULL as unknown as string[]);
+        const r = readName(text, pos, MONTH_NAMES_FULL);
         if (r === null) return null;
         month = r.index;
         pos = r.end;
@@ -474,7 +474,7 @@ function readDigits(
 function readName(
   text: string,
   pos: number,
-  names: string[],
+  names: readonly string[],
 ): { index: number; end: number } | null {
   const remaining = text.slice(pos);
 

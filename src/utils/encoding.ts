@@ -212,7 +212,7 @@ export function encodePdfName(name: string): string {
     if (isRegularNameByte(b)) {
       result += String.fromCharCode(b);
     } else {
-      result += '#' + new Uint8Array([b]).toHex().toUpperCase();
+      result += '#' + b.toString(16).padStart(2, '0').toUpperCase();
     }
   }
 

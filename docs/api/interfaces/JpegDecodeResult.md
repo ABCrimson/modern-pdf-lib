@@ -6,7 +6,7 @@
 
 # Interface: JpegDecodeResult
 
-Defined in: [src/wasm/jpeg/bridge.ts:64](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/wasm/jpeg/bridge.ts#L64)
+Defined in: [src/wasm/jpeg/bridge.ts:64](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/wasm/jpeg/bridge.ts#L64)
 
 Result of decoding a JPEG image.
 
@@ -16,7 +16,7 @@ Result of decoding a JPEG image.
 
 > `readonly` **channels**: `number`
 
-Defined in: [src/wasm/jpeg/bridge.ts:72](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/wasm/jpeg/bridge.ts#L72)
+Defined in: [src/wasm/jpeg/bridge.ts:72](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/wasm/jpeg/bridge.ts#L72)
 
 Number of channels (1=grayscale, 3=RGB).
 
@@ -26,7 +26,7 @@ Number of channels (1=grayscale, 3=RGB).
 
 > `readonly` **height**: `number`
 
-Defined in: [src/wasm/jpeg/bridge.ts:70](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/wasm/jpeg/bridge.ts#L70)
+Defined in: [src/wasm/jpeg/bridge.ts:70](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/wasm/jpeg/bridge.ts#L70)
 
 Image height in pixels.
 
@@ -36,7 +36,7 @@ Image height in pixels.
 
 > `readonly` **pixels**: `Uint8Array`
 
-Defined in: [src/wasm/jpeg/bridge.ts:66](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/wasm/jpeg/bridge.ts#L66)
+Defined in: [src/wasm/jpeg/bridge.ts:66](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/wasm/jpeg/bridge.ts#L66)
 
 Raw pixel data (row-major, channel-interleaved).
 
@@ -46,6 +46,6 @@ Raw pixel data (row-major, channel-interleaved).
 
 > `readonly` **width**: `number`
 
-Defined in: [src/wasm/jpeg/bridge.ts:68](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/wasm/jpeg/bridge.ts#L68)
+Defined in: [src/wasm/jpeg/bridge.ts:68](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/wasm/jpeg/bridge.ts#L68)
 
 Image width in pixels.

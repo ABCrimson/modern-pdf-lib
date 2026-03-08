@@ -6,7 +6,7 @@
 
 # Interface: DataMatrixOptions
 
-Defined in: [src/barcode/dataMatrix.ts:33](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/barcode/dataMatrix.ts#L33)
+Defined in: [src/barcode/dataMatrix.ts:33](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/barcode/dataMatrix.ts#L33)
 
 Options for rendering a Data Matrix to PDF operators.
 
@@ -16,7 +16,7 @@ Options for rendering a Data Matrix to PDF operators.
 
 > `readonly` `optional` **backgroundColor**: [`Color`](../type-aliases/Color.md)
 
-Defined in: [src/barcode/dataMatrix.ts:39](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/barcode/dataMatrix.ts#L39)
+Defined in: [src/barcode/dataMatrix.ts:39](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/barcode/dataMatrix.ts#L39)
 
 Background colour. Default: white.
 
@@ -26,7 +26,7 @@ Background colour. Default: white.
 
 > `readonly` `optional` **color**: [`Color`](../type-aliases/Color.md)
 
-Defined in: [src/barcode/dataMatrix.ts:37](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/barcode/dataMatrix.ts#L37)
+Defined in: [src/barcode/dataMatrix.ts:37](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/barcode/dataMatrix.ts#L37)
 
 Foreground (dark module) colour. Default: black.
 
@@ -36,7 +36,7 @@ Foreground (dark module) colour. Default: black.
 
 > `readonly` `optional` **moduleSize**: `number`
 
-Defined in: [src/barcode/dataMatrix.ts:35](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/barcode/dataMatrix.ts#L35)
+Defined in: [src/barcode/dataMatrix.ts:35](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/barcode/dataMatrix.ts#L35)
 
 Size of each module in PDF points. Default: `2`.
 
@@ -46,6 +46,6 @@ Size of each module in PDF points. Default: `2`.
 
 > `readonly` `optional` **quietZone**: `number`
 
-Defined in: [src/barcode/dataMatrix.ts:41](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/barcode/dataMatrix.ts#L41)
+Defined in: [src/barcode/dataMatrix.ts:41](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/barcode/dataMatrix.ts#L41)
 
 Number of quiet-zone modules around the code. Default: `1`.

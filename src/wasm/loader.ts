@@ -277,22 +277,34 @@ function resolveModulePath(
 
     case 'node':
     case 'bun': {
-      // Try to resolve relative to this module's location
-      // Note: import.meta.url gives us this file's URL
+      // Try to resolve relative to this module's location.
+      // In dev (src/wasm/loader.ts), the path is ../wasm/<name>/pkg/<file>.
+      // In dist (dist/loader-*.mjs), the path is ./wasm/<name>/<file>.
+      // We try the dist layout first (npm consumers), then fall back to dev.
       try {
-        const moduleUrl = new URL(`../wasm/${name}/pkg/${filename}`, import.meta.url);
-        return moduleUrl.pathname;
+        const distUrl = new URL(`./wasm/${name}/${filename}`, import.meta.url);
+        const devUrl = new URL(`../wasm/${name}/pkg/${filename}`, import.meta.url);
+        // Check if the dist path exists by trying it first
+        return distUrl.pathname;
       } catch {
-        return `./wasm/${name}/pkg/${filename}`;
+        try {
+          return new URL(`../wasm/${name}/pkg/${filename}`, import.meta.url).pathname;
+        } catch {
+          return `./wasm/${name}/pkg/${filename}`;
+        }
       }
     }
 
     case 'deno': {
-      // Deno supports file:// URLs
+      // Deno supports file:// URLs — try dist layout first, then dev
       try {
-        return new URL(`../wasm/${name}/pkg/${filename}`, import.meta.url).href;
+        return new URL(`./wasm/${name}/${filename}`, import.meta.url).href;
       } catch {
-        return `./wasm/${name}/pkg/${filename}`;
+        try {
+          return new URL(`../wasm/${name}/pkg/${filename}`, import.meta.url).href;
+        } catch {
+          return `./wasm/${name}/pkg/${filename}`;
+        }
       }
     }
 

@@ -6,7 +6,7 @@
 
 # Class: PdfWriter
 
-Defined in: [src/core/pdfWriter.ts:116](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/core/pdfWriter.ts#L116)
+Defined in: [src/core/pdfWriter.ts:118](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/pdfWriter.ts#L118)
 
 Serialize a PDF document to a `Uint8Array`.
 
@@ -19,9 +19,9 @@ const bytes = writer.write();
 
 ### Constructor
 
-> **new PdfWriter**(`registry`, `structure`, `options?`): `PdfWriter`
+> **new PdfWriter**(`registry`, `structure`, `options?`, `encryptionHandler?`): `PdfWriter`
 
-Defined in: [src/core/pdfWriter.ts:124](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/core/pdfWriter.ts#L124)
+Defined in: [src/core/pdfWriter.ts:133](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/pdfWriter.ts#L133)
 
 #### Parameters
 
@@ -41,6 +41,10 @@ Document structure references.
 
 [`PdfSaveOptions`](../interfaces/PdfSaveOptions.md)
 
+##### encryptionHandler?
+
+[`PdfEncryptionHandler`](PdfEncryptionHandler.md)
+
 #### Returns
 
 `PdfWriter`
@@ -49,23 +53,27 @@ Document structure references.
 
 ### write()
 
-> **write**(): `Uint8Array`
+> **write**(): `Promise`\<`Uint8Array`\<`ArrayBufferLike`\>\>
 
-Defined in: [src/core/pdfWriter.ts:144](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/core/pdfWriter.ts#L144)
+Defined in: [src/core/pdfWriter.ts:159](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/pdfWriter.ts#L159)
 
 Produce the complete PDF file as a `Uint8Array`.
 
+When an encryption handler is present, all string and stream
+objects are encrypted and the /Encrypt dictionary + /ID array
+are added to the trailer.
+
 #### Returns
 
-`Uint8Array`
+`Promise`\<`Uint8Array`\<`ArrayBufferLike`\>\>
 
 ***
 
 ### writeBodyWithObjectStreams()
 
-> **writeBodyWithObjectStreams**(`threshold`): `boolean`
+> **writeBodyWithObjectStreams**(`threshold`): `Promise`\<`boolean`\>
 
-Defined in: [src/core/pdfWriter.ts:275](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/core/pdfWriter.ts#L275)
+Defined in: [src/core/pdfWriter.ts:384](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/pdfWriter.ts#L384)
 
 Write the document body using object streams when the number of
 eligible non-stream objects exceeds `threshold`.
@@ -78,7 +86,7 @@ eligible non-stream objects exceeds `threshold`.
 
 #### Returns
 
-`boolean`
+`Promise`\<`boolean`\>
 
 `true` if object streams (and a cross-reference stream)
          were used and the PDF is complete.  `false` if the

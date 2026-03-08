@@ -8,7 +8,7 @@
 
 > **renderStyledBarcode**(`matrix`, `x`, `y`, `text`, `options?`): `string`
 
-Defined in: [src/barcode/style.ts:128](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/barcode/style.ts#L128)
+Defined in: [src/barcode/style.ts:128](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/barcode/style.ts#L128)
 
 Render a barcode matrix with full styling options.
 

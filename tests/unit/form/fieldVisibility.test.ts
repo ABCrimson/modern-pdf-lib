@@ -224,7 +224,7 @@ describe('addVisibilityAction', () => {
     addVisibilityAction(field, 'status', { operator: 'contains', value: 'yes' });
 
     const js = ((field.getWidgetDict().get('/AA') as PdfDict).get('/V') as PdfDict).get('/JS') as PdfString;
-    expect(js.value).toContain('.indexOf("yes") >= 0');
+    expect(js.value).toContain('.includes("yes")');
   });
 
   it('generates correct script for "empty" condition', () => {

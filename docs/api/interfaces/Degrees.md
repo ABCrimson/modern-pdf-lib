@@ -6,7 +6,7 @@
 
 # Interface: Degrees
 
-Defined in: [src/core/operators/state.ts:32](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/core/operators/state.ts#L32)
+Defined in: [src/core/operators/state.ts:32](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/operators/state.ts#L32)
 
 A rotation / angle value in degrees.
 
@@ -16,7 +16,7 @@ A rotation / angle value in degrees.
 
 > `readonly` **type**: `"degrees"`
 
-Defined in: [src/core/operators/state.ts:33](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/core/operators/state.ts#L33)
+Defined in: [src/core/operators/state.ts:33](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/operators/state.ts#L33)
 
 ***
 
@@ -24,4 +24,4 @@ Defined in: [src/core/operators/state.ts:33](https://github.com/ABCrimson/modern
 
 > `readonly` **value**: `number`
 
-Defined in: [src/core/operators/state.ts:34](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/core/operators/state.ts#L34)
+Defined in: [src/core/operators/state.ts:34](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/operators/state.ts#L34)

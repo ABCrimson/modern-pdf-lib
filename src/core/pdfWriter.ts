@@ -3,24 +3,26 @@
  *
  * Binary serialization of a PDF document to a single `Uint8Array`.
  *
- * Produces a valid PDF 1.7 file:
+ * Produces a valid PDF 1.7 (or 2.0 when encryption V=5) file:
  *
- * 1. `%PDF-1.7` header + binary comment
- * 2. Indirect-object bodies
+ * 1. `%PDF-1.7` (or `%PDF-2.0`) header + binary comment
+ * 2. Indirect-object bodies (optionally encrypted)
  * 3. Cross-reference table
- * 4. Trailer dictionary (`/Size`, `/Root`, `/Info`)
+ * 4. Trailer dictionary (`/Size`, `/Root`, `/Info`, `/Encrypt`, `/ID`)
  * 5. `startxref` pointer
  * 6. `%%EOF`
  *
- * Supports optional FlateDecode compression for streams via `fflate`.
+ * Supports optional FlateDecode compression for streams via `fflate`
+ * and optional encryption via a {@link PdfEncryptionHandler}.
  */
 
 import { deflateSync as fflateDeflateSync } from 'fflate';
 import { isAvailable as isWasmDeflateAvailable, deflateSync as wasmDeflateSync } from '../compression/libdeflateWasm.js';
 import type { PdfRef, PdfObject, PdfStream, ByteWriter } from './pdfObjects.js';
-import { PdfObjectRegistry, PdfNumber, PdfName, PdfDict, PdfArray } from './pdfObjects.js';
+import { PdfObjectRegistry, PdfNumber, PdfName, PdfDict, PdfArray, PdfString } from './pdfObjects.js';
 import type { RegistryEntry } from './pdfObjects.js';
 import type { DocumentStructure } from './pdfCatalog.js';
+import type { PdfEncryptionHandler } from '../crypto/encryptionHandler.js';
 
 // ---------------------------------------------------------------------------
 // Save options
@@ -120,6 +122,13 @@ export class PdfWriter {
   private readonly compressionLevel: number;
   private readonly useWasm: boolean;
   private readonly objectStreamThreshold: number;
+  private readonly encryptionHandler: PdfEncryptionHandler | undefined;
+
+  /**
+   * When encryption is active, the /Encrypt dict is registered as an
+   * indirect object.  Its reference is stored here for the trailer.
+   */
+  private encryptDictRef: PdfRef | undefined;
 
   constructor(
     /** All indirect objects. */
@@ -127,11 +136,13 @@ export class PdfWriter {
     /** Document structure references. */
     private readonly structure: DocumentStructure,
     options?: PdfSaveOptions,
+    encryptionHandler?: PdfEncryptionHandler | undefined,
   ) {
     this.compress = options?.compress ?? true;
     this.compressionLevel = options?.compressionLevel ?? 6;
     this.useWasm = options?.useWasm ?? false;
     this.objectStreamThreshold = options?.objectStreamThreshold ?? Infinity;
+    this.encryptionHandler = encryptionHandler;
   }
 
   // -----------------------------------------------------------------------
@@ -140,13 +151,24 @@ export class PdfWriter {
 
   /**
    * Produce the complete PDF file as a `Uint8Array`.
+   *
+   * When an encryption handler is present, all string and stream
+   * objects are encrypted and the /Encrypt dictionary + /ID array
+   * are added to the trailer.
    */
-  write(): Uint8Array {
+  async write(): Promise<Uint8Array> {
+    // If encryption is configured, register the /Encrypt dict as an
+    // indirect object so we can reference it from the trailer.
+    if (this.encryptionHandler) {
+      const encDict = this.encryptionHandler.buildEncryptDict();
+      this.encryptDictRef = this.registry.register(encDict);
+    }
+
     this.writeHeader();
 
     if (this.objectStreamThreshold !== Infinity) {
       // PDF 1.5+ path: try object streams + cross-reference stream
-      const useObjStreams = this.writeBodyWithObjectStreams(this.objectStreamThreshold);
+      const useObjStreams = await this.writeBodyWithObjectStreams(this.objectStreamThreshold);
       if (useObjStreams) {
         return this.buf.toUint8Array();
       }
@@ -155,7 +177,7 @@ export class PdfWriter {
       const xrefOffset = this.writeXref();
       this.writeTrailer(xrefOffset);
     } else {
-      this.writeBody();
+      await this.writeBody();
       const xrefOffset = this.writeXref();
       this.writeTrailer(xrefOffset);
     }
@@ -168,8 +190,12 @@ export class PdfWriter {
   // -----------------------------------------------------------------------
 
   private writeHeader(): void {
-    // PDF version header
-    this.buf.writeString('%PDF-1.7\n');
+    // PDF version header — use 2.0 for AES-256 (V=5 R=6), 1.7 otherwise
+    const version =
+      this.encryptionHandler && this.encryptionHandler.getVersion() === 5
+        ? '2.0'
+        : '1.7';
+    this.buf.writeString(`%PDF-${version}\n`);
     // Binary comment — four bytes > 127 to signal binary content to
     // transfer programs.
     this.buf.write(
@@ -181,20 +207,30 @@ export class PdfWriter {
   // Body — indirect object definitions
   // -----------------------------------------------------------------------
 
-  private writeBody(): void {
+  private async writeBody(): Promise<void> {
     // Pre-allocate xref entries.  Index 0 is reserved for the free
     // head entry; actual objects start at index 1.
     // We'll record offsets indexed by object number.
 
     for (const entry of this.registry) {
-      this.writeIndirectObject(entry);
+      await this.writeIndirectObject(entry);
     }
   }
 
-  private writeIndirectObject(entry: RegistryEntry): void {
-    // Optionally compress stream data
+  private async writeIndirectObject(entry: RegistryEntry): Promise<void> {
+    // Optionally compress stream data (before encryption — per the spec,
+    // compression is applied first, then encryption)
     if (this.compress && entry.object.kind === 'stream') {
       this.compressStream(entry.object as PdfStream);
+    }
+
+    // Encrypt if handler is present and this is not the /Encrypt dict itself
+    const isEncryptDict =
+      this.encryptDictRef &&
+      entry.ref.objectNumber === this.encryptDictRef.objectNumber;
+
+    if (this.encryptionHandler && !isEncryptDict) {
+      await this.encryptEntry(entry);
     }
 
     // Record byte offset
@@ -213,6 +249,79 @@ export class PdfWriter {
 
     // \nendobj\n
     this.buf.writeString(`\n${entry.ref.toObjectFooter()}\n`);
+  }
+
+  /**
+   * Encrypt all encryptable data within an indirect object.
+   *
+   * Per the PDF spec:
+   * - Strings inside the object are encrypted with the per-object key.
+   * - Stream data is encrypted with the per-object key.
+   * - The /Encrypt dictionary itself is never encrypted.
+   * - String values in the trailer /ID array are never encrypted.
+   */
+  private async encryptEntry(entry: RegistryEntry): Promise<void> {
+    const handler = this.encryptionHandler!;
+    const objNum = entry.ref.objectNumber;
+    const genNum = entry.ref.generationNumber;
+
+    if (entry.object.kind === 'stream') {
+      const stream = entry.object as PdfStream;
+      // Encrypt all strings inside the stream dictionary
+      await this.encryptDictStrings(stream.dict, objNum, genNum);
+      // Encrypt the stream data itself
+      stream.data = await handler.encryptObject(objNum, genNum, stream.data);
+      stream.syncLength();
+    } else if (entry.object.kind === 'dict') {
+      await this.encryptDictStrings(entry.object as PdfDict, objNum, genNum);
+    }
+    // Individual PdfString objects at the top level of an indirect
+    // object are rare but handled by the dict/array traversal.
+  }
+
+  /**
+   * Recursively encrypt all PdfString values inside a PdfDict.
+   */
+  private async encryptDictStrings(
+    dict: PdfDict,
+    objNum: number,
+    genNum: number,
+  ): Promise<void> {
+    const handler = this.encryptionHandler!;
+
+    for (const [key, value] of dict) {
+      if (value.kind === 'string') {
+        const encrypted = await handler.encryptString(objNum, genNum, value as PdfString);
+        dict.set(key, encrypted);
+      } else if (value.kind === 'dict') {
+        await this.encryptDictStrings(value as PdfDict, objNum, genNum);
+      } else if (value.kind === 'array') {
+        await this.encryptArrayStrings(value as PdfArray, objNum, genNum);
+      }
+    }
+  }
+
+  /**
+   * Recursively encrypt all PdfString values inside a PdfArray.
+   */
+  private async encryptArrayStrings(
+    arr: PdfArray,
+    objNum: number,
+    genNum: number,
+  ): Promise<void> {
+    const handler = this.encryptionHandler!;
+    const items = arr.items;
+
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i]!;
+      if (item.kind === 'string') {
+        items[i] = await handler.encryptString(objNum, genNum, item as PdfString);
+      } else if (item.kind === 'dict') {
+        await this.encryptDictStrings(item as PdfDict, objNum, genNum);
+      } else if (item.kind === 'array') {
+        await this.encryptArrayStrings(item as PdfArray, objNum, genNum);
+      }
+    }
   }
 
   /**
@@ -272,7 +381,7 @@ export class PdfWriter {
    *          written in traditional format and the caller must still
    *          emit the classic xref table and trailer.
    */
-  writeBodyWithObjectStreams(threshold: number): boolean {
+  async writeBodyWithObjectStreams(threshold: number): Promise<boolean> {
     const protectedNums = this.protectedObjectNumbers();
 
     // Partition entries into:
@@ -295,7 +404,7 @@ export class PdfWriter {
 
     // If packable count is below threshold, write everything traditionally
     if (packableEntries.length < threshold) {
-      this.writeBody();
+      await this.writeBody();
       return false;
     }
 
@@ -303,10 +412,10 @@ export class PdfWriter {
 
     // 1. Write stream objects and protected objects as normal indirect objects
     for (const entry of streamEntries) {
-      this.writeIndirectObject(entry);
+      await this.writeIndirectObject(entry);
     }
     for (const entry of protectedEntries) {
-      this.writeIndirectObject(entry);
+      await this.writeIndirectObject(entry);
     }
 
     // 2. Pack packable objects into object streams.
@@ -593,6 +702,17 @@ export class PdfWriter {
       `/Info ${this.structure.infoRef.objectNumber} ${this.structure.infoRef.generationNumber} R\n`,
     );
 
+    // /Encrypt and /ID — when encryption is active
+    if (this.encryptionHandler && this.encryptDictRef) {
+      this.buf.writeString(
+        `/Encrypt ${this.encryptDictRef.objectNumber} ${this.encryptDictRef.generationNumber} R\n`,
+      );
+
+      // /ID array — two identical hex strings based on the file ID
+      const fileIdHex = this.encryptionHandler.getFileId().toHex();
+      this.buf.writeString(`/ID [<${fileIdHex}> <${fileIdHex}>]\n`);
+    }
+
     this.buf.writeString('>>\n');
     this.buf.writeString('startxref\n');
     this.buf.writeString(`${xrefOffset}\n`);
@@ -662,15 +782,19 @@ function writeIntBE(buf: Uint8Array, offset: number, width: number, value: numbe
 /**
  * Serialize a complete PDF from a registry and structure refs.
  *
- * @param registry   All registered indirect objects.
- * @param structure  Catalog / Info / Pages references.
- * @param options    Save options.
- * @returns          The raw PDF bytes.
+ * @param registry            All registered indirect objects.
+ * @param structure           Catalog / Info / Pages references.
+ * @param options             Save options.
+ * @param encryptionHandler   Optional encryption handler for encrypting
+ *                            all objects and adding /Encrypt + /ID to
+ *                            the trailer.
+ * @returns                   The raw PDF bytes.
  */
-export function serializePdf(
+export async function serializePdf(
   registry: PdfObjectRegistry,
   structure: DocumentStructure,
   options?: PdfSaveOptions,
-): Uint8Array {
-  return new PdfWriter(registry, structure, options).write();
+  encryptionHandler?: PdfEncryptionHandler | undefined,
+): Promise<Uint8Array> {
+  return new PdfWriter(registry, structure, options, encryptionHandler).write();
 }

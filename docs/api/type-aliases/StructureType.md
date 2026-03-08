@@ -8,7 +8,7 @@
 
 > **StructureType** = `"Document"` \| `"Part"` \| `"Art"` \| `"Sect"` \| `"Div"` \| `"BlockQuote"` \| `"Caption"` \| `"TOC"` \| `"TOCI"` \| `"Index"` \| `"NonStruct"` \| `"Private"` \| `"P"` \| `"H"` \| `"H1"` \| `"H2"` \| `"H3"` \| `"H4"` \| `"H5"` \| `"H6"` \| `"L"` \| `"LI"` \| `"Lbl"` \| `"LBody"` \| `"Table"` \| `"TR"` \| `"TH"` \| `"TD"` \| `"THead"` \| `"TBody"` \| `"TFoot"` \| `"Span"` \| `"Quote"` \| `"Note"` \| `"Reference"` \| `"BibEntry"` \| `"Code"` \| `"Link"` \| `"Annot"` \| `"Ruby"` \| `"RB"` \| `"RT"` \| `"RP"` \| `"Warichu"` \| `"WT"` \| `"WP"` \| `"Figure"` \| `"Formula"` \| `"Form"` \| `string` & `object`
 
-Defined in: [src/accessibility/structureTree.ts:50](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/accessibility/structureTree.ts#L50)
+Defined in: [src/accessibility/structureTree.ts:50](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/accessibility/structureTree.ts#L50)
 
 Standard structure types defined by the PDF specification (ISO 32000-1,
 Table 333 through Table 340), plus a `string` catch-all for custom

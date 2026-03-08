@@ -143,6 +143,8 @@ export interface PageEntry {
   readonly trimBox?: readonly [number, number, number, number] | undefined;
   /** Optional annotation indirect references. */
   readonly annotationRefs?: readonly PdfRef[] | undefined;
+  /** Optional tab order: 'S' (structure), 'R' (row), 'C' (column). */
+  readonly tabOrder?: 'S' | 'R' | 'C' | undefined;
 }
 
 /**
@@ -216,6 +218,11 @@ export function buildPageTree(
     // Optional annotations
     if (page.annotationRefs !== undefined && page.annotationRefs.length > 0) {
       pageDict.set('/Annots', PdfArray.of([...page.annotationRefs]));
+    }
+
+    // Optional tab order
+    if (page.tabOrder !== undefined) {
+      pageDict.set('/Tabs', PdfName.of(page.tabOrder));
     }
 
     // Register the page dict with the pre-allocated ref

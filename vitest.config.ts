@@ -11,7 +11,7 @@ export default defineConfig({
       include: ['src/**/*.ts'],
       exclude: ['src/types/**', 'src/wasm/*/pkg/**'],
       thresholds: {
-        branches: 80,
+        branches: 85,
         functions: 90,
         lines: 85,
       },

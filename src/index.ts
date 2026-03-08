@@ -698,8 +698,8 @@ export type { SvgDrawCommand, SvgElement, SvgRenderOptions } from './assets/svg/
 // Linearization
 // ---------------------------------------------------------------------------
 
-export { linearizePdf, isLinearized } from './core/linearization.js';
-export type { LinearizationOptions } from './core/linearization.js';
+export { linearizePdf, isLinearized, delinearizePdf, getLinearizationInfo } from './core/linearization.js';
+export type { LinearizationOptions, LinearizationInfo } from './core/linearization.js';
 
 // ---------------------------------------------------------------------------
 // PDF/A compliance
@@ -743,6 +743,9 @@ export type { WatermarkOptions } from './core/watermark.js';
 
 export { markForRedaction, applyRedactions, getRedactionMarks } from './core/redaction.js';
 export type { RedactionOptions, RedactionMark } from './core/redaction.js';
+
+export { applyRedaction } from './annotation/applyRedactions.js';
+export type { RedactionResult } from './annotation/applyRedactions.js';
 
 // ---------------------------------------------------------------------------
 // Image optimization
@@ -1005,3 +1008,45 @@ export {
   CombedTextLayoutError,
   ExceededMaxLengthError,
 } from './errors.js';
+
+// ---------------------------------------------------------------------------
+// Form flattening
+// ---------------------------------------------------------------------------
+
+export { flattenForm, flattenField, flattenFields } from './form/formFlatten.js';
+export type { FlattenOptions, FlattenFormResult } from './form/formFlatten.js';
+
+// ---------------------------------------------------------------------------
+// Bookmarks / Outlines
+// ---------------------------------------------------------------------------
+
+export { addBookmark, getBookmarks, removeBookmark, removeAllBookmarks } from './core/outlines.js';
+export type { BookmarkRef, BookmarkNode, AddBookmarkOptions } from './core/outlines.js';
+
+// ---------------------------------------------------------------------------
+// Page labels
+// ---------------------------------------------------------------------------
+
+export { setPageLabels, getPageLabels, removePageLabels } from './core/pageLabels.js';
+export type { PageLabelRange, PageLabelStyle } from './core/pageLabels.js';
+
+// ---------------------------------------------------------------------------
+// Batch processing
+// ---------------------------------------------------------------------------
+
+export { processBatch, batchMerge, batchFlatten } from './batch/batchProcessor.js';
+export type { BatchOptions, BatchResult, BatchProgressCallback } from './batch/batchProcessor.js';
+
+// ---------------------------------------------------------------------------
+// PDF/UA validation
+// ---------------------------------------------------------------------------
+
+export { validatePdfUa, enforcePdfUa } from './accessibility/pdfUaValidator.js';
+export type { PdfUaValidationResult, PdfUaError, PdfUaWarning, PdfUaLevel, PdfUaEnforcementResult } from './accessibility/pdfUaValidator.js';
+
+// ---------------------------------------------------------------------------
+// Inline WASM
+// ---------------------------------------------------------------------------
+
+export { getInlineWasmBytes, hasInlineWasmData, isValidModuleName } from './wasm/inlineWasm.js';
+export type { WasmModuleName } from './wasm/inlineWasm.js';

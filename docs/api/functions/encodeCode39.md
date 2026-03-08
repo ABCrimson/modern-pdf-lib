@@ -8,7 +8,7 @@
 
 > **encodeCode39**(`data`, `includeCheckDigit?`, `wideToNarrowRatio?`): [`BarcodeMatrix`](../interfaces/BarcodeMatrix.md)
 
-Defined in: [src/barcode/code39.ts:190](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/barcode/code39.ts#L190)
+Defined in: [src/barcode/code39.ts:190](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/barcode/code39.ts#L190)
 
 Encode a string as a Code 39 barcode.
 

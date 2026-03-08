@@ -1,6 +1,6 @@
 {
   "name": "modern-pdf-lib",
-  "version": "0.25.0",
+  "version": "0.26.0",
   "description": "A modern, WASM-accelerated PDF creation engine for every JavaScript runtime",
   "type": "module",
   "exports": {
@@ -85,6 +85,7 @@
     "docs:build": "vitepress build docs",
     "docs:api": "typedoc",
     "validate-pdf": "tsx scripts/validate-pdf.ts",
+    "generate:wasm-inline": "tsx scripts/generate-inline-wasm.ts",
     "clean": "rm -rf dist coverage"
   },
   "dependencies": {

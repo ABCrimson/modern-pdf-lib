@@ -101,7 +101,7 @@ export function computeTargetDimensions(
     displayHeight,
   );
 
-  if (dpi.effectiveDpi <= maxDpi || !isFinite(dpi.effectiveDpi)) {
+  if (dpi.effectiveDpi <= maxDpi || !Number.isFinite(dpi.effectiveDpi)) {
     return { width: imageWidth, height: imageHeight, downscaled: false };
   }
 

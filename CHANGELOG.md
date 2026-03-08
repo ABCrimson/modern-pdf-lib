@@ -5,6 +5,89 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 See [VERSIONING.md](./VERSIONING.md) for this project's versioning policy.
 
+## [0.26.0] - 2026-03-08
+
+### Added
+
+- **PDF form flattening** (`src/form/formFlatten.ts`):
+  - `flattenForm()` — burn all form fields into page content, remove AcroForm
+  - `flattenField()` / `flattenFields()` — flatten specific fields by name
+  - `FlattenOptions` with `preserveReadOnly` support
+
+- **Bookmarks / Outlines API** (`src/core/outlines.ts`):
+  - `addBookmark()` — add nested bookmarks with bold/italic/color/position
+  - `getBookmarks()` — return the full bookmark tree
+  - `removeBookmark()` / `removeAllBookmarks()` — bookmark management
+
+- **Page labels** (`src/core/pageLabels.ts`):
+  - `setPageLabels()` — set label ranges (decimal, roman, alpha, custom prefix)
+  - `getPageLabels()` / `removePageLabels()` — label management
+  - Catalog integration with `/PageLabels` number tree
+
+- **AES-256 encryption** (PDF 2.0, V=5 R=6):
+  - Full writer integration — `doc.encrypt({ algorithm: 'aes-256' })` now works end-to-end
+  - Algorithm 2.B key derivation (ISO 32000-2), SASLprep password normalization
+  - `%PDF-2.0` header for AES-256 encrypted documents
+  - Trailer `/Encrypt` and `/ID` dictionary generation
+
+- **SVG-to-PDF vector conversion** (enhanced):
+  - Text rendering with standard font resolution (Helvetica/Times/Courier families)
+  - Fill-rule support (nonzero/evenodd → `f`/`f*`/`B`/`B*`)
+  - Stroke properties: linecap, linejoin, miterlimit, dasharray, dashoffset
+  - 60 new SVG conversion tests
+
+- **Redaction application** (`src/annotation/applyRedactions.ts`):
+  - `applyRedactions()` — apply all redaction annotations (fill area, overlay text, remove annotation)
+  - `applyRedaction()` — apply a single redaction by page/annotation index
+
+- **Batch processing** (`src/batch/batchProcessor.ts`):
+  - `processBatch()` — process multiple PDFs with bounded concurrency
+  - `batchMerge()` / `batchFlatten()` — parallel merge and flatten operations
+  - Progress callbacks, error isolation, runtime-aware concurrency
+
+- **PDF linearization** (fast web view) — complete rewrite:
+  - `linearizePdf()` — full page classification, hint tables, xref streams
+  - `delinearizePdf()` — convert linearized PDF back to normal
+  - `getLinearizationInfo()` — extract linearization parameters
+  - Page offset and shared object hint tables per PDF spec §F
+
+- **PDF/UA accessibility validation** (`src/accessibility/pdfUaValidator.ts`):
+  - `validatePdfUa()` — 12 checks: structure tree, language, title, headings, alt text, tables, lists, reading order, fonts, contrast, bookmarks, tab order
+  - `enforcePdfUa()` — auto-fix language, title, structure tree, tab order
+  - Page tab order API (`setTabOrder()`)
+
+- **WASM-by-default infrastructure**:
+  - `getInlineWasmBytes()` — decode base64-embedded WASM at runtime
+  - `scripts/generate-inline-wasm.ts` — build-time code generation for inline WASM
+  - `generate:wasm-inline` npm script
+
+- **586 new tests** across 20+ test files:
+  - Form flattening (26), outlines (24), page labels (31), AES-256 (55)
+  - SVG conversion (60 new), redaction (17), batch processing (18)
+  - Linearization (44), PDF/UA validation (51), inline WASM (17)
+  - PDF/A enforcement (24), sRGB ICC profile (20), transparency flattener (18)
+  - JPEG2000 tiles (25), JPEG2000 bit depth (41)
+  - Object pool (26), PDF value helpers (24), validation (60)
+
+### Changed
+
+- **WASM loader** — now resolves `dist/wasm/` layout first (npm consumers), falls back to dev `src/wasm/` layout
+- **tsdown config** — removed duplicate IIFE config (esbuild script handles it)
+- **Coverage threshold** — branch coverage raised from 80% to 85%
+- **Modernization audit** — 32 changes across 14 source files:
+  - 22× `isNaN()` → `Number.isNaN()`, `isFinite()` → `Number.isFinite()`
+  - `.indexOf() >= 0` → `.includes()` in generated Acrobat JS
+  - Removed 4 `as unknown` casts via proper typing
+  - `.split('')` → `[...str]` spread for string iteration
+- **PdfWriter** — now async with full AES-256 encryption integration
+- **API audit** — comprehensive audit doc at `docs/plans/api-audit-results.md`
+- Test count: **5,135 tests** passing across **227 test suites**
+
+### Fixed
+
+- IIFE test failures from tsdown config removal
+- `fieldVisibility` test updated for `.includes()` modernization
+
 ## [0.25.0] - 2026-03-08
 
 ### Added

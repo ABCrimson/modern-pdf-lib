@@ -8,7 +8,7 @@
 
 > **drawImageWithMatrix**(`name`, `a`, `b`, `c`, `d`, `tx`, `ty`): `string`
 
-Defined in: [src/core/operators/image.ts:95](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/core/operators/image.ts#L95)
+Defined in: [src/core/operators/image.ts:95](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/operators/image.ts#L95)
 
 Produce the full operator sequence to draw an image XObject with an
 arbitrary 6-component transformation matrix.

@@ -591,7 +591,7 @@ class ContentStreamLexer {
     const str = this.decodeAscii(start, this.pos);
     const value = parseFloat(str);
 
-    return { type: TokenType.Number, value: isNaN(value) ? 0 : value };
+    return { type: TokenType.Number, value: Number.isNaN(value) ? 0 : value };
   }
 
   /**

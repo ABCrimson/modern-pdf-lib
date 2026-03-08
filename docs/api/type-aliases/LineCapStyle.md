@@ -8,7 +8,7 @@
 
 > **LineCapStyle** = *typeof* [`LineCapStyle`](../variables/LineCapStyle.md)\[keyof *typeof* [`LineCapStyle`](../variables/LineCapStyle.md)\]
 
-Defined in: [src/core/enums.ts:45](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/core/enums.ts#L45)
+Defined in: [src/core/enums.ts:45](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/enums.ts#L45)
 
 PDF line cap styles (Table 54).
 Applied via the J operator.

@@ -6,7 +6,7 @@
 
 # Interface: ImageOptimizeEntry
 
-Defined in: [src/assets/image/batchOptimize.ts:145](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/assets/image/batchOptimize.ts#L145)
+Defined in: [src/assets/image/batchOptimize.ts:145](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/image/batchOptimize.ts#L145)
 
 Per-image optimization report entry.
 
@@ -16,7 +16,7 @@ Per-image optimization report entry.
 
 > `readonly` **name**: `string`
 
-Defined in: [src/assets/image/batchOptimize.ts:147](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/assets/image/batchOptimize.ts#L147)
+Defined in: [src/assets/image/batchOptimize.ts:147](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/image/batchOptimize.ts#L147)
 
 Resource name (e.g. '/Im1').
 
@@ -26,7 +26,7 @@ Resource name (e.g. '/Im1').
 
 > `readonly` **newSize**: `number`
 
-Defined in: [src/assets/image/batchOptimize.ts:153](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/assets/image/batchOptimize.ts#L153)
+Defined in: [src/assets/image/batchOptimize.ts:153](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/image/batchOptimize.ts#L153)
 
 New compressed size in bytes (same as original if skipped).
 
@@ -36,7 +36,7 @@ New compressed size in bytes (same as original if skipped).
 
 > `readonly` **originalSize**: `number`
 
-Defined in: [src/assets/image/batchOptimize.ts:151](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/assets/image/batchOptimize.ts#L151)
+Defined in: [src/assets/image/batchOptimize.ts:151](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/image/batchOptimize.ts#L151)
 
 Original compressed size in bytes.
 
@@ -46,7 +46,7 @@ Original compressed size in bytes.
 
 > `readonly` **pageIndex**: `number`
 
-Defined in: [src/assets/image/batchOptimize.ts:149](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/assets/image/batchOptimize.ts#L149)
+Defined in: [src/assets/image/batchOptimize.ts:149](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/image/batchOptimize.ts#L149)
 
 Page index where this image appears.
 
@@ -56,7 +56,7 @@ Page index where this image appears.
 
 > `readonly` `optional` **reason**: `string`
 
-Defined in: [src/assets/image/batchOptimize.ts:159](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/assets/image/batchOptimize.ts#L159)
+Defined in: [src/assets/image/batchOptimize.ts:159](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/image/batchOptimize.ts#L159)
 
 Reason for skipping, if applicable.
 
@@ -66,7 +66,7 @@ Reason for skipping, if applicable.
 
 > `readonly` **skipped**: `boolean`
 
-Defined in: [src/assets/image/batchOptimize.ts:155](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/assets/image/batchOptimize.ts#L155)
+Defined in: [src/assets/image/batchOptimize.ts:155](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/image/batchOptimize.ts#L155)
 
 Whether this image was skipped.
 
@@ -76,6 +76,6 @@ Whether this image was skipped.
 
 > `readonly` **skippedByFilter**: `boolean`
 
-Defined in: [src/assets/image/batchOptimize.ts:157](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/assets/image/batchOptimize.ts#L157)
+Defined in: [src/assets/image/batchOptimize.ts:157](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/image/batchOptimize.ts#L157)
 
 Whether this image was skipped due to a selective filter.

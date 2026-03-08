@@ -6,6 +6,18 @@
  * SVG uses a top-left coordinate system (y increases downward), while
  * PDF uses a bottom-left system (y increases upward).  The converter
  * applies a y-flip transformation to map SVG coordinates into PDF space.
+ *
+ * Supported SVG features:
+ * - Shape elements: `<rect>`, `<circle>`, `<ellipse>`, `<line>`,
+ *   `<polyline>`, `<polygon>`, `<path>` (all commands)
+ * - Text elements: `<text>`, `<tspan>` (basic)
+ * - Groups: `<g>` with `transform` attribute
+ * - Styles: `fill`, `stroke`, `stroke-width`, `opacity`,
+ *   `fill-rule`, `stroke-linecap`, `stroke-linejoin`,
+ *   `stroke-dasharray`, `stroke-dashoffset`, `stroke-miterlimit`
+ * - Transforms: `matrix`, `translate`, `scale`, `rotate`,
+ *   `skewX`, `skewY`
+ * - ViewBox scaling and aspect ratio preservation
  */
 
 import type { SvgElement, SvgDrawCommand } from './svgParser.js';
@@ -41,7 +53,24 @@ function n(value: number): string {
 }
 
 // ---------------------------------------------------------------------------
-// Drawing command → PDF operators
+// PDF string escaping
+// ---------------------------------------------------------------------------
+
+/**
+ * Escape a string for use inside a PDF literal string `(...)`.
+ */
+function escapePdfString(text: string): string {
+  return text
+    .replace(/\\/g, '\\\\')
+    .replace(/\(/g, '\\(')
+    .replace(/\)/g, '\\)')
+    .replace(/\r/g, '\\r')
+    .replace(/\n/g, '\\n')
+    .replace(/\t/g, '\\t');
+}
+
+// ---------------------------------------------------------------------------
+// Drawing command -> PDF operators
 // ---------------------------------------------------------------------------
 
 /** Magic constant for circular arc approximation: 4*(sqrt(2)-1)/3. */
@@ -321,7 +350,57 @@ function commandsToPathOps(commands: SvgDrawCommand[]): string {
 }
 
 // ---------------------------------------------------------------------------
-// Element → PDF operators
+// Stroke-state helpers
+// ---------------------------------------------------------------------------
+
+/** Map SVG stroke-linecap value to PDF line cap integer. */
+function linecapToInt(cap: 'butt' | 'round' | 'square'): 0 | 1 | 2 {
+  switch (cap) {
+    case 'butt':   return 0;
+    case 'round':  return 1;
+    case 'square': return 2;
+  }
+}
+
+/** Map SVG stroke-linejoin value to PDF line join integer. */
+function linejoinToInt(join: 'miter' | 'round' | 'bevel'): 0 | 1 | 2 {
+  switch (join) {
+    case 'miter': return 0;
+    case 'round': return 1;
+    case 'bevel': return 2;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Painting operator selection
+// ---------------------------------------------------------------------------
+
+/**
+ * Choose the correct PDF painting operator based on fill/stroke state
+ * and fill-rule.
+ */
+function paintingOperator(
+  hasFill: boolean,
+  hasStroke: boolean,
+  fillRule: 'nonzero' | 'evenodd' | undefined,
+): string {
+  const evenOdd = fillRule === 'evenodd';
+
+  if (hasFill && hasStroke) {
+    return evenOdd ? 'B*\n' : 'B\n';
+  }
+  if (hasFill) {
+    return evenOdd ? 'f*\n' : 'f\n';
+  }
+  if (hasStroke) {
+    return 'S\n';
+  }
+  // Default: fill with black (SVG default behaviour)
+  return evenOdd ? 'f*\n' : 'f\n';
+}
+
+// ---------------------------------------------------------------------------
+// Element -> PDF operators
 // ---------------------------------------------------------------------------
 
 /**
@@ -395,7 +474,9 @@ function renderElement(el: SvgElement): string {
 
   // Skip non-renderable elements
   const tag = el.tag;
-  if (tag === 'defs' || tag === 'title' || tag === 'desc' || tag === 'metadata') {
+  if (tag === 'defs' || tag === 'title' || tag === 'desc' ||
+      tag === 'metadata' || tag === 'style' || tag === 'clipPath' ||
+      tag === 'mask' || tag === 'symbol' || tag === 'marker') {
     return '';
   }
 
@@ -412,38 +493,58 @@ function renderElement(el: SvgElement): string {
     ops += `${n(a)} ${n(b)} ${n(c)} ${n(d)} ${n(e)} ${n(f)} cm\n`;
   }
 
-  // Draw this element's commands
+  // Handle text elements
+  if (tag === 'text' || tag === 'tspan') {
+    ops += renderTextElement(el);
+  }
+
+  // Draw this element's path commands
   if (el.commands && el.commands.length > 0) {
-    // Set fill colour
     const hasFill = el.fill !== undefined;
     const hasStroke = el.stroke !== undefined;
 
+    // Set fill colour
     if (hasFill) {
       ops += `${n(el.fill!.r / 255)} ${n(el.fill!.g / 255)} ${n(el.fill!.b / 255)} rg\n`;
     }
 
+    // Set stroke colour
     if (hasStroke) {
       ops += `${n(el.stroke!.r / 255)} ${n(el.stroke!.g / 255)} ${n(el.stroke!.b / 255)} RG\n`;
     }
 
+    // Set stroke width
     if (el.strokeWidth !== undefined) {
       ops += `${n(el.strokeWidth)} w\n`;
+    }
+
+    // Set line cap
+    if (el.strokeLinecap !== undefined) {
+      ops += `${linecapToInt(el.strokeLinecap)} J\n`;
+    }
+
+    // Set line join
+    if (el.strokeLinejoin !== undefined) {
+      ops += `${linejoinToInt(el.strokeLinejoin)} j\n`;
+    }
+
+    // Set miter limit
+    if (el.strokeMiterlimit !== undefined) {
+      ops += `${n(el.strokeMiterlimit)} M\n`;
+    }
+
+    // Set dash pattern
+    if (el.strokeDasharray !== undefined) {
+      const phase = el.strokeDashoffset ?? 0;
+      const arr = `[${el.strokeDasharray.map(n).join(' ')}]`;
+      ops += `${arr} ${n(phase)} d\n`;
     }
 
     // Path operators
     ops += commandsToPathOps(el.commands);
 
-    // Painting operator
-    if (hasFill && hasStroke) {
-      ops += 'B\n'; // Fill and stroke
-    } else if (hasFill) {
-      ops += 'f\n'; // Fill
-    } else if (hasStroke) {
-      ops += 'S\n'; // Stroke
-    } else {
-      // Default: fill with black (SVG default)
-      ops += 'f\n';
-    }
+    // Painting operator (with fill-rule awareness)
+    ops += paintingOperator(hasFill, hasStroke, el.fillRule);
   }
 
   // Render children
@@ -456,6 +557,99 @@ function renderElement(el: SvgElement): string {
   }
 
   return ops;
+}
+
+// ---------------------------------------------------------------------------
+// Text rendering
+// ---------------------------------------------------------------------------
+
+/**
+ * Render a `<text>` or `<tspan>` SVG element as PDF text operators.
+ *
+ * SVG text positioning uses `x` and `y` attributes.  We emit a
+ * text matrix (Tm) to position the text, using Helvetica as the
+ * default font (since we cannot embed arbitrary fonts without the
+ * full font pipeline).
+ *
+ * The font is referenced as `/Helvetica` which must exist in the
+ * page's font resources.  When drawn via `drawSvgOnPage`, the page
+ * will need to have a Helvetica resource.  For standalone operator
+ * generation the caller is responsible for resource setup.
+ */
+function renderTextElement(el: SvgElement): string {
+  // Collect text content from direct content or __text attribute
+  const text = el.textContent ?? el.attributes['__text'] ?? '';
+  if (!text) return '';
+
+  let ops = '';
+
+  const posX = parseFloat(el.attributes['x'] ?? '0') || 0;
+  const posY = parseFloat(el.attributes['y'] ?? '0') || 0;
+  const fontSize = el.fontSize ?? 16;
+
+  // Determine font name — map common families to PDF standard fonts
+  const fontName = resolveStandardFont(el.fontFamily, el.fontWeight, el.fontStyle);
+
+  // Set fill colour for text
+  if (el.fill) {
+    ops += `${n(el.fill.r / 255)} ${n(el.fill.g / 255)} ${n(el.fill.b / 255)} rg\n`;
+  }
+
+  // Begin text object
+  ops += 'BT\n';
+
+  // Select font
+  ops += `/${fontName} ${n(fontSize)} Tf\n`;
+
+  // Position text with a text matrix
+  // Since we're already in SVG coordinate space (y-down), we
+  // position the text at (posX, posY).
+  ops += `${n(posX)} ${n(posY)} Td\n`;
+
+  // Show text
+  ops += `(${escapePdfString(text)}) Tj\n`;
+
+  // End text object
+  ops += 'ET\n';
+
+  return ops;
+}
+
+/**
+ * Resolve a font-family + weight + style to a PDF standard font name.
+ *
+ * PDF has 14 standard fonts; we map common CSS font families to them.
+ */
+function resolveStandardFont(
+  family: string | undefined,
+  weight: string | undefined,
+  style: string | undefined,
+): string {
+  const isBold = weight === 'bold' || (weight !== undefined && parseInt(weight, 10) >= 700);
+  const isItalic = style === 'italic' || style === 'oblique';
+
+  const lowerFamily = (family ?? '').toLowerCase();
+
+  // Map to standard PDF font names
+  if (lowerFamily.includes('courier') || lowerFamily.includes('monospace')) {
+    if (isBold && isItalic) return 'Courier-BoldOblique';
+    if (isBold) return 'Courier-Bold';
+    if (isItalic) return 'Courier-Oblique';
+    return 'Courier';
+  }
+
+  if (lowerFamily.includes('times') || lowerFamily.includes('serif')) {
+    if (isBold && isItalic) return 'Times-BoldItalic';
+    if (isBold) return 'Times-Bold';
+    if (isItalic) return 'Times-Italic';
+    return 'Times-Roman';
+  }
+
+  // Default: Helvetica (sans-serif)
+  if (isBold && isItalic) return 'Helvetica-BoldOblique';
+  if (isBold) return 'Helvetica-Bold';
+  if (isItalic) return 'Helvetica-Oblique';
+  return 'Helvetica';
 }
 
 // ---------------------------------------------------------------------------

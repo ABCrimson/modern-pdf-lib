@@ -566,7 +566,7 @@ function hexToUnicode(hex: string): string {
   for (let i = 0; i < hex.length; i += step) {
     const chunk = hex.slice(i, i + step);
     const code = parseInt(chunk, 16);
-    if (!isNaN(code)) {
+    if (!Number.isNaN(code)) {
       parts.push(String.fromCodePoint(code));
     }
   }
@@ -1041,7 +1041,7 @@ function operandAsNumber(operand: Operand | undefined): number {
   if (operand instanceof PdfNumber) return operand.value;
   if (typeof operand === 'string') {
     const n = parseFloat(operand);
-    return isNaN(n) ? 0 : n;
+    return Number.isNaN(n) ? 0 : n;
   }
   return 0;
 }

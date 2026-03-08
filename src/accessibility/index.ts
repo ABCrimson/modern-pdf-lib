@@ -49,3 +49,19 @@ export {
   summarizeIssues,
   isAccessible,
 } from './accessibilityChecker.js';
+
+// ---------------------------------------------------------------------------
+// PDF/UA validator
+// ---------------------------------------------------------------------------
+
+export {
+  validatePdfUa,
+  enforcePdfUa,
+} from './pdfUaValidator.js';
+export type {
+  PdfUaLevel,
+  PdfUaError,
+  PdfUaWarning,
+  PdfUaValidationResult,
+  PdfUaEnforcementResult,
+} from './pdfUaValidator.js';

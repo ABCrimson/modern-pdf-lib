@@ -8,7 +8,7 @@
 
 > **parseSvg**(`svgString`): [`SvgElement`](../interfaces/SvgElement.md)
 
-Defined in: [src/assets/svg/svgParser.ts:864](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/assets/svg/svgParser.ts#L864)
+Defined in: [src/assets/svg/svgParser.ts:969](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/svg/svgParser.ts#L969)
 
 Parse an SVG string into an [SvgElement](../interfaces/SvgElement.md) tree.
 

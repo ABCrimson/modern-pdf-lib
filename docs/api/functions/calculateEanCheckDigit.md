@@ -8,7 +8,7 @@
 
 > **calculateEanCheckDigit**(`data`): `number`
 
-Defined in: [src/barcode/ean.ts:113](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/barcode/ean.ts#L113)
+Defined in: [src/barcode/ean.ts:113](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/barcode/ean.ts#L113)
 
 Calculate the EAN / UPC check digit using the Modulo-10 algorithm.
 

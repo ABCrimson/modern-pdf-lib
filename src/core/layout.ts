@@ -96,7 +96,7 @@ export function layoutCombedText(
   options: LayoutCombedOptions,
 ): Array<{ char: string; x: number; width: number }> {
   const { font, fontSize, cellCount, cellWidth } = options;
-  const chars = text.slice(0, cellCount).split('');
+  const chars = [...text.slice(0, cellCount)];
 
   return chars.map((char, i) => {
     const charWidth = font.widthOfTextAtSize(char, fontSize);

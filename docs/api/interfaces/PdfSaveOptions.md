@@ -6,7 +6,7 @@
 
 # Interface: PdfSaveOptions
 
-Defined in: [src/core/pdfWriter.ts:30](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/core/pdfWriter.ts#L30)
+Defined in: [src/core/pdfWriter.ts:32](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/pdfWriter.ts#L32)
 
 Options that control how the PDF is written.
 
@@ -16,7 +16,7 @@ Options that control how the PDF is written.
 
 > `optional` **addDefaultPage**: `boolean`
 
-Defined in: [src/core/pdfWriter.ts:56](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/core/pdfWriter.ts#L56)
+Defined in: [src/core/pdfWriter.ts:58](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/pdfWriter.ts#L58)
 
 Add a blank page if the document has no pages. Default: `true`.
 
@@ -26,7 +26,7 @@ Add a blank page if the document has no pages. Default: `true`.
 
 > `optional` **compress**: `boolean`
 
-Defined in: [src/core/pdfWriter.ts:32](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/core/pdfWriter.ts#L32)
+Defined in: [src/core/pdfWriter.ts:34](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/pdfWriter.ts#L34)
 
 Apply FlateDecode compression to streams.  Default: `true`.
 
@@ -36,7 +36,7 @@ Apply FlateDecode compression to streams.  Default: `true`.
 
 > `optional` **compressionLevel**: `1` \| `6` \| `3` \| `2` \| `4` \| `5` \| `7` \| `8` \| `9`
 
-Defined in: [src/core/pdfWriter.ts:37](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/core/pdfWriter.ts#L37)
+Defined in: [src/core/pdfWriter.ts:39](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/pdfWriter.ts#L39)
 
 Compression level for FlateDecode (1–9).  Default: `6`.
 Ignored when `compress` is `false`.
@@ -47,7 +47,7 @@ Ignored when `compress` is `false`.
 
 > `optional` **objectStreamThreshold**: `number`
 
-Defined in: [src/core/pdfWriter.ts:54](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/core/pdfWriter.ts#L54)
+Defined in: [src/core/pdfWriter.ts:56](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/pdfWriter.ts#L56)
 
 Minimum number of non-stream indirect objects before object streams
 are used.  When the count exceeds this threshold, objects are packed
@@ -65,7 +65,7 @@ Default: `Infinity` (disabled for backward compatibility).
 
 > `optional` **updateFieldAppearances**: `boolean`
 
-Defined in: [src/core/pdfWriter.ts:58](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/core/pdfWriter.ts#L58)
+Defined in: [src/core/pdfWriter.ts:60](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/pdfWriter.ts#L60)
 
 Regenerate form field appearances before saving. Default: `true`.
 
@@ -75,7 +75,7 @@ Regenerate form field appearances before saving. Default: `true`.
 
 > `optional` **useWasm**: `boolean`
 
-Defined in: [src/core/pdfWriter.ts:42](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/core/pdfWriter.ts#L42)
+Defined in: [src/core/pdfWriter.ts:44](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/pdfWriter.ts#L44)
 
 When `true`, attempt to use WASM-accelerated compression if the
 WASM module has been initialized.  Default: `false`.

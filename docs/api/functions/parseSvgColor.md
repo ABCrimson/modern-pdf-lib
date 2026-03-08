@@ -8,7 +8,7 @@
 
 > **parseSvgColor**(`colorStr`): \{ `a?`: `number`; `b`: `number`; `g`: `number`; `r`: `number`; \} \| `undefined`
 
-Defined in: [src/assets/svg/svgParser.ts:118](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/assets/svg/svgParser.ts#L118)
+Defined in: [src/assets/svg/svgParser.ts:142](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/svg/svgParser.ts#L142)
 
 ## Parameters
 

@@ -6,7 +6,7 @@
 
 # Class: FontNotEmbeddedError
 
-Defined in: [src/errors.ts:40](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/errors.ts#L40)
+Defined in: [src/errors.ts:40](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/errors.ts#L40)
 
 Thrown when a font operation requires an embedded font but none has been
 registered or the font reference is invalid.
@@ -21,7 +21,7 @@ registered or the font reference is invalid.
 
 > **new FontNotEmbeddedError**(`fontName?`, `options?`): `FontNotEmbeddedError`
 
-Defined in: [src/errors.ts:42](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/errors.ts#L42)
+Defined in: [src/errors.ts:42](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/errors.ts#L42)
 
 #### Parameters
 
@@ -71,7 +71,7 @@ Defined in: node\_modules/typescript/lib/lib.es5.d.ts:1075
 
 > `readonly` **name**: `"FontNotEmbeddedError"` = `'FontNotEmbeddedError'`
 
-Defined in: [src/errors.ts:41](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/errors.ts#L41)
+Defined in: [src/errors.ts:41](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/errors.ts#L41)
 
 #### Overrides
 

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 describe('IIFE bundle', () => {
@@ -13,30 +13,15 @@ describe('IIFE bundle', () => {
     expect(exists).toBe(true);
   });
 
-  it('tsdown config includes IIFE format', async () => {
-    const configModule = await import('../../tsdown.config.ts');
-    const configs = Array.isArray(configModule.default)
-      ? configModule.default
-      : [configModule.default];
-    const iifeConfig = configs.find((c: Record<string, unknown>) => {
-      const fmt = c.format as string | string[] | undefined;
-      return Array.isArray(fmt) ? fmt.includes('iife') : fmt === 'iife';
-    });
-    expect(iifeConfig).toBeDefined();
-    expect(iifeConfig.globalName).toBe('ModernPdf');
+  it('esbuild script outputs correct filename', () => {
+    const script = readFileSync(resolve('scripts/build-iife.ts'), 'utf-8');
+    expect(script).toContain('modern-pdf-lib.iife.js');
+    expect(script).toContain("globalName: 'ModernPdf'");
   });
 
-  it('IIFE entry points to browser.ts', async () => {
-    const configModule = await import('../../tsdown.config.ts');
-    const configs = Array.isArray(configModule.default)
-      ? configModule.default
-      : [configModule.default];
-    const iifeConfig = configs.find((c: Record<string, unknown>) => {
-      const fmt = c.format as string | string[] | undefined;
-      return Array.isArray(fmt) ? fmt.includes('iife') : fmt === 'iife';
-    });
-    const entry = iifeConfig.entry as Record<string, string>;
-    expect(Object.values(entry)).toContain('src/browser.ts');
+  it('esbuild script uses browser.ts entry', () => {
+    const script = readFileSync(resolve('scripts/build-iife.ts'), 'utf-8');
+    expect(script).toContain('src/browser.ts');
   });
 
   it('IIFE file is listed in package.json files', async () => {

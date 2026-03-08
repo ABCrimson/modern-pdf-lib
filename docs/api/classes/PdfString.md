@@ -6,7 +6,7 @@
 
 # Class: PdfString
 
-Defined in: [src/core/pdfObjects.ts:138](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/core/pdfObjects.ts#L138)
+Defined in: [src/core/pdfObjects.ts:138](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/pdfObjects.ts#L138)
 
 A PDF string — either literal `(…)` or hexadecimal `<…>`.
 
@@ -19,7 +19,7 @@ helpers for explicit control.
 
 > `readonly` **hex**: `boolean`
 
-Defined in: [src/core/pdfObjects.ts:146](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/core/pdfObjects.ts#L146)
+Defined in: [src/core/pdfObjects.ts:146](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/pdfObjects.ts#L146)
 
 When `true` the string is serialized in hexadecimal form `<…>`.
 
@@ -29,7 +29,7 @@ When `true` the string is serialized in hexadecimal form `<…>`.
 
 > `readonly` **value**: `string`
 
-Defined in: [src/core/pdfObjects.ts:144](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/core/pdfObjects.ts#L144)
+Defined in: [src/core/pdfObjects.ts:144](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/pdfObjects.ts#L144)
 
 The raw string content (unescaped).
 
@@ -39,7 +39,7 @@ The raw string content (unescaped).
 
 > **serialize**(`writer`): `void`
 
-Defined in: [src/core/pdfObjects.ts:164](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/core/pdfObjects.ts#L164)
+Defined in: [src/core/pdfObjects.ts:164](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/pdfObjects.ts#L164)
 
 #### Parameters
 
@@ -57,7 +57,7 @@ Defined in: [src/core/pdfObjects.ts:164](https://github.com/ABCrimson/modern-pdf
 
 > `static` **hex**(`value`): `PdfString`
 
-Defined in: [src/core/pdfObjects.ts:155](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/core/pdfObjects.ts#L155)
+Defined in: [src/core/pdfObjects.ts:155](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/pdfObjects.ts#L155)
 
 Create a hexadecimal string `<…>` from a plain string.
 
@@ -77,7 +77,7 @@ Create a hexadecimal string `<…>` from a plain string.
 
 > `static` **hexFromBytes**(`data`): `PdfString`
 
-Defined in: [src/core/pdfObjects.ts:160](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/core/pdfObjects.ts#L160)
+Defined in: [src/core/pdfObjects.ts:160](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/pdfObjects.ts#L160)
 
 Create a hexadecimal string from raw bytes.
 
@@ -97,7 +97,7 @@ Create a hexadecimal string from raw bytes.
 
 > `static` **literal**(`value`): `PdfString`
 
-Defined in: [src/core/pdfObjects.ts:150](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/core/pdfObjects.ts#L150)
+Defined in: [src/core/pdfObjects.ts:150](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/pdfObjects.ts#L150)
 
 Create a literal string `(…)`.
 

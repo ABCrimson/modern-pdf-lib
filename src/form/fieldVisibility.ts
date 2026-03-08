@@ -197,7 +197,7 @@ function buildVisibilityScript(
       condExpr = `${fieldRef}.value != "${escapeJS(condition.value ?? '')}"`;
       break;
     case 'contains':
-      condExpr = `${fieldRef}.value.indexOf("${escapeJS(condition.value ?? '')}") >= 0`;
+      condExpr = `${fieldRef}.value.includes("${escapeJS(condition.value ?? '')}")`;
       break;
     case 'empty':
       condExpr = `${fieldRef}.value == ""`;

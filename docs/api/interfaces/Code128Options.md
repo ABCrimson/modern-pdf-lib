@@ -6,7 +6,7 @@
 
 # Interface: Code128Options
 
-Defined in: [src/barcode/code128.ts:155](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/barcode/code128.ts#L155)
+Defined in: [src/barcode/code128.ts:155](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/barcode/code128.ts#L155)
 
 Options for rendering a Code 128 barcode as PDF operators.
 
@@ -16,7 +16,7 @@ Options for rendering a Code 128 barcode as PDF operators.
 
 > `readonly` `optional` **color**: [`Color`](../type-aliases/Color.md)
 
-Defined in: [src/barcode/code128.ts:163](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/barcode/code128.ts#L163)
+Defined in: [src/barcode/code128.ts:163](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/barcode/code128.ts#L163)
 
 Bar colour. Default: black (grayscale 0).
 
@@ -26,7 +26,7 @@ Bar colour. Default: black (grayscale 0).
 
 > `readonly` `optional` **fontSize**: `number`
 
-Defined in: [src/barcode/code128.ts:167](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/barcode/code128.ts#L167)
+Defined in: [src/barcode/code128.ts:167](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/barcode/code128.ts#L167)
 
 Font size for the human-readable text. Default: `10`.
 
@@ -36,7 +36,7 @@ Font size for the human-readable text. Default: `10`.
 
 > `readonly` `optional` **height**: `number`
 
-Defined in: [src/barcode/code128.ts:157](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/barcode/code128.ts#L157)
+Defined in: [src/barcode/code128.ts:157](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/barcode/code128.ts#L157)
 
 Bar height in points. Default: `50`.
 
@@ -46,7 +46,7 @@ Bar height in points. Default: `50`.
 
 > `readonly` `optional` **moduleWidth**: `number`
 
-Defined in: [src/barcode/code128.ts:159](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/barcode/code128.ts#L159)
+Defined in: [src/barcode/code128.ts:159](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/barcode/code128.ts#L159)
 
 Narrow bar (module) width in points. Default: `1`.
 
@@ -56,7 +56,7 @@ Narrow bar (module) width in points. Default: `1`.
 
 > `readonly` `optional` **quietZone**: `number`
 
-Defined in: [src/barcode/code128.ts:161](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/barcode/code128.ts#L161)
+Defined in: [src/barcode/code128.ts:161](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/barcode/code128.ts#L161)
 
 Quiet zone width in modules. Default: `10`.
 
@@ -66,6 +66,6 @@ Quiet zone width in modules. Default: `10`.
 
 > `readonly` `optional` **showText**: `boolean`
 
-Defined in: [src/barcode/code128.ts:165](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/barcode/code128.ts#L165)
+Defined in: [src/barcode/code128.ts:165](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/barcode/code128.ts#L165)
 
 Show human-readable text below the barcode. Default: `false`.

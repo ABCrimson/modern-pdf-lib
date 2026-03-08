@@ -6,7 +6,7 @@
 
 # Interface: Type0FontData
 
-Defined in: [src/assets/font/fontEmbed.ts:501](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/assets/font/fontEmbed.ts#L501)
+Defined in: [src/assets/font/fontEmbed.ts:501](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/font/fontEmbed.ts#L501)
 
 Data for the top-level /Font (Type 0) dictionary.
 
@@ -16,7 +16,7 @@ Data for the top-level /Font (Type 0) dictionary.
 
 > `readonly` **baseFont**: `string`
 
-Defined in: [src/assets/font/fontEmbed.ts:502](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/assets/font/fontEmbed.ts#L502)
+Defined in: [src/assets/font/fontEmbed.ts:502](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/font/fontEmbed.ts#L502)
 
 ***
 
@@ -24,4 +24,4 @@ Defined in: [src/assets/font/fontEmbed.ts:502](https://github.com/ABCrimson/mode
 
 > `readonly` **encoding**: `string`
 
-Defined in: [src/assets/font/fontEmbed.ts:503](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/assets/font/fontEmbed.ts#L503)
+Defined in: [src/assets/font/fontEmbed.ts:503](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/font/fontEmbed.ts#L503)
