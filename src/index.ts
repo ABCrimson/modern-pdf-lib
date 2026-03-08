@@ -609,6 +609,38 @@ export {
   requestTimestamp,
   buildTimestampRequest,
   parseTimestampResponse,
+  // Incremental save with signature preservation
+  saveIncrementalWithSignaturePreservation,
+  appendIncrementalUpdate,
+  findExistingSignatures,
+  validateByteRangeIntegrity,
+  parseExistingTrailer,
+  // Multi-signature chain validation
+  validateSignatureChain,
+  // MDP (DocMDP) certification policy
+  MdpPermission,
+  setCertificationLevel,
+  getCertificationLevel,
+  buildDocMdpReference,
+  // Modification detection
+  detectModifications,
+  // Signature field lock
+  addFieldLock,
+  getFieldLocks,
+  buildFieldLockDict,
+  // Document diff
+  diffSignedContent,
+  // Counter-signatures
+  addCounterSignature,
+  getCounterSignatures,
+  // LTV embedding
+  embedLtvData,
+  buildDssDictionary,
+  hasLtvData,
+  // Incremental save optimization
+  optimizeIncrementalSave,
+  computeObjectHash,
+  findChangedObjects,
 } from './signature/index.js';
 export type {
   SignOptions,
@@ -620,6 +652,32 @@ export type {
   SignatureOptions,
   TimestampResult,
   PrepareAppearanceOptions,
+  // Incremental save types
+  SignatureByteRange,
+  IncrementalSaveOptions,
+  AppendOptions,
+  IncrementalObject,
+  TrailerInfo,
+  // Multi-signature chain types
+  SignatureChainEntry,
+  SignatureChainResult,
+  // Modification detection types
+  ModificationViolationType,
+  ModificationViolation,
+  ModificationReport,
+  // Field lock types
+  FieldLockOptions,
+  FieldLockInfo,
+  // Document diff types
+  DocumentDiff,
+  DiffEntry,
+  // Counter-signature types
+  CounterSignatureInfo,
+  // LTV types
+  LtvOptions,
+  DssData,
+  // Incremental optimizer types
+  IncrementalChange,
 } from './signature/index.js';
 
 // ---------------------------------------------------------------------------
@@ -752,6 +810,81 @@ export type { JpegMarkerInfo } from './assets/image/jpegMarkers.js';
 
 export { extractJpegMetadata, injectJpegMetadata } from './assets/image/imageMetadata.js';
 export type { JpegMetadata } from './assets/image/imageMetadata.js';
+
+// ---------------------------------------------------------------------------
+// TIFF CMYK support
+// ---------------------------------------------------------------------------
+
+export {
+  convertTiffCmykToRgb,
+  embedTiffCmyk,
+  isCmykTiff,
+} from './assets/image/tiffCmyk.js';
+export type { TiffIfdEntry, TiffCmykEmbedResult } from './assets/image/tiffCmyk.js';
+
+// ---------------------------------------------------------------------------
+// Image format detection
+// ---------------------------------------------------------------------------
+
+export {
+  detectImageFormat,
+  getImageFormatName,
+  getSupportedFormats,
+} from './assets/image/formatDetect.js';
+export type { ImageFormat } from './assets/image/formatDetect.js';
+
+// ---------------------------------------------------------------------------
+// WebP optimization (decode → JPEG/PNG re-encode)
+// ---------------------------------------------------------------------------
+
+export {
+  recompressWebP,
+  webpToJpeg,
+  webpToPng,
+  encodePngFromPixels,
+} from './assets/image/webpOptimize.js';
+
+// ---------------------------------------------------------------------------
+// TIFF direct embedding
+// ---------------------------------------------------------------------------
+
+export {
+  embedTiffDirect,
+  canDirectEmbed,
+} from './assets/image/tiffDirectEmbed.js';
+export type {
+  DirectEmbedOptions,
+  DirectEmbedResult,
+} from './assets/image/tiffDirectEmbed.js';
+
+// ---------------------------------------------------------------------------
+// WebP decoding
+// ---------------------------------------------------------------------------
+
+export {
+  decodeWebP,
+  isWebP,
+  isWebPLossless,
+} from './assets/image/webpDecode.js';
+export type { WebPImage } from './assets/image/webpDecode.js';
+
+// ---------------------------------------------------------------------------
+// TIFF decoding
+// ---------------------------------------------------------------------------
+
+export {
+  decodeTiff,
+  decodeTiffPage,
+  decodeTiffAll,
+  getTiffPageCount,
+  parseTiffIfd,
+  isTiff,
+} from './assets/image/tiffDecode.js';
+export type {
+  TiffImage,
+  TiffDecodeOptions,
+  IfdEntry,
+} from './assets/image/tiffDecode.js';
 
 // ---------------------------------------------------------------------------
 // WASM loader (streaming compilation, runtime detection, configuration)

@@ -228,3 +228,123 @@ export type {
   DetailedVerifyOptions,
   CertificateInfo,
 } from './detailedVerifier.js';
+
+// ---------------------------------------------------------------------------
+// Incremental save with signature preservation
+// ---------------------------------------------------------------------------
+
+export {
+  saveIncrementalWithSignaturePreservation,
+  appendIncrementalUpdate,
+  findExistingSignatures,
+  validateByteRangeIntegrity,
+  parseExistingTrailer,
+} from './incrementalSave.js';
+export type {
+  SignatureByteRange,
+  IncrementalSaveOptions,
+  AppendOptions,
+  IncrementalObject,
+  TrailerInfo,
+} from './incrementalSave.js';
+
+// ---------------------------------------------------------------------------
+// Multi-signature chain validation
+// ---------------------------------------------------------------------------
+
+export {
+  validateSignatureChain,
+} from './multiSignatureValidator.js';
+export type {
+  SignatureChainEntry,
+  SignatureChainResult,
+} from './multiSignatureValidator.js';
+
+// ---------------------------------------------------------------------------
+// MDP (DocMDP) certification policy
+// ---------------------------------------------------------------------------
+
+export {
+  MdpPermission,
+  setCertificationLevel,
+  getCertificationLevel,
+  buildDocMdpReference,
+} from './mdpPolicy.js';
+
+// ---------------------------------------------------------------------------
+// Modification detection
+// ---------------------------------------------------------------------------
+
+export {
+  detectModifications,
+} from './modificationDetector.js';
+export type {
+  ModificationViolationType,
+  ModificationViolation,
+  ModificationReport,
+} from './modificationDetector.js';
+
+// ---------------------------------------------------------------------------
+// Signature field lock
+// ---------------------------------------------------------------------------
+
+export {
+  addFieldLock,
+  getFieldLocks,
+  buildFieldLockDict,
+} from './fieldLock.js';
+export type {
+  FieldLockOptions,
+  FieldLockInfo,
+} from './fieldLock.js';
+
+// ---------------------------------------------------------------------------
+// Document diff (signed vs current content)
+// ---------------------------------------------------------------------------
+
+export {
+  diffSignedContent,
+} from './documentDiff.js';
+export type {
+  DocumentDiff,
+  DiffEntry,
+} from './documentDiff.js';
+
+// ---------------------------------------------------------------------------
+// Counter-signatures
+// ---------------------------------------------------------------------------
+
+export {
+  addCounterSignature,
+  getCounterSignatures,
+} from './counterSignature.js';
+export type {
+  CounterSignatureInfo,
+} from './counterSignature.js';
+
+// ---------------------------------------------------------------------------
+// LTV (Long-Term Validation) embedding
+// ---------------------------------------------------------------------------
+
+export {
+  embedLtvData,
+  buildDssDictionary,
+  hasLtvData,
+} from './ltvEmbed.js';
+export type {
+  LtvOptions,
+  DssData,
+} from './ltvEmbed.js';
+
+// ---------------------------------------------------------------------------
+// Incremental save optimization
+// ---------------------------------------------------------------------------
+
+export {
+  optimizeIncrementalSave,
+  computeObjectHash,
+  findChangedObjects,
+} from './incrementalOptimizer.js';
+export type {
+  IncrementalChange,
+} from './incrementalOptimizer.js';

@@ -65,6 +65,7 @@ function buildSignatureDictString(
   placeholderSize: number,
   fieldName: string,
   signingDate?: Date,
+  mdpReference?: string,
 ): string {
   const contentsHex = '0'.repeat(placeholderSize * 2);
   // Use large placeholder values for ByteRange — will be patched later
@@ -79,6 +80,10 @@ function buildSignatureDictString(
 
   if (signingDate !== undefined) {
     dict += ` /M (D:${formatPdfDate(signingDate)})`;
+  }
+
+  if (mdpReference !== undefined) {
+    dict += mdpReference;
   }
 
   dict += ' >>';
@@ -290,6 +295,8 @@ export function prepareForSigning(
   signatureFieldName: string,
   placeholderSize: number = 8192,
   appearance?: PrepareAppearanceOptions | undefined,
+  mdpPermission?: number | undefined,
+  fieldLock?: { action: 'All' | 'Include' | 'Exclude'; fields?: string[] | undefined } | undefined,
 ): { preparedPdf: Uint8Array; byteRange: ByteRangeResult } {
   // Step 1: Find the original trailer/xref info
   const pdfStr = decoder.decode(pdfBytes);
@@ -307,12 +314,13 @@ export function prepareForSigning(
   }
   const prevXrefOffset = parseInt(xrefOffsetMatch[1]!, 10);
 
-  // Find /Size in trailer
-  const sizeMatch = pdfStr.match(/\/Size\s+(\d+)/);
-  if (!sizeMatch) {
+  // Find the LAST /Size in the trailer (for incremental updates,
+  // there may be multiple trailers with /Size)
+  const sizeMatches = [...pdfStr.matchAll(/\/Size\s+(\d+)/g)];
+  if (sizeMatches.length === 0) {
     throw new Error('Cannot find /Size in PDF trailer');
   }
-  const originalSize = parseInt(sizeMatch[1]!, 10);
+  const originalSize = parseInt(sizeMatches[sizeMatches.length - 1]![1]!, 10);
 
   // Find /Root reference
   const rootMatch = pdfStr.match(/\/Root\s+(\d+)\s+(\d+)\s+R/);
@@ -338,7 +346,15 @@ export function prepareForSigning(
   }
 
   // Step 2: Build the incremental update
-  const sigDictStr = buildSignatureDictString(placeholderSize, signatureFieldName);
+  // Build optional MDP reference string
+  let mdpReference: string | undefined;
+  if (mdpPermission !== undefined && mdpPermission >= 1 && mdpPermission <= 3) {
+    mdpReference =
+      ` /Reference [<< /Type /SigRef /TransformMethod /DocMDP` +
+      ` /TransformParams << /Type /TransformParams /P ${mdpPermission} /V /1.2 >> >>]`;
+  }
+
+  const sigDictStr = buildSignatureDictString(placeholderSize, signatureFieldName, undefined, mdpReference);
 
   // Build rect string
   let rectStr = '0 0 0 0';
@@ -355,6 +371,19 @@ export function prepareForSigning(
   if (appearance && apStreamObjNum >= 0) {
     sigFieldDict += ` /AP << /N ${apStreamObjNum} 0 R >>`;
   }
+
+  // Add field lock dictionary if specified
+  if (fieldLock !== undefined) {
+    sigFieldDict += ` /Lock << /Type /SigFieldLock /Action /${fieldLock.action}`;
+    if (fieldLock.action !== 'All' && fieldLock.fields && fieldLock.fields.length > 0) {
+      const fieldEntries = fieldLock.fields
+        .map((f: string) => `(${escapePdfString(f)})`)
+        .join(' ');
+      sigFieldDict += ` /Fields [${fieldEntries}]`;
+    }
+    sigFieldDict += ' >>';
+  }
+
   sigFieldDict += ' >>';
 
   // Build the appendix

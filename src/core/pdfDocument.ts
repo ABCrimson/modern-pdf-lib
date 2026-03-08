@@ -43,6 +43,11 @@ import { subsetFont, buildSubsetCmap, computeSubsetTag } from '../assets/font/fo
 import { isOpenTypeCFF } from '../assets/font/otfDetect.js';
 import { findTable } from '../assets/font/cffEmbed.js';
 import { embedPng as decodePng } from '../assets/image/pngEmbed.js';
+import { detectImageFormat } from '../assets/image/formatDetect.js';
+import { decodeWebP, isWebP } from '../assets/image/webpDecode.js';
+import { decodeTiff, isTiff } from '../assets/image/tiffDecode.js';
+import type { TiffDecodeOptions } from '../assets/image/tiffDecode.js';
+import { deflateSync } from 'fflate';
 import type { LoadPdfOptions } from '../parser/documentParser.js';
 import { loadPdf } from '../parser/documentParser.js';
 import { PdfEncryptionHandler } from '../crypto/encryptionHandler.js';
@@ -1039,12 +1044,240 @@ export class PdfDocument {
   }
 
   /**
+   * Embed a WebP image.
+   *
+   * WebP cannot be directly embedded in PDF. This method decodes the
+   * WebP image to raw pixels (VP8/lossy, VP8L/lossless, or VP8+ALPH),
+   * then embeds as a FlateDecode image XObject. If the WebP has
+   * transparency, the alpha channel is embedded as a soft mask.
+   *
+   * @param webpData  Raw WebP file bytes as a `Uint8Array` or `ArrayBuffer`.
+   * @returns         An {@link ImageRef}.
+   */
+  embedWebP(webpData: Uint8Array | ArrayBuffer): ImageRef {
+    const data = webpData instanceof ArrayBuffer ? new Uint8Array(webpData) : webpData;
+    const decoded = decodeWebP(data);
+
+    this.imageCounter++;
+    const resourceName = `Im${this.imageCounter}`;
+
+    const dict = new PdfDict();
+    dict.set('/Type', PdfName.of('XObject'));
+    dict.set('/Subtype', PdfName.of('Image'));
+    dict.set('/Width', PdfNumber.of(decoded.width));
+    dict.set('/Height', PdfNumber.of(decoded.height));
+    dict.set('/BitsPerComponent', PdfNumber.of(8));
+
+    if (decoded.hasAlpha) {
+      // Separate RGB and Alpha
+      const pixelCount = decoded.width * decoded.height;
+      const rgb = new Uint8Array(pixelCount * 3);
+      const alpha = new Uint8Array(pixelCount);
+
+      for (let i = 0; i < pixelCount; i++) {
+        const srcIdx = i * 4;
+        const dstIdx = i * 3;
+        rgb[dstIdx] = decoded.pixels[srcIdx]!;
+        rgb[dstIdx + 1] = decoded.pixels[srcIdx + 1]!;
+        rgb[dstIdx + 2] = decoded.pixels[srcIdx + 2]!;
+        alpha[i] = decoded.pixels[srcIdx + 3]!;
+      }
+
+      const compressedRgb = deflateSync(rgb, { level: 6 });
+      const compressedAlpha = deflateSync(alpha, { level: 6 });
+
+      dict.set('/ColorSpace', PdfName.of('DeviceRGB'));
+      dict.set('/Filter', PdfName.of('FlateDecode'));
+      dict.set('/Length', PdfNumber.of(compressedRgb.length));
+
+      // Create SMask for alpha
+      const smaskDict = new PdfDict();
+      smaskDict.set('/Type', PdfName.of('XObject'));
+      smaskDict.set('/Subtype', PdfName.of('Image'));
+      smaskDict.set('/Width', PdfNumber.of(decoded.width));
+      smaskDict.set('/Height', PdfNumber.of(decoded.height));
+      smaskDict.set('/BitsPerComponent', PdfNumber.of(8));
+      smaskDict.set('/ColorSpace', PdfName.of('DeviceGray'));
+      smaskDict.set('/Filter', PdfName.of('FlateDecode'));
+      smaskDict.set('/Length', PdfNumber.of(compressedAlpha.length));
+
+      const smaskStream = new PdfStream(smaskDict, compressedAlpha);
+      const smaskRef = this.registry.register(smaskStream);
+      dict.set('/SMask', smaskRef);
+
+      const stream = new PdfStream(dict, compressedRgb);
+      const ref = this.registry.register(stream);
+
+      const w = decoded.width;
+      const h = decoded.height;
+      const imageRef: ImageRef = {
+        name: resourceName,
+        ref,
+        width: w,
+        height: h,
+        scale(factor: number) { return { width: w * factor, height: h * factor }; },
+        scaleToFit(maxW: number, maxH: number) {
+          const ratio = Math.min(maxW / w, maxH / h);
+          return { width: w * ratio, height: h * ratio };
+        },
+      };
+      this.embeddedImages.push(imageRef);
+      return imageRef;
+    }
+
+    // RGB only (no alpha)
+    const compressedRgb = deflateSync(decoded.pixels, { level: 6 });
+
+    dict.set('/ColorSpace', PdfName.of('DeviceRGB'));
+    dict.set('/Filter', PdfName.of('FlateDecode'));
+    dict.set('/Length', PdfNumber.of(compressedRgb.length));
+
+    const stream = new PdfStream(dict, compressedRgb);
+    const ref = this.registry.register(stream);
+
+    const w = decoded.width;
+    const h = decoded.height;
+    const imageRef: ImageRef = {
+      name: resourceName,
+      ref,
+      width: w,
+      height: h,
+      scale(factor: number) { return { width: w * factor, height: h * factor }; },
+      scaleToFit(maxW: number, maxH: number) {
+        const ratio = Math.min(maxW / w, maxH / h);
+        return { width: w * ratio, height: h * ratio };
+      },
+    };
+    this.embeddedImages.push(imageRef);
+    return imageRef;
+  }
+
+  /**
+   * Embed a TIFF image.
+   *
+   * Decodes the TIFF image and creates a PDF image XObject with
+   * FlateDecode compression. For multi-page TIFFs, a specific page
+   * can be selected via options.
+   *
+   * @param tiffData  Raw TIFF file bytes as a `Uint8Array` or `ArrayBuffer`.
+   * @param options   Options (e.g., `{ page: 0 }` for multi-page TIFFs).
+   * @returns         An {@link ImageRef}.
+   */
+  embedTiff(tiffData: Uint8Array | ArrayBuffer, options?: { page?: number | undefined } | undefined): ImageRef {
+    const data = tiffData instanceof ArrayBuffer ? new Uint8Array(tiffData) : tiffData;
+    const tiffOptions: TiffDecodeOptions | undefined = options?.page !== undefined
+      ? { page: options.page }
+      : undefined;
+    const decoded = decodeTiff(data, tiffOptions);
+
+    this.imageCounter++;
+    const resourceName = `Im${this.imageCounter}`;
+
+    const dict = new PdfDict();
+    dict.set('/Type', PdfName.of('XObject'));
+    dict.set('/Subtype', PdfName.of('Image'));
+    dict.set('/Width', PdfNumber.of(decoded.width));
+    dict.set('/Height', PdfNumber.of(decoded.height));
+    dict.set('/BitsPerComponent', PdfNumber.of(8));
+
+    if (decoded.channels === 4) {
+      // RGBA: separate into RGB + alpha SMask
+      const pixelCount = decoded.width * decoded.height;
+      const rgb = new Uint8Array(pixelCount * 3);
+      const alpha = new Uint8Array(pixelCount);
+
+      for (let i = 0; i < pixelCount; i++) {
+        const srcIdx = i * 4;
+        const dstIdx = i * 3;
+        rgb[dstIdx] = decoded.pixels[srcIdx]!;
+        rgb[dstIdx + 1] = decoded.pixels[srcIdx + 1]!;
+        rgb[dstIdx + 2] = decoded.pixels[srcIdx + 2]!;
+        alpha[i] = decoded.pixels[srcIdx + 3]!;
+      }
+
+      const compressedRgb = deflateSync(rgb, { level: 6 });
+      const compressedAlpha = deflateSync(alpha, { level: 6 });
+
+      dict.set('/ColorSpace', PdfName.of('DeviceRGB'));
+      dict.set('/Filter', PdfName.of('FlateDecode'));
+      dict.set('/Length', PdfNumber.of(compressedRgb.length));
+
+      const smaskDict = new PdfDict();
+      smaskDict.set('/Type', PdfName.of('XObject'));
+      smaskDict.set('/Subtype', PdfName.of('Image'));
+      smaskDict.set('/Width', PdfNumber.of(decoded.width));
+      smaskDict.set('/Height', PdfNumber.of(decoded.height));
+      smaskDict.set('/BitsPerComponent', PdfNumber.of(8));
+      smaskDict.set('/ColorSpace', PdfName.of('DeviceGray'));
+      smaskDict.set('/Filter', PdfName.of('FlateDecode'));
+      smaskDict.set('/Length', PdfNumber.of(compressedAlpha.length));
+
+      const smaskStream = new PdfStream(smaskDict, compressedAlpha);
+      const smaskRef = this.registry.register(smaskStream);
+      dict.set('/SMask', smaskRef);
+
+      const stream = new PdfStream(dict, compressedRgb);
+      const ref = this.registry.register(stream);
+
+      const w = decoded.width;
+      const h = decoded.height;
+      const imageRef: ImageRef = {
+        name: resourceName,
+        ref,
+        width: w,
+        height: h,
+        scale(factor: number) { return { width: w * factor, height: h * factor }; },
+        scaleToFit(maxW: number, maxH: number) {
+          const ratio = Math.min(maxW / w, maxH / h);
+          return { width: w * ratio, height: h * ratio };
+        },
+      };
+      this.embeddedImages.push(imageRef);
+      return imageRef;
+    }
+
+    // Grayscale or RGB (no alpha)
+    const colorSpace = decoded.channels === 1 ? 'DeviceGray' : 'DeviceRGB';
+    const compressed = deflateSync(decoded.pixels, { level: 6 });
+
+    dict.set('/ColorSpace', PdfName.of(colorSpace));
+    dict.set('/Filter', PdfName.of('FlateDecode'));
+    dict.set('/Length', PdfNumber.of(compressed.length));
+
+    const stream = new PdfStream(dict, compressed);
+    const ref = this.registry.register(stream);
+
+    const w = decoded.width;
+    const h = decoded.height;
+    const imageRef: ImageRef = {
+      name: resourceName,
+      ref,
+      width: w,
+      height: h,
+      scale(factor: number) { return { width: w * factor, height: h * factor }; },
+      scaleToFit(maxW: number, maxH: number) {
+        const ratio = Math.min(maxW / w, maxH / h);
+        return { width: w * ratio, height: h * ratio };
+      },
+    };
+    this.embeddedImages.push(imageRef);
+    return imageRef;
+  }
+
+  /**
    * Embed an image, auto-detecting the format from file headers.
    *
-   * Inspects the first bytes to determine whether the data is PNG or JPEG,
-   * then delegates to {@link embedPng} or {@link embedJpeg} accordingly.
+   * Inspects the first bytes to determine the image format (PNG, JPEG,
+   * WebP, or TIFF), then delegates to the appropriate embedding method.
    *
-   * @param imageData  Raw image file bytes (PNG or JPEG).
+   * Supported formats:
+   * - **PNG**: `89 50 4E 47` — embedded via {@link embedPng}
+   * - **JPEG**: `FF D8 FF` — embedded via {@link embedJpeg}
+   * - **WebP**: `52 49 46 46` + `57 45 42 50` — embedded via {@link embedWebP}
+   * - **TIFF LE**: `49 49 2A 00` — embedded via {@link embedTiff}
+   * - **TIFF BE**: `4D 4D 00 2A` — embedded via {@link embedTiff}
+   *
+   * @param imageData  Raw image file bytes (PNG, JPEG, WebP, or TIFF).
    * @returns          An {@link ImageRef} to pass to `page.drawImage()`.
    * @throws           If the image format cannot be detected.
    *
@@ -1061,20 +1294,23 @@ export class PdfDocument {
       throw new Error('Image data too short to detect format');
     }
 
-    // PNG: 89 50 4E 47 (.PNG)
-    if (data[0] === 0x89 && data[1] === 0x50 && data[2] === 0x4E && data[3] === 0x47) {
-      return this.embedPng(data);
-    }
+    const format = detectImageFormat(data);
 
-    // JPEG: FF D8 FF
-    if (data[0] === 0xFF && data[1] === 0xD8 && data[2] === 0xFF) {
-      return this.embedJpeg(data);
+    switch (format) {
+      case 'png':
+        return this.embedPng(data);
+      case 'jpeg':
+        return this.embedJpeg(data);
+      case 'webp':
+        return this.embedWebP(data);
+      case 'tiff':
+        return this.embedTiff(data);
+      default:
+        throw new Error(
+          'Unsupported image format. Expected PNG, JPEG, WebP, or TIFF, ' +
+          `got ${data.subarray(0, 4).toHex().match(/.{2}/g)?.join(' ') ?? ''}.`,
+        );
     }
-
-    throw new Error(
-      'Unsupported image format. Expected PNG (89 50 4E 47) or JPEG (FF D8 FF), ' +
-      `got ${data.subarray(0, 4).toHex().match(/.{2}/g)?.join(' ') ?? ''}.`,
-    );
   }
 
   // -----------------------------------------------------------------------
