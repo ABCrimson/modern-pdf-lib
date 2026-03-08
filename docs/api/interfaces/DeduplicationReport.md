@@ -6,7 +6,7 @@
 
 # Interface: DeduplicationReport
 
-Defined in: [src/assets/image/deduplicateImages.ts:28](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/assets/image/deduplicateImages.ts#L28)
+Defined in: [src/assets/image/deduplicateImages.ts:28](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/assets/image/deduplicateImages.ts#L28)
 
 Report from image deduplication.
 
@@ -16,7 +16,7 @@ Report from image deduplication.
 
 > `readonly` **bytesSaved**: `number`
 
-Defined in: [src/assets/image/deduplicateImages.ts:36](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/assets/image/deduplicateImages.ts#L36)
+Defined in: [src/assets/image/deduplicateImages.ts:36](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/assets/image/deduplicateImages.ts#L36)
 
 Estimated bytes saved by deduplication.
 
@@ -26,7 +26,7 @@ Estimated bytes saved by deduplication.
 
 > `readonly` **duplicatesRemoved**: `number`
 
-Defined in: [src/assets/image/deduplicateImages.ts:34](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/assets/image/deduplicateImages.ts#L34)
+Defined in: [src/assets/image/deduplicateImages.ts:34](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/assets/image/deduplicateImages.ts#L34)
 
 Number of duplicate references replaced.
 
@@ -36,7 +36,7 @@ Number of duplicate references replaced.
 
 > `readonly` **totalImages**: `number`
 
-Defined in: [src/assets/image/deduplicateImages.ts:30](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/assets/image/deduplicateImages.ts#L30)
+Defined in: [src/assets/image/deduplicateImages.ts:30](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/assets/image/deduplicateImages.ts#L30)
 
 Total number of image XObjects found.
 
@@ -46,6 +46,6 @@ Total number of image XObjects found.
 
 > `readonly` **uniqueImages**: `number`
 
-Defined in: [src/assets/image/deduplicateImages.ts:32](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/assets/image/deduplicateImages.ts#L32)
+Defined in: [src/assets/image/deduplicateImages.ts:32](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/assets/image/deduplicateImages.ts#L32)
 
 Number of unique images (after deduplication).

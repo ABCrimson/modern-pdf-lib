@@ -8,7 +8,7 @@
 
 > **downscaleImage**(`image`, `options?`): [`RawImageData`](../interfaces/RawImageData.md)
 
-Defined in: [src/assets/image/imageOptimize.ts:198](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/assets/image/imageOptimize.ts#L198)
+Defined in: [src/assets/image/imageOptimize.ts:198](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/assets/image/imageOptimize.ts#L198)
 
 Downscale an image to fit within the specified dimensions.
 

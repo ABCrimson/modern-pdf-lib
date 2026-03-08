@@ -8,7 +8,7 @@
 
 > **detectTransparency**(`pdfBytes`): [`TransparencyInfo`](../interfaces/TransparencyInfo.md)
 
-Defined in: [src/compliance/transparencyFlattener.ts:57](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/compliance/transparencyFlattener.ts#L57)
+Defined in: [src/compliance/transparencyFlattener.ts:57](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/compliance/transparencyFlattener.ts#L57)
 
 Analyze PDF bytes for transparency usage.
 

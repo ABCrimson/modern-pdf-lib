@@ -8,7 +8,7 @@
 
 > **ellipsePath**(`cx`, `cy`, `rx`, `ry`): `string`
 
-Defined in: [src/core/operators/graphics.ts:307](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/core/operators/graphics.ts#L307)
+Defined in: [src/core/operators/graphics.ts:307](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/operators/graphics.ts#L307)
 
 Produce the path operators for an approximate ellipse.
 

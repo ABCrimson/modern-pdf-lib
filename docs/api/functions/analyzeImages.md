@@ -8,7 +8,7 @@
 
 > **analyzeImages**(`doc`, `options?`): [`AnalysisReport`](../interfaces/AnalysisReport.md)
 
-Defined in: [src/assets/image/compressionAnalysis.ts:199](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/assets/image/compressionAnalysis.ts#L199)
+Defined in: [src/assets/image/compressionAnalysis.ts:199](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/assets/image/compressionAnalysis.ts#L199)
 
 Analyze all images in a PDF and report potential savings without
 modifying the document.

@@ -8,7 +8,7 @@
 
 > **showTextArray**(`items`): `string`
 
-Defined in: [src/core/operators/text.ts:242](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/core/operators/text.ts#L242)
+Defined in: [src/core/operators/text.ts:242](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/operators/text.ts#L242)
 
 Show one or more text strings with individual glyph positioning (`TJ`).
 

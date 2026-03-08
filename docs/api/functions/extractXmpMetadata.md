@@ -8,7 +8,7 @@
 
 > **extractXmpMetadata**(`pdfBytes`): `string` \| `undefined`
 
-Defined in: [src/compliance/xmpValidator.ts:64](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/compliance/xmpValidator.ts#L64)
+Defined in: [src/compliance/xmpValidator.ts:64](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/compliance/xmpValidator.ts#L64)
 
 Extract XMP metadata from raw PDF bytes.
 

@@ -8,7 +8,7 @@
 
 > **encodeContextTag**(`tag`, `contents`): `Uint8Array`
 
-Defined in: [src/signature/pkcs7.ts:327](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/signature/pkcs7.ts#L327)
+Defined in: [src/signature/pkcs7.ts:327](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/signature/pkcs7.ts#L327)
 
 Encode a context-specific tagged value (implicit or explicit).
 

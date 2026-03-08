@@ -8,7 +8,7 @@
 
 > **generateWinAnsiToUnicodeCmap**(): `string`
 
-Defined in: [src/compliance/toUnicodeCmap.ts:557](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/compliance/toUnicodeCmap.ts#L557)
+Defined in: [src/compliance/toUnicodeCmap.ts:557](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/compliance/toUnicodeCmap.ts#L557)
 
 Generate a ToUnicode CMap string for a standard WinAnsi-encoded font.
 

@@ -8,7 +8,7 @@
 
 > **encodePdf417**(`data`, `options?`): [`Pdf417Matrix`](../interfaces/Pdf417Matrix.md)
 
-Defined in: [src/barcode/pdf417.ts:678](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/barcode/pdf417.ts#L678)
+Defined in: [src/barcode/pdf417.ts:678](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/barcode/pdf417.ts#L678)
 
 Encode a string as a PDF417 2D stacked barcode.
 

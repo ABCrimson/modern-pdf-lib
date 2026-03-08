@@ -6,7 +6,7 @@
 
 # Class: PdfTextField
 
-Defined in: [src/form/fields/textField.ts:43](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/form/fields/textField.ts#L43)
+Defined in: [src/form/fields/textField.ts:43](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/form/fields/textField.ts#L43)
 
 A PDF text form field (/FT /Tx).
 
@@ -23,7 +23,7 @@ multiline mode, password masking, and maximum length.
 
 > **new PdfTextField**(`name`, `dict`, `widgetDict`, `parentNames?`): `PdfTextField`
 
-Defined in: [src/form/pdfField.ts:175](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/form/pdfField.ts#L175)
+Defined in: [src/form/pdfField.ts:175](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/form/pdfField.ts#L175)
 
 #### Parameters
 
@@ -57,7 +57,7 @@ Defined in: [src/form/pdfField.ts:175](https://github.com/ABCrimson/modern-pdf-l
 
 > `protected` `readonly` **dict**: [`PdfDict`](PdfDict.md)
 
-Defined in: [src/form/pdfField.ts:164](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/form/pdfField.ts#L164)
+Defined in: [src/form/pdfField.ts:164](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/form/pdfField.ts#L164)
 
 The underlying field dictionary (may contain both field and widget
 entries for simple one-widget fields).
@@ -72,7 +72,7 @@ entries for simple one-widget fields).
 
 > `readonly` **fieldType**: [`FieldType`](../type-aliases/FieldType.md) = `'text'`
 
-Defined in: [src/form/fields/textField.ts:44](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/form/fields/textField.ts#L44)
+Defined in: [src/form/fields/textField.ts:44](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/form/fields/textField.ts#L44)
 
 Discriminator for the concrete field type.
 
@@ -86,7 +86,7 @@ Discriminator for the concrete field type.
 
 > `readonly` **name**: `string`
 
-Defined in: [src/form/pdfField.ts:158](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/form/pdfField.ts#L158)
+Defined in: [src/form/pdfField.ts:158](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/form/pdfField.ts#L158)
 
 The fully-qualified field name.
 
@@ -100,7 +100,7 @@ The fully-qualified field name.
 
 > `protected` `readonly` **parentNames**: `string`[]
 
-Defined in: [src/form/pdfField.ts:173](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/form/pdfField.ts#L173)
+Defined in: [src/form/pdfField.ts:173](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/form/pdfField.ts#L173)
 
 Parent field dictionary chain for building full names.
 
@@ -114,7 +114,7 @@ Parent field dictionary chain for building full names.
 
 > `protected` `readonly` **widgetDict**: [`PdfDict`](PdfDict.md)
 
-Defined in: [src/form/pdfField.ts:170](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/form/pdfField.ts#L170)
+Defined in: [src/form/pdfField.ts:170](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/form/pdfField.ts#L170)
 
 The widget annotation dictionary. For merged field+widget dicts,
 this is the same object as `dict`.
@@ -129,7 +129,7 @@ this is the same object as `dict`.
 
 > **addToPage**(`page`): `void`
 
-Defined in: [src/form/pdfField.ts:314](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/form/pdfField.ts#L314)
+Defined in: [src/form/pdfField.ts:314](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/form/pdfField.ts#L314)
 
 Add this field's widget annotation to a page.
 
@@ -159,7 +159,7 @@ A page that implements [WidgetAnnotationHost](../interfaces/WidgetAnnotationHost
 
 > **disableExporting**(): `void`
 
-Defined in: [src/form/pdfField.ts:276](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/form/pdfField.ts#L276)
+Defined in: [src/form/pdfField.ts:276](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/form/pdfField.ts#L276)
 
 Disable exporting this field (set the NoExport flag).
 
@@ -177,7 +177,7 @@ Disable exporting this field (set the NoExport flag).
 
 > **enableExporting**(): `void`
 
-Defined in: [src/form/pdfField.ts:271](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/form/pdfField.ts#L271)
+Defined in: [src/form/pdfField.ts:271](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/form/pdfField.ts#L271)
 
 Enable exporting this field (clear the NoExport flag).
 
@@ -195,7 +195,7 @@ Enable exporting this field (clear the NoExport flag).
 
 > **generateAppearance**(): [`PdfStream`](PdfStream.md)
 
-Defined in: [src/form/fields/textField.ts:229](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/form/fields/textField.ts#L229)
+Defined in: [src/form/fields/textField.ts:229](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/form/fields/textField.ts#L229)
 
 Generate the appearance stream for this text field.
 
@@ -213,7 +213,7 @@ Generate the appearance stream for this text field.
 
 > **getAlignment**(): `"left"` \| `"center"` \| `"right"`
 
-Defined in: [src/form/fields/textField.ts:123](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/form/fields/textField.ts#L123)
+Defined in: [src/form/fields/textField.ts:123](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/form/fields/textField.ts#L123)
 
 Get the text alignment.
 /Q: 0 = left, 1 = center, 2 = right.
@@ -228,7 +228,7 @@ Get the text alignment.
 
 > **getDict**(): [`PdfDict`](PdfDict.md)
 
-Defined in: [src/form/pdfField.ts:207](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/form/pdfField.ts#L207)
+Defined in: [src/form/pdfField.ts:207](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/form/pdfField.ts#L207)
 
 Return the underlying field dictionary (for internal use by PdfForm).
 
@@ -246,7 +246,7 @@ Return the underlying field dictionary (for internal use by PdfForm).
 
 > `protected` **getFieldFlags**(): `number`
 
-Defined in: [src/form/pdfField.ts:216](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/form/pdfField.ts#L216)
+Defined in: [src/form/pdfField.ts:216](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/form/pdfField.ts#L216)
 
 Get the raw /Ff (field flags) integer value.
 
@@ -264,7 +264,7 @@ Get the raw /Ff (field flags) integer value.
 
 > **getFontName**(): `string`
 
-Defined in: [src/form/fields/textField.ts:108](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/form/fields/textField.ts#L108)
+Defined in: [src/form/fields/textField.ts:108](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/form/fields/textField.ts#L108)
 
 Get the font name from the /DA string.
 Returns "Helv" (Helvetica) as default.
@@ -279,7 +279,7 @@ Returns "Helv" (Helvetica) as default.
 
 > **getFontSize**(): `number`
 
-Defined in: [src/form/fields/textField.ts:83](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/form/fields/textField.ts#L83)
+Defined in: [src/form/fields/textField.ts:83](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/form/fields/textField.ts#L83)
 
 Get the font size from the /DA (default appearance) string.
 Returns 0 if the font size is not specified or is auto.
@@ -294,7 +294,7 @@ Returns 0 if the font size is not specified or is auto.
 
 > **getFullName**(): `string`
 
-Defined in: [src/form/pdfField.ts:201](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/form/pdfField.ts#L201)
+Defined in: [src/form/pdfField.ts:201](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/form/pdfField.ts#L201)
 
 Get the fully qualified field name (Parent.Child.Name format).
 Per PDF spec SS12.7.3.2, the full name is formed by concatenating
@@ -314,7 +314,7 @@ ancestor /T values with periods.
 
 > **getMaxLength**(): `number` \| `undefined`
 
-Defined in: [src/form/fields/textField.ts:166](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/form/fields/textField.ts#L166)
+Defined in: [src/form/fields/textField.ts:166](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/form/fields/textField.ts#L166)
 
 Get the maximum length, or undefined if no limit.
 
@@ -328,7 +328,7 @@ Get the maximum length, or undefined if no limit.
 
 > **getName**(): `string`
 
-Defined in: [src/form/pdfField.ts:192](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/form/pdfField.ts#L192)
+Defined in: [src/form/pdfField.ts:192](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/form/pdfField.ts#L192)
 
 Get the partial field name (/T entry).
 
@@ -346,7 +346,7 @@ Get the partial field name (/T entry).
 
 > **getRect**(): \[`number`, `number`, `number`, `number`\]
 
-Defined in: [src/form/pdfField.ts:288](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/form/pdfField.ts#L288)
+Defined in: [src/form/pdfField.ts:288](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/form/pdfField.ts#L288)
 
 Get the field's widget rectangle as `[x1, y1, x2, y2]`.
 The /Rect entry comes from the widget annotation dictionary.
@@ -365,7 +365,7 @@ The /Rect entry comes from the widget annotation dictionary.
 
 > **getText**(): `string`
 
-Defined in: [src/form/fields/textField.ts:51](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/form/fields/textField.ts#L51)
+Defined in: [src/form/fields/textField.ts:51](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/form/fields/textField.ts#L51)
 
 Get the text value of this field.
 
@@ -379,7 +379,7 @@ Get the text value of this field.
 
 > **getValue**(): `string`
 
-Defined in: [src/form/fields/textField.ts:66](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/form/fields/textField.ts#L66)
+Defined in: [src/form/fields/textField.ts:66](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/form/fields/textField.ts#L66)
 
 Alias for getText().
 
@@ -397,7 +397,7 @@ Alias for getText().
 
 > `protected` **hasFlag**(`flag`): `boolean`
 
-Defined in: [src/form/pdfField.ts:226](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/form/pdfField.ts#L226)
+Defined in: [src/form/pdfField.ts:226](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/form/pdfField.ts#L226)
 
 Check if a specific flag bit is set.
 
@@ -421,7 +421,7 @@ Check if a specific flag bit is set.
 
 > **isExported**(): `boolean`
 
-Defined in: [src/form/pdfField.ts:266](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/form/pdfField.ts#L266)
+Defined in: [src/form/pdfField.ts:266](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/form/pdfField.ts#L266)
 
 Whether the field is exported (inverse of NoExport flag).
 
@@ -439,7 +439,7 @@ Whether the field is exported (inverse of NoExport flag).
 
 > **isMultiline**(): `boolean`
 
-Defined in: [src/form/fields/textField.ts:147](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/form/fields/textField.ts#L147)
+Defined in: [src/form/fields/textField.ts:147](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/form/fields/textField.ts#L147)
 
 Whether this is a multiline text field.
 
@@ -453,7 +453,7 @@ Whether this is a multiline text field.
 
 > **isNoExport**(): `boolean`
 
-Defined in: [src/form/pdfField.ts:261](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/form/pdfField.ts#L261)
+Defined in: [src/form/pdfField.ts:261](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/form/pdfField.ts#L261)
 
 Whether the field should not be exported.
 
@@ -471,7 +471,7 @@ Whether the field should not be exported.
 
 > **isPassword**(): `boolean`
 
-Defined in: [src/form/fields/textField.ts:157](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/form/fields/textField.ts#L157)
+Defined in: [src/form/fields/textField.ts:157](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/form/fields/textField.ts#L157)
 
 Whether this is a password field.
 
@@ -485,7 +485,7 @@ Whether this is a password field.
 
 > **isReadOnly**(): `boolean`
 
-Defined in: [src/form/pdfField.ts:241](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/form/pdfField.ts#L241)
+Defined in: [src/form/pdfField.ts:241](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/form/pdfField.ts#L241)
 
 Whether the field is read-only.
 
@@ -503,7 +503,7 @@ Whether the field is read-only.
 
 > **isRequired**(): `boolean`
 
-Defined in: [src/form/pdfField.ts:251](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/form/pdfField.ts#L251)
+Defined in: [src/form/pdfField.ts:251](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/form/pdfField.ts#L251)
 
 Whether the field is required.
 
@@ -521,7 +521,7 @@ Whether the field is required.
 
 > **setAlignment**(`align`): `void`
 
-Defined in: [src/form/fields/textField.ts:136](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/form/fields/textField.ts#L136)
+Defined in: [src/form/fields/textField.ts:136](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/form/fields/textField.ts#L136)
 
 Set the text alignment.
 
@@ -541,7 +541,7 @@ Set the text alignment.
 
 > `protected` **setFieldFlags**(`flags`): `void`
 
-Defined in: [src/form/pdfField.ts:221](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/form/pdfField.ts#L221)
+Defined in: [src/form/pdfField.ts:221](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/form/pdfField.ts#L221)
 
 Set the raw /Ff (field flags) integer value.
 
@@ -565,7 +565,7 @@ Set the raw /Ff (field flags) integer value.
 
 > `protected` **setFlag**(`flag`, `on`): `void`
 
-Defined in: [src/form/pdfField.ts:231](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/form/pdfField.ts#L231)
+Defined in: [src/form/pdfField.ts:231](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/form/pdfField.ts#L231)
 
 Set or clear a specific flag bit.
 
@@ -593,7 +593,7 @@ Set or clear a specific flag bit.
 
 > **setFontSize**(`size`): `void`
 
-Defined in: [src/form/fields/textField.ts:98](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/form/fields/textField.ts#L98)
+Defined in: [src/form/fields/textField.ts:98](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/form/fields/textField.ts#L98)
 
 Set the font size in the /DA string.
 Creates or updates the /DA entry.
@@ -614,7 +614,7 @@ Creates or updates the /DA entry.
 
 > **setImage**(`imageRef`): `void`
 
-Defined in: [src/form/fields/textField.ts:188](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/form/fields/textField.ts#L188)
+Defined in: [src/form/fields/textField.ts:188](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/form/fields/textField.ts#L188)
 
 Set an image on this text field.
 
@@ -654,7 +654,7 @@ An object with `name` (resource name) and `ref` (PdfRef)
 
 > **setMaxLength**(`maxLength`): `void`
 
-Defined in: [src/form/fields/textField.ts:171](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/form/fields/textField.ts#L171)
+Defined in: [src/form/fields/textField.ts:171](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/form/fields/textField.ts#L171)
 
 Set the maximum length.
 
@@ -674,7 +674,7 @@ Set the maximum length.
 
 > **setMultiline**(`multiline`): `void`
 
-Defined in: [src/form/fields/textField.ts:152](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/form/fields/textField.ts#L152)
+Defined in: [src/form/fields/textField.ts:152](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/form/fields/textField.ts#L152)
 
 Set the multiline flag.
 
@@ -694,7 +694,7 @@ Set the multiline flag.
 
 > **setReadOnly**(`readOnly`): `void`
 
-Defined in: [src/form/pdfField.ts:246](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/form/pdfField.ts#L246)
+Defined in: [src/form/pdfField.ts:246](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/form/pdfField.ts#L246)
 
 Set the read-only flag.
 
@@ -718,7 +718,7 @@ Set the read-only flag.
 
 > **setRequired**(`required`): `void`
 
-Defined in: [src/form/pdfField.ts:256](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/form/pdfField.ts#L256)
+Defined in: [src/form/pdfField.ts:256](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/form/pdfField.ts#L256)
 
 Set the required flag.
 
@@ -742,7 +742,7 @@ Set the required flag.
 
 > **setText**(`value`): `void`
 
-Defined in: [src/form/fields/textField.ts:59](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/form/fields/textField.ts#L59)
+Defined in: [src/form/fields/textField.ts:59](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/form/fields/textField.ts#L59)
 
 Set the text value of this field.
 Also updates /V and removes /AP to force regeneration.
@@ -763,7 +763,7 @@ Also updates /V and removes /AP to force regeneration.
 
 > **setValue**(`value`): `void`
 
-Defined in: [src/form/fields/textField.ts:71](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/form/fields/textField.ts#L71)
+Defined in: [src/form/fields/textField.ts:71](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/form/fields/textField.ts#L71)
 
 Alias for setText().
 

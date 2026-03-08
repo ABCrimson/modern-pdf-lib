@@ -8,7 +8,7 @@
 
 > **signPdf**(`pdfBytes`, `fieldName`, `options`): `Promise`\<`Uint8Array`\<`ArrayBufferLike`\>\>
 
-Defined in: [src/signature/signatureHandler.ts:277](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/signature/signatureHandler.ts#L277)
+Defined in: [src/signature/signatureHandler.ts:277](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/signature/signatureHandler.ts#L277)
 
 Sign a PDF document.
 

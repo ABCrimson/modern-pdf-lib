@@ -6,7 +6,7 @@
 
 # Class: PdfLineAnnotation
 
-Defined in: [src/annotation/types/shapeAnnotations.ts:74](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/annotation/types/shapeAnnotations.ts#L74)
+Defined in: [src/annotation/types/shapeAnnotations.ts:74](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/annotation/types/shapeAnnotations.ts#L74)
 
 Line annotation (subtype /Line).
 
@@ -22,7 +22,7 @@ Draws a straight line between two points on the page.
 
 > **new PdfLineAnnotation**(`dict`): `PdfLineAnnotation`
 
-Defined in: [src/annotation/types/shapeAnnotations.ts:75](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/annotation/types/shapeAnnotations.ts#L75)
+Defined in: [src/annotation/types/shapeAnnotations.ts:75](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/annotation/types/shapeAnnotations.ts#L75)
 
 #### Parameters
 
@@ -44,7 +44,7 @@ Defined in: [src/annotation/types/shapeAnnotations.ts:75](https://github.com/ABC
 
 > `readonly` **annotationType**: [`AnnotationType`](../type-aliases/AnnotationType.md)
 
-Defined in: [src/annotation/pdfAnnotation.ts:227](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/annotation/pdfAnnotation.ts#L227)
+Defined in: [src/annotation/pdfAnnotation.ts:227](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/annotation/pdfAnnotation.ts#L227)
 
 The annotation subtype.
 
@@ -58,7 +58,7 @@ The annotation subtype.
 
 > `protected` **dict**: [`PdfDict`](PdfDict.md)
 
-Defined in: [src/annotation/pdfAnnotation.ts:230](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/annotation/pdfAnnotation.ts#L230)
+Defined in: [src/annotation/pdfAnnotation.ts:230](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/annotation/pdfAnnotation.ts#L230)
 
 The underlying annotation dictionary.
 
@@ -72,7 +72,7 @@ The underlying annotation dictionary.
 
 > **generateAppearance**(): [`PdfStream`](PdfStream.md)
 
-Defined in: [src/annotation/types/shapeAnnotations.ts:151](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/annotation/types/shapeAnnotations.ts#L151)
+Defined in: [src/annotation/types/shapeAnnotations.ts:151](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/annotation/types/shapeAnnotations.ts#L151)
 
 Generate an appearance stream for this annotation.
 
@@ -95,7 +95,7 @@ A PdfStream for the /AP /N entry, or undefined.
 
 > **getAuthor**(): `string` \| `undefined`
 
-Defined in: [src/annotation/pdfAnnotation.ts:293](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/annotation/pdfAnnotation.ts#L293)
+Defined in: [src/annotation/pdfAnnotation.ts:293](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/annotation/pdfAnnotation.ts#L293)
 
 Get the author (PDF /T entry).
 
@@ -113,7 +113,7 @@ Get the author (PDF /T entry).
 
 > **getColor**(): \{ `b`: `number`; `g`: `number`; `r`: `number`; \} \| `undefined`
 
-Defined in: [src/annotation/pdfAnnotation.ts:311](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/annotation/pdfAnnotation.ts#L311)
+Defined in: [src/annotation/pdfAnnotation.ts:311](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/annotation/pdfAnnotation.ts#L311)
 
 Get the annotation colour.
 
@@ -131,7 +131,7 @@ Get the annotation colour.
 
 > **getContents**(): `string` \| `undefined`
 
-Defined in: [src/annotation/pdfAnnotation.ts:275](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/annotation/pdfAnnotation.ts#L275)
+Defined in: [src/annotation/pdfAnnotation.ts:275](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/annotation/pdfAnnotation.ts#L275)
 
 Get the text contents (tooltip / popup text).
 
@@ -149,7 +149,7 @@ Get the text contents (tooltip / popup text).
 
 > **getLineEndingStyles**(): \[`string`, `string`\]
 
-Defined in: [src/annotation/types/shapeAnnotations.ts:130](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/annotation/types/shapeAnnotations.ts#L130)
+Defined in: [src/annotation/types/shapeAnnotations.ts:130](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/annotation/types/shapeAnnotations.ts#L130)
 
 Get the line ending styles [start, end].
 
@@ -163,7 +163,7 @@ Get the line ending styles [start, end].
 
 > **getLinePoints**(): \[`number`, `number`, `number`, `number`\]
 
-Defined in: [src/annotation/types/shapeAnnotations.ts:111](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/annotation/types/shapeAnnotations.ts#L111)
+Defined in: [src/annotation/types/shapeAnnotations.ts:111](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/annotation/types/shapeAnnotations.ts#L111)
 
 Get the line endpoints [x1, y1, x2, y2].
 
@@ -177,7 +177,7 @@ Get the line endpoints [x1, y1, x2, y2].
 
 > **getOpacity**(): `number`
 
-Defined in: [src/annotation/pdfAnnotation.ts:333](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/annotation/pdfAnnotation.ts#L333)
+Defined in: [src/annotation/pdfAnnotation.ts:333](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/annotation/pdfAnnotation.ts#L333)
 
 Get the annotation opacity (0-1). Defaults to 1.
 
@@ -195,7 +195,7 @@ Get the annotation opacity (0-1). Defaults to 1.
 
 > **getRect**(): \[`number`, `number`, `number`, `number`\]
 
-Defined in: [src/annotation/pdfAnnotation.ts:251](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/annotation/pdfAnnotation.ts#L251)
+Defined in: [src/annotation/pdfAnnotation.ts:251](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/annotation/pdfAnnotation.ts#L251)
 
 Get the annotation rectangle [x1, y1, x2, y2].
 
@@ -213,7 +213,7 @@ Get the annotation rectangle [x1, y1, x2, y2].
 
 > **getType**(): [`AnnotationType`](../type-aliases/AnnotationType.md)
 
-Defined in: [src/annotation/pdfAnnotation.ts:242](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/annotation/pdfAnnotation.ts#L242)
+Defined in: [src/annotation/pdfAnnotation.ts:242](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/annotation/pdfAnnotation.ts#L242)
 
 Get the annotation subtype.
 
@@ -231,7 +231,7 @@ Get the annotation subtype.
 
 > **isHidden**(): `boolean`
 
-Defined in: [src/annotation/pdfAnnotation.ts:381](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/annotation/pdfAnnotation.ts#L381)
+Defined in: [src/annotation/pdfAnnotation.ts:381](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/annotation/pdfAnnotation.ts#L381)
 
 Whether the annotation is hidden.
 
@@ -249,7 +249,7 @@ Whether the annotation is hidden.
 
 > **isLocked**(): `boolean`
 
-Defined in: [src/annotation/pdfAnnotation.ts:401](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/annotation/pdfAnnotation.ts#L401)
+Defined in: [src/annotation/pdfAnnotation.ts:401](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/annotation/pdfAnnotation.ts#L401)
 
 Whether the annotation is locked (cannot be moved/resized).
 
@@ -267,7 +267,7 @@ Whether the annotation is locked (cannot be moved/resized).
 
 > **isPrintable**(): `boolean`
 
-Defined in: [src/annotation/pdfAnnotation.ts:391](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/annotation/pdfAnnotation.ts#L391)
+Defined in: [src/annotation/pdfAnnotation.ts:391](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/annotation/pdfAnnotation.ts#L391)
 
 Whether the annotation should be printed.
 
@@ -285,7 +285,7 @@ Whether the annotation should be printed.
 
 > **setAuthor**(`author`): `void`
 
-Defined in: [src/annotation/pdfAnnotation.ts:302](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/annotation/pdfAnnotation.ts#L302)
+Defined in: [src/annotation/pdfAnnotation.ts:302](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/annotation/pdfAnnotation.ts#L302)
 
 Set the author.
 
@@ -309,7 +309,7 @@ Set the author.
 
 > **setColor**(`color`): `void`
 
-Defined in: [src/annotation/pdfAnnotation.ts:324](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/annotation/pdfAnnotation.ts#L324)
+Defined in: [src/annotation/pdfAnnotation.ts:324](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/annotation/pdfAnnotation.ts#L324)
 
 Set the annotation colour.
 
@@ -343,7 +343,7 @@ Set the annotation colour.
 
 > **setContents**(`contents`): `void`
 
-Defined in: [src/annotation/pdfAnnotation.ts:284](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/annotation/pdfAnnotation.ts#L284)
+Defined in: [src/annotation/pdfAnnotation.ts:284](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/annotation/pdfAnnotation.ts#L284)
 
 Set the text contents.
 
@@ -367,7 +367,7 @@ Set the text contents.
 
 > **setHidden**(`hidden`): `void`
 
-Defined in: [src/annotation/pdfAnnotation.ts:386](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/annotation/pdfAnnotation.ts#L386)
+Defined in: [src/annotation/pdfAnnotation.ts:386](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/annotation/pdfAnnotation.ts#L386)
 
 Set the hidden flag.
 
@@ -391,7 +391,7 @@ Set the hidden flag.
 
 > **setLineEndingStyles**(`start`, `end`): `void`
 
-Defined in: [src/annotation/types/shapeAnnotations.ts:147](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/annotation/types/shapeAnnotations.ts#L147)
+Defined in: [src/annotation/types/shapeAnnotations.ts:147](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/annotation/types/shapeAnnotations.ts#L147)
 
 Set the line ending styles.
 
@@ -415,7 +415,7 @@ Set the line ending styles.
 
 > **setLinePoints**(`points`): `void`
 
-Defined in: [src/annotation/types/shapeAnnotations.ts:125](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/annotation/types/shapeAnnotations.ts#L125)
+Defined in: [src/annotation/types/shapeAnnotations.ts:125](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/annotation/types/shapeAnnotations.ts#L125)
 
 Set the line endpoints.
 
@@ -435,7 +435,7 @@ Set the line endpoints.
 
 > **setLocked**(`locked`): `void`
 
-Defined in: [src/annotation/pdfAnnotation.ts:406](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/annotation/pdfAnnotation.ts#L406)
+Defined in: [src/annotation/pdfAnnotation.ts:406](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/annotation/pdfAnnotation.ts#L406)
 
 Set the locked flag.
 
@@ -459,7 +459,7 @@ Set the locked flag.
 
 > **setOpacity**(`opacity`): `void`
 
-Defined in: [src/annotation/pdfAnnotation.ts:342](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/annotation/pdfAnnotation.ts#L342)
+Defined in: [src/annotation/pdfAnnotation.ts:342](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/annotation/pdfAnnotation.ts#L342)
 
 Set the annotation opacity.
 
@@ -483,7 +483,7 @@ Set the annotation opacity.
 
 > **setPrintable**(`printable`): `void`
 
-Defined in: [src/annotation/pdfAnnotation.ts:396](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/annotation/pdfAnnotation.ts#L396)
+Defined in: [src/annotation/pdfAnnotation.ts:396](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/annotation/pdfAnnotation.ts#L396)
 
 Set the print flag.
 
@@ -507,7 +507,7 @@ Set the print flag.
 
 > **setRect**(`rect`): `void`
 
-Defined in: [src/annotation/pdfAnnotation.ts:266](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/annotation/pdfAnnotation.ts#L266)
+Defined in: [src/annotation/pdfAnnotation.ts:266](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/annotation/pdfAnnotation.ts#L266)
 
 Set the annotation rectangle.
 
@@ -531,7 +531,7 @@ Set the annotation rectangle.
 
 > **toDict**(`registry`): [`PdfDict`](PdfDict.md)
 
-Defined in: [src/annotation/pdfAnnotation.ts:420](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/annotation/pdfAnnotation.ts#L420)
+Defined in: [src/annotation/pdfAnnotation.ts:420](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/annotation/pdfAnnotation.ts#L420)
 
 Convert this annotation to a PdfDict suitable for embedding in a PDF.
 
@@ -559,7 +559,7 @@ The annotation dictionary.
 
 > `static` **create**(`options`): `PdfLineAnnotation`
 
-Defined in: [src/annotation/types/shapeAnnotations.ts:82](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/annotation/types/shapeAnnotations.ts#L82)
+Defined in: [src/annotation/types/shapeAnnotations.ts:82](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/annotation/types/shapeAnnotations.ts#L82)
 
 Create a new line annotation.
 
@@ -579,7 +579,7 @@ Create a new line annotation.
 
 > `static` **fromDict**(`dict`, `resolver?`): `PdfLineAnnotation`
 
-Defined in: [src/annotation/types/shapeAnnotations.ts:103](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/annotation/types/shapeAnnotations.ts#L103)
+Defined in: [src/annotation/types/shapeAnnotations.ts:103](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/annotation/types/shapeAnnotations.ts#L103)
 
 #### Parameters
 

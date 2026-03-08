@@ -8,7 +8,7 @@
 
 > **stripProhibitedFeatures**(`pdfBytes`, `options?`): [`StripResult`](../interfaces/StripResult.md)
 
-Defined in: [src/compliance/stripProhibited.ts:89](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/compliance/stripProhibited.ts#L89)
+Defined in: [src/compliance/stripProhibited.ts:89](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/compliance/stripProhibited.ts#L89)
 
 Strip prohibited features from PDF bytes.
 

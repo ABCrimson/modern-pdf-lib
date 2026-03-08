@@ -6,7 +6,7 @@
 
 # Class: PdfObjectRegistry
 
-Defined in: [src/core/pdfObjects.ts:471](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/core/pdfObjects.ts#L471)
+Defined in: [src/core/pdfObjects.ts:471](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfObjects.ts#L471)
 
 Allocates monotonically increasing object numbers and stores the
 mapping from `PdfRef` → object value.
@@ -29,7 +29,7 @@ mapping from `PdfRef` → object value.
 
 > **get** **nextNumber**(): `number`
 
-Defined in: [src/core/pdfObjects.ts:542](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/core/pdfObjects.ts#L542)
+Defined in: [src/core/pdfObjects.ts:542](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfObjects.ts#L542)
 
 The next object number that *would* be assigned.
 
@@ -45,7 +45,7 @@ The next object number that *would* be assigned.
 
 > **get** **size**(): `number`
 
-Defined in: [src/core/pdfObjects.ts:537](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/core/pdfObjects.ts#L537)
+Defined in: [src/core/pdfObjects.ts:537](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfObjects.ts#L537)
 
 Total number of registered objects (≥ 1 in a valid PDF because of
 the free entry at object 0).
@@ -60,7 +60,7 @@ the free entry at object 0).
 
 > **\[iterator\]**(): `IterableIterator`\<[`RegistryEntry`](../interfaces/RegistryEntry.md)\>
 
-Defined in: [src/core/pdfObjects.ts:531](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/core/pdfObjects.ts#L531)
+Defined in: [src/core/pdfObjects.ts:531](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfObjects.ts#L531)
 
 Iterate all entries in allocation order.
 
@@ -74,7 +74,7 @@ Iterate all entries in allocation order.
 
 > **allocate**(): [`PdfRef`](PdfRef.md)
 
-Defined in: [src/core/pdfObjects.ts:507](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/core/pdfObjects.ts#L507)
+Defined in: [src/core/pdfObjects.ts:507](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfObjects.ts#L507)
 
 Pre-allocate an object number and return the reference.
 Call [assign](#assign) later to attach the actual object.
@@ -89,7 +89,7 @@ Call [assign](#assign) later to attach the actual object.
 
 > **assign**(`ref`, `object`): `void`
 
-Defined in: [src/core/pdfObjects.ts:514](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/core/pdfObjects.ts#L514)
+Defined in: [src/core/pdfObjects.ts:514](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfObjects.ts#L514)
 
 Assign an object to a previously allocated (or registered) reference.
 
@@ -113,7 +113,7 @@ Assign an object to a previously allocated (or registered) reference.
 
 > **filterReachable**(`rootRefs`): `void`
 
-Defined in: [src/core/pdfObjects.ts:555](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/core/pdfObjects.ts#L555)
+Defined in: [src/core/pdfObjects.ts:555](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfObjects.ts#L555)
 
 Remove all registry entries that are not reachable from the given
 root references.  This is used after rebuilding the document
@@ -139,7 +139,7 @@ and `PdfStream` objects, handling cycles via a visited set.
 
 > **register**(`object`): [`PdfRef`](PdfRef.md)
 
-Defined in: [src/core/pdfObjects.ts:480](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/core/pdfObjects.ts#L480)
+Defined in: [src/core/pdfObjects.ts:480](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfObjects.ts#L480)
 
 Register a new object, allocate an object number, and return its
 indirect reference.
@@ -160,7 +160,7 @@ indirect reference.
 
 > **registerWithRef**(`ref`, `object`): `void`
 
-Defined in: [src/core/pdfObjects.ts:493](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/core/pdfObjects.ts#L493)
+Defined in: [src/core/pdfObjects.ts:493](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfObjects.ts#L493)
 
 Register a pre-built `PdfRef` with an object.
 Useful when the ref must be known before the object is fully built
@@ -186,7 +186,7 @@ Useful when the ref must be known before the object is fully built
 
 > **resolve**(`ref`): [`PdfObject`](../type-aliases/PdfObject.md) \| `undefined`
 
-Defined in: [src/core/pdfObjects.ts:526](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/core/pdfObjects.ts#L526)
+Defined in: [src/core/pdfObjects.ts:526](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfObjects.ts#L526)
 
 Look up the object for a given reference.
 

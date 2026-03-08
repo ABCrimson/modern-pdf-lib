@@ -6,7 +6,7 @@
 
 # Interface: SoftMaskRef
 
-Defined in: [src/core/pdfPage.ts:594](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/core/pdfPage.ts#L594)
+Defined in: [src/core/pdfPage.ts:594](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfPage.ts#L594)
 
 Opaque reference to a soft mask Form XObject.
 
@@ -19,7 +19,7 @@ Created by [PdfDocument.createSoftMask](../classes/PdfDocument.md#createsoftmask
 
 > `readonly` **\_tag**: `"softMask"`
 
-Defined in: [src/core/pdfPage.ts:595](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/core/pdfPage.ts#L595)
+Defined in: [src/core/pdfPage.ts:595](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfPage.ts#L595)
 
 ***
 
@@ -27,4 +27,4 @@ Defined in: [src/core/pdfPage.ts:595](https://github.com/ABCrimson/modern-pdf-li
 
 > `readonly` **ref**: [`PdfRef`](../classes/PdfRef.md)
 
-Defined in: [src/core/pdfPage.ts:596](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/core/pdfPage.ts#L596)
+Defined in: [src/core/pdfPage.ts:596](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfPage.ts#L596)

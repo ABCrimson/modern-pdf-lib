@@ -8,7 +8,7 @@
 
 > **getToUnicodeCmap**(`fontName`): `string`
 
-Defined in: [src/compliance/toUnicodeCmap.ts:606](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/compliance/toUnicodeCmap.ts#L606)
+Defined in: [src/compliance/toUnicodeCmap.ts:606](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/compliance/toUnicodeCmap.ts#L606)
 
 Get the appropriate ToUnicode CMap for a standard 14 font.
 

@@ -6,7 +6,7 @@
 
 # Interface: TransparencyGroupOptions
 
-Defined in: [src/core/pdfPage.ts:549](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/core/pdfPage.ts#L549)
+Defined in: [src/core/pdfPage.ts:549](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfPage.ts#L549)
 
 Options for transparency groups.
 
@@ -19,7 +19,7 @@ as a single unit before being blended with the page content.
 
 > `optional` **colorSpace**: `"DeviceRGB"` \| `"DeviceCMYK"` \| `"DeviceGray"`
 
-Defined in: [src/core/pdfPage.ts:563](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/core/pdfPage.ts#L563)
+Defined in: [src/core/pdfPage.ts:563](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfPage.ts#L563)
 
 Color space for the transparency group.  Default: `'DeviceRGB'`.
 
@@ -29,7 +29,7 @@ Color space for the transparency group.  Default: `'DeviceRGB'`.
 
 > `optional` **isolated**: `boolean`
 
-Defined in: [src/core/pdfPage.ts:554](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/core/pdfPage.ts#L554)
+Defined in: [src/core/pdfPage.ts:554](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfPage.ts#L554)
 
 When `true`, the group is composited against a fully transparent
 backdrop rather than the existing page content.  Default: `true`.
@@ -40,7 +40,7 @@ backdrop rather than the existing page content.  Default: `true`.
 
 > `optional` **knockout**: `boolean`
 
-Defined in: [src/core/pdfPage.ts:559](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/core/pdfPage.ts#L559)
+Defined in: [src/core/pdfPage.ts:559](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfPage.ts#L559)
 
 When `true`, earlier objects in the group are knocked out (replaced)
 by later objects, rather than composited on top.  Default: `false`.

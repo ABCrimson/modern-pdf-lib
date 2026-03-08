@@ -8,7 +8,7 @@
 
 > **parseIccColorSpace**(`data`): `string`
 
-Defined in: [src/assets/image/iccProfile.ts:84](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/assets/image/iccProfile.ts#L84)
+Defined in: [src/assets/image/iccProfile.ts:84](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/assets/image/iccProfile.ts#L84)
 
 Read the color space signature from raw ICC profile data.
 

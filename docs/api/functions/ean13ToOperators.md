@@ -8,7 +8,7 @@
 
 > **ean13ToOperators**(`matrix`, `x`, `y`, `options?`): `string`
 
-Defined in: [src/barcode/ean.ts:264](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/barcode/ean.ts#L264)
+Defined in: [src/barcode/ean.ts:264](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/barcode/ean.ts#L264)
 
 Generate PDF content-stream operators for an EAN-13 barcode.
 

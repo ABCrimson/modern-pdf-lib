@@ -8,7 +8,7 @@
 
 > `const` **BlendMode**: `object`
 
-Defined in: [src/core/enums.ts:5](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/core/enums.ts#L5)
+Defined in: [src/core/enums.ts:5](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/enums.ts#L5)
 
 PDF blend modes (PDF 1.4+, Table 136).
 Applied via ExtGState /BM key.

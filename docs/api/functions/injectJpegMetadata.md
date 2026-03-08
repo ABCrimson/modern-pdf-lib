@@ -8,7 +8,7 @@
 
 > **injectJpegMetadata**(`jpegBytes`, `metadata`): `Uint8Array`
 
-Defined in: [src/assets/image/imageMetadata.ts:450](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/assets/image/imageMetadata.ts#L450)
+Defined in: [src/assets/image/imageMetadata.ts:450](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/assets/image/imageMetadata.ts#L450)
 
 Inject preserved APP markers into a recompressed JPEG.
 

@@ -8,7 +8,7 @@
 
 > **applyPreset**(`preset`, `options`): [`DrawTableOptions`](../interfaces/DrawTableOptions.md)
 
-Defined in: [src/layout/presets.ts:130](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/layout/presets.ts#L130)
+Defined in: [src/layout/presets.ts:130](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/layout/presets.ts#L130)
 
 Merge a preset with explicit table options.
 

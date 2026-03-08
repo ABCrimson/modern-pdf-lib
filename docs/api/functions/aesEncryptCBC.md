@@ -8,7 +8,7 @@
 
 > **aesEncryptCBC**(`key`, `data`, `iv?`): `Promise`\<`Uint8Array`\<`ArrayBufferLike`\>\>
 
-Defined in: [src/crypto/aes.ts:97](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/crypto/aes.ts#L97)
+Defined in: [src/crypto/aes.ts:97](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/crypto/aes.ts#L97)
 
 Encrypt data using AES-CBC with PKCS#7 padding.
 

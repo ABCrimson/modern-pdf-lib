@@ -6,7 +6,7 @@
 
 # Class: PdfStructureElement
 
-Defined in: [src/accessibility/structureTree.ts:158](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/accessibility/structureTree.ts#L158)
+Defined in: [src/accessibility/structureTree.ts:158](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/accessibility/structureTree.ts#L158)
 
 A single node in the structure tree.
 
@@ -22,7 +22,7 @@ content.
 
 > **new PdfStructureElement**(`type`, `options?`): `PdfStructureElement`
 
-Defined in: [src/accessibility/structureTree.ts:181](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/accessibility/structureTree.ts#L181)
+Defined in: [src/accessibility/structureTree.ts:181](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/accessibility/structureTree.ts#L181)
 
 #### Parameters
 
@@ -48,7 +48,7 @@ Optional attributes for the element.
 
 > `readonly` **children**: `PdfStructureElement`[] = `[]`
 
-Defined in: [src/accessibility/structureTree.ts:163](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/accessibility/structureTree.ts#L163)
+Defined in: [src/accessibility/structureTree.ts:163](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/accessibility/structureTree.ts#L163)
 
 Child structure elements.
 
@@ -58,7 +58,7 @@ Child structure elements.
 
 > `optional` **mcid**: `number`
 
-Defined in: [src/accessibility/structureTree.ts:169](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/accessibility/structureTree.ts#L169)
+Defined in: [src/accessibility/structureTree.ts:169](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/accessibility/structureTree.ts#L169)
 
 Marked content ID linking this element to page content.
 
@@ -68,7 +68,7 @@ Marked content ID linking this element to page content.
 
 > `readonly` **options**: [`StructureElementOptions`](../interfaces/StructureElementOptions.md)
 
-Defined in: [src/accessibility/structureTree.ts:166](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/accessibility/structureTree.ts#L166)
+Defined in: [src/accessibility/structureTree.ts:166](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/accessibility/structureTree.ts#L166)
 
 Optional attributes (alt text, language, title, etc.).
 
@@ -78,7 +78,7 @@ Optional attributes (alt text, language, title, etc.).
 
 > `optional` **pageIndex**: `number`
 
-Defined in: [src/accessibility/structureTree.ts:172](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/accessibility/structureTree.ts#L172)
+Defined in: [src/accessibility/structureTree.ts:172](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/accessibility/structureTree.ts#L172)
 
 Zero-based page index this element's content appears on.
 
@@ -88,7 +88,7 @@ Zero-based page index this element's content appears on.
 
 > `optional` **parent**: `PdfStructureElement`
 
-Defined in: [src/accessibility/structureTree.ts:175](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/accessibility/structureTree.ts#L175)
+Defined in: [src/accessibility/structureTree.ts:175](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/accessibility/structureTree.ts#L175)
 
 The parent element (undefined for the root).
 
@@ -98,7 +98,7 @@ The parent element (undefined for the root).
 
 > `readonly` **type**: [`StructureType`](../type-aliases/StructureType.md)
 
-Defined in: [src/accessibility/structureTree.ts:160](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/accessibility/structureTree.ts#L160)
+Defined in: [src/accessibility/structureTree.ts:160](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/accessibility/structureTree.ts#L160)
 
 The structure type of this element.
 
@@ -108,7 +108,7 @@ The structure type of this element.
 
 > **addChild**(`type`, `options?`): `PdfStructureElement`
 
-Defined in: [src/accessibility/structureTree.ts:193](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/accessibility/structureTree.ts#L193)
+Defined in: [src/accessibility/structureTree.ts:193](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/accessibility/structureTree.ts#L193)
 
 Add a child element to this node.
 
@@ -138,7 +138,7 @@ The newly created child element.
 
 > **depth**(): `number`
 
-Defined in: [src/accessibility/structureTree.ts:257](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/accessibility/structureTree.ts#L257)
+Defined in: [src/accessibility/structureTree.ts:257](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/accessibility/structureTree.ts#L257)
 
 Return the depth of this element in the tree (root = 0).
 
@@ -152,7 +152,7 @@ Return the depth of this element in the tree (root = 0).
 
 > **find**(`type`): `PdfStructureElement` \| `undefined`
 
-Defined in: [src/accessibility/structureTree.ts:233](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/accessibility/structureTree.ts#L233)
+Defined in: [src/accessibility/structureTree.ts:233](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/accessibility/structureTree.ts#L233)
 
 Find the first descendant (or self) matching the given type.
 
@@ -172,7 +172,7 @@ Find the first descendant (or self) matching the given type.
 
 > **findAll**(`type`): `PdfStructureElement`[]
 
-Defined in: [src/accessibility/structureTree.ts:245](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/accessibility/structureTree.ts#L245)
+Defined in: [src/accessibility/structureTree.ts:245](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/accessibility/structureTree.ts#L245)
 
 Find all descendants (and self) matching the given type.
 
@@ -192,7 +192,7 @@ Find all descendants (and self) matching the given type.
 
 > **removeChild**(`element`): `void`
 
-Defined in: [src/accessibility/structureTree.ts:209](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/accessibility/structureTree.ts#L209)
+Defined in: [src/accessibility/structureTree.ts:209](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/accessibility/structureTree.ts#L209)
 
 Remove a direct child element.
 
@@ -218,7 +218,7 @@ If the element is not a direct child.
 
 > **toDict**(`registry`, `parentRef`, `pageRefs`): `object`
 
-Defined in: [src/accessibility/structureTree.ts:275](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/accessibility/structureTree.ts#L275)
+Defined in: [src/accessibility/structureTree.ts:275](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/accessibility/structureTree.ts#L275)
 
 Serialize this element to a PDF dictionary.
 
@@ -262,7 +262,7 @@ An object containing the element's dict and its ref.
 
 > **walk**(): `PdfStructureElement`[]
 
-Defined in: [src/accessibility/structureTree.ts:222](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/accessibility/structureTree.ts#L222)
+Defined in: [src/accessibility/structureTree.ts:222](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/accessibility/structureTree.ts#L222)
 
 Recursively collect all elements in the subtree (depth-first,
 including this element).

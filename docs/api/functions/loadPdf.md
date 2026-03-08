@@ -8,7 +8,7 @@
 
 > **loadPdf**(`data`, `options?`): `Promise`\<[`PdfDocument`](../classes/PdfDocument.md)\>
 
-Defined in: [src/parser/documentParser.ts:1628](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/parser/documentParser.ts#L1628)
+Defined in: [src/parser/documentParser.ts:1628](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/parser/documentParser.ts#L1628)
 
 Load a PDF document from raw bytes, an ArrayBuffer, or a Base64-encoded
 string.

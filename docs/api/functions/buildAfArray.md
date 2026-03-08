@@ -8,7 +8,7 @@
 
 > **buildAfArray**(`fileSpecRefs`): [`PdfArray`](../classes/PdfArray.md)
 
-Defined in: [src/compliance/associatedFiles.ts:151](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/compliance/associatedFiles.ts#L151)
+Defined in: [src/compliance/associatedFiles.ts:151](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/compliance/associatedFiles.ts#L151)
 
 Build an /AF array from multiple associated file specification references.
 

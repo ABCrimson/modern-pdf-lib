@@ -8,7 +8,7 @@
 
 > **generatePdfAXmp**(`options`): `string`
 
-Defined in: [src/compliance/xmpGenerator.ts:86](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/compliance/xmpGenerator.ts#L86)
+Defined in: [src/compliance/xmpGenerator.ts:86](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/compliance/xmpGenerator.ts#L86)
 
 Generate a complete XMP metadata packet for PDF/A.
 

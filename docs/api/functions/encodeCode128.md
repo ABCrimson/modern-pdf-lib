@@ -8,7 +8,7 @@
 
 > **encodeCode128**(`data`): [`BarcodeMatrix`](../interfaces/BarcodeMatrix.md)
 
-Defined in: [src/barcode/code128.ts:406](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/barcode/code128.ts#L406)
+Defined in: [src/barcode/code128.ts:404](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/barcode/code128.ts#L404)
 
 Encode data as a Code 128 barcode.
 

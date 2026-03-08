@@ -6,7 +6,7 @@
 
 # Interface: LayoutMultilineOptions
 
-Defined in: [src/core/layout.ts:22](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/core/layout.ts#L22)
+Defined in: [src/core/layout.ts:22](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/layout.ts#L22)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [src/core/layout.ts:22](https://github.com/ABCrimson/modern-pdf-lib/
 
 > **font**: [`FontRef`](FontRef.md)
 
-Defined in: [src/core/layout.ts:23](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/core/layout.ts#L23)
+Defined in: [src/core/layout.ts:23](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/layout.ts#L23)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [src/core/layout.ts:23](https://github.com/ABCrimson/modern-pdf-lib/
 
 > **fontSize**: `number`
 
-Defined in: [src/core/layout.ts:24](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/core/layout.ts#L24)
+Defined in: [src/core/layout.ts:24](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/layout.ts#L24)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [src/core/layout.ts:24](https://github.com/ABCrimson/modern-pdf-lib/
 
 > `optional` **lineHeight**: `number`
 
-Defined in: [src/core/layout.ts:26](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/core/layout.ts#L26)
+Defined in: [src/core/layout.ts:26](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/layout.ts#L26)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [src/core/layout.ts:26](https://github.com/ABCrimson/modern-pdf-lib/
 
 > **maxWidth**: `number`
 
-Defined in: [src/core/layout.ts:25](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/core/layout.ts#L25)
+Defined in: [src/core/layout.ts:25](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/layout.ts#L25)
 
 ***
 
@@ -46,4 +46,4 @@ Defined in: [src/core/layout.ts:25](https://github.com/ABCrimson/modern-pdf-lib/
 
 > `optional` **wordBreaks**: `string`[]
 
-Defined in: [src/core/layout.ts:27](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/core/layout.ts#L27)
+Defined in: [src/core/layout.ts:27](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/layout.ts#L27)

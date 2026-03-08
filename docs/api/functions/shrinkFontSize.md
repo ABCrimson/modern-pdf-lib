@@ -8,7 +8,7 @@
 
 > **shrinkFontSize**(`text`, `availableWidth`, `fontSize`, `options?`): `number`
 
-Defined in: [src/layout/overflow.ts:238](https://github.com/ABCrimson/modern-pdf-lib/blob/6d046595d60660cf33d40ffaf2f06aafcf356d8e/src/layout/overflow.ts#L238)
+Defined in: [src/layout/overflow.ts:238](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/layout/overflow.ts#L238)
 
 Calculate the font size needed to fit text within `availableWidth`.
 
