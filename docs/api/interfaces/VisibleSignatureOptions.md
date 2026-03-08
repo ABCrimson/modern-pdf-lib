@@ -6,7 +6,7 @@
 
 # Interface: VisibleSignatureOptions
 
-Defined in: [src/signature/signatureHandler.ts:26](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/signature/signatureHandler.ts#L26)
+Defined in: [src/signature/signatureHandler.ts:26](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/signature/signatureHandler.ts#L26)
 
 Options for a visible signature appearance on the page.
 
@@ -16,7 +16,7 @@ Options for a visible signature appearance on the page.
 
 > `optional` **backgroundColor**: \[`number`, `number`, `number`\]
 
-Defined in: [src/signature/signatureHandler.ts:42](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/signature/signatureHandler.ts#L42)
+Defined in: [src/signature/signatureHandler.ts:42](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/signature/signatureHandler.ts#L42)
 
 Background color as [r, g, b] values (0–1). Default: transparent.
 
@@ -26,7 +26,7 @@ Background color as [r, g, b] values (0–1). Default: transparent.
 
 > `optional` **borderColor**: \[`number`, `number`, `number`\]
 
-Defined in: [src/signature/signatureHandler.ts:46](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/signature/signatureHandler.ts#L46)
+Defined in: [src/signature/signatureHandler.ts:46](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/signature/signatureHandler.ts#L46)
 
 Border color as [r, g, b] values (0–1). Default: [0, 0, 0] (black).
 
@@ -36,7 +36,7 @@ Border color as [r, g, b] values (0–1). Default: [0, 0, 0] (black).
 
 > `optional` **borderWidth**: `number`
 
-Defined in: [src/signature/signatureHandler.ts:48](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/signature/signatureHandler.ts#L48)
+Defined in: [src/signature/signatureHandler.ts:48](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/signature/signatureHandler.ts#L48)
 
 Border width in points. Default: 1. Set to 0 for no border.
 
@@ -46,7 +46,7 @@ Border width in points. Default: 1. Set to 0 for no border.
 
 > `optional` **fontSize**: `number`
 
-Defined in: [src/signature/signatureHandler.ts:38](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/signature/signatureHandler.ts#L38)
+Defined in: [src/signature/signatureHandler.ts:38](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/signature/signatureHandler.ts#L38)
 
 Font size for the text. Default: 10.
 
@@ -56,7 +56,7 @@ Font size for the text. Default: 10.
 
 > `optional` **pageIndex**: `number`
 
-Defined in: [src/signature/signatureHandler.ts:28](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/signature/signatureHandler.ts#L28)
+Defined in: [src/signature/signatureHandler.ts:28](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/signature/signatureHandler.ts#L28)
 
 Zero-based page index where the signature should appear. Default: 0.
 
@@ -66,7 +66,7 @@ Zero-based page index where the signature should appear. Default: 0.
 
 > **rect**: \[`number`, `number`, `number`, `number`\]
 
-Defined in: [src/signature/signatureHandler.ts:30](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/signature/signatureHandler.ts#L30)
+Defined in: [src/signature/signatureHandler.ts:30](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/signature/signatureHandler.ts#L30)
 
 Rectangle [x, y, width, height] in PDF points from the bottom-left corner.
 
@@ -76,7 +76,7 @@ Rectangle [x, y, width, height] in PDF points from the bottom-left corner.
 
 > `optional` **text**: `string`[]
 
-Defined in: [src/signature/signatureHandler.ts:36](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/signature/signatureHandler.ts#L36)
+Defined in: [src/signature/signatureHandler.ts:36](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/signature/signatureHandler.ts#L36)
 
 Text lines to display in the signature box.
 Each string becomes a separate line. If omitted, auto-generates

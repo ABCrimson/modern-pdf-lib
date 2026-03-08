@@ -6,7 +6,7 @@
 
 # Interface: ColorStop
 
-Defined in: [src/core/patterns.ts:43](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/patterns.ts#L43)
+Defined in: [src/core/patterns.ts:43](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/core/patterns.ts#L43)
 
 A colour stop in a gradient, specifying the position (0..1) and colour.
 
@@ -16,7 +16,7 @@ A colour stop in a gradient, specifying the position (0..1) and colour.
 
 > `readonly` **color**: [`Color`](../type-aliases/Color.md)
 
-Defined in: [src/core/patterns.ts:45](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/patterns.ts#L45)
+Defined in: [src/core/patterns.ts:45](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/core/patterns.ts#L45)
 
 ***
 
@@ -24,4 +24,4 @@ Defined in: [src/core/patterns.ts:45](https://github.com/ABCrimson/modern-pdf-li
 
 > `readonly` **offset**: `number`
 
-Defined in: [src/core/patterns.ts:44](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/patterns.ts#L44)
+Defined in: [src/core/patterns.ts:44](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/core/patterns.ts#L44)

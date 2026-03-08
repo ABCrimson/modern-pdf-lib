@@ -6,7 +6,7 @@
 
 # Interface: EnforcementAction
 
-Defined in: [src/compliance/enforcePdfAv2.ts:63](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/compliance/enforcePdfAv2.ts#L63)
+Defined in: [src/compliance/enforcePdfAv2.ts:63](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/compliance/enforcePdfAv2.ts#L63)
 
 A single action taken during enforcement.
 
@@ -16,7 +16,7 @@ A single action taken during enforcement.
 
 > `readonly` **action**: `string`
 
-Defined in: [src/compliance/enforcePdfAv2.ts:64](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/compliance/enforcePdfAv2.ts#L64)
+Defined in: [src/compliance/enforcePdfAv2.ts:64](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/compliance/enforcePdfAv2.ts#L64)
 
 ***
 
@@ -24,4 +24,4 @@ Defined in: [src/compliance/enforcePdfAv2.ts:64](https://github.com/ABCrimson/mo
 
 > `readonly` **description**: `string`
 
-Defined in: [src/compliance/enforcePdfAv2.ts:65](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/compliance/enforcePdfAv2.ts#L65)
+Defined in: [src/compliance/enforcePdfAv2.ts:65](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/compliance/enforcePdfAv2.ts#L65)

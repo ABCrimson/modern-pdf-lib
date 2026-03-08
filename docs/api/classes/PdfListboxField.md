@@ -6,7 +6,7 @@
 
 # Class: PdfListboxField
 
-Defined in: [src/form/fields/listboxField.ts:29](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/fields/listboxField.ts#L29)
+Defined in: [src/form/fields/listboxField.ts:29](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/form/fields/listboxField.ts#L29)
 
 A PDF listbox field (/FT /Ch without Combo flag).
 
@@ -23,7 +23,7 @@ The /V entry holds the selected value(s).
 
 > **new PdfListboxField**(`name`, `dict`, `widgetDict`, `parentNames?`): `PdfListboxField`
 
-Defined in: [src/form/pdfField.ts:175](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/pdfField.ts#L175)
+Defined in: [src/form/pdfField.ts:175](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/form/pdfField.ts#L175)
 
 #### Parameters
 
@@ -57,7 +57,7 @@ Defined in: [src/form/pdfField.ts:175](https://github.com/ABCrimson/modern-pdf-l
 
 > `protected` `readonly` **dict**: [`PdfDict`](PdfDict.md)
 
-Defined in: [src/form/pdfField.ts:164](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/pdfField.ts#L164)
+Defined in: [src/form/pdfField.ts:164](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/form/pdfField.ts#L164)
 
 The underlying field dictionary (may contain both field and widget
 entries for simple one-widget fields).
@@ -72,7 +72,7 @@ entries for simple one-widget fields).
 
 > `readonly` **fieldType**: [`FieldType`](../type-aliases/FieldType.md) = `'listbox'`
 
-Defined in: [src/form/fields/listboxField.ts:30](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/fields/listboxField.ts#L30)
+Defined in: [src/form/fields/listboxField.ts:30](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/form/fields/listboxField.ts#L30)
 
 Discriminator for the concrete field type.
 
@@ -86,7 +86,7 @@ Discriminator for the concrete field type.
 
 > `readonly` **name**: `string`
 
-Defined in: [src/form/pdfField.ts:158](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/pdfField.ts#L158)
+Defined in: [src/form/pdfField.ts:158](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/form/pdfField.ts#L158)
 
 The fully-qualified field name.
 
@@ -100,7 +100,7 @@ The fully-qualified field name.
 
 > `protected` `readonly` **parentNames**: `string`[]
 
-Defined in: [src/form/pdfField.ts:173](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/pdfField.ts#L173)
+Defined in: [src/form/pdfField.ts:173](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/form/pdfField.ts#L173)
 
 Parent field dictionary chain for building full names.
 
@@ -114,7 +114,7 @@ Parent field dictionary chain for building full names.
 
 > `protected` `readonly` **widgetDict**: [`PdfDict`](PdfDict.md)
 
-Defined in: [src/form/pdfField.ts:170](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/pdfField.ts#L170)
+Defined in: [src/form/pdfField.ts:170](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/form/pdfField.ts#L170)
 
 The widget annotation dictionary. For merged field+widget dicts,
 this is the same object as `dict`.
@@ -129,7 +129,7 @@ this is the same object as `dict`.
 
 > **addToPage**(`page`): `void`
 
-Defined in: [src/form/pdfField.ts:314](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/pdfField.ts#L314)
+Defined in: [src/form/pdfField.ts:314](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/form/pdfField.ts#L314)
 
 Add this field's widget annotation to a page.
 
@@ -159,7 +159,7 @@ A page that implements [WidgetAnnotationHost](../interfaces/WidgetAnnotationHost
 
 > **disableExporting**(): `void`
 
-Defined in: [src/form/pdfField.ts:276](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/pdfField.ts#L276)
+Defined in: [src/form/pdfField.ts:276](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/form/pdfField.ts#L276)
 
 Disable exporting this field (set the NoExport flag).
 
@@ -177,7 +177,7 @@ Disable exporting this field (set the NoExport flag).
 
 > **enableExporting**(): `void`
 
-Defined in: [src/form/pdfField.ts:271](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/pdfField.ts#L271)
+Defined in: [src/form/pdfField.ts:271](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/form/pdfField.ts#L271)
 
 Enable exporting this field (clear the NoExport flag).
 
@@ -195,7 +195,7 @@ Enable exporting this field (clear the NoExport flag).
 
 > **generateAppearance**(): [`PdfStream`](PdfStream.md)
 
-Defined in: [src/form/fields/listboxField.ts:124](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/fields/listboxField.ts#L124)
+Defined in: [src/form/fields/listboxField.ts:124](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/form/fields/listboxField.ts#L124)
 
 Generate the appearance stream for this listbox.
 
@@ -213,7 +213,7 @@ Generate the appearance stream for this listbox.
 
 > **getDict**(): [`PdfDict`](PdfDict.md)
 
-Defined in: [src/form/pdfField.ts:207](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/pdfField.ts#L207)
+Defined in: [src/form/pdfField.ts:207](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/form/pdfField.ts#L207)
 
 Return the underlying field dictionary (for internal use by PdfForm).
 
@@ -231,7 +231,7 @@ Return the underlying field dictionary (for internal use by PdfForm).
 
 > `protected` **getFieldFlags**(): `number`
 
-Defined in: [src/form/pdfField.ts:216](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/pdfField.ts#L216)
+Defined in: [src/form/pdfField.ts:216](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/form/pdfField.ts#L216)
 
 Get the raw /Ff (field flags) integer value.
 
@@ -249,7 +249,7 @@ Get the raw /Ff (field flags) integer value.
 
 > **getFullName**(): `string`
 
-Defined in: [src/form/pdfField.ts:201](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/pdfField.ts#L201)
+Defined in: [src/form/pdfField.ts:201](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/form/pdfField.ts#L201)
 
 Get the fully qualified field name (Parent.Child.Name format).
 Per PDF spec SS12.7.3.2, the full name is formed by concatenating
@@ -269,7 +269,7 @@ ancestor /T values with periods.
 
 > **getName**(): `string`
 
-Defined in: [src/form/pdfField.ts:192](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/pdfField.ts#L192)
+Defined in: [src/form/pdfField.ts:192](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/form/pdfField.ts#L192)
 
 Get the partial field name (/T entry).
 
@@ -287,7 +287,7 @@ Get the partial field name (/T entry).
 
 > **getOptions**(): `string`[]
 
-Defined in: [src/form/fields/listboxField.ts:90](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/fields/listboxField.ts#L90)
+Defined in: [src/form/fields/listboxField.ts:90](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/form/fields/listboxField.ts#L90)
 
 Get the list of options.
 
@@ -301,7 +301,7 @@ Get the list of options.
 
 > **getRect**(): \[`number`, `number`, `number`, `number`\]
 
-Defined in: [src/form/pdfField.ts:288](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/pdfField.ts#L288)
+Defined in: [src/form/pdfField.ts:288](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/form/pdfField.ts#L288)
 
 Get the field's widget rectangle as `[x1, y1, x2, y2]`.
 The /Rect entry comes from the widget annotation dictionary.
@@ -320,7 +320,7 @@ The /Rect entry comes from the widget annotation dictionary.
 
 > **getSelected**(): `string`[]
 
-Defined in: [src/form/fields/listboxField.ts:42](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/fields/listboxField.ts#L42)
+Defined in: [src/form/fields/listboxField.ts:42](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/form/fields/listboxField.ts#L42)
 
 Get the currently selected value(s).
 
@@ -337,7 +337,7 @@ single-select listboxes).
 
 > **getValue**(): `string`[]
 
-Defined in: [src/form/fields/listboxField.ts:72](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/fields/listboxField.ts#L72)
+Defined in: [src/form/fields/listboxField.ts:72](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/form/fields/listboxField.ts#L72)
 
 Get value as string array.
 
@@ -355,7 +355,7 @@ Get value as string array.
 
 > `protected` **hasFlag**(`flag`): `boolean`
 
-Defined in: [src/form/pdfField.ts:226](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/pdfField.ts#L226)
+Defined in: [src/form/pdfField.ts:226](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/form/pdfField.ts#L226)
 
 Check if a specific flag bit is set.
 
@@ -379,7 +379,7 @@ Check if a specific flag bit is set.
 
 > **isExported**(): `boolean`
 
-Defined in: [src/form/pdfField.ts:266](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/pdfField.ts#L266)
+Defined in: [src/form/pdfField.ts:266](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/form/pdfField.ts#L266)
 
 Whether the field is exported (inverse of NoExport flag).
 
@@ -397,7 +397,7 @@ Whether the field is exported (inverse of NoExport flag).
 
 > **isNoExport**(): `boolean`
 
-Defined in: [src/form/pdfField.ts:261](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/pdfField.ts#L261)
+Defined in: [src/form/pdfField.ts:261](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/form/pdfField.ts#L261)
 
 Whether the field should not be exported.
 
@@ -415,7 +415,7 @@ Whether the field should not be exported.
 
 > **isReadOnly**(): `boolean`
 
-Defined in: [src/form/pdfField.ts:241](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/pdfField.ts#L241)
+Defined in: [src/form/pdfField.ts:241](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/form/pdfField.ts#L241)
 
 Whether the field is read-only.
 
@@ -433,7 +433,7 @@ Whether the field is read-only.
 
 > **isRequired**(): `boolean`
 
-Defined in: [src/form/pdfField.ts:251](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/pdfField.ts#L251)
+Defined in: [src/form/pdfField.ts:251](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/form/pdfField.ts#L251)
 
 Whether the field is required.
 
@@ -451,7 +451,7 @@ Whether the field is required.
 
 > **select**(`values`): `void`
 
-Defined in: [src/form/fields/listboxField.ts:61](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/fields/listboxField.ts#L61)
+Defined in: [src/form/fields/listboxField.ts:61](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/form/fields/listboxField.ts#L61)
 
 Select one or more values.
 
@@ -471,7 +471,7 @@ Select one or more values.
 
 > `protected` **setFieldFlags**(`flags`): `void`
 
-Defined in: [src/form/pdfField.ts:221](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/pdfField.ts#L221)
+Defined in: [src/form/pdfField.ts:221](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/form/pdfField.ts#L221)
 
 Set the raw /Ff (field flags) integer value.
 
@@ -495,7 +495,7 @@ Set the raw /Ff (field flags) integer value.
 
 > `protected` **setFlag**(`flag`, `on`): `void`
 
-Defined in: [src/form/pdfField.ts:231](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/pdfField.ts#L231)
+Defined in: [src/form/pdfField.ts:231](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/form/pdfField.ts#L231)
 
 Set or clear a specific flag bit.
 
@@ -523,7 +523,7 @@ Set or clear a specific flag bit.
 
 > **setOptions**(`options`): `void`
 
-Defined in: [src/form/fields/listboxField.ts:113](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/fields/listboxField.ts#L113)
+Defined in: [src/form/fields/listboxField.ts:113](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/form/fields/listboxField.ts#L113)
 
 Set the list of options.
 
@@ -543,7 +543,7 @@ Set the list of options.
 
 > **setReadOnly**(`readOnly`): `void`
 
-Defined in: [src/form/pdfField.ts:246](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/pdfField.ts#L246)
+Defined in: [src/form/pdfField.ts:246](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/form/pdfField.ts#L246)
 
 Set the read-only flag.
 
@@ -567,7 +567,7 @@ Set the read-only flag.
 
 > **setRequired**(`required`): `void`
 
-Defined in: [src/form/pdfField.ts:256](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/pdfField.ts#L256)
+Defined in: [src/form/pdfField.ts:256](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/form/pdfField.ts#L256)
 
 Set the required flag.
 
@@ -591,7 +591,7 @@ Set the required flag.
 
 > **setValue**(`value`): `void`
 
-Defined in: [src/form/fields/listboxField.ts:77](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/fields/listboxField.ts#L77)
+Defined in: [src/form/fields/listboxField.ts:77](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/form/fields/listboxField.ts#L77)
 
 Set value from string array.
 

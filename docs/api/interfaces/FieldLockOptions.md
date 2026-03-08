@@ -1,0 +1,31 @@
+[**modern-pdf-lib**](../index.md)
+
+***
+
+[modern-pdf-lib](../index.md) / FieldLockOptions
+
+# Interface: FieldLockOptions
+
+Defined in: [src/signature/fieldLock.ts:30](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/signature/fieldLock.ts#L30)
+
+Options for locking fields when a signature is applied.
+
+## Properties
+
+### action
+
+> **action**: `"All"` \| `"Include"` \| `"Exclude"`
+
+Defined in: [src/signature/fieldLock.ts:32](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/signature/fieldLock.ts#L32)
+
+Lock action: 'All', 'Include', or 'Exclude'.
+
+***
+
+### fields?
+
+> `optional` **fields**: `string`[]
+
+Defined in: [src/signature/fieldLock.ts:34](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/signature/fieldLock.ts#L34)
+
+Field names to include or exclude (required for 'Include' and 'Exclude').

@@ -6,7 +6,7 @@
 
 # Interface: Code39Options
 
-Defined in: [src/barcode/code39.ts:107](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/barcode/code39.ts#L107)
+Defined in: [src/barcode/code39.ts:107](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/barcode/code39.ts#L107)
 
 Options for rendering a Code 39 barcode as PDF operators.
 
@@ -16,7 +16,7 @@ Options for rendering a Code 39 barcode as PDF operators.
 
 > `readonly` `optional` **color**: [`Color`](../type-aliases/Color.md)
 
-Defined in: [src/barcode/code39.ts:117](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/barcode/code39.ts#L117)
+Defined in: [src/barcode/code39.ts:117](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/barcode/code39.ts#L117)
 
 Bar colour. Default: grayscale black.
 
@@ -26,7 +26,7 @@ Bar colour. Default: grayscale black.
 
 > `readonly` `optional` **height**: `number`
 
-Defined in: [src/barcode/code39.ts:109](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/barcode/code39.ts#L109)
+Defined in: [src/barcode/code39.ts:109](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/barcode/code39.ts#L109)
 
 Height of the bars in user-space units. Default: `50`.
 
@@ -36,7 +36,7 @@ Height of the bars in user-space units. Default: `50`.
 
 > `readonly` `optional` **includeCheckDigit**: `boolean`
 
-Defined in: [src/barcode/code39.ts:121](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/barcode/code39.ts#L121)
+Defined in: [src/barcode/code39.ts:121](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/barcode/code39.ts#L121)
 
 Include a modulo-43 check digit. Default: `false`.
 
@@ -46,7 +46,7 @@ Include a modulo-43 check digit. Default: `false`.
 
 > `readonly` `optional` **moduleWidth**: `number`
 
-Defined in: [src/barcode/code39.ts:111](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/barcode/code39.ts#L111)
+Defined in: [src/barcode/code39.ts:111](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/barcode/code39.ts#L111)
 
 Width of a narrow module in user-space units. Default: `1`.
 
@@ -56,7 +56,7 @@ Width of a narrow module in user-space units. Default: `1`.
 
 > `readonly` `optional` **quietZone**: `number`
 
-Defined in: [src/barcode/code39.ts:115](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/barcode/code39.ts#L115)
+Defined in: [src/barcode/code39.ts:115](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/barcode/code39.ts#L115)
 
 Quiet-zone width in narrow modules on each side. Default: `10`.
 
@@ -66,7 +66,7 @@ Quiet-zone width in narrow modules on each side. Default: `10`.
 
 > `readonly` `optional` **showText**: `boolean`
 
-Defined in: [src/barcode/code39.ts:119](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/barcode/code39.ts#L119)
+Defined in: [src/barcode/code39.ts:119](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/barcode/code39.ts#L119)
 
 Show human-readable text below the barcode. Default: `false`.
 
@@ -76,6 +76,6 @@ Show human-readable text below the barcode. Default: `false`.
 
 > `readonly` `optional` **wideToNarrowRatio**: `number`
 
-Defined in: [src/barcode/code39.ts:113](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/barcode/code39.ts#L113)
+Defined in: [src/barcode/code39.ts:113](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/barcode/code39.ts#L113)
 
 Wide-to-narrow ratio. Default: `3`. Must be >= 2.

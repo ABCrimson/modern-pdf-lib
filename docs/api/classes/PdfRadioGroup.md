@@ -6,7 +6,7 @@
 
 # Class: PdfRadioGroup
 
-Defined in: [src/form/fields/radioGroup.ts:34](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/fields/radioGroup.ts#L34)
+Defined in: [src/form/fields/radioGroup.ts:34](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/form/fields/radioGroup.ts#L34)
 
 A PDF radio button group (/FT /Btn with Radio flag).
 
@@ -23,7 +23,7 @@ The field's /V value is the name of the selected option.
 
 > **new PdfRadioGroup**(`name`, `dict`, `widgetDict`, `parentNames?`, `widgets?`): `PdfRadioGroup`
 
-Defined in: [src/form/fields/radioGroup.ts:40](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/fields/radioGroup.ts#L40)
+Defined in: [src/form/fields/radioGroup.ts:40](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/form/fields/radioGroup.ts#L40)
 
 #### Parameters
 
@@ -61,7 +61,7 @@ Defined in: [src/form/fields/radioGroup.ts:40](https://github.com/ABCrimson/mode
 
 > `protected` `readonly` **dict**: [`PdfDict`](PdfDict.md)
 
-Defined in: [src/form/pdfField.ts:164](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/pdfField.ts#L164)
+Defined in: [src/form/pdfField.ts:164](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/form/pdfField.ts#L164)
 
 The underlying field dictionary (may contain both field and widget
 entries for simple one-widget fields).
@@ -76,7 +76,7 @@ entries for simple one-widget fields).
 
 > `readonly` **fieldType**: [`FieldType`](../type-aliases/FieldType.md) = `'radio'`
 
-Defined in: [src/form/fields/radioGroup.ts:35](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/fields/radioGroup.ts#L35)
+Defined in: [src/form/fields/radioGroup.ts:35](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/form/fields/radioGroup.ts#L35)
 
 Discriminator for the concrete field type.
 
@@ -90,7 +90,7 @@ Discriminator for the concrete field type.
 
 > `readonly` **name**: `string`
 
-Defined in: [src/form/pdfField.ts:158](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/pdfField.ts#L158)
+Defined in: [src/form/pdfField.ts:158](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/form/pdfField.ts#L158)
 
 The fully-qualified field name.
 
@@ -104,7 +104,7 @@ The fully-qualified field name.
 
 > `protected` `readonly` **parentNames**: `string`[]
 
-Defined in: [src/form/pdfField.ts:173](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/pdfField.ts#L173)
+Defined in: [src/form/pdfField.ts:173](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/form/pdfField.ts#L173)
 
 Parent field dictionary chain for building full names.
 
@@ -118,7 +118,7 @@ Parent field dictionary chain for building full names.
 
 > `protected` `readonly` **widgetDict**: [`PdfDict`](PdfDict.md)
 
-Defined in: [src/form/pdfField.ts:170](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/pdfField.ts#L170)
+Defined in: [src/form/pdfField.ts:170](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/form/pdfField.ts#L170)
 
 The widget annotation dictionary. For merged field+widget dicts,
 this is the same object as `dict`.
@@ -133,7 +133,7 @@ this is the same object as `dict`.
 
 > **addToPage**(`page`): `void`
 
-Defined in: [src/form/fields/radioGroup.ts:62](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/fields/radioGroup.ts#L62)
+Defined in: [src/form/fields/radioGroup.ts:62](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/form/fields/radioGroup.ts#L62)
 
 Add all radio button widgets to a page.
 
@@ -161,7 +161,7 @@ adds all of them.
 
 > **disableExporting**(): `void`
 
-Defined in: [src/form/pdfField.ts:276](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/pdfField.ts#L276)
+Defined in: [src/form/pdfField.ts:276](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/form/pdfField.ts#L276)
 
 Disable exporting this field (set the NoExport flag).
 
@@ -179,7 +179,7 @@ Disable exporting this field (set the NoExport flag).
 
 > **enableExporting**(): `void`
 
-Defined in: [src/form/pdfField.ts:271](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/pdfField.ts#L271)
+Defined in: [src/form/pdfField.ts:271](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/form/pdfField.ts#L271)
 
 Enable exporting this field (clear the NoExport flag).
 
@@ -197,7 +197,7 @@ Enable exporting this field (clear the NoExport flag).
 
 > **generateAppearance**(): [`PdfStream`](PdfStream.md)
 
-Defined in: [src/form/fields/radioGroup.ts:172](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/fields/radioGroup.ts#L172)
+Defined in: [src/form/fields/radioGroup.ts:172](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/form/fields/radioGroup.ts#L172)
 
 Generate the appearance stream for the first widget.
 For full appearance generation, use generateAppearanceForWidget().
@@ -216,7 +216,7 @@ For full appearance generation, use generateAppearanceForWidget().
 
 > **getDict**(): [`PdfDict`](PdfDict.md)
 
-Defined in: [src/form/pdfField.ts:207](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/pdfField.ts#L207)
+Defined in: [src/form/pdfField.ts:207](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/form/pdfField.ts#L207)
 
 Return the underlying field dictionary (for internal use by PdfForm).
 
@@ -234,7 +234,7 @@ Return the underlying field dictionary (for internal use by PdfForm).
 
 > `protected` **getFieldFlags**(): `number`
 
-Defined in: [src/form/pdfField.ts:216](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/pdfField.ts#L216)
+Defined in: [src/form/pdfField.ts:216](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/form/pdfField.ts#L216)
 
 Get the raw /Ff (field flags) integer value.
 
@@ -252,7 +252,7 @@ Get the raw /Ff (field flags) integer value.
 
 > **getFullName**(): `string`
 
-Defined in: [src/form/pdfField.ts:201](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/pdfField.ts#L201)
+Defined in: [src/form/pdfField.ts:201](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/form/pdfField.ts#L201)
 
 Get the fully qualified field name (Parent.Child.Name format).
 Per PDF spec SS12.7.3.2, the full name is formed by concatenating
@@ -272,7 +272,7 @@ ancestor /T values with periods.
 
 > **getName**(): `string`
 
-Defined in: [src/form/pdfField.ts:192](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/pdfField.ts#L192)
+Defined in: [src/form/pdfField.ts:192](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/form/pdfField.ts#L192)
 
 Get the partial field name (/T entry).
 
@@ -290,7 +290,7 @@ Get the partial field name (/T entry).
 
 > **getOptions**(): `string`[]
 
-Defined in: [src/form/fields/radioGroup.ts:113](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/fields/radioGroup.ts#L113)
+Defined in: [src/form/fields/radioGroup.ts:113](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/form/fields/radioGroup.ts#L113)
 
 Get the list of option names available in this radio group.
 Derived from the /AP /N dictionaries of each widget.
@@ -305,7 +305,7 @@ Derived from the /AP /N dictionaries of each widget.
 
 > **getRect**(): \[`number`, `number`, `number`, `number`\]
 
-Defined in: [src/form/pdfField.ts:288](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/pdfField.ts#L288)
+Defined in: [src/form/pdfField.ts:288](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/form/pdfField.ts#L288)
 
 Get the field's widget rectangle as `[x1, y1, x2, y2]`.
 The /Rect entry comes from the widget annotation dictionary.
@@ -324,7 +324,7 @@ The /Rect entry comes from the widget annotation dictionary.
 
 > **getSelected**(): `string` \| `undefined`
 
-Defined in: [src/form/fields/radioGroup.ts:82](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/fields/radioGroup.ts#L82)
+Defined in: [src/form/fields/radioGroup.ts:82](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/form/fields/radioGroup.ts#L82)
 
 Get the currently selected option name.
 Returns undefined if no option is selected.
@@ -339,7 +339,7 @@ Returns undefined if no option is selected.
 
 > **getValue**(): `string`
 
-Defined in: [src/form/fields/radioGroup.ts:130](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/fields/radioGroup.ts#L130)
+Defined in: [src/form/fields/radioGroup.ts:130](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/form/fields/radioGroup.ts#L130)
 
 Get the value: the selected option name or undefined.
 
@@ -357,7 +357,7 @@ Get the value: the selected option name or undefined.
 
 > **getWidgets**(): [`PdfDict`](PdfDict.md)[]
 
-Defined in: [src/form/fields/radioGroup.ts:125](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/fields/radioGroup.ts#L125)
+Defined in: [src/form/fields/radioGroup.ts:125](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/form/fields/radioGroup.ts#L125)
 
 Get the widget annotation dictionaries.
 
@@ -371,7 +371,7 @@ Get the widget annotation dictionaries.
 
 > `protected` **hasFlag**(`flag`): `boolean`
 
-Defined in: [src/form/pdfField.ts:226](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/pdfField.ts#L226)
+Defined in: [src/form/pdfField.ts:226](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/form/pdfField.ts#L226)
 
 Check if a specific flag bit is set.
 
@@ -395,7 +395,7 @@ Check if a specific flag bit is set.
 
 > **isExported**(): `boolean`
 
-Defined in: [src/form/pdfField.ts:266](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/pdfField.ts#L266)
+Defined in: [src/form/pdfField.ts:266](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/form/pdfField.ts#L266)
 
 Whether the field is exported (inverse of NoExport flag).
 
@@ -413,7 +413,7 @@ Whether the field is exported (inverse of NoExport flag).
 
 > **isNoExport**(): `boolean`
 
-Defined in: [src/form/pdfField.ts:261](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/pdfField.ts#L261)
+Defined in: [src/form/pdfField.ts:261](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/form/pdfField.ts#L261)
 
 Whether the field should not be exported.
 
@@ -431,7 +431,7 @@ Whether the field should not be exported.
 
 > **isReadOnly**(): `boolean`
 
-Defined in: [src/form/pdfField.ts:241](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/pdfField.ts#L241)
+Defined in: [src/form/pdfField.ts:241](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/form/pdfField.ts#L241)
 
 Whether the field is read-only.
 
@@ -449,7 +449,7 @@ Whether the field is read-only.
 
 > **isRequired**(): `boolean`
 
-Defined in: [src/form/pdfField.ts:251](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/pdfField.ts#L251)
+Defined in: [src/form/pdfField.ts:251](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/form/pdfField.ts#L251)
 
 Whether the field is required.
 
@@ -467,7 +467,7 @@ Whether the field is required.
 
 > **select**(`optionName`): `void`
 
-Defined in: [src/form/fields/radioGroup.ts:94](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/fields/radioGroup.ts#L94)
+Defined in: [src/form/fields/radioGroup.ts:94](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/form/fields/radioGroup.ts#L94)
 
 Select an option by its name.
 
@@ -490,7 +490,7 @@ show the correct appearance state.
 
 > `protected` **setFieldFlags**(`flags`): `void`
 
-Defined in: [src/form/pdfField.ts:221](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/pdfField.ts#L221)
+Defined in: [src/form/pdfField.ts:221](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/form/pdfField.ts#L221)
 
 Set the raw /Ff (field flags) integer value.
 
@@ -514,7 +514,7 @@ Set the raw /Ff (field flags) integer value.
 
 > `protected` **setFlag**(`flag`, `on`): `void`
 
-Defined in: [src/form/pdfField.ts:231](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/pdfField.ts#L231)
+Defined in: [src/form/pdfField.ts:231](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/form/pdfField.ts#L231)
 
 Set or clear a specific flag bit.
 
@@ -542,7 +542,7 @@ Set or clear a specific flag bit.
 
 > **setReadOnly**(`readOnly`): `void`
 
-Defined in: [src/form/pdfField.ts:246](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/pdfField.ts#L246)
+Defined in: [src/form/pdfField.ts:246](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/form/pdfField.ts#L246)
 
 Set the read-only flag.
 
@@ -566,7 +566,7 @@ Set the read-only flag.
 
 > **setRequired**(`required`): `void`
 
-Defined in: [src/form/pdfField.ts:256](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/pdfField.ts#L256)
+Defined in: [src/form/pdfField.ts:256](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/form/pdfField.ts#L256)
 
 Set the required flag.
 
@@ -590,7 +590,7 @@ Set the required flag.
 
 > **setValue**(`value`): `void`
 
-Defined in: [src/form/fields/radioGroup.ts:135](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/fields/radioGroup.ts#L135)
+Defined in: [src/form/fields/radioGroup.ts:135](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/form/fields/radioGroup.ts#L135)
 
 Set the value: select the named option.
 

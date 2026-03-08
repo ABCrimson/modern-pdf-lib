@@ -6,7 +6,7 @@
 
 # Interface: TextRun
 
-Defined in: [src/layout/table.ts:40](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/layout/table.ts#L40)
+Defined in: [src/layout/table.ts:40](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/layout/table.ts#L40)
 
 A styled text run within a cell -- allows inline style variation.
 
@@ -16,7 +16,7 @@ A styled text run within a cell -- allows inline style variation.
 
 > `readonly` `optional` **color**: [`Color`](../type-aliases/Color.md)
 
-Defined in: [src/layout/table.ts:43](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/layout/table.ts#L43)
+Defined in: [src/layout/table.ts:43](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/layout/table.ts#L43)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [src/layout/table.ts:43](https://github.com/ABCrimson/modern-pdf-lib
 
 > `readonly` `optional` **fontName**: `string`
 
-Defined in: [src/layout/table.ts:44](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/layout/table.ts#L44)
+Defined in: [src/layout/table.ts:44](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/layout/table.ts#L44)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [src/layout/table.ts:44](https://github.com/ABCrimson/modern-pdf-lib
 
 > `readonly` `optional` **fontSize**: `number`
 
-Defined in: [src/layout/table.ts:42](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/layout/table.ts#L42)
+Defined in: [src/layout/table.ts:42](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/layout/table.ts#L42)
 
 ***
 
@@ -40,4 +40,4 @@ Defined in: [src/layout/table.ts:42](https://github.com/ABCrimson/modern-pdf-lib
 
 > `readonly` **text**: `string`
 
-Defined in: [src/layout/table.ts:41](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/layout/table.ts#L41)
+Defined in: [src/layout/table.ts:41](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/layout/table.ts#L41)

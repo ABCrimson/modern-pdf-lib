@@ -6,7 +6,7 @@
 
 # Interface: QrCodeMatrix
 
-Defined in: [src/barcode/qr.ts:39](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/barcode/qr.ts#L39)
+Defined in: [src/barcode/qr.ts:39](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/barcode/qr.ts#L39)
 
 The result of QR code encoding — a boolean matrix.
 
@@ -16,7 +16,7 @@ The result of QR code encoding — a boolean matrix.
 
 > `readonly` **modules**: readonly `boolean`[]
 
-Defined in: [src/barcode/qr.ts:43](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/barcode/qr.ts#L43)
+Defined in: [src/barcode/qr.ts:43](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/barcode/qr.ts#L43)
 
 Row-major boolean array. `true` = dark module.
 
@@ -26,7 +26,7 @@ Row-major boolean array. `true` = dark module.
 
 > `readonly` **size**: `number`
 
-Defined in: [src/barcode/qr.ts:41](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/barcode/qr.ts#L41)
+Defined in: [src/barcode/qr.ts:41](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/barcode/qr.ts#L41)
 
 Number of modules per side.
 
@@ -36,6 +36,6 @@ Number of modules per side.
 
 > `readonly` **version**: `number`
 
-Defined in: [src/barcode/qr.ts:45](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/barcode/qr.ts#L45)
+Defined in: [src/barcode/qr.ts:45](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/barcode/qr.ts#L45)
 
 QR version (1-40).

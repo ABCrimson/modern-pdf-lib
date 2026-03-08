@@ -8,7 +8,7 @@
 
 > **RadialGradientFill** = [`GradientFill`](../interfaces/GradientFill.md) & `object`
 
-Defined in: [src/core/patterns.ts:146](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/patterns.ts#L146)
+Defined in: [src/core/patterns.ts:146](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/core/patterns.ts#L146)
 
 Descriptor for a radial gradient fill.
 Structurally identical to [GradientFill](../interfaces/GradientFill.md) but with `shadingType: 3`.
