@@ -13,8 +13,22 @@
 // Parser
 // ---------------------------------------------------------------------------
 
-export { loadPdf, extractText, extractTextWithPositions, parseContentStream, decodeStream } from './parser/index.js';
-export type { LoadPdfOptions, TextItem, TextExtractionOptions, ContentStreamOperator } from './parser/index.js';
+export {
+  loadPdf,
+  extractText,
+  extractTextWithPositions,
+  parseContentStream,
+  decodeStream,
+  PdfParseError,
+  formatHexContext,
+} from './parser/index.js';
+export type {
+  LoadPdfOptions,
+  TextItem,
+  TextExtractionOptions,
+  ContentStreamOperator,
+  Operand,
+} from './parser/index.js';
 
 // ---------------------------------------------------------------------------
 // Image extraction
@@ -28,7 +42,7 @@ export type { ImageInfo } from './assets/image/imageExtract.js';
 // ---------------------------------------------------------------------------
 
 export { analyzeImages } from './assets/image/compressionAnalysis.js';
-export type { ImageAnalysis, AnalysisReport } from './assets/image/compressionAnalysis.js';
+export type { ImageAnalysis, AnalysisReport, AnalyzeImagesOptions } from './assets/image/compressionAnalysis.js';
 
 // ---------------------------------------------------------------------------
 // Low-level objects (needed to inspect parsed PDFs)

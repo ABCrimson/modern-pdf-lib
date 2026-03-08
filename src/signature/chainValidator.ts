@@ -114,12 +114,6 @@ const OID_ECDSA_WITH_SHA1 = '1.2.840.10045.4.1';
 // Internal helpers
 // ---------------------------------------------------------------------------
 
-/**
- * Convert a Uint8Array to a hex string.
- */
-function toHex(data: Uint8Array): string {
-  return data.toHex();
-}
 
 /**
  * Parse a GeneralizedTime string to Date.
@@ -570,7 +564,7 @@ export async function validateCertificateChain(
       // For the issuer CN, we parse the issuerDer
       const issuerNode = parseDerTlv(info.issuerDer, 0);
       issuer = extractCommonNameFromNode(issuerNode);
-      serialNumber = toHex(info.serialDer);
+      serialNumber = info.serialDer.toHex();
     } catch {
       certErrors.push('Failed to parse certificate metadata');
     }

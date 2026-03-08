@@ -1,6 +1,6 @@
 {
   "name": "modern-pdf-lib",
-  "version": "0.24.10",
+  "version": "0.25.0",
   "description": "A modern, WASM-accelerated PDF creation engine for every JavaScript runtime",
   "type": "module",
   "exports": {
@@ -58,6 +58,7 @@
     "dist/**/*.d.mts.map",
     "dist/**/*.d.cts.map",
     "dist/modern-pdf-lib.iife.js",
+    "dist/wasm/**",
     "LICENSE",
     "README.md"
   ],
@@ -69,7 +70,8 @@
     "build": "tsdown",
     "build:iife": "tsx scripts/build-iife.ts",
     "build:wasm": "bash scripts/build-wasm.sh",
-    "build:all": "npm run build:wasm && npm run build",
+    "build:all": "npm run build:wasm && npm run build && npm run build:iife && npm run copy:wasm",
+    "copy:wasm": "bash -c 'mkdir -p dist/wasm && for d in src/wasm/*/pkg; do crate=$(basename $(dirname $d)); mkdir -p dist/wasm/$crate && cp $d/*.wasm $d/*.js $d/*.d.ts dist/wasm/$crate/ 2>/dev/null || true; done'",
     "dev": "vite",
     "test": "vitest run",
     "test:watch": "vitest",

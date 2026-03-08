@@ -8,7 +8,7 @@
 
 > **computeImageDpi**(`imageWidth`, `imageHeight`, `displayWidth`, `displayHeight`): [`ImageDpi`](../interfaces/ImageDpi.md)
 
-Defined in: [src/assets/image/dpiAnalyze.ts:57](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/assets/image/dpiAnalyze.ts#L57)
+Defined in: [src/assets/image/dpiAnalyze.ts:57](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/assets/image/dpiAnalyze.ts#L57)
 
 Compute the effective DPI of an image given its pixel dimensions
 and display dimensions in points.

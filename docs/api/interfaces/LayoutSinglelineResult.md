@@ -6,7 +6,7 @@
 
 # Interface: LayoutSinglelineResult
 
-Defined in: [src/core/layout.ts:189](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/core/layout.ts#L189)
+Defined in: [src/core/layout.ts:189](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/core/layout.ts#L189)
 
 Result of [layoutSinglelineText](../functions/layoutSinglelineText.md).
 
@@ -16,7 +16,7 @@ Result of [layoutSinglelineText](../functions/layoutSinglelineText.md).
 
 > **line**: `object`
 
-Defined in: [src/core/layout.ts:191](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/core/layout.ts#L191)
+Defined in: [src/core/layout.ts:191](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/core/layout.ts#L191)
 
 The text line with its measured width.
 
@@ -38,7 +38,7 @@ The text line with its measured width.
 
 > **x**: `number`
 
-Defined in: [src/core/layout.ts:193](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/core/layout.ts#L193)
+Defined in: [src/core/layout.ts:193](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/core/layout.ts#L193)
 
 The x offset after alignment (0 for left-aligned).
 
@@ -48,6 +48,6 @@ The x offset after alignment (0 for left-aligned).
 
 > **y**: `number`
 
-Defined in: [src/core/layout.ts:195](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/core/layout.ts#L195)
+Defined in: [src/core/layout.ts:195](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/core/layout.ts#L195)
 
 The y offset for the text baseline.

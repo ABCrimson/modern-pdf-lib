@@ -6,7 +6,7 @@
 
 # Interface: TransparencyInfo
 
-Defined in: [src/compliance/transparencyFlattener.ts:19](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/compliance/transparencyFlattener.ts#L19)
+Defined in: [src/compliance/transparencyFlattener.ts:19](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/compliance/transparencyFlattener.ts#L19)
 
 Detected transparency usage in a PDF.
 
@@ -16,7 +16,7 @@ Detected transparency usage in a PDF.
 
 > `readonly` **blendModeCount**: `number`
 
-Defined in: [src/compliance/transparencyFlattener.ts:29](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/compliance/transparencyFlattener.ts#L29)
+Defined in: [src/compliance/transparencyFlattener.ts:29](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/compliance/transparencyFlattener.ts#L29)
 
 Number of non-Normal blend mode references.
 
@@ -26,7 +26,7 @@ Number of non-Normal blend mode references.
 
 > `readonly` **fillOpacityCount**: `number`
 
-Defined in: [src/compliance/transparencyFlattener.ts:25](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/compliance/transparencyFlattener.ts#L25)
+Defined in: [src/compliance/transparencyFlattener.ts:25](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/compliance/transparencyFlattener.ts#L25)
 
 Number of ExtGState objects with non-1.0 ca.
 
@@ -36,7 +36,7 @@ Number of ExtGState objects with non-1.0 ca.
 
 > `readonly` **findings**: [`TransparencyFinding`](TransparencyFinding.md)[]
 
-Defined in: [src/compliance/transparencyFlattener.ts:31](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/compliance/transparencyFlattener.ts#L31)
+Defined in: [src/compliance/transparencyFlattener.ts:31](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/compliance/transparencyFlattener.ts#L31)
 
 Detailed findings.
 
@@ -46,7 +46,7 @@ Detailed findings.
 
 > `readonly` **hasTransparency**: `boolean`
 
-Defined in: [src/compliance/transparencyFlattener.ts:21](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/compliance/transparencyFlattener.ts#L21)
+Defined in: [src/compliance/transparencyFlattener.ts:21](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/compliance/transparencyFlattener.ts#L21)
 
 Whether any transparency was found.
 
@@ -56,7 +56,7 @@ Whether any transparency was found.
 
 > `readonly` **softMaskCount**: `number`
 
-Defined in: [src/compliance/transparencyFlattener.ts:27](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/compliance/transparencyFlattener.ts#L27)
+Defined in: [src/compliance/transparencyFlattener.ts:27](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/compliance/transparencyFlattener.ts#L27)
 
 Number of SMask references found.
 
@@ -66,6 +66,6 @@ Number of SMask references found.
 
 > `readonly` **strokeOpacityCount**: `number`
 
-Defined in: [src/compliance/transparencyFlattener.ts:23](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/compliance/transparencyFlattener.ts#L23)
+Defined in: [src/compliance/transparencyFlattener.ts:23](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/compliance/transparencyFlattener.ts#L23)
 
 Number of ExtGState objects with non-1.0 CA.

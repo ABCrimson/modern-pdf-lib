@@ -33,20 +33,24 @@ export type {
   DrawCircleOptions,
   DrawEllipseOptions,
   DrawSvgPathOptions,
+  DrawQrCodeOptions,
+  TransparencyGroupOptions,
+  SoftMaskBuilder,
+  SoftMaskRef,
 } from './core/pdfPage.js';
 
 // ---------------------------------------------------------------------------
 // Colour helpers
 // ---------------------------------------------------------------------------
 
-export { rgb, cmyk, grayscale } from './core/operators/color.js';
+export { rgb, cmyk, grayscale, componentsToColor, colorToComponents, setFillingColor, setStrokingColor } from './core/operators/color.js';
 export type { RgbColor, CmykColor, GrayscaleColor, Color } from './core/operators/color.js';
 
 // ---------------------------------------------------------------------------
 // Angle helpers
 // ---------------------------------------------------------------------------
 
-export { degrees, radians } from './core/operators/state.js';
+export { degrees, radians, degreesToRadians, radiansToDegrees } from './core/operators/state.js';
 export type { Degrees, Radians, Angle } from './core/operators/state.js';
 
 // ---------------------------------------------------------------------------
@@ -54,6 +58,14 @@ export type { Degrees, Radians, Angle } from './core/operators/state.js';
 // ---------------------------------------------------------------------------
 
 export { layoutMultilineText, layoutCombedText, computeFontSize, layoutSinglelineText } from './core/layout.js';
+export type {
+  LayoutMultilineOptions,
+  LayoutMultilineResult,
+  LayoutCombedOptions,
+  ComputeFontSizeOptions,
+  LayoutSinglelineOptions,
+  LayoutSinglelineResult,
+} from './core/layout.js';
 
 // ---------------------------------------------------------------------------
 // Enums
@@ -71,16 +83,55 @@ export type { PdfSaveOptions } from './core/pdfWriter.js';
 // Page manipulation
 // ---------------------------------------------------------------------------
 
-export { insertPage, removePage, movePage, rotatePage, getPageSize, resizePage } from './core/pageManipulation.js';
+export {
+  insertPage,
+  removePage,
+  movePage,
+  rotatePage,
+  cropPage,
+  getPageSize,
+  resizePage,
+  reversePages,
+  removePages,
+  rotateAllPages,
+} from './core/pageManipulation.js';
+export type { CropBox } from './core/pageManipulation.js';
 
 // ---------------------------------------------------------------------------
 // Merge / Split
 // ---------------------------------------------------------------------------
 
 export { mergePdfs, splitPdf, copyPages } from './core/documentMerge.js';
+export type { PageRange } from './core/documentMerge.js';
 
 // ---------------------------------------------------------------------------
 // Font embedding (TrueType / OpenType)
 // ---------------------------------------------------------------------------
 
 export { EmbeddedFont } from './assets/font/fontEmbed.js';
+
+// ---------------------------------------------------------------------------
+// PDF embedding (Form XObjects)
+// ---------------------------------------------------------------------------
+
+export { embedPageAsFormXObject } from './core/pdfEmbed.js';
+export type { EmbeddedPdfPage, DrawPageOptions, EmbedPageOptions } from './core/pdfEmbed.js';
+
+// ---------------------------------------------------------------------------
+// Gradients & Patterns
+// ---------------------------------------------------------------------------
+
+export { linearGradient, radialGradient, tilingPattern, buildGradientObjects, buildPatternObjects } from './core/patterns.js';
+export type { ColorStop, LinearGradientOptions, RadialGradientOptions, TilingPatternOptions, GradientFill, PatternFill, RadialGradientFill, NormalizedStop } from './core/patterns.js';
+
+// ---------------------------------------------------------------------------
+// Document metadata types
+// ---------------------------------------------------------------------------
+
+export type { DocumentMetadata, CatalogOptions } from './core/pdfCatalog.js';
+
+// ---------------------------------------------------------------------------
+// PDF value helpers
+// ---------------------------------------------------------------------------
+
+export { asPDFName, asPDFNumber, asNumber } from './utils/pdfValueHelpers.js';

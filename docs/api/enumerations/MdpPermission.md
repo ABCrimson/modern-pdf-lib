@@ -6,7 +6,7 @@
 
 # Enumeration: MdpPermission
 
-Defined in: [src/signature/mdpPolicy.ts:33](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/signature/mdpPolicy.ts#L33)
+Defined in: [src/signature/mdpPolicy.ts:33](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/signature/mdpPolicy.ts#L33)
 
 MDP permission levels for certification signatures.
 
@@ -19,7 +19,7 @@ of a /DocMDP transform method.
 
 > **FormFillAndSign**: `2`
 
-Defined in: [src/signature/mdpPolicy.ts:37](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/signature/mdpPolicy.ts#L37)
+Defined in: [src/signature/mdpPolicy.ts:37](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/signature/mdpPolicy.ts#L37)
 
 Only form filling and signing are permitted.
 
@@ -29,7 +29,7 @@ Only form filling and signing are permitted.
 
 > **FormFillSignAnnotate**: `3`
 
-Defined in: [src/signature/mdpPolicy.ts:39](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/signature/mdpPolicy.ts#L39)
+Defined in: [src/signature/mdpPolicy.ts:39](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/signature/mdpPolicy.ts#L39)
 
 Form filling, signing, and annotation changes are permitted.
 
@@ -39,6 +39,6 @@ Form filling, signing, and annotation changes are permitted.
 
 > **NoChanges**: `1`
 
-Defined in: [src/signature/mdpPolicy.ts:35](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/signature/mdpPolicy.ts#L35)
+Defined in: [src/signature/mdpPolicy.ts:35](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/signature/mdpPolicy.ts#L35)
 
 No changes to the document are permitted.

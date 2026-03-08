@@ -20,5 +20,24 @@ export {
   PdfListboxField,
   PdfButtonField,
   PdfSignatureField,
+  generateTextAppearance,
+  generateCheckboxAppearance,
+  generateRadioAppearance,
+  generateDropdownAppearance,
+  generateListboxAppearance,
+  generateButtonAppearance,
+  generateSignatureAppearance,
 } from './form/index.js';
-export type { FieldType, AppearanceProviderFor } from './form/index.js';
+export type {
+  FieldType,
+  WidgetAnnotationHost,
+  RefResolver,
+  AppearanceProviderFor,
+  TextAppearanceOptions,
+  CheckboxAppearanceOptions,
+  RadioAppearanceOptions,
+  DropdownAppearanceOptions,
+  ListboxAppearanceOptions,
+  ButtonAppearanceOptions,
+  SignatureAppearanceOptions,
+} from './form/index.js';

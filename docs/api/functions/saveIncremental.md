@@ -8,7 +8,7 @@
 
 > **saveIncremental**(`originalBytes`, `registry`, `structure`, `changedObjects`, `options?`): [`IncrementalSaveResult`](../interfaces/IncrementalSaveResult.md)
 
-Defined in: [src/core/incrementalWriter.ts:245](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/core/incrementalWriter.ts#L245)
+Defined in: [src/core/incrementalWriter.ts:245](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/core/incrementalWriter.ts#L245)
 
 Perform an incremental save of a PDF document.
 

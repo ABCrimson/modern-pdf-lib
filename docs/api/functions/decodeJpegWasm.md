@@ -8,7 +8,7 @@
 
 > **decodeJpegWasm**(`jpegBytes`): [`JpegDecodeResult`](../interfaces/JpegDecodeResult.md) \| `undefined`
 
-Defined in: [src/wasm/jpeg/bridge.ts:196](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/wasm/jpeg/bridge.ts#L196)
+Defined in: [src/wasm/jpeg/bridge.ts:196](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/wasm/jpeg/bridge.ts#L196)
 
 Decode JPEG bytes to raw pixel data using the WASM decoder.
 

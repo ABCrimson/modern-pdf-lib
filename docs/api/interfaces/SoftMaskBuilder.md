@@ -6,7 +6,7 @@
 
 # Interface: SoftMaskBuilder
 
-Defined in: [src/core/pdfPage.ts:571](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/core/pdfPage.ts#L571)
+Defined in: [src/core/pdfPage.ts:571](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/core/pdfPage.ts#L571)
 
 Builder interface for constructing soft mask content.
 
@@ -18,7 +18,7 @@ All drawing is in grayscale: `1` = fully opaque, `0` = fully transparent.
 
 > **drawCircle**(`cx`, `cy`, `radius`, `gray`): `void`
 
-Defined in: [src/core/pdfPage.ts:581](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/core/pdfPage.ts#L581)
+Defined in: [src/core/pdfPage.ts:581](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/core/pdfPage.ts#L581)
 
 Draw a filled circle at the given center with the specified radius
 and grayscale value.
@@ -51,7 +51,7 @@ and grayscale value.
 
 > **drawRectangle**(`x`, `y`, `width`, `height`, `gray`): `void`
 
-Defined in: [src/core/pdfPage.ts:576](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/core/pdfPage.ts#L576)
+Defined in: [src/core/pdfPage.ts:576](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/core/pdfPage.ts#L576)
 
 Draw a filled rectangle at the given position with the specified
 grayscale value (`0` = black/transparent, `1` = white/opaque).
@@ -88,7 +88,7 @@ grayscale value (`0` = black/transparent, `1` = white/opaque).
 
 > **pushRawOperators**(`ops`): `void`
 
-Defined in: [src/core/pdfPage.ts:585](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/core/pdfPage.ts#L585)
+Defined in: [src/core/pdfPage.ts:585](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/core/pdfPage.ts#L585)
 
 Append raw PDF content-stream operators to the mask.
 

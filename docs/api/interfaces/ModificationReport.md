@@ -6,7 +6,7 @@
 
 # Interface: ModificationReport
 
-Defined in: [src/signature/modificationDetector.ts:49](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/signature/modificationDetector.ts#L49)
+Defined in: [src/signature/modificationDetector.ts:49](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/signature/modificationDetector.ts#L49)
 
 Report of modifications detected in a certified document.
 
@@ -16,7 +16,7 @@ Report of modifications detected in a certified document.
 
 > `optional` **certificationLevel**: [`MdpPermission`](../enumerations/MdpPermission.md)
 
-Defined in: [src/signature/modificationDetector.ts:51](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/signature/modificationDetector.ts#L51)
+Defined in: [src/signature/modificationDetector.ts:51](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/signature/modificationDetector.ts#L51)
 
 The certification level, if any.
 
@@ -26,7 +26,7 @@ The certification level, if any.
 
 > **isCompliant**: `boolean`
 
-Defined in: [src/signature/modificationDetector.ts:53](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/signature/modificationDetector.ts#L53)
+Defined in: [src/signature/modificationDetector.ts:53](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/signature/modificationDetector.ts#L53)
 
 Whether the modifications comply with the certification level.
 
@@ -36,6 +36,6 @@ Whether the modifications comply with the certification level.
 
 > **violations**: [`ModificationViolation`](ModificationViolation.md)[]
 
-Defined in: [src/signature/modificationDetector.ts:55](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/signature/modificationDetector.ts#L55)
+Defined in: [src/signature/modificationDetector.ts:55](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/signature/modificationDetector.ts#L55)
 
 List of detected violations.

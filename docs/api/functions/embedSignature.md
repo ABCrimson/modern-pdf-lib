@@ -8,7 +8,7 @@
 
 > **embedSignature**(`preparedPdf`, `signatureBytes`, `byteRange`): `Uint8Array`
 
-Defined in: [src/signature/byteRange.ts:578](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/signature/byteRange.ts#L578)
+Defined in: [src/signature/byteRange.ts:578](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/signature/byteRange.ts#L578)
 
 Embed a signature into the prepared PDF at the placeholder position.
 

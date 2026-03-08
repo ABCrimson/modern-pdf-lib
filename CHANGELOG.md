@@ -5,6 +5,43 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 See [VERSIONING.md](./VERSIONING.md) for this project's versioning policy.
 
+## [0.25.0] - 2026-03-08
+
+### Added
+
+- **267 new tests** — comprehensive coverage for previously untested security-critical and core modules:
+  - `signatureVerifier.test.ts` (23 tests) — digital signature verification with tamper detection, multi-sig, hash algorithms
+  - `sha256.test.ts` (28 tests) — NIST FIPS 180-4 test vectors for SHA-256/384/512
+  - `textShaper.test.ts` (32 tests) — Unicode text shaping, RTL, glyph mapping, WASM fallback
+  - `jpegEmbed.test.ts` (42 tests) — SOF parsing, color space detection, Adobe APP14, error handling
+  - `cffEmbed.test.ts` (36 tests) — OpenType table directory parsing, tag matching, all standard tags
+  - `freeTextAnnotation.test.ts` (16 tests) — creation, parsing, alignment, font size
+  - `inkAnnotation.test.ts` (12 tests) — ink list management, multi-path, clear workflow
+  - `redactAnnotation.test.ts` (13 tests) — overlay text, interior color, quad points
+  - `stampAnnotation.test.ts` (13 tests) — all 14 standard stamp names, custom stamps
+  - `detect.test.ts` (16 tests) — runtime detection for Node/Deno/Bun, caching, adapter creation
+  - `adapter.test.ts` (18 tests) — runtime adapter interface, override, stream creation
+  - `cli.test.ts` (18 tests) — help text, argument parsing, validation, optimize command
+
+- **Complete sub-entry point exports**:
+  - `modern-pdf-lib/create` — added ~30 missing exports: gradients, patterns, page manipulation, PDF embedding, QR code options, transparency, document metadata
+  - `modern-pdf-lib/parse` — added `Operand` type, `AnalyzeImagesOptions`, `PdfParseError`, `formatHexContext`
+  - `modern-pdf-lib/forms` — added 7 appearance generators + 9 option types for complete form appearance API
+
+### Fixed
+
+- **CI/CD branch mismatch** — `.github/workflows/ci.yml` triggered on `main` but repo uses `master`; CI was never running on pushes or PRs
+- **Missing sidebar entries** — `Image Formats` and `Multi-Party Signing` guides were invisible in VitePress navigation
+- **CI WASM build missing crates** — `build-wasm-ci.sh` was missing `jbig2` and `jpeg` modules (only had 4/6)
+- **WASM binaries excluded from npm package** — added `dist/wasm/**` to `package.json` files field
+- **No WASM copy step in build pipeline** — added `copy:wasm` script to copy built WASM from `src/wasm/*/pkg/` to `dist/wasm/`
+- **IIFE bundle not in build pipeline** — added `build:iife` to `build:all` script chain
+
+### Changed
+
+- **Code deduplication** — inlined `.toHex()` at 8 call sites, removed 3 identical wrapper functions from `ocsp.ts`, `crl.ts`, `chainValidator.ts`
+- Test count: **4,549 tests** passing across **211 test suites** (up from 4,282 across 199)
+
 ## [0.24.10] - 2026-03-07
 
 ### Added

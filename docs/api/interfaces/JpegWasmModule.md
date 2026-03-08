@@ -6,7 +6,7 @@
 
 # Interface: JpegWasmModule
 
-Defined in: [src/wasm/jpeg/bridge.ts:20](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/wasm/jpeg/bridge.ts#L20)
+Defined in: [src/wasm/jpeg/bridge.ts:20](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/wasm/jpeg/bridge.ts#L20)
 
 Pre-built wasm-bindgen module interface (when passed directly).
 
@@ -16,7 +16,7 @@ Pre-built wasm-bindgen module interface (when passed directly).
 
 > **decode\_jpeg**(`data`): `Uint8Array`
 
-Defined in: [src/wasm/jpeg/bridge.ts:30](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/wasm/jpeg/bridge.ts#L30)
+Defined in: [src/wasm/jpeg/bridge.ts:30](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/wasm/jpeg/bridge.ts#L30)
 
 #### Parameters
 
@@ -34,7 +34,7 @@ Defined in: [src/wasm/jpeg/bridge.ts:30](https://github.com/ABCrimson/modern-pdf
 
 > **encode\_jpeg**(`pixels`, `width`, `height`, `channels`, `quality`, `progressive`, `chroma_subsampling`): `Uint8Array`
 
-Defined in: [src/wasm/jpeg/bridge.ts:21](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/wasm/jpeg/bridge.ts#L21)
+Defined in: [src/wasm/jpeg/bridge.ts:21](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/wasm/jpeg/bridge.ts#L21)
 
 #### Parameters
 

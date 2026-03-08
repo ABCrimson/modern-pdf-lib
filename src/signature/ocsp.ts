@@ -206,12 +206,6 @@ function parseAsn1Time(node: Asn1Node): Date {
   return parseUtcTime(timeStr);
 }
 
-/**
- * Convert a Uint8Array to a hex string.
- */
-function toHex(data: Uint8Array): string {
-  return data.toHex();
-}
 
 /**
  * Extract the raw issuer Name bytes from a DER-encoded certificate's
@@ -452,11 +446,11 @@ export function parseOcspResponse(response: Uint8Array): OcspResponse {
   let responderId: string;
   if (responderIdNode.tag === 0xa1) {
     // byName — contains a Name SEQUENCE
-    responderId = 'name:' + toHex(responderIdNode.data);
+    responderId = 'name:' + responderIdNode.data.toHex();
   } else if (responderIdNode.tag === 0xa2) {
     // byKey — contains an OCTET STRING with key hash
     const keyHashNode = responderIdNode.children[0];
-    responderId = 'keyHash:' + (keyHashNode ? toHex(keyHashNode.data) : toHex(responderIdNode.data));
+    responderId = 'keyHash:' + (keyHashNode ? keyHashNode.data.toHex() : responderIdNode.data.toHex());
   } else {
     responderId = 'unknown';
   }
@@ -509,7 +503,7 @@ function parseSingleResponse(node: Asn1Node): OcspSingleResponse {
   const certIdNode = node.children[0]!;
   // Serial number is the last child of CertID
   const serialNode = certIdNode.children[3]!;
-  const serialNumber = toHex(serialNode.data);
+  const serialNumber = serialNode.data.toHex();
 
   // certStatus
   const certStatusNode = node.children[1]!;

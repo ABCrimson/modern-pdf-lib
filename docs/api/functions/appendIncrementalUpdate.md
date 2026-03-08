@@ -8,7 +8,7 @@
 
 > **appendIncrementalUpdate**(`originalPdf`, `newObjects`, `options?`): `Uint8Array`
 
-Defined in: [src/signature/incrementalSave.ts:452](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/signature/incrementalSave.ts#L452)
+Defined in: [src/signature/incrementalSave.ts:452](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/signature/incrementalSave.ts#L452)
 
 Append a pure incremental update to a PDF.
 

@@ -6,7 +6,7 @@
 
 # Interface: ItfOptions
 
-Defined in: [src/barcode/itf.ts:59](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/barcode/itf.ts#L59)
+Defined in: [src/barcode/itf.ts:59](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/barcode/itf.ts#L59)
 
 Options for rendering an ITF barcode as PDF operators.
 
@@ -16,7 +16,7 @@ Options for rendering an ITF barcode as PDF operators.
 
 > `readonly` `optional` **bearerBars**: `boolean`
 
-Defined in: [src/barcode/itf.ts:76](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/barcode/itf.ts#L76)
+Defined in: [src/barcode/itf.ts:76](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/barcode/itf.ts#L76)
 
 Add horizontal bearer bars at the top and bottom of the barcode.
 Bearer bars help prevent partial reads. Default: `false`.
@@ -27,7 +27,7 @@ Bearer bars help prevent partial reads. Default: `false`.
 
 > `readonly` `optional` **bearerBarWidth**: `number`
 
-Defined in: [src/barcode/itf.ts:81](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/barcode/itf.ts#L81)
+Defined in: [src/barcode/itf.ts:81](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/barcode/itf.ts#L81)
 
 Width of the bearer bars in user-space units. Only used when
 `bearerBars` is `true`. Default: `2`.
@@ -38,7 +38,7 @@ Width of the bearer bars in user-space units. Only used when
 
 > `readonly` `optional` **color**: [`Color`](../type-aliases/Color.md)
 
-Defined in: [src/barcode/itf.ts:69](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/barcode/itf.ts#L69)
+Defined in: [src/barcode/itf.ts:69](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/barcode/itf.ts#L69)
 
 Bar colour. Default: grayscale black.
 
@@ -48,7 +48,7 @@ Bar colour. Default: grayscale black.
 
 > `readonly` `optional` **height**: `number`
 
-Defined in: [src/barcode/itf.ts:61](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/barcode/itf.ts#L61)
+Defined in: [src/barcode/itf.ts:61](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/barcode/itf.ts#L61)
 
 Height of the bars in user-space units. Default: `50`.
 
@@ -58,7 +58,7 @@ Height of the bars in user-space units. Default: `50`.
 
 > `readonly` `optional` **moduleWidth**: `number`
 
-Defined in: [src/barcode/itf.ts:63](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/barcode/itf.ts#L63)
+Defined in: [src/barcode/itf.ts:63](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/barcode/itf.ts#L63)
 
 Width of a narrow module in user-space units. Default: `1`.
 
@@ -68,7 +68,7 @@ Width of a narrow module in user-space units. Default: `1`.
 
 > `readonly` `optional` **quietZone**: `number`
 
-Defined in: [src/barcode/itf.ts:67](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/barcode/itf.ts#L67)
+Defined in: [src/barcode/itf.ts:67](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/barcode/itf.ts#L67)
 
 Quiet-zone width in narrow modules on each side. Default: `10`.
 
@@ -78,7 +78,7 @@ Quiet-zone width in narrow modules on each side. Default: `10`.
 
 > `readonly` `optional` **showText**: `boolean`
 
-Defined in: [src/barcode/itf.ts:71](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/barcode/itf.ts#L71)
+Defined in: [src/barcode/itf.ts:71](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/barcode/itf.ts#L71)
 
 Show human-readable text below the barcode. Default: `false`.
 
@@ -88,6 +88,6 @@ Show human-readable text below the barcode. Default: `false`.
 
 > `readonly` `optional` **wideToNarrowRatio**: `number`
 
-Defined in: [src/barcode/itf.ts:65](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/barcode/itf.ts#L65)
+Defined in: [src/barcode/itf.ts:65](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/barcode/itf.ts#L65)
 
 Wide-to-narrow ratio. Default: `3`. Must be >= 2.

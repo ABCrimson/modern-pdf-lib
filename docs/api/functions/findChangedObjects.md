@@ -8,7 +8,7 @@
 
 > **findChangedObjects**(`original`, `modified`): `number`[]
 
-Defined in: [src/signature/incrementalOptimizer.ts:111](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/signature/incrementalOptimizer.ts#L111)
+Defined in: [src/signature/incrementalOptimizer.ts:111](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/signature/incrementalOptimizer.ts#L111)
 
 Find the list of object numbers whose content actually changed
 between two versions of a PDF.

@@ -6,7 +6,7 @@
 
 # Interface: RadialGradientOptions
 
-Defined in: [src/core/patterns.ts:75](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/core/patterns.ts#L75)
+Defined in: [src/core/patterns.ts:75](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/core/patterns.ts#L75)
 
 Options for creating a radial gradient (radial shading, ShadingType 3).
 
@@ -16,7 +16,7 @@ Options for creating a radial gradient (radial shading, ShadingType 3).
 
 > `readonly` `optional` **extend**: `boolean`
 
-Defined in: [src/core/patterns.ts:96](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/core/patterns.ts#L96)
+Defined in: [src/core/patterns.ts:96](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/core/patterns.ts#L96)
 
 Whether to extend the gradient beyond the start and end circles.
 Default: `true`.
@@ -27,7 +27,7 @@ Default: `true`.
 
 > `readonly` **r0**: `number`
 
-Defined in: [src/core/patterns.ts:81](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/core/patterns.ts#L81)
+Defined in: [src/core/patterns.ts:81](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/core/patterns.ts#L81)
 
 Radius of the start circle.
 
@@ -37,7 +37,7 @@ Radius of the start circle.
 
 > `readonly` **r1**: `number`
 
-Defined in: [src/core/patterns.ts:87](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/core/patterns.ts#L87)
+Defined in: [src/core/patterns.ts:87](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/core/patterns.ts#L87)
 
 Radius of the end circle.
 
@@ -47,7 +47,7 @@ Radius of the end circle.
 
 > `readonly` **stops**: readonly ([`Color`](../type-aliases/Color.md) \| [`ColorStop`](ColorStop.md))[]
 
-Defined in: [src/core/patterns.ts:91](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/core/patterns.ts#L91)
+Defined in: [src/core/patterns.ts:91](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/core/patterns.ts#L91)
 
 Colour stops (same semantics as [LinearGradientOptions.stops](LinearGradientOptions.md#stops)).
 
@@ -57,7 +57,7 @@ Colour stops (same semantics as [LinearGradientOptions.stops](LinearGradientOpti
 
 > `readonly` **x0**: `number`
 
-Defined in: [src/core/patterns.ts:77](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/core/patterns.ts#L77)
+Defined in: [src/core/patterns.ts:77](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/core/patterns.ts#L77)
 
 Centre X of the start circle.
 
@@ -67,7 +67,7 @@ Centre X of the start circle.
 
 > `readonly` **x1**: `number`
 
-Defined in: [src/core/patterns.ts:83](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/core/patterns.ts#L83)
+Defined in: [src/core/patterns.ts:83](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/core/patterns.ts#L83)
 
 Centre X of the end circle.
 
@@ -77,7 +77,7 @@ Centre X of the end circle.
 
 > `readonly` **y0**: `number`
 
-Defined in: [src/core/patterns.ts:79](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/core/patterns.ts#L79)
+Defined in: [src/core/patterns.ts:79](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/core/patterns.ts#L79)
 
 Centre Y of the start circle.
 
@@ -87,6 +87,6 @@ Centre Y of the start circle.
 
 > `readonly` **y1**: `number`
 
-Defined in: [src/core/patterns.ts:85](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/core/patterns.ts#L85)
+Defined in: [src/core/patterns.ts:85](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/core/patterns.ts#L85)
 
 Centre Y of the end circle.

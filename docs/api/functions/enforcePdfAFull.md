@@ -8,7 +8,7 @@
 
 > **enforcePdfAFull**(`pdfBytes`, `level`, `options?`): `Promise`\<[`EnforcePdfAResult`](../interfaces/EnforcePdfAResult.md)\>
 
-Defined in: [src/compliance/enforcePdfAv2.ts:220](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/compliance/enforcePdfAv2.ts#L220)
+Defined in: [src/compliance/enforcePdfAv2.ts:220](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/compliance/enforcePdfAv2.ts#L220)
 
 Enforce PDF/A compliance with a full pipeline.
 

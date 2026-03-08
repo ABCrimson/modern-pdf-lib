@@ -6,7 +6,7 @@
 
 # Interface: WasmLoaderConfig
 
-Defined in: [src/wasm/loader.ts:29](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/wasm/loader.ts#L29)
+Defined in: [src/wasm/loader.ts:29](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/wasm/loader.ts#L29)
 
 Configuration for custom WASM module paths.
 
@@ -16,7 +16,7 @@ Configuration for custom WASM module paths.
 
 > `optional` **basePath**: `string`
 
-Defined in: [src/wasm/loader.ts:38](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/wasm/loader.ts#L38)
+Defined in: [src/wasm/loader.ts:38](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/wasm/loader.ts#L38)
 
 Base path or URL for WASM modules.
 
@@ -31,7 +31,7 @@ Base path or URL for WASM modules.
 
 > `optional` **disableWasm**: `boolean`
 
-Defined in: [src/wasm/loader.ts:72](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/wasm/loader.ts#L72)
+Defined in: [src/wasm/loader.ts:72](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/wasm/loader.ts#L72)
 
 Disable all WASM loading.
 
@@ -48,7 +48,7 @@ Policies that do not allow `wasm-unsafe-eval`.
 
 > `optional` **moduleBytes**: `Record`\<`string`, `Uint8Array`\<`ArrayBufferLike`\>\>
 
-Defined in: [src/wasm/loader.ts:60](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/wasm/loader.ts#L60)
+Defined in: [src/wasm/loader.ts:60](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/wasm/loader.ts#L60)
 
 Pre-loaded WASM bytes keyed by module name.
 
@@ -65,7 +65,7 @@ directly. This is the recommended approach for:
 
 > `optional` **modulePaths**: `Record`\<`string`, `string`\>
 
-Defined in: [src/wasm/loader.ts:48](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/wasm/loader.ts#L48)
+Defined in: [src/wasm/loader.ts:48](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/wasm/loader.ts#L48)
 
 Custom per-module paths.
 

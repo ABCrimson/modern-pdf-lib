@@ -6,7 +6,7 @@
 
 # Interface: IncrementalSaveOptions
 
-Defined in: [src/signature/incrementalSave.ts:41](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/signature/incrementalSave.ts#L41)
+Defined in: [src/signature/incrementalSave.ts:41](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/signature/incrementalSave.ts#L41)
 
 Options for incremental save with signature preservation.
 
@@ -16,7 +16,7 @@ Options for incremental save with signature preservation.
 
 > `optional` **compress**: `boolean`
 
-Defined in: [src/signature/incrementalSave.ts:43](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/signature/incrementalSave.ts#L43)
+Defined in: [src/signature/incrementalSave.ts:43](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/signature/incrementalSave.ts#L43)
 
 Apply FlateDecode compression to new stream objects. Default: true.
 
@@ -26,6 +26,6 @@ Apply FlateDecode compression to new stream objects. Default: true.
 
 > `optional` **preserveSignatures**: `boolean`
 
-Defined in: [src/signature/incrementalSave.ts:45](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/signature/incrementalSave.ts#L45)
+Defined in: [src/signature/incrementalSave.ts:45](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/signature/incrementalSave.ts#L45)
 
 Preserve existing signatures by verifying byte ranges. Default: true.

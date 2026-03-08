@@ -61,7 +61,7 @@ export default defineConfig({
       { text: 'Migration', link: '/migration/from-pdf-lib' },
       { text: 'Playground', link: '/playground/' },
       {
-        text: 'v0.24.10',
+        text: 'v0.25.0',
         items: [
           {
             text: 'Changelog',
@@ -100,7 +100,9 @@ export default defineConfig({
             { text: 'Signatures', link: '/guide/signatures' },
             { text: 'Signature Verification', link: '/guide/verification' },
             { text: 'Accessibility', link: '/guide/accessibility' },
+            { text: 'Image Formats', link: '/guide/image-formats' },
             { text: 'JPEG2000 Support', link: '/guide/jpeg2000' },
+            { text: 'Multi-Party Signing', link: '/guide/multi-sign' },
             { text: 'Form Scripting', link: '/guide/form-scripts' },
             { text: 'Cookbook', link: '/guide/cookbook' },
             { text: 'Troubleshooting', link: '/guide/troubleshooting' },

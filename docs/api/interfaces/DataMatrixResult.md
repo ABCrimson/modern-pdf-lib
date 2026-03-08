@@ -6,7 +6,7 @@
 
 # Interface: DataMatrixResult
 
-Defined in: [src/barcode/dataMatrix.ts:45](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/barcode/dataMatrix.ts#L45)
+Defined in: [src/barcode/dataMatrix.ts:45](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/barcode/dataMatrix.ts#L45)
 
 The result of Data Matrix encoding — a boolean matrix.
 
@@ -16,7 +16,7 @@ The result of Data Matrix encoding — a boolean matrix.
 
 > `readonly` **cols**: `number`
 
-Defined in: [src/barcode/dataMatrix.ts:49](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/barcode/dataMatrix.ts#L49)
+Defined in: [src/barcode/dataMatrix.ts:49](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/barcode/dataMatrix.ts#L49)
 
 Number of columns in the symbol.
 
@@ -26,7 +26,7 @@ Number of columns in the symbol.
 
 > `readonly` **modules**: readonly `boolean`[]
 
-Defined in: [src/barcode/dataMatrix.ts:51](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/barcode/dataMatrix.ts#L51)
+Defined in: [src/barcode/dataMatrix.ts:51](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/barcode/dataMatrix.ts#L51)
 
 Row-major boolean array. `true` = dark module.
 
@@ -36,6 +36,6 @@ Row-major boolean array. `true` = dark module.
 
 > `readonly` **rows**: `number`
 
-Defined in: [src/barcode/dataMatrix.ts:47](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/barcode/dataMatrix.ts#L47)
+Defined in: [src/barcode/dataMatrix.ts:47](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/barcode/dataMatrix.ts#L47)
 
 Number of rows in the symbol.

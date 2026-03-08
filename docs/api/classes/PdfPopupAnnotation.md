@@ -6,7 +6,7 @@
 
 # Class: PdfPopupAnnotation
 
-Defined in: [src/annotation/types/popupAnnotation.ts:32](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/annotation/types/popupAnnotation.ts#L32)
+Defined in: [src/annotation/types/popupAnnotation.ts:32](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/annotation/types/popupAnnotation.ts#L32)
 
 A popup annotation (subtype /Popup).
 
@@ -24,7 +24,7 @@ annotation. The parent annotation references this popup via its
 
 > **new PdfPopupAnnotation**(`dict`): `PdfPopupAnnotation`
 
-Defined in: [src/annotation/types/popupAnnotation.ts:33](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/annotation/types/popupAnnotation.ts#L33)
+Defined in: [src/annotation/types/popupAnnotation.ts:33](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/annotation/types/popupAnnotation.ts#L33)
 
 #### Parameters
 
@@ -46,7 +46,7 @@ Defined in: [src/annotation/types/popupAnnotation.ts:33](https://github.com/ABCr
 
 > `readonly` **annotationType**: [`AnnotationType`](../type-aliases/AnnotationType.md)
 
-Defined in: [src/annotation/pdfAnnotation.ts:227](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/annotation/pdfAnnotation.ts#L227)
+Defined in: [src/annotation/pdfAnnotation.ts:227](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/annotation/pdfAnnotation.ts#L227)
 
 The annotation subtype.
 
@@ -60,7 +60,7 @@ The annotation subtype.
 
 > `protected` **dict**: [`PdfDict`](PdfDict.md)
 
-Defined in: [src/annotation/pdfAnnotation.ts:230](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/annotation/pdfAnnotation.ts#L230)
+Defined in: [src/annotation/pdfAnnotation.ts:230](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/annotation/pdfAnnotation.ts#L230)
 
 The underlying annotation dictionary.
 
@@ -74,7 +74,7 @@ The underlying annotation dictionary.
 
 > **generateAppearance**(): [`PdfStream`](PdfStream.md) \| `undefined`
 
-Defined in: [src/annotation/pdfAnnotation.ts:440](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/annotation/pdfAnnotation.ts#L440)
+Defined in: [src/annotation/pdfAnnotation.ts:440](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/annotation/pdfAnnotation.ts#L440)
 
 Generate an appearance stream for this annotation.
 
@@ -97,7 +97,7 @@ A PdfStream for the /AP /N entry, or undefined.
 
 > **getAuthor**(): `string` \| `undefined`
 
-Defined in: [src/annotation/pdfAnnotation.ts:293](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/annotation/pdfAnnotation.ts#L293)
+Defined in: [src/annotation/pdfAnnotation.ts:293](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/annotation/pdfAnnotation.ts#L293)
 
 Get the author (PDF /T entry).
 
@@ -115,7 +115,7 @@ Get the author (PDF /T entry).
 
 > **getColor**(): \{ `b`: `number`; `g`: `number`; `r`: `number`; \} \| `undefined`
 
-Defined in: [src/annotation/pdfAnnotation.ts:311](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/annotation/pdfAnnotation.ts#L311)
+Defined in: [src/annotation/pdfAnnotation.ts:311](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/annotation/pdfAnnotation.ts#L311)
 
 Get the annotation colour.
 
@@ -133,7 +133,7 @@ Get the annotation colour.
 
 > **getContents**(): `string` \| `undefined`
 
-Defined in: [src/annotation/pdfAnnotation.ts:275](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/annotation/pdfAnnotation.ts#L275)
+Defined in: [src/annotation/pdfAnnotation.ts:275](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/annotation/pdfAnnotation.ts#L275)
 
 Get the text contents (tooltip / popup text).
 
@@ -151,7 +151,7 @@ Get the text contents (tooltip / popup text).
 
 > **getOpacity**(): `number`
 
-Defined in: [src/annotation/pdfAnnotation.ts:333](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/annotation/pdfAnnotation.ts#L333)
+Defined in: [src/annotation/pdfAnnotation.ts:333](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/annotation/pdfAnnotation.ts#L333)
 
 Get the annotation opacity (0-1). Defaults to 1.
 
@@ -169,7 +169,7 @@ Get the annotation opacity (0-1). Defaults to 1.
 
 > **getParent**(): [`PdfRef`](PdfRef.md) \| `undefined`
 
-Defined in: [src/annotation/types/popupAnnotation.ts:96](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/annotation/types/popupAnnotation.ts#L96)
+Defined in: [src/annotation/types/popupAnnotation.ts:96](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/annotation/types/popupAnnotation.ts#L96)
 
 Get the parent annotation reference, if set.
 
@@ -183,7 +183,7 @@ Get the parent annotation reference, if set.
 
 > **getRect**(): \[`number`, `number`, `number`, `number`\]
 
-Defined in: [src/annotation/pdfAnnotation.ts:251](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/annotation/pdfAnnotation.ts#L251)
+Defined in: [src/annotation/pdfAnnotation.ts:251](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/annotation/pdfAnnotation.ts#L251)
 
 Get the annotation rectangle [x1, y1, x2, y2].
 
@@ -201,7 +201,7 @@ Get the annotation rectangle [x1, y1, x2, y2].
 
 > **getType**(): [`AnnotationType`](../type-aliases/AnnotationType.md)
 
-Defined in: [src/annotation/pdfAnnotation.ts:242](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/annotation/pdfAnnotation.ts#L242)
+Defined in: [src/annotation/pdfAnnotation.ts:242](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/annotation/pdfAnnotation.ts#L242)
 
 Get the annotation subtype.
 
@@ -219,7 +219,7 @@ Get the annotation subtype.
 
 > **isHidden**(): `boolean`
 
-Defined in: [src/annotation/pdfAnnotation.ts:381](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/annotation/pdfAnnotation.ts#L381)
+Defined in: [src/annotation/pdfAnnotation.ts:381](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/annotation/pdfAnnotation.ts#L381)
 
 Whether the annotation is hidden.
 
@@ -237,7 +237,7 @@ Whether the annotation is hidden.
 
 > **isLocked**(): `boolean`
 
-Defined in: [src/annotation/pdfAnnotation.ts:401](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/annotation/pdfAnnotation.ts#L401)
+Defined in: [src/annotation/pdfAnnotation.ts:401](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/annotation/pdfAnnotation.ts#L401)
 
 Whether the annotation is locked (cannot be moved/resized).
 
@@ -255,7 +255,7 @@ Whether the annotation is locked (cannot be moved/resized).
 
 > **isOpen**(): `boolean`
 
-Defined in: [src/annotation/types/popupAnnotation.ts:70](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/annotation/types/popupAnnotation.ts#L70)
+Defined in: [src/annotation/types/popupAnnotation.ts:70](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/annotation/types/popupAnnotation.ts#L70)
 
 Whether the popup is initially open.
 
@@ -269,7 +269,7 @@ Whether the popup is initially open.
 
 > **isPrintable**(): `boolean`
 
-Defined in: [src/annotation/pdfAnnotation.ts:391](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/annotation/pdfAnnotation.ts#L391)
+Defined in: [src/annotation/pdfAnnotation.ts:391](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/annotation/pdfAnnotation.ts#L391)
 
 Whether the annotation should be printed.
 
@@ -287,7 +287,7 @@ Whether the annotation should be printed.
 
 > **setAuthor**(`author`): `void`
 
-Defined in: [src/annotation/pdfAnnotation.ts:302](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/annotation/pdfAnnotation.ts#L302)
+Defined in: [src/annotation/pdfAnnotation.ts:302](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/annotation/pdfAnnotation.ts#L302)
 
 Set the author.
 
@@ -311,7 +311,7 @@ Set the author.
 
 > **setColor**(`color`): `void`
 
-Defined in: [src/annotation/pdfAnnotation.ts:324](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/annotation/pdfAnnotation.ts#L324)
+Defined in: [src/annotation/pdfAnnotation.ts:324](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/annotation/pdfAnnotation.ts#L324)
 
 Set the annotation colour.
 
@@ -345,7 +345,7 @@ Set the annotation colour.
 
 > **setContents**(`contents`): `void`
 
-Defined in: [src/annotation/pdfAnnotation.ts:284](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/annotation/pdfAnnotation.ts#L284)
+Defined in: [src/annotation/pdfAnnotation.ts:284](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/annotation/pdfAnnotation.ts#L284)
 
 Set the text contents.
 
@@ -369,7 +369,7 @@ Set the text contents.
 
 > **setHidden**(`hidden`): `void`
 
-Defined in: [src/annotation/pdfAnnotation.ts:386](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/annotation/pdfAnnotation.ts#L386)
+Defined in: [src/annotation/pdfAnnotation.ts:386](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/annotation/pdfAnnotation.ts#L386)
 
 Set the hidden flag.
 
@@ -393,7 +393,7 @@ Set the hidden flag.
 
 > **setLocked**(`locked`): `void`
 
-Defined in: [src/annotation/pdfAnnotation.ts:406](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/annotation/pdfAnnotation.ts#L406)
+Defined in: [src/annotation/pdfAnnotation.ts:406](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/annotation/pdfAnnotation.ts#L406)
 
 Set the locked flag.
 
@@ -417,7 +417,7 @@ Set the locked flag.
 
 > **setOpacity**(`opacity`): `void`
 
-Defined in: [src/annotation/pdfAnnotation.ts:342](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/annotation/pdfAnnotation.ts#L342)
+Defined in: [src/annotation/pdfAnnotation.ts:342](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/annotation/pdfAnnotation.ts#L342)
 
 Set the annotation opacity.
 
@@ -441,7 +441,7 @@ Set the annotation opacity.
 
 > **setOpen**(`open`): `void`
 
-Defined in: [src/annotation/types/popupAnnotation.ts:79](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/annotation/types/popupAnnotation.ts#L79)
+Defined in: [src/annotation/types/popupAnnotation.ts:79](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/annotation/types/popupAnnotation.ts#L79)
 
 Set the initial open state.
 
@@ -461,7 +461,7 @@ Set the initial open state.
 
 > **setParent**(`parentRef`): `void`
 
-Defined in: [src/annotation/types/popupAnnotation.ts:91](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/annotation/types/popupAnnotation.ts#L91)
+Defined in: [src/annotation/types/popupAnnotation.ts:91](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/annotation/types/popupAnnotation.ts#L91)
 
 Set the parent annotation reference.
 The parent is the annotation whose text this popup displays.
@@ -482,7 +482,7 @@ The parent is the annotation whose text this popup displays.
 
 > **setPrintable**(`printable`): `void`
 
-Defined in: [src/annotation/pdfAnnotation.ts:396](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/annotation/pdfAnnotation.ts#L396)
+Defined in: [src/annotation/pdfAnnotation.ts:396](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/annotation/pdfAnnotation.ts#L396)
 
 Set the print flag.
 
@@ -506,7 +506,7 @@ Set the print flag.
 
 > **setRect**(`rect`): `void`
 
-Defined in: [src/annotation/pdfAnnotation.ts:266](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/annotation/pdfAnnotation.ts#L266)
+Defined in: [src/annotation/pdfAnnotation.ts:266](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/annotation/pdfAnnotation.ts#L266)
 
 Set the annotation rectangle.
 
@@ -530,7 +530,7 @@ Set the annotation rectangle.
 
 > **toDict**(`registry`): [`PdfDict`](PdfDict.md)
 
-Defined in: [src/annotation/pdfAnnotation.ts:420](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/annotation/pdfAnnotation.ts#L420)
+Defined in: [src/annotation/pdfAnnotation.ts:420](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/annotation/pdfAnnotation.ts#L420)
 
 Convert this annotation to a PdfDict suitable for embedding in a PDF.
 
@@ -558,7 +558,7 @@ The annotation dictionary.
 
 > `static` **create**(`options`): `PdfPopupAnnotation`
 
-Defined in: [src/annotation/types/popupAnnotation.ts:42](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/annotation/types/popupAnnotation.ts#L42)
+Defined in: [src/annotation/types/popupAnnotation.ts:42](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/annotation/types/popupAnnotation.ts#L42)
 
 Create a new popup annotation.
 
@@ -578,7 +578,7 @@ Create a new popup annotation.
 
 > `static` **fromDict**(`dict`, `_resolver?`): `PdfPopupAnnotation`
 
-Defined in: [src/annotation/types/popupAnnotation.ts:58](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/annotation/types/popupAnnotation.ts#L58)
+Defined in: [src/annotation/types/popupAnnotation.ts:58](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/annotation/types/popupAnnotation.ts#L58)
 
 Create a PdfPopupAnnotation from an existing dictionary.
 

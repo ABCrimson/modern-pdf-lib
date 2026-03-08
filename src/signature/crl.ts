@@ -78,12 +78,6 @@ const CRL_REASONS: Record<number, string> = {
 // Internal helpers
 // ---------------------------------------------------------------------------
 
-/**
- * Convert a Uint8Array to a hex string.
- */
-function toHex(data: Uint8Array): string {
-  return data.toHex();
-}
 
 /**
  * Parse a GeneralizedTime string (YYYYMMDDHHmmSS[.fff]Z) to Date.
@@ -231,7 +225,7 @@ export function parseCrl(data: Uint8Array): CrlData {
 
   // issuer Name
   const issuerNode = tbsCertList.children[idx]!;
-  const issuer = toHex(issuerNode.data);
+  const issuer = issuerNode.data.toHex();
   idx++;
 
   // thisUpdate Time
@@ -260,7 +254,7 @@ export function parseCrl(data: Uint8Array): CrlData {
     for (const revokedCert of revokedSeq.children) {
       // userCertificate INTEGER
       const serialNode = revokedCert.children[0]!;
-      const serialNumber = toHex(serialNode.data);
+      const serialNumber = serialNode.data.toHex();
 
       // revocationDate Time
       const revDateNode = revokedCert.children[1]!;
@@ -347,7 +341,7 @@ export function isCertificateRevoked(cert: Uint8Array, crl: CrlData): boolean {
     idx = 1;
   }
   const serialNode = tbsCert.children[idx]!;
-  const certSerial = toHex(serialNode.data);
+  const certSerial = serialNode.data.toHex();
 
   // Check if this serial appears in the CRL entries
   return crl.entries.some((entry) => entry.serialNumber === certSerial);

@@ -8,7 +8,7 @@
 
 > **markForRedaction**(`page`, `options`): `void`
 
-Defined in: [src/core/redaction.ts:75](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/core/redaction.ts#L75)
+Defined in: [src/core/redaction.ts:75](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/core/redaction.ts#L75)
 
 Mark a rectangular region on a page for redaction.
 

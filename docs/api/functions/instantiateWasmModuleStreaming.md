@@ -8,7 +8,7 @@
 
 > **instantiateWasmModuleStreaming**(`name`, `imports?`): `Promise`\<`Instance`\>
 
-Defined in: [src/wasm/loader.ts:470](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/wasm/loader.ts#L470)
+Defined in: [src/wasm/loader.ts:470](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/wasm/loader.ts#L470)
 
 Load, compile, and instantiate a WASM module with streaming when available.
 

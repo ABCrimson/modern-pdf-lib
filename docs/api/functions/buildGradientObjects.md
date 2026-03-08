@@ -8,7 +8,7 @@
 
 > **buildGradientObjects**(`gradient`, `registry`): `object`
 
-Defined in: [src/core/patterns.ts:372](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/core/patterns.ts#L372)
+Defined in: [src/core/patterns.ts:372](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/core/patterns.ts#L372)
 
 Materialise a [GradientFill](../interfaces/GradientFill.md) descriptor into actual PDF objects
 in the given registry.

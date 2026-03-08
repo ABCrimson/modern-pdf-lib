@@ -8,7 +8,7 @@
 
 > **TablePreset** = `Partial`\<`Omit`\<[`DrawTableOptions`](../interfaces/DrawTableOptions.md), `"x"` \| `"y"` \| `"width"` \| `"rows"`\>\>
 
-Defined in: [src/layout/presets.ts:23](https://github.com/ABCrimson/modern-pdf-lib/blob/c9a6cf208b5db5d88cc08a5d539f2a20bff9d3c4/src/layout/presets.ts#L23)
+Defined in: [src/layout/presets.ts:23](https://github.com/ABCrimson/modern-pdf-lib/blob/24d045852a3d92d1265ead3e87177fbe27aaafc9/src/layout/presets.ts#L23)
 
 A partial set of table options that can be applied as a style preset.
 Excludes positional / data fields (`x`, `y`, `width`, `rows`) that
