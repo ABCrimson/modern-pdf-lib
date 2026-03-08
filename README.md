@@ -15,7 +15,7 @@ Create, parse, fill, merge, sign, and manipulate PDF documents<br />in Node, Den
 
 [![npm version](https://img.shields.io/npm/v/modern-pdf-lib?style=flat-square&color=cb3837)](https://www.npmjs.com/package/modern-pdf-lib)
 [![bundle size](https://img.shields.io/badge/gzip-36kb_core-blue?style=flat-square)](https://bundlephobia.com/package/modern-pdf-lib)
-[![tests](https://img.shields.io/badge/tests-3%2C997_passing-brightgreen?style=flat-square)](#)
+[![tests](https://img.shields.io/badge/tests-4%2C282_passing-brightgreen?style=flat-square)](#)
 [![TypeScript](https://img.shields.io/badge/TypeScript-6.0-3178c6?style=flat-square&logo=typescript&logoColor=white)](#)
 [![License: MIT](https://img.shields.io/badge/license-MIT-yellow?style=flat-square)](LICENSE)
 
@@ -131,6 +131,9 @@ For environments without ES module support, use the IIFE bundle which exposes a 
 - AES-256 / RC4 encryption & decryption
 - Digital signatures (PKCS#7, visible/invisible, timestamps)
 - CRL/OCSP revocation checking & certificate chain validation
+- Incremental save with signature preservation
+- Multi-signature chains, MDP certification, LTV archival
+- Counter-signatures & field locking
 - PDF/A-1b through PDF/A-3u validation
 - Tagged PDF / PDF/UA accessibility
 - Structure tree & marked content
@@ -143,6 +146,9 @@ For environments without ES module support, use the IIFE bundle which exposes a 
 - QR codes & barcodes (9 formats)
 - Table layout engine with pagination
 - JPEG2000 (JPXDecode) image support
+- WebP image embedding (lossy, lossless, alpha)
+- TIFF image embedding (multi-page, CMYK, direct mapping)
+- Image format auto-detection (PNG/JPEG/WebP/TIFF)
 - Form field JavaScript evaluation & sandboxing
 - Outlines / bookmarks
 - Optional content layers (OCGs)
@@ -192,7 +198,19 @@ For environments without ES module support, use the IIFE bundle which exposes a 
 <td align="center">No</td></tr>
 
 <tr><td><strong>Digital signatures</strong></td>
-<td align="center">PKCS#7, timestamps, CRL/OCSP</td>
+<td align="center">PKCS#7, timestamps, CRL/OCSP, LTV, MDP</td>
+<td align="center">No</td></tr>
+
+<tr><td><strong>Incremental save</strong></td>
+<td align="center">Signature-preserving, multi-sig chains</td>
+<td align="center">No</td></tr>
+
+<tr><td><strong>WebP images</strong></td>
+<td align="center">Lossy, lossless, alpha</td>
+<td align="center">No</td></tr>
+
+<tr><td><strong>TIFF images</strong></td>
+<td align="center">Multi-page, CMYK, direct mapping</td>
 <td align="center">No</td></tr>
 
 <tr><td><strong>JPEG2000 decoding</strong></td>
@@ -586,7 +604,7 @@ modern-pdf-lib/
     metadata/       XMP metadata, viewer preferences
     wasm/           Rust crate sources (6 modules)
     cli/            CLI tool (modern-pdf optimize)
-  tests/            3,997 tests across 184 suites
+  tests/            4,282 tests across 199 suites
   docs/             VitePress documentation
 ```
 
@@ -598,7 +616,7 @@ modern-pdf-lib/
 git clone https://github.com/ABCrimson/modern-pdf-lib.git
 cd modern-pdf-lib
 npm install
-npm test          # 3,997 tests
+npm test          # 4,282 tests
 npm run typecheck # TypeScript 6.0 strict
 npm run build     # ESM + CJS + declarations
 ```

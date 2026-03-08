@@ -5,6 +5,81 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 See [VERSIONING.md](./VERSIONING.md) for this project's versioning policy.
 
+## [0.24.10] - 2026-03-07
+
+### Added
+
+- **Incremental save with signature preservation** (`src/signature/incrementalSave.ts`):
+  - `saveIncrementalWithSignaturePreservation()` — preserves all existing signature byte ranges
+  - `appendIncrementalUpdate()` — pure append-only incremental updates
+  - `parseExistingTrailer()` — parse trailer info from existing PDF
+  - `findExistingSignatures()` / `validateByteRangeIntegrity()` — signature detection and validation
+
+- **Multi-signature chain validation** (`src/signature/multiSignatureValidator.ts`):
+  - `validateSignatureChain()` — validates ordered chain of signatures and byte range coverage
+
+- **MDP certification policy** (`src/signature/mdpPolicy.ts`):
+  - `MdpPermission` enum (NoChanges, FormFillAndSign, FormFillSignAnnotate)
+  - `setCertificationLevel()` / `getCertificationLevel()` — DocMDP transform methods
+
+- **Modification detection** (`src/signature/modificationDetector.ts`):
+  - `detectModifications()` — checks if modifications exceed MDP-permitted level
+
+- **Signature field locking** (`src/signature/fieldLock.ts`):
+  - `addFieldLock()` / `getFieldLocks()` — lock specific fields after signing
+
+- **Document diff** (`src/signature/documentDiff.ts`):
+  - `diffSignedContent()` — compares signed version vs current content
+
+- **Counter-signatures** (`src/signature/counterSignature.ts`):
+  - `addCounterSignature()` / `getCounterSignatures()` — sign existing signatures
+
+- **LTV embedding** (`src/signature/ltvEmbed.ts`):
+  - `embedLtvData()` — embeds CRL + OCSP + certs in Document Security Store (DSS)
+  - `hasLtvData()` / `buildDssDictionary()` — LTV data detection and building
+
+- **Incremental save optimization** (`src/signature/incrementalOptimizer.ts`):
+  - `optimizeIncrementalSave()` — FNV-1a object hashing, only append changed objects
+  - `findChangedObjects()` / `computeObjectHash()` — object-level diff detection
+
+- **WebP image embedding** (`src/assets/image/webpDecode.ts`):
+  - `decodeWebP()` — pure TypeScript VP8 (lossy) and VP8L (lossless) decoder
+  - Alpha channel support via ALPH chunk parsing
+  - DCT coefficient decoding, YUV420→RGB, macroblock processing
+  - LZ77, Huffman coding, spatial prediction (13 modes) for lossless
+
+- **TIFF image embedding** (`src/assets/image/tiffDecode.ts`):
+  - `decodeTiff()` / `decodeTiffPage()` / `decodeTiffAll()` — full TIFF decoder
+  - Uncompressed, PackBits, LZW, Deflate, JPEG-in-TIFF compression support
+  - Multi-page TIFF (IFD chain following)
+  - `getTiffPageCount()` / `parseTiffIfd()` — TIFF introspection
+
+- **TIFF CMYK support** (`src/assets/image/tiffCmyk.ts`):
+  - `embedTiffCmyk()` — native DeviceCMYK embedding (no RGB conversion)
+  - `convertTiffCmykToRgb()` — CMYK→RGB conversion when needed
+
+- **Image format auto-detection** (`src/assets/image/formatDetect.ts`):
+  - `detectImageFormat()` — detects PNG/JPEG/WebP/TIFF from magic bytes
+  - Updated `embedImage()` to support all 4 formats automatically
+
+- **WebP optimization** (`src/assets/image/webpOptimize.ts`):
+  - `webpToJpeg()` / `webpToPng()` — format conversion
+  - `recompressWebP()` — decode → JPEG/PNG re-encode pipeline
+
+- **TIFF direct embedding** (`src/assets/image/tiffDirectEmbed.ts`):
+  - `embedTiffDirect()` — direct strip/tile mapping (skip decode/re-encode)
+  - `canDirectEmbed()` — format compatibility check
+
+- **Documentation**:
+  - Multi-signature workflow guide (`docs/guide/multi-sign.md`)
+  - Image format support guide (`docs/guide/image-formats.md`)
+
+### Stats
+
+- 4,282 tests passing across 199 suites (+285 new tests)
+- Zero TypeScript errors (strict mode + exactOptionalPropertyTypes)
+- 15 new source files, 15 new test files, 2 new guides
+
 ## [0.22.9] - 2026-03-07
 
 ### Added
