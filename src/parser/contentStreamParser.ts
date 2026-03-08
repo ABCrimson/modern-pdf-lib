@@ -702,6 +702,6 @@ class ContentStreamLexer {
    * Decode a slice of the data as ASCII text.
    */
   private decodeAscii(start: number, end: number): string {
-    return String.fromCharCode(...this.data.subarray(start, end));
+    return new TextDecoder('latin1').decode(this.data.subarray(start, end));
   }
 }

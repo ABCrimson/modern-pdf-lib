@@ -38,7 +38,7 @@ describe('extractImages', () => {
   it('extracts a single PNG image from a PDF', async () => {
     const pngBytes = new Uint8Array(await readFile(resolve(fixturesDir, 'sample.png')));
     const doc = createPdf();
-    const img = doc.embedPng(pngBytes);
+    const img = await doc.embedPng(pngBytes);
     const page = doc.addPage(PageSizes.A4);
     page.drawImage(img, { x: 50, y: 50, width: 100, height: 100 });
 
@@ -83,7 +83,7 @@ describe('extractImages', () => {
     const doc = createPdf();
 
     for (let i = 0; i < 3; i++) {
-      const img = doc.embedPng(pngBytes);
+      const img = await doc.embedPng(pngBytes);
       const page = doc.addPage(PageSizes.A4);
       page.drawImage(img, { x: 50, y: 50, width: 100, height: 100 });
     }
@@ -102,7 +102,7 @@ describe('extractImages', () => {
   it('deduplicates images that share the same object reference', async () => {
     const pngBytes = new Uint8Array(await readFile(resolve(fixturesDir, 'sample.png')));
     const doc = createPdf();
-    const img = doc.embedPng(pngBytes);
+    const img = await doc.embedPng(pngBytes);
 
     // Same image drawn on multiple pages
     const page1 = doc.addPage(PageSizes.A4);
@@ -124,7 +124,7 @@ describe('extractImages', () => {
   it('reports correct color space for RGB images', async () => {
     const pngBytes = new Uint8Array(await readFile(resolve(fixturesDir, 'sample.png')));
     const doc = createPdf();
-    const img = doc.embedPng(pngBytes);
+    const img = await doc.embedPng(pngBytes);
     const page = doc.addPage(PageSizes.A4);
     page.drawImage(img, { x: 0, y: 0 });
 
@@ -146,7 +146,7 @@ describe('decodeImageStream', () => {
   it('decodes FlateDecode stream from an embedded PNG', async () => {
     const pngBytes = new Uint8Array(await readFile(resolve(fixturesDir, 'sample.png')));
     const doc = createPdf();
-    const img = doc.embedPng(pngBytes);
+    const img = await doc.embedPng(pngBytes);
     const page = doc.addPage(PageSizes.A4);
     page.drawImage(img, { x: 0, y: 0 });
 

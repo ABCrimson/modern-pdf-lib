@@ -563,11 +563,7 @@ export class PdfDocumentParser {
     const decrypted = await handler.decryptObject(objNum, genNum, encrypted);
 
     // Reconstruct as a literal string from the decrypted bytes (Latin-1)
-    let result = '';
-    for (let i = 0; i < decrypted.length; i++) {
-      result += String.fromCharCode(decrypted[i]!);
-    }
-    return PdfString.literal(result);
+    return PdfString.literal(new TextDecoder('latin1').decode(decrypted));
   }
 
   /**

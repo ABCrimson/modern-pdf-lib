@@ -57,7 +57,7 @@ describe('analyzeImages — report structure', () => {
   it('AnalysisReport has the correct shape', async () => {
     const pngBytes = new Uint8Array(await readFile(resolve(fixturesDir, 'sample.png')));
     const doc = createPdf();
-    const img = doc.embedPng(pngBytes);
+    const img = await doc.embedPng(pngBytes);
     const page = doc.addPage(PageSizes.A4);
     page.drawImage(img, { x: 0, y: 0, width: 100, height: 100 });
 
@@ -76,7 +76,7 @@ describe('analyzeImages — report structure', () => {
   it('per-image entries have correct ImageAnalysis shape', async () => {
     const pngBytes = new Uint8Array(await readFile(resolve(fixturesDir, 'sample.png')));
     const doc = createPdf();
-    const img = doc.embedPng(pngBytes);
+    const img = await doc.embedPng(pngBytes);
     const page = doc.addPage(PageSizes.A4);
     page.drawImage(img, { x: 0, y: 0 });
 
@@ -109,7 +109,7 @@ describe('analyzeImages — report structure', () => {
   it('totalSavings is non-negative', async () => {
     const pngBytes = new Uint8Array(await readFile(resolve(fixturesDir, 'sample.png')));
     const doc = createPdf();
-    const img = doc.embedPng(pngBytes);
+    const img = await doc.embedPng(pngBytes);
     const page = doc.addPage(PageSizes.A4);
     page.drawImage(img, { x: 0, y: 0 });
 
@@ -124,7 +124,7 @@ describe('analyzeImages — report structure', () => {
   it('totalCurrentSize equals sum of per-image currentSize', async () => {
     const pngBytes = new Uint8Array(await readFile(resolve(fixturesDir, 'sample.png')));
     const doc = createPdf();
-    const img = doc.embedPng(pngBytes);
+    const img = await doc.embedPng(pngBytes);
     const page = doc.addPage(PageSizes.A4);
     page.drawImage(img, { x: 0, y: 0, width: 100, height: 100 });
 
@@ -139,7 +139,7 @@ describe('analyzeImages — report structure', () => {
   it('totalEstimatedSize equals sum of per-image estimatedJpegSize', async () => {
     const pngBytes = new Uint8Array(await readFile(resolve(fixturesDir, 'sample.png')));
     const doc = createPdf();
-    const img = doc.embedPng(pngBytes);
+    const img = await doc.embedPng(pngBytes);
     const page = doc.addPage(PageSizes.A4);
     page.drawImage(img, { x: 0, y: 0, width: 100, height: 100 });
 
@@ -163,11 +163,11 @@ describe('analyzeImages — multiple images', () => {
 
     const doc = createPdf();
 
-    const img1 = doc.embedPng(pngBytes);
+    const img1 = await doc.embedPng(pngBytes);
     const page1 = doc.addPage(PageSizes.A4);
     page1.drawImage(img1, { x: 0, y: 0 });
 
-    const img2 = doc.embedPng(gradientBytes);
+    const img2 = await doc.embedPng(gradientBytes);
     const page2 = doc.addPage(PageSizes.A4);
     page2.drawImage(img2, { x: 0, y: 0 });
 
@@ -212,7 +212,7 @@ describe('analyzeImages — options', () => {
   it('defaults to quality 80 and maxDpi 150', async () => {
     const pngBytes = new Uint8Array(await readFile(resolve(fixturesDir, 'sample.png')));
     const doc = createPdf();
-    const img = doc.embedPng(pngBytes);
+    const img = await doc.embedPng(pngBytes);
     const page = doc.addPage(PageSizes.A4);
     page.drawImage(img, { x: 0, y: 0 });
 
@@ -256,7 +256,7 @@ describe('analyzeImages — recommendation logic', () => {
   it('width and height match extracted image dimensions', async () => {
     const pngBytes = new Uint8Array(await readFile(resolve(fixturesDir, 'sample.png')));
     const doc = createPdf();
-    const img = doc.embedPng(pngBytes);
+    const img = await doc.embedPng(pngBytes);
     const page = doc.addPage(PageSizes.A4);
     page.drawImage(img, { x: 0, y: 0, width: 200, height: 200 });
 
@@ -278,7 +278,7 @@ describe('analyzeImages — recommendation logic', () => {
   it('currentFormat reflects the image encoding', async () => {
     const pngBytes = new Uint8Array(await readFile(resolve(fixturesDir, 'sample.png')));
     const doc = createPdf();
-    const img = doc.embedPng(pngBytes);
+    const img = await doc.embedPng(pngBytes);
     const page = doc.addPage(PageSizes.A4);
     page.drawImage(img, { x: 0, y: 0 });
 
@@ -302,7 +302,7 @@ describe('analyzeImages — read-only', () => {
   it('does not modify image streams in the document', async () => {
     const pngBytes = new Uint8Array(await readFile(resolve(fixturesDir, 'sample.png')));
     const doc = createPdf();
-    const img = doc.embedPng(pngBytes);
+    const img = await doc.embedPng(pngBytes);
     const page = doc.addPage(PageSizes.A4);
     page.drawImage(img, { x: 0, y: 0, width: 100, height: 100 });
 

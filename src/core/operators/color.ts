@@ -34,8 +34,30 @@ export interface GrayscaleColor {
   readonly gray: number;
 }
 
+/** A spot (Separation) colour with a named colorant and a fallback. */
+export interface SpotColor {
+  readonly type: 'spot';
+  /** Colorant name, e.g. `'PANTONE 185 C'`. */
+  readonly name: string;
+  /** Fallback colour used when the spot ink is unavailable. */
+  readonly alternateColor: RgbColor | CmykColor | GrayscaleColor;
+  /** Tint value `[0, 1]` — 0 = no ink, 1 = full ink. */
+  readonly tint: number;
+}
+
+/** A DeviceN colour for multi-ink printing. */
+export interface DeviceNColor {
+  readonly type: 'devicen';
+  /** Ordered list of colorant names. */
+  readonly colorants: string[];
+  /** Alternate colour space used for fallback rendering. */
+  readonly alternateSpace: 'DeviceCMYK' | 'DeviceRGB';
+  /** Tint value for each colorant `[0, 1]`. */
+  readonly tints: number[];
+}
+
 /** Union of all supported colour value types. */
-export type Color = RgbColor | CmykColor | GrayscaleColor;
+export type Color = RgbColor | CmykColor | GrayscaleColor | SpotColor | DeviceNColor;
 
 // ---------------------------------------------------------------------------
 // Colour constructors
@@ -79,12 +101,185 @@ export function grayscale(gray: number): GrayscaleColor {
   return { type: 'grayscale', gray: clamp01(gray) };
 }
 
+/**
+ * Create a spot (Separation) colour.
+ *
+ * Spot colours map to a named ink (e.g. a Pantone shade) with a
+ * device-space fallback and a tint value that controls intensity.
+ *
+ * @param name       Colorant name, e.g. `'PANTONE 185 C'`.
+ * @param alternate  Fallback colour (RGB, CMYK, or grayscale).
+ * @param tint       Tint intensity `[0, 1]`.  Defaults to `1`.
+ */
+export function spotColor(
+  name: string,
+  alternate: RgbColor | CmykColor | GrayscaleColor,
+  tint = 1,
+): SpotColor {
+  return { type: 'spot', name, alternateColor: alternate, tint: clamp01(tint) };
+}
+
+/**
+ * Create a DeviceN colour for multi-ink printing.
+ *
+ * @param colorants       Ordered list of colorant names.
+ * @param alternateSpace  Alternate colour space (`'DeviceCMYK'` or `'DeviceRGB'`).
+ * @param tints           Tint value per colorant `[0, 1]`.
+ */
+export function deviceNColor(
+  colorants: string[],
+  alternateSpace: 'DeviceCMYK' | 'DeviceRGB',
+  tints: number[],
+): DeviceNColor {
+  if (colorants.length !== tints.length) {
+    throw new Error(
+      `deviceNColor: colorants length (${colorants.length}) must match tints length (${tints.length})`,
+    );
+  }
+  return {
+    type: 'devicen',
+    colorants: [...colorants],
+    alternateSpace,
+    tints: tints.map(clamp01),
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Colour conversion utilities
+// ---------------------------------------------------------------------------
+
+/**
+ * Convert RGB components to CMYK.
+ *
+ * Uses the standard RGB-to-CMYK formula:
+ * ```
+ * K = 1 - max(R, G, B)
+ * C = (1 - R - K) / (1 - K)
+ * M = (1 - G - K) / (1 - K)
+ * Y = (1 - B - K) / (1 - K)
+ * ```
+ *
+ * @returns A tuple `[C, M, Y, K]` with values in `[0, 1]`.
+ */
+export function rgbToCmyk(
+  r: number,
+  g: number,
+  b: number,
+): [number, number, number, number] {
+  r = clamp01(r);
+  g = clamp01(g);
+  b = clamp01(b);
+
+  const k = 1 - Math.max(r, g, b);
+  if (k >= 1) return [0, 0, 0, 1];
+
+  const inv = 1 / (1 - k);
+  return [
+    (1 - r - k) * inv,
+    (1 - g - k) * inv,
+    (1 - b - k) * inv,
+    k,
+  ];
+}
+
+/**
+ * Convert CMYK components to RGB.
+ *
+ * Uses the standard CMYK-to-RGB formula:
+ * ```
+ * R = (1 - C) * (1 - K)
+ * G = (1 - M) * (1 - K)
+ * B = (1 - Y) * (1 - K)
+ * ```
+ *
+ * @returns A tuple `[R, G, B]` with values in `[0, 1]`.
+ */
+export function cmykToRgb(
+  c: number,
+  m: number,
+  y: number,
+  k: number,
+): [number, number, number] {
+  c = clamp01(c);
+  m = clamp01(m);
+  y = clamp01(y);
+  k = clamp01(k);
+
+  const inv = 1 - k;
+  return [
+    (1 - c) * inv,
+    (1 - m) * inv,
+    (1 - y) * inv,
+  ];
+}
+
+/**
+ * Convert a base colour (RGB, CMYK, or grayscale) to a hex string.
+ *
+ * - RGB → `'#rrggbb'`
+ * - CMYK → converted to RGB first, then `'#rrggbb'`
+ * - Grayscale → `'#gggggg'`
+ * - Spot → uses the alternate colour
+ * - DeviceN → throws (no single representation)
+ *
+ * @returns A 7-character hex string like `'#ff0000'`.
+ */
+export function colorToHex(color: Color): string {
+  switch (color.type) {
+    case 'rgb':
+      return `#${hex2(color.r)}${hex2(color.g)}${hex2(color.b)}`;
+    case 'cmyk': {
+      const [r, g, b] = cmykToRgb(color.c, color.m, color.y, color.k);
+      return `#${hex2(r)}${hex2(g)}${hex2(b)}`;
+    }
+    case 'grayscale':
+      return `#${hex2(color.gray)}${hex2(color.gray)}${hex2(color.gray)}`;
+    case 'spot':
+      return colorToHex(color.alternateColor);
+    case 'devicen':
+      throw new Error('colorToHex: DeviceN colours have no single hex representation');
+  }
+}
+
+/**
+ * Parse a hex colour string into an {@link RgbColor}.
+ *
+ * Accepts `'#rgb'`, `'#rrggbb'`, `'rgb'`, or `'rrggbb'` formats.
+ */
+export function hexToColor(hex: string): RgbColor {
+  let h = hex.startsWith('#') ? hex.slice(1) : hex;
+
+  // Expand shorthand (#abc → aabbcc)
+  if (h.length === 3) {
+    h = h[0]! + h[0]! + h[1]! + h[1]! + h[2]! + h[2]!;
+  }
+
+  if (h.length !== 6) {
+    throw new Error(`hexToColor: invalid hex colour '${hex}'`);
+  }
+
+  const ri = Number.parseInt(h.slice(0, 2), 16);
+  const gi = Number.parseInt(h.slice(2, 4), 16);
+  const bi = Number.parseInt(h.slice(4, 6), 16);
+
+  if (Number.isNaN(ri) || Number.isNaN(gi) || Number.isNaN(bi)) {
+    throw new Error(`hexToColor: invalid hex colour '${hex}'`);
+  }
+
+  return rgb(ri / 255, gi / 255, bi / 255);
+}
+
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
 function clamp01(v: number): number {
   return Math.max(0, Math.min(1, v));
+}
+
+/** Convert a `[0, 1]` component to a 2-digit hex string. */
+function hex2(v: number): string {
+  return Math.round(clamp01(v) * 255).toString(16).padStart(2, '0');
 }
 
 /** Format a number for PDF output. */
@@ -209,6 +404,13 @@ export function setStrokeColor(...components: number[]): string {
 
 /**
  * Emit the appropriate fill-colour operator for a {@link Color} value.
+ *
+ * For spot colours, emits a `cs` (set colour space) followed by `scn`
+ * (set colour in current space) using the spot colour's resource name.
+ * The caller must ensure the Separation colour space is registered as
+ * a page resource with the matching name.
+ *
+ * For DeviceN colours, emits `cs` + `scn` with the tint values.
  */
 export function applyFillColor(color: Color): string {
   switch (color.type) {
@@ -218,11 +420,20 @@ export function applyFillColor(color: Color): string {
       return setFillColorCmyk(color.c, color.m, color.y, color.k);
     case 'grayscale':
       return setFillColorGray(color.gray);
+    case 'spot':
+      return setColorSpace(spotResourceName(color.name)) + setFillColor(color.tint);
+    case 'devicen':
+      return setColorSpace(deviceNResourceName(color.colorants)) + setFillColor(...color.tints);
   }
 }
 
 /**
  * Emit the appropriate stroke-colour operator for a {@link Color} value.
+ *
+ * For spot colours, emits a `CS` (set stroking colour space) followed
+ * by `SCN` (set stroking colour in current space).
+ *
+ * For DeviceN colours, emits `CS` + `SCN` with the tint values.
  */
 export function applyStrokeColor(color: Color): string {
   switch (color.type) {
@@ -232,7 +443,33 @@ export function applyStrokeColor(color: Color): string {
       return setStrokeColorCmyk(color.c, color.m, color.y, color.k);
     case 'grayscale':
       return setStrokeColorGray(color.gray);
+    case 'spot':
+      return setStrokeColorSpace(spotResourceName(color.name)) + setStrokeColor(color.tint);
+    case 'devicen':
+      return setStrokeColorSpace(deviceNResourceName(color.colorants)) + setStrokeColor(...color.tints);
   }
+}
+
+/**
+ * Derive a PDF resource name from a spot colorant name.
+ *
+ * Replaces spaces and special characters with underscores to produce
+ * a valid PDF name.
+ *
+ * @example
+ * ```ts
+ * spotResourceName('PANTONE 185 C') // 'CS_PANTONE_185_C'
+ * ```
+ */
+export function spotResourceName(colorantName: string): string {
+  return `CS_${colorantName.replaceAll(/[^A-Za-z0-9]/g, '_')}`;
+}
+
+/**
+ * Derive a PDF resource name from a DeviceN colorant list.
+ */
+export function deviceNResourceName(colorants: string[]): string {
+  return `CS_DN_${colorants.map((c) => c.replaceAll(/[^A-Za-z0-9]/g, '_')).join('_')}`;
 }
 
 // ---------------------------------------------------------------------------
@@ -270,6 +507,8 @@ export function componentsToColor(components: number[]): Color {
  * - Grayscale → `[gray]`
  * - RGB → `[r, g, b]`
  * - CMYK → `[c, m, y, k]`
+ * - Spot → `[tint]`
+ * - DeviceN → `[...tints]`
  */
 export function colorToComponents(color: Color): number[] {
   switch (color.type) {
@@ -279,19 +518,25 @@ export function colorToComponents(color: Color): number[] {
       return [color.r, color.g, color.b];
     case 'cmyk':
       return [color.c, color.m, color.y, color.k];
+    case 'spot':
+      return [color.tint];
+    case 'devicen':
+      return [...color.tints];
   }
 }
 
 /**
  * Emit the appropriate fill-colour operator for a {@link Color} value.
  *
- * Alias for {@link applyFillColor} for pdf-lib API compatibility.
+ * @deprecated Use {@link applyFillColor} instead. This alias exists only
+ *             for pdf-lib API compatibility and will be removed in v2.0.
  */
 export const setFillingColor = applyFillColor;
 
 /**
  * Emit the appropriate stroke-colour operator for a {@link Color} value.
  *
- * Alias for {@link applyStrokeColor} for pdf-lib API compatibility.
+ * @deprecated Use {@link applyStrokeColor} instead. This alias exists only
+ *             for pdf-lib API compatibility and will be removed in v2.0.
  */
 export const setStrokingColor = applyStrokeColor;

@@ -1,7 +1,7 @@
 /**
  * @module compliance
  *
- * PDF/A compliance validation and enforcement — barrel export.
+ * PDF/A and PDF/X compliance validation and enforcement — barrel export.
  */
 
 export { validatePdfA, enforcePdfA } from './pdfA.js';
@@ -54,3 +54,12 @@ export type {
   EnforcePdfAResult,
   EnforcementAction,
 } from './enforcePdfAv2.js';
+
+export { validatePdfX, enforcePdfX, buildPdfXOutputIntent } from './pdfxCompliance.js';
+export type {
+  PdfXLevel,
+  PdfXValidationResult,
+  PdfXIssue,
+  PdfXOptions,
+  OutputIntentConfig,
+} from './pdfxCompliance.js';

@@ -43,7 +43,7 @@ async function createMultiImagePdf(pageCount: number): Promise<Uint8Array> {
   const doc = createPdf();
 
   for (let i = 0; i < pageCount; i++) {
-    const img = doc.embedPng(pngBytes);
+    const img = await doc.embedPng(pngBytes);
     const page = doc.addPage(PageSizes.A4);
     page.drawImage(img, { x: 0, y: 0, width: 100, height: 100 });
   }

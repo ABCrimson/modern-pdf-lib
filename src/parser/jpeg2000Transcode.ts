@@ -749,14 +749,14 @@ function buildStandardDht(): Uint8Array {
  * @internal
  */
 interface HuffTable {
-  readonly codes: number[];
-  readonly lengths: number[];
+  readonly codes: Uint32Array;
+  readonly lengths: Uint8Array;
 }
 
 /** Build a Huffman encoding table from bits/vals. @internal */
 function buildHuffTable(bits: number[], vals: number[]): HuffTable {
-  const codes: number[] = new Array(256).fill(0);
-  const lengths: number[] = new Array(256).fill(0);
+  const codes = new Uint32Array(256);
+  const lengths = new Uint8Array(256);
 
   let code = 0;
   let valIdx = 0;

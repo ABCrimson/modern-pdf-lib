@@ -57,13 +57,7 @@ export function encodeToLatin1(str: string): Uint8Array {
  * @returns     Decoded string.
  */
 export function decodeLatin1(data: Uint8Array): string {
-  // Each byte maps directly to the corresponding Unicode code point
-  // in the 0x00-0xFF range.
-  let result = '';
-  for (let i = 0; i < data.length; i++) {
-    result += String.fromCharCode(data[i]!);
-  }
-  return result;
+  return new TextDecoder('latin1').decode(data);
 }
 
 // ---------------------------------------------------------------------------
@@ -122,13 +116,7 @@ export function decodeUtf16BE(data: Uint8Array): string {
     offset = 2;
   }
 
-  let result = '';
-  for (let i = offset; i + 1 < data.length; i += 2) {
-    const code = (data[i]! << 8) | data[i + 1]!;
-    result += String.fromCharCode(code);
-  }
-
-  return result;
+  return new TextDecoder('utf-16be').decode(data.subarray(offset));
 }
 
 // ---------------------------------------------------------------------------

@@ -34,6 +34,43 @@ export interface SvgDrawCommand {
   params: number[];
 }
 
+/** A single gradient colour stop. */
+export interface SvgGradientStop {
+  /** Offset in range 0..1. */
+  offset: number;
+  /** Stop colour (RGB, 0-255). */
+  color: { r: number; g: number; b: number };
+  /** Stop opacity (0..1, default 1). */
+  opacity: number;
+}
+
+/** Parsed gradient definition from `<linearGradient>` or `<radialGradient>`. */
+export interface SvgGradient {
+  /** Gradient type. */
+  type: 'linearGradient' | 'radialGradient';
+  /** Gradient XML id. */
+  id: string;
+  /** Colour stops, sorted by offset. */
+  stops: SvgGradientStop[];
+  /** SVG `spreadMethod`: pad | reflect | repeat. Default: pad. */
+  spreadMethod: 'pad' | 'reflect' | 'repeat';
+  /** SVG `gradientUnits`: objectBoundingBox | userSpaceOnUse. Default: objectBoundingBox. */
+  gradientUnits: 'objectBoundingBox' | 'userSpaceOnUse';
+  /** Optional `gradientTransform` as a 2D affine matrix [a,b,c,d,e,f]. */
+  gradientTransform?: [number, number, number, number, number, number] | undefined;
+  // Linear gradient coordinates (percentages or user units depending on gradientUnits)
+  x1?: number | undefined;
+  y1?: number | undefined;
+  x2?: number | undefined;
+  y2?: number | undefined;
+  // Radial gradient coordinates
+  cx?: number | undefined;
+  cy?: number | undefined;
+  r?: number | undefined;
+  fx?: number | undefined;
+  fy?: number | undefined;
+}
+
 /** Parsed representation of an SVG element. */
 export interface SvgElement {
   tag: string;
@@ -69,6 +106,12 @@ export interface SvgElement {
   fontStyle?: string | undefined;
   /** Text anchor: start | middle | end. */
   textAnchor?: 'start' | 'middle' | 'end' | undefined;
+  /** Gradient definitions found in `<defs>` blocks, keyed by id. */
+  gradients?: Map<string, SvgGradient> | undefined;
+  /** Fill gradient reference (resolved from `fill="url(#id)"`). */
+  fillGradientId?: string | undefined;
+  /** Stroke gradient reference (resolved from `stroke="url(#id)"`). */
+  strokeGradientId?: string | undefined;
 }
 
 // ---------------------------------------------------------------------------
@@ -125,6 +168,34 @@ const NAMED_COLORS: Record<string, [number, number, number]> = {
 // ---------------------------------------------------------------------------
 
 /**
+ * Convert HSL values to RGB (0-255).
+ *
+ * @param h  Hue in degrees (0-360).
+ * @param s  Saturation (0-1).
+ * @param l  Lightness (0-1).
+ */
+function hslToRgb(h: number, s: number, l: number): { r: number; g: number; b: number } {
+  const c = (1 - Math.abs(2 * l - 1)) * s;
+  const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+  const m = l - c / 2;
+
+  let r1: number, g1: number, b1: number;
+
+  if (h < 60)       { r1 = c; g1 = x; b1 = 0; }
+  else if (h < 120) { r1 = x; g1 = c; b1 = 0; }
+  else if (h < 180) { r1 = 0; g1 = c; b1 = x; }
+  else if (h < 240) { r1 = 0; g1 = x; b1 = c; }
+  else if (h < 300) { r1 = x; g1 = 0; b1 = c; }
+  else              { r1 = c; g1 = 0; b1 = x; }
+
+  return {
+    r: Math.round((r1 + m) * 255),
+    g: Math.round((g1 + m) * 255),
+    b: Math.round((b1 + m) * 255),
+  };
+}
+
+/**
  * Parse an SVG colour string into an RGB object.
  *
  * Supported formats:
@@ -132,6 +203,8 @@ const NAMED_COLORS: Record<string, [number, number, number]> = {
  * - `#rrggbb`
  * - `rgb(r, g, b)` (0-255)
  * - `rgba(r, g, b, a)` (a: 0-1)
+ * - `hsl(h, s%, l%)`
+ * - `hsla(h, s%, l%, a)` (a: 0-1)
  * - Named colours (basic set)
  *
  * @returns  RGB values (0-255) or `undefined` if not parseable.
@@ -186,6 +259,19 @@ export function parseSvgColor(
     const g = Math.round(parseFloat(rgbaMatch[2]!));
     const b = Math.round(parseFloat(rgbaMatch[3]!));
     const a = rgbaMatch[4] !== undefined ? parseFloat(rgbaMatch[4]) : undefined;
+    const result = { r, g, b, ...(a !== undefined ? { a } : {}) };
+    colorCache.set(colorStr, result);
+    return result;
+  }
+
+  // hsl(h, s%, l%) / hsla(h, s%, l%, a)
+  const hslMatch = /^hsla?\(\s*([\d.]+)\s*[,\s]\s*([\d.]+)%?\s*[,\s]\s*([\d.]+)%?(?:\s*[,/\s]\s*([\d.]+))?\s*\)$/.exec(s);
+  if (hslMatch) {
+    const h = parseFloat(hslMatch[1]!) % 360;
+    const sat = parseFloat(hslMatch[2]!) / 100;
+    const lit = parseFloat(hslMatch[3]!) / 100;
+    const a = hslMatch[4] !== undefined ? parseFloat(hslMatch[4]) : undefined;
+    const { r, g, b } = hslToRgb(h, sat, lit);
     const result = { r, g, b, ...(a !== undefined ? { a } : {}) };
     colorCache.set(colorStr, result);
     return result;
@@ -957,6 +1043,246 @@ function resolveStyles(el: SvgElement): void {
 }
 
 // ---------------------------------------------------------------------------
+// Gradient parsing helpers
+// ---------------------------------------------------------------------------
+
+/** Parse a gradient stop offset (supports percentage and decimal). */
+function parseStopOffset(value: string | undefined): number {
+  if (value === undefined) return 0;
+  const trimmed = value.trim();
+  if (trimmed.endsWith('%')) {
+    const pct = parseFloat(trimmed.slice(0, -1));
+    return Number.isNaN(pct) ? 0 : Math.max(0, Math.min(1, pct / 100));
+  }
+  const n = parseFloat(trimmed);
+  return Number.isNaN(n) ? 0 : Math.max(0, Math.min(1, n));
+}
+
+/**
+ * Parse a `<stop>` element's attributes into an {@link SvgGradientStop}.
+ */
+function parseGradientStop(attrs: Record<string, string>): SvgGradientStop {
+  // Parse inline style to extract stop-color/stop-opacity
+  const style = attrs['style'];
+  if (style) {
+    for (const prop of style.split(';')) {
+      const colonIdx = prop.indexOf(':');
+      if (colonIdx >= 0) {
+        const key = prop.slice(0, colonIdx).trim().toLowerCase();
+        const val = prop.slice(colonIdx + 1).trim();
+        if (key && val) {
+          attrs[key] = val;
+        }
+      }
+    }
+  }
+
+  const offset = parseStopOffset(attrs['offset']);
+  const stopColorStr = attrs['stop-color'] ?? '#000000';
+  const parsed = parseSvgColor(stopColorStr);
+  const color = parsed ? { r: parsed.r, g: parsed.g, b: parsed.b } : { r: 0, g: 0, b: 0 };
+
+  let opacity = 1;
+  const opacityStr = attrs['stop-opacity'];
+  if (opacityStr !== undefined) {
+    const v = parseFloat(opacityStr);
+    if (!Number.isNaN(v)) {
+      opacity = Math.max(0, Math.min(1, v));
+    }
+  }
+  // If the parsed color had an alpha, multiply it with stop-opacity
+  if (parsed?.a !== undefined) {
+    opacity *= parsed.a;
+  }
+
+  return { offset, color, opacity };
+}
+
+/**
+ * Normalize gradient stops:
+ * - Sort by offset
+ * - Handle duplicate offsets (PDF spec: keep last value)
+ * - Handle single stop (duplicate it at 0 and 1)
+ * - Handle no stops (default black-to-black)
+ */
+function normalizeGradientStops(stops: SvgGradientStop[]): SvgGradientStop[] {
+  if (stops.length === 0) {
+    return [
+      { offset: 0, color: { r: 0, g: 0, b: 0 }, opacity: 1 },
+      { offset: 1, color: { r: 0, g: 0, b: 0 }, opacity: 1 },
+    ];
+  }
+
+  if (stops.length === 1) {
+    const s = stops[0]!;
+    return [
+      { offset: 0, color: { ...s.color }, opacity: s.opacity },
+      { offset: 1, color: { ...s.color }, opacity: s.opacity },
+    ];
+  }
+
+  // Sort by offset (stable sort)
+  const sorted = [...stops].sort((a, b) => a.offset - b.offset);
+
+  // Handle duplicate offsets: per SVG/PDF spec, keep the last one at each offset
+  const deduped: SvgGradientStop[] = [];
+  for (const stop of sorted) {
+    if (deduped.length > 0 && deduped.at(-1)!.offset === stop.offset) {
+      // Replace with the later stop (last wins)
+      deduped[deduped.length - 1] = stop;
+    } else {
+      deduped.push(stop);
+    }
+  }
+
+  return deduped;
+}
+
+/**
+ * Interpolate between two colours in linear RGB space.
+ *
+ * Linear RGB interpolation converts sRGB (0-255) to linear light,
+ * interpolates, then converts back. This produces perceptually
+ * correct gradients.
+ *
+ * @param c0  Start colour (0-255 sRGB).
+ * @param c1  End colour (0-255 sRGB).
+ * @param t   Interpolation factor (0..1).
+ * @returns Interpolated colour (0-255 sRGB).
+ */
+export function interpolateLinearRgb(
+  c0: { r: number; g: number; b: number },
+  c1: { r: number; g: number; b: number },
+  t: number,
+): { r: number; g: number; b: number } {
+  // sRGB -> linear
+  const toLinear = (v: number): number => {
+    const s = v / 255;
+    return s <= 0.04045 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
+  };
+  // linear -> sRGB
+  const toSrgb = (v: number): number => {
+    const s = v <= 0.0031308 ? v * 12.92 : 1.055 * v ** (1 / 2.4) - 0.055;
+    return Math.round(Math.max(0, Math.min(255, s * 255)));
+  };
+
+  const r0 = toLinear(c0.r), g0 = toLinear(c0.g), b0 = toLinear(c0.b);
+  const r1 = toLinear(c1.r), g1 = toLinear(c1.g), b1 = toLinear(c1.b);
+
+  return {
+    r: toSrgb(r0 + (r1 - r0) * t),
+    g: toSrgb(g0 + (g1 - g0) * t),
+    b: toSrgb(b0 + (b1 - b0) * t),
+  };
+}
+
+/**
+ * Apply `spreadMethod` to a gradient parameter `t` outside [0, 1].
+ *
+ * - `pad`: clamp to [0, 1]
+ * - `reflect`: mirror at boundaries (0->1->0->1...)
+ * - `repeat`: wrap around (0->1, 0->1, ...)
+ */
+export function applySpreadMethod(
+  t: number,
+  method: 'pad' | 'reflect' | 'repeat',
+): number {
+  if (method === 'pad') {
+    return Math.max(0, Math.min(1, t));
+  }
+  if (method === 'repeat') {
+    const mod = t % 1;
+    return mod < 0 ? mod + 1 : mod;
+  }
+  // reflect
+  const mod = Math.abs(t) % 2;
+  return mod > 1 ? 2 - mod : mod;
+}
+
+/**
+ * Parse a gradient element (`<linearGradient>` or `<radialGradient>`)
+ * from its attributes and child `<stop>` elements.
+ */
+function parseGradientElement(
+  tag: 'lineargradient' | 'radialgradient',
+  attrs: Record<string, string>,
+  stopElements: Array<{ attrs: Record<string, string> }>,
+): SvgGradient | undefined {
+  const id = attrs['id'];
+  if (!id) return undefined;
+
+  const gradientType = tag === 'lineargradient' ? 'linearGradient' : 'radialGradient';
+
+  // Build a case-insensitive attribute lookup (SVG attribute names are case-sensitive
+  // in XML but our tokenizer preserves original case, so we need to check both forms)
+  const attrLower = new Map<string, string>();
+  for (const [k, v] of Object.entries(attrs)) {
+    attrLower.set(k.toLowerCase(), v);
+  }
+
+  // Parse spread method
+  const smRaw = (attrLower.get('spreadmethod') ?? 'pad').toLowerCase();
+  const spreadMethod: 'pad' | 'reflect' | 'repeat' =
+    smRaw === 'reflect' ? 'reflect' : smRaw === 'repeat' ? 'repeat' : 'pad';
+
+  // Parse gradient units
+  const guRaw = (attrLower.get('gradientunits') ?? 'objectBoundingBox').toLowerCase();
+  const gradientUnits: 'objectBoundingBox' | 'userSpaceOnUse' =
+    guRaw === 'userspaceonuse' ? 'userSpaceOnUse' : 'objectBoundingBox';
+
+  // Parse gradient transform
+  const transformStr = attrLower.get('gradienttransform');
+  const gradientTransform = transformStr ? parseSvgTransform(transformStr) : undefined;
+
+  // Parse stops
+  const rawStops: SvgGradientStop[] = [];
+  for (const stopEl of stopElements) {
+    rawStops.push(parseGradientStop({ ...stopEl.attrs }));
+  }
+  const stops = normalizeGradientStops(rawStops);
+
+  const gradient: SvgGradient = {
+    type: gradientType,
+    id,
+    stops,
+    spreadMethod,
+    gradientUnits,
+    gradientTransform,
+  };
+
+  if (gradientType === 'linearGradient') {
+    // Default: x1=0%, y1=0%, x2=100%, y2=0% for objectBoundingBox
+    gradient.x1 = parseGradientCoord(attrs['x1'], gradientUnits === 'objectBoundingBox' ? 0 : 0);
+    gradient.y1 = parseGradientCoord(attrs['y1'], 0);
+    gradient.x2 = parseGradientCoord(attrs['x2'], gradientUnits === 'objectBoundingBox' ? 1 : 100);
+    gradient.y2 = parseGradientCoord(attrs['y2'], 0);
+  } else {
+    // Radial defaults: cx=cy=0.5, r=0.5 for objectBoundingBox
+    const defCenter = gradientUnits === 'objectBoundingBox' ? 0.5 : 50;
+    const defRadius = gradientUnits === 'objectBoundingBox' ? 0.5 : 50;
+    gradient.cx = parseGradientCoord(attrs['cx'], defCenter);
+    gradient.cy = parseGradientCoord(attrs['cy'], defCenter);
+    gradient.r = parseGradientCoord(attrs['r'], defRadius);
+    gradient.fx = parseGradientCoord(attrs['fx'], gradient.cx);
+    gradient.fy = parseGradientCoord(attrs['fy'], gradient.cy);
+  }
+
+  return gradient;
+}
+
+/** Parse a gradient coordinate value (may be percentage or absolute). */
+function parseGradientCoord(value: string | undefined, defaultVal: number): number {
+  if (value === undefined) return defaultVal;
+  const trimmed = value.trim();
+  if (trimmed.endsWith('%')) {
+    const pct = parseFloat(trimmed.slice(0, -1));
+    return Number.isNaN(pct) ? defaultVal : pct / 100;
+  }
+  const n = parseFloat(trimmed);
+  return Number.isNaN(n) ? defaultVal : n;
+}
+
+// ---------------------------------------------------------------------------
 // Main SVG parser
 // ---------------------------------------------------------------------------
 
@@ -970,11 +1296,60 @@ export function parseSvg(svgString: string): SvgElement {
   const stack: SvgElement[] = [];
   let root: SvgElement | undefined;
 
+  // Track current gradient being parsed
+  let currentGradient: {
+    tag: 'lineargradient' | 'radialgradient';
+    attrs: Record<string, string>;
+    stops: Array<{ attrs: Record<string, string> }>;
+  } | undefined;
+
+  // Collect all gradients
+  const gradients = new Map<string, SvgGradient>();
+
   for (const token of tokenizeXml(svgString)) {
     switch (token.type) {
       case 'open': {
+        const tagName = token.tag!;
+
+        // Handle gradient elements
+        if (tagName === 'lineargradient' || tagName === 'radialgradient') {
+          currentGradient = {
+            tag: tagName,
+            attrs: token.attrs ?? {},
+            stops: [],
+          };
+          // Still push to stack for proper close-tag tracking
+          const el: SvgElement = {
+            tag: tagName,
+            attributes: token.attrs ?? {},
+            children: [],
+          };
+          if (stack.length > 0) {
+            stack.at(-1)!.children.push(el);
+          }
+          stack.push(el);
+          root ??= el;
+          break;
+        }
+
+        // Handle stop elements inside gradients
+        if (tagName === 'stop' && currentGradient) {
+          currentGradient.stops.push({ attrs: { ...(token.attrs ?? {}) } });
+          const el: SvgElement = {
+            tag: tagName,
+            attributes: token.attrs ?? {},
+            children: [],
+          };
+          if (stack.length > 0) {
+            stack.at(-1)!.children.push(el);
+          }
+          stack.push(el);
+          root ??= el;
+          break;
+        }
+
         const el: SvgElement = {
-          tag: token.tag!,
+          tag: tagName,
           attributes: token.attrs ?? {},
           children: [],
         };
@@ -993,8 +1368,43 @@ export function parseSvg(svgString: string): SvgElement {
       }
 
       case 'selfclose': {
+        const tagName = token.tag!;
+
+        // Handle self-closing stop inside gradient
+        if (tagName === 'stop' && currentGradient) {
+          currentGradient.stops.push({ attrs: { ...(token.attrs ?? {}) } });
+          const el: SvgElement = {
+            tag: tagName,
+            attributes: token.attrs ?? {},
+            children: [],
+          };
+          if (stack.length > 0) {
+            stack.at(-1)!.children.push(el);
+          }
+          root ??= el;
+          break;
+        }
+
+        // Handle self-closing gradient elements (rare but valid)
+        if (tagName === 'lineargradient' || tagName === 'radialgradient') {
+          const grad = parseGradientElement(tagName, token.attrs ?? {}, []);
+          if (grad) {
+            gradients.set(grad.id, grad);
+          }
+          const el: SvgElement = {
+            tag: tagName,
+            attributes: token.attrs ?? {},
+            children: [],
+          };
+          if (stack.length > 0) {
+            stack.at(-1)!.children.push(el);
+          }
+          root ??= el;
+          break;
+        }
+
         const el: SvgElement = {
-          tag: token.tag!,
+          tag: tagName,
           attributes: token.attrs ?? {},
           children: [],
         };
@@ -1011,6 +1421,24 @@ export function parseSvg(svgString: string): SvgElement {
       }
 
       case 'close': {
+        const tagName = token.tag;
+
+        // Finalize gradient on close
+        if (
+          currentGradient &&
+          (tagName === 'lineargradient' || tagName === 'radialgradient')
+        ) {
+          const grad = parseGradientElement(
+            currentGradient.tag,
+            currentGradient.attrs,
+            currentGradient.stops,
+          );
+          if (grad) {
+            gradients.set(grad.id, grad);
+          }
+          currentGradient = undefined;
+        }
+
         if (stack.length > 1) {
           stack.pop();
         }
@@ -1032,7 +1460,42 @@ export function parseSvg(svgString: string): SvgElement {
     }
   }
 
-  return root ?? { tag: 'svg', attributes: {}, children: [] };
+  const result = root ?? { tag: 'svg', attributes: {}, children: [] };
+
+  // Attach gradients to root element
+  if (gradients.size > 0) {
+    result.gradients = gradients;
+  }
+
+  // Resolve gradient references in all elements
+  if (gradients.size > 0) {
+    resolveGradientReferences(result);
+  }
+
+  return result;
+}
+
+/** Resolve `fill="url(#id)"` gradient references in the element tree. */
+function resolveGradientReferences(el: SvgElement): void {
+  const fillStr = el.attributes['fill'];
+  if (fillStr) {
+    const urlMatch = /^url\(\s*#([^)]+)\s*\)$/i.exec(fillStr.trim());
+    if (urlMatch) {
+      el.fillGradientId = urlMatch[1]!;
+    }
+  }
+
+  const strokeStr = el.attributes['stroke'];
+  if (strokeStr) {
+    const urlMatch = /^url\(\s*#([^)]+)\s*\)$/i.exec(strokeStr.trim());
+    if (urlMatch) {
+      el.strokeGradientId = urlMatch[1]!;
+    }
+  }
+
+  for (const child of el.children) {
+    resolveGradientReferences(child);
+  }
 }
 
 /** Add drawing commands to an element based on its tag name. */

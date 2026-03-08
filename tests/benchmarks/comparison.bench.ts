@@ -464,9 +464,9 @@ describe('5d. drawSvgPath — 100 calls', () => {
 // ═══════════════════════════════════════════════════════════════════════════
 
 describe('6a. Embed RGBA PNG image', () => {
-  bench('modern-pdf-lib: embedPng (RGBA)', () => {
+  bench('modern-pdf-lib: embedPng (RGBA)', async () => {
     const doc = createPdf();
-    doc.embedPng(SAMPLE_PNG_BYTES);
+    await doc.embedPng(SAMPLE_PNG_BYTES);
   });
 
   bench('pdf-lib: embedPng (RGBA)', async () => {
@@ -476,9 +476,9 @@ describe('6a. Embed RGBA PNG image', () => {
 });
 
 describe('6a2. Embed RGB PNG image (no alpha — IDAT passthrough)', () => {
-  bench('modern-pdf-lib: embedPng (RGB)', () => {
+  bench('modern-pdf-lib: embedPng (RGB)', async () => {
     const doc = createPdf();
-    doc.embedPng(SAMPLE_RGB_PNG_BYTES);
+    await doc.embedPng(SAMPLE_RGB_PNG_BYTES);
   });
 
   bench('pdf-lib: embedPng (RGB)', async () => {
@@ -488,10 +488,10 @@ describe('6a2. Embed RGB PNG image (no alpha — IDAT passthrough)', () => {
 });
 
 describe('6b. drawImage — 100 calls', () => {
-  bench('modern-pdf-lib: embed + 100x drawImage', () => {
+  bench('modern-pdf-lib: embed + 100x drawImage', async () => {
     const doc = createPdf();
     const page = doc.addPage(PageSizes.A4);
-    const img = doc.embedPng(SAMPLE_PNG_BYTES);
+    const img = await doc.embedPng(SAMPLE_PNG_BYTES);
     for (let i = 0; i < 100; i++) {
       page.drawImage(img.ref, {
         x: (i % 10) * 55,

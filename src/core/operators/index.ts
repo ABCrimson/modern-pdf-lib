@@ -52,6 +52,14 @@ export {
   rgb,
   cmyk,
   grayscale,
+  spotColor,
+  deviceNColor,
+  rgbToCmyk,
+  cmykToRgb,
+  colorToHex,
+  hexToColor,
+  spotResourceName,
+  deviceNResourceName,
   setFillColorRgb,
   setFillColorCmyk,
   setFillColorGray,
@@ -69,7 +77,16 @@ export {
   setFillingColor,
   setStrokingColor,
 } from './color.js';
-export type { RgbColor, CmykColor, GrayscaleColor, Color } from './color.js';
+export type { RgbColor, CmykColor, GrayscaleColor, SpotColor, DeviceNColor, Color } from './color.js';
+
+// ---------------------------------------------------------------------------
+// Spot / Separation / DeviceN colour space builders
+// ---------------------------------------------------------------------------
+
+export {
+  buildSeparationColorSpace,
+  buildDeviceNColorSpace,
+} from './spotColor.js';
 
 // ---------------------------------------------------------------------------
 // Graphics state & transformations

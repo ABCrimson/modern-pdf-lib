@@ -516,4 +516,235 @@ describe('formFlatten', () => {
       expect(result.acroFormRemoved).toBe(false);
     });
   });
+
+  // -----------------------------------------------------------------------
+  // Rich text (/RV) handling
+  // -----------------------------------------------------------------------
+
+  describe('rich text (/RV) handling', () => {
+    /** Create a text field with /RV (rich text value). */
+    function makeRichTextFieldDict(
+      name: string,
+      plainValue: string,
+      richValue: string,
+      options?: { readOnly?: boolean; multiline?: boolean },
+    ): PdfDict {
+      const dict = makeTextFieldDict(name, plainValue, options?.readOnly);
+      dict.set('/RV', PdfString.literal(richValue));
+      if (options?.multiline) {
+        const ff = (dict.get('/Ff') as PdfNumber | undefined)?.value ?? 0;
+        dict.set('/Ff', PdfNumber.of(ff | FieldFlags.Multiline));
+      }
+      return dict;
+    }
+
+    it('uses /RV with bold text for appearance generation', () => {
+      const rv = '<body><p><b>Bold Text</b></p></body>';
+      const dict = makeRichTextFieldDict('bold_field', 'Bold Text', rv);
+      const form = buildForm([dict]);
+
+      const result = flattenForm(form);
+
+      expect(result.flattenedFields).toContain('bold_field');
+      expect(result.xObjects).toHaveLength(1);
+      const decoder = new TextDecoder();
+      const content = decoder.decode(result.xObjects[0]!.stream.data);
+      // Should use a bold font variant (HeBo = Helvetica-Bold)
+      expect(content).toContain('/HeBo');
+      expect(content).toContain('Bold Text');
+    });
+
+    it('uses /RV with mixed bold and italic text', () => {
+      const rv = '<body><p><b>Bold</b> and <i>Italic</i></p></body>';
+      const dict = makeRichTextFieldDict('mixed_field', 'Bold and Italic', rv);
+      const form = buildForm([dict]);
+
+      const result = flattenForm(form);
+
+      expect(result.flattenedFields).toContain('mixed_field');
+      const decoder = new TextDecoder();
+      const content = decoder.decode(result.xObjects[0]!.stream.data);
+      // Should contain both bold and italic font names
+      expect(content).toContain('/HeBo');
+      expect(content).toContain('/HeIt');
+      expect(content).toContain('Bold');
+      expect(content).toContain('Italic');
+    });
+
+    it('uses /RV with font-size and color styling', () => {
+      const rv = '<body><p><span style="font-size: 16pt; color: rgb(255, 0, 0);">Red Large</span></p></body>';
+      const dict = makeRichTextFieldDict('styled_field', 'Red Large', rv);
+      const form = buildForm([dict]);
+
+      const result = flattenForm(form);
+
+      expect(result.flattenedFields).toContain('styled_field');
+      const decoder = new TextDecoder();
+      const content = decoder.decode(result.xObjects[0]!.stream.data);
+      // Should use 16pt font size
+      expect(content).toContain('16 Tf');
+      // Should have red color (1 0 0 rg)
+      expect(content).toContain('1 0 0 rg');
+      expect(content).toContain('Red Large');
+    });
+
+    it('prefers /RV over /V when both are present', () => {
+      const rv = '<body><p><b>Rich Version</b></p></body>';
+      const dict = makeRichTextFieldDict('prefer_rv', 'Plain Version', rv);
+      const form = buildForm([dict]);
+
+      const result = flattenForm(form);
+
+      const decoder = new TextDecoder();
+      const content = decoder.decode(result.xObjects[0]!.stream.data);
+      // Should contain the rich text content, not the plain text
+      expect(content).toContain('Rich Version');
+      // Should use bold font
+      expect(content).toContain('/HeBo');
+    });
+
+    it('falls back to /V when /RV contains invalid XHTML', () => {
+      // Use content that only has unclosed/invalid tags and no text nodes
+      // inside a <p>, causing the parser to produce empty paragraphs
+      const rv = '<html><body><p></p></body></html>';
+      const dict = makeRichTextFieldDict('invalid_rv', 'Fallback Value', rv);
+      const form = buildForm([dict]);
+
+      const result = flattenForm(form);
+
+      expect(result.flattenedFields).toContain('invalid_rv');
+      expect(result.xObjects).toHaveLength(1);
+      // Should have fallen back to /V — the appearance is from
+      // generateAppearance() or existing /AP, not from /RV
+      const decoder = new TextDecoder();
+      const content = decoder.decode(result.xObjects[0]!.stream.data);
+      // Should contain the plain text value
+      expect(content).toContain('Fallback Value');
+    });
+
+    it('uses /V when preserveRichText is false, ignoring /RV', () => {
+      const rv = '<body><p><b>Rich Version</b></p></body>';
+      const dict = makeRichTextFieldDict('no_rich', 'Plain Version', rv);
+      const form = buildForm([dict]);
+
+      const result = flattenForm(form, { preserveRichText: false });
+
+      expect(result.flattenedFields).toContain('no_rich');
+      const decoder = new TextDecoder();
+      const content = decoder.decode(result.xObjects[0]!.stream.data);
+      // Should contain the plain text value, not the rich text
+      expect(content).toContain('Plain Version');
+      // Should NOT contain bold font (since rich text was ignored)
+      expect(content).not.toContain('/HeBo');
+    });
+
+    it('handles multi-line rich text field', () => {
+      const rv = '<body><p>First paragraph</p><p>Second paragraph</p></body>';
+      const dict = makeRichTextFieldDict('multiline_rv', 'First\nSecond', rv, { multiline: true });
+      // Give the field a taller rect so both paragraphs fit
+      dict.set('/Rect', PdfArray.fromNumbers([50, 600, 250, 700]));
+      const form = buildForm([dict]);
+
+      const result = flattenForm(form);
+
+      expect(result.flattenedFields).toContain('multiline_rv');
+      const decoder = new TextDecoder();
+      const content = decoder.decode(result.xObjects[0]!.stream.data);
+      expect(content).toContain('First paragraph');
+      expect(content).toContain('Second paragraph');
+    });
+
+    it('handles /RV with <span> font-family mapping', () => {
+      const rv = '<body><p><span style="font-family: Courier;">Code</span></p></body>';
+      const dict = makeRichTextFieldDict('font_family', 'Code', rv);
+      const form = buildForm([dict]);
+
+      const result = flattenForm(form);
+
+      const decoder = new TextDecoder();
+      const content = decoder.decode(result.xObjects[0]!.stream.data);
+      // Should use Courier font
+      expect(content).toContain('/Cour');
+    });
+
+    it('handles /RV with text-align center on paragraph', () => {
+      const rv = '<body><p style="text-align: center;">Centered</p></body>';
+      const dict = makeRichTextFieldDict('centered_rv', 'Centered', rv);
+      const form = buildForm([dict]);
+
+      const result = flattenForm(form);
+
+      const decoder = new TextDecoder();
+      const content = decoder.decode(result.xObjects[0]!.stream.data);
+      expect(content).toContain('Centered');
+    });
+
+    it('handles /RV with <br/> line break', () => {
+      const rv = '<body><p>Line 1<br/>Line 2</p></body>';
+      const dict = makeRichTextFieldDict('br_field', 'Line 1\nLine 2', rv, { multiline: true });
+      // Give the field a taller rect so both lines fit
+      dict.set('/Rect', PdfArray.fromNumbers([50, 600, 250, 700]));
+      const form = buildForm([dict]);
+
+      const result = flattenForm(form);
+
+      const decoder = new TextDecoder();
+      const content = decoder.decode(result.xObjects[0]!.stream.data);
+      expect(content).toContain('Line 1');
+      expect(content).toContain('Line 2');
+    });
+
+    it('handles /RV with hex color #ff0000', () => {
+      const rv = '<body><p><span style="color: #ff0000;">Red</span></p></body>';
+      const dict = makeRichTextFieldDict('hex_color', 'Red', rv);
+      const form = buildForm([dict]);
+
+      const result = flattenForm(form);
+
+      const decoder = new TextDecoder();
+      const content = decoder.decode(result.xObjects[0]!.stream.data);
+      expect(content).toContain('1 0 0 rg');
+    });
+
+    it('handles /RV with bold+italic combined', () => {
+      const rv = '<body><p><b><i>BoldItalic</i></b></p></body>';
+      const dict = makeRichTextFieldDict('bold_italic', 'BoldItalic', rv);
+      const form = buildForm([dict]);
+
+      const result = flattenForm(form);
+
+      const decoder = new TextDecoder();
+      const content = decoder.decode(result.xObjects[0]!.stream.data);
+      // Should use Helvetica-BoldOblique (HeBI)
+      expect(content).toContain('/HeBI');
+      expect(content).toContain('BoldItalic');
+    });
+
+    it('defaults preserveRichText to true (uses /RV by default)', () => {
+      const rv = '<body><p><b>DefaultRich</b></p></body>';
+      const dict = makeRichTextFieldDict('default_rv', 'Plain', rv);
+      const form = buildForm([dict]);
+
+      // No options passed — should default to preserveRichText: true
+      const result = flattenForm(form);
+
+      const decoder = new TextDecoder();
+      const content = decoder.decode(result.xObjects[0]!.stream.data);
+      expect(content).toContain('DefaultRich');
+      expect(content).toContain('/HeBo');
+    });
+
+    it('handles empty /RV string by falling back to /V', () => {
+      const dict = makeTextFieldDict('empty_rv', 'Fallback');
+      dict.set('/RV', PdfString.literal(''));
+      const form = buildForm([dict]);
+
+      const result = flattenForm(form);
+
+      expect(result.flattenedFields).toContain('empty_rv');
+      const decoder = new TextDecoder();
+      const content = decoder.decode(result.xObjects[0]!.stream.data);
+      expect(content).toContain('Fallback');
+    });
+  });
 });

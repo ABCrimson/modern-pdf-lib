@@ -53,6 +53,25 @@ function isRedactAnnotation(annot: PdfAnnotation): annot is PdfRedactAnnotation 
   return annot.getType() === 'Redact';
 }
 
+/** Horizontal alignment for overlay text. */
+export type OverlayAlignment = 'left' | 'center' | 'right';
+
+/** Extended options for building redaction operators. */
+export interface RedactionOperatorOptions {
+  /** Font name for overlay text (default: 'Helvetica'). */
+  overlayFont?: string | undefined;
+  /** Font size for overlay text. When omitted, auto-calculated from rect height. */
+  overlayFontSize?: number | undefined;
+  /** Horizontal alignment for overlay text (default: 'left'). */
+  overlayAlignment?: OverlayAlignment | undefined;
+  /** Border width for the redaction rectangle outline (default: 0). */
+  borderWidth?: number | undefined;
+  /** Border colour (default: same as fill colour). */
+  borderColor?: { r: number; g: number; b: number } | undefined;
+  /** Opacity for the redaction overlay, 0–1 (default: 1). */
+  opacity?: number | undefined;
+}
+
 /**
  * Build the PDF operator string that renders the redaction overlay.
  *
@@ -63,6 +82,7 @@ function buildRedactionOperators(
   rect: [number, number, number, number],
   interiorColor: { r: number; g: number; b: number } | undefined,
   overlayText: string | undefined,
+  options: RedactionOperatorOptions = {},
 ): string {
   // Annotation rect is [x1, y1, x2, y2] in default user space
   const [x1, y1, x2, y2] = rect;
@@ -72,29 +92,61 @@ function buildRedactionOperators(
   const h = Math.abs(y2 - y1);
 
   const { r, g, b } = interiorColor ?? { r: 0, g: 0, b: 0 };
+  const font = options.overlayFont ?? 'Helvetica';
+  const alignment = options.overlayAlignment ?? 'left';
+  const borderWidth = options.borderWidth ?? 0;
+  const borderColor = options.borderColor ?? { r, g, b };
+  const opacity = options.opacity ?? 1;
 
   let ops = '';
 
   // Save graphics state
   ops += 'q\n';
 
+  // Apply opacity if not fully opaque
+  if (opacity < 1) {
+    ops += `/GS_R gs\n`;
+    ops += `${n(opacity)} ca\n`;
+  }
+
   // Draw filled rectangle
   ops += `${n(r)} ${n(g)} ${n(b)} rg\n`;
   ops += `${n(x)} ${n(y)} ${n(w)} ${n(h)} re\n`;
   ops += 'f\n';
 
+  // Draw border if borderWidth > 0
+  if (borderWidth > 0) {
+    const { r: br, g: bg, b: bb } = borderColor;
+    ops += `${n(br)} ${n(bg)} ${n(bb)} RG\n`;
+    ops += `${n(borderWidth)} w\n`;
+    ops += `${n(x)} ${n(y)} ${n(w)} ${n(h)} re\n`;
+    ops += 'S\n';
+  }
+
   // Overlay text
   if (overlayText) {
     const brightness = r * 0.299 + g * 0.587 + b * 0.114;
-    const tc = brightness > 0.5 ? 0 : 1;
+    const textColor = brightness > 0.5 ? 0 : 1;
 
-    const fontSize = Math.min(h * 0.6, 10);
-    const textX = x + 2;
+    const fontSize = options.overlayFontSize ?? Math.min(h * 0.6, 10);
+
+    // Estimate text width (~0.5 * fontSize per character for Helvetica)
+    const estimatedTextWidth = overlayText.length * fontSize * 0.5;
+
+    let textX: number;
+    if (alignment === 'center') {
+      textX = x + (w - estimatedTextWidth) / 2;
+    } else if (alignment === 'right') {
+      textX = x + w - estimatedTextWidth - 2;
+    } else {
+      textX = x + 2;
+    }
+
     const textY = y + h / 2 - fontSize / 3;
 
-    ops += `${n(tc)} ${n(tc)} ${n(tc)} rg\n`;
+    ops += `${n(textColor)} ${n(textColor)} ${n(textColor)} rg\n`;
     ops += 'BT\n';
-    ops += `/Helvetica ${n(fontSize)} Tf\n`;
+    ops += `/${font} ${n(fontSize)} Tf\n`;
     ops += `${n(textX)} ${n(textY)} Td\n`;
 
     const escaped = overlayText

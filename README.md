@@ -15,7 +15,7 @@ Create, parse, fill, merge, sign, and manipulate PDF documents<br />in Node, Den
 
 [![npm version](https://img.shields.io/npm/v/modern-pdf-lib?style=flat-square&color=cb3837)](https://www.npmjs.com/package/modern-pdf-lib)
 [![bundle size](https://img.shields.io/badge/gzip-36kb_core-blue?style=flat-square)](https://bundlephobia.com/package/modern-pdf-lib)
-[![tests](https://img.shields.io/badge/tests-5%2C135_passing-brightgreen?style=flat-square)](#)
+[![tests](https://img.shields.io/badge/tests-5%2C904_passing-brightgreen?style=flat-square)](#)
 [![TypeScript](https://img.shields.io/badge/TypeScript-6.0-3178c6?style=flat-square&logo=typescript&logoColor=white)](#)
 [![License: MIT](https://img.shields.io/badge/license-MIT-yellow?style=flat-square)](LICENSE)
 
@@ -107,9 +107,11 @@ For environments without ES module support, use the IIFE bundle which exposes a 
 - Automatic font subsetting
 - JPEG / PNG image embedding
 - Image optimization (JPEG recompression, dedup, grayscale)
-- RGB, CMYK, grayscale colors
+- RGB, CMYK, grayscale, spot, DeviceN colors
 - Linear & radial gradients, tiling patterns
 - Text layout (multiline, combed, auto-size)
+- Header/footer engine with templates
+- Advanced text layout (Knuth-Plass, hyphenation)
 
 </td>
 <td width="50%" valign="top">
@@ -137,7 +139,8 @@ For environments without ES module support, use the IIFE bundle which exposes a 
 - PDF/A-1b through PDF/A-3u validation
 - Tagged PDF / PDF/UA accessibility
 - Structure tree & marked content
-- Redaction with content removal
+- Redaction with content removal & overlay
+- PDF/UA validation & auto-enforcement
 
 </td>
 <td width="50%" valign="top">
@@ -156,6 +159,8 @@ For environments without ES module support, use the IIFE bundle which exposes a 
 - Linearization (fast web view)
 - Browser helpers (download, blob, data URL)
 - Service Worker & Web Worker support
+- Batch processing with memory pressure handling
+- Spot colors (Separation) & DeviceN
 - CLI: `npx modern-pdf optimize`
 
 </td>
@@ -267,6 +272,14 @@ For environments without ES module support, use the IIFE bundle which exposes a 
 
 <tr><td><strong>QR codes & barcodes</strong></td>
 <td align="center">9 formats (QR, EAN, Code 128, PDF417…)</td>
+<td align="center">No</td></tr>
+
+<tr><td><strong>Spot / DeviceN colors</strong></td>
+<td align="center">Separation, multi-ink, conversion</td>
+<td align="center">No</td></tr>
+
+<tr><td><strong>Header / footer engine</strong></td>
+<td align="center">Templates, page numbers, dates</td>
 <td align="center">No</td></tr>
 
 <tr><td><strong>Table layout</strong></td>

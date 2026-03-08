@@ -217,7 +217,7 @@ describe('Real-world: document with embedded PNG', () => {
     const png = createMinimalPng(4, 4, [255, 0, 0]);
 
     const doc = createPdf();
-    const img = doc.embedPng(png);
+    const img = await doc.embedPng(png);
     const page = doc.addPage(PageSizes.A4);
     page.drawImage(img, { x: 50, y: 700, width: 100, height: 100 });
 
@@ -241,7 +241,7 @@ describe('Real-world: document with embedded PNG', () => {
     );
 
     const doc = createPdf();
-    const img = doc.embedPng(pngBytes);
+    const img = await doc.embedPng(pngBytes);
     const page = doc.addPage(PageSizes.A4);
     page.drawImage(img, { x: 50, y: 50, width: 100, height: 100 });
 
@@ -259,8 +259,8 @@ describe('Real-world: document with embedded PNG', () => {
     const blue = createMinimalPng(2, 2, [0, 0, 255]);
 
     const doc = createPdf();
-    const img1 = doc.embedPng(red);
-    const img2 = doc.embedPng(blue);
+    const img1 = await doc.embedPng(red);
+    const img2 = await doc.embedPng(blue);
     const page = doc.addPage(PageSizes.A4);
     page.drawImage(img1, { x: 50, y: 700, width: 50, height: 50 });
     page.drawImage(img2, { x: 150, y: 700, width: 50, height: 50 });
@@ -282,8 +282,8 @@ describe('Real-world: image deduplication', () => {
     const png = createMinimalPng(4, 4, [0, 128, 255]);
 
     const doc = createPdf();
-    const img1 = doc.embedPng(png);
-    const img2 = doc.embedPng(png);
+    const img1 = await doc.embedPng(png);
+    const img2 = await doc.embedPng(png);
     const page = doc.addPage(PageSizes.A4);
     page.drawImage(img1, { x: 50, y: 700, width: 100, height: 100 });
     page.drawImage(img2, { x: 200, y: 700, width: 100, height: 100 });
@@ -305,8 +305,8 @@ describe('Real-world: image deduplication', () => {
     const green = createMinimalPng(4, 4, [0, 255, 0]);
 
     const doc = createPdf();
-    const img1 = doc.embedPng(red);
-    const img2 = doc.embedPng(green);
+    const img1 = await doc.embedPng(red);
+    const img2 = await doc.embedPng(green);
     const page = doc.addPage(PageSizes.A4);
     page.drawImage(img1, { x: 50, y: 700, width: 100, height: 100 });
     page.drawImage(img2, { x: 200, y: 700, width: 100, height: 100 });
@@ -331,7 +331,7 @@ describe('Real-world: analysis report', () => {
     const png = createMinimalPng(8, 8, [128, 128, 128]);
 
     const doc = createPdf();
-    const img = doc.embedPng(png);
+    const img = await doc.embedPng(png);
     const page = doc.addPage(PageSizes.A4);
     page.drawImage(img, { x: 0, y: 0, width: 100, height: 100 });
 
@@ -511,15 +511,15 @@ describe('Real-world: multi-page with images', () => {
 
     const doc = createPdf();
 
-    const img1 = doc.embedPng(png1);
+    const img1 = await doc.embedPng(png1);
     const page1 = doc.addPage(PageSizes.A4);
     page1.drawImage(img1, { x: 50, y: 700, width: 100, height: 100 });
 
-    const img2 = doc.embedPng(png2);
+    const img2 = await doc.embedPng(png2);
     const page2 = doc.addPage(PageSizes.A4);
     page2.drawImage(img2, { x: 50, y: 700, width: 100, height: 100 });
 
-    const img3 = doc.embedPng(png3);
+    const img3 = await doc.embedPng(png3);
     const page3 = doc.addPage(PageSizes.A4);
     page3.drawImage(img3, { x: 50, y: 700, width: 100, height: 100 });
 
@@ -545,7 +545,7 @@ describe('Real-world: multi-page with images', () => {
 
     // Create a document with the fixture image on two pages
     const doc = createPdf();
-    const img = doc.embedPng(pngBytes);
+    const img = await doc.embedPng(pngBytes);
 
     const page1 = doc.addPage(PageSizes.A4);
     page1.drawImage(img, { x: 10, y: 10, width: 200, height: 200 });
@@ -579,7 +579,7 @@ describe('Real-world: optimizeAllImages without WASM', () => {
     const png = createMinimalPng(4, 4, [128, 64, 32]);
 
     const doc = createPdf();
-    const img = doc.embedPng(png);
+    const img = await doc.embedPng(png);
     const page = doc.addPage(PageSizes.A4);
     page.drawImage(img, { x: 0, y: 0, width: 100, height: 100 });
 
@@ -634,7 +634,7 @@ describe('Real-world: edge cases', () => {
     const png = createMinimalPng(4, 4, [100, 100, 100]);
 
     const doc = createPdf();
-    const img = doc.embedPng(png);
+    const img = await doc.embedPng(png);
     const page = doc.addPage(PageSizes.A4);
     page.drawImage(img, { x: 0, y: 0, width: 100, height: 100 });
 
@@ -651,7 +651,7 @@ describe('Real-world: edge cases', () => {
     const png = createMinimalPng(4, 4, [200, 200, 200]);
 
     const doc = createPdf();
-    const img = doc.embedPng(png);
+    const img = await doc.embedPng(png);
     const page = doc.addPage(PageSizes.A4);
     page.drawImage(img, { x: 0, y: 0, width: 50, height: 50 });
 

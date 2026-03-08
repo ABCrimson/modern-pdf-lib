@@ -47,7 +47,7 @@ describe('optimizeAllImages', () => {
   it('report has correct structure', async () => {
     const pngBytes = new Uint8Array(await readFile(resolve(fixturesDir, 'sample.png')));
     const doc = createPdf();
-    const img = doc.embedPng(pngBytes);
+    const img = await doc.embedPng(pngBytes);
     const page = doc.addPage(PageSizes.A4);
     page.drawImage(img, { x: 0, y: 0, width: 100, height: 100 });
 
@@ -71,7 +71,7 @@ describe('optimizeAllImages', () => {
   it('per-image entries have correct shape', async () => {
     const pngBytes = new Uint8Array(await readFile(resolve(fixturesDir, 'sample.png')));
     const doc = createPdf();
-    const img = doc.embedPng(pngBytes);
+    const img = await doc.embedPng(pngBytes);
     const page = doc.addPage(PageSizes.A4);
     page.drawImage(img, { x: 0, y: 0 });
 
@@ -94,7 +94,7 @@ describe('optimizeAllImages', () => {
   it('skips images when WASM is not initialized', async () => {
     const pngBytes = new Uint8Array(await readFile(resolve(fixturesDir, 'sample.png')));
     const doc = createPdf();
-    const img = doc.embedPng(pngBytes);
+    const img = await doc.embedPng(pngBytes);
     const page = doc.addPage(PageSizes.A4);
     page.drawImage(img, { x: 0, y: 0 });
 
@@ -120,11 +120,11 @@ describe('optimizeAllImages', () => {
 
     const doc = createPdf();
 
-    const img1 = doc.embedPng(pngBytes);
+    const img1 = await doc.embedPng(pngBytes);
     const page1 = doc.addPage(PageSizes.A4);
     page1.drawImage(img1, { x: 0, y: 0 });
 
-    const img2 = doc.embedPng(gradientBytes);
+    const img2 = await doc.embedPng(gradientBytes);
     const page2 = doc.addPage(PageSizes.A4);
     page2.drawImage(img2, { x: 0, y: 0 });
 
@@ -182,7 +182,7 @@ describe('optimizeAllImages', () => {
   it('accepts skipSmallImages option', async () => {
     const pngBytes = new Uint8Array(await readFile(resolve(fixturesDir, 'sample.png')));
     const doc = createPdf();
-    const img = doc.embedPng(pngBytes);
+    const img = await doc.embedPng(pngBytes);
     const page = doc.addPage(PageSizes.A4);
     page.drawImage(img, { x: 0, y: 0 });
 
@@ -211,7 +211,7 @@ describe('optimizeAllImages', () => {
   it('preserves valid PDF after optimization', async () => {
     const pngBytes = new Uint8Array(await readFile(resolve(fixturesDir, 'sample.png')));
     const doc = createPdf();
-    const img = doc.embedPng(pngBytes);
+    const img = await doc.embedPng(pngBytes);
     const page = doc.addPage(PageSizes.A4);
     page.drawImage(img, { x: 0, y: 0, width: 100, height: 100 });
 

@@ -853,6 +853,6 @@ export class PdfLexer {
    * because it avoids the per-call overhead of the streaming decoder.
    */
   private bytesToAscii(from: number, to: number): string {
-    return String.fromCharCode(...this._data.subarray(from, to));
+    return new TextDecoder('latin1').decode(this._data.subarray(from, to));
   }
 }

@@ -28,6 +28,7 @@ import {
 } from './pdfObjects.js';
 import type { PdfObjectRegistry } from './pdfObjects.js';
 import type { PdfPage } from './pdfPage.js';
+import type { Angle } from './operators/state.js';
 import { decodeStream, getStreamFilters } from '../parser/streamDecode.js';
 
 // ---------------------------------------------------------------------------
@@ -84,15 +85,15 @@ export interface DrawPageOptions {
   /** Rendered height (defaults to the embedded page's original height). */
   height?: number | undefined;
   /** Rotation angle. */
-  rotate?: { type: 'degrees' | 'radians'; value: number } | undefined;
+  rotate?: Angle | undefined;
   /** Opacity `[0, 1]`. */
   opacity?: number | undefined;
   /** Blend mode for compositing. */
   blendMode?: import('./enums.js').BlendMode | undefined;
   /** Horizontal skew angle. */
-  xSkew?: { type: 'degrees' | 'radians'; value: number } | undefined;
+  xSkew?: Angle | undefined;
   /** Vertical skew angle. */
-  ySkew?: { type: 'degrees' | 'radians'; value: number } | undefined;
+  ySkew?: Angle | undefined;
 }
 
 // ---------------------------------------------------------------------------

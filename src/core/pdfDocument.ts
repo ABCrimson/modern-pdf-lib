@@ -17,7 +17,7 @@
  * ```
  */
 
-import type { PageSize, FontRef, ImageRef, SoftMaskRef, SoftMaskBuilder } from './pdfPage.js';
+import type { PageSize, FontRef, FontRefInternal, ImageRef, SoftMaskRef, SoftMaskBuilder } from './pdfPage.js';
 import { PdfPage, PageSizes } from './pdfPage.js';
 import {
   PdfObjectRegistry,
@@ -82,6 +82,8 @@ import type { EmbeddedPdfPage, EmbedPageOptions } from './pdfEmbed.js';
 import { embedPageAsFormXObject } from './pdfEmbed.js';
 import { buildToUnicodeCmap, parseJpegDimensions } from './pdfDocumentEmbed.js';
 import { getPageLabelEntries, styleToPdf } from './pageLabels.js';
+import { PdfPluginManager } from '../plugins/pluginSystem.js';
+import type { PdfPlugin } from '../plugins/pluginSystem.js';
 
 // ---------------------------------------------------------------------------
 // Standard 14 fonts
@@ -213,6 +215,9 @@ export class PdfDocument {
   /** Counter for form XObject resource names (XF1, XF2, …). */
   private formXObjectCounter = 0;
 
+  /** Plugin manager — handles plugin registration and lifecycle hooks. */
+  private readonly pluginManager = new PdfPluginManager();
+
   /**
    * @param registry  Optional pre-populated object registry (used when
    *                  loading an existing PDF so parsed objects are preserved).
@@ -226,6 +231,46 @@ export class PdfDocument {
 
   /** Embedded images — maps an internal key → ImageRef. */
   private readonly embeddedImages: ImageRef[] = [];
+
+  // -----------------------------------------------------------------------
+  // Plugin system
+  // -----------------------------------------------------------------------
+
+  /**
+   * Register a plugin on this document.
+   *
+   * Plugins execute their lifecycle hooks in registration order.
+   * The plugin's `onRegister` hook (if defined) is called immediately.
+   *
+   * @param plugin  The plugin to register.
+   * @returns       This document (for chaining).
+   *
+   * @example
+   * ```ts
+   * import { createPdf } from 'modern-pdf-lib';
+   * import { timestampPlugin } from 'modern-pdf-lib/plugins';
+   *
+   * const doc = createPdf()
+   *   .use(timestampPlugin())
+   *   .use(myCustomPlugin);
+   * ```
+   */
+  use(plugin: PdfPlugin): this {
+    this.pluginManager.register(plugin);
+    this.pluginManager.executeOnRegister(plugin, this);
+    return this;
+  }
+
+  /**
+   * Get the plugin manager for advanced plugin operations.
+   *
+   * Most users should prefer `doc.use(plugin)` for registration.
+   * The manager is exposed for cases where you need to unregister,
+   * list, or introspect registered plugins.
+   */
+  getPluginManager(): PdfPluginManager {
+    return this.pluginManager;
+  }
 
   // -----------------------------------------------------------------------
   // Page management
@@ -254,10 +299,20 @@ export class PdfDocument {
       // Register all currently embedded fonts on the page
       this.registerFontsOnPage(existingPage);
 
+      // Plugin hook: onAfterAddPage
+      if (this.pluginManager.hasPlugins) {
+        this.pluginManager.executeOnAfterAddPage(existingPage, this);
+      }
+
       return existingPage;
     }
 
-    const resolved = sizeOrPage ?? PageSizes.A4;
+    // Plugin hook: onBeforeAddPage — allow plugins to modify the page size
+    let resolved: PageSize = sizeOrPage ?? PageSizes.A4;
+    if (this.pluginManager.hasPlugins) {
+      resolved = this.pluginManager.executeOnBeforeAddPage(resolved);
+    }
+
     const [w, h] = Array.isArray(resolved)
       ? resolved
       : [(resolved as { readonly width: number; readonly height: number }).width,
@@ -275,6 +330,12 @@ export class PdfDocument {
     }
 
     this.pages.push(page);
+
+    // Plugin hook: onAfterAddPage
+    if (this.pluginManager.hasPlugins) {
+      this.pluginManager.executeOnAfterAddPage(page, this);
+    }
+
     return page;
   }
 
@@ -525,10 +586,20 @@ export class PdfDocument {
     if (typeof fontNameOrData === 'string') {
       return this.embedStandardFont(fontNameOrData);
     }
-    if (isOpenTypeCFF(fontNameOrData)) {
-      return this.embedCffFont(fontNameOrData, options);
+
+    // Plugin hook: onBeforeEmbedFont — allow plugins to transform font data/options
+    let data = fontNameOrData;
+    let opts = options ?? {};
+    if (this.pluginManager.hasPlugins) {
+      const result = this.pluginManager.executeOnBeforeEmbedFont(data, opts);
+      data = result.data;
+      opts = result.options;
     }
-    return this.embedTrueTypeFont(fontNameOrData, options);
+
+    if (isOpenTypeCFF(data)) {
+      return this.embedCffFont(data, opts);
+    }
+    return this.embedTrueTypeFont(data, opts);
   }
 
   /**
@@ -709,7 +780,7 @@ export class PdfDocument {
     const type0Ref = this.registry.register(type0Dict);
 
     // Build the FontRef with measurement methods and CID encoding
-    const fontRef: FontRef = {
+    const fontRef: FontRefInternal = {
       name: resourceName,
       ref: type0Ref,
       _isCIDFont: true,
@@ -857,7 +928,7 @@ export class PdfDocument {
     const type0Ref = this.registry.register(type0Dict);
 
     // Build the FontRef with measurement methods and CID encoding
-    const fontRef: FontRef = {
+    const fontRef: FontRefInternal = {
       name: resourceName,
       ref: type0Ref,
       _isCIDFont: true,
@@ -910,9 +981,21 @@ export class PdfDocument {
    * and referenced from the main image.
    *
    * @param pngData  Raw PNG file bytes as a `Uint8Array` or `ArrayBuffer`.
+   * @returns        A promise resolving to an {@link ImageRef} to pass to `page.drawImage()`.
+   */
+  async embedPng(pngData: Uint8Array | ArrayBuffer): Promise<ImageRef> {
+    return this.embedPngSync(pngData);
+  }
+
+  /**
+   * Embed a PNG image synchronously.
+   *
+   * @deprecated Use {@link embedPng} (now async) for API consistency.
+   *             Will be removed in v2.0.
+   * @param pngData  Raw PNG file bytes as a `Uint8Array` or `ArrayBuffer`.
    * @returns        An {@link ImageRef} to pass to `page.drawImage()`.
    */
-  embedPng(pngData: Uint8Array | ArrayBuffer): ImageRef {
+  embedPngSync(pngData: Uint8Array | ArrayBuffer): ImageRef {
     const data = pngData instanceof ArrayBuffer ? new Uint8Array(pngData) : pngData;
     // Decode PNG: decompress IDAT, reconstruct filters, separate alpha
     const result = decodePng(data);
@@ -1290,18 +1373,23 @@ export class PdfDocument {
    * ```
    */
   async embedImage(imageData: Uint8Array | ArrayBuffer): Promise<ImageRef> {
-    const data = imageData instanceof ArrayBuffer ? new Uint8Array(imageData) : imageData;
+    let data = imageData instanceof ArrayBuffer ? new Uint8Array(imageData) : imageData;
     if (data.length < 4) {
       throw new Error('Image data too short to detect format');
+    }
+
+    // Plugin hook: onBeforeEmbedImage — allow plugins to transform image data
+    if (this.pluginManager.hasPlugins) {
+      data = this.pluginManager.executeOnBeforeEmbedImage(data);
     }
 
     const format = detectImageFormat(data);
 
     switch (format) {
       case 'png':
-        return this.embedPng(data);
+        return await this.embedPng(data);
       case 'jpeg':
-        return this.embedJpeg(data);
+        return await this.embedJpeg(data);
       case 'webp':
         return this.embedWebP(data);
       case 'tiff':
@@ -1312,6 +1400,55 @@ export class PdfDocument {
           `got ${data.subarray(0, 4).toHex().match(/.{2}/g)?.join(' ') ?? ''}.`,
         );
     }
+  }
+
+  /**
+   * Embed multiple images in parallel.
+   *
+   * Auto-detects each image's format (PNG, JPEG, WebP, TIFF) and embeds
+   * them concurrently using `Promise.all`. Returns an array of
+   * {@link ImageRef} in the same order as the input.
+   *
+   * @param items  Array of image descriptors with raw bytes and optional name.
+   * @returns      Array of {@link ImageRef} in the same order as `items`.
+   *
+   * @example
+   * ```ts
+   * const [logo, photo] = await doc.embedImages([
+   *   { data: logoPngBytes },
+   *   { data: photoJpegBytes },
+   * ]);
+   * ```
+   */
+  async embedImages(
+    items: Array<{ data: Uint8Array | ArrayBuffer; name?: string }>,
+  ): Promise<ImageRef[]> {
+    return Promise.all(items.map((item) => this.embedImage(item.data)));
+  }
+
+  /**
+   * Embed multiple fonts in parallel.
+   *
+   * Accepts an array of font descriptors — each containing either a
+   * standard font name string or raw TTF/OTF bytes — and embeds them
+   * concurrently using `Promise.all`. Returns an array of
+   * {@link FontRef} in the same order as the input.
+   *
+   * @param items  Array of font descriptors with font name/data and options.
+   * @returns      Array of {@link FontRef} in the same order as `items`.
+   *
+   * @example
+   * ```ts
+   * const [serif, mono] = await doc.embedFonts([
+   *   { data: serifTtfBytes },
+   *   { data: 'Courier' },
+   * ]);
+   * ```
+   */
+  async embedFonts(
+    items: Array<{ data: string | Uint8Array; options?: EmbedFontOptions }>,
+  ): Promise<FontRef[]> {
+    return Promise.all(items.map((item) => this.embedFont(item.data, item.options)));
   }
 
   // -----------------------------------------------------------------------
@@ -2183,8 +2320,21 @@ export class PdfDocument {
         field.generateAppearance();
       }
     }
+
+    // Plugin hook: onBeforeSave
+    if (this.pluginManager.hasPlugins) {
+      await this.pluginManager.executeOnBeforeSave(this);
+    }
+
     const structure = this.buildStructure();
-    return serializePdf(this.registry, structure, options, this.encryptionHandler);
+    let bytes = await serializePdf(this.registry, structure, options, this.encryptionHandler);
+
+    // Plugin hook: onAfterSave
+    if (this.pluginManager.hasPlugins) {
+      bytes = await this.pluginManager.executeOnAfterSave(bytes);
+    }
+
+    return bytes;
   }
 
   /**
@@ -2464,6 +2614,21 @@ export class PdfDocument {
         const pageLabelsDict = new PdfDict();
         pageLabelsDict.set('/Nums', numsArray);
         catalogObj.set('/PageLabels', pageLabelsDict);
+      }
+
+      // Plugin hook: onBuildCatalog — let plugins add custom catalog entries
+      if (this.pluginManager.hasPlugins) {
+        this.pluginManager.executeOnBuildCatalog(catalogObj);
+      }
+    }
+
+    // Plugin hook: onBuildPageDict — let plugins add custom page dict entries
+    if (this.pluginManager.hasPlugins) {
+      for (let i = 0; i < pageEntries.length; i++) {
+        const pageDict = this.registry.resolve(pageEntries[i]!.pageRef);
+        if (pageDict instanceof PdfDict) {
+          this.pluginManager.executeOnBuildPageDict(pageDict, i);
+        }
       }
     }
 

@@ -29,14 +29,17 @@ export async function optimizeCommand(args: string[]): Promise<void> {
   }
 
   // Dynamic import to avoid loading the library at module scope
-  const { loadPdf } = await import('../index.js');
-  const { initJpegWasm } = await import('../wasm/jpeg/bridge.js');
-  const { optimizeAllImages } = await import(
-    '../assets/image/batchOptimize.js'
-  );
-  const { deduplicateImages } = await import(
-    '../assets/image/deduplicateImages.js'
-  );
+  const [
+    { loadPdf },
+    { initJpegWasm },
+    { optimizeAllImages },
+    { deduplicateImages },
+  ] = await Promise.all([
+    import('../index.js'),
+    import('../wasm/jpeg/bridge.js'),
+    import('../assets/image/batchOptimize.js'),
+    import('../assets/image/deduplicateImages.js'),
+  ]);
 
   // Read input PDF
   const inputBytes = new Uint8Array(await readFile(parsed.input));

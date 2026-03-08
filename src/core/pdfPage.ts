@@ -292,9 +292,9 @@ export interface DrawRectangleOptions {
 /** Options for {@link PdfPage.drawLine}. */
 export interface DrawLineOptions {
   /** Start point. */
-  start: { x: number; y: number };
+  start: Point;
   /** End point. */
-  end: { x: number; y: number };
+  end: Point;
   /** Line colour. */
   color?: Color | undefined;
   /** Line width. */
@@ -456,6 +456,27 @@ export interface DrawSquareOptions {
 // Embedded resource reference (returned by embedFont / embedImage)
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// Point type for coordinate pairs
+// ---------------------------------------------------------------------------
+
+/**
+ * A 2D point in PDF coordinate space.
+ *
+ * Used by drawing options that accept coordinate pairs (e.g.
+ * {@link DrawLineOptions}).
+ */
+export interface Point {
+  /** X coordinate in PDF points. */
+  readonly x: number;
+  /** Y coordinate in PDF points. */
+  readonly y: number;
+}
+
+// ---------------------------------------------------------------------------
+// Font references (public + internal)
+// ---------------------------------------------------------------------------
+
 /** Opaque handle for a font that has been embedded in the document. */
 export interface FontRef {
   /** Resource name used in content-stream operators (e.g. `F1`). */
@@ -465,25 +486,20 @@ export interface FontRef {
   /**
    * Compute the width of a text string at the given font size (in points).
    * Available for both standard and TrueType fonts.
+   *
+   * @param text  The text string to measure.
+   * @param size  Font size in points.
+   * @returns     Width of the text in points.
    */
   widthOfTextAtSize(text: string, size: number): number;
   /**
    * Compute the height of the font at the given size (ascender - descender).
    * Available for both standard and TrueType fonts.
+   *
+   * @param size  Font size in points.
+   * @returns     Height in points.
    */
   heightAtSize(size: number): number;
-  /**
-   * Whether this font uses CID (Identity-H) encoding.
-   * When true, text must be encoded as hex glyph IDs in content streams.
-   * @internal
-   */
-  readonly _isCIDFont?: boolean;
-  /**
-   * Encode text as a hex string of CID glyph IDs for content streams.
-   * Only present for CID (TrueType) fonts.
-   * @internal
-   */
-  _encodeText?(text: string): string;
   /**
    * Compute the font size needed to achieve a given height (ascender - descender).
    * This is the inverse of `heightAtSize()`.
@@ -491,7 +507,7 @@ export interface FontRef {
    * @param height  Desired height in points.
    * @returns       Font size in points.
    */
-  sizeAtHeight?(height: number): number;
+  sizeAtHeight(height: number): number;
   /**
    * Return the set of Unicode codepoints supported by this font.
    *
@@ -500,7 +516,29 @@ export interface FontRef {
    *
    * @returns  Array of Unicode codepoint numbers.
    */
-  getCharacterSet?(): number[];
+  getCharacterSet(): number[];
+}
+
+/**
+ * Extended font reference with internal members used by the rendering
+ * engine.  These members are implementation details and must not be
+ * relied upon by external consumers.
+ *
+ * @internal
+ */
+export interface FontRefInternal extends FontRef {
+  /**
+   * Whether this font uses CID (Identity-H) encoding.
+   * When true, text must be encoded as hex glyph IDs in content streams.
+   * @internal
+   */
+  readonly _isCIDFont?: boolean | undefined;
+  /**
+   * Encode text as a hex string of CID glyph IDs for content streams.
+   * Only present for CID (TrueType) fonts.
+   * @internal
+   */
+  _encodeText?(text: string): string;
 }
 
 /** Opaque handle for an image that has been embedded in the document. */
@@ -551,16 +589,16 @@ export interface TransparencyGroupOptions {
    * When `true`, the group is composited against a fully transparent
    * backdrop rather than the existing page content.  Default: `true`.
    */
-  isolated?: boolean;
+  isolated?: boolean | undefined;
   /**
    * When `true`, earlier objects in the group are knocked out (replaced)
    * by later objects, rather than composited on top.  Default: `false`.
    */
-  knockout?: boolean;
+  knockout?: boolean | undefined;
   /**
    * Color space for the transparency group.  Default: `'DeviceRGB'`.
    */
-  colorSpace?: 'DeviceRGB' | 'DeviceCMYK' | 'DeviceGray';
+  colorSpace?: 'DeviceRGB' | 'DeviceCMYK' | 'DeviceGray' | undefined;
 }
 
 /**
@@ -1095,9 +1133,10 @@ export class PdfPage {
       if (fontRef.ref) {
         this.registerFont(fontRef.name, fontRef.ref);
       }
-      // Use the FontRef's CID encoder if available
-      if (fontRef._isCIDFont && fontRef._encodeText) {
-        fontRefEncoder = fontRef._encodeText;
+      // Use the FontRef's CID encoder if available (internal interface)
+      const internal = fontRef as FontRefInternal;
+      if (internal._isCIDFont && internal._encodeText) {
+        fontRefEncoder = internal._encodeText;
       }
     } else {
       fontName = (effectiveFont as string | undefined) ?? 'F1';
@@ -1125,14 +1164,10 @@ export class PdfPage {
       this.ops += setTextRenderingMode(options.renderingMode);
     }
 
-    const hasRotate = options.rotate !== undefined;
-    const hasXSkew = options.xSkew !== undefined;
-    const hasYSkew = options.ySkew !== undefined;
-
-    if (hasRotate || hasXSkew || hasYSkew) {
-      const rotRad = hasRotate ? toRadians(options.rotate!) : 0;
-      const xSkewRad = hasXSkew ? toRadians(options.xSkew!) : 0;
-      const ySkewRad = hasYSkew ? toRadians(options.ySkew!) : 0;
+    if (options.rotate !== undefined || options.xSkew !== undefined || options.ySkew !== undefined) {
+      const rotRad = options.rotate !== undefined ? toRadians(options.rotate) : 0;
+      const xSkewRad = options.xSkew !== undefined ? toRadians(options.xSkew) : 0;
+      const ySkewRad = options.ySkew !== undefined ? toRadians(options.ySkew) : 0;
 
       const cosR = Math.cos(rotRad);
       const sinR = Math.sin(rotRad);
@@ -1221,7 +1256,7 @@ export class PdfPage {
         const gsName = this.getOrCreateExtGState(options.opacity, options.blendMode);
         this.ops += setGraphicsState(gsName);
       }
-      const rad = hasRotate ? toRadians(options.rotate!) : 0;
+      const rad = options.rotate !== undefined ? toRadians(options.rotate) : 0;
       const cos = Math.cos(rad);
       const sin = Math.sin(rad);
       const tanX = options.xSkew ? Math.tan(toRadians(options.xSkew)) : 0;
@@ -1294,7 +1329,7 @@ export class PdfPage {
     const hasSkew = options.xSkew !== undefined || options.ySkew !== undefined;
 
     if (hasRotate || hasSkew) {
-      const rad = hasRotate ? toRadians(options.rotate!) : 0;
+      const rad = options.rotate !== undefined ? toRadians(options.rotate) : 0;
       const cos = Math.cos(rad);
       const sin = Math.sin(rad);
       const tanX = options.xSkew ? Math.tan(toRadians(options.xSkew)) : 0;
@@ -1812,6 +1847,95 @@ export class PdfPage {
   /** Set the art box for this page. */
   setArtBox(x: number, y: number, width: number, height: number): void {
     this.artBox = [x, y, x + width, y + height];
+  }
+
+  // -----------------------------------------------------------------------
+  // Remove optional boxes
+  // -----------------------------------------------------------------------
+
+  /** Remove the crop box from this page (it will default to the media box). */
+  removeCropBox(): void {
+    this.cropBox = undefined;
+  }
+
+  /** Remove the bleed box from this page (it will default to the crop box). */
+  removeBleedBox(): void {
+    this.bleedBox = undefined;
+  }
+
+  /** Remove the trim box from this page (it will default to the crop box). */
+  removeTrimBox(): void {
+    this.trimBox = undefined;
+  }
+
+  /** Remove the art box from this page (it will default to the crop box). */
+  removeArtBox(): void {
+    this.artBox = undefined;
+  }
+
+  // -----------------------------------------------------------------------
+  // Box validation (PDF spec §14.11.2)
+  // -----------------------------------------------------------------------
+
+  /**
+   * Validate that page boxes conform to the PDF specification nesting rules.
+   *
+   * PDF spec §14.11.2 requirements:
+   * - MediaBox is required on every page.
+   * - CropBox defaults to MediaBox.
+   * - BleedBox, TrimBox, and ArtBox default to CropBox.
+   * - All boxes must be within or equal to the MediaBox.
+   *
+   * @returns An object with `valid` (boolean) and `issues` (string array).
+   */
+  validateBoxes(): { valid: boolean; issues: string[] } {
+    const issues: string[] = [];
+
+    const mediaLlx = this.mediaX;
+    const mediaLly = this.mediaY;
+    const mediaUrx = this.mediaX + this.mediaWidth;
+    const mediaUry = this.mediaY + this.mediaHeight;
+
+    const isWithinMedia = (box: [number, number, number, number], name: string): void => {
+      const [llx, lly, urx, ury] = box;
+      if (llx < mediaLlx || lly < mediaLly || urx > mediaUrx || ury > mediaUry) {
+        issues.push(`${name} extends outside MediaBox`);
+      }
+    };
+
+    const isValidRect = (box: [number, number, number, number], name: string): void => {
+      const [llx, lly, urx, ury] = box;
+      if (urx <= llx || ury <= lly) {
+        issues.push(`${name} has zero or negative dimensions`);
+      }
+    };
+
+    // MediaBox must have positive dimensions
+    if (this.mediaWidth <= 0 || this.mediaHeight <= 0) {
+      issues.push('MediaBox has zero or negative dimensions');
+    }
+
+    if (this.cropBox !== undefined) {
+      isValidRect(this.cropBox, 'CropBox');
+      isWithinMedia(this.cropBox, 'CropBox');
+    }
+
+    if (this.bleedBox !== undefined) {
+      isValidRect(this.bleedBox, 'BleedBox');
+      isWithinMedia(this.bleedBox, 'BleedBox');
+    }
+
+    if (this.trimBox !== undefined) {
+      isValidRect(this.trimBox, 'TrimBox');
+      isWithinMedia(this.trimBox, 'TrimBox');
+    }
+
+    if (this.artBox !== undefined) {
+      isValidRect(this.artBox, 'ArtBox');
+      isWithinMedia(this.artBox, 'ArtBox');
+    }
+
+    return { valid: issues.length === 0, issues };
   }
 
   // -----------------------------------------------------------------------

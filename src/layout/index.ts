@@ -32,3 +32,17 @@ export type { TablePreset, PresetName, PresetOptions } from './presets.js';
 
 export { estimateTextWidth, applyOverflow, wrapText, truncateText, ellipsisText, shrinkFontSize } from './overflow.js';
 export type { OverflowMode, OverflowResult } from './overflow.js';
+
+export {
+  applyHeaderFooter,
+  applyHeaderFooterToPage,
+  toRoman,
+  toAlpha,
+  formatDate,
+  replaceTemplateVariables,
+} from './headerFooter.js';
+export type {
+  HeaderFooterPosition,
+  HeaderFooterContent,
+  HeaderFooterOptions,
+} from './headerFooter.js';

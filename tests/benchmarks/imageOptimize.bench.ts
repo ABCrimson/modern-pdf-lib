@@ -64,10 +64,10 @@ function buildGrayRgbPixels(width: number, height: number): Uint8Array {
 }
 
 /** Create a PDF with N PNG images. */
-function createPdfWithImages(count: number): Promise<Uint8Array> {
+async function createPdfWithImages(count: number): Promise<Uint8Array> {
   const doc = createPdf();
   for (let i = 0; i < count; i++) {
-    const img = doc.embedPng(SAMPLE_PNG);
+    const img = await doc.embedPng(SAMPLE_PNG);
     const page = doc.addPage(PageSizes.A4);
     page.drawImage(img, { x: 50, y: 400, width: 100, height: 100 });
   }
@@ -171,7 +171,7 @@ describe('Image deduplication', () => {
     if (!pdfDupes) {
       const doc = createPdf();
       for (let i = 0; i < 10; i++) {
-        const img = doc.embedPng(SAMPLE_PNG);
+        const img = await doc.embedPng(SAMPLE_PNG);
         const page = doc.addPage(PageSizes.A4);
         page.drawImage(img, { x: 50, y: 400, width: 100, height: 100 });
       }

@@ -85,6 +85,33 @@ export interface StructureElementOptions {
   language?: string | undefined;
   /** An optional unique identifier for the element. */
   id?: string | undefined;
+  /**
+   * Whether this element is an artifact (decorative, pagination, etc.).
+   * Artifact elements are excluded from accessibility checks such as
+   * alt text requirements.
+   */
+  artifact?: boolean | undefined;
+  /**
+   * Presentational role hint for the element.  Setting `role` to
+   * `"presentation"` marks the element as layout-only (e.g. a layout
+   * table that should not be treated as a data table).
+   */
+  role?: 'presentation' | (string & {}) | undefined;
+  /**
+   * Header scope for TH cells (`"Row"`, `"Column"`, or `"Both"`).
+   * Used by table header validation.
+   */
+  scope?: 'Row' | 'Column' | 'Both' | undefined;
+  /**
+   * Number of columns this cell spans (for TH/TD elements).
+   * Defaults to 1 when not specified.
+   */
+  colSpan?: number | undefined;
+  /**
+   * Number of rows this cell spans (for TH/TD elements).
+   * Defaults to 1 when not specified.
+   */
+  rowSpan?: number | undefined;
 }
 
 // ---------------------------------------------------------------------------

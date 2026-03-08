@@ -17,6 +17,10 @@
  * - PDF structure verification (outlines dict in catalog)
  * - Empty tree returns empty array
  * - Multiple addBookmark calls produce correct tree
+ * - All fit types (Fit, FitH, FitV, FitB, FitBH, FitBV, XYZ)
+ * - XYZ with zoom factor
+ * - FitV with left coordinate
+ * - BookmarkNode includes fit, left, zoom
  */
 
 import { describe, it, expect } from 'vitest';
@@ -188,7 +192,243 @@ describe('addBookmark', () => {
 });
 
 // ---------------------------------------------------------------------------
-// getBookmarks
+// Destination fit types
+// ---------------------------------------------------------------------------
+
+describe('addBookmark destination fit types', () => {
+  it('sets Fit destination with explicit fit option', () => {
+    const doc = createDocWithPages(1);
+    const ref = addBookmark(doc, {
+      title: 'Fit',
+      pageIndex: 0,
+      fit: 'Fit',
+    });
+
+    expect(ref._item.destination.fit).toBe('Fit');
+  });
+
+  it('sets FitH destination with explicit fit and y', () => {
+    const doc = createDocWithPages(1);
+    const ref = addBookmark(doc, {
+      title: 'FitH',
+      pageIndex: 0,
+      fit: 'FitH',
+      y: 500,
+    });
+
+    expect(ref._item.destination.fit).toBe('FitH');
+    expect(ref._item.destination.top).toBe(500);
+  });
+
+  it('sets FitV destination with left coordinate', () => {
+    const doc = createDocWithPages(1);
+    const ref = addBookmark(doc, {
+      title: 'FitV',
+      pageIndex: 0,
+      fit: 'FitV',
+      left: 100,
+    });
+
+    expect(ref._item.destination.fit).toBe('FitV');
+    expect(ref._item.destination.left).toBe(100);
+  });
+
+  it('sets FitB destination', () => {
+    const doc = createDocWithPages(1);
+    const ref = addBookmark(doc, {
+      title: 'FitB',
+      pageIndex: 0,
+      fit: 'FitB',
+    });
+
+    expect(ref._item.destination.fit).toBe('FitB');
+  });
+
+  it('sets FitBH destination with y', () => {
+    const doc = createDocWithPages(1);
+    const ref = addBookmark(doc, {
+      title: 'FitBH',
+      pageIndex: 0,
+      fit: 'FitBH',
+      y: 300,
+    });
+
+    expect(ref._item.destination.fit).toBe('FitBH');
+    expect(ref._item.destination.top).toBe(300);
+  });
+
+  it('sets FitBV destination with left coordinate', () => {
+    const doc = createDocWithPages(1);
+    const ref = addBookmark(doc, {
+      title: 'FitBV',
+      pageIndex: 0,
+      fit: 'FitBV',
+      left: 50,
+    });
+
+    expect(ref._item.destination.fit).toBe('FitBV');
+    expect(ref._item.destination.left).toBe(50);
+  });
+
+  it('sets XYZ destination with left, top, and zoom', () => {
+    const doc = createDocWithPages(1);
+    const ref = addBookmark(doc, {
+      title: 'XYZ',
+      pageIndex: 0,
+      fit: 'XYZ',
+      left: 72,
+      y: 720,
+      zoom: 1.5,
+    });
+
+    expect(ref._item.destination.fit).toBe('XYZ');
+    expect(ref._item.destination.left).toBe(72);
+    expect(ref._item.destination.top).toBe(720);
+    expect(ref._item.destination.zoom).toBe(1.5);
+  });
+
+  it('sets XYZ with zoom = 0 (keep current zoom)', () => {
+    const doc = createDocWithPages(1);
+    const ref = addBookmark(doc, {
+      title: 'XYZ no zoom',
+      pageIndex: 0,
+      fit: 'XYZ',
+      left: 0,
+      y: 0,
+      zoom: 0,
+    });
+
+    expect(ref._item.destination.fit).toBe('XYZ');
+    expect(ref._item.destination.zoom).toBe(0);
+  });
+
+  it('explicit fit overrides legacy y-based FitH default', () => {
+    // When fit is explicitly set, y should be used as `top` but the
+    // fit mode should be the one specified, not the legacy FitH.
+    const doc = createDocWithPages(1);
+    const ref = addBookmark(doc, {
+      title: 'Explicit Fit with y',
+      pageIndex: 0,
+      fit: 'Fit',
+      y: 400,
+    });
+
+    // fit should be 'Fit' even though y is provided
+    expect(ref._item.destination.fit).toBe('Fit');
+    expect(ref._item.destination.top).toBe(400);
+  });
+
+  it('defaults to FitH when only y is provided (legacy behaviour)', () => {
+    const doc = createDocWithPages(1);
+    const ref = addBookmark(doc, {
+      title: 'Legacy',
+      pageIndex: 0,
+      y: 600,
+    });
+
+    expect(ref._item.destination.fit).toBe('FitH');
+    expect(ref._item.destination.top).toBe(600);
+  });
+
+  it('defaults to Fit when neither fit nor y is provided', () => {
+    const doc = createDocWithPages(1);
+    const ref = addBookmark(doc, {
+      title: 'Default',
+      pageIndex: 0,
+    });
+
+    expect(ref._item.destination.fit).toBe('Fit');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// getBookmarks — fit, left, zoom in BookmarkNode
+// ---------------------------------------------------------------------------
+
+describe('getBookmarks with fit types', () => {
+  it('returns fit type in BookmarkNode', () => {
+    const doc = createDocWithPages(1);
+    addBookmark(doc, { title: 'FitV', pageIndex: 0, fit: 'FitV', left: 200 });
+
+    const tree = getBookmarks(doc);
+    expect(tree[0]!.fit).toBe('FitV');
+    expect(tree[0]!.left).toBe(200);
+  });
+
+  it('returns XYZ coordinates in BookmarkNode', () => {
+    const doc = createDocWithPages(1);
+    addBookmark(doc, {
+      title: 'XYZ',
+      pageIndex: 0,
+      fit: 'XYZ',
+      left: 10,
+      y: 20,
+      zoom: 2,
+    });
+
+    const tree = getBookmarks(doc);
+    expect(tree[0]!.fit).toBe('XYZ');
+    expect(tree[0]!.left).toBe(10);
+    expect(tree[0]!.y).toBe(20);
+    expect(tree[0]!.zoom).toBe(2);
+  });
+
+  it('returns FitBH in BookmarkNode', () => {
+    const doc = createDocWithPages(1);
+    addBookmark(doc, { title: 'FitBH', pageIndex: 0, fit: 'FitBH', y: 100 });
+
+    const tree = getBookmarks(doc);
+    expect(tree[0]!.fit).toBe('FitBH');
+    expect(tree[0]!.y).toBe(100);
+  });
+
+  it('returns FitBV in BookmarkNode', () => {
+    const doc = createDocWithPages(1);
+    addBookmark(doc, { title: 'FitBV', pageIndex: 0, fit: 'FitBV', left: 75 });
+
+    const tree = getBookmarks(doc);
+    expect(tree[0]!.fit).toBe('FitBV');
+    expect(tree[0]!.left).toBe(75);
+  });
+
+  it('returns Fit in BookmarkNode for default', () => {
+    const doc = createDocWithPages(1);
+    addBookmark(doc, { title: 'Default', pageIndex: 0 });
+
+    const tree = getBookmarks(doc);
+    expect(tree[0]!.fit).toBe('Fit');
+    expect(tree[0]!.left).toBeUndefined();
+    expect(tree[0]!.zoom).toBeUndefined();
+  });
+
+  it('returns FitB in BookmarkNode', () => {
+    const doc = createDocWithPages(1);
+    addBookmark(doc, { title: 'FitB', pageIndex: 0, fit: 'FitB' });
+
+    const tree = getBookmarks(doc);
+    expect(tree[0]!.fit).toBe('FitB');
+  });
+
+  it('returns all fit types correctly in a mixed tree', () => {
+    const doc = createDocWithPages(3);
+    addBookmark(doc, { title: 'Fit', pageIndex: 0, fit: 'Fit' });
+    addBookmark(doc, { title: 'FitH', pageIndex: 1, fit: 'FitH', y: 400 });
+    addBookmark(doc, { title: 'XYZ', pageIndex: 2, fit: 'XYZ', left: 50, y: 750, zoom: 1.25 });
+
+    const tree = getBookmarks(doc);
+    expect(tree).toHaveLength(3);
+    expect(tree[0]!.fit).toBe('Fit');
+    expect(tree[1]!.fit).toBe('FitH');
+    expect(tree[1]!.y).toBe(400);
+    expect(tree[2]!.fit).toBe('XYZ');
+    expect(tree[2]!.left).toBe(50);
+    expect(tree[2]!.y).toBe(750);
+    expect(tree[2]!.zoom).toBe(1.25);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// getBookmarks (original tests)
 // ---------------------------------------------------------------------------
 
 describe('getBookmarks', () => {
@@ -374,5 +614,62 @@ describe('PDF structure', () => {
     // The tree itself manages linking at serialization time.
     // Verify the items are stored in order.
     expect(tree.items.map((i) => i.title)).toEqual(['A', 'B', 'C']);
+  });
+
+  it('serializes FitV destination in saved PDF', async () => {
+    const doc = createDocWithPages(1);
+    addBookmark(doc, { title: 'FitV Test', pageIndex: 0, fit: 'FitV', left: 100 });
+
+    const bytes = await doc.save({ addDefaultPage: false });
+    const text = new TextDecoder('latin1').decode(bytes);
+
+    expect(text).toContain('/FitV');
+  });
+
+  it('serializes XYZ destination in saved PDF', async () => {
+    const doc = createDocWithPages(1);
+    addBookmark(doc, {
+      title: 'XYZ Test',
+      pageIndex: 0,
+      fit: 'XYZ',
+      left: 72,
+      y: 720,
+      zoom: 1.5,
+    });
+
+    const bytes = await doc.save({ addDefaultPage: false });
+    const text = new TextDecoder('latin1').decode(bytes);
+
+    expect(text).toContain('/XYZ');
+  });
+
+  it('serializes FitB destination in saved PDF', async () => {
+    const doc = createDocWithPages(1);
+    addBookmark(doc, { title: 'FitB Test', pageIndex: 0, fit: 'FitB' });
+
+    const bytes = await doc.save({ addDefaultPage: false });
+    const text = new TextDecoder('latin1').decode(bytes);
+
+    expect(text).toContain('/FitB');
+  });
+
+  it('serializes FitBH destination in saved PDF', async () => {
+    const doc = createDocWithPages(1);
+    addBookmark(doc, { title: 'FitBH Test', pageIndex: 0, fit: 'FitBH', y: 500 });
+
+    const bytes = await doc.save({ addDefaultPage: false });
+    const text = new TextDecoder('latin1').decode(bytes);
+
+    expect(text).toContain('/FitBH');
+  });
+
+  it('serializes FitBV destination in saved PDF', async () => {
+    const doc = createDocWithPages(1);
+    addBookmark(doc, { title: 'FitBV Test', pageIndex: 0, fit: 'FitBV', left: 25 });
+
+    const bytes = await doc.save({ addDefaultPage: false });
+    const text = new TextDecoder('latin1').decode(bytes);
+
+    expect(text).toContain('/FitBV');
   });
 });

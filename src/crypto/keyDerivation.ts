@@ -205,6 +205,9 @@ function isProhibited(cp: number): boolean {
   // C.6: Inappropriate for plain text
   if (cp === 0xFFF9 || cp === 0xFFFA || cp === 0xFFFB || cp === 0xFFFC) return true;
 
+  // C.7: Inappropriate for canonical representation
+  if (cp >= 0x2FF0 && cp <= 0x2FFB) return true;
+
   // C.8: Change display properties / deprecated
   if (cp === 0x0340 || cp === 0x0341 || cp === 0x200E || cp === 0x200F ||
       (cp >= 0x202A && cp <= 0x202E) ||

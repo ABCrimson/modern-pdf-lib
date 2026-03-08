@@ -41,7 +41,7 @@ describe('deduplicateImages', () => {
   it('returns zero duplicates for PDF with single image', async () => {
     const pngBytes = new Uint8Array(await readFile(resolve(fixturesDir, 'sample.png')));
     const doc = createPdf();
-    const img = doc.embedPng(pngBytes);
+    const img = await doc.embedPng(pngBytes);
     const page = doc.addPage(PageSizes.A4);
     page.drawImage(img, { x: 0, y: 0 });
 
@@ -59,9 +59,9 @@ describe('deduplicateImages', () => {
     const doc = createPdf();
 
     // Embed the same PNG 3 times as separate objects
-    const img1 = doc.embedPng(pngBytes);
-    const img2 = doc.embedPng(pngBytes);
-    const img3 = doc.embedPng(pngBytes);
+    const img1 = await doc.embedPng(pngBytes);
+    const img2 = await doc.embedPng(pngBytes);
+    const img3 = await doc.embedPng(pngBytes);
 
     const page = doc.addPage(PageSizes.A4);
     page.drawImage(img1, { x: 0, y: 0, width: 50, height: 50 });
@@ -87,8 +87,8 @@ describe('deduplicateImages', () => {
     const gradientBytes = new Uint8Array(await readFile(resolve(fixturesDir, 'gradient-8x8.png')));
 
     const doc = createPdf();
-    const img1 = doc.embedPng(pngBytes);
-    const img2 = doc.embedPng(gradientBytes);
+    const img1 = await doc.embedPng(pngBytes);
+    const img2 = await doc.embedPng(gradientBytes);
 
     const page = doc.addPage(PageSizes.A4);
     page.drawImage(img1, { x: 0, y: 0, width: 50, height: 50 });
@@ -109,11 +109,11 @@ describe('deduplicateImages', () => {
     const doc = createPdf();
 
     // Same image on two different pages
-    const img1 = doc.embedPng(pngBytes);
+    const img1 = await doc.embedPng(pngBytes);
     const page1 = doc.addPage(PageSizes.A4);
     page1.drawImage(img1, { x: 0, y: 0, width: 50, height: 50 });
 
-    const img2 = doc.embedPng(pngBytes);
+    const img2 = await doc.embedPng(pngBytes);
     const page2 = doc.addPage(PageSizes.A4);
     page2.drawImage(img2, { x: 0, y: 0, width: 50, height: 50 });
 

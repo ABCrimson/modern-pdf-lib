@@ -12,15 +12,18 @@
  * - Structure tree presence (MarkInfo, StructTreeRoot)
  * - Document language (/Lang)
  * - Document title and /DisplayDocTitle
- * - Heading hierarchy (sequential, no skips)
- * - Alt text on images/figures
- * - Table header cells with scope
+ * - Heading hierarchy (section-aware, same-parent validation)
+ * - Alt text on images/figures (excluding artifacts)
+ * - Table header cells (size-aware, layout table detection)
  * - List structure (L/LI/Lbl/LBody)
  * - Reading order via structure tree
- * - Font embedding (no unembedded standard 14 fonts)
+ * - Font embedding (excluding form-field-only fonts)
  * - Color contrast (WCAG AA: 4.5:1, AAA: 7:1)
- * - Bookmarks for navigation
+ * - Bookmarks for navigation (documents > 3 pages)
  * - Tab order (/Tabs /S)
+ *
+ * Uses a warning vs error distinction: ambiguous or low-confidence
+ * issues are reported as warnings rather than errors.
  *
  * Reference: ISO 14289-1:2014 (PDF/UA-1), WCAG 2.1.
  */
@@ -106,6 +109,17 @@ const HEADING_LEVEL: Record<string, number> = {
   H1: 1, H2: 2, H3: 3, H4: 4, H5: 5, H6: 6,
 };
 
+/**
+ * Section-like container types where heading levels can restart.
+ * Note: `Div` is intentionally excluded — it is a generic grouping
+ * element that does not represent a document section.  Headings
+ * inside Div elements are still validated against their enclosing
+ * section scope.
+ */
+const SECTION_TYPES = new Set<string>([
+  'Document', 'Part', 'Art', 'Sect', 'BlockQuote',
+]);
+
 /** Illustration types that require alt text per PDF/UA. */
 const ILLUSTRATION_TYPES = new Set<string>(['Figure', 'Formula', 'Form']);
 
@@ -116,6 +130,16 @@ const STANDARD_14_FONTS = new Set<string>([
   'Times-Roman', 'Times-Bold', 'Times-Italic', 'Times-BoldItalic',
   'Symbol', 'ZapfDingbats',
 ]);
+
+/** Minimum number of pages before missing bookmarks triggers a warning. */
+const BOOKMARK_PAGE_THRESHOLD = 3;
+
+/**
+ * Minimum number of columns/rows in a table before missing TH cells
+ * triggers a warning.  Small (1-2 col/row) tables are often trivial
+ * enough that headers are unnecessary.
+ */
+const TABLE_HEADER_SIZE_THRESHOLD = 3;
 
 // ---------------------------------------------------------------------------
 // validatePdfUa
@@ -128,14 +152,14 @@ const STANDARD_14_FONTS = new Set<string>([
  * 1. Structure tree presence (/StructTreeRoot, /MarkInfo)
  * 2. Document language (/Lang)
  * 3. Document title and /DisplayDocTitle
- * 4. Heading hierarchy (sequential, no skips)
- * 5. Alt text on all illustration elements (Figure, Formula, Form)
- * 6. Table header cells (TH) with scope
+ * 4. Heading hierarchy (section-aware, same-parent skip detection)
+ * 5. Alt text on all illustration elements (excluding artifacts)
+ * 6. Table header cells (size-aware, layout table aware)
  * 7. List structure (L/LI/Lbl/LBody)
  * 8. Reading order via structure tree
- * 9. Font embedding (no unembedded standard 14 fonts)
+ * 9. Font embedding (excluding form-field-only fonts)
  * 10. Color contrast (AA: 4.5:1, AAA: 7:1)
- * 11. Bookmarks for navigation
+ * 11. Bookmarks for navigation (documents > 3 pages)
  * 12. Tab order (/Tabs /S) on pages
  *
  * @param doc    The PDF document to validate.
@@ -172,18 +196,18 @@ export function validatePdfUa(
   // 3. Document title and DisplayDocTitle
   checkTitle(doc, errors, warnings);
 
-  // 4–8. Structure-dependent checks (only if tree exists)
+  // 4-8. Structure-dependent checks (only if tree exists)
   const tree = doc.getStructureTree();
   if (tree) {
     const allElements = tree.getAllElements();
 
-    // 4. Heading hierarchy
-    checkHeadingHierarchy(allElements, errors);
+    // 4. Heading hierarchy (section-aware)
+    checkHeadingHierarchy(allElements, errors, warnings);
 
-    // 5. Alt text on illustration elements
+    // 5. Alt text on illustration elements (artifact-aware)
     checkAltText(allElements, errors);
 
-    // 6. Table header cells
+    // 6. Table header cells (size-aware, layout-table-aware)
     checkTableHeaders(allElements, errors, warnings);
 
     // 7. List structure
@@ -193,13 +217,13 @@ export function validatePdfUa(
     checkReadingOrder(doc, warnings);
   }
 
-  // 9. Font embedding
-  checkFontEmbedding(doc, errors);
+  // 9. Font embedding (form-field-aware)
+  checkFontEmbedding(doc, errors, warnings);
 
   // 10. Color contrast (informational — requires rendered content)
   checkColorContrast(doc, warnings);
 
-  // 11. Bookmarks
+  // 11. Bookmarks (only for documents > 3 pages)
   checkBookmarks(doc, warnings);
 
   // 12. Tab order
@@ -294,6 +318,65 @@ export function enforcePdfUa(doc: PdfDocument): PdfUaEnforcementResult {
   const unfixable = postValidation.errors;
 
   return { fixed, unfixable };
+}
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Find the nearest section-like ancestor of an element (or the element
+ * itself if it is a section type).  Returns `undefined` if there is no
+ * section ancestor.
+ *
+ * @internal
+ */
+function findSectionAncestor(
+  elem: PdfStructureElement,
+): PdfStructureElement | undefined {
+  let current: PdfStructureElement | undefined = elem.parent;
+  while (current) {
+    if (SECTION_TYPES.has(current.type)) return current;
+    current = current.parent;
+  }
+  return undefined;
+}
+
+/**
+ * Count the effective number of columns and rows in a table.
+ * Takes colspan/rowspan into account for a more accurate picture.
+ *
+ * @internal
+ */
+function getTableDimensions(
+  table: PdfStructureElement,
+): { cols: number; rows: number } {
+  const allRows = table.findAll('TR');
+  const rows = allRows.length;
+  let maxCols = 0;
+
+  for (const row of allRows) {
+    let colCount = 0;
+    for (const cell of row.children) {
+      if (cell.type === 'TH' || cell.type === 'TD') {
+        colCount += cell.options.colSpan ?? 1;
+      }
+    }
+    if (colCount > maxCols) maxCols = colCount;
+  }
+
+  return { cols: maxCols, rows };
+}
+
+/**
+ * Determine whether a table is a layout/presentational table
+ * (i.e. not a data table).  A table is considered presentational if
+ * it has `role: "presentation"` in its options.
+ *
+ * @internal
+ */
+function isLayoutTable(table: PdfStructureElement): boolean {
+  return table.options.role === 'presentation';
 }
 
 // ---------------------------------------------------------------------------
@@ -398,14 +481,24 @@ function checkTitle(
 }
 
 /**
- * Check that heading hierarchy is sequential (no skipped levels).
- * For example, H1 followed directly by H3 without an H2 is a violation.
+ * Check heading hierarchy with section awareness.
+ *
+ * Rules:
+ * - First heading in the document should be H1 (warning if not).
+ * - Within the **same parent container**, heading levels must not skip
+ *   more than 1 level (e.g. H1 -> H3 in the same parent is an error).
+ * - Heading level resets (e.g. H3 back to H1) are always valid — they
+ *   indicate the start of a new section.
+ * - Headings in **different section containers** (Sect, Part, Art, Div,
+ *   etc.) are validated independently; a skip across sections is not
+ *   flagged.
  *
  * @internal
  */
 function checkHeadingHierarchy(
   elements: PdfStructureElement[],
   errors: PdfUaError[],
+  warnings: PdfUaWarning[],
 ): void {
   const headings = elements.filter((e) => HEADING_TYPES.has(e.type));
   if (headings.length === 0) return;
@@ -424,30 +517,90 @@ function checkHeadingHierarchy(
     });
   }
 
-  // Check for skipped levels
-  let lastLevel = 0;
-  for (const h of headings) {
-    const level = HEADING_LEVEL[h.type];
-    if (level === undefined) continue;
+  // Group headings by their nearest section ancestor so we can
+  // validate each section independently.
+  const sectionMap = new Map<
+    PdfStructureElement | undefined,
+    PdfStructureElement[]
+  >();
 
-    if (level > lastLevel + 1 && lastLevel > 0) {
-      errors.push({
-        code: 'UA-STRUCT-004',
-        message:
-          `Heading level skipped: ${h.type} follows H${lastLevel} ` +
-          `(expected H${lastLevel + 1}). ` +
-          'Heading levels must be sequential without gaps.',
-        clause: '7.4.2',
-        element: h,
-        pageIndex: h.pageIndex,
-      });
+  for (const h of headings) {
+    const section = findSectionAncestor(h);
+    const list = sectionMap.get(section);
+    if (list) {
+      list.push(h);
+    } else {
+      sectionMap.set(section, [h]);
     }
-    lastLevel = level;
+  }
+
+  // Validate heading sequence within each section group
+  for (const [, sectionHeadings] of sectionMap) {
+    let lastLevel = 0;
+    for (const h of sectionHeadings) {
+      const level = HEADING_LEVEL[h.type];
+      if (level === undefined) continue;
+
+      // A heading level decrease (e.g. H3 -> H1) is always valid —
+      // it indicates a new section scope.
+      if (level <= lastLevel || lastLevel === 0) {
+        lastLevel = level;
+        continue;
+      }
+
+      // Only flag a skip if the jump is > 1 level within the same
+      // parent container.
+      if (level > lastLevel + 1) {
+        // Check whether both headings share the same direct parent
+        const prevHeading = findPreviousHeadingInSection(h, sectionHeadings);
+        const sameParent = prevHeading?.parent === h.parent;
+
+        if (sameParent) {
+          errors.push({
+            code: 'UA-STRUCT-004',
+            message:
+              `Heading level skipped: ${h.type} follows H${lastLevel} ` +
+              `(expected H${lastLevel + 1}) within the same parent container. ` +
+              'Heading levels must be sequential without gaps.',
+            clause: '7.4.2',
+            element: h,
+            pageIndex: h.pageIndex,
+          });
+        } else {
+          // Different parents within the same section — ambiguous, warn
+          warnings.push({
+            code: 'UA-WARN-HEADING-SKIP',
+            message:
+              `Heading level skip: ${h.type} follows H${lastLevel} ` +
+              `in a different sub-container. ` +
+              'Consider using sequential heading levels for clarity.',
+            element: h,
+            pageIndex: h.pageIndex,
+          });
+        }
+      }
+      lastLevel = level;
+    }
   }
 }
 
 /**
+ * Find the heading that directly precedes `current` in the ordered
+ * `sectionHeadings` list.
+ *
+ * @internal
+ */
+function findPreviousHeadingInSection(
+  current: PdfStructureElement,
+  sectionHeadings: PdfStructureElement[],
+): PdfStructureElement | undefined {
+  const idx = sectionHeadings.indexOf(current);
+  return idx > 0 ? sectionHeadings[idx - 1] : undefined;
+}
+
+/**
  * Check that all illustration elements have /Alt or /ActualText.
+ * Skips elements marked as artifacts (decorative content).
  *
  * @internal
  */
@@ -457,6 +610,9 @@ function checkAltText(
 ): void {
   for (const elem of elements) {
     if (!ILLUSTRATION_TYPES.has(elem.type)) continue;
+
+    // Decorative images marked as artifacts do not require alt text
+    if (elem.options.artifact) continue;
 
     if (
       elem.options.altText === undefined &&
@@ -489,9 +645,17 @@ function checkAltText(
 }
 
 /**
- * Check table structure: tables must have TH (header) cells.
- * Tables without headers get an error; tables with TH but without
- * scope attributes get a warning.
+ * Check table structure with improved heuristics:
+ *
+ * - Layout/presentational tables (role="presentation") are skipped
+ *   entirely — they are not data tables.
+ * - Small tables (2 or fewer columns AND 2 or fewer rows) only get a
+ *   warning (not an error) for missing TH cells, since simple tables
+ *   often don't need them.
+ * - Tables with more than 2 columns or rows get a warning for missing
+ *   TH cells (previously was always an error).
+ * - Merged cells (colspan/rowspan) are handled gracefully in dimension
+ *   counting.
  *
  * @internal
  */
@@ -503,6 +667,9 @@ function checkTableHeaders(
   const tables = elements.filter((e) => e.type === 'Table');
 
   for (const table of tables) {
+    // Skip layout/presentational tables entirely
+    if (isLayoutTable(table)) continue;
+
     // Check that the table has rows
     const hasRows = table.children.some(
       (c) => c.type === 'TR' || c.type === 'THead' ||
@@ -524,19 +691,37 @@ function checkTableHeaders(
     // Check for header cells (TH)
     const headerCells = table.findAll('TH');
     if (headerCells.length === 0) {
-      warnings.push({
-        code: 'UA-TABLE-002',
-        message:
-          'Table has no TH (header) cells. ' +
-          'PDF/UA recommends that tables identify header cells for accessibility.',
-        element: table,
-        pageIndex: table.pageIndex,
-      });
+      const { cols, rows } = getTableDimensions(table);
+      const isSmallTable =
+        cols < TABLE_HEADER_SIZE_THRESHOLD &&
+        rows < TABLE_HEADER_SIZE_THRESHOLD;
+
+      if (isSmallTable) {
+        // Small simple tables: warning only
+        warnings.push({
+          code: 'UA-TABLE-002',
+          message:
+            'Small table has no TH (header) cells. ' +
+            'Consider adding header cells for improved accessibility.',
+          element: table,
+          pageIndex: table.pageIndex,
+        });
+      } else {
+        // Larger tables: stronger warning
+        warnings.push({
+          code: 'UA-TABLE-002',
+          message:
+            'Table has no TH (header) cells. ' +
+            'PDF/UA recommends that tables identify header cells for accessibility.',
+          element: table,
+          pageIndex: table.pageIndex,
+        });
+      }
     }
 
     // Check that TR elements contain TH or TD
-    const rows = table.findAll('TR');
-    for (const row of rows) {
+    const allRows = table.findAll('TR');
+    for (const row of allRows) {
       const hasCells = row.children.some(
         (c) => c.type === 'TH' || c.type === 'TD',
       );
@@ -660,23 +845,58 @@ function checkReadingOrder(doc: PdfDocument, warnings: PdfUaWarning[]): void {
  * Check that all fonts are embedded (no standard 14 fallback).
  * PDF/UA requires all fonts to be embedded.
  *
+ * Fonts that are only used in form field appearances (not page content)
+ * are reported as warnings rather than errors, since many PDF/UA
+ * validators treat form appearance fonts more leniently.
+ *
  * @internal
  */
-function checkFontEmbedding(doc: PdfDocument, errors: PdfUaError[]): void {
+function checkFontEmbedding(
+  doc: PdfDocument,
+  errors: PdfUaError[],
+  warnings: PdfUaWarning[],
+): void {
   const embeddedFonts = doc.getEmbeddedFonts();
+
+  // Collect font names that appear on actual pages
+  const pageFontNames = new Set<string>();
+  const pageCount = doc.getPageCount();
+  for (let i = 0; i < pageCount; i++) {
+    const page = doc.getPage(i);
+    const pageFonts = 'getFontNames' in page
+      ? (page as unknown as { getFontNames(): string[] }).getFontNames()
+      : undefined;
+    if (pageFonts) {
+      for (const name of pageFonts) {
+        pageFontNames.add(name);
+      }
+    }
+  }
 
   for (const [fontName] of embeddedFonts) {
     // Standard 14 fonts embedded via embedStandardFont produce
     // a Type1 font dict without a /FontFile stream — they rely on
     // the viewer's built-in metrics.  PDF/UA forbids this.
     if (STANDARD_14_FONTS.has(fontName)) {
-      errors.push({
-        code: 'UA-FONT-001',
-        message:
-          `Font "${fontName}" is a standard 14 font used without full embedding. ` +
-          'PDF/UA requires all fonts to be embedded with their glyph data.',
-        clause: '7.21.3.1',
-      });
+      // If the font is NOT used on any page, it is likely form-field-only
+      const usedOnPages = pageFontNames.has(fontName);
+      if (!usedOnPages && pageFontNames.size > 0) {
+        // Form-field-only font: warning instead of error
+        warnings.push({
+          code: 'UA-FONT-002',
+          message:
+            `Font "${fontName}" is a standard 14 font used only in form field appearances. ` +
+            'Consider embedding the font fully for strict PDF/UA compliance.',
+        });
+      } else {
+        errors.push({
+          code: 'UA-FONT-001',
+          message:
+            `Font "${fontName}" is a standard 14 font used without full embedding. ` +
+            'PDF/UA requires all fonts to be embedded with their glyph data.',
+          clause: '7.21.3.1',
+        });
+      }
     }
   }
 }
@@ -709,13 +929,18 @@ function checkColorContrast(doc: PdfDocument, warnings: PdfUaWarning[]): void {
 
 /**
  * Check that the document has bookmarks for navigation.
- * PDF/UA recommends bookmarks for documents with multiple pages.
+ * PDF/UA recommends bookmarks for documents with more than
+ * {@link BOOKMARK_PAGE_THRESHOLD} pages.  Documents with 3 or fewer
+ * pages are not flagged.
  *
  * @internal
  */
 function checkBookmarks(doc: PdfDocument, warnings: PdfUaWarning[]): void {
   const outlines = doc.getOutlines();
-  if (outlines.items.length === 0 && doc.getPageCount() > 1) {
+  if (
+    outlines.items.length === 0 &&
+    doc.getPageCount() > BOOKMARK_PAGE_THRESHOLD
+  ) {
     warnings.push({
       code: 'UA-NAV-001',
       message:

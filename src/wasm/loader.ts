@@ -18,6 +18,8 @@
  * @packageDocumentation
  */
 
+import { hasInlineWasmData, getInlineWasmBytes } from './inlineWasm.js';
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -109,8 +111,7 @@ let globalConfig: WasmLoaderConfig = {};
  */
 export function detectRuntime(): RuntimeKind {
   // Cloudflare Workers / workerd
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-  if (typeof globalThis !== 'undefined' && 'caches' in globalThis && typeof (globalThis as Record<string, unknown>)['HTMLElement'] === 'undefined' && typeof (globalThis as Record<string, unknown>)['process'] === 'undefined') {
+  if ('caches' in globalThis && !('HTMLElement' in globalThis) && !('process' in globalThis)) {
     // In Workers, there's no `process` and no `HTMLElement`, but there are caches
     // However, we need a more reliable check
     if (typeof (globalThis as Record<string, unknown>)['navigator'] === 'object') {
@@ -122,12 +123,12 @@ export function detectRuntime(): RuntimeKind {
   }
 
   // Deno
-  if (typeof (globalThis as Record<string, unknown>)['Deno'] === 'object') {
+  if ('Deno' in globalThis) {
     return 'deno';
   }
 
   // Bun
-  if (typeof (globalThis as Record<string, unknown>)['Bun'] === 'object') {
+  if ('Bun' in globalThis) {
     return 'bun';
   }
 
@@ -366,7 +367,18 @@ export async function loadWasmModule(name: string): Promise<Uint8Array> {
     return bytes;
   }
 
-  // 3. Detect runtime and load accordingly
+  // 3. Try inline WASM data (zero-config: no file paths needed)
+  if (hasInlineWasmData(name)) {
+    try {
+      const bytes = getInlineWasmBytes(name);
+      moduleCache.set(name, bytes);
+      return bytes;
+    } catch {
+      // Inline data failed — fall through to file/network loading
+    }
+  }
+
+  // 4. Detect runtime and load accordingly
   const runtime = detectRuntime();
   const modulePath = resolveModulePath(name, globalConfig, runtime);
 
@@ -403,7 +415,7 @@ export async function loadWasmModule(name: string): Promise<Uint8Array> {
       break;
   }
 
-  // 4. Cache and return
+  // 5. Cache and return
   moduleCache.set(name, bytes);
   return bytes;
 }

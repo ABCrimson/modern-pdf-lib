@@ -9,6 +9,9 @@
  * - No redactions — no-op
  * - Redaction removes annotation from page
  * - Error cases (out of range, wrong type)
+ * - Overlay text with special characters (escaping)
+ * - Contrasting text colour selection
+ * - Multiple redactions on same page
  */
 
 import { describe, it, expect } from 'vitest';
@@ -294,5 +297,119 @@ describe('applyRedaction', () => {
 
     // One redaction removed, one remains
     expect(page.getAnnotations()).toHaveLength(1);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Overlay text escaping and alignment (annotation path)
+// ---------------------------------------------------------------------------
+
+describe('annotation redaction — overlay text escaping', () => {
+  it('escapes backslashes in overlay text', () => {
+    const doc = createDocWithRedactions([
+      { rect: [40, 690, 250, 720], overlayText: 'path\\to\\file' },
+    ]);
+
+    applyRedactions(doc);
+
+    const ops = doc.getPage(0).getContentStreamData();
+    expect(ops).toContain('path\\\\to\\\\file');
+  });
+
+  it('escapes parentheses in overlay text', () => {
+    const doc = createDocWithRedactions([
+      { rect: [40, 690, 250, 720], overlayText: 'Text (with) parens' },
+    ]);
+
+    applyRedactions(doc);
+
+    const ops = doc.getPage(0).getContentStreamData();
+    expect(ops).toContain('Text \\(with\\) parens');
+  });
+
+  it('escapes multiple special characters together', () => {
+    const doc = createDocWithRedactions([
+      { rect: [40, 690, 250, 720], overlayText: 'a\\b(c)d' },
+    ]);
+
+    applyRedactions(doc);
+
+    const ops = doc.getPage(0).getContentStreamData();
+    expect(ops).toContain('a\\\\b\\(c\\)d');
+  });
+});
+
+describe('annotation redaction — default rendering', () => {
+  it('uses Helvetica font by default', () => {
+    const doc = createDocWithRedactions([
+      { rect: [40, 690, 250, 720], overlayText: 'REDACTED' },
+    ]);
+
+    applyRedactions(doc);
+
+    const ops = doc.getPage(0).getContentStreamData();
+    expect(ops).toContain('/Helvetica');
+  });
+
+  it('auto-calculates font size from rect height', () => {
+    const doc = createDocWithRedactions([
+      { rect: [40, 690, 250, 720], overlayText: 'REDACTED' },
+    ]);
+
+    applyRedactions(doc);
+
+    const ops = doc.getPage(0).getContentStreamData();
+    // rect height = |720 - 690| = 30, fontSize = min(30*0.6, 10) = 10
+    expect(ops).toContain('/Helvetica 10 Tf');
+  });
+
+  it('does not emit opacity operators at full opacity', () => {
+    const doc = createDocWithRedactions([
+      { rect: [40, 690, 250, 720] },
+    ]);
+
+    applyRedactions(doc);
+
+    const ops = doc.getPage(0).getContentStreamData();
+    expect(ops).not.toContain('ca\n');
+    expect(ops).not.toContain('/GS_R gs');
+  });
+
+  it('does not draw border by default', () => {
+    const doc = createDocWithRedactions([
+      { rect: [40, 690, 250, 720] },
+    ]);
+
+    applyRedactions(doc);
+
+    const ops = doc.getPage(0).getContentStreamData();
+    expect(ops).not.toContain('S\n');
+    expect(ops).not.toContain(' w\n');
+  });
+
+  it('handles multiple redactions on same page with different colours', () => {
+    const doc = createDocWithRedactions([
+      { rect: [40, 690, 250, 720], interiorColor: { r: 1, g: 0, b: 0 } },
+      { rect: [40, 650, 250, 680], interiorColor: { r: 0, g: 0, b: 1 } },
+    ]);
+
+    applyRedactions(doc);
+
+    const ops = doc.getPage(0).getContentStreamData();
+    expect(ops).toContain('1 0 0 rg');
+    expect(ops).toContain('0 0 1 rg');
+  });
+
+  it('handles multiple redactions on same page with overlay text', () => {
+    const doc = createDocWithRedactions([
+      { rect: [40, 690, 250, 720], overlayText: 'FIRST' },
+      { rect: [40, 650, 250, 680], overlayText: 'SECOND' },
+    ]);
+
+    applyRedactions(doc);
+
+    const ops = doc.getPage(0).getContentStreamData();
+    expect(ops).toContain('(FIRST) Tj');
+    expect(ops).toContain('(SECOND) Tj');
   });
 });

@@ -642,4 +642,311 @@ describe('PdfPage', () => {
     // The entire text should appear on one line
     expect(ops).toContain('This is a long line of text that would normally wrap');
   });
+
+  // -------------------------------------------------------------------------
+  // Page box manipulation (BleedBox, TrimBox, ArtBox)
+  // -------------------------------------------------------------------------
+
+  describe('page box manipulation', () => {
+    // -----------------------------------------------------------------------
+    // getMediaBox / setMediaBox
+    // -----------------------------------------------------------------------
+
+    it('getMediaBox returns default media box', () => {
+      const { page } = makePage(612, 792);
+      const box = page.getMediaBox();
+      expect(box).toEqual({ x: 0, y: 0, width: 612, height: 792 });
+    });
+
+    it('setMediaBox updates media box', () => {
+      const { page } = makePage(612, 792);
+      page.setMediaBox(10, 20, 500, 700);
+      const box = page.getMediaBox();
+      expect(box).toEqual({ x: 10, y: 20, width: 500, height: 700 });
+      // Also updates width/height getters
+      expect(page.width).toBe(500);
+      expect(page.height).toBe(700);
+    });
+
+    // -----------------------------------------------------------------------
+    // setCropBox / getCropBox
+    // -----------------------------------------------------------------------
+
+    it('getCropBox returns undefined when not set', () => {
+      const { page } = makePage();
+      expect(page.getCropBox()).toBeUndefined();
+    });
+
+    it('setCropBox and getCropBox round-trip', () => {
+      const { page } = makePage(612, 792);
+      page.setCropBox(50, 50, 500, 700);
+      const box = page.getCropBox();
+      expect(box).toEqual({ x: 50, y: 50, width: 500, height: 700 });
+    });
+
+    // -----------------------------------------------------------------------
+    // setBleedBox / getBleedBox
+    // -----------------------------------------------------------------------
+
+    it('getBleedBox returns undefined when not set', () => {
+      const { page } = makePage();
+      expect(page.getBleedBox()).toBeUndefined();
+    });
+
+    it('setBleedBox and getBleedBox round-trip', () => {
+      const { page } = makePage(612, 792);
+      page.setBleedBox(10, 10, 592, 772);
+      const box = page.getBleedBox();
+      expect(box).toEqual({ x: 10, y: 10, width: 592, height: 772 });
+    });
+
+    // -----------------------------------------------------------------------
+    // setTrimBox / getTrimBox
+    // -----------------------------------------------------------------------
+
+    it('getTrimBox returns undefined when not set', () => {
+      const { page } = makePage();
+      expect(page.getTrimBox()).toBeUndefined();
+    });
+
+    it('setTrimBox and getTrimBox round-trip', () => {
+      const { page } = makePage(612, 792);
+      page.setTrimBox(20, 20, 572, 752);
+      const box = page.getTrimBox();
+      expect(box).toEqual({ x: 20, y: 20, width: 572, height: 752 });
+    });
+
+    // -----------------------------------------------------------------------
+    // setArtBox / getArtBox
+    // -----------------------------------------------------------------------
+
+    it('getArtBox returns undefined when not set', () => {
+      const { page } = makePage();
+      expect(page.getArtBox()).toBeUndefined();
+    });
+
+    it('setArtBox and getArtBox round-trip', () => {
+      const { page } = makePage(612, 792);
+      page.setArtBox(72, 72, 468, 648);
+      const box = page.getArtBox();
+      expect(box).toEqual({ x: 72, y: 72, width: 468, height: 648 });
+    });
+
+    // -----------------------------------------------------------------------
+    // Remove optional boxes
+    // -----------------------------------------------------------------------
+
+    it('removeCropBox clears the crop box', () => {
+      const { page } = makePage(612, 792);
+      page.setCropBox(50, 50, 500, 700);
+      expect(page.getCropBox()).not.toBeUndefined();
+      page.removeCropBox();
+      expect(page.getCropBox()).toBeUndefined();
+    });
+
+    it('removeBleedBox clears the bleed box', () => {
+      const { page } = makePage(612, 792);
+      page.setBleedBox(10, 10, 592, 772);
+      expect(page.getBleedBox()).not.toBeUndefined();
+      page.removeBleedBox();
+      expect(page.getBleedBox()).toBeUndefined();
+    });
+
+    it('removeTrimBox clears the trim box', () => {
+      const { page } = makePage(612, 792);
+      page.setTrimBox(20, 20, 572, 752);
+      expect(page.getTrimBox()).not.toBeUndefined();
+      page.removeTrimBox();
+      expect(page.getTrimBox()).toBeUndefined();
+    });
+
+    it('removeArtBox clears the art box', () => {
+      const { page } = makePage(612, 792);
+      page.setArtBox(72, 72, 468, 648);
+      expect(page.getArtBox()).not.toBeUndefined();
+      page.removeArtBox();
+      expect(page.getArtBox()).toBeUndefined();
+    });
+
+    // -----------------------------------------------------------------------
+    // Box nesting validation (PDF spec §14.11.2)
+    // -----------------------------------------------------------------------
+
+    it('validateBoxes returns valid when no optional boxes are set', () => {
+      const { page } = makePage(612, 792);
+      const result = page.validateBoxes();
+      expect(result.valid).toBe(true);
+      expect(result.issues).toEqual([]);
+    });
+
+    it('validateBoxes returns valid when all boxes are within media box', () => {
+      const { page } = makePage(612, 792);
+      page.setCropBox(0, 0, 612, 792);
+      page.setBleedBox(10, 10, 592, 772);
+      page.setTrimBox(20, 20, 572, 752);
+      page.setArtBox(72, 72, 468, 648);
+      const result = page.validateBoxes();
+      expect(result.valid).toBe(true);
+      expect(result.issues).toEqual([]);
+    });
+
+    it('validateBoxes detects CropBox outside MediaBox', () => {
+      const { page } = makePage(612, 792);
+      page.setCropBox(-10, 0, 650, 792);
+      const result = page.validateBoxes();
+      expect(result.valid).toBe(false);
+      expect(result.issues).toContain('CropBox extends outside MediaBox');
+    });
+
+    it('validateBoxes detects BleedBox outside MediaBox', () => {
+      const { page } = makePage(612, 792);
+      page.setBleedBox(0, 0, 700, 792);
+      const result = page.validateBoxes();
+      expect(result.valid).toBe(false);
+      expect(result.issues).toContain('BleedBox extends outside MediaBox');
+    });
+
+    it('validateBoxes detects TrimBox outside MediaBox', () => {
+      const { page } = makePage(612, 792);
+      page.setTrimBox(0, 0, 612, 900);
+      const result = page.validateBoxes();
+      expect(result.valid).toBe(false);
+      expect(result.issues).toContain('TrimBox extends outside MediaBox');
+    });
+
+    it('validateBoxes detects ArtBox outside MediaBox', () => {
+      const { page } = makePage(612, 792);
+      page.setArtBox(-5, -5, 620, 800);
+      const result = page.validateBoxes();
+      expect(result.valid).toBe(false);
+      expect(result.issues).toContain('ArtBox extends outside MediaBox');
+    });
+
+    it('validateBoxes reports multiple issues at once', () => {
+      const { page } = makePage(612, 792);
+      page.setCropBox(-10, 0, 650, 800);
+      page.setBleedBox(0, 0, 700, 792);
+      const result = page.validateBoxes();
+      expect(result.valid).toBe(false);
+      expect(result.issues.length).toBeGreaterThanOrEqual(2);
+      expect(result.issues).toContain('CropBox extends outside MediaBox');
+      expect(result.issues).toContain('BleedBox extends outside MediaBox');
+    });
+
+    it('validateBoxes detects zero-dimension MediaBox', () => {
+      const { page } = makePage(612, 792);
+      page.setMediaBox(0, 0, 0, 792);
+      const result = page.validateBoxes();
+      expect(result.valid).toBe(false);
+      expect(result.issues).toContain('MediaBox has zero or negative dimensions');
+    });
+
+    // -----------------------------------------------------------------------
+    // Default behavior: CropBox defaults to MediaBox, etc.
+    // -----------------------------------------------------------------------
+
+    it('CropBox defaults to undefined (meaning MediaBox in PDF spec)', () => {
+      const { page } = makePage(612, 792);
+      // Per PDF spec, CropBox defaults to MediaBox when not set
+      expect(page.getCropBox()).toBeUndefined();
+      // MediaBox should still be available
+      const mediaBox = page.getMediaBox();
+      expect(mediaBox).toEqual({ x: 0, y: 0, width: 612, height: 792 });
+    });
+
+    it('BleedBox, TrimBox, ArtBox default to undefined (meaning CropBox in PDF spec)', () => {
+      const { page } = makePage(612, 792);
+      // Per PDF spec, these default to CropBox when not set
+      expect(page.getBleedBox()).toBeUndefined();
+      expect(page.getTrimBox()).toBeUndefined();
+      expect(page.getArtBox()).toBeUndefined();
+    });
+
+    // -----------------------------------------------------------------------
+    // Serialization includes all boxes
+    // -----------------------------------------------------------------------
+
+    it('finalize includes all boxes in page entry', () => {
+      const { page } = makePage(612, 792);
+      page.setCropBox(10, 10, 592, 772);
+      page.setBleedBox(5, 5, 602, 782);
+      page.setTrimBox(20, 20, 572, 752);
+      page.setArtBox(72, 72, 468, 648);
+
+      const entry = page.finalize();
+
+      // MediaBox as [llx, lly, urx, ury]
+      expect(entry.mediaBox).toEqual([0, 0, 612, 792]);
+      // CropBox as [llx, lly, urx, ury]
+      expect(entry.cropBox).toEqual([10, 10, 602, 782]);
+      // BleedBox as [llx, lly, urx, ury]
+      expect(entry.bleedBox).toEqual([5, 5, 607, 787]);
+      // TrimBox as [llx, lly, urx, ury]
+      expect(entry.trimBox).toEqual([20, 20, 592, 772]);
+      // ArtBox as [llx, lly, urx, ury]
+      expect(entry.artBox).toEqual([72, 72, 540, 720]);
+    });
+
+    it('finalize omits optional boxes when not set', () => {
+      const { page } = makePage(612, 792);
+      const entry = page.finalize();
+
+      expect(entry.mediaBox).toEqual([0, 0, 612, 792]);
+      expect(entry.cropBox).toBeUndefined();
+      expect(entry.bleedBox).toBeUndefined();
+      expect(entry.trimBox).toBeUndefined();
+      expect(entry.artBox).toBeUndefined();
+    });
+
+    it('finalize omits removed boxes', () => {
+      const { page } = makePage(612, 792);
+      page.setCropBox(10, 10, 592, 772);
+      page.setBleedBox(5, 5, 602, 782);
+      page.removeCropBox();
+      page.removeBleedBox();
+
+      const entry = page.finalize();
+      expect(entry.cropBox).toBeUndefined();
+      expect(entry.bleedBox).toBeUndefined();
+    });
+
+    // -----------------------------------------------------------------------
+    // Box with non-zero origin MediaBox
+    // -----------------------------------------------------------------------
+
+    it('validates boxes against non-zero-origin MediaBox', () => {
+      const { page } = makePage(612, 792);
+      page.setMediaBox(100, 100, 400, 600);
+
+      // CropBox within the shifted MediaBox — should be valid
+      page.setCropBox(100, 100, 400, 600);
+      let result = page.validateBoxes();
+      expect(result.valid).toBe(true);
+
+      // CropBox starting before MediaBox origin — should be invalid
+      page.setCropBox(50, 100, 400, 600);
+      result = page.validateBoxes();
+      expect(result.valid).toBe(false);
+      expect(result.issues).toContain('CropBox extends outside MediaBox');
+    });
+
+    // -----------------------------------------------------------------------
+    // Parsed page preserves all boxes
+    // -----------------------------------------------------------------------
+
+    it('_fromParsed preserves all box types', () => {
+      const registry = new PdfObjectRegistry();
+      const page = PdfPage._fromParsed(612, 792, registry, {
+        cropBox: [10, 10, 602, 782],
+        bleedBox: [5, 5, 607, 787],
+        trimBox: [20, 20, 592, 772],
+        artBox: [72, 72, 540, 720],
+      });
+
+      expect(page.getCropBox()).toEqual({ x: 10, y: 10, width: 592, height: 772 });
+      expect(page.getBleedBox()).toEqual({ x: 5, y: 5, width: 602, height: 782 });
+      expect(page.getTrimBox()).toEqual({ x: 20, y: 20, width: 572, height: 752 });
+      expect(page.getArtBox()).toEqual({ x: 72, y: 72, width: 468, height: 648 });
+    });
+  });
 });

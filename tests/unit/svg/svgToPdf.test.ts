@@ -709,3 +709,310 @@ describe('drawSvgOnPage', () => {
     expect(content).toContain('ET\n');
   });
 });
+
+// ---------------------------------------------------------------------------
+// Gradient rendering
+// ---------------------------------------------------------------------------
+
+describe('svgToPdfOperators — gradient fills', () => {
+  it('should render a rect with linear gradient fill', () => {
+    const svg = `
+      <svg width="200" height="200">
+        <defs>
+          <linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="red"/>
+            <stop offset="100%" stop-color="blue"/>
+          </linearGradient>
+        </defs>
+        <rect x="0" y="0" width="200" height="200" fill="url(#g1)"/>
+      </svg>
+    `;
+    const el = parseSvg(svg);
+    const ops = svgToPdfOperators(el);
+
+    // Should contain gradient comment marker
+    expect(ops).toContain('% gradient:linearGradient:g1');
+    // Should contain stops info
+    expect(ops).toContain(':stops(');
+    // Should still produce fill colour (first stop approximation)
+    expect(ops).toContain('rg\n');
+    // Should still paint the rect
+    expect(ops).toContain('re\n');
+    expect(ops).toContain('f\n');
+  });
+
+  it('should render a complex gradient with 5+ stops', () => {
+    const svg = `
+      <svg width="200" height="200">
+        <defs>
+          <linearGradient id="rainbow5">
+            <stop offset="0%" stop-color="red"/>
+            <stop offset="25%" stop-color="orange"/>
+            <stop offset="50%" stop-color="yellow"/>
+            <stop offset="75%" stop-color="green"/>
+            <stop offset="100%" stop-color="blue"/>
+          </linearGradient>
+        </defs>
+        <rect x="0" y="0" width="200" height="200" fill="url(#rainbow5)"/>
+      </svg>
+    `;
+    const el = parseSvg(svg);
+    const ops = svgToPdfOperators(el);
+    expect(ops).toContain('% gradient:linearGradient:rainbow5');
+    // 5 stops should be encoded in the comment
+    const stopsMatch = ops.match(/:stops\(([^)]+)\)/);
+    expect(stopsMatch).toBeDefined();
+    const stopParts = stopsMatch![1]!.split(';');
+    expect(stopParts).toHaveLength(5);
+  });
+
+  it('should render a radial gradient with focal point', () => {
+    const svg = `
+      <svg width="200" height="200">
+        <defs>
+          <radialGradient id="rg1" cx="50%" cy="50%" r="50%" fx="30%" fy="30%">
+            <stop offset="0%" stop-color="white"/>
+            <stop offset="100%" stop-color="black"/>
+          </radialGradient>
+        </defs>
+        <circle cx="100" cy="100" r="80" fill="url(#rg1)"/>
+      </svg>
+    `;
+    const el = parseSvg(svg);
+    const ops = svgToPdfOperators(el);
+    expect(ops).toContain('% gradient:radialGradient:rg1');
+    expect(ops).toContain(':coords(0.5,0.5,0.5,0.3,0.3)');
+  });
+
+  it('should render gradient with stop opacity', () => {
+    const svg = `
+      <svg width="200" height="200">
+        <defs>
+          <linearGradient id="opacGrad">
+            <stop offset="0%" stop-color="red" stop-opacity="0.5"/>
+            <stop offset="100%" stop-color="blue" stop-opacity="0.8"/>
+          </linearGradient>
+        </defs>
+        <rect x="0" y="0" width="200" height="200" fill="url(#opacGrad)"/>
+      </svg>
+    `;
+    const el = parseSvg(svg);
+    const ops = svgToPdfOperators(el);
+    expect(ops).toContain('% gradient:linearGradient:opacGrad');
+    // Opacity should be encoded in stops
+    expect(ops).toContain('0.5');
+    expect(ops).toContain('0.8');
+  });
+
+  it('should render gradient with gradientTransform rotation', () => {
+    const svg = `
+      <svg width="200" height="200">
+        <defs>
+          <linearGradient id="rotGrad" gradientTransform="rotate(45)">
+            <stop offset="0%" stop-color="red"/>
+            <stop offset="100%" stop-color="blue"/>
+          </linearGradient>
+        </defs>
+        <rect x="0" y="0" width="200" height="200" fill="url(#rotGrad)"/>
+      </svg>
+    `;
+    const el = parseSvg(svg);
+    const ops = svgToPdfOperators(el);
+    expect(ops).toContain('% gradient:linearGradient:rotGrad');
+    expect(ops).toContain(':transform(');
+  });
+
+  it('should render gradient with spreadMethod reflect', () => {
+    const svg = `
+      <svg width="200" height="200">
+        <defs>
+          <linearGradient id="reflectGrad" spreadMethod="reflect">
+            <stop offset="0%" stop-color="red"/>
+            <stop offset="100%" stop-color="blue"/>
+          </linearGradient>
+        </defs>
+        <rect x="0" y="0" width="200" height="200" fill="url(#reflectGrad)"/>
+      </svg>
+    `;
+    const el = parseSvg(svg);
+    const ops = svgToPdfOperators(el);
+    expect(ops).toContain(':spread(reflect)');
+  });
+
+  it('should render gradient with spreadMethod repeat', () => {
+    const svg = `
+      <svg width="200" height="200">
+        <defs>
+          <linearGradient id="repeatGrad" spreadMethod="repeat">
+            <stop offset="0%" stop-color="red"/>
+            <stop offset="100%" stop-color="blue"/>
+          </linearGradient>
+        </defs>
+        <rect x="0" y="0" width="200" height="200" fill="url(#repeatGrad)"/>
+      </svg>
+    `;
+    const el = parseSvg(svg);
+    const ops = svgToPdfOperators(el);
+    expect(ops).toContain(':spread(repeat)');
+  });
+
+  it('should render gradient with spreadMethod pad (default)', () => {
+    const svg = `
+      <svg width="200" height="200">
+        <defs>
+          <linearGradient id="padGrad">
+            <stop offset="0%" stop-color="red"/>
+            <stop offset="100%" stop-color="blue"/>
+          </linearGradient>
+        </defs>
+        <rect x="0" y="0" width="200" height="200" fill="url(#padGrad)"/>
+      </svg>
+    `;
+    const el = parseSvg(svg);
+    const ops = svgToPdfOperators(el);
+    expect(ops).toContain(':spread(pad)');
+  });
+
+  it('should render gradient with gradientUnits="userSpaceOnUse"', () => {
+    const svg = `
+      <svg width="200" height="200">
+        <defs>
+          <linearGradient id="userGrad" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="200" y2="0">
+            <stop offset="0%" stop-color="red"/>
+            <stop offset="100%" stop-color="blue"/>
+          </linearGradient>
+        </defs>
+        <rect x="0" y="0" width="200" height="200" fill="url(#userGrad)"/>
+      </svg>
+    `;
+    const el = parseSvg(svg);
+    const ops = svgToPdfOperators(el);
+    expect(ops).toContain(':units(userSpaceOnUse)');
+  });
+
+  it('should skip gradient elements in rendering output', () => {
+    const svg = `
+      <svg width="200" height="200">
+        <defs>
+          <linearGradient id="skipMe">
+            <stop offset="0%" stop-color="red"/>
+            <stop offset="100%" stop-color="blue"/>
+          </linearGradient>
+        </defs>
+        <rect x="0" y="0" width="200" height="200" fill="red"/>
+      </svg>
+    `;
+    const el = parseSvg(svg);
+    const ops = svgToPdfOperators(el);
+    // The gradient element itself should not produce any path operators
+    expect(ops).not.toContain('% gradient:');
+    // But the rect with solid red fill should render normally
+    expect(ops).toContain('re\n');
+    expect(ops).toContain('1 0 0 rg\n');
+  });
+
+  it('should handle nested SVG with gradient references across groups', () => {
+    const svg = `
+      <svg width="400" height="400">
+        <defs>
+          <linearGradient id="sharedGrad">
+            <stop offset="0%" stop-color="red"/>
+            <stop offset="100%" stop-color="blue"/>
+          </linearGradient>
+        </defs>
+        <g transform="translate(10,10)">
+          <rect x="0" y="0" width="100" height="100" fill="url(#sharedGrad)"/>
+        </g>
+        <g transform="translate(120,10)">
+          <rect x="0" y="0" width="100" height="100" fill="url(#sharedGrad)"/>
+        </g>
+      </svg>
+    `;
+    const el = parseSvg(svg);
+    const ops = svgToPdfOperators(el);
+    // Both rects should reference the gradient
+    const gradientCount = (ops.match(/% gradient:linearGradient:sharedGrad/g) ?? []).length;
+    expect(gradientCount).toBe(2);
+  });
+
+  it('should handle rect with gradient fill and solid stroke', () => {
+    const svg = `
+      <svg width="200" height="200">
+        <defs>
+          <linearGradient id="fillGrad">
+            <stop offset="0%" stop-color="red"/>
+            <stop offset="100%" stop-color="blue"/>
+          </linearGradient>
+        </defs>
+        <rect x="10" y="10" width="180" height="180" fill="url(#fillGrad)" stroke="black" stroke-width="2"/>
+      </svg>
+    `;
+    const el = parseSvg(svg);
+    const ops = svgToPdfOperators(el);
+    expect(ops).toContain('% gradient:linearGradient:fillGrad');
+    expect(ops).toContain('0 0 0 RG\n'); // black stroke
+    expect(ops).toContain('2 w\n'); // stroke width
+    expect(ops).toContain('B\n'); // fill + stroke
+  });
+
+  it('should handle edge case: single stop gradient', () => {
+    const svg = `
+      <svg width="200" height="200">
+        <defs>
+          <linearGradient id="singleStop">
+            <stop offset="50%" stop-color="red"/>
+          </linearGradient>
+        </defs>
+        <rect x="0" y="0" width="200" height="200" fill="url(#singleStop)"/>
+      </svg>
+    `;
+    const el = parseSvg(svg);
+    const ops = svgToPdfOperators(el);
+    expect(ops).toContain('% gradient:linearGradient:singleStop');
+    // Single stop gets duplicated at 0 and 1
+    const stopsMatch = ops.match(/:stops\(([^)]+)\)/);
+    expect(stopsMatch).toBeDefined();
+    const stopParts = stopsMatch![1]!.split(';');
+    expect(stopParts).toHaveLength(2);
+  });
+
+  it('should handle edge case: no stops gradient', () => {
+    const svg = `
+      <svg width="200" height="200">
+        <defs>
+          <linearGradient id="noStops"></linearGradient>
+        </defs>
+        <rect x="0" y="0" width="200" height="200" fill="url(#noStops)"/>
+      </svg>
+    `;
+    const el = parseSvg(svg);
+    const ops = svgToPdfOperators(el);
+    expect(ops).toContain('% gradient:linearGradient:noStops');
+    // No stops defaults to black-to-black
+    expect(ops).toContain('0 0 0 rg\n');
+  });
+
+  it('should handle identical stop offsets (last value wins)', () => {
+    const svg = `
+      <svg width="200" height="200">
+        <defs>
+          <linearGradient id="identicalStops">
+            <stop offset="0%" stop-color="red"/>
+            <stop offset="50%" stop-color="green"/>
+            <stop offset="50%" stop-color="yellow"/>
+            <stop offset="100%" stop-color="blue"/>
+          </linearGradient>
+        </defs>
+        <rect x="0" y="0" width="200" height="200" fill="url(#identicalStops)"/>
+      </svg>
+    `;
+    const el = parseSvg(svg);
+    const ops = svgToPdfOperators(el);
+    expect(ops).toContain('% gradient:linearGradient:identicalStops');
+    // After dedup, should have 3 stops
+    const stopsMatch = ops.match(/:stops\(([^)]+)\)/);
+    expect(stopsMatch).toBeDefined();
+    const stopParts = stopsMatch![1]!.split(';');
+    expect(stopParts).toHaveLength(3);
+  });
+});

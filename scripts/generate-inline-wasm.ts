@@ -5,9 +5,13 @@
  * binary from `src/wasm/<name>/pkg/*.wasm`, base64-encodes it, and writes
  * a generated TypeScript file at `src/wasm/inlineWasm.generated.ts`.
  *
- * The generated file exports a constant map of module names to their
- * base64-encoded WASM bytes. At runtime, the inline WASM loader decodes
- * these constants on demand, avoiding any filesystem or network access.
+ * The generated file exports:
+ * - Individual per-module constants (tree-shakeable by bundlers)
+ * - A lookup map for runtime access
+ * - Size metadata for diagnostics
+ *
+ * At runtime, the inline WASM loader decodes these constants on demand,
+ * avoiding any filesystem or network access.
  *
  * Usage:
  *   npx tsx scripts/generate-inline-wasm.ts
@@ -49,6 +53,36 @@ async function fileExists(path: string): Promise<boolean> {
   }
 }
 
+/**
+ * Format a byte count as a human-readable string with appropriate unit.
+ */
+function formatBytes(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+}
+
+// ---------------------------------------------------------------------------
+// Size report type
+// ---------------------------------------------------------------------------
+
+interface ModuleSizeEntry {
+  name: string;
+  binarySize: number;
+  base64Size: number;
+  overhead: number;       // base64Size - binarySize
+  overheadPercent: number; // (overhead / binarySize) * 100
+}
+
+interface SizeReport {
+  generatedAt: string;
+  modules: ModuleSizeEntry[];
+  totalBinarySize: number;
+  totalBase64Size: number;
+  totalOverhead: number;
+  totalOverheadPercent: number;
+}
+
 // ---------------------------------------------------------------------------
 // Main
 // ---------------------------------------------------------------------------
@@ -77,6 +111,12 @@ async function main(): Promise<void> {
   }
 
   // -----------------------------------------------------------------------
+  // Build size report
+  // -----------------------------------------------------------------------
+
+  const sizeReport: SizeReport = buildSizeReport(entries);
+
+  // -----------------------------------------------------------------------
   // Generate TypeScript source
   // -----------------------------------------------------------------------
 
@@ -90,13 +130,30 @@ async function main(): Promise<void> {
     ` * Generated at: ${new Date().toISOString()}`,
     ' *',
     ' * Contains base64-encoded WASM module binaries for inline embedding.',
-    ' * Each constant is decoded at runtime by `getInlineWasmBytes()` in',
-    ' * `src/wasm/inlineWasm.ts`.',
+    ' * Each module is exported as a separate constant for tree-shaking:',
+    ' * bundlers can exclude unused modules from the final bundle.',
+    ' *',
+    ' * Size report:',
+    ` *   Total binary: ${formatBytes(sizeReport.totalBinarySize)}`,
+    ` *   Total base64: ${formatBytes(sizeReport.totalBase64Size)}`,
+    ` *   Overhead: ${formatBytes(sizeReport.totalOverhead)} (+${sizeReport.totalOverheadPercent.toFixed(1)}%)`,
+    ' *',
+    ...sizeReport.modules.map(m =>
+      ` *   - ${m.name}: ${formatBytes(m.binarySize)} binary -> ${formatBytes(m.base64Size)} base64 (+${m.overheadPercent.toFixed(1)}%)`
+    ),
     ' */',
     '',
     '// ---------------------------------------------------------------------------',
-    '// Inline WASM module data',
+    '// Per-module exports (tree-shakeable)',
     '// ---------------------------------------------------------------------------',
+    '//',
+    '// Each module is exported as a separate named constant. Bundlers that',
+    '// support tree-shaking (Rollup, esbuild, webpack 5+) will exclude',
+    '// unused modules from the final bundle. Import only what you need:',
+    '//',
+    '//   import { WASM_LIBDEFLATE_BASE64 } from "./inlineWasm.generated.js";',
+    '//',
+    '// If you import the INLINE_WASM_MODULES map, all modules will be included.',
     '',
   ];
 
@@ -104,17 +161,25 @@ async function main(): Promise<void> {
     lines.push(`/**`);
     lines.push(` * Base64-encoded WASM binary for the \`${entry.name}\` module.`);
     lines.push(` * Original size: ${entry.sizeBytes.toLocaleString()} bytes.`);
+    lines.push(` *`);
+    lines.push(` * @remarks Tree-shakeable — only included in the bundle if imported.`);
     lines.push(` */`);
-    lines.push(`export const WASM_${entry.name.toUpperCase()}_BASE64 = '${entry.base64}';`);
+    lines.push(`/* @__PURE__ */ export const WASM_${entry.name.toUpperCase()}_BASE64 = '${entry.base64}';`);
     lines.push('');
   }
 
   // Export a lookup map
   lines.push('// ---------------------------------------------------------------------------');
-  lines.push('// Module name → base64 lookup');
+  lines.push('// Module name -> base64 lookup');
   lines.push('// ---------------------------------------------------------------------------');
   lines.push('');
-  lines.push('/** Map of WASM module names to their base64-encoded binaries. */');
+  lines.push('/**');
+  lines.push(' * Map of WASM module names to their base64-encoded binaries.');
+  lines.push(' *');
+  lines.push(' * Importing this map prevents tree-shaking of individual modules.');
+  lines.push(' * Prefer importing per-module constants directly if you only need');
+  lines.push(' * a subset of modules.');
+  lines.push(' */');
   lines.push('export const INLINE_WASM_MODULES: Readonly<Record<string, string>> = {');
   for (const entry of entries) {
     lines.push(`  ${entry.name}: WASM_${entry.name.toUpperCase()}_BASE64,`);
@@ -127,23 +192,87 @@ async function main(): Promise<void> {
   lines.push(`export const INLINE_WASM_MODULE_NAMES: readonly string[] = [${entries.map(e => `'${e.name}'`).join(', ')}];`);
   lines.push('');
 
+  // Export size metadata
+  lines.push('// ---------------------------------------------------------------------------');
+  lines.push('// Size metadata (for diagnostics / bundle analysis)');
+  lines.push('// ---------------------------------------------------------------------------');
+  lines.push('');
+  lines.push('/**');
+  lines.push(' * Size information for each inline WASM module.');
+  lines.push(' *');
+  lines.push(' * - `binarySize`: original .wasm file size in bytes');
+  lines.push(' * - `base64Size`: base64-encoded string length in characters');
+  lines.push(' */');
+  lines.push('export const INLINE_WASM_SIZES: Readonly<Record<string, { binarySize: number; base64Size: number }>> = {');
+  for (const entry of entries) {
+    const b64Len = entry.base64.length;
+    lines.push(`  ${entry.name}: { binarySize: ${entry.sizeBytes}, base64Size: ${b64Len} },`);
+  }
+  lines.push('};');
+  lines.push('');
+
   await writeFile(OUTPUT_FILE, lines.join('\n'), 'utf-8');
 
   // -----------------------------------------------------------------------
-  // Report
+  // Console report
   // -----------------------------------------------------------------------
 
   console.log('generate-inline-wasm: code generation complete.');
   console.log(`  Output: ${OUTPUT_FILE}`);
   console.log(`  Modules embedded: ${entries.length}`);
-  for (const entry of entries) {
-    const kbSize = (entry.sizeBytes / 1024).toFixed(1);
-    const b64Kb = (entry.base64.length / 1024).toFixed(1);
-    console.log(`    - ${entry.name}: ${kbSize} KB binary -> ${b64Kb} KB base64`);
+  console.log('');
+  console.log('  Size report:');
+  console.log(`    ${'Module'.padEnd(12)} ${'Binary'.padStart(10)} ${'Base64'.padStart(10)} ${'Overhead'.padStart(10)}`);
+  console.log(`    ${''.padEnd(12, '-')} ${''.padEnd(10, '-')} ${''.padEnd(10, '-')} ${''.padEnd(10, '-')}`);
+
+  for (const m of sizeReport.modules) {
+    console.log(
+      `    ${m.name.padEnd(12)} ${formatBytes(m.binarySize).padStart(10)} ${formatBytes(m.base64Size).padStart(10)} ${(`+${m.overheadPercent.toFixed(1)}%`).padStart(10)}`
+    );
   }
+
+  console.log(`    ${''.padEnd(12, '-')} ${''.padEnd(10, '-')} ${''.padEnd(10, '-')} ${''.padEnd(10, '-')}`);
+  console.log(
+    `    ${'TOTAL'.padEnd(12)} ${formatBytes(sizeReport.totalBinarySize).padStart(10)} ${formatBytes(sizeReport.totalBase64Size).padStart(10)} ${(`+${sizeReport.totalOverheadPercent.toFixed(1)}%`).padStart(10)}`
+  );
+  console.log('');
+
   if (skipped.length > 0) {
     console.log(`  Skipped (not compiled): ${skipped.join(', ')}`);
   }
+}
+
+// ---------------------------------------------------------------------------
+// Size report builder
+// ---------------------------------------------------------------------------
+
+function buildSizeReport(
+  entries: ReadonlyArray<{ name: string; base64: string; sizeBytes: number }>,
+): SizeReport {
+  const modules: ModuleSizeEntry[] = entries.map(entry => {
+    const base64Size = entry.base64.length;
+    const overhead = base64Size - entry.sizeBytes;
+    return {
+      name: entry.name,
+      binarySize: entry.sizeBytes,
+      base64Size,
+      overhead,
+      overheadPercent: entry.sizeBytes > 0 ? (overhead / entry.sizeBytes) * 100 : 0,
+    };
+  });
+
+  const totalBinarySize = modules.reduce((sum, m) => sum + m.binarySize, 0);
+  const totalBase64Size = modules.reduce((sum, m) => sum + m.base64Size, 0);
+  const totalOverhead = totalBase64Size - totalBinarySize;
+
+  return {
+    generatedAt: new Date().toISOString(),
+    modules,
+    totalBinarySize,
+    totalBase64Size,
+    totalOverhead,
+    totalOverheadPercent: totalBinarySize > 0 ? (totalOverhead / totalBinarySize) * 100 : 0,
+  };
 }
 
 main().catch((err: unknown) => {

@@ -4,11 +4,13 @@
  * Covers:
  * - SVG path `d` attribute parsing (all commands)
  * - Shape elements (rect, circle, ellipse, line, polyline, polygon)
- * - Colour parsing (hex, rgb, rgba, named)
+ * - Colour parsing (hex, rgb, rgba, hsl, hsla, named)
  * - Transform parsing (matrix, translate, scale, rotate, skew)
  * - Fill-rule, stroke-linecap, stroke-linejoin, stroke-dasharray
  * - Font/text attribute parsing
  * - Full SVG document parsing
+ * - Gradient parsing (linearGradient, radialGradient, stops, transforms)
+ * - Gradient stop interpolation and spread methods
  */
 
 import { describe, it, expect } from 'vitest';
@@ -17,6 +19,8 @@ import {
   parseSvgPath,
   parseSvgColor,
   parseSvgTransform,
+  interpolateLinearRgb,
+  applySpreadMethod,
 } from '../../../src/assets/svg/svgParser.js';
 
 // ---------------------------------------------------------------------------
@@ -493,5 +497,576 @@ describe('parseSvg — extended attributes', () => {
     const svg = '<svg><line x1="0" y1="0" x2="100" y2="0" style="stroke: black; stroke-linecap: square"/></svg>';
     const el = parseSvg(svg);
     expect(el.children[0]!.strokeLinecap).toBe('square');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// parseSvgColor — HSL support
+// ---------------------------------------------------------------------------
+
+describe('parseSvgColor — HSL', () => {
+  it('should parse hsl(0, 100%, 50%) as red', () => {
+    const c = parseSvgColor('hsl(0, 100%, 50%)');
+    expect(c).toBeDefined();
+    expect(c!.r).toBe(255);
+    expect(c!.g).toBe(0);
+    expect(c!.b).toBe(0);
+  });
+
+  it('should parse hsl(120, 100%, 50%) as green', () => {
+    const c = parseSvgColor('hsl(120, 100%, 50%)');
+    expect(c).toBeDefined();
+    expect(c!.r).toBe(0);
+    expect(c!.g).toBe(255);
+    expect(c!.b).toBe(0);
+  });
+
+  it('should parse hsl(240, 100%, 50%) as blue', () => {
+    const c = parseSvgColor('hsl(240, 100%, 50%)');
+    expect(c).toBeDefined();
+    expect(c!.r).toBe(0);
+    expect(c!.g).toBe(0);
+    expect(c!.b).toBe(255);
+  });
+
+  it('should parse hsla with alpha', () => {
+    const c = parseSvgColor('hsla(0, 100%, 50%, 0.5)');
+    expect(c).toBeDefined();
+    expect(c!.r).toBe(255);
+    expect(c!.g).toBe(0);
+    expect(c!.b).toBe(0);
+    expect(c!.a).toBe(0.5);
+  });
+
+  it('should parse hsl(0, 0%, 50%) as gray', () => {
+    const c = parseSvgColor('hsl(0, 0%, 50%)');
+    expect(c).toBeDefined();
+    expect(c!.r).toBe(128);
+    expect(c!.g).toBe(128);
+    expect(c!.b).toBe(128);
+  });
+
+  it('should parse hsl(60, 100%, 50%) as yellow', () => {
+    const c = parseSvgColor('hsl(60, 100%, 50%)');
+    expect(c).toBeDefined();
+    expect(c!.r).toBe(255);
+    expect(c!.g).toBe(255);
+    expect(c!.b).toBe(0);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Gradient parsing
+// ---------------------------------------------------------------------------
+
+describe('parseSvg — gradients', () => {
+  it('should parse a simple linearGradient with 2 stops', () => {
+    const svg = `
+      <svg width="200" height="200">
+        <defs>
+          <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="red"/>
+            <stop offset="100%" stop-color="blue"/>
+          </linearGradient>
+        </defs>
+        <rect x="0" y="0" width="200" height="200" fill="url(#grad1)"/>
+      </svg>
+    `;
+    const el = parseSvg(svg);
+    expect(el.gradients).toBeDefined();
+    expect(el.gradients!.size).toBe(1);
+
+    const grad = el.gradients!.get('grad1')!;
+    expect(grad.type).toBe('linearGradient');
+    expect(grad.stops).toHaveLength(2);
+    expect(grad.stops[0]!.color).toEqual({ r: 255, g: 0, b: 0 });
+    expect(grad.stops[1]!.color).toEqual({ r: 0, g: 0, b: 255 });
+    expect(grad.stops[0]!.offset).toBe(0);
+    expect(grad.stops[1]!.offset).toBe(1);
+  });
+
+  it('should parse a complex gradient with 5+ stops', () => {
+    const svg = `
+      <svg width="200" height="200">
+        <defs>
+          <linearGradient id="rainbow">
+            <stop offset="0%" stop-color="red"/>
+            <stop offset="20%" stop-color="orange"/>
+            <stop offset="40%" stop-color="yellow"/>
+            <stop offset="60%" stop-color="green"/>
+            <stop offset="80%" stop-color="blue"/>
+            <stop offset="100%" stop-color="purple"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    `;
+    const el = parseSvg(svg);
+    const grad = el.gradients!.get('rainbow')!;
+    expect(grad.stops).toHaveLength(6);
+    expect(grad.stops[0]!.offset).toBeCloseTo(0);
+    expect(grad.stops[1]!.offset).toBeCloseTo(0.2);
+    expect(grad.stops[2]!.offset).toBeCloseTo(0.4);
+    expect(grad.stops[3]!.offset).toBeCloseTo(0.6);
+    expect(grad.stops[4]!.offset).toBeCloseTo(0.8);
+    expect(grad.stops[5]!.offset).toBeCloseTo(1);
+  });
+
+  it('should sort stops by offset', () => {
+    const svg = `
+      <svg>
+        <defs>
+          <linearGradient id="unsorted">
+            <stop offset="100%" stop-color="blue"/>
+            <stop offset="0%" stop-color="red"/>
+            <stop offset="50%" stop-color="green"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    `;
+    const el = parseSvg(svg);
+    const grad = el.gradients!.get('unsorted')!;
+    expect(grad.stops[0]!.offset).toBe(0);
+    expect(grad.stops[1]!.offset).toBe(0.5);
+    expect(grad.stops[2]!.offset).toBe(1);
+    expect(grad.stops[0]!.color).toEqual({ r: 255, g: 0, b: 0 });
+    expect(grad.stops[1]!.color).toEqual({ r: 0, g: 128, b: 0 });
+    expect(grad.stops[2]!.color).toEqual({ r: 0, g: 0, b: 255 });
+  });
+
+  it('should handle duplicate stop offsets (keep last value)', () => {
+    const svg = `
+      <svg>
+        <defs>
+          <linearGradient id="dupes">
+            <stop offset="0%" stop-color="red"/>
+            <stop offset="50%" stop-color="green"/>
+            <stop offset="50%" stop-color="yellow"/>
+            <stop offset="100%" stop-color="blue"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    `;
+    const el = parseSvg(svg);
+    const grad = el.gradients!.get('dupes')!;
+    // Should have 3 stops (duplicate at 50% resolved to last: yellow)
+    expect(grad.stops).toHaveLength(3);
+    expect(grad.stops[1]!.color).toEqual({ r: 255, g: 255, b: 0 }); // yellow
+  });
+
+  it('should handle single stop (duplicate at 0 and 1)', () => {
+    const svg = `
+      <svg>
+        <defs>
+          <linearGradient id="single">
+            <stop offset="50%" stop-color="red"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    `;
+    const el = parseSvg(svg);
+    const grad = el.gradients!.get('single')!;
+    expect(grad.stops).toHaveLength(2);
+    expect(grad.stops[0]!.offset).toBe(0);
+    expect(grad.stops[1]!.offset).toBe(1);
+    expect(grad.stops[0]!.color).toEqual({ r: 255, g: 0, b: 0 });
+    expect(grad.stops[1]!.color).toEqual({ r: 255, g: 0, b: 0 });
+  });
+
+  it('should handle no stops (default black-to-black)', () => {
+    const svg = `
+      <svg>
+        <defs>
+          <linearGradient id="empty"></linearGradient>
+        </defs>
+      </svg>
+    `;
+    const el = parseSvg(svg);
+    const grad = el.gradients!.get('empty')!;
+    expect(grad.stops).toHaveLength(2);
+    expect(grad.stops[0]!.color).toEqual({ r: 0, g: 0, b: 0 });
+    expect(grad.stops[1]!.color).toEqual({ r: 0, g: 0, b: 0 });
+  });
+
+  it('should parse stop opacity', () => {
+    const svg = `
+      <svg>
+        <defs>
+          <linearGradient id="withOpacity">
+            <stop offset="0%" stop-color="red" stop-opacity="0.5"/>
+            <stop offset="100%" stop-color="blue" stop-opacity="0.8"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    `;
+    const el = parseSvg(svg);
+    const grad = el.gradients!.get('withOpacity')!;
+    expect(grad.stops[0]!.opacity).toBe(0.5);
+    expect(grad.stops[1]!.opacity).toBe(0.8);
+  });
+
+  it('should parse stop-color and stop-opacity from inline style', () => {
+    const svg = `
+      <svg>
+        <defs>
+          <linearGradient id="styledStops">
+            <stop offset="0%" style="stop-color: red; stop-opacity: 0.3"/>
+            <stop offset="100%" style="stop-color: blue"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    `;
+    const el = parseSvg(svg);
+    const grad = el.gradients!.get('styledStops')!;
+    expect(grad.stops[0]!.color).toEqual({ r: 255, g: 0, b: 0 });
+    expect(grad.stops[0]!.opacity).toBeCloseTo(0.3);
+    expect(grad.stops[1]!.color).toEqual({ r: 0, g: 0, b: 255 });
+  });
+
+  it('should parse a radialGradient with focal point', () => {
+    const svg = `
+      <svg>
+        <defs>
+          <radialGradient id="radial1" cx="50%" cy="50%" r="50%" fx="30%" fy="30%">
+            <stop offset="0%" stop-color="white"/>
+            <stop offset="100%" stop-color="black"/>
+          </radialGradient>
+        </defs>
+      </svg>
+    `;
+    const el = parseSvg(svg);
+    const grad = el.gradients!.get('radial1')!;
+    expect(grad.type).toBe('radialGradient');
+    expect(grad.cx).toBeCloseTo(0.5);
+    expect(grad.cy).toBeCloseTo(0.5);
+    expect(grad.r).toBeCloseTo(0.5);
+    expect(grad.fx).toBeCloseTo(0.3);
+    expect(grad.fy).toBeCloseTo(0.3);
+    expect(grad.stops).toHaveLength(2);
+  });
+
+  it('should parse gradientTransform rotation', () => {
+    const svg = `
+      <svg>
+        <defs>
+          <linearGradient id="rotated" gradientTransform="rotate(45)">
+            <stop offset="0%" stop-color="red"/>
+            <stop offset="100%" stop-color="blue"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    `;
+    const el = parseSvg(svg);
+    const grad = el.gradients!.get('rotated')!;
+    expect(grad.gradientTransform).toBeDefined();
+    // rotate(45): cos(45) ~ 0.7071, sin(45) ~ 0.7071
+    expect(grad.gradientTransform![0]).toBeCloseTo(Math.cos(Math.PI / 4), 4);
+    expect(grad.gradientTransform![1]).toBeCloseTo(Math.sin(Math.PI / 4), 4);
+  });
+
+  it('should parse spreadMethod="reflect"', () => {
+    const svg = `
+      <svg>
+        <defs>
+          <linearGradient id="reflected" spreadMethod="reflect">
+            <stop offset="0%" stop-color="red"/>
+            <stop offset="100%" stop-color="blue"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    `;
+    const el = parseSvg(svg);
+    const grad = el.gradients!.get('reflected')!;
+    expect(grad.spreadMethod).toBe('reflect');
+  });
+
+  it('should parse spreadMethod="repeat"', () => {
+    const svg = `
+      <svg>
+        <defs>
+          <linearGradient id="repeated" spreadMethod="repeat">
+            <stop offset="0%" stop-color="red"/>
+            <stop offset="100%" stop-color="blue"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    `;
+    const el = parseSvg(svg);
+    const grad = el.gradients!.get('repeated')!;
+    expect(grad.spreadMethod).toBe('repeat');
+  });
+
+  it('should default spreadMethod to "pad"', () => {
+    const svg = `
+      <svg>
+        <defs>
+          <linearGradient id="default">
+            <stop offset="0%" stop-color="red"/>
+            <stop offset="100%" stop-color="blue"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    `;
+    const el = parseSvg(svg);
+    const grad = el.gradients!.get('default')!;
+    expect(grad.spreadMethod).toBe('pad');
+  });
+
+  it('should parse gradientUnits="userSpaceOnUse"', () => {
+    const svg = `
+      <svg>
+        <defs>
+          <linearGradient id="userSpace" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="200" y2="0">
+            <stop offset="0%" stop-color="red"/>
+            <stop offset="100%" stop-color="blue"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    `;
+    const el = parseSvg(svg);
+    const grad = el.gradients!.get('userSpace')!;
+    expect(grad.gradientUnits).toBe('userSpaceOnUse');
+    expect(grad.x1).toBe(0);
+    expect(grad.x2).toBe(200);
+  });
+
+  it('should default gradientUnits to "objectBoundingBox"', () => {
+    const svg = `
+      <svg>
+        <defs>
+          <linearGradient id="obb">
+            <stop offset="0%" stop-color="red"/>
+            <stop offset="100%" stop-color="blue"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    `;
+    const el = parseSvg(svg);
+    const grad = el.gradients!.get('obb')!;
+    expect(grad.gradientUnits).toBe('objectBoundingBox');
+  });
+
+  it('should resolve fill="url(#id)" gradient references', () => {
+    const svg = `
+      <svg width="200" height="200">
+        <defs>
+          <linearGradient id="myGrad">
+            <stop offset="0%" stop-color="red"/>
+            <stop offset="100%" stop-color="blue"/>
+          </linearGradient>
+        </defs>
+        <rect x="0" y="0" width="200" height="200" fill="url(#myGrad)"/>
+      </svg>
+    `;
+    const el = parseSvg(svg);
+    // Find the rect (inside defs children + rect)
+    const rect = el.children.find((c) => c.tag === 'rect');
+    expect(rect).toBeDefined();
+    expect(rect!.fillGradientId).toBe('myGrad');
+  });
+
+  it('should parse self-closing gradient elements', () => {
+    const svg = `
+      <svg>
+        <defs>
+          <linearGradient id="selfClose"/>
+        </defs>
+      </svg>
+    `;
+    const el = parseSvg(svg);
+    expect(el.gradients).toBeDefined();
+    expect(el.gradients!.has('selfClose')).toBe(true);
+    // No stops = default black-to-black
+    expect(el.gradients!.get('selfClose')!.stops).toHaveLength(2);
+  });
+
+  it('should handle nested SVG with gradient references', () => {
+    const svg = `
+      <svg width="400" height="400">
+        <defs>
+          <radialGradient id="outerGrad" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="white"/>
+            <stop offset="100%" stop-color="gray"/>
+          </radialGradient>
+          <linearGradient id="innerGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="red"/>
+            <stop offset="50%" stop-color="green"/>
+            <stop offset="100%" stop-color="blue"/>
+          </linearGradient>
+        </defs>
+        <rect x="0" y="0" width="400" height="400" fill="url(#outerGrad)"/>
+        <g transform="translate(50,50)">
+          <rect x="0" y="0" width="100" height="100" fill="url(#innerGrad)"/>
+        </g>
+      </svg>
+    `;
+    const el = parseSvg(svg);
+    expect(el.gradients!.size).toBe(2);
+    expect(el.gradients!.has('outerGrad')).toBe(true);
+    expect(el.gradients!.has('innerGrad')).toBe(true);
+    expect(el.gradients!.get('outerGrad')!.type).toBe('radialGradient');
+    expect(el.gradients!.get('innerGrad')!.type).toBe('linearGradient');
+    expect(el.gradients!.get('innerGrad')!.stops).toHaveLength(3);
+
+    // The inner rect should reference innerGrad
+    const g = el.children.find((c) => c.tag === 'g');
+    const innerRect = g?.children.find((c) => c.tag === 'rect');
+    expect(innerRect?.fillGradientId).toBe('innerGrad');
+  });
+
+  it('should parse stop-color with all CSS color formats', () => {
+    const svg = `
+      <svg>
+        <defs>
+          <linearGradient id="allFormats">
+            <stop offset="0%" stop-color="#ff0000"/>
+            <stop offset="16%" stop-color="#f00"/>
+            <stop offset="33%" stop-color="rgb(0, 255, 0)"/>
+            <stop offset="50%" stop-color="rgba(0, 0, 255, 0.8)"/>
+            <stop offset="66%" stop-color="hsl(60, 100%, 50%)"/>
+            <stop offset="83%" stop-color="orange"/>
+            <stop offset="100%" stop-color="hsla(300, 100%, 50%, 0.5)"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    `;
+    const el = parseSvg(svg);
+    const grad = el.gradients!.get('allFormats')!;
+    expect(grad.stops).toHaveLength(7);
+
+    // #ff0000 -> red
+    expect(grad.stops[0]!.color).toEqual({ r: 255, g: 0, b: 0 });
+    // #f00 -> red
+    expect(grad.stops[1]!.color).toEqual({ r: 255, g: 0, b: 0 });
+    // rgb(0, 255, 0) -> green
+    expect(grad.stops[2]!.color).toEqual({ r: 0, g: 255, b: 0 });
+    // rgba(0, 0, 255, 0.8) -> blue with opacity
+    expect(grad.stops[3]!.color).toEqual({ r: 0, g: 0, b: 255 });
+    expect(grad.stops[3]!.opacity).toBeCloseTo(0.8);
+    // hsl(60, 100%, 50%) -> yellow
+    expect(grad.stops[4]!.color).toEqual({ r: 255, g: 255, b: 0 });
+    // orange -> named
+    expect(grad.stops[5]!.color).toEqual({ r: 255, g: 165, b: 0 });
+    // hsla(300, 100%, 50%, 0.5) -> magenta with opacity
+    expect(grad.stops[6]!.color).toEqual({ r: 255, g: 0, b: 255 });
+    expect(grad.stops[6]!.opacity).toBeCloseTo(0.5);
+  });
+
+  it('should parse gradientTransform with complex transform', () => {
+    const svg = `
+      <svg>
+        <defs>
+          <linearGradient id="complexTransform" gradientTransform="translate(50,50) rotate(45) scale(2)">
+            <stop offset="0%" stop-color="red"/>
+            <stop offset="100%" stop-color="blue"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    `;
+    const el = parseSvg(svg);
+    const grad = el.gradients!.get('complexTransform')!;
+    expect(grad.gradientTransform).toBeDefined();
+    // This is a composed matrix, so just verify it exists and is a 6-element array
+    expect(grad.gradientTransform).toHaveLength(6);
+  });
+
+  it('should clamp stop offsets to [0, 1]', () => {
+    const svg = `
+      <svg>
+        <defs>
+          <linearGradient id="clamped">
+            <stop offset="-10%" stop-color="red"/>
+            <stop offset="150%" stop-color="blue"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    `;
+    const el = parseSvg(svg);
+    const grad = el.gradients!.get('clamped')!;
+    expect(grad.stops[0]!.offset).toBe(0);
+    expect(grad.stops[1]!.offset).toBe(1);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// interpolateLinearRgb
+// ---------------------------------------------------------------------------
+
+describe('interpolateLinearRgb', () => {
+  it('should return start colour at t=0', () => {
+    const result = interpolateLinearRgb({ r: 255, g: 0, b: 0 }, { r: 0, g: 0, b: 255 }, 0);
+    expect(result.r).toBe(255);
+    expect(result.g).toBe(0);
+    expect(result.b).toBe(0);
+  });
+
+  it('should return end colour at t=1', () => {
+    const result = interpolateLinearRgb({ r: 255, g: 0, b: 0 }, { r: 0, g: 0, b: 255 }, 1);
+    expect(result.r).toBe(0);
+    expect(result.g).toBe(0);
+    expect(result.b).toBe(255);
+  });
+
+  it('should interpolate at t=0.5 in linear RGB space', () => {
+    const result = interpolateLinearRgb({ r: 255, g: 0, b: 0 }, { r: 0, g: 0, b: 255 }, 0.5);
+    // In linear RGB space, midpoint of (255,0,0) and (0,0,255) is brighter than sRGB midpoint
+    expect(result.r).toBeGreaterThan(0);
+    expect(result.r).toBeLessThan(255);
+    expect(result.b).toBeGreaterThan(0);
+    expect(result.b).toBeLessThan(255);
+  });
+
+  it('should handle black to white', () => {
+    const result = interpolateLinearRgb({ r: 0, g: 0, b: 0 }, { r: 255, g: 255, b: 255 }, 0.5);
+    // Midpoint should be approximately 188 in sRGB (sqrt(0.5) in linear)
+    expect(result.r).toBeGreaterThan(100);
+    expect(result.r).toBeLessThan(220);
+    expect(result.r).toBe(result.g);
+    expect(result.g).toBe(result.b);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// applySpreadMethod
+// ---------------------------------------------------------------------------
+
+describe('applySpreadMethod', () => {
+  it('pad: should clamp t < 0 to 0', () => {
+    expect(applySpreadMethod(-0.5, 'pad')).toBe(0);
+  });
+
+  it('pad: should clamp t > 1 to 1', () => {
+    expect(applySpreadMethod(1.5, 'pad')).toBe(1);
+  });
+
+  it('pad: should pass through t in [0,1]', () => {
+    expect(applySpreadMethod(0.5, 'pad')).toBe(0.5);
+  });
+
+  it('repeat: should wrap t=1.3 to 0.3', () => {
+    expect(applySpreadMethod(1.3, 'repeat')).toBeCloseTo(0.3, 5);
+  });
+
+  it('repeat: should wrap t=2.7 to 0.7', () => {
+    expect(applySpreadMethod(2.7, 'repeat')).toBeCloseTo(0.7, 5);
+  });
+
+  it('repeat: should wrap t=-0.3 to 0.7', () => {
+    expect(applySpreadMethod(-0.3, 'repeat')).toBeCloseTo(0.7, 5);
+  });
+
+  it('reflect: should mirror t=1.3 to 0.7', () => {
+    expect(applySpreadMethod(1.3, 'reflect')).toBeCloseTo(0.7, 5);
+  });
+
+  it('reflect: should mirror t=2.3 to 0.3', () => {
+    expect(applySpreadMethod(2.3, 'reflect')).toBeCloseTo(0.3, 5);
+  });
+
+  it('reflect: should mirror t=-0.3 to 0.3', () => {
+    expect(applySpreadMethod(-0.3, 'reflect')).toBeCloseTo(0.3, 5);
+  });
+
+  it('reflect: should handle t=0.5 unchanged', () => {
+    expect(applySpreadMethod(0.5, 'reflect')).toBeCloseTo(0.5, 5);
   });
 });

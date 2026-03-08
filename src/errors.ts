@@ -213,3 +213,120 @@ export class ExceededMaxLengthError extends Error {
     );
   }
 }
+
+// ---------------------------------------------------------------------------
+// Page size validation
+// ---------------------------------------------------------------------------
+
+/**
+ * Thrown when an invalid page size is provided (e.g. zero or negative
+ * dimensions, non-finite values).
+ *
+ * @example
+ * ```ts
+ * throw new InvalidPageSizeError(0, 842);
+ * ```
+ */
+export class InvalidPageSizeError extends Error {
+  override readonly name = 'InvalidPageSizeError';
+  constructor(width: number, height: number, options?: ErrorOptions) {
+    super(
+      `Invalid page size: width=${width}, height=${height}. ` +
+        'Both dimensions must be finite positive numbers.',
+      options,
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Color validation
+// ---------------------------------------------------------------------------
+
+/**
+ * Thrown when an invalid color value is provided (e.g. component values
+ * outside the `[0, 1]` range, unknown color type).
+ *
+ * @example
+ * ```ts
+ * throw new InvalidColorError('RGB component out of range: r=1.5');
+ * ```
+ */
+export class InvalidColorError extends Error {
+  override readonly name = 'InvalidColorError';
+  constructor(message: string, options?: ErrorOptions) {
+    super(message, options);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Plugin errors
+// ---------------------------------------------------------------------------
+
+/**
+ * Thrown when a plugin encounters an error during initialization or
+ * execution.  Wraps the underlying cause for error-chain inspection.
+ *
+ * @example
+ * ```ts
+ * throw new PluginError('myPlugin', 'Failed to initialize WASM module');
+ * ```
+ */
+export class PluginError extends Error {
+  override readonly name = 'PluginError';
+  /** Name of the plugin that caused the error. */
+  readonly pluginName: string;
+  constructor(pluginName: string, message: string, options?: ErrorOptions) {
+    super(`Plugin "${pluginName}": ${message}`, options);
+    this.pluginName = pluginName;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Streaming parse errors
+// ---------------------------------------------------------------------------
+
+/**
+ * Thrown when a streaming (incremental) parse operation encounters
+ * corrupt or incomplete data that prevents further processing.
+ *
+ * @example
+ * ```ts
+ * throw new StreamingParseError('Unexpected EOF at byte offset 4096');
+ * ```
+ */
+export class StreamingParseError extends Error {
+  override readonly name = 'StreamingParseError';
+  /** Byte offset where the error occurred, if known. */
+  readonly offset?: number | undefined;
+  constructor(message: string, offset?: number, options?: ErrorOptions) {
+    super(offset !== undefined ? `${message} (at byte offset ${offset})` : message, options);
+    this.offset = offset;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Batch processing errors
+// ---------------------------------------------------------------------------
+
+/**
+ * Thrown when a batch processing operation fails.  Contains information
+ * about which items succeeded and which failed.
+ *
+ * @example
+ * ```ts
+ * throw new BatchProcessingError('2 of 5 documents failed', failures);
+ * ```
+ */
+export class BatchProcessingError extends Error {
+  override readonly name = 'BatchProcessingError';
+  /** Details of individual item failures. */
+  readonly failures: ReadonlyArray<{ readonly index: number; readonly error: Error }>;
+  constructor(
+    message: string,
+    failures: ReadonlyArray<{ readonly index: number; readonly error: Error }>,
+    options?: ErrorOptions,
+  ) {
+    super(message, options);
+    this.failures = failures;
+  }
+}

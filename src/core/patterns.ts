@@ -189,6 +189,9 @@ function colorToRgb(c: Color): { r: number; g: number; b: number } {
       const b = (1 - c.y) * (1 - c.k);
       return { r, g, b };
     }
+    default:
+      // SpotColor / DeviceNColor — fall back to black
+      return { r: 0, g: 0, b: 0 };
   }
 }
 

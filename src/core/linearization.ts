@@ -28,6 +28,10 @@
  * - Delinearization (`delinearizePdf`) that strips linearization
  *   artifacts and produces a normal (non-linearized) PDF.
  *
+ * Two-pass serialization ensures all byte offsets in hint tables,
+ * cross-reference streams, and the linearization parameter dictionary
+ * are exact — not placeholders or approximations.
+ *
  * Reference: PDF 1.7 spec, Appendix F (Linearized PDF).
  */
 
@@ -399,60 +403,132 @@ function classifyObjects(
 }
 
 // ---------------------------------------------------------------------------
-// Hint table builders (PDF spec §F.4)
+// Hint table builders (PDF spec §F.4) — exact byte offsets
 // ---------------------------------------------------------------------------
 
 /**
- * Build a page offset hint table (§F.4.1).
- *
- * The table is a header followed by per-page entries that describe
- * how many objects and bytes each page consumes.
+ * Per-page statistics used by both hint table construction and verification.
  */
-function buildPageOffsetHintTable(
+interface PageStats {
+  /** Number of objects exclusively belonging to this page. */
+  objCount: number;
+  /** Total byte length of this page's exclusive objects in the output. */
+  totalBytes: number;
+  /** Object number of the first object for this page. */
+  firstObjNum: number;
+  /** Byte offset of the first object for this page. */
+  firstObjOffset: number;
+  /** Byte offset of the content stream for this page (0 if none). */
+  contentStreamOffset: number;
+  /** Byte length of the content stream for this page (0 if none). */
+  contentStreamLength: number;
+  /** Number of shared object references for this page. */
+  sharedObjRefCount: number;
+}
+
+/**
+ * Compute exact per-page statistics from final byte offsets.
+ */
+function computePageStats(
   pages: PageInfo[],
   offsets: Map<number, number>,
-  objectSizes: Map<number, number>,
-): Uint8Array {
-  const nPages = pages.length;
-  if (nPages === 0) return new Uint8Array(0);
-
-  // Compute per-page statistics
-  const pageStats: Array<{
-    objCount: number;
-    totalBytes: number;
-    firstObjNum: number;
-  }> = [];
+  serializedSizes: Map<number, number>,
+  objects: Map<number, Uint8Array>,
+): PageStats[] {
+  const stats: PageStats[] = [];
 
   for (const page of pages) {
     const allObjs = [page.pageObjNum, ...page.referencedObjects];
     let totalBytes = 0;
     let firstObj = page.pageObjNum;
+    let firstObjOffset = offsets.get(page.pageObjNum) ?? 0;
+    let contentStreamOffset = 0;
+    let contentStreamLength = 0;
 
     for (const objNum of allObjs) {
-      const size = objectSizes.get(objNum) ?? 0;
+      const size = serializedSizes.get(objNum) ?? 0;
       totalBytes += size;
-      if (objNum < firstObj) firstObj = objNum;
+
+      const off = offsets.get(objNum) ?? 0;
+      if (off < firstObjOffset || (off === firstObjOffset && objNum < firstObj)) {
+        firstObj = objNum;
+        firstObjOffset = off;
+      }
+
+      // Detect content streams
+      const objBytes = objects.get(objNum);
+      if (objBytes && isStreamObject(objBytes)) {
+        const objStr = decoder.decode(objBytes);
+        if (!/\/Type\s*\//.test(objStr) || /\/Type\s*\/XObject/.test(objStr)) {
+          // This is likely a content stream or XObject stream
+          if (contentStreamOffset === 0) {
+            contentStreamOffset = off;
+            contentStreamLength = size;
+          }
+        }
+      }
     }
 
-    pageStats.push({
+    // Count shared object references for this page
+    // (This is the number of shared objects this page references, stored
+    //  so we can write it in per-page hint entries)
+    let sharedObjRefCount = 0;
+    const objBytes = objects.get(page.pageObjNum);
+    if (objBytes) {
+      const objStr = decoder.decode(objBytes);
+      const refs = objStr.matchAll(/(\d+)\s+\d+\s+R/g);
+      for (const _ref of refs) {
+        sharedObjRefCount++;
+      }
+    }
+
+    stats.push({
       objCount: allObjs.length,
       totalBytes,
       firstObjNum: firstObj,
+      firstObjOffset,
+      contentStreamOffset,
+      contentStreamLength,
+      sharedObjRefCount,
     });
   }
 
-  // Header fields (§F.4.1, Table F.3):
-  // 1. Least number of objects in a page
-  // 2. Location of first page's page object (offset)
-  // 3. Number of bits needed for difference in objects per page
-  // 4. Least page length (bytes)
-  // 5. Number of bits for difference in page lengths
-  // 6. Least offset to content stream (we set to 0)
-  // 7. Number of bits for difference in content stream offsets (0)
-  // 8. Least content stream length (0)
-  // 9. Number of bits for difference in content stream lengths (0)
-  // 10+: per-page entries
+  return stats;
+}
 
+/**
+ * Build a page offset hint table (§F.4.1) with exact byte offsets.
+ *
+ * The table is a binary header (13 4-byte fields = 52 bytes) followed
+ * by per-page entries encoding deltas from the minimums.
+ *
+ * Header fields (per Table F.3):
+ *  1.  Least number of objects in a page
+ *  2.  Location of first page's page object (byte offset)
+ *  3.  Bits needed for difference from least objects per page
+ *  4.  Least page length (bytes)
+ *  5.  Bits for difference from least page length
+ *  6.  Least offset to start of content stream
+ *  7.  Bits for difference in content stream offsets
+ *  8.  Least content stream length
+ *  9.  Bits for difference in content stream lengths
+ * 10.  Bits needed for number of shared object references
+ * 11.  Bits needed for shared object reference identifier
+ * 12.  Bits needed for numerator of fractional position
+ * 13.  Shared object denominator
+ */
+function buildPageOffsetHintTable(
+  pages: PageInfo[],
+  offsets: Map<number, number>,
+  serializedSizes: Map<number, number>,
+  objects: Map<number, Uint8Array>,
+): Uint8Array {
+  const nPages = pages.length;
+  if (nPages === 0) return new Uint8Array(0);
+
+  const pageStats = computePageStats(pages, offsets, serializedSizes, objects);
+
+  // Header values
   const leastObjCount = Math.min(...pageStats.map(p => p.objCount));
   const maxObjDiff = Math.max(...pageStats.map(p => p.objCount - leastObjCount));
   const bitsForObjDiff = maxObjDiff > 0 ? Math.ceil(Math.log2(maxObjDiff + 1)) : 0;
@@ -461,31 +537,49 @@ function buildPageOffsetHintTable(
   const maxLenDiff = Math.max(...pageStats.map(p => p.totalBytes - leastPageLen));
   const bitsForLenDiff = maxLenDiff > 0 ? Math.ceil(Math.log2(maxLenDiff + 1)) : 0;
 
+  const contentOffsets = pageStats.map(p => p.contentStreamOffset);
+  const leastContentOffset = Math.min(...contentOffsets);
+  const maxContentOffDiff = Math.max(...contentOffsets) - leastContentOffset;
+  const bitsForContentOffDiff = maxContentOffDiff > 0
+    ? Math.ceil(Math.log2(maxContentOffDiff + 1)) : 0;
+
+  const contentLengths = pageStats.map(p => p.contentStreamLength);
+  const leastContentLen = Math.min(...contentLengths);
+  const maxContentLenDiff = Math.max(...contentLengths) - leastContentLen;
+  const bitsForContentLenDiff = maxContentLenDiff > 0
+    ? Math.ceil(Math.log2(maxContentLenDiff + 1)) : 0;
+
+  const sharedRefCounts = pageStats.map(p => p.sharedObjRefCount);
+  const maxSharedRefs = Math.max(...sharedRefCounts);
+  const bitsForSharedRefs = maxSharedRefs > 0
+    ? Math.ceil(Math.log2(maxSharedRefs + 1)) : 0;
+
   const firstPageObjOffset = offsets.get(pages[0]!.pageObjNum) ?? 0;
 
-  // Encode header as big-endian 4-byte integers (simplified encoding)
-  // Header: 9 fields x 4 bytes = 36 bytes
-  const headerSize = 36;
-  // Per-page data: variable bits, but we use 4-byte entries for simplicity
-  // Each page entry: objCountDiff(4 bytes) + pageLenDiff(4 bytes) = 8 bytes
-  const perPageSize = 8;
+  // 13-field header (52 bytes) + per-page entries (8 bytes each for deltas)
+  const headerSize = 52;
+  const perPageSize = 8; // objCountDelta(4) + pageLenDelta(4)
   const totalSize = headerSize + nPages * perPageSize;
 
   const data = new Uint8Array(totalSize);
   let pos = 0;
 
-  // Write header fields
-  writeU32BE(data, pos, leastObjCount); pos += 4;
-  writeU32BE(data, pos, firstPageObjOffset); pos += 4;
-  writeU32BE(data, pos, bitsForObjDiff); pos += 4;
-  writeU32BE(data, pos, leastPageLen); pos += 4;
-  writeU32BE(data, pos, bitsForLenDiff); pos += 4;
-  writeU32BE(data, pos, 0); pos += 4; // least content stream offset
-  writeU32BE(data, pos, 0); pos += 4; // bits for content stream offset diff
-  writeU32BE(data, pos, 0); pos += 4; // least content stream length
-  writeU32BE(data, pos, 0); pos += 4; // bits for content stream length diff
+  // Write 13 header fields
+  writeU32BE(data, pos, leastObjCount); pos += 4;           // 1
+  writeU32BE(data, pos, firstPageObjOffset); pos += 4;       // 2
+  writeU32BE(data, pos, bitsForObjDiff); pos += 4;           // 3
+  writeU32BE(data, pos, leastPageLen); pos += 4;             // 4
+  writeU32BE(data, pos, bitsForLenDiff); pos += 4;           // 5
+  writeU32BE(data, pos, leastContentOffset); pos += 4;       // 6
+  writeU32BE(data, pos, bitsForContentOffDiff); pos += 4;    // 7
+  writeU32BE(data, pos, leastContentLen); pos += 4;          // 8
+  writeU32BE(data, pos, bitsForContentLenDiff); pos += 4;    // 9
+  writeU32BE(data, pos, bitsForSharedRefs); pos += 4;        // 10
+  writeU32BE(data, pos, bitsForSharedRefs); pos += 4;        // 11
+  writeU32BE(data, pos, 0); pos += 4;                        // 12 numerator bits
+  writeU32BE(data, pos, 1); pos += 4;                        // 13 denominator
 
-  // Write per-page entries
+  // Write per-page entries with exact deltas
   for (const stat of pageStats) {
     writeU32BE(data, pos, stat.objCount - leastObjCount); pos += 4;
     writeU32BE(data, pos, stat.totalBytes - leastPageLen); pos += 4;
@@ -495,46 +589,56 @@ function buildPageOffsetHintTable(
 }
 
 /**
- * Build a shared object hint table (§F.4.2).
+ * Build a shared object hint table (§F.4.2) with exact byte offsets.
  *
- * This describes shared objects — objects referenced by multiple pages.
+ * Header fields (per Table F.5, 7 fields):
+ *  1.  Object number of first shared object
+ *  2.  Byte offset of first shared object in file
+ *  3.  Number of shared object entries
+ *  4.  Least object length (bytes)
+ *  5.  Bits for difference from least object length
+ *  6.  Flag: 1 if first shared object is the first page's page object
+ *  7.  Number of shared object entries for first page
  */
 function buildSharedObjectHintTable(
   sharedObjectNums: number[],
   offsets: Map<number, number>,
-  objectSizes: Map<number, number>,
+  serializedSizes: Map<number, number>,
+  firstPageObjNum: number,
 ): Uint8Array {
   const nShared = sharedObjectNums.length;
   if (nShared === 0) return new Uint8Array(0);
 
-  // Header: 5 fields x 4 bytes = 20 bytes
-  // Per-object: offset(4) + length(4) = 8 bytes
-  const headerSize = 20;
+  // 7-field header (28 bytes) + per-object entries (8 bytes each)
+  const headerSize = 28;
   const perObjectSize = 8;
   const totalSize = headerSize + nShared * perObjectSize;
 
   const data = new Uint8Array(totalSize);
   let pos = 0;
 
-  // Compute sizes
-  const sizes = sharedObjectNums.map(n => objectSizes.get(n) ?? 0);
+  // Compute sizes using exact serialized sizes
+  const sizes = sharedObjectNums.map(n => serializedSizes.get(n) ?? 0);
   const leastLen = sizes.length > 0 ? Math.min(...sizes) : 0;
   const maxLenDiff = sizes.length > 0 ? Math.max(...sizes) - leastLen : 0;
   const bitsForLenDiff = maxLenDiff > 0 ? Math.ceil(Math.log2(maxLenDiff + 1)) : 0;
   const firstObjNum = sharedObjectNums.length > 0 ? Math.min(...sharedObjectNums) : 0;
   const firstObjOffset = offsets.get(firstObjNum) ?? 0;
+  const firstIsPageObj = sharedObjectNums.includes(firstPageObjNum) ? 1 : 0;
 
-  // Header
-  writeU32BE(data, pos, firstObjNum); pos += 4;
-  writeU32BE(data, pos, firstObjOffset); pos += 4;
-  writeU32BE(data, pos, nShared); pos += 4;
-  writeU32BE(data, pos, leastLen); pos += 4;
-  writeU32BE(data, pos, bitsForLenDiff); pos += 4;
+  // 7 header fields
+  writeU32BE(data, pos, firstObjNum); pos += 4;          // 1
+  writeU32BE(data, pos, firstObjOffset); pos += 4;       // 2
+  writeU32BE(data, pos, nShared); pos += 4;              // 3
+  writeU32BE(data, pos, leastLen); pos += 4;             // 4
+  writeU32BE(data, pos, bitsForLenDiff); pos += 4;       // 5
+  writeU32BE(data, pos, firstIsPageObj); pos += 4;       // 6
+  writeU32BE(data, pos, nShared); pos += 4;              // 7
 
-  // Per-object entries
+  // Per-object entries with exact offsets and sizes
   for (let i = 0; i < nShared; i++) {
     const off = offsets.get(sharedObjectNums[i]!) ?? 0;
-    const size = objectSizes.get(sharedObjectNums[i]!) ?? 0;
+    const size = serializedSizes.get(sharedObjectNums[i]!) ?? 0;
     writeU32BE(data, pos, off); pos += 4;
     writeU32BE(data, pos, size); pos += 4;
   }
@@ -548,6 +652,16 @@ function writeU32BE(buf: Uint8Array, offset: number, value: number): void {
   buf[offset + 1] = (value >>> 16) & 0xff;
   buf[offset + 2] = (value >>> 8) & 0xff;
   buf[offset + 3] = value & 0xff;
+}
+
+/** Read a 4-byte big-endian unsigned integer. */
+export function readU32BE(buf: Uint8Array, offset: number): number {
+  return (
+    ((buf[offset]! << 24) |
+      (buf[offset + 1]! << 16) |
+      (buf[offset + 2]! << 8) |
+      buf[offset + 3]!) >>> 0
+  );
 }
 
 /** Compute minimum bytes to represent a value in big-endian. */
@@ -642,6 +756,218 @@ function buildXrefStream(
 }
 
 // ---------------------------------------------------------------------------
+// Two-pass serialization helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Serialization state collected during a layout pass.
+ * Captures exact byte offsets and sizes for every component.
+ */
+interface LayoutResult {
+  /** Total file length. */
+  fileLength: number;
+  /** Byte offsets of each object in the output. */
+  offsets: Map<number, number>;
+  /** Serialized byte sizes of each object (including trailing newline). */
+  serializedSizes: Map<number, number>;
+  /** Byte offset where first-page objects end. */
+  endOfFirstPage: number;
+  /** Byte offset of the hint stream object. */
+  hintStreamStart: number;
+  /** Byte length of the hint stream object (from obj header to endobj). */
+  hintStreamLength: number;
+  /** Byte offset of the main (overflow) xref stream. */
+  mainXrefOffset: number;
+  /** The assembled file bytes (only valid on pass 2). */
+  bytes: Uint8Array;
+}
+
+/**
+ * Execute one serialization pass, producing a LayoutResult.
+ *
+ * On pass 1, hint table offsets passed in may be 0 (placeholders).
+ * On pass 2, they reflect the exact values from pass 1 so every
+ * offset in the output is self-consistent.
+ */
+function serializationPass(
+  objects: Map<number, Uint8Array>,
+  firstPageObjNumsSorted: number[],
+  remainingObjNums: number[],
+  classification: { pages: PageInfo[]; sharedObjects: Set<number> },
+  linObjNum: number,
+  hintObjNum: number,
+  firstPageObjNum: number,
+  pageCount: number,
+  trailer: TrailerInfo,
+  /** Values from previous pass (or placeholders on pass 1). */
+  prev: {
+    fileLength: number;
+    endOfFirstPage: number;
+    mainXrefOffset: number;
+    hintStreamStart: number;
+    hintStreamLength: number;
+  },
+  /** Object offsets from a previous pass, used for hint table construction. */
+  prevOffsets?: Map<number, number>,
+  /** Serialized sizes from a previous pass, used for hint table construction. */
+  prevSizes?: Map<number, number>,
+): LayoutResult {
+  const chunks: Uint8Array[] = [];
+  const newOffsets = new Map<number, number>();
+  const serializedSizes = new Map<number, number>();
+  let currentOffset = 0;
+
+  function writeStr(s: string): void {
+    const bytes = encoder.encode(s);
+    chunks.push(bytes);
+    currentOffset += bytes.length;
+  }
+
+  function writeBytes(data: Uint8Array): void {
+    chunks.push(data);
+    currentOffset += data.length;
+  }
+
+  // ----- Part 1: Header -----
+  writeStr('%PDF-1.7\n');
+  writeStr('%\xe2\xe3\xcf\xd3\n');
+
+  // ----- Part 2: Linearization parameter dictionary -----
+  // Use padded 10-digit placeholders so the dict is always the same size
+  const linDictOffset = currentOffset;
+  writeStr(`${linObjNum} 0 obj\n`);
+  writeStr('<< /Linearized 1.0\n');
+  writeStr(`   /L ${prev.fileLength.toString().padStart(10, '0')}\n`);
+  writeStr(`   /O ${firstPageObjNum}\n`);
+  writeStr(`   /E ${prev.endOfFirstPage.toString().padStart(10, '0')}\n`);
+  writeStr(`   /N ${pageCount}\n`);
+  writeStr(`   /T ${prev.mainXrefOffset.toString().padStart(10, '0')}\n`);
+  writeStr(`   /H [${prev.hintStreamStart.toString().padStart(10, '0')} ${prev.hintStreamLength.toString().padStart(10, '0')}]\n`);
+  writeStr('>>\n');
+  writeStr('endobj\n');
+  newOffsets.set(linObjNum, linDictOffset);
+  serializedSizes.set(linObjNum, currentOffset - linDictOffset);
+
+  // ----- Part 4: First-page objects -----
+  for (const objNum of firstPageObjNumsSorted) {
+    const objBytes = objects.get(objNum);
+    if (objBytes) {
+      const start = currentOffset;
+      newOffsets.set(objNum, start);
+      writeBytes(objBytes);
+      writeStr('\n');
+      serializedSizes.set(objNum, currentOffset - start);
+    }
+  }
+
+  const endOfFirstPage = currentOffset;
+
+  // ----- Part 5: Primary hint stream -----
+  const hintStreamStart = currentOffset;
+
+  // Build hint tables using offsets from the previous pass when available.
+  // This is essential because at this point in the file layout, only
+  // first-page objects have been written — remaining-page objects haven't
+  // been placed yet. The previous pass provides complete offset data.
+  const hintOffsets = prevOffsets ?? newOffsets;
+  const hintSizes = prevSizes ?? serializedSizes;
+
+  const pageOffsetHints = buildPageOffsetHintTable(
+    classification.pages,
+    hintOffsets,
+    hintSizes,
+    objects,
+  );
+  const sharedObjNums = [...classification.sharedObjects].sort((a, b) => a - b);
+  const sharedObjectHints = buildSharedObjectHintTable(
+    sharedObjNums,
+    hintOffsets,
+    hintSizes,
+    firstPageObjNum,
+  );
+
+  // The hint stream contains both tables concatenated.
+  // /S marks the offset of the shared object hint table within the stream.
+  const hintStreamData = new Uint8Array(pageOffsetHints.length + sharedObjectHints.length);
+  hintStreamData.set(pageOffsetHints, 0);
+  hintStreamData.set(sharedObjectHints, pageOffsetHints.length);
+
+  const sharedHintOffset = pageOffsetHints.length;
+
+  writeStr(`${hintObjNum} 0 obj\n`);
+  writeStr(`<< /Length ${hintStreamData.length} /S ${sharedHintOffset} >>\n`);
+  writeStr('stream\n');
+  writeBytes(hintStreamData);
+  writeStr('\nendstream\n');
+  writeStr('endobj\n');
+  newOffsets.set(hintObjNum, hintStreamStart);
+  serializedSizes.set(hintObjNum, currentOffset - hintStreamStart);
+
+  const hintStreamLength = currentOffset - hintStreamStart;
+
+  // ----- Part 6: Remaining pages' objects -----
+  for (const objNum of remainingObjNums) {
+    const objBytes = objects.get(objNum);
+    if (objBytes) {
+      const start = currentOffset;
+      newOffsets.set(objNum, start);
+      writeBytes(objBytes);
+      writeStr('\n');
+      serializedSizes.set(objNum, currentOffset - start);
+    }
+  }
+
+  // ----- Part 7: Main cross-reference stream -----
+  // Build xref entries for ALL objects (including itself)
+  const xrefEntries = new Map<number, { type: number; field2: number; field3: number }>();
+  for (const [objNum, offset] of newOffsets) {
+    xrefEntries.set(objNum, { type: 1, field2: offset, field3: 0 });
+  }
+
+  const maxObjNumInFile = Math.max(...newOffsets.keys(), 0);
+  const mainXrefObjNum = maxObjNumInFile + 1;
+
+  // The xref stream object is also an entry pointing to itself
+  const mainXrefOffset = currentOffset;
+  xrefEntries.set(mainXrefObjNum, { type: 1, field2: mainXrefOffset, field3: 0 });
+
+  const xrefStreamBytes = buildXrefStream(
+    mainXrefObjNum,
+    mainXrefObjNum + 1,
+    xrefEntries,
+    trailer.rootRef,
+    trailer.infoRef,
+  );
+  writeBytes(xrefStreamBytes);
+
+  // ----- Part 8: startxref + %%EOF -----
+  writeStr('startxref\n');
+  writeStr(`${mainXrefOffset}\n`);
+  writeStr('%%EOF\n');
+
+  const fileLength = currentOffset;
+
+  // Assemble all chunks
+  const result = new Uint8Array(fileLength);
+  let pos = 0;
+  for (const chunk of chunks) {
+    result.set(chunk, pos);
+    pos += chunk.length;
+  }
+
+  return {
+    fileLength,
+    offsets: newOffsets,
+    serializedSizes,
+    endOfFirstPage,
+    hintStreamStart,
+    hintStreamLength,
+    mainXrefOffset,
+    bytes: result,
+  };
+}
+
+// ---------------------------------------------------------------------------
 // Linearization
 // ---------------------------------------------------------------------------
 
@@ -653,6 +979,11 @@ function buildXrefStream(
  * 2. Objects needed for the first page appear early in the file
  * 3. A primary hint stream describes page offsets and shared objects (§F.4)
  * 4. Cross-reference streams are used for all xref data (§7.5.8)
+ *
+ * Uses two-pass serialization:
+ * - Pass 1 produces a trial layout to determine exact byte sizes.
+ * - Pass 2 re-serializes with the correct values, so all offsets
+ *   (/L, /O, /E, /T, /H, hint table entries, xref entries) are exact.
  *
  * @param pdfBytes  The raw PDF bytes.
  * @param options   Linearization options.
@@ -763,174 +1094,97 @@ export async function linearizePdf(
   }
   remainingObjNums.sort((a, b) => a - b);
 
-  // Allocate new object numbers:
-  // We need 2 additional objects: linearization dict + hint stream
+  // Allocate new object numbers for linearization dict + hint stream
   const maxOrigObjNum = Math.max(...objects.keys(), 0);
   const linObjNum = maxOrigObjNum + 1;
   const hintObjNum = maxOrigObjNum + 2;
-  const totalObjectCount = maxOrigObjNum + 3; // 0..maxOrigObjNum + linObj + hintObj
-
-  // Build the linearized output using a two-pass approach:
-  // Pass 1: calculate sizes without final values for placeholders
-  // Pass 2: write with correct values
 
   const firstPageObjNumsSorted = [...firstPageObjNums].sort((a, b) => a - b);
 
-  // Pre-compute object sizes
-  const objectSizes = new Map<number, number>();
-  for (const [objNum, objBytes] of objects) {
-    objectSizes.set(objNum, objBytes.length + 1); // +1 for newline
-  }
+  // ===================================================================
+  // Two-pass serialization
+  // ===================================================================
 
-  // ----- Pass: build the file -----
-  const chunks: Uint8Array[] = [];
-  const newOffsets = new Map<number, number>();
-  let currentOffset = 0;
-
-  function writeStr(s: string): void {
-    const bytes = encoder.encode(s);
-    chunks.push(bytes);
-    currentOffset += bytes.length;
-  }
-
-  function writeBytes(data: Uint8Array): void {
-    chunks.push(data);
-    currentOffset += data.length;
-  }
-
-  // ----- Part 1: Header -----
-  writeStr('%PDF-1.7\n');
-  writeStr('%\xe2\xe3\xcf\xd3\n');
-
-  // ----- Part 2: Linearization parameter dictionary -----
-  const linDictOffset = currentOffset;
-  // Use padded placeholders for /L, /E, /T, /H that we'll patch later
-  writeStr(`${linObjNum} 0 obj\n`);
-  writeStr(`<< /Linearized 1.0\n`);
-  writeStr(`   /L 0000000000\n`);
-  writeStr(`   /O ${firstPageObjNum}\n`);
-  writeStr(`   /E 0000000000\n`);
-  writeStr(`   /N ${pageCount}\n`);
-  writeStr(`   /T 0000000000\n`);
-  writeStr(`   /H [0000000000 0000000000]\n`);
-  writeStr('>>\n');
-  writeStr('endobj\n');
-  newOffsets.set(linObjNum, linDictOffset);
-
-  // ----- Part 3: First-page cross-reference section -----
-  // (We'll write the first-page xref after knowing offsets — placeholder)
-  const firstXrefPlaceholderStart = currentOffset;
-
-  // Reserve space for first-page xref by writing objects first,
-  // then come back. Actually, per spec the first-page xref comes
-  // BEFORE the first-page objects. We'll do a two-pass approach:
-  // write placeholder, then fill in.
-
-  // For simplicity, we use the traditional xref table for the first-page
-  // cross-reference section. The main xref at the end uses a cross-reference
-  // stream.
-
-  // Skip xref for now — we'll splice it in at the end.
-  // Instead, write first-page objects directly and track their offsets.
-
-  // ----- Part 4: First-page objects -----
-  for (const objNum of firstPageObjNumsSorted) {
-    const objBytes = objects.get(objNum);
-    if (objBytes) {
-      newOffsets.set(objNum, currentOffset);
-      writeBytes(objBytes);
-      writeStr('\n');
-    }
-  }
-
-  const endOfFirstPage = currentOffset;
-
-  // ----- Part 5: Primary hint stream -----
-  const hintStreamStart = currentOffset;
-
-  // Build hint tables
-  const pageOffsetHints = buildPageOffsetHintTable(
-    classification.pages,
-    newOffsets,
-    objectSizes,
-  );
-  const sharedObjNums = [...classification.sharedObjects].sort((a, b) => a - b);
-  const sharedObjectHints = buildSharedObjectHintTable(
-    sharedObjNums,
-    newOffsets,
-    objectSizes,
+  // Pass 1: Trial layout with placeholder values (all zeros)
+  const pass1 = serializationPass(
+    objects,
+    firstPageObjNumsSorted,
+    remainingObjNums,
+    classification,
+    linObjNum,
+    hintObjNum,
+    firstPageObjNum,
+    pageCount,
+    trailer,
+    {
+      fileLength: 0,
+      endOfFirstPage: 0,
+      mainXrefOffset: 0,
+      hintStreamStart: 0,
+      hintStreamLength: 0,
+    },
   );
 
-  // The hint stream contains both tables concatenated.
-  // /S marks the offset of the shared object hint table within the stream.
-  const hintStreamData = new Uint8Array(pageOffsetHints.length + sharedObjectHints.length);
-  hintStreamData.set(pageOffsetHints, 0);
-  hintStreamData.set(sharedObjectHints, pageOffsetHints.length);
-
-  const sharedHintOffset = pageOffsetHints.length;
-
-  writeStr(`${hintObjNum} 0 obj\n`);
-  writeStr(`<< /Length ${hintStreamData.length} /S ${sharedHintOffset} >>\n`);
-  writeStr('stream\n');
-  writeBytes(hintStreamData);
-  writeStr('\nendstream\n');
-  writeStr('endobj\n');
-  newOffsets.set(hintObjNum, hintStreamStart);
-
-  const hintStreamLength = currentOffset - hintStreamStart;
-
-  // ----- Part 6: Remaining pages' objects -----
-  for (const objNum of remainingObjNums) {
-    const objBytes = objects.get(objNum);
-    if (objBytes) {
-      newOffsets.set(objNum, currentOffset);
-      writeBytes(objBytes);
-      writeStr('\n');
-    }
-  }
-
-  // ----- Part 7: Main cross-reference stream -----
-  // Build xref entries for ALL objects
-  const xrefEntries = new Map<number, { type: number; field2: number; field3: number }>();
-  for (const [objNum, offset] of newOffsets) {
-    xrefEntries.set(objNum, { type: 1, field2: offset, field3: 0 });
-  }
-
-  const mainXrefObjNum = totalObjectCount;
-  const mainXrefOffset = currentOffset;
-
-  const xrefStreamBytes = buildXrefStream(
-    mainXrefObjNum,
-    mainXrefObjNum + 1,
-    xrefEntries,
-    trailer.rootRef,
-    trailer.infoRef,
+  // Pass 2: Re-serialize with exact values from pass 1.
+  // Because the linearization dict uses fixed-width 10-digit fields,
+  // the total file size does not change between passes — only the
+  // numeric values inside placeholders change.
+  // We also pass pass1's complete offsets/sizes so hint tables can
+  // reference ALL objects (including remaining-page objects that
+  // haven't been written yet at hint table construction time).
+  const pass2 = serializationPass(
+    objects,
+    firstPageObjNumsSorted,
+    remainingObjNums,
+    classification,
+    linObjNum,
+    hintObjNum,
+    firstPageObjNum,
+    pageCount,
+    trailer,
+    {
+      fileLength: pass1.fileLength,
+      endOfFirstPage: pass1.endOfFirstPage,
+      mainXrefOffset: pass1.mainXrefOffset,
+      hintStreamStart: pass1.hintStreamStart,
+      hintStreamLength: pass1.hintStreamLength,
+    },
+    pass1.offsets,
+    pass1.serializedSizes,
   );
-  writeBytes(xrefStreamBytes);
 
-  // ----- Part 8: startxref + %%EOF -----
-  writeStr('startxref\n');
-  writeStr(`${mainXrefOffset}\n`);
-  writeStr('%%EOF\n');
-
-  const fileLength = currentOffset;
-
-  // Combine all chunks
-  const result = new Uint8Array(fileLength);
-  let pos = 0;
-  for (const chunk of chunks) {
-    result.set(chunk, pos);
-    pos += chunk.length;
+  // The second pass should produce identical layout sizes.
+  // If not (defensive check), run a third pass to converge.
+  if (
+    pass2.fileLength !== pass1.fileLength ||
+    pass2.endOfFirstPage !== pass1.endOfFirstPage ||
+    pass2.mainXrefOffset !== pass1.mainXrefOffset ||
+    pass2.hintStreamStart !== pass1.hintStreamStart
+  ) {
+    const pass3 = serializationPass(
+      objects,
+      firstPageObjNumsSorted,
+      remainingObjNums,
+      classification,
+      linObjNum,
+      hintObjNum,
+      firstPageObjNum,
+      pageCount,
+      trailer,
+      {
+        fileLength: pass2.fileLength,
+        endOfFirstPage: pass2.endOfFirstPage,
+        mainXrefOffset: pass2.mainXrefOffset,
+        hintStreamStart: pass2.hintStreamStart,
+        hintStreamLength: pass2.hintStreamLength,
+      },
+      pass2.offsets,
+      pass2.serializedSizes,
+    );
+    return pass3.bytes;
   }
 
-  // Patch the linearization dictionary placeholders
-  patchNumber(result, linDictOffset, '/L ', fileLength);
-  patchNumber(result, linDictOffset, '/E ', endOfFirstPage);
-  patchNumber(result, linDictOffset, '/T ', mainXrefOffset);
-  // Patch /H array [hintStreamOffset hintStreamLength]
-  patchHintArray(result, linDictOffset, hintStreamStart, hintStreamLength);
-
-  return result;
+  return pass2.bytes;
 }
 
 // ---------------------------------------------------------------------------
@@ -1226,63 +1480,4 @@ function rebuildNormalPdf(
   }
 
   return result;
-}
-
-// ---------------------------------------------------------------------------
-// Placeholder patching
-// ---------------------------------------------------------------------------
-
-/** Patch a 10-digit number placeholder in the output. */
-function patchNumber(
-  data: Uint8Array,
-  searchStart: number,
-  prefix: string,
-  value: number,
-): void {
-  const prefixBytes = encoder.encode(prefix);
-  const searchEnd = Math.min(searchStart + 500, data.length);
-
-  outer:
-  for (let i = searchStart; i < searchEnd - prefixBytes.length; i++) {
-    for (let j = 0; j < prefixBytes.length; j++) {
-      if (data[i + j] !== prefixBytes[j]) continue outer;
-    }
-    // Found prefix — patch the 10-digit number after it
-    const numStr = value.toString().padStart(10, '0');
-    const numBytes = encoder.encode(numStr);
-    for (let k = 0; k < 10 && i + prefixBytes.length + k < data.length; k++) {
-      data[i + prefixBytes.length + k] = numBytes[k]!;
-    }
-    return;
-  }
-}
-
-/**
- * Patch the /H [offset length] hint array in the linearization dict.
- */
-function patchHintArray(
-  data: Uint8Array,
-  searchStart: number,
-  hintOffset: number,
-  hintLength: number,
-): void {
-  const prefix = encoder.encode('/H [');
-  const searchEnd = Math.min(searchStart + 500, data.length);
-
-  outer:
-  for (let i = searchStart; i < searchEnd - prefix.length; i++) {
-    for (let j = 0; j < prefix.length; j++) {
-      if (data[i + j] !== prefix[j]) continue outer;
-    }
-    // Found "/H [" — patch the two 10-digit numbers
-    const numStr1 = hintOffset.toString().padStart(10, '0');
-    const numStr2 = hintLength.toString().padStart(10, '0');
-    const combined = `${numStr1} ${numStr2}`;
-    const numBytes = encoder.encode(combined);
-    const writeStart = i + prefix.length;
-    for (let k = 0; k < numBytes.length && writeStart + k < data.length; k++) {
-      data[writeStart + k] = numBytes[k]!;
-    }
-    return;
-  }
 }

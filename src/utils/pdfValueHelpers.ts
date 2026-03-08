@@ -12,8 +12,14 @@ import type { PdfObject } from '../core/pdfObjects.js';
  * Create a {@link PdfName} from a string.
  *
  * @param value  The name value (with or without leading `/`).
+ * @returns      A new {@link PdfName} instance.
+ *
+ * @example
+ * ```ts
+ * const name = asPdfName('Type');
+ * ```
  */
-export function asPDFName(value: string): PdfName {
+export function asPdfName(value: string): PdfName {
   return PdfName.of(value);
 }
 
@@ -21,9 +27,41 @@ export function asPDFName(value: string): PdfName {
  * Create a {@link PdfNumber} from a numeric value.
  *
  * @param value  The number.
+ * @returns      A new {@link PdfNumber} instance.
+ *
+ * @example
+ * ```ts
+ * const num = asPdfNumber(42);
+ * ```
+ */
+export function asPdfNumber(value: number): PdfNumber {
+  return PdfNumber.of(value);
+}
+
+/**
+ * Create a {@link PdfName} from a string.
+ *
+ * @deprecated Use {@link asPdfName} instead. This alias uses inconsistent
+ *             PascalCase `PDF` while the rest of the codebase uses `Pdf`.
+ *             Will be removed in v2.0.
+ * @param value  The name value (with or without leading `/`).
+ * @returns      A new {@link PdfName} instance.
+ */
+export function asPDFName(value: string): PdfName {
+  return asPdfName(value);
+}
+
+/**
+ * Create a {@link PdfNumber} from a numeric value.
+ *
+ * @deprecated Use {@link asPdfNumber} instead. This alias uses inconsistent
+ *             PascalCase `PDF` while the rest of the codebase uses `Pdf`.
+ *             Will be removed in v2.0.
+ * @param value  The number.
+ * @returns      A new {@link PdfNumber} instance.
  */
 export function asPDFNumber(value: number): PdfNumber {
-  return PdfNumber.of(value);
+  return asPdfNumber(value);
 }
 
 /**
@@ -32,6 +70,12 @@ export function asPDFNumber(value: number): PdfNumber {
  * Returns `undefined` if the object is not a PdfNumber.
  *
  * @param obj  The PDF object to inspect.
+ * @returns    The numeric value, or `undefined` if not a PdfNumber.
+ *
+ * @example
+ * ```ts
+ * const val = asNumber(someObj); // number | undefined
+ * ```
  */
 export function asNumber(obj: PdfObject): number | undefined {
   if (obj.kind === 'number') return (obj as PdfNumber).value;

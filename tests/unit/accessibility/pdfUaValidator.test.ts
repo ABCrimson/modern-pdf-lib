@@ -484,11 +484,13 @@ describe('validatePdfUa — font embedding', () => {
 // ---------------------------------------------------------------------------
 
 describe('validatePdfUa — bookmarks', () => {
-  it('warns about multi-page document without bookmarks', () => {
+  it('warns about document with more than 3 pages without bookmarks', () => {
     const doc = createPdf();
     doc.setTitle('Test', { showInWindowTitleBar: true });
     doc.setLanguage('en');
     doc.createStructureTree();
+    doc.addPage();
+    doc.addPage();
     doc.addPage();
     doc.addPage();
 
@@ -503,6 +505,20 @@ describe('validatePdfUa — bookmarks', () => {
     doc.setTitle('Test', { showInWindowTitleBar: true });
     doc.setLanguage('en');
     doc.createStructureTree();
+    doc.addPage();
+
+    const result = validatePdfUa(doc);
+
+    expect(result.warnings.find((w) => w.code === 'UA-NAV-001')).toBeUndefined();
+  });
+
+  it('does not warn about document with 3 or fewer pages without bookmarks', () => {
+    const doc = createPdf();
+    doc.setTitle('Test', { showInWindowTitleBar: true });
+    doc.setLanguage('en');
+    doc.createStructureTree();
+    doc.addPage();
+    doc.addPage();
     doc.addPage();
 
     const result = validatePdfUa(doc);
@@ -709,6 +725,223 @@ describe('enforcePdfUa', () => {
     enforcePdfUa(doc);
 
     expect(doc.getTitle()).toBe('My Document');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// PdfPage tab order methods
+// ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
+// validatePdfUa — Heading hierarchy (section-aware false-positive fixes)
+// ---------------------------------------------------------------------------
+
+describe('validatePdfUa — heading sections', () => {
+  it('allows heading skip within same section when in different sub-containers', () => {
+    // H1 in a Div, H3 in a sibling Div — same Sect parent but different
+    // direct parents => should be a warning, not an error
+    const doc = createPdf();
+    doc.setTitle('Test', { showInWindowTitleBar: true });
+    doc.setLanguage('en');
+    const tree = doc.createStructureTree();
+    const sect = tree.addElement(null, 'Sect');
+    const div1 = sect.addChild('Div');
+    div1.addChild('H1');
+    const div2 = sect.addChild('Div');
+    div2.addChild('H3');
+
+    const result = validatePdfUa(doc);
+
+    // Should NOT be an error (different parent containers within same section)
+    const error = result.errors.find((e) => e.code === 'UA-STRUCT-004');
+    expect(error).toBeUndefined();
+
+    // Should produce a warning instead
+    const warn = result.warnings.find((w) => w.code === 'UA-WARN-HEADING-SKIP');
+    expect(warn).toBeDefined();
+  });
+
+  it('allows heading skip across separate sections', () => {
+    // Section 1: H1 → H2, Section 2: H1 → H3 in different containers
+    const doc = createPdf();
+    doc.setTitle('Test', { showInWindowTitleBar: true });
+    doc.setLanguage('en');
+    const tree = doc.createStructureTree();
+
+    const sect1 = tree.addElement(null, 'Sect');
+    sect1.addChild('H1');
+    sect1.addChild('H2');
+
+    const sect2 = tree.addElement(null, 'Sect');
+    sect2.addChild('H1');
+
+    const result = validatePdfUa(doc);
+
+    // No heading errors — headings in different sections are independent
+    expect(result.errors.find((e) => e.code === 'UA-STRUCT-004')).toBeUndefined();
+  });
+
+  it('flags heading skip within the same parent as error', () => {
+    const doc = createPdf();
+    doc.setTitle('Test', { showInWindowTitleBar: true });
+    doc.setLanguage('en');
+    const tree = doc.createStructureTree();
+
+    // Both headings share the same direct parent (root Document)
+    tree.addElement(null, 'H1');
+    tree.addElement(null, 'H3');
+
+    const result = validatePdfUa(doc);
+
+    const error = result.errors.find((e) => e.code === 'UA-STRUCT-004');
+    expect(error).toBeDefined();
+    expect(error!.message).toContain('H3');
+    expect(error!.message).toContain('same parent container');
+  });
+
+  it('allows heading level reset (H3 back to H1 for a new section)', () => {
+    const doc = createPdf();
+    doc.setTitle('Test', { showInWindowTitleBar: true });
+    doc.setLanguage('en');
+    const tree = doc.createStructureTree();
+    tree.addElement(null, 'H1');
+    tree.addElement(null, 'H2');
+    tree.addElement(null, 'H3');
+    tree.addElement(null, 'H1'); // reset — valid
+
+    const result = validatePdfUa(doc);
+
+    expect(result.errors.find((e) => e.code === 'UA-STRUCT-004')).toBeUndefined();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// validatePdfUa — Table false-positive fixes
+// ---------------------------------------------------------------------------
+
+describe('validatePdfUa — table false-positive fixes', () => {
+  it('warns (not errors) for simple table without TH cells', () => {
+    const doc = createPdf();
+    doc.setTitle('Test', { showInWindowTitleBar: true });
+    doc.setLanguage('en');
+    const tree = doc.createStructureTree();
+    const table = tree.addElement(null, 'Table');
+    const row1 = table.addChild('TR');
+    row1.addChild('TD');
+    row1.addChild('TD');
+    const row2 = table.addChild('TR');
+    row2.addChild('TD');
+    row2.addChild('TD');
+
+    const result = validatePdfUa(doc);
+
+    // Small 2x2 table — should be a warning, not an error
+    const warn = result.warnings.find((w) => w.code === 'UA-TABLE-002');
+    expect(warn).toBeDefined();
+    // Should NOT be in errors
+    const err = result.errors.find((e) => e.code === 'UA-TABLE-002');
+    expect(err).toBeUndefined();
+  });
+
+  it('skips layout/presentational tables entirely', () => {
+    const doc = createPdf();
+    doc.setTitle('Test', { showInWindowTitleBar: true });
+    doc.setLanguage('en');
+    const tree = doc.createStructureTree();
+    const table = tree.addElement(null, 'Table', { role: 'presentation' });
+    const row = table.addChild('TR');
+    row.addChild('TD');
+
+    const result = validatePdfUa(doc);
+
+    // Layout table should not trigger any table warnings or errors
+    expect(result.warnings.find((w) => w.code === 'UA-TABLE-002')).toBeUndefined();
+    expect(result.errors.find((e) => e.code === 'UA-TABLE-001')).toBeUndefined();
+  });
+
+  it('handles merged cells (colspan) in dimension calculation', () => {
+    const doc = createPdf();
+    doc.setTitle('Test', { showInWindowTitleBar: true });
+    doc.setLanguage('en');
+    const tree = doc.createStructureTree();
+    const table = tree.addElement(null, 'Table');
+    // 1 row with a cell spanning 2 columns — effective 2 columns, 1 row
+    const row = table.addChild('TR');
+    row.addChild('TD', { colSpan: 2 });
+
+    const result = validatePdfUa(doc);
+
+    // Small table (2 cols, 1 row) — should be a warning, not error
+    const warn = result.warnings.find((w) => w.code === 'UA-TABLE-002');
+    expect(warn).toBeDefined();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// validatePdfUa — Decorative image (artifact) false-positive fix
+// ---------------------------------------------------------------------------
+
+describe('validatePdfUa — decorative images', () => {
+  it('does not flag missing alt text on decorative images marked as artifact', () => {
+    const doc = createPdf();
+    doc.setTitle('Test', { showInWindowTitleBar: true });
+    doc.setLanguage('en');
+    const tree = doc.createStructureTree();
+    tree.addElement(null, 'Figure', { artifact: true });
+
+    const result = validatePdfUa(doc);
+
+    expect(result.errors.find((e) => e.code === 'UA-STRUCT-005')).toBeUndefined();
+    expect(result.errors.find((e) => e.code === 'UA-STRUCT-006')).toBeUndefined();
+  });
+
+  it('still flags non-artifact Figure without alt text', () => {
+    const doc = createPdf();
+    doc.setTitle('Test', { showInWindowTitleBar: true });
+    doc.setLanguage('en');
+    const tree = doc.createStructureTree();
+    tree.addElement(null, 'Figure');
+
+    const result = validatePdfUa(doc);
+
+    const noAlt = result.errors.find((e) => e.code === 'UA-STRUCT-005');
+    expect(noAlt).toBeDefined();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// validatePdfUa — Small document bookmark false-positive fix
+// ---------------------------------------------------------------------------
+
+describe('validatePdfUa — small document bookmarks', () => {
+  it('does not flag missing bookmarks if document has 3 or fewer pages', () => {
+    const doc = createPdf();
+    doc.setTitle('Test', { showInWindowTitleBar: true });
+    doc.setLanguage('en');
+    doc.createStructureTree();
+    doc.addPage();
+    doc.addPage();
+    doc.addPage();
+
+    const result = validatePdfUa(doc);
+
+    expect(result.warnings.find((w) => w.code === 'UA-NAV-001')).toBeUndefined();
+  });
+
+  it('flags missing bookmarks for documents with more than 3 pages', () => {
+    const doc = createPdf();
+    doc.setTitle('Test', { showInWindowTitleBar: true });
+    doc.setLanguage('en');
+    doc.createStructureTree();
+    doc.addPage();
+    doc.addPage();
+    doc.addPage();
+    doc.addPage();
+
+    const result = validatePdfUa(doc);
+
+    const warn = result.warnings.find((w) => w.code === 'UA-NAV-001');
+    expect(warn).toBeDefined();
   });
 });
 

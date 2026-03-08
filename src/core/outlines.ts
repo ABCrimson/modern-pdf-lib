@@ -58,6 +58,12 @@ export interface BookmarkNode {
   readonly pageIndex: number;
   /** Vertical position on the target page (if set). */
   readonly y?: number | undefined;
+  /** Page fit mode used by this bookmark's destination. */
+  readonly fit?: 'Fit' | 'FitH' | 'FitV' | 'FitB' | 'FitBH' | 'FitBV' | 'XYZ' | undefined;
+  /** Left coordinate (for FitV, FitBV, XYZ). */
+  readonly left?: number | undefined;
+  /** Zoom factor (for XYZ). */
+  readonly zoom?: number | undefined;
   /** Whether the title is bold. */
   readonly bold?: boolean | undefined;
   /** Whether the title is italic. */
@@ -80,8 +86,14 @@ export interface AddBookmarkOptions {
   pageIndex: number;
   /** Parent bookmark for nesting.  Omit for a top-level bookmark. */
   parent?: BookmarkRef | undefined;
-  /** Vertical position on the page (top coordinate for FitH). */
+  /** Vertical position on the page (top coordinate for FitH, FitBH, XYZ). */
   y?: number | undefined;
+  /** Page fit mode. Default: `'Fit'` (or `'FitH'` when only `y` is set). */
+  fit?: 'Fit' | 'FitH' | 'FitV' | 'FitB' | 'FitBH' | 'FitBV' | 'XYZ' | undefined;
+  /** Left coordinate (for FitV, FitBV, XYZ). */
+  left?: number | undefined;
+  /** Zoom factor (for XYZ). 0 = keep current zoom. */
+  zoom?: number | undefined;
   /** Whether the title text is bold. */
   bold?: boolean | undefined;
   /** Whether the title text is italic. */
@@ -110,12 +122,19 @@ export function addBookmark(
   doc: PdfDocument,
   options: AddBookmarkOptions,
 ): BookmarkRef {
-  const { title, pageIndex, parent, y, bold, italic, color, isOpen } = options;
+  const { title, pageIndex, parent, y, fit, left, zoom, bold, italic, color, isOpen } = options;
 
-  // Build the destination
-  const dest: OutlineDestination = y !== undefined
-    ? { type: 'page', pageIndex, fit: 'FitH', top: y }
-    : { type: 'page', pageIndex, fit: 'Fit' };
+  // Build the destination — explicit `fit` takes priority, otherwise
+  // fall back to legacy behaviour (FitH when y is set, Fit otherwise).
+  const resolvedFit = fit ?? (y !== undefined ? 'FitH' : 'Fit');
+  const dest: OutlineDestination = {
+    type: 'page',
+    pageIndex,
+    fit: resolvedFit,
+    top: y,
+    left,
+    zoom,
+  };
 
   // Build style options
   const itemOptions: OutlineItemOptions = {};
@@ -204,6 +223,9 @@ function itemToNode(item: PdfOutlineItem): BookmarkNode {
     title: item.title,
     pageIndex: dest.pageIndex ?? 0,
     y: dest.top,
+    fit: dest.fit,
+    left: dest.left,
+    zoom: dest.zoom,
     bold: item.bold,
     italic: item.italic,
     color: item.color,

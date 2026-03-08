@@ -99,23 +99,11 @@ const pdfNameToStyle: Record<string, PageLabelStyle> = {
 };
 
 // ---------------------------------------------------------------------------
-// Internal storage key
+// Internal storage
 // ---------------------------------------------------------------------------
 
-/**
- * Symbol used to store page labels on the PdfDocument instance.
- * This avoids modifying the PdfDocument class while keeping state
- * associated with the document.
- */
-const PAGE_LABELS_KEY = Symbol.for('modern-pdf-lib:pageLabels');
-
-/**
- * Augment PdfDocument to carry page label state.
- * @internal
- */
-interface PageLabelStore {
-  [PAGE_LABELS_KEY]?: PageLabelRange[] | undefined;
-}
+/** Module-scoped WeakMap to store page labels without mutating PdfDocument. */
+const pageLabelStore = new WeakMap<PdfDocument, PageLabelRange[]>();
 
 // ---------------------------------------------------------------------------
 // API functions
@@ -140,6 +128,20 @@ export function setPageLabels(
     throw new Error('Page labels array must not be empty');
   }
 
+  // Validate individual ranges
+  for (const range of labels) {
+    if (range.startPage < 0) {
+      throw new RangeError(
+        `startPage must be non-negative, got ${range.startPage}`,
+      );
+    }
+    if (range.start !== undefined && range.start < 0) {
+      throw new RangeError(
+        `start must be non-negative, got ${range.start}`,
+      );
+    }
+  }
+
   // Validate sorting
   for (let i = 1; i < labels.length; i++) {
     if (labels[i]!.startPage <= labels[i - 1]!.startPage) {
@@ -151,8 +153,7 @@ export function setPageLabels(
   }
 
   // Store a defensive copy
-  const store = doc as unknown as PageLabelStore;
-  store[PAGE_LABELS_KEY] = labels.map((r) => ({ ...r }));
+  pageLabelStore.set(doc, labels.map((r) => ({ ...r })));
 }
 
 /**
@@ -166,8 +167,7 @@ export function setPageLabels(
 export function getPageLabels(
   doc: PdfDocument,
 ): readonly PageLabelRange[] | undefined {
-  const store = doc as unknown as PageLabelStore;
-  const labels = store[PAGE_LABELS_KEY];
+  const labels = pageLabelStore.get(doc);
   if (labels === undefined) return undefined;
   // Return defensive copies
   return labels.map((r) => ({ ...r }));
@@ -179,8 +179,7 @@ export function getPageLabels(
  * @param doc  The document to clear page labels from.
  */
 export function removePageLabels(doc: PdfDocument): void {
-  const store = doc as unknown as PageLabelStore;
-  store[PAGE_LABELS_KEY] = undefined;
+  pageLabelStore.delete(doc);
 }
 
 // ---------------------------------------------------------------------------
@@ -213,8 +212,7 @@ export function removePageLabels(doc: PdfDocument): void {
 export function getPageLabelEntries(
   doc: PdfDocument,
 ): readonly PageLabelRange[] | undefined {
-  const store = doc as unknown as PageLabelStore;
-  return store[PAGE_LABELS_KEY];
+  return pageLabelStore.get(doc);
 }
 
 /**

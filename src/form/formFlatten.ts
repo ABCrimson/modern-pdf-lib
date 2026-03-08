@@ -19,11 +19,12 @@ import {
   PdfDict,
   PdfName,
   PdfNumber,
+  PdfString,
   PdfArray,
   PdfStream,
 } from '../core/pdfObjects.js';
 import type { PdfField } from './pdfField.js';
-import { FieldFlags, numVal } from './pdfField.js';
+import { FieldFlags, numVal, strVal } from './pdfField.js';
 import type { PdfForm } from './pdfForm.js';
 
 // ---------------------------------------------------------------------------
@@ -41,6 +42,18 @@ export interface FlattenOptions {
    * Default: `false` (all fields are flattened, including read-only ones).
    */
   preserveReadOnly?: boolean | undefined;
+
+  /**
+   * If `true`, use /RV rich text value when available instead of /V.
+   * Rich text (/RV) is an XHTML string containing formatting such as
+   * bold, italic, font-size, color, and font-family. When enabled,
+   * the flattener parses the XHTML and generates an appearance stream
+   * that preserves the rich text styling. If parsing fails, the
+   * flattener falls back to the plain text /V value.
+   *
+   * Default: `true`.
+   */
+  preserveRichText?: boolean | undefined;
 }
 
 // ---------------------------------------------------------------------------
@@ -194,20 +207,743 @@ export function _resetFlattenCounter(): void {
   flattenXObjectCounter = 0;
 }
 
+// ---------------------------------------------------------------------------
+// Rich text (XHTML /RV) parsing and appearance generation
+// ---------------------------------------------------------------------------
+
+/**
+ * Standard 14 PDF font name mapping.
+ *
+ * Maps common CSS font-family names (lower-cased) to their PDF
+ * standard 14 resource names. When a rich text XHTML references a
+ * font-family, we try this map first before falling back to the
+ * default Helvetica.
+ */
+const CSS_TO_PDF_FONT: ReadonlyMap<string, string> = new Map([
+  ['helvetica', 'Helv'],
+  ['arial', 'Helv'],
+  ['sans-serif', 'Helv'],
+  ['times', 'TiRo'],
+  ['times new roman', 'TiRo'],
+  ['times-roman', 'TiRo'],
+  ['serif', 'TiRo'],
+  ['courier', 'Cour'],
+  ['courier new', 'Cour'],
+  ['monospace', 'Cour'],
+]);
+
+/** Base font name for each short name. */
+const PDF_FONT_BASE: ReadonlyMap<string, string> = new Map([
+  ['Helv', 'Helvetica'],
+  ['TiRo', 'Times-Roman'],
+  ['Cour', 'Courier'],
+  ['HeBo', 'Helvetica-Bold'],
+  ['HeIt', 'Helvetica-Oblique'],
+  ['HeBI', 'Helvetica-BoldOblique'],
+  ['TiBo', 'Times-Bold'],
+  ['TiIt', 'Times-Italic'],
+  ['TiBI', 'Times-BoldItalic'],
+  ['CoBo', 'Courier-Bold'],
+  ['CoIt', 'Courier-Oblique'],
+  ['CoBI', 'Courier-BoldOblique'],
+]);
+
+/**
+ * A single span of text with uniform styling, extracted from XHTML.
+ */
+interface RichTextSpan {
+  text: string;
+  bold: boolean;
+  italic: boolean;
+  fontSize: number;
+  /** CSS color string (e.g. "rgb(255,0,0)", "#ff0000", "red"). */
+  color: string;
+  /** Resolved PDF short font name (e.g. "Helv"). */
+  fontName: string;
+}
+
+/**
+ * A paragraph of rich text spans, with optional text alignment.
+ */
+interface RichTextParagraph {
+  spans: RichTextSpan[];
+  alignment: number; // 0=left, 1=center, 2=right
+}
+
+/**
+ * Result of parsing an XHTML /RV value.
+ */
+interface RichTextParseResult {
+  paragraphs: RichTextParagraph[];
+}
+
+/** Escape a string for use in a PDF literal string. */
+function escapePdf(text: string): string {
+  return text
+    .replaceAll('\\', '\\\\')
+    .replaceAll('(', '\\(')
+    .replaceAll(')', '\\)')
+    .replaceAll('\r', '\\r')
+    .replaceAll('\n', '\\n');
+}
+
+/**
+ * Parse a CSS color value and return PDF color operators.
+ *
+ * Supports: `rgb(r,g,b)`, `#rrggbb`, `#rgb`, and named colors
+ * (black, red, blue, green, white).
+ *
+ * Returns a string like `"1 0 0 rg"` (fill color) or `"0 g"` for grayscale.
+ */
+function cssColorToPdfOps(color: string): string {
+  const trimmed = color.trim().toLowerCase();
+
+  // Named colors
+  const named: Record<string, [number, number, number]> = {
+    black: [0, 0, 0],
+    white: [1, 1, 1],
+    red: [1, 0, 0],
+    green: [0, 0.5, 0],
+    blue: [0, 0, 1],
+    gray: [0.5, 0.5, 0.5],
+    grey: [0.5, 0.5, 0.5],
+  };
+  if (trimmed in named) {
+    const [r, g, b] = named[trimmed]!;
+    if (r === g && g === b) return `${n(r)} g`;
+    return `${n(r)} ${n(g)} ${n(b)} rg`;
+  }
+
+  // rgb(r, g, b) or rgb(r,g,b)
+  const rgbMatch = trimmed.match(/rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/);
+  if (rgbMatch) {
+    const r = parseInt(rgbMatch[1]!, 10) / 255;
+    const g = parseInt(rgbMatch[2]!, 10) / 255;
+    const b = parseInt(rgbMatch[3]!, 10) / 255;
+    if (r === g && g === b) return `${n(r)} g`;
+    return `${n(r)} ${n(g)} ${n(b)} rg`;
+  }
+
+  // #rrggbb
+  const hex6Match = trimmed.match(/^#([0-9a-f]{6})$/);
+  if (hex6Match) {
+    const hex = hex6Match[1]!;
+    const r = parseInt(hex.slice(0, 2), 16) / 255;
+    const g = parseInt(hex.slice(2, 4), 16) / 255;
+    const b = parseInt(hex.slice(4, 6), 16) / 255;
+    if (r === g && g === b) return `${n(r)} g`;
+    return `${n(r)} ${n(g)} ${n(b)} rg`;
+  }
+
+  // #rgb
+  const hex3Match = trimmed.match(/^#([0-9a-f]{3})$/);
+  if (hex3Match) {
+    const hex = hex3Match[1]!;
+    const r = parseInt(hex[0]! + hex[0]!, 16) / 255;
+    const g = parseInt(hex[1]! + hex[1]!, 16) / 255;
+    const b = parseInt(hex[2]! + hex[2]!, 16) / 255;
+    if (r === g && g === b) return `${n(r)} g`;
+    return `${n(r)} ${n(g)} ${n(b)} rg`;
+  }
+
+  // Default: black
+  return '0 g';
+}
+
+/**
+ * Resolve a CSS font-family string to a PDF font short name.
+ */
+function cssFontFamilyToPdf(family: string): string {
+  // Strip quotes and take the first family in the list
+  const first = family.split(',')[0]!.trim().replaceAll('"', '').replaceAll("'", '').toLowerCase();
+  return CSS_TO_PDF_FONT.get(first) ?? 'Helv';
+}
+
+/**
+ * Get the styled variant of a base PDF font.
+ *
+ * For example, Helv + bold + italic = HeBI.
+ */
+function getStyledFontName(baseName: string, bold: boolean, italic: boolean): string {
+  if (!bold && !italic) return baseName;
+
+  // Map base short names to their styled variants
+  const variants: Record<string, { bold: string; italic: string; boldItalic: string }> = {
+    Helv: { bold: 'HeBo', italic: 'HeIt', boldItalic: 'HeBI' },
+    TiRo: { bold: 'TiBo', italic: 'TiIt', boldItalic: 'TiBI' },
+    Cour: { bold: 'CoBo', italic: 'CoIt', boldItalic: 'CoBI' },
+  };
+
+  const entry = variants[baseName];
+  if (entry === undefined) return baseName;
+
+  if (bold && italic) return entry.boldItalic;
+  if (bold) return entry.bold;
+  return entry.italic;
+}
+
+/**
+ * Parse inline CSS style attributes and extract relevant properties.
+ */
+function parseStyleAttribute(style: string): {
+  fontSize?: number;
+  color?: string;
+  fontFamily?: string;
+  fontWeight?: string;
+  fontStyle?: string;
+  textAlign?: string;
+} {
+  const result: ReturnType<typeof parseStyleAttribute> = {};
+
+  for (const declaration of style.split(';')) {
+    const colonIdx = declaration.indexOf(':');
+    if (colonIdx < 0) continue;
+    const prop = declaration.slice(0, colonIdx).trim().toLowerCase();
+    const value = declaration.slice(colonIdx + 1).trim();
+
+    switch (prop) {
+      case 'font-size': {
+        const sizeMatch = value.match(/([\d.]+)\s*(pt|px|em|rem)?/);
+        if (sizeMatch) {
+          let size = parseFloat(sizeMatch[1]!);
+          const unit = sizeMatch[2] ?? 'pt';
+          // Approximate conversions to points
+          if (unit === 'px') size *= 0.75;
+          else if (unit === 'em' || unit === 'rem') size *= 12;
+          result.fontSize = size;
+        }
+        break;
+      }
+      case 'color':
+        result.color = value;
+        break;
+      case 'font-family':
+        result.fontFamily = value;
+        break;
+      case 'font-weight':
+        result.fontWeight = value;
+        break;
+      case 'font-style':
+        result.fontStyle = value;
+        break;
+      case 'text-align':
+        result.textAlign = value;
+        break;
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Parse CSS text-align to PDF quadding value.
+ */
+function textAlignToQuadding(align: string | undefined): number {
+  if (align === undefined) return 0;
+  switch (align.toLowerCase()) {
+    case 'center':
+      return 1;
+    case 'right':
+      return 2;
+    default:
+      return 0;
+  }
+}
+
+/**
+ * Parse an XHTML /RV rich text string into structured paragraphs.
+ *
+ * Supports: `<b>`, `<i>`, `<span style="...">`, `<p>`, `<br/>`.
+ * This is a lightweight regex-based parser — not a full XML parser —
+ * suitable for the simple XHTML subset used in PDF /RV values.
+ *
+ * @throws If the input is empty or cannot be parsed at all.
+ */
+function parseRichTextXhtml(xhtml: string): RichTextParseResult {
+  if (xhtml.trim().length === 0) {
+    throw new Error('Empty rich text value');
+  }
+
+  const paragraphs: RichTextParagraph[] = [];
+
+  // Strip XML declaration and <body>/<html> wrappers
+  let cleaned = xhtml
+    .replace(/<\?xml[^?]*\?>/gi, '')
+    .replace(/<\/?html[^>]*>/gi, '')
+    .replace(/<\/?body[^>]*>/gi, '')
+    .trim();
+
+  // If no <p> tags, treat the entire content as one paragraph
+  if (!/<p[\s>]/i.test(cleaned)) {
+    cleaned = `<p>${cleaned}</p>`;
+  }
+
+  // Split into paragraphs
+  const pRegex = /<p([^>]*)>([\s\S]*?)<\/p>/gi;
+  let pMatch: RegExpExecArray | null;
+
+  while ((pMatch = pRegex.exec(cleaned)) !== null) {
+    const pAttrs = pMatch[1] ?? '';
+    const pContent = pMatch[2] ?? '';
+
+    // Parse paragraph-level style for alignment
+    let alignment = 0;
+    const pStyleMatch = pAttrs.match(/style\s*=\s*"([^"]*)"/i);
+    if (pStyleMatch) {
+      const pStyle = parseStyleAttribute(pStyleMatch[1]!);
+      alignment = textAlignToQuadding(pStyle.textAlign);
+    }
+
+    const spans = parseInlineContent(pContent, {
+      bold: false,
+      italic: false,
+      fontSize: 0,
+      color: '',
+      fontName: 'Helv',
+    });
+
+    if (spans.length > 0) {
+      paragraphs.push({ spans, alignment });
+    }
+  }
+
+  if (paragraphs.length === 0) {
+    throw new Error('No parseable content in rich text value');
+  }
+
+  return { paragraphs };
+}
+
+/**
+ * Inherited style context for recursive inline parsing.
+ */
+interface InlineStyleContext {
+  bold: boolean;
+  italic: boolean;
+  fontSize: number;
+  color: string;
+  fontName: string;
+}
+
+/**
+ * Parse inline XHTML content (inside a `<p>`) into text spans.
+ *
+ * Handles nested `<b>`, `<i>`, `<span style="...">`, and `<br/>`.
+ */
+function parseInlineContent(
+  html: string,
+  inherited: InlineStyleContext,
+): RichTextSpan[] {
+  const spans: RichTextSpan[] = [];
+
+  // Tokenize: split on tags while keeping them
+  const tokens = html.split(/(<[^>]+>)/g);
+
+  // Stack of style contexts
+  const styleStack: InlineStyleContext[] = [{ ...inherited }];
+
+  const currentStyle = (): InlineStyleContext => styleStack.at(-1)!;
+
+  for (const token of tokens) {
+    if (token.length === 0) continue;
+
+    // Self-closing <br/> or <br />
+    if (/^<br\s*\/?>$/i.test(token)) {
+      spans.push({
+        text: '\n',
+        ...currentStyle(),
+      });
+      continue;
+    }
+
+    // Opening tags
+    const openMatch = token.match(/^<(b|i|span|strong|em)\b([^>]*)>$/i);
+    if (openMatch) {
+      const tag = openMatch[1]!.toLowerCase();
+      const attrs = openMatch[2] ?? '';
+      const parent = currentStyle();
+      const ctx: InlineStyleContext = { ...parent };
+
+      if (tag === 'b' || tag === 'strong') {
+        ctx.bold = true;
+      } else if (tag === 'i' || tag === 'em') {
+        ctx.italic = true;
+      }
+
+      // Parse style attribute if present
+      const styleMatch = attrs.match(/style\s*=\s*"([^"]*)"/i);
+      if (styleMatch) {
+        const style = parseStyleAttribute(styleMatch[1]!);
+        if (style.fontSize !== undefined) ctx.fontSize = style.fontSize;
+        if (style.color !== undefined) ctx.color = style.color;
+        if (style.fontFamily !== undefined) ctx.fontName = cssFontFamilyToPdf(style.fontFamily);
+        if (style.fontWeight === 'bold' || style.fontWeight === '700') ctx.bold = true;
+        if (style.fontStyle === 'italic' || style.fontStyle === 'oblique') ctx.italic = true;
+      }
+
+      styleStack.push(ctx);
+      continue;
+    }
+
+    // Closing tags
+    const closeMatch = token.match(/^<\/(b|i|span|strong|em)>$/i);
+    if (closeMatch) {
+      if (styleStack.length > 1) {
+        styleStack.pop();
+      }
+      continue;
+    }
+
+    // Skip any other tags
+    if (token.startsWith('<')) continue;
+
+    // Plain text — decode HTML entities
+    const text = decodeHtmlEntities(token);
+    if (text.length > 0) {
+      const style = currentStyle();
+      spans.push({
+        text,
+        bold: style.bold,
+        italic: style.italic,
+        fontSize: style.fontSize,
+        color: style.color,
+        fontName: style.fontName,
+      });
+    }
+  }
+
+  return spans;
+}
+
+/**
+ * Decode basic HTML entities.
+ */
+function decodeHtmlEntities(text: string): string {
+  return text
+    .replaceAll('&amp;', '&')
+    .replaceAll('&lt;', '<')
+    .replaceAll('&gt;', '>')
+    .replaceAll('&quot;', '"')
+    .replaceAll('&#39;', "'")
+    .replaceAll('&apos;', "'")
+    .replaceAll('&nbsp;', ' ');
+}
+
+/**
+ * Generate a PDF appearance stream from parsed rich text.
+ *
+ * Lays out text spans with their individual styling (font, size, color)
+ * within the given rectangle, respecting paragraph alignment.
+ */
+function generateRichTextAppearance(
+  parsed: RichTextParseResult,
+  rect: [number, number, number, number],
+  multiline: boolean,
+  defaultFontSize: number,
+): PdfStream {
+  const width = rect[2] - rect[0];
+  const height = rect[3] - rect[1];
+  const padding = 2;
+
+  // Collect all unique font names used
+  const usedFonts = new Set<string>();
+
+  let ops = '';
+  ops += '/Tx BMC\n';
+  ops += 'q\n';
+  // Clipping rectangle
+  ops += `${n(padding)} ${n(padding)} ${n(width - 2 * padding)} ${n(height - 2 * padding)} re\n`;
+  ops += 'W\n';
+  ops += 'n\n';
+
+  // Determine effective default font size
+  const effectiveDefault = defaultFontSize > 0 ? defaultFontSize : 10;
+
+  if (multiline) {
+    // Multiline: render paragraphs vertically
+    let cursorY = height - padding;
+
+    for (const para of parsed.paragraphs) {
+      // Determine line height from the tallest span
+      let maxFontSize = effectiveDefault;
+      for (const span of para.spans) {
+        const sz = span.fontSize > 0 ? span.fontSize : effectiveDefault;
+        if (sz > maxFontSize) maxFontSize = sz;
+      }
+      const lineHeight = maxFontSize * 1.2;
+      cursorY -= maxFontSize;
+
+      if (cursorY < padding) break;
+
+      // Calculate total text width for alignment
+      const totalWidth = computeSpansTotalWidth(para.spans, effectiveDefault);
+      const availableWidth = width - 2 * padding;
+      let startX = padding;
+      if (para.alignment === 1) {
+        startX = padding + Math.max(0, (availableWidth - totalWidth) / 2);
+      } else if (para.alignment === 2) {
+        startX = padding + Math.max(0, availableWidth - totalWidth);
+      }
+
+      // Handle newlines within spans (from <br/>)
+      const lines = splitSpansIntoLines(para.spans);
+
+      for (const lineSpans of lines) {
+        if (cursorY < padding) break;
+
+        const lineTotalWidth = computeSpansTotalWidth(lineSpans, effectiveDefault);
+        let lineStartX = padding;
+        if (para.alignment === 1) {
+          lineStartX = padding + Math.max(0, (availableWidth - lineTotalWidth) / 2);
+        } else if (para.alignment === 2) {
+          lineStartX = padding + Math.max(0, availableWidth - lineTotalWidth);
+        }
+
+        let cursorX = lineStartX;
+
+        ops += 'BT\n';
+        for (const span of lineSpans) {
+          const sz = span.fontSize > 0 ? span.fontSize : effectiveDefault;
+          const styledFont = getStyledFontName(span.fontName, span.bold, span.italic);
+          usedFonts.add(styledFont);
+
+          ops += `/${styledFont} ${n(sz)} Tf\n`;
+          ops += span.color.length > 0 ? `${cssColorToPdfOps(span.color)}\n` : '0 g\n';
+          ops += `${n(cursorX)} ${n(cursorY)} Td\n`;
+          ops += `(${escapePdf(span.text)}) Tj\n`;
+
+          cursorX += span.text.length * sz * 0.5;
+          // Reset Td base point
+          ops += `${n(-cursorX)} ${n(-cursorY)} Td\n`;
+        }
+        ops += 'ET\n';
+
+        cursorY -= lineHeight;
+      }
+    }
+  } else {
+    // Single-line: render first paragraph only, ignoring newlines
+    const para = parsed.paragraphs[0];
+    if (para !== undefined) {
+      const flatSpans = flattenSpansRemovingNewlines(para.spans);
+
+      // Determine the max font size for vertical centering
+      let maxFontSize = effectiveDefault;
+      for (const span of flatSpans) {
+        const sz = span.fontSize > 0 ? span.fontSize : effectiveDefault;
+        if (sz > maxFontSize) maxFontSize = sz;
+      }
+
+      const ty = (height - maxFontSize) / 2;
+      const totalWidth = computeSpansTotalWidth(flatSpans, effectiveDefault);
+      const availableWidth = width - 2 * padding;
+      let startX = padding;
+      if (para.alignment === 1) {
+        startX = padding + Math.max(0, (availableWidth - totalWidth) / 2);
+      } else if (para.alignment === 2) {
+        startX = padding + Math.max(0, availableWidth - totalWidth);
+      }
+
+      let cursorX = startX;
+
+      ops += 'BT\n';
+      for (const span of flatSpans) {
+        const sz = span.fontSize > 0 ? span.fontSize : effectiveDefault;
+        const styledFont = getStyledFontName(span.fontName, span.bold, span.italic);
+        usedFonts.add(styledFont);
+
+        ops += `/${styledFont} ${n(sz)} Tf\n`;
+        ops += span.color.length > 0 ? `${cssColorToPdfOps(span.color)}\n` : '0 g\n';
+        ops += `${n(cursorX)} ${n(ty)} Td\n`;
+        ops += `(${escapePdf(span.text)}) Tj\n`;
+
+        cursorX += span.text.length * sz * 0.5;
+        // Reset Td base point
+        ops += `${n(-cursorX)} ${n(-ty)} Td\n`;
+      }
+      ops += 'ET\n';
+    }
+  }
+
+  ops += 'Q\n';
+  ops += 'EMC\n';
+
+  // Build stream with resources for all used fonts
+  const streamDict = new PdfDict();
+  streamDict.set('/Type', PdfName.of('XObject'));
+  streamDict.set('/Subtype', PdfName.of('Form'));
+  streamDict.set('/BBox', PdfArray.fromNumbers([0, 0, width, height]));
+
+  const resources = new PdfDict();
+  const fontDict = new PdfDict();
+  for (const fontShortName of usedFonts) {
+    const baseFont = PDF_FONT_BASE.get(fontShortName) ?? 'Helvetica';
+    const fontEntry = new PdfDict();
+    fontEntry.set('/Type', PdfName.of('Font'));
+    fontEntry.set('/Subtype', PdfName.of('Type1'));
+    fontEntry.set('/BaseFont', PdfName.of(baseFont));
+    fontDict.set(`/${fontShortName}`, fontEntry);
+  }
+  // Always include default Helv
+  if (!usedFonts.has('Helv')) {
+    const defaultFont = new PdfDict();
+    defaultFont.set('/Type', PdfName.of('Font'));
+    defaultFont.set('/Subtype', PdfName.of('Type1'));
+    defaultFont.set('/BaseFont', PdfName.of('Helvetica'));
+    fontDict.set('/Helv', defaultFont);
+  }
+  resources.set('/Font', fontDict);
+  streamDict.set('/Resources', resources);
+
+  return PdfStream.fromString(ops, streamDict);
+}
+
+/**
+ * Compute the approximate total width of a list of spans.
+ */
+function computeSpansTotalWidth(spans: RichTextSpan[], defaultFontSize: number): number {
+  let total = 0;
+  for (const span of spans) {
+    const sz = span.fontSize > 0 ? span.fontSize : defaultFontSize;
+    total += span.text.length * sz * 0.5;
+  }
+  return total;
+}
+
+/**
+ * Split a list of spans into lines at newline characters.
+ */
+function splitSpansIntoLines(spans: RichTextSpan[]): RichTextSpan[][] {
+  const lines: RichTextSpan[][] = [[]];
+
+  for (const span of spans) {
+    if (span.text === '\n') {
+      lines.push([]);
+      continue;
+    }
+
+    const parts = span.text.split('\n');
+    for (let i = 0; i < parts.length; i++) {
+      if (i > 0) lines.push([]);
+      const part = parts[i]!;
+      if (part.length > 0) {
+        lines.at(-1)!.push({ ...span, text: part });
+      }
+    }
+  }
+
+  return lines;
+}
+
+/**
+ * Flatten spans by stripping newline characters (for single-line mode).
+ */
+function flattenSpansRemovingNewlines(spans: RichTextSpan[]): RichTextSpan[] {
+  const result: RichTextSpan[] = [];
+  for (const span of spans) {
+    if (span.text === '\n') continue;
+    const text = span.text.replaceAll('\n', ' ');
+    if (text.length > 0) {
+      result.push({ ...span, text });
+    }
+  }
+  return result;
+}
+
+/**
+ * Try to generate a rich text appearance for a field.
+ *
+ * Reads the /RV entry from the field dictionary, parses the XHTML,
+ * and generates an appearance stream that reflects the rich text
+ * formatting. Returns `undefined` if the field has no /RV or if
+ * parsing fails.
+ */
+function tryRichTextAppearance(field: PdfField): PdfStream | undefined {
+  const widgetDict = field.getWidgetDict();
+  const dict = field.getDict();
+
+  // Get /RV from the field dict (rich text value is on the field, not widget)
+  const rvObj = dict.get('/RV');
+  if (rvObj === undefined) return undefined;
+
+  // /RV should be a string
+  let rvString: string | undefined;
+  if (rvObj.kind === 'string') {
+    rvString = (rvObj as PdfString).value;
+  }
+  if (rvString === undefined || rvString.trim().length === 0) return undefined;
+
+  try {
+    const parsed = parseRichTextXhtml(rvString);
+    const rect = getWidgetRect(widgetDict);
+
+    // Check if field is multiline
+    const ff = numVal(dict.get('/Ff')) ?? 0;
+    const multiline = (ff & FieldFlags.Multiline) !== 0;
+
+    // Get default font size from /DA
+    let defaultFontSize = 0;
+    const daObj = dict.get('/DA');
+    if (daObj !== undefined && daObj.kind === 'string') {
+      const da = (daObj as PdfString).value;
+      const sizeMatch = da.match(/\/\w+\s+([\d.]+)\s+Tf/);
+      if (sizeMatch) {
+        defaultFontSize = parseFloat(sizeMatch[1]!);
+      }
+    }
+
+    return generateRichTextAppearance(parsed, rect, multiline, defaultFontSize);
+  } catch {
+    // Parsing failed — fall back to /V
+    return undefined;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Exported for testing
+// ---------------------------------------------------------------------------
+
+/**
+ * Parse an XHTML /RV rich text string into structured paragraphs.
+ * Exported for unit testing.
+ * @internal
+ */
+export { parseRichTextXhtml as _parseRichTextXhtml };
+
+/**
+ * Generate a rich text appearance stream from parsed XHTML.
+ * Exported for unit testing.
+ * @internal
+ */
+export { generateRichTextAppearance as _generateRichTextAppearance };
+
+// ---------------------------------------------------------------------------
+// Core flatten logic
+// ---------------------------------------------------------------------------
+
 /**
  * Flatten a single field: extract its appearance, build operators,
  * and return the result without mutating any form/page state.
  */
-function flattenSingleField(field: PdfField): FlattenResult {
+function flattenSingleField(field: PdfField, options: FlattenOptions = {}): FlattenResult {
   const result: FlattenResult = { ops: '', xObjects: [] };
 
-  // Ensure appearance is generated
+  // Try rich text appearance first (if preserveRichText is not disabled)
+  const useRichText = options.preserveRichText !== false;
+  let richTextAppearance: PdfStream | undefined;
+  if (useRichText && field.fieldType === 'text') {
+    richTextAppearance = tryRichTextAppearance(field);
+  }
+
+  // Ensure appearance is generated (fallback)
   const generatedAppearance = field.generateAppearance();
 
   // Try to get an existing appearance stream from the widget dict first
   const widgetDict = field.getWidgetDict();
   const existingAppearance = getAppearanceStream(widgetDict);
-  const appearance = existingAppearance ?? generatedAppearance;
+
+  // Priority: rich text > existing appearance > generated appearance
+  const appearance = richTextAppearance ?? existingAppearance ?? generatedAppearance;
 
   const rect = getWidgetRect(widgetDict);
 
@@ -359,7 +1095,7 @@ function flattenFieldList(
       continue;
     }
 
-    const fieldResult = flattenSingleField(field);
+    const fieldResult = flattenSingleField(field, options);
     result.contentOps += fieldResult.ops;
     result.xObjects.push(...fieldResult.xObjects);
     result.flattenedFields.push(field.getFullName());

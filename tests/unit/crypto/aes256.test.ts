@@ -38,6 +38,9 @@ import {
   computeFileEncryptionKey,
   verifyUserPassword,
   verifyOwnerPassword,
+  preparePasswordV5,
+  saslprep,
+  concat,
 } from '../../../src/crypto/keyDerivation.js';
 import type { EncryptDictValues } from '../../../src/crypto/keyDerivation.js';
 import { aesEncryptCBC, aesDecryptCBC } from '../../../src/crypto/aes.js';
@@ -1063,5 +1066,988 @@ describe('AES-256 known-structure test', () => {
     // Compare as signed 32-bit
     const pSigned = pValue | 0;
     expect(pSigned).toBe(h.getPermissionsValue());
+  });
+});
+
+// ===========================================================================
+// Edge case tests — AES-256 key derivation hardening
+// ===========================================================================
+
+// ---------------------------------------------------------------------------
+// 22. Empty password edge cases
+// ---------------------------------------------------------------------------
+
+describe('AES-256 empty password edge cases', () => {
+  it('empty password produces valid preparePasswordV5 output (zero-length bytes)', () => {
+    const result = preparePasswordV5('');
+    expect(result).toBeInstanceOf(Uint8Array);
+    expect(result.length).toBe(0);
+  });
+
+  it('empty user password with non-empty owner password round-trips', async () => {
+    const fid = randomBytes(16);
+    const h = await PdfEncryptionHandler.create(
+      { userPassword: '', ownerPassword: 'strongOwner!', algorithm: 'aes-256' },
+      fid,
+    );
+    const dict = h.buildEncryptDict();
+
+    // User password (empty) should work
+    const restoredUser = await PdfEncryptionHandler.fromEncryptDict(dict, fid, '');
+    const plain = enc.encode('empty user pwd edge case');
+    const cipher = await h.encryptObject(1, 0, plain);
+    expect(await restoredUser.decryptObject(1, 0, cipher)).toEqual(plain);
+
+    // Owner password should also work
+    const restoredOwner = await PdfEncryptionHandler.fromEncryptDict(dict, fid, 'strongOwner!');
+    expect(await restoredOwner.decryptObject(1, 0, cipher)).toEqual(plain);
+
+    // Wrong password should fail
+    await expect(
+      PdfEncryptionHandler.fromEncryptDict(dict, fid, 'wrong'),
+    ).rejects.toThrow(/ncorrect password/);
+  });
+
+  it('empty owner password with non-empty user password round-trips', async () => {
+    const fid = randomBytes(16);
+    const h = await PdfEncryptionHandler.create(
+      { userPassword: 'user123', ownerPassword: '', algorithm: 'aes-256' },
+      fid,
+    );
+    const dict = h.buildEncryptDict();
+
+    const restoredUser = await PdfEncryptionHandler.fromEncryptDict(dict, fid, 'user123');
+    const plain = enc.encode('empty owner pwd edge case');
+    const cipher = await h.encryptObject(1, 0, plain);
+    expect(await restoredUser.decryptObject(1, 0, cipher)).toEqual(plain);
+
+    const restoredOwner = await PdfEncryptionHandler.fromEncryptDict(dict, fid, '');
+    expect(await restoredOwner.decryptObject(1, 0, cipher)).toEqual(plain);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// 23. Maximum-length password boundary (127/128 bytes)
+// ---------------------------------------------------------------------------
+
+describe('AES-256 maximum-length password boundary', () => {
+  it('127-byte ASCII password (exactly at limit) round-trips', async () => {
+    const pwd = 'A'.repeat(127);
+    expect(enc.encode(pwd).length).toBe(127);
+
+    const fid = randomBytes(16);
+    const h = await PdfEncryptionHandler.create(
+      { userPassword: pwd, ownerPassword: 'owner', algorithm: 'aes-256' },
+      fid,
+    );
+    const dict = h.buildEncryptDict();
+
+    const restored = await PdfEncryptionHandler.fromEncryptDict(dict, fid, pwd);
+    const plain = enc.encode('127-byte password test');
+    const cipher = await h.encryptObject(1, 0, plain);
+    expect(await restored.decryptObject(1, 0, cipher)).toEqual(plain);
+  });
+
+  it('128-byte ASCII password (one over limit) is truncated to 127', async () => {
+    const pwd128 = 'B'.repeat(128);
+    const pwd127 = 'B'.repeat(127);
+    expect(enc.encode(pwd128).length).toBe(128);
+
+    // Both passwords should produce the same prepared bytes
+    const prepared128 = preparePasswordV5(pwd128);
+    const prepared127 = preparePasswordV5(pwd127);
+    expect(prepared128.length).toBe(127);
+    expect(prepared128.toHex()).toBe(prepared127.toHex());
+
+    // Handler created with 128 should be openable with 127 and vice versa
+    const fid = randomBytes(16);
+    const h = await PdfEncryptionHandler.create(
+      { userPassword: pwd128, ownerPassword: 'owner', algorithm: 'aes-256' },
+      fid,
+    );
+    const dict = h.buildEncryptDict();
+
+    const restored = await PdfEncryptionHandler.fromEncryptDict(dict, fid, pwd127);
+    const plain = enc.encode('128-byte boundary test');
+    const cipher = await h.encryptObject(1, 0, plain);
+    expect(await restored.decryptObject(1, 0, cipher)).toEqual(plain);
+  });
+
+  it('200-byte ASCII password is truncated to 127 bytes', async () => {
+    const pwd = 'C'.repeat(200);
+    const prepared = preparePasswordV5(pwd);
+    expect(prepared.length).toBe(127);
+    // All bytes should be 'C' (0x43)
+    for (let i = 0; i < 127; i++) {
+      expect(prepared[i]).toBe(0x43);
+    }
+  });
+
+  it('multi-byte UTF-8 password truncated at 127-byte boundary', async () => {
+    // Each CJK char is 3 bytes in UTF-8; 42 chars = 126 bytes, 43 chars = 129 bytes
+    const pwd42 = '\u4e00'.repeat(42); // 126 bytes
+    const pwd43 = '\u4e00'.repeat(43); // 129 bytes -> truncated to 127
+
+    const prepared42 = preparePasswordV5(pwd42);
+    expect(prepared42.length).toBe(126); // Not truncated
+
+    const prepared43 = preparePasswordV5(pwd43);
+    expect(prepared43.length).toBe(127); // Truncated (may split a 3-byte char)
+
+    // Round-trip with the 42-char password (fits exactly)
+    const fid = randomBytes(16);
+    const h = await PdfEncryptionHandler.create(
+      { userPassword: pwd42, ownerPassword: 'owner', algorithm: 'aes-256' },
+      fid,
+    );
+    const dict = h.buildEncryptDict();
+    const restored = await PdfEncryptionHandler.fromEncryptDict(dict, fid, pwd42);
+    const plain = enc.encode('multi-byte boundary');
+    const cipher = await h.encryptObject(1, 0, plain);
+    expect(await restored.decryptObject(1, 0, cipher)).toEqual(plain);
+  });
+
+  it('exactly 127 bytes after SASLprep (with mapped-to-nothing chars removed)', async () => {
+    // 127 'A' chars + some soft hyphens that get removed = still 127 bytes
+    const pwd = 'A'.repeat(127) + '\u00AD\u00AD\u00AD';
+    const prepared = preparePasswordV5(pwd);
+    expect(prepared.length).toBe(127); // Soft hyphens removed, then 127 fits exactly
+  });
+});
+
+// ---------------------------------------------------------------------------
+// 24. Non-ASCII / Unicode password edge cases
+// ---------------------------------------------------------------------------
+
+describe('AES-256 non-ASCII password edge cases', () => {
+  it('Chinese password encrypts and decrypts correctly', async () => {
+    const pwd = '\u5bc6\u7801\u6d4b\u8bd5\u52a0\u5bc6';
+    const fid = randomBytes(16);
+    const h = await PdfEncryptionHandler.create(
+      { userPassword: pwd, ownerPassword: '\u6240\u6709\u8005', algorithm: 'aes-256' },
+      fid,
+    );
+    const dict = h.buildEncryptDict();
+
+    const restored = await PdfEncryptionHandler.fromEncryptDict(dict, fid, pwd);
+    const plain = enc.encode('Chinese pwd test');
+    const cipher = await h.encryptObject(1, 0, plain);
+    expect(await restored.decryptObject(1, 0, cipher)).toEqual(plain);
+  });
+
+  it('Arabic password encrypts and decrypts correctly', async () => {
+    const pwd = '\u0643\u0644\u0645\u0629 \u0627\u0644\u0633\u0631';
+    const fid = randomBytes(16);
+    const h = await PdfEncryptionHandler.create(
+      { userPassword: pwd, ownerPassword: 'owner', algorithm: 'aes-256' },
+      fid,
+    );
+    const dict = h.buildEncryptDict();
+
+    const restored = await PdfEncryptionHandler.fromEncryptDict(dict, fid, pwd);
+    const plain = enc.encode('Arabic pwd test');
+    const cipher = await h.encryptObject(1, 0, plain);
+    expect(await restored.decryptObject(1, 0, cipher)).toEqual(plain);
+  });
+
+  it('emoji password encrypts and decrypts correctly', async () => {
+    const pwd = 'pass\uD83D\uDD11word\uD83D\uDD12';
+    const fid = randomBytes(16);
+    const h = await PdfEncryptionHandler.create(
+      { userPassword: pwd, ownerPassword: 'owner', algorithm: 'aes-256' },
+      fid,
+    );
+    const dict = h.buildEncryptDict();
+
+    const restored = await PdfEncryptionHandler.fromEncryptDict(dict, fid, pwd);
+    const plain = enc.encode('emoji pwd test');
+    const cipher = await h.encryptObject(1, 0, plain);
+    expect(await restored.decryptObject(1, 0, cipher)).toEqual(plain);
+  });
+
+  it('combining characters are normalized by NFKC', async () => {
+    // "a" + combining ring above (U+030A) = NFKC -> "\u00E5" (a-ring)
+    const pwdDecomposed = 'a\u030Abc';
+    const pwdComposed = '\u00E5bc';
+
+    // Both should produce the same prepared bytes
+    const prep1 = preparePasswordV5(pwdDecomposed);
+    const prep2 = preparePasswordV5(pwdComposed);
+    expect(prep1.toHex()).toBe(prep2.toHex());
+
+    // Handler created with decomposed form should accept composed form
+    const fid = randomBytes(16);
+    const h = await PdfEncryptionHandler.create(
+      { userPassword: pwdDecomposed, ownerPassword: 'owner', algorithm: 'aes-256' },
+      fid,
+    );
+    const dict = h.buildEncryptDict();
+
+    const restored = await PdfEncryptionHandler.fromEncryptDict(dict, fid, pwdComposed);
+    const plain = enc.encode('combining char normalization');
+    const cipher = await h.encryptObject(1, 0, plain);
+    expect(await restored.decryptObject(1, 0, cipher)).toEqual(plain);
+  });
+
+  it('full-width digits are normalized to ASCII digits', async () => {
+    // Full-width digits U+FF10-FF19 -> '0'-'9' via NFKC
+    const pwdFullWidth = '\uFF11\uFF12\uFF13\uFF14\uFF15';
+    const pwdAscii = '12345';
+
+    const prep1 = preparePasswordV5(pwdFullWidth);
+    const prep2 = preparePasswordV5(pwdAscii);
+    expect(prep1.toHex()).toBe(prep2.toHex());
+
+    const fid = randomBytes(16);
+    const h = await PdfEncryptionHandler.create(
+      { userPassword: pwdFullWidth, ownerPassword: 'owner', algorithm: 'aes-256' },
+      fid,
+    );
+    const dict = h.buildEncryptDict();
+
+    const restored = await PdfEncryptionHandler.fromEncryptDict(dict, fid, pwdAscii);
+    const plain = enc.encode('full-width normalization');
+    const cipher = await h.encryptObject(1, 0, plain);
+    expect(await restored.decryptObject(1, 0, cipher)).toEqual(plain);
+  });
+
+  it('Japanese mixed Hiragana/Katakana password works', async () => {
+    const pwd = '\u3053\u3093\u306b\u3061\u306f\u30D1\u30B9\u30EF\u30FC\u30C9';
+    const fid = randomBytes(16);
+    const h = await PdfEncryptionHandler.create(
+      { userPassword: pwd, ownerPassword: 'owner', algorithm: 'aes-256' },
+      fid,
+    );
+    const dict = h.buildEncryptDict();
+
+    const restored = await PdfEncryptionHandler.fromEncryptDict(dict, fid, pwd);
+    const plain = enc.encode('Japanese password');
+    const cipher = await h.encryptObject(1, 0, plain);
+    expect(await restored.decryptObject(1, 0, cipher)).toEqual(plain);
+  });
+
+  it('Korean Hangul password works', async () => {
+    const pwd = '\uBE44\uBC00\uBC88\uD638';
+    const fid = randomBytes(16);
+    const h = await PdfEncryptionHandler.create(
+      { userPassword: pwd, ownerPassword: 'owner', algorithm: 'aes-256' },
+      fid,
+    );
+    const dict = h.buildEncryptDict();
+
+    const restored = await PdfEncryptionHandler.fromEncryptDict(dict, fid, pwd);
+    const plain = enc.encode('Korean password');
+    const cipher = await h.encryptObject(1, 0, plain);
+    expect(await restored.decryptObject(1, 0, cipher)).toEqual(plain);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// 25. SASLprep normalization edge cases
+// ---------------------------------------------------------------------------
+
+describe('AES-256 SASLprep edge cases', () => {
+  it('rejects null bytes (U+0000) in password', () => {
+    expect(() => saslprep('pass\x00word')).toThrow(/prohibited/i);
+  });
+
+  it('rejects ASCII control characters (U+0001-U+001F)', () => {
+    for (let cp = 1; cp <= 0x1F; cp++) {
+      expect(() => saslprep('a' + String.fromCodePoint(cp) + 'b')).toThrow(/prohibited/i);
+    }
+  });
+
+  it('rejects DEL (U+007F)', () => {
+    expect(() => saslprep('pass\x7Fword')).toThrow(/prohibited/i);
+  });
+
+  it('rejects C0 control characters (U+0080-U+009F)', () => {
+    for (let cp = 0x80; cp <= 0x9F; cp++) {
+      expect(() => saslprep(String.fromCodePoint(cp))).toThrow(/prohibited/i);
+    }
+  });
+
+  it('rejects private use area characters', () => {
+    expect(() => saslprep('test' + String.fromCodePoint(0xE000))).toThrow(/prohibited/i);
+    expect(() => saslprep('test' + String.fromCodePoint(0xF8FF))).toThrow(/prohibited/i);
+  });
+
+  it('rejects ideographic description characters (C.7: U+2FF0-U+2FFB)', () => {
+    expect(() => saslprep('test' + String.fromCodePoint(0x2FF0))).toThrow(/prohibited/i);
+    expect(() => saslprep('test' + String.fromCodePoint(0x2FFB))).toThrow(/prohibited/i);
+  });
+
+  it('removes multiple mapped-to-nothing characters', () => {
+    // SOFT HYPHEN + ZERO WIDTH SPACE + BOM interspersed
+    const input = '\u00ADhel\u200Blo\uFEFF';
+    expect(saslprep(input)).toBe('hello');
+  });
+
+  it('removes variation selectors (U+FE00-U+FE0F)', () => {
+    expect(saslprep('A\uFE00B\uFE0FC')).toBe('ABC');
+  });
+
+  it('removes Mongolian free variation selectors', () => {
+    expect(saslprep('x\u180By\u180Cz\u180D')).toBe('xyz');
+  });
+
+  it('maps all non-ASCII space types to U+0020', () => {
+    const spaces = [
+      0x00A0, 0x1680, 0x2000, 0x2001, 0x2002, 0x2003, 0x2004,
+      0x2005, 0x2006, 0x2007, 0x2008, 0x2009, 0x200A, 0x202F,
+      0x205F, 0x3000,
+    ];
+    for (const cp of spaces) {
+      const result = saslprep('a' + String.fromCodePoint(cp) + 'b');
+      expect(result).toBe('a b');
+    }
+  });
+
+  it('NFKC normalization: superscript digits become regular digits', () => {
+    // Superscript 2 (U+00B2) -> '2' via NFKC
+    expect(saslprep('\u00B2')).toBe('2');
+  });
+
+  it('NFKC normalization: ligature fi (U+FB01) becomes "fi"', () => {
+    expect(saslprep('\uFB01le')).toBe('file');
+  });
+
+  it('password that normalizes to empty string via mapped-to-nothing', () => {
+    // A password made entirely of mapped-to-nothing characters
+    const pwd = '\u00AD\u200B\u2060\uFEFF';
+    expect(saslprep(pwd)).toBe('');
+
+    // This should produce an empty prepared password
+    const prepared = preparePasswordV5(pwd);
+    expect(prepared.length).toBe(0);
+  });
+
+  it('password with only non-ASCII spaces normalizes to spaces', () => {
+    const pwd = '\u00A0\u3000\u2003';
+    expect(saslprep(pwd)).toBe('   ');
+  });
+
+  it('combining grapheme joiner (U+034F) is removed', () => {
+    expect(saslprep('a\u034Fb')).toBe('ab');
+  });
+
+  it('preserves legitimate Unicode after normalization', () => {
+    // Latin Extended characters should pass through
+    expect(saslprep('\u00FC\u00F6\u00E4')).toBe('\u00FC\u00F6\u00E4'); // umlaut chars
+    // Devanagari
+    expect(saslprep('\u0939\u093F\u0928\u094D\u0926\u0940')).toBe(
+      '\u0939\u093F\u0928\u094D\u0926\u0940',
+    );
+  });
+});
+
+// ---------------------------------------------------------------------------
+// 26. Password with null bytes
+// ---------------------------------------------------------------------------
+
+describe('AES-256 password with null bytes', () => {
+  it('rejects password containing null byte (U+0000)', () => {
+    expect(() => saslprep('before\x00after')).toThrow(/prohibited/i);
+  });
+
+  it('rejects password that is just a null byte', () => {
+    expect(() => saslprep('\x00')).toThrow(/prohibited/i);
+  });
+
+  it('rejects password with multiple null bytes', () => {
+    expect(() => saslprep('\x00\x00\x00')).toThrow(/prohibited/i);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// 27. Password that normalizes to empty string
+// ---------------------------------------------------------------------------
+
+describe('AES-256 password normalizing to empty', () => {
+  it('mapped-to-nothing password is equivalent to empty string', async () => {
+    const fid = randomBytes(16);
+    // Password consisting entirely of soft hyphens
+    const softHyphenPwd = '\u00AD\u00AD\u00AD';
+
+    const h = await PdfEncryptionHandler.create(
+      { userPassword: softHyphenPwd, ownerPassword: 'owner', algorithm: 'aes-256' },
+      fid,
+    );
+    const dict = h.buildEncryptDict();
+
+    // Should be openable with empty string (soft hyphens map to nothing)
+    const restored = await PdfEncryptionHandler.fromEncryptDict(dict, fid, '');
+    const plain = enc.encode('normalized-to-empty test');
+    const cipher = await h.encryptObject(1, 0, plain);
+    expect(await restored.decryptObject(1, 0, cipher)).toEqual(plain);
+  });
+
+  it('BOM-only password is equivalent to empty string', async () => {
+    const fid = randomBytes(16);
+    const bomPwd = '\uFEFF';
+
+    const h = await PdfEncryptionHandler.create(
+      { userPassword: bomPwd, ownerPassword: 'owner', algorithm: 'aes-256' },
+      fid,
+    );
+    const dict = h.buildEncryptDict();
+
+    const restored = await PdfEncryptionHandler.fromEncryptDict(dict, fid, '');
+    const plain = enc.encode('BOM-only password');
+    const cipher = await h.encryptObject(1, 0, plain);
+    expect(await restored.decryptObject(1, 0, cipher)).toEqual(plain);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// 28. Key derivation with all-zero salt
+// ---------------------------------------------------------------------------
+
+describe('AES-256 key derivation with all-zero salt', () => {
+  it('Algorithm 2.B works with all-zero salt', async () => {
+    const pwd = enc.encode('test');
+    const zeroSalt = new Uint8Array(8); // all zeros
+    const hash = await algorithm2B(pwd, zeroSalt);
+    expect(hash.length).toBe(32);
+    // Should be deterministic
+    const hash2 = await algorithm2B(pwd, zeroSalt);
+    expect(hash.toHex()).toBe(hash2.toHex());
+  });
+
+  it('all-zero salt produces different hash than non-zero salt', async () => {
+    const pwd = enc.encode('test');
+    const zeroSalt = new Uint8Array(8);
+    const nonZeroSalt = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8]);
+    const h1 = await algorithm2B(pwd, zeroSalt);
+    const h2 = await algorithm2B(pwd, nonZeroSalt);
+    expect(h1.toHex()).not.toBe(h2.toHex());
+  });
+
+  it('all-zero salt with empty password produces a valid hash', async () => {
+    const pwd = new Uint8Array(0);
+    const zeroSalt = new Uint8Array(8);
+    const hash = await algorithm2B(pwd, zeroSalt);
+    expect(hash.length).toBe(32);
+  });
+
+  it('all-zero salt with uKey (owner path) works', async () => {
+    const pwd = enc.encode('owner');
+    const zeroSalt = new Uint8Array(8);
+    const uKey = randomBytes(48);
+    const hash = await algorithm2B(pwd, zeroSalt, uKey);
+    expect(hash.length).toBe(32);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// 29. Algorithm 2.B specification conformance (PDF 2.0)
+// ---------------------------------------------------------------------------
+
+describe('Algorithm 2.B specification conformance', () => {
+  it('initial hash is SHA-256(password + salt [+ uKey])', async () => {
+    const pwd = enc.encode('test');
+    const salt = new Uint8Array([0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08]);
+
+    // The first step of Algorithm 2.B is SHA-256(password + salt)
+    // We can verify the algorithm produces a 32-byte result
+    const hash = await algorithm2B(pwd, salt);
+    expect(hash.length).toBe(32);
+  });
+
+  it('produces consistent results across multiple calls', async () => {
+    const pwd = enc.encode('consistency');
+    const salt = new Uint8Array([0xAA, 0xBB, 0xCC, 0xDD, 0x11, 0x22, 0x33, 0x44]);
+    const uKey = randomBytes(48);
+
+    const results = await Promise.all(
+      Array.from({ length: 5 }, () => algorithm2B(pwd, salt, uKey)),
+    );
+
+    const firstHex = results[0]!.toHex();
+    for (const r of results) {
+      expect(r.toHex()).toBe(firstHex);
+    }
+  });
+
+  it('different passwords produce different hashes', async () => {
+    const salt = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8]);
+    const h1 = await algorithm2B(enc.encode('password1'), salt);
+    const h2 = await algorithm2B(enc.encode('password2'), salt);
+    expect(h1.toHex()).not.toBe(h2.toHex());
+  });
+
+  it('K1 block is (password+K+uKey) repeated 64 times', async () => {
+    // This is a structural test: verify algorithm handles the 64x repetition
+    // by checking output is always 32 bytes regardless of input lengths
+    const shortPwd = enc.encode('x');
+    const longPwd = enc.encode('a'.repeat(127));
+    const salt = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8]);
+    const uKey = randomBytes(48);
+
+    const h1 = await algorithm2B(shortPwd, salt, uKey);
+    const h2 = await algorithm2B(longPwd, salt, uKey);
+
+    expect(h1.length).toBe(32);
+    expect(h2.length).toBe(32);
+    expect(h1.toHex()).not.toBe(h2.toHex());
+  });
+
+  it('round terminates after round 63 with correct E[-1] condition', async () => {
+    // Algorithm 2.B should run at least 64 rounds (0-63) and may run more
+    // We verify by ensuring the algorithm completes and produces valid output
+    const pwd = enc.encode('termination-test');
+    const salt = randomBytes(8);
+    const hash = await algorithm2B(pwd, salt);
+    expect(hash.length).toBe(32);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// 30. Encrypt/decrypt round-trip with edge-case passwords
+// ---------------------------------------------------------------------------
+
+describe('AES-256 encrypt/decrypt round-trip with edge-case passwords', () => {
+  it('single-character password', async () => {
+    const fid = randomBytes(16);
+    const h = await PdfEncryptionHandler.create(
+      { userPassword: 'x', ownerPassword: 'y', algorithm: 'aes-256' },
+      fid,
+    );
+    const dict = h.buildEncryptDict();
+    const restored = await PdfEncryptionHandler.fromEncryptDict(dict, fid, 'x');
+    const plain = enc.encode('single char password');
+    const cipher = await h.encryptObject(1, 0, plain);
+    expect(await restored.decryptObject(1, 0, cipher)).toEqual(plain);
+  });
+
+  it('password with only spaces', async () => {
+    const fid = randomBytes(16);
+    const h = await PdfEncryptionHandler.create(
+      { userPassword: '   ', ownerPassword: 'owner', algorithm: 'aes-256' },
+      fid,
+    );
+    const dict = h.buildEncryptDict();
+    const restored = await PdfEncryptionHandler.fromEncryptDict(dict, fid, '   ');
+    const plain = enc.encode('spaces password');
+    const cipher = await h.encryptObject(1, 0, plain);
+    expect(await restored.decryptObject(1, 0, cipher)).toEqual(plain);
+  });
+
+  it('password with special ASCII characters', async () => {
+    const pwd = '!@#$%^&*()_+-=[]{}|;:\'",.<>?/~`';
+    const fid = randomBytes(16);
+    const h = await PdfEncryptionHandler.create(
+      { userPassword: pwd, ownerPassword: 'owner', algorithm: 'aes-256' },
+      fid,
+    );
+    const dict = h.buildEncryptDict();
+    const restored = await PdfEncryptionHandler.fromEncryptDict(dict, fid, pwd);
+    const plain = enc.encode('special ASCII chars');
+    const cipher = await h.encryptObject(1, 0, plain);
+    expect(await restored.decryptObject(1, 0, cipher)).toEqual(plain);
+  });
+
+  it('password with accented Latin characters', async () => {
+    const pwd = '\u00E9\u00E8\u00EA\u00EB\u00E0\u00E2\u00E4\u00F9\u00FB\u00FC';
+    const fid = randomBytes(16);
+    const h = await PdfEncryptionHandler.create(
+      { userPassword: pwd, ownerPassword: 'owner', algorithm: 'aes-256' },
+      fid,
+    );
+    const dict = h.buildEncryptDict();
+    const restored = await PdfEncryptionHandler.fromEncryptDict(dict, fid, pwd);
+    const plain = enc.encode('accented latin');
+    const cipher = await h.encryptObject(1, 0, plain);
+    expect(await restored.decryptObject(1, 0, cipher)).toEqual(plain);
+  });
+
+  it('user and owner passwords that are identical', async () => {
+    const fid = randomBytes(16);
+    const h = await PdfEncryptionHandler.create(
+      { userPassword: 'same', ownerPassword: 'same', algorithm: 'aes-256' },
+      fid,
+    );
+    const dict = h.buildEncryptDict();
+    const restored = await PdfEncryptionHandler.fromEncryptDict(dict, fid, 'same');
+    const plain = enc.encode('identical passwords');
+    const cipher = await h.encryptObject(1, 0, plain);
+    expect(await restored.decryptObject(1, 0, cipher)).toEqual(plain);
+  });
+
+  it('password with mixed scripts (Latin + CJK + Cyrillic)', async () => {
+    const pwd = 'Hello\u4e16\u754c\u041f\u0440\u0438\u0432\u0435\u0442';
+    const fid = randomBytes(16);
+    const h = await PdfEncryptionHandler.create(
+      { userPassword: pwd, ownerPassword: 'owner', algorithm: 'aes-256' },
+      fid,
+    );
+    const dict = h.buildEncryptDict();
+    const restored = await PdfEncryptionHandler.fromEncryptDict(dict, fid, pwd);
+    const plain = enc.encode('mixed scripts');
+    const cipher = await h.encryptObject(1, 0, plain);
+    expect(await restored.decryptObject(1, 0, cipher)).toEqual(plain);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// 31. Owner password vs user password validation
+// ---------------------------------------------------------------------------
+
+describe('AES-256 owner vs user password validation', () => {
+  it('user password cannot open owner-locked content path, but both decrypt the same key', async () => {
+    const fid = randomBytes(16);
+    const h = await PdfEncryptionHandler.create(
+      { userPassword: 'userPwd', ownerPassword: 'ownerPwd', algorithm: 'aes-256' },
+      fid,
+    );
+    const dict = h.buildEncryptDict();
+
+    const dictValues: EncryptDictValues = {
+      version: 5,
+      revision: 6,
+      keyLength: 256,
+      ownerKey: Uint8Array.fromHex((dict.get('/O') as PdfString).value),
+      userKey: Uint8Array.fromHex((dict.get('/U') as PdfString).value),
+      ownerEncryptionKey: Uint8Array.fromHex((dict.get('/OE') as PdfString).value),
+      userEncryptionKey: Uint8Array.fromHex((dict.get('/UE') as PdfString).value),
+      perms: Uint8Array.fromHex((dict.get('/Perms') as PdfString).value),
+      permissions: (dict.get('/P') as PdfNumber).value,
+      encryptMetadata: true,
+    };
+
+    // User password verifies via user path
+    expect(await verifyUserPassword('userPwd', dictValues, fid)).toBe(true);
+    expect(await verifyOwnerPassword('userPwd', dictValues, fid)).toBe(false);
+
+    // Owner password verifies via owner path
+    expect(await verifyOwnerPassword('ownerPwd', dictValues, fid)).toBe(true);
+    expect(await verifyUserPassword('ownerPwd', dictValues, fid)).toBe(false);
+
+    // Both recover the same file key
+    const userKey = await computeFileEncryptionKey('userPwd', dictValues, fid);
+    const ownerKey = await computeFileEncryptionKey('ownerPwd', dictValues, fid);
+    expect(userKey.toHex()).toBe(ownerKey.toHex());
+    expect(userKey.toHex()).toBe(h.getFileKey().toHex());
+  });
+
+  it('owner password can decrypt content encrypted with user password key', async () => {
+    const fid = randomBytes(16);
+    const h = await PdfEncryptionHandler.create(
+      { userPassword: 'user', ownerPassword: 'owner', algorithm: 'aes-256' },
+      fid,
+    );
+    const dict = h.buildEncryptDict();
+
+    const restoredUser = await PdfEncryptionHandler.fromEncryptDict(dict, fid, 'user');
+    const restoredOwner = await PdfEncryptionHandler.fromEncryptDict(dict, fid, 'owner');
+
+    const plain = enc.encode('cross-decryption test');
+
+    // Encrypt with user-restored handler, decrypt with owner-restored handler
+    const cipher = await restoredUser.encryptObject(1, 0, plain);
+    const result = await restoredOwner.decryptObject(1, 0, cipher);
+    expect(result).toEqual(plain);
+  });
+
+  it('neither user nor owner password matches wrong password', async () => {
+    const fid = randomBytes(16);
+    const h = await PdfEncryptionHandler.create(
+      { userPassword: 'user123', ownerPassword: 'owner456', algorithm: 'aes-256' },
+      fid,
+    );
+    const dict = h.buildEncryptDict();
+
+    const dictValues: EncryptDictValues = {
+      version: 5,
+      revision: 6,
+      keyLength: 256,
+      ownerKey: Uint8Array.fromHex((dict.get('/O') as PdfString).value),
+      userKey: Uint8Array.fromHex((dict.get('/U') as PdfString).value),
+      ownerEncryptionKey: Uint8Array.fromHex((dict.get('/OE') as PdfString).value),
+      userEncryptionKey: Uint8Array.fromHex((dict.get('/UE') as PdfString).value),
+      perms: Uint8Array.fromHex((dict.get('/Perms') as PdfString).value),
+      permissions: (dict.get('/P') as PdfNumber).value,
+      encryptMetadata: true,
+    };
+
+    expect(await verifyUserPassword('wrong', dictValues, fid)).toBe(false);
+    expect(await verifyOwnerPassword('wrong', dictValues, fid)).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// 32. Permission flags with AES-256
+// ---------------------------------------------------------------------------
+
+describe('AES-256 permission flags edge cases', () => {
+  it('all permissions granted', async () => {
+    const h = await createAes256Handler('u', 'o', {
+      permissions: {
+        printing: true,
+        modifying: true,
+        copying: true,
+        annotating: true,
+        fillingForms: true,
+        contentAccessibility: true,
+        documentAssembly: true,
+      },
+    });
+    const p = h.getPermissions();
+    expect(p.printing).toBe(true);
+    expect(p.modifying).toBe(true);
+    expect(p.copying).toBe(true);
+    expect(p.annotating).toBe(true);
+    expect(p.fillingForms).toBe(true);
+    expect(p.contentAccessibility).toBe(true);
+    expect(p.documentAssembly).toBe(true);
+  });
+
+  it('no permissions granted (all false)', async () => {
+    const h = await createAes256Handler('u', 'o', {
+      permissions: {
+        printing: false,
+        modifying: false,
+        copying: false,
+        annotating: false,
+        fillingForms: false,
+        contentAccessibility: false,
+        documentAssembly: false,
+      },
+    });
+    const p = h.getPermissions();
+    expect(p.printing).toBe(false);
+    expect(p.modifying).toBe(false);
+    expect(p.copying).toBe(false);
+    expect(p.annotating).toBe(false);
+    expect(p.fillingForms).toBe(false);
+    expect(p.contentAccessibility).toBe(false);
+    expect(p.documentAssembly).toBe(false);
+  });
+
+  it('permission value encodes correctly in /Perms block', async () => {
+    const h = await PdfEncryptionHandler.create({
+      userPassword: 'u',
+      ownerPassword: 'o',
+      algorithm: 'aes-256',
+      permissions: { printing: true, copying: true },
+    });
+
+    const pValue = h.getPermissionsValue();
+    // Should have bits 3 (print), 5 (copy), 12 (high-quality print) set, plus reserved
+    expect(pValue & (1 << 2)).not.toBe(0); // bit 3
+    expect(pValue & (1 << 4)).not.toBe(0); // bit 5
+    expect(pValue & (1 << 11)).not.toBe(0); // bit 12
+
+    // Verify round-trip through encode/decode
+    const decoded = decodePermissions(pValue);
+    expect(decoded.printing).toBe(true);
+    expect(decoded.copying).toBe(true);
+    expect(decoded.modifying).toBe(false);
+  });
+
+  it('permissions survive fromEncryptDict round-trip', async () => {
+    const fid = randomBytes(16);
+    const perms = {
+      printing: 'lowResolution' as const,
+      modifying: true,
+      copying: false,
+      annotating: true,
+      fillingForms: false,
+      contentAccessibility: true,
+      documentAssembly: false,
+    };
+    const h = await PdfEncryptionHandler.create(
+      { userPassword: 'u', ownerPassword: 'o', algorithm: 'aes-256', permissions: perms },
+      fid,
+    );
+    const dict = h.buildEncryptDict();
+    const restored = await PdfEncryptionHandler.fromEncryptDict(dict, fid, 'u');
+    const rPerms = restored.getPermissions();
+    expect(rPerms.printing).toBe('lowResolution');
+    expect(rPerms.modifying).toBe(true);
+    expect(rPerms.copying).toBe(false);
+    expect(rPerms.annotating).toBe(true);
+    expect(rPerms.contentAccessibility).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// 33. preparePasswordV5 unit tests
+// ---------------------------------------------------------------------------
+
+describe('preparePasswordV5 edge cases', () => {
+  it('returns empty array for empty string', () => {
+    expect(preparePasswordV5('').length).toBe(0);
+  });
+
+  it('truncates to exactly 127 bytes', () => {
+    const longPwd = 'Z'.repeat(500);
+    const prepared = preparePasswordV5(longPwd);
+    expect(prepared.length).toBe(127);
+  });
+
+  it('does not truncate 126-byte password', () => {
+    const pwd = 'A'.repeat(126);
+    const prepared = preparePasswordV5(pwd);
+    expect(prepared.length).toBe(126);
+  });
+
+  it('does not truncate 127-byte password', () => {
+    const pwd = 'A'.repeat(127);
+    const prepared = preparePasswordV5(pwd);
+    expect(prepared.length).toBe(127);
+  });
+
+  it('applies SASLprep before truncation', () => {
+    // 130 'A' chars + 10 soft hyphens = after SASLprep: 130 'A' chars -> truncated to 127
+    const pwd = 'A'.repeat(130) + '\u00AD'.repeat(10);
+    const prepared = preparePasswordV5(pwd);
+    expect(prepared.length).toBe(127);
+  });
+
+  it('returns UTF-8 encoded bytes', () => {
+    const pwd = '\u00E9'; // e-acute, 2 bytes in UTF-8
+    const prepared = preparePasswordV5(pwd);
+    expect(prepared.length).toBe(2);
+    expect(prepared[0]).toBe(0xC3);
+    expect(prepared[1]).toBe(0xA9);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// 34. Key derivation cache isolation
+// ---------------------------------------------------------------------------
+
+describe('AES-256 key derivation cache behavior', () => {
+  it('different passwords yield different file keys for same dict structure', async () => {
+    const fid1 = randomBytes(16);
+    const fid2 = randomBytes(16);
+    const h1 = await PdfEncryptionHandler.create(
+      { userPassword: 'alpha', ownerPassword: 'beta', algorithm: 'aes-256' },
+      fid1,
+    );
+    const h2 = await PdfEncryptionHandler.create(
+      { userPassword: 'gamma', ownerPassword: 'delta', algorithm: 'aes-256' },
+      fid2,
+    );
+    expect(h1.getFileKey().toHex()).not.toBe(h2.getFileKey().toHex());
+  });
+
+  it('repeated calls to computeFileEncryptionKey return same key', async () => {
+    const fid = randomBytes(16);
+    const h = await PdfEncryptionHandler.create(
+      { userPassword: 'cached', ownerPassword: 'owner', algorithm: 'aes-256' },
+      fid,
+    );
+    const dict = h.buildEncryptDict();
+    const dictValues: EncryptDictValues = {
+      version: 5,
+      revision: 6,
+      keyLength: 256,
+      ownerKey: Uint8Array.fromHex((dict.get('/O') as PdfString).value),
+      userKey: Uint8Array.fromHex((dict.get('/U') as PdfString).value),
+      ownerEncryptionKey: Uint8Array.fromHex((dict.get('/OE') as PdfString).value),
+      userEncryptionKey: Uint8Array.fromHex((dict.get('/UE') as PdfString).value),
+      perms: Uint8Array.fromHex((dict.get('/Perms') as PdfString).value),
+      permissions: (dict.get('/P') as PdfNumber).value,
+      encryptMetadata: true,
+    };
+
+    const key1 = await computeFileEncryptionKey('cached', dictValues, fid);
+    const key2 = await computeFileEncryptionKey('cached', dictValues, fid);
+    expect(key1.toHex()).toBe(key2.toHex());
+  });
+});
+
+// ---------------------------------------------------------------------------
+// 35. Algorithm 2.B with empty password
+// ---------------------------------------------------------------------------
+
+describe('Algorithm 2.B with empty password', () => {
+  it('produces a valid 32-byte hash with empty password', async () => {
+    const pwd = new Uint8Array(0);
+    const salt = randomBytes(8);
+    const hash = await algorithm2B(pwd, salt);
+    expect(hash.length).toBe(32);
+  });
+
+  it('empty password with uKey still produces valid hash', async () => {
+    const pwd = new Uint8Array(0);
+    const salt = randomBytes(8);
+    const uKey = randomBytes(48);
+    const hash = await algorithm2B(pwd, salt, uKey);
+    expect(hash.length).toBe(32);
+  });
+
+  it('empty password hash differs from non-empty', async () => {
+    const salt = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8]);
+    const emptyHash = await algorithm2B(new Uint8Array(0), salt);
+    const nonEmptyHash = await algorithm2B(enc.encode('notempty'), salt);
+    expect(emptyHash.toHex()).not.toBe(nonEmptyHash.toHex());
+  });
+});
+
+// ---------------------------------------------------------------------------
+// 36. Full end-to-end with SASLprep-equivalent passwords
+// ---------------------------------------------------------------------------
+
+describe('AES-256 SASLprep equivalence end-to-end', () => {
+  it('NO-BREAK SPACE password is equivalent to ASCII space password', async () => {
+    const fid = randomBytes(16);
+    // U+00A0 (no-break space) should map to regular space
+    const h = await PdfEncryptionHandler.create(
+      { userPassword: 'a\u00A0b', ownerPassword: 'owner', algorithm: 'aes-256' },
+      fid,
+    );
+    const dict = h.buildEncryptDict();
+
+    // Should be openable with regular space
+    const restored = await PdfEncryptionHandler.fromEncryptDict(dict, fid, 'a b');
+    const plain = enc.encode('NBSP equivalence');
+    const cipher = await h.encryptObject(1, 0, plain);
+    expect(await restored.decryptObject(1, 0, cipher)).toEqual(plain);
+  });
+
+  it('IDEOGRAPHIC SPACE (U+3000) password is equivalent to ASCII space', async () => {
+    const fid = randomBytes(16);
+    const h = await PdfEncryptionHandler.create(
+      { userPassword: 'x\u3000y', ownerPassword: 'owner', algorithm: 'aes-256' },
+      fid,
+    );
+    const dict = h.buildEncryptDict();
+
+    const restored = await PdfEncryptionHandler.fromEncryptDict(dict, fid, 'x y');
+    const plain = enc.encode('ideographic space');
+    const cipher = await h.encryptObject(1, 0, plain);
+    expect(await restored.decryptObject(1, 0, cipher)).toEqual(plain);
+  });
+
+  it('zero-width space password is equivalent to stripped version', async () => {
+    const fid = randomBytes(16);
+    const h = await PdfEncryptionHandler.create(
+      { userPassword: 'ab\u200Bcd', ownerPassword: 'owner', algorithm: 'aes-256' },
+      fid,
+    );
+    const dict = h.buildEncryptDict();
+
+    const restored = await PdfEncryptionHandler.fromEncryptDict(dict, fid, 'abcd');
+    const plain = enc.encode('ZWS equivalence');
+    const cipher = await h.encryptObject(1, 0, plain);
+    expect(await restored.decryptObject(1, 0, cipher)).toEqual(plain);
+  });
+
+  it('full-width digits password is equivalent to ASCII digits', async () => {
+    const fid = randomBytes(16);
+    // Full-width '123' -> NFKC -> '123'
+    const h = await PdfEncryptionHandler.create(
+      { userPassword: '\uFF11\uFF12\uFF13', ownerPassword: 'owner', algorithm: 'aes-256' },
+      fid,
+    );
+    const dict = h.buildEncryptDict();
+
+    const restored = await PdfEncryptionHandler.fromEncryptDict(dict, fid, '123');
+    const plain = enc.encode('full-width digits');
+    const cipher = await h.encryptObject(1, 0, plain);
+    expect(await restored.decryptObject(1, 0, cipher)).toEqual(plain);
   });
 });

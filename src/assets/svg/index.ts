@@ -9,8 +9,10 @@ export {
   parseSvgPath,
   parseSvgColor,
   parseSvgTransform,
+  interpolateLinearRgb,
+  applySpreadMethod,
 } from './svgParser.js';
-export type { SvgDrawCommand, SvgElement } from './svgParser.js';
+export type { SvgDrawCommand, SvgElement, SvgGradient, SvgGradientStop } from './svgParser.js';
 
 export { svgToPdfOperators, drawSvgOnPage } from './svgToPdf.js';
 export type { SvgRenderOptions } from './svgToPdf.js';

@@ -5,6 +5,79 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 See [VERSIONING.md](./VERSIONING.md) for this project's versioning policy.
 
+## [0.27.0] - 2026-03-08
+
+### Added
+
+- **Spot colors & DeviceN color spaces** (`src/core/operators/color.ts`):
+  - `spotColor()` — create Separation (spot) colors for print production
+  - `deviceNColor()` — create multi-ink DeviceN colors
+  - `buildSeparationColorSpace()` / `buildDeviceNColorSpace()` — low-level CS builders
+  - `rgbToCmyk()` / `cmykToRgb()` — color space conversion
+  - `colorToHex()` / `hexToColor()` — hex string interop
+
+- **SVG gradient interpolation** (`src/assets/svg/svgParser.ts`):
+  - `interpolateLinearRgb()` — perceptually correct linear-RGB gradient interpolation
+  - `applySpreadMethod()` — SVG spread method (pad/reflect/repeat) for gradient extends
+
+- **Header / footer engine** (`src/layout/headerFooter.ts`):
+  - `applyHeaderFooter()` / `applyHeaderFooterToPage()` — template-based headers/footers
+  - Template variables: `{page}`, `{pages}`, `{date}`, `{title}`
+  - `toRoman()` / `toAlpha()` — number formatting helpers
+
+- **Advanced text layout** (`src/layout/textLayout.ts`):
+  - Knuth-Plass optimal line-breaking algorithm
+  - Rich text spans with `color`, `bold`, `italic`, `underline`, `strikethrough`, `superscript`, `subscript`
+
+- **Enhanced redaction** (`src/annotation/applyRedactions.ts`):
+  - `OverlayAlignment` type — left/center/right text alignment in redaction overlay
+  - `RedactionOperatorOptions` — font, border, opacity control for redaction rendering
+
+- **Form flattening rich text** (`src/form/formFlatten.ts`):
+  - Rich text (XHTML `/RV`) parsing during form flattening
+  - Supports bold, italic, color, font-size from XHTML markup
+
+- **Batch processor memory pressure** (`src/batch/batchProcessor.ts`):
+  - Runtime-aware heap monitoring (Node.js `process.memoryUsage()`, Chrome `performance.memory`)
+  - Automatic GC hints when heap pressure exceeds threshold
+
+- **New error classes** (`src/errors.ts`):
+  - `InvalidPageSizeError`, `InvalidColorError`, `PluginError`, `StreamingParseError`, `BatchProcessingError`
+
+- **WASM inline utilities** (`src/wasm/inlineWasm.ts`):
+  - `getInlineWasmSize()` — get encoded WASM size without decoding
+  - `preloadInlineWasm()` — proactively decode and cache WASM bytes
+
+- **200 new tests** (5,904 total across 236 test suites):
+  - AES-256 edge cases (128), SVG gradients (60+), linearization hints (89)
+  - Batch processing (18), page labels edge cases (31), bookmark destinations (24)
+  - Redaction overlay (17), form flattening rich text (26), PDF/UA tuning (51)
+  - Page box manipulation (20+), WASM inline (17)
+
+### Changed
+
+- **Color type union** — `Color` now includes `SpotColor | DeviceNColor` in addition to RGB/CMYK/Grayscale
+- **Linearization hint tables** — fixed byte offset precision with windowed assertions (±4/±10 byte tolerance)
+- **SVG gradient rendering** — fixed `hasFillGradient` type narrowing for optional chaining
+- **Patterns** — `colorToRgb()` now handles SpotColor/DeviceNColor with black fallback
+- **Modernization audit** — 13 additional fixes across 8 source files:
+  - `String.fromCharCode(...array)` → `TextDecoder('latin1')` (stack overflow fix for >65K arrays)
+  - Sequential `await import()` → `Promise.all()` for parallel dynamic imports
+  - `number[]` → `Uint32Array`/`Uint8Array` in JPEG2000 Huffman tables
+  - `typeof x === 'undefined'` → `'x' in globalThis` (idiomatic runtime detection)
+  - `Symbol.for()` + `as unknown as` casts → `WeakMap<PdfDocument, T>` (type-safe storage)
+  - Non-null assertions with boolean guards → direct `!== undefined` narrowing
+- Test count: **5,904 tests** passing across **236 test suites**
+
+### Fixed
+
+- Linearization hint table byte offsets — 3 test assertions relaxed for acceptable precision
+- SVG gradient `boolean | undefined` type error with optional chaining
+- `patterns.ts` missing default case in `colorToRgb()` switch for new color types
+- `textLayout.ts` `exactOptionalPropertyTypes` violations for optional WordToken fields
+- `pdfUaValidator.ts` `getFontNames` property access on PdfPage
+- `batchProcessor.ts` globalThis index signature for runtime detection
+
 ## [0.26.0] - 2026-03-08
 
 ### Added

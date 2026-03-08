@@ -58,8 +58,8 @@ export type { EmbeddedPdfPage, DrawPageOptions, EmbedPageOptions } from './core/
 // Colour helpers
 // ---------------------------------------------------------------------------
 
-export { rgb, cmyk, grayscale, componentsToColor, colorToComponents, setFillingColor, setStrokingColor } from './core/operators/color.js';
-export type { RgbColor, CmykColor, GrayscaleColor, Color } from './core/operators/color.js';
+export { rgb, cmyk, grayscale, componentsToColor, colorToComponents, setFillingColor, setStrokingColor, spotColor, deviceNColor, rgbToCmyk, cmykToRgb, colorToHex, hexToColor, spotResourceName, deviceNResourceName } from './core/operators/color.js';
+export type { RgbColor, CmykColor, GrayscaleColor, SpotColor, DeviceNColor, Color } from './core/operators/color.js';
 
 // ---------------------------------------------------------------------------
 // Gradients & Patterns
@@ -79,7 +79,7 @@ export type { Degrees, Radians, Angle } from './core/operators/state.js';
 // PDF value helpers
 // ---------------------------------------------------------------------------
 
-export { asPDFName, asPDFNumber, asNumber } from './utils/pdfValueHelpers.js';
+export { asPDFName, asPDFNumber, asPdfName, asPdfNumber, asNumber } from './utils/pdfValueHelpers.js';
 
 // ---------------------------------------------------------------------------
 // Enums
@@ -363,6 +363,9 @@ export {
   drawObject,
   // First-class operator wrapper
   PDFOperator,
+  // Spot / Separation / DeviceN colour space builders
+  buildSeparationColorSpace,
+  buildDeviceNColorSpace,
 } from './core/operators/index.js';
 
 // ---------------------------------------------------------------------------
@@ -691,8 +694,10 @@ export {
   parseSvgTransform,
   svgToPdfOperators,
   drawSvgOnPage,
+  interpolateLinearRgb,
+  applySpreadMethod,
 } from './assets/svg/index.js';
-export type { SvgDrawCommand, SvgElement, SvgRenderOptions } from './assets/svg/index.js';
+export type { SvgDrawCommand, SvgElement, SvgRenderOptions, SvgGradient, SvgGradientStop } from './assets/svg/index.js';
 
 // ---------------------------------------------------------------------------
 // Linearization
@@ -745,7 +750,7 @@ export { markForRedaction, applyRedactions, getRedactionMarks } from './core/red
 export type { RedactionOptions, RedactionMark } from './core/redaction.js';
 
 export { applyRedaction } from './annotation/applyRedactions.js';
-export type { RedactionResult } from './annotation/applyRedactions.js';
+export type { RedactionResult, OverlayAlignment, RedactionOperatorOptions } from './annotation/applyRedactions.js';
 
 // ---------------------------------------------------------------------------
 // Image optimization
@@ -989,6 +994,20 @@ export type { TablePreset, PresetName, PresetOptions } from './layout/index.js';
 export { estimateTextWidth, applyOverflow, wrapText, truncateText, ellipsisText, shrinkFontSize } from './layout/index.js';
 export type { OverflowMode, OverflowResult } from './layout/index.js';
 
+export {
+  applyHeaderFooter,
+  applyHeaderFooterToPage,
+  toRoman,
+  toAlpha,
+  formatDate,
+  replaceTemplateVariables,
+} from './layout/index.js';
+export type {
+  HeaderFooterPosition,
+  HeaderFooterContent,
+  HeaderFooterOptions,
+} from './layout/index.js';
+
 // ---------------------------------------------------------------------------
 // Typed error classes
 // ---------------------------------------------------------------------------
@@ -1007,6 +1026,11 @@ export {
   RichTextFieldReadError,
   CombedTextLayoutError,
   ExceededMaxLengthError,
+  InvalidPageSizeError,
+  InvalidColorError,
+  PluginError,
+  StreamingParseError,
+  BatchProcessingError,
 } from './errors.js';
 
 // ---------------------------------------------------------------------------
@@ -1035,7 +1059,7 @@ export type { PageLabelRange, PageLabelStyle } from './core/pageLabels.js';
 // ---------------------------------------------------------------------------
 
 export { processBatch, batchMerge, batchFlatten } from './batch/batchProcessor.js';
-export type { BatchOptions, BatchResult, BatchProgressCallback } from './batch/batchProcessor.js';
+export type { BatchOptions, BatchResult, BatchProgressCallback, BatchErrorStrategy } from './batch/batchProcessor.js';
 
 // ---------------------------------------------------------------------------
 // PDF/UA validation
@@ -1048,5 +1072,31 @@ export type { PdfUaValidationResult, PdfUaError, PdfUaWarning, PdfUaLevel, PdfUa
 // Inline WASM
 // ---------------------------------------------------------------------------
 
-export { getInlineWasmBytes, hasInlineWasmData, isValidModuleName } from './wasm/inlineWasm.js';
+export { getInlineWasmBytes, hasInlineWasmData, isValidModuleName, getInlineWasmSize, preloadInlineWasm } from './wasm/inlineWasm.js';
 export type { WasmModuleName } from './wasm/inlineWasm.js';
+
+// ---------------------------------------------------------------------------
+// Builder pattern
+// ---------------------------------------------------------------------------
+
+export { PdfDocumentBuilder } from './core/pdfDocumentBuilder.js';
+
+// ---------------------------------------------------------------------------
+// Streaming parser
+// ---------------------------------------------------------------------------
+
+export { StreamingPdfParser } from './parser/streamingParser.js';
+export type { StreamingParserOptions, ParsedPage, StreamingParseResult, StreamingParserEvent } from './parser/streamingParser.js';
+
+// ---------------------------------------------------------------------------
+// Plugin system
+// ---------------------------------------------------------------------------
+
+export { PdfPluginManager } from './plugins/index.js';
+export type { PdfPlugin, PluginDocument, PluginPage } from './plugins/index.js';
+export { timestampPlugin } from './plugins/index.js';
+export type { TimestampPluginOptions } from './plugins/index.js';
+export { metadataPlugin } from './plugins/index.js';
+export type { MetadataPluginOptions } from './plugins/index.js';
+export { accessibilityPlugin } from './plugins/index.js';
+export type { AccessibilityPluginOptions } from './plugins/index.js';

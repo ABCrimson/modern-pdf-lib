@@ -20,7 +20,7 @@
  * - ViewBox scaling and aspect ratio preservation
  */
 
-import type { SvgElement, SvgDrawCommand } from './svgParser.js';
+import type { SvgElement, SvgDrawCommand, SvgGradient } from './svgParser.js';
 import { parseSvg } from './svgParser.js';
 import type { PdfPage } from '../../core/pdfPage.js';
 
@@ -461,7 +461,7 @@ export function svgToPdfOperators(
   }
 
   // Render child elements
-  ops += renderElement(element);
+  ops += renderElement(element, element.gradients);
 
   ops += 'Q\n';
 
@@ -469,16 +469,23 @@ export function svgToPdfOperators(
 }
 
 /** Recursively render an SVG element to PDF operators. */
-function renderElement(el: SvgElement): string {
+function renderElement(
+  el: SvgElement,
+  gradients?: Map<string, SvgGradient>,
+): string {
   let ops = '';
 
   // Skip non-renderable elements
   const tag = el.tag;
   if (tag === 'defs' || tag === 'title' || tag === 'desc' ||
       tag === 'metadata' || tag === 'style' || tag === 'clipPath' ||
-      tag === 'mask' || tag === 'symbol' || tag === 'marker') {
+      tag === 'mask' || tag === 'symbol' || tag === 'marker' ||
+      tag === 'lineargradient' || tag === 'radialgradient' || tag === 'stop') {
     return '';
   }
+
+  // Merge gradient maps (element may have its own)
+  const effectiveGradients = el.gradients ?? gradients;
 
   const hasTransform = el.transform !== undefined;
   const needsState = hasTransform || el.opacity !== undefined;
@@ -500,12 +507,16 @@ function renderElement(el: SvgElement): string {
 
   // Draw this element's path commands
   if (el.commands && el.commands.length > 0) {
-    const hasFill = el.fill !== undefined;
+    const hasFillGradient = el.fillGradientId !== undefined && (effectiveGradients?.has(el.fillGradientId) ?? false);
+    const hasFill = el.fill !== undefined || hasFillGradient;
     const hasStroke = el.stroke !== undefined;
 
-    // Set fill colour
-    if (hasFill) {
-      ops += `${n(el.fill!.r / 255)} ${n(el.fill!.g / 255)} ${n(el.fill!.b / 255)} rg\n`;
+    // Set fill colour (solid or gradient comment marker)
+    if (hasFillGradient) {
+      const gradient = effectiveGradients!.get(el.fillGradientId!)!;
+      ops += renderGradientFill(gradient, el);
+    } else if (el.fill) {
+      ops += `${n(el.fill.r / 255)} ${n(el.fill.g / 255)} ${n(el.fill.b / 255)} rg\n`;
     }
 
     // Set stroke colour
@@ -543,18 +554,68 @@ function renderElement(el: SvgElement): string {
     // Path operators
     ops += commandsToPathOps(el.commands);
 
-    // Painting operator (with fill-rule awareness)
+    // For gradient fills, we use the first stop's colour as a solid-fill
+    // approximation in the content stream (the full shading is separate).
+    // The painting operator still needs to reflect fill + stroke.
     ops += paintingOperator(hasFill, hasStroke, el.fillRule);
   }
 
   // Render children
   for (const child of el.children) {
-    ops += renderElement(child);
+    ops += renderElement(child, effectiveGradients);
   }
 
   if (needsState) {
     ops += 'Q\n';
   }
+
+  return ops;
+}
+
+// ---------------------------------------------------------------------------
+// Gradient fill rendering
+// ---------------------------------------------------------------------------
+
+/**
+ * Render a gradient fill as PDF content-stream operators.
+ *
+ * For content-stream-only output (no indirect objects), we approximate
+ * the gradient by using the first stop's colour as the fill colour and
+ * emit a comment with the gradient metadata. Full PDF shading requires
+ * indirect objects (handled by the page integration path).
+ *
+ * When using `drawSvgOnPage`, the gradient information is available for
+ * proper PDF shading pattern construction.
+ */
+function renderGradientFill(gradient: SvgGradient, el: SvgElement): string {
+  let ops = '';
+
+  // Use the first stop's colour as solid fill approximation
+  if (gradient.stops.length > 0) {
+    const stop = gradient.stops[0]!;
+    const r = stop.color.r / 255;
+    const g = stop.color.g / 255;
+    const b = stop.color.b / 255;
+    ops += `${n(r)} ${n(g)} ${n(b)} rg\n`;
+  }
+
+  // Emit gradient metadata as a PDF comment for downstream processing
+  ops += `% gradient:${gradient.type}:${gradient.id}`;
+  if (gradient.gradientTransform) {
+    const [a, b, c, d, e, f] = gradient.gradientTransform;
+    ops += `:transform(${n(a)},${n(b)},${n(c)},${n(d)},${n(e)},${n(f)})`;
+  }
+  ops += `:spread(${gradient.spreadMethod})`;
+  ops += `:units(${gradient.gradientUnits})`;
+
+  if (gradient.type === 'linearGradient') {
+    ops += `:coords(${n(gradient.x1 ?? 0)},${n(gradient.y1 ?? 0)},${n(gradient.x2 ?? 1)},${n(gradient.y2 ?? 0)})`;
+  } else {
+    ops += `:coords(${n(gradient.cx ?? 0.5)},${n(gradient.cy ?? 0.5)},${n(gradient.r ?? 0.5)},${n(gradient.fx ?? 0.5)},${n(gradient.fy ?? 0.5)})`;
+  }
+
+  ops += `:stops(${gradient.stops.map((s) => `${n(s.offset)}=${s.color.r},${s.color.g},${s.color.b},${n(s.opacity)}`).join(';')})`;
+  ops += '\n';
 
   return ops;
 }

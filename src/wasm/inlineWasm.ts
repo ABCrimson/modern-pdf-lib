@@ -1,22 +1,25 @@
 /**
  * @module wasm/inlineWasm
  *
- * Provides runtime access to inline (base64-encoded) WASM module bytes.
+ * Provides runtime access to inline (base64-encoded) WASM module bytes
+ * with **lazy decoding** and **GC-friendly caching**.
  *
  * This module is the runtime companion to the build-time code generation
  * script `scripts/generate-inline-wasm.ts`. It imports the generated
- * constants from `inlineWasm.generated.ts` and exposes a single function,
- * {@link getInlineWasmBytes}, that decodes a module's base64 string into
- * a `Uint8Array` on demand.
+ * constants from `inlineWasm.generated.ts` and exposes functions that
+ * decode a module's base64 string into a `Uint8Array` on demand.
  *
  * Design:
  * - The heavy lifting (reading WASM files, base64 encoding) happens at
  *   **build time** via the code generation script.
- * - At **runtime**, only a single base64 decode is needed per module,
- *   and the result is cached.
- * - This approach avoids shipping base64 strings in the default bundle.
- *   The generated file is only imported when inline WASM is needed
- *   (e.g., as a fallback when no WASM path is configured).
+ * - At **runtime**, base64 decoding is deferred until the module is
+ *   actually requested — no upfront cost.
+ * - Decoded bytes are held via `WeakRef` so the GC can reclaim them
+ *   when memory pressure is high. A strong cache is also available
+ *   for performance-critical paths.
+ * - {@link preloadInlineWasm} allows proactive decoding before first use.
+ * - {@link getInlineWasmSize} returns the encoded size without triggering
+ *   any base64 decode.
  *
  * @packageDocumentation
  */
@@ -43,11 +46,26 @@ export const WASM_MODULE_NAMES = [
 export type WasmModuleName = (typeof WASM_MODULE_NAMES)[number];
 
 // ---------------------------------------------------------------------------
-// Decoded bytes cache
+// Decoded bytes cache (strong + WeakRef)
 // ---------------------------------------------------------------------------
 
-/** Cache of decoded WASM bytes, keyed by module name. */
-const decodedCache = new Map<string, Uint8Array>();
+/**
+ * Strong cache of decoded WASM bytes, keyed by module name.
+ *
+ * Entries are populated on first access and kept alive as long as
+ * callers hold references. {@link clearInlineWasmCache} clears this.
+ */
+const strongCache = new Map<string, Uint8Array>();
+
+/**
+ * Weak cache of decoded WASM bytes.
+ *
+ * When the strong cache is cleared (e.g., to reduce memory), the
+ * weak cache may still hold a reference if the GC hasn't collected
+ * the bytes. This avoids redundant re-decoding when bytes are still
+ * reachable elsewhere.
+ */
+const weakCache = new Map<string, WeakRef<Uint8Array>>();
 
 // ---------------------------------------------------------------------------
 // Public API
@@ -58,7 +76,8 @@ const decodedCache = new Map<string, Uint8Array>();
  *
  * On first call for a module, the base64 string from the generated file
  * is decoded into a `Uint8Array`. Subsequent calls return the cached
- * result.
+ * result. If the strong cache has been cleared but a `WeakRef` still
+ * holds the bytes, they are recovered without re-decoding.
  *
  * @param name  The WASM module name (e.g., `'libdeflate'`, `'png'`).
  * @returns     The decoded WASM binary as a `Uint8Array`.
@@ -80,45 +99,33 @@ export function getInlineWasmBytes(name: string): Uint8Array {
     );
   }
 
-  // 2. Return cached bytes if available
-  const cached = decodedCache.get(name);
-  if (cached) return cached;
+  // 2. Return from strong cache if available
+  const strong = strongCache.get(name);
+  if (strong) return strong;
 
-  // 3. Lazy-load the generated module data
-  //    The generated file is imported synchronously since it is a static
-  //    TypeScript module. Tree shaking ensures only the used constants
-  //    are included in the final bundle.
-  let base64Data: string;
-  try {
-    // Dynamic access to avoid hard failure when the generated file
-    // does not exist (e.g., in development before running the generator).
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const generated = requireGenerated();
-    const moduleData = generated.INLINE_WASM_MODULES[name];
-    if (!moduleData) {
-      throw new Error(
-        `WASM module "${name}" is not available in the generated inline data. ` +
-        `Run \`npm run generate:wasm-inline\` to regenerate.`,
-      );
+  // 3. Check weak cache — may survive after strong cache was cleared
+  const weakRef = weakCache.get(name);
+  if (weakRef) {
+    const weakBytes = weakRef.deref();
+    if (weakBytes) {
+      // Re-promote to strong cache
+      strongCache.set(name, weakBytes);
+      return weakBytes;
     }
-    base64Data = moduleData;
-  } catch (err) {
-    if (err instanceof Error && err.message.includes('is not available')) {
-      throw err;
-    }
-    throw new Error(
-      `Failed to load inline WASM data for module "${name}". ` +
-      `The generated file may not exist. ` +
-      `Run \`npm run generate:wasm-inline\` to generate it. ` +
-      `Original error: ${err instanceof Error ? err.message : String(err)}`,
-    );
+    // WeakRef was collected — remove stale entry
+    weakCache.delete(name);
   }
 
-  // 4. Decode base64 to Uint8Array
+  // 4. Decode base64 from generated data (lazy — only on first access)
+  const base64Data = getBase64Data(name);
+
+  // 5. Decode base64 to Uint8Array
   const bytes = Uint8Array.fromBase64(base64Data);
 
-  // 5. Cache and return
-  decodedCache.set(name, bytes);
+  // 6. Cache in both strong and weak maps
+  strongCache.set(name, bytes);
+  weakCache.set(name, new WeakRef(bytes));
+
   return bytes;
 }
 
@@ -133,12 +140,15 @@ export function isValidModuleName(name: string): name is WasmModuleName {
 }
 
 /**
- * Clear the decoded bytes cache.
+ * Clear the decoded bytes cache (both strong and weak).
  *
  * Primarily useful for testing. Does not affect the generated constants.
+ * After clearing, the next call to {@link getInlineWasmBytes} will
+ * re-decode from base64.
  */
 export function clearInlineWasmCache(): void {
-  decodedCache.clear();
+  strongCache.clear();
+  weakCache.clear();
 }
 
 /**
@@ -160,6 +170,78 @@ export function hasInlineWasmData(name: string): boolean {
   } catch {
     return false;
   }
+}
+
+/**
+ * Get the encoded (base64) size of a WASM module **without** decoding it.
+ *
+ * This is useful for diagnostics, size budgeting, and bundle analysis.
+ * The returned value is the number of characters in the base64 string;
+ * the actual binary size is approximately `encodedSize * 3 / 4`.
+ *
+ * @param name  The WASM module name.
+ * @returns     The base64 string length (in characters), or `0` if the
+ *              module is not available.
+ *
+ * @example
+ * ```ts
+ * const encoded = getInlineWasmSize('libdeflate');
+ * const binaryApprox = Math.floor(encoded * 3 / 4);
+ * console.log(`libdeflate: ~${binaryApprox} bytes binary`);
+ * ```
+ */
+export function getInlineWasmSize(name: string): number {
+  if (!isValidModuleName(name)) return 0;
+
+  try {
+    const generated = requireGenerated();
+    const data = generated.INLINE_WASM_MODULES[name];
+    return data ? data.length : 0;
+  } catch {
+    return 0;
+  }
+}
+
+/**
+ * Proactively decode and cache WASM bytes for the specified modules.
+ *
+ * Call this during application initialization to avoid decoding latency
+ * on the first actual use. If no names are provided, all available
+ * modules are preloaded.
+ *
+ * @param names  Optional list of module names to preload. Defaults to
+ *               all modules present in the generated data.
+ * @returns      The names of modules that were successfully preloaded.
+ *
+ * @example
+ * ```ts
+ * // Preload specific modules
+ * preloadInlineWasm('libdeflate', 'png');
+ *
+ * // Preload everything available
+ * preloadInlineWasm();
+ * ```
+ */
+export function preloadInlineWasm(...names: string[]): string[] {
+  const targets = names.length > 0 ? names : [...WASM_MODULE_NAMES];
+  const loaded: string[] = [];
+
+  for (const name of targets) {
+    if (!isValidModuleName(name)) continue;
+    if (strongCache.has(name)) {
+      loaded.push(name);
+      continue;
+    }
+
+    try {
+      getInlineWasmBytes(name);
+      loaded.push(name);
+    } catch {
+      // Module not available in generated data — skip silently
+    }
+  }
+
+  return loaded;
 }
 
 // ---------------------------------------------------------------------------
@@ -199,6 +281,35 @@ function requireGenerated(): GeneratedModule {
   } catch (err) {
     if (generatedModule) return generatedModule;
     throw err;
+  }
+}
+
+/**
+ * Extract the base64 string for a given module name from the generated data.
+ *
+ * @throws If the generated data is not loaded or does not contain the module.
+ */
+function getBase64Data(name: string): string {
+  try {
+    const generated = requireGenerated();
+    const moduleData = generated.INLINE_WASM_MODULES[name];
+    if (!moduleData) {
+      throw new Error(
+        `WASM module "${name}" is not available in the generated inline data. ` +
+        `Run \`npm run generate:wasm-inline\` to regenerate.`,
+      );
+    }
+    return moduleData;
+  } catch (err) {
+    if (err instanceof Error && err.message.includes('is not available')) {
+      throw err;
+    }
+    throw new Error(
+      `Failed to load inline WASM data for module "${name}". ` +
+      `The generated file may not exist. ` +
+      `Run \`npm run generate:wasm-inline\` to generate it. ` +
+      `Original error: ${err instanceof Error ? err.message : String(err)}`,
+    );
   }
 }
 
