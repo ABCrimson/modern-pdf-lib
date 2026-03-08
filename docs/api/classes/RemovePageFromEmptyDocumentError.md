@@ -6,7 +6,7 @@
 
 # Class: RemovePageFromEmptyDocumentError
 
-Defined in: [src/errors.ts:74](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/errors.ts#L74)
+Defined in: [src/errors.ts:74](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/errors.ts#L74)
 
 Thrown when attempting to remove a page from a document that has no pages.
 
@@ -20,7 +20,7 @@ Thrown when attempting to remove a page from a document that has no pages.
 
 > **new RemovePageFromEmptyDocumentError**(`options?`): `RemovePageFromEmptyDocumentError`
 
-Defined in: [src/errors.ts:76](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/errors.ts#L76)
+Defined in: [src/errors.ts:76](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/errors.ts#L76)
 
 #### Parameters
 
@@ -66,7 +66,7 @@ Defined in: node\_modules/typescript/lib/lib.es5.d.ts:1075
 
 > `readonly` **name**: `"RemovePageFromEmptyDocumentError"` = `'RemovePageFromEmptyDocumentError'`
 
-Defined in: [src/errors.ts:75](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/errors.ts#L75)
+Defined in: [src/errors.ts:75](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/errors.ts#L75)
 
 #### Overrides
 

@@ -8,7 +8,7 @@
 
 > **generateSymbolToUnicodeCmap**(): `string`
 
-Defined in: [src/compliance/toUnicodeCmap.ts:580](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/compliance/toUnicodeCmap.ts#L580)
+Defined in: [src/compliance/toUnicodeCmap.ts:580](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/compliance/toUnicodeCmap.ts#L580)
 
 Generate a ToUnicode CMap for the Symbol font.
 

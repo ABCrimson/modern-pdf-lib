@@ -6,7 +6,7 @@
 
 # Interface: FontDescriptorData
 
-Defined in: [src/assets/font/fontEmbed.ts:461](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/assets/font/fontEmbed.ts#L461)
+Defined in: [src/assets/font/fontEmbed.ts:461](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/assets/font/fontEmbed.ts#L461)
 
 Data for the `/FontDescriptor` dictionary.
 
@@ -16,7 +16,7 @@ Data for the `/FontDescriptor` dictionary.
 
 > `readonly` **ascent**: `number`
 
-Defined in: [src/assets/font/fontEmbed.ts:466](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/assets/font/fontEmbed.ts#L466)
+Defined in: [src/assets/font/fontEmbed.ts:466](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/assets/font/fontEmbed.ts#L466)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [src/assets/font/fontEmbed.ts:466](https://github.com/ABCrimson/mode
 
 > `readonly` **bbox**: readonly \[`number`, `number`, `number`, `number`\]
 
-Defined in: [src/assets/font/fontEmbed.ts:464](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/assets/font/fontEmbed.ts#L464)
+Defined in: [src/assets/font/fontEmbed.ts:464](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/assets/font/fontEmbed.ts#L464)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [src/assets/font/fontEmbed.ts:464](https://github.com/ABCrimson/mode
 
 > `readonly` **capHeight**: `number`
 
-Defined in: [src/assets/font/fontEmbed.ts:468](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/assets/font/fontEmbed.ts#L468)
+Defined in: [src/assets/font/fontEmbed.ts:468](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/assets/font/fontEmbed.ts#L468)
 
 ***
 
@@ -40,7 +40,7 @@ Defined in: [src/assets/font/fontEmbed.ts:468](https://github.com/ABCrimson/mode
 
 > `readonly` **descent**: `number`
 
-Defined in: [src/assets/font/fontEmbed.ts:467](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/assets/font/fontEmbed.ts#L467)
+Defined in: [src/assets/font/fontEmbed.ts:467](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/assets/font/fontEmbed.ts#L467)
 
 ***
 
@@ -48,7 +48,7 @@ Defined in: [src/assets/font/fontEmbed.ts:467](https://github.com/ABCrimson/mode
 
 > `readonly` **flags**: `number`
 
-Defined in: [src/assets/font/fontEmbed.ts:463](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/assets/font/fontEmbed.ts#L463)
+Defined in: [src/assets/font/fontEmbed.ts:463](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/assets/font/fontEmbed.ts#L463)
 
 ***
 
@@ -56,7 +56,7 @@ Defined in: [src/assets/font/fontEmbed.ts:463](https://github.com/ABCrimson/mode
 
 > `readonly` **fontName**: `string`
 
-Defined in: [src/assets/font/fontEmbed.ts:462](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/assets/font/fontEmbed.ts#L462)
+Defined in: [src/assets/font/fontEmbed.ts:462](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/assets/font/fontEmbed.ts#L462)
 
 ***
 
@@ -64,7 +64,7 @@ Defined in: [src/assets/font/fontEmbed.ts:462](https://github.com/ABCrimson/mode
 
 > `readonly` **italicAngle**: `number`
 
-Defined in: [src/assets/font/fontEmbed.ts:465](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/assets/font/fontEmbed.ts#L465)
+Defined in: [src/assets/font/fontEmbed.ts:465](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/assets/font/fontEmbed.ts#L465)
 
 ***
 
@@ -72,4 +72,4 @@ Defined in: [src/assets/font/fontEmbed.ts:465](https://github.com/ABCrimson/mode
 
 > `readonly` **stemV**: `number`
 
-Defined in: [src/assets/font/fontEmbed.ts:469](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/assets/font/fontEmbed.ts#L469)
+Defined in: [src/assets/font/fontEmbed.ts:469](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/assets/font/fontEmbed.ts#L469)

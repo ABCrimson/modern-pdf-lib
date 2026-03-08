@@ -8,7 +8,7 @@
 
 > **validateXmpMetadata**(`pdfBytes`, `level`): [`XmpValidationResult`](../interfaces/XmpValidationResult.md)
 
-Defined in: [src/compliance/xmpValidator.ts:137](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/compliance/xmpValidator.ts#L137)
+Defined in: [src/compliance/xmpValidator.ts:137](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/compliance/xmpValidator.ts#L137)
 
 Validate XMP metadata in a PDF against PDF/A requirements.
 

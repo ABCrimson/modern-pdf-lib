@@ -8,7 +8,7 @@
 
 > **parseIccDescription**(`data`): `string` \| `undefined`
 
-Defined in: [src/assets/image/iccProfile.ts:108](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/assets/image/iccProfile.ts#L108)
+Defined in: [src/assets/image/iccProfile.ts:108](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/assets/image/iccProfile.ts#L108)
 
 Parse the human-readable description from an ICC profile's 'desc' tag.
 

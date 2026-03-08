@@ -8,7 +8,7 @@
 
 > **cropPage**(`doc`, `index`, `cropBox`): `void`
 
-Defined in: [src/core/pageManipulation.ts:280](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pageManipulation.ts#L280)
+Defined in: [src/core/pageManipulation.ts:280](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pageManipulation.ts#L280)
 
 Set a crop box on a page.
 

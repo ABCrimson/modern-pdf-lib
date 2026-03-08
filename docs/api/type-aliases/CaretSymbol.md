@@ -8,7 +8,7 @@
 
 > **CaretSymbol** = `"None"` \| `"P"`
 
-Defined in: [src/annotation/types/caretAnnotation.ts:35](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/annotation/types/caretAnnotation.ts#L35)
+Defined in: [src/annotation/types/caretAnnotation.ts:35](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/annotation/types/caretAnnotation.ts#L35)
 
 Symbol displayed by the caret annotation.
 

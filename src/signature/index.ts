@@ -47,6 +47,7 @@ export {
 } from './byteRange.js';
 export type {
   ByteRangeResult,
+  PrepareAppearanceOptions,
 } from './byteRange.js';
 
 // ---------------------------------------------------------------------------

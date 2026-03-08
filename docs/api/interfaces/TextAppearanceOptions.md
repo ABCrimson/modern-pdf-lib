@@ -6,7 +6,7 @@
 
 # Interface: TextAppearanceOptions
 
-Defined in: [src/form/fieldAppearance.ts:74](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/form/fieldAppearance.ts#L74)
+Defined in: [src/form/fieldAppearance.ts:74](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/fieldAppearance.ts#L74)
 
 Options for generating a text field appearance.
 
@@ -16,7 +16,7 @@ Options for generating a text field appearance.
 
 > `optional` **alignment**: `number`
 
-Defined in: [src/form/fieldAppearance.ts:84](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/form/fieldAppearance.ts#L84)
+Defined in: [src/form/fieldAppearance.ts:84](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/fieldAppearance.ts#L84)
 
 Text alignment: 0=left, 1=center, 2=right. Default: 0.
 
@@ -26,7 +26,7 @@ Text alignment: 0=left, 1=center, 2=right. Default: 0.
 
 > `optional` **borderWidth**: `number`
 
-Defined in: [src/form/fieldAppearance.ts:88](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/form/fieldAppearance.ts#L88)
+Defined in: [src/form/fieldAppearance.ts:88](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/fieldAppearance.ts#L88)
 
 Border width in points. Default: 1.
 
@@ -36,7 +36,7 @@ Border width in points. Default: 1.
 
 > `optional` **fontName**: `string`
 
-Defined in: [src/form/fieldAppearance.ts:80](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/form/fieldAppearance.ts#L80)
+Defined in: [src/form/fieldAppearance.ts:80](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/fieldAppearance.ts#L80)
 
 Font name to use (e.g. "Helv"). Default: "Helv".
 
@@ -46,7 +46,7 @@ Font name to use (e.g. "Helv"). Default: "Helv".
 
 > `optional` **fontSize**: `number`
 
-Defined in: [src/form/fieldAppearance.ts:82](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/form/fieldAppearance.ts#L82)
+Defined in: [src/form/fieldAppearance.ts:82](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/fieldAppearance.ts#L82)
 
 Font size in points. 0 means auto-size. Default: 0.
 
@@ -56,7 +56,7 @@ Font size in points. 0 means auto-size. Default: 0.
 
 > `optional` **multiline**: `boolean`
 
-Defined in: [src/form/fieldAppearance.ts:86](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/form/fieldAppearance.ts#L86)
+Defined in: [src/form/fieldAppearance.ts:86](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/fieldAppearance.ts#L86)
 
 Whether the field is multiline. Default: false.
 
@@ -66,7 +66,7 @@ Whether the field is multiline. Default: false.
 
 > **rect**: \[`number`, `number`, `number`, `number`\]
 
-Defined in: [src/form/fieldAppearance.ts:78](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/form/fieldAppearance.ts#L78)
+Defined in: [src/form/fieldAppearance.ts:78](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/fieldAppearance.ts#L78)
 
 The widget rectangle [x1, y1, x2, y2].
 
@@ -76,6 +76,6 @@ The widget rectangle [x1, y1, x2, y2].
 
 > **value**: `string`
 
-Defined in: [src/form/fieldAppearance.ts:76](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/form/fieldAppearance.ts#L76)
+Defined in: [src/form/fieldAppearance.ts:76](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/fieldAppearance.ts#L76)
 
 The text value to render.

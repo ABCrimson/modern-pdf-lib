@@ -6,7 +6,7 @@
 
 # Interface: StripResult
 
-Defined in: [src/compliance/stripProhibited.ts:25](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/compliance/stripProhibited.ts#L25)
+Defined in: [src/compliance/stripProhibited.ts:25](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/compliance/stripProhibited.ts#L25)
 
 Result returned by [stripProhibitedFeatures](../functions/stripProhibitedFeatures.md).
 
@@ -16,7 +16,7 @@ Result returned by [stripProhibitedFeatures](../functions/stripProhibitedFeature
 
 > `readonly` **bytes**: `Uint8Array`
 
-Defined in: [src/compliance/stripProhibited.ts:27](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/compliance/stripProhibited.ts#L27)
+Defined in: [src/compliance/stripProhibited.ts:27](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/compliance/stripProhibited.ts#L27)
 
 Modified PDF bytes.
 
@@ -26,7 +26,7 @@ Modified PDF bytes.
 
 > `readonly` **modified**: `boolean`
 
-Defined in: [src/compliance/stripProhibited.ts:31](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/compliance/stripProhibited.ts#L31)
+Defined in: [src/compliance/stripProhibited.ts:31](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/compliance/stripProhibited.ts#L31)
 
 Whether any modifications were made.
 
@@ -36,6 +36,6 @@ Whether any modifications were made.
 
 > `readonly` **stripped**: [`StrippedFeature`](StrippedFeature.md)[]
 
-Defined in: [src/compliance/stripProhibited.ts:29](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/compliance/stripProhibited.ts#L29)
+Defined in: [src/compliance/stripProhibited.ts:29](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/compliance/stripProhibited.ts#L29)
 
 Features that were stripped.

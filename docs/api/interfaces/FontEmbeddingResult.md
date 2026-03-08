@@ -6,7 +6,7 @@
 
 # Interface: FontEmbeddingResult
 
-Defined in: [src/assets/font/fontEmbed.ts:509](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/assets/font/fontEmbed.ts#L509)
+Defined in: [src/assets/font/fontEmbed.ts:509](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/assets/font/fontEmbed.ts#L509)
 
 The complete result of building a font embedding.
 
@@ -16,7 +16,7 @@ The complete result of building a font embedding.
 
 > `readonly` **cidFont**: [`CIDFontData`](CIDFontData.md)
 
-Defined in: [src/assets/font/fontEmbed.ts:513](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/assets/font/fontEmbed.ts#L513)
+Defined in: [src/assets/font/fontEmbed.ts:513](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/assets/font/fontEmbed.ts#L513)
 
 CIDFont (DescendantFont) dictionary data.
 
@@ -26,7 +26,7 @@ CIDFont (DescendantFont) dictionary data.
 
 > `readonly` **cmapResult**: [`SubsetCmap`](SubsetCmap.md)
 
-Defined in: [src/assets/font/fontEmbed.ts:523](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/assets/font/fontEmbed.ts#L523)
+Defined in: [src/assets/font/fontEmbed.ts:523](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/assets/font/fontEmbed.ts#L523)
 
 Raw CMap result for advanced use.
 
@@ -36,7 +36,7 @@ Raw CMap result for advanced use.
 
 > `readonly` **fontDescriptor**: [`FontDescriptorData`](FontDescriptorData.md)
 
-Defined in: [src/assets/font/fontEmbed.ts:515](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/assets/font/fontEmbed.ts#L515)
+Defined in: [src/assets/font/fontEmbed.ts:515](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/assets/font/fontEmbed.ts#L515)
 
 FontDescriptor dictionary data.
 
@@ -46,7 +46,7 @@ FontDescriptor dictionary data.
 
 > `readonly` **fontProgram**: `Uint8Array`
 
-Defined in: [src/assets/font/fontEmbed.ts:519](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/assets/font/fontEmbed.ts#L519)
+Defined in: [src/assets/font/fontEmbed.ts:519](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/assets/font/fontEmbed.ts#L519)
 
 Subsetted (or full) font program bytes.
 
@@ -56,7 +56,7 @@ Subsetted (or full) font program bytes.
 
 > `readonly` **subsetResult**: [`SubsetResult`](SubsetResult.md)
 
-Defined in: [src/assets/font/fontEmbed.ts:521](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/assets/font/fontEmbed.ts#L521)
+Defined in: [src/assets/font/fontEmbed.ts:521](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/assets/font/fontEmbed.ts#L521)
 
 Raw subset result for advanced use.
 
@@ -66,7 +66,7 @@ Raw subset result for advanced use.
 
 > `readonly` **toUnicodeCmap**: `string`
 
-Defined in: [src/assets/font/fontEmbed.ts:517](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/assets/font/fontEmbed.ts#L517)
+Defined in: [src/assets/font/fontEmbed.ts:517](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/assets/font/fontEmbed.ts#L517)
 
 ToUnicode CMap stream body.
 
@@ -76,6 +76,6 @@ ToUnicode CMap stream body.
 
 > `readonly` **type0Font**: [`Type0FontData`](Type0FontData.md)
 
-Defined in: [src/assets/font/fontEmbed.ts:511](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/assets/font/fontEmbed.ts#L511)
+Defined in: [src/assets/font/fontEmbed.ts:511](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/assets/font/fontEmbed.ts#L511)
 
 Top-level Type 0 font dictionary data.

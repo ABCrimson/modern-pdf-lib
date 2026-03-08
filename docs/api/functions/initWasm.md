@@ -8,7 +8,7 @@
 
 > **initWasm**(`options?`): `Promise`\<`void`\>
 
-Defined in: [src/index.ts:202](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/index.ts#L202)
+Defined in: [src/index.ts:202](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/index.ts#L202)
 
 Initialize the optional WASM acceleration modules.
 

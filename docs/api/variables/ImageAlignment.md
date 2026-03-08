@@ -8,7 +8,7 @@
 
 > `const` **ImageAlignment**: `object`
 
-Defined in: [src/core/enums.ts:76](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/enums.ts#L76)
+Defined in: [src/core/enums.ts:76](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/enums.ts#L76)
 
 Image alignment for layout operations.
 

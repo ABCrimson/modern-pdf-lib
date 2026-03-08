@@ -8,7 +8,7 @@
 
 > **formatPdfDate**(`date`): `string`
 
-Defined in: [src/core/pdfCatalog.ts:36](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfCatalog.ts#L36)
+Defined in: [src/core/pdfCatalog.ts:36](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfCatalog.ts#L36)
 
 Format a `Date` as a PDF date string.
 

@@ -6,7 +6,7 @@
 
 # Interface: RedactionMark
 
-Defined in: [src/core/redaction.ts:40](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/redaction.ts#L40)
+Defined in: [src/core/redaction.ts:40](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/redaction.ts#L40)
 
 Redaction mark stored on a page.
 
@@ -16,7 +16,7 @@ Redaction mark stored on a page.
 
 > **color**: `object`
 
-Defined in: [src/core/redaction.ts:43](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/redaction.ts#L43)
+Defined in: [src/core/redaction.ts:43](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/redaction.ts#L43)
 
 #### b
 
@@ -36,7 +36,7 @@ Defined in: [src/core/redaction.ts:43](https://github.com/ABCrimson/modern-pdf-l
 
 > `optional` **overlayText**: `string`
 
-Defined in: [src/core/redaction.ts:42](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/redaction.ts#L42)
+Defined in: [src/core/redaction.ts:42](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/redaction.ts#L42)
 
 ***
 
@@ -44,4 +44,4 @@ Defined in: [src/core/redaction.ts:42](https://github.com/ABCrimson/modern-pdf-l
 
 > **rect**: \[`number`, `number`, `number`, `number`\]
 
-Defined in: [src/core/redaction.ts:41](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/redaction.ts#L41)
+Defined in: [src/core/redaction.ts:41](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/redaction.ts#L41)

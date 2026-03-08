@@ -8,7 +8,7 @@
 
 > **applyRedactions**(`doc`): `void`
 
-Defined in: [src/core/redaction.ts:97](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/redaction.ts#L97)
+Defined in: [src/core/redaction.ts:97](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/redaction.ts#L97)
 
 Apply all pending redactions across all pages in a document.
 

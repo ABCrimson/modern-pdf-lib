@@ -8,7 +8,7 @@
 
 > **generateSrgbIccProfile**(): `Uint8Array`
 
-Defined in: [src/compliance/srgbIccProfile.ts:237](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/compliance/srgbIccProfile.ts#L237)
+Defined in: [src/compliance/srgbIccProfile.ts:237](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/compliance/srgbIccProfile.ts#L237)
 
 Generate a minimal sRGB ICC v2 profile.
 

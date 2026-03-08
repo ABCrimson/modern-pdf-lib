@@ -8,7 +8,7 @@
 
 > **encodeJpegWasm**(`pixels`, `width`, `height`, `channels`, `quality`, `progressive?`, `chroma?`): `Uint8Array`\<`ArrayBufferLike`\> \| `undefined`
 
-Defined in: [src/wasm/jpeg/bridge.ts:160](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/wasm/jpeg/bridge.ts#L160)
+Defined in: [src/wasm/jpeg/bridge.ts:160](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/wasm/jpeg/bridge.ts#L160)
 
 Encode raw pixel data to JPEG using the WASM encoder.
 

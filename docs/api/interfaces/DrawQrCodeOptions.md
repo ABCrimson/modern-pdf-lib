@@ -6,7 +6,7 @@
 
 # Interface: DrawQrCodeOptions
 
-Defined in: [src/core/pdfPage.ts:404](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfPage.ts#L404)
+Defined in: [src/core/pdfPage.ts:404](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfPage.ts#L404)
 
 Options for [PdfPage.drawQrCode](../classes/PdfPage.md#drawqrcode).
 
@@ -16,7 +16,7 @@ Options for [PdfPage.drawQrCode](../classes/PdfPage.md#drawqrcode).
 
 > `optional` **backgroundColor**: [`Color`](../type-aliases/Color.md)
 
-Defined in: [src/core/pdfPage.ts:418](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfPage.ts#L418)
+Defined in: [src/core/pdfPage.ts:418](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfPage.ts#L418)
 
 Background colour. Default: white.
 
@@ -26,7 +26,7 @@ Background colour. Default: white.
 
 > `optional` **color**: [`Color`](../type-aliases/Color.md)
 
-Defined in: [src/core/pdfPage.ts:416](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfPage.ts#L416)
+Defined in: [src/core/pdfPage.ts:416](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfPage.ts#L416)
 
 Foreground (dark module) colour. Default: black.
 
@@ -36,7 +36,7 @@ Foreground (dark module) colour. Default: black.
 
 > `optional` **errorCorrection**: [`ErrorCorrectionLevel`](../type-aliases/ErrorCorrectionLevel.md)
 
-Defined in: [src/core/pdfPage.ts:410](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfPage.ts#L410)
+Defined in: [src/core/pdfPage.ts:410](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfPage.ts#L410)
 
 Error correction level. Default: `'M'`.
 
@@ -46,7 +46,7 @@ Error correction level. Default: `'M'`.
 
 > `optional` **moduleSize**: `number`
 
-Defined in: [src/core/pdfPage.ts:412](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfPage.ts#L412)
+Defined in: [src/core/pdfPage.ts:412](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfPage.ts#L412)
 
 Size of each module in PDF points. Default: `2`.
 
@@ -56,7 +56,7 @@ Size of each module in PDF points. Default: `2`.
 
 > `optional` **quietZone**: `number`
 
-Defined in: [src/core/pdfPage.ts:414](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfPage.ts#L414)
+Defined in: [src/core/pdfPage.ts:414](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfPage.ts#L414)
 
 Number of quiet-zone modules around the code. Default: `4`.
 
@@ -66,7 +66,7 @@ Number of quiet-zone modules around the code. Default: `4`.
 
 > `optional` **x**: `number`
 
-Defined in: [src/core/pdfPage.ts:406](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfPage.ts#L406)
+Defined in: [src/core/pdfPage.ts:406](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfPage.ts#L406)
 
 X coordinate (bottom-left of QR code).
 
@@ -76,6 +76,6 @@ X coordinate (bottom-left of QR code).
 
 > `optional` **y**: `number`
 
-Defined in: [src/core/pdfPage.ts:408](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfPage.ts#L408)
+Defined in: [src/core/pdfPage.ts:408](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfPage.ts#L408)
 
 Y coordinate (bottom-left of QR code).

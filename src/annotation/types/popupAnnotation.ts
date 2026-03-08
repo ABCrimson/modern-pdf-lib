@@ -38,7 +38,6 @@ export class PdfPopupAnnotation extends PdfAnnotation {
    * Create a new popup annotation.
    *
    * @param options.open  Whether the popup is initially open. Default: false.
-   * @param options.parent  Reference to the parent annotation (set after registration).
    */
   static create(
     options: AnnotationOptions & {

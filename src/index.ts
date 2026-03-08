@@ -619,6 +619,7 @@ export type {
   SignerInfo,
   SignatureOptions,
   TimestampResult,
+  PrepareAppearanceOptions,
 } from './signature/index.js';
 
 // ---------------------------------------------------------------------------
@@ -712,6 +713,7 @@ export {
 export type {
   ChromaSubsampling,
   JpegDecodeResult,
+  JpegWasmModule,
 } from './wasm/jpeg/bridge.js';
 
 export { extractImages, decodeImageStream } from './assets/image/imageExtract.js';
@@ -743,7 +745,7 @@ export {
 export type { ImageDpi } from './assets/image/dpiAnalyze.js';
 
 export { analyzeImages } from './assets/image/compressionAnalysis.js';
-export type { ImageAnalysis, AnalysisReport } from './assets/image/compressionAnalysis.js';
+export type { ImageAnalysis, AnalysisReport, AnalyzeImagesOptions } from './assets/image/compressionAnalysis.js';
 
 export { analyzeJpegMarkers } from './assets/image/jpegMarkers.js';
 export type { JpegMarkerInfo } from './assets/image/jpegMarkers.js';

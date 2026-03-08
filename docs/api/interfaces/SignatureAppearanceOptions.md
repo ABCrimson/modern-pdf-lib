@@ -6,7 +6,7 @@
 
 # Interface: SignatureAppearanceOptions
 
-Defined in: [src/form/fieldAppearance.ts:463](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/form/fieldAppearance.ts#L463)
+Defined in: [src/form/fieldAppearance.ts:463](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/fieldAppearance.ts#L463)
 
 Options for generating a signature field appearance.
 
@@ -16,7 +16,7 @@ Options for generating a signature field appearance.
 
 > **rect**: \[`number`, `number`, `number`, `number`\]
 
-Defined in: [src/form/fieldAppearance.ts:467](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/form/fieldAppearance.ts#L467)
+Defined in: [src/form/fieldAppearance.ts:467](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/fieldAppearance.ts#L467)
 
 The widget rectangle [x1, y1, x2, y2].
 
@@ -26,6 +26,6 @@ The widget rectangle [x1, y1, x2, y2].
 
 > **signed**: `boolean`
 
-Defined in: [src/form/fieldAppearance.ts:465](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/form/fieldAppearance.ts#L465)
+Defined in: [src/form/fieldAppearance.ts:465](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/form/fieldAppearance.ts#L465)
 
 Whether the field has been signed.

@@ -6,7 +6,7 @@
 
 # Interface: SubsetResult
 
-Defined in: [src/assets/font/fontSubset.ts:31](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/assets/font/fontSubset.ts#L31)
+Defined in: [src/assets/font/fontSubset.ts:31](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/assets/font/fontSubset.ts#L31)
 
 The result of subsetting a font.
 
@@ -16,7 +16,7 @@ The result of subsetting a font.
 
 > `readonly` **fontData**: `Uint8Array`
 
-Defined in: [src/assets/font/fontSubset.ts:33](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/assets/font/fontSubset.ts#L33)
+Defined in: [src/assets/font/fontSubset.ts:33](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/assets/font/fontSubset.ts#L33)
 
 The subsetted font file bytes (TrueType).
 
@@ -26,7 +26,7 @@ The subsetted font file bytes (TrueType).
 
 > `readonly` **newToOldGid**: readonly `number`[]
 
-Defined in: [src/assets/font/fontSubset.ts:38](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/assets/font/fontSubset.ts#L38)
+Defined in: [src/assets/font/fontSubset.ts:38](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/assets/font/fontSubset.ts#L38)
 
 Mapping from new glyph ID (sequential, starting at 0) to original
 glyph ID.  Index = new GID, value = old GID.
@@ -37,7 +37,7 @@ glyph ID.  Index = new GID, value = old GID.
 
 > `readonly` **oldToNewGid**: `ReadonlyMap`\<`number`, `number`\>
 
-Defined in: [src/assets/font/fontSubset.ts:43](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/assets/font/fontSubset.ts#L43)
+Defined in: [src/assets/font/fontSubset.ts:43](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/assets/font/fontSubset.ts#L43)
 
 Mapping from original glyph ID to new glyph ID.
 Only contains entries for glyphs that were retained.

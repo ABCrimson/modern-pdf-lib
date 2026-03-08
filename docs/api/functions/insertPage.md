@@ -8,7 +8,7 @@
 
 > **insertPage**(`doc`, `index`, `size?`): [`PdfPage`](../classes/PdfPage.md)
 
-Defined in: [src/core/pageManipulation.ts:146](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pageManipulation.ts#L146)
+Defined in: [src/core/pageManipulation.ts:146](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pageManipulation.ts#L146)
 
 Insert a new blank page into the document at the specified position.
 

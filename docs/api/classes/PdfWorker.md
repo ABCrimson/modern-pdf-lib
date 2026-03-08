@@ -6,7 +6,7 @@
 
 # Class: PdfWorker
 
-Defined in: [src/browser/worker.ts:74](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/browser/worker.ts#L74)
+Defined in: [src/browser/worker.ts:74](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/browser/worker.ts#L74)
 
 Manages a Web Worker for PDF generation tasks.
 
@@ -27,7 +27,7 @@ reconstructed with `new Function()` inside the worker. This means:
 
 > **new PdfWorker**(`options?`): `PdfWorker`
 
-Defined in: [src/browser/worker.ts:83](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/browser/worker.ts#L83)
+Defined in: [src/browser/worker.ts:83](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/browser/worker.ts#L83)
 
 #### Parameters
 
@@ -47,7 +47,7 @@ Defined in: [src/browser/worker.ts:83](https://github.com/ABCrimson/modern-pdf-l
 
 > **get** **isActive**(): `boolean`
 
-Defined in: [src/browser/worker.ts:133](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/browser/worker.ts#L133)
+Defined in: [src/browser/worker.ts:133](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/browser/worker.ts#L133)
 
 Whether the worker is currently active (has been created and not yet terminated).
 
@@ -63,7 +63,7 @@ Whether the worker is currently active (has been created and not yet terminated)
 
 > **get** **pendingCount**(): `number`
 
-Defined in: [src/browser/worker.ts:138](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/browser/worker.ts#L138)
+Defined in: [src/browser/worker.ts:138](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/browser/worker.ts#L138)
 
 Number of in-flight tasks awaiting a response.
 
@@ -77,7 +77,7 @@ Number of in-flight tasks awaiting a response.
 
 > **generate**(`taskFn`): `Promise`\<`Uint8Array`\<`ArrayBufferLike`\>\>
 
-Defined in: [src/browser/worker.ts:107](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/browser/worker.ts#L107)
+Defined in: [src/browser/worker.ts:107](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/browser/worker.ts#L107)
 
 Generate a PDF in the worker thread.
 
@@ -116,7 +116,7 @@ const bytes = await worker.generate(async (pdf) => {
 
 > **terminate**(): `void`
 
-Defined in: [src/browser/worker.ts:121](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/browser/worker.ts#L121)
+Defined in: [src/browser/worker.ts:121](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/browser/worker.ts#L121)
 
 Terminate the worker and reject all pending tasks.
 

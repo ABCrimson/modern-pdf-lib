@@ -8,4 +8,4 @@
 
 > **StandardFontName** = *typeof* [`StandardFonts`](../variables/StandardFonts.md)\[keyof *typeof* [`StandardFonts`](../variables/StandardFonts.md)\]
 
-Defined in: [src/core/pdfDocument.ts:105](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfDocument.ts#L105)
+Defined in: [src/core/pdfDocument.ts:105](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfDocument.ts#L105)

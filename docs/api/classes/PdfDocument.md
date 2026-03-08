@@ -6,7 +6,7 @@
 
 # Class: PdfDocument
 
-Defined in: [src/core/pdfDocument.ts:140](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfDocument.ts#L140)
+Defined in: [src/core/pdfDocument.ts:140](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfDocument.ts#L140)
 
 The root document object.  Create via [createPdf](../functions/createPdf.md).
 
@@ -22,7 +22,7 @@ Manages:
 
 > **new PdfDocument**(`registry?`): `PdfDocument`
 
-Defined in: [src/core/pdfDocument.ts:214](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfDocument.ts#L214)
+Defined in: [src/core/pdfDocument.ts:214](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfDocument.ts#L214)
 
 #### Parameters
 
@@ -45,7 +45,7 @@ Optional pre-populated object registry (used when
 
 > **get** **pageCount**(): `number`
 
-Defined in: [src/core/pdfDocument.ts:306](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfDocument.ts#L306)
+Defined in: [src/core/pdfDocument.ts:306](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfDocument.ts#L306)
 
 The number of pages in this document.
 
@@ -59,7 +59,7 @@ The number of pages in this document.
 
 > **addJavaScript**(`name`, `script`): `void`
 
-Defined in: [src/core/pdfDocument.ts:1785](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfDocument.ts#L1785)
+Defined in: [src/core/pdfDocument.ts:1785](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfDocument.ts#L1785)
 
 Add a document-level JavaScript action.
 
@@ -98,7 +98,7 @@ doc.addJavaScript('init', 'app.alert("Hello from PDF JavaScript!");');
 
 > **addLayer**(`name`, `visible?`): [`PdfLayer`](PdfLayer.md)
 
-Defined in: [src/core/pdfDocument.ts:1701](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfDocument.ts#L1701)
+Defined in: [src/core/pdfDocument.ts:1701](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfDocument.ts#L1701)
 
 Add a new optional content layer.
 
@@ -128,7 +128,7 @@ The newly created [PdfLayer](PdfLayer.md).
 
 > **addOutline**(`title`, `pageIndex`, `options?`): [`PdfOutlineItem`](PdfOutlineItem.md)
 
-Defined in: [src/core/pdfDocument.ts:1461](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfDocument.ts#L1461)
+Defined in: [src/core/pdfDocument.ts:1461](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfDocument.ts#L1461)
 
 Add a top-level outline (bookmark) entry.
 
@@ -167,7 +167,7 @@ The newly created [PdfOutlineItem](PdfOutlineItem.md).
 
 > **addPage**(`sizeOrPage?`): [`PdfPage`](PdfPage.md)
 
-Defined in: [src/core/pdfDocument.ts:242](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfDocument.ts#L242)
+Defined in: [src/core/pdfDocument.ts:242](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfDocument.ts#L242)
 
 Add a page to the document.
 
@@ -199,7 +199,7 @@ The [PdfPage](PdfPage.md) that was added.
 
 > **addSignatureField**(`pageIndex`, `rect`, `name`): `void`
 
-Defined in: [src/core/pdfDocument.ts:1363](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfDocument.ts#L1363)
+Defined in: [src/core/pdfDocument.ts:1363](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfDocument.ts#L1363)
 
 Add a signature field to a page.
 
@@ -236,7 +236,7 @@ The signature field name (must be unique).
 
 > **addWatermark**(`options`): `void`
 
-Defined in: [src/core/pdfDocument.ts:1798](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfDocument.ts#L1798)
+Defined in: [src/core/pdfDocument.ts:1798](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfDocument.ts#L1798)
 
 Add a text watermark to all pages in the document.
 
@@ -258,7 +258,7 @@ Watermark appearance options.
 
 > **applyRedactions**(): `void`
 
-Defined in: [src/core/pdfDocument.ts:1899](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfDocument.ts#L1899)
+Defined in: [src/core/pdfDocument.ts:1899](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfDocument.ts#L1899)
 
 Apply all pending redactions across all pages.
 
@@ -276,7 +276,7 @@ rectangles on all pages that have pending marks.
 
 > **attachFile**(`name`, `data`, `mimeType`, `options?`): `void`
 
-Defined in: [src/core/pdfDocument.ts:1733](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfDocument.ts#L1733)
+Defined in: [src/core/pdfDocument.ts:1733](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfDocument.ts#L1733)
 
 Attach a file to this PDF document.
 
@@ -318,7 +318,7 @@ Optional description.
 
 > **checkAccessibility**(): [`AccessibilityIssue`](../interfaces/AccessibilityIssue.md)[]
 
-Defined in: [src/core/pdfDocument.ts:1578](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfDocument.ts#L1578)
+Defined in: [src/core/pdfDocument.ts:1578](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfDocument.ts#L1578)
 
 Run accessibility checks on this document.
 
@@ -337,7 +337,7 @@ An array of [AccessibilityIssue](../interfaces/AccessibilityIssue.md) objects.
 
 > **copy**(): `Promise`\<`PdfDocument`\>
 
-Defined in: [src/core/pdfDocument.ts:1925](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfDocument.ts#L1925)
+Defined in: [src/core/pdfDocument.ts:1925](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfDocument.ts#L1925)
 
 Create an independent deep copy of this document.
 
@@ -367,7 +367,7 @@ clone.addPage(PageSizes.Letter); // does not affect `doc`
 
 > **copyPages**(`sourceDoc`, `indices`): `Promise`\<[`PdfPage`](PdfPage.md)[]\>
 
-Defined in: [src/core/pdfDocument.ts:467](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfDocument.ts#L467)
+Defined in: [src/core/pdfDocument.ts:467](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfDocument.ts#L467)
 
 Copy pages from another document into this one.
 
@@ -401,7 +401,7 @@ The newly created pages in this document.
 
 > **createSoftMask**(`width`, `height`, `builder`): [`SoftMaskRef`](../interfaces/SoftMaskRef.md)
 
-Defined in: [src/core/pdfDocument.ts:1836](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfDocument.ts#L1836)
+Defined in: [src/core/pdfDocument.ts:1836](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfDocument.ts#L1836)
 
 Create a soft mask Form XObject that can be used with
 [PdfPage.applySoftMask](PdfPage.md#applysoftmask).
@@ -460,7 +460,7 @@ page.clearSoftMask();
 
 > **createStructureTree**(): [`PdfStructureTree`](PdfStructureTree.md)
 
-Defined in: [src/core/pdfDocument.ts:1544](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfDocument.ts#L1544)
+Defined in: [src/core/pdfDocument.ts:1544](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfDocument.ts#L1544)
 
 Create a new structure tree for this document.
 
@@ -479,7 +479,7 @@ The [PdfStructureTree](PdfStructureTree.md) for this document.
 
 > **drawSvg**(`pageIndex`, `svgString`, `options?`): `void`
 
-Defined in: [src/core/pdfDocument.ts:1682](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfDocument.ts#L1682)
+Defined in: [src/core/pdfDocument.ts:1682](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfDocument.ts#L1682)
 
 Draw an SVG image onto a page.
 
@@ -513,7 +513,7 @@ Rendering options (position, size).
 
 > **embedFont**(`fontNameOrData`, `options?`): `Promise`\<[`FontRef`](../interfaces/FontRef.md)\>
 
-Defined in: [src/core/pdfDocument.ts:515](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfDocument.ts#L515)
+Defined in: [src/core/pdfDocument.ts:515](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfDocument.ts#L515)
 
 Embed a font in the document.
 
@@ -553,7 +553,7 @@ A [FontRef](../interfaces/FontRef.md) to pass to drawing methods.
 
 > **embedImage**(`imageData`): `Promise`\<[`ImageRef`](../interfaces/ImageRef.md)\>
 
-Defined in: [src/core/pdfDocument.ts:1058](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfDocument.ts#L1058)
+Defined in: [src/core/pdfDocument.ts:1058](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfDocument.ts#L1058)
 
 Embed an image, auto-detecting the format from file headers.
 
@@ -592,7 +592,7 @@ page.drawImage(image, { x: 50, y: 400, width: 200, height: 150 });
 
 > **embedJpeg**(`jpegData`): `Promise`\<[`ImageRef`](../interfaces/ImageRef.md)\>
 
-Defined in: [src/core/pdfDocument.ts:1002](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfDocument.ts#L1002)
+Defined in: [src/core/pdfDocument.ts:1002](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfDocument.ts#L1002)
 
 Embed a JPEG image.
 
@@ -619,7 +619,7 @@ An [ImageRef](../interfaces/ImageRef.md).
 
 > **embedPage**(`page`, `options?`): [`EmbeddedPdfPage`](../interfaces/EmbeddedPdfPage.md)
 
-Defined in: [src/core/pdfDocument.ts:1155](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfDocument.ts#L1155)
+Defined in: [src/core/pdfDocument.ts:1155](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfDocument.ts#L1155)
 
 Embed a single page (from this or another document) as a Form XObject.
 
@@ -652,7 +652,7 @@ An [EmbeddedPdfPage](../interfaces/EmbeddedPdfPage.md) handle.
 
 > **embedPages**(`pages`): [`EmbeddedPdfPage`](../interfaces/EmbeddedPdfPage.md)[]
 
-Defined in: [src/core/pdfDocument.ts:1176](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfDocument.ts#L1176)
+Defined in: [src/core/pdfDocument.ts:1176](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfDocument.ts#L1176)
 
 Embed multiple pages as Form XObjects in batch.
 Convenience wrapper around [embedPage](#embedpage).
@@ -677,7 +677,7 @@ Array of [EmbeddedPdfPage](../interfaces/EmbeddedPdfPage.md) handles, one per in
 
 > **embedPdf**(`data`, `pageIndices?`, `options?`): `Promise`\<[`EmbeddedPdfPage`](../interfaces/EmbeddedPdfPage.md)[]\>
 
-Defined in: [src/core/pdfDocument.ts:1104](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfDocument.ts#L1104)
+Defined in: [src/core/pdfDocument.ts:1104](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfDocument.ts#L1104)
 
 Embed pages from another PDF as Form XObjects.
 
@@ -725,7 +725,7 @@ page.drawPage(embeddedPage, { x: 50, y: 50, width: 300, height: 400 });
 
 > **embedPng**(`pngData`): [`ImageRef`](../interfaces/ImageRef.md)
 
-Defined in: [src/core/pdfDocument.ts:909](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfDocument.ts#L909)
+Defined in: [src/core/pdfDocument.ts:909](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfDocument.ts#L909)
 
 Embed a PNG image.
 
@@ -754,7 +754,7 @@ An [ImageRef](../interfaces/ImageRef.md) to pass to `page.drawImage()`.
 
 > **encrypt**(`options`): `Promise`\<`void`\>
 
-Defined in: [src/core/pdfDocument.ts:1300](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfDocument.ts#L1300)
+Defined in: [src/core/pdfDocument.ts:1300](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfDocument.ts#L1300)
 
 Configure encryption for this document.
 
@@ -794,7 +794,7 @@ const bytes = await doc.save();
 
 > **getAttachments**(): [`EmbeddedFile`](../interfaces/EmbeddedFile.md)[]
 
-Defined in: [src/core/pdfDocument.ts:1758](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfDocument.ts#L1758)
+Defined in: [src/core/pdfDocument.ts:1758](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfDocument.ts#L1758)
 
 Get all file attachments in this document.
 
@@ -814,7 +814,7 @@ An array of embedded file metadata.
 
 > **getAuthor**(): `string` \| `undefined`
 
-Defined in: [src/core/pdfDocument.ts:1237](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfDocument.ts#L1237)
+Defined in: [src/core/pdfDocument.ts:1237](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfDocument.ts#L1237)
 
 Get the document author, or `undefined` if not set.
 
@@ -828,7 +828,7 @@ Get the document author, or `undefined` if not set.
 
 > **getCreationDate**(): `Date` \| `undefined`
 
-Defined in: [src/core/pdfDocument.ts:1262](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfDocument.ts#L1262)
+Defined in: [src/core/pdfDocument.ts:1262](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfDocument.ts#L1262)
 
 Get the document creation date.
 
@@ -842,7 +842,7 @@ Get the document creation date.
 
 > **getCreator**(): `string` \| `undefined`
 
-Defined in: [src/core/pdfDocument.ts:1252](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfDocument.ts#L1252)
+Defined in: [src/core/pdfDocument.ts:1252](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfDocument.ts#L1252)
 
 Get the creator application name, or `undefined` if not set.
 
@@ -856,7 +856,7 @@ Get the creator application name, or `undefined` if not set.
 
 > **getForm**(): [`PdfForm`](PdfForm.md)
 
-Defined in: [src/core/pdfDocument.ts:1654](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfDocument.ts#L1654)
+Defined in: [src/core/pdfDocument.ts:1654](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfDocument.ts#L1654)
 
 Get the interactive form (AcroForm) for this document.
 
@@ -876,7 +876,7 @@ The [PdfForm](PdfForm.md) for this document.
 
 > **getKeywords**(): `string` \| `undefined`
 
-Defined in: [src/core/pdfDocument.ts:1247](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfDocument.ts#L1247)
+Defined in: [src/core/pdfDocument.ts:1247](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfDocument.ts#L1247)
 
 Get the document keywords, or `undefined` if not set.
 
@@ -890,7 +890,7 @@ Get the document keywords, or `undefined` if not set.
 
 > **getLanguage**(): `string` \| `undefined`
 
-Defined in: [src/core/pdfDocument.ts:1566](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfDocument.ts#L1566)
+Defined in: [src/core/pdfDocument.ts:1566](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfDocument.ts#L1566)
 
 Get the document's natural language, or `undefined` if not set.
 
@@ -906,7 +906,7 @@ The BCP 47 language tag, or `undefined`.
 
 > **getLayers**(): [`PdfLayer`](PdfLayer.md)[]
 
-Defined in: [src/core/pdfDocument.ts:1711](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfDocument.ts#L1711)
+Defined in: [src/core/pdfDocument.ts:1711](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfDocument.ts#L1711)
 
 Get all layers in this document.
 
@@ -922,7 +922,7 @@ An array of [PdfLayer](PdfLayer.md) objects.
 
 > **getModDate**(): `Date` \| `undefined`
 
-Defined in: [src/core/pdfDocument.ts:1267](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfDocument.ts#L1267)
+Defined in: [src/core/pdfDocument.ts:1267](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfDocument.ts#L1267)
 
 Get the document modification date, or `undefined` if not set.
 
@@ -936,7 +936,7 @@ Get the document modification date, or `undefined` if not set.
 
 > **getOutlines**(): [`PdfOutlineTree`](PdfOutlineTree.md)
 
-Defined in: [src/core/pdfDocument.ts:1445](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfDocument.ts#L1445)
+Defined in: [src/core/pdfDocument.ts:1445](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfDocument.ts#L1445)
 
 Get the outline (bookmark) tree for this document.
 
@@ -954,7 +954,7 @@ The [PdfOutlineTree](PdfOutlineTree.md) for this document.
 
 > **getPage**(`index`): [`PdfPage`](PdfPage.md)
 
-Defined in: [src/core/pdfDocument.ts:282](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfDocument.ts#L282)
+Defined in: [src/core/pdfDocument.ts:282](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfDocument.ts#L282)
 
 Return a specific page by zero-based index.
 
@@ -982,7 +982,7 @@ If the index is out of range.
 
 > **getPageCount**(): `number`
 
-Defined in: [src/core/pdfDocument.ts:301](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfDocument.ts#L301)
+Defined in: [src/core/pdfDocument.ts:301](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfDocument.ts#L301)
 
 Return the page count.
 
@@ -996,7 +996,7 @@ Return the page count.
 
 > **getPages**(): readonly [`PdfPage`](PdfPage.md)[]
 
-Defined in: [src/core/pdfDocument.ts:294](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfDocument.ts#L294)
+Defined in: [src/core/pdfDocument.ts:294](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfDocument.ts#L294)
 
 Return all pages.
 
@@ -1010,7 +1010,7 @@ readonly [`PdfPage`](PdfPage.md)[]
 
 > **getPermissions**(): [`PdfPermissionFlags`](../interfaces/PdfPermissionFlags.md) \| `undefined`
 
-Defined in: [src/core/pdfDocument.ts:1320](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfDocument.ts#L1320)
+Defined in: [src/core/pdfDocument.ts:1320](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfDocument.ts#L1320)
 
 Get the permission flags for this document, if encrypted.
 
@@ -1027,7 +1027,7 @@ The decoded permission flags, or `undefined` if the
 
 > **getProducer**(): `string` \| `undefined`
 
-Defined in: [src/core/pdfDocument.ts:1257](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfDocument.ts#L1257)
+Defined in: [src/core/pdfDocument.ts:1257](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfDocument.ts#L1257)
 
 Get the producer string.
 
@@ -1041,7 +1041,7 @@ Get the producer string.
 
 > **getSignatures**(): [`PdfSignatureInfo`](../interfaces/PdfSignatureInfo.md)[]
 
-Defined in: [src/core/pdfDocument.ts:1416](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfDocument.ts#L1416)
+Defined in: [src/core/pdfDocument.ts:1416](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfDocument.ts#L1416)
 
 Get information about all signatures in this document.
 
@@ -1057,7 +1057,7 @@ Array of signature info objects.
 
 > **getStructureTree**(): [`PdfStructureTree`](PdfStructureTree.md) \| `undefined`
 
-Defined in: [src/core/pdfDocument.ts:1532](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfDocument.ts#L1532)
+Defined in: [src/core/pdfDocument.ts:1532](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfDocument.ts#L1532)
 
 Get the structure tree for this document, or `undefined` if
 no structure tree has been created.
@@ -1076,7 +1076,7 @@ The [PdfStructureTree](PdfStructureTree.md), or `undefined`.
 
 > **getSubject**(): `string` \| `undefined`
 
-Defined in: [src/core/pdfDocument.ts:1242](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfDocument.ts#L1242)
+Defined in: [src/core/pdfDocument.ts:1242](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfDocument.ts#L1242)
 
 Get the document subject, or `undefined` if not set.
 
@@ -1090,7 +1090,7 @@ Get the document subject, or `undefined` if not set.
 
 > **getTitle**(): `string` \| `undefined`
 
-Defined in: [src/core/pdfDocument.ts:1232](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfDocument.ts#L1232)
+Defined in: [src/core/pdfDocument.ts:1232](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfDocument.ts#L1232)
 
 Get the document title, or `undefined` if not set.
 
@@ -1104,7 +1104,7 @@ Get the document title, or `undefined` if not set.
 
 > **getViewerPreferences**(): [`PdfViewerPreferences`](PdfViewerPreferences.md)
 
-Defined in: [src/core/pdfDocument.ts:1600](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfDocument.ts#L1600)
+Defined in: [src/core/pdfDocument.ts:1600](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfDocument.ts#L1600)
 
 Get the viewer preferences for this document as a
 [PdfViewerPreferences](PdfViewerPreferences.md) instance with getter/setter pairs.
@@ -1123,7 +1123,7 @@ the same object and mutations are preserved.
 
 > **getXmpMetadata**(): `string` \| `undefined`
 
-Defined in: [src/core/pdfDocument.ts:1497](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfDocument.ts#L1497)
+Defined in: [src/core/pdfDocument.ts:1497](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfDocument.ts#L1497)
 
 Get the raw XMP metadata string, or `undefined` if not set.
 
@@ -1137,7 +1137,7 @@ Get the raw XMP metadata string, or `undefined` if not set.
 
 > **hasForm**(): `boolean`
 
-Defined in: [src/core/pdfDocument.ts:1641](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfDocument.ts#L1641)
+Defined in: [src/core/pdfDocument.ts:1641](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfDocument.ts#L1641)
 
 Check whether this document has an AcroForm (interactive form).
 
@@ -1154,7 +1154,7 @@ was loaded from a PDF that contains an /AcroForm dictionary.
 
 > **insertPage**(`index`, `size?`): [`PdfPage`](PdfPage.md)
 
-Defined in: [src/core/pdfDocument.ts:395](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfDocument.ts#L395)
+Defined in: [src/core/pdfDocument.ts:395](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfDocument.ts#L395)
 
 Insert a new blank page at the specified position.
 
@@ -1184,7 +1184,7 @@ The newly created PdfPage.
 
 > **isEncrypted**(): `boolean`
 
-Defined in: [src/core/pdfDocument.ts:1310](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfDocument.ts#L1310)
+Defined in: [src/core/pdfDocument.ts:1310](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfDocument.ts#L1310)
 
 Check whether this document has encryption configured.
 
@@ -1201,7 +1201,7 @@ or if the document was loaded from an encrypted PDF.
 
 > **movePage**(`fromIndex`, `toIndex`): `void`
 
-Defined in: [src/core/pdfDocument.ts:436](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfDocument.ts#L436)
+Defined in: [src/core/pdfDocument.ts:436](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfDocument.ts#L436)
 
 Move a page from one position to another.
 
@@ -1229,7 +1229,7 @@ Target zero-based index (after removal).
 
 > **removePage**(`index`): `void`
 
-Defined in: [src/core/pdfDocument.ts:421](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfDocument.ts#L421)
+Defined in: [src/core/pdfDocument.ts:421](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfDocument.ts#L421)
 
 Remove a page by its zero-based index.
 
@@ -1255,7 +1255,7 @@ RangeError if the index is out of bounds.
 
 > **save**(`options?`): `Promise`\<`Uint8Array`\<`ArrayBufferLike`\>\>
 
-Defined in: [src/core/pdfDocument.ts:1940](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfDocument.ts#L1940)
+Defined in: [src/core/pdfDocument.ts:1940](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfDocument.ts#L1940)
 
 Serialize the document to a `Uint8Array`.
 
@@ -1279,7 +1279,7 @@ The complete PDF file as bytes.
 
 > **saveAsBase64**(`options?`): `Promise`\<`string`\>
 
-Defined in: [src/core/pdfDocument.ts:2007](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfDocument.ts#L2007)
+Defined in: [src/core/pdfDocument.ts:2007](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfDocument.ts#L2007)
 
 Serialize the document to a Base64-encoded string.
 
@@ -1317,7 +1317,7 @@ const dataUri = await doc.saveAsBase64({ dataUri: true });
 
 > **saveAsBlob**(`options?`): `Promise`\<`Blob`\>
 
-Defined in: [src/core/pdfDocument.ts:1981](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfDocument.ts#L1981)
+Defined in: [src/core/pdfDocument.ts:1981](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfDocument.ts#L1981)
 
 Serialize the document to a `Blob`.
 
@@ -1341,7 +1341,7 @@ Compression and serialization options.
 
 > **saveAsStream**(`options?`): `ReadableStream`\<`Uint8Array`\<`ArrayBufferLike`\>\>
 
-Defined in: [src/core/pdfDocument.ts:1960](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfDocument.ts#L1960)
+Defined in: [src/core/pdfDocument.ts:1960](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfDocument.ts#L1960)
 
 Serialize the document as a `ReadableStream<Uint8Array>`.
 
@@ -1365,7 +1365,7 @@ Compression and serialization options.
 
 > **setAuthor**(`author`): `void`
 
-Defined in: [src/core/pdfDocument.ts:1193](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfDocument.ts#L1193)
+Defined in: [src/core/pdfDocument.ts:1193](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfDocument.ts#L1193)
 
 Set the document author.
 
@@ -1385,7 +1385,7 @@ Set the document author.
 
 > **setCreationDate**(`date`): `void`
 
-Defined in: [src/core/pdfDocument.ts:1218](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfDocument.ts#L1218)
+Defined in: [src/core/pdfDocument.ts:1218](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfDocument.ts#L1218)
 
 Set the document creation date.
 
@@ -1405,7 +1405,7 @@ Set the document creation date.
 
 > **setCreator**(`creator`): `void`
 
-Defined in: [src/core/pdfDocument.ts:1208](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfDocument.ts#L1208)
+Defined in: [src/core/pdfDocument.ts:1208](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfDocument.ts#L1208)
 
 Set the creator application name.
 
@@ -1425,7 +1425,7 @@ Set the creator application name.
 
 > **setKeywords**(`keywords`): `void`
 
-Defined in: [src/core/pdfDocument.ts:1203](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfDocument.ts#L1203)
+Defined in: [src/core/pdfDocument.ts:1203](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfDocument.ts#L1203)
 
 Set the document keywords.
 
@@ -1445,7 +1445,7 @@ Set the document keywords.
 
 > **setLanguage**(`lang`): `void`
 
-Defined in: [src/core/pdfDocument.ts:1557](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfDocument.ts#L1557)
+Defined in: [src/core/pdfDocument.ts:1557](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfDocument.ts#L1557)
 
 Set the document's natural language.
 
@@ -1470,7 +1470,7 @@ The BCP 47 language tag.
 
 > **setModDate**(`date`): `void`
 
-Defined in: [src/core/pdfDocument.ts:1223](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfDocument.ts#L1223)
+Defined in: [src/core/pdfDocument.ts:1223](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfDocument.ts#L1223)
 
 Set the document modification date.
 
@@ -1490,7 +1490,7 @@ Set the document modification date.
 
 > **setOutlines**(`outlines`): `void`
 
-Defined in: [src/core/pdfDocument.ts:1483](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfDocument.ts#L1483)
+Defined in: [src/core/pdfDocument.ts:1483](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfDocument.ts#L1483)
 
 Replace the outline tree for this document.
 
@@ -1512,7 +1512,7 @@ The new outline tree.
 
 > **setProducer**(`producer`): `void`
 
-Defined in: [src/core/pdfDocument.ts:1213](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfDocument.ts#L1213)
+Defined in: [src/core/pdfDocument.ts:1213](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfDocument.ts#L1213)
 
 Set the producer string (defaults to `"modern-pdf"`).
 
@@ -1532,7 +1532,7 @@ Set the producer string (defaults to `"modern-pdf"`).
 
 > **setSubject**(`subject`): `void`
 
-Defined in: [src/core/pdfDocument.ts:1198](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfDocument.ts#L1198)
+Defined in: [src/core/pdfDocument.ts:1198](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfDocument.ts#L1198)
 
 Set the document subject.
 
@@ -1552,7 +1552,7 @@ Set the document subject.
 
 > **setTitle**(`title`, `options?`): `void`
 
-Defined in: [src/core/pdfDocument.ts:1185](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfDocument.ts#L1185)
+Defined in: [src/core/pdfDocument.ts:1185](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfDocument.ts#L1185)
 
 Set the document title.
 
@@ -1576,7 +1576,7 @@ Set the document title.
 
 > **setViewerPreferences**(`prefs`): `void`
 
-Defined in: [src/core/pdfDocument.ts:1618](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfDocument.ts#L1618)
+Defined in: [src/core/pdfDocument.ts:1618](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfDocument.ts#L1618)
 
 Set viewer preferences for this document.
 
@@ -1604,7 +1604,7 @@ The viewer preferences to set.
 
 > **setXmpMetadata**(`xmp`): `void`
 
-Defined in: [src/core/pdfDocument.ts:1510](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfDocument.ts#L1510)
+Defined in: [src/core/pdfDocument.ts:1510](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfDocument.ts#L1510)
 
 Set raw XMP metadata as an XML string.
 
@@ -1630,7 +1630,7 @@ The XMP XML string.
 
 > **sign**(`fieldName`, `options`): `Promise`\<`Uint8Array`\<`ArrayBufferLike`\>\>
 
-Defined in: [src/core/pdfDocument.ts:1405](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfDocument.ts#L1405)
+Defined in: [src/core/pdfDocument.ts:1405](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfDocument.ts#L1405)
 
 Sign the PDF document.
 
@@ -1674,7 +1674,7 @@ const signedBytes = await doc.sign('Signature1', {
 
 > **verifySignatures**(): `Promise`\<[`SignatureVerificationResult`](../interfaces/SignatureVerificationResult.md)[]\>
 
-Defined in: [src/core/pdfDocument.ts:1426](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfDocument.ts#L1426)
+Defined in: [src/core/pdfDocument.ts:1426](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfDocument.ts#L1426)
 
 Verify all signatures in this document.
 
@@ -1690,7 +1690,7 @@ Array of verification results.
 
 > `static` **create**(): `PdfDocument`
 
-Defined in: [src/core/pdfDocument.ts:185](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfDocument.ts#L185)
+Defined in: [src/core/pdfDocument.ts:185](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfDocument.ts#L185)
 
 Create a new, empty PDF document.
 
@@ -1710,7 +1710,7 @@ const doc = PdfDocument.create();
 
 > `static` **load**(`data`, `options?`): `Promise`\<`PdfDocument`\>
 
-Defined in: [src/core/pdfDocument.ts:169](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/pdfDocument.ts#L169)
+Defined in: [src/core/pdfDocument.ts:169](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/pdfDocument.ts#L169)
 
 Load an existing PDF document from raw bytes, an ArrayBuffer, or a
 Base64-encoded string.

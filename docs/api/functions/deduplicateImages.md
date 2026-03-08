@@ -8,7 +8,7 @@
 
 > **deduplicateImages**(`doc`): [`DeduplicationReport`](../interfaces/DeduplicationReport.md)
 
-Defined in: [src/assets/image/deduplicateImages.ts:110](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/assets/image/deduplicateImages.ts#L110)
+Defined in: [src/assets/image/deduplicateImages.ts:110](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/assets/image/deduplicateImages.ts#L110)
 
 Deduplicate identical images in a PDF document.
 

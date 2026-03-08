@@ -8,7 +8,7 @@
 
 > **renderMultiPageTable**(`options`, `bottomMargin?`): [`MultiPageTableResult`](../interfaces/MultiPageTableResult.md)
 
-Defined in: [src/layout/table.ts:810](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/layout/table.ts#L810)
+Defined in: [src/layout/table.ts:810](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/layout/table.ts#L810)
 
 Render a table across multiple pages, breaking rows when content
 would exceed the available vertical space.

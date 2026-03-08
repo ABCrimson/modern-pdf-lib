@@ -8,7 +8,7 @@
 
 > **beginMarkedContentSequence**(`tag`, `mcid`): `string`
 
-Defined in: [src/accessibility/markedContent.ts:110](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/accessibility/markedContent.ts#L110)
+Defined in: [src/accessibility/markedContent.ts:110](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/accessibility/markedContent.ts#L110)
 
 Generate a `BDC` operator for a structure-tagged marked-content
 sequence with an MCID.

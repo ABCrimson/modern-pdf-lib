@@ -17,7 +17,7 @@
 // ---------------------------------------------------------------------------
 
 /** Pre-built wasm-bindgen module interface (when passed directly). */
-interface JpegWasmModule {
+export interface JpegWasmModule {
   encode_jpeg(
     pixels: Uint8Array,
     width: number,

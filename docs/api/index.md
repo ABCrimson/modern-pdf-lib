@@ -79,6 +79,7 @@
 
 - [AccessibilityIssue](interfaces/AccessibilityIssue.md)
 - [AnalysisReport](interfaces/AnalysisReport.md)
+- [AnalyzeImagesOptions](interfaces/AnalyzeImagesOptions.md)
 - [AnnotationOptions](interfaces/AnnotationOptions.md)
 - [AssociatedFileOptions](interfaces/AssociatedFileOptions.md)
 - [AssociatedFileResult](interfaces/AssociatedFileResult.md)
@@ -147,6 +148,7 @@
 - [JpegDecodeResult](interfaces/JpegDecodeResult.md)
 - [JpegMarkerInfo](interfaces/JpegMarkerInfo.md)
 - [JpegMetadata](interfaces/JpegMetadata.md)
+- [JpegWasmModule](interfaces/JpegWasmModule.md)
 - [LayoutCombedOptions](interfaces/LayoutCombedOptions.md)
 - [LayoutMultilineOptions](interfaces/LayoutMultilineOptions.md)
 - [LayoutMultilineResult](interfaces/LayoutMultilineResult.md)

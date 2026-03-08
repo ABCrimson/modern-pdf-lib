@@ -8,7 +8,7 @@
 
 > **asPDFName**(`value`): [`PdfName`](../classes/PdfName.md)
 
-Defined in: [src/utils/pdfValueHelpers.ts:16](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/utils/pdfValueHelpers.ts#L16)
+Defined in: [src/utils/pdfValueHelpers.ts:16](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/utils/pdfValueHelpers.ts#L16)
 
 Create a [PdfName](../classes/PdfName.md) from a string.
 

@@ -6,7 +6,7 @@
 
 # Interface: StripOptions
 
-Defined in: [src/compliance/stripProhibited.ts:43](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/compliance/stripProhibited.ts#L43)
+Defined in: [src/compliance/stripProhibited.ts:43](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/compliance/stripProhibited.ts#L43)
 
 Options controlling which prohibited features to strip.
 
@@ -16,7 +16,7 @@ Options controlling which prohibited features to strip.
 
 > `optional` **stripJavaScript**: `boolean`
 
-Defined in: [src/compliance/stripProhibited.ts:45](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/compliance/stripProhibited.ts#L45)
+Defined in: [src/compliance/stripProhibited.ts:45](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/compliance/stripProhibited.ts#L45)
 
 Strip /JavaScript and /JS actions. Default: `true`.
 
@@ -26,7 +26,7 @@ Strip /JavaScript and /JS actions. Default: `true`.
 
 > `optional` **stripLaunch**: `boolean`
 
-Defined in: [src/compliance/stripProhibited.ts:47](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/compliance/stripProhibited.ts#L47)
+Defined in: [src/compliance/stripProhibited.ts:47](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/compliance/stripProhibited.ts#L47)
 
 Strip /Launch actions. Default: `true`.
 
@@ -36,7 +36,7 @@ Strip /Launch actions. Default: `true`.
 
 > `optional` **stripMovie**: `boolean`
 
-Defined in: [src/compliance/stripProhibited.ts:51](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/compliance/stripProhibited.ts#L51)
+Defined in: [src/compliance/stripProhibited.ts:51](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/compliance/stripProhibited.ts#L51)
 
 Strip /Movie actions. Default: `true`.
 
@@ -46,7 +46,7 @@ Strip /Movie actions. Default: `true`.
 
 > `optional` **stripRichMedia**: `boolean`
 
-Defined in: [src/compliance/stripProhibited.ts:53](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/compliance/stripProhibited.ts#L53)
+Defined in: [src/compliance/stripProhibited.ts:53](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/compliance/stripProhibited.ts#L53)
 
 Strip /RichMedia annotations. Default: `true`.
 
@@ -56,6 +56,6 @@ Strip /RichMedia annotations. Default: `true`.
 
 > `optional` **stripSound**: `boolean`
 
-Defined in: [src/compliance/stripProhibited.ts:49](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/compliance/stripProhibited.ts#L49)
+Defined in: [src/compliance/stripProhibited.ts:49](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/compliance/stripProhibited.ts#L49)
 
 Strip /Sound actions. Default: `true`.

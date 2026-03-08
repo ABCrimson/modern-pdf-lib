@@ -8,7 +8,7 @@
 
 > **encodeSequence**(`contents`): `Uint8Array`
 
-Defined in: [src/signature/pkcs7.ts:191](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/signature/pkcs7.ts#L191)
+Defined in: [src/signature/pkcs7.ts:191](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/signature/pkcs7.ts#L191)
 
 Encode a SEQUENCE containing the given DER-encoded contents.
 

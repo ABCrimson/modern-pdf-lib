@@ -6,7 +6,7 @@
 
 # Interface: OutlineItemOptions
 
-Defined in: [src/outline/pdfOutline.ts:66](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/outline/pdfOutline.ts#L66)
+Defined in: [src/outline/pdfOutline.ts:66](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/outline/pdfOutline.ts#L66)
 
 Options for creating an outline item.
 
@@ -16,7 +16,7 @@ Options for creating an outline item.
 
 > `optional` **bold**: `boolean`
 
-Defined in: [src/outline/pdfOutline.ts:72](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/outline/pdfOutline.ts#L72)
+Defined in: [src/outline/pdfOutline.ts:72](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/outline/pdfOutline.ts#L72)
 
 Whether the title text is bold.
 
@@ -26,7 +26,7 @@ Whether the title text is bold.
 
 > `optional` **color**: `object`
 
-Defined in: [src/outline/pdfOutline.ts:70](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/outline/pdfOutline.ts#L70)
+Defined in: [src/outline/pdfOutline.ts:70](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/outline/pdfOutline.ts#L70)
 
 Colour of the outline text as RGB in range 0-1.
 
@@ -48,7 +48,7 @@ Colour of the outline text as RGB in range 0-1.
 
 > `optional` **isOpen**: `boolean`
 
-Defined in: [src/outline/pdfOutline.ts:68](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/outline/pdfOutline.ts#L68)
+Defined in: [src/outline/pdfOutline.ts:68](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/outline/pdfOutline.ts#L68)
 
 Whether the item's children are initially visible. Default: `true`.
 
@@ -58,6 +58,6 @@ Whether the item's children are initially visible. Default: `true`.
 
 > `optional` **italic**: `boolean`
 
-Defined in: [src/outline/pdfOutline.ts:74](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/outline/pdfOutline.ts#L74)
+Defined in: [src/outline/pdfOutline.ts:74](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/outline/pdfOutline.ts#L74)
 
 Whether the title text is italic.

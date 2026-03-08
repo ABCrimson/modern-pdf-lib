@@ -6,7 +6,7 @@
 
 # Interface: NormalizedStop
 
-Defined in: [src/core/patterns.ts:167](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/patterns.ts#L167)
+Defined in: [src/core/patterns.ts:167](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/patterns.ts#L167)
 
 A normalised colour stop with explicit offset and RGB values.
 
@@ -16,7 +16,7 @@ A normalised colour stop with explicit offset and RGB values.
 
 > `readonly` **b**: `number`
 
-Defined in: [src/core/patterns.ts:171](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/patterns.ts#L171)
+Defined in: [src/core/patterns.ts:171](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/patterns.ts#L171)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [src/core/patterns.ts:171](https://github.com/ABCrimson/modern-pdf-l
 
 > `readonly` **g**: `number`
 
-Defined in: [src/core/patterns.ts:170](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/patterns.ts#L170)
+Defined in: [src/core/patterns.ts:170](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/patterns.ts#L170)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [src/core/patterns.ts:170](https://github.com/ABCrimson/modern-pdf-l
 
 > `readonly` **offset**: `number`
 
-Defined in: [src/core/patterns.ts:168](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/patterns.ts#L168)
+Defined in: [src/core/patterns.ts:168](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/patterns.ts#L168)
 
 ***
 
@@ -40,4 +40,4 @@ Defined in: [src/core/patterns.ts:168](https://github.com/ABCrimson/modern-pdf-l
 
 > `readonly` **r**: `number`
 
-Defined in: [src/core/patterns.ts:169](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/core/patterns.ts#L169)
+Defined in: [src/core/patterns.ts:169](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/core/patterns.ts#L169)

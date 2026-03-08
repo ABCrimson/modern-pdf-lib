@@ -8,7 +8,7 @@
 
 > **calculateUpcCheckDigit**(`data`): `number`
 
-Defined in: [src/barcode/upc.ts:29](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/barcode/upc.ts#L29)
+Defined in: [src/barcode/upc.ts:29](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/barcode/upc.ts#L29)
 
 Calculate the UPC-A check digit (Modulo-10 algorithm).
 

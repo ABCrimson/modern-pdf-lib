@@ -6,7 +6,7 @@
 
 # Interface: ProgressInfo
 
-Defined in: [src/assets/image/batchOptimize.ts:28](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/assets/image/batchOptimize.ts#L28)
+Defined in: [src/assets/image/batchOptimize.ts:28](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/assets/image/batchOptimize.ts#L28)
 
 Progress information passed to the `onProgress` callback.
 
@@ -16,7 +16,7 @@ Progress information passed to the `onProgress` callback.
 
 > `readonly` **current**: `number`
 
-Defined in: [src/assets/image/batchOptimize.ts:30](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/assets/image/batchOptimize.ts#L30)
+Defined in: [src/assets/image/batchOptimize.ts:30](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/assets/image/batchOptimize.ts#L30)
 
 1-based index of the current image being processed.
 
@@ -26,7 +26,7 @@ Defined in: [src/assets/image/batchOptimize.ts:30](https://github.com/ABCrimson/
 
 > `readonly` **imageName**: `string`
 
-Defined in: [src/assets/image/batchOptimize.ts:34](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/assets/image/batchOptimize.ts#L34)
+Defined in: [src/assets/image/batchOptimize.ts:34](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/assets/image/batchOptimize.ts#L34)
 
 Resource name of the current image (e.g., '/Im1').
 
@@ -36,7 +36,7 @@ Resource name of the current image (e.g., '/Im1').
 
 > `readonly` **pageIndex**: `number`
 
-Defined in: [src/assets/image/batchOptimize.ts:36](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/assets/image/batchOptimize.ts#L36)
+Defined in: [src/assets/image/batchOptimize.ts:36](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/assets/image/batchOptimize.ts#L36)
 
 Page index (0-based) where the image appears.
 
@@ -46,7 +46,7 @@ Page index (0-based) where the image appears.
 
 > `readonly` **savedBytes**: `number`
 
-Defined in: [src/assets/image/batchOptimize.ts:38](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/assets/image/batchOptimize.ts#L38)
+Defined in: [src/assets/image/batchOptimize.ts:38](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/assets/image/batchOptimize.ts#L38)
 
 Bytes saved for this image (negative if image grew).
 
@@ -56,7 +56,7 @@ Bytes saved for this image (negative if image grew).
 
 > `readonly` **skipped**: `boolean`
 
-Defined in: [src/assets/image/batchOptimize.ts:42](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/assets/image/batchOptimize.ts#L42)
+Defined in: [src/assets/image/batchOptimize.ts:42](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/assets/image/batchOptimize.ts#L42)
 
 Whether this image was skipped (by filter or incompatibility).
 
@@ -66,7 +66,7 @@ Whether this image was skipped (by filter or incompatibility).
 
 > `readonly` **total**: `number`
 
-Defined in: [src/assets/image/batchOptimize.ts:32](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/assets/image/batchOptimize.ts#L32)
+Defined in: [src/assets/image/batchOptimize.ts:32](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/assets/image/batchOptimize.ts#L32)
 
 Total number of images to process.
 
@@ -76,6 +76,6 @@ Total number of images to process.
 
 > `readonly` **totalSavedBytes**: `number`
 
-Defined in: [src/assets/image/batchOptimize.ts:40](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/assets/image/batchOptimize.ts#L40)
+Defined in: [src/assets/image/batchOptimize.ts:40](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/assets/image/batchOptimize.ts#L40)
 
 Cumulative bytes saved so far.

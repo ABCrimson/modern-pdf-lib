@@ -6,7 +6,7 @@
 
 # Interface: OverflowResult
 
-Defined in: [src/layout/overflow.ts:24](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/layout/overflow.ts#L24)
+Defined in: [src/layout/overflow.ts:24](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/layout/overflow.ts#L24)
 
 Result of applying an overflow mode to a text string.
 
@@ -16,7 +16,7 @@ Result of applying an overflow mode to a text string.
 
 > `readonly` **fontSize**: `number`
 
-Defined in: [src/layout/overflow.ts:28](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/layout/overflow.ts#L28)
+Defined in: [src/layout/overflow.ts:28](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/layout/overflow.ts#L28)
 
 The font size to use (may differ from input for 'shrink' mode).
 
@@ -26,7 +26,7 @@ The font size to use (may differ from input for 'shrink' mode).
 
 > `readonly` **lines**: readonly `string`[]
 
-Defined in: [src/layout/overflow.ts:26](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/layout/overflow.ts#L26)
+Defined in: [src/layout/overflow.ts:26](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/layout/overflow.ts#L26)
 
 The processed line(s) of text.
 
@@ -36,6 +36,6 @@ The processed line(s) of text.
 
 > `readonly` **wasModified**: `boolean`
 
-Defined in: [src/layout/overflow.ts:30](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/layout/overflow.ts#L30)
+Defined in: [src/layout/overflow.ts:30](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/layout/overflow.ts#L30)
 
 Whether the text was modified (truncated, wrapped, or shrunk).

@@ -8,7 +8,7 @@
 
 > **FileAttachmentIcon** = `"GraphPushPin"` \| `"PaperclipTag"` \| `"Paperclip"` \| `"Tag"`
 
-Defined in: [src/annotation/types/fileAttachmentAnnotation.ts:37](https://github.com/ABCrimson/modern-pdf-lib/blob/5f326ba39cc414c1559c669879130eaa00d3e49e/src/annotation/types/fileAttachmentAnnotation.ts#L37)
+Defined in: [src/annotation/types/fileAttachmentAnnotation.ts:37](https://github.com/ABCrimson/modern-pdf-lib/blob/ca8606e1bf65904fde5f1faa25932bc860f3b8d2/src/annotation/types/fileAttachmentAnnotation.ts#L37)
 
 Standard icon names for file attachment annotations.
 
