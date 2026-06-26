@@ -175,7 +175,11 @@ test.describe('Browser PDF creation', () => {
   // that produce visually different output.
   // -------------------------------------------------------------------------
 
-  test('visual regression: single page with text', async ({ page, browserName }) => {
+  // Skipped in CI: these compare against committed baseline screenshots of
+  // Chromium's built-in PDF viewer, which don't exist yet and vary by Chromium
+  // version/platform. Re-enable once baselines are captured against a pinned
+  // renderer (tracked with the 0.29.x rasterization work).
+  test.skip('visual regression: single page with text', async ({ page, browserName }) => {
     test.skip(browserName !== 'chromium', 'Visual tests only run on Chromium');
 
     await page.goto('/');
@@ -216,7 +220,7 @@ test.describe('Browser PDF creation', () => {
     });
   });
 
-  test('visual regression: shapes and colors', async ({ page, browserName }) => {
+  test.skip('visual regression: shapes and colors', async ({ page, browserName }) => {
     test.skip(browserName !== 'chromium', 'Visual tests only run on Chromium');
 
     await page.goto('/');
@@ -277,7 +281,7 @@ test.describe('Browser PDF creation', () => {
     });
   });
 
-  test('visual regression: multi-page document', async ({ page, browserName }) => {
+  test.skip('visual regression: multi-page document', async ({ page, browserName }) => {
     test.skip(browserName !== 'chromium', 'Visual tests only run on Chromium');
 
     await page.goto('/');
