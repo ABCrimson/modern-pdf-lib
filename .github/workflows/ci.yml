@@ -267,7 +267,6 @@ jobs:
 
       - name: Run benchmarks (tinybench harness — Vitest 5 removed `vitest bench`)
         run: npm run bench
-          retention-days: 30
 
   # ---------------------------------------------------------------------------
   # Bundle size check
