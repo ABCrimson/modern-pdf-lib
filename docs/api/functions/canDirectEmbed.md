@@ -8,7 +8,7 @@
 
 > **canDirectEmbed**(`data`): `boolean`
 
-Defined in: [src/assets/image/tiffDirectEmbed.ts:338](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/image/tiffDirectEmbed.ts#L338)
+Defined in: [src/assets/image/tiffDirectEmbed.ts:334](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/tiffDirectEmbed.ts#L334)
 
 Check whether a TIFF file can be directly embedded in PDF without
 a full decode-re-encode cycle.

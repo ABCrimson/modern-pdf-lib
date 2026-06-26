@@ -25,7 +25,7 @@ import {
   parseTiffIfd,
   isTiff,
 } from '../../../../src/assets/image/tiffDecode.js';
-import type { TiffImage, IfdEntry } from '../../../../src/assets/image/tiffDecode.js';
+
 import { deflateSync } from 'fflate';
 
 // ---------------------------------------------------------------------------
@@ -723,8 +723,6 @@ describe('multi-page TIFF', () => {
     // [after IFD 1] overflow + page1 data
     // [after page 1] IFD 2
     // [after IFD 2] overflow + page2 data
-
-    const littleEndian = true;
 
     // Page 1 tags
     const page1Tags: TiffTag[] = [

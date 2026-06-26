@@ -8,7 +8,6 @@ import {
   PdfDict,
   PdfName,
   PdfArray,
-  PdfNumber,
 } from '../../../src/core/pdfObjects.js';
 
 describe('PdfInkAnnotation', () => {

@@ -8,7 +8,7 @@
 
 > **processBatch**(`files`, `operation`, `options?`): `Promise`\<[`BatchResult`](../interfaces/BatchResult.md)\>
 
-Defined in: src/batch/batchProcessor.ts:109
+Defined in: [src/batch/batchProcessor.ts:245](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/batch/batchProcessor.ts#L245)
 
 Process multiple PDFs in parallel (or with bounded concurrency).
 
@@ -41,7 +41,7 @@ An async function that receives a loaded
 
 [`BatchOptions`](../interfaces/BatchOptions.md)
 
-Concurrency and progress options.
+Concurrency, progress, memory, error, and timeout options.
 
 ## Returns
 

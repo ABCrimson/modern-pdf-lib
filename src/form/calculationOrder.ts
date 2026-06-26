@@ -19,11 +19,9 @@
 
 import {
   PdfDict,
-  PdfName,
-  PdfArray,
   PdfString,
 } from '../core/pdfObjects.js';
-import type { PdfObject } from '../core/pdfObjects.js';
+
 import type { PdfForm } from './pdfForm.js';
 import type { PdfField } from './pdfField.js';
 import { strVal } from './pdfField.js';
@@ -271,10 +269,12 @@ export function topologicalSort(dependencies: Map<string, string[]>): string[] {
   queue.sort();
 
   const result: string[] = [];
+  const visited = new Set<string>();
 
   while (queue.length > 0) {
     const node = queue.shift()!;
     result.push(node);
+    visited.add(node);
 
     for (const dependent of reverseEdges.get(node) ?? []) {
       const newDegree = (inDegree.get(dependent) ?? 1) - 1;
@@ -289,7 +289,7 @@ export function topologicalSort(dependencies: Map<string, string[]>): string[] {
 
   // Handle cycles: append any remaining nodes
   for (const node of allNodes) {
-    if (!result.includes(node)) {
+    if (!visited.has(node)) {
       result.push(node);
     }
   }

@@ -17,7 +17,7 @@
  */
 
 import { findExistingSignatures } from './incrementalSave.js';
-import type { SignatureByteRange } from './incrementalSave.js';
+
 
 // ---------------------------------------------------------------------------
 // Types
@@ -57,31 +57,7 @@ export interface SignatureChainResult {
 // Internal helpers
 // ---------------------------------------------------------------------------
 
-const encoder = new TextEncoder();
 const decoder = new TextDecoder('latin1');
-
-/**
- * Find a string forward in a Uint8Array.
- */
-function findStringForward(
-  data: Uint8Array,
-  needle: string,
-  startOffset: number,
-): number {
-  const needleBytes = encoder.encode(needle);
-  const len = needleBytes.length;
-  for (let i = startOffset; i <= data.length - len; i++) {
-    let match = true;
-    for (let j = 0; j < len; j++) {
-      if (data[i + j] !== needleBytes[j]) {
-        match = false;
-        break;
-      }
-    }
-    if (match) return i;
-  }
-  return -1;
-}
 
 /**
  * Extract the field name from the signature dictionary context.
@@ -174,24 +150,6 @@ function extractSigningDate(pdfStr: string, sigOffset: number): Date | undefined
   return undefined;
 }
 
-/**
- * Find all %%EOF markers in the PDF and return their byte offsets.
- */
-function findAllEofMarkers(pdf: Uint8Array): number[] {
-  const markers: number[] = [];
-  const eofStr = '%%EOF';
-  let offset = 0;
-
-  while (offset < pdf.length) {
-    const idx = findStringForward(pdf, eofStr, offset);
-    if (idx === -1) break;
-    markers.push(idx + eofStr.length);
-    offset = idx + eofStr.length;
-  }
-
-  return markers;
-}
-
 // ---------------------------------------------------------------------------
 // Public API
 // ---------------------------------------------------------------------------
@@ -229,9 +187,6 @@ export async function validateSignatureChain(
     const bEnd = b.byteRange[2] + b.byteRange[3];
     return aEnd - bEnd;
   });
-
-  // Find all %%EOF markers for document revision detection
-  const eofMarkers = findAllEofMarkers(pdf);
 
   const entries: SignatureChainEntry[] = [];
   let chainValid = true;

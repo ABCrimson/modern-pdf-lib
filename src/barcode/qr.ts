@@ -361,7 +361,7 @@ type EncodingMode = 'numeric' | 'alphanumeric' | 'byte';
 
 function detectMode(data: string): EncodingMode {
   if (/^\d*$/.test(data)) return 'numeric';
-  if ([...data].every((ch) => ALPHANUMERIC_CHARS.includes(ch))) return 'alphanumeric';
+  if (Array.from(data).every((ch) => ALPHANUMERIC_CHARS.includes(ch))) return 'alphanumeric';
   return 'byte';
 }
 
@@ -1126,7 +1126,6 @@ export function encodeQrCode(
   const functionMask = createFunctionPatternMask(size, version);
 
   // Try all 8 mask patterns, pick the one with lowest penalty
-  let bestMask = 0;
   let bestPenalty = Infinity;
   let bestMatrix: Int8Array | null = null;
 
@@ -1154,7 +1153,6 @@ export function encodeQrCode(
 
     if (penalty < bestPenalty) {
       bestPenalty = penalty;
-      bestMask = maskIdx;
       bestMatrix = matrix;
     }
   }
@@ -1172,12 +1170,6 @@ export function encodeQrCode(
 // PDF operator generation
 // ---------------------------------------------------------------------------
 
-/** Format a number for PDF output (avoid trailing zeros). */
-function pdfNum(value: number): string {
-  if (Number.isInteger(value)) return value.toString();
-  const s = value.toFixed(6).replace(/\.?0+$/, '');
-  return s === '-0' ? '0' : s;
-}
 
 /**
  * Convert a {@link QrCodeMatrix} to PDF content-stream operators.

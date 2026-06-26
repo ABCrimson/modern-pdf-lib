@@ -24,8 +24,7 @@ import {
   PdfNull,
 } from './pdfObjects.js';
 import type { PdfObject, PdfObjectRegistry } from './pdfObjects.js';
-import { PdfPage, PageSizes } from './pdfPage.js';
-import type { PageSize } from './pdfPage.js';
+import { PdfPage } from './pdfPage.js';
 import { PdfDocument, createPdf } from './pdfDocument.js';
 
 // ---------------------------------------------------------------------------

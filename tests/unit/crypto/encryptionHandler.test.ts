@@ -7,7 +7,7 @@
 import { describe, it, expect } from 'vitest';
 import { PdfEncryptionHandler } from '../../../src/crypto/encryptionHandler.js';
 import type { EncryptOptions } from '../../../src/crypto/encryptionHandler.js';
-import { PdfString, PdfDict, PdfName, PdfNumber, PdfBool } from '../../../src/core/pdfObjects.js';
+import { PdfString, PdfName, PdfNumber } from '../../../src/core/pdfObjects.js';
 
 // ---------------------------------------------------------------------------
 // Helpers

@@ -148,9 +148,9 @@ export function addWatermarkToPage(
 
   // Escape text for PDF string
   const escaped = text
-    .replace(/\\/g, '\\\\')
-    .replace(/\(/g, '\\(')
-    .replace(/\)/g, '\\)');
+    .replaceAll('\\', '\\\\')
+    .replaceAll('(', '\\(')
+    .replaceAll(')', '\\)');
 
   ops += `(${escaped}) Tj\n`;
   ops += 'ET\n';

@@ -650,7 +650,7 @@ describe('Multi-lang: Emoji (supplementary plane)', () => {
     const resources = makeCIDFontResource('F1', makeToUnicodeCMapRaw(rawMappings));
     const ops = makeCIDTextOps('F1', 12, [0x0001, 0x0002, 0x0003]);
     const text = extractText(ops, resources);
-    const codePoints = [...text].map((ch) => ch.codePointAt(0));
+    const codePoints = Array.from(text).map((ch) => ch.codePointAt(0));
     expect(codePoints).toEqual([0x1f600, 0x1f680, 0x1f30d]);
   });
 
@@ -669,9 +669,6 @@ describe('Multi-lang: Emoji (supplementary plane)', () => {
     const bmpMappings = new Map<number, number>([
       [0x0002, 0x0041], // A
       [0x0003, 0x0042], // B
-    ]);
-    const rawMappings = new Map<number, string>([
-      [0x0001, 'D83DDE00'], // grinning face
     ]);
     // Build combined CMap manually
     let cmap = '/CIDInit /ProcSet findresource begin\n';
@@ -692,7 +689,7 @@ describe('Multi-lang: Emoji (supplementary plane)', () => {
     // A + grinning face + B
     expect(text.startsWith('A')).toBe(true);
     expect(text.endsWith('B')).toBe(true);
-    expect([...text].map((c) => c.codePointAt(0))).toEqual([0x41, 0x1f600, 0x42]);
+    expect(Array.from(text).map((c) => c.codePointAt(0))).toEqual([0x41, 0x1f600, 0x42]);
   });
 });
 

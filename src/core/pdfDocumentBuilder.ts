@@ -34,7 +34,7 @@ import type { EncryptOptions } from '../crypto/encryptionHandler.js';
 import type { LoadPdfOptions } from '../parser/documentParser.js';
 import type { PageLabelRange } from './pageLabels.js';
 import { setPageLabels } from './pageLabels.js';
-import type { AddBookmarkOptions, BookmarkRef } from './outlines.js';
+import type { AddBookmarkOptions } from './outlines.js';
 import { addBookmark } from './outlines.js';
 
 // ---------------------------------------------------------------------------

@@ -16,10 +16,9 @@
     "noFallthroughCasesInSwitch": true,
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,
+    "isolatedDeclarations": true,
     "verbatimModuleSyntax": true,
     "skipLibCheck": true,
-    "esModuleInterop": false,
-    "ignoreDeprecations": "6.0",
     "resolveJsonModule": true,
     "types": []
   },

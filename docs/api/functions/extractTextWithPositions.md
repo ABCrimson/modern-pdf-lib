@@ -8,7 +8,7 @@
 
 > **extractTextWithPositions**(`operators`, `resources?`): [`TextItem`](../interfaces/TextItem.md)[]
 
-Defined in: [src/parser/textExtractor.ts:268](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/parser/textExtractor.ts#L268)
+Defined in: [src/parser/textExtractor.ts:265](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/parser/textExtractor.ts#L265)
 
 Extract text with position information from a parsed content stream.
 

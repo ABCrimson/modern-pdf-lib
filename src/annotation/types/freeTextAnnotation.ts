@@ -9,7 +9,6 @@
 
 import {
   PdfDict,
-  PdfName,
   PdfNumber,
   PdfString,
   PdfStream,
@@ -87,7 +86,7 @@ export class PdfFreeTextAnnotation extends PdfAnnotation {
    */
   static fromDict(
     dict: PdfDict,
-    resolver?: (ref: PdfRef) => PdfObject | undefined,
+    _resolver?: (ref: PdfRef) => PdfObject | undefined,
   ): PdfFreeTextAnnotation {
     return new PdfFreeTextAnnotation(dict);
   }
@@ -123,7 +122,7 @@ export class PdfFreeTextAnnotation extends PdfAnnotation {
 
   /** Set the font size (rebuilds the default appearance string). */
   setFontSize(size: number): void {
-    let da = this.getDefaultAppearance();
+    const da = this.getDefaultAppearance();
     // Replace font size in existing DA string
     const replaced = da.replace(
       /(\/\w+)\s+[\d.]+\s+Tf/,

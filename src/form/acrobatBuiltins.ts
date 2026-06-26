@@ -138,10 +138,10 @@ export function parseFormattedNumber(text: string): number {
   if (lastComma > -1 && lastDot > -1) {
     if (lastComma > lastDot) {
       // European: 1.234,56 → comma is decimal
-      s = s.replace(/\./g, '').replace(',', '.');
+      s = s.replaceAll('.', '').replace(',', '.');
     } else {
       // US: 1,234.56 → dot is decimal
-      s = s.replace(/,/g, '');
+      s = s.replaceAll(',', '');
     }
   } else if (lastComma > -1) {
     // Only commas — check if it's a decimal or thousands
@@ -152,7 +152,7 @@ export function parseFormattedNumber(text: string): number {
       s = s.replace(',', '.');
     } else {
       // Multiple commas or 3+ trailing digits → thousands
-      s = s.replace(/,/g, '');
+      s = s.replaceAll(',', '');
     }
   }
   // else: only dots or nothing — standard parseFloat
@@ -288,7 +288,7 @@ export function AFNumber_Keystroke(
   negStyle: number,
   currStyle: number,
   strCurrency: string,
-  bCurrencyPrepend: boolean,
+  _bCurrencyPrepend: boolean,
 ): (value: string) => boolean {
   const seps = getSeparators(sepStyle);
 

@@ -8,7 +8,7 @@
 
 > **AppearanceProviderFor**\<`T`\> = `T` *extends* `"text"` ? (`options`) => [`PdfStream`](../classes/PdfStream.md) : `T` *extends* `"checkbox"` ? (`options`) => [`PdfStream`](../classes/PdfStream.md) : `T` *extends* `"radio"` ? (`options`) => [`PdfStream`](../classes/PdfStream.md) : `T` *extends* `"dropdown"` ? (`options`) => [`PdfStream`](../classes/PdfStream.md) : `T` *extends* `"listbox"` ? (`options`) => [`PdfStream`](../classes/PdfStream.md) : `T` *extends* `"button"` ? (`options`) => [`PdfStream`](../classes/PdfStream.md) : `T` *extends* `"signature"` ? (`options`) => [`PdfStream`](../classes/PdfStream.md) : `never`
 
-Defined in: [src/form/fieldAppearance.ts:38](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/form/fieldAppearance.ts#L38)
+Defined in: [src/form/fieldAppearance.ts:37](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/form/fieldAppearance.ts#L37)
 
 A typed function that generates an appearance stream for a specific
 field type. Use this as a callback type when providing custom

@@ -174,7 +174,7 @@ function parseChunks(data: Uint8Array): PngChunk[] {
       data[offset + 7]!,
     );
 
-    const chunkData = data.slice(offset + 8, offset + 8 + length);
+    const chunkData = data.subarray(offset + 8, offset + 8 + length);
     chunks.push({ type, data: chunkData });
 
     // length (4) + type (4) + data (length) + CRC (4)

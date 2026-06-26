@@ -59,7 +59,7 @@ export class PdfRedactAnnotation extends PdfAnnotation {
 
   static fromDict(
     dict: PdfDict,
-    resolver?: (ref: PdfRef) => PdfObject | undefined,
+    _resolver?: (ref: PdfRef) => PdfObject | undefined,
   ): PdfRedactAnnotation {
     return new PdfRedactAnnotation(dict);
   }

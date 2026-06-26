@@ -7,9 +7,6 @@
  */
 
 import {
-  PdfDict,
-  PdfName,
-  PdfNumber,
   PdfString,
   PdfArray,
   PdfStream,

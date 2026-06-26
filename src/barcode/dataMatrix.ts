@@ -603,13 +603,6 @@ export function encodeDataMatrix(data: string): DataMatrixResult {
 // PDF operator generation
 // ---------------------------------------------------------------------------
 
-/** Format a number for PDF output (avoid trailing zeros). */
-function pdfNum(value: number): string {
-  if (Number.isInteger(value)) return value.toString();
-  const s = value.toFixed(6).replace(/\.?0+$/, '');
-  return s === '-0' ? '0' : s;
-}
-
 /**
  * Convert a {@link DataMatrixResult} to PDF content-stream operators.
  *

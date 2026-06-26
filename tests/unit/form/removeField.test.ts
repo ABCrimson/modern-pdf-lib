@@ -5,13 +5,9 @@
 import { describe, it, expect } from 'vitest';
 import {
   PdfDict,
-  PdfName,
-  PdfNumber,
-  PdfString,
   PdfArray,
 } from '../../../src/core/pdfObjects.js';
 import { PdfForm } from '../../../src/form/pdfForm.js';
-import { FieldFlags } from '../../../src/form/pdfField.js';
 
 // ---------------------------------------------------------------------------
 // Helpers

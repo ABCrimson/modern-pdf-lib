@@ -8,7 +8,7 @@
 
 > **linearizePdf**(`pdfBytes`, `options?`): `Promise`\<`Uint8Array`\<`ArrayBufferLike`\>\>
 
-Defined in: [src/core/linearization.ts:661](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/linearization.ts#L661)
+Defined in: [src/core/linearization.ts:989](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/linearization.ts#L989)
 
 Linearize a PDF document for fast web viewing.
 
@@ -17,6 +17,11 @@ This reorganizes the PDF so that:
 2. Objects needed for the first page appear early in the file
 3. A primary hint stream describes page offsets and shared objects (§F.4)
 4. Cross-reference streams are used for all xref data (§7.5.8)
+
+Uses two-pass serialization:
+- Pass 1 produces a trial layout to determine exact byte sizes.
+- Pass 2 re-serializes with the correct values, so all offsets
+  (/L, /O, /E, /T, /H, hint table entries, xref entries) are exact.
 
 ## Parameters
 

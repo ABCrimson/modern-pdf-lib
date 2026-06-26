@@ -39,6 +39,13 @@ export interface TransparencyFinding {
 }
 
 // ---------------------------------------------------------------------------
+// Module-level singletons
+// ---------------------------------------------------------------------------
+
+const encoder = new TextEncoder();
+const decoder = new TextDecoder();
+
+// ---------------------------------------------------------------------------
 // Detection
 // ---------------------------------------------------------------------------
 
@@ -55,7 +62,7 @@ export interface TransparencyFinding {
  * @returns         A {@link TransparencyInfo} describing any transparency found.
  */
 export function detectTransparency(pdfBytes: Uint8Array): TransparencyInfo {
-  const text = new TextDecoder().decode(pdfBytes);
+  const text = decoder.decode(pdfBytes);
   const findings: TransparencyFinding[] = [];
 
   // Check for non-1.0 CA (stroke opacity)
@@ -141,8 +148,7 @@ export function detectTransparency(pdfBytes: Uint8Array): TransparencyInfo {
  * @returns         Modified PDF bytes with transparency removed.
  */
 export function flattenTransparency(pdfBytes: Uint8Array): Uint8Array {
-  const encoder = new TextEncoder();
-  let text = new TextDecoder().decode(pdfBytes);
+  let text = decoder.decode(pdfBytes);
 
   // Replace non-1.0 CA with /CA 1
   text = text.replace(/\/CA\s+[\d.]+/g, (match) => {

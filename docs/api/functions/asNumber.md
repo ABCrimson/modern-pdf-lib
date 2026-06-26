@@ -8,7 +8,7 @@
 
 > **asNumber**(`obj`): `number` \| `undefined`
 
-Defined in: [src/utils/pdfValueHelpers.ts:36](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/utils/pdfValueHelpers.ts#L36)
+Defined in: [src/utils/pdfValueHelpers.ts:80](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/utils/pdfValueHelpers.ts#L80)
 
 Extract a numeric value from a [PdfObject](../type-aliases/PdfObject.md).
 
@@ -25,3 +25,11 @@ The PDF object to inspect.
 ## Returns
 
 `number` \| `undefined`
+
+The numeric value, or `undefined` if not a PdfNumber.
+
+## Example
+
+```ts
+const val = asNumber(someObj); // number | undefined
+```

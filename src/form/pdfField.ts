@@ -52,7 +52,23 @@ export type FieldType =
 // ---------------------------------------------------------------------------
 
 /** Common field flags (/Ff) — bit positions (0-indexed). */
-export const FieldFlags = {
+export const FieldFlags: {
+  readonly ReadOnly: number;
+  readonly Required: number;
+  readonly NoExport: number;
+  readonly Multiline: number;
+  readonly Password: number;
+  readonly DoNotScroll: number;
+  readonly RichText: number;
+  readonly NoToggleToOff: number;
+  readonly Radio: number;
+  readonly Pushbutton: number;
+  readonly RadiosInUnison: number;
+  readonly Combo: number;
+  readonly Edit: number;
+  readonly Sort: number;
+  readonly MultiSelect: number;
+} = {
   /** Bit 0: The user may not change the value of the field. */
   ReadOnly: 1 << 0,
   /** Bit 1: The field must have a value at export time. */

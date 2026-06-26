@@ -5,6 +5,57 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 See [VERSIONING.md](./VERSIONING.md) for this project's versioning policy.
 
+## [0.28.0] - 2026-06-25
+
+This release pairs a full **bleeding-edge toolchain migration** (TypeScript 7, oxlint, Vite 8 / Vitest 5, Node 26) with **27 net-new features** added only where an evidence-based audit (`GAP-ANALYSIS.md`) confirmed a genuine gap — the planned roadmap was found to be ~half already-implemented. Every feature is TDD-verified; the full suite (**6,254 tests**), typecheck, lint (0 errors), and build all pass, with **no performance regression** (34/37 wins vs pdf-lib).
+
+### Added
+
+### Added
+
+- **In-page text search** (`0.28.7`, `src/parser/textSearch.ts`): `searchTextItems()` — string/RegExp search over positioned text with case/whole-word options, returning per-item bounding-box hit-rectangles.
+- **Table extraction** (`0.28.6`, `src/parser/tableExtract.ts`): `extractTables()` (whitespace/column clustering) + `tableToCsv()` (RFC 4180) + `tableToJson()`.
+- **PDF 2.0 Document Parts** (`0.30.0`, `src/core/documentParts.ts`): `buildDPartRoot()` — `/DPartRoot` + `/DPart` hierarchy with page ranges + `/DPM` metadata (ISO 32000-2 §14.12).
+- **Structure Namespaces** (`0.30.4`, `src/accessibility/namespaces.ts`): `buildNamespace()`/`buildNamespacesArray()` + `PDF2_NAMESPACE`/`MATHML_NAMESPACE` (§14.7.4).
+- **Document /Requirements** (`0.30.5`, `src/core/requirements.ts`): `buildRequirements()` (§7.12.7).
+- **PieceInfo** (`0.30.9`, `src/core/pieceInfo.ts`): `buildPieceInfo()` private application data (§14.5).
+- **Validation report** (`0.32.7`, `src/compliance/validationReport.ts`): `toJsonReport()` + `toSarif()` (SARIF 2.1.0 for CI code-scanning).
+- **Paragraph reconstruction** (`0.28.3`, `src/parser/textReconstruct.ts`): `reconstructLines()`/`reconstructParagraphs()` — groups positioned text into reading-order lines and paragraphs.
+- **CIE color spaces** (`0.37.1`, `src/core/colorSpacesCIE.ts`): `buildCalGray`/`buildCalRGB`/`buildLab` + `labToRgb()` (CIE L*a*b*→sRGB).
+- **Standalone DocTimeStamp** (`0.34.6`, `src/signature/docTimeStamp.ts`): `buildDocTimeStampDict()` (ETSI.RFC3161, ISO 32000-2 §12.8.5).
+- **PDF Portfolios / Collections** (`0.33.7`, `src/core/collections.ts`): `buildCollection()` — `/Collection` with schema/sort/folders (§7.11.6).
+- **Markdown-to-PDF** (`0.40.4`, `src/assets/markdown/markdownToPdf.ts`): `markdownToPdf()` — CommonMark subset → laid-out PDF.
+- **PDF function objects** (`0.37.0`, `src/core/pdfFunctions.ts`): `evaluateFunction()` for sampled (0), exponential (2), stitching (3), and a PostScript-calculator (4) interpreter (ISO 32000-2 §7.10) — the shared core for shadings/transfer/tint.
+- **Halftones & transfer functions** (`0.38.7`, `src/core/halftone.ts`): `buildType1Halftone`/`buildThresholdHalftone`/`buildType5Halftone` (§10.5/§10.6).
+- **PDF/X-6** (`0.32.4`, `src/compliance/pdfX6.ts`): `buildPdfX6OutputIntent`/`buildGtsPdfxVersion`/`validateBoxGeometry` (ISO 15930-9).
+- **Factur-X / ZUGFeRD CII** (`0.33.2`, `src/compliance/facturX.ts`): `generateCiiXml()` — UN/CEFACT CrossIndustryInvoice for MINIMUM…EXTENDED profiles.
+- **Function-based shading** (`0.37.3`, `src/core/shadingFunction.ts`): `buildFunctionShading()` (ShadingType 1).
+- **PDF/A-4** (`0.32.1/.2`, `src/compliance/pdfA4.ts`): `buildPdfA4Xmp()` (pdfaid:part=4 + extension schemas).
+- **XRechnung / Order-X** (`0.33.4`, `src/compliance/xRechnung.ts`): `generateXRechnungCii()`/`generateOrderX()`.
+- **Font fallback chains** (`0.36.7`, `src/assets/font/fontFallback.ts`): `resolveFallback()`/`splitByScript()` per-glyph script splitting.
+- **HTTP Range lazy fetch** (`0.39.6`, `src/runtime/rangeFetch.ts`): `createRangeFetcher()` for progressive remote PDF open.
+- **Error-DX** (`0.40.7`, `src/utils/codeframe.ts`): `renderCodeFrame()` + `didYouMean()`/`levenshtein()`.
+- **VDOM-to-PDF core** (`0.40.0`, `src/assets/vdom/reconciler.ts`): `renderToPdf()` + `h()` hyperscript — declarative node-tree → laid-out PDF.
+- **PDF/VT** (`0.32.5`, `src/compliance/pdfVT.ts`): `buildVtDpm`/`buildPdfVtDParts` variable & transactional printing on Document Parts (ISO 16612-2).
+- **Worker-pool orchestrator** (`0.39.0`, `src/runtime/workerPool.ts`): `createWorkerPool()` — `hardwareConcurrency`-aware task pool with ordered `runAll`.
+- **External HSM/KMS signer** (`0.34.4`, `src/signature/externalSigner.ts`): `signDeferred()` deferred-hash signing — private key never touches the library.
+- **WOFF font input** (`0.36.3`, `src/assets/font/woff.ts`): `decodeWoff()` (WOFF1→sfnt) + `isWoff`/`isWoff2`/`readWoffHeader` (WOFF2 detection).
+
+### Changed
+
+- **Bleeding-edge toolchain** (`0.27.1`): TypeScript `7.0.1-rc` (Go-native `tsgo`), **oxlint** + `tsgolint` replacing ESLint/typescript-eslint (immune to TS7's dropped compiler-API exports), oxc `isolatedDeclarations` `.d.ts` emit via tsdown, Vite `8.1.0` / Vitest `5.0.0-beta.5`, Node `26.4`, Rust `beta`, all deps newest-across-channels.
+- **Lint-to-zero** (`0.27.2`): 466 → 0 oxlint errors; intentional unused params `_`-prefixed, dead code removed, `any` replaced with precise types.
+- **Tooling** (`0.27.4`–`0.27.6`): `.gitattributes` LF normalization; `format`/`format:check` prettier scripts; isolated TS6 typedoc sidecar (`tools/docs`) since typedoc has no TS7 path until ~7.1; standalone `npm run bench` tinybench harness (Vitest 5 removed the `bench` export).
+
+### Fixed
+
+- **JBIG2 arithmetic integer decoder** (`src/parser/jbig2Decode.ts`): magnitude classes 2–3 read the wrong bit widths (2/4 instead of 4/6 per ITU-T T.88 §A.3), leaving undecodable integer gaps (`[8,19]`, `[36,83]`) that desynced the arithmetic stream. Now table-driven with a contiguity invariant test.
+- **String coercion**: removed `[object Object]` leaks in stream-filter names, outline titles, and extracted text; emoji-splitting string spreads replaced with `Array.from`.
+
+### Performance
+
+- **0.27 baseline vs pdf-lib v1.17.1**: wins **34 / 37** head-to-head benchmarks (no regression from the toolchain swap). Optimization targets: RGBA-PNG embed, load→save roundtrip, uncompressed save.
+
 ## [0.27.0] - 2026-03-08
 
 ### Added

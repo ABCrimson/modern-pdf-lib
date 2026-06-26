@@ -8,7 +8,7 @@
 
 > **isTiff**(`data`): `boolean`
 
-Defined in: [src/assets/image/tiffDecode.ts:134](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/image/tiffDecode.ts#L134)
+Defined in: [src/assets/image/tiffDecode.ts:133](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/tiffDecode.ts#L133)
 
 Check if data is a TIFF file by examining the byte order marker and magic number.
 

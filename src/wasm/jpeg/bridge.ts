@@ -30,25 +30,6 @@ export interface JpegWasmModule {
   decode_jpeg(data: Uint8Array): Uint8Array;
 }
 
-/** Raw WASM exports interface (when instantiated via WebAssembly.instantiate). */
-interface JpegWasmRaw {
-  memory: WebAssembly.Memory;
-  encode_jpeg(
-    pixelsPtr: number,
-    pixelsLen: number,
-    width: number,
-    height: number,
-    channels: number,
-    quality: number,
-    progressive: number,
-    chroma_subsampling: number,
-  ): number;
-  decode_jpeg(dataPtr: number, dataLen: number): number;
-  __wbindgen_malloc(size: number, align: number): number;
-  __wbindgen_free(ptr: number, size: number, align: number): void;
-  __wbindgen_add_to_stack_pointer(delta: number): number;
-}
-
 let wasmModule: JpegWasmModule | undefined;
 
 /**

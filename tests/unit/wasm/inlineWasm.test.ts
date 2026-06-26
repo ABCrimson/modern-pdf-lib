@@ -20,7 +20,6 @@ import {
   preloadInlineWasm,
   WASM_MODULE_NAMES,
   provideInlineWasmModule,
-  loadInlineWasmModule,
 } from '../../../src/wasm/inlineWasm.js';
 import type { WasmModuleName } from '../../../src/wasm/inlineWasm.js';
 

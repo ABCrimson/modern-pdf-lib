@@ -341,7 +341,6 @@ describe('FlateDecode with PNG predictors', () => {
   it('handles PNG None predictor (type byte = 0)', () => {
     // Row of 4 bytes, PNG predictor 10 (None)
     // Each row: [filterByte, data...]
-    const rowBytes = 4;
     const row1 = new Uint8Array([0, 10, 20, 30, 40]); // filter=0 (None)
     const row2 = new Uint8Array([0, 50, 60, 70, 80]); // filter=0 (None)
     const predictedData = new Uint8Array([...row1, ...row2]);

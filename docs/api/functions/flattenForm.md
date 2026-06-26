@@ -8,7 +8,7 @@
 
 > **flattenForm**(`form`, `options?`): [`FlattenFormResult`](../interfaces/FlattenFormResult.md)
 
-Defined in: src/form/formFlatten.ts:261
+Defined in: [src/form/formFlatten.ts:989](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/form/formFlatten.ts#L989)
 
 Flatten ALL form fields into static page content.
 

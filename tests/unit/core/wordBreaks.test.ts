@@ -1,12 +1,13 @@
 import { describe, it, expect } from 'vitest';
 import { PdfPage, wrapText } from '../../../src/core/pdfPage.js';
 import { PdfObjectRegistry } from '../../../src/core/pdfObjects.js';
+import type { PdfRef } from '../../../src/core/pdfObjects.js';
 
 // Create a mock FontRef that returns fixed character widths
 function mockFont(charWidth: number) {
   return {
     name: 'F1',
-    ref: { kind: 'ref' as const, objectNumber: 1, generationNumber: 0, serialize: () => {} } as any,
+    ref: { kind: 'ref' as const, objectNumber: 1, generationNumber: 0, serialize: () => {} } as unknown as PdfRef,
     widthOfTextAtSize: (text: string, size: number) => text.length * charWidth * (size / 12),
     heightAtSize: (size: number) => size * 1.2,
   };

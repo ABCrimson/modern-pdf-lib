@@ -120,9 +120,7 @@ const CH_7 = 0x37;
 const CH_9 = 0x39;
 
 const CH_A = 0x41;
-const CH_F_UPPER = 0x46;
 const CH_a = 0x61;
-const CH_f = 0x66;
 
 const CH_BACKSLASH = 0x5c; // \
 

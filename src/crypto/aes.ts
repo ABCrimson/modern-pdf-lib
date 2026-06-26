@@ -97,7 +97,7 @@ function randomIv(): Uint8Array {
 export async function aesEncryptCBC(
   key: Uint8Array,
   data: Uint8Array,
-  iv?: Uint8Array | undefined,
+  iv?: Uint8Array  ,
 ): Promise<Uint8Array> {
   const actualIv = iv ?? randomIv();
   if (actualIv.length !== 16) {

@@ -15,7 +15,6 @@ import {
   PdfName,
   PdfNumber,
   PdfString,
-  PdfBool,
   PdfRef,
   PdfStream,
 } from '../core/pdfObjects.js';
@@ -70,7 +69,18 @@ export interface AnnotationOptions {
 // ---------------------------------------------------------------------------
 
 /** Annotation flag bit positions. */
-export const AnnotationFlags = {
+export const AnnotationFlags: {
+  readonly Invisible: number;
+  readonly Hidden: number;
+  readonly Print: number;
+  readonly NoZoom: number;
+  readonly NoRotate: number;
+  readonly NoView: number;
+  readonly ReadOnly: number;
+  readonly Locked: number;
+  readonly ToggleNoView: number;
+  readonly LockedContents: number;
+} = {
   Invisible:      1 << 0,
   Hidden:         1 << 1,
   Print:          1 << 2,
@@ -119,7 +129,7 @@ function generateUniqueName(): string {
  */
 export function annotationFromDict(
   dict: PdfDict,
-  resolver?: (ref: PdfRef) => PdfObject | undefined,
+  _resolver?: (ref: PdfRef) => PdfObject | undefined,
 ): PdfAnnotation {
   let subtype: AnnotationType = 'Text';
   const subtypeObj = dict.get('/Subtype');

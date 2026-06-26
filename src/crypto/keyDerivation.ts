@@ -21,8 +21,8 @@ import { rc4 } from './rc4.js';
 // aesDecryptCBCNoPad (without PKCS#7) because the wrapped keys are
 // exactly 32 bytes with no padding.
 import { sha256, sha384, sha512 } from './sha256.js';
-import { encodePermissions } from './permissions.js';
-import type { PdfPermissionFlags } from './permissions.js';
+
+
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -32,7 +32,7 @@ import type { PdfPermissionFlags } from './permissions.js';
  * Padding string used in password-based key derivation (Algorithm 2).
  * This is defined in the PDF spec, Table 20.
  */
-const PASSWORD_PADDING = new Uint8Array([
+const PASSWORD_PADDING: Uint8Array = new Uint8Array([
   0x28, 0xbf, 0x4e, 0x5e, 0x4e, 0x75, 0x8a, 0x41,
   0x64, 0x00, 0x4e, 0x56, 0xff, 0xfa, 0x01, 0x08,
   0x2e, 0x2e, 0x00, 0xb6, 0xd0, 0x68, 0x3e, 0x80,
@@ -532,7 +532,7 @@ export async function computeEncryptionKeyR5(
 export async function algorithm2B(
   password: Uint8Array,
   salt: Uint8Array,
-  uKey?: Uint8Array | undefined,
+  uKey?: Uint8Array  ,
 ): Promise<Uint8Array> {
   // Step a: SHA-256(password + salt + uKey)
   const input = uKey ? concat(password, salt, uKey) : concat(password, salt);

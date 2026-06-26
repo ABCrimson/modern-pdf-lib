@@ -91,7 +91,8 @@ export async function transcodeJp2ToJpeg(
   const { decodeJpeg2000WithFallback } = await import('./jpeg2000WasmBridge.js');
   const decoded = await decodeJpeg2000WithFallback(jp2Data);
 
-  let { data, width, height, components } = decoded;
+  const { width, height } = decoded;
+  let { data, components } = decoded;
 
   // Step 2: Handle 16-bit to 8-bit downscaling
   // If the data length suggests 16-bit components, downscale

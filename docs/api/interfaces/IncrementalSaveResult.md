@@ -6,7 +6,7 @@
 
 # Interface: IncrementalSaveResult
 
-Defined in: [src/core/incrementalWriter.ts:45](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/incrementalWriter.ts#L45)
+Defined in: [src/core/incrementalWriter.ts:41](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/incrementalWriter.ts#L41)
 
 Result of an incremental save operation.
 
@@ -16,7 +16,7 @@ Result of an incremental save operation.
 
 > `readonly` **bytes**: `Uint8Array`
 
-Defined in: [src/core/incrementalWriter.ts:47](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/incrementalWriter.ts#L47)
+Defined in: [src/core/incrementalWriter.ts:43](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/incrementalWriter.ts#L43)
 
 The complete PDF file bytes (original + appended data).
 
@@ -26,6 +26,6 @@ The complete PDF file bytes (original + appended data).
 
 > `readonly` **newXrefOffset**: `number`
 
-Defined in: [src/core/incrementalWriter.ts:50](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/incrementalWriter.ts#L50)
+Defined in: [src/core/incrementalWriter.ts:46](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/incrementalWriter.ts#L46)
 
 Byte offset of the new xref section in the output.

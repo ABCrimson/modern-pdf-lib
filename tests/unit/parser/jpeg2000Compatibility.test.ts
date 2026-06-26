@@ -19,7 +19,7 @@ import {
   offsetSignedToUnsigned,
   summarizeBitDepth,
 } from '../../../src/parser/jpeg2000BitDepth.js';
-import type { BitDepthInfo, ComponentDepth } from '../../../src/parser/jpeg2000BitDepth.js';
+import type { ComponentDepth } from '../../../src/parser/jpeg2000BitDepth.js';
 import {
   parseTileInfo,
   decodeTile,

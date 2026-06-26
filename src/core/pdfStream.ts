@@ -13,7 +13,7 @@
 
 import { deflateSync as fflateDeflateSync } from 'fflate';
 import { isAvailable as isWasmDeflateAvailable, deflateSync as wasmDeflateSync } from '../compression/libdeflateWasm.js';
-import type { PdfStream as PdfStreamObj, RegistryEntry, PdfRef } from './pdfObjects.js';
+import type { PdfStream as PdfStreamObj } from './pdfObjects.js';
 import { PdfObjectRegistry, PdfName } from './pdfObjects.js';
 import type { DocumentStructure } from './pdfCatalog.js';
 import type { PdfSaveOptions } from './pdfWriter.js';

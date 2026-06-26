@@ -10,7 +10,7 @@
  *  - Not providing onProgress doesn't break anything
  */
 
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
@@ -278,7 +278,7 @@ describe('onProgress callback — pageIndex', () => {
       onProgress: (info) => progressCalls.push(info),
     });
 
-    const pageIndices = progressCalls.map((c) => c.pageIndex).sort();
+    const pageIndices = progressCalls.map((c) => c.pageIndex).sort((a, b) => a - b);
     expect(pageIndices).toEqual([0, 1, 2]);
   });
 });

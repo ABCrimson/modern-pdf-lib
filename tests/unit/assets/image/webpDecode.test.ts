@@ -16,7 +16,7 @@ import {
   isWebP,
   isWebPLossless,
 } from '../../../../src/assets/image/webpDecode.js';
-import type { WebPImage } from '../../../../src/assets/image/webpDecode.js';
+
 
 // ---------------------------------------------------------------------------
 // Helpers — minimal valid WebP construction

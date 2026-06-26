@@ -5,7 +5,10 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { decodeJBIG2 } from '../../../src/parser/jbig2Decode.js';
+import {
+  decodeJBIG2,
+  JBIG2_INTEGER_MAGNITUDE_CLASSES,
+} from '../../../src/parser/jbig2Decode.js';
 import {
   PdfDict,
   PdfNumber,
@@ -161,10 +164,6 @@ const EOFB = EOL + EOL;
 
 // White/black Huffman codes for horizontal mode
 const WHITE_0 = '00110101';
-const WHITE_4 = '1011';
-const WHITE_8 = '10011';
-const BLACK_0 = '0000110111';
-const BLACK_4 = '011';
 const BLACK_8 = '000101';
 
 /**
@@ -653,5 +652,24 @@ describe('JBIG2Decode segment type coverage', () => {
     const result = decodeJBIG2(stream, null);
     // Page should still be white (no immediate region was composed)
     expect(result[0]).toBe(0x00);
+  });
+});
+
+describe('JBIG2 arithmetic integer magnitude classes (ITU-T T.88 §A.3)', () => {
+  it('tile the non-negative integers contiguously with no gaps', () => {
+    // Each class must begin exactly where the previous class ends, i.e.
+    // offset[i] === offset[i-1] + 2 ** width[i-1]. A gap means some integers
+    // are unencodable and the arithmetic bitstream desyncs after them.
+    let expectedOffset = 0;
+    for (const { width, offset } of JBIG2_INTEGER_MAGNITUDE_CLASSES) {
+      expect(offset).toBe(expectedOffset);
+      expectedOffset += 1 << width;
+    }
+  });
+
+  it('use the spec-defined magnitude bit widths', () => {
+    expect(JBIG2_INTEGER_MAGNITUDE_CLASSES.map((c) => c.width)).toEqual([
+      2, 4, 6, 8, 12, 32,
+    ]);
   });
 });

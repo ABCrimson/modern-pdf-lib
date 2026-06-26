@@ -7,10 +7,7 @@ import {
   validatePdfUa,
   enforcePdfUa,
 } from '../../../src/accessibility/pdfUaValidator.js';
-import type {
-  PdfUaValidationResult,
-  PdfUaEnforcementResult,
-} from '../../../src/accessibility/pdfUaValidator.js';
+
 import { createPdf } from '../../../src/core/pdfDocument.js';
 import type { PdfDocument } from '../../../src/core/pdfDocument.js';
 
@@ -469,7 +466,7 @@ describe('validatePdfUa — font embedding', () => {
     doc.createStructureTree();
 
     // Use the embedFont method with a standard font name
-    doc.embedFont('Helvetica');
+    void doc.embedFont('Helvetica');
 
     const result = validatePdfUa(doc);
 

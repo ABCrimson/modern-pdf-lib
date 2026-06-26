@@ -22,11 +22,7 @@ import {
   extractImages,
   PageSizes,
 } from '../../src/index.js';
-import type {
-  BatchOptimizeOptions,
-  OptimizationReport,
-  ImageOptimizeEntry,
-} from '../../src/index.js';
+
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -72,11 +68,11 @@ describe('selective filters — pageRange', () => {
     expect(notFiltered.length).toBe(2);
 
     // Filtered entries should be on pages 0 and 3
-    const filteredPages = filtered.map((e) => e.pageIndex).sort();
+    const filteredPages = filtered.map((e) => e.pageIndex).sort((a, b) => a - b);
     expect(filteredPages).toEqual([0, 3]);
 
     // Non-filtered entries should be on pages 1 and 2
-    const nonFilteredPages = notFiltered.map((e) => e.pageIndex).sort();
+    const nonFilteredPages = notFiltered.map((e) => e.pageIndex).sort((a, b) => a - b);
     expect(nonFilteredPages).toEqual([1, 2]);
 
     // Report-level count

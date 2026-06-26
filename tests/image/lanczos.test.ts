@@ -104,21 +104,6 @@ function makeRgbaGradient(
   return { pixels, width, height, channels: 4, bitsPerChannel: 8 };
 }
 
-/**
- * Compute the mean squared error between two pixel arrays.
- */
-function computeMse(a: Uint8Array, b: Uint8Array): number {
-  if (a.length !== b.length) {
-    throw new Error(`Array length mismatch: ${a.length} vs ${b.length}`);
-  }
-  let sum = 0;
-  for (let i = 0; i < a.length; i++) {
-    const diff = a[i]! - b[i]!;
-    sum += diff * diff;
-  }
-  return sum / a.length;
-}
-
 // ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------

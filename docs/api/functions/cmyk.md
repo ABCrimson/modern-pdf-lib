@@ -8,7 +8,7 @@
 
 > **cmyk**(`c`, `m`, `y`, `k`): [`CmykColor`](../interfaces/CmykColor.md)
 
-Defined in: [src/core/operators/color.ts:63](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/operators/color.ts#L63)
+Defined in: [src/core/operators/color.ts:85](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/operators/color.ts#L85)
 
 Create a CMYK colour.
 

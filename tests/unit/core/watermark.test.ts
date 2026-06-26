@@ -12,7 +12,6 @@
 
 import { describe, it, expect } from 'vitest';
 import { addWatermarkToPage, addWatermark } from '../../../src/core/watermark.js';
-import type { WatermarkOptions } from '../../../src/core/watermark.js';
 import { PdfPage } from '../../../src/core/pdfPage.js';
 import { PdfObjectRegistry } from '../../../src/core/pdfObjects.js';
 import { createPdf } from '../../../src/core/pdfDocument.js';

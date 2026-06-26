@@ -25,7 +25,6 @@ import {
   PdfString,
   PdfNumber,
   PdfStream,
-  PdfArray,
 } from '../core/pdfObjects.js';
 import type { PdfObjectRegistry, PdfRef } from '../core/pdfObjects.js';
 
@@ -93,15 +92,6 @@ function findPattern(data: Uint8Array, pattern: string, start: number = 0): numb
 /** Check if a pattern exists anywhere in the PDF. */
 function containsPattern(data: Uint8Array, pattern: string): boolean {
   return findPattern(data, pattern) >= 0;
-}
-
-/** Extract text between two markers. */
-function extractBetween(data: Uint8Array, start: string, end: string): string | undefined {
-  const startIdx = findPattern(data, start);
-  if (startIdx < 0) return undefined;
-  const endIdx = findPattern(data, end, startIdx + start.length);
-  if (endIdx < 0) return undefined;
-  return decoder.decode(data.subarray(startIdx + start.length, endIdx));
 }
 
 /**

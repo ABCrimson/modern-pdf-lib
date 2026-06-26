@@ -6,7 +6,7 @@
 
 # Interface: DiffEntry
 
-Defined in: [src/signature/documentDiff.ts:24](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/signature/documentDiff.ts#L24)
+Defined in: [src/signature/documentDiff.ts:24](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/documentDiff.ts#L24)
 
 A single difference found between signed and current content.
 
@@ -16,7 +16,7 @@ A single difference found between signed and current content.
 
 > **description**: `string`
 
-Defined in: [src/signature/documentDiff.ts:38](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/signature/documentDiff.ts#L38)
+Defined in: [src/signature/documentDiff.ts:38](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/documentDiff.ts#L38)
 
 Human-readable description of the change.
 
@@ -24,9 +24,9 @@ Human-readable description of the change.
 
 ### fieldName?
 
-> `optional` **fieldName**: `string`
+> `optional` **fieldName?**: `string`
 
-Defined in: [src/signature/documentDiff.ts:36](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/signature/documentDiff.ts#L36)
+Defined in: [src/signature/documentDiff.ts:36](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/documentDiff.ts#L36)
 
 Form field name (for form field changes).
 
@@ -34,9 +34,9 @@ Form field name (for form field changes).
 
 ### pageIndex?
 
-> `optional` **pageIndex**: `number`
+> `optional` **pageIndex?**: `number`
 
-Defined in: [src/signature/documentDiff.ts:34](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/signature/documentDiff.ts#L34)
+Defined in: [src/signature/documentDiff.ts:34](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/documentDiff.ts#L34)
 
 Zero-based page index (for page-related changes).
 
@@ -46,6 +46,6 @@ Zero-based page index (for page-related changes).
 
 > **type**: `"page_added"` \| `"page_removed"` \| `"page_modified"` \| `"form_field_changed"` \| `"annotation_changed"` \| `"metadata_changed"`
 
-Defined in: [src/signature/documentDiff.ts:26](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/signature/documentDiff.ts#L26)
+Defined in: [src/signature/documentDiff.ts:26](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/documentDiff.ts#L26)
 
 The category of change detected.

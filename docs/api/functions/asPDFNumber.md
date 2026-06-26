@@ -2,13 +2,13 @@
 
 ***
 
-[modern-pdf-lib](../index.md) / asPDFNumber
+[modern-pdf-lib](../index.md) / asPdfNumber
 
-# Function: asPDFNumber()
+# Function: asPdfNumber()
 
-> **asPDFNumber**(`value`): [`PdfNumber`](../classes/PdfNumber.md)
+> **asPdfNumber**(`value`): [`PdfNumber`](../classes/PdfNumber.md)
 
-Defined in: [src/utils/pdfValueHelpers.ts:25](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/utils/pdfValueHelpers.ts#L25)
+Defined in: [src/utils/pdfValueHelpers.ts:37](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/utils/pdfValueHelpers.ts#L37)
 
 Create a [PdfNumber](../classes/PdfNumber.md) from a numeric value.
 
@@ -23,3 +23,11 @@ The number.
 ## Returns
 
 [`PdfNumber`](../classes/PdfNumber.md)
+
+A new [PdfNumber](../classes/PdfNumber.md) instance.
+
+## Example
+
+```ts
+const num = asPdfNumber(42);
+```

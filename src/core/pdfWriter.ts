@@ -18,7 +18,7 @@
 
 import { deflateSync as fflateDeflateSync } from 'fflate';
 import { isAvailable as isWasmDeflateAvailable, deflateSync as wasmDeflateSync } from '../compression/libdeflateWasm.js';
-import type { PdfRef, PdfObject, PdfStream, ByteWriter } from './pdfObjects.js';
+import type { PdfRef, PdfStream, ByteWriter } from './pdfObjects.js';
 import { PdfObjectRegistry, PdfNumber, PdfName, PdfDict, PdfArray, PdfString } from './pdfObjects.js';
 import type { RegistryEntry } from './pdfObjects.js';
 import type { DocumentStructure } from './pdfCatalog.js';
@@ -136,7 +136,7 @@ export class PdfWriter {
     /** Document structure references. */
     private readonly structure: DocumentStructure,
     options?: PdfSaveOptions,
-    encryptionHandler?: PdfEncryptionHandler | undefined,
+    encryptionHandler?: PdfEncryptionHandler  ,
   ) {
     this.compress = options?.compress ?? true;
     this.compressionLevel = options?.compressionLevel ?? 6;
@@ -578,7 +578,7 @@ export class PdfWriter {
 
     // Find the maximum values to determine byte widths
     const allEntries = xrefEntries.values().toArray();
-    let maxField2 = allEntries.reduce((max, e) => Math.max(max, e.field2), 0);
+    const maxField2 = allEntries.reduce((max, e) => Math.max(max, e.field2), 0);
     let maxField3 = allEntries.reduce((max, e) => Math.max(max, e.field3), 0);
     // Also consider the offset of this xref stream itself for free entry linking
     // (the free entry at 0 has field2=0, field3=65535)
@@ -794,7 +794,7 @@ export async function serializePdf(
   registry: PdfObjectRegistry,
   structure: DocumentStructure,
   options?: PdfSaveOptions,
-  encryptionHandler?: PdfEncryptionHandler | undefined,
+  encryptionHandler?: PdfEncryptionHandler  ,
 ): Promise<Uint8Array> {
   return new PdfWriter(registry, structure, options, encryptionHandler).write();
 }

@@ -8,7 +8,7 @@
 
 > **loadWasmModuleStreaming**(`name`): `Promise`\<`Module`\>
 
-Defined in: [src/wasm/loader.ts:428](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/wasm/loader.ts#L428)
+Defined in: [src/wasm/loader.ts:439](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/wasm/loader.ts#L439)
 
 Load and compile a WASM module using streaming compilation when available.
 

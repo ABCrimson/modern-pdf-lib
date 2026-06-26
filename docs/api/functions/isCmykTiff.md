@@ -8,7 +8,7 @@
 
 > **isCmykTiff**(`ifdEntries`): `boolean`
 
-Defined in: [src/assets/image/tiffCmyk.ts:154](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/image/tiffCmyk.ts#L154)
+Defined in: [src/assets/image/tiffCmyk.ts:154](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/tiffCmyk.ts#L154)
 
 Detect whether a TIFF image uses CMYK color space by inspecting IFD entries.
 

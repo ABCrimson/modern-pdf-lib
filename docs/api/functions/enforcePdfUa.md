@@ -8,7 +8,7 @@
 
 > **enforcePdfUa**(`doc`): [`PdfUaEnforcementResult`](../interfaces/PdfUaEnforcementResult.md)
 
-Defined in: src/accessibility/pdfUaValidator.ts:250
+Defined in: [src/accessibility/pdfUaValidator.ts:274](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/accessibility/pdfUaValidator.ts#L274)
 
 Auto-fix PDF/UA issues that can be corrected programmatically.
 

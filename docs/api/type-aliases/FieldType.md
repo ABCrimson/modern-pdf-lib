@@ -8,6 +8,6 @@
 
 > **FieldType** = `"text"` \| `"checkbox"` \| `"radio"` \| `"dropdown"` \| `"listbox"` \| `"button"` \| `"signature"`
 
-Defined in: [src/form/pdfField.ts:41](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/form/pdfField.ts#L41)
+Defined in: [src/form/pdfField.ts:41](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/form/pdfField.ts#L41)
 
 Discriminated union tag for PDF form field types.

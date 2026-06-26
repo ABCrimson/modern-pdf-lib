@@ -82,10 +82,10 @@ export function cleanNumber(raw: string): number {
   if (lastComma > -1 && lastDot > -1) {
     if (lastComma > lastDot) {
       // Comma is decimal separator (European style): 1.234,56
-      s = s.replace(/\./g, '').replace(',', '.');
+      s = s.replaceAll('.', '').replace(',', '.');
     } else {
       // Dot is decimal separator (US style): 1,234.56
-      s = s.replace(/,/g, '');
+      s = s.replaceAll(',', '');
     }
   } else if (lastComma > -1) {
     // Only commas — could be thousands or decimal.
@@ -94,7 +94,7 @@ export function cleanNumber(raw: string): number {
     if (parts.length === 2 && (parts[1]!.length <= 2)) {
       s = s.replace(',', '.');
     } else {
-      s = s.replace(/,/g, '');
+      s = s.replaceAll(',', '');
     }
   }
   // else: only dots (or neither) — standard parseFloat

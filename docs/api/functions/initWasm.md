@@ -8,7 +8,7 @@
 
 > **initWasm**(`options?`): `Promise`\<`void`\>
 
-Defined in: [src/index.ts:202](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/index.ts#L202)
+Defined in: [src/index.ts:202](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/index.ts#L202)
 
 Initialize the optional WASM acceleration modules.
 
@@ -23,13 +23,13 @@ If not called, the library falls back to pure-JS implementations
 
 ### options?
 
+`string` \| `URL` \| [`InitWasmOptions`](../interfaces/InitWasmOptions.md)
+
 Configuration for which WASM modules to load,
                 and optionally pre-loaded WASM binary bytes.
                 When a string or URL is passed, it is treated as
                 a legacy `wasmUrl` parameter (ignored for backward
                 compatibility).
-
-`string` | `URL` | [`InitWasmOptions`](../interfaces/InitWasmOptions.md)
 
 ## Returns
 

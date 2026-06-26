@@ -414,7 +414,7 @@ describe('PdfObjectParser - indirect references', () => {
 
 describe('PdfObjectParser - indirect object definitions', () => {
   it('parses a simple indirect object (number)', () => {
-    const { parser, registry } = createParser('5 0 obj 42 endobj');
+    const { parser } = createParser('5 0 obj 42 endobj');
     const { ref, object } = parser.parseIndirectObject();
     expect(ref.objectNumber).toBe(5);
     expect(ref.generationNumber).toBe(0);
@@ -539,7 +539,7 @@ describe('PdfObjectParser - streams', () => {
   it('parses a stream with direct /Length', () => {
     // The stream data is 5 bytes: "Hello"
     const input = '1 0 obj\n<< /Length 5 >>\nstream\nHello\nendstream\nendobj';
-    const { parser, registry } = createParser(input);
+    const { parser } = createParser(input);
     const { ref, object } = parser.parseIndirectObject();
 
     expect(ref.objectNumber).toBe(1);
@@ -591,7 +591,7 @@ describe('PdfObjectParser - streams', () => {
     // When parseObject reads a number, then another number, then "obj",
     // it delegates to parseIndirectObjectBody which can handle streams.
     const input = '5 0 obj << /Length 3 >> stream\nABC\nendstream endobj';
-    const { parser, registry } = createParser(input);
+    const { parser } = createParser(input);
     const obj = parser.parseObject();
 
     // The indirect object body returns the parsed object itself

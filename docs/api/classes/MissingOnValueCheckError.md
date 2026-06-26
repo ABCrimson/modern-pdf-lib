@@ -6,7 +6,7 @@
 
 # Class: MissingOnValueCheckError
 
-Defined in: [src/errors.ts:117](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/errors.ts#L117)
+Defined in: [src/errors.ts:117](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/errors.ts#L117)
 
 Thrown when a checkbox or radio button is checked but no "on" value
 can be determined from its appearance dictionary.
@@ -21,7 +21,7 @@ can be determined from its appearance dictionary.
 
 > **new MissingOnValueCheckError**(`fieldName`, `options?`): `MissingOnValueCheckError`
 
-Defined in: [src/errors.ts:119](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/errors.ts#L119)
+Defined in: [src/errors.ts:119](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/errors.ts#L119)
 
 #### Parameters
 
@@ -45,9 +45,9 @@ Defined in: [src/errors.ts:119](https://github.com/ABCrimson/modern-pdf-lib/blob
 
 ### cause?
 
-> `optional` **cause**: `unknown`
+> `optional` **cause?**: `unknown`
 
-Defined in: node\_modules/typescript/lib/lib.es2022.error.d.ts:24
+Defined in: tools/docs/node\_modules/typescript/lib/lib.es2022.error.d.ts:24
 
 #### Inherited from
 
@@ -59,7 +59,7 @@ Defined in: node\_modules/typescript/lib/lib.es2022.error.d.ts:24
 
 > **message**: `string`
 
-Defined in: node\_modules/typescript/lib/lib.es5.d.ts:1075
+Defined in: tools/docs/node\_modules/typescript/lib/lib.es5.d.ts:1075
 
 #### Inherited from
 
@@ -71,7 +71,7 @@ Defined in: node\_modules/typescript/lib/lib.es5.d.ts:1075
 
 > `readonly` **name**: `"MissingOnValueCheckError"` = `'MissingOnValueCheckError'`
 
-Defined in: [src/errors.ts:118](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/errors.ts#L118)
+Defined in: [src/errors.ts:118](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/errors.ts#L118)
 
 #### Overrides
 
@@ -81,9 +81,9 @@ Defined in: [src/errors.ts:118](https://github.com/ABCrimson/modern-pdf-lib/blob
 
 ### stack?
 
-> `optional` **stack**: `string`
+> `optional` **stack?**: `string`
 
-Defined in: node\_modules/typescript/lib/lib.es5.d.ts:1076
+Defined in: tools/docs/node\_modules/typescript/lib/lib.es5.d.ts:1076
 
 #### Inherited from
 
@@ -95,7 +95,7 @@ Defined in: node\_modules/typescript/lib/lib.es5.d.ts:1076
 
 > `static` **isError**(`error`): `error is Error`
 
-Defined in: node\_modules/typescript/lib/lib.esnext.error.d.ts:21
+Defined in: tools/docs/node\_modules/typescript/lib/lib.esnext.error.d.ts:21
 
 Indicates whether the argument provided is a built-in Error instance or not.
 

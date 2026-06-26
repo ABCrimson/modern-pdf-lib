@@ -8,7 +8,7 @@
 
 > **hasInlineWasmData**(`name`): `boolean`
 
-Defined in: src/wasm/inlineWasm.ts:154
+Defined in: [src/wasm/inlineWasm.ts:164](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/wasm/inlineWasm.ts#L164)
 
 Check whether inline WASM data is available for a given module.
 

@@ -4,7 +4,7 @@
  * Covers page management, font embedding, metadata, and save output.
  */
 
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
@@ -13,7 +13,6 @@ import {
   PdfDocument,
   StandardFonts,
   PageSizes,
-  rgb,
   base64Encode,
   base64Decode,
 } from '../../../src/index.js';

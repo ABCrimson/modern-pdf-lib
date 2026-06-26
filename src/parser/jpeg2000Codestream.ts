@@ -86,11 +86,6 @@ const JP2_SIGNATURE = new Uint8Array([
   0x0D, 0x0A, 0x87, 0x0A, // JP2 magic number
 ]);
 
-/**
- * JPEG2000 codestream SOC (Start Of Codestream) marker: `FF 4F`.
- */
-const SOC_MARKER = 0xFF4F;
-
 // ---------------------------------------------------------------------------
 // Detection functions
 // ---------------------------------------------------------------------------

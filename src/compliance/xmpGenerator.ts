@@ -58,14 +58,16 @@ export interface PdfAXmpOptions {
 // XML escaping
 // ---------------------------------------------------------------------------
 
+const encoder = new TextEncoder();
+
 /** Escape XML special characters in a string. */
 function escapeXml(str: string): string {
   return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&apos;');
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&apos;');
 }
 
 // ---------------------------------------------------------------------------
@@ -163,5 +165,5 @@ export function generatePdfAXmp(options: PdfAXmpOptions): string {
  * @returns XMP metadata as a `Uint8Array`.
  */
 export function generatePdfAXmpBytes(options: PdfAXmpOptions): Uint8Array {
-  return new TextEncoder().encode(generatePdfAXmp(options));
+  return encoder.encode(generatePdfAXmp(options));
 }

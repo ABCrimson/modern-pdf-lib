@@ -7,8 +7,8 @@ import {
   encodeQrCode,
   qrCodeToOperators,
 } from '../../src/barcode/qr.js';
-import type { QrCodeMatrix, QrCodeOptions } from '../../src/barcode/qr.js';
-import { rgb, grayscale } from '../../src/core/operators/color.js';
+
+import { rgb } from '../../src/core/operators/color.js';
 import { createPdf } from '../../src/core/pdfDocument.js';
 
 describe('QR Code Encoder', () => {
@@ -158,7 +158,6 @@ describe('QR Code Encoder', () => {
     // Byte mode overhead: 4 (mode) + 8 (count) = 12 bits.
     // 19*8 - 12 = 140 bits = 17 bytes of data + 4 bits remaining (not enough for another byte)
     // So max 17 ASCII chars in byte mode for V1-L
-    const data = 'ABCDEFGHIJKLMNOPQ'; // 17 chars, all lowercase would be byte mode; uppercase is alphanumeric
     const matrixByteMode = encodeQrCode('abcdefghijklmnopq', 'L'); // lowercase forces byte mode
     expect(matrixByteMode.version).toBe(1);
   });

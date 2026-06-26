@@ -8,7 +8,7 @@
 
 > **configureWasmLoader**(`config`): `void`
 
-Defined in: [src/wasm/loader.ts:181](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/wasm/loader.ts#L181)
+Defined in: [src/wasm/loader.ts:182](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/wasm/loader.ts#L182)
 
 Set the global WASM loader configuration.
 

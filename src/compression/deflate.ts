@@ -25,9 +25,6 @@
  * @packageDocumentation
  */
 
-import type { LibdeflateWasm } from './libdeflateWasm.js';
-import type { FflateEngine } from './fflateAdapter.js';
-
 // ---------------------------------------------------------------------------
 // Public interfaces
 // ---------------------------------------------------------------------------

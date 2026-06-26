@@ -43,7 +43,6 @@ export enum MdpPermission {
 // Internal helpers
 // ---------------------------------------------------------------------------
 
-const encoder = new TextEncoder();
 const decoder = new TextDecoder('latin1');
 
 // ---------------------------------------------------------------------------

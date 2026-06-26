@@ -18,13 +18,12 @@
 import {
   PdfDict,
   PdfName,
-  PdfNumber,
   PdfString,
   PdfArray,
   PdfStream,
 } from '../core/pdfObjects.js';
 import type { PdfField } from './pdfField.js';
-import { FieldFlags, numVal, strVal } from './pdfField.js';
+import { FieldFlags, numVal } from './pdfField.js';
 import type { PdfForm } from './pdfForm.js';
 
 // ---------------------------------------------------------------------------
@@ -675,15 +674,8 @@ function generateRichTextAppearance(
 
       if (cursorY < padding) break;
 
-      // Calculate total text width for alignment
-      const totalWidth = computeSpansTotalWidth(para.spans, effectiveDefault);
+      // Calculate available width for alignment
       const availableWidth = width - 2 * padding;
-      let startX = padding;
-      if (para.alignment === 1) {
-        startX = padding + Math.max(0, (availableWidth - totalWidth) / 2);
-      } else if (para.alignment === 2) {
-        startX = padding + Math.max(0, availableWidth - totalWidth);
-      }
 
       // Handle newlines within spans (from <br/>)
       const lines = splitSpansIntoLines(para.spans);

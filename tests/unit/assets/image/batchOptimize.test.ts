@@ -16,7 +16,6 @@ import {
   createPdf,
   loadPdf,
   optimizeAllImages,
-  extractImages,
   PageSizes,
 } from '../../../../src/index.js';
 

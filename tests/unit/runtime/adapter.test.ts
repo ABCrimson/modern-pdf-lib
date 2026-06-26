@@ -5,7 +5,7 @@
  * the inline fallback adapter, and the `RuntimeAdapter` interface contract.
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, afterEach } from 'vitest';
 import {
   getRuntime,
   setRuntime,

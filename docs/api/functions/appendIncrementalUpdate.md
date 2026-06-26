@@ -6,9 +6,9 @@
 
 # Function: appendIncrementalUpdate()
 
-> **appendIncrementalUpdate**(`originalPdf`, `newObjects`, `options?`): `Uint8Array`
+> **appendIncrementalUpdate**(`originalPdf`, `newObjects`, `_options?`): `Uint8Array`
 
-Defined in: [src/signature/incrementalSave.ts:452](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/signature/incrementalSave.ts#L452)
+Defined in: [src/signature/incrementalSave.ts:429](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/incrementalSave.ts#L429)
 
 Append a pure incremental update to a PDF.
 
@@ -30,11 +30,9 @@ The original PDF bytes.
 
 Objects to append (new or modified).
 
-### options?
+### \_options?
 
 [`AppendOptions`](../interfaces/AppendOptions.md)
-
-Options for the append operation.
 
 ## Returns
 

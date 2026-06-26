@@ -13,13 +13,11 @@ import {
   extractTextWithPositions,
   parseToUnicodeCMap,
 } from '../../../src/parser/textExtractor.js';
-import type { TextItem } from '../../../src/parser/textExtractor.js';
 import { parseContentStream } from '../../../src/parser/contentStreamParser.js';
 import type { ContentStreamOperator } from '../../../src/parser/contentStreamParser.js';
 import {
   PdfDict,
   PdfName,
-  PdfNumber,
   PdfStream,
 } from '../../../src/core/pdfObjects.js';
 
@@ -159,7 +157,7 @@ describe('extractText() — TJ array', () => {
     const text = extractText(operators);
     // Only kerning adjustments, no strings
     // A large negative might trigger space insertion in decodeTJArray
-    expect(text).toBeTruthy; // Should not crash
+    expect(text).toBeTruthy(); // Should not crash
   });
 });
 

@@ -217,28 +217,24 @@ async function main(): Promise<void> {
   // Console report
   // -----------------------------------------------------------------------
 
-  console.log('generate-inline-wasm: code generation complete.');
-  console.log(`  Output: ${OUTPUT_FILE}`);
-  console.log(`  Modules embedded: ${entries.length}`);
-  console.log('');
-  console.log('  Size report:');
-  console.log(`    ${'Module'.padEnd(12)} ${'Binary'.padStart(10)} ${'Base64'.padStart(10)} ${'Overhead'.padStart(10)}`);
-  console.log(`    ${''.padEnd(12, '-')} ${''.padEnd(10, '-')} ${''.padEnd(10, '-')} ${''.padEnd(10, '-')}`);
+  
+  
+  
+  
+  
+  
+  
 
   for (const m of sizeReport.modules) {
-    console.log(
-      `    ${m.name.padEnd(12)} ${formatBytes(m.binarySize).padStart(10)} ${formatBytes(m.base64Size).padStart(10)} ${(`+${m.overheadPercent.toFixed(1)}%`).padStart(10)}`
-    );
+    
   }
 
-  console.log(`    ${''.padEnd(12, '-')} ${''.padEnd(10, '-')} ${''.padEnd(10, '-')} ${''.padEnd(10, '-')}`);
-  console.log(
-    `    ${'TOTAL'.padEnd(12)} ${formatBytes(sizeReport.totalBinarySize).padStart(10)} ${formatBytes(sizeReport.totalBase64Size).padStart(10)} ${(`+${sizeReport.totalOverheadPercent.toFixed(1)}%`).padStart(10)}`
-  );
-  console.log('');
+  
+  
+  
 
   if (skipped.length > 0) {
-    console.log(`  Skipped (not compiled): ${skipped.join(', ')}`);
+    
   }
 }
 
@@ -276,6 +272,6 @@ function buildSizeReport(
 }
 
 main().catch((err: unknown) => {
-  console.error('generate-inline-wasm: fatal error:', err);
+  
   process.exitCode = 1;
 });

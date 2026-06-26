@@ -6,7 +6,7 @@
 
 # Interface: DocumentDiff
 
-Defined in: [src/signature/documentDiff.ts:44](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/signature/documentDiff.ts#L44)
+Defined in: [src/signature/documentDiff.ts:44](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/documentDiff.ts#L44)
 
 Result of comparing signed content against the current PDF.
 
@@ -16,7 +16,7 @@ Result of comparing signed content against the current PDF.
 
 > **changes**: [`DiffEntry`](DiffEntry.md)[]
 
-Defined in: [src/signature/documentDiff.ts:50](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/signature/documentDiff.ts#L50)
+Defined in: [src/signature/documentDiff.ts:50](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/documentDiff.ts#L50)
 
 All detected changes between the signed and current version.
 
@@ -26,7 +26,7 @@ All detected changes between the signed and current version.
 
 > **hasChanges**: `boolean`
 
-Defined in: [src/signature/documentDiff.ts:52](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/signature/documentDiff.ts#L52)
+Defined in: [src/signature/documentDiff.ts:52](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/documentDiff.ts#L52)
 
 Whether any changes were detected at all.
 
@@ -36,7 +36,7 @@ Whether any changes were detected at all.
 
 > **signatureIndex**: `number`
 
-Defined in: [src/signature/documentDiff.ts:46](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/signature/documentDiff.ts#L46)
+Defined in: [src/signature/documentDiff.ts:46](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/documentDiff.ts#L46)
 
 Which signature was used as the baseline (zero-based).
 
@@ -44,8 +44,8 @@ Which signature was used as the baseline (zero-based).
 
 ### signedAt?
 
-> `optional` **signedAt**: `Date`
+> `optional` **signedAt?**: `Date`
 
-Defined in: [src/signature/documentDiff.ts:48](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/signature/documentDiff.ts#L48)
+Defined in: [src/signature/documentDiff.ts:48](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/documentDiff.ts#L48)
 
 The signing date from the signature dictionary, if available.

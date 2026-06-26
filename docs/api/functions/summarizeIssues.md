@@ -8,7 +8,7 @@
 
 > **summarizeIssues**(`issues`): `object`
 
-Defined in: [src/accessibility/accessibilityChecker.ts:298](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/accessibility/accessibilityChecker.ts#L298)
+Defined in: [src/accessibility/accessibilityChecker.ts:298](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/accessibility/accessibilityChecker.ts#L298)
 
 Generate a summary of accessibility issues by severity.
 

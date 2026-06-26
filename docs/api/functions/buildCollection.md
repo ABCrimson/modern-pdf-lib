@@ -1,0 +1,30 @@
+[**modern-pdf-lib**](../index.md)
+
+***
+
+[modern-pdf-lib](../index.md) / buildCollection
+
+# Function: buildCollection()
+
+> **buildCollection**(`options?`): [`PdfDict`](../classes/PdfDict.md)
+
+Defined in: src/core/collections.ts:114
+
+Build a `/Collection` dictionary (ISO 32000-2 §7.11.6) suitable for
+placing in the document catalog under `/Collection`.
+
+## Parameters
+
+### options?
+
+[`CollectionOptions`](../interfaces/CollectionOptions.md) = `{}`
+
+Collection configuration; all fields are optional.  An
+  empty/omitted options object yields a minimal collection with
+  `/Type /Collection` and `/View /D`.
+
+## Returns
+
+[`PdfDict`](../classes/PdfDict.md)
+
+The populated collection dictionary.

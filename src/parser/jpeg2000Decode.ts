@@ -225,10 +225,7 @@ const JP2_SIGNATURE = new Uint8Array([
 ]);
 
 /** JP2 box type constants. */
-const BOX_JP = 0x6a502020; // 'jP  ' — signature
-const BOX_FTYP = 0x66747970; // 'ftyp' — file type
 const BOX_JP2H = 0x6a703268; // 'jp2h' — JP2 header
-const BOX_IHDR = 0x69686472; // 'ihdr' — image header
 const BOX_COLR = 0x636f6c72; // 'colr' — color specification
 const BOX_CDEF = 0x63646566; // 'cdef' — channel definition
 const BOX_JP2C = 0x6a703263; // 'jp2c' — contiguous codestream
@@ -450,11 +447,6 @@ const MRK_QCD = 0xff5c; // Quantization default
 const MRK_SOT = 0xff90; // Start of tile-part
 const MRK_SOD = 0xff93; // Start of data
 const MRK_EOC = 0xffd9; // End of codestream
-const MRK_COC = 0xff53; // Coding style component
-const MRK_QCC = 0xff5d; // Quantization component
-const MRK_RGN = 0xff5e; // Region of interest
-const MRK_POC = 0xff5f; // Progression order change
-const MRK_COM = 0xff64; // Comment
 
 // ---------------------------------------------------------------------------
 // Codestream structures
@@ -1121,12 +1113,6 @@ function buildSubbands(
 
   // Build from highest resolution to lowest
   for (let level = numDecompLevels; level >= 1; level--) {
-    const hlW = Math.ceil(w / 2);
-    const hlH = Math.floor(h / 2) + (h % 2);
-    const lhW = Math.floor(w / 2) + (w % 2);
-    const lhH = Math.ceil(h / 2);
-    const hhW = Math.ceil(w / 2);
-    const hhH = Math.ceil(h / 2);
     const llW = Math.floor(w / 2) + (w % 2);
     const llH = Math.floor(h / 2) + (h % 2);
 
@@ -1300,9 +1286,9 @@ class BitstreamReader {
 function decodePackets(
   reader: BitstreamReader,
   subbands: SubbandInfo[],
-  cod: CODMarker,
-  numComponents: number,
-  componentIndex: number,
+  _cod: CODMarker,
+  _numComponents: number,
+  _componentIndex: number,
 ): void {
   // For the simplified decoder, we treat the entire tile data as
   // a single contribution and distribute coded data to code-blocks
@@ -1562,7 +1548,6 @@ class MQDecoder {
       }
     } else {
       // LPS sub-interval
-      const cLow = this.c >>> 16;
       this.c -= this.a << 16;
       if (this.a < qe) {
         d = cx.mps;
@@ -1951,7 +1936,6 @@ function dequantize(
         stepSize = base;
       } else {
         // Derive step size for this subband
-        const levelOffset = sb.resLevel * 3;
         const idx = Math.min(
           subbandIndex,
           qcd.stepSizes.length - 1,

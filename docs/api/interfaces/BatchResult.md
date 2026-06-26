@@ -6,7 +6,7 @@
 
 # Interface: BatchResult
 
-Defined in: src/batch/batchProcessor.ts:42
+Defined in: [src/batch/batchProcessor.ts:59](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/batch/batchProcessor.ts#L59)
 
 Result of a batch operation.
 
@@ -16,7 +16,7 @@ Result of a batch operation.
 
 > **errors**: `Map`\<`number`, `Error`\>
 
-Defined in: src/batch/batchProcessor.ts:48
+Defined in: [src/batch/batchProcessor.ts:65](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/batch/batchProcessor.ts#L65)
 
 Indices of files that failed, mapped to their error.
 
@@ -26,7 +26,7 @@ Indices of files that failed, mapped to their error.
 
 > **outputs**: `Uint8Array`\<`ArrayBufferLike`\>[]
 
-Defined in: src/batch/batchProcessor.ts:44
+Defined in: [src/batch/batchProcessor.ts:61](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/batch/batchProcessor.ts#L61)
 
 Output PDF bytes for each input file (same order).
 
@@ -36,6 +36,6 @@ Output PDF bytes for each input file (same order).
 
 > **successCount**: `number`
 
-Defined in: src/batch/batchProcessor.ts:46
+Defined in: [src/batch/batchProcessor.ts:63](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/batch/batchProcessor.ts#L63)
 
 Number of files that were processed successfully.

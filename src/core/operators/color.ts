@@ -531,7 +531,7 @@ export function colorToComponents(color: Color): number[] {
  * @deprecated Use {@link applyFillColor} instead. This alias exists only
  *             for pdf-lib API compatibility and will be removed in v2.0.
  */
-export const setFillingColor = applyFillColor;
+export const setFillingColor: typeof applyFillColor = applyFillColor;
 
 /**
  * Emit the appropriate stroke-colour operator for a {@link Color} value.
@@ -539,4 +539,4 @@ export const setFillingColor = applyFillColor;
  * @deprecated Use {@link applyStrokeColor} instead. This alias exists only
  *             for pdf-lib API compatibility and will be removed in v2.0.
  */
-export const setStrokingColor = applyStrokeColor;
+export const setStrokingColor: typeof applyStrokeColor = applyStrokeColor;

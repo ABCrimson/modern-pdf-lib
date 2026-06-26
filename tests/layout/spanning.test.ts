@@ -10,7 +10,6 @@ import { renderTable } from '../../src/layout/table.js';
 import type {
   DrawTableOptions,
   TableCell,
-  TableRow,
 } from '../../src/layout/table.js';
 
 // ---------------------------------------------------------------------------

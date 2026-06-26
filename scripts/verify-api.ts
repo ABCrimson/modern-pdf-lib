@@ -45,20 +45,20 @@ let failed = 0;
 function assert(condition: boolean, label: string): void {
   if (condition) {
     passed++;
-    console.log(`  ✓ ${label}`);
+    
   } else {
     failed++;
-    console.error(`  ✗ ${label}`);
+    
   }
 }
 
 async function main(): Promise<void> {
-  console.log('\n=== modern-pdf Comprehensive API Verification ===\n');
+  
 
   // -----------------------------------------------------------------------
   // 1. Exports check
   // -----------------------------------------------------------------------
-  console.log('1. Export availability');
+  
   assert(typeof createPdf === 'function', 'createPdf is a function');
   assert(typeof PdfDocument !== 'undefined', 'PdfDocument is exported');
   assert(typeof StandardFonts === 'object', 'StandardFonts is exported');
@@ -94,14 +94,14 @@ async function main(): Promise<void> {
   // -----------------------------------------------------------------------
   // 2. createPdf and basic document
   // -----------------------------------------------------------------------
-  console.log('\n2. Document creation');
+  
   const doc = createPdf();
   assert(doc instanceof PdfDocument, 'createPdf() returns PdfDocument');
 
   // -----------------------------------------------------------------------
   // 3. Page sizes — tuple and object forms
   // -----------------------------------------------------------------------
-  console.log('\n3. Page sizes');
+  
   const pageTuple = doc.addPage(PageSizes.A4);
   assert(pageTuple instanceof PdfPage, 'addPage(PageSizes.A4) works (tuple)');
   assert(pageTuple.width === 595.28, 'A4 width = 595.28');
@@ -122,7 +122,7 @@ async function main(): Promise<void> {
   // -----------------------------------------------------------------------
   // 4. All predefined page sizes
   // -----------------------------------------------------------------------
-  console.log('\n4. Predefined page sizes');
+  
   const sizeNames = Object.keys(PageSizes) as (keyof typeof PageSizes)[];
   for (const name of sizeNames) {
     const [w, h] = PageSizes[name];
@@ -133,7 +133,7 @@ async function main(): Promise<void> {
   // -----------------------------------------------------------------------
   // 5. Standard fonts
   // -----------------------------------------------------------------------
-  console.log('\n5. Standard fonts');
+  
   const doc2 = createPdf();
   const page2 = doc2.addPage(PageSizes.A4);
   const standardFontNames = [
@@ -150,7 +150,7 @@ async function main(): Promise<void> {
   // -----------------------------------------------------------------------
   // 6. Font measurement
   // -----------------------------------------------------------------------
-  console.log('\n6. Font measurement');
+  
   const helvetica = await doc2.embedFont('Helvetica');
   const textWidth = helvetica.widthOfTextAtSize('Hello', 12);
   assert(typeof textWidth === 'number' && textWidth > 0, `widthOfTextAtSize('Hello', 12) = ${textWidth.toFixed(2)}`);
@@ -160,7 +160,7 @@ async function main(): Promise<void> {
   // -----------------------------------------------------------------------
   // 7. drawText
   // -----------------------------------------------------------------------
-  console.log('\n7. drawText');
+  
   page2.drawText('Basic text', { x: 50, y: 750 });
   assert(true, 'drawText with x, y');
 
@@ -196,7 +196,7 @@ async function main(): Promise<void> {
   // -----------------------------------------------------------------------
   // 8. drawRectangle
   // -----------------------------------------------------------------------
-  console.log('\n8. drawRectangle');
+  
   page2.drawRectangle({ x: 300, y: 700, width: 100, height: 50 });
   assert(true, 'drawRectangle basic');
 
@@ -219,7 +219,7 @@ async function main(): Promise<void> {
   // -----------------------------------------------------------------------
   // 9. drawLine
   // -----------------------------------------------------------------------
-  console.log('\n9. drawLine');
+  
   page2.drawLine({
     start: { x: 50, y: 450 },
     end: { x: 250, y: 450 },
@@ -243,7 +243,7 @@ async function main(): Promise<void> {
   // -----------------------------------------------------------------------
   // 10. drawCircle
   // -----------------------------------------------------------------------
-  console.log('\n10. drawCircle');
+  
   page2.drawCircle({ x: 350, y: 450, radius: 30 });
   assert(true, 'drawCircle basic');
 
@@ -257,7 +257,7 @@ async function main(): Promise<void> {
   // -----------------------------------------------------------------------
   // 11. drawEllipse
   // -----------------------------------------------------------------------
-  console.log('\n11. drawEllipse');
+  
   page2.drawEllipse({ x: 350, y: 350, xScale: 60, yScale: 30 });
   assert(true, 'drawEllipse basic');
 
@@ -271,7 +271,7 @@ async function main(): Promise<void> {
   // -----------------------------------------------------------------------
   // 12. Colour helpers
   // -----------------------------------------------------------------------
-  console.log('\n12. Colour helpers');
+  
   const r = rgb(0.1, 0.2, 0.3);
   assert(r.type === 'rgb' && r.r === 0.1, 'rgb() creates RgbColor');
 
@@ -284,7 +284,7 @@ async function main(): Promise<void> {
   // -----------------------------------------------------------------------
   // 13. Angle helpers
   // -----------------------------------------------------------------------
-  console.log('\n13. Angle helpers');
+  
   const d = degrees(90);
   assert(d.type === 'degrees' && d.value === 90, 'degrees(90) correct');
 
@@ -294,7 +294,7 @@ async function main(): Promise<void> {
   // -----------------------------------------------------------------------
   // 14. Metadata
   // -----------------------------------------------------------------------
-  console.log('\n14. Metadata');
+  
   const doc3 = createPdf();
   doc3.setTitle('Test Title');
   doc3.setAuthor('Test Author');
@@ -308,7 +308,7 @@ async function main(): Promise<void> {
   // -----------------------------------------------------------------------
   // 15. Image embedding (PNG)
   // -----------------------------------------------------------------------
-  console.log('\n15. PNG embedding');
+  
   const doc4 = createPdf();
   const page4 = doc4.addPage(PageSizes.A4);
 
@@ -328,7 +328,7 @@ async function main(): Promise<void> {
   // -----------------------------------------------------------------------
   // 16. Image embedding (JPEG)
   // -----------------------------------------------------------------------
-  console.log('\n16. JPEG embedding');
+  
   const jpegBytes = createMinimalJpeg();
   const jpegImage = await doc4.embedJpeg(jpegBytes);
   assert(jpegImage !== undefined, 'embedJpeg returns ImageRef');
@@ -341,7 +341,7 @@ async function main(): Promise<void> {
   // -----------------------------------------------------------------------
   // 17. Save methods
   // -----------------------------------------------------------------------
-  console.log('\n17. Save methods');
+  
   const bytes1 = await doc2.save();
   assert(bytes1 instanceof Uint8Array && bytes1.length > 0, 'save() returns Uint8Array');
 
@@ -364,7 +364,7 @@ async function main(): Promise<void> {
   // -----------------------------------------------------------------------
   // 18. Save as stream
   // -----------------------------------------------------------------------
-  console.log('\n18. saveAsStream');
+  
   const stream = doc3.saveAsStream();
   assert(stream instanceof ReadableStream, 'saveAsStream() returns ReadableStream');
 
@@ -380,7 +380,7 @@ async function main(): Promise<void> {
   // -----------------------------------------------------------------------
   // 19. Save as Blob
   // -----------------------------------------------------------------------
-  console.log('\n19. saveAsBlob');
+  
   const blob = await doc3.saveAsBlob();
   assert(blob instanceof Blob, 'saveAsBlob() returns Blob');
   assert(blob.size > 0, 'Blob has data');
@@ -389,7 +389,7 @@ async function main(): Promise<void> {
   // -----------------------------------------------------------------------
   // 20. Object streams
   // -----------------------------------------------------------------------
-  console.log('\n20. Object streams');
+  
   const doc5 = createPdf();
   for (let i = 0; i < 5; i++) {
     const p = doc5.addPage(PageSizes.A4);
@@ -404,7 +404,7 @@ async function main(): Promise<void> {
   // -----------------------------------------------------------------------
   // 21. PDF object model
   // -----------------------------------------------------------------------
-  console.log('\n21. PDF object model');
+  
 
   // Helper to serialize a PDF object to a string
   function ser(obj: { serialize(w: { writeString(s: string): void; writeBytes(b: Uint8Array): void }): void }): string {
@@ -437,7 +437,7 @@ async function main(): Promise<void> {
   // -----------------------------------------------------------------------
   // 22. Registry
   // -----------------------------------------------------------------------
-  console.log('\n22. PdfObjectRegistry');
+  
   const reg = new PdfObjectRegistry();
   const ref1 = reg.allocate();
   assert(ref1 instanceof PdfRef, 'allocate() returns PdfRef');
@@ -448,7 +448,7 @@ async function main(): Promise<void> {
   // -----------------------------------------------------------------------
   // 23. Document structure builders
   // -----------------------------------------------------------------------
-  console.log('\n23. Document structure builders');
+  
   // buildDocumentStructure/buildPageTree are internal APIs tightly coupled
   // to the registry lifecycle; test them via the high-level API instead.
   const registry2 = new PdfObjectRegistry();
@@ -461,7 +461,7 @@ async function main(): Promise<void> {
   // -----------------------------------------------------------------------
   // 24. initWasm (no-op without binaries)
   // -----------------------------------------------------------------------
-  console.log('\n24. initWasm');
+  
   await initWasm(); // no-op
   assert(true, 'initWasm() with no args is a no-op');
 
@@ -471,7 +471,7 @@ async function main(): Promise<void> {
   // -----------------------------------------------------------------------
   // 25. Multiple pages with mixed content
   // -----------------------------------------------------------------------
-  console.log('\n25. Complex multi-page document');
+  
   const docComplex = createPdf();
   docComplex.setTitle('Complex Test Document');
   docComplex.setAuthor('Verification Script');
@@ -513,9 +513,9 @@ async function main(): Promise<void> {
   // -----------------------------------------------------------------------
   // Summary
   // -----------------------------------------------------------------------
-  console.log(`\n${'='.repeat(50)}`);
-  console.log(`Results: ${passed} passed, ${failed} failed, ${passed + failed} total`);
-  console.log(`${'='.repeat(50)}\n`);
+  
+  
+  
 
   if (failed > 0) {
     process.exit(1);
@@ -656,6 +656,6 @@ function createMinimalJpeg(): Uint8Array {
 }
 
 main().catch((err) => {
-  console.error('FATAL:', err);
+  
   process.exit(1);
 });

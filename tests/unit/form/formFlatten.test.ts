@@ -11,14 +11,14 @@ import {
   PdfArray,
   PdfStream,
 } from '../../../src/core/pdfObjects.js';
-import { PdfForm } from '../../../src/form/pdfForm.js';
-import { PdfTextField } from '../../../src/form/fields/textField.js';
-import { PdfCheckboxField } from '../../../src/form/fields/checkboxField.js';
-import { PdfRadioGroup } from '../../../src/form/fields/radioGroup.js';
-import { PdfDropdownField } from '../../../src/form/fields/dropdownField.js';
-import { PdfListboxField } from '../../../src/form/fields/listboxField.js';
-import { PdfButtonField } from '../../../src/form/fields/buttonField.js';
-import { PdfSignatureField } from '../../../src/form/fields/signatureField.js';
+import { PdfForm, type RefResolver } from '../../../src/form/pdfForm.js';
+
+
+
+
+
+
+
 import { FieldFlags } from '../../../src/form/pdfField.js';
 import {
   flattenForm,
@@ -26,7 +26,7 @@ import {
   flattenFields,
   _resetFlattenCounter,
 } from '../../../src/form/formFlatten.js';
-import type { FlattenFormResult } from '../../../src/form/formFlatten.js';
+
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -150,7 +150,7 @@ function buildForm(fieldDicts: PdfDict[]): PdfForm {
   const fieldsArr = PdfArray.of(fieldDicts);
   acroFormDict.set('/Fields', fieldsArr);
 
-  const resolver = (_ref: any) => fieldDicts[0]!;
+  const resolver: RefResolver = (_ref) => fieldDicts[0]!;
   return PdfForm.fromDict(acroFormDict, resolver);
 }
 

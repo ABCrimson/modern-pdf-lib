@@ -22,14 +22,10 @@
  */
 
 import { deflateSync as fflateDeflateSync } from 'fflate';
-import type { PdfObject, PdfRef, ByteWriter, RegistryEntry } from './pdfObjects.js';
 import {
   PdfObjectRegistry,
-  PdfDict,
   PdfName,
-  PdfNumber,
   PdfStream,
-  PdfArray,
 } from './pdfObjects.js';
 import type { DocumentStructure } from './pdfCatalog.js';
 import type { PdfSaveOptions } from './pdfWriter.js';
@@ -473,7 +469,6 @@ export async function saveDocumentIncremental(
 ): Promise<IncrementalSaveResult> {
   // Import buildDocumentStructure to get the structure
   const { buildDocumentStructure } = await import('./pdfCatalog.js');
-  const { PdfPage: _PdfPage } = await import('./pdfPage.js');
 
   const registry = doc.getRegistry();
   const pages = doc.getInternalPages();

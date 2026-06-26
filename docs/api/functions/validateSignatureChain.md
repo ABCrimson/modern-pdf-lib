@@ -8,7 +8,7 @@
 
 > **validateSignatureChain**(`pdf`): `Promise`\<[`SignatureChainResult`](../interfaces/SignatureChainResult.md)\>
 
-Defined in: [src/signature/multiSignatureValidator.ts:209](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/signature/multiSignatureValidator.ts#L209)
+Defined in: [src/signature/multiSignatureValidator.ts:167](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/multiSignatureValidator.ts#L167)
 
 Validate the entire signature chain in a PDF.
 

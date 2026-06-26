@@ -10,7 +10,6 @@
 import {
   PdfDict,
   PdfName,
-  PdfString,
   PdfBool,
 } from '../../core/pdfObjects.js';
 import type { PdfObject, PdfRef } from '../../core/pdfObjects.js';
@@ -71,7 +70,7 @@ export class PdfTextAnnotation extends PdfAnnotation {
    */
   static fromDict(
     dict: PdfDict,
-    resolver?: (ref: PdfRef) => PdfObject | undefined,
+    _resolver?: (ref: PdfRef) => PdfObject | undefined,
   ): PdfTextAnnotation {
     return new PdfTextAnnotation(dict);
   }

@@ -13,12 +13,6 @@
 import type { PageSize } from './pdfPage.js';
 import { PdfPage, PageSizes } from './pdfPage.js';
 import type { PdfDocument } from './pdfDocument.js';
-import {
-  PdfArray,
-  PdfName,
-  PdfNumber,
-} from './pdfObjects.js';
-import type { PdfObjectRegistry } from './pdfObjects.js';
 
 // ---------------------------------------------------------------------------
 // Size resolution helper

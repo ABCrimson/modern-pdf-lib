@@ -48,17 +48,6 @@ function packBitString(bits: string): Uint8Array {
   return result;
 }
 
-/**
- * Extract a specific bit from a byte array.
- * Returns 0 or 1. MSB first within each byte.
- */
-function getBit(data: Uint8Array, bitIndex: number): number {
-  const byteIdx = Math.floor(bitIndex / 8);
-  const bitIdx = 7 - (bitIndex % 8);
-  if (byteIdx >= data.length) return 0;
-  return (data[byteIdx]! >>> bitIdx) & 1;
-}
-
 // ---------------------------------------------------------------------------
 // CCITT code references for building test vectors
 // ---------------------------------------------------------------------------
@@ -146,15 +135,8 @@ const BLACK_MAKEUP_CODES: Record<number, string> = {
 };
 
 // 2D mode codes
-const MODE_PASS = '0001';
 const MODE_HORIZONTAL = '001';
 const MODE_V0 = '1';
-const MODE_VR1 = '011';
-const MODE_VL1 = '010';
-const MODE_VR2 = '000011';
-const MODE_VL2 = '000010';
-const MODE_VR3 = '0000011';
-const MODE_VL3 = '0000010';
 
 // EOL code (12 bits)
 const EOL = '000000000001';
@@ -189,8 +171,6 @@ function encodeWhiteRun(run: number): string {
 
   // Make-up codes (multiples of 64)
   while (remaining >= 64) {
-    const makeupLen = Math.min(remaining - (remaining % 64), 1728);
-    const lookup = remaining - (remaining % 64);
     // Find the largest make-up code <= remaining
     const makeupValues = [1728, 640, 576, 512, 448, 384, 320, 256, 192, 128, 64];
     for (const mv of makeupValues) {

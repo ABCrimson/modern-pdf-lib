@@ -44,7 +44,7 @@ const KAPPA = 0.5522847498;
 function buildAppearanceStream(
   content: string,
   bbox: [number, number, number, number],
-  resources?: PdfDict | undefined,
+  resources?: PdfDict  ,
 ): PdfStream {
   const dict = new PdfDict();
   dict.set('/Type', PdfName.of('XObject'));

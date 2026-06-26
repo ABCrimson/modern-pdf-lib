@@ -21,4 +21,4 @@ await build({
   treeShaking: true,
 });
 
-console.log('Built dist/modern-pdf-lib.iife.js');
+

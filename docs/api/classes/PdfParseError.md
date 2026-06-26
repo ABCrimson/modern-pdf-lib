@@ -6,7 +6,7 @@
 
 # Class: PdfParseError
 
-Defined in: [src/parser/parseError.ts:7](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/parser/parseError.ts#L7)
+Defined in: [src/parser/parseError.ts:7](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/parser/parseError.ts#L7)
 
 ## Extends
 
@@ -18,7 +18,7 @@ Defined in: [src/parser/parseError.ts:7](https://github.com/ABCrimson/modern-pdf
 
 > **new PdfParseError**(`options`): `PdfParseError`
 
-Defined in: [src/parser/parseError.ts:14](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/parser/parseError.ts#L14)
+Defined in: [src/parser/parseError.ts:14](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/parser/parseError.ts#L14)
 
 #### Parameters
 
@@ -62,15 +62,15 @@ Defined in: [src/parser/parseError.ts:14](https://github.com/ABCrimson/modern-pd
 
 > `readonly` **actual**: `string`
 
-Defined in: [src/parser/parseError.ts:11](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/parser/parseError.ts#L11)
+Defined in: [src/parser/parseError.ts:11](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/parser/parseError.ts#L11)
 
 ***
 
 ### cause?
 
-> `optional` **cause**: `unknown`
+> `optional` **cause?**: `unknown`
 
-Defined in: node\_modules/typescript/lib/lib.es2022.error.d.ts:24
+Defined in: tools/docs/node\_modules/typescript/lib/lib.es2022.error.d.ts:24
 
 #### Inherited from
 
@@ -82,7 +82,7 @@ Defined in: node\_modules/typescript/lib/lib.es2022.error.d.ts:24
 
 > `readonly` **expected**: `string`
 
-Defined in: [src/parser/parseError.ts:10](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/parser/parseError.ts#L10)
+Defined in: [src/parser/parseError.ts:10](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/parser/parseError.ts#L10)
 
 ***
 
@@ -90,7 +90,7 @@ Defined in: [src/parser/parseError.ts:10](https://github.com/ABCrimson/modern-pd
 
 > `readonly` **hexContext**: `string`
 
-Defined in: [src/parser/parseError.ts:12](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/parser/parseError.ts#L12)
+Defined in: [src/parser/parseError.ts:12](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/parser/parseError.ts#L12)
 
 ***
 
@@ -98,7 +98,7 @@ Defined in: [src/parser/parseError.ts:12](https://github.com/ABCrimson/modern-pd
 
 > **message**: `string`
 
-Defined in: node\_modules/typescript/lib/lib.es5.d.ts:1075
+Defined in: tools/docs/node\_modules/typescript/lib/lib.es5.d.ts:1075
 
 #### Inherited from
 
@@ -110,7 +110,7 @@ Defined in: node\_modules/typescript/lib/lib.es5.d.ts:1075
 
 > `readonly` **name**: `"PdfParseError"` = `'PdfParseError'`
 
-Defined in: [src/parser/parseError.ts:8](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/parser/parseError.ts#L8)
+Defined in: [src/parser/parseError.ts:8](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/parser/parseError.ts#L8)
 
 #### Overrides
 
@@ -122,15 +122,15 @@ Defined in: [src/parser/parseError.ts:8](https://github.com/ABCrimson/modern-pdf
 
 > `readonly` **offset**: `number`
 
-Defined in: [src/parser/parseError.ts:9](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/parser/parseError.ts#L9)
+Defined in: [src/parser/parseError.ts:9](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/parser/parseError.ts#L9)
 
 ***
 
 ### stack?
 
-> `optional` **stack**: `string`
+> `optional` **stack?**: `string`
 
-Defined in: node\_modules/typescript/lib/lib.es5.d.ts:1076
+Defined in: tools/docs/node\_modules/typescript/lib/lib.es5.d.ts:1076
 
 #### Inherited from
 
@@ -142,7 +142,7 @@ Defined in: node\_modules/typescript/lib/lib.es5.d.ts:1076
 
 > `static` **isError**(`error`): `error is Error`
 
-Defined in: node\_modules/typescript/lib/lib.esnext.error.d.ts:21
+Defined in: tools/docs/node\_modules/typescript/lib/lib.esnext.error.d.ts:21
 
 Indicates whether the argument provided is a built-in Error instance or not.
 

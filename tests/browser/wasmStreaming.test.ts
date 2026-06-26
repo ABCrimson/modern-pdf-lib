@@ -25,15 +25,6 @@ const MINIMAL_WASM = new Uint8Array([
  * Create a fake WebAssembly.Module object for mocking purposes.
  * In Node.js test environment we can compile the minimal WASM to get a real one.
  */
-async function createRealModule(): Promise<WebAssembly.Module> {
-  return WebAssembly.compile(MINIMAL_WASM);
-}
-
-async function createRealInstance(): Promise<WebAssembly.Instance> {
-  const mod = await createRealModule();
-  return new WebAssembly.Instance(mod, {});
-}
-
 // ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------

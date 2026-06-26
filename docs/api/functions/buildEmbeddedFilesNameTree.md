@@ -6,9 +6,9 @@
 
 # Function: buildEmbeddedFilesNameTree()
 
-> **buildEmbeddedFilesNameTree**(`files`, `names`, `registry`): [`PdfDict`](../classes/PdfDict.md)
+> **buildEmbeddedFilesNameTree**(`files`, `names`, `_registry`): [`PdfDict`](../classes/PdfDict.md)
 
-Defined in: [src/core/embeddedFiles.ts:243](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/embeddedFiles.ts#L243)
+Defined in: [src/core/embeddedFiles.ts:243](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/embeddedFiles.ts#L243)
 
 Build an `/EmbeddedFiles` name tree dictionary.
 
@@ -26,11 +26,9 @@ Array of indirect references to filespec dictionaries.
 
 Corresponding file names (same order as `files`).
 
-### registry
+### \_registry
 
 [`PdfObjectRegistry`](../classes/PdfObjectRegistry.md)
-
-The PDF object registry.
 
 ## Returns
 

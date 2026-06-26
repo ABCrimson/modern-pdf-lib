@@ -8,7 +8,7 @@
 
 > **copyPages**(`sourceDoc`, `targetDoc`, `indices`): [`PdfPage`](../classes/PdfPage.md)[]
 
-Defined in: [src/core/documentMerge.ts:351](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/documentMerge.ts#L351)
+Defined in: [src/core/documentMerge.ts:350](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/documentMerge.ts#L350)
 
 Copy pages from a source document to a target document.
 

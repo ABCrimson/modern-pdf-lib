@@ -8,7 +8,7 @@
 
 > **valuesToModules**(`values`): [`BarcodeMatrix`](../interfaces/BarcodeMatrix.md)
 
-Defined in: [src/barcode/code128.ts:373](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/barcode/code128.ts#L373)
+Defined in: [src/barcode/code128.ts:373](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/barcode/code128.ts#L373)
 
 Convert a sequence of Code 128 symbol values to a module (bar/space) array.
 

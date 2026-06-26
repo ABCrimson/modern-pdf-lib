@@ -22,9 +22,7 @@ import {
   PdfNumber,
   PdfString,
   PdfStream,
-  PdfRef,
 } from '../../../src/core/pdfObjects.js';
-import { buildDocumentStructure } from '../../../src/core/pdfCatalog.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -281,11 +279,11 @@ describe('saveIncremental', () => {
 
     const dict2 = new PdfDict();
     dict2.set('/Key2', PdfString.literal('Value2'));
-    const ref2 = registry.register(dict2);
+    registry.register(dict2);
 
     const dict3 = new PdfDict();
     dict3.set('/Key3', PdfString.literal('Value3'));
-    const ref3 = registry.register(dict3);
+    registry.register(dict3);
 
     // info + pages + catalog
     const infoDict = new PdfDict();
@@ -446,7 +444,6 @@ describe('saveIncremental', () => {
     );
 
     // Compression should have been applied — result may contain FlateDecode
-    const text = pdfToString(compressedResult.bytes.subarray(originalBytes.length));
     // We expect either the stream was compressed or left as-is
     // (depending on whether compression actually helps)
     expect(compressedResult.bytes.length).toBeGreaterThan(originalBytes.length);

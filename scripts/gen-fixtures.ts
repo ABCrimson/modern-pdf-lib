@@ -87,7 +87,7 @@ const rgbPng = makePng(4, 4, 2, 3, (x, y) => [
   128,
 ]);
 await writeFile('tests/fixtures/images/sample.png', rgbPng);
-console.log('sample.png:', rgbPng.length, 'bytes');
+
 
 // 4x4 RGBA PNG
 const rgbaPng = makePng(4, 4, 6, 4, (x, y) => [
@@ -97,7 +97,7 @@ const rgbaPng = makePng(4, 4, 6, 4, (x, y) => [
   Math.round(((x + y) / 6) * 255),
 ]);
 await writeFile('tests/fixtures/images/sample-rgba.png', rgbaPng);
-console.log('sample-rgba.png:', rgbaPng.length, 'bytes');
+
 
 // 8x8 RGB PNG (larger for better visual test)
 const largePng = makePng(8, 8, 2, 3, (x, y) => [
@@ -106,7 +106,7 @@ const largePng = makePng(8, 8, 2, 3, (x, y) => [
   Math.round(((x + y) / 14) * 255),
 ]);
 await writeFile('tests/fixtures/images/gradient-8x8.png', largePng);
-console.log('gradient-8x8.png:', largePng.length, 'bytes');
+
 
 // Minimal valid JPEG 1x1 grayscale
 const jpeg = new Uint8Array([
@@ -140,6 +140,6 @@ const jpeg = new Uint8Array([
   0xff, 0xd9, // EOI
 ]);
 await writeFile('tests/fixtures/images/sample.jpg', jpeg);
-console.log('sample.jpg:', jpeg.length, 'bytes');
 
-console.log('\nAll fixtures generated.');
+
+

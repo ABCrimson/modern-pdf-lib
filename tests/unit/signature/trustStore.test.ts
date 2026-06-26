@@ -4,7 +4,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { TrustStore } from '../../../src/signature/trustStore.js';
-import type { TrustStoreOptions } from '../../../src/signature/trustStore.js';
+
 import {
   encodeSequence,
   encodeSet,

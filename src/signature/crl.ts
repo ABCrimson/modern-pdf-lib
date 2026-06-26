@@ -19,7 +19,6 @@
 import {
   parseDerTlv,
   decodeOidBytes,
-  toBuffer,
 } from './pkcs7.js';
 import type { Asn1Node } from './pkcs7.js';
 
@@ -312,11 +311,7 @@ export async function downloadCrl(url: string): Promise<CrlData> {
       .replace(/-----BEGIN[^-]+-----/, '')
       .replace(/-----END[^-]+-----/, '')
       .replace(/\s/g, '');
-    const binaryStr = atob(base64);
-    crlBytes = new Uint8Array(binaryStr.length);
-    for (let i = 0; i < binaryStr.length; i++) {
-      crlBytes[i] = binaryStr.charCodeAt(i);
-    }
+    crlBytes = Uint8Array.fromBase64(base64);
   }
 
   return parseCrl(crlBytes);

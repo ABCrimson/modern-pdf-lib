@@ -13,7 +13,6 @@
 import {
   PdfDict,
   PdfName,
-  PdfNumber,
   PdfArray,
   PdfStream,
 } from '../core/pdfObjects.js';
@@ -59,11 +58,11 @@ function n(value: number): string {
 /** Escape a string for use in a PDF literal string. */
 function escapePdf(text: string): string {
   return text
-    .replace(/\\/g, '\\\\')
-    .replace(/\(/g, '\\(')
-    .replace(/\)/g, '\\)')
-    .replace(/\r/g, '\\r')
-    .replace(/\n/g, '\\n');
+    .replaceAll('\\', '\\\\')
+    .replaceAll('(', '\\(')
+    .replaceAll(')', '\\)')
+    .replaceAll('\r', '\\r')
+    .replaceAll('\n', '\\n');
 }
 
 // ---------------------------------------------------------------------------

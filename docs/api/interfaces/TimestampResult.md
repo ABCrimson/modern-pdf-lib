@@ -6,7 +6,7 @@
 
 # Interface: TimestampResult
 
-Defined in: [src/signature/timestamp.ts:37](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/signature/timestamp.ts#L37)
+Defined in: [src/signature/timestamp.ts:35](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/timestamp.ts#L35)
 
 Result from a timestamp request.
 
@@ -16,7 +16,7 @@ Result from a timestamp request.
 
 > **signingTime**: `Date`
 
-Defined in: [src/signature/timestamp.ts:41](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/signature/timestamp.ts#L41)
+Defined in: [src/signature/timestamp.ts:39](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/timestamp.ts#L39)
 
 The signing time reported by the TSA.
 
@@ -26,6 +26,6 @@ The signing time reported by the TSA.
 
 > **timestampToken**: `Uint8Array`
 
-Defined in: [src/signature/timestamp.ts:39](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/signature/timestamp.ts#L39)
+Defined in: [src/signature/timestamp.ts:37](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/timestamp.ts#L37)
 
 The DER-encoded TimeStampToken (a CMS SignedData).

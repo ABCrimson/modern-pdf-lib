@@ -24,7 +24,7 @@
  */
 
 import type { FontMetrics } from './fontMetrics.js';
-import { extractMetrics, measureText, getGlyphId, getGlyphWidth } from './fontMetrics.js';
+import { extractMetrics, getGlyphId, getGlyphWidth } from './fontMetrics.js';
 import { subsetFont, buildSubsetCmap, computeSubsetTag } from './fontSubset.js';
 import type { SubsetResult, SubsetCmap } from './fontSubset.js';
 
@@ -345,19 +345,23 @@ export class EmbeddedFont {
    * @returns Hex string (e.g. `"00480065006C006C006F"` for "Hello").
    */
   encodeText(text: string): string {
-    const bytes: number[] = [];
+    // Count codepoints first to pre-allocate
+    const chars = Array.from(text);
+    const bytes = new Uint8Array(chars.length * 2);
+    let offset = 0;
 
-    for (const char of text) {
-      const codepoint = char.codePointAt(0)!;
+    for (const char of chars) {
+      const codepoint = char.codePointAt(0) ?? 0;
       const glyphId = getGlyphId(codepoint, this.metrics.cmapTable);
 
       this.usedGlyphs.add(glyphId);
 
       // 2-byte big-endian
-      bytes.push((glyphId >> 8) & 0xFF, glyphId & 0xFF);
+      bytes[offset++] = (glyphId >> 8) & 0xFF;
+      bytes[offset++] = glyphId & 0xFF;
     }
 
-    return new Uint8Array(bytes).toHex();
+    return bytes.toHex();
   }
 
   // -----------------------------------------------------------------------

@@ -1,6 +1,6 @@
 {
   "name": "modern-pdf-lib",
-  "version": "0.27.0",
+  "version": "0.28.0",
   "description": "A modern, WASM-accelerated PDF creation engine for every JavaScript runtime",
   "type": "module",
   "exports": {
@@ -63,7 +63,7 @@
     "README.md"
   ],
   "engines": {
-    "node": ">=25.7"
+    "node": ">=26.4"
   },
   "sideEffects": false,
   "scripts": {
@@ -78,39 +78,42 @@
     "test:integration": "vitest run tests/integration",
     "test:e2e": "playwright test",
     "test:bench": "vitest bench",
-    "lint": "eslint src/ tests/",
+    "bench": "tsx tests/benchmarks/run.ts",
+    "lint": "oxlint --type-aware src tests",
+    "lint:fix": "oxlint --type-aware --fix src tests",
+    "format": "prettier --write \"{src,tests,scripts}/**/*.ts\"",
+    "format:check": "prettier --check \"{src,tests,scripts}/**/*.ts\"",
     "typecheck": "tsc --noEmit",
     "prepublishOnly": "npm run typecheck && npm test && npm run build",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
-    "docs:api": "typedoc",
+    "docs:api": "node tools/docs/node_modules/typedoc/bin/typedoc",
     "validate-pdf": "tsx scripts/validate-pdf.ts",
     "generate:wasm-inline": "tsx scripts/generate-inline-wasm.ts",
     "clean": "rm -rf dist coverage"
   },
   "dependencies": {
-    "fflate": "0.8.2"
+    "fflate": "0.8.3"
   },
   "devDependencies": {
-    "@eslint/js": "10.0.1",
-    "@playwright/test": "1.59.0-alpha-2026-02-27",
-    "esbuild": "0.27.3",
-    "eslint": "10.0.2",
+    "@playwright/test": "1.62.0-alpha-2026-06-25",
+    "esbuild": "0.28.1",
     "fast-png": "8.0.0",
-    "miniflare": "4.20260305.0",
+    "miniflare": "4.20260623.0",
+    "oxlint": "^1.71.0",
+    "oxlint-tsgolint": "^0.23.0",
     "pdf-lib": "^1.17.1",
-    "prettier": "3.8.1",
-    "rollup": "4.59.0",
-    "tsdown": "0.21.0-beta.2",
-    "tsx": "4.21.0",
-    "typedoc": "0.28.17",
-    "typedoc-plugin-markdown": "4.10.0",
-    "typescript": "6.0.0-dev.20260227",
-    "typescript-eslint": "8.56.2-alpha.1",
-    "vite": "8.0.0-beta.16",
-    "vitepress": "2.0.0-alpha.16",
-    "vitest": "4.1.0-beta.5",
-    "wasm-pack": "0.14.0"
+    "prettier": "4.0.0-alpha.13",
+    "rollup": "4.62.2",
+    "tsdown": "0.22.3",
+    "tsx": "4.22.4",
+    "typedoc": "0.28.19",
+    "typedoc-plugin-markdown": "4.12.0",
+    "typescript": "7.0.1-rc",
+    "vite": "8.1.0",
+    "vitepress": "2.0.0-alpha.17",
+    "vitest": "5.0.0-beta.5",
+    "wasm-pack": "0.15.0"
   },
   "keywords": [
     "pdf",

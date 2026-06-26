@@ -71,13 +71,6 @@ const DEFAULT_BORDER_COLOR: Color = { type: 'grayscale', gray: 0 };
 // Helpers
 // ---------------------------------------------------------------------------
 
-/** Format a number for PDF output. */
-function n(value: number): string {
-  if (Number.isInteger(value)) return value.toString();
-  const s = value.toFixed(6).replace(/\.?0+$/, '');
-  return s === '-0' ? '0' : s;
-}
-
 // ---------------------------------------------------------------------------
 // Public API
 // ---------------------------------------------------------------------------

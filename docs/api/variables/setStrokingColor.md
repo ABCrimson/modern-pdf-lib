@@ -4,24 +4,15 @@
 
 [modern-pdf-lib](../index.md) / setStrokingColor
 
-# Variable: setStrokingColor()
+# ~~Variable: setStrokingColor~~
 
-> `const` **setStrokingColor**: (`color`) => `string` = `applyStrokeColor`
+> `const` **setStrokingColor**: *typeof* [`applyStrokeColor`](../functions/applyStrokeColor.md) = `applyStrokeColor`
 
-Defined in: [src/core/operators/color.ts:297](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/operators/color.ts#L297)
-
-Emit the appropriate stroke-colour operator for a [Color](../type-aliases/Color.md) value.
-
-Alias for [applyStrokeColor](../functions/applyStrokeColor.md) for pdf-lib API compatibility.
+Defined in: [src/core/operators/color.ts:542](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/operators/color.ts#L542)
 
 Emit the appropriate stroke-colour operator for a [Color](../type-aliases/Color.md) value.
 
-## Parameters
+## Deprecated
 
-### color
-
-[`Color`](../type-aliases/Color.md)
-
-## Returns
-
-`string`
+Use [applyStrokeColor](../functions/applyStrokeColor.md) instead. This alias exists only
+            for pdf-lib API compatibility and will be removed in v2.0.

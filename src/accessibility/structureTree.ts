@@ -138,12 +138,6 @@ export interface AccessibilityIssue {
 // Standard structure type sets (for validation)
 // ---------------------------------------------------------------------------
 
-/** Block-level grouping elements. */
-const GROUPING_TYPES = new Set<string>([
-  'Document', 'Part', 'Art', 'Sect', 'Div', 'BlockQuote',
-  'Caption', 'TOC', 'TOCI', 'Index', 'NonStruct', 'Private',
-]);
-
 /** Heading elements for hierarchy validation. */
 const HEADING_TYPES = new Set<string>(['H1', 'H2', 'H3', 'H4', 'H5', 'H6']);
 
@@ -158,16 +152,8 @@ const TABLE_CELL_TYPES = new Set<string>(['TH', 'TD']);
 /** Table row section types. */
 const TABLE_SECTION_TYPES = new Set<string>(['THead', 'TBody', 'TFoot']);
 
-/** All table-related types. */
-const TABLE_TYPES = new Set<string>([
-  'Table', 'TR', 'TH', 'TD', 'THead', 'TBody', 'TFoot',
-]);
-
 /** Illustration types that need alt text. */
 const ILLUSTRATION_TYPES = new Set<string>(['Figure', 'Formula', 'Form']);
-
-/** List structure types. */
-const LIST_TYPES = new Set<string>(['L', 'LI', 'Lbl', 'LBody']);
 
 // ---------------------------------------------------------------------------
 // PdfStructureElement

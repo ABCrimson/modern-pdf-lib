@@ -54,6 +54,13 @@ export interface StripOptions {
 }
 
 // ---------------------------------------------------------------------------
+// Module-level singletons
+// ---------------------------------------------------------------------------
+
+const encoder = new TextEncoder();
+const decoder = new TextDecoder();
+
+// ---------------------------------------------------------------------------
 // Implementation
 // ---------------------------------------------------------------------------
 
@@ -91,7 +98,7 @@ export function stripProhibitedFeatures(
   options: StripOptions = {},
 ): StripResult {
   const stripped: StrippedFeature[] = [];
-  let text = new TextDecoder().decode(pdfBytes);
+  let text = decoder.decode(pdfBytes);
   let modified = false;
 
   // --- Strip JavaScript actions ---
@@ -159,7 +166,7 @@ export function stripProhibitedFeatures(
   }
 
   return {
-    bytes: modified ? new TextEncoder().encode(text) : pdfBytes,
+    bytes: modified ? encoder.encode(text) : pdfBytes,
     stripped,
     modified,
   };
@@ -171,9 +178,9 @@ export function stripProhibitedFeatures(
 
 /** Count regex matches in a string. */
 function countMatches(text: string, regex: RegExp): number {
-  let count = 0;
   // Ensure the regex has the global flag
   const re = new RegExp(regex.source, regex.flags.includes('g') ? regex.flags : regex.flags + 'g');
+  let count = 0;
   while (re.exec(text) !== null) {
     count++;
   }

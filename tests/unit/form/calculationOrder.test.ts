@@ -15,10 +15,9 @@ import {
   PdfName,
   PdfString,
   PdfArray,
-  PdfNumber,
 } from '../../../src/core/pdfObjects.js';
-import { PdfForm } from '../../../src/form/pdfForm.js';
-import { PdfTextField } from '../../../src/form/fields/textField.js';
+import { PdfForm, type RefResolver } from '../../../src/form/pdfForm.js';
+
 import {
   getCalculationOrder,
   setCalculationOrder,
@@ -26,7 +25,7 @@ import {
   buildDependencyGraph,
   topologicalSort,
 } from '../../../src/form/calculationOrder.js';
-import { FieldFlags } from '../../../src/form/pdfField.js';
+
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -65,7 +64,7 @@ function buildForm(fieldDicts: PdfDict[]): PdfForm {
   const fieldsArr = new PdfArray(fieldDicts);
   acroFormDict.set('/Fields', fieldsArr);
 
-  const resolver = (ref: any) => ref; // no refs in our test
+  const resolver: RefResolver = (ref) => ref; // no refs in our test
   return PdfForm.fromDict(acroFormDict, resolver);
 }
 

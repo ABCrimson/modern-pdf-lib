@@ -8,7 +8,7 @@
 
 > `const` **SRGB\_ICC\_PROFILE**: `Uint8Array`
 
-Defined in: [src/compliance/srgbIccProfile.ts:385](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/compliance/srgbIccProfile.ts#L385)
+Defined in: [src/compliance/srgbIccProfile.ts:385](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/compliance/srgbIccProfile.ts#L385)
 
 Pre-generated sRGB ICC profile (cached).
 

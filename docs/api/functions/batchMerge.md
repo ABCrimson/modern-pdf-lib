@@ -8,7 +8,7 @@
 
 > **batchMerge**(`files`, `options?`): `Promise`\<`Uint8Array`\<`ArrayBufferLike`\>\>
 
-Defined in: src/batch/batchProcessor.ts:164
+Defined in: [src/batch/batchProcessor.ts:354](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/batch/batchProcessor.ts#L354)
 
 Merge multiple PDFs in parallel chunks, then merge the chunks.
 

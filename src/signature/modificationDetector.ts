@@ -16,7 +16,7 @@
 import { getCertificationLevel } from './mdpPolicy.js';
 import type { MdpPermission } from './mdpPolicy.js';
 import { findExistingSignatures } from './incrementalSave.js';
-import type { SignatureByteRange } from './incrementalSave.js';
+
 
 // ---------------------------------------------------------------------------
 // Types
@@ -60,24 +60,6 @@ export interface ModificationReport {
 // ---------------------------------------------------------------------------
 
 const decoder = new TextDecoder('latin1');
-
-/**
- * Detect incremental revisions by finding all %%EOF markers.
- */
-function findRevisionBoundaries(pdf: Uint8Array): number[] {
-  const text = decoder.decode(pdf);
-  const boundaries: number[] = [];
-  let offset = 0;
-
-  while (offset < text.length) {
-    const idx = text.indexOf('%%EOF', offset);
-    if (idx === -1) break;
-    boundaries.push(idx + 5); // past %%EOF
-    offset = idx + 5;
-  }
-
-  return boundaries;
-}
 
 /**
  * Extract objects from a specific revision of the PDF.
@@ -188,9 +170,6 @@ export async function detectModifications(
     const bEnd = b.byteRange[2] + b.byteRange[3];
     return aEnd - bEnd;
   });
-
-  // Find revision boundaries
-  const revisionBoundaries = findRevisionBoundaries(pdf);
 
   // For each signature, check what changed after its coverage
   for (let i = 0; i < sortedSigs.length; i++) {

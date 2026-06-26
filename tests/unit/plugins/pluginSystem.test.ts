@@ -6,7 +6,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import {
   createPdf,
-  PdfDocument,
   PageSizes,
 } from '../../../src/index.js';
 import {
@@ -20,7 +19,7 @@ import type {
 import { timestampPlugin } from '../../../src/plugins/builtins/timestampPlugin.js';
 import { metadataPlugin } from '../../../src/plugins/builtins/metadataPlugin.js';
 import { accessibilityPlugin } from '../../../src/plugins/builtins/accessibilityPlugin.js';
-import { PdfDict, PdfName, PdfString } from '../../../src/core/pdfObjects.js';
+import { PdfDict, PdfName } from '../../../src/core/pdfObjects.js';
 
 // ---------------------------------------------------------------------------
 // Helpers

@@ -42,6 +42,7 @@ import {
   asPDFNumber,
   asNumber,
   PdfNumber,
+  PdfRef,
 } from '../../../src/index.js';
 
 // Import new items directly from source files (not yet in index.ts)
@@ -406,7 +407,7 @@ describe('FontRefInternal interface', () => {
     // Type-level check: if a FontRefInternal satisfies FontRef, this compiles
     const internal: FontRefInternal = {
       name: 'F1',
-      ref: { kind: 'ref', objectNumber: 1, generationNumber: 0 } as any,
+      ref: PdfRef.of(1, 0),
       widthOfTextAtSize: () => 0,
       heightAtSize: () => 0,
       sizeAtHeight: () => 0,
@@ -592,7 +593,7 @@ describe('integration: drawPage with Angle-typed rotate', async () => {
     const loaded = await createPdf().constructor.load(bytes1);
 
     const doc2 = createPdf();
-    const embedded = await doc2.embedPage(loaded.getPage(0));
+    const embedded =  doc2.embedPage(loaded.getPage(0));
     const page2 = doc2.addPage(PageSizes.A4);
 
     // This should work because DrawPageOptions now uses Angle

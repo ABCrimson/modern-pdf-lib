@@ -8,7 +8,7 @@
 
 > **embedTiffCmyk**(`pixels`, `width`, `height`): [`TiffCmykEmbedResult`](../interfaces/TiffCmykEmbedResult.md)
 
-Defined in: [src/assets/image/tiffCmyk.ts:120](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/image/tiffCmyk.ts#L120)
+Defined in: [src/assets/image/tiffCmyk.ts:120](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/tiffCmyk.ts#L120)
 
 Prepare CMYK pixel data for native embedding in a PDF using /DeviceCMYK.
 

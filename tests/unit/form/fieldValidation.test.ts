@@ -14,10 +14,7 @@ import {
   validateFieldValue,
   parseValidationScript,
 } from '../../../src/form/fieldValidation.js';
-import type {
-  ValidationResult,
-  ValidationType,
-} from '../../../src/form/fieldValidation.js';
+
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -141,7 +138,7 @@ describe('validateFieldValue — email', () => {
   const field = makeTextField('email');
 
   it('accepts valid email', () => {
-    const result = validateFieldValue(
+    validateFieldValue(
       field,
       'user@example.com',
       'if (event.value.indexOf("@") < 0) { app.alert("Invalid email"); event.rc = false; }',

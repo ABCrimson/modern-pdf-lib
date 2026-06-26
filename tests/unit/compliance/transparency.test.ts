@@ -24,10 +24,7 @@ import {
   detectTransparency,
   flattenTransparency,
 } from '../../../src/compliance/transparencyFlattener.js';
-import type {
-  TransparencyInfo,
-  TransparencyFinding,
-} from '../../../src/compliance/transparencyFlattener.js';
+
 
 // ---------------------------------------------------------------------------
 // Helpers

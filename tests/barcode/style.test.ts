@@ -7,11 +7,11 @@ import {
   renderStyledBarcode,
   calculateBarcodeDimensions,
 } from '../../src/barcode/style.js';
-import type { StyledBarcodeOptions } from '../../src/barcode/style.js';
+
 import { encodeCode128 } from '../../src/barcode/code128.js';
 import { encodeEan13 } from '../../src/barcode/ean.js';
 import type { BarcodeMatrix } from '../../src/barcode/types.js';
-import { rgb, grayscale } from '../../src/core/operators/color.js';
+import { rgb } from '../../src/core/operators/color.js';
 
 // Helper: create a simple test matrix
 function testMatrix(): BarcodeMatrix {

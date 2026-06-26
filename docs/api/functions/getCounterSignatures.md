@@ -8,7 +8,7 @@
 
 > **getCounterSignatures**(`pdf`): [`CounterSignatureInfo`](../interfaces/CounterSignatureInfo.md)[]
 
-Defined in: [src/signature/counterSignature.ts:490](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/signature/counterSignature.ts#L490)
+Defined in: [src/signature/counterSignature.ts:422](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/counterSignature.ts#L422)
 
 Extract counter-signatures from all signatures in a PDF.
 

@@ -24,10 +24,8 @@ import {
   PdfName,
   PdfNumber,
   PdfString,
-  PdfArray,
   PdfBool,
 } from '../core/pdfObjects.js';
-import type { PdfObject } from '../core/pdfObjects.js';
 import { md5 } from './md5.js';
 import { rc4 } from './rc4.js';
 import { aesEncryptCBC, aesDecryptCBC } from './aes.js';
@@ -41,8 +39,6 @@ import {
   generateUserKeyV5,
   generateOwnerKeyV5,
   generatePermsV5,
-  concat,
-  int32LE,
 } from './keyDerivation.js';
 import type { EncryptDictValues } from './keyDerivation.js';
 
@@ -200,7 +196,7 @@ export class PdfEncryptionHandler {
    */
   static async create(
     options: EncryptOptions,
-    fileId?: Uint8Array | undefined,
+    fileId?: Uint8Array  ,
   ): Promise<PdfEncryptionHandler> {
     const algorithm = options.algorithm ?? 'aes-128';
     const params = getAlgorithmParams(algorithm);

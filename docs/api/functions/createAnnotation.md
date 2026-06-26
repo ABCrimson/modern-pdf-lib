@@ -8,7 +8,7 @@
 
 > **createAnnotation**(`type`, `options`): [`PdfAnnotation`](../classes/PdfAnnotation.md)
 
-Defined in: [src/annotation/pdfAnnotation.ts:207](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/annotation/pdfAnnotation.ts#L207)
+Defined in: [src/annotation/pdfAnnotation.ts:217](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/annotation/pdfAnnotation.ts#L217)
 
 Create a new annotation with the given type and options.
 

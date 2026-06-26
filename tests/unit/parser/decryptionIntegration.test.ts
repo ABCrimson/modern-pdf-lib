@@ -18,10 +18,7 @@ import {
   PdfDict,
   PdfName,
   PdfNumber,
-  PdfArray,
-  PdfStream,
   PdfString,
-  PdfRef,
   PdfBool,
 } from '../../../src/core/pdfObjects.js';
 
@@ -227,7 +224,7 @@ async function buildEncryptedPdf(
   const fileIdHex = bytesToHex(fileId);
 
   // Trailer with /Encrypt and /ID
-  let trailer = `trailer<</Size ${totalObjects}/Root 1 0 R/Info 5 0 R/Encrypt 6 0 R/ID[<${fileIdHex}><${fileIdHex}>]>>\n`;
+  const trailer = `trailer<</Size ${totalObjects}/Root 1 0 R/Info 5 0 R/Encrypt 6 0 R/ID[<${fileIdHex}><${fileIdHex}>]>>\n`;
 
   const startxref = `startxref\n${xrefPos}\n%%EOF\n`;
 
@@ -424,7 +421,7 @@ describe('Decryption integration: authentication failure', () => {
 
 describe('Decryption integration: decrypted content accessible', () => {
   it('decrypts /Title string in the /Info dictionary (RC4-128, empty password)', async () => {
-    const { bytes, expectedTitle } = await buildEncryptedPdf('', 'ownerpass', 'rc4-128');
+    const { bytes } = await buildEncryptedPdf('', 'ownerpass', 'rc4-128');
     const doc = await loadPdf(bytes);
 
     // The document was parsed and strings were decrypted, so the title

@@ -12,7 +12,7 @@ import {
   verifySignatures,
   verifySignature,
 } from '../../../src/signature/signatureVerifier.js';
-import type { SignatureVerificationResult } from '../../../src/signature/signatureVerifier.js';
+
 import { signPdf } from '../../../src/signature/signatureHandler.js';
 import {
   encodeSequence,

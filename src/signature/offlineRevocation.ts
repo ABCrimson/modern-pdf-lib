@@ -67,17 +67,8 @@ export interface OfflineRevocationResult {
 /** OID for adbe-revocationInfoArchival (Adobe PDF signature attribute). */
 const OID_ADBE_REVOCATION_INFO = '1.2.840.113583.1.1.8';
 
-/** OID for id-smime-aa-ets-revocationRefs (CMS revocation refs). */
-const OID_REVOCATION_REFS = '1.2.840.113549.1.9.16.2.22';
-
 /** OID for id-smime-aa-ets-CertValues (certificate values). */
 const OID_REVOCATION_VALUES = '1.2.840.113549.1.9.16.2.24';
-
-/** OID for OCSP response type id-pkix-ocsp-basic. */
-const OID_OCSP_BASIC = '1.3.6.1.5.5.7.48.1.1';
-
-/** OID for PKCS#7 signedData content type. */
-const OID_SIGNED_DATA = '1.2.840.113549.1.7.2';
 
 // ---------------------------------------------------------------------------
 // Internal helpers
@@ -120,20 +111,6 @@ function findAttributesByOid(
   }
 
   return matches;
-}
-
-/**
- * Walk an ASN.1 tree and collect all nodes with the given tag.
- */
-function collectNodesByTag(node: Asn1Node, tag: number): Asn1Node[] {
-  const results: Asn1Node[] = [];
-  if (node.tag === tag) {
-    results.push(node);
-  }
-  for (const child of node.children) {
-    results.push(...collectNodesByTag(child, tag));
-  }
-  return results;
 }
 
 /**

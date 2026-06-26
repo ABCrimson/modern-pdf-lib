@@ -6,7 +6,7 @@
 
 # Interface: TrailerInfo
 
-Defined in: [src/signature/incrementalSave.ts:71](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/signature/incrementalSave.ts#L71)
+Defined in: [src/signature/incrementalSave.ts:71](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/incrementalSave.ts#L71)
 
 Information extracted from an existing PDF trailer.
 
@@ -14,9 +14,9 @@ Information extracted from an existing PDF trailer.
 
 ### infoRef?
 
-> `optional` **infoRef**: `string`
+> `optional` **infoRef?**: `string`
 
-Defined in: [src/signature/incrementalSave.ts:77](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/signature/incrementalSave.ts#L77)
+Defined in: [src/signature/incrementalSave.ts:77](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/incrementalSave.ts#L77)
 
 The /Info reference string (e.g., "4 0 R"), if present.
 
@@ -26,7 +26,7 @@ The /Info reference string (e.g., "4 0 R"), if present.
 
 > **prevXrefOffset**: `number`
 
-Defined in: [src/signature/incrementalSave.ts:79](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/signature/incrementalSave.ts#L79)
+Defined in: [src/signature/incrementalSave.ts:79](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/incrementalSave.ts#L79)
 
 The byte offset of the previous cross-reference section.
 
@@ -36,7 +36,7 @@ The byte offset of the previous cross-reference section.
 
 > **rootRef**: `string`
 
-Defined in: [src/signature/incrementalSave.ts:75](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/signature/incrementalSave.ts#L75)
+Defined in: [src/signature/incrementalSave.ts:75](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/incrementalSave.ts#L75)
 
 The /Root reference string (e.g., "1 0 R").
 
@@ -46,6 +46,6 @@ The /Root reference string (e.g., "1 0 R").
 
 > **size**: `number`
 
-Defined in: [src/signature/incrementalSave.ts:73](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/signature/incrementalSave.ts#L73)
+Defined in: [src/signature/incrementalSave.ts:73](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/incrementalSave.ts#L73)
 
 The /Size value (total number of objects).

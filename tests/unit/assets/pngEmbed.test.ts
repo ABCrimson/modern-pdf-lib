@@ -4,7 +4,7 @@
  * Covers PNG signature validation, IHDR parsing, and JPEG SOF parsing.
  */
 
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';

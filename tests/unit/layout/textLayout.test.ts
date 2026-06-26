@@ -16,9 +16,7 @@ import {
 import type {
   TextFrame,
   TextSpan,
-  ParagraphOptions,
   MultiColumnOptions,
-  TextLayoutResult,
 } from '../../../src/layout/textLayout.js';
 
 // ---------------------------------------------------------------------------

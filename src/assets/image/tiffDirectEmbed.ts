@@ -46,9 +46,6 @@ const TAG_STRIP_OFFSETS = 273;
 /** Tag 277: SamplesPerPixel. */
 const TAG_SAMPLES_PER_PIXEL = 277;
 
-/** Tag 278: RowsPerStrip. */
-const TAG_ROWS_PER_STRIP = 278;
-
 /** Tag 279: StripByteCounts. */
 const TAG_STRIP_BYTE_COUNTS = 279;
 
@@ -139,14 +136,26 @@ function isLittleEndian(data: Uint8Array): boolean {
 }
 
 /**
+ * Shared DataView instance, created lazily per data buffer.
+ * @internal
+ */
+let _cachedView: DataView | undefined;
+let _cachedBuffer: ArrayBufferLike | undefined;
+
+function getView(data: Uint8Array): DataView {
+  if (_cachedBuffer !== data.buffer) {
+    _cachedView = new DataView(data.buffer, data.byteOffset, data.byteLength);
+    _cachedBuffer = data.buffer;
+  }
+  return _cachedView!;
+}
+
+/**
  * Read a 16-bit unsigned integer.
  * @internal
  */
 function readU16(data: Uint8Array, offset: number, le: boolean): number {
-  if (le) {
-    return data[offset]! | (data[offset + 1]! << 8);
-  }
-  return (data[offset]! << 8) | data[offset + 1]!;
+  return getView(data).getUint16(offset, le);
 }
 
 /**
@@ -154,20 +163,7 @@ function readU16(data: Uint8Array, offset: number, le: boolean): number {
  * @internal
  */
 function readU32(data: Uint8Array, offset: number, le: boolean): number {
-  if (le) {
-    return (
-      data[offset]! |
-      (data[offset + 1]! << 8) |
-      (data[offset + 2]! << 16) |
-      ((data[offset + 3]! << 24) >>> 0)
-    ) >>> 0;
-  }
-  return (
-    ((data[offset]! << 24) >>> 0) |
-    (data[offset + 1]! << 16) |
-    (data[offset + 2]! << 8) |
-    data[offset + 3]!
-  ) >>> 0;
+  return getView(data).getUint32(offset, le);
 }
 
 /**
@@ -200,7 +196,7 @@ function parseIfd(data: Uint8Array, offset: number, le: boolean): IfdEntry[] {
 function readTagValue(
   data: Uint8Array,
   entry: IfdEntry,
-  le: boolean,
+  _le: boolean,
 ): number {
   // SHORT (type 3): 2 bytes, LONG (type 4): 4 bytes
   if (entry.count === 1) {
@@ -379,7 +375,7 @@ export function canDirectEmbed(data: Uint8Array): boolean {
  */
 export function embedTiffDirect(
   data: Uint8Array,
-  options?: DirectEmbedOptions | undefined,
+  options?: DirectEmbedOptions  ,
 ): DirectEmbedResult {
   if (data.length < 8) {
     throw new Error('TIFF data too short');
@@ -455,10 +451,10 @@ function extractStrips(
   data: Uint8Array,
   entries: IfdEntry[],
   le: boolean,
-  width: number,
-  height: number,
-  samplesPerPixel: number,
-  bitsPerSample: number,
+  _width: number,
+  _height: number,
+  _samplesPerPixel: number,
+  _bitsPerSample: number,
 ): Uint8Array {
   const offsetEntry = getTagEntry(entries, TAG_STRIP_OFFSETS);
   const countEntry = getTagEntry(entries, TAG_STRIP_BYTE_COUNTS);
@@ -605,7 +601,7 @@ function embedJpegInTiff(
       throw new Error('TIFF JPEG data extends beyond file');
     }
 
-    const jpegData = data.slice(jpegOffset, jpegOffset + jpegLength);
+    const jpegData = data.subarray(jpegOffset, jpegOffset + jpegLength);
 
     return {
       width,
@@ -642,7 +638,7 @@ function embedJpegInTiff(
       return {
         width,
         height,
-        data: data.slice(offset, offset + count),
+        data: data.subarray(offset, offset + count),
         colorSpace,
         bitsPerComponent: bitsPerSample,
         filter: 'DCTDecode',
@@ -666,7 +662,7 @@ function embedJpegInTiff(
     return {
       width,
       height,
-      data: data.slice(offset, offset + count),
+      data: data.subarray(offset, offset + count),
       colorSpace,
       bitsPerComponent: bitsPerSample,
       filter: 'DCTDecode',

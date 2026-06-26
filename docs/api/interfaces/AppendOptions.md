@@ -6,7 +6,7 @@
 
 # Interface: AppendOptions
 
-Defined in: [src/signature/incrementalSave.ts:51](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/signature/incrementalSave.ts#L51)
+Defined in: [src/signature/incrementalSave.ts:51](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/incrementalSave.ts#L51)
 
 Options for pure append-only incremental updates.
 
@@ -14,8 +14,8 @@ Options for pure append-only incremental updates.
 
 ### compress?
 
-> `optional` **compress**: `boolean`
+> `optional` **compress?**: `boolean`
 
-Defined in: [src/signature/incrementalSave.ts:53](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/signature/incrementalSave.ts#L53)
+Defined in: [src/signature/incrementalSave.ts:53](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/incrementalSave.ts#L53)
 
 Apply FlateDecode compression. Default: false.

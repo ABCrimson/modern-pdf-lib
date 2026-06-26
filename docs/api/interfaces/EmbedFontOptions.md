@@ -6,7 +6,7 @@
 
 # Interface: EmbedFontOptions
 
-Defined in: [src/core/pdfDocument.ts:116](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/pdfDocument.ts#L116)
+Defined in: [src/core/pdfDocument.ts:118](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/pdfDocument.ts#L118)
 
 Options for font embedding.
 
@@ -14,9 +14,9 @@ Options for font embedding.
 
 ### customName?
 
-> `optional` **customName**: `string`
+> `optional` **customName?**: `string`
 
-Defined in: [src/core/pdfDocument.ts:122](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/pdfDocument.ts#L122)
+Defined in: [src/core/pdfDocument.ts:124](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/pdfDocument.ts#L124)
 
 Custom name to use in the font dictionary's /BaseFont instead of the font's PostScript name.
 
@@ -24,9 +24,9 @@ Custom name to use in the font dictionary's /BaseFont instead of the font's Post
 
 ### features?
 
-> `optional` **features**: `Record`\<`string`, `boolean`\>
+> `optional` **features?**: `Record`\<`string`, `boolean`\>
 
-Defined in: [src/core/pdfDocument.ts:120](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/pdfDocument.ts#L120)
+Defined in: [src/core/pdfDocument.ts:122](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/pdfDocument.ts#L122)
 
 OpenType feature flags. e.g., { kern: true, liga: true }.
 
@@ -34,8 +34,8 @@ OpenType feature flags. e.g., { kern: true, liga: true }.
 
 ### subset?
 
-> `optional` **subset**: `boolean`
+> `optional` **subset?**: `boolean`
 
-Defined in: [src/core/pdfDocument.ts:118](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/pdfDocument.ts#L118)
+Defined in: [src/core/pdfDocument.ts:120](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/pdfDocument.ts#L120)
 
 Whether to subset the font to reduce file size. Default: true.

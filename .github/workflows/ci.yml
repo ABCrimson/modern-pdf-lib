@@ -11,8 +11,8 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  NODE_VERSION: '25.7'
-  RUST_TOOLCHAIN: 'stable'
+  NODE_VERSION: '26.4'
+  RUST_TOOLCHAIN: 'beta'
   CARGO_TERM_COLOR: always
 
 jobs:
@@ -23,7 +23,7 @@ jobs:
     name: Lint & Type-check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-node@v6
         with:
@@ -35,7 +35,7 @@ jobs:
       - name: TypeScript type-check
         run: npx tsc --noEmit
 
-      - name: ESLint
+      - name: Lint (oxlint + tsgolint, type-aware)
         run: npm run lint
 
   # ---------------------------------------------------------------------------
@@ -45,15 +45,15 @@ jobs:
     name: Build WASM
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@beta
         with:
           targets: wasm32-unknown-unknown
 
       - name: Cache Cargo registry & build artifacts
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: |
             ~/.cargo/registry
@@ -67,7 +67,7 @@ jobs:
         run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
 
       - name: Cache WASM output
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         id: wasm-cache
         with:
           path: src/wasm/*/pkg
@@ -92,7 +92,7 @@ jobs:
     needs: build-wasm
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-node@v6
         with:
@@ -125,7 +125,7 @@ jobs:
     needs: build-ts
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-node@v6
         with:
@@ -165,7 +165,7 @@ jobs:
     needs: build-ts
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-node@v6
         with:
@@ -197,7 +197,7 @@ jobs:
     needs: build-ts
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-node@v6
         with:
@@ -239,9 +239,9 @@ jobs:
     name: Benchmarks
     needs: build-ts
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
+    if: always()
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-node@v6
         with:
@@ -280,7 +280,7 @@ jobs:
     needs: build-ts
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-node@v6
         with:

@@ -16,17 +16,14 @@
  * - Edge cases: empty array, single item, all failures
  */
 
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { createPdf, PdfDocument } from '../../../src/core/pdfDocument.js';
 import {
   processBatch,
   batchMerge,
   batchFlatten,
 } from '../../../src/batch/batchProcessor.js';
-import type {
-  BatchOptions,
-  BatchResult,
-} from '../../../src/batch/batchProcessor.js';
+
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -184,7 +181,7 @@ describe('processBatch', () => {
 
     const result = await processBatch(
       [pdf, pdf],
-      async (doc) => {
+      async (_doc) => {
         throw new Error('Operation failed');
       },
     );

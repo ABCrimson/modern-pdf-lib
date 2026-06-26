@@ -20,7 +20,6 @@ import {
   encodeUtf8String,
   encodeUTCTime,
   parseDerTlv,
-  decodeOidBytes,
 } from '../../../src/signature/pkcs7.js';
 
 // ---------------------------------------------------------------------------
@@ -51,13 +50,6 @@ function encodeBitString(data: Uint8Array): Uint8Array {
 }
 
 /**
- * Encode a BOOLEAN value.
- */
-function encodeBoolean(value: boolean): Uint8Array {
-  return new Uint8Array([0x01, 0x01, value ? 0xff : 0x00]);
-}
-
-/**
  * Build a Name (SEQUENCE of SET of AttributeTypeAndValue) with only CN.
  */
 function buildName(commonName: string): Uint8Array {
@@ -66,20 +58,6 @@ function buildName(commonName: string): Uint8Array {
   const atv = encodeSequence([cnOid, cnValue]);
   const rdn = encodeSet([atv]);
   return encodeSequence([rdn]);
-}
-
-/**
- * Build an IA5String tagged value (for GeneralName URI).
- */
-function encodeIA5String(str: string): Uint8Array {
-  const encoder = new TextEncoder();
-  const bytes = encoder.encode(str);
-  const len = encodeLength(bytes.length);
-  const result = new Uint8Array(1 + len.length + bytes.length);
-  result[0] = 0x16; // IA5String tag
-  result.set(len, 1);
-  result.set(bytes, 1 + len.length);
-  return result;
 }
 
 /**

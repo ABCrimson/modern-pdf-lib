@@ -9,7 +9,6 @@ import {
   hasLtvData,
 } from '../../../src/signature/ltvEmbed.js';
 import type { LtvOptions, DssData } from '../../../src/signature/ltvEmbed.js';
-import { prepareForSigning, embedSignature } from '../../../src/signature/byteRange.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -41,14 +40,6 @@ startxref
 %%EOF
 `;
   return encoder.encode(pdf);
-}
-
-function createSignedPdf(): Uint8Array {
-  const pdf = createMinimalPdf();
-  const { preparedPdf, byteRange } = prepareForSigning(pdf, 'Sig1');
-  const fakeSig = new Uint8Array(256);
-  globalThis.crypto.getRandomValues(fakeSig);
-  return embedSignature(preparedPdf, fakeSig, byteRange);
 }
 
 // ---------------------------------------------------------------------------

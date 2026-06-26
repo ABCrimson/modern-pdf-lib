@@ -6,9 +6,7 @@ import { describe, it, expect } from 'vitest';
 import {
   verifySignatureDetailed,
 } from '../../../src/signature/detailedVerifier.js';
-import type {
-  DetailedVerificationResult,
-} from '../../../src/signature/detailedVerifier.js';
+
 import {
   RevocationCache,
 } from '../../../src/signature/revocationCache.js';
@@ -21,7 +19,6 @@ import {
 import {
   encodeSequence,
   encodeOID,
-  encodeOctetString,
   encodeContextTag,
   encodeInteger,
   encodeUtf8String,

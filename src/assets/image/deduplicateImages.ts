@@ -12,9 +12,7 @@
 import type { PdfDocument } from '../../core/pdfDocument.js';
 import {
   PdfDict,
-  PdfName,
   PdfRef,
-  PdfStream,
 } from '../../core/pdfObjects.js';
 import { extractImages } from './imageExtract.js';
 

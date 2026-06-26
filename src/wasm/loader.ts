@@ -284,7 +284,6 @@ function resolveModulePath(
       // We try the dist layout first (npm consumers), then fall back to dev.
       try {
         const distUrl = new URL(`./wasm/${name}/${filename}`, import.meta.url);
-        const devUrl = new URL(`../wasm/${name}/pkg/${filename}`, import.meta.url);
         // Check if the dist path exists by trying it first
         return distUrl.pathname;
       } catch {

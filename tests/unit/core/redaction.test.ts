@@ -21,7 +21,7 @@ import {
   applyRedactions,
   getRedactionMarks,
 } from '../../../src/core/redaction.js';
-import type { RedactionOptions } from '../../../src/core/redaction.js';
+
 import { PdfPage } from '../../../src/core/pdfPage.js';
 import { PdfObjectRegistry } from '../../../src/core/pdfObjects.js';
 import { createPdf } from '../../../src/core/pdfDocument.js';

@@ -119,30 +119,6 @@ function formatPdfDate(date: Date): string {
 
 /**
  * Find the byte offset of a needle string in a Uint8Array,
- * searching backward from startOffset.
- */
-function findStringBackward(
-  data: Uint8Array,
-  needle: string,
-  startOffset: number,
-): number {
-  const needleBytes = encoder.encode(needle);
-  const len = needleBytes.length;
-  for (let i = Math.min(startOffset, data.length - len); i >= 0; i--) {
-    let match = true;
-    for (let j = 0; j < len; j++) {
-      if (data[i + j] !== needleBytes[j]) {
-        match = false;
-        break;
-      }
-    }
-    if (match) return i;
-  }
-  return -1;
-}
-
-/**
- * Find the byte offset of a needle string in a Uint8Array,
  * searching forward from startOffset.
  */
 function findStringForward(
@@ -294,9 +270,9 @@ export function prepareForSigning(
   pdfBytes: Uint8Array,
   signatureFieldName: string,
   placeholderSize: number = 8192,
-  appearance?: PrepareAppearanceOptions | undefined,
-  mdpPermission?: number | undefined,
-  fieldLock?: { action: 'All' | 'Include' | 'Exclude'; fields?: string[] | undefined } | undefined,
+  appearance?: PrepareAppearanceOptions  ,
+  mdpPermission?: number  ,
+  fieldLock?: { action: 'All' | 'Include' | 'Exclude'; fields?: string[] | undefined }  ,
 ): { preparedPdf: Uint8Array; byteRange: ByteRangeResult } {
   // Step 1: Find the original trailer/xref info
   const pdfStr = decoder.decode(pdfBytes);
@@ -594,7 +570,7 @@ export function embedSignature(
   }
 
   // Hex-encode the signature and pad remaining space with zeroes
-  let hexSig = signatureBytes.toHex().padEnd(maxHexLength, '0');
+  const hexSig = signatureBytes.toHex().padEnd(maxHexLength, '0');
 
   // Build the hex string with angle brackets: <hexSig>
   const hexStringBytes = encoder.encode(`<${hexSig}>`);

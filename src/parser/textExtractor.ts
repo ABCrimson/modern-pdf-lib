@@ -86,13 +86,11 @@ export function extractText(
 
   const state = new TextState(resources);
   const parts: string[] = [];
-  let inTextObject = false;
   let lineHasContent = false;
 
   for (const op of operators) {
     switch (op.operator) {
       case 'BT':
-        inTextObject = true;
         state.resetTextMatrix();
         if (parts.length > 0 && lineHasContent) {
           parts.push(' ');
@@ -101,7 +99,6 @@ export function extractText(
         break;
 
       case 'ET':
-        inTextObject = false;
         break;
 
       case 'Tf':
@@ -921,7 +918,7 @@ class TextState {
     if (operand == null) return '';
     if (typeof operand === 'number') return '';
 
-    const raw = typeof operand === 'string' ? operand : String(operand);
+    const raw = typeof operand === 'string' ? operand : '';
 
     // Look up the font's ToUnicode CMap
     const cmap = this.cmapCache.get(this.fontName);

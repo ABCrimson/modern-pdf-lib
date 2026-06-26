@@ -12,7 +12,6 @@ import {
   encodeOID,
   encodeOctetString,
   encodeContextTag,
-  encodeInteger,
   encodeLength,
 } from '../../../src/signature/pkcs7.js';
 

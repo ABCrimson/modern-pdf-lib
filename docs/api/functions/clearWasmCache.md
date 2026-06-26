@@ -8,7 +8,7 @@
 
 > **clearWasmCache**(): `void`
 
-Defined in: [src/wasm/loader.ts:563](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/wasm/loader.ts#L563)
+Defined in: [src/wasm/loader.ts:574](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/wasm/loader.ts#L574)
 
 Clear the WASM module cache.
 

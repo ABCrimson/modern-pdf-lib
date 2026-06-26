@@ -307,10 +307,10 @@ const bytesUncompressed = await pdf.save({ compress: false });
 await writeFile('showcase.pdf', bytes);
 await writeFile('showcase-uncompressed.pdf', bytesUncompressed);
 
-console.log(`Showcase PDF generated:`);
-console.log(`  Compressed:   ${bytes.length.toLocaleString()} bytes (${(bytes.length / 1024).toFixed(1)} KB)`);
-console.log(`  Uncompressed: ${bytesUncompressed.length.toLocaleString()} bytes (${(bytesUncompressed.length / 1024).toFixed(1)} KB)`);
-console.log(`  Compression:  ${((1 - bytes.length / bytesUncompressed.length) * 100).toFixed(1)}% reduction`);
-console.log(`  Pages:        ${pdf.getPageCount()}`);
-console.log(`  Fonts:        ${fonts.length}`);
-console.log(`  Images:       3 (PNG RGB, PNG RGBA, JPEG)`);
+
+
+
+
+
+
+

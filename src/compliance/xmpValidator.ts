@@ -48,6 +48,12 @@ export interface ParsedXmpMetadata {
 }
 
 // ---------------------------------------------------------------------------
+// Module-level singletons
+// ---------------------------------------------------------------------------
+
+const decoder = new TextDecoder();
+
+// ---------------------------------------------------------------------------
 // Extraction
 // ---------------------------------------------------------------------------
 
@@ -62,7 +68,7 @@ export interface ParsedXmpMetadata {
  * @returns         The XMP XML string, or `undefined`.
  */
 export function extractXmpMetadata(pdfBytes: Uint8Array): string | undefined {
-  const text = new TextDecoder().decode(pdfBytes);
+  const text = decoder.decode(pdfBytes);
   const start = text.indexOf('<x:xmpmeta');
   if (start < 0) return undefined;
   const end = text.indexOf('</x:xmpmeta>', start);

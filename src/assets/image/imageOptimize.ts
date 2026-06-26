@@ -312,7 +312,7 @@ export async function optimizeImage(
  * at quality 50, scaled to quality 100 = all-ones.
  * @internal
  */
-const STANDARD_LUMINANCE_QT = [
+const STANDARD_LUMINANCE_QT = new Uint8Array([
   16, 11, 10, 16, 24, 40, 51, 61,
   12, 12, 14, 19, 26, 58, 60, 55,
   14, 13, 16, 24, 40, 57, 69, 56,
@@ -321,7 +321,7 @@ const STANDARD_LUMINANCE_QT = [
   24, 35, 55, 64, 81, 104, 113, 92,
   49, 64, 78, 87, 103, 121, 120, 101,
   72, 92, 95, 98, 112, 100, 103, 99,
-];
+]);
 
 /**
  * Estimate the JPEG quality level (1–100) from the quantization tables
@@ -648,6 +648,9 @@ function resampleLanczos(
   const xRatio = src.width / dstWidth;
   const yRatio = src.height / dstHeight;
 
+  // Pre-allocate accumulator outside the hot loop to avoid per-pixel allocation
+  const sum = new Float64Array(channels);
+
   for (let y = 0; y < dstHeight; y++) {
     // Map output pixel center to source coordinates
     const srcYf = (y + 0.5) * yRatio - 0.5;
@@ -657,8 +660,8 @@ function resampleLanczos(
 
       const dstIdx = (y * dstWidth + x) * channels;
 
-      // Accumulate weighted values for each channel
-      const sum = new Float64Array(channels);
+      // Reset accumulator for each pixel
+      sum.fill(0);
       let weightSum = 0;
 
       // Sample the neighborhood: floor(srcY) - a + 1 .. floor(srcY) + a
@@ -686,7 +689,7 @@ function resampleLanczos(
           const srcIdx = (clampedY * src.width + clampedX) * channels;
 
           for (let c = 0; c < channels; c++) {
-            sum[c] = (sum[c] ?? 0) + src.pixels[srcIdx + c]! * w;
+            sum[c] = sum[c]! + src.pixels[srcIdx + c]! * w;
           }
           weightSum += w;
         }
@@ -877,14 +880,14 @@ function convertCmykToRgb(
   const rgb = new Uint8Array(pixelCount * 3);
 
   for (let i = 0; i < pixelCount; i++) {
-    const c = pixels[i * 4]! / 255;
-    const m = pixels[i * 4 + 1]! / 255;
-    const y = pixels[i * 4 + 2]! / 255;
-    const k = pixels[i * 4 + 3]! / 255;
+    const ci = 255 - pixels[i * 4]!;
+    const mi = 255 - pixels[i * 4 + 1]!;
+    const yi = 255 - pixels[i * 4 + 2]!;
+    const ki = 255 - pixels[i * 4 + 3]!;
 
-    rgb[i * 3] = Math.round(255 * (1 - c) * (1 - k));
-    rgb[i * 3 + 1] = Math.round(255 * (1 - m) * (1 - k));
-    rgb[i * 3 + 2] = Math.round(255 * (1 - y) * (1 - k));
+    rgb[i * 3] = (ci * ki + 127) / 255 | 0;
+    rgb[i * 3 + 1] = (mi * ki + 127) / 255 | 0;
+    rgb[i * 3 + 2] = (yi * ki + 127) / 255 | 0;
   }
 
   return rgb;

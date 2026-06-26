@@ -8,7 +8,7 @@
 
 > **decodeImageStream**(`imageInfo`): `Uint8Array`
 
-Defined in: [src/assets/image/imageExtract.ts:281](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/image/imageExtract.ts#L281)
+Defined in: [src/assets/image/imageExtract.ts:281](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/imageExtract.ts#L281)
 
 Decode image stream data into raw pixels.
 

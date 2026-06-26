@@ -6,7 +6,7 @@
 
 # Interface: ComputeFontSizeOptions
 
-Defined in: [src/core/layout.ts:113](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/layout.ts#L113)
+Defined in: [src/core/layout.ts:113](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/layout.ts#L113)
 
 ## Properties
 
@@ -14,31 +14,31 @@ Defined in: [src/core/layout.ts:113](https://github.com/ABCrimson/modern-pdf-lib
 
 > **font**: [`FontRef`](FontRef.md)
 
-Defined in: [src/core/layout.ts:114](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/layout.ts#L114)
+Defined in: [src/core/layout.ts:114](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/layout.ts#L114)
 
 ***
 
 ### lineHeight?
 
-> `optional` **lineHeight**: `number`
+> `optional` **lineHeight?**: `number`
 
-Defined in: [src/core/layout.ts:117](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/layout.ts#L117)
+Defined in: [src/core/layout.ts:117](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/layout.ts#L117)
 
 ***
 
 ### maxHeight?
 
-> `optional` **maxHeight**: `number`
+> `optional` **maxHeight?**: `number`
 
-Defined in: [src/core/layout.ts:116](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/layout.ts#L116)
+Defined in: [src/core/layout.ts:116](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/layout.ts#L116)
 
 ***
 
 ### maxSize?
 
-> `optional` **maxSize**: `number`
+> `optional` **maxSize?**: `number`
 
-Defined in: [src/core/layout.ts:119](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/layout.ts#L119)
+Defined in: [src/core/layout.ts:119](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/layout.ts#L119)
 
 ***
 
@@ -46,20 +46,20 @@ Defined in: [src/core/layout.ts:119](https://github.com/ABCrimson/modern-pdf-lib
 
 > **maxWidth**: `number`
 
-Defined in: [src/core/layout.ts:115](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/layout.ts#L115)
+Defined in: [src/core/layout.ts:115](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/layout.ts#L115)
 
 ***
 
 ### minSize?
 
-> `optional` **minSize**: `number`
+> `optional` **minSize?**: `number`
 
-Defined in: [src/core/layout.ts:118](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/layout.ts#L118)
+Defined in: [src/core/layout.ts:118](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/layout.ts#L118)
 
 ***
 
 ### wordBreaks?
 
-> `optional` **wordBreaks**: `string`[]
+> `optional` **wordBreaks?**: `string`[]
 
-Defined in: [src/core/layout.ts:120](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/layout.ts#L120)
+Defined in: [src/core/layout.ts:120](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/layout.ts#L120)

@@ -21,7 +21,7 @@
 import type { Color } from '../core/operators/color.js';
 import { applyFillColor } from '../core/operators/color.js';
 import { saveState, restoreState } from '../core/operators/state.js';
-import { rectangle, fill } from '../core/operators/graphics.js';
+import { fill } from '../core/operators/graphics.js';
 
 // ---------------------------------------------------------------------------
 // Public types
@@ -115,7 +115,7 @@ TEXT_LOWER.set(32, 26); // space
 // Mixed: 0(0)..9(9), &(10), CR(11), HT(12), ,(13), :(14),
 //        #(15), -(16), .(17), $(18), /(19), +(20), %(21),
 //        *(22), =(23), ^(24), SP(26)
-const MIXED_CHARS = '0123456789\r\t,:#-.$\/+%*=^';
+const MIXED_CHARS = '0123456789\r\t,:#-.$/+%*=^';
 for (let i = 0; i < MIXED_CHARS.length; i++) {
   TEXT_MIXED.set(MIXED_CHARS.charCodeAt(i), i);
 }
@@ -198,7 +198,7 @@ function buildCodewordTable(): number[][][] {
 
                 // Compute cluster from bar widths
                 // cluster metric = (b1 - b2 + b3 - b4) mod 9
-                let metric = ((b1 - b2 + b3 - b4) % 9 + 9) % 9;
+                const metric = ((b1 - b2 + b3 - b4) % 9 + 9) % 9;
                 let cluster: number;
                 if (metric === 0) cluster = 0;
                 else if (metric === 3) cluster = 1;

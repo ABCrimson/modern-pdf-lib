@@ -102,7 +102,7 @@ export class PdfLineAnnotation extends PdfAnnotation {
 
   static fromDict(
     dict: PdfDict,
-    resolver?: (ref: PdfRef) => PdfObject | undefined,
+    _resolver?: (ref: PdfRef) => PdfObject | undefined,
   ): PdfLineAnnotation {
     return new PdfLineAnnotation(dict);
   }
@@ -182,7 +182,7 @@ export class PdfSquareAnnotation extends PdfAnnotation {
 
   static fromDict(
     dict: PdfDict,
-    resolver?: (ref: PdfRef) => PdfObject | undefined,
+    _resolver?: (ref: PdfRef) => PdfObject | undefined,
   ): PdfSquareAnnotation {
     return new PdfSquareAnnotation(dict);
   }
@@ -231,7 +231,7 @@ export class PdfCircleAnnotation extends PdfAnnotation {
 
   static fromDict(
     dict: PdfDict,
-    resolver?: (ref: PdfRef) => PdfObject | undefined,
+    _resolver?: (ref: PdfRef) => PdfObject | undefined,
   ): PdfCircleAnnotation {
     return new PdfCircleAnnotation(dict);
   }
@@ -284,7 +284,7 @@ export class PdfPolygonAnnotation extends PdfAnnotation {
 
   static fromDict(
     dict: PdfDict,
-    resolver?: (ref: PdfRef) => PdfObject | undefined,
+    _resolver?: (ref: PdfRef) => PdfObject | undefined,
   ): PdfPolygonAnnotation {
     return new PdfPolygonAnnotation(dict);
   }
@@ -345,7 +345,7 @@ export class PdfPolyLineAnnotation extends PdfAnnotation {
 
   static fromDict(
     dict: PdfDict,
-    resolver?: (ref: PdfRef) => PdfObject | undefined,
+    _resolver?: (ref: PdfRef) => PdfObject | undefined,
   ): PdfPolyLineAnnotation {
     return new PdfPolyLineAnnotation(dict);
   }

@@ -12,7 +12,7 @@ import {
   isJpeg,
   getJpegInfo,
 } from '../../../src/assets/image/jpegEmbed.js';
-import type { JpegEmbedResult } from '../../../src/assets/image/jpegEmbed.js';
+
 
 // ---------------------------------------------------------------------------
 // Helpers — JPEG builders

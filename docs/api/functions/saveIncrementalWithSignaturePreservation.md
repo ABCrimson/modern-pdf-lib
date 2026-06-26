@@ -8,7 +8,7 @@
 
 > **saveIncrementalWithSignaturePreservation**(`originalPdf`, `modifiedPdf`, `options?`): `Uint8Array`
 
-Defined in: [src/signature/incrementalSave.ts:345](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/signature/incrementalSave.ts#L345)
+Defined in: [src/signature/incrementalSave.ts:322](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/incrementalSave.ts#L322)
 
 Perform an incremental save that preserves ALL existing signatures.
 

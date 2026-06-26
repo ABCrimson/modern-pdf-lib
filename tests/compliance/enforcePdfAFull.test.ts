@@ -19,7 +19,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { enforcePdfAFull } from '../../src/compliance/enforcePdfAv2.js';
-import { validatePdfA } from '../../src/compliance/pdfA.js';
+
 
 // ---------------------------------------------------------------------------
 // Helpers

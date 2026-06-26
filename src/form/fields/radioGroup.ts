@@ -13,10 +13,8 @@
 import {
   PdfDict,
   PdfName,
-  PdfArray,
   PdfStream,
 } from '../../core/pdfObjects.js';
-import type { PdfObject } from '../../core/pdfObjects.js';
 import { PdfField, nameVal } from '../pdfField.js';
 import type { FieldType, WidgetAnnotationHost } from '../pdfField.js';
 import { generateRadioAppearance } from '../fieldAppearance.js';

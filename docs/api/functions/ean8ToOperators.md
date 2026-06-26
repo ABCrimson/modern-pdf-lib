@@ -8,7 +8,7 @@
 
 > **ean8ToOperators**(`matrix`, `x`, `y`, `options?`): `string`
 
-Defined in: [src/barcode/ean.ts:282](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/barcode/ean.ts#L282)
+Defined in: [src/barcode/ean.ts:282](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/barcode/ean.ts#L282)
 
 Generate PDF content-stream operators for an EAN-8 barcode.
 

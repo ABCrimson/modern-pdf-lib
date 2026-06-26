@@ -22,10 +22,8 @@
 import { findSignatures } from './byteRange.js';
 import {
   parseDerTlv,
-  extractIssuerAndSerial,
-  decodeOidBytes,
 } from './pkcs7.js';
-import type { Asn1Node } from './pkcs7.js';
+
 
 // ---------------------------------------------------------------------------
 // Types
@@ -199,7 +197,7 @@ export function hasLtvData(pdf: Uint8Array): boolean {
  */
 export async function embedLtvData(
   pdf: Uint8Array,
-  options?: LtvOptions | undefined,
+  options?: LtvOptions  ,
 ): Promise<Uint8Array> {
   const includeOcsp = options?.includeOcsp !== false;
   const includeCrl = options?.includeCrl !== false;
@@ -277,7 +275,7 @@ function buildDssIncrementalUpdate(
   const lastSizeMatch = sizeMatches?.[sizeMatches.length - 1]?.match(
     /\/Size\s+(\d+)/,
   );
-  let currentSize = lastSizeMatch ? parseInt(lastSizeMatch[1]!, 10) : 100;
+  const currentSize = lastSizeMatch ? parseInt(lastSizeMatch[1]!, 10) : 100;
 
   // Find /Root reference
   const rootMatch = pdfText.match(/\/Root\s+(\d+)\s+(\d+)\s+R/);

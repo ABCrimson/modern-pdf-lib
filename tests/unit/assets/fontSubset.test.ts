@@ -12,7 +12,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { subsetTtf } from '../../../src/assets/font/ttfSubset.js';
-import { subsetFont, buildSubsetCmap, computeSubsetTag } from '../../../src/assets/font/fontSubset.js';
+import { subsetFont, computeSubsetTag } from '../../../src/assets/font/fontSubset.js';
 
 // ---------------------------------------------------------------------------
 // Helper: build a TrueType font with glyf/loca tables

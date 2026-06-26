@@ -100,7 +100,7 @@ export function convertToGrayscale(
     const g = pixels[i * channels + 1]!;
     const b = pixels[i * channels + 2]!;
 
-    gray[i] = Math.round(0.299 * r + 0.587 * g + 0.114 * b);
+    gray[i] = (306 * r + 601 * g + 117 * b + 512) >> 10;
   }
 
   return gray;

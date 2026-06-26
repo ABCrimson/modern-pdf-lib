@@ -1,0 +1,39 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "oxc"],
+  "categories": {
+    "correctness": "error"
+  },
+  "rules": {
+    "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
+    "no-console": "warn",
+    "prefer-const": "error",
+    "no-restricted-globals": ["error", "Buffer"],
+    "typescript/no-explicit-any": "error",
+    "typescript/no-non-null-assertion": "warn",
+    "typescript/no-duplicate-type-constituents": "warn",
+    "typescript/unbound-method": "warn"
+  },
+  "overrides": [
+    {
+      "files": ["src/form/jsEvaluator.ts", "src/form/acrobatBuiltins.ts", "src/parser/streamingParser.ts", "src/runtime/*.ts"],
+      "rules": {
+        "typescript/no-implied-eval": "off",
+        "no-new-func": "off"
+      }
+    },
+    {
+      "files": ["src/cli/**"],
+      "rules": {
+        "no-console": "off"
+      }
+    }
+  ],
+  "ignorePatterns": [
+    "dist/**",
+    "node_modules/**",
+    "src/wasm/*/pkg/**",
+    "docs/**",
+    "coverage/**"
+  ]
+}

@@ -6,7 +6,7 @@
 
 # Interface: CheckboxAppearanceOptions
 
-Defined in: [src/form/fieldAppearance.ts:198](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/form/fieldAppearance.ts#L198)
+Defined in: [src/form/fieldAppearance.ts:197](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/form/fieldAppearance.ts#L197)
 
 Options for generating a checkbox appearance.
 
@@ -16,7 +16,7 @@ Options for generating a checkbox appearance.
 
 > **checked**: `boolean`
 
-Defined in: [src/form/fieldAppearance.ts:200](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/form/fieldAppearance.ts#L200)
+Defined in: [src/form/fieldAppearance.ts:199](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/form/fieldAppearance.ts#L199)
 
 Whether the checkbox is checked.
 
@@ -26,6 +26,6 @@ Whether the checkbox is checked.
 
 > **rect**: \[`number`, `number`, `number`, `number`\]
 
-Defined in: [src/form/fieldAppearance.ts:202](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/form/fieldAppearance.ts#L202)
+Defined in: [src/form/fieldAppearance.ts:201](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/form/fieldAppearance.ts#L201)
 
 The widget rectangle [x1, y1, x2, y2].

@@ -13,7 +13,6 @@ import { appendIncrementalUpdate } from '../../../src/signature/incrementalSave.
 // ---------------------------------------------------------------------------
 
 const encoder = new TextEncoder();
-const decoder = new TextDecoder('latin1');
 
 function createMinimalPdf(): Uint8Array {
   const pdf = `%PDF-1.7
@@ -123,9 +122,6 @@ describe('detectModifications', () => {
     const report = await detectModifications(modifiedPdf);
 
     // Form fills should be compliant with MDP level 2
-    const formFillViolations = report.violations.filter(
-      (v) => v.type === 'form_filled',
-    );
     // If there are only form fill violations, it should be compliant
     if (
       report.violations.length > 0 &&

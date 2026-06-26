@@ -20,7 +20,7 @@ import { dirname, resolve } from 'node:path';
 import { PdfDocumentBuilder } from '../../../src/core/pdfDocumentBuilder.js';
 import { PdfDocument } from '../../../src/core/pdfDocument.js';
 import { PageSizes } from '../../../src/core/pdfPage.js';
-import type { PdfPage } from '../../../src/core/pdfPage.js';
+
 import { rgb } from '../../../src/core/operators/color.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -480,7 +480,7 @@ describe('PdfDocumentBuilder', () => {
 
     const bytes = await PdfDocumentBuilder.create()
       .addPage(PageSizes.A4)
-      .withFont('Courier', (font) => {
+      .withFont('Courier', (_font) => {
         order.push('font');
       })
       .encrypt({

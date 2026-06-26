@@ -587,7 +587,7 @@ function renderElement(
  * When using `drawSvgOnPage`, the gradient information is available for
  * proper PDF shading pattern construction.
  */
-function renderGradientFill(gradient: SvgGradient, el: SvgElement): string {
+function renderGradientFill(gradient: SvgGradient, _el: SvgElement): string {
   let ops = '';
 
   // Use the first stop's colour as solid fill approximation

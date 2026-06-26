@@ -17,7 +17,6 @@ import {
 } from '../../../src/assets/font/textShaper.js';
 import type {
   ShapingResult,
-  ShapedGlyph,
   ShapingOptions,
 } from '../../../src/assets/font/textShaper.js';
 import type { FontMetrics } from '../../../src/assets/font/fontMetrics.js';

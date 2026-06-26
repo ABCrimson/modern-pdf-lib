@@ -8,7 +8,7 @@
 
 > **encodeJpegWasm**(`pixels`, `width`, `height`, `channels`, `quality`, `progressive?`, `chroma?`): `Uint8Array`\<`ArrayBufferLike`\> \| `undefined`
 
-Defined in: [src/wasm/jpeg/bridge.ts:160](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/wasm/jpeg/bridge.ts#L160)
+Defined in: [src/wasm/jpeg/bridge.ts:141](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/wasm/jpeg/bridge.ts#L141)
 
 Encode raw pixel data to JPEG using the WASM encoder.
 
@@ -34,9 +34,9 @@ Image height in pixels.
 
 ### channels
 
-Number of channels: 1 (grayscale), 3 (RGB), or 4 (RGBA).
+`1` \| `3` \| `4`
 
-`1` | `3` | `4`
+Number of channels: 1 (grayscale), 3 (RGB), or 4 (RGBA).
 
 ### quality
 

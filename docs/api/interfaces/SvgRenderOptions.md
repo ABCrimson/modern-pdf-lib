@@ -6,7 +6,7 @@
 
 # Interface: SvgRenderOptions
 
-Defined in: [src/assets/svg/svgToPdf.ts:32](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/svg/svgToPdf.ts#L32)
+Defined in: [src/assets/svg/svgToPdf.ts:32](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/svg/svgToPdf.ts#L32)
 
 Options for rendering an SVG onto a PDF page.
 
@@ -14,9 +14,9 @@ Options for rendering an SVG onto a PDF page.
 
 ### height?
 
-> `optional` **height**: `number`
+> `optional` **height?**: `number`
 
-Defined in: [src/assets/svg/svgToPdf.ts:36](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/svg/svgToPdf.ts#L36)
+Defined in: [src/assets/svg/svgToPdf.ts:36](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/svg/svgToPdf.ts#L36)
 
 Rendered height in PDF points.
 
@@ -24,9 +24,9 @@ Rendered height in PDF points.
 
 ### preserveAspectRatio?
 
-> `optional` **preserveAspectRatio**: `boolean`
+> `optional` **preserveAspectRatio?**: `boolean`
 
-Defined in: [src/assets/svg/svgToPdf.ts:42](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/svg/svgToPdf.ts#L42)
+Defined in: [src/assets/svg/svgToPdf.ts:42](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/svg/svgToPdf.ts#L42)
 
 Whether to preserve the aspect ratio of the SVG.
 
@@ -34,9 +34,9 @@ Whether to preserve the aspect ratio of the SVG.
 
 ### width?
 
-> `optional` **width**: `number`
+> `optional` **width?**: `number`
 
-Defined in: [src/assets/svg/svgToPdf.ts:34](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/svg/svgToPdf.ts#L34)
+Defined in: [src/assets/svg/svgToPdf.ts:34](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/svg/svgToPdf.ts#L34)
 
 Rendered width in PDF points.
 
@@ -44,9 +44,9 @@ Rendered width in PDF points.
 
 ### x?
 
-> `optional` **x**: `number`
+> `optional` **x?**: `number`
 
-Defined in: [src/assets/svg/svgToPdf.ts:38](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/svg/svgToPdf.ts#L38)
+Defined in: [src/assets/svg/svgToPdf.ts:38](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/svg/svgToPdf.ts#L38)
 
 X offset in PDF points.
 
@@ -54,8 +54,8 @@ X offset in PDF points.
 
 ### y?
 
-> `optional` **y**: `number`
+> `optional` **y?**: `number`
 
-Defined in: [src/assets/svg/svgToPdf.ts:40](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/svg/svgToPdf.ts#L40)
+Defined in: [src/assets/svg/svgToPdf.ts:40](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/svg/svgToPdf.ts#L40)
 
 Y offset in PDF points (bottom of the SVG).

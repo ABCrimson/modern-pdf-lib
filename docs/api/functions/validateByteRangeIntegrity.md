@@ -8,7 +8,7 @@
 
 > **validateByteRangeIntegrity**(`pdf`, `signatures`): `boolean`
 
-Defined in: [src/signature/incrementalSave.ts:222](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/signature/incrementalSave.ts#L222)
+Defined in: [src/signature/incrementalSave.ts:199](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/incrementalSave.ts#L199)
 
 Verify that no existing signature's covered bytes would overlap
 with content appended after the current end of file.

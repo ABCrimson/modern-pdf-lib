@@ -75,10 +75,10 @@ export function getStreamFilters(
       if (item instanceof PdfName) {
         return item.value.replace(/^\//, '');
       }
-      return String(item);
+      return ''; // malformed: a non-name filter entry is ignored
     });
   } else {
-    filters = [String(filterObj)];
+    filters = ['']; // malformed /Filter: treated as a single unknown filter
   }
 
   const dpObj = dict.get('/DecodeParms');
@@ -842,7 +842,7 @@ function decodeRunLength(data: Uint8Array): Uint8Array {
  * `/DecodeParms` dictionary may specify a color space override, but
  * the decoded data is always raw interleaved component bytes.
  */
-function decodeJPX(data: Uint8Array, parms: PdfDict | null): Uint8Array {
+function decodeJPX(data: Uint8Array, _parms: PdfDict | null): Uint8Array {
   const decoded = decodeJpeg2000(data);
   return decoded.data;
 }

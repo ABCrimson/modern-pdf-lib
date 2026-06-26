@@ -5,7 +5,7 @@
  * PDF output.
  */
 
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
@@ -14,9 +14,6 @@ import {
   PageSizes,
   StandardFonts,
   rgb,
-  cmyk,
-  grayscale,
-  degrees,
 } from '../../src/index.js';
 
 const __filename = fileURLToPath(import.meta.url);

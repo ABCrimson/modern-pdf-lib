@@ -8,7 +8,7 @@
 
 > **validatePdfUa**(`doc`, `level?`): [`PdfUaValidationResult`](../interfaces/PdfUaValidationResult.md)
 
-Defined in: src/accessibility/pdfUaValidator.ts:159
+Defined in: [src/accessibility/pdfUaValidator.ts:183](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/accessibility/pdfUaValidator.ts#L183)
 
 Validate a PDF document against PDF/UA-1 (ISO 14289-1) requirements.
 
@@ -16,14 +16,14 @@ Performs the following checks:
 1. Structure tree presence (/StructTreeRoot, /MarkInfo)
 2. Document language (/Lang)
 3. Document title and /DisplayDocTitle
-4. Heading hierarchy (sequential, no skips)
-5. Alt text on all illustration elements (Figure, Formula, Form)
-6. Table header cells (TH) with scope
+4. Heading hierarchy (section-aware, same-parent skip detection)
+5. Alt text on all illustration elements (excluding artifacts)
+6. Table header cells (size-aware, layout table aware)
 7. List structure (L/LI/Lbl/LBody)
 8. Reading order via structure tree
-9. Font embedding (no unembedded standard 14 fonts)
+9. Font embedding (excluding form-field-only fonts)
 10. Color contrast (AA: 4.5:1, AAA: 7:1)
-11. Bookmarks for navigation
+11. Bookmarks for navigation (documents > 3 pages)
 12. Tab order (/Tabs /S) on pages
 
 ## Parameters

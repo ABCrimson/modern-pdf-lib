@@ -227,7 +227,7 @@ describe('rgbToCmyk()', () => {
   });
 
   it('clamps out-of-range inputs', () => {
-    const [c, m, y, k] = rgbToCmyk(2, -1, 0.5);
+    const [c, , , k] = rgbToCmyk(2, -1, 0.5);
     // clamped to (1, 0, 0.5) — same as red-ish
     expect(k).toBeCloseTo(0, 10); // max(1, 0, 0.5) = 1
     expect(c).toBeCloseTo(0, 10);

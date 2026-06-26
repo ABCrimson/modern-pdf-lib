@@ -44,7 +44,7 @@ describe('embedPages', () => {
 
     const target = PdfDocument.create();
     target.addPage();
-    const embedded = await target.embedPages([p1, p2]);
+    const embedded =  target.embedPages([p1, p2]);
 
     expect(embedded).toHaveLength(2);
     expect(embedded[0].width).toBe(200);
@@ -53,7 +53,7 @@ describe('embedPages', () => {
 
   it('returns empty array for empty input', async () => {
     const doc = PdfDocument.create();
-    const embedded = await doc.embedPages([]);
+    const embedded =  doc.embedPages([]);
     expect(embedded).toHaveLength(0);
   });
 });

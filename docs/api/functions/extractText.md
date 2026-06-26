@@ -8,7 +8,7 @@
 
 > **extractText**(`operators`, `resources?`, `options?`): `string`
 
-Defined in: [src/parser/textExtractor.ts:76](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/parser/textExtractor.ts#L76)
+Defined in: [src/parser/textExtractor.ts:76](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/parser/textExtractor.ts#L76)
 
 Extract plain text from a sequence of parsed content-stream operators.
 

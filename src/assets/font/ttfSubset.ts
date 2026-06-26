@@ -83,20 +83,20 @@ function parseLoca(
   locaLength: number,
   numGlyphs: number,
   indexToLocFormat: number,
-): number[] {
+): Uint32Array {
   const view = new DataView(data.buffer, data.byteOffset + locaOffset, locaLength);
-  const offsets: number[] = [];
   const count = numGlyphs + 1;
+  const offsets = new Uint32Array(count);
 
   if (indexToLocFormat === 0) {
     // Short format: uint16 offsets divided by 2
     for (let i = 0; i < count; i++) {
-      offsets.push(view.getUint16(i * 2, false) * 2);
+      offsets[i] = view.getUint16(i * 2, false) * 2;
     }
   } else {
     // Long format: uint32 offsets
     for (let i = 0; i < count; i++) {
-      offsets.push(view.getUint32(i * 4, false));
+      offsets[i] = view.getUint32(i * 4, false);
     }
   }
 
@@ -114,7 +114,7 @@ function parseLoca(
 function resolveCompositeDeps(
   data: Uint8Array,
   glyfOffset: number,
-  locaOffsets: number[],
+  locaOffsets: Uint32Array | number[],
   usedGids: Set<number>,
 ): Set<number> {
   const retained = new Set(usedGids);
@@ -315,11 +315,11 @@ export function subsetTtf(
   }
 
   const newGlyf = new Uint8Array(newGlyfSize);
-  const newLocaOffsets: number[] = [];
+  const newLocaOffsets = new Uint32Array(numGlyphs + 1);
   let glyfPos = 0;
 
   for (let gid = 0; gid < numGlyphs; gid++) {
-    newLocaOffsets.push(glyfPos);
+    newLocaOffsets[gid] = glyfPos;
 
     if (retained.has(gid)) {
       const srcStart = glyfEntry.offset + locaOffsets[gid]!;
@@ -337,7 +337,7 @@ export function subsetTtf(
     // Unused glyphs: newLocaOffsets[gid] === glyfPos (same as next → zero-length)
   }
   // Final offset (past last glyph)
-  newLocaOffsets.push(glyfPos);
+  newLocaOffsets[numGlyphs] = glyfPos;
 
   // -----------------------------------------------------------------------
   // Build new loca table

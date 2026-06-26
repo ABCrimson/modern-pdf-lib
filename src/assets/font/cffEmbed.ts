@@ -21,15 +21,16 @@
  */
 export function findTable(data: Uint8Array, tag: string): { offset: number; length: number } | undefined {
   if (data.length < 12) return undefined;
-  const numTables = (data[4]! << 8) | data[5]!;
+  const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
+  const numTables = view.getUint16(4, false);
   for (let i = 0; i < numTables; i++) {
     const rec = 12 + i * 16;
     if (rec + 16 > data.length) break;
     const t = String.fromCharCode(data[rec]!, data[rec + 1]!, data[rec + 2]!, data[rec + 3]!);
     if (t === tag) {
-      const offset = (data[rec + 8]! << 24) | (data[rec + 9]! << 16) | (data[rec + 10]! << 8) | data[rec + 11]!;
-      const length = (data[rec + 12]! << 24) | (data[rec + 13]! << 16) | (data[rec + 14]! << 8) | data[rec + 15]!;
-      return { offset: offset >>> 0, length: length >>> 0 };
+      const offset = view.getUint32(rec + 8, false);
+      const length = view.getUint32(rec + 12, false);
+      return { offset, length };
     }
   }
   return undefined;

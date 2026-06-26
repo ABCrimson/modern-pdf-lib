@@ -90,7 +90,7 @@ export function AFPercent_Format(
   const sep = getSepConfig(sepStyle);
 
   return (value: string): string => {
-    const stripped = value.replace(/[^0-9.\-]/g, '');
+    const stripped = value.replace(/[^0-9.-]/g, '');
     if (stripped === '' || stripped === '-') return '';
 
     const num = parseFloat(stripped) * 100;

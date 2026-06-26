@@ -7,8 +7,8 @@ import {
   encodeDataMatrix,
   dataMatrixToOperators,
 } from '../../src/barcode/dataMatrix.js';
-import type { DataMatrixOptions, DataMatrixResult } from '../../src/barcode/dataMatrix.js';
-import { rgb, grayscale } from '../../src/core/operators/color.js';
+
+import { rgb } from '../../src/core/operators/color.js';
 
 describe('Data Matrix ECC200', () => {
   // -----------------------------------------------------------------------

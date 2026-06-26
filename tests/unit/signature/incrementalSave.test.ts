@@ -336,13 +336,6 @@ describe('saveIncrementalWithSignaturePreservation', () => {
 
   it('should detect and append changed objects', () => {
     const pdf = createMinimalPdf();
-    // Create a modified version by adding an object
-    const modifiedPdfStr = decoder.decode(pdf).replace(
-      '4 0 obj',
-      '4 0 obj\n% modified\n',
-    );
-    const modifiedPdf = encoder.encode(modifiedPdfStr);
-
     // Need a valid xref — just use a different /Producer value
     const modifiedText = decoder.decode(pdf).replace(
       '/Producer (modern-pdf)',

@@ -6,7 +6,7 @@
 
 # Interface: SvgElement
 
-Defined in: [src/assets/svg/svgParser.ts:38](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/svg/svgParser.ts#L38)
+Defined in: [src/assets/svg/svgParser.ts:75](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/svg/svgParser.ts#L75)
 
 Parsed representation of an SVG element.
 
@@ -16,7 +16,7 @@ Parsed representation of an SVG element.
 
 > **attributes**: `Record`\<`string`, `string`\>
 
-Defined in: [src/assets/svg/svgParser.ts:40](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/svg/svgParser.ts#L40)
+Defined in: [src/assets/svg/svgParser.ts:77](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/svg/svgParser.ts#L77)
 
 ***
 
@@ -24,27 +24,27 @@ Defined in: [src/assets/svg/svgParser.ts:40](https://github.com/ABCrimson/modern
 
 > **children**: `SvgElement`[]
 
-Defined in: [src/assets/svg/svgParser.ts:41](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/svg/svgParser.ts#L41)
+Defined in: [src/assets/svg/svgParser.ts:78](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/svg/svgParser.ts#L78)
 
 ***
 
 ### commands?
 
-> `optional` **commands**: [`SvgDrawCommand`](SvgDrawCommand.md)[]
+> `optional` **commands?**: [`SvgDrawCommand`](SvgDrawCommand.md)[]
 
-Defined in: [src/assets/svg/svgParser.ts:42](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/svg/svgParser.ts#L42)
+Defined in: [src/assets/svg/svgParser.ts:79](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/svg/svgParser.ts#L79)
 
 ***
 
 ### fill?
 
-> `optional` **fill**: `object`
+> `optional` **fill?**: `object`
 
-Defined in: [src/assets/svg/svgParser.ts:43](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/svg/svgParser.ts#L43)
+Defined in: [src/assets/svg/svgParser.ts:80](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/svg/svgParser.ts#L80)
 
 #### a?
 
-> `optional` **a**: `number`
+> `optional` **a?**: `number`
 
 #### b
 
@@ -60,11 +60,21 @@ Defined in: [src/assets/svg/svgParser.ts:43](https://github.com/ABCrimson/modern
 
 ***
 
+### fillGradientId?
+
+> `optional` **fillGradientId?**: `string`
+
+Defined in: [src/assets/svg/svgParser.ts:112](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/svg/svgParser.ts#L112)
+
+Fill gradient reference (resolved from `fill="url(#id)"`).
+
+***
+
 ### fillRule?
 
-> `optional` **fillRule**: `"nonzero"` \| `"evenodd"`
+> `optional` **fillRule?**: `"nonzero"` \| `"evenodd"`
 
-Defined in: [src/assets/svg/svgParser.ts:49](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/svg/svgParser.ts#L49)
+Defined in: [src/assets/svg/svgParser.ts:86](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/svg/svgParser.ts#L86)
 
 `evenodd` or `nonzero` (default).
 
@@ -72,9 +82,9 @@ Defined in: [src/assets/svg/svgParser.ts:49](https://github.com/ABCrimson/modern
 
 ### fontFamily?
 
-> `optional` **fontFamily**: `string`
+> `optional` **fontFamily?**: `string`
 
-Defined in: [src/assets/svg/svgParser.ts:63](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/svg/svgParser.ts#L63)
+Defined in: [src/assets/svg/svgParser.ts:100](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/svg/svgParser.ts#L100)
 
 Font family name.
 
@@ -82,9 +92,9 @@ Font family name.
 
 ### fontSize?
 
-> `optional` **fontSize**: `number`
+> `optional` **fontSize?**: `number`
 
-Defined in: [src/assets/svg/svgParser.ts:65](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/svg/svgParser.ts#L65)
+Defined in: [src/assets/svg/svgParser.ts:102](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/svg/svgParser.ts#L102)
 
 Font size in SVG user units.
 
@@ -92,9 +102,9 @@ Font size in SVG user units.
 
 ### fontStyle?
 
-> `optional` **fontStyle**: `string`
+> `optional` **fontStyle?**: `string`
 
-Defined in: [src/assets/svg/svgParser.ts:69](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/svg/svgParser.ts#L69)
+Defined in: [src/assets/svg/svgParser.ts:106](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/svg/svgParser.ts#L106)
 
 Font style (e.g. `italic`, `normal`).
 
@@ -102,31 +112,41 @@ Font style (e.g. `italic`, `normal`).
 
 ### fontWeight?
 
-> `optional` **fontWeight**: `string`
+> `optional` **fontWeight?**: `string`
 
-Defined in: [src/assets/svg/svgParser.ts:67](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/svg/svgParser.ts#L67)
+Defined in: [src/assets/svg/svgParser.ts:104](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/svg/svgParser.ts#L104)
 
 Font weight (e.g. `bold`, `normal`, or numeric).
 
 ***
 
+### gradients?
+
+> `optional` **gradients?**: `Map`\<`string`, [`SvgGradient`](SvgGradient.md)\>
+
+Defined in: [src/assets/svg/svgParser.ts:110](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/svg/svgParser.ts#L110)
+
+Gradient definitions found in `<defs>` blocks, keyed by id.
+
+***
+
 ### opacity?
 
-> `optional` **opacity**: `number`
+> `optional` **opacity?**: `number`
 
-Defined in: [src/assets/svg/svgParser.ts:47](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/svg/svgParser.ts#L47)
+Defined in: [src/assets/svg/svgParser.ts:84](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/svg/svgParser.ts#L84)
 
 ***
 
 ### stroke?
 
-> `optional` **stroke**: `object`
+> `optional` **stroke?**: `object`
 
-Defined in: [src/assets/svg/svgParser.ts:44](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/svg/svgParser.ts#L44)
+Defined in: [src/assets/svg/svgParser.ts:81](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/svg/svgParser.ts#L81)
 
 #### a?
 
-> `optional` **a**: `number`
+> `optional` **a?**: `number`
 
 #### b
 
@@ -144,9 +164,9 @@ Defined in: [src/assets/svg/svgParser.ts:44](https://github.com/ABCrimson/modern
 
 ### strokeDasharray?
 
-> `optional` **strokeDasharray**: `number`[]
+> `optional` **strokeDasharray?**: `number`[]
 
-Defined in: [src/assets/svg/svgParser.ts:57](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/svg/svgParser.ts#L57)
+Defined in: [src/assets/svg/svgParser.ts:94](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/svg/svgParser.ts#L94)
 
 SVG `stroke-dasharray` as numeric array.
 
@@ -154,19 +174,29 @@ SVG `stroke-dasharray` as numeric array.
 
 ### strokeDashoffset?
 
-> `optional` **strokeDashoffset**: `number`
+> `optional` **strokeDashoffset?**: `number`
 
-Defined in: [src/assets/svg/svgParser.ts:59](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/svg/svgParser.ts#L59)
+Defined in: [src/assets/svg/svgParser.ts:96](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/svg/svgParser.ts#L96)
 
 SVG `stroke-dashoffset`.
 
 ***
 
+### strokeGradientId?
+
+> `optional` **strokeGradientId?**: `string`
+
+Defined in: [src/assets/svg/svgParser.ts:114](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/svg/svgParser.ts#L114)
+
+Stroke gradient reference (resolved from `stroke="url(#id)"`).
+
+***
+
 ### strokeLinecap?
 
-> `optional` **strokeLinecap**: `"butt"` \| `"round"` \| `"square"`
+> `optional` **strokeLinecap?**: `"butt"` \| `"round"` \| `"square"`
 
-Defined in: [src/assets/svg/svgParser.ts:51](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/svg/svgParser.ts#L51)
+Defined in: [src/assets/svg/svgParser.ts:88](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/svg/svgParser.ts#L88)
 
 SVG `stroke-linecap`: butt | round | square.
 
@@ -174,9 +204,9 @@ SVG `stroke-linecap`: butt | round | square.
 
 ### strokeLinejoin?
 
-> `optional` **strokeLinejoin**: `"round"` \| `"miter"` \| `"bevel"`
+> `optional` **strokeLinejoin?**: `"round"` \| `"miter"` \| `"bevel"`
 
-Defined in: [src/assets/svg/svgParser.ts:53](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/svg/svgParser.ts#L53)
+Defined in: [src/assets/svg/svgParser.ts:90](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/svg/svgParser.ts#L90)
 
 SVG `stroke-linejoin`: miter | round | bevel.
 
@@ -184,9 +214,9 @@ SVG `stroke-linejoin`: miter | round | bevel.
 
 ### strokeMiterlimit?
 
-> `optional` **strokeMiterlimit**: `number`
+> `optional` **strokeMiterlimit?**: `number`
 
-Defined in: [src/assets/svg/svgParser.ts:55](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/svg/svgParser.ts#L55)
+Defined in: [src/assets/svg/svgParser.ts:92](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/svg/svgParser.ts#L92)
 
 SVG `stroke-miterlimit`.
 
@@ -194,9 +224,9 @@ SVG `stroke-miterlimit`.
 
 ### strokeWidth?
 
-> `optional` **strokeWidth**: `number`
+> `optional` **strokeWidth?**: `number`
 
-Defined in: [src/assets/svg/svgParser.ts:45](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/svg/svgParser.ts#L45)
+Defined in: [src/assets/svg/svgParser.ts:82](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/svg/svgParser.ts#L82)
 
 ***
 
@@ -204,15 +234,15 @@ Defined in: [src/assets/svg/svgParser.ts:45](https://github.com/ABCrimson/modern
 
 > **tag**: `string`
 
-Defined in: [src/assets/svg/svgParser.ts:39](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/svg/svgParser.ts#L39)
+Defined in: [src/assets/svg/svgParser.ts:76](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/svg/svgParser.ts#L76)
 
 ***
 
 ### textAnchor?
 
-> `optional` **textAnchor**: `"start"` \| `"middle"` \| `"end"`
+> `optional` **textAnchor?**: `"start"` \| `"middle"` \| `"end"`
 
-Defined in: [src/assets/svg/svgParser.ts:71](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/svg/svgParser.ts#L71)
+Defined in: [src/assets/svg/svgParser.ts:108](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/svg/svgParser.ts#L108)
 
 Text anchor: start | middle | end.
 
@@ -220,9 +250,9 @@ Text anchor: start | middle | end.
 
 ### textContent?
 
-> `optional` **textContent**: `string`
+> `optional` **textContent?**: `string`
 
-Defined in: [src/assets/svg/svgParser.ts:61](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/svg/svgParser.ts#L61)
+Defined in: [src/assets/svg/svgParser.ts:98](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/svg/svgParser.ts#L98)
 
 Text content for `<text>` / `<tspan>` elements.
 
@@ -230,6 +260,6 @@ Text content for `<text>` / `<tspan>` elements.
 
 ### transform?
 
-> `optional` **transform**: \[`number`, `number`, `number`, `number`, `number`, `number`\]
+> `optional` **transform?**: \[`number`, `number`, `number`, `number`, `number`, `number`\]
 
-Defined in: [src/assets/svg/svgParser.ts:46](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/svg/svgParser.ts#L46)
+Defined in: [src/assets/svg/svgParser.ts:83](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/svg/svgParser.ts#L83)

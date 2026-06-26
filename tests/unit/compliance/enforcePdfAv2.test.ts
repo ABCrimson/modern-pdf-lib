@@ -16,11 +16,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { enforcePdfAFull } from '../../../src/compliance/enforcePdfAv2.js';
-import type {
-  EnforcePdfAOptions,
-  EnforcePdfAResult,
-  EnforcementAction,
-} from '../../../src/compliance/enforcePdfAv2.js';
+
 
 // ---------------------------------------------------------------------------
 // Helpers

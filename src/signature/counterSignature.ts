@@ -32,9 +32,7 @@ import {
   encodeInteger,
   encodeUTCTime,
   encodeContextTag,
-  encodeLength,
 } from './pkcs7.js';
-import type { Asn1Node } from './pkcs7.js';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -58,7 +56,6 @@ export interface CounterSignatureInfo {
 // Well-known OIDs
 // ---------------------------------------------------------------------------
 
-const OID_SIGNED_DATA = '1.2.840.113549.1.7.2';
 const OID_DATA = '1.2.840.113549.1.7.1';
 const OID_COUNTER_SIGNATURE = '1.2.840.113549.1.9.6';
 const OID_CONTENT_TYPE = '1.2.840.113549.1.9.3';
@@ -167,44 +164,6 @@ function hexToBytes(hex: string): Uint8Array {
   }
   if (clean.length % 2 !== 0) clean = '0' + clean;
   return Uint8Array.fromHex(clean);
-}
-
-/**
- * Extract the signing time from PKCS#7 signed attributes.
- */
-function extractSigningTimeFromAttrs(signedData: Asn1Node): Date | undefined {
-  try {
-    // Navigate to signerInfos -> first SignerInfo -> signedAttrs
-    for (const child of signedData.children) {
-      // signerInfos SET (tag 0x31)
-      if (child.tag === 0x31 && child.children.length > 0) {
-        const signerInfo = child.children[0]!;
-        for (const siChild of signerInfo.children) {
-          if (siChild.tag === 0xa0) {
-            // signedAttrs — look for signing time
-            for (const attr of siChild.children) {
-              if (attr.children.length >= 2) {
-                const oidBytes = attr.children[0]!.data;
-                const oid = decodeOidBytes(oidBytes);
-                if (oid === OID_SIGNING_TIME) {
-                  const valueSet = attr.children[1]!;
-                  if (valueSet.children.length > 0) {
-                    const timeStr = new TextDecoder('ascii').decode(
-                      valueSet.children[0]!.data,
-                    );
-                    return parseUtcTime(timeStr);
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  } catch {
-    // Fall through
-  }
-  return undefined;
 }
 
 /**
@@ -370,19 +329,6 @@ export async function addCounterSignature(
 
   // Step 8: Build a new signature object that embeds the counter-sig
   // as an unsigned attribute, and append via incremental update
-  const pdfText = decoder.decode(pdf);
-
-  // Build the counter-signature annotation as an incremental object
-  const counterSigDict =
-    `<< /Type /Sig /Filter /Adobe.PPKLite /SubFilter /adbe.pkcs7.detached` +
-    ` /Reason (Counter-signature for signature ${targetSignatureIndex})` +
-    ` /M (D:${formatPdfDate(now)})` +
-    ` /Contents <${sigHash.toHex().padEnd(16384, '0')}>` +
-    ` /ByteRange [0 0 0 0]` +
-    ` >>`;
-
-  // Append via incremental update
-  const counterSigAnnot = encoder.encode(counterSigDict);
   const appendix = buildCounterSignatureAppendix(pdf, targetSignatureIndex, counterSigAttr);
 
   const result = new Uint8Array(pdf.length + appendix.length);
@@ -390,20 +336,6 @@ export async function addCounterSignature(
   result.set(appendix, pdf.length);
 
   return result;
-}
-
-/**
- * Format a Date as a PDF date string.
- */
-function formatPdfDate(date: Date): string {
-  const pad = (n: number, w: number = 2) => n.toString().padStart(w, '0');
-  const year = pad(date.getFullYear(), 4);
-  const month = pad(date.getMonth() + 1);
-  const day = pad(date.getDate());
-  const hours = pad(date.getHours());
-  const minutes = pad(date.getMinutes());
-  const seconds = pad(date.getSeconds());
-  return `${year}${month}${day}${hours}${minutes}${seconds}Z`;
 }
 
 /**
@@ -586,7 +518,7 @@ export function getCounterSignatures(pdf: Uint8Array): CounterSignatureInfo[] {
                   const oid = decodeOidBytes(attr.children[0]!.data);
                   if (oid === OID_COUNTER_SIGNATURE) {
                     // Found a counter-signature
-                    let csSignerName = 'Unknown';
+                    const csSignerName = 'Unknown';
                     let csSignedAt: Date | undefined;
 
                     const csInfoSet = attr.children[1]!;

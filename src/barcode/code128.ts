@@ -452,7 +452,6 @@ export function code128ToOperators(
   const startX = x + quietZone * moduleWidth;
 
   // Draw bars as filled rectangles
-  let currentX = startX;
   let barStart = -1;
 
   for (let i = 0; i <= matrix.modules.length; i++) {

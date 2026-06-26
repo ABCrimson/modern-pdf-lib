@@ -8,7 +8,7 @@
 
 > **buildPkcs7Signature**(`dataHash`, `options`): `Promise`\<`Uint8Array`\<`ArrayBufferLike`\>\>
 
-Defined in: [src/signature/pkcs7.ts:715](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/signature/pkcs7.ts#L715)
+Defined in: [src/signature/pkcs7.ts:715](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/pkcs7.ts#L715)
 
 Build a PKCS#7 (CMS) SignedData structure for a PDF signature.
 

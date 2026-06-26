@@ -17,7 +17,6 @@ import {
 import { PdfForm } from '../../../src/form/pdfForm.js';
 import { PdfTextField } from '../../../src/form/fields/textField.js';
 import { PdfCheckboxField } from '../../../src/form/fields/checkboxField.js';
-import { PdfRadioGroup } from '../../../src/form/fields/radioGroup.js';
 import { PdfDropdownField } from '../../../src/form/fields/dropdownField.js';
 import { PdfListboxField } from '../../../src/form/fields/listboxField.js';
 import { PdfButtonField } from '../../../src/form/fields/buttonField.js';

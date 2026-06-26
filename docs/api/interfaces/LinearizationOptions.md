@@ -6,7 +6,7 @@
 
 # Interface: LinearizationOptions
 
-Defined in: [src/core/linearization.ts:39](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/linearization.ts#L39)
+Defined in: [src/core/linearization.ts:43](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/linearization.ts#L43)
 
 Options for the linearization process.
 
@@ -14,8 +14,8 @@ Options for the linearization process.
 
 ### firstPage?
 
-> `optional` **firstPage**: `number`
+> `optional` **firstPage?**: `number`
 
-Defined in: [src/core/linearization.ts:41](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/linearization.ts#L41)
+Defined in: [src/core/linearization.ts:45](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/linearization.ts#L45)
 
 First page to optimize for (default: 0).

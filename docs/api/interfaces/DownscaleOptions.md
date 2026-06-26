@@ -6,7 +6,7 @@
 
 # Interface: DownscaleOptions
 
-Defined in: [src/assets/image/imageOptimize.ts:24](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/image/imageOptimize.ts#L24)
+Defined in: [src/assets/image/imageOptimize.ts:24](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/imageOptimize.ts#L24)
 
 Options for image downscaling.
 
@@ -18,9 +18,9 @@ Options for image downscaling.
 
 ### algorithm?
 
-> `readonly` `optional` **algorithm**: `"nearest"` \| `"bilinear"` \| `"lanczos"`
+> `readonly` `optional` **algorithm?**: `"nearest"` \| `"bilinear"` \| `"lanczos"`
 
-Defined in: [src/assets/image/imageOptimize.ts:56](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/image/imageOptimize.ts#L56)
+Defined in: [src/assets/image/imageOptimize.ts:56](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/imageOptimize.ts#L56)
 
 Resampling algorithm.
 - `'nearest'`: Nearest-neighbor (fast, blocky)
@@ -33,9 +33,9 @@ Default: `'lanczos'`.
 
 ### maxHeight?
 
-> `readonly` `optional` **maxHeight**: `number`
+> `readonly` `optional` **maxHeight?**: `number`
 
-Defined in: [src/assets/image/imageOptimize.ts:28](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/image/imageOptimize.ts#L28)
+Defined in: [src/assets/image/imageOptimize.ts:28](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/imageOptimize.ts#L28)
 
 Target maximum height in pixels.  The image is scaled proportionally.
 
@@ -43,9 +43,9 @@ Target maximum height in pixels.  The image is scaled proportionally.
 
 ### maxWidth?
 
-> `readonly` `optional` **maxWidth**: `number`
+> `readonly` `optional` **maxWidth?**: `number`
 
-Defined in: [src/assets/image/imageOptimize.ts:26](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/image/imageOptimize.ts#L26)
+Defined in: [src/assets/image/imageOptimize.ts:26](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/imageOptimize.ts#L26)
 
 Target maximum width in pixels.  The image is scaled proportionally.
 
@@ -53,9 +53,9 @@ Target maximum width in pixels.  The image is scaled proportionally.
 
 ### printHeight?
 
-> `readonly` `optional` **printHeight**: `number`
+> `readonly` `optional` **printHeight?**: `number`
 
-Defined in: [src/assets/image/imageOptimize.ts:47](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/image/imageOptimize.ts#L47)
+Defined in: [src/assets/image/imageOptimize.ts:47](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/imageOptimize.ts#L47)
 
 Intended print height in points (1/72 inch).
 Used together with `targetDpi` to compute the target pixel dimensions.
@@ -64,9 +64,9 @@ Used together with `targetDpi` to compute the target pixel dimensions.
 
 ### printWidth?
 
-> `readonly` `optional` **printWidth**: `number`
+> `readonly` `optional` **printWidth?**: `number`
 
-Defined in: [src/assets/image/imageOptimize.ts:42](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/image/imageOptimize.ts#L42)
+Defined in: [src/assets/image/imageOptimize.ts:42](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/imageOptimize.ts#L42)
 
 Intended print width in points (1/72 inch).
 Used together with `targetDpi` to compute the target pixel dimensions.
@@ -75,9 +75,9 @@ Used together with `targetDpi` to compute the target pixel dimensions.
 
 ### targetDpi?
 
-> `readonly` `optional` **targetDpi**: `number`
+> `readonly` `optional` **targetDpi?**: `number`
 
-Defined in: [src/assets/image/imageOptimize.ts:37](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/image/imageOptimize.ts#L37)
+Defined in: [src/assets/image/imageOptimize.ts:37](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/imageOptimize.ts#L37)
 
 Target DPI for the image at its intended print size.  If specified
 along with `printWidth` / `printHeight`, the image is downscaled

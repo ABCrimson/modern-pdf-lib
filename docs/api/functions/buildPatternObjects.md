@@ -8,7 +8,7 @@
 
 > **buildPatternObjects**(`pattern`, `registry`): `object`
 
-Defined in: [src/core/patterns.ts:415](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/patterns.ts#L415)
+Defined in: [src/core/patterns.ts:418](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/patterns.ts#L418)
 
 Materialise a [PatternFill](../interfaces/PatternFill.md) descriptor into actual PDF objects
 in the given registry.

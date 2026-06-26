@@ -519,7 +519,7 @@ function decodeGroup3_1D(data: Uint8Array, params: CCITTParams): Uint8Array {
   return new Uint8Array(output);
 }
 
-function skipEOL(reader: BitReader): void {
+function skipEOL(_reader: BitReader): void {
   // Peek ahead for up to 12 zero bits followed by a 1 (EOL)
   // This is a best-effort skip -- we don't consume bits we shouldn't
   // For simplicity, this is handled within the run-length decoding
@@ -759,48 +759,6 @@ function read2DMode(reader: BitReader): Mode2D {
 }
 
 /**
- * Find the next changing element in a line at or after position `pos`
- * that has the given `color` (0=white, 1=black).
- *
- * A "changing element" is a position where the color changes, or the
- * start of the line if it is the specified color.
- */
-function findChangingElement(line: Uint8Array, pos: number, color: number, columns: number): number {
-  // If pos is at or past end, return columns
-  if (pos >= columns) return columns;
-
-  // If the pixel at pos is already the target color, we need to find
-  // where the color changes to the target color after it first becomes
-  // something else, OR if we're looking for b1/b2 reference elements,
-  // we find the next change.
-  //
-  // Actually, for b1 finding: find the first changing element in the
-  // reference line to the right of a0 whose color is opposite to the
-  // current color of the coding line at a0.
-  //
-  // Let's implement a simpler version: find the next position >= pos
-  // where the line has `color` and the previous position (pos-1) does
-  // not (or pos is 0).
-  // But actually for 2D coding, we need:
-  // b1 = first changing element on reference line to the right of a0
-  //       with color opposite to the current coding color.
-  // b2 = next changing element after b1.
-
-  let i = pos;
-  // Skip pixels that are not the desired color
-  while (i < columns && line[i] !== color) {
-    i++;
-  }
-  if (i >= columns) return columns;
-
-  // Now find where this color ends (the changing element)
-  while (i < columns && line[i] === color) {
-    i++;
-  }
-  return i;
-}
-
-/**
  * Find b1: the position of the first changing element on the reference
  * line to the right of a0, whose color is opposite to the current
  * coding line color at a0.
@@ -873,7 +831,6 @@ function decode2DLine(
     switch (mode) {
       case Mode2D.PASS: {
         // Pass mode: b2 is identified, a0 moves to below b2
-        const searchStart = a0IsBeforeLine ? 0 : a0;
         const b1 = findB1(referenceLine, a0IsBeforeLine ? -1 : a0, currentColor, columns);
         const b2 = findB2(referenceLine, b1, columns);
 

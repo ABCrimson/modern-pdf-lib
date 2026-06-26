@@ -653,7 +653,7 @@ export async function verifySignatureDetailed(
     let revocationChecked = false;
     let revocationStatus: 'good' | 'revoked' | 'unknown' | 'unchecked' = 'unchecked';
     let ocspResponse: { status: string; thisUpdate: Date; nextUpdate?: Date } | undefined;
-    let crlChecked = false;
+    const crlChecked = false;
 
     if (opts.checkRevocation) {
       // Check the cache first if provided

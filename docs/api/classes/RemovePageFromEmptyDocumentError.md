@@ -6,7 +6,7 @@
 
 # Class: RemovePageFromEmptyDocumentError
 
-Defined in: [src/errors.ts:74](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/errors.ts#L74)
+Defined in: [src/errors.ts:74](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/errors.ts#L74)
 
 Thrown when attempting to remove a page from a document that has no pages.
 
@@ -20,7 +20,7 @@ Thrown when attempting to remove a page from a document that has no pages.
 
 > **new RemovePageFromEmptyDocumentError**(`options?`): `RemovePageFromEmptyDocumentError`
 
-Defined in: [src/errors.ts:76](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/errors.ts#L76)
+Defined in: [src/errors.ts:76](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/errors.ts#L76)
 
 #### Parameters
 
@@ -40,9 +40,9 @@ Defined in: [src/errors.ts:76](https://github.com/ABCrimson/modern-pdf-lib/blob/
 
 ### cause?
 
-> `optional` **cause**: `unknown`
+> `optional` **cause?**: `unknown`
 
-Defined in: node\_modules/typescript/lib/lib.es2022.error.d.ts:24
+Defined in: tools/docs/node\_modules/typescript/lib/lib.es2022.error.d.ts:24
 
 #### Inherited from
 
@@ -54,7 +54,7 @@ Defined in: node\_modules/typescript/lib/lib.es2022.error.d.ts:24
 
 > **message**: `string`
 
-Defined in: node\_modules/typescript/lib/lib.es5.d.ts:1075
+Defined in: tools/docs/node\_modules/typescript/lib/lib.es5.d.ts:1075
 
 #### Inherited from
 
@@ -66,7 +66,7 @@ Defined in: node\_modules/typescript/lib/lib.es5.d.ts:1075
 
 > `readonly` **name**: `"RemovePageFromEmptyDocumentError"` = `'RemovePageFromEmptyDocumentError'`
 
-Defined in: [src/errors.ts:75](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/errors.ts#L75)
+Defined in: [src/errors.ts:75](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/errors.ts#L75)
 
 #### Overrides
 
@@ -76,9 +76,9 @@ Defined in: [src/errors.ts:75](https://github.com/ABCrimson/modern-pdf-lib/blob/
 
 ### stack?
 
-> `optional` **stack**: `string`
+> `optional` **stack?**: `string`
 
-Defined in: node\_modules/typescript/lib/lib.es5.d.ts:1076
+Defined in: tools/docs/node\_modules/typescript/lib/lib.es5.d.ts:1076
 
 #### Inherited from
 
@@ -90,7 +90,7 @@ Defined in: node\_modules/typescript/lib/lib.es5.d.ts:1076
 
 > `static` **isError**(`error`): `error is Error`
 
-Defined in: node\_modules/typescript/lib/lib.esnext.error.d.ts:21
+Defined in: tools/docs/node\_modules/typescript/lib/lib.esnext.error.d.ts:21
 
 Indicates whether the argument provided is a built-in Error instance or not.
 

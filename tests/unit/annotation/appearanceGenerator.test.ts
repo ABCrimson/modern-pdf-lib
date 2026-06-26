@@ -14,8 +14,7 @@ import {
   generateInkAppearance,
   generateFreeTextAppearance,
 } from '../../../src/annotation/appearanceGenerator.js';
-import { createAnnotation, buildAnnotationDict } from '../../../src/annotation/pdfAnnotation.js';
-import { PdfAnnotation } from '../../../src/annotation/pdfAnnotation.js';
+import { createAnnotation } from '../../../src/annotation/pdfAnnotation.js';
 import { PdfSquareAnnotation } from '../../../src/annotation/types/shapeAnnotations.js';
 import { PdfCircleAnnotation } from '../../../src/annotation/types/shapeAnnotations.js';
 import { PdfLineAnnotation } from '../../../src/annotation/types/shapeAnnotations.js';
@@ -24,9 +23,7 @@ import { PdfInkAnnotation } from '../../../src/annotation/types/inkAnnotation.js
 import { PdfFreeTextAnnotation } from '../../../src/annotation/types/freeTextAnnotation.js';
 import {
   PdfDict,
-  PdfArray,
   PdfName,
-  PdfNumber,
   PdfStream,
 } from '../../../src/core/pdfObjects.js';
 

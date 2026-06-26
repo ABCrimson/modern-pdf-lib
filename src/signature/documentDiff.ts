@@ -56,7 +56,6 @@ export interface DocumentDiff {
 // Internal helpers
 // ---------------------------------------------------------------------------
 
-const encoder = new TextEncoder();
 const decoder = new TextDecoder('latin1');
 
 /**
@@ -258,7 +257,7 @@ function extractSigningDate(
  */
 export async function diffSignedContent(
   pdf: Uint8Array,
-  signatureIndex?: number | undefined,
+  signatureIndex?: number  ,
 ): Promise<DocumentDiff> {
   const signatures = findSignatures(pdf);
 

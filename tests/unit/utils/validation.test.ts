@@ -172,7 +172,7 @@ describe('validatePositiveNumber', () => {
   });
 
   it('throws for string', () => {
-    expect(() => validatePositiveNumber('10' as any, 'size')).toThrow(ModernPdfError);
+    expect(() => validatePositiveNumber('10', 'size')).toThrow(ModernPdfError);
   });
 
   it('throws for null', () => {

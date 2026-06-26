@@ -19,7 +19,6 @@ import {
   PdfName,
   PdfString,
   PdfRef,
-  PdfBool,
 } from '../core/pdfObjects.js';
 import type { PdfObjectRegistry, PdfObject } from '../core/pdfObjects.js';
 

@@ -11,13 +11,11 @@
 
 import { describe, it, expect } from 'vitest';
 import {
-  PdfAnnotation,
   AnnotationFlags,
   createAnnotation,
   annotationFromDict,
   buildAnnotationDict,
 } from '../../../src/annotation/pdfAnnotation.js';
-import type { AnnotationOptions } from '../../../src/annotation/pdfAnnotation.js';
 import {
   PdfDict,
   PdfArray,

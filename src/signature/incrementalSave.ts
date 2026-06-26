@@ -87,29 +87,6 @@ const encoder = new TextEncoder();
 const decoder = new TextDecoder('latin1');
 
 /**
- * Find a string in a Uint8Array searching forward from startOffset.
- */
-function findForward(
-  data: Uint8Array,
-  needle: string,
-  startOffset: number,
-): number {
-  const needleBytes = encoder.encode(needle);
-  const len = needleBytes.length;
-  for (let i = startOffset; i <= data.length - len; i++) {
-    let match = true;
-    for (let j = 0; j < len; j++) {
-      if (data[i + j] !== needleBytes[j]) {
-        match = false;
-        break;
-      }
-    }
-    if (match) return i;
-  }
-  return -1;
-}
-
-/**
  * Simple FNV-1a hash for change detection.
  */
 function fnv1aHash(data: Uint8Array): number {
@@ -452,7 +429,7 @@ function parseObjectBodies(
 export function appendIncrementalUpdate(
   originalPdf: Uint8Array,
   newObjects: IncrementalObject[],
-  options?: AppendOptions,
+  _options?: AppendOptions,
 ): Uint8Array {
   if (newObjects.length === 0) {
     return originalPdf;

@@ -8,7 +8,7 @@
 
 > **getBookmarks**(`doc`): readonly [`BookmarkNode`](../interfaces/BookmarkNode.md)[]
 
-Defined in: src/core/outlines.ts:150
+Defined in: [src/core/outlines.ts:169](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/outlines.ts#L169)
 
 Return the bookmark tree for the document.
 

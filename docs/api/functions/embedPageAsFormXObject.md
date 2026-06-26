@@ -8,7 +8,7 @@
 
 > **embedPageAsFormXObject**(`page`, `sourceRegistry`, `targetRegistry`, `xObjectName`, `options?`): [`EmbeddedPdfPage`](../interfaces/EmbeddedPdfPage.md)
 
-Defined in: [src/core/pdfEmbed.ts:264](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/pdfEmbed.ts#L264)
+Defined in: [src/core/pdfEmbed.ts:265](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/pdfEmbed.ts#L265)
 
 Embed a single page as a Form XObject in the target registry.
 

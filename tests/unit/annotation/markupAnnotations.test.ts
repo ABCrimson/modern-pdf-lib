@@ -13,8 +13,6 @@ import {
   PdfDict,
   PdfArray,
   PdfName,
-  PdfNumber,
-  PdfObjectRegistry,
 } from '../../../src/core/pdfObjects.js';
 
 describe('PdfHighlightAnnotation', () => {

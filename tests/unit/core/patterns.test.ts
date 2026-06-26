@@ -20,10 +20,6 @@ import {
   buildGradientObjects,
   buildPatternObjects,
 } from '../../../src/core/patterns.js';
-import type {
-  GradientFill,
-  PatternFill,
-} from '../../../src/core/patterns.js';
 import {
   PdfObjectRegistry,
   PdfDict,
@@ -514,7 +510,7 @@ describe('buildGradientObjects', () => {
     // /Coords = [0, 0, 200, 0]
     const coords = shadingDict.get('/Coords') as PdfArray;
     expect(coords.items).toHaveLength(4);
-    expect(coords.items.map((n: any) => n.value)).toEqual([0, 0, 200, 0]);
+    expect(coords.items.map((n) => (n as PdfNumber).value)).toEqual([0, 0, 200, 0]);
 
     // /Extend = [true, true]
     const extend = shadingDict.get('/Extend') as PdfArray;
@@ -534,15 +530,15 @@ describe('buildGradientObjects', () => {
 
     // /C0 = [1, 0, 0] (red)
     const c0 = fnDict.get('/C0') as PdfArray;
-    expect(c0.items.map((n: any) => n.value)).toEqual([1, 0, 0]);
+    expect(c0.items.map((n) => (n as PdfNumber).value)).toEqual([1, 0, 0]);
 
     // /C1 = [0, 0, 1] (blue)
     const c1 = fnDict.get('/C1') as PdfArray;
-    expect(c1.items.map((n: any) => n.value)).toEqual([0, 0, 1]);
+    expect(c1.items.map((n) => (n as PdfNumber).value)).toEqual([0, 0, 1]);
 
     // /Domain = [0, 1]
     const domain = fnDict.get('/Domain') as PdfArray;
-    expect(domain.items.map((n: any) => n.value)).toEqual([0, 1]);
+    expect(domain.items.map((n) => (n as PdfNumber).value)).toEqual([0, 1]);
   });
 
   it('creates a stitching function (Type 3) for 3-stop linear gradient', () => {
@@ -566,7 +562,7 @@ describe('buildGradientObjects', () => {
 
     // Domain = [0, 1]
     const domain = fnDict.get('/Domain') as PdfArray;
-    expect(domain.items.map((n: any) => n.value)).toEqual([0, 1]);
+    expect(domain.items.map((n) => (n as PdfNumber).value)).toEqual([0, 1]);
 
     // 2 sub-functions (one per segment: red->green, green->blue)
     const subFunctions = fnDict.get('/Functions') as PdfArray;
@@ -587,7 +583,7 @@ describe('buildGradientObjects', () => {
     // Encode array: 4 entries (2 per sub-function: [0,1,0,1])
     const encode = fnDict.get('/Encode') as PdfArray;
     expect(encode.items).toHaveLength(4);
-    expect(encode.items.map((n: any) => n.value)).toEqual([0, 1, 0, 1]);
+    expect(encode.items.map((n) => (n as PdfNumber).value)).toEqual([0, 1, 0, 1]);
   });
 
   it('creates correct stitching for 4 stops (3 segments)', () => {
@@ -640,7 +636,7 @@ describe('buildGradientObjects', () => {
     // Coords should have 6 values: [x0, y0, r0, x1, y1, r1]
     const coords = shadingDict.get('/Coords') as PdfArray;
     expect(coords.items).toHaveLength(6);
-    expect(coords.items.map((n: any) => n.value)).toEqual([50, 50, 0, 50, 50, 100]);
+    expect(coords.items.map((n) => (n as PdfNumber).value)).toEqual([50, 50, 0, 50, 50, 100]);
   });
 
   it('respects extend: false in the Extend array', () => {
@@ -722,7 +718,7 @@ describe('buildPatternObjects', () => {
 
     // /BBox = [0, 0, 20, 20]
     const bbox = dict.get('/BBox') as PdfArray;
-    expect(bbox.items.map((n: any) => n.value)).toEqual([0, 0, 20, 20]);
+    expect(bbox.items.map((n) => (n as PdfNumber).value)).toEqual([0, 0, 20, 20]);
 
     // /XStep and /YStep
     expect((dict.get('/XStep') as PdfNumber).value).toBe(20);
@@ -784,7 +780,7 @@ describe('buildPatternObjects', () => {
     const dict = stream.dict;
 
     const bbox = dict.get('/BBox') as PdfArray;
-    expect(bbox.items.map((n: any) => n.value)).toEqual([0, 0, 35, 42]);
+    expect(bbox.items.map((n) => (n as PdfNumber).value)).toEqual([0, 0, 35, 42]);
 
     expect((dict.get('/XStep') as PdfNumber).value).toBe(35);
     expect((dict.get('/YStep') as PdfNumber).value).toBe(42);

@@ -22,11 +22,8 @@ import {
   encodeOID,
   encodeOctetString,
   encodeInteger,
-  encodeContextTag,
-  encodeLength,
   parseDerTlv,
   decodeOidBytes,
-  extractIssuerAndSerial,
   extractSubjectPublicKeyInfo,
   toBuffer,
 } from './pkcs7.js';
@@ -88,10 +85,7 @@ export interface OcspResult {
 // OID constants
 // ---------------------------------------------------------------------------
 
-const OID_SHA256 = '2.16.840.1.101.3.4.2.1';
 const OID_SHA1 = '1.3.14.3.2.26';
-const OID_OCSP_BASIC = '1.3.6.1.5.5.7.48.1.1';
-const OID_OCSP_NONCE = '1.3.6.1.5.5.7.48.1.2';
 const OID_ID_AD_OCSP = '1.3.6.1.5.5.7.48.1';
 const OID_AIA = '1.3.6.1.5.5.7.1.1';
 
@@ -121,47 +115,11 @@ function encodeNull(): Uint8Array {
 }
 
 /**
- * Concatenate multiple Uint8Arrays.
- */
-function concat(...arrays: Uint8Array[]): Uint8Array {
-  let totalLength = 0;
-  for (const arr of arrays) totalLength += arr.length;
-  const result = new Uint8Array(totalLength);
-  let offset = 0;
-  for (const arr of arrays) {
-    result.set(arr, offset);
-    offset += arr.length;
-  }
-  return result;
-}
-
-/**
- * Encode an explicit context-specific primitive tag (non-constructed).
- */
-function encodePrimitiveContextTag(tag: number, contents: Uint8Array): Uint8Array {
-  const tagByte = 0x80 | tag;
-  const len = encodeLength(contents.length);
-  const result = new Uint8Array(1 + len.length + contents.length);
-  result[0] = tagByte;
-  result.set(len, 1);
-  result.set(contents, 1 + len.length);
-  return result;
-}
-
-/**
  * Compute SHA-1 hash using Web Crypto.
  * OCSP uses SHA-1 for issuer name/key hashes by default (RFC 6960).
  */
 async function sha1(data: Uint8Array): Promise<Uint8Array> {
   const digest = await globalThis.crypto.subtle.digest('SHA-1', toBuffer(data));
-  return new Uint8Array(digest);
-}
-
-/**
- * Compute SHA-256 hash using Web Crypto.
- */
-async function sha256(data: Uint8Array): Promise<Uint8Array> {
-  const digest = await globalThis.crypto.subtle.digest('SHA-256', toBuffer(data));
   return new Uint8Array(digest);
 }
 
@@ -206,23 +164,6 @@ function parseAsn1Time(node: Asn1Node): Date {
   return parseUtcTime(timeStr);
 }
 
-
-/**
- * Extract the raw issuer Name bytes from a DER-encoded certificate's
- * TBSCertificate.
- */
-function extractIssuerRawBytes(certDer: Uint8Array): Uint8Array {
-  const cert = parseDerTlv(certDer, 0);
-  const tbsCert = cert.children[0]!;
-  let idx = 0;
-  if (tbsCert.children[0]!.tag === 0xa0) {
-    idx = 1;
-  }
-  // issuer is at idx+2
-  const issuerNode = tbsCert.children[idx + 2]!;
-  const issuerStart = issuerNode.offset + (tbsCert.data.byteOffset - certDer.byteOffset);
-  return certDer.subarray(issuerStart, issuerStart + issuerNode.totalLength);
-}
 
 /**
  * Extract the subject Name bytes from a DER-encoded certificate's
@@ -426,7 +367,6 @@ export function parseOcspResponse(response: Uint8Array): OcspResponse {
   const responseBytes = responseBytesWrapper.children[0]!;
 
   // ResponseBytes: SEQUENCE { responseType OID, response OCTET STRING }
-  const responseTypeNode = responseBytes.children[0]!;
   const responseOctet = responseBytes.children[1]!;
 
   // Parse the BasicOCSPResponse from the OCTET STRING

@@ -8,7 +8,7 @@
 
 > **closePathOp**(): `string`
 
-Defined in: [src/core/operators/graphics.ts:104](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/operators/graphics.ts#L104)
+Defined in: [src/core/operators/graphics.ts:104](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/operators/graphics.ts#L104)
 
 Close the current sub-path by appending a straight line from the
 current point to the starting point (`h`).

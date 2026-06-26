@@ -6,7 +6,7 @@
 
 # Interface: LayoutCombedOptions
 
-Defined in: [src/core/layout.ts:81](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/layout.ts#L81)
+Defined in: [src/core/layout.ts:81](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/layout.ts#L81)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [src/core/layout.ts:81](https://github.com/ABCrimson/modern-pdf-lib/
 
 > **cellCount**: `number`
 
-Defined in: [src/core/layout.ts:84](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/layout.ts#L84)
+Defined in: [src/core/layout.ts:84](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/layout.ts#L84)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [src/core/layout.ts:84](https://github.com/ABCrimson/modern-pdf-lib/
 
 > **cellWidth**: `number`
 
-Defined in: [src/core/layout.ts:85](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/layout.ts#L85)
+Defined in: [src/core/layout.ts:85](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/layout.ts#L85)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [src/core/layout.ts:85](https://github.com/ABCrimson/modern-pdf-lib/
 
 > **font**: [`FontRef`](FontRef.md)
 
-Defined in: [src/core/layout.ts:82](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/layout.ts#L82)
+Defined in: [src/core/layout.ts:82](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/layout.ts#L82)
 
 ***
 
@@ -38,4 +38,4 @@ Defined in: [src/core/layout.ts:82](https://github.com/ABCrimson/modern-pdf-lib/
 
 > **fontSize**: `number`
 
-Defined in: [src/core/layout.ts:83](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/layout.ts#L83)
+Defined in: [src/core/layout.ts:83](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/layout.ts#L83)

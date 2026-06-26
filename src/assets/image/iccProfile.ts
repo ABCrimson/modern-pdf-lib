@@ -139,14 +139,15 @@ export function parseIccDescription(data: Uint8Array): string | undefined {
     const strEnd = Math.min(tagOffset + 12 + descLen - 1, tagOffset + tagSize);
     if (strEnd <= tagOffset + 12) return undefined;
 
-    const chars: string[] = [];
+    // Find the null terminator within the string range
+    let nullIdx = strEnd;
     for (let j = tagOffset + 12; j < strEnd; j++) {
-      const c = data[j]!;
-      if (c === 0) break; // null terminator
-      chars.push(String.fromCharCode(c));
+      if (data[j] === 0) { nullIdx = j; break; }
     }
 
-    return chars.length > 0 ? chars.join('') : undefined;
+    const strBytes = data.subarray(tagOffset + 12, nullIdx);
+    if (strBytes.length === 0) return undefined;
+    return new TextDecoder('ascii').decode(strBytes);
   }
 
   return undefined;

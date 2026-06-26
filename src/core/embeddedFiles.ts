@@ -243,7 +243,7 @@ export function getAttachments(
 export function buildEmbeddedFilesNameTree(
   files: PdfRef[],
   names: string[],
-  registry: PdfObjectRegistry,
+  _registry: PdfObjectRegistry,
 ): PdfDict {
   // Build the /Names array: [name1 ref1 name2 ref2 ...]
   const namesArray = new PdfArray();

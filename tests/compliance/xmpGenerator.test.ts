@@ -129,7 +129,6 @@ describe('generatePdfAXmp', () => {
   });
 
   it('uses current date as default for CreateDate and ModifyDate', () => {
-    const before = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
     const xmp = generatePdfAXmp({ part: 1, conformance: 'B' });
     // Dates should start with today's date prefix
     expect(xmp).toMatch(/<xmp:CreateDate>\d{4}-\d{2}-\d{2}T/);

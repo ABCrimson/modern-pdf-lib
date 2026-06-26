@@ -8,7 +8,7 @@
 
 > **isJpegWasmReady**(): `boolean`
 
-Defined in: [src/wasm/jpeg/bridge.ts:124](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/wasm/jpeg/bridge.ts#L124)
+Defined in: [src/wasm/jpeg/bridge.ts:105](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/wasm/jpeg/bridge.ts#L105)
 
 Check whether the JPEG WASM module has been initialized.
 

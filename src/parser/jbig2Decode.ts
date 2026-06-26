@@ -23,7 +23,7 @@
  */
 
 import type { PdfDict } from '../core/pdfObjects.js';
-import { PdfNumber } from '../core/pdfObjects.js';
+
 
 // ---------------------------------------------------------------------------
 // WASM bridge (optional acceleration)
@@ -1121,7 +1121,6 @@ class JBIG2Decoder {
 
     const htMMR = htFlags & 1;
     const htTemplate = (htFlags >>> 1) & 3;
-    const enableSkip = (htFlags >>> 3) & 1;
     const htCombOp = (htFlags >>> 4) & 7;
     const htDefPixel = (htFlags >>> 7) & 1;
 
@@ -1298,7 +1297,6 @@ class JBIG2Decoder {
     }
 
     const arithData = data.subarray(offset);
-    const rowBytes = Math.ceil(regionWidth / 8);
     let bitmap: Uint8Array;
 
     if (refBitmap) {
@@ -2038,6 +2036,27 @@ class ArithmeticDecoder {
 // ---------------------------------------------------------------------------
 
 /**
+ * Magnitude classes for the JBIG2 integer-arithmetic decoding procedure
+ * (ITU-T T.88 §A.3). A unary prefix of bits selects a class; the class fixes
+ * the number of magnitude bits to read (`width`) and the value `offset` added
+ * to them. The classes must tile `[0, ∞)` contiguously — each `offset` equals
+ * the previous `offset + 2 ** previous width` — or the codec desyncs.
+ *
+ * @internal
+ */
+export const JBIG2_INTEGER_MAGNITUDE_CLASSES: readonly {
+  readonly width: number;
+  readonly offset: number;
+}[] = [
+  { width: 2, offset: 0 }, //     prefix 0     → [0, 3]
+  { width: 4, offset: 4 }, //     prefix 10    → [4, 19]
+  { width: 6, offset: 20 }, //    prefix 110   → [20, 83]
+  { width: 8, offset: 84 }, //    prefix 1110  → [84, 339]
+  { width: 12, offset: 340 }, //  prefix 11110 → [340, 4435]
+  { width: 32, offset: 4436 }, // prefix 11111 → [4436, …]
+];
+
+/**
  * Decodes signed integers using the JBIG2 arithmetic integer procedure.
  *
  * The procedure uses a 9-bit context model (512 entries) with a
@@ -2066,20 +2085,17 @@ class IntegerDecoder {
 
     const sign = readBits(1);
 
-    let value: number;
-    if (readBits(1) === 0) {
-      value = readBits(2);                  // [0, 3]
-    } else if (readBits(1) === 0) {
-      value = readBits(2) + 4;              // [4, 7]
-    } else if (readBits(1) === 0) {
-      value = readBits(4) + 20;             // [20, 35]
-    } else if (readBits(1) === 0) {
-      value = readBits(8) + 84;             // [84, 339]
-    } else if (readBits(1) === 0) {
-      value = readBits(12) + 340;           // [340, 4435]
-    } else {
-      value = readBits(32) + 4436;          // [4436, ...]
+    // ITU-T T.88 §A.3: read up to 5 unary prefix bits; the first 0 selects
+    // magnitude classes 0-4, and an all-ones prefix falls through to class 5.
+    let selected = JBIG2_INTEGER_MAGNITUDE_CLASSES.at(-1);
+    for (let i = 0; i < JBIG2_INTEGER_MAGNITUDE_CLASSES.length - 1; i++) {
+      if (readBits(1) === 0) {
+        selected = JBIG2_INTEGER_MAGNITUDE_CLASSES[i];
+        break;
+      }
     }
+    const { width, offset } = selected ?? { width: 32, offset: 4436 };
+    const value = readBits(width) + offset;
 
     if (sign) {
       return value > 0 ? -value : null;     // null = OOB

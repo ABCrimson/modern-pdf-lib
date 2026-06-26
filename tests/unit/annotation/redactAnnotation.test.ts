@@ -8,7 +8,6 @@ import {
   PdfDict,
   PdfName,
   PdfArray,
-  PdfNumber,
   PdfString,
 } from '../../../src/core/pdfObjects.js';
 

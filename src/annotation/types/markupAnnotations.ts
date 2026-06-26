@@ -18,7 +18,7 @@ import {
 } from '../../core/pdfObjects.js';
 import type { PdfObject, PdfRef } from '../../core/pdfObjects.js';
 import { PdfAnnotation, buildAnnotationDict } from '../pdfAnnotation.js';
-import type { AnnotationType, AnnotationOptions } from '../pdfAnnotation.js';
+import type { AnnotationOptions } from '../pdfAnnotation.js';
 import {
   generateHighlightAppearance,
   generateUnderlineAppearance,
@@ -83,7 +83,7 @@ export class PdfHighlightAnnotation extends PdfAnnotation {
    */
   static createForRect(
     rect: [number, number, number, number],
-    color?: { r: number; g: number; b: number } | undefined,
+    color?: { r: number; g: number; b: number }  ,
   ): PdfHighlightAnnotation {
     return PdfHighlightAnnotation.create({
       rect,
@@ -93,7 +93,7 @@ export class PdfHighlightAnnotation extends PdfAnnotation {
 
   static fromDict(
     dict: PdfDict,
-    resolver?: (ref: PdfRef) => PdfObject | undefined,
+    _resolver?: (ref: PdfRef) => PdfObject | undefined,
   ): PdfHighlightAnnotation {
     return new PdfHighlightAnnotation(dict);
   }
@@ -137,7 +137,7 @@ export class PdfUnderlineAnnotation extends PdfAnnotation {
 
   static fromDict(
     dict: PdfDict,
-    resolver?: (ref: PdfRef) => PdfObject | undefined,
+    _resolver?: (ref: PdfRef) => PdfObject | undefined,
   ): PdfUnderlineAnnotation {
     return new PdfUnderlineAnnotation(dict);
   }
@@ -181,7 +181,7 @@ export class PdfSquigglyAnnotation extends PdfAnnotation {
 
   static fromDict(
     dict: PdfDict,
-    resolver?: (ref: PdfRef) => PdfObject | undefined,
+    _resolver?: (ref: PdfRef) => PdfObject | undefined,
   ): PdfSquigglyAnnotation {
     return new PdfSquigglyAnnotation(dict);
   }
@@ -225,7 +225,7 @@ export class PdfStrikeOutAnnotation extends PdfAnnotation {
 
   static fromDict(
     dict: PdfDict,
-    resolver?: (ref: PdfRef) => PdfObject | undefined,
+    _resolver?: (ref: PdfRef) => PdfObject | undefined,
   ): PdfStrikeOutAnnotation {
     return new PdfStrikeOutAnnotation(dict);
   }

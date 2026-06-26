@@ -31,7 +31,7 @@ import {
   removeBookmark,
   removeAllBookmarks,
 } from '../../../src/core/outlines.js';
-import type { BookmarkRef, BookmarkNode } from '../../../src/core/outlines.js';
+
 
 // ---------------------------------------------------------------------------
 // Helpers

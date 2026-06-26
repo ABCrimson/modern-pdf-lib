@@ -22,7 +22,6 @@ import {
   PdfObjectRegistry,
   PageSizes,
   rgb,
-  grayscale,
 } from '../../../src/index.js';
 import type {
   TransparencyGroupOptions,
@@ -437,7 +436,7 @@ describe('Soft masks', () => {
   });
 
   it('applySoftMask emits gs operator in content stream', () => {
-    const { page, registry } = makePage();
+    const { page } = makePage();
 
     const doc = createPdf();
     const mask = doc.createSoftMask(100, 100, (b) => {

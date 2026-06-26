@@ -19,11 +19,9 @@ import {
   createPdf,
   loadPdf,
   optimizeAllImages,
-  extractImages,
   PageSizes,
 } from '../../src/index.js';
 import type {
-  BatchOptimizeOptions,
   OptimizationReport,
 } from '../../src/index.js';
 
@@ -254,7 +252,7 @@ describe('parallel optimization — with filters', () => {
     expect(report.skippedByFilter).toBe(2);
 
     // Filtered pages should be 0 and 3
-    const filteredPages = filtered.map((e) => e.pageIndex).sort();
+    const filteredPages = filtered.map((e) => e.pageIndex).sort((a, b) => a - b);
     expect(filteredPages).toEqual([0, 3]);
   });
 

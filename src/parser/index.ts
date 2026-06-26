@@ -24,6 +24,8 @@ export type { LoadPdfOptions } from './documentParser.js';
 
 export { extractText, extractTextWithPositions } from './textExtractor.js';
 export type { TextItem, TextExtractionOptions } from './textExtractor.js';
+export { searchTextItems } from './textSearch.js';
+export type { TextMatch, SearchRect, SearchOptions } from './textSearch.js';
 
 // ---------------------------------------------------------------------------
 // Content stream parsing

@@ -6,7 +6,7 @@
 
 # Interface: SignatureVerificationResult
 
-Defined in: [src/signature/signatureVerifier.ts:44](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/signature/signatureVerifier.ts#L44)
+Defined in: [src/signature/signatureVerifier.ts:44](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/signatureVerifier.ts#L44)
 
 Result of verifying a single signature.
 
@@ -14,9 +14,9 @@ Result of verifying a single signature.
 
 ### certificateValid?
 
-> `optional` **certificateValid**: `boolean`
+> `optional` **certificateValid?**: `boolean`
 
-Defined in: [src/signature/signatureVerifier.ts:56](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/signature/signatureVerifier.ts#L56)
+Defined in: [src/signature/signatureVerifier.ts:56](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/signatureVerifier.ts#L56)
 
 Whether the cryptographic signature is valid.
 
@@ -26,7 +26,7 @@ Whether the cryptographic signature is valid.
 
 > **fieldName**: `string`
 
-Defined in: [src/signature/signatureVerifier.ts:46](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/signature/signatureVerifier.ts#L46)
+Defined in: [src/signature/signatureVerifier.ts:46](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/signatureVerifier.ts#L46)
 
 The signature field name.
 
@@ -36,7 +36,7 @@ The signature field name.
 
 > **integrityValid**: `boolean`
 
-Defined in: [src/signature/signatureVerifier.ts:54](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/signature/signatureVerifier.ts#L54)
+Defined in: [src/signature/signatureVerifier.ts:54](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/signatureVerifier.ts#L54)
 
 Whether the ByteRange hash matches the signed hash.
 
@@ -44,9 +44,9 @@ Whether the ByteRange hash matches the signed hash.
 
 ### reason?
 
-> `optional` **reason**: `string`
+> `optional` **reason?**: `string`
 
-Defined in: [src/signature/signatureVerifier.ts:52](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/signature/signatureVerifier.ts#L52)
+Defined in: [src/signature/signatureVerifier.ts:52](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/signatureVerifier.ts#L52)
 
 Reason for signing (if present).
 
@@ -56,7 +56,7 @@ Reason for signing (if present).
 
 > **signedBy**: `string`
 
-Defined in: [src/signature/signatureVerifier.ts:48](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/signature/signatureVerifier.ts#L48)
+Defined in: [src/signature/signatureVerifier.ts:48](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/signatureVerifier.ts#L48)
 
 Subject CN from the certificate.
 
@@ -64,9 +64,9 @@ Subject CN from the certificate.
 
 ### signingDate?
 
-> `optional` **signingDate**: `Date`
+> `optional` **signingDate?**: `Date`
 
-Defined in: [src/signature/signatureVerifier.ts:58](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/signature/signatureVerifier.ts#L58)
+Defined in: [src/signature/signatureVerifier.ts:58](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/signatureVerifier.ts#L58)
 
 Signing date (if present in signed attributes).
 
@@ -76,6 +76,6 @@ Signing date (if present in signed attributes).
 
 > **valid**: `boolean`
 
-Defined in: [src/signature/signatureVerifier.ts:50](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/signature/signatureVerifier.ts#L50)
+Defined in: [src/signature/signatureVerifier.ts:50](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/signatureVerifier.ts#L50)
 
 Overall validity (integrity AND signature).

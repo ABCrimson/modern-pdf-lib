@@ -8,7 +8,7 @@
 
 > **buildAnnotationDict**(`type`, `options`): [`PdfDict`](../classes/PdfDict.md)
 
-Defined in: [src/annotation/pdfAnnotation.ts:145](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/annotation/pdfAnnotation.ts#L145)
+Defined in: [src/annotation/pdfAnnotation.ts:155](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/annotation/pdfAnnotation.ts#L155)
 
 Build an annotation dictionary from options.
 

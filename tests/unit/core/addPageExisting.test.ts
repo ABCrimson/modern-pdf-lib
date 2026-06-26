@@ -4,9 +4,8 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { createPdf, PdfDocument, PageSizes } from '../../../src/index.js';
+import { createPdf, PageSizes } from '../../../src/index.js';
 import { PdfPage } from '../../../src/core/pdfPage.js';
-import { PdfObjectRegistry } from '../../../src/core/pdfObjects.js';
 
 // ---------------------------------------------------------------------------
 // Tests
@@ -31,7 +30,7 @@ describe('addPage(existingPage)', () => {
 
     const p1 = doc.addPage(PageSizes.A4);
     const existingPage = new PdfPage(300, 500, registry);
-    const p3 = doc.addPage(existingPage);
+    doc.addPage(existingPage);
     const p4 = doc.addPage(PageSizes.Letter);
 
     const pages = doc.getPages();

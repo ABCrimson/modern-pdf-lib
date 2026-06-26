@@ -513,7 +513,7 @@ export class XrefParser {
           sectionEntries = result.entries;
           trailerDict = result.trailerDict;
         }
-      } catch (err) {
+      } catch  {
         // If parsing this section fails but we already have a primary
         // trailer, stop following the chain
         if (primaryTrailer !== undefined) {
@@ -979,7 +979,7 @@ export class XrefParser {
     if (rootRef === undefined) {
       for (const [objNum, entry] of entries) {
         try {
-          const obj = this.objectParser.parseObjectAt(entry.offset);
+          this.objectParser.parseObjectAt(entry.offset);
           // parseObjectAt will return the object value; for indirect objects
           // we skip the "N G obj" header. Let's try parseIndirectObjectAt.
           const { object } = this.objectParser.parseIndirectObjectAt(entry.offset);
@@ -1160,7 +1160,7 @@ export class XrefParser {
   private readXrefEntryAt(pos: number): { text: string; nextPos: number } {
     // Try to read exactly 20 bytes first (the standard entry length)
     const end = Math.min(pos + 20, this.data.length);
-    let text = TEXT_DECODER.decode(this.data.subarray(pos, end));
+    const text = TEXT_DECODER.decode(this.data.subarray(pos, end));
 
     // If we have a valid entry in those 20 bytes, use it
     if (/\d{10}\s+\d{5}\s+[fn]/.test(text)) {

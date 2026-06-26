@@ -8,7 +8,7 @@
 
 > **dataMatrixToOperators**(`matrix`, `x`, `y`, `options?`): `string`
 
-Defined in: [src/barcode/dataMatrix.ts:626](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/barcode/dataMatrix.ts#L626)
+Defined in: [src/barcode/dataMatrix.ts:619](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/barcode/dataMatrix.ts#L619)
 
 Convert a [DataMatrixResult](../interfaces/DataMatrixResult.md) to PDF content-stream operators.
 

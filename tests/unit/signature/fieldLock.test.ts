@@ -356,7 +356,7 @@ describe('prepareForSigning with fieldLock', () => {
     expect(text).toContain('/Action /Include');
 
     // ByteRange should still be valid
-    const [off1, len1, off2, len2] = byteRange.byteRange;
+    const [, len1, , len2] = byteRange.byteRange;
     expect(len1 + len2 + byteRange.contentsLength).toBe(preparedPdf.length);
   });
 });

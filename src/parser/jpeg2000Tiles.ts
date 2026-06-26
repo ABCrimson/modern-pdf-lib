@@ -88,14 +88,8 @@ export interface Region {
 /** Start of Codestream. */
 const MARKER_SOC = 0xff4f;
 
-/** Image and tile size. */
-const MARKER_SIZ = 0xff51;
-
 /** Start of tile-part. */
 const MARKER_SOT = 0xff90;
-
-/** Start of data. */
-const MARKER_SOD = 0xff93;
 
 /** End of codestream. */
 const MARKER_EOC = 0xffd9;

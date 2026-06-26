@@ -8,7 +8,7 @@
 
 > **setPageLabels**(`doc`, `labels`): `void`
 
-Defined in: src/core/pageLabels.ts:135
+Defined in: [src/core/pageLabels.ts:123](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/pageLabels.ts#L123)
 
 Set the page label ranges for the document.
 

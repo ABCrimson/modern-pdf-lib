@@ -481,7 +481,7 @@ function encodeJpegBaseline(
     writer.writeU16BE(19 + total);
     writer.writeByte((cls << 4) | id);
     for (let i = 1; i <= 16; i++) writer.writeByte(bits[i]!);
-    writer.writeBytes(vals.slice(0, total));
+    writer.writeBytes(vals.subarray(0, total));
   }
 
   writeDHT(0, 0, DC_LUMA_BITS, DC_LUMA_VALS);
@@ -723,7 +723,7 @@ export function recompressWebP(
   pixels: Uint8Array,
   width: number,
   height: number,
-  quality?: number | undefined,
+  quality?: number  ,
 ): Uint8Array {
   const q = quality ?? 85;
   const pixelCount = width * height;
@@ -775,7 +775,7 @@ export function recompressWebP(
  */
 export function webpToJpeg(
   webpData: Uint8Array,
-  quality?: number | undefined,
+  _quality?: number  ,
 ): Uint8Array {
   // Validate WebP magic bytes
   if (

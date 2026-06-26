@@ -8,7 +8,7 @@
 
 > **movePage**(`doc`, `fromIndex`, `toIndex`): `void`
 
-Defined in: [src/core/pageManipulation.ts:203](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/pageManipulation.ts#L203)
+Defined in: [src/core/pageManipulation.ts:197](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/pageManipulation.ts#L197)
 
 Move a page from one position to another within the document.
 

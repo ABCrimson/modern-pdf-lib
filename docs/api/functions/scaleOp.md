@@ -8,7 +8,7 @@
 
 > **scaleOp**(`sx`, `sy`): `string`
 
-Defined in: [src/core/operators/state.ts:141](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/operators/state.ts#L141)
+Defined in: [src/core/operators/state.ts:141](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/operators/state.ts#L141)
 
 Produce a `cm` operator that applies a **uniform scale** about the
 origin.

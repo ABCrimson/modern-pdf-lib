@@ -476,10 +476,7 @@ function computePageStats(
     const objBytes = objects.get(page.pageObjNum);
     if (objBytes) {
       const objStr = decoder.decode(objBytes);
-      const refs = objStr.matchAll(/(\d+)\s+\d+\s+R/g);
-      for (const _ref of refs) {
-        sharedObjRefCount++;
-      }
+      sharedObjRefCount = [...objStr.matchAll(/(\d+)\s+\d+\s+R/g)].length;
     }
 
     stats.push({

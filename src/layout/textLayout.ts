@@ -36,8 +36,6 @@ import {
   stroke,
   setLineWidth,
   setDashPattern,
-  rectangle,
-  fill,
 } from '../core/operators/graphics.js';
 import { applyFillColor, applyStrokeColor } from '../core/operators/color.js';
 import type { Color } from '../core/operators/color.js';
@@ -379,7 +377,6 @@ function tokenize(
 /** Word spacing limits for justified text (as fractions of normal space). */
 const MIN_SPACE_FACTOR = 0.5;
 const MAX_SPACE_FACTOR = 2.5;
-const IDEAL_SPACE_FACTOR = 1.0;
 
 /**
  * Break tokens into lines using a simplified Knuth-Plass approach.
@@ -581,13 +578,6 @@ function calculateJustifySpacing(
 // ---------------------------------------------------------------------------
 // PDF operator emission
 // ---------------------------------------------------------------------------
-
-/** Format a number for PDF output. */
-function n(value: number): string {
-  if (Number.isInteger(value)) return value.toString();
-  const s = value.toFixed(4).replace(/\.?0+$/, '');
-  return s === '-0' ? '0' : s;
-}
 
 /**
  * Render a single laid-out line to PDF operators.
@@ -940,7 +930,6 @@ export function layoutColumns(
 
     if (fullResult.overflow === '' && fullResult.lineCount > 0) {
       // Calculate balanced height: distribute lines evenly
-      const measure = measureFn ?? defaultMeasure;
       const normalizedSpans = normalizeSpans(spans);
       const defaultFontSize = normalizedSpans[0]?.fontSize ?? 12;
       const lineHeightMult = paragraphOptions?.lineHeight ?? 1.2;

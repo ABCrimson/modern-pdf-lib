@@ -8,7 +8,7 @@
 
 > **isGrayscaleImage**(`pixels`, `width`, `height`, `channels`, `tolerance?`): `boolean`
 
-Defined in: [src/assets/image/grayscaleDetect.ts:43](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/image/grayscaleDetect.ts#L43)
+Defined in: [src/assets/image/grayscaleDetect.ts:43](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/grayscaleDetect.ts#L43)
 
 Check whether an RGB/RGBA image is effectively grayscale.
 
@@ -38,9 +38,9 @@ Image height in pixels.
 
 ### channels
 
-Number of channels: 3 (RGB) or 4 (RGBA).
+`3` \| `4`
 
-`3` | `4`
+Number of channels: 3 (RGB) or 4 (RGBA).
 
 ### tolerance?
 

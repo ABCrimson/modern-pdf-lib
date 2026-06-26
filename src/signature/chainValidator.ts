@@ -24,7 +24,6 @@ import {
   decodeOidBytes,
   extractIssuerAndSerial,
   extractSubjectPublicKeyInfo,
-  detectKeyAlgorithm,
   detectNamedCurve,
   toBuffer,
   getSubtle,
@@ -98,8 +97,6 @@ export interface ChainValidationResult {
 // ---------------------------------------------------------------------------
 
 const OID_BASIC_CONSTRAINTS = '2.5.29.19';
-const OID_RSA_ENCRYPTION = '1.2.840.113549.1.1.1';
-const OID_EC_PUBLIC_KEY = '1.2.840.10045.2.1';
 
 const OID_SHA256_WITH_RSA = '1.2.840.113549.1.1.11';
 const OID_SHA384_WITH_RSA = '1.2.840.113549.1.1.12';

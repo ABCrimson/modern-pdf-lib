@@ -41,12 +41,12 @@ function checkJava(): void {
     if (match) {
       const major = parseInt(match[1]!, 10);
       if (major < 11) {
-        console.error(`Java ${major} detected — veraPDF requires Java 11+.`);
+        
         process.exit(2);
       }
     }
   } catch {
-    console.error('Java not found. veraPDF requires Java 11+ on the PATH.');
+    
     process.exit(2);
   }
 }
@@ -87,7 +87,7 @@ async function ensureVeraPdf(): Promise<string> {
   const existing = await resolveVeraPdfBinary();
   if (existing) return existing;
 
-  console.log(`Downloading veraPDF ${VERAPDF_VERSION}...`);
+  
   await mkdir(CACHE_DIR, { recursive: true });
 
   const response = await fetch(VERAPDF_URL);
@@ -98,7 +98,7 @@ async function ensureVeraPdf(): Promise<string> {
   const zipPath = join(CACHE_DIR, 'verapdf.zip');
   const buffer = new Uint8Array(await response.arrayBuffer());
   await writeFile(zipPath, buffer);
-  console.log(`Downloaded ${(buffer.length / 1024 / 1024).toFixed(1)} MB`);
+  
 
   // Extract — platform-dependent
   const isWindows = process.platform === 'win32';
@@ -120,7 +120,7 @@ async function ensureVeraPdf(): Promise<string> {
     execSync(`chmod +x "${verapdfPath}"`, { stdio: 'pipe' });
   }
 
-  console.log(`veraPDF ready at: ${verapdfPath}`);
+  
   return verapdfPath;
 }
 
@@ -205,16 +205,16 @@ const levelIdx = args.indexOf('--level');
 const level = levelIdx >= 0 ? args[levelIdx + 1] ?? '1b' : '1b';
 
 if (!file) {
-  console.error('Usage: npx tsx scripts/verapdf-validate.ts <file.pdf> [--level 1b]');
-  console.error('');
-  console.error('Options:');
-  console.error('  --level <level>  PDF/A conformance level (1a|1b|2a|2b|2u|3a|3b|3u)');
-  console.error('                   Default: 1b');
+  
+  
+  
+  
+  
   process.exit(1);
 }
 
 if (!existsSync(file)) {
-  console.error(`Error: File not found: ${file}`);
+  
   process.exit(2);
 }
 
@@ -223,7 +223,7 @@ checkJava();
 
 const result = await validate(file, level);
 
-console.log('');
-console.log(JSON.stringify(result, null, 2));
+
+
 
 process.exit(result.valid ? 0 : 1);

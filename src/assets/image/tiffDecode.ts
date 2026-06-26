@@ -66,7 +66,6 @@ const TAG_STRIP_OFFSETS = 273;
 const TAG_SAMPLES_PER_PIXEL = 277;
 const TAG_ROWS_PER_STRIP = 278;
 const TAG_STRIP_BYTE_COUNTS = 279;
-const TAG_PLANAR_CONFIG = 284;
 const TAG_JPEG_TABLES = 347;
 
 // Compression types
@@ -78,7 +77,7 @@ const COMPRESS_DEFLATE = 8;
 const COMPRESS_PACKBITS = 32773;
 
 // Data type sizes
-const TYPE_SIZES: readonly number[] = [
+const TYPE_SIZES = new Uint8Array([
   0, // 0: unused
   1, // 1: BYTE
   1, // 2: ASCII
@@ -92,7 +91,7 @@ const TYPE_SIZES: readonly number[] = [
   8, // 10: SRATIONAL
   4, // 11: FLOAT
   8, // 12: DOUBLE
-];
+]);
 
 // ---------------------------------------------------------------------------
 // Byte order-aware reader
@@ -288,7 +287,7 @@ function decompressPackBits(input: Uint8Array, expectedLength: number): Uint8Arr
     // n === -128: no-op (skip)
   }
 
-  return output.slice(0, dstPos);
+  return output.subarray(0, dstPos);
 }
 
 /** LZW decompression (compression=5). */
@@ -420,13 +419,13 @@ function decompressLzw(input: Uint8Array, expectedLength: number): Uint8Array {
     oldCode = code;
   }
 
-  return output.slice(0, Math.min(outPos, expectedLength));
+  return output.subarray(0, Math.min(outPos, expectedLength));
 }
 
 /** Deflate decompression (compression=8). */
 function decompressDeflate(input: Uint8Array, expectedLength: number): Uint8Array {
   const decompressed = inflateSync(input);
-  return decompressed.slice(0, expectedLength);
+  return decompressed.subarray(0, expectedLength);
 }
 
 // ---------------------------------------------------------------------------
@@ -488,8 +487,8 @@ function decodeJpegStrip(
   stripData: Uint8Array,
   jpegTables: Uint8Array | undefined,
   _width: number,
-  stripHeight: number,
-  samplesPerPixel: number,
+  _stripHeight: number,
+  _samplesPerPixel: number,
 ): Uint8Array {
   // If we have separate JPEG tables, we need to merge them with the strip data.
   // The JPEGTables tag contains a complete JPEG with SOI...EOI that holds
@@ -589,7 +588,7 @@ export function decodeTiffAll(data: Uint8Array): TiffImage[] {
  * @param options  Decode options (page selection).
  * @returns        Decoded image data.
  */
-export function decodeTiff(data: Uint8Array, options?: TiffDecodeOptions | undefined): TiffImage {
+export function decodeTiff(data: Uint8Array, options?: TiffDecodeOptions  ): TiffImage {
   if (!isTiff(data)) {
     throw new Error('TIFF: invalid TIFF header (expected II or MM byte order marker + 42)');
   }
@@ -654,7 +653,7 @@ export function decodeTiff(data: Uint8Array, options?: TiffDecodeOptions | undef
       break;
     }
 
-    const compressedData = data.slice(stripOffset, stripOffset + stripByteCount);
+    const compressedData = data.subarray(stripOffset, stripOffset + stripByteCount);
     let decompressed: Uint8Array;
 
     switch (compression) {
@@ -680,7 +679,7 @@ export function decodeTiff(data: Uint8Array, options?: TiffDecodeOptions | undef
 
     // Copy decompressed data to output
     const copyLen = Math.min(decompressed.length, rawData.length - outOffset);
-    rawData.set(decompressed.slice(0, copyLen), outOffset);
+    rawData.set(decompressed.subarray(0, copyLen), outOffset);
     outOffset += expectedStripBytes;
   }
 
@@ -700,7 +699,7 @@ export function decodeTiff(data: Uint8Array, options?: TiffDecodeOptions | undef
       }
     }
   } else if (bitsPerSample === 8) {
-    pixels = rawData.slice(0, width * height * samplesPerPixel);
+    pixels = rawData.subarray(0, width * height * samplesPerPixel);
     if (whiteIsZero && samplesPerPixel === 1) {
       for (let i = 0; i < pixels.length; i++) {
         pixels[i] = 255 - pixels[i]!;

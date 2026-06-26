@@ -8,7 +8,7 @@
 
 > **computeSignatureHash**(`pdfBytes`, `byteRange`, `algorithm?`): `Promise`\<`Uint8Array`\<`ArrayBufferLike`\>\>
 
-Defined in: [src/signature/byteRange.ts:531](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/signature/byteRange.ts#L531)
+Defined in: [src/signature/byteRange.ts:507](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/byteRange.ts#L507)
 
 Compute the hash of PDF bytes excluding the signature placeholder.
 
@@ -31,9 +31,9 @@ The [offset1, length1, offset2, length2] array.
 
 ### algorithm?
 
-Hash algorithm. Default 'SHA-256'.
+`"SHA-256"` \| `"SHA-384"` \| `"SHA-512"`
 
-`"SHA-256"` | `"SHA-384"` | `"SHA-512"`
+Hash algorithm. Default 'SHA-256'.
 
 ## Returns
 

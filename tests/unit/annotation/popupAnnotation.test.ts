@@ -9,7 +9,6 @@ import {
   PdfName,
   PdfBool,
   PdfArray,
-  PdfNumber,
   PdfRef,
 } from '../../../src/core/pdfObjects.js';
 

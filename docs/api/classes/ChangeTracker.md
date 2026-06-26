@@ -6,7 +6,7 @@
 
 # Class: ChangeTracker
 
-Defined in: [src/core/incrementalWriter.ts:61](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/incrementalWriter.ts#L61)
+Defined in: [src/core/incrementalWriter.ts:57](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/incrementalWriter.ts#L57)
 
 Tracks which objects have been added or modified since the document
 was loaded. Only these objects are written during an incremental save.
@@ -17,7 +17,7 @@ was loaded. Only these objects are written during an incremental save.
 
 > **new ChangeTracker**(`originalMaxObjNum`): `ChangeTracker`
 
-Defined in: [src/core/incrementalWriter.ts:71](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/incrementalWriter.ts#L71)
+Defined in: [src/core/incrementalWriter.ts:67](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/incrementalWriter.ts#L67)
 
 #### Parameters
 
@@ -37,7 +37,7 @@ Defined in: [src/core/incrementalWriter.ts:71](https://github.com/ABCrimson/mode
 
 > **get** **changedCount**(): `number`
 
-Defined in: [src/core/incrementalWriter.ts:110](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/incrementalWriter.ts#L110)
+Defined in: [src/core/incrementalWriter.ts:106](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/incrementalWriter.ts#L106)
 
 Get the count of changed objects.
 
@@ -51,7 +51,7 @@ Get the count of changed objects.
 
 > **getChangedObjects**(): `Set`\<`number`\>
 
-Defined in: [src/core/incrementalWriter.ts:103](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/incrementalWriter.ts#L103)
+Defined in: [src/core/incrementalWriter.ts:99](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/incrementalWriter.ts#L99)
 
 Get all changed object numbers (new + modified).
 
@@ -65,7 +65,7 @@ Get all changed object numbers (new + modified).
 
 > **isChanged**(`objectNumber`): `boolean`
 
-Defined in: [src/core/incrementalWriter.ts:96](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/incrementalWriter.ts#L96)
+Defined in: [src/core/incrementalWriter.ts:92](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/incrementalWriter.ts#L92)
 
 Check if an object is new or modified.
 
@@ -85,7 +85,7 @@ Check if an object is new or modified.
 
 > **markModified**(`objectNumber`): `void`
 
-Defined in: [src/core/incrementalWriter.ts:85](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/incrementalWriter.ts#L85)
+Defined in: [src/core/incrementalWriter.ts:81](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/incrementalWriter.ts#L81)
 
 Mark an object as modified (existed in the original file).
 
@@ -105,7 +105,7 @@ Mark an object as modified (existed in the original file).
 
 > **markNew**(`objectNumber`): `void`
 
-Defined in: [src/core/incrementalWriter.ts:78](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/incrementalWriter.ts#L78)
+Defined in: [src/core/incrementalWriter.ts:74](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/incrementalWriter.ts#L74)
 
 Mark an object as new (did not exist in the original file).
 

@@ -530,7 +530,7 @@ describe('Real-world: multi-page with images', () => {
     expect(images.length).toBe(3);
 
     // Images should be on different pages
-    const pageIndices = images.map((i) => i.pageIndex).sort();
+    const pageIndices = images.map((i) => i.pageIndex).sort((a, b) => a - b);
     expect(pageIndices).toEqual([0, 1, 2]);
 
     // Check dimensions

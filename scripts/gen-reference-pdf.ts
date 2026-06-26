@@ -70,11 +70,11 @@ async function main(): Promise<void> {
   // Write the file
   await writeFile(outputPath, bytes);
 
-  console.log(`Reference PDF written to: ${outputPath}`);
-  console.log(`Size: ${bytes.length} bytes`);
+  
+  
 }
 
 main().catch((err) => {
-  console.error('Failed to generate reference PDF:', err);
+  
   process.exit(1);
 });

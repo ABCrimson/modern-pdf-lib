@@ -8,7 +8,7 @@
 
 > **beginArtifact**(): `string`
 
-Defined in: [src/accessibility/markedContent.ts:172](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/accessibility/markedContent.ts#L172)
+Defined in: [src/accessibility/markedContent.ts:172](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/accessibility/markedContent.ts#L172)
 
 Generate an `Artifact` marked-content operator for content that is
 not part of the document's logical structure (e.g. page numbers,

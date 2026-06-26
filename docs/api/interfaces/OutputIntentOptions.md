@@ -6,7 +6,7 @@
 
 # Interface: OutputIntentOptions
 
-Defined in: [src/compliance/outputIntent.ts:30](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/compliance/outputIntent.ts#L30)
+Defined in: [src/compliance/outputIntent.ts:30](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/compliance/outputIntent.ts#L30)
 
 Options for building a PDF/A output intent.
 
@@ -14,9 +14,9 @@ Options for building a PDF/A output intent.
 
 ### components?
 
-> `optional` **components**: `number`
+> `optional` **components?**: `number`
 
-Defined in: [src/compliance/outputIntent.ts:87](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/compliance/outputIntent.ts#L87)
+Defined in: [src/compliance/outputIntent.ts:87](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/compliance/outputIntent.ts#L87)
 
 Number of color components in the ICC profile.
 
@@ -35,9 +35,9 @@ Must match the profile's color space:
 
 ### iccProfile?
 
-> `optional` **iccProfile**: `Uint8Array`\<`ArrayBufferLike`\>
+> `optional` **iccProfile?**: `Uint8Array`\<`ArrayBufferLike`\>
 
-Defined in: [src/compliance/outputIntent.ts:75](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/compliance/outputIntent.ts#L75)
+Defined in: [src/compliance/outputIntent.ts:75](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/compliance/outputIntent.ts#L75)
 
 Custom ICC profile bytes to embed instead of the built-in sRGB profile.
 
@@ -54,9 +54,9 @@ Built-in minimal sRGB ICC v2 profile.
 
 ### outputCondition?
 
-> `optional` **outputCondition**: `string`
+> `optional` **outputCondition?**: `string`
 
-Defined in: [src/compliance/outputIntent.ts:48](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/compliance/outputIntent.ts#L48)
+Defined in: [src/compliance/outputIntent.ts:48](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/compliance/outputIntent.ts#L48)
 
 Human-readable output condition description.
 
@@ -70,9 +70,9 @@ Human-readable output condition description.
 
 ### outputConditionIdentifier?
 
-> `optional` **outputConditionIdentifier**: `string`
+> `optional` **outputConditionIdentifier?**: `string`
 
-Defined in: [src/compliance/outputIntent.ts:58](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/compliance/outputIntent.ts#L58)
+Defined in: [src/compliance/outputIntent.ts:58](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/compliance/outputIntent.ts#L58)
 
 Formal registry identifier for the output condition.
 
@@ -89,9 +89,9 @@ ICC profile registry or a vendor-specific identifier.
 
 ### registryName?
 
-> `optional` **registryName**: `string`
+> `optional` **registryName?**: `string`
 
-Defined in: [src/compliance/outputIntent.ts:65](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/compliance/outputIntent.ts#L65)
+Defined in: [src/compliance/outputIntent.ts:65](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/compliance/outputIntent.ts#L65)
 
 URL of the ICC profile registry.
 
@@ -105,9 +105,9 @@ URL of the ICC profile registry.
 
 ### subtype?
 
-> `optional` **subtype**: `string`
+> `optional` **subtype?**: `string`
 
-Defined in: [src/compliance/outputIntent.ts:41](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/compliance/outputIntent.ts#L41)
+Defined in: [src/compliance/outputIntent.ts:41](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/compliance/outputIntent.ts#L41)
 
 Output intent subtype.
 

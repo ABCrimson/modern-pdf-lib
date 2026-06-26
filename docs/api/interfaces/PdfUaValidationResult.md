@@ -6,7 +6,7 @@
 
 # Interface: PdfUaValidationResult
 
-Defined in: src/accessibility/pdfUaValidator.ts:76
+Defined in: [src/accessibility/pdfUaValidator.ts:79](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/accessibility/pdfUaValidator.ts#L79)
 
 Result of a PDF/UA validation check.
 
@@ -16,7 +16,7 @@ Result of a PDF/UA validation check.
 
 > `readonly` **errors**: [`PdfUaError`](PdfUaError.md)[]
 
-Defined in: src/accessibility/pdfUaValidator.ts:82
+Defined in: [src/accessibility/pdfUaValidator.ts:85](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/accessibility/pdfUaValidator.ts#L85)
 
 Must-fix violations that prevent compliance.
 
@@ -26,7 +26,7 @@ Must-fix violations that prevent compliance.
 
 > `readonly` **level**: `"UA1"`
 
-Defined in: src/accessibility/pdfUaValidator.ts:80
+Defined in: [src/accessibility/pdfUaValidator.ts:83](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/accessibility/pdfUaValidator.ts#L83)
 
 The PDF/UA conformance level checked against.
 
@@ -36,7 +36,7 @@ The PDF/UA conformance level checked against.
 
 > `readonly` **valid**: `boolean`
 
-Defined in: src/accessibility/pdfUaValidator.ts:78
+Defined in: [src/accessibility/pdfUaValidator.ts:81](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/accessibility/pdfUaValidator.ts#L81)
 
 Whether the document passes all PDF/UA requirements (no errors).
 
@@ -46,6 +46,6 @@ Whether the document passes all PDF/UA requirements (no errors).
 
 > `readonly` **warnings**: [`PdfUaWarning`](PdfUaWarning.md)[]
 
-Defined in: src/accessibility/pdfUaValidator.ts:84
+Defined in: [src/accessibility/pdfUaValidator.ts:87](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/accessibility/pdfUaValidator.ts#L87)
 
 Best-practice recommendations.

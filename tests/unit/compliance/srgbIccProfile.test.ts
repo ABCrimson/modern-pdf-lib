@@ -38,11 +38,6 @@ function readU32(data: Uint8Array, offset: number): number {
   );
 }
 
-/** Read a 16-bit big-endian unsigned integer from data at offset. */
-function readU16(data: Uint8Array, offset: number): number {
-  return (data[offset]! << 8) | data[offset + 1]!;
-}
-
 /** Read 4 ASCII characters starting at offset. */
 function readAscii4(data: Uint8Array, offset: number): string {
   return String.fromCharCode(

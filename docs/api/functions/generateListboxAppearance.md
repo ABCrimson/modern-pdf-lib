@@ -8,7 +8,7 @@
 
 > **generateListboxAppearance**(`options`): [`PdfStream`](../classes/PdfStream.md)
 
-Defined in: [src/form/fieldAppearance.ts:346](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/form/fieldAppearance.ts#L346)
+Defined in: [src/form/fieldAppearance.ts:345](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/form/fieldAppearance.ts#L345)
 
 Generate the appearance stream for a listbox.
 Renders visible options with highlighting for selected items.

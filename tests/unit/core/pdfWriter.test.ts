@@ -13,11 +13,8 @@ import {
   PdfObjectRegistry,
   PdfDict,
   PdfName,
-  PdfNumber,
-  PdfString,
   PdfStream,
   PdfArray,
-  PdfRef,
 } from '../../../src/core/pdfObjects.js';
 import { buildDocumentStructure } from '../../../src/core/pdfCatalog.js';
 import type { PageEntry } from '../../../src/core/pdfCatalog.js';
@@ -35,7 +32,7 @@ function pdfToString(bytes: Uint8Array): string {
 /**
  * Build a minimal valid document structure with one empty page.
  */
-function buildMinimalDocument(compress = false) {
+function buildMinimalDocument() {
   const registry = new PdfObjectRegistry();
 
   // Allocate page refs
@@ -205,7 +202,6 @@ describe('PdfWriter', () => {
     // All streams should be readable ASCII (no FlateDecode)
     // The content stream should not have /Filter /FlateDecode
     // (though it may be empty in this minimal case)
-    const hasFlate = text.includes('/Filter /FlateDecode');
     // In the minimal case with empty stream, compression may be skipped
     // even with compress: true, so just verify the structure is valid
     expect(text).toContain('stream');

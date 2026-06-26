@@ -11,8 +11,6 @@ import { renderTable } from '../../src/layout/table.js';
 import type {
   DrawTableOptions,
   TableCell,
-  TableRow,
-  TableRenderResult,
   NestedTableContent,
 } from '../../src/layout/table.js';
 import { PdfPage, PageSizes } from '../../src/core/pdfPage.js';

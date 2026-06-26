@@ -21,8 +21,6 @@ import {
   encodeSequence,
   encodeOID,
   encodeOctetString,
-  encodeContextTag,
-  encodeLength,
   parseDerTlv,
   decodeOidBytes,
 } from './pkcs7.js';

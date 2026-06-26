@@ -9,7 +9,6 @@ import {
   PdfName,
   PdfString,
   PdfArray,
-  PdfNumber,
   PdfRef,
 } from '../../../src/core/pdfObjects.js';
 import type { PdfObject, PdfObjectRegistry } from '../../../src/core/pdfObjects.js';
@@ -21,10 +20,10 @@ import type { PdfObject, PdfObjectRegistry } from '../../../src/core/pdfObjects.
 function createMockRegistry(): PdfObjectRegistry {
   let nextId = 100;
   return {
-    register(obj: PdfObject): PdfRef {
+    register(_obj: PdfObject): PdfRef {
       return PdfRef.of(nextId++, 0);
     },
-    resolve(ref: PdfRef): PdfObject | undefined {
+    resolve(_ref: PdfRef): PdfObject | undefined {
       return undefined;
     },
   } as PdfObjectRegistry;

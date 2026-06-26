@@ -236,24 +236,24 @@ async function main(): Promise<void> {
   const args = process.argv.slice(2);
 
   if (args.length === 0) {
-    console.error('Usage: npx tsx scripts/validate-pdf.ts <file.pdf>');
+    
     process.exit(2);
   }
 
   const filePath = resolve(args[0]!);
 
   if (!existsSync(filePath)) {
-    console.error(`Error: File not found: ${filePath}`);
+    
     process.exit(2);
   }
 
-  console.log(`Validating: ${filePath}`);
-  console.log('');
+  
+  
 
   const bytes = new Uint8Array(await readFile(filePath));
 
-  console.log(`File size: ${(bytes.length / 1024).toFixed(1)} KB`);
-  console.log('');
+  
+  
 
   // Run all validators
   const results: ValidationResult[] = [
@@ -272,22 +272,22 @@ async function main(): Promise<void> {
     const status = result.passed ? 'PASS' : 'FAIL';
     const icon = result.passed ? '[ok]' : '[!!]';
     const paddedName = result.name.padEnd(maxNameLen);
-    console.log(`  ${icon} ${paddedName}  ${result.detail}`);
+    
   }
 
-  console.log('');
+  
 
   const passed = results.filter((r) => r.passed).length;
   const failed = results.filter((r) => !r.passed).length;
   const total = results.length;
 
   if (failed === 0) {
-    console.log(`Result: All ${total} checks passed.`);
+    
     process.exit(0);
   } else {
-    console.log(`Result: ${passed}/${total} checks passed, ${failed} failed.`);
+    
     process.exit(1);
   }
 }
 
-main();
+void main();

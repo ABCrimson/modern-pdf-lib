@@ -13,7 +13,7 @@ describe('Sub-path imports', () => {
 
   it('create entry does NOT export loadPdf', async () => {
     const mod = await import('../../src/create.js');
-    expect((mod as any).loadPdf).toBeUndefined();
+    expect((mod as Record<string, unknown>).loadPdf).toBeUndefined();
   });
 
   it('parse entry exports loadPdf', async () => {

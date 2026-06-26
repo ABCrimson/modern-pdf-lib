@@ -9,13 +9,12 @@
 import {
   PdfDict,
   PdfName,
-  PdfNumber,
   PdfArray,
   PdfString,
   PdfStream,
   PdfRef,
 } from '../../core/pdfObjects.js';
-import { PdfField, strVal, numVal } from '../pdfField.js';
+import { PdfField, strVal } from '../pdfField.js';
 import type { FieldType } from '../pdfField.js';
 import { generateButtonAppearance } from '../fieldAppearance.js';
 

@@ -35,9 +35,6 @@ const ANNOT_FLAG_HIDDEN = 1 << 1;
 /** Annotation flag: NoView (bit 5, value 32). Not displayed but may print. */
 const ANNOT_FLAG_NOVIEW = 1 << 5;
 
-/** Annotation flag: Print (bit 2, value 4). Printed when present. */
-const ANNOT_FLAG_PRINT = 1 << 2;
-
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -185,7 +182,7 @@ function buildVisibilityScript(
   triggerField: string,
   condition: VisibilityCondition,
 ): string {
-  const escaped = triggerField.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+  const escaped = triggerField.replaceAll('\\', '\\\\').replaceAll('"', '\\"');
   const fieldRef = `this.getField("${escaped}")`;
   let condExpr: string;
 
@@ -216,8 +213,8 @@ function buildVisibilityScript(
  */
 function escapeJS(str: string): string {
   return str
-    .replace(/\\/g, '\\\\')
-    .replace(/"/g, '\\"')
-    .replace(/\n/g, '\\n')
-    .replace(/\r/g, '\\r');
+    .replaceAll('\\', '\\\\')
+    .replaceAll('"', '\\"')
+    .replaceAll('\n', '\\n')
+    .replaceAll('\r', '\\r');
 }

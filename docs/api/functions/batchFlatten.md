@@ -8,7 +8,7 @@
 
 > **batchFlatten**(`files`, `options?`): `Promise`\<[`BatchResult`](../interfaces/BatchResult.md)\>
 
-Defined in: src/batch/batchProcessor.ts:227
+Defined in: [src/batch/batchProcessor.ts:419](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/batch/batchProcessor.ts#L419)
 
 Flatten interactive form fields across many PDFs.
 

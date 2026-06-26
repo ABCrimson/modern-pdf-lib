@@ -8,7 +8,7 @@
 
 > **generateZapfDingbatsToUnicodeCmap**(): `string`
 
-Defined in: [src/compliance/toUnicodeCmap.ts:592](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/compliance/toUnicodeCmap.ts#L592)
+Defined in: [src/compliance/toUnicodeCmap.ts:592](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/compliance/toUnicodeCmap.ts#L592)
 
 Generate a ToUnicode CMap for the ZapfDingbats font.
 

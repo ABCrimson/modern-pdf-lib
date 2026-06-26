@@ -21,7 +21,7 @@ import {
   applyRedactions,
   applyRedaction,
 } from '../../../src/annotation/applyRedactions.js';
-import type { RedactionResult } from '../../../src/annotation/applyRedactions.js';
+
 
 // ---------------------------------------------------------------------------
 // Helpers

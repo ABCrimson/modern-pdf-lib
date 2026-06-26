@@ -11,10 +11,8 @@ import {
   isStandardFont,
   measureStandardText,
   standardFontHeight,
-  STANDARD_FONTS,
   STANDARD_FONT_NAMES,
 } from '../../../src/assets/font/standardFonts.js';
-import type { StandardFontName } from '../../../src/assets/font/standardFonts.js';
 
 // ---------------------------------------------------------------------------
 // Tests

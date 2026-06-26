@@ -38,19 +38,6 @@ function makeTable(
   };
 }
 
-/**
- * Count occurrences of a substring in a string.
- */
-function countOccurrences(haystack: string, needle: string): number {
-  let count = 0;
-  let pos = 0;
-  while ((pos = haystack.indexOf(needle, pos)) !== -1) {
-    count++;
-    pos += needle.length;
-  }
-  return count;
-}
-
 // ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------

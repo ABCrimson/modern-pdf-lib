@@ -1,0 +1,17 @@
+# Normalize all text files to LF in the repository (modern, cross-runtime standard).
+# Resolves the CRLF/LF mix introduced when the Rust-based formatter/linter (oxlint) rewrites files.
+* text=auto eol=lf
+
+# Treat binary assets as binary (never normalize / diff as text).
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.tiff binary
+*.pdf binary
+*.wasm binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary

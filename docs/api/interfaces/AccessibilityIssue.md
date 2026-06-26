@@ -6,7 +6,7 @@
 
 # Interface: AccessibilityIssue
 
-Defined in: [src/accessibility/structureTree.ts:97](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/accessibility/structureTree.ts#L97)
+Defined in: [src/accessibility/structureTree.ts:124](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/accessibility/structureTree.ts#L124)
 
 Describes a single accessibility issue found during validation.
 
@@ -16,7 +16,7 @@ Describes a single accessibility issue found during validation.
 
 > **code**: `string`
 
-Defined in: [src/accessibility/structureTree.ts:101](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/accessibility/structureTree.ts#L101)
+Defined in: [src/accessibility/structureTree.ts:128](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/accessibility/structureTree.ts#L128)
 
 Machine-readable issue code.
 
@@ -24,9 +24,9 @@ Machine-readable issue code.
 
 ### element?
 
-> `optional` **element**: [`PdfStructureElement`](../classes/PdfStructureElement.md)
+> `optional` **element?**: [`PdfStructureElement`](../classes/PdfStructureElement.md)
 
-Defined in: [src/accessibility/structureTree.ts:105](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/accessibility/structureTree.ts#L105)
+Defined in: [src/accessibility/structureTree.ts:132](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/accessibility/structureTree.ts#L132)
 
 The structure element related to the issue, if any.
 
@@ -36,7 +36,7 @@ The structure element related to the issue, if any.
 
 > **message**: `string`
 
-Defined in: [src/accessibility/structureTree.ts:103](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/accessibility/structureTree.ts#L103)
+Defined in: [src/accessibility/structureTree.ts:130](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/accessibility/structureTree.ts#L130)
 
 Human-readable description of the issue.
 
@@ -44,9 +44,9 @@ Human-readable description of the issue.
 
 ### pageIndex?
 
-> `optional` **pageIndex**: `number`
+> `optional` **pageIndex?**: `number`
 
-Defined in: [src/accessibility/structureTree.ts:107](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/accessibility/structureTree.ts#L107)
+Defined in: [src/accessibility/structureTree.ts:134](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/accessibility/structureTree.ts#L134)
 
 The zero-based page index related to the issue, if any.
 
@@ -56,6 +56,6 @@ The zero-based page index related to the issue, if any.
 
 > **severity**: `"error"` \| `"warning"` \| `"info"`
 
-Defined in: [src/accessibility/structureTree.ts:99](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/accessibility/structureTree.ts#L99)
+Defined in: [src/accessibility/structureTree.ts:126](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/accessibility/structureTree.ts#L126)
 
 Severity of the issue.

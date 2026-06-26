@@ -6,7 +6,7 @@
 
 # Interface: CatalogOptions
 
-Defined in: [src/core/pdfCatalog.ts:249](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/pdfCatalog.ts#L249)
+Defined in: [src/core/pdfCatalog.ts:249](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/pdfCatalog.ts#L249)
 
 Options for building the catalog.
 
@@ -14,9 +14,9 @@ Options for building the catalog.
 
 ### lang?
 
-> `optional` **lang**: `string`
+> `optional` **lang?**: `string`
 
-Defined in: [src/core/pdfCatalog.ts:269](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/pdfCatalog.ts#L269)
+Defined in: [src/core/pdfCatalog.ts:269](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/pdfCatalog.ts#L269)
 
 The natural language of the document content (e.g. `en-US`).
 
@@ -24,9 +24,9 @@ The natural language of the document content (e.g. `en-US`).
 
 ### pageLayout?
 
-> `optional` **pageLayout**: `"SinglePage"` \| `"OneColumn"` \| `"TwoColumnLeft"` \| `"TwoColumnRight"` \| `"TwoPageLeft"` \| `"TwoPageRight"`
+> `optional` **pageLayout?**: `"SinglePage"` \| `"OneColumn"` \| `"TwoColumnLeft"` \| `"TwoColumnRight"` \| `"TwoPageLeft"` \| `"TwoPageRight"`
 
-Defined in: [src/core/pdfCatalog.ts:251](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/pdfCatalog.ts#L251)
+Defined in: [src/core/pdfCatalog.ts:251](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/pdfCatalog.ts#L251)
 
 Page layout hint.
 
@@ -34,8 +34,8 @@ Page layout hint.
 
 ### pageMode?
 
-> `optional` **pageMode**: `"UseNone"` \| `"UseOutlines"` \| `"UseThumbs"` \| `"FullScreen"` \| `"UseOC"` \| `"UseAttachments"`
+> `optional` **pageMode?**: `"UseNone"` \| `"UseOutlines"` \| `"UseThumbs"` \| `"FullScreen"` \| `"UseOC"` \| `"UseAttachments"`
 
-Defined in: [src/core/pdfCatalog.ts:260](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/pdfCatalog.ts#L260)
+Defined in: [src/core/pdfCatalog.ts:260](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/pdfCatalog.ts#L260)
 
 Page mode hint.

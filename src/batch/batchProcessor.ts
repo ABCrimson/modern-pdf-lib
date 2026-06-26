@@ -113,16 +113,18 @@ function hintGC(): void {
  * if the timeout fires first.
  */
 function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
-  return new Promise<T>((resolve, reject) => {
-    const timer = setTimeout(() => {
-      reject(new Error(`Batch item ${label} timed out after ${ms}ms`));
-    }, ms);
+  const { promise: result, resolve, reject } = Promise.withResolvers<T>();
 
-    promise.then(
-      (value) => { clearTimeout(timer); resolve(value); },
-      (err) => { clearTimeout(timer); reject(err); },
-    );
-  });
+  const timer = setTimeout(() => {
+    reject(new Error(`Batch item ${label} timed out after ${ms}ms`));
+  }, ms);
+
+  promise.then(
+    (value) => { clearTimeout(timer); resolve(value); },
+    (err) => { clearTimeout(timer); reject(err); },
+  );
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -169,7 +171,9 @@ async function runWithConcurrency<T>(
   const waiters: (() => void)[] = [];
   const acquire = async (): Promise<void> => {
     while (activeCount >= activeCap) {
-      await new Promise<void>((resolve) => { waiters.push(resolve); });
+      const { promise, resolve } = Promise.withResolvers<void>();
+      waiters.push(resolve);
+      await promise;
     }
     activeCount++;
   };

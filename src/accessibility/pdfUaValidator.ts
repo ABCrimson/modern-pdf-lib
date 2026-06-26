@@ -448,7 +448,7 @@ function checkLanguage(doc: PdfDocument, errors: PdfUaError[]): void {
 function checkTitle(
   doc: PdfDocument,
   errors: PdfUaError[],
-  warnings: PdfUaWarning[],
+  _warnings: PdfUaWarning[],
 ): void {
   const title = doc.getTitle();
   if (title === undefined) {

@@ -15,7 +15,7 @@
  * ```
  */
 
-import { PdfName, PdfBool, PdfDict } from '../../core/pdfObjects.js';
+import { PdfBool, PdfDict } from '../../core/pdfObjects.js';
 import type { PdfPlugin, PluginDocument } from '../pluginSystem.js';
 
 /** Options for the accessibility plugin. */

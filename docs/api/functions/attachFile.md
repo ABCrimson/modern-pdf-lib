@@ -8,7 +8,7 @@
 
 > **attachFile**(`registry`, `file`): [`PdfRef`](../classes/PdfRef.md)
 
-Defined in: [src/core/embeddedFiles.ts:58](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/embeddedFiles.ts#L58)
+Defined in: [src/core/embeddedFiles.ts:58](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/embeddedFiles.ts#L58)
 
 Create an embedded file stream and filespec dictionary, registering
 them in the object registry.

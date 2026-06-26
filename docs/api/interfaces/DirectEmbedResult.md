@@ -6,7 +6,7 @@
 
 # Interface: DirectEmbedResult
 
-Defined in: [src/assets/image/tiffDirectEmbed.ts:103](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/image/tiffDirectEmbed.ts#L103)
+Defined in: [src/assets/image/tiffDirectEmbed.ts:100](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/tiffDirectEmbed.ts#L100)
 
 Result of a direct TIFF embedding operation.
 
@@ -16,7 +16,7 @@ Result of a direct TIFF embedding operation.
 
 > `readonly` **bitsPerComponent**: `number`
 
-Defined in: [src/assets/image/tiffDirectEmbed.ts:113](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/image/tiffDirectEmbed.ts#L113)
+Defined in: [src/assets/image/tiffDirectEmbed.ts:110](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/tiffDirectEmbed.ts#L110)
 
 Bits per component (1, 2, 4, 8, or 16).
 
@@ -26,7 +26,7 @@ Bits per component (1, 2, 4, 8, or 16).
 
 > `readonly` **colorSpace**: `string`
 
-Defined in: [src/assets/image/tiffDirectEmbed.ts:111](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/image/tiffDirectEmbed.ts#L111)
+Defined in: [src/assets/image/tiffDirectEmbed.ts:108](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/tiffDirectEmbed.ts#L108)
 
 PDF color space name (e.g. 'DeviceRGB', 'DeviceGray', 'DeviceCMYK').
 
@@ -36,7 +36,7 @@ PDF color space name (e.g. 'DeviceRGB', 'DeviceGray', 'DeviceCMYK').
 
 > `readonly` **data**: `Uint8Array`
 
-Defined in: [src/assets/image/tiffDirectEmbed.ts:109](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/image/tiffDirectEmbed.ts#L109)
+Defined in: [src/assets/image/tiffDirectEmbed.ts:106](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/tiffDirectEmbed.ts#L106)
 
 The image data for the PDF stream.
 
@@ -44,9 +44,9 @@ The image data for the PDF stream.
 
 ### filter?
 
-> `readonly` `optional` **filter**: `string`
+> `readonly` `optional` **filter?**: `string`
 
-Defined in: [src/assets/image/tiffDirectEmbed.ts:115](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/image/tiffDirectEmbed.ts#L115)
+Defined in: [src/assets/image/tiffDirectEmbed.ts:112](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/tiffDirectEmbed.ts#L112)
 
 PDF filter to use, if any (e.g. 'FlateDecode', 'DCTDecode').
 
@@ -56,7 +56,7 @@ PDF filter to use, if any (e.g. 'FlateDecode', 'DCTDecode').
 
 > `readonly` **height**: `number`
 
-Defined in: [src/assets/image/tiffDirectEmbed.ts:107](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/image/tiffDirectEmbed.ts#L107)
+Defined in: [src/assets/image/tiffDirectEmbed.ts:104](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/tiffDirectEmbed.ts#L104)
 
 Image height in pixels.
 
@@ -66,6 +66,6 @@ Image height in pixels.
 
 > `readonly` **width**: `number`
 
-Defined in: [src/assets/image/tiffDirectEmbed.ts:105](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/image/tiffDirectEmbed.ts#L105)
+Defined in: [src/assets/image/tiffDirectEmbed.ts:102](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/tiffDirectEmbed.ts#L102)
 
 Image width in pixels.

@@ -19,10 +19,8 @@ import {
   PdfObjectRegistry,
   PdfDict,
   PdfArray,
-  PdfName,
   PdfString,
   PdfRef,
-  PdfStream,
 } from '../../../src/core/pdfObjects.js';
 
 // ---------------------------------------------------------------------------

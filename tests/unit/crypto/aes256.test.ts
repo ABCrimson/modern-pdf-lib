@@ -16,13 +16,12 @@
 
 import { describe, it, expect } from 'vitest';
 import { PdfEncryptionHandler } from '../../../src/crypto/encryptionHandler.js';
-import type { EncryptOptions, EncryptAlgorithm } from '../../../src/crypto/encryptionHandler.js';
+import type { EncryptOptions } from '../../../src/crypto/encryptionHandler.js';
 import {
   PdfString,
   PdfDict,
   PdfName,
   PdfNumber,
-  PdfBool,
   PdfArray,
   PdfObjectRegistry,
   PdfStream,
@@ -40,11 +39,10 @@ import {
   verifyOwnerPassword,
   preparePasswordV5,
   saslprep,
-  concat,
 } from '../../../src/crypto/keyDerivation.js';
 import type { EncryptDictValues } from '../../../src/crypto/keyDerivation.js';
 import { aesEncryptCBC, aesDecryptCBC } from '../../../src/crypto/aes.js';
-import { encodePermissions, decodePermissions } from '../../../src/crypto/permissions.js';
+import { decodePermissions } from '../../../src/crypto/permissions.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -995,7 +993,6 @@ describe('AES-256 multiple objects', () => {
 describe('AES-256 known-structure test', () => {
   it('/Perms block has correct structure after decryption', async () => {
     // Create a handler with known permissions
-    const perms = encodePermissions({ printing: true, copying: true, modifying: true });
     const h = await PdfEncryptionHandler.create({
       userPassword: 'u',
       ownerPassword: 'o',

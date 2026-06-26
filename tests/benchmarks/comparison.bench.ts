@@ -7,13 +7,11 @@
  * Run: npx vitest bench tests/benchmarks/comparison.bench.ts
  */
 
-import { describe, bench, beforeAll } from 'vitest';
+import { describe, bench, beforeAll } from './benchHarness.js';
 
 // ── modern-pdf-lib imports ──────────────────────────────────────────────────
 import {
   createPdf,
-  PdfDocument,
-  PdfPage,
   PageSizes,
   StandardFonts,
   rgb,
@@ -30,7 +28,6 @@ import {
 // ── pdf-lib imports ─────────────────────────────────────────────────────────
 import {
   PDFDocument,
-  PDFPage,
   StandardFonts as PdfLibStandardFonts,
   PageSizes as PdfLibPageSizes,
   rgb as pdfLibRgb,
@@ -493,7 +490,7 @@ describe('6b. drawImage — 100 calls', () => {
     const page = doc.addPage(PageSizes.A4);
     const img = await doc.embedPng(SAMPLE_PNG_BYTES);
     for (let i = 0; i < 100; i++) {
-      page.drawImage(img.ref, {
+      page.drawImage(img, {
         x: (i % 10) * 55,
         y: Math.floor(i / 10) * 80,
         width: 50,
@@ -669,7 +666,7 @@ describe('9. Copy pages between documents', () => {
   bench('modern-pdf-lib: copyPages (5 pages)', async () => {
     const src = await loadPdf(MODERN_MERGE_A);
     const dest = createPdf();
-    const copied = await copyPages(src, dest, [0, 1, 2, 3, 4]);
+    const copied =  copyPages(src, dest, [0, 1, 2, 3, 4]);
     for (const page of copied) dest.addPage(page);
     await dest.save();
   });
@@ -882,7 +879,7 @@ describe('15. Create form with fields', () => {
     doc.addPage(PageSizes.A4);
     const form = doc.getForm();
     for (let i = 0; i < 10; i++) {
-      const field = form.createTextField(`field_${i}`);
+      const field = form.createTextField(`field_${i}`, 0, [50, 750 - i * 30, 250, 775 - i * 30]);
       field.setText(`Value ${i}`);
     }
   });
@@ -1056,7 +1053,7 @@ describe('17b. E2E: Multi-page report (50 pages)', () => {
     const doc = createPdf();
     doc.setTitle('Annual Report 2026');
     const font = await doc.embedFont(StandardFonts.TimesRoman);
-    const boldFont = await doc.embedFont(StandardFonts.TimesRomanBold);
+    const boldFont = await doc.embedFont(StandardFonts.TimesBold);
 
     for (let p = 0; p < 50; p++) {
       const page = doc.addPage(PageSizes.A4);

@@ -82,7 +82,7 @@ function buildExifSegment(opts: {
 
   const ifdStart = 8; // TIFF header is 8 bytes
   const ifdHeaderSize = 2 + entryCount * 12 + 4; // count + entries + next IFD ptr
-  let dataOffset = ifdStart + ifdHeaderSize;
+  const dataOffset = ifdStart + ifdHeaderSize;
 
   // Build tags
   if (opts.orientation !== undefined) {

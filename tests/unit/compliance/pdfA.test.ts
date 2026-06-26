@@ -14,7 +14,6 @@
 
 import { describe, it, expect } from 'vitest';
 import { validatePdfA, enforcePdfA } from '../../../src/compliance/pdfA.js';
-import type { PdfALevel } from '../../../src/compliance/pdfA.js';
 
 // ---------------------------------------------------------------------------
 // Helpers

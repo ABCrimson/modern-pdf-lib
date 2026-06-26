@@ -22,9 +22,7 @@ import {
   PdfDict,
   PdfName,
   PdfString,
-  PdfArray,
   PdfRef,
-  PdfBool,
 } from '../../../src/core/pdfObjects.js';
 
 // ---------------------------------------------------------------------------

@@ -17,7 +17,6 @@ import {
   PdfStream,
   PdfRef,
 } from '../../../src/index.js';
-import type { EmbeddedPdfPage } from '../../../src/core/pdfEmbed.js';
 
 // ---------------------------------------------------------------------------
 // Helpers

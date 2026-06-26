@@ -6,7 +6,7 @@
 
 # Interface: AnalyzeImagesOptions
 
-Defined in: [src/assets/image/compressionAnalysis.ts:78](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/image/compressionAnalysis.ts#L78)
+Defined in: [src/assets/image/compressionAnalysis.ts:78](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/compressionAnalysis.ts#L78)
 
 Options for `analyzeImages()`.
 
@@ -14,9 +14,9 @@ Options for `analyzeImages()`.
 
 ### maxDpi?
 
-> `readonly` `optional` **maxDpi**: `number`
+> `readonly` `optional` **maxDpi?**: `number`
 
-Defined in: [src/assets/image/compressionAnalysis.ts:91](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/image/compressionAnalysis.ts#L91)
+Defined in: [src/assets/image/compressionAnalysis.ts:91](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/compressionAnalysis.ts#L91)
 
 Maximum allowed DPI.  Images exceeding this at their display size
 receive a `'downscale'` recommendation.
@@ -27,9 +27,9 @@ Default: `150`.
 
 ### quality?
 
-> `readonly` `optional` **quality**: `number`
+> `readonly` `optional` **quality?**: `number`
 
-Defined in: [src/assets/image/compressionAnalysis.ts:84](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/image/compressionAnalysis.ts#L84)
+Defined in: [src/assets/image/compressionAnalysis.ts:84](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/compressionAnalysis.ts#L84)
 
 JPEG quality used for size estimation (1–100).
 

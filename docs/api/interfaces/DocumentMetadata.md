@@ -6,7 +6,7 @@
 
 # Interface: DocumentMetadata
 
-Defined in: [src/core/pdfCatalog.ts:54](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/pdfCatalog.ts#L54)
+Defined in: [src/core/pdfCatalog.ts:54](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/pdfCatalog.ts#L54)
 
 Metadata fields for the /Info dictionary.
 
@@ -14,62 +14,62 @@ Metadata fields for the /Info dictionary.
 
 ### author?
 
-> `optional` **author**: `string`
+> `optional` **author?**: `string`
 
-Defined in: [src/core/pdfCatalog.ts:56](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/pdfCatalog.ts#L56)
+Defined in: [src/core/pdfCatalog.ts:56](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/pdfCatalog.ts#L56)
 
 ***
 
 ### creationDate?
 
-> `optional` **creationDate**: `Date`
+> `optional` **creationDate?**: `Date`
 
-Defined in: [src/core/pdfCatalog.ts:61](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/pdfCatalog.ts#L61)
+Defined in: [src/core/pdfCatalog.ts:61](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/pdfCatalog.ts#L61)
 
 ***
 
 ### creator?
 
-> `optional` **creator**: `string`
+> `optional` **creator?**: `string`
 
-Defined in: [src/core/pdfCatalog.ts:59](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/pdfCatalog.ts#L59)
+Defined in: [src/core/pdfCatalog.ts:59](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/pdfCatalog.ts#L59)
 
 ***
 
 ### keywords?
 
-> `optional` **keywords**: `string`
+> `optional` **keywords?**: `string`
 
-Defined in: [src/core/pdfCatalog.ts:58](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/pdfCatalog.ts#L58)
+Defined in: [src/core/pdfCatalog.ts:58](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/pdfCatalog.ts#L58)
 
 ***
 
 ### modDate?
 
-> `optional` **modDate**: `Date`
+> `optional` **modDate?**: `Date`
 
-Defined in: [src/core/pdfCatalog.ts:62](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/pdfCatalog.ts#L62)
+Defined in: [src/core/pdfCatalog.ts:62](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/pdfCatalog.ts#L62)
 
 ***
 
 ### producer?
 
-> `optional` **producer**: `string`
+> `optional` **producer?**: `string`
 
-Defined in: [src/core/pdfCatalog.ts:60](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/pdfCatalog.ts#L60)
+Defined in: [src/core/pdfCatalog.ts:60](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/pdfCatalog.ts#L60)
 
 ***
 
 ### subject?
 
-> `optional` **subject**: `string`
+> `optional` **subject?**: `string`
 
-Defined in: [src/core/pdfCatalog.ts:57](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/pdfCatalog.ts#L57)
+Defined in: [src/core/pdfCatalog.ts:57](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/pdfCatalog.ts#L57)
 
 ***
 
 ### title?
 
-> `optional` **title**: `string`
+> `optional` **title?**: `string`
 
-Defined in: [src/core/pdfCatalog.ts:55](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/pdfCatalog.ts#L55)
+Defined in: [src/core/pdfCatalog.ts:55](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/pdfCatalog.ts#L55)

@@ -363,15 +363,16 @@ export async function optimizeAllImages(
 
     // Handle CMYK conversion
     if (channels === 4 && img.colorSpace === 'DeviceCMYK') {
-      const rgb = new Uint8Array(img.width * img.height * 3);
-      for (let i = 0; i < img.width * img.height; i++) {
-        const c = pixels[i * 4]! / 255;
-        const m = pixels[i * 4 + 1]! / 255;
-        const y = pixels[i * 4 + 2]! / 255;
-        const k = pixels[i * 4 + 3]! / 255;
-        rgb[i * 3] = Math.round(255 * (1 - c) * (1 - k));
-        rgb[i * 3 + 1] = Math.round(255 * (1 - m) * (1 - k));
-        rgb[i * 3 + 2] = Math.round(255 * (1 - y) * (1 - k));
+      const pixelCount = img.width * img.height;
+      const rgb = new Uint8Array(pixelCount * 3);
+      for (let i = 0; i < pixelCount; i++) {
+        const ci = 255 - pixels[i * 4]!;
+        const mi = 255 - pixels[i * 4 + 1]!;
+        const yi = 255 - pixels[i * 4 + 2]!;
+        const ki = 255 - pixels[i * 4 + 3]!;
+        rgb[i * 3] = (ci * ki + 127) / 255 | 0;
+        rgb[i * 3 + 1] = (mi * ki + 127) / 255 | 0;
+        rgb[i * 3 + 2] = (yi * ki + 127) / 255 | 0;
       }
       pixels = rgb;
       channels = 3;

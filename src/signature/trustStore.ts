@@ -17,9 +17,8 @@
 import { sha256 } from '../crypto/sha256.js';
 import {
   parseDerTlv,
-  extractIssuerAndSerial,
 } from './pkcs7.js';
-import type { Asn1Node } from './pkcs7.js';
+
 
 // ---------------------------------------------------------------------------
 // Types

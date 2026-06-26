@@ -26,7 +26,6 @@ import {
   PdfNumber,
   PdfString,
   PdfRef,
-  PdfNull,
   PdfObjectRegistry,
 } from '../../../src/core/pdfObjects.js';
 import type { ByteWriter, PdfObject } from '../../../src/core/pdfObjects.js';

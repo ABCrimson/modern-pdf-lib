@@ -8,7 +8,7 @@
 
 > **computeTargetDimensions**(`imageWidth`, `imageHeight`, `displayWidth`, `displayHeight`, `maxDpi`): `object`
 
-Defined in: [src/assets/image/dpiAnalyze.ts:90](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/image/dpiAnalyze.ts#L90)
+Defined in: [src/assets/image/dpiAnalyze.ts:90](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/dpiAnalyze.ts#L90)
 
 Compute the target pixel dimensions for downscaling an image
 to a maximum DPI at a given display size.

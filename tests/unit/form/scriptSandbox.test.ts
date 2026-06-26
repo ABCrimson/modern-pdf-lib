@@ -7,7 +7,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { createSandbox, FormScriptSandbox } from '../../../src/form/scriptSandbox.js';
-import type { SandboxResult } from '../../../src/form/scriptSandbox.js';
+
 
 // ---------------------------------------------------------------------------
 // Basic execution
@@ -402,7 +402,7 @@ describe('FormScriptSandbox — security', () => {
     const sandbox = createSandbox();
     // .constructor is sanitized to /* blocked */ so dangerous access
     // patterns like "".constructor("return this")() are neutralized
-    const result = sandbox.execute('return ""["con" + "structor"]');
+    sandbox.execute('return ""["con" + "structor"]');
     // Even though the bracket access works syntactically, constructor
     // invocation via .constructor is sanitized in the source text
     const result2 = sandbox.execute('var x = {}.constructor; return typeof x;');

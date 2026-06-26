@@ -70,7 +70,7 @@ export class PdfLinkAnnotation extends PdfAnnotation {
    */
   static fromDict(
     dict: PdfDict,
-    resolver?: (ref: PdfRef) => PdfObject | undefined,
+    _resolver?: (ref: PdfRef) => PdfObject | undefined,
   ): PdfLinkAnnotation {
     return new PdfLinkAnnotation(dict);
   }
@@ -119,7 +119,7 @@ export class PdfLinkAnnotation extends PdfAnnotation {
    * @param pageIndex  Zero-based page index.
    * @param fit        Fit mode (defaults to 'Fit').
    */
-  setDestination(pageIndex: number, fit?: string | undefined): void {
+  setDestination(pageIndex: number, fit?: string  ): void {
     const fitName = fit ?? 'Fit';
     this.dict.set(
       '/Dest',

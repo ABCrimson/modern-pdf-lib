@@ -10,7 +10,6 @@ import {
   PdfString,
   PdfBool,
   PdfArray,
-  PdfNumber,
 } from '../../../src/core/pdfObjects.js';
 
 describe('PdfTextAnnotation', () => {

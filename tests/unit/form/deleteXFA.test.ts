@@ -5,8 +5,6 @@
 import { describe, it, expect } from 'vitest';
 import {
   PdfDict,
-  PdfName,
-  PdfString,
   PdfArray,
   PdfBool,
   PdfStream,

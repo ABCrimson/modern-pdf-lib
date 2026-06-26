@@ -67,7 +67,7 @@ export class PdfStampAnnotation extends PdfAnnotation {
 
   static fromDict(
     dict: PdfDict,
-    resolver?: (ref: PdfRef) => PdfObject | undefined,
+    _resolver?: (ref: PdfRef) => PdfObject | undefined,
   ): PdfStampAnnotation {
     return new PdfStampAnnotation(dict);
   }

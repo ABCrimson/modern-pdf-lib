@@ -546,7 +546,7 @@ function parseOutlineItem(
   if (titleObj instanceof PdfString) {
     title = titleObj.value;
   } else {
-    title = String(titleObj);
+    title = ''; // a non-string /Title is malformed; use an empty title
   }
 
   // /Dest — parse the destination

@@ -17,7 +17,6 @@ import { describe, it, expect } from 'vitest';
 import {
   XrefParser,
 } from '../../../src/parser/xrefParser.js';
-import type { XrefEntry, ParsedTrailer } from '../../../src/parser/xrefParser.js';
 import { PdfLexer } from '../../../src/parser/lexer.js';
 import { PdfObjectParser } from '../../../src/parser/objectParser.js';
 import { PdfObjectRegistry } from '../../../src/core/pdfObjects.js';
@@ -411,7 +410,7 @@ describe('XrefParser.parseXref', () => {
       + `startxref\n${xref2Pos}\n%%EOF\n`;
 
     const parser = makeParser(fullPdf);
-    const { entries, trailer } = await parser.parseXref();
+    const { entries } = await parser.parseXref();
 
     // Object 1 should point to the NEWER offset (obj1v2Offset)
     const entry1 = entries.get(1);

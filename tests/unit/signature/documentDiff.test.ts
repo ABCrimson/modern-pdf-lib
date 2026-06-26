@@ -66,34 +66,6 @@ startxref
   return encoder.encode(pdf);
 }
 
-function createPdfWithFormFields(): Uint8Array {
-  const pdf = `%PDF-1.7
-1 0 obj
-<< /Type /Catalog /Pages 2 0 R /AcroForm << /Fields [5 0 R] >> >>
-endobj
-2 0 obj
-<< /Type /Pages /Kids [3 0 R] /Count 1 >>
-endobj
-3 0 obj
-<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Annots [5 0 R] >>
-endobj
-4 0 obj
-<< /Producer (modern-pdf) >>
-endobj
-5 0 obj
-<< /Type /Annot /Subtype /Widget /FT /Tx /T (FullName) /V (Alice) /Rect [50 700 200 730] >>
-endobj
-xref
-0 6
-0000000000 65535 f \n0000000009 00000 n \n0000000086 00000 n \n0000000139 00000 n \n0000000236 00000 n \n0000000275 00000 n \ntrailer
-<< /Size 6 /Root 1 0 R /Info 4 0 R >>
-startxref
-400
-%%EOF
-`;
-  return encoder.encode(pdf);
-}
-
 // ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
@@ -188,7 +160,7 @@ describe('diffSignedContent', () => {
 
   it('should have correct DiffEntry type values', async () => {
     const pdf = createMinimalPdf();
-    const diff = await diffSignedContent(pdf);
+    await diffSignedContent(pdf);
 
     // Verify types compile correctly
     const validTypes: DiffEntry['type'][] = [

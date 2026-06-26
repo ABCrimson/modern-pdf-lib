@@ -8,7 +8,7 @@
 
 > **recompressWebP**(`pixels`, `width`, `height`, `quality?`): `Uint8Array`
 
-Defined in: [src/assets/image/webpOptimize.ts:722](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/image/webpOptimize.ts#L722)
+Defined in: [src/assets/image/webpOptimize.ts:722](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/webpOptimize.ts#L722)
 
 Re-encode decoded WebP pixels as JPEG data for PDF embedding.
 

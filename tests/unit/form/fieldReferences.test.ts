@@ -19,7 +19,7 @@ import {
   setFieldValue,
   createFieldProxy,
 } from '../../../src/form/fieldReferences.js';
-import type { FieldRef } from '../../../src/form/fieldReferences.js';
+
 
 // ---------------------------------------------------------------------------
 // Helpers

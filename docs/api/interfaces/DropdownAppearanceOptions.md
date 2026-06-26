@@ -6,7 +6,7 @@
 
 # Interface: DropdownAppearanceOptions
 
-Defined in: [src/form/fieldAppearance.ts:298](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/form/fieldAppearance.ts#L298)
+Defined in: [src/form/fieldAppearance.ts:297](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/form/fieldAppearance.ts#L297)
 
 Options for generating a dropdown field appearance.
 
@@ -14,9 +14,9 @@ Options for generating a dropdown field appearance.
 
 ### fontName?
 
-> `optional` **fontName**: `string`
+> `optional` **fontName?**: `string`
 
-Defined in: [src/form/fieldAppearance.ts:304](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/form/fieldAppearance.ts#L304)
+Defined in: [src/form/fieldAppearance.ts:303](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/form/fieldAppearance.ts#L303)
 
 Font name. Default: "Helv".
 
@@ -24,9 +24,9 @@ Font name. Default: "Helv".
 
 ### fontSize?
 
-> `optional` **fontSize**: `number`
+> `optional` **fontSize?**: `number`
 
-Defined in: [src/form/fieldAppearance.ts:306](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/form/fieldAppearance.ts#L306)
+Defined in: [src/form/fieldAppearance.ts:305](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/form/fieldAppearance.ts#L305)
 
 Font size. 0 means auto. Default: 0.
 
@@ -36,7 +36,7 @@ Font size. 0 means auto. Default: 0.
 
 > **rect**: \[`number`, `number`, `number`, `number`\]
 
-Defined in: [src/form/fieldAppearance.ts:302](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/form/fieldAppearance.ts#L302)
+Defined in: [src/form/fieldAppearance.ts:301](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/form/fieldAppearance.ts#L301)
 
 The widget rectangle [x1, y1, x2, y2].
 
@@ -46,6 +46,6 @@ The widget rectangle [x1, y1, x2, y2].
 
 > **value**: `string`
 
-Defined in: [src/form/fieldAppearance.ts:300](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/form/fieldAppearance.ts#L300)
+Defined in: [src/form/fieldAppearance.ts:299](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/form/fieldAppearance.ts#L299)
 
 The selected value text.

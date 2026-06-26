@@ -7,7 +7,6 @@ import {
   createPdf,
   PdfDocument,
   PageSizes,
-  rgb,
 } from '../../../src/index.js';
 
 // ---------------------------------------------------------------------------

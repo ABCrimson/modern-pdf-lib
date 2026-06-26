@@ -28,20 +28,16 @@ import {
   nextLine,
   setTextMatrix,
   setTextRenderingMode,
-  showTextArray,
 } from './operators/text.js';
 import {
   rectangle,
   moveTo,
   lineTo,
-  curveTo,
   stroke,
   fill,
   fillAndStroke,
-  closePath,
   setLineWidth,
   setLineCap,
-  setLineJoin,
   setDashPattern,
   circlePath,
   ellipsePath,
@@ -52,10 +48,7 @@ import { drawXObject, drawImageXObject } from './operators/image.js';
 import {
   applyFillColor,
   applyStrokeColor,
-  setFillColorRgb,
-  setStrokeColorRgb,
   setColorSpace,
-  setFillColor,
 } from './operators/color.js';
 import {
   saveState,
@@ -72,7 +65,6 @@ import {
   PdfBool,
   PdfRef,
   PdfStream,
-  PdfString,
   PdfObjectRegistry,
 } from './pdfObjects.js';
 import type { StructureType } from '../accessibility/structureTree.js';
@@ -162,7 +154,7 @@ export const PageSizes = {
   SRA2: [1275.59, 1814.17] as const,
   SRA3: [907.09, 1275.59] as const,
   SRA4: [637.80, 907.09] as const,
-} as const satisfies Record<string, readonly [number, number]>;
+} as const;
 
 /** Type for a page-size input: a `[width, height]` tuple or `{ width, height }` object. */
 export type PageSize =

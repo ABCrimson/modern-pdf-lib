@@ -8,7 +8,7 @@
 
 > **diffSignedContent**(`pdf`, `signatureIndex?`): `Promise`\<[`DocumentDiff`](../interfaces/DocumentDiff.md)\>
 
-Defined in: [src/signature/documentDiff.ts:259](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/signature/documentDiff.ts#L259)
+Defined in: [src/signature/documentDiff.ts:258](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/documentDiff.ts#L258)
 
 Diff the signed content of a PDF against its current state.
 

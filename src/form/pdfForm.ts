@@ -753,7 +753,7 @@ export class PdfForm {
    * Updates /NeedAppearances if appearances need to be generated
    * by the viewer.
    */
-  toDict(registry: PdfObjectRegistry): PdfDict {
+  toDict(_registry: PdfObjectRegistry): PdfDict {
     // Register default fonts if not already present
     const dr = this.acroFormDict.get('/DR');
     if (dr === undefined) {

@@ -16,7 +16,6 @@ import type { Color } from '../../src/core/operators/color.js';
 
 const white: Color = { type: 'rgb', r: 1, g: 1, b: 1 };
 const lightGray: Color = { type: 'rgb', r: 0.9, g: 0.9, b: 0.9 };
-const darkGray: Color = { type: 'rgb', r: 0.3, g: 0.3, b: 0.3 };
 const blue: Color = { type: 'rgb', r: 0, g: 0, b: 0.8 };
 const red: Color = { type: 'rgb', r: 1, g: 0, b: 0 };
 

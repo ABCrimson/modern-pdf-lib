@@ -8,8 +8,8 @@
 import { describe, it, expect } from 'vitest';
 import { PdfPage, PageSizes } from '../../../src/core/pdfPage.js';
 import { PdfObjectRegistry, PdfRef } from '../../../src/core/pdfObjects.js';
-import { rgb, cmyk, grayscale } from '../../../src/core/operators/color.js';
-import { degrees, radians } from '../../../src/core/operators/state.js';
+import { rgb } from '../../../src/core/operators/color.js';
+import { degrees } from '../../../src/core/operators/state.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -258,7 +258,7 @@ describe('PdfPage', () => {
   // -------------------------------------------------------------------------
 
   it('drawImage queues image XObject operators', () => {
-    const { page, registry } = makePage();
+    const { page } = makePage();
     const imgRef = PdfRef.of(99);
     const image = { name: 'Im1', ref: imgRef, width: 200, height: 150 };
 
@@ -273,7 +273,7 @@ describe('PdfPage', () => {
   });
 
   it('drawImage registers the XObject resource on the page', () => {
-    const { page, registry } = makePage();
+    const { page } = makePage();
     const imgRef = PdfRef.of(99);
     const image = { name: 'Im1', ref: imgRef, width: 100, height: 100 };
 
@@ -378,7 +378,7 @@ describe('PdfPage', () => {
   // -------------------------------------------------------------------------
 
   it('finalize() produces a valid page entry', () => {
-    const { page, registry } = makePage(300, 400);
+    const { page } = makePage(300, 400);
     page.drawText('Finalize test', { x: 10, y: 380 });
 
     const entry = page.finalize();

@@ -6,7 +6,7 @@
 
 # Interface: TransparencyGroupOptions
 
-Defined in: [src/core/pdfPage.ts:549](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/pdfPage.ts#L549)
+Defined in: [src/core/pdfPage.ts:579](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/pdfPage.ts#L579)
 
 Options for transparency groups.
 
@@ -17,9 +17,9 @@ as a single unit before being blended with the page content.
 
 ### colorSpace?
 
-> `optional` **colorSpace**: `"DeviceRGB"` \| `"DeviceCMYK"` \| `"DeviceGray"`
+> `optional` **colorSpace?**: `"DeviceCMYK"` \| `"DeviceRGB"` \| `"DeviceGray"`
 
-Defined in: [src/core/pdfPage.ts:563](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/pdfPage.ts#L563)
+Defined in: [src/core/pdfPage.ts:593](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/pdfPage.ts#L593)
 
 Color space for the transparency group.  Default: `'DeviceRGB'`.
 
@@ -27,9 +27,9 @@ Color space for the transparency group.  Default: `'DeviceRGB'`.
 
 ### isolated?
 
-> `optional` **isolated**: `boolean`
+> `optional` **isolated?**: `boolean`
 
-Defined in: [src/core/pdfPage.ts:554](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/pdfPage.ts#L554)
+Defined in: [src/core/pdfPage.ts:584](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/pdfPage.ts#L584)
 
 When `true`, the group is composited against a fully transparent
 backdrop rather than the existing page content.  Default: `true`.
@@ -38,9 +38,9 @@ backdrop rather than the existing page content.  Default: `true`.
 
 ### knockout?
 
-> `optional` **knockout**: `boolean`
+> `optional` **knockout?**: `boolean`
 
-Defined in: [src/core/pdfPage.ts:559](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/pdfPage.ts#L559)
+Defined in: [src/core/pdfPage.ts:589](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/pdfPage.ts#L589)
 
 When `true`, earlier objects in the group are knocked out (replaced)
 by later objects, rather than composited on top.  Default: `false`.

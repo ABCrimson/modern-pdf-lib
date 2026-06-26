@@ -32,20 +32,20 @@ import {
 } from './pdfObjects.js';
 import type { DocumentMetadata, PageEntry } from './pdfCatalog.js';
 import { buildDocumentStructure } from './pdfCatalog.js';
-import { PdfWriter, serializePdf } from './pdfWriter.js';
+import { serializePdf } from './pdfWriter.js';
 import type { PdfSaveOptions } from './pdfWriter.js';
 import { PdfStreamWriter } from './pdfStream.js';
 import { getStandardFont, measureStandardText, standardFontHeight } from '../assets/font/standardFonts.js';
 import type { StandardFontName as StdFontName } from '../assets/font/standardFonts.js';
 import type { EmbeddedFont } from '../assets/font/fontEmbed.js';
 import { embedFont as embedTtfFont } from '../assets/font/fontEmbed.js';
-import { subsetFont, buildSubsetCmap, computeSubsetTag } from '../assets/font/fontSubset.js';
+import { subsetFont, buildSubsetCmap } from '../assets/font/fontSubset.js';
 import { isOpenTypeCFF } from '../assets/font/otfDetect.js';
 import { findTable } from '../assets/font/cffEmbed.js';
 import { embedPng as decodePng } from '../assets/image/pngEmbed.js';
 import { detectImageFormat } from '../assets/image/formatDetect.js';
-import { decodeWebP, isWebP } from '../assets/image/webpDecode.js';
-import { decodeTiff, isTiff } from '../assets/image/tiffDecode.js';
+import { decodeWebP } from '../assets/image/webpDecode.js';
+import { decodeTiff } from '../assets/image/tiffDecode.js';
 import type { TiffDecodeOptions } from '../assets/image/tiffDecode.js';
 import { deflateSync } from 'fflate';
 import type { LoadPdfOptions } from '../parser/documentParser.js';
@@ -55,8 +55,8 @@ import type { EncryptOptions } from '../crypto/encryptionHandler.js';
 import type { PdfPermissionFlags } from '../crypto/permissions.js';
 import { PdfOutlineTree } from '../outline/pdfOutline.js';
 import type { PdfOutlineItem, OutlineDestination, OutlineItemOptions } from '../outline/pdfOutline.js';
-import { buildXmpMetadata, parseXmpMetadata, createXmpStream } from '../metadata/xmpMetadata.js';
-import { buildViewerPreferencesDict, parseViewerPreferences } from '../metadata/viewerPreferences.js';
+
+import { buildViewerPreferencesDict } from '../metadata/viewerPreferences.js';
 import type { ViewerPreferences } from '../metadata/viewerPreferences.js';
 import { PdfViewerPreferences } from '../metadata/pdfViewerPreferences.js';
 import { PdfStructureTree } from '../accessibility/structureTree.js';
@@ -68,13 +68,13 @@ import type { SignOptions, PdfSignatureInfo } from '../signature/signatureHandle
 import { verifySignatures } from '../signature/signatureVerifier.js';
 import type { SvgRenderOptions } from '../assets/svg/svgToPdf.js';
 import { drawSvgOnPage } from '../assets/svg/svgToPdf.js';
-import { PdfLayer, PdfLayerManager, beginLayerContent, endLayerContent } from '../layers/optionalContent.js';
+import { PdfLayer, PdfLayerManager } from '../layers/optionalContent.js';
 import type { EmbeddedFile } from './embeddedFiles.js';
 import { attachFile, buildEmbeddedFilesNameTree } from './embeddedFiles.js';
 import type { WatermarkOptions } from './watermark.js';
 import { addWatermark as addWatermarkImpl } from './watermark.js';
-import type { RedactionOptions } from './redaction.js';
-import { markForRedaction, applyRedactions as applyRedactionsImpl } from './redaction.js';
+
+import { applyRedactions as applyRedactionsImpl } from './redaction.js';
 import type { SignatureVerificationResult } from '../signature/signatureVerifier.js';
 import { PdfForm } from '../form/pdfForm.js';
 import { getDocumentActionState } from '../form/documentScripts.js';
@@ -108,7 +108,7 @@ export const StandardFonts = {
   TimesBoldItalic: 'Times-BoldItalic',
   Symbol: 'Symbol',
   ZapfDingbats: 'ZapfDingbats',
-} as const satisfies Record<string, string>;
+} as const;
 
 export type StandardFontName = (typeof StandardFonts)[keyof typeof StandardFonts];
 
@@ -426,7 +426,7 @@ export class PdfDocument {
    * @internal Advance font/image counters past names already used
    * by loaded pages so new resources don't collide.
    */
-  _advanceCounters(maxFont: number, maxImage: number, maxGState: number): void {
+  _advanceCounters(maxFont: number, maxImage: number, _maxGState: number): void {
     if (maxFont > this.fontCounter) this.fontCounter = maxFont;
     if (maxImage > this.imageCounter) this.imageCounter = maxImage;
     // GState counter is page-local, but we note it for future use
@@ -1247,7 +1247,7 @@ export class PdfDocument {
    * @param options   Options (e.g., `{ page: 0 }` for multi-page TIFFs).
    * @returns         An {@link ImageRef}.
    */
-  embedTiff(tiffData: Uint8Array | ArrayBuffer, options?: { page?: number | undefined } | undefined): ImageRef {
+  embedTiff(tiffData: Uint8Array | ArrayBuffer, options?: { page?: number | undefined }  ): ImageRef {
     const data = tiffData instanceof ArrayBuffer ? new Uint8Array(tiffData) : tiffData;
     const tiffOptions: TiffDecodeOptions | undefined = options?.page !== undefined
       ? { page: options.page }

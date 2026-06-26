@@ -25,7 +25,6 @@ import {
   encodeOID,
   encodeOctetString,
   encodeContextTag,
-  encodeLength,
   decodeOidBytes,
 } from './pkcs7.js';
 import type { Asn1Node } from './pkcs7.js';
@@ -59,19 +58,6 @@ function concat(...arrays: Uint8Array[]): Uint8Array {
     result.set(arr, offset);
     offset += arr.length;
   }
-  return result;
-}
-
-/**
- * Encode a raw DER TLV (tag-length-value) from a tag byte and content.
- * @internal
- */
-function encodeTlv(tag: number, value: Uint8Array): Uint8Array {
-  const len = encodeLength(value.length);
-  const result = new Uint8Array(1 + len.length + value.length);
-  result[0] = tag;
-  result.set(len, 1);
-  result.set(value, 1 + len.length);
   return result;
 }
 

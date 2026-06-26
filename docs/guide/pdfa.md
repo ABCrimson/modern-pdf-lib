@@ -600,3 +600,125 @@ await convertToPdfA('input.pdf', 'output-pdfa.pdf', '2b');
 | `AssociatedFileOptions` | Associated file configuration |
 | `AssociatedFileResult` | `{ fileSpecRef, streamRef }` |
 | `AFRelationship` | `'Source' \| 'Data' \| 'Alternative' \| ...` |
+
+---
+
+## PDF/UA Accessibility Validation
+
+modern-pdf-lib also supports PDF/UA (ISO 14289-1) validation and enforcement for accessible, tagged PDF documents. PDF/UA ensures that PDFs are usable by assistive technologies such as screen readers.
+
+### Validating PDF/UA Compliance
+
+Use `validatePdfUa()` to check a document against PDF/UA-1 requirements:
+
+```ts
+import { createPdf } from 'modern-pdf-lib';
+import { validatePdfUa } from 'modern-pdf-lib/accessibility';
+
+const doc = createPdf();
+doc.addPage();
+doc.setTitle('Accessible Report');
+doc.setLanguage('en-US');
+
+const result = validatePdfUa(doc);
+
+if (result.valid) {
+  console.log('Document passes PDF/UA-1!');
+} else {
+  for (const err of result.errors) {
+    console.error(`[${err.code}] ${err.message}`);
+    if (err.clause) console.error(`  ISO 14289-1, clause ${err.clause}`);
+  }
+  for (const warn of result.warnings) {
+    console.warn(`[${warn.code}] ${warn.message}`);
+  }
+}
+```
+
+### PDF/UA Conformance Level
+
+```ts
+type PdfUaLevel = 'UA1';
+```
+
+Currently only PDF/UA-1 (ISO 14289-1:2014) is supported. PDF/UA-2 (ISO 14289-2) may be added in a future release.
+
+### Validation Checks
+
+The validator performs the following checks:
+
+| Code | Check | Severity |
+|---|---|---|
+| `UA-STRUCT-001` | Structure tree present (`/StructTreeRoot`) | Error |
+| `UA-STRUCT-002` | Document marked (`/MarkInfo` with `/Marked true`) | Error |
+| `UA-STRUCT-003` | First heading is H1 | Error |
+| `UA-STRUCT-004` | Heading levels sequential (no skips in same parent) | Error |
+| `UA-STRUCT-005` | Alt text on illustration elements (Figure, Formula, Form) | Error |
+| `UA-STRUCT-006` | Non-empty alt text | Error |
+| `UA-META-001..003` | Document language (`/Lang`) present and valid BCP 47 | Error |
+| `UA-META-004..006` | Document title present and `/DisplayDocTitle` enabled | Error |
+| `UA-TABLE-001..003` | Table structure (TR/TH/TD hierarchy) | Error/Warning |
+| `UA-LIST-001..003` | List structure (L/LI/LBody hierarchy) | Error/Warning |
+| `UA-FONT-001` | All fonts embedded (standard 14 not exempt) | Error |
+| `UA-NAV-001` | Bookmarks present for multi-page documents | Warning |
+| `UA-PAGE-001` | Tab order set to structure order (`/Tabs /S`) | Warning |
+| `UA-CONTRAST-001` | Color contrast reminder (manual check needed) | Warning |
+
+### Auto-Fixing with enforcePdfUa
+
+Use `enforcePdfUa()` to automatically fix issues that can be corrected programmatically:
+
+```ts
+import { createPdf } from 'modern-pdf-lib';
+import { enforcePdfUa, validatePdfUa } from 'modern-pdf-lib/accessibility';
+
+const doc = createPdf();
+doc.addPage();
+
+const enforcement = enforcePdfUa(doc);
+console.log('Fixed:', enforcement.fixed);
+// e.g. ['Set document language to "en"',
+//        'Set document title to "Untitled" with DisplayDocTitle',
+//        'Created structure tree (MarkInfo / StructTreeRoot)',
+//        'Set tab order to structure order (/Tabs /S) on all pages']
+
+console.log('Unfixable:', enforcement.unfixable.length);
+// Issues that require manual content changes (alt text, heading hierarchy, etc.)
+```
+
+The enforcement function applies the following corrections:
+
+| Auto-Fix | Description |
+|---|---|
+| Language | Sets `/Lang` to `'en'` if missing |
+| Title | Sets title to `'Untitled'` with `/DisplayDocTitle` if missing |
+| Structure tree | Creates `/StructTreeRoot` and `/MarkInfo` if missing |
+| Tab order | Sets `/Tabs /S` on all pages |
+
+::: warning
+`enforcePdfUa()` cannot fix content-level issues such as missing alt text on images, heading hierarchy violations, or missing table headers. These require manual changes to the document content and structure tree.
+:::
+
+### PDF/UA Validation Result Types
+
+```ts
+interface PdfUaValidationResult {
+  valid: boolean;           // true if no errors
+  level: PdfUaLevel;        // 'UA1'
+  errors: PdfUaError[];     // Must-fix violations
+  warnings: PdfUaWarning[]; // Best-practice recommendations
+}
+
+interface PdfUaError {
+  code: string;                           // e.g. 'UA-STRUCT-001'
+  message: string;                        // Human-readable description
+  clause?: string;                        // ISO 14289-1 clause reference
+  element?: PdfStructureElement;          // Related structure element
+  pageIndex?: number;                     // Zero-based page index
+}
+
+interface PdfUaEnforcementResult {
+  fixed: string[];           // Actions successfully applied
+  unfixable: PdfUaError[];   // Issues requiring manual attention
+}
+```

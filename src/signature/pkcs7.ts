@@ -746,12 +746,6 @@ export async function buildPkcs7Signature(
   // the signature, but embedded as [0] IMPLICIT in the SignerInfo
   const signedAttrsForHash = encodeSet(signedAttrs);
 
-  // Hash the signed attributes
-  const subtle = getSubtle();
-  const signedAttrsHash = new Uint8Array(
-    await subtle.digest(hashAlgorithm, toBuffer(signedAttrsForHash)),
-  );
-
   // Sign the signed attributes hash (actually, sign the raw bytes
   // because Web Crypto does the hashing internally for RSA PKCS1)
   const signatureValue = await signData(

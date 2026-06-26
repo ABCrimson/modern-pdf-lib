@@ -1,0 +1,28 @@
+[**modern-pdf-lib**](../index.md)
+
+***
+
+[modern-pdf-lib](../index.md) / gtsPdfVtVersion
+
+# Function: gtsPdfVtVersion()
+
+> **gtsPdfVtVersion**(`conformance?`): `string`
+
+Defined in: src/compliance/pdfVT.ts:146
+
+Map a [PdfVtConformance](../type-aliases/PdfVtConformance.md) level to its `GTS_PDFVTVersion` string, the
+value placed in the document's XMP / output-intent VT version field.
+
+## Parameters
+
+### conformance?
+
+[`PdfVtConformance`](../type-aliases/PdfVtConformance.md) = `'PDF/VT-1'`
+
+The conformance level (defaults to `PDF/VT-1`).
+
+## Returns
+
+`string`
+
+The `GTS_PDFVTVersion` string (e.g. `PDF/VT-1`).

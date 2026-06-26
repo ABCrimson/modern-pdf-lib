@@ -8,7 +8,7 @@
 
 > **findExistingSignatures**(`pdf`): [`SignatureByteRange`](../interfaces/SignatureByteRange.md)[]
 
-Defined in: [src/signature/incrementalSave.ts:165](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/signature/incrementalSave.ts#L165)
+Defined in: [src/signature/incrementalSave.ts:142](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/incrementalSave.ts#L142)
 
 Scan a PDF for all /Type /Sig dictionaries and extract their byte ranges.
 

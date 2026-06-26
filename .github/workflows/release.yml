@@ -11,8 +11,8 @@ permissions:
   id-token: write
 
 env:
-  NODE_VERSION: '25.7'
-  RUST_TOOLCHAIN: 'stable'
+  NODE_VERSION: '26.4'
+  RUST_TOOLCHAIN: 'beta'
 
 jobs:
   # ---------------------------------------------------------------------------
@@ -22,15 +22,15 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@beta
         with:
           targets: wasm32-unknown-unknown
 
       - name: Cache Cargo registry
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: |
             ~/.cargo/registry
@@ -52,7 +52,16 @@ jobs:
 
       - name: Build WASM crates
         run: bash scripts/build-wasm.sh --release
-        continue-on-error: true
+
+      - name: Verify WASM binaries
+        run: |
+          for crate in libdeflate png ttf shaping jbig2 jpeg; do
+            if ! ls src/wasm/${crate}/pkg/*.wasm 1>/dev/null 2>&1; then
+              echo "::error::WASM binary missing for crate: ${crate}"
+              exit 1
+            fi
+          done
+          echo "All WASM binaries verified."
 
       - name: Build TypeScript
         run: npm run build
@@ -83,7 +92,7 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-node@v6
         with:
@@ -119,7 +128,7 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Download WASM modules
         uses: actions/download-artifact@v8
@@ -147,7 +156,7 @@ jobs:
           echo "EOF" >> "$GITHUB_OUTPUT"
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2.5.0
+        uses: softprops/action-gh-release@v3.0.1
         with:
           body: ${{ steps.changelog.outputs.body }}
           files: modern-pdf-wasm-*.tar.gz
@@ -164,7 +173,7 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-node@v6
         with:
@@ -173,6 +182,9 @@ jobs:
 
       - run: npm ci --legacy-peer-deps
 
+      - name: Install docs toolchain (isolated TS6 sidecar — typedoc has no TS7 path yet)
+        run: npm install --prefix tools/docs --no-audit --no-fund
+
       - name: Generate API docs
         run: npm run docs:api
 
@@ -180,13 +192,13 @@ jobs:
         run: npm run docs:build
 
       - name: Configure GitHub Pages
-        uses: actions/configure-pages@v5
+        uses: actions/configure-pages@v6
 
       - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v4
+        uses: actions/upload-pages-artifact@v5
         with:
           path: docs/.vitepress/dist
 
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5

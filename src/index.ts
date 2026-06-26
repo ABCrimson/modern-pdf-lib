@@ -572,6 +572,7 @@ export {
   loadPdf,
   extractText,
   extractTextWithPositions,
+  searchTextItems,
   parseContentStream,
   decodeStream,
   PdfParseError,
@@ -1100,3 +1101,212 @@ export { metadataPlugin } from './plugins/index.js';
 export type { MetadataPluginOptions } from './plugins/index.js';
 export { accessibilityPlugin } from './plugins/index.js';
 export type { AccessibilityPluginOptions } from './plugins/index.js';
+
+// ---------------------------------------------------------------------------
+// Reading & extraction (0.28.6) — table extraction
+// ---------------------------------------------------------------------------
+export { extractTables, tableToCsv, tableToJson } from './parser/tableExtract.js';
+export type { ExtractedTable, TableExtractOptions } from './parser/tableExtract.js';
+
+// ---------------------------------------------------------------------------
+// PDF 2.0 core (0.30.0 / 0.30.5 / 0.30.9)
+// ---------------------------------------------------------------------------
+export { buildDPartRoot } from './core/documentParts.js';
+export type { DocumentPart } from './core/documentParts.js';
+export { buildRequirement, buildRequirements } from './core/requirements.js';
+export type { RequirementType } from './core/requirements.js';
+export { buildPieceInfo } from './core/pieceInfo.js';
+
+// ---------------------------------------------------------------------------
+// Tagged-PDF structure namespaces (0.30.4)
+// ---------------------------------------------------------------------------
+export {
+  buildNamespace,
+  buildNamespacesArray,
+  PDF2_NAMESPACE,
+  MATHML_NAMESPACE,
+} from './accessibility/namespaces.js';
+export type { NamespaceDef } from './accessibility/namespaces.js';
+
+// ---------------------------------------------------------------------------
+// Structured validation report — JSON + SARIF 2.1.0 (0.32.7)
+// ---------------------------------------------------------------------------
+export {
+  toJsonReport,
+  toSarif,
+  SARIF_SCHEMA_URI,
+  DEFAULT_SARIF_TOOL_NAME,
+} from './compliance/validationReport.js';
+export type {
+  ValidationLevel,
+  ValidationFinding,
+  JsonReport,
+  SarifLog,
+  SarifRun,
+  SarifResult,
+} from './compliance/validationReport.js';
+
+// ---------------------------------------------------------------------------
+// CIE device-independent color spaces (0.37.1)
+// ---------------------------------------------------------------------------
+export { buildCalGray, buildCalRGB, buildLab, labToRgb } from './core/colorSpacesCIE.js';
+export type { CalGrayParams, CalRGBParams, LabParams } from './core/colorSpacesCIE.js';
+
+// ---------------------------------------------------------------------------
+// Standalone document timestamp (0.34.6)
+// ---------------------------------------------------------------------------
+export {
+  buildDocTimeStampDict,
+  DEFAULT_DOC_TIMESTAMP_CONTENTS_SIZE,
+} from './signature/docTimeStamp.js';
+export type { DocTimeStampOptions } from './signature/docTimeStamp.js';
+
+// ---------------------------------------------------------------------------
+// Word/line/paragraph reconstruction (0.28.3)
+// ---------------------------------------------------------------------------
+export { reconstructLines, reconstructParagraphs } from './parser/textReconstruct.js';
+export type {
+  Line as TextLine,
+  Paragraph as TextParagraph,
+  ReconstructOptions,
+} from './parser/textReconstruct.js';
+
+// ---------------------------------------------------------------------------
+// PDF Portfolios / Collections (0.33.7)
+// ---------------------------------------------------------------------------
+export { buildCollection } from './core/collections.js';
+export type {
+  CollectionView,
+  CollectionSchemaField,
+  CollectionOptions,
+} from './core/collections.js';
+
+// ---------------------------------------------------------------------------
+// Markdown-to-PDF (0.40.4)
+// ---------------------------------------------------------------------------
+export { markdownToPdf } from './assets/markdown/markdownToPdf.js';
+export type { MarkdownToPdfOptions } from './assets/markdown/markdownToPdf.js';
+
+// ---------------------------------------------------------------------------
+// PDF function objects + evaluator (0.37.0)
+// ---------------------------------------------------------------------------
+export { evaluateFunction } from './core/pdfFunctions.js';
+export type {
+  SampledFunction,
+  ExponentialFunction,
+  StitchingFunction,
+  PostScriptFunction,
+  PdfFunctionDef,
+} from './core/pdfFunctions.js';
+
+// ---------------------------------------------------------------------------
+// Halftone dictionaries + transfer functions (0.38.7)
+// ---------------------------------------------------------------------------
+export {
+  buildType1Halftone,
+  buildThresholdHalftone,
+  buildType5Halftone,
+  identityTransferFunction,
+  buildSampledTransferFunction,
+  nameHalftone,
+  STANDARD_SPOT_FUNCTIONS,
+} from './core/halftone.js';
+export type { Type1Halftone } from './core/halftone.js';
+
+// ---------------------------------------------------------------------------
+// PDF/X-6 print-production conformance (0.32.4)
+// ---------------------------------------------------------------------------
+export {
+  buildPdfX6OutputIntent,
+  buildGtsPdfxVersion,
+  validateBoxGeometry,
+  buildBoxDict,
+} from './compliance/pdfX6.js';
+export type { PdfX6Variant, PdfX6Options, PdfRect, BoxGeometry } from './compliance/pdfX6.js';
+
+// ---------------------------------------------------------------------------
+// Factur-X / ZUGFeRD CII e-invoice XML (0.33.2)
+// ---------------------------------------------------------------------------
+export { generateCiiXml } from './compliance/facturX.js';
+export type { FacturXProfile, Invoice, InvoiceParty, InvoiceLine } from './compliance/facturX.js';
+
+// ---------------------------------------------------------------------------
+// Developer-experience helpers — code frames + did-you-mean (0.40.7)
+// ---------------------------------------------------------------------------
+export { renderCodeFrame, levenshtein, didYouMean } from './utils/codeframe.js';
+export type { CodeFrameOptions } from './utils/codeframe.js';
+
+// ---------------------------------------------------------------------------
+// Function-based shading (0.37.3)
+// ---------------------------------------------------------------------------
+export { buildFunctionShading, sampleShadingColor } from './core/shadingFunction.js';
+export type { FunctionShadingOptions } from './core/shadingFunction.js';
+
+// ---------------------------------------------------------------------------
+// PDF/A-4 conformance metadata (0.32.1 / 0.32.2)
+// ---------------------------------------------------------------------------
+export { buildPdfA4Xmp, pdfA4Rules } from './compliance/pdfA4.js';
+export type {
+  PdfA4Level,
+  PdfA4Options,
+  PdfA4ExtensionSchema,
+  PdfA4ExtensionProperty,
+} from './compliance/pdfA4.js';
+
+// ---------------------------------------------------------------------------
+// XRechnung / Order-X e-document profiles (0.33.4)
+// ---------------------------------------------------------------------------
+export { generateXRechnungCii, generateOrderX } from './compliance/xRechnung.js';
+export type { XRechnungOptions, OrderXType } from './compliance/xRechnung.js';
+
+// ---------------------------------------------------------------------------
+// Font fallback chains (0.36.7)
+// ---------------------------------------------------------------------------
+export { resolveFallback, splitByScript } from './assets/font/fontFallback.js';
+export type { FallbackFont, FallbackRun, ScriptRun } from './assets/font/fontFallback.js';
+
+// ---------------------------------------------------------------------------
+// HTTP Range-request lazy fetch (0.39.6)
+// ---------------------------------------------------------------------------
+export { createRangeFetcher } from './runtime/rangeFetch.js';
+export type {
+  FetchLike,
+  FetchLikeResponse,
+  RangeFetcher,
+  RangeFetchOptions,
+} from './runtime/rangeFetch.js';
+
+// ---------------------------------------------------------------------------
+// Declarative VDOM-to-PDF (0.40.0)
+// ---------------------------------------------------------------------------
+export { h as createVNode, renderToPdf } from './assets/vdom/reconciler.js';
+export type { VNode, RenderOptions as VdomRenderOptions } from './assets/vdom/reconciler.js';
+
+// ---------------------------------------------------------------------------
+// PDF/VT variable & transactional printing (0.32.5)
+// ---------------------------------------------------------------------------
+export { buildVtDpm, buildPdfVtDParts, gtsPdfVtVersion } from './compliance/pdfVT.js';
+export type { PdfVtConformance, RecordMetadata as VtRecordMetadata } from './compliance/pdfVT.js';
+
+// ---------------------------------------------------------------------------
+// Worker-pool task orchestrator (0.39.0)
+// ---------------------------------------------------------------------------
+export { createWorkerPool } from './runtime/workerPool.js';
+export type { TaskRunner, WorkerPool, WorkerPoolOptions } from './runtime/workerPool.js';
+
+// ---------------------------------------------------------------------------
+// External (HSM/KMS) deferred-hash signer (0.34.4)
+// ---------------------------------------------------------------------------
+export { signDeferred } from './signature/externalSigner.js';
+export type {
+  SignatureAlgorithm,
+  ExternalSigner,
+  DeferredSignOptions,
+  DeferredSignResult,
+} from './signature/externalSigner.js';
+
+// ---------------------------------------------------------------------------
+// WOFF / WOFF2 font input (0.36.3)
+// ---------------------------------------------------------------------------
+export { isWoff, isWoff2, readWoffHeader, decodeWoff } from './assets/font/woff.js';
+export type { WoffInfo } from './assets/font/woff.js';

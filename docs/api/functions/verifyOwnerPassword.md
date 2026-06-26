@@ -8,7 +8,7 @@
 
 > **verifyOwnerPassword**(`password`, `dict`, `fileId`): `Promise`\<`boolean`\>
 
-Defined in: [src/crypto/keyDerivation.ts:960](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/crypto/keyDerivation.ts#L960)
+Defined in: [src/crypto/keyDerivation.ts:963](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/crypto/keyDerivation.ts#L963)
 
 Verify an owner password against the /O value in the encryption dict.
 

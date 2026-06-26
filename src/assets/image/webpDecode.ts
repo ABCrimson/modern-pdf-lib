@@ -73,7 +73,7 @@ function parseRiffChunks(data: Uint8Array): RiffChunk[] {
       data[offset + 3]!,
     );
     const chunkSize = view.getUint32(offset + 4, true); // Little-endian
-    const chunkData = data.slice(offset + 8, offset + 8 + chunkSize);
+    const chunkData = data.subarray(offset + 8, offset + 8 + chunkSize);
     chunks.push({ fourcc, data: chunkData, offset: offset + 8 });
 
     // Chunks are padded to even byte boundaries
@@ -194,175 +194,6 @@ class BoolDecoder {
   }
 }
 
-/**
- * Simple bitstream reader for VP8 unpartitioned header.
- */
-class BitReader {
-  private data: Uint8Array;
-  private pos: number;
-  private bitPos = 0;
-
-  constructor(data: Uint8Array, byteOffset: number) {
-    this.data = data;
-    this.pos = byteOffset;
-  }
-
-  readBit(): number {
-    if (this.pos >= this.data.length) return 0;
-    const bit = (this.data[this.pos]! >> this.bitPos) & 1;
-    this.bitPos++;
-    if (this.bitPos === 8) {
-      this.bitPos = 0;
-      this.pos++;
-    }
-    return bit;
-  }
-
-  readBits(n: number): number {
-    let val = 0;
-    for (let i = 0; i < n; i++) {
-      val |= this.readBit() << i;
-    }
-    return val;
-  }
-
-  getByteOffset(): number {
-    return this.bitPos > 0 ? this.pos + 1 : this.pos;
-  }
-}
-
-// VP8 quantization matrices
-interface QuantMatrix {
-  y1: { dc: number; ac: number };
-  y2: { dc: number; ac: number };
-  uv: { dc: number; ac: number };
-}
-
-// DC dequant lookup (0-127 range, values from VP8 spec)
-const dcQLookup: readonly number[] = [
-  4,5,6,7,8,9,10,10,11,12,13,14,15,16,17,17,
-  18,19,20,20,21,21,22,22,23,23,24,25,25,26,27,28,
-  29,30,31,32,33,34,35,36,37,37,38,39,40,41,42,43,
-  44,45,46,46,47,48,49,50,51,52,53,54,55,56,57,58,
-  59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,
-  75,76,76,77,78,79,80,81,82,83,84,85,86,87,88,89,
-  91,93,95,96,98,100,101,102,104,106,108,110,112,114,116,118,
-  122,124,126,128,130,132,134,136,138,140,143,145,148,151,154,157,
-];
-
-const acQLookup: readonly number[] = [
-  4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,
-  20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,
-  36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,
-  52,53,54,55,56,57,58,60,62,64,66,68,70,72,74,76,
-  78,80,82,84,86,88,91,93,95,97,99,101,104,106,108,110,
-  113,115,118,120,123,125,128,130,133,136,138,141,144,146,149,152,
-  155,158,161,164,167,170,173,177,180,184,187,191,195,198,202,206,
-  210,214,219,223,228,232,237,242,247,252,257,263,269,275,281,287,
-];
-
-function clampQ(v: number): number {
-  return Math.max(0, Math.min(127, v));
-}
-
-function buildQuantMatrix(yDcDelta: number, yAcDelta: number, y2DcDelta: number, y2AcDelta: number, uvDcDelta: number, uvAcDelta: number, baseQ: number): QuantMatrix {
-  return {
-    y1: {
-      dc: dcQLookup[clampQ(baseQ + yDcDelta)]!,
-      ac: acQLookup[clampQ(baseQ + yAcDelta)]!,
-    },
-    y2: {
-      dc: dcQLookup[clampQ(baseQ + y2DcDelta)]! * 2,
-      ac: acQLookup[clampQ(baseQ + y2AcDelta)]! * 155 / 100 | 0,
-    },
-    uv: {
-      dc: dcQLookup[clampQ(baseQ + uvDcDelta)]!,
-      ac: acQLookup[clampQ(baseQ + uvAcDelta)]!,
-    },
-  };
-}
-
-// Zigzag scan order for 4x4 blocks
-const zigzag: readonly number[] = [
-  0, 1, 4, 8, 5, 2, 3, 6, 9, 12, 13, 10, 7, 11, 14, 15,
-];
-
-// Simple IDCT for 4x4 block (Walsh-Hadamard for DC, simplified DCT for AC)
-function idct4x4(input: Int16Array): Int16Array {
-  const output = new Int16Array(16);
-
-  // Row transform
-  for (let i = 0; i < 4; i++) {
-    const a0 = input[i * 4]!;
-    const a1 = input[i * 4 + 1]!;
-    const a2 = input[i * 4 + 2]!;
-    const a3 = input[i * 4 + 3]!;
-
-    const b0 = a0 + a2;
-    const b1 = a0 - a2;
-    const b2 = ((a1 * 35468) >> 16) - ((a3 * 85627) >> 16);
-    const b3 = ((a1 * 85627) >> 16) + ((a3 * 35468) >> 16);
-
-    output[i * 4] = (b0 + b3) | 0;
-    output[i * 4 + 1] = (b1 + b2) | 0;
-    output[i * 4 + 2] = (b1 - b2) | 0;
-    output[i * 4 + 3] = (b0 - b3) | 0;
-  }
-
-  // Column transform
-  const result = new Int16Array(16);
-  for (let i = 0; i < 4; i++) {
-    const a0 = output[i]!;
-    const a1 = output[4 + i]!;
-    const a2 = output[8 + i]!;
-    const a3 = output[12 + i]!;
-
-    const b0 = a0 + a2;
-    const b1 = a0 - a2;
-    const b2 = ((a1 * 35468) >> 16) - ((a3 * 85627) >> 16);
-    const b3 = ((a1 * 85627) >> 16) + ((a3 * 35468) >> 16);
-
-    result[i] = ((b0 + b3 + 4) >> 3) | 0;
-    result[4 + i] = ((b1 + b2 + 4) >> 3) | 0;
-    result[8 + i] = ((b1 - b2 + 4) >> 3) | 0;
-    result[12 + i] = ((b0 - b3 + 4) >> 3) | 0;
-  }
-
-  return result;
-}
-
-// Walsh-Hadamard transform for Y2 (DC) block
-function iwht4x4(input: Int16Array): Int16Array {
-  const output = new Int16Array(16);
-
-  for (let i = 0; i < 4; i++) {
-    const a0 = input[i * 4]! + input[i * 4 + 3]!;
-    const a1 = input[i * 4 + 1]! + input[i * 4 + 2]!;
-    const a2 = input[i * 4 + 1]! - input[i * 4 + 2]!;
-    const a3 = input[i * 4]! - input[i * 4 + 3]!;
-
-    output[i * 4] = a0 + a1;
-    output[i * 4 + 1] = a3 + a2;
-    output[i * 4 + 2] = a0 - a1;
-    output[i * 4 + 3] = a3 - a2;
-  }
-
-  const result = new Int16Array(16);
-  for (let i = 0; i < 4; i++) {
-    const a0 = output[i]! + output[12 + i]!;
-    const a1 = output[4 + i]! + output[8 + i]!;
-    const a2 = output[4 + i]! - output[8 + i]!;
-    const a3 = output[i]! - output[12 + i]!;
-
-    result[i] = ((a0 + a1 + 3) >> 3) | 0;
-    result[4 + i] = ((a3 + a2 + 3) >> 3) | 0;
-    result[8 + i] = ((a0 - a1 + 3) >> 3) | 0;
-    result[12 + i] = ((a3 - a2 + 3) >> 3) | 0;
-  }
-
-  return result;
-}
-
 function clamp255(v: number): number {
   return v < 0 ? 0 : v > 255 ? 255 : v;
 }
@@ -410,7 +241,6 @@ function decodeVP8(data: Uint8Array): WebPImage {
   const isKeyframe = (frameTag & 1) === 0;
   // const version = (frameTag >> 1) & 7;
   // const showFrame = (frameTag >> 4) & 1;
-  const firstPartSize = (frameTag >> 5) & 0x7FFFF;
 
   if (!isKeyframe) {
     throw new Error('WebP VP8: only keyframes are supported (not an animation frame)');
@@ -485,19 +315,16 @@ function decodeVP8(data: Uint8Array): WebPImage {
     }
   }
 
-  // Number of DCT partitions
-  const logPartitions = bd.readLiteral(2);
-  const numPartitions = 1 << logPartitions;
+  // Number of DCT partitions (value unused; read to advance the bitstream)
+  bd.readLiteral(2);
 
-  // Quantization indices
-  const baseQ = bd.readLiteral(7);
-  const yDcDelta = bd.readBool(128) ? bd.readSignedLiteral(4) : 0;
-  const y2DcDelta = bd.readBool(128) ? bd.readSignedLiteral(4) : 0;
-  const y2AcDelta = bd.readBool(128) ? bd.readSignedLiteral(4) : 0;
-  const uvDcDelta = bd.readBool(128) ? bd.readSignedLiteral(4) : 0;
-  const uvAcDelta = bd.readBool(128) ? bd.readSignedLiteral(4) : 0;
-
-  const quant = buildQuantMatrix(yDcDelta, 0, y2DcDelta, y2AcDelta, uvDcDelta, uvAcDelta, baseQ);
+  // Quantization indices (values unused in simplified decode; reads advance the bitstream)
+  bd.readLiteral(7);
+  if (bd.readBool(128)) bd.readSignedLiteral(4);
+  if (bd.readBool(128)) bd.readSignedLiteral(4);
+  if (bd.readBool(128)) bd.readSignedLiteral(4);
+  if (bd.readBool(128)) bd.readSignedLiteral(4);
+  if (bd.readBool(128)) bd.readSignedLiteral(4);
 
   // Token probability update
   // VP8 default probabilities (simplified: all 128)
@@ -743,60 +570,6 @@ function readCodeLengths(
   return codeLengths;
 }
 
-// VP8L spatial prediction modes
-const VP8L_PRED_NONE = 0;
-const VP8L_PRED_LEFT = 1;
-const VP8L_PRED_TOP = 2;
-const VP8L_PRED_TR = 3;
-const VP8L_PRED_TL = 4;
-const VP8L_PRED_AVG_TOP_LEFT = 5;
-const VP8L_PRED_AVG_LEFT_TL = 6;
-const VP8L_PRED_AVG_LEFT_TOP = 7;
-const VP8L_PRED_AVG_TL_TOP = 8;
-const VP8L_PRED_AVG_TR_TOP = 9;
-const VP8L_PRED_AVG_TL_LEFT_TR_TOP = 10;
-const VP8L_PRED_SELECT = 11;
-const VP8L_PRED_CLAMP_ADD_SUB = 12;
-
-function applyPrediction(mode: number, left: number[], top: number[], tl: number[], tr: number[]): number[] {
-  const avg = (a: number[], b: number[]) => [
-    ((a[0]! + b[0]!) >> 1) & 0xFF,
-    ((a[1]! + b[1]!) >> 1) & 0xFF,
-    ((a[2]! + b[2]!) >> 1) & 0xFF,
-    ((a[3]! + b[3]!) >> 1) & 0xFF,
-  ];
-
-  switch (mode) {
-    case VP8L_PRED_NONE: return [0, 0, 0, 255];
-    case VP8L_PRED_LEFT: return left;
-    case VP8L_PRED_TOP: return top;
-    case VP8L_PRED_TR: return tr;
-    case VP8L_PRED_TL: return tl;
-    case VP8L_PRED_AVG_TOP_LEFT: return avg(top, left);
-    case VP8L_PRED_AVG_LEFT_TL: return avg(left, tl);
-    case VP8L_PRED_AVG_LEFT_TOP: return avg(left, top);
-    case VP8L_PRED_AVG_TL_TOP: return avg(tl, top);
-    case VP8L_PRED_AVG_TR_TOP: return avg(tr, top);
-    case VP8L_PRED_AVG_TL_LEFT_TR_TOP: return avg(avg(tl, left), avg(tr, top));
-    case VP8L_PRED_SELECT: {
-      const l = Math.abs(top[0]! - tl[0]!) + Math.abs(top[1]! - tl[1]!) +
-                Math.abs(top[2]! - tl[2]!) + Math.abs(top[3]! - tl[3]!);
-      const t = Math.abs(left[0]! - tl[0]!) + Math.abs(left[1]! - tl[1]!) +
-                Math.abs(left[2]! - tl[2]!) + Math.abs(left[3]! - tl[3]!);
-      return l <= t ? left : top;
-    }
-    case VP8L_PRED_CLAMP_ADD_SUB: {
-      return [
-        clamp255(left[0]! + top[0]! - tl[0]!),
-        clamp255(left[1]! + top[1]! - tl[1]!),
-        clamp255(left[2]! + top[2]! - tl[2]!),
-        clamp255(left[3]! + top[3]! - tl[3]!),
-      ];
-    }
-    default: return [0, 0, 0, 255];
-  }
-}
-
 /**
  * Decode a VP8L (lossless) bitstream.
  */
@@ -831,21 +604,22 @@ function decodeVP8L(data: Uint8Array): WebPImage {
     // Skip transform data parsing for now - handle in simplified mode
     if (transformType === 0) {
       // Predictor transform
-      const sizeBits = reader.readBits(3) + 2;
-      const blockWidth = Math.ceil(width / (1 << sizeBits));
-      const blockHeight = Math.ceil(height / (1 << sizeBits));
+      // Read size-bits header to advance the bitstream; value unused in simplified decode
+      reader.readBits(3);
       // Skip reading the transform image - use simplified decode
       break;
     } else if (transformType === 1) {
       // Cross-color transform
-      const sizeBits = reader.readBits(3) + 2;
+      // Read size-bits header to advance the bitstream; value unused
+      reader.readBits(3);
       break;
     } else if (transformType === 2) {
       // Subtract green transform (simple, no extra data)
       // No additional data needed
     } else if (transformType === 3) {
       // Color indexing transform
-      const numColors = reader.readBits(8) + 1;
+      // Read color-count header to advance the bitstream; value unused
+      reader.readBits(8);
       break;
     }
   }
@@ -904,10 +678,6 @@ function decodeVP8L(data: Uint8Array): WebPImage {
   // Decode pixel data using Huffman codes
   const numPixels = width * height;
   const pixels = new Uint8Array(numPixels * 4);
-
-  // Color cache
-  let colorCache: Uint32Array | undefined;
-  // (Color cache is not read from the bitstream in this simplified decode)
 
   let pixelIdx = 0;
   while (pixelIdx < numPixels) {
@@ -990,13 +760,13 @@ function decodeVP8L(data: Uint8Array): WebPImage {
 }
 
 // LZ77 prefix code tables for VP8L
-const lz77LengthPrefixExtraBits: readonly number[] = [
+const lz77LengthPrefixExtraBits = new Uint8Array([
   0,0,0,0, 0,0,0,0, 1,1,1,1, 2,2,2,2, 3,3,3,3, 4,4,4,4,
-];
+]);
 
-const lz77LengthPrefixOffset: readonly number[] = [
+const lz77LengthPrefixOffset = new Uint8Array([
   1,2,3,4, 5,6,7,8, 9,11,13,15, 17,21,25,29, 33,41,49,57, 65,81,97,113,
-];
+]);
 
 function decodeLZ77Length(reader: VP8LBitReader, code: number): number {
   if (code < 24) {
@@ -1007,16 +777,16 @@ function decodeLZ77Length(reader: VP8LBitReader, code: number): number {
   return 1;
 }
 
-const lz77DistPrefixExtraBits: readonly number[] = [
+const lz77DistPrefixExtraBits = new Uint8Array([
   0,0,0,0, 1,1,1,1, 2,2,2,2, 3,3,3,3, 4,4,4,4,
   5,5,5,5, 6,6,6,6, 7,7,7,7, 8,8,8,8, 9,9,9,9,
-];
+]);
 
-const lz77DistPrefixOffset: readonly number[] = [
+const lz77DistPrefixOffset = new Uint16Array([
   1,2,3,4, 5,7,9,11, 13,17,21,25, 29,37,45,53,
   61,77,93,109, 125,157,189,221, 253,317,381,445,
   509,637,765,893, 1021,1277,1533,1789, 2045,2557,3069,3581,
-];
+]);
 
 function decodeLZ77Distance(reader: VP8LBitReader, code: number, _width: number): number {
   if (code < 40) {
@@ -1061,13 +831,13 @@ function decodeAlphaChunk(data: Uint8Array, width: number, height: number): Uint
 
   if (compression === 0) {
     // Uncompressed
-    alphaData = data.slice(1);
+    alphaData = data.subarray(1);
   } else if (compression === 1) {
     // VP8L-compressed alpha
     // The compressed data is a VP8L bitstream but for a single-channel image
     // Simplified: try to decode as raw VP8L
     try {
-      const lossless = decodeVP8L(data.slice(1));
+      const lossless = decodeVP8L(data.subarray(1));
       // Extract green channel as alpha (VP8L stores single-channel as green)
       alphaData = new Uint8Array(width * height);
       for (let i = 0; i < width * height; i++) {
@@ -1088,9 +858,9 @@ function decodeAlphaChunk(data: Uint8Array, width: number, height: number): Uint
 
   if (alphaData.length < numPixels) {
     // Pad short data
-    alpha.set(alphaData.slice(0, numPixels));
+    alpha.set(alphaData.subarray(0, numPixels));
   } else {
-    alpha.set(alphaData.slice(0, numPixels));
+    alpha.set(alphaData.subarray(0, numPixels));
   }
 
   applyAlphaFilter(alpha, width, height, filtering);

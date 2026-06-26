@@ -6,7 +6,7 @@
 
 # Interface: DirectEmbedOptions
 
-Defined in: [src/assets/image/tiffDirectEmbed.ts:95](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/image/tiffDirectEmbed.ts#L95)
+Defined in: [src/assets/image/tiffDirectEmbed.ts:92](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/tiffDirectEmbed.ts#L92)
 
 Options for direct TIFF embedding.
 
@@ -14,8 +14,8 @@ Options for direct TIFF embedding.
 
 ### page?
 
-> `optional` **page**: `number`
+> `optional` **page?**: `number`
 
-Defined in: [src/assets/image/tiffDirectEmbed.ts:97](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/assets/image/tiffDirectEmbed.ts#L97)
+Defined in: [src/assets/image/tiffDirectEmbed.ts:94](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/tiffDirectEmbed.ts#L94)
 
 Page index for multi-page TIFFs (0-based). Default: 0.

@@ -61,7 +61,7 @@ export default defineConfig({
       { text: 'Migration', link: '/migration/from-pdf-lib' },
       { text: 'Playground', link: '/playground/' },
       {
-        text: 'v0.26.0',
+        text: 'v0.27.0',
         items: [
           {
             text: 'Changelog',
@@ -107,6 +107,11 @@ export default defineConfig({
             { text: 'Spot Colors & DeviceN', link: '/guide/spot-colors' },
             { text: 'Headers & Footers', link: '/guide/headers-footers' },
             { text: 'Batch Processing', link: '/guide/batch-processing' },
+            { text: 'Streaming Parser', link: '/guide/streaming-parser' },
+            { text: 'Builder Pattern', link: '/guide/builder' },
+            { text: 'PDF/X Compliance', link: '/guide/pdfx' },
+            { text: 'Plugins', link: '/guide/plugins' },
+            { text: 'Text Layout', link: '/guide/text-layout' },
             { text: 'Cookbook', link: '/guide/cookbook' },
             { text: 'Troubleshooting', link: '/guide/troubleshooting' },
           ],

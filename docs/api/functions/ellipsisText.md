@@ -8,7 +8,7 @@
 
 > **ellipsisText**(`text`, `availableWidth`, `fontSize`, `options?`): `string`
 
-Defined in: [src/layout/overflow.ts:201](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/layout/overflow.ts#L201)
+Defined in: [src/layout/overflow.ts:201](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/layout/overflow.ts#L201)
 
 Truncate text and append an ellipsis string to fit within `availableWidth`.
 

@@ -19,7 +19,6 @@ import {
 } from '../../../src/metadata/xmpMetadata.js';
 import type { DocumentMetadata } from '../../../src/core/pdfCatalog.js';
 import {
-  PdfDict,
   PdfName,
   PdfStream,
   PdfObjectRegistry,

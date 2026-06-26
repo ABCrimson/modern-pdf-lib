@@ -6,7 +6,7 @@
 
 # Interface: PresetOptions
 
-Defined in: [src/layout/presets.ts:145](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/layout/presets.ts#L145)
+Defined in: [src/layout/presets.ts:145](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/layout/presets.ts#L145)
 
 Options to customise a named preset.
 
@@ -14,9 +14,9 @@ Options to customise a named preset.
 
 ### fontSize?
 
-> `readonly` `optional` **fontSize**: `number`
+> `readonly` `optional` **fontSize?**: `number`
 
-Defined in: [src/layout/presets.ts:147](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/layout/presets.ts#L147)
+Defined in: [src/layout/presets.ts:147](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/layout/presets.ts#L147)
 
 Base font size. Default: 11.
 
@@ -24,9 +24,9 @@ Base font size. Default: 11.
 
 ### hasHeader?
 
-> `readonly` `optional` **hasHeader**: `boolean`
+> `readonly` `optional` **hasHeader?**: `boolean`
 
-Defined in: [src/layout/presets.ts:151](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/layout/presets.ts#L151)
+Defined in: [src/layout/presets.ts:151](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/layout/presets.ts#L151)
 
 Whether table has header row(s). Default: true.
 
@@ -34,8 +34,8 @@ Whether table has header row(s). Default: true.
 
 ### primaryColor?
 
-> `readonly` `optional` **primaryColor**: [`Color`](../type-aliases/Color.md)
+> `readonly` `optional` **primaryColor?**: [`Color`](../type-aliases/Color.md)
 
-Defined in: [src/layout/presets.ts:149](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/layout/presets.ts#L149)
+Defined in: [src/layout/presets.ts:149](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/layout/presets.ts#L149)
 
 Primary color (used for headers, accents).

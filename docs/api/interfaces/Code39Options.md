@@ -6,7 +6,7 @@
 
 # Interface: Code39Options
 
-Defined in: [src/barcode/code39.ts:107](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/barcode/code39.ts#L107)
+Defined in: [src/barcode/code39.ts:107](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/barcode/code39.ts#L107)
 
 Options for rendering a Code 39 barcode as PDF operators.
 
@@ -14,9 +14,9 @@ Options for rendering a Code 39 barcode as PDF operators.
 
 ### color?
 
-> `readonly` `optional` **color**: [`Color`](../type-aliases/Color.md)
+> `readonly` `optional` **color?**: [`Color`](../type-aliases/Color.md)
 
-Defined in: [src/barcode/code39.ts:117](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/barcode/code39.ts#L117)
+Defined in: [src/barcode/code39.ts:117](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/barcode/code39.ts#L117)
 
 Bar colour. Default: grayscale black.
 
@@ -24,9 +24,9 @@ Bar colour. Default: grayscale black.
 
 ### height?
 
-> `readonly` `optional` **height**: `number`
+> `readonly` `optional` **height?**: `number`
 
-Defined in: [src/barcode/code39.ts:109](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/barcode/code39.ts#L109)
+Defined in: [src/barcode/code39.ts:109](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/barcode/code39.ts#L109)
 
 Height of the bars in user-space units. Default: `50`.
 
@@ -34,9 +34,9 @@ Height of the bars in user-space units. Default: `50`.
 
 ### includeCheckDigit?
 
-> `readonly` `optional` **includeCheckDigit**: `boolean`
+> `readonly` `optional` **includeCheckDigit?**: `boolean`
 
-Defined in: [src/barcode/code39.ts:121](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/barcode/code39.ts#L121)
+Defined in: [src/barcode/code39.ts:121](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/barcode/code39.ts#L121)
 
 Include a modulo-43 check digit. Default: `false`.
 
@@ -44,9 +44,9 @@ Include a modulo-43 check digit. Default: `false`.
 
 ### moduleWidth?
 
-> `readonly` `optional` **moduleWidth**: `number`
+> `readonly` `optional` **moduleWidth?**: `number`
 
-Defined in: [src/barcode/code39.ts:111](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/barcode/code39.ts#L111)
+Defined in: [src/barcode/code39.ts:111](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/barcode/code39.ts#L111)
 
 Width of a narrow module in user-space units. Default: `1`.
 
@@ -54,9 +54,9 @@ Width of a narrow module in user-space units. Default: `1`.
 
 ### quietZone?
 
-> `readonly` `optional` **quietZone**: `number`
+> `readonly` `optional` **quietZone?**: `number`
 
-Defined in: [src/barcode/code39.ts:115](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/barcode/code39.ts#L115)
+Defined in: [src/barcode/code39.ts:115](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/barcode/code39.ts#L115)
 
 Quiet-zone width in narrow modules on each side. Default: `10`.
 
@@ -64,9 +64,9 @@ Quiet-zone width in narrow modules on each side. Default: `10`.
 
 ### showText?
 
-> `readonly` `optional` **showText**: `boolean`
+> `readonly` `optional` **showText?**: `boolean`
 
-Defined in: [src/barcode/code39.ts:119](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/barcode/code39.ts#L119)
+Defined in: [src/barcode/code39.ts:119](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/barcode/code39.ts#L119)
 
 Show human-readable text below the barcode. Default: `false`.
 
@@ -74,8 +74,8 @@ Show human-readable text below the barcode. Default: `false`.
 
 ### wideToNarrowRatio?
 
-> `readonly` `optional` **wideToNarrowRatio**: `number`
+> `readonly` `optional` **wideToNarrowRatio?**: `number`
 
-Defined in: [src/barcode/code39.ts:113](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/barcode/code39.ts#L113)
+Defined in: [src/barcode/code39.ts:113](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/barcode/code39.ts#L113)
 
 Wide-to-narrow ratio. Default: `3`. Must be >= 2.

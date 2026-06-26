@@ -102,15 +102,6 @@ export type StreamingParserEvent =
 
 const TEXT_DECODER = new TextDecoder('latin1');
 
-/** Read a big-endian integer of `width` bytes from `data` at `offset`. */
-function readBEInt(data: Uint8Array, offset: number, width: number): number {
-  let value = 0;
-  for (let i = 0; i < width; i++) {
-    value = (value << 8) | (data[offset + i] ?? 0);
-  }
-  return value >>> 0;
-}
-
 /**
  * Concatenate two Uint8Arrays into a new one.
  */
@@ -495,18 +486,6 @@ function getDictNumberArray(
 ): number[] | undefined {
   const v = dict.get(key);
   if (v?.kind === 'array') return v.values;
-  return undefined;
-}
-
-/**
- * Get a string value from a LightDict.
- */
-function getDictString(
-  dict: Map<string, LightValue>,
-  key: string,
-): string | undefined {
-  const v = dict.get(key);
-  if (v?.kind === 'string') return v.value;
   return undefined;
 }
 
@@ -1090,9 +1069,6 @@ export class StreamingPdfParser {
     // For the streaming parser, we record the xref stream metadata but
     // skip full decompression — we parse only the trailer fields needed
     // for structure resolution.
-
-    // Extract /Size
-    const size = getDictNumber(dictResult.entries, '/Size') ?? 0;
 
     // We cannot fully parse the xref stream binary data without a
     // deflate decompressor. Instead, we fall back to scanning the file

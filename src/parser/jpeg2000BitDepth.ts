@@ -48,12 +48,6 @@ export interface ComponentDepth {
 // JPEG2000 marker constants
 // ---------------------------------------------------------------------------
 
-/** Start-of-codestream marker. */
-const SOC = 0xff4f;
-
-/** Image and tile size marker (SIZ). */
-const SIZ_MARKER = 0xff51;
-
 // ---------------------------------------------------------------------------
 // SIZ marker parsing
 // ---------------------------------------------------------------------------

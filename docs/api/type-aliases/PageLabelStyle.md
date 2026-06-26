@@ -8,7 +8,7 @@
 
 > **PageLabelStyle** = `"decimal"` \| `"roman"` \| `"Roman"` \| `"alpha"` \| `"Alpha"`
 
-Defined in: src/core/pageLabels.ts:44
+Defined in: [src/core/pageLabels.ts:44](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/pageLabels.ts#L44)
 
 Numbering style for page labels.
 

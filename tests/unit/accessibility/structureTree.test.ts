@@ -7,11 +7,6 @@ import {
   PdfStructureElement,
   PdfStructureTree,
 } from '../../../src/accessibility/structureTree.js';
-import type {
-  StructureType,
-  StructureElementOptions,
-  AccessibilityIssue,
-} from '../../../src/accessibility/structureTree.js';
 import {
   PdfObjectRegistry,
   PdfRef,

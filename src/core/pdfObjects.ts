@@ -69,7 +69,7 @@ function bytesToHex(data: Uint8Array): string {
 
 /** The PDF `null` object. */
 export class PdfNull {
-  static readonly instance = new PdfNull();
+  static readonly instance: PdfNull = new PdfNull();
 
   /** @internal */
   readonly kind = 'null' as const;
@@ -88,8 +88,8 @@ export class PdfNull {
 
 /** A PDF boolean — `true` or `false`. */
 export class PdfBool {
-  static readonly TRUE = new PdfBool(true);
-  static readonly FALSE = new PdfBool(false);
+  static readonly TRUE: PdfBool = new PdfBool(true);
+  static readonly FALSE: PdfBool = new PdfBool(false);
 
   /** @internal */
   readonly kind = 'bool' as const;

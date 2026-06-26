@@ -17,7 +17,6 @@ import {
 } from '../../../src/layout/headerFooter.js';
 import type {
   HeaderFooterOptions,
-  HeaderFooterContent,
 } from '../../../src/layout/headerFooter.js';
 import { PdfPage, PageSizes } from '../../../src/core/pdfPage.js';
 import { PdfDocument, createPdf } from '../../../src/core/pdfDocument.js';

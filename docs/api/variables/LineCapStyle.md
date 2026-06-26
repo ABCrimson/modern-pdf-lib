@@ -8,7 +8,7 @@
 
 > `const` **LineCapStyle**: `object`
 
-Defined in: [src/core/enums.ts:45](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/core/enums.ts#L45)
+Defined in: [src/core/enums.ts:45](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/enums.ts#L45)
 
 PDF line cap styles (Table 54).
 Applied via the J operator.

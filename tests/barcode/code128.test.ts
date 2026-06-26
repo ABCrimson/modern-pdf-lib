@@ -9,8 +9,8 @@ import {
   valuesToModules,
   code128ToOperators,
 } from '../../src/barcode/code128.js';
-import type { BarcodeMatrix, Code128Options } from '../../src/barcode/code128.js';
-import { rgb, grayscale } from '../../src/core/operators/color.js';
+
+import { rgb } from '../../src/core/operators/color.js';
 
 // ---------------------------------------------------------------------------
 // Helper: manually compute the check digit from symbol values
@@ -261,7 +261,6 @@ describe('Code 128 Barcode', () => {
     // With quiet zone 0, bars start at x=0
     // With quiet zone 10, bars start at x=10
     // The first rectangle x coordinate should differ by 10
-    const xRegex = /^q\n.*?\n(\d+)/s;
     expect(opsNoQuiet).not.toBe(opsWithQuiet);
   });
 

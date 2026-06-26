@@ -643,10 +643,10 @@ function smartParseDate(text: string): Date | null {
   }
 
   // Try slash or dash separated: mm/dd/yyyy or dd/mm/yyyy
-  const slashMatch = s.match(/^(\d{1,2})[/\-](\d{1,2})[/\-](\d{2,4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(AM|PM)?)?/i);
+  const slashMatch = s.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{2,4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(AM|PM)?)?/i);
   if (slashMatch) {
-    let a = parseInt(slashMatch[1]!, 10);
-    let b = parseInt(slashMatch[2]!, 10);
+    const a = parseInt(slashMatch[1]!, 10);
+    const b = parseInt(slashMatch[2]!, 10);
     let yr = parseInt(slashMatch[3]!, 10);
     if (yr < 100) yr = yr < 50 ? 2000 + yr : 1900 + yr;
 

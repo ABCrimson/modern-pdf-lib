@@ -282,14 +282,14 @@ function parseExif(segmentData: Uint8Array): ExifInfo {
         if (type === EXIF_TYPE_ASCII && count > 0) {
           if (valueOffset + count <= tiffData.length) {
             // Read ASCII string, stopping at null terminator
-            const chars: string[] = [];
+            let nullIdx = count;
             for (let j = 0; j < count; j++) {
-              const c = tiffData[valueOffset + j]!;
-              if (c === 0) break;
-              chars.push(String.fromCharCode(c));
+              if (tiffData[valueOffset + j] === 0) { nullIdx = j; break; }
             }
-            if (chars.length > 0) {
-              result.copyright = chars.join('');
+            if (nullIdx > 0) {
+              result.copyright = new TextDecoder('ascii').decode(
+                tiffData.subarray(valueOffset, valueOffset + nullIdx),
+              );
             }
           }
         }

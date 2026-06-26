@@ -86,7 +86,7 @@ export type ImageAlignment = (typeof ImageAlignment)[keyof typeof ImageAlignment
  * Lower values keep the main thread more responsive but parse more slowly.
  */
 export const ParseSpeeds = {
-  Fastest: Infinity,
+  Fastest: Infinity as number,
   Fast: 500,
   Medium: 100,
   Slow: 10,

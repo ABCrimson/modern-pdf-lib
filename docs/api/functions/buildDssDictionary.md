@@ -8,7 +8,7 @@
 
 > **buildDssDictionary**(`data`): `string`
 
-Defined in: [src/signature/ltvEmbed.ts:148](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/signature/ltvEmbed.ts#L148)
+Defined in: [src/signature/ltvEmbed.ts:146](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/ltvEmbed.ts#L146)
 
 Build a DSS (Document Security Store) dictionary string for
 incremental append to a PDF.

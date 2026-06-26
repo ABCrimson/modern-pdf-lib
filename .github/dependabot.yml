@@ -1,0 +1,65 @@
+version: 2
+
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+    labels:
+      - dependencies
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    labels:
+      - ci
+
+  - package-ecosystem: cargo
+    directory: /src/wasm/libdeflate
+    schedule:
+      interval: weekly
+    labels:
+      - dependencies
+      - wasm
+
+  - package-ecosystem: cargo
+    directory: /src/wasm/png
+    schedule:
+      interval: weekly
+    labels:
+      - dependencies
+      - wasm
+
+  - package-ecosystem: cargo
+    directory: /src/wasm/ttf
+    schedule:
+      interval: weekly
+    labels:
+      - dependencies
+      - wasm
+
+  - package-ecosystem: cargo
+    directory: /src/wasm/shaping
+    schedule:
+      interval: weekly
+    labels:
+      - dependencies
+      - wasm
+
+  - package-ecosystem: cargo
+    directory: /src/wasm/jbig2
+    schedule:
+      interval: weekly
+    labels:
+      - dependencies
+      - wasm
+
+  - package-ecosystem: cargo
+    directory: /src/wasm/jpeg
+    schedule:
+      interval: weekly
+    labels:
+      - dependencies
+      - wasm

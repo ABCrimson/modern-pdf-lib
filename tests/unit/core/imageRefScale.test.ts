@@ -4,7 +4,6 @@
 
 import { describe, it, expect } from 'vitest';
 import { createPdf } from '../../../src/core/pdfDocument.js';
-import type { ImageRef } from '../../../src/core/pdfPage.js';
 
 // ---------------------------------------------------------------------------
 // Helpers

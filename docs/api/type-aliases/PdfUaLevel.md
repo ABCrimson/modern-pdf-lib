@@ -8,7 +8,7 @@
 
 > **PdfUaLevel** = `"UA1"`
 
-Defined in: src/accessibility/pdfUaValidator.ts:41
+Defined in: [src/accessibility/pdfUaValidator.ts:44](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/accessibility/pdfUaValidator.ts#L44)
 
 PDF/UA conformance level.
 

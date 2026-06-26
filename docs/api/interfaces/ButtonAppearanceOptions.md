@@ -6,7 +6,7 @@
 
 # Interface: ButtonAppearanceOptions
 
-Defined in: [src/form/fieldAppearance.ts:403](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/form/fieldAppearance.ts#L403)
+Defined in: [src/form/fieldAppearance.ts:402](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/form/fieldAppearance.ts#L402)
 
 Options for generating a button field appearance.
 
@@ -16,7 +16,7 @@ Options for generating a button field appearance.
 
 > **caption**: `string`
 
-Defined in: [src/form/fieldAppearance.ts:405](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/form/fieldAppearance.ts#L405)
+Defined in: [src/form/fieldAppearance.ts:404](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/form/fieldAppearance.ts#L404)
 
 The button caption text.
 
@@ -24,9 +24,9 @@ The button caption text.
 
 ### fontName?
 
-> `optional` **fontName**: `string`
+> `optional` **fontName?**: `string`
 
-Defined in: [src/form/fieldAppearance.ts:409](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/form/fieldAppearance.ts#L409)
+Defined in: [src/form/fieldAppearance.ts:408](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/form/fieldAppearance.ts#L408)
 
 Font name. Default: "Helv".
 
@@ -34,9 +34,9 @@ Font name. Default: "Helv".
 
 ### fontSize?
 
-> `optional` **fontSize**: `number`
+> `optional` **fontSize?**: `number`
 
-Defined in: [src/form/fieldAppearance.ts:411](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/form/fieldAppearance.ts#L411)
+Defined in: [src/form/fieldAppearance.ts:410](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/form/fieldAppearance.ts#L410)
 
 Font size. Default: 0 (auto).
 
@@ -46,6 +46,6 @@ Font size. Default: 0 (auto).
 
 > **rect**: \[`number`, `number`, `number`, `number`\]
 
-Defined in: [src/form/fieldAppearance.ts:407](https://github.com/ABCrimson/modern-pdf-lib/blob/2514f232afb2c4adc7dadc80c23b28a0c54e69b6/src/form/fieldAppearance.ts#L407)
+Defined in: [src/form/fieldAppearance.ts:406](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/form/fieldAppearance.ts#L406)
 
 The widget rectangle [x1, y1, x2, y2].

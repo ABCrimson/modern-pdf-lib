@@ -7,12 +7,11 @@
  */
 
 import {
-  PdfDict,
   PdfString,
   PdfArray,
   PdfStream,
 } from '../../core/pdfObjects.js';
-import { PdfField, strVal } from '../pdfField.js';
+import { PdfField } from '../pdfField.js';
 import type { FieldType } from '../pdfField.js';
 import { generateListboxAppearance } from '../fieldAppearance.js';
 

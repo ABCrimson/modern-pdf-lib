@@ -6,7 +6,7 @@
 
 # Interface: PageLabelRange
 
-Defined in: src/core/pageLabels.ts:52
+Defined in: [src/core/pageLabels.ts:52](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/pageLabels.ts#L52)
 
 Defines a contiguous range of pages that share a labelling scheme.
 
@@ -17,9 +17,9 @@ to the next range's `startPage` (or the end of the document).
 
 ### prefix?
 
-> `optional` **prefix**: `string`
+> `optional` **prefix?**: `string`
 
-Defined in: src/core/pageLabels.ts:67
+Defined in: [src/core/pageLabels.ts:67](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/pageLabels.ts#L67)
 
 An optional prefix string prepended to each page label.
 For example, `"A-"` produces labels like "A-1", "A-2", etc.
@@ -28,9 +28,9 @@ For example, `"A-"` produces labels like "A-1", "A-2", etc.
 
 ### start?
 
-> `optional` **start**: `number`
+> `optional` **start?**: `number`
 
-Defined in: src/core/pageLabels.ts:76
+Defined in: [src/core/pageLabels.ts:76](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/pageLabels.ts#L76)
 
 The numeric value of the first page label in this range.
 Defaults to `1`.
@@ -44,7 +44,7 @@ page index 4 is labelled "5", page index 5 is labelled "6", etc.
 
 > **startPage**: `number`
 
-Defined in: src/core/pageLabels.ts:56
+Defined in: [src/core/pageLabels.ts:56](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/pageLabels.ts#L56)
 
 Zero-based index of the first page this label range applies to.
 
@@ -54,6 +54,6 @@ Zero-based index of the first page this label range applies to.
 
 > **style**: [`PageLabelStyle`](../type-aliases/PageLabelStyle.md)
 
-Defined in: src/core/pageLabels.ts:61
+Defined in: [src/core/pageLabels.ts:61](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/pageLabels.ts#L61)
 
 The numbering style for this range.

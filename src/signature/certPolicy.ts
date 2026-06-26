@@ -164,16 +164,6 @@ const KEY_USAGE_BITS: Record<KeyUsageFlag, number> = {
   crlSign: 6,
 };
 
-const ALL_KEY_USAGE_FLAGS: KeyUsageFlag[] = [
-  'digitalSignature',
-  'nonRepudiation',
-  'keyEncipherment',
-  'dataEncipherment',
-  'keyAgreement',
-  'keyCertSign',
-  'crlSign',
-];
-
 // ---------------------------------------------------------------------------
 // Internal helpers
 // ---------------------------------------------------------------------------
@@ -266,7 +256,6 @@ function parseKeyUsageBits(bitStringData: Uint8Array): KeyUsageFlag[] {
   const bitString = parseDerTlv(bitStringData, 0);
   if (bitString.tag !== 0x03 || bitString.data.length < 2) return [];
 
-  const unusedBits = bitString.data[0]!;
   const flags: KeyUsageFlag[] = [];
 
   // Key usage bits are in the first (and possibly second) byte after unused-bits
