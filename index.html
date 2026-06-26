@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>modern-pdf-lib — browser E2E harness</title>
+  </head>
+  <body>
+    <!--
+      Minimal page served by `npx vite` for the Playwright E2E suite
+      (tests/e2e/browser.spec.ts). The specs drive everything via
+      `page.evaluate(() => import('/src/index.ts'))`, so this page only needs to
+      exist and return HTTP 200 so Playwright's webServer health-check passes.
+    -->
+    <main id="app">
+      <h1>modern-pdf-lib</h1>
+      <p>Browser end-to-end test harness. Open the console to drive the library.</p>
+    </main>
+  </body>
+</html>
