@@ -6,7 +6,7 @@
 
 # Interface: EmbedPageOptions
 
-Defined in: [src/core/pdfEmbed.ts:106](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/pdfEmbed.ts#L106)
+Defined in: [src/core/pdfEmbed.ts:106](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfEmbed.ts#L106)
 
 Options for embedding a page as a Form XObject.
 
@@ -14,36 +14,48 @@ Options for embedding a page as a Form XObject.
 
 ### boundingBox?
 
-> `optional` **boundingBox?**: `object`
+```ts
+optional boundingBox?: object;
+```
 
-Defined in: [src/core/pdfEmbed.ts:111](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/pdfEmbed.ts#L111)
+Defined in: [src/core/pdfEmbed.ts:111](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfEmbed.ts#L111)
 
 Clip the embedded page to a sub-region (bounding box).
 Coordinates are in the source page's coordinate system.
 
 #### height
 
-> **height**: `number`
+```ts
+height: number;
+```
 
 #### width
 
-> **width**: `number`
+```ts
+width: number;
+```
 
 #### x
 
-> **x**: `number`
+```ts
+x: number;
+```
 
 #### y
 
-> **y**: `number`
+```ts
+y: number;
+```
 
 ***
 
 ### transformationMatrix?
 
-> `optional` **transformationMatrix?**: \[`number`, `number`, `number`, `number`, `number`, `number`\]
+```ts
+optional transformationMatrix?: [number, number, number, number, number, number];
+```
 
-Defined in: [src/core/pdfEmbed.ts:123](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/pdfEmbed.ts#L123)
+Defined in: [src/core/pdfEmbed.ts:123](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfEmbed.ts#L123)
 
 Apply an affine transformation matrix to the Form XObject.
 The six values correspond to `[a, b, c, d, tx, ty]` in the

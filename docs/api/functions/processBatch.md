@@ -6,9 +6,14 @@
 
 # Function: processBatch()
 
-> **processBatch**(`files`, `operation`, `options?`): `Promise`\<[`BatchResult`](../interfaces/BatchResult.md)\>
+```ts
+function processBatch(
+   files, 
+   operation, 
+options?): Promise<BatchResult>;
+```
 
-Defined in: [src/batch/batchProcessor.ts:245](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/batch/batchProcessor.ts#L245)
+Defined in: [src/batch/batchProcessor.ts:245](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/batch/batchProcessor.ts#L245)
 
 Process multiple PDFs in parallel (or with bounded concurrency).
 
@@ -25,13 +30,13 @@ concurrency limiter ensures memory pressure stays manageable.
 
 ### files
 
-`Uint8Array`\<`ArrayBufferLike`\>[]
+`Uint8Array`\&lt;`ArrayBufferLike`\&gt;[]
 
 Array of raw PDF bytes.
 
 ### operation
 
-(`doc`) => `Promise`\<`Uint8Array`\<`ArrayBufferLike`\>\>
+(`doc`) =&gt; `Promise`\&lt;`Uint8Array`\&lt;`ArrayBufferLike`\&gt;\&gt;
 
 An async function that receives a loaded
                   [PdfDocument](../classes/PdfDocument.md) and returns the processed
@@ -45,7 +50,7 @@ Concurrency, progress, memory, error, and timeout options.
 
 ## Returns
 
-`Promise`\<[`BatchResult`](../interfaces/BatchResult.md)\>
+`Promise`\&lt;[`BatchResult`](../interfaces/BatchResult.md)\&gt;
 
 A [BatchResult](../interfaces/BatchResult.md) with outputs, success
                   count, and any per-file errors.

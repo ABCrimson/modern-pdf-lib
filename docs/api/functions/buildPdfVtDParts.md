@@ -6,9 +6,11 @@
 
 # Function: buildPdfVtDParts()
 
-> **buildPdfVtDParts**(`records`): [`PdfDict`](../classes/PdfDict.md)
+```ts
+function buildPdfVtDParts(records): PdfDict;
+```
 
-Defined in: src/compliance/pdfVT.ts:112
+Defined in: [src/compliance/pdfVT.ts:112](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/pdfVT.ts#L112)
 
 Build a PDF/VT `/DPartRoot` dictionary from a flat list of records.
 

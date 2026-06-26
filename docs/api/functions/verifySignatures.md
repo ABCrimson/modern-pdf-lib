@@ -6,9 +6,11 @@
 
 # Function: verifySignatures()
 
-> **verifySignatures**(`pdfBytes`): `Promise`\<[`SignatureVerificationResult`](../interfaces/SignatureVerificationResult.md)[]\>
+```ts
+function verifySignatures(pdfBytes): Promise<SignatureVerificationResult[]>;
+```
 
-Defined in: [src/signature/signatureVerifier.ts:338](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/signatureVerifier.ts#L338)
+Defined in: [src/signature/signatureVerifier.ts:338](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/signatureVerifier.ts#L338)
 
 Verify all signatures in a PDF.
 
@@ -28,6 +30,6 @@ The PDF file bytes.
 
 ## Returns
 
-`Promise`\<[`SignatureVerificationResult`](../interfaces/SignatureVerificationResult.md)[]\>
+`Promise`\&lt;[`SignatureVerificationResult`](../interfaces/SignatureVerificationResult.md)[]\&gt;
 
 Array of verification results.

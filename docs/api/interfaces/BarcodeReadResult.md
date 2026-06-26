@@ -6,7 +6,7 @@
 
 # Interface: BarcodeReadResult
 
-Defined in: [src/barcode/reader.ts:24](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/barcode/reader.ts#L24)
+Defined in: [src/barcode/reader.ts:24](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/barcode/reader.ts#L24)
 
 Result of a barcode read operation.
 
@@ -14,9 +14,11 @@ Result of a barcode read operation.
 
 ### checkDigitValid?
 
-> `readonly` `optional` **checkDigitValid?**: `boolean`
+```ts
+readonly optional checkDigitValid?: boolean;
+```
 
-Defined in: [src/barcode/reader.ts:32](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/barcode/reader.ts#L32)
+Defined in: [src/barcode/reader.ts:32](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/barcode/reader.ts#L32)
 
 Whether the check digit is valid (if applicable).
 
@@ -24,9 +26,11 @@ Whether the check digit is valid (if applicable).
 
 ### data
 
-> `readonly` **data**: `string`
+```ts
+readonly data: string;
+```
 
-Defined in: [src/barcode/reader.ts:26](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/barcode/reader.ts#L26)
+Defined in: [src/barcode/reader.ts:26](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/barcode/reader.ts#L26)
 
 The decoded data string.
 
@@ -34,9 +38,11 @@ The decoded data string.
 
 ### format
 
-> `readonly` **format**: `string`
+```ts
+readonly format: string;
+```
 
-Defined in: [src/barcode/reader.ts:28](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/barcode/reader.ts#L28)
+Defined in: [src/barcode/reader.ts:28](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/barcode/reader.ts#L28)
 
 The detected barcode format.
 
@@ -44,8 +50,10 @@ The detected barcode format.
 
 ### valid
 
-> `readonly` **valid**: `boolean`
+```ts
+readonly valid: boolean;
+```
 
-Defined in: [src/barcode/reader.ts:30](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/barcode/reader.ts#L30)
+Defined in: [src/barcode/reader.ts:30](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/barcode/reader.ts#L30)
 
 Whether decoding was successful.

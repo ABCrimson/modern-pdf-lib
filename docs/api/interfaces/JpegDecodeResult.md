@@ -6,7 +6,7 @@
 
 # Interface: JpegDecodeResult
 
-Defined in: [src/wasm/jpeg/bridge.ts:45](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/wasm/jpeg/bridge.ts#L45)
+Defined in: [src/wasm/jpeg/bridge.ts:45](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/wasm/jpeg/bridge.ts#L45)
 
 Result of decoding a JPEG image.
 
@@ -14,9 +14,11 @@ Result of decoding a JPEG image.
 
 ### channels
 
-> `readonly` **channels**: `number`
+```ts
+readonly channels: number;
+```
 
-Defined in: [src/wasm/jpeg/bridge.ts:53](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/wasm/jpeg/bridge.ts#L53)
+Defined in: [src/wasm/jpeg/bridge.ts:53](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/wasm/jpeg/bridge.ts#L53)
 
 Number of channels (1=grayscale, 3=RGB).
 
@@ -24,9 +26,11 @@ Number of channels (1=grayscale, 3=RGB).
 
 ### height
 
-> `readonly` **height**: `number`
+```ts
+readonly height: number;
+```
 
-Defined in: [src/wasm/jpeg/bridge.ts:51](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/wasm/jpeg/bridge.ts#L51)
+Defined in: [src/wasm/jpeg/bridge.ts:51](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/wasm/jpeg/bridge.ts#L51)
 
 Image height in pixels.
 
@@ -34,9 +38,11 @@ Image height in pixels.
 
 ### pixels
 
-> `readonly` **pixels**: `Uint8Array`
+```ts
+readonly pixels: Uint8Array;
+```
 
-Defined in: [src/wasm/jpeg/bridge.ts:47](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/wasm/jpeg/bridge.ts#L47)
+Defined in: [src/wasm/jpeg/bridge.ts:47](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/wasm/jpeg/bridge.ts#L47)
 
 Raw pixel data (row-major, channel-interleaved).
 
@@ -44,8 +50,10 @@ Raw pixel data (row-major, channel-interleaved).
 
 ### width
 
-> `readonly` **width**: `number`
+```ts
+readonly width: number;
+```
 
-Defined in: [src/wasm/jpeg/bridge.ts:49](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/wasm/jpeg/bridge.ts#L49)
+Defined in: [src/wasm/jpeg/bridge.ts:49](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/wasm/jpeg/bridge.ts#L49)
 
 Image width in pixels.

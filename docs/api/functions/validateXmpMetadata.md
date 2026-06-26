@@ -6,9 +6,11 @@
 
 # Function: validateXmpMetadata()
 
-> **validateXmpMetadata**(`pdfBytes`, `level`): [`XmpValidationResult`](../interfaces/XmpValidationResult.md)
+```ts
+function validateXmpMetadata(pdfBytes, level): XmpValidationResult;
+```
 
-Defined in: [src/compliance/xmpValidator.ts:143](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/compliance/xmpValidator.ts#L143)
+Defined in: [src/compliance/xmpValidator.ts:143](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/xmpValidator.ts#L143)
 
 Validate XMP metadata in a PDF against PDF/A requirements.
 

@@ -6,9 +6,11 @@
 
 # Function: splitPdf()
 
-> **splitPdf**(`document`, `ranges`): `Promise`\<[`PdfDocument`](../classes/PdfDocument.md)[]\>
+```ts
+function splitPdf(document, ranges): Promise<PdfDocument[]>;
+```
 
-Defined in: [src/core/documentMerge.ts:454](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/documentMerge.ts#L454)
+Defined in: [src/core/documentMerge.ts:454](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/documentMerge.ts#L454)
 
 Split a PDF document into multiple documents by page ranges.
 
@@ -32,7 +34,7 @@ Array of `[start, end]` ranges (zero-based, inclusive).
 
 ## Returns
 
-`Promise`\<[`PdfDocument`](../classes/PdfDocument.md)[]\>
+`Promise`\&lt;[`PdfDocument`](../classes/PdfDocument.md)[]\&gt;
 
 Array of new PdfDocument objects, one per range.
 

@@ -6,7 +6,7 @@
 
 # Class: PdfNumber
 
-Defined in: [src/core/pdfObjects.ts:113](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/pdfObjects.ts#L113)
+Defined in: [src/core/pdfObjects.ts:113](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfObjects.ts#L113)
 
 A PDF numeric object (integer or real).
 
@@ -14,9 +14,11 @@ A PDF numeric object (integer or real).
 
 ### Constructor
 
-> **new PdfNumber**(`value`): `PdfNumber`
+```ts
+new PdfNumber(value): PdfNumber;
+```
 
-Defined in: [src/core/pdfObjects.ts:117](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/pdfObjects.ts#L117)
+Defined in: [src/core/pdfObjects.ts:117](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfObjects.ts#L117)
 
 #### Parameters
 
@@ -32,17 +34,21 @@ Defined in: [src/core/pdfObjects.ts:117](https://github.com/ABCrimson/modern-pdf
 
 ### value
 
-> `readonly` **value**: `number`
+```ts
+readonly value: number;
+```
 
-Defined in: [src/core/pdfObjects.ts:117](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/pdfObjects.ts#L117)
+Defined in: [src/core/pdfObjects.ts:117](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfObjects.ts#L117)
 
 ## Methods
 
 ### serialize()
 
-> **serialize**(`writer`): `void`
+```ts
+serialize(writer): void;
+```
 
-Defined in: [src/core/pdfObjects.ts:123](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/pdfObjects.ts#L123)
+Defined in: [src/core/pdfObjects.ts:123](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfObjects.ts#L123)
 
 #### Parameters
 
@@ -58,9 +64,11 @@ Defined in: [src/core/pdfObjects.ts:123](https://github.com/ABCrimson/modern-pdf
 
 ### of()
 
-> `static` **of**(`value`): `PdfNumber`
+```ts
+static of(value): PdfNumber;
+```
 
-Defined in: [src/core/pdfObjects.ts:119](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/pdfObjects.ts#L119)
+Defined in: [src/core/pdfObjects.ts:119](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfObjects.ts#L119)
 
 #### Parameters
 

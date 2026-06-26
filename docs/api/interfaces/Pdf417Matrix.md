@@ -6,7 +6,7 @@
 
 # Interface: Pdf417Matrix
 
-Defined in: [src/barcode/pdf417.ts:47](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/barcode/pdf417.ts#L47)
+Defined in: [src/barcode/pdf417.ts:47](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/barcode/pdf417.ts#L47)
 
 The result of PDF417 encoding — a 2D boolean matrix.
 
@@ -14,9 +14,11 @@ The result of PDF417 encoding — a 2D boolean matrix.
 
 ### columns
 
-> `readonly` **columns**: `number`
+```ts
+readonly columns: number;
+```
 
-Defined in: [src/barcode/pdf417.ts:51](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/barcode/pdf417.ts#L51)
+Defined in: [src/barcode/pdf417.ts:51](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/barcode/pdf417.ts#L51)
 
 Number of data columns.
 
@@ -24,9 +26,11 @@ Number of data columns.
 
 ### modules
 
-> `readonly` **modules**: readonly `boolean`[]
+```ts
+readonly modules: readonly boolean[];
+```
 
-Defined in: [src/barcode/pdf417.ts:55](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/barcode/pdf417.ts#L55)
+Defined in: [src/barcode/pdf417.ts:55](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/barcode/pdf417.ts#L55)
 
 Row-major boolean array. `true` = dark bar.
 
@@ -34,9 +38,11 @@ Row-major boolean array. `true` = dark bar.
 
 ### moduleWidth
 
-> `readonly` **moduleWidth**: `number`
+```ts
+readonly moduleWidth: number;
+```
 
-Defined in: [src/barcode/pdf417.ts:53](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/barcode/pdf417.ts#L53)
+Defined in: [src/barcode/pdf417.ts:53](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/barcode/pdf417.ts#L53)
 
 Total modules per row.
 
@@ -44,8 +50,10 @@ Total modules per row.
 
 ### rows
 
-> `readonly` **rows**: `number`
+```ts
+readonly rows: number;
+```
 
-Defined in: [src/barcode/pdf417.ts:49](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/barcode/pdf417.ts#L49)
+Defined in: [src/barcode/pdf417.ts:49](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/barcode/pdf417.ts#L49)
 
 Number of rows.

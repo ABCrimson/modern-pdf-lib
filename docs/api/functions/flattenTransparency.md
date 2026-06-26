@@ -6,15 +6,17 @@
 
 # Function: flattenTransparency()
 
-> **flattenTransparency**(`pdfBytes`): `Uint8Array`
+```ts
+function flattenTransparency(pdfBytes): Uint8Array;
+```
 
-Defined in: [src/compliance/transparencyFlattener.ts:150](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/compliance/transparencyFlattener.ts#L150)
+Defined in: [src/compliance/transparencyFlattener.ts:150](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/transparencyFlattener.ts#L150)
 
 Flatten transparency by modifying PDF bytes.
 
 This replaces:
-- `/CA <value>` with `/CA 1` (where value < 1)
-- `/ca <value>` with `/ca 1` (where value < 1)
+- `/CA <value>` with `/CA 1` (where value &lt; 1)
+- `/ca <value>` with `/ca 1` (where value &lt; 1)
 - `/SMask <ref>` with `/SMask /None`
 - `/BM /<mode>` with `/BM /Normal`
 

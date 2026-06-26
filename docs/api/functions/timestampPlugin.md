@@ -6,9 +6,11 @@
 
 # Function: timestampPlugin()
 
-> **timestampPlugin**(`options?`): [`PdfPlugin`](../interfaces/PdfPlugin.md)
+```ts
+function timestampPlugin(options?): PdfPlugin;
+```
 
-Defined in: [src/plugins/builtins/timestampPlugin.ts:40](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/plugins/builtins/timestampPlugin.ts#L40)
+Defined in: [src/plugins/builtins/timestampPlugin.ts:40](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/plugins/builtins/timestampPlugin.ts#L40)
 
 Create a timestamp plugin instance.
 

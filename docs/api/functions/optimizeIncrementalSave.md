@@ -6,9 +6,11 @@
 
 # Function: optimizeIncrementalSave()
 
-> **optimizeIncrementalSave**(`originalPdf`, `changes`): `Uint8Array`
+```ts
+function optimizeIncrementalSave(originalPdf, changes): Uint8Array;
+```
 
-Defined in: [src/signature/incrementalOptimizer.ts:180](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/incrementalOptimizer.ts#L180)
+Defined in: [src/signature/incrementalOptimizer.ts:180](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/incrementalOptimizer.ts#L180)
 
 Optimize an incremental save by removing unchanged objects and
 deduplicating identical updates.

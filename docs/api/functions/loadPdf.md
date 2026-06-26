@@ -6,9 +6,11 @@
 
 # Function: loadPdf()
 
-> **loadPdf**(`data`, `options?`): `Promise`\<[`PdfDocument`](../classes/PdfDocument.md)\>
+```ts
+function loadPdf(data, options?): Promise<PdfDocument>;
+```
 
-Defined in: [src/parser/documentParser.ts:1624](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/parser/documentParser.ts#L1624)
+Defined in: [src/parser/documentParser.ts:1624](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/parser/documentParser.ts#L1624)
 
 Load a PDF document from raw bytes, an ArrayBuffer, or a Base64-encoded
 string.
@@ -21,7 +23,7 @@ a populated [PdfDocument](../classes/PdfDocument.md).
 
 ### data
 
-`string` \| `ArrayBuffer` \| `Uint8Array`\<`ArrayBufferLike`\>
+`string` \| `ArrayBuffer` \| `Uint8Array`\&lt;`ArrayBufferLike`\&gt;
 
 The PDF data as a `Uint8Array`, `ArrayBuffer`, or a
                 Base64-encoded string.
@@ -34,7 +36,7 @@ Optional loading options.
 
 ## Returns
 
-`Promise`\<[`PdfDocument`](../classes/PdfDocument.md)\>
+`Promise`\&lt;[`PdfDocument`](../classes/PdfDocument.md)\&gt;
 
 A fully parsed PdfDocument.
 

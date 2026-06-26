@@ -6,9 +6,11 @@
 
 # Variable: AnnotationFlags
 
-> `const` **AnnotationFlags**: `object`
+```ts
+const AnnotationFlags: object;
+```
 
-Defined in: [src/annotation/pdfAnnotation.ts:72](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/annotation/pdfAnnotation.ts#L72)
+Defined in: [src/annotation/pdfAnnotation.ts:72](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/annotation/pdfAnnotation.ts#L72)
 
 Annotation flag bit positions.
 
@@ -16,40 +18,60 @@ Annotation flag bit positions.
 
 ### Hidden
 
-> `readonly` **Hidden**: `number`
+```ts
+readonly Hidden: number;
+```
 
 ### Invisible
 
-> `readonly` **Invisible**: `number`
+```ts
+readonly Invisible: number;
+```
 
 ### Locked
 
-> `readonly` **Locked**: `number`
+```ts
+readonly Locked: number;
+```
 
 ### LockedContents
 
-> `readonly` **LockedContents**: `number`
+```ts
+readonly LockedContents: number;
+```
 
 ### NoRotate
 
-> `readonly` **NoRotate**: `number`
+```ts
+readonly NoRotate: number;
+```
 
 ### NoView
 
-> `readonly` **NoView**: `number`
+```ts
+readonly NoView: number;
+```
 
 ### NoZoom
 
-> `readonly` **NoZoom**: `number`
+```ts
+readonly NoZoom: number;
+```
 
 ### Print
 
-> `readonly` **Print**: `number`
+```ts
+readonly Print: number;
+```
 
 ### ReadOnly
 
-> `readonly` **ReadOnly**: `number`
+```ts
+readonly ReadOnly: number;
+```
 
 ### ToggleNoView
 
-> `readonly` **ToggleNoView**: `number`
+```ts
+readonly ToggleNoView: number;
+```

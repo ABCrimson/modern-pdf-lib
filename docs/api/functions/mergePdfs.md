@@ -6,9 +6,11 @@
 
 # Function: mergePdfs()
 
-> **mergePdfs**(`documents`): `Promise`\<[`PdfDocument`](../classes/PdfDocument.md)\>
+```ts
+function mergePdfs(documents): Promise<PdfDocument>;
+```
 
-Defined in: [src/core/documentMerge.ts:382](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/documentMerge.ts#L382)
+Defined in: [src/core/documentMerge.ts:382](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/documentMerge.ts#L382)
 
 Merge multiple PDF documents into a single document.
 
@@ -26,7 +28,7 @@ Array of PdfDocument objects to merge.
 
 ## Returns
 
-`Promise`\<[`PdfDocument`](../classes/PdfDocument.md)\>
+`Promise`\&lt;[`PdfDocument`](../classes/PdfDocument.md)\&gt;
 
 A new PdfDocument containing all pages.
 

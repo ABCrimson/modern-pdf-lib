@@ -6,9 +6,11 @@
 
 # Function: buildType1Halftone()
 
-> **buildType1Halftone**(`p`): [`PdfDict`](../classes/PdfDict.md)
+```ts
+function buildType1Halftone(p): PdfDict;
+```
 
-Defined in: src/core/halftone.ts:100
+Defined in: [src/core/halftone.ts:100](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/halftone.ts#L100)
 
 Build a Type 1 halftone dictionary.
 

@@ -6,7 +6,7 @@
 
 # Interface: Pdf417Options
 
-Defined in: [src/barcode/pdf417.ts:31](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/barcode/pdf417.ts#L31)
+Defined in: [src/barcode/pdf417.ts:31](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/barcode/pdf417.ts#L31)
 
 Options for encoding a PDF417 barcode.
 
@@ -14,9 +14,11 @@ Options for encoding a PDF417 barcode.
 
 ### color?
 
-> `readonly` `optional` **color?**: [`Color`](../type-aliases/Color.md)
+```ts
+readonly optional color?: Color;
+```
 
-Defined in: [src/barcode/pdf417.ts:41](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/barcode/pdf417.ts#L41)
+Defined in: [src/barcode/pdf417.ts:41](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/barcode/pdf417.ts#L41)
 
 Bar colour. Default: black.
 
@@ -24,9 +26,11 @@ Bar colour. Default: black.
 
 ### columns?
 
-> `readonly` `optional` **columns?**: `number`
+```ts
+readonly optional columns?: number;
+```
 
-Defined in: [src/barcode/pdf417.ts:33](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/barcode/pdf417.ts#L33)
+Defined in: [src/barcode/pdf417.ts:33](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/barcode/pdf417.ts#L33)
 
 Number of data columns (1-30). Default: auto-calculated.
 
@@ -34,9 +38,11 @@ Number of data columns (1-30). Default: auto-calculated.
 
 ### errorLevel?
 
-> `readonly` `optional` **errorLevel?**: `number`
+```ts
+readonly optional errorLevel?: number;
+```
 
-Defined in: [src/barcode/pdf417.ts:35](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/barcode/pdf417.ts#L35)
+Defined in: [src/barcode/pdf417.ts:35](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/barcode/pdf417.ts#L35)
 
 Error correction level (0-8). Default: `2`.
 
@@ -44,9 +50,11 @@ Error correction level (0-8). Default: `2`.
 
 ### moduleWidth?
 
-> `readonly` `optional` **moduleWidth?**: `number`
+```ts
+readonly optional moduleWidth?: number;
+```
 
-Defined in: [src/barcode/pdf417.ts:39](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/barcode/pdf417.ts#L39)
+Defined in: [src/barcode/pdf417.ts:39](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/barcode/pdf417.ts#L39)
 
 Width of a single module in PDF points. Default: `1`.
 
@@ -54,9 +62,11 @@ Width of a single module in PDF points. Default: `1`.
 
 ### quietZone?
 
-> `readonly` `optional` **quietZone?**: `number`
+```ts
+readonly optional quietZone?: number;
+```
 
-Defined in: [src/barcode/pdf417.ts:43](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/barcode/pdf417.ts#L43)
+Defined in: [src/barcode/pdf417.ts:43](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/barcode/pdf417.ts#L43)
 
 Quiet zone width in modules. Default: `2`.
 
@@ -64,8 +74,10 @@ Quiet zone width in modules. Default: `2`.
 
 ### rowHeight?
 
-> `readonly` `optional` **rowHeight?**: `number`
+```ts
+readonly optional rowHeight?: number;
+```
 
-Defined in: [src/barcode/pdf417.ts:37](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/barcode/pdf417.ts#L37)
+Defined in: [src/barcode/pdf417.ts:37](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/barcode/pdf417.ts#L37)
 
 Row height in PDF points. Default: `8`.

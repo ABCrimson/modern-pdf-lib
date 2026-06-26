@@ -6,7 +6,7 @@
 
 # Interface: DrawLineOptions
 
-Defined in: [src/core/pdfPage.ts:285](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/pdfPage.ts#L285)
+Defined in: [src/core/pdfPage.ts:285](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfPage.ts#L285)
 
 Options for [PdfPage.drawLine](../classes/PdfPage.md#drawline).
 
@@ -14,9 +14,11 @@ Options for [PdfPage.drawLine](../classes/PdfPage.md#drawline).
 
 ### blendMode?
 
-> `optional` **blendMode?**: [`BlendMode`](../type-aliases/BlendMode.md)
+```ts
+optional blendMode?: BlendMode;
+```
 
-Defined in: [src/core/pdfPage.ts:301](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/pdfPage.ts#L301)
+Defined in: [src/core/pdfPage.ts:301](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfPage.ts#L301)
 
 Blend mode for compositing.
 
@@ -24,9 +26,11 @@ Blend mode for compositing.
 
 ### color?
 
-> `optional` **color?**: [`Color`](../type-aliases/Color.md)
+```ts
+optional color?: Color;
+```
 
-Defined in: [src/core/pdfPage.ts:291](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/pdfPage.ts#L291)
+Defined in: [src/core/pdfPage.ts:291](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfPage.ts#L291)
 
 Line colour.
 
@@ -34,9 +38,11 @@ Line colour.
 
 ### dashArray?
 
-> `optional` **dashArray?**: `number`[]
+```ts
+optional dashArray?: number[];
+```
 
-Defined in: [src/core/pdfPage.ts:295](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/pdfPage.ts#L295)
+Defined in: [src/core/pdfPage.ts:295](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfPage.ts#L295)
 
 Dash pattern `[dashLength, gapLength]`.
 
@@ -44,9 +50,11 @@ Dash pattern `[dashLength, gapLength]`.
 
 ### dashPhase?
 
-> `optional` **dashPhase?**: `number`
+```ts
+optional dashPhase?: number;
+```
 
-Defined in: [src/core/pdfPage.ts:297](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/pdfPage.ts#L297)
+Defined in: [src/core/pdfPage.ts:297](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfPage.ts#L297)
 
 Dash phase.
 
@@ -54,9 +62,11 @@ Dash phase.
 
 ### end
 
-> **end**: `Point`
+```ts
+end: Point;
+```
 
-Defined in: [src/core/pdfPage.ts:289](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/pdfPage.ts#L289)
+Defined in: [src/core/pdfPage.ts:289](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfPage.ts#L289)
 
 End point.
 
@@ -64,9 +74,11 @@ End point.
 
 ### opacity?
 
-> `optional` **opacity?**: `number`
+```ts
+optional opacity?: number;
+```
 
-Defined in: [src/core/pdfPage.ts:299](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/pdfPage.ts#L299)
+Defined in: [src/core/pdfPage.ts:299](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfPage.ts#L299)
 
 Opacity `[0, 1]`.
 
@@ -74,9 +86,11 @@ Opacity `[0, 1]`.
 
 ### start
 
-> **start**: `Point`
+```ts
+start: Point;
+```
 
-Defined in: [src/core/pdfPage.ts:287](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/pdfPage.ts#L287)
+Defined in: [src/core/pdfPage.ts:287](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfPage.ts#L287)
 
 Start point.
 
@@ -84,8 +98,10 @@ Start point.
 
 ### thickness?
 
-> `optional` **thickness?**: `number`
+```ts
+optional thickness?: number;
+```
 
-Defined in: [src/core/pdfPage.ts:293](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/pdfPage.ts#L293)
+Defined in: [src/core/pdfPage.ts:293](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfPage.ts#L293)
 
 Line width.

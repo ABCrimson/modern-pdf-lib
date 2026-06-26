@@ -6,9 +6,11 @@
 
 # Function: lineToOp()
 
-> **lineToOp**(`x`, `y`): `string`
+```ts
+function lineToOp(x, y): string;
+```
 
-Defined in: [src/core/operators/graphics.ts:53](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/operators/graphics.ts#L53)
+Defined in: [src/core/operators/graphics.ts:53](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/operators/graphics.ts#L53)
 
 Append a straight line segment from the current point to `(x, y)` (`l`).
 

@@ -6,9 +6,11 @@
 
 # Function: beginLayerContent()
 
-> **beginLayerContent**(`layer`): `string`
+```ts
+function beginLayerContent(layer): string;
+```
 
-Defined in: [src/layers/optionalContent.ts:291](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/layers/optionalContent.ts#L291)
+Defined in: [src/layers/optionalContent.ts:291](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layers/optionalContent.ts#L291)
 
 Generate the PDF operator to begin optional content for a layer.
 

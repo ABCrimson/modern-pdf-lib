@@ -6,7 +6,7 @@
 
 # Class: PDFOperator
 
-Defined in: [src/core/operators/index.ts:188](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/operators/index.ts#L188)
+Defined in: [src/core/operators/index.ts:188](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/operators/index.ts#L188)
 
 A first-class representation of a single PDF content-stream operator.
 
@@ -23,9 +23,11 @@ page.pushOperators(op.toString());
 
 ### name
 
-> `readonly` **name**: `string`
+```ts
+readonly name: string;
+```
 
-Defined in: [src/core/operators/index.ts:201](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/operators/index.ts#L201)
+Defined in: [src/core/operators/index.ts:201](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/operators/index.ts#L201)
 
 The PDF operator name.
 
@@ -33,9 +35,11 @@ The PDF operator name.
 
 ### operands
 
-> `readonly` **operands**: readonly (`string` \| `number`)[]
+```ts
+readonly operands: readonly (string | number)[];
+```
 
-Defined in: [src/core/operators/index.ts:203](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/operators/index.ts#L203)
+Defined in: [src/core/operators/index.ts:203](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/operators/index.ts#L203)
 
 The operands for this operator.
 
@@ -43,9 +47,11 @@ The operands for this operator.
 
 ### toString()
 
-> **toString**(): `string`
+```ts
+toString(): string;
+```
 
-Defined in: [src/core/operators/index.ts:211](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/operators/index.ts#L211)
+Defined in: [src/core/operators/index.ts:211](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/operators/index.ts#L211)
 
 Serialize this operator to its PDF content-stream representation.
 
@@ -59,9 +65,11 @@ A string like `"100 200 m\n"`.
 
 ### of()
 
-> `static` **of**(`name`, ...`operands`): `PDFOperator`
+```ts
+static of(name, ...operands): PDFOperator;
+```
 
-Defined in: [src/core/operators/index.ts:195](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/operators/index.ts#L195)
+Defined in: [src/core/operators/index.ts:195](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/operators/index.ts#L195)
 
 Create a new operator.
 

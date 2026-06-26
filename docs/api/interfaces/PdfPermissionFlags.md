@@ -6,7 +6,7 @@
 
 # Interface: PdfPermissionFlags
 
-Defined in: [src/crypto/permissions.ts:78](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/crypto/permissions.ts#L78)
+Defined in: [src/crypto/permissions.ts:78](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/crypto/permissions.ts#L78)
 
 Human-friendly permission flags for a PDF document.
 
@@ -25,54 +25,68 @@ Each flag controls a specific capability:
 
 ### annotating?
 
-> `optional` **annotating?**: `boolean`
+```ts
+optional annotating?: boolean;
+```
 
-Defined in: [src/crypto/permissions.ts:82](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/crypto/permissions.ts#L82)
+Defined in: [src/crypto/permissions.ts:82](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/crypto/permissions.ts#L82)
 
 ***
 
 ### contentAccessibility?
 
-> `optional` **contentAccessibility?**: `boolean`
+```ts
+optional contentAccessibility?: boolean;
+```
 
-Defined in: [src/crypto/permissions.ts:84](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/crypto/permissions.ts#L84)
+Defined in: [src/crypto/permissions.ts:84](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/crypto/permissions.ts#L84)
 
 ***
 
 ### copying?
 
-> `optional` **copying?**: `boolean`
+```ts
+optional copying?: boolean;
+```
 
-Defined in: [src/crypto/permissions.ts:81](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/crypto/permissions.ts#L81)
+Defined in: [src/crypto/permissions.ts:81](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/crypto/permissions.ts#L81)
 
 ***
 
 ### documentAssembly?
 
-> `optional` **documentAssembly?**: `boolean`
+```ts
+optional documentAssembly?: boolean;
+```
 
-Defined in: [src/crypto/permissions.ts:85](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/crypto/permissions.ts#L85)
+Defined in: [src/crypto/permissions.ts:85](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/crypto/permissions.ts#L85)
 
 ***
 
 ### fillingForms?
 
-> `optional` **fillingForms?**: `boolean`
+```ts
+optional fillingForms?: boolean;
+```
 
-Defined in: [src/crypto/permissions.ts:83](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/crypto/permissions.ts#L83)
+Defined in: [src/crypto/permissions.ts:83](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/crypto/permissions.ts#L83)
 
 ***
 
 ### modifying?
 
-> `optional` **modifying?**: `boolean`
+```ts
+optional modifying?: boolean;
+```
 
-Defined in: [src/crypto/permissions.ts:80](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/crypto/permissions.ts#L80)
+Defined in: [src/crypto/permissions.ts:80](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/crypto/permissions.ts#L80)
 
 ***
 
 ### printing?
 
-> `optional` **printing?**: `boolean` \| `"lowResolution"`
+```ts
+optional printing?: boolean | "lowResolution";
+```
 
-Defined in: [src/crypto/permissions.ts:79](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/crypto/permissions.ts#L79)
+Defined in: [src/crypto/permissions.ts:79](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/crypto/permissions.ts#L79)

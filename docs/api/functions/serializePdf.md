@@ -6,9 +6,15 @@
 
 # Function: serializePdf()
 
-> **serializePdf**(`registry`, `structure`, `options?`, `encryptionHandler?`): `Promise`\<`Uint8Array`\<`ArrayBufferLike`\>\>
+```ts
+function serializePdf(
+   registry, 
+   structure, 
+   options?, 
+encryptionHandler?): Promise<Uint8Array<ArrayBufferLike>>;
+```
 
-Defined in: [src/core/pdfWriter.ts:793](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/pdfWriter.ts#L793)
+Defined in: [src/core/pdfWriter.ts:793](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfWriter.ts#L793)
 
 Serialize a complete PDF from a registry and structure refs.
 
@@ -42,6 +48,6 @@ Optional encryption handler for encrypting
 
 ## Returns
 
-`Promise`\<`Uint8Array`\<`ArrayBufferLike`\>\>
+`Promise`\&lt;`Uint8Array`\&lt;`ArrayBufferLike`\&gt;\&gt;
 
 The raw PDF bytes.

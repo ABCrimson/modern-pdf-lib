@@ -6,9 +6,16 @@
 
 # Function: isGrayscaleImage()
 
-> **isGrayscaleImage**(`pixels`, `width`, `height`, `channels`, `tolerance?`): `boolean`
+```ts
+function isGrayscaleImage(
+   pixels, 
+   width, 
+   height, 
+   channels, 
+   tolerance?): boolean;
+```
 
-Defined in: [src/assets/image/grayscaleDetect.ts:43](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/grayscaleDetect.ts#L43)
+Defined in: [src/assets/image/grayscaleDetect.ts:43](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/grayscaleDetect.ts#L43)
 
 Check whether an RGB/RGBA image is effectively grayscale.
 

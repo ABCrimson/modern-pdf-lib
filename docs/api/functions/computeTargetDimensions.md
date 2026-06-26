@@ -6,9 +6,16 @@
 
 # Function: computeTargetDimensions()
 
-> **computeTargetDimensions**(`imageWidth`, `imageHeight`, `displayWidth`, `displayHeight`, `maxDpi`): `object`
+```ts
+function computeTargetDimensions(
+   imageWidth, 
+   imageHeight, 
+   displayWidth, 
+   displayHeight, 
+   maxDpi): object;
+```
 
-Defined in: [src/assets/image/dpiAnalyze.ts:90](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/dpiAnalyze.ts#L90)
+Defined in: [src/assets/image/dpiAnalyze.ts:90](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/dpiAnalyze.ts#L90)
 
 Compute the target pixel dimensions for downscaling an image
 to a maximum DPI at a given display size.
@@ -54,12 +61,18 @@ Target dimensions, or the original dimensions if no
 
 ### downscaled
 
-> **downscaled**: `boolean`
+```ts
+downscaled: boolean;
+```
 
 ### height
 
-> **height**: `number`
+```ts
+height: number;
+```
 
 ### width
 
-> **width**: `number`
+```ts
+width: number;
+```

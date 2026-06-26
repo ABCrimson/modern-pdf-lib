@@ -6,9 +6,11 @@
 
 # Function: asNumber()
 
-> **asNumber**(`obj`): `number` \| `undefined`
+```ts
+function asNumber(obj): number | undefined;
+```
 
-Defined in: [src/utils/pdfValueHelpers.ts:80](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/utils/pdfValueHelpers.ts#L80)
+Defined in: [src/utils/pdfValueHelpers.ts:80](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/utils/pdfValueHelpers.ts#L80)
 
 Extract a numeric value from a [PdfObject](../type-aliases/PdfObject.md).
 

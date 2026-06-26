@@ -6,7 +6,7 @@
 
 # Interface: StreamingParserOptions
 
-Defined in: [src/parser/streamingParser.ts:35](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/parser/streamingParser.ts#L35)
+Defined in: [src/parser/streamingParser.ts:35](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/parser/streamingParser.ts#L35)
 
 Options for the streaming PDF parser.
 
@@ -14,9 +14,11 @@ Options for the streaming PDF parser.
 
 ### maxBufferSize?
 
-> `optional` **maxBufferSize?**: `number`
+```ts
+optional maxBufferSize?: number;
+```
 
-Defined in: [src/parser/streamingParser.ts:37](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/parser/streamingParser.ts#L37)
+Defined in: [src/parser/streamingParser.ts:37](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/parser/streamingParser.ts#L37)
 
 Maximum bytes to buffer at once. Default: 64 MB.
 
@@ -24,26 +26,34 @@ Maximum bytes to buffer at once. Default: 64 MB.
 
 ### pageRange?
 
-> `optional` **pageRange?**: `object`
+```ts
+optional pageRange?: object;
+```
 
-Defined in: [src/parser/streamingParser.ts:41](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/parser/streamingParser.ts#L41)
+Defined in: [src/parser/streamingParser.ts:41](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/parser/streamingParser.ts#L41)
 
 Pages to parse (for selective loading). Default: all.
 
 #### end?
 
-> `optional` **end?**: `number`
+```ts
+optional end?: number;
+```
 
 #### start?
 
-> `optional` **start?**: `number`
+```ts
+optional start?: number;
+```
 
 ***
 
 ### parseContentStreams?
 
-> `optional` **parseContentStreams?**: `boolean`
+```ts
+optional parseContentStreams?: boolean;
+```
 
-Defined in: [src/parser/streamingParser.ts:39](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/parser/streamingParser.ts#L39)
+Defined in: [src/parser/streamingParser.ts:39](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/parser/streamingParser.ts#L39)
 
 Whether to parse content streams. Default: false.

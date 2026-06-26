@@ -6,9 +6,11 @@
 
 # Function: resolveFallback()
 
-> **resolveFallback**(`text`, `fonts`): [`FallbackRun`](../interfaces/FallbackRun.md)[]
+```ts
+function resolveFallback(text, fonts): FallbackRun[];
+```
 
-Defined in: src/assets/font/fontFallback.ts:70
+Defined in: [src/assets/font/fontFallback.ts:70](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/font/fontFallback.ts#L70)
 
 Resolve a fallback chain over `text`, code point by code point.
 

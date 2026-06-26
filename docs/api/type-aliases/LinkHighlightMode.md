@@ -6,8 +6,10 @@
 
 # Type Alias: LinkHighlightMode
 
-> **LinkHighlightMode** = `"None"` \| `"Invert"` \| `"Outline"` \| `"Push"`
+```ts
+type LinkHighlightMode = "None" | "Invert" | "Outline" | "Push";
+```
 
-Defined in: [src/annotation/types/linkAnnotation.ts:26](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/annotation/types/linkAnnotation.ts#L26)
+Defined in: [src/annotation/types/linkAnnotation.ts:26](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/annotation/types/linkAnnotation.ts#L26)
 
 Visual effect when clicking the link.

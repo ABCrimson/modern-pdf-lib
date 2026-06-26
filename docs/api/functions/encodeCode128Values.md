@@ -6,9 +6,11 @@
 
 # Function: encodeCode128Values()
 
-> **encodeCode128Values**(`data`): readonly `number`[]
+```ts
+function encodeCode128Values(data): readonly number[];
+```
 
-Defined in: [src/barcode/code128.ts:253](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/barcode/code128.ts#L253)
+Defined in: [src/barcode/code128.ts:253](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/barcode/code128.ts#L253)
 
 Encode a string as a sequence of Code 128 symbol values (including
 START code, data symbols, code-set switches, check digit, and STOP).

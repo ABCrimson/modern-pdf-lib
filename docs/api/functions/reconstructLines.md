@@ -6,9 +6,11 @@
 
 # Function: reconstructLines()
 
-> **reconstructLines**(`items`, `options?`): [`TextLine`](../interfaces/TextLine.md)[]
+```ts
+function reconstructLines(items, options?): TextLine[];
+```
 
-Defined in: src/parser/textReconstruct.ts:120
+Defined in: [src/parser/textReconstruct.ts:120](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/parser/textReconstruct.ts#L120)
 
 Group positioned text items into lines.
 

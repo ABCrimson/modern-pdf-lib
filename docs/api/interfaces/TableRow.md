@@ -6,7 +6,7 @@
 
 # Interface: TableRow
 
-Defined in: [src/layout/table.ts:79](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/layout/table.ts#L79)
+Defined in: [src/layout/table.ts:79](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layout/table.ts#L79)
 
 Table row.
 
@@ -14,22 +14,28 @@ Table row.
 
 ### backgroundColor?
 
-> `readonly` `optional` **backgroundColor?**: [`Color`](../type-aliases/Color.md)
+```ts
+readonly optional backgroundColor?: Color;
+```
 
-Defined in: [src/layout/table.ts:82](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/layout/table.ts#L82)
+Defined in: [src/layout/table.ts:82](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layout/table.ts#L82)
 
 ***
 
 ### cells
 
-> `readonly` **cells**: readonly (`string` \| [`TableCell`](TableCell.md))[]
+```ts
+readonly cells: readonly (string | TableCell)[];
+```
 
-Defined in: [src/layout/table.ts:80](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/layout/table.ts#L80)
+Defined in: [src/layout/table.ts:80](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layout/table.ts#L80)
 
 ***
 
 ### height?
 
-> `readonly` `optional` **height?**: `number`
+```ts
+readonly optional height?: number;
+```
 
-Defined in: [src/layout/table.ts:81](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/layout/table.ts#L81)
+Defined in: [src/layout/table.ts:81](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layout/table.ts#L81)

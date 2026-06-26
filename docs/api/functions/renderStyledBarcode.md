@@ -6,9 +6,16 @@
 
 # Function: renderStyledBarcode()
 
-> **renderStyledBarcode**(`matrix`, `x`, `y`, `text`, `options?`): `string`
+```ts
+function renderStyledBarcode(
+   matrix, 
+   x, 
+   y, 
+   text, 
+   options?): string;
+```
 
-Defined in: [src/barcode/style.ts:121](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/barcode/style.ts#L121)
+Defined in: [src/barcode/style.ts:121](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/barcode/style.ts#L121)
 
 Render a barcode matrix with full styling options.
 

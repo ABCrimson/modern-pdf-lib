@@ -6,9 +6,11 @@
 
 # Function: layoutMultilineText()
 
-> **layoutMultilineText**(`text`, `options`): [`LayoutMultilineResult`](../interfaces/LayoutMultilineResult.md)
+```ts
+function layoutMultilineText(text, options): LayoutMultilineResult;
+```
 
-Defined in: [src/core/layout.ts:42](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/layout.ts#L42)
+Defined in: [src/core/layout.ts:42](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/layout.ts#L42)
 
 Break text into lines that fit within `maxWidth`, measuring each line's
 width.  Explicit newlines (`\n`) are always honoured.

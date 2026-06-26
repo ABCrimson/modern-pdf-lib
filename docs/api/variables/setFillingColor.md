@@ -6,9 +6,11 @@
 
 # ~~Variable: setFillingColor~~
 
-> `const` **setFillingColor**: *typeof* [`applyFillColor`](../functions/applyFillColor.md) = `applyFillColor`
+```ts
+const setFillingColor: typeof applyFillColor = applyFillColor;
+```
 
-Defined in: [src/core/operators/color.ts:534](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/operators/color.ts#L534)
+Defined in: [src/core/operators/color.ts:534](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/operators/color.ts#L534)
 
 Emit the appropriate fill-colour operator for a [Color](../type-aliases/Color.md) value.
 

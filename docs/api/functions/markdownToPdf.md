@@ -6,9 +6,11 @@
 
 # Function: markdownToPdf()
 
-> **markdownToPdf**(`markdown`, `options?`): `Promise`\<`Uint8Array`\<`ArrayBufferLike`\>\>
+```ts
+function markdownToPdf(markdown, options?): Promise<Uint8Array<ArrayBufferLike>>;
+```
 
-Defined in: src/assets/markdown/markdownToPdf.ts:60
+Defined in: [src/assets/markdown/markdownToPdf.ts:60](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/markdown/markdownToPdf.ts#L60)
 
 Convert a CommonMark **subset** string into PDF bytes.
 
@@ -28,6 +30,6 @@ Optional layout options ([MarkdownToPdfOptions](../interfaces/MarkdownToPdfOptio
 
 ## Returns
 
-`Promise`\<`Uint8Array`\<`ArrayBufferLike`\>\>
+`Promise`\&lt;`Uint8Array`\&lt;`ArrayBufferLike`\&gt;\&gt;
 
 A promise resolving to the saved PDF as a `Uint8Array`.

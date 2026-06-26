@@ -6,7 +6,7 @@
 
 # Interface: StrippedFeature
 
-Defined in: [src/compliance/stripProhibited.ts:35](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/compliance/stripProhibited.ts#L35)
+Defined in: [src/compliance/stripProhibited.ts:35](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/stripProhibited.ts#L35)
 
 A single category of stripped feature.
 
@@ -14,9 +14,11 @@ A single category of stripped feature.
 
 ### count
 
-> `readonly` **count**: `number`
+```ts
+readonly count: number;
+```
 
-Defined in: [src/compliance/stripProhibited.ts:39](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/compliance/stripProhibited.ts#L39)
+Defined in: [src/compliance/stripProhibited.ts:39](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/stripProhibited.ts#L39)
 
 Number of occurrences that were removed/neutralized.
 
@@ -24,8 +26,10 @@ Number of occurrences that were removed/neutralized.
 
 ### type
 
-> `readonly` **type**: `string`
+```ts
+readonly type: string;
+```
 
-Defined in: [src/compliance/stripProhibited.ts:37](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/compliance/stripProhibited.ts#L37)
+Defined in: [src/compliance/stripProhibited.ts:37](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/stripProhibited.ts#L37)
 
 Feature type that was stripped (e.g. "JavaScript", "Launch").

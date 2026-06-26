@@ -6,9 +6,11 @@
 
 # Function: getInlineWasmSize()
 
-> **getInlineWasmSize**(`name`): `number`
+```ts
+function getInlineWasmSize(name): number;
+```
 
-Defined in: [src/wasm/inlineWasm.ts:193](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/wasm/inlineWasm.ts#L193)
+Defined in: [src/wasm/inlineWasm.ts:193](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/wasm/inlineWasm.ts#L193)
 
 Get the encoded (base64) size of a WASM module **without** decoding it.
 

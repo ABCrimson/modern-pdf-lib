@@ -6,7 +6,7 @@
 
 # Interface: RgbColor
 
-Defined in: [src/core/operators/color.ts:15](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/operators/color.ts#L15)
+Defined in: [src/core/operators/color.ts:15](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/operators/color.ts#L15)
 
 An RGB colour with components in the range `[0, 1]`.
 
@@ -14,30 +14,38 @@ An RGB colour with components in the range `[0, 1]`.
 
 ### b
 
-> `readonly` **b**: `number`
+```ts
+readonly b: number;
+```
 
-Defined in: [src/core/operators/color.ts:19](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/operators/color.ts#L19)
+Defined in: [src/core/operators/color.ts:19](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/operators/color.ts#L19)
 
 ***
 
 ### g
 
-> `readonly` **g**: `number`
+```ts
+readonly g: number;
+```
 
-Defined in: [src/core/operators/color.ts:18](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/operators/color.ts#L18)
+Defined in: [src/core/operators/color.ts:18](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/operators/color.ts#L18)
 
 ***
 
 ### r
 
-> `readonly` **r**: `number`
+```ts
+readonly r: number;
+```
 
-Defined in: [src/core/operators/color.ts:17](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/operators/color.ts#L17)
+Defined in: [src/core/operators/color.ts:17](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/operators/color.ts#L17)
 
 ***
 
 ### type
 
-> `readonly` **type**: `"rgb"`
+```ts
+readonly type: "rgb";
+```
 
-Defined in: [src/core/operators/color.ts:16](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/operators/color.ts#L16)
+Defined in: [src/core/operators/color.ts:16](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/operators/color.ts#L16)

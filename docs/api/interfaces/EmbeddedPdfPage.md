@@ -6,7 +6,7 @@
 
 # Interface: EmbeddedPdfPage
 
-Defined in: [src/core/pdfEmbed.ts:44](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/pdfEmbed.ts#L44)
+Defined in: [src/core/pdfEmbed.ts:44](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfEmbed.ts#L44)
 
 Handle for a page that has been embedded as a Form XObject.
 
@@ -17,9 +17,11 @@ Pass it to `PdfPage.drawPage()` to paint the embedded page.
 
 ### height
 
-> `readonly` **height**: `number`
+```ts
+readonly height: number;
+```
 
-Defined in: [src/core/pdfEmbed.ts:52](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/pdfEmbed.ts#L52)
+Defined in: [src/core/pdfEmbed.ts:52](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfEmbed.ts#L52)
 
 Original page height in points.
 
@@ -27,9 +29,11 @@ Original page height in points.
 
 ### name
 
-> `readonly` **name**: `string`
+```ts
+readonly name: string;
+```
 
-Defined in: [src/core/pdfEmbed.ts:46](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/pdfEmbed.ts#L46)
+Defined in: [src/core/pdfEmbed.ts:46](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfEmbed.ts#L46)
 
 XObject resource name (e.g. `'XF1'`).
 
@@ -37,9 +41,11 @@ XObject resource name (e.g. `'XF1'`).
 
 ### ref
 
-> `readonly` **ref**: [`PdfRef`](../classes/PdfRef.md)
+```ts
+readonly ref: PdfRef;
+```
 
-Defined in: [src/core/pdfEmbed.ts:48](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/pdfEmbed.ts#L48)
+Defined in: [src/core/pdfEmbed.ts:48](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfEmbed.ts#L48)
 
 Indirect reference to the Form XObject in the target registry.
 
@@ -47,9 +53,11 @@ Indirect reference to the Form XObject in the target registry.
 
 ### width
 
-> `readonly` **width**: `number`
+```ts
+readonly width: number;
+```
 
-Defined in: [src/core/pdfEmbed.ts:50](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/pdfEmbed.ts#L50)
+Defined in: [src/core/pdfEmbed.ts:50](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfEmbed.ts#L50)
 
 Original page width in points.
 
@@ -57,9 +65,11 @@ Original page width in points.
 
 ### scale()
 
-> **scale**(`factor`): `object`
+```ts
+scale(factor): object;
+```
 
-Defined in: [src/core/pdfEmbed.ts:59](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/pdfEmbed.ts#L59)
+Defined in: [src/core/pdfEmbed.ts:59](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfEmbed.ts#L59)
 
 Return the dimensions after applying a uniform scale factor.
 
@@ -77,19 +87,25 @@ Scale factor (e.g. `0.5` for half size).
 
 ##### height
 
-> **height**: `number`
+```ts
+height: number;
+```
 
 ##### width
 
-> **width**: `number`
+```ts
+width: number;
+```
 
 ***
 
 ### scaleToFit()
 
-> **scaleToFit**(`maxW`, `maxH`): `object`
+```ts
+scaleToFit(maxW, maxH): object;
+```
 
-Defined in: [src/core/pdfEmbed.ts:68](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/pdfEmbed.ts#L68)
+Defined in: [src/core/pdfEmbed.ts:68](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfEmbed.ts#L68)
 
 Compute dimensions that fit within the given maximum size while
 preserving the original aspect ratio.
@@ -114,8 +130,12 @@ Maximum height.
 
 ##### height
 
-> **height**: `number`
+```ts
+height: number;
+```
 
 ##### width
 
-> **width**: `number`
+```ts
+width: number;
+```

@@ -6,9 +6,11 @@
 
 # Function: beginMarkedContentSequence()
 
-> **beginMarkedContentSequence**(`tag`, `mcid`): `string`
+```ts
+function beginMarkedContentSequence(tag, mcid): string;
+```
 
-Defined in: [src/accessibility/markedContent.ts:110](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/accessibility/markedContent.ts#L110)
+Defined in: [src/accessibility/markedContent.ts:110](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/accessibility/markedContent.ts#L110)
 
 Generate a `BDC` operator for a structure-tagged marked-content
 sequence with an MCID.

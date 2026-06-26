@@ -6,9 +6,11 @@
 
 # Function: readCode128()
 
-> **readCode128**(`modules`): [`BarcodeReadResult`](../interfaces/BarcodeReadResult.md)
+```ts
+function readCode128(modules): BarcodeReadResult;
+```
 
-Defined in: [src/barcode/reader.ts:258](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/barcode/reader.ts#L258)
+Defined in: [src/barcode/reader.ts:258](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/barcode/reader.ts#L258)
 
 Decode a Code 128 barcode from its module array.
 

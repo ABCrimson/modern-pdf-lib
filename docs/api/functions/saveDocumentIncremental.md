@@ -6,9 +6,14 @@
 
 # Function: saveDocumentIncremental()
 
-> **saveDocumentIncremental**(`originalBytes`, `doc`, `options?`): `Promise`\<[`IncrementalSaveResult`](../interfaces/IncrementalSaveResult.md)\>
+```ts
+function saveDocumentIncremental(
+   originalBytes, 
+   doc, 
+options?): Promise<IncrementalSaveResult>;
+```
 
-Defined in: [src/core/incrementalWriter.ts:465](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/incrementalWriter.ts#L465)
+Defined in: [src/core/incrementalWriter.ts:465](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/incrementalWriter.ts#L465)
 
 Perform an incremental save given the original bytes and a PdfDocument.
 
@@ -37,6 +42,6 @@ Optional save options.
 
 ## Returns
 
-`Promise`\<[`IncrementalSaveResult`](../interfaces/IncrementalSaveResult.md)\>
+`Promise`\&lt;[`IncrementalSaveResult`](../interfaces/IncrementalSaveResult.md)\&gt;
 
 The incremental save result.

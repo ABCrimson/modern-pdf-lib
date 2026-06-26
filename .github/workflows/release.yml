@@ -162,43 +162,5 @@ jobs:
           files: modern-pdf-wasm-*.tar.gz
           generate_release_notes: true
 
-  # ---------------------------------------------------------------------------
-  # Deploy docs to GitHub Pages
-  # ---------------------------------------------------------------------------
-  docs:
-    name: Deploy Docs
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - uses: actions/checkout@v7
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-
-      - run: npm ci --legacy-peer-deps
-
-      - name: Install docs toolchain (isolated TS6 sidecar — typedoc has no TS7 path yet)
-        run: npm install --prefix tools/docs --no-audit --no-fund
-
-      - name: Generate API docs
-        run: npm run docs:api
-
-      - name: Build VitePress site
-        run: npm run docs:build
-
-      - name: Configure GitHub Pages
-        uses: actions/configure-pages@v6
-
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v5
-        with:
-          path: docs/.vitepress/dist
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v5
+# Docs are deployed by the dedicated docs.yml workflow on every push to master
+# (decoupled from version tags), so there is no docs job here.

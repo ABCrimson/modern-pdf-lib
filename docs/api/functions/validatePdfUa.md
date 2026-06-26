@@ -6,9 +6,11 @@
 
 # Function: validatePdfUa()
 
-> **validatePdfUa**(`doc`, `level?`): [`PdfUaValidationResult`](../interfaces/PdfUaValidationResult.md)
+```ts
+function validatePdfUa(doc, level?): PdfUaValidationResult;
+```
 
-Defined in: [src/accessibility/pdfUaValidator.ts:183](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/accessibility/pdfUaValidator.ts#L183)
+Defined in: [src/accessibility/pdfUaValidator.ts:183](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/accessibility/pdfUaValidator.ts#L183)
 
 Validate a PDF document against PDF/UA-1 (ISO 14289-1) requirements.
 
@@ -23,7 +25,7 @@ Performs the following checks:
 8. Reading order via structure tree
 9. Font embedding (excluding form-field-only fonts)
 10. Color contrast (AA: 4.5:1, AAA: 7:1)
-11. Bookmarks for navigation (documents > 3 pages)
+11. Bookmarks for navigation (documents &gt; 3 pages)
 12. Tab order (/Tabs /S) on pages
 
 ## Parameters

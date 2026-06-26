@@ -6,9 +6,11 @@
 
 # Function: downscaleImage()
 
-> **downscaleImage**(`image`, `options?`): [`RawImageData`](../interfaces/RawImageData.md)
+```ts
+function downscaleImage(image, options?): RawImageData;
+```
 
-Defined in: [src/assets/image/imageOptimize.ts:198](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/imageOptimize.ts#L198)
+Defined in: [src/assets/image/imageOptimize.ts:198](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/imageOptimize.ts#L198)
 
 Downscale an image to fit within the specified dimensions.
 

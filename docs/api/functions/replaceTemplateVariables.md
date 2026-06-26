@@ -6,9 +6,17 @@
 
 # Function: replaceTemplateVariables()
 
-> **replaceTemplateVariables**(`text`, `pageNumber`, `totalPages`, `date`, `dateFormat`, `title`): `string`
+```ts
+function replaceTemplateVariables(
+   text, 
+   pageNumber, 
+   totalPages, 
+   date, 
+   dateFormat, 
+   title): string;
+```
 
-Defined in: [src/layout/headerFooter.ts:116](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/layout/headerFooter.ts#L116)
+Defined in: [src/layout/headerFooter.ts:116](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layout/headerFooter.ts#L116)
 
 Replace template variables in a text string.
 

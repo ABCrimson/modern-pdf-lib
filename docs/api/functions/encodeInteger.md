@@ -6,9 +6,11 @@
 
 # Function: encodeInteger()
 
-> **encodeInteger**(`data`): `Uint8Array`
+```ts
+function encodeInteger(data): Uint8Array;
+```
 
-Defined in: [src/signature/pkcs7.ts:249](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/pkcs7.ts#L249)
+Defined in: [src/signature/pkcs7.ts:249](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/pkcs7.ts#L249)
 
 Encode an INTEGER.
 

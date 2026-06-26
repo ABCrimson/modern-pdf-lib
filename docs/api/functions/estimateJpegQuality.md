@@ -6,9 +6,11 @@
 
 # Function: estimateJpegQuality()
 
-> **estimateJpegQuality**(`jpegBytes`): `number` \| `undefined`
+```ts
+function estimateJpegQuality(jpegBytes): number | undefined;
+```
 
-Defined in: [src/assets/image/imageOptimize.ts:350](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/imageOptimize.ts#L350)
+Defined in: [src/assets/image/imageOptimize.ts:350](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/imageOptimize.ts#L350)
 
 Estimate the JPEG quality level (1–100) from the quantization tables
 embedded in a JPEG file.

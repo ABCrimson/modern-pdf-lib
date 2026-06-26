@@ -6,9 +6,11 @@
 
 # Function: setStrokeColorGray()
 
-> **setStrokeColorGray**(`gray`): `string`
+```ts
+function setStrokeColorGray(gray): string;
+```
 
-Defined in: [src/core/operators/color.ts:352](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/operators/color.ts#L352)
+Defined in: [src/core/operators/color.ts:352](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/operators/color.ts#L352)
 
 Set the stroke colour in the DeviceGray colour space (`G`).
 

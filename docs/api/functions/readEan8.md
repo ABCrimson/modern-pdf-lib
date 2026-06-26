@@ -6,9 +6,11 @@
 
 # Function: readEan8()
 
-> **readEan8**(`modules`): [`BarcodeReadResult`](../interfaces/BarcodeReadResult.md)
+```ts
+function readEan8(modules): BarcodeReadResult;
+```
 
-Defined in: [src/barcode/reader.ts:537](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/barcode/reader.ts#L537)
+Defined in: [src/barcode/reader.ts:537](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/barcode/reader.ts#L537)
 
 Decode an EAN-8 barcode from its module array.
 

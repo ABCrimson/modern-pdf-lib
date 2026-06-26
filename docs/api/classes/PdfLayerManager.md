@@ -6,7 +6,7 @@
 
 # Class: PdfLayerManager
 
-Defined in: [src/layers/optionalContent.ts:120](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/layers/optionalContent.ts#L120)
+Defined in: [src/layers/optionalContent.ts:120](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layers/optionalContent.ts#L120)
 
 Manages a collection of optional content groups (layers) for a PDF
 document.
@@ -18,7 +18,9 @@ the `/OCProperties` dictionary that goes into the catalog.
 
 ### Constructor
 
-> **new PdfLayerManager**(): `PdfLayerManager`
+```ts
+new PdfLayerManager(): PdfLayerManager;
+```
 
 #### Returns
 
@@ -28,9 +30,11 @@ the `/OCProperties` dictionary that goes into the catalog.
 
 ### addLayer()
 
-> **addLayer**(`name`, `visible?`): [`PdfLayer`](PdfLayer.md)
+```ts
+addLayer(name, visible?): PdfLayer;
+```
 
-Defined in: [src/layers/optionalContent.ts:130](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/layers/optionalContent.ts#L130)
+Defined in: [src/layers/optionalContent.ts:130](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layers/optionalContent.ts#L130)
 
 Add a new layer.
 
@@ -58,9 +62,11 @@ The newly created layer.
 
 ### getLayer()
 
-> **getLayer**(`name`): [`PdfLayer`](PdfLayer.md) \| `undefined`
+```ts
+getLayer(name): PdfLayer | undefined;
+```
 
-Defined in: [src/layers/optionalContent.ts:142](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/layers/optionalContent.ts#L142)
+Defined in: [src/layers/optionalContent.ts:142](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layers/optionalContent.ts#L142)
 
 Get a layer by name.
 
@@ -82,9 +88,11 @@ The layer, or `undefined` if not found.
 
 ### getLayers()
 
-> **getLayers**(): [`PdfLayer`](PdfLayer.md)[]
+```ts
+getLayers(): PdfLayer[];
+```
 
-Defined in: [src/layers/optionalContent.ts:151](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/layers/optionalContent.ts#L151)
+Defined in: [src/layers/optionalContent.ts:151](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layers/optionalContent.ts#L151)
 
 Get all layers.
 
@@ -98,9 +106,11 @@ A copy of the layers array.
 
 ### removeLayer()
 
-> **removeLayer**(`name`): `void`
+```ts
+removeLayer(name): void;
+```
 
-Defined in: [src/layers/optionalContent.ts:160](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/layers/optionalContent.ts#L160)
+Defined in: [src/layers/optionalContent.ts:160](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layers/optionalContent.ts#L160)
 
 Remove a layer by name.
 
@@ -120,9 +130,11 @@ The layer name.
 
 ### toOCProperties()
 
-> **toOCProperties**(`registry`): [`PdfDict`](PdfDict.md)
+```ts
+toOCProperties(registry): PdfDict;
+```
 
-Defined in: [src/layers/optionalContent.ts:173](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/layers/optionalContent.ts#L173)
+Defined in: [src/layers/optionalContent.ts:173](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layers/optionalContent.ts#L173)
 
 Build the `/OCProperties` dictionary for the document catalog.
 
@@ -147,9 +159,11 @@ The `/OCProperties` dictionary (not indirect).
 
 ### fromDict()
 
-> `static` **fromDict**(`dict`, `resolver`): `PdfLayerManager`
+```ts
+static fromDict(dict, resolver): PdfLayerManager;
+```
 
-Defined in: [src/layers/optionalContent.ts:226](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/layers/optionalContent.ts#L226)
+Defined in: [src/layers/optionalContent.ts:226](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layers/optionalContent.ts#L226)
 
 Parse a PdfLayerManager from an `/OCProperties` dictionary.
 
@@ -163,7 +177,7 @@ The `/OCProperties` dictionary from the catalog.
 
 ##### resolver
 
-(`ref`) => [`PdfObject`](../type-aliases/PdfObject.md)
+(`ref`) =&gt; [`PdfObject`](../type-aliases/PdfObject.md)
 
 A function that resolves indirect references.
 

@@ -6,9 +6,11 @@
 
 # Variable: BlendMode
 
-> `const` **BlendMode**: `object`
+```ts
+const BlendMode: object;
+```
 
-Defined in: [src/core/enums.ts:5](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/enums.ts#L5)
+Defined in: [src/core/enums.ts:5](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/enums.ts#L5)
 
 PDF blend modes (PDF 1.4+, Table 136).
 Applied via ExtGState /BM key.
@@ -17,48 +19,72 @@ Applied via ExtGState /BM key.
 
 ### ColorBurn
 
-> `readonly` **ColorBurn**: `"ColorBurn"` = `'ColorBurn'`
+```ts
+readonly ColorBurn: "ColorBurn" = 'ColorBurn';
+```
 
 ### ColorDodge
 
-> `readonly` **ColorDodge**: `"ColorDodge"` = `'ColorDodge'`
+```ts
+readonly ColorDodge: "ColorDodge" = 'ColorDodge';
+```
 
 ### Darken
 
-> `readonly` **Darken**: `"Darken"` = `'Darken'`
+```ts
+readonly Darken: "Darken" = 'Darken';
+```
 
 ### Difference
 
-> `readonly` **Difference**: `"Difference"` = `'Difference'`
+```ts
+readonly Difference: "Difference" = 'Difference';
+```
 
 ### Exclusion
 
-> `readonly` **Exclusion**: `"Exclusion"` = `'Exclusion'`
+```ts
+readonly Exclusion: "Exclusion" = 'Exclusion';
+```
 
 ### HardLight
 
-> `readonly` **HardLight**: `"HardLight"` = `'HardLight'`
+```ts
+readonly HardLight: "HardLight" = 'HardLight';
+```
 
 ### Lighten
 
-> `readonly` **Lighten**: `"Lighten"` = `'Lighten'`
+```ts
+readonly Lighten: "Lighten" = 'Lighten';
+```
 
 ### Multiply
 
-> `readonly` **Multiply**: `"Multiply"` = `'Multiply'`
+```ts
+readonly Multiply: "Multiply" = 'Multiply';
+```
 
 ### Normal
 
-> `readonly` **Normal**: `"Normal"` = `'Normal'`
+```ts
+readonly Normal: "Normal" = 'Normal';
+```
 
 ### Overlay
 
-> `readonly` **Overlay**: `"Overlay"` = `'Overlay'`
+```ts
+readonly Overlay: "Overlay" = 'Overlay';
+```
 
 ### Screen
 
-> `readonly` **Screen**: `"Screen"` = `'Screen'`
+```ts
+readonly Screen: "Screen" = 'Screen';
+```
 
 ### SoftLight
 
-> `readonly` **SoftLight**: `"SoftLight"` = `'SoftLight'`
+```ts
+readonly SoftLight: "SoftLight" = 'SoftLight';
+```

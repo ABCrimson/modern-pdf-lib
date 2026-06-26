@@ -6,7 +6,7 @@
 
 # Interface: TableRenderResult
 
-Defined in: [src/layout/table.ts:128](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/layout/table.ts#L128)
+Defined in: [src/layout/table.ts:128](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layout/table.ts#L128)
 
 Result of table rendering.
 
@@ -14,38 +14,48 @@ Result of table rendering.
 
 ### columnWidths
 
-> `readonly` **columnWidths**: readonly `number`[]
+```ts
+readonly columnWidths: readonly number[];
+```
 
-Defined in: [src/layout/table.ts:132](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/layout/table.ts#L132)
+Defined in: [src/layout/table.ts:132](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layout/table.ts#L132)
 
 ***
 
 ### height
 
-> `readonly` **height**: `number`
+```ts
+readonly height: number;
+```
 
-Defined in: [src/layout/table.ts:130](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/layout/table.ts#L130)
+Defined in: [src/layout/table.ts:130](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layout/table.ts#L130)
 
 ***
 
 ### pagesUsed
 
-> `readonly` **pagesUsed**: `number`
+```ts
+readonly pagesUsed: number;
+```
 
-Defined in: [src/layout/table.ts:133](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/layout/table.ts#L133)
+Defined in: [src/layout/table.ts:133](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layout/table.ts#L133)
 
 ***
 
 ### rowHeights
 
-> `readonly` **rowHeights**: readonly `number`[]
+```ts
+readonly rowHeights: readonly number[];
+```
 
-Defined in: [src/layout/table.ts:131](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/layout/table.ts#L131)
+Defined in: [src/layout/table.ts:131](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layout/table.ts#L131)
 
 ***
 
 ### width
 
-> `readonly` **width**: `number`
+```ts
+readonly width: number;
+```
 
-Defined in: [src/layout/table.ts:129](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/layout/table.ts#L129)
+Defined in: [src/layout/table.ts:129](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layout/table.ts#L129)

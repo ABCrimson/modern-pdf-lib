@@ -6,7 +6,7 @@
 
 # Interface: RedactionOperatorOptions
 
-Defined in: [src/annotation/applyRedactions.ts:60](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/annotation/applyRedactions.ts#L60)
+Defined in: [src/annotation/applyRedactions.ts:60](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/annotation/applyRedactions.ts#L60)
 
 Extended options for building redaction operators.
 
@@ -14,31 +14,41 @@ Extended options for building redaction operators.
 
 ### borderColor?
 
-> `optional` **borderColor?**: `object`
+```ts
+optional borderColor?: object;
+```
 
-Defined in: [src/annotation/applyRedactions.ts:70](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/annotation/applyRedactions.ts#L70)
+Defined in: [src/annotation/applyRedactions.ts:70](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/annotation/applyRedactions.ts#L70)
 
 Border colour (default: same as fill colour).
 
 #### b
 
-> **b**: `number`
+```ts
+b: number;
+```
 
 #### g
 
-> **g**: `number`
+```ts
+g: number;
+```
 
 #### r
 
-> **r**: `number`
+```ts
+r: number;
+```
 
 ***
 
 ### borderWidth?
 
-> `optional` **borderWidth?**: `number`
+```ts
+optional borderWidth?: number;
+```
 
-Defined in: [src/annotation/applyRedactions.ts:68](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/annotation/applyRedactions.ts#L68)
+Defined in: [src/annotation/applyRedactions.ts:68](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/annotation/applyRedactions.ts#L68)
 
 Border width for the redaction rectangle outline (default: 0).
 
@@ -46,9 +56,11 @@ Border width for the redaction rectangle outline (default: 0).
 
 ### opacity?
 
-> `optional` **opacity?**: `number`
+```ts
+optional opacity?: number;
+```
 
-Defined in: [src/annotation/applyRedactions.ts:72](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/annotation/applyRedactions.ts#L72)
+Defined in: [src/annotation/applyRedactions.ts:72](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/annotation/applyRedactions.ts#L72)
 
 Opacity for the redaction overlay, 0–1 (default: 1).
 
@@ -56,9 +68,11 @@ Opacity for the redaction overlay, 0–1 (default: 1).
 
 ### overlayAlignment?
 
-> `optional` **overlayAlignment?**: [`OverlayAlignment`](../type-aliases/OverlayAlignment.md)
+```ts
+optional overlayAlignment?: OverlayAlignment;
+```
 
-Defined in: [src/annotation/applyRedactions.ts:66](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/annotation/applyRedactions.ts#L66)
+Defined in: [src/annotation/applyRedactions.ts:66](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/annotation/applyRedactions.ts#L66)
 
 Horizontal alignment for overlay text (default: 'left').
 
@@ -66,9 +80,11 @@ Horizontal alignment for overlay text (default: 'left').
 
 ### overlayFont?
 
-> `optional` **overlayFont?**: `string`
+```ts
+optional overlayFont?: string;
+```
 
-Defined in: [src/annotation/applyRedactions.ts:62](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/annotation/applyRedactions.ts#L62)
+Defined in: [src/annotation/applyRedactions.ts:62](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/annotation/applyRedactions.ts#L62)
 
 Font name for overlay text (default: 'Helvetica').
 
@@ -76,8 +92,10 @@ Font name for overlay text (default: 'Helvetica').
 
 ### overlayFontSize?
 
-> `optional` **overlayFontSize?**: `number`
+```ts
+optional overlayFontSize?: number;
+```
 
-Defined in: [src/annotation/applyRedactions.ts:64](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/annotation/applyRedactions.ts#L64)
+Defined in: [src/annotation/applyRedactions.ts:64](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/annotation/applyRedactions.ts#L64)
 
 Font size for overlay text. When omitted, auto-calculated from rect height.

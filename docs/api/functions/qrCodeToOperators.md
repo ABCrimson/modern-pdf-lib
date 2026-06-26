@@ -6,9 +6,15 @@
 
 # Function: qrCodeToOperators()
 
-> **qrCodeToOperators**(`matrix`, `x`, `y`, `options?`): `string`
+```ts
+function qrCodeToOperators(
+   matrix, 
+   x, 
+   y, 
+   options?): string;
+```
 
-Defined in: [src/barcode/qr.ts:1187](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/barcode/qr.ts#L1187)
+Defined in: [src/barcode/qr.ts:1187](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/barcode/qr.ts#L1187)
 
 Convert a [QrCodeMatrix](../interfaces/QrCodeMatrix.md) to PDF content-stream operators.
 

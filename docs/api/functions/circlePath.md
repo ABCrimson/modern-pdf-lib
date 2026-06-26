@@ -6,9 +6,14 @@
 
 # Function: circlePath()
 
-> **circlePath**(`cx`, `cy`, `radius`): `string`
+```ts
+function circlePath(
+   cx, 
+   cy, 
+   radius): string;
+```
 
-Defined in: [src/core/operators/graphics.ts:281](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/operators/graphics.ts#L281)
+Defined in: [src/core/operators/graphics.ts:281](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/operators/graphics.ts#L281)
 
 Produce the path operators for an approximate circle (4 cubic Bezier
 curves).  Does NOT include the painting operator — call [stroke](strokeOp.md),

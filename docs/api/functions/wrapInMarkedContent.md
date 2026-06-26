@@ -6,9 +6,14 @@
 
 # Function: wrapInMarkedContent()
 
-> **wrapInMarkedContent**(`operators`, `tag`, `mcid`): `string`
+```ts
+function wrapInMarkedContent(
+   operators, 
+   tag, 
+   mcid): string;
+```
 
-Defined in: [src/accessibility/markedContent.ts:128](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/accessibility/markedContent.ts#L128)
+Defined in: [src/accessibility/markedContent.ts:128](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/accessibility/markedContent.ts#L128)
 
 Wrap existing content-stream operators in a marked-content sequence.
 

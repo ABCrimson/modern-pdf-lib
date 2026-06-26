@@ -6,7 +6,7 @@
 
 # Interface: PdfA4ExtensionSchema
 
-Defined in: src/compliance/pdfA4.ts:46
+Defined in: [src/compliance/pdfA4.ts:46](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/pdfA4.ts#L46)
 
 Describes a PDF/A extension schema for non-standard XMP namespaces.
 
@@ -14,9 +14,11 @@ Describes a PDF/A extension schema for non-standard XMP namespaces.
 
 ### namespaceUri
 
-> `readonly` **namespaceUri**: `string`
+```ts
+readonly namespaceUri: string;
+```
 
-Defined in: src/compliance/pdfA4.ts:48
+Defined in: [src/compliance/pdfA4.ts:48](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/pdfA4.ts#L48)
 
 Namespace URI of the extended schema.
 
@@ -24,9 +26,11 @@ Namespace URI of the extended schema.
 
 ### prefix
 
-> `readonly` **prefix**: `string`
+```ts
+readonly prefix: string;
+```
 
-Defined in: src/compliance/pdfA4.ts:50
+Defined in: [src/compliance/pdfA4.ts:50](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/pdfA4.ts#L50)
 
 Preferred namespace prefix.
 
@@ -34,9 +38,11 @@ Preferred namespace prefix.
 
 ### properties
 
-> `readonly` **properties**: readonly [`PdfA4ExtensionProperty`](PdfA4ExtensionProperty.md)[]
+```ts
+readonly properties: readonly PdfA4ExtensionProperty[];
+```
 
-Defined in: src/compliance/pdfA4.ts:54
+Defined in: [src/compliance/pdfA4.ts:54](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/pdfA4.ts#L54)
 
 Properties defined by this schema.
 
@@ -44,8 +50,10 @@ Properties defined by this schema.
 
 ### schema
 
-> `readonly` **schema**: `string`
+```ts
+readonly schema: string;
+```
 
-Defined in: src/compliance/pdfA4.ts:52
+Defined in: [src/compliance/pdfA4.ts:52](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/pdfA4.ts#L52)
 
 Human-readable schema name.

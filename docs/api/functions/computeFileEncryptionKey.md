@@ -6,9 +6,14 @@
 
 # Function: computeFileEncryptionKey()
 
-> **computeFileEncryptionKey**(`password`, `dict`, `fileId`): `Promise`\<`Uint8Array`\<`ArrayBufferLike`\>\>
+```ts
+function computeFileEncryptionKey(
+   password, 
+   dict, 
+fileId): Promise<Uint8Array<ArrayBufferLike>>;
+```
 
-Defined in: [src/crypto/keyDerivation.ts:777](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/crypto/keyDerivation.ts#L777)
+Defined in: [src/crypto/keyDerivation.ts:777](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/crypto/keyDerivation.ts#L777)
 
 Compute the file encryption key from a password and encryption dict.
 
@@ -36,11 +41,11 @@ Encryption dictionary values.
 
 `Uint8Array`
 
-The first element of the /ID array (unused for R>=5).
+The first element of the /ID array (unused for R&gt;=5).
 
 ## Returns
 
-`Promise`\<`Uint8Array`\<`ArrayBufferLike`\>\>
+`Promise`\&lt;`Uint8Array`\&lt;`ArrayBufferLike`\&gt;\&gt;
 
 The file encryption key.
 

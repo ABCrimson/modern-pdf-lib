@@ -6,9 +6,14 @@
 
 # Function: aesEncryptCBC()
 
-> **aesEncryptCBC**(`key`, `data`, `iv?`): `Promise`\<`Uint8Array`\<`ArrayBufferLike`\>\>
+```ts
+function aesEncryptCBC(
+   key, 
+   data, 
+iv?): Promise<Uint8Array<ArrayBufferLike>>;
+```
 
-Defined in: [src/crypto/aes.ts:97](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/crypto/aes.ts#L97)
+Defined in: [src/crypto/aes.ts:97](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/crypto/aes.ts#L97)
 
 Encrypt data using AES-CBC with PKCS#7 padding.
 
@@ -34,13 +39,13 @@ Plaintext data to encrypt.
 
 ### iv?
 
-`Uint8Array`\<`ArrayBufferLike`\>
+`Uint8Array`\&lt;`ArrayBufferLike`\&gt;
 
 Optional 16-byte initialization vector.  If omitted, a
              random IV is generated.
 
 ## Returns
 
-`Promise`\<`Uint8Array`\<`ArrayBufferLike`\>\>
+`Promise`\&lt;`Uint8Array`\&lt;`ArrayBufferLike`\&gt;\&gt;
 
 IV + ciphertext as a single Uint8Array.

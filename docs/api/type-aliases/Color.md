@@ -6,8 +6,15 @@
 
 # Type Alias: Color
 
-> **Color** = [`RgbColor`](../interfaces/RgbColor.md) \| [`CmykColor`](../interfaces/CmykColor.md) \| [`GrayscaleColor`](../interfaces/GrayscaleColor.md) \| [`SpotColor`](../interfaces/SpotColor.md) \| [`DeviceNColor`](../interfaces/DeviceNColor.md)
+```ts
+type Color = 
+  | RgbColor
+  | CmykColor
+  | GrayscaleColor
+  | SpotColor
+  | DeviceNColor;
+```
 
-Defined in: [src/core/operators/color.ts:60](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/operators/color.ts#L60)
+Defined in: [src/core/operators/color.ts:60](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/operators/color.ts#L60)
 
 Union of all supported colour value types.

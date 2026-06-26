@@ -6,7 +6,7 @@
 
 # Interface: OverflowResult
 
-Defined in: [src/layout/overflow.ts:24](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/layout/overflow.ts#L24)
+Defined in: [src/layout/overflow.ts:24](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layout/overflow.ts#L24)
 
 Result of applying an overflow mode to a text string.
 
@@ -14,9 +14,11 @@ Result of applying an overflow mode to a text string.
 
 ### fontSize
 
-> `readonly` **fontSize**: `number`
+```ts
+readonly fontSize: number;
+```
 
-Defined in: [src/layout/overflow.ts:28](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/layout/overflow.ts#L28)
+Defined in: [src/layout/overflow.ts:28](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layout/overflow.ts#L28)
 
 The font size to use (may differ from input for 'shrink' mode).
 
@@ -24,9 +26,11 @@ The font size to use (may differ from input for 'shrink' mode).
 
 ### lines
 
-> `readonly` **lines**: readonly `string`[]
+```ts
+readonly lines: readonly string[];
+```
 
-Defined in: [src/layout/overflow.ts:26](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/layout/overflow.ts#L26)
+Defined in: [src/layout/overflow.ts:26](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layout/overflow.ts#L26)
 
 The processed line(s) of text.
 
@@ -34,8 +38,10 @@ The processed line(s) of text.
 
 ### wasModified
 
-> `readonly` **wasModified**: `boolean`
+```ts
+readonly wasModified: boolean;
+```
 
-Defined in: [src/layout/overflow.ts:30](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/layout/overflow.ts#L30)
+Defined in: [src/layout/overflow.ts:30](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layout/overflow.ts#L30)
 
 Whether the text was modified (truncated, wrapped, or shrunk).

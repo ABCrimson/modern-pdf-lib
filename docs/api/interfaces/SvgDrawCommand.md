@@ -6,7 +6,7 @@
 
 # Interface: SvgDrawCommand
 
-Defined in: [src/assets/svg/svgParser.ts:23](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/svg/svgParser.ts#L23)
+Defined in: [src/assets/svg/svgParser.ts:23](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/svg/svgParser.ts#L23)
 
 A single drawing command produced from an SVG element.
 
@@ -14,14 +14,27 @@ A single drawing command produced from an SVG element.
 
 ### params
 
-> **params**: `number`[]
+```ts
+params: number[];
+```
 
-Defined in: [src/assets/svg/svgParser.ts:34](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/svg/svgParser.ts#L34)
+Defined in: [src/assets/svg/svgParser.ts:34](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/svg/svgParser.ts#L34)
 
 ***
 
 ### type
 
-> **type**: `"moveTo"` \| `"lineTo"` \| `"curveTo"` \| `"quadCurveTo"` \| `"closePath"` \| `"rect"` \| `"circle"` \| `"ellipse"` \| `"arc"`
+```ts
+type: 
+  | "moveTo"
+  | "lineTo"
+  | "curveTo"
+  | "quadCurveTo"
+  | "closePath"
+  | "rect"
+  | "circle"
+  | "ellipse"
+  | "arc";
+```
 
-Defined in: [src/assets/svg/svgParser.ts:24](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/svg/svgParser.ts#L24)
+Defined in: [src/assets/svg/svgParser.ts:24](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/svg/svgParser.ts#L24)

@@ -6,7 +6,7 @@
 
 # Interface: FlattenFormResult
 
-Defined in: [src/form/formFlatten.ts:1053](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/form/formFlatten.ts#L1053)
+Defined in: [src/form/formFlatten.ts:1053](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/formFlatten.ts#L1053)
 
 Result of a form flatten operation.
 
@@ -17,9 +17,11 @@ must be applied to the page(s) to complete the flattening.
 
 ### acroFormRemoved
 
-> **acroFormRemoved**: `boolean`
+```ts
+acroFormRemoved: boolean;
+```
 
-Defined in: [src/form/formFlatten.ts:1063](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/form/formFlatten.ts#L1063)
+Defined in: [src/form/formFlatten.ts:1063](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/formFlatten.ts#L1063)
 
 Whether the AcroForm was fully removed (all fields flattened).
 
@@ -27,9 +29,11 @@ Whether the AcroForm was fully removed (all fields flattened).
 
 ### contentOps
 
-> **contentOps**: `string`
+```ts
+contentOps: string;
+```
 
-Defined in: [src/form/formFlatten.ts:1055](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/form/formFlatten.ts#L1055)
+Defined in: [src/form/formFlatten.ts:1055](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/formFlatten.ts#L1055)
 
 Content stream operators to append to the page.
 
@@ -37,9 +41,11 @@ Content stream operators to append to the page.
 
 ### flattenedFields
 
-> **flattenedFields**: `string`[]
+```ts
+flattenedFields: string[];
+```
 
-Defined in: [src/form/formFlatten.ts:1059](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/form/formFlatten.ts#L1059)
+Defined in: [src/form/formFlatten.ts:1059](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/formFlatten.ts#L1059)
 
 Names of fields that were flattened.
 
@@ -47,9 +53,11 @@ Names of fields that were flattened.
 
 ### skippedFields
 
-> **skippedFields**: `string`[]
+```ts
+skippedFields: string[];
+```
 
-Defined in: [src/form/formFlatten.ts:1061](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/form/formFlatten.ts#L1061)
+Defined in: [src/form/formFlatten.ts:1061](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/formFlatten.ts#L1061)
 
 Names of fields that were skipped (e.g. read-only with preserveReadOnly).
 
@@ -57,16 +65,22 @@ Names of fields that were skipped (e.g. read-only with preserveReadOnly).
 
 ### xObjects
 
-> **xObjects**: `object`[]
+```ts
+xObjects: object[];
+```
 
-Defined in: [src/form/formFlatten.ts:1057](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/form/formFlatten.ts#L1057)
+Defined in: [src/form/formFlatten.ts:1057](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/formFlatten.ts#L1057)
 
 XObject name-to-stream pairs to add to page resources.
 
 #### name
 
-> **name**: `string`
+```ts
+name: string;
+```
 
 #### stream
 
-> **stream**: [`PdfStream`](../classes/PdfStream.md)
+```ts
+stream: PdfStream;
+```

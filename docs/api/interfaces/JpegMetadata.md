@@ -6,7 +6,7 @@
 
 # Interface: JpegMetadata
 
-Defined in: [src/assets/image/imageMetadata.ts:28](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/imageMetadata.ts#L28)
+Defined in: [src/assets/image/imageMetadata.ts:28](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/imageMetadata.ts#L28)
 
 Extracted JPEG metadata from APP markers.
 
@@ -14,9 +14,11 @@ Extracted JPEG metadata from APP markers.
 
 ### appMarkers
 
-> `readonly` **appMarkers**: readonly `Uint8Array`\<`ArrayBufferLike`\>[]
+```ts
+readonly appMarkers: readonly Uint8Array<ArrayBufferLike>[];
+```
 
-Defined in: [src/assets/image/imageMetadata.ts:38](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/imageMetadata.ts#L38)
+Defined in: [src/assets/image/imageMetadata.ts:38](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/imageMetadata.ts#L38)
 
 Raw APP marker segments to preserve (excluding APP2/ICC).
 
@@ -24,9 +26,11 @@ Raw APP marker segments to preserve (excluding APP2/ICC).
 
 ### copyright?
 
-> `readonly` `optional` **copyright?**: `string`
+```ts
+readonly optional copyright?: string;
+```
 
-Defined in: [src/assets/image/imageMetadata.ts:36](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/imageMetadata.ts#L36)
+Defined in: [src/assets/image/imageMetadata.ts:36](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/imageMetadata.ts#L36)
 
 Copyright string from EXIF.
 
@@ -34,9 +38,11 @@ Copyright string from EXIF.
 
 ### dpiX?
 
-> `readonly` `optional` **dpiX?**: `number`
+```ts
+readonly optional dpiX?: number;
+```
 
-Defined in: [src/assets/image/imageMetadata.ts:32](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/imageMetadata.ts#L32)
+Defined in: [src/assets/image/imageMetadata.ts:32](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/imageMetadata.ts#L32)
 
 Horizontal DPI from EXIF or JFIF.
 
@@ -44,9 +50,11 @@ Horizontal DPI from EXIF or JFIF.
 
 ### dpiY?
 
-> `readonly` `optional` **dpiY?**: `number`
+```ts
+readonly optional dpiY?: number;
+```
 
-Defined in: [src/assets/image/imageMetadata.ts:34](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/imageMetadata.ts#L34)
+Defined in: [src/assets/image/imageMetadata.ts:34](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/imageMetadata.ts#L34)
 
 Vertical DPI from EXIF or JFIF.
 
@@ -54,8 +62,10 @@ Vertical DPI from EXIF or JFIF.
 
 ### orientation?
 
-> `readonly` `optional` **orientation?**: `number`
+```ts
+readonly optional orientation?: number;
+```
 
-Defined in: [src/assets/image/imageMetadata.ts:30](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/imageMetadata.ts#L30)
+Defined in: [src/assets/image/imageMetadata.ts:30](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/imageMetadata.ts#L30)
 
 EXIF orientation tag (1-8). 1 = normal, 6 = rotated 90 CW, etc.

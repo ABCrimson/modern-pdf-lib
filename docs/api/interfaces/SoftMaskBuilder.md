@@ -6,7 +6,7 @@
 
 # Interface: SoftMaskBuilder
 
-Defined in: [src/core/pdfPage.ts:601](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/pdfPage.ts#L601)
+Defined in: [src/core/pdfPage.ts:601](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfPage.ts#L601)
 
 Builder interface for constructing soft mask content.
 
@@ -16,9 +16,15 @@ All drawing is in grayscale: `1` = fully opaque, `0` = fully transparent.
 
 ### drawCircle()
 
-> **drawCircle**(`cx`, `cy`, `radius`, `gray`): `void`
+```ts
+drawCircle(
+   cx, 
+   cy, 
+   radius, 
+   gray): void;
+```
 
-Defined in: [src/core/pdfPage.ts:611](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/pdfPage.ts#L611)
+Defined in: [src/core/pdfPage.ts:611](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfPage.ts#L611)
 
 Draw a filled circle at the given center with the specified radius
 and grayscale value.
@@ -49,9 +55,16 @@ and grayscale value.
 
 ### drawRectangle()
 
-> **drawRectangle**(`x`, `y`, `width`, `height`, `gray`): `void`
+```ts
+drawRectangle(
+   x, 
+   y, 
+   width, 
+   height, 
+   gray): void;
+```
 
-Defined in: [src/core/pdfPage.ts:606](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/pdfPage.ts#L606)
+Defined in: [src/core/pdfPage.ts:606](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfPage.ts#L606)
 
 Draw a filled rectangle at the given position with the specified
 grayscale value (`0` = black/transparent, `1` = white/opaque).
@@ -86,9 +99,11 @@ grayscale value (`0` = black/transparent, `1` = white/opaque).
 
 ### pushRawOperators()
 
-> **pushRawOperators**(`ops`): `void`
+```ts
+pushRawOperators(ops): void;
+```
 
-Defined in: [src/core/pdfPage.ts:615](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/pdfPage.ts#L615)
+Defined in: [src/core/pdfPage.ts:615](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfPage.ts#L615)
 
 Append raw PDF content-stream operators to the mask.
 

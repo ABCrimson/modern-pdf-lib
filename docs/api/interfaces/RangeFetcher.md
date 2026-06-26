@@ -6,7 +6,7 @@
 
 # Interface: RangeFetcher
 
-Defined in: src/runtime/rangeFetch.ts:52
+Defined in: [src/runtime/rangeFetch.ts:52](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/runtime/rangeFetch.ts#L52)
 
 A lazy, range-aware reader over a single remote resource.
 
@@ -14,9 +14,11 @@ A lazy, range-aware reader over a single remote resource.
 
 ### fetchRange()
 
-> **fetchRange**(`start`, `end`): `Promise`\<`Uint8Array`\<`ArrayBufferLike`\>\>
+```ts
+fetchRange(start, end): Promise<Uint8Array<ArrayBufferLike>>;
+```
 
-Defined in: src/runtime/rangeFetch.ts:60
+Defined in: [src/runtime/rangeFetch.ts:60](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/runtime/rangeFetch.ts#L60)
 
 Fetch the half-open... actually inclusive byte range `[start, end]`.
 
@@ -26,17 +28,17 @@ Fetch the half-open... actually inclusive byte range `[start, end]`.
 
 `number`
 
-First byte offset (inclusive, >= 0).
+First byte offset (inclusive, &gt;= 0).
 
 ##### end
 
 `number`
 
-Last byte offset (inclusive, >= start).
+Last byte offset (inclusive, &gt;= start).
 
 #### Returns
 
-`Promise`\<`Uint8Array`\<`ArrayBufferLike`\>\>
+`Promise`\&lt;`Uint8Array`\&lt;`ArrayBufferLike`\&gt;\&gt;
 
 The requested bytes as a Uint8Array.
 
@@ -44,28 +46,32 @@ The requested bytes as a Uint8Array.
 
 ### getLength()
 
-> **getLength**(): `Promise`\<`number`\>
+```ts
+getLength(): Promise<number>;
+```
 
-Defined in: src/runtime/rangeFetch.ts:65
+Defined in: [src/runtime/rangeFetch.ts:65](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/runtime/rangeFetch.ts#L65)
 
 Resolve the total length of the resource in bytes. The result is
 cached after the first successful probe.
 
 #### Returns
 
-`Promise`\<`number`\>
+`Promise`\&lt;`number`\&gt;
 
 ***
 
 ### supportsRanges()
 
-> **supportsRanges**(): `Promise`\<`boolean`\>
+```ts
+supportsRanges(): Promise<boolean>;
+```
 
-Defined in: src/runtime/rangeFetch.ts:70
+Defined in: [src/runtime/rangeFetch.ts:70](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/runtime/rangeFetch.ts#L70)
 
 Determine whether the server supports byte-range requests. The
 result is cached after the first probe.
 
 #### Returns
 
-`Promise`\<`boolean`\>
+`Promise`\&lt;`boolean`\&gt;

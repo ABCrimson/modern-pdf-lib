@@ -6,9 +6,11 @@
 
 # Variable: TextRenderingMode
 
-> `const` **TextRenderingMode**: `object`
+```ts
+const TextRenderingMode: object;
+```
 
-Defined in: [src/core/enums.ts:27](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/enums.ts#L27)
+Defined in: [src/core/enums.ts:27](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/enums.ts#L27)
 
 PDF text rendering modes (Table 106).
 Applied via the Tr operator inside a text object.
@@ -17,32 +19,48 @@ Applied via the Tr operator inside a text object.
 
 ### Clip
 
-> `readonly` **Clip**: `7` = `7`
+```ts
+readonly Clip: 7 = 7;
+```
 
 ### Fill
 
-> `readonly` **Fill**: `0` = `0`
+```ts
+readonly Fill: 0 = 0;
+```
 
 ### FillAndClip
 
-> `readonly` **FillAndClip**: `4` = `4`
+```ts
+readonly FillAndClip: 4 = 4;
+```
 
 ### FillAndOutline
 
-> `readonly` **FillAndOutline**: `2` = `2`
+```ts
+readonly FillAndOutline: 2 = 2;
+```
 
 ### FillAndOutlineAndClip
 
-> `readonly` **FillAndOutlineAndClip**: `6` = `6`
+```ts
+readonly FillAndOutlineAndClip: 6 = 6;
+```
 
 ### Invisible
 
-> `readonly` **Invisible**: `3` = `3`
+```ts
+readonly Invisible: 3 = 3;
+```
 
 ### Outline
 
-> `readonly` **Outline**: `1` = `1`
+```ts
+readonly Outline: 1 = 1;
+```
 
 ### OutlineAndClip
 
-> `readonly` **OutlineAndClip**: `5` = `5`
+```ts
+readonly OutlineAndClip: 5 = 5;
+```

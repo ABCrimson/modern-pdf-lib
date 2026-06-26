@@ -6,9 +6,11 @@
 
 # Function: generateSymbolToUnicodeCmap()
 
-> **generateSymbolToUnicodeCmap**(): `string`
+```ts
+function generateSymbolToUnicodeCmap(): string;
+```
 
-Defined in: [src/compliance/toUnicodeCmap.ts:580](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/compliance/toUnicodeCmap.ts#L580)
+Defined in: [src/compliance/toUnicodeCmap.ts:580](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/toUnicodeCmap.ts#L580)
 
 Generate a ToUnicode CMap for the Symbol font.
 

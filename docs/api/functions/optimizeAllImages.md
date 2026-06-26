@@ -6,9 +6,11 @@
 
 # Function: optimizeAllImages()
 
-> **optimizeAllImages**(`doc`, `options?`): `Promise`\<[`OptimizationReport`](../interfaces/OptimizationReport.md)\>
+```ts
+function optimizeAllImages(doc, options?): Promise<OptimizationReport>;
+```
 
-Defined in: [src/assets/image/batchOptimize.ts:249](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/batchOptimize.ts#L249)
+Defined in: [src/assets/image/batchOptimize.ts:249](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/batchOptimize.ts#L249)
 
 Optimize all images in a PDF document by recompressing them as JPEG.
 
@@ -36,7 +38,7 @@ Optimization settings.
 
 ## Returns
 
-`Promise`\<[`OptimizationReport`](../interfaces/OptimizationReport.md)\>
+`Promise`\&lt;[`OptimizationReport`](../interfaces/OptimizationReport.md)\&gt;
 
 A report summarizing the optimization results.
 

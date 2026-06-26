@@ -6,9 +6,11 @@
 
 # Function: detectModifications()
 
-> **detectModifications**(`pdf`): `Promise`\<[`ModificationReport`](../interfaces/ModificationReport.md)\>
+```ts
+function detectModifications(pdf): Promise<ModificationReport>;
+```
 
-Defined in: [src/signature/modificationDetector.ts:152](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/modificationDetector.ts#L152)
+Defined in: [src/signature/modificationDetector.ts:152](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/modificationDetector.ts#L152)
 
 Detect modifications in a certified PDF document.
 
@@ -31,6 +33,6 @@ The PDF bytes to analyze.
 
 ## Returns
 
-`Promise`\<[`ModificationReport`](../interfaces/ModificationReport.md)\>
+`Promise`\&lt;[`ModificationReport`](../interfaces/ModificationReport.md)\&gt;
 
 A detailed modification report.

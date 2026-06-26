@@ -6,9 +6,14 @@
 
 # Function: interpolateLinearRgb()
 
-> **interpolateLinearRgb**(`c0`, `c1`, `t`): `object`
+```ts
+function interpolateLinearRgb(
+   c0, 
+   c1, 
+   t): object;
+```
 
-Defined in: [src/assets/svg/svgParser.ts:1153](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/svg/svgParser.ts#L1153)
+Defined in: [src/assets/svg/svgParser.ts:1153](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/svg/svgParser.ts#L1153)
 
 Interpolate between two colours in linear RGB space.
 
@@ -64,12 +69,18 @@ Interpolated colour (0-255 sRGB).
 
 ### b
 
-> **b**: `number`
+```ts
+b: number;
+```
 
 ### g
 
-> **g**: `number`
+```ts
+g: number;
+```
 
 ### r
 
-> **r**: `number`
+```ts
+r: number;
+```

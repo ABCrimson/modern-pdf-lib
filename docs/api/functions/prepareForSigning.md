@@ -6,9 +6,17 @@
 
 # Function: prepareForSigning()
 
-> **prepareForSigning**(`pdfBytes`, `signatureFieldName`, `placeholderSize?`, `appearance?`, `mdpPermission?`, `fieldLock?`): `object`
+```ts
+function prepareForSigning(
+   pdfBytes, 
+   signatureFieldName, 
+   placeholderSize?, 
+   appearance?, 
+   mdpPermission?, 
+   fieldLock?): object;
+```
 
-Defined in: [src/signature/byteRange.ts:269](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/byteRange.ts#L269)
+Defined in: [src/signature/byteRange.ts:269](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/byteRange.ts#L269)
 
 ## Parameters
 
@@ -48,8 +56,12 @@ Defined in: [src/signature/byteRange.ts:269](https://github.com/ABCrimson/modern
 
 ### byteRange
 
-> **byteRange**: [`ByteRangeResult`](../interfaces/ByteRangeResult.md)
+```ts
+byteRange: ByteRangeResult;
+```
 
 ### preparedPdf
 
-> **preparedPdf**: `Uint8Array`
+```ts
+preparedPdf: Uint8Array;
+```

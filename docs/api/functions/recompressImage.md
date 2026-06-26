@@ -6,9 +6,11 @@
 
 # Function: recompressImage()
 
-> **recompressImage**(`image`, `options?`): `Promise`\<[`OptimizeResult`](../interfaces/OptimizeResult.md)\>
+```ts
+function recompressImage(image, options?): Promise<OptimizeResult>;
+```
 
-Defined in: [src/assets/image/imageOptimize.ts:243](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/imageOptimize.ts#L243)
+Defined in: [src/assets/image/imageOptimize.ts:243](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/imageOptimize.ts#L243)
 
 Recompress raw image pixel data using the specified format.
 
@@ -28,7 +30,7 @@ Recompression options (format, quality).
 
 ## Returns
 
-`Promise`\<[`OptimizeResult`](../interfaces/OptimizeResult.md)\>
+`Promise`\&lt;[`OptimizeResult`](../interfaces/OptimizeResult.md)\&gt;
 
 The compressed image data.
 

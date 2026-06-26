@@ -6,7 +6,7 @@
 
 # Interface: CollectionOptions
 
-Defined in: src/core/collections.ts:69
+Defined in: [src/core/collections.ts:69](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/collections.ts#L69)
 
 Options controlling the generated `/Collection` dictionary.
 
@@ -14,9 +14,11 @@ Options controlling the generated `/Collection` dictionary.
 
 ### initialDocument?
 
-> `readonly` `optional` **initialDocument?**: `string`
+```ts
+readonly optional initialDocument?: string;
+```
 
-Defined in: src/core/collections.ts:83
+Defined in: [src/core/collections.ts:83](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/collections.ts#L83)
 
 Name (in the `EmbeddedFiles` name tree) of the file to present first
 (`/D`).
@@ -25,9 +27,11 @@ Name (in the `EmbeddedFiles` name tree) of the file to present first
 
 ### schema?
 
-> `readonly` `optional` **schema?**: readonly [`CollectionSchemaField`](CollectionSchemaField.md)[]
+```ts
+readonly optional schema?: readonly CollectionSchemaField[];
+```
 
-Defined in: src/core/collections.ts:73
+Defined in: [src/core/collections.ts:73](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/collections.ts#L73)
 
 Schema fields describing the columns / metadata of each embedded file.
 
@@ -35,9 +39,11 @@ Schema fields describing the columns / metadata of each embedded file.
 
 ### sortKeys?
 
-> `readonly` `optional` **sortKeys?**: readonly `string`[]
+```ts
+readonly optional sortKeys?: readonly string[];
+```
 
-Defined in: src/core/collections.ts:78
+Defined in: [src/core/collections.ts:78](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/collections.ts#L78)
 
 One or more schema keys used to sort the file list initially.
 A single key serializes `/S` as a name; multiple keys as an array.
@@ -46,8 +52,10 @@ A single key serializes `/S` as a name; multiple keys as an array.
 
 ### view?
 
-> `readonly` `optional` **view?**: [`CollectionView`](../type-aliases/CollectionView.md)
+```ts
+readonly optional view?: CollectionView;
+```
 
-Defined in: src/core/collections.ts:71
+Defined in: [src/core/collections.ts:71](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/collections.ts#L71)
 
 Initial view mode; defaults to `'D'` (Details).

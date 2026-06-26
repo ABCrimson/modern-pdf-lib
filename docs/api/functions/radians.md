@@ -6,9 +6,11 @@
 
 # Function: radians()
 
-> **radians**(`rad`): [`Radians`](../interfaces/Radians.md)
+```ts
+function radians(rad): Radians;
+```
 
-Defined in: [src/core/operators/state.ts:54](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/operators/state.ts#L54)
+Defined in: [src/core/operators/state.ts:54](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/operators/state.ts#L54)
 
 Create an angle in radians.
 

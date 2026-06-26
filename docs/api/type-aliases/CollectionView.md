@@ -6,9 +6,11 @@
 
 # Type Alias: CollectionView
 
-> **CollectionView** = `"D"` \| `"T"` \| `"H"`
+```ts
+type CollectionView = "D" | "T" | "H";
+```
 
-Defined in: src/core/collections.ts:45
+Defined in: [src/core/collections.ts:45](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/collections.ts#L45)
 
 Collection view mode (ISO 32000-2, Table 43, `/View`):
 

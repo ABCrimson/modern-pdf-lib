@@ -6,9 +6,11 @@
 
 # Function: evaluateFunction()
 
-> **evaluateFunction**(`fn`, `inputs`): `number`[]
+```ts
+function evaluateFunction(fn, inputs): number[];
+```
 
-Defined in: src/core/pdfFunctions.ts:715
+Defined in: [src/core/pdfFunctions.ts:715](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfFunctions.ts#L715)
 
 Evaluate a PDF function definition at the given input vector.
 

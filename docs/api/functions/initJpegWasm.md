@@ -6,9 +6,11 @@
 
 # Function: initJpegWasm()
 
-> **initJpegWasm**(`wasmSource?`): `Promise`\<`void`\>
+```ts
+function initJpegWasm(wasmSource?): Promise<void>;
+```
 
-Defined in: [src/wasm/jpeg/bridge.ts:67](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/wasm/jpeg/bridge.ts#L67)
+Defined in: [src/wasm/jpeg/bridge.ts:67](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/wasm/jpeg/bridge.ts#L67)
 
 Initialize the JPEG WASM module.
 
@@ -16,7 +18,11 @@ Initialize the JPEG WASM module.
 
 ### wasmSource?
 
-`string` \| `Uint8Array`\<`ArrayBufferLike`\> \| `URL` \| `Response` \| [`JpegWasmModule`](../interfaces/JpegWasmModule.md)
+  \| `string`
+  \| `Uint8Array`\&lt;`ArrayBufferLike`\&gt;
+  \| `URL`
+  \| `Response`
+  \| [`JpegWasmModule`](../interfaces/JpegWasmModule.md)
 
 The WASM binary as `Uint8Array`, URL, `Response`,
                     or a pre-built wasm-bindgen module.  When omitted,
@@ -24,4 +30,4 @@ The WASM binary as `Uint8Array`, URL, `Response`,
 
 ## Returns
 
-`Promise`\<`void`\>
+`Promise`\&lt;`void`\&gt;

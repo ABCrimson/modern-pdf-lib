@@ -1,0 +1,59 @@
+name: Docs
+
+# Deploy the documentation site on every push to master (decoupled from the
+# Release workflow, which only fires on version tags). Also runnable manually.
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Serialize Pages deployments so this never races the Release workflow's deploy.
+concurrency:
+  group: github-pages
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '26.4'
+
+jobs:
+  deploy-docs:
+    name: Build & Deploy Docs
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - run: npm ci --legacy-peer-deps
+
+      - name: Install docs toolchain (isolated TS6 sidecar — typedoc has no TS7 path yet)
+        run: npm install --prefix tools/docs --no-audit --no-fund
+
+      - name: Generate API docs (typedoc + VitePress sanitizer)
+        run: npm run docs:api
+
+      - name: Build VitePress site
+        run: npm run docs:build
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v6
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: docs/.vitepress/dist
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5

@@ -6,9 +6,15 @@
 
 # Function: code39ToOperators()
 
-> **code39ToOperators**(`matrix`, `x`, `y`, `options?`): `string`
+```ts
+function code39ToOperators(
+   matrix, 
+   x, 
+   y, 
+   options?): string;
+```
 
-Defined in: [src/barcode/code39.ts:269](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/barcode/code39.ts#L269)
+Defined in: [src/barcode/code39.ts:269](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/barcode/code39.ts#L269)
 
 Generate PDF content-stream operators for a Code 39 barcode.
 

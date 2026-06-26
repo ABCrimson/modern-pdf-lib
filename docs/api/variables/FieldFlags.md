@@ -6,9 +6,11 @@
 
 # Variable: FieldFlags
 
-> `const` **FieldFlags**: `object`
+```ts
+const FieldFlags: object;
+```
 
-Defined in: [src/form/pdfField.ts:55](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/form/pdfField.ts#L55)
+Defined in: [src/form/pdfField.ts:55](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/pdfField.ts#L55)
 
 Common field flags (/Ff) — bit positions (0-indexed).
 
@@ -16,60 +18,90 @@ Common field flags (/Ff) — bit positions (0-indexed).
 
 ### Combo
 
-> `readonly` **Combo**: `number`
+```ts
+readonly Combo: number;
+```
 
 ### DoNotScroll
 
-> `readonly` **DoNotScroll**: `number`
+```ts
+readonly DoNotScroll: number;
+```
 
 ### Edit
 
-> `readonly` **Edit**: `number`
+```ts
+readonly Edit: number;
+```
 
 ### Multiline
 
-> `readonly` **Multiline**: `number`
+```ts
+readonly Multiline: number;
+```
 
 ### MultiSelect
 
-> `readonly` **MultiSelect**: `number`
+```ts
+readonly MultiSelect: number;
+```
 
 ### NoExport
 
-> `readonly` **NoExport**: `number`
+```ts
+readonly NoExport: number;
+```
 
 ### NoToggleToOff
 
-> `readonly` **NoToggleToOff**: `number`
+```ts
+readonly NoToggleToOff: number;
+```
 
 ### Password
 
-> `readonly` **Password**: `number`
+```ts
+readonly Password: number;
+```
 
 ### Pushbutton
 
-> `readonly` **Pushbutton**: `number`
+```ts
+readonly Pushbutton: number;
+```
 
 ### Radio
 
-> `readonly` **Radio**: `number`
+```ts
+readonly Radio: number;
+```
 
 ### RadiosInUnison
 
-> `readonly` **RadiosInUnison**: `number`
+```ts
+readonly RadiosInUnison: number;
+```
 
 ### ReadOnly
 
-> `readonly` **ReadOnly**: `number`
+```ts
+readonly ReadOnly: number;
+```
 
 ### Required
 
-> `readonly` **Required**: `number`
+```ts
+readonly Required: number;
+```
 
 ### RichText
 
-> `readonly` **RichText**: `number`
+```ts
+readonly RichText: number;
+```
 
 ### Sort
 
-> `readonly` **Sort**: `number`
+```ts
+readonly Sort: number;
+```

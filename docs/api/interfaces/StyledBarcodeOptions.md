@@ -6,7 +6,7 @@
 
 # Interface: StyledBarcodeOptions
 
-Defined in: [src/barcode/style.ts:26](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/barcode/style.ts#L26)
+Defined in: [src/barcode/style.ts:26](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/barcode/style.ts#L26)
 
 Full styling options for rendering a barcode with background,
 borders, colours, and human-readable text.
@@ -15,9 +15,11 @@ borders, colours, and human-readable text.
 
 ### backgroundColor?
 
-> `readonly` `optional` **backgroundColor?**: [`Color`](../type-aliases/Color.md)
+```ts
+readonly optional backgroundColor?: Color;
+```
 
-Defined in: [src/barcode/style.ts:36](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/barcode/style.ts#L36)
+Defined in: [src/barcode/style.ts:36](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/barcode/style.ts#L36)
 
 Background color. Default: white.
 
@@ -25,9 +27,11 @@ Background color. Default: white.
 
 ### border?
 
-> `readonly` `optional` **border?**: `boolean`
+```ts
+readonly optional border?: boolean;
+```
 
-Defined in: [src/barcode/style.ts:46](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/barcode/style.ts#L46)
+Defined in: [src/barcode/style.ts:46](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/barcode/style.ts#L46)
 
 Add a border around the barcode. Default: false.
 
@@ -35,9 +39,11 @@ Add a border around the barcode. Default: false.
 
 ### borderColor?
 
-> `readonly` `optional` **borderColor?**: [`Color`](../type-aliases/Color.md)
+```ts
+readonly optional borderColor?: Color;
+```
 
-Defined in: [src/barcode/style.ts:50](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/barcode/style.ts#L50)
+Defined in: [src/barcode/style.ts:50](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/barcode/style.ts#L50)
 
 Border color. Default: black.
 
@@ -45,9 +51,11 @@ Border color. Default: black.
 
 ### borderWidth?
 
-> `readonly` `optional` **borderWidth?**: `number`
+```ts
+readonly optional borderWidth?: number;
+```
 
-Defined in: [src/barcode/style.ts:48](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/barcode/style.ts#L48)
+Defined in: [src/barcode/style.ts:48](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/barcode/style.ts#L48)
 
 Border width in points. Default: 0.5.
 
@@ -55,9 +63,11 @@ Border width in points. Default: 0.5.
 
 ### color?
 
-> `readonly` `optional` **color?**: [`Color`](../type-aliases/Color.md)
+```ts
+readonly optional color?: Color;
+```
 
-Defined in: [src/barcode/style.ts:34](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/barcode/style.ts#L34)
+Defined in: [src/barcode/style.ts:34](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/barcode/style.ts#L34)
 
 Bar color. Default: black.
 
@@ -65,9 +75,11 @@ Bar color. Default: black.
 
 ### fontName?
 
-> `readonly` `optional` **fontName?**: `string`
+```ts
+readonly optional fontName?: string;
+```
 
-Defined in: [src/barcode/style.ts:40](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/barcode/style.ts#L40)
+Defined in: [src/barcode/style.ts:40](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/barcode/style.ts#L40)
 
 Font name for human-readable text. Default: 'Helvetica'.
 
@@ -75,9 +87,11 @@ Font name for human-readable text. Default: 'Helvetica'.
 
 ### fontSize?
 
-> `readonly` `optional` **fontSize?**: `number`
+```ts
+readonly optional fontSize?: number;
+```
 
-Defined in: [src/barcode/style.ts:42](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/barcode/style.ts#L42)
+Defined in: [src/barcode/style.ts:42](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/barcode/style.ts#L42)
 
 Font size for text. Default: 10.
 
@@ -85,9 +99,11 @@ Font size for text. Default: 10.
 
 ### height?
 
-> `readonly` `optional` **height?**: `number`
+```ts
+readonly optional height?: number;
+```
 
-Defined in: [src/barcode/style.ts:28](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/barcode/style.ts#L28)
+Defined in: [src/barcode/style.ts:28](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/barcode/style.ts#L28)
 
 Bar height in points. Default: 50.
 
@@ -95,9 +111,11 @@ Bar height in points. Default: 50.
 
 ### moduleWidth?
 
-> `readonly` `optional` **moduleWidth?**: `number`
+```ts
+readonly optional moduleWidth?: number;
+```
 
-Defined in: [src/barcode/style.ts:30](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/barcode/style.ts#L30)
+Defined in: [src/barcode/style.ts:30](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/barcode/style.ts#L30)
 
 Module width in points. Default: 1.
 
@@ -105,9 +123,11 @@ Module width in points. Default: 1.
 
 ### padding?
 
-> `readonly` `optional` **padding?**: `number`
+```ts
+readonly optional padding?: number;
+```
 
-Defined in: [src/barcode/style.ts:52](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/barcode/style.ts#L52)
+Defined in: [src/barcode/style.ts:52](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/barcode/style.ts#L52)
 
 Padding inside border in points. Default: 4.
 
@@ -115,9 +135,11 @@ Padding inside border in points. Default: 4.
 
 ### quietZone?
 
-> `readonly` `optional` **quietZone?**: `number`
+```ts
+readonly optional quietZone?: number;
+```
 
-Defined in: [src/barcode/style.ts:32](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/barcode/style.ts#L32)
+Defined in: [src/barcode/style.ts:32](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/barcode/style.ts#L32)
 
 Quiet zone in modules. Default: 10.
 
@@ -125,9 +147,11 @@ Quiet zone in modules. Default: 10.
 
 ### showText?
 
-> `readonly` `optional` **showText?**: `boolean`
+```ts
+readonly optional showText?: boolean;
+```
 
-Defined in: [src/barcode/style.ts:38](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/barcode/style.ts#L38)
+Defined in: [src/barcode/style.ts:38](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/barcode/style.ts#L38)
 
 Show human-readable text below the barcode. Default: false.
 
@@ -135,8 +159,10 @@ Show human-readable text below the barcode. Default: false.
 
 ### textColor?
 
-> `readonly` `optional` **textColor?**: [`Color`](../type-aliases/Color.md)
+```ts
+readonly optional textColor?: Color;
+```
 
-Defined in: [src/barcode/style.ts:44](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/barcode/style.ts#L44)
+Defined in: [src/barcode/style.ts:44](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/barcode/style.ts#L44)
 
 Text color. Default: same as bar color.

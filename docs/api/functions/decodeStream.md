@@ -6,9 +6,14 @@
 
 # Function: decodeStream()
 
-> **decodeStream**(`data`, `filters`, `decodeParms?`): `Uint8Array`
+```ts
+function decodeStream(
+   data, 
+   filters, 
+   decodeParms?): Uint8Array;
+```
 
-Defined in: [src/parser/streamDecode.ts:37](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/parser/streamDecode.ts#L37)
+Defined in: [src/parser/streamDecode.ts:37](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/parser/streamDecode.ts#L37)
 
 Decode (decompress) PDF stream data that may have one or more filters
 applied.  Filters are applied in the order they appear in the array
@@ -32,7 +37,9 @@ A single filter name or an ordered array of filter
 
 ### decodeParms?
 
-[`PdfDict`](../classes/PdfDict.md) \| [`PdfDict`](../classes/PdfDict.md)[] \| `null`
+  \| [`PdfDict`](../classes/PdfDict.md)
+  \| [`PdfDict`](../classes/PdfDict.md)[]
+  \| `null`
 
 Optional decode parameters — a single `PdfDict` or
                      an array of `PdfDict | null` parallel to `filters`.

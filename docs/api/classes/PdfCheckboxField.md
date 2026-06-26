@@ -6,7 +6,7 @@
 
 # Class: PdfCheckboxField
 
-Defined in: [src/form/fields/checkboxField.ts:28](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/form/fields/checkboxField.ts#L28)
+Defined in: [src/form/fields/checkboxField.ts:28](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/fields/checkboxField.ts#L28)
 
 A PDF checkbox form field (/FT /Btn).
 
@@ -21,9 +21,15 @@ The /AS (appearance state) entry controls which appearance is shown.
 
 ### Constructor
 
-> **new PdfCheckboxField**(`name`, `dict`, `widgetDict`, `parentNames?`): `PdfCheckboxField`
+```ts
+new PdfCheckboxField(
+   name, 
+   dict, 
+   widgetDict, 
+   parentNames?): PdfCheckboxField;
+```
 
-Defined in: [src/form/pdfField.ts:191](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/form/pdfField.ts#L191)
+Defined in: [src/form/pdfField.ts:191](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/pdfField.ts#L191)
 
 #### Parameters
 
@@ -55,9 +61,11 @@ Defined in: [src/form/pdfField.ts:191](https://github.com/ABCrimson/modern-pdf-l
 
 ### dict
 
-> `protected` `readonly` **dict**: [`PdfDict`](PdfDict.md)
+```ts
+protected readonly dict: PdfDict;
+```
 
-Defined in: [src/form/pdfField.ts:180](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/form/pdfField.ts#L180)
+Defined in: [src/form/pdfField.ts:180](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/pdfField.ts#L180)
 
 The underlying field dictionary (may contain both field and widget
 entries for simple one-widget fields).
@@ -70,9 +78,11 @@ entries for simple one-widget fields).
 
 ### fieldType
 
-> `readonly` **fieldType**: [`FieldType`](../type-aliases/FieldType.md) = `'checkbox'`
+```ts
+readonly fieldType: FieldType = 'checkbox';
+```
 
-Defined in: [src/form/fields/checkboxField.ts:29](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/form/fields/checkboxField.ts#L29)
+Defined in: [src/form/fields/checkboxField.ts:29](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/fields/checkboxField.ts#L29)
 
 Discriminator for the concrete field type.
 
@@ -84,9 +94,11 @@ Discriminator for the concrete field type.
 
 ### name
 
-> `readonly` **name**: `string`
+```ts
+readonly name: string;
+```
 
-Defined in: [src/form/pdfField.ts:174](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/form/pdfField.ts#L174)
+Defined in: [src/form/pdfField.ts:174](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/pdfField.ts#L174)
 
 The fully-qualified field name.
 
@@ -98,9 +110,11 @@ The fully-qualified field name.
 
 ### parentNames
 
-> `protected` `readonly` **parentNames**: `string`[]
+```ts
+protected readonly parentNames: string[];
+```
 
-Defined in: [src/form/pdfField.ts:189](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/form/pdfField.ts#L189)
+Defined in: [src/form/pdfField.ts:189](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/pdfField.ts#L189)
 
 Parent field dictionary chain for building full names.
 
@@ -112,9 +126,11 @@ Parent field dictionary chain for building full names.
 
 ### widgetDict
 
-> `protected` `readonly` **widgetDict**: [`PdfDict`](PdfDict.md)
+```ts
+protected readonly widgetDict: PdfDict;
+```
 
-Defined in: [src/form/pdfField.ts:186](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/form/pdfField.ts#L186)
+Defined in: [src/form/pdfField.ts:186](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/pdfField.ts#L186)
 
 The widget annotation dictionary. For merged field+widget dicts,
 this is the same object as `dict`.
@@ -127,9 +143,11 @@ this is the same object as `dict`.
 
 ### addToPage()
 
-> **addToPage**(`page`): `void`
+```ts
+addToPage(page): void;
+```
 
-Defined in: [src/form/pdfField.ts:330](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/form/pdfField.ts#L330)
+Defined in: [src/form/pdfField.ts:330](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/pdfField.ts#L330)
 
 Add this field's widget annotation to a page.
 
@@ -157,9 +175,11 @@ A page that implements [WidgetAnnotationHost](../interfaces/WidgetAnnotationHost
 
 ### check()
 
-> **check**(): `void`
+```ts
+check(): void;
+```
 
-Defined in: [src/form/fields/checkboxField.ts:51](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/form/fields/checkboxField.ts#L51)
+Defined in: [src/form/fields/checkboxField.ts:51](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/fields/checkboxField.ts#L51)
 
 Check the checkbox (set to the "on" value).
 
@@ -171,9 +191,11 @@ Check the checkbox (set to the "on" value).
 
 ### disableExporting()
 
-> **disableExporting**(): `void`
+```ts
+disableExporting(): void;
+```
 
-Defined in: [src/form/pdfField.ts:292](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/form/pdfField.ts#L292)
+Defined in: [src/form/pdfField.ts:292](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/pdfField.ts#L292)
 
 Disable exporting this field (set the NoExport flag).
 
@@ -189,9 +211,11 @@ Disable exporting this field (set the NoExport flag).
 
 ### enableExporting()
 
-> **enableExporting**(): `void`
+```ts
+enableExporting(): void;
+```
 
-Defined in: [src/form/pdfField.ts:287](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/form/pdfField.ts#L287)
+Defined in: [src/form/pdfField.ts:287](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/pdfField.ts#L287)
 
 Enable exporting this field (clear the NoExport flag).
 
@@ -207,9 +231,11 @@ Enable exporting this field (clear the NoExport flag).
 
 ### generateAppearance()
 
-> **generateAppearance**(): [`PdfStream`](PdfStream.md)
+```ts
+generateAppearance(): PdfStream;
+```
 
-Defined in: [src/form/fields/checkboxField.ts:133](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/form/fields/checkboxField.ts#L133)
+Defined in: [src/form/fields/checkboxField.ts:133](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/fields/checkboxField.ts#L133)
 
 Generate the appearance stream for this checkbox.
 
@@ -225,9 +251,11 @@ Generate the appearance stream for this checkbox.
 
 ### getDict()
 
-> **getDict**(): [`PdfDict`](PdfDict.md)
+```ts
+getDict(): PdfDict;
+```
 
-Defined in: [src/form/pdfField.ts:223](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/form/pdfField.ts#L223)
+Defined in: [src/form/pdfField.ts:223](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/pdfField.ts#L223)
 
 Return the underlying field dictionary (for internal use by PdfForm).
 
@@ -243,9 +271,11 @@ Return the underlying field dictionary (for internal use by PdfForm).
 
 ### getFieldFlags()
 
-> `protected` **getFieldFlags**(): `number`
+```ts
+protected getFieldFlags(): number;
+```
 
-Defined in: [src/form/pdfField.ts:232](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/form/pdfField.ts#L232)
+Defined in: [src/form/pdfField.ts:232](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/pdfField.ts#L232)
 
 Get the raw /Ff (field flags) integer value.
 
@@ -261,9 +291,11 @@ Get the raw /Ff (field flags) integer value.
 
 ### getFullName()
 
-> **getFullName**(): `string`
+```ts
+getFullName(): string;
+```
 
-Defined in: [src/form/pdfField.ts:217](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/form/pdfField.ts#L217)
+Defined in: [src/form/pdfField.ts:217](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/pdfField.ts#L217)
 
 Get the fully qualified field name (Parent.Child.Name format).
 Per PDF spec SS12.7.3.2, the full name is formed by concatenating
@@ -281,9 +313,11 @@ ancestor /T values with periods.
 
 ### getName()
 
-> **getName**(): `string`
+```ts
+getName(): string;
+```
 
-Defined in: [src/form/pdfField.ts:208](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/form/pdfField.ts#L208)
+Defined in: [src/form/pdfField.ts:208](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/pdfField.ts#L208)
 
 Get the partial field name (/T entry).
 
@@ -299,9 +333,11 @@ Get the partial field name (/T entry).
 
 ### getOnValue()
 
-> **getOnValue**(): `string`
+```ts
+getOnValue(): string;
+```
 
-Defined in: [src/form/fields/checkboxField.ts:80](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/form/fields/checkboxField.ts#L80)
+Defined in: [src/form/fields/checkboxField.ts:80](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/fields/checkboxField.ts#L80)
 
 Get the "on" value name for this checkbox.
 
@@ -316,9 +352,11 @@ Falls back to "Yes" if no appearance dictionary is found.
 
 ### getRect()
 
-> **getRect**(): \[`number`, `number`, `number`, `number`\]
+```ts
+getRect(): [number, number, number, number];
+```
 
-Defined in: [src/form/pdfField.ts:304](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/form/pdfField.ts#L304)
+Defined in: [src/form/pdfField.ts:304](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/pdfField.ts#L304)
 
 Get the field's widget rectangle as `[x1, y1, x2, y2]`.
 The /Rect entry comes from the widget annotation dictionary.
@@ -335,9 +373,11 @@ The /Rect entry comes from the widget annotation dictionary.
 
 ### getValue()
 
-> **getValue**(): `boolean`
+```ts
+getValue(): boolean;
+```
 
-Defined in: [src/form/fields/checkboxField.ts:106](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/form/fields/checkboxField.ts#L106)
+Defined in: [src/form/fields/checkboxField.ts:106](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/fields/checkboxField.ts#L106)
 
 Get the value: "Yes"/"Off" as boolean for convenience.
 
@@ -353,9 +393,11 @@ Get the value: "Yes"/"Off" as boolean for convenience.
 
 ### hasFlag()
 
-> `protected` **hasFlag**(`flag`): `boolean`
+```ts
+protected hasFlag(flag): boolean;
+```
 
-Defined in: [src/form/pdfField.ts:242](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/form/pdfField.ts#L242)
+Defined in: [src/form/pdfField.ts:242](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/pdfField.ts#L242)
 
 Check if a specific flag bit is set.
 
@@ -377,9 +419,11 @@ Check if a specific flag bit is set.
 
 ### isChecked()
 
-> **isChecked**(): `boolean`
+```ts
+isChecked(): boolean;
+```
 
-Defined in: [src/form/fields/checkboxField.ts:40](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/form/fields/checkboxField.ts#L40)
+Defined in: [src/form/fields/checkboxField.ts:40](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/fields/checkboxField.ts#L40)
 
 Check whether the checkbox is currently checked.
 
@@ -393,9 +437,11 @@ The checkbox is checked when /V or /AS is not "/Off".
 
 ### isExported()
 
-> **isExported**(): `boolean`
+```ts
+isExported(): boolean;
+```
 
-Defined in: [src/form/pdfField.ts:282](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/form/pdfField.ts#L282)
+Defined in: [src/form/pdfField.ts:282](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/pdfField.ts#L282)
 
 Whether the field is exported (inverse of NoExport flag).
 
@@ -411,9 +457,11 @@ Whether the field is exported (inverse of NoExport flag).
 
 ### isNoExport()
 
-> **isNoExport**(): `boolean`
+```ts
+isNoExport(): boolean;
+```
 
-Defined in: [src/form/pdfField.ts:277](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/form/pdfField.ts#L277)
+Defined in: [src/form/pdfField.ts:277](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/pdfField.ts#L277)
 
 Whether the field should not be exported.
 
@@ -429,9 +477,11 @@ Whether the field should not be exported.
 
 ### isReadOnly()
 
-> **isReadOnly**(): `boolean`
+```ts
+isReadOnly(): boolean;
+```
 
-Defined in: [src/form/pdfField.ts:257](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/form/pdfField.ts#L257)
+Defined in: [src/form/pdfField.ts:257](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/pdfField.ts#L257)
 
 Whether the field is read-only.
 
@@ -447,9 +497,11 @@ Whether the field is read-only.
 
 ### isRequired()
 
-> **isRequired**(): `boolean`
+```ts
+isRequired(): boolean;
+```
 
-Defined in: [src/form/pdfField.ts:267](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/form/pdfField.ts#L267)
+Defined in: [src/form/pdfField.ts:267](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/pdfField.ts#L267)
 
 Whether the field is required.
 
@@ -465,9 +517,11 @@ Whether the field is required.
 
 ### setFieldFlags()
 
-> `protected` **setFieldFlags**(`flags`): `void`
+```ts
+protected setFieldFlags(flags): void;
+```
 
-Defined in: [src/form/pdfField.ts:237](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/form/pdfField.ts#L237)
+Defined in: [src/form/pdfField.ts:237](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/pdfField.ts#L237)
 
 Set the raw /Ff (field flags) integer value.
 
@@ -489,9 +543,11 @@ Set the raw /Ff (field flags) integer value.
 
 ### setFlag()
 
-> `protected` **setFlag**(`flag`, `on`): `void`
+```ts
+protected setFlag(flag, on): void;
+```
 
-Defined in: [src/form/pdfField.ts:247](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/form/pdfField.ts#L247)
+Defined in: [src/form/pdfField.ts:247](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/pdfField.ts#L247)
 
 Set or clear a specific flag bit.
 
@@ -517,9 +573,11 @@ Set or clear a specific flag bit.
 
 ### setReadOnly()
 
-> **setReadOnly**(`readOnly`): `void`
+```ts
+setReadOnly(readOnly): void;
+```
 
-Defined in: [src/form/pdfField.ts:262](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/form/pdfField.ts#L262)
+Defined in: [src/form/pdfField.ts:262](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/pdfField.ts#L262)
 
 Set the read-only flag.
 
@@ -541,9 +599,11 @@ Set the read-only flag.
 
 ### setRequired()
 
-> **setRequired**(`required`): `void`
+```ts
+setRequired(required): void;
+```
 
-Defined in: [src/form/pdfField.ts:272](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/form/pdfField.ts#L272)
+Defined in: [src/form/pdfField.ts:272](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/pdfField.ts#L272)
 
 Set the required flag.
 
@@ -565,9 +625,11 @@ Set the required flag.
 
 ### setValue()
 
-> **setValue**(`value`): `void`
+```ts
+setValue(value): void;
+```
 
-Defined in: [src/form/fields/checkboxField.ts:111](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/form/fields/checkboxField.ts#L111)
+Defined in: [src/form/fields/checkboxField.ts:111](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/fields/checkboxField.ts#L111)
 
 Set the value as boolean.
 
@@ -589,9 +651,11 @@ Set the value as boolean.
 
 ### toggle()
 
-> **toggle**(): `void`
+```ts
+toggle(): void;
+```
 
-Defined in: [src/form/fields/checkboxField.ts:66](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/form/fields/checkboxField.ts#L66)
+Defined in: [src/form/fields/checkboxField.ts:66](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/fields/checkboxField.ts#L66)
 
 Toggle the checkbox.
 
@@ -603,9 +667,11 @@ Toggle the checkbox.
 
 ### uncheck()
 
-> **uncheck**(): `void`
+```ts
+uncheck(): void;
+```
 
-Defined in: [src/form/fields/checkboxField.ts:59](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/form/fields/checkboxField.ts#L59)
+Defined in: [src/form/fields/checkboxField.ts:59](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/fields/checkboxField.ts#L59)
 
 Uncheck the checkbox (set to /Off).
 

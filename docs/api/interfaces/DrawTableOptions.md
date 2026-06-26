@@ -6,7 +6,7 @@
 
 # Interface: DrawTableOptions
 
-Defined in: [src/layout/table.ts:101](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/layout/table.ts#L101)
+Defined in: [src/layout/table.ts:101](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layout/table.ts#L101)
 
 Full table configuration.
 
@@ -14,9 +14,11 @@ Full table configuration.
 
 ### alternateRowColors?
 
-> `readonly` `optional` **alternateRowColors?**: readonly \[[`Color`](../type-aliases/Color.md), [`Color`](../type-aliases/Color.md)\]
+```ts
+readonly optional alternateRowColors?: readonly [Color, Color];
+```
 
-Defined in: [src/layout/table.ts:120](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/layout/table.ts#L120)
+Defined in: [src/layout/table.ts:120](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layout/table.ts#L120)
 
 Alternating row background colors [even, odd].
 
@@ -24,17 +26,21 @@ Alternating row background colors [even, odd].
 
 ### borderColor?
 
-> `readonly` `optional` **borderColor?**: [`Color`](../type-aliases/Color.md)
+```ts
+readonly optional borderColor?: Color;
+```
 
-Defined in: [src/layout/table.ts:112](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/layout/table.ts#L112)
+Defined in: [src/layout/table.ts:112](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layout/table.ts#L112)
 
 ***
 
 ### borderWidth?
 
-> `readonly` `optional` **borderWidth?**: `number`
+```ts
+readonly optional borderWidth?: number;
+```
 
-Defined in: [src/layout/table.ts:114](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/layout/table.ts#L114)
+Defined in: [src/layout/table.ts:114](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layout/table.ts#L114)
 
 Border line width in points, default 0.5.
 
@@ -42,17 +48,21 @@ Border line width in points, default 0.5.
 
 ### columns?
 
-> `readonly` `optional` **columns?**: readonly [`TableColumn`](TableColumn.md)[]
+```ts
+readonly optional columns?: readonly TableColumn[];
+```
 
-Defined in: [src/layout/table.ts:106](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/layout/table.ts#L106)
+Defined in: [src/layout/table.ts:106](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layout/table.ts#L106)
 
 ***
 
 ### fontName?
 
-> `readonly` `optional` **fontName?**: `string`
+```ts
+readonly optional fontName?: string;
+```
 
-Defined in: [src/layout/table.ts:108](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/layout/table.ts#L108)
+Defined in: [src/layout/table.ts:108](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layout/table.ts#L108)
 
 PDF font resource name, default 'Helvetica'.
 
@@ -60,9 +70,11 @@ PDF font resource name, default 'Helvetica'.
 
 ### fontSize?
 
-> `readonly` `optional` **fontSize?**: `number`
+```ts
+readonly optional fontSize?: number;
+```
 
-Defined in: [src/layout/table.ts:110](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/layout/table.ts#L110)
+Defined in: [src/layout/table.ts:110](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layout/table.ts#L110)
 
 Default font size in points, default 12.
 
@@ -70,9 +82,11 @@ Default font size in points, default 12.
 
 ### headerBackgroundColor?
 
-> `readonly` `optional` **headerBackgroundColor?**: [`Color`](../type-aliases/Color.md)
+```ts
+readonly optional headerBackgroundColor?: Color;
+```
 
-Defined in: [src/layout/table.ts:122](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/layout/table.ts#L122)
+Defined in: [src/layout/table.ts:122](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layout/table.ts#L122)
 
 Header background color (overrides alternateRowColors for header rows).
 
@@ -80,9 +94,11 @@ Header background color (overrides alternateRowColors for header rows).
 
 ### headerRows?
 
-> `readonly` `optional` **headerRows?**: `number`
+```ts
+readonly optional headerRows?: number;
+```
 
-Defined in: [src/layout/table.ts:116](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/layout/table.ts#L116)
+Defined in: [src/layout/table.ts:116](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layout/table.ts#L116)
 
 Number of header rows (reserved for future page-break support).
 
@@ -90,9 +106,11 @@ Number of header rows (reserved for future page-break support).
 
 ### headerTextColor?
 
-> `readonly` `optional` **headerTextColor?**: [`Color`](../type-aliases/Color.md)
+```ts
+readonly optional headerTextColor?: Color;
+```
 
-Defined in: [src/layout/table.ts:124](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/layout/table.ts#L124)
+Defined in: [src/layout/table.ts:124](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layout/table.ts#L124)
 
 Header text color.
 
@@ -100,9 +118,11 @@ Header text color.
 
 ### padding?
 
-> `readonly` `optional` **padding?**: `number`
+```ts
+readonly optional padding?: number;
+```
 
-Defined in: [src/layout/table.ts:118](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/layout/table.ts#L118)
+Defined in: [src/layout/table.ts:118](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layout/table.ts#L118)
 
 Default cell padding in points, default 4.
 
@@ -110,38 +130,48 @@ Default cell padding in points, default 4.
 
 ### rows
 
-> `readonly` **rows**: readonly [`TableRow`](TableRow.md)[]
+```ts
+readonly rows: readonly TableRow[];
+```
 
-Defined in: [src/layout/table.ts:105](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/layout/table.ts#L105)
+Defined in: [src/layout/table.ts:105](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layout/table.ts#L105)
 
 ***
 
 ### textColor?
 
-> `readonly` `optional` **textColor?**: [`Color`](../type-aliases/Color.md)
+```ts
+readonly optional textColor?: Color;
+```
 
-Defined in: [src/layout/table.ts:111](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/layout/table.ts#L111)
+Defined in: [src/layout/table.ts:111](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layout/table.ts#L111)
 
 ***
 
 ### width
 
-> `readonly` **width**: `number`
+```ts
+readonly width: number;
+```
 
-Defined in: [src/layout/table.ts:104](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/layout/table.ts#L104)
+Defined in: [src/layout/table.ts:104](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layout/table.ts#L104)
 
 ***
 
 ### x
 
-> `readonly` **x**: `number`
+```ts
+readonly x: number;
+```
 
-Defined in: [src/layout/table.ts:102](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/layout/table.ts#L102)
+Defined in: [src/layout/table.ts:102](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layout/table.ts#L102)
 
 ***
 
 ### y
 
-> `readonly` **y**: `number`
+```ts
+readonly y: number;
+```
 
-Defined in: [src/layout/table.ts:103](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/layout/table.ts#L103)
+Defined in: [src/layout/table.ts:103](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layout/table.ts#L103)

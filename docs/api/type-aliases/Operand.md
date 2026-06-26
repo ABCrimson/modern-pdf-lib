@@ -6,9 +6,17 @@
 
 # Type Alias: Operand
 
-> **Operand** = `number` \| `string` \| `boolean` \| `null` \| [`PdfName`](../classes/PdfName.md) \| `Operand`[]
+```ts
+type Operand = 
+  | number
+  | string
+  | boolean
+  | null
+  | PdfName
+  | Operand[];
+```
 
-Defined in: [src/parser/contentStreamParser.ts:34](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/parser/contentStreamParser.ts#L34)
+Defined in: [src/parser/contentStreamParser.ts:34](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/parser/contentStreamParser.ts#L34)
 
 A single operand value in a content stream.
 

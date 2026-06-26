@@ -6,84 +6,104 @@
 
 # Interface: PdfAProfile
 
-Defined in: [src/compliance/pdfAProfiles.ts:12](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/compliance/pdfAProfiles.ts#L12)
+Defined in: [src/compliance/pdfAProfiles.ts:12](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/pdfAProfiles.ts#L12)
 
 ## Properties
 
 ### allowsEmbeddedFiles
 
-> `readonly` **allowsEmbeddedFiles**: `boolean`
+```ts
+readonly allowsEmbeddedFiles: boolean;
+```
 
-Defined in: [src/compliance/pdfAProfiles.ts:19](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/compliance/pdfAProfiles.ts#L19)
+Defined in: [src/compliance/pdfAProfiles.ts:19](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/pdfAProfiles.ts#L19)
 
 ***
 
 ### allowsJpeg2000
 
-> `readonly` **allowsJpeg2000**: `boolean`
+```ts
+readonly allowsJpeg2000: boolean;
+```
 
-Defined in: [src/compliance/pdfAProfiles.ts:17](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/compliance/pdfAProfiles.ts#L17)
+Defined in: [src/compliance/pdfAProfiles.ts:17](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/pdfAProfiles.ts#L17)
 
 ***
 
 ### allowsLayers
 
-> `readonly` **allowsLayers**: `boolean`
+```ts
+readonly allowsLayers: boolean;
+```
 
-Defined in: [src/compliance/pdfAProfiles.ts:18](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/compliance/pdfAProfiles.ts#L18)
+Defined in: [src/compliance/pdfAProfiles.ts:18](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/pdfAProfiles.ts#L18)
 
 ***
 
 ### allowsTransparency
 
-> `readonly` **allowsTransparency**: `boolean`
+```ts
+readonly allowsTransparency: boolean;
+```
 
-Defined in: [src/compliance/pdfAProfiles.ts:16](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/compliance/pdfAProfiles.ts#L16)
+Defined in: [src/compliance/pdfAProfiles.ts:16](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/pdfAProfiles.ts#L16)
 
 ***
 
 ### conformance
 
-> `readonly` **conformance**: `"b"` \| `"a"` \| `"u"`
+```ts
+readonly conformance: "b" | "a" | "u";
+```
 
-Defined in: [src/compliance/pdfAProfiles.ts:14](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/compliance/pdfAProfiles.ts#L14)
+Defined in: [src/compliance/pdfAProfiles.ts:14](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/pdfAProfiles.ts#L14)
 
 ***
 
 ### outputIntentSubtype
 
-> `readonly` **outputIntentSubtype**: `string`
+```ts
+readonly outputIntentSubtype: string;
+```
 
-Defined in: [src/compliance/pdfAProfiles.ts:22](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/compliance/pdfAProfiles.ts#L22)
+Defined in: [src/compliance/pdfAProfiles.ts:22](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/pdfAProfiles.ts#L22)
 
 ***
 
 ### part
 
-> `readonly` **part**: `1` \| `2` \| `3`
+```ts
+readonly part: 1 | 2 | 3;
+```
 
-Defined in: [src/compliance/pdfAProfiles.ts:13](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/compliance/pdfAProfiles.ts#L13)
+Defined in: [src/compliance/pdfAProfiles.ts:13](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/pdfAProfiles.ts#L13)
 
 ***
 
 ### pdfVersion
 
-> `readonly` **pdfVersion**: `string`
+```ts
+readonly pdfVersion: string;
+```
 
-Defined in: [src/compliance/pdfAProfiles.ts:15](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/compliance/pdfAProfiles.ts#L15)
+Defined in: [src/compliance/pdfAProfiles.ts:15](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/pdfAProfiles.ts#L15)
 
 ***
 
 ### requiresStructureTree
 
-> `readonly` **requiresStructureTree**: `boolean`
+```ts
+readonly requiresStructureTree: boolean;
+```
 
-Defined in: [src/compliance/pdfAProfiles.ts:20](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/compliance/pdfAProfiles.ts#L20)
+Defined in: [src/compliance/pdfAProfiles.ts:20](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/pdfAProfiles.ts#L20)
 
 ***
 
 ### requiresToUnicode
 
-> `readonly` **requiresToUnicode**: `boolean`
+```ts
+readonly requiresToUnicode: boolean;
+```
 
-Defined in: [src/compliance/pdfAProfiles.ts:21](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/compliance/pdfAProfiles.ts#L21)
+Defined in: [src/compliance/pdfAProfiles.ts:21](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/pdfAProfiles.ts#L21)

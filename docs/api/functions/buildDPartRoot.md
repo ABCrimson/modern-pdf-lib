@@ -6,9 +6,11 @@
 
 # Function: buildDPartRoot()
 
-> **buildDPartRoot**(`parts`): [`PdfDict`](../classes/PdfDict.md)
+```ts
+function buildDPartRoot(parts): PdfDict;
+```
 
-Defined in: src/core/documentParts.ts:106
+Defined in: [src/core/documentParts.ts:106](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/documentParts.ts#L106)
 
 Build a PDF 2.0 `/DPartRoot` dictionary from a flat list of document parts.
 

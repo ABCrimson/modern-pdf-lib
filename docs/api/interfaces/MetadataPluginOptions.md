@@ -6,7 +6,7 @@
 
 # Interface: MetadataPluginOptions
 
-Defined in: [src/plugins/builtins/metadataPlugin.ts:20](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/plugins/builtins/metadataPlugin.ts#L20)
+Defined in: [src/plugins/builtins/metadataPlugin.ts:20](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/plugins/builtins/metadataPlugin.ts#L20)
 
 Options for the metadata plugin.
 
@@ -14,9 +14,11 @@ Options for the metadata plugin.
 
 ### creator?
 
-> `optional` **creator?**: `string`
+```ts
+optional creator?: string;
+```
 
-Defined in: [src/plugins/builtins/metadataPlugin.ts:28](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/plugins/builtins/metadataPlugin.ts#L28)
+Defined in: [src/plugins/builtins/metadataPlugin.ts:28](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/plugins/builtins/metadataPlugin.ts#L28)
 
 Optional creator string (e.g. application name).
 
@@ -24,9 +26,11 @@ Optional creator string (e.g. application name).
 
 ### defaultAuthor?
 
-> `optional` **defaultAuthor?**: `string`
+```ts
+optional defaultAuthor?: string;
+```
 
-Defined in: [src/plugins/builtins/metadataPlugin.ts:34](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/plugins/builtins/metadataPlugin.ts#L34)
+Defined in: [src/plugins/builtins/metadataPlugin.ts:34](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/plugins/builtins/metadataPlugin.ts#L34)
 
 Optional default author. Only set if the document has no author.
 
@@ -34,9 +38,11 @@ Optional default author. Only set if the document has no author.
 
 ### defaultTitle?
 
-> `optional` **defaultTitle?**: `string`
+```ts
+optional defaultTitle?: string;
+```
 
-Defined in: [src/plugins/builtins/metadataPlugin.ts:31](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/plugins/builtins/metadataPlugin.ts#L31)
+Defined in: [src/plugins/builtins/metadataPlugin.ts:31](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/plugins/builtins/metadataPlugin.ts#L31)
 
 Optional default title. Only set if the document has no title.
 
@@ -44,9 +50,11 @@ Optional default title. Only set if the document has no title.
 
 ### producer?
 
-> `optional` **producer?**: `string`
+```ts
+optional producer?: string;
+```
 
-Defined in: [src/plugins/builtins/metadataPlugin.ts:25](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/plugins/builtins/metadataPlugin.ts#L25)
+Defined in: [src/plugins/builtins/metadataPlugin.ts:25](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/plugins/builtins/metadataPlugin.ts#L25)
 
 Producer string to set on the document.
 Default: `'modern-pdf-lib'`.

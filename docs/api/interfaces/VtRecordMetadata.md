@@ -6,7 +6,7 @@
 
 # Interface: VtRecordMetadata
 
-Defined in: src/compliance/pdfVT.ts:50
+Defined in: [src/compliance/pdfVT.ts:50](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/pdfVT.ts#L50)
 
 Metadata describing a single variable-data *record*.
 
@@ -17,9 +17,11 @@ carries a stable identifier plus optional production fields.
 
 ### endPage
 
-> `readonly` **endPage**: `number`
+```ts
+readonly endPage: number;
+```
 
-Defined in: src/compliance/pdfVT.ts:54
+Defined in: [src/compliance/pdfVT.ts:54](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/pdfVT.ts#L54)
 
 Zero-based index of the last page in this record (inclusive).
 
@@ -27,9 +29,11 @@ Zero-based index of the last page in this record (inclusive).
 
 ### fields?
 
-> `readonly` `optional` **fields?**: `Readonly`\<`Record`\<`string`, `string`\>\>
+```ts
+readonly optional fields?: Readonly<Record<string, string>>;
+```
 
-Defined in: src/compliance/pdfVT.ts:61
+Defined in: [src/compliance/pdfVT.ts:61](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/pdfVT.ts#L61)
 
 Optional per-record production fields.  Each key/value pair is emitted as
 a PDF name → literal-string entry inside the record's `/DPM` dictionary.
@@ -38,9 +42,11 @@ a PDF name → literal-string entry inside the record's `/DPM` dictionary.
 
 ### recordId
 
-> `readonly` **recordId**: `string`
+```ts
+readonly recordId: string;
+```
 
-Defined in: src/compliance/pdfVT.ts:56
+Defined in: [src/compliance/pdfVT.ts:56](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/pdfVT.ts#L56)
 
 Stable record identifier (emitted as `/RecordID`).
 
@@ -48,8 +54,10 @@ Stable record identifier (emitted as `/RecordID`).
 
 ### startPage
 
-> `readonly` **startPage**: `number`
+```ts
+readonly startPage: number;
+```
 
-Defined in: src/compliance/pdfVT.ts:52
+Defined in: [src/compliance/pdfVT.ts:52](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/pdfVT.ts#L52)
 
 Zero-based index of the first page in this record (inclusive).

@@ -6,9 +6,14 @@
 
 # Function: showTextWithSpacing()
 
-> **showTextWithSpacing**(`wordSpacing`, `charSpacing`, `text`): `string`
+```ts
+function showTextWithSpacing(
+   wordSpacing, 
+   charSpacing, 
+   text): string;
+```
 
-Defined in: [src/core/operators/text.ts:271](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/operators/text.ts#L271)
+Defined in: [src/core/operators/text.ts:271](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/operators/text.ts#L271)
 
 Show a text string, set word and character spacing, and move to the
 next line (`"`).

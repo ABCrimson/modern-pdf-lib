@@ -6,7 +6,7 @@
 
 # Interface: AccessibilityPluginOptions
 
-Defined in: [src/plugins/builtins/accessibilityPlugin.ts:22](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/plugins/builtins/accessibilityPlugin.ts#L22)
+Defined in: [src/plugins/builtins/accessibilityPlugin.ts:22](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/plugins/builtins/accessibilityPlugin.ts#L22)
 
 Options for the accessibility plugin.
 
@@ -14,9 +14,11 @@ Options for the accessibility plugin.
 
 ### language?
 
-> `optional` **language?**: `string`
+```ts
+optional language?: string;
+```
 
-Defined in: [src/plugins/builtins/accessibilityPlugin.ts:27](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/plugins/builtins/accessibilityPlugin.ts#L27)
+Defined in: [src/plugins/builtins/accessibilityPlugin.ts:27](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/plugins/builtins/accessibilityPlugin.ts#L27)
 
 BCP 47 language tag for the document (e.g. `'en-US'`, `'de-DE'`).
 Default: `'en'`.
@@ -25,9 +27,11 @@ Default: `'en'`.
 
 ### markAsTagged?
 
-> `optional` **markAsTagged?**: `boolean`
+```ts
+optional markAsTagged?: boolean;
+```
 
-Defined in: [src/plugins/builtins/accessibilityPlugin.ts:34](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/plugins/builtins/accessibilityPlugin.ts#L34)
+Defined in: [src/plugins/builtins/accessibilityPlugin.ts:34](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/plugins/builtins/accessibilityPlugin.ts#L34)
 
 When `true`, add a `/MarkInfo` dictionary with `/Marked true`
 to the catalog, signaling tagged PDF.

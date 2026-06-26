@@ -6,9 +6,11 @@
 
 # Function: decodePermissions()
 
-> **decodePermissions**(`value`): [`PdfPermissionFlags`](../interfaces/PdfPermissionFlags.md)
+```ts
+function decodePermissions(value): PdfPermissionFlags;
+```
 
-Defined in: [src/crypto/permissions.ts:168](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/crypto/permissions.ts#L168)
+Defined in: [src/crypto/permissions.ts:168](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/crypto/permissions.ts#L168)
 
 Decode the 32-bit /P integer from a PDF encryption dictionary into
 human-friendly permission flags.

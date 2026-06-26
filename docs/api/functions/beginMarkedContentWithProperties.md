@@ -6,9 +6,11 @@
 
 # Function: beginMarkedContentWithProperties()
 
-> **beginMarkedContentWithProperties**(`tag`, `properties`): `string`
+```ts
+function beginMarkedContentWithProperties(tag, properties): string;
+```
 
-Defined in: [src/accessibility/markedContent.ts:79](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/accessibility/markedContent.ts#L79)
+Defined in: [src/accessibility/markedContent.ts:79](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/accessibility/markedContent.ts#L79)
 
 Generate a `BDC` (begin marked-content with properties) operator.
 
@@ -28,7 +30,7 @@ The marked-content tag.
 
 ### properties
 
-`Record`\<`string`, `unknown`\>
+`Record`\&lt;`string`, `unknown`\&gt;
 
 Key-value pairs for the properties dictionary.
 

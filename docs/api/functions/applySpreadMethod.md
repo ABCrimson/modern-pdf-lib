@@ -6,15 +6,17 @@
 
 # Function: applySpreadMethod()
 
-> **applySpreadMethod**(`t`, `method`): `number`
+```ts
+function applySpreadMethod(t, method): number;
+```
 
-Defined in: [src/assets/svg/svgParser.ts:1186](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/svg/svgParser.ts#L1186)
+Defined in: [src/assets/svg/svgParser.ts:1186](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/svg/svgParser.ts#L1186)
 
 Apply `spreadMethod` to a gradient parameter `t` outside [0, 1].
 
 - `pad`: clamp to [0, 1]
-- `reflect`: mirror at boundaries (0->1->0->1...)
-- `repeat`: wrap around (0->1, 0->1, ...)
+- `reflect`: mirror at boundaries (0-&gt;1-&gt;0-&gt;1...)
+- `repeat`: wrap around (0-&gt;1, 0-&gt;1, ...)
 
 ## Parameters
 

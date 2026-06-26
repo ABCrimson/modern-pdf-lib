@@ -6,9 +6,11 @@
 
 # Function: pdfA4Rules()
 
-> **pdfA4Rules**(`level?`): readonly `string`[]
+```ts
+function pdfA4Rules(level?): readonly string[];
+```
 
-Defined in: src/compliance/pdfA4.ts:210
+Defined in: [src/compliance/pdfA4.ts:210](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/pdfA4.ts#L210)
 
 Return the human-readable conformance requirements for a PDF/A-4
 variant.

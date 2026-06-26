@@ -6,9 +6,14 @@
 
 # Function: addCounterSignature()
 
-> **addCounterSignature**(`pdf`, `targetSignatureIndex`, `signerInfo`): `Promise`\<`Uint8Array`\<`ArrayBufferLike`\>\>
+```ts
+function addCounterSignature(
+   pdf, 
+   targetSignatureIndex, 
+signerInfo): Promise<Uint8Array<ArrayBufferLike>>;
+```
 
-Defined in: [src/signature/counterSignature.ts:219](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/counterSignature.ts#L219)
+Defined in: [src/signature/counterSignature.ts:219](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/counterSignature.ts#L219)
 
 Add a counter-signature to an existing PDF signature.
 
@@ -48,7 +53,7 @@ The counter-signer's certificate, private key, and hash algorithm.
 
 ## Returns
 
-`Promise`\<`Uint8Array`\<`ArrayBufferLike`\>\>
+`Promise`\&lt;`Uint8Array`\&lt;`ArrayBufferLike`\&gt;\&gt;
 
 The PDF with the counter-signature appended.
 

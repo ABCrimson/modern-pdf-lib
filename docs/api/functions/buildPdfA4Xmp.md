@@ -6,9 +6,11 @@
 
 # Function: buildPdfA4Xmp()
 
-> **buildPdfA4Xmp**(`options?`): `string`
+```ts
+function buildPdfA4Xmp(options?): string;
+```
 
-Defined in: src/compliance/pdfA4.ts:148
+Defined in: [src/compliance/pdfA4.ts:148](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/pdfA4.ts#L148)
 
 Build a complete XMP metadata packet for a PDF/A-4 document.
 

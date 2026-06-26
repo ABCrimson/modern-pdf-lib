@@ -6,9 +6,11 @@
 
 # Function: buildOutputIntent()
 
-> **buildOutputIntent**(`registry`, `options?`): [`PdfRef`](../classes/PdfRef.md)
+```ts
+function buildOutputIntent(registry, options?): PdfRef;
+```
 
-Defined in: [src/compliance/outputIntent.ts:119](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/compliance/outputIntent.ts#L119)
+Defined in: [src/compliance/outputIntent.ts:119](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/outputIntent.ts#L119)
 
 Build an OutputIntent dictionary and register it in the given registry.
 

@@ -6,9 +6,15 @@
 
 # Function: pdf417ToOperators()
 
-> **pdf417ToOperators**(`matrix`, `x`, `y`, `options?`): `string`
+```ts
+function pdf417ToOperators(
+   matrix, 
+   x, 
+   y, 
+   options?): string;
+```
 
-Defined in: [src/barcode/pdf417.ts:794](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/barcode/pdf417.ts#L794)
+Defined in: [src/barcode/pdf417.ts:794](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/barcode/pdf417.ts#L794)
 
 Convert a [Pdf417Matrix](../interfaces/Pdf417Matrix.md) to PDF content-stream operators.
 

@@ -6,7 +6,7 @@
 
 # Interface: PdfAValidationResult
 
-Defined in: [src/compliance/pdfA.ts:33](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/compliance/pdfA.ts#L33)
+Defined in: [src/compliance/pdfA.ts:33](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/pdfA.ts#L33)
 
 Result of a PDF/A validation check.
 
@@ -14,22 +14,28 @@ Result of a PDF/A validation check.
 
 ### issues
 
-> **issues**: [`PdfAIssue`](PdfAIssue.md)[]
+```ts
+issues: PdfAIssue[];
+```
 
-Defined in: [src/compliance/pdfA.ts:36](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/compliance/pdfA.ts#L36)
+Defined in: [src/compliance/pdfA.ts:36](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/pdfA.ts#L36)
 
 ***
 
 ### level
 
-> **level**: [`PdfALevel`](../type-aliases/PdfALevel.md)
+```ts
+level: PdfALevel;
+```
 
-Defined in: [src/compliance/pdfA.ts:35](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/compliance/pdfA.ts#L35)
+Defined in: [src/compliance/pdfA.ts:35](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/pdfA.ts#L35)
 
 ***
 
 ### valid
 
-> **valid**: `boolean`
+```ts
+valid: boolean;
+```
 
-Defined in: [src/compliance/pdfA.ts:34](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/compliance/pdfA.ts#L34)
+Defined in: [src/compliance/pdfA.ts:34](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/pdfA.ts#L34)

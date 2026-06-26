@@ -6,7 +6,7 @@
 
 # Interface: FlattenOptions
 
-Defined in: [src/form/formFlatten.ts:36](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/form/formFlatten.ts#L36)
+Defined in: [src/form/formFlatten.ts:36](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/formFlatten.ts#L36)
 
 Options for form flattening operations.
 
@@ -14,9 +14,11 @@ Options for form flattening operations.
 
 ### preserveReadOnly?
 
-> `optional` **preserveReadOnly?**: `boolean`
+```ts
+optional preserveReadOnly?: boolean;
+```
 
-Defined in: [src/form/formFlatten.ts:43](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/form/formFlatten.ts#L43)
+Defined in: [src/form/formFlatten.ts:43](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/formFlatten.ts#L43)
 
 If `true`, read-only fields are skipped and left interactive.
 All other fields are flattened normally.
@@ -27,9 +29,11 @@ Default: `false` (all fields are flattened, including read-only ones).
 
 ### preserveRichText?
 
-> `optional` **preserveRichText?**: `boolean`
+```ts
+optional preserveRichText?: boolean;
+```
 
-Defined in: [src/form/formFlatten.ts:55](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/form/formFlatten.ts#L55)
+Defined in: [src/form/formFlatten.ts:55](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/formFlatten.ts#L55)
 
 If `true`, use /RV rich text value when available instead of /V.
 Rich text (/RV) is an XHTML string containing formatting such as

@@ -6,9 +6,11 @@
 
 # Function: initWasm()
 
-> **initWasm**(`options?`): `Promise`\<`void`\>
+```ts
+function initWasm(options?): Promise<void>;
+```
 
-Defined in: [src/index.ts:202](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/index.ts#L202)
+Defined in: [src/index.ts:202](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/index.ts#L202)
 
 Initialize the optional WASM acceleration modules.
 
@@ -33,7 +35,7 @@ Configuration for which WASM modules to load,
 
 ## Returns
 
-`Promise`\<`void`\>
+`Promise`\&lt;`void`\&gt;
 
 A promise that resolves when all requested modules
                 are ready.

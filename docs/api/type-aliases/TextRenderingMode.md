@@ -6,8 +6,10 @@
 
 # Type Alias: TextRenderingMode
 
-> **TextRenderingMode** = *typeof* [`TextRenderingMode`](../variables/TextRenderingMode.md)\[keyof *typeof* [`TextRenderingMode`](../variables/TextRenderingMode.md)\]
+```ts
+type TextRenderingMode = typeof TextRenderingMode[keyof typeof TextRenderingMode];
+```
 
-Defined in: [src/core/enums.ts:27](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/enums.ts#L27)
+Defined in: [src/core/enums.ts:27](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/enums.ts#L27)
 
 A PDF text rendering mode integer (0-7).

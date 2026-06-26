@@ -6,7 +6,7 @@
 
 # Enumeration: MdpPermission
 
-Defined in: [src/signature/mdpPolicy.ts:33](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/mdpPolicy.ts#L33)
+Defined in: [src/signature/mdpPolicy.ts:33](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/mdpPolicy.ts#L33)
 
 MDP permission levels for certification signatures.
 
@@ -17,9 +17,11 @@ of a /DocMDP transform method.
 
 ### FormFillAndSign
 
-> **FormFillAndSign**: `2`
+```ts
+FormFillAndSign: 2;
+```
 
-Defined in: [src/signature/mdpPolicy.ts:37](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/mdpPolicy.ts#L37)
+Defined in: [src/signature/mdpPolicy.ts:37](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/mdpPolicy.ts#L37)
 
 Only form filling and signing are permitted.
 
@@ -27,9 +29,11 @@ Only form filling and signing are permitted.
 
 ### FormFillSignAnnotate
 
-> **FormFillSignAnnotate**: `3`
+```ts
+FormFillSignAnnotate: 3;
+```
 
-Defined in: [src/signature/mdpPolicy.ts:39](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/mdpPolicy.ts#L39)
+Defined in: [src/signature/mdpPolicy.ts:39](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/mdpPolicy.ts#L39)
 
 Form filling, signing, and annotation changes are permitted.
 
@@ -37,8 +41,10 @@ Form filling, signing, and annotation changes are permitted.
 
 ### NoChanges
 
-> **NoChanges**: `1`
+```ts
+NoChanges: 1;
+```
 
-Defined in: [src/signature/mdpPolicy.ts:35](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/mdpPolicy.ts#L35)
+Defined in: [src/signature/mdpPolicy.ts:35](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/mdpPolicy.ts#L35)
 
 No changes to the document are permitted.

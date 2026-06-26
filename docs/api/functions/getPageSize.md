@@ -6,9 +6,11 @@
 
 # Function: getPageSize()
 
-> **getPageSize**(`doc`, `index`): `object`
+```ts
+function getPageSize(doc, index): object;
+```
 
-Defined in: [src/core/pageManipulation.ts:297](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/pageManipulation.ts#L297)
+Defined in: [src/core/pageManipulation.ts:297](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pageManipulation.ts#L297)
 
 Get the size of a page.
 
@@ -34,8 +36,12 @@ A `{ width, height }` object in PDF points.
 
 ### height
 
-> **height**: `number`
+```ts
+height: number;
+```
 
 ### width
 
-> **width**: `number`
+```ts
+width: number;
+```

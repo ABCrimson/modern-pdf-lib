@@ -6,7 +6,7 @@
 
 # Interface: SarifResult
 
-Defined in: src/compliance/validationReport.ts:112
+Defined in: [src/compliance/validationReport.ts:112](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/validationReport.ts#L112)
 
 A single SARIF result — one validation finding.
 
@@ -14,38 +14,48 @@ A single SARIF result — one validation finding.
 
 ### level
 
-> `readonly` **level**: [`ValidationLevel`](../type-aliases/ValidationLevel.md)
+```ts
+readonly level: ValidationLevel;
+```
 
-Defined in: src/compliance/validationReport.ts:114
+Defined in: [src/compliance/validationReport.ts:114](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/validationReport.ts#L114)
 
 ***
 
 ### locations?
 
-> `readonly` `optional` **locations?**: readonly `SarifLocation`[]
+```ts
+readonly optional locations?: readonly SarifLocation[];
+```
 
-Defined in: src/compliance/validationReport.ts:116
+Defined in: [src/compliance/validationReport.ts:116](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/validationReport.ts#L116)
 
 ***
 
 ### message
 
-> `readonly` **message**: `SarifMessage`
+```ts
+readonly message: SarifMessage;
+```
 
-Defined in: src/compliance/validationReport.ts:115
+Defined in: [src/compliance/validationReport.ts:115](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/validationReport.ts#L115)
 
 ***
 
 ### properties?
 
-> `readonly` `optional` **properties?**: `SarifResultProperties`
+```ts
+readonly optional properties?: SarifResultProperties;
+```
 
-Defined in: src/compliance/validationReport.ts:117
+Defined in: [src/compliance/validationReport.ts:117](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/validationReport.ts#L117)
 
 ***
 
 ### ruleId
 
-> `readonly` **ruleId**: `string`
+```ts
+readonly ruleId: string;
+```
 
-Defined in: src/compliance/validationReport.ts:113
+Defined in: [src/compliance/validationReport.ts:113](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/validationReport.ts#L113)

@@ -6,9 +6,11 @@
 
 # Function: extractXmpMetadata()
 
-> **extractXmpMetadata**(`pdfBytes`): `string` \| `undefined`
+```ts
+function extractXmpMetadata(pdfBytes): string | undefined;
+```
 
-Defined in: [src/compliance/xmpValidator.ts:70](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/compliance/xmpValidator.ts#L70)
+Defined in: [src/compliance/xmpValidator.ts:70](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/xmpValidator.ts#L70)
 
 Extract XMP metadata from raw PDF bytes.
 

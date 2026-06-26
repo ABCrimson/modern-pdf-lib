@@ -5,5 +5,6 @@
   "readme": "none",
   "entryFileName": "index",
   "excludePrivate": true,
-  "excludeInternal": true
+  "excludeInternal": true,
+  "useCodeBlocks": true
 }

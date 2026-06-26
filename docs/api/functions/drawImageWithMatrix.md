@@ -6,9 +6,18 @@
 
 # Function: drawImageWithMatrix()
 
-> **drawImageWithMatrix**(`name`, `a`, `b`, `c`, `d`, `tx`, `ty`): `string`
+```ts
+function drawImageWithMatrix(
+   name, 
+   a, 
+   b, 
+   c, 
+   d, 
+   tx, 
+   ty): string;
+```
 
-Defined in: [src/core/operators/image.ts:95](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/operators/image.ts#L95)
+Defined in: [src/core/operators/image.ts:95](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/operators/image.ts#L95)
 
 Produce the full operator sequence to draw an image XObject with an
 arbitrary 6-component transformation matrix.

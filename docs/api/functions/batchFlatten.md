@@ -6,9 +6,11 @@
 
 # Function: batchFlatten()
 
-> **batchFlatten**(`files`, `options?`): `Promise`\<[`BatchResult`](../interfaces/BatchResult.md)\>
+```ts
+function batchFlatten(files, options?): Promise<BatchResult>;
+```
 
-Defined in: [src/batch/batchProcessor.ts:419](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/batch/batchProcessor.ts#L419)
+Defined in: [src/batch/batchProcessor.ts:419](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/batch/batchProcessor.ts#L419)
 
 Flatten interactive form fields across many PDFs.
 
@@ -19,7 +21,7 @@ into page content), and the result is saved.
 
 ### files
 
-`Uint8Array`\<`ArrayBufferLike`\>[]
+`Uint8Array`\&lt;`ArrayBufferLike`\&gt;[]
 
 Array of raw PDF bytes.
 
@@ -31,6 +33,6 @@ Concurrency and progress options.
 
 ## Returns
 
-`Promise`\<[`BatchResult`](../interfaces/BatchResult.md)\>
+`Promise`\&lt;[`BatchResult`](../interfaces/BatchResult.md)\&gt;
 
 A [BatchResult](../interfaces/BatchResult.md) with flattened PDF outputs.

@@ -6,9 +6,11 @@
 
 # Function: clipOp()
 
-> **clipOp**(): `string`
+```ts
+function clipOp(): string;
+```
 
-Defined in: [src/core/operators/graphics.ts:184](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/operators/graphics.ts#L184)
+Defined in: [src/core/operators/graphics.ts:184](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/operators/graphics.ts#L184)
 
 Intersect the clipping path with the current path using the non-zero
 winding rule (`W`).  Must be followed by a painting operator.

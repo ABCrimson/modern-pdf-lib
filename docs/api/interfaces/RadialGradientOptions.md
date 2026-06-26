@@ -6,7 +6,7 @@
 
 # Interface: RadialGradientOptions
 
-Defined in: [src/core/patterns.ts:75](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/patterns.ts#L75)
+Defined in: [src/core/patterns.ts:75](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/patterns.ts#L75)
 
 Options for creating a radial gradient (radial shading, ShadingType 3).
 
@@ -14,9 +14,11 @@ Options for creating a radial gradient (radial shading, ShadingType 3).
 
 ### extend?
 
-> `readonly` `optional` **extend?**: `boolean`
+```ts
+readonly optional extend?: boolean;
+```
 
-Defined in: [src/core/patterns.ts:96](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/patterns.ts#L96)
+Defined in: [src/core/patterns.ts:96](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/patterns.ts#L96)
 
 Whether to extend the gradient beyond the start and end circles.
 Default: `true`.
@@ -25,9 +27,11 @@ Default: `true`.
 
 ### r0
 
-> `readonly` **r0**: `number`
+```ts
+readonly r0: number;
+```
 
-Defined in: [src/core/patterns.ts:81](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/patterns.ts#L81)
+Defined in: [src/core/patterns.ts:81](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/patterns.ts#L81)
 
 Radius of the start circle.
 
@@ -35,9 +39,11 @@ Radius of the start circle.
 
 ### r1
 
-> `readonly` **r1**: `number`
+```ts
+readonly r1: number;
+```
 
-Defined in: [src/core/patterns.ts:87](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/patterns.ts#L87)
+Defined in: [src/core/patterns.ts:87](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/patterns.ts#L87)
 
 Radius of the end circle.
 
@@ -45,9 +51,11 @@ Radius of the end circle.
 
 ### stops
 
-> `readonly` **stops**: readonly ([`Color`](../type-aliases/Color.md) \| [`ColorStop`](ColorStop.md))[]
+```ts
+readonly stops: readonly (Color | ColorStop)[];
+```
 
-Defined in: [src/core/patterns.ts:91](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/patterns.ts#L91)
+Defined in: [src/core/patterns.ts:91](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/patterns.ts#L91)
 
 Colour stops (same semantics as [LinearGradientOptions.stops](LinearGradientOptions.md#stops)).
 
@@ -55,9 +63,11 @@ Colour stops (same semantics as [LinearGradientOptions.stops](LinearGradientOpti
 
 ### x0
 
-> `readonly` **x0**: `number`
+```ts
+readonly x0: number;
+```
 
-Defined in: [src/core/patterns.ts:77](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/patterns.ts#L77)
+Defined in: [src/core/patterns.ts:77](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/patterns.ts#L77)
 
 Centre X of the start circle.
 
@@ -65,9 +75,11 @@ Centre X of the start circle.
 
 ### x1
 
-> `readonly` **x1**: `number`
+```ts
+readonly x1: number;
+```
 
-Defined in: [src/core/patterns.ts:83](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/patterns.ts#L83)
+Defined in: [src/core/patterns.ts:83](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/patterns.ts#L83)
 
 Centre X of the end circle.
 
@@ -75,9 +87,11 @@ Centre X of the end circle.
 
 ### y0
 
-> `readonly` **y0**: `number`
+```ts
+readonly y0: number;
+```
 
-Defined in: [src/core/patterns.ts:79](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/patterns.ts#L79)
+Defined in: [src/core/patterns.ts:79](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/patterns.ts#L79)
 
 Centre Y of the start circle.
 
@@ -85,8 +99,10 @@ Centre Y of the start circle.
 
 ### y1
 
-> `readonly` **y1**: `number`
+```ts
+readonly y1: number;
+```
 
-Defined in: [src/core/patterns.ts:85](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/patterns.ts#L85)
+Defined in: [src/core/patterns.ts:85](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/patterns.ts#L85)
 
 Centre Y of the end circle.

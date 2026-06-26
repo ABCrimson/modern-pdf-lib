@@ -6,7 +6,7 @@
 
 # Class: PdfOutlineTree
 
-Defined in: [src/outline/pdfOutline.ts:214](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/outline/pdfOutline.ts#L214)
+Defined in: [src/outline/pdfOutline.ts:214](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/outline/pdfOutline.ts#L214)
 
 The root of the outline tree, containing top-level outline items.
 
@@ -14,9 +14,11 @@ The root of the outline tree, containing top-level outline items.
 
 ### Constructor
 
-> **new PdfOutlineTree**(): `PdfOutlineTree`
+```ts
+new PdfOutlineTree(): PdfOutlineTree;
+```
 
-Defined in: [src/outline/pdfOutline.ts:218](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/outline/pdfOutline.ts#L218)
+Defined in: [src/outline/pdfOutline.ts:218](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/outline/pdfOutline.ts#L218)
 
 #### Returns
 
@@ -26,9 +28,11 @@ Defined in: [src/outline/pdfOutline.ts:218](https://github.com/ABCrimson/modern-
 
 ### items
 
-> **items**: [`PdfOutlineItem`](PdfOutlineItem.md)[]
+```ts
+items: PdfOutlineItem[];
+```
 
-Defined in: [src/outline/pdfOutline.ts:216](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/outline/pdfOutline.ts#L216)
+Defined in: [src/outline/pdfOutline.ts:216](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/outline/pdfOutline.ts#L216)
 
 Top-level outline items.
 
@@ -36,9 +40,14 @@ Top-level outline items.
 
 ### addItem()
 
-> **addItem**(`title`, `destination`, `options?`): [`PdfOutlineItem`](PdfOutlineItem.md)
+```ts
+addItem(
+   title, 
+   destination, 
+   options?): PdfOutlineItem;
+```
 
-Defined in: [src/outline/pdfOutline.ts:230](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/outline/pdfOutline.ts#L230)
+Defined in: [src/outline/pdfOutline.ts:230](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/outline/pdfOutline.ts#L230)
 
 Add a top-level outline item.
 
@@ -72,9 +81,11 @@ The newly created item.
 
 ### removeItem()
 
-> **removeItem**(`item`): `void`
+```ts
+removeItem(item): void;
+```
 
-Defined in: [src/outline/pdfOutline.ts:246](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/outline/pdfOutline.ts#L246)
+Defined in: [src/outline/pdfOutline.ts:246](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/outline/pdfOutline.ts#L246)
 
 Remove a top-level outline item.
 
@@ -98,9 +109,11 @@ If the item is not in the tree.
 
 ### toDict()
 
-> **toDict**(`registry`, `pageRefs`): [`PdfRef`](PdfRef.md)
+```ts
+toDict(registry, pageRefs): PdfRef;
+```
 
-Defined in: [src/outline/pdfOutline.ts:269](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/outline/pdfOutline.ts#L269)
+Defined in: [src/outline/pdfOutline.ts:269](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/outline/pdfOutline.ts#L269)
 
 Serialize the outline tree to a PDF /Outlines dictionary.
 
@@ -136,9 +149,14 @@ The indirect reference to the /Outlines root dict.
 
 ### fromDict()
 
-> `static` **fromDict**(`dict`, `resolver`, `pageRefToIndex`): `PdfOutlineTree`
+```ts
+static fromDict(
+   dict, 
+   resolver, 
+   pageRefToIndex): PdfOutlineTree;
+```
 
-Defined in: [src/outline/pdfOutline.ts:321](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/outline/pdfOutline.ts#L321)
+Defined in: [src/outline/pdfOutline.ts:321](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/outline/pdfOutline.ts#L321)
 
 Parse an outline tree from an existing /Outlines dictionary.
 
@@ -152,13 +170,13 @@ The /Outlines dictionary.
 
 ##### resolver
 
-(`ref`) => [`PdfObject`](../type-aliases/PdfObject.md) \| `undefined`
+(`ref`) =&gt; [`PdfObject`](../type-aliases/PdfObject.md) \| `undefined`
 
 Function to resolve indirect references to objects.
 
 ##### pageRefToIndex
 
-`ReadonlyMap`\<`number`, `number`\>
+`ReadonlyMap`\&lt;`number`, `number`\&gt;
 
 Mapping from page ref object numbers to page indices.
 

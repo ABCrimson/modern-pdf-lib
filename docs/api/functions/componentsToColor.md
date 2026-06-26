@@ -6,9 +6,11 @@
 
 # Function: componentsToColor()
 
-> **componentsToColor**(`components`): [`Color`](../type-aliases/Color.md)
+```ts
+function componentsToColor(components): Color;
+```
 
-Defined in: [src/core/operators/color.ts:489](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/operators/color.ts#L489)
+Defined in: [src/core/operators/color.ts:489](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/operators/color.ts#L489)
 
 Convert a numeric component array to a typed [Color](../type-aliases/Color.md).
 

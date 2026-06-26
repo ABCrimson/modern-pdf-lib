@@ -6,7 +6,7 @@
 
 # Interface: RedactionMark
 
-Defined in: [src/core/redaction.ts:55](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/redaction.ts#L55)
+Defined in: [src/core/redaction.ts:55](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/redaction.ts#L55)
 
 Redaction mark stored on a page.
 
@@ -14,94 +14,124 @@ Redaction mark stored on a page.
 
 ### borderColor
 
-> **borderColor**: `object`
+```ts
+borderColor: object;
+```
 
-Defined in: [src/core/redaction.ts:63](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/redaction.ts#L63)
+Defined in: [src/core/redaction.ts:63](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/redaction.ts#L63)
 
 #### b
 
-> **b**: `number`
+```ts
+b: number;
+```
 
 #### g
 
-> **g**: `number`
+```ts
+g: number;
+```
 
 #### r
 
-> **r**: `number`
+```ts
+r: number;
+```
 
 ***
 
 ### borderWidth
 
-> **borderWidth**: `number`
+```ts
+borderWidth: number;
+```
 
-Defined in: [src/core/redaction.ts:62](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/redaction.ts#L62)
+Defined in: [src/core/redaction.ts:62](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/redaction.ts#L62)
 
 ***
 
 ### color
 
-> **color**: `object`
+```ts
+color: object;
+```
 
-Defined in: [src/core/redaction.ts:58](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/redaction.ts#L58)
+Defined in: [src/core/redaction.ts:58](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/redaction.ts#L58)
 
 #### b
 
-> **b**: `number`
+```ts
+b: number;
+```
 
 #### g
 
-> **g**: `number`
+```ts
+g: number;
+```
 
 #### r
 
-> **r**: `number`
+```ts
+r: number;
+```
 
 ***
 
 ### opacity
 
-> **opacity**: `number`
+```ts
+opacity: number;
+```
 
-Defined in: [src/core/redaction.ts:64](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/redaction.ts#L64)
+Defined in: [src/core/redaction.ts:64](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/redaction.ts#L64)
 
 ***
 
 ### overlayAlignment
 
-> **overlayAlignment**: `OverlayAlignment`
+```ts
+overlayAlignment: OverlayAlignment;
+```
 
-Defined in: [src/core/redaction.ts:61](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/redaction.ts#L61)
+Defined in: [src/core/redaction.ts:61](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/redaction.ts#L61)
 
 ***
 
 ### overlayFont
 
-> **overlayFont**: `string`
+```ts
+overlayFont: string;
+```
 
-Defined in: [src/core/redaction.ts:59](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/redaction.ts#L59)
+Defined in: [src/core/redaction.ts:59](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/redaction.ts#L59)
 
 ***
 
 ### overlayFontSize?
 
-> `optional` **overlayFontSize?**: `number`
+```ts
+optional overlayFontSize?: number;
+```
 
-Defined in: [src/core/redaction.ts:60](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/redaction.ts#L60)
+Defined in: [src/core/redaction.ts:60](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/redaction.ts#L60)
 
 ***
 
 ### overlayText?
 
-> `optional` **overlayText?**: `string`
+```ts
+optional overlayText?: string;
+```
 
-Defined in: [src/core/redaction.ts:57](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/redaction.ts#L57)
+Defined in: [src/core/redaction.ts:57](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/redaction.ts#L57)
 
 ***
 
 ### rect
 
-> **rect**: \[`number`, `number`, `number`, `number`\]
+```ts
+rect: [number, number, number, number];
+```
 
-Defined in: [src/core/redaction.ts:56](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/redaction.ts#L56)
+Defined in: [src/core/redaction.ts:56](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/redaction.ts#L56)

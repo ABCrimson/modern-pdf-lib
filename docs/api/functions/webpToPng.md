@@ -6,9 +6,11 @@
 
 # Function: webpToPng()
 
-> **webpToPng**(`webpData`): `Uint8Array`
+```ts
+function webpToPng(webpData): Uint8Array;
+```
 
-Defined in: [src/assets/image/webpOptimize.ts:812](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/webpOptimize.ts#L812)
+Defined in: [src/assets/image/webpOptimize.ts:812](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/webpOptimize.ts#L812)
 
 Decode a WebP file and re-encode as PNG.
 

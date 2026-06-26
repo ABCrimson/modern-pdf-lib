@@ -6,7 +6,7 @@
 
 # Interface: ScriptRun
 
-Defined in: src/assets/font/fontFallback.ts:48
+Defined in: [src/assets/font/fontFallback.ts:48](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/font/fontFallback.ts#L48)
 
 A contiguous slice of the input text belonging to a single Unicode script.
 
@@ -14,9 +14,11 @@ A contiguous slice of the input text belonging to a single Unicode script.
 
 ### script
 
-> `readonly` **script**: `string`
+```ts
+readonly script: string;
+```
 
-Defined in: src/assets/font/fontFallback.ts:50
+Defined in: [src/assets/font/fontFallback.ts:50](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/font/fontFallback.ts#L50)
 
 Script name (e.g. `'Latin'`, `'Han'`, `'Common'`).
 
@@ -24,9 +26,11 @@ Script name (e.g. `'Latin'`, `'Han'`, `'Common'`).
 
 ### start
 
-> `readonly` **start**: `number`
+```ts
+readonly start: number;
+```
 
-Defined in: src/assets/font/fontFallback.ts:54
+Defined in: [src/assets/font/fontFallback.ts:54](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/font/fontFallback.ts#L54)
 
 Code-point index (not UTF-16 index) where this run starts.
 
@@ -34,8 +38,10 @@ Code-point index (not UTF-16 index) where this run starts.
 
 ### text
 
-> `readonly` **text**: `string`
+```ts
+readonly text: string;
+```
 
-Defined in: src/assets/font/fontFallback.ts:52
+Defined in: [src/assets/font/fontFallback.ts:52](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/font/fontFallback.ts#L52)
 
 The text covered by this run.

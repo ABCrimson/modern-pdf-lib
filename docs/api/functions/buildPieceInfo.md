@@ -6,9 +6,14 @@
 
 # Function: buildPieceInfo()
 
-> **buildPieceInfo**(`appName`, `privateData`, `lastModified?`): [`PdfDict`](../classes/PdfDict.md)
+```ts
+function buildPieceInfo(
+   appName, 
+   privateData, 
+   lastModified?): PdfDict;
+```
 
-Defined in: src/core/pieceInfo.ts:40
+Defined in: [src/core/pieceInfo.ts:40](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pieceInfo.ts#L40)
 
 Build a `/PieceInfo` dictionary containing a single application data
 dictionary.

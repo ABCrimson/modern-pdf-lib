@@ -6,9 +6,11 @@
 
 # Function: stripProhibitedFeatures()
 
-> **stripProhibitedFeatures**(`pdfBytes`, `options?`): [`StripResult`](../interfaces/StripResult.md)
+```ts
+function stripProhibitedFeatures(pdfBytes, options?): StripResult;
+```
 
-Defined in: [src/compliance/stripProhibited.ts:96](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/compliance/stripProhibited.ts#L96)
+Defined in: [src/compliance/stripProhibited.ts:96](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/stripProhibited.ts#L96)
 
 Strip prohibited features from PDF bytes.
 

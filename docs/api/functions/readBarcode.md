@@ -6,9 +6,11 @@
 
 # Function: readBarcode()
 
-> **readBarcode**(`modules`): [`BarcodeReadResult`](../interfaces/BarcodeReadResult.md) \| `null`
+```ts
+function readBarcode(modules): BarcodeReadResult | null;
+```
 
-Defined in: [src/barcode/reader.ts:752](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/barcode/reader.ts#L752)
+Defined in: [src/barcode/reader.ts:752](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/barcode/reader.ts#L752)
 
 Auto-detect barcode format and decode.
 

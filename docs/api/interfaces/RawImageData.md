@@ -6,7 +6,7 @@
 
 # Interface: RawImageData
 
-Defined in: [src/assets/image/imageOptimize.ts:127](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/imageOptimize.ts#L127)
+Defined in: [src/assets/image/imageOptimize.ts:127](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/imageOptimize.ts#L127)
 
 Raw image pixel data with metadata.
 
@@ -14,9 +14,11 @@ Raw image pixel data with metadata.
 
 ### bitsPerChannel
 
-> `readonly` **bitsPerChannel**: `number`
+```ts
+readonly bitsPerChannel: number;
+```
 
-Defined in: [src/assets/image/imageOptimize.ts:143](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/imageOptimize.ts#L143)
+Defined in: [src/assets/image/imageOptimize.ts:143](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/imageOptimize.ts#L143)
 
 Bits per channel (typically 8).
 
@@ -24,9 +26,11 @@ Bits per channel (typically 8).
 
 ### channels
 
-> `readonly` **channels**: `1` \| `2` \| `3` \| `4`
+```ts
+readonly channels: 1 | 2 | 3 | 4;
+```
 
-Defined in: [src/assets/image/imageOptimize.ts:141](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/imageOptimize.ts#L141)
+Defined in: [src/assets/image/imageOptimize.ts:141](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/imageOptimize.ts#L141)
 
 Number of channels:
 - 1: Grayscale
@@ -38,9 +42,11 @@ Number of channels:
 
 ### colorSpace?
 
-> `readonly` `optional` **colorSpace?**: `"rgb"` \| `"cmyk"` \| `"gray"`
+```ts
+readonly optional colorSpace?: "rgb" | "cmyk" | "gray";
+```
 
-Defined in: [src/assets/image/imageOptimize.ts:154](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/imageOptimize.ts#L154)
+Defined in: [src/assets/image/imageOptimize.ts:154](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/imageOptimize.ts#L154)
 
 Color space of the pixel data.
 
@@ -55,9 +61,11 @@ Default: inferred from channel count (`1|2 → 'gray'`, `3|4 → 'rgb'`).
 
 ### height
 
-> `readonly` **height**: `number`
+```ts
+readonly height: number;
+```
 
-Defined in: [src/assets/image/imageOptimize.ts:133](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/imageOptimize.ts#L133)
+Defined in: [src/assets/image/imageOptimize.ts:133](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/imageOptimize.ts#L133)
 
 Image height in pixels.
 
@@ -65,9 +73,11 @@ Image height in pixels.
 
 ### pixels
 
-> `readonly` **pixels**: `Uint8Array`
+```ts
+readonly pixels: Uint8Array;
+```
 
-Defined in: [src/assets/image/imageOptimize.ts:129](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/imageOptimize.ts#L129)
+Defined in: [src/assets/image/imageOptimize.ts:129](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/imageOptimize.ts#L129)
 
 Pixel data in row-major order, channel-interleaved.
 
@@ -75,8 +85,10 @@ Pixel data in row-major order, channel-interleaved.
 
 ### width
 
-> `readonly` **width**: `number`
+```ts
+readonly width: number;
+```
 
-Defined in: [src/assets/image/imageOptimize.ts:131](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/imageOptimize.ts#L131)
+Defined in: [src/assets/image/imageOptimize.ts:131](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/imageOptimize.ts#L131)
 
 Image width in pixels.

@@ -6,9 +6,11 @@
 
 # Function: buildVtDpm()
 
-> **buildVtDpm**(`record`): [`PdfDict`](../classes/PdfDict.md)
+```ts
+function buildVtDpm(record): PdfDict;
+```
 
-Defined in: src/compliance/pdfVT.ts:80
+Defined in: [src/compliance/pdfVT.ts:80](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/pdfVT.ts#L80)
 
 Build the VT *Document Part Metadata* (`/DPM`) dictionary for a single record.
 

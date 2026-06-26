@@ -6,9 +6,11 @@
 
 # Function: professionalPreset()
 
-> **professionalPreset**(): [`TablePreset`](../type-aliases/TablePreset.md)
+```ts
+function professionalPreset(): TablePreset;
+```
 
-Defined in: [src/layout/presets.ts:101](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/layout/presets.ts#L101)
+Defined in: [src/layout/presets.ts:101](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layout/presets.ts#L101)
 
 Business / formal style — subtle alternating rows with a dark-blue
 header.

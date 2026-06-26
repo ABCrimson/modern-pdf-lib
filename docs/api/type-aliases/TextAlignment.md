@@ -6,8 +6,10 @@
 
 # Type Alias: TextAlignment
 
-> **TextAlignment** = *typeof* [`TextAlignment`](../variables/TextAlignment.md)\[keyof *typeof* [`TextAlignment`](../variables/TextAlignment.md)\]
+```ts
+type TextAlignment = typeof TextAlignment[keyof typeof TextAlignment];
+```
 
-Defined in: [src/core/enums.ts:66](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/enums.ts#L66)
+Defined in: [src/core/enums.ts:66](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/enums.ts#L66)
 
 Text alignment for form fields and layout operations.

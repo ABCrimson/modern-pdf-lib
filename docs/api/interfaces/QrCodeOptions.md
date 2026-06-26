@@ -6,7 +6,7 @@
 
 # Interface: QrCodeOptions
 
-Defined in: [src/barcode/qr.ts:25](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/barcode/qr.ts#L25)
+Defined in: [src/barcode/qr.ts:25](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/barcode/qr.ts#L25)
 
 Options for rendering a QR code to PDF operators.
 
@@ -14,9 +14,11 @@ Options for rendering a QR code to PDF operators.
 
 ### backgroundColor?
 
-> `readonly` `optional` **backgroundColor?**: [`Color`](../type-aliases/Color.md)
+```ts
+readonly optional backgroundColor?: Color;
+```
 
-Defined in: [src/barcode/qr.ts:35](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/barcode/qr.ts#L35)
+Defined in: [src/barcode/qr.ts:35](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/barcode/qr.ts#L35)
 
 Background colour. Default: white.
 
@@ -24,9 +26,11 @@ Background colour. Default: white.
 
 ### color?
 
-> `readonly` `optional` **color?**: [`Color`](../type-aliases/Color.md)
+```ts
+readonly optional color?: Color;
+```
 
-Defined in: [src/barcode/qr.ts:33](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/barcode/qr.ts#L33)
+Defined in: [src/barcode/qr.ts:33](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/barcode/qr.ts#L33)
 
 Foreground (dark module) colour. Default: black.
 
@@ -34,9 +38,11 @@ Foreground (dark module) colour. Default: black.
 
 ### errorCorrection?
 
-> `readonly` `optional` **errorCorrection?**: [`ErrorCorrectionLevel`](../type-aliases/ErrorCorrectionLevel.md)
+```ts
+readonly optional errorCorrection?: ErrorCorrectionLevel;
+```
 
-Defined in: [src/barcode/qr.ts:27](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/barcode/qr.ts#L27)
+Defined in: [src/barcode/qr.ts:27](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/barcode/qr.ts#L27)
 
 Error correction level. Default: `'M'`.
 
@@ -44,9 +50,11 @@ Error correction level. Default: `'M'`.
 
 ### moduleSize?
 
-> `readonly` `optional` **moduleSize?**: `number`
+```ts
+readonly optional moduleSize?: number;
+```
 
-Defined in: [src/barcode/qr.ts:29](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/barcode/qr.ts#L29)
+Defined in: [src/barcode/qr.ts:29](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/barcode/qr.ts#L29)
 
 Size of each module in PDF points. Default: `2`.
 
@@ -54,8 +62,10 @@ Size of each module in PDF points. Default: `2`.
 
 ### quietZone?
 
-> `readonly` `optional` **quietZone?**: `number`
+```ts
+readonly optional quietZone?: number;
+```
 
-Defined in: [src/barcode/qr.ts:31](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/barcode/qr.ts#L31)
+Defined in: [src/barcode/qr.ts:31](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/barcode/qr.ts#L31)
 
 Number of quiet-zone modules around the code. Default: `4`.

@@ -6,9 +6,11 @@
 
 # Function: buildCollection()
 
-> **buildCollection**(`options?`): [`PdfDict`](../classes/PdfDict.md)
+```ts
+function buildCollection(options?): PdfDict;
+```
 
-Defined in: src/core/collections.ts:114
+Defined in: [src/core/collections.ts:114](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/collections.ts#L114)
 
 Build a `/Collection` dictionary (ISO 32000-2 §7.11.6) suitable for
 placing in the document catalog under `/Collection`.

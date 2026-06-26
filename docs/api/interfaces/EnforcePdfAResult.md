@@ -6,7 +6,7 @@
 
 # Interface: EnforcePdfAResult
 
-Defined in: [src/compliance/enforcePdfAv2.ts:49](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/compliance/enforcePdfAv2.ts#L49)
+Defined in: [src/compliance/enforcePdfAv2.ts:49](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/enforcePdfAv2.ts#L49)
 
 Result of the enhanced PDF/A enforcement.
 
@@ -14,9 +14,11 @@ Result of the enhanced PDF/A enforcement.
 
 ### actions
 
-> `readonly` **actions**: [`EnforcementAction`](EnforcementAction.md)[]
+```ts
+readonly actions: EnforcementAction[];
+```
 
-Defined in: [src/compliance/enforcePdfAv2.ts:55](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/compliance/enforcePdfAv2.ts#L55)
+Defined in: [src/compliance/enforcePdfAv2.ts:55](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/enforcePdfAv2.ts#L55)
 
 Actions taken during enforcement.
 
@@ -24,9 +26,11 @@ Actions taken during enforcement.
 
 ### bytes
 
-> `readonly` **bytes**: `Uint8Array`
+```ts
+readonly bytes: Uint8Array;
+```
 
-Defined in: [src/compliance/enforcePdfAv2.ts:51](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/compliance/enforcePdfAv2.ts#L51)
+Defined in: [src/compliance/enforcePdfAv2.ts:51](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/enforcePdfAv2.ts#L51)
 
 Modified PDF bytes.
 
@@ -34,9 +38,11 @@ Modified PDF bytes.
 
 ### fullyCompliant
 
-> `readonly` **fullyCompliant**: `boolean`
+```ts
+readonly fullyCompliant: boolean;
+```
 
-Defined in: [src/compliance/enforcePdfAv2.ts:57](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/compliance/enforcePdfAv2.ts#L57)
+Defined in: [src/compliance/enforcePdfAv2.ts:57](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/enforcePdfAv2.ts#L57)
 
 Whether all errors were resolved.
 
@@ -44,9 +50,11 @@ Whether all errors were resolved.
 
 ### remainingIssues
 
-> `readonly` **remainingIssues**: `number`
+```ts
+readonly remainingIssues: number;
+```
 
-Defined in: [src/compliance/enforcePdfAv2.ts:59](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/compliance/enforcePdfAv2.ts#L59)
+Defined in: [src/compliance/enforcePdfAv2.ts:59](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/enforcePdfAv2.ts#L59)
 
 Remaining error-level issues (if any).
 
@@ -54,8 +62,10 @@ Remaining error-level issues (if any).
 
 ### validation
 
-> `readonly` **validation**: [`PdfAValidationResult`](PdfAValidationResult.md)
+```ts
+readonly validation: PdfAValidationResult;
+```
 
-Defined in: [src/compliance/enforcePdfAv2.ts:53](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/compliance/enforcePdfAv2.ts#L53)
+Defined in: [src/compliance/enforcePdfAv2.ts:53](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/enforcePdfAv2.ts#L53)
 
 Validation result after enforcement.

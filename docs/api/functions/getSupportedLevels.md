@@ -6,9 +6,11 @@
 
 # Function: getSupportedLevels()
 
-> **getSupportedLevels**(): [`PdfALevel`](../type-aliases/PdfALevel.md)[]
+```ts
+function getSupportedLevels(): PdfALevel[];
+```
 
-Defined in: [src/compliance/pdfAProfiles.ts:46](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/compliance/pdfAProfiles.ts#L46)
+Defined in: [src/compliance/pdfAProfiles.ts:46](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/pdfAProfiles.ts#L46)
 
 Get all supported PDF/A levels.
 

@@ -6,9 +6,11 @@
 
 # Function: computeCode39CheckDigit()
 
-> **computeCode39CheckDigit**(`data`): `string`
+```ts
+function computeCode39CheckDigit(data): string;
+```
 
-Defined in: [src/barcode/code39.ts:158](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/barcode/code39.ts#L158)
+Defined in: [src/barcode/code39.ts:158](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/barcode/code39.ts#L158)
 
 Compute the modulo-43 check digit for a Code 39 data string.
 

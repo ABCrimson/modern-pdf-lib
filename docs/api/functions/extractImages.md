@@ -6,9 +6,11 @@
 
 # Function: extractImages()
 
-> **extractImages**(`doc`): [`ImageInfo`](../interfaces/ImageInfo.md)[]
+```ts
+function extractImages(doc): ImageInfo[];
+```
 
-Defined in: [src/assets/image/imageExtract.ts:169](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/imageExtract.ts#L169)
+Defined in: [src/assets/image/imageExtract.ts:169](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/imageExtract.ts#L169)
 
 Extract all image XObjects from a PDF document.
 

@@ -6,9 +6,11 @@
 
 # Function: summarizeIssues()
 
-> **summarizeIssues**(`issues`): `object`
+```ts
+function summarizeIssues(issues): object;
+```
 
-Defined in: [src/accessibility/accessibilityChecker.ts:298](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/accessibility/accessibilityChecker.ts#L298)
+Defined in: [src/accessibility/accessibilityChecker.ts:298](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/accessibility/accessibilityChecker.ts#L298)
 
 Generate a summary of accessibility issues by severity.
 
@@ -28,16 +30,24 @@ An object with counts per severity level.
 
 ### errors
 
-> **errors**: `number`
+```ts
+errors: number;
+```
 
 ### infos
 
-> **infos**: `number`
+```ts
+infos: number;
+```
 
 ### total
 
-> **total**: `number`
+```ts
+total: number;
+```
 
 ### warnings
 
-> **warnings**: `number`
+```ts
+warnings: number;
+```

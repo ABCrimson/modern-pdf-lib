@@ -6,9 +6,11 @@
 
 # Function: createRangeFetcher()
 
-> **createRangeFetcher**(`url`, `options?`): [`RangeFetcher`](../interfaces/RangeFetcher.md)
+```ts
+function createRangeFetcher(url, options?): RangeFetcher;
+```
 
-Defined in: src/runtime/rangeFetch.ts:147
+Defined in: [src/runtime/rangeFetch.ts:147](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/runtime/rangeFetch.ts#L147)
 
 Create a [RangeFetcher](../interfaces/RangeFetcher.md) for the given URL.
 

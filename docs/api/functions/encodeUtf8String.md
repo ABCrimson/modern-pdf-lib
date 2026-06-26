@@ -6,9 +6,11 @@
 
 # Function: encodeUtf8String()
 
-> **encodeUtf8String**(`str`): `Uint8Array`
+```ts
+function encodeUtf8String(str): Uint8Array;
+```
 
-Defined in: [src/signature/pkcs7.ts:288](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/pkcs7.ts#L288)
+Defined in: [src/signature/pkcs7.ts:288](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/pkcs7.ts#L288)
 
 Encode a UTF8String.
 

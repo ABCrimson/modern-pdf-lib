@@ -6,7 +6,7 @@
 
 # Interface: InvoiceLine
 
-Defined in: src/compliance/facturX.ts:51
+Defined in: [src/compliance/facturX.ts:51](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/facturX.ts#L51)
 
 A single invoice line item.
 
@@ -14,9 +14,11 @@ A single invoice line item.
 
 ### description
 
-> `readonly` **description**: `string`
+```ts
+readonly description: string;
+```
 
-Defined in: src/compliance/facturX.ts:53
+Defined in: [src/compliance/facturX.ts:53](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/facturX.ts#L53)
 
 Free-text description of the goods or services.
 
@@ -24,9 +26,11 @@ Free-text description of the goods or services.
 
 ### quantity
 
-> `readonly` **quantity**: `number`
+```ts
+readonly quantity: number;
+```
 
-Defined in: src/compliance/facturX.ts:55
+Defined in: [src/compliance/facturX.ts:55](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/facturX.ts#L55)
 
 Billed quantity.
 
@@ -34,9 +38,11 @@ Billed quantity.
 
 ### taxPercent
 
-> `readonly` **taxPercent**: `number`
+```ts
+readonly taxPercent: number;
+```
 
-Defined in: src/compliance/facturX.ts:59
+Defined in: [src/compliance/facturX.ts:59](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/facturX.ts#L59)
 
 VAT rate applied to this line, in percent (e.g. 19 for 19%).
 
@@ -44,8 +50,10 @@ VAT rate applied to this line, in percent (e.g. 19 for 19%).
 
 ### unitPrice
 
-> `readonly` **unitPrice**: `number`
+```ts
+readonly unitPrice: number;
+```
 
-Defined in: src/compliance/facturX.ts:57
+Defined in: [src/compliance/facturX.ts:57](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/facturX.ts#L57)
 
 Net unit price (excluding tax) in the invoice currency.

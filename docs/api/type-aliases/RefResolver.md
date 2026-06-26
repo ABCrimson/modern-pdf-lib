@@ -6,9 +6,11 @@
 
 # Type Alias: RefResolver
 
-> **RefResolver** = (`ref`) => [`PdfObject`](PdfObject.md)
+```ts
+type RefResolver = (ref) => PdfObject;
+```
 
-Defined in: [src/form/pdfForm.ts:40](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/form/pdfForm.ts#L40)
+Defined in: [src/form/pdfForm.ts:40](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/pdfForm.ts#L40)
 
 Function that resolves a PdfRef to its underlying PdfObject.
 Used when traversing the field tree from parsed PDF data.

@@ -6,9 +6,11 @@
 
 # Function: loadWasmModule()
 
-> **loadWasmModule**(`name`): `Promise`\<`Uint8Array`\<`ArrayBufferLike`\>\>
+```ts
+function loadWasmModule(name): Promise<Uint8Array<ArrayBufferLike>>;
+```
 
-Defined in: [src/wasm/loader.ts:350](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/wasm/loader.ts#L350)
+Defined in: [src/wasm/loader.ts:350](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/wasm/loader.ts#L350)
 
 Load a WASM module by name.
 
@@ -28,7 +30,7 @@ Module name. One of: `'libdeflate'`, `'png'`, `'ttf'`, `'shaping'`, `'jbig2'`.
 
 ## Returns
 
-`Promise`\<`Uint8Array`\<`ArrayBufferLike`\>\>
+`Promise`\&lt;`Uint8Array`\&lt;`ArrayBufferLike`\&gt;\&gt;
 
 The raw WASM bytes.
 

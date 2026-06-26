@@ -6,9 +6,11 @@
 
 # Function: readWoffHeader()
 
-> **readWoffHeader**(`data`): [`WoffInfo`](../interfaces/WoffInfo.md)
+```ts
+function readWoffHeader(data): WoffInfo;
+```
 
-Defined in: src/assets/font/woff.ts:123
+Defined in: [src/assets/font/woff.ts:123](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/font/woff.ts#L123)
 
 Parse the header of a WOFF1 or WOFF2 file.
 

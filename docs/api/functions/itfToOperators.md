@@ -6,9 +6,15 @@
 
 # Function: itfToOperators()
 
-> **itfToOperators**(`matrix`, `x`, `y`, `options?`): `string`
+```ts
+function itfToOperators(
+   matrix, 
+   x, 
+   y, 
+   options?): string;
+```
 
-Defined in: [src/barcode/itf.ts:194](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/barcode/itf.ts#L194)
+Defined in: [src/barcode/itf.ts:194](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/barcode/itf.ts#L194)
 
 Generate PDF content-stream operators for an ITF barcode.
 

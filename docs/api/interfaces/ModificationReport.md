@@ -6,7 +6,7 @@
 
 # Interface: ModificationReport
 
-Defined in: [src/signature/modificationDetector.ts:49](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/modificationDetector.ts#L49)
+Defined in: [src/signature/modificationDetector.ts:49](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/modificationDetector.ts#L49)
 
 Report of modifications detected in a certified document.
 
@@ -14,9 +14,11 @@ Report of modifications detected in a certified document.
 
 ### certificationLevel?
 
-> `optional` **certificationLevel?**: [`MdpPermission`](../enumerations/MdpPermission.md)
+```ts
+optional certificationLevel?: MdpPermission;
+```
 
-Defined in: [src/signature/modificationDetector.ts:51](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/modificationDetector.ts#L51)
+Defined in: [src/signature/modificationDetector.ts:51](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/modificationDetector.ts#L51)
 
 The certification level, if any.
 
@@ -24,9 +26,11 @@ The certification level, if any.
 
 ### isCompliant
 
-> **isCompliant**: `boolean`
+```ts
+isCompliant: boolean;
+```
 
-Defined in: [src/signature/modificationDetector.ts:53](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/modificationDetector.ts#L53)
+Defined in: [src/signature/modificationDetector.ts:53](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/modificationDetector.ts#L53)
 
 Whether the modifications comply with the certification level.
 
@@ -34,8 +38,10 @@ Whether the modifications comply with the certification level.
 
 ### violations
 
-> **violations**: [`ModificationViolation`](ModificationViolation.md)[]
+```ts
+violations: ModificationViolation[];
+```
 
-Defined in: [src/signature/modificationDetector.ts:55](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/modificationDetector.ts#L55)
+Defined in: [src/signature/modificationDetector.ts:55](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/modificationDetector.ts#L55)
 
 List of detected violations.

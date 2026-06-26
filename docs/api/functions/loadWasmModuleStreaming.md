@@ -6,9 +6,11 @@
 
 # Function: loadWasmModuleStreaming()
 
-> **loadWasmModuleStreaming**(`name`): `Promise`\<`Module`\>
+```ts
+function loadWasmModuleStreaming(name): Promise<Module>;
+```
 
-Defined in: [src/wasm/loader.ts:439](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/wasm/loader.ts#L439)
+Defined in: [src/wasm/loader.ts:439](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/wasm/loader.ts#L439)
 
 Load and compile a WASM module using streaming compilation when available.
 
@@ -27,7 +29,7 @@ Module name (e.g., 'libdeflate', 'png').
 
 ## Returns
 
-`Promise`\<`Module`\>
+`Promise`\&lt;`Module`\&gt;
 
 A compiled WebAssembly.Module ready for instantiation.
 

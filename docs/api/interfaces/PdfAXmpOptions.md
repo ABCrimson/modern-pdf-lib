@@ -6,7 +6,7 @@
 
 # Interface: PdfAXmpOptions
 
-Defined in: [src/compliance/xmpGenerator.ts:32](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/compliance/xmpGenerator.ts#L32)
+Defined in: [src/compliance/xmpGenerator.ts:32](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/xmpGenerator.ts#L32)
 
 Options for generating PDF/A XMP metadata.
 
@@ -14,9 +14,11 @@ Options for generating PDF/A XMP metadata.
 
 ### author?
 
-> `readonly` `optional` **author?**: `string`
+```ts
+readonly optional author?: string;
+```
 
-Defined in: [src/compliance/xmpGenerator.ts:40](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/compliance/xmpGenerator.ts#L40)
+Defined in: [src/compliance/xmpGenerator.ts:40](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/xmpGenerator.ts#L40)
 
 Document author.
 
@@ -24,9 +26,11 @@ Document author.
 
 ### conformance
 
-> `readonly` **conformance**: `string`
+```ts
+readonly conformance: string;
+```
 
-Defined in: [src/compliance/xmpGenerator.ts:36](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/compliance/xmpGenerator.ts#L36)
+Defined in: [src/compliance/xmpGenerator.ts:36](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/xmpGenerator.ts#L36)
 
 PDF/A conformance level ('A', 'B', or 'U').
 
@@ -34,9 +38,11 @@ PDF/A conformance level ('A', 'B', or 'U').
 
 ### createDate?
 
-> `readonly` `optional` **createDate?**: `string`
+```ts
+readonly optional createDate?: string;
+```
 
-Defined in: [src/compliance/xmpGenerator.ts:50](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/compliance/xmpGenerator.ts#L50)
+Defined in: [src/compliance/xmpGenerator.ts:50](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/xmpGenerator.ts#L50)
 
 Creation date (ISO 8601). Default: current date.
 
@@ -44,9 +50,11 @@ Creation date (ISO 8601). Default: current date.
 
 ### creatorTool?
 
-> `readonly` `optional` **creatorTool?**: `string`
+```ts
+readonly optional creatorTool?: string;
+```
 
-Defined in: [src/compliance/xmpGenerator.ts:46](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/compliance/xmpGenerator.ts#L46)
+Defined in: [src/compliance/xmpGenerator.ts:46](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/xmpGenerator.ts#L46)
 
 Creator tool name. Default: 'modern-pdf-lib'.
 
@@ -54,9 +62,11 @@ Creator tool name. Default: 'modern-pdf-lib'.
 
 ### keywords?
 
-> `readonly` `optional` **keywords?**: `string`
+```ts
+readonly optional keywords?: string;
+```
 
-Defined in: [src/compliance/xmpGenerator.ts:44](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/compliance/xmpGenerator.ts#L44)
+Defined in: [src/compliance/xmpGenerator.ts:44](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/xmpGenerator.ts#L44)
 
 Keywords.
 
@@ -64,9 +74,11 @@ Keywords.
 
 ### language?
 
-> `readonly` `optional` **language?**: `string`
+```ts
+readonly optional language?: string;
+```
 
-Defined in: [src/compliance/xmpGenerator.ts:54](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/compliance/xmpGenerator.ts#L54)
+Defined in: [src/compliance/xmpGenerator.ts:54](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/xmpGenerator.ts#L54)
 
 Document language (BCP 47). Default: 'en'.
 
@@ -74,9 +86,11 @@ Document language (BCP 47). Default: 'en'.
 
 ### modifyDate?
 
-> `readonly` `optional` **modifyDate?**: `string`
+```ts
+readonly optional modifyDate?: string;
+```
 
-Defined in: [src/compliance/xmpGenerator.ts:52](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/compliance/xmpGenerator.ts#L52)
+Defined in: [src/compliance/xmpGenerator.ts:52](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/xmpGenerator.ts#L52)
 
 Modification date (ISO 8601). Default: current date.
 
@@ -84,9 +98,11 @@ Modification date (ISO 8601). Default: current date.
 
 ### part
 
-> `readonly` **part**: `number`
+```ts
+readonly part: number;
+```
 
-Defined in: [src/compliance/xmpGenerator.ts:34](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/compliance/xmpGenerator.ts#L34)
+Defined in: [src/compliance/xmpGenerator.ts:34](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/xmpGenerator.ts#L34)
 
 PDF/A part number (1, 2, or 3).
 
@@ -94,9 +110,11 @@ PDF/A part number (1, 2, or 3).
 
 ### producer?
 
-> `readonly` `optional` **producer?**: `string`
+```ts
+readonly optional producer?: string;
+```
 
-Defined in: [src/compliance/xmpGenerator.ts:48](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/compliance/xmpGenerator.ts#L48)
+Defined in: [src/compliance/xmpGenerator.ts:48](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/xmpGenerator.ts#L48)
 
 PDF producer name. Default: 'modern-pdf-lib'.
 
@@ -104,9 +122,11 @@ PDF producer name. Default: 'modern-pdf-lib'.
 
 ### subject?
 
-> `readonly` `optional` **subject?**: `string`
+```ts
+readonly optional subject?: string;
+```
 
-Defined in: [src/compliance/xmpGenerator.ts:42](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/compliance/xmpGenerator.ts#L42)
+Defined in: [src/compliance/xmpGenerator.ts:42](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/xmpGenerator.ts#L42)
 
 Document subject/description.
 
@@ -114,8 +134,10 @@ Document subject/description.
 
 ### title?
 
-> `readonly` `optional` **title?**: `string`
+```ts
+readonly optional title?: string;
+```
 
-Defined in: [src/compliance/xmpGenerator.ts:38](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/compliance/xmpGenerator.ts#L38)
+Defined in: [src/compliance/xmpGenerator.ts:38](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/xmpGenerator.ts#L38)
 
 Document title.

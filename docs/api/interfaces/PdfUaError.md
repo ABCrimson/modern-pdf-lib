@@ -6,7 +6,7 @@
 
 # Interface: PdfUaError
 
-Defined in: [src/accessibility/pdfUaValidator.ts:49](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/accessibility/pdfUaValidator.ts#L49)
+Defined in: [src/accessibility/pdfUaValidator.ts:49](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/accessibility/pdfUaValidator.ts#L49)
 
 A single PDF/UA validation error — a must-fix violation.
 
@@ -14,9 +14,11 @@ A single PDF/UA validation error — a must-fix violation.
 
 ### clause?
 
-> `readonly` `optional` **clause?**: `string`
+```ts
+readonly optional clause?: string;
+```
 
-Defined in: [src/accessibility/pdfUaValidator.ts:55](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/accessibility/pdfUaValidator.ts#L55)
+Defined in: [src/accessibility/pdfUaValidator.ts:55](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/accessibility/pdfUaValidator.ts#L55)
 
 The ISO 14289-1 clause reference, if applicable.
 
@@ -24,9 +26,11 @@ The ISO 14289-1 clause reference, if applicable.
 
 ### code
 
-> `readonly` **code**: `string`
+```ts
+readonly code: string;
+```
 
-Defined in: [src/accessibility/pdfUaValidator.ts:51](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/accessibility/pdfUaValidator.ts#L51)
+Defined in: [src/accessibility/pdfUaValidator.ts:51](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/accessibility/pdfUaValidator.ts#L51)
 
 Machine-readable error code (e.g. `"UA-STRUCT-001"`).
 
@@ -34,9 +38,11 @@ Machine-readable error code (e.g. `"UA-STRUCT-001"`).
 
 ### element?
 
-> `readonly` `optional` **element?**: [`PdfStructureElement`](../classes/PdfStructureElement.md)
+```ts
+readonly optional element?: PdfStructureElement;
+```
 
-Defined in: [src/accessibility/pdfUaValidator.ts:57](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/accessibility/pdfUaValidator.ts#L57)
+Defined in: [src/accessibility/pdfUaValidator.ts:57](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/accessibility/pdfUaValidator.ts#L57)
 
 The structure element related to the error, if any.
 
@@ -44,9 +50,11 @@ The structure element related to the error, if any.
 
 ### message
 
-> `readonly` **message**: `string`
+```ts
+readonly message: string;
+```
 
-Defined in: [src/accessibility/pdfUaValidator.ts:53](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/accessibility/pdfUaValidator.ts#L53)
+Defined in: [src/accessibility/pdfUaValidator.ts:53](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/accessibility/pdfUaValidator.ts#L53)
 
 Human-readable description of the violation.
 
@@ -54,8 +62,10 @@ Human-readable description of the violation.
 
 ### pageIndex?
 
-> `readonly` `optional` **pageIndex?**: `number`
+```ts
+readonly optional pageIndex?: number;
+```
 
-Defined in: [src/accessibility/pdfUaValidator.ts:59](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/accessibility/pdfUaValidator.ts#L59)
+Defined in: [src/accessibility/pdfUaValidator.ts:59](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/accessibility/pdfUaValidator.ts#L59)
 
 Zero-based page index, if the issue is page-specific.

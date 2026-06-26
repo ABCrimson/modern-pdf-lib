@@ -6,9 +6,11 @@
 
 # Function: asPdfNumber()
 
-> **asPdfNumber**(`value`): [`PdfNumber`](../classes/PdfNumber.md)
+```ts
+function asPdfNumber(value): PdfNumber;
+```
 
-Defined in: [src/utils/pdfValueHelpers.ts:37](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/utils/pdfValueHelpers.ts#L37)
+Defined in: [src/utils/pdfValueHelpers.ts:37](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/utils/pdfValueHelpers.ts#L37)
 
 Create a [PdfNumber](../classes/PdfNumber.md) from a numeric value.
 

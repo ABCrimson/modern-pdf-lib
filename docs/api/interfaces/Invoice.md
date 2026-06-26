@@ -6,7 +6,7 @@
 
 # Interface: Invoice
 
-Defined in: src/compliance/facturX.ts:63
+Defined in: [src/compliance/facturX.ts:63](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/facturX.ts#L63)
 
 A complete invoice ready to be rendered as CII XML.
 
@@ -14,9 +14,11 @@ A complete invoice ready to be rendered as CII XML.
 
 ### buyer
 
-> `readonly` **buyer**: [`InvoiceParty`](InvoiceParty.md)
+```ts
+readonly buyer: InvoiceParty;
+```
 
-Defined in: src/compliance/facturX.ts:73
+Defined in: [src/compliance/facturX.ts:73](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/facturX.ts#L73)
 
 Buyer trade party.
 
@@ -24,9 +26,11 @@ Buyer trade party.
 
 ### currency
 
-> `readonly` **currency**: `string`
+```ts
+readonly currency: string;
+```
 
-Defined in: src/compliance/facturX.ts:69
+Defined in: [src/compliance/facturX.ts:69](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/facturX.ts#L69)
 
 ISO 4217 currency code (e.g. 'EUR').
 
@@ -34,9 +38,11 @@ ISO 4217 currency code (e.g. 'EUR').
 
 ### invoiceNumber
 
-> `readonly` **invoiceNumber**: `string`
+```ts
+readonly invoiceNumber: string;
+```
 
-Defined in: src/compliance/facturX.ts:65
+Defined in: [src/compliance/facturX.ts:65](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/facturX.ts#L65)
 
 Invoice document number (BT-1).
 
@@ -44,9 +50,11 @@ Invoice document number (BT-1).
 
 ### issueDate
 
-> `readonly` **issueDate**: `string`
+```ts
+readonly issueDate: string;
+```
 
-Defined in: src/compliance/facturX.ts:67
+Defined in: [src/compliance/facturX.ts:67](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/facturX.ts#L67)
 
 Issue date as an ISO date string ('YYYY-MM-DD').
 
@@ -54,9 +62,11 @@ Issue date as an ISO date string ('YYYY-MM-DD').
 
 ### lines
 
-> `readonly` **lines**: readonly [`InvoiceLine`](InvoiceLine.md)[]
+```ts
+readonly lines: readonly InvoiceLine[];
+```
 
-Defined in: src/compliance/facturX.ts:75
+Defined in: [src/compliance/facturX.ts:75](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/facturX.ts#L75)
 
 Invoice line items.
 
@@ -64,8 +74,10 @@ Invoice line items.
 
 ### seller
 
-> `readonly` **seller**: [`InvoiceParty`](InvoiceParty.md)
+```ts
+readonly seller: InvoiceParty;
+```
 
-Defined in: src/compliance/facturX.ts:71
+Defined in: [src/compliance/facturX.ts:71](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/facturX.ts#L71)
 
 Seller trade party.

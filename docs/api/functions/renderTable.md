@@ -6,9 +6,11 @@
 
 # Function: renderTable()
 
-> **renderTable**(`options`): `object`
+```ts
+function renderTable(options): object;
+```
 
-Defined in: [src/layout/table.ts:708](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/layout/table.ts#L708)
+Defined in: [src/layout/table.ts:708](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layout/table.ts#L708)
 
 ## Parameters
 
@@ -22,8 +24,12 @@ Defined in: [src/layout/table.ts:708](https://github.com/ABCrimson/modern-pdf-li
 
 ### ops
 
-> **ops**: `string`
+```ts
+ops: string;
+```
 
 ### result
 
-> **result**: [`TableRenderResult`](../interfaces/TableRenderResult.md)
+```ts
+result: TableRenderResult;
+```

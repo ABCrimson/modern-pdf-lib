@@ -6,9 +6,11 @@
 
 # Type Alias: ChromaSubsampling
 
-> **ChromaSubsampling** = `"4:4:4"` \| `"4:2:2"` \| `"4:2:0"`
+```ts
+type ChromaSubsampling = "4:4:4" | "4:2:2" | "4:2:0";
+```
 
-Defined in: [src/wasm/jpeg/bridge.ts:42](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/wasm/jpeg/bridge.ts#L42)
+Defined in: [src/wasm/jpeg/bridge.ts:42](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/wasm/jpeg/bridge.ts#L42)
 
 Chroma subsampling modes for JPEG encoding.
 

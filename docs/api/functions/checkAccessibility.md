@@ -6,9 +6,11 @@
 
 # Function: checkAccessibility()
 
-> **checkAccessibility**(`doc`): [`AccessibilityIssue`](../interfaces/AccessibilityIssue.md)[]
+```ts
+function checkAccessibility(doc): AccessibilityIssue[];
+```
 
-Defined in: [src/accessibility/accessibilityChecker.ts:62](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/accessibility/accessibilityChecker.ts#L62)
+Defined in: [src/accessibility/accessibilityChecker.ts:62](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/accessibility/accessibilityChecker.ts#L62)
 
 Check a PDF document for accessibility issues.
 

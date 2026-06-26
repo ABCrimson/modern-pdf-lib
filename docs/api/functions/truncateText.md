@@ -6,9 +6,15 @@
 
 # Function: truncateText()
 
-> **truncateText**(`text`, `availableWidth`, `fontSize`, `avgCharWidth?`): `string`
+```ts
+function truncateText(
+   text, 
+   availableWidth, 
+   fontSize, 
+   avgCharWidth?): string;
+```
 
-Defined in: [src/layout/overflow.ts:171](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/layout/overflow.ts#L171)
+Defined in: [src/layout/overflow.ts:171](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layout/overflow.ts#L171)
 
 Truncate text to fit within `availableWidth`.
 

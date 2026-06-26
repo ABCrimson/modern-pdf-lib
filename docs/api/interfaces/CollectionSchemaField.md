@@ -6,7 +6,7 @@
 
 # Interface: CollectionSchemaField
 
-Defined in: src/core/collections.ts:51
+Defined in: [src/core/collections.ts:51](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/collections.ts#L51)
 
 One field of a collection schema (ISO 32000-2, Table 44 "Entries in a
 collection field dictionary").
@@ -15,9 +15,11 @@ collection field dictionary").
 
 ### fieldType
 
-> `readonly` **fieldType**: `"S"` \| `"D"` \| `"N"`
+```ts
+readonly fieldType: "S" | "D" | "N";
+```
 
-Defined in: src/core/collections.ts:63
+Defined in: [src/core/collections.ts:63](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/collections.ts#L63)
 
 Field data type (`/Subtype`):
 
@@ -29,9 +31,11 @@ Field data type (`/Subtype`):
 
 ### key
 
-> `readonly` **key**: `string`
+```ts
+readonly key: string;
+```
 
-Defined in: src/core/collections.ts:53
+Defined in: [src/core/collections.ts:53](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/collections.ts#L53)
 
 Schema key — the name under which the subfield dict is stored in `/Schema`.
 
@@ -39,9 +43,11 @@ Schema key — the name under which the subfield dict is stored in `/Schema`.
 
 ### label
 
-> `readonly` **label**: `string`
+```ts
+readonly label: string;
+```
 
-Defined in: src/core/collections.ts:55
+Defined in: [src/core/collections.ts:55](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/collections.ts#L55)
 
 Human-readable column label (`/N`).
 
@@ -49,8 +55,10 @@ Human-readable column label (`/N`).
 
 ### order?
 
-> `readonly` `optional` **order?**: `number`
+```ts
+readonly optional order?: number;
+```
 
-Defined in: src/core/collections.ts:65
+Defined in: [src/core/collections.ts:65](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/collections.ts#L65)
 
 Optional relative column order (`/O`); lower sorts first.

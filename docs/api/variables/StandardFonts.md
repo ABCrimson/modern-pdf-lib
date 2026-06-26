@@ -6,9 +6,11 @@
 
 # Variable: StandardFonts
 
-> `const` **StandardFonts**: `object`
+```ts
+const StandardFonts: object;
+```
 
-Defined in: [src/core/pdfDocument.ts:96](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/pdfDocument.ts#L96)
+Defined in: [src/core/pdfDocument.ts:96](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfDocument.ts#L96)
 
 The 14 standard PDF fonts guaranteed to be available in every PDF
 viewer.  These can be used without embedding font data.
@@ -17,56 +19,84 @@ viewer.  These can be used without embedding font data.
 
 ### Courier
 
-> `readonly` **Courier**: `"Courier"` = `'Courier'`
+```ts
+readonly Courier: "Courier" = 'Courier';
+```
 
 ### CourierBold
 
-> `readonly` **CourierBold**: `"Courier-Bold"` = `'Courier-Bold'`
+```ts
+readonly CourierBold: "Courier-Bold" = 'Courier-Bold';
+```
 
 ### CourierBoldOblique
 
-> `readonly` **CourierBoldOblique**: `"Courier-BoldOblique"` = `'Courier-BoldOblique'`
+```ts
+readonly CourierBoldOblique: "Courier-BoldOblique" = 'Courier-BoldOblique';
+```
 
 ### CourierOblique
 
-> `readonly` **CourierOblique**: `"Courier-Oblique"` = `'Courier-Oblique'`
+```ts
+readonly CourierOblique: "Courier-Oblique" = 'Courier-Oblique';
+```
 
 ### Helvetica
 
-> `readonly` **Helvetica**: `"Helvetica"` = `'Helvetica'`
+```ts
+readonly Helvetica: "Helvetica" = 'Helvetica';
+```
 
 ### HelveticaBold
 
-> `readonly` **HelveticaBold**: `"Helvetica-Bold"` = `'Helvetica-Bold'`
+```ts
+readonly HelveticaBold: "Helvetica-Bold" = 'Helvetica-Bold';
+```
 
 ### HelveticaBoldOblique
 
-> `readonly` **HelveticaBoldOblique**: `"Helvetica-BoldOblique"` = `'Helvetica-BoldOblique'`
+```ts
+readonly HelveticaBoldOblique: "Helvetica-BoldOblique" = 'Helvetica-BoldOblique';
+```
 
 ### HelveticaOblique
 
-> `readonly` **HelveticaOblique**: `"Helvetica-Oblique"` = `'Helvetica-Oblique'`
+```ts
+readonly HelveticaOblique: "Helvetica-Oblique" = 'Helvetica-Oblique';
+```
 
 ### Symbol
 
-> `readonly` **Symbol**: `"Symbol"` = `'Symbol'`
+```ts
+readonly Symbol: "Symbol" = 'Symbol';
+```
 
 ### TimesBold
 
-> `readonly` **TimesBold**: `"Times-Bold"` = `'Times-Bold'`
+```ts
+readonly TimesBold: "Times-Bold" = 'Times-Bold';
+```
 
 ### TimesBoldItalic
 
-> `readonly` **TimesBoldItalic**: `"Times-BoldItalic"` = `'Times-BoldItalic'`
+```ts
+readonly TimesBoldItalic: "Times-BoldItalic" = 'Times-BoldItalic';
+```
 
 ### TimesItalic
 
-> `readonly` **TimesItalic**: `"Times-Italic"` = `'Times-Italic'`
+```ts
+readonly TimesItalic: "Times-Italic" = 'Times-Italic';
+```
 
 ### TimesRoman
 
-> `readonly` **TimesRoman**: `"Times-Roman"` = `'Times-Roman'`
+```ts
+readonly TimesRoman: "Times-Roman" = 'Times-Roman';
+```
 
 ### ZapfDingbats
 
-> `readonly` **ZapfDingbats**: `"ZapfDingbats"` = `'ZapfDingbats'`
+```ts
+readonly ZapfDingbats: "ZapfDingbats" = 'ZapfDingbats';
+```

@@ -6,9 +6,11 @@
 
 # Function: generateOrderX()
 
-> **generateOrderX**(`invoice`, `orderType`): `string`
+```ts
+function generateOrderX(invoice, orderType): string;
+```
 
-Defined in: src/compliance/xRechnung.ts:409
+Defined in: [src/compliance/xRechnung.ts:409](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/xRechnung.ts#L409)
 
 Generate an Order-X CII order document (Order, OrderChange or
 OrderResponse) from the shared [Invoice](../interfaces/Invoice.md) data model.

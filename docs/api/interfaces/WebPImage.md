@@ -6,7 +6,7 @@
 
 # Interface: WebPImage
 
-Defined in: [src/assets/image/webpDecode.ts:20](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/webpDecode.ts#L20)
+Defined in: [src/assets/image/webpDecode.ts:20](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/webpDecode.ts#L20)
 
 Decoded WebP image data.
 
@@ -14,9 +14,11 @@ Decoded WebP image data.
 
 ### channels
 
-> `readonly` **channels**: `3` \| `4`
+```ts
+readonly channels: 3 | 4;
+```
 
-Defined in: [src/assets/image/webpDecode.ts:28](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/webpDecode.ts#L28)
+Defined in: [src/assets/image/webpDecode.ts:28](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/webpDecode.ts#L28)
 
 Number of channels (3 for RGB, 4 for RGBA).
 
@@ -24,9 +26,11 @@ Number of channels (3 for RGB, 4 for RGBA).
 
 ### hasAlpha
 
-> `readonly` **hasAlpha**: `boolean`
+```ts
+readonly hasAlpha: boolean;
+```
 
-Defined in: [src/assets/image/webpDecode.ts:30](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/webpDecode.ts#L30)
+Defined in: [src/assets/image/webpDecode.ts:30](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/webpDecode.ts#L30)
 
 Whether the image has an alpha channel.
 
@@ -34,9 +38,11 @@ Whether the image has an alpha channel.
 
 ### height
 
-> `readonly` **height**: `number`
+```ts
+readonly height: number;
+```
 
-Defined in: [src/assets/image/webpDecode.ts:24](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/webpDecode.ts#L24)
+Defined in: [src/assets/image/webpDecode.ts:24](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/webpDecode.ts#L24)
 
 Image height in pixels.
 
@@ -44,9 +50,11 @@ Image height in pixels.
 
 ### pixels
 
-> `readonly` **pixels**: `Uint8Array`
+```ts
+readonly pixels: Uint8Array;
+```
 
-Defined in: [src/assets/image/webpDecode.ts:26](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/webpDecode.ts#L26)
+Defined in: [src/assets/image/webpDecode.ts:26](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/webpDecode.ts#L26)
 
 Raw pixel data (RGB or RGBA).
 
@@ -54,8 +62,10 @@ Raw pixel data (RGB or RGBA).
 
 ### width
 
-> `readonly` **width**: `number`
+```ts
+readonly width: number;
+```
 
-Defined in: [src/assets/image/webpDecode.ts:22](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/webpDecode.ts#L22)
+Defined in: [src/assets/image/webpDecode.ts:22](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/webpDecode.ts#L22)
 
 Image width in pixels.

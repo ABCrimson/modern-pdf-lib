@@ -6,9 +6,14 @@
 
 # Function: convertTiffCmykToRgb()
 
-> **convertTiffCmykToRgb**(`cmykPixels`, `width`, `height`): `Uint8Array`
+```ts
+function convertTiffCmykToRgb(
+   cmykPixels, 
+   width, 
+   height): Uint8Array;
+```
 
-Defined in: [src/assets/image/tiffCmyk.ts:72](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/tiffCmyk.ts#L72)
+Defined in: [src/assets/image/tiffCmyk.ts:72](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/tiffCmyk.ts#L72)
 
 Convert CMYK pixel data to RGB.
 

@@ -6,9 +6,14 @@
 
 # Function: cropPage()
 
-> **cropPage**(`doc`, `index`, `cropBox`): `void`
+```ts
+function cropPage(
+   doc, 
+   index, 
+   cropBox): void;
+```
 
-Defined in: [src/core/pageManipulation.ts:274](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/pageManipulation.ts#L274)
+Defined in: [src/core/pageManipulation.ts:274](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pageManipulation.ts#L274)
 
 Set a crop box on a page.
 

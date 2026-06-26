@@ -6,9 +6,11 @@
 
 # Function: renderToPdf()
 
-> **renderToPdf**(`root`, `options?`): `Promise`\<`Uint8Array`\<`ArrayBufferLike`\>\>
+```ts
+function renderToPdf(root, options?): Promise<Uint8Array<ArrayBufferLike>>;
+```
 
-Defined in: src/assets/vdom/reconciler.ts:131
+Defined in: [src/assets/vdom/reconciler.ts:131](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/vdom/reconciler.ts#L131)
 
 Reconcile a [VNode](../type-aliases/VNode.md) tree into a saved PDF document.
 
@@ -34,6 +36,6 @@ Optional layout overrides.
 
 ## Returns
 
-`Promise`\<`Uint8Array`\<`ArrayBufferLike`\>\>
+`Promise`\&lt;`Uint8Array`\&lt;`ArrayBufferLike`\&gt;\&gt;
 
 A promise resolving to the saved PDF bytes (starting `%PDF-`).

@@ -6,9 +6,11 @@
 
 # Function: analyzeJpegMarkers()
 
-> **analyzeJpegMarkers**(`data`): [`JpegMarkerInfo`](../interfaces/JpegMarkerInfo.md) \| `undefined`
+```ts
+function analyzeJpegMarkers(data): JpegMarkerInfo | undefined;
+```
 
-Defined in: [src/assets/image/jpegMarkers.ts:90](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/jpegMarkers.ts#L90)
+Defined in: [src/assets/image/jpegMarkers.ts:90](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/jpegMarkers.ts#L90)
 
 Parse JPEG markers to detect arithmetic coding and other properties.
 Scans marker segments without decoding image data.

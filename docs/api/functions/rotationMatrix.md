@@ -6,9 +6,14 @@
 
 # Function: rotationMatrix()
 
-> **rotationMatrix**(`angle`, `cx`, `cy`): \[`number`, `number`, `number`, `number`, `number`, `number`\]
+```ts
+function rotationMatrix(
+   angle, 
+   cx, 
+   cy): [number, number, number, number, number, number];
+```
 
-Defined in: [src/core/operators/state.ts:178](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/operators/state.ts#L178)
+Defined in: [src/core/operators/state.ts:178](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/operators/state.ts#L178)
 
 Build the six-component matrix array for a rotation about an
 arbitrary centre point `(cx, cy)`.

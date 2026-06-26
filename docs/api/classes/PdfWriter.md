@@ -6,7 +6,7 @@
 
 # Class: PdfWriter
 
-Defined in: [src/core/pdfWriter.ts:118](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/pdfWriter.ts#L118)
+Defined in: [src/core/pdfWriter.ts:118](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfWriter.ts#L118)
 
 Serialize a PDF document to a `Uint8Array`.
 
@@ -19,9 +19,15 @@ const bytes = writer.write();
 
 ### Constructor
 
-> **new PdfWriter**(`registry`, `structure`, `options?`, `encryptionHandler?`): `PdfWriter`
+```ts
+new PdfWriter(
+   registry, 
+   structure, 
+   options?, 
+   encryptionHandler?): PdfWriter;
+```
 
-Defined in: [src/core/pdfWriter.ts:133](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/pdfWriter.ts#L133)
+Defined in: [src/core/pdfWriter.ts:133](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfWriter.ts#L133)
 
 #### Parameters
 
@@ -53,9 +59,11 @@ Document structure references.
 
 ### write()
 
-> **write**(): `Promise`\<`Uint8Array`\<`ArrayBufferLike`\>\>
+```ts
+write(): Promise<Uint8Array<ArrayBufferLike>>;
+```
 
-Defined in: [src/core/pdfWriter.ts:159](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/pdfWriter.ts#L159)
+Defined in: [src/core/pdfWriter.ts:159](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfWriter.ts#L159)
 
 Produce the complete PDF file as a `Uint8Array`.
 
@@ -65,15 +73,17 @@ are added to the trailer.
 
 #### Returns
 
-`Promise`\<`Uint8Array`\<`ArrayBufferLike`\>\>
+`Promise`\&lt;`Uint8Array`\&lt;`ArrayBufferLike`\&gt;\&gt;
 
 ***
 
 ### writeBodyWithObjectStreams()
 
-> **writeBodyWithObjectStreams**(`threshold`): `Promise`\<`boolean`\>
+```ts
+writeBodyWithObjectStreams(threshold): Promise<boolean>;
+```
 
-Defined in: [src/core/pdfWriter.ts:384](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/pdfWriter.ts#L384)
+Defined in: [src/core/pdfWriter.ts:384](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfWriter.ts#L384)
 
 Write the document body using object streams when the number of
 eligible non-stream objects exceeds `threshold`.
@@ -86,7 +96,7 @@ eligible non-stream objects exceeds `threshold`.
 
 #### Returns
 
-`Promise`\<`boolean`\>
+`Promise`\&lt;`boolean`\&gt;
 
 `true` if object streams (and a cross-reference stream)
          were used and the PDF is complete.  `false` if the

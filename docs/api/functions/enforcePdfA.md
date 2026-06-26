@@ -6,9 +6,11 @@
 
 # Function: enforcePdfA()
 
-> **enforcePdfA**(`pdfBytes`, `level`): `Promise`\<`Uint8Array`\<`ArrayBufferLike`\>\>
+```ts
+function enforcePdfA(pdfBytes, level): Promise<Uint8Array<ArrayBufferLike>>;
+```
 
-Defined in: [src/compliance/pdfA.ts:316](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/compliance/pdfA.ts#L316)
+Defined in: [src/compliance/pdfA.ts:316](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/pdfA.ts#L316)
 
 Attempt to make a PDF conform to PDF/A.
 
@@ -39,6 +41,6 @@ The target PDF/A conformance level.
 
 ## Returns
 
-`Promise`\<`Uint8Array`\<`ArrayBufferLike`\>\>
+`Promise`\&lt;`Uint8Array`\&lt;`ArrayBufferLike`\&gt;\&gt;
 
 The modified PDF bytes.

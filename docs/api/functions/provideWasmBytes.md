@@ -6,9 +6,11 @@
 
 # Function: provideWasmBytes()
 
-> **provideWasmBytes**(`name`, `bytes`): `void`
+```ts
+function provideWasmBytes(name, bytes): void;
+```
 
-Defined in: [src/wasm/loader.ts:553](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/wasm/loader.ts#L553)
+Defined in: [src/wasm/loader.ts:553](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/wasm/loader.ts#L553)
 
 Provide WASM bytes directly for a module.
 

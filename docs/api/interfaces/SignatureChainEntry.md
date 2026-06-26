@@ -6,7 +6,7 @@
 
 # Interface: SignatureChainEntry
 
-Defined in: [src/signature/multiSignatureValidator.ts:29](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/multiSignatureValidator.ts#L29)
+Defined in: [src/signature/multiSignatureValidator.ts:29](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/multiSignatureValidator.ts#L29)
 
 Validation status for a single signature in the chain.
 
@@ -14,9 +14,11 @@ Validation status for a single signature in the chain.
 
 ### byteRange
 
-> **byteRange**: \[`number`, `number`, `number`, `number`\]
+```ts
+byteRange: [number, number, number, number];
+```
 
-Defined in: [src/signature/multiSignatureValidator.ts:37](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/multiSignatureValidator.ts#L37)
+Defined in: [src/signature/multiSignatureValidator.ts:37](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/multiSignatureValidator.ts#L37)
 
 The byte range covering this signature.
 
@@ -24,9 +26,11 @@ The byte range covering this signature.
 
 ### coversEntireDocument
 
-> **coversEntireDocument**: `boolean`
+```ts
+coversEntireDocument: boolean;
+```
 
-Defined in: [src/signature/multiSignatureValidator.ts:39](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/multiSignatureValidator.ts#L39)
+Defined in: [src/signature/multiSignatureValidator.ts:39](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/multiSignatureValidator.ts#L39)
 
 Whether this signature covers the entire document up to its point.
 
@@ -34,9 +38,11 @@ Whether this signature covers the entire document up to its point.
 
 ### fieldName
 
-> **fieldName**: `string`
+```ts
+fieldName: string;
+```
 
-Defined in: [src/signature/multiSignatureValidator.ts:31](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/multiSignatureValidator.ts#L31)
+Defined in: [src/signature/multiSignatureValidator.ts:31](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/multiSignatureValidator.ts#L31)
 
 The signature field name (extracted from /T).
 
@@ -44,9 +50,11 @@ The signature field name (extracted from /T).
 
 ### signedAt?
 
-> `optional` **signedAt?**: `Date`
+```ts
+optional signedAt?: Date;
+```
 
-Defined in: [src/signature/multiSignatureValidator.ts:35](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/multiSignatureValidator.ts#L35)
+Defined in: [src/signature/multiSignatureValidator.ts:35](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/multiSignatureValidator.ts#L35)
 
 The signing date (extracted from /M), if present.
 
@@ -54,9 +62,11 @@ The signing date (extracted from /M), if present.
 
 ### signerName
 
-> **signerName**: `string`
+```ts
+signerName: string;
+```
 
-Defined in: [src/signature/multiSignatureValidator.ts:33](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/multiSignatureValidator.ts#L33)
+Defined in: [src/signature/multiSignatureValidator.ts:33](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/multiSignatureValidator.ts#L33)
 
 The signer name (extracted from /Contents PKCS#7 or dictionary).
 
@@ -64,8 +74,10 @@ The signer name (extracted from /Contents PKCS#7 or dictionary).
 
 ### status
 
-> **status**: `"valid"` \| `"invalid"` \| `"broken_chain"`
+```ts
+status: "valid" | "invalid" | "broken_chain";
+```
 
-Defined in: [src/signature/multiSignatureValidator.ts:41](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/multiSignatureValidator.ts#L41)
+Defined in: [src/signature/multiSignatureValidator.ts:41](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/multiSignatureValidator.ts#L41)
 
 Validation status for this entry in the chain.

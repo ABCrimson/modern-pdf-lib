@@ -6,9 +6,11 @@
 
 # Function: buildTimestampRequest()
 
-> **buildTimestampRequest**(`dataHash`, `hashAlgorithm`): `Uint8Array`
+```ts
+function buildTimestampRequest(dataHash, hashAlgorithm): Uint8Array;
+```
 
-Defined in: [src/signature/timestamp.ts:139](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/timestamp.ts#L139)
+Defined in: [src/signature/timestamp.ts:139](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/timestamp.ts#L139)
 
 Build a DER-encoded TimeStampReq (RFC 3161 SS2.4.1).
 

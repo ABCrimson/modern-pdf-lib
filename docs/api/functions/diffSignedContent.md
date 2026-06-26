@@ -6,9 +6,11 @@
 
 # Function: diffSignedContent()
 
-> **diffSignedContent**(`pdf`, `signatureIndex?`): `Promise`\<[`DocumentDiff`](../interfaces/DocumentDiff.md)\>
+```ts
+function diffSignedContent(pdf, signatureIndex?): Promise<DocumentDiff>;
+```
 
-Defined in: [src/signature/documentDiff.ts:258](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/documentDiff.ts#L258)
+Defined in: [src/signature/documentDiff.ts:258](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/documentDiff.ts#L258)
 
 Diff the signed content of a PDF against its current state.
 
@@ -34,7 +36,7 @@ Zero-based index of the signature to diff against.
 
 ## Returns
 
-`Promise`\<[`DocumentDiff`](../interfaces/DocumentDiff.md)\>
+`Promise`\&lt;[`DocumentDiff`](../interfaces/DocumentDiff.md)\&gt;
 
 A DocumentDiff describing all detected changes.
 

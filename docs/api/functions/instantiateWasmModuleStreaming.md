@@ -6,9 +6,11 @@
 
 # Function: instantiateWasmModuleStreaming()
 
-> **instantiateWasmModuleStreaming**(`name`, `imports?`): `Promise`\<`Instance`\>
+```ts
+function instantiateWasmModuleStreaming(name, imports?): Promise<Instance>;
+```
 
-Defined in: [src/wasm/loader.ts:493](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/wasm/loader.ts#L493)
+Defined in: [src/wasm/loader.ts:493](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/wasm/loader.ts#L493)
 
 Load, compile, and instantiate a WASM module with streaming when available.
 
@@ -33,7 +35,7 @@ WebAssembly import object.
 
 ## Returns
 
-`Promise`\<`Instance`\>
+`Promise`\&lt;`Instance`\&gt;
 
 An instantiated WebAssembly module.
 

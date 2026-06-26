@@ -6,7 +6,7 @@
 
 # Class: StreamingPdfParser
 
-Defined in: [src/parser/streamingParser.ts:528](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/parser/streamingParser.ts#L528)
+Defined in: [src/parser/streamingParser.ts:528](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/parser/streamingParser.ts#L528)
 
 A streaming PDF parser that processes PDF data incrementally without
 loading the entire file into memory.
@@ -38,9 +38,11 @@ const result = parser.end();
 
 ### Constructor
 
-> **new StreamingPdfParser**(`options?`): `StreamingPdfParser`
+```ts
+new StreamingPdfParser(options?): StreamingPdfParser;
+```
 
-Defined in: [src/parser/streamingParser.ts:548](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/parser/streamingParser.ts#L548)
+Defined in: [src/parser/streamingParser.ts:548](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/parser/streamingParser.ts#L548)
 
 #### Parameters
 
@@ -56,9 +58,11 @@ Defined in: [src/parser/streamingParser.ts:548](https://github.com/ABCrimson/mod
 
 ### end()
 
-> **end**(): [`StreamingParseResult`](../interfaces/StreamingParseResult.md)
+```ts
+end(): StreamingParseResult;
+```
 
-Defined in: [src/parser/streamingParser.ts:623](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/parser/streamingParser.ts#L623)
+Defined in: [src/parser/streamingParser.ts:623](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/parser/streamingParser.ts#L623)
 
 Signal end of input and perform the full parse.
 
@@ -76,9 +80,11 @@ If the PDF is malformed or cannot be parsed.
 
 ### feed()
 
-> **feed**(`chunk`): `void`
+```ts
+feed(chunk): void;
+```
 
-Defined in: [src/parser/streamingParser.ts:592](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/parser/streamingParser.ts#L592)
+Defined in: [src/parser/streamingParser.ts:592](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/parser/streamingParser.ts#L592)
 
 Feed a chunk of data to the parser.
 
@@ -100,9 +106,11 @@ the full file to locate startxref).
 
 ### getPageContent()
 
-> **getPageContent**(`pageIndex`): `Promise`\<`Uint8Array`\<`ArrayBufferLike`\>\>
+```ts
+getPageContent(pageIndex): Promise<Uint8Array<ArrayBufferLike>>;
+```
 
-Defined in: [src/parser/streamingParser.ts:767](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/parser/streamingParser.ts#L767)
+Defined in: [src/parser/streamingParser.ts:767](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/parser/streamingParser.ts#L767)
 
 Get the raw content stream bytes for a specific page.
 
@@ -120,7 +128,7 @@ Zero-based page index.
 
 #### Returns
 
-`Promise`\<`Uint8Array`\<`ArrayBufferLike`\>\>
+`Promise`\&lt;`Uint8Array`\&lt;`ArrayBufferLike`\&gt;\&gt;
 
 The raw content stream bytes.
 
@@ -128,9 +136,11 @@ The raw content stream bytes.
 
 ### on()
 
-> **on**(`event`, `handler`): `void`
+```ts
+on(event, handler): void;
+```
 
-Defined in: [src/parser/streamingParser.ts:563](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/parser/streamingParser.ts#L563)
+Defined in: [src/parser/streamingParser.ts:563](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/parser/streamingParser.ts#L563)
 
 Register an event listener for a specific event type.
 
@@ -152,9 +162,11 @@ Register an event listener for a specific event type.
 
 ### fromFile()
 
-> `static` **fromFile**(`path`, `options?`): `Promise`\<[`StreamingParseResult`](../interfaces/StreamingParseResult.md)\>
+```ts
+static fromFile(path, options?): Promise<StreamingParseResult>;
+```
 
-Defined in: [src/parser/streamingParser.ts:706](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/parser/streamingParser.ts#L706)
+Defined in: [src/parser/streamingParser.ts:706](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/parser/streamingParser.ts#L706)
 
 Parse from a file path (Node.js / Deno / Bun only).
 
@@ -173,15 +185,17 @@ browsers. Falls back to `Deno.readFile` if available.
 
 #### Returns
 
-`Promise`\<[`StreamingParseResult`](../interfaces/StreamingParseResult.md)\>
+`Promise`\&lt;[`StreamingParseResult`](../interfaces/StreamingParseResult.md)\&gt;
 
 ***
 
 ### fromStream()
 
-> `static` **fromStream**(`stream`, `options?`): `Promise`\<[`StreamingParseResult`](../interfaces/StreamingParseResult.md)\>
+```ts
+static fromStream(stream, options?): Promise<StreamingParseResult>;
+```
 
-Defined in: [src/parser/streamingParser.ts:680](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/parser/streamingParser.ts#L680)
+Defined in: [src/parser/streamingParser.ts:680](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/parser/streamingParser.ts#L680)
 
 Parse from a `ReadableStream<Uint8Array>`.
 
@@ -193,7 +207,7 @@ available to seek to startxref and the xref table.
 
 ##### stream
 
-`ReadableStream`\<`Uint8Array`\<`ArrayBufferLike`\>\>
+`ReadableStream`\&lt;`Uint8Array`\&lt;`ArrayBufferLike`\&gt;\&gt;
 
 ##### options?
 
@@ -201,4 +215,4 @@ available to seek to startxref and the xref table.
 
 #### Returns
 
-`Promise`\<[`StreamingParseResult`](../interfaces/StreamingParseResult.md)\>
+`Promise`\&lt;[`StreamingParseResult`](../interfaces/StreamingParseResult.md)\&gt;

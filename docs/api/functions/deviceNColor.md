@@ -6,9 +6,14 @@
 
 # Function: deviceNColor()
 
-> **deviceNColor**(`colorants`, `alternateSpace`, `tints`): [`DeviceNColor`](../interfaces/DeviceNColor.md)
+```ts
+function deviceNColor(
+   colorants, 
+   alternateSpace, 
+   tints): DeviceNColor;
+```
 
-Defined in: [src/core/operators/color.ts:129](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/operators/color.ts#L129)
+Defined in: [src/core/operators/color.ts:129](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/operators/color.ts#L129)
 
 Create a DeviceN colour for multi-ink printing.
 

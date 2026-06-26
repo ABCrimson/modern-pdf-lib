@@ -6,9 +6,14 @@
 
 # Function: rgbToCmyk()
 
-> **rgbToCmyk**(`r`, `g`, `b`): \[`number`, `number`, `number`, `number`\]
+```ts
+function rgbToCmyk(
+   r, 
+   g, 
+   b): [number, number, number, number];
+```
 
-Defined in: [src/core/operators/color.ts:164](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/operators/color.ts#L164)
+Defined in: [src/core/operators/color.ts:164](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/operators/color.ts#L164)
 
 Convert RGB components to CMYK.
 

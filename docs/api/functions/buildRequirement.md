@@ -6,9 +6,11 @@
 
 # Function: buildRequirement()
 
-> **buildRequirement**(`type`): [`PdfDict`](../classes/PdfDict.md)
+```ts
+function buildRequirement(type): PdfDict;
+```
 
-Defined in: src/core/requirements.ts:69
+Defined in: [src/core/requirements.ts:69](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/requirements.ts#L69)
 
 Build a single requirement dictionary for the given requirement type.
 

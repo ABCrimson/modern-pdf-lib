@@ -6,9 +6,11 @@
 
 # Function: generateCiiXml()
 
-> **generateCiiXml**(`invoice`, `profile?`): `string`
+```ts
+function generateCiiXml(invoice, profile?): string;
+```
 
-Defined in: src/compliance/facturX.ts:300
+Defined in: [src/compliance/facturX.ts:300](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/facturX.ts#L300)
 
 Generate a UN/CEFACT Cross Industry Invoice (CII) XML document for
 the given invoice and Factur-X / ZUGFeRD profile.

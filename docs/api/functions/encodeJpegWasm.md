@@ -6,9 +6,18 @@
 
 # Function: encodeJpegWasm()
 
-> **encodeJpegWasm**(`pixels`, `width`, `height`, `channels`, `quality`, `progressive?`, `chroma?`): `Uint8Array`\<`ArrayBufferLike`\> \| `undefined`
+```ts
+function encodeJpegWasm(
+   pixels, 
+   width, 
+   height, 
+   channels, 
+   quality, 
+   progressive?, 
+   chroma?): Uint8Array<ArrayBufferLike> | undefined;
+```
 
-Defined in: [src/wasm/jpeg/bridge.ts:141](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/wasm/jpeg/bridge.ts#L141)
+Defined in: [src/wasm/jpeg/bridge.ts:141](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/wasm/jpeg/bridge.ts#L141)
 
 Encode raw pixel data to JPEG using the WASM encoder.
 
@@ -58,6 +67,6 @@ Chroma subsampling mode (default: '4:2:0').
 
 ## Returns
 
-`Uint8Array`\<`ArrayBufferLike`\> \| `undefined`
+`Uint8Array`\&lt;`ArrayBufferLike`\&gt; \| `undefined`
 
 JPEG-encoded bytes, or `undefined` if WASM is not available.

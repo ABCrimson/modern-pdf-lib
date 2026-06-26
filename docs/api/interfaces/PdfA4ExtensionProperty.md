@@ -6,7 +6,7 @@
 
 # Interface: PdfA4ExtensionProperty
 
-Defined in: src/compliance/pdfA4.ts:34
+Defined in: [src/compliance/pdfA4.ts:34](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/pdfA4.ts#L34)
 
 A single property within a PDF/A extension schema.
 
@@ -14,9 +14,11 @@ A single property within a PDF/A extension schema.
 
 ### category
 
-> `readonly` **category**: `"external"` \| `"internal"`
+```ts
+readonly category: "external" | "internal";
+```
 
-Defined in: src/compliance/pdfA4.ts:40
+Defined in: [src/compliance/pdfA4.ts:40](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/pdfA4.ts#L40)
 
 Whether the property is internally or externally derived.
 
@@ -24,9 +26,11 @@ Whether the property is internally or externally derived.
 
 ### description
 
-> `readonly` **description**: `string`
+```ts
+readonly description: string;
+```
 
-Defined in: src/compliance/pdfA4.ts:42
+Defined in: [src/compliance/pdfA4.ts:42](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/pdfA4.ts#L42)
 
 Human-readable description of the property.
 
@@ -34,9 +38,11 @@ Human-readable description of the property.
 
 ### name
 
-> `readonly` **name**: `string`
+```ts
+readonly name: string;
+```
 
-Defined in: src/compliance/pdfA4.ts:36
+Defined in: [src/compliance/pdfA4.ts:36](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/pdfA4.ts#L36)
 
 Property name.
 
@@ -44,8 +50,10 @@ Property name.
 
 ### valueType
 
-> `readonly` **valueType**: `string`
+```ts
+readonly valueType: string;
+```
 
-Defined in: src/compliance/pdfA4.ts:38
+Defined in: [src/compliance/pdfA4.ts:38](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/pdfA4.ts#L38)
 
 XMP value type (e.g. 'Text', 'Integer', 'Boolean').

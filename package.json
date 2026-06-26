@@ -87,7 +87,7 @@
     "prepublishOnly": "npm run typecheck && npm test && npm run build",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
-    "docs:api": "node tools/docs/node_modules/typedoc/bin/typedoc",
+    "docs:api": "node tools/docs/node_modules/typedoc/bin/typedoc && tsx scripts/sanitize-api-docs.ts",
     "validate-pdf": "tsx scripts/validate-pdf.ts",
     "generate:wasm-inline": "tsx scripts/generate-inline-wasm.ts",
     "clean": "rm -rf dist coverage"

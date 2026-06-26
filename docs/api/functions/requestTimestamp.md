@@ -6,9 +6,14 @@
 
 # Function: requestTimestamp()
 
-> **requestTimestamp**(`dataHash`, `tsaUrl`, `hashAlgorithm?`): `Promise`\<[`TimestampResult`](../interfaces/TimestampResult.md)\>
+```ts
+function requestTimestamp(
+   dataHash, 
+   tsaUrl, 
+hashAlgorithm?): Promise<TimestampResult>;
+```
 
-Defined in: [src/signature/timestamp.ts:316](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/timestamp.ts#L316)
+Defined in: [src/signature/timestamp.ts:316](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/timestamp.ts#L316)
 
 Request a timestamp from an RFC 3161 TSA.
 
@@ -38,7 +43,7 @@ The hash algorithm. Default 'SHA-256'.
 
 ## Returns
 
-`Promise`\<[`TimestampResult`](../interfaces/TimestampResult.md)\>
+`Promise`\&lt;[`TimestampResult`](../interfaces/TimestampResult.md)\&gt;
 
 The timestamp result.
 

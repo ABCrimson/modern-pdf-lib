@@ -6,7 +6,7 @@
 
 # Interface: ByteRangeResult
 
-Defined in: [src/signature/byteRange.ts:35](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/byteRange.ts#L35)
+Defined in: [src/signature/byteRange.ts:35](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/byteRange.ts#L35)
 
 Result of ByteRange computation for a prepared PDF.
 
@@ -14,9 +14,11 @@ Result of ByteRange computation for a prepared PDF.
 
 ### byteRange
 
-> **byteRange**: \[`number`, `number`, `number`, `number`\]
+```ts
+byteRange: [number, number, number, number];
+```
 
-Defined in: [src/signature/byteRange.ts:37](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/byteRange.ts#L37)
+Defined in: [src/signature/byteRange.ts:37](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/byteRange.ts#L37)
 
 The byte range array [offset1, length1, offset2, length2].
 
@@ -24,9 +26,11 @@ The byte range array [offset1, length1, offset2, length2].
 
 ### contentsLength
 
-> **contentsLength**: `number`
+```ts
+contentsLength: number;
+```
 
-Defined in: [src/signature/byteRange.ts:41](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/byteRange.ts#L41)
+Defined in: [src/signature/byteRange.ts:41](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/byteRange.ts#L41)
 
 Length of the placeholder in bytes (including angle brackets `<…>`).
 
@@ -34,8 +38,10 @@ Length of the placeholder in bytes (including angle brackets `<…>`).
 
 ### contentsOffset
 
-> **contentsOffset**: `number`
+```ts
+contentsOffset: number;
+```
 
-Defined in: [src/signature/byteRange.ts:39](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/byteRange.ts#L39)
+Defined in: [src/signature/byteRange.ts:39](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/byteRange.ts#L39)
 
 Start offset of the /Contents hex string placeholder (the `<`).

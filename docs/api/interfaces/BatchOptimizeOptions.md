@@ -6,7 +6,7 @@
 
 # Interface: BatchOptimizeOptions
 
-Defined in: [src/assets/image/batchOptimize.ts:48](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/batchOptimize.ts#L48)
+Defined in: [src/assets/image/batchOptimize.ts:48](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/batchOptimize.ts#L48)
 
 Options for batch image optimization.
 
@@ -14,9 +14,11 @@ Options for batch image optimization.
 
 ### autoGrayscale?
 
-> `readonly` `optional` **autoGrayscale?**: `boolean`
+```ts
+readonly optional autoGrayscale?: boolean;
+```
 
-Defined in: [src/assets/image/batchOptimize.ts:94](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/batchOptimize.ts#L94)
+Defined in: [src/assets/image/batchOptimize.ts:94](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/batchOptimize.ts#L94)
 
 Auto-detect and convert pseudo-grayscale RGB images to true
 grayscale before encoding.
@@ -27,9 +29,11 @@ Default: `false`.
 
 ### chromaSubsampling?
 
-> `readonly` `optional` **chromaSubsampling?**: [`ChromaSubsampling`](../type-aliases/ChromaSubsampling.md)
+```ts
+readonly optional chromaSubsampling?: ChromaSubsampling;
+```
 
-Defined in: [src/assets/image/batchOptimize.ts:73](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/batchOptimize.ts#L73)
+Defined in: [src/assets/image/batchOptimize.ts:73](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/batchOptimize.ts#L73)
 
 Chroma subsampling mode for JPEG encoding.
 
@@ -39,9 +43,11 @@ Default: `'4:2:0'`.
 
 ### colorSpaces?
 
-> `readonly` `optional` **colorSpaces?**: readonly `string`[]
+```ts
+readonly optional colorSpaces?: readonly string[];
+```
 
-Defined in: [src/assets/image/batchOptimize.ts:119](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/batchOptimize.ts#L119)
+Defined in: [src/assets/image/batchOptimize.ts:119](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/batchOptimize.ts#L119)
 
 Only optimize images in these color spaces
 (e.g. `'DeviceRGB'`, `'DeviceCMYK'`, `'ICCBased'`).
@@ -52,9 +58,11 @@ Images in other color spaces are skipped.
 
 ### concurrency?
 
-> `readonly` `optional` **concurrency?**: `number`
+```ts
+readonly optional concurrency?: number;
+```
 
-Defined in: [src/assets/image/batchOptimize.ts:134](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/batchOptimize.ts#L134)
+Defined in: [src/assets/image/batchOptimize.ts:134](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/batchOptimize.ts#L134)
 
 Maximum number of images to process concurrently.
 
@@ -64,9 +72,11 @@ Default: `1` (sequential).  Values less than 1 are treated as 1.
 
 ### maxDpi?
 
-> `readonly` `optional` **maxDpi?**: `number`
+```ts
+readonly optional maxDpi?: number;
+```
 
-Defined in: [src/assets/image/batchOptimize.ts:61](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/batchOptimize.ts#L61)
+Defined in: [src/assets/image/batchOptimize.ts:61](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/batchOptimize.ts#L61)
 
 Maximum DPI for images.  Images exceeding this DPI at their
 display size will be downscaled before recompression.
@@ -77,9 +87,11 @@ Default: `150`.
 
 ### minImageSize?
 
-> `readonly` `optional` **minImageSize?**: `number`
+```ts
+readonly optional minImageSize?: number;
+```
 
-Defined in: [src/assets/image/batchOptimize.ts:111](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/batchOptimize.ts#L111)
+Defined in: [src/assets/image/batchOptimize.ts:111](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/batchOptimize.ts#L111)
 
 Skip images with compressed size below this threshold in bytes.
 
@@ -89,9 +101,11 @@ Default: `0` (no minimum).
 
 ### minSavingsPercent?
 
-> `readonly` `optional` **minSavingsPercent?**: `number`
+```ts
+readonly optional minSavingsPercent?: number;
+```
 
-Defined in: [src/assets/image/batchOptimize.ts:87](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/batchOptimize.ts#L87)
+Defined in: [src/assets/image/batchOptimize.ts:87](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/batchOptimize.ts#L87)
 
 Minimum savings percentage required to replace an image.
 If the recompressed image is not at least this much smaller,
@@ -103,9 +117,11 @@ Default: `10`.
 
 ### namePattern?
 
-> `readonly` `optional` **namePattern?**: `RegExp`
+```ts
+readonly optional namePattern?: RegExp;
+```
 
-Defined in: [src/assets/image/batchOptimize.ts:127](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/batchOptimize.ts#L127)
+Defined in: [src/assets/image/batchOptimize.ts:127](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/batchOptimize.ts#L127)
 
 Only optimize images whose resource name matches this pattern.
 
@@ -116,9 +132,11 @@ For example, `/Im[0-3]/` would only optimize images named
 
 ### onProgress?
 
-> `readonly` `optional` **onProgress?**: (`info`) => `void`
+```ts
+readonly optional onProgress?: (info) => void;
+```
 
-Defined in: [src/assets/image/batchOptimize.ts:139](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/batchOptimize.ts#L139)
+Defined in: [src/assets/image/batchOptimize.ts:139](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/batchOptimize.ts#L139)
 
 Progress callback invoked after each image is processed.
 
@@ -136,9 +154,11 @@ Progress callback invoked after each image is processed.
 
 ### pageRange?
 
-> `readonly` `optional` **pageRange?**: `object`
+```ts
+readonly optional pageRange?: object;
+```
 
-Defined in: [src/assets/image/batchOptimize.ts:104](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/batchOptimize.ts#L104)
+Defined in: [src/assets/image/batchOptimize.ts:104](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/batchOptimize.ts#L104)
 
 Only optimize images on pages within this range (0-indexed, inclusive).
 
@@ -147,19 +167,25 @@ Images on pages outside this range are skipped and counted as
 
 #### end
 
-> `readonly` **end**: `number`
+```ts
+readonly end: number;
+```
 
 #### start
 
-> `readonly` **start**: `number`
+```ts
+readonly start: number;
+```
 
 ***
 
 ### progressive?
 
-> `readonly` `optional` **progressive?**: `boolean`
+```ts
+readonly optional progressive?: boolean;
+```
 
-Defined in: [src/assets/image/batchOptimize.ts:67](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/batchOptimize.ts#L67)
+Defined in: [src/assets/image/batchOptimize.ts:67](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/batchOptimize.ts#L67)
 
 Encode as progressive JPEG.
 
@@ -169,9 +195,11 @@ Default: `false`.
 
 ### quality?
 
-> `readonly` `optional` **quality?**: `number`
+```ts
+readonly optional quality?: number;
+```
 
-Defined in: [src/assets/image/batchOptimize.ts:54](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/batchOptimize.ts#L54)
+Defined in: [src/assets/image/batchOptimize.ts:54](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/batchOptimize.ts#L54)
 
 JPEG quality (1–100) for recompressed images.
 
@@ -181,9 +209,11 @@ Default: `80`.
 
 ### skipSmallImages?
 
-> `readonly` `optional` **skipSmallImages?**: `boolean`
+```ts
+readonly optional skipSmallImages?: boolean;
+```
 
-Defined in: [src/assets/image/batchOptimize.ts:79](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/batchOptimize.ts#L79)
+Defined in: [src/assets/image/batchOptimize.ts:79](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/batchOptimize.ts#L79)
 
 Skip images smaller than this threshold (in bytes).
 

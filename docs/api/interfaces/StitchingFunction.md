@@ -6,7 +6,7 @@
 
 # Interface: StitchingFunction
 
-Defined in: src/core/pdfFunctions.ts:87
+Defined in: [src/core/pdfFunctions.ts:87](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfFunctions.ts#L87)
 
 Type 3 — stitching function (ISO 32000-2 §7.10.4).
 
@@ -18,9 +18,11 @@ input into that sub-function's domain via `encode`.
 
 ### bounds
 
-> `readonly` **bounds**: readonly `number`[]
+```ts
+readonly bounds: readonly number[];
+```
 
-Defined in: src/core/pdfFunctions.ts:94
+Defined in: [src/core/pdfFunctions.ts:94](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfFunctions.ts#L94)
 
 The `k − 1` interior boundary values, strictly increasing.
 
@@ -28,9 +30,11 @@ The `k − 1` interior boundary values, strictly increasing.
 
 ### domain
 
-> `readonly` **domain**: readonly `number`[]
+```ts
+readonly domain: readonly number[];
+```
 
-Defined in: src/core/pdfFunctions.ts:90
+Defined in: [src/core/pdfFunctions.ts:90](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfFunctions.ts#L90)
 
 Input domain `[min max]`.
 
@@ -38,9 +42,11 @@ Input domain `[min max]`.
 
 ### encode
 
-> `readonly` **encode**: readonly `number`[]
+```ts
+readonly encode: readonly number[];
+```
 
-Defined in: src/core/pdfFunctions.ts:96
+Defined in: [src/core/pdfFunctions.ts:96](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfFunctions.ts#L96)
 
 `2k` encode values mapping each subdomain to its sub-function domain.
 
@@ -48,9 +54,11 @@ Defined in: src/core/pdfFunctions.ts:96
 
 ### functions
 
-> `readonly` **functions**: readonly [`PdfFunctionDef`](../type-aliases/PdfFunctionDef.md)[]
+```ts
+readonly functions: readonly PdfFunctionDef[];
+```
 
-Defined in: src/core/pdfFunctions.ts:92
+Defined in: [src/core/pdfFunctions.ts:92](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfFunctions.ts#L92)
 
 The `k` sub-functions.
 
@@ -58,6 +66,8 @@ The `k` sub-functions.
 
 ### functionType
 
-> `readonly` **functionType**: `3`
+```ts
+readonly functionType: 3;
+```
 
-Defined in: src/core/pdfFunctions.ts:88
+Defined in: [src/core/pdfFunctions.ts:88](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfFunctions.ts#L88)

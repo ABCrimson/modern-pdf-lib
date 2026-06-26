@@ -6,9 +6,11 @@
 
 # Function: setCertificationLevel()
 
-> **setCertificationLevel**(`options`, `level`): `void`
+```ts
+function setCertificationLevel(options, level): void;
+```
 
-Defined in: [src/signature/mdpPolicy.ts:75](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/mdpPolicy.ts#L75)
+Defined in: [src/signature/mdpPolicy.ts:75](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/mdpPolicy.ts#L75)
 
 Set the certification level (MDP permission) on sign options.
 

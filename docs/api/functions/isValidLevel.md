@@ -6,9 +6,11 @@
 
 # Function: isValidLevel()
 
-> **isValidLevel**(`level`): `level is PdfALevel`
+```ts
+function isValidLevel(level): level is PdfALevel;
+```
 
-Defined in: [src/compliance/pdfAProfiles.ts:53](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/compliance/pdfAProfiles.ts#L53)
+Defined in: [src/compliance/pdfAProfiles.ts:53](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/pdfAProfiles.ts#L53)
 
 Check if a PDF/A level is supported.
 

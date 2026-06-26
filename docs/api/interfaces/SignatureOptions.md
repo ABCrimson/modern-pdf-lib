@@ -6,7 +6,7 @@
 
 # Interface: SignatureOptions
 
-Defined in: [src/signature/pkcs7.ts:60](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/pkcs7.ts#L60)
+Defined in: [src/signature/pkcs7.ts:60](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/pkcs7.ts#L60)
 
 Options for building a signature.
 
@@ -14,38 +14,48 @@ Options for building a signature.
 
 ### contactInfo?
 
-> `optional` **contactInfo?**: `string`
+```ts
+optional contactInfo?: string;
+```
 
-Defined in: [src/signature/pkcs7.ts:64](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/pkcs7.ts#L64)
+Defined in: [src/signature/pkcs7.ts:64](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/pkcs7.ts#L64)
 
 ***
 
 ### location?
 
-> `optional` **location?**: `string`
+```ts
+optional location?: string;
+```
 
-Defined in: [src/signature/pkcs7.ts:63](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/pkcs7.ts#L63)
+Defined in: [src/signature/pkcs7.ts:63](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/pkcs7.ts#L63)
 
 ***
 
 ### reason?
 
-> `optional` **reason?**: `string`
+```ts
+optional reason?: string;
+```
 
-Defined in: [src/signature/pkcs7.ts:62](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/pkcs7.ts#L62)
+Defined in: [src/signature/pkcs7.ts:62](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/pkcs7.ts#L62)
 
 ***
 
 ### signerInfo
 
-> **signerInfo**: [`SignerInfo`](SignerInfo.md)
+```ts
+signerInfo: SignerInfo;
+```
 
-Defined in: [src/signature/pkcs7.ts:61](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/pkcs7.ts#L61)
+Defined in: [src/signature/pkcs7.ts:61](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/pkcs7.ts#L61)
 
 ***
 
 ### signingDate?
 
-> `optional` **signingDate?**: `Date`
+```ts
+optional signingDate?: Date;
+```
 
-Defined in: [src/signature/pkcs7.ts:65](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/pkcs7.ts#L65)
+Defined in: [src/signature/pkcs7.ts:65](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/pkcs7.ts#L65)

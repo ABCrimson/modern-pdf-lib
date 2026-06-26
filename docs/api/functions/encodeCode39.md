@@ -6,9 +6,14 @@
 
 # Function: encodeCode39()
 
-> **encodeCode39**(`data`, `includeCheckDigit?`, `wideToNarrowRatio?`): [`BarcodeMatrix`](../interfaces/BarcodeMatrix.md)
+```ts
+function encodeCode39(
+   data, 
+   includeCheckDigit?, 
+   wideToNarrowRatio?): BarcodeMatrix;
+```
 
-Defined in: [src/barcode/code39.ts:190](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/barcode/code39.ts#L190)
+Defined in: [src/barcode/code39.ts:190](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/barcode/code39.ts#L190)
 
 Encode a string as a Code 39 barcode.
 

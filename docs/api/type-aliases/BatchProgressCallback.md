@@ -6,9 +6,11 @@
 
 # Type Alias: BatchProgressCallback
 
-> **BatchProgressCallback** = (`done`, `total`) => `void`
+```ts
+type BatchProgressCallback = (done, total) => void;
+```
 
-Defined in: [src/batch/batchProcessor.ts:27](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/batch/batchProcessor.ts#L27)
+Defined in: [src/batch/batchProcessor.ts:27](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/batch/batchProcessor.ts#L27)
 
 Callback invoked as batch items complete.
 

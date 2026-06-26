@@ -6,9 +6,11 @@
 
 # Function: buildGtsPdfxVersion()
 
-> **buildGtsPdfxVersion**(`variant?`): `string`
+```ts
+function buildGtsPdfxVersion(variant?): string;
+```
 
-Defined in: src/compliance/pdfX6.ts:105
+Defined in: [src/compliance/pdfX6.ts:105](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/pdfX6.ts#L105)
 
 Return the `GTS_PDFXVersion` Info-dictionary value for a variant.
 

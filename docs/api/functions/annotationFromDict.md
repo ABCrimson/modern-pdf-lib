@@ -6,9 +6,11 @@
 
 # Function: annotationFromDict()
 
-> **annotationFromDict**(`dict`, `_resolver?`): [`PdfAnnotation`](../classes/PdfAnnotation.md)
+```ts
+function annotationFromDict(dict, _resolver?): PdfAnnotation;
+```
 
-Defined in: [src/annotation/pdfAnnotation.ts:130](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/annotation/pdfAnnotation.ts#L130)
+Defined in: [src/annotation/pdfAnnotation.ts:130](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/annotation/pdfAnnotation.ts#L130)
 
 Create a PdfAnnotation from an existing dictionary.
 
@@ -22,7 +24,7 @@ The annotation dictionary.
 
 ### \_resolver?
 
-(`ref`) => [`PdfObject`](../type-aliases/PdfObject.md) \| `undefined`
+(`ref`) =&gt; [`PdfObject`](../type-aliases/PdfObject.md) \| `undefined`
 
 ## Returns
 

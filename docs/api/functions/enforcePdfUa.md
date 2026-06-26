@@ -6,9 +6,11 @@
 
 # Function: enforcePdfUa()
 
-> **enforcePdfUa**(`doc`): [`PdfUaEnforcementResult`](../interfaces/PdfUaEnforcementResult.md)
+```ts
+function enforcePdfUa(doc): PdfUaEnforcementResult;
+```
 
-Defined in: [src/accessibility/pdfUaValidator.ts:274](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/accessibility/pdfUaValidator.ts#L274)
+Defined in: [src/accessibility/pdfUaValidator.ts:274](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/accessibility/pdfUaValidator.ts#L274)
 
 Auto-fix PDF/UA issues that can be corrected programmatically.
 

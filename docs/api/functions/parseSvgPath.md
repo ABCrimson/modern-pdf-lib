@@ -6,9 +6,11 @@
 
 # Function: parseSvgPath()
 
-> **parseSvgPath**(`d`): [`SvgDrawCommand`](../interfaces/SvgDrawCommand.md)[]
+```ts
+function parseSvgPath(d): SvgDrawCommand[];
+```
 
-Defined in: [src/assets/svg/svgParser.ts:415](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/svg/svgParser.ts#L415)
+Defined in: [src/assets/svg/svgParser.ts:415](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/svg/svgParser.ts#L415)
 
 Parse an SVG path `d` attribute string into an array of drawing commands.
 

@@ -6,9 +6,11 @@
 
 # Function: applyPreset()
 
-> **applyPreset**(`preset`, `options`): [`DrawTableOptions`](../interfaces/DrawTableOptions.md)
+```ts
+function applyPreset(preset, options): DrawTableOptions;
+```
 
-Defined in: [src/layout/presets.ts:130](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/layout/presets.ts#L130)
+Defined in: [src/layout/presets.ts:130](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layout/presets.ts#L130)
 
 Merge a preset with explicit table options.
 

@@ -6,9 +6,11 @@
 
 # Function: toAlpha()
 
-> **toAlpha**(`num`): `string`
+```ts
+function toAlpha(num): string;
+```
 
-Defined in: [src/layout/headerFooter.ts:85](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/layout/headerFooter.ts#L85)
+Defined in: [src/layout/headerFooter.ts:85](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layout/headerFooter.ts#L85)
 
 Convert an integer to a lowercase alphabetic string (1=a, 2=b, ..., 27=aa).
 

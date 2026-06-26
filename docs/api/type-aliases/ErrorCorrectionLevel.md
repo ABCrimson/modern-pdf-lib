@@ -6,8 +6,10 @@
 
 # Type Alias: ErrorCorrectionLevel
 
-> **ErrorCorrectionLevel** = `"L"` \| `"M"` \| `"Q"` \| `"H"`
+```ts
+type ErrorCorrectionLevel = "L" | "M" | "Q" | "H";
+```
 
-Defined in: [src/barcode/qr.ts:22](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/barcode/qr.ts#L22)
+Defined in: [src/barcode/qr.ts:22](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/barcode/qr.ts#L22)
 
 Error correction level.

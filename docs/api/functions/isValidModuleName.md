@@ -6,9 +6,11 @@
 
 # Function: isValidModuleName()
 
-> **isValidModuleName**(`name`): name is "libdeflate" \| "png" \| "ttf" \| "shaping" \| "jbig2" \| "jpeg"
+```ts
+function isValidModuleName(name): name is "libdeflate" | "png" | "ttf" | "shaping" | "jbig2" | "jpeg";
+```
 
-Defined in: [src/wasm/inlineWasm.ts:138](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/wasm/inlineWasm.ts#L138)
+Defined in: [src/wasm/inlineWasm.ts:138](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/wasm/inlineWasm.ts#L138)
 
 Check whether a given module name is a valid WASM module name.
 

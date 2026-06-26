@@ -6,9 +6,11 @@
 
 # Function: buildSampledTransferFunction()
 
-> **buildSampledTransferFunction**(`samples`): [`PdfStream`](../classes/PdfStream.md)
+```ts
+function buildSampledTransferFunction(samples): PdfStream;
+```
 
-Defined in: src/core/halftone.ts:197
+Defined in: [src/core/halftone.ts:197](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/halftone.ts#L197)
 
 Build a sampled (Type 0) transfer-function stream from a lookup table.
 

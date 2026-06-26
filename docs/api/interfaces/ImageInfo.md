@@ -6,7 +6,7 @@
 
 # Interface: ImageInfo
 
-Defined in: [src/assets/image/imageExtract.ts:33](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/imageExtract.ts#L33)
+Defined in: [src/assets/image/imageExtract.ts:33](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/imageExtract.ts#L33)
 
 Information about a single image XObject in a PDF document.
 
@@ -14,9 +14,11 @@ Information about a single image XObject in a PDF document.
 
 ### bitsPerComponent
 
-> `readonly` **bitsPerComponent**: `number`
+```ts
+readonly bitsPerComponent: number;
+```
 
-Defined in: [src/assets/image/imageExtract.ts:47](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/imageExtract.ts#L47)
+Defined in: [src/assets/image/imageExtract.ts:47](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/imageExtract.ts#L47)
 
 Bits per component (typically 8).
 
@@ -24,9 +26,11 @@ Bits per component (typically 8).
 
 ### channels
 
-> `readonly` **channels**: `number`
+```ts
+readonly channels: number;
+```
 
-Defined in: [src/assets/image/imageExtract.ts:51](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/imageExtract.ts#L51)
+Defined in: [src/assets/image/imageExtract.ts:51](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/imageExtract.ts#L51)
 
 Number of color channels (1, 3, or 4).
 
@@ -34,9 +38,11 @@ Number of color channels (1, 3, or 4).
 
 ### colorSpace
 
-> `readonly` **colorSpace**: `string`
+```ts
+readonly colorSpace: string;
+```
 
-Defined in: [src/assets/image/imageExtract.ts:49](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/imageExtract.ts#L49)
+Defined in: [src/assets/image/imageExtract.ts:49](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/imageExtract.ts#L49)
 
 PDF color space name (e.g. 'DeviceRGB', 'DeviceGray', 'DeviceCMYK').
 
@@ -44,9 +50,11 @@ PDF color space name (e.g. 'DeviceRGB', 'DeviceGray', 'DeviceCMYK').
 
 ### compressedSize
 
-> `readonly` **compressedSize**: `number`
+```ts
+readonly compressedSize: number;
+```
 
-Defined in: [src/assets/image/imageExtract.ts:55](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/imageExtract.ts#L55)
+Defined in: [src/assets/image/imageExtract.ts:55](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/imageExtract.ts#L55)
 
 Size of the compressed stream data in bytes.
 
@@ -54,9 +62,11 @@ Size of the compressed stream data in bytes.
 
 ### filters
 
-> `readonly` **filters**: readonly `string`[]
+```ts
+readonly filters: readonly string[];
+```
 
-Defined in: [src/assets/image/imageExtract.ts:53](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/imageExtract.ts#L53)
+Defined in: [src/assets/image/imageExtract.ts:53](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/imageExtract.ts#L53)
 
 PDF filter name(s) applied to this stream.
 
@@ -64,9 +74,11 @@ PDF filter name(s) applied to this stream.
 
 ### height
 
-> `readonly` **height**: `number`
+```ts
+readonly height: number;
+```
 
-Defined in: [src/assets/image/imageExtract.ts:45](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/imageExtract.ts#L45)
+Defined in: [src/assets/image/imageExtract.ts:45](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/imageExtract.ts#L45)
 
 Image height in pixels.
 
@@ -74,9 +86,11 @@ Image height in pixels.
 
 ### name
 
-> `readonly` **name**: `string`
+```ts
+readonly name: string;
+```
 
-Defined in: [src/assets/image/imageExtract.ts:39](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/imageExtract.ts#L39)
+Defined in: [src/assets/image/imageExtract.ts:39](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/imageExtract.ts#L39)
 
 Resource name on the page (e.g. '/Im1').
 
@@ -84,9 +98,11 @@ Resource name on the page (e.g. '/Im1').
 
 ### pageIndex
 
-> `readonly` **pageIndex**: `number`
+```ts
+readonly pageIndex: number;
+```
 
-Defined in: [src/assets/image/imageExtract.ts:41](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/imageExtract.ts#L41)
+Defined in: [src/assets/image/imageExtract.ts:41](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/imageExtract.ts#L41)
 
 Zero-based page index where this image appears.
 
@@ -94,9 +110,11 @@ Zero-based page index where this image appears.
 
 ### ref
 
-> `readonly` **ref**: [`PdfRef`](../classes/PdfRef.md)
+```ts
+readonly ref: PdfRef;
+```
 
-Defined in: [src/assets/image/imageExtract.ts:37](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/imageExtract.ts#L37)
+Defined in: [src/assets/image/imageExtract.ts:37](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/imageExtract.ts#L37)
 
 The indirect reference to this stream in the registry.
 
@@ -104,9 +122,11 @@ The indirect reference to this stream in the registry.
 
 ### stream
 
-> `readonly` **stream**: [`PdfStream`](../classes/PdfStream.md)
+```ts
+readonly stream: PdfStream;
+```
 
-Defined in: [src/assets/image/imageExtract.ts:35](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/imageExtract.ts#L35)
+Defined in: [src/assets/image/imageExtract.ts:35](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/imageExtract.ts#L35)
 
 The PdfStream object for this image (can be mutated for in-place optimization).
 
@@ -114,8 +134,10 @@ The PdfStream object for this image (can be mutated for in-place optimization).
 
 ### width
 
-> `readonly` **width**: `number`
+```ts
+readonly width: number;
+```
 
-Defined in: [src/assets/image/imageExtract.ts:43](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/imageExtract.ts#L43)
+Defined in: [src/assets/image/imageExtract.ts:43](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/imageExtract.ts#L43)
 
 Image width in pixels.

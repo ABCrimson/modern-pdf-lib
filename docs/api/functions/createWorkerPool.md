@@ -6,9 +6,11 @@
 
 # Function: createWorkerPool()
 
-> **createWorkerPool**\<`I`, `O`\>(`runner`, `options?`): [`WorkerPool`](../interfaces/WorkerPool.md)\<`I`, `O`\>
+```ts
+function createWorkerPool<I, O>(runner, options?): WorkerPool<I, O>;
+```
 
-Defined in: src/runtime/workerPool.ts:94
+Defined in: [src/runtime/workerPool.ts:94](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/runtime/workerPool.ts#L94)
 
 Create a [WorkerPool](../interfaces/WorkerPool.md) backed by the given [TaskRunner](../type-aliases/TaskRunner.md).
 
@@ -26,7 +28,7 @@ Create a [WorkerPool](../interfaces/WorkerPool.md) backed by the given [TaskRunn
 
 ### runner
 
-[`TaskRunner`](../type-aliases/TaskRunner.md)\<`I`, `O`\>
+[`TaskRunner`](../type-aliases/TaskRunner.md)\&lt;`I`, `O`\&gt;
 
 The async function invoked once per scheduled input.
 
@@ -38,7 +40,7 @@ Optional [WorkerPoolOptions](../interfaces/WorkerPoolOptions.md).
 
 ## Returns
 
-[`WorkerPool`](../interfaces/WorkerPool.md)\<`I`, `O`\>
+[`WorkerPool`](../interfaces/WorkerPool.md)\&lt;`I`, `O`\&gt;
 
 A [WorkerPool](../interfaces/WorkerPool.md).
 

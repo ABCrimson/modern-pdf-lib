@@ -6,9 +6,14 @@
 
 # Function: spotColor()
 
-> **spotColor**(`name`, `alternate`, `tint?`): [`SpotColor`](../interfaces/SpotColor.md)
+```ts
+function spotColor(
+   name, 
+   alternate, 
+   tint?): SpotColor;
+```
 
-Defined in: [src/core/operators/color.ts:114](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/operators/color.ts#L114)
+Defined in: [src/core/operators/color.ts:114](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/operators/color.ts#L114)
 
 Create a spot (Separation) colour.
 
@@ -25,7 +30,9 @@ Colorant name, e.g. `'PANTONE 185 C'`.
 
 ### alternate
 
-[`RgbColor`](../interfaces/RgbColor.md) \| [`CmykColor`](../interfaces/CmykColor.md) \| [`GrayscaleColor`](../interfaces/GrayscaleColor.md)
+  \| [`RgbColor`](../interfaces/RgbColor.md)
+  \| [`CmykColor`](../interfaces/CmykColor.md)
+  \| [`GrayscaleColor`](../interfaces/GrayscaleColor.md)
 
 Fallback colour (RGB, CMYK, or grayscale).
 

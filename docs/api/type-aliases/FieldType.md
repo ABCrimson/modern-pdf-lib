@@ -6,8 +6,17 @@
 
 # Type Alias: FieldType
 
-> **FieldType** = `"text"` \| `"checkbox"` \| `"radio"` \| `"dropdown"` \| `"listbox"` \| `"button"` \| `"signature"`
+```ts
+type FieldType = 
+  | "text"
+  | "checkbox"
+  | "radio"
+  | "dropdown"
+  | "listbox"
+  | "button"
+  | "signature";
+```
 
-Defined in: [src/form/pdfField.ts:41](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/form/pdfField.ts#L41)
+Defined in: [src/form/pdfField.ts:41](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/pdfField.ts#L41)
 
 Discriminated union tag for PDF form field types.

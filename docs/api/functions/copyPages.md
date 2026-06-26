@@ -6,9 +6,14 @@
 
 # Function: copyPages()
 
-> **copyPages**(`sourceDoc`, `targetDoc`, `indices`): [`PdfPage`](../classes/PdfPage.md)[]
+```ts
+function copyPages(
+   sourceDoc, 
+   targetDoc, 
+   indices): PdfPage[];
+```
 
-Defined in: [src/core/documentMerge.ts:350](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/documentMerge.ts#L350)
+Defined in: [src/core/documentMerge.ts:350](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/documentMerge.ts#L350)
 
 Copy pages from a source document to a target document.
 

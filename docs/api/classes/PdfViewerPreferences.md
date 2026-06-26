@@ -6,7 +6,7 @@
 
 # Class: PdfViewerPreferences
 
-Defined in: [src/metadata/pdfViewerPreferences.ts:26](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/metadata/pdfViewerPreferences.ts#L26)
+Defined in: [src/metadata/pdfViewerPreferences.ts:26](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/metadata/pdfViewerPreferences.ts#L26)
 
 Class-based API for PDF viewer preferences with individual getter/setter pairs.
 
@@ -24,9 +24,11 @@ prefs.setPrintScaling('None');
 
 ### Constructor
 
-> **new PdfViewerPreferences**(`data?`): `PdfViewerPreferences`
+```ts
+new PdfViewerPreferences(data?): PdfViewerPreferences;
+```
 
-Defined in: [src/metadata/pdfViewerPreferences.ts:29](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/metadata/pdfViewerPreferences.ts#L29)
+Defined in: [src/metadata/pdfViewerPreferences.ts:29](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/metadata/pdfViewerPreferences.ts#L29)
 
 #### Parameters
 
@@ -42,9 +44,11 @@ Defined in: [src/metadata/pdfViewerPreferences.ts:29](https://github.com/ABCrims
 
 ### getCenterWindow()
 
-> **getCenterWindow**(): `boolean`
+```ts
+getCenterWindow(): boolean;
+```
 
-Defined in: [src/metadata/pdfViewerPreferences.ts:56](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/metadata/pdfViewerPreferences.ts#L56)
+Defined in: [src/metadata/pdfViewerPreferences.ts:56](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/metadata/pdfViewerPreferences.ts#L56)
 
 Whether the document window should be centered on the screen.
 
@@ -56,9 +60,11 @@ Whether the document window should be centered on the screen.
 
 ### getDirection()
 
-> **getDirection**(): `"L2R"` \| `"R2L"`
+```ts
+getDirection(): "L2R" | "R2L";
+```
 
-Defined in: [src/metadata/pdfViewerPreferences.ts:82](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/metadata/pdfViewerPreferences.ts#L82)
+Defined in: [src/metadata/pdfViewerPreferences.ts:82](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/metadata/pdfViewerPreferences.ts#L82)
 
 Predominant reading order for text.
 
@@ -70,9 +76,11 @@ Predominant reading order for text.
 
 ### getDisplayDocTitle()
 
-> **getDisplayDocTitle**(): `boolean`
+```ts
+getDisplayDocTitle(): boolean;
+```
 
-Defined in: [src/metadata/pdfViewerPreferences.ts:61](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/metadata/pdfViewerPreferences.ts#L61)
+Defined in: [src/metadata/pdfViewerPreferences.ts:61](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/metadata/pdfViewerPreferences.ts#L61)
 
 Whether the title bar should display the document title from metadata.
 
@@ -84,9 +92,11 @@ Whether the title bar should display the document title from metadata.
 
 ### getDuplex()
 
-> **getDuplex**(): `"Simplex"` \| `"DuplexFlipShortEdge"` \| `"DuplexFlipLongEdge"` \| `undefined`
+```ts
+getDuplex(): "Simplex" | "DuplexFlipShortEdge" | "DuplexFlipLongEdge" | undefined;
+```
 
-Defined in: [src/metadata/pdfViewerPreferences.ts:100](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/metadata/pdfViewerPreferences.ts#L100)
+Defined in: [src/metadata/pdfViewerPreferences.ts:100](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/metadata/pdfViewerPreferences.ts#L100)
 
 Paper handling option for duplex printing, or undefined if not set.
 
@@ -98,9 +108,11 @@ Paper handling option for duplex printing, or undefined if not set.
 
 ### getFitWindow()
 
-> **getFitWindow**(): `boolean`
+```ts
+getFitWindow(): boolean;
+```
 
-Defined in: [src/metadata/pdfViewerPreferences.ts:51](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/metadata/pdfViewerPreferences.ts#L51)
+Defined in: [src/metadata/pdfViewerPreferences.ts:51](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/metadata/pdfViewerPreferences.ts#L51)
 
 Whether the document window should be resized to fit the first page.
 
@@ -112,9 +124,11 @@ Whether the document window should be resized to fit the first page.
 
 ### getHideMenubar()
 
-> **getHideMenubar**(): `boolean`
+```ts
+getHideMenubar(): boolean;
+```
 
-Defined in: [src/metadata/pdfViewerPreferences.ts:41](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/metadata/pdfViewerPreferences.ts#L41)
+Defined in: [src/metadata/pdfViewerPreferences.ts:41](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/metadata/pdfViewerPreferences.ts#L41)
 
 Whether the viewer's menu bar should be hidden.
 
@@ -126,9 +140,11 @@ Whether the viewer's menu bar should be hidden.
 
 ### getHideToolbar()
 
-> **getHideToolbar**(): `boolean`
+```ts
+getHideToolbar(): boolean;
+```
 
-Defined in: [src/metadata/pdfViewerPreferences.ts:36](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/metadata/pdfViewerPreferences.ts#L36)
+Defined in: [src/metadata/pdfViewerPreferences.ts:36](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/metadata/pdfViewerPreferences.ts#L36)
 
 Whether the viewer's toolbar should be hidden.
 
@@ -140,9 +156,11 @@ Whether the viewer's toolbar should be hidden.
 
 ### getHideWindowUI()
 
-> **getHideWindowUI**(): `boolean`
+```ts
+getHideWindowUI(): boolean;
+```
 
-Defined in: [src/metadata/pdfViewerPreferences.ts:46](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/metadata/pdfViewerPreferences.ts#L46)
+Defined in: [src/metadata/pdfViewerPreferences.ts:46](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/metadata/pdfViewerPreferences.ts#L46)
 
 Whether the viewer's window UI elements should be hidden.
 
@@ -154,9 +172,11 @@ Whether the viewer's window UI elements should be hidden.
 
 ### getNonFullScreenPageMode()
 
-> **getNonFullScreenPageMode**(): `"UseNone"` \| `"UseOutlines"` \| `"UseThumbs"` \| `"UseOC"`
+```ts
+getNonFullScreenPageMode(): "UseNone" | "UseOutlines" | "UseThumbs" | "UseOC";
+```
 
-Defined in: [src/metadata/pdfViewerPreferences.ts:73](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/metadata/pdfViewerPreferences.ts#L73)
+Defined in: [src/metadata/pdfViewerPreferences.ts:73](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/metadata/pdfViewerPreferences.ts#L73)
 
 Page mode to use when exiting full-screen mode.
 
@@ -168,9 +188,11 @@ Page mode to use when exiting full-screen mode.
 
 ### getNumCopies()
 
-> **getNumCopies**(): `number`
+```ts
+getNumCopies(): number;
+```
 
-Defined in: [src/metadata/pdfViewerPreferences.ts:111](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/metadata/pdfViewerPreferences.ts#L111)
+Defined in: [src/metadata/pdfViewerPreferences.ts:111](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/metadata/pdfViewerPreferences.ts#L111)
 
 Default number of copies to print.
 
@@ -182,9 +204,11 @@ Default number of copies to print.
 
 ### getPickTrayByPDFSize()
 
-> **getPickTrayByPDFSize**(): `boolean`
+```ts
+getPickTrayByPDFSize(): boolean;
+```
 
-Defined in: [src/metadata/pdfViewerPreferences.ts:66](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/metadata/pdfViewerPreferences.ts#L66)
+Defined in: [src/metadata/pdfViewerPreferences.ts:66](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/metadata/pdfViewerPreferences.ts#L66)
 
 Whether the paper tray should be selected based on the PDF page size.
 
@@ -196,9 +220,11 @@ Whether the paper tray should be selected based on the PDF page size.
 
 ### getPrintPageRange()
 
-> **getPrintPageRange**(): \[`number`, `number`\][] \| `undefined`
+```ts
+getPrintPageRange(): [number, number][] | undefined;
+```
 
-Defined in: [src/metadata/pdfViewerPreferences.ts:116](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/metadata/pdfViewerPreferences.ts#L116)
+Defined in: [src/metadata/pdfViewerPreferences.ts:116](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/metadata/pdfViewerPreferences.ts#L116)
 
 Page ranges to print, as [start, end] pairs, or undefined if not set.
 
@@ -210,9 +236,11 @@ Page ranges to print, as [start, end] pairs, or undefined if not set.
 
 ### getPrintScaling()
 
-> **getPrintScaling**(): `"None"` \| `"AppDefault"`
+```ts
+getPrintScaling(): "None" | "AppDefault";
+```
 
-Defined in: [src/metadata/pdfViewerPreferences.ts:91](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/metadata/pdfViewerPreferences.ts#L91)
+Defined in: [src/metadata/pdfViewerPreferences.ts:91](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/metadata/pdfViewerPreferences.ts#L91)
 
 Page scaling preference for the print dialog.
 
@@ -224,9 +252,11 @@ Page scaling preference for the print dialog.
 
 ### setCenterWindow()
 
-> **setCenterWindow**(`value`): `void`
+```ts
+setCenterWindow(value): void;
+```
 
-Defined in: [src/metadata/pdfViewerPreferences.ts:58](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/metadata/pdfViewerPreferences.ts#L58)
+Defined in: [src/metadata/pdfViewerPreferences.ts:58](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/metadata/pdfViewerPreferences.ts#L58)
 
 Set whether the document window should be centered on the screen.
 
@@ -244,9 +274,11 @@ Set whether the document window should be centered on the screen.
 
 ### setDirection()
 
-> **setDirection**(`value`): `void`
+```ts
+setDirection(value): void;
+```
 
-Defined in: [src/metadata/pdfViewerPreferences.ts:86](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/metadata/pdfViewerPreferences.ts#L86)
+Defined in: [src/metadata/pdfViewerPreferences.ts:86](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/metadata/pdfViewerPreferences.ts#L86)
 
 Set the predominant reading order for text.
 
@@ -264,9 +296,11 @@ Set the predominant reading order for text.
 
 ### setDisplayDocTitle()
 
-> **setDisplayDocTitle**(`value`): `void`
+```ts
+setDisplayDocTitle(value): void;
+```
 
-Defined in: [src/metadata/pdfViewerPreferences.ts:63](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/metadata/pdfViewerPreferences.ts#L63)
+Defined in: [src/metadata/pdfViewerPreferences.ts:63](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/metadata/pdfViewerPreferences.ts#L63)
 
 Set whether the title bar should display the document title.
 
@@ -284,9 +318,11 @@ Set whether the title bar should display the document title.
 
 ### setDuplex()
 
-> **setDuplex**(`value`): `void`
+```ts
+setDuplex(value): void;
+```
 
-Defined in: [src/metadata/pdfViewerPreferences.ts:104](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/metadata/pdfViewerPreferences.ts#L104)
+Defined in: [src/metadata/pdfViewerPreferences.ts:104](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/metadata/pdfViewerPreferences.ts#L104)
 
 Set the paper handling option for duplex printing.
 
@@ -304,9 +340,11 @@ Set the paper handling option for duplex printing.
 
 ### setFitWindow()
 
-> **setFitWindow**(`value`): `void`
+```ts
+setFitWindow(value): void;
+```
 
-Defined in: [src/metadata/pdfViewerPreferences.ts:53](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/metadata/pdfViewerPreferences.ts#L53)
+Defined in: [src/metadata/pdfViewerPreferences.ts:53](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/metadata/pdfViewerPreferences.ts#L53)
 
 Set whether the document window should be resized to fit the first page.
 
@@ -324,9 +362,11 @@ Set whether the document window should be resized to fit the first page.
 
 ### setHideMenubar()
 
-> **setHideMenubar**(`value`): `void`
+```ts
+setHideMenubar(value): void;
+```
 
-Defined in: [src/metadata/pdfViewerPreferences.ts:43](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/metadata/pdfViewerPreferences.ts#L43)
+Defined in: [src/metadata/pdfViewerPreferences.ts:43](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/metadata/pdfViewerPreferences.ts#L43)
 
 Set whether the viewer's menu bar should be hidden.
 
@@ -344,9 +384,11 @@ Set whether the viewer's menu bar should be hidden.
 
 ### setHideToolbar()
 
-> **setHideToolbar**(`value`): `void`
+```ts
+setHideToolbar(value): void;
+```
 
-Defined in: [src/metadata/pdfViewerPreferences.ts:38](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/metadata/pdfViewerPreferences.ts#L38)
+Defined in: [src/metadata/pdfViewerPreferences.ts:38](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/metadata/pdfViewerPreferences.ts#L38)
 
 Set whether the viewer's toolbar should be hidden.
 
@@ -364,9 +406,11 @@ Set whether the viewer's toolbar should be hidden.
 
 ### setHideWindowUI()
 
-> **setHideWindowUI**(`value`): `void`
+```ts
+setHideWindowUI(value): void;
+```
 
-Defined in: [src/metadata/pdfViewerPreferences.ts:48](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/metadata/pdfViewerPreferences.ts#L48)
+Defined in: [src/metadata/pdfViewerPreferences.ts:48](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/metadata/pdfViewerPreferences.ts#L48)
 
 Set whether the viewer's window UI elements should be hidden.
 
@@ -384,9 +428,11 @@ Set whether the viewer's window UI elements should be hidden.
 
 ### setNonFullScreenPageMode()
 
-> **setNonFullScreenPageMode**(`value`): `void`
+```ts
+setNonFullScreenPageMode(value): void;
+```
 
-Defined in: [src/metadata/pdfViewerPreferences.ts:77](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/metadata/pdfViewerPreferences.ts#L77)
+Defined in: [src/metadata/pdfViewerPreferences.ts:77](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/metadata/pdfViewerPreferences.ts#L77)
 
 Set the page mode to use when exiting full-screen mode.
 
@@ -404,9 +450,11 @@ Set the page mode to use when exiting full-screen mode.
 
 ### setNumCopies()
 
-> **setNumCopies**(`value`): `void`
+```ts
+setNumCopies(value): void;
+```
 
-Defined in: [src/metadata/pdfViewerPreferences.ts:113](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/metadata/pdfViewerPreferences.ts#L113)
+Defined in: [src/metadata/pdfViewerPreferences.ts:113](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/metadata/pdfViewerPreferences.ts#L113)
 
 Set the default number of copies to print.
 
@@ -424,9 +472,11 @@ Set the default number of copies to print.
 
 ### setPickTrayByPDFSize()
 
-> **setPickTrayByPDFSize**(`value`): `void`
+```ts
+setPickTrayByPDFSize(value): void;
+```
 
-Defined in: [src/metadata/pdfViewerPreferences.ts:68](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/metadata/pdfViewerPreferences.ts#L68)
+Defined in: [src/metadata/pdfViewerPreferences.ts:68](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/metadata/pdfViewerPreferences.ts#L68)
 
 Set whether the paper tray should be selected based on the PDF page size.
 
@@ -444,9 +494,11 @@ Set whether the paper tray should be selected based on the PDF page size.
 
 ### setPrintPageRange()
 
-> **setPrintPageRange**(`value`): `void`
+```ts
+setPrintPageRange(value): void;
+```
 
-Defined in: [src/metadata/pdfViewerPreferences.ts:118](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/metadata/pdfViewerPreferences.ts#L118)
+Defined in: [src/metadata/pdfViewerPreferences.ts:118](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/metadata/pdfViewerPreferences.ts#L118)
 
 Set the page ranges to print, as [start, end] pairs.
 
@@ -464,9 +516,11 @@ Set the page ranges to print, as [start, end] pairs.
 
 ### setPrintScaling()
 
-> **setPrintScaling**(`value`): `void`
+```ts
+setPrintScaling(value): void;
+```
 
-Defined in: [src/metadata/pdfViewerPreferences.ts:95](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/metadata/pdfViewerPreferences.ts#L95)
+Defined in: [src/metadata/pdfViewerPreferences.ts:95](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/metadata/pdfViewerPreferences.ts#L95)
 
 Set the page scaling preference for the print dialog.
 
@@ -484,9 +538,11 @@ Set the page scaling preference for the print dialog.
 
 ### toDict()
 
-> **toDict**(): [`PdfDict`](PdfDict.md)
+```ts
+toDict(): PdfDict;
+```
 
-Defined in: [src/metadata/pdfViewerPreferences.ts:123](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/metadata/pdfViewerPreferences.ts#L123)
+Defined in: [src/metadata/pdfViewerPreferences.ts:123](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/metadata/pdfViewerPreferences.ts#L123)
 
 Convert to a PdfDict for embedding in the PDF catalog.
 
@@ -498,9 +554,11 @@ Convert to a PdfDict for embedding in the PDF catalog.
 
 ### toObject()
 
-> **toObject**(): [`ViewerPreferences`](../interfaces/ViewerPreferences.md)
+```ts
+toObject(): ViewerPreferences;
+```
 
-Defined in: [src/metadata/pdfViewerPreferences.ts:126](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/metadata/pdfViewerPreferences.ts#L126)
+Defined in: [src/metadata/pdfViewerPreferences.ts:126](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/metadata/pdfViewerPreferences.ts#L126)
 
 Convert to a plain ViewerPreferences object.
 

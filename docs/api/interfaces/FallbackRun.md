@@ -6,7 +6,7 @@
 
 # Interface: FallbackRun
 
-Defined in: src/assets/font/fontFallback.ts:36
+Defined in: [src/assets/font/fontFallback.ts:36](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/font/fontFallback.ts#L36)
 
 A contiguous slice of the input text that resolves to a single font.
 
@@ -14,9 +14,11 @@ A contiguous slice of the input text that resolves to a single font.
 
 ### font
 
-> `readonly` **font**: `string`
+```ts
+readonly font: string;
+```
 
-Defined in: src/assets/font/fontFallback.ts:38
+Defined in: [src/assets/font/fontFallback.ts:38](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/font/fontFallback.ts#L38)
 
 Name of the font chosen for every code point in this run.
 
@@ -24,9 +26,11 @@ Name of the font chosen for every code point in this run.
 
 ### start
 
-> `readonly` **start**: `number`
+```ts
+readonly start: number;
+```
 
-Defined in: src/assets/font/fontFallback.ts:42
+Defined in: [src/assets/font/fontFallback.ts:42](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/font/fontFallback.ts#L42)
 
 Code-point index (not UTF-16 index) where this run starts.
 
@@ -34,8 +38,10 @@ Code-point index (not UTF-16 index) where this run starts.
 
 ### text
 
-> `readonly` **text**: `string`
+```ts
+readonly text: string;
+```
 
-Defined in: src/assets/font/fontFallback.ts:40
+Defined in: [src/assets/font/fontFallback.ts:40](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/font/fontFallback.ts#L40)
 
 The text covered by this run (may include astral characters).

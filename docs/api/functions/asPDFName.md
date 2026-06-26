@@ -6,9 +6,11 @@
 
 # Function: asPdfName()
 
-> **asPdfName**(`value`): [`PdfName`](../classes/PdfName.md)
+```ts
+function asPdfName(value): PdfName;
+```
 
-Defined in: [src/utils/pdfValueHelpers.ts:22](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/utils/pdfValueHelpers.ts#L22)
+Defined in: [src/utils/pdfValueHelpers.ts:22](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/utils/pdfValueHelpers.ts#L22)
 
 Create a [PdfName](../classes/PdfName.md) from a string.
 

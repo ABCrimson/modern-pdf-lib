@@ -6,9 +6,11 @@
 
 # Function: getToUnicodeCmap()
 
-> **getToUnicodeCmap**(`fontName`): `string`
+```ts
+function getToUnicodeCmap(fontName): string;
+```
 
-Defined in: [src/compliance/toUnicodeCmap.ts:606](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/compliance/toUnicodeCmap.ts#L606)
+Defined in: [src/compliance/toUnicodeCmap.ts:606](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/toUnicodeCmap.ts#L606)
 
 Get the appropriate ToUnicode CMap for a standard 14 font.
 

@@ -6,9 +6,16 @@
 
 # Function: saveIncremental()
 
-> **saveIncremental**(`originalBytes`, `registry`, `structure`, `changedObjects`, `options?`): [`IncrementalSaveResult`](../interfaces/IncrementalSaveResult.md)
+```ts
+function saveIncremental(
+   originalBytes, 
+   registry, 
+   structure, 
+   changedObjects, 
+   options?): IncrementalSaveResult;
+```
 
-Defined in: [src/core/incrementalWriter.ts:241](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/incrementalWriter.ts#L241)
+Defined in: [src/core/incrementalWriter.ts:241](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/incrementalWriter.ts#L241)
 
 Perform an incremental save of a PDF document.
 
@@ -42,7 +49,7 @@ Document structure references (catalog, info, pages).
 
 ### changedObjects
 
-`Set`\<`number`\>
+`Set`\&lt;`number`\&gt;
 
 Set of object numbers that are new or modified.
 

@@ -6,9 +6,11 @@
 
 # Function: getAttachments()
 
-> **getAttachments**(`catalogDict`, `resolver`): [`EmbeddedFile`](../interfaces/EmbeddedFile.md)[]
+```ts
+function getAttachments(catalogDict, resolver): EmbeddedFile[];
+```
 
-Defined in: [src/core/embeddedFiles.ts:116](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/embeddedFiles.ts#L116)
+Defined in: [src/core/embeddedFiles.ts:116](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/embeddedFiles.ts#L116)
 
 Extract embedded file attachments from a catalog dictionary.
 
@@ -22,7 +24,7 @@ The catalog dictionary.
 
 ### resolver
 
-(`ref`) => [`PdfObject`](../type-aliases/PdfObject.md)
+(`ref`) =&gt; [`PdfObject`](../type-aliases/PdfObject.md)
 
 A function to resolve indirect references.
 

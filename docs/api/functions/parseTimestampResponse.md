@@ -6,9 +6,11 @@
 
 # Function: parseTimestampResponse()
 
-> **parseTimestampResponse**(`response`): [`TimestampResult`](../interfaces/TimestampResult.md)
+```ts
+function parseTimestampResponse(response): TimestampResult;
+```
 
-Defined in: [src/signature/timestamp.ts:198](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/timestamp.ts#L198)
+Defined in: [src/signature/timestamp.ts:198](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/timestamp.ts#L198)
 
 Parse a DER-encoded TimeStampResp (RFC 3161 SS2.4.2).
 

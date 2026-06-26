@@ -6,9 +6,14 @@
 
 # Function: enforcePdfAFull()
 
-> **enforcePdfAFull**(`pdfBytes`, `level`, `options?`): `Promise`\<[`EnforcePdfAResult`](../interfaces/EnforcePdfAResult.md)\>
+```ts
+function enforcePdfAFull(
+   pdfBytes, 
+   level, 
+options?): Promise<EnforcePdfAResult>;
+```
 
-Defined in: [src/compliance/enforcePdfAv2.ts:220](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/compliance/enforcePdfAv2.ts#L220)
+Defined in: [src/compliance/enforcePdfAv2.ts:220](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/enforcePdfAv2.ts#L220)
 
 Enforce PDF/A compliance with a full pipeline.
 
@@ -46,7 +51,7 @@ Fine-grained control over which steps to execute.
 
 ## Returns
 
-`Promise`\<[`EnforcePdfAResult`](../interfaces/EnforcePdfAResult.md)\>
+`Promise`\&lt;[`EnforcePdfAResult`](../interfaces/EnforcePdfAResult.md)\&gt;
 
 The enforcement result including modified bytes,
                  validation report, and actions taken.

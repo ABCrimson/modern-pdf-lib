@@ -6,7 +6,7 @@
 
 # Interface: IncrementalChange
 
-Defined in: [src/signature/incrementalOptimizer.ts:22](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/incrementalOptimizer.ts#L22)
+Defined in: [src/signature/incrementalOptimizer.ts:22](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/incrementalOptimizer.ts#L22)
 
 A single object change for an incremental update.
 
@@ -14,9 +14,11 @@ A single object change for an incremental update.
 
 ### generationNumber
 
-> **generationNumber**: `number`
+```ts
+generationNumber: number;
+```
 
-Defined in: [src/signature/incrementalOptimizer.ts:26](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/incrementalOptimizer.ts#L26)
+Defined in: [src/signature/incrementalOptimizer.ts:26](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/incrementalOptimizer.ts#L26)
 
 The generation number.
 
@@ -24,9 +26,11 @@ The generation number.
 
 ### newContent
 
-> **newContent**: `Uint8Array`
+```ts
+newContent: Uint8Array;
+```
 
-Defined in: [src/signature/incrementalOptimizer.ts:28](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/incrementalOptimizer.ts#L28)
+Defined in: [src/signature/incrementalOptimizer.ts:28](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/incrementalOptimizer.ts#L28)
 
 The new content for this object (raw bytes).
 
@@ -34,8 +38,10 @@ The new content for this object (raw bytes).
 
 ### objectNumber
 
-> **objectNumber**: `number`
+```ts
+objectNumber: number;
+```
 
-Defined in: [src/signature/incrementalOptimizer.ts:24](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/incrementalOptimizer.ts#L24)
+Defined in: [src/signature/incrementalOptimizer.ts:24](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/incrementalOptimizer.ts#L24)
 
 The PDF object number.

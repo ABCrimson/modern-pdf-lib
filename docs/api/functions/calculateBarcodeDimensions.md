@@ -6,9 +6,11 @@
 
 # Function: calculateBarcodeDimensions()
 
-> **calculateBarcodeDimensions**(`matrix`, `options?`): `object`
+```ts
+function calculateBarcodeDimensions(matrix, options?): object;
+```
 
-Defined in: [src/barcode/style.ts:88](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/barcode/style.ts#L88)
+Defined in: [src/barcode/style.ts:88](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/barcode/style.ts#L88)
 
 Calculate the total dimensions of a styled barcode.
 
@@ -37,8 +39,12 @@ Styling options.
 
 ### height
 
-> **height**: `number`
+```ts
+height: number;
+```
 
 ### width
 
-> **width**: `number`
+```ts
+width: number;
+```

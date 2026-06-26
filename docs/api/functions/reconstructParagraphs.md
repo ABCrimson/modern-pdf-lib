@@ -6,9 +6,11 @@
 
 # Function: reconstructParagraphs()
 
-> **reconstructParagraphs**(`items`, `options?`): [`TextParagraph`](../interfaces/TextParagraph.md)[]
+```ts
+function reconstructParagraphs(items, options?): TextParagraph[];
+```
 
-Defined in: src/parser/textReconstruct.ts:184
+Defined in: [src/parser/textReconstruct.ts:184](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/parser/textReconstruct.ts#L184)
 
 Group positioned text items into paragraphs.
 

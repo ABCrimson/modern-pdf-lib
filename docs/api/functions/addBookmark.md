@@ -6,9 +6,11 @@
 
 # Function: addBookmark()
 
-> **addBookmark**(`doc`, `options`): [`BookmarkRef`](../interfaces/BookmarkRef.md)
+```ts
+function addBookmark(doc, options): BookmarkRef;
+```
 
-Defined in: [src/core/outlines.ts:121](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/outlines.ts#L121)
+Defined in: [src/core/outlines.ts:121](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/outlines.ts#L121)
 
 Add a bookmark entry to the document's outline tree.
 

@@ -6,7 +6,7 @@
 
 # Interface: SarifLog
 
-Defined in: src/compliance/validationReport.ts:127
+Defined in: [src/compliance/validationReport.ts:127](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/validationReport.ts#L127)
 
 A complete SARIF 2.1.0 log.
 
@@ -14,22 +14,28 @@ A complete SARIF 2.1.0 log.
 
 ### $schema
 
-> `readonly` **$schema**: `string`
+```ts
+readonly $schema: string;
+```
 
-Defined in: src/compliance/validationReport.ts:129
+Defined in: [src/compliance/validationReport.ts:129](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/validationReport.ts#L129)
 
 ***
 
 ### runs
 
-> `readonly` **runs**: readonly \[[`SarifRun`](SarifRun.md)\]
+```ts
+readonly runs: readonly [SarifRun];
+```
 
-Defined in: src/compliance/validationReport.ts:130
+Defined in: [src/compliance/validationReport.ts:130](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/validationReport.ts#L130)
 
 ***
 
 ### version
 
-> `readonly` **version**: `"2.1.0"`
+```ts
+readonly version: "2.1.0";
+```
 
-Defined in: src/compliance/validationReport.ts:128
+Defined in: [src/compliance/validationReport.ts:128](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/validationReport.ts#L128)

@@ -6,9 +6,11 @@
 
 # Function: addFieldLock()
 
-> **addFieldLock**(`options`, `lock`): `void`
+```ts
+function addFieldLock(options, lock): void;
+```
 
-Defined in: [src/signature/fieldLock.ts:92](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/fieldLock.ts#L92)
+Defined in: [src/signature/fieldLock.ts:92](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/fieldLock.ts#L92)
 
 Add a field lock dictionary to sign options.
 

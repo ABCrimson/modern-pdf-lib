@@ -6,9 +6,15 @@
 
 # Function: verifySignature()
 
-> **verifySignature**(`pdfBytes`, `byteRange`, `signatureBytes`, `certificateBytes`): `Promise`\<`boolean`\>
+```ts
+function verifySignature(
+   pdfBytes, 
+   byteRange, 
+   signatureBytes, 
+certificateBytes): Promise<boolean>;
+```
 
-Defined in: [src/signature/signatureVerifier.ts:434](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/signatureVerifier.ts#L434)
+Defined in: [src/signature/signatureVerifier.ts:434](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/signatureVerifier.ts#L434)
 
 Verify a single signature.
 
@@ -43,6 +49,6 @@ The DER-encoded X.509 certificate.
 
 ## Returns
 
-`Promise`\<`boolean`\>
+`Promise`\&lt;`boolean`\&gt;
 
 `true` if the signature is valid.

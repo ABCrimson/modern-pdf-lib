@@ -6,7 +6,7 @@
 
 # Interface: FieldLockInfo
 
-Defined in: [src/signature/fieldLock.ts:40](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/fieldLock.ts#L40)
+Defined in: [src/signature/fieldLock.ts:40](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/fieldLock.ts#L40)
 
 Information about a field lock on a signature field.
 
@@ -14,9 +14,11 @@ Information about a field lock on a signature field.
 
 ### action
 
-> **action**: `"All"` \| `"Include"` \| `"Exclude"`
+```ts
+action: "All" | "Include" | "Exclude";
+```
 
-Defined in: [src/signature/fieldLock.ts:44](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/fieldLock.ts#L44)
+Defined in: [src/signature/fieldLock.ts:44](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/fieldLock.ts#L44)
 
 The lock action: 'All', 'Include', or 'Exclude'.
 
@@ -24,9 +26,11 @@ The lock action: 'All', 'Include', or 'Exclude'.
 
 ### lockedFields
 
-> **lockedFields**: `string`[]
+```ts
+lockedFields: string[];
+```
 
-Defined in: [src/signature/fieldLock.ts:46](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/fieldLock.ts#L46)
+Defined in: [src/signature/fieldLock.ts:46](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/fieldLock.ts#L46)
 
 The list of locked fields (empty for 'All' action).
 
@@ -34,8 +38,10 @@ The list of locked fields (empty for 'All' action).
 
 ### signatureFieldName
 
-> **signatureFieldName**: `string`
+```ts
+signatureFieldName: string;
+```
 
-Defined in: [src/signature/fieldLock.ts:42](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/fieldLock.ts#L42)
+Defined in: [src/signature/fieldLock.ts:42](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/fieldLock.ts#L42)
 
 The name of the signature field that has the lock.

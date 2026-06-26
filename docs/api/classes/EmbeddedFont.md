@@ -6,7 +6,7 @@
 
 # Class: EmbeddedFont
 
-Defined in: [src/assets/font/fontEmbed.ts:183](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/font/fontEmbed.ts#L183)
+Defined in: [src/assets/font/fontEmbed.ts:183](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/font/fontEmbed.ts#L183)
 
 Represents a TrueType / OpenType font that has been loaded for
 embedding in a PDF document.
@@ -20,9 +20,11 @@ Create via `PdfDocument.embedFont()`.
 
 ### fontData
 
-> `readonly` **fontData**: `Uint8Array`
+```ts
+readonly fontData: Uint8Array;
+```
 
-Defined in: [src/assets/font/fontEmbed.ts:185](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/font/fontEmbed.ts#L185)
+Defined in: [src/assets/font/fontEmbed.ts:185](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/font/fontEmbed.ts#L185)
 
 The raw font file bytes.
 
@@ -30,9 +32,11 @@ The raw font file bytes.
 
 ### metrics
 
-> `readonly` **metrics**: [`FontMetrics`](../interfaces/FontMetrics.md)
+```ts
+readonly metrics: FontMetrics;
+```
 
-Defined in: [src/assets/font/fontEmbed.ts:188](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/font/fontEmbed.ts#L188)
+Defined in: [src/assets/font/fontEmbed.ts:188](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/font/fontEmbed.ts#L188)
 
 Extracted font metrics.
 
@@ -40,9 +44,11 @@ Extracted font metrics.
 
 ### ascentAtSize()
 
-> **ascentAtSize**(`fontSize`): `number`
+```ts
+ascentAtSize(fontSize): number;
+```
 
-Defined in: [src/assets/font/fontEmbed.ts:255](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/font/fontEmbed.ts#L255)
+Defined in: [src/assets/font/fontEmbed.ts:255](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/font/fontEmbed.ts#L255)
 
 Compute the ascender height at the given font size.
 
@@ -64,9 +70,11 @@ The ascender height in points (positive).
 
 ### buildEmbedding()
 
-> **buildEmbedding**(): [`FontEmbeddingResult`](../interfaces/FontEmbeddingResult.md)
+```ts
+buildEmbedding(): FontEmbeddingResult;
+```
 
-Defined in: [src/assets/font/fontEmbed.ts:380](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/font/fontEmbed.ts#L380)
+Defined in: [src/assets/font/fontEmbed.ts:380](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/font/fontEmbed.ts#L380)
 
 Build the complete set of PDF dictionary data needed to embed this
 font.  This performs subsetting (if WASM is available) and generates
@@ -84,9 +92,11 @@ The embedding result containing all PDF object data.
 
 ### capHeightAtSize()
 
-> **capHeightAtSize**(`fontSize`): `number`
+```ts
+capHeightAtSize(fontSize): number;
+```
 
-Defined in: [src/assets/font/fontEmbed.ts:275](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/font/fontEmbed.ts#L275)
+Defined in: [src/assets/font/fontEmbed.ts:275](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/font/fontEmbed.ts#L275)
 
 Compute the cap height at the given font size.
 
@@ -108,9 +118,11 @@ The cap height in points.
 
 ### descentAtSize()
 
-> **descentAtSize**(`fontSize`): `number`
+```ts
+descentAtSize(fontSize): number;
+```
 
-Defined in: [src/assets/font/fontEmbed.ts:265](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/font/fontEmbed.ts#L265)
+Defined in: [src/assets/font/fontEmbed.ts:265](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/font/fontEmbed.ts#L265)
 
 Compute the descender depth at the given font size.
 
@@ -132,9 +144,11 @@ The descender depth in points (negative).
 
 ### encodeText()
 
-> **encodeText**(`text`): `string`
+```ts
+encodeText(text): string;
+```
 
-Defined in: [src/assets/font/fontEmbed.ts:347](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/font/fontEmbed.ts#L347)
+Defined in: [src/assets/font/fontEmbed.ts:347](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/font/fontEmbed.ts#L347)
 
 Encode a text string as hex-encoded CID bytes for use in PDF
 content stream `Tj` / `TJ` operators.
@@ -160,23 +174,27 @@ Hex string (e.g. `"00480065006C006C006F"` for "Hello").
 
 ### getUsedGlyphs()
 
-> **getUsedGlyphs**(): `ReadonlySet`\<`number`\>
+```ts
+getUsedGlyphs(): ReadonlySet<number>;
+```
 
-Defined in: [src/assets/font/fontEmbed.ts:329](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/font/fontEmbed.ts#L329)
+Defined in: [src/assets/font/fontEmbed.ts:329](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/font/fontEmbed.ts#L329)
 
 Get the set of all glyph IDs that have been used.
 
 #### Returns
 
-`ReadonlySet`\<`number`\>
+`ReadonlySet`\&lt;`number`\&gt;
 
 ***
 
 ### heightAtSize()
 
-> **heightAtSize**(`fontSize`): `number`
+```ts
+heightAtSize(fontSize): number;
+```
 
-Defined in: [src/assets/font/fontEmbed.ts:244](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/font/fontEmbed.ts#L244)
+Defined in: [src/assets/font/fontEmbed.ts:244](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/font/fontEmbed.ts#L244)
 
 Compute the height of the font at the given size.
 
@@ -201,9 +219,11 @@ The font height in points.
 
 ### lineHeightAtSize()
 
-> **lineHeightAtSize**(`fontSize`): `number`
+```ts
+lineHeightAtSize(fontSize): number;
+```
 
-Defined in: [src/assets/font/fontEmbed.ts:285](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/font/fontEmbed.ts#L285)
+Defined in: [src/assets/font/fontEmbed.ts:285](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/font/fontEmbed.ts#L285)
 
 Compute the line height (ascent - descent + lineGap) at size.
 
@@ -225,9 +245,11 @@ The default line height in points.
 
 ### markCodepointUsed()
 
-> **markCodepointUsed**(`codepoint`): `void`
+```ts
+markCodepointUsed(codepoint): void;
+```
 
-Defined in: [src/assets/font/fontEmbed.ts:299](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/font/fontEmbed.ts#L299)
+Defined in: [src/assets/font/fontEmbed.ts:299](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/font/fontEmbed.ts#L299)
 
 Mark a Unicode codepoint as used (records its glyph ID for subsetting).
 
@@ -247,9 +269,11 @@ The Unicode codepoint.
 
 ### markGlyphUsed()
 
-> **markGlyphUsed**(`glyphId`): `void`
+```ts
+markGlyphUsed(glyphId): void;
+```
 
-Defined in: [src/assets/font/fontEmbed.ts:309](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/font/fontEmbed.ts#L309)
+Defined in: [src/assets/font/fontEmbed.ts:309](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/font/fontEmbed.ts#L309)
 
 Mark a glyph ID as used directly.
 
@@ -269,9 +293,11 @@ The glyph ID.
 
 ### markTextUsed()
 
-> **markTextUsed**(`text`): `void`
+```ts
+markTextUsed(text): void;
+```
 
-Defined in: [src/assets/font/fontEmbed.ts:318](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/font/fontEmbed.ts#L318)
+Defined in: [src/assets/font/fontEmbed.ts:318](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/font/fontEmbed.ts#L318)
 
 Mark all codepoints in a text string as used.
 
@@ -291,9 +317,11 @@ The text string.
 
 ### widthOfTextAtSize()
 
-> **widthOfTextAtSize**(`text`, `fontSize`): `number`
+```ts
+widthOfTextAtSize(text, fontSize): number;
+```
 
-Defined in: [src/assets/font/fontEmbed.ts:215](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/font/fontEmbed.ts#L215)
+Defined in: [src/assets/font/fontEmbed.ts:215](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/font/fontEmbed.ts#L215)
 
 Compute the width of a text string at the given font size.
 

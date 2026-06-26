@@ -6,9 +6,11 @@
 
 # Type Alias: PageRange
 
-> **PageRange** = \[`number`, `number`\]
+```ts
+type PageRange = [number, number];
+```
 
-Defined in: [src/core/documentMerge.ts:432](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/documentMerge.ts#L432)
+Defined in: [src/core/documentMerge.ts:432](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/documentMerge.ts#L432)
 
 A page range for splitting, specified as `[startIndex, endIndex]`.
 Both indices are zero-based and inclusive.

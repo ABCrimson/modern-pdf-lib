@@ -156,7 +156,9 @@ async function run() {
   error.value = '';
 
   try {
-    const pdf = await import('modern-pdf-lib');
+    // Load the published package from the CDN at runtime. `@vite-ignore` keeps
+    // the docs build from trying to bundle it (which would require a local dist).
+    const pdf = await import(/* @vite-ignore */ 'https://esm.sh/modern-pdf-lib');
     const fn = new Function('pdf', `return (async () => { ${code.value} })()`);
     const bytes = await fn(pdf);
 

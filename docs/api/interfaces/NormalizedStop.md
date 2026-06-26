@@ -6,7 +6,7 @@
 
 # Interface: NormalizedStop
 
-Defined in: [src/core/patterns.ts:167](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/patterns.ts#L167)
+Defined in: [src/core/patterns.ts:167](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/patterns.ts#L167)
 
 A normalised colour stop with explicit offset and RGB values.
 
@@ -14,30 +14,38 @@ A normalised colour stop with explicit offset and RGB values.
 
 ### b
 
-> `readonly` **b**: `number`
+```ts
+readonly b: number;
+```
 
-Defined in: [src/core/patterns.ts:171](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/patterns.ts#L171)
+Defined in: [src/core/patterns.ts:171](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/patterns.ts#L171)
 
 ***
 
 ### g
 
-> `readonly` **g**: `number`
+```ts
+readonly g: number;
+```
 
-Defined in: [src/core/patterns.ts:170](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/patterns.ts#L170)
+Defined in: [src/core/patterns.ts:170](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/patterns.ts#L170)
 
 ***
 
 ### offset
 
-> `readonly` **offset**: `number`
+```ts
+readonly offset: number;
+```
 
-Defined in: [src/core/patterns.ts:168](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/patterns.ts#L168)
+Defined in: [src/core/patterns.ts:168](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/patterns.ts#L168)
 
 ***
 
 ### r
 
-> `readonly` **r**: `number`
+```ts
+readonly r: number;
+```
 
-Defined in: [src/core/patterns.ts:169](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/patterns.ts#L169)
+Defined in: [src/core/patterns.ts:169](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/patterns.ts#L169)

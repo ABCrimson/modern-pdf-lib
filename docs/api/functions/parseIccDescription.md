@@ -6,9 +6,11 @@
 
 # Function: parseIccDescription()
 
-> **parseIccDescription**(`data`): `string` \| `undefined`
+```ts
+function parseIccDescription(data): string | undefined;
+```
 
-Defined in: [src/assets/image/iccProfile.ts:108](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/iccProfile.ts#L108)
+Defined in: [src/assets/image/iccProfile.ts:108](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/iccProfile.ts#L108)
 
 Parse the human-readable description from an ICC profile's 'desc' tag.
 

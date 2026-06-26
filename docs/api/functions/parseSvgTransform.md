@@ -6,9 +6,11 @@
 
 # Function: parseSvgTransform()
 
-> **parseSvgTransform**(`transformStr`): \[`number`, `number`, `number`, `number`, `number`, `number`\]
+```ts
+function parseSvgTransform(transformStr): [number, number, number, number, number, number];
+```
 
-Defined in: [src/assets/svg/svgParser.ts:309](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/svg/svgParser.ts#L309)
+Defined in: [src/assets/svg/svgParser.ts:309](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/svg/svgParser.ts#L309)
 
 Parse an SVG `transform` attribute into a 2D affine matrix.
 

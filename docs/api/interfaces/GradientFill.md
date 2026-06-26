@@ -6,7 +6,7 @@
 
 # Interface: GradientFill
 
-Defined in: [src/core/patterns.ts:134](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/patterns.ts#L134)
+Defined in: [src/core/patterns.ts:134](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/patterns.ts#L134)
 
 Descriptor for a gradient fill (linear or radial).
 This is a lightweight value object — actual PDF objects are created
@@ -16,38 +16,48 @@ when [buildGradientObjects](../functions/buildGradientObjects.md) is called.
 
 ### coords
 
-> `readonly` **coords**: readonly `number`[]
+```ts
+readonly coords: readonly number[];
+```
 
-Defined in: [src/core/patterns.ts:137](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/patterns.ts#L137)
+Defined in: [src/core/patterns.ts:137](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/patterns.ts#L137)
 
 ***
 
 ### extend
 
-> `readonly` **extend**: `boolean`
+```ts
+readonly extend: boolean;
+```
 
-Defined in: [src/core/patterns.ts:139](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/patterns.ts#L139)
+Defined in: [src/core/patterns.ts:139](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/patterns.ts#L139)
 
 ***
 
 ### kind
 
-> `readonly` **kind**: `"gradient"`
+```ts
+readonly kind: "gradient";
+```
 
-Defined in: [src/core/patterns.ts:135](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/patterns.ts#L135)
+Defined in: [src/core/patterns.ts:135](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/patterns.ts#L135)
 
 ***
 
 ### normalizedStops
 
-> `readonly` **normalizedStops**: readonly [`NormalizedStop`](NormalizedStop.md)[]
+```ts
+readonly normalizedStops: readonly NormalizedStop[];
+```
 
-Defined in: [src/core/patterns.ts:138](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/patterns.ts#L138)
+Defined in: [src/core/patterns.ts:138](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/patterns.ts#L138)
 
 ***
 
 ### shadingType
 
-> `readonly` **shadingType**: `2` \| `3`
+```ts
+readonly shadingType: 2 | 3;
+```
 
-Defined in: [src/core/patterns.ts:136](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/patterns.ts#L136)
+Defined in: [src/core/patterns.ts:136](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/patterns.ts#L136)

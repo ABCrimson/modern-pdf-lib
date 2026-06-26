@@ -6,7 +6,7 @@
 
 # Class: PluginError
 
-Defined in: [src/errors.ts:274](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/errors.ts#L274)
+Defined in: [src/errors.ts:274](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/errors.ts#L274)
 
 Thrown when a plugin encounters an error during initialization or
 execution.  Wraps the underlying cause for error-chain inspection.
@@ -25,9 +25,14 @@ throw new PluginError('myPlugin', 'Failed to initialize WASM module');
 
 ### Constructor
 
-> **new PluginError**(`pluginName`, `message`, `options?`): `PluginError`
+```ts
+new PluginError(
+   pluginName, 
+   message, 
+   options?): PluginError;
+```
 
-Defined in: [src/errors.ts:278](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/errors.ts#L278)
+Defined in: [src/errors.ts:278](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/errors.ts#L278)
 
 #### Parameters
 
@@ -49,51 +54,67 @@ Defined in: [src/errors.ts:278](https://github.com/ABCrimson/modern-pdf-lib/blob
 
 #### Overrides
 
-`Error.constructor`
+```ts
+Error.constructor
+```
 
 ## Properties
 
 ### cause?
 
-> `optional` **cause?**: `unknown`
+```ts
+optional cause?: unknown;
+```
 
 Defined in: tools/docs/node\_modules/typescript/lib/lib.es2022.error.d.ts:24
 
 #### Inherited from
 
-`Error.cause`
+```ts
+Error.cause
+```
 
 ***
 
 ### message
 
-> **message**: `string`
+```ts
+message: string;
+```
 
 Defined in: tools/docs/node\_modules/typescript/lib/lib.es5.d.ts:1075
 
 #### Inherited from
 
-`Error.message`
+```ts
+Error.message
+```
 
 ***
 
 ### name
 
-> `readonly` **name**: `"PluginError"` = `'PluginError'`
+```ts
+readonly name: "PluginError" = 'PluginError';
+```
 
-Defined in: [src/errors.ts:275](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/errors.ts#L275)
+Defined in: [src/errors.ts:275](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/errors.ts#L275)
 
 #### Overrides
 
-`Error.name`
+```ts
+Error.name
+```
 
 ***
 
 ### pluginName
 
-> `readonly` **pluginName**: `string`
+```ts
+readonly pluginName: string;
+```
 
-Defined in: [src/errors.ts:277](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/errors.ts#L277)
+Defined in: [src/errors.ts:277](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/errors.ts#L277)
 
 Name of the plugin that caused the error.
 
@@ -101,19 +122,25 @@ Name of the plugin that caused the error.
 
 ### stack?
 
-> `optional` **stack?**: `string`
+```ts
+optional stack?: string;
+```
 
 Defined in: tools/docs/node\_modules/typescript/lib/lib.es5.d.ts:1076
 
 #### Inherited from
 
-`Error.stack`
+```ts
+Error.stack
+```
 
 ## Methods
 
 ### isError()
 
-> `static` **isError**(`error`): `error is Error`
+```ts
+static isError(error): error is Error;
+```
 
 Defined in: tools/docs/node\_modules/typescript/lib/lib.esnext.error.d.ts:21
 
@@ -131,4 +158,6 @@ Indicates whether the argument provided is a built-in Error instance or not.
 
 #### Inherited from
 
-`Error.isError`
+```ts
+Error.isError
+```

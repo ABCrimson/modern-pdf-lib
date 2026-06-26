@@ -6,9 +6,14 @@
 
 # Function: createVNode()
 
-> **createVNode**(`type`, `props`, ...`children`): [`VNode`](../type-aliases/VNode.md)
+```ts
+function createVNode(
+   type, 
+   props, ...
+   children): VNode;
+```
 
-Defined in: src/assets/vdom/reconciler.ts:77
+Defined in: [src/assets/vdom/reconciler.ts:77](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/vdom/reconciler.ts#L77)
 
 Construct a well-formed [VNode](../type-aliases/VNode.md) from a type, a props bag, and
 child nodes — a hyperscript-style helper.
@@ -27,7 +32,7 @@ The node type to create.
 
 ### props
 
-`Record`\<`string`, `unknown`\>
+`Record`\&lt;`string`, `unknown`\&gt;
 
 Attribute bag (e.g. `{ text: 'hi', level: 2 }`).
 

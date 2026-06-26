@@ -6,7 +6,7 @@
 
 # Interface: EmbeddedFile
 
-Defined in: [src/core/embeddedFiles.ts:31](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/embeddedFiles.ts#L31)
+Defined in: [src/core/embeddedFiles.ts:31](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/embeddedFiles.ts#L31)
 
 Describes a file to attach to (or already attached to) a PDF.
 
@@ -14,9 +14,11 @@ Describes a file to attach to (or already attached to) a PDF.
 
 ### creationDate?
 
-> `optional` **creationDate?**: `Date`
+```ts
+optional creationDate?: Date;
+```
 
-Defined in: [src/core/embeddedFiles.ts:41](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/embeddedFiles.ts#L41)
+Defined in: [src/core/embeddedFiles.ts:41](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/embeddedFiles.ts#L41)
 
 Optional creation date.
 
@@ -24,9 +26,11 @@ Optional creation date.
 
 ### data
 
-> **data**: `Uint8Array`
+```ts
+data: Uint8Array;
+```
 
-Defined in: [src/core/embeddedFiles.ts:35](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/embeddedFiles.ts#L35)
+Defined in: [src/core/embeddedFiles.ts:35](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/embeddedFiles.ts#L35)
 
 File data.
 
@@ -34,9 +38,11 @@ File data.
 
 ### description?
 
-> `optional` **description?**: `string`
+```ts
+optional description?: string;
+```
 
-Defined in: [src/core/embeddedFiles.ts:39](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/embeddedFiles.ts#L39)
+Defined in: [src/core/embeddedFiles.ts:39](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/embeddedFiles.ts#L39)
 
 Optional description.
 
@@ -44,9 +50,11 @@ Optional description.
 
 ### mimeType
 
-> **mimeType**: `string`
+```ts
+mimeType: string;
+```
 
-Defined in: [src/core/embeddedFiles.ts:37](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/embeddedFiles.ts#L37)
+Defined in: [src/core/embeddedFiles.ts:37](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/embeddedFiles.ts#L37)
 
 MIME type (e.g. `"application/pdf"`, `"text/plain"`).
 
@@ -54,9 +62,11 @@ MIME type (e.g. `"application/pdf"`, `"text/plain"`).
 
 ### modificationDate?
 
-> `optional` **modificationDate?**: `Date`
+```ts
+optional modificationDate?: Date;
+```
 
-Defined in: [src/core/embeddedFiles.ts:43](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/embeddedFiles.ts#L43)
+Defined in: [src/core/embeddedFiles.ts:43](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/embeddedFiles.ts#L43)
 
 Optional modification date.
 
@@ -64,8 +74,10 @@ Optional modification date.
 
 ### name
 
-> **name**: `string`
+```ts
+name: string;
+```
 
-Defined in: [src/core/embeddedFiles.ts:33](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/embeddedFiles.ts#L33)
+Defined in: [src/core/embeddedFiles.ts:33](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/embeddedFiles.ts#L33)
 
 Filename.

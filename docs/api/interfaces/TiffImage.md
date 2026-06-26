@@ -6,7 +6,7 @@
 
 # Interface: TiffImage
 
-Defined in: [src/assets/image/tiffDecode.ts:25](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/tiffDecode.ts#L25)
+Defined in: [src/assets/image/tiffDecode.ts:25](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/tiffDecode.ts#L25)
 
 Decoded TIFF image data.
 
@@ -14,9 +14,11 @@ Decoded TIFF image data.
 
 ### bitsPerSample
 
-> `readonly` **bitsPerSample**: `number`
+```ts
+readonly bitsPerSample: number;
+```
 
-Defined in: [src/assets/image/tiffDecode.ts:35](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/tiffDecode.ts#L35)
+Defined in: [src/assets/image/tiffDecode.ts:35](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/tiffDecode.ts#L35)
 
 Original bits per sample.
 
@@ -24,9 +26,11 @@ Original bits per sample.
 
 ### channels
 
-> `readonly` **channels**: `1` \| `3` \| `4`
+```ts
+readonly channels: 1 | 3 | 4;
+```
 
-Defined in: [src/assets/image/tiffDecode.ts:33](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/tiffDecode.ts#L33)
+Defined in: [src/assets/image/tiffDecode.ts:33](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/tiffDecode.ts#L33)
 
 Number of channels.
 
@@ -34,9 +38,11 @@ Number of channels.
 
 ### height
 
-> `readonly` **height**: `number`
+```ts
+readonly height: number;
+```
 
-Defined in: [src/assets/image/tiffDecode.ts:29](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/tiffDecode.ts#L29)
+Defined in: [src/assets/image/tiffDecode.ts:29](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/tiffDecode.ts#L29)
 
 Image height in pixels.
 
@@ -44,9 +50,11 @@ Image height in pixels.
 
 ### pixels
 
-> `readonly` **pixels**: `Uint8Array`
+```ts
+readonly pixels: Uint8Array;
+```
 
-Defined in: [src/assets/image/tiffDecode.ts:31](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/tiffDecode.ts#L31)
+Defined in: [src/assets/image/tiffDecode.ts:31](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/tiffDecode.ts#L31)
 
 Raw pixel data (normalized to 8-bit per channel).
 
@@ -54,8 +62,10 @@ Raw pixel data (normalized to 8-bit per channel).
 
 ### width
 
-> `readonly` **width**: `number`
+```ts
+readonly width: number;
+```
 
-Defined in: [src/assets/image/tiffDecode.ts:27](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/assets/image/tiffDecode.ts#L27)
+Defined in: [src/assets/image/tiffDecode.ts:27](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/tiffDecode.ts#L27)
 
 Image width in pixels.

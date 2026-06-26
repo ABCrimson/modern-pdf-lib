@@ -6,9 +6,14 @@
 
 # Function: signPdf()
 
-> **signPdf**(`pdfBytes`, `fieldName`, `options`): `Promise`\<`Uint8Array`\<`ArrayBufferLike`\>\>
+```ts
+function signPdf(
+   pdfBytes, 
+   fieldName, 
+options): Promise<Uint8Array<ArrayBufferLike>>;
+```
 
-Defined in: [src/signature/signatureHandler.ts:277](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/signatureHandler.ts#L277)
+Defined in: [src/signature/signatureHandler.ts:277](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/signatureHandler.ts#L277)
 
 Sign a PDF document.
 
@@ -37,7 +42,7 @@ Signing options (certificate, key, etc.).
 
 ## Returns
 
-`Promise`\<`Uint8Array`\<`ArrayBufferLike`\>\>
+`Promise`\&lt;`Uint8Array`\&lt;`ArrayBufferLike`\&gt;\&gt;
 
 The signed PDF bytes.
 

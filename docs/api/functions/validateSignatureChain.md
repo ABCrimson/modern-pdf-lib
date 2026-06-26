@@ -6,9 +6,11 @@
 
 # Function: validateSignatureChain()
 
-> **validateSignatureChain**(`pdf`): `Promise`\<[`SignatureChainResult`](../interfaces/SignatureChainResult.md)\>
+```ts
+function validateSignatureChain(pdf): Promise<SignatureChainResult>;
+```
 
-Defined in: [src/signature/multiSignatureValidator.ts:167](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/multiSignatureValidator.ts#L167)
+Defined in: [src/signature/multiSignatureValidator.ts:167](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/multiSignatureValidator.ts#L167)
 
 Validate the entire signature chain in a PDF.
 
@@ -26,6 +28,6 @@ The PDF bytes to validate.
 
 ## Returns
 
-`Promise`\<[`SignatureChainResult`](../interfaces/SignatureChainResult.md)\>
+`Promise`\&lt;[`SignatureChainResult`](../interfaces/SignatureChainResult.md)\&gt;
 
 The signature chain validation result.

@@ -6,9 +6,11 @@
 
 # Function: buildType5Halftone()
 
-> **buildType5Halftone**(`colorants`, `defaultHalftone`): [`PdfDict`](../classes/PdfDict.md)
+```ts
+function buildType5Halftone(colorants, defaultHalftone): PdfDict;
+```
 
-Defined in: src/core/halftone.ts:159
+Defined in: [src/core/halftone.ts:159](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/halftone.ts#L159)
 
 Build a Type 5 halftone dictionary.
 
@@ -21,7 +23,7 @@ per colorant (keyed by colorant name), and `/Default`.
 
 ### colorants
 
-`Readonly`\<`Record`\<`string`, [`PdfDict`](../classes/PdfDict.md)\>\>
+`Readonly`\&lt;`Record`\&lt;`string`, [`PdfDict`](../classes/PdfDict.md)\&gt;\&gt;
 
 Map of colorant name → halftone dictionary (each a
   Type 1/6/10/16 halftone). The reserved key `Default` is ignored here

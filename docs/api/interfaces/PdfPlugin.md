@@ -6,7 +6,7 @@
 
 # Interface: PdfPlugin
 
-Defined in: [src/plugins/pluginSystem.ts:59](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/plugins/pluginSystem.ts#L59)
+Defined in: [src/plugins/pluginSystem.ts:59](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/plugins/pluginSystem.ts#L59)
 
 Plugin lifecycle hooks -- plugins can intercept and modify behavior
 at various points in the PDF creation pipeline.
@@ -15,9 +15,11 @@ at various points in the PDF creation pipeline.
 
 ### name
 
-> `readonly` **name**: `string`
+```ts
+readonly name: string;
+```
 
-Defined in: [src/plugins/pluginSystem.ts:61](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/plugins/pluginSystem.ts#L61)
+Defined in: [src/plugins/pluginSystem.ts:61](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/plugins/pluginSystem.ts#L61)
 
 Unique plugin name.
 
@@ -25,9 +27,11 @@ Unique plugin name.
 
 ### version?
 
-> `readonly` `optional` **version?**: `string`
+```ts
+readonly optional version?: string;
+```
 
-Defined in: [src/plugins/pluginSystem.ts:64](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/plugins/pluginSystem.ts#L64)
+Defined in: [src/plugins/pluginSystem.ts:64](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/plugins/pluginSystem.ts#L64)
 
 Plugin version string.
 
@@ -35,9 +39,11 @@ Plugin version string.
 
 ### onAfterAddPage()?
 
-> `optional` **onAfterAddPage**(`page`, `doc`): `void`
+```ts
+optional onAfterAddPage(page, doc): void;
+```
 
-Defined in: [src/plugins/pluginSystem.ts:75](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/plugins/pluginSystem.ts#L75)
+Defined in: [src/plugins/pluginSystem.ts:75](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/plugins/pluginSystem.ts#L75)
 
 Called after a page is added. Can add content to the page.
 
@@ -59,9 +65,13 @@ Called after a page is added. Can add content to the page.
 
 ### onAfterSave()?
 
-> `optional` **onAfterSave**(`bytes`): `Uint8Array`\<`ArrayBufferLike`\> \| `Promise`\<`Uint8Array`\<`ArrayBufferLike`\>\>
+```ts
+optional onAfterSave(bytes): 
+  | Uint8Array<ArrayBufferLike>
+| Promise<Uint8Array<ArrayBufferLike>>;
+```
 
-Defined in: [src/plugins/pluginSystem.ts:99](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/plugins/pluginSystem.ts#L99)
+Defined in: [src/plugins/pluginSystem.ts:99](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/plugins/pluginSystem.ts#L99)
 
 Called after serialization. Can post-process the final PDF bytes.
 May be async.
@@ -74,15 +84,18 @@ May be async.
 
 #### Returns
 
-`Uint8Array`\<`ArrayBufferLike`\> \| `Promise`\<`Uint8Array`\<`ArrayBufferLike`\>\>
+  \| `Uint8Array`\&lt;`ArrayBufferLike`\&gt;
+  \| `Promise`\&lt;`Uint8Array`\&lt;`ArrayBufferLike`\&gt;\&gt;
 
 ***
 
 ### onBeforeAddPage()?
 
-> `optional` **onBeforeAddPage**(`size`): [`PageSize`](../type-aliases/PageSize.md)
+```ts
+optional onBeforeAddPage(size): PageSize;
+```
 
-Defined in: [src/plugins/pluginSystem.ts:72](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/plugins/pluginSystem.ts#L72)
+Defined in: [src/plugins/pluginSystem.ts:72](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/plugins/pluginSystem.ts#L72)
 
 Called before a page is added. Can modify page options.
 
@@ -100,9 +113,11 @@ Called before a page is added. Can modify page options.
 
 ### onBeforeEmbedFont()?
 
-> `optional` **onBeforeEmbedFont**(`data`, `options`): `object`
+```ts
+optional onBeforeEmbedFont(data, options): object;
+```
 
-Defined in: [src/plugins/pluginSystem.ts:81](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/plugins/pluginSystem.ts#L81)
+Defined in: [src/plugins/pluginSystem.ts:81](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/plugins/pluginSystem.ts#L81)
 
 Called before font embedding. Can transform font data and options.
 Return the (possibly modified) data and options.
@@ -123,19 +138,25 @@ Return the (possibly modified) data and options.
 
 ##### data
 
-> **data**: `Uint8Array`
+```ts
+data: Uint8Array;
+```
 
 ##### options
 
-> **options**: [`EmbedFontOptions`](EmbedFontOptions.md)
+```ts
+options: EmbedFontOptions;
+```
 
 ***
 
 ### onBeforeEmbedImage()?
 
-> `optional` **onBeforeEmbedImage**(`data`): `Uint8Array`
+```ts
+optional onBeforeEmbedImage(data): Uint8Array;
+```
 
-Defined in: [src/plugins/pluginSystem.ts:87](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/plugins/pluginSystem.ts#L87)
+Defined in: [src/plugins/pluginSystem.ts:87](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/plugins/pluginSystem.ts#L87)
 
 Called before image embedding. Can transform image data.
 
@@ -153,9 +174,11 @@ Called before image embedding. Can transform image data.
 
 ### onBeforeSave()?
 
-> `optional` **onBeforeSave**(`doc`): `void` \| `Promise`\<`void`\>
+```ts
+optional onBeforeSave(doc): void | Promise<void>;
+```
 
-Defined in: [src/plugins/pluginSystem.ts:93](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/plugins/pluginSystem.ts#L93)
+Defined in: [src/plugins/pluginSystem.ts:93](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/plugins/pluginSystem.ts#L93)
 
 Called before serialization. Can modify document structure.
 May be async (e.g. for network-dependent plugins).
@@ -168,15 +191,17 @@ May be async (e.g. for network-dependent plugins).
 
 #### Returns
 
-`void` \| `Promise`\<`void`\>
+`void` \| `Promise`\&lt;`void`\&gt;
 
 ***
 
 ### onBuildCatalog()?
 
-> `optional` **onBuildCatalog**(`catalog`): `void`
+```ts
+optional onBuildCatalog(catalog): void;
+```
 
-Defined in: [src/plugins/pluginSystem.ts:102](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/plugins/pluginSystem.ts#L102)
+Defined in: [src/plugins/pluginSystem.ts:102](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/plugins/pluginSystem.ts#L102)
 
 Called to add custom entries to the document catalog dict.
 
@@ -194,9 +219,11 @@ Called to add custom entries to the document catalog dict.
 
 ### onBuildPageDict()?
 
-> `optional` **onBuildPageDict**(`pageDict`, `pageIndex`): `void`
+```ts
+optional onBuildPageDict(pageDict, pageIndex): void;
+```
 
-Defined in: [src/plugins/pluginSystem.ts:105](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/plugins/pluginSystem.ts#L105)
+Defined in: [src/plugins/pluginSystem.ts:105](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/plugins/pluginSystem.ts#L105)
 
 Called to add custom entries to page dictionaries.
 
@@ -218,9 +245,11 @@ Called to add custom entries to page dictionaries.
 
 ### onRegister()?
 
-> `optional` **onRegister**(`doc`): `void`
+```ts
+optional onRegister(doc): void;
+```
 
-Defined in: [src/plugins/pluginSystem.ts:69](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/plugins/pluginSystem.ts#L69)
+Defined in: [src/plugins/pluginSystem.ts:69](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/plugins/pluginSystem.ts#L69)
 
 Called when the plugin is registered on a document.
 

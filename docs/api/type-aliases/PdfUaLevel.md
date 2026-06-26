@@ -6,9 +6,11 @@
 
 # Type Alias: PdfUaLevel
 
-> **PdfUaLevel** = `"UA1"`
+```ts
+type PdfUaLevel = "UA1";
+```
 
-Defined in: [src/accessibility/pdfUaValidator.ts:44](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/accessibility/pdfUaValidator.ts#L44)
+Defined in: [src/accessibility/pdfUaValidator.ts:44](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/accessibility/pdfUaValidator.ts#L44)
 
 PDF/UA conformance level.
 

@@ -6,9 +6,11 @@
 
 # Function: showTextArray()
 
-> **showTextArray**(`items`): `string`
+```ts
+function showTextArray(items): string;
+```
 
-Defined in: [src/core/operators/text.ts:242](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/operators/text.ts#L242)
+Defined in: [src/core/operators/text.ts:242](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/operators/text.ts#L242)
 
 Show one or more text strings with individual glyph positioning (`TJ`).
 

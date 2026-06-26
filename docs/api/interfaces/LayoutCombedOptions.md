@@ -6,36 +6,44 @@
 
 # Interface: LayoutCombedOptions
 
-Defined in: [src/core/layout.ts:81](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/layout.ts#L81)
+Defined in: [src/core/layout.ts:81](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/layout.ts#L81)
 
 ## Properties
 
 ### cellCount
 
-> **cellCount**: `number`
+```ts
+cellCount: number;
+```
 
-Defined in: [src/core/layout.ts:84](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/layout.ts#L84)
+Defined in: [src/core/layout.ts:84](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/layout.ts#L84)
 
 ***
 
 ### cellWidth
 
-> **cellWidth**: `number`
+```ts
+cellWidth: number;
+```
 
-Defined in: [src/core/layout.ts:85](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/layout.ts#L85)
+Defined in: [src/core/layout.ts:85](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/layout.ts#L85)
 
 ***
 
 ### font
 
-> **font**: [`FontRef`](FontRef.md)
+```ts
+font: FontRef;
+```
 
-Defined in: [src/core/layout.ts:82](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/layout.ts#L82)
+Defined in: [src/core/layout.ts:82](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/layout.ts#L82)
 
 ***
 
 ### fontSize
 
-> **fontSize**: `number`
+```ts
+fontSize: number;
+```
 
-Defined in: [src/core/layout.ts:83](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/layout.ts#L83)
+Defined in: [src/core/layout.ts:83](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/layout.ts#L83)

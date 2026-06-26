@@ -6,8 +6,15 @@
 
 # Type Alias: PageSize
 
-> **PageSize** = readonly \[`number`, `number`\] \| \{ `height`: `number`; `width`: `number`; \}
+```ts
+type PageSize = 
+  | readonly [number, number]
+  | {
+  height: number;
+  width: number;
+};
+```
 
-Defined in: [src/core/pdfPage.ts:160](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/pdfPage.ts#L160)
+Defined in: [src/core/pdfPage.ts:160](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfPage.ts#L160)
 
 Type for a page-size input: a `[width, height]` tuple or `{ width, height }` object.

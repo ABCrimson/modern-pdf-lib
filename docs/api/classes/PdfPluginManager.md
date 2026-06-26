@@ -6,7 +6,7 @@
 
 # Class: PdfPluginManager
 
-Defined in: [src/plugins/pluginSystem.ts:117](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/plugins/pluginSystem.ts#L117)
+Defined in: [src/plugins/pluginSystem.ts:117](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/plugins/pluginSystem.ts#L117)
 
 Manages plugin registration, ordering, and hook execution.
 
@@ -16,7 +16,9 @@ Plugins execute in registration order for every hook.
 
 ### Constructor
 
-> **new PdfPluginManager**(): `PdfPluginManager`
+```ts
+new PdfPluginManager(): PdfPluginManager;
+```
 
 #### Returns
 
@@ -28,9 +30,11 @@ Plugins execute in registration order for every hook.
 
 #### Get Signature
 
-> **get** **hasPlugins**(): `boolean`
+```ts
+get hasPlugins(): boolean;
+```
 
-Defined in: [src/plugins/pluginSystem.ts:162](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/plugins/pluginSystem.ts#L162)
+Defined in: [src/plugins/pluginSystem.ts:162](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/plugins/pluginSystem.ts#L162)
 
 Check whether any plugins are registered.
 
@@ -42,9 +46,11 @@ Check whether any plugins are registered.
 
 ### executeOnAfterAddPage()
 
-> **executeOnAfterAddPage**(`page`, `doc`): `void`
+```ts
+executeOnAfterAddPage(page, doc): void;
+```
 
-Defined in: [src/plugins/pluginSystem.ts:197](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/plugins/pluginSystem.ts#L197)
+Defined in: [src/plugins/pluginSystem.ts:197](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/plugins/pluginSystem.ts#L197)
 
 Execute `onAfterAddPage` across all plugins in order.
 
@@ -66,9 +72,11 @@ Execute `onAfterAddPage` across all plugins in order.
 
 ### executeOnAfterSave()
 
-> **executeOnAfterSave**(`bytes`): `Promise`\<`Uint8Array`\<`ArrayBufferLike`\>\>
+```ts
+executeOnAfterSave(bytes): Promise<Uint8Array<ArrayBufferLike>>;
+```
 
-Defined in: [src/plugins/pluginSystem.ts:252](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/plugins/pluginSystem.ts#L252)
+Defined in: [src/plugins/pluginSystem.ts:252](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/plugins/pluginSystem.ts#L252)
 
 Execute `onAfterSave` across all plugins in order.
 Each plugin may transform the output bytes; the final result is returned.
@@ -81,15 +89,17 @@ Each plugin may transform the output bytes; the final result is returned.
 
 #### Returns
 
-`Promise`\<`Uint8Array`\<`ArrayBufferLike`\>\>
+`Promise`\&lt;`Uint8Array`\&lt;`ArrayBufferLike`\&gt;\&gt;
 
 ***
 
 ### executeOnBeforeAddPage()
 
-> **executeOnBeforeAddPage**(`size`): [`PageSize`](../type-aliases/PageSize.md)
+```ts
+executeOnBeforeAddPage(size): PageSize;
+```
 
-Defined in: [src/plugins/pluginSystem.ts:184](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/plugins/pluginSystem.ts#L184)
+Defined in: [src/plugins/pluginSystem.ts:184](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/plugins/pluginSystem.ts#L184)
 
 Execute `onBeforeAddPage` across all plugins in order.
 Each plugin may modify the page size; the final result is returned.
@@ -108,9 +118,11 @@ Each plugin may modify the page size; the final result is returned.
 
 ### executeOnBeforeEmbedFont()
 
-> **executeOnBeforeEmbedFont**(`data`, `options`): `object`
+```ts
+executeOnBeforeEmbedFont(data, options): object;
+```
 
-Defined in: [src/plugins/pluginSystem.ts:209](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/plugins/pluginSystem.ts#L209)
+Defined in: [src/plugins/pluginSystem.ts:209](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/plugins/pluginSystem.ts#L209)
 
 Execute `onBeforeEmbedFont` across all plugins in order.
 Each plugin may modify the data/options; the final result is returned.
@@ -131,19 +143,25 @@ Each plugin may modify the data/options; the final result is returned.
 
 ##### data
 
-> **data**: `Uint8Array`
+```ts
+data: Uint8Array;
+```
 
 ##### options
 
-> **options**: [`EmbedFontOptions`](../interfaces/EmbedFontOptions.md)
+```ts
+options: EmbedFontOptions;
+```
 
 ***
 
 ### executeOnBeforeEmbedImage()
 
-> **executeOnBeforeEmbedImage**(`data`): `Uint8Array`
+```ts
+executeOnBeforeEmbedImage(data): Uint8Array;
+```
 
-Defined in: [src/plugins/pluginSystem.ts:226](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/plugins/pluginSystem.ts#L226)
+Defined in: [src/plugins/pluginSystem.ts:226](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/plugins/pluginSystem.ts#L226)
 
 Execute `onBeforeEmbedImage` across all plugins in order.
 Each plugin may transform the image data; the final result is returned.
@@ -162,9 +180,11 @@ Each plugin may transform the image data; the final result is returned.
 
 ### executeOnBeforeSave()
 
-> **executeOnBeforeSave**(`doc`): `Promise`\<`void`\>
+```ts
+executeOnBeforeSave(doc): Promise<void>;
+```
 
-Defined in: [src/plugins/pluginSystem.ts:240](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/plugins/pluginSystem.ts#L240)
+Defined in: [src/plugins/pluginSystem.ts:240](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/plugins/pluginSystem.ts#L240)
 
 Execute `onBeforeSave` across all plugins in order.
 Awaits each plugin sequentially to maintain ordering guarantees.
@@ -177,15 +197,17 @@ Awaits each plugin sequentially to maintain ordering guarantees.
 
 #### Returns
 
-`Promise`\<`void`\>
+`Promise`\&lt;`void`\&gt;
 
 ***
 
 ### executeOnBuildCatalog()
 
-> **executeOnBuildCatalog**(`catalog`): `void`
+```ts
+executeOnBuildCatalog(catalog): void;
+```
 
-Defined in: [src/plugins/pluginSystem.ts:265](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/plugins/pluginSystem.ts#L265)
+Defined in: [src/plugins/pluginSystem.ts:265](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/plugins/pluginSystem.ts#L265)
 
 Execute `onBuildCatalog` across all plugins in order.
 
@@ -203,9 +225,11 @@ Execute `onBuildCatalog` across all plugins in order.
 
 ### executeOnBuildPageDict()
 
-> **executeOnBuildPageDict**(`pageDict`, `pageIndex`): `void`
+```ts
+executeOnBuildPageDict(pageDict, pageIndex): void;
+```
 
-Defined in: [src/plugins/pluginSystem.ts:276](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/plugins/pluginSystem.ts#L276)
+Defined in: [src/plugins/pluginSystem.ts:276](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/plugins/pluginSystem.ts#L276)
 
 Execute `onBuildPageDict` across all plugins in order.
 
@@ -227,9 +251,11 @@ Execute `onBuildPageDict` across all plugins in order.
 
 ### executeOnRegister()
 
-> **executeOnRegister**(`plugin`, `doc`): `void`
+```ts
+executeOnRegister(plugin, doc): void;
+```
 
-Defined in: [src/plugins/pluginSystem.ts:174](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/plugins/pluginSystem.ts#L174)
+Defined in: [src/plugins/pluginSystem.ts:174](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/plugins/pluginSystem.ts#L174)
 
 Execute the `onRegister` hook on a single plugin.
 Called internally when `.use()` is called on a document.
@@ -252,9 +278,11 @@ Called internally when `.use()` is called on a document.
 
 ### get()
 
-> **get**(`name`): [`PdfPlugin`](../interfaces/PdfPlugin.md) \| `undefined`
+```ts
+get(name): PdfPlugin | undefined;
+```
 
-Defined in: [src/plugins/pluginSystem.ts:152](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/plugins/pluginSystem.ts#L152)
+Defined in: [src/plugins/pluginSystem.ts:152](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/plugins/pluginSystem.ts#L152)
 
 Get a registered plugin by name.
 
@@ -272,9 +300,11 @@ Get a registered plugin by name.
 
 ### list()
 
-> **list**(): readonly [`PdfPlugin`](../interfaces/PdfPlugin.md)[]
+```ts
+list(): readonly PdfPlugin[];
+```
 
-Defined in: [src/plugins/pluginSystem.ts:157](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/plugins/pluginSystem.ts#L157)
+Defined in: [src/plugins/pluginSystem.ts:157](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/plugins/pluginSystem.ts#L157)
 
 List all registered plugins in registration order.
 
@@ -286,9 +316,11 @@ readonly [`PdfPlugin`](../interfaces/PdfPlugin.md)[]
 
 ### register()
 
-> **register**(`plugin`): `void`
+```ts
+register(plugin): void;
+```
 
-Defined in: [src/plugins/pluginSystem.ts:129](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/plugins/pluginSystem.ts#L129)
+Defined in: [src/plugins/pluginSystem.ts:129](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/plugins/pluginSystem.ts#L129)
 
 Register a plugin. Plugins execute in registration order.
 
@@ -310,9 +342,11 @@ If a plugin with the same name is already registered.
 
 ### unregister()
 
-> **unregister**(`name`): `boolean`
+```ts
+unregister(name): boolean;
+```
 
-Defined in: [src/plugins/pluginSystem.ts:144](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/plugins/pluginSystem.ts#L144)
+Defined in: [src/plugins/pluginSystem.ts:144](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/plugins/pluginSystem.ts#L144)
 
 Unregister a plugin by name.
 

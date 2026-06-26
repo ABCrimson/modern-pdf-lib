@@ -6,9 +6,11 @@
 
 # Function: isAccessible()
 
-> **isAccessible**(`issues`): `boolean`
+```ts
+function isAccessible(issues): boolean;
+```
 
-Defined in: [src/accessibility/accessibilityChecker.ts:320](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/accessibility/accessibilityChecker.ts#L320)
+Defined in: [src/accessibility/accessibilityChecker.ts:320](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/accessibility/accessibilityChecker.ts#L320)
 
 Check whether a set of issues contains any errors (severity = "error").
 

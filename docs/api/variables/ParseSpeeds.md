@@ -6,9 +6,11 @@
 
 # Variable: ParseSpeeds
 
-> `const` **ParseSpeeds**: `object`
+```ts
+const ParseSpeeds: object;
+```
 
-Defined in: [src/core/enums.ts:88](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/core/enums.ts#L88)
+Defined in: [src/core/enums.ts:88](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/enums.ts#L88)
 
 Preset parsing speeds — maps to objectsPerTick values in LoadPdfOptions.
 
@@ -18,16 +20,24 @@ Lower values keep the main thread more responsive but parse more slowly.
 
 ### Fast
 
-> `readonly` **Fast**: `500` = `500`
+```ts
+readonly Fast: 500 = 500;
+```
 
 ### Fastest
 
-> `readonly` **Fastest**: `number`
+```ts
+readonly Fastest: number;
+```
 
 ### Medium
 
-> `readonly` **Medium**: `100` = `100`
+```ts
+readonly Medium: 100 = 100;
+```
 
 ### Slow
 
-> `readonly` **Slow**: `10` = `10`
+```ts
+readonly Slow: 10 = 10;
+```

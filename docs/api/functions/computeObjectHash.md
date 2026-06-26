@@ -6,9 +6,11 @@
 
 # Function: computeObjectHash()
 
-> **computeObjectHash**(`data`): `string`
+```ts
+function computeObjectHash(data): string;
+```
 
-Defined in: [src/signature/incrementalOptimizer.ts:47](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/incrementalOptimizer.ts#L47)
+Defined in: [src/signature/incrementalOptimizer.ts:47](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/incrementalOptimizer.ts#L47)
 
 FNV-1a 32-bit hash.
 

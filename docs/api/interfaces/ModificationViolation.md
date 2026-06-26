@@ -6,7 +6,7 @@
 
 # Interface: ModificationViolation
 
-Defined in: [src/signature/modificationDetector.ts:37](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/modificationDetector.ts#L37)
+Defined in: [src/signature/modificationDetector.ts:37](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/modificationDetector.ts#L37)
 
 A single modification violation detected in the document.
 
@@ -14,9 +14,11 @@ A single modification violation detected in the document.
 
 ### affectedSignatureIndex
 
-> **affectedSignatureIndex**: `number`
+```ts
+affectedSignatureIndex: number;
+```
 
-Defined in: [src/signature/modificationDetector.ts:43](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/modificationDetector.ts#L43)
+Defined in: [src/signature/modificationDetector.ts:43](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/modificationDetector.ts#L43)
 
 Index of the signature whose coverage was violated.
 
@@ -24,9 +26,11 @@ Index of the signature whose coverage was violated.
 
 ### description
 
-> **description**: `string`
+```ts
+description: string;
+```
 
-Defined in: [src/signature/modificationDetector.ts:41](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/modificationDetector.ts#L41)
+Defined in: [src/signature/modificationDetector.ts:41](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/modificationDetector.ts#L41)
 
 Human-readable description of the violation.
 
@@ -34,8 +38,10 @@ Human-readable description of the violation.
 
 ### type
 
-> **type**: [`ModificationViolationType`](../type-aliases/ModificationViolationType.md)
+```ts
+type: ModificationViolationType;
+```
 
-Defined in: [src/signature/modificationDetector.ts:39](https://github.com/ABCrimson/modern-pdf-lib/blob/539dbdf3be4c0bc676699d4c8969d4330c935cec/src/signature/modificationDetector.ts#L39)
+Defined in: [src/signature/modificationDetector.ts:39](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/modificationDetector.ts#L39)
 
 The type of modification detected.
