@@ -265,14 +265,8 @@ jobs:
           name: wasm-modules
           path: src/wasm
 
-      - name: Run benchmarks
-        run: npx vitest bench --reporter=json --outputFile=bench-results.json
-
-      - name: Upload benchmark results
-        uses: actions/upload-artifact@v7
-        with:
-          name: benchmark-results
-          path: bench-results.json
+      - name: Run benchmarks (tinybench harness — Vitest 5 removed `vitest bench`)
+        run: npm run bench
           retention-days: 30
 
   # ---------------------------------------------------------------------------
