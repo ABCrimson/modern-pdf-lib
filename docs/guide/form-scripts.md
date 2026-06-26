@@ -23,55 +23,79 @@ The most common use case is auto-calculating field values. The Acrobat API provi
 ### Sum, Average, Product, Min, Max
 
 ```ts
-import { createPdf, PdfForm } from 'modern-pdf-lib';
+import { createPdf, PdfForm, PdfDict, PdfName, PdfString } from 'modern-pdf-lib';
 
 const doc = createPdf();
 const page = doc.addPage([612, 792]);
 const form = doc.getForm();
 
-// Create line item fields
-form.createTextField('item1', { page, x: 100, y: 700, width: 100, height: 24 });
-form.createTextField('item2', { page, x: 100, y: 670, width: 100, height: 24 });
-form.createTextField('item3', { page, x: 100, y: 640, width: 100, height: 24 });
+// createTextField(name, pageIndex, rect) where rect is [x1, y1, x2, y2].
+// Create line item fields on the first page (index 0).
+form.createTextField('item1', 0, [100, 700, 200, 724]);
+form.createTextField('item2', 0, [100, 670, 200, 694]);
+form.createTextField('item3', 0, [100, 640, 200, 664]);
 
-// Create a total field with a SUM calculation
-form.createTextField('total', {
-  page, x: 100, y: 600, width: 100, height: 24,
-  calculateScript: 'AFSimple_Calculate("SUM", ["item1", "item2", "item3"]);',
-});
+// Create a total field, then attach a SUM calculation as its calculate
+// action (the widget's /AA → /C JavaScript entry) so viewers recompute it.
+const total = form.createTextField('total', 0, [100, 600, 200, 624]);
+
+const calcAction = new PdfDict();
+calcAction.set('/S', PdfName.of('JavaScript'));
+calcAction.set('/JS', PdfString.literal('AFSimple_Calculate("SUM", ["item1", "item2", "item3"]);'));
+const aa = new PdfDict();
+aa.set('/C', calcAction);
+total.getWidgetDict().set('/AA', aa);
 ```
 
 ### Custom Calculation Scripts
 
+A small helper keeps the rest of the examples concise. It attaches a piece of
+JavaScript to a field's additional-actions dictionary using the public PDF
+object API. The action key follows ISO 32000: `/C` = calculate, `/F` = format,
+`/V` = validate, `/K` = keystroke.
+
+```ts
+import { PdfDict, PdfName, PdfString } from 'modern-pdf-lib';
+import type { PdfField } from 'modern-pdf-lib';
+
+function setFieldScript(field: PdfField, key: '/C' | '/F' | '/V' | '/K', js: string) {
+  const action = new PdfDict();
+  action.set('/S', PdfName.of('JavaScript'));
+  action.set('/JS', PdfString.literal(js));
+
+  const widget = field.getWidgetDict();
+  let aa = widget.get('/AA');
+  if (aa === undefined || aa.kind !== 'dict') {
+    aa = new PdfDict();
+    widget.set('/AA', aa);
+  }
+  (aa as PdfDict).set(key, action);
+}
+```
+
 For more complex calculations (e.g., applying tax or discounts):
 
 ```ts
-form.createTextField('subtotal', {
-  page, x: 100, y: 560, width: 100, height: 24,
-  calculateScript: `
-    var qty = parseFloat(getField("quantity").value) || 0;
-    var price = parseFloat(getField("unitPrice").value) || 0;
-    event.value = (qty * price).toFixed(2);
-  `,
-});
+const subtotal = form.createTextField('subtotal', 0, [100, 560, 200, 584]);
+setFieldScript(subtotal, '/C', `
+  var qty = parseFloat(getField("quantity").value) || 0;
+  var price = parseFloat(getField("unitPrice").value) || 0;
+  event.value = (qty * price).toFixed(2);
+`);
 
-form.createTextField('tax', {
-  page, x: 100, y: 530, width: 100, height: 24,
-  calculateScript: `
-    var subtotal = parseFloat(getField("subtotal").value) || 0;
-    var taxRate = 0.085; // 8.5%
-    event.value = (subtotal * taxRate).toFixed(2);
-  `,
-});
+const tax = form.createTextField('tax', 0, [100, 530, 200, 554]);
+setFieldScript(tax, '/C', `
+  var subtotal = parseFloat(getField("subtotal").value) || 0;
+  var taxRate = 0.085; // 8.5%
+  event.value = (subtotal * taxRate).toFixed(2);
+`);
 
-form.createTextField('grandTotal', {
-  page, x: 100, y: 500, width: 100, height: 24,
-  calculateScript: `
-    var subtotal = parseFloat(getField("subtotal").value) || 0;
-    var tax = parseFloat(getField("tax").value) || 0;
-    event.value = (subtotal + tax).toFixed(2);
-  `,
-});
+const grandTotal = form.createTextField('grandTotal', 0, [100, 500, 200, 524]);
+setFieldScript(grandTotal, '/C', `
+  var subtotal = parseFloat(getField("subtotal").value) || 0;
+  var tax = parseFloat(getField("tax").value) || 0;
+  event.value = (subtotal + tax).toFixed(2);
+`);
 ```
 
 ---
@@ -81,13 +105,9 @@ form.createTextField('grandTotal', {
 `AFNumber_Format` controls how numeric values display in fields.
 
 ```ts
-import { AFNumber_Format } from 'modern-pdf-lib';
-
 // Format with 2 decimal places, comma separators, dollar sign
-form.createTextField('price', {
-  page, x: 100, y: 460, width: 120, height: 24,
-  formatScript: 'AFNumber_Format(2, 0, 0, 0, "$", false);',
-});
+const price = form.createTextField('price', 0, [100, 460, 220, 484]);
+setFieldScript(price, '/F', 'AFNumber_Format(2, 0, 0, 0, "$", false);');
 // Input: 1234.5 -> Display: $1,234.50
 ```
 
@@ -107,11 +127,12 @@ form.createTextField('price', {
 You can also format values programmatically without embedding scripts:
 
 ```ts
-import { AFNumber_Format, formatNumber } from 'modern-pdf-lib';
+import { formatNumber } from 'modern-pdf-lib';
 
 const formatted = formatNumber(1234.5, {
   decimals: 2,
-  separatorStyle: 0,
+  thousandsSep: ',',
+  decimalSep: '.',
   currency: '$',
   currencyPrepend: true,
 });
@@ -125,11 +146,9 @@ const formatted = formatNumber(1234.5, {
 Use `AFDate_FormatEx` to display and validate dates.
 
 ```ts
-form.createTextField('birthDate', {
-  page, x: 100, y: 420, width: 120, height: 24,
-  formatScript: 'AFDate_FormatEx("mm/dd/yyyy");',
-  keystrokeScript: 'AFDate_KeystrokeEx("mm/dd/yyyy");',
-});
+const birthDate = form.createTextField('birthDate', 0, [100, 420, 220, 444]);
+setFieldScript(birthDate, '/F', 'AFDate_FormatEx("mm/dd/yyyy");');
+setFieldScript(birthDate, '/K', 'AFDate_KeystrokeEx("mm/dd/yyyy");');
 ```
 
 ### Common Date Patterns
@@ -146,10 +165,10 @@ form.createTextField('birthDate', {
 ### Server-Side Date Handling
 
 ```ts
-import { AFDate_FormatEx, parseAcrobatDate, formatDate } from 'modern-pdf-lib';
+import { AFDate_FormatEx, parseAcrobatDate, formatAcrobatDate } from 'modern-pdf-lib';
 
 const date = parseAcrobatDate('03/07/2026', 'mm/dd/yyyy');
-const iso = formatDate(date, 'yyyy-mm-dd'); // "2026-03-07"
+const iso = formatAcrobatDate(date, 'yyyy-mm-dd'); // "2026-03-07"
 ```
 
 ---
@@ -161,47 +180,41 @@ Field validation scripts run on the `keystroke` or `validate` event to enforce i
 ### Email Validation
 
 ```ts
-form.createTextField('email', {
-  page, x: 100, y: 380, width: 200, height: 24,
-  validateScript: `
-    var email = event.value;
-    var re = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
-    if (!re.test(email) && email !== "") {
-      app.alert("Please enter a valid email address.");
-      event.rc = false;
-    }
-  `,
-});
+const email = form.createTextField('email', 0, [100, 380, 300, 404]);
+setFieldScript(email, '/V', `
+  var email = event.value;
+  var re = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
+  if (!re.test(email) && email !== "") {
+    app.alert("Please enter a valid email address.");
+    event.rc = false;
+  }
+`);
 ```
 
 ### Phone Number Validation
 
 ```ts
-form.createTextField('phone', {
-  page, x: 100, y: 340, width: 200, height: 24,
-  validateScript: `
-    var phone = event.value.replace(/[^0-9]/g, "");
-    if (phone.length > 0 && phone.length !== 10) {
-      app.alert("Phone number must be 10 digits.");
-      event.rc = false;
-    }
-  `,
-});
+const phone = form.createTextField('phone', 0, [100, 340, 300, 364]);
+setFieldScript(phone, '/V', `
+  var phone = event.value.replace(/[^0-9]/g, "");
+  if (phone.length > 0 && phone.length !== 10) {
+    app.alert("Phone number must be 10 digits.");
+    event.rc = false;
+  }
+`);
 ```
 
 ### Numeric Range
 
 ```ts
-form.createTextField('age', {
-  page, x: 100, y: 300, width: 80, height: 24,
-  validateScript: `
-    var val = parseInt(event.value);
-    if (isNaN(val) || val < 0 || val > 150) {
-      app.alert("Age must be between 0 and 150.");
-      event.rc = false;
-    }
-  `,
-});
+const age = form.createTextField('age', 0, [100, 300, 180, 324]);
+setFieldScript(age, '/V', `
+  var val = parseInt(event.value);
+  if (isNaN(val) || val < 0 || val > 150) {
+    app.alert("Age must be between 0 and 150.");
+    event.rc = false;
+  }
+`);
 ```
 
 ### Server-Side Validation
@@ -209,14 +222,15 @@ form.createTextField('age', {
 ```ts
 import { validateFieldValue } from 'modern-pdf-lib';
 
-const result = validateFieldValue('test@example.com', {
-  type: 'email',
-});
+// validateFieldValue(field, value, script) inspects the Acrobat validation
+// script to decide which built-in check to run (email, phone, range, etc.).
+const emailField = form.getField('email');
+const emailScript = 'if (!isValidEmail(event.value)) { app.alert("Invalid email@address"); }';
+
+const result = validateFieldValue(emailField, 'test@example.com', emailScript);
 // { valid: true }
 
-const bad = validateFieldValue('not-an-email', {
-  type: 'email',
-});
+const bad = validateFieldValue(emailField, 'not-an-email', emailScript);
 // { valid: false, message: '...' }
 ```
 
@@ -227,35 +241,25 @@ const bad = validateFieldValue('not-an-email', {
 `AFSpecial_Format` handles common masked-input patterns.
 
 ```ts
-import { AFSpecial_Format } from 'modern-pdf-lib';
-
 // Social Security Number: 123-45-6789
-form.createTextField('ssn', {
-  page, x: 100, y: 260, width: 120, height: 24,
-  formatScript: 'AFSpecial_Format(3);',
-  keystrokeScript: 'AFSpecial_Keystroke(3);',
-});
+const ssn = form.createTextField('ssn', 0, [100, 260, 220, 284]);
+setFieldScript(ssn, '/F', 'AFSpecial_Format(3);');
+setFieldScript(ssn, '/K', 'AFSpecial_Keystroke(3);');
 
 // Phone number: (123) 456-7890
-form.createTextField('phone', {
-  page, x: 100, y: 230, width: 120, height: 24,
-  formatScript: 'AFSpecial_Format(2);',
-  keystrokeScript: 'AFSpecial_Keystroke(2);',
-});
+const phone = form.createTextField('phone', 0, [100, 230, 220, 254]);
+setFieldScript(phone, '/F', 'AFSpecial_Format(2);');
+setFieldScript(phone, '/K', 'AFSpecial_Keystroke(2);');
 
 // ZIP code: 12345
-form.createTextField('zip', {
-  page, x: 100, y: 200, width: 80, height: 24,
-  formatScript: 'AFSpecial_Format(0);',
-  keystrokeScript: 'AFSpecial_Keystroke(0);',
-});
+const zip = form.createTextField('zip', 0, [100, 200, 180, 224]);
+setFieldScript(zip, '/F', 'AFSpecial_Format(0);');
+setFieldScript(zip, '/K', 'AFSpecial_Keystroke(0);');
 
 // ZIP+4: 12345-6789
-form.createTextField('zip4', {
-  page, x: 100, y: 170, width: 100, height: 24,
-  formatScript: 'AFSpecial_Format(1);',
-  keystrokeScript: 'AFSpecial_Keystroke(1);',
-});
+const zip4 = form.createTextField('zip4', 0, [100, 170, 200, 194]);
+setFieldScript(zip4, '/F', 'AFSpecial_Format(1);');
+setFieldScript(zip4, '/K', 'AFSpecial_Keystroke(1);');
 ```
 
 ### AFSpecial_Format Codes
@@ -274,25 +278,26 @@ form.createTextField('zip4', {
 Use `getField()` to read or write values in other form fields from any script.
 
 ```ts
+import { PdfDict, PdfName, PdfString } from 'modern-pdf-lib';
+
 // Toggle a "same as billing" address
-form.createTextField('billingAddress', {
-  page, x: 100, y: 130, width: 200, height: 24,
-});
+form.createTextField('billingAddress', 0, [100, 130, 300, 154]);
 
-form.createCheckbox('sameAsBilling', {
-  page, x: 100, y: 100, width: 16, height: 16,
-  actionScript: `
-    var same = getField("sameAsBilling").value === "Yes";
-    var billing = getField("billingAddress").value;
-    if (same) {
-      getField("shippingAddress").value = billing;
-    }
-  `,
-});
+const sameAsBilling = form.createCheckbox('sameAsBilling', 0, [100, 100, 116, 116]);
 
-form.createTextField('shippingAddress', {
-  page, x: 100, y: 70, width: 200, height: 24,
-});
+// A checkbox runs its activation action (/A) when clicked.
+const onClick = new PdfDict();
+onClick.set('/S', PdfName.of('JavaScript'));
+onClick.set('/JS', PdfString.literal(`
+  var same = getField("sameAsBilling").value === "Yes";
+  var billing = getField("billingAddress").value;
+  if (same) {
+    getField("shippingAddress").value = billing;
+  }
+`));
+sameAsBilling.getWidgetDict().set('/A', onClick);
+
+form.createTextField('shippingAddress', 0, [100, 70, 300, 94]);
 ```
 
 ### Server-Side Field References
@@ -314,30 +319,36 @@ Show or hide form sections based on field values.
 ```ts
 import { setFieldVisibility, addVisibilityAction } from 'modern-pdf-lib';
 
-// Hide the "spouse" section by default
-setFieldVisibility(form, 'spouseName', false);
-setFieldVisibility(form, 'spouseSSN', false);
+// setFieldVisibility(field, visible) — pass the field object, not its name.
+const spouseName = form.getField('spouseName');
+const spouseSSN = form.getField('spouseSSN');
 
-// Show it when "Married" is selected
-addVisibilityAction(form, 'maritalStatus', {
-  condition: (value) => value === 'Married',
-  targetFields: ['spouseName', 'spouseSSN'],
-});
+// Hide the "spouse" section by default
+setFieldVisibility(spouseName, false);
+setFieldVisibility(spouseSSN, false);
+
+// Attach a value-changed action to each spouse field that re-shows it when
+// the "maritalStatus" field equals "Married".
+// addVisibilityAction(field, triggerField, { operator, value? })
+addVisibilityAction(spouseName, 'maritalStatus', { operator: 'equals', value: 'Married' });
+addVisibilityAction(spouseSSN, 'maritalStatus', { operator: 'equals', value: 'Married' });
 ```
 
 ### Script-Based Visibility
 
 ```ts
-form.createDropdown('filingStatus', {
-  page, x: 100, y: 500, width: 150, height: 24,
-  options: ['Single', 'Married Filing Jointly', 'Head of Household'],
-  actionScript: `
-    var status = getField("filingStatus").value;
-    var show = (status === "Married Filing Jointly");
-    getField("spouseName").display = show ? display.visible : display.hidden;
-    getField("spouseSSN").display = show ? display.visible : display.hidden;
-  `,
-});
+// createDropdown(name, pageIndex, rect, options)
+const filingStatus = form.createDropdown('filingStatus', 0, [100, 500, 250, 524], [
+  'Single', 'Married Filing Jointly', 'Head of Household',
+]);
+
+// Run on the value-changed event (/AA → /V)
+setFieldScript(filingStatus, '/V', `
+  var status = getField("filingStatus").value;
+  var show = (status === "Married Filing Jointly");
+  getField("spouseName").display = show ? display.visible : display.hidden;
+  getField("spouseSSN").display = show ? display.visible : display.hidden;
+`);
 ```
 
 ---
@@ -346,57 +357,44 @@ form.createDropdown('filingStatus', {
 
 Document-level actions trigger on lifecycle events: open, close, print, and save.
 
+Document-level scripts are registered with `doc.addJavaScript(name, script)`.
+Viewers (Adobe Acrobat, Foxit) execute these when the document opens; named
+scripts run in name order. Use them to install global helpers and to wire up
+the field-level actions that fire on the close, print, and save events.
+
 ### Open Action
 
 ```ts
 import { createPdf } from 'modern-pdf-lib';
-import { addDocumentOpenAction } from 'modern-pdf-lib/form';
 
 const doc = createPdf();
-addDocumentOpenAction(doc, 'app.alert("Welcome to this form!");');
+doc.addJavaScript('welcome', 'app.alert("Welcome to this form!");');
 ```
 
 ### Close Action
 
 ```ts
-import { addDocumentCloseAction } from 'modern-pdf-lib/form';
-
-addDocumentCloseAction(doc, `
-  if (this.dirty) {
-    app.alert("You have unsaved changes.");
-  }
+doc.addJavaScript('onClose', `
+  this.setAction("WillClose", 'if (this.dirty) app.alert("You have unsaved changes.");');
 `);
 ```
 
 ### Print Actions
 
 ```ts
-import { addDocumentPrintAction } from 'modern-pdf-lib/form';
-
-addDocumentPrintAction(doc, {
-  beforePrint: `
-    getField("printDate").value = util.printd("mm/dd/yyyy", new Date());
-    getField("watermark").display = display.visible;
-  `,
-  afterPrint: `
-    getField("watermark").display = display.hidden;
-  `,
-});
+doc.addJavaScript('onPrint', `
+  this.setAction("WillPrint", 'getField("printDate").value = util.printd("mm/dd/yyyy", new Date()); getField("watermark").display = display.visible;');
+  this.setAction("DidPrint", 'getField("watermark").display = display.hidden;');
+`);
 ```
 
 ### Save Actions
 
 ```ts
-import { addDocumentSaveAction } from 'modern-pdf-lib/form';
-
-addDocumentSaveAction(doc, {
-  beforeSave: `
-    getField("lastModified").value = util.printd("yyyy-mm-dd HH:MM:ss", new Date());
-  `,
-  afterSave: `
-    app.alert("Document saved successfully.");
-  `,
-});
+doc.addJavaScript('onSave', `
+  this.setAction("WillSave", 'getField("lastModified").value = util.printd("yyyy-mm-dd HH:MM:ss", new Date());');
+  this.setAction("DidSave", 'app.alert("Document saved successfully.");');
+`);
 ```
 
 ### Named Document Scripts
@@ -498,8 +496,23 @@ sandbox.destroy();
 ### Invoice Form with Auto-Calculating Totals
 
 ```ts
-import { createPdf } from 'modern-pdf-lib';
-import { addDocumentOpenAction } from 'modern-pdf-lib/form';
+import { createPdf, PdfDict, PdfName, PdfString } from 'modern-pdf-lib';
+import type { PdfField } from 'modern-pdf-lib';
+
+// Helper: attach JavaScript to a field's /AA action dictionary.
+// /C = calculate, /F = format, /V = validate, /K = keystroke.
+function setFieldScript(field: PdfField, key: '/C' | '/F' | '/V' | '/K', js: string) {
+  const action = new PdfDict();
+  action.set('/S', PdfName.of('JavaScript'));
+  action.set('/JS', PdfString.literal(js));
+  const widget = field.getWidgetDict();
+  let aa = widget.get('/AA');
+  if (aa === undefined || aa.kind !== 'dict') {
+    aa = new PdfDict();
+    widget.set('/AA', aa);
+  }
+  (aa as PdfDict).set(key, action);
+}
 
 const doc = createPdf();
 const page = doc.addPage([612, 792]);
@@ -512,46 +525,39 @@ page.drawText('INVOICE', { x: 50, y: 742, size: 24 });
 for (let i = 1; i <= 3; i++) {
   const y = 700 - (i - 1) * 30;
 
-  form.createTextField(`desc${i}`, { page, x: 50, y, width: 200, height: 24 });
-  form.createTextField(`qty${i}`,  { page, x: 260, y, width: 60, height: 24 });
-  form.createTextField(`price${i}`, { page, x: 330, y, width: 80, height: 24 });
-  form.createTextField(`line${i}`, {
-    page, x: 420, y, width: 80, height: 24,
-    calculateScript: `
-      var q = parseFloat(getField("qty${i}").value) || 0;
-      var p = parseFloat(getField("price${i}").value) || 0;
-      event.value = (q * p).toFixed(2);
-    `,
-    formatScript: 'AFNumber_Format(2, 0, 0, 0, "$", true);',
-  });
+  form.createTextField(`desc${i}`, 0, [50, y, 250, y + 24]);
+  form.createTextField(`qty${i}`, 0, [260, y, 320, y + 24]);
+  form.createTextField(`price${i}`, 0, [330, y, 410, y + 24]);
+
+  const line = form.createTextField(`line${i}`, 0, [420, y, 500, y + 24]);
+  setFieldScript(line, '/C', `
+    var q = parseFloat(getField("qty${i}").value) || 0;
+    var p = parseFloat(getField("price${i}").value) || 0;
+    event.value = (q * p).toFixed(2);
+  `);
+  setFieldScript(line, '/F', 'AFNumber_Format(2, 0, 0, 0, "$", true);');
 }
 
 // Subtotal
-form.createTextField('subtotal', {
-  page, x: 420, y: 580, width: 80, height: 24,
-  calculateScript: 'AFSimple_Calculate("SUM", ["line1", "line2", "line3"]);',
-  formatScript: 'AFNumber_Format(2, 0, 0, 0, "$", true);',
-});
+const subtotal = form.createTextField('subtotal', 0, [420, 580, 500, 604]);
+setFieldScript(subtotal, '/C', 'AFSimple_Calculate("SUM", ["line1", "line2", "line3"]);');
+setFieldScript(subtotal, '/F', 'AFNumber_Format(2, 0, 0, 0, "$", true);');
 
 // Tax (8.5%)
-form.createTextField('tax', {
-  page, x: 420, y: 550, width: 80, height: 24,
-  calculateScript: `
-    var sub = parseFloat(getField("subtotal").value) || 0;
-    event.value = (sub * 0.085).toFixed(2);
-  `,
-  formatScript: 'AFNumber_Format(2, 0, 0, 0, "$", true);',
-});
+const tax = form.createTextField('tax', 0, [420, 550, 500, 574]);
+setFieldScript(tax, '/C', `
+  var sub = parseFloat(getField("subtotal").value) || 0;
+  event.value = (sub * 0.085).toFixed(2);
+`);
+setFieldScript(tax, '/F', 'AFNumber_Format(2, 0, 0, 0, "$", true);');
 
 // Grand total
-form.createTextField('grandTotal', {
-  page, x: 420, y: 520, width: 80, height: 24,
-  calculateScript: 'AFSimple_Calculate("SUM", ["subtotal", "tax"]);',
-  formatScript: 'AFNumber_Format(2, 0, 0, 0, "$", true);',
-});
+const grandTotal = form.createTextField('grandTotal', 0, [420, 520, 500, 544]);
+setFieldScript(grandTotal, '/C', 'AFSimple_Calculate("SUM", ["subtotal", "tax"]);');
+setFieldScript(grandTotal, '/F', 'AFNumber_Format(2, 0, 0, 0, "$", true);');
 
-// Set today's date on open
-addDocumentOpenAction(doc, `
+// Set today's date when the document opens
+doc.addJavaScript('invoiceDate', `
   getField("invoiceDate").value = util.printd("mm/dd/yyyy", new Date());
 `);
 
@@ -561,46 +567,38 @@ const bytes = await doc.save();
 ### Tax Form with Conditional Sections
 
 ```ts
+// Reuses the setFieldScript() helper defined in the invoice example above.
 const doc = createPdf();
 const page = doc.addPage([612, 792]);
 const form = doc.getForm();
 
 // Filing status dropdown
-form.createDropdown('filingStatus', {
-  page, x: 150, y: 700, width: 200, height: 24,
-  options: ['Single', 'Married Filing Jointly', 'Married Filing Separately'],
-  actionScript: `
-    var status = event.value;
-    var married = (status === "Married Filing Jointly" ||
-                   status === "Married Filing Separately");
-    getField("spouseName").display = married ? display.visible : display.hidden;
-    getField("spouseSSN").display = married ? display.visible : display.hidden;
-  `,
-});
+const filingStatus = form.createDropdown('filingStatus', 0, [150, 700, 350, 724], [
+  'Single', 'Married Filing Jointly', 'Married Filing Separately',
+]);
+setFieldScript(filingStatus, '/V', `
+  var status = event.value;
+  var married = (status === "Married Filing Jointly" ||
+                 status === "Married Filing Separately");
+  getField("spouseName").display = married ? display.visible : display.hidden;
+  getField("spouseSSN").display = married ? display.visible : display.hidden;
+`);
 
 // Spouse fields (hidden by default)
-form.createTextField('spouseName', { page, x: 150, y: 660, width: 200, height: 24 });
-form.createTextField('spouseSSN', {
-  page, x: 150, y: 630, width: 120, height: 24,
-  formatScript: 'AFSpecial_Format(3);',
-});
+form.createTextField('spouseName', 0, [150, 660, 350, 684]);
+const spouseSSN = form.createTextField('spouseSSN', 0, [150, 630, 270, 654]);
+setFieldScript(spouseSSN, '/F', 'AFSpecial_Format(3);');
 
 // Income fields
-form.createTextField('wages', {
-  page, x: 150, y: 580, width: 120, height: 24,
-  formatScript: 'AFNumber_Format(2, 0, 0, 0, "$", true);',
-});
-form.createTextField('interest', {
-  page, x: 150, y: 550, width: 120, height: 24,
-  formatScript: 'AFNumber_Format(2, 0, 0, 0, "$", true);',
-});
+const wages = form.createTextField('wages', 0, [150, 580, 270, 604]);
+setFieldScript(wages, '/F', 'AFNumber_Format(2, 0, 0, 0, "$", true);');
+const interest = form.createTextField('interest', 0, [150, 550, 270, 574]);
+setFieldScript(interest, '/F', 'AFNumber_Format(2, 0, 0, 0, "$", true);');
 
 // Total income
-form.createTextField('totalIncome', {
-  page, x: 150, y: 510, width: 120, height: 24,
-  calculateScript: 'AFSimple_Calculate("SUM", ["wages", "interest"]);',
-  formatScript: 'AFNumber_Format(2, 0, 0, 0, "$", true);',
-});
+const totalIncome = form.createTextField('totalIncome', 0, [150, 510, 270, 534]);
+setFieldScript(totalIncome, '/C', 'AFSimple_Calculate("SUM", ["wages", "interest"]);');
+setFieldScript(totalIncome, '/F', 'AFNumber_Format(2, 0, 0, 0, "$", true);');
 ```
 
 ### Registration Form with Validation
@@ -612,42 +610,36 @@ const form = doc.getForm();
 
 page.drawText('Registration Form', { x: 50, y: 742, size: 20 });
 
+// Reuses the setFieldScript() helper defined in the invoice example above.
+
 // Name (required)
-form.createTextField('fullName', {
-  page, x: 150, y: 700, width: 250, height: 24,
-  validateScript: `
-    if (event.value.trim() === "") {
-      app.alert("Full name is required.");
-      event.rc = false;
-    }
-  `,
-});
+const fullName = form.createTextField('fullName', 0, [150, 700, 400, 724]);
+setFieldScript(fullName, '/V', `
+  if (event.value.trim() === "") {
+    app.alert("Full name is required.");
+    event.rc = false;
+  }
+`);
 
 // Email
-form.createTextField('email', {
-  page, x: 150, y: 660, width: 250, height: 24,
-  validateScript: `
-    var re = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
-    if (event.value !== "" && !re.test(event.value)) {
-      app.alert("Please enter a valid email address.");
-      event.rc = false;
-    }
-  `,
-});
+const email = form.createTextField('email', 0, [150, 660, 400, 684]);
+setFieldScript(email, '/V', `
+  var re = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
+  if (event.value !== "" && !re.test(event.value)) {
+    app.alert("Please enter a valid email address.");
+    event.rc = false;
+  }
+`);
 
 // Phone
-form.createTextField('phone', {
-  page, x: 150, y: 620, width: 150, height: 24,
-  formatScript: 'AFSpecial_Format(2);',
-  keystrokeScript: 'AFSpecial_Keystroke(2);',
-});
+const phone = form.createTextField('phone', 0, [150, 620, 300, 644]);
+setFieldScript(phone, '/F', 'AFSpecial_Format(2);');
+setFieldScript(phone, '/K', 'AFSpecial_Keystroke(2);');
 
 // Date of birth
-form.createTextField('dob', {
-  page, x: 150, y: 580, width: 120, height: 24,
-  formatScript: 'AFDate_FormatEx("mm/dd/yyyy");',
-  keystrokeScript: 'AFDate_KeystrokeEx("mm/dd/yyyy");',
-});
+const dob = form.createTextField('dob', 0, [150, 580, 270, 604]);
+setFieldScript(dob, '/F', 'AFDate_FormatEx("mm/dd/yyyy");');
+setFieldScript(dob, '/K', 'AFDate_KeystrokeEx("mm/dd/yyyy");');
 
 // Server-side pre-validation with sandbox
 import { createSandbox } from 'modern-pdf-lib';

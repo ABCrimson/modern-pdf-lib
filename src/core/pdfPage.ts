@@ -67,6 +67,7 @@ import {
   PdfStream,
   PdfObjectRegistry,
 } from './pdfObjects.js';
+import { decodeStreamData } from '../parser/streamDecode.js';
 import type { StructureType } from '../accessibility/structureTree.js';
 import {
   wrapInMarkedContent,
@@ -2556,6 +2557,55 @@ export class PdfPage {
   // -----------------------------------------------------------------------
   // Materialisation (called by PdfDocument.save)
   // -----------------------------------------------------------------------
+
+  /**
+   * Return this page's content stream as fully decoded bytes.
+   *
+   * For a page parsed from a loaded PDF, the original (possibly compressed)
+   * content stream(s) are resolved and decompressed; any operators added
+   * afterwards (via {@link drawText}, {@link drawImage}, …) are appended.
+   * Multiple content streams are joined with newline separators.
+   *
+   * This is the public entry point for the text-extraction pipeline:
+   *
+   * ```ts
+   * import { loadPdf, parseContentStream, extractTextWithPositions } from 'modern-pdf-lib';
+   *
+   * const doc = await loadPdf(bytes);
+   * const ops = parseContentStream(doc.getPage(0).getContentStream());
+   * const items = extractTextWithPositions(ops);
+   * ```
+   *
+   * @returns The decoded content-stream bytes (`Uint8Array`).
+   */
+  getContentStream(): Uint8Array {
+    const chunks: Uint8Array[] = [];
+
+    // Original content streams from a loaded PDF (decode each).
+    for (const ref of this._originalContentRefs) {
+      const obj = this.registry.resolve(ref);
+      if (obj && obj.kind === 'stream') {
+        chunks.push(decodeStreamData(obj as PdfStream));
+      }
+    }
+
+    // Operators added in-memory after load (or on a freshly created page).
+    if (this.ops.length > 0) {
+      chunks.push(new TextEncoder().encode(this.ops));
+    }
+
+    let totalLen = 0;
+    for (const chunk of chunks) totalLen += chunk.length + 1; // +1 for newline separator
+    const result = new Uint8Array(totalLen);
+    let offset = 0;
+    for (const chunk of chunks) {
+      result.set(chunk, offset);
+      offset += chunk.length;
+      result[offset] = 0x0a; // newline
+      offset += 1;
+    }
+    return result;
+  }
 
   /** @internal Return the accumulated operator string. */
   getContentStreamData(): string {

@@ -60,7 +60,7 @@ Cells can be simple strings or objects with styling:
 {
   cells: [
     { content: 'Total', align: 'right', fontSize: 14 },
-    { content: '$197.50', textColor: { type: 'rgb', red: 0, green: 0.5, blue: 0 } },
+    { content: '$197.50', textColor: { type: 'rgb', r: 0, g: 0.5, b: 0 } },
   ]
 }
 ```
@@ -127,7 +127,7 @@ const result = page.drawTable({
         { content: 'Unit Price', align: 'right' },
         { content: 'Amount', align: 'right' },
       ],
-      backgroundColor: { type: 'rgb', red: 0.2, green: 0.3, blue: 0.5 },
+      backgroundColor: { type: 'rgb', r: 0.2, g: 0.3, b: 0.5 },
     },
     { cells: ['1', 'Web Development Services', '40', '$150.00', '$6,000.00'] },
     { cells: ['2', 'UI/UX Design', '20', '$120.00', '$2,400.00'] },
@@ -151,7 +151,7 @@ const result = page.drawTable({
       cells: [
         '', '', '',
         { content: 'TOTAL:', align: 'right', fontSize: 14 },
-        { content: '$10,906.92', align: 'right', fontSize: 14, textColor: { type: 'rgb', red: 0, green: 0.4, blue: 0 } },
+        { content: '$10,906.92', align: 'right', fontSize: 14, textColor: { type: 'rgb', r: 0, g: 0.4, b: 0 } },
       ],
       backgroundColor: { type: 'grayscale', gray: 0.95 },
     },
@@ -211,7 +211,7 @@ const result = page.drawTable({
   rows: [
     {
       cells: ['Time', ...days],
-      backgroundColor: { type: 'rgb', red: 0.2, green: 0.4, blue: 0.6 },
+      backgroundColor: { type: 'rgb', r: 0.2, g: 0.4, b: 0.6 },
     },
     ...times.map(time => ({
       cells: [time, '', '', '', '', ''],

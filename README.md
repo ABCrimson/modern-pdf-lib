@@ -15,8 +15,8 @@ Create, parse, fill, merge, sign, and manipulate PDF documents<br />in Node, Den
 
 [![npm version](https://img.shields.io/npm/v/modern-pdf-lib?style=flat-square&color=cb3837)](https://www.npmjs.com/package/modern-pdf-lib)
 [![bundle size](https://img.shields.io/badge/gzip-36kb_core-blue?style=flat-square)](https://bundlephobia.com/package/modern-pdf-lib)
-[![tests](https://img.shields.io/badge/tests-5%2C904_passing-brightgreen?style=flat-square)](#)
-[![TypeScript](https://img.shields.io/badge/TypeScript-6.0-3178c6?style=flat-square&logo=typescript&logoColor=white)](#)
+[![tests](https://img.shields.io/badge/tests-6%2C302_passing-brightgreen?style=flat-square)](#)
+[![TypeScript](https://img.shields.io/badge/TypeScript-7.0-3178c6?style=flat-square&logo=typescript&logoColor=white)](#)
 [![License: MIT](https://img.shields.io/badge/license-MIT-yellow?style=flat-square)](LICENSE)
 
 <br />
@@ -187,7 +187,7 @@ For environments without ES module support, use the IIFE bundle which exposes a 
 <td align="center">CJS (with ESM wrapper)</td></tr>
 
 <tr><td><strong>TypeScript</strong></td>
-<td align="center">6.0 strict</td>
+<td align="center">7.0 strict</td>
 <td align="center">3.x</td></tr>
 
 <tr><td><strong>Parse existing PDFs</strong></td>
@@ -314,7 +314,7 @@ For environments without ES module support, use the IIFE bundle which exposes a 
 
 | Runtime | Version | Status |
 |:---|:---|:---:|
-| **Node.js** | 25.7+ | Fully supported |
+| **Node.js** | 26.4+ | Fully supported |
 | **Deno** | 1.40+ | Fully supported |
 | **Bun** | 1.0+ | Fully supported |
 | **Cloudflare Workers** | &mdash; | Fully supported |
@@ -393,10 +393,11 @@ form.flatten(); // Burn values into page content
 <summary><strong>Merge & Split</strong></summary>
 
 ```ts
-import { mergePdfs, splitPdf, copyPages } from 'modern-pdf-lib';
+import { loadPdf, mergePdfs, splitPdf } from 'modern-pdf-lib';
 
-const merged = await mergePdfs([pdf1Bytes, pdf2Bytes]);
-const pages = await splitPdf(pdfBytes, [
+// mergePdfs / splitPdf operate on PdfDocument objects — load the bytes first.
+const merged = await mergePdfs([await loadPdf(pdf1Bytes), await loadPdf(pdf2Bytes)]);
+const pages = await splitPdf(await loadPdf(pdfBytes), [
   { start: 0, end: 4 },   // Pages 1-5
   { start: 5, end: 9 },   // Pages 6-10
 ]);
@@ -407,11 +408,13 @@ const pages = await splitPdf(pdfBytes, [
 <summary><strong>Encryption</strong> &mdash; AES-256, RC4, permissions</summary>
 
 ```ts
-const bytes = await doc.save({
+// Configure encryption with doc.encrypt(), then save().
+await doc.encrypt({
   userPassword: 'reader',
   ownerPassword: 'admin',
   permissions: { printing: true, copying: false },
 });
+const bytes = await doc.save();
 ```
 </details>
 
@@ -439,11 +442,12 @@ const results = await verifySignatures(signed);
 <summary><strong>Text Extraction</strong></summary>
 
 ```ts
-import { loadPdf, extractTextWithPositions } from 'modern-pdf-lib';
+import { loadPdf, parseContentStream, extractTextWithPositions } from 'modern-pdf-lib';
 
 const doc = await loadPdf(pdfBytes);
 const page = doc.getPage(0);
-const items = extractTextWithPositions(page.getOperators(), page.getResources());
+const operators = parseContentStream(page.getContentStream());
+const items = extractTextWithPositions(operators);
 
 for (const item of items) {
   console.log(`"${item.text}" at (${item.x}, ${item.y})`);
@@ -524,7 +528,7 @@ page.drawQrCode('https://example.com', { x: 50, y: 700, size: 120 });
 import { encodeCode128, encodeEan13, renderStyledBarcode } from 'modern-pdf-lib';
 
 const barcode = encodeCode128('ABC-12345');
-const ops = renderStyledBarcode(barcode, { x: 50, y: 500, height: 60 });
+const ops = renderStyledBarcode(barcode, 50, 500, 'ABC-12345', { height: 60 });
 ```
 </details>
 
@@ -617,7 +621,7 @@ modern-pdf-lib/
     metadata/       XMP metadata, viewer preferences
     wasm/           Rust crate sources (6 modules)
     cli/            CLI tool (modern-pdf optimize)
-  tests/            4,282 tests across 199 suites
+  tests/            6,302 tests across 265 suites
   docs/             VitePress documentation
 ```
 
@@ -629,8 +633,8 @@ modern-pdf-lib/
 git clone https://github.com/ABCrimson/modern-pdf-lib.git
 cd modern-pdf-lib
 npm install
-npm test          # 4,282 tests
-npm run typecheck # TypeScript 6.0 strict
+npm test          # 6,302 tests
+npm run typecheck # TypeScript 7.0 strict
 npm run build     # ESM + CJS + declarations
 ```
 

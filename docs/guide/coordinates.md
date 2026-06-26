@@ -157,7 +157,7 @@ const pdf = await loadPdf(pdfBytes);
 
 // Get the first page's content stream operators
 const page = pdf.getPages()[0]!;
-const streamData = page.getContentStreamData();
+const streamData = page.getContentStream();
 const operators = parseContentStream(streamData);
 
 // Extract positioned text items

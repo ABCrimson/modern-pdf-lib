@@ -25,12 +25,12 @@ deno add npm:modern-pdf-lib
 :::
 
 > [!NOTE]
-> `modern-pdf-lib` is ESM-only. It requires Node 25.7 or later, or any runtime with native ES module support.
+> `modern-pdf-lib` is ESM-only. It requires Node 26.4 or later, or any runtime with native ES module support.
 
 ::: details Supported Runtimes
 | Runtime | Minimum Version | Notes |
 |---|---|---|
-| Node.js | 25.7+ | Full support including WASM acceleration |
+| Node.js | 26.4+ | Full support including WASM acceleration |
 | Deno | Latest | Full support via `npm:` specifier |
 | Bun | Latest | Full support |
 | Cloudflare Workers | — | Streaming output, no file system |
@@ -173,12 +173,17 @@ await initWasm({ deflate: true, png: true, fonts: true });
 const bytes = await pdf.save();
 ```
 
-You can also provide custom paths to the `.wasm` files if your deployment requires specific asset locations:
+You can also provide pre-loaded WASM bytes if your deployment requires specific asset locations:
 
 ```ts
+const [deflateWasm, pngWasm] = await Promise.all([
+  fetch(new URL('./wasm/deflate.wasm', import.meta.url)).then((r) => r.arrayBuffer()),
+  fetch(new URL('./wasm/png.wasm', import.meta.url)).then((r) => r.arrayBuffer()),
+]);
+
 await initWasm({
-  deflateWasm: new URL('./wasm/deflate.wasm', import.meta.url),
-  pngWasm: new URL('./wasm/png.wasm', import.meta.url),
+  deflateWasm: new Uint8Array(deflateWasm),
+  pngWasm: new Uint8Array(pngWasm),
 });
 ```
 

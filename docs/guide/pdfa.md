@@ -612,8 +612,7 @@ modern-pdf-lib also supports PDF/UA (ISO 14289-1) validation and enforcement for
 Use `validatePdfUa()` to check a document against PDF/UA-1 requirements:
 
 ```ts
-import { createPdf } from 'modern-pdf-lib';
-import { validatePdfUa } from 'modern-pdf-lib/accessibility';
+import { createPdf, validatePdfUa } from 'modern-pdf-lib';
 
 const doc = createPdf();
 doc.addPage();
@@ -669,8 +668,7 @@ The validator performs the following checks:
 Use `enforcePdfUa()` to automatically fix issues that can be corrected programmatically:
 
 ```ts
-import { createPdf } from 'modern-pdf-lib';
-import { enforcePdfUa, validatePdfUa } from 'modern-pdf-lib/accessibility';
+import { createPdf, enforcePdfUa, validatePdfUa } from 'modern-pdf-lib';
 
 const doc = createPdf();
 doc.addPage();

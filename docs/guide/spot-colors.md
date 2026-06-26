@@ -80,14 +80,13 @@ import {
 const doc = createPdf();
 const page = doc.addPage();
 
-// 1. Build the Separation colour space array
+// 1. Build the Separation colour space array (a PdfArray object)
 const pantone = cmyk(0, 0.91, 0.76, 0);
 const csArray = buildSeparationColorSpace('PANTONE 185 C', pantone);
 
-// 2. Register it as a page colour space resource
+// 2. Derive the resource name used inside the content stream
 const resourceName = spotResourceName('PANTONE 185 C');
 // resourceName => 'CS_PANTONE_185_C'
-page.node.get('/Resources').get('/ColorSpace').set(`/${resourceName}`, csArray);
 
 // 3. Build a DeviceN colour space for multi-ink use
 const dnArray = buildDeviceNColorSpace(
@@ -95,8 +94,9 @@ const dnArray = buildDeviceNColorSpace(
   'DeviceCMYK',
 );
 const dnName = deviceNResourceName(['WarmRed', 'CoolBlue']);
-page.node.get('/Resources').get('/ColorSpace').set(`/${dnName}`, dnArray);
 ```
+
+`buildSeparationColorSpace()` and `buildDeviceNColorSpace()` return native `PdfArray` colour-space objects. Register each one in the page's `/Resources` `/ColorSpace` sub-dictionary under its derived resource name so the content-stream operators below can reference it.
 
 The `spotResourceName()` and `deviceNResourceName()` helpers sanitise colorant names into valid PDF name tokens by replacing spaces and special characters with underscores.
 

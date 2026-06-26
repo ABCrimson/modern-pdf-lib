@@ -276,7 +276,7 @@ const fontBytes = new Uint8Array(await readFile('fonts/Inter-Regular.ttf'));
 const font = await pdf.embedFont(fontBytes);
 
 const logoBytes = new Uint8Array(await readFile('images/logo.png'));
-const logo = pdf.embedPng(logoBytes);
+const logo = await pdf.embedPng(logoBytes);
 
 // Reuse across all pages
 for (let i = 0; i < 200; i++) {

@@ -60,8 +60,8 @@ PNG is the best choice for images with transparency, text overlays, or sharp edg
 ### Embedding
 
 ```ts
-// Synchronous -- no async needed
-const image = doc.embedPng(pngBytes);
+// Async -- await the embed
+const image = await doc.embedPng(pngBytes);
 page.drawImage(image, { x: 50, y: 400, width: 200, height: 150 });
 ```
 
@@ -313,7 +313,7 @@ When embedding the same image multiple times, use deduplication:
 import { deduplicateImages } from 'modern-pdf-lib';
 
 const report = deduplicateImages(doc);
-// report.savedBytes -- bytes saved by removing duplicates
+// report.bytesSaved -- bytes saved by removing duplicates
 ```
 
 ### Batch Optimization
@@ -325,7 +325,7 @@ import { optimizeAllImages } from 'modern-pdf-lib';
 
 const report = await optimizeAllImages(doc, {
   maxDpi: 150,
-  jpegQuality: 80,
+  quality: 80,
 });
 ```
 

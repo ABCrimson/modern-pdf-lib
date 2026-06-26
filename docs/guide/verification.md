@@ -47,17 +47,14 @@ Each certificate in the chain is signed by the one above it. The root CA is self
 import {
   buildCertificateChain,
   validateCertificateChain,
-  TrustStore,
 } from 'modern-pdf-lib';
 
-// Build a trust store with your root CA
-const trustStore = new TrustStore();
-await trustStore.addCertificate(rootCaDer);
+// Build the chain (leaf first, root last)
+const { chain, complete } = buildCertificateChain(leafCert, [intermediateCert]);
 
-// Build and validate the chain
-const chain = buildCertificateChain(leafCert, [intermediateCert]);
+// Validate the chain against your trusted root CAs (DER-encoded)
 const result = await validateCertificateChain(chain, {
-  trustStore,
+  trustedCerts: [rootCaDer],
 });
 console.log(`Chain valid: ${result.valid}`);
 ```
@@ -160,23 +157,24 @@ const preloaded = new TrustStore({
 For full information about a signature, use `verifySignatureDetailed()`:
 
 ```ts
-import { verifySignatureDetailed, TrustStore } from 'modern-pdf-lib';
+import { verifySignatureDetailed } from 'modern-pdf-lib';
 import { readFile } from 'node:fs/promises';
 
 const pdfBytes = new Uint8Array(await readFile('signed.pdf'));
 const rootCa = new Uint8Array(await readFile('root-ca.der'));
 
-const trustStore = new TrustStore({ certificates: [rootCa] });
-
-const result = await verifySignatureDetailed(pdfBytes, {
-  trustStore,
+// verifySignatureDetailed returns one result per signature in the document
+const results = await verifySignatureDetailed(pdfBytes, {
+  trustedCerts: [rootCa],
   checkRevocation: true,
 });
 
-console.log(`Integrity: ${result.integrityValid}`);
-console.log(`Signature: ${result.signatureValid}`);
-console.log(`Signed by: ${result.signerInfo?.commonName}`);
-console.log(`Signing date: ${result.signingDate}`);
+for (const result of results) {
+  console.log(`Integrity: ${result.integrityValid}`);
+  console.log(`Signature: ${result.cryptoValid}`);
+  console.log(`Signed by: ${result.signedBy}`);
+  console.log(`Signing time: ${result.timestamp?.time}`);
+}
 ```
 
 The `DetailedVerificationResult` provides:
@@ -184,10 +182,10 @@ The `DetailedVerificationResult` provides:
 | Field | Description |
 |-------|-------------|
 | `integrityValid` | ByteRange hash matches the signed digest |
-| `signatureValid` | Cryptographic signature verification passed |
-| `signerInfo` | Certificate details (CN, issuer, serial, validity) |
-| `signingDate` | Date from the signed attributes |
-| `chainValid` | Certificate chain validates to a trusted root |
+| `cryptoValid` | Cryptographic signature verification passed |
+| `signedBy` | Subject CN of the signing certificate |
+| `chain` | Certificate chain details (CN, issuer, serial, validity) |
+| `timestamp` | Timestamp info (`time`, `valid`), if present |
 | `revocationStatus` | OCSP/CRL check result |
 
 ## Offline Verification

@@ -5,11 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 See [VERSIONING.md](./VERSIONING.md) for this project's versioning policy.
 
+## [0.28.1] - 2026-06-26
+
+**Critical fix release.** v0.28.0's bleeding-edge toolchain migration introduced a build regression that made the **published package completely unimportable**: `import … from 'modern-pdf-lib'` threw `SyntaxError: Export 'AFRelationship' is not defined in module` at link time for every ESM consumer. CI never caught it because the test suite imports from `src/`, never from the built `dist/`. This release fixes the build, makes the artifact a first-class verified gate, and corrects the remaining documentation inaccuracies.
+
+### Fixed
+
+- **🔴 Package was unimportable** (`tsdown.config.ts`): tsdown's dts plugin (`rolldown-plugin-dts`) was leaking **type-only re-exports** (e.g. `export type { AFRelationship }`) into the runtime value bundle as unbound `export { … }` statements, breaking every ESM entry at link time. Fixed with a **two-pass build** — the value bundle is emitted with `dts: false` (kept pristine), and declarations are emitted separately and merged back in by `scripts/finalize-dts.mjs`. The source was already correct (`verbatimModuleSyntax` enforces type-only exports); the bug was purely in bundling.
+
+### Added
+
+- **`PdfPage.getContentStream(): Uint8Array`** — public entry point for the text-extraction pipeline. Resolves and decompresses a loaded page's content stream(s) (appending any newly-drawn operators), so `parseContentStream(page.getContentStream())` → `extractText(ops)` now composes through the **public** API. Previously the only path was the `@internal`, `string`-returning `getContentStreamData()`, so the documented extraction example was not actually achievable.
+- **46 root re-exports** so every documented `import { … } from 'modern-pdf-lib'` actually resolves — these functions existed and were tested but weren't reachable from the package root: Acrobat-JS form helpers (`AFNumber_Format`, `AFDate_FormatEx`, `parseAcrobatDate`, `formatAcrobatDate`, `createSandbox`, `setFieldVisibility`, …), signature verification/revocation/chain/policy (`TrustStore`, `verifySignatureDetailed`, `checkCertificateStatus`, `downloadCrl`, `buildCertificateChain`, `validateKeyUsage`, `EKU_OIDS`, `verifyOfflineRevocation`, …), JPEG 2000 internals (`decodeJpeg2000`, `parseTileInfo`, `getComponentDepths`, …), PDF/X (`validatePdfX`, `enforcePdfX`, `buildPdfXOutputIntent`), and advanced text layout (`layoutParagraph`, `layoutColumns`, `layoutTextFlow`, `findHyphenationPoints`). The root barrel now exposes **608** symbols.
+- **`scripts/smoke-dist.mjs`** import gate (`npm run smoke`) — imports every built ESM **and** CJS entry and asserts it links and exposes its public API (incl. one symbol per specialized guide). Wired into `npm run build` and into both CI and release workflows so an unimportable artifact can never publish again.
+
+### Documentation
+
+- **Audited every code example** across the README and all 33 guides against the real source (a per-file, adversarially-verified pass) and fixed every factually-wrong snippet, including:
+  - Text extraction: the broken `page.getOperators()`/`getResources()` (non-existent) and type-incorrect `page.getContentStreamData()` (`@internal`, returns `string`) → `parseContentStream(page.getContentStream())`.
+  - `mergePdfs`/`splitPdf` take `PdfDocument` objects, not raw bytes (load with `loadPdf` first).
+  - Encryption is configured via `doc.encrypt({ … })` then `doc.save()`, not as a `save()` option.
+  - `RgbColor` literals are `{ type: 'rgb', r, g, b }` (not `red`/`green`/`blue`); rotation uses `degrees(n)`, not `{ angle: n }`.
+  - `embedPng`/`embedJpeg`/`embedImage` are async and must be `await`-ed; `renderStyledBarcode(matrix, x, y, text, options?)` is positional.
+  - Sub-path imports that don't resolve (`modern-pdf-lib/plugins`, `/layout`, `/accessibility`) → root imports.
+- Corrected stale facts across README/docs/metadata: test count (**6,290**), TypeScript **7.0**, Node **26.4+**, suite count **264**, benchmark **34/37**, current-version markers, `package.json` description + keywords.
+
 ## [0.28.0] - 2026-06-25
 
 This release pairs a full **bleeding-edge toolchain migration** (TypeScript 7, oxlint, Vite 8 / Vitest 5, Node 26) with **27 net-new features** added only where an evidence-based audit (`GAP-ANALYSIS.md`) confirmed a genuine gap — the planned roadmap was found to be ~half already-implemented. Every feature is TDD-verified; the full suite (**6,254 tests**), typecheck, lint (0 errors), and build all pass, with **no performance regression** (34/37 wins vs pdf-lib).
-
-### Added
 
 ### Added
 

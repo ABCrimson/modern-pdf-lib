@@ -78,10 +78,12 @@ page.drawText('Accessible text with proper Unicode mappings', {
 Verify that text can be extracted correctly from your generated PDFs:
 
 ```ts
-import { loadPdf, extractText } from 'modern-pdf-lib';
+import { loadPdf, extractText, parseContentStream } from 'modern-pdf-lib';
 
-const doc = loadPdf(pdfBytes);
-const text = extractText(doc);
+const doc = await loadPdf(pdfBytes);
+const page = doc.getPages()[0];
+const operators = parseContentStream(page.getContentStream());
+const text = extractText(operators);
 console.log(text);
 // Should output the exact text content, not garbled characters
 ```

@@ -9,7 +9,7 @@ modern-pdf-lib provides a memory-aware batch processing engine for applying oper
 ## Quick Start
 
 ```ts
-import { processBatch } from 'modern-pdf-lib';
+import { processBatch, degrees } from 'modern-pdf-lib';
 import { readFile, writeFile } from 'node:fs/promises';
 import { readdir } from 'node:fs/promises';
 
@@ -26,7 +26,7 @@ const result = await processBatch(files, async (doc) => {
     page.drawText('DRAFT', {
       x: 200, y: 400, size: 60,
       color: { type: 'rgb', r: 0.9, g: 0.9, b: 0.9 },
-      rotate: { angle: 45 },
+      rotate: degrees(45),
     });
   }
   return doc.save();
@@ -239,7 +239,7 @@ PDFs without forms (or where flattening fails) are saved as-is -- they are not t
 ## Full Example: Watermark with Progress and Memory Guard
 
 ```ts
-import { processBatch } from 'modern-pdf-lib';
+import { processBatch, degrees } from 'modern-pdf-lib';
 
 const result = await processBatch(files, async (doc) => {
   for (const page of doc.getPages()) {
@@ -248,7 +248,7 @@ const result = await processBatch(files, async (doc) => {
       x: width / 4, y: height / 2, size: 48,
       color: { type: 'rgb', r: 1, g: 0, b: 0 },
       opacity: 0.15,
-      rotate: { angle: 45 },
+      rotate: degrees(45),
     });
   }
   return doc.save();

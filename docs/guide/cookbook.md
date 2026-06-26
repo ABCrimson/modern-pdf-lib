@@ -202,7 +202,7 @@ const pages = doc.getPages();
 
 for (let pageIdx = 0; pageIdx < pages.length; pageIdx++) {
   const page = pages[pageIdx];
-  const contentStream = page.getContentStreamData();
+  const contentStream = page.getContentStream();
 
   // Parse the content stream into operators
   const operators = parseContentStream(contentStream);
@@ -298,12 +298,12 @@ Combine several PDF files into a single document using `mergePdfs`, or selective
 **Approach A — Merge entire documents:**
 
 ```ts
-import { mergePdfs } from 'modern-pdf-lib';
+import { loadPdf, mergePdfs } from 'modern-pdf-lib';
 import { readFile, writeFile } from 'node:fs/promises';
 
-const pdf1 = new Uint8Array(await readFile('report-part1.pdf'));
-const pdf2 = new Uint8Array(await readFile('report-part2.pdf'));
-const pdf3 = new Uint8Array(await readFile('appendix.pdf'));
+const pdf1 = await loadPdf(new Uint8Array(await readFile('report-part1.pdf')));
+const pdf2 = await loadPdf(new Uint8Array(await readFile('report-part2.pdf')));
+const pdf3 = await loadPdf(new Uint8Array(await readFile('appendix.pdf')));
 
 const mergedDoc = await mergePdfs([pdf1, pdf2, pdf3]);
 
@@ -569,8 +569,13 @@ import {
   computeSignatureHash,
   embedSignature,
   buildPkcs7Signature,
+  base64Decode,
 } from 'modern-pdf-lib';
 import { readFile, writeFile } from 'node:fs/promises';
+
+// Strip the PEM armor and decode the base64 body into DER bytes.
+const pemToDer = (pem: string): Uint8Array =>
+  base64Decode(pem.replace(/-----(BEGIN|END)[^-]+-----/g, ''));
 
 // Step 0: Load and save the PDF to get final bytes
 const originalBytes = new Uint8Array(await readFile('contract.pdf'));
@@ -601,9 +606,11 @@ const privateKeyPem = await readFile('certs/private-key.pem', 'utf-8');
 const certificatePem = await readFile('certs/certificate.pem', 'utf-8');
 
 const signatureBytes = await buildPkcs7Signature(hashDigest, {
-  privateKey: privateKeyPem,
-  certificate: certificatePem,
-  hashAlgorithm: 'SHA-256',
+  signerInfo: {
+    privateKey: pemToDer(privateKeyPem),   // PKCS#8 DER bytes
+    certificate: pemToDer(certificatePem), // X.509 DER bytes
+    hashAlgorithm: 'SHA-256',
+  },
 });
 
 // Step 4: Embed the signature into the prepared PDF
@@ -630,7 +637,7 @@ const results = await verifySignatures(pdfBytes);
 for (const result of results) {
   console.log(`Field: ${result.fieldName}`);
   console.log(`  Integrity: ${result.integrityValid ? 'VALID' : 'INVALID'}`);
-  console.log(`  Signer:    ${result.signerName ?? 'unknown'}`);
+  console.log(`  Signer:    ${result.signedBy ?? 'unknown'}`);
   console.log(`  Date:      ${result.signingDate ?? 'unknown'}`);
 }
 ```

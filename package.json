@@ -1,7 +1,7 @@
 {
   "name": "modern-pdf-lib",
-  "version": "0.28.0",
-  "description": "A modern, WASM-accelerated PDF creation engine for every JavaScript runtime",
+  "version": "0.28.1",
+  "description": "A modern, WASM-accelerated PDF engine to create, parse, extract, fill, merge, and sign PDFs in every JavaScript runtime",
   "type": "module",
   "exports": {
     ".": {
@@ -67,7 +67,8 @@
   },
   "sideEffects": false,
   "scripts": {
-    "build": "tsdown",
+    "build": "tsdown && node scripts/finalize-dts.mjs && node scripts/smoke-dist.mjs",
+    "smoke": "node scripts/smoke-dist.mjs",
     "build:iife": "tsx scripts/build-iife.ts",
     "build:wasm": "bash scripts/build-wasm.sh",
     "build:all": "npm run build:wasm && npm run build && npm run build:iife && npm run copy:wasm",
@@ -118,6 +119,11 @@
   "keywords": [
     "pdf",
     "pdf-generation",
+    "pdf-parser",
+    "pdf-extraction",
+    "text-extraction",
+    "pdf-forms",
+    "pdf-signature",
     "wasm",
     "typescript",
     "esm",

@@ -353,7 +353,7 @@ const bytes = new Uint8Array(await readFile('encrypted-doc.pdf'));
 const doc = await loadPdf(bytes, { password: 'mypassword' });
 
 const page = doc.getPages()[0];
-const operators = parseContentStream(page.getContentStreamData());
+const operators = parseContentStream(page.getContentStream());
 const items = extractTextWithPositions(operators);
 const text = items.map((item) => item.text).join(' ');
 console.log(text);

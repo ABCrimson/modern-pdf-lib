@@ -13,8 +13,7 @@ modern-pdf-lib includes an advanced text layout engine with paragraph reflow, ju
 ### Simple Paragraph
 
 ```ts
-import { createPdf, PageSizes } from 'modern-pdf-lib';
-import { layoutParagraph } from 'modern-pdf-lib/layout';
+import { createPdf, PageSizes, layoutParagraph } from 'modern-pdf-lib';
 
 const doc = createPdf();
 const page = doc.addPage(PageSizes.A4);
@@ -116,10 +115,9 @@ The justified alignment uses a Knuth-Plass-inspired algorithm that adjusts inter
 For mixed styling within a paragraph, pass an array of `TextSpan` objects instead of a plain string:
 
 ```ts
-import type { TextSpan } from 'modern-pdf-lib/layout';
-import { rgb } from 'modern-pdf-lib';
+import { rgb, layoutParagraph } from 'modern-pdf-lib';
 
-const spans: TextSpan[] = [
+const spans = [
   { text: 'Important: ', bold: true, color: rgb(0.8, 0, 0) },
   { text: 'This paragraph contains ' },
   { text: 'mixed styles', italic: true, underline: true },
@@ -168,7 +166,7 @@ The hyphenation engine uses suffix and prefix pattern matching to find valid bre
 You can query hyphenation points programmatically:
 
 ```ts
-import { findHyphenationPoints } from 'modern-pdf-lib/layout';
+import { findHyphenationPoints } from 'modern-pdf-lib';
 
 const points = findHyphenationPoints('internationalization');
 // => [5, 10, 15] — possible break positions
@@ -181,8 +179,7 @@ const points = findHyphenationPoints('internationalization');
 Use `layoutColumns()` to flow text across multiple columns within a single frame:
 
 ```ts
-import { layoutColumns } from 'modern-pdf-lib/layout';
-import { rgb } from 'modern-pdf-lib';
+import { layoutColumns, rgb } from 'modern-pdf-lib';
 
 const result = layoutColumns(
   longArticleText,
@@ -214,8 +211,7 @@ When `balanceColumns` is `true` (the default), the engine pre-calculates the tot
 Use `layoutTextFlow()` to flow text across multiple frames -- typically one frame per page:
 
 ```ts
-import { createPdf, PageSizes } from 'modern-pdf-lib';
-import { layoutTextFlow } from 'modern-pdf-lib/layout';
+import { createPdf, PageSizes, layoutTextFlow } from 'modern-pdf-lib';
 
 const doc = createPdf();
 const frames = [];

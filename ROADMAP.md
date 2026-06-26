@@ -1,6 +1,6 @@
 # modern-pdf-lib — Roadmap to 1.0.0
 
-> Granular, per-patch release plan from the current **0.27.0** through **1.0.0**.
+> Granular, per-patch release plan from the current **0.28.0** through **1.0.0**.
 > Versioning follows [`VERSIONING.md`](./VERSIONING.md): patch `.0–.9`, then roll to the next minor.
 > Effort key: **S** ≤1 day · **M** a few days · **L** ~1–2 weeks · **XL** multi-week.
 
@@ -10,7 +10,7 @@
 
 ---
 
-## 0.27.x — Evergreen Modernization *(in progress)*
+## 0.27.x — Evergreen Modernization *(shipped in 0.28.0)*
 The bleeding-edge toolchain migration + code modernization.
 
 | Version | Title | Detail | Effort |

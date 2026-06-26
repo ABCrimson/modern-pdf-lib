@@ -29,7 +29,7 @@ import {
 import type { PdfObjectRegistry } from './pdfObjects.js';
 import type { PdfPage } from './pdfPage.js';
 import type { Angle } from './operators/state.js';
-import { decodeStream, getStreamFilters } from '../parser/streamDecode.js';
+import { decodeStreamData } from '../parser/streamDecode.js';
 
 // ---------------------------------------------------------------------------
 // EmbeddedPdfPage interface
@@ -231,19 +231,7 @@ function remapRef(sourceRef: PdfRef, ctx: CloneContext): PdfRef {
 // Decode a PdfStream's data
 // ---------------------------------------------------------------------------
 
-/**
- * Decode a PdfStream's raw data by applying its filters.
- *
- * @param stream  The PdfStream to decode.
- * @returns       The decoded (uncompressed) bytes.
- */
-function decodeStreamData(stream: PdfStream): Uint8Array {
-  const { filters, decodeParms } = getStreamFilters(stream.dict);
-  if (filters.length === 0) {
-    return stream.data;
-  }
-  return decodeStream(stream.data, filters, decodeParms as PdfDict[]);
-}
+// `decodeStreamData` is shared with PdfPage.getContentStream(); see streamDecode.
 
 // ---------------------------------------------------------------------------
 // Core embedding logic

@@ -50,11 +50,7 @@ const contractPdf = await doc.save();
 The first signer typically certifies the document, setting the MDP (Modification Detection and Prevention) level to control what subsequent signers can do.
 
 ```ts
-// Certify with MDP level 2 (allow form filling and signing)
-const certifiedPdf = setCertificationLevel(contractPdf, MdpPermission.FormFilling);
-
-// Sign the certified document
-const signerAPdf = await signPdf(certifiedPdf, 'SignerA', {
+const signerAOptions = {
   certificate: signerACert,
   privateKey: signerAKey,
   reason: 'Approval of terms',
@@ -63,18 +59,33 @@ const signerAPdf = await signPdf(certifiedPdf, 'SignerA', {
     rect: [50, 50, 200, 80],
     text: ['Signed by: Alice Smith', 'Role: Authorized Representative'],
   },
-});
+};
+
+// Certify with MDP level 2 (allow form filling and signing).
+// setCertificationLevel mutates the sign options in place.
+setCertificationLevel(signerAOptions, MdpPermission.FormFillAndSign);
+
+// Sign the certified document
+const signerAPdf = await signPdf(contractPdf, 'SignerA', signerAOptions);
 ```
 
 ### 3. Lock Specific Fields (Optional)
 
-After signing, you can lock specific form fields to prevent modification.
+To lock specific form fields when a signature is applied, attach a field lock to
+the sign options *before* signing. `addFieldLock` mutates the options in place.
 
 ```ts
-const lockedPdf = addFieldLock(signerAPdf, 'SignerA', {
-  action: 'include',
+const lockingOptions = {
+  certificate: signerACert,
+  privateKey: signerAKey,
+  reason: 'Approval of terms',
+};
+addFieldLock(lockingOptions, {
+  action: 'Include',
   fields: ['ContractAmount', 'EffectiveDate'],
 });
+
+const lockedPdf = await signPdf(contractPdf, 'SignerA', lockingOptions);
 ```
 
 ### 4. Signer B Counter-Signs
@@ -153,16 +164,19 @@ The MDP (Modification Detection and Prevention) system controls what changes are
 | Level | Constant | Allowed Changes |
 |-------|----------|-----------------|
 | 1 | `MdpPermission.NoChanges` | No changes allowed at all |
-| 2 | `MdpPermission.FormFilling` | Form filling and additional signatures |
-| 3 | `MdpPermission.Annotating` | Annotations, form filling, and signatures |
+| 2 | `MdpPermission.FormFillAndSign` | Form filling and additional signatures |
+| 3 | `MdpPermission.FormFillSignAnnotate` | Annotations, form filling, and signatures |
 
 ```ts
-// Set certification level before the first signature
-const certified = setCertificationLevel(pdfBytes, MdpPermission.FormFilling);
+// Set the certification level on the sign options (mutated in place)
+// before applying the first signature.
+const options = { certificate: certDer, privateKey: keyDer };
+setCertificationLevel(options, MdpPermission.FormFillAndSign);
+const certified = await signPdf(pdfBytes, 'CertSig', options);
 
-// Read the current certification level
-const level = getCertificationLevel(pdfBytes);
-// level === MdpPermission.FormFilling
+// Read the current certification level from the signed PDF
+const level = getCertificationLevel(certified);
+// level === MdpPermission.FormFillAndSign
 ```
 
 ---
@@ -172,22 +186,26 @@ const level = getCertificationLevel(pdfBytes);
 Lock form fields after signing to prevent tampering:
 
 ```ts
-// Lock specific fields
-const locked = addFieldLock(signedPdf, 'SignerA', {
-  action: 'include',
+// Lock specific fields: attach the lock to the sign options before signing
+const lockOptions = { certificate: certDer, privateKey: keyDer };
+addFieldLock(lockOptions, {
+  action: 'Include',
   fields: ['Amount', 'Date', 'Terms'],
 });
+const locked = await signPdf(pdfBytes, 'SignerA', lockOptions);
 
 // Lock all fields except specified ones
-const partialLock = addFieldLock(signedPdf, 'SignerA', {
-  action: 'exclude',
+const partialLockOptions = { certificate: certDer, privateKey: keyDer };
+addFieldLock(partialLockOptions, {
+  action: 'Exclude',
   fields: ['Comments'], // only Comments remains editable
 });
+const partialLock = await signPdf(pdfBytes, 'SignerB', partialLockOptions);
 
 // Read existing field locks
-const locks = getFieldLocks(signedPdf);
+const locks = getFieldLocks(locked);
 for (const lock of locks) {
-  console.log(`Signature "${lock.fieldName}" locks: ${lock.fields.join(', ')}`);
+  console.log(`Signature "${lock.signatureFieldName}" locks: ${lock.lockedFields.join(', ')}`);
 }
 ```
 
@@ -274,9 +292,9 @@ Ensure all signatures form a valid incremental chain:
 
 ```ts
 const chainResult = await validateSignatureChain(pdfBytes);
-console.log(`Chain valid: ${chainResult.valid}`);
-for (const entry of chainResult.entries) {
-  console.log(`  ${entry.fieldName}: ${entry.valid ? 'OK' : 'BROKEN'}`);
+console.log(`Chain valid: ${chainResult.isChainValid}`);
+for (const entry of chainResult.signatures) {
+  console.log(`  ${entry.fieldName}: ${entry.status === 'valid' ? 'OK' : 'BROKEN'}`);
 }
 ```
 
@@ -375,11 +393,15 @@ If your signing workflow produces large incremental updates, use the optimizer t
 ```ts
 import { findChangedObjects, optimizeIncrementalSave } from 'modern-pdf-lib';
 
-// See what actually changed
-const changed = findChangedObjects(originalPdf, modifiedPdf);
-console.log(`${changed.length} objects actually changed`);
+// See what actually changed (returns the changed object numbers)
+const changedObjectNumbers = findChangedObjects(originalPdf, modifiedPdf);
+console.log(`${changedObjectNumbers.length} objects actually changed`);
 
-// Build optimized incremental update
+// Build optimized incremental update from the changed objects.
+// Each change carries the object/generation number and its new raw bytes.
+const changes = [
+  { objectNumber: 12, generationNumber: 0, newContent: updatedObjectBytes },
+];
 const optimized = optimizeIncrementalSave(originalPdf, changes);
 console.log(`Saved ${modifiedPdf.length - optimized.length} bytes`);
 ```

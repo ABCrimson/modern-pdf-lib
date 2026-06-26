@@ -7,7 +7,7 @@ This guide helps you migrate existing projects from `pdf-lib` to `modern-pdf-lib
 | Aspect | pdf-lib | modern-pdf-lib |
 |---|---|---|
 | Module format | CJS + ESM | ESM-only |
-| TypeScript | 4.x | 6.0 with strict types |
+| TypeScript | 4.x | 7.0 with strict types |
 | Target | ES2017 | ESNext |
 | Buffer usage | `Buffer` in Node APIs | `Uint8Array` everywhere |
 | Async model | Mixed sync/async | Async-first |
@@ -15,8 +15,8 @@ This guide helps you migrate existing projects from `pdf-lib` to `modern-pdf-lib
 | Compression | Pure JS (pako) | WASM-accelerated (libdeflate) + JS fallback |
 | Font shaping | None | WASM text shaping (rustybuzz) |
 | Streaming | Not supported | `ReadableStream` output |
-| Node version | 10+ | 25.7+ |
-| Performance | Baseline | 32/35 benchmarks faster (up to 97,545x) |
+| Node version | 10+ | 26.4+ |
+| Performance | Baseline | 34/37 benchmarks faster (up to 97,545x) |
 
 ## API Comparison
 
@@ -362,5 +362,5 @@ Use this checklist when migrating a project:
 - [ ] Replace `image.scale()` with manual width/height calculation
 - [ ] Update file writing from `fs.writeFileSync` to `await writeFile`
 - [ ] Ensure your project uses ESM (`"type": "module"` in `package.json`)
-- [ ] Ensure Node 25.7+ or a compatible runtime
+- [ ] Ensure Node 26.4+ or a compatible runtime
 - [ ] Test all generated PDFs for visual correctness

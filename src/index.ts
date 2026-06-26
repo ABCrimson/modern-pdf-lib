@@ -1310,3 +1310,77 @@ export type {
 // ---------------------------------------------------------------------------
 export { isWoff, isWoff2, readWoffHeader, decodeWoff } from './assets/font/woff.js';
 export type { WoffInfo } from './assets/font/woff.js';
+
+// ---------------------------------------------------------------------------
+// Acrobat-compatible form scripting (docs/guide/form-scripts.md)
+// ---------------------------------------------------------------------------
+export { AFNumber_Format, formatNumber } from './form/acrobatBuiltins.js';
+export {
+  AFDate_FormatEx,
+  parseAcrobatDate,
+  // Re-exported as `formatAcrobatDate` to disambiguate from the header/footer
+  // engine's `formatDate` (same name, different format-token vocabulary).
+  formatDate as formatAcrobatDate,
+} from './form/acrobatDateBuiltins.js';
+export { AFSpecial_Format } from './form/acrobatSpecialBuiltins.js';
+export { validateFieldValue } from './form/fieldValidation.js';
+export { resolveFieldReference, getFieldValue, setFieldValue } from './form/fieldReferences.js';
+export { setFieldVisibility, addVisibilityAction } from './form/fieldVisibility.js';
+export { createSandbox } from './form/scriptSandbox.js';
+
+// ---------------------------------------------------------------------------
+// Signature verification, revocation & trust (docs/guide/verification.md)
+// ---------------------------------------------------------------------------
+export { checkCertificateStatus, extractOcspUrl } from './signature/ocsp.js';
+export { downloadCrl, isCertificateRevoked, extractCrlUrls } from './signature/crl.js';
+export { TrustStore } from './signature/trustStore.js';
+export { verifySignatureDetailed } from './signature/detailedVerifier.js';
+
+// ---------------------------------------------------------------------------
+// JPEG 2000 decoding internals (docs/guide/jpeg2000.md)
+// ---------------------------------------------------------------------------
+export { decodeJpeg2000 } from './parser/jpeg2000Decode.js';
+export {
+  parseTileInfo,
+  decodeTile,
+  decodeTileRegion,
+  assembleTiles,
+} from './parser/jpeg2000Tiles.js';
+export {
+  getComponentDepths,
+  summarizeBitDepth,
+  normalizeComponentDepth,
+  downscale16To8,
+  upscale8To16,
+  offsetSignedToUnsigned,
+} from './parser/jpeg2000BitDepth.js';
+
+// ---------------------------------------------------------------------------
+// PDF/X validation & enforcement (docs/guide/pdfx.md)
+// ---------------------------------------------------------------------------
+export { validatePdfX, enforcePdfX, buildPdfXOutputIntent } from './compliance/pdfxCompliance.js';
+
+// ---------------------------------------------------------------------------
+// Advanced text-layout primitives (docs/guide/text-layout.md)
+// ---------------------------------------------------------------------------
+export {
+  layoutParagraph,
+  layoutColumns,
+  layoutTextFlow,
+  findHyphenationPoints,
+} from './layout/textLayout.js';
+
+// ---------------------------------------------------------------------------
+// Certificate chain / policy / offline revocation (docs/guide/verification.md)
+// ---------------------------------------------------------------------------
+export { buildCertificateChain, validateCertificateChain } from './signature/chainValidator.js';
+export {
+  validateCertificatePolicy,
+  validateKeyUsage,
+  validateExtendedKeyUsage,
+  EKU_OIDS,
+} from './signature/certPolicy.js';
+export {
+  extractEmbeddedRevocationData,
+  verifyOfflineRevocation,
+} from './signature/offlineRevocation.js';

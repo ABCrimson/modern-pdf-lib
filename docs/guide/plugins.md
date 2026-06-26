@@ -13,8 +13,7 @@ modern-pdf-lib includes an extensible plugin system that lets you intercept and 
 Register a plugin on any document using the `.use()` method:
 
 ```ts
-import { createPdf } from 'modern-pdf-lib';
-import { timestampPlugin } from 'modern-pdf-lib/plugins';
+import { createPdf, timestampPlugin } from 'modern-pdf-lib';
 
 const doc = createPdf();
 doc.use(timestampPlugin());
@@ -35,7 +34,7 @@ modern-pdf-lib ships with three built-in plugins that cover common needs.
 Automatically manages document timestamps -- sets the creation date when the plugin is registered, and updates the modification date before every save.
 
 ```ts
-import { timestampPlugin } from 'modern-pdf-lib/plugins';
+import { timestampPlugin } from 'modern-pdf-lib';
 
 doc.use(timestampPlugin());
 
@@ -51,7 +50,7 @@ doc.use(timestampPlugin({
 Sets the producer string and optionally configures default metadata fields:
 
 ```ts
-import { metadataPlugin } from 'modern-pdf-lib/plugins';
+import { metadataPlugin } from 'modern-pdf-lib';
 
 doc.use(metadataPlugin({
   producer: 'My Application v3.0',   // Default: 'modern-pdf-lib'
@@ -66,7 +65,7 @@ doc.use(metadataPlugin({
 Adds accessibility features automatically -- sets the document language, marks the catalog for tagged PDF, and enables `DisplayDocTitle` in viewer preferences:
 
 ```ts
-import { accessibilityPlugin } from 'modern-pdf-lib/plugins';
+import { accessibilityPlugin } from 'modern-pdf-lib';
 
 doc.use(accessibilityPlugin({
   language: 'en-US',       // BCP 47 language tag (default: 'en')
@@ -93,7 +92,7 @@ A plugin is any object that implements the `PdfPlugin` interface. At minimum, it
 ### Basic Example
 
 ```ts
-import type { PdfPlugin, PluginDocument } from 'modern-pdf-lib/plugins';
+import type { PdfPlugin, PluginDocument } from 'modern-pdf-lib';
 
 const watermarkPlugin: PdfPlugin = {
   name: 'watermark',
@@ -118,7 +117,7 @@ doc.use(watermarkPlugin);
 For configurable plugins, wrap the plugin object in a factory function:
 
 ```ts
-import type { PdfPlugin, PluginDocument } from 'modern-pdf-lib/plugins';
+import type { PdfPlugin, PluginDocument } from 'modern-pdf-lib';
 
 interface ClassificationOptions {
   level: 'public' | 'internal' | 'confidential' | 'secret';
@@ -218,7 +217,7 @@ const auditPlugin: PdfPlugin = {
 Under the hood, plugins are managed by the `PdfPluginManager` class. You can also use it directly for advanced scenarios:
 
 ```ts
-import { PdfPluginManager } from 'modern-pdf-lib/plugins';
+import { PdfPluginManager } from 'modern-pdf-lib';
 
 const manager = new PdfPluginManager();
 

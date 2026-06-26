@@ -189,7 +189,7 @@ const bytes = await PdfDocumentBuilder.create()
 ```ts
 const bytes = await PdfDocumentBuilder.create()
   .setPageLabels([
-    { startPage: 0, style: 'roman-lower', prefix: '' },
+    { startPage: 0, style: 'roman', prefix: '' },
     { startPage: 3, style: 'decimal', prefix: '' },
   ])
   .addPage(PageSizes.A4, (page) => {

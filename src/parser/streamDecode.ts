@@ -11,7 +11,7 @@
  */
 
 import { unzlibSync, inflateSync } from 'fflate';
-import type { PdfObject } from '../core/pdfObjects.js';
+import type { PdfObject, PdfStream } from '../core/pdfObjects.js';
 import { PdfDict, PdfName, PdfArray, PdfNumber } from '../core/pdfObjects.js';
 import { decodeCCITT } from './ccittDecode.js';
 import { decodeJBIG2 } from './jbig2Decode.js';
@@ -85,6 +85,22 @@ export function getStreamFilters(
   const decodeParms = normalizeDecodeParms(dpObj as PdfDict | PdfDict[] | PdfArray | null, filters.length);
 
   return { filters, decodeParms };
+}
+
+/**
+ * Decode a `PdfStream`'s raw data by applying the filters declared in its
+ * dictionary (`/Filter` + `/DecodeParms`).  Returns the raw bytes unchanged
+ * when the stream has no filters.
+ *
+ * @param stream - The stream object to decode.
+ * @returns The fully decoded (uncompressed) bytes.
+ */
+export function decodeStreamData(stream: PdfStream): Uint8Array {
+  const { filters, decodeParms } = getStreamFilters(stream.dict);
+  if (filters.length === 0) {
+    return stream.data;
+  }
+  return decodeStream(stream.data, filters, decodeParms as PdfDict[]);
 }
 
 // ---------------------------------------------------------------------------
