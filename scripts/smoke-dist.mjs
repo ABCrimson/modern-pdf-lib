@@ -72,6 +72,10 @@ const ESM_ENTRIES = [
       'buildCoonsPatchShading',
       'parseIccTransform',
       'rgbToLab',
+      // 0.38.x next-gen images + SVG filters
+      'probeNextGenImage',
+      'registerImageDecoder',
+      'feGaussianBlur',
     ],
   },
   { file: 'create.mjs', expect: ['createPdf'] },

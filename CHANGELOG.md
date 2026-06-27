@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 See [VERSIONING.md](./VERSIONING.md) for this project's versioning policy.
 
+## [0.38.0] - 2026-06-27
+
+**Next-Gen Image Formats.** AVIF/HEIC/JPEG XL are AV1/HEVC/JXL codecs whose decoders are far too large to bundle in a pure-JS, single-dependency library — so, honestly, this minor does **not** decode their pixels. Instead it *detects and probes* them (so the library recognises them and fails clearly), provides a **pluggable decoder registry** as the real integration path, and ships **SVG filter primitives**. No pixel decoding is ever faked. TDD-verified; suite now **6,816 tests**, **701** root exports; 34/37 vs pdf-lib (no regression).
+
+### Added
+
+- **AVIF / HEIC / JPEG XL detection & probing** (`0.38`, `src/assets/image/nextGenImageDetect.ts`): `detectNextGenFormat` (ISOBMFF `ftyp` brands + JXL signatures) and `probeNextGenImage`, which walks the ISOBMFF box tree (`meta`→`iprp`→`ipco`→`ispe`/`pixi`) to report AVIF/HEIC dimensions + bit depth. `decodable` is **always `false`** with an actionable `reason` — these never emit pixels. Verified against ISO/IEC 14496-12, 23008-12 (HEIF), and 18181 (JPEG XL).
+- **Pluggable image-decoder registry** (`0.38`, `src/assets/image/imageDecoderRegistry.ts`): `registerImageDecoder`/`unregisterImageDecoder`/`hasImageDecoder`/`getImageDecoder`/`decodeRegisteredImage` — wire in an external WASM codec (libheif/libjxl/dav1d, or the browser `ImageDecoder`). The registry validates the decoder's RGBA result (`length === width*height*4`) and does no decoding itself.
+- **SVG filter primitives** (`0.38`, `src/assets/image/svgFilters.ts`): `feGaussianBlur` (SVG §15.17 three-box-blur), `feColorMatrix`/`feColorMatrixSaturate`, `feOffset`, `feFlood`, `feBlend` (normal/multiply/screen/darken/lighten), and `feComposite` (Porter-Duff over/in/out/atop/xor) over RGBA8888 buffers. Verified against SVG 1.1 §15 + Porter-Duff 1984.
+
+### Documentation
+
+- New "Next-generation formats" + "SVG filter effects" sections in the Image Format guide, explaining the honest detect-and-register model.
+
+### Notes
+
+- **Bundled AVIF/HEIC/JPEG XL decoders** are intentionally out of scope: a pure-JS AV1/HEVC/JXL decoder is impractical and a bundled WASM codec would dwarf the library. The registry is the supported path for those who need full decode — consistent with keeping a single runtime dependency.
+
 ## [0.37.0] - 2026-06-27
 
 **Color Science & Rendering.** Function/axial/radial shadings, the CIE colour-space builders, and ICC embedding already ship; this minor adds the genuine gaps: PDF mesh shadings (types 4–7), an ICC matrix/TRC colour transform, and pure device colour conversions. Every bit-packing rule, ICC tag, and colorimetry constant was verified against the cited spec (ISO 32000-2 §8.7.4.5, ICC.1:2010, CIE 15:2004). TDD-verified; suite now **6,741 tests**, **687** root exports; **34/37 vs pdf-lib** (re-benchmarked — no regression). New `src/color/` module.

@@ -329,6 +329,74 @@ const report = await optimizeAllImages(doc, {
 });
 ```
 
+## Next-generation formats (AVIF, HEIC, JPEG XL)
+
+AVIF (AV1), HEIC (HEVC), and JPEG XL are modern codecs whose **decoders are far
+too large to bundle in a pure-JS, single-dependency library** (the same reason
+WOFF2/Brotli is not bundled). modern-pdf-lib therefore *detects and probes*
+these formats — so the library recognises them and fails clearly instead of
+mis-embedding garbage — and gives you a clean way to plug in a real decoder.
+
+### Detecting & probing
+
+```ts
+import { detectNextGenFormat, probeNextGenImage } from 'modern-pdf-lib';
+
+detectNextGenFormat(bytes); // 'avif' | 'heic' | 'heif' | 'jpegxl' | null
+
+const info = probeNextGenImage(bytes);
+// { format: 'avif', width: 1920, height: 1080, decodable: false,
+//   reason: 'AVIF detected; … convert to PNG/JPEG or register a WASM decoder' }
+```
+
+Detection follows the ISOBMFF brands (`ftyp`) and JPEG XL signatures; dimensions
+for AVIF/HEIC come from the `ispe` box. `decodable` is **always `false`** — these
+functions never produce pixels, and `reason` tells you what to do next. (JPEG XL
+dimensions are not parsed; only the format is reported.)
+
+### Plugging in a decoder
+
+To actually rasterize these formats, register a decoder (e.g. a WASM `libheif`/
+`libjxl`/`dav1d` build, or the browser `ImageDecoder` Web API):
+
+```ts
+import { registerImageDecoder, decodeRegisteredImage } from 'modern-pdf-lib';
+
+registerImageDecoder('avif', async (bytes) => {
+  const { width, height, rgba } = await myWasmAvifDecoder(bytes); // your codec
+  return { width, height, rgba }; // RGBA8888, length === width*height*4
+});
+
+const image = await decodeRegisteredImage('avif', bytes); // → { width, height, rgba }
+```
+
+The registry validates that the decoder returns a well-formed RGBA buffer
+(`rgba.length === width * height * 4`) and throws a clear error otherwise. The
+library performs no decoding itself — this is purely the dispatch layer.
+
+## SVG filter effects
+
+For SVG-to-PDF and raster pipelines, modern-pdf-lib implements the common SVG 1.1
+filter primitives over straight RGBA8888 buffers:
+
+```ts
+import {
+  feGaussianBlur, feColorMatrix, feColorMatrixSaturate,
+  feOffset, feFlood, feBlend, feComposite,
+} from 'modern-pdf-lib';
+
+const blurred = feGaussianBlur(buffer, 3);          // 3-box-blur Gaussian (SVG §15.17)
+const grey = feColorMatrixSaturate(buffer, 0);      // desaturate
+const shifted = feOffset(buffer, 4, 4);
+const over = feComposite(top, bottom, 'over');      // Porter-Duff
+const lit = feBlend(a, b, 'screen');
+```
+
+Each takes/returns a `RasterBuffer` (`{ width, height, rgba }`). The blur uses
+the SVG-recommended three-successive-box-blur approximation; `feComposite`
+implements the Porter-Duff `over`/`in`/`out`/`atop`/`xor` operators; the colour
+matrix and blend modes follow SVG 1.1 §15.
+
 ---
 
 ## API Reference Links

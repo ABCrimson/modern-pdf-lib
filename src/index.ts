@@ -1474,6 +1474,37 @@ export {
   rgbToLab,
 } from './color/colorConvert.js';
 
+// ---------------------------------------------------------------------------
+// Next-gen image formats (0.38.x): honest AVIF / HEIC / JPEG XL detection +
+// dimension probing (no pixel decode — those need an external WASM codec), a
+// pluggable decoder registry as the integration path for such codecs, and
+// SVG filter-primitive evaluators (feGaussianBlur/feColorMatrix/…).
+// ---------------------------------------------------------------------------
+export { detectNextGenFormat, probeNextGenImage } from './assets/image/nextGenImageDetect.js';
+export type { NextGenFormat, NextGenImageInfo } from './assets/image/nextGenImageDetect.js';
+export {
+  registerImageDecoder,
+  unregisterImageDecoder,
+  hasImageDecoder,
+  getImageDecoder,
+  decodeRegisteredImage,
+} from './assets/image/imageDecoderRegistry.js';
+export type { DecodedRasterImage, ImageDecoder } from './assets/image/imageDecoderRegistry.js';
+export {
+  feFlood,
+  feColorMatrix,
+  feColorMatrixSaturate,
+  feOffset,
+  feGaussianBlur,
+  feComposite,
+  feBlend,
+} from './assets/image/svgFilters.js';
+// NB: svgFilters' `BlendMode` ('normal'|'multiply'|… lowercase, SVG semantics)
+// is intentionally not re-exported — `BlendMode` is already the PDF ExtGState
+// blend-mode type at the root. Pass the SVG mode to `feBlend` as a string literal.
+export type { RasterBuffer, CompositeOp } from './assets/image/svgFilters.js';
+
+
 
 // ---------------------------------------------------------------------------
 // Rendering & rasterization (0.29.x): content-stream interpreter, pure-JS
