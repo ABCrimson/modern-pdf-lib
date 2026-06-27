@@ -70,14 +70,18 @@ jobs:
         run: npm run smoke
 
       - name: Run tests
-        # The 6,600+ test suite accumulates >8 GB in a single fork-pool pass
-        # (bumping the heap alone just delays the OOM and risks OS-OOM with
-        # multiple forks on a 16 GB runner). Shard into independent processes so
-        # memory is fully released between shards — peak ~1/3 of the whole suite.
+        # The fork-pool worker accumulates memory across the files it handles and
+        # tips past 8 GB at ~2,250 tests in one shard (3-way sharding OOM'd in
+        # shard 1 once the suite passed ~6,800 tests). Each shard is an
+        # independent process that releases memory on exit, so split into 6 to
+        # keep per-worker accumulation to ~1/6 of the suite — comfortable headroom.
         run: |
-          npx vitest run --shard=1/3
-          npx vitest run --shard=2/3
-          npx vitest run --shard=3/3
+          npx vitest run --shard=1/6
+          npx vitest run --shard=2/6
+          npx vitest run --shard=3/6
+          npx vitest run --shard=4/6
+          npx vitest run --shard=5/6
+          npx vitest run --shard=6/6
         env:
           NODE_OPTIONS: --max-old-space-size=8192
 
