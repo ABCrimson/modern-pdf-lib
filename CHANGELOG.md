@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 See [VERSIONING.md](./VERSIONING.md) for this project's versioning policy.
 
+## [0.40.2] - 2026-06-27
+
+**Form-field flag fix.** A full gap-audit of the 0.41→1.0.0 roadmap against the actual code (to confirm nothing planned was already built — only OCR overlay was, now marked shipped) surfaced one real correctness bug. TDD-fixed; suite now **6,969 tests**, 721 root exports.
+
+### Fixed
+
+- **`FieldFlags.DoNotScroll` was on the wrong bit** (`src/form/pdfField.ts`): encoded as `1 << 20` (bit 21, which is actually `FileSelect`) instead of ISO 32000-1 Table 228 **bit 24** (`1 << 23`). Setting "do not scroll" on a text field therefore wrote the wrong flag and a conforming reader would not honour it. Corrected, with a new `fieldFlags` spec-bit regression test covering the whole flag table. (`FieldFlags.RichText` was already correct at bit 26 (`1 << 25`); only its JSDoc comment was wrong and is fixed.)
+
+### Changed
+
+- **Evergreen dependency bumps:** `miniflare` 4.20260623.0 → 4.20260625.0, `@playwright/test` 1.62.0-alpha-2026-06-25 → 1.62.0-alpha-2026-06-27 (newest pre-release channel, exact-pinned).
+
 ## [0.40.1] - 2026-06-27
 
 **Ultrareview fixes.** A full adversarial multi-agent review of the entire 0.31→0.40 marathon (every new module reviewed, then each finding independently verified against the source). It confirmed **10 real bugs** (2 high, 4 medium, 4 low) — all fixed here via TDD with regression tests; the rest of the new surface (the color cluster and ~22 modules) was pronounced clean. Suite now **6,954 tests**, **721** root exports; 34/37 vs pdf-lib.

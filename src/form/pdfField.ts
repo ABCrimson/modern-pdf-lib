@@ -81,9 +81,9 @@ export const FieldFlags: {
   Multiline: 1 << 12,
   /** Bit 13: The field is intended for entering a password. */
   Password: 1 << 13,
-  /** Bit 20: The field shall not scroll. */
-  DoNotScroll: 1 << 20,
-  /** Bit 23: The value is a rich text string. */
+  /** Bit 24: The field shall not scroll (ISO 32000-1 Table 228). */
+  DoNotScroll: 1 << 23,
+  /** Bit 26: The value is a rich text string (ISO 32000-1 Table 228). */
   RichText: 1 << 25,
 
   // Button field flags (Table 226)
