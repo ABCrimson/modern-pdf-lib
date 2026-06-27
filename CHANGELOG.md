@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 See [VERSIONING.md](./VERSIONING.md) for this project's versioning policy.
 
+## [0.37.0] - 2026-06-27
+
+**Color Science & Rendering.** Function/axial/radial shadings, the CIE colour-space builders, and ICC embedding already ship; this minor adds the genuine gaps: PDF mesh shadings (types 4–7), an ICC matrix/TRC colour transform, and pure device colour conversions. Every bit-packing rule, ICC tag, and colorimetry constant was verified against the cited spec (ISO 32000-2 §8.7.4.5, ICC.1:2010, CIE 15:2004). TDD-verified; suite now **6,741 tests**, **687** root exports; **34/37 vs pdf-lib** (re-benchmarked — no regression). New `src/color/` module.
+
+### Added
+
+- **Mesh shadings** (`0.37`, `src/core/meshShading.ts`): `buildFreeFormGouraudShading` (type 4), `buildLatticeFormGouraudShading` (type 5), `buildCoonsPatchShading` (type 6), `buildTensorPatchShading` (type 7) — each returns a `PdfStream` with the correct `/ShadingType` + bit keys and a body bit-packed big-endian/MSB-first and mapped through `/Decode` per ISO 32000-2 §8.7.4.5 (verified by hand-computed exact-byte fixtures). Supports the `/Function` (one parametric `t`) and direct-N-component colour forms.
+- **ICC matrix/TRC transform** (`0.37`, `src/color/iccTransform.ts`): `parseIccTransform` reads the ICC header + tag table; `deviceRgbToXyz` linearizes through the `curv`/`para` TRCs and applies the `rXYZ`/`gXYZ`/`bXYZ` colorant matrix to PCS XYZ (D50); `xyzToLab` gives CIE L\*a\*b\*. LUT-based profiles (`mft`/`mAB`) are detected and rejected with a clear error rather than returning wrong numbers.
+- **Device colour conversions** (`0.37`, `src/color/colorConvert.ts`): `rgbToHsl`/`hslToRgb`, `rgbToHsv`/`hsvToRgb`, `rgbToXyz`/`xyzToRgb` (sRGB↔CIE XYZ D65), and `rgbToLab` — the standard sRGB transfer function + matrices + CIE Lab formulas, round-tripping within tight tolerance. (`cmykToRgb`/`rgbToCmyk`/`labToRgb` already existed at the root and are unchanged.)
+
+### Documentation
+
+- Expanded the Spot Colors guide with HSL/HSV/XYZ/Lab conversions, ICC colour transforms, and mesh shadings (each with explicit scope notes).
+
 ## [0.36.0] - 2026-06-27
 
 **Advanced Typography & Fonts.** GSUB/GPOS shaping (ligatures, kerning, mark positioning) and WOFF1 decoding already ship via the shaping WASM + font modules; this minor adds the genuine pure-JS gaps: the Unicode Bidirectional Algorithm, OpenType variable-font axis parsing, and COLR/CPAL color fonts. Every byte layout and algorithm rule was verified against the cited spec (UAX #9 rev 49, OpenType 1.9.1) with honest scope notes. TDD-verified; suite now **6,683 tests**, **673** root exports; 34/37 vs pdf-lib (no regression).

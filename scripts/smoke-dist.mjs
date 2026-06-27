@@ -68,6 +68,10 @@ const ESM_ENTRIES = [
       'resolveBidi',
       'parseVariableFont',
       'parseColorFont',
+      // 0.37.x color science
+      'buildCoonsPatchShading',
+      'parseIccTransform',
+      'rgbToLab',
     ],
   },
   { file: 'create.mjs', expect: ['createPdf'] },

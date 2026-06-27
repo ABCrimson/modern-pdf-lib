@@ -1432,6 +1432,50 @@ export { parseColorFont, getColorGlyphLayers } from './assets/font/colorFont.js'
 export type { ColorGlyphLayer, CpalPalette, ColorFontInfo } from './assets/font/colorFont.js';
 
 // ---------------------------------------------------------------------------
+// Color science & rendering (0.37.x): mesh shadings (ShadingType 4–7), an ICC
+// matrix/TRC colour transform (device RGB → PCS XYZ → Lab), and pure device
+// colour-space conversions. (Function/axial/radial shadings + CalRGB/CalGray/Lab
+// colour-space builders + ICC embedding ship in the core/compliance modules.)
+// ---------------------------------------------------------------------------
+export {
+  buildFreeFormGouraudShading,
+  buildLatticeFormGouraudShading,
+  buildCoonsPatchShading,
+  buildTensorPatchShading,
+} from './core/meshShading.js';
+export type {
+  BitsPerCoordinate,
+  BitsPerComponent,
+  BitsPerFlag,
+  MeshVertex,
+  FlaggedVertex,
+  CoonsPatch,
+  TensorPatch,
+  MeshShadingCommon,
+  FreeFormGouraudOptions,
+  LatticeFormGouraudOptions,
+  CoonsPatchOptions,
+  TensorPatchOptions,
+} from './core/meshShading.js';
+export { parseIccTransform, deviceRgbToXyz, xyzToLab } from './color/iccTransform.js';
+export type { IccTransformInfo } from './color/iccTransform.js';
+// NB: `cmykToRgb`/`rgbToCmyk` (core/operators/color) and `labToRgb`
+// (core/colorSpacesCIE) are already exported at the root with identical
+// plain-number semantics, so colorConvert only contributes the new conversions
+// (HSL/HSV, sRGB↔XYZ, RGB→Lab). The duplicates stay in colorConvert for internal
+// use but are not re-exported here to avoid a name clash.
+export {
+  rgbToHsl,
+  hslToRgb,
+  rgbToHsv,
+  hsvToRgb,
+  rgbToXyz,
+  xyzToRgb,
+  rgbToLab,
+} from './color/colorConvert.js';
+
+
+// ---------------------------------------------------------------------------
 // Rendering & rasterization (0.29.x): content-stream interpreter, pure-JS
 // rasterizer, Canvas adapter, thumbnails, image/font extraction, visual diff,
 // OCR overlay, redaction-by-removal, and tiling/cache.

@@ -160,6 +160,79 @@ const [r, g, b] = cmykToRgb(0, 0.91, 0.76, 0);
 These conversions use the standard formulae and are device-independent approximations. For colour-critical print work, use ICC profiles and a colour management system.
 :::
 
+### HSL, HSV, XYZ and Lab
+
+For UI colour pickers and perceptual colour work, modern-pdf-lib also converts
+between sRGB and HSL, HSV, CIE XYZ (D65), and CIE L\*a\*b\*. All channels are
+normalized to `0..1` except hue (degrees) and Lab (its natural ranges); the
+conversions round-trip.
+
+```ts
+import { rgbToHsl, hslToRgb, rgbToHsv, rgbToLab, rgbToXyz } from 'modern-pdf-lib';
+
+rgbToHsl(1, 0, 0);   // [0, 1, 0.5]   — hue°, saturation, lightness
+rgbToHsv(1, 0, 0);   // [0, 1, 1]
+rgbToXyz(1, 1, 1);   // sRGB white → CIE XYZ (D65)
+rgbToLab(1, 1, 1);   // ≈ [100, 0, 0]
+const back = hslToRgb(0, 1, 0.5); // → [1, 0, 0]
+```
+
+### ICC colour transforms
+
+For matrix/TRC ICC profiles (the common RGB-display and grayscale kind, e.g.
+sRGB), `parseIccTransform` reports the profile model and `deviceRgbToXyz`
+evaluates device RGB through the profile's tone-reproduction curves and colorant
+matrix into PCS XYZ (D50); `xyzToLab` then yields L\*a\*b\*.
+
+```ts
+import { parseIccTransform, deviceRgbToXyz, xyzToLab } from 'modern-pdf-lib';
+
+const info = parseIccTransform(iccBytes);
+// { version, deviceClass: 'mntr', colorSpace: 'RGB ', pcs: 'XYZ ', hasMatrixTrc: true }
+if (info.hasMatrixTrc) {
+  const xyz = deviceRgbToXyz(iccBytes, [1, 1, 1]); // ≈ D50 white [0.9642, 1.0, 0.8249]
+  const lab = xyzToLab(xyz);                        // ≈ [100, 0, 0]
+}
+```
+
+::: warning Scope
+This evaluates **matrix/TRC** profiles. LUT-based profiles (`mft1`/`mft2`/`mAB`/
+`mBA`) are detected (`hasMatrixTrc: false`) and `deviceRgbToXyz` throws a clear
+error rather than returning wrong numbers — it never silently guesses. No
+Bradford chromatic adaptation is applied (colorant/white-point XYZ are taken as
+the D50-relative PCS values stored in the profile).
+:::
+
+### Mesh shadings (smooth gradients)
+
+Beyond axial/radial gradients, modern-pdf-lib builds the PDF mesh shadings
+(`ShadingType` 4–7) — Gouraud-shaded triangle meshes and Coons/tensor patch
+meshes — for smooth multi-point colour blends. Each builder returns a
+`PdfStream` whose body is the spec's bit-packed mesh data.
+
+```ts
+import {
+  buildFreeFormGouraudShading,   // type 4
+  buildLatticeFormGouraudShading,// type 5
+  buildCoonsPatchShading,        // type 6
+  buildTensorPatchShading,       // type 7
+} from 'modern-pdf-lib';
+
+const shading = buildCoonsPatchShading({
+  colorSpace: PdfName.of('DeviceRGB'),
+  bitsPerCoordinate: 16,
+  bitsPerComponent: 8,
+  bitsPerFlag: 8,
+  decode: [0, 1, 0, 1, 0, 1, 0, 1, 0, 1],
+  patches: [/* one Coons patch: 12 control points + 4 corner colours */],
+});
+```
+
+Values are packed big-endian, MSB-first, and mapped through `/Decode` exactly per
+ISO 32000-2 §8.7.4.5. Supply a `/Function` to drive colours from a single
+parametric value `t`, or omit it to give each vertex N colour components
+directly.
+
 ### Color to Hex
 
 ```ts
