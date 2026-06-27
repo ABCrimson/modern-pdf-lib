@@ -1504,6 +1504,25 @@ export {
 // blend-mode type at the root. Pass the SVG mode to `feBlend` as a string literal.
 export type { RasterBuffer, CompositeOp } from './assets/image/svgFilters.js';
 
+// ---------------------------------------------------------------------------
+// Performance & concurrency (0.39.x): SharedArrayBuffer + Atomics primitives
+// for cross-worker coordination, a memory-budget guard for untrusted input, and
+// honest runtime-capability detection (WASM SIMD/threads — detection only; the
+// bundled WASM is not SIMD-accelerated today, see SIMD_NOTE).
+// ---------------------------------------------------------------------------
+export {
+  isSharedMemoryAvailable,
+  SharedCounter,
+  SharedFlag,
+  SharedRingBuffer,
+} from './runtime/sharedConcurrency.js';
+export type { SharedFlagWaitResult } from './runtime/sharedConcurrency.js';
+export { MemoryBudget, MemoryBudgetExceededError, createMemoryBudget } from './runtime/memoryBudget.js';
+export type { MemoryBudgetOptions } from './runtime/memoryBudget.js';
+export { detectRuntimeCapabilities, isWasmSimdSupported, SIMD_NOTE } from './runtime/runtimeCapabilities.js';
+export type { RuntimeCapabilities } from './runtime/runtimeCapabilities.js';
+
+
 
 
 // ---------------------------------------------------------------------------

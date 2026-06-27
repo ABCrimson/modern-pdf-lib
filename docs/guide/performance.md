@@ -356,6 +356,70 @@ Image handling varies significantly by format:
 | Cloudflare Workers | 128 MB | Always use `saveAsStream()`; keep documents under 100 pages |
 | Browser | Device-dependent | Use `saveAsBlob()` for downloads; `saveAsStream()` for large docs |
 
+## Concurrency & resource control
+
+### Memory budget (untrusted input)
+
+When processing PDFs from untrusted sources, a `MemoryBudget` rejects work that
+would exceed a ceiling **before** the allocation happens — a guard against
+decompression bombs. It is a pure accounting guard (callers report the size they
+are about to allocate); it does not measure real RSS.
+
+```ts
+import { createMemoryBudget, MemoryBudgetExceededError } from 'modern-pdf-lib';
+
+const budget = createMemoryBudget(256 * 1024 * 1024); // 256 MB ceiling
+try {
+  budget.allocate(expectedInflatedLength); // throws if it would exceed
+  // … decode the stream …
+} catch (e) {
+  if (e instanceof MemoryBudgetExceededError) { /* reject the document */ }
+} finally {
+  budget.release(expectedInflatedLength);
+}
+// Or scope it automatically:
+budget.withAllocation(size, () => decodeStream(/* … */));
+```
+
+### Shared-memory primitives
+
+For coordinating work across Web Workers / worker threads, `SharedArrayBuffer` +
+`Atomics` primitives are provided: an atomic `SharedCounter`, a `SharedFlag`
+(Atomics wait/notify gate), and an SPSC `SharedRingBuffer`. `isSharedMemoryAvailable()`
+reports whether shared memory is usable in the current context (it requires
+cross-origin isolation in browsers).
+
+```ts
+import { isSharedMemoryAvailable, SharedCounter, SharedRingBuffer } from 'modern-pdf-lib';
+
+if (isSharedMemoryAvailable()) {
+  const counter = new SharedCounter();      // post counter.buffer to a worker
+  counter.add(1);                            // atomic; returns the pre-add value
+  const ring = new SharedRingBuffer(1 << 16);// byte queue shared across workers
+}
+```
+
+These are thin correctness wrappers — they add no acceleration of their own.
+
+### Runtime capability detection
+
+`detectRuntimeCapabilities()` honestly probes the host for WASM SIMD/threads/
+bulk-memory, `SharedArrayBuffer`/`Atomics`, and `hardwareConcurrency`, so you can
+gate fast paths:
+
+```ts
+import { detectRuntimeCapabilities, SIMD_NOTE } from 'modern-pdf-lib';
+
+const caps = detectRuntimeCapabilities();
+// { wasm, wasmSimd, wasmThreads, sharedArrayBuffer, atomics, hardwareConcurrency, … }
+```
+
+> [!NOTE]
+> A `wasmSimd: true` means a SIMD-enabled build *would* run here — it does **not**
+> mean modern-pdf-lib is currently using SIMD. The bundled WASM is built without
+> SIMD today (`SIMD_NOTE` documents this); SIMD acceleration requires a
+> SIMD-enabled rebuild.
+
 ## Cross-Runtime Performance
 
 `modern-pdf-lib` runs in every JavaScript runtime. Performance characteristics vary:

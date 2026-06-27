@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 See [VERSIONING.md](./VERSIONING.md) for this project's versioning policy.
 
+## [0.39.0] - 2026-06-27
+
+**Performance & Concurrency.** Cross-worker shared-memory primitives, a memory-budget guard for untrusted input, and honest runtime-capability detection. SIMD acceleration would require a SIMD-enabled WASM rebuild (out of scope here), so this minor *detects* SIMD/threads support rather than faking it. TDD-verified; suite now **6,885 tests**, **711** root exports; 34/37 vs pdf-lib (no regression).
+
+### Added
+
+- **SharedArrayBuffer + Atomics primitives** (`0.39`, `src/runtime/sharedConcurrency.ts`): `isSharedMemoryAvailable()`, an atomic `SharedCounter` (add/increment return the pre-add value, plus `compareExchange`), a `SharedFlag` (Atomics wait/notify gate that degrades safely off the main thread), and an SPSC `SharedRingBuffer` (Atomics head/tail over a `[head, tail, …data]` SAB layout) — for coordinating work across workers. Thin correctness wrappers; no acceleration of their own.
+- **Memory budget guard** (`0.39`, `src/runtime/memoryBudget.ts`): `MemoryBudget`/`createMemoryBudget` track and cap reported allocations, throwing `MemoryBudgetExceededError` *before* a decompression bomb is materialized; `tryAllocate`, `withAllocation`, and `release` (clamped at 0) round it out. A pure accounting guard — documented as not measuring real RSS.
+- **Runtime capability detection** (`0.39`, `src/runtime/runtimeCapabilities.ts`): `detectRuntimeCapabilities()` feature-detects WASM SIMD/threads/bulk-memory (via `WebAssembly.validate` of hand-verified minimal modules), `SharedArrayBuffer`/`Atomics`/`BigInt64Array`, `crossOriginIsolated`, and `hardwareConcurrency` — never throwing. `isWasmSimdSupported()` + `SIMD_NOTE` make clear a `true` means "a SIMD build would run here," not that SIMD is in use.
+
+### Documentation
+
+- New "Concurrency & resource control" section in the Performance guide (memory budget, shared-memory primitives, capability detection).
+
+### Notes
+
+- **SIMD-accelerated WASM** is out of scope: the bundled WASM crates are compiled without SIMD today, and adding it requires a `wasm32` rebuild with SIMD target features. The detection API reports host capability so a future SIMD build can be gated cleanly — no current code claims SIMD acceleration.
+
 ## [0.38.0] - 2026-06-27
 
 **Next-Gen Image Formats.** AVIF/HEIC/JPEG XL are AV1/HEVC/JXL codecs whose decoders are far too large to bundle in a pure-JS, single-dependency library — so, honestly, this minor does **not** decode their pixels. Instead it *detects and probes* them (so the library recognises them and fails clearly), provides a **pluggable decoder registry** as the real integration path, and ships **SVG filter primitives**. No pixel decoding is ever faked. TDD-verified; suite now **6,816 tests**, **701** root exports; 34/37 vs pdf-lib (no regression).

@@ -76,6 +76,10 @@ const ESM_ENTRIES = [
       'probeNextGenImage',
       'registerImageDecoder',
       'feGaussianBlur',
+      // 0.39.x performance & concurrency
+      'SharedCounter',
+      'createMemoryBudget',
+      'detectRuntimeCapabilities',
     ],
   },
   { file: 'create.mjs', expect: ['createPdf'] },
