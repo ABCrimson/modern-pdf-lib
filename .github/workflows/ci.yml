@@ -151,6 +151,10 @@ jobs:
 
       - name: Run unit tests
         run: npx vitest run --coverage
+        env:
+          # v8 coverage instrumentation is memory-heavy; give the vitest process
+          # and its forked workers ample heap so a worker can't OOM mid-run.
+          NODE_OPTIONS: --max-old-space-size=8192
 
       - name: Upload coverage
         if: always()
