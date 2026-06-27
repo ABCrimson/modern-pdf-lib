@@ -41,6 +41,11 @@ export interface EmbeddedFile {
   creationDate?: Date | undefined;
   /** Optional modification date. */
   modificationDate?: Date | undefined;
+  /**
+   * Optional PDF 2.0 `/AFRelationship` of this file to the document
+   * (`Source`/`Data`/`Alternative`/…). Defaults to `Unspecified`.
+   */
+  relationship?: string | undefined;
 }
 
 // ---------------------------------------------------------------------------
@@ -97,7 +102,7 @@ export function attachFile(
   }
 
   // AFRelationship (PDF 2.0 / PDF/A-3)
-  filespec.set('/AFRelationship', PdfName.of('Unspecified'));
+  filespec.set('/AFRelationship', PdfName.of(file.relationship ?? 'Unspecified'));
 
   return registry.register(filespec);
 }

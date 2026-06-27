@@ -27,7 +27,7 @@ The bleeding-edge toolchain migration + code modernization.
 
 ---
 
-## 0.28.x — Reading & Extraction
+## 0.28.x — Reading & Extraction *(shipped in 0.28.0)*
 *The library's biggest gap: it can create but not read. This minor adds full text/structure extraction.*
 
 | Version | Title | Detail | Effort |
@@ -45,7 +45,7 @@ The bleeding-edge toolchain migration + code modernization.
 
 ---
 
-## 0.29.x — Rendering & Rasterization
+## 0.29.x — Rendering & Rasterization *(shipped in 0.29.0)*
 *Turn PDFs into pixels: a content interpreter + WASM rasterizer unlock thumbnails, previews, OCR, and visual diffing.*
 
 | Version | Title | Detail | Effort |

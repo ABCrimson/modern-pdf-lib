@@ -41,6 +41,10 @@ const ESM_ENTRIES = [
       'renderPageToImage',
       'interpretPage',
       'comparePages',
+      // 0.30.x PDF 2.0 core
+      'attachAssociatedFiles',
+      'buildSoftMaskGroupExtGState',
+      'buildPageOutputIntent',
     ],
   },
   { file: 'create.mjs', expect: ['createPdf'] },

@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 See [VERSIONING.md](./VERSIONING.md) for this project's versioning policy.
 
+## [0.30.0] - 2026-06-27
+
+**PDF 2.0 Core (ISO 32000-2).** An evidence-based gap analysis found 4 of the 10 planned items already shipped in v0.28.0 (Document Parts, Structure Namespaces, processor Requirements, PieceInfo), so this release builds only the genuine gaps and documents the whole set. All TDD-verified; the suite is now **6,425 tests** and the root barrel exposes **636** symbols. No performance regression vs pdf-lib (34/37).
+
+### Added
+
+- **`PdfDocument.addAssociatedFile()`** (`0.30.1`): high-level PDF 2.0 associated files — an embedded file with a **typed** `/AFRelationship` (Source/Data/Alternative/…) written to the catalog `/AF` array (not just `/Names/EmbeddedFiles`), so companion data is recognized as *associated* with the document. This is what PDF/A-3 and Factur-X/ZUGFeRD require. (`attachFile` now accepts a relationship too.)
+- **Associated-file attachment builders** (`0.30.1/.2`, `src/compliance/afAttach.ts`): `attachAssociatedFiles()` sets/merges `/AF` on any object dictionary (page, annotation, XObject, structure element — §7.11.4/§14.13); `registerEmbeddedFile()` adds a file to a catalog's `/Names/EmbeddedFiles` name tree + `/AF`.
+- **Per-page / per-stream output intents** (`0.30.3`, `src/compliance/pageOutputIntent.ts`): `buildPageOutputIntent()` + `attachOutputIntents()` for per-page and per-Form-XObject `/OutputIntents` with ICC `/DestOutputProfile` (§14.11.5).
+- **Encrypted-payload wrapper** (`0.30.6`, `src/compliance/encryptedPayload.ts`): `buildEncryptedPayload()` + `buildUnencryptedWrapper()` — a clear-text wrapper around an `/EncryptedPayload` body for DRM/secure-mail readers (§7.6.7).
+- **Soft-mask groups** (`0.30.7`, `src/core/softMask.ts`): `buildSoftMaskGroupExtGState()` (Luminosity/Alpha `/SMask` over a transparency-group XObject with `/BC`/`/TR`, §11.6.5.2) + `buildSoftMaskNone()`.
+- **Image masks + black-point** (`0.30.8`, `src/core/imageMask.ts`): `buildStencilMask()` (1-bpc `/ImageMask`), `buildColorKeyMask()` (`/Mask` color-key array), `buildImageSoftMask()` (DeviceGray `/SMask` image) (§8.9.6), and `buildBlackPointCompensationExtGState()` (`/UseBlackPtComp`, §8.6.5.9).
+
+### Documentation
+
+- New **PDF 2.0 Core** guide covering associated files, document parts, output intents, namespaces, requirements, encrypted payload, soft masks, image masks, and PieceInfo — with the already-shipped builders (`buildDPartRoot`, `buildNamespace`, `buildRequirements`, `buildPieceInfo`) included.
+
 ## [0.29.0] - 2026-06-27
 
 **Rendering & Rasterization.** The library could create and parse PDFs but not turn them into pixels. This minor adds a full, dependency-free rendering stack — a content-stream interpreter, a pure-JS rasterizer, a Canvas adapter, plus thumbnails, image/font extraction, visual diffing, an OCR overlay hook, and true redaction. All TDD-verified; the suite is now **6,359 tests** and the root barrel exposes **624** symbols. No performance regression vs pdf-lib.

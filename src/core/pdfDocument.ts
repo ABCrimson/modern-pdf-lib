@@ -71,6 +71,7 @@ import { drawSvgOnPage } from '../assets/svg/svgToPdf.js';
 import { PdfLayer, PdfLayerManager } from '../layers/optionalContent.js';
 import type { EmbeddedFile } from './embeddedFiles.js';
 import { attachFile, buildEmbeddedFilesNameTree } from './embeddedFiles.js';
+import type { AFRelationship } from '../compliance/associatedFiles.js';
 import type { WatermarkOptions } from './watermark.js';
 import { addWatermark as addWatermarkImpl } from './watermark.js';
 
@@ -2093,6 +2094,9 @@ export class PdfDocument {
   /** Attached file references. */
   private readonly attachedFiles: { ref: PdfRef; name: string }[] = [];
 
+  /** Filespec refs that must also appear in the catalog `/AF` array (PDF 2.0). */
+  private readonly associatedAfRefs: PdfRef[] = [];
+
   /** Document-level JavaScript actions — maps name → script source. */
   private readonly javaScripts = new Map<string, string>();
 
@@ -2118,6 +2122,42 @@ export class PdfDocument {
     };
     const ref = attachFile(this.registry, file);
     this.attachedFiles.push({ ref, name });
+  }
+
+  /**
+   * Attach a PDF 2.0 **associated file** to this document — an embedded file
+   * with a typed `/AFRelationship` that is referenced from the catalog's `/AF`
+   * array, so the companion data is recognized as associated with the document
+   * (required for PDF/A-3, Factur-X/ZUGFeRD, etc.) rather than merely embedded.
+   *
+   * @param name          File name.
+   * @param data          File bytes.
+   * @param mimeType      MIME type (e.g. `'text/xml'`).
+   * @param relationship  The `/AFRelationship` (`Source`/`Data`/`Alternative`/…).
+   * @param options       Optional description.
+   *
+   * @example
+   * ```ts
+   * doc.addAssociatedFile('factur-x.xml', xmlBytes, 'text/xml', 'Alternative');
+   * ```
+   */
+  addAssociatedFile(
+    name: string,
+    data: Uint8Array,
+    mimeType: string,
+    relationship: AFRelationship,
+    options?: { description?: string | undefined },
+  ): void {
+    const file: EmbeddedFile = {
+      name,
+      data,
+      mimeType,
+      relationship,
+      ...(options?.description !== undefined ? { description: options.description } : {}),
+    };
+    const ref = attachFile(this.registry, file);
+    this.attachedFiles.push({ ref, name });
+    this.associatedAfRefs.push(ref);
   }
 
   /**
@@ -2524,6 +2564,13 @@ export class PdfDocument {
 
           catalogObj.set('/Names', namesDict);
         }
+      }
+
+      // PDF 2.0 associated files — catalog /AF array (§7.11.4)
+      if (this.associatedAfRefs.length > 0) {
+        const afArray = new PdfArray();
+        for (const ref of this.associatedAfRefs) afArray.push(ref);
+        catalogObj.set('/AF', afArray);
       }
 
       // Document-level actions (/OpenAction and /AA) — set by documentScripts.ts

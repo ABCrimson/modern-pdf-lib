@@ -1421,3 +1421,23 @@ export { redactRegions } from './render/redactContent.js';
 export type { RedactRect, RedactResult } from './render/redactContent.js';
 export { computeTileGrid, renderPageTile, RenderCache } from './render/tiles.js';
 export type { TileOptions, TileGrid } from './render/tiles.js';
+
+// ---------------------------------------------------------------------------
+// PDF 2.0 core (0.30.x): associated-file attachment, per-page/stream output
+// intents, encrypted-payload wrapper, soft-mask groups, image masks &
+// black-point compensation. (Document Parts, Structure Namespaces,
+// Requirements, and PieceInfo shipped in 0.28.0.)
+// ---------------------------------------------------------------------------
+export { attachAssociatedFiles, registerEmbeddedFile } from './compliance/afAttach.js';
+export { attachOutputIntents, buildPageOutputIntent } from './compliance/pageOutputIntent.js';
+export type { PageOutputIntentOptions } from './compliance/pageOutputIntent.js';
+export { buildEncryptedPayload, buildUnencryptedWrapper } from './compliance/encryptedPayload.js';
+export type { EncryptedPayloadOptions, WrapperPayloadOptions } from './compliance/encryptedPayload.js';
+export { buildSoftMaskGroupExtGState, buildSoftMaskNone } from './core/softMask.js';
+export type { SoftMaskGroupOptions } from './core/softMask.js';
+export {
+  buildStencilMask,
+  buildColorKeyMask,
+  buildImageSoftMask,
+  buildBlackPointCompensationExtGState,
+} from './core/imageMask.js';
