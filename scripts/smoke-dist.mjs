@@ -59,6 +59,11 @@ const ESM_ENTRIES = [
       // 0.34.x advanced signatures
       'buildSigningCertificateV2Attribute',
       'buildCertPath',
+      // 0.35.x security & redaction
+      'scanPdfThreats',
+      'sanitizePdf',
+      'verifyRedactions',
+      'inspectEncryption',
     ],
   },
   { file: 'create.mjs', expect: ['createPdf'] },

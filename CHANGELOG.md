@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 See [VERSIONING.md](./VERSIONING.md) for this project's versioning policy.
 
+## [0.35.0] - 2026-06-27
+
+**Security & Redaction.** A document-hardening layer for auditing untrusted PDFs: a static threat scanner, a content sanitizer that proves *physical* removal, a redaction-leak verifier, and a password-free encryption/permission inspector. Every dictionary key and permission bit was verified against ISO 32000 (each module cites its clauses); limitations are documented honestly, never papered over. TDD-verified; suite now **6,638 tests**, **666** root exports; 34/37 vs pdf-lib (no regression). New `src/security/` module.
+
+### Added
+
+- **Threat scanner** (`0.35`, `src/security/threatScanner.ts`): `scanPdfThreats(pdf)` walks the *parsed object graph* (not raw bytes) and reports active-content risks per ISO 32000 §12.6 — `/OpenAction`/`/AA`, JavaScript (`/S /JavaScript` + the `/Names` JS tree), `/Launch`, `/URI`/`/SubmitForm`/`/ImportData`/`/GoToR`, embedded media, executable attachments, `/XFA` — each with a justified severity and an aggregate `riskLevel`. Structural detection means a content stream that merely draws the word "JavaScript" raises no false positive.
+- **Content sanitizer** (`0.35`, `src/security/sanitize.ts`): `sanitizePdf(pdf, options?)` returns a cleaned copy with document JavaScript, auto-run `/OpenAction`, embedded files (`/EmbeddedFiles` + `/AF`), and metadata removed — *physically* pruned from the output bytes (re-serialize + `filterReachable`), not merely de-referenced; tests assert the payload bytes are absent. Each class is opt-out; the report lists only what was actually present.
+- **Redaction-leak verifier** (`0.35`, `src/security/redactionVerifier.ts`): `verifyRedactions(pdf, regions)` extracts text positions and flags any text whose box intersects a redaction region — catching "fake" redactions (a black box over still-extractable text). Coordinates match the library's PDF user-space convention (bottom-left, y-up, points); `regions` is required by design (auto-detecting redaction rectangles is unreliable, so it is not faked).
+- **Encryption inspector** (`0.35`, `src/security/encryptionInspector.ts`): `inspectEncryption(pdf)` reports the scheme (RC4-40/128, AES-128 `/AESV2`, AES-256 `/AESV3`), `/V`/`/R`, the `/Standard` vs `/Adobe.PubSec` handler, empty-user-password status, and the `/P` permission bits decoded per ISO 32000 Table 22 — all without the password (read-only; never decrypts content).
+
+### Documentation
+
+- New **Security & Redaction** guide (`docs/guide/security.md`, added to the sidebar) covering all four tools with verified signatures and explicit scope notes.
+
+### Notes
+
+- **Public-key (Adobe.PubSec) encryption** and an **AES-GCM** filter were considered for this tier and deliberately not shipped: full PubSec save-path integration is a substantial focused effort better done deliberately than rushed, and AES-GCM is not a standardized PDF encryption mode (PDF 2.0 uses AES-256-CBC / `/AESV3`). The inspector already *recognises* `/Adobe.PubSec` documents.
+
 ## [0.34.0] - 2026-06-27
 
 **Advanced Signatures & Cryptography.** Upgrades the existing CMS signer/verifier to the ETSI CAdES-BES / PAdES-B-B baseline and adds RSASSA-PSS plus RFC 5280 certificate-path building. Every OID and ASN.1 structure was verified against the cited RFC text (5035, 4055, 5280) — nothing fabricated. All additive and default-off: the full 430-test signature suite stays green. TDD-verified; suite now **6,596 tests**, **662** root exports; 34/37 vs pdf-lib (no regression).

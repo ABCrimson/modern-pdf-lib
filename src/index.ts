@@ -1399,6 +1399,20 @@ export { buildCertPath } from './signature/certPathBuilder.js';
 export type { CertPathResult } from './signature/certPathBuilder.js';
 
 // ---------------------------------------------------------------------------
+// Security & redaction (0.35.x): static threat scanning, content sanitization,
+// redaction-leak verification, and an encryption/permission inspector. (Active
+// redaction itself ships in core/annotation; these are the audit/hardening layer.)
+// ---------------------------------------------------------------------------
+export { scanPdfThreats } from './security/threatScanner.js';
+export type { ThreatReport, ThreatFinding, ThreatSeverity } from './security/threatScanner.js';
+export { sanitizePdf } from './security/sanitize.js';
+export type { SanitizeOptions, SanitizeReport, SanitizeClass } from './security/sanitize.js';
+export { verifyRedactions } from './security/redactionVerifier.js';
+export type { RedactionRegion, RedactionLeak, RedactionVerificationReport } from './security/redactionVerifier.js';
+export { inspectEncryption } from './security/encryptionInspector.js';
+export type { EncryptionReport, PermissionFlags } from './security/encryptionInspector.js';
+
+// ---------------------------------------------------------------------------
 // Rendering & rasterization (0.29.x): content-stream interpreter, pure-JS
 // rasterizer, Canvas adapter, thumbnails, image/font extraction, visual diff,
 // OCR overlay, redaction-by-removal, and tiling/cache.
