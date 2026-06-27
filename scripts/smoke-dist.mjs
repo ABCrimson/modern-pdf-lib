@@ -49,6 +49,9 @@ const ESM_ENTRIES = [
       'tagHeading',
       'validatePdfUa2',
       'autoTagPage',
+      // 0.32.x standards
+      'preflightPdfA',
+      'convertPdfAConformanceXmp',
     ],
   },
   { file: 'create.mjs', expect: ['createPdf'] },

@@ -1465,3 +1465,13 @@ export { validatePdfUa2, buildPdfUa2Xmp } from './accessibility/pdfUa2.js';
 export type { PdfUa2Issue, PdfUa2Result } from './accessibility/pdfUa2.js';
 export { autoTagPage } from './accessibility/autoTag.js';
 export type { AutoTagOptions, AutoTagResult } from './accessibility/autoTag.js';
+
+// ---------------------------------------------------------------------------
+// Standards & validation (0.32.x): PDF/A profile conversion + preflight, and
+// WTPDF / PDF/R identification markers. (PDF/A-4, PDF/X-6, PDF/VT, and the
+// SARIF validation report shipped earlier.)
+// ---------------------------------------------------------------------------
+export { preflightPdfA, convertPdfAConformanceXmp } from './compliance/profileConvert.js';
+export type { PreflightIssue } from './compliance/profileConvert.js';
+export { buildWtpdfIdentificationXmp, buildPdfRIdentificationXmp } from './compliance/rasterProfile.js';
+export type { ProfileXmpOptions } from './compliance/rasterProfile.js';

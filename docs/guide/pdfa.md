@@ -720,3 +720,38 @@ interface PdfUaEnforcementResult {
   unfixable: PdfUaError[];   // Issues requiring manual attention
 }
 ```
+
+## Profile conversion & preflight
+
+Remap an XMP packet's PDF/A conformance (e.g. PDF/A-3 → PDF/A-4) and run a
+pre-serialization preflight:
+
+```ts
+import { convertPdfAConformanceXmp, preflightPdfA } from 'modern-pdf-lib';
+
+const xmp4 = convertPdfAConformanceXmp(existingXmp, 4);          // pdfaid:part 3 → 4
+const xmp4u = convertPdfAConformanceXmp(existingXmp, 4, 'u');    // + conformance
+
+for (const issue of preflightPdfA(doc, 'PDF/A-4')) {
+  console.log(`[${issue.severity}] ${issue.code} ${issue.message}${issue.fixable ? ' (fixable)' : ''}`);
+}
+```
+
+`preflightPdfA` reports what's checkable before serialization (OutputIntent,
+`/Lang`, XMP, title); for the full byte-level pass, serialize and use
+`validatePdfA` / `enforcePdfAFull`.
+
+## Raster & tagged profile markers (WTPDF, PDF/R)
+
+```ts
+import { buildWtpdfIdentificationXmp, buildPdfRIdentificationXmp } from 'modern-pdf-lib';
+
+const wtpdf = buildWtpdfIdentificationXmp({ part: 1 }); // Well-Tagged PDF via PDF Declarations
+const pdfr = buildPdfRIdentificationXmp();              // PDF/R (ISO 23504)
+```
+
+> These emit identification XMP only. WTPDF conformance is asserted through the
+> PDF Association *PDF Declarations* mechanism; PDF/R has no normative XMP marker
+> (it is identified by a trailer comment). Conformance target URIs the specs have
+> not finalized are flagged provisional in the source — not claims of full
+> conformance.

@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 See [VERSIONING.md](./VERSIONING.md) for this project's versioning policy.
 
+## [0.32.0] - 2026-06-27
+
+**Next-Gen Standards & Validation.** Gap-driven — PDF/A-4, PDF/X-6, PDF/VT-2/3, and the SARIF 2.1.0 validation report already shipped; this minor adds profile conversion/preflight and (carefully-scoped) raster/tagged profile markers. TDD-verified; suite now **6,520 tests**, **654** root exports; 34/37 vs pdf-lib.
+
+### Added
+
+- **PDF/A profile conversion + preflight** (`0.32.8`, `src/compliance/profileConvert.ts`): `convertPdfAConformanceXmp()` remaps an XMP packet's `pdfaid:part`/`pdfaid:conformance` (e.g. PDF/A-3 → PDF/A-4, both attribute and element forms, injecting if absent); `preflightPdfA()` reports fixable conformance issues (missing OutputIntent/`/Lang`/XMP/title) using the existing `PDFA-0xx` validator vocabulary. (Pre-serialization scope is documented; serialize + `validatePdfA`/`enforcePdfAFull` for the full pass.)
+- **WTPDF / PDF/R identification markers** (`0.32.6`, `src/compliance/rasterProfile.ts`): `buildWtpdfIdentificationXmp()` (Well-Tagged PDF via the PDF Association **PDF Declarations** mechanism) and `buildPdfRIdentificationXmp()` (PDF/R / ISO 23504). Researched against the specs: WTPDF uses `pdfd:conformsTo` declarations (not a bespoke namespace) and PDF/R has no normative XMP marker — the modules document these facts and flag any provisional conformance URIs rather than fabricating them.
+
 ## [0.31.0] - 2026-06-27
 
 **Tagged PDF & Accessibility (PDF/UA-2).** Gap-driven — the structure-tree core, alt-text/`ActualText`/artifacts, document `/Lang`, and structure namespaces already shipped; this minor adds the ergonomic + conformance layer on top. TDD-verified; suite now **6,488 tests**, **650** root exports; 34/37 vs pdf-lib (no regression).
