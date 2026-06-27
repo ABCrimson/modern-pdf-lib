@@ -70,11 +70,15 @@ jobs:
         run: npm run smoke
 
       - name: Run tests
-        run: npx vitest run
+        # The 6,600+ test suite accumulates >8 GB in a single fork-pool pass
+        # (bumping the heap alone just delays the OOM and risks OS-OOM with
+        # multiple forks on a 16 GB runner). Shard into independent processes so
+        # memory is fully released between shards — peak ~1/3 of the whole suite.
+        run: |
+          npx vitest run --shard=1/3
+          npx vitest run --shard=2/3
+          npx vitest run --shard=3/3
         env:
-          # The suite has grown past the default ~4 GB v8 old-space cap (a worker
-          # OOM'd mid-run on the v0.34.0 tag); give vitest + its workers ample heap.
-          # Mirrors the same guard on ci.yml's Unit Tests step.
           NODE_OPTIONS: --max-old-space-size=8192
 
       - name: Upload dist
