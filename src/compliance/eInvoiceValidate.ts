@@ -122,11 +122,30 @@ function amountsEqual(a: number, b: number): boolean {
   return Math.abs(a - b) <= MONETARY_TOLERANCE;
 }
 
-/** Sum the line net amounts (Σ quantity × unit price) of an invoice. */
+/**
+ * Round a monetary amount to two decimals using half-away-from-zero, the
+ * commercial rounding convention EN 16931 applies to BT-* amounts (and the
+ * convention the Factur-X generator emits). `Math.round` is half-up toward
+ * +∞, which is wrong for negative amounts (e.g. a credit line), so the sign
+ * is factored out explicitly.
+ */
+function roundToCents(value: number): number {
+  return (Math.sign(value) * Math.round(Math.abs(value) * 100)) / 100;
+}
+
+/**
+ * Sum the line net amounts (Σ BT-131) of an invoice.
+ *
+ * Per EN 16931 each line net amount (BT-131) is rounded to two decimals
+ * before the document-level sum (BT-106 / BT-109) is formed. Summing the raw
+ * `quantity × unitPrice` products instead would diverge from the spec total
+ * for fractional unit prices and could falsely flag (or falsely pass) a
+ * borderline BR-CO-10 / BR-CO-13 comparison.
+ */
 function sumLineNet(invoice: Invoice): number {
   let total = 0;
   for (const line of invoice.lines) {
-    total += line.quantity * line.unitPrice;
+    total += roundToCents(line.quantity * line.unitPrice);
   }
   return total;
 }

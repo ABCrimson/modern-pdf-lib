@@ -249,7 +249,9 @@ export function convertPdfAConformanceXmp(
   let result = xmp;
 
   // --- pdfaid:part ------------------------------------------------------
-  const partAttr = /pdfaid:part\s*=\s*"[^"]*"/;
+  // Quote-agnostic: match either "..." or '...' via a capture-group
+  // backreference, then normalize the emitted replacement to double quotes.
+  const partAttr = /pdfaid:part\s*=\s*(["'])[^"']*\1/;
   const partElem = /<pdfaid:part>[^<]*<\/pdfaid:part>/;
 
   if (partAttr.test(result)) {
@@ -265,7 +267,8 @@ export function convertPdfAConformanceXmp(
   // --- pdfaid:conformance (only when explicitly requested) --------------
   if (toConformance !== undefined) {
     const confVal = conformanceString(toConformance);
-    const confAttr = /pdfaid:conformance\s*=\s*"[^"]*"/;
+    // Quote-agnostic (see pdfaid:part above); replacement normalizes to "...".
+    const confAttr = /pdfaid:conformance\s*=\s*(["'])[^"']*\1/;
     const confElem = /<pdfaid:conformance>[^<]*<\/pdfaid:conformance>/;
 
     if (confAttr.test(result)) {
@@ -343,8 +346,10 @@ function addConformanceBesidePart(xmp: string, confVal: string): string {
     );
   }
 
-  // Attribute-form part: append a sibling attribute.
-  const partAttr = /(pdfaid:part\s*=\s*"[^"]*")/;
+  // Attribute-form part: append a sibling attribute. Quote-agnostic — the
+  // outer group ($1) preserves the part verbatim (whatever quotes it used);
+  // the inner backreference (\2) only ties the open/close quote together.
+  const partAttr = /(pdfaid:part\s*=\s*(["'])[^"']*\2)/;
   if (partAttr.test(xmp)) {
     return xmp.replace(partAttr, `$1 pdfaid:conformance="${confVal}"`);
   }

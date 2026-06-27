@@ -226,4 +226,58 @@ describe('validateEn16931', () => {
     const issues = validateEn16931(makeInvoice());
     expect(ruleIds(issues).some((r) => r.startsWith('BR-CO'))).toBe(false);
   });
+
+  // ---------------------------------------------------------------------
+  // BR-CO per-line rounding of BT-131 (regression — BUG 6)
+  // ---------------------------------------------------------------------
+
+  it('compares against per-line-rounded BT-131 net (BR-CO-10/13)', () => {
+    // 3 lines of qty 1 × 0.125 = 0.125 each. EN 16931 rounds each line net
+    // (BT-131) to 2 decimals -> 0.13, so Σ BT-131 = 0.39, NOT the raw
+    // 3 × 0.125 = 0.375. A caller that declares the spec-correct 0.39 must
+    // pass; comparing against the unrounded 0.375 would falsely flag it
+    // (|0.39 - 0.375| = 0.015 > 0.005 tolerance).
+    const lines: readonly InvoiceLine[] = [
+      { description: 'L1', quantity: 1, unitPrice: 0.125, taxPercent: 0 },
+      { description: 'L2', quantity: 1, unitPrice: 0.125, taxPercent: 0 },
+      { description: 'L3', quantity: 1, unitPrice: 0.125, taxPercent: 0 },
+    ];
+    const invoice: ValidatableInvoice = {
+      ...makeInvoice({ lines }),
+      declaredTotals: {
+        lineTotal: 0.39,
+        taxBasisTotal: 0.39,
+        taxTotal: 0,
+        grandTotal: 0.39,
+        duePayable: 0.39,
+      },
+    };
+    const issues = validateEn16931(invoice);
+    expect(hasRule(issues, 'BR-CO-10')).toBe(false);
+    expect(hasRule(issues, 'BR-CO-13')).toBe(false);
+    expect(issues).toEqual([]);
+  });
+
+  it('still flags a line total that disagrees with the rounded BT-131 sum', () => {
+    const lines: readonly InvoiceLine[] = [
+      { description: 'L1', quantity: 1, unitPrice: 0.125, taxPercent: 0 },
+      { description: 'L2', quantity: 1, unitPrice: 0.125, taxPercent: 0 },
+      { description: 'L3', quantity: 1, unitPrice: 0.125, taxPercent: 0 },
+    ];
+    const invoice: ValidatableInvoice = {
+      ...makeInvoice({ lines }),
+      declaredTotals: {
+        // The unrounded raw sum (0.375) is NOT the spec total (0.39); a
+        // caller declaring 0.375 must still be flagged.
+        lineTotal: 0.375,
+        taxBasisTotal: 0.375,
+        taxTotal: 0,
+        grandTotal: 0.375,
+        duePayable: 0.375,
+      },
+    };
+    const issues = validateEn16931(invoice);
+    expect(hasRule(issues, 'BR-CO-10')).toBe(true);
+    expect(hasRule(issues, 'BR-CO-13')).toBe(true);
+  });
 });

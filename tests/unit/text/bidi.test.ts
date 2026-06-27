@@ -209,6 +209,49 @@ describe('reorderVisual', () => {
 });
 
 // ---------------------------------------------------------------------------
+// L1 — reset whitespace/separators at segment separators & line end
+// ---------------------------------------------------------------------------
+
+describe('resolveBidi — L1 whitespace reset (UAX #9)', () => {
+  it('resets WS preceding a segment separator (S), not the trailing strong run', () => {
+    // 'א \tא' in an LTR paragraph:
+    //   index 0 'א'  R   → implicit level 1
+    //   index 1 ' '  WS  → precedes the S → reset to base 0
+    //   index 2 '\t' S   → segment separator → reset to base 0
+    //   index 3 'א'  R   → strong, follows the separator → stays level 1
+    const res = resolveBidi('א \tא', 'ltr');
+    expect(res.levels).toEqual([1, 0, 0, 1]);
+  });
+
+  it('resets the WS run before S while keeping the strong runs on both sides', () => {
+    // 'אב \tגד' in an LTR paragraph:
+    //   0 'א' R →1, 1 'ב' R →1, 2 ' ' WS (precedes S) →0,
+    //   3 '\t' S →0, 4 'ג' R →1, 5 'ד' R →1
+    const res = resolveBidi('אב \tגד', 'ltr');
+    expect(res.levels).toEqual([1, 1, 0, 0, 1, 1]);
+  });
+
+  it('resets to the RTL paragraph level (1) in a base-rtl context', () => {
+    // 'א \tא' in an RTL paragraph: base level 1.
+    //   0 'א' R →1, 1 ' ' WS (precedes S) → base 1, 2 '\t' S → base 1, 3 'א' R →1
+    const res = resolveBidi('א \tא', 'rtl');
+    expect(res.levels).toEqual([1, 1, 1, 1]);
+    // And a sanity check where the reset is observable: LTR text before the
+    // separator in an RTL paragraph keeps its even level, the WS before S resets.
+    const res2 = resolveBidi('ab \tab', 'rtl');
+    // 0 'a' L, 1 'b' L → level 2 (L inside odd base → +1 → 2), 2 ' ' WS before S
+    // → reset to base 1, 3 '\t' S → base 1, 4 'a' L, 5 'b' L → level 2.
+    expect(res2.levels).toEqual([2, 2, 1, 1, 2, 2]);
+  });
+
+  it('resets a trailing whitespace run at end of line to the paragraph level', () => {
+    // 'אב  ' in an LTR paragraph: trailing WS run resets to base 0.
+    const res = resolveBidi('אב  ', 'ltr');
+    expect(res.levels).toEqual([1, 1, 0, 0]);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Run partitioning invariants
 // ---------------------------------------------------------------------------
 

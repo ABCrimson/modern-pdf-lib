@@ -23,7 +23,14 @@ import {
   encodeSet,
   encodeUTCTime,
   encodeLength,
+  encodeOctetString,
+  extractIssuerAndSerial,
 } from '../../../src/signature/pkcs7.js';
+import {
+  prepareForSigning,
+  computeSignatureHash,
+  embedSignature,
+} from '../../../src/signature/byteRange.js';
 
 // ---------------------------------------------------------------------------
 // Helpers: certificate generation (mirrors existing test patterns)
@@ -599,5 +606,310 @@ describe('verifySignatures — hash algorithms', () => {
     const results = await verifySignatures(signedPdf);
     expect(results[0]!.integrityValid).toBe(true);
     expect(results[0]!.valid).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Tests: verifySignatures — RSASSA-PSS with explicit RFC 4055 params (BUG 3)
+// ---------------------------------------------------------------------------
+
+// Hash OID map for building PSS params by hand.
+const HASH_OID: Record<string, string> = {
+  'SHA-256': '2.16.840.1.101.3.4.2.1',
+  'SHA-384': '2.16.840.1.101.3.4.2.2',
+  'SHA-512': '2.16.840.1.101.3.4.2.3',
+};
+const RSASSA_PSS_OID = '1.2.840.113549.1.1.10';
+const MGF1_OID = '1.2.840.113549.1.1.8';
+
+/**
+ * Build an RSASSA-PSS-params SEQUENCE (RFC 4055) with explicit hash, MGF1
+ * inner hash, and salt length.
+ *
+ * Allows overriding the MGF OID and the MGF1 inner hash to exercise the
+ * verifier's conservative-rejection paths.
+ */
+function buildPssParams(opts: {
+  hashName: string;
+  mgfHashName?: string;
+  saltLength: number;
+  mgfOid?: string;
+}): Uint8Array {
+  const NULL = new Uint8Array([0x05, 0x00]);
+  const hashOid = HASH_OID[opts.hashName]!;
+  const mgfHashOid = HASH_OID[opts.mgfHashName ?? opts.hashName]!;
+  const mgfOid = opts.mgfOid ?? MGF1_OID;
+
+  const hashAlgId = encodeSequence([encodeOID(hashOid), NULL]);
+  const mgfInnerHashAlgId = encodeSequence([encodeOID(mgfHashOid), NULL]);
+  const mgfAlgId = encodeSequence([encodeOID(mgfOid), mgfInnerHashAlgId]);
+  const saltInt = encodeInteger(new Uint8Array([opts.saltLength]));
+
+  return encodeSequence([
+    encodeContextTag(0, hashAlgId),
+    encodeContextTag(1, mgfAlgId),
+    encodeContextTag(2, saltInt),
+  ]);
+}
+
+/**
+ * Build a complete PSS-signed PDF by hand so the SignerInfo carries an
+ * explicit RSASSA-PSS-params with the requested salt length / hash.
+ *
+ * Returns the signed PDF bytes.
+ */
+async function buildPssSignedPdf(opts: {
+  cn?: string;
+  hashName: string;
+  saltLength: number;
+  mgfHashName?: string;
+  mgfOid?: string;
+  fieldName: string;
+}): Promise<Uint8Array> {
+  const { certificate, keyPair } = await generateTestCert(opts.cn ?? 'PSS Signer');
+
+  // Re-import the RSA private key for RSA-PSS signing (PKCS#8 key material
+  // is scheme-agnostic; the test cert SPKI is generic rsaEncryption).
+  const pkcs8 = new Uint8Array(
+    await globalThis.crypto.subtle.exportKey('pkcs8', keyPair.privateKey),
+  );
+  const pssKey = await globalThis.crypto.subtle.importKey(
+    'pkcs8',
+    pkcs8.buffer.slice(pkcs8.byteOffset, pkcs8.byteOffset + pkcs8.byteLength) as ArrayBuffer,
+    { name: 'RSA-PSS', hash: opts.hashName },
+    false,
+    ['sign'],
+  );
+
+  const pdfBytes = createMinimalPdf();
+  const { preparedPdf, byteRange } = prepareForSigning(pdfBytes, opts.fieldName, 8192);
+  const dataHash = await computeSignatureHash(
+    preparedPdf,
+    byteRange.byteRange,
+    opts.hashName as 'SHA-256' | 'SHA-384' | 'SHA-512',
+  );
+
+  // Signed attributes: contentType (data) + messageDigest.
+  const contentTypeAttr = encodeSequence([
+    encodeOID('1.2.840.113549.1.9.3'),
+    encodeSet([encodeOID('1.2.840.113549.1.7.1')]),
+  ]);
+  const messageDigestAttr = encodeSequence([
+    encodeOID('1.2.840.113549.1.9.4'),
+    encodeSet([encodeOctetString(dataHash)]),
+  ]);
+  const signedAttrs = [contentTypeAttr, messageDigestAttr];
+  const signedAttrsForHash = encodeSet(signedAttrs);
+
+  // Sign the SET-encoded signed attributes with RSA-PSS at the chosen salt.
+  const sigBuf = await globalThis.crypto.subtle.sign(
+    { name: 'RSA-PSS', saltLength: opts.saltLength },
+    pssKey,
+    signedAttrsForHash.buffer.slice(
+      signedAttrsForHash.byteOffset,
+      signedAttrsForHash.byteOffset + signedAttrsForHash.byteLength,
+    ) as ArrayBuffer,
+  );
+  const signatureValue = new Uint8Array(sigBuf);
+
+  // Build the SignerInfo with an explicit id-RSASSA-PSS signatureAlgorithm.
+  const { issuerDer, serialDer } = extractIssuerAndSerial(certificate);
+  const version = new Uint8Array([0x02, 0x01, 0x01]);
+  const issuerAndSerial = encodeSequence([issuerDer, serialDer]);
+  const digestAlgo = encodeSequence([
+    encodeOID(HASH_OID[opts.hashName]!),
+    new Uint8Array([0x05, 0x00]),
+  ]);
+  const signedAttrsTagged = encodeContextTag(0, concatArrays(signedAttrs));
+  const pssParams = buildPssParams({
+    hashName: opts.hashName,
+    saltLength: opts.saltLength,
+    mgfHashName: opts.mgfHashName,
+    mgfOid: opts.mgfOid,
+  });
+  const sigAlgo = encodeSequence([encodeOID(RSASSA_PSS_OID), pssParams]);
+  const sigOctet = encodeOctetString(signatureValue);
+  const signerInfo = encodeSequence([
+    version,
+    issuerAndSerial,
+    digestAlgo,
+    signedAttrsTagged,
+    sigAlgo,
+    sigOctet,
+  ]);
+
+  // Build SignedData + ContentInfo.
+  const sdVersion = new Uint8Array([0x02, 0x01, 0x01]);
+  const digestAlgorithms = encodeSet([digestAlgo]);
+  const encapContentInfo = encodeSequence([encodeOID('1.2.840.113549.1.7.1')]);
+  const certificates = encodeContextTag(0, certificate);
+  const signerInfos = encodeSet([signerInfo]);
+  const signedData = encodeSequence([
+    sdVersion,
+    digestAlgorithms,
+    encapContentInfo,
+    certificates,
+    signerInfos,
+  ]);
+  const contentInfo = encodeSequence([
+    encodeOID('1.2.840.113549.1.7.2'),
+    encodeContextTag(0, signedData),
+  ]);
+
+  return embedSignature(preparedPdf, contentInfo, byteRange);
+}
+
+function concatArrays(arrays: Uint8Array[]): Uint8Array {
+  let total = 0;
+  for (const a of arrays) total += a.length;
+  const out = new Uint8Array(total);
+  let off = 0;
+  for (const a of arrays) {
+    out.set(a, off);
+    off += a.length;
+  }
+  return out;
+}
+
+describe('verifySignatures — RSASSA-PSS explicit params (RFC 4055)', () => {
+  it('verifies a PSS signature with a non-default salt length (salt 48, SHA-256)', async () => {
+    // The default PSS profile uses salt = digest length (32 for SHA-256).
+    // Here the salt is 48: the verifier MUST read saltLength from the
+    // RSASSA-PSS-params, not assume the digest length.
+    const signedPdf = await buildPssSignedPdf({
+      cn: 'PSS Salt48',
+      hashName: 'SHA-256',
+      saltLength: 48,
+      fieldName: 'PssSalt48',
+    });
+
+    const results = await verifySignatures(signedPdf);
+    expect(results.length).toBeGreaterThanOrEqual(1);
+    const result = results[0]!;
+    expect(result.integrityValid).toBe(true);
+    expect(result.certificateValid).toBe(true);
+    expect(result.valid).toBe(true);
+  });
+
+  it('verifies a PSS signature using SHA-384 with its default salt (48)', async () => {
+    const signedPdf = await buildPssSignedPdf({
+      cn: 'PSS Sha384',
+      hashName: 'SHA-384',
+      saltLength: 48,
+      fieldName: 'PssSha384',
+    });
+
+    const results = await verifySignatures(signedPdf);
+    const result = results[0]!;
+    expect(result.certificateValid).toBe(true);
+    expect(result.valid).toBe(true);
+  });
+
+  it('fails when the PSS params declare a salt length that does not match the signature', async () => {
+    // Sign with salt 32 but advertise salt 48 in the params — verification
+    // must fail because the verifier uses the declared (wrong) salt length.
+    const { certificate, keyPair } = await generateTestCert('PSS Mismatch');
+    const pkcs8 = new Uint8Array(
+      await globalThis.crypto.subtle.exportKey('pkcs8', keyPair.privateKey),
+    );
+    const pssKey = await globalThis.crypto.subtle.importKey(
+      'pkcs8',
+      pkcs8.buffer.slice(pkcs8.byteOffset, pkcs8.byteOffset + pkcs8.byteLength) as ArrayBuffer,
+      { name: 'RSA-PSS', hash: 'SHA-256' },
+      false,
+      ['sign'],
+    );
+
+    const pdfBytes = createMinimalPdf();
+    const { preparedPdf, byteRange } = prepareForSigning(pdfBytes, 'PssBadParams', 8192);
+    const dataHash = await computeSignatureHash(preparedPdf, byteRange.byteRange, 'SHA-256');
+
+    const contentTypeAttr = encodeSequence([
+      encodeOID('1.2.840.113549.1.9.3'),
+      encodeSet([encodeOID('1.2.840.113549.1.7.1')]),
+    ]);
+    const messageDigestAttr = encodeSequence([
+      encodeOID('1.2.840.113549.1.9.4'),
+      encodeSet([encodeOctetString(dataHash)]),
+    ]);
+    const signedAttrs = [contentTypeAttr, messageDigestAttr];
+    const signedAttrsForHash = encodeSet(signedAttrs);
+
+    // Sign with salt 32.
+    const sigBuf = await globalThis.crypto.subtle.sign(
+      { name: 'RSA-PSS', saltLength: 32 },
+      pssKey,
+      signedAttrsForHash.buffer.slice(
+        signedAttrsForHash.byteOffset,
+        signedAttrsForHash.byteOffset + signedAttrsForHash.byteLength,
+      ) as ArrayBuffer,
+    );
+    const signatureValue = new Uint8Array(sigBuf);
+
+    const { issuerDer, serialDer } = extractIssuerAndSerial(certificate);
+    const digestAlgo = encodeSequence([
+      encodeOID(HASH_OID['SHA-256']!),
+      new Uint8Array([0x05, 0x00]),
+    ]);
+    // Advertise salt 48 (mismatch).
+    const pssParams = buildPssParams({ hashName: 'SHA-256', saltLength: 48 });
+    const signerInfo = encodeSequence([
+      new Uint8Array([0x02, 0x01, 0x01]),
+      encodeSequence([issuerDer, serialDer]),
+      digestAlgo,
+      encodeContextTag(0, concatArrays(signedAttrs)),
+      encodeSequence([encodeOID(RSASSA_PSS_OID), pssParams]),
+      encodeOctetString(signatureValue),
+    ]);
+    const signedData = encodeSequence([
+      new Uint8Array([0x02, 0x01, 0x01]),
+      encodeSet([digestAlgo]),
+      encodeSequence([encodeOID('1.2.840.113549.1.7.1')]),
+      encodeContextTag(0, certificate),
+      encodeSet([signerInfo]),
+    ]);
+    const contentInfo = encodeSequence([
+      encodeOID('1.2.840.113549.1.7.2'),
+      encodeContextTag(0, signedData),
+    ]);
+    const signedPdf = embedSignature(preparedPdf, contentInfo, byteRange);
+
+    const results = await verifySignatures(signedPdf);
+    expect(results[0]!.certificateValid).toBe(false);
+    expect(results[0]!.valid).toBe(false);
+  });
+
+  it('conservatively rejects when the MGF is not id-mgf1', async () => {
+    // A non-MGF1 mask generation function cannot be modelled by WebCrypto;
+    // the verifier must reject rather than silently verify with MGF1.
+    const signedPdf = await buildPssSignedPdf({
+      cn: 'PSS BadMgf',
+      hashName: 'SHA-256',
+      saltLength: 32,
+      // Use a bogus OID in the MGF slot (id-RSASSA-PSS itself, not id-mgf1).
+      mgfOid: RSASSA_PSS_OID,
+      fieldName: 'PssBadMgf',
+    });
+
+    const results = await verifySignatures(signedPdf);
+    expect(results[0]!.certificateValid).toBe(false);
+    expect(results[0]!.valid).toBe(false);
+  });
+
+  it('conservatively rejects when the MGF1 inner hash differs from the PSS hash', async () => {
+    // WebCrypto cannot model a divergent MGF hash (it always uses the same
+    // hash for both). Verifier must reject rather than verify with the
+    // wrong (single) hash.
+    const signedPdf = await buildPssSignedPdf({
+      cn: 'PSS DivergentHash',
+      hashName: 'SHA-256',
+      saltLength: 32,
+      mgfHashName: 'SHA-384',
+      fieldName: 'PssDivergent',
+    });
+
+    const results = await verifySignatures(signedPdf);
+    expect(results[0]!.certificateValid).toBe(false);
+    expect(results[0]!.valid).toBe(false);
   });
 });

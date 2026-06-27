@@ -46,9 +46,11 @@
  */
 
 import {
+  PdfBool,
   PdfDict,
   PdfName,
   PdfNumber,
+  PdfString,
   type PdfObject,
 } from '../core/pdfObjects.js';
 import type { PdfRef } from '../core/pdfObjects.js';
@@ -57,7 +59,8 @@ import { PdfLexer } from '../parser/lexer.js';
 import { PdfObjectParser } from '../parser/objectParser.js';
 import { XrefParser } from '../parser/xrefParser.js';
 import type { XrefEntry } from '../parser/xrefParser.js';
-import { PdfEncryptionHandler } from '../crypto/encryptionHandler.js';
+import { verifyUserPassword } from '../crypto/keyDerivation.js';
+import type { EncryptDictValues } from '../crypto/keyDerivation.js';
 
 // ---------------------------------------------------------------------------
 // Public types
@@ -358,28 +361,53 @@ function decodePermissionBits(p: number): PermissionFlags {
 // ---------------------------------------------------------------------------
 
 /**
- * Test whether the empty user password (`""`) authenticates against the
- * standard security handler.  Reuses {@link PdfEncryptionHandler.fromEncryptDict},
- * which throws when the password is incorrect; a successful return means
- * the empty password derived a valid file key.
+ * Test whether the empty **user** password (`""`) authenticates against the
+ * standard security handler.
  *
- * Returns `undefined` when the test cannot be performed (e.g. the handler
- * implementation does not support the document's /V/R).
+ * This must verify specifically against the `/U` (user) value using the
+ * standard /U validation algorithm — **not** simply check whether the empty
+ * password opens the document.  The general file-key derivation
+ * (`PdfEncryptionHandler.fromEncryptDict` / `computeFileEncryptionKey`)
+ * accepts a password that matches **either** the user **or** the owner
+ * password, so a document whose *owner* password is empty (while the user
+ * password is non-empty) would otherwise be mis-reported as having an empty
+ * user password.  To avoid asserting a possibly-false `true`, we run the
+ * user-password-specific check ({@link verifyUserPassword}) against `/U`.
+ *
+ * Returns `undefined` when the test cannot be performed (e.g. the `/O` / `/U`
+ * values are missing, or the maths throws for an unsupported /V/R).
  */
 async function testEmptyUserPassword(
   dict: PdfDict,
   fileId: Uint8Array,
 ): Promise<boolean | undefined> {
+  // Build the subset of encryption-dict values the /U validation needs.
+  const ownerKey = getStringBytes(dict, '/O');
+  const userKey = getStringBytes(dict, '/U');
+  // Without /O and /U we cannot run the standard /U validation algorithm.
+  if (ownerKey === undefined || userKey === undefined) return undefined;
+
+  const dictValues: EncryptDictValues = {
+    version: getNumber(dict, '/V') ?? 0,
+    revision: getNumber(dict, '/R') ?? 0,
+    keyLength: getNumber(dict, '/Length') ?? 40,
+    ownerKey,
+    userKey,
+    permissions: getNumber(dict, '/P') ?? 0,
+    ownerEncryptionKey: getStringBytes(dict, '/OE'),
+    userEncryptionKey: getStringBytes(dict, '/UE'),
+    perms: getStringBytes(dict, '/Perms'),
+    encryptMetadata: getBool(dict, '/EncryptMetadata') ?? true,
+  };
+
   try {
-    await PdfEncryptionHandler.fromEncryptDict(dict, fileId, '');
-    return true;
-  } catch (err) {
-    // A thrown "Incorrect password" means the empty password is wrong.
-    // Any other error means we could not run the check → undefined.
-    const message = err instanceof Error ? err.message : String(err);
-    if (/password/i.test(message)) {
-      return false;
-    }
+    // verifyUserPassword checks the empty password against /U *only* (it does
+    // not fall back to the owner password), so a `true` result genuinely means
+    // the empty string is the user password.
+    return await verifyUserPassword('', dictValues, fileId);
+  } catch {
+    // Any thrown error (e.g. unsupported /V/R, SASLprep failure) means we
+    // could not run the check → report conservatively as undefined.
     return undefined;
   }
 }
@@ -404,4 +432,39 @@ function getNumber(dict: PdfDict, key: string): number | undefined {
     return (obj as PdfNumber).value;
   }
   return undefined;
+}
+
+/** Read a boolean value from a dict. */
+function getBool(dict: PdfDict, key: string): boolean | undefined {
+  const obj = dict.get(key);
+  if (obj !== undefined && obj.kind === 'bool') {
+    return (obj as PdfBool).value;
+  }
+  return undefined;
+}
+
+/**
+ * Read raw bytes from a `/String` entry.
+ *
+ * Hex strings whose value is still raw hex digits (e.g. produced by
+ * `PdfString.hexFromBytes`) are decoded from hex pairs; otherwise the
+ * character codes are treated as raw Latin-1 bytes.  Mirrors the decoding
+ * used by `crypto/encryptionHandler.fromEncryptDict` so the /U validation
+ * sees the same /O, /U, /OE, /UE, /Perms bytes.
+ */
+function getStringBytes(dict: PdfDict, key: string): Uint8Array | undefined {
+  const obj = dict.get(key);
+  if (obj === undefined || obj.kind !== 'string') return undefined;
+
+  const str = obj as PdfString;
+  if (str.hex && /^[\da-fA-F\s]*$/.test(str.value)) {
+    const clean = str.value.replace(/\s/g, '');
+    return Uint8Array.fromHex(clean.length % 2 === 0 ? clean : clean + '0');
+  }
+
+  const bytes = new Uint8Array(str.value.length);
+  for (let i = 0; i < str.value.length; i++) {
+    bytes[i] = str.value.charCodeAt(i) & 0xff;
+  }
+  return bytes;
 }

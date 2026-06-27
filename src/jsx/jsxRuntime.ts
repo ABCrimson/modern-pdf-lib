@@ -558,10 +558,16 @@ function collectPages(children: readonly PdfNode[]): PdfElement[] {
  * );
  * ```
  */
-export async function renderToPdf(root: PdfNode): Promise<Uint8Array> {
+export async function renderToPdf(
+  root: PdfNode | readonly PdfNode[],
+): Promise<Uint8Array> {
   // Resolve the root down to a concrete `document` element (unwrapping any
-  // component / fragment layers).
+  // component / fragment layers). An explicit `document` element wins outright;
+  // otherwise we synthesize a single document whose children are ALL the
+  // resolved top-level element nodes (so a Fragment / array of bare `page`s
+  // keeps every page, not just the first).
   let documentEl: PdfElement | undefined;
+  const synthesized: PdfElement[] = [];
   const stack = resolveNode(root);
   while (stack.length > 0) {
     const node = stack.shift();
@@ -570,16 +576,21 @@ export async function renderToPdf(root: PdfNode): Promise<Uint8Array> {
       continue;
     }
     if (typeof node.type === 'function') {
+      // Unwrap a component / fragment layer in place, preserving order.
       stack.unshift(...resolveNode(node));
       continue;
     }
     if (node.type === 'document') {
+      // An explicit document wins outright; ignore any synthesized siblings.
       documentEl = node;
       break;
     }
-    // A bare `page` (or group) without a `document` wrapper: synthesize one.
-    documentEl = { type: 'document', props: {}, children: [node] };
-    break;
+    // A bare `page` (or group) without a `document` wrapper: collect it and
+    // keep draining so sibling pages are not discarded.
+    synthesized.push(node);
+  }
+  if (documentEl === undefined && synthesized.length > 0) {
+    documentEl = { type: 'document', props: {}, children: synthesized };
   }
 
   const doc = createPdf();

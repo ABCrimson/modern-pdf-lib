@@ -193,3 +193,55 @@ describe('verifyRedactions() — required regions', () => {
     expect(report.regionsChecked).toBe(1);
   });
 });
+
+// ===========================================================================
+// Page-range validation — an uninspected page must NEVER be reported clean
+// ===========================================================================
+//
+// Regression for a dangerous false-negative: when a region named a page index
+// outside [0, pageCount) the verifier silently extracted nothing for that page
+// (getItems() guards the index and returns []), found no leak, and reported
+// `clean: true`. For a SECURITY tool that means "this page contains no leaked
+// text under your redaction" — a guarantee it never actually checked. The
+// out-of-range page must instead be rejected loudly so a caller can never
+// mistake an uninspected page for a verified-clean one.
+describe('verifyRedactions() — page-range validation', () => {
+  it('throws (not clean:true) when a region names a page >= pageCount', async () => {
+    // One-page doc (only page index 0 exists) with extractable text on it.
+    const bytes = await pdfWithTextAt('SECRET', 50, 550);
+
+    // Region points at page 1, which does NOT exist. The page was never
+    // inspected, so reporting it clean would be a false-negative.
+    await expect(
+      verifyRedactions(bytes, [{ page: 1, x: 0, y: 0, width: 400, height: 600 }]),
+    ).rejects.toThrow(RangeError);
+  });
+
+  it('throws when a region names a negative page index', async () => {
+    const bytes = await pdfWithTextAt('SECRET', 50, 550);
+    await expect(
+      verifyRedactions(bytes, [{ page: -1, x: 0, y: 0, width: 400, height: 600 }]),
+    ).rejects.toThrow(RangeError);
+  });
+
+  it('throws when a region names a non-integer page index', async () => {
+    const bytes = await pdfWithTextAt('SECRET', 50, 550);
+    await expect(
+      verifyRedactions(bytes, [{ page: 0.5, x: 0, y: 0, width: 400, height: 600 }]),
+    ).rejects.toThrow(RangeError);
+  });
+
+  it('rejects the whole call if ANY region is out of range (even a degenerate one)', async () => {
+    // The first region is a valid hit; the second is a zero-area region on a
+    // non-existent page. The degenerate region would otherwise be skipped
+    // before any page lookup, hiding the bad page index. Validation must run
+    // up front, so the entire call is rejected regardless of region area.
+    const bytes = await pdfWithTextAt('SECRET', 50, 550);
+    await expect(
+      verifyRedactions(bytes, [
+        { page: 0, x: 45, y: 545, width: 120, height: 25 },
+        { page: 99, x: 0, y: 0, width: 0, height: 0 },
+      ]),
+    ).rejects.toThrow(RangeError);
+  });
+});

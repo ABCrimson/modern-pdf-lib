@@ -903,33 +903,34 @@ function resetWhitespaceLevels(
   baseLevel: number,
 ): void {
   const n = levels.length;
-  let resetFrom = n; // start of a trailing whitespace run, or n
-  for (let i = n - 1; i >= 0; i--) {
+
+  // A character is "resettable" for L1 if it is whitespace, an isolate
+  // formatting character (FSI/LRI/RLI/PDI), or one of the characters removed
+  // by rule X9 (the embedding/override formatting chars + BN). A maximal run of
+  // these *preceding* a B/S separator — and the separator itself — is reset to
+  // the paragraph level, as is any such run at the very end of the line.
+  const resettable = (t: BC): boolean =>
+    t === 'WS' || t === 'FSI' || t === 'LRI' || t === 'RLI' || t === 'PDI' || isRemovedByX9(t);
+
+  // Walk left-to-right tracking the start of the current candidate run.
+  let runStart = 0;
+  for (let i = 0; i < n; i++) {
     const t = originalTypes[i]!;
     if (t === 'B' || t === 'S') {
-      levels[i] = baseLevel;
-      // Reset any whitespace run that preceded this separator.
-      for (let j = i + 1; j < resetFrom; j++) levels[j] = baseLevel;
-      resetFrom = i;
-    } else if (t === 'WS' || t === 'FSI' || t === 'LRI' || t === 'RLI' || t === 'PDI' || isRemovedByX9(t)) {
-      // part of a candidate whitespace run; keep scanning
+      // L1 rules 1 & 2: reset the separator and the resettable run preceding it.
+      for (let j = runStart; j <= i; j++) levels[j] = baseLevel;
+      runStart = i + 1;
+    } else if (resettable(t)) {
+      // Part of a candidate run; keep it (extend the current run).
     } else {
-      // non-whitespace: flush any trailing-at-line-end run starting after i.
-      if (resetFrom === n) {
-        // we are still in the "could be trailing run to end of line" zone only
-        // if everything after was whitespace; reset handled below
-      }
-      resetFrom = i + 1 > resetFrom ? resetFrom : i + 1;
-      resetFrom = i + 1;
+      // Strong / number / other: ends the candidate run.
+      runStart = i + 1;
     }
   }
-  // Reset trailing whitespace at the very end of the line.
-  for (let i = n - 1; i >= 0; i--) {
-    const t = originalTypes[i]!;
-    if (t === 'WS' || t === 'FSI' || t === 'LRI' || t === 'RLI' || t === 'PDI' || isRemovedByX9(t)) {
-      levels[i] = baseLevel;
-    } else break;
-  }
+
+  // L1 rules 3 & 4: reset any trailing resettable run at the end of the line.
+  // `runStart` is the start of the run currently open at end-of-line.
+  for (let i = runStart; i < n; i++) levels[i] = baseLevel;
 }
 
 // ---------------------------------------------------------------------------

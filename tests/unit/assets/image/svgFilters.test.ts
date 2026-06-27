@@ -195,6 +195,32 @@ describe('feGaussianBlur', () => {
     const src = makeBuffer(2, 2);
     expect(() => feGaussianBlur(src, -1)).toThrow();
   });
+
+  it('fades the edges of a fully-opaque buffer to transparent (edgeMode="none", SVG 1.1 §15.17)', () => {
+    // SVG 1.1 §15.17 feGaussianBlur defaults to edgeMode="none": samples
+    // outside the filter region are treated as transparent black [0,0,0,0].
+    // Blurring a fully-opaque white buffer therefore drops the corner alpha
+    // below 255, because the blur window straddles the (transparent) edge.
+    // (With the old edgeMode="duplicate" clamp every pixel would stay 255.)
+    const src = makeBuffer(11, 11, [255, 255, 255, 255]);
+    const out = feGaussianBlur(src, 2);
+
+    // Corner pixel: window overlaps the most out-of-bounds (transparent)
+    // area, so its alpha must drop the furthest below full opacity.
+    const cornerAlpha = px(out, 0, 0)[3];
+    expect(cornerAlpha).toBeLessThan(255);
+
+    // The deep interior centre is far enough from every edge that the
+    // window stays inside the buffer, so it remains fully opaque.
+    const centreAlpha = px(out, 5, 5)[3];
+    expect(centreAlpha).toBe(255);
+
+    // The corner sees more transparent neighbours than an edge-midpoint,
+    // which in turn sees more than the centre — alpha increases inward.
+    const edgeMidAlpha = px(out, 5, 0)[3];
+    expect(cornerAlpha).toBeLessThan(edgeMidAlpha);
+    expect(edgeMidAlpha).toBeLessThan(centreAlpha);
+  });
 });
 
 // ---------------------------------------------------------------------------

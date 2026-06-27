@@ -222,4 +222,27 @@ describe('jsxRuntime — renderToPdf', () => {
     expect(texts[0]).toContain('BareString');
     expect(texts[0]).toContain('42');
   });
+
+  it('keeps ALL pages when the root is a Fragment of <page> with no <document>', async () => {
+    const bytes = await renderToPdf(
+      h(Fragment, null, h('page', null, 'A'), h('page', null, 'B')),
+    );
+    const doc = await PdfDocument.load(bytes);
+    expect(doc.getPageCount()).toBe(2);
+    const texts = await pageTexts(bytes);
+    expect(texts[0]).toContain('A');
+    expect(texts[1]).toContain('B');
+  });
+
+  it('keeps ALL pages when the root is an array of <page> with no <document>', async () => {
+    const bytes = await renderToPdf([
+      h('page', null, 'A'),
+      h('page', null, 'B'),
+    ]);
+    const doc = await PdfDocument.load(bytes);
+    expect(doc.getPageCount()).toBe(2);
+    const texts = await pageTexts(bytes);
+    expect(texts[0]).toContain('A');
+    expect(texts[1]).toContain('B');
+  });
 });

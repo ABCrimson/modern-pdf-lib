@@ -304,11 +304,15 @@ function boxBlurD(stdDev: number): number {
 }
 
 /**
- * One horizontal box blur of the given (odd) length, premultiplied float
- * data, with an asymmetric left/right radius to support the even-`d` rule.
- * The window covers offsets `[-leftRadius, +rightRadius]` inclusive. Edge
- * samples are clamped (extend-edge) rather than treated as transparent so a
- * flat region stays flat.
+ * One horizontal box blur of the given length, premultiplied float data, with
+ * an asymmetric left/right radius to support the even-`d` rule. The window
+ * covers offsets `[-leftRadius, +rightRadius]` inclusive.
+ *
+ * Samples that fall outside the filter region are treated as **transparent
+ * black** `[0,0,0,0]` (SVG 1.1 §15.17 `edgeMode="none"`, the spec default).
+ * In premultiplied space those samples contribute zero to every channel, so
+ * the running sum simply skips them (the window length stays the full box
+ * size, which is what fades edge pixels per spec).
  */
 function boxBlurH(
   data: Float32Array,
@@ -323,26 +327,31 @@ function boxBlurH(
     const row = y * width;
     for (let c = 0; c < 4; c++) {
       let sum = 0;
-      // Prime the running sum for x = 0.
+      // Prime the running sum for x = 0. Out-of-bounds samples are
+      // transparent black (zero) and so are simply not added.
       for (let k = -leftRadius; k <= rightRadius; k++) {
-        const cx = k < 0 ? 0 : k >= width ? width - 1 : k;
-        sum += data[(row + cx) * 4 + c]!;
+        if (k < 0 || k >= width) continue;
+        sum += data[(row + k) * 4 + c]!;
       }
       for (let x = 0; x < width; x++) {
         out[(row + x) * 4 + c] = sum / windowLen;
-        // Slide window: drop the leftmost, add the next-right.
+        // Slide window: drop the leftmost, add the next-right. Indices
+        // outside the row are transparent black and contribute nothing.
         const dropX = x - leftRadius;
         const addX = x + rightRadius + 1;
-        const dc = dropX < 0 ? 0 : dropX >= width ? width - 1 : dropX;
-        const ac = addX < 0 ? 0 : addX >= width ? width - 1 : addX;
-        sum += data[(row + ac) * 4 + c]! - data[(row + dc) * 4 + c]!;
+        if (addX >= 0 && addX < width) sum += data[(row + addX) * 4 + c]!;
+        if (dropX >= 0 && dropX < width) sum -= data[(row + dropX) * 4 + c]!;
       }
     }
   }
   return out;
 }
 
-/** One vertical box blur — the transpose of {@link boxBlurH}. */
+/**
+ * One vertical box blur — the transpose of {@link boxBlurH}. Out-of-bounds
+ * samples are transparent black (SVG 1.1 §15.17 `edgeMode="none"`) and so
+ * contribute zero to the running sum.
+ */
 function boxBlurV(
   data: Float32Array,
   width: number,
@@ -356,16 +365,15 @@ function boxBlurV(
     for (let c = 0; c < 4; c++) {
       let sum = 0;
       for (let k = -topRadius; k <= bottomRadius; k++) {
-        const cy = k < 0 ? 0 : k >= height ? height - 1 : k;
-        sum += data[(cy * width + x) * 4 + c]!;
+        if (k < 0 || k >= height) continue;
+        sum += data[(k * width + x) * 4 + c]!;
       }
       for (let y = 0; y < height; y++) {
         out[(y * width + x) * 4 + c] = sum / windowLen;
         const dropY = y - topRadius;
         const addY = y + bottomRadius + 1;
-        const dc = dropY < 0 ? 0 : dropY >= height ? height - 1 : dropY;
-        const ac = addY < 0 ? 0 : addY >= height ? height - 1 : addY;
-        sum += data[(ac * width + x) * 4 + c]! - data[(dc * width + x) * 4 + c]!;
+        if (addY >= 0 && addY < height) sum += data[(addY * width + x) * 4 + c]!;
+        if (dropY >= 0 && dropY < height) sum -= data[(dropY * width + x) * 4 + c]!;
       }
     }
   }

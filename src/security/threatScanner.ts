@@ -136,19 +136,53 @@ const EXECUTABLE_EXTENSIONS: ReadonlySet<string> = new Set([
 // Internal: object-graph helpers
 // ---------------------------------------------------------------------------
 
-/** Read a `PdfName` value (without the leading `/`) from a dict entry. */
-function nameValue(obj: PdfObject | undefined): string | undefined {
-  if (obj !== undefined && obj.kind === 'name') {
-    const v = (obj as PdfName).value;
+/**
+ * Resolve a {@link PdfObject} that may be an indirect reference to its
+ * underlying value using the registry. Non-refs are returned as-is; an
+ * unresolvable ref yields `undefined`. (Mirrors `resolve()` in
+ * `./sanitize.ts`.)
+ *
+ * This is security-critical: a hostile PDF can write a dangerous value
+ * indirectly — e.g. `/S 99 0 R` where object 99 is the name `/JavaScript` — and
+ * a conforming viewer treats that exactly like `/S /JavaScript`. Classifying
+ * `/S`, `/Type`, `/Subtype`, `/UF`, `/F`, and `/URI` without resolving the ref
+ * first would let that one indirection evade detection entirely.
+ */
+function resolveRef(
+  obj: PdfObject | undefined,
+  registry: PdfObjectRegistry,
+): PdfObject | undefined {
+  if (obj instanceof PdfRef) return registry.resolve(obj);
+  return obj;
+}
+
+/**
+ * Read a `PdfName` value (without the leading `/`) from a dict entry, resolving
+ * an indirect reference through the registry first.
+ */
+function nameValue(
+  obj: PdfObject | undefined,
+  registry: PdfObjectRegistry,
+): string | undefined {
+  const resolved = resolveRef(obj, registry);
+  if (resolved !== undefined && resolved.kind === 'name') {
+    const v = (resolved as PdfName).value;
     return v.startsWith('/') ? v.slice(1) : v;
   }
   return undefined;
 }
 
-/** Read a `PdfString` value from a dict entry. */
-function stringValue(obj: PdfObject | undefined): string | undefined {
-  if (obj !== undefined && obj.kind === 'string') {
-    return (obj as PdfString).value;
+/**
+ * Read a `PdfString` value from a dict entry, resolving an indirect reference
+ * through the registry first.
+ */
+function stringValue(
+  obj: PdfObject | undefined,
+  registry: PdfObjectRegistry,
+): string | undefined {
+  const resolved = resolveRef(obj, registry);
+  if (resolved !== undefined && resolved.kind === 'string') {
+    return (resolved as PdfString).value;
   }
   return undefined;
 }
@@ -232,7 +266,7 @@ function scanObjectGraph(
     else if (obj.kind === 'stream') dict = (obj as PdfStream).dict;
     if (dict === undefined) continue;
 
-    inspectDict(dict, refStr, findings);
+    inspectDict(dict, refStr, findings, registry);
   }
 }
 
@@ -242,11 +276,14 @@ function scanObjectGraph(
  * @param dict     The dictionary (or stream dictionary).
  * @param refStr   The owning object's `"N G R"` string, if known.
  * @param findings Accumulator.
+ * @param registry Object registry, used to resolve indirectly-referenced
+ *                 name/string values (e.g. an `/S` that is a `PdfRef`).
  */
 function inspectDict(
   dict: PdfDict,
   refStr: string | undefined,
   findings: ThreatFinding[],
+  registry: PdfObjectRegistry,
 ): void {
   // --- Auto-run: /OpenAction (catalog) — §12.6.3 -------------------------
   // The catalog's /OpenAction runs automatically when the document opens.
@@ -295,9 +332,9 @@ function inspectDict(
 
   // --- Action subtype (/S) — §12.6.4 -------------------------------------
   // An action dictionary names its type via /S. Flag the dangerous subtypes.
-  const subtype = nameValue(dict.get('/S'));
+  const subtype = nameValue(dict.get('/S'), registry);
   if (subtype !== undefined) {
-    inspectActionSubtype(subtype, dict, refStr, findings);
+    inspectActionSubtype(subtype, dict, refStr, findings, registry);
   }
 
   // --- XFA forms — §12.7.8 -----------------------------------------------
@@ -317,7 +354,7 @@ function inspectDict(
   // --- Annotation subtypes carrying embedded media — §13.x ---------------
   // /Subtype on an annotation dictionary. RichMedia/Movie/Sound embed media
   // that some viewers render/play. Low (media, not direct code execution).
-  const annotSubtype = nameValue(dict.get('/Subtype'));
+  const annotSubtype = nameValue(dict.get('/Subtype'), registry);
   if (annotSubtype === 'RichMedia') {
     findings.push({
       category: 'RichMedia',
@@ -383,9 +420,11 @@ function inspectDict(
   // /F and /UF. An executable/script extension means "open attachment" can run
   // it. High. We only inspect filespec dicts (key /EF or /Type /Filespec).
   const isFilespec =
-    nameValue(dict.get('/Type')) === 'Filespec' || dict.has('/EF');
+    nameValue(dict.get('/Type'), registry) === 'Filespec' || dict.has('/EF');
   if (isFilespec) {
-    const fileName = stringValue(dict.get('/UF')) ?? stringValue(dict.get('/F'));
+    const fileName =
+      stringValue(dict.get('/UF'), registry) ??
+      stringValue(dict.get('/F'), registry);
     if (fileName !== undefined) {
       const ext = extensionOf(fileName);
       if (ext !== '' && EXECUTABLE_EXTENSIONS.has(ext)) {
@@ -411,6 +450,7 @@ function inspectActionSubtype(
   dict: PdfDict,
   refStr: string | undefined,
   findings: ThreatFinding[],
+  registry: PdfObjectRegistry,
 ): void {
   switch (subtype) {
     case 'JavaScript':
@@ -442,7 +482,7 @@ function inspectActionSubtype(
         severity: 'medium',
         detail:
           'URI action (/S /URI, ISO 32000 §12.6.4.7) opens a remote URL ' +
-          `${describeUri(dict)}.`,
+          `${describeUri(dict, registry)}.`,
         objectRef: refStr,
       });
       break;
@@ -505,8 +545,8 @@ function inspectActionSubtype(
 }
 
 /** Append the target URL of a /URI action to the detail string, if present. */
-function describeUri(dict: PdfDict): string {
-  const uri = stringValue(dict.get('/URI'));
+function describeUri(dict: PdfDict, registry: PdfObjectRegistry): string {
+  const uri = stringValue(dict.get('/URI'), registry);
   return uri !== undefined ? `→ "${uri}"` : '';
 }
 

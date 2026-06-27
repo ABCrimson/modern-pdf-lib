@@ -97,6 +97,106 @@ function hexToBytes(hex: string): Uint8Array {
   return Uint8Array.fromHex(clean.slice(0, endIdx));
 }
 
+/** Map a hash AlgorithmIdentifier OID to a Web Crypto hash name. */
+const HASH_OID_TO_NAME: Record<string, 'SHA-1' | 'SHA-256' | 'SHA-384' | 'SHA-512'> = {
+  '1.3.14.3.2.26': 'SHA-1',
+  '2.16.840.1.101.3.4.2.1': 'SHA-256',
+  '2.16.840.1.101.3.4.2.2': 'SHA-384',
+  '2.16.840.1.101.3.4.2.3': 'SHA-512',
+};
+
+/** Decode a DER INTEGER node's value bytes into a JavaScript number. */
+function decodeIntegerValue(data: Uint8Array): number {
+  let value = 0;
+  for (const byte of data) {
+    value = value * 256 + byte;
+  }
+  return value;
+}
+
+/**
+ * Parsed RSASSA-PSS parameters (RFC 4055).
+ */
+interface PssParams {
+  /** Web Crypto hash name from the params hashAlgorithm (default SHA-1). */
+  hash: 'SHA-1' | 'SHA-256' | 'SHA-384' | 'SHA-512';
+  /** Salt length in bytes from the params (default 20). */
+  saltLength: number;
+  /**
+   * `false` when the params cannot be verified with Web Crypto: the MGF is
+   * not id-mgf1, the MGF1 inner hash differs from `hash`, or a hash OID is
+   * unsupported. In those cases the verifier must reject conservatively.
+   */
+  supported: boolean;
+}
+
+/**
+ * Parse an RSASSA-PSS-params SEQUENCE (RFC 4055 §3.1) from the SignerInfo
+ * signatureAlgorithm.
+ *
+ * ```
+ * RSASSA-PSS-params ::= SEQUENCE {
+ *   hashAlgorithm    [0] HashAlgorithm    DEFAULT sha1Identifier,
+ *   maskGenAlgorithm [1] MaskGenAlgorithm DEFAULT mgf1SHA1Identifier,
+ *   saltLength       [2] INTEGER          DEFAULT 20,
+ *   trailerField     [3] INTEGER          DEFAULT 1 }
+ * ```
+ *
+ * Each `[n]` is EXPLICIT, so it wraps the full underlying TLV.  Web Crypto
+ * can only model `RSA-PSS` with MGF1 over the *same* hash as the message
+ * hash, so any divergence (non-MGF1, divergent MGF1 hash, unsupported hash
+ * OID) sets `supported = false` so the verifier rejects conservatively.
+ *
+ * @param paramsNode  The RSASSA-PSS-params SEQUENCE node (2nd child of the
+ *                    signatureAlgorithm AlgorithmIdentifier).
+ */
+function parsePssParams(paramsNode: Asn1Node): PssParams {
+  // Defaults per RFC 4055: SHA-1 hash, MGF1-SHA-1, salt length 20.
+  let hash: 'SHA-1' | 'SHA-256' | 'SHA-384' | 'SHA-512' = 'SHA-1';
+  let saltLength = 20;
+  let supported = true;
+  let mgfHash: string = '1.3.14.3.2.26'; // id-sha1 (default MGF1 hash)
+
+  for (const field of paramsNode.children) {
+    if (field.tag === 0xa0) {
+      // hashAlgorithm [0] EXPLICIT → AlgorithmIdentifier SEQUENCE → OID
+      const algId = field.children[0];
+      const oidNode = algId?.children[0];
+      if (oidNode) {
+        const name = HASH_OID_TO_NAME[decodeOidBytes(oidNode.data)];
+        if (name) hash = name;
+        else supported = false;
+      }
+    } else if (field.tag === 0xa1) {
+      // maskGenAlgorithm [1] EXPLICIT → AlgorithmIdentifier { mgfOid, hashAlgId }
+      const algId = field.children[0];
+      const mgfOidNode = algId?.children[0];
+      const mgfHashAlgId = algId?.children[1];
+      const mgfHashOidNode = mgfHashAlgId?.children[0];
+      const MGF1_OID = '1.2.840.113549.1.1.8';
+      if (mgfOidNode && decodeOidBytes(mgfOidNode.data) !== MGF1_OID) {
+        // Non-MGF1 MGF — WebCrypto cannot model it. Reject conservatively.
+        supported = false;
+      }
+      if (mgfHashOidNode) mgfHash = decodeOidBytes(mgfHashOidNode.data);
+    } else if (field.tag === 0xa2) {
+      // saltLength [2] EXPLICIT → INTEGER
+      const intNode = field.children[0];
+      if (intNode) saltLength = decodeIntegerValue(intNode.data);
+    }
+    // trailerField [3] is the default (1); ignored.
+  }
+
+  // WebCrypto always uses the message hash as the MGF1 hash, so a divergent
+  // MGF1 inner hash cannot be honoured — reject rather than verify wrongly.
+  const expectedMgfHashName = HASH_OID_TO_NAME[mgfHash];
+  if (!expectedMgfHashName || expectedMgfHashName !== hash) {
+    supported = false;
+  }
+
+  return { hash, saltLength, supported };
+}
+
 /**
  * Extract the certificate, signed attributes, and raw signature
  * from a PKCS#7 SignedData structure.
@@ -109,6 +209,11 @@ function parsePkcs7Structure(pkcs7Bytes: Uint8Array): {
   digestAlgorithm: string;
   /** Signature algorithm OID from the SignerInfo (e.g. id-RSASSA-PSS). */
   signatureAlgorithmOid: string;
+  /**
+   * Parsed RSASSA-PSS parameters when the signatureAlgorithm is
+   * id-RSASSA-PSS; `null` otherwise.
+   */
+  pssParams: PssParams | null;
 } | null {
   try {
     const contentInfo = parseDerTlv(pkcs7Bytes, 0);
@@ -179,11 +284,22 @@ function parsePkcs7Structure(pkcs7Bytes: Uint8Array): {
     }
 
     // signatureAlgorithm AlgorithmIdentifier — capture its OID so the
-    // verifier can detect RSASSA-PSS (id-RSASSA-PSS = 1.2.840.113549.1.1.10).
+    // verifier can detect RSASSA-PSS (id-RSASSA-PSS = 1.2.840.113549.1.1.10),
+    // and parse the RSASSA-PSS-params (RFC 4055) when present so verification
+    // honours the actual hash / MGF / salt length rather than a fixed profile.
     let signatureAlgorithmOid = '';
+    let pssParams: PssParams | null = null;
     const sigAlgoNode = signerInfo.children[idx];
     if (sigAlgoNode && sigAlgoNode.children.length > 0) {
       signatureAlgorithmOid = decodeOidBytes(sigAlgoNode.children[0]!.data);
+      if (signatureAlgorithmOid === '1.2.840.113549.1.1.10') {
+        const paramsNode = sigAlgoNode.children[1];
+        // Per RFC 4055 the params SEQUENCE is REQUIRED for id-RSASSA-PSS.
+        // If absent, all fields take their (SHA-1 / MGF1-SHA-1 / 20) defaults.
+        pssParams = paramsNode
+          ? parsePssParams(paramsNode)
+          : { hash: 'SHA-1', saltLength: 20, supported: true };
+      }
     }
     idx++; // advance past signatureAlgorithm
 
@@ -198,6 +314,7 @@ function parsePkcs7Structure(pkcs7Bytes: Uint8Array): {
       signatureValue,
       digestAlgorithm,
       signatureAlgorithmOid,
+      pssParams,
     };
   } catch {
     return null;
@@ -495,14 +612,16 @@ export async function verifySignature(
     const keyAlgo = detectKeyAlgorithm(certificateBytes);
 
     // id-RSASSA-PSS (RFC 4055): when present in the SignerInfo
-    // signatureAlgorithm, verify with RSA-PSS rather than PKCS#1 v1.5.
+    // signatureAlgorithm, verify with RSA-PSS rather than PKCS#1 v1.5,
+    // using the hash and salt length from the actual RSASSA-PSS-params.
     const RSASSA_PSS_OID = '1.2.840.113549.1.1.10';
     const isPss = parsed.signatureAlgorithmOid === RSASSA_PSS_OID;
-    const PSS_SALT_LENGTH: Record<string, number> = {
-      'SHA-256': 32,
-      'SHA-384': 48,
-      'SHA-512': 64,
-    };
+
+    // Conservatively reject PSS signatures whose params cannot be honoured
+    // by Web Crypto (non-MGF1 MGF, divergent MGF1 hash, unsupported hash OID).
+    if (isPss && parsed.pssParams && !parsed.pssParams.supported) {
+      return false;
+    }
 
     // Import the public key from the certificate's SPKI
     const spki = extractSubjectPublicKeyInfo(certificateBytes);
@@ -513,10 +632,15 @@ export async function verifySignature(
 
     if (keyAlgo === 'RSA') {
       if (isPss) {
-        importAlgo = { name: 'RSA-PSS', hash: parsed.digestAlgorithm };
+        // Use the hash + salt length parsed from RSASSA-PSS-params. The
+        // hashAlgorithm in the params drives both the message hash and (for
+        // WebCrypto) the MGF1 hash; saltLength is honoured exactly.
+        const pssHash = parsed.pssParams?.hash ?? 'SHA-1';
+        const pssSaltLength = parsed.pssParams?.saltLength ?? 20;
+        importAlgo = { name: 'RSA-PSS', hash: pssHash };
         verifyAlgo = {
           name: 'RSA-PSS',
-          saltLength: PSS_SALT_LENGTH[parsed.digestAlgorithm] ?? 32,
+          saltLength: pssSaltLength,
         };
       } else {
         importAlgo = {

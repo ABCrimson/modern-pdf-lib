@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 See [VERSIONING.md](./VERSIONING.md) for this project's versioning policy.
 
+## [0.40.1] - 2026-06-27
+
+**Ultrareview fixes.** A full adversarial multi-agent review of the entire 0.31→0.40 marathon (every new module reviewed, then each finding independently verified against the source). It confirmed **10 real bugs** (2 high, 4 medium, 4 low) — all fixed here via TDD with regression tests; the rest of the new surface (the color cluster and ~22 modules) was pronounced clean. Suite now **6,954 tests**, **721** root exports; 34/37 vs pdf-lib.
+
+### Fixed
+
+- **Security — redaction verifier false-negative (high):** `verifyRedactions` returned `clean: true` for an out-of-range `region.page` (it silently inspected nothing). It now throws `RangeError` up front for any non-integer/negative/`>= pageCount` page, so an unchecked page can never be reported safe. (`src/security/redactionVerifier.ts`)
+- **Security — threat-scanner evasion (high):** action `/S` (and `/Type`, `/Subtype`, `/UF`, `/F`, `/URI`) were classified without resolving indirect references, so `/S 99 0 R → /JavaScript` slipped past the scanner. Value reads now resolve `PdfRef`s through the registry. (`src/security/threatScanner.ts`)
+- **PDF/A XMP conversion (medium):** `convertPdfAConformanceXmp` only matched double-quoted `pdfaid` attributes, duplicating them for single-quoted XMP. The detectors are now quote-agnostic (in-place remap). (`src/compliance/profileConvert.ts`)
+- **Signature verify — RSA-PSS params (medium):** PSS verification derived hash/salt from the SignerInfo digest instead of the actual RSASSA-PSS-params; it now parses them (and conservatively fails on an unsupported MGF/hash) per RFC 4055. (`src/signature/signatureVerifier.ts`)
+- **BiDi L1 (medium):** the UAX #9 rule-L1 whitespace reset was inverted (reset the run *after* a separator instead of the whitespace *before* it). Rewritten to spec. (`src/text/bidi.ts`)
+- **JSX renderer (medium):** `renderJsxToPdf` dropped all but the first page when given a wrapper-less `Fragment`/array of `<page>`; it now collects every top-level page. (`src/jsx/jsxRuntime.ts`)
+- **EN 16931 (low):** BR-CO line-total checks now round each line net to 2 decimals before summing (per BT-131). (`src/compliance/eInvoiceValidate.ts`)
+- **CMS signing time (low):** signing times in 2050+ now encode as `GeneralizedTime` (UTCTime is only valid 1950–2049). (`src/signature/pkcs7.ts`)
+- **Encryption inspector (low):** `emptyUserPassword` could report `true` when only the *owner* password was empty; it now validates against `/U` only. (`src/security/encryptionInspector.ts`)
+- **SVG blur (low):** `feGaussianBlur` now uses SVG §15.17's transparent-black edge mode (was edge-extend), matching its documented behaviour. (`src/assets/image/svgFilters.ts`)
+
 ## [0.40.0] - 2026-06-27
 
 **Developer Experience & Framework Integration.** The milestone 0.40 release: a JSX/component renderer, JSON-Schema-driven form generation, and Web-standard + Node server adapters — every feature verified end-to-end (the rendered output is parsed back as a real PDF). TDD-verified; suite now **6,926 tests**, **721** root exports; 34/37 vs pdf-lib (no regression).

@@ -37,12 +37,13 @@ async function makeEncryptedPdf(
   algorithm: 'rc4-40' | 'rc4-128' | 'aes-128' | 'aes-256',
   perms: Parameters<ReturnType<typeof createPdf>['encrypt']>[0]['permissions'],
   userPassword = '',
+  ownerPassword = 'owner-secret',
 ): Promise<Uint8Array> {
   const doc = createPdf();
   doc.addPage();
   await doc.encrypt({
     userPassword,
-    ownerPassword: 'owner-secret',
+    ownerPassword,
     algorithm,
     permissions: perms,
   });
@@ -135,6 +136,15 @@ describe('inspectEncryption — AES-256', () => {
     const report = await inspectEncryption(pdf);
     expect(report.emptyUserPassword).toBe(false);
   });
+
+  it('does NOT report emptyUserPassword:true when only the OWNER password is empty (R=6)', async () => {
+    // User password is non-empty; owner password is empty. The empty
+    // password DOES open the document (it matches the owner), but it is
+    // NOT the user password — so emptyUserPassword must not be asserted true.
+    const pdf = await makeEncryptedPdf('aes-256', { printing: true }, 'hunter2', '');
+    const report = await inspectEncryption(pdf);
+    expect(report.emptyUserPassword).not.toBe(true);
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -168,5 +178,13 @@ describe('inspectEncryption — AES-128 & RC4', () => {
     expect(report.keyBits).toBe(40);
     expect(report.version).toBe(1);
     expect(report.revision).toBe(2);
+  });
+
+  it('does NOT report emptyUserPassword:true when only the OWNER password is empty (R=4)', async () => {
+    // R<=4 path: empty password matches the owner but not the (non-empty)
+    // user password. emptyUserPassword must not be asserted true.
+    const pdf = await makeEncryptedPdf('aes-128', { printing: true }, 'hunter2', '');
+    const report = await inspectEncryption(pdf);
+    expect(report.emptyUserPassword).not.toBe(true);
   });
 });

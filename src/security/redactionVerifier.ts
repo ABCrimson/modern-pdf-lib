@@ -221,6 +221,30 @@ export async function verifyRedactions(
   const doc = await loadPdf(pdf);
   const pageCount = doc.getPageCount();
 
+  // Validate every region's page index UP FRONT, before any extraction.
+  //
+  // This is a security guarantee, not a convenience check: if a region named a
+  // page outside [0, pageCount) we would otherwise extract nothing for it (the
+  // per-page lookup guards the index and yields no text items), find no leak,
+  // and report `clean: true`. For a redaction *verifier* that is a dangerous
+  // false-negative — it would tell the caller "this page has no leaked text
+  // under your redaction" about a page that was never inspected. Mirror the
+  // module's loud empty-`regions` guard and reject the whole call instead, so
+  // an uninspected page can never be mistaken for a verified-clean one. A
+  // degenerate (zero-area) region is normally skipped later, but its page is
+  // validated here too so a bad index can't hide behind a zero-area region.
+  for (const region of regions) {
+    const { page } = region;
+    if (!Number.isInteger(page) || page < 0 || page >= pageCount) {
+      throw new RangeError(
+        `verifyRedactions: region page index ${page} is out of range. ` +
+          `The document has ${pageCount} page(s) (valid indices 0..${pageCount - 1}). ` +
+          'Every region must name a real, inspectable page — an out-of-range page ' +
+          'cannot be verified and must not be silently reported clean.',
+      );
+    }
+  }
+
   // Cache positioned text items per page so multiple regions on the same page
   // only parse + extract once.
   const itemsByPage = new Map<number, readonly TextItem[]>();

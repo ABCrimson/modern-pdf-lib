@@ -61,7 +61,7 @@ export default defineConfig({
       { text: 'Migration', link: '/migration/from-pdf-lib' },
       { text: 'Playground', link: '/playground/' },
       {
-        text: 'v0.40.0',
+        text: 'v0.40.1',
         items: [
           {
             text: 'Changelog',

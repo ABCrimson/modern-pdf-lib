@@ -115,6 +115,60 @@ describe('convertPdfAConformanceXmp', () => {
     expect(hasPart).toBe(true);
     expect(hasConf).toBe(true);
   });
+
+  // -------------------------------------------------------------------------
+  // Single-quoted attribute form (regression — BUG 5)
+  // -------------------------------------------------------------------------
+
+  const singleQuoteXmp =
+    '<?xpacket begin="" id="W5M0MpCehiHzreSzNTczkc9d"?>\n' +
+    '<x:xmpmeta xmlns:x="adobe:ns:meta/">\n' +
+    '  <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">\n' +
+    "    <rdf:Description rdf:about=''\n" +
+    "      xmlns:pdfaid='http://www.aiim.org/pdfa/ns/id/'\n" +
+    "      pdfaid:part='3'\n" +
+    "      pdfaid:conformance='B'/>\n" +
+    '  </rdf:RDF>\n' +
+    '</x:xmpmeta>\n' +
+    '<?xpacket end="w"?>';
+
+  it('remaps a single-quoted pdfaid:part in place (no duplicate attribute)', () => {
+    const out = convertPdfAConformanceXmp(singleQuoteXmp, 4);
+    // The new part must be present, normalized to double quotes.
+    expect(out).toContain('pdfaid:part="4"');
+    // The original single-quoted part must be gone, NOT left alongside a
+    // freshly injected duplicate.
+    expect(out).not.toContain("pdfaid:part='3'");
+    // There must be exactly one pdfaid:part occurrence in the packet.
+    expect(out.match(/pdfaid:part/g)?.length).toBe(1);
+  });
+
+  it('remaps a single-quoted pdfaid:conformance in place', () => {
+    const out = convertPdfAConformanceXmp(singleQuoteXmp, 2, 'u');
+    expect(out).toContain('pdfaid:part="2"');
+    expect(out).toContain('pdfaid:conformance="U"');
+    expect(out).not.toContain("pdfaid:conformance='B'");
+    expect(out.match(/pdfaid:conformance/g)?.length).toBe(1);
+  });
+
+  it('adds conformance beside a single-quoted part without duplicating part', () => {
+    const partOnlySingle =
+      '<?xpacket begin="" id="W5M0MpCehiHzreSzNTczkc9d"?>\n' +
+      '<x:xmpmeta xmlns:x="adobe:ns:meta/">\n' +
+      '  <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">\n' +
+      "    <rdf:Description rdf:about=''\n" +
+      "      xmlns:pdfaid='http://www.aiim.org/pdfa/ns/id/'\n" +
+      "      pdfaid:part='3'/>\n" +
+      '  </rdf:RDF>\n' +
+      '</x:xmpmeta>\n' +
+      '<?xpacket end="w"?>';
+    const out = convertPdfAConformanceXmp(partOnlySingle, 4, 'a');
+    expect(out).toContain('pdfaid:part="4"');
+    expect(out).toContain('pdfaid:conformance="A"');
+    // Exactly one part attribute — no injected duplicate.
+    expect(out.match(/pdfaid:part/g)?.length).toBe(1);
+    expect(out.match(/pdfaid:conformance/g)?.length).toBe(1);
+  });
 });
 
 // ---------------------------------------------------------------------------

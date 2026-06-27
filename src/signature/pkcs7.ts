@@ -335,6 +335,42 @@ export function encodeUTCTime(date: Date): Uint8Array {
 }
 
 /**
+ * Encode a GeneralizedTime from a Date.
+ *
+ * Format: YYYYMMDDHHmmSSZ (full four-digit year).
+ */
+export function encodeGeneralizedTime(date: Date): Uint8Array {
+  const pad = (n: number) => n.toString().padStart(2, '0');
+  const year = date.getUTCFullYear().toString().padStart(4, '0');
+  const month = pad(date.getUTCMonth() + 1);
+  const day = pad(date.getUTCDate());
+  const hours = pad(date.getUTCHours());
+  const minutes = pad(date.getUTCMinutes());
+  const seconds = pad(date.getUTCSeconds());
+  const str = `${year}${month}${day}${hours}${minutes}${seconds}Z`;
+  const encoder = new TextEncoder();
+  return encodeTlv(TAG.GENERALIZED_TIME, encoder.encode(str));
+}
+
+/**
+ * Encode a CMS signing-time value (PKCS#9 signingTime / X.509 Time).
+ *
+ * Per RFC 5280 §4.1.2.5 and RFC 5652, a `Time` CHOICE is encoded as
+ * `UTCTime` only for years 1950–2049; years outside that window MUST use
+ * `GeneralizedTime` (with a full four-digit year) to avoid the two-digit
+ * year ambiguity. This selects the correct ASN.1 type accordingly so a
+ * signing time in 2050 or later is not silently mis-encoded as a 1950s
+ * UTCTime.
+ */
+export function encodeSigningTime(date: Date): Uint8Array {
+  const year = date.getUTCFullYear();
+  if (year < 1950 || year >= 2050) {
+    return encodeGeneralizedTime(date);
+  }
+  return encodeUTCTime(date);
+}
+
+/**
  * Encode a context-specific tagged value (implicit or explicit).
  *
  * For PKCS#7:
@@ -923,9 +959,11 @@ async function buildSignedAttributes(
   ]);
 
   // Attribute: signingTime
+  // Use UTCTime for 1950-2049 and GeneralizedTime otherwise (RFC 5280/CMS):
+  // a signing time in 2050+ must not be encoded as an ambiguous UTCTime.
   const signingTimeAttr = encodeSequence([
     encodeOID(OID.signingTime),
-    encodeSet([encodeUTCTime(signingTime)]),
+    encodeSet([encodeSigningTime(signingTime)]),
   ]);
 
   // Attribute: messageDigest

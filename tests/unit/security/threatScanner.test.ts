@@ -38,6 +38,34 @@ function byCategory(report: ThreatReport, needle: string): ThreatFinding[] {
   return report.findings.filter((f) => f.category.includes(needle));
 }
 
+/**
+ * Assemble a raw PDF from a list of indirect-object body strings (each the full
+ * `"N 0 obj … endobj"` definition, in object-number order starting at 1) with a
+ * correct cross-reference table and trailer. This lets a test express an exact
+ * object graph — including indirect references between objects — that the parser
+ * loads as a genuine registry. The object bodies are written verbatim, so a test
+ * can place `/S 99 0 R` (an indirect reference) where a name would normally sit.
+ */
+function buildRawPdf(objects: readonly string[], rootObjNum: number): Uint8Array {
+  const enc = new TextEncoder();
+  let body = '%PDF-1.7\n';
+  const offsets: number[] = [];
+  for (const obj of objects) {
+    offsets.push(enc.encode(body).length);
+    body += obj.endsWith('\n') ? obj : obj + '\n';
+  }
+  const xrefPos = enc.encode(body).length;
+  const count = objects.length + 1; // +1 for the free object 0
+  let xref = `xref\n0 ${count}\n0000000000 65535 f \n`;
+  for (const off of offsets) {
+    xref += `${String(off).padStart(10, '0')} 00000 n \n`;
+  }
+  const trailer =
+    `trailer\n<</Size ${count}/Root ${rootObjNum} 0 R>>\n` +
+    `startxref\n${xrefPos}\n%%EOF\n`;
+  return enc.encode(body + xref + trailer);
+}
+
 // ---------------------------------------------------------------------------
 // Clean document
 // ---------------------------------------------------------------------------
@@ -177,5 +205,59 @@ describe('scanPdfThreats — riskLevel aggregation', () => {
     const report = await scanPdfThreats(bytes);
     expect(Array.isArray(report.findings)).toBe(true);
     expect(['none', 'low', 'medium', 'high']).toContain(report.riskLevel);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Indirect-reference evasion (regression)
+// ---------------------------------------------------------------------------
+//
+// A PDF object value may be written either DIRECTLY (`/S /JavaScript`) or as an
+// INDIRECT REFERENCE to another object (`/S 99 0 R` where object 99 is the name
+// `/JavaScript`). Both are equivalent to a conforming viewer. The scanner read
+// `/S`, `/Type`, `/Subtype`, `/UF`, `/F`, and `/URI` with helpers that only
+// accepted a directly-embedded name/string and ignored a PdfRef — so an
+// attacker who hid the dangerous name one indirection away evaded detection and
+// the malicious PDF reported clean. The scanner must resolve the reference
+// before classifying the value, exactly as the sanitizer does.
+describe('scanPdfThreats — indirect-reference evasion', () => {
+  it('flags a JavaScript action whose /S is an INDIRECT REF to /JavaScript', async () => {
+    // Object 4 is the bare name /JavaScript; the action dict (obj 3) points its
+    // /S at it via "4 0 R" instead of embedding the name directly.
+    const pdf = buildRawPdf(
+      [
+        '1 0 obj\n<</Type/Catalog/Pages 2 0 R/OpenAction 3 0 R>>\nendobj',
+        '2 0 obj\n<</Type/Pages/Kids[]/Count 0>>\nendobj',
+        '3 0 obj\n<</Type/Action/S 4 0 R/JS(app.alert\\(1\\))>>\nendobj',
+        '4 0 obj\n/JavaScript\nendobj',
+      ],
+      1,
+    );
+
+    const report = await scanPdfThreats(pdf);
+    const jsFindings = byCategory(report, 'JavaScript');
+    expect(jsFindings.some((f) => f.severity === 'high')).toBe(true);
+    expect(report.riskLevel).toBe('high');
+  });
+
+  it('flags an embedded executable whose /UF is an INDIRECT REF to a string', async () => {
+    // Filespec (obj 3) hides the executable filename one indirection away: its
+    // /UF is "4 0 R", and object 4 is the literal string "(payload.exe)".
+    const pdf = buildRawPdf(
+      [
+        '1 0 obj\n<</Type/Catalog/Pages 2 0 R/Names 5 0 R>>\nendobj',
+        '2 0 obj\n<</Type/Pages/Kids[]/Count 0>>\nendobj',
+        '3 0 obj\n<</Type/Filespec/UF 4 0 R/EF<</F 6 0 R>>>>\nendobj',
+        '4 0 obj\n(payload.exe)\nendobj',
+        '5 0 obj\n<</EmbeddedFiles<</Names[(payload.exe) 3 0 R]>>>>\nendobj',
+        '6 0 obj\n<</Type/EmbeddedFile/Length 4>>\nstream\nMZ\x90\x00\nendstream\nendobj',
+      ],
+      1,
+    );
+
+    const report = await scanPdfThreats(pdf);
+    const fileFindings = byCategory(report, 'EmbeddedFile');
+    expect(fileFindings.some((f) => f.severity === 'high')).toBe(true);
+    expect(report.riskLevel).toBe('high');
   });
 });

@@ -13,6 +13,7 @@ import {
   encodeUtf8String,
   encodePrintableString,
   encodeUTCTime,
+  encodeSigningTime,
   encodeContextTag,
   buildPkcs7Signature,
 } from '../../../src/signature/pkcs7.js';
@@ -319,6 +320,40 @@ describe('ASN.1 DER encoding', () => {
       const decoder = new TextDecoder();
       const timeStr = decoder.decode(encoded.subarray(2));
       expect(timeStr).toBe('260225120000Z');
+    });
+  });
+
+  describe('encodeSigningTime', () => {
+    it('should use UTCTime (YYMMDD…) for years 1950-2049', () => {
+      const date = new Date(Date.UTC(2026, 1, 25, 12, 0, 0));
+      const encoded = encodeSigningTime(date);
+      expect(encoded[0]).toBe(0x17); // UTCTime tag
+
+      const decoder = new TextDecoder();
+      const timeStr = decoder.decode(encoded.subarray(2));
+      expect(timeStr).toBe('260225120000Z');
+    });
+
+    it('should use GeneralizedTime (YYYYMMDD…) for years >= 2050', () => {
+      // RFC 5280/CMS: UTCTime only valid for 1950-2049. 2050 must be
+      // GeneralizedTime to avoid the YY=50 → 1950 ambiguity.
+      const date = new Date(Date.UTC(2050, 1, 25, 12, 0, 0));
+      const encoded = encodeSigningTime(date);
+      expect(encoded[0]).toBe(0x18); // GeneralizedTime tag
+
+      const decoder = new TextDecoder();
+      const timeStr = decoder.decode(encoded.subarray(2));
+      expect(timeStr).toBe('20500225120000Z');
+    });
+
+    it('should use GeneralizedTime for years < 1950', () => {
+      const date = new Date(Date.UTC(1949, 11, 31, 23, 59, 59));
+      const encoded = encodeSigningTime(date);
+      expect(encoded[0]).toBe(0x18); // GeneralizedTime tag
+
+      const decoder = new TextDecoder();
+      const timeStr = decoder.decode(encoded.subarray(2));
+      expect(timeStr).toBe('19491231235959Z');
     });
   });
 
