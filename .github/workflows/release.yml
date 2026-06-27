@@ -71,6 +71,11 @@ jobs:
 
       - name: Run tests
         run: npx vitest run
+        env:
+          # The suite has grown past the default ~4 GB v8 old-space cap (a worker
+          # OOM'd mid-run on the v0.34.0 tag); give vitest + its workers ample heap.
+          # Mirrors the same guard on ci.yml's Unit Tests step.
+          NODE_OPTIONS: --max-old-space-size=8192
 
       - name: Upload dist
         uses: actions/upload-artifact@v7
