@@ -37,6 +37,10 @@ const ESM_ENTRIES = [
       'TrustStore',
       'decodeJpeg2000',
       'validatePdfX',
+      // 0.29.x rendering
+      'renderPageToImage',
+      'interpretPage',
+      'comparePages',
     ],
   },
   { file: 'create.mjs', expect: ['createPdf'] },

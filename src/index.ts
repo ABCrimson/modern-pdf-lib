@@ -1384,3 +1384,40 @@ export {
   extractEmbeddedRevocationData,
   verifyOfflineRevocation,
 } from './signature/offlineRevocation.js';
+
+// ---------------------------------------------------------------------------
+// Rendering & rasterization (0.29.x): content-stream interpreter, pure-JS
+// rasterizer, Canvas adapter, thumbnails, image/font extraction, visual diff,
+// OCR overlay, redaction-by-removal, and tiling/cache.
+// ---------------------------------------------------------------------------
+export { interpretContentStream, interpretPage } from './render/interpreter.js';
+export type { InterpretOptions } from './render/interpreter.js';
+export type { Matrix } from './render/matrix.js';
+export type {
+  DisplayList,
+  DisplayItem,
+  FillItem,
+  StrokeItem,
+  ImageItem,
+  SubPath,
+  Rgba,
+  TextItem as TextDisplayItem,
+} from './render/displayList.js';
+export { rasterize, renderPageToImage } from './render/rasterizer.js';
+export type { RenderOptions, RasterImage } from './render/rasterizer.js';
+export { renderPageToCanvas, renderDisplayListToCanvas } from './render/canvas.js';
+export type { CanvasRenderOptions, Canvas2DLike } from './render/canvas.js';
+export { generateThumbnail } from './render/thumbnail.js';
+export type { ThumbnailOptions } from './render/thumbnail.js';
+export { extractImages as extractPageImages } from './render/imageExtract.js';
+export type { ExtractedImage } from './render/imageExtract.js';
+export { extractFonts } from './render/fontExtract.js';
+export type { ExtractedFont, FontFileFormat } from './render/fontExtract.js';
+export { compareImages, comparePages } from './render/diff.js';
+export type { DiffResult, CompareOptions } from './render/diff.js';
+export { applyOcr } from './render/ocr.js';
+export type { OcrEngine, OcrWord, ApplyOcrOptions } from './render/ocr.js';
+export { redactRegions } from './render/redactContent.js';
+export type { RedactRect, RedactResult } from './render/redactContent.js';
+export { computeTileGrid, renderPageTile, RenderCache } from './render/tiles.js';
+export type { TileOptions, TileGrid } from './render/tiles.js';

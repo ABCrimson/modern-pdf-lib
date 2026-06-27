@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 See [VERSIONING.md](./VERSIONING.md) for this project's versioning policy.
 
+## [0.29.0] - 2026-06-27
+
+**Rendering & Rasterization.** The library could create and parse PDFs but not turn them into pixels. This minor adds a full, dependency-free rendering stack — a content-stream interpreter, a pure-JS rasterizer, a Canvas adapter, plus thumbnails, image/font extraction, visual diffing, an OCR overlay hook, and true redaction. All TDD-verified; the suite is now **6,359 tests** and the root barrel exposes **624** symbols. No performance regression vs pdf-lib.
+
+### Added
+
+- **Content-stream interpreter** (`0.29.0`, `src/render/interpreter.ts`): `interpretContentStream()` / `interpretPage()` — a graphics-state machine (q/Q/cm/w/gs, m/l/c/v/y/re/h, f/S/B/n, W clip, rg/g/k/cs/sc/scn, BT…ET text, `Do` with form-XObject recursion) that flattens Bézier curves and produces a resolution-independent **display list** (page space, y-up). The layer every renderer builds on.
+- **Pure-JS rasterizer** (`0.29.1`, `src/render/rasterizer.ts`): `renderPageToImage()` / `rasterize()` — a scanline renderer with 4× supersampled anti-aliasing, nonzero/even-odd winding, alpha compositing, and stroke expansion → RGBA8888 → PNG at any DPI.
+- **Canvas / OffscreenCanvas adapter** (`0.29.2`, `src/render/canvas.ts`): `renderPageToCanvas()` / `renderDisplayListToCanvas()` — replays the display list onto a 2D context with `devicePixelRatio` scaling and **native high-fidelity text** via `fillText` (browser + Workers).
+- **Thumbnails** (`0.29.3`, `src/render/thumbnail.ts`): `generateThumbnail()` — fits a page's longest side to a target size.
+- **Embedded image extraction** (`0.29.4`, `src/render/imageExtract.ts`): `extractPageImages()` — decodes every image XObject by colorspace/BPC (RGB/Gray/CMYK/Indexed/ICCBased, DCTDecode/Flate) and composites `/SMask` alpha (§11.6.5) → interleaved RGBA.
+- **Embedded font extraction** (`0.29.5`, `src/render/fontExtract.ts`): `extractFonts()` — rebuilds standalone font files from FontFile/FontFile2 (TrueType)/FontFile3 (CFF/OpenType), following Type0 descendant descriptors, with subset-tag detection.
+- **Visual page diff** (`0.29.6`, `src/render/diff.ts`): `comparePages()` / `compareImages()` — per-pixel difference count, a red-over-grayscale heatmap, and a windowed **SSIM** score for visual regression.
+- **Pluggable OCR hook** (`0.29.7`, `src/render/ocr.ts`): `OcrEngine` interface + `applyOcr()` — rasterizes a page, runs your engine, and writes the results as an **invisible** (`Tr 3`, §9.3.3) selectable/searchable text overlay so scanned PDFs become searchable.
+- **True text redaction** (`0.29.8`, `src/render/redactContent.ts`): `redactRegions()` — re-emits a filtered content stream that **removes** the underlying text-show/image operators intersecting a rect — real removal, not a black box overlay.
+- **Tiling + render cache** (`0.29.9`, `src/render/tiles.ts`): `renderPageTile()` / `computeTileGrid()` for bounded-memory rendering of huge pages (via the rasterizer's `region` window), plus an LRU `RenderCache`.
+
+### Notes
+
+- The pure-JS rasterizer renders vector paths/strokes at full fidelity and approximates text as positioned glyph boxes (no bundled font engine); use the Canvas adapter for pixel-accurate text in browsers. Image rasterization within `renderPageToImage` and `/Thumb` XObject persistence are tracked follow-ups.
+
 ## [0.28.1] - 2026-06-26
 
 **Critical fix release.** v0.28.0's bleeding-edge toolchain migration introduced a build regression that made the **published package completely unimportable**: `import … from 'modern-pdf-lib'` threw `SyntaxError: Export 'AFRelationship' is not defined in module` at link time for every ESM consumer. CI never caught it because the test suite imports from `src/`, never from the built `dist/`. This release fixes the build, makes the artifact a first-class verified gate, and corrects the remaining documentation inaccuracies.

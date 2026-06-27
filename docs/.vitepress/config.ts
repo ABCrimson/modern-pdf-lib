@@ -61,7 +61,7 @@ export default defineConfig({
       { text: 'Migration', link: '/migration/from-pdf-lib' },
       { text: 'Playground', link: '/playground/' },
       {
-        text: 'v0.28.0',
+        text: 'v0.29.0',
         items: [
           {
             text: 'Changelog',
@@ -112,6 +112,7 @@ export default defineConfig({
             { text: 'PDF/X Compliance', link: '/guide/pdfx' },
             { text: 'Plugins', link: '/guide/plugins' },
             { text: 'Text Layout', link: '/guide/text-layout' },
+            { text: 'Rendering & Rasterization', link: '/guide/rendering' },
             { text: 'Cookbook', link: '/guide/cookbook' },
             { text: 'Troubleshooting', link: '/guide/troubleshooting' },
           ],
