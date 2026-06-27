@@ -56,6 +56,9 @@ const ESM_ENTRIES = [
       'assembleFacturX',
       'validateEn16931',
       'parseCiiXml',
+      // 0.34.x advanced signatures
+      'buildSigningCertificateV2Attribute',
+      'buildCertPath',
     ],
   },
   { file: 'create.mjs', expect: ['createPdf'] },

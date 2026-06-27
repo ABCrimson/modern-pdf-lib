@@ -33,6 +33,7 @@ import type { Asn1Node } from './pkcs7.js';
 import {
   encodeSet,
 } from './pkcs7.js';
+import { extractSigningCertificateV2 } from './cadesAttributes.js';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -56,6 +57,18 @@ export interface SignatureVerificationResult {
   certificateValid?: boolean | undefined;
   /** Signing date (if present in signed attributes). */
   signingDate?: Date | undefined;
+  /**
+   * Whether the ESS `signing-certificate-v2` attribute (RFC 5035,
+   * CAdES-BES / PAdES-B-B) is present in the signed attributes.
+   */
+  cadesSigningCertPresent?: boolean | undefined;
+  /**
+   * When the ESS signing-certificate-v2 attribute is present, whether its
+   * embedded `certHash` matches the digest of the signer certificate
+   * (binding the signature to that exact certificate). `undefined` when
+   * the attribute is absent.
+   */
+  cadesSigningCertHashValid?: boolean | undefined;
 }
 
 // ---------------------------------------------------------------------------
@@ -94,6 +107,8 @@ function parsePkcs7Structure(pkcs7Bytes: Uint8Array): {
   signedAttrsRaw: Uint8Array;
   signatureValue: Uint8Array;
   digestAlgorithm: string;
+  /** Signature algorithm OID from the SignerInfo (e.g. id-RSASSA-PSS). */
+  signatureAlgorithmOid: string;
 } | null {
   try {
     const contentInfo = parseDerTlv(pkcs7Bytes, 0);
@@ -163,8 +178,14 @@ function parsePkcs7Structure(pkcs7Bytes: Uint8Array): {
       idx++;
     }
 
-    // signatureAlgorithm
-    idx++; // skip
+    // signatureAlgorithm AlgorithmIdentifier — capture its OID so the
+    // verifier can detect RSASSA-PSS (id-RSASSA-PSS = 1.2.840.113549.1.1.10).
+    let signatureAlgorithmOid = '';
+    const sigAlgoNode = signerInfo.children[idx];
+    if (sigAlgoNode && sigAlgoNode.children.length > 0) {
+      signatureAlgorithmOid = decodeOidBytes(sigAlgoNode.children[0]!.data);
+    }
+    idx++; // advance past signatureAlgorithm
 
     // signature OCTET STRING
     const signatureNode = signerInfo.children[idx]!;
@@ -176,6 +197,7 @@ function parsePkcs7Structure(pkcs7Bytes: Uint8Array): {
       signedAttrsRaw,
       signatureValue,
       digestAlgorithm,
+      signatureAlgorithmOid,
     };
   } catch {
     return null;
@@ -405,6 +427,32 @@ export async function verifySignatures(
       certificateValid = false;
     }
 
+    // Step 4: CAdES — detect the ESS signing-certificate-v2 attribute and,
+    // if present, check its certHash binds to the signer certificate.
+    let cadesSigningCertPresent: boolean | undefined;
+    let cadesSigningCertHashValid: boolean | undefined;
+    try {
+      const ess = extractSigningCertificateV2(parsed.signedAttrsRaw);
+      cadesSigningCertPresent = ess.present;
+      if (ess.present && ess.certHash) {
+        // certHash length disambiguates the algorithm (32/48/64 bytes).
+        const algoByLen: Record<number, 'SHA-256' | 'SHA-384' | 'SHA-512'> = {
+          32: 'SHA-256', 48: 'SHA-384', 64: 'SHA-512',
+        };
+        const algo = algoByLen[ess.certHash.length];
+        if (algo) {
+          const digest = new Uint8Array(
+            await getSubtle().digest(algo, toBuffer(parsed.certificate)),
+          );
+          cadesSigningCertHashValid =
+            digest.length === ess.certHash.length &&
+            digest.every((b, i) => b === ess.certHash![i]);
+        }
+      }
+    } catch {
+      // Leave CAdES fields undefined on any error.
+    }
+
     results.push({
       fieldName: fieldInfo.fieldName,
       signedBy,
@@ -413,6 +461,8 @@ export async function verifySignatures(
       certificateValid,
       signingDate,
       reason: fieldInfo.reason,
+      cadesSigningCertPresent,
+      cadesSigningCertHashValid,
     });
   }
 
@@ -444,6 +494,16 @@ export async function verifySignature(
     const subtle = getSubtle();
     const keyAlgo = detectKeyAlgorithm(certificateBytes);
 
+    // id-RSASSA-PSS (RFC 4055): when present in the SignerInfo
+    // signatureAlgorithm, verify with RSA-PSS rather than PKCS#1 v1.5.
+    const RSASSA_PSS_OID = '1.2.840.113549.1.1.10';
+    const isPss = parsed.signatureAlgorithmOid === RSASSA_PSS_OID;
+    const PSS_SALT_LENGTH: Record<string, number> = {
+      'SHA-256': 32,
+      'SHA-384': 48,
+      'SHA-512': 64,
+    };
+
     // Import the public key from the certificate's SPKI
     const spki = extractSubjectPublicKeyInfo(certificateBytes);
 
@@ -452,11 +512,19 @@ export async function verifySignature(
     let sigBytes = parsed.signatureValue;
 
     if (keyAlgo === 'RSA') {
-      importAlgo = {
-        name: 'RSASSA-PKCS1-v1_5',
-        hash: parsed.digestAlgorithm,
-      };
-      verifyAlgo = { name: 'RSASSA-PKCS1-v1_5' };
+      if (isPss) {
+        importAlgo = { name: 'RSA-PSS', hash: parsed.digestAlgorithm };
+        verifyAlgo = {
+          name: 'RSA-PSS',
+          saltLength: PSS_SALT_LENGTH[parsed.digestAlgorithm] ?? 32,
+        };
+      } else {
+        importAlgo = {
+          name: 'RSASSA-PKCS1-v1_5',
+          hash: parsed.digestAlgorithm,
+        };
+        verifyAlgo = { name: 'RSASSA-PKCS1-v1_5' };
+      }
     } else {
       const namedCurve = detectNamedCurve(certificateBytes);
       importAlgo = {

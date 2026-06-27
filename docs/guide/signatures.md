@@ -167,6 +167,80 @@ const externalPkcs7 = await yourSigningService.sign(hash);
 const signedPdf = embedSignature(preparedPdf, externalPkcs7, byteRange);
 ```
 
+## CAdES / PAdES baseline & RSA-PSS
+
+By default `buildPkcs7Signature` produces a CMS signature with the classic
+authenticated-attribute triad (content-type, signing-time, message-digest). To
+reach the **CAdES-BES / PAdES-B-B baseline** required by ETSI EN 319 122 /
+319 142, set `cades: true` — the signer then adds the ESS
+**signing-certificate-v2** attribute (RFC 5035), which binds a hash of the
+signing certificate into the signed attributes so the signature cannot be
+re-pointed at a different certificate:
+
+```ts
+const pkcs7 = await buildPkcs7Signature(hash, {
+  signerInfo: { certificate, privateKey, hashAlgorithm: 'SHA-256' },
+  cades: true,                 // add ESS signing-certificate-v2 (PAdES-B-B)
+  reason: 'Approval',
+});
+```
+
+`cades` is additive and **off by default**, so existing output stays
+byte-identical unless you opt in. For SHA-256 the ESS attribute omits the
+algorithm identifier (it is the RFC 5035 default); SHA-384/512 include it.
+
+### RSASSA-PSS
+
+To sign with the **RSASSA-PSS** scheme instead of PKCS#1 v1.5, set
+`signatureScheme: 'pss'` on the signer. The salt length matches the digest
+length and the SignerInfo carries the proper `id-RSASSA-PSS` algorithm
+identifier with its MGF1 parameters (RFC 4055):
+
+```ts
+const pkcs7 = await buildPkcs7Signature(hash, {
+  signerInfo: {
+    certificate, privateKey,
+    hashAlgorithm: 'SHA-256',
+    signatureScheme: 'pss',    // RSASSA-PSS instead of PKCS#1 v1.5
+  },
+  cades: true,
+});
+```
+
+The verifier auto-detects `id-RSASSA-PSS` and verifies accordingly; PKCS#1 v1.5
+and ECDSA signatures continue to verify unchanged. `verifySignatures` also
+reports `cadesSigningCertPresent` and `cadesSigningCertHashValid` when an ESS
+attribute is found.
+
+### Building these attributes directly
+
+The ESS attribute builder/extractor are exported for custom CMS pipelines:
+
+```ts
+import {
+  buildSigningCertificateV2Attribute,
+  extractSigningCertificateV2,
+} from 'modern-pdf-lib';
+
+const attr = await buildSigningCertificateV2Attribute(certificate, 'SHA-256');
+const { present, certHash } = extractSigningCertificateV2(signedAttrsDer);
+```
+
+## Certificate path building
+
+`buildCertPath` constructs the ordered leaf → … → trust-anchor certification
+path (RFC 5280 §6.1) by matching each certificate's issuer to a candidate's
+subject (and, where present, AKI → SKI). It builds the chain; signature/validity
+checking remains the job of `validateCertificateChain`.
+
+```ts
+import { buildCertPath } from 'modern-pdf-lib';
+
+const { path, complete, anchor } = buildCertPath(leafDer, [intermediateDer], [rootDer]);
+// path is leaf-first and excludes the anchor; `complete` is false if the chain
+// could not be built up to one of the supplied anchors.
+```
+
 ## RFC 3161 Timestamping
 
 Add a trusted timestamp from a TSA server:
@@ -208,9 +282,12 @@ openssl pkcs8 -topk8 -inform PEM -outform DER \
   -in key.pem -out key.der -nocrypt
 ```
 
-## Limitations
+## Supported algorithms & related features
 
-- **Certificate chain validation** is not performed — Web Crypto does not expose chain/trust-store APIs. Only the mathematical signature against the embedded certificate is verified.
-- **CRL/OCSP revocation** checking is not supported.
-- **LTV (Long-Term Validation)** embedding is not yet implemented.
-- Supported key types: RSA (PKCS#1 v1.5), ECDSA (P-256, P-384, P-521).
+- **Signature schemes:** RSA PKCS#1 v1.5 (default), **RSASSA-PSS** (`signatureScheme: 'pss'`), and ECDSA (P-256, P-384, P-521). Digests: SHA-256/384/512.
+- **CAdES-BES / PAdES-B-B baseline:** the ESS signing-certificate-v2 attribute via `cades: true` (see above).
+- **Certificate chain & path building:** `buildCertPath` (RFC 5280 §6.1 path construction) and `validateCertificateChain` — see the [verification guide](./verification.md).
+- **Revocation:** CRL and OCSP checking, delta CRLs, OCSP stapling, and offline/embedded revocation (`src/signature/crl.ts`, `ocsp.ts`, `offlineRevocation.ts`).
+- **LTV (Long-Term Validation):** DSS embedding (`embedLtvData`) and document timestamps for archival signatures.
+
+> **EdDSA (Ed25519)** and **deterministic ECDSA (RFC 6979)** are not currently implemented — standard randomized ECDSA and RSA (PKCS#1 v1.5 / PSS) cover the algorithms PDF signing relies on today.

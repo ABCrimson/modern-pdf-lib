@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 See [VERSIONING.md](./VERSIONING.md) for this project's versioning policy.
 
+## [0.34.0] - 2026-06-27
+
+**Advanced Signatures & Cryptography.** Upgrades the existing CMS signer/verifier to the ETSI CAdES-BES / PAdES-B-B baseline and adds RSASSA-PSS plus RFC 5280 certificate-path building. Every OID and ASN.1 structure was verified against the cited RFC text (5035, 4055, 5280) — nothing fabricated. All additive and default-off: the full 430-test signature suite stays green. TDD-verified; suite now **6,596 tests**, **662** root exports; 34/37 vs pdf-lib (no regression).
+
+### Added
+
+- **CAdES-BES / PAdES-B-B baseline** (`0.34`, `src/signature/cadesAttributes.ts`): `buildSigningCertificateV2Attribute(certDer, hash)` builds the ESS **signing-certificate-v2** attribute (RFC 5035 — OID `1.2.840.113549.1.9.16.2.47`, `certHash` over the whole certificate, algorithm id omitted for the SHA-256 default and included for SHA-384/512); `extractSigningCertificateV2()` scans a SignedAttributes set for it. A new `cades: true` option on `buildPkcs7Signature` embeds it (canonically re-sorting the attribute SET per X.690 §11.6); off by default ⇒ byte-identical output.
+- **RSASSA-PSS** (`0.34`, `src/signature/pkcs7.ts`): a `signatureScheme: 'pss'` option on `SignerInfo` signs with RSA-PSS (salt = digest length) and emits the `id-RSASSA-PSS` algorithm identifier with its MGF1 parameters (RFC 4055). `signatureVerifier` auto-detects `id-RSASSA-PSS` and reports `cadesSigningCertPresent` / `cadesSigningCertHashValid`; PKCS#1 v1.5 and ECDSA paths are unchanged.
+- **Certificate path building** (`0.34`, `src/signature/certPathBuilder.ts`): `buildCertPath(leaf, intermediates, anchors)` constructs the ordered leaf → … → anchor chain (RFC 5280 §6.1) by issuer/subject DN matching plus AKI → SKI when present, with loop guarding; returns `{ path, complete, anchor }`.
+
+### Fixed
+
+- **Documentation accuracy:** the signatures guide's "Limitations" section falsely claimed certificate-chain validation, CRL/OCSP revocation, and LTV embedding were unimplemented — all three have shipped. Replaced it with an accurate "Supported algorithms & related features" section (and an honest note that EdDSA/Ed25519 and deterministic ECDSA remain out of scope).
+
+### Notes
+
+- **EdDSA (Ed25519)** and **deterministic ECDSA (RFC 6979)** were intentionally deferred — randomized ECDSA and RSA (PKCS#1 v1.5 / PSS) cover what PDF signing relies on today, and a correct RFC 6979 HMAC-DRBG is better added deliberately than rushed.
+
 ## [0.33.0] - 2026-06-27
 
 **E-Invoicing & Document Assembly.** The Factur-X / ZUGFeRD round-trip, completed end-to-end. The outbound CII generator + typed `Invoice` model already shipped; this minor adds a high-level hybrid **assembler**, an **EN 16931 validator**, and an inbound **CII reader** — so generate → validate → attach → read is now one cohesive, spec-verified API. TDD-verified; suite now **6,569 tests**, **659** root exports; 34/37 vs pdf-lib (no regression).

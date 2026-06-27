@@ -1386,6 +1386,19 @@ export {
 } from './signature/offlineRevocation.js';
 
 // ---------------------------------------------------------------------------
+// Advanced signatures & cryptography (0.34.x): CAdES-BES / PAdES-B-B baseline
+// (ESS signing-certificate-v2), RSASSA-PSS (the `cades` / `signatureScheme`
+// options on the existing signer + verifier), and RFC 5280 §6.1 cert-path
+// building. (EdDSA/Ed25519 and deterministic-ECDSA are intentionally deferred.)
+// ---------------------------------------------------------------------------
+export {
+  buildSigningCertificateV2Attribute,
+  extractSigningCertificateV2,
+} from './signature/cadesAttributes.js';
+export { buildCertPath } from './signature/certPathBuilder.js';
+export type { CertPathResult } from './signature/certPathBuilder.js';
+
+// ---------------------------------------------------------------------------
 // Rendering & rasterization (0.29.x): content-stream interpreter, pure-JS
 // rasterizer, Canvas adapter, thumbnails, image/font extraction, visual diff,
 // OCR overlay, redaction-by-removal, and tiling/cache.

@@ -38,6 +38,8 @@
  * @packageDocumentation
  */
 
+import { buildSigningCertificateV2Attribute } from './cadesAttributes.js';
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -52,6 +54,13 @@ export interface SignerInfo {
   privateKey: Uint8Array;
   /** Hash algorithm. */
   hashAlgorithm: 'SHA-256' | 'SHA-384' | 'SHA-512';
+  /**
+   * RSA signature scheme. Default `'pkcs1v15'` (RSASSA-PKCS1-v1_5,
+   * byte-identical to prior behaviour). Set `'pss'` to use RSASSA-PSS
+   * (RFC 4055) with MGF1 over the same hash and a salt length equal to
+   * the hash output length. Ignored for ECDSA keys.
+   */
+  signatureScheme?: 'pkcs1v15' | 'pss' | undefined;
 }
 
 /**
@@ -63,6 +72,12 @@ export interface SignatureOptions {
   location?: string | undefined;
   contactInfo?: string | undefined;
   signingDate?: Date | undefined;
+  /**
+   * When `true`, include the ESS `signing-certificate-v2` signed
+   * attribute (RFC 5035), upgrading the signature to the CAdES-BES /
+   * PAdES-B-B baseline. Default `false` ⇒ byte-identical to prior output.
+   */
+  cades?: boolean | undefined;
 }
 
 // ---------------------------------------------------------------------------
@@ -85,6 +100,9 @@ const OID = {
   sha256WithRSA: '1.2.840.113549.1.1.11',
   sha384WithRSA: '1.2.840.113549.1.1.12',
   sha512WithRSA: '1.2.840.113549.1.1.13',
+  // RSASSA-PSS (RFC 4055): id-RSASSA-PSS = { pkcs-1 10 }, id-mgf1 = { pkcs-1 8 }
+  rsaPss: '1.2.840.113549.1.1.10',
+  mgf1: '1.2.840.113549.1.1.8',
   ecPublicKey: '1.2.840.10045.2.1',
   ecdsaWithSHA256: '1.2.840.10045.4.3.2',
   ecdsaWithSHA384: '1.2.840.10045.4.3.3',
@@ -381,6 +399,71 @@ function encodeSignatureAlgorithm(keyAlgo: string, hashAlgo: string): Uint8Array
   throw new Error(`Unsupported key algorithm: ${keyAlgo}`);
 }
 
+/**
+ * Encode the AlgorithmIdentifier for an RSASSA-PSS signature (RFC 4055 §3.1).
+ *
+ * ```
+ * AlgorithmIdentifier ::= SEQUENCE {
+ *   algorithm  id-RSASSA-PSS,                       -- 1.2.840.113549.1.1.10
+ *   parameters RSASSA-PSS-params }
+ *
+ * RSASSA-PSS-params ::= SEQUENCE {
+ *   hashAlgorithm    [0] HashAlgorithm    DEFAULT sha1Identifier,
+ *   maskGenAlgorithm [1] MaskGenAlgorithm DEFAULT mgf1SHA1Identifier,
+ *   saltLength       [2] INTEGER          DEFAULT 20,
+ *   trailerField     [3] INTEGER          DEFAULT 1 }
+ * ```
+ *
+ * The `[0]`/`[1]`/`[2]` tags are EXPLICIT (the fields are tagged in the
+ * ASN.1 module without `IMPLICIT`, and the CMS modules import EXPLICIT
+ * tagging by default), so each wraps the full underlying TLV.  Per
+ * RFC 4055, when the hash is SHA-256 the hashAlgorithm AlgorithmIdentifier
+ * is `{ id-sha256, NULL }` and the maskGenAlgorithm is
+ * `{ id-mgf1, { id-sha256, NULL } }`.  `trailerField` is the default (1)
+ * and is omitted (RFC 4055 mandates generators omit it).
+ *
+ * Salt length equals the hash output length: 32 (SHA-256), 48 (SHA-384),
+ * 64 (SHA-512).
+ */
+function encodeRsaPssSignatureAlgorithm(hashAlgo: string): Uint8Array {
+  const hashOid = HASH_OID_MAP[hashAlgo];
+  if (!hashOid) {
+    throw new Error(`Unsupported hash for RSA-PSS: ${hashAlgo}`);
+  }
+  const saltLength = PSS_SALT_LENGTH[hashAlgo];
+  if (saltLength === undefined) {
+    throw new Error(`Unsupported hash for RSA-PSS: ${hashAlgo}`);
+  }
+
+  // hashAlgorithm AlgorithmIdentifier = SEQUENCE { hashOid, NULL }
+  const hashAlgId = encodeSequence([
+    encodeOID(hashOid),
+    encodeTlv(TAG.NULL, new Uint8Array(0)),
+  ]);
+
+  // maskGenAlgorithm AlgorithmIdentifier = SEQUENCE { id-mgf1, hashAlgId }
+  const mgfAlgId = encodeSequence([
+    encodeOID(OID.mgf1),
+    hashAlgId,
+  ]);
+
+  // RSASSA-PSS-params SEQUENCE with EXPLICIT [0],[1],[2] (trailerField omitted).
+  const params = encodeSequence([
+    encodeContextTag(0, hashAlgId),
+    encodeContextTag(1, mgfAlgId),
+    encodeContextTag(2, encodeIntegerValue(saltLength)),
+  ]);
+
+  return encodeSequence([encodeOID(OID.rsaPss), params]);
+}
+
+/** PSS salt length (= hash output length in bytes) per hash algorithm. */
+const PSS_SALT_LENGTH: Record<string, number> = {
+  'SHA-256': 32,
+  'SHA-384': 48,
+  'SHA-512': 64,
+};
+
 // ---------------------------------------------------------------------------
 // X.509 Certificate parsing (minimal)
 // ---------------------------------------------------------------------------
@@ -650,13 +733,14 @@ async function importPrivateKey(
   keyAlgorithm: 'RSA' | 'EC',
   hashAlgorithm: string,
   namedCurve?: string,
+  rsaScheme: 'pkcs1v15' | 'pss' = 'pkcs1v15',
 ): Promise<CryptoKey> {
   const subtle = getSubtle();
 
   let algorithm: RsaHashedImportParams | EcKeyImportParams;
   if (keyAlgorithm === 'RSA') {
     algorithm = {
-      name: 'RSASSA-PKCS1-v1_5',
+      name: rsaScheme === 'pss' ? 'RSA-PSS' : 'RSASSA-PKCS1-v1_5',
       hash: hashAlgorithm,
     };
   } else {
@@ -683,12 +767,22 @@ async function signData(
   data: Uint8Array,
   keyAlgorithm: 'RSA' | 'EC',
   hashAlgorithm: string,
+  rsaScheme: 'pkcs1v15' | 'pss' = 'pkcs1v15',
 ): Promise<Uint8Array> {
   const subtle = getSubtle();
 
   let algorithm: AlgorithmIdentifier | RsaPssParams | EcdsaParams;
   if (keyAlgorithm === 'RSA') {
-    algorithm = { name: 'RSASSA-PKCS1-v1_5' };
+    if (rsaScheme === 'pss') {
+      const saltLength = PSS_SALT_LENGTH[hashAlgorithm];
+      if (saltLength === undefined) {
+        throw new Error(`Unsupported hash for RSA-PSS: ${hashAlgorithm}`);
+      }
+      // RFC 4055 / our params: salt length = hash output length.
+      algorithm = { name: 'RSA-PSS', saltLength };
+    } else {
+      algorithm = { name: 'RSASSA-PKCS1-v1_5' };
+    }
   } else {
     algorithm = { name: 'ECDSA', hash: hashAlgorithm };
   }
@@ -725,6 +819,12 @@ export async function buildPkcs7Signature(
     ? detectNamedCurve(signerInfoOpts.certificate)
     : undefined;
 
+  // RSA signature scheme (PSS only meaningful for RSA keys).
+  const rsaScheme: 'pkcs1v15' | 'pss' =
+    keyAlgo === 'RSA' && signerInfoOpts.signatureScheme === 'pss'
+      ? 'pss'
+      : 'pkcs1v15';
+
   // Extract issuer and serial from certificate
   const { issuerDer, serialDer } = extractIssuerAndSerial(
     signerInfoOpts.certificate,
@@ -736,14 +836,21 @@ export async function buildPkcs7Signature(
     keyAlgo,
     hashAlgorithm,
     namedCurve,
+    rsaScheme,
   );
 
-  // Build signed attributes
+  // Build signed attributes (optionally with the CAdES ESS attribute).
   const signingTime = options.signingDate ?? new Date();
-  const signedAttrs = buildSignedAttributes(dataHash, hashAlgorithm, signingTime);
+  const signedAttrs = await buildSignedAttributes(
+    dataHash,
+    hashAlgorithm,
+    signingTime,
+    options.cades === true ? signerInfoOpts.certificate : undefined,
+  );
 
   // The signed attributes must be hashed as a SET when computing
-  // the signature, but embedded as [0] IMPLICIT in the SignerInfo
+  // the signature, but embedded as [0] IMPLICIT in the SignerInfo.
+  // Members of a SET OF must be DER-ordered by their encoding (X.690 §11.6).
   const signedAttrsForHash = encodeSet(signedAttrs);
 
   // Sign the signed attributes hash (actually, sign the raw bytes
@@ -753,6 +860,7 @@ export async function buildPkcs7Signature(
     signedAttrsForHash,
     keyAlgo,
     hashAlgorithm,
+    rsaScheme,
   );
 
   // Convert ECDSA signature from IEEE P1363 to DER format if needed
@@ -768,6 +876,7 @@ export async function buildPkcs7Signature(
     keyAlgo,
     signedAttrs,
     finalSignature,
+    rsaScheme,
   );
 
   // Build the SignedData
@@ -793,12 +902,20 @@ export async function buildPkcs7Signature(
  * 1. contentType (data)
  * 2. signingTime
  * 3. messageDigest (the hash of the PDF content)
+ *
+ * When `cadesCertDer` is provided, the ESS `signing-certificate-v2`
+ * attribute (RFC 5035) is added and the whole SET OF is re-sorted into
+ * DER order (X.690 §11.6) so the resulting SignedAttributes encoding is
+ * valid.  When omitted, the original three attributes are returned in
+ * their original order so the output stays byte-identical to prior
+ * versions.
  */
-function buildSignedAttributes(
+async function buildSignedAttributes(
   dataHash: Uint8Array,
   _hashAlgorithm: string,
   signingTime: Date,
-): Uint8Array[] {
+  cadesCertDer?: Uint8Array,
+): Promise<Uint8Array[]> {
   // Attribute: contentType = data
   const contentTypeAttr = encodeSequence([
     encodeOID(OID.contentType),
@@ -817,7 +934,52 @@ function buildSignedAttributes(
     encodeSet([encodeOctetString(dataHash)]),
   ]);
 
-  return [contentTypeAttr, signingTimeAttr, messageDigestAttr];
+  if (cadesCertDer === undefined) {
+    // Default path: preserve historical order for byte-identical output.
+    return [contentTypeAttr, signingTimeAttr, messageDigestAttr];
+  }
+
+  // CAdES-BES / PAdES-B-B: add the ESS signing-certificate-v2 attribute.
+  // hashAlgorithm of ESSCertIDv2 follows the SignerInfo digest algorithm.
+  const signingCertAttr = await buildSigningCertificateV2Attribute(
+    cadesCertDer,
+    _hashAlgorithm as 'SHA-256' | 'SHA-384' | 'SHA-512',
+  );
+
+  const attrs = [
+    contentTypeAttr,
+    signingTimeAttr,
+    messageDigestAttr,
+    signingCertAttr,
+  ];
+
+  // A SET OF must be DER-ordered by the full encoding of each member
+  // (X.690 §11.6). Sort lexicographically over the encoded bytes.
+  return sortDerSetMembers(attrs);
+}
+
+/**
+ * Sort the members of a SET OF into DER canonical order (X.690 §11.6):
+ * by ascending lexicographic comparison of their complete DER encodings,
+ * padding the shorter encoding with conceptual trailing zero octets.
+ */
+function sortDerSetMembers(members: Uint8Array[]): Uint8Array[] {
+  return [...members].sort(compareDerEncodings);
+}
+
+/**
+ * Compare two DER encodings as unsigned octet strings, treating a
+ * shorter array as if padded with trailing zero octets (X.690 §11.6).
+ */
+function compareDerEncodings(a: Uint8Array, b: Uint8Array): number {
+  const len = Math.max(a.length, b.length);
+  for (let i = 0; i < len; i++) {
+    // Past the end of the shorter array, X.690 §11.6 treats octets as zero.
+    const av = a[i] ?? 0;
+    const bv = b[i] ?? 0;
+    if (av !== bv) return av - bv;
+  }
+  return 0;
 }
 
 /**
@@ -830,6 +992,7 @@ function buildSignerInfo(
   keyAlgorithm: 'RSA' | 'EC',
   signedAttrs: Uint8Array[],
   signatureValue: Uint8Array,
+  rsaScheme: 'pkcs1v15' | 'pss' = 'pkcs1v15',
 ): Uint8Array {
   // version INTEGER (1 for issuerAndSerialNumber)
   const version = encodeIntegerValue(1);
@@ -843,8 +1006,12 @@ function buildSignerInfo(
   // signedAttrs [0] IMPLICIT SET OF Attribute
   const signedAttrsEncoded = encodeContextTag(0, concat(...signedAttrs));
 
-  // signatureAlgorithm AlgorithmIdentifier
-  const sigAlgo = encodeSignatureAlgorithm(keyAlgorithm, hashAlgorithm);
+  // signatureAlgorithm AlgorithmIdentifier.
+  // For RSA-PSS emit id-RSASSA-PSS with parameters; otherwise the
+  // classic sha*WithRSAEncryption / ecdsa-with-SHA* identifier.
+  const sigAlgo = keyAlgorithm === 'RSA' && rsaScheme === 'pss'
+    ? encodeRsaPssSignatureAlgorithm(hashAlgorithm)
+    : encodeSignatureAlgorithm(keyAlgorithm, hashAlgorithm);
 
   // signature OCTET STRING
   const sigOctetStr = encodeOctetString(signatureValue);
