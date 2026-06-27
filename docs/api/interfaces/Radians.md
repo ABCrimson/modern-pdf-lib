@@ -6,7 +6,7 @@
 
 # Interface: Radians
 
-Defined in: [src/core/operators/state.ts:26](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/operators/state.ts#L26)
+Defined in: [src/core/operators/state.ts:26](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/operators/state.ts#L26)
 
 A rotation / angle value in radians.
 
@@ -18,7 +18,7 @@ A rotation / angle value in radians.
 readonly type: "radians";
 ```
 
-Defined in: [src/core/operators/state.ts:27](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/operators/state.ts#L27)
+Defined in: [src/core/operators/state.ts:27](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/operators/state.ts#L27)
 
 ***
 
@@ -28,4 +28,4 @@ Defined in: [src/core/operators/state.ts:27](https://github.com/ABCrimson/modern
 readonly value: number;
 ```
 
-Defined in: [src/core/operators/state.ts:28](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/operators/state.ts#L28)
+Defined in: [src/core/operators/state.ts:28](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/operators/state.ts#L28)

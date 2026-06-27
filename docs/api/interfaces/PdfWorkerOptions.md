@@ -6,7 +6,7 @@
 
 # Interface: PdfWorkerOptions
 
-Defined in: [src/browser/worker.ts:31](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/browser/worker.ts#L31)
+Defined in: [src/browser/worker.ts:31](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/browser/worker.ts#L31)
 
 Options for creating a [PdfWorker](../classes/PdfWorker.md).
 
@@ -18,7 +18,7 @@ Options for creating a [PdfWorker](../classes/PdfWorker.md).
 readonly optional workerUrl?: string | URL;
 ```
 
-Defined in: [src/browser/worker.ts:40](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/browser/worker.ts#L40)
+Defined in: [src/browser/worker.ts:40](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/browser/worker.ts#L40)
 
 URL to a custom worker script. If not provided, an inline worker
 is created via `Blob` + `URL.createObjectURL`.

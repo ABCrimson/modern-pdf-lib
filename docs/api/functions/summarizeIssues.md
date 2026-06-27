@@ -10,7 +10,7 @@
 function summarizeIssues(issues): object;
 ```
 
-Defined in: [src/accessibility/accessibilityChecker.ts:298](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/accessibility/accessibilityChecker.ts#L298)
+Defined in: [src/accessibility/accessibilityChecker.ts:298](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/accessibility/accessibilityChecker.ts#L298)
 
 Generate a summary of accessibility issues by severity.
 

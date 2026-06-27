@@ -6,7 +6,7 @@
 
 # Interface: PdfA4ExtensionSchema
 
-Defined in: [src/compliance/pdfA4.ts:46](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/pdfA4.ts#L46)
+Defined in: [src/compliance/pdfA4.ts:46](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/compliance/pdfA4.ts#L46)
 
 Describes a PDF/A extension schema for non-standard XMP namespaces.
 
@@ -18,7 +18,7 @@ Describes a PDF/A extension schema for non-standard XMP namespaces.
 readonly namespaceUri: string;
 ```
 
-Defined in: [src/compliance/pdfA4.ts:48](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/pdfA4.ts#L48)
+Defined in: [src/compliance/pdfA4.ts:48](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/compliance/pdfA4.ts#L48)
 
 Namespace URI of the extended schema.
 
@@ -30,7 +30,7 @@ Namespace URI of the extended schema.
 readonly prefix: string;
 ```
 
-Defined in: [src/compliance/pdfA4.ts:50](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/pdfA4.ts#L50)
+Defined in: [src/compliance/pdfA4.ts:50](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/compliance/pdfA4.ts#L50)
 
 Preferred namespace prefix.
 
@@ -42,7 +42,7 @@ Preferred namespace prefix.
 readonly properties: readonly PdfA4ExtensionProperty[];
 ```
 
-Defined in: [src/compliance/pdfA4.ts:54](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/pdfA4.ts#L54)
+Defined in: [src/compliance/pdfA4.ts:54](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/compliance/pdfA4.ts#L54)
 
 Properties defined by this schema.
 
@@ -54,6 +54,6 @@ Properties defined by this schema.
 readonly schema: string;
 ```
 
-Defined in: [src/compliance/pdfA4.ts:52](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/pdfA4.ts#L52)
+Defined in: [src/compliance/pdfA4.ts:52](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/compliance/pdfA4.ts#L52)
 
 Human-readable schema name.

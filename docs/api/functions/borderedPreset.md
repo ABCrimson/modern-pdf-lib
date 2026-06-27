@@ -10,7 +10,7 @@
 function borderedPreset(): TablePreset;
 ```
 
-Defined in: [src/layout/presets.ts:83](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layout/presets.ts#L83)
+Defined in: [src/layout/presets.ts:83](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/layout/presets.ts#L83)
 
 Full visible borders with a dark header row.
 

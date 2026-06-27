@@ -6,7 +6,7 @@
 
 # Class: PdfLayerManager
 
-Defined in: [src/layers/optionalContent.ts:120](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layers/optionalContent.ts#L120)
+Defined in: [src/layers/optionalContent.ts:120](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/layers/optionalContent.ts#L120)
 
 Manages a collection of optional content groups (layers) for a PDF
 document.
@@ -34,7 +34,7 @@ new PdfLayerManager(): PdfLayerManager;
 addLayer(name, visible?): PdfLayer;
 ```
 
-Defined in: [src/layers/optionalContent.ts:130](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layers/optionalContent.ts#L130)
+Defined in: [src/layers/optionalContent.ts:130](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/layers/optionalContent.ts#L130)
 
 Add a new layer.
 
@@ -66,7 +66,7 @@ The newly created layer.
 getLayer(name): PdfLayer | undefined;
 ```
 
-Defined in: [src/layers/optionalContent.ts:142](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layers/optionalContent.ts#L142)
+Defined in: [src/layers/optionalContent.ts:142](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/layers/optionalContent.ts#L142)
 
 Get a layer by name.
 
@@ -92,7 +92,7 @@ The layer, or `undefined` if not found.
 getLayers(): PdfLayer[];
 ```
 
-Defined in: [src/layers/optionalContent.ts:151](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layers/optionalContent.ts#L151)
+Defined in: [src/layers/optionalContent.ts:151](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/layers/optionalContent.ts#L151)
 
 Get all layers.
 
@@ -110,7 +110,7 @@ A copy of the layers array.
 removeLayer(name): void;
 ```
 
-Defined in: [src/layers/optionalContent.ts:160](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layers/optionalContent.ts#L160)
+Defined in: [src/layers/optionalContent.ts:160](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/layers/optionalContent.ts#L160)
 
 Remove a layer by name.
 
@@ -134,7 +134,7 @@ The layer name.
 toOCProperties(registry): PdfDict;
 ```
 
-Defined in: [src/layers/optionalContent.ts:173](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layers/optionalContent.ts#L173)
+Defined in: [src/layers/optionalContent.ts:173](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/layers/optionalContent.ts#L173)
 
 Build the `/OCProperties` dictionary for the document catalog.
 
@@ -163,7 +163,7 @@ The `/OCProperties` dictionary (not indirect).
 static fromDict(dict, resolver): PdfLayerManager;
 ```
 
-Defined in: [src/layers/optionalContent.ts:226](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layers/optionalContent.ts#L226)
+Defined in: [src/layers/optionalContent.ts:226](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/layers/optionalContent.ts#L226)
 
 Parse a PdfLayerManager from an `/OCProperties` dictionary.
 

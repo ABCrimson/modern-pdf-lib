@@ -10,7 +10,7 @@
 function encodeCode128(data): BarcodeMatrix;
 ```
 
-Defined in: [src/barcode/code128.ts:404](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/barcode/code128.ts#L404)
+Defined in: [src/barcode/code128.ts:404](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/barcode/code128.ts#L404)
 
 Encode data as a Code 128 barcode.
 

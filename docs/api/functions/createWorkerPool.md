@@ -10,7 +10,7 @@
 function createWorkerPool<I, O>(runner, options?): WorkerPool<I, O>;
 ```
 
-Defined in: [src/runtime/workerPool.ts:94](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/runtime/workerPool.ts#L94)
+Defined in: [src/runtime/workerPool.ts:94](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/runtime/workerPool.ts#L94)
 
 Create a [WorkerPool](../interfaces/WorkerPool.md) backed by the given [TaskRunner](../type-aliases/TaskRunner.md).
 

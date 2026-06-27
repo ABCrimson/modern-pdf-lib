@@ -6,7 +6,7 @@
 
 # Interface: SvgDrawCommand
 
-Defined in: [src/assets/svg/svgParser.ts:23](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/svg/svgParser.ts#L23)
+Defined in: [src/assets/svg/svgParser.ts:23](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/assets/svg/svgParser.ts#L23)
 
 A single drawing command produced from an SVG element.
 
@@ -18,7 +18,7 @@ A single drawing command produced from an SVG element.
 params: number[];
 ```
 
-Defined in: [src/assets/svg/svgParser.ts:34](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/svg/svgParser.ts#L34)
+Defined in: [src/assets/svg/svgParser.ts:34](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/assets/svg/svgParser.ts#L34)
 
 ***
 
@@ -37,4 +37,4 @@ type:
   | "arc";
 ```
 
-Defined in: [src/assets/svg/svgParser.ts:24](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/svg/svgParser.ts#L24)
+Defined in: [src/assets/svg/svgParser.ts:24](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/assets/svg/svgParser.ts#L24)

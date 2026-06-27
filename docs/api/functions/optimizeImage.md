@@ -10,7 +10,7 @@
 function optimizeImage(image, options?): Promise<OptimizeResult>;
 ```
 
-Defined in: [src/assets/image/imageOptimize.ts:283](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/imageOptimize.ts#L283)
+Defined in: [src/assets/image/imageOptimize.ts:283](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/assets/image/imageOptimize.ts#L283)
 
 Run the full image optimization pipeline: downscale then recompress.
 

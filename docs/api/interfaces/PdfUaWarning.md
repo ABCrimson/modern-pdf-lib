@@ -6,7 +6,7 @@
 
 # Interface: PdfUaWarning
 
-Defined in: [src/accessibility/pdfUaValidator.ts:65](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/accessibility/pdfUaValidator.ts#L65)
+Defined in: [src/accessibility/pdfUaValidator.ts:65](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/accessibility/pdfUaValidator.ts#L65)
 
 A single PDF/UA validation warning — a best-practice recommendation.
 
@@ -18,7 +18,7 @@ A single PDF/UA validation warning — a best-practice recommendation.
 readonly code: string;
 ```
 
-Defined in: [src/accessibility/pdfUaValidator.ts:67](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/accessibility/pdfUaValidator.ts#L67)
+Defined in: [src/accessibility/pdfUaValidator.ts:67](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/accessibility/pdfUaValidator.ts#L67)
 
 Machine-readable warning code (e.g. `"UA-WARN-001"`).
 
@@ -30,7 +30,7 @@ Machine-readable warning code (e.g. `"UA-WARN-001"`).
 readonly optional element?: PdfStructureElement;
 ```
 
-Defined in: [src/accessibility/pdfUaValidator.ts:71](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/accessibility/pdfUaValidator.ts#L71)
+Defined in: [src/accessibility/pdfUaValidator.ts:71](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/accessibility/pdfUaValidator.ts#L71)
 
 The structure element related to the warning, if any.
 
@@ -42,7 +42,7 @@ The structure element related to the warning, if any.
 readonly message: string;
 ```
 
-Defined in: [src/accessibility/pdfUaValidator.ts:69](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/accessibility/pdfUaValidator.ts#L69)
+Defined in: [src/accessibility/pdfUaValidator.ts:69](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/accessibility/pdfUaValidator.ts#L69)
 
 Human-readable recommendation.
 
@@ -54,6 +54,6 @@ Human-readable recommendation.
 readonly optional pageIndex?: number;
 ```
 
-Defined in: [src/accessibility/pdfUaValidator.ts:73](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/accessibility/pdfUaValidator.ts#L73)
+Defined in: [src/accessibility/pdfUaValidator.ts:73](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/accessibility/pdfUaValidator.ts#L73)
 
 Zero-based page index, if the warning is page-specific.

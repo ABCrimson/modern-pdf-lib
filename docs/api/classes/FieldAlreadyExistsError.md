@@ -6,7 +6,7 @@
 
 # Class: FieldAlreadyExistsError
 
-Defined in: [src/errors.ts:131](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/errors.ts#L131)
+Defined in: [src/errors.ts:131](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/errors.ts#L131)
 
 Thrown when creating a form field with a name that is already in use.
 
@@ -22,7 +22,7 @@ Thrown when creating a form field with a name that is already in use.
 new FieldAlreadyExistsError(fieldName, options?): FieldAlreadyExistsError;
 ```
 
-Defined in: [src/errors.ts:133](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/errors.ts#L133)
+Defined in: [src/errors.ts:133](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/errors.ts#L133)
 
 #### Parameters
 
@@ -84,7 +84,7 @@ Error.message
 readonly name: "FieldAlreadyExistsError" = 'FieldAlreadyExistsError';
 ```
 
-Defined in: [src/errors.ts:132](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/errors.ts#L132)
+Defined in: [src/errors.ts:132](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/errors.ts#L132)
 
 #### Overrides
 

@@ -6,7 +6,7 @@
 
 # Interface: TransparencyGroupOptions
 
-Defined in: [src/core/pdfPage.ts:579](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfPage.ts#L579)
+Defined in: [src/core/pdfPage.ts:580](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfPage.ts#L580)
 
 Options for transparency groups.
 
@@ -21,7 +21,7 @@ as a single unit before being blended with the page content.
 optional colorSpace?: "DeviceCMYK" | "DeviceRGB" | "DeviceGray";
 ```
 
-Defined in: [src/core/pdfPage.ts:593](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfPage.ts#L593)
+Defined in: [src/core/pdfPage.ts:594](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfPage.ts#L594)
 
 Color space for the transparency group.  Default: `'DeviceRGB'`.
 
@@ -33,7 +33,7 @@ Color space for the transparency group.  Default: `'DeviceRGB'`.
 optional isolated?: boolean;
 ```
 
-Defined in: [src/core/pdfPage.ts:584](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfPage.ts#L584)
+Defined in: [src/core/pdfPage.ts:585](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfPage.ts#L585)
 
 When `true`, the group is composited against a fully transparent
 backdrop rather than the existing page content.  Default: `true`.
@@ -46,7 +46,7 @@ backdrop rather than the existing page content.  Default: `true`.
 optional knockout?: boolean;
 ```
 
-Defined in: [src/core/pdfPage.ts:589](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfPage.ts#L589)
+Defined in: [src/core/pdfPage.ts:590](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfPage.ts#L590)
 
 When `true`, earlier objects in the group are knocked out (replaced)
 by later objects, rather than composited on top.  Default: `false`.

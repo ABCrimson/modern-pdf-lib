@@ -13,7 +13,7 @@ function copyPages(
    indices): PdfPage[];
 ```
 
-Defined in: [src/core/documentMerge.ts:350](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/documentMerge.ts#L350)
+Defined in: [src/core/documentMerge.ts:350](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/documentMerge.ts#L350)
 
 Copy pages from a source document to a target document.
 

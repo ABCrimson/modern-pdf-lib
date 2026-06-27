@@ -6,7 +6,7 @@
 
 # Interface: TableCell
 
-Defined in: [src/layout/table.ts:57](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layout/table.ts#L57)
+Defined in: [src/layout/table.ts:57](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/layout/table.ts#L57)
 
 Single table cell.
 
@@ -18,7 +18,7 @@ Single table cell.
 readonly optional align?: "left" | "center" | "right";
 ```
 
-Defined in: [src/layout/table.ts:64](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layout/table.ts#L64)
+Defined in: [src/layout/table.ts:64](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/layout/table.ts#L64)
 
 ***
 
@@ -28,7 +28,7 @@ Defined in: [src/layout/table.ts:64](https://github.com/ABCrimson/modern-pdf-lib
 readonly optional backgroundColor?: Color;
 ```
 
-Defined in: [src/layout/table.ts:61](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layout/table.ts#L61)
+Defined in: [src/layout/table.ts:61](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/layout/table.ts#L61)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [src/layout/table.ts:61](https://github.com/ABCrimson/modern-pdf-lib
 readonly optional colSpan?: number;
 ```
 
-Defined in: [src/layout/table.ts:59](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layout/table.ts#L59)
+Defined in: [src/layout/table.ts:59](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/layout/table.ts#L59)
 
 ***
 
@@ -48,7 +48,7 @@ Defined in: [src/layout/table.ts:59](https://github.com/ABCrimson/modern-pdf-lib
 readonly content: CellContent;
 ```
 
-Defined in: [src/layout/table.ts:58](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layout/table.ts#L58)
+Defined in: [src/layout/table.ts:58](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/layout/table.ts#L58)
 
 ***
 
@@ -58,7 +58,7 @@ Defined in: [src/layout/table.ts:58](https://github.com/ABCrimson/modern-pdf-lib
 readonly optional fontSize?: number;
 ```
 
-Defined in: [src/layout/table.ts:63](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layout/table.ts#L63)
+Defined in: [src/layout/table.ts:63](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/layout/table.ts#L63)
 
 ***
 
@@ -68,7 +68,7 @@ Defined in: [src/layout/table.ts:63](https://github.com/ABCrimson/modern-pdf-lib
 readonly optional overflow?: "wrap" | "truncate" | "ellipsis" | "shrink";
 ```
 
-Defined in: [src/layout/table.ts:75](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layout/table.ts#L75)
+Defined in: [src/layout/table.ts:75](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/layout/table.ts#L75)
 
 Text overflow mode. Default: 'truncate'.
 
@@ -87,7 +87,7 @@ readonly optional padding?:
 };
 ```
 
-Defined in: [src/layout/table.ts:66](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layout/table.ts#L66)
+Defined in: [src/layout/table.ts:66](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/layout/table.ts#L66)
 
 ***
 
@@ -97,7 +97,7 @@ Defined in: [src/layout/table.ts:66](https://github.com/ABCrimson/modern-pdf-lib
 readonly optional rowSpan?: number;
 ```
 
-Defined in: [src/layout/table.ts:60](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layout/table.ts#L60)
+Defined in: [src/layout/table.ts:60](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/layout/table.ts#L60)
 
 ***
 
@@ -107,14 +107,14 @@ Defined in: [src/layout/table.ts:60](https://github.com/ABCrimson/modern-pdf-lib
 readonly optional textColor?: Color;
 ```
 
-Defined in: [src/layout/table.ts:62](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layout/table.ts#L62)
+Defined in: [src/layout/table.ts:62](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/layout/table.ts#L62)
 
 ***
 
 ### verticalAlign?
 
 ```ts
-readonly optional verticalAlign?: "middle" | "top" | "bottom";
+readonly optional verticalAlign?: "top" | "middle" | "bottom";
 ```
 
-Defined in: [src/layout/table.ts:65](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layout/table.ts#L65)
+Defined in: [src/layout/table.ts:65](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/layout/table.ts#L65)

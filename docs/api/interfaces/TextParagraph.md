@@ -6,7 +6,7 @@
 
 # Interface: TextParagraph
 
-Defined in: [src/parser/textReconstruct.ts:42](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/parser/textReconstruct.ts#L42)
+Defined in: [src/parser/textReconstruct.ts:42](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/parser/textReconstruct.ts#L42)
 
 A reconstructed paragraph: a run of vertically-adjacent lines.
 
@@ -18,7 +18,7 @@ A reconstructed paragraph: a run of vertically-adjacent lines.
 readonly lines: readonly TextLine[];
 ```
 
-Defined in: [src/parser/textReconstruct.ts:46](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/parser/textReconstruct.ts#L46)
+Defined in: [src/parser/textReconstruct.ts:46](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/parser/textReconstruct.ts#L46)
 
 The lines that make up this paragraph, in top-to-bottom reading order.
 
@@ -30,6 +30,6 @@ The lines that make up this paragraph, in top-to-bottom reading order.
 readonly text: string;
 ```
 
-Defined in: [src/parser/textReconstruct.ts:44](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/parser/textReconstruct.ts#L44)
+Defined in: [src/parser/textReconstruct.ts:44](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/parser/textReconstruct.ts#L44)
 
 The joined text content of the paragraph (lines joined with `"\n"`).

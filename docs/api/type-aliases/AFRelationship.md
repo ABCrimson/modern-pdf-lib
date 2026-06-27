@@ -18,6 +18,6 @@ type AFRelationship =
   | "Unspecified";
 ```
 
-Defined in: [src/compliance/associatedFiles.ts:42](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/associatedFiles.ts#L42)
+Defined in: [src/compliance/associatedFiles.ts:42](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/compliance/associatedFiles.ts#L42)
 
 Relationship type for associated files (PDF 2.0 / PDF/A-3).

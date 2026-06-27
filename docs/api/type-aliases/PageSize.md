@@ -15,6 +15,6 @@ type PageSize =
 };
 ```
 
-Defined in: [src/core/pdfPage.ts:160](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfPage.ts#L160)
+Defined in: [src/core/pdfPage.ts:161](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfPage.ts#L161)
 
 Type for a page-size input: a `[width, height]` tuple or `{ width, height }` object.

@@ -10,7 +10,7 @@
 function detectImageFormat(data): ImageFormat;
 ```
 
-Defined in: [src/assets/image/formatDetect.ts:37](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/formatDetect.ts#L37)
+Defined in: [src/assets/image/formatDetect.ts:37](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/assets/image/formatDetect.ts#L37)
 
 Detect the image format from the raw file bytes by inspecting magic bytes.
 

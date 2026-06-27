@@ -13,7 +13,7 @@ function addCounterSignature(
 signerInfo): Promise<Uint8Array<ArrayBufferLike>>;
 ```
 
-Defined in: [src/signature/counterSignature.ts:219](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/counterSignature.ts#L219)
+Defined in: [src/signature/counterSignature.ts:219](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/signature/counterSignature.ts#L219)
 
 Add a counter-signature to an existing PDF signature.
 

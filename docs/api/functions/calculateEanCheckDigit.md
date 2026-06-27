@@ -10,7 +10,7 @@
 function calculateEanCheckDigit(data): number;
 ```
 
-Defined in: [src/barcode/ean.ts:113](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/barcode/ean.ts#L113)
+Defined in: [src/barcode/ean.ts:113](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/barcode/ean.ts#L113)
 
 Calculate the EAN / UPC check digit using the Modulo-10 algorithm.
 

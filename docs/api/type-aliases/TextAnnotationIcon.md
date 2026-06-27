@@ -17,6 +17,6 @@ type TextAnnotationIcon =
   | "Insert";
 ```
 
-Defined in: [src/annotation/types/textAnnotation.ts:24](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/annotation/types/textAnnotation.ts#L24)
+Defined in: [src/annotation/types/textAnnotation.ts:24](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/annotation/types/textAnnotation.ts#L24)
 
 Standard icon names for text annotations.

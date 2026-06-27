@@ -6,7 +6,7 @@
 
 # Interface: StreamingParserOptions
 
-Defined in: [src/parser/streamingParser.ts:35](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/parser/streamingParser.ts#L35)
+Defined in: [src/parser/streamingParser.ts:35](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/parser/streamingParser.ts#L35)
 
 Options for the streaming PDF parser.
 
@@ -18,7 +18,7 @@ Options for the streaming PDF parser.
 optional maxBufferSize?: number;
 ```
 
-Defined in: [src/parser/streamingParser.ts:37](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/parser/streamingParser.ts#L37)
+Defined in: [src/parser/streamingParser.ts:37](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/parser/streamingParser.ts#L37)
 
 Maximum bytes to buffer at once. Default: 64 MB.
 
@@ -30,7 +30,7 @@ Maximum bytes to buffer at once. Default: 64 MB.
 optional pageRange?: object;
 ```
 
-Defined in: [src/parser/streamingParser.ts:41](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/parser/streamingParser.ts#L41)
+Defined in: [src/parser/streamingParser.ts:41](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/parser/streamingParser.ts#L41)
 
 Pages to parse (for selective loading). Default: all.
 
@@ -54,6 +54,6 @@ optional start?: number;
 optional parseContentStreams?: boolean;
 ```
 
-Defined in: [src/parser/streamingParser.ts:39](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/parser/streamingParser.ts#L39)
+Defined in: [src/parser/streamingParser.ts:39](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/parser/streamingParser.ts#L39)
 
 Whether to parse content streams. Default: false.

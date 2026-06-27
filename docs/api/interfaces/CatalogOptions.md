@@ -6,7 +6,7 @@
 
 # Interface: CatalogOptions
 
-Defined in: [src/core/pdfCatalog.ts:249](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfCatalog.ts#L249)
+Defined in: [src/core/pdfCatalog.ts:249](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfCatalog.ts#L249)
 
 Options for building the catalog.
 
@@ -18,7 +18,7 @@ Options for building the catalog.
 optional lang?: string;
 ```
 
-Defined in: [src/core/pdfCatalog.ts:269](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfCatalog.ts#L269)
+Defined in: [src/core/pdfCatalog.ts:269](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfCatalog.ts#L269)
 
 The natural language of the document content (e.g. `en-US`).
 
@@ -36,7 +36,7 @@ optional pageLayout?:
   | "TwoPageRight";
 ```
 
-Defined in: [src/core/pdfCatalog.ts:251](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfCatalog.ts#L251)
+Defined in: [src/core/pdfCatalog.ts:251](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfCatalog.ts#L251)
 
 Page layout hint.
 
@@ -54,6 +54,6 @@ optional pageMode?:
   | "UseAttachments";
 ```
 
-Defined in: [src/core/pdfCatalog.ts:260](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfCatalog.ts#L260)
+Defined in: [src/core/pdfCatalog.ts:260](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfCatalog.ts#L260)
 
 Page mode hint.

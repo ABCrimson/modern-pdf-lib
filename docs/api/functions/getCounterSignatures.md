@@ -10,7 +10,7 @@
 function getCounterSignatures(pdf): CounterSignatureInfo[];
 ```
 
-Defined in: [src/signature/counterSignature.ts:422](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/counterSignature.ts#L422)
+Defined in: [src/signature/counterSignature.ts:422](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/signature/counterSignature.ts#L422)
 
 Extract counter-signatures from all signatures in a PDF.
 

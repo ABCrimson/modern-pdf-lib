@@ -6,7 +6,7 @@
 
 # Interface: BarcodeOptions
 
-Defined in: [src/barcode/types.ts:25](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/barcode/types.ts#L25)
+Defined in: [src/barcode/types.ts:25](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/barcode/types.ts#L25)
 
 Common options for rendering a barcode into PDF content-stream operators.
 
@@ -18,7 +18,7 @@ Common options for rendering a barcode into PDF content-stream operators.
 readonly optional color?: Color;
 ```
 
-Defined in: [src/barcode/types.ts:33](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/barcode/types.ts#L33)
+Defined in: [src/barcode/types.ts:33](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/barcode/types.ts#L33)
 
 Bar colour. Default: grayscale black.
 
@@ -30,7 +30,7 @@ Bar colour. Default: grayscale black.
 readonly optional fontSize?: number;
 ```
 
-Defined in: [src/barcode/types.ts:41](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/barcode/types.ts#L41)
+Defined in: [src/barcode/types.ts:41](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/barcode/types.ts#L41)
 
 Font size for human-readable text. Default: `10`.
 
@@ -42,7 +42,7 @@ Font size for human-readable text. Default: `10`.
 readonly optional height?: number;
 ```
 
-Defined in: [src/barcode/types.ts:27](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/barcode/types.ts#L27)
+Defined in: [src/barcode/types.ts:27](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/barcode/types.ts#L27)
 
 Height of the bars in user-space units. Default: `50`.
 
@@ -54,7 +54,7 @@ Height of the bars in user-space units. Default: `50`.
 readonly optional moduleWidth?: number;
 ```
 
-Defined in: [src/barcode/types.ts:29](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/barcode/types.ts#L29)
+Defined in: [src/barcode/types.ts:29](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/barcode/types.ts#L29)
 
 Width of a single module in user-space units. Default: `1`.
 
@@ -66,7 +66,7 @@ Width of a single module in user-space units. Default: `1`.
 readonly optional quietZone?: number;
 ```
 
-Defined in: [src/barcode/types.ts:31](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/barcode/types.ts#L31)
+Defined in: [src/barcode/types.ts:31](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/barcode/types.ts#L31)
 
 Quiet-zone width in modules on each side. Default: `10`.
 
@@ -78,7 +78,7 @@ Quiet-zone width in modules on each side. Default: `10`.
 readonly optional showText?: boolean;
 ```
 
-Defined in: [src/barcode/types.ts:39](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/barcode/types.ts#L39)
+Defined in: [src/barcode/types.ts:39](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/barcode/types.ts#L39)
 
 Whether to render human-readable text below the barcode.
 Note: text rendering requires a font to be set in the content stream

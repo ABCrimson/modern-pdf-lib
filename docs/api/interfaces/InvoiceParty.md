@@ -6,7 +6,7 @@
 
 # Interface: InvoiceParty
 
-Defined in: [src/compliance/facturX.ts:41](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/facturX.ts#L41)
+Defined in: [src/compliance/facturX.ts:41](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/compliance/facturX.ts#L41)
 
 A trading party (seller or buyer) on the invoice.
 
@@ -18,7 +18,7 @@ A trading party (seller or buyer) on the invoice.
 readonly countryCode: string;
 ```
 
-Defined in: [src/compliance/facturX.ts:45](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/facturX.ts#L45)
+Defined in: [src/compliance/facturX.ts:45](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/compliance/facturX.ts#L45)
 
 ISO 3166-1 alpha-2 country code (e.g. 'DE', 'FR').
 
@@ -30,7 +30,7 @@ ISO 3166-1 alpha-2 country code (e.g. 'DE', 'FR').
 readonly name: string;
 ```
 
-Defined in: [src/compliance/facturX.ts:43](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/facturX.ts#L43)
+Defined in: [src/compliance/facturX.ts:43](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/compliance/facturX.ts#L43)
 
 Legal/trading name of the party.
 
@@ -42,6 +42,6 @@ Legal/trading name of the party.
 readonly optional vatId?: string;
 ```
 
-Defined in: [src/compliance/facturX.ts:47](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/facturX.ts#L47)
+Defined in: [src/compliance/facturX.ts:47](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/compliance/facturX.ts#L47)
 
 VAT registration identifier, if any (e.g. 'DE123456789').

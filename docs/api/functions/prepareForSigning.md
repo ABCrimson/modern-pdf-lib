@@ -16,7 +16,7 @@ function prepareForSigning(
    fieldLock?): object;
 ```
 
-Defined in: [src/signature/byteRange.ts:269](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/byteRange.ts#L269)
+Defined in: [src/signature/byteRange.ts:269](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/signature/byteRange.ts#L269)
 
 ## Parameters
 

@@ -6,7 +6,7 @@
 
 # Class: InvalidColorError
 
-Defined in: [src/errors.ts:254](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/errors.ts#L254)
+Defined in: [src/errors.ts:254](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/errors.ts#L254)
 
 Thrown when an invalid color value is provided (e.g. component values
 outside the `[0, 1]` range, unknown color type).
@@ -29,7 +29,7 @@ throw new InvalidColorError('RGB component out of range: r=1.5');
 new InvalidColorError(message, options?): InvalidColorError;
 ```
 
-Defined in: [src/errors.ts:256](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/errors.ts#L256)
+Defined in: [src/errors.ts:256](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/errors.ts#L256)
 
 #### Parameters
 
@@ -91,7 +91,7 @@ Error.message
 readonly name: "InvalidColorError" = 'InvalidColorError';
 ```
 
-Defined in: [src/errors.ts:255](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/errors.ts#L255)
+Defined in: [src/errors.ts:255](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/errors.ts#L255)
 
 #### Overrides
 

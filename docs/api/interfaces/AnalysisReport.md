@@ -6,7 +6,7 @@
 
 # Interface: AnalysisReport
 
-Defined in: [src/assets/image/compressionAnalysis.ts:58](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/compressionAnalysis.ts#L58)
+Defined in: [src/assets/image/compressionAnalysis.ts:58](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/assets/image/compressionAnalysis.ts#L58)
 
 Full document analysis report.
 
@@ -18,7 +18,7 @@ Full document analysis report.
 readonly images: readonly ImageAnalysis[];
 ```
 
-Defined in: [src/assets/image/compressionAnalysis.ts:60](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/compressionAnalysis.ts#L60)
+Defined in: [src/assets/image/compressionAnalysis.ts:60](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/assets/image/compressionAnalysis.ts#L60)
 
 Per-image analysis results.
 
@@ -30,7 +30,7 @@ Per-image analysis results.
 readonly totalCurrentSize: number;
 ```
 
-Defined in: [src/assets/image/compressionAnalysis.ts:62](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/compressionAnalysis.ts#L62)
+Defined in: [src/assets/image/compressionAnalysis.ts:62](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/assets/image/compressionAnalysis.ts#L62)
 
 Total size of all image streams in bytes.
 
@@ -42,7 +42,7 @@ Total size of all image streams in bytes.
 readonly totalEstimatedSize: number;
 ```
 
-Defined in: [src/assets/image/compressionAnalysis.ts:64](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/compressionAnalysis.ts#L64)
+Defined in: [src/assets/image/compressionAnalysis.ts:64](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/assets/image/compressionAnalysis.ts#L64)
 
 Total estimated size after optimization.
 
@@ -54,7 +54,7 @@ Total estimated size after optimization.
 readonly totalSavings: number;
 ```
 
-Defined in: [src/assets/image/compressionAnalysis.ts:66](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/compressionAnalysis.ts#L66)
+Defined in: [src/assets/image/compressionAnalysis.ts:66](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/assets/image/compressionAnalysis.ts#L66)
 
 Total estimated savings in bytes.
 
@@ -66,6 +66,6 @@ Total estimated savings in bytes.
 readonly totalSavingsPercent: number;
 ```
 
-Defined in: [src/assets/image/compressionAnalysis.ts:68](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/compressionAnalysis.ts#L68)
+Defined in: [src/assets/image/compressionAnalysis.ts:68](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/assets/image/compressionAnalysis.ts#L68)
 
 Total savings as a percentage of total current size.

@@ -6,7 +6,7 @@
 
 # Interface: ParsedXmpMetadata
 
-Defined in: [src/compliance/xmpValidator.ts:39](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/xmpValidator.ts#L39)
+Defined in: [src/compliance/xmpValidator.ts:39](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/compliance/xmpValidator.ts#L39)
 
 Structured XMP metadata extracted from a PDF.
 
@@ -18,7 +18,7 @@ Structured XMP metadata extracted from a PDF.
 readonly optional dcTitle?: string;
 ```
 
-Defined in: [src/compliance/xmpValidator.ts:42](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/xmpValidator.ts#L42)
+Defined in: [src/compliance/xmpValidator.ts:42](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/compliance/xmpValidator.ts#L42)
 
 ***
 
@@ -28,7 +28,7 @@ Defined in: [src/compliance/xmpValidator.ts:42](https://github.com/ABCrimson/mod
 readonly optional pdfaidConformance?: string;
 ```
 
-Defined in: [src/compliance/xmpValidator.ts:41](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/xmpValidator.ts#L41)
+Defined in: [src/compliance/xmpValidator.ts:41](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/compliance/xmpValidator.ts#L41)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [src/compliance/xmpValidator.ts:41](https://github.com/ABCrimson/mod
 readonly optional pdfaidPart?: number;
 ```
 
-Defined in: [src/compliance/xmpValidator.ts:40](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/xmpValidator.ts#L40)
+Defined in: [src/compliance/xmpValidator.ts:40](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/compliance/xmpValidator.ts#L40)
 
 ***
 
@@ -48,7 +48,7 @@ Defined in: [src/compliance/xmpValidator.ts:40](https://github.com/ABCrimson/mod
 readonly optional pdfProducer?: string;
 ```
 
-Defined in: [src/compliance/xmpValidator.ts:46](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/xmpValidator.ts#L46)
+Defined in: [src/compliance/xmpValidator.ts:46](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/compliance/xmpValidator.ts#L46)
 
 ***
 
@@ -58,7 +58,7 @@ Defined in: [src/compliance/xmpValidator.ts:46](https://github.com/ABCrimson/mod
 readonly optional raw?: string;
 ```
 
-Defined in: [src/compliance/xmpValidator.ts:47](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/xmpValidator.ts#L47)
+Defined in: [src/compliance/xmpValidator.ts:47](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/compliance/xmpValidator.ts#L47)
 
 ***
 
@@ -68,7 +68,7 @@ Defined in: [src/compliance/xmpValidator.ts:47](https://github.com/ABCrimson/mod
 readonly optional xmpCreateDate?: string;
 ```
 
-Defined in: [src/compliance/xmpValidator.ts:43](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/xmpValidator.ts#L43)
+Defined in: [src/compliance/xmpValidator.ts:43](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/compliance/xmpValidator.ts#L43)
 
 ***
 
@@ -78,7 +78,7 @@ Defined in: [src/compliance/xmpValidator.ts:43](https://github.com/ABCrimson/mod
 readonly optional xmpCreatorTool?: string;
 ```
 
-Defined in: [src/compliance/xmpValidator.ts:45](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/xmpValidator.ts#L45)
+Defined in: [src/compliance/xmpValidator.ts:45](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/compliance/xmpValidator.ts#L45)
 
 ***
 
@@ -88,4 +88,4 @@ Defined in: [src/compliance/xmpValidator.ts:45](https://github.com/ABCrimson/mod
 readonly optional xmpModifyDate?: string;
 ```
 
-Defined in: [src/compliance/xmpValidator.ts:44](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/xmpValidator.ts#L44)
+Defined in: [src/compliance/xmpValidator.ts:44](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/compliance/xmpValidator.ts#L44)

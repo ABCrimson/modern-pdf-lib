@@ -6,7 +6,7 @@
 
 # Class: StreamingParseError
 
-Defined in: [src/errors.ts:297](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/errors.ts#L297)
+Defined in: [src/errors.ts:297](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/errors.ts#L297)
 
 Thrown when a streaming (incremental) parse operation encounters
 corrupt or incomplete data that prevents further processing.
@@ -32,7 +32,7 @@ new StreamingParseError(
    options?): StreamingParseError;
 ```
 
-Defined in: [src/errors.ts:301](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/errors.ts#L301)
+Defined in: [src/errors.ts:301](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/errors.ts#L301)
 
 #### Parameters
 
@@ -98,7 +98,7 @@ Error.message
 readonly name: "StreamingParseError" = 'StreamingParseError';
 ```
 
-Defined in: [src/errors.ts:298](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/errors.ts#L298)
+Defined in: [src/errors.ts:298](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/errors.ts#L298)
 
 #### Overrides
 
@@ -114,7 +114,7 @@ Error.name
 readonly optional offset?: number;
 ```
 
-Defined in: [src/errors.ts:300](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/errors.ts#L300)
+Defined in: [src/errors.ts:300](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/errors.ts#L300)
 
 Byte offset where the error occurred, if known.
 

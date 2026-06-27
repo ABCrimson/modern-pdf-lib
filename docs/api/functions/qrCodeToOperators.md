@@ -14,7 +14,7 @@ function qrCodeToOperators(
    options?): string;
 ```
 
-Defined in: [src/barcode/qr.ts:1187](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/barcode/qr.ts#L1187)
+Defined in: [src/barcode/qr.ts:1187](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/barcode/qr.ts#L1187)
 
 Convert a [QrCodeMatrix](../interfaces/QrCodeMatrix.md) to PDF content-stream operators.
 

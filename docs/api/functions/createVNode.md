@@ -13,7 +13,7 @@ function createVNode(
    children): VNode;
 ```
 
-Defined in: [src/assets/vdom/reconciler.ts:77](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/vdom/reconciler.ts#L77)
+Defined in: [src/assets/vdom/reconciler.ts:77](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/assets/vdom/reconciler.ts#L77)
 
 Construct a well-formed [VNode](../type-aliases/VNode.md) from a type, a props bag, and
 child nodes — a hyperscript-style helper.
@@ -26,7 +26,7 @@ Unknown or missing props fall back to sensible defaults.
 
 ### type
 
-`"text"` \| `"document"` \| `"page"` \| `"heading"` \| `"spacer"`
+`"document"` \| `"text"` \| `"page"` \| `"heading"` \| `"spacer"`
 
 The node type to create.
 

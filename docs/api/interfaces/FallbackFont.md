@@ -6,7 +6,7 @@
 
 # Interface: FallbackFont
 
-Defined in: [src/assets/font/fontFallback.ts:26](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/font/fontFallback.ts#L26)
+Defined in: [src/assets/font/fontFallback.ts:26](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/assets/font/fontFallback.ts#L26)
 
 A candidate font in a fallback chain. The [covers](#covers) predicate reports
 whether the font can render a given Unicode code point.
@@ -19,7 +19,7 @@ whether the font can render a given Unicode code point.
 readonly covers: (codepoint) => boolean;
 ```
 
-Defined in: [src/assets/font/fontFallback.ts:30](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/font/fontFallback.ts#L30)
+Defined in: [src/assets/font/fontFallback.ts:30](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/assets/font/fontFallback.ts#L30)
 
 Returns `true` if this font can render the given Unicode code point.
 
@@ -41,6 +41,6 @@ Returns `true` if this font can render the given Unicode code point.
 readonly name: string;
 ```
 
-Defined in: [src/assets/font/fontFallback.ts:28](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/font/fontFallback.ts#L28)
+Defined in: [src/assets/font/fontFallback.ts:28](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/assets/font/fontFallback.ts#L28)
 
 Human-readable font identifier returned in [FallbackRun.font](FallbackRun.md#font).

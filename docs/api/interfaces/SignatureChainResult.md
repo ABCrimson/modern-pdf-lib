@@ -6,7 +6,7 @@
 
 # Interface: SignatureChainResult
 
-Defined in: [src/signature/multiSignatureValidator.ts:47](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/multiSignatureValidator.ts#L47)
+Defined in: [src/signature/multiSignatureValidator.ts:47](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/signature/multiSignatureValidator.ts#L47)
 
 Result of validating the entire signature chain.
 
@@ -18,7 +18,7 @@ Result of validating the entire signature chain.
 errors: string[];
 ```
 
-Defined in: [src/signature/multiSignatureValidator.ts:53](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/multiSignatureValidator.ts#L53)
+Defined in: [src/signature/multiSignatureValidator.ts:53](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/signature/multiSignatureValidator.ts#L53)
 
 Descriptive error messages, if any.
 
@@ -30,7 +30,7 @@ Descriptive error messages, if any.
 isChainValid: boolean;
 ```
 
-Defined in: [src/signature/multiSignatureValidator.ts:51](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/multiSignatureValidator.ts#L51)
+Defined in: [src/signature/multiSignatureValidator.ts:51](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/signature/multiSignatureValidator.ts#L51)
 
 Whether the entire chain is valid (all entries valid, no breaks).
 
@@ -42,6 +42,6 @@ Whether the entire chain is valid (all entries valid, no breaks).
 signatures: SignatureChainEntry[];
 ```
 
-Defined in: [src/signature/multiSignatureValidator.ts:49](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/multiSignatureValidator.ts#L49)
+Defined in: [src/signature/multiSignatureValidator.ts:49](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/signature/multiSignatureValidator.ts#L49)
 
 Ordered array of signature chain entries.

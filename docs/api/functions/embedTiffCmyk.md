@@ -13,7 +13,7 @@ function embedTiffCmyk(
    height): TiffCmykEmbedResult;
 ```
 
-Defined in: [src/assets/image/tiffCmyk.ts:120](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/tiffCmyk.ts#L120)
+Defined in: [src/assets/image/tiffCmyk.ts:120](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/assets/image/tiffCmyk.ts#L120)
 
 Prepare CMYK pixel data for native embedding in a PDF using /DeviceCMYK.
 

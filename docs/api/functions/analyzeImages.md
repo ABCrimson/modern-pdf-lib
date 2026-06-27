@@ -10,7 +10,7 @@
 function analyzeImages(doc, options?): AnalysisReport;
 ```
 
-Defined in: [src/assets/image/compressionAnalysis.ts:199](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/compressionAnalysis.ts#L199)
+Defined in: [src/assets/image/compressionAnalysis.ts:199](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/assets/image/compressionAnalysis.ts#L199)
 
 Analyze all images in a PDF and report potential savings without
 modifying the document.

@@ -10,7 +10,7 @@
 function gtsPdfVtVersion(conformance?): string;
 ```
 
-Defined in: [src/compliance/pdfVT.ts:146](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/pdfVT.ts#L146)
+Defined in: [src/compliance/pdfVT.ts:146](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/compliance/pdfVT.ts#L146)
 
 Map a [PdfVtConformance](../type-aliases/PdfVtConformance.md) level to its `GTS_PDFVTVersion` string, the
 value placed in the document's XMP / output-intent VT version field.

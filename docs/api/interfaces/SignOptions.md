@@ -6,7 +6,7 @@
 
 # Interface: SignOptions
 
-Defined in: [src/signature/signatureHandler.ts:54](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/signatureHandler.ts#L54)
+Defined in: [src/signature/signatureHandler.ts:54](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/signature/signatureHandler.ts#L54)
 
 Options for signing a PDF.
 
@@ -18,7 +18,7 @@ Options for signing a PDF.
 optional appearance?: VisibleSignatureOptions;
 ```
 
-Defined in: [src/signature/signatureHandler.ts:74](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/signatureHandler.ts#L74)
+Defined in: [src/signature/signatureHandler.ts:74](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/signature/signatureHandler.ts#L74)
 
 Visible signature appearance options. When provided, the signature
 field is rendered visibly on the specified page with text and
@@ -32,7 +32,7 @@ optional styling. When omitted, the signature is invisible.
 certificate: Uint8Array;
 ```
 
-Defined in: [src/signature/signatureHandler.ts:56](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/signatureHandler.ts#L56)
+Defined in: [src/signature/signatureHandler.ts:56](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/signature/signatureHandler.ts#L56)
 
 DER-encoded X.509 certificate.
 
@@ -44,7 +44,7 @@ DER-encoded X.509 certificate.
 optional contactInfo?: string;
 ```
 
-Defined in: [src/signature/signatureHandler.ts:66](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/signatureHandler.ts#L66)
+Defined in: [src/signature/signatureHandler.ts:66](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/signature/signatureHandler.ts#L66)
 
 Contact information.
 
@@ -56,7 +56,7 @@ Contact information.
 optional hashAlgorithm?: "SHA-256" | "SHA-384" | "SHA-512";
 ```
 
-Defined in: [src/signature/signatureHandler.ts:60](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/signatureHandler.ts#L60)
+Defined in: [src/signature/signatureHandler.ts:60](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/signature/signatureHandler.ts#L60)
 
 Hash algorithm. Default: 'SHA-256'.
 
@@ -68,7 +68,7 @@ Hash algorithm. Default: 'SHA-256'.
 optional location?: string;
 ```
 
-Defined in: [src/signature/signatureHandler.ts:64](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/signatureHandler.ts#L64)
+Defined in: [src/signature/signatureHandler.ts:64](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/signature/signatureHandler.ts#L64)
 
 Location of signing.
 
@@ -80,7 +80,7 @@ Location of signing.
 privateKey: Uint8Array;
 ```
 
-Defined in: [src/signature/signatureHandler.ts:58](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/signatureHandler.ts#L58)
+Defined in: [src/signature/signatureHandler.ts:58](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/signature/signatureHandler.ts#L58)
 
 PKCS#8 DER-encoded private key.
 
@@ -92,7 +92,7 @@ PKCS#8 DER-encoded private key.
 optional reason?: string;
 ```
 
-Defined in: [src/signature/signatureHandler.ts:62](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/signatureHandler.ts#L62)
+Defined in: [src/signature/signatureHandler.ts:62](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/signature/signatureHandler.ts#L62)
 
 Reason for signing.
 
@@ -104,6 +104,6 @@ Reason for signing.
 optional timestampUrl?: string;
 ```
 
-Defined in: [src/signature/signatureHandler.ts:68](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/signatureHandler.ts#L68)
+Defined in: [src/signature/signatureHandler.ts:68](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/signature/signatureHandler.ts#L68)
 
 RFC 3161 TSA URL for timestamping (optional).

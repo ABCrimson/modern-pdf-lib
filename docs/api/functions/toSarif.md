@@ -10,7 +10,7 @@
 function toSarif(findings, toolName?): SarifLog;
 ```
 
-Defined in: [src/compliance/validationReport.ts:234](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/validationReport.ts#L234)
+Defined in: [src/compliance/validationReport.ts:234](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/compliance/validationReport.ts#L234)
 
 Build a SARIF 2.1.0 log from a list of findings.
 

@@ -6,7 +6,7 @@
 
 # Class: PdfWriter
 
-Defined in: [src/core/pdfWriter.ts:118](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfWriter.ts#L118)
+Defined in: [src/core/pdfWriter.ts:118](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfWriter.ts#L118)
 
 Serialize a PDF document to a `Uint8Array`.
 
@@ -27,7 +27,7 @@ new PdfWriter(
    encryptionHandler?): PdfWriter;
 ```
 
-Defined in: [src/core/pdfWriter.ts:133](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfWriter.ts#L133)
+Defined in: [src/core/pdfWriter.ts:133](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfWriter.ts#L133)
 
 #### Parameters
 
@@ -63,7 +63,7 @@ Document structure references.
 write(): Promise<Uint8Array<ArrayBufferLike>>;
 ```
 
-Defined in: [src/core/pdfWriter.ts:159](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfWriter.ts#L159)
+Defined in: [src/core/pdfWriter.ts:159](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfWriter.ts#L159)
 
 Produce the complete PDF file as a `Uint8Array`.
 
@@ -83,7 +83,7 @@ are added to the trailer.
 writeBodyWithObjectStreams(threshold): Promise<boolean>;
 ```
 
-Defined in: [src/core/pdfWriter.ts:384](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfWriter.ts#L384)
+Defined in: [src/core/pdfWriter.ts:384](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfWriter.ts#L384)
 
 Write the document body using object streams when the number of
 eligible non-stream objects exceeds `threshold`.

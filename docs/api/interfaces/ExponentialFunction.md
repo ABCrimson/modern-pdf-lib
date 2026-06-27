@@ -6,7 +6,7 @@
 
 # Interface: ExponentialFunction
 
-Defined in: [src/core/pdfFunctions.ts:68](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfFunctions.ts#L68)
+Defined in: [src/core/pdfFunctions.ts:68](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfFunctions.ts#L68)
 
 Type 2 — exponential interpolation function (ISO 32000-2 §7.10.3).
 
@@ -21,7 +21,7 @@ input `x`.
 readonly optional c0?: readonly number[];
 ```
 
-Defined in: [src/core/pdfFunctions.ts:73](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfFunctions.ts#L73)
+Defined in: [src/core/pdfFunctions.ts:73](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfFunctions.ts#L73)
 
 Output values at `x = 0`; defaults to `[0]`.
 
@@ -33,7 +33,7 @@ Output values at `x = 0`; defaults to `[0]`.
 readonly optional c1?: readonly number[];
 ```
 
-Defined in: [src/core/pdfFunctions.ts:75](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfFunctions.ts#L75)
+Defined in: [src/core/pdfFunctions.ts:75](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfFunctions.ts#L75)
 
 Output values at `x = 1`; defaults to `[1]`.
 
@@ -45,7 +45,7 @@ Output values at `x = 1`; defaults to `[1]`.
 readonly domain: readonly number[];
 ```
 
-Defined in: [src/core/pdfFunctions.ts:71](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfFunctions.ts#L71)
+Defined in: [src/core/pdfFunctions.ts:71](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfFunctions.ts#L71)
 
 Input domain `[min max]` for the single input.
 
@@ -57,7 +57,7 @@ Input domain `[min max]` for the single input.
 readonly functionType: 2;
 ```
 
-Defined in: [src/core/pdfFunctions.ts:69](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfFunctions.ts#L69)
+Defined in: [src/core/pdfFunctions.ts:69](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfFunctions.ts#L69)
 
 ***
 
@@ -67,6 +67,6 @@ Defined in: [src/core/pdfFunctions.ts:69](https://github.com/ABCrimson/modern-pd
 readonly n: number;
 ```
 
-Defined in: [src/core/pdfFunctions.ts:77](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfFunctions.ts#L77)
+Defined in: [src/core/pdfFunctions.ts:77](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfFunctions.ts#L77)
 
 Interpolation exponent `N`.

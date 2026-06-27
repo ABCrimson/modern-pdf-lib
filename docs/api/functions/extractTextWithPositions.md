@@ -10,7 +10,7 @@
 function extractTextWithPositions(operators, resources?): TextItem[];
 ```
 
-Defined in: [src/parser/textExtractor.ts:265](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/parser/textExtractor.ts#L265)
+Defined in: [src/parser/textExtractor.ts:265](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/parser/textExtractor.ts#L265)
 
 Extract text with position information from a parsed content stream.
 

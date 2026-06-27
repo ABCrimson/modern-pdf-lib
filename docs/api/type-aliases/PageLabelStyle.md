@@ -10,7 +10,7 @@
 type PageLabelStyle = "decimal" | "roman" | "Roman" | "alpha" | "Alpha";
 ```
 
-Defined in: [src/core/pageLabels.ts:44](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pageLabels.ts#L44)
+Defined in: [src/core/pageLabels.ts:44](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pageLabels.ts#L44)
 
 Numbering style for page labels.
 

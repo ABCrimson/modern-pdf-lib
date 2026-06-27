@@ -6,7 +6,7 @@
 
 # Interface: BookmarkNode
 
-Defined in: [src/core/outlines.ts:54](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/outlines.ts#L54)
+Defined in: [src/core/outlines.ts:54](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/outlines.ts#L54)
 
 Represents a single node in the bookmark tree, as returned by
 [getBookmarks](../functions/getBookmarks.md).
@@ -19,7 +19,7 @@ Represents a single node in the bookmark tree, as returned by
 readonly optional bold?: boolean;
 ```
 
-Defined in: [src/core/outlines.ts:68](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/outlines.ts#L68)
+Defined in: [src/core/outlines.ts:68](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/outlines.ts#L68)
 
 Whether the title is bold.
 
@@ -31,7 +31,7 @@ Whether the title is bold.
 readonly children: readonly BookmarkNode[];
 ```
 
-Defined in: [src/core/outlines.ts:74](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/outlines.ts#L74)
+Defined in: [src/core/outlines.ts:74](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/outlines.ts#L74)
 
 Child bookmarks.
 
@@ -43,7 +43,7 @@ Child bookmarks.
 readonly optional color?: object;
 ```
 
-Defined in: [src/core/outlines.ts:72](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/outlines.ts#L72)
+Defined in: [src/core/outlines.ts:72](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/outlines.ts#L72)
 
 Colour of the bookmark title (RGB, 0-1 range).
 
@@ -73,7 +73,7 @@ readonly r: number;
 readonly optional fit?: "Fit" | "FitH" | "FitV" | "FitB" | "FitBH" | "FitBV" | "XYZ";
 ```
 
-Defined in: [src/core/outlines.ts:62](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/outlines.ts#L62)
+Defined in: [src/core/outlines.ts:62](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/outlines.ts#L62)
 
 Page fit mode used by this bookmark's destination.
 
@@ -85,7 +85,7 @@ Page fit mode used by this bookmark's destination.
 readonly optional italic?: boolean;
 ```
 
-Defined in: [src/core/outlines.ts:70](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/outlines.ts#L70)
+Defined in: [src/core/outlines.ts:70](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/outlines.ts#L70)
 
 Whether the title is italic.
 
@@ -97,7 +97,7 @@ Whether the title is italic.
 readonly optional left?: number;
 ```
 
-Defined in: [src/core/outlines.ts:64](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/outlines.ts#L64)
+Defined in: [src/core/outlines.ts:64](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/outlines.ts#L64)
 
 Left coordinate (for FitV, FitBV, XYZ).
 
@@ -109,7 +109,7 @@ Left coordinate (for FitV, FitBV, XYZ).
 readonly pageIndex: number;
 ```
 
-Defined in: [src/core/outlines.ts:58](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/outlines.ts#L58)
+Defined in: [src/core/outlines.ts:58](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/outlines.ts#L58)
 
 Zero-based page index this bookmark points to.
 
@@ -121,7 +121,7 @@ Zero-based page index this bookmark points to.
 readonly ref: BookmarkRef;
 ```
 
-Defined in: [src/core/outlines.ts:76](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/outlines.ts#L76)
+Defined in: [src/core/outlines.ts:76](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/outlines.ts#L76)
 
 The handle for this bookmark node.
 
@@ -133,7 +133,7 @@ The handle for this bookmark node.
 readonly title: string;
 ```
 
-Defined in: [src/core/outlines.ts:56](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/outlines.ts#L56)
+Defined in: [src/core/outlines.ts:56](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/outlines.ts#L56)
 
 The displayed bookmark title.
 
@@ -145,7 +145,7 @@ The displayed bookmark title.
 readonly optional y?: number;
 ```
 
-Defined in: [src/core/outlines.ts:60](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/outlines.ts#L60)
+Defined in: [src/core/outlines.ts:60](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/outlines.ts#L60)
 
 Vertical position on the target page (if set).
 
@@ -157,6 +157,6 @@ Vertical position on the target page (if set).
 readonly optional zoom?: number;
 ```
 
-Defined in: [src/core/outlines.ts:66](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/outlines.ts#L66)
+Defined in: [src/core/outlines.ts:66](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/outlines.ts#L66)
 
 Zoom factor (for XYZ).

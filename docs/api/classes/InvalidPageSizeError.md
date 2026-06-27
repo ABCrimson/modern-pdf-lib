@@ -6,7 +6,7 @@
 
 # Class: InvalidPageSizeError
 
-Defined in: [src/errors.ts:230](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/errors.ts#L230)
+Defined in: [src/errors.ts:230](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/errors.ts#L230)
 
 Thrown when an invalid page size is provided (e.g. zero or negative
 dimensions, non-finite values).
@@ -32,7 +32,7 @@ new InvalidPageSizeError(
    options?): InvalidPageSizeError;
 ```
 
-Defined in: [src/errors.ts:232](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/errors.ts#L232)
+Defined in: [src/errors.ts:232](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/errors.ts#L232)
 
 #### Parameters
 
@@ -98,7 +98,7 @@ Error.message
 readonly name: "InvalidPageSizeError" = 'InvalidPageSizeError';
 ```
 
-Defined in: [src/errors.ts:231](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/errors.ts#L231)
+Defined in: [src/errors.ts:231](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/errors.ts#L231)
 
 #### Overrides
 

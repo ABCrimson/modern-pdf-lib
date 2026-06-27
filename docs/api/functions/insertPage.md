@@ -13,7 +13,7 @@ function insertPage(
    size?): PdfPage;
 ```
 
-Defined in: [src/core/pageManipulation.ts:140](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pageManipulation.ts#L140)
+Defined in: [src/core/pageManipulation.ts:140](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pageManipulation.ts#L140)
 
 Insert a new blank page into the document at the specified position.
 

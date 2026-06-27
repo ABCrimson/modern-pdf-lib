@@ -6,7 +6,7 @@
 
 # Interface: ContentStreamOperator
 
-Defined in: [src/parser/contentStreamParser.ts:39](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/parser/contentStreamParser.ts#L39)
+Defined in: [src/parser/contentStreamParser.ts:39](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/parser/contentStreamParser.ts#L39)
 
 A parsed content-stream operator with its preceding operands.
 
@@ -18,7 +18,7 @@ A parsed content-stream operator with its preceding operands.
 operands: Operand[];
 ```
 
-Defined in: [src/parser/contentStreamParser.ts:43](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/parser/contentStreamParser.ts#L43)
+Defined in: [src/parser/contentStreamParser.ts:43](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/parser/contentStreamParser.ts#L43)
 
 The operand values that preceded this operator.
 
@@ -30,6 +30,6 @@ The operand values that preceded this operator.
 operator: string;
 ```
 
-Defined in: [src/parser/contentStreamParser.ts:41](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/parser/contentStreamParser.ts#L41)
+Defined in: [src/parser/contentStreamParser.ts:41](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/parser/contentStreamParser.ts#L41)
 
 The operator keyword, e.g. `"BT"`, `"Tf"`, `"Tj"`, `"re"`, `"cm"`.

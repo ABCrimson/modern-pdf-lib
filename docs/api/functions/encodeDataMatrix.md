@@ -10,7 +10,7 @@
 function encodeDataMatrix(data): DataMatrixResult;
 ```
 
-Defined in: [src/barcode/dataMatrix.ts:539](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/barcode/dataMatrix.ts#L539)
+Defined in: [src/barcode/dataMatrix.ts:539](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/barcode/dataMatrix.ts#L539)
 
 Encode a string as a Data Matrix ECC200 symbol.
 

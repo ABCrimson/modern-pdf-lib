@@ -6,7 +6,7 @@
 
 # Interface: RedactionMark
 
-Defined in: [src/core/redaction.ts:55](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/redaction.ts#L55)
+Defined in: [src/core/redaction.ts:55](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/redaction.ts#L55)
 
 Redaction mark stored on a page.
 
@@ -18,7 +18,7 @@ Redaction mark stored on a page.
 borderColor: object;
 ```
 
-Defined in: [src/core/redaction.ts:63](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/redaction.ts#L63)
+Defined in: [src/core/redaction.ts:63](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/redaction.ts#L63)
 
 #### b
 
@@ -46,7 +46,7 @@ r: number;
 borderWidth: number;
 ```
 
-Defined in: [src/core/redaction.ts:62](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/redaction.ts#L62)
+Defined in: [src/core/redaction.ts:62](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/redaction.ts#L62)
 
 ***
 
@@ -56,7 +56,7 @@ Defined in: [src/core/redaction.ts:62](https://github.com/ABCrimson/modern-pdf-l
 color: object;
 ```
 
-Defined in: [src/core/redaction.ts:58](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/redaction.ts#L58)
+Defined in: [src/core/redaction.ts:58](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/redaction.ts#L58)
 
 #### b
 
@@ -84,7 +84,7 @@ r: number;
 opacity: number;
 ```
 
-Defined in: [src/core/redaction.ts:64](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/redaction.ts#L64)
+Defined in: [src/core/redaction.ts:64](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/redaction.ts#L64)
 
 ***
 
@@ -94,7 +94,7 @@ Defined in: [src/core/redaction.ts:64](https://github.com/ABCrimson/modern-pdf-l
 overlayAlignment: OverlayAlignment;
 ```
 
-Defined in: [src/core/redaction.ts:61](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/redaction.ts#L61)
+Defined in: [src/core/redaction.ts:61](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/redaction.ts#L61)
 
 ***
 
@@ -104,7 +104,7 @@ Defined in: [src/core/redaction.ts:61](https://github.com/ABCrimson/modern-pdf-l
 overlayFont: string;
 ```
 
-Defined in: [src/core/redaction.ts:59](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/redaction.ts#L59)
+Defined in: [src/core/redaction.ts:59](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/redaction.ts#L59)
 
 ***
 
@@ -114,7 +114,7 @@ Defined in: [src/core/redaction.ts:59](https://github.com/ABCrimson/modern-pdf-l
 optional overlayFontSize?: number;
 ```
 
-Defined in: [src/core/redaction.ts:60](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/redaction.ts#L60)
+Defined in: [src/core/redaction.ts:60](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/redaction.ts#L60)
 
 ***
 
@@ -124,7 +124,7 @@ Defined in: [src/core/redaction.ts:60](https://github.com/ABCrimson/modern-pdf-l
 optional overlayText?: string;
 ```
 
-Defined in: [src/core/redaction.ts:57](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/redaction.ts#L57)
+Defined in: [src/core/redaction.ts:57](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/redaction.ts#L57)
 
 ***
 
@@ -134,4 +134,4 @@ Defined in: [src/core/redaction.ts:57](https://github.com/ABCrimson/modern-pdf-l
 rect: [number, number, number, number];
 ```
 
-Defined in: [src/core/redaction.ts:56](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/redaction.ts#L56)
+Defined in: [src/core/redaction.ts:56](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/redaction.ts#L56)

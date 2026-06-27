@@ -6,7 +6,7 @@
 
 # Interface: SvgGradientStop
 
-Defined in: [src/assets/svg/svgParser.ts:38](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/svg/svgParser.ts#L38)
+Defined in: [src/assets/svg/svgParser.ts:38](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/assets/svg/svgParser.ts#L38)
 
 A single gradient colour stop.
 
@@ -18,7 +18,7 @@ A single gradient colour stop.
 color: object;
 ```
 
-Defined in: [src/assets/svg/svgParser.ts:42](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/svg/svgParser.ts#L42)
+Defined in: [src/assets/svg/svgParser.ts:42](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/assets/svg/svgParser.ts#L42)
 
 Stop colour (RGB, 0-255).
 
@@ -48,7 +48,7 @@ r: number;
 offset: number;
 ```
 
-Defined in: [src/assets/svg/svgParser.ts:40](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/svg/svgParser.ts#L40)
+Defined in: [src/assets/svg/svgParser.ts:40](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/assets/svg/svgParser.ts#L40)
 
 Offset in range 0..1.
 
@@ -60,6 +60,6 @@ Offset in range 0..1.
 opacity: number;
 ```
 
-Defined in: [src/assets/svg/svgParser.ts:44](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/svg/svgParser.ts#L44)
+Defined in: [src/assets/svg/svgParser.ts:44](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/assets/svg/svgParser.ts#L44)
 
 Stop opacity (0..1, default 1).

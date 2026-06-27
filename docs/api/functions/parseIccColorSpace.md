@@ -10,7 +10,7 @@
 function parseIccColorSpace(data): string;
 ```
 
-Defined in: [src/assets/image/iccProfile.ts:84](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/iccProfile.ts#L84)
+Defined in: [src/assets/image/iccProfile.ts:84](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/assets/image/iccProfile.ts#L84)
 
 Read the color space signature from raw ICC profile data.
 

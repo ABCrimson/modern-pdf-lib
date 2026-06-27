@@ -10,7 +10,7 @@
 function levenshtein(a, b): number;
 ```
 
-Defined in: [src/utils/codeframe.ts:90](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/utils/codeframe.ts#L90)
+Defined in: [src/utils/codeframe.ts:90](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/utils/codeframe.ts#L90)
 
 Compute the Levenshtein edit distance between two strings: the minimum
 number of single-character insertions, deletions, or substitutions required

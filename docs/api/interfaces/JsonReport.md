@@ -6,7 +6,7 @@
 
 # Interface: JsonReport
 
-Defined in: [src/compliance/validationReport.ts:52](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/validationReport.ts#L52)
+Defined in: [src/compliance/validationReport.ts:52](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/compliance/validationReport.ts#L52)
 
 Compact JSON validation report with conformance status and counts.
 
@@ -18,7 +18,7 @@ Compact JSON validation report with conformance status and counts.
 readonly conformant: boolean;
 ```
 
-Defined in: [src/compliance/validationReport.ts:53](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/validationReport.ts#L53)
+Defined in: [src/compliance/validationReport.ts:53](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/compliance/validationReport.ts#L53)
 
 ***
 
@@ -28,7 +28,7 @@ Defined in: [src/compliance/validationReport.ts:53](https://github.com/ABCrimson
 readonly errorCount: number;
 ```
 
-Defined in: [src/compliance/validationReport.ts:54](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/validationReport.ts#L54)
+Defined in: [src/compliance/validationReport.ts:54](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/compliance/validationReport.ts#L54)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [src/compliance/validationReport.ts:54](https://github.com/ABCrimson
 readonly findings: readonly ValidationFinding[];
 ```
 
-Defined in: [src/compliance/validationReport.ts:56](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/validationReport.ts#L56)
+Defined in: [src/compliance/validationReport.ts:56](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/compliance/validationReport.ts#L56)
 
 ***
 
@@ -48,4 +48,4 @@ Defined in: [src/compliance/validationReport.ts:56](https://github.com/ABCrimson
 readonly warningCount: number;
 ```
 
-Defined in: [src/compliance/validationReport.ts:55](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/validationReport.ts#L55)
+Defined in: [src/compliance/validationReport.ts:55](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/compliance/validationReport.ts#L55)

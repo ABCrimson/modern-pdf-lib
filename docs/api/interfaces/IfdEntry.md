@@ -6,7 +6,7 @@
 
 # Interface: IfdEntry
 
-Defined in: [src/assets/image/tiffDecode.ts:45](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/tiffDecode.ts#L45)
+Defined in: [src/assets/image/tiffDecode.ts:45](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/assets/image/tiffDecode.ts#L45)
 
 A single IFD entry (tag).
 
@@ -18,7 +18,7 @@ A single IFD entry (tag).
 readonly count: number;
 ```
 
-Defined in: [src/assets/image/tiffDecode.ts:51](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/tiffDecode.ts#L51)
+Defined in: [src/assets/image/tiffDecode.ts:51](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/assets/image/tiffDecode.ts#L51)
 
 Number of values.
 
@@ -30,7 +30,7 @@ Number of values.
 readonly tag: number;
 ```
 
-Defined in: [src/assets/image/tiffDecode.ts:47](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/tiffDecode.ts#L47)
+Defined in: [src/assets/image/tiffDecode.ts:47](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/assets/image/tiffDecode.ts#L47)
 
 Tag ID (e.g., 256 = ImageWidth).
 
@@ -42,7 +42,7 @@ Tag ID (e.g., 256 = ImageWidth).
 readonly type: number;
 ```
 
-Defined in: [src/assets/image/tiffDecode.ts:49](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/tiffDecode.ts#L49)
+Defined in: [src/assets/image/tiffDecode.ts:49](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/assets/image/tiffDecode.ts#L49)
 
 Data type (1=BYTE, 2=ASCII, 3=SHORT, 4=LONG, 5=RATIONAL, etc.).
 
@@ -54,6 +54,6 @@ Data type (1=BYTE, 2=ASCII, 3=SHORT, 4=LONG, 5=RATIONAL, etc.).
 readonly values: number[];
 ```
 
-Defined in: [src/assets/image/tiffDecode.ts:53](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/tiffDecode.ts#L53)
+Defined in: [src/assets/image/tiffDecode.ts:53](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/assets/image/tiffDecode.ts#L53)
 
 The value(s) or offset to value data.

@@ -10,7 +10,7 @@
 function generateXRechnungCii(invoice, options?): string;
 ```
 
-Defined in: [src/compliance/xRechnung.ts:315](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/xRechnung.ts#L315)
+Defined in: [src/compliance/xRechnung.ts:315](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/compliance/xRechnung.ts#L315)
 
 Generate an XRechnung 3.x CII (Cross Industry Invoice) XML document.
 

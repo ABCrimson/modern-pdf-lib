@@ -6,7 +6,7 @@
 
 # Interface: AnnotationOptions
 
-Defined in: [src/annotation/pdfAnnotation.ts:45](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/annotation/pdfAnnotation.ts#L45)
+Defined in: [src/annotation/pdfAnnotation.ts:45](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/annotation/pdfAnnotation.ts#L45)
 
 Options for creating a new annotation.
 
@@ -18,7 +18,7 @@ Options for creating a new annotation.
 optional author?: string;
 ```
 
-Defined in: [src/annotation/pdfAnnotation.ts:51](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/annotation/pdfAnnotation.ts#L51)
+Defined in: [src/annotation/pdfAnnotation.ts:51](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/annotation/pdfAnnotation.ts#L51)
 
 Author / title of the annotation.
 
@@ -30,7 +30,7 @@ Author / title of the annotation.
 optional border?: object;
 ```
 
-Defined in: [src/annotation/pdfAnnotation.ts:61](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/annotation/pdfAnnotation.ts#L61)
+Defined in: [src/annotation/pdfAnnotation.ts:61](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/annotation/pdfAnnotation.ts#L61)
 
 Border specification.
 
@@ -54,7 +54,7 @@ width: number;
 optional color?: object;
 ```
 
-Defined in: [src/annotation/pdfAnnotation.ts:55](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/annotation/pdfAnnotation.ts#L55)
+Defined in: [src/annotation/pdfAnnotation.ts:55](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/annotation/pdfAnnotation.ts#L55)
 
 Colour in RGB (each component 0-1).
 
@@ -84,7 +84,7 @@ r: number;
 optional contents?: string;
 ```
 
-Defined in: [src/annotation/pdfAnnotation.ts:49](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/annotation/pdfAnnotation.ts#L49)
+Defined in: [src/annotation/pdfAnnotation.ts:49](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/annotation/pdfAnnotation.ts#L49)
 
 Text contents (displayed as tooltip or popup).
 
@@ -96,7 +96,7 @@ Text contents (displayed as tooltip or popup).
 optional flags?: number;
 ```
 
-Defined in: [src/annotation/pdfAnnotation.ts:59](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/annotation/pdfAnnotation.ts#L59)
+Defined in: [src/annotation/pdfAnnotation.ts:59](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/annotation/pdfAnnotation.ts#L59)
 
 Annotation flags bitmask (PDF spec Table 165).
 
@@ -108,7 +108,7 @@ Annotation flags bitmask (PDF spec Table 165).
 optional modificationDate?: Date;
 ```
 
-Defined in: [src/annotation/pdfAnnotation.ts:53](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/annotation/pdfAnnotation.ts#L53)
+Defined in: [src/annotation/pdfAnnotation.ts:53](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/annotation/pdfAnnotation.ts#L53)
 
 Last modification date.
 
@@ -120,7 +120,7 @@ Last modification date.
 optional opacity?: number;
 ```
 
-Defined in: [src/annotation/pdfAnnotation.ts:57](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/annotation/pdfAnnotation.ts#L57)
+Defined in: [src/annotation/pdfAnnotation.ts:57](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/annotation/pdfAnnotation.ts#L57)
 
 Opacity (0 = transparent, 1 = opaque).
 
@@ -132,6 +132,6 @@ Opacity (0 = transparent, 1 = opaque).
 rect: [number, number, number, number];
 ```
 
-Defined in: [src/annotation/pdfAnnotation.ts:47](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/annotation/pdfAnnotation.ts#L47)
+Defined in: [src/annotation/pdfAnnotation.ts:47](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/annotation/pdfAnnotation.ts#L47)
 
 Annotation rectangle [x1, y1, x2, y2] in default user space.

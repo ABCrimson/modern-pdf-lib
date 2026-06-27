@@ -60,7 +60,7 @@ type StructureType =
   | string & object;
 ```
 
-Defined in: [src/accessibility/structureTree.ts:50](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/accessibility/structureTree.ts#L50)
+Defined in: [src/accessibility/structureTree.ts:50](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/accessibility/structureTree.ts#L50)
 
 Standard structure types defined by the PDF specification (ISO 32000-1,
 Table 333 through Table 340), plus a `string` catch-all for custom

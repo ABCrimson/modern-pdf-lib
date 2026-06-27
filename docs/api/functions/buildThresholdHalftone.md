@@ -14,7 +14,7 @@ function buildThresholdHalftone(
    thresholds): PdfStream;
 ```
 
-Defined in: [src/core/halftone.ts:127](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/halftone.ts#L127)
+Defined in: [src/core/halftone.ts:127](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/halftone.ts#L127)
 
 Build a threshold-array halftone stream (Type 6, 10, or 16).
 

@@ -6,7 +6,7 @@
 
 # Interface: LayoutCombedOptions
 
-Defined in: [src/core/layout.ts:81](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/layout.ts#L81)
+Defined in: [src/core/layout.ts:81](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/layout.ts#L81)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [src/core/layout.ts:81](https://github.com/ABCrimson/modern-pdf-lib/
 cellCount: number;
 ```
 
-Defined in: [src/core/layout.ts:84](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/layout.ts#L84)
+Defined in: [src/core/layout.ts:84](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/layout.ts#L84)
 
 ***
 
@@ -26,7 +26,7 @@ Defined in: [src/core/layout.ts:84](https://github.com/ABCrimson/modern-pdf-lib/
 cellWidth: number;
 ```
 
-Defined in: [src/core/layout.ts:85](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/layout.ts#L85)
+Defined in: [src/core/layout.ts:85](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/layout.ts#L85)
 
 ***
 
@@ -36,7 +36,7 @@ Defined in: [src/core/layout.ts:85](https://github.com/ABCrimson/modern-pdf-lib/
 font: FontRef;
 ```
 
-Defined in: [src/core/layout.ts:82](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/layout.ts#L82)
+Defined in: [src/core/layout.ts:82](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/layout.ts#L82)
 
 ***
 
@@ -46,4 +46,4 @@ Defined in: [src/core/layout.ts:82](https://github.com/ABCrimson/modern-pdf-lib/
 fontSize: number;
 ```
 
-Defined in: [src/core/layout.ts:83](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/layout.ts#L83)
+Defined in: [src/core/layout.ts:83](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/layout.ts#L83)

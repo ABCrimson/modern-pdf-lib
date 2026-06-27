@@ -10,7 +10,7 @@
 function embedIccProfile(profile, registry): PdfRef;
 ```
 
-Defined in: [src/assets/image/iccProfile.ts:276](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/iccProfile.ts#L276)
+Defined in: [src/assets/image/iccProfile.ts:276](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/assets/image/iccProfile.ts#L276)
 
 Embed an ICC color profile into the PDF object registry and return
 a reference that can be used as a `/ColorSpace` entry.

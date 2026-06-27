@@ -6,7 +6,7 @@
 
 # Interface: AssociatedFileOptions
 
-Defined in: [src/compliance/associatedFiles.ts:53](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/associatedFiles.ts#L53)
+Defined in: [src/compliance/associatedFiles.ts:53](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/compliance/associatedFiles.ts#L53)
 
 Options for creating an associated file entry.
 
@@ -18,7 +18,7 @@ Options for creating an associated file entry.
 readonly optional creationDate?: string;
 ```
 
-Defined in: [src/compliance/associatedFiles.ts:65](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/associatedFiles.ts#L65)
+Defined in: [src/compliance/associatedFiles.ts:65](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/compliance/associatedFiles.ts#L65)
 
 Optional creation date (ISO 8601 string, stored as PDF date).
 
@@ -30,7 +30,7 @@ Optional creation date (ISO 8601 string, stored as PDF date).
 readonly data: Uint8Array;
 ```
 
-Defined in: [src/compliance/associatedFiles.ts:55](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/associatedFiles.ts#L55)
+Defined in: [src/compliance/associatedFiles.ts:55](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/compliance/associatedFiles.ts#L55)
 
 The file data bytes.
 
@@ -42,7 +42,7 @@ The file data bytes.
 readonly optional description?: string;
 ```
 
-Defined in: [src/compliance/associatedFiles.ts:63](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/associatedFiles.ts#L63)
+Defined in: [src/compliance/associatedFiles.ts:63](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/compliance/associatedFiles.ts#L63)
 
 Optional description of the file.
 
@@ -54,7 +54,7 @@ Optional description of the file.
 readonly filename: string;
 ```
 
-Defined in: [src/compliance/associatedFiles.ts:57](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/associatedFiles.ts#L57)
+Defined in: [src/compliance/associatedFiles.ts:57](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/compliance/associatedFiles.ts#L57)
 
 The filename.
 
@@ -66,7 +66,7 @@ The filename.
 readonly mimeType: string;
 ```
 
-Defined in: [src/compliance/associatedFiles.ts:59](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/associatedFiles.ts#L59)
+Defined in: [src/compliance/associatedFiles.ts:59](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/compliance/associatedFiles.ts#L59)
 
 MIME type of the file (e.g. `"text/xml"`, `"application/pdf"`).
 
@@ -78,7 +78,7 @@ MIME type of the file (e.g. `"text/xml"`, `"application/pdf"`).
 readonly optional modificationDate?: string;
 ```
 
-Defined in: [src/compliance/associatedFiles.ts:67](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/associatedFiles.ts#L67)
+Defined in: [src/compliance/associatedFiles.ts:67](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/compliance/associatedFiles.ts#L67)
 
 Optional modification date (ISO 8601 string, stored as PDF date).
 
@@ -90,6 +90,6 @@ Optional modification date (ISO 8601 string, stored as PDF date).
 readonly relationship: AFRelationship;
 ```
 
-Defined in: [src/compliance/associatedFiles.ts:61](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/associatedFiles.ts#L61)
+Defined in: [src/compliance/associatedFiles.ts:61](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/compliance/associatedFiles.ts#L61)
 
 Relationship to the PDF document.

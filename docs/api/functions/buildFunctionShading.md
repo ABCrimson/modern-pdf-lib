@@ -10,7 +10,7 @@
 function buildFunctionShading(options): PdfDict;
 ```
 
-Defined in: [src/core/shadingFunction.ts:136](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/shadingFunction.ts#L136)
+Defined in: [src/core/shadingFunction.ts:136](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/shadingFunction.ts#L136)
 
 Build a function-based (type 1) `/Shading` dictionary.
 

@@ -6,7 +6,7 @@
 
 # Interface: StitchingFunction
 
-Defined in: [src/core/pdfFunctions.ts:87](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfFunctions.ts#L87)
+Defined in: [src/core/pdfFunctions.ts:87](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfFunctions.ts#L87)
 
 Type 3 — stitching function (ISO 32000-2 §7.10.4).
 
@@ -22,7 +22,7 @@ input into that sub-function's domain via `encode`.
 readonly bounds: readonly number[];
 ```
 
-Defined in: [src/core/pdfFunctions.ts:94](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfFunctions.ts#L94)
+Defined in: [src/core/pdfFunctions.ts:94](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfFunctions.ts#L94)
 
 The `k − 1` interior boundary values, strictly increasing.
 
@@ -34,7 +34,7 @@ The `k − 1` interior boundary values, strictly increasing.
 readonly domain: readonly number[];
 ```
 
-Defined in: [src/core/pdfFunctions.ts:90](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfFunctions.ts#L90)
+Defined in: [src/core/pdfFunctions.ts:90](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfFunctions.ts#L90)
 
 Input domain `[min max]`.
 
@@ -46,7 +46,7 @@ Input domain `[min max]`.
 readonly encode: readonly number[];
 ```
 
-Defined in: [src/core/pdfFunctions.ts:96](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfFunctions.ts#L96)
+Defined in: [src/core/pdfFunctions.ts:96](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfFunctions.ts#L96)
 
 `2k` encode values mapping each subdomain to its sub-function domain.
 
@@ -58,7 +58,7 @@ Defined in: [src/core/pdfFunctions.ts:96](https://github.com/ABCrimson/modern-pd
 readonly functions: readonly PdfFunctionDef[];
 ```
 
-Defined in: [src/core/pdfFunctions.ts:92](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfFunctions.ts#L92)
+Defined in: [src/core/pdfFunctions.ts:92](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfFunctions.ts#L92)
 
 The `k` sub-functions.
 
@@ -70,4 +70,4 @@ The `k` sub-functions.
 readonly functionType: 3;
 ```
 
-Defined in: [src/core/pdfFunctions.ts:88](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfFunctions.ts#L88)
+Defined in: [src/core/pdfFunctions.ts:88](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfFunctions.ts#L88)

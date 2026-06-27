@@ -6,7 +6,7 @@
 
 # Class: BatchProcessingError
 
-Defined in: [src/errors.ts:320](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/errors.ts#L320)
+Defined in: [src/errors.ts:320](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/errors.ts#L320)
 
 Thrown when a batch processing operation fails.  Contains information
 about which items succeeded and which failed.
@@ -32,7 +32,7 @@ new BatchProcessingError(
    options?): BatchProcessingError;
 ```
 
-Defined in: [src/errors.ts:324](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/errors.ts#L324)
+Defined in: [src/errors.ts:324](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/errors.ts#L324)
 
 #### Parameters
 
@@ -82,7 +82,7 @@ Error.cause
 readonly failures: readonly object[];
 ```
 
-Defined in: [src/errors.ts:323](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/errors.ts#L323)
+Defined in: [src/errors.ts:323](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/errors.ts#L323)
 
 Details of individual item failures.
 
@@ -110,7 +110,7 @@ Error.message
 readonly name: "BatchProcessingError" = 'BatchProcessingError';
 ```
 
-Defined in: [src/errors.ts:321](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/errors.ts#L321)
+Defined in: [src/errors.ts:321](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/errors.ts#L321)
 
 #### Overrides
 

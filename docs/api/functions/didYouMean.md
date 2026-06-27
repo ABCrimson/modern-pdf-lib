@@ -13,7 +13,7 @@ function didYouMean(
    maxDistance?): string | undefined;
 ```
 
-Defined in: [src/utils/codeframe.ts:143](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/utils/codeframe.ts#L143)
+Defined in: [src/utils/codeframe.ts:143](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/utils/codeframe.ts#L143)
 
 Suggest the closest candidate to `input` from a list of `candidates`,
 useful for "did you mean …?" hints.

@@ -6,7 +6,7 @@
 
 # Interface: TableColumn
 
-Defined in: [src/layout/table.ts:86](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layout/table.ts#L86)
+Defined in: [src/layout/table.ts:86](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/layout/table.ts#L86)
 
 Column definition.
 
@@ -18,7 +18,7 @@ Column definition.
 readonly optional align?: "left" | "center" | "right";
 ```
 
-Defined in: [src/layout/table.ts:97](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layout/table.ts#L97)
+Defined in: [src/layout/table.ts:97](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/layout/table.ts#L97)
 
 ***
 
@@ -28,7 +28,7 @@ Defined in: [src/layout/table.ts:97](https://github.com/ABCrimson/modern-pdf-lib
 readonly optional autoFit?: boolean;
 ```
 
-Defined in: [src/layout/table.ts:94](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layout/table.ts#L94)
+Defined in: [src/layout/table.ts:94](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/layout/table.ts#L94)
 
 Auto-fit: measure content and use minimum needed width.
 
@@ -40,7 +40,7 @@ Auto-fit: measure content and use minimum needed width.
 readonly optional flex?: number;
 ```
 
-Defined in: [src/layout/table.ts:92](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layout/table.ts#L92)
+Defined in: [src/layout/table.ts:92](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/layout/table.ts#L92)
 
 Flex weight (like CSS flex-grow). Default: 1 when no width/percentage.
 
@@ -52,7 +52,7 @@ Flex weight (like CSS flex-grow). Default: 1 when no width/percentage.
 readonly optional maxWidth?: number;
 ```
 
-Defined in: [src/layout/table.ts:96](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layout/table.ts#L96)
+Defined in: [src/layout/table.ts:96](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/layout/table.ts#L96)
 
 ***
 
@@ -62,7 +62,7 @@ Defined in: [src/layout/table.ts:96](https://github.com/ABCrimson/modern-pdf-lib
 readonly optional minWidth?: number;
 ```
 
-Defined in: [src/layout/table.ts:95](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layout/table.ts#L95)
+Defined in: [src/layout/table.ts:95](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/layout/table.ts#L95)
 
 ***
 
@@ -72,7 +72,7 @@ Defined in: [src/layout/table.ts:95](https://github.com/ABCrimson/modern-pdf-lib
 readonly optional percentage?: string;
 ```
 
-Defined in: [src/layout/table.ts:90](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layout/table.ts#L90)
+Defined in: [src/layout/table.ts:90](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/layout/table.ts#L90)
 
 Percentage of table width (e.g., '30%').
 
@@ -84,6 +84,6 @@ Percentage of table width (e.g., '30%').
 readonly optional width?: number;
 ```
 
-Defined in: [src/layout/table.ts:88](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layout/table.ts#L88)
+Defined in: [src/layout/table.ts:88](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/layout/table.ts#L88)
 
 Fixed width in points.

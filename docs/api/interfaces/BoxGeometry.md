@@ -6,7 +6,7 @@
 
 # Interface: BoxGeometry
 
-Defined in: [src/compliance/pdfX6.ts:58](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/pdfX6.ts#L58)
+Defined in: [src/compliance/pdfX6.ts:58](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/compliance/pdfX6.ts#L58)
 
 Page-geometry boxes relevant to PDF/X conformance.
 
@@ -18,7 +18,7 @@ Page-geometry boxes relevant to PDF/X conformance.
 readonly optional bleedBox?: PdfRect;
 ```
 
-Defined in: [src/compliance/pdfX6.ts:64](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/pdfX6.ts#L64)
+Defined in: [src/compliance/pdfX6.ts:64](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/compliance/pdfX6.ts#L64)
 
 The bleed box — the region painted then trimmed away.
 
@@ -30,7 +30,7 @@ The bleed box — the region painted then trimmed away.
 readonly mediaBox: PdfRect;
 ```
 
-Defined in: [src/compliance/pdfX6.ts:60](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/pdfX6.ts#L60)
+Defined in: [src/compliance/pdfX6.ts:60](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/compliance/pdfX6.ts#L60)
 
 The media box — the physical medium bounds. Required.
 
@@ -42,6 +42,6 @@ The media box — the physical medium bounds. Required.
 readonly optional trimBox?: PdfRect;
 ```
 
-Defined in: [src/compliance/pdfX6.ts:62](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/pdfX6.ts#L62)
+Defined in: [src/compliance/pdfX6.ts:62](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/compliance/pdfX6.ts#L62)
 
 The trim box — the intended finished page bounds.

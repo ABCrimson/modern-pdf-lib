@@ -15,7 +15,7 @@ function embedPageAsFormXObject(
    options?): EmbeddedPdfPage;
 ```
 
-Defined in: [src/core/pdfEmbed.ts:265](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfEmbed.ts#L265)
+Defined in: [src/core/pdfEmbed.ts:253](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfEmbed.ts#L253)
 
 Embed a single page as a Form XObject in the target registry.
 

@@ -10,7 +10,7 @@
 function getSignatures(pdfBytes): PdfSignatureInfo[];
 ```
 
-Defined in: [src/signature/signatureHandler.ts:359](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/signatureHandler.ts#L359)
+Defined in: [src/signature/signatureHandler.ts:359](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/signature/signatureHandler.ts#L359)
 
 Extract signature information from a PDF.
 

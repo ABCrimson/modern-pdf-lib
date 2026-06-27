@@ -6,7 +6,7 @@
 
 # Class: PdfForm
 
-Defined in: [src/form/pdfForm.ts:132](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/pdfForm.ts#L132)
+Defined in: [src/form/pdfForm.ts:132](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/form/pdfForm.ts#L132)
 
 Represents a PDF document's interactive form (AcroForm).
 
@@ -20,7 +20,7 @@ Provides access to all form fields, bulk fill, and flatten operations.
 new PdfForm(fields, acroFormDict): PdfForm;
 ```
 
-Defined in: [src/form/pdfForm.ts:142](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/pdfForm.ts#L142)
+Defined in: [src/form/pdfForm.ts:142](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/form/pdfForm.ts#L142)
 
 #### Parameters
 
@@ -48,7 +48,7 @@ createButton(
    label?): PdfButtonField;
 ```
 
-Defined in: [src/form/pdfForm.ts:648](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/pdfForm.ts#L648)
+Defined in: [src/form/pdfForm.ts:648](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/form/pdfForm.ts#L648)
 
 Create a new push button and add it to the form.
 
@@ -109,7 +109,7 @@ createCheckbox(
    rect): PdfCheckboxField;
 ```
 
-Defined in: [src/form/pdfForm.ts:530](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/pdfForm.ts#L530)
+Defined in: [src/form/pdfForm.ts:530](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/form/pdfForm.ts#L530)
 
 Create a new checkbox and add it to the form.
 
@@ -151,7 +151,7 @@ createDropdown(
    options): PdfDropdownField;
 ```
 
-Defined in: [src/form/pdfForm.ts:555](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/pdfForm.ts#L555)
+Defined in: [src/form/pdfForm.ts:555](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/form/pdfForm.ts#L555)
 
 Create a new dropdown and add it to the form.
 
@@ -199,7 +199,7 @@ createListbox(
    options): PdfListboxField;
 ```
 
-Defined in: [src/form/pdfForm.ts:685](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/pdfForm.ts#L685)
+Defined in: [src/form/pdfForm.ts:685](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/form/pdfForm.ts#L685)
 
 Create a new listbox and add it to the form.
 
@@ -264,7 +264,7 @@ createRadioGroup(
    options?): PdfRadioGroup;
 ```
 
-Defined in: [src/form/pdfForm.ts:589](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/pdfForm.ts#L589)
+Defined in: [src/form/pdfForm.ts:589](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/form/pdfForm.ts#L589)
 
 Create a new radio button group and add it to the form.
 
@@ -318,7 +318,7 @@ createTextField(
    rect): PdfTextField;
 ```
 
-Defined in: [src/form/pdfForm.ts:507](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/pdfForm.ts#L507)
+Defined in: [src/form/pdfForm.ts:507](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/form/pdfForm.ts#L507)
 
 Create a new text field and add it to the form.
 
@@ -356,7 +356,7 @@ The newly created text field.
 deleteXFA(): void;
 ```
 
-Defined in: [src/form/pdfForm.ts:487](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/pdfForm.ts#L487)
+Defined in: [src/form/pdfForm.ts:487](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/form/pdfForm.ts#L487)
 
 Remove the /XFA entry from the AcroForm dictionary, if present.
 
@@ -384,7 +384,7 @@ an /XFA entry.
 fill(values): void;
 ```
 
-Defined in: [src/form/pdfForm.ts:413](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/pdfForm.ts#L413)
+Defined in: [src/form/pdfForm.ts:413](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/form/pdfForm.ts#L413)
 
 Fill multiple fields at once.
 
@@ -416,7 +416,7 @@ If a field name is not found.
 flatten(): void;
 ```
 
-Defined in: [src/form/pdfForm.ts:442](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/pdfForm.ts#L442)
+Defined in: [src/form/pdfForm.ts:442](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/form/pdfForm.ts#L442)
 
 Flatten the form: burn field values into the page content streams
 and remove the interactive form structure.
@@ -444,7 +444,7 @@ streams remain as page annotations will reference them.
 getButton(name): PdfButtonField;
 ```
 
-Defined in: [src/form/pdfForm.ts:369](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/pdfForm.ts#L369)
+Defined in: [src/form/pdfForm.ts:369](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/form/pdfForm.ts#L369)
 
 Get a button field by name.
 Throws if the field is not found or is not a button.
@@ -467,7 +467,7 @@ Throws if the field is not found or is not a button.
 getCheckbox(name): PdfCheckboxField;
 ```
 
-Defined in: [src/form/pdfForm.ts:301](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/pdfForm.ts#L301)
+Defined in: [src/form/pdfForm.ts:301](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/form/pdfForm.ts#L301)
 
 Get a checkbox field by name.
 Throws if the field is not found or is not a checkbox.
@@ -490,7 +490,7 @@ Throws if the field is not found or is not a checkbox.
 getDropdown(name): PdfDropdownField;
 ```
 
-Defined in: [src/form/pdfForm.ts:335](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/pdfForm.ts#L335)
+Defined in: [src/form/pdfForm.ts:335](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/form/pdfForm.ts#L335)
 
 Get a dropdown field by name.
 Throws if the field is not found or is not a dropdown.
@@ -513,7 +513,7 @@ Throws if the field is not found or is not a dropdown.
 getField(name): PdfField | undefined;
 ```
 
-Defined in: [src/form/pdfForm.ts:276](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/pdfForm.ts#L276)
+Defined in: [src/form/pdfForm.ts:276](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/form/pdfForm.ts#L276)
 
 Get a field by name (partial or fully-qualified).
 Returns undefined if not found.
@@ -536,7 +536,7 @@ Returns undefined if not found.
 getFields(): PdfField[];
 ```
 
-Defined in: [src/form/pdfForm.ts:268](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/pdfForm.ts#L268)
+Defined in: [src/form/pdfForm.ts:268](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/form/pdfForm.ts#L268)
 
 Get all fields in the form.
 
@@ -552,7 +552,7 @@ Get all fields in the form.
 getListbox(name): PdfListboxField;
 ```
 
-Defined in: [src/form/pdfForm.ts:352](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/pdfForm.ts#L352)
+Defined in: [src/form/pdfForm.ts:352](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/form/pdfForm.ts#L352)
 
 Get a listbox field by name.
 Throws if the field is not found or is not a listbox.
@@ -575,7 +575,7 @@ Throws if the field is not found or is not a listbox.
 getRadioGroup(name): PdfRadioGroup;
 ```
 
-Defined in: [src/form/pdfForm.ts:318](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/pdfForm.ts#L318)
+Defined in: [src/form/pdfForm.ts:318](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/form/pdfForm.ts#L318)
 
 Get a radio group by name.
 Throws if the field is not found or is not a radio group.
@@ -598,7 +598,7 @@ Throws if the field is not found or is not a radio group.
 getSignatureField(name): PdfSignatureField;
 ```
 
-Defined in: [src/form/pdfForm.ts:386](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/pdfForm.ts#L386)
+Defined in: [src/form/pdfForm.ts:386](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/form/pdfForm.ts#L386)
 
 Get a signature field by name.
 Throws if the field is not found or is not a signature field.
@@ -621,7 +621,7 @@ Throws if the field is not found or is not a signature field.
 getTextField(name): PdfTextField;
 ```
 
-Defined in: [src/form/pdfForm.ts:284](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/pdfForm.ts#L284)
+Defined in: [src/form/pdfForm.ts:284](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/form/pdfForm.ts#L284)
 
 Get a text field by name.
 Throws if the field is not found or is not a text field.
@@ -644,7 +644,7 @@ Throws if the field is not found or is not a text field.
 hasXFA(): boolean;
 ```
 
-Defined in: [src/form/pdfForm.ts:468](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/pdfForm.ts#L468)
+Defined in: [src/form/pdfForm.ts:468](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/form/pdfForm.ts#L468)
 
 Check whether the AcroForm dictionary contains XFA data.
 
@@ -666,7 +666,7 @@ XFA renderer instead of the standard AcroForm renderer. Use
 removeField(name): void;
 ```
 
-Defined in: [src/form/pdfForm.ts:715](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/pdfForm.ts#L715)
+Defined in: [src/form/pdfForm.ts:715](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/form/pdfForm.ts#L715)
 
 Remove a field from the form by name.
 
@@ -697,7 +697,7 @@ If no field with the given name exists.
 toDict(_registry): PdfDict;
 ```
 
-Defined in: [src/form/pdfForm.ts:756](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/pdfForm.ts#L756)
+Defined in: [src/form/pdfForm.ts:756](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/form/pdfForm.ts#L756)
 
 Serialize the form back to a PdfDict.
 
@@ -722,7 +722,7 @@ by the viewer.
 static fromDict(acroFormDict, resolver): PdfForm;
 ```
 
-Defined in: [src/form/pdfForm.ts:169](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/pdfForm.ts#L169)
+Defined in: [src/form/pdfForm.ts:169](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/form/pdfForm.ts#L169)
 
 Build a PdfForm from a parsed /AcroForm dictionary.
 

@@ -13,7 +13,7 @@ function processBatch(
 options?): Promise<BatchResult>;
 ```
 
-Defined in: [src/batch/batchProcessor.ts:245](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/batch/batchProcessor.ts#L245)
+Defined in: [src/batch/batchProcessor.ts:245](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/batch/batchProcessor.ts#L245)
 
 Process multiple PDFs in parallel (or with bounded concurrency).
 

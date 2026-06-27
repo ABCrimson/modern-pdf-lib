@@ -10,7 +10,7 @@
 function detectModifications(pdf): Promise<ModificationReport>;
 ```
 
-Defined in: [src/signature/modificationDetector.ts:152](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/modificationDetector.ts#L152)
+Defined in: [src/signature/modificationDetector.ts:152](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/signature/modificationDetector.ts#L152)
 
 Detect modifications in a certified PDF document.
 

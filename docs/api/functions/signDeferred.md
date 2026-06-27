@@ -13,7 +13,7 @@ function signDeferred(
 options?): Promise<DeferredSignResult>;
 ```
 
-Defined in: [src/signature/externalSigner.ts:96](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/externalSigner.ts#L96)
+Defined in: [src/signature/externalSigner.ts:96](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/signature/externalSigner.ts#L96)
 
 Perform a deferred-hash signing operation against an external signer.
 

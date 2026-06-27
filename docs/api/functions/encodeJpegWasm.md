@@ -17,7 +17,7 @@ function encodeJpegWasm(
    chroma?): Uint8Array<ArrayBufferLike> | undefined;
 ```
 
-Defined in: [src/wasm/jpeg/bridge.ts:141](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/wasm/jpeg/bridge.ts#L141)
+Defined in: [src/wasm/jpeg/bridge.ts:141](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/wasm/jpeg/bridge.ts#L141)
 
 Encode raw pixel data to JPEG using the WASM encoder.
 

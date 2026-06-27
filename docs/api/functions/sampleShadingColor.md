@@ -13,7 +13,7 @@ function sampleShadingColor(
    y): number[];
 ```
 
-Defined in: [src/core/shadingFunction.ts:163](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/shadingFunction.ts#L163)
+Defined in: [src/core/shadingFunction.ts:163](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/shadingFunction.ts#L163)
 
 Sample the shading's colour at domain coordinate `(x, y)`.
 

@@ -6,7 +6,7 @@
 
 # Class: RichTextFieldReadError
 
-Defined in: [src/errors.ts:172](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/errors.ts#L172)
+Defined in: [src/errors.ts:172](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/errors.ts#L172)
 
 Thrown when attempting to read the rich text value (/RV) of a field
 that does not support it or whose rich text is malformed.
@@ -23,7 +23,7 @@ that does not support it or whose rich text is malformed.
 new RichTextFieldReadError(fieldName, options?): RichTextFieldReadError;
 ```
 
-Defined in: [src/errors.ts:174](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/errors.ts#L174)
+Defined in: [src/errors.ts:174](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/errors.ts#L174)
 
 #### Parameters
 
@@ -85,7 +85,7 @@ Error.message
 readonly name: "RichTextFieldReadError" = 'RichTextFieldReadError';
 ```
 
-Defined in: [src/errors.ts:173](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/errors.ts#L173)
+Defined in: [src/errors.ts:173](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/errors.ts#L173)
 
 #### Overrides
 

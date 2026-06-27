@@ -6,7 +6,7 @@
 
 # Class: PdfStream
 
-Defined in: [src/core/pdfObjects.ts:349](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfObjects.ts#L349)
+Defined in: [src/core/pdfObjects.ts:349](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfObjects.ts#L349)
 
 A PDF stream object — a dictionary followed by `stream … endstream`.
 
@@ -21,7 +21,7 @@ is responsible for setting `/Length` in the dict before serialization.
 new PdfStream(dict, data): PdfStream;
 ```
 
-Defined in: [src/core/pdfObjects.ts:353](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfObjects.ts#L353)
+Defined in: [src/core/pdfObjects.ts:353](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfObjects.ts#L353)
 
 #### Parameters
 
@@ -49,7 +49,7 @@ Raw stream data (already encoded / compressed).
 data: Uint8Array;
 ```
 
-Defined in: [src/core/pdfObjects.ts:357](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfObjects.ts#L357)
+Defined in: [src/core/pdfObjects.ts:357](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfObjects.ts#L357)
 
 Raw stream data (already encoded / compressed).
 
@@ -61,7 +61,7 @@ Raw stream data (already encoded / compressed).
 readonly dict: PdfDict;
 ```
 
-Defined in: [src/core/pdfObjects.ts:355](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfObjects.ts#L355)
+Defined in: [src/core/pdfObjects.ts:355](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfObjects.ts#L355)
 
 Stream metadata dictionary.
 
@@ -73,7 +73,7 @@ Stream metadata dictionary.
 serialize(writer): void;
 ```
 
-Defined in: [src/core/pdfObjects.ts:385](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfObjects.ts#L385)
+Defined in: [src/core/pdfObjects.ts:385](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfObjects.ts#L385)
 
 #### Parameters
 
@@ -93,7 +93,7 @@ Defined in: [src/core/pdfObjects.ts:385](https://github.com/ABCrimson/modern-pdf
 syncLength(): void;
 ```
 
-Defined in: [src/core/pdfObjects.ts:381](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfObjects.ts#L381)
+Defined in: [src/core/pdfObjects.ts:381](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfObjects.ts#L381)
 
 Update `/Length` to reflect the current data size.
 
@@ -109,7 +109,7 @@ Update `/Length` to reflect the current data size.
 static fromBytes(data, extraEntries?): PdfStream;
 ```
 
-Defined in: [src/core/pdfObjects.ts:374](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfObjects.ts#L374)
+Defined in: [src/core/pdfObjects.ts:374](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfObjects.ts#L374)
 
 Create a stream from raw bytes.  Sets `/Length` automatically.
 
@@ -135,7 +135,7 @@ Create a stream from raw bytes.  Sets `/Length` automatically.
 static fromString(content, extraEntries?): PdfStream;
 ```
 
-Defined in: [src/core/pdfObjects.ts:364](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfObjects.ts#L364)
+Defined in: [src/core/pdfObjects.ts:364](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfObjects.ts#L364)
 
 Create a stream from a plain UTF-8 string (e.g. content-stream
 operators).  Sets `/Length` automatically.

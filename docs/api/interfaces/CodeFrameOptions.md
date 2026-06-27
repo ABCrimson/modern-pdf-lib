@@ -6,7 +6,7 @@
 
 # Interface: CodeFrameOptions
 
-Defined in: [src/utils/codeframe.ts:20](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/utils/codeframe.ts#L20)
+Defined in: [src/utils/codeframe.ts:20](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/utils/codeframe.ts#L20)
 
 Options for [renderCodeFrame](../functions/renderCodeFrame.md).
 
@@ -18,7 +18,7 @@ Options for [renderCodeFrame](../functions/renderCodeFrame.md).
 readonly optional contextLines?: number;
 ```
 
-Defined in: [src/utils/codeframe.ts:25](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/utils/codeframe.ts#L25)
+Defined in: [src/utils/codeframe.ts:25](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/utils/codeframe.ts#L25)
 
 Number of context lines to show before and after the target line.
 Defaults to `2`.

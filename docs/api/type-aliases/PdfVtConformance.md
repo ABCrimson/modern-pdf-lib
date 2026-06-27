@@ -10,7 +10,7 @@
 type PdfVtConformance = "PDF/VT-1" | "PDF/VT-2" | "PDF/VT-3";
 ```
 
-Defined in: [src/compliance/pdfVT.ts:42](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/pdfVT.ts#L42)
+Defined in: [src/compliance/pdfVT.ts:42](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/compliance/pdfVT.ts#L42)
 
 PDF/VT conformance level (ISO 16612-2).
 

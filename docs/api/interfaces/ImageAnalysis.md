@@ -6,7 +6,7 @@
 
 # Interface: ImageAnalysis
 
-Defined in: [src/assets/image/compressionAnalysis.ts:26](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/compressionAnalysis.ts#L26)
+Defined in: [src/assets/image/compressionAnalysis.ts:26](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/assets/image/compressionAnalysis.ts#L26)
 
 Per-image analysis result.
 
@@ -18,7 +18,7 @@ Per-image analysis result.
 readonly colorSpace: string;
 ```
 
-Defined in: [src/assets/image/compressionAnalysis.ts:40](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/compressionAnalysis.ts#L40)
+Defined in: [src/assets/image/compressionAnalysis.ts:40](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/assets/image/compressionAnalysis.ts#L40)
 
 PDF color space name (e.g. 'DeviceRGB', 'DeviceGray').
 
@@ -30,7 +30,7 @@ PDF color space name (e.g. 'DeviceRGB', 'DeviceGray').
 readonly currentFormat: string;
 ```
 
-Defined in: [src/assets/image/compressionAnalysis.ts:38](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/compressionAnalysis.ts#L38)
+Defined in: [src/assets/image/compressionAnalysis.ts:38](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/assets/image/compressionAnalysis.ts#L38)
 
 Description of the current encoding (e.g. 'FlateDecode', 'DCTDecode').
 
@@ -42,7 +42,7 @@ Description of the current encoding (e.g. 'FlateDecode', 'DCTDecode').
 readonly currentSize: number;
 ```
 
-Defined in: [src/assets/image/compressionAnalysis.ts:36](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/compressionAnalysis.ts#L36)
+Defined in: [src/assets/image/compressionAnalysis.ts:36](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/assets/image/compressionAnalysis.ts#L36)
 
 Size of the current (compressed) stream data in bytes.
 
@@ -54,7 +54,7 @@ Size of the current (compressed) stream data in bytes.
 readonly effectiveDpi: number | undefined;
 ```
 
-Defined in: [src/assets/image/compressionAnalysis.ts:50](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/compressionAnalysis.ts#L50)
+Defined in: [src/assets/image/compressionAnalysis.ts:50](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/assets/image/compressionAnalysis.ts#L50)
 
 Effective DPI of the image at its display size, or `undefined` if unknown.
 
@@ -66,7 +66,7 @@ Effective DPI of the image at its display size, or `undefined` if unknown.
 readonly estimatedJpegSize: number;
 ```
 
-Defined in: [src/assets/image/compressionAnalysis.ts:42](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/compressionAnalysis.ts#L42)
+Defined in: [src/assets/image/compressionAnalysis.ts:42](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/assets/image/compressionAnalysis.ts#L42)
 
 Estimated JPEG-encoded size in bytes.
 
@@ -78,7 +78,7 @@ Estimated JPEG-encoded size in bytes.
 readonly estimatedSavings: number;
 ```
 
-Defined in: [src/assets/image/compressionAnalysis.ts:44](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/compressionAnalysis.ts#L44)
+Defined in: [src/assets/image/compressionAnalysis.ts:44](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/assets/image/compressionAnalysis.ts#L44)
 
 Estimated savings in bytes (`currentSize - estimatedJpegSize`).
 
@@ -90,7 +90,7 @@ Estimated savings in bytes (`currentSize - estimatedJpegSize`).
 readonly height: number;
 ```
 
-Defined in: [src/assets/image/compressionAnalysis.ts:34](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/compressionAnalysis.ts#L34)
+Defined in: [src/assets/image/compressionAnalysis.ts:34](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/assets/image/compressionAnalysis.ts#L34)
 
 Image height in pixels.
 
@@ -102,7 +102,7 @@ Image height in pixels.
 readonly isGrayscale: boolean;
 ```
 
-Defined in: [src/assets/image/compressionAnalysis.ts:48](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/compressionAnalysis.ts#L48)
+Defined in: [src/assets/image/compressionAnalysis.ts:48](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/assets/image/compressionAnalysis.ts#L48)
 
 Whether the image is effectively grayscale (even if stored as RGB).
 
@@ -114,7 +114,7 @@ Whether the image is effectively grayscale (even if stored as RGB).
 readonly name: string;
 ```
 
-Defined in: [src/assets/image/compressionAnalysis.ts:28](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/compressionAnalysis.ts#L28)
+Defined in: [src/assets/image/compressionAnalysis.ts:28](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/assets/image/compressionAnalysis.ts#L28)
 
 Resource name on the page (e.g. '/Im1').
 
@@ -126,7 +126,7 @@ Resource name on the page (e.g. '/Im1').
 readonly pageIndex: number;
 ```
 
-Defined in: [src/assets/image/compressionAnalysis.ts:30](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/compressionAnalysis.ts#L30)
+Defined in: [src/assets/image/compressionAnalysis.ts:30](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/assets/image/compressionAnalysis.ts#L30)
 
 Zero-based page index where this image appears.
 
@@ -138,7 +138,7 @@ Zero-based page index where this image appears.
 readonly recommendation: "grayscale" | "recompress" | "keep" | "downscale";
 ```
 
-Defined in: [src/assets/image/compressionAnalysis.ts:52](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/compressionAnalysis.ts#L52)
+Defined in: [src/assets/image/compressionAnalysis.ts:52](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/assets/image/compressionAnalysis.ts#L52)
 
 Recommended action for this image.
 
@@ -150,7 +150,7 @@ Recommended action for this image.
 readonly savingsPercent: number;
 ```
 
-Defined in: [src/assets/image/compressionAnalysis.ts:46](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/compressionAnalysis.ts#L46)
+Defined in: [src/assets/image/compressionAnalysis.ts:46](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/assets/image/compressionAnalysis.ts#L46)
 
 Savings as a percentage of the current size.
 
@@ -162,6 +162,6 @@ Savings as a percentage of the current size.
 readonly width: number;
 ```
 
-Defined in: [src/assets/image/compressionAnalysis.ts:32](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/compressionAnalysis.ts#L32)
+Defined in: [src/assets/image/compressionAnalysis.ts:32](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/assets/image/compressionAnalysis.ts#L32)
 
 Image width in pixels.

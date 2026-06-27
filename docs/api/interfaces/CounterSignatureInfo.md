@@ -6,7 +6,7 @@
 
 # Interface: CounterSignatureInfo
 
-Defined in: [src/signature/counterSignature.ts:44](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/counterSignature.ts#L44)
+Defined in: [src/signature/counterSignature.ts:44](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/signature/counterSignature.ts#L44)
 
 Information about a counter-signature found on a PDF signature.
 
@@ -18,7 +18,7 @@ Information about a counter-signature found on a PDF signature.
 isValid: boolean;
 ```
 
-Defined in: [src/signature/counterSignature.ts:52](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/counterSignature.ts#L52)
+Defined in: [src/signature/counterSignature.ts:52](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/signature/counterSignature.ts#L52)
 
 Whether the counter-signature is structurally valid.
 
@@ -30,7 +30,7 @@ Whether the counter-signature is structurally valid.
 optional signedAt?: Date;
 ```
 
-Defined in: [src/signature/counterSignature.ts:50](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/counterSignature.ts#L50)
+Defined in: [src/signature/counterSignature.ts:50](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/signature/counterSignature.ts#L50)
 
 When the counter-signature was applied.
 
@@ -42,7 +42,7 @@ When the counter-signature was applied.
 signerName: string;
 ```
 
-Defined in: [src/signature/counterSignature.ts:48](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/counterSignature.ts#L48)
+Defined in: [src/signature/counterSignature.ts:48](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/signature/counterSignature.ts#L48)
 
 The Common Name of the counter-signer.
 
@@ -54,6 +54,6 @@ The Common Name of the counter-signer.
 targetSignatureIndex: number;
 ```
 
-Defined in: [src/signature/counterSignature.ts:46](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/counterSignature.ts#L46)
+Defined in: [src/signature/counterSignature.ts:46](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/signature/counterSignature.ts#L46)
 
 The index of the primary signature that was counter-signed.

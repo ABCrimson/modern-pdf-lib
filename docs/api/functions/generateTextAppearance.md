@@ -10,7 +10,7 @@
 function generateTextAppearance(options): PdfStream;
 ```
 
-Defined in: [src/form/fieldAppearance.ts:97](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/fieldAppearance.ts#L97)
+Defined in: [src/form/fieldAppearance.ts:97](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/form/fieldAppearance.ts#L97)
 
 Generate the appearance stream for a text field.
 

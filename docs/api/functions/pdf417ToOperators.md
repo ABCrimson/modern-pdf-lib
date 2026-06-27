@@ -14,7 +14,7 @@ function pdf417ToOperators(
    options?): string;
 ```
 
-Defined in: [src/barcode/pdf417.ts:794](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/barcode/pdf417.ts#L794)
+Defined in: [src/barcode/pdf417.ts:794](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/barcode/pdf417.ts#L794)
 
 Convert a [Pdf417Matrix](../interfaces/Pdf417Matrix.md) to PDF content-stream operators.
 

@@ -10,7 +10,7 @@
 function validateByteRangeIntegrity(pdf, signatures): boolean;
 ```
 
-Defined in: [src/signature/incrementalSave.ts:199](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/incrementalSave.ts#L199)
+Defined in: [src/signature/incrementalSave.ts:199](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/signature/incrementalSave.ts#L199)
 
 Verify that no existing signature's covered bytes would overlap
 with content appended after the current end of file.

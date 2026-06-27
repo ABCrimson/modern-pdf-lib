@@ -6,7 +6,7 @@
 
 # Interface: NestedTableContent
 
-Defined in: [src/layout/table.ts:51](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layout/table.ts#L51)
+Defined in: [src/layout/table.ts:51](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/layout/table.ts#L51)
 
 A nested table definition used as cell content.
 
@@ -18,7 +18,7 @@ A nested table definition used as cell content.
 readonly table: Omit<DrawTableOptions, "x" | "y">;
 ```
 
-Defined in: [src/layout/table.ts:53](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layout/table.ts#L53)
+Defined in: [src/layout/table.ts:53](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/layout/table.ts#L53)
 
 ***
 
@@ -28,4 +28,4 @@ Defined in: [src/layout/table.ts:53](https://github.com/ABCrimson/modern-pdf-lib
 readonly type: "table";
 ```
 
-Defined in: [src/layout/table.ts:52](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layout/table.ts#L52)
+Defined in: [src/layout/table.ts:52](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/layout/table.ts#L52)

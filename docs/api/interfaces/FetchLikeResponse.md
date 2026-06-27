@@ -6,7 +6,7 @@
 
 # Interface: FetchLikeResponse
 
-Defined in: [src/runtime/rangeFetch.ts:31](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/runtime/rangeFetch.ts#L31)
+Defined in: [src/runtime/rangeFetch.ts:31](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/runtime/rangeFetch.ts#L31)
 
 Minimal response shape consumed by the range fetcher. A subset of the
 standard `Response` interface, declared explicitly so non-`fetch`
@@ -20,7 +20,7 @@ transports can be injected.
 readonly headers: object;
 ```
 
-Defined in: [src/runtime/rangeFetch.ts:35](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/runtime/rangeFetch.ts#L35)
+Defined in: [src/runtime/rangeFetch.ts:35](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/runtime/rangeFetch.ts#L35)
 
 Response headers accessor.
 
@@ -48,7 +48,7 @@ get(name): string | null;
 readonly status: number;
 ```
 
-Defined in: [src/runtime/rangeFetch.ts:33](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/runtime/rangeFetch.ts#L33)
+Defined in: [src/runtime/rangeFetch.ts:33](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/runtime/rangeFetch.ts#L33)
 
 HTTP status code (e.g. `200`, `206`).
 
@@ -60,7 +60,7 @@ HTTP status code (e.g. `200`, `206`).
 arrayBuffer(): Promise<ArrayBuffer>;
 ```
 
-Defined in: [src/runtime/rangeFetch.ts:37](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/runtime/rangeFetch.ts#L37)
+Defined in: [src/runtime/rangeFetch.ts:37](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/runtime/rangeFetch.ts#L37)
 
 Resolve the body as an ArrayBuffer.
 

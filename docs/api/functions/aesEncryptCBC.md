@@ -13,7 +13,7 @@ function aesEncryptCBC(
 iv?): Promise<Uint8Array<ArrayBufferLike>>;
 ```
 
-Defined in: [src/crypto/aes.ts:97](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/crypto/aes.ts#L97)
+Defined in: [src/crypto/aes.ts:97](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/crypto/aes.ts#L97)
 
 Encrypt data using AES-CBC with PKCS#7 padding.
 

@@ -6,7 +6,7 @@
 
 # Class: InvalidFieldNamePartError
 
-Defined in: [src/errors.ts:142](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/errors.ts#L142)
+Defined in: [src/errors.ts:142](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/errors.ts#L142)
 
 Thrown when a field name part (between dots in a qualified name) is
 empty or contains invalid characters.
@@ -23,7 +23,7 @@ empty or contains invalid characters.
 new InvalidFieldNamePartError(namePart, options?): InvalidFieldNamePartError;
 ```
 
-Defined in: [src/errors.ts:144](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/errors.ts#L144)
+Defined in: [src/errors.ts:144](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/errors.ts#L144)
 
 #### Parameters
 
@@ -85,7 +85,7 @@ Error.message
 readonly name: "InvalidFieldNamePartError" = 'InvalidFieldNamePartError';
 ```
 
-Defined in: [src/errors.ts:143](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/errors.ts#L143)
+Defined in: [src/errors.ts:143](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/errors.ts#L143)
 
 #### Overrides
 

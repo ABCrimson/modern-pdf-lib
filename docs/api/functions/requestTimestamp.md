@@ -13,7 +13,7 @@ function requestTimestamp(
 hashAlgorithm?): Promise<TimestampResult>;
 ```
 
-Defined in: [src/signature/timestamp.ts:316](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/timestamp.ts#L316)
+Defined in: [src/signature/timestamp.ts:316](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/signature/timestamp.ts#L316)
 
 Request a timestamp from an RFC 3161 TSA.
 

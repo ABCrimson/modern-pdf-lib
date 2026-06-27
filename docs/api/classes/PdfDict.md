@@ -6,7 +6,7 @@
 
 # Class: PdfDict
 
-Defined in: [src/core/pdfObjects.ts:275](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfObjects.ts#L275)
+Defined in: [src/core/pdfObjects.ts:275](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfObjects.ts#L275)
 
 A PDF dictionary `<< … >>`.
 
@@ -18,7 +18,7 @@ A PDF dictionary `<< … >>`.
 new PdfDict(entries?): PdfDict;
 ```
 
-Defined in: [src/core/pdfObjects.ts:281](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfObjects.ts#L281)
+Defined in: [src/core/pdfObjects.ts:281](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfObjects.ts#L281)
 
 #### Parameters
 
@@ -40,7 +40,7 @@ Defined in: [src/core/pdfObjects.ts:281](https://github.com/ABCrimson/modern-pdf
 get size(): number;
 ```
 
-Defined in: [src/core/pdfObjects.ts:318](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfObjects.ts#L318)
+Defined in: [src/core/pdfObjects.ts:318](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfObjects.ts#L318)
 
 Number of entries.
 
@@ -56,7 +56,7 @@ Number of entries.
 iterator: IterableIterator<[string, PdfObject]>;
 ```
 
-Defined in: [src/core/pdfObjects.ts:323](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfObjects.ts#L323)
+Defined in: [src/core/pdfObjects.ts:323](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfObjects.ts#L323)
 
 Iterate over entries as `[key, value]` pairs.
 
@@ -72,7 +72,7 @@ Iterate over entries as `[key, value]` pairs.
 delete(key): boolean;
 ```
 
-Defined in: [src/core/pdfObjects.ts:312](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfObjects.ts#L312)
+Defined in: [src/core/pdfObjects.ts:312](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfObjects.ts#L312)
 
 Delete a key.
 
@@ -94,7 +94,7 @@ Delete a key.
 get(key): PdfObject | undefined;
 ```
 
-Defined in: [src/core/pdfObjects.ts:300](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfObjects.ts#L300)
+Defined in: [src/core/pdfObjects.ts:300](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfObjects.ts#L300)
 
 Get a value by key.
 
@@ -116,7 +116,7 @@ Get a value by key.
 has(key): boolean;
 ```
 
-Defined in: [src/core/pdfObjects.ts:306](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfObjects.ts#L306)
+Defined in: [src/core/pdfObjects.ts:306](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfObjects.ts#L306)
 
 Check if a key exists.
 
@@ -138,7 +138,7 @@ Check if a key exists.
 serialize(writer): void;
 ```
 
-Defined in: [src/core/pdfObjects.ts:327](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfObjects.ts#L327)
+Defined in: [src/core/pdfObjects.ts:327](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfObjects.ts#L327)
 
 #### Parameters
 
@@ -158,7 +158,7 @@ Defined in: [src/core/pdfObjects.ts:327](https://github.com/ABCrimson/modern-pdf
 set(key, value): this;
 ```
 
-Defined in: [src/core/pdfObjects.ts:293](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfObjects.ts#L293)
+Defined in: [src/core/pdfObjects.ts:293](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfObjects.ts#L293)
 
 Set a key-value pair.  Keys are always stored / looked up *with*
 the leading `/`.

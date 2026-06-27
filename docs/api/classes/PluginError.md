@@ -6,7 +6,7 @@
 
 # Class: PluginError
 
-Defined in: [src/errors.ts:274](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/errors.ts#L274)
+Defined in: [src/errors.ts:274](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/errors.ts#L274)
 
 Thrown when a plugin encounters an error during initialization or
 execution.  Wraps the underlying cause for error-chain inspection.
@@ -32,7 +32,7 @@ new PluginError(
    options?): PluginError;
 ```
 
-Defined in: [src/errors.ts:278](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/errors.ts#L278)
+Defined in: [src/errors.ts:278](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/errors.ts#L278)
 
 #### Parameters
 
@@ -98,7 +98,7 @@ Error.message
 readonly name: "PluginError" = 'PluginError';
 ```
 
-Defined in: [src/errors.ts:275](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/errors.ts#L275)
+Defined in: [src/errors.ts:275](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/errors.ts#L275)
 
 #### Overrides
 
@@ -114,7 +114,7 @@ Error.name
 readonly pluginName: string;
 ```
 
-Defined in: [src/errors.ts:277](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/errors.ts#L277)
+Defined in: [src/errors.ts:277](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/errors.ts#L277)
 
 Name of the plugin that caused the error.
 

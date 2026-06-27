@@ -6,7 +6,7 @@
 
 # Interface: DiffEntry
 
-Defined in: [src/signature/documentDiff.ts:24](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/documentDiff.ts#L24)
+Defined in: [src/signature/documentDiff.ts:24](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/signature/documentDiff.ts#L24)
 
 A single difference found between signed and current content.
 
@@ -18,7 +18,7 @@ A single difference found between signed and current content.
 description: string;
 ```
 
-Defined in: [src/signature/documentDiff.ts:38](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/documentDiff.ts#L38)
+Defined in: [src/signature/documentDiff.ts:38](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/signature/documentDiff.ts#L38)
 
 Human-readable description of the change.
 
@@ -30,7 +30,7 @@ Human-readable description of the change.
 optional fieldName?: string;
 ```
 
-Defined in: [src/signature/documentDiff.ts:36](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/documentDiff.ts#L36)
+Defined in: [src/signature/documentDiff.ts:36](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/signature/documentDiff.ts#L36)
 
 Form field name (for form field changes).
 
@@ -42,7 +42,7 @@ Form field name (for form field changes).
 optional pageIndex?: number;
 ```
 
-Defined in: [src/signature/documentDiff.ts:34](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/documentDiff.ts#L34)
+Defined in: [src/signature/documentDiff.ts:34](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/signature/documentDiff.ts#L34)
 
 Zero-based page index (for page-related changes).
 
@@ -60,6 +60,6 @@ type:
   | "metadata_changed";
 ```
 
-Defined in: [src/signature/documentDiff.ts:26](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/documentDiff.ts#L26)
+Defined in: [src/signature/documentDiff.ts:26](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/signature/documentDiff.ts#L26)
 
 The category of change detected.

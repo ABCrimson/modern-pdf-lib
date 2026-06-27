@@ -14,7 +14,7 @@ function renderCodeFrame(
    options?): string;
 ```
 
-Defined in: [src/utils/codeframe.ts:42](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/utils/codeframe.ts#L42)
+Defined in: [src/utils/codeframe.ts:42](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/utils/codeframe.ts#L42)
 
 Render a code frame: an excerpt of `source` centered on a 1-based
 `line`/`column`, with a line-number gutter and a caret (`^`) underneath the

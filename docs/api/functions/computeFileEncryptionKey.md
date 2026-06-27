@@ -13,7 +13,7 @@ function computeFileEncryptionKey(
 fileId): Promise<Uint8Array<ArrayBufferLike>>;
 ```
 
-Defined in: [src/crypto/keyDerivation.ts:777](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/crypto/keyDerivation.ts#L777)
+Defined in: [src/crypto/keyDerivation.ts:777](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/crypto/keyDerivation.ts#L777)
 
 Compute the file encryption key from a password and encryption dict.
 

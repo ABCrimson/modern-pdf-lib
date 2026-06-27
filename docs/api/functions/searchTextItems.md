@@ -13,7 +13,7 @@ function searchTextItems(
    options?): TextMatch[];
 ```
 
-Defined in: [src/parser/textSearch.ts:118](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/parser/textSearch.ts#L118)
+Defined in: [src/parser/textSearch.ts:118](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/parser/textSearch.ts#L118)
 
 Search positioned text items for a string or RegExp, returning each match
 with its page-coordinate hit-rectangles.

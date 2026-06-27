@@ -6,7 +6,7 @@
 
 # Interface: HeaderFooterOptions
 
-Defined in: [src/layout/headerFooter.ts:38](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layout/headerFooter.ts#L38)
+Defined in: [src/layout/headerFooter.ts:38](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/layout/headerFooter.ts#L38)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [src/layout/headerFooter.ts:38](https://github.com/ABCrimson/modern-
 optional dateFormat?: string;
 ```
 
-Defined in: [src/layout/headerFooter.ts:50](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layout/headerFooter.ts#L50)
+Defined in: [src/layout/headerFooter.ts:50](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/layout/headerFooter.ts#L50)
 
 Date format string. Default: 'YYYY-MM-DD'
 
@@ -28,7 +28,7 @@ Date format string. Default: 'YYYY-MM-DD'
 optional footer?: HeaderFooterContent[];
 ```
 
-Defined in: [src/layout/headerFooter.ts:40](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layout/headerFooter.ts#L40)
+Defined in: [src/layout/headerFooter.ts:40](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/layout/headerFooter.ts#L40)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [src/layout/headerFooter.ts:40](https://github.com/ABCrimson/modern-
 optional header?: HeaderFooterContent[];
 ```
 
-Defined in: [src/layout/headerFooter.ts:39](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layout/headerFooter.ts#L39)
+Defined in: [src/layout/headerFooter.ts:39](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/layout/headerFooter.ts#L39)
 
 ***
 
@@ -48,7 +48,7 @@ Defined in: [src/layout/headerFooter.ts:39](https://github.com/ABCrimson/modern-
 optional margins?: object;
 ```
 
-Defined in: [src/layout/headerFooter.ts:42](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layout/headerFooter.ts#L42)
+Defined in: [src/layout/headerFooter.ts:42](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/layout/headerFooter.ts#L42)
 
 Margins from page edge in points. Default: &#123; top: 36, bottom: 36, left: 50, right: 50 &#125;
 
@@ -84,7 +84,7 @@ optional top?: number;
 optional pageRange?: object;
 ```
 
-Defined in: [src/layout/headerFooter.ts:46](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layout/headerFooter.ts#L46)
+Defined in: [src/layout/headerFooter.ts:46](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/layout/headerFooter.ts#L46)
 
 Page range to apply to. Default: all pages.
 
@@ -108,7 +108,7 @@ optional start?: number;
 optional separatorLine?: object;
 ```
 
-Defined in: [src/layout/headerFooter.ts:48](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layout/headerFooter.ts#L48)
+Defined in: [src/layout/headerFooter.ts:48](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/layout/headerFooter.ts#L48)
 
 Separator line between header/footer and content.
 
@@ -138,6 +138,6 @@ optional width?: number;
 optional skipFirstPage?: boolean;
 ```
 
-Defined in: [src/layout/headerFooter.ts:44](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layout/headerFooter.ts#L44)
+Defined in: [src/layout/headerFooter.ts:44](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/layout/headerFooter.ts#L44)
 
 Skip first page (e.g. for title page). Default: false

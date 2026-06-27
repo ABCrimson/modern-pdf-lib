@@ -6,7 +6,7 @@
 
 # Class: PdfEncryptionHandler
 
-Defined in: [src/crypto/encryptionHandler.ts:104](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/crypto/encryptionHandler.ts#L104)
+Defined in: [src/crypto/encryptionHandler.ts:104](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/crypto/encryptionHandler.ts#L104)
 
 Handles encryption and decryption of PDF objects according to the
 standard security handler.
@@ -23,7 +23,7 @@ Create via:
 buildEncryptDict(): PdfDict;
 ```
 
-Defined in: [src/crypto/encryptionHandler.ts:545](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/crypto/encryptionHandler.ts#L545)
+Defined in: [src/crypto/encryptionHandler.ts:545](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/crypto/encryptionHandler.ts#L545)
 
 Build the /Encrypt dictionary for the PDF trailer.
 
@@ -44,7 +44,7 @@ decryptObject(
 data): Promise<Uint8Array<ArrayBufferLike>>;
 ```
 
-Defined in: [src/crypto/encryptionHandler.ts:483](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/crypto/encryptionHandler.ts#L483)
+Defined in: [src/crypto/encryptionHandler.ts:483](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/crypto/encryptionHandler.ts#L483)
 
 Decrypt raw data for a specific object.
 
@@ -85,7 +85,7 @@ decryptStream(
 streamData): Promise<Uint8Array<ArrayBufferLike>>;
 ```
 
-Defined in: [src/crypto/encryptionHandler.ts:528](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/crypto/encryptionHandler.ts#L528)
+Defined in: [src/crypto/encryptionHandler.ts:528](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/crypto/encryptionHandler.ts#L528)
 
 Decrypt a stream's data.
 
@@ -126,7 +126,7 @@ encryptObject(
 data): Promise<Uint8Array<ArrayBufferLike>>;
 ```
 
-Defined in: [src/crypto/encryptionHandler.ts:462](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/crypto/encryptionHandler.ts#L462)
+Defined in: [src/crypto/encryptionHandler.ts:462](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/crypto/encryptionHandler.ts#L462)
 
 Encrypt raw data for a specific object.
 
@@ -167,7 +167,7 @@ encryptString(
 str): Promise<PdfString>;
 ```
 
-Defined in: [src/crypto/encryptionHandler.ts:509](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/crypto/encryptionHandler.ts#L509)
+Defined in: [src/crypto/encryptionHandler.ts:509](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/crypto/encryptionHandler.ts#L509)
 
 Encrypt a PdfString value.
 
@@ -208,7 +208,7 @@ An encrypted PdfString (hex-encoded).
 getFileId(): Uint8Array;
 ```
 
-Defined in: [src/crypto/encryptionHandler.ts:651](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/crypto/encryptionHandler.ts#L651)
+Defined in: [src/crypto/encryptionHandler.ts:651](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/crypto/encryptionHandler.ts#L651)
 
 The file ID used for key derivation.
 
@@ -224,7 +224,7 @@ The file ID used for key derivation.
 getFileKey(): Uint8Array;
 ```
 
-Defined in: [src/crypto/encryptionHandler.ts:646](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/crypto/encryptionHandler.ts#L646)
+Defined in: [src/crypto/encryptionHandler.ts:646](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/crypto/encryptionHandler.ts#L646)
 
 The file encryption key (for testing/debugging).
 
@@ -240,7 +240,7 @@ The file encryption key (for testing/debugging).
 getPermissions(): PdfPermissionFlags;
 ```
 
-Defined in: [src/crypto/encryptionHandler.ts:621](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/crypto/encryptionHandler.ts#L621)
+Defined in: [src/crypto/encryptionHandler.ts:621](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/crypto/encryptionHandler.ts#L621)
 
 Get the permission flags.
 
@@ -256,7 +256,7 @@ Get the permission flags.
 getPermissionsValue(): number;
 ```
 
-Defined in: [src/crypto/encryptionHandler.ts:626](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/crypto/encryptionHandler.ts#L626)
+Defined in: [src/crypto/encryptionHandler.ts:626](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/crypto/encryptionHandler.ts#L626)
 
 Get the raw permissions value.
 
@@ -272,7 +272,7 @@ Get the raw permissions value.
 getRevision(): number;
 ```
 
-Defined in: [src/crypto/encryptionHandler.ts:641](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/crypto/encryptionHandler.ts#L641)
+Defined in: [src/crypto/encryptionHandler.ts:641](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/crypto/encryptionHandler.ts#L641)
 
 The security handler revision (/R).
 
@@ -288,7 +288,7 @@ The security handler revision (/R).
 getVersion(): number;
 ```
 
-Defined in: [src/crypto/encryptionHandler.ts:636](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/crypto/encryptionHandler.ts#L636)
+Defined in: [src/crypto/encryptionHandler.ts:636](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/crypto/encryptionHandler.ts#L636)
 
 The algorithm version (/V).
 
@@ -304,7 +304,7 @@ The algorithm version (/V).
 isAes(): boolean;
 ```
 
-Defined in: [src/crypto/encryptionHandler.ts:631](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/crypto/encryptionHandler.ts#L631)
+Defined in: [src/crypto/encryptionHandler.ts:631](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/crypto/encryptionHandler.ts#L631)
 
 Whether this handler uses AES (vs RC4).
 
@@ -320,7 +320,7 @@ Whether this handler uses AES (vs RC4).
 isMetadataEncrypted(): boolean;
 ```
 
-Defined in: [src/crypto/encryptionHandler.ts:656](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/crypto/encryptionHandler.ts#L656)
+Defined in: [src/crypto/encryptionHandler.ts:656](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/crypto/encryptionHandler.ts#L656)
 
 Whether metadata streams are encrypted.
 
@@ -336,7 +336,7 @@ Whether metadata streams are encrypted.
 static create(options, fileId?): Promise<PdfEncryptionHandler>;
 ```
 
-Defined in: [src/crypto/encryptionHandler.ts:197](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/crypto/encryptionHandler.ts#L197)
+Defined in: [src/crypto/encryptionHandler.ts:197](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/crypto/encryptionHandler.ts#L197)
 
 Create a new encryption handler for encrypting a document.
 
@@ -373,7 +373,7 @@ static fromEncryptDict(
 password): Promise<PdfEncryptionHandler>;
 ```
 
-Defined in: [src/crypto/encryptionHandler.ts:312](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/crypto/encryptionHandler.ts#L312)
+Defined in: [src/crypto/encryptionHandler.ts:312](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/crypto/encryptionHandler.ts#L312)
 
 Create an encryption handler from an existing /Encrypt dictionary.
 

@@ -6,7 +6,7 @@
 
 # Interface: DocTimeStampOptions
 
-Defined in: [src/signature/docTimeStamp.ts:60](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/docTimeStamp.ts#L60)
+Defined in: [src/signature/docTimeStamp.ts:60](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/signature/docTimeStamp.ts#L60)
 
 Options controlling how the Document Timestamp dictionary is built.
 
@@ -18,7 +18,7 @@ Options controlling how the Document Timestamp dictionary is built.
 readonly optional contentsSize?: number;
 ```
 
-Defined in: [src/signature/docTimeStamp.ts:66](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/docTimeStamp.ts#L66)
+Defined in: [src/signature/docTimeStamp.ts:66](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/signature/docTimeStamp.ts#L66)
 
 Number of bytes reserved for the `/Contents` placeholder.  This must
 be large enough to hold the DER-encoded TimeStampToken returned by
@@ -32,7 +32,7 @@ the TSA.  Defaults to [DEFAULT\_DOC\_TIMESTAMP\_CONTENTS\_SIZE](../variables/DEF
 readonly optional reason?: string;
 ```
 
-Defined in: [src/signature/docTimeStamp.ts:71](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/docTimeStamp.ts#L71)
+Defined in: [src/signature/docTimeStamp.ts:71](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/signature/docTimeStamp.ts#L71)
 
 Optional human-readable reason recorded in the signature dictionary's
 `/Reason` field.  Purely informational for a timestamp.

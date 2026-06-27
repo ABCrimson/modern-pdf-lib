@@ -6,7 +6,7 @@
 
 # Interface: SampledFunction
 
-Defined in: [src/core/pdfFunctions.ts:41](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfFunctions.ts#L41)
+Defined in: [src/core/pdfFunctions.ts:41](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfFunctions.ts#L41)
 
 Type 0 — sampled function (ISO 32000-2 §7.10.2).
 
@@ -22,7 +22,7 @@ decoded into the `[0, 2^bitsPerSample − 1]` integer range as numbers.
 readonly bitsPerSample: number;
 ```
 
-Defined in: [src/core/pdfFunctions.ts:50](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfFunctions.ts#L50)
+Defined in: [src/core/pdfFunctions.ts:50](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfFunctions.ts#L50)
 
 Bits used to represent each sample component (1,2,4,8,12,16,24,32).
 
@@ -34,7 +34,7 @@ Bits used to represent each sample component (1,2,4,8,12,16,24,32).
 readonly optional decode?: readonly number[];
 ```
 
-Defined in: [src/core/pdfFunctions.ts:59](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfFunctions.ts#L59)
+Defined in: [src/core/pdfFunctions.ts:59](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfFunctions.ts#L59)
 
 Per-output decode pairs mapping raw samples → range.
 
@@ -46,7 +46,7 @@ Per-output decode pairs mapping raw samples → range.
 readonly domain: readonly number[];
 ```
 
-Defined in: [src/core/pdfFunctions.ts:44](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfFunctions.ts#L44)
+Defined in: [src/core/pdfFunctions.ts:44](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfFunctions.ts#L44)
 
 Input domain `[min0 max0 min1 max1 …]`, two entries per input.
 
@@ -58,7 +58,7 @@ Input domain `[min0 max0 min1 max1 …]`, two entries per input.
 readonly optional encode?: readonly number[];
 ```
 
-Defined in: [src/core/pdfFunctions.ts:57](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfFunctions.ts#L57)
+Defined in: [src/core/pdfFunctions.ts:57](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfFunctions.ts#L57)
 
 Per-input encode pairs mapping domain → sample-grid coordinates.
 
@@ -70,7 +70,7 @@ Per-input encode pairs mapping domain → sample-grid coordinates.
 readonly functionType: 0;
 ```
 
-Defined in: [src/core/pdfFunctions.ts:42](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfFunctions.ts#L42)
+Defined in: [src/core/pdfFunctions.ts:42](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfFunctions.ts#L42)
 
 ***
 
@@ -80,7 +80,7 @@ Defined in: [src/core/pdfFunctions.ts:42](https://github.com/ABCrimson/modern-pd
 readonly range: readonly number[];
 ```
 
-Defined in: [src/core/pdfFunctions.ts:46](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfFunctions.ts#L46)
+Defined in: [src/core/pdfFunctions.ts:46](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfFunctions.ts#L46)
 
 Output range `[min0 max0 …]`, two entries per output component.
 
@@ -92,7 +92,7 @@ Output range `[min0 max0 …]`, two entries per output component.
 readonly samples: readonly number[];
 ```
 
-Defined in: [src/core/pdfFunctions.ts:55](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfFunctions.ts#L55)
+Defined in: [src/core/pdfFunctions.ts:55](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfFunctions.ts#L55)
 
 Flat list of sample component values, row-major, first input dimension
 varying fastest, output components grouped per grid point.
@@ -105,6 +105,6 @@ varying fastest, output components grouped per grid point.
 readonly size: readonly number[];
 ```
 
-Defined in: [src/core/pdfFunctions.ts:48](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfFunctions.ts#L48)
+Defined in: [src/core/pdfFunctions.ts:48](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfFunctions.ts#L48)
 
 Number of samples in each input dimension.

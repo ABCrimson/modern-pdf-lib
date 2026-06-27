@@ -6,7 +6,7 @@
 
 # Interface: GrayscaleColor
 
-Defined in: [src/core/operators/color.ts:32](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/operators/color.ts#L32)
+Defined in: [src/core/operators/color.ts:32](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/operators/color.ts#L32)
 
 A grayscale colour with the component in the range `[0, 1]`.
 
@@ -18,7 +18,7 @@ A grayscale colour with the component in the range `[0, 1]`.
 readonly gray: number;
 ```
 
-Defined in: [src/core/operators/color.ts:34](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/operators/color.ts#L34)
+Defined in: [src/core/operators/color.ts:34](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/operators/color.ts#L34)
 
 ***
 
@@ -28,4 +28,4 @@ Defined in: [src/core/operators/color.ts:34](https://github.com/ABCrimson/modern
 readonly type: "grayscale";
 ```
 
-Defined in: [src/core/operators/color.ts:33](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/operators/color.ts#L33)
+Defined in: [src/core/operators/color.ts:33](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/operators/color.ts#L33)

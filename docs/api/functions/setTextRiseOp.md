@@ -10,7 +10,7 @@
 function setTextRiseOp(rise): string;
 ```
 
-Defined in: [src/core/operators/text.ts:123](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/operators/text.ts#L123)
+Defined in: [src/core/operators/text.ts:123](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/operators/text.ts#L123)
 
 Set the text rise (super / subscript offset) (`Ts`).
 

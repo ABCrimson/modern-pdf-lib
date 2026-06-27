@@ -14,7 +14,7 @@ function serializePdf(
 encryptionHandler?): Promise<Uint8Array<ArrayBufferLike>>;
 ```
 
-Defined in: [src/core/pdfWriter.ts:793](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfWriter.ts#L793)
+Defined in: [src/core/pdfWriter.ts:793](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfWriter.ts#L793)
 
 Serialize a complete PDF from a registry and structure refs.
 

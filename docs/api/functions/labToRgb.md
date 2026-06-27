@@ -14,7 +14,7 @@ function labToRgb(
    whitePoint?): [number, number, number];
 ```
 
-Defined in: [src/core/colorSpacesCIE.ts:198](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/colorSpacesCIE.ts#L198)
+Defined in: [src/core/colorSpacesCIE.ts:198](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/colorSpacesCIE.ts#L198)
 
 Convert a CIE L*a*b* colour to sRGB (0..1 per channel).
 

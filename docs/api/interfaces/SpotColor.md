@@ -6,7 +6,7 @@
 
 # Interface: SpotColor
 
-Defined in: [src/core/operators/color.ts:38](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/operators/color.ts#L38)
+Defined in: [src/core/operators/color.ts:38](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/operators/color.ts#L38)
 
 A spot (Separation) colour with a named colorant and a fallback.
 
@@ -21,7 +21,7 @@ readonly alternateColor:
   | GrayscaleColor;
 ```
 
-Defined in: [src/core/operators/color.ts:43](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/operators/color.ts#L43)
+Defined in: [src/core/operators/color.ts:43](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/operators/color.ts#L43)
 
 Fallback colour used when the spot ink is unavailable.
 
@@ -33,7 +33,7 @@ Fallback colour used when the spot ink is unavailable.
 readonly name: string;
 ```
 
-Defined in: [src/core/operators/color.ts:41](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/operators/color.ts#L41)
+Defined in: [src/core/operators/color.ts:41](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/operators/color.ts#L41)
 
 Colorant name, e.g. `'PANTONE 185 C'`.
 
@@ -45,7 +45,7 @@ Colorant name, e.g. `'PANTONE 185 C'`.
 readonly tint: number;
 ```
 
-Defined in: [src/core/operators/color.ts:45](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/operators/color.ts#L45)
+Defined in: [src/core/operators/color.ts:45](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/operators/color.ts#L45)
 
 Tint value `[0, 1]` — 0 = no ink, 1 = full ink.
 
@@ -57,4 +57,4 @@ Tint value `[0, 1]` — 0 = no ink, 1 = full ink.
 readonly type: "spot";
 ```
 
-Defined in: [src/core/operators/color.ts:39](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/operators/color.ts#L39)
+Defined in: [src/core/operators/color.ts:39](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/operators/color.ts#L39)

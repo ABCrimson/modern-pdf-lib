@@ -6,7 +6,7 @@
 
 # Interface: DrawImageOptions
 
-Defined in: [src/core/pdfPage.ts:227](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfPage.ts#L227)
+Defined in: [src/core/pdfPage.ts:228](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfPage.ts#L228)
 
 Options for [PdfPage.drawImage](../classes/PdfPage.md#drawimage).
 
@@ -18,7 +18,7 @@ Options for [PdfPage.drawImage](../classes/PdfPage.md#drawimage).
 optional blendMode?: BlendMode;
 ```
 
-Defined in: [src/core/pdfPage.ts:241](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfPage.ts#L241)
+Defined in: [src/core/pdfPage.ts:242](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfPage.ts#L242)
 
 Blend mode for compositing.
 
@@ -30,7 +30,7 @@ Blend mode for compositing.
 optional height?: number;
 ```
 
-Defined in: [src/core/pdfPage.ts:235](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfPage.ts#L235)
+Defined in: [src/core/pdfPage.ts:236](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfPage.ts#L236)
 
 Rendered height.
 
@@ -42,7 +42,7 @@ Rendered height.
 optional opacity?: number;
 ```
 
-Defined in: [src/core/pdfPage.ts:239](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfPage.ts#L239)
+Defined in: [src/core/pdfPage.ts:240](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfPage.ts#L240)
 
 Opacity `[0, 1]`.
 
@@ -54,7 +54,7 @@ Opacity `[0, 1]`.
 optional rotate?: Angle;
 ```
 
-Defined in: [src/core/pdfPage.ts:237](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfPage.ts#L237)
+Defined in: [src/core/pdfPage.ts:238](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfPage.ts#L238)
 
 Rotation angle.
 
@@ -66,7 +66,7 @@ Rotation angle.
 optional width?: number;
 ```
 
-Defined in: [src/core/pdfPage.ts:233](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfPage.ts#L233)
+Defined in: [src/core/pdfPage.ts:234](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfPage.ts#L234)
 
 Rendered width.
 
@@ -78,7 +78,7 @@ Rendered width.
 optional x?: number;
 ```
 
-Defined in: [src/core/pdfPage.ts:229](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfPage.ts#L229)
+Defined in: [src/core/pdfPage.ts:230](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfPage.ts#L230)
 
 X coordinate of the lower-left corner.
 
@@ -90,7 +90,7 @@ X coordinate of the lower-left corner.
 optional xSkew?: Angle;
 ```
 
-Defined in: [src/core/pdfPage.ts:243](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfPage.ts#L243)
+Defined in: [src/core/pdfPage.ts:244](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfPage.ts#L244)
 
 Horizontal skew angle.
 
@@ -102,7 +102,7 @@ Horizontal skew angle.
 optional y?: number;
 ```
 
-Defined in: [src/core/pdfPage.ts:231](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfPage.ts#L231)
+Defined in: [src/core/pdfPage.ts:232](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfPage.ts#L232)
 
 Y coordinate of the lower-left corner.
 
@@ -114,6 +114,6 @@ Y coordinate of the lower-left corner.
 optional ySkew?: Angle;
 ```
 
-Defined in: [src/core/pdfPage.ts:245](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfPage.ts#L245)
+Defined in: [src/core/pdfPage.ts:246](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfPage.ts#L246)
 
 Vertical skew angle.

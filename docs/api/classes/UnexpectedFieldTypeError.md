@@ -6,7 +6,7 @@
 
 # Class: UnexpectedFieldTypeError
 
-Defined in: [src/errors.ts:102](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/errors.ts#L102)
+Defined in: [src/errors.ts:102](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/errors.ts#L102)
 
 Thrown when a form field is accessed via the wrong typed getter
 (e.g. calling `getTextField()` on a checkbox field).
@@ -27,7 +27,7 @@ new UnexpectedFieldTypeError(
    options?): UnexpectedFieldTypeError;
 ```
 
-Defined in: [src/errors.ts:104](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/errors.ts#L104)
+Defined in: [src/errors.ts:104](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/errors.ts#L104)
 
 #### Parameters
 
@@ -97,7 +97,7 @@ Error.message
 readonly name: "UnexpectedFieldTypeError" = 'UnexpectedFieldTypeError';
 ```
 
-Defined in: [src/errors.ts:103](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/errors.ts#L103)
+Defined in: [src/errors.ts:103](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/errors.ts#L103)
 
 #### Overrides
 

@@ -13,7 +13,7 @@ function saveDocumentIncremental(
 options?): Promise<IncrementalSaveResult>;
 ```
 
-Defined in: [src/core/incrementalWriter.ts:465](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/incrementalWriter.ts#L465)
+Defined in: [src/core/incrementalWriter.ts:465](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/incrementalWriter.ts#L465)
 
 Perform an incremental save given the original bytes and a PdfDocument.
 

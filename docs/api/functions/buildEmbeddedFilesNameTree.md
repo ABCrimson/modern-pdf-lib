@@ -13,7 +13,7 @@ function buildEmbeddedFilesNameTree(
    _registry): PdfDict;
 ```
 
-Defined in: [src/core/embeddedFiles.ts:243](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/embeddedFiles.ts#L243)
+Defined in: [src/core/embeddedFiles.ts:243](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/embeddedFiles.ts#L243)
 
 Build an `/EmbeddedFiles` name tree dictionary.
 

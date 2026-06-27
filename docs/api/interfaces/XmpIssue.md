@@ -6,7 +6,7 @@
 
 # Interface: XmpIssue
 
-Defined in: [src/compliance/xmpValidator.ts:30](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/xmpValidator.ts#L30)
+Defined in: [src/compliance/xmpValidator.ts:30](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/compliance/xmpValidator.ts#L30)
 
 A single XMP validation issue.
 
@@ -18,7 +18,7 @@ A single XMP validation issue.
 readonly code: string;
 ```
 
-Defined in: [src/compliance/xmpValidator.ts:31](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/xmpValidator.ts#L31)
+Defined in: [src/compliance/xmpValidator.ts:31](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/compliance/xmpValidator.ts#L31)
 
 ***
 
@@ -28,7 +28,7 @@ Defined in: [src/compliance/xmpValidator.ts:31](https://github.com/ABCrimson/mod
 readonly message: string;
 ```
 
-Defined in: [src/compliance/xmpValidator.ts:32](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/xmpValidator.ts#L32)
+Defined in: [src/compliance/xmpValidator.ts:32](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/compliance/xmpValidator.ts#L32)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [src/compliance/xmpValidator.ts:32](https://github.com/ABCrimson/mod
 readonly optional namespace?: string;
 ```
 
-Defined in: [src/compliance/xmpValidator.ts:34](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/xmpValidator.ts#L34)
+Defined in: [src/compliance/xmpValidator.ts:34](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/compliance/xmpValidator.ts#L34)
 
 ***
 
@@ -48,7 +48,7 @@ Defined in: [src/compliance/xmpValidator.ts:34](https://github.com/ABCrimson/mod
 readonly optional property?: string;
 ```
 
-Defined in: [src/compliance/xmpValidator.ts:35](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/xmpValidator.ts#L35)
+Defined in: [src/compliance/xmpValidator.ts:35](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/compliance/xmpValidator.ts#L35)
 
 ***
 
@@ -58,4 +58,4 @@ Defined in: [src/compliance/xmpValidator.ts:35](https://github.com/ABCrimson/mod
 readonly severity: "error" | "warning";
 ```
 
-Defined in: [src/compliance/xmpValidator.ts:33](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/xmpValidator.ts#L33)
+Defined in: [src/compliance/xmpValidator.ts:33](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/compliance/xmpValidator.ts#L33)

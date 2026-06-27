@@ -6,7 +6,7 @@
 
 # Class: PdfOutlineTree
 
-Defined in: [src/outline/pdfOutline.ts:214](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/outline/pdfOutline.ts#L214)
+Defined in: [src/outline/pdfOutline.ts:214](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/outline/pdfOutline.ts#L214)
 
 The root of the outline tree, containing top-level outline items.
 
@@ -18,7 +18,7 @@ The root of the outline tree, containing top-level outline items.
 new PdfOutlineTree(): PdfOutlineTree;
 ```
 
-Defined in: [src/outline/pdfOutline.ts:218](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/outline/pdfOutline.ts#L218)
+Defined in: [src/outline/pdfOutline.ts:218](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/outline/pdfOutline.ts#L218)
 
 #### Returns
 
@@ -32,7 +32,7 @@ Defined in: [src/outline/pdfOutline.ts:218](https://github.com/ABCrimson/modern-
 items: PdfOutlineItem[];
 ```
 
-Defined in: [src/outline/pdfOutline.ts:216](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/outline/pdfOutline.ts#L216)
+Defined in: [src/outline/pdfOutline.ts:216](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/outline/pdfOutline.ts#L216)
 
 Top-level outline items.
 
@@ -47,7 +47,7 @@ addItem(
    options?): PdfOutlineItem;
 ```
 
-Defined in: [src/outline/pdfOutline.ts:230](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/outline/pdfOutline.ts#L230)
+Defined in: [src/outline/pdfOutline.ts:230](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/outline/pdfOutline.ts#L230)
 
 Add a top-level outline item.
 
@@ -85,7 +85,7 @@ The newly created item.
 removeItem(item): void;
 ```
 
-Defined in: [src/outline/pdfOutline.ts:246](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/outline/pdfOutline.ts#L246)
+Defined in: [src/outline/pdfOutline.ts:246](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/outline/pdfOutline.ts#L246)
 
 Remove a top-level outline item.
 
@@ -113,7 +113,7 @@ If the item is not in the tree.
 toDict(registry, pageRefs): PdfRef;
 ```
 
-Defined in: [src/outline/pdfOutline.ts:269](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/outline/pdfOutline.ts#L269)
+Defined in: [src/outline/pdfOutline.ts:269](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/outline/pdfOutline.ts#L269)
 
 Serialize the outline tree to a PDF /Outlines dictionary.
 
@@ -156,7 +156,7 @@ static fromDict(
    pageRefToIndex): PdfOutlineTree;
 ```
 
-Defined in: [src/outline/pdfOutline.ts:321](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/outline/pdfOutline.ts#L321)
+Defined in: [src/outline/pdfOutline.ts:321](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/outline/pdfOutline.ts#L321)
 
 Parse an outline tree from an existing /Outlines dictionary.
 

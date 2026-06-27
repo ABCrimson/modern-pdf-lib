@@ -13,7 +13,7 @@ function drawSvgOnPage(
    options?): void;
 ```
 
-Defined in: [src/assets/svg/svgToPdf.ts:726](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/svg/svgToPdf.ts#L726)
+Defined in: [src/assets/svg/svgToPdf.ts:726](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/assets/svg/svgToPdf.ts#L726)
 
 Draw an SVG string onto a PDF page.
 

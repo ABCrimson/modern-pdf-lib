@@ -6,7 +6,7 @@
 
 # Interface: OutlineDestination
 
-Defined in: [src/outline/pdfOutline.ts:44](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/outline/pdfOutline.ts#L44)
+Defined in: [src/outline/pdfOutline.ts:44](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/outline/pdfOutline.ts#L44)
 
 Describes where an outline item navigates to when clicked.
 
@@ -21,7 +21,7 @@ Describes where an outline item navigates to when clicked.
 optional fit?: "Fit" | "FitH" | "FitV" | "FitB" | "FitBH" | "FitBV" | "XYZ";
 ```
 
-Defined in: [src/outline/pdfOutline.ts:52](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/outline/pdfOutline.ts#L52)
+Defined in: [src/outline/pdfOutline.ts:52](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/outline/pdfOutline.ts#L52)
 
 Page fit mode — how the page should be displayed.
 
@@ -33,7 +33,7 @@ Page fit mode — how the page should be displayed.
 optional left?: number;
 ```
 
-Defined in: [src/outline/pdfOutline.ts:56](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/outline/pdfOutline.ts#L56)
+Defined in: [src/outline/pdfOutline.ts:56](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/outline/pdfOutline.ts#L56)
 
 Left coordinate for FitV, FitBV, XYZ fit modes.
 
@@ -45,7 +45,7 @@ Left coordinate for FitV, FitBV, XYZ fit modes.
 optional namedDestination?: string;
 ```
 
-Defined in: [src/outline/pdfOutline.ts:50](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/outline/pdfOutline.ts#L50)
+Defined in: [src/outline/pdfOutline.ts:50](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/outline/pdfOutline.ts#L50)
 
 Named destination string (used when `type` is `'named'`).
 
@@ -57,7 +57,7 @@ Named destination string (used when `type` is `'named'`).
 optional pageIndex?: number;
 ```
 
-Defined in: [src/outline/pdfOutline.ts:48](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/outline/pdfOutline.ts#L48)
+Defined in: [src/outline/pdfOutline.ts:48](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/outline/pdfOutline.ts#L48)
 
 Zero-based page index (used when `type` is `'page'`).
 
@@ -69,7 +69,7 @@ Zero-based page index (used when `type` is `'page'`).
 optional top?: number;
 ```
 
-Defined in: [src/outline/pdfOutline.ts:54](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/outline/pdfOutline.ts#L54)
+Defined in: [src/outline/pdfOutline.ts:54](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/outline/pdfOutline.ts#L54)
 
 Top coordinate for FitH, FitBH, XYZ fit modes.
 
@@ -81,7 +81,7 @@ Top coordinate for FitH, FitBH, XYZ fit modes.
 type: "page" | "named";
 ```
 
-Defined in: [src/outline/pdfOutline.ts:46](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/outline/pdfOutline.ts#L46)
+Defined in: [src/outline/pdfOutline.ts:46](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/outline/pdfOutline.ts#L46)
 
 Whether to navigate by page index or named destination.
 
@@ -93,6 +93,6 @@ Whether to navigate by page index or named destination.
 optional zoom?: number;
 ```
 
-Defined in: [src/outline/pdfOutline.ts:58](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/outline/pdfOutline.ts#L58)
+Defined in: [src/outline/pdfOutline.ts:58](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/outline/pdfOutline.ts#L58)
 
 Zoom factor for XYZ fit mode (0 means keep current).

@@ -10,7 +10,7 @@
 function nameHalftone(halftone, name?): PdfDict;
 ```
 
-Defined in: [src/core/halftone.ts:218](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/halftone.ts#L218)
+Defined in: [src/core/halftone.ts:218](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/halftone.ts#L218)
 
 Build a graphics-state-ready halftone reference dictionary fragment
 pairing a halftone with an optional `/HalftoneName`.

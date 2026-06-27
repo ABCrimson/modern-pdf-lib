@@ -6,7 +6,7 @@
 
 # Interface: LinearGradientOptions
 
-Defined in: [src/core/patterns.ts:51](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/patterns.ts#L51)
+Defined in: [src/core/patterns.ts:51](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/patterns.ts#L51)
 
 Options for creating a linear gradient (axial shading, ShadingType 2).
 
@@ -18,7 +18,7 @@ Options for creating a linear gradient (axial shading, ShadingType 2).
 readonly optional extend?: boolean;
 ```
 
-Defined in: [src/core/patterns.ts:69](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/patterns.ts#L69)
+Defined in: [src/core/patterns.ts:69](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/patterns.ts#L69)
 
 Whether to extend the gradient beyond the start and end points.
 Default: `true`.
@@ -31,7 +31,7 @@ Default: `true`.
 readonly stops: readonly (Color | ColorStop)[];
 ```
 
-Defined in: [src/core/patterns.ts:64](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/patterns.ts#L64)
+Defined in: [src/core/patterns.ts:64](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/patterns.ts#L64)
 
 Colour stops. Each element is either a bare [Color](../type-aliases/Color.md) (positions
 are distributed evenly) or a [ColorStop](ColorStop.md) with an explicit offset.
@@ -44,7 +44,7 @@ are distributed evenly) or a [ColorStop](ColorStop.md) with an explicit offset.
 readonly x1: number;
 ```
 
-Defined in: [src/core/patterns.ts:53](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/patterns.ts#L53)
+Defined in: [src/core/patterns.ts:53](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/patterns.ts#L53)
 
 Start X coordinate.
 
@@ -56,7 +56,7 @@ Start X coordinate.
 readonly x2: number;
 ```
 
-Defined in: [src/core/patterns.ts:57](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/patterns.ts#L57)
+Defined in: [src/core/patterns.ts:57](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/patterns.ts#L57)
 
 End X coordinate.
 
@@ -68,7 +68,7 @@ End X coordinate.
 readonly y1: number;
 ```
 
-Defined in: [src/core/patterns.ts:55](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/patterns.ts#L55)
+Defined in: [src/core/patterns.ts:55](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/patterns.ts#L55)
 
 Start Y coordinate.
 
@@ -80,6 +80,6 @@ Start Y coordinate.
 readonly y2: number;
 ```
 
-Defined in: [src/core/patterns.ts:59](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/patterns.ts#L59)
+Defined in: [src/core/patterns.ts:59](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/patterns.ts#L59)
 
 End Y coordinate.

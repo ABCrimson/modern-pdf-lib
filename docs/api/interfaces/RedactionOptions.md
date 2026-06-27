@@ -6,7 +6,7 @@
 
 # Interface: RedactionOptions
 
-Defined in: [src/core/redaction.ts:33](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/redaction.ts#L33)
+Defined in: [src/core/redaction.ts:33](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/redaction.ts#L33)
 
 Options for marking a region for redaction.
 
@@ -18,7 +18,7 @@ Options for marking a region for redaction.
 optional borderColor?: object;
 ```
 
-Defined in: [src/core/redaction.ts:49](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/redaction.ts#L49)
+Defined in: [src/core/redaction.ts:49](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/redaction.ts#L49)
 
 Border colour (default: same as fill colour).
 
@@ -48,7 +48,7 @@ r: number;
 optional borderWidth?: number;
 ```
 
-Defined in: [src/core/redaction.ts:47](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/redaction.ts#L47)
+Defined in: [src/core/redaction.ts:47](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/redaction.ts#L47)
 
 Border width for the redaction rectangle outline (default: 0 — no border).
 
@@ -60,7 +60,7 @@ Border width for the redaction rectangle outline (default: 0 — no border).
 optional color?: object;
 ```
 
-Defined in: [src/core/redaction.ts:39](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/redaction.ts#L39)
+Defined in: [src/core/redaction.ts:39](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/redaction.ts#L39)
 
 Colour for the redaction rectangle (default: black).
 
@@ -90,7 +90,7 @@ r: number;
 optional opacity?: number;
 ```
 
-Defined in: [src/core/redaction.ts:51](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/redaction.ts#L51)
+Defined in: [src/core/redaction.ts:51](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/redaction.ts#L51)
 
 Opacity for the redaction overlay, 0–1 (default: 1 — fully opaque). Useful for preview/draft mode.
 
@@ -102,7 +102,7 @@ Opacity for the redaction overlay, 0–1 (default: 1 — fully opaque). Useful f
 optional overlayAlignment?: OverlayAlignment;
 ```
 
-Defined in: [src/core/redaction.ts:45](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/redaction.ts#L45)
+Defined in: [src/core/redaction.ts:45](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/redaction.ts#L45)
 
 Horizontal alignment for overlay text (default: 'left').
 
@@ -114,7 +114,7 @@ Horizontal alignment for overlay text (default: 'left').
 optional overlayFont?: string;
 ```
 
-Defined in: [src/core/redaction.ts:41](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/redaction.ts#L41)
+Defined in: [src/core/redaction.ts:41](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/redaction.ts#L41)
 
 Custom font name for overlay text (default: 'Helvetica').
 
@@ -126,7 +126,7 @@ Custom font name for overlay text (default: 'Helvetica').
 optional overlayFontSize?: number;
 ```
 
-Defined in: [src/core/redaction.ts:43](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/redaction.ts#L43)
+Defined in: [src/core/redaction.ts:43](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/redaction.ts#L43)
 
 Custom font size for overlay text. When omitted, auto-calculated from rect height.
 
@@ -138,7 +138,7 @@ Custom font size for overlay text. When omitted, auto-calculated from rect heigh
 optional overlayText?: string;
 ```
 
-Defined in: [src/core/redaction.ts:37](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/redaction.ts#L37)
+Defined in: [src/core/redaction.ts:37](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/redaction.ts#L37)
 
 Optional text to overlay on the redacted area.
 
@@ -150,6 +150,6 @@ Optional text to overlay on the redacted area.
 rect: [number, number, number, number];
 ```
 
-Defined in: [src/core/redaction.ts:35](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/redaction.ts#L35)
+Defined in: [src/core/redaction.ts:35](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/redaction.ts#L35)
 
 The rectangle to redact: [x, y, width, height].

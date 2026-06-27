@@ -6,7 +6,7 @@
 
 # Interface: PluginDocument
 
-Defined in: [src/plugins/pluginSystem.ts:31](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/plugins/pluginSystem.ts#L31)
+Defined in: [src/plugins/pluginSystem.ts:31](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/plugins/pluginSystem.ts#L31)
 
 Minimal document shape visible to plugins.
 
@@ -18,7 +18,7 @@ Minimal document shape visible to plugins.
 getPageCount(): number;
 ```
 
-Defined in: [src/plugins/pluginSystem.ts:32](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/plugins/pluginSystem.ts#L32)
+Defined in: [src/plugins/pluginSystem.ts:32](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/plugins/pluginSystem.ts#L32)
 
 #### Returns
 
@@ -32,7 +32,7 @@ Defined in: [src/plugins/pluginSystem.ts:32](https://github.com/ABCrimson/modern
 getPages(): readonly PluginPage[];
 ```
 
-Defined in: [src/plugins/pluginSystem.ts:33](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/plugins/pluginSystem.ts#L33)
+Defined in: [src/plugins/pluginSystem.ts:33](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/plugins/pluginSystem.ts#L33)
 
 #### Returns
 
@@ -46,7 +46,7 @@ readonly [`PluginPage`](PluginPage.md)[]
 setAuthor(author): void;
 ```
 
-Defined in: [src/plugins/pluginSystem.ts:35](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/plugins/pluginSystem.ts#L35)
+Defined in: [src/plugins/pluginSystem.ts:35](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/plugins/pluginSystem.ts#L35)
 
 #### Parameters
 
@@ -66,7 +66,7 @@ Defined in: [src/plugins/pluginSystem.ts:35](https://github.com/ABCrimson/modern
 setCreationDate(date): void;
 ```
 
-Defined in: [src/plugins/pluginSystem.ts:40](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/plugins/pluginSystem.ts#L40)
+Defined in: [src/plugins/pluginSystem.ts:40](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/plugins/pluginSystem.ts#L40)
 
 #### Parameters
 
@@ -86,7 +86,7 @@ Defined in: [src/plugins/pluginSystem.ts:40](https://github.com/ABCrimson/modern
 setCreator(creator): void;
 ```
 
-Defined in: [src/plugins/pluginSystem.ts:39](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/plugins/pluginSystem.ts#L39)
+Defined in: [src/plugins/pluginSystem.ts:39](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/plugins/pluginSystem.ts#L39)
 
 #### Parameters
 
@@ -106,7 +106,7 @@ Defined in: [src/plugins/pluginSystem.ts:39](https://github.com/ABCrimson/modern
 setKeywords(keywords): void;
 ```
 
-Defined in: [src/plugins/pluginSystem.ts:37](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/plugins/pluginSystem.ts#L37)
+Defined in: [src/plugins/pluginSystem.ts:37](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/plugins/pluginSystem.ts#L37)
 
 #### Parameters
 
@@ -126,7 +126,7 @@ Defined in: [src/plugins/pluginSystem.ts:37](https://github.com/ABCrimson/modern
 setLanguage(lang): void;
 ```
 
-Defined in: [src/plugins/pluginSystem.ts:42](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/plugins/pluginSystem.ts#L42)
+Defined in: [src/plugins/pluginSystem.ts:42](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/plugins/pluginSystem.ts#L42)
 
 #### Parameters
 
@@ -146,7 +146,7 @@ Defined in: [src/plugins/pluginSystem.ts:42](https://github.com/ABCrimson/modern
 setModDate(date): void;
 ```
 
-Defined in: [src/plugins/pluginSystem.ts:41](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/plugins/pluginSystem.ts#L41)
+Defined in: [src/plugins/pluginSystem.ts:41](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/plugins/pluginSystem.ts#L41)
 
 #### Parameters
 
@@ -166,7 +166,7 @@ Defined in: [src/plugins/pluginSystem.ts:41](https://github.com/ABCrimson/modern
 setProducer(producer): void;
 ```
 
-Defined in: [src/plugins/pluginSystem.ts:38](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/plugins/pluginSystem.ts#L38)
+Defined in: [src/plugins/pluginSystem.ts:38](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/plugins/pluginSystem.ts#L38)
 
 #### Parameters
 
@@ -186,7 +186,7 @@ Defined in: [src/plugins/pluginSystem.ts:38](https://github.com/ABCrimson/modern
 setSubject(subject): void;
 ```
 
-Defined in: [src/plugins/pluginSystem.ts:36](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/plugins/pluginSystem.ts#L36)
+Defined in: [src/plugins/pluginSystem.ts:36](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/plugins/pluginSystem.ts#L36)
 
 #### Parameters
 
@@ -206,7 +206,7 @@ Defined in: [src/plugins/pluginSystem.ts:36](https://github.com/ABCrimson/modern
 setTitle(title): void;
 ```
 
-Defined in: [src/plugins/pluginSystem.ts:34](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/plugins/pluginSystem.ts#L34)
+Defined in: [src/plugins/pluginSystem.ts:34](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/plugins/pluginSystem.ts#L34)
 
 #### Parameters
 

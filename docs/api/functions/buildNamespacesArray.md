@@ -10,7 +10,7 @@
 function buildNamespacesArray(defs): PdfArray;
 ```
 
-Defined in: [src/accessibility/namespaces.ts:116](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/accessibility/namespaces.ts#L116)
+Defined in: [src/accessibility/namespaces.ts:116](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/accessibility/namespaces.ts#L116)
 
 Build the `/Namespaces` array (as found in `/StructTreeRoot`) from a
 list of [NamespaceDef](../interfaces/NamespaceDef.md) descriptors.

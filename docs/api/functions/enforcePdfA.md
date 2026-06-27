@@ -10,7 +10,7 @@
 function enforcePdfA(pdfBytes, level): Promise<Uint8Array<ArrayBufferLike>>;
 ```
 
-Defined in: [src/compliance/pdfA.ts:316](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/pdfA.ts#L316)
+Defined in: [src/compliance/pdfA.ts:316](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/compliance/pdfA.ts#L316)
 
 Attempt to make a PDF conform to PDF/A.
 

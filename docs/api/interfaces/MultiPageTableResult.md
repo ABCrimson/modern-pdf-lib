@@ -6,7 +6,7 @@
 
 # Interface: MultiPageTableResult
 
-Defined in: [src/layout/table.ts:143](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layout/table.ts#L143)
+Defined in: [src/layout/table.ts:143](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/layout/table.ts#L143)
 
 Result of multi-page table rendering.
 
@@ -18,7 +18,7 @@ Result of multi-page table rendering.
 readonly pages: readonly PageContent[];
 ```
 
-Defined in: [src/layout/table.ts:144](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layout/table.ts#L144)
+Defined in: [src/layout/table.ts:144](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/layout/table.ts#L144)
 
 ***
 
@@ -28,4 +28,4 @@ Defined in: [src/layout/table.ts:144](https://github.com/ABCrimson/modern-pdf-li
 readonly result: TableRenderResult;
 ```
 
-Defined in: [src/layout/table.ts:145](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layout/table.ts#L145)
+Defined in: [src/layout/table.ts:145](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/layout/table.ts#L145)

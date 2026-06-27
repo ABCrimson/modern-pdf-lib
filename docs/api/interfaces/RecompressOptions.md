@@ -6,7 +6,7 @@
 
 # Interface: RecompressOptions
 
-Defined in: [src/assets/image/imageOptimize.ts:62](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/imageOptimize.ts#L62)
+Defined in: [src/assets/image/imageOptimize.ts:62](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/assets/image/imageOptimize.ts#L62)
 
 Options for image recompression.
 
@@ -22,7 +22,7 @@ Options for image recompression.
 readonly optional chromaSubsampling?: ChromaSubsampling;
 ```
 
-Defined in: [src/assets/image/imageOptimize.ts:108](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/imageOptimize.ts#L108)
+Defined in: [src/assets/image/imageOptimize.ts:108](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/assets/image/imageOptimize.ts#L108)
 
 Chroma subsampling mode.  Only used when `format` is `'jpeg'`.
 
@@ -42,7 +42,7 @@ Default: `'4:2:0'`.
 readonly optional compressionLevel?: 1 | 4 | 2 | 3 | 6 | 5 | 7 | 8 | 9;
 ```
 
-Defined in: [src/assets/image/imageOptimize.ts:84](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/imageOptimize.ts#L84)
+Defined in: [src/assets/image/imageOptimize.ts:84](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/assets/image/imageOptimize.ts#L84)
 
 Deflate compression level (1–9).  Only used when `format` is `'deflate'`.
 Higher values produce smaller files but take longer.
@@ -57,7 +57,7 @@ Default: `6`.
 readonly optional format?: "jpeg" | "deflate";
 ```
 
-Defined in: [src/assets/image/imageOptimize.ts:70](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/imageOptimize.ts#L70)
+Defined in: [src/assets/image/imageOptimize.ts:70](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/assets/image/imageOptimize.ts#L70)
 
 Output format.
 - `'jpeg'`: JPEG compression (lossy, good for photographs)
@@ -73,7 +73,7 @@ Default: `'deflate'`.
 readonly optional progressive?: boolean;
 ```
 
-Defined in: [src/assets/image/imageOptimize.ts:96](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/imageOptimize.ts#L96)
+Defined in: [src/assets/image/imageOptimize.ts:96](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/assets/image/imageOptimize.ts#L96)
 
 Encode as progressive JPEG.  Only used when `format` is `'jpeg'`.
 
@@ -93,7 +93,7 @@ Default: `false`.
 readonly optional quality?: number;
 ```
 
-Defined in: [src/assets/image/imageOptimize.ts:77](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/imageOptimize.ts#L77)
+Defined in: [src/assets/image/imageOptimize.ts:77](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/assets/image/imageOptimize.ts#L77)
 
 JPEG quality (1–100).  Only used when `format` is `'jpeg'`.
 Higher values produce larger files with better quality.

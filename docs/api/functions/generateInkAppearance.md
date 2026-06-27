@@ -10,7 +10,7 @@
 function generateInkAppearance(annot): PdfStream;
 ```
 
-Defined in: [src/annotation/appearanceGenerator.ts:472](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/annotation/appearanceGenerator.ts#L472)
+Defined in: [src/annotation/appearanceGenerator.ts:472](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/annotation/appearanceGenerator.ts#L472)
 
 Generate appearance stream for an Ink annotation.
 

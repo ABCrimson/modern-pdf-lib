@@ -6,7 +6,7 @@
 
 # Interface: PostScriptFunction
 
-Defined in: [src/core/pdfFunctions.ts:104](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfFunctions.ts#L104)
+Defined in: [src/core/pdfFunctions.ts:104](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfFunctions.ts#L104)
 
 Type 4 — PostScript calculator function (ISO 32000-2 §7.10.5).
 
@@ -20,7 +20,7 @@ Type 4 — PostScript calculator function (ISO 32000-2 §7.10.5).
 readonly domain: readonly number[];
 ```
 
-Defined in: [src/core/pdfFunctions.ts:107](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfFunctions.ts#L107)
+Defined in: [src/core/pdfFunctions.ts:107](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfFunctions.ts#L107)
 
 Input domain `[min0 max0 …]`, two entries per input.
 
@@ -32,7 +32,7 @@ Input domain `[min0 max0 …]`, two entries per input.
 readonly functionType: 4;
 ```
 
-Defined in: [src/core/pdfFunctions.ts:105](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfFunctions.ts#L105)
+Defined in: [src/core/pdfFunctions.ts:105](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfFunctions.ts#L105)
 
 ***
 
@@ -42,7 +42,7 @@ Defined in: [src/core/pdfFunctions.ts:105](https://github.com/ABCrimson/modern-p
 readonly range: readonly number[];
 ```
 
-Defined in: [src/core/pdfFunctions.ts:109](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfFunctions.ts#L109)
+Defined in: [src/core/pdfFunctions.ts:109](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfFunctions.ts#L109)
 
 Output range `[min0 max0 …]`, two entries per output component.
 
@@ -54,6 +54,6 @@ Output range `[min0 max0 …]`, two entries per output component.
 readonly source: string;
 ```
 
-Defined in: [src/core/pdfFunctions.ts:111](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfFunctions.ts#L111)
+Defined in: [src/core/pdfFunctions.ts:111](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfFunctions.ts#L111)
 
 The PostScript calculator source, including the outer braces.

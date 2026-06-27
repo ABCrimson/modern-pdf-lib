@@ -10,7 +10,7 @@
 function getCertificationLevel(pdf): MdpPermission | undefined;
 ```
 
-Defined in: [src/signature/mdpPolicy.ts:94](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/mdpPolicy.ts#L94)
+Defined in: [src/signature/mdpPolicy.ts:94](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/signature/mdpPolicy.ts#L94)
 
 Read the certification level (MDP permission) from a PDF.
 

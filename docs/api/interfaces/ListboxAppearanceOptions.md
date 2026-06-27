@@ -6,7 +6,7 @@
 
 # Interface: ListboxAppearanceOptions
 
-Defined in: [src/form/fieldAppearance.ts:328](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/fieldAppearance.ts#L328)
+Defined in: [src/form/fieldAppearance.ts:328](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/form/fieldAppearance.ts#L328)
 
 Options for generating a listbox field appearance.
 
@@ -18,7 +18,7 @@ Options for generating a listbox field appearance.
 optional fontName?: string;
 ```
 
-Defined in: [src/form/fieldAppearance.ts:336](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/fieldAppearance.ts#L336)
+Defined in: [src/form/fieldAppearance.ts:336](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/form/fieldAppearance.ts#L336)
 
 Font name. Default: "Helv".
 
@@ -30,7 +30,7 @@ Font name. Default: "Helv".
 optional fontSize?: number;
 ```
 
-Defined in: [src/form/fieldAppearance.ts:338](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/fieldAppearance.ts#L338)
+Defined in: [src/form/fieldAppearance.ts:338](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/form/fieldAppearance.ts#L338)
 
 Font size. Default: 10.
 
@@ -42,7 +42,7 @@ Font size. Default: 10.
 options: string[];
 ```
 
-Defined in: [src/form/fieldAppearance.ts:330](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/fieldAppearance.ts#L330)
+Defined in: [src/form/fieldAppearance.ts:330](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/form/fieldAppearance.ts#L330)
 
 All option strings.
 
@@ -54,7 +54,7 @@ All option strings.
 rect: [number, number, number, number];
 ```
 
-Defined in: [src/form/fieldAppearance.ts:334](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/fieldAppearance.ts#L334)
+Defined in: [src/form/fieldAppearance.ts:334](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/form/fieldAppearance.ts#L334)
 
 The widget rectangle [x1, y1, x2, y2].
 
@@ -66,6 +66,6 @@ The widget rectangle [x1, y1, x2, y2].
 selected: string[];
 ```
 
-Defined in: [src/form/fieldAppearance.ts:332](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/form/fieldAppearance.ts#L332)
+Defined in: [src/form/fieldAppearance.ts:332](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/form/fieldAppearance.ts#L332)
 
 Currently selected option strings.

@@ -6,7 +6,7 @@
 
 # Interface: ByteRangeResult
 
-Defined in: [src/signature/byteRange.ts:35](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/byteRange.ts#L35)
+Defined in: [src/signature/byteRange.ts:35](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/signature/byteRange.ts#L35)
 
 Result of ByteRange computation for a prepared PDF.
 
@@ -18,7 +18,7 @@ Result of ByteRange computation for a prepared PDF.
 byteRange: [number, number, number, number];
 ```
 
-Defined in: [src/signature/byteRange.ts:37](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/byteRange.ts#L37)
+Defined in: [src/signature/byteRange.ts:37](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/signature/byteRange.ts#L37)
 
 The byte range array [offset1, length1, offset2, length2].
 
@@ -30,7 +30,7 @@ The byte range array [offset1, length1, offset2, length2].
 contentsLength: number;
 ```
 
-Defined in: [src/signature/byteRange.ts:41](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/byteRange.ts#L41)
+Defined in: [src/signature/byteRange.ts:41](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/signature/byteRange.ts#L41)
 
 Length of the placeholder in bytes (including angle brackets `<…>`).
 
@@ -42,6 +42,6 @@ Length of the placeholder in bytes (including angle brackets `<…>`).
 contentsOffset: number;
 ```
 
-Defined in: [src/signature/byteRange.ts:39](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/byteRange.ts#L39)
+Defined in: [src/signature/byteRange.ts:39](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/signature/byteRange.ts#L39)
 
 Start offset of the /Contents hex string placeholder (the `<`).

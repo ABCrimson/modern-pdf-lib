@@ -10,7 +10,7 @@
 function parseIccDescription(data): string | undefined;
 ```
 
-Defined in: [src/assets/image/iccProfile.ts:108](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/iccProfile.ts#L108)
+Defined in: [src/assets/image/iccProfile.ts:108](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/assets/image/iccProfile.ts#L108)
 
 Parse the human-readable description from an ICC profile's 'desc' tag.
 

@@ -6,7 +6,7 @@
 
 # Class: MissingOnValueCheckError
 
-Defined in: [src/errors.ts:117](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/errors.ts#L117)
+Defined in: [src/errors.ts:117](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/errors.ts#L117)
 
 Thrown when a checkbox or radio button is checked but no "on" value
 can be determined from its appearance dictionary.
@@ -23,7 +23,7 @@ can be determined from its appearance dictionary.
 new MissingOnValueCheckError(fieldName, options?): MissingOnValueCheckError;
 ```
 
-Defined in: [src/errors.ts:119](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/errors.ts#L119)
+Defined in: [src/errors.ts:119](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/errors.ts#L119)
 
 #### Parameters
 
@@ -85,7 +85,7 @@ Error.message
 readonly name: "MissingOnValueCheckError" = 'MissingOnValueCheckError';
 ```
 
-Defined in: [src/errors.ts:118](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/errors.ts#L118)
+Defined in: [src/errors.ts:118](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/errors.ts#L118)
 
 #### Overrides
 

@@ -6,7 +6,7 @@
 
 # Interface: EncryptOptions
 
-Defined in: [src/crypto/encryptionHandler.ts:57](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/crypto/encryptionHandler.ts#L57)
+Defined in: [src/crypto/encryptionHandler.ts:57](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/crypto/encryptionHandler.ts#L57)
 
 Options for encrypting a PDF document.
 
@@ -18,7 +18,7 @@ Options for encrypting a PDF document.
 optional algorithm?: EncryptAlgorithm;
 ```
 
-Defined in: [src/crypto/encryptionHandler.ts:65](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/crypto/encryptionHandler.ts#L65)
+Defined in: [src/crypto/encryptionHandler.ts:65](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/crypto/encryptionHandler.ts#L65)
 
 Encryption algorithm. Default: `'aes-128'`.
 
@@ -30,7 +30,7 @@ Encryption algorithm. Default: `'aes-128'`.
 ownerPassword: string;
 ```
 
-Defined in: [src/crypto/encryptionHandler.ts:61](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/crypto/encryptionHandler.ts#L61)
+Defined in: [src/crypto/encryptionHandler.ts:61](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/crypto/encryptionHandler.ts#L61)
 
 The owner password (restricts editing).
 
@@ -42,7 +42,7 @@ The owner password (restricts editing).
 optional permissions?: PdfPermissionFlags;
 ```
 
-Defined in: [src/crypto/encryptionHandler.ts:63](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/crypto/encryptionHandler.ts#L63)
+Defined in: [src/crypto/encryptionHandler.ts:63](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/crypto/encryptionHandler.ts#L63)
 
 Permission flags.
 
@@ -54,6 +54,6 @@ Permission flags.
 userPassword: string;
 ```
 
-Defined in: [src/crypto/encryptionHandler.ts:59](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/crypto/encryptionHandler.ts#L59)
+Defined in: [src/crypto/encryptionHandler.ts:59](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/crypto/encryptionHandler.ts#L59)
 
 The user password (may be empty string for open access).

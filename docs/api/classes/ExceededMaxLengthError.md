@@ -6,7 +6,7 @@
 
 # Class: ExceededMaxLengthError
 
-Defined in: [src/errors.ts:206](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/errors.ts#L206)
+Defined in: [src/errors.ts:206](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/errors.ts#L206)
 
 Thrown when a text field value exceeds the field's declared
 maximum length (/MaxLen).
@@ -27,7 +27,7 @@ new ExceededMaxLengthError(
    options?): ExceededMaxLengthError;
 ```
 
-Defined in: [src/errors.ts:208](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/errors.ts#L208)
+Defined in: [src/errors.ts:208](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/errors.ts#L208)
 
 #### Parameters
 
@@ -97,7 +97,7 @@ Error.message
 readonly name: "ExceededMaxLengthError" = 'ExceededMaxLengthError';
 ```
 
-Defined in: [src/errors.ts:207](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/errors.ts#L207)
+Defined in: [src/errors.ts:207](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/errors.ts#L207)
 
 #### Overrides
 

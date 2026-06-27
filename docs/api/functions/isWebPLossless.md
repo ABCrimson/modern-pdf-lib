@@ -10,7 +10,7 @@
 function isWebPLossless(data): boolean;
 ```
 
-Defined in: [src/assets/image/webpDecode.ts:47](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/webpDecode.ts#L47)
+Defined in: [src/assets/image/webpDecode.ts:47](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/assets/image/webpDecode.ts#L47)
 
 Check if a WebP file contains a VP8L (lossless) bitstream.
 

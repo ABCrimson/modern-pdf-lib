@@ -6,7 +6,7 @@
 
 # Class: PdfLayer
 
-Defined in: [src/layers/optionalContent.ts:36](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layers/optionalContent.ts#L36)
+Defined in: [src/layers/optionalContent.ts:36](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/layers/optionalContent.ts#L36)
 
 Represents a single optional content group (layer) in a PDF.
 
@@ -22,7 +22,7 @@ operators in the content stream.
 new PdfLayer(name, visible?): PdfLayer;
 ```
 
-Defined in: [src/layers/optionalContent.ts:41](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layers/optionalContent.ts#L41)
+Defined in: [src/layers/optionalContent.ts:41](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/layers/optionalContent.ts#L41)
 
 #### Parameters
 
@@ -46,7 +46,7 @@ Defined in: [src/layers/optionalContent.ts:41](https://github.com/ABCrimson/mode
 readonly name: string;
 ```
 
-Defined in: [src/layers/optionalContent.ts:37](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layers/optionalContent.ts#L37)
+Defined in: [src/layers/optionalContent.ts:37](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/layers/optionalContent.ts#L37)
 
 ## Methods
 
@@ -56,7 +56,7 @@ Defined in: [src/layers/optionalContent.ts:37](https://github.com/ABCrimson/mode
 getName(): string;
 ```
 
-Defined in: [src/layers/optionalContent.ts:57](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layers/optionalContent.ts#L57)
+Defined in: [src/layers/optionalContent.ts:57](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/layers/optionalContent.ts#L57)
 
 Get the layer name.
 
@@ -72,7 +72,7 @@ Get the layer name.
 getRef(): PdfRef | undefined;
 ```
 
-Defined in: [src/layers/optionalContent.ts:65](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layers/optionalContent.ts#L65)
+Defined in: [src/layers/optionalContent.ts:65](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/layers/optionalContent.ts#L65)
 
 Get the indirect reference for this layer's OCG dictionary.
 Only available after `toDict()` has been called.
@@ -89,7 +89,7 @@ Only available after `toDict()` has been called.
 isVisible(): boolean;
 ```
 
-Defined in: [src/layers/optionalContent.ts:47](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layers/optionalContent.ts#L47)
+Defined in: [src/layers/optionalContent.ts:47](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/layers/optionalContent.ts#L47)
 
 Check whether this layer is visible by default.
 
@@ -105,7 +105,7 @@ Check whether this layer is visible by default.
 setVisible(visible): void;
 ```
 
-Defined in: [src/layers/optionalContent.ts:52](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layers/optionalContent.ts#L52)
+Defined in: [src/layers/optionalContent.ts:52](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/layers/optionalContent.ts#L52)
 
 Set the default visibility of this layer.
 
@@ -127,7 +127,7 @@ Set the default visibility of this layer.
 toDict(registry): PdfRef;
 ```
 
-Defined in: [src/layers/optionalContent.ts:76](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layers/optionalContent.ts#L76)
+Defined in: [src/layers/optionalContent.ts:76](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/layers/optionalContent.ts#L76)
 
 Serialize this layer as an OCG dictionary and register it in the
 object registry.
@@ -154,7 +154,7 @@ The indirect reference to the OCG dictionary.
 static fromDict(dict): PdfLayer;
 ```
 
-Defined in: [src/layers/optionalContent.ts:96](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/layers/optionalContent.ts#L96)
+Defined in: [src/layers/optionalContent.ts:96](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/layers/optionalContent.ts#L96)
 
 Parse a PdfLayer from an OCG dictionary.
 

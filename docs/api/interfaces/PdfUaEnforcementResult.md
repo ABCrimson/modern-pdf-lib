@@ -6,7 +6,7 @@
 
 # Interface: PdfUaEnforcementResult
 
-Defined in: [src/accessibility/pdfUaValidator.ts:93](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/accessibility/pdfUaValidator.ts#L93)
+Defined in: [src/accessibility/pdfUaValidator.ts:93](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/accessibility/pdfUaValidator.ts#L93)
 
 Result of the [enforcePdfUa](../functions/enforcePdfUa.md) auto-fix pass.
 
@@ -18,7 +18,7 @@ Result of the [enforcePdfUa](../functions/enforcePdfUa.md) auto-fix pass.
 readonly fixed: string[];
 ```
 
-Defined in: [src/accessibility/pdfUaValidator.ts:95](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/accessibility/pdfUaValidator.ts#L95)
+Defined in: [src/accessibility/pdfUaValidator.ts:95](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/accessibility/pdfUaValidator.ts#L95)
 
 Actions that were successfully applied.
 
@@ -30,6 +30,6 @@ Actions that were successfully applied.
 readonly unfixable: PdfUaError[];
 ```
 
-Defined in: [src/accessibility/pdfUaValidator.ts:97](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/accessibility/pdfUaValidator.ts#L97)
+Defined in: [src/accessibility/pdfUaValidator.ts:97](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/accessibility/pdfUaValidator.ts#L97)
 
 Issues that could not be auto-fixed and require manual attention.

@@ -10,7 +10,7 @@
 function buildRequirements(types): PdfArray;
 ```
 
-Defined in: [src/core/requirements.ts:88](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/requirements.ts#L88)
+Defined in: [src/core/requirements.ts:88](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/requirements.ts#L88)
 
 Build the document catalog `/Requirements` array from a list of
 requirement types.

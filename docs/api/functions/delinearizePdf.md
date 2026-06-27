@@ -10,7 +10,7 @@
 function delinearizePdf(pdfBytes): Promise<Uint8Array<ArrayBufferLike>>;
 ```
 
-Defined in: [src/core/linearization.ts:1206](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/linearization.ts#L1206)
+Defined in: [src/core/linearization.ts:1206](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/linearization.ts#L1206)
 
 Remove linearization artifacts from a PDF, producing a normal
 (non-linearized) PDF.

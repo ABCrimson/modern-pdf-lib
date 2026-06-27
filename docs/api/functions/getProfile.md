@@ -10,7 +10,7 @@
 function getProfile(level): PdfAProfile;
 ```
 
-Defined in: [src/compliance/pdfAProfiles.ts:39](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/pdfAProfiles.ts#L39)
+Defined in: [src/compliance/pdfAProfiles.ts:39](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/compliance/pdfAProfiles.ts#L39)
 
 Get the profile definition for a PDF/A level.
 

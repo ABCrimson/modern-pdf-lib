@@ -6,7 +6,7 @@
 
 # Interface: CIDSystemInfoData
 
-Defined in: [src/assets/font/fontEmbed.ts:456](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/font/fontEmbed.ts#L456)
+Defined in: [src/assets/font/fontEmbed.ts:456](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/assets/font/fontEmbed.ts#L456)
 
 Data for the `/CIDSystemInfo` dictionary.
 
@@ -18,7 +18,7 @@ Data for the `/CIDSystemInfo` dictionary.
 readonly ordering: string;
 ```
 
-Defined in: [src/assets/font/fontEmbed.ts:458](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/font/fontEmbed.ts#L458)
+Defined in: [src/assets/font/fontEmbed.ts:458](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/assets/font/fontEmbed.ts#L458)
 
 ***
 
@@ -28,7 +28,7 @@ Defined in: [src/assets/font/fontEmbed.ts:458](https://github.com/ABCrimson/mode
 readonly registry: string;
 ```
 
-Defined in: [src/assets/font/fontEmbed.ts:457](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/font/fontEmbed.ts#L457)
+Defined in: [src/assets/font/fontEmbed.ts:457](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/assets/font/fontEmbed.ts#L457)
 
 ***
 
@@ -38,4 +38,4 @@ Defined in: [src/assets/font/fontEmbed.ts:457](https://github.com/ABCrimson/mode
 readonly supplement: number;
 ```
 
-Defined in: [src/assets/font/fontEmbed.ts:459](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/font/fontEmbed.ts#L459)
+Defined in: [src/assets/font/fontEmbed.ts:459](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/assets/font/fontEmbed.ts#L459)

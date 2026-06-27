@@ -6,7 +6,7 @@
 
 # Class: PdfDocumentBuilder
 
-Defined in: [src/core/pdfDocumentBuilder.ts:65](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfDocumentBuilder.ts#L65)
+Defined in: [src/core/pdfDocumentBuilder.ts:65](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfDocumentBuilder.ts#L65)
 
 Fluent builder for creating PDF documents with a chainable API.
 
@@ -37,7 +37,7 @@ const bytes = await PdfDocumentBuilder.create()
 addBookmark(options): this;
 ```
 
-Defined in: [src/core/pdfDocumentBuilder.ts:304](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfDocumentBuilder.ts#L304)
+Defined in: [src/core/pdfDocumentBuilder.ts:304](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfDocumentBuilder.ts#L304)
 
 Add a bookmark (outline entry) to the document.
 
@@ -65,7 +65,7 @@ The builder (for continued chaining).  The
 addPage(size?, setup?): this;
 ```
 
-Defined in: [src/core/pdfDocumentBuilder.ts:189](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfDocumentBuilder.ts#L189)
+Defined in: [src/core/pdfDocumentBuilder.ts:189](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfDocumentBuilder.ts#L189)
 
 Add a page to the document.
 
@@ -101,7 +101,7 @@ addPages(
    setup?): this;
 ```
 
-Defined in: [src/core/pdfDocumentBuilder.ts:203](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfDocumentBuilder.ts#L203)
+Defined in: [src/core/pdfDocumentBuilder.ts:203](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfDocumentBuilder.ts#L203)
 
 Add multiple pages with the same size and optional per-page setup.
 
@@ -138,7 +138,7 @@ Optional callback invoked for each page with its
 encrypt(options): this;
 ```
 
-Defined in: [src/core/pdfDocumentBuilder.ts:275](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfDocumentBuilder.ts#L275)
+Defined in: [src/core/pdfDocumentBuilder.ts:275](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfDocumentBuilder.ts#L275)
 
 Configure encryption for this document.
 
@@ -164,7 +164,7 @@ Encryption options (passwords, algorithm, permissions).
 getDocument(): PdfDocument;
 ```
 
-Defined in: [src/core/pdfDocumentBuilder.ts:344](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfDocumentBuilder.ts#L344)
+Defined in: [src/core/pdfDocumentBuilder.ts:344](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfDocumentBuilder.ts#L344)
 
 Escape hatch — return the underlying [PdfDocument](PdfDocument.md).
 
@@ -188,7 +188,7 @@ are only resolved when [save](#save) is called.
 save(options?): Promise<Uint8Array<ArrayBufferLike>>;
 ```
 
-Defined in: [src/core/pdfDocumentBuilder.ts:322](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfDocumentBuilder.ts#L322)
+Defined in: [src/core/pdfDocumentBuilder.ts:322](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfDocumentBuilder.ts#L322)
 
 Serialize the document to a `Uint8Array`.
 
@@ -217,7 +217,7 @@ The complete PDF file as bytes.
 setAuthor(author): this;
 ```
 
-Defined in: [src/core/pdfDocumentBuilder.ts:125](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfDocumentBuilder.ts#L125)
+Defined in: [src/core/pdfDocumentBuilder.ts:125](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfDocumentBuilder.ts#L125)
 
 Set the document author.
 
@@ -239,7 +239,7 @@ Set the document author.
 setCreationDate(date): this;
 ```
 
-Defined in: [src/core/pdfDocumentBuilder.ts:155](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfDocumentBuilder.ts#L155)
+Defined in: [src/core/pdfDocumentBuilder.ts:155](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfDocumentBuilder.ts#L155)
 
 Set the document creation date.
 
@@ -261,7 +261,7 @@ Set the document creation date.
 setCreator(creator): this;
 ```
 
-Defined in: [src/core/pdfDocumentBuilder.ts:149](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfDocumentBuilder.ts#L149)
+Defined in: [src/core/pdfDocumentBuilder.ts:149](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfDocumentBuilder.ts#L149)
 
 Set the creator application name.
 
@@ -283,7 +283,7 @@ Set the creator application name.
 setKeywords(keywords): this;
 ```
 
-Defined in: [src/core/pdfDocumentBuilder.ts:137](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfDocumentBuilder.ts#L137)
+Defined in: [src/core/pdfDocumentBuilder.ts:137](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfDocumentBuilder.ts#L137)
 
 Set the document keywords.
 
@@ -305,7 +305,7 @@ Set the document keywords.
 setLanguage(lang): this;
 ```
 
-Defined in: [src/core/pdfDocumentBuilder.ts:171](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfDocumentBuilder.ts#L171)
+Defined in: [src/core/pdfDocumentBuilder.ts:171](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfDocumentBuilder.ts#L171)
 
 Set the document's natural language (BCP 47 tag).
 
@@ -329,7 +329,7 @@ BCP 47 language tag (e.g. `"en"`, `"en-US"`, `"de-DE"`).
 setModificationDate(date): this;
 ```
 
-Defined in: [src/core/pdfDocumentBuilder.ts:161](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfDocumentBuilder.ts#L161)
+Defined in: [src/core/pdfDocumentBuilder.ts:161](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfDocumentBuilder.ts#L161)
 
 Set the document modification date.
 
@@ -351,7 +351,7 @@ Set the document modification date.
 setPageLabels(labels): this;
 ```
 
-Defined in: [src/core/pdfDocumentBuilder.ts:291](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfDocumentBuilder.ts#L291)
+Defined in: [src/core/pdfDocumentBuilder.ts:291](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfDocumentBuilder.ts#L291)
 
 Set page label ranges for the document.
 
@@ -379,7 +379,7 @@ An array of label range definitions, sorted by
 setProducer(producer): this;
 ```
 
-Defined in: [src/core/pdfDocumentBuilder.ts:143](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfDocumentBuilder.ts#L143)
+Defined in: [src/core/pdfDocumentBuilder.ts:143](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfDocumentBuilder.ts#L143)
 
 Set the producer string.
 
@@ -401,7 +401,7 @@ Set the producer string.
 setSubject(subject): this;
 ```
 
-Defined in: [src/core/pdfDocumentBuilder.ts:131](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfDocumentBuilder.ts#L131)
+Defined in: [src/core/pdfDocumentBuilder.ts:131](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfDocumentBuilder.ts#L131)
 
 Set the document subject.
 
@@ -423,7 +423,7 @@ Set the document subject.
 setTitle(title, options?): this;
 ```
 
-Defined in: [src/core/pdfDocumentBuilder.ts:119](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfDocumentBuilder.ts#L119)
+Defined in: [src/core/pdfDocumentBuilder.ts:119](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfDocumentBuilder.ts#L119)
 
 Set the document title.
 
@@ -453,7 +453,7 @@ Optional display options (e.g. show in window title bar).
 withFont(fontNameOrData, callback): this;
 ```
 
-Defined in: [src/core/pdfDocumentBuilder.ts:231](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfDocumentBuilder.ts#L231)
+Defined in: [src/core/pdfDocumentBuilder.ts:231](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfDocumentBuilder.ts#L231)
 
 Embed a font and use it in a callback.
 
@@ -489,7 +489,7 @@ Invoked with the embedded font reference and
 withImage(imageData, callback): this;
 ```
 
-Defined in: [src/core/pdfDocumentBuilder.ts:253](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfDocumentBuilder.ts#L253)
+Defined in: [src/core/pdfDocumentBuilder.ts:253](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfDocumentBuilder.ts#L253)
 
 Embed an image and use it in a callback.
 
@@ -524,7 +524,7 @@ Invoked with the embedded image reference and
 static create(): PdfDocumentBuilder;
 ```
 
-Defined in: [src/core/pdfDocumentBuilder.ts:88](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfDocumentBuilder.ts#L88)
+Defined in: [src/core/pdfDocumentBuilder.ts:88](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfDocumentBuilder.ts#L88)
 
 Create a new, empty builder wrapping a fresh [PdfDocument](PdfDocument.md).
 
@@ -542,7 +542,7 @@ A new builder instance.
 static load(data, options?): Promise<PdfDocumentBuilder>;
 ```
 
-Defined in: [src/core/pdfDocumentBuilder.ts:101](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfDocumentBuilder.ts#L101)
+Defined in: [src/core/pdfDocumentBuilder.ts:101](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfDocumentBuilder.ts#L101)
 
 Load an existing PDF into the builder.
 

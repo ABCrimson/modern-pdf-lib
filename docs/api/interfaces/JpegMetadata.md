@@ -6,7 +6,7 @@
 
 # Interface: JpegMetadata
 
-Defined in: [src/assets/image/imageMetadata.ts:28](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/imageMetadata.ts#L28)
+Defined in: [src/assets/image/imageMetadata.ts:28](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/assets/image/imageMetadata.ts#L28)
 
 Extracted JPEG metadata from APP markers.
 
@@ -18,7 +18,7 @@ Extracted JPEG metadata from APP markers.
 readonly appMarkers: readonly Uint8Array<ArrayBufferLike>[];
 ```
 
-Defined in: [src/assets/image/imageMetadata.ts:38](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/imageMetadata.ts#L38)
+Defined in: [src/assets/image/imageMetadata.ts:38](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/assets/image/imageMetadata.ts#L38)
 
 Raw APP marker segments to preserve (excluding APP2/ICC).
 
@@ -30,7 +30,7 @@ Raw APP marker segments to preserve (excluding APP2/ICC).
 readonly optional copyright?: string;
 ```
 
-Defined in: [src/assets/image/imageMetadata.ts:36](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/imageMetadata.ts#L36)
+Defined in: [src/assets/image/imageMetadata.ts:36](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/assets/image/imageMetadata.ts#L36)
 
 Copyright string from EXIF.
 
@@ -42,7 +42,7 @@ Copyright string from EXIF.
 readonly optional dpiX?: number;
 ```
 
-Defined in: [src/assets/image/imageMetadata.ts:32](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/imageMetadata.ts#L32)
+Defined in: [src/assets/image/imageMetadata.ts:32](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/assets/image/imageMetadata.ts#L32)
 
 Horizontal DPI from EXIF or JFIF.
 
@@ -54,7 +54,7 @@ Horizontal DPI from EXIF or JFIF.
 readonly optional dpiY?: number;
 ```
 
-Defined in: [src/assets/image/imageMetadata.ts:34](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/imageMetadata.ts#L34)
+Defined in: [src/assets/image/imageMetadata.ts:34](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/assets/image/imageMetadata.ts#L34)
 
 Vertical DPI from EXIF or JFIF.
 
@@ -66,6 +66,6 @@ Vertical DPI from EXIF or JFIF.
 readonly optional orientation?: number;
 ```
 
-Defined in: [src/assets/image/imageMetadata.ts:30](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/image/imageMetadata.ts#L30)
+Defined in: [src/assets/image/imageMetadata.ts:30](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/assets/image/imageMetadata.ts#L30)
 
 EXIF orientation tag (1-8). 1 = normal, 6 = rotated 90 CW, etc.

@@ -6,7 +6,7 @@
 
 # Interface: ModificationViolation
 
-Defined in: [src/signature/modificationDetector.ts:37](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/modificationDetector.ts#L37)
+Defined in: [src/signature/modificationDetector.ts:37](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/signature/modificationDetector.ts#L37)
 
 A single modification violation detected in the document.
 
@@ -18,7 +18,7 @@ A single modification violation detected in the document.
 affectedSignatureIndex: number;
 ```
 
-Defined in: [src/signature/modificationDetector.ts:43](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/modificationDetector.ts#L43)
+Defined in: [src/signature/modificationDetector.ts:43](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/signature/modificationDetector.ts#L43)
 
 Index of the signature whose coverage was violated.
 
@@ -30,7 +30,7 @@ Index of the signature whose coverage was violated.
 description: string;
 ```
 
-Defined in: [src/signature/modificationDetector.ts:41](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/modificationDetector.ts#L41)
+Defined in: [src/signature/modificationDetector.ts:41](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/signature/modificationDetector.ts#L41)
 
 Human-readable description of the violation.
 
@@ -42,6 +42,6 @@ Human-readable description of the violation.
 type: ModificationViolationType;
 ```
 
-Defined in: [src/signature/modificationDetector.ts:39](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/modificationDetector.ts#L39)
+Defined in: [src/signature/modificationDetector.ts:39](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/signature/modificationDetector.ts#L39)
 
 The type of modification detected.

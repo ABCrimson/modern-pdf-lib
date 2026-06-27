@@ -6,7 +6,7 @@
 
 # Interface: WoffInfo
 
-Defined in: [src/assets/font/woff.ts:58](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/font/woff.ts#L58)
+Defined in: [src/assets/font/woff.ts:58](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/assets/font/woff.ts#L58)
 
 Parsed summary of a WOFF / WOFF2 file header.
 
@@ -18,7 +18,7 @@ Parsed summary of a WOFF / WOFF2 file header.
 readonly flavor: number;
 ```
 
-Defined in: [src/assets/font/woff.ts:62](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/font/woff.ts#L62)
+Defined in: [src/assets/font/woff.ts:62](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/assets/font/woff.ts#L62)
 
 The wrapped sfnt flavor (e.g. `0x00010000` for TrueType, `OTTO`).
 
@@ -30,7 +30,7 @@ The wrapped sfnt flavor (e.g. `0x00010000` for TrueType, `OTTO`).
 readonly numTables: number;
 ```
 
-Defined in: [src/assets/font/woff.ts:64](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/font/woff.ts#L64)
+Defined in: [src/assets/font/woff.ts:64](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/assets/font/woff.ts#L64)
 
 Number of font tables contained in the file.
 
@@ -42,7 +42,7 @@ Number of font tables contained in the file.
 readonly signature: "wOFF" | "wOF2";
 ```
 
-Defined in: [src/assets/font/woff.ts:60](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/font/woff.ts#L60)
+Defined in: [src/assets/font/woff.ts:60](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/assets/font/woff.ts#L60)
 
 The container signature: `'wOFF'` (WOFF1) or `'wOF2'` (WOFF2).
 
@@ -54,6 +54,6 @@ The container signature: `'wOFF'` (WOFF1) or `'wOF2'` (WOFF2).
 readonly totalSfntSize: number;
 ```
 
-Defined in: [src/assets/font/woff.ts:66](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/font/woff.ts#L66)
+Defined in: [src/assets/font/woff.ts:66](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/assets/font/woff.ts#L66)
 
 Size in bytes of the reconstructed (uncompressed) sfnt font.

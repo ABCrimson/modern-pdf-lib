@@ -10,7 +10,7 @@
 function removePage(doc, index): void;
 ```
 
-Defined in: [src/core/pageManipulation.ts:174](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pageManipulation.ts#L174)
+Defined in: [src/core/pageManipulation.ts:174](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pageManipulation.ts#L174)
 
 Remove a page from the document by its zero-based index.
 

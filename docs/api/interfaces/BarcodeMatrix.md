@@ -6,7 +6,7 @@
 
 # Interface: BarcodeMatrix
 
-Defined in: [src/barcode/types.ts:15](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/barcode/types.ts#L15)
+Defined in: [src/barcode/types.ts:15](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/barcode/types.ts#L15)
 
 Encoded barcode data — a sequence of modules (bars and spaces).
 
@@ -21,7 +21,7 @@ light space.  The `width` property gives the total number of modules.
 readonly modules: readonly boolean[];
 ```
 
-Defined in: [src/barcode/types.ts:17](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/barcode/types.ts#L17)
+Defined in: [src/barcode/types.ts:17](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/barcode/types.ts#L17)
 
 Module pattern: `true` = dark bar, `false` = light space.
 
@@ -33,6 +33,6 @@ Module pattern: `true` = dark bar, `false` = light space.
 readonly width: number;
 ```
 
-Defined in: [src/barcode/types.ts:19](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/barcode/types.ts#L19)
+Defined in: [src/barcode/types.ts:19](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/barcode/types.ts#L19)
 
 Total number of modules (= `modules.length`).

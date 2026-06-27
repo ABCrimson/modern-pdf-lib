@@ -6,7 +6,7 @@
 
 # Interface: DrawRectangleOptions
 
-Defined in: [src/core/pdfPage.ts:249](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfPage.ts#L249)
+Defined in: [src/core/pdfPage.ts:250](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfPage.ts#L250)
 
 Options for [PdfPage.drawRectangle](../classes/PdfPage.md#drawrectangle).
 
@@ -18,7 +18,7 @@ Options for [PdfPage.drawRectangle](../classes/PdfPage.md#drawrectangle).
 optional blendMode?: BlendMode;
 ```
 
-Defined in: [src/core/pdfPage.ts:269](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfPage.ts#L269)
+Defined in: [src/core/pdfPage.ts:270](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfPage.ts#L270)
 
 Blend mode for compositing.
 
@@ -30,7 +30,7 @@ Blend mode for compositing.
 optional borderColor?: Color;
 ```
 
-Defined in: [src/core/pdfPage.ts:261](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfPage.ts#L261)
+Defined in: [src/core/pdfPage.ts:262](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfPage.ts#L262)
 
 Border (stroke) colour.  Set to `undefined` for no stroke.
 
@@ -42,7 +42,7 @@ Border (stroke) colour.  Set to `undefined` for no stroke.
 optional borderDashArray?: number[];
 ```
 
-Defined in: [src/core/pdfPage.ts:275](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfPage.ts#L275)
+Defined in: [src/core/pdfPage.ts:276](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfPage.ts#L276)
 
 Dash pattern for border `[dashLen, gapLen, ...]`.
 
@@ -54,7 +54,7 @@ Dash pattern for border `[dashLen, gapLen, ...]`.
 optional borderDashPhase?: number;
 ```
 
-Defined in: [src/core/pdfPage.ts:277](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfPage.ts#L277)
+Defined in: [src/core/pdfPage.ts:278](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfPage.ts#L278)
 
 Dash phase offset for border.
 
@@ -66,7 +66,7 @@ Dash phase offset for border.
 optional borderLineCap?: 0 | 1 | 2;
 ```
 
-Defined in: [src/core/pdfPage.ts:279](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfPage.ts#L279)
+Defined in: [src/core/pdfPage.ts:280](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfPage.ts#L280)
 
 Line cap style for border (0 = butt, 1 = round, 2 = projecting square).
 
@@ -78,7 +78,7 @@ Line cap style for border (0 = butt, 1 = round, 2 = projecting square).
 optional borderOpacity?: number;
 ```
 
-Defined in: [src/core/pdfPage.ts:281](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfPage.ts#L281)
+Defined in: [src/core/pdfPage.ts:282](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfPage.ts#L282)
 
 Border stroke opacity `[0, 1]`, separate from fill opacity.
 
@@ -90,7 +90,7 @@ Border stroke opacity `[0, 1]`, separate from fill opacity.
 optional borderWidth?: number;
 ```
 
-Defined in: [src/core/pdfPage.ts:263](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfPage.ts#L263)
+Defined in: [src/core/pdfPage.ts:264](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfPage.ts#L264)
 
 Border width in points.
 
@@ -102,7 +102,7 @@ Border width in points.
 optional color?: Color;
 ```
 
-Defined in: [src/core/pdfPage.ts:259](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfPage.ts#L259)
+Defined in: [src/core/pdfPage.ts:260](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfPage.ts#L260)
 
 Fill colour.  Set to `undefined` for no fill.
 
@@ -114,7 +114,7 @@ Fill colour.  Set to `undefined` for no fill.
 optional height?: number;
 ```
 
-Defined in: [src/core/pdfPage.ts:257](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfPage.ts#L257)
+Defined in: [src/core/pdfPage.ts:258](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfPage.ts#L258)
 
 Rectangle height.
 
@@ -126,7 +126,7 @@ Rectangle height.
 optional opacity?: number;
 ```
 
-Defined in: [src/core/pdfPage.ts:267](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfPage.ts#L267)
+Defined in: [src/core/pdfPage.ts:268](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfPage.ts#L268)
 
 Opacity `[0, 1]`.
 
@@ -138,7 +138,7 @@ Opacity `[0, 1]`.
 optional rotate?: Angle;
 ```
 
-Defined in: [src/core/pdfPage.ts:265](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfPage.ts#L265)
+Defined in: [src/core/pdfPage.ts:266](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfPage.ts#L266)
 
 Rotation angle.
 
@@ -150,7 +150,7 @@ Rotation angle.
 optional width?: number;
 ```
 
-Defined in: [src/core/pdfPage.ts:255](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfPage.ts#L255)
+Defined in: [src/core/pdfPage.ts:256](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfPage.ts#L256)
 
 Rectangle width.
 
@@ -162,7 +162,7 @@ Rectangle width.
 optional x?: number;
 ```
 
-Defined in: [src/core/pdfPage.ts:251](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfPage.ts#L251)
+Defined in: [src/core/pdfPage.ts:252](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfPage.ts#L252)
 
 X coordinate.
 
@@ -174,7 +174,7 @@ X coordinate.
 optional xSkew?: Angle;
 ```
 
-Defined in: [src/core/pdfPage.ts:271](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfPage.ts#L271)
+Defined in: [src/core/pdfPage.ts:272](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfPage.ts#L272)
 
 Horizontal skew angle.
 
@@ -186,7 +186,7 @@ Horizontal skew angle.
 optional y?: number;
 ```
 
-Defined in: [src/core/pdfPage.ts:253](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfPage.ts#L253)
+Defined in: [src/core/pdfPage.ts:254](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfPage.ts#L254)
 
 Y coordinate.
 
@@ -198,6 +198,6 @@ Y coordinate.
 optional ySkew?: Angle;
 ```
 
-Defined in: [src/core/pdfPage.ts:273](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfPage.ts#L273)
+Defined in: [src/core/pdfPage.ts:274](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfPage.ts#L274)
 
 Vertical skew angle.

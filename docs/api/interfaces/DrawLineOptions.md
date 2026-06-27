@@ -6,7 +6,7 @@
 
 # Interface: DrawLineOptions
 
-Defined in: [src/core/pdfPage.ts:285](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfPage.ts#L285)
+Defined in: [src/core/pdfPage.ts:286](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfPage.ts#L286)
 
 Options for [PdfPage.drawLine](../classes/PdfPage.md#drawline).
 
@@ -18,7 +18,7 @@ Options for [PdfPage.drawLine](../classes/PdfPage.md#drawline).
 optional blendMode?: BlendMode;
 ```
 
-Defined in: [src/core/pdfPage.ts:301](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfPage.ts#L301)
+Defined in: [src/core/pdfPage.ts:302](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfPage.ts#L302)
 
 Blend mode for compositing.
 
@@ -30,7 +30,7 @@ Blend mode for compositing.
 optional color?: Color;
 ```
 
-Defined in: [src/core/pdfPage.ts:291](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfPage.ts#L291)
+Defined in: [src/core/pdfPage.ts:292](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfPage.ts#L292)
 
 Line colour.
 
@@ -42,7 +42,7 @@ Line colour.
 optional dashArray?: number[];
 ```
 
-Defined in: [src/core/pdfPage.ts:295](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfPage.ts#L295)
+Defined in: [src/core/pdfPage.ts:296](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfPage.ts#L296)
 
 Dash pattern `[dashLength, gapLength]`.
 
@@ -54,7 +54,7 @@ Dash pattern `[dashLength, gapLength]`.
 optional dashPhase?: number;
 ```
 
-Defined in: [src/core/pdfPage.ts:297](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfPage.ts#L297)
+Defined in: [src/core/pdfPage.ts:298](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfPage.ts#L298)
 
 Dash phase.
 
@@ -66,7 +66,7 @@ Dash phase.
 end: Point;
 ```
 
-Defined in: [src/core/pdfPage.ts:289](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfPage.ts#L289)
+Defined in: [src/core/pdfPage.ts:290](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfPage.ts#L290)
 
 End point.
 
@@ -78,7 +78,7 @@ End point.
 optional opacity?: number;
 ```
 
-Defined in: [src/core/pdfPage.ts:299](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfPage.ts#L299)
+Defined in: [src/core/pdfPage.ts:300](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfPage.ts#L300)
 
 Opacity `[0, 1]`.
 
@@ -90,7 +90,7 @@ Opacity `[0, 1]`.
 start: Point;
 ```
 
-Defined in: [src/core/pdfPage.ts:287](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfPage.ts#L287)
+Defined in: [src/core/pdfPage.ts:288](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfPage.ts#L288)
 
 Start point.
 
@@ -102,6 +102,6 @@ Start point.
 optional thickness?: number;
 ```
 
-Defined in: [src/core/pdfPage.ts:293](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfPage.ts#L293)
+Defined in: [src/core/pdfPage.ts:294](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfPage.ts#L294)
 
 Line width.

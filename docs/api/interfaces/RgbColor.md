@@ -6,7 +6,7 @@
 
 # Interface: RgbColor
 
-Defined in: [src/core/operators/color.ts:15](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/operators/color.ts#L15)
+Defined in: [src/core/operators/color.ts:15](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/operators/color.ts#L15)
 
 An RGB colour with components in the range `[0, 1]`.
 
@@ -18,7 +18,7 @@ An RGB colour with components in the range `[0, 1]`.
 readonly b: number;
 ```
 
-Defined in: [src/core/operators/color.ts:19](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/operators/color.ts#L19)
+Defined in: [src/core/operators/color.ts:19](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/operators/color.ts#L19)
 
 ***
 
@@ -28,7 +28,7 @@ Defined in: [src/core/operators/color.ts:19](https://github.com/ABCrimson/modern
 readonly g: number;
 ```
 
-Defined in: [src/core/operators/color.ts:18](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/operators/color.ts#L18)
+Defined in: [src/core/operators/color.ts:18](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/operators/color.ts#L18)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [src/core/operators/color.ts:18](https://github.com/ABCrimson/modern
 readonly r: number;
 ```
 
-Defined in: [src/core/operators/color.ts:17](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/operators/color.ts#L17)
+Defined in: [src/core/operators/color.ts:17](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/operators/color.ts#L17)
 
 ***
 
@@ -48,4 +48,4 @@ Defined in: [src/core/operators/color.ts:17](https://github.com/ABCrimson/modern
 readonly type: "rgb";
 ```
 
-Defined in: [src/core/operators/color.ts:16](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/operators/color.ts#L16)
+Defined in: [src/core/operators/color.ts:16](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/operators/color.ts#L16)

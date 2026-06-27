@@ -6,7 +6,7 @@
 
 # Interface: EmbeddedPdfPage
 
-Defined in: [src/core/pdfEmbed.ts:44](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfEmbed.ts#L44)
+Defined in: [src/core/pdfEmbed.ts:44](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfEmbed.ts#L44)
 
 Handle for a page that has been embedded as a Form XObject.
 
@@ -21,7 +21,7 @@ Pass it to `PdfPage.drawPage()` to paint the embedded page.
 readonly height: number;
 ```
 
-Defined in: [src/core/pdfEmbed.ts:52](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfEmbed.ts#L52)
+Defined in: [src/core/pdfEmbed.ts:52](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfEmbed.ts#L52)
 
 Original page height in points.
 
@@ -33,7 +33,7 @@ Original page height in points.
 readonly name: string;
 ```
 
-Defined in: [src/core/pdfEmbed.ts:46](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfEmbed.ts#L46)
+Defined in: [src/core/pdfEmbed.ts:46](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfEmbed.ts#L46)
 
 XObject resource name (e.g. `'XF1'`).
 
@@ -45,7 +45,7 @@ XObject resource name (e.g. `'XF1'`).
 readonly ref: PdfRef;
 ```
 
-Defined in: [src/core/pdfEmbed.ts:48](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfEmbed.ts#L48)
+Defined in: [src/core/pdfEmbed.ts:48](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfEmbed.ts#L48)
 
 Indirect reference to the Form XObject in the target registry.
 
@@ -57,7 +57,7 @@ Indirect reference to the Form XObject in the target registry.
 readonly width: number;
 ```
 
-Defined in: [src/core/pdfEmbed.ts:50](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfEmbed.ts#L50)
+Defined in: [src/core/pdfEmbed.ts:50](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfEmbed.ts#L50)
 
 Original page width in points.
 
@@ -69,7 +69,7 @@ Original page width in points.
 scale(factor): object;
 ```
 
-Defined in: [src/core/pdfEmbed.ts:59](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfEmbed.ts#L59)
+Defined in: [src/core/pdfEmbed.ts:59](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfEmbed.ts#L59)
 
 Return the dimensions after applying a uniform scale factor.
 
@@ -105,7 +105,7 @@ width: number;
 scaleToFit(maxW, maxH): object;
 ```
 
-Defined in: [src/core/pdfEmbed.ts:68](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/pdfEmbed.ts#L68)
+Defined in: [src/core/pdfEmbed.ts:68](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/pdfEmbed.ts#L68)
 
 Compute dimensions that fit within the given maximum size while
 preserving the original aspect ratio.

@@ -10,7 +10,7 @@
 const TextRenderingMode: object;
 ```
 
-Defined in: [src/core/enums.ts:27](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/enums.ts#L27)
+Defined in: [src/core/enums.ts:27](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/enums.ts#L27)
 
 PDF text rendering modes (Table 106).
 Applied via the Tr operator inside a text object.

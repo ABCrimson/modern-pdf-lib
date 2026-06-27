@@ -10,7 +10,7 @@
 function layoutCombedText(text, options): object[];
 ```
 
-Defined in: [src/core/layout.ts:94](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/layout.ts#L94)
+Defined in: [src/core/layout.ts:94](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/layout.ts#L94)
 
 Layout text into evenly-spaced cells for combed text fields.
 

@@ -6,7 +6,7 @@
 
 # Class: PdfParseError
 
-Defined in: [src/parser/parseError.ts:7](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/parser/parseError.ts#L7)
+Defined in: [src/parser/parseError.ts:7](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/parser/parseError.ts#L7)
 
 ## Extends
 
@@ -20,7 +20,7 @@ Defined in: [src/parser/parseError.ts:7](https://github.com/ABCrimson/modern-pdf
 new PdfParseError(options): PdfParseError;
 ```
 
-Defined in: [src/parser/parseError.ts:14](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/parser/parseError.ts#L14)
+Defined in: [src/parser/parseError.ts:14](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/parser/parseError.ts#L14)
 
 #### Parameters
 
@@ -68,7 +68,7 @@ Error.constructor
 readonly actual: string;
 ```
 
-Defined in: [src/parser/parseError.ts:11](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/parser/parseError.ts#L11)
+Defined in: [src/parser/parseError.ts:11](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/parser/parseError.ts#L11)
 
 ***
 
@@ -94,7 +94,7 @@ Error.cause
 readonly expected: string;
 ```
 
-Defined in: [src/parser/parseError.ts:10](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/parser/parseError.ts#L10)
+Defined in: [src/parser/parseError.ts:10](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/parser/parseError.ts#L10)
 
 ***
 
@@ -104,7 +104,7 @@ Defined in: [src/parser/parseError.ts:10](https://github.com/ABCrimson/modern-pd
 readonly hexContext: string;
 ```
 
-Defined in: [src/parser/parseError.ts:12](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/parser/parseError.ts#L12)
+Defined in: [src/parser/parseError.ts:12](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/parser/parseError.ts#L12)
 
 ***
 
@@ -130,7 +130,7 @@ Error.message
 readonly name: "PdfParseError" = 'PdfParseError';
 ```
 
-Defined in: [src/parser/parseError.ts:8](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/parser/parseError.ts#L8)
+Defined in: [src/parser/parseError.ts:8](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/parser/parseError.ts#L8)
 
 #### Overrides
 
@@ -146,7 +146,7 @@ Error.name
 readonly offset: number;
 ```
 
-Defined in: [src/parser/parseError.ts:9](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/parser/parseError.ts#L9)
+Defined in: [src/parser/parseError.ts:9](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/parser/parseError.ts#L9)
 
 ***
 

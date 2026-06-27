@@ -10,7 +10,7 @@
 function splitByScript(text): ScriptRun[];
 ```
 
-Defined in: [src/assets/font/fontFallback.ts:130](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/assets/font/fontFallback.ts#L130)
+Defined in: [src/assets/font/fontFallback.ts:130](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/assets/font/fontFallback.ts#L130)
 
 Segment `text` into runs of a single Unicode script using simple range
 checks. Supported scripts: Latin, Greek, Cyrillic, Arabic, Hebrew, Han,

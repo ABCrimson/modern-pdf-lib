@@ -6,7 +6,7 @@
 
 # Interface: Invoice
 
-Defined in: [src/compliance/facturX.ts:63](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/facturX.ts#L63)
+Defined in: [src/compliance/facturX.ts:63](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/compliance/facturX.ts#L63)
 
 A complete invoice ready to be rendered as CII XML.
 
@@ -18,7 +18,7 @@ A complete invoice ready to be rendered as CII XML.
 readonly buyer: InvoiceParty;
 ```
 
-Defined in: [src/compliance/facturX.ts:73](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/facturX.ts#L73)
+Defined in: [src/compliance/facturX.ts:73](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/compliance/facturX.ts#L73)
 
 Buyer trade party.
 
@@ -30,7 +30,7 @@ Buyer trade party.
 readonly currency: string;
 ```
 
-Defined in: [src/compliance/facturX.ts:69](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/facturX.ts#L69)
+Defined in: [src/compliance/facturX.ts:69](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/compliance/facturX.ts#L69)
 
 ISO 4217 currency code (e.g. 'EUR').
 
@@ -42,7 +42,7 @@ ISO 4217 currency code (e.g. 'EUR').
 readonly invoiceNumber: string;
 ```
 
-Defined in: [src/compliance/facturX.ts:65](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/facturX.ts#L65)
+Defined in: [src/compliance/facturX.ts:65](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/compliance/facturX.ts#L65)
 
 Invoice document number (BT-1).
 
@@ -54,7 +54,7 @@ Invoice document number (BT-1).
 readonly issueDate: string;
 ```
 
-Defined in: [src/compliance/facturX.ts:67](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/facturX.ts#L67)
+Defined in: [src/compliance/facturX.ts:67](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/compliance/facturX.ts#L67)
 
 Issue date as an ISO date string ('YYYY-MM-DD').
 
@@ -66,7 +66,7 @@ Issue date as an ISO date string ('YYYY-MM-DD').
 readonly lines: readonly InvoiceLine[];
 ```
 
-Defined in: [src/compliance/facturX.ts:75](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/facturX.ts#L75)
+Defined in: [src/compliance/facturX.ts:75](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/compliance/facturX.ts#L75)
 
 Invoice line items.
 
@@ -78,6 +78,6 @@ Invoice line items.
 readonly seller: InvoiceParty;
 ```
 
-Defined in: [src/compliance/facturX.ts:71](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/facturX.ts#L71)
+Defined in: [src/compliance/facturX.ts:71](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/compliance/facturX.ts#L71)
 
 Seller trade party.

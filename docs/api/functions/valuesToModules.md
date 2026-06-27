@@ -10,7 +10,7 @@
 function valuesToModules(values): BarcodeMatrix;
 ```
 
-Defined in: [src/barcode/code128.ts:373](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/barcode/code128.ts#L373)
+Defined in: [src/barcode/code128.ts:373](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/barcode/code128.ts#L373)
 
 Convert a sequence of Code 128 symbol values to a module (bar/space) array.
 

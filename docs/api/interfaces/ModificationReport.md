@@ -6,7 +6,7 @@
 
 # Interface: ModificationReport
 
-Defined in: [src/signature/modificationDetector.ts:49](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/modificationDetector.ts#L49)
+Defined in: [src/signature/modificationDetector.ts:49](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/signature/modificationDetector.ts#L49)
 
 Report of modifications detected in a certified document.
 
@@ -18,7 +18,7 @@ Report of modifications detected in a certified document.
 optional certificationLevel?: MdpPermission;
 ```
 
-Defined in: [src/signature/modificationDetector.ts:51](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/modificationDetector.ts#L51)
+Defined in: [src/signature/modificationDetector.ts:51](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/signature/modificationDetector.ts#L51)
 
 The certification level, if any.
 
@@ -30,7 +30,7 @@ The certification level, if any.
 isCompliant: boolean;
 ```
 
-Defined in: [src/signature/modificationDetector.ts:53](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/modificationDetector.ts#L53)
+Defined in: [src/signature/modificationDetector.ts:53](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/signature/modificationDetector.ts#L53)
 
 Whether the modifications comply with the certification level.
 
@@ -42,6 +42,6 @@ Whether the modifications comply with the certification level.
 violations: ModificationViolation[];
 ```
 
-Defined in: [src/signature/modificationDetector.ts:55](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/signature/modificationDetector.ts#L55)
+Defined in: [src/signature/modificationDetector.ts:55](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/signature/modificationDetector.ts#L55)
 
 List of detected violations.

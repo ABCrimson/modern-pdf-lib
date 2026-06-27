@@ -6,7 +6,7 @@
 
 # Interface: ParsedPage
 
-Defined in: [src/parser/streamingParser.ts:50](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/parser/streamingParser.ts#L50)
+Defined in: [src/parser/streamingParser.ts:50](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/parser/streamingParser.ts#L50)
 
 A page extracted from the streaming parse — contains structural
 metadata (boxes, rotation) and the byte-range location of its
@@ -21,7 +21,7 @@ themselves.
 contentStreamLength: number;
 ```
 
-Defined in: [src/parser/streamingParser.ts:62](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/parser/streamingParser.ts#L62)
+Defined in: [src/parser/streamingParser.ts:62](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/parser/streamingParser.ts#L62)
 
 Length of the content stream in bytes.
 
@@ -33,7 +33,7 @@ Length of the content stream in bytes.
 contentStreamOffset: number;
 ```
 
-Defined in: [src/parser/streamingParser.ts:60](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/parser/streamingParser.ts#L60)
+Defined in: [src/parser/streamingParser.ts:60](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/parser/streamingParser.ts#L60)
 
 Byte offset of the content stream within the PDF data.
 
@@ -45,7 +45,7 @@ Byte offset of the content stream within the PDF data.
 optional cropBox?: [number, number, number, number];
 ```
 
-Defined in: [src/parser/streamingParser.ts:56](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/parser/streamingParser.ts#L56)
+Defined in: [src/parser/streamingParser.ts:56](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/parser/streamingParser.ts#L56)
 
 The /CropBox rectangle (if present).
 
@@ -57,7 +57,7 @@ The /CropBox rectangle (if present).
 index: number;
 ```
 
-Defined in: [src/parser/streamingParser.ts:52](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/parser/streamingParser.ts#L52)
+Defined in: [src/parser/streamingParser.ts:52](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/parser/streamingParser.ts#L52)
 
 Zero-based page index.
 
@@ -69,7 +69,7 @@ Zero-based page index.
 mediaBox: [number, number, number, number];
 ```
 
-Defined in: [src/parser/streamingParser.ts:54](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/parser/streamingParser.ts#L54)
+Defined in: [src/parser/streamingParser.ts:54](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/parser/streamingParser.ts#L54)
 
 The /MediaBox rectangle.
 
@@ -81,7 +81,7 @@ The /MediaBox rectangle.
 optional resourcesOffset?: number;
 ```
 
-Defined in: [src/parser/streamingParser.ts:64](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/parser/streamingParser.ts#L64)
+Defined in: [src/parser/streamingParser.ts:64](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/parser/streamingParser.ts#L64)
 
 Byte offset of the /Resources dictionary (if resolvable).
 
@@ -93,6 +93,6 @@ Byte offset of the /Resources dictionary (if resolvable).
 optional rotation?: number;
 ```
 
-Defined in: [src/parser/streamingParser.ts:58](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/parser/streamingParser.ts#L58)
+Defined in: [src/parser/streamingParser.ts:58](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/parser/streamingParser.ts#L58)
 
 Page rotation in degrees (0, 90, 180, 270).

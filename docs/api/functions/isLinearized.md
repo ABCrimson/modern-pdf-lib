@@ -10,7 +10,7 @@
 function isLinearized(pdfBytes): boolean;
 ```
 
-Defined in: [src/core/linearization.ts:86](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/core/linearization.ts#L86)
+Defined in: [src/core/linearization.ts:86](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/core/linearization.ts#L86)
 
 Check if a PDF is linearized.
 

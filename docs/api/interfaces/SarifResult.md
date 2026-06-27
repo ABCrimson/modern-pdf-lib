@@ -6,7 +6,7 @@
 
 # Interface: SarifResult
 
-Defined in: [src/compliance/validationReport.ts:112](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/validationReport.ts#L112)
+Defined in: [src/compliance/validationReport.ts:112](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/compliance/validationReport.ts#L112)
 
 A single SARIF result — one validation finding.
 
@@ -18,7 +18,7 @@ A single SARIF result — one validation finding.
 readonly level: ValidationLevel;
 ```
 
-Defined in: [src/compliance/validationReport.ts:114](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/validationReport.ts#L114)
+Defined in: [src/compliance/validationReport.ts:114](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/compliance/validationReport.ts#L114)
 
 ***
 
@@ -28,7 +28,7 @@ Defined in: [src/compliance/validationReport.ts:114](https://github.com/ABCrimso
 readonly optional locations?: readonly SarifLocation[];
 ```
 
-Defined in: [src/compliance/validationReport.ts:116](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/validationReport.ts#L116)
+Defined in: [src/compliance/validationReport.ts:116](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/compliance/validationReport.ts#L116)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [src/compliance/validationReport.ts:116](https://github.com/ABCrimso
 readonly message: SarifMessage;
 ```
 
-Defined in: [src/compliance/validationReport.ts:115](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/validationReport.ts#L115)
+Defined in: [src/compliance/validationReport.ts:115](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/compliance/validationReport.ts#L115)
 
 ***
 
@@ -48,7 +48,7 @@ Defined in: [src/compliance/validationReport.ts:115](https://github.com/ABCrimso
 readonly optional properties?: SarifResultProperties;
 ```
 
-Defined in: [src/compliance/validationReport.ts:117](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/validationReport.ts#L117)
+Defined in: [src/compliance/validationReport.ts:117](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/compliance/validationReport.ts#L117)
 
 ***
 
@@ -58,4 +58,4 @@ Defined in: [src/compliance/validationReport.ts:117](https://github.com/ABCrimso
 readonly ruleId: string;
 ```
 
-Defined in: [src/compliance/validationReport.ts:113](https://github.com/ABCrimson/modern-pdf-lib/blob/4c6faf7ea78c1427e7e0b3e77475e1cab1cc8964/src/compliance/validationReport.ts#L113)
+Defined in: [src/compliance/validationReport.ts:113](https://github.com/ABCrimson/modern-pdf-lib/blob/41e38d3cdf2c93941dd206dd1bfad0f001b30727/src/compliance/validationReport.ts#L113)
