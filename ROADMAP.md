@@ -6,7 +6,7 @@
 
 **Within each minor:** `.0` lays the load-bearing foundation, `.1–.8` ship individually-releasable sub-features that progressively complete the theme, and `.9` is stabilization (edge-cases, performance, tests, docs, benchmarks) before rolling to the next minor.
 
-**1.0.0 reconciliation:** `VERSIONING.md` allows minors up to `0.99` before `1.0.0`. That's *headroom*, not a mandate — `1.0.0` ships when the library is **ISO 32000-2 feature-complete with a frozen, semver-guaranteed public API** (reached after `0.40.x` below). Recommend amending the policy to make 1.0.0 milestone-driven rather than mechanically gated on `0.99.9`.
+**1.0.0 reconciliation:** `VERSIONING.md` allows minors up to `0.99` before `1.0.0`. That's *headroom*, not a mandate — `1.0.0` ships when the library is **ISO 32000-2 feature-complete with a frozen, semver-guaranteed public API** (reached after `0.50.x` below). Recommend amending the policy to make 1.0.0 milestone-driven rather than mechanically gated on `0.99.9`.
 
 ---
 
@@ -241,10 +241,191 @@ The bleeding-edge toolchain migration + code modernization.
 
 ---
 
+## 0.41.x — Print Production & Prepress
+*Drive PDF straight onto the press: in-RIP separations, trapping, imposition, ink limiting, and prepress marks for ISO 12647 production.*
+
+| Version | Title | Detail | Effort |
+|---|---|---|---|
+| **0.41.0** | Separation & in-RIP color pipeline | Per-page colorant model atop existing Separation/DeviceN (§8.6.6.4): named-ink registry, alternate/tint-transform graph, overprint OP/op + OPM (§8.6.7.1, §11.7.4.5), `/Separation_info` plate enumeration, host-side plate compositor producing per-colorant grayscale buffers. | XL |
+| **0.41.1** | ICC DeviceLink & ink-coverage limiting | DeviceLink ICC profile application (ICC.1:2022 §8.4 multiProcessElements/AToB) for CMYK→CMYK retarget; TAC/TIC enforcement (e.g. 240/300/320%), GCR/UCR ink reallocation, black-generation curves per ISO 12647-2 substrate classes. | L |
+| **0.41.2** | Trapping engine | Vector spread/choke trap generation with neutral-density-driven direction, configurable trap width/miter, sliding/centerline traps, pullback on rich black, `/Trapped` flag (§14.11.6) + TrapNet-style intent annotation. | L |
+| **0.41.3** | N-up imposition & booklet layout | Imposition engine: step-and-repeat, cut-and-stack, saddle-stitch/perfect-bound signatures, creep/shingling compensation, gutter/bleed control, page reordering via printer's spreads onto press-sheet `/MediaBox`+`/BleedBox`+`/TrimBox` (§14.11.2). | L |
+| **0.41.4** | Printer's marks & color bars | Registration targets, crop/trim/bleed/fold marks, star targets, slug/job-ticket text, ISO 12647-/Ugra-Fogra control strips and gray-balance/solid-ink color bars placed in mark zone outside TrimBox. | M |
+| **0.41.5** | Soft-proofing & gamut simulation | ICC absolute/relative-colorimetric proof transform with paper-white & black-point simulation, out-of-gamut highlighting, BPC toggle (ICC §F), proof-condition (DeviceN→monitor RGB) for substrate-accurate on-screen rendering. | L |
+| **0.41.6** | Overprint & flattening preview | Composite preview honoring overprint/knockout, spot-vs-process interaction, transparency-group blending under separations; flatten-for-press path emitting opaque DeviceN content with preserved overprint semantics. | M |
+| **0.41.7** | PDF/X print-path export | PostScript Level 3 / DSC 3.0 separated & composite export, `setcmykcolor`/`setoverprint`/Separation colorspace emission, OutputIntent→ICC link mapping, plus PJTF/JDF (CIP4) job-ticket emission for press handoff. | L |
+| **0.41.8** | Preflight & Ghent-spec validation | Prepress preflight engine: min-resolution, hairline, RGB-in-CMYK-job, missing-OutputIntent, TAC-over-limit, font-embedding, spot-count checks against Ghent Workgroup (GWG) 2022 profiles, machine-readable report. | L |
+| **0.41.9** | Stabilization | Edge-cases, fuzzing, performance, tests, docs, benchmarks before rolling to the next minor. | M |
+
+---
+
+## 0.42.x — 3D, Rich Media & Multimedia
+*Resurrect interactive 3D, embedded media, and rendition-driven presentations — the post-Flash multimedia stack of ISO 32000-2 §13.6.*
+
+| Version | Title | Detail | Effort |
+|---|---|---|---|
+| **0.42.0** | 3D annotation & stream core | `Subtype /3D` annot + `3DD` stream (§13.6.2), `/Type /3D` w/ `/Subtype /U3D` (ECMA-363) & `/PRC` (ISO 14739-1); `3DV`/`3DA` activation dict, `VA` views array, default `/U3DPath`. | XL |
+| **0.42.1** | 3D views & camera | `3DView` dicts (§13.6.4) — `MS` (matrix/none/U3D), `C2W` camera-to-world 12-elem matrix, `CO` center-of-orbit, `U3DPath` named view binding, `XN`/`IN` external/internal names. | L |
+| **0.42.2** | Lighting & render modes | `3DLightingScheme` (§13.6.4 — Artwork/White/Day/Night/Hard/Primary/Blue/Red/Cube/CAD/Headlamp) + `3DRenderMode` (Solid/Wireframe/Transparent/BoundingBox/ShadedVertices/Illustration, `AC`/`FC` aux colors). | M |
+| **0.42.3** | 3D cross-sections & nodes | `3DCrossSection` array (`C` center, `O` orientation, `PO`/`PC` plane opacity/color, `IV`/`IC` intersection) + `3DNode` visibility/opacity/matrix overrides via `/Node` array (§13.6.4). | L |
+| **0.42.4** | RichMedia annotation | `Subtype /RichMedia` (§13.6.2) — `RichMediaContent` w/ `Assets` name-tree, `Configurations`/`Instances` (Flash/Video/Audio/3D subtype), `RichMediaSettings` `Activation`/`Deactivation`. | M |
+| **0.42.5** | Screen annot & rendition actions | `Subtype /Screen` (§12.5.6.18) + `Rendition` action (`/S /Rendition`, §12.6.4.13) — `OP` operation 0–4, media/selector renditions `MR`/`SR`, `JS` script, `AN` annot target. | L |
+| **0.42.6** | Media clips & players | `MediaClip` (`MCD` data / `MCS` section §13.2.4), `MediaPlayers` `MU` must/`A` available/`NU` never lists by `SoftwareIdentifier` (`OS`/`L`/`H`), `MediaPermissions` `TF` temp-file policy. | M |
+| **0.42.7** | Legacy Movie/Sound annots | `Subtype /Movie` (§12.5.6.17) + `Movie`/`MovieActivation` dicts, `Subtype /Sound` (§12.5.6.16) + `Sound` stream (`R` rate, `B` bits, `C` channels, `E` encoding), `Play Sound`/`Movie` actions (§12.6.4.10–11). | L |
+| **0.42.8** | JavaScript-driven 3D | 3D scene scripting binding (§13.6.4.3) — `OnInstantiate` handler, Acrobat `Annot3D`/`Camera`/`Mesh`/`Node`/`RenderMode` JS object model, `runtime.setView`/event dispatch into sandboxed evaluator. | L |
+| **0.42.9** | Stabilization | Edge-cases, fuzzing, performance, tests, docs, benchmarks before rolling to the next minor. | M |
+
+---
+
+## 0.43.x — Geospatial PDF & Measurement
+*Turn pages into georeferenced maps: ISO 32000-2 §8.8 Viewport/Measure/GEO with full WKT/EPSG coordinate machinery and ruler-grade distance/area/angle measurement.*
+
+| Version | Title | Detail | Effort |
+|---|---|---|---|
+| **0.43.0** | Viewport & Measure foundation | Page `/VP` array of Viewport dicts (§8.8.1) with `/BBox`, `/Name`, `/Measure`; dispatch to GEO vs RL measure subtypes; reader/writer round-trip + object model. | XL |
+| **0.43.1** | GEO measure dict (§8.8.2) | `/GEO` subtype with `/GPTS` (geo lat/lon pairs), `/LPTS` (normalized 0–1 page coords), `/BOUNDS` neatline quad, `/GCS`/`/DCS`/`/PCS` slots, `/PDU` display units. | L |
+| **0.43.2** | GCS/PCS coordinate systems | Geographic/projected CS dicts via `/WKT` (OGC 01-009 / ISO 19125) or `/EPSG` code; WGS84 (EPSG:4326) datum default, axis-order handling per ISO 19111. | M |
+| **0.43.3** | Datum & projection transforms | Forward/inverse Transverse Mercator, UTM zones, Web Mercator (EPSG:3857), LCC; Helmert 7-param datum shifts; GPTS↔LPTS↔device pipeline. | L |
+| **0.43.4** | Geodesic distance & area | Vincenty/Karney geodesics on the ellipsoid for `/PDU=DISTANCE/AREA`; great-circle fallback; planar shoelace area in PCS with unit scaling. | M |
+| **0.43.5** | RL number-format measure (§8.8.3) | `/RL` rectilinear measure: `/X`/`/Y` axis arrays, `/D` distance, `/A` area, `/T`/`/S`/`/V` number-format dicts (`/U`,`/C`,`/F`,`/D`,`/PS`,`/SS`,`/RD`,`/RT`). | L |
+| **0.43.6** | Geospatial annotations | Measurement annots carrying `/Measure` (Line/Polygon/PolyLine §12.5.6); `/IT` Intents (PolygonDimension, LineDimension); leader lines and caption text rendering. | M |
+| **0.43.7** | Georeferenced raster overlays | Embed GeoTIFF/world-file rasters as XObjects with derived `/VP`+`/GEO`; reproject tie-points to page CTM; `/Measure` attached to image bbox. | L |
+| **0.43.8** | Vector overlays & coord queries | GeoJSON (RFC 7946) polyline/polygon import projected to page space; `pageToGeo()`/`geoToPage()` query API; KML point/path ingest, OGC GeoPackage tie-in. | L |
+| **0.43.9** | Stabilization | Edge-cases, fuzzing, performance, tests, docs, benchmarks before rolling to the next minor. | M |
+
+---
+
+## 0.44.x — Dynamic Forms & XFA Migration
+*Ingest legacy XFA templates and modern dynamic forms, then losslessly-as-possible migrate them to spec-complete, fully-scriptable AcroForms.*
+
+| Version | Title | Detail | Effort |
+|---|---|---|---|
+| **0.44.0** | XFA packet model & XDP parser | Parse the XFA stream array / XDP packet set (ISO 32000-1 §12.7.8, AcroForm `/XFA`): split `template`, `datasets`, `config`, `form`, `localeSet`, `connectionSet` into a typed DOM; resolve XFA 3.3 grammar namespaces and SOM expressions. | XL |
+| **0.44.1** | Static vs dynamic classification & shell detection | Detect `/NeedsRendering`, classify forms per XFAF/XDP and full-vs-shell (XFA 3.3 §1); reconcile the legacy AcroForm fallback layer against the XFA `form` packet for hybrid documents. | L |
+| **0.44.2** | Template layout engine (flowed/positioned) | Resolve `subform` layout (`positioned`/`tb`/`lr-tb`), `occur` min/max/initial, `breakBefore`/`breakAfter`, `keep`, content-area/pageSet pagination to produce a concrete box tree from the XFA template. | M |
+| **0.44.3** | Migration to static AcroForm | Flatten the resolved box tree into AcroForm fields + widget annotations (§12.7.4–12.7.5), mapping `field`/`draw`/`exclGroup` to Tx/Btn/Ch/Sig with MK/DA/appearance synthesis; emit a lossy-migration report. | L |
+| **0.44.4** | Full field & widget completeness | Complete all field flags (§12.7.4.1, Ff/Tf tables), comb/multiline/password/file-select, radio `/Opt` + `/AS`, listbox `/TI`/`/I` top-index & multiselect, `/RV` rich-text values (§12.7.4.3) and merged field/widget dicts. | M |
+| **0.44.5** | Form data import/export | Round-trip data via XFA `datasets`, XFDF (ISO 19444-1), FDF (§12.7.8.2), and JSON; bind SOM data paths to AcroForm field names, preserving `dataGroup`/`dataValue` structure and Unicode. | L |
+| **0.44.6** | Calculation-order dependency graph | Build a topological calc graph from `/CO` and XFA `calculate`/`validate` script bindings; detect cycles, derive evaluation order, and surface `dirtyNodes` recalculation semantics. | M |
+| **0.44.7** | Form event model completeness | Extend the sandbox with the full XFA/AcroForm event set — `calculate`/`validate`/`enter`/`exit`/`change`/`click`/`format`/`initialize`/`docReady`/`preSave` — with `xfa.event` propagation and re-entrancy guards. | L |
+| **0.44.8** | Format/validate picture clauses & FormCalc bridge | Implement XFA picture-clause `format`/`validate` patterns (date/time/num/text categories, ISO 8601 + locale) and a FormCalc→JS interop bridge for `Eval`/builtin functions referenced from calc scripts. | L |
+| **0.44.9** | Stabilization | Edge-cases, fuzzing, performance, tests, docs, benchmarks before rolling to the next minor. | M |
+
+---
+
+## 0.45.x — Annotations & Collaboration
+*Deliver the complete ISO 32000-2 §12.5 annotation suite with generated appearance streams, threaded markup review, and lossless FDF/XFDF interchange.*
+
+| Version | Title | Detail | Effort |
+|---|---|---|---|
+| **0.45.0** | Annotation object model & AP engine | Core `/Annot` dictionary model (§12.5.2: Rect, Flags, AP/AS, BS/Border, OC, M/CreationDate, NM); appearance-stream generator emitting Form XObject `/N`,`/R`,`/D` streams with `/BBox`+`/Matrix` per §12.5.5. | XL |
+| **0.45.1** | Markup & text annotations | Text (note icons §12.5.6.4), FreeText with `/DA`+`/RC` rich text and `/CL` callout/`/Q` justify (§12.5.6.6), `/Popup` parent linkage (§12.5.6.14). | L |
+| **0.45.2** | Geometric annotations | Line (`/L`,`/LE` endings,`/CP`,`/LL`/`/LLE` leader lines §12.5.6.7), Square/Circle (`/RD`,`/IC` §12.5.6.8), Polygon/PolyLine (`/Vertices`,`/BE` cloud effect §12.5.6.9) with auto-generated AP. | M |
+| **0.45.3** | Text-markup annotations | Highlight/Underline/Squiggly/StrikeOut via `/QuadPoints` (§12.5.6.10); multiply-blend highlight AP, baseline-offset squiggle/strike geometry derived from extracted glyph runs. | L |
+| **0.45.4** | Ink, Stamp & rubber stamps | Ink `/InkList` path smoothing with Catmull-Rom→Bézier AP (§12.5.6.13); Stamp standard `/Name` set + custom image/vector stamps (§12.5.6.12). | M |
+| **0.45.5** | File-attachment, Sound, Projection & 3D | FileAttachment `/FS` embedded-file streams + icons (§12.5.6.15), Sound (§12.5.6.16), Projection (§12.5.6.24), 3D `/3DD`/`/3DV` PRC/U3D viewport refs (§13.6). | L |
+| **0.45.6** | Reply threads & review workflow | In-reply-to `/IRT` + `/RT` (Reply/Group §12.5.6.2), `/State`/`/StateModel` review status (Accepted/Rejected/Cancelled/Completed §12.5.6.3), author/`/T` threading, comment-tree traversal API. | M |
+| **0.45.7** | FDF/XFDF round-trip | FDF (§12.7.8) and XFDF (ISO 19444-1) import/export of annotations + fields: parse/serialize `<annots>`,`<add>`/`<modify>`/`<delete>` deltas, embedded AP, rich-text spans; lossless re-merge into source. | L |
+| **0.45.8** | Flattening & extraction | Bake AP streams into page content with OCG/print-flag awareness, redact-annotation application (§12.5.6.23 apply-and-remove), structured extraction to JSON with QuadPoints→text mapping. | L |
+| **0.45.9** | Stabilization | Edge-cases, fuzzing, performance, tests, docs, benchmarks before rolling to the next minor. | M |
+
+---
+
+## 0.46.x — Document Intelligence & Layout Analysis
+*Recover physical and logical document structure — reading order, regions, tables, headings, and searchable text — from glyph geometry alone, via pluggable heuristics and zero bundled ML weights.*
+
+| Version | Title | Detail | Effort |
+|---|---|---|---|
+| **0.46.0** | Geometric content model + page graph | Build a normalized per-page geometry model from §9.4 text-showing ops and §8.6 graphics state: glyph runs with CTM-resolved quads, baselines, font/size, color, z-order; expose `LayoutModel` API with spatial R-tree index over word/line/region nodes. | XL |
+| **0.46.1** | Reading-order detection | XY-cut recursive segmentation + topological ordering of blocks; honor explicit order via Tagged-PDF §14.8.2 `/StructTreeRoot` when present, else infer from column geometry and bidi base direction (UAX #9). | L |
+| **0.46.2** | Physical layout segmentation | Whitespace-density + connected-component analysis into columns/regions/blocks; gutter detection, multi-column flow resolution, header/footer/margin-note classification via repetition across pages (running-head detection per §14.8.4.3). | M |
+| **0.46.3** | Table-structure recognition | Detect tables from §8.5.2.1 path-ruling lines (h/v segment graph → cell grid) and whitespace lattices for borderless tables; emit row/col spans, header rows, and round-trip to Tagged-PDF `/Table`/`/TR`/`/TH`/`/TD` (§14.8.4.5). | L |
+| **0.46.4** | Heading & list inference | Cluster lines into a logical outline using font-size/weight/leading deltas and indentation; detect ordered/unordered list markers (bullets, decimal/roman/alpha), nesting depth, and map to `/H1`–`/Hn`/`/L`/`/LI` structure types. | M |
+| **0.46.5** | Language & script detection | Per-run Unicode script resolution (UAX #24) + n-gram language ID over extracted text; populate span `/Lang` (BCP-47, RFC 5646) hints and select shaping/segmentation rules; confidence scores per region. | L |
+| **0.46.6** | Pluggable OCR pipeline + searchable overlay | Define `OcrEngine` interface (image tiles in → words+quads+confidence out, no bundled weights); render rasterized regions, run engine, inject invisible §9.3.3 `Tr 3` text layer aligned to glyph quads producing a searchable overlay. | M |
+| **0.46.7** | Key-value & form extraction hooks | Heuristic label→value pairing via proximity/alignment graphs and colon/underline cues; expose `FieldExtractor` plugin API and reconcile with AcroForm §12.7 widget rects when present; emit typed KV records. | L |
+| **0.46.8** | Document classification hooks + structured export | `Classifier` plugin interface over layout+text features (no weights); serialize the full intelligence model to hOCR/ALTO 4.x and JSON-LD, with bbox provenance and per-node confidence. | L |
+| **0.46.9** | Stabilization | Edge-cases, fuzzing, performance, tests, docs, benchmarks before rolling to the next minor. | M |
+
+---
+
+## 0.47.x — Archival & Long-Term Preservation
+*OAIS-compliant ingest-to-AIP pipeline that normalizes, repairs, enriches, and packages PDFs for guaranteed multi-decade fixity and renderability.*
+
+| Version | Title | Detail | Effort |
+|---|---|---|---|
+| **0.47.0** | OAIS fixity & manifest core | SHA-256/SHA-512/BLAKE3 fixity over per-object byte-ranges + whole-file digest; emit ISO 14721 (OAIS) manifest with RFC 8493 BagIt-style `manifest-sha512.txt`/`tagmanifest`, byte counts, and RFC 3161 timestamp anchoring of the digest set. | XL |
+| **0.47.1** | PREMIS/METS preservation metadata | Embed ISO/PREMIS 3.0 events (ingest/normalization/validation/migration) + agents/rights as METS XML, serialized into XMP via a `premis:` ext-schema packet (ISO 32000-2 §14.3.2) and document-level `/Metadata`. | L |
+| **0.47.2** | Deep PDF/A normalization engine | Conformance-driven rewrite to PDF/A-1/2/3 (ISO 19005-1/2/3) and PDF/A-4 (ISO 19005-4 over ISO 32000-2): strip encryption/JS/transparency-as-required, force `OutputIntent`, normalize `/MarkInfo`, set GTS_PDFA1 XMP conformance/part keys. | XL |
+| **0.47.3** | Structural repair & rebuild | Reconstruct broken xref/trailer, rebuild object/xref streams (§7.5.7–7.5.8), repair `/Root`/`/Info` links, recover orphaned objects, fix `/ID` and `/Size`, and re-linearize (§F) for byte-stable AIP output. | L |
+| **0.47.4** | Font completeness enforcement | Detect non-embedded/subset-incomplete fonts; embed full or widened subsets, regenerate `/CIDToGIDMap`/`/ToUnicode` (§9.10), validate `/CharSet`/`/CIDSet`, and substitute metrically-compatible fallbacks flagged as PREMIS migration events. | L |
+| **0.47.5** | ICC & color completeness | Enforce explicit `OutputIntent` ICC (ICC v2/v4, ISO 15076-1), tag all DeviceN/Separation/ICCBased streams, resolve unmanaged Device* color via DefaultGray/RGB/CMYK, and validate profile presence against PDF/A color rules. | L |
+| **0.47.6** | Format migration legacy→PDF 2.0 | Upgrade PDF 1.x AIPs to ISO 32000-2: rewrite deprecated constructs (XFA drop, `/Encrypt` V<5 re-key, name-tree/AcroForm cleanup), set `/Version` 2.0, and log each transform as a PREMIS migration with before/after fixity. | L |
+| **0.47.7** | AIP packaging & SIP/DIP | Produce OAIS AIP as a BagIt (RFC 8493) bag or PDF Collection/Portfolio (§7.11.4) bundling source SIP, normalized PDF/A, sidecar METS/PREMIS, fixity manifest, and provenance log; emit reversible DIP export descriptor. | M |
+| **0.47.8** | Preservation-policy validation | Declarative policy engine asserting PDF/A part+level, embedded-font/ICC completeness, fixity validity, and metadata presence; gate ingest with pass/fail report (machine-readable JSON + human PDF) and exit-coded CI integration. | L |
+| **0.47.9** | Stabilization | Edge-cases, fuzzing, performance, tests, docs, benchmarks before rolling to the next minor. | M |
+
+---
+
+## 0.48.x — Edge & Cloud-Native Runtimes
+*Make modern-pdf-lib a first-class citizen of edge/serverless isolates: sub-millisecond cold starts, range-streamed object storage, and request-scoped memory governance everywhere from CF Workers to Deno Deploy.*
+
+| Version | Title | Detail | Effort |
+|---|---|---|---|
+| **0.48.0** | Isolate-safe runtime core | Refactor global/module singletons to request-scoped contexts; remove `import.meta.url`/FS assumptions; WinterCG Minimum Common API surface only; `AsyncLocalStorage`-style scope via per-request `RuntimeContext`; verified on Workers `nodejs_compat`, Deno Deploy, Vercel Edge, Bun. | XL |
+| **0.48.1** | Streaming WASM + cold-start budget | `WebAssembly.compileStreaming`/`instantiateStreaming` from `Response`; precompiled module caching across isolate reuse; lazy per-codec module load; cold-start budget asserts (<5ms init, <1MB resident) with CI gate on V8-isolate snapshot. | L |
+| **0.48.2** | Range-streaming storage adapters | Pluggable `StorageReader` over HTTP `Range` (RFC 9110 §14); R2/S3 (`GetObject` Range)/GCS (`Range` header) backends; xref-driven sparse fetch reading only touched objects via ISO 32000-2 §7.5.8 cross-reference streams. | L |
+| **0.48.3** | KV / Durable Object structure cache | Serialize parsed xref + object-stream index to a compact binary blob cached in Workers KV / Deno KV; Durable Object as single-writer coherence point; content-addressed keys (SHA-256 of byte ranges) with TTL + ETag revalidation. | M |
+| **0.48.4** | Request-scoped memory caps | Hard byte budget per `RuntimeContext`; streaming back-pressure on parse/render; bounded LRU object cache with eviction; `Reader.byteLength` gating to honor Workers 128MB / Edge isolate limits; deterministic OOM-prevention errors. | L |
+| **0.48.5** | Signed-URL asset loading | Fetch fonts/ICC/images via pre-signed URLs (AWS SigV4, GCS V4, R2 S3-compat); short-TTL credential scoping; SSRF allowlist + redirect pinning; integrity via SRI-style SHA-384 digests on remote assets. | M |
+| **0.48.6** | Streaming response writer | Emit PDF as a `ReadableStream`/`Response` body with incremental xref so first bytes flush before the document finishes; chunked-transfer friendly; linearized-first-page (ISO 32000-2 Annex F) fast path for edge previews. | L |
+| **0.48.7** | Platform bindings & adapters | Thin idiomatic shims: CF Workers `fetch` handler + R2/KV bindings, Deno Deploy, Vercel Edge Functions, Netlify Edge, Bun.serve; `wrangler`/`deno.json`/`vercel.json` recipes; env-var driven storage wiring. | L |
+| **0.48.8** | Durable batch & queue workers | Long jobs via CF Queues / Durable Object alarms / Deno Cron with checkpointed resumable parse-render state; idempotent message keys; partial-result spillover to R2/S3 for documents exceeding a single isolate's wall-clock/CPU budget. | L |
+| **0.48.9** | Stabilization | Edge-cases, fuzzing, performance, tests, docs, benchmarks before rolling to the next minor. | M |
+
+---
+
+## 0.49.x — Reliability, Fuzzing & Differential Testing
+*Prove the engine never crashes, never diverges, and always builds the same bytes — under adversarial, property-driven, cross-implementation scrutiny.*
+
+| Version | Title | Detail | Effort |
+|---|---|---|---|
+| **0.49.0** | Differential test harness | Golden-oracle runner diffing our parse/serialize against pdf.js, qpdf `--json`, Ghostscript `pdfwrite`, and veraPDF over a versioned corpus; normalized AST + rendered-pixel (SSIM) comparators with per-oracle tolerance manifests. | XL |
+| **0.49.1** | Property-based invariants | fast-check arbitraries generating well-formed COS object graphs (ISO 32000-2 §7.3) asserting round-trip idempotence `parse∘write∘parse≡parse`, xref↔offset consistency (§7.5.4/§7.5.8), and stream `/Length` invariants. | L |
+| **0.49.2** | Coverage-guided fuzz corpus | libFuzzer/AFL++-style harness over the parser via `wasm` + native bindings, seeded from PDFBox/qpdf/pdfium adversarial suites; minimized corpus checked in, branch-coverage tracked against §7.5 file-structure grammar. | M |
+| **0.49.3** | CI fuzz job + crash triage | Nightly OSS-Fuzz-style GitHub Actions matrix (short fuzz budget per PR, long nightly), ASan/UBSan on native shims, automatic crash dedup by stack hash and corpus-entry bisection to first-failing commit. | L |
+| **0.49.4** | Crash-free parsing guarantee | Total-function parser contract: every byte sequence yields `Result<Doc, RecoverableError>` never an unhandled throw; recursion-depth/allocation guards against billion-laughs, deep `/Kids` trees, and cyclic indirect refs (§7.3.10). | M |
+| **0.49.5** | Malformed/adversarial recovery | Reconstruct broken xref by full-file object scan (§7.5.4 recovery), repair off-by-N offsets, truncated/overlapping streams, salvage missing `startxref`/`%%EOF`, mirroring qpdf `--check`/pdfium recovery semantics; fidelity-scored vs oracles. | L |
+| **0.49.6** | Regression-snapshot corpus | Deterministic byte-snapshot suite over a curated real-world doc set; content-addressed (BLAKE3) snapshots, intentional-vs-regression diff gate in CI, and a `--update-snapshots` workflow with reviewer sign-off. | M |
+| **0.49.7** | Reproducible builds | Bit-identical artifacts: pinned `SOURCE_DATE_EPOCH`, sorted/zeroed zip metadata in WASM+npm tarballs, deterministic `/ID` & XMP timestamps in emitted PDFs, dual-runner build-equivalence check in CI. | L |
+| **0.49.8** | Supply-chain attestation | SLSA L3 provenance + Sigstore/cosign keyless signing of npm + WASM artifacts, CycloneDX SBOM, `npm pkg` provenance, and verification gate (`slsa-verifier`) blocking release on attestation mismatch. | L |
+| **0.49.9** | Stabilization | Edge-cases, fuzzing, performance, tests, docs, benchmarks before rolling to the next minor. | M |
+
+---
+
+## 0.50.x — 1.0 Readiness: API Freeze & Migration
+*Curate ~600 ad-hoc exports into one intentional, frozen, tool-gated public surface — the last gate before 1.0.0.*
+
+| Version | Title | Detail | Effort |
+|---|---|---|---|
+| **0.50.0** | Public-API entry-point consolidation | Collapse ~600 deep-path exports into a single rolled-up `index.ts` barrel + curated subpath `exports` map (Node conditional exports, `"types"` first); annotate every symbol `@public`/`@beta`/`@internal` per TSDoc spec; strip `@internal` from emitted `.d.ts` via API-Extractor rollup. | XL |
+| **0.50.1** | Deprecation purge | Delete all `@deprecated` 0.x shims (legacy sync `embedPng`, `isNaN`-era helpers, pre-WeakMap stores); enforce zero `@deprecated` in public rollup via lint gate; record removals in MIGRATION.md keyed to last-supported version. | L |
+| **0.50.2** | API-report gating in CI | `@microsoft/api-extractor` generates `etc/modern-pdf-lib.api.md`; CI fails on uncommitted report diff (`--local`/`--ci`); PR bot surfaces additions/removals/breaking changes as the canonical reviewable API contract. | M |
+| **0.50.3** | Type-level contract tests | `expect-type`/`tsd` assertions over every public signature + `tsc --noEmit` against the `.d.cts`/`.d.mts` rollups under matrix `tsconfig` (`strict`, `exactOptionalPropertyTypes`, `verbatimModuleSyntax`, `moduleResolution: bundler|node16`). | L |
+| **0.50.4** | Semver-lint & API diff gating | Wire `@arethetypeswrong/cli` (ATTW) + `api-extractor` diff into release flow; classify each PR diff patch/minor/major; block disallowed breaks on `0.50.x→1.0` track; verify `package.json` `exports`/`types` resolve across all conditions. | M |
+| **0.50.5** | Codemods & automated migration | Ship `jscodeshift`/`ts-morph` codemods for renamed symbols + moved import paths (`npx modern-pdf-lib-codemod v0-to-v1`); AST-rewrite deep imports to curated subpaths; idempotent, dry-run, and snapshot-tested. | L |
+| **0.50.6** | Exhaustive docs & example coverage | `eslint-plugin-jsdoc` requires TSDoc on 100% of `@public`; doc-lint gate fails on undocumented exports; every public entry gets a runnable, type-checked example (`twoslash`) executed in CI to prevent doc drift. | M |
+| **0.50.7** | Supported-runtime matrix CI | Conformance suite across Node ≥25.7 LTS line, Deno, Bun, CF-Workers (`workerd`), and browser (Playwright); publish a support-tier matrix; `engines`/`exports` `"worker"`/`"deno"`/`"browser"` conditions verified against real runtimes. | L |
+| **0.50.8** | Security audit & supply-chain hardening | `npm audit`/`osv-scanner` zero-known-vuln gate; provenance via npm `--provenance` (SLSA/sigstore attestation); SBOM (CycloneDX); `socket`/`provenance`-gated single `fflate` dep; reproducible build + signed git tags. | L |
+| **0.50.9** | Stabilization | Edge-cases, fuzzing, performance, tests, docs, benchmarks before rolling to the next minor. | M |
+
+---
+
 ## 1.0.0 — Stable
-**The milestone.** Declared once the above ships:
-- **ISO 32000-2 (PDF 2.0) feature-complete** across create / read / render / sign / validate.
-- **Frozen public API** with semver guarantees; all deprecations from the 0.x line removed.
-- **Conformance**: PDF/A-4, PDF/UA-2, PDF/X-6 writers + validators green against veraPDF.
-- **Performance**: documented wins vs pdf-lib across the full benchmark matrix; streaming + worker-parallel paths stable.
-- **LTS line** begins; published support/versioning policy.
+**The milestone.** Declared once the full `0.28.x → 0.50.x` arc above ships — feature work (`0.28`–`0.49`) then the `0.50.x` API-freeze gate:
+- **ISO 32000-2 (PDF 2.0) feature-complete** across create / read / render / sign / validate — including the §13.6 3D & rich-media stack, §8.8 geospatial/measurement, §12.5 full annotation suite, dynamic forms/XFA migration, and the prepress/print-production path.
+- **Frozen public API** with semver guarantees; the export surface curated and gated by API-extractor + `expect-type` (`0.50.x`); all deprecations from the 0.x line removed with codemods.
+- **Conformance**: PDF/A-4, PDF/UA-2, PDF/X-6, Factur-X/ZUGFeRD writers + validators green against veraPDF; differential-tested vs pdf.js / qpdf / Ghostscript.
+- **Performance**: documented wins vs pdf-lib across the full benchmark matrix; streaming, worker-parallel, and edge/serverless paths stable.
+- **Reliability**: property-based + fuzzing corpus in CI, crash-free parsing of adversarial input, reproducible builds with supply-chain attestation.
+- **LTS line** begins; published support/versioning policy and supported-runtime matrix (Node / Deno / Bun / CF Workers / browsers).
