@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 See [VERSIONING.md](./VERSIONING.md) for this project's versioning policy.
 
+## [0.36.0] - 2026-06-27
+
+**Advanced Typography & Fonts.** GSUB/GPOS shaping (ligatures, kerning, mark positioning) and WOFF1 decoding already ship via the shaping WASM + font modules; this minor adds the genuine pure-JS gaps: the Unicode Bidirectional Algorithm, OpenType variable-font axis parsing, and COLR/CPAL color fonts. Every byte layout and algorithm rule was verified against the cited spec (UAX #9 rev 49, OpenType 1.9.1) with honest scope notes. TDD-verified; suite now **6,683 tests**, **673** root exports; 34/37 vs pdf-lib (no regression).
+
+### Added
+
+- **Bidirectional text (UAX #9)** (`0.36`, `src/text/bidi.ts`): `resolveBidi(text, base?)` runs the full Unicode Bidi pipeline — explicit embeddings/overrides + isolates (X1–X10), weak (W1–W7), neutral + paired-bracket (N0/BD16, N1/N2), and implicit (I1/I2) resolution, then L1/L2 reordering — returning embedding levels, directional runs, and the logical→visual map; `reorderVisual` is the string convenience. The `Bidi_Class`/bracket tables are a documented range-based subset (Latin, Hebrew, Arabic+Supplement, Syriac, Thaana); the *algorithm* is complete, coverage degrades to Unicode defaults elsewhere.
+- **Variable fonts** (`0.36`, `src/assets/font/variableFont.ts`): `parseVariableFont` reads the `fvar` axes + named instances (field offsets cross-checked against the spec's worked example, incl. the `postScriptNameID`-presence rule and the `0xFFFF` sentinel); `normalizeAxisCoordinate` does OpenType default-normalization and applies `avar` segment maps. Outline (`gvar`) instancing is documented as a follow-up.
+- **Color fonts** (`0.36`, `src/assets/font/colorFont.ts`): `parseColorFont` reads `CPAL` palettes (BGRA→RGBA) and detects `COLR`; `getColorGlyphLayers` binary-searches the `COLR` v0 base-glyph records and resolves each layer's palette colour. `COLR` v1 (gradients) and PDF embedding of colour glyphs are documented as out of scope.
+
+### Documentation
+
+- Expanded the Fonts guide with an "Advanced typography" section covering BiDi, variable fonts, and color fonts (each with explicit scope notes).
+
+### Notes
+
+- **WOFF2** input decoding remains unsupported on purpose: it requires Brotli, and modern-pdf-lib keeps a single runtime dependency (fflate, zlib-only). WOFF1 is decoded; WOFF2 headers are recognised and rejected with a clear error.
+
 ## [0.35.0] - 2026-06-27
 
 **Security & Redaction.** A document-hardening layer for auditing untrusted PDFs: a static threat scanner, a content sanitizer that proves *physical* removal, a redaction-leak verifier, and a password-free encryption/permission inspector. Every dictionary key and permission bit was verified against ISO 32000 (each module cites its clauses); limitations are documented honestly, never papered over. TDD-verified; suite now **6,638 tests**, **666** root exports; 34/37 vs pdf-lib (no regression). New `src/security/` module.

@@ -64,6 +64,10 @@ const ESM_ENTRIES = [
       'sanitizePdf',
       'verifyRedactions',
       'inspectEncryption',
+      // 0.36.x typography
+      'resolveBidi',
+      'parseVariableFont',
+      'parseColorFont',
     ],
   },
   { file: 'create.mjs', expect: ['createPdf'] },

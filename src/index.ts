@@ -1413,6 +1413,25 @@ export { inspectEncryption } from './security/encryptionInspector.js';
 export type { EncryptionReport, PermissionFlags } from './security/encryptionInspector.js';
 
 // ---------------------------------------------------------------------------
+// Advanced typography (0.36.x): the Unicode Bidirectional Algorithm (UAX #9),
+// OpenType variable-font axis/instance parsing (fvar/avar), and COLR/CPAL color
+// fonts. (GSUB/GPOS shaping + WOFF1 decoding ship in the font/shaping modules.)
+// ---------------------------------------------------------------------------
+export { resolveBidi, reorderVisual } from './text/bidi.js';
+export type { BidiDirection, BidiRun, BidiResult } from './text/bidi.js';
+export {
+  parseVariableFont,
+  normalizeAxisCoordinate,
+  resolveInstanceCoordinates,
+} from './assets/font/variableFont.js';
+export type { VariationAxis, NamedInstance, AvarSegmentMap, VariableFontInfo } from './assets/font/variableFont.js';
+export { parseColorFont, getColorGlyphLayers } from './assets/font/colorFont.js';
+// NB: colorFont's internal `ColorStop` (gid + paletteIndex) is intentionally not
+// re-exported — `ColorStop` is already the gradient-stop type at the root, and
+// the color-font public API surfaces layers via `ColorGlyphLayer`, not `ColorStop`.
+export type { ColorGlyphLayer, CpalPalette, ColorFontInfo } from './assets/font/colorFont.js';
+
+// ---------------------------------------------------------------------------
 // Rendering & rasterization (0.29.x): content-stream interpreter, pure-JS
 // rasterizer, Canvas adapter, thumbnails, image/font extraction, visual diff,
 // OCR overlay, redaction-by-removal, and tiling/cache.

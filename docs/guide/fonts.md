@@ -163,6 +163,91 @@ Basic text shaping (Latin ligatures, CJK mapping) works out of the box with pure
 
 The text shaping WASM module is loaded automatically when complex script rendering is needed. No explicit initialization is required — the library detects when shaping is necessary and uses the WASM accelerator if available, falling back to the pure-JS implementation otherwise.
 
+## Advanced typography
+
+### Bidirectional text (UAX #9)
+
+`resolveBidi` implements the Unicode Bidirectional Algorithm so mixed
+left-to-right and right-to-left text (Latin + Hebrew/Arabic) is laid out in the
+correct visual order. It returns the resolved embedding levels, the contiguous
+directional runs, and the visual reordering.
+
+```ts
+import { resolveBidi, reorderVisual } from 'modern-pdf-lib';
+
+const result = resolveBidi('abc אבג xyz'); // Latin + a Hebrew word
+// result.baseLevel: 0 (LTR paragraph)
+// result.runs: [{ direction:'ltr', level:0, ... }, { direction:'rtl', level:1, ... }, ...]
+for (const run of result.runs) console.log(run.direction, run.level, run.text);
+
+// Or just get the string reordered into visual order:
+const visual = reorderVisual('שלום', 'rtl'); // pure-Hebrew → reversed
+```
+
+```ts
+function resolveBidi(text: string, base?: 'ltr' | 'rtl' | 'auto'): BidiResult;
+interface BidiResult {
+  runs: BidiRun[];
+  levels: number[];        // embedding level per UTF-16 unit
+  visualOrder: number[];   // logical→visual index map
+  baseLevel: number;       // 0 = LTR paragraph, 1 = RTL
+}
+```
+
+The full UAX #9 pipeline (explicit embeddings/isolates, weak/neutral/implicit
+rules, paired-bracket resolution, L1/L2 reordering) is implemented. The
+`Bidi_Class` and bracket-pair tables are a range-based subset covering Latin,
+Hebrew, Arabic (+ Supplement), Syriac, and Thaana; code points outside those
+ranges fall back to the Unicode default classes. Line breaking is not performed
+(the paragraph is reordered as one line).
+
+### Variable fonts (`fvar` / `avar`)
+
+`parseVariableFont` reads an OpenType variable font's variation axes and named
+instances, and `normalizeAxisCoordinate` maps a user axis value into the
+normalized `[-1, 0, +1]` design space (applying `avar` segment maps when present).
+
+```ts
+import { parseVariableFont, normalizeAxisCoordinate } from 'modern-pdf-lib';
+
+const info = parseVariableFont(fontBytes);
+if (info.isVariable) {
+  for (const axis of info.axes) {
+    console.log(axis.tag, axis.minValue, axis.defaultValue, axis.maxValue);
+  }
+  const wght = info.axes.find((a) => a.tag === 'wght')!;
+  const n = normalizeAxisCoordinate(wght, 250); // e.g. → -0.5
+}
+```
+
+::: warning Scope
+This exposes the axis/instance model and coordinate normalization — the
+foundation for instancing. Baking the `gvar`/`glyf` outline deltas into a static
+instance font is not yet performed (a planned follow-up).
+:::
+
+### Color fonts (`COLR` / `CPAL`)
+
+`parseColorFont` reads `CPAL` palettes and detects a `COLR` table;
+`getColorGlyphLayers` returns the layered color glyphs (each layer a base glyph
+id + its resolved palette colour) so a renderer can draw multi-colour glyphs.
+
+```ts
+import { parseColorFont, getColorGlyphLayers } from 'modern-pdf-lib';
+
+const info = parseColorFont(fontBytes); // { hasColor, numPalettes, palettes }
+if (info.hasColor) {
+  const layers = getColorGlyphLayers(fontBytes, glyphId); // ColorGlyphLayer[]
+  for (const layer of layers) console.log(layer.glyphId, layer.rgba); // [r,g,b,a] 0..255
+}
+```
+
+::: warning Scope
+`COLR` v0 (layered solid colours) is parsed. `COLR` v1 (gradients/transforms)
+and embedding the colour glyphs into the PDF (e.g. as Type 3 fonts) are out of
+scope for this parser, which exposes the palette + layer model.
+:::
+
 ## Font Metrics and Measurement
 
 Use font metrics for precise text layout:
