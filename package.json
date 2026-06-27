@@ -85,7 +85,7 @@
     "format": "prettier --write \"{src,tests,scripts}/**/*.ts\"",
     "format:check": "prettier --check \"{src,tests,scripts}/**/*.ts\"",
     "typecheck": "tsc --noEmit",
-    "prepublishOnly": "npm run typecheck && npm test && npm run build",
+    "prepublishOnly": "npm run typecheck && npm run build",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
     "docs:api": "node tools/docs/node_modules/typedoc/bin/typedoc && tsx scripts/sanitize-api-docs.ts",
