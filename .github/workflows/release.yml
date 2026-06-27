@@ -70,18 +70,18 @@ jobs:
         run: npm run smoke
 
       - name: Run tests
-        # The fork-pool worker accumulates memory across the files it handles and
-        # tips past 8 GB at ~2,250 tests in one shard (3-way sharding OOM'd in
-        # shard 1 once the suite passed ~6,800 tests). Each shard is an
-        # independent process that releases memory on exit, so split into 6 to
-        # keep per-worker accumulation to ~1/6 of the suite — comfortable headroom.
+        # Each fork-pool worker accumulates memory (largely the inline WASM
+        # modules) across the files it handles; with 6 shards a worker that
+        # happened to get the heavy crypto/image files still tipped past 8 GB.
+        # Split into 10 independent processes so per-worker accumulation stays
+        # well under the cap regardless of how files distribute. (vitest.config
+        # `retry: 2` separately absorbs the rare WebCrypto-under-load flake.)
         run: |
-          npx vitest run --shard=1/6
-          npx vitest run --shard=2/6
-          npx vitest run --shard=3/6
-          npx vitest run --shard=4/6
-          npx vitest run --shard=5/6
-          npx vitest run --shard=6/6
+          for shard in 1 2 3 4 5 6 7 8 9 10; do
+            echo "::group::shard $shard/10"
+            npx vitest run --shard="$shard/10"
+            echo "::endgroup::"
+          done
         env:
           NODE_OPTIONS: --max-old-space-size=8192
 

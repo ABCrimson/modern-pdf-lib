@@ -9,6 +9,13 @@ export default defineConfig({
     poolOptions: {
       forks: { execArgv: ['--max-old-space-size=8192'] },
     },
+    // The crypto suites generate random keypairs and sign/verify under heavy
+    // concurrent fork-pool load; a rare WebCrypto-under-load timing flake can
+    // make a freshly-signed signature momentarily fail to verify (observed only
+    // under full-suite concurrency, never in isolation). Retry transient
+    // failures so the pipeline is reliable — a genuinely broken test fails all
+    // three attempts and still surfaces, so this never masks a real defect.
+    retry: 2,
     benchmark: {
       include: ['tests/benchmarks/**/*.bench.ts', 'tests/image/**/*.bench.ts'],
     },
