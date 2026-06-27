@@ -45,6 +45,10 @@ const ESM_ENTRIES = [
       'attachAssociatedFiles',
       'buildSoftMaskGroupExtGState',
       'buildPageOutputIntent',
+      // 0.31.x tagged PDF
+      'tagHeading',
+      'validatePdfUa2',
+      'autoTagPage',
     ],
   },
   { file: 'create.mjs', expect: ['createPdf'] },

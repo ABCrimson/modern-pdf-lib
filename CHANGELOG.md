@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 See [VERSIONING.md](./VERSIONING.md) for this project's versioning policy.
 
+## [0.31.0] - 2026-06-27
+
+**Tagged PDF & Accessibility (PDF/UA-2).** Gap-driven — the structure-tree core, alt-text/`ActualText`/artifacts, document `/Lang`, and structure namespaces already shipped; this minor adds the ergonomic + conformance layer on top. TDD-verified; suite now **6,488 tests**, **650** root exports; 34/37 vs pdf-lib (no regression).
+
+### Added
+
+- **High-level tagging helpers** (`0.31.1–.3`, `src/accessibility/taggingHelpers.ts`): `tagHeading`/`tagParagraph`/`tagFigure`/`tagLink`, `tagList`/`tagListItem` (with ISO 32000 Table 384 `/ListNumbering`), and `tagTable`/`tagTableRow`/`tagTableHeaderCell` (with `/Scope`)/`tagTableDataCell` (with `colSpan`/`rowSpan`) — wrapping `doc.createStructureTree().addElement()` so building H1–H6/L/LI/Table/TH/TD structure is one call each.
+- **PDF/UA-2 (ISO 14289-2)** (`0.31.7`, `src/accessibility/pdfUa2.ts`): `validatePdfUa2()` (structure tree, namespaces, `/Lang`, figure alt — each mapped to an ISO 14289-2 clause) + `buildPdfUa2Xmp()` (XMP packet with `pdfuaid:part=2`), layered on the existing PDF/UA-1 validator.
+- **Heuristic auto-tagging** (`0.31.8`, `src/accessibility/autoTag.ts`): `autoTagPage()` infers a structure tree for an untagged page — headings detected by font size, body grouped into reading-order paragraphs.
+
+### Documentation
+
+- Replaced the accessibility guide's "Future: Tagged PDF" placeholder with the real tagged-PDF, auto-tagging, and PDF/UA-2 APIs.
+
 ## [0.30.0] - 2026-06-27
 
 **PDF 2.0 Core (ISO 32000-2).** An evidence-based gap analysis found 4 of the 10 planned items already shipped in v0.28.0 (Document Parts, Structure Namespaces, processor Requirements, PieceInfo), so this release builds only the genuine gaps and documents the whole set. All TDD-verified; the suite is now **6,425 tests** and the root barrel exposes **636** symbols. No performance regression vs pdf-lib (34/37).

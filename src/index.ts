@@ -1441,3 +1441,27 @@ export {
   buildImageSoftMask,
   buildBlackPointCompensationExtGState,
 } from './core/imageMask.js';
+
+// ---------------------------------------------------------------------------
+// Tagged PDF & accessibility (0.31.x): high-level structure-tagging helpers,
+// PDF/UA-2 (ISO 14289-2) validation + XMP, and heuristic auto-tagging.
+// (Structure-tree core, alt-text/artifacts, /Lang, and namespaces shipped earlier.)
+// ---------------------------------------------------------------------------
+export {
+  tagHeading,
+  tagParagraph,
+  tagFigure,
+  tagLink,
+  tagList,
+  tagListItem,
+  tagTable,
+  tagTableRow,
+  tagTableHeaderCell,
+  tagTableDataCell,
+  LIST_NUMBERING_KEY,
+} from './accessibility/taggingHelpers.js';
+export type { ListNumbering, TaggedListItem } from './accessibility/taggingHelpers.js';
+export { validatePdfUa2, buildPdfUa2Xmp } from './accessibility/pdfUa2.js';
+export type { PdfUa2Issue, PdfUa2Result } from './accessibility/pdfUa2.js';
+export { autoTagPage } from './accessibility/autoTag.js';
+export type { AutoTagOptions, AutoTagResult } from './accessibility/autoTag.js';

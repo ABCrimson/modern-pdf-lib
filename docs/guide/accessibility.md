@@ -166,12 +166,52 @@ pdf.setAuthor('Author Name');
 // an XMP metadata stream with dc:title, dc:creator, etc.
 ```
 
-## Future: Tagged PDF
+## Tagged PDF (structure trees)
 
-Full tagged PDF support (structure trees, heading levels, list items, table headers, alt text) is on the roadmap. When available, it will enable:
+Build a logical structure tree, then tag content with high-level helpers:
 
-- Automatic heading hierarchy (`<H1>`, `<H2>`, etc.)
-- List structure (`<L>`, `<LI>`, `<Lbl>`, `<LBody>`)
-- Table structure (`<Table>`, `<TR>`, `<TH>`, `<TD>`)
-- Figure alt text (`<Figure>` with `/Alt` attribute)
-- Reading order specification via the structure tree
+```ts
+import {
+  createPdf, tagHeading, tagParagraph, tagFigure, tagList, tagListItem,
+  tagTable, tagTableRow, tagTableHeaderCell, tagTableDataCell,
+} from 'modern-pdf-lib';
+
+const doc = createPdf();
+const tree = doc.createStructureTree();
+
+tagHeading(tree, null, 1, { altText: 'Annual report' }); // H1
+tagParagraph(tree, null);                                 // P
+tagFigure(tree, null, 'Revenue chart 2026');              // Figure with /Alt
+
+// Lists (with ISO 32000 Table 384 /ListNumbering)
+const list = tagList(tree, null, 'Decimal');
+const { item, label, body } = tagListItem(tree, list);    // LI → Lbl + LBody
+
+// Tables with header scope + cell spans
+const table = tagTable(tree, null);
+const row = tagTableRow(tree, table);
+tagTableHeaderCell(tree, row, 'Column');                  // TH /Scope /Column
+tagTableDataCell(tree, row, { colSpan: 2 });              // TD
+```
+
+### Heuristic auto-tagging
+
+Infer a basic structure tree for an untagged page — headings detected by font
+size, body text grouped into paragraphs:
+
+```ts
+import { autoTagPage } from 'modern-pdf-lib';
+
+const { headings, paragraphs, elements } = autoTagPage(doc, 0, { headingScale: 1.2 });
+```
+
+### PDF/UA-2 (ISO 14289-2)
+
+```ts
+import { validatePdfUa2, buildPdfUa2Xmp } from 'modern-pdf-lib';
+
+const { conformant, issues } = validatePdfUa2(doc); // structure tree, namespaces, /Lang, figure alt
+const xmp = buildPdfUa2Xmp();                       // XMP packet with pdfuaid:part=2
+```
+
+(PDF/UA-1 validation is also available via `validatePdfUa` / `enforcePdfUa` / `checkAccessibility`.)
