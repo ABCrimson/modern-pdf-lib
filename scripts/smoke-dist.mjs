@@ -52,6 +52,10 @@ const ESM_ENTRIES = [
       // 0.32.x standards
       'preflightPdfA',
       'convertPdfAConformanceXmp',
+      // 0.33.x e-invoicing
+      'assembleFacturX',
+      'validateEn16931',
+      'parseCiiXml',
     ],
   },
   { file: 'create.mjs', expect: ['createPdf'] },

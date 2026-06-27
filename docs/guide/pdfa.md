@@ -424,6 +424,99 @@ const compliant = await enforcePdfA(pdfBytes, '3b');
 await writeFile('invoice-zugferd.pdf', compliant);
 ```
 
+### High-level Factur-X API (recommended)
+
+Rather than hand-authoring the CII XML and wiring the `/AF` array yourself, build
+the invoice from a typed model and let `assembleFacturX` generate the XML and
+attach it in one call. The same `Invoice` model drives generation, validation,
+and round-trip reading.
+
+```typescript
+import {
+  createPdf,
+  PageSizes,
+  assembleFacturX,    // generate CII XML + attach as an /AF (one call)
+  buildFacturXXmp,    // the fx: XMP extension metadata for the document
+  validateEn16931,    // EN 16931 business-rule check
+  generateCiiXml,     // (lower-level) just the CII XML string
+  enforcePdfA,
+} from 'modern-pdf-lib';
+import type { Invoice } from 'modern-pdf-lib';
+
+// 1. Build the invoice from the typed model.
+const invoice: Invoice = {
+  invoiceNumber: 'INV-2026-001',
+  issueDate: '2026-03-07',            // ISO 'YYYY-MM-DD'
+  currency: 'EUR',                    // ISO 4217
+  seller: { name: 'ACME GmbH', countryCode: 'DE', vatId: 'DE123456789' },
+  buyer:  { name: 'Beispiel AG', countryCode: 'DE' },
+  lines: [
+    { description: 'Web Development', quantity: 10, unitPrice: 100, taxPercent: 19 },
+    { description: 'Design Services', quantity: 3,  unitPrice: 78.19, taxPercent: 19 },
+  ],
+};
+
+// 2. (Optional) Validate against EN 16931 before you commit.
+const issues = validateEn16931(invoice);            // EInvoiceIssue[]
+const errors = issues.filter((i) => i.severity === 'error');
+if (errors.length) throw new Error(errors.map((e) => `${e.rule}: ${e.message}`).join('\n'));
+
+// 3. Attach the machine-readable XML to your visual PDF in one call.
+const doc = createPdf();
+doc.addPage(PageSizes.A4);
+// …draw the human-readable invoice…
+const xml = assembleFacturX(doc, invoice, { profile: 'EN16931' });
+//  ↑ generates the CII XML, encodes it, and calls doc.addAssociatedFile(
+//    'factur-x.xml', bytes, 'text/xml', 'Alternative', …). Returns the XML string.
+
+// 4. Merge the Factur-X identification XMP into the document metadata, then
+//    enforce PDF/A-3b. buildFacturXXmp returns the <rdf:RDF> fragment whose
+//    fx: properties (DocumentType, DocumentFileName, Version, ConformanceLevel)
+//    let validators recognise the hybrid invoice.
+const xmpFragment = buildFacturXXmp('EN16931', 'factur-x.xml');
+const compliant = await enforcePdfA(await doc.save(), '3b');
+```
+
+::: tip Default profile & filename
+`assembleFacturX(doc, invoice)` defaults to the `EN16931` profile and the
+`factur-x.xml` filename mandated by the spec. Pass `{ profile, filename }` to
+override. The internal profile tokens are `'MINIMUM' | 'BASIC-WL' | 'BASIC' |
+'EN16931' | 'EXTENDED'`; `buildFacturXXmp` emits the spec's display
+`ConformanceLevel` strings (`MINIMUM`, `BASIC WL`, `BASIC`, `EN 16931`,
+`EXTENDED`).
+:::
+
+### Reading an inbound invoice (CII reader)
+
+To process a received ZUGFeRD/Factur-X PDF, extract its embedded XML (via the
+attachments API) and parse it back into the typed model:
+
+```typescript
+import { parseCiiXml, detectFacturXProfile } from 'modern-pdf-lib';
+
+const profile = detectFacturXProfile(xml);   // 'EN16931' | … | undefined
+const invoice = parseCiiXml(xml);            // → Invoice
+console.log(invoice.invoiceNumber, invoice.currency, invoice.lines.length);
+```
+
+`parseCiiXml` is namespace-tolerant (it matches CII elements by local name, so
+`ram:`/`rsm:` or any other prefix parse identically) and round-trips the data
+that the `Invoice` model carries: number, date, currency, seller/buyer name +
+country + VAT id, and each line's description, quantity, unit price, and tax
+rate. `detectFacturXProfile` reads the guideline URN and returns `undefined`
+for an unknown profile rather than guessing.
+
+::: warning Validation scope
+`validateEn16931` checks the EN 16931 business rules that are expressible from
+the typed `Invoice` model — presence rules **BR-02** (number), **BR-03** (issue
+date), **BR-05** (currency), **BR-06**/**BR-07** (seller/buyer name), **BR-16**
+(at least one line), and the **BR-CO-1x** calculation rules when you supply
+`declaredTotals`. It is not a full schema/Schematron validator: document-level
+fields the base model does not carry (the specification identifier BR-01, the
+type code BR-04, allowances/charges) are not asserted. For byte-level
+conformance, validate the serialized PDF/A-3 with veraPDF.
+:::
+
 ### ZUGFeRD / Factur-X Profiles
 
 ZUGFeRD defines several profiles with increasing detail:

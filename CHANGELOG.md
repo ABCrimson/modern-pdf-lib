@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 See [VERSIONING.md](./VERSIONING.md) for this project's versioning policy.
 
+## [0.33.0] - 2026-06-27
+
+**E-Invoicing & Document Assembly.** The Factur-X / ZUGFeRD round-trip, completed end-to-end. The outbound CII generator + typed `Invoice` model already shipped; this minor adds a high-level hybrid **assembler**, an **EN 16931 validator**, and an inbound **CII reader** — so generate → validate → attach → read is now one cohesive, spec-verified API. TDD-verified; suite now **6,569 tests**, **659** root exports; 34/37 vs pdf-lib (no regression).
+
+### Added
+
+- **Factur-X assembler** (`0.33.3`, `src/compliance/facturXAssemble.ts`): `assembleFacturX(doc, invoice, { profile?, filename? })` generates the CII XML and attaches it in one call (`doc.addAssociatedFile('factur-x.xml', …, 'text/xml', 'Alternative', …)`), returning the XML; `buildFacturXXmp(profile, filename?)` emits the `fx:` identification XMP (DocumentType/DocumentFileName/Version/ConformanceLevel) plus the mandatory PDF/A-3 `pdfaExtension:schemas` block. Verified against the official Factur-X 1.0 reference extension schema (namespace `urn:factur-x:pdfa:CrossIndustryDocument:invoice:1p0#`, `ConformanceLevel` display strings `MINIMUM`/`BASIC WL`/`BASIC`/`EN 16931`/`EXTENDED`).
+- **EN 16931 validation** (`0.33.5`, `src/compliance/eInvoiceValidate.ts`): `validateEn16931(invoice)` returns typed `EInvoiceIssue[]` for the business rules expressible from the model — **BR-02/03/05/06/07/16** (presence) and **BR-CO-10/13/15/16** (calculation, when `declaredTotals` is supplied). Rule IDs verified against the ConnectingEurope/eInvoicing-EN16931 and OpenPEPPOL schematron (correcting the common BR-01/BR-02 mislabel); unexpressible rules are documented, not faked.
+- **Inbound CII reader** (`0.33.6`, `src/compliance/ciiReader.ts`): `parseCiiXml(xml)` parses a UN/CEFACT CrossIndustryInvoice back into the typed `Invoice` (namespace-tolerant — matches by local element name); `detectFacturXProfile(xml)` reads the guideline URN → `FacturXProfile | undefined`. Round-trips id, date, currency, seller/buyer, and all line fields with `generateCiiXml`.
+
+### Documentation
+
+- Expanded the PDF/A guide's e-invoicing section with the high-level `assembleFacturX`/`buildFacturXXmp` workflow, EN 16931 validation, and the inbound CII reader — replacing the manual `/AF`-wiring walkthrough as the recommended path.
+
 ## [0.32.0] - 2026-06-27
 
 **Next-Gen Standards & Validation.** Gap-driven — PDF/A-4, PDF/X-6, PDF/VT-2/3, and the SARIF 2.1.0 validation report already shipped; this minor adds profile conversion/preflight and (carefully-scoped) raster/tagged profile markers. TDD-verified; suite now **6,520 tests**, **654** root exports; 34/37 vs pdf-lib.

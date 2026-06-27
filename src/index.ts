@@ -1475,3 +1475,15 @@ export { preflightPdfA, convertPdfAConformanceXmp } from './compliance/profileCo
 export type { PreflightIssue } from './compliance/profileConvert.js';
 export { buildWtpdfIdentificationXmp, buildPdfRIdentificationXmp } from './compliance/rasterProfile.js';
 export type { ProfileXmpOptions } from './compliance/rasterProfile.js';
+
+// ---------------------------------------------------------------------------
+// E-invoicing & document assembly (0.33.x): the Factur-X / ZUGFeRD round-trip
+// completed end-to-end — a high-level hybrid assembler (CII XML + AF), the
+// EN16931 business-rule validator, and an inbound CII reader. (The outbound
+// CII generator + typed Invoice model shipped earlier in `facturX`.)
+// ---------------------------------------------------------------------------
+export { assembleFacturX, buildFacturXXmp } from './compliance/facturXAssemble.js';
+export type { FacturXAssembleOptions } from './compliance/facturXAssemble.js';
+export { validateEn16931 } from './compliance/eInvoiceValidate.js';
+export type { EInvoiceIssue, DeclaredInvoiceTotals, ValidatableInvoice } from './compliance/eInvoiceValidate.js';
+export { parseCiiXml, detectFacturXProfile } from './compliance/ciiReader.js';
