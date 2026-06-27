@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 See [VERSIONING.md](./VERSIONING.md) for this project's versioning policy.
 
+## [0.40.0] - 2026-06-27
+
+**Developer Experience & Framework Integration.** The milestone 0.40 release: a JSX/component renderer, JSON-Schema-driven form generation, and Web-standard + Node server adapters — every feature verified end-to-end (the rendered output is parsed back as a real PDF). TDD-verified; suite now **6,926 tests**, **721** root exports; 34/37 vs pdf-lib (no regression).
+
+### Added
+
+- **JSX / component renderer** (`0.40`, `src/jsx/jsxRuntime.ts`): the automatic JSX runtime (`jsx`/`jsxs`/`Fragment`) plus a classic hyperscript pragma (`jsxh`) and `renderJsxToPdf(tree)`. Intrinsic elements `document`/`page`/`text`/`view`/`rect`, function components, and Fragment, with a documented simple block-flow + absolute-positioning layout model (Standard-14 fonts auto-embedded). Every test renders then re-parses the PDF to assert the drawn text — no eyeballing. (Complements the existing classic VDOM `renderToPdf`/`createVNode`.)
+- **JSON-Schema → PDF forms** (`0.40`, `src/form/schemaForm.ts`): `buildFormFromJsonSchema(schema, options?)` emits a labelled AcroForm — `string`→text, `string`+`enum`→dropdown, `boolean`→checkbox, `number`/`integer`→text — stacking fields top-down with automatic pagination and required-field markers, returning the `PdfDocument` + the generated field list. Verified by round-tripping the saved bytes back through the parser's AcroForm.
+- **Server adapters** (`0.40`, `src/runtime/serverAdapters.ts`): `pdfResponse`/`pdfStreamResponse` build a Web-standard `Response` (Workers/Deno/Bun/Node ≥18) with correct `Content-Type`/`Content-Length`/RFC 6266 `Content-Disposition` (RFC 5987 `filename*` for non-ASCII), `pdfHeaders` for manual control, and `sendPdfToNodeResponse` for Express/`node:http` (structural typing — no Node import).
+
+### Documentation
+
+- New **Framework Integration** guide (added to the sidebar) covering JSX rendering, schema-driven forms, and server adapters.
+
 ## [0.39.0] - 2026-06-27
 
 **Performance & Concurrency.** Cross-worker shared-memory primitives, a memory-budget guard for untrusted input, and honest runtime-capability detection. SIMD acceleration would require a SIMD-enabled WASM rebuild (out of scope here), so this minor *detects* SIMD/threads support rather than faking it. TDD-verified; suite now **6,885 tests**, **711** root exports; 34/37 vs pdf-lib (no regression).

@@ -80,6 +80,10 @@ const ESM_ENTRIES = [
       'SharedCounter',
       'createMemoryBudget',
       'detectRuntimeCapabilities',
+      // 0.40.x developer experience
+      'renderJsxToPdf',
+      'buildFormFromJsonSchema',
+      'pdfResponse',
     ],
   },
   { file: 'create.mjs', expect: ['createPdf'] },

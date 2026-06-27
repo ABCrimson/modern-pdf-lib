@@ -1522,6 +1522,32 @@ export type { MemoryBudgetOptions } from './runtime/memoryBudget.js';
 export { detectRuntimeCapabilities, isWasmSimdSupported, SIMD_NOTE } from './runtime/runtimeCapabilities.js';
 export type { RuntimeCapabilities } from './runtime/runtimeCapabilities.js';
 
+// ---------------------------------------------------------------------------
+// Developer experience & framework integration (0.40.x): the automatic JSX
+// runtime (jsx/jsxs/Fragment, for `jsxImportSource: 'modern-pdf-lib'`) +
+// `renderJsxToPdf`, JSON-Schema → PDF form generation, and Web-standard + Node
+// server-response adapters. (The classic-pragma `h`/`renderToPdf` VDOM API ships
+// above from assets/vdom; this adds real JSX-syntax support.)
+// ---------------------------------------------------------------------------
+export { h as jsxh, jsx, jsxs, Fragment, renderToPdf as renderJsxToPdf } from './jsx/jsxRuntime.js';
+export type { PdfComponent, PdfElement, PdfNode } from './jsx/jsxRuntime.js';
+export { buildFormFromJsonSchema } from './form/schemaForm.js';
+export type {
+  JsonSchemaLike,
+  SchemaFormOptions,
+  SchemaFieldKind,
+  SchemaFormField,
+  SchemaFormResult,
+} from './form/schemaForm.js';
+export {
+  pdfHeaders,
+  pdfResponse,
+  pdfStreamResponse,
+  sendPdfToNodeResponse,
+} from './runtime/serverAdapters.js';
+export type { PdfResponseOptions, NodeServerResponseLike } from './runtime/serverAdapters.js';
+
+
 
 
 
