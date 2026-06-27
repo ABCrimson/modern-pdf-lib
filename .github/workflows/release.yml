@@ -67,23 +67,15 @@ jobs:
         run: npm run build
 
       - name: Verify dist is importable (ESM + CJS smoke)
+        # The smoke gate imports every BUILT dist entry and asserts it links +
+        # exposes its API — the check that actually guards the published artifact
+        # (it catches the v0.28.0-class "unimportable package" bug that the unit
+        # suite, running on src/, cannot). The full unit/integration suite is
+        # gated by ci.yml on this exact commit (a tag is cut from a master commit
+        # that ci.yml tests), so re-running the whole 6,900-test suite here is
+        # redundant — and doing it in this same job (after the WASM+TS build) OOM'd
+        # a fork worker. Tests live in ci.yml; this job builds, smokes, publishes.
         run: npm run smoke
-
-      - name: Run tests
-        # Each fork-pool worker accumulates memory (largely the inline WASM
-        # modules) across the files it handles; with 6 shards a worker that
-        # happened to get the heavy crypto/image files still tipped past 8 GB.
-        # Split into 10 independent processes so per-worker accumulation stays
-        # well under the cap regardless of how files distribute. (vitest.config
-        # `retry: 2` separately absorbs the rare WebCrypto-under-load flake.)
-        run: |
-          for shard in 1 2 3 4 5 6 7 8 9 10; do
-            echo "::group::shard $shard/10"
-            npx vitest run --shard="$shard/10"
-            echo "::endgroup::"
-          done
-        env:
-          NODE_OPTIONS: --max-old-space-size=8192
 
       - name: Upload dist
         uses: actions/upload-artifact@v7
