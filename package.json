@@ -103,7 +103,7 @@
     "fast-png": "8.0.0",
     "miniflare": "4.20260625.0",
     "oxlint": "^1.71.0",
-    "oxlint-tsgolint": "^0.23.0",
+    "oxlint-tsgolint": "^0.24.0",
     "pdf-lib": "^1.17.1",
     "prettier": "4.0.0-alpha.13",
     "rollup": "4.62.2",
