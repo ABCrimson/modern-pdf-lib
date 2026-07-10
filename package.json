@@ -113,7 +113,7 @@
     "typedoc-plugin-markdown": "4.12.0",
     "typescript": "7.0.1-rc",
     "vite": "8.1.0",
-    "vitepress": "2.0.0-alpha.17",
+    "vitepress": "2.0.0-alpha.18",
     "vitest": "5.0.0-beta.5",
     "wasm-pack": "0.15.0"
   },
