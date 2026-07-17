@@ -204,7 +204,7 @@ jobs:
           echo "EOF" >> "$GITHUB_OUTPUT"
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v3.0.1
+        uses: softprops/action-gh-release@v3.0.2
         with:
           body: ${{ steps.changelog.outputs.body }}
           files: modern-pdf-wasm-*.tar.gz
