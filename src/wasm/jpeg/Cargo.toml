@@ -10,9 +10,9 @@ publish = false
 crate-type = ["cdylib"]
 
 [dependencies]
-wasm-bindgen = "0.2.126"
-jpeg-encoder = "0.7"
-jpeg-decoder = "0.3"
+wasm-bindgen = "0.2.127"
+jpeg-encoder = "0.7.1"
+jpeg-decoder = "0.3.2"
 
 [package.metadata.wasm-pack.profile.release]
 wasm-opt = ["-O", "--enable-bulk-memory", "--enable-nontrapping-float-to-int", "--enable-sign-ext"]

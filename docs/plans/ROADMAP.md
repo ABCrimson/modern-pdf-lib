@@ -1,7 +1,7 @@
 # modern-pdf-lib — Roadmap to 1.0.0
 
 > Granular, per-patch release plan from the current **0.28.0** through **1.0.0**.
-> Versioning follows [`VERSIONING.md`](./VERSIONING.md): patch `.0–.9`, then roll to the next minor.
+> Versioning follows [`VERSIONING.md`](https://github.com/ABCrimson/modern-pdf-lib/blob/master/VERSIONING.md): patch `.0–.9`, then roll to the next minor.
 > Effort key: **S** ≤1 day · **M** a few days · **L** ~1–2 weeks · **XL** multi-week.
 
 **Within each minor:** `.0` lays the load-bearing foundation, `.1–.8` ship individually-releasable sub-features that progressively complete the theme, and `.9` is stabilization (edge-cases, performance, tests, docs, benchmarks) before rolling to the next minor.

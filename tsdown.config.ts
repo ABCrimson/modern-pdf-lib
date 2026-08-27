@@ -25,7 +25,8 @@ const shared = {
 };
 
 // Two-pass build to work around a rolldown-plugin-dts contamination bug
-// (tsdown 0.22 / rolldown-plugin-dts 0.26): when `dts: true` runs in the same
+// (still present in tsdown 0.23.0-rc.0 / rolldown-plugin-dts 0.28.2 —
+// re-verified 2026-08-27 via smoke-dist): when `dts: true` runs in the same
 // pass as the value bundle, the dts plugin leaks type-only re-exports
 // (e.g. `export type { AFRelationship }`) into the runtime value graph as
 // unbound `export { … }` statements. That makes every ESM entry throw

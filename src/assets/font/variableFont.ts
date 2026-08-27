@@ -442,7 +442,7 @@ function applyAvarSegmentMap(value: number, segmentMap: AvarSegmentMap): number 
 export function normalizeAxisCoordinate(
   axis: VariationAxis,
   userValue: number,
-  avar?: AvarSegmentMap | undefined,
+  avar?: AvarSegmentMap,
 ): number {
   const { minValue, defaultValue, maxValue } = axis;
 

@@ -67,7 +67,7 @@ export function buildStencilMask(
   bits: Uint8Array,
   width: number,
   height: number,
-  decode?: readonly [number, number] | undefined,
+  decode?: readonly [number, number],
 ): PdfRef {
   const dict = new PdfDict();
   dict.set('/Type', PdfName.of('XObject'));
@@ -134,7 +134,7 @@ export function buildImageSoftMask(
   gray: Uint8Array,
   width: number,
   height: number,
-  bitsPerComponent?: number | undefined,
+  bitsPerComponent?: number,
 ): PdfRef {
   const dict = new PdfDict();
   dict.set('/Type', PdfName.of('XObject'));

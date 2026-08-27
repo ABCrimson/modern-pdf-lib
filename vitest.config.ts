@@ -5,10 +5,9 @@ export default defineConfig({
     include: ['tests/unit/**/*.test.ts', 'tests/integration/**/*.test.ts', 'tests/image/**/*.test.ts', 'tests/browser/**/*.test.ts', 'tests/compliance/**/*.test.ts', 'tests/barcode/**/*.test.ts', 'tests/layout/**/*.test.ts'],
     // Vitest 5 changed worker-pool memory behaviour; raise the per-fork heap so the
     // large image/compliance suites don't hit Node's default ~4 GB old-space limit.
+    // (Vitest 4+ pool rework: worker options are top-level — `poolOptions` is gone.)
     pool: 'forks',
-    poolOptions: {
-      forks: { execArgv: ['--max-old-space-size=8192'] },
-    },
+    execArgv: ['--max-old-space-size=8192'],
     // The crypto suites generate random keypairs and sign/verify under heavy
     // concurrent fork-pool load; a rare WebCrypto-under-load timing flake can
     // make a freshly-signed signature momentarily fail to verify (observed only
