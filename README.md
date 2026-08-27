@@ -602,7 +602,7 @@ await initWasm({
 |:---|:---|:---:|
 | libdeflate | Stream compression | ~2x |
 | png | PNG image decoding | ~5x |
-| ttf | Font parsing & subsetting | ~3x |
+| ttf | Font parsing (feeds the JS subsetter) | ~3x |
 | shaping | Complex script layout | ~10x |
 | jbig2 | JBIG2 bilevel image decoding | ~3x |
 | jpeg | JPEG encode/decode for image optimization | Required |
