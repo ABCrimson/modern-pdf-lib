@@ -7,11 +7,19 @@ See [VERSIONING.md](./VERSIONING.md) for this project's versioning policy.
 
 ## [0.40.3] - 2026-08-27
 
-**Docs-only release.** Republishes the package so the corrected README reaches npmjs.com — the registry only refreshes a package's rendered README on publish, so a version bump is the only way to ship documentation fixes to the package page. **No code changes:** `src/`, `dist/`, and the WASM crates are byte-identical to 0.40.2.
+**Docs-driven release.** Cut to get the corrected README onto npmjs.com — the registry only refreshes a package's rendered README on publish, so a version bump is the only way to ship documentation fixes to the package page. The release commit itself is documentation and version metadata only; it adds no behavioural change.
+
+Because 0.40.2 was tagged on 2026-06-27 and `master` has moved since, this release also carries the unreleased maintenance work that had accumulated behind it (listed below). No behavioural change is expected from any of it.
 
 ### Documentation
 
-- **Corrected README** — accuracy and aesthetics pass over `README.md` (plus the internal `CONTRIBUTING.md`, `SECURITY.md`, `VERSIONING.md`, and the VitePress guide set), landed on `master` ahead of this release. This publish is what carries it to the npm package page.
+- **Corrected README** — accuracy and aesthetics pass over `README.md` (plus the internal `CONTRIBUTING.md`, `SECURITY.md`, `VERSIONING.md`, and the VitePress guide set). This publish is what carries it to the npm package page.
+
+### Changed
+
+- **WASM crate dependencies** (all six crates rebuilt): `wasm-bindgen` 0.2.126 → **0.2.127**; `jpeg-encoder` 0.7 → **0.7.1** and `jpeg-decoder` 0.3 → **0.3.2** (now exact-pinned).
+- **Type-signature tidy, behaviour-neutral:** redundant `| undefined` dropped from two optional parameters under `exactOptionalPropertyTypes` — `normalizeAxisCoordinate(avar?)` (`src/assets/font/variableFont.ts`) and `buildStencilMask(decode?)` / `buildImageSoftMask(bitsPerComponent?)` (`src/core/imageMask.ts`). No call-site or runtime change.
+- **Tooling:** evergreen devDependency bumps, `tsdown`/`vitest` config touch-ups, and CI/release workflow hardening (the fail-closed "CI green on this commit" gate before publish).
 
 ## [0.40.2] - 2026-06-27
 
