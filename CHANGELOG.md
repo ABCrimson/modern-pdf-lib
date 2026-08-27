@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 See [VERSIONING.md](./VERSIONING.md) for this project's versioning policy.
 
+## [0.40.3] - 2026-08-27
+
+**Docs-only release.** Republishes the package so the corrected README reaches npmjs.com — the registry only refreshes a package's rendered README on publish, so a version bump is the only way to ship documentation fixes to the package page. **No code changes:** `src/`, `dist/`, and the WASM crates are byte-identical to 0.40.2.
+
+### Documentation
+
+- **Corrected README** — accuracy and aesthetics pass over `README.md` (plus the internal `CONTRIBUTING.md`, `SECURITY.md`, `VERSIONING.md`, and the VitePress guide set), landed on `master` ahead of this release. This publish is what carries it to the npm package page.
+
 ## [0.40.2] - 2026-06-27
 
 **Form-field flag fix.** A full gap-audit of the 0.41→1.0.0 roadmap against the actual code (to confirm nothing planned was already built — only OCR overlay was, now marked shipped) surfaced one real correctness bug. TDD-fixed; suite now **6,969 tests**, 721 root exports.
