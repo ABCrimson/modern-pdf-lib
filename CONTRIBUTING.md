@@ -50,7 +50,7 @@ npm run build
 We use [Vitest](https://vitest.dev/) for all tests. When adding a new feature or fixing a bug:
 
 - Write tests that cover the new behavior
-- Place test files alongside source files using the `*.test.ts` naming convention
+- Place test files under `tests/` (e.g. `tests/unit/`, `tests/integration/`) using the `*.test.ts` naming convention, mirroring the `src/` module layout
 - Run the full suite to ensure nothing is broken
 
 ## Commit Messages

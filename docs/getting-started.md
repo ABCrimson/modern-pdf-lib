@@ -25,7 +25,7 @@ deno add npm:modern-pdf-lib
 :::
 
 > [!NOTE]
-> `modern-pdf-lib` is ESM-only. It requires Node 26.4 or later, or any runtime with native ES module support.
+> `modern-pdf-lib` is ESM-first and also ships CJS compatibility builds (`require('modern-pdf-lib')` works). It requires Node 26.4 or later, or any runtime with native ES module support.
 
 ::: details Supported Runtimes
 | Runtime | Minimum Version | Notes |

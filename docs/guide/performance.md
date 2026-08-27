@@ -6,7 +6,7 @@ This guide covers performance optimization techniques for `modern-pdf-lib`, from
 
 PDF generation can be CPU-intensive and memory-hungry. A 500-page report with embedded fonts and images may take seconds to generate and consume hundreds of megabytes of memory. With the right settings, you can cut generation time by 5-10x and reduce peak memory by 80% or more.
 
-`modern-pdf-lib` is designed for performance out of the box: subsetting is automatic, compression is enabled by default, and the ESM-only architecture enables tree-shaking. This guide covers how to go further.
+`modern-pdf-lib` is designed for performance out of the box: subsetting is automatic, compression is enabled by default, and the ESM-first architecture enables tree-shaking. This guide covers how to go further.
 
 ## WASM Acceleration
 
@@ -437,19 +437,19 @@ const caps = detectRuntimeCapabilities();
 
 ## Tree-Shaking and Bundle Size
 
-`modern-pdf-lib` is ESM-only with granular exports, allowing bundlers (Vite, esbuild, Rollup, webpack 5) to tree-shake unused code.
+`modern-pdf-lib` ships pure-ESM builds with granular exports and `"sideEffects": false`, allowing bundlers (Vite, esbuild, Rollup, webpack 5) to tree-shake unused code.
 
 ### Bundle Size Breakdown
 
-| Import | Approximate Size (minified + gzipped) |
+Measured against v0.40.2 with `esbuild --bundle --minify` + gzip:
+
+| Scenario | Size (minified + gzipped) |
 |:---|:---:|
-| Core (`createPdf`, `PdfPage`, `save`) | ~25 KB |
-| Font embedding + subsetting | ~15 KB |
-| Image embedding (JPEG + PNG) | ~10 KB |
-| Form fields (AcroForm) | ~12 KB |
-| Parser (`loadPdf`, `extractText`) | ~18 KB |
-| Compression (fflate) | ~13 KB |
-| Full library (all exports) | ~90 KB |
+| Minimal document (`createPdf` + `drawText` + `save`) | ~108 KB |
+| Create + load existing (`createPdf` + `loadPdf`) | ~108 KB |
+| Parse + text extraction (`loadPdf` + `extractTextWithPositions`) | ~111 KB |
+| Signatures only (`signPdf` + `verifySignatures`) | ~10 KB |
+| Entire library (all 721 exports) | ~261 KB |
 
 ### Minimizing Bundle Size
 

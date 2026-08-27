@@ -409,8 +409,8 @@ import { loadPdf, mergePdfs, splitPdf } from 'modern-pdf-lib';
 // mergePdfs / splitPdf operate on PdfDocument objects — load the bytes first.
 const merged = await mergePdfs([await loadPdf(pdf1Bytes), await loadPdf(pdf2Bytes)]);
 const pages = await splitPdf(await loadPdf(pdfBytes), [
-  { start: 0, end: 4 },   // Pages 1-5
-  { start: 5, end: 9 },   // Pages 6-10
+  [0, 4],   // Pages 1-5 (zero-based, inclusive)
+  [5, 9],   // Pages 6-10
 ]);
 ```
 </details>
@@ -662,5 +662,3 @@ npm run build     # ESM + CJS + declarations
 ## License
 
 [MIT](LICENSE) &copy; 2026
-
-</div>

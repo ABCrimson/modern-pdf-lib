@@ -6,7 +6,7 @@ This guide helps you migrate existing projects from `pdf-lib` to `modern-pdf-lib
 
 | Aspect | pdf-lib | modern-pdf-lib |
 |---|---|---|
-| Module format | CJS + ESM | ESM-only |
+| Module format | CJS (with ESM wrapper) | ESM-first (ESM + CJS builds) |
 | TypeScript | 4.x | 7.0 with strict types |
 | Target | ES2017 | ESNext |
 | Buffer usage | `Buffer` in Node APIs | `Uint8Array` everywhere |
