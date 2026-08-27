@@ -255,7 +255,7 @@ See [VERSIONING.md](./VERSIONING.md) for this project's versioning policy.
 
 ## [0.28.0] - 2026-06-25
 
-This release pairs a full **bleeding-edge toolchain migration** (TypeScript 7, oxlint, Vite 8 / Vitest 5, Node 26) with **27 net-new features** added only where an evidence-based audit (`GAP-ANALYSIS.md`) confirmed a genuine gap — the planned roadmap was found to be ~half already-implemented. Every feature is TDD-verified; the full suite (**6,254 tests**), typecheck, lint (0 errors), and build all pass, with **no performance regression** (34/37 wins vs pdf-lib).
+This release pairs a full **bleeding-edge toolchain migration** (TypeScript 7, oxlint, Vite 8 / Vitest 5, Node 26) with **27 net-new features** added only where an evidence-based audit (`docs/plans/GAP-ANALYSIS.md`) confirmed a genuine gap — the planned roadmap was found to be ~half already-implemented. Every feature is TDD-verified; the full suite (**6,254 tests**), typecheck, lint (0 errors), and build all pass, with **no performance regression** (34/37 wins vs pdf-lib).
 
 ### Added
 
