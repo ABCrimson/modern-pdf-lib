@@ -38,15 +38,17 @@ npm install modern-pdf-lib
 ```
 
 ```ts
-import { createPdf, PageSizes, rgb } from 'modern-pdf-lib';
+import { createPdf, PageSizes, StandardFonts, rgb } from 'modern-pdf-lib';
 
 const doc = createPdf();
 const page = doc.addPage(PageSizes.A4);
+const font = await doc.embedFont(StandardFonts.Helvetica);
 
 page.drawText('Hello from modern-pdf-lib', {
   x: 50,
   y: 750,
   size: 28,
+  font,
   color: rgb(0.13, 0.13, 0.13),
 });
 
@@ -61,11 +63,12 @@ Use directly in the browser via CDN — no bundler required:
 
 ```html
 <script type="module">
-  import { createPdf, PageSizes, rgb } from 'https://cdn.jsdelivr.net/npm/modern-pdf-lib/dist/browser.mjs';
+  import { createPdf, PageSizes, StandardFonts, rgb } from 'https://cdn.jsdelivr.net/npm/modern-pdf-lib/dist/browser.mjs';
 
   const doc = createPdf();
   const page = doc.addPage(PageSizes.A4);
-  page.drawText('Hello from CDN!', { x: 50, y: 750, size: 24, color: rgb(0, 0, 0) });
+  const font = await doc.embedFont(StandardFonts.Helvetica);
+  page.drawText('Hello from CDN!', { x: 50, y: 750, size: 24, font, color: rgb(0, 0, 0) });
   const bytes = await doc.save();
   console.log('PDF size:', bytes.length, 'bytes');
 </script>
@@ -82,12 +85,14 @@ For environments without ES module support, use the IIFE bundle which exposes a 
 ```html
 <script src="https://cdn.jsdelivr.net/npm/modern-pdf-lib/dist/modern-pdf-lib.iife.js"></script>
 <script>
-  const { createPdf, PageSizes, rgb } = ModernPdf;
+  const { createPdf, PageSizes, StandardFonts, rgb } = ModernPdf;
 
   const doc = createPdf();
   const page = doc.addPage(PageSizes.A4);
-  page.drawText('Hello from script tag!', { x: 50, y: 750, size: 24, color: rgb(0, 0, 0) });
-  doc.save().then(function (bytes) {
+  doc.embedFont(StandardFonts.Helvetica).then(function (font) {
+    page.drawText('Hello from script tag!', { x: 50, y: 750, size: 24, font, color: rgb(0, 0, 0) });
+    return doc.save();
+  }).then(function (bytes) {
     console.log('PDF size:', bytes.length, 'bytes');
   });
 </script>
@@ -362,8 +367,9 @@ const stream = doc.saveAsStream();
 
 ```ts
 const page = doc.addPage(PageSizes.LETTER);
+const font = await doc.embedFont(StandardFonts.Helvetica);
 
-page.drawText('Hello', { x: 50, y: 700, size: 24 });
+page.drawText('Hello', { x: 50, y: 700, size: 24, font });
 page.drawImage(imageRef, { x: 50, y: 400, width: 200, height: 200 });
 page.drawRectangle({ x: 50, y: 300, width: 100, height: 50, color: rgb(0, 0.5, 1) });
 page.drawCircle({ x: 200, y: 325, radius: 25 });
@@ -375,8 +381,8 @@ page.drawSvgPath('M 0 0 L 100 0 L 50 80 Z', { x: 300, y: 300 });
 <summary><strong>Fonts</strong> &mdash; embed, subset, standard 14</summary>
 
 ```ts
-// Standard fonts (no embedding needed)
-const helvetica = doc.embedStandardFont('Helvetica');
+// Standard fonts (no glyph data embedded — just a font dictionary)
+const helvetica = await doc.embedFont(StandardFonts.Helvetica);
 
 // Custom TrueType / OpenType
 const fontBytes = await readFile('Inter.ttf');

@@ -2,6 +2,20 @@
 
 This guide covers the most common issues encountered when working with `modern-pdf-lib`, along with explanations and working fixes for each.
 
+Find your symptom, jump to the fix:
+
+| Symptom | Section |
+|---|---|
+| `EncryptedPdfError` on `loadPdf()` | [1. EncryptedPdfError](#_1-encryptedpdferror) |
+| The PDF opens but the text is invisible | [2. Text Doesn't Render](#_2-text-doesn-t-render-missing-font) |
+| Content lands upside down or off the page | [3. Coordinate Confusion](#_3-coordinate-confusion) |
+| WASM fails to load or initialize | [4. WASM Initialization Errors](#_4-wasm-initialization-errors) |
+| Out-of-memory on a large document | [5. Large PDF Memory Issues](#_5-large-pdf-memory-issues) |
+| Works in Node, breaks in Deno / Workers / the browser | [6. Cross-Runtime Quirks](#_6-cross-runtime-quirks) |
+| Extracted text is mojibake | [7. Text Extraction Garbage](#_7-text-extraction-garbage) |
+| `NoSuchFieldError` when filling a form | [8. NoSuchFieldError](#_8-nosuchfielderror) |
+| A real-world PDF fails to parse | [9. Common Parsing Failures](#_9-common-parsing-failures) |
+
 ## 1. EncryptedPdfError
 
 ### What happens
@@ -41,25 +55,21 @@ If you want to load the document structure without decrypting streams (for inspe
 const doc = await loadPdf(bytes, { ignoreEncryption: true });
 ```
 
-## 2. FontNotEmbeddedError
+## 2. Text Doesn't Render (Missing Font)
 
 ### What happens
 
-You call `page.drawText()` and get:
-
-```
-FontNotEmbeddedError: No font has been embedded. Call doc.embedFont() first.
-```
+`drawText()` and `save()` both succeed, but the text is invisible in the viewer — or the viewer reports an error such as "Cannot find font resource".
 
 ### Why it happens
 
-Every `drawText()` call requires a font. If you do not pass a `font` option, the library looks for a default embedded font on the document. When none has been embedded yet, it throws.
+`drawText()` needs a font that is actually registered on the document. If you skip the `font` option (and no font has been embedded), the content stream references a default font resource name (`F1`) that does not exist in the page's `/Font` resources — the PDF saves without error but is invalid, and viewers cannot render the text. The same happens if you pass a `StandardFonts` name string directly as `font:` — that string is treated as a raw resource name, not as a font to load.
 
 ### How to fix it
 
-Either embed a custom font or use one of the 14 standard PDF fonts:
+Always draw with a `FontRef` returned by `embedFont()`. Standard fonts and custom fonts both go through it:
 
-**Option A — Standard font (simplest, no embedding needed):**
+**Option A — Standard font (no glyph data embedded, smallest output):**
 
 ```ts
 import { createPdf, PageSizes, StandardFonts, rgb } from 'modern-pdf-lib';
@@ -67,11 +77,13 @@ import { createPdf, PageSizes, StandardFonts, rgb } from 'modern-pdf-lib';
 const doc = createPdf();
 const page = doc.addPage(PageSizes.A4);
 
+const helvetica = await doc.embedFont(StandardFonts.Helvetica);
+
 page.drawText('Hello with Helvetica', {
   x: 50,
   y: 700,
   size: 16,
-  font: StandardFonts.Helvetica,
+  font: helvetica,
   color: rgb(0, 0, 0),
 });
 
@@ -129,6 +141,7 @@ import { createPdf, PageSizes, StandardFonts, rgb } from 'modern-pdf-lib';
 
 const doc = createPdf();
 const page = doc.addPage(PageSizes.A4);
+const helvetica = await doc.embedFont(StandardFonts.Helvetica);
 
 const pageWidth = page.getWidth();   // 595.28 for A4
 const pageHeight = page.getHeight(); // 841.89 for A4
@@ -141,7 +154,7 @@ page.drawText('This is near the top of the page', {
   x: leftMargin,
   y: pageHeight - topMargin,
   size: 16,
-  font: StandardFonts.Helvetica,
+  font: helvetica,
   color: rgb(0, 0, 0),
 });
 
@@ -150,7 +163,7 @@ page.drawText('This is near the bottom of the page', {
   x: leftMargin,
   y: topMargin,
   size: 16,
-  font: StandardFonts.Helvetica,
+  font: helvetica,
   color: rgb(0, 0, 0),
 });
 
@@ -215,6 +228,7 @@ import { createWriteStream } from 'node:fs';
 import { Writable } from 'node:stream';
 
 const doc = createPdf();
+const helvetica = await doc.embedFont(StandardFonts.Helvetica);
 
 // Add many pages
 for (let i = 0; i < 500; i++) {
@@ -223,7 +237,7 @@ for (let i = 0; i < 500; i++) {
     x: 50,
     y: 750,
     size: 24,
-    font: StandardFonts.Helvetica,
+    font: helvetica,
     color: rgb(0, 0, 0),
   });
 }
@@ -287,11 +301,12 @@ export default {
 
     const doc = createPdf();
     const page = doc.addPage(PageSizes.A4);
+    const helvetica = await doc.embedFont(StandardFonts.Helvetica);
     page.drawText('Generated on the edge', {
       x: 50,
       y: 700,
       size: 20,
-      font: StandardFonts.Helvetica,
+      font: helvetica,
       color: rgb(0, 0, 0),
     });
 
@@ -315,11 +330,12 @@ import { createPdf, PageSizes, StandardFonts, rgb } from 'modern-pdf-lib';
 
 const doc = createPdf();
 const page = doc.addPage(PageSizes.A4);
+const helvetica = await doc.embedFont(StandardFonts.Helvetica);
 page.drawText('Hello from Bun', {
   x: 50,
   y: 700,
   size: 20,
-  font: StandardFonts.Helvetica,
+  font: helvetica,
   color: rgb(0, 0, 0),
 });
 

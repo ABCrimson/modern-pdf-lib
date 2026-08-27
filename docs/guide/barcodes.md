@@ -4,13 +4,15 @@ title: Barcodes & QR Codes
 
 # Barcodes & QR Codes
 
-modern-pdf-lib includes built-in barcode generation for 7 formats -- all rendered as native PDF vector graphics for crisp output at any zoom level. No external dependencies or image generation required.
+modern-pdf-lib includes built-in barcode generation for 9 formats -- all rendered as native PDF vector graphics for crisp output at any zoom level. No external dependencies or image generation required.
 
 ## Supported Formats
 
 | Format | Type | Data | Use Case |
 |---|---|---|---|
 | QR Code | 2D matrix | Up to 4296 chars | URLs, tickets, payments |
+| PDF417 | 2D stacked | Text (multi-row symbol) | IDs, boarding passes, government forms |
+| Data Matrix | 2D matrix | Text (ASCII mode) | Small-part marking, electronics, pharma |
 | Code 128 | 1D linear | ASCII 0-127 | Shipping, logistics |
 | EAN-13 | 1D linear | 13 digits | Retail products (worldwide) |
 | EAN-8 | 1D linear | 8 digits | Small retail products |
@@ -248,6 +250,78 @@ console.log(`Size: ${matrix.size}x${matrix.size}`);  // e.g. 25x25
 | `'H'` (High) | ~30% | Harsh environments, logos overlaid on code |
 
 Higher error correction allows more damage to the QR code while remaining scannable, but reduces the maximum data capacity for a given version.
+
+### PDF417 (ISO 15438)
+
+A stacked 2D symbology used on IDs, boarding passes, and government forms. Configurable data columns (1-30) and error correction levels 0-8:
+
+```ts
+import { encodePdf417, pdf417ToOperators } from 'modern-pdf-lib';
+
+const matrix = encodePdf417('Boarding pass data', { columns: 6, errorLevel: 2 });
+const operators = pdf417ToOperators(matrix, 50, 400, {
+  moduleWidth: 1,   // default 1
+  rowHeight: 8,     // default 8 — PDF417 rows are tall and narrow
+  quietZone: 2,     // default 2
+});
+page.pushOperators(operators);
+```
+
+### Data Matrix (ISO 16022)
+
+A compact 2D matrix code (ECC 200, ASCII mode) for marking small items:
+
+```ts
+import { encodeDataMatrix, dataMatrixToOperators } from 'modern-pdf-lib';
+
+const matrix = encodeDataMatrix('SN-004217');
+const operators = dataMatrixToOperators(matrix, 50, 300, {
+  moduleSize: 2,   // default 2
+  quietZone: 1,    // default 1 module on each side
+});
+page.pushOperators(operators);
+```
+
+## Decoding (Round-Trip Verification)
+
+The reader functions decode a module array back to its data — useful for verifying generated barcodes in tests:
+
+```ts
+import { encodeCode128, readCode128, readBarcode } from 'modern-pdf-lib';
+
+const matrix = encodeCode128('SHIP-2026-0042');
+const result = readCode128(matrix.modules);
+// result: { data: 'SHIP-2026-0042', format: 'Code 128', valid: true, checkDigitValid: true }
+
+// Or auto-detect the format:
+const detected = readBarcode(matrix.modules); // BarcodeReadResult | null
+```
+
+`readCode128`, `readEan13`, `readEan8`, `readCode39`, and the auto-detecting `readBarcode` are exported.
+
+## Styled Rendering
+
+`renderStyledBarcode` wraps any 1D `BarcodeMatrix` with background, border, and human-readable text in one call:
+
+```ts
+import { encodeCode128, renderStyledBarcode, StandardFonts, rgb } from 'modern-pdf-lib';
+
+const font = await doc.embedFont(StandardFonts.Helvetica); // for the human-readable line
+
+const matrix = encodeCode128('SHIP-2026-0042');
+const ops = renderStyledBarcode(matrix, 50, 600, 'SHIP-2026-0042', {
+  height: 60,
+  showText: true,
+  fontName: font.name, // a registered page font resource name
+  border: true,
+  backgroundColor: rgb(1, 1, 1),
+});
+page.pushOperators(ops);
+```
+
+The `fontName` option is a page font **resource name**; when `showText` is enabled, pass the `.name` of a font embedded with `doc.embedFont()` so the text references a registered font.
+
+`calculateBarcodeDimensions(matrix, options)` returns the total rendered size for layout planning.
 
 ## Common Styling Options
 

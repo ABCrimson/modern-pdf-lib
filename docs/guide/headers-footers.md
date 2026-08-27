@@ -9,25 +9,30 @@ modern-pdf-lib includes a template-driven header and footer engine for automatic
 ## Quick Start
 
 ```ts
-import { createPdf, PageSizes, applyHeaderFooter, rgb } from 'modern-pdf-lib';
+import { createPdf, PageSizes, StandardFonts, applyHeaderFooter, rgb } from 'modern-pdf-lib';
 
 const doc = createPdf();
+const font = await doc.embedFont(StandardFonts.Helvetica);
 doc.addPage(PageSizes.A4);
 doc.addPage(PageSizes.A4);
 doc.addPage(PageSizes.A4);
 
 applyHeaderFooter(doc, {
   header: [
-    { text: 'Annual Report 2026', position: 'left', fontSize: 10 },
-    { text: 'Page {page} of {pages}', position: 'right', fontSize: 10 },
+    { text: 'Annual Report 2026', position: 'left', fontSize: 10, font },
+    { text: 'Page {page} of {pages}', position: 'right', fontSize: 10, font },
   ],
   footer: [
-    { text: '{date}', position: 'center', fontSize: 9, color: rgb(0.5, 0.5, 0.5) },
+    { text: '{date}', position: 'center', fontSize: 9, font, color: rgb(0.5, 0.5, 0.5) },
   ],
 });
 
 const bytes = await doc.save();
 ```
+
+::: warning Always pass a `font`
+Each content item's `font` should be a `FontRef` from `doc.embedFont()`. When omitted, the text operators reference a default font resource that only exists if a font has been embedded on the document — and center/right alignment falls back to a rough width estimate instead of real font metrics. Embed once, pass the ref to every item (the snippets below assume a `font` variable is in scope).
+:::
 
 ## Template Variables
 
@@ -84,8 +89,8 @@ All three positions render on the same line, aligned to the left margin, page ce
 | `font` | `FontRef \| string` | default font | Font to use |
 | `fontSize` | `number` | `10` | Font size in points |
 | `color` | `Color` | black | Text colour |
-| `bold` | `boolean` | `false` | Bold text |
-| `italic` | `boolean` | `false` | Italic text |
+| `bold` | `boolean` | `false` | Accepted but currently inert — pass a bold `FontRef` via `font` instead |
+| `italic` | `boolean` | `false` | Accepted but currently inert — pass an italic `FontRef` via `font` instead |
 
 ## HeaderFooterOptions
 
@@ -237,9 +242,10 @@ toAlpha(52);   // 'az'
 ## Complete Example
 
 ```ts
-import { createPdf, PageSizes, applyHeaderFooter, rgb, grayscale } from 'modern-pdf-lib';
+import { createPdf, PageSizes, StandardFonts, applyHeaderFooter, rgb, grayscale } from 'modern-pdf-lib';
 
 const doc = createPdf();
+const font = await doc.embedFont(StandardFonts.Helvetica);
 doc.setTitle('Quarterly Report');
 for (let i = 0; i < 12; i++) {
   doc.addPage(PageSizes.A4);
@@ -248,13 +254,13 @@ for (let i = 0; i < 12; i++) {
 applyHeaderFooter(doc, {
   skipFirstPage: true,
   header: [
-    { text: '{title}', position: 'left', fontSize: 10, color: grayscale(0.3) },
-    { text: 'Q1 2026', position: 'right', fontSize: 10, color: grayscale(0.3) },
+    { text: '{title}', position: 'left', fontSize: 10, font, color: grayscale(0.3) },
+    { text: 'Q1 2026', position: 'right', fontSize: 10, font, color: grayscale(0.3) },
   ],
   footer: [
-    { text: 'Confidential', position: 'left', fontSize: 8, color: rgb(0.7, 0, 0) },
-    { text: 'Page {page} of {pages}', position: 'center', fontSize: 9 },
-    { text: '{date}', position: 'right', fontSize: 8, color: grayscale(0.5) },
+    { text: 'Confidential', position: 'left', fontSize: 8, font, color: rgb(0.7, 0, 0) },
+    { text: 'Page {page} of {pages}', position: 'center', fontSize: 9, font },
+    { text: '{date}', position: 'right', fontSize: 8, font, color: grayscale(0.5) },
   ],
   separatorLine: { width: 0.5, color: grayscale(0.8) },
   margins: { top: 30, bottom: 30, left: 50, right: 50 },

@@ -64,11 +64,12 @@ page.drawText('Hello!', {
 import { createPdf, PageSizes, StandardFonts, rgb } from 'modern-pdf-lib';
 const pdf = createPdf();
 const page = pdf.addPage(PageSizes.A4);
+const font = await pdf.embedFont(StandardFonts.Helvetica);
 page.drawText('Hello!', {
   x: 50,
   y: 700,
   size: 24,
-  font: StandardFonts.Helvetica,
+  font,
   color: rgb(0, 0, 0),
 });
 ```
@@ -197,6 +198,7 @@ for (let i = 0; i < 10; i++) {
 
 // modern-pdf-lib
 const pdf = createPdf();
+const font = await pdf.embedFont(StandardFonts.Helvetica);
 for (let i = 0; i < 10; i++) {
   const page = pdf.addPage(PageSizes.A4);
   const [width] = PageSizes.A4;
@@ -204,7 +206,7 @@ for (let i = 0; i < 10; i++) {
     x: width / 2 - 20,
     y: 30,
     size: 10,
-    font: StandardFonts.Helvetica,
+    font,
   });
 }
 ```
@@ -217,11 +219,13 @@ import { createPdf, PageSizes, rgb, StandardFonts } from 'modern-pdf-lib';
 
 const pdf = createPdf();
 const page = pdf.addPage(PageSizes.A4);
+const helvetica = await pdf.embedFont(StandardFonts.Helvetica);
+const helveticaBold = await pdf.embedFont(StandardFonts.HelveticaBold);
 
 // Header
 page.drawText('INVOICE', {
   x: 50, y: 780, size: 28,
-  font: StandardFonts.HelveticaBold,
+  font: helveticaBold,
   color: rgb(0.1, 0.1, 0.1),
 });
 
@@ -241,9 +245,9 @@ const items = [
 
 let y = 680;
 for (const item of items) {
-  page.drawText(item.desc, { x: 50, y, size: 11 });
-  page.drawText(String(item.qty), { x: 350, y, size: 11 });
-  page.drawText(`$${(item.qty * item.price).toFixed(2)}`, { x: 450, y, size: 11 });
+  page.drawText(item.desc, { x: 50, y, size: 11, font: helvetica });
+  page.drawText(String(item.qty), { x: 350, y, size: 11, font: helvetica });
+  page.drawText(`$${(item.qty * item.price).toFixed(2)}`, { x: 450, y, size: 11, font: helvetica });
   y -= 20;
 }
 
@@ -301,23 +305,17 @@ const doc = await PDFDocument.create();
 const doc = createPdf(); // synchronous, no await needed
 ```
 
-### 5. Standard Fonts Without Embedding
+### 5. Standard Fonts: Same Pattern, Watch the `font` Option Type
 
-In `pdf-lib`, standard fonts had to be embedded via `embedFont()`. In `modern-pdf-lib`, standard fonts can be used directly:
+Standard fonts use the **same** `embedFont(StandardFonts.X)` pattern as `pdf-lib` — no glyph data is written, only a small font dictionary:
 
 ```ts
-// pdf-lib
-const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+// Identical in both libraries
+const font = await doc.embedFont(StandardFonts.Helvetica);
 page.drawText('Hello', { font, size: 16, x: 50, y: 700 });
-
-// modern-pdf-lib
-page.drawText('Hello', {
-  font: StandardFonts.Helvetica,
-  size: 16,
-  x: 50,
-  y: 700,
-});
 ```
+
+One trap: `modern-pdf-lib`'s `drawText` also accepts a **string** for `font`, but a string is treated as a raw page font *resource name* (e.g. `'F1'`), not as a font to load. Passing `StandardFonts.Helvetica` (the string `'Helvetica'`) directly produces a PDF whose content stream references a font resource that was never registered — text will not render. Always pass the `FontRef` returned by `embedFont()`.
 
 ### 6. Image `scale()` Removed
 
@@ -358,7 +356,7 @@ Use this checklist when migrating a project:
 - [ ] Replace `PDFDocument.create()` with `createPdf()`
 - [ ] Replace `Buffer` usage with `Uint8Array`
 - [ ] Replace `PDFDocument.load()` with `loadPdf()`
-- [ ] Update standard font usage (no embedding required)
+- [ ] Keep standard font usage as-is (`await doc.embedFont(StandardFonts.X)` works unchanged)
 - [ ] Replace `image.scale()` with manual width/height calculation
 - [ ] Update file writing from `fs.writeFileSync` to `await writeFile`
 - [ ] Ensure your project uses ESM (`"type": "module"` in `package.json`)

@@ -496,7 +496,7 @@ sandbox.destroy();
 ### Invoice Form with Auto-Calculating Totals
 
 ```ts
-import { createPdf, PdfDict, PdfName, PdfString } from 'modern-pdf-lib';
+import { createPdf, PdfDict, PdfName, PdfString, StandardFonts } from 'modern-pdf-lib';
 import type { PdfField } from 'modern-pdf-lib';
 
 // Helper: attach JavaScript to a field's /AA action dictionary.
@@ -516,10 +516,11 @@ function setFieldScript(field: PdfField, key: '/C' | '/F' | '/V' | '/K', js: str
 
 const doc = createPdf();
 const page = doc.addPage([612, 792]);
+const font = await doc.embedFont(StandardFonts.Helvetica);
 const form = doc.getForm();
 
 // Header
-page.drawText('INVOICE', { x: 50, y: 742, size: 24 });
+page.drawText('INVOICE', { x: 50, y: 742, size: 24, font });
 
 // Line items (3 rows x 3 columns: Description, Qty, Price)
 for (let i = 1; i <= 3; i++) {
@@ -606,9 +607,10 @@ setFieldScript(totalIncome, '/F', 'AFNumber_Format(2, 0, 0, 0, "$", true);');
 ```ts
 const doc = createPdf();
 const page = doc.addPage([612, 792]);
+const font = await doc.embedFont(StandardFonts.Helvetica);
 const form = doc.getForm();
 
-page.drawText('Registration Form', { x: 50, y: 742, size: 20 });
+page.drawText('Registration Form', { x: 50, y: 742, size: 20, font });
 
 // Reuses the setFieldScript() helper defined in the invoice example above.
 

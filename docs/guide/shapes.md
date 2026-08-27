@@ -276,7 +276,7 @@ page.drawText('DRAFT', {
 **Isolated drawing region:**
 
 ```ts
-function drawCard(page: PdfPage, x: number, y: number): void {
+function drawCard(page: PdfPage, font: FontRef, x: number, y: number): void {
   page.pushGraphicsState();
 
   page.drawRectangle({
@@ -288,12 +288,12 @@ function drawCard(page: PdfPage, x: number, y: number): void {
 
   page.drawText('Card Title', {
     x: x + 16, y: y + 88,
-    size: 14, color: rgb(0.1, 0.1, 0.1),
+    size: 14, font, color: rgb(0.1, 0.1, 0.1),
   });
 
   page.drawText('Card description text here.', {
     x: x + 16, y: y + 64,
-    size: 10, color: rgb(0.4, 0.4, 0.4),
+    size: 10, font, color: rgb(0.4, 0.4, 0.4),
   });
 
   page.popGraphicsState();
@@ -306,16 +306,21 @@ function drawCard(page: PdfPage, x: number, y: number): void {
 
 | Option | Type | Default | Description |
 |---|---|---|---|
-| `x` | `number` | Required | Left edge in points |
-| `y` | `number` | Required | Bottom edge in points |
-| `width` | `number` | Required | Width in points |
-| `height` | `number` | Required | Height in points |
-| `color` | `Color` | — | Fill color |
-| `borderColor` | `Color` | — | Border color |
+| `x` | `number` | Cursor position (initially `0`) | Left edge in points |
+| `y` | `number` | Cursor position (initially `0`) | Bottom edge in points |
+| `width` | `number` | `150` | Width in points |
+| `height` | `number` | `100` | Height in points |
+| `color` | `Color` | — | Fill color (omit for no fill) |
+| `borderColor` | `Color` | — | Border color (omit for no stroke) |
 | `borderWidth` | `number` | `1` | Border thickness |
 | `opacity` | `number` | `1` | Fill opacity |
 | `borderOpacity` | `number` | `1` | Border opacity |
 | `rotate` | `Angle` | `degrees(0)` | Rotation angle |
+| `xSkew` / `ySkew` | `Angle` | `degrees(0)` | Skew angles |
+| `blendMode` | `BlendMode` | `'Normal'` | Blend mode for compositing |
+| `borderDashArray` | `number[]` | — | Border dash pattern `[dash, gap, …]` |
+| `borderDashPhase` | `number` | `0` | Border dash phase offset |
+| `borderLineCap` | `0 \| 1 \| 2` | `0` | Border line cap (butt / round / projecting square) |
 
 ### `drawLine()`
 
@@ -325,30 +330,40 @@ function drawCard(page: PdfPage, x: number, y: number): void {
 | `end` | `{ x, y }` | Required | End point |
 | `thickness` | `number` | `1` | Line thickness |
 | `color` | `Color` | `rgb(0,0,0)` | Line color |
-| `dashArray` | `number[]` | — | Dash pattern |
+| `dashArray` | `number[]` | — | Dash pattern `[dash, gap]` |
+| `dashPhase` | `number` | `0` | Dash phase offset |
 | `opacity` | `number` | `1` | Line opacity |
+| `blendMode` | `BlendMode` | `'Normal'` | Blend mode for compositing |
 
 ### `drawCircle()`
 
 | Option | Type | Default | Description |
 |---|---|---|---|
-| `x` | `number` | Required | Center X |
-| `y` | `number` | Required | Center Y |
-| `radius` | `number` | Required | Radius in points |
+| `x` | `number` | Cursor position (initially `0`) | Center X |
+| `y` | `number` | Cursor position (initially `0`) | Center Y |
+| `radius` | `number` | `50` | Radius in points |
 | `color` | `Color` | — | Fill color |
 | `borderColor` | `Color` | — | Border color |
 | `borderWidth` | `number` | `1` | Border thickness |
 | `opacity` | `number` | `1` | Fill opacity |
+| `borderOpacity` | `number` | `1` | Border opacity |
+| `blendMode` | `BlendMode` | `'Normal'` | Blend mode for compositing |
+| `borderDashArray` / `borderDashPhase` / `borderLineCap` | — | — | Border dash controls (as for `drawRectangle`) |
 
 ### `drawEllipse()`
 
 | Option | Type | Default | Description |
 |---|---|---|---|
-| `x` | `number` | Required | Center X |
-| `y` | `number` | Required | Center Y |
-| `xScale` | `number` | Required | Horizontal radius |
-| `yScale` | `number` | Required | Vertical radius |
+| `x` | `number` | Cursor position (initially `0`) | Center X |
+| `y` | `number` | Cursor position (initially `0`) | Center Y |
+| `xScale` | `number` | `100` | Horizontal radius |
+| `yScale` | `number` | `50` | Vertical radius |
 | `color` | `Color` | — | Fill color |
 | `borderColor` | `Color` | — | Border color |
 | `borderWidth` | `number` | `1` | Border thickness |
 | `opacity` | `number` | `1` | Fill opacity |
+| `borderOpacity` | `number` | `1` | Border opacity |
+| `blendMode` | `BlendMode` | `'Normal'` | Blend mode for compositing |
+| `borderDashArray` / `borderDashPhase` / `borderLineCap` | — | — | Border dash controls (as for `drawRectangle`) |
+
+`drawSvgPath(pathData, options)` is also available for arbitrary SVG path data — see the [API reference](/api/classes/PdfPage).

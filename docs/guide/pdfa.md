@@ -341,33 +341,38 @@ import { readFile, writeFile } from 'node:fs/promises';
 const doc = createPdf();
 const page = doc.addPage(PageSizes.A4);
 
+// PDF/A requires ALL fonts to be embedded — the standard 14 are not exempt,
+// so embed a real TrueType/OpenType font:
+const fontBytes = new Uint8Array(await readFile('fonts/Inter-Regular.ttf'));
+const font = await doc.embedFont(fontBytes);
+
 page.drawText('INVOICE', {
-  x: 50, y: 780, size: 28,
+  x: 50, y: 780, size: 28, font,
   color: rgb(0.1, 0.1, 0.1),
 });
 page.drawText('Invoice Number: INV-2026-001', {
-  x: 50, y: 740, size: 12,
+  x: 50, y: 740, size: 12, font,
 });
 page.drawText('Date: 2026-03-07', {
-  x: 50, y: 720, size: 12,
+  x: 50, y: 720, size: 12, font,
 });
 page.drawText('Due Date: 2026-04-06', {
-  x: 50, y: 700, size: 12,
+  x: 50, y: 700, size: 12, font,
 });
 
 // Line items
 page.drawText('Description              Qty    Unit Price    Total', {
-  x: 50, y: 660, size: 10,
+  x: 50, y: 660, size: 10, font,
 });
 page.drawText('Web Development          10     €100.00       €1,000.00', {
-  x: 50, y: 640, size: 10,
+  x: 50, y: 640, size: 10, font,
 });
 page.drawText('Design Services           3     €78.19         €234.56', {
-  x: 50, y: 620, size: 10,
+  x: 50, y: 620, size: 10, font,
 });
 
 page.drawText('Total: EUR 1,234.56', {
-  x: 50, y: 580, size: 16,
+  x: 50, y: 580, size: 16, font,
   color: rgb(0, 0.4, 0),
 });
 

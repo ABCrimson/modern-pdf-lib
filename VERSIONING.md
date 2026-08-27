@@ -6,28 +6,28 @@ This project uses **MAJOR.MINOR.PATCH** versioning with strict single-digit limi
 
 ```
 MAJOR . MINOR . PATCH
-  0   .  11   .  5
+  0   .  40   .  2
 ```
 
 ## Rules
 
-**Each digit position maxes out at 9.** There is no `0.11.10` — instead it rolls over:
+**Each digit position maxes out at 9.** There is no `0.40.10` — instead it rolls over:
 
 | Current | Next |
 |---|---|
-| `0.11.8` | `0.11.9` |
-| `0.11.9` | `0.12.0` |
+| `0.40.8` | `0.40.9` |
+| `0.40.9` | `0.41.0` |
 | `0.99.9` | `1.0.0` |
 
 ## What Each Position Means
 
-### PATCH (0.11.**5** → 0.11.**6**)
+### PATCH (0.40.**2** → 0.40.**3**)
 
 Bug fixes, documentation updates, small improvements. Anything that doesn't add significant new functionality.
 
 *Examples: fix a typo, update a dependency, improve error message, add a test.*
 
-### MINOR (0.**11**.0 → 0.**12**.0)
+### MINOR (0.**40**.0 → 0.**41**.0)
 
 Something notable happened — a meaningful new feature, a non-trivial API addition, a significant performance improvement.
 

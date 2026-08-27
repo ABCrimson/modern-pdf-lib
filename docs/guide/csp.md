@@ -26,7 +26,8 @@ WASM modules require the `wasm-unsafe-eval` directive:
 Content-Security-Policy: default-src 'self'; script-src 'self' 'wasm-unsafe-eval'
 ```
 
-> **Note:** `wasm-unsafe-eval` is a narrowly-scoped directive that only allows WebAssembly compilation. It does NOT allow JavaScript `eval()`. It is supported in Chrome 97+, Firefox 102+, and Safari 16+.
+> [!NOTE]
+> `wasm-unsafe-eval` is a narrowly-scoped directive that only allows WebAssembly compilation. It does **not** allow JavaScript `eval()`. It is supported in Chrome 97+, Firefox 102+, and Safari 16+.
 
 ### With Web Workers
 
@@ -50,7 +51,7 @@ Content-Security-Policy: default-src 'self'; script-src 'self' https://cdn.jsdel
 
 ## CSP-Safe WASM Loading
 
-When `wasm-unsafe-eval` is not available, the library automatically falls back to pure JavaScript implementations. You can also explicitly disable WASM:
+When `wasm-unsafe-eval` is not available, WASM instantiation fails and the library falls through to its pure-JavaScript implementation — compression, for example, drops from libdeflate to fflate and produces identical output. You can also disable WASM up front, which avoids the failed attempt entirely:
 
 ```typescript
 import { configureWasmLoader } from 'modern-pdf-lib';
@@ -58,6 +59,9 @@ import { configureWasmLoader } from 'modern-pdf-lib';
 // Force pure-JS mode (no WASM needed)
 configureWasmLoader({ disableWasm: true });
 ```
+
+> [!TIP]
+> `disableWasm` is the deterministic choice for a locked-down deployment. Rather than attempting a WASM instantiation that the CSP will reject and then recovering, the loader skips WASM entirely and the pure-JS paths run from the first call. Output is byte-identical either way.
 
 ## Strict CSP Checklist
 

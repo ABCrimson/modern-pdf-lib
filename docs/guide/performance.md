@@ -28,13 +28,14 @@ Call `initWasm()` once at startup, before any `save()` calls:
 #### Node / Bun
 
 ```ts
-import { initWasm, createPdf, PageSizes, rgb } from 'modern-pdf-lib';
+import { initWasm, createPdf, PageSizes, StandardFonts, rgb } from 'modern-pdf-lib';
 
 await initWasm({ deflate: true, fonts: true, png: true });
 
 const pdf = createPdf();
 const page = pdf.addPage(PageSizes.A4);
-page.drawText('WASM-accelerated PDF', { x: 50, y: 700, size: 24, color: rgb(0, 0, 0) });
+const font = await pdf.embedFont(StandardFonts.Helvetica);
+page.drawText('WASM-accelerated PDF', { x: 50, y: 700, size: 24, font, color: rgb(0, 0, 0) });
 
 const bytes = await pdf.save({ useWasm: true });
 ```
@@ -218,13 +219,14 @@ import { Writable } from 'node:stream';
 import { createPdf, PageSizes, StandardFonts, rgb } from 'modern-pdf-lib';
 
 const pdf = createPdf();
+const helvetica = await pdf.embedFont(StandardFonts.Helvetica);
 for (let i = 0; i < 500; i++) {
   const page = pdf.addPage(PageSizes.A4);
   page.drawText(`Page ${i + 1}`, {
     x: 50,
     y: 750,
     size: 24,
-    font: StandardFonts.Helvetica,
+    font: helvetica,
     color: rgb(0, 0, 0),
   });
 }
@@ -318,10 +320,11 @@ For documents with hundreds or thousands of pages, use `saveAsStream()` to avoid
 
 ```ts
 const pdf = createPdf();
+const helvetica = await pdf.embedFont(StandardFonts.Helvetica);
 
 for (let i = 0; i < 2000; i++) {
   const page = pdf.addPage(PageSizes.A4);
-  page.drawText(`Page ${i + 1}`, { x: 50, y: 750, size: 18, font: StandardFonts.Helvetica });
+  page.drawText(`Page ${i + 1}`, { x: 50, y: 750, size: 18, font: helvetica });
 }
 
 // Stream to disk instead of buffering the entire PDF

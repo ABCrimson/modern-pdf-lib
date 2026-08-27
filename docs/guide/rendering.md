@@ -7,6 +7,21 @@ adapter** paints onto a 2D context (with native, pixel-accurate text in the
 browser). On top sit thumbnails, image/font extraction, visual diffing, an OCR
 overlay hook, and true content-removal redaction.
 
+## What's in the box
+
+| Task | Entry point | Runs where |
+|---|---|---|
+| Page → PNG bytes | `renderPageToImage` | Everywhere (pure JS) |
+| Page → Canvas 2D | `renderPageToCanvas` | Browser / Worker (native text) |
+| Page → display list | `interpretPage` | Everywhere |
+| Thumbnail | `generateThumbnail` | Everywhere |
+| Visual regression diff | `comparePages` | Everywhere |
+| Extract embedded images | `extractPageImages` | Everywhere |
+| Extract embedded fonts | `extractFonts` | Everywhere |
+| Searchable OCR text layer | `applyOcr` (+ your `OcrEngine`) | Everywhere |
+| Content-removal redaction | `redactRegions` | Everywhere |
+| Bounded-memory tiling | `computeTileGrid`, `renderPageTile`, `RenderCache` | Everywhere |
+
 ## Render a page to a PNG
 
 ```ts
@@ -20,10 +35,21 @@ const { data, width, height } = await renderPageToImage(page, { dpi: 150 });
 await writeFile('page-1.png', data);
 ```
 
-`RenderOptions`: `scale` (1 = 72 dpi), `dpi`, `background` (an `[r,g,b,a]` or
-`'transparent'`), and `renderText`. The pure-JS rasterizer renders vector paths
-and strokes at full fidelity with anti-aliasing and the nonzero/even-odd rules;
-text is approximated as positioned glyph boxes (no bundled font engine).
+### `RenderOptions`
+
+| Option | Type | Default | Meaning |
+|---|---|---|---|
+| `scale` | `number` | `1` | Pixels per user unit. `1` = 72 dpi. **Overrides `dpi`.** |
+| `dpi` | `number` | `72` | Target resolution; internally `scale = dpi / 72`. |
+| `background` | `[r,g,b,a]` \| `'transparent'` | white | Canvas fill before drawing. |
+| `renderText` | `boolean` | `true` | Draw text runs as positioned glyph boxes. |
+| `region` | `{ x, y, width, height }` | full page | Render only this pixel sub-window (used by tiling). |
+
+> [!NOTE]
+> The pure-JS rasterizer renders vector paths and strokes at full fidelity —
+> anti-aliased, with both the nonzero and even-odd fill rules. **Text is
+> approximated as positioned glyph boxes**, because no font engine is bundled.
+> When you need real glyphs, use the Canvas adapter below.
 
 ## Render onto a Canvas (high-fidelity text)
 

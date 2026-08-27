@@ -7,6 +7,29 @@ application data. The high-level pieces are on `PdfDocument`; the rest are
 low-level builders that return PDF objects you register via
 `doc.getRegistry()` / `page.registerExtGState()`.
 
+## Feature index
+
+| Feature | ISO 32000-2 | API |
+|---|---|---|
+| [Associated files](#associated-files) | §14.13 | `doc.addAssociatedFile`, `createAssociatedFile`, `attachAssociatedFiles` |
+| [Document parts](#document-parts-dpart-hierarchy) | §14.12 | `buildDPartRoot` |
+| [Per-page output intents](#per-page-per-stream-output-intents) | §14.11.5 | `buildPageOutputIntent`, `attachOutputIntents` |
+| [Structure namespaces](#structure-namespaces-processor-requirements) | §14.7.4 | `buildNamespace`, `PDF2_NAMESPACE`, `MATHML_NAMESPACE` |
+| [Processor requirements](#structure-namespaces-processor-requirements) | §7.12.7 | `buildRequirements` |
+| [Encrypted-payload wrapper](#encrypted-payload-wrapper) | §7.6.7 | `buildUnencryptedWrapper`, `buildEncryptedPayload` |
+| [Soft-mask groups](#soft-mask-groups-luminosity-alpha) | §11.6.5.2 | `buildSoftMaskGroupExtGState`, `buildSoftMaskNone` |
+| [Image masks](#image-masks-black-point-compensation) | §8.9.6 | `buildStencilMask`, `buildColorKeyMask`, `buildImageSoftMask` |
+| [Black-point compensation](#image-masks-black-point-compensation) | §8.6.5.9 | `buildBlackPointCompensationExtGState` |
+| [Private application data](#private-application-data-pieceinfo) | §14.5 | `buildPieceInfo` |
+
+> [!NOTE]
+> These builders emit PDF 2.0 *structure*, but they do not change the file
+> header. `save()` writes `%PDF-1.7` in every case except AES-256 encryption
+> (V5/R6), where it writes `%PDF-2.0`. That matches how readers behave in
+> practice — PDF 2.0 constructs are ignored rather than rejected by 1.7
+> consumers — but if a downstream validator insists on a 2.0 header, encrypt
+> with AES-256 or post-process the header yourself.
+
 ## Associated files
 
 A PDF 2.0 **associated file** is an embedded file with a typed

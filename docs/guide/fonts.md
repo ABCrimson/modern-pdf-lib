@@ -4,7 +4,7 @@ This guide covers font handling in `modern-pdf-lib`, including standard fonts, c
 
 ## Standard 14 PDF Fonts
 
-The PDF specification defines 14 standard fonts that every PDF viewer must support. These fonts can be used without embedding any font data, keeping file sizes small:
+The PDF specification defines 14 standard fonts that every PDF viewer must support. Pass a standard font name to `embedFont()` to use one — no glyph data is embedded (only a small font dictionary), so file sizes stay tiny:
 
 ```ts
 import { createPdf, PageSizes, StandardFonts, rgb } from 'modern-pdf-lib';
@@ -12,11 +12,15 @@ import { createPdf, PageSizes, StandardFonts, rgb } from 'modern-pdf-lib';
 const pdf = createPdf();
 const page = pdf.addPage(PageSizes.A4);
 
+const helvetica = await pdf.embedFont(StandardFonts.Helvetica);
+const times = await pdf.embedFont(StandardFonts.TimesRoman);
+const courier = await pdf.embedFont(StandardFonts.Courier);
+
 page.drawText('Helvetica text', {
   x: 50,
   y: 700,
   size: 16,
-  font: StandardFonts.Helvetica,
+  font: helvetica,
   color: rgb(0, 0, 0),
 });
 
@@ -24,7 +28,7 @@ page.drawText('Times Roman text', {
   x: 50,
   y: 670,
   size: 16,
-  font: StandardFonts.TimesRoman,
+  font: times,
   color: rgb(0, 0, 0),
 });
 
@@ -32,7 +36,7 @@ page.drawText('Courier text', {
   x: 50,
   y: 640,
   size: 16,
-  font: StandardFonts.Courier,
+  font: courier,
   color: rgb(0, 0, 0),
 });
 ```

@@ -16,8 +16,8 @@ const page = doc.addPage(PageSizes.A4);
 const pageWidth = page.getWidth();   // 595.28
 const pageHeight = page.getHeight(); // 841.89
 
-const fontRegular = StandardFonts.Helvetica;
-const fontBold = StandardFonts.HelveticaBold;
+const fontRegular = await doc.embedFont(StandardFonts.Helvetica);
+const fontBold = await doc.embedFont(StandardFonts.HelveticaBold);
 const black = rgb(0, 0, 0);
 const gray = rgb(0.4, 0.4, 0.4);
 const lightGray = rgb(0.92, 0.92, 0.92);
@@ -407,6 +407,9 @@ doc.setLanguage('en-US');
 
 const page = doc.addPage(PageSizes.A4);
 const pageHeight = page.getHeight();
+const helvetica = await doc.embedFont(StandardFonts.Helvetica);
+const helveticaBold = await doc.embedFont(StandardFonts.HelveticaBold);
+const helveticaOblique = await doc.embedFont(StandardFonts.HelveticaOblique);
 
 // Create the structure tree for tagged PDF
 const tree = doc.createStructureTree();
@@ -421,7 +424,7 @@ page.drawText('Quarterly Sales Report', {
   x: 50,
   y: pageHeight - 60,
   size: 24,
-  font: StandardFonts.HelveticaBold,
+  font: helveticaBold,
   color: rgb(0, 0, 0),
 });
 page.pushOperators(endMarkedContent());
@@ -435,7 +438,7 @@ page.drawText('This report covers Q4 2025 sales data across all regions.', {
   x: 50,
   y: pageHeight - 100,
   size: 12,
-  font: StandardFonts.Helvetica,
+  font: helvetica,
   color: rgb(0, 0, 0),
 });
 page.pushOperators(endMarkedContent());
@@ -449,7 +452,7 @@ page.drawText('Total revenue increased by 15% compared to the previous quarter.'
   x: 50,
   y: pageHeight - 125,
   size: 12,
-  font: StandardFonts.Helvetica,
+  font: helvetica,
   color: rgb(0, 0, 0),
 });
 page.pushOperators(endMarkedContent());
@@ -476,7 +479,7 @@ page.drawText('[Chart: Revenue by Region]', {
   x: 160,
   y: pageHeight - 260,
   size: 14,
-  font: StandardFonts.HelveticaOblique,
+  font: helveticaOblique,
   color: rgb(0.5, 0.5, 0.5),
 });
 
@@ -505,12 +508,13 @@ import { writeFile } from 'node:fs/promises';
 
 const doc = createPdf();
 const page = doc.addPage(PageSizes.A4);
+const helvetica = await doc.embedFont(StandardFonts.Helvetica);
 
 page.drawText('This document is encrypted and copy-protected.', {
   x: 50,
   y: page.getHeight() - 60,
   size: 16,
-  font: StandardFonts.Helvetica,
+  font: helvetica,
   color: rgb(0, 0, 0),
 });
 
@@ -518,7 +522,7 @@ page.drawText('You can print this PDF, but you cannot copy text from it.', {
   x: 50,
   y: page.getHeight() - 90,
   size: 12,
-  font: StandardFonts.Helvetica,
+  font: helvetica,
   color: rgb(0.3, 0.3, 0.3),
 });
 

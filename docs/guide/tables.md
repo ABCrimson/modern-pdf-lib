@@ -9,16 +9,17 @@ modern-pdf-lib includes a powerful table layout engine for creating data tables,
 ## Quick Start
 
 ```typescript
-import { createPdf, PageSizes, rgb, renderTable } from 'modern-pdf-lib';
+import { createPdf, PageSizes, StandardFonts, rgb } from 'modern-pdf-lib';
 
 const doc = createPdf();
+const font = await doc.embedFont(StandardFonts.Helvetica);
 const page = doc.addPage(PageSizes.A4);
 
 page.drawTable({
   x: 50,
   y: 750,
   width: 495,
-  fontName: 'Helvetica',
+  fontName: font.name,
   fontSize: 11,
   rows: [
     { cells: ['Product', 'Qty', 'Price', 'Total'], backgroundColor: { type: 'grayscale', gray: 0.9 } },
@@ -31,6 +32,10 @@ page.drawTable({
 const bytes = await doc.save();
 ```
 
+::: warning `fontName` is a resource name
+`fontName` is written into the content stream as a page font **resource name** — it is not resolved to a font by itself. Embed a font (`await doc.embedFont(StandardFonts.Helvetica)`) and pass the returned ref's `name` (as above); the document registers embedded fonts on its pages automatically. Passing a bare string like `'Helvetica'` without a matching registered font produces a PDF whose table text does not render.
+:::
+
 ## Table Options
 
 | Option | Type | Default | Description |
@@ -40,7 +45,7 @@ const bytes = await doc.save();
 | `width` | `number` | required | Total table width |
 | `rows` | `TableRow[]` | required | Array of row definitions |
 | `columns` | `TableColumn[]` | auto | Column width definitions |
-| `fontName` | `string` | `'Helvetica'` | Font name |
+| `fontName` | `string` | `'Helvetica'` | Page font **resource name** — pass an embedded font's `.name` |
 | `fontSize` | `number` | `12` | Default font size |
 | `textColor` | `Color` | black | Default text color |
 | `borderColor` | `Color` | black | Border color |
@@ -96,18 +101,19 @@ page.drawTable({
 ### Invoice Table
 
 ```typescript
+const helvetica = await doc.embedFont(StandardFonts.Helvetica);
 const page = doc.addPage(PageSizes.A4);
 
 // Header
-page.drawText('INVOICE #2026-042', { x: 50, y: 780, size: 24 });
-page.drawText('March 7, 2026', { x: 50, y: 755, size: 12 });
+page.drawText('INVOICE #2026-042', { x: 50, y: 780, size: 24, font: helvetica });
+page.drawText('March 7, 2026', { x: 50, y: 755, size: 12, font: helvetica });
 
 // Table
 const result = page.drawTable({
   x: 50,
   y: 720,
   width: 495,
-  fontName: 'Helvetica',
+  fontName: helvetica.name,
   fontSize: 10,
   borderWidth: 0.5,
   padding: 6,
@@ -162,11 +168,13 @@ const result = page.drawTable({
 ### Financial Report
 
 ```typescript
+const courier = await doc.embedFont(StandardFonts.Courier);
+
 const result = page.drawTable({
   x: 50,
   y: 700,
   width: 500,
-  fontName: 'Courier',
+  fontName: courier.name,
   fontSize: 9,
   padding: 5,
   rows: [
@@ -306,8 +314,8 @@ Control how text behaves when it exceeds cell width:
 ```typescript
 {
   cells: [
-    { content: 'Very long text...', overflow: 'wrap' },       // Word wrap (default)
-    { content: 'Very long text...', overflow: 'truncate' },    // Hard cut
+    { content: 'Very long text...', overflow: 'wrap' },       // Word wrap
+    { content: 'Very long text...', overflow: 'truncate' },    // Hard cut (default)
     { content: 'Very long text...', overflow: 'ellipsis' },    // Truncate with "..."
     { content: 'Very long text...', overflow: 'shrink' },      // Reduce font size
   ]
@@ -344,10 +352,12 @@ For tables that span multiple pages with automatic header repetition:
 ```typescript
 import { renderMultiPageTable } from 'modern-pdf-lib';
 
+const helvetica = await doc.embedFont(StandardFonts.Helvetica);
+
 const result = renderMultiPageTable({
   x: 50, y: 750, width: 495,
   headerRows: 1,
-  fontName: 'Helvetica',
+  fontName: helvetica.name,
   fontSize: 10,
   rows: longDataRows,
 }, 50); // bottom margin

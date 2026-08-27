@@ -123,7 +123,7 @@ The WCAG 2.1 guideline requires a minimum contrast ratio of 4.5:1 for normal tex
 
 ## Images and Alt Text
 
-When embedding images, consider providing text descriptions nearby for accessibility. While PDF annotation-level alt text requires tagged PDF structure, you can include descriptive text on the page:
+Give every meaningful image real alt text via the structure tree — `tagFigure` writes a `/Figure` element with `/Alt` (see [Tagged PDF](#tagged-pdf-structure-trees) below). A visible caption is still good practice for sighted readers:
 
 ```ts
 const image = await pdf.embedImage(await readFile('chart.png'));
@@ -138,7 +138,7 @@ page.drawText('Figure 1: Revenue growth by quarter, showing 15% YoY increase', {
 
 ## PDF/UA Compliance Checklist
 
-PDF/UA (ISO 14289) defines requirements for universally accessible PDFs. While full PDF/UA support requires tagged PDF structure trees (a planned future feature), you can follow these practices today:
+PDF/UA (ISO 14289) defines requirements for universally accessible PDFs. Every requirement below is supported today:
 
 | Requirement | Status | How |
 |---|---|---|
@@ -147,10 +147,11 @@ PDF/UA (ISO 14289) defines requirements for universally accessible PDFs. While f
 | Fonts embedded with Unicode mappings | Supported | `pdf.embedFont(ttfBytes)` |
 | Text is extractable | Supported | Verified via `extractText()` |
 | Sufficient color contrast | Manual | Use `rgb()` with WCAG ratios |
-| Structure tags (headings, paragraphs, lists) | Planned | Not yet implemented |
-| Alt text on images | Planned | Requires structure tree |
-| Reading order tags | Planned | Requires structure tree |
-| Table headers marked | Planned | Requires structure tree |
+| Structure tags (headings, paragraphs, lists) | Supported | `tagHeading` / `tagParagraph` / `tagList` — see [Tagged PDF](#tagged-pdf-structure-trees) |
+| Alt text on images | Supported | `tagFigure(tree, parent, altText)` writes `/Figure` + `/Alt` |
+| Reading order tags | Supported | Structure-tree order defines logical reading order |
+| Table headers marked | Supported | `tagTableHeaderCell` writes `TH` with `/Scope` |
+| Validation | Supported | `validatePdfUa` (UA-1), `validatePdfUa2` (UA-2), `checkAccessibility` |
 
 ## XMP Metadata
 

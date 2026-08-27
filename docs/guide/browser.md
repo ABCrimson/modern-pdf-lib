@@ -18,11 +18,12 @@ npm install modern-pdf-lib
 
 ```html
 <script type="module">
-  import { createPdf, PageSizes, rgb } from 'https://esm.sh/modern-pdf-lib';
+  import { createPdf, PageSizes, StandardFonts, rgb } from 'https://esm.sh/modern-pdf-lib';
 
   const doc = createPdf();
   const page = doc.addPage(PageSizes.A4);
-  page.drawText('Hello from the browser!', { x: 50, y: 750, size: 24, color: rgb(0, 0, 0) });
+  const font = await doc.embedFont(StandardFonts.Helvetica);
+  page.drawText('Hello from the browser!', { x: 50, y: 750, size: 24, font, color: rgb(0, 0, 0) });
   const bytes = await doc.save();
 </script>
 ```
@@ -39,15 +40,16 @@ npm install modern-pdf-lib
 ## Quick Start
 
 ```typescript
-import { createPdf, PageSizes, rgb } from 'modern-pdf-lib';
+import { createPdf, PageSizes, StandardFonts, rgb } from 'modern-pdf-lib';
 import { saveAsDownload } from 'modern-pdf-lib/browser';
 
 async function generatePdf() {
   const doc = createPdf();
   const page = doc.addPage(PageSizes.A4);
+  const font = await doc.embedFont(StandardFonts.Helvetica);
 
-  page.drawText('Invoice #1234', { x: 50, y: 780, size: 28, color: rgb(0.1, 0.1, 0.1) });
-  page.drawText('Date: 2026-03-07', { x: 50, y: 750, size: 12 });
+  page.drawText('Invoice #1234', { x: 50, y: 780, size: 28, font, color: rgb(0.1, 0.1, 0.1) });
+  page.drawText('Date: 2026-03-07', { x: 50, y: 750, size: 12, font });
   page.drawLine({ start: { x: 50, y: 740 }, end: { x: 545, y: 740 }, thickness: 1 });
 
   const bytes = await doc.save();
@@ -73,7 +75,7 @@ The `modern-pdf-lib/browser` sub-path exports browser-specific helpers:
 
 ```tsx
 import { useState, useCallback } from 'react';
-import { createPdf, PageSizes, rgb } from 'modern-pdf-lib';
+import { createPdf, PageSizes, StandardFonts, rgb } from 'modern-pdf-lib';
 import { saveAsDownload, saveAsDataUrl } from 'modern-pdf-lib/browser';
 
 export function PdfGenerator() {
@@ -85,7 +87,8 @@ export function PdfGenerator() {
     try {
       const doc = createPdf();
       const page = doc.addPage(PageSizes.A4);
-      page.drawText('Generated in React', { x: 50, y: 750, size: 24, color: rgb(0, 0, 0) });
+      const font = await doc.embedFont(StandardFonts.Helvetica);
+      page.drawText('Generated in React', { x: 50, y: 750, size: 24, font, color: rgb(0, 0, 0) });
       const bytes = await doc.save();
 
       // Preview in iframe
@@ -99,7 +102,8 @@ export function PdfGenerator() {
   const download = useCallback(async () => {
     const doc = createPdf();
     const page = doc.addPage(PageSizes.A4);
-    page.drawText('Downloaded from React', { x: 50, y: 750, size: 24 });
+    const font = await doc.embedFont(StandardFonts.Helvetica);
+    page.drawText('Downloaded from React', { x: 50, y: 750, size: 24, font });
     const bytes = await doc.save();
     saveAsDownload(bytes, 'react-demo.pdf');
   }, []);
@@ -123,7 +127,7 @@ export function PdfGenerator() {
 ```vue
 <script setup lang="ts">
 import { ref, onUnmounted } from 'vue';
-import { createPdf, PageSizes, rgb } from 'modern-pdf-lib';
+import { createPdf, PageSizes, StandardFonts, rgb } from 'modern-pdf-lib';
 import { saveAsDownload, saveAsDataUrl } from 'modern-pdf-lib/browser';
 
 const previewUrl = ref<string | null>(null);
@@ -138,7 +142,8 @@ async function generate() {
   try {
     const doc = createPdf();
     const page = doc.addPage(PageSizes.A4);
-    page.drawText('Generated in Vue', { x: 50, y: 750, size: 24, color: rgb(0, 0, 0) });
+    const font = await doc.embedFont(StandardFonts.Helvetica);
+    page.drawText('Generated in Vue', { x: 50, y: 750, size: 24, font, color: rgb(0, 0, 0) });
     const bytes = await doc.save();
 
     if (previewUrl.value) URL.revokeObjectURL(previewUrl.value);
@@ -151,7 +156,8 @@ async function generate() {
 async function download() {
   const doc = createPdf();
   const page = doc.addPage(PageSizes.A4);
-  page.drawText('Downloaded from Vue', { x: 50, y: 750, size: 24 });
+  const font = await doc.embedFont(StandardFonts.Helvetica);
+  page.drawText('Downloaded from Vue', { x: 50, y: 750, size: 24, font });
   const bytes = await doc.save();
   saveAsDownload(bytes, 'vue-demo.pdf');
 }
@@ -172,7 +178,7 @@ async function download() {
 
 ```svelte
 <script lang="ts">
-  import { createPdf, PageSizes, rgb } from 'modern-pdf-lib';
+  import { createPdf, PageSizes, StandardFonts, rgb } from 'modern-pdf-lib';
   import { saveAsDownload, saveAsDataUrl } from 'modern-pdf-lib/browser';
   import { onDestroy } from 'svelte';
 
@@ -188,7 +194,8 @@ async function download() {
     try {
       const doc = createPdf();
       const page = doc.addPage(PageSizes.A4);
-      page.drawText('Generated in Svelte', { x: 50, y: 750, size: 24, color: rgb(0, 0, 0) });
+      const font = await doc.embedFont(StandardFonts.Helvetica);
+      page.drawText('Generated in Svelte', { x: 50, y: 750, size: 24, font, color: rgb(0, 0, 0) });
       const bytes = await doc.save();
 
       if (previewUrl) URL.revokeObjectURL(previewUrl);
@@ -201,7 +208,8 @@ async function download() {
   async function download() {
     const doc = createPdf();
     const page = doc.addPage(PageSizes.A4);
-    page.drawText('Downloaded from Svelte', { x: 50, y: 750, size: 24 });
+    const font = await doc.embedFont(StandardFonts.Helvetica);
+    page.drawText('Downloaded from Svelte', { x: 50, y: 750, size: 24, font });
     const bytes = await doc.save();
     saveAsDownload(bytes, 'svelte-demo.pdf');
   }
@@ -232,12 +240,13 @@ async function download() {
   <iframe id="preview" style="width: 100%; height: 600px; border: 1px solid #ddd; display: none;"></iframe>
 
   <script type="module">
-    import { createPdf, PageSizes, rgb } from 'https://esm.sh/modern-pdf-lib';
+    import { createPdf, PageSizes, StandardFonts, rgb } from 'https://esm.sh/modern-pdf-lib';
 
     document.getElementById('generate').addEventListener('click', async () => {
       const doc = createPdf();
       const page = doc.addPage(PageSizes.A4);
-      page.drawText('Hello from Vanilla JS!', { x: 50, y: 750, size: 24, color: rgb(0, 0, 0) });
+      const font = await doc.embedFont(StandardFonts.Helvetica);
+      page.drawText('Hello from Vanilla JS!', { x: 50, y: 750, size: 24, font, color: rgb(0, 0, 0) });
       const bytes = await doc.save();
 
       const blob = new Blob([bytes], { type: 'application/pdf' });
@@ -250,7 +259,8 @@ async function download() {
     document.getElementById('download').addEventListener('click', async () => {
       const doc = createPdf();
       const page = doc.addPage(PageSizes.A4);
-      page.drawText('Downloaded!', { x: 50, y: 750, size: 24 });
+      const font = await doc.embedFont(StandardFonts.Helvetica);
+      page.drawText('Downloaded!', { x: 50, y: 750, size: 24, font });
       const bytes = await doc.save();
 
       const blob = new Blob([bytes], { type: 'application/pdf' });
@@ -278,7 +288,8 @@ const worker = new PdfWorker();
 const bytes = await worker.generate(async (pdf) => {
   const doc = pdf.createPdf();
   const page = doc.addPage(pdf.PageSizes.A4);
-  page.drawText('Generated in a Web Worker!', { x: 50, y: 750, size: 24 });
+  const font = await doc.embedFont(pdf.StandardFonts.Helvetica);
+  page.drawText('Generated in a Web Worker!', { x: 50, y: 750, size: 24, font });
   return doc.save();
 });
 

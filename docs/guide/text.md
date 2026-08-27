@@ -7,20 +7,24 @@ This guide covers everything you need to know about drawing text on a PDF page w
 Use `page.drawText()` to place a string at a specific position. Coordinates are in PDF points (1 point = 1/72 inch), with the origin at the bottom-left corner of the page.
 
 ```ts
-import { createPdf, PageSizes, rgb } from 'modern-pdf-lib';
+import { createPdf, PageSizes, StandardFonts, rgb } from 'modern-pdf-lib';
 
 const pdf = createPdf();
 const page = pdf.addPage(PageSizes.A4);
+const helvetica = await pdf.embedFont(StandardFonts.Helvetica);
 
 page.drawText('Hello, world!', {
   x: 50,
   y: 700,
   size: 16,
+  font: helvetica,
   color: rgb(0, 0, 0),
 });
 
 const bytes = await pdf.save();
 ```
+
+Every drawn string needs a font that is registered on the document — embed one once with `embedFont()` (a standard font here, so no font file is required) and pass it via the `font` option. The examples below assume `helvetica` is in scope.
 
 ## Font Sizes and Colors
 
@@ -135,19 +139,23 @@ The rotation is counter-clockwise, following the standard PDF coordinate system.
 
 ### Standard Fonts
 
-Every PDF viewer includes 14 built-in standard fonts. You can use them without embedding any font data:
+Every PDF viewer includes 14 built-in standard fonts. Pass a standard font name to `embedFont()` — no font file needed (only a small font dictionary is written, never glyph data):
 
 ```ts
 import { StandardFonts } from 'modern-pdf-lib';
+
+const helvetica = await pdf.embedFont(StandardFonts.Helvetica);
 
 page.drawText('Standard font text', {
   x: 50,
   y: 700,
   size: 14,
   color: rgb(0, 0, 0),
-  font: StandardFonts.Helvetica,
+  font: helvetica,
 });
 ```
+
+The returned `FontRef` also gives you metrics (`widthOfTextAtSize`, `heightAtSize`) backed by the built-in AFM data, so measurement works exactly as with embedded fonts.
 
 Available standard fonts:
 
@@ -195,12 +203,17 @@ See the [Fonts guide](/guide/fonts) for details on subsetting, complex script sh
 ::: details Full `drawText()` Options
 | Option | Type | Default | Description |
 |---|---|---|---|
-| `x` | `number` | Required | Horizontal position in points |
-| `y` | `number` | Required | Vertical position in points (from bottom) |
-| `size` | `number` | `12` | Font size in points |
-| `font` | `FontRef` | Standard Helvetica | Font to use |
-| `color` | `Color` | `rgb(0, 0, 0)` | Text color |
+| `x` | `number` | Cursor position (initially `0`) | Horizontal position in points |
+| `y` | `number` | Cursor position (initially `0`) | Vertical position in points (from bottom) |
+| `size` | `number` | `12` (or page default) | Font size in points |
+| `font` | `FontRef \| string` | Page default font | Font to use — a `FontRef` from `embedFont()`, or a raw font resource name string |
+| `color` | `Color` | Black | Text color |
 | `rotate` | `Angle` | `degrees(0)` | Rotation angle |
 | `lineHeight` | `number` | `size * 1.2` | Vertical spacing for multi-line text |
 | `opacity` | `number` | `1` | Text opacity (0 to 1) |
+| `blendMode` | `BlendMode` | `'Normal'` | Blend mode for compositing |
+| `renderingMode` | `TextRenderingMode` | Fill | Fill, stroke, invisible, clip, etc. |
+| `xSkew` / `ySkew` | `Angle` | `degrees(0)` | Skew angles (italic-like effects) |
+| `maxWidth` | `number` | — | Wrap text at word boundaries to fit this width (requires a `FontRef` font) |
+| `wordBreaks` | `string[]` | `[' ']` | Extra characters where wrapped text may break (e.g. `[' ', '-', '/']`) |
 :::

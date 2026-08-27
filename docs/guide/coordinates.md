@@ -109,11 +109,13 @@ const screenY = pageHeight - pdfY;       // 841.89 - 700 = 141.89
 When you call `page.drawText()`, the `x` and `y` options specify the **baseline start position** of the text -- not the top-left corner. The baseline is the line that letters sit on; descenders (like "g" and "p") extend below it.
 
 ```ts
+const helvetica = await pdf.embedFont(StandardFonts.Helvetica);
+
 page.drawText('Hello, world!', {
   x: 50,
   y: 700,
   size: 16,
-  font: StandardFonts.Helvetica,
+  font: helvetica,
   color: rgb(0, 0, 0),
 });
 ```
@@ -247,6 +249,8 @@ import { createPdf, PageSizes, StandardFonts, rgb } from 'modern-pdf-lib';
 
 const pdf = createPdf();
 const page = pdf.addPage(PageSizes.A4);
+const helvetica = await pdf.embedFont(StandardFonts.Helvetica);
+const helveticaBold = await pdf.embedFont(StandardFonts.HelveticaBold);
 const pageHeight = page.getHeight();
 const margin = 50;
 
@@ -257,7 +261,7 @@ page.drawText('Document Title', {
   x: margin,
   y: cursor,
   size: 24,
-  font: StandardFonts.HelveticaBold,
+  font: helveticaBold,
   color: rgb(0, 0, 0),
 });
 cursor -= 36; // Move down past the title
@@ -267,7 +271,7 @@ page.drawText('A subtitle goes here', {
   x: margin,
   y: cursor,
   size: 14,
-  font: StandardFonts.Helvetica,
+  font: helvetica,
   color: rgb(0.4, 0.4, 0.4),
 });
 cursor -= 28;
@@ -293,6 +297,7 @@ for (const line of bodyLines) {
     x: margin,
     y: cursor,
     size: 12,
+    font: helvetica,
     color: rgb(0, 0, 0),
   });
   cursor -= 18;

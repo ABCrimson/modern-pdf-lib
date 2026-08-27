@@ -36,11 +36,14 @@ You will also need DER-encoded X.509 certificates and PKCS#8 private keys for ea
 ### 1. Create the Contract
 
 ```ts
+import { StandardFonts } from 'modern-pdf-lib';
+
 const doc = createPdf();
 const page = doc.addPage([612, 792]);
-page.drawText('Service Agreement', { x: 50, y: 750, size: 24 });
-page.drawText('Between Party A and Party B', { x: 50, y: 720, size: 14 });
-page.drawText('Terms and conditions...', { x: 50, y: 680, size: 12 });
+const font = await doc.embedFont(StandardFonts.Helvetica);
+page.drawText('Service Agreement', { x: 50, y: 750, size: 24, font });
+page.drawText('Between Party A and Party B', { x: 50, y: 720, size: 14, font });
+page.drawText('Terms and conditions...', { x: 50, y: 680, size: 12, font });
 
 const contractPdf = await doc.save();
 ```

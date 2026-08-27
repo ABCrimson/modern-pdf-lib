@@ -40,15 +40,17 @@
 import { ref, onUnmounted } from 'vue';
 
 const EXAMPLES: Record<string, string> = {
-  hello: `const { createPdf, PageSizes, rgb } = pdf;
+  hello: `const { createPdf, PageSizes, StandardFonts, rgb } = pdf;
 
 const doc = createPdf();
 const page = doc.addPage(PageSizes.A4);
+const font = await doc.embedFont(StandardFonts.Helvetica);
 
 page.drawText('Hello from the Playground!', {
   x: 50,
   y: 750,
   size: 28,
+  font,
   color: rgb(0.13, 0.13, 0.13),
 });
 
@@ -56,53 +58,57 @@ page.drawText('Edit the code on the left and press Ctrl+Enter.', {
   x: 50,
   y: 700,
   size: 14,
+  font,
   color: rgb(0.4, 0.4, 0.4),
 });
 
 return await doc.save();`,
 
-  invoice: `const { createPdf, PageSizes, rgb, grayscale } = pdf;
+  invoice: `const { createPdf, PageSizes, StandardFonts, rgb, grayscale } = pdf;
 
 const doc = createPdf();
 const page = doc.addPage(PageSizes.A4);
+const font = await doc.embedFont(StandardFonts.Helvetica);
+const bold = await doc.embedFont(StandardFonts.HelveticaBold);
 
 // Header
 page.drawRectangle({ x: 0, y: 780, width: 595, height: 62, color: rgb(0.1, 0.1, 0.2) });
-page.drawText('INVOICE', { x: 50, y: 800, size: 24, color: rgb(1, 1, 1) });
-page.drawText('#INV-2026-001', { x: 400, y: 800, size: 14, color: rgb(0.7, 0.7, 0.8) });
+page.drawText('INVOICE', { x: 50, y: 800, size: 24, font: bold, color: rgb(1, 1, 1) });
+page.drawText('#INV-2026-001', { x: 400, y: 800, size: 14, font, color: rgb(0.7, 0.7, 0.8) });
 
 // Details
-page.drawText('Bill To: Acme Corp', { x: 50, y: 740, size: 12 });
-page.drawText('Date: 2026-03-07', { x: 400, y: 740, size: 12 });
+page.drawText('Bill To: Acme Corp', { x: 50, y: 740, size: 12, font });
+page.drawText('Date: 2026-03-07', { x: 400, y: 740, size: 12, font });
 
 // Line items header
 const y = 680;
 page.drawRectangle({ x: 50, y: y - 5, width: 495, height: 20, color: rgb(0.95, 0.95, 0.95) });
-page.drawText('Item', { x: 55, y, size: 10 });
-page.drawText('Qty', { x: 350, y, size: 10 });
-page.drawText('Price', { x: 400, y, size: 10 });
-page.drawText('Total', { x: 470, y, size: 10 });
+page.drawText('Item', { x: 55, y, size: 10, font: bold });
+page.drawText('Qty', { x: 350, y, size: 10, font: bold });
+page.drawText('Price', { x: 400, y, size: 10, font: bold });
+page.drawText('Total', { x: 470, y, size: 10, font: bold });
 
 // Items
 const items = [['PDF Library License', '1', '$499', '$499'], ['Support Plan', '1', '$199', '$199']];
 items.forEach(([item, qty, price, total], i) => {
   const iy = y - 25 - i * 20;
-  page.drawText(item, { x: 55, y: iy, size: 10 });
-  page.drawText(qty, { x: 355, y: iy, size: 10 });
-  page.drawText(price, { x: 400, y: iy, size: 10 });
-  page.drawText(total, { x: 470, y: iy, size: 10 });
+  page.drawText(item, { x: 55, y: iy, size: 10, font });
+  page.drawText(qty, { x: 355, y: iy, size: 10, font });
+  page.drawText(price, { x: 400, y: iy, size: 10, font });
+  page.drawText(total, { x: 470, y: iy, size: 10, font });
 });
 
 // Total
 page.drawLine({ start: { x: 400, y: y - 70 }, end: { x: 545, y: y - 70 }, thickness: 1 });
-page.drawText('Total: $698', { x: 450, y: y - 90, size: 14 });
+page.drawText('Total: $698', { x: 450, y: y - 90, size: 14, font: bold });
 
 return await doc.save();`,
 
-  shapes: `const { createPdf, PageSizes, rgb, cmyk, grayscale } = pdf;
+  shapes: `const { createPdf, PageSizes, StandardFonts, rgb, cmyk, grayscale } = pdf;
 
 const doc = createPdf();
 const page = doc.addPage(PageSizes.A4);
+const font = await doc.embedFont(StandardFonts.HelveticaBold);
 
 // Colorful rectangles
 const colors = [rgb(0.95, 0.26, 0.21), rgb(0.13, 0.59, 0.95), rgb(0.30, 0.69, 0.31), rgb(1, 0.76, 0.03)];
@@ -131,7 +137,7 @@ for (let i = 0; i < 10; i++) {
   });
 }
 
-page.drawText('Shapes & Colors', { x: 50, y: 250, size: 32, color: rgb(0.1, 0.1, 0.1) });
+page.drawText('Shapes & Colors', { x: 50, y: 250, size: 32, font, color: rgb(0.1, 0.1, 0.1) });
 
 return await doc.save();`,
 };

@@ -6,6 +6,17 @@ a redaction-leak verifier, and an encryption/permission inspector. These tools
 inspect or clean an existing PDF — active redaction itself lives in the
 [core redaction API](#see-also).
 
+| Tool | Answers | Mutates the PDF? |
+|---|---|---|
+| [`scanPdfThreats`](#threat-scanning) | What dangerous active content is in here? | No — read-only report |
+| [`sanitizePdf`](#sanitizing-active-hidden-content) | Give me a copy with that content removed. | Returns a **new** document |
+| [`verifyRedactions`](#verifying-redactions) | Did anything survive my redactions? | No — read-only report |
+| [`inspectEncryption`](#inspecting-encryption-permissions) | How is this protected, and what does it permit? | No — never decrypts content |
+
+> [!TIP]
+> A useful pipeline for untrusted uploads: `scanPdfThreats` to decide whether to
+> accept the file at all, then `sanitizePdf` on everything you do accept.
+
 ## Threat scanning
 
 `scanPdfThreats` walks a PDF's **parsed object graph** (not its raw bytes) and

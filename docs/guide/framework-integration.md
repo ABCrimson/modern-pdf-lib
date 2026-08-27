@@ -28,12 +28,37 @@ const pdf = await renderJsxToPdf(
 ); // → Uint8Array, a valid %PDF-
 ```
 
-Intrinsic elements: `document` (root, `{ size }`), `page` (`{ size }`), `text`
-(`{ x?, y?, size?, color?, bold? }`), `view` (block container,
-`{ x?, y?, width?, height?, padding?, background? }`), and `rect`
-(`{ x, y, width, height, color?, border? }`). Function components receive their
-props and render their return value; `Fragment` groups children. Standard-14
-Helvetica/Helvetica-Bold are embedded automatically.
+#### Intrinsic elements
+
+| Tag | Props | Meaning |
+|---|---|---|
+| `document` | `{ size? }` | Root container. `size` is the default page size. |
+| `page` | `{ size? }` | Starts a new PDF page (overrides the document size). |
+| `text` | `{ x?, y?, size?, color?, bold? }` | Draws one text line. |
+| `view` | `{ x?, y?, width?, height?, padding?, background? }` | A block container; indents and pads its children. |
+| `rect` | `{ x, y, width, height, color?, border? }` | Draws a rectangle. |
+
+Function components are plain `(props) => PdfNode` functions — they receive
+their props (children as `props.children`) and their return value is rendered in
+place. `Fragment` groups children without adding a layout box. Standard-14
+Helvetica and Helvetica-Bold are embedded automatically.
+
+::: details How the layout cursor works
+Layout is a deterministic **top-down block flow**, one cursor per page:
+
+- Each `page` starts a y cursor at `pageHeight - MARGIN_TOP` and an x cursor at
+  `MARGIN_LEFT`. PDF space is y-up but documents read top-down, so the y cursor
+  *decreases* as blocks are placed.
+- A flowed `text` draws at `(x, y - ascent)` and advances y down by its line
+  height (`size × LINE_HEIGHT_FACTOR`).
+- A flowed `view` optionally paints its `background`, indents x by `padding`,
+  flows its children, then restores x and advances y past the consumed block
+  plus padding.
+- **Absolute positioning:** an element that supplies both `x` *and* `y` is
+  placed at exactly that PDF coordinate and neither consumes nor advances the
+  flow cursor. `rect` requires explicit `x`/`y`, so it is always absolute.
+- Each `page` element resets both cursors and starts a fresh PDF page.
+:::
 
 ### JSX syntax (automatic runtime)
 
@@ -90,11 +115,19 @@ const bytes = await doc.save();
 // fields → [{ name: 'fullName', kind: 'text' }, { name: 'country', kind: 'dropdown' }, …]
 ```
 
-Mapping: `string` → text field, `string` + `enum` → dropdown, `boolean` →
-checkbox, `number`/`integer` → text field. Required properties get an asterisk in
-the label. Fields stack top-down and paginate automatically. Nested
-`object`/`array` (and unknown keywords) degrade to a text placeholder — documented
-in the API.
+#### Schema → field mapping
+
+| JSON Schema | Field kind |
+|---|---|
+| `type: 'string'` | text field |
+| `type: 'string'` **+** `enum: [...]` | dropdown (combo box) |
+| `type: 'boolean'` | checkbox |
+| `type: 'number'` / `type: 'integer'` | text field |
+| `type: 'object'` / `type: 'array'` / unknown | text field (placeholder) |
+
+Only `type`, `properties`, `required`, and `enum` are read; other keywords are
+ignored. `enum` is honoured for `type: 'string'` only. Required properties get an
+asterisk in their label. Fields stack top-down and paginate automatically.
 
 ## Serving PDFs from a server
 
@@ -119,6 +152,25 @@ app.get('/report.pdf', (req, res) => {
 });
 ```
 
+#### Which adapter to use
+
+| Function | Returns | Use it for |
+|---|---|---|
+| `pdfResponse(bytes, options?)` | `Response` | Any Web-standard server: Workers, Deno, Bun, Hono, Next route handlers |
+| `pdfStreamResponse(stream, options?)` | `Response` | Streaming a `ReadableStream`; pass `byteLength` if you know it, otherwise `Content-Length` is omitted and the body is chunked |
+| `sendPdfToNodeResponse(res, bytes, options?)` | `void` | Classic Node `http` / Express — writes head and ends the response |
+| `pdfHeaders(byteLength, options?)` | `Record<string, string>` | Building the response yourself |
+
+#### `PdfResponseOptions`
+
+| Option | Type | Effect |
+|---|---|---|
+| `filename` | `string` | Populates `Content-Disposition`; non-ASCII is handled automatically |
+| `download` | `boolean` | `true` → `attachment` (downloads); omitted or `false` → `inline` (viewer) |
+| `status` | `number` | HTTP status code. Default `200` |
+| `cacheControl` | `string` | Value for `Cache-Control` |
+| `lastModified` | `Date` | Serialised to the HTTP-date format for `Last-Modified` |
+| `headers` | `Record<string, string>` | Extra headers, merged **first** — the core PDF headers always win |
+
 Non-ASCII filenames are encoded with the RFC 5987 `filename*` form (with an ASCII
-fallback), so `résumé.pdf` downloads correctly everywhere. `pdfHeaders(byteLength,
-options)` is exposed if you want to set the headers yourself.
+fallback), so `résumé.pdf` downloads correctly everywhere.

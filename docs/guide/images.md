@@ -4,10 +4,19 @@ This guide covers embedding and drawing images in PDF documents with `modern-pdf
 
 ## Overview
 
-`modern-pdf-lib` supports two image formats:
+`modern-pdf-lib` embeds five image formats:
 
-- **PNG** — Full support including alpha transparency. Decoded using a WASM-accelerated PNG decoder (with a pure-JS fallback).
-- **JPEG** — Passed through directly to the PDF without re-encoding, making JPEG embedding extremely fast.
+| Format | Method | Notes |
+|---|---|---|
+| **PNG** | `pdf.embedPng()` | Full support including alpha transparency; WASM-accelerated decoder with a pure-JS fallback |
+| **JPEG** | `pdf.embedJpeg()` | Zero-copy passthrough — the raw JPEG bytes are written directly into the PDF |
+| **WebP** | `pdf.embedWebP()` | Lossy and lossless, including alpha — see [Image Formats](./image-formats.md) |
+| **TIFF** | `pdf.embedTiff()` | Multi-page aware (`{ page }` option) — see [Image Formats](./image-formats.md) |
+| **JPEG 2000** | via `decodeJpeg2000()` | Decode-and-re-embed workflow — see [JPEG 2000 Support](./jpeg2000.md) |
+
+Don't know the format ahead of time? `pdf.embedImage()` sniffs the magic bytes and dispatches to the right decoder automatically.
+
+This guide focuses on the two everyday formats — PNG and JPEG — plus positioning, scaling, and reuse. For WebP, TIFF, and format auto-detection details, see the [Image Formats guide](./image-formats.md).
 
 ## Embedding a PNG
 
@@ -177,9 +186,12 @@ The full set of options accepted by `page.drawImage()`:
 
 | Option | Type | Default | Description |
 |---|---|---|---|
-| `x` | `number` | Required | Horizontal position in points |
-| `y` | `number` | Required | Vertical position in points (from bottom) |
+| `x` | `number` | Cursor position (initially `0`) | Horizontal position of the lower-left corner, in points |
+| `y` | `number` | Cursor position (initially `0`) | Vertical position of the lower-left corner, in points (from bottom) |
 | `width` | `number` | Image's native width | Width in points |
 | `height` | `number` | Image's native height | Height in points |
-| `rotate` | `Angle` | `degrees(0)` | Rotation angle |
+| `rotate` | `Angle` | `degrees(0)` | Rotation angle around the lower-left corner |
 | `opacity` | `number` | `1` | Image opacity (0 to 1) |
+| `blendMode` | `BlendMode` | `'Normal'` | Blend mode for compositing over existing content |
+| `xSkew` | `Angle` | `degrees(0)` | Horizontal skew angle |
+| `ySkew` | `Angle` | `degrees(0)` | Vertical skew angle |

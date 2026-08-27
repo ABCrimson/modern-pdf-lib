@@ -11,26 +11,29 @@ modern-pdf-lib provides a fluent `PdfDocumentBuilder` that wraps the standard `P
 ## Quick Start
 
 ```ts
-import { PdfDocumentBuilder, PageSizes, rgb } from 'modern-pdf-lib';
+import { PdfDocumentBuilder, PageSizes, StandardFonts, rgb } from 'modern-pdf-lib';
 
 const bytes = await PdfDocumentBuilder.create()
   .setTitle('Quarterly Report')
   .setAuthor('Finance Team')
   .setLanguage('en-US')
-  .addPage(PageSizes.A4, (page) => {
-    page.drawText('Q1 2026 Results', { x: 50, y: 750, size: 28 });
-    page.drawRectangle({
-      x: 50, y: 700, width: 200, height: 2,
-      color: rgb(0.2, 0.4, 0.8),
-    });
-  })
-  .addPage(PageSizes.A4, (page) => {
-    page.drawText('Revenue Overview', { x: 50, y: 750, size: 18 });
+  .withFont(StandardFonts.Helvetica, (font, builder) => {
+    builder
+      .addPage(PageSizes.A4, (page) => {
+        page.drawText('Q1 2026 Results', { x: 50, y: 750, size: 28, font });
+        page.drawRectangle({
+          x: 50, y: 700, width: 200, height: 2,
+          color: rgb(0.2, 0.4, 0.8),
+        });
+      })
+      .addPage(PageSizes.A4, (page) => {
+        page.drawText('Revenue Overview', { x: 50, y: 750, size: 18, font });
+      });
   })
   .save();
 ```
 
-The entire document -- metadata, pages, and content -- is defined in a single chained expression. The `save()` call at the end serializes everything to a `Uint8Array`.
+The entire document -- metadata, pages, and content -- is defined in a single chained expression. The `save()` call at the end serializes everything to a `Uint8Array`. Note that text always needs an embedded font — `withFont()` accepts either a standard font name (as here) or raw TTF/OTF bytes.
 
 ---
 
@@ -99,11 +102,11 @@ const builder = PdfDocumentBuilder.create()
 
 ### Single Page with Content
 
-The `addPage()` method accepts an optional page size and a setup callback:
+The `addPage()` method accepts an optional page size and a setup callback (the fragments below assume a `font` from an enclosing `withFont()` callback is in scope):
 
 ```ts
 builder.addPage(PageSizes.Letter, (page) => {
-  page.drawText('Hello from the builder!', { x: 50, y: 700, size: 20 });
+  page.drawText('Hello from the builder!', { x: 50, y: 700, size: 20, font });
 });
 ```
 
@@ -111,7 +114,7 @@ When no size is provided, the page defaults to A4:
 
 ```ts
 builder.addPage(undefined, (page) => {
-  page.drawText('Default A4 page', { x: 50, y: 750, size: 14 });
+  page.drawText('Default A4 page', { x: 50, y: 750, size: 14, font });
 });
 ```
 
@@ -121,7 +124,7 @@ Use `addPages()` to add a batch of pages with the same size:
 
 ```ts
 builder.addPages(5, PageSizes.A4, (page, index) => {
-  page.drawText(`Page ${index + 1}`, { x: 50, y: 750, size: 14 });
+  page.drawText(`Page ${index + 1}`, { x: 50, y: 750, size: 14, font });
 });
 ```
 
@@ -172,8 +175,10 @@ const bytes = await PdfDocumentBuilder.create()
 ```ts
 const bytes = await PdfDocumentBuilder.create()
   .setTitle('Confidential Report')
-  .addPage(PageSizes.A4, (page) => {
-    page.drawText('Secret content', { x: 50, y: 700, size: 14 });
+  .withFont(StandardFonts.Helvetica, (font, builder) => {
+    builder.addPage(PageSizes.A4, (page) => {
+      page.drawText('Secret content', { x: 50, y: 700, size: 14, font });
+    });
   })
   .encrypt({
     userPassword: 'reader-pass',
@@ -192,8 +197,10 @@ const bytes = await PdfDocumentBuilder.create()
     { startPage: 0, style: 'roman', prefix: '' },
     { startPage: 3, style: 'decimal', prefix: '' },
   ])
-  .addPage(PageSizes.A4, (page) => {
-    page.drawText('Cover', { x: 50, y: 700, size: 24 });
+  .withFont(StandardFonts.Helvetica, (font, builder) => {
+    builder.addPage(PageSizes.A4, (page) => {
+      page.drawText('Cover', { x: 50, y: 700, size: 24, font });
+    });
   })
   .addBookmark({ title: 'Cover Page', pageIndex: 0 })
   .addBookmark({ title: 'Chapter 1', pageIndex: 1 })
