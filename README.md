@@ -14,7 +14,7 @@ Create, parse, fill, merge, sign, and manipulate PDF documents<br />in Node, Den
 <br />
 
 [![npm version](https://img.shields.io/npm/v/modern-pdf-lib?style=flat-square&color=cb3837)](https://www.npmjs.com/package/modern-pdf-lib)
-[![bundle size](https://img.shields.io/badge/gzip-36kb_core-blue?style=flat-square)](https://bundlephobia.com/package/modern-pdf-lib)
+[![bundle size](https://img.shields.io/badge/gzip-108kb_core-blue?style=flat-square)](https://bundlephobia.com/package/modern-pdf-lib)
 [![tests](https://img.shields.io/badge/tests-6%2C969_passing-brightgreen?style=flat-square)](#)
 [![TypeScript](https://img.shields.io/badge/TypeScript-7.0-3178c6?style=flat-square&logo=typescript&logoColor=white)](#)
 [![License: MIT](https://img.shields.io/badge/license-MIT-yellow?style=flat-square)](LICENSE)
@@ -138,8 +138,9 @@ For environments without ES module support, use the IIFE bundle which exposes a 
 - Incremental save with signature preservation
 - Multi-signature chains, MDP certification, LTV archival
 - Counter-signatures & field locking
-- PDF/A-1b through PDF/A-3u validation
-- Tagged PDF / PDF/UA accessibility
+- PDF/A-1b through PDF/A-3u validation, PDF/A-4/4e/4f
+- PDF/X-6, PDF/VT, Factur-X / ZUGFeRD e-invoicing
+- Tagged PDF / PDF/UA-1 & PDF/UA-2 accessibility
 - Structure tree & marked content
 - Redaction with content removal & overlay
 - PDF/UA validation & auto-enforcement
@@ -150,6 +151,9 @@ For environments without ES module support, use the IIFE bundle which exposes a 
 **Advanced**
 - QR codes & barcodes (9 formats)
 - Table layout engine with pagination
+- JSX / VDOM component renderer (`renderJsxToPdf`)
+- JSON Schema &rarr; AcroForm generation
+- Server adapters (`pdfResponse` for Workers/Deno/Bun/Node)
 - JPEG2000 (JPXDecode) image support
 - WebP image embedding (lossy, lossless, alpha)
 - TIFF image embedding (multi-page, CMYK, direct mapping)
@@ -234,7 +238,11 @@ For environments without ES module support, use the IIFE bundle which exposes a 
 <td align="center">Full</td></tr>
 
 <tr><td><strong>PDF/A compliance</strong></td>
-<td align="center">1a/1b through 3a/3b/3u</td>
+<td align="center">1a/1b through 3a/3b/3u + 4/4e/4f</td>
+<td align="center">No</td></tr>
+
+<tr><td><strong>JSX / VDOM rendering</strong></td>
+<td align="center">JSX runtime + component renderer</td>
 <td align="center">No</td></tr>
 
 <tr><td><strong>Accessibility (PDF/UA)</strong></td>
@@ -608,20 +616,28 @@ modern-pdf-lib/
   src/
     core/           PDF document model, objects, writer, pages
     parser/         PDF loading, text extraction, content streams
-    form/           AcroForm fields (7 types) + appearances
+    render/         Content-stream interpreter, rasterizer, Canvas, thumbnails, OCR, redaction
+    form/           AcroForm fields (7 types), appearances, JSON Schema forms
     annotation/     18 annotation types + appearance generators
-    accessibility/  Structure tree, marked content, PDF/UA checker
-    compliance/     PDF/A validation & enforcement
-    signature/      PKCS#7 signatures, timestamps, verification, CRL/OCSP
+    accessibility/  Structure tree, marked content, PDF/UA-1 & UA-2 checkers, auto-tagging
+    compliance/     PDF/A & PDF/X validation, PDF/A-4, Factur-X / e-invoicing
+    signature/      PKCS#7 signatures, timestamps, verification, CRL/OCSP, LTV
+    security/       Threat scanner, sanitizer, redaction verifier, encryption inspector
     crypto/         AES-256, RC4, MD5, SHA-256/384/512
     compression/    Deflate (fflate + optional WASM)
     assets/         Font metrics/embed/subset, image embed, SVG
+    text/           BiDi (UAX #9) text ordering
+    color/          Color conversion & ICC transforms
     barcode/        QR, Code 128, EAN, UPC, Code 39, ITF, PDF417, Data Matrix
-    layout/         Table engine (spanning, pagination, presets, overflow)
+    layout/         Tables, headers/footers, Knuth-Plass text layout, hyphenation
+    jsx/            JSX runtime + renderJsxToPdf component renderer
     browser/        Download helpers, Service Worker, Web Worker
+    runtime/        Server adapters, capability detection, memory budget
+    batch/          Batch processing with memory pressure handling
     layers/         Optional content groups (OCG)
     outline/        Bookmarks / document outline
     metadata/       XMP metadata, viewer preferences
+    plugins/        Plugin manager & hooks
     wasm/           Rust crate sources (6 modules)
     cli/            CLI tool (modern-pdf optimize)
   tests/            6,969 tests across 323 suites

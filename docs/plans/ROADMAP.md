@@ -1,6 +1,6 @@
 # modern-pdf-lib — Roadmap to 1.0.0
 
-> Granular, per-patch release plan from the current **0.28.0** through **1.0.0**.
+> Granular, per-patch release plan from **0.28.0** through **1.0.0** (current: **0.40.2** — everything through 0.40.x has shipped; see the CHANGELOG).
 > Versioning follows [`VERSIONING.md`](https://github.com/ABCrimson/modern-pdf-lib/blob/master/VERSIONING.md): patch `.0–.9`, then roll to the next minor.
 > Effort key: **S** ≤1 day · **M** a few days · **L** ~1–2 weeks · **XL** multi-week.
 
@@ -63,7 +63,7 @@ The bleeding-edge toolchain migration + code modernization.
 
 ---
 
-## 0.30.x — PDF 2.0 Core (ISO 32000-2)
+## 0.30.x — PDF 2.0 Core (ISO 32000-2) *(shipped in 0.30.0)*
 *The headline PDF 2.0 features no JS library ships.*
 
 | Version | Title | Detail | Effort |
@@ -81,7 +81,7 @@ The bleeding-edge toolchain migration + code modernization.
 
 ---
 
-## 0.31.x — Tagged PDF & Accessibility (PDF/UA-2)
+## 0.31.x — Tagged PDF & Accessibility (PDF/UA-2) *(shipped in 0.31.0)*
 | Version | Title | Detail | Effort |
 |---|---|---|---|
 | **0.31.0** | Structure-tree authoring core | Build StructTreeRoot/StructElem/ParentTree + BDC/EMC marked content (MCID) for generated content. | XL |
@@ -97,7 +97,7 @@ The bleeding-edge toolchain migration + code modernization.
 
 ---
 
-## 0.32.x — Next-Gen Standards & Validation
+## 0.32.x — Next-Gen Standards & Validation *(shipped in 0.32.0)*
 | Version | Title | Detail | Effort |
 |---|---|---|---|
 | **0.32.0** | Output-intent manager + ICC registry | Central ICC registry, OutputIntent dicts (GTS/CGATS), doc + page intents. | L |
@@ -113,7 +113,7 @@ The bleeding-edge toolchain migration + code modernization.
 
 ---
 
-## 0.33.x — E-Invoicing & Document Assembly
+## 0.33.x — E-Invoicing & Document Assembly *(shipped in 0.33.0)*
 | Version | Title | Detail | Effort |
 |---|---|---|---|
 | **0.33.0** | PDF/A-3 embedded-file core | `/EmbeddedFile` + `/AFRelationship` + Params(CheckSum/ModDate/Size) + EmbeddedFiles tree. | L |
@@ -129,7 +129,7 @@ The bleeding-edge toolchain migration + code modernization.
 
 ---
 
-## 0.34.x — Advanced Signatures (PAdES)
+## 0.34.x — Advanced Signatures (PAdES) *(shipped in 0.34.0)*
 | Version | Title | Detail | Effort |
 |---|---|---|---|
 | **0.34.0** | PAdES-B-B baseline | ETSI EN 319 142-1 CAdES-BES detached CMS (ETSI.CAdES.detached). | L |
@@ -145,7 +145,7 @@ The bleeding-edge toolchain migration + code modernization.
 
 ---
 
-## 0.35.x — Security & Sanitization
+## 0.35.x — Security & Sanitization *(shipped in 0.35.0)*
 | Version | Title | Detail | Effort |
 |---|---|---|---|
 | **0.35.0** | Public-key (certificate) encryption | Adobe.PubSec handler, PKCS#7 enveloped CMS per-recipient — opens with a private key. | XL |
@@ -161,7 +161,7 @@ The bleeding-edge toolchain migration + code modernization.
 
 ---
 
-## 0.36.x — Fonts, Text & Internationalization
+## 0.36.x — Fonts, Text & Internationalization *(shipped in 0.36.0)*
 | Version | Title | Detail | Effort |
 |---|---|---|---|
 | **0.36.0** | Unicode Bidi reordering core | UAX #9 embedding-level resolution + visual reordering — the shaping-pipeline foundation. | XL |
@@ -177,7 +177,7 @@ The bleeding-edge toolchain migration + code modernization.
 
 ---
 
-## 0.37.x — Graphics & Color
+## 0.37.x — Graphics & Color *(shipped in 0.37.0)*
 | Version | Title | Detail | Effort |
 |---|---|---|---|
 | **0.37.0** | PDF function objects (types 0/2/3/4) | Sampled, exponential, stitching, PostScript-calculator — shared eval core. | XL |
@@ -193,7 +193,7 @@ The bleeding-edge toolchain migration + code modernization.
 
 ---
 
-## 0.38.x — Imaging & Media
+## 0.38.x — Imaging & Media *(shipped in 0.38.0)*
 | Version | Title | Detail | Effort |
 |---|---|---|---|
 | **0.38.0** | Modern codec embed core | Unified RGBA/CMYK decode → Image XObject (ColorSpace/BPC/SMask/filters) backbone. | L |
@@ -209,7 +209,7 @@ The bleeding-edge toolchain migration + code modernization.
 
 ---
 
-## 0.39.x — Performance & Concurrency
+## 0.39.x — Performance & Concurrency *(shipped in 0.39.0)*
 | Version | Title | Detail | Effort |
 |---|---|---|---|
 | **0.39.0** | Worker-pool orchestrator | hardwareConcurrency-aware pool, task queue, transferable handoff, single-thread fallback. | L |
@@ -225,7 +225,7 @@ The bleeding-edge toolchain migration + code modernization.
 
 ---
 
-## 0.40.x — Developer Experience & Ecosystem
+## 0.40.x — Developer Experience & Ecosystem *(shipped in 0.40.0)*
 | Version | Title | Detail | Effort |
 |---|---|---|---|
 | **0.40.0** | Declarative VDOM-to-PDF core | Framework-agnostic reconciler: Document/Page/View/Text/Image → content streams. | XL |

@@ -197,4 +197,4 @@ await initWasm({
 - [Fonts](/guide/fonts) — Custom fonts, subsetting, and complex scripts
 - [Shapes](/guide/shapes) — Rectangles, circles, lines, and colors
 - [Streaming](/guide/streaming) — Memory-efficient output for large documents
-- [API Reference](/api/) — Full TypeDoc-generated reference
+- [API Reference](/api/) — TypeDoc-generated reference (snapshot from v0.28.1 — APIs added since are documented in the guides and the [CHANGELOG](https://github.com/ABCrimson/modern-pdf-lib/blob/master/CHANGELOG.md))

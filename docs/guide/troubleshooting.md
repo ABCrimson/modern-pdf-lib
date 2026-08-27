@@ -102,7 +102,7 @@ const bytes = await doc.save();
 ```
 
 > [!WARNING]
-> Standard fonts only support the WinAnsi (Latin-1) character set. If your text contains characters outside this set (CJK, Arabic, Cyrillic, emoji, etc.), you **must** embed a custom TrueType or OpenType font that contains those glyphs. See the [Fonts guide](./fonts) for details.
+> Standard fonts only support the WinAnsi (Latin-1) character set. If your text contains characters outside this set (CJK, Arabic, Cyrillic, emoji, etc.), you **must** embed a custom TrueType or OpenType font that contains those glyphs. See the [Fonts guide](./fonts.md) for details.
 
 ## 3. Coordinate Confusion
 

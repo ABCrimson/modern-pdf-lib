@@ -71,15 +71,22 @@ refactor: simplify encryption handler key derivation
 src/
   core/        PDF document model, pages, writer, embedding, merging
   parser/      PDF parser, image decoders (CCITT, JBIG2, JPEG2000)
+  render/      Content-stream interpreter, rasterizer, Canvas adapter, redaction
   crypto/      RC4 and AES encryption
   signature/   Digital signatures, PKCS#7, CRL/OCSP, LTV
-  form/        Interactive form fields, JavaScript evaluator
+  security/    Threat scanner, sanitizer, redaction verifier
+  form/        Interactive form fields, JavaScript evaluator, JSON Schema forms
   assets/      Font and image embedding (PNG, JPEG, WebP, TIFF)
+  text/        BiDi (UAX #9) text ordering
   barcode/     QR codes, Code 128, EAN, PDF417, Data Matrix
-  layout/      Table engine with pagination
-  compliance/  PDF/A enforcement
+  layout/      Tables, headers/footers, Knuth-Plass text layout, hyphenation
+  jsx/         JSX runtime + renderJsxToPdf component renderer
+  compliance/  PDF/A & PDF/X enforcement, e-invoicing (Factur-X)
+  runtime/     Server adapters, capability detection, memory budget
   wasm/        Rust WASM modules (libdeflate, png, ttf, shaping, jbig2, jpeg)
 ```
+
+See the [README's project structure](./README.md#project-structure) for the full module map.
 
 ## Questions?
 
