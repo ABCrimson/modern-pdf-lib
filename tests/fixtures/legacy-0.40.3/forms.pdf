@@ -1,0 +1,117 @@
+%PDF-1.7
+%âãÏÓ
+1 0 obj
+<<
+/Fields [4 0 R 5 0 R 6 0 R]
+/DR <<
+/Font <<
+/Helv <<
+/Type /Font
+/Subtype /Type1
+/BaseFont /Helvetica
+>>
+>>
+>>
+/DA (/Helv 0 Tf 0 g)
+/NeedAppearances true
+>>
+endobj
+4 0 obj
+<<
+/Type /Annot
+/Subtype /Widget
+/FT /Tx
+/T (name)
+/Rect [208 729.89 547.28 749.89]
+/DA (/Helv 0 Tf 0 g)
+/V (Ada Lovelace)
+>>
+endobj
+5 0 obj
+<<
+/Type /Annot
+/Subtype /Widget
+/FT /Btn
+/T (agree)
+/Rect [208 695.89 228 715.89]
+/V /Yes
+/AS /Yes
+>>
+endobj
+6 0 obj
+<<
+/Type /Annot
+/Subtype /Widget
+/FT /Ch
+/T (colour)
+/Rect [208 661.89 547.28 681.89]
+/Ff 131072
+/Opt [(red) (green) (blue)]
+/DA (/Helv 0 Tf 0 g)
+/V (green)
+>>
+endobj
+3 0 obj
+<<
+/Length 142
+/Filter /FlateDecode
+>>
+stream
+}ÍM
+Â0àı;Å[ª‹˜Äæ§Ku'hs¢iE‚ñú¦ØT´¥³˜ÅÇ<€b›PÃÆÀrÏi4d•Dçh®0+.7ëJ¬|ps4wØ8A¤Dşc–ğªÇÇÒY\\×ó!N/à4*·ÊÈáın è‹æÓ±OÊÒçºÖş^NR)U¢[ßøgøÚ7
+endstream
+endobj
+2 0 obj
+<<
+/Type /Page
+/Parent 7 0 R
+/MediaBox [0 0 595.28 841.89]
+/Contents 3 0 R
+/Resources <<
+/ProcSet [/PDF /Text /ImageB /ImageC /ImageI]
+>>
+/Annots [4 0 R 5 0 R 6 0 R]
+>>
+endobj
+7 0 obj
+<<
+/Type /Pages
+/Kids [2 0 R]
+/Count 1
+>>
+endobj
+8 0 obj
+<<
+/Type /Catalog
+/Pages 7 0 R
+/AcroForm 1 0 R
+>>
+endobj
+9 0 obj
+<<
+/Producer (modern-pdf-lib)
+/CreationDate (D:20261030120000Z)
+/ModDate (D:20261030120000Z)
+>>
+endobj
+xref
+0 10
+0000000000 65535 f 
+0000000015 00000 n 
+0000000838 00000 n 
+0000000624 00000 n 
+0000000190 00000 n 
+0000000331 00000 n 
+0000000449 00000 n 
+0000001022 00000 n 
+0000001079 00000 n 
+0000001144 00000 n 
+trailer
+<<
+/Size 10
+/Root 8 0 R
+/Info 9 0 R
+>>
+startxref
+1255
+%%EOF

@@ -1,0 +1,201 @@
+[
+  {
+    "file": "raw-deflate.pdf",
+    "sha256": "7fa2efc5b0ef712ade9f4cb2454f716051e6a58de40346a563bf4fc4e60f3717",
+    "bytes": 1380,
+    "producer": "modern-pdf-lib@0.40.3",
+    "api": "createPdf(); setTitle/setAuthor/setProducer/setCreationDate; addPage([612, 792]); drawText x21 per page; save()",
+    "inputs": {
+      "pages": ["Legacy page one", "Legacy page two"]
+    },
+    "expect": {
+      "pageCount": 2,
+      "info": {
+        "Title": "raw-deflate",
+        "Author": "legacy-0.40.3 generator"
+      },
+      "pageText": ["Legacy page one", "Legacy page two"]
+    },
+    "notes": "Flate streams are raw DEFLATE (no zlib header)."
+  },
+  {
+    "file": "raw-deflate-objstm.pdf",
+    "sha256": "a1ab81c04ff14ac5a08a7dee7e1804bc560da0d60124ed31dfee733395d33d3e",
+    "bytes": 1266,
+    "producer": "modern-pdf-lib@0.40.3",
+    "api": "same as raw-deflate.pdf; save({ objectStreamThreshold: 1 })",
+    "inputs": {
+      "pages": ["ObjStm page one", "ObjStm page two"]
+    },
+    "expect": {
+      "pageCount": 2,
+      "info": {
+        "Title": "raw-deflate-objstm",
+        "Author": "legacy-0.40.3 generator"
+      },
+      "pageText": ["ObjStm page one", "ObjStm page two"]
+    },
+    "notes": "Object stream and xref stream, raw DEFLATE."
+  },
+  {
+    "file": "encrypted-r6.pdf",
+    "sha256": "b0ca7ef7e482b33412796151738c0345a2db8b3be374c2d8961fadd9ccb2f66a",
+    "bytes": 1975,
+    "producer": "modern-pdf-lib@0.40.3",
+    "api": "same base document; await encrypt({ userPassword, ownerPassword, algorithm: 'aes-256' }); save()",
+    "inputs": {
+      "pages": ["Encrypted R6 page"],
+      "algorithm": "aes-256"
+    },
+    "expect": {
+      "pageCount": 1,
+      "info": {
+        "Title": "aes-256",
+        "Author": "legacy-0.40.3 generator"
+      },
+      "pageText": ["Encrypted R6 page"],
+      "encryption": {
+        "V": 5,
+        "R": 6,
+        "CFM": "AESV3",
+        "userPassword": "user-0403",
+        "ownerPassword": "owner-0403"
+      }
+    },
+    "notes": "Salts and IVs come from the pinned RNG: predictable, test fixtures only."
+  },
+  {
+    "file": "encrypted-r4.pdf",
+    "sha256": "256461417d99173f9c1ed7af6107dd5da132e0368415a36d27527d9d313b8a22",
+    "bytes": 1727,
+    "producer": "modern-pdf-lib@0.40.3",
+    "api": "same base document; await encrypt({ userPassword, ownerPassword, algorithm: 'aes-128' }); save()",
+    "inputs": {
+      "pages": ["Encrypted R4 page"],
+      "algorithm": "aes-128"
+    },
+    "expect": {
+      "pageCount": 1,
+      "info": {
+        "Title": "aes-128",
+        "Author": "legacy-0.40.3 generator"
+      },
+      "pageText": ["Encrypted R4 page"],
+      "encryption": {
+        "V": 4,
+        "R": 4,
+        "CFM": "AESV2",
+        "userPassword": "user-0403",
+        "ownerPassword": "owner-0403"
+      }
+    },
+    "notes": "Salts and IVs come from the pinned RNG: predictable, test fixtures only."
+  },
+  {
+    "file": "utf8-strings.pdf",
+    "sha256": "ffcdaf73ee21dd7d7450294e7fa9487f43beb508730c97ecf31fc73073dde993",
+    "bytes": 2242,
+    "producer": "modern-pdf-lib@0.40.3",
+    "api": "setTitle/setSubject/setKeywords with non-ASCII text; drawText with non-ASCII text; save({ compress: false })",
+    "inputs": {
+      "pages": ["Café naïve été"],
+      "keywords": ["été", "ascii"]
+    },
+    "expect": {
+      "pageCount": 1,
+      "info": {
+        "Title": "Café — 日本語 ✓",
+        "Author": "legacy-0.40.3 generator",
+        "Subject": "Übersicht äöü"
+      },
+      "pageText": ["Café naïve été"]
+    },
+    "notes": "Info strings and content-stream text are UTF-8 bytes in literal strings, no BOM."
+  },
+  {
+    "file": "linearized.pdf",
+    "sha256": "e7a648cf01c21e19d93c71a550441c74beb5eafe250825983b94dcae9d17bee3",
+    "bytes": 2113,
+    "producer": "modern-pdf-lib@0.40.3",
+    "api": "linearizePdf(await save())",
+    "inputs": {
+      "pages": ["Lin page one", "Lin page two", "Lin page three"]
+    },
+    "expect": {
+      "pageCount": 3,
+      "info": {
+        "Title": "linearized",
+        "Author": "legacy-0.40.3 generator"
+      },
+      "pageText": ["Lin page one", "Lin page two", "Lin page three"],
+      "linearized": true
+    }
+  },
+  {
+    "file": "forms.pdf",
+    "sha256": "1d73894d97c96b6cfe17b773ee0a7e5ba769c329f984715014e156cf048ec70d",
+    "bytes": 1533,
+    "producer": "modern-pdf-lib@0.40.3",
+    "api": "buildFormFromJsonSchema(schema, { title: 'Schema form' }).doc; getTextField('name').setText; getCheckbox('agree').check; getDropdown('colour').select; save()",
+    "inputs": {
+      "schema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "agree": {
+            "type": "boolean",
+            "title": "Agree"
+          },
+          "colour": {
+            "type": "string",
+            "enum": ["red", "green", "blue"],
+            "title": "Colour"
+          }
+        },
+        "required": ["name"]
+      },
+      "values": {
+        "name": "Ada Lovelace",
+        "agree": true,
+        "colour": "green"
+      }
+    },
+    "expect": {
+      "pageCount": 1,
+      "pageText": ["Schema form"],
+      "fields": {
+        "name": "Ada Lovelace",
+        "agree": true,
+        "colour": "green"
+      }
+    },
+    "notes": "buildFormFromJsonSchema is the only 0.40.3 path that writes /AcroForm: getForm().create* writes no /AcroForm and no widget."
+  },
+  {
+    "file": "signed.pdf",
+    "sha256": "0b7b76a8a4d6c5363f69d34380eada609ee4ece63a78cbfdb059872954a8100c",
+    "bytes": 17677,
+    "producer": "modern-pdf-lib@0.40.3",
+    "api": "signPdf(await save(), 'Signature1', { certificate, privateKey, reason, location })",
+    "inputs": {
+      "pages": ["Signed page"],
+      "certificateDerBase64": "MIICxDCCAaygAwIBAgIEAQIDBDANBgkqhkiG9w0BAQsFADAkMSIwIAYDVQQDDBlMZWdhY3kgMC40MC4zIFRlc3QgU2lnbmVyMB4XDTI2MDEwMTAwMDAwMFoXDTQ2MDEwMTAwMDAwMFowJDEiMCAGA1UEAwwZTGVnYWN5IDAuNDAuMyBUZXN0IFNpZ25lcjCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAJXvW+jHB/OOV9xndantBcfu2YqotnH4me5Fmuw0/ebvdKZyBZH38tUyb1LY3nE0ivmxorHut6KNb3I4QqaTgLoh3r1UC2LwizV7kG44cH68pkWxExrz4Z3odZE8QtGfFNMyty2mosku4Jn16Ckwezr9ZcJ6uPwc7HpPFlaEaZTqhlqsO42/P2FWJDMyZ3Q5yenwuwevLFt2PBMmCycjTO50d81N6W6TCXMdJ4SSEaceZgDvIDHsIynuMFmy9k6g9I3O35qqgDK45DHWLQigUqUFbCiSBDT+Cw5D0A2oISw7ifWYfL+4Kk+y6G40Lig5DKQ9vaM+gJyhrpxYb44vUxsCAwEAATANBgkqhkiG9w0BAQsFAAOCAQEAOAZFTkSidTyyZDtbzrQUQPAfVHdSOpAUSCf6M2eoO+5NC8LFcqgicX/TPeAh1hA03/4O6tySfjabYhRmqGFjRGUlrvIvLTMXo8y7f5SJuYhtczqdjiBnFfp1DpjXjA8Fu2GbDITpMe9xBUQAJ0MdTCSuTZ/U5w0+NheomOM7dTOlMrXJ49sBbODjdIudS0l6sGwF+cuGupKSqGr5f42b7c0HyMhbGRimzvsoeU9cwsUFOJfui3noQEpAfNRMy09Qo/YcesxtwcQwak/dlR3Y5Yhka2Y3MqWOvBldNXC0ff/s85koVoeJAUYcgUzlkA/bsu228AbHT8prq/gJxWVC3w=="
+    },
+    "expect": {
+      "pageCount": 1,
+      "info": {
+        "Title": "signed",
+        "Author": "legacy-0.40.3 generator"
+      },
+      "pageText": ["Signed page"],
+      "signature": {
+        "fieldName": "Signature1",
+        "subFilter": "adbe.pkcs7.detached"
+      }
+    },
+    "notes": "Self-signed test certificate, key in scripts/legacy-0.40.3/test-signer.json; one incremental update, no /AcroForm in the updated catalog."
+  }
+]
