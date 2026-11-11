@@ -42,6 +42,7 @@ import { buildDocumentStructure } from './pdfCatalog.js';
 import { serializePdf } from './pdfWriter.js';
 import type { PdfSaveOptions } from './pdfWriter.js';
 import { PdfStreamWriter } from './pdfStream.js';
+import { UnsupportedEncryptionError } from '../errors.js';
 import {
   getStandardFont,
   measureStandardText,
@@ -1686,7 +1687,9 @@ export class PdfDocument {
    *
    * When encryption is set, the document will be encrypted on the next
    * call to `save()`.  The /Encrypt dictionary and file ID are
-   * generated automatically.
+   * generated automatically.  `saveAsStream()` and the
+   * `objectStreamThreshold` save option throw `UnsupportedEncryptionError`
+   * for a document with encryption configured.
    *
    * @param options  Encryption options (passwords, permissions, algorithm).
    *
@@ -1694,11 +1697,11 @@ export class PdfDocument {
    * ```ts
    * const doc = createPdf();
    * doc.addPage();
-   * doc.encrypt({
+   * await doc.encrypt({
    *   userPassword: 'user123',
    *   ownerPassword: 'owner456',
    *   permissions: { printing: true, copying: false },
-   *   algorithm: 'aes-256',
+   *   algorithm: 'aes-128',
    * });
    * const bytes = await doc.save();
    * ```
@@ -1710,8 +1713,9 @@ export class PdfDocument {
   /**
    * Check whether this document has encryption configured.
    *
-   * Returns `true` if `encrypt()` has been called on this document,
-   * or if the document was loaded from an encrypted PDF.
+   * Returns `true` only after `encrypt()` has been called on this
+   * document.  Loading a PDF never sets it, so a document loaded from an
+   * encrypted file reports `false`.
    */
   isEncrypted(): boolean {
     return this.encryptionHandler !== undefined;
@@ -2411,10 +2415,20 @@ export class PdfDocument {
    * Serialize the document as a `ReadableStream<Uint8Array>`.
    *
    * Ideal for streaming responses in edge/serverless environments.
+   * The stream writer does not encrypt, so a document with encryption
+   * configured is refused before anything is changed or written.
    *
    * @param options  Compression and serialization options.
+   * @throws {UnsupportedEncryptionError} When encryption is configured
+   *         (`encrypt()` was called); use `save()` instead.
    */
   saveAsStream(options?: PdfSaveOptions): ReadableStream<Uint8Array> {
+    // Fail-closed guard: the stream writer does not encrypt, so an encrypted document is refused here.
+    if (this.encryptionHandler !== undefined) {
+      throw new UnsupportedEncryptionError(
+        'saveAsStream() cannot encrypt; the stream writer would emit plaintext. Use save() for an encrypted document.',
+      );
+    }
     if ((options?.addDefaultPage ?? true) && this.getPageCount() === 0) {
       this.addPage();
     }

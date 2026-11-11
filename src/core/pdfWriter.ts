@@ -21,7 +21,7 @@ import {
   isAvailable as isWasmDeflateAvailable,
   deflateSync as wasmDeflateSync,
 } from '../compression/libdeflateWasm.js';
-import type { PdfRef, PdfStream, ByteWriter } from './pdfObjects.js';
+import type { PdfRef, ByteWriter } from './pdfObjects.js';
 import {
   PdfObjectRegistry,
   PdfNumber,
@@ -29,10 +29,12 @@ import {
   PdfDict,
   PdfArray,
   PdfString,
+  PdfStream,
 } from './pdfObjects.js';
-import type { RegistryEntry } from './pdfObjects.js';
+import type { PdfObject, RegistryEntry } from './pdfObjects.js';
 import type { DocumentStructure } from './pdfCatalog.js';
 import type { PdfEncryptionHandler } from '../crypto/encryptionHandler.js';
+import { UnsupportedEncryptionError } from '../errors.js';
 
 // ---------------------------------------------------------------------------
 // Save options
@@ -60,6 +62,8 @@ export interface PdfSaveOptions {
    *
    * Set to `Infinity` to disable object streams (traditional xref).
    * A useful value for size reduction is `100`.
+   * Any other value combined with encryption (`doc.encrypt()`) throws
+   * `UnsupportedEncryptionError`.
    *
    * Default: `Infinity` (disabled for backward compatibility).
    */
@@ -122,7 +126,7 @@ const encoder = new TextEncoder();
  *
  * ```ts
  * const writer = new PdfWriter(registry, structure, options);
- * const bytes = writer.write();
+ * const bytes = await writer.write();
  * ```
  */
 export class PdfWriter {
@@ -134,15 +138,28 @@ export class PdfWriter {
   private readonly objectStreamThreshold: number;
   private readonly encryptionHandler: PdfEncryptionHandler | undefined;
 
+  /** The caller's registry. */
+  private readonly source: PdfObjectRegistry;
+
+  /**
+   * The registry the writer serializes.  Without encryption it is the
+   * caller's registry (streams are compressed in place).  With an
+   * encryption handler, write() serializes a private copy taken when it
+   * starts, so compression, encryption and the /Encrypt registration never
+   * change the caller's objects and a later save encrypts nothing twice.
+   */
+  private registry: PdfObjectRegistry;
+
   /**
    * When encryption is active, the /Encrypt dict is registered as an
-   * indirect object.  Its reference is stored here for the trailer.
+   * indirect object in the writer's private copy of the registry.  Its
+   * reference is stored here for the trailer.
    */
   private encryptDictRef: PdfRef | undefined;
 
   constructor(
     /** All indirect objects. */
-    private readonly registry: PdfObjectRegistry,
+    registry: PdfObjectRegistry,
     /** Document structure references. */
     private readonly structure: DocumentStructure,
     options?: PdfSaveOptions,
@@ -153,6 +170,8 @@ export class PdfWriter {
     this.useWasm = options?.useWasm ?? false;
     this.objectStreamThreshold = options?.objectStreamThreshold ?? Infinity;
     this.encryptionHandler = encryptionHandler;
+    this.source = registry;
+    this.registry = registry;
   }
 
   // -----------------------------------------------------------------------
@@ -162,11 +181,25 @@ export class PdfWriter {
   /**
    * Produce the complete PDF file as a `Uint8Array`.
    *
-   * When an encryption handler is present, all string and stream
-   * objects are encrypted and the /Encrypt dictionary + /ID array
-   * are added to the trailer.
+   * When an encryption handler is present, every string (inside
+   * dictionaries, arrays and stream dictionaries, and indirect strings)
+   * and all stream data are encrypted, except the /Encrypt dictionary
+   * itself, and the /Encrypt dictionary + /ID array are added to the
+   * trailer.  All of that happens on a private copy of the registry taken
+   * when write() starts; the caller's registry is left as it was.
+   *
+   * @throws {UnsupportedEncryptionError} When an encryption handler is
+   *         present and `objectStreamThreshold` is not `Infinity`.
    */
   async write(): Promise<Uint8Array> {
+    // Fail-closed guard: object streams are not encrypted, so an encrypted document with them is refused here.
+    if (this.encryptionHandler !== undefined && this.objectStreamThreshold !== Infinity) {
+      throw new UnsupportedEncryptionError(
+        'objectStreamThreshold cannot be combined with encryption; objects packed into an object stream would not be encrypted. Omit objectStreamThreshold for an encrypted document.',
+      );
+    }
+    this.registry = this.encryptionHandler ? copyRegistryForWrite(this.source) : this.source;
+
     // If encryption is configured, register the /Encrypt dict as an
     // indirect object so we can reference it from the trailer.
     if (this.encryptionHandler) {
@@ -280,10 +313,12 @@ export class PdfWriter {
       stream.data = await handler.encryptObject(objNum, genNum, stream.data);
       stream.syncLength();
     } else if (entry.object.kind === 'dict') {
-      await this.encryptDictStrings(entry.object as PdfDict, objNum, genNum);
+      await this.encryptDictStrings(entry.object, objNum, genNum);
+    } else if (entry.object.kind === 'array') {
+      await this.encryptArrayStrings(entry.object, objNum, genNum);
+    } else if (entry.object.kind === 'string') {
+      entry.object = await handler.encryptString(objNum, genNum, entry.object);
     }
-    // Individual PdfString objects at the top level of an indirect
-    // object are rare but handled by the dict/array traversal.
   }
 
   /**
@@ -798,6 +833,50 @@ function writeIntBE(buf: Uint8Array, offset: number, width: number, value: numbe
 }
 
 // ---------------------------------------------------------------------------
+// Private registry copy for encrypted writes
+// ---------------------------------------------------------------------------
+
+/**
+ * Copy containers (dicts, arrays, streams) so that encryption never writes
+ * into the caller's objects.  Strings, names, numbers, booleans, null and
+ * refs are immutable and shared.  Stream `data` buffers are shared too: the
+ * writer only ever replaces `stream.data`, it never writes into the buffer.
+ */
+function copyObject(obj: PdfObject): PdfObject {
+  switch (obj.kind) {
+    case 'dict':
+      return copyDict(obj);
+    case 'array':
+      return new PdfArray(obj.items.map(copyObject));
+    case 'stream':
+      return new PdfStream(copyDict(obj.dict), obj.data);
+    default:
+      return obj;
+  }
+}
+
+function copyDict(dict: PdfDict): PdfDict {
+  return new PdfDict([...dict].map(([key, value]) => [key, copyObject(value)] as const));
+}
+
+/**
+ * Copy a registry for one encrypted write.  Replaying the entries with
+ * `registerWithRef` keeps their order and any repeated object numbers;
+ * the `allocate()` loop restores numbers that were allocated but never
+ * assigned, so `/Size` and the /Encrypt object number match the source.
+ */
+function copyRegistryForWrite(source: PdfObjectRegistry): PdfObjectRegistry {
+  const copy = new PdfObjectRegistry();
+  for (const entry of source) {
+    copy.registerWithRef(entry.ref, copyObject(entry.object));
+  }
+  while (copy.nextNumber < source.nextNumber) {
+    copy.allocate();
+  }
+  return copy;
+}
+
+// ---------------------------------------------------------------------------
 // Convenience: one-shot serialization
 // ---------------------------------------------------------------------------
 
@@ -811,6 +890,8 @@ function writeIntBE(buf: Uint8Array, offset: number, width: number, value: numbe
  *                            all objects and adding /Encrypt + /ID to
  *                            the trailer.
  * @returns                   The raw PDF bytes.
+ * @throws {UnsupportedEncryptionError} When `encryptionHandler` is given
+ *         together with an `objectStreamThreshold` other than `Infinity`.
  */
 export async function serializePdf(
   registry: PdfObjectRegistry,

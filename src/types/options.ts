@@ -47,6 +47,8 @@ export interface PdfSaveOptions {
    *
    * Set to `Infinity` to disable object streams (traditional xref).
    * A useful value for size reduction is `100`.
+   * Any other value combined with encryption (`doc.encrypt()`) throws
+   * `UnsupportedEncryptionError`.
    *
    * Default: `Infinity` (disabled for backward compatibility).
    */

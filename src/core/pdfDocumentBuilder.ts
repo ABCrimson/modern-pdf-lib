@@ -265,6 +265,8 @@ export class PdfDocumentBuilder {
    * Configure encryption for this document.
    *
    * The encryption is applied when {@link save} serializes the document.
+   * Saving an encrypted document with `objectStreamThreshold` set to any
+   * value other than `Infinity` throws `UnsupportedEncryptionError`.
    *
    * @param options  Encryption options (passwords, algorithm, permissions).
    */

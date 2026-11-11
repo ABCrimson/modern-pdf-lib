@@ -8,7 +8,9 @@
  * works in browsers, Deno, Cloudflare Workers, and Node 18+.
  *
  * Reference: same PDF structure as {@link PdfWriter} but written chunk
- * by chunk through a `TransformStream`.
+ * by chunk through a `TransformStream`.  The stream writer does not
+ * encrypt; `PdfDocument.saveAsStream()` refuses a document with
+ * encryption configured.
  */
 
 import { deflateSync as fflateDeflateSync } from 'fflate';
