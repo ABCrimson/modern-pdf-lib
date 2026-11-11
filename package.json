@@ -5,39 +5,49 @@
   "type": "module",
   "exports": {
     ".": {
-      "types": "./dist/index.d.mts",
-      "import": "./dist/index.mjs",
+      "import": {
+        "types": "./dist/index.d.mts",
+        "default": "./dist/index.mjs"
+      },
       "require": {
         "types": "./dist/index.d.cts",
         "default": "./dist/index.cjs"
       }
     },
-    "./browser": {
-      "types": "./dist/browser.d.mts",
-      "import": "./dist/browser.mjs"
-    },
     "./create": {
-      "types": "./dist/create.d.mts",
-      "import": "./dist/create.mjs",
+      "import": {
+        "types": "./dist/create.d.mts",
+        "default": "./dist/create.mjs"
+      },
       "require": {
         "types": "./dist/create.d.cts",
         "default": "./dist/create.cjs"
       }
     },
     "./parse": {
-      "types": "./dist/parse.d.mts",
-      "import": "./dist/parse.mjs",
+      "import": {
+        "types": "./dist/parse.d.mts",
+        "default": "./dist/parse.mjs"
+      },
       "require": {
         "types": "./dist/parse.d.cts",
         "default": "./dist/parse.cjs"
       }
     },
     "./forms": {
-      "types": "./dist/forms.d.mts",
-      "import": "./dist/forms.mjs",
+      "import": {
+        "types": "./dist/forms.d.mts",
+        "default": "./dist/forms.mjs"
+      },
       "require": {
         "types": "./dist/forms.d.cts",
         "default": "./dist/forms.cjs"
+      }
+    },
+    "./browser": {
+      "import": {
+        "types": "./dist/browser.d.mts",
+        "default": "./dist/browser.mjs"
       }
     },
     "./wasm/*": "./dist/wasm/*"
@@ -49,14 +59,12 @@
   "module": "./dist/index.mjs",
   "unpkg": "./dist/browser.mjs",
   "jsdelivr": "./dist/browser.mjs",
-  "types": "./dist/index.d.mts",
+  "types": "./dist/index.d.cts",
   "files": [
     "dist/**/*.mjs",
     "dist/**/*.cjs",
     "dist/**/*.d.mts",
     "dist/**/*.d.cts",
-    "dist/**/*.d.mts.map",
-    "dist/**/*.d.cts.map",
     "dist/modern-pdf-lib.iife.js",
     "dist/wasm/**",
     "LICENSE",
@@ -67,12 +75,13 @@
   },
   "sideEffects": false,
   "scripts": {
-    "build": "tsdown && node scripts/finalize-dts.mjs && node scripts/smoke-dist.mjs",
+    "build": "tsdown && node scripts/build-iife.ts && node scripts/smoke-dist.mjs",
     "smoke": "node scripts/smoke-dist.mjs",
-    "build:iife": "tsx scripts/build-iife.ts",
+    "build:iife": "node scripts/build-iife.ts",
     "build:wasm": "bash scripts/build-wasm.sh",
-    "build:all": "npm run build:wasm && npm run build && npm run build:iife && npm run copy:wasm",
-    "copy:wasm": "bash -c 'mkdir -p dist/wasm && for d in src/wasm/*/pkg; do crate=$(basename $(dirname $d)); mkdir -p dist/wasm/$crate && cp $d/*.wasm $d/*.js $d/*.d.ts dist/wasm/$crate/ 2>/dev/null || true; done'",
+    "build:all": "pnpm run build:wasm && pnpm run build && pnpm run copy:wasm",
+    "copy:wasm": "node scripts/copy-wasm.mjs",
+    "check:pack": "node scripts/check-pack.mjs",
     "dev": "vite",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -80,42 +89,42 @@
     "test:e2e": "playwright test",
     "test:bench": "vitest bench",
     "bench": "tsx tests/benchmarks/run.ts",
-    "lint": "oxlint --type-aware src tests",
-    "lint:fix": "oxlint --type-aware --fix src tests",
-    "format": "prettier --write \"{src,tests,scripts}/**/*.ts\"",
-    "format:check": "prettier --check \"{src,tests,scripts}/**/*.ts\"",
-    "typecheck": "tsc --noEmit",
-    "prepublishOnly": "npm run typecheck && npm run build",
+    "lint": "oxlint src tests",
+    "lint:fix": "oxlint --fix src tests",
+    "format": "oxfmt src tests scripts",
+    "format:check": "oxfmt --check src tests scripts",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.cli.json && tsc -p tsconfig.scripts.json",
+    "typecheck:tests": "tsc -p tsconfig.tests.json",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
-    "docs:api": "node tools/docs/node_modules/typedoc/bin/typedoc && tsx scripts/sanitize-api-docs.ts",
-    "validate-pdf": "tsx scripts/validate-pdf.ts",
-    "generate:wasm-inline": "tsx scripts/generate-inline-wasm.ts",
-    "clean": "rm -rf dist coverage"
+    "docs:api": "node tools/docs/node_modules/typedoc/bin/typedoc && node scripts/sanitize-api-docs.ts",
+    "validate-pdf": "node scripts/validate-pdf.ts",
+    "generate:wasm-inline": "node scripts/generate-inline-wasm.ts",
+    "clean": "node -e \"for (const d of ['dist','coverage']) require('node:fs').rmSync(d,{recursive:true,force:true})\""
   },
   "dependencies": {
     "fflate": "0.8.3"
   },
   "devDependencies": {
-    "@playwright/test": "1.63.0-alpha-2026-08-27",
-    "@vitest/coverage-v8": "5.0.0-rc.2",
+    "@arethetypeswrong/cli": "0.18.5",
+    "@playwright/test": "1.66.0-alpha-2026-11-11",
+    "@types/node": "26.6.6",
+    "@vitest/coverage-v8": "5.1.0",
     "esbuild": "0.28.2",
-    "fast-png": "8.0.0",
-    "miniflare": "5.20260826.0-alpha",
-    "oxlint": "1.80.0",
-    "oxlint-tsgolint": "7.0.2001",
+    "oxfmt": "0.78.0",
+    "oxlint": "1.93.0",
+    "oxlint-tsgolint": "7.0.2006",
     "pdf-lib": "1.17.1",
-    "prettier": "4.0.0-alpha.13",
-    "rollup": "4.63.0",
-    "tsdown": "0.23.0-rc.0",
-    "tsx": "4.23.12",
-    "typedoc": "0.28.20",
-    "typedoc-plugin-markdown": "4.13.0",
-    "typescript": "7.0.2",
-    "vite": "8.2.2",
-    "vitepress": "2.0.0-alpha.19",
-    "vitest": "5.0.0-rc.2",
-    "wasm-pack": "0.15.0"
+    "publint": "0.3.25",
+    "tinybench": "6.2.3",
+    "tsdown": "0.23.7",
+    "tsx": "4.23.15",
+    "typescript": "7.1.0-dev.20261111.1",
+    "vite": "8.3.8",
+    "vitepress": "2.0.0-alpha.21",
+    "vitest": "5.1.0",
+    "vue": "3.6.0-rc.14",
+    "wasm-pack": "0.15.1"
   },
   "keywords": [
     "pdf",
@@ -139,5 +148,13 @@
   "homepage": "https://github.com/ABCrimson/modern-pdf-lib#readme",
   "bugs": {
     "url": "https://github.com/ABCrimson/modern-pdf-lib/issues"
+  },
+  "packageManager": "pnpm@12.19.0",
+  "devEngines": {
+    "runtime": {
+      "name": "node",
+      "version": "28.0.0-nightly20261111e8c1160d20",
+      "onFail": "download"
+    }
   }
 }

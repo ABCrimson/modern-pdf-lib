@@ -13,10 +13,11 @@
  * At runtime, the inline WASM loader decodes these constants on demand,
  * avoiding any filesystem or network access.
  *
- * Usage:
- *   npx tsx scripts/generate-inline-wasm.ts
+ * Usage (Node runs the TypeScript file directly):
+ *   pnpm run generate:wasm-inline
+ *   node scripts/generate-inline-wasm.ts
  *
- * This is registered as `npm run generate:wasm-inline` in package.json.
+ * `generate:wasm-inline` is registered in package.json.
  */
 
 import { readFile, writeFile, access } from 'node:fs/promises';

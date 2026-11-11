@@ -1,0 +1,19 @@
+{
+  "holds": [
+    {
+      "kind": "npm",
+      "name": "typescript",
+      "file": "tools/docs/package.json",
+      "pin": "6.0.3",
+      "reason": "Held on 2026-11-11: the newest typedoc (0.28.20, no release since 2026-07-05; dist-tags latest) peers typescript 5.0.x through 6.0.x only, so TypeScript 7 cannot load it (typedoc-plugin-markdown 4.14.1 peers typedoc only, not typescript); docs:api resolves TypeScript 6.0.3 (the newest 6.x) from this sidecar while the root package runs 7.1.0-dev.20261111.1.",
+      "evidence": "https://github.com/TypeStrong/typedoc/issues/3098 (open, last updated 2026-10-28, checked 2026-11-11); pnpm view typedoc@0.28.20 peerDependencies = { typescript: '5.0.x || ... || 5.9.x || 6.0.x' }; typedoc master package.json peerDependencies.typescript has the same range (checked 2026-11-11); pnpm view typedoc dist-tags = { latest: '0.28.20', beta: '0.28.0-beta.2' }; pnpm view typedoc-plugin-markdown@4.14.1 peerDependencies = { typedoc: ... } (no typescript peer, re-checked 2026-11-11T06:15Z)."
+    },
+    {
+      "kind": "action",
+      "name": "dtolnay/rust-toolchain",
+      "pin": "master",
+      "reason": "Held on 2026-11-11: the action's only release tag is v1; a dated nightly toolchain input (rust-toolchain.toml pins a nightly-YYYY-MM-DD date) must be passed as the toolchain input with dtolnay/rust-toolchain@master, because the action otherwise derives the toolchain from the @rev (stable, beta, nightly, 1.x.y), so the sweep's 'beta -> v1' suggestion does not apply.",
+      "evidence": "https://github.com/dtolnay/rust-toolchain README (master, read 2026-11-11): 'When passing an explicit toolchain as an input instead of @rev, you'll want to use \"dtolnay/rust-toolchain@master\" as the revision of the action.'; GitHub tags API for dtolnay/rust-toolchain lists v1 only (2026-11-11)."
+    }
+  ]
+}

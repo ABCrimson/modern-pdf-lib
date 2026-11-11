@@ -1,0 +1,42 @@
+# pnpm 12 workspace settings (pnpm.io/settings). The root package is the workspace root;
+# tools/docs is the isolated TypeScript 6 typedoc sidecar (see its package.json).
+packages:
+  - tools/docs
+
+# Supply-chain delay: a version must be at least 24 h old (minutes). Never lower this;
+# add an exact name@version to minimumReleaseAgeExclude instead.
+minimumReleaseAge: 1440
+# Exact pins younger than 1440 min on 2026-11-11, when they were adopted: vite 8.3.8
+# (published 02:49Z, ~170 min), the TypeScript 7.1 dev build (published 2026-11-11 08:45Z,
+# ~7 h) with its seven per-platform native packages, and the Playwright 1.66.0-alpha-2026-11-11
+# trio (playwright-core published 06:10Z). These entries go stale on the next bump;
+# drop each one once its version is older than 24 h.
+minimumReleaseAgeExclude:
+  - 'vite@8.3.8'
+  - '@playwright/test@1.66.0-alpha-2026-11-11'
+  - 'playwright@1.66.0-alpha-2026-11-11'
+  - 'playwright-core@1.66.0-alpha-2026-11-11'
+  - 'typescript@7.1.0-dev.20261111.1'
+  - '@typescript/typescript-darwin-arm64@7.1.0-dev.20261111.1'
+  - '@typescript/typescript-darwin-x64@7.1.0-dev.20261111.1'
+  - '@typescript/typescript-linux-arm64@7.1.0-dev.20261111.1'
+  - '@typescript/typescript-linux-arm@7.1.0-dev.20261111.1'
+  - '@typescript/typescript-linux-x64@7.1.0-dev.20261111.1'
+  - '@typescript/typescript-win32-arm64@7.1.0-dev.20261111.1'
+  - '@typescript/typescript-win32-x64@7.1.0-dev.20261111.1'
+
+# Dependency build scripts are reviewed, not trusted: unlisted packages fail the install.
+strictDepBuilds: true
+# esbuild: native-binary postinstall (scripts/build-iife.ts); wasm-pack: postinstall downloads the 0.15.1 binary.
+allowBuilds:
+  esbuild: true
+  wasm-pack: true
+
+# One Vue runtime for vitepress and docs/.vitepress/components (PdfPlayground.vue imports vue).
+overrides:
+  vue: 3.6.0-rc.14
+
+# Agent skills shipped by dependencies are denied: this repo wires none into an agent (tsdown 0.23.7 ships a skills/ folder, pnpm 12.19 lists it as awaiting approval).
+permissions:
+  tsdown:
+    skills: false

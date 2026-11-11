@@ -1,0 +1,7 @@
+# Pinned dated nightly: every Rust gate (cargo check, clippy, wasm-pack) resolves
+# to this exact compiler via rustup. Bump the date together with CI.
+[toolchain]
+channel = "nightly-2026-11-11"
+components = ["clippy", "rustfmt"]
+targets = ["wasm32-unknown-unknown"]
+profile = "minimal"

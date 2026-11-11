@@ -1,6 +1,6 @@
 /**
  * Generate test fixture files: sample.png, sample-rgba.png, sample.jpg
- * Run with: npx tsx scripts/gen-fixtures.ts
+ * Run with: pnpm exec tsx scripts/gen-fixtures.ts
  */
 import { zlibSync } from 'fflate';
 import { writeFile } from 'node:fs/promises';

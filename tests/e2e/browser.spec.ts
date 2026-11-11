@@ -169,7 +169,7 @@ test.describe('Browser PDF creation', () => {
   // built-in PDF viewer, and compare screenshots against golden images.
   //
   // To generate/update golden images:
-  //   npx playwright test --update-snapshots --project=chromium
+  //   pnpm exec playwright test --update-snapshots --project=chromium
   //
   // Only run on Chromium — other browsers have different PDF renderers
   // that produce visually different output.

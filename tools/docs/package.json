@@ -1,10 +1,10 @@
 {
   "name": "modern-pdf-lib-docs-tooling",
   "private": true,
-  "description": "Isolated TypeScript 6 sidecar for typedoc. TypeScript 7 (tsgo) dropped the JS compiler-API exports, and typedoc has no TS7-compatible path until ~7.1 — so the docs:api step resolves `typescript` from THIS folder (pinned to 6.x) instead of the project's bleeding-edge TS7.",
+  "description": "Isolated TypeScript 6 sidecar for typedoc. HELD on typescript 6.0.3: the newest typedoc (0.28.20) peers typescript 5.0.x-6.0.x only and has no TypeScript 7 release (TypeStrong/typedoc#3098), so docs:api resolves typescript from THIS folder instead of the root TypeScript 7.x.",
   "devDependencies": {
-    "typescript": "6.0.3",
     "typedoc": "0.28.20",
-    "typedoc-plugin-markdown": "4.13.0"
+    "typedoc-plugin-markdown": "4.14.1",
+    "typescript": "6.0.3"
   }
 }

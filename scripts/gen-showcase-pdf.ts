@@ -1,6 +1,6 @@
 /**
  * Generate a comprehensive showcase PDF that exercises every feature.
- * Run with: npx tsx scripts/gen-showcase-pdf.ts
+ * Run with: pnpm exec tsx scripts/gen-showcase-pdf.ts
  */
 import { createPdf, PageSizes, rgb, degrees } from '../src/index.js';
 import { readFile, writeFile } from 'node:fs/promises';

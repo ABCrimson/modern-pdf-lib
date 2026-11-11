@@ -430,12 +430,12 @@ describe('verifySignature', () => {
     expect(result).toBe(false);
   });
 
-  it('should return false for random garbage as signature', async () => {
+  it('should return false for fixed garbage as signature', async () => {
     const pdfBytes = createMinimalPdf();
     const byteRange: [number, number, number, number] = [0, 50, 100, 50];
 
-    const garbage = new Uint8Array(128);
-    globalThis.crypto.getRandomValues(garbage);
+    // Fixed bytes keep this test deterministic.
+    const garbage = new Uint8Array(128).fill(0x5a);
 
     const result = await verifySignature(
       pdfBytes,
