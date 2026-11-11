@@ -12,10 +12,7 @@ export {
   annotationFromDict,
   buildAnnotationDict,
 } from './pdfAnnotation.js';
-export type {
-  AnnotationType,
-  AnnotationOptions,
-} from './pdfAnnotation.js';
+export type { AnnotationType, AnnotationOptions } from './pdfAnnotation.js';
 
 // Text (sticky note)
 export { PdfTextAnnotation } from './types/textAnnotation.js';

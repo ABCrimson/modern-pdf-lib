@@ -96,9 +96,7 @@ describe('setPageLabels', () => {
 
   it('sets labels with a prefix', () => {
     const doc = createDocWithPages(5);
-    setPageLabels(doc, [
-      { startPage: 0, style: 'decimal', prefix: 'A-' },
-    ]);
+    setPageLabels(doc, [{ startPage: 0, style: 'decimal', prefix: 'A-' }]);
 
     const labels = getPageLabels(doc);
     expect(labels![0]!.prefix).toBe('A-');
@@ -106,9 +104,7 @@ describe('setPageLabels', () => {
 
   it('sets labels with a custom start value', () => {
     const doc = createDocWithPages(5);
-    setPageLabels(doc, [
-      { startPage: 0, style: 'decimal', start: 10 },
-    ]);
+    setPageLabels(doc, [{ startPage: 0, style: 'decimal', start: 10 }]);
 
     const labels = getPageLabels(doc);
     expect(labels![0]!.start).toBe(10);
@@ -143,9 +139,7 @@ describe('setPageLabels', () => {
 
   it('throws on empty labels array', () => {
     const doc = createDocWithPages(1);
-    expect(() => setPageLabels(doc, [])).toThrow(
-      'Page labels array must not be empty',
-    );
+    expect(() => setPageLabels(doc, [])).toThrow('Page labels array must not be empty');
   });
 
   it('throws on unsorted ranges', () => {
@@ -176,22 +170,20 @@ describe('setPageLabels', () => {
 describe('setPageLabels validation', () => {
   it('throws RangeError on negative startPage', () => {
     const doc = createDocWithPages(5);
-    expect(() =>
-      setPageLabels(doc, [{ startPage: -1, style: 'decimal' }]),
-    ).toThrow(RangeError);
-    expect(() =>
-      setPageLabels(doc, [{ startPage: -1, style: 'decimal' }]),
-    ).toThrow('startPage must be non-negative');
+    expect(() => setPageLabels(doc, [{ startPage: -1, style: 'decimal' }])).toThrow(RangeError);
+    expect(() => setPageLabels(doc, [{ startPage: -1, style: 'decimal' }])).toThrow(
+      'startPage must be non-negative',
+    );
   });
 
   it('throws RangeError on negative start value', () => {
     const doc = createDocWithPages(5);
-    expect(() =>
-      setPageLabels(doc, [{ startPage: 0, style: 'decimal', start: -5 }]),
-    ).toThrow(RangeError);
-    expect(() =>
-      setPageLabels(doc, [{ startPage: 0, style: 'decimal', start: -5 }]),
-    ).toThrow('start must be non-negative');
+    expect(() => setPageLabels(doc, [{ startPage: 0, style: 'decimal', start: -5 }])).toThrow(
+      RangeError,
+    );
+    expect(() => setPageLabels(doc, [{ startPage: 0, style: 'decimal', start: -5 }])).toThrow(
+      'start must be non-negative',
+    );
   });
 
   it('throws RangeError on negative startPage in a later range', () => {
@@ -339,9 +331,7 @@ describe('PDF structure', () => {
 
   it('includes prefix in saved PDF', async () => {
     const doc = createDocWithPages(3);
-    setPageLabels(doc, [
-      { startPage: 0, style: 'decimal', prefix: 'Ch-' },
-    ]);
+    setPageLabels(doc, [{ startPage: 0, style: 'decimal', prefix: 'Ch-' }]);
 
     const bytes = await doc.save({ addDefaultPage: false });
     const text = new TextDecoder('latin1').decode(bytes);
@@ -380,9 +370,7 @@ describe('large page counts', () => {
     // range with the style and start value.  The viewer decides how to
     // display values > 3999.
     const doc = createDocWithPages(2);
-    setPageLabels(doc, [
-      { startPage: 0, style: 'Roman', start: 4000 },
-    ]);
+    setPageLabels(doc, [{ startPage: 0, style: 'Roman', start: 4000 }]);
 
     const labels = getPageLabels(doc);
     expect(labels![0]!.start).toBe(4000);
@@ -391,9 +379,7 @@ describe('large page counts', () => {
 
   it('accepts lowercase roman style with start > 3999', () => {
     const doc = createDocWithPages(2);
-    setPageLabels(doc, [
-      { startPage: 0, style: 'roman', start: 5000 },
-    ]);
+    setPageLabels(doc, [{ startPage: 0, style: 'roman', start: 5000 }]);
 
     const labels = getPageLabels(doc);
     expect(labels![0]!.start).toBe(5000);
@@ -402,9 +388,7 @@ describe('large page counts', () => {
   it('handles a document with many pages and Roman labels', () => {
     // Create a document with enough pages that the range would span >3999
     const doc = createDocWithPages(10);
-    setPageLabels(doc, [
-      { startPage: 0, style: 'Roman' },
-    ]);
+    setPageLabels(doc, [{ startPage: 0, style: 'Roman' }]);
 
     const labels = getPageLabels(doc);
     expect(labels).toHaveLength(1);
@@ -413,9 +397,7 @@ describe('large page counts', () => {
 
   it('handles very large start values', () => {
     const doc = createDocWithPages(2);
-    setPageLabels(doc, [
-      { startPage: 0, style: 'decimal', start: 999_999 },
-    ]);
+    setPageLabels(doc, [{ startPage: 0, style: 'decimal', start: 999_999 }]);
 
     const labels = getPageLabels(doc);
     expect(labels![0]!.start).toBe(999_999);
@@ -423,9 +405,7 @@ describe('large page counts', () => {
 
   it('serializes large start values into the PDF', async () => {
     const doc = createDocWithPages(2);
-    setPageLabels(doc, [
-      { startPage: 0, style: 'decimal', start: 10_000 },
-    ]);
+    setPageLabels(doc, [{ startPage: 0, style: 'decimal', start: 10_000 }]);
 
     const bytes = await doc.save({ addDefaultPage: false });
     const text = new TextDecoder('latin1').decode(bytes);
@@ -453,9 +433,7 @@ describe('mixed prefix scenarios', () => {
 
   it('supports multi-character prefix strings', () => {
     const doc = createDocWithPages(5);
-    setPageLabels(doc, [
-      { startPage: 0, style: 'decimal', prefix: 'Section-' },
-    ]);
+    setPageLabels(doc, [{ startPage: 0, style: 'decimal', prefix: 'Section-' }]);
 
     const labels = getPageLabels(doc);
     expect(labels![0]!.prefix).toBe('Section-');
@@ -463,9 +441,7 @@ describe('mixed prefix scenarios', () => {
 
   it('supports empty string prefix', () => {
     const doc = createDocWithPages(3);
-    setPageLabels(doc, [
-      { startPage: 0, style: 'decimal', prefix: '' },
-    ]);
+    setPageLabels(doc, [{ startPage: 0, style: 'decimal', prefix: '' }]);
 
     const labels = getPageLabels(doc);
     expect(labels![0]!.prefix).toBe('');
@@ -507,9 +483,7 @@ describe('mixed prefix scenarios', () => {
 describe('start value of 0', () => {
   it('stores start = 0 correctly', () => {
     const doc = createDocWithPages(3);
-    setPageLabels(doc, [
-      { startPage: 0, style: 'decimal', start: 0 },
-    ]);
+    setPageLabels(doc, [{ startPage: 0, style: 'decimal', start: 0 }]);
 
     const labels = getPageLabels(doc);
     expect(labels![0]!.start).toBe(0);
@@ -517,9 +491,7 @@ describe('start value of 0', () => {
 
   it('serializes start = 0 into the PDF', async () => {
     const doc = createDocWithPages(3);
-    setPageLabels(doc, [
-      { startPage: 0, style: 'decimal', start: 0 },
-    ]);
+    setPageLabels(doc, [{ startPage: 0, style: 'decimal', start: 0 }]);
 
     const bytes = await doc.save({ addDefaultPage: false });
     const text = new TextDecoder('latin1').decode(bytes);
@@ -535,8 +507,8 @@ describe('mixed label styles', () => {
   it('uses roman for front matter, decimal for body, alpha for appendix', () => {
     const doc = createDocWithPages(15);
     setPageLabels(doc, [
-      { startPage: 0, style: 'roman' },                         // front matter: i, ii, iii
-      { startPage: 3, style: 'decimal', start: 1 },             // body: 1, 2, 3, ...
+      { startPage: 0, style: 'roman' }, // front matter: i, ii, iii
+      { startPage: 3, style: 'decimal', start: 1 }, // body: 1, 2, 3, ...
       { startPage: 10, style: 'alpha', prefix: 'App-', start: 1 }, // appendix: App-a, App-b, ...
     ]);
 

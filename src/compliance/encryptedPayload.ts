@@ -87,9 +87,7 @@ export interface WrapperPayloadOptions {
  * @param options - The crypto-filter subtype and optional version.
  * @returns A spec-shaped `/EncryptedPayload` {@link PdfDict}.
  */
-export function buildEncryptedPayload(
-  options: EncryptedPayloadOptions,
-): PdfDict {
+export function buildEncryptedPayload(options: EncryptedPayloadOptions): PdfDict {
   const dict = new PdfDict();
   dict.set('/Type', PdfName.of('EncryptedPayload'));
   dict.set('/Subtype', PdfName.of(options.subtype));

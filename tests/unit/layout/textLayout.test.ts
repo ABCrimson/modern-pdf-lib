@@ -13,11 +13,7 @@ import {
   layoutTextFlow,
   findHyphenationPoints,
 } from '../../../src/layout/textLayout.js';
-import type {
-  TextFrame,
-  TextSpan,
-  MultiColumnOptions,
-} from '../../../src/layout/textLayout.js';
+import type { TextFrame, TextSpan, MultiColumnOptions } from '../../../src/layout/textLayout.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -60,12 +56,7 @@ describe('layoutParagraph — basic wrapping', () => {
   });
 
   it('fits short text on a single line', () => {
-    const result = layoutParagraph(
-      'Hi',
-      STD_FRAME,
-      { alignment: 'left' },
-      fixedMeasure,
-    );
+    const result = layoutParagraph('Hi', STD_FRAME, { alignment: 'left' }, fixedMeasure);
     expect(result.lineCount).toBe(1);
     expect(result.overflow).toBe('');
   });
@@ -103,12 +94,7 @@ describe('layoutParagraph — justified alignment', () => {
 
   it('does not justify the last line of a paragraph', () => {
     // Single-line text should not get word spacing
-    const result = layoutParagraph(
-      'Short text',
-      STD_FRAME,
-      { alignment: 'justify' },
-      fixedMeasure,
-    );
+    const result = layoutParagraph('Short text', STD_FRAME, { alignment: 'justify' }, fixedMeasure);
     // Last line of paragraph should have Tw 0 (or no Tw at all in non-justify)
     // Since it's the only line and it's the last line of paragraph, no extra spacing
     expect(result.lineCount).toBe(1);
@@ -123,18 +109,8 @@ describe('layoutParagraph — justified alignment', () => {
 describe('layoutParagraph — paragraph spacing', () => {
   it('adds extra spacing between paragraphs', () => {
     const text = 'Paragraph one text.\nParagraph two text.';
-    const withSpacing = layoutParagraph(
-      text,
-      STD_FRAME,
-      { paragraphSpacing: 20 },
-      fixedMeasure,
-    );
-    const withoutSpacing = layoutParagraph(
-      text,
-      STD_FRAME,
-      { paragraphSpacing: 0 },
-      fixedMeasure,
-    );
+    const withSpacing = layoutParagraph(text, STD_FRAME, { paragraphSpacing: 20 }, fixedMeasure);
+    const withoutSpacing = layoutParagraph(text, STD_FRAME, { paragraphSpacing: 0 }, fixedMeasure);
     // Both should render all lines
     expect(withSpacing.lineCount).toBe(2);
     expect(withoutSpacing.lineCount).toBe(2);
@@ -164,18 +140,8 @@ describe('layoutParagraph — first line indent', () => {
     // Text that just fits a 200pt line at 6pt/char = 33 chars
     // With a 30pt indent, effective width = 170pt = 28 chars
     const text = 'A'.repeat(30); // 30 * 6 = 180pt
-    const withIndent = layoutParagraph(
-      text,
-      STD_FRAME,
-      { firstLineIndent: 30 },
-      fixedMeasure,
-    );
-    const withoutIndent = layoutParagraph(
-      text,
-      STD_FRAME,
-      {},
-      fixedMeasure,
-    );
+    const withIndent = layoutParagraph(text, STD_FRAME, { firstLineIndent: 30 }, fixedMeasure);
+    const withoutIndent = layoutParagraph(text, STD_FRAME, {}, fixedMeasure);
     // With indent should need more lines since first line has less space
     expect(withIndent.lineCount).toBeGreaterThanOrEqual(withoutIndent.lineCount);
   });
@@ -187,21 +153,17 @@ describe('layoutParagraph — first line indent', () => {
 
 describe('layoutColumns — basic multi-column', () => {
   it('distributes text across 2 columns', () => {
-    const text = 'The quick brown fox jumps over the lazy dog and keeps on running through the forest all day long without stopping even for a moment';
+    const text =
+      'The quick brown fox jumps over the lazy dog and keeps on running through the forest all day long without stopping even for a moment';
     const colOpts: MultiColumnOptions = { columns: 2, columnGap: 18 };
-    const result = layoutColumns(
-      text,
-      STD_FRAME,
-      colOpts,
-      { alignment: 'left' },
-      fixedMeasure,
-    );
+    const result = layoutColumns(text, STD_FRAME, colOpts, { alignment: 'left' }, fixedMeasure);
     expect(result.lineCount).toBeGreaterThan(0);
     expect(result.operators).toContain('Tj');
   });
 
   it('distributes text across 3 columns', () => {
-    const text = 'Alpha Beta Gamma Delta Epsilon Zeta Eta Theta Iota Kappa Lambda Mu Nu Xi Omicron Pi Rho Sigma';
+    const text =
+      'Alpha Beta Gamma Delta Epsilon Zeta Eta Theta Iota Kappa Lambda Mu Nu Xi Omicron Pi Rho Sigma';
     const colOpts: MultiColumnOptions = { columns: 3, columnGap: 12 };
     const result = layoutColumns(
       text,
@@ -215,7 +177,8 @@ describe('layoutColumns — basic multi-column', () => {
   });
 
   it('draws column rules when specified', () => {
-    const text = 'Some text for two columns that is long enough to actually need two columns to fit all of it';
+    const text =
+      'Some text for two columns that is long enough to actually need two columns to fit all of it';
     const colOpts: MultiColumnOptions = {
       columns: 2,
       columnGap: 18,
@@ -225,13 +188,7 @@ describe('layoutColumns — basic multi-column', () => {
         style: 'solid',
       },
     };
-    const result = layoutColumns(
-      text,
-      STD_FRAME,
-      colOpts,
-      {},
-      fixedMeasure,
-    );
+    const result = layoutColumns(text, STD_FRAME, colOpts, {}, fixedMeasure);
     // Column rule should produce line drawing operators
     expect(result.operators).toContain('l\n'); // lineTo
     expect(result.operators).toContain('S\n'); // stroke
@@ -248,13 +205,7 @@ describe('layoutColumns — basic multi-column', () => {
         style: 'dashed',
       },
     };
-    const result = layoutColumns(
-      text,
-      STD_FRAME,
-      colOpts,
-      {},
-      fixedMeasure,
-    );
+    const result = layoutColumns(text, STD_FRAME, colOpts, {}, fixedMeasure);
     // Should include dash pattern operator
     expect(result.operators).toContain('d\n'); // setDashPattern
   });
@@ -458,12 +409,7 @@ describe('layoutParagraph — mixed spans', () => {
       { text: 'normal text ', fontSize: 12 },
       { text: 'italic text', italic: true, fontSize: 12 },
     ];
-    const result = layoutParagraph(
-      spans,
-      STD_FRAME,
-      { alignment: 'left' },
-      fixedMeasure,
-    );
+    const result = layoutParagraph(spans, STD_FRAME, { alignment: 'left' }, fixedMeasure);
     expect(result.lineCount).toBeGreaterThan(0);
     expect(result.operators).toContain('Tj');
     expect(result.overflow).toBe('');
@@ -474,55 +420,29 @@ describe('layoutParagraph — mixed spans', () => {
       { text: 'Large ', fontSize: 24 },
       { text: 'Small', fontSize: 8 },
     ];
-    const result = layoutParagraph(
-      spans,
-      STD_FRAME,
-      {},
-      fixedMeasure,
-    );
+    const result = layoutParagraph(spans, STD_FRAME, {}, fixedMeasure);
     expect(result.lineCount).toBeGreaterThan(0);
     expect(result.overflow).toBe('');
   });
 
   it('applies underline decoration', () => {
-    const spans: TextSpan[] = [
-      { text: 'Underlined', underline: true },
-    ];
-    const result = layoutParagraph(
-      spans,
-      STD_FRAME,
-      {},
-      fixedMeasure,
-    );
+    const spans: TextSpan[] = [{ text: 'Underlined', underline: true }];
+    const result = layoutParagraph(spans, STD_FRAME, {}, fixedMeasure);
     // Underline should produce line drawing operators
     expect(result.operators).toContain('l\n'); // lineTo
     expect(result.operators).toContain('S\n'); // stroke
   });
 
   it('applies strikethrough decoration', () => {
-    const spans: TextSpan[] = [
-      { text: 'Struck', strikethrough: true },
-    ];
-    const result = layoutParagraph(
-      spans,
-      STD_FRAME,
-      {},
-      fixedMeasure,
-    );
+    const spans: TextSpan[] = [{ text: 'Struck', strikethrough: true }];
+    const result = layoutParagraph(spans, STD_FRAME, {}, fixedMeasure);
     expect(result.operators).toContain('l\n');
     expect(result.operators).toContain('S\n');
   });
 
   it('handles spans with color', () => {
-    const spans: TextSpan[] = [
-      { text: 'Red text', color: { type: 'rgb', r: 1, g: 0, b: 0 } },
-    ];
-    const result = layoutParagraph(
-      spans,
-      STD_FRAME,
-      {},
-      fixedMeasure,
-    );
+    const spans: TextSpan[] = [{ text: 'Red text', color: { type: 'rgb', r: 1, g: 0, b: 0 } }];
+    const result = layoutParagraph(spans, STD_FRAME, {}, fixedMeasure);
     expect(result.lineCount).toBe(1);
     // Should contain color-setting operator
     expect(result.operators).toContain('rg');
@@ -596,34 +516,19 @@ describe('layoutParagraph — edge cases', () => {
 
 describe('layoutParagraph — alignment modes', () => {
   it('left-aligns text by default', () => {
-    const result = layoutParagraph(
-      'Hello',
-      STD_FRAME,
-      { alignment: 'left' },
-      fixedMeasure,
-    );
+    const result = layoutParagraph('Hello', STD_FRAME, { alignment: 'left' }, fixedMeasure);
     expect(result.lineCount).toBe(1);
     expect(result.operators).toContain('Td');
   });
 
   it('right-aligns text', () => {
-    const result = layoutParagraph(
-      'Hello',
-      STD_FRAME,
-      { alignment: 'right' },
-      fixedMeasure,
-    );
+    const result = layoutParagraph('Hello', STD_FRAME, { alignment: 'right' }, fixedMeasure);
     expect(result.lineCount).toBe(1);
     expect(result.operators).toContain('Td');
   });
 
   it('center-aligns text', () => {
-    const result = layoutParagraph(
-      'Hello',
-      STD_FRAME,
-      { alignment: 'center' },
-      fixedMeasure,
-    );
+    const result = layoutParagraph('Hello', STD_FRAME, { alignment: 'center' }, fixedMeasure);
     expect(result.lineCount).toBe(1);
     expect(result.operators).toContain('Td');
   });
@@ -635,13 +540,7 @@ describe('layoutParagraph — alignment modes', () => {
 
 describe('layoutColumns — edge cases', () => {
   it('handles single column (degenerates to paragraph)', () => {
-    const result = layoutColumns(
-      'Hello World',
-      STD_FRAME,
-      { columns: 1 },
-      {},
-      fixedMeasure,
-    );
+    const result = layoutColumns('Hello World', STD_FRAME, { columns: 1 }, {}, fixedMeasure);
     expect(result.lineCount).toBeGreaterThan(0);
     expect(result.overflow).toBe('');
   });
@@ -677,31 +576,22 @@ describe('layoutColumns — edge cases', () => {
 
 describe('layoutTextFlow — edge cases', () => {
   it('handles text that fits in first frame with no overflow', () => {
-    const results = layoutTextFlow(
-      'Short',
-      [STD_FRAME],
-      {},
-      fixedMeasure,
-    );
+    const results = layoutTextFlow('Short', [STD_FRAME], {}, fixedMeasure);
     expect(results.length).toBe(1);
     expect(results[0]!.overflow).toBe('');
     expect(results[0]!.lineCount).toBe(1);
   });
 
   it('handles empty text across multiple frames', () => {
-    const results = layoutTextFlow(
-      '',
-      [STD_FRAME, STD_FRAME],
-      {},
-      fixedMeasure,
-    );
+    const results = layoutTextFlow('', [STD_FRAME, STD_FRAME], {}, fixedMeasure);
     expect(results.length).toBe(2);
     expect(results[0]!.lineCount).toBe(0);
     expect(results[1]!.lineCount).toBe(0);
   });
 
   it('flows paragraphs with spacing across frames', () => {
-    const text = 'First paragraph.\nSecond paragraph with more words to fill space.\nThird paragraph.';
+    const text =
+      'First paragraph.\nSecond paragraph with more words to fill space.\nThird paragraph.';
     const results = layoutTextFlow(
       text,
       [
@@ -742,18 +632,8 @@ describe('layoutParagraph — hanging indent', () => {
 describe('layoutParagraph — line height', () => {
   it('uses custom line height multiplier', () => {
     const text = 'Line one\nLine two\nLine three';
-    const tight = layoutParagraph(
-      text,
-      STD_FRAME,
-      { lineHeight: 1.0 },
-      fixedMeasure,
-    );
-    const loose = layoutParagraph(
-      text,
-      STD_FRAME,
-      { lineHeight: 2.0 },
-      fixedMeasure,
-    );
+    const tight = layoutParagraph(text, STD_FRAME, { lineHeight: 1.0 }, fixedMeasure);
+    const loose = layoutParagraph(text, STD_FRAME, { lineHeight: 2.0 }, fixedMeasure);
     // Both should render all 3 lines
     expect(tight.lineCount).toBe(3);
     expect(loose.lineCount).toBe(3);
@@ -768,12 +648,7 @@ describe('layoutParagraph — line height', () => {
 
 describe('layoutParagraph — PDF operator output', () => {
   it('produces valid PDF text operators', () => {
-    const result = layoutParagraph(
-      'Hello World',
-      STD_FRAME,
-      { alignment: 'left' },
-      fixedMeasure,
-    );
+    const result = layoutParagraph('Hello World', STD_FRAME, { alignment: 'left' }, fixedMeasure);
     const ops = result.operators;
 
     // Must contain save/restore state
@@ -795,12 +670,7 @@ describe('layoutParagraph — PDF operator output', () => {
   });
 
   it('emits font name with leading slash', () => {
-    const result = layoutParagraph(
-      'Test',
-      STD_FRAME,
-      {},
-      fixedMeasure,
-    );
+    const result = layoutParagraph('Test', STD_FRAME, {}, fixedMeasure);
     // Font names in PDF operators have a leading slash
     expect(result.operators).toMatch(/\/\w+ \d+(\.\d+)? Tf/);
   });

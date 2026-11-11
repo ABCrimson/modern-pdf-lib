@@ -95,9 +95,11 @@ function buildTiff(
 
   // Header
   if (littleEndian) {
-    result[0] = 0x49; result[1] = 0x49; // II
+    result[0] = 0x49;
+    result[1] = 0x49; // II
   } else {
-    result[0] = 0x4D; result[1] = 0x4D; // MM
+    result[0] = 0x4d;
+    result[1] = 0x4d; // MM
   }
   view.setUint16(2, 42, littleEndian);
   view.setUint32(4, ifdOffset, littleEndian);
@@ -132,7 +134,7 @@ function buildTiff(
     } else {
       // Pointer to overflow area
       view.setUint32(pos + 8, currentOverflow, littleEndian);
-      const oe = overflowEntries.find(e => e.entryIdx === i);
+      const oe = overflowEntries.find((e) => e.entryIdx === i);
       if (oe) {
         result.set(oe.data, currentOverflow);
         currentOverflow += oe.data.length;
@@ -153,7 +155,8 @@ function buildTiff(
   let tagPos = ifdOffset + 2;
   for (let i = 0; i < tags.length; i++) {
     const tag = tags[i]!;
-    if (tag.tag === 273) { // StripOffsets
+    if (tag.tag === 273) {
+      // StripOffsets
       const typeSize = tag.type === 3 ? 2 : 4;
       const totalDataSize = typeSize * tag.values.length;
       if (totalDataSize <= 4) {
@@ -176,15 +179,15 @@ function buildGrayscaleTiff(width: number, height: number, pixelValue: number = 
   imageData.fill(pixelValue);
 
   const tags: TiffTag[] = [
-    { tag: 256, type: 3, values: [width] },           // ImageWidth
-    { tag: 257, type: 3, values: [height] },          // ImageHeight
-    { tag: 258, type: 3, values: [8] },               // BitsPerSample
-    { tag: 259, type: 3, values: [1] },               // Compression (none)
-    { tag: 262, type: 3, values: [1] },               // PhotometricInterpretation (BlackIsZero)
-    { tag: 273, type: 4, values: [0] },               // StripOffsets (placeholder)
-    { tag: 277, type: 3, values: [1] },               // SamplesPerPixel
-    { tag: 278, type: 4, values: [height] },          // RowsPerStrip
-    { tag: 279, type: 4, values: [width * height] },  // StripByteCounts
+    { tag: 256, type: 3, values: [width] }, // ImageWidth
+    { tag: 257, type: 3, values: [height] }, // ImageHeight
+    { tag: 258, type: 3, values: [8] }, // BitsPerSample
+    { tag: 259, type: 3, values: [1] }, // Compression (none)
+    { tag: 262, type: 3, values: [1] }, // PhotometricInterpretation (BlackIsZero)
+    { tag: 273, type: 4, values: [0] }, // StripOffsets (placeholder)
+    { tag: 277, type: 3, values: [1] }, // SamplesPerPixel
+    { tag: 278, type: 4, values: [height] }, // RowsPerStrip
+    { tag: 279, type: 4, values: [width * height] }, // StripByteCounts
   ];
 
   return buildTiff(tags, imageData);
@@ -204,7 +207,7 @@ function buildRgbTiff(width: number, height: number, r: number, g: number, b: nu
     { tag: 257, type: 3, values: [height] },
     { tag: 258, type: 3, values: [8] },
     { tag: 259, type: 3, values: [1] },
-    { tag: 262, type: 3, values: [2] },               // RGB
+    { tag: 262, type: 3, values: [2] }, // RGB
     { tag: 273, type: 4, values: [0] },
     { tag: 277, type: 3, values: [3] },
     { tag: 278, type: 4, values: [height] },
@@ -246,15 +249,16 @@ describe('isTiff', () => {
     // Convert to big-endian
     const be = new Uint8Array(tiff.length);
     be.set(tiff);
-    be[0] = 0x4D; be[1] = 0x4D;
+    be[0] = 0x4d;
+    be[1] = 0x4d;
     const view = new DataView(be.buffer);
     view.setUint16(2, 42, false); // big-endian magic
     expect(isTiff(be)).toBe(true);
   });
 
   it('rejects non-TIFF data', () => {
-    expect(isTiff(new Uint8Array([0x89, 0x50, 0x4E, 0x47]))).toBe(false); // PNG
-    expect(isTiff(new Uint8Array([0xFF, 0xD8, 0xFF, 0xE0]))).toBe(false); // JPEG
+    expect(isTiff(new Uint8Array([0x89, 0x50, 0x4e, 0x47]))).toBe(false); // PNG
+    expect(isTiff(new Uint8Array([0xff, 0xd8, 0xff, 0xe0]))).toBe(false); // JPEG
     expect(isTiff(new Uint8Array(4))).toBe(false);
   });
 
@@ -265,7 +269,8 @@ describe('isTiff', () => {
 
   it('rejects wrong magic number', () => {
     const data = new Uint8Array(8);
-    data[0] = 0x49; data[1] = 0x49;
+    data[0] = 0x49;
+    data[1] = 0x49;
     const view = new DataView(data.buffer);
     view.setUint16(2, 43, true); // Wrong magic
     expect(isTiff(data)).toBe(false);
@@ -284,12 +289,12 @@ describe('parseTiffIfd', () => {
     expect(entries.length).toBeGreaterThan(0);
 
     // Find ImageWidth tag
-    const widthEntry = entries.find(e => e.tag === 256);
+    const widthEntry = entries.find((e) => e.tag === 256);
     expect(widthEntry).toBeDefined();
     expect(widthEntry!.values[0]).toBe(4);
 
     // Find ImageHeight tag
-    const heightEntry = entries.find(e => e.tag === 257);
+    const heightEntry = entries.find((e) => e.tag === 257);
     expect(heightEntry).toBeDefined();
     expect(heightEntry!.values[0]).toBe(4);
   });
@@ -298,7 +303,7 @@ describe('parseTiffIfd', () => {
     const tiff = buildGrayscaleTiff(10, 10);
     const entries = parseTiffIfd(tiff, 8, true);
 
-    const bps = entries.find(e => e.tag === 258); // BitsPerSample
+    const bps = entries.find((e) => e.tag === 258); // BitsPerSample
     expect(bps).toBeDefined();
     expect(bps!.type).toBe(3); // SHORT
     expect(bps!.values[0]).toBe(8);
@@ -308,7 +313,7 @@ describe('parseTiffIfd', () => {
     const tiff = buildGrayscaleTiff(10, 10);
     const entries = parseTiffIfd(tiff, 8, true);
 
-    const rps = entries.find(e => e.tag === 278); // RowsPerStrip
+    const rps = entries.find((e) => e.tag === 278); // RowsPerStrip
     expect(rps).toBeDefined();
     expect(rps!.type).toBe(4); // LONG
     expect(rps!.values[0]).toBe(10);
@@ -348,7 +353,7 @@ describe('decodeTiff — uncompressed', () => {
     // Check first pixel
     expect(result.pixels[0]).toBe(255); // R
     expect(result.pixels[1]).toBe(128); // G
-    expect(result.pixels[2]).toBe(64);  // B
+    expect(result.pixels[2]).toBe(64); // B
   });
 
   it('handles WhiteIsZero (photometric=0)', () => {
@@ -360,7 +365,7 @@ describe('decodeTiff — uncompressed', () => {
       { tag: 257, type: 3, values: [2] },
       { tag: 258, type: 3, values: [8] },
       { tag: 259, type: 3, values: [1] },
-      { tag: 262, type: 3, values: [0] },  // WhiteIsZero
+      { tag: 262, type: 3, values: [0] }, // WhiteIsZero
       { tag: 273, type: 4, values: [0] },
       { tag: 277, type: 3, values: [1] },
       { tag: 278, type: 4, values: [2] },
@@ -400,7 +405,7 @@ describe('decodeTiff — PackBits compression', () => {
       { tag: 256, type: 3, values: [4] },
       { tag: 257, type: 3, values: [2] },
       { tag: 258, type: 3, values: [8] },
-      { tag: 259, type: 3, values: [32773] },  // PackBits
+      { tag: 259, type: 3, values: [32773] }, // PackBits
       { tag: 262, type: 3, values: [1] },
       { tag: 273, type: 4, values: [0] },
       { tag: 277, type: 3, values: [1] },
@@ -445,12 +450,12 @@ describe('decodeTiff — LZW compression', () => {
       }
     }
 
-    writeBits(256, 9);  // Clear code
-    writeBits(128, 9);  // First pixel
-    writeBits(128, 9);  // Second pixel
-    writeBits(128, 9);  // Third pixel
-    writeBits(128, 9);  // Fourth pixel
-    writeBits(257, 9);  // EOI
+    writeBits(256, 9); // Clear code
+    writeBits(128, 9); // First pixel
+    writeBits(128, 9); // Second pixel
+    writeBits(128, 9); // Third pixel
+    writeBits(128, 9); // Fourth pixel
+    writeBits(257, 9); // EOI
 
     // Convert bits to bytes
     const byteCount = Math.ceil(bits.length / 8);
@@ -465,7 +470,7 @@ describe('decodeTiff — LZW compression', () => {
       { tag: 256, type: 3, values: [2] },
       { tag: 257, type: 3, values: [2] },
       { tag: 258, type: 3, values: [8] },
-      { tag: 259, type: 3, values: [5] },  // LZW
+      { tag: 259, type: 3, values: [5] }, // LZW
       { tag: 262, type: 3, values: [1] },
       { tag: 273, type: 4, values: [0] },
       { tag: 277, type: 3, values: [1] },
@@ -500,7 +505,7 @@ describe('decodeTiff — Deflate compression', () => {
       { tag: 256, type: 3, values: [2] },
       { tag: 257, type: 3, values: [2] },
       { tag: 258, type: 3, values: [8] },
-      { tag: 259, type: 3, values: [8] },  // Deflate
+      { tag: 259, type: 3, values: [8] }, // Deflate
       { tag: 262, type: 3, values: [1] },
       { tag: 273, type: 4, values: [0] },
       { tag: 277, type: 3, values: [1] },
@@ -528,7 +533,7 @@ describe('decodeTiff — Deflate compression', () => {
       { tag: 257, type: 3, values: [2] },
       { tag: 258, type: 3, values: [8] },
       { tag: 259, type: 3, values: [8] },
-      { tag: 262, type: 3, values: [2] },  // RGB
+      { tag: 262, type: 3, values: [2] }, // RGB
       { tag: 273, type: 4, values: [0] },
       { tag: 277, type: 3, values: [3] },
       { tag: 278, type: 4, values: [2] },
@@ -544,7 +549,7 @@ describe('decodeTiff — Deflate compression', () => {
     expect(result.pixels[0]).toBe(255); // Red pixel
     expect(result.pixels[1]).toBe(0);
     expect(result.pixels[2]).toBe(0);
-    expect(result.pixels[3]).toBe(0);   // Green pixel
+    expect(result.pixels[3]).toBe(0); // Green pixel
     expect(result.pixels[4]).toBe(255);
     expect(result.pixels[5]).toBe(0);
   });
@@ -558,14 +563,14 @@ describe('decodeTiff — bit depth normalization', () => {
   it('normalizes 1-bit BlackIsZero', () => {
     // 2x2 image: all bits set to 1 = black
     // In 1-bit: byte = 0b11000000 for first 2 pixels in a row
-    const imageData = new Uint8Array([0xC0, 0xC0]); // Two rows, each with bits for 2 pixels
+    const imageData = new Uint8Array([0xc0, 0xc0]); // Two rows, each with bits for 2 pixels
 
     const tags: TiffTag[] = [
       { tag: 256, type: 3, values: [2] },
       { tag: 257, type: 3, values: [2] },
       { tag: 258, type: 3, values: [1] },
       { tag: 259, type: 3, values: [1] },
-      { tag: 262, type: 3, values: [1] },  // BlackIsZero
+      { tag: 262, type: 3, values: [1] }, // BlackIsZero
       { tag: 273, type: 4, values: [0] },
       { tag: 277, type: 3, values: [1] },
       { tag: 278, type: 4, values: [2] },
@@ -587,14 +592,14 @@ describe('decodeTiff — bit depth normalization', () => {
 
   it('normalizes 1-bit WhiteIsZero', () => {
     // All bits set to 1 = black when WhiteIsZero
-    const imageData = new Uint8Array([0xC0, 0xC0]);
+    const imageData = new Uint8Array([0xc0, 0xc0]);
 
     const tags: TiffTag[] = [
       { tag: 256, type: 3, values: [2] },
       { tag: 257, type: 3, values: [2] },
       { tag: 258, type: 3, values: [1] },
       { tag: 259, type: 3, values: [1] },
-      { tag: 262, type: 3, values: [0] },  // WhiteIsZero
+      { tag: 262, type: 3, values: [0] }, // WhiteIsZero
       { tag: 273, type: 4, values: [0] },
       { tag: 277, type: 3, values: [1] },
       { tag: 278, type: 4, values: [2] },
@@ -612,14 +617,14 @@ describe('decodeTiff — bit depth normalization', () => {
 
   it('normalizes 4-bit grayscale', () => {
     // 2x2 image: nibbles [0xF, 0x0, 0x8, 0x4]
-    const imageData = new Uint8Array([0xF0, 0x84]);
+    const imageData = new Uint8Array([0xf0, 0x84]);
 
     const tags: TiffTag[] = [
       { tag: 256, type: 3, values: [2] },
       { tag: 257, type: 3, values: [2] },
       { tag: 258, type: 3, values: [4] },
       { tag: 259, type: 3, values: [1] },
-      { tag: 262, type: 3, values: [1] },  // BlackIsZero
+      { tag: 262, type: 3, values: [1] }, // BlackIsZero
       { tag: 273, type: 4, values: [0] },
       { tag: 277, type: 3, values: [1] },
       { tag: 278, type: 4, values: [2] },
@@ -632,8 +637,8 @@ describe('decodeTiff — bit depth normalization', () => {
     expect(result.width).toBe(2);
     expect(result.height).toBe(2);
     expect(result.bitsPerSample).toBe(4);
-    expect(result.pixels[0]).toBe(255);   // 0xF -> 255
-    expect(result.pixels[1]).toBe(0);     // 0x0 -> 0
+    expect(result.pixels[0]).toBe(255); // 0xF -> 255
+    expect(result.pixels[1]).toBe(0); // 0x0 -> 0
   });
 
   it('normalizes 16-bit grayscale to 8-bit', () => {
@@ -641,7 +646,7 @@ describe('decodeTiff — bit depth normalization', () => {
     const imageData = new Uint8Array(4);
     const view = new DataView(imageData.buffer);
     view.setUint16(0, 0x8000, true); // LE
-    view.setUint16(2, 0xFF00, true);
+    view.setUint16(2, 0xff00, true);
 
     const tags: TiffTag[] = [
       { tag: 256, type: 3, values: [2] },
@@ -662,7 +667,7 @@ describe('decodeTiff — bit depth normalization', () => {
     expect(result.height).toBe(1);
     expect(result.bitsPerSample).toBe(16);
     expect(result.pixels[0]).toBe(0x80); // High byte of 0x8000
-    expect(result.pixels[1]).toBe(0xFF); // High byte of 0xFF00
+    expect(result.pixels[1]).toBe(0xff); // High byte of 0xFF00
   });
 });
 
@@ -673,8 +678,14 @@ describe('decodeTiff — bit depth normalization', () => {
 describe('decodeTiff — RGBA', () => {
   it('decodes 4-channel RGBA image', () => {
     const imageData = new Uint8Array([
-      255, 0, 0, 128,    // Red, alpha=128
-      0, 255, 0, 255,    // Green, alpha=255
+      255,
+      0,
+      0,
+      128, // Red, alpha=128
+      0,
+      255,
+      0,
+      255, // Green, alpha=255
     ]);
 
     const tags: TiffTag[] = [
@@ -682,9 +693,9 @@ describe('decodeTiff — RGBA', () => {
       { tag: 257, type: 3, values: [1] },
       { tag: 258, type: 3, values: [8] },
       { tag: 259, type: 3, values: [1] },
-      { tag: 262, type: 3, values: [2] },  // RGB
+      { tag: 262, type: 3, values: [2] }, // RGB
       { tag: 273, type: 4, values: [0] },
-      { tag: 277, type: 3, values: [4] },  // 4 samples
+      { tag: 277, type: 3, values: [4] }, // 4 samples
       { tag: 278, type: 4, values: [1] },
       { tag: 279, type: 4, values: [8] },
     ];
@@ -695,10 +706,10 @@ describe('decodeTiff — RGBA', () => {
     expect(result.width).toBe(2);
     expect(result.height).toBe(1);
     expect(result.channels).toBe(4);
-    expect(result.pixels[0]).toBe(255);  // R
-    expect(result.pixels[1]).toBe(0);    // G
-    expect(result.pixels[2]).toBe(0);    // B
-    expect(result.pixels[3]).toBe(128);  // A
+    expect(result.pixels[0]).toBe(255); // R
+    expect(result.pixels[1]).toBe(0); // G
+    expect(result.pixels[2]).toBe(0); // B
+    expect(result.pixels[3]).toBe(128); // A
   });
 });
 
@@ -731,7 +742,7 @@ describe('multi-page TIFF', () => {
       { tag: 258, type: 3, values: [8] },
       { tag: 259, type: 3, values: [1] },
       { tag: 262, type: 3, values: [1] },
-      { tag: 273, type: 4, values: [0] },  // Placeholder
+      { tag: 273, type: 4, values: [0] }, // Placeholder
       { tag: 277, type: 3, values: [1] },
       { tag: 278, type: 4, values: [2] },
       { tag: 279, type: 4, values: [4] },
@@ -766,7 +777,8 @@ describe('multi-page TIFF', () => {
     const view = new DataView(result.buffer);
 
     // Header
-    result[0] = 0x49; result[1] = 0x49;
+    result[0] = 0x49;
+    result[1] = 0x49;
     view.setUint16(2, 42, true);
     view.setUint32(4, ifd1Offset, true);
 
@@ -915,7 +927,9 @@ describe('decodeTiff — big-endian byte order', () => {
 
 describe('decodeTiff — error handling', () => {
   it('throws on non-TIFF data', () => {
-    expect(() => decodeTiff(new Uint8Array([0x89, 0x50, 0x4E, 0x47]))).toThrow('invalid TIFF header');
+    expect(() => decodeTiff(new Uint8Array([0x89, 0x50, 0x4e, 0x47]))).toThrow(
+      'invalid TIFF header',
+    );
   });
 
   it('throws on missing ImageWidth/ImageHeight', () => {
@@ -933,7 +947,7 @@ describe('decodeTiff — error handling', () => {
       { tag: 256, type: 3, values: [2] },
       { tag: 257, type: 3, values: [2] },
       { tag: 258, type: 3, values: [8] },
-      { tag: 259, type: 3, values: [99] },  // Unknown compression
+      { tag: 259, type: 3, values: [99] }, // Unknown compression
       { tag: 262, type: 3, values: [1] },
       { tag: 273, type: 4, values: [0] },
       { tag: 277, type: 3, values: [1] },

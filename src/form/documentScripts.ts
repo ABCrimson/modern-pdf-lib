@@ -186,10 +186,7 @@ export function addDocumentCloseAction(doc: PdfDocument, script: string): void {
  * });
  * ```
  */
-export function addDocumentPrintAction(
-  doc: PdfDocument,
-  options: PrintActionOptions,
-): void {
+export function addDocumentPrintAction(doc: PdfDocument, options: PrintActionOptions): void {
   const state = getState(doc);
   if (options.beforePrint !== undefined) {
     state.beforePrint = options.beforePrint;
@@ -223,10 +220,7 @@ export function addDocumentPrintAction(
  * });
  * ```
  */
-export function addDocumentSaveAction(
-  doc: PdfDocument,
-  options: SaveActionOptions,
-): void {
+export function addDocumentSaveAction(doc: PdfDocument, options: SaveActionOptions): void {
   const state = getState(doc);
   if (options.beforeSave !== undefined) {
     state.beforeSave = options.beforeSave;
@@ -272,9 +266,7 @@ export function removeDocumentScript(doc: PdfDocument, name: string): boolean {
  *
  * @internal
  */
-export function getDocumentActionState(
-  doc: PdfDocument,
-): DocumentScriptState | undefined {
+export function getDocumentActionState(doc: PdfDocument): DocumentScriptState | undefined {
   return documentActionState.get(doc);
 }
 

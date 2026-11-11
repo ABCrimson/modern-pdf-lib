@@ -9,9 +9,7 @@ import {
   validateCertificatePolicy,
   EKU_OIDS,
 } from '../../../src/signature/certPolicy.js';
-import type {
-  KeyUsageFlag,
-} from '../../../src/signature/certPolicy.js';
+import type { KeyUsageFlag } from '../../../src/signature/certPolicy.js';
 import {
   encodeSequence,
   encodeSet,
@@ -134,11 +132,7 @@ function buildBasicConstraints(isCA: boolean, pathLen?: number): Uint8Array {
  * Build a single Extension SEQUENCE.
  * Extension ::= SEQUENCE { extnID OID, critical BOOLEAN OPTIONAL, extnValue OCTET STRING }
  */
-function buildExtension(
-  oid: string,
-  value: Uint8Array,
-  critical = false,
-): Uint8Array {
+function buildExtension(oid: string, value: Uint8Array, critical = false): Uint8Array {
   const children: Uint8Array[] = [encodeOID(oid)];
   if (critical) {
     children.push(encodeBoolean(true));
@@ -166,19 +160,11 @@ function buildCertWithExtensions(
   ]);
   const issuer = buildName(cn);
   const notBefore = options?.notBefore ?? new Date();
-  const notAfter =
-    options?.notAfter ??
-    new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
-  const validity = encodeSequence([
-    encodeUTCTime(notBefore),
-    encodeUTCTime(notAfter),
-  ]);
+  const notAfter = options?.notAfter ?? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
+  const validity = encodeSequence([encodeUTCTime(notBefore), encodeUTCTime(notAfter)]);
   const subject = buildName(cn);
   const spki = encodeSequence([
-    encodeSequence([
-      encodeOID('1.2.840.113549.1.1.1'),
-      new Uint8Array([0x05, 0x00]),
-    ]),
+    encodeSequence([encodeOID('1.2.840.113549.1.1.1'), new Uint8Array([0x05, 0x00])]),
     encodeBitString(new Uint8Array(64)),
   ]);
 
@@ -214,28 +200,14 @@ function buildCertWithoutExtensions(cn: string): Uint8Array {
   const issuer = buildName(cn);
   const now = new Date();
   const later = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000);
-  const validity = encodeSequence([
-    encodeUTCTime(now),
-    encodeUTCTime(later),
-  ]);
+  const validity = encodeSequence([encodeUTCTime(now), encodeUTCTime(later)]);
   const subject = buildName(cn);
   const spki = encodeSequence([
-    encodeSequence([
-      encodeOID('1.2.840.113549.1.1.1'),
-      new Uint8Array([0x05, 0x00]),
-    ]),
+    encodeSequence([encodeOID('1.2.840.113549.1.1.1'), new Uint8Array([0x05, 0x00])]),
     encodeBitString(new Uint8Array(64)),
   ]);
 
-  const tbsCert = encodeSequence([
-    version,
-    serial,
-    sigAlgo,
-    issuer,
-    validity,
-    subject,
-    spki,
-  ]);
+  const tbsCert = encodeSequence([version, serial, sigAlgo, issuer, validity, subject, spki]);
 
   const sigBitString = encodeBitString(new Uint8Array(32));
   return encodeSequence([tbsCert, sigAlgo, sigBitString]);
@@ -277,19 +249,11 @@ describe('validateKeyUsage', () => {
   });
 
   it('should validate multiple required flags', () => {
-    const kuBits = buildKeyUsageBitString([
-      'digitalSignature',
-      'nonRepudiation',
-      'keyCertSign',
-    ]);
+    const kuBits = buildKeyUsageBitString(['digitalSignature', 'nonRepudiation', 'keyCertSign']);
     const kuExt = buildExtension('2.5.29.15', kuBits, true);
     const cert = buildCertWithExtensions('Test', [kuExt]);
 
-    const result = validateKeyUsage(cert, [
-      'digitalSignature',
-      'nonRepudiation',
-      'keyCertSign',
-    ]);
+    const result = validateKeyUsage(cert, ['digitalSignature', 'nonRepudiation', 'keyCertSign']);
     expect(result.valid).toBe(true);
     expect(result.missingFlags).toEqual([]);
   });
@@ -454,9 +418,7 @@ describe('validateCertificatePolicy', () => {
 
     const result = validateCertificatePolicy(cert);
     expect(result.extendedKeyUsage).toBeDefined();
-    expect(result.extendedKeyUsage!.presentOids).toContain(
-      EKU_OIDS.emailProtection,
-    );
+    expect(result.extendedKeyUsage!.presentOids).toContain(EKU_OIDS.emailProtection);
   });
 
   it('should warn when no signing EKU is present', () => {
@@ -467,9 +429,7 @@ describe('validateCertificatePolicy', () => {
     const cert = buildCertWithExtensions('Signer', [kuExt, ekuExt]);
 
     const result = validateCertificatePolicy(cert);
-    expect(result.warnings.some((w) => w.includes('document-signing EKU'))).toBe(
-      true,
-    );
+    expect(result.warnings.some((w) => w.includes('document-signing EKU'))).toBe(true);
   });
 });
 

@@ -75,9 +75,7 @@ export class DenoRuntimeAdapter implements RuntimeAdapter {
   async readFile(path: string): Promise<Uint8Array> {
     const deno = getDenoGlobal();
     if (!deno) {
-      throw new Error(
-        'DenoRuntimeAdapter.readFile: Deno global is not available.',
-      );
+      throw new Error('DenoRuntimeAdapter.readFile: Deno global is not available.');
     }
     return deno.readFile(path);
   }
@@ -93,9 +91,7 @@ export class DenoRuntimeAdapter implements RuntimeAdapter {
   async writeFile(path: string, data: Uint8Array): Promise<void> {
     const deno = getDenoGlobal();
     if (!deno) {
-      throw new Error(
-        'DenoRuntimeAdapter.writeFile: Deno global is not available.',
-      );
+      throw new Error('DenoRuntimeAdapter.writeFile: Deno global is not available.');
     }
     await deno.writeFile(path, data);
   }

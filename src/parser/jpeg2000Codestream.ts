@@ -81,9 +81,18 @@ export const JP2_BOX_TYPES = {
  * ```
  */
 const JP2_SIGNATURE = new Uint8Array([
-  0x00, 0x00, 0x00, 0x0C, // length = 12
-  0x6A, 0x50, 0x20, 0x20, // type = 'jP  '
-  0x0D, 0x0A, 0x87, 0x0A, // JP2 magic number
+  0x00,
+  0x00,
+  0x00,
+  0x0c, // length = 12
+  0x6a,
+  0x50,
+  0x20,
+  0x20, // type = 'jP  '
+  0x0d,
+  0x0a,
+  0x87,
+  0x0a, // JP2 magic number
 ]);
 
 // ---------------------------------------------------------------------------
@@ -108,7 +117,7 @@ const JP2_SIGNATURE = new Uint8Array([
  */
 export function isJpeg2000Codestream(data: Uint8Array): boolean {
   if (data.length < 2) return false;
-  return data[0] === 0xFF && data[1] === 0x4F;
+  return data[0] === 0xff && data[1] === 0x4f;
 }
 
 /**
@@ -267,9 +276,7 @@ export function extractCodestream(data: Uint8Array): Uint8Array {
     }
   }
 
-  throw new Error(
-    'JPEG2000: no codestream box (jp2c) found in JP2 container',
-  );
+  throw new Error('JPEG2000: no codestream box (jp2c) found in JP2 container');
 }
 
 /**
@@ -322,17 +329,13 @@ export function parseImageHeader(ihdrData: Uint8Array): {
     throw new Error('JPEG2000: ihdr box is too short (need 14 bytes)');
   }
 
-  const view = new DataView(
-    ihdrData.buffer,
-    ihdrData.byteOffset,
-    ihdrData.byteLength,
-  );
+  const view = new DataView(ihdrData.buffer, ihdrData.byteOffset, ihdrData.byteLength);
 
   return {
     height: view.getUint32(0, false),
     width: view.getUint32(4, false),
     components: view.getUint16(8, false),
-    bitsPerComponent: (ihdrData[10]! & 0x7F) + 1,
+    bitsPerComponent: (ihdrData[10]! & 0x7f) + 1,
     compressionType: ihdrData[11]!,
     colorspaceUnknown: ihdrData[12]! !== 0,
     intellectualProperty: ihdrData[13]! !== 0,

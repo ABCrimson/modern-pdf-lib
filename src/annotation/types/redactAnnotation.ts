@@ -8,12 +8,7 @@
  * Reference: PDF 1.7 spec, Section 12.5.6.23 (Redaction Annotations).
  */
 
-import {
-  PdfDict,
-  PdfArray,
-  PdfNumber,
-  PdfString,
-} from '../../core/pdfObjects.js';
+import { PdfDict, PdfArray, PdfNumber, PdfString } from '../../core/pdfObjects.js';
 import type { PdfObject, PdfRef } from '../../core/pdfObjects.js';
 import { PdfAnnotation, buildAnnotationDict } from '../pdfAnnotation.js';
 import type { AnnotationOptions } from '../pdfAnnotation.js';

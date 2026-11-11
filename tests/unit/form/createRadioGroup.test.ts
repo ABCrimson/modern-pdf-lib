@@ -3,10 +3,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  PdfDict,
-  PdfArray,
-} from '../../../src/core/pdfObjects.js';
+import { PdfDict, PdfArray } from '../../../src/core/pdfObjects.js';
 import { PdfForm } from '../../../src/form/pdfForm.js';
 import { PdfRadioGroup } from '../../../src/form/fields/radioGroup.js';
 
@@ -115,9 +112,7 @@ describe('PdfForm.createRadioGroup', () => {
 
   it('appears in getFields() after creation', () => {
     const form = emptyForm();
-    form.createRadioGroup('rg1', null, [
-      { x: 0, y: 0, width: 10, height: 10 },
-    ]);
+    form.createRadioGroup('rg1', null, [{ x: 0, y: 0, width: 10, height: 10 }]);
 
     const fields = form.getFields();
     expect(fields).toHaveLength(1);

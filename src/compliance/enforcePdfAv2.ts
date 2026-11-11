@@ -20,7 +20,10 @@
 import type { PdfALevel, PdfAValidationResult } from './pdfA.js';
 import { validatePdfA } from './pdfA.js';
 import { stripProhibitedFeatures } from './stripProhibited.js';
-import { flattenTransparency as flattenTransparencyFn, detectTransparency } from './transparencyFlattener.js';
+import {
+  flattenTransparency as flattenTransparencyFn,
+  detectTransparency,
+} from './transparencyFlattener.js';
 import { concatBytes } from '../utils/binary.js';
 
 // ---------------------------------------------------------------------------
@@ -75,8 +78,7 @@ const decoder = new TextDecoder();
 /** Search for a byte pattern starting at `start`. */
 function findPattern(data: Uint8Array, pattern: string, start: number = 0): number {
   const bytes = encoder.encode(pattern);
-  outer:
-  for (let i = start; i <= data.length - bytes.length; i++) {
+  outer: for (let i = start; i <= data.length - bytes.length; i++) {
     for (let j = 0; j < bytes.length; j++) {
       if (data[i + j] !== bytes[j]) continue outer;
     }
@@ -113,10 +115,14 @@ function addXmpMetadata(
   ];
 
   if (options.title) {
-    xmp.push(`      <dc:title><rdf:Alt><rdf:li xml:lang="${options.language ?? 'en'}">${options.title}</rdf:li></rdf:Alt></dc:title>`);
+    xmp.push(
+      `      <dc:title><rdf:Alt><rdf:li xml:lang="${options.language ?? 'en'}">${options.title}</rdf:li></rdf:Alt></dc:title>`,
+    );
   }
   if (options.author) {
-    xmp.push(`      <dc:creator><rdf:Seq><rdf:li>${options.author}</rdf:li></rdf:Seq></dc:creator>`);
+    xmp.push(
+      `      <dc:creator><rdf:Seq><rdf:li>${options.author}</rdf:li></rdf:Seq></dc:creator>`,
+    );
   }
 
   xmp.push('    </rdf:Description>');
@@ -229,7 +235,7 @@ export async function enforcePdfAFull(
 
   // Check for encryption (cannot fix automatically)
   const initialValidation = validatePdfA(bytes, level);
-  const hasEncryption = initialValidation.issues.some(i => i.code === 'PDFA-003');
+  const hasEncryption = initialValidation.issues.some((i) => i.code === 'PDFA-003');
   if (hasEncryption) {
     throw new Error('Cannot enforce PDF/A: document is encrypted. Remove encryption first.');
   }
@@ -288,7 +294,7 @@ export async function enforcePdfAFull(
 
   // Validate final result
   const validation = validatePdfA(bytes, level);
-  const errorCount = validation.issues.filter(i => i.severity === 'error').length;
+  const errorCount = validation.issues.filter((i) => i.severity === 'error').length;
 
   return {
     bytes,

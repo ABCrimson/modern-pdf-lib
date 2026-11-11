@@ -4,13 +4,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { PdfFileAttachmentAnnotation } from '../../../src/annotation/types/fileAttachmentAnnotation.js';
-import {
-  PdfDict,
-  PdfName,
-  PdfString,
-  PdfArray,
-  PdfRef,
-} from '../../../src/core/pdfObjects.js';
+import { PdfDict, PdfName, PdfString, PdfArray, PdfRef } from '../../../src/core/pdfObjects.js';
 import type { PdfObject, PdfObjectRegistry } from '../../../src/core/pdfObjects.js';
 
 // ---------------------------------------------------------------------------
@@ -32,7 +26,7 @@ function createMockRegistry(): PdfObjectRegistry {
 describe('PdfFileAttachmentAnnotation', () => {
   describe('create', () => {
     it('creates a file attachment annotation with required options', () => {
-      const fileData = new Uint8Array([0x48, 0x65, 0x6C, 0x6C, 0x6F]); // "Hello"
+      const fileData = new Uint8Array([0x48, 0x65, 0x6c, 0x6c, 0x6f]); // "Hello"
       const annot = PdfFileAttachmentAnnotation.create({
         rect: [100, 700, 120, 720],
         file: fileData,
@@ -71,7 +65,7 @@ describe('PdfFileAttachmentAnnotation', () => {
     it('creates with MIME type and description', () => {
       const annot = PdfFileAttachmentAnnotation.create({
         rect: [0, 0, 20, 20],
-        file: new Uint8Array([0x3C, 0x3F, 0x78, 0x6D, 0x6C]),
+        file: new Uint8Array([0x3c, 0x3f, 0x78, 0x6d, 0x6c]),
         fileName: 'invoice.xml',
         mimeType: 'application/xml',
         description: 'Invoice XML data',

@@ -157,7 +157,7 @@ const C128_START_C = 105;
 const C128_STOP = 106;
 const C128_CODE_A = 101; // When in B: switch to A; When in C: switch to A
 const C128_CODE_B = 100; // When in A: switch to B; When in C: switch to B
-const C128_CODE_C = 99;  // When in A or B: switch to C
+const C128_CODE_C = 99; // When in A or B: switch to C
 
 // Build lookups from widths-string to symbol value for Code 128.
 // We need two maps because START patterns (103-105) share the same
@@ -320,8 +320,7 @@ export function readCode128(modules: readonly boolean[]): BarcodeReadResult {
 
   // Decode data symbols (between START and check digit)
   let codeSet: 'A' | 'B' | 'C' =
-    startValue === C128_START_A ? 'A' :
-    startValue === C128_START_B ? 'B' : 'C';
+    startValue === C128_START_A ? 'A' : startValue === C128_START_B ? 'B' : 'C';
 
   let data = '';
   for (let i = 1; i < checkIdx; i++) {
@@ -329,29 +328,34 @@ export function readCode128(modules: readonly boolean[]): BarcodeReadResult {
 
     // Handle code-set switching
     if (codeSet === 'A' || codeSet === 'B') {
-      if (val === C128_CODE_C) { // 99
+      if (val === C128_CODE_C) {
+        // 99
         codeSet = 'C';
         continue;
       }
     }
     if (codeSet === 'A') {
-      if (val === C128_CODE_B) { // 100
+      if (val === C128_CODE_B) {
+        // 100
         codeSet = 'B';
         continue;
       }
     }
     if (codeSet === 'B') {
-      if (val === C128_CODE_A) { // 101 in Code B context means switch to Code A
+      if (val === C128_CODE_A) {
+        // 101 in Code B context means switch to Code A
         codeSet = 'A';
         continue;
       }
     }
     if (codeSet === 'C') {
-      if (val === C128_CODE_B) { // 100 in Code C context means switch to Code B
+      if (val === C128_CODE_B) {
+        // 100 in Code C context means switch to Code B
         codeSet = 'B';
         continue;
       }
-      if (val === C128_CODE_A) { // 101 in Code C context means switch to Code A
+      if (val === C128_CODE_A) {
+        // 101 in Code C context means switch to Code A
         // NOTE: In Code C, value 100 = CODE B, value 101 = CODE A
         // But in our encoder, CODE_A = 101 when in Code C
         codeSet = 'A';
@@ -384,26 +388,58 @@ export function readCode128(modules: readonly boolean[]): BarcodeReadResult {
  * Each string is '0'=space, '1'=bar.
  */
 const EAN_L: readonly string[] = [
-  '0001101', '0011001', '0010011', '0111101', '0100011',
-  '0110001', '0101111', '0111011', '0110111', '0001011',
+  '0001101',
+  '0011001',
+  '0010011',
+  '0111101',
+  '0100011',
+  '0110001',
+  '0101111',
+  '0111011',
+  '0110111',
+  '0001011',
 ];
 
 /** G-code patterns. */
 const EAN_G: readonly string[] = [
-  '0100111', '0110011', '0011011', '0100001', '0011101',
-  '0111001', '0000101', '0010001', '0001001', '0010111',
+  '0100111',
+  '0110011',
+  '0011011',
+  '0100001',
+  '0011101',
+  '0111001',
+  '0000101',
+  '0010001',
+  '0001001',
+  '0010111',
 ];
 
 /** R-code patterns. */
 const EAN_R: readonly string[] = [
-  '1110010', '1100110', '1101100', '1000010', '1011100',
-  '1001110', '1010000', '1000100', '1001000', '1110100',
+  '1110010',
+  '1100110',
+  '1101100',
+  '1000010',
+  '1011100',
+  '1001110',
+  '1010000',
+  '1000100',
+  '1001000',
+  '1110100',
 ];
 
 /** First-digit parity encodings for EAN-13. */
 const PARITY_PATTERNS: readonly string[] = [
-  'LLLLLL', 'LLGLGG', 'LLGGLG', 'LLGGGL', 'LGLLGG',
-  'LGGLLG', 'LGGGLL', 'LGLGLG', 'LGLGGL', 'LGGLGL',
+  'LLLLLL',
+  'LLGLGG',
+  'LLGGLG',
+  'LLGGGL',
+  'LGLLGG',
+  'LGGLLG',
+  'LGGGLL',
+  'LGLGLG',
+  'LGLGGL',
+  'LGGLGL',
 ];
 
 /** Build lookup maps from 7-module pattern to digit. */
@@ -437,7 +473,7 @@ function calculateEanCheck(digits: string): number {
   let sum = 0;
   for (let i = 0; i < digits.length; i++) {
     const digit = Number(digits[i]);
-    const weight = ((digits.length - 1 - i) % 2 === 0) ? 3 : 1;
+    const weight = (digits.length - 1 - i) % 2 === 0 ? 3 : 1;
     sum += digit * weight;
   }
   const remainder = sum % 10;

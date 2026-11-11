@@ -19,12 +19,7 @@
  * Reference: ISO 16612-2 (PDF/VT); ISO 32000-2:2020, §14.12 (Document parts).
  */
 
-import {
-  PdfArray,
-  PdfDict,
-  PdfName,
-  PdfString,
-} from '../core/pdfObjects.js';
+import { PdfArray, PdfDict, PdfName, PdfString } from '../core/pdfObjects.js';
 import { buildDPartRoot } from '../core/documentParts.js';
 import type { DocumentPart } from '../core/documentParts.js';
 

@@ -4,11 +4,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { PdfCaretAnnotation } from '../../../src/annotation/types/caretAnnotation.js';
-import {
-  PdfDict,
-  PdfName,
-  PdfArray,
-} from '../../../src/core/pdfObjects.js';
+import { PdfDict, PdfName, PdfArray } from '../../../src/core/pdfObjects.js';
 
 describe('PdfCaretAnnotation', () => {
   describe('create', () => {

@@ -7,7 +7,13 @@ import { PdfDocument } from '../../../src/core/pdfDocument.js';
 async function loadPage(w: number, h: number) {
   const doc = PdfDocument.create();
   const page = doc.addPage([w, h]);
-  page.drawRectangle({ x: 15, y: 15, width: 50, height: 50, color: { type: 'rgb', r: 1, g: 0, b: 0 } as never });
+  page.drawRectangle({
+    x: 15,
+    y: 15,
+    width: 50,
+    height: 50,
+    color: { type: 'rgb', r: 1, g: 0, b: 0 } as never,
+  });
   const bytes = await doc.save();
   return (await PdfDocument.load(bytes)).getPage(0);
 }

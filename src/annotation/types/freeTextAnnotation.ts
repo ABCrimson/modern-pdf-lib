@@ -7,12 +7,7 @@
  * Reference: PDF 1.7 spec, Section 12.5.6.6 (Free Text Annotations).
  */
 
-import {
-  PdfDict,
-  PdfNumber,
-  PdfString,
-  PdfStream,
-} from '../../core/pdfObjects.js';
+import { PdfDict, PdfNumber, PdfString, PdfStream } from '../../core/pdfObjects.js';
 import type { PdfObject, PdfRef } from '../../core/pdfObjects.js';
 import { PdfAnnotation, buildAnnotationDict } from '../pdfAnnotation.js';
 import type { AnnotationOptions } from '../pdfAnnotation.js';
@@ -124,10 +119,7 @@ export class PdfFreeTextAnnotation extends PdfAnnotation {
   setFontSize(size: number): void {
     const da = this.getDefaultAppearance();
     // Replace font size in existing DA string
-    const replaced = da.replace(
-      /(\/\w+)\s+[\d.]+\s+Tf/,
-      `$1 ${size} Tf`,
-    );
+    const replaced = da.replace(/(\/\w+)\s+[\d.]+\s+Tf/, `$1 ${size} Tf`);
     if (replaced !== da) {
       this.setDefaultAppearance(replaced);
     } else {

@@ -22,13 +22,7 @@ import {
   type CoonsPatch,
   type TensorPatch,
 } from '../../../src/core/meshShading.js';
-import {
-  PdfArray,
-  PdfDict,
-  PdfName,
-  PdfNumber,
-  PdfStream,
-} from '../../../src/core/pdfObjects.js';
+import { PdfArray, PdfDict, PdfName, PdfNumber, PdfStream } from '../../../src/core/pdfObjects.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -97,9 +91,24 @@ describe('buildFreeFormGouraudShading (type 4)', () => {
       triangles: [tri],
     });
     expect(Array.from(stream.data)).toEqual([
-      0x00, 0x0a, 0x14, 0x1e, 0x28, 0x32, // v0: flag,10,20,30,40,50
-      0x00, 0x3c, 0x46, 0x50, 0x5a, 0x64, // v1: flag,60,70,80,90,100
-      0x00, 0x6e, 0x78, 0x82, 0x8c, 0x96, // v2: flag,110,120,130,140,150
+      0x00,
+      0x0a,
+      0x14,
+      0x1e,
+      0x28,
+      0x32, // v0: flag,10,20,30,40,50
+      0x00,
+      0x3c,
+      0x46,
+      0x50,
+      0x5a,
+      0x64, // v1: flag,60,70,80,90,100
+      0x00,
+      0x6e,
+      0x78,
+      0x82,
+      0x8c,
+      0x96, // v2: flag,110,120,130,140,150
     ]);
     expect((stream.dict.get('/Length') as PdfNumber).value).toBe(18);
   });
@@ -120,10 +129,7 @@ describe('buildFreeFormGouraudShading (type 4)', () => {
         { flag: 0, x: 1, y: 2, color: [3] },
         { flag: 0, x: 1, y: 2, color: [3] },
         { flag: 0, x: 1, y: 2, color: [3] },
-      ] as [
-        MeshVertex & { flag: number },
-        ...(MeshVertex & { flag: number })[],
-      ],
+      ] as [MeshVertex & { flag: number }, ...(MeshVertex & { flag: number })[]],
     };
     const stream = buildFreeFormGouraudShading({
       colorSpace: PdfName.of('DeviceRGB'),

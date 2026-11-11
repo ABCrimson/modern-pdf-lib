@@ -121,11 +121,7 @@ function formatPdfDate(date: Date): string {
  * Find the byte offset of a needle string in a Uint8Array,
  * searching forward from startOffset.
  */
-function findStringForward(
-  data: Uint8Array,
-  needle: string,
-  startOffset: number,
-): number {
+function findStringForward(data: Uint8Array, needle: string, startOffset: number): number {
   const needleBytes = encoder.encode(needle);
   const len = needleBytes.length;
   for (let i = startOffset; i <= data.length - len; i++) {
@@ -211,10 +207,7 @@ function buildSignatureAppearanceStream(options: PrepareAppearanceOptions): stri
  * @internal
  */
 function escapePdfString(str: string): string {
-  return str
-    .replace(/\\/g, '\\\\')
-    .replace(/\(/g, '\\(')
-    .replace(/\)/g, '\\)');
+  return str.replace(/\\/g, '\\\\').replace(/\(/g, '\\(').replace(/\)/g, '\\)');
 }
 
 /**
@@ -270,9 +263,9 @@ export function prepareForSigning(
   pdfBytes: Uint8Array,
   signatureFieldName: string,
   placeholderSize: number = 8192,
-  appearance?: PrepareAppearanceOptions  ,
-  mdpPermission?: number  ,
-  fieldLock?: { action: 'All' | 'Include' | 'Exclude'; fields?: string[] | undefined }  ,
+  appearance?: PrepareAppearanceOptions,
+  mdpPermission?: number,
+  fieldLock?: { action: 'All' | 'Include' | 'Exclude'; fields?: string[] | undefined },
 ): { preparedPdf: Uint8Array; byteRange: ByteRangeResult } {
   // Step 1: Find the original trailer/xref info
   const pdfStr = decoder.decode(pdfBytes);
@@ -310,7 +303,7 @@ export function prepareForSigning(
   const infoMatch = pdfStr.match(/\/Info\s+(\d+)\s+(\d+)\s+R/);
 
   // Allocate new object numbers
-  const sigValueObjNum = originalSize;     // Signature value dict
+  const sigValueObjNum = originalSize; // Signature value dict
   const sigFieldObjNum = originalSize + 1; // Signature field (Widget)
   let apStreamObjNum = -1;
   let newSize = originalSize + 2;
@@ -330,7 +323,12 @@ export function prepareForSigning(
       ` /TransformParams << /Type /TransformParams /P ${mdpPermission} /V /1.2 >> >>]`;
   }
 
-  const sigDictStr = buildSignatureDictString(placeholderSize, signatureFieldName, undefined, mdpReference);
+  const sigDictStr = buildSignatureDictString(
+    placeholderSize,
+    signatureFieldName,
+    undefined,
+    mdpReference,
+  );
 
   // Build rect string
   let rectStr = '0 0 0 0';
@@ -352,9 +350,7 @@ export function prepareForSigning(
   if (fieldLock !== undefined) {
     sigFieldDict += ` /Lock << /Type /SigFieldLock /Action /${fieldLock.action}`;
     if (fieldLock.action !== 'All' && fieldLock.fields && fieldLock.fields.length > 0) {
-      const fieldEntries = fieldLock.fields
-        .map((f: string) => `(${escapePdfString(f)})`)
-        .join(' ');
+      const fieldEntries = fieldLock.fields.map((f: string) => `(${escapePdfString(f)})`).join(' ');
       sigFieldDict += ` /Fields [${fieldEntries}]`;
     }
     sigFieldDict += ' >>';
@@ -432,11 +428,7 @@ export function prepareForSigning(
   // Step 3: Find the /Contents placeholder to compute ByteRange
   // The /Contents hex string is in the sig value object
   const contentsMarker = '/Contents <';
-  const contentsKeyOffset = findStringForward(
-    preparedPdf,
-    contentsMarker,
-    pdfBytes.length,
-  );
+  const contentsKeyOffset = findStringForward(preparedPdf, contentsMarker, pdfBytes.length);
   if (contentsKeyOffset === -1) {
     throw new Error('Cannot find /Contents placeholder in prepared PDF');
   }
@@ -470,11 +462,7 @@ export function prepareForSigning(
     `${byteRange[3].toString().padStart(10, ' ')}`;
 
   const byteRangeMarker = '/ByteRange [';
-  const byteRangeKeyOffset = findStringForward(
-    preparedPdf,
-    byteRangeMarker,
-    pdfBytes.length,
-  );
+  const byteRangeKeyOffset = findStringForward(preparedPdf, byteRangeMarker, pdfBytes.length);
   if (byteRangeKeyOffset === -1) {
     throw new Error('Cannot find /ByteRange placeholder in prepared PDF');
   }
@@ -525,7 +513,7 @@ export async function computeSignatureHash(
   if (!subtle) {
     throw new Error(
       'Web Crypto API (crypto.subtle) is not available. ' +
-      'Requires Node.js 18+, a modern browser, Deno, or Bun.',
+        'Requires Node.js 18+, a modern browser, Deno, or Bun.',
     );
   }
 
@@ -565,7 +553,7 @@ export function embedSignature(
   if (signatureBytes.length > maxSigBytes) {
     throw new Error(
       `Signature (${signatureBytes.length} bytes) exceeds placeholder capacity ` +
-      `(${maxSigBytes} bytes). Increase placeholderSize.`,
+        `(${maxSigBytes} bytes). Increase placeholderSize.`,
     );
   }
 
@@ -589,9 +577,7 @@ export function embedSignature(
  * @param pdfBytes  The PDF bytes to scan.
  * @returns         Array of signature info objects.
  */
-export function findSignatures(
-  pdfBytes: Uint8Array,
-): Array<{
+export function findSignatures(pdfBytes: Uint8Array): Array<{
   byteRange: [number, number, number, number];
   contentsHex: string;
   contentsOffset: number;

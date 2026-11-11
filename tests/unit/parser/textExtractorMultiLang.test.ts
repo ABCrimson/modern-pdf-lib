@@ -18,11 +18,7 @@ import {
   parseToUnicodeCMap,
 } from '../../../src/parser/textExtractor.js';
 import type { ContentStreamOperator } from '../../../src/parser/contentStreamParser.js';
-import {
-  PdfDict,
-  PdfName,
-  PdfStream,
-} from '../../../src/core/pdfObjects.js';
+import { PdfDict, PdfName, PdfStream } from '../../../src/core/pdfObjects.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -226,8 +222,13 @@ describe('Multi-lang: Japanese', () => {
   it('extracts mixed Kanji + Hiragana', () => {
     const resources = makeCIDFontResource('F1', makeToUnicodeCMap(mappings));
     const ops = makeCIDTextOps('F1', 12, [
-      0x0020, 0x0021, // 東京
-      0x0001, 0x0002, 0x0003, 0x0004, 0x0005, // こんにちは
+      0x0020,
+      0x0021, // 東京
+      0x0001,
+      0x0002,
+      0x0003,
+      0x0004,
+      0x0005, // こんにちは
     ]);
     const text = extractText(ops, resources);
     expect(text).toBe('\u6771\u4EAC\u3053\u3093\u306B\u3061\u306F'); // 東京こんにちは
@@ -712,8 +713,14 @@ describe('Multi-lang: Arabic + numbers', () => {
   it('extracts Arabic word followed by digits', () => {
     const resources = makeCIDFontResource('F1', makeToUnicodeCMap(mappings));
     const ops = makeCIDTextOps('F1', 12, [
-      0x0001, 0x0002, 0x0003, 0x0004, 0x0005, // الرقم
-      0x000a, 0x000b, 0x000c, // 123
+      0x0001,
+      0x0002,
+      0x0003,
+      0x0004,
+      0x0005, // الرقم
+      0x000a,
+      0x000b,
+      0x000c, // 123
     ]);
     const text = extractText(ops, resources);
     expect(text).toContain('\u0627\u0644\u0631\u0642\u0645'); // الرقم
@@ -723,9 +730,12 @@ describe('Multi-lang: Arabic + numbers', () => {
   it('extracts digits surrounded by Arabic text', () => {
     const resources = makeCIDFontResource('F1', makeToUnicodeCMap(mappings));
     const ops = makeCIDTextOps('F1', 12, [
-      0x0001, 0x0002, // ال
-      0x000a, 0x000b, // 12
-      0x0003, 0x0004, // رق
+      0x0001,
+      0x0002, // ال
+      0x000a,
+      0x000b, // 12
+      0x0003,
+      0x0004, // رق
     ]);
     const text = extractText(ops, resources);
     expect(text).toBe('\u0627\u064412\u0631\u0642'); // ال12رق
@@ -1011,7 +1021,10 @@ describe('Multi-lang: Single-byte font with ToUnicode', () => {
     const operators: ContentStreamOperator[] = [
       { operator: 'BT', operands: [] },
       { operator: 'Tf', operands: ['/F1', 12] },
-      { operator: 'Tj', operands: [String.fromCharCode(1) + String.fromCharCode(2) + String.fromCharCode(3)] },
+      {
+        operator: 'Tj',
+        operands: [String.fromCharCode(1) + String.fromCharCode(2) + String.fromCharCode(3)],
+      },
       { operator: 'ET', operands: [] },
     ];
 

@@ -57,9 +57,7 @@ describe('formatDate', () => {
   });
 
   it('formats with full day name', () => {
-    expect(formatDate(date, 'dddd, mmmm d, yyyy')).toBe(
-      'Wednesday, March 5, 2025',
-    );
+    expect(formatDate(date, 'dddd, mmmm d, yyyy')).toBe('Wednesday, March 5, 2025');
   });
 
   it('formats 24-hour time', () => {
@@ -81,9 +79,7 @@ describe('formatDate', () => {
   });
 
   it('formats full datetime', () => {
-    expect(formatDate(date, 'mm/dd/yyyy HH:MM:ss')).toBe(
-      '03/05/2025 14:30:45',
-    );
+    expect(formatDate(date, 'mm/dd/yyyy HH:MM:ss')).toBe('03/05/2025 14:30:45');
   });
 
   it('handles midnight (12 AM)', () => {
@@ -167,10 +163,7 @@ describe('parseAcrobatDate', () => {
   });
 
   it('parses time with 24-hour clock', () => {
-    const result = parseAcrobatDate(
-      '03/05/2025 14:30:45',
-      'mm/dd/yyyy HH:MM:ss',
-    );
+    const result = parseAcrobatDate('03/05/2025 14:30:45', 'mm/dd/yyyy HH:MM:ss');
     expect(result).not.toBeNull();
     expect(result!.getHours()).toBe(14);
     expect(result!.getMinutes()).toBe(30);
@@ -178,10 +171,7 @@ describe('parseAcrobatDate', () => {
   });
 
   it('parses time with AM/PM', () => {
-    const result = parseAcrobatDate(
-      '03/05/2025 02:30 PM',
-      'mm/dd/yyyy hh:MM tt',
-    );
+    const result = parseAcrobatDate('03/05/2025 02:30 PM', 'mm/dd/yyyy hh:MM tt');
     expect(result).not.toBeNull();
     expect(result!.getHours()).toBe(14);
     expect(result!.getMinutes()).toBe(30);
@@ -320,13 +310,7 @@ describe('AFDate_KeystrokeEx', () => {
 // ---------------------------------------------------------------------------
 
 describe('format → parse round-trip', () => {
-  const formats = [
-    'mm/dd/yyyy',
-    'dd/mm/yyyy',
-    'yyyy-mm-dd',
-    'mmm d, yyyy',
-    'mmmm dd, yyyy',
-  ];
+  const formats = ['mm/dd/yyyy', 'dd/mm/yyyy', 'yyyy-mm-dd', 'mmm d, yyyy', 'mmmm dd, yyyy'];
 
   for (const fmt of formats) {
     it(`round-trips format "${fmt}"`, () => {
@@ -357,8 +341,18 @@ describe('format → parse round-trip', () => {
 
 describe('month names', () => {
   const months = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December',
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
   ];
 
   for (let i = 0; i < 12; i++) {

@@ -25,12 +25,7 @@
  * Reference: PDF 2.0 spec (ISO 32000-2), §14.7.4 (Namespaces).
  */
 
-import {
-  PdfArray,
-  PdfDict,
-  PdfName,
-  PdfString,
-} from '../core/pdfObjects.js';
+import { PdfArray, PdfDict, PdfName, PdfString } from '../core/pdfObjects.js';
 
 // ---------------------------------------------------------------------------
 // Common namespace identifiers

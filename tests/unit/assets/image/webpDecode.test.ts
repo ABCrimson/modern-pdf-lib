@@ -11,12 +11,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  decodeWebP,
-  isWebP,
-  isWebPLossless,
-} from '../../../../src/assets/image/webpDecode.js';
-
+import { decodeWebP, isWebP, isWebPLossless } from '../../../../src/assets/image/webpDecode.js';
 
 // ---------------------------------------------------------------------------
 // Helpers — minimal valid WebP construction
@@ -26,12 +21,18 @@ import {
 function riffHeader(fileSize: number): Uint8Array {
   const h = new Uint8Array(12);
   // RIFF
-  h[0] = 0x52; h[1] = 0x49; h[2] = 0x46; h[3] = 0x46;
+  h[0] = 0x52;
+  h[1] = 0x49;
+  h[2] = 0x46;
+  h[3] = 0x46;
   // File size (little-endian)
   const view = new DataView(h.buffer);
   view.setUint32(4, fileSize - 8, true);
   // WEBP
-  h[8] = 0x57; h[9] = 0x45; h[10] = 0x42; h[11] = 0x50;
+  h[8] = 0x57;
+  h[9] = 0x45;
+  h[10] = 0x42;
+  h[11] = 0x50;
   return h;
 }
 
@@ -60,16 +61,16 @@ function buildMinimalVP8(width: number, height: number): Uint8Array {
   // Frame tag: 3 bytes, little-endian
   // bit0: 0=keyframe, bits1-3: version=0, bit4: showFrame=1, bits5-23: firstPartSize
   const firstPartSize = 50; // Approximate
-  const frameTag = (0) | (0 << 1) | (1 << 4) | (firstPartSize << 5);
-  headerBytes.push(frameTag & 0xFF, (frameTag >> 8) & 0xFF, (frameTag >> 16) & 0xFF);
+  const frameTag = 0 | (0 << 1) | (1 << 4) | (firstPartSize << 5);
+  headerBytes.push(frameTag & 0xff, (frameTag >> 8) & 0xff, (frameTag >> 16) & 0xff);
 
   // Keyframe signature: 0x9D 0x01 0x2A
-  headerBytes.push(0x9D, 0x01, 0x2A);
+  headerBytes.push(0x9d, 0x01, 0x2a);
 
   // Width (LE 16-bit, lower 14 bits = width, upper 2 = scale)
-  headerBytes.push(width & 0xFF, (width >> 8) & 0x3F);
+  headerBytes.push(width & 0xff, (width >> 8) & 0x3f);
   // Height (LE 16-bit)
-  headerBytes.push(height & 0xFF, (height >> 8) & 0x3F);
+  headerBytes.push(height & 0xff, (height >> 8) & 0x3f);
 
   // Bool decoder data: we need at least enough bytes for the header parsing
   // Fill with neutral bytes (128) for the bool decoder
@@ -125,23 +126,30 @@ class BitWriter {
  * - 5 Huffman code groups using simple codes
  * - Pixel data encoded through the Huffman trees
  */
-function buildMinimalVP8L(width: number, height: number, r: number, g: number, b: number, a: number): Uint8Array {
+function buildMinimalVP8L(
+  width: number,
+  height: number,
+  r: number,
+  g: number,
+  b: number,
+  a: number,
+): Uint8Array {
   const header = new Uint8Array(5);
-  header[0] = 0x2F; // VP8L signature
+  header[0] = 0x2f; // VP8L signature
 
   const w = width - 1;
   const h = height - 1;
   const hasAlpha = a < 255 ? 1 : 0;
 
   let headerBits = 0;
-  headerBits |= w & 0x3FFF;
-  headerBits |= (h & 0x3FFF) << 14;
+  headerBits |= w & 0x3fff;
+  headerBits |= (h & 0x3fff) << 14;
   headerBits |= hasAlpha << 28;
 
-  header[1] = headerBits & 0xFF;
-  header[2] = (headerBits >> 8) & 0xFF;
-  header[3] = (headerBits >> 16) & 0xFF;
-  header[4] = (headerBits >> 24) & 0xFF;
+  header[1] = headerBits & 0xff;
+  header[2] = (headerBits >> 8) & 0xff;
+  header[3] = (headerBits >> 16) & 0xff;
+  header[4] = (headerBits >> 24) & 0xff;
 
   const bw = new BitWriter();
 
@@ -157,10 +165,10 @@ function buildMinimalVP8L(width: number, height: number, r: number, g: number, b
   const symbols = [g, r, b, a, 0]; // Green, Red, Blue, Alpha, Distance
 
   for (const sym of symbols) {
-    bw.write(1, 1);  // simple code
-    bw.write(1, 1);  // numBits = 1 (two 8-bit symbol format)
-    bw.write(sym, 8);  // first symbol
-    bw.write(sym, 8);  // second symbol (same = single-symbol tree)
+    bw.write(1, 1); // simple code
+    bw.write(1, 1); // numBits = 1 (two 8-bit symbol format)
+    bw.write(sym, 8); // first symbol
+    bw.write(sym, 8); // second symbol (same = single-symbol tree)
   }
 
   // Now write pixel data: for 1x1, the decoder reads 1 literal pixel.
@@ -197,7 +205,14 @@ function buildMinimalWebP_VP8(width: number, height: number): Uint8Array {
 }
 
 /** Build a complete minimal WebP file with VP8L chunk. */
-function buildMinimalWebP_VP8L(width: number, height: number, r: number, g: number, b: number, a: number = 255): Uint8Array {
+function buildMinimalWebP_VP8L(
+  width: number,
+  height: number,
+  r: number,
+  g: number,
+  b: number,
+  a: number = 255,
+): Uint8Array {
   const vp8lData = buildMinimalVP8L(width, height, r, g, b, a);
   const vp8lChunk = chunk('VP8L', vp8lData);
   const fileSize = 12 + vp8lChunk.length;
@@ -253,8 +268,14 @@ describe('isWebP', () => {
 
   it('rejects RIFF file that is not WEBP', () => {
     const data = new Uint8Array(12);
-    data[0] = 0x52; data[1] = 0x49; data[2] = 0x46; data[3] = 0x46;
-    data[8] = 0x41; data[9] = 0x56; data[10] = 0x49; data[11] = 0x20; // "AVI "
+    data[0] = 0x52;
+    data[1] = 0x49;
+    data[2] = 0x46;
+    data[3] = 0x46;
+    data[8] = 0x41;
+    data[9] = 0x56;
+    data[10] = 0x49;
+    data[11] = 0x20; // "AVI "
     expect(isWebP(data)).toBe(false);
   });
 });
@@ -340,8 +361,8 @@ describe('decodeWebP — VP8L (lossless)', () => {
     expect(result.pixels.length).toBe(3);
     // Verify pixel values (R, G, B)
     expect(result.pixels[0]).toBe(128); // Red
-    expect(result.pixels[1]).toBe(64);  // Green
-    expect(result.pixels[2]).toBe(32);  // Blue
+    expect(result.pixels[1]).toBe(64); // Green
+    expect(result.pixels[2]).toBe(32); // Blue
   });
 
   it('decodes a VP8L image with alpha', () => {
@@ -355,7 +376,7 @@ describe('decodeWebP — VP8L (lossless)', () => {
     expect(result.pixels.length).toBe(4);
     expect(result.pixels[0]).toBe(200); // R
     expect(result.pixels[1]).toBe(100); // G
-    expect(result.pixels[2]).toBe(50);  // B
+    expect(result.pixels[2]).toBe(50); // B
     expect(result.pixels[3]).toBe(128); // A
   });
 });

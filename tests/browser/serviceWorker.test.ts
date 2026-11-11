@@ -21,16 +21,21 @@ function installServiceWorkerGlobals(): void {
   // Create a mock ServiceWorkerGlobalScope constructor
   class MockServiceWorkerGlobalScope {}
 
-  originalServiceWorkerGlobalScope = (globalThis as Record<string, unknown>)['ServiceWorkerGlobalScope'];
+  originalServiceWorkerGlobalScope = (globalThis as Record<string, unknown>)[
+    'ServiceWorkerGlobalScope'
+  ];
   originalSelf = (globalThis as Record<string, unknown>)['self'];
   originalProcess = (globalThis as Record<string, unknown>)['process'];
   hasSWGS = 'ServiceWorkerGlobalScope' in globalThis;
   hasProcess = 'process' in globalThis;
 
   // Install mock
-  (globalThis as Record<string, unknown>)['ServiceWorkerGlobalScope'] = MockServiceWorkerGlobalScope;
+  (globalThis as Record<string, unknown>)['ServiceWorkerGlobalScope'] =
+    MockServiceWorkerGlobalScope;
   // Make `self` an instance of the mock
-  (globalThis as Record<string, unknown>)['self'] = Object.create(MockServiceWorkerGlobalScope.prototype);
+  (globalThis as Record<string, unknown>)['self'] = Object.create(
+    MockServiceWorkerGlobalScope.prototype,
+  );
   // Remove process to simulate a non-Node environment (real Service Workers
   // have no process.versions.node)
   delete (globalThis as Record<string, unknown>)['process'];
@@ -38,7 +43,8 @@ function installServiceWorkerGlobals(): void {
 
 function removeServiceWorkerGlobals(): void {
   if (hasSWGS) {
-    (globalThis as Record<string, unknown>)['ServiceWorkerGlobalScope'] = originalServiceWorkerGlobalScope;
+    (globalThis as Record<string, unknown>)['ServiceWorkerGlobalScope'] =
+      originalServiceWorkerGlobalScope;
   } else {
     delete (globalThis as Record<string, unknown>)['ServiceWorkerGlobalScope'];
   }
@@ -109,9 +115,7 @@ describe('createPdfResponse', () => {
 
   it('sets content-disposition with the given filename', () => {
     const res = createPdfResponse(new Uint8Array(0), 'report.pdf');
-    expect(res.headers.get('content-disposition')).toBe(
-      'attachment; filename="report.pdf"',
-    );
+    expect(res.headers.get('content-disposition')).toBe('attachment; filename="report.pdf"');
   });
 
   it('body contains the original PDF bytes', async () => {

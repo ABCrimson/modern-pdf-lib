@@ -3,11 +3,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  createPdf,
-  PdfDocument,
-  PageSizes,
-} from '../../../src/index.js';
+import { createPdf, PdfDocument, PageSizes } from '../../../src/index.js';
 
 // ---------------------------------------------------------------------------
 // Tests

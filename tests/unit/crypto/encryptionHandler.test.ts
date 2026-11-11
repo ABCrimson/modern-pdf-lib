@@ -339,11 +339,7 @@ describe('PdfEncryptionHandler — fromEncryptDict round-trip', () => {
     const dict = original.buildEncryptDict();
 
     // Recreate from the dictionary
-    const restored = await PdfEncryptionHandler.fromEncryptDict(
-      dict,
-      fileId,
-      'user',
-    );
+    const restored = await PdfEncryptionHandler.fromEncryptDict(dict, fileId, 'user');
 
     // Should be able to decrypt what the original encrypted
     const plaintext = new TextEncoder().encode('round-trip test');
@@ -408,9 +404,9 @@ describe('PdfEncryptionHandler — fromEncryptDict round-trip', () => {
     );
     const dict = original.buildEncryptDict();
 
-    await expect(
-      PdfEncryptionHandler.fromEncryptDict(dict, fileId, 'wrong'),
-    ).rejects.toThrow('Incorrect password');
+    await expect(PdfEncryptionHandler.fromEncryptDict(dict, fileId, 'wrong')).rejects.toThrow(
+      'Incorrect password',
+    );
   });
 
   it('should round-trip AES-256: create -> buildDict -> fromDict', async () => {

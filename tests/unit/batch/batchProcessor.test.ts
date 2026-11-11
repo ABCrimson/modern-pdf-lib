@@ -18,12 +18,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { createPdf, PdfDocument } from '../../../src/core/pdfDocument.js';
-import {
-  processBatch,
-  batchMerge,
-  batchFlatten,
-} from '../../../src/batch/batchProcessor.js';
-
+import { processBatch, batchMerge, batchFlatten } from '../../../src/batch/batchProcessor.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -61,10 +56,7 @@ describe('processBatch', () => {
   it('processes a single file', async () => {
     const pdf = await makeSimplePdf();
 
-    const result = await processBatch(
-      [pdf],
-      async (doc) => doc.save(),
-    );
+    const result = await processBatch([pdf], async (doc) => doc.save());
 
     expect(result.outputs).toHaveLength(1);
     expect(result.successCount).toBe(1);
@@ -77,10 +69,7 @@ describe('processBatch', () => {
     const pdf2 = await makeSimplePdf('File 2');
     const pdf3 = await makeSimplePdf('File 3');
 
-    const result = await processBatch(
-      [pdf1, pdf2, pdf3],
-      async (doc) => doc.save(),
-    );
+    const result = await processBatch([pdf1, pdf2, pdf3], async (doc) => doc.save());
 
     expect(result.outputs).toHaveLength(3);
     expect(result.successCount).toBe(3);
@@ -94,15 +83,12 @@ describe('processBatch', () => {
     const pdf = await makeSimplePdf();
     const pageCounts: number[] = [];
 
-    await processBatch(
-      [pdf, pdf],
-      async (doc) => {
-        pageCounts.push(doc.getPageCount());
-        // Add a page to verify operation runs
-        doc.addPage([100, 100]);
-        return doc.save();
-      },
-    );
+    await processBatch([pdf, pdf], async (doc) => {
+      pageCounts.push(doc.getPageCount());
+      // Add a page to verify operation runs
+      doc.addPage([100, 100]);
+      return doc.save();
+    });
 
     // Each original PDF has 1 page
     expect(pageCounts).toEqual([1, 1]);
@@ -136,15 +122,11 @@ describe('processBatch', () => {
     const pdf = await makeSimplePdf();
     const progressCalls: [number, number][] = [];
 
-    await processBatch(
-      [pdf, pdf, pdf],
-      async (doc) => doc.save(),
-      {
-        onProgress: (done, total) => {
-          progressCalls.push([done, total]);
-        },
+    await processBatch([pdf, pdf, pdf], async (doc) => doc.save(), {
+      onProgress: (done, total) => {
+        progressCalls.push([done, total]);
       },
-    );
+    });
 
     expect(progressCalls).toHaveLength(3);
     // Each call should report correct total
@@ -160,10 +142,7 @@ describe('processBatch', () => {
     const goodPdf = await makeSimplePdf();
     const badPdf = new Uint8Array([0, 1, 2, 3]); // Invalid PDF
 
-    const result = await processBatch(
-      [goodPdf, badPdf, goodPdf],
-      async (doc) => doc.save(),
-    );
+    const result = await processBatch([goodPdf, badPdf, goodPdf], async (doc) => doc.save());
 
     expect(result.successCount).toBe(2);
     expect(result.errors.size).toBe(1);
@@ -179,35 +158,25 @@ describe('processBatch', () => {
   it('handles error thrown by operation', async () => {
     const pdf = await makeSimplePdf();
 
-    const result = await processBatch(
-      [pdf, pdf],
-      async (_doc) => {
-        throw new Error('Operation failed');
-      },
-    );
+    const result = await processBatch([pdf, pdf], async (_doc) => {
+      throw new Error('Operation failed');
+    });
 
     expect(result.successCount).toBe(0);
     expect(result.errors.size).toBe(2);
   });
 
   it('preserves output order matching input order', async () => {
-    const pdfs = await Promise.all([
-      makeSimplePdf('A'),
-      makeSimplePdf('B'),
-      makeSimplePdf('C'),
-    ]);
+    const pdfs = await Promise.all([makeSimplePdf('A'), makeSimplePdf('B'), makeSimplePdf('C')]);
 
     const titles: string[] = [];
 
-    const result = await processBatch(
-      pdfs,
-      async (doc) => {
-        const title = doc.getTitle() ?? 'none';
-        doc.setTitle(`processed-${titles.length}`);
-        titles.push(title);
-        return doc.save();
-      },
-    );
+    const result = await processBatch(pdfs, async (doc) => {
+      const title = doc.getTitle() ?? 'none';
+      doc.setTitle(`processed-${titles.length}`);
+      titles.push(title);
+      return doc.save();
+    });
 
     expect(result.outputs).toHaveLength(3);
     expect(result.successCount).toBe(3);
@@ -243,11 +212,9 @@ describe('error strategies', () => {
       const goodPdf = await makeSimplePdf();
       const badPdf = new Uint8Array([0, 1, 2, 3]);
 
-      const result = await processBatch(
-        [goodPdf, badPdf, goodPdf],
-        async (doc) => doc.save(),
-        { errorStrategy: 'continue' },
-      );
+      const result = await processBatch([goodPdf, badPdf, goodPdf], async (doc) => doc.save(), {
+        errorStrategy: 'continue',
+      });
 
       expect(result.successCount).toBe(2);
       expect(result.errors.size).toBe(1);
@@ -261,10 +228,7 @@ describe('error strategies', () => {
       const goodPdf = await makeSimplePdf();
       const badPdf = new Uint8Array([0, 1, 2, 3]);
 
-      const result = await processBatch(
-        [goodPdf, badPdf],
-        async (doc) => doc.save(),
-      );
+      const result = await processBatch([goodPdf, badPdf], async (doc) => doc.save());
 
       expect(result.successCount).toBe(1);
       expect(result.errors.size).toBe(1);
@@ -277,11 +241,10 @@ describe('error strategies', () => {
       const badPdf = new Uint8Array([0, 1, 2, 3]);
 
       await expect(
-        processBatch(
-          [goodPdf, badPdf, goodPdf],
-          async (doc) => doc.save(),
-          { errorStrategy: 'fail-fast', concurrency: 1 },
-        ),
+        processBatch([goodPdf, badPdf, goodPdf], async (doc) => doc.save(), {
+          errorStrategy: 'fail-fast',
+          concurrency: 1,
+        }),
       ).rejects.toThrow();
     });
 
@@ -291,7 +254,9 @@ describe('error strategies', () => {
       await expect(
         processBatch(
           [pdf],
-          async () => { throw new Error('custom failure'); },
+          async () => {
+            throw new Error('custom failure');
+          },
           { errorStrategy: 'fail-fast' },
         ),
       ).rejects.toThrow('custom failure');
@@ -301,11 +266,9 @@ describe('error strategies', () => {
       const pdf = await makeSimplePdf();
 
       // Should resolve normally
-      const result = await processBatch(
-        [pdf, pdf],
-        async (doc) => doc.save(),
-        { errorStrategy: 'fail-fast' },
-      );
+      const result = await processBatch([pdf, pdf], async (doc) => doc.save(), {
+        errorStrategy: 'fail-fast',
+      });
 
       expect(result.successCount).toBe(2);
       expect(result.errors.size).toBe(0);
@@ -317,11 +280,9 @@ describe('error strategies', () => {
       const badPdf = new Uint8Array([0, 1, 2, 3]);
 
       try {
-        await processBatch(
-          [badPdf, badPdf, badPdf],
-          async (doc) => doc.save(),
-          { errorStrategy: 'collect' },
-        );
+        await processBatch([badPdf, badPdf, badPdf], async (doc) => doc.save(), {
+          errorStrategy: 'collect',
+        });
         expect.unreachable('should have thrown');
       } catch (err) {
         expect(err).toBeInstanceOf(AggregateError);
@@ -336,11 +297,9 @@ describe('error strategies', () => {
       const badPdf = new Uint8Array([0, 1, 2, 3]);
 
       try {
-        await processBatch(
-          [goodPdf, badPdf, goodPdf, badPdf],
-          async (doc) => doc.save(),
-          { errorStrategy: 'collect' },
-        );
+        await processBatch([goodPdf, badPdf, goodPdf, badPdf], async (doc) => doc.save(), {
+          errorStrategy: 'collect',
+        });
         expect.unreachable('should have thrown');
       } catch (err) {
         const agg = err as AggregateError;
@@ -355,11 +314,9 @@ describe('error strategies', () => {
     it('does not throw when all items succeed', async () => {
       const pdf = await makeSimplePdf();
 
-      const result = await processBatch(
-        [pdf, pdf],
-        async (doc) => doc.save(),
-        { errorStrategy: 'collect' },
-      );
+      const result = await processBatch([pdf, pdf], async (doc) => doc.save(), {
+        errorStrategy: 'collect',
+      });
 
       expect(result.successCount).toBe(2);
       expect(result.errors.size).toBe(0);
@@ -393,11 +350,7 @@ describe('per-item timeout', () => {
   it('allows items that complete within the timeout', async () => {
     const pdf = await makeSimplePdf();
 
-    const result = await processBatch(
-      [pdf],
-      async (doc) => doc.save(),
-      { timeout: 5000 },
-    );
+    const result = await processBatch([pdf], async (doc) => doc.save(), { timeout: 5000 });
 
     expect(result.successCount).toBe(1);
     expect(result.errors.size).toBe(0);
@@ -451,11 +404,10 @@ describe('memory pressure throttling', () => {
     const pdf = await makeSimplePdf();
 
     // A very high threshold — should never throttle
-    const result = await processBatch(
-      [pdf, pdf],
-      async (doc) => doc.save(),
-      { maxMemoryMB: 4096, concurrency: 2 },
-    );
+    const result = await processBatch([pdf, pdf], async (doc) => doc.save(), {
+      maxMemoryMB: 4096,
+      concurrency: 2,
+    });
 
     expect(result.successCount).toBe(2);
   });
@@ -489,11 +441,10 @@ describe('memory pressure throttling', () => {
   it('still processes all items under memory pressure', async () => {
     const pdf = await makeSimplePdf();
 
-    const result = await processBatch(
-      [pdf, pdf, pdf],
-      async (doc) => doc.save(),
-      { maxMemoryMB: 0.000001, concurrency: 3 },
-    );
+    const result = await processBatch([pdf, pdf, pdf], async (doc) => doc.save(), {
+      maxMemoryMB: 0.000001,
+      concurrency: 3,
+    });
 
     // All items should still succeed, just with reduced concurrency
     expect(result.successCount).toBe(3);
@@ -582,14 +533,12 @@ describe('progress callback accuracy', () => {
     const pdf = await makeSimplePdf();
     const doneValues: number[] = [];
 
-    await processBatch(
-      [pdf, pdf, pdf, pdf],
-      async (doc) => doc.save(),
-      {
-        concurrency: 1,
-        onProgress: (done) => { doneValues.push(done); },
+    await processBatch([pdf, pdf, pdf, pdf], async (doc) => doc.save(), {
+      concurrency: 1,
+      onProgress: (done) => {
+        doneValues.push(done);
       },
-    );
+    });
 
     expect(doneValues).toEqual([1, 2, 3, 4]);
   });
@@ -598,13 +547,11 @@ describe('progress callback accuracy', () => {
     const pdf = await makeSimplePdf();
     const totals: number[] = [];
 
-    await processBatch(
-      [pdf, pdf, pdf],
-      async (doc) => doc.save(),
-      {
-        onProgress: (_, total) => { totals.push(total); },
+    await processBatch([pdf, pdf, pdf], async (doc) => doc.save(), {
+      onProgress: (_, total) => {
+        totals.push(total);
       },
-    );
+    });
 
     expect(totals).toEqual([3, 3, 3]);
   });
@@ -614,14 +561,12 @@ describe('progress callback accuracy', () => {
     const badPdf = new Uint8Array([0, 1, 2, 3]);
     const progressCalls: [number, number][] = [];
 
-    await processBatch(
-      [goodPdf, badPdf, goodPdf],
-      async (doc) => doc.save(),
-      {
-        concurrency: 1,
-        onProgress: (done, total) => { progressCalls.push([done, total]); },
+    await processBatch([goodPdf, badPdf, goodPdf], async (doc) => doc.save(), {
+      concurrency: 1,
+      onProgress: (done, total) => {
+        progressCalls.push([done, total]);
       },
-    );
+    });
 
     // All 3 items should trigger progress, including the failed one
     expect(progressCalls).toHaveLength(3);
@@ -639,7 +584,9 @@ describe('progress callback accuracy', () => {
       },
       {
         timeout: 50,
-        onProgress: (done, total) => { progressCalls.push([done, total]); },
+        onProgress: (done, total) => {
+          progressCalls.push([done, total]);
+        },
       },
     );
 
@@ -656,10 +603,7 @@ describe('edge cases', () => {
   it('handles single item with success', async () => {
     const pdf = await makeSimplePdf();
 
-    const result = await processBatch(
-      [pdf],
-      async (doc) => doc.save(),
-    );
+    const result = await processBatch([pdf], async (doc) => doc.save());
 
     expect(result.outputs).toHaveLength(1);
     expect(result.successCount).toBe(1);
@@ -669,10 +613,7 @@ describe('edge cases', () => {
   it('handles single item with failure', async () => {
     const badPdf = new Uint8Array([0, 1, 2, 3]);
 
-    const result = await processBatch(
-      [badPdf],
-      async (doc) => doc.save(),
-    );
+    const result = await processBatch([badPdf], async (doc) => doc.save());
 
     expect(result.outputs).toHaveLength(1);
     expect(result.successCount).toBe(0);
@@ -683,10 +624,7 @@ describe('edge cases', () => {
   it('handles all failures gracefully', async () => {
     const badPdf = new Uint8Array([0, 1, 2, 3]);
 
-    const result = await processBatch(
-      [badPdf, badPdf, badPdf],
-      async (doc) => doc.save(),
-    );
+    const result = await processBatch([badPdf, badPdf, badPdf], async (doc) => doc.save());
 
     expect(result.successCount).toBe(0);
     expect(result.errors.size).toBe(3);
@@ -698,10 +636,9 @@ describe('edge cases', () => {
   it('handles operation that throws non-Error values', async () => {
     const pdf = await makeSimplePdf();
 
-    const result = await processBatch(
-      [pdf],
-      async () => { throw 'string error'; },
-    );
+    const result = await processBatch([pdf], async () => {
+      throw 'string error';
+    });
 
     expect(result.errors.size).toBe(1);
     expect(result.errors.get(0)).toBeInstanceOf(Error);
@@ -714,16 +651,14 @@ describe('edge cases', () => {
     const progressCalls: number[] = [];
 
     try {
-      await processBatch(
-        [goodPdf, badPdf],
-        async (doc) => doc.save(),
-        {
-          concurrency: 1,
-          timeout: 5000,
-          errorStrategy: 'collect',
-          onProgress: (done) => { progressCalls.push(done); },
+      await processBatch([goodPdf, badPdf], async (doc) => doc.save(), {
+        concurrency: 1,
+        timeout: 5000,
+        errorStrategy: 'collect',
+        onProgress: (done) => {
+          progressCalls.push(done);
         },
-      );
+      });
       expect.unreachable('should have thrown');
     } catch (err) {
       expect(err).toBeInstanceOf(AggregateError);

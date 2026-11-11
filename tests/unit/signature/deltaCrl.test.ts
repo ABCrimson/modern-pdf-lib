@@ -3,11 +3,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  parseDeltaCrl,
-  mergeCrls,
-  isDeltaCrl,
-} from '../../../src/signature/deltaCrl.js';
+import { parseDeltaCrl, mergeCrls, isDeltaCrl } from '../../../src/signature/deltaCrl.js';
 import type { DeltaCrlData } from '../../../src/signature/deltaCrl.js';
 import type { CrlData } from '../../../src/signature/revocationCache.js';
 import {
@@ -106,20 +102,28 @@ function buildMockTbsCertList(options: {
   }
 
   // signature AlgorithmIdentifier
-  parts.push(encodeSequence([
-    encodeOID('1.2.840.113549.1.1.11'), // sha256WithRSA
-    new Uint8Array([0x05, 0x00]),
-  ]));
+  parts.push(
+    encodeSequence([
+      encodeOID('1.2.840.113549.1.1.11'), // sha256WithRSA
+      new Uint8Array([0x05, 0x00]),
+    ]),
+  );
 
   // issuer Name
-  parts.push(encodeSequence([
-    encodeSet([
-      encodeSequence([
-        encodeOID('2.5.4.3'), // CN
-        new Uint8Array([0x0c, options.issuerCN.length, ...new TextEncoder().encode(options.issuerCN)]),
+  parts.push(
+    encodeSequence([
+      encodeSet([
+        encodeSequence([
+          encodeOID('2.5.4.3'), // CN
+          new Uint8Array([
+            0x0c,
+            options.issuerCN.length,
+            ...new TextEncoder().encode(options.issuerCN),
+          ]),
+        ]),
       ]),
     ]),
-  ]));
+  );
 
   // thisUpdate
   parts.push(encodeUTCTime(options.thisUpdate));
@@ -132,10 +136,7 @@ function buildMockTbsCertList(options: {
   // revokedCertificates (optional)
   if (options.revokedSerials && options.revokedSerials.length > 0) {
     const entries = options.revokedSerials.map((entry) => {
-      const entryParts: Uint8Array[] = [
-        encodeInteger(entry.serial),
-        encodeUTCTime(entry.date),
-      ];
+      const entryParts: Uint8Array[] = [encodeInteger(entry.serial), encodeUTCTime(entry.date)];
 
       if (entry.reason !== undefined) {
         // Extensions with CRL reason code
@@ -154,9 +155,7 @@ function buildMockTbsCertList(options: {
   // extensions [0] EXPLICIT
   const extensions: Uint8Array[] = [];
   if (options.crlNumber !== undefined) {
-    extensions.push(
-      buildExtension('2.5.29.20', encodeSmallInteger(options.crlNumber)),
-    );
+    extensions.push(buildExtension('2.5.29.20', encodeSmallInteger(options.crlNumber)));
   }
   if (options.deltaCrlIndicator !== undefined) {
     extensions.push(

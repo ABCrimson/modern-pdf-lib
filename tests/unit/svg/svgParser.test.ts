@@ -267,7 +267,8 @@ describe('parseSvgPath', () => {
 
 describe('parseSvg', () => {
   it('should parse a simple SVG with a rectangle', () => {
-    const svg = '<svg width="100" height="100"><rect x="10" y="10" width="80" height="80" fill="red"/></svg>';
+    const svg =
+      '<svg width="100" height="100"><rect x="10" y="10" width="80" height="80" fill="red"/></svg>';
     const el = parseSvg(svg);
     expect(el.tag).toBe('svg');
     expect(el.children).toHaveLength(1);
@@ -306,7 +307,8 @@ describe('parseSvg', () => {
   });
 
   it('should parse nested groups', () => {
-    const svg = '<svg><g transform="translate(10,20)"><rect x="0" y="0" width="50" height="50"/></g></svg>';
+    const svg =
+      '<svg><g transform="translate(10,20)"><rect x="0" y="0" width="50" height="50"/></g></svg>';
     const el = parseSvg(svg);
     const g = el.children[0]!;
     expect(g.tag).toBe('g');
@@ -340,7 +342,8 @@ describe('parseSvg', () => {
   });
 
   it('should parse inline styles', () => {
-    const svg = '<svg><rect x="0" y="0" width="10" height="10" style="fill: blue; stroke: red; stroke-width: 2"/></svg>';
+    const svg =
+      '<svg><rect x="0" y="0" width="10" height="10" style="fill: blue; stroke: red; stroke-width: 2"/></svg>';
     const el = parseSvg(svg);
     const rect = el.children[0]!;
     expect(rect.fill).toEqual({ r: 0, g: 0, b: 255 });
@@ -361,7 +364,8 @@ describe('parseSvg', () => {
   });
 
   it('should skip XML comments and processing instructions', () => {
-    const svg = '<?xml version="1.0"?><!-- comment --><svg><rect x="0" y="0" width="10" height="10"/></svg>';
+    const svg =
+      '<?xml version="1.0"?><!-- comment --><svg><rect x="0" y="0" width="10" height="10"/></svg>';
     const el = parseSvg(svg);
     expect(el.tag).toBe('svg');
     expect(el.children).toHaveLength(1);
@@ -392,49 +396,57 @@ describe('parseSvg — extended attributes', () => {
   });
 
   it('should parse stroke-linecap', () => {
-    const svg = '<svg><line x1="0" y1="0" x2="10" y2="0" stroke="black" stroke-linecap="round"/></svg>';
+    const svg =
+      '<svg><line x1="0" y1="0" x2="10" y2="0" stroke="black" stroke-linecap="round"/></svg>';
     const el = parseSvg(svg);
     expect(el.children[0]!.strokeLinecap).toBe('round');
   });
 
   it('should parse stroke-linecap="square"', () => {
-    const svg = '<svg><line x1="0" y1="0" x2="10" y2="0" stroke="black" stroke-linecap="square"/></svg>';
+    const svg =
+      '<svg><line x1="0" y1="0" x2="10" y2="0" stroke="black" stroke-linecap="square"/></svg>';
     const el = parseSvg(svg);
     expect(el.children[0]!.strokeLinecap).toBe('square');
   });
 
   it('should parse stroke-linejoin', () => {
-    const svg = '<svg><polyline points="0,0 5,10 10,0" stroke="black" stroke-linejoin="bevel"/></svg>';
+    const svg =
+      '<svg><polyline points="0,0 5,10 10,0" stroke="black" stroke-linejoin="bevel"/></svg>';
     const el = parseSvg(svg);
     expect(el.children[0]!.strokeLinejoin).toBe('bevel');
   });
 
   it('should parse stroke-linejoin="round"', () => {
-    const svg = '<svg><polyline points="0,0 5,10 10,0" stroke="black" stroke-linejoin="round"/></svg>';
+    const svg =
+      '<svg><polyline points="0,0 5,10 10,0" stroke="black" stroke-linejoin="round"/></svg>';
     const el = parseSvg(svg);
     expect(el.children[0]!.strokeLinejoin).toBe('round');
   });
 
   it('should parse stroke-miterlimit', () => {
-    const svg = '<svg><polyline points="0,0 5,10 10,0" stroke="black" stroke-miterlimit="8"/></svg>';
+    const svg =
+      '<svg><polyline points="0,0 5,10 10,0" stroke="black" stroke-miterlimit="8"/></svg>';
     const el = parseSvg(svg);
     expect(el.children[0]!.strokeMiterlimit).toBe(8);
   });
 
   it('should parse stroke-dasharray', () => {
-    const svg = '<svg><line x1="0" y1="0" x2="100" y2="0" stroke="black" stroke-dasharray="5 3 2"/></svg>';
+    const svg =
+      '<svg><line x1="0" y1="0" x2="100" y2="0" stroke="black" stroke-dasharray="5 3 2"/></svg>';
     const el = parseSvg(svg);
     expect(el.children[0]!.strokeDasharray).toEqual([5, 3, 2]);
   });
 
   it('should parse stroke-dashoffset', () => {
-    const svg = '<svg><line x1="0" y1="0" x2="100" y2="0" stroke="black" stroke-dasharray="5 3" stroke-dashoffset="2"/></svg>';
+    const svg =
+      '<svg><line x1="0" y1="0" x2="100" y2="0" stroke="black" stroke-dasharray="5 3" stroke-dashoffset="2"/></svg>';
     const el = parseSvg(svg);
     expect(el.children[0]!.strokeDashoffset).toBe(2);
   });
 
   it('should ignore stroke-dasharray="none"', () => {
-    const svg = '<svg><line x1="0" y1="0" x2="100" y2="0" stroke="black" stroke-dasharray="none"/></svg>';
+    const svg =
+      '<svg><line x1="0" y1="0" x2="100" y2="0" stroke="black" stroke-dasharray="none"/></svg>';
     const el = parseSvg(svg);
     expect(el.children[0]!.strokeDasharray).toBeUndefined();
   });
@@ -482,19 +494,22 @@ describe('parseSvg — extended attributes', () => {
   });
 
   it('should parse fill-rule from inline style', () => {
-    const svg = '<svg><path d="M 0 0 L 10 0 L 10 10 Z" style="fill: red; fill-rule: evenodd"/></svg>';
+    const svg =
+      '<svg><path d="M 0 0 L 10 0 L 10 10 Z" style="fill: red; fill-rule: evenodd"/></svg>';
     const el = parseSvg(svg);
     expect(el.children[0]!.fillRule).toBe('evenodd');
   });
 
   it('should parse stroke-dasharray from inline style', () => {
-    const svg = '<svg><line x1="0" y1="0" x2="100" y2="0" style="stroke: black; stroke-dasharray: 10 5"/></svg>';
+    const svg =
+      '<svg><line x1="0" y1="0" x2="100" y2="0" style="stroke: black; stroke-dasharray: 10 5"/></svg>';
     const el = parseSvg(svg);
     expect(el.children[0]!.strokeDasharray).toEqual([10, 5]);
   });
 
   it('should parse stroke-linecap from inline style', () => {
-    const svg = '<svg><line x1="0" y1="0" x2="100" y2="0" style="stroke: black; stroke-linecap: square"/></svg>';
+    const svg =
+      '<svg><line x1="0" y1="0" x2="100" y2="0" style="stroke: black; stroke-linecap: square"/></svg>';
     const el = parseSvg(svg);
     expect(el.children[0]!.strokeLinecap).toBe('square');
   });

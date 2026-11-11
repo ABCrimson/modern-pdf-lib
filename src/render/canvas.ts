@@ -46,7 +46,8 @@ export interface CanvasRenderOptions {
 }
 
 function effectiveScale(opts: CanvasRenderOptions): number {
-  const base = typeof opts.scale === 'number' ? opts.scale : typeof opts.dpi === 'number' ? opts.dpi / 72 : 1;
+  const base =
+    typeof opts.scale === 'number' ? opts.scale : typeof opts.dpi === 'number' ? opts.dpi / 72 : 1;
   return base * (opts.pixelRatio ?? 1);
 }
 
@@ -116,6 +117,10 @@ function tracePath(
  * Render a {@link PdfPage} onto a 2D context. The context's canvas should be
  * sized to `page.width × scale` by `page.height × scale`.
  */
-export function renderPageToCanvas(page: PdfPage, ctx: Canvas2DLike, opts: CanvasRenderOptions = {}): void {
+export function renderPageToCanvas(
+  page: PdfPage,
+  ctx: Canvas2DLike,
+  opts: CanvasRenderOptions = {},
+): void {
   renderDisplayListToCanvas(interpretPage(page), ctx, opts);
 }

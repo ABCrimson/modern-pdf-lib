@@ -120,10 +120,7 @@ export function isSubsetWasmReady(): boolean {
  *
  * @internal
  */
-function subsetWithWasm(
-  fontData: Uint8Array,
-  usedGlyphIds: Set<number>,
-): SubsetResult {
+function subsetWithWasm(fontData: Uint8Array, usedGlyphIds: Set<number>): SubsetResult {
   return subsetJs(fontData, usedGlyphIds);
 }
 
@@ -152,10 +149,7 @@ function subsetWithWasm(
  *          identity glyph-ID mappings for the used glyphs.
  * @internal
  */
-function subsetJs(
-  fontData: Uint8Array,
-  usedGlyphIds: Set<number>,
-): SubsetResult {
+function subsetJs(fontData: Uint8Array, usedGlyphIds: Set<number>): SubsetResult {
   // Ensure .notdef (GID 0) is always included
   const allGids = new Set(usedGlyphIds);
   allGids.add(0);
@@ -164,7 +158,10 @@ function subsetJs(
   const subsetFontData = subsetTtf(fontData, allGids);
 
   // Sort glyph IDs for deterministic ordering
-  const sortedGids = allGids.values().toArray().sort((a, b) => a - b);
+  const sortedGids = allGids
+    .values()
+    .toArray()
+    .sort((a, b) => a - b);
 
   // Build identity mappings: old GID === new GID (no renumbering).
   // GID slots are preserved in the font, so glyph IDs are unchanged.
@@ -199,10 +196,7 @@ function subsetJs(
  * @returns The subset result with the (possibly reduced) font and
  *          glyph-ID remapping tables.
  */
-export function subsetFont(
-  fontData: Uint8Array,
-  usedGlyphIds: Set<number>,
-): SubsetResult {
+export function subsetFont(fontData: Uint8Array, usedGlyphIds: Set<number>): SubsetResult {
   if (usedGlyphIds.size === 0) {
     // Nothing to subset — just include .notdef
     return subsetJs(fontData, new Set([0]));
@@ -293,7 +287,10 @@ function generateToUnicodeCmap(cidToUnicode: ReadonlyMap<number, number[]>): str
   lines.push('endcodespacerange');
 
   // Collect all entries, sorted by CID
-  const entries = cidToUnicode.entries().toArray().sort((a, b) => a[0] - b[0]);
+  const entries = cidToUnicode
+    .entries()
+    .toArray()
+    .sort((a, b) => a[0] - b[0]);
 
   // Emit in chunks of 100 (PDF CMap limit per section)
   const CHUNK_SIZE = 100;

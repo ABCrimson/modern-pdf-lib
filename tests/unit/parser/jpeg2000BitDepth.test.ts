@@ -21,9 +21,7 @@ import {
   offsetSignedToUnsigned,
   summarizeBitDepth,
 } from '../../../src/parser/jpeg2000BitDepth.js';
-import type {
-  ComponentDepth,
-} from '../../../src/parser/jpeg2000BitDepth.js';
+import type { ComponentDepth } from '../../../src/parser/jpeg2000BitDepth.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -60,17 +58,17 @@ function buildSIZ(components: Array<{ bits: number; signed: boolean }>): Uint8Ar
   arr[3] = 0x51;
 
   const base = 4;
-  writeU16(arr, base, sizLen);           // Lsiz
-  writeU16(arr, base + 2, 0);           // Rsiz
-  writeU32(arr, base + 4, 256);         // Xsiz
-  writeU32(arr, base + 8, 256);         // Ysiz
-  writeU32(arr, base + 12, 0);          // XOsiz
-  writeU32(arr, base + 16, 0);          // YOsiz
-  writeU32(arr, base + 20, 256);        // XTsiz
-  writeU32(arr, base + 24, 256);        // YTsiz
-  writeU32(arr, base + 28, 0);          // XTOsiz
-  writeU32(arr, base + 32, 0);          // YTOsiz
-  writeU16(arr, base + 36, csiz);       // Csiz
+  writeU16(arr, base, sizLen); // Lsiz
+  writeU16(arr, base + 2, 0); // Rsiz
+  writeU32(arr, base + 4, 256); // Xsiz
+  writeU32(arr, base + 8, 256); // Ysiz
+  writeU32(arr, base + 12, 0); // XOsiz
+  writeU32(arr, base + 16, 0); // YOsiz
+  writeU32(arr, base + 20, 256); // XTsiz
+  writeU32(arr, base + 24, 256); // YTsiz
+  writeU32(arr, base + 28, 0); // XTOsiz
+  writeU32(arr, base + 32, 0); // YTOsiz
+  writeU16(arr, base + 36, csiz); // Csiz
 
   const compStart = base + 38;
   for (let i = 0; i < csiz; i++) {
@@ -195,9 +193,12 @@ describe('downscale16To8', () => {
 
   it('handles multiple 16-bit samples', () => {
     const data = new Uint8Array([
-      0xff, 0xff, // 65535 -> 255
-      0x00, 0x00, // 0 -> 0
-      0x80, 0x00, // ~32768 -> ~128
+      0xff,
+      0xff, // 65535 -> 255
+      0x00,
+      0x00, // 0 -> 0
+      0x80,
+      0x00, // ~32768 -> ~128
     ]);
     const result = downscale16To8(data, 16);
     expect(result.length).toBe(3);

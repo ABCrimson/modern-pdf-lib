@@ -121,7 +121,10 @@ describe('convertTiffCmykToRgb', () => {
 
   it('handles partial ink coverage', () => {
     // C=100, M=50, Y=25, K=10
-    const c = 100, m = 50, y = 25, k = 10;
+    const c = 100,
+      m = 50,
+      y = 25,
+      k = 10;
     const cmyk = new Uint8Array([c, m, y, k]);
     const rgb = convertTiffCmykToRgb(cmyk, 1, 1);
 
@@ -197,23 +200,17 @@ describe('isCmykTiff', () => {
   });
 
   it('returns false for PhotometricInterpretation=2 (RGB)', () => {
-    const entries = [
-      { tag: 262, value: 2 },
-    ];
+    const entries = [{ tag: 262, value: 2 }];
     expect(isCmykTiff(entries)).toBe(false);
   });
 
   it('returns false for PhotometricInterpretation=1 (BlackIsZero)', () => {
-    const entries = [
-      { tag: 262, value: 1 },
-    ];
+    const entries = [{ tag: 262, value: 1 }];
     expect(isCmykTiff(entries)).toBe(false);
   });
 
   it('returns false for PhotometricInterpretation=0 (WhiteIsZero)', () => {
-    const entries = [
-      { tag: 262, value: 0 },
-    ];
+    const entries = [{ tag: 262, value: 0 }];
     expect(isCmykTiff(entries)).toBe(false);
   });
 
@@ -230,12 +227,12 @@ describe('isCmykTiff', () => {
 
   it('handles entries with other tags mixed in', () => {
     const entries = [
-      { tag: 256, value: 100 },   // ImageWidth
-      { tag: 257, value: 200 },   // ImageLength
-      { tag: 258, value: 8 },     // BitsPerSample
-      { tag: 262, value: 5 },     // PhotometricInterpretation = Separated
-      { tag: 277, value: 4 },     // SamplesPerPixel
-      { tag: 332, value: 1 },     // InkSet = CMYK
+      { tag: 256, value: 100 }, // ImageWidth
+      { tag: 257, value: 200 }, // ImageLength
+      { tag: 258, value: 8 }, // BitsPerSample
+      { tag: 262, value: 5 }, // PhotometricInterpretation = Separated
+      { tag: 277, value: 4 }, // SamplesPerPixel
+      { tag: 332, value: 1 }, // InkSet = CMYK
     ];
     expect(isCmykTiff(entries)).toBe(true);
   });

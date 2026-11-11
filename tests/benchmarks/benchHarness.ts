@@ -44,9 +44,7 @@ export function beforeAll(fn: BenchFn): void {
 
 /** tinybench exposes throughput under different shapes across versions. */
 function opsPerSecond(result: unknown): number {
-  const r = result as
-    | { throughput?: { mean?: number }; hz?: number }
-    | undefined;
+  const r = result as { throughput?: { mean?: number }; hz?: number } | undefined;
   return r?.throughput?.mean ?? r?.hz ?? 0;
 }
 
@@ -83,8 +81,7 @@ export async function runRegisteredBenchmarks(): Promise<void> {
   let wins = 0;
   for (const { group, ratio } of summary) {
     if (ratio >= 1) wins++;
-    const label =
-      ratio >= 1 ? `${ratio.toFixed(1)}x faster` : `${(1 / ratio).toFixed(1)}x SLOWER`;
+    const label = ratio >= 1 ? `${ratio.toFixed(1)}x faster` : `${(1 / ratio).toFixed(1)}x SLOWER`;
     console.log(`  ${label.padStart(14)}   ${group}`);
   }
   console.log(`\n  modern-pdf-lib wins ${wins} / ${summary.length} head-to-head benchmarks.`);

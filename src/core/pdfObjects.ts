@@ -38,7 +38,7 @@ function formatNumber(value: number): string {
   // Trim trailing zeros and optional decimal point manually
   let end = s.length;
   while (end > 0 && s.charCodeAt(end - 1) === 0x30 /* '0' */) end--;
-  if (end > 0 && s.charCodeAt(end - 1) === 0x2E /* '.' */) end--;
+  if (end > 0 && s.charCodeAt(end - 1) === 0x2e /* '.' */) end--;
   const trimmed = end === s.length ? s : s.slice(0, end);
   return trimmed === '-0' ? '0' : trimmed;
 }

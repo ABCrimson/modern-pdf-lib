@@ -33,14 +33,7 @@
  *
  * These correspond to the crate directories under `src/wasm/`.
  */
-export const WASM_MODULE_NAMES = [
-  'libdeflate',
-  'png',
-  'ttf',
-  'shaping',
-  'jbig2',
-  'jpeg',
-] as const;
+export const WASM_MODULE_NAMES = ['libdeflate', 'png', 'ttf', 'shaping', 'jbig2', 'jpeg'] as const;
 
 /** Union type of all valid WASM module names. */
 export type WasmModuleName = (typeof WASM_MODULE_NAMES)[number];
@@ -94,8 +87,7 @@ export function getInlineWasmBytes(name: string): Uint8Array {
   // 1. Validate the module name
   if (!isValidModuleName(name)) {
     throw new Error(
-      `Unknown WASM module: "${name}". ` +
-      `Valid modules: ${WASM_MODULE_NAMES.join(', ')}`,
+      `Unknown WASM module: "${name}". ` + `Valid modules: ${WASM_MODULE_NAMES.join(', ')}`,
     );
   }
 
@@ -276,7 +268,7 @@ function requireGenerated(): GeneratedModule {
     // by the caller using dynamic import or a pre-loaded reference.
     throw new Error(
       'Inline WASM data not loaded. ' +
-      'Call loadInlineWasmModule() first, or run `npm run generate:wasm-inline`.',
+        'Call loadInlineWasmModule() first, or run `npm run generate:wasm-inline`.',
     );
   } catch (err) {
     if (generatedModule) return generatedModule;
@@ -296,7 +288,7 @@ function getBase64Data(name: string): string {
     if (!moduleData) {
       throw new Error(
         `WASM module "${name}" is not available in the generated inline data. ` +
-        `Run \`npm run generate:wasm-inline\` to regenerate.`,
+          `Run \`npm run generate:wasm-inline\` to regenerate.`,
       );
     }
     return moduleData;
@@ -306,9 +298,9 @@ function getBase64Data(name: string): string {
     }
     throw new Error(
       `Failed to load inline WASM data for module "${name}". ` +
-      `The generated file may not exist. ` +
-      `Run \`npm run generate:wasm-inline\` to generate it. ` +
-      `Original error: ${err instanceof Error ? err.message : String(err)}`,
+        `The generated file may not exist. ` +
+        `Run \`npm run generate:wasm-inline\` to generate it. ` +
+        `Original error: ${err instanceof Error ? err.message : String(err)}`,
     );
   }
 }
@@ -331,7 +323,7 @@ function getBase64Data(name: string): string {
 export async function loadInlineWasmModule(): Promise<void> {
   if (generatedModule) return;
 
-  const mod = await import('./inlineWasm.generated.js') as GeneratedModule;
+  const mod = (await import('./inlineWasm.generated.js')) as GeneratedModule;
   generatedModule = mod;
 }
 

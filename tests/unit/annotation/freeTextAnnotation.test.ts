@@ -4,13 +4,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { PdfFreeTextAnnotation } from '../../../src/annotation/types/freeTextAnnotation.js';
-import {
-  PdfDict,
-  PdfName,
-  PdfArray,
-  PdfNumber,
-  PdfString,
-} from '../../../src/core/pdfObjects.js';
+import { PdfDict, PdfName, PdfArray, PdfNumber, PdfString } from '../../../src/core/pdfObjects.js';
 
 describe('PdfFreeTextAnnotation', () => {
   describe('create', () => {

@@ -14,16 +14,8 @@ import {
   sampleShadingColor,
   type FunctionShadingOptions,
 } from '../../../src/core/shadingFunction.js';
-import {
-  PdfArray,
-  PdfDict,
-  PdfName,
-  PdfNumber,
-} from '../../../src/core/pdfObjects.js';
-import type {
-  ExponentialFunction,
-  PostScriptFunction,
-} from '../../../src/core/pdfFunctions.js';
+import { PdfArray, PdfDict, PdfName, PdfNumber } from '../../../src/core/pdfObjects.js';
+import type { ExponentialFunction, PostScriptFunction } from '../../../src/core/pdfFunctions.js';
 
 // ---------------------------------------------------------------------------
 // Helpers

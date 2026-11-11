@@ -13,10 +13,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  extractJpegMetadata,
-  injectJpegMetadata,
-} from '../../src/assets/image/imageMetadata.js';
+import { extractJpegMetadata, injectJpegMetadata } from '../../src/assets/image/imageMetadata.js';
 import type { JpegMetadata } from '../../src/assets/image/imageMetadata.js';
 
 // ---------------------------------------------------------------------------
@@ -148,11 +145,7 @@ function buildExifSegment(opts: {
 
   // TIFF header at offset 6
   const tiffBase = 6;
-  const tiffView = new DataView(
-    exifData.buffer,
-    exifData.byteOffset + tiffBase,
-    tiffSize,
-  );
+  const tiffView = new DataView(exifData.buffer, exifData.byteOffset + tiffBase, tiffSize);
 
   // Byte order
   if (le) {
@@ -216,15 +209,31 @@ function buildExifSegment(opts: {
  */
 function buildIccSegment(): Uint8Array {
   const data = new Uint8Array([
-    0x49, 0x43, 0x43, 0x5f, 0x50, 0x52, 0x4f, 0x46,
-    0x49, 0x4c, 0x45, 0x00, // "ICC_PROFILE\0"
-    0x01, 0x01, // chunk number, total chunks
-    0x00, 0x00, 0x00, 0x00, // dummy profile data
+    0x49,
+    0x43,
+    0x43,
+    0x5f,
+    0x50,
+    0x52,
+    0x4f,
+    0x46,
+    0x49,
+    0x4c,
+    0x45,
+    0x00, // "ICC_PROFILE\0"
+    0x01,
+    0x01, // chunk number, total chunks
+    0x00,
+    0x00,
+    0x00,
+    0x00, // dummy profile data
   ]);
   const length = data.length + 2;
   return new Uint8Array([
-    0xff, 0xe2, // APP2
-    (length >> 8) & 0xff, length & 0xff,
+    0xff,
+    0xe2, // APP2
+    (length >> 8) & 0xff,
+    length & 0xff,
     ...data,
   ]);
 }
@@ -236,8 +245,10 @@ function buildIccSegment(): Uint8Array {
 function buildJpeg(...segments: Uint8Array[]): Uint8Array {
   // Minimal DQT marker (needed for valid JPEG structure)
   const dqt = new Uint8Array([
-    0xff, 0xdb, // DQT marker
-    0x00, 0x43, // length = 67
+    0xff,
+    0xdb, // DQT marker
+    0x00,
+    0x43, // length = 67
     0x00, // 8-bit precision, table 0
     // 64 quantization values (all 1s for testing)
     ...new Array(64).fill(1),
@@ -245,24 +256,36 @@ function buildJpeg(...segments: Uint8Array[]): Uint8Array {
 
   // Minimal SOF0 marker
   const sof = new Uint8Array([
-    0xff, 0xc0, // SOF0
-    0x00, 0x0b, // length = 11
+    0xff,
+    0xc0, // SOF0
+    0x00,
+    0x0b, // length = 11
     0x08, // 8-bit precision
-    0x00, 0x01, // height = 1
-    0x00, 0x01, // width = 1
+    0x00,
+    0x01, // height = 1
+    0x00,
+    0x01, // width = 1
     0x01, // 1 component
-    0x01, 0x11, 0x00, // component 1: ID=1, sampling=1x1, quant table 0
+    0x01,
+    0x11,
+    0x00, // component 1: ID=1, sampling=1x1, quant table 0
   ]);
 
   // Minimal SOS + data + EOI
   const sos = new Uint8Array([
-    0xff, 0xda, // SOS
-    0x00, 0x08, // length = 8
+    0xff,
+    0xda, // SOS
+    0x00,
+    0x08, // length = 8
     0x01, // 1 component
-    0x01, 0x00, // component 1, DC/AC tables 0/0
-    0x00, 0x3f, 0x00, // spectral selection
+    0x01,
+    0x00, // component 1, DC/AC tables 0/0
+    0x00,
+    0x3f,
+    0x00, // spectral selection
     0x00, // dummy scan data
-    0xff, 0xd9, // EOI
+    0xff,
+    0xd9, // EOI
   ]);
 
   // Calculate total size

@@ -6,11 +6,7 @@
  */
 
 import { describe, it, expect, afterEach } from 'vitest';
-import {
-  getRuntime,
-  setRuntime,
-  type RuntimeAdapter,
-} from '../../../src/runtime/adapter.js';
+import { getRuntime, setRuntime, type RuntimeAdapter } from '../../../src/runtime/adapter.js';
 import { resetDetection } from '../../../src/runtime/detect.js';
 
 // ---------------------------------------------------------------------------
@@ -128,14 +124,12 @@ describe('setRuntime', () => {
   });
 
   it('custom adapter methods are callable through getRuntime', async () => {
-    const readFileMock = () => Promise.resolve(new Uint8Array([0xDE, 0xAD]));
+    const readFileMock = () => Promise.resolve(new Uint8Array([0xde, 0xad]));
     const mock = createMockAdapter({ readFile: readFileMock });
     setRuntime(mock);
 
     const adapter = getRuntime();
-    await expect(adapter.readFile('test.txt')).resolves.toEqual(
-      new Uint8Array([0xDE, 0xAD]),
-    );
+    await expect(adapter.readFile('test.txt')).resolves.toEqual(new Uint8Array([0xde, 0xad]));
   });
 
   it('custom adapter performance.now returns custom value', () => {
@@ -214,9 +208,9 @@ describe('RuntimeAdapter interface contract', () => {
       },
     });
 
-    await mock.writeFile('/out.pdf', new Uint8Array([0xFF]));
+    await mock.writeFile('/out.pdf', new Uint8Array([0xff]));
     expect(writtenPath).toBe('/out.pdf');
-    expect(writtenData).toEqual(new Uint8Array([0xFF]));
+    expect(writtenData).toEqual(new Uint8Array([0xff]));
   });
 
   it('createWorker throws on the mock adapter', () => {
@@ -232,9 +226,9 @@ describe('RuntimeAdapter interface contract', () => {
 
   it('fetchBytes returns a Promise<Uint8Array>', async () => {
     const mock = createMockAdapter({
-      fetchBytes: () => Promise.resolve(new Uint8Array([0xCA, 0xFE])),
+      fetchBytes: () => Promise.resolve(new Uint8Array([0xca, 0xfe])),
     });
     const result = await mock.fetchBytes('https://example.com');
-    expect(result).toEqual(new Uint8Array([0xCA, 0xFE]));
+    expect(result).toEqual(new Uint8Array([0xca, 0xfe]));
   });
 });

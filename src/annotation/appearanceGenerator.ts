@@ -10,13 +10,7 @@
  * Reference: PDF 1.7 spec, Section 12.5.5 (Appearance Streams).
  */
 
-import {
-  PdfDict,
-  PdfArray,
-  PdfName,
-  PdfNumber,
-  PdfStream,
-} from '../core/pdfObjects.js';
+import { PdfDict, PdfArray, PdfName, PdfNumber, PdfStream } from '../core/pdfObjects.js';
 import type { PdfAnnotation } from './pdfAnnotation.js';
 
 // ---------------------------------------------------------------------------
@@ -44,7 +38,7 @@ const KAPPA = 0.5522847498;
 function buildAppearanceStream(
   content: string,
   bbox: [number, number, number, number],
-  resources?: PdfDict  ,
+  resources?: PdfDict,
 ): PdfStream {
   const dict = new PdfDict();
   dict.set('/Type', PdfName.of('XObject'));
@@ -227,7 +221,10 @@ export function generateLineAppearance(annot: PdfAnnotation): PdfStream {
   // Get line points from /L entry
   const dict = annot.getDict();
   const lObj = dict.get('/L');
-  let lx1 = 0, ly1 = 0, lx2 = w, ly2 = h;
+  let lx1 = 0,
+    ly1 = 0,
+    lx2 = w,
+    ly2 = h;
   if (lObj && lObj.kind === 'array' && lObj.items.length >= 4) {
     lx1 = (lObj.items[0] as PdfNumber | undefined)?.value ?? 0;
     ly1 = (lObj.items[1] as PdfNumber | undefined)?.value ?? 0;
@@ -443,8 +440,8 @@ export function generateStrikeOutAppearance(annot: PdfAnnotation): PdfStream {
 
     for (let i = 0; i + 7 < points.length; i += 8) {
       // Calculate middle line: average of top and bottom
-      const topY = ((points[i + 1]! - y1) + (points[i + 3]! - y1)) / 2;
-      const botY = ((points[i + 5]! - y1) + (points[i + 7]! - y1)) / 2;
+      const topY = (points[i + 1]! - y1 + (points[i + 3]! - y1)) / 2;
+      const botY = (points[i + 5]! - y1 + (points[i + 7]! - y1)) / 2;
       const midY = (topY + botY) / 2;
       const leftX = Math.min(points[i]! - x1, points[i + 4]! - x1);
       const rightX = Math.max(points[i + 2]! - x1, points[i + 6]! - x1);
@@ -573,10 +570,7 @@ export function generateFreeTextAppearance(annot: PdfAnnotation): PdfStream {
   }
 
   // Escape text for PDF string
-  const escapedText = text
-    .replace(/\\/g, '\\\\')
-    .replace(/\(/g, '\\(')
-    .replace(/\)/g, '\\)');
+  const escapedText = text.replace(/\\/g, '\\\\').replace(/\(/g, '\\(').replace(/\)/g, '\\)');
   ops += `(${escapedText}) Tj\n`;
   ops += 'ET\n';
 

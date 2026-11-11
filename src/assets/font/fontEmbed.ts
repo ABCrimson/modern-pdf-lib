@@ -77,9 +77,7 @@ let fontParserWasm: FontParserWasmModule | undefined;
  *
  * @param wasmSource - A pre-built wasm-bindgen module, or omit to auto-locate.
  */
-export async function initFontParserWasm(
-  wasmSource?: FontParserWasmModule,
-): Promise<void> {
+export async function initFontParserWasm(wasmSource?: FontParserWasmModule): Promise<void> {
   if (fontParserWasm) return;
 
   try {
@@ -91,10 +89,7 @@ export async function initFontParserWasm(
     const { loadWasmModule } = await import('../../wasm/loader.js');
     const wasmBytes = await loadWasmModule('ttf');
     const imports = { env: {} };
-    const result = await WebAssembly.instantiate(
-      wasmBytes.buffer as ArrayBuffer,
-      imports,
-    );
+    const result = await WebAssembly.instantiate(wasmBytes.buffer as ArrayBuffer, imports);
     fontParserWasm = result.instance.exports as unknown as FontParserWasmModule;
   } catch {
     fontParserWasm = undefined;
@@ -139,8 +134,8 @@ function extractMetricsWasm(fontData: Uint8Array): FontMetrics {
   const cmapCount = cmapBytes.byteLength / 6;
 
   for (let i = 0; i < cmapCount; i++) {
-    const codepoint = cmapView.getUint32(i * 6, true);     // LE u32
-    const glyphId = cmapView.getUint16(i * 6 + 4, true);   // LE u16
+    const codepoint = cmapView.getUint32(i * 6, true); // LE u32
+    const glyphId = cmapView.getUint16(i * 6 + 4, true); // LE u16
     cmapTable.set(codepoint, glyphId);
   }
 
@@ -150,7 +145,7 @@ function extractMetricsWasm(fontData: Uint8Array): FontMetrics {
     descender: info.descender,
     lineGap: info.line_gap,
     capHeight: Math.round(info.units_per_em * 0.7), // estimate
-    xHeight: Math.round(info.units_per_em * 0.5),   // estimate
+    xHeight: Math.round(info.units_per_em * 0.5), // estimate
     italicAngle: 0,
     numGlyphs,
     defaultWidth,
@@ -219,11 +214,7 @@ export class EmbeddedFont {
     for (const char of text) {
       const codepoint = char.codePointAt(0)!;
       const glyphId = getGlyphId(codepoint, this.metrics.cmapTable);
-      const advance = getGlyphWidth(
-        glyphId,
-        this.metrics.glyphWidths,
-        this.metrics.defaultWidth,
-      );
+      const advance = getGlyphWidth(glyphId, this.metrics.glyphWidths, this.metrics.defaultWidth);
 
       this.usedGlyphs.add(glyphId);
       totalWidth += advance;
@@ -357,8 +348,8 @@ export class EmbeddedFont {
       this.usedGlyphs.add(glyphId);
 
       // 2-byte big-endian
-      bytes[offset++] = (glyphId >> 8) & 0xFF;
-      bytes[offset++] = glyphId & 0xFF;
+      bytes[offset++] = (glyphId >> 8) & 0xff;
+      bytes[offset++] = glyphId & 0xff;
     }
 
     return bytes.toHex();
@@ -497,7 +488,12 @@ export interface CIDFontData {
  */
 export type WidthEntry =
   | { readonly kind: 'individual'; readonly start: number; readonly widths: readonly number[] }
-  | { readonly kind: 'range'; readonly first: number; readonly last: number; readonly width: number };
+  | {
+      readonly kind: 'range';
+      readonly first: number;
+      readonly last: number;
+      readonly width: number;
+    };
 
 /**
  * Data for the top-level /Font (Type 0) dictionary.
@@ -540,10 +536,7 @@ export interface FontEmbeddingResult {
  *
  * @internal
  */
-function buildWidthArray(
-  subsetResult: SubsetResult,
-  metrics: FontMetrics,
-): WidthEntry[] {
+function buildWidthArray(subsetResult: SubsetResult, metrics: FontMetrics): WidthEntry[] {
   const entries: WidthEntry[] = [];
   const scale = 1000 / metrics.unitsPerEm;
 
@@ -679,9 +672,7 @@ export async function embedFont(fontBytes: Uint8Array): Promise<EmbeddedFont> {
   }
 
   // Use WASM-accelerated parsing when available, pure JS otherwise
-  const metrics = fontParserWasm
-    ? extractMetricsWasm(fontBytes)
-    : extractMetrics(fontBytes);
+  const metrics = fontParserWasm ? extractMetricsWasm(fontBytes) : extractMetrics(fontBytes);
 
   return new EmbeddedFont(fontBytes, metrics);
 }

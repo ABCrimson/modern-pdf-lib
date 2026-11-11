@@ -3,11 +3,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  embedLtvData,
-  buildDssDictionary,
-  hasLtvData,
-} from '../../../src/signature/ltvEmbed.js';
+import { embedLtvData, buildDssDictionary, hasLtvData } from '../../../src/signature/ltvEmbed.js';
 import type { LtvOptions, DssData } from '../../../src/signature/ltvEmbed.js';
 
 // ---------------------------------------------------------------------------
@@ -130,9 +126,7 @@ describe('hasLtvData', () => {
 
   it('should return true for PDF with DSS type marker', () => {
     const pdf = createMinimalPdf();
-    const dssAppendix = encoder.encode(
-      '\n10 0 obj\n<< /Type /DSS /Certs [] >>\nendobj\n',
-    );
+    const dssAppendix = encoder.encode('\n10 0 obj\n<< /Type /DSS /Certs [] >>\nendobj\n');
     const modified = new Uint8Array(pdf.length + dssAppendix.length);
     modified.set(pdf, 0);
     modified.set(dssAppendix, pdf.length);
@@ -173,7 +167,7 @@ describe('embedLtvData', () => {
 
   it('should embed extra certificates via incremental update', async () => {
     const pdf = createMinimalPdf();
-    const fakeCert = new Uint8Array([0x30, 0x82, 0x01, 0x00, 0xAA, 0xBB]);
+    const fakeCert = new Uint8Array([0x30, 0x82, 0x01, 0x00, 0xaa, 0xbb]);
 
     const result = await embedLtvData(pdf, {
       extraCertificates: [fakeCert],
@@ -188,7 +182,7 @@ describe('embedLtvData', () => {
 
   it('should embed CRLs when provided', async () => {
     const pdf = createMinimalPdf();
-    const fakeCrl = new Uint8Array([0x30, 0x82, 0x02, 0x00, 0xCC, 0xDD]);
+    const fakeCrl = new Uint8Array([0x30, 0x82, 0x02, 0x00, 0xcc, 0xdd]);
 
     const result = await embedLtvData(pdf, {
       crls: [fakeCrl],
@@ -204,7 +198,7 @@ describe('embedLtvData', () => {
 
   it('should embed OCSP responses when provided', async () => {
     const pdf = createMinimalPdf();
-    const fakeOcsp = new Uint8Array([0x30, 0x82, 0x03, 0x00, 0xEE, 0xFF]);
+    const fakeOcsp = new Uint8Array([0x30, 0x82, 0x03, 0x00, 0xee, 0xff]);
 
     const result = await embedLtvData(pdf, {
       ocspResponses: [fakeOcsp],
@@ -220,8 +214,8 @@ describe('embedLtvData', () => {
 
   it('should exclude certs when includeCerts is false', async () => {
     const pdf = createMinimalPdf();
-    const fakeCert = new Uint8Array([0x30, 0x82, 0x01, 0x00, 0xAA]);
-    const fakeCrl = new Uint8Array([0x30, 0x82, 0x02, 0x00, 0xBB]);
+    const fakeCert = new Uint8Array([0x30, 0x82, 0x01, 0x00, 0xaa]);
+    const fakeCrl = new Uint8Array([0x30, 0x82, 0x02, 0x00, 0xbb]);
 
     const result = await embedLtvData(pdf, {
       extraCertificates: [fakeCert],
@@ -237,8 +231,8 @@ describe('embedLtvData', () => {
 
   it('should exclude OCSPs when includeOcsp is false', async () => {
     const pdf = createMinimalPdf();
-    const fakeCert = new Uint8Array([0x30, 0x82, 0x01, 0x00, 0xAA]);
-    const fakeOcsp = new Uint8Array([0x30, 0x82, 0x03, 0x00, 0xEE]);
+    const fakeCert = new Uint8Array([0x30, 0x82, 0x01, 0x00, 0xaa]);
+    const fakeOcsp = new Uint8Array([0x30, 0x82, 0x03, 0x00, 0xee]);
 
     const result = await embedLtvData(pdf, {
       extraCertificates: [fakeCert],
@@ -253,8 +247,8 @@ describe('embedLtvData', () => {
 
   it('should exclude CRLs when includeCrl is false', async () => {
     const pdf = createMinimalPdf();
-    const fakeCert = new Uint8Array([0x30, 0x82, 0x01, 0x00, 0xAA]);
-    const fakeCrl = new Uint8Array([0x30, 0x82, 0x02, 0x00, 0xBB]);
+    const fakeCert = new Uint8Array([0x30, 0x82, 0x01, 0x00, 0xaa]);
+    const fakeCrl = new Uint8Array([0x30, 0x82, 0x02, 0x00, 0xbb]);
 
     const result = await embedLtvData(pdf, {
       extraCertificates: [fakeCert],
@@ -269,8 +263,8 @@ describe('embedLtvData', () => {
 
   it('should deduplicate certificates', async () => {
     const pdf = createMinimalPdf();
-    const cert1 = new Uint8Array([0x30, 0x82, 0x01, 0x00, 0xAA]);
-    const cert2 = new Uint8Array([0x30, 0x82, 0x01, 0x00, 0xAA]); // same
+    const cert1 = new Uint8Array([0x30, 0x82, 0x01, 0x00, 0xaa]);
+    const cert2 = new Uint8Array([0x30, 0x82, 0x01, 0x00, 0xaa]); // same
 
     const result = await embedLtvData(pdf, {
       extraCertificates: [cert1, cert2],
@@ -287,9 +281,9 @@ describe('embedLtvData', () => {
   it('should produce valid PDF structure', async () => {
     const pdf = createMinimalPdf();
     const result = await embedLtvData(pdf, {
-      extraCertificates: [new Uint8Array([0x30, 0x02, 0xAA, 0xBB])],
-      crls: [new Uint8Array([0x30, 0x02, 0xCC, 0xDD])],
-      ocspResponses: [new Uint8Array([0x30, 0x02, 0xEE, 0xFF])],
+      extraCertificates: [new Uint8Array([0x30, 0x02, 0xaa, 0xbb])],
+      crls: [new Uint8Array([0x30, 0x02, 0xcc, 0xdd])],
+      ocspResponses: [new Uint8Array([0x30, 0x02, 0xee, 0xff])],
     });
 
     const text = decoder.decode(result);

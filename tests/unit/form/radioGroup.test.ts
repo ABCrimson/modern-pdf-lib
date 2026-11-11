@@ -35,11 +35,7 @@ function makeRadioWidget(optionName: string, rect: [number, number, number, numb
   return widget;
 }
 
-function makeRadioGroup(
-  name: string,
-  options: string[],
-  selected?: string,
-): PdfRadioGroup {
+function makeRadioGroup(name: string, options: string[], selected?: string): PdfRadioGroup {
   const dict = new PdfDict();
   dict.set('/FT', PdfName.of('Btn'));
   dict.set('/Ff', PdfNumber.of(FieldFlags.Radio));
@@ -49,9 +45,7 @@ function makeRadioGroup(
     dict.set('/V', PdfName.of(selected));
   }
 
-  const widgets = options.map((opt, i) =>
-    makeRadioWidget(opt, [10, 10 + i * 25, 30, 30 + i * 25]),
-  );
+  const widgets = options.map((opt, i) => makeRadioWidget(opt, [10, 10 + i * 25, 30, 30 + i * 25]));
 
   // Set /AS on the selected widget
   if (selected !== undefined) {

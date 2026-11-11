@@ -167,8 +167,8 @@ function buildTextTag(text: string): Uint8Array {
  * in an ICC profile are relative to D50 = (0.9505, 1.0000, 1.0890).
  */
 const D50_WHITE_X = 0.9505;
-const D50_WHITE_Y = 1.0000;
-const D50_WHITE_Z = 1.0890;
+const D50_WHITE_Y = 1.0;
+const D50_WHITE_Z = 1.089;
 
 /**
  * sRGB primaries in XYZ, adapted to D50 PCS via Bradford chromatic
@@ -312,11 +312,11 @@ export function generateSrgbIccProfile(): Uint8Array {
 
   // Offset 24-35: Date/time (12 bytes): 2025-01-01 00:00:00 UTC
   writeU16(profile, 24, 2025); // year
-  writeU16(profile, 26, 1);    // month
-  writeU16(profile, 28, 1);    // day
-  writeU16(profile, 30, 0);    // hour
-  writeU16(profile, 32, 0);    // minute
-  writeU16(profile, 34, 0);    // second
+  writeU16(profile, 26, 1); // month
+  writeU16(profile, 28, 1); // day
+  writeU16(profile, 30, 0); // hour
+  writeU16(profile, 32, 0); // minute
+  writeU16(profile, 34, 0); // second
 
   // Offset 36-39: Profile file signature: 'acsp'
   writeAscii(profile, 36, 'acsp', 4);

@@ -6,15 +6,8 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  createPdf,
-  PageSizes,
-  PdfDocument,
-} from '../../../src/index.js';
-import {
-  saveIncremental,
-  ChangeTracker,
-} from '../../../src/core/incrementalWriter.js';
+import { createPdf, PageSizes, PdfDocument } from '../../../src/index.js';
+import { saveIncremental, ChangeTracker } from '../../../src/core/incrementalWriter.js';
 import {
   PdfObjectRegistry,
   PdfDict,
@@ -135,13 +128,9 @@ describe('saveIncremental', () => {
     const structure = { catalogRef, infoRef, pagesRef };
     const changedObjects = new Set([infoRef.objectNumber]);
 
-    const result = saveIncremental(
-      originalBytes,
-      registry,
-      structure,
-      changedObjects,
-      { compress: false },
-    );
+    const result = saveIncremental(originalBytes, registry, structure, changedObjects, {
+      compress: false,
+    });
 
     // The output should start with the original bytes
     const originalPortion = result.bytes.subarray(0, originalBytes.length);
@@ -171,13 +160,9 @@ describe('saveIncremental', () => {
     const structure = { catalogRef, infoRef, pagesRef };
     const changedObjects = new Set([infoRef.objectNumber]);
 
-    const result = saveIncremental(
-      originalBytes,
-      registry,
-      structure,
-      changedObjects,
-      { compress: false },
-    );
+    const result = saveIncremental(originalBytes, registry, structure, changedObjects, {
+      compress: false,
+    });
 
     const appendedPart = pdfToString(result.bytes.subarray(originalBytes.length));
 
@@ -218,13 +203,9 @@ describe('saveIncremental', () => {
     const structure = { catalogRef, infoRef, pagesRef };
     const changedObjects = new Set([infoRef.objectNumber]);
 
-    const result = saveIncremental(
-      originalBytes,
-      registry,
-      structure,
-      changedObjects,
-      { compress: false },
-    );
+    const result = saveIncremental(originalBytes, registry, structure, changedObjects, {
+      compress: false,
+    });
 
     expect(result.bytes.length).toBeGreaterThan(originalBytes.length);
   });
@@ -251,19 +232,17 @@ describe('saveIncremental', () => {
     const structure = { catalogRef, infoRef, pagesRef };
     const changedObjects = new Set([infoRef.objectNumber]);
 
-    const result = saveIncremental(
-      originalBytes,
-      registry,
-      structure,
-      changedObjects,
-      { compress: false },
-    );
+    const result = saveIncremental(originalBytes, registry, structure, changedObjects, {
+      compress: false,
+    });
 
     // The xref offset should point to a position after the original bytes
     expect(result.newXrefOffset).toBeGreaterThan(originalBytes.length);
 
     // At that offset, the string 'xref' should appear
-    const xrefStr = pdfToString(result.bytes.subarray(result.newXrefOffset, result.newXrefOffset + 4));
+    const xrefStr = pdfToString(
+      result.bytes.subarray(result.newXrefOffset, result.newXrefOffset + 4),
+    );
     expect(xrefStr).toBe('xref');
   });
 
@@ -306,13 +285,9 @@ describe('saveIncremental', () => {
     // Only mark dict1 as changed
     const changedObjects = new Set([ref1.objectNumber]);
 
-    const result = saveIncremental(
-      originalBytes,
-      registry,
-      structure,
-      changedObjects,
-      { compress: false },
-    );
+    const result = saveIncremental(originalBytes, registry, structure, changedObjects, {
+      compress: false,
+    });
 
     const appendedText = pdfToString(result.bytes.subarray(originalBytes.length));
 
@@ -355,13 +330,9 @@ describe('saveIncremental', () => {
     const structure = { catalogRef, infoRef, pagesRef };
     const changedObjects = new Set([ref1.objectNumber, ref2.objectNumber]);
 
-    const result = saveIncremental(
-      originalBytes,
-      registry,
-      structure,
-      changedObjects,
-      { compress: false },
-    );
+    const result = saveIncremental(originalBytes, registry, structure, changedObjects, {
+      compress: false,
+    });
 
     const appendedText = pdfToString(result.bytes.subarray(originalBytes.length));
 
@@ -391,12 +362,7 @@ describe('saveIncremental', () => {
     const structure = { catalogRef, infoRef, pagesRef };
     const changedObjects = new Set([infoRef.objectNumber]);
 
-    const result = saveIncremental(
-      originalBytes,
-      registry,
-      structure,
-      changedObjects,
-    );
+    const result = saveIncremental(originalBytes, registry, structure, changedObjects);
 
     const appendedText = pdfToString(result.bytes.subarray(originalBytes.length));
     const sizeMatch = appendedText.match(/\/Size\s+(\d+)/);
@@ -435,13 +401,9 @@ describe('saveIncremental', () => {
     const structure = { catalogRef, infoRef, pagesRef };
     const changedObjects = new Set([streamRef.objectNumber]);
 
-    const compressedResult = saveIncremental(
-      originalBytes,
-      registry,
-      structure,
-      changedObjects,
-      { compress: true },
-    );
+    const compressedResult = saveIncremental(originalBytes, registry, structure, changedObjects, {
+      compress: true,
+    });
 
     // Compression should have been applied — result may contain FlateDecode
     // We expect either the stream was compressed or left as-is
@@ -482,13 +444,9 @@ describe('incremental save integration', () => {
       catalogRef.objectNumber,
     ]);
 
-    const result = saveIncremental(
-      originalBytes,
-      registry,
-      structure,
-      changedObjects,
-      { compress: false },
-    );
+    const result = saveIncremental(originalBytes, registry, structure, changedObjects, {
+      compress: false,
+    });
 
     const fullText = pdfToString(result.bytes);
 

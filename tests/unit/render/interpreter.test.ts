@@ -77,10 +77,10 @@ describe('interpretContentStream — graphics-state machine → display list', (
   });
 
   it('flattens Bézier curves into the fill polygon', () => {
-    const dl = interpretContentStream(
-      ops(`0 0 m 0 100 100 100 100 0 c f`),
-      { width: 100, height: 100 },
-    );
+    const dl = interpretContentStream(ops(`0 0 m 0 100 100 100 100 0 c f`), {
+      width: 100,
+      height: 100,
+    });
     const item = dl.items[0]!;
     if (item.type !== 'fill') throw new Error('expected fill');
     // a flattened cubic should yield many points, not just the 2 endpoints
@@ -88,10 +88,10 @@ describe('interpretContentStream — graphics-state machine → display list', (
   });
 
   it('captures text shows as TextItems with transform + render mode', () => {
-    const dl = interpretContentStream(
-      ops(`BT /F1 24 Tf 1 0 0 1 72 700 Tm (Hello) Tj ET`),
-      { width: 612, height: 792 },
-    );
+    const dl = interpretContentStream(ops(`BT /F1 24 Tf 1 0 0 1 72 700 Tm (Hello) Tj ET`), {
+      width: 612,
+      height: 792,
+    });
     const t = dl.items.find((i) => i.type === 'text');
     expect(t).toBeDefined();
     if (!t || t.type !== 'text') throw new Error('expected text');

@@ -144,9 +144,7 @@ function extractFormFields(pdfText: string): Map<string, string> {
     );
 
     const valueMatch = searchRegion.match(/\/V\s*(?:\(([^)]*)\)|\/(\S+))/);
-    const value = valueMatch
-      ? (valueMatch[1] ?? valueMatch[2] ?? '')
-      : '';
+    const value = valueMatch ? (valueMatch[1] ?? valueMatch[2] ?? '') : '';
     fields.set(name, value);
   }
 
@@ -203,17 +201,12 @@ function extractMetadata(pdfText: string): Map<string, string> {
  * Extract the /M (signing date) from a signature dictionary near the
  * given ByteRange match.
  */
-function extractSigningDate(
-  pdfText: string,
-  byteRangeOffset: number,
-): Date | undefined {
+function extractSigningDate(pdfText: string, byteRangeOffset: number): Date | undefined {
   const searchStart = Math.max(0, byteRangeOffset - 1000);
   const searchEnd = Math.min(pdfText.length, byteRangeOffset + 2000);
   const region = pdfText.slice(searchStart, searchEnd);
 
-  const dateMatch = region.match(
-    /\/M\s*\(D:(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})/,
-  );
+  const dateMatch = region.match(/\/M\s*\(D:(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})/);
   if (!dateMatch) return undefined;
 
   const year = parseInt(dateMatch[1]!, 10);
@@ -257,7 +250,7 @@ function extractSigningDate(
  */
 export async function diffSignedContent(
   pdf: Uint8Array,
-  signatureIndex?: number  ,
+  signatureIndex?: number,
 ): Promise<DocumentDiff> {
   const signatures = findSignatures(pdf);
 
@@ -273,9 +266,7 @@ export async function diffSignedContent(
   const targetIdx = signatureIndex ?? signatures.length - 1;
 
   if (targetIdx < 0 || targetIdx >= signatures.length) {
-    throw new Error(
-      `Signature index ${targetIdx} out of range (0–${signatures.length - 1})`,
-    );
+    throw new Error(`Signature index ${targetIdx} out of range (0–${signatures.length - 1})`);
   }
 
   const sig = signatures[targetIdx]!;
@@ -386,10 +377,7 @@ export async function diffSignedContent(
   const signedAnnotCounts = countAnnotations(signedText);
   const currentAnnotCounts = countAnnotations(currentText);
 
-  const annotCompareCount = Math.min(
-    signedAnnotCounts.length,
-    currentAnnotCounts.length,
-  );
+  const annotCompareCount = Math.min(signedAnnotCounts.length, currentAnnotCounts.length);
   for (let i = 0; i < annotCompareCount; i++) {
     if (signedAnnotCounts[i] !== currentAnnotCounts[i]) {
       changes.push({

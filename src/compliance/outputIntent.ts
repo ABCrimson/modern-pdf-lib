@@ -124,10 +124,12 @@ export function buildOutputIntent(
   const components = options.components ?? 3;
 
   // Build ICC profile stream
-  const profileDict = new PdfDict(new Map<string, PdfNumber>([
-    ['/N', new PdfNumber(components)],
-    ['/Length', new PdfNumber(profile.length)],
-  ]));
+  const profileDict = new PdfDict(
+    new Map<string, PdfNumber>([
+      ['/N', new PdfNumber(components)],
+      ['/Length', new PdfNumber(profile.length)],
+    ]),
+  );
   const profileStream = new PdfStream(profileDict, profile);
   const profileRef = registry.register(profileStream);
 
@@ -139,9 +141,10 @@ export function buildOutputIntent(
     ['/Type', PdfName.of('/OutputIntent')],
     ['/S', PdfName.of(normalizedSubtype)],
     ['/OutputCondition', PdfString.literal(options.outputCondition ?? 'sRGB')],
-    ['/OutputConditionIdentifier', PdfString.literal(
-      options.outputConditionIdentifier ?? 'sRGB IEC61966-2.1',
-    )],
+    [
+      '/OutputConditionIdentifier',
+      PdfString.literal(options.outputConditionIdentifier ?? 'sRGB IEC61966-2.1'),
+    ],
     ['/RegistryName', PdfString.literal(options.registryName ?? 'http://www.color.org')],
     ['/DestOutputProfile', profileRef],
   ]);

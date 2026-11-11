@@ -56,10 +56,7 @@ const decoder = new TextDecoder('latin1');
  * Escape a string for use in a PDF name.
  */
 function escapePdfString(str: string): string {
-  return str
-    .replace(/\\/g, '\\\\')
-    .replace(/\(/g, '\\(')
-    .replace(/\)/g, '\\)');
+  return str.replace(/\\/g, '\\\\').replace(/\(/g, '\\(').replace(/\)/g, '\\)');
 }
 
 // ---------------------------------------------------------------------------
@@ -89,14 +86,9 @@ function escapePdfString(str: string): string {
  * const signedPdf = await signPdf(pdfBytes, 'ApprovalSig', options);
  * ```
  */
-export function addFieldLock(
-  options: SignOptions,
-  lock: FieldLockOptions,
-): void {
+export function addFieldLock(options: SignOptions, lock: FieldLockOptions): void {
   if (lock.action !== 'All' && (!lock.fields || lock.fields.length === 0)) {
-    throw new Error(
-      `Field lock action "${lock.action}" requires at least one field name`,
-    );
+    throw new Error(`Field lock action "${lock.action}" requires at least one field name`);
   }
 
   // Store on the options object for prepareForSigning to read
@@ -178,9 +170,7 @@ export function buildFieldLockDict(lock: FieldLockOptions): string {
   let dict = `/Lock << /Type /SigFieldLock /Action /${lock.action}`;
 
   if (lock.action !== 'All' && lock.fields && lock.fields.length > 0) {
-    const fieldEntries = lock.fields
-      .map((f) => `(${escapePdfString(f)})`)
-      .join(' ');
+    const fieldEntries = lock.fields.map((f) => `(${escapePdfString(f)})`).join(' ');
     dict += ` /Fields [${fieldEntries}]`;
   }
 

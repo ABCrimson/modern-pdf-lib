@@ -33,7 +33,11 @@ describe('vdom reconciler', () => {
 
   it('h() builds a well-formed heading VNode with a defaulted level', () => {
     expect(h('heading', { text: 'Title' })).toEqual({ type: 'heading', level: 1, text: 'Title' });
-    expect(h('heading', { level: 3, text: 'Sub' })).toEqual({ type: 'heading', level: 3, text: 'Sub' });
+    expect(h('heading', { level: 3, text: 'Sub' })).toEqual({
+      type: 'heading',
+      level: 3,
+      text: 'Sub',
+    });
   });
 
   it('h() builds spacer and page container nodes', () => {

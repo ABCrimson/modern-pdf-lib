@@ -11,12 +11,7 @@
  */
 
 import { describe, bench } from 'vitest';
-import {
-  createPdf,
-  PageSizes,
-  StandardFonts,
-  rgb,
-} from '../../src/index.js';
+import { createPdf, PageSizes, StandardFonts, rgb } from '../../src/index.js';
 
 // ---------------------------------------------------------------------------
 // Empty document benchmarks
@@ -82,7 +77,7 @@ describe('text document creation', () => {
       });
       page.drawText(
         'Lorem ipsum dolor sit amet, consectetur adipiscing elit. ' +
-        'Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+          'Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
         {
           x: 50,
           y: 700,
@@ -109,7 +104,7 @@ describe('text document creation', () => {
       });
       page.drawText(
         'Lorem ipsum dolor sit amet, consectetur adipiscing elit. ' +
-        'Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+          'Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
         {
           x: 50,
           y: 700,
@@ -136,8 +131,8 @@ describe('text document creation', () => {
       });
       page.drawText(
         'Lorem ipsum dolor sit amet, consectetur adipiscing elit. ' +
-        'Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ' +
-        'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
+          'Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ' +
+          'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
         {
           x: 50,
           y: 700,
@@ -184,7 +179,7 @@ describe('drawing operations', () => {
         y: Math.floor(i / 20) * 15,
         width: 25,
         height: 10,
-        color: rgb(i % 256 / 255, 0, 0),
+        color: rgb((i % 256) / 255, 0, 0),
       });
     }
 
@@ -200,7 +195,7 @@ describe('drawing operations', () => {
         x: 50 + (i % 10) * 50,
         y: 50 + Math.floor(i / 10) * 15,
         size: 5,
-        color: rgb(0, 0, i % 256 / 255),
+        color: rgb(0, 0, (i % 256) / 255),
       });
     }
 

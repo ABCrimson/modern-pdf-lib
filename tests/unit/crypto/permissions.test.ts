@@ -3,10 +3,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  encodePermissions,
-  decodePermissions,
-} from '../../../src/crypto/permissions.js';
+import { encodePermissions, decodePermissions } from '../../../src/crypto/permissions.js';
 import type { PdfPermissionFlags } from '../../../src/crypto/permissions.js';
 
 describe('encodePermissions', () => {
@@ -26,14 +23,14 @@ describe('encodePermissions', () => {
     // Reserved bits 7-8 (0xC0) should always be set
     // The upper bits 13-32 are set by convention
     expect(p & 0xc0).toBe(0xc0); // bits 7-8 set
-    expect(p & 0x04).toBe(0);    // bit 3 (print) off
-    expect(p & 0x08).toBe(0);    // bit 4 (modify) off
-    expect(p & 0x10).toBe(0);    // bit 5 (copy) off
-    expect(p & 0x20).toBe(0);    // bit 6 (annotate) off
-    expect(p & 0x100).toBe(0);   // bit 9 (fill forms) off
-    expect(p & 0x200).toBe(0);   // bit 10 (accessibility) off
-    expect(p & 0x400).toBe(0);   // bit 11 (assembly) off
-    expect(p & 0x800).toBe(0);   // bit 12 (HQ print) off
+    expect(p & 0x04).toBe(0); // bit 3 (print) off
+    expect(p & 0x08).toBe(0); // bit 4 (modify) off
+    expect(p & 0x10).toBe(0); // bit 5 (copy) off
+    expect(p & 0x20).toBe(0); // bit 6 (annotate) off
+    expect(p & 0x100).toBe(0); // bit 9 (fill forms) off
+    expect(p & 0x200).toBe(0); // bit 10 (accessibility) off
+    expect(p & 0x400).toBe(0); // bit 11 (assembly) off
+    expect(p & 0x800).toBe(0); // bit 12 (HQ print) off
   });
 
   it('should encode all permissions granted', () => {
@@ -49,10 +46,10 @@ describe('encodePermissions', () => {
 
     const p = encodePermissions(flags);
 
-    expect(p & 0x04).toBe(0x04);   // print
-    expect(p & 0x08).toBe(0x08);   // modify
-    expect(p & 0x10).toBe(0x10);   // copy
-    expect(p & 0x20).toBe(0x20);   // annotate
+    expect(p & 0x04).toBe(0x04); // print
+    expect(p & 0x08).toBe(0x08); // modify
+    expect(p & 0x10).toBe(0x10); // copy
+    expect(p & 0x20).toBe(0x20); // annotate
     expect(p & 0x100).toBe(0x100); // fill forms
     expect(p & 0x200).toBe(0x200); // accessibility
     expect(p & 0x400).toBe(0x400); // assembly
@@ -67,7 +64,7 @@ describe('encodePermissions', () => {
     const p = encodePermissions(flags);
 
     expect(p & 0x04).toBe(0x04); // print allowed
-    expect(p & 0x800).toBe(0);   // HQ print NOT set
+    expect(p & 0x800).toBe(0); // HQ print NOT set
   });
 
   it('should handle empty flags object', () => {

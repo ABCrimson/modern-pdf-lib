@@ -145,7 +145,7 @@ describe('formatPdfDate', () => {
 
 describe('encodeHexString', () => {
   it('produces hex-encoded string with angle brackets', () => {
-    const data = new Uint8Array([0x48, 0x65, 0x6C, 0x6C, 0x6F]);
+    const data = new Uint8Array([0x48, 0x65, 0x6c, 0x6c, 0x6f]);
     const result = encodeHexString(data);
     expect(result).toBe('<48656C6C6F>');
   });
@@ -155,13 +155,13 @@ describe('encodeHexString', () => {
   });
 
   it('uses uppercase hex digits', () => {
-    const data = new Uint8Array([0xAB, 0xCD, 0xEF]);
+    const data = new Uint8Array([0xab, 0xcd, 0xef]);
     const result = encodeHexString(data);
     expect(result).toBe('<ABCDEF>');
   });
 
   it('pads single-digit values with leading zero', () => {
-    const data = new Uint8Array([0x00, 0x01, 0x0F]);
+    const data = new Uint8Array([0x00, 0x01, 0x0f]);
     const result = encodeHexString(data);
     expect(result).toBe('<00010F>');
   });
@@ -175,8 +175,8 @@ describe('encodeToUtf16BE', () => {
   it('produces BOM-prefixed output', () => {
     const result = encodeToUtf16BE('A');
     // BOM is 0xFE 0xFF
-    expect(result[0]).toBe(0xFE);
-    expect(result[1]).toBe(0xFF);
+    expect(result[0]).toBe(0xfe);
+    expect(result[1]).toBe(0xff);
   });
 
   it('encodes ASCII characters as two bytes each', () => {
@@ -196,15 +196,15 @@ describe('encodeToUtf16BE', () => {
     const result = encodeToUtf16BE('\u00E9');
     expect(result.length).toBe(4); // BOM + 2 bytes
     expect(result[2]).toBe(0x00);
-    expect(result[3]).toBe(0xE9);
+    expect(result[3]).toBe(0xe9);
   });
 
   it('handles empty string', () => {
     const result = encodeToUtf16BE('');
     // Just the BOM
     expect(result.length).toBe(2);
-    expect(result[0]).toBe(0xFE);
-    expect(result[1]).toBe(0xFF);
+    expect(result[0]).toBe(0xfe);
+    expect(result[1]).toBe(0xff);
   });
 });
 

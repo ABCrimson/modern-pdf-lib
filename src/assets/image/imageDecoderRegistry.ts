@@ -58,9 +58,7 @@ export interface DecodedRasterImage {
  * decoder. The decoder is solely responsible for parsing the container/bitstream
  * and producing valid RGBA8888 output.
  */
-export type ImageDecoder = (
-  bytes: Uint8Array,
-) => DecodedRasterImage | Promise<DecodedRasterImage>;
+export type ImageDecoder = (bytes: Uint8Array) => DecodedRasterImage | Promise<DecodedRasterImage>;
 
 // ---------------------------------------------------------------------------
 // Module-level registry
@@ -96,10 +94,7 @@ function normalizeFormat(format: string): string {
  *                 normalized (trimmed + lowercased) before storage.
  * @param decoder  The {@link ImageDecoder} that turns encoded bytes into RGBA.
  */
-export function registerImageDecoder(
-  format: string,
-  decoder: ImageDecoder,
-): void {
+export function registerImageDecoder(format: string, decoder: ImageDecoder): void {
   registry.set(normalizeFormat(format), decoder);
 }
 
@@ -150,10 +145,7 @@ export function getImageDecoder(format: string): ImageDecoder | undefined {
  * @param result  The value returned by the decoder.
  * @returns       The same value, narrowed to {@link DecodedRasterImage}.
  */
-function validateDecodedResult(
-  format: string,
-  result: unknown,
-): DecodedRasterImage {
+function validateDecodedResult(format: string, result: unknown): DecodedRasterImage {
   if (result === null || typeof result !== 'object') {
     throw new Error(
       `Image decoder for format "${format}" returned a malformed result: ` +
@@ -180,9 +172,7 @@ function validateDecodedResult(
   if (!(rgba instanceof Uint8Array)) {
     throw new Error(
       `Image decoder for format "${format}" returned a malformed result: ` +
-        `rgba must be a Uint8Array, got ${
-          rgba === null ? 'null' : typeof rgba
-        }.`,
+        `rgba must be a Uint8Array, got ${rgba === null ? 'null' : typeof rgba}.`,
     );
   }
 

@@ -88,10 +88,7 @@ export class RemovePageFromEmptyDocumentError extends Error {
 export class NoSuchFieldError extends Error {
   override readonly name = 'NoSuchFieldError';
   constructor(fieldName: string, options?: ErrorOptions) {
-    super(
-      `No form field named "${fieldName}" exists in this document.`,
-      options,
-    );
+    super(`No form field named "${fieldName}" exists in this document.`, options);
   }
 }
 

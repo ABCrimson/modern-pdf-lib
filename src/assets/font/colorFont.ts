@@ -134,12 +134,7 @@ function readTableDirectory(data: Uint8Array): Map<string, TableRecord> | undefi
   const tables = new Map<string, TableRecord>();
   for (let i = 0; i < numTables; i++) {
     const off = 12 + i * 16;
-    const tag = String.fromCharCode(
-      data[off]!,
-      data[off + 1]!,
-      data[off + 2]!,
-      data[off + 3]!,
-    );
+    const tag = String.fromCharCode(data[off]!, data[off + 1]!, data[off + 2]!, data[off + 3]!);
     const offset = view.getUint32(off + 8, false);
     const length = view.getUint32(off + 12, false);
     tables.set(tag, { offset, length });

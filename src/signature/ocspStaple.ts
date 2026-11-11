@@ -95,10 +95,7 @@ function buildRevocationInfoAttribute(ocspResponse: Uint8Array): Uint8Array {
   const revInfoSeq = encodeSequence([ocspTagged]);
 
   // Attribute: OID + SET { value }
-  return encodeSequence([
-    encodeOID(OID_ADBE_REVOCATION_INFO),
-    encodeSet([revInfoSeq]),
-  ]);
+  return encodeSequence([encodeOID(OID_ADBE_REVOCATION_INFO), encodeSet([revInfoSeq])]);
 }
 
 // ---------------------------------------------------------------------------
@@ -166,7 +163,9 @@ export function embedOcspResponse(
   // Extract the original SignerInfo raw bytes
   const signerInfoBase = signatureBytes.subarray(
     signerInfo.offset + (signerInfosNode.data.byteOffset - signatureBytes.byteOffset),
-    signerInfo.offset + signerInfo.totalLength + (signerInfosNode.data.byteOffset - signatureBytes.byteOffset),
+    signerInfo.offset +
+      signerInfo.totalLength +
+      (signerInfosNode.data.byteOffset - signatureBytes.byteOffset),
   );
 
   // The original SignerInfo is a SEQUENCE; we need to parse its contents
@@ -213,15 +212,9 @@ export function embedOcspResponse(
   // Rebuild ContentInfo: OID + [0] EXPLICIT { SignedData }
   const oidChild = contentInfo.children[0]!;
   const oidAbsStart = oidChild.offset + (contentInfo.data.byteOffset - signatureBytes.byteOffset);
-  const contentTypeOid = signatureBytes.subarray(
-    oidAbsStart,
-    oidAbsStart + oidChild.totalLength,
-  );
+  const contentTypeOid = signatureBytes.subarray(oidAbsStart, oidAbsStart + oidChild.totalLength);
 
-  const newContentInfo = encodeSequence([
-    contentTypeOid,
-    encodeContextTag(0, newSignedData),
-  ]);
+  const newContentInfo = encodeSequence([contentTypeOid, encodeContextTag(0, newSignedData)]);
 
   return newContentInfo;
 }
@@ -235,9 +228,7 @@ export function embedOcspResponse(
  * @param signatureBytes  DER-encoded PKCS#7 / CMS ContentInfo.
  * @returns               The DER-encoded OCSP response, or `null` if none found.
  */
-export function extractStapledOcsp(
-  signatureBytes: Uint8Array,
-): Uint8Array | null {
+export function extractStapledOcsp(signatureBytes: Uint8Array): Uint8Array | null {
   try {
     const contentInfo = parseDerTlv(signatureBytes, 0);
     if (contentInfo.children.length < 2) return null;

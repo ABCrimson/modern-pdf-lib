@@ -99,17 +99,17 @@ const BYTE_COMPACTION_MODE_LATCH_6 = 924;
 // ---------------------------------------------------------------------------
 
 /** Sub-mode character mappings. Value at index = the sub-mode value for the character. */
-const TEXT_UPPER = new Map<number, number>();  // A-Z, space
-const TEXT_LOWER = new Map<number, number>();  // a-z, space
-const TEXT_MIXED = new Map<number, number>();  // digits, & @ # etc.
-const TEXT_PUNCT = new Map<number, number>();  // punctuation
+const TEXT_UPPER = new Map<number, number>(); // A-Z, space
+const TEXT_LOWER = new Map<number, number>(); // a-z, space
+const TEXT_MIXED = new Map<number, number>(); // digits, & @ # etc.
+const TEXT_PUNCT = new Map<number, number>(); // punctuation
 
 // Upper: A(0)..Z(25), SP(26)
-for (let i = 0; i < 26; i++) TEXT_UPPER.set(65 + i, i);   // A=65
+for (let i = 0; i < 26; i++) TEXT_UPPER.set(65 + i, i); // A=65
 TEXT_UPPER.set(32, 26); // space
 
 // Lower: a(0)..z(25), SP(26)
-for (let i = 0; i < 26; i++) TEXT_LOWER.set(97 + i, i);   // a=97
+for (let i = 0; i < 26; i++) TEXT_LOWER.set(97 + i, i); // a=97
 TEXT_LOWER.set(32, 26); // space
 
 // Mixed: 0(0)..9(9), &(10), CR(11), HT(12), ,(13), :(14),
@@ -130,18 +130,18 @@ for (let i = 0; i < PUNCT_CHARS.length; i++) {
 }
 
 /** Sub-mode latch/shift values. */
-const SUBMODE_LATCH_LOWER = 27;  // Upper -> Lower
-const SUBMODE_LATCH_MIXED = 28;  // Upper/Lower -> Mixed
-const SUBMODE_SHIFT_PUNCT = 29;  // Any -> Punct (shift, single char)
+const SUBMODE_LATCH_LOWER = 27; // Upper -> Lower
+const SUBMODE_LATCH_MIXED = 28; // Upper/Lower -> Mixed
+const SUBMODE_SHIFT_PUNCT = 29; // Any -> Punct (shift, single char)
 
-const SUBMODE_SHIFT_UPPER = 27;  // Lower -> Upper (shift, single char)
+const SUBMODE_SHIFT_UPPER = 27; // Lower -> Upper (shift, single char)
 // Lower -> Mixed uses 28
 
-const MIXED_LATCH_LOWER = 27;    // Mixed -> Lower
-const MIXED_LATCH_PUNCT = 28;    // Mixed -> Punct
+const MIXED_LATCH_LOWER = 27; // Mixed -> Lower
+const MIXED_LATCH_PUNCT = 28; // Mixed -> Punct
 // Mixed -> Upper uses 29 (shift)
 
-const PUNCT_LATCH_UPPER = 29;    // Punct -> Upper
+const PUNCT_LATCH_UPPER = 29; // Punct -> Upper
 
 // ---------------------------------------------------------------------------
 // Cluster bar patterns
@@ -198,7 +198,7 @@ function buildCodewordTable(): number[][][] {
 
                 // Compute cluster from bar widths
                 // cluster metric = (b1 - b2 + b3 - b4) mod 9
-                const metric = ((b1 - b2 + b3 - b4) % 9 + 9) % 9;
+                const metric = (((b1 - b2 + b3 - b4) % 9) + 9) % 9;
                 let cluster: number;
                 if (metric === 0) cluster = 0;
                 else if (metric === 3) cluster = 1;
@@ -366,10 +366,14 @@ function textCompaction(data: string): number[] {
 
 function getSubModeValue(ch: number, mode: TextSubMode): number | undefined {
   switch (mode) {
-    case 'upper': return TEXT_UPPER.get(ch);
-    case 'lower': return TEXT_LOWER.get(ch);
-    case 'mixed': return TEXT_MIXED.get(ch);
-    case 'punct': return TEXT_PUNCT.get(ch);
+    case 'upper':
+      return TEXT_UPPER.get(ch);
+    case 'lower':
+      return TEXT_LOWER.get(ch);
+    case 'mixed':
+      return TEXT_MIXED.get(ch);
+    case 'punct':
+      return TEXT_PUNCT.get(ch);
   }
 }
 
@@ -451,12 +455,7 @@ function encodeDataCodewords(data: string): number[] {
 function isAllTextCompactable(data: string): boolean {
   for (let i = 0; i < data.length; i++) {
     const ch = data.charCodeAt(i);
-    if (
-      !TEXT_UPPER.has(ch) &&
-      !TEXT_LOWER.has(ch) &&
-      !TEXT_MIXED.has(ch) &&
-      !TEXT_PUNCT.has(ch)
-    ) {
+    if (!TEXT_UPPER.has(ch) && !TEXT_LOWER.has(ch) && !TEXT_MIXED.has(ch) && !TEXT_PUNCT.has(ch)) {
       return false;
     }
   }
@@ -497,9 +496,9 @@ function computeECCodewords(dataCodewords: readonly number[], ecLevel: number): 
     // Multiply by (x - 3^i)
     const factor = modPow(3, i, MOD);
     for (let j = k; j >= 1; j--) {
-      gen[j] = (gen[j - 1]! - gen[j]! * factor % MOD + MOD * MOD) % MOD;
+      gen[j] = (gen[j - 1]! - ((gen[j]! * factor) % MOD) + MOD * MOD) % MOD;
     }
-    gen[0] = (-(gen[0]! * factor) % MOD + MOD * MOD) % MOD;
+    gen[0] = ((-(gen[0]! * factor) % MOD) + MOD * MOD) % MOD;
   }
 
   // Perform polynomial division
@@ -508,9 +507,9 @@ function computeECCodewords(dataCodewords: readonly number[], ecLevel: number): 
   for (const d of dataCodewords) {
     const t = (d + remainder[k - 1]!) % MOD;
     for (let j = k - 1; j >= 1; j--) {
-      remainder[j] = (remainder[j - 1]! + MOD - (t * gen[j]!) % MOD) % MOD;
+      remainder[j] = (remainder[j - 1]! + MOD - ((t * gen[j]!) % MOD)) % MOD;
     }
-    remainder[0] = (MOD - (t * gen[0]!) % MOD) % MOD;
+    remainder[0] = (MOD - ((t * gen[0]!) % MOD)) % MOD;
   }
 
   // Negate the remainder
@@ -599,12 +598,7 @@ function computeDimensions(
  * Cluster 1 (row % 3 == 1): 30 * (row/3) + (ecLevel * 3) + ((rows-1) % 3)
  * Cluster 2 (row % 3 == 2): 30 * (row/3) + (columns - 1)
  */
-function leftRowIndicator(
-  row: number,
-  rows: number,
-  columns: number,
-  ecLevel: number,
-): number {
+function leftRowIndicator(row: number, rows: number, columns: number, ecLevel: number): number {
   const clusterRow = Math.floor(row / 3);
   switch (row % 3) {
     case 0:
@@ -625,12 +619,7 @@ function leftRowIndicator(
  * Cluster 1 (row % 3 == 1): 30 * (row/3) + ((rows-1)/3)
  * Cluster 2 (row % 3 == 2): 30 * (row/3) + (ecLevel * 3) + ((rows-1) % 3)
  */
-function rightRowIndicator(
-  row: number,
-  rows: number,
-  columns: number,
-  ecLevel: number,
-): number {
+function rightRowIndicator(row: number, rows: number, columns: number, ecLevel: number): number {
   const clusterRow = Math.floor(row / 3);
   switch (row % 3) {
     case 0:
@@ -695,11 +684,7 @@ export function encodePdf417(
   }
 
   // Determine symbol dimensions
-  const { rows, columns } = computeDimensions(
-    dataCodewords.length,
-    ecLevel,
-    options?.columns,
-  );
+  const { rows, columns } = computeDimensions(dataCodewords.length, ecLevel, options?.columns);
 
   // Build the complete codeword sequence:
   // [length descriptor] [data codewords...] [padding...] [EC codewords...]
@@ -822,9 +807,7 @@ export function pdf417ToOperators(
     let barStart = -1;
 
     for (let col = 0; col <= matrix.moduleWidth; col++) {
-      const isBar = col < matrix.moduleWidth
-        ? matrix.modules[rowOffset + col]
-        : false;
+      const isBar = col < matrix.moduleWidth ? matrix.modules[rowOffset + col] : false;
 
       if (isBar && barStart === -1) {
         barStart = col;

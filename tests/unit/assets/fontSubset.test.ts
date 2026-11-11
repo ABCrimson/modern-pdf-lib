@@ -72,7 +72,7 @@ function buildTtfWithGlyf(opts: {
       gView.setInt16(8, 700, false); // yMax
       // Fill rest with non-zero data to simulate glyph outlines
       for (let i = 10; i < glyphDataSize; i++) {
-        gData[i] = (gid * 17 + i) & 0xFF;
+        gData[i] = (gid * 17 + i) & 0xff;
       }
       glyphEntries.push(gData);
     }
@@ -110,8 +110,12 @@ function buildTtfWithGlyf(opts: {
   view.setUint32(0, 0x00010000, false); // sfVersion
   view.setUint16(4, numTables, false);
   // searchRange, entrySelector, rangeShift
-  let sr = 1, es = 0;
-  while (sr * 2 <= numTables) { sr *= 2; es++; }
+  let sr = 1,
+    es = 0;
+  while (sr * 2 <= numTables) {
+    sr *= 2;
+    es++;
+  }
   sr *= 16;
   view.setUint16(6, sr, false);
   view.setUint16(8, es, false);
@@ -136,8 +140,8 @@ function buildTtfWithGlyf(opts: {
   view.setUint32(headOff, 0x00010000, false);
   view.setUint32(headOff + 4, 0x00010000, false);
   view.setUint32(headOff + 8, 0, false); // checkSumAdjustment
-  view.setUint32(headOff + 12, 0x5F0F3CF5, false);
-  view.setUint16(headOff + 16, 0x000B, false);
+  view.setUint32(headOff + 12, 0x5f0f3cf5, false);
+  view.setUint16(headOff + 16, 0x000b, false);
   view.setUint16(headOff + 18, 1000, false); // unitsPerEm
   view.setInt16(headOff + 36, 0, false);
   view.setInt16(headOff + 38, -200, false);
@@ -204,13 +208,13 @@ function buildTtfWithGlyf(opts: {
   const endCodeOff = fmt4Off + 14;
   const maxMappedGlyph = Math.min(numGlyphs - 1, 26);
   view.setUint16(endCodeOff, 0x40 + maxMappedGlyph, false); // endCode for A..Z
-  view.setUint16(endCodeOff + 2, 0xFFFF, false); // sentinel
+  view.setUint16(endCodeOff + 2, 0xffff, false); // sentinel
   // reservedPad
   view.setUint16(endCodeOff + 4, 0, false);
   // startCode array: [0x41 (A), 0xFFFF]
   const startCodeOff = endCodeOff + 6;
   view.setUint16(startCodeOff, 0x41, false);
-  view.setUint16(startCodeOff + 2, 0xFFFF, false);
+  view.setUint16(startCodeOff + 2, 0xffff, false);
   // idDelta array: delta so that 0x41 maps to glyph 1
   const idDeltaOff = startCodeOff + 4;
   view.setInt16(idDeltaOff, -(0x41 - 1), false); // delta = -64
@@ -251,18 +255,12 @@ function findTable(data: Uint8Array, tag: string): Uint8Array | undefined {
 }
 
 /** Parse loca table offsets. */
-function readLocaOffsets(
-  data: Uint8Array,
-  indexToLocFormat: number,
-  numGlyphs: number,
-): number[] {
+function readLocaOffsets(data: Uint8Array, indexToLocFormat: number, numGlyphs: number): number[] {
   const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
   const offsets: number[] = [];
   for (let i = 0; i <= numGlyphs; i++) {
     offsets.push(
-      indexToLocFormat === 0
-        ? view.getUint16(i * 2, false) * 2
-        : view.getUint32(i * 4, false),
+      indexToLocFormat === 0 ? view.getUint16(i * 2, false) * 2 : view.getUint32(i * 4, false),
     );
   }
   return offsets;

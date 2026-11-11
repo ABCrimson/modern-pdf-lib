@@ -33,39 +33,67 @@ export class PdfViewerPreferences {
   // --- Boolean properties (7 total) ---
 
   /** Whether the viewer's toolbar should be hidden. */
-  getHideToolbar(): boolean { return this.data.hideToolbar ?? false; }
+  getHideToolbar(): boolean {
+    return this.data.hideToolbar ?? false;
+  }
   /** Set whether the viewer's toolbar should be hidden. */
-  setHideToolbar(value: boolean): void { this.data.hideToolbar = value; }
+  setHideToolbar(value: boolean): void {
+    this.data.hideToolbar = value;
+  }
 
   /** Whether the viewer's menu bar should be hidden. */
-  getHideMenubar(): boolean { return this.data.hideMenubar ?? false; }
+  getHideMenubar(): boolean {
+    return this.data.hideMenubar ?? false;
+  }
   /** Set whether the viewer's menu bar should be hidden. */
-  setHideMenubar(value: boolean): void { this.data.hideMenubar = value; }
+  setHideMenubar(value: boolean): void {
+    this.data.hideMenubar = value;
+  }
 
   /** Whether the viewer's window UI elements should be hidden. */
-  getHideWindowUI(): boolean { return this.data.hideWindowUI ?? false; }
+  getHideWindowUI(): boolean {
+    return this.data.hideWindowUI ?? false;
+  }
   /** Set whether the viewer's window UI elements should be hidden. */
-  setHideWindowUI(value: boolean): void { this.data.hideWindowUI = value; }
+  setHideWindowUI(value: boolean): void {
+    this.data.hideWindowUI = value;
+  }
 
   /** Whether the document window should be resized to fit the first page. */
-  getFitWindow(): boolean { return this.data.fitWindow ?? false; }
+  getFitWindow(): boolean {
+    return this.data.fitWindow ?? false;
+  }
   /** Set whether the document window should be resized to fit the first page. */
-  setFitWindow(value: boolean): void { this.data.fitWindow = value; }
+  setFitWindow(value: boolean): void {
+    this.data.fitWindow = value;
+  }
 
   /** Whether the document window should be centered on the screen. */
-  getCenterWindow(): boolean { return this.data.centerWindow ?? false; }
+  getCenterWindow(): boolean {
+    return this.data.centerWindow ?? false;
+  }
   /** Set whether the document window should be centered on the screen. */
-  setCenterWindow(value: boolean): void { this.data.centerWindow = value; }
+  setCenterWindow(value: boolean): void {
+    this.data.centerWindow = value;
+  }
 
   /** Whether the title bar should display the document title from metadata. */
-  getDisplayDocTitle(): boolean { return this.data.displayDocTitle ?? false; }
+  getDisplayDocTitle(): boolean {
+    return this.data.displayDocTitle ?? false;
+  }
   /** Set whether the title bar should display the document title. */
-  setDisplayDocTitle(value: boolean): void { this.data.displayDocTitle = value; }
+  setDisplayDocTitle(value: boolean): void {
+    this.data.displayDocTitle = value;
+  }
 
   /** Whether the paper tray should be selected based on the PDF page size. */
-  getPickTrayByPDFSize(): boolean { return this.data.pickTrayByPDFSize ?? false; }
+  getPickTrayByPDFSize(): boolean {
+    return this.data.pickTrayByPDFSize ?? false;
+  }
   /** Set whether the paper tray should be selected based on the PDF page size. */
-  setPickTrayByPDFSize(value: boolean): void { this.data.pickTrayByPDFSize = value; }
+  setPickTrayByPDFSize(value: boolean): void {
+    this.data.pickTrayByPDFSize = value;
+  }
 
   // --- Enum properties (4 total) ---
 
@@ -108,20 +136,32 @@ export class PdfViewerPreferences {
   // --- Numeric / complex properties (2 total) ---
 
   /** Default number of copies to print. */
-  getNumCopies(): number { return this.data.numCopies ?? 1; }
+  getNumCopies(): number {
+    return this.data.numCopies ?? 1;
+  }
   /** Set the default number of copies to print. */
-  setNumCopies(value: number): void { this.data.numCopies = value; }
+  setNumCopies(value: number): void {
+    this.data.numCopies = value;
+  }
 
   /** Page ranges to print, as [start, end] pairs, or undefined if not set. */
-  getPrintPageRange(): [number, number][] | undefined { return this.data.printPageRange; }
+  getPrintPageRange(): [number, number][] | undefined {
+    return this.data.printPageRange;
+  }
   /** Set the page ranges to print, as [start, end] pairs. */
-  setPrintPageRange(value: [number, number][]): void { this.data.printPageRange = value; }
+  setPrintPageRange(value: [number, number][]): void {
+    this.data.printPageRange = value;
+  }
 
   // --- Serialization ---
 
   /** Convert to a PdfDict for embedding in the PDF catalog. */
-  toDict(): PdfDict { return buildViewerPreferencesDict(this.data); }
+  toDict(): PdfDict {
+    return buildViewerPreferencesDict(this.data);
+  }
 
   /** Convert to a plain ViewerPreferences object. */
-  toObject(): ViewerPreferences { return { ...this.data }; }
+  toObject(): ViewerPreferences {
+    return { ...this.data };
+  }
 }

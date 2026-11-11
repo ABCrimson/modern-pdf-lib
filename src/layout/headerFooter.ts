@@ -66,9 +66,19 @@ const DEFAULT_DATE_FORMAT = 'YYYY-MM-DD';
 export function toRoman(num: number): string {
   if (num <= 0) return String(num);
   const lookup: [number, string][] = [
-    [1000, 'm'], [900, 'cm'], [500, 'd'], [400, 'cd'],
-    [100, 'c'], [90, 'xc'], [50, 'l'], [40, 'xl'],
-    [10, 'x'], [9, 'ix'], [5, 'v'], [4, 'iv'], [1, 'i'],
+    [1000, 'm'],
+    [900, 'cm'],
+    [500, 'd'],
+    [400, 'cd'],
+    [100, 'c'],
+    [90, 'xc'],
+    [50, 'l'],
+    [40, 'xl'],
+    [10, 'x'],
+    [9, 'ix'],
+    [5, 'v'],
+    [4, 'iv'],
+    [1, 'i'],
   ];
   let result = '';
   let remaining = num;
@@ -188,7 +198,12 @@ export function applyHeaderFooterToPage(
     for (const item of options.header) {
       const fontSize = item.fontSize ?? DEFAULT_FONT_SIZE;
       const resolvedText = replaceTemplateVariables(
-        item.text, pageNumber, totalPages, now, dateFormat, effectiveTitle,
+        item.text,
+        pageNumber,
+        totalPages,
+        now,
+        dateFormat,
+        effectiveTitle,
       );
       const textWidth = estimateWidth(resolvedText, item.font, fontSize);
 
@@ -230,7 +245,12 @@ export function applyHeaderFooterToPage(
     for (const item of options.footer) {
       const fontSize = item.fontSize ?? DEFAULT_FONT_SIZE;
       const resolvedText = replaceTemplateVariables(
-        item.text, pageNumber, totalPages, now, dateFormat, effectiveTitle,
+        item.text,
+        pageNumber,
+        totalPages,
+        now,
+        dateFormat,
+        effectiveTitle,
       );
       const textWidth = estimateWidth(resolvedText, item.font, fontSize);
 

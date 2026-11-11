@@ -65,7 +65,12 @@ export function computeTileGrid(page: PdfPage, opts: TileOptions = {}): TileGrid
 }
 
 /** Render a single tile `(column, row)` of a page to an RGBA image. */
-export function renderPageTile(page: PdfPage, column: number, row: number, opts: TileOptions = {}): RasterImage {
+export function renderPageTile(
+  page: PdfPage,
+  column: number,
+  row: number,
+  opts: TileOptions = {},
+): RasterImage {
   const dl = interpretPage(page);
   const grid = gridFromDisplayList(dl, opts);
   const x = column * grid.tileSize;

@@ -90,16 +90,15 @@ async function buildSelfSignedCert(
   const later = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000);
   const validity = encodeSequence([encodeUTCTime(now), encodeUTCTime(later)]);
 
-  const tbsCert = encodeSequence([
-    version, serial, sigAlgo, name, validity, name, spkiDer,
-  ]);
+  const tbsCert = encodeSequence([version, serial, sigAlgo, name, validity, name, spkiDer]);
 
   const signature = new Uint8Array(
     await globalThis.crypto.subtle.sign(
       { name: 'RSASSA-PKCS1-v1_5' },
       privateKey,
       tbsCert.buffer.slice(
-        tbsCert.byteOffset, tbsCert.byteOffset + tbsCert.byteLength,
+        tbsCert.byteOffset,
+        tbsCert.byteOffset + tbsCert.byteLength,
       ) as ArrayBuffer,
     ),
   );
@@ -126,7 +125,9 @@ const OID_MGF1 = '1.2.840.113549.1.1.8';
 
 /** Hex helper for substring assertions. */
 function toHex(bytes: Uint8Array): string {
-  return Array.from(bytes).map((b) => b.toString(16).padStart(2, '0')).join('');
+  return Array.from(bytes)
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
 }
 
 /**
@@ -184,9 +185,13 @@ describe('buildSigningCertificateV2Attribute', () => {
 
     // Compute the expected certHash directly.
     const digest = new Uint8Array(
-      await globalThis.crypto.subtle.digest('SHA-256', certificate.buffer.slice(
-        certificate.byteOffset, certificate.byteOffset + certificate.byteLength,
-      ) as ArrayBuffer),
+      await globalThis.crypto.subtle.digest(
+        'SHA-256',
+        certificate.buffer.slice(
+          certificate.byteOffset,
+          certificate.byteOffset + certificate.byteLength,
+        ) as ArrayBuffer,
+      ),
     );
     expect(digest.length).toBe(32);
 
@@ -246,7 +251,10 @@ describe('buildSigningCertificateV2Attribute', () => {
 describe('extractSigningCertificateV2', () => {
   it('reports present:false when the attribute is absent', () => {
     const signedAttrs = encodeSet([
-      encodeSequence([encodeOID('1.2.840.113549.1.9.3'), encodeSet([encodeOID('1.2.840.113549.1.7.1')])]),
+      encodeSequence([
+        encodeOID('1.2.840.113549.1.9.3'),
+        encodeSet([encodeOID('1.2.840.113549.1.7.1')]),
+      ]),
     ]);
     const res = extractSigningCertificateV2(signedAttrs);
     expect(res.present).toBe(false);
@@ -270,9 +278,13 @@ describe('extractSigningCertificateV2', () => {
     expect(res.certHash!.length).toBe(32);
 
     const digest = new Uint8Array(
-      await globalThis.crypto.subtle.digest('SHA-256', certificate.buffer.slice(
-        certificate.byteOffset, certificate.byteOffset + certificate.byteLength,
-      ) as ArrayBuffer),
+      await globalThis.crypto.subtle.digest(
+        'SHA-256',
+        certificate.buffer.slice(
+          certificate.byteOffset,
+          certificate.byteOffset + certificate.byteLength,
+        ) as ArrayBuffer,
+      ),
     );
     expect(toHex(res.certHash!)).toBe(toHex(digest));
   });
@@ -329,12 +341,7 @@ describe('buildPkcs7Signature with cades: true', () => {
     });
 
     // Verify the signature mathematically using the verifier helper.
-    const ok = await verifySignature(
-      new Uint8Array(0),
-      [0, 0, 0, 0],
-      pkcs7,
-      certificate,
-    );
+    const ok = await verifySignature(new Uint8Array(0), [0, 0, 0, 0], pkcs7, certificate);
     expect(ok).toBe(true);
   });
 });
@@ -391,12 +398,7 @@ describe('buildPkcs7Signature with signatureScheme: pss', () => {
       signingDate: new Date(Date.UTC(2026, 1, 25, 12, 0, 0)),
     });
 
-    const ok = await verifySignature(
-      new Uint8Array(0),
-      [0, 0, 0, 0],
-      pkcs7,
-      certificate,
-    );
+    const ok = await verifySignature(new Uint8Array(0), [0, 0, 0, 0], pkcs7, certificate);
     expect(ok).toBe(true);
   });
 
@@ -420,12 +422,7 @@ describe('buildPkcs7Signature with signatureScheme: pss', () => {
     expect(hex).toContain('06092a864886f70d01010a'); // id-RSASSA-PSS
     expect(hex).toContain('060b2a864886f70d010910022f'); // signing-cert-v2
 
-    const ok = await verifySignature(
-      new Uint8Array(0),
-      [0, 0, 0, 0],
-      pkcs7,
-      certificate,
-    );
+    const ok = await verifySignature(new Uint8Array(0), [0, 0, 0, 0], pkcs7, certificate);
     expect(ok).toBe(true);
   });
 

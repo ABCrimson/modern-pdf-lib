@@ -59,7 +59,8 @@ describe('Text skew in drawText', () => {
   it('combines rotation and skew in Tm matrix', () => {
     const page = makePage();
     page.drawText('Both', {
-      x: 50, y: 700,
+      x: 50,
+      y: 700,
       rotate: degrees(45),
       xSkew: degrees(10),
     });

@@ -199,7 +199,7 @@ export class RevocationCache {
     // If the entry has no explicit expiration, use the configured TTL
     const storedEntry: OcspCacheEntry = {
       ...entry,
-      expiresAt: entry.expiresAt || (entry.cachedAt + this._ttlMs),
+      expiresAt: entry.expiresAt || entry.cachedAt + this._ttlMs,
     };
 
     this._ocspMap.set(certId, storedEntry);
@@ -242,7 +242,7 @@ export class RevocationCache {
   cacheCrl(url: string, entry: CrlCacheEntry): void {
     const storedEntry: CrlCacheEntry = {
       ...entry,
-      expiresAt: entry.expiresAt || (entry.cachedAt + this._ttlMs),
+      expiresAt: entry.expiresAt || entry.cachedAt + this._ttlMs,
     };
 
     this._crlMap.set(url, storedEntry);

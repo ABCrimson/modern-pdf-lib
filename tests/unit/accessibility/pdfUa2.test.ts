@@ -8,14 +8,8 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  validatePdfUa2,
-  buildPdfUa2Xmp,
-} from '../../../src/accessibility/pdfUa2.js';
-import type {
-  PdfUa2Issue,
-  PdfUa2Result,
-} from '../../../src/accessibility/pdfUa2.js';
+import { validatePdfUa2, buildPdfUa2Xmp } from '../../../src/accessibility/pdfUa2.js';
+import type { PdfUa2Issue, PdfUa2Result } from '../../../src/accessibility/pdfUa2.js';
 
 import { createPdf } from '../../../src/core/pdfDocument.js';
 import { PDF2_NAMESPACE } from '../../../src/accessibility/namespaces.js';
@@ -72,9 +66,7 @@ describe('validatePdfUa2 — bare document', () => {
     const doc = createPdf();
     const result = validatePdfUa2(doc);
 
-    const treeIssue = result.issues.find(
-      (i) => i.code === 'UA2-STRUCT-001',
-    );
+    const treeIssue = result.issues.find((i) => i.code === 'UA2-STRUCT-001');
     expect(treeIssue).toBeDefined();
     expect(treeIssue!.message.toLowerCase()).toContain('structure tree');
     // Every issue must cite an ISO 14289-2 clause string.
@@ -114,9 +106,7 @@ describe('validatePdfUa2 — minimal tagging', () => {
     doc.createStructureTree();
     const tagged = validatePdfUa2(doc);
 
-    const taggedTreeIssue = tagged.issues.find(
-      (i) => i.code === 'UA2-STRUCT-001',
-    );
+    const taggedTreeIssue = tagged.issues.find((i) => i.code === 'UA2-STRUCT-001');
     expect(taggedTreeIssue).toBeUndefined();
     // Strictly fewer issues than the bare baseline.
     expect(tagged.issues.length).toBeLessThan(bare.issues.length);
@@ -126,9 +116,7 @@ describe('validatePdfUa2 — minimal tagging', () => {
     const doc = createPdf();
     const tree = doc.createStructureTree();
     // Declare the PDF 2.0 standard structure namespace on the tree.
-    (tree as unknown as { namespaces: string[] }).namespaces = [
-      PDF2_NAMESPACE,
-    ];
+    (tree as unknown as { namespaces: string[] }).namespaces = [PDF2_NAMESPACE];
 
     const result = validatePdfUa2(doc);
     const nsIssue = result.issues.find((i) => i.code === 'UA2-NS-001');
@@ -148,9 +136,7 @@ describe('validatePdfUa2 — minimal tagging', () => {
     const doc = createPdf();
     doc.setLanguage('en');
     const tree = doc.createStructureTree();
-    (tree as unknown as { namespaces: string[] }).namespaces = [
-      PDF2_NAMESPACE,
-    ];
+    (tree as unknown as { namespaces: string[] }).namespaces = [PDF2_NAMESPACE];
 
     const result = validatePdfUa2(doc);
     const langIssue = result.issues.find((i) => i.code === 'UA2-LANG-001');
@@ -161,9 +147,7 @@ describe('validatePdfUa2 — minimal tagging', () => {
     const doc = createPdf();
     doc.setLanguage('en');
     const tree = doc.createStructureTree();
-    (tree as unknown as { namespaces: string[] }).namespaces = [
-      PDF2_NAMESPACE,
-    ];
+    (tree as unknown as { namespaces: string[] }).namespaces = [PDF2_NAMESPACE];
     // Figure with no alt text / actual text.
     tree.addElement(null, 'Figure');
 
@@ -176,9 +160,7 @@ describe('validatePdfUa2 — minimal tagging', () => {
     const doc = createPdf();
     doc.setLanguage('en');
     const tree = doc.createStructureTree();
-    (tree as unknown as { namespaces: string[] }).namespaces = [
-      PDF2_NAMESPACE,
-    ];
+    (tree as unknown as { namespaces: string[] }).namespaces = [PDF2_NAMESPACE];
     tree.addElement(null, 'Figure', { altText: 'A descriptive label' });
 
     const result = validatePdfUa2(doc);

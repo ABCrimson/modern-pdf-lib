@@ -26,7 +26,9 @@ import type { ThreatReport, ThreatFinding } from '../../../src/security/threatSc
 // ---------------------------------------------------------------------------
 
 /** Save a document to bytes (the scanner consumes raw PDF bytes). */
-async function bytesOf(buildFn: (doc: ReturnType<typeof createPdf>) => void | Promise<void>): Promise<Uint8Array> {
+async function bytesOf(
+  buildFn: (doc: ReturnType<typeof createPdf>) => void | Promise<void>,
+): Promise<Uint8Array> {
   const doc = createPdf();
   doc.addPage(PageSizes.A4);
   await buildFn(doc);
@@ -61,8 +63,7 @@ function buildRawPdf(objects: readonly string[], rootObjNum: number): Uint8Array
     xref += `${String(off).padStart(10, '0')} 00000 n \n`;
   }
   const trailer =
-    `trailer\n<</Size ${count}/Root ${rootObjNum} 0 R>>\n` +
-    `startxref\n${xrefPos}\n%%EOF\n`;
+    `trailer\n<</Size ${count}/Root ${rootObjNum} 0 R>>\n` + `startxref\n${xrefPos}\n%%EOF\n`;
   return enc.encode(body + xref + trailer);
 }
 
@@ -161,7 +162,11 @@ describe('scanPdfThreats — document JavaScript', () => {
 describe('scanPdfThreats — embedded executable files', () => {
   it('flags an embedded file with an executable extension (.exe) as high', async () => {
     const bytes = await bytesOf((doc) => {
-      doc.attachFile('payload.exe', new Uint8Array([0x4d, 0x5a, 0x90, 0x00]), 'application/octet-stream');
+      doc.attachFile(
+        'payload.exe',
+        new Uint8Array([0x4d, 0x5a, 0x90, 0x00]),
+        'application/octet-stream',
+      );
     });
 
     const report = await scanPdfThreats(bytes);

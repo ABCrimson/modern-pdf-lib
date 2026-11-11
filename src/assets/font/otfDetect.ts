@@ -19,10 +19,10 @@
 export function isOpenTypeCFF(data: Uint8Array): boolean {
   if (data.length < 4) return false;
   return (
-    data[0] === 0x4F && // O
+    data[0] === 0x4f && // O
     data[1] === 0x54 && // T
     data[2] === 0x54 && // T
-    data[3] === 0x4F    // O
+    data[3] === 0x4f // O
   );
 }
 

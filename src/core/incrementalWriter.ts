@@ -22,11 +22,7 @@
  */
 
 import { deflateSync as fflateDeflateSync } from 'fflate';
-import {
-  PdfObjectRegistry,
-  PdfName,
-  PdfStream,
-} from './pdfObjects.js';
+import { PdfObjectRegistry, PdfName, PdfStream } from './pdfObjects.js';
 import type { DocumentStructure } from './pdfCatalog.js';
 import type { PdfSaveOptions } from './pdfWriter.js';
 import type { PdfDocument } from './pdfDocument.js';
@@ -170,7 +166,7 @@ function findOriginalXrefOffset(data: Uint8Array): number {
   if (idx === -1) {
     throw new Error(
       'Incremental save: could not find "startxref" in the original PDF. ' +
-      'The file may be corrupted.',
+        'The file may be corrupted.',
     );
   }
 
@@ -179,9 +175,7 @@ function findOriginalXrefOffset(data: Uint8Array): number {
   const match = afterStartxref.match(/^(\d+)/);
 
   if (!match) {
-    throw new Error(
-      'Incremental save: could not parse xref offset after "startxref".',
-    );
+    throw new Error('Incremental save: could not parse xref offset after "startxref".');
   }
 
   return parseInt(match[1]!, 10);
@@ -205,9 +199,7 @@ function findOriginalTrailerSize(data: Uint8Array): number {
   }
 
   // Default — could not find
-  throw new Error(
-    'Incremental save: could not find /Size in the original trailer.',
-  );
+  throw new Error('Incremental save: could not find /Size in the original trailer.');
 }
 
 // ---------------------------------------------------------------------------
@@ -308,7 +300,10 @@ export function saveIncremental(
 
   // Build xref subsections
   // Group consecutive object numbers into subsections for efficiency
-  const sortedObjNums = xrefOffsets.keys().toArray().sort((a, b) => a - b);
+  const sortedObjNums = xrefOffsets
+    .keys()
+    .toArray()
+    .sort((a, b) => a - b);
   const subsections = buildXrefSubsections(sortedObjNums, xrefOffsets);
 
   buf.writeString('xref\n');
@@ -477,16 +472,20 @@ export async function saveDocumentIncremental(
   const pageEntries = pages.map((p) => p.finalize());
 
   // Build document structure
-  const structure = buildDocumentStructure(pageEntries, {
-    producer: doc.getProducer(),
-    creationDate: doc.getCreationDate(),
-    modDate: doc.getModDate() ?? new Date(),
-    title: doc.getTitle(),
-    author: doc.getAuthor(),
-    subject: doc.getSubject(),
-    keywords: doc.getKeywords(),
-    creator: doc.getCreator(),
-  }, registry);
+  const structure = buildDocumentStructure(
+    pageEntries,
+    {
+      producer: doc.getProducer(),
+      creationDate: doc.getCreationDate(),
+      modDate: doc.getModDate() ?? new Date(),
+      title: doc.getTitle(),
+      author: doc.getAuthor(),
+      subject: doc.getSubject(),
+      keywords: doc.getKeywords(),
+      creator: doc.getCreator(),
+    },
+    registry,
+  );
 
   // Determine which objects are changed
   // For simplicity, we consider ALL objects in the registry as potentially changed
@@ -504,11 +503,5 @@ export async function saveDocumentIncremental(
   changedObjects.add(structure.infoRef.objectNumber);
   changedObjects.add(structure.pagesRef.objectNumber);
 
-  return saveIncremental(
-    originalBytes,
-    registry,
-    structure,
-    changedObjects,
-    options,
-  );
+  return saveIncremental(originalBytes, registry, structure, changedObjects, options);
 }

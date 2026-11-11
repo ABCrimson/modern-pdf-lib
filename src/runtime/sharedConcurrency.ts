@@ -141,9 +141,7 @@ export class SharedCounter {
   public constructor(buffer?: SharedArrayBuffer, index?: number) {
     const slot = index ?? 0;
     if (!Number.isInteger(slot) || slot < 0) {
-      throw new Error(
-        `SharedCounter: index must be a non-negative integer, received ${slot}`,
-      );
+      throw new Error(`SharedCounter: index must be a non-negative integer, received ${slot}`);
     }
 
     const buf = buffer ?? allocShared(INT32_BYTES);
@@ -446,9 +444,7 @@ export class SharedRingBuffer {
    */
   public static fromBuffer(buffer: SharedArrayBuffer): SharedRingBuffer {
     if (buffer.byteLength <= CONTROL_BYTES) {
-      throw new Error(
-        `SharedRingBuffer.fromBuffer: buffer too small (${buffer.byteLength} bytes)`,
-      );
+      throw new Error(`SharedRingBuffer.fromBuffer: buffer too small (${buffer.byteLength} bytes)`);
     }
     const dataBytes = buffer.byteLength - CONTROL_BYTES;
     return new SharedRingBuffer(dataBytes, buffer);

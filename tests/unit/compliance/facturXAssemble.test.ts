@@ -17,10 +17,7 @@
 
 import { describe, it, expect } from 'vitest';
 
-import {
-  assembleFacturX,
-  buildFacturXXmp,
-} from '../../../src/compliance/facturXAssemble.js';
+import { assembleFacturX, buildFacturXXmp } from '../../../src/compliance/facturXAssemble.js';
 import type { FacturXAssembleOptions } from '../../../src/compliance/facturXAssemble.js';
 import { createPdf } from '../../../src/core/pdfDocument.js';
 import type {
@@ -73,9 +70,7 @@ function bytesToLatin1(bytes: Uint8Array): string {
 describe('buildFacturXXmp', () => {
   it('uses the official Factur-X fx: namespace URI', () => {
     const xmp = buildFacturXXmp('EN16931');
-    expect(xmp).toContain(
-      'urn:factur-x:pdfa:CrossIndustryDocument:invoice:1p0#',
-    );
+    expect(xmp).toContain('urn:factur-x:pdfa:CrossIndustryDocument:invoice:1p0#');
     expect(xmp).toContain('xmlns:fx=');
   });
 
@@ -87,16 +82,12 @@ describe('buildFacturXXmp', () => {
 
   it('embeds the default document file name', () => {
     const xmp = buildFacturXXmp('EN16931');
-    expect(xmp).toContain(
-      '<fx:DocumentFileName>factur-x.xml</fx:DocumentFileName>',
-    );
+    expect(xmp).toContain('<fx:DocumentFileName>factur-x.xml</fx:DocumentFileName>');
   });
 
   it('uses a custom document file name when provided', () => {
     const xmp = buildFacturXXmp('EN16931', 'my-invoice.xml');
-    expect(xmp).toContain(
-      '<fx:DocumentFileName>my-invoice.xml</fx:DocumentFileName>',
-    );
+    expect(xmp).toContain('<fx:DocumentFileName>my-invoice.xml</fx:DocumentFileName>');
   });
 
   it('derives the spec ConformanceLevel string from the profile', () => {
@@ -109,9 +100,7 @@ describe('buildFacturXXmp', () => {
     ];
     for (const [profile, level] of cases) {
       const xmp = buildFacturXXmp(profile);
-      expect(xmp).toContain(
-        `<fx:ConformanceLevel>${level}</fx:ConformanceLevel>`,
-      );
+      expect(xmp).toContain(`<fx:ConformanceLevel>${level}</fx:ConformanceLevel>`);
     }
   });
 

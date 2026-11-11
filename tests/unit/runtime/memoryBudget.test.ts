@@ -40,9 +40,7 @@ describe('createMemoryBudget', () => {
   });
 
   it('throws a TypeError for an Infinity limit', () => {
-    expect(() => createMemoryBudget(Number.POSITIVE_INFINITY)).toThrow(
-      TypeError,
-    );
+    expect(() => createMemoryBudget(Number.POSITIVE_INFINITY)).toThrow(TypeError);
   });
 });
 
@@ -243,9 +241,7 @@ describe('MemoryBudget#withAllocation', () => {
     const budget = createMemoryBudget(1000);
     budget.allocate(600);
     const fn = vi.fn(() => 1);
-    expect(() => budget.withAllocation(500, fn)).toThrow(
-      MemoryBudgetExceededError,
-    );
+    expect(() => budget.withAllocation(500, fn)).toThrow(MemoryBudgetExceededError);
     expect(fn).not.toHaveBeenCalled();
     expect(budget.used).toBe(600);
   });

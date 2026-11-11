@@ -17,7 +17,6 @@ import { getCertificationLevel } from './mdpPolicy.js';
 import type { MdpPermission } from './mdpPolicy.js';
 import { findExistingSignatures } from './incrementalSave.js';
 
-
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -64,10 +63,7 @@ const decoder = new TextDecoder('latin1');
 /**
  * Extract objects from a specific revision of the PDF.
  */
-function extractObjectsFromRevision(
-  pdf: Uint8Array,
-  revisionEnd: number,
-): Map<number, string> {
+function extractObjectsFromRevision(pdf: Uint8Array, revisionEnd: number): Map<number, string> {
   const text = decoder.decode(pdf.subarray(0, revisionEnd));
   const objects = new Map<number, string>();
 
@@ -103,20 +99,14 @@ function isFormFillChange(oldContent: string, newContent: string): boolean {
  * Check if a change looks like an annotation addition.
  */
 function isAnnotationChange(oldContent: string, newContent: string): boolean {
-  return (
-    newContent.includes('/Type /Annot') ||
-    newContent.includes('/Annots')
-  );
+  return newContent.includes('/Type /Annot') || newContent.includes('/Annots');
 }
 
 /**
  * Check if a change looks like a page addition.
  */
 function isPageAddition(oldContent: string, newContent: string): boolean {
-  return (
-    newContent.includes('/Type /Page') &&
-    !oldContent.includes('/Type /Page')
-  );
+  return newContent.includes('/Type /Page') && !oldContent.includes('/Type /Page');
 }
 
 /**
@@ -149,9 +139,7 @@ function isSignatureChange(newContent: string): boolean {
  * @param pdf  The PDF bytes to analyze.
  * @returns    A detailed modification report.
  */
-export async function detectModifications(
-  pdf: Uint8Array,
-): Promise<ModificationReport> {
+export async function detectModifications(pdf: Uint8Array): Promise<ModificationReport> {
   const certLevel = getCertificationLevel(pdf);
   const signatures = findExistingSignatures(pdf);
   const violations: ModificationViolation[] = [];
@@ -255,10 +243,7 @@ export async function detectModifications(
           break;
 
         case 3: // FormFillSignAnnotate — form fills + annotations allowed
-          if (
-            violation.type !== 'form_filled' &&
-            violation.type !== 'annotation_added'
-          ) {
+          if (violation.type !== 'form_filled' && violation.type !== 'annotation_added') {
             isCompliant = false;
           }
           break;

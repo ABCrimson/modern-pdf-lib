@@ -47,7 +47,7 @@ describe('JPEG2000 WASM bridge — availability', () => {
   });
 
   it('initJpeg2000Wasm() throws for invalid WASM bytes', async () => {
-    const invalidBytes = new Uint8Array([0xDE, 0xAD, 0xBE, 0xEF]);
+    const invalidBytes = new Uint8Array([0xde, 0xad, 0xbe, 0xef]);
     await expect(initJpeg2000Wasm(invalidBytes)).rejects.toThrow();
     expect(isJpeg2000WasmReady()).toBe(false);
   });
@@ -92,10 +92,8 @@ describe('JPEG2000 WASM bridge — availability', () => {
 
 describe('JPEG2000 WASM bridge — decode without init', () => {
   it('decodeJpeg2000Wasm throws when WASM is not initialized', () => {
-    const data = new Uint8Array([0xFF, 0x4F, 0xFF, 0x51]);
-    expect(() => decodeJpeg2000Wasm(data)).toThrow(
-      'JPEG2000 WASM not initialized',
-    );
+    const data = new Uint8Array([0xff, 0x4f, 0xff, 0x51]);
+    expect(() => decodeJpeg2000Wasm(data)).toThrow('JPEG2000 WASM not initialized');
   });
 });
 

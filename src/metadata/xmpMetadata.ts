@@ -19,12 +19,7 @@
  */
 
 import type { DocumentMetadata } from '../core/pdfCatalog.js';
-import {
-  PdfDict,
-  PdfName,
-  PdfNumber,
-  PdfStream,
-} from '../core/pdfObjects.js';
+import { PdfDict, PdfName, PdfNumber, PdfStream } from '../core/pdfObjects.js';
 import type { PdfObjectRegistry, PdfRef } from '../core/pdfObjects.js';
 
 // ---------------------------------------------------------------------------
@@ -51,8 +46,8 @@ function escapeXml(str: string): string {
   for (let i = 0; i < str.length; i++) {
     const c = str.charCodeAt(i);
     if (c === 0x26) parts.push('&amp;');
-    else if (c === 0x3C) parts.push('&lt;');
-    else if (c === 0x3E) parts.push('&gt;');
+    else if (c === 0x3c) parts.push('&lt;');
+    else if (c === 0x3e) parts.push('&gt;');
     else if (c === 0x22) parts.push('&quot;');
     else if (c === 0x27) parts.push('&apos;');
     else parts.push(str[i]!);
@@ -277,10 +272,7 @@ export function parseXmpMetadata(xmpString: string): Partial<DocumentMetadata> {
  * @param registry  Object registry for allocating a reference.
  * @returns         The indirect reference to the metadata stream.
  */
-export function createXmpStream(
-  meta: DocumentMetadata,
-  registry: PdfObjectRegistry,
-): PdfRef {
+export function createXmpStream(meta: DocumentMetadata, registry: PdfObjectRegistry): PdfRef {
   const xmpString = buildXmpMetadata(meta);
   const encoder = new TextEncoder();
   const data = encoder.encode(xmpString);
@@ -350,10 +342,7 @@ function extractSimpleValue(xmp: string, tagName: string): string | undefined {
   }
 
   // Also check for attribute form: tagName="value"
-  const attrPattern = new RegExp(
-    `${escapeRegex(tagName)}="([^"]*)"`,
-    'i',
-  );
+  const attrPattern = new RegExp(`${escapeRegex(tagName)}="([^"]*)"`, 'i');
   const attrMatch = attrPattern.exec(xmp);
   if (attrMatch?.[1] !== undefined) {
     return unescapeXml(attrMatch[1]);

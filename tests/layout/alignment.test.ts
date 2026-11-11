@@ -8,10 +8,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { renderTable, resolvePadding } from '../../src/layout/table.js';
-import type {
-  DrawTableOptions,
-  TableCell,
-} from '../../src/layout/table.js';
+import type { DrawTableOptions, TableCell } from '../../src/layout/table.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -22,9 +19,7 @@ function simpleTable(overrides?: Partial<DrawTableOptions>): DrawTableOptions {
     x: 50,
     y: 700,
     width: 500,
-    rows: [
-      { cells: ['A', 'B', 'C'] },
-    ],
+    rows: [{ cells: ['A', 'B', 'C'] }],
     ...overrides,
   };
 }
@@ -65,12 +60,8 @@ describe('horizontal alignment', () => {
     const cell: TableCell = { content: 'Hi', align: 'center' };
     const leftCell: TableCell = { content: 'Hi', align: 'left' };
 
-    const { ops: centerOps } = renderTable(
-      simpleTable({ rows: [{ cells: [cell] }] }),
-    );
-    const { ops: leftOps } = renderTable(
-      simpleTable({ rows: [{ cells: [leftCell] }] }),
-    );
+    const { ops: centerOps } = renderTable(simpleTable({ rows: [{ cells: [cell] }] }));
+    const { ops: leftOps } = renderTable(simpleTable({ rows: [{ cells: [leftCell] }] }));
 
     const centerCoords = extractTdCoords(centerOps);
     const leftCoords = extractTdCoords(leftOps);
@@ -84,12 +75,8 @@ describe('horizontal alignment', () => {
     const cell: TableCell = { content: 'Hi', align: 'right' };
     const leftCell: TableCell = { content: 'Hi', align: 'left' };
 
-    const { ops: rightOps } = renderTable(
-      simpleTable({ rows: [{ cells: [cell] }] }),
-    );
-    const { ops: leftOps } = renderTable(
-      simpleTable({ rows: [{ cells: [leftCell] }] }),
-    );
+    const { ops: rightOps } = renderTable(simpleTable({ rows: [{ cells: [cell] }] }));
+    const { ops: leftOps } = renderTable(simpleTable({ rows: [{ cells: [leftCell] }] }));
 
     const rightCoords = extractTdCoords(rightOps);
     const leftCoords = extractTdCoords(leftOps);
@@ -127,12 +114,8 @@ describe('cell padding', () => {
     const smallPad: TableCell = { content: 'Test', padding: 2 };
     const largePad: TableCell = { content: 'Test', padding: 40 };
 
-    const { ops: smallOps } = renderTable(
-      simpleTable({ rows: [{ cells: [smallPad] }] }),
-    );
-    const { ops: largeOps } = renderTable(
-      simpleTable({ rows: [{ cells: [largePad] }] }),
-    );
+    const { ops: smallOps } = renderTable(simpleTable({ rows: [{ cells: [smallPad] }] }));
+    const { ops: largeOps } = renderTable(simpleTable({ rows: [{ cells: [largePad] }] }));
 
     const smallCoords = extractTdCoords(smallOps);
     const largeCoords = extractTdCoords(largeOps);
@@ -162,12 +145,8 @@ describe('vertical alignment', () => {
     const topCell: TableCell = { content: 'A', verticalAlign: 'top' };
     const midCell: TableCell = { content: 'A', verticalAlign: 'middle' };
 
-    const { ops: topOps } = renderTable(
-      simpleTable({ rows: [{ cells: [topCell], height: 60 }] }),
-    );
-    const { ops: midOps } = renderTable(
-      simpleTable({ rows: [{ cells: [midCell], height: 60 }] }),
-    );
+    const { ops: topOps } = renderTable(simpleTable({ rows: [{ cells: [topCell], height: 60 }] }));
+    const { ops: midOps } = renderTable(simpleTable({ rows: [{ cells: [midCell], height: 60 }] }));
 
     const topY = extractTdCoords(topOps)[0]!.y;
     const midY = extractTdCoords(midOps)[0]!.y;
@@ -181,12 +160,8 @@ describe('vertical alignment', () => {
     const topCell: TableCell = { content: 'A', verticalAlign: 'top' };
     const botCell: TableCell = { content: 'A', verticalAlign: 'bottom' };
 
-    const { ops: topOps } = renderTable(
-      simpleTable({ rows: [{ cells: [topCell], height: 60 }] }),
-    );
-    const { ops: botOps } = renderTable(
-      simpleTable({ rows: [{ cells: [botCell], height: 60 }] }),
-    );
+    const { ops: topOps } = renderTable(simpleTable({ rows: [{ cells: [topCell], height: 60 }] }));
+    const { ops: botOps } = renderTable(simpleTable({ rows: [{ cells: [botCell], height: 60 }] }));
 
     const topY = extractTdCoords(topOps)[0]!.y;
     const botY = extractTdCoords(botOps)[0]!.y;

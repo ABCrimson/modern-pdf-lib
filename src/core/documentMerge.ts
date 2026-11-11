@@ -236,9 +236,7 @@ export function copyPagesToTarget(
   // Validate indices
   for (const index of indices) {
     if (index < 0 || index >= sourcePages.length) {
-      throw new RangeError(
-        `copyPages: index ${index} out of range [0, ${sourcePages.length - 1}]`,
-      );
+      throw new RangeError(`copyPages: index ${index} out of range [0, ${sourcePages.length - 1}]`);
     }
   }
 
@@ -321,10 +319,7 @@ export function copyPagesToTarget(
           // ExtGState registration on PdfPage is via extGStates map
           // We use registerXObject as a workaround — but actually we need
           // a proper registerExtGState method. For now, use the internal approach.
-          newPage.registerExtGState(
-            gsName.startsWith('/') ? gsName.slice(1) : gsName,
-            mappedRef,
-          );
+          newPage.registerExtGState(gsName.startsWith('/') ? gsName.slice(1) : gsName, mappedRef);
         }
       }
     }
@@ -451,23 +446,16 @@ export type PageRange = [start: number, end: number];
  * const [part1, part2] = await splitPdf(doc, [[0, 2], [3, doc.getPageCount() - 1]]);
  * ```
  */
-export async function splitPdf(
-  document: PdfDocument,
-  ranges: PageRange[],
-): Promise<PdfDocument[]> {
+export async function splitPdf(document: PdfDocument, ranges: PageRange[]): Promise<PdfDocument[]> {
   const pageCount = document.getPageCount();
 
   // Validate ranges
   for (const [start, end] of ranges) {
     if (start < 0 || start >= pageCount) {
-      throw new RangeError(
-        `splitPdf: start index ${start} out of range [0, ${pageCount - 1}]`,
-      );
+      throw new RangeError(`splitPdf: start index ${start} out of range [0, ${pageCount - 1}]`);
     }
     if (end < start || end >= pageCount) {
-      throw new RangeError(
-        `splitPdf: end index ${end} out of range [${start}, ${pageCount - 1}]`,
-      );
+      throw new RangeError(`splitPdf: end index ${end} out of range [${start}, ${pageCount - 1}]`);
     }
   }
 

@@ -13,10 +13,7 @@
 // Structure tree
 // ---------------------------------------------------------------------------
 
-export {
-  PdfStructureElement,
-  PdfStructureTree,
-} from './structureTree.js';
+export { PdfStructureElement, PdfStructureTree } from './structureTree.js';
 export type {
   StructureType,
   StructureElementOptions,
@@ -44,20 +41,13 @@ export type { MarkedContentScope } from './markedContent.js';
 // Accessibility checker
 // ---------------------------------------------------------------------------
 
-export {
-  checkAccessibility,
-  summarizeIssues,
-  isAccessible,
-} from './accessibilityChecker.js';
+export { checkAccessibility, summarizeIssues, isAccessible } from './accessibilityChecker.js';
 
 // ---------------------------------------------------------------------------
 // PDF/UA validator
 // ---------------------------------------------------------------------------
 
-export {
-  validatePdfUa,
-  enforcePdfUa,
-} from './pdfUaValidator.js';
+export { validatePdfUa, enforcePdfUa } from './pdfUaValidator.js';
 export type {
   PdfUaLevel,
   PdfUaError,

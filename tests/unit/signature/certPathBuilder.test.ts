@@ -75,10 +75,7 @@ function basicConstraintsCa(): Uint8Array {
 
 /** Subject Key Identifier (2.5.29.14): OCTET STRING wrapping a KeyIdentifier OCTET STRING. */
 function subjectKeyIdentifier(keyId: Uint8Array): Uint8Array {
-  return encodeSequence([
-    encodeOID('2.5.29.14'),
-    encodeOctetString(encodeOctetString(keyId)),
-  ]);
+  return encodeSequence([encodeOID('2.5.29.14'), encodeOctetString(encodeOctetString(keyId))]);
 }
 
 /**
@@ -93,10 +90,7 @@ function authorityKeyIdentifier(keyId: Uint8Array): Uint8Array {
   keyIdTagged.set(ctxLen, 1);
   keyIdTagged.set(keyId, 1 + ctxLen.length);
   const akiSeq = encodeSequence([keyIdTagged]);
-  return encodeSequence([
-    encodeOID('2.5.29.35'),
-    encodeOctetString(akiSeq),
-  ]);
+  return encodeSequence([encodeOID('2.5.29.35'), encodeOctetString(akiSeq)]);
 }
 
 interface GenOptions {
@@ -152,10 +146,7 @@ async function generateCert(
 
   const notBefore = new Date(Date.UTC(2020, 0, 1));
   const notAfter = new Date(Date.UTC(2035, 0, 1));
-  const validity = encodeSequence([
-    encodeUTCTime(notBefore),
-    encodeUTCTime(notAfter),
-  ]);
+  const validity = encodeSequence([encodeUTCTime(notBefore), encodeUTCTime(notAfter)]);
 
   const exts: Uint8Array[] = [];
   if (options.ca) exts.push(basicConstraintsCa());
@@ -163,8 +154,13 @@ async function generateCert(
   if (options.aki) exts.push(authorityKeyIdentifier(options.aki));
 
   const tbsParts: Uint8Array[] = [
-    version, serialNumber, SHA256_RSA_ALGO,
-    issuerName, validity, subject, spkiDer,
+    version,
+    serialNumber,
+    SHA256_RSA_ALGO,
+    issuerName,
+    validity,
+    subject,
+    spkiDer,
   ];
   if (exts.length > 0) {
     tbsParts.push(encodeContextTag(3, encodeSequence(exts)));
@@ -182,11 +178,7 @@ async function generateCert(
     ),
   );
 
-  const certificate = encodeSequence([
-    tbsCert,
-    SHA256_RSA_ALGO,
-    encodeBitString(signature),
-  ]);
+  const certificate = encodeSequence([tbsCert, SHA256_RSA_ALGO, encodeBitString(signature)]);
 
   return { certificate, keyPair };
 }
@@ -223,14 +215,14 @@ describe('buildCertPath', () => {
     const leaf = await generateCert(
       'Leaf',
       {},
-      { name: 'Intermediate CA', subjectName: subjectNameOf(inter.certificate), keyPair: inter.keyPair },
+      {
+        name: 'Intermediate CA',
+        subjectName: subjectNameOf(inter.certificate),
+        keyPair: inter.keyPair,
+      },
     );
 
-    const result = buildCertPath(
-      leaf.certificate,
-      [inter.certificate],
-      [root.certificate],
-    );
+    const result = buildCertPath(leaf.certificate, [inter.certificate], [root.certificate]);
 
     expect(result.complete).toBe(true);
     expect(result.path).toHaveLength(2);
@@ -253,14 +245,14 @@ describe('buildCertPath', () => {
     const leaf = await generateCert(
       'Leaf',
       { aki: interSki },
-      { name: 'Intermediate CA', subjectName: subjectNameOf(inter.certificate), keyPair: inter.keyPair },
+      {
+        name: 'Intermediate CA',
+        subjectName: subjectNameOf(inter.certificate),
+        keyPair: inter.keyPair,
+      },
     );
 
-    const result = buildCertPath(
-      leaf.certificate,
-      [inter.certificate],
-      [root.certificate],
-    );
+    const result = buildCertPath(leaf.certificate, [inter.certificate], [root.certificate]);
 
     expect(result.complete).toBe(true);
     expect(result.path).toHaveLength(2);
@@ -278,7 +270,11 @@ describe('buildCertPath', () => {
     const leaf = await generateCert(
       'Leaf',
       {},
-      { name: 'Intermediate CA', subjectName: subjectNameOf(inter.certificate), keyPair: inter.keyPair },
+      {
+        name: 'Intermediate CA',
+        subjectName: subjectNameOf(inter.certificate),
+        keyPair: inter.keyPair,
+      },
     );
 
     // intermediates omitted entirely
@@ -300,7 +296,11 @@ describe('buildCertPath', () => {
     const leaf = await generateCert(
       'Leaf',
       {},
-      { name: 'Intermediate CA', subjectName: subjectNameOf(inter.certificate), keyPair: inter.keyPair },
+      {
+        name: 'Intermediate CA',
+        subjectName: subjectNameOf(inter.certificate),
+        keyPair: inter.keyPair,
+      },
     );
 
     // intermediate available but root not a trust anchor
@@ -316,11 +316,7 @@ describe('buildCertPath', () => {
   it('handles a self-signed leaf that is its own anchor', async () => {
     const selfSigned = await generateCert('Self-Signed Root', { ca: true });
 
-    const result = buildCertPath(
-      selfSigned.certificate,
-      [],
-      [selfSigned.certificate],
-    );
+    const result = buildCertPath(selfSigned.certificate, [], [selfSigned.certificate]);
 
     expect(result.complete).toBe(true);
     expect(result.path).toHaveLength(1);
@@ -338,13 +334,21 @@ describe('buildCertPath', () => {
     const inter2 = await generateCert(
       'Intermediate 2',
       { ca: true },
-      { name: 'Intermediate 1', subjectName: subjectNameOf(inter1.certificate), keyPair: inter1.keyPair },
+      {
+        name: 'Intermediate 1',
+        subjectName: subjectNameOf(inter1.certificate),
+        keyPair: inter1.keyPair,
+      },
     );
     const unrelated = await generateCert('Unrelated CA', { ca: true });
     const leaf = await generateCert(
       'Leaf',
       {},
-      { name: 'Intermediate 2', subjectName: subjectNameOf(inter2.certificate), keyPair: inter2.keyPair },
+      {
+        name: 'Intermediate 2',
+        subjectName: subjectNameOf(inter2.certificate),
+        keyPair: inter2.keyPair,
+      },
     );
 
     const result = buildCertPath(
@@ -373,7 +377,11 @@ describe('buildCertPath', () => {
     const leaf = await generateCert(
       'Leaf',
       {},
-      { name: 'Intermediate CA', subjectName: subjectNameOf(inter.certificate), keyPair: inter.keyPair },
+      {
+        name: 'Intermediate CA',
+        subjectName: subjectNameOf(inter.certificate),
+        keyPair: inter.keyPair,
+      },
     );
 
     const result = buildCertPath(
@@ -408,11 +416,7 @@ describe('buildCertPath', () => {
     );
 
     // No anchors; supply both so issuer-DN matching could revisit DN 'A'.
-    const result = buildCertPath(
-      b.certificate,
-      [aPrime.certificate, a.certificate],
-      [],
-    );
+    const result = buildCertPath(b.certificate, [aPrime.certificate, a.certificate], []);
 
     // Must terminate (no infinite loop) and not be complete.
     expect(result.complete).toBe(false);

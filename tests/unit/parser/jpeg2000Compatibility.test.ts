@@ -191,29 +191,60 @@ function buildEocMarker(): number[] {
 function wrapInJp2(codestream: number[]): number[] {
   // Signature box: 12 bytes
   const sigBox = [
-    0x00, 0x00, 0x00, 0x0c, // box length = 12
-    0x6a, 0x50, 0x20, 0x20, // box type = "jP  "
-    0x0d, 0x0a, 0x87, 0x0a, // signature content
+    0x00,
+    0x00,
+    0x00,
+    0x0c, // box length = 12
+    0x6a,
+    0x50,
+    0x20,
+    0x20, // box type = "jP  "
+    0x0d,
+    0x0a,
+    0x87,
+    0x0a, // signature content
   ];
 
   // File Type box: 20 bytes
   const ftypBox = [
-    0x00, 0x00, 0x00, 0x14, // box length = 20
-    0x66, 0x74, 0x79, 0x70, // box type = "ftyp"
-    0x6a, 0x70, 0x32, 0x20, // brand = "jp2 "
-    0x00, 0x00, 0x00, 0x00, // minor version
-    0x6a, 0x70, 0x32, 0x20, // compatible brand
+    0x00,
+    0x00,
+    0x00,
+    0x14, // box length = 20
+    0x66,
+    0x74,
+    0x79,
+    0x70, // box type = "ftyp"
+    0x6a,
+    0x70,
+    0x32,
+    0x20, // brand = "jp2 "
+    0x00,
+    0x00,
+    0x00,
+    0x00, // minor version
+    0x6a,
+    0x70,
+    0x32,
+    0x20, // compatible brand
   ];
 
   // JP2 Header box (jp2h) — minimal with image header (ihdr)
   const ihdrContent = [
-    0x00, 0x00, 0x00, 0x01, // height = 1
-    0x00, 0x00, 0x00, 0x01, // width = 1
-    0x00, 0x03,             // num components = 3
-    0x07,                   // bpc = 8 (stored as 7 = bpc-1)
-    0x07,                   // compression type = 7 (jpeg2000)
-    0x00,                   // unknown colorspace = 0
-    0x00,                   // intellectual property = 0
+    0x00,
+    0x00,
+    0x00,
+    0x01, // height = 1
+    0x00,
+    0x00,
+    0x00,
+    0x01, // width = 1
+    0x00,
+    0x03, // num components = 3
+    0x07, // bpc = 8 (stored as 7 = bpc-1)
+    0x07, // compression type = 7 (jpeg2000)
+    0x00, // unknown colorspace = 0
+    0x00, // intellectual property = 0
   ];
   const ihdrBoxLen = 8 + ihdrContent.length;
   const ihdrBox = [
@@ -221,7 +252,10 @@ function wrapInJp2(codestream: number[]): number[] {
     (ihdrBoxLen >>> 16) & 0xff,
     (ihdrBoxLen >>> 8) & 0xff,
     ihdrBoxLen & 0xff,
-    0x69, 0x68, 0x64, 0x72, // "ihdr"
+    0x69,
+    0x68,
+    0x64,
+    0x72, // "ihdr"
     ...ihdrContent,
   ];
 
@@ -231,7 +265,10 @@ function wrapInJp2(codestream: number[]): number[] {
     (jp2hBoxLen >>> 16) & 0xff,
     (jp2hBoxLen >>> 8) & 0xff,
     jp2hBoxLen & 0xff,
-    0x6a, 0x70, 0x32, 0x68, // "jp2h"
+    0x6a,
+    0x70,
+    0x32,
+    0x68, // "jp2h"
     ...ihdrBox,
   ];
 
@@ -242,7 +279,10 @@ function wrapInJp2(codestream: number[]): number[] {
     (jp2cBoxLen >>> 16) & 0xff,
     (jp2cBoxLen >>> 8) & 0xff,
     jp2cBoxLen & 0xff,
-    0x6a, 0x70, 0x32, 0x63, // "jp2c"
+    0x6a,
+    0x70,
+    0x32,
+    0x63, // "jp2c"
   ];
 
   return [...sigBox, ...ftypBox, ...jp2hBox, ...jp2cBoxHeader, ...codestream];
@@ -338,15 +378,11 @@ describe('JPEG2000 single-tile lossless (8-bit RGB)', () => {
 
   it('reports correct tile grid for a single-tile image', () => {
     const cs = new Uint8Array(
-      buildSingleTileCodestream(
-        64,
-        48,
-        [
-          { bits: 8, isSigned: false },
-          { bits: 8, isSigned: false },
-          { bits: 8, isSigned: false },
-        ],
-      ),
+      buildSingleTileCodestream(64, 48, [
+        { bits: 8, isSigned: false },
+        { bits: 8, isSigned: false },
+        { bits: 8, isSigned: false },
+      ]),
     );
 
     const info = parseTileInfo(cs);
@@ -440,17 +476,11 @@ describe('JPEG2000 single-tile lossy (8-bit RGB)', () => {
 describe('JPEG2000 multi-tile image', () => {
   it('parses tile grid for a 2x2 tiled image', () => {
     const cs = new Uint8Array(
-      buildMultiTileCodestream(
-        100,
-        80,
-        50,
-        40,
-        [
-          { bits: 8, isSigned: false },
-          { bits: 8, isSigned: false },
-          { bits: 8, isSigned: false },
-        ],
-      ),
+      buildMultiTileCodestream(100, 80, 50, 40, [
+        { bits: 8, isSigned: false },
+        { bits: 8, isSigned: false },
+        { bits: 8, isSigned: false },
+      ]),
     );
 
     const info = parseTileInfo(cs);
@@ -464,13 +494,7 @@ describe('JPEG2000 multi-tile image', () => {
 
   it('parses tile grid with non-evenly-divisible dimensions', () => {
     const cs = new Uint8Array(
-      buildMultiTileCodestream(
-        100,
-        75,
-        64,
-        64,
-        [{ bits: 8, isSigned: false }],
-      ),
+      buildMultiTileCodestream(100, 75, 64, 64, [{ bits: 8, isSigned: false }]),
     );
 
     const info = parseTileInfo(cs);
@@ -480,13 +504,7 @@ describe('JPEG2000 multi-tile image', () => {
 
   it('decodes individual tiles by index', () => {
     const cs = new Uint8Array(
-      buildMultiTileCodestream(
-        100,
-        80,
-        50,
-        40,
-        [{ bits: 8, isSigned: false }],
-      ),
+      buildMultiTileCodestream(100, 80, 50, 40, [{ bits: 8, isSigned: false }]),
     );
 
     // Tile 0 (top-left)
@@ -520,13 +538,7 @@ describe('JPEG2000 multi-tile image', () => {
 
   it('throws for out-of-range tile index', () => {
     const cs = new Uint8Array(
-      buildMultiTileCodestream(
-        100,
-        80,
-        50,
-        40,
-        [{ bits: 8, isSigned: false }],
-      ),
+      buildMultiTileCodestream(100, 80, 50, 40, [{ bits: 8, isSigned: false }]),
     );
 
     expect(() => decodeTile(cs, 4)).toThrow('out of range');
@@ -548,19 +560,48 @@ describe('JPEG2000 multi-tile image', () => {
     };
 
     const tiles: TileData[] = [
-      { index: 0, x: 0, y: 0, width: 2, height: 2, data: new Uint8Array([1, 2, 3, 4]), components: 1 },
-      { index: 1, x: 2, y: 0, width: 2, height: 2, data: new Uint8Array([5, 6, 7, 8]), components: 1 },
-      { index: 2, x: 0, y: 2, width: 2, height: 2, data: new Uint8Array([9, 10, 11, 12]), components: 1 },
-      { index: 3, x: 2, y: 2, width: 2, height: 2, data: new Uint8Array([13, 14, 15, 16]), components: 1 },
+      {
+        index: 0,
+        x: 0,
+        y: 0,
+        width: 2,
+        height: 2,
+        data: new Uint8Array([1, 2, 3, 4]),
+        components: 1,
+      },
+      {
+        index: 1,
+        x: 2,
+        y: 0,
+        width: 2,
+        height: 2,
+        data: new Uint8Array([5, 6, 7, 8]),
+        components: 1,
+      },
+      {
+        index: 2,
+        x: 0,
+        y: 2,
+        width: 2,
+        height: 2,
+        data: new Uint8Array([9, 10, 11, 12]),
+        components: 1,
+      },
+      {
+        index: 3,
+        x: 2,
+        y: 2,
+        width: 2,
+        height: 2,
+        data: new Uint8Array([13, 14, 15, 16]),
+        components: 1,
+      },
     ];
 
     const assembled = assembleTiles(tiles, gridInfo);
-    expect(assembled).toEqual(new Uint8Array([
-      1, 2, 5, 6,
-      3, 4, 7, 8,
-      9, 10, 13, 14,
-      11, 12, 15, 16,
-    ]));
+    expect(assembled).toEqual(
+      new Uint8Array([1, 2, 5, 6, 3, 4, 7, 8, 9, 10, 13, 14, 11, 12, 15, 16]),
+    );
   });
 });
 
@@ -638,9 +679,12 @@ describe('JPEG2000 16-bit depth image', () => {
     // 16-bit value 0     -> 0
     // 16-bit value 32768 -> 128 (approximately)
     const data16 = new Uint8Array([
-      0xff, 0xff, // 65535
-      0x00, 0x00, // 0
-      0x80, 0x00, // 32768
+      0xff,
+      0xff, // 65535
+      0x00,
+      0x00, // 0
+      0x80,
+      0x00, // 32768
     ]);
 
     const data8 = downscale16To8(data16, 16);
@@ -654,9 +698,12 @@ describe('JPEG2000 16-bit depth image', () => {
     // 12-bit max = 4095 -> 255
     // 12-bit value 2048 -> 128 (approximately)
     const data12 = new Uint8Array([
-      0x0f, 0xff, // 4095
-      0x00, 0x00, // 0
-      0x08, 0x00, // 2048
+      0x0f,
+      0xff, // 4095
+      0x00,
+      0x00, // 0
+      0x08,
+      0x00, // 2048
     ]);
 
     const data8 = downscale16To8(data12, 12);
@@ -693,9 +740,12 @@ describe('JPEG2000 16-bit depth image', () => {
   it('normalizes 10-bit to 8-bit', () => {
     // 10-bit max = 1023
     const data = new Uint8Array([
-      0x03, 0xff, // 1023 -> 255
-      0x00, 0x00, // 0 -> 0
-      0x02, 0x00, // 512 -> ~128
+      0x03,
+      0xff, // 1023 -> 255
+      0x00,
+      0x00, // 0 -> 0
+      0x02,
+      0x00, // 512 -> ~128
     ]);
 
     const result = normalizeComponentDepth(data, 10, 8);
@@ -716,9 +766,12 @@ describe('JPEG2000 16-bit depth image', () => {
     // Signed 16-bit range: -32768 to 32767
     // After offset by 32768: 0 to 65535
     const data = new Uint8Array([
-      0x80, 0x00, // -32768 in unsigned representation -> 0 after offset
-      0x00, 0x00, // 0 in signed -> 32768 after offset
-      0x7f, 0xff, // 32767 -> 65535 after offset
+      0x80,
+      0x00, // -32768 in unsigned representation -> 0 after offset
+      0x00,
+      0x00, // 0 in signed -> 32768 after offset
+      0x7f,
+      0xff, // 32767 -> 65535 after offset
     ]);
 
     // In this representation, 0x8000 = 32768 unsigned, which represents -32768 signed
@@ -745,13 +798,7 @@ describe('JPEG2000 16-bit depth image', () => {
   });
 
   it('tile info reports correct bitsPerComponent for 16-bit', () => {
-    const cs = new Uint8Array(
-      buildSingleTileCodestream(
-        64,
-        64,
-        [{ bits: 16, isSigned: false }],
-      ),
-    );
+    const cs = new Uint8Array(buildSingleTileCodestream(64, 64, [{ bits: 16, isSigned: false }]));
 
     const info = parseTileInfo(cs);
     expect(info.bitsPerComponent).toBe(16);
@@ -790,12 +837,7 @@ describe('JPEG2000 raw J2K codestream', () => {
 
   it('decodes tile from raw codestream', () => {
     const cs = new Uint8Array(
-      buildSingleTileCodestream(
-        16,
-        16,
-        [{ bits: 8, isSigned: false }],
-        [0xaa, 0xbb],
-      ),
+      buildSingleTileCodestream(16, 16, [{ bits: 8, isSigned: false }], [0xaa, 0xbb]),
     );
 
     const tile = decodeTile(cs, 0);
@@ -811,15 +853,11 @@ describe('JPEG2000 raw J2K codestream', () => {
 
 describe('JPEG2000 JP2 with wrapper', () => {
   it('parses SIZ from within a JP2 wrapper', () => {
-    const rawCs = buildSingleTileCodestream(
-      200,
-      150,
-      [
-        { bits: 8, isSigned: false },
-        { bits: 8, isSigned: false },
-        { bits: 8, isSigned: false },
-      ],
-    );
+    const rawCs = buildSingleTileCodestream(200, 150, [
+      { bits: 8, isSigned: false },
+      { bits: 8, isSigned: false },
+      { bits: 8, isSigned: false },
+    ]);
     const jp2 = new Uint8Array(wrapInJp2(rawCs));
 
     // Verify JP2 signature
@@ -839,7 +877,11 @@ describe('JPEG2000 JP2 with wrapper', () => {
     const rawCs = buildSingleTileCodestream(
       32,
       32,
-      [{ bits: 8, isSigned: false }, { bits: 8, isSigned: false }, { bits: 8, isSigned: false }],
+      [
+        { bits: 8, isSigned: false },
+        { bits: 8, isSigned: false },
+        { bits: 8, isSigned: false },
+      ],
       [0x01, 0x02, 0x03],
     );
     const jp2 = new Uint8Array(wrapInJp2(rawCs));
@@ -976,13 +1018,7 @@ describe('JPEG2000 reduced resolution', () => {
 describe('JPEG2000 region-of-interest decoding', () => {
   it('decodes a region that spans a single tile', () => {
     const cs = new Uint8Array(
-      buildMultiTileCodestream(
-        100,
-        80,
-        50,
-        40,
-        [{ bits: 8, isSigned: false }],
-      ),
+      buildMultiTileCodestream(100, 80, 50, 40, [{ bits: 8, isSigned: false }]),
     );
 
     // Region entirely within tile 0 (0,0)-(50,40)
@@ -994,13 +1030,7 @@ describe('JPEG2000 region-of-interest decoding', () => {
 
   it('decodes a region spanning multiple tiles', () => {
     const cs = new Uint8Array(
-      buildMultiTileCodestream(
-        100,
-        80,
-        50,
-        40,
-        [{ bits: 8, isSigned: false }],
-      ),
+      buildMultiTileCodestream(100, 80, 50, 40, [{ bits: 8, isSigned: false }]),
     );
 
     // Region that spans all 4 tiles
@@ -1011,13 +1041,7 @@ describe('JPEG2000 region-of-interest decoding', () => {
 
   it('clamps region to image bounds', () => {
     const cs = new Uint8Array(
-      buildMultiTileCodestream(
-        100,
-        80,
-        50,
-        40,
-        [{ bits: 8, isSigned: false }],
-      ),
+      buildMultiTileCodestream(100, 80, 50, 40, [{ bits: 8, isSigned: false }]),
     );
 
     // Region extending beyond image bounds
@@ -1028,18 +1052,12 @@ describe('JPEG2000 region-of-interest decoding', () => {
 
   it('throws for a region entirely outside the image', () => {
     const cs = new Uint8Array(
-      buildMultiTileCodestream(
-        100,
-        80,
-        50,
-        40,
-        [{ bits: 8, isSigned: false }],
-      ),
+      buildMultiTileCodestream(100, 80, 50, 40, [{ bits: 8, isSigned: false }]),
     );
 
-    expect(() =>
-      decodeTileRegion(cs, { x: 200, y: 200, width: 50, height: 50 }),
-    ).toThrow('outside image bounds');
+    expect(() => decodeTileRegion(cs, { x: 200, y: 200, width: 50, height: 50 })).toThrow(
+      'outside image bounds',
+    );
   });
 });
 
@@ -1099,9 +1117,12 @@ describe('JPEG2000 error handling', () => {
   it('getComponentDepths throws on truncated SIZ marker', () => {
     // SOC + partial SIZ (not enough bytes for component entries)
     const cs = new Uint8Array([
-      0xff, 0x4f, // SOC
-      0xff, 0x51, // SIZ marker
-      0x00, 0x2f, // Lsiz (short)
+      0xff,
+      0x4f, // SOC
+      0xff,
+      0x51, // SIZ marker
+      0x00,
+      0x2f, // Lsiz (short)
       // Missing the rest
     ]);
     expect(() => getComponentDepths(cs)).toThrow('truncated');
@@ -1150,12 +1171,19 @@ describe('JPEG2000 error handling', () => {
 
   it('parseTileInfo throws on truncated SIZ segment', () => {
     const cs = new Uint8Array([
-      0xff, 0x4f, // SOC
-      0xff, 0x51, // SIZ
-      0x00, 0x30, // Lsiz
+      0xff,
+      0x4f, // SOC
+      0xff,
+      0x51, // SIZ
+      0x00,
+      0x30, // Lsiz
       // Only a few more bytes — truncated
-      0x00, 0x00,
-      0x00, 0x00, 0x01, 0x00,
+      0x00,
+      0x00,
+      0x00,
+      0x00,
+      0x01,
+      0x00,
     ]);
     expect(() => parseTileInfo(cs)).toThrow('truncated');
   });
@@ -1268,11 +1296,7 @@ describe('JPEG2000 JP2 box parser', () => {
   });
 
   it('finds codestream within JP2 wrapper', () => {
-    const rawCs = buildSingleTileCodestream(
-      40,
-      30,
-      [{ bits: 8, isSigned: false }],
-    );
+    const rawCs = buildSingleTileCodestream(40, 30, [{ bits: 8, isSigned: false }]);
     const jp2 = new Uint8Array(wrapInJp2(rawCs));
 
     // parseTileInfo should work through the JP2 wrapper

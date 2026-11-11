@@ -17,14 +17,7 @@
  * Reference: PDF 1.7 spec, SS14.7 (Logical Structure).
  */
 
-import {
-  PdfArray,
-  PdfDict,
-  PdfName,
-  PdfNumber,
-  PdfRef,
-  PdfString,
-} from '../core/pdfObjects.js';
+import { PdfArray, PdfDict, PdfName, PdfNumber, PdfRef, PdfString } from '../core/pdfObjects.js';
 import type { PdfObject, PdfObjectRegistry } from '../core/pdfObjects.js';
 
 // ---------------------------------------------------------------------------
@@ -49,21 +42,61 @@ import type { PdfObject, PdfObjectRegistry } from '../core/pdfObjects.js';
  */
 export type StructureType =
   // Grouping elements
-  | 'Document' | 'Part' | 'Art' | 'Sect' | 'Div' | 'BlockQuote'
-  | 'Caption' | 'TOC' | 'TOCI' | 'Index' | 'NonStruct' | 'Private'
+  | 'Document'
+  | 'Part'
+  | 'Art'
+  | 'Sect'
+  | 'Div'
+  | 'BlockQuote'
+  | 'Caption'
+  | 'TOC'
+  | 'TOCI'
+  | 'Index'
+  | 'NonStruct'
+  | 'Private'
   // Block-level elements
-  | 'P' | 'H' | 'H1' | 'H2' | 'H3' | 'H4' | 'H5' | 'H6'
+  | 'P'
+  | 'H'
+  | 'H1'
+  | 'H2'
+  | 'H3'
+  | 'H4'
+  | 'H5'
+  | 'H6'
   // List elements
-  | 'L' | 'LI' | 'Lbl' | 'LBody'
+  | 'L'
+  | 'LI'
+  | 'Lbl'
+  | 'LBody'
   // Table elements
-  | 'Table' | 'TR' | 'TH' | 'TD' | 'THead' | 'TBody' | 'TFoot'
+  | 'Table'
+  | 'TR'
+  | 'TH'
+  | 'TD'
+  | 'THead'
+  | 'TBody'
+  | 'TFoot'
   // Inline-level elements
-  | 'Span' | 'Quote' | 'Note' | 'Reference' | 'BibEntry' | 'Code'
-  | 'Link' | 'Annot'
+  | 'Span'
+  | 'Quote'
+  | 'Note'
+  | 'Reference'
+  | 'BibEntry'
+  | 'Code'
+  | 'Link'
+  | 'Annot'
   // Ruby / Warichu
-  | 'Ruby' | 'RB' | 'RT' | 'RP' | 'Warichu' | 'WT' | 'WP'
+  | 'Ruby'
+  | 'RB'
+  | 'RT'
+  | 'RP'
+  | 'Warichu'
+  | 'WT'
+  | 'WP'
   // Illustration elements
-  | 'Figure' | 'Formula' | 'Form'
+  | 'Figure'
+  | 'Formula'
+  | 'Form'
   // Allow custom structure types
   | (string & {});
 
@@ -143,7 +176,12 @@ const HEADING_TYPES = new Set<string>(['H1', 'H2', 'H3', 'H4', 'H5', 'H6']);
 
 /** Heading level map for hierarchy validation. */
 const HEADING_LEVEL: Record<string, number> = {
-  H1: 1, H2: 2, H3: 3, H4: 4, H5: 5, H6: 6,
+  H1: 1,
+  H2: 2,
+  H3: 3,
+  H4: 4,
+  H5: 5,
+  H6: 6,
 };
 
 /** Table cell types. */
@@ -203,10 +241,7 @@ export class PdfStructureElement {
    * @param options  Optional attributes for the child.
    * @returns        The newly created child element.
    */
-  addChild(
-    type: StructureType,
-    options?: StructureElementOptions,
-  ): PdfStructureElement {
+  addChild(type: StructureType, options?: StructureElementOptions): PdfStructureElement {
     const child = new PdfStructureElement(type, options);
     child.parent = this;
     this.children.push(child);
@@ -473,10 +508,7 @@ export class PdfStructureTree {
    * @param pageRefs  Array of page references indexed by page number.
    * @returns         An object containing the StructTreeRoot ref and dict.
    */
-  toDict(
-    registry: PdfObjectRegistry,
-    pageRefs: readonly PdfRef[],
-  ): { ref: PdfRef; dict: PdfDict } {
+  toDict(registry: PdfObjectRegistry, pageRefs: readonly PdfRef[]): { ref: PdfRef; dict: PdfDict } {
     const rootRef = registry.allocate();
     const rootDict = new PdfDict();
 
@@ -529,9 +561,7 @@ export class PdfStructureTree {
     pageRefs: readonly PdfRef[],
   ): { ref: PdfRef; dict: PdfDict } | undefined {
     const allElements = this.root.walk();
-    const elementsWithMcid = allElements.filter(
-      (e) => e.mcid !== undefined,
-    );
+    const elementsWithMcid = allElements.filter((e) => e.mcid !== undefined);
 
     if (elementsWithMcid.length === 0) return undefined;
 
@@ -576,16 +606,12 @@ export class PdfStructureTree {
     _pageRefs: readonly PdfRef[],
   ): { ref: PdfRef; dict: PdfDict } | undefined {
     const allElements = this.root.walk();
-    const elementsWithId = allElements.filter(
-      (e) => e.options.id !== undefined,
-    );
+    const elementsWithId = allElements.filter((e) => e.options.id !== undefined);
 
     if (elementsWithId.length === 0) return undefined;
 
     // Sort by ID
-    elementsWithId.sort((a, b) =>
-      (a.options.id ?? '').localeCompare(b.options.id ?? ''),
-    );
+    elementsWithId.sort((a, b) => (a.options.id ?? '').localeCompare(b.options.id ?? ''));
 
     // Build /Names array: [name1, ref1, name2, ref2, ...]
     const namesArray = new PdfArray();
@@ -627,10 +653,7 @@ export class PdfStructureTree {
     const kids = dict.get('/K');
     if (!kids) return tree;
 
-    const parseElement = (
-      obj: PdfObject,
-      parent: PdfStructureElement,
-    ): void => {
+    const parseElement = (obj: PdfObject, parent: PdfStructureElement): void => {
       // Resolve indirect reference
       let resolved: PdfObject | undefined = obj;
       if (resolved.kind === 'ref') {
@@ -666,9 +689,7 @@ export class PdfStructureTree {
         if (!sObj || sObj.kind !== 'name') return;
 
         // Extract the type name (strip leading '/')
-        const typeName = sObj.value.startsWith('/')
-          ? sObj.value.slice(1)
-          : sObj.value;
+        const typeName = sObj.value.startsWith('/') ? sObj.value.slice(1) : sObj.value;
 
         const elemOptions: StructureElementOptions = {};
 
@@ -904,10 +925,7 @@ export class PdfStructureTree {
   ): void {
     for (const elem of elements) {
       if (ILLUSTRATION_TYPES.has(elem.type)) {
-        if (
-          elem.options.altText === undefined &&
-          elem.options.actualText === undefined
-        ) {
+        if (elem.options.altText === undefined && elem.options.actualText === undefined) {
           issues.push({
             severity: 'error',
             code: 'FIGURE_NO_ALT',

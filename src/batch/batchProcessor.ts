@@ -78,8 +78,14 @@ export interface BatchResult {
  */
 function getHeapUsedBytes(): number | undefined {
   // Node.js / Bun / Deno (with --allow-env)
-  if ('process' in globalThis && typeof (globalThis as unknown as { process: { memoryUsage?: unknown } }).process.memoryUsage === 'function') {
-    return ((globalThis as unknown as { process: { memoryUsage(): { heapUsed: number } } }).process.memoryUsage()).heapUsed;
+  if (
+    'process' in globalThis &&
+    typeof (globalThis as unknown as { process: { memoryUsage?: unknown } }).process.memoryUsage ===
+      'function'
+  ) {
+    return (
+      globalThis as unknown as { process: { memoryUsage(): { heapUsed: number } } }
+    ).process.memoryUsage().heapUsed;
   }
 
   // Chrome-based browsers expose a non-standard `performance.memory`
@@ -120,8 +126,14 @@ function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise
   }, ms);
 
   promise.then(
-    (value) => { clearTimeout(timer); resolve(value); },
-    (err) => { clearTimeout(timer); reject(err); },
+    (value) => {
+      clearTimeout(timer);
+      resolve(value);
+    },
+    (err) => {
+      clearTimeout(timer);
+      reject(err);
+    },
   );
 
   return result;
@@ -198,9 +210,15 @@ async function runWithConcurrency<T>(
     while (nextIndex < tasks.length) {
       if (cancelled.value) return;
       await acquire();
-      if (cancelled.value) { release(); return; }
+      if (cancelled.value) {
+        release();
+        return;
+      }
       const idx = nextIndex++;
-      if (idx >= tasks.length) { release(); return; }
+      if (idx >= tasks.length) {
+        release();
+        return;
+      }
       try {
         results[idx] = await tasks[idx]!();
       } finally {
@@ -209,10 +227,7 @@ async function runWithConcurrency<T>(
     }
   };
 
-  const workers = Array.from(
-    { length: Math.min(concurrency, tasks.length) },
-    () => worker(),
-  );
+  const workers = Array.from({ length: Math.min(concurrency, tasks.length) }, () => worker());
 
   await Promise.all(workers);
   return results;
@@ -257,9 +272,8 @@ export async function processBatch(
   const onProgress = options?.onProgress;
   const errorStrategy = options?.errorStrategy ?? 'continue';
   const timeoutMs = options?.timeout;
-  const maxMemoryBytes = options?.maxMemoryMB !== undefined
-    ? options.maxMemoryMB * 1024 * 1024
-    : undefined;
+  const maxMemoryBytes =
+    options?.maxMemoryMB !== undefined ? options.maxMemoryMB * 1024 * 1024 : undefined;
 
   let doneCount = 0;
   const errors = new Map<number, Error>();
@@ -282,9 +296,8 @@ export async function processBatch(
         return operation(doc);
       };
 
-      const result = timeoutMs !== undefined
-        ? await withTimeout(run(), timeoutMs, `#${idx}`)
-        : await run();
+      const result =
+        timeoutMs !== undefined ? await withTimeout(run(), timeoutMs, `#${idx}`) : await run();
 
       outputs[idx] = result;
     } catch (err) {
@@ -304,12 +317,7 @@ export async function processBatch(
     }
   });
 
-  await runWithConcurrency(
-    tasks,
-    Math.max(1, concurrency),
-    maxMemoryBytes,
-    cancelled,
-  );
+  await runWithConcurrency(tasks, Math.max(1, concurrency), maxMemoryBytes, cancelled);
 
   // Fail-fast: re-throw the first error encountered
   if (errorStrategy === 'fail-fast' && failFastError) {
@@ -351,10 +359,7 @@ export async function processBatch(
  * @param options  Concurrency and progress options.
  * @returns        The merged PDF as `Uint8Array`.
  */
-export async function batchMerge(
-  files: Uint8Array[],
-  options?: BatchOptions,
-): Promise<Uint8Array> {
+export async function batchMerge(files: Uint8Array[], options?: BatchOptions): Promise<Uint8Array> {
   if (files.length === 0) {
     const empty = createPdf();
     return empty.save();

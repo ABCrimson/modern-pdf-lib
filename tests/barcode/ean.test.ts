@@ -52,26 +52,26 @@ describe('encodeEan13', () => {
 
   it('starts with start guard pattern 101', () => {
     const matrix = encodeEan13('590123412345');
-    expect(matrix.modules[0]).toBe(true);  // 1
+    expect(matrix.modules[0]).toBe(true); // 1
     expect(matrix.modules[1]).toBe(false); // 0
-    expect(matrix.modules[2]).toBe(true);  // 1
+    expect(matrix.modules[2]).toBe(true); // 1
   });
 
   it('has correct center guard pattern 01010', () => {
     const matrix = encodeEan13('590123412345');
     // Center guard starts at position: 3 (start) + 42 (left digits) = 45
     expect(matrix.modules[45]).toBe(false); // 0
-    expect(matrix.modules[46]).toBe(true);  // 1
+    expect(matrix.modules[46]).toBe(true); // 1
     expect(matrix.modules[47]).toBe(false); // 0
-    expect(matrix.modules[48]).toBe(true);  // 1
+    expect(matrix.modules[48]).toBe(true); // 1
     expect(matrix.modules[49]).toBe(false); // 0
   });
 
   it('ends with end guard pattern 101', () => {
     const matrix = encodeEan13('590123412345');
-    expect(matrix.modules[92]).toBe(true);  // 1
+    expect(matrix.modules[92]).toBe(true); // 1
     expect(matrix.modules[93]).toBe(false); // 0
-    expect(matrix.modules[94]).toBe(true);  // 1
+    expect(matrix.modules[94]).toBe(true); // 1
   });
 
   it('accepts 13-digit input with valid check digit', () => {
@@ -103,8 +103,16 @@ describe('encodeEan13', () => {
     // L pattern for 9 is: 0001011
     // Start guard (101) + L-9 pattern (0001011):
     const expectedStart = [
-      true, false, true,        // start guard
-      false, false, false, true, false, true, true, // L pattern for 9
+      true,
+      false,
+      true, // start guard
+      false,
+      false,
+      false,
+      true,
+      false,
+      true,
+      true, // L pattern for 9
     ];
     for (let i = 0; i < expectedStart.length; i++) {
       expect(matrix.modules[i]).toBe(expectedStart[i]);
@@ -123,13 +131,13 @@ describe('encodeEan13', () => {
     expect(matrix.width).toBe(95);
     // First digit 0 -> parity LLLLLL -> all left digits use L patterns
     // Digit data[1] = 0, L pattern for 0: 0001101
-    expect(matrix.modules[3]).toBe(false);  // 0
-    expect(matrix.modules[4]).toBe(false);  // 0
-    expect(matrix.modules[5]).toBe(false);  // 0
-    expect(matrix.modules[6]).toBe(true);   // 1
-    expect(matrix.modules[7]).toBe(true);   // 1
-    expect(matrix.modules[8]).toBe(false);  // 0
-    expect(matrix.modules[9]).toBe(true);   // 1
+    expect(matrix.modules[3]).toBe(false); // 0
+    expect(matrix.modules[4]).toBe(false); // 0
+    expect(matrix.modules[5]).toBe(false); // 0
+    expect(matrix.modules[6]).toBe(true); // 1
+    expect(matrix.modules[7]).toBe(true); // 1
+    expect(matrix.modules[8]).toBe(false); // 0
+    expect(matrix.modules[9]).toBe(true); // 1
   });
 });
 
@@ -219,11 +227,11 @@ describe('ean13ToOperators', () => {
   it('generates valid PDF operators with default options', () => {
     const matrix = encodeEan13('590123412345');
     const ops = ean13ToOperators(matrix, 50, 700);
-    expect(ops).toContain('q\n');   // saveState
-    expect(ops).toContain('Q\n');   // restoreState
-    expect(ops).toContain('re\n');  // rectangle
-    expect(ops).toContain('f\n');   // fill
-    expect(ops).toContain('0 g');   // default black
+    expect(ops).toContain('q\n'); // saveState
+    expect(ops).toContain('Q\n'); // restoreState
+    expect(ops).toContain('re\n'); // rectangle
+    expect(ops).toContain('f\n'); // fill
+    expect(ops).toContain('0 g'); // default black
   });
 
   it('respects custom color option', () => {

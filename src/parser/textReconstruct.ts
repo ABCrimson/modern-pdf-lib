@@ -117,10 +117,7 @@ function joinLineItems(items: readonly TextItem[]): string {
  * @param options Reconstruction options.
  * @returns The reconstructed lines, in reading order.
  */
-export function reconstructLines(
-  items: readonly TextItem[],
-  options?: ReconstructOptions,
-): Line[] {
+export function reconstructLines(items: readonly TextItem[], options?: ReconstructOptions): Line[] {
   if (items.length === 0) return [];
 
   const heights = items.map((it) => (it.height > 0 ? it.height : it.fontSize));
@@ -207,8 +204,7 @@ export function reconstructParagraphs(
     }
   }
   const heights = items.map((it) => (it.height > 0 ? it.height : it.fontSize));
-  const typicalGap =
-    baselineGaps.length > 0 ? median(baselineGaps) : median(heights) || 1;
+  const typicalGap = baselineGaps.length > 0 ? median(baselineGaps) : median(heights) || 1;
   const paragraphThreshold = typicalGap * gapFactor;
 
   const paragraphs: Paragraph[] = [];

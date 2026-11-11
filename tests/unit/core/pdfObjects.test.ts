@@ -125,7 +125,7 @@ describe('PdfString', () => {
   });
 
   it('hexFromBytes produces hex string from Uint8Array', () => {
-    const bytes = new Uint8Array([0x48, 0x65, 0x6C, 0x6C, 0x6F]);
+    const bytes = new Uint8Array([0x48, 0x65, 0x6c, 0x6c, 0x6f]);
     const result = serialize(PdfString.hexFromBytes(bytes));
     expect(result).toBe('<48656c6c6f>');
   });

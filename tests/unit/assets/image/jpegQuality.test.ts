@@ -16,14 +16,9 @@ import { estimateJpegQuality } from '../../../../src/assets/image/imageOptimize.
  * This is the reference table that quality factors scale from.
  */
 const STANDARD_LUMINANCE_QT = [
-  16, 11, 10, 16,  24,  40,  51,  61,
-  12, 12, 14, 19,  26,  58,  60,  55,
-  14, 13, 16, 24,  40,  57,  69,  56,
-  14, 17, 22, 29,  51,  87,  80,  62,
-  18, 22, 37, 56,  68, 109, 103,  77,
-  24, 35, 55, 64,  81, 104, 113,  92,
-  49, 64, 78, 87, 103, 121, 120, 101,
-  72, 92, 95, 98, 112, 100, 103,  99,
+  16, 11, 10, 16, 24, 40, 51, 61, 12, 12, 14, 19, 26, 58, 60, 55, 14, 13, 16, 24, 40, 57, 69, 56,
+  14, 17, 22, 29, 51, 87, 80, 62, 18, 22, 37, 56, 68, 109, 103, 77, 24, 35, 55, 64, 81, 104, 113,
+  92, 49, 64, 78, 87, 103, 121, 120, 101, 72, 92, 95, 98, 112, 100, 103, 99,
 ];
 
 /**
@@ -34,10 +29,10 @@ function buildJpegWithQuality(quality: number): Uint8Array {
   const parts: number[] = [];
 
   // SOI
-  parts.push(0xFF, 0xD8);
+  parts.push(0xff, 0xd8);
 
   // DQT segment
-  parts.push(0xFF, 0xDB);
+  parts.push(0xff, 0xdb);
 
   // Compute the quantization table for this quality
   let scaleFactor: number;
@@ -59,7 +54,7 @@ function buildJpegWithQuality(quality: number): Uint8Array {
   const dqtPayload = 1 + 64; // 1 byte header + 64 bytes table
   const segLength = 2 + dqtPayload; // 2 bytes for length field
 
-  parts.push((segLength >> 8) & 0xFF, segLength & 0xFF);
+  parts.push((segLength >> 8) & 0xff, segLength & 0xff);
   parts.push(0x00); // precision=0 (8-bit), tableId=0
 
   for (const val of table) {
@@ -67,22 +62,22 @@ function buildJpegWithQuality(quality: number): Uint8Array {
   }
 
   // SOF0 (needed for valid JPEG structure)
-  parts.push(0xFF, 0xC0);
+  parts.push(0xff, 0xc0);
   const sofLen = 8 + 3; // 1 component
   parts.push(0x00, sofLen);
-  parts.push(8);                // precision
-  parts.push(0x00, 0x01);      // height = 1
-  parts.push(0x00, 0x01);      // width = 1
-  parts.push(1);                // 1 component
-  parts.push(1, 0x11, 0);      // component spec
+  parts.push(8); // precision
+  parts.push(0x00, 0x01); // height = 1
+  parts.push(0x00, 0x01); // width = 1
+  parts.push(1); // 1 component
+  parts.push(1, 0x11, 0); // component spec
 
   // SOS (marks end of header scanning)
-  parts.push(0xFF, 0xDA);
+  parts.push(0xff, 0xda);
   parts.push(0x00, 0x03); // length
-  parts.push(0x00);       // dummy
+  parts.push(0x00); // dummy
 
   // EOI
-  parts.push(0xFF, 0xD9);
+  parts.push(0xff, 0xd9);
 
   return new Uint8Array(parts);
 }
@@ -93,7 +88,7 @@ function buildJpegWithQuality(quality: number): Uint8Array {
 
 describe('estimateJpegQuality', () => {
   it('returns undefined for non-JPEG data', () => {
-    const png = new Uint8Array([0x89, 0x50, 0x4E, 0x47]);
+    const png = new Uint8Array([0x89, 0x50, 0x4e, 0x47]);
     expect(estimateJpegQuality(png)).toBeUndefined();
   });
 
@@ -102,15 +97,21 @@ describe('estimateJpegQuality', () => {
   });
 
   it('returns undefined for too-short data', () => {
-    expect(estimateJpegQuality(new Uint8Array([0xFF]))).toBeUndefined();
+    expect(estimateJpegQuality(new Uint8Array([0xff]))).toBeUndefined();
   });
 
   it('returns undefined for JPEG without DQT marker', () => {
     // SOI + SOF + SOS + EOI (no DQT)
     const jpeg = new Uint8Array([
-      0xFF, 0xD8, // SOI
-      0xFF, 0xDA, 0x00, 0x03, 0x00, // SOS
-      0xFF, 0xD9, // EOI
+      0xff,
+      0xd8, // SOI
+      0xff,
+      0xda,
+      0x00,
+      0x03,
+      0x00, // SOS
+      0xff,
+      0xd9, // EOI
     ]);
     expect(estimateJpegQuality(jpeg)).toBeUndefined();
   });

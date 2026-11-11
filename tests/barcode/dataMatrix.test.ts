@@ -3,10 +3,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  encodeDataMatrix,
-  dataMatrixToOperators,
-} from '../../src/barcode/dataMatrix.js';
+import { encodeDataMatrix, dataMatrixToOperators } from '../../src/barcode/dataMatrix.js';
 
 import { rgb } from '../../src/core/operators/color.js';
 
@@ -115,10 +112,10 @@ describe('Data Matrix ECC200', () => {
     const matrix = encodeDataMatrix('PDF');
     const ops = dataMatrixToOperators(matrix, 50, 100);
 
-    expect(ops).toContain('q\n');   // saveState
-    expect(ops).toContain('Q\n');   // restoreState
+    expect(ops).toContain('q\n'); // saveState
+    expect(ops).toContain('Q\n'); // restoreState
     expect(ops).toContain(' re\n'); // rectangle
-    expect(ops).toContain('f\n');   // fill
+    expect(ops).toContain('f\n'); // fill
   });
 
   // -----------------------------------------------------------------------
@@ -153,7 +150,7 @@ describe('Data Matrix ECC200', () => {
   it('handles custom colours', () => {
     const matrix = encodeDataMatrix('Color');
     const ops = dataMatrixToOperators(matrix, 0, 0, {
-      color: rgb(1, 0, 0),           // red foreground
+      color: rgb(1, 0, 0), // red foreground
       backgroundColor: rgb(1, 1, 0), // yellow background
     });
 
@@ -182,9 +179,9 @@ describe('Data Matrix ECC200', () => {
     // ASCII encoding: each char = 1 codeword (charCode + 1)
     // 10x10 = 3 data CW, 12x12 = 5 data CW, 14x14 = 8 data CW
     const sizes = [
-      { data: 'AB', expectedSize: 10 },        // 2 CW -> fits in 10x10 (3)
-      { data: 'ABCDE', expectedSize: 12 },      // 5 CW -> fits in 12x12 (5)
-      { data: 'ABCDEFGH', expectedSize: 14 },   // 8 CW -> fits in 14x14 (8)
+      { data: 'AB', expectedSize: 10 }, // 2 CW -> fits in 10x10 (3)
+      { data: 'ABCDE', expectedSize: 12 }, // 5 CW -> fits in 12x12 (5)
+      { data: 'ABCDEFGH', expectedSize: 14 }, // 8 CW -> fits in 14x14 (8)
     ];
 
     for (const { data, expectedSize } of sizes) {

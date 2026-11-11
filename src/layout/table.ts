@@ -22,13 +22,7 @@ import {
   clip,
   endPath,
 } from '../core/operators/graphics.js';
-import {
-  beginText,
-  endText,
-  setFont,
-  moveText,
-  showText,
-} from '../core/operators/text.js';
+import { beginText, endText, setFont, moveText, showText } from '../core/operators/text.js';
 import { applyFillColor, applyStrokeColor } from '../core/operators/color.js';
 import type { Color } from '../core/operators/color.js';
 
@@ -201,14 +195,16 @@ function normalizeCell(cell: TableCell | string | undefined): TableCell {
 }
 
 export function resolvePadding(
-  padding:
-    | number
-    | { top?: number; right?: number; bottom?: number; left?: number }
-    | undefined,
+  padding: number | { top?: number; right?: number; bottom?: number; left?: number } | undefined,
   defaultPadding: number,
 ): { top: number; right: number; bottom: number; left: number } {
   if (padding === undefined) {
-    return { top: defaultPadding, right: defaultPadding, bottom: defaultPadding, left: defaultPadding };
+    return {
+      top: defaultPadding,
+      right: defaultPadding,
+      bottom: defaultPadding,
+      left: defaultPadding,
+    };
   }
   if (typeof padding === 'number') {
     return { top: padding, right: padding, bottom: padding, left: padding };
@@ -443,9 +439,8 @@ function buildOccupationGrid(
   rows: readonly TableRow[],
   numCols: number,
 ): (OccupationEntry | null)[][] {
-  const grid: (OccupationEntry | null)[][] = Array.from(
-    { length: rows.length },
-    () => Array.from({ length: numCols }, () => null),
+  const grid: (OccupationEntry | null)[][] = Array.from({ length: rows.length }, () =>
+    Array.from({ length: numCols }, () => null),
   );
 
   for (let r = 0; r < rows.length; r++) {
@@ -692,8 +687,17 @@ function renderCellOps(
     const text = typeof content === 'string' ? content : '';
     if (text) {
       ops += renderPlainTextOps(
-        cell, text, cellX, cellY, cellWidth, cellHeight,
-        fontName, fontSize, padding, textColor, colDef,
+        cell,
+        text,
+        cellX,
+        cellY,
+        cellWidth,
+        cellHeight,
+        fontName,
+        fontSize,
+        padding,
+        textColor,
+        colDef,
       );
     }
   }
@@ -712,10 +716,8 @@ export function renderTable(options: DrawTableOptions): {
   const fontSize = options.fontSize ?? 12;
   const defaultPadding = options.padding ?? 4;
   const borderWidth = options.borderWidth ?? 0.5;
-  const borderColor: Color =
-    options.borderColor ?? ({ type: 'grayscale', gray: 0 } as const);
-  const textColor: Color =
-    options.textColor ?? ({ type: 'grayscale', gray: 0 } as const);
+  const borderColor: Color = options.borderColor ?? ({ type: 'grayscale', gray: 0 } as const);
+  const textColor: Color = options.textColor ?? ({ type: 'grayscale', gray: 0 } as const);
   const fontName = options.fontName ?? 'Helvetica';
 
   const headerRows = options.headerRows ?? 0;
@@ -754,8 +756,7 @@ export function renderTable(options: DrawTableOptions): {
       ops += restoreState();
     }
 
-    const rowTextColor =
-      isHeader && options.headerTextColor ? options.headerTextColor : textColor;
+    const rowTextColor = isHeader && options.headerTextColor ? options.headerTextColor : textColor;
 
     for (let colIdx = 0; colIdx < numCols; colIdx++) {
       const entry = grid[rowIdx]![colIdx];
@@ -772,8 +773,18 @@ export function renderTable(options: DrawTableOptions): {
       const colDef = options.columns?.[colIdx];
 
       ops += renderCellOps(
-        cell, cellX, currentY, cellWidth, cellHeight,
-        fontName, fontSize, defaultPadding, borderWidth, borderColor, rowTextColor, colDef,
+        cell,
+        cellX,
+        currentY,
+        cellWidth,
+        cellHeight,
+        fontName,
+        fontSize,
+        defaultPadding,
+        borderWidth,
+        borderColor,
+        rowTextColor,
+        colDef,
       );
     }
 
@@ -814,10 +825,8 @@ export function renderMultiPageTable(
   const fontSize = options.fontSize ?? 12;
   const defaultPadding = options.padding ?? 4;
   const borderWidth = options.borderWidth ?? 0.5;
-  const borderColor: Color =
-    options.borderColor ?? ({ type: 'grayscale', gray: 0 } as const);
-  const textColor: Color =
-    options.textColor ?? ({ type: 'grayscale', gray: 0 } as const);
+  const borderColor: Color = options.borderColor ?? ({ type: 'grayscale', gray: 0 } as const);
+  const textColor: Color = options.textColor ?? ({ type: 'grayscale', gray: 0 } as const);
   const fontName = options.fontName ?? 'Helvetica';
   const headerRowCount = options.headerRows ?? 0;
 
@@ -839,9 +848,7 @@ export function renderMultiPageTable(
       if (hRow.backgroundColor) {
         currentPageOps += saveState();
         currentPageOps += applyFillColor(hRow.backgroundColor);
-        currentPageOps += rectangle(
-          options.x, currentY - hRowHeight, options.width, hRowHeight,
-        );
+        currentPageOps += rectangle(options.x, currentY - hRowHeight, options.width, hRowHeight);
         currentPageOps += fill();
         currentPageOps += restoreState();
       }
@@ -861,8 +868,18 @@ export function renderMultiPageTable(
         const colDef = options.columns?.[colIdx];
 
         currentPageOps += renderCellOps(
-          cell, cellX, currentY, cellWidth, cellHeight,
-          fontName, fontSize, defaultPadding, borderWidth, borderColor, textColor, colDef,
+          cell,
+          cellX,
+          currentY,
+          cellWidth,
+          cellHeight,
+          fontName,
+          fontSize,
+          defaultPadding,
+          borderWidth,
+          borderColor,
+          textColor,
+          colDef,
         );
       }
 
@@ -892,9 +909,7 @@ export function renderMultiPageTable(
     if (row.backgroundColor) {
       currentPageOps += saveState();
       currentPageOps += applyFillColor(row.backgroundColor);
-      currentPageOps += rectangle(
-        options.x, currentY - rowHeight, options.width, rowHeight,
-      );
+      currentPageOps += rectangle(options.x, currentY - rowHeight, options.width, rowHeight);
       currentPageOps += fill();
       currentPageOps += restoreState();
     }
@@ -914,8 +929,18 @@ export function renderMultiPageTable(
       const colDef = options.columns?.[colIdx];
 
       currentPageOps += renderCellOps(
-        cell, cellX, currentY, cellWidth, cellHeight,
-        fontName, fontSize, defaultPadding, borderWidth, borderColor, textColor, colDef,
+        cell,
+        cellX,
+        currentY,
+        cellWidth,
+        cellHeight,
+        fontName,
+        fontSize,
+        defaultPadding,
+        borderWidth,
+        borderColor,
+        textColor,
+        colDef,
       );
     }
 

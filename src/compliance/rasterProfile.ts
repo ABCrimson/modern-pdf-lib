@@ -219,9 +219,7 @@ function buildIdentificationXmp(identity: ProfileIdentity): string {
  *   conformance level (WTPDF defines `'reuse'` and `'accessibility'`).
  * @returns A serialized XMP/RDF identification packet.
  */
-export function buildWtpdfIdentificationXmp(
-  options?: ProfileXmpOptions,
-): string {
+export function buildWtpdfIdentificationXmp(options?: ProfileXmpOptions): string {
   const part = options?.part ?? 1;
   const conformance = options?.conformance;
 
@@ -260,9 +258,7 @@ export function buildWtpdfIdentificationXmp(
  *   and a conformance token.
  * @returns A serialized XMP/RDF identification packet.
  */
-export function buildPdfRIdentificationXmp(
-  options?: ProfileXmpOptions,
-): string {
+export function buildPdfRIdentificationXmp(options?: ProfileXmpOptions): string {
   const part = options?.part ?? 1;
   const conformance = options?.conformance;
 

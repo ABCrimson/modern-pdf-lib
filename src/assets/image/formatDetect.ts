@@ -40,21 +40,12 @@ export function detectImageFormat(data: Uint8Array): ImageFormat {
   }
 
   // PNG: 89 50 4E 47
-  if (
-    data[0] === 0x89 &&
-    data[1] === 0x50 &&
-    data[2] === 0x4E &&
-    data[3] === 0x47
-  ) {
+  if (data[0] === 0x89 && data[1] === 0x50 && data[2] === 0x4e && data[3] === 0x47) {
     return 'png';
   }
 
   // JPEG: FF D8 FF
-  if (
-    data[0] === 0xFF &&
-    data[1] === 0xD8 &&
-    data[2] === 0xFF
-  ) {
+  if (data[0] === 0xff && data[1] === 0xd8 && data[2] === 0xff) {
     return 'jpeg';
   }
 
@@ -74,22 +65,12 @@ export function detectImageFormat(data: Uint8Array): ImageFormat {
   }
 
   // TIFF LE: 49 49 2A 00 (II*)
-  if (
-    data[0] === 0x49 &&
-    data[1] === 0x49 &&
-    data[2] === 0x2A &&
-    data[3] === 0x00
-  ) {
+  if (data[0] === 0x49 && data[1] === 0x49 && data[2] === 0x2a && data[3] === 0x00) {
     return 'tiff';
   }
 
   // TIFF BE: 4D 4D 00 2A (MM*)
-  if (
-    data[0] === 0x4D &&
-    data[1] === 0x4D &&
-    data[2] === 0x00 &&
-    data[3] === 0x2A
-  ) {
+  if (data[0] === 0x4d && data[1] === 0x4d && data[2] === 0x00 && data[3] === 0x2a) {
     return 'tiff';
   }
 

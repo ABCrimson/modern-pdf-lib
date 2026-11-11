@@ -61,7 +61,7 @@ describe('concatBytes', () => {
 
 describe('writeUint32BE / readUint32BE', () => {
   it('roundtrips a value correctly', () => {
-    const value = 0xDEADBEEF;
+    const value = 0xdeadbeef;
     const bytes = writeUint32BE(value);
     expect(bytes.length).toBe(4);
     const readBack = readUint32BE(bytes, 0);
@@ -74,8 +74,8 @@ describe('writeUint32BE / readUint32BE', () => {
   });
 
   it('handles max value', () => {
-    const bytes = writeUint32BE(0xFFFFFFFF);
-    expect(readUint32BE(bytes, 0)).toBe(0xFFFFFFFF);
+    const bytes = writeUint32BE(0xffffffff);
+    expect(readUint32BE(bytes, 0)).toBe(0xffffffff);
   });
 
   it('writes in big-endian order', () => {
@@ -93,7 +93,7 @@ describe('writeUint32BE / readUint32BE', () => {
 
 describe('writeUint16BE / readUint16BE', () => {
   it('roundtrips a value correctly', () => {
-    const value = 0xCAFE;
+    const value = 0xcafe;
     const bytes = writeUint16BE(value);
     expect(bytes.length).toBe(2);
     const readBack = readUint16BE(bytes, 0);
@@ -106,8 +106,8 @@ describe('writeUint16BE / readUint16BE', () => {
   });
 
   it('handles max value', () => {
-    const bytes = writeUint16BE(0xFFFF);
-    expect(readUint16BE(bytes, 0)).toBe(0xFFFF);
+    const bytes = writeUint16BE(0xffff);
+    expect(readUint16BE(bytes, 0)).toBe(0xffff);
   });
 
   it('writes in big-endian order', () => {
@@ -164,7 +164,7 @@ describe('bytesToHex / hexToBytes', () => {
 
   it('handles uppercase hex input', () => {
     const decoded = hexToBytes('DEADBEEF');
-    expect(decoded).toEqual(new Uint8Array([0xDE, 0xAD, 0xBE, 0xEF]));
+    expect(decoded).toEqual(new Uint8Array([0xde, 0xad, 0xbe, 0xef]));
   });
 
   it('throws on odd-length hex string', () => {

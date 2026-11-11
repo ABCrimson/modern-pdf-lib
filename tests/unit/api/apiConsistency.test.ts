@@ -54,10 +54,7 @@ import {
   BatchProcessingError,
 } from '../../../src/errors.js';
 
-import {
-  asPdfName,
-  asPdfNumber,
-} from '../../../src/utils/pdfValueHelpers.js';
+import { asPdfName, asPdfNumber } from '../../../src/utils/pdfValueHelpers.js';
 
 import type {
   FontRef,
@@ -67,9 +64,7 @@ import type {
   TransparencyGroupOptions,
 } from '../../../src/core/pdfPage.js';
 
-import type {
-  DrawPageOptions,
-} from '../../../src/core/pdfEmbed.js';
+import type { DrawPageOptions } from '../../../src/core/pdfEmbed.js';
 
 import type { Angle } from '../../../src/core/operators/state.js';
 
@@ -593,7 +588,7 @@ describe('integration: drawPage with Angle-typed rotate', async () => {
     const loaded = await createPdf().constructor.load(bytes1);
 
     const doc2 = createPdf();
-    const embedded =  doc2.embedPage(loaded.getPage(0));
+    const embedded = doc2.embedPage(loaded.getPage(0));
     const page2 = doc2.addPage(PageSizes.A4);
 
     // This should work because DrawPageOptions now uses Angle

@@ -95,10 +95,7 @@ export interface ItfOptions {
  * @returns     A {@link BarcodeMatrix} with the module pattern.
  * @throws      If the data contains non-digit characters.
  */
-export function encodeItf(
-  data: string,
-  wideToNarrowRatio: number = 3,
-): BarcodeMatrix {
+export function encodeItf(data: string, wideToNarrowRatio: number = 3): BarcodeMatrix {
   // Validate: digits only
   for (let i = 0; i < data.length; i++) {
     const ch = data.charCodeAt(i);
@@ -114,9 +111,7 @@ export function encodeItf(
   }
 
   if (wideToNarrowRatio < 2) {
-    throw new Error(
-      `ITF: wideToNarrowRatio must be >= 2, got ${wideToNarrowRatio}`,
-    );
+    throw new Error(`ITF: wideToNarrowRatio must be >= 2, got ${wideToNarrowRatio}`);
   }
 
   // Prepend 0 if odd length
@@ -129,14 +124,14 @@ export function encodeItf(
   const modules: boolean[] = [];
 
   // Start pattern: 4 narrow elements (bar, space, bar, space)
-  modules.push(true);   // narrow bar
-  modules.push(false);  // narrow space
-  modules.push(true);   // narrow bar
-  modules.push(false);  // narrow space
+  modules.push(true); // narrow bar
+  modules.push(false); // narrow space
+  modules.push(true); // narrow bar
+  modules.push(false); // narrow space
 
   // Interleaved digit pairs
   for (let i = 0; i < digits.length; i += 2) {
-    const d1 = parseInt(digits[i]!, 10);     // bars
+    const d1 = parseInt(digits[i]!, 10); // bars
     const d2 = parseInt(digits[i + 1]!, 10); // spaces
     const barPattern = DIGIT_PATTERNS[d1]!;
     const spacePattern = DIGIT_PATTERNS[d2]!;
@@ -159,10 +154,10 @@ export function encodeItf(
 
   // Stop pattern: wide bar, narrow space, narrow bar
   for (let m = 0; m < ratio; m++) {
-    modules.push(true);  // wide bar
+    modules.push(true); // wide bar
   }
-  modules.push(false);   // narrow space
-  modules.push(true);    // narrow bar
+  modules.push(false); // narrow space
+  modules.push(true); // narrow bar
 
   return { modules, width: modules.length };
 }

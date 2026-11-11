@@ -59,9 +59,7 @@ export function computeObjectHash(data: Uint8Array): string {
  * Scans for `N G obj ... endobj` patterns and returns a map of
  * object number to the raw content bytes.
  */
-function extractObjectContents(
-  pdf: Uint8Array,
-): Map<number, { gen: number; content: Uint8Array }> {
+function extractObjectContents(pdf: Uint8Array): Map<number, { gen: number; content: Uint8Array }> {
   const text = decoder.decode(pdf);
   const objects = new Map<number, { gen: number; content: Uint8Array }>();
 
@@ -108,10 +106,7 @@ function extractObjectContents(
  * console.log(`${changed.length} objects actually changed`);
  * ```
  */
-export function findChangedObjects(
-  original: Uint8Array,
-  modified: Uint8Array,
-): number[] {
+export function findChangedObjects(original: Uint8Array, modified: Uint8Array): number[] {
   const originalObjs = extractObjectContents(original);
   const modifiedObjs = extractObjectContents(modified);
 
@@ -232,24 +227,17 @@ export function optimizeIncrementalSave(
 /**
  * Build the incremental update appendix for the given changes.
  */
-function buildOptimizedAppendix(
-  originalPdf: Uint8Array,
-  changes: IncrementalChange[],
-): Uint8Array {
+function buildOptimizedAppendix(originalPdf: Uint8Array, changes: IncrementalChange[]): Uint8Array {
   const pdfText = decoder.decode(originalPdf);
 
   // Find /Size in the last trailer
   const sizeMatches = pdfText.match(/\/Size\s+(\d+)/g);
-  const lastSizeMatch = sizeMatches?.[sizeMatches.length - 1]?.match(
-    /\/Size\s+(\d+)/,
-  );
+  const lastSizeMatch = sizeMatches?.[sizeMatches.length - 1]?.match(/\/Size\s+(\d+)/);
   const currentSize = lastSizeMatch ? parseInt(lastSizeMatch[1]!, 10) : 100;
 
   // Find /Root reference
   const rootMatch = pdfText.match(/\/Root\s+(\d+)\s+(\d+)\s+R/);
-  const rootRef = rootMatch
-    ? `${rootMatch[1]} ${rootMatch[2]} R`
-    : '1 0 R';
+  const rootRef = rootMatch ? `${rootMatch[1]} ${rootMatch[2]} R` : '1 0 R';
 
   // Find /Info reference
   const infoMatch = pdfText.match(/\/Info\s+(\d+)\s+(\d+)\s+R/);
@@ -270,9 +258,7 @@ function buildOptimizedAppendix(
   const newSize = Math.max(currentSize, maxObjNum + 1);
 
   // Sort changes by object number for organized xref
-  const sortedChanges = [...changes].sort(
-    (a, b) => a.objectNumber - b.objectNumber,
-  );
+  const sortedChanges = [...changes].sort((a, b) => a.objectNumber - b.objectNumber);
 
   // Build the appendix
   let appendix = '\n';

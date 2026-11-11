@@ -1,8 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  resolveFallback,
-  splitByScript,
-} from '../../../../src/assets/font/fontFallback.js';
+import { resolveFallback, splitByScript } from '../../../../src/assets/font/fontFallback.js';
 import type { FallbackFont } from '../../../../src/assets/font/fontFallback.js';
 
 const latin: FallbackFont = {
@@ -12,8 +9,7 @@ const latin: FallbackFont = {
 
 const cjk: FallbackFont = {
   name: 'CJK',
-  covers: (cp) =>
-    (cp >= 0x3040 && cp <= 0x30ff) || (cp >= 0x4e00 && cp <= 0x9fff),
+  covers: (cp) => (cp >= 0x3040 && cp <= 0x30ff) || (cp >= 0x4e00 && cp <= 0x9fff),
 };
 
 describe('resolveFallback', () => {
@@ -73,9 +69,7 @@ describe('splitByScript', () => {
   });
 
   it('coalesces consecutive same-script code points', () => {
-    expect(splitByScript('Hello')).toEqual([
-      { script: 'Latin', text: 'Hello', start: 0 },
-    ]);
+    expect(splitByScript('Hello')).toEqual([{ script: 'Latin', text: 'Hello', start: 0 }]);
   });
 
   it('classifies spaces and digits as Common', () => {

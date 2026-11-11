@@ -23,10 +23,7 @@ import {
   decodeTileRegion,
   assembleTiles,
 } from '../../../src/parser/jpeg2000Tiles.js';
-import type {
-  TileGridInfo,
-  TileData,
-} from '../../../src/parser/jpeg2000Tiles.js';
+import type { TileGridInfo, TileData } from '../../../src/parser/jpeg2000Tiles.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -97,17 +94,17 @@ function buildJ2K(options: {
   arr[3] = 0x51;
 
   const base = 4; // after marker bytes
-  writeU16(arr, base, sizLen);         // Lsiz
-  writeU16(arr, base + 2, 0);         // Rsiz
-  writeU32(arr, base + 4, options.width + originX);  // Xsiz
+  writeU16(arr, base, sizLen); // Lsiz
+  writeU16(arr, base + 2, 0); // Rsiz
+  writeU32(arr, base + 4, options.width + originX); // Xsiz
   writeU32(arr, base + 8, options.height + originY); // Ysiz
-  writeU32(arr, base + 12, originX);   // XOsiz
-  writeU32(arr, base + 16, originY);   // YOsiz
-  writeU32(arr, base + 20, options.tileWidth);  // XTsiz
+  writeU32(arr, base + 12, originX); // XOsiz
+  writeU32(arr, base + 16, originY); // YOsiz
+  writeU32(arr, base + 20, options.tileWidth); // XTsiz
   writeU32(arr, base + 24, options.tileHeight); // YTsiz
   writeU32(arr, base + 28, tileOriginX); // XTOsiz
   writeU32(arr, base + 32, tileOriginY); // YTOsiz
-  writeU16(arr, base + 36, comps);     // Csiz
+  writeU16(arr, base + 36, comps); // Csiz
 
   // Component entries
   const compStart = base + 38;
@@ -171,15 +168,15 @@ describe('parseTileInfo', () => {
   it('calculates correct tile counts', () => {
     const data = buildJ2K({ width: 256, height: 128, tileWidth: 64, tileHeight: 64 });
     const info = parseTileInfo(data);
-    expect(info.tilesX).toBe(4);  // 256 / 64 = 4
-    expect(info.tilesY).toBe(2);  // 128 / 64 = 2
+    expect(info.tilesX).toBe(4); // 256 / 64 = 4
+    expect(info.tilesY).toBe(2); // 128 / 64 = 2
   });
 
   it('handles non-evenly-divisible tile grid', () => {
     const data = buildJ2K({ width: 300, height: 200, tileWidth: 128, tileHeight: 128 });
     const info = parseTileInfo(data);
-    expect(info.tilesX).toBe(3);  // ceil(300/128) = 3
-    expect(info.tilesY).toBe(2);  // ceil(200/128) = 2
+    expect(info.tilesX).toBe(3); // ceil(300/128) = 3
+    expect(info.tilesY).toBe(2); // ceil(200/128) = 2
   });
 
   it('handles single tile image (tile = image)', () => {
@@ -198,8 +195,12 @@ describe('parseTileInfo', () => {
 
   it('extracts tile grid origin', () => {
     const data = buildJ2K({
-      width: 256, height: 256, tileWidth: 64, tileHeight: 64,
-      tileOriginX: 10, tileOriginY: 20,
+      width: 256,
+      height: 256,
+      tileWidth: 64,
+      tileHeight: 64,
+      tileOriginX: 10,
+      tileOriginY: 20,
     });
     const info = parseTileInfo(data);
     expect(info.originX).toBe(10);
@@ -207,14 +208,23 @@ describe('parseTileInfo', () => {
   });
 
   it('extracts component count', () => {
-    const data = buildJ2K({ width: 100, height: 100, tileWidth: 100, tileHeight: 100, components: 4 });
+    const data = buildJ2K({
+      width: 100,
+      height: 100,
+      tileWidth: 100,
+      tileHeight: 100,
+      components: 4,
+    });
     const info = parseTileInfo(data);
     expect(info.components).toBe(4);
   });
 
   it('extracts bits per component', () => {
     const data = buildJ2K({
-      width: 100, height: 100, tileWidth: 100, tileHeight: 100,
+      width: 100,
+      height: 100,
+      tileWidth: 100,
+      tileHeight: 100,
       bitsPerComponent: 16,
     });
     const info = parseTileInfo(data);
@@ -235,10 +245,14 @@ describe('parseTileInfo', () => {
   it('throws on truncated SIZ marker', () => {
     // SOC + SIZ marker but with only 10 bytes of content (need 38+)
     const data = new Uint8Array([
-      0xff, 0x4f, // SOC
-      0xff, 0x51, // SIZ
-      0x00, 0x0a, // Lsiz = 10 (way too short)
-      0x00, 0x00, // Rsiz
+      0xff,
+      0x4f, // SOC
+      0xff,
+      0x51, // SIZ
+      0x00,
+      0x0a, // Lsiz = 10 (way too short)
+      0x00,
+      0x00, // Rsiz
     ]);
     expect(() => parseTileInfo(data)).toThrow(/truncated/i);
   });
@@ -251,7 +265,10 @@ describe('parseTileInfo', () => {
 describe('decodeTile', () => {
   it('returns tile data with correct index and position for tile 0', () => {
     const data = buildJ2K({
-      width: 128, height: 128, tileWidth: 64, tileHeight: 64,
+      width: 128,
+      height: 128,
+      tileWidth: 64,
+      tileHeight: 64,
       addSOT: true,
     });
     const tile = decodeTile(data, 0);
@@ -265,7 +282,10 @@ describe('decodeTile', () => {
 
   it('returns correct position for tile at col=1, row=0', () => {
     const data = buildJ2K({
-      width: 128, height: 128, tileWidth: 64, tileHeight: 64,
+      width: 128,
+      height: 128,
+      tileWidth: 64,
+      tileHeight: 64,
       addSOT: true,
     });
     const tile = decodeTile(data, 1);
@@ -276,7 +296,10 @@ describe('decodeTile', () => {
 
   it('returns correct position for tile at row=1', () => {
     const data = buildJ2K({
-      width: 128, height: 128, tileWidth: 64, tileHeight: 64,
+      width: 128,
+      height: 128,
+      tileWidth: 64,
+      tileHeight: 64,
       addSOT: true,
     });
     // Tile 2 = row 1, col 0
@@ -288,7 +311,10 @@ describe('decodeTile', () => {
 
   it('returns tile data as a Uint8Array', () => {
     const data = buildJ2K({
-      width: 64, height: 64, tileWidth: 64, tileHeight: 64,
+      width: 64,
+      height: 64,
+      tileWidth: 64,
+      tileHeight: 64,
       addSOT: true,
     });
     const tile = decodeTile(data, 0);
@@ -297,7 +323,10 @@ describe('decodeTile', () => {
 
   it('throws for negative tile index', () => {
     const data = buildJ2K({
-      width: 64, height: 64, tileWidth: 64, tileHeight: 64,
+      width: 64,
+      height: 64,
+      tileWidth: 64,
+      tileHeight: 64,
       addSOT: true,
     });
     expect(() => decodeTile(data, -1)).toThrow(/out of range/i);
@@ -305,7 +334,10 @@ describe('decodeTile', () => {
 
   it('throws for tile index beyond total tiles', () => {
     const data = buildJ2K({
-      width: 128, height: 128, tileWidth: 64, tileHeight: 64,
+      width: 128,
+      height: 128,
+      tileWidth: 64,
+      tileHeight: 64,
       addSOT: true,
     });
     // Total tiles = 4 (2x2), so index 4 is out of range
@@ -314,7 +346,10 @@ describe('decodeTile', () => {
 
   it('handles edge tile with reduced width', () => {
     const data = buildJ2K({
-      width: 100, height: 64, tileWidth: 64, tileHeight: 64,
+      width: 100,
+      height: 64,
+      tileWidth: 64,
+      tileHeight: 64,
       addSOT: true,
     });
     // Tile 1 at col=1 should have width 36 (100-64)
@@ -331,7 +366,10 @@ describe('decodeTile', () => {
 describe('decodeTileRegion', () => {
   it('returns pixel data for the requested region', () => {
     const data = buildJ2K({
-      width: 128, height: 128, tileWidth: 64, tileHeight: 64,
+      width: 128,
+      height: 128,
+      tileWidth: 64,
+      tileHeight: 64,
       addSOT: true,
     });
     const result = decodeTileRegion(data, { x: 0, y: 0, width: 32, height: 32 });
@@ -342,7 +380,10 @@ describe('decodeTileRegion', () => {
 
   it('returns data matching clamped region size', () => {
     const data = buildJ2K({
-      width: 128, height: 128, tileWidth: 64, tileHeight: 64,
+      width: 128,
+      height: 128,
+      tileWidth: 64,
+      tileHeight: 64,
       addSOT: true,
     });
     // Region extends beyond image: should be clamped
@@ -353,12 +394,15 @@ describe('decodeTileRegion', () => {
 
   it('throws when region is entirely outside image bounds', () => {
     const data = buildJ2K({
-      width: 128, height: 128, tileWidth: 64, tileHeight: 64,
+      width: 128,
+      height: 128,
+      tileWidth: 64,
+      tileHeight: 64,
       addSOT: true,
     });
-    expect(() =>
-      decodeTileRegion(data, { x: 200, y: 200, width: 50, height: 50 }),
-    ).toThrow(/outside image bounds/i);
+    expect(() => decodeTileRegion(data, { x: 200, y: 200, width: 50, height: 50 })).toThrow(
+      /outside image bounds/i,
+    );
   });
 });
 
@@ -382,12 +426,20 @@ describe('assembleTiles', () => {
     };
 
     const tile0: TileData = {
-      index: 0, x: 0, y: 0, width: 64, height: 64,
+      index: 0,
+      x: 0,
+      y: 0,
+      width: 64,
+      height: 64,
       data: new Uint8Array(64 * 64 * 3).fill(100),
       components: 3,
     };
     const tile1: TileData = {
-      index: 1, x: 64, y: 0, width: 64, height: 64,
+      index: 1,
+      x: 64,
+      y: 0,
+      width: 64,
+      height: 64,
       data: new Uint8Array(64 * 64 * 3).fill(200),
       components: 3,
     };
@@ -411,12 +463,20 @@ describe('assembleTiles', () => {
     };
 
     const tile0: TileData = {
-      index: 0, x: 0, y: 0, width: 2, height: 2,
+      index: 0,
+      x: 0,
+      y: 0,
+      width: 2,
+      height: 2,
       data: new Uint8Array([10, 20, 30, 40]),
       components: 1,
     };
     const tile1: TileData = {
-      index: 1, x: 2, y: 0, width: 2, height: 2,
+      index: 1,
+      x: 2,
+      y: 0,
+      width: 2,
+      height: 2,
       data: new Uint8Array([50, 60, 70, 80]),
       components: 1,
     };
@@ -451,7 +511,7 @@ describe('assembleTiles', () => {
     const result = assembleTiles([], gridInfo);
     expect(result.length).toBe(64 * 64 * 3);
     // All zeros since no tiles were provided
-    expect(result.every(b => b === 0)).toBe(true);
+    expect(result.every((b) => b === 0)).toBe(true);
   });
 
   it('handles 16-bit depth (2 bytes per sample)', () => {
@@ -469,7 +529,11 @@ describe('assembleTiles', () => {
     };
 
     const tile: TileData = {
-      index: 0, x: 0, y: 0, width: 2, height: 1,
+      index: 0,
+      x: 0,
+      y: 0,
+      width: 2,
+      height: 1,
       data: new Uint8Array([0x01, 0x00, 0x02, 0x00]),
       components: 1,
     };

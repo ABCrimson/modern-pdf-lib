@@ -29,7 +29,14 @@ function buildRgbImage(width: number, height: number, r: number, g: number, b: n
 }
 
 /** Build a flat RGBA pixel buffer with a single color. */
-function buildRgbaImage(width: number, height: number, r: number, g: number, b: number, a: number): Uint8Array {
+function buildRgbaImage(
+  width: number,
+  height: number,
+  r: number,
+  g: number,
+  b: number,
+  a: number,
+): Uint8Array {
   const pixels = new Uint8Array(width * height * 4);
   for (let i = 0; i < width * height; i++) {
     pixels[i * 4] = r;
@@ -57,28 +64,28 @@ describe('recompressWebP', () => {
     const jpeg = recompressWebP(pixels, 8, 8);
 
     // Check JPEG SOI marker
-    expect(jpeg[0]).toBe(0xFF);
-    expect(jpeg[1]).toBe(0xD8);
+    expect(jpeg[0]).toBe(0xff);
+    expect(jpeg[1]).toBe(0xd8);
 
     // Check JPEG EOI marker at end
-    expect(jpeg[jpeg.length - 2]).toBe(0xFF);
-    expect(jpeg[jpeg.length - 1]).toBe(0xD9);
+    expect(jpeg[jpeg.length - 2]).toBe(0xff);
+    expect(jpeg[jpeg.length - 1]).toBe(0xd9);
   });
 
   it('produces valid JPEG from RGBA pixels (strips alpha)', () => {
     const pixels = buildRgbaImage(8, 8, 0, 255, 0, 128);
     const jpeg = recompressWebP(pixels, 8, 8);
 
-    expect(jpeg[0]).toBe(0xFF);
-    expect(jpeg[1]).toBe(0xD8);
+    expect(jpeg[0]).toBe(0xff);
+    expect(jpeg[1]).toBe(0xd8);
   });
 
   it('produces valid JPEG from grayscale pixels', () => {
     const pixels = buildGrayImage(8, 8, 128);
     const jpeg = recompressWebP(pixels, 8, 8);
 
-    expect(jpeg[0]).toBe(0xFF);
-    expect(jpeg[1]).toBe(0xD8);
+    expect(jpeg[0]).toBe(0xff);
+    expect(jpeg[1]).toBe(0xd8);
   });
 
   it('accepts custom quality parameter', () => {
@@ -94,22 +101,22 @@ describe('recompressWebP', () => {
     const pixels = buildRgbImage(8, 8, 100, 100, 100);
     const result = recompressWebP(pixels, 8, 8);
     // Just verify it produces valid output
-    expect(result[0]).toBe(0xFF);
-    expect(result[1]).toBe(0xD8);
+    expect(result[0]).toBe(0xff);
+    expect(result[1]).toBe(0xd8);
   });
 
   it('handles non-multiple-of-8 dimensions', () => {
     const pixels = buildRgbImage(13, 7, 200, 100, 50);
     const jpeg = recompressWebP(pixels, 13, 7);
-    expect(jpeg[0]).toBe(0xFF);
-    expect(jpeg[1]).toBe(0xD8);
+    expect(jpeg[0]).toBe(0xff);
+    expect(jpeg[1]).toBe(0xd8);
   });
 
   it('handles 1x1 image', () => {
     const pixels = new Uint8Array([128, 64, 32]);
     const jpeg = recompressWebP(pixels, 1, 1);
-    expect(jpeg[0]).toBe(0xFF);
-    expect(jpeg[1]).toBe(0xD8);
+    expect(jpeg[0]).toBe(0xff);
+    expect(jpeg[1]).toBe(0xd8);
   });
 
   it('throws on pixel data length mismatch', () => {
@@ -120,8 +127,8 @@ describe('recompressWebP', () => {
   it('handles large image (64x64)', () => {
     const pixels = buildRgbImage(64, 64, 50, 100, 150);
     const jpeg = recompressWebP(pixels, 64, 64);
-    expect(jpeg[0]).toBe(0xFF);
-    expect(jpeg[1]).toBe(0xD8);
+    expect(jpeg[0]).toBe(0xff);
+    expect(jpeg[1]).toBe(0xd8);
     expect(jpeg.length).toBeGreaterThan(100);
   });
 
@@ -130,11 +137,11 @@ describe('recompressWebP', () => {
 
     // Quality 0 (clamped to 1)
     const veryLow = recompressWebP(pixels, 8, 8, 0);
-    expect(veryLow[0]).toBe(0xFF);
+    expect(veryLow[0]).toBe(0xff);
 
     // Quality 200 (clamped to 100)
     const veryHigh = recompressWebP(pixels, 8, 8, 200);
-    expect(veryHigh[0]).toBe(0xFF);
+    expect(veryHigh[0]).toBe(0xff);
   });
 });
 
@@ -151,9 +158,7 @@ describe('webpToJpeg', () => {
   it('throws for valid WebP header but requires decoder', () => {
     // Valid WebP RIFF header but no actual decoder
     const webpHeader = new Uint8Array([
-      0x52, 0x49, 0x46, 0x46,
-      0x00, 0x00, 0x00, 0x00,
-      0x57, 0x45, 0x42, 0x50,
+      0x52, 0x49, 0x46, 0x46, 0x00, 0x00, 0x00, 0x00, 0x57, 0x45, 0x42, 0x50,
     ]);
     expect(() => webpToJpeg(webpHeader)).toThrow('requires the WebP decoder module');
   });
@@ -170,15 +175,13 @@ describe('webpToJpeg', () => {
 
 describe('webpToPng', () => {
   it('throws for invalid WebP data', () => {
-    const notWebP = new Uint8Array([0xFF, 0xD8, 0xFF, 0xE0]);
+    const notWebP = new Uint8Array([0xff, 0xd8, 0xff, 0xe0]);
     expect(() => webpToPng(notWebP)).toThrow('Invalid WebP');
   });
 
   it('throws for valid WebP header but requires decoder', () => {
     const webpHeader = new Uint8Array([
-      0x52, 0x49, 0x46, 0x46,
-      0x00, 0x00, 0x00, 0x00,
-      0x57, 0x45, 0x42, 0x50,
+      0x52, 0x49, 0x46, 0x46, 0x00, 0x00, 0x00, 0x00, 0x57, 0x45, 0x42, 0x50,
     ]);
     expect(() => webpToPng(webpHeader)).toThrow('requires the WebP decoder module');
   });
@@ -196,12 +199,12 @@ describe('encodePngFromPixels', () => {
     // PNG signature: 89 50 4E 47 0D 0A 1A 0A
     expect(png[0]).toBe(0x89);
     expect(png[1]).toBe(0x50);
-    expect(png[2]).toBe(0x4E);
+    expect(png[2]).toBe(0x4e);
     expect(png[3]).toBe(0x47);
-    expect(png[4]).toBe(0x0D);
-    expect(png[5]).toBe(0x0A);
-    expect(png[6]).toBe(0x1A);
-    expect(png[7]).toBe(0x0A);
+    expect(png[4]).toBe(0x0d);
+    expect(png[5]).toBe(0x0a);
+    expect(png[6]).toBe(0x1a);
+    expect(png[7]).toBe(0x0a);
   });
 
   it('produces PNG with IHDR chunk', () => {
@@ -272,7 +275,10 @@ describe('encodePngFromPixels', () => {
     const iendLength = view.getUint32(iendStart, false);
     expect(iendLength).toBe(0);
     const iendType = String.fromCharCode(
-      png[iendStart + 4]!, png[iendStart + 5]!, png[iendStart + 6]!, png[iendStart + 7]!,
+      png[iendStart + 4]!,
+      png[iendStart + 5]!,
+      png[iendStart + 6]!,
+      png[iendStart + 7]!,
     );
     expect(iendType).toBe('IEND');
   });

@@ -18,7 +18,6 @@
 
 import { findExistingSignatures } from './incrementalSave.js';
 
-
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -70,7 +69,11 @@ const decoder = new TextDecoder('latin1');
  * then search the entire PDF for `/V N 0 R` which is in the widget annotation
  * that also contains `/T (fieldname)`.
  */
-function extractFieldName(pdfStr: string, sigOffset: number, byteRange: [number, number, number, number]): string {
+function extractFieldName(
+  pdfStr: string,
+  sigOffset: number,
+  byteRange: [number, number, number, number],
+): string {
   // Strategy 1: Find the object number of this sig value by looking for
   // "N 0 obj" before the /ByteRange. The sig value dict is at a specific offset.
   // The byteRange's first gap (off1+len1) starts at the /Contents hex string.
@@ -134,9 +137,7 @@ function extractSigningDate(pdfStr: string, sigOffset: number): Date | undefined
   const searchEnd = Math.min(pdfStr.length, sigOffset + 2000);
   const region = pdfStr.slice(searchStart, searchEnd);
 
-  const dateMatch = region.match(
-    /\/M\s*\(D:(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})/,
-  );
+  const dateMatch = region.match(/\/M\s*\(D:(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})/);
   if (dateMatch) {
     const year = parseInt(dateMatch[1]!, 10);
     const month = parseInt(dateMatch[2]!, 10) - 1;
@@ -164,9 +165,7 @@ function extractSigningDate(pdfStr: string, sigOffset: number): Date | undefined
  * @param pdf  The PDF bytes to validate.
  * @returns    The signature chain validation result.
  */
-export async function validateSignatureChain(
-  pdf: Uint8Array,
-): Promise<SignatureChainResult> {
+export async function validateSignatureChain(pdf: Uint8Array): Promise<SignatureChainResult> {
   const pdfStr = decoder.decode(pdf);
   const rawSignatures = findExistingSignatures(pdf);
   const errors: string[] = [];
@@ -205,9 +204,7 @@ export async function validateSignatureChain(
     // Check: first range should start at 0
     if (off1 !== 0) {
       status = 'invalid';
-      errors.push(
-        `Signature "${fieldName}": byte range does not start at 0 (starts at ${off1})`,
-      );
+      errors.push(`Signature "${fieldName}": byte range does not start at 0 (starts at ${off1})`);
       chainValid = false;
     }
 
@@ -225,9 +222,7 @@ export async function validateSignatureChain(
     const gapEnd = off2;
     if (gapStart !== sig.contentsOffset || gapEnd - gapStart !== sig.contentsLength) {
       status = 'invalid';
-      errors.push(
-        `Signature "${fieldName}": byte range gap does not match /Contents placeholder`,
-      );
+      errors.push(`Signature "${fieldName}": byte range gap does not match /Contents placeholder`);
       chainValid = false;
     }
 
@@ -248,7 +243,7 @@ export async function validateSignatureChain(
         status = 'broken_chain';
         errors.push(
           `Signature "${fieldName}": does not cover previous signature ` +
-          `(ends at ${signatureEnd}, previous ends at ${prevEnd})`,
+            `(ends at ${signatureEnd}, previous ends at ${prevEnd})`,
         );
         chainValid = false;
       }

@@ -16,10 +16,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import { createPdf, PdfDocument } from '../../../src/core/pdfDocument.js';
 import { extractImages } from '../../../src/render/imageExtract.js';
-import {
-  initJpegWasm,
-  isJpegWasmReady,
-} from '../../../src/wasm/jpeg/bridge.js';
+import { initJpegWasm, isJpegWasmReady } from '../../../src/wasm/jpeg/bridge.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);

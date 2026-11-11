@@ -118,7 +118,7 @@ describe('decodeRegisteredImage', () => {
         rgba: new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8]),
       });
     });
-    const decoded = await decodeRegisteredImage('jpegxl', new Uint8Array([0xFF, 0x0A]));
+    const decoded = await decodeRegisteredImage('jpegxl', new Uint8Array([0xff, 0x0a]));
     expect(decoded.width).toBe(2);
     expect(decoded.rgba.length).toBe(8);
   });
@@ -141,12 +141,10 @@ describe('decodeRegisteredImage', () => {
   });
 
   it('throws a clear error for an unregistered format, naming it and how to register', async () => {
-    await expect(
-      decodeRegisteredImage('heic', new Uint8Array([0])),
-    ).rejects.toThrow(/heic/i);
-    await expect(
-      decodeRegisteredImage('heic', new Uint8Array([0])),
-    ).rejects.toThrow(/registerImageDecoder/);
+    await expect(decodeRegisteredImage('heic', new Uint8Array([0]))).rejects.toThrow(/heic/i);
+    await expect(decodeRegisteredImage('heic', new Uint8Array([0]))).rejects.toThrow(
+      /registerImageDecoder/,
+    );
   });
 
   it('throws when the decoder returns the wrong rgba length', async () => {
@@ -155,19 +153,13 @@ describe('decodeRegisteredImage', () => {
       height: 2, // expects 2*2*4 = 16 bytes
       rgba: new Uint8Array([0, 0, 0, 0]), // only 4
     }));
-    await expect(
-      decodeRegisteredImage('avif', new Uint8Array([0])),
-    ).rejects.toThrow(/avif/i);
-    await expect(
-      decodeRegisteredImage('avif', new Uint8Array([0])),
-    ).rejects.toThrow(/16/);
+    await expect(decodeRegisteredImage('avif', new Uint8Array([0]))).rejects.toThrow(/avif/i);
+    await expect(decodeRegisteredImage('avif', new Uint8Array([0]))).rejects.toThrow(/16/);
   });
 
   it('throws when the decoder returns a non-object result', async () => {
     registerImageDecoder('avif', () => undefined as unknown as DecodedRasterImage);
-    await expect(
-      decodeRegisteredImage('avif', new Uint8Array([0])),
-    ).rejects.toThrow(/avif/i);
+    await expect(decodeRegisteredImage('avif', new Uint8Array([0]))).rejects.toThrow(/avif/i);
   });
 
   it('throws when width/height are not positive integers', async () => {
@@ -176,9 +168,7 @@ describe('decodeRegisteredImage', () => {
       height: 1,
       rgba: new Uint8Array([]),
     }));
-    await expect(
-      decodeRegisteredImage('avif', new Uint8Array([0])),
-    ).rejects.toThrow();
+    await expect(decodeRegisteredImage('avif', new Uint8Array([0]))).rejects.toThrow();
   });
 
   it('throws when rgba is not a Uint8Array', async () => {
@@ -187,8 +177,6 @@ describe('decodeRegisteredImage', () => {
       height: 1,
       rgba: [255, 0, 0, 255] as unknown as Uint8Array,
     }));
-    await expect(
-      decodeRegisteredImage('avif', new Uint8Array([0])),
-    ).rejects.toThrow();
+    await expect(decodeRegisteredImage('avif', new Uint8Array([0]))).rejects.toThrow();
   });
 });

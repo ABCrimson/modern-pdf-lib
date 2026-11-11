@@ -8,14 +8,7 @@
  *            §7.7.3 (Page Tree), §14.3.3 (Document Information Dictionary).
  */
 
-import {
-  PdfArray,
-  PdfDict,
-  PdfName,
-  PdfNumber,
-  PdfRef,
-  PdfString,
-} from './pdfObjects.js';
+import { PdfArray, PdfDict, PdfName, PdfNumber, PdfRef, PdfString } from './pdfObjects.js';
 import type { PdfObjectRegistry } from './pdfObjects.js';
 
 // ---------------------------------------------------------------------------
@@ -70,10 +63,7 @@ export interface DocumentMetadata {
  *                  indirect object.
  * @returns         The indirect reference to the `/Info` dict.
  */
-export function buildInfoDict(
-  meta: DocumentMetadata,
-  registry: PdfObjectRegistry,
-): PdfRef {
+export function buildInfoDict(meta: DocumentMetadata, registry: PdfObjectRegistry): PdfRef {
   const dict = new PdfDict();
 
   if (meta.title !== undefined) {
@@ -157,10 +147,7 @@ export interface PageEntry {
  * @param registry  Object registry.
  * @returns         The indirect reference to the root `/Pages` node.
  */
-export function buildPageTree(
-  pages: readonly PageEntry[],
-  registry: PdfObjectRegistry,
-): PdfRef {
+export function buildPageTree(pages: readonly PageEntry[], registry: PdfObjectRegistry): PdfRef {
   // Allocate the /Pages reference first so that child /Page dicts can
   // point back to their parent.
   const pagesRef = registry.allocate();

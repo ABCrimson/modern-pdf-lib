@@ -24,7 +24,6 @@
 
 import type { PdfDict } from '../core/pdfObjects.js';
 
-
 // ---------------------------------------------------------------------------
 // WASM bridge (optional acceleration)
 // ---------------------------------------------------------------------------
@@ -319,7 +318,10 @@ class JBIG2Decoder {
   /**
    * Parse a segment header from the data at the given offset.
    */
-  private parseSegmentHeader(data: Uint8Array, offset: number): { header: SegmentHeader; newOffset: number } | null {
+  private parseSegmentHeader(
+    data: Uint8Array,
+    offset: number,
+  ): { header: SegmentHeader; newOffset: number } | null {
     if (offset + 6 > data.length) return null;
 
     // Segment number (4 bytes, big-endian)
@@ -743,21 +745,11 @@ class JBIG2Decoder {
 
         if (sdRefAgg) {
           // Refinement aggregate: skip for now, decode as plain bitmap
-          const bitmap = decodeGenericBitmap(
-            decoder,
-            symbolWidth,
-            heightClassHeight,
-            sdTemplate,
-          );
+          const bitmap = decodeGenericBitmap(decoder, symbolWidth, heightClassHeight, sdTemplate);
           newSymbols.push({ data: bitmap, width: symbolWidth, height: heightClassHeight });
         } else {
           // Standard: decode each symbol as a generic bitmap
-          const bitmap = decodeGenericBitmap(
-            decoder,
-            symbolWidth,
-            heightClassHeight,
-            sdTemplate,
-          );
+          const bitmap = decodeGenericBitmap(decoder, symbolWidth, heightClassHeight, sdTemplate);
           newSymbols.push({ data: bitmap, width: symbolWidth, height: heightClassHeight });
         }
 
@@ -880,7 +872,14 @@ class JBIG2Decoder {
       const bitmap = new Uint8Array(rowBytes * regionHeight);
       if (sbDefPixel) bitmap.fill(0xff);
       if (immediate) {
-        this.composeRegion(bitmap, regionWidth, regionHeight, regionX, regionY, combinationOperator);
+        this.composeRegion(
+          bitmap,
+          regionWidth,
+          regionHeight,
+          regionX,
+          regionY,
+          combinationOperator,
+        );
       } else {
         this.decodedSegments.set(header.segmentNumber, {
           bitmap: { data: bitmap, width: regionWidth, height: regionHeight },
@@ -958,24 +957,74 @@ class JBIG2Decoder {
         if (transposed) {
           // Transposed: S is vertical, T is horizontal
           switch (refCorner) {
-            case 0: si = curS; ti = t; break;                     // TOPLEFT
-            case 1: si = curS; ti = t - sym.width + 1; break;     // TOPRIGHT
-            case 2: si = curS - sym.height + 1; ti = t; break;    // BOTTOMLEFT
-            case 3: si = curS - sym.height + 1; ti = t - sym.width + 1; break; // BOTTOMRIGHT
-            default: si = curS; ti = t; break;
+            case 0:
+              si = curS;
+              ti = t;
+              break; // TOPLEFT
+            case 1:
+              si = curS;
+              ti = t - sym.width + 1;
+              break; // TOPRIGHT
+            case 2:
+              si = curS - sym.height + 1;
+              ti = t;
+              break; // BOTTOMLEFT
+            case 3:
+              si = curS - sym.height + 1;
+              ti = t - sym.width + 1;
+              break; // BOTTOMRIGHT
+            default:
+              si = curS;
+              ti = t;
+              break;
           }
-          composeBitmapOnto(regionBitmap, regionWidth, regionHeight, sym.data, sym.width, sym.height, ti, si, sbCombOp);
+          composeBitmapOnto(
+            regionBitmap,
+            regionWidth,
+            regionHeight,
+            sym.data,
+            sym.width,
+            sym.height,
+            ti,
+            si,
+            sbCombOp,
+          );
           curS += sym.height - 1;
         } else {
           // Normal: S is horizontal, T is vertical
           switch (refCorner) {
-            case 0: ti = t; si = curS; break;                       // TOPLEFT
-            case 1: ti = t; si = curS - sym.width + 1; break;       // TOPRIGHT
-            case 2: ti = t - sym.height + 1; si = curS; break;      // BOTTOMLEFT
-            case 3: ti = t - sym.height + 1; si = curS - sym.width + 1; break; // BOTTOMRIGHT
-            default: ti = t; si = curS; break;
+            case 0:
+              ti = t;
+              si = curS;
+              break; // TOPLEFT
+            case 1:
+              ti = t;
+              si = curS - sym.width + 1;
+              break; // TOPRIGHT
+            case 2:
+              ti = t - sym.height + 1;
+              si = curS;
+              break; // BOTTOMLEFT
+            case 3:
+              ti = t - sym.height + 1;
+              si = curS - sym.width + 1;
+              break; // BOTTOMRIGHT
+            default:
+              ti = t;
+              si = curS;
+              break;
           }
-          composeBitmapOnto(regionBitmap, regionWidth, regionHeight, sym.data, sym.width, sym.height, si, ti, sbCombOp);
+          composeBitmapOnto(
+            regionBitmap,
+            regionWidth,
+            regionHeight,
+            sym.data,
+            sym.width,
+            sym.height,
+            si,
+            ti,
+            sbCombOp,
+          );
           curS += sym.width - 1;
         }
 
@@ -984,7 +1033,14 @@ class JBIG2Decoder {
     }
 
     if (immediate) {
-      this.composeRegion(regionBitmap, regionWidth, regionHeight, regionX, regionY, combinationOperator);
+      this.composeRegion(
+        regionBitmap,
+        regionWidth,
+        regionHeight,
+        regionX,
+        regionY,
+        combinationOperator,
+      );
     } else {
       this.decodedSegments.set(header.segmentNumber, {
         bitmap: { data: regionBitmap, width: regionWidth, height: regionHeight },
@@ -1160,7 +1216,14 @@ class JBIG2Decoder {
     if (!patDict || patDict.patterns.length === 0) {
       // No patterns — just use default bitmap
       if (immediate) {
-        this.composeRegion(regionBitmap, regionWidth, regionHeight, regionX, regionY, combinationOperator);
+        this.composeRegion(
+          regionBitmap,
+          regionWidth,
+          regionHeight,
+          regionX,
+          regionY,
+          combinationOperator,
+        );
       } else {
         this.decodedSegments.set(header.segmentNumber, {
           bitmap: { data: regionBitmap, width: regionWidth, height: regionHeight },
@@ -1237,7 +1300,14 @@ class JBIG2Decoder {
     }
 
     if (immediate) {
-      this.composeRegion(regionBitmap, regionWidth, regionHeight, regionX, regionY, combinationOperator);
+      this.composeRegion(
+        regionBitmap,
+        regionWidth,
+        regionHeight,
+        regionX,
+        regionY,
+        combinationOperator,
+      );
     } else {
       this.decodedSegments.set(header.segmentNumber, {
         bitmap: { data: regionBitmap, width: regionWidth, height: regionHeight },
@@ -1311,7 +1381,13 @@ class JBIG2Decoder {
       );
     } else {
       // No reference — decode as generic bitmap
-      bitmap = decodeArithmeticGenericRegion(arithData, regionWidth, regionHeight, grTemplate, false);
+      bitmap = decodeArithmeticGenericRegion(
+        arithData,
+        regionWidth,
+        regionHeight,
+        grTemplate,
+        false,
+      );
     }
 
     if (immediate) {
@@ -1342,11 +1418,7 @@ class JBIG2Decoder {
  * Decode an MMR-encoded bitmap.  MMR is essentially ITU-T T.6 (Group 4)
  * with the addition that the end-of-data pattern differs.
  */
-function decodeMMRBitmap(
-  data: Uint8Array,
-  width: number,
-  height: number,
-): Uint8Array {
+function decodeMMRBitmap(data: Uint8Array, width: number, height: number): Uint8Array {
   const rowBytes = Math.ceil(width / 8);
   const output = new Uint8Array(rowBytes * height);
 
@@ -1489,75 +1561,212 @@ function buildMMRTree(
 
 // White terminating codes
 const MMR_WHITE_TERM: [number, number, number][] = [
-  [0b00110101, 8, 0], [0b000111, 6, 1], [0b0111, 4, 2], [0b1000, 4, 3],
-  [0b1011, 4, 4], [0b1100, 4, 5], [0b1110, 4, 6], [0b1111, 4, 7],
-  [0b10011, 5, 8], [0b10100, 5, 9], [0b00111, 5, 10], [0b01000, 5, 11],
-  [0b001000, 6, 12], [0b000011, 6, 13], [0b110100, 6, 14], [0b110101, 6, 15],
-  [0b101010, 6, 16], [0b101011, 6, 17], [0b0100111, 7, 18], [0b0001100, 7, 19],
-  [0b0001000, 7, 20], [0b0010111, 7, 21], [0b0000011, 7, 22], [0b0000100, 7, 23],
-  [0b0101000, 7, 24], [0b0101011, 7, 25], [0b0010011, 7, 26], [0b0100100, 7, 27],
-  [0b0011000, 7, 28], [0b00000010, 8, 29], [0b00000011, 8, 30], [0b00011010, 8, 31],
-  [0b00011011, 8, 32], [0b00010010, 8, 33], [0b00010011, 8, 34], [0b00010100, 8, 35],
-  [0b00010101, 8, 36], [0b00010110, 8, 37], [0b00010111, 8, 38], [0b00101000, 8, 39],
-  [0b00101001, 8, 40], [0b00101010, 8, 41], [0b00101011, 8, 42], [0b00101100, 8, 43],
-  [0b00101101, 8, 44], [0b00000100, 8, 45], [0b00000101, 8, 46], [0b00001010, 8, 47],
-  [0b00001011, 8, 48], [0b01010010, 8, 49], [0b01010011, 8, 50], [0b01010100, 8, 51],
-  [0b01010101, 8, 52], [0b00100100, 8, 53], [0b00100101, 8, 54], [0b01011000, 8, 55],
-  [0b01011001, 8, 56], [0b01011010, 8, 57], [0b01011011, 8, 58], [0b01001010, 8, 59],
-  [0b01001011, 8, 60], [0b00110010, 8, 61], [0b00110011, 8, 62], [0b00110100, 8, 63],
+  [0b00110101, 8, 0],
+  [0b000111, 6, 1],
+  [0b0111, 4, 2],
+  [0b1000, 4, 3],
+  [0b1011, 4, 4],
+  [0b1100, 4, 5],
+  [0b1110, 4, 6],
+  [0b1111, 4, 7],
+  [0b10011, 5, 8],
+  [0b10100, 5, 9],
+  [0b00111, 5, 10],
+  [0b01000, 5, 11],
+  [0b001000, 6, 12],
+  [0b000011, 6, 13],
+  [0b110100, 6, 14],
+  [0b110101, 6, 15],
+  [0b101010, 6, 16],
+  [0b101011, 6, 17],
+  [0b0100111, 7, 18],
+  [0b0001100, 7, 19],
+  [0b0001000, 7, 20],
+  [0b0010111, 7, 21],
+  [0b0000011, 7, 22],
+  [0b0000100, 7, 23],
+  [0b0101000, 7, 24],
+  [0b0101011, 7, 25],
+  [0b0010011, 7, 26],
+  [0b0100100, 7, 27],
+  [0b0011000, 7, 28],
+  [0b00000010, 8, 29],
+  [0b00000011, 8, 30],
+  [0b00011010, 8, 31],
+  [0b00011011, 8, 32],
+  [0b00010010, 8, 33],
+  [0b00010011, 8, 34],
+  [0b00010100, 8, 35],
+  [0b00010101, 8, 36],
+  [0b00010110, 8, 37],
+  [0b00010111, 8, 38],
+  [0b00101000, 8, 39],
+  [0b00101001, 8, 40],
+  [0b00101010, 8, 41],
+  [0b00101011, 8, 42],
+  [0b00101100, 8, 43],
+  [0b00101101, 8, 44],
+  [0b00000100, 8, 45],
+  [0b00000101, 8, 46],
+  [0b00001010, 8, 47],
+  [0b00001011, 8, 48],
+  [0b01010010, 8, 49],
+  [0b01010011, 8, 50],
+  [0b01010100, 8, 51],
+  [0b01010101, 8, 52],
+  [0b00100100, 8, 53],
+  [0b00100101, 8, 54],
+  [0b01011000, 8, 55],
+  [0b01011001, 8, 56],
+  [0b01011010, 8, 57],
+  [0b01011011, 8, 58],
+  [0b01001010, 8, 59],
+  [0b01001011, 8, 60],
+  [0b00110010, 8, 61],
+  [0b00110011, 8, 62],
+  [0b00110100, 8, 63],
 ];
 
 const MMR_WHITE_MAKEUP: [number, number, number][] = [
-  [0b11011, 5, 64], [0b10010, 5, 128], [0b010111, 6, 192], [0b0110111, 7, 256],
-  [0b00110110, 8, 320], [0b00110111, 8, 384], [0b01100100, 8, 448], [0b01100101, 8, 512],
-  [0b01101000, 8, 576], [0b01100111, 8, 640], [0b011001100, 9, 704], [0b011001101, 9, 768],
-  [0b011010010, 9, 832], [0b011010011, 9, 896], [0b011010100, 9, 960], [0b011010101, 9, 1024],
-  [0b011010110, 9, 1088], [0b011010111, 9, 1152], [0b011011000, 9, 1216], [0b011011001, 9, 1280],
-  [0b011011010, 9, 1344], [0b011011011, 9, 1408], [0b010011000, 9, 1472], [0b010011001, 9, 1536],
-  [0b010011010, 9, 1600], [0b011000, 6, 1664], [0b010011011, 9, 1728],
+  [0b11011, 5, 64],
+  [0b10010, 5, 128],
+  [0b010111, 6, 192],
+  [0b0110111, 7, 256],
+  [0b00110110, 8, 320],
+  [0b00110111, 8, 384],
+  [0b01100100, 8, 448],
+  [0b01100101, 8, 512],
+  [0b01101000, 8, 576],
+  [0b01100111, 8, 640],
+  [0b011001100, 9, 704],
+  [0b011001101, 9, 768],
+  [0b011010010, 9, 832],
+  [0b011010011, 9, 896],
+  [0b011010100, 9, 960],
+  [0b011010101, 9, 1024],
+  [0b011010110, 9, 1088],
+  [0b011010111, 9, 1152],
+  [0b011011000, 9, 1216],
+  [0b011011001, 9, 1280],
+  [0b011011010, 9, 1344],
+  [0b011011011, 9, 1408],
+  [0b010011000, 9, 1472],
+  [0b010011001, 9, 1536],
+  [0b010011010, 9, 1600],
+  [0b011000, 6, 1664],
+  [0b010011011, 9, 1728],
 ];
 
 const MMR_BLACK_TERM: [number, number, number][] = [
-  [0b0000110111, 10, 0], [0b010, 3, 1], [0b11, 2, 2], [0b10, 2, 3],
-  [0b011, 3, 4], [0b0011, 4, 5], [0b0010, 4, 6], [0b00011, 5, 7],
-  [0b000101, 6, 8], [0b000100, 6, 9], [0b0000100, 7, 10], [0b0000101, 7, 11],
-  [0b0000111, 7, 12], [0b00000100, 8, 13], [0b00000111, 8, 14],
-  [0b000011000, 9, 15], [0b0000010111, 10, 16], [0b0000011000, 10, 17],
-  [0b0000001000, 10, 18], [0b00001100111, 11, 19], [0b00001101000, 11, 20],
-  [0b00001101100, 11, 21], [0b00000110111, 11, 22], [0b00000101000, 11, 23],
-  [0b00000010111, 11, 24], [0b00000011000, 11, 25], [0b000011001010, 12, 26],
-  [0b000011001011, 12, 27], [0b000011001100, 12, 28], [0b000011001101, 12, 29],
-  [0b000001101000, 12, 30], [0b000001101001, 12, 31], [0b000001101010, 12, 32],
-  [0b000001101011, 12, 33], [0b000011010010, 12, 34], [0b000011010011, 12, 35],
-  [0b000011010100, 12, 36], [0b000011010101, 12, 37], [0b000011010110, 12, 38],
-  [0b000011010111, 12, 39], [0b000001101100, 12, 40], [0b000001101101, 12, 41],
-  [0b000011011010, 12, 42], [0b000011011011, 12, 43], [0b000001010100, 12, 44],
-  [0b000001010101, 12, 45], [0b000001010110, 12, 46], [0b000001010111, 12, 47],
-  [0b000001100100, 12, 48], [0b000001100101, 12, 49], [0b000001010010, 12, 50],
-  [0b000001010011, 12, 51], [0b000000100100, 12, 52], [0b000000110111, 12, 53],
-  [0b000000111000, 12, 54], [0b000000100111, 12, 55], [0b000000101000, 12, 56],
-  [0b000001011000, 12, 57], [0b000001011001, 12, 58], [0b000000101011, 12, 59],
-  [0b000000101100, 12, 60], [0b000001011010, 12, 61], [0b000001100110, 12, 62],
+  [0b0000110111, 10, 0],
+  [0b010, 3, 1],
+  [0b11, 2, 2],
+  [0b10, 2, 3],
+  [0b011, 3, 4],
+  [0b0011, 4, 5],
+  [0b0010, 4, 6],
+  [0b00011, 5, 7],
+  [0b000101, 6, 8],
+  [0b000100, 6, 9],
+  [0b0000100, 7, 10],
+  [0b0000101, 7, 11],
+  [0b0000111, 7, 12],
+  [0b00000100, 8, 13],
+  [0b00000111, 8, 14],
+  [0b000011000, 9, 15],
+  [0b0000010111, 10, 16],
+  [0b0000011000, 10, 17],
+  [0b0000001000, 10, 18],
+  [0b00001100111, 11, 19],
+  [0b00001101000, 11, 20],
+  [0b00001101100, 11, 21],
+  [0b00000110111, 11, 22],
+  [0b00000101000, 11, 23],
+  [0b00000010111, 11, 24],
+  [0b00000011000, 11, 25],
+  [0b000011001010, 12, 26],
+  [0b000011001011, 12, 27],
+  [0b000011001100, 12, 28],
+  [0b000011001101, 12, 29],
+  [0b000001101000, 12, 30],
+  [0b000001101001, 12, 31],
+  [0b000001101010, 12, 32],
+  [0b000001101011, 12, 33],
+  [0b000011010010, 12, 34],
+  [0b000011010011, 12, 35],
+  [0b000011010100, 12, 36],
+  [0b000011010101, 12, 37],
+  [0b000011010110, 12, 38],
+  [0b000011010111, 12, 39],
+  [0b000001101100, 12, 40],
+  [0b000001101101, 12, 41],
+  [0b000011011010, 12, 42],
+  [0b000011011011, 12, 43],
+  [0b000001010100, 12, 44],
+  [0b000001010101, 12, 45],
+  [0b000001010110, 12, 46],
+  [0b000001010111, 12, 47],
+  [0b000001100100, 12, 48],
+  [0b000001100101, 12, 49],
+  [0b000001010010, 12, 50],
+  [0b000001010011, 12, 51],
+  [0b000000100100, 12, 52],
+  [0b000000110111, 12, 53],
+  [0b000000111000, 12, 54],
+  [0b000000100111, 12, 55],
+  [0b000000101000, 12, 56],
+  [0b000001011000, 12, 57],
+  [0b000001011001, 12, 58],
+  [0b000000101011, 12, 59],
+  [0b000000101100, 12, 60],
+  [0b000001011010, 12, 61],
+  [0b000001100110, 12, 62],
   [0b000001100111, 12, 63],
 ];
 
 const MMR_BLACK_MAKEUP: [number, number, number][] = [
-  [0b0000001111, 10, 64], [0b000011001000, 12, 128], [0b000011001001, 12, 192],
-  [0b000001011011, 12, 256], [0b000000110011, 12, 320], [0b000000110100, 12, 384],
-  [0b000000110101, 12, 448], [0b0000001101100, 13, 512], [0b0000001101101, 13, 576],
-  [0b0000001001010, 13, 640], [0b0000001001011, 13, 704], [0b0000001001100, 13, 768],
-  [0b0000001001101, 13, 832], [0b0000001110010, 13, 896], [0b0000001110011, 13, 960],
-  [0b0000001110100, 13, 1024], [0b0000001110101, 13, 1088], [0b0000001110110, 13, 1152],
-  [0b0000001110111, 13, 1216], [0b0000001010010, 13, 1280], [0b0000001010011, 13, 1344],
-  [0b0000001010100, 13, 1408], [0b0000001010101, 13, 1472], [0b0000001011010, 13, 1536],
-  [0b0000001011011, 13, 1600], [0b0000001100100, 13, 1664], [0b0000001100101, 13, 1728],
+  [0b0000001111, 10, 64],
+  [0b000011001000, 12, 128],
+  [0b000011001001, 12, 192],
+  [0b000001011011, 12, 256],
+  [0b000000110011, 12, 320],
+  [0b000000110100, 12, 384],
+  [0b000000110101, 12, 448],
+  [0b0000001101100, 13, 512],
+  [0b0000001101101, 13, 576],
+  [0b0000001001010, 13, 640],
+  [0b0000001001011, 13, 704],
+  [0b0000001001100, 13, 768],
+  [0b0000001001101, 13, 832],
+  [0b0000001110010, 13, 896],
+  [0b0000001110011, 13, 960],
+  [0b0000001110100, 13, 1024],
+  [0b0000001110101, 13, 1088],
+  [0b0000001110110, 13, 1152],
+  [0b0000001110111, 13, 1216],
+  [0b0000001010010, 13, 1280],
+  [0b0000001010011, 13, 1344],
+  [0b0000001010100, 13, 1408],
+  [0b0000001010101, 13, 1472],
+  [0b0000001011010, 13, 1536],
+  [0b0000001011011, 13, 1600],
+  [0b0000001100100, 13, 1664],
+  [0b0000001100101, 13, 1728],
 ];
 
 const MMR_COMMON_MAKEUP: [number, number, number][] = [
-  [0b00000001000, 11, 1792], [0b00000001100, 11, 1856], [0b00000001101, 11, 1920],
-  [0b000000010010, 12, 1984], [0b000000010011, 12, 2048], [0b000000010100, 12, 2112],
-  [0b000000010101, 12, 2176], [0b000000010110, 12, 2240], [0b000000010111, 12, 2304],
-  [0b000000011100, 12, 2368], [0b000000011101, 12, 2432], [0b000000011110, 12, 2496],
+  [0b00000001000, 11, 1792],
+  [0b00000001100, 11, 1856],
+  [0b00000001101, 11, 1920],
+  [0b000000010010, 12, 1984],
+  [0b000000010011, 12, 2048],
+  [0b000000010100, 12, 2112],
+  [0b000000010101, 12, 2176],
+  [0b000000010110, 12, 2240],
+  [0b000000010111, 12, 2304],
+  [0b000000011100, 12, 2368],
+  [0b000000011101, 12, 2432],
+  [0b000000011110, 12, 2496],
   [0b000000011111, 12, 2560],
 ];
 
@@ -1644,7 +1853,7 @@ function decodeMMRLine(
         const b1 = mmrFindB1(referenceLine, a0IsBeforeLine ? -1 : a0, currentColor, columns);
         const b2 = mmrFindB2(referenceLine, b1, columns);
         const fillEnd = Math.min(b2, columns);
-        for (let i = (a0IsBeforeLine ? 0 : a0); i < fillEnd; i++) {
+        for (let i = a0IsBeforeLine ? 0 : a0; i < fillEnd; i++) {
           line[i] = currentColor;
         }
         a0 = b2;
@@ -1703,7 +1912,7 @@ function decodeMMRLine(
       case MMRMode.EOFB:
       default:
         // Fill remaining with current color
-        for (let i = (a0IsBeforeLine ? 0 : a0); i < columns; i++) {
+        for (let i = a0IsBeforeLine ? 0 : a0; i < columns; i++) {
           line[i] = currentColor;
         }
         return line;
@@ -1854,15 +2063,15 @@ function buildGenericContext(
  *   SWITCH = 1 if MPS sense should be toggled after LPS
  */
 const QE_TABLE: [number, number, number, number][] = [
-  [0x5601, 1, 1, 1],   // 0
-  [0x3401, 2, 6, 0],   // 1
-  [0x1801, 3, 9, 0],   // 2
-  [0x0ac1, 4, 12, 0],  // 3
-  [0x0521, 5, 29, 0],  // 4
+  [0x5601, 1, 1, 1], // 0
+  [0x3401, 2, 6, 0], // 1
+  [0x1801, 3, 9, 0], // 2
+  [0x0ac1, 4, 12, 0], // 3
+  [0x0521, 5, 29, 0], // 4
   [0x0221, 38, 33, 0], // 5
-  [0x5601, 7, 6, 1],   // 6
-  [0x5401, 8, 14, 0],  // 7
-  [0x4801, 9, 14, 0],  // 8
+  [0x5601, 7, 6, 1], // 6
+  [0x5401, 8, 14, 0], // 7
+  [0x4801, 9, 14, 0], // 8
   [0x3801, 10, 14, 0], // 9
   [0x3001, 11, 17, 0], // 10
   [0x2401, 12, 18, 0], // 11
@@ -1974,7 +2183,7 @@ class ArithmeticDecoder {
     this.a -= qe;
 
     // Check if the code register is in the MPS or LPS sub-interval
-    if ((this.c >>> 16) < this.a) {
+    if (this.c >>> 16 < this.a) {
       // MPS sub-interval
       if (this.a >= 0x8000) {
         return mps;
@@ -1997,7 +2206,7 @@ class ArithmeticDecoder {
       }
     } else {
       // LPS sub-interval
-      this.c = ((this.c >>> 16) - this.a) << 16 | (this.c & 0xffff);
+      this.c = (((this.c >>> 16) - this.a) << 16) | (this.c & 0xffff);
 
       if (this.a < qe) {
         // Conditional exchange: actually MPS
@@ -2098,7 +2307,7 @@ class IntegerDecoder {
     const value = readBits(width) + offset;
 
     if (sign) {
-      return value > 0 ? -value : null;     // null = OOB
+      return value > 0 ? -value : null; // null = OOB
     }
     return value;
   }
@@ -2226,11 +2435,22 @@ function composeBitmapOnto(
       // Apply combination operator
       let result: number;
       switch (operator) {
-        case 0: result = dstPixel | srcPixel; break;        // OR
-        case 1: result = dstPixel & srcPixel; break;        // AND
-        case 2: result = dstPixel ^ srcPixel; break;        // XOR
-        case 3: result = (dstPixel ^ srcPixel) ^ 1; break;  // XNOR
-        case 4: default: result = srcPixel; break;           // REPLACE
+        case 0:
+          result = dstPixel | srcPixel;
+          break; // OR
+        case 1:
+          result = dstPixel & srcPixel;
+          break; // AND
+        case 2:
+          result = dstPixel ^ srcPixel;
+          break; // XOR
+        case 3:
+          result = dstPixel ^ srcPixel ^ 1;
+          break; // XNOR
+        case 4:
+        default:
+          result = srcPixel;
+          break; // REPLACE
       }
 
       if (result) {
@@ -2274,7 +2494,14 @@ function decodeRefinementBitmap(
   const contextSize = templateId === 0 ? 13 : 10;
   const stats = new Uint8Array(1 << contextSize);
 
-  function getPixel(bitmap: Uint8Array, rBytes: number, r: number, c: number, w: number, h: number): number {
+  function getPixel(
+    bitmap: Uint8Array,
+    rBytes: number,
+    r: number,
+    c: number,
+    w: number,
+    h: number,
+  ): number {
     if (r < 0 || c < 0 || r >= h || c >= w) return 0;
     return (bitmap[r * rBytes + (c >>> 3)]! >>> (7 - (c & 7))) & 1;
   }
@@ -2345,10 +2572,7 @@ function readUint32BE(data: Uint8Array, offset: number): number {
 
 function readInt32BE(data: Uint8Array, offset: number): number {
   return (
-    (data[offset]! << 24) |
-    (data[offset + 1]! << 16) |
-    (data[offset + 2]! << 8) |
-    data[offset + 3]!
+    (data[offset]! << 24) | (data[offset + 1]! << 16) | (data[offset + 2]! << 8) | data[offset + 3]!
   );
 }
 

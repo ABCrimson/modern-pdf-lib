@@ -436,13 +436,15 @@ describe('loadPdf page tree traversal', () => {
 
     // Object 3: SubPages1 (2 pages) - with inherited MediaBox
     offsets.push(pos);
-    const subPages1 = '3 0 obj<</Type/Pages/Parent 2 0 R/Kids[5 0 R 6 0 R]/Count 2/MediaBox[0 0 612 792]>>endobj\n';
+    const subPages1 =
+      '3 0 obj<</Type/Pages/Parent 2 0 R/Kids[5 0 R 6 0 R]/Count 2/MediaBox[0 0 612 792]>>endobj\n';
     parts.push(subPages1);
     pos += subPages1.length;
 
     // Object 4: SubPages2 (1 page) - with different MediaBox
     offsets.push(pos);
-    const subPages2 = '4 0 obj<</Type/Pages/Parent 2 0 R/Kids[7 0 R]/Count 1/MediaBox[0 0 595 842]>>endobj\n';
+    const subPages2 =
+      '4 0 obj<</Type/Pages/Parent 2 0 R/Kids[7 0 R]/Count 1/MediaBox[0 0 595 842]>>endobj\n';
     parts.push(subPages2);
     pos += subPages2.length;
 

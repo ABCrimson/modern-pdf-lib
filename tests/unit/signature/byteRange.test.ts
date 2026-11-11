@@ -126,11 +126,7 @@ describe('computeSignatureHash', () => {
     const pdfBytes = createMinimalPdf();
     const { preparedPdf, byteRange } = prepareForSigning(pdfBytes, 'Sig1');
 
-    const hash = await computeSignatureHash(
-      preparedPdf,
-      byteRange.byteRange,
-      'SHA-256',
-    );
+    const hash = await computeSignatureHash(preparedPdf, byteRange.byteRange, 'SHA-256');
 
     expect(hash).toBeInstanceOf(Uint8Array);
     expect(hash.length).toBe(32); // SHA-256 = 32 bytes
@@ -140,11 +136,7 @@ describe('computeSignatureHash', () => {
     const pdfBytes = createMinimalPdf();
     const { preparedPdf, byteRange } = prepareForSigning(pdfBytes, 'Sig1');
 
-    const hash = await computeSignatureHash(
-      preparedPdf,
-      byteRange.byteRange,
-      'SHA-384',
-    );
+    const hash = await computeSignatureHash(preparedPdf, byteRange.byteRange, 'SHA-384');
 
     expect(hash).toBeInstanceOf(Uint8Array);
     expect(hash.length).toBe(48); // SHA-384 = 48 bytes
@@ -154,11 +146,7 @@ describe('computeSignatureHash', () => {
     const pdfBytes = createMinimalPdf();
     const { preparedPdf, byteRange } = prepareForSigning(pdfBytes, 'Sig1');
 
-    const hash = await computeSignatureHash(
-      preparedPdf,
-      byteRange.byteRange,
-      'SHA-512',
-    );
+    const hash = await computeSignatureHash(preparedPdf, byteRange.byteRange, 'SHA-512');
 
     expect(hash).toBeInstanceOf(Uint8Array);
     expect(hash.length).toBe(64); // SHA-512 = 64 bytes
@@ -168,10 +156,7 @@ describe('computeSignatureHash', () => {
     const pdfBytes = createMinimalPdf();
     const { preparedPdf, byteRange } = prepareForSigning(pdfBytes, 'Sig1');
 
-    const hash = await computeSignatureHash(
-      preparedPdf,
-      byteRange.byteRange,
-    );
+    const hash = await computeSignatureHash(preparedPdf, byteRange.byteRange);
 
     expect(hash.length).toBe(32);
   });
@@ -233,7 +218,10 @@ describe('embedSignature', () => {
 
     // Read the hex string from the signed PDF
     const contentsStr = new TextDecoder('latin1').decode(
-      signed.subarray(byteRange.contentsOffset, byteRange.contentsOffset + byteRange.contentsLength),
+      signed.subarray(
+        byteRange.contentsOffset,
+        byteRange.contentsOffset + byteRange.contentsLength,
+      ),
     );
 
     // Should start with `<deadbeef` and be padded with `0`s

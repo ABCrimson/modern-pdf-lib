@@ -15,9 +15,7 @@ import {
   SARIF_SCHEMA_URI,
   DEFAULT_SARIF_TOOL_NAME,
 } from '../../../src/compliance/validationReport.js';
-import type {
-  ValidationFinding,
-} from '../../../src/compliance/validationReport.js';
+import type { ValidationFinding } from '../../../src/compliance/validationReport.js';
 
 const findings: readonly ValidationFinding[] = [
   {
@@ -121,11 +119,7 @@ describe('toSarif', () => {
   it('de-duplicates rule descriptors by id (first-seen order)', () => {
     const log = toSarif(findings);
     const rules = log.runs[0].tool.driver.rules;
-    expect(rules.map((r) => r.id)).toEqual([
-      'PDFA-6.1.2',
-      'PDFA-6.1.3',
-      'PDFA-6.2.2',
-    ]);
+    expect(rules.map((r) => r.id)).toEqual(['PDFA-6.1.2', 'PDFA-6.1.3', 'PDFA-6.2.2']);
   });
 
   it('maps page onto a physical-location region', () => {

@@ -93,13 +93,36 @@ export interface RuntimeCapabilities {
  * SIMD-capable host and to be rejected by a host lacking SIMD.
  */
 const WASM_SIMD_MODULE: Uint8Array<ArrayBuffer> = new Uint8Array([
-  0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00, // magic + version
-  0x01, 0x05, 0x01, 0x60, 0x00, 0x01, 0x7b, //        type: () -> (v128)
-  0x03, 0x02, 0x01, 0x00, //                           func: 1 func, type 0
-  0x0a, 0x0a, 0x01, 0x08, 0x00, //                     code: 1 func, body size 8, 0 locals
-  0x41, 0x00, //                                       i32.const 0
-  0xfd, 0x0f, //                                       i32x4.splat
-  0xfd, 0x62, //                                       i8x16.popcnt
+  0x00,
+  0x61,
+  0x73,
+  0x6d,
+  0x01,
+  0x00,
+  0x00,
+  0x00, // magic + version
+  0x01,
+  0x05,
+  0x01,
+  0x60,
+  0x00,
+  0x01,
+  0x7b, //        type: () -> (v128)
+  0x03,
+  0x02,
+  0x01,
+  0x00, //                           func: 1 func, type 0
+  0x0a,
+  0x0a,
+  0x01,
+  0x08,
+  0x00, //                     code: 1 func, body size 8, 0 locals
+  0x41,
+  0x00, //                                       i32.const 0
+  0xfd,
+  0x0f, //                                       i32x4.splat
+  0xfd,
+  0x62, //                                       i8x16.popcnt
   0x0b, //                                             end
 ]);
 
@@ -111,14 +134,43 @@ const WASM_SIMD_MODULE: Uint8Array<ArrayBuffer> = new Uint8Array([
  * validate on such a host.
  */
 const WASM_THREADS_MODULE: Uint8Array<ArrayBuffer> = new Uint8Array([
-  0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00, // magic + version
-  0x01, 0x04, 0x01, 0x60, 0x00, 0x00, //               type: () -> ()
-  0x03, 0x02, 0x01, 0x00, //                           func: 1 func, type 0
-  0x05, 0x04, 0x01, 0x03, 0x01, 0x01, //               memory: 1 mem, flags 0x03 (shared+max), min 1, max 1
-  0x0a, 0x0d, 0x01, 0x0b, 0x00, //                     code: 1 func, body size 11, 0 locals
-  0x41, 0x00, //                                       i32.const 0   (address)
-  0x41, 0x00, //                                       i32.const 0   (count)
-  0xfe, 0x00, 0x02, 0x00, //                           memory.atomic.notify  align=2 offset=0
+  0x00,
+  0x61,
+  0x73,
+  0x6d,
+  0x01,
+  0x00,
+  0x00,
+  0x00, // magic + version
+  0x01,
+  0x04,
+  0x01,
+  0x60,
+  0x00,
+  0x00, //               type: () -> ()
+  0x03,
+  0x02,
+  0x01,
+  0x00, //                           func: 1 func, type 0
+  0x05,
+  0x04,
+  0x01,
+  0x03,
+  0x01,
+  0x01, //               memory: 1 mem, flags 0x03 (shared+max), min 1, max 1
+  0x0a,
+  0x0d,
+  0x01,
+  0x0b,
+  0x00, //                     code: 1 func, body size 11, 0 locals
+  0x41,
+  0x00, //                                       i32.const 0   (address)
+  0x41,
+  0x00, //                                       i32.const 0   (count)
+  0xfe,
+  0x00,
+  0x02,
+  0x00, //                           memory.atomic.notify  align=2 offset=0
   0x1a, //                                             drop
   0x0b, //                                             end
 ]);
@@ -131,15 +183,43 @@ const WASM_THREADS_MODULE: Uint8Array<ArrayBuffer> = new Uint8Array([
  * `memory.fill` is the discriminating instruction).
  */
 const WASM_BULK_MEMORY_MODULE: Uint8Array<ArrayBuffer> = new Uint8Array([
-  0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00, // magic + version
-  0x01, 0x04, 0x01, 0x60, 0x00, 0x00, //               type: () -> ()
-  0x03, 0x02, 0x01, 0x00, //                           func: 1 func, type 0
-  0x05, 0x03, 0x01, 0x00, 0x01, //                     memory: 1 mem, flags 0x00, min 1
-  0x0a, 0x0d, 0x01, 0x0b, 0x00, //                     code: 1 func, body size 11, 0 locals
-  0x41, 0x00, //                                       i32.const 0   (dest)
-  0x41, 0x00, //                                       i32.const 0   (value)
-  0x41, 0x00, //                                       i32.const 0   (size)
-  0xfc, 0x0b, 0x00, //                                 memory.fill   memidx 0
+  0x00,
+  0x61,
+  0x73,
+  0x6d,
+  0x01,
+  0x00,
+  0x00,
+  0x00, // magic + version
+  0x01,
+  0x04,
+  0x01,
+  0x60,
+  0x00,
+  0x00, //               type: () -> ()
+  0x03,
+  0x02,
+  0x01,
+  0x00, //                           func: 1 func, type 0
+  0x05,
+  0x03,
+  0x01,
+  0x00,
+  0x01, //                     memory: 1 mem, flags 0x00, min 1
+  0x0a,
+  0x0d,
+  0x01,
+  0x0b,
+  0x00, //                     code: 1 func, body size 11, 0 locals
+  0x41,
+  0x00, //                                       i32.const 0   (dest)
+  0x41,
+  0x00, //                                       i32.const 0   (value)
+  0x41,
+  0x00, //                                       i32.const 0   (size)
+  0xfc,
+  0x0b,
+  0x00, //                                 memory.fill   memidx 0
   0x0b, //                                             end
 ]);
 
@@ -200,14 +280,9 @@ function hasGlobal(name: string): boolean {
  */
 function resolveHardwareConcurrency(): number {
   try {
-    const reported = (
-      globalThis as { navigator?: { hardwareConcurrency?: unknown } }
-    ).navigator?.hardwareConcurrency;
-    if (
-      typeof reported === 'number' &&
-      Number.isInteger(reported) &&
-      reported > 0
-    ) {
+    const reported = (globalThis as { navigator?: { hardwareConcurrency?: unknown } }).navigator
+      ?.hardwareConcurrency;
+    if (typeof reported === 'number' && Number.isInteger(reported) && reported > 0) {
       return reported;
     }
   } catch {
@@ -240,15 +315,13 @@ export function detectRuntimeCapabilities(): RuntimeCapabilities {
     wasmSimd: wasm && validatesModule(WASM_SIMD_MODULE),
     // A wasm shared memory requires SharedArrayBuffer to back it, so gate the
     // threads probe on the global too — honest about what is actually usable.
-    wasmThreads:
-      wasm && sharedArrayBuffer && validatesModule(WASM_THREADS_MODULE),
+    wasmThreads: wasm && sharedArrayBuffer && validatesModule(WASM_THREADS_MODULE),
     wasmBulkMemory: wasm && validatesModule(WASM_BULK_MEMORY_MODULE),
     sharedArrayBuffer,
     atomics: hasGlobal('Atomics'),
     bigInt64Array: hasGlobal('BigInt64Array'),
     crossOriginIsolated:
-      (globalThis as { crossOriginIsolated?: unknown }).crossOriginIsolated ===
-      true,
+      (globalThis as { crossOriginIsolated?: unknown }).crossOriginIsolated === true,
     hardwareConcurrency: resolveHardwareConcurrency(),
   };
 }

@@ -9,14 +9,7 @@ import { describe, it, expect } from 'vitest';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
-import {
-  createPdf,
-  PageSizes,
-  StandardFonts,
-  rgb,
-  loadPdf,
-  mergePdfs,
-} from '../../src/index.js';
+import { createPdf, PageSizes, StandardFonts, rgb, loadPdf, mergePdfs } from '../../src/index.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -319,25 +312,53 @@ describe('Stress tests', () => {
 
     // Draw on pages in interleaved order
     page1.drawText('Page 1 - First draw', {
-      x: 50, y: 750, size: 14, font: font.name, color: rgb(1, 0, 0),
+      x: 50,
+      y: 750,
+      size: 14,
+      font: font.name,
+      color: rgb(1, 0, 0),
     });
     page2.drawText('Page 2 - First draw', {
-      x: 50, y: 750, size: 14, font: font.name, color: rgb(0, 1, 0),
+      x: 50,
+      y: 750,
+      size: 14,
+      font: font.name,
+      color: rgb(0, 1, 0),
     });
     page1.drawText('Page 1 - Second draw', {
-      x: 50, y: 720, size: 14, font: font.name, color: rgb(1, 0, 0),
+      x: 50,
+      y: 720,
+      size: 14,
+      font: font.name,
+      color: rgb(1, 0, 0),
     });
     page3.drawText('Page 3 - First draw', {
-      x: 50, y: 750, size: 14, font: font.name, color: rgb(0, 0, 1),
+      x: 50,
+      y: 750,
+      size: 14,
+      font: font.name,
+      color: rgb(0, 0, 1),
     });
     page2.drawText('Page 2 - Second draw', {
-      x: 50, y: 720, size: 14, font: font.name, color: rgb(0, 1, 0),
+      x: 50,
+      y: 720,
+      size: 14,
+      font: font.name,
+      color: rgb(0, 1, 0),
     });
     page1.drawText('Page 1 - Third draw', {
-      x: 50, y: 690, size: 14, font: font.name, color: rgb(1, 0, 0),
+      x: 50,
+      y: 690,
+      size: 14,
+      font: font.name,
+      color: rgb(1, 0, 0),
     });
     page3.drawText('Page 3 - Second draw', {
-      x: 50, y: 720, size: 14, font: font.name, color: rgb(0, 0, 1),
+      x: 50,
+      y: 720,
+      size: 14,
+      font: font.name,
+      color: rgb(0, 0, 1),
     });
 
     // Also add some shapes in interleaved order

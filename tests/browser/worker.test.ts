@@ -12,7 +12,9 @@ describe('PdfWorker', () => {
   });
 
   it('can be instantiated with a workerUrl URL object', () => {
-    expect(() => new PdfWorker({ workerUrl: new URL('https://example.com/worker.js') })).not.toThrow();
+    expect(
+      () => new PdfWorker({ workerUrl: new URL('https://example.com/worker.js') }),
+    ).not.toThrow();
   });
 
   it('isActive is false before first generate()', () => {

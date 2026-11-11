@@ -10,12 +10,7 @@
 import { describe, it, expect } from 'vitest';
 import { zlibSync, deflateSync } from 'fflate';
 import { decodeStream, getStreamFilters } from '../../../src/parser/streamDecode.js';
-import {
-  PdfDict,
-  PdfName,
-  PdfArray,
-  PdfNumber,
-} from '../../../src/core/pdfObjects.js';
+import { PdfDict, PdfName, PdfArray, PdfNumber } from '../../../src/core/pdfObjects.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -260,9 +255,13 @@ describe('RunLengthDecode', () => {
   it('handles mixed copy and repeat runs', () => {
     // Copy 3 bytes literally, then repeat 0xAA 3 times
     const encoded = new Uint8Array([
-      2, 0x01, 0x02, 0x03,  // N=2: copy 3 bytes
-      254, 0xaa,              // N=254: repeat 0xAA (257-254)=3 times
-      128,                    // EOD
+      2,
+      0x01,
+      0x02,
+      0x03, // N=2: copy 3 bytes
+      254,
+      0xaa, // N=254: repeat 0xAA (257-254)=3 times
+      128, // EOD
     ]);
     const result = decodeStream(encoded, 'RunLengthDecode');
     expect(result).toEqual(new Uint8Array([0x01, 0x02, 0x03, 0xaa, 0xaa, 0xaa]));
@@ -383,8 +382,14 @@ describe('FlateDecode with PNG predictors', () => {
     // Row 2 raw: [15, 25, 35]
     // Row 2 predicted: [5, 5, 5]  (15-10=5, 25-20=5, 35-30=5)
     const predictedData = new Uint8Array([
-      2, 10, 20, 30,  // filter=2 (Up), row 1
-      2, 5, 5, 5,     // filter=2 (Up), row 2
+      2,
+      10,
+      20,
+      30, // filter=2 (Up), row 1
+      2,
+      5,
+      5,
+      5, // filter=2 (Up), row 2
     ]);
 
     const compressed = zlibSync(predictedData);
@@ -410,8 +415,12 @@ describe('FlateDecode with PNG predictors', () => {
     //   byte 0: 30 - floor((0+10)/2) = 30 - 5 = 25
     //   byte 1: 40 - floor((30+20)/2) = 40 - 25 = 15
     const predictedData = new Uint8Array([
-      3, 10, 15,   // filter=3 (Average), row 1
-      3, 25, 15,   // filter=3 (Average), row 2
+      3,
+      10,
+      15, // filter=3 (Average), row 1
+      3,
+      25,
+      15, // filter=3 (Average), row 2
     ]);
 
     const compressed = zlibSync(predictedData);
@@ -456,8 +465,12 @@ describe('FlateDecode with PNG predictors', () => {
   it('handles PNG Optimum predictor (type 15 = per-row filter bytes)', () => {
     // Predictor 15: each row has its own filter type byte
     const predictedData = new Uint8Array([
-      0, 10, 20,  // row 1: None
-      1, 5, 5,    // row 2: Sub (raw = [5, 10])
+      0,
+      10,
+      20, // row 1: None
+      1,
+      5,
+      5, // row 2: Sub (raw = [5, 10])
     ]);
 
     const compressed = zlibSync(predictedData);
@@ -827,23 +840,23 @@ describe('Passthrough filters', () => {
     cs.push(0x00, 0x00, 0x00, 0x02); // YTsiz = 2
     cs.push(0x00, 0x00, 0x00, 0x00); // XTOsiz
     cs.push(0x00, 0x00, 0x00, 0x00); // YTOsiz
-    cs.push(0x00, 0x01);             // Csiz = 1
-    cs.push(0x07, 0x01, 0x01);       // Ssiz=7 (8-bit), XRsiz=1, YRsiz=1
+    cs.push(0x00, 0x01); // Csiz = 1
+    cs.push(0x07, 0x01, 0x01); // Ssiz=7 (8-bit), XRsiz=1, YRsiz=1
     // COD
     cs.push(0xff, 0x52);
     cs.push(0x00, 0x0c); // Lcod = 12
-    cs.push(0x00);       // Scod
-    cs.push(0x00);       // Progression = LRCP
+    cs.push(0x00); // Scod
+    cs.push(0x00); // Progression = LRCP
     cs.push(0x00, 0x01); // Layers = 1
-    cs.push(0x00);       // MCT = 0
-    cs.push(0x01);       // Decomp levels = 1
+    cs.push(0x00); // MCT = 0
+    cs.push(0x01); // Decomp levels = 1
     cs.push(0x04, 0x04); // CB width/height exp
-    cs.push(0x00);       // CB style
-    cs.push(0x01);       // Wavelet = 5/3 reversible
+    cs.push(0x00); // CB style
+    cs.push(0x01); // Wavelet = 5/3 reversible
     // QCD
     cs.push(0xff, 0x5c);
     cs.push(0x00, 0x07); // Lqcd = 7
-    cs.push(0x20);       // Sqcd: guardBits=1, quantStyle=0
+    cs.push(0x20); // Sqcd: guardBits=1, quantStyle=0
     cs.push(0x40, 0x40, 0x40, 0x40); // 4 subbands
     // EOC (no tile data)
     cs.push(0xff, 0xd9);
@@ -937,10 +950,7 @@ describe('getStreamFilters()', () => {
 
   it('extracts multiple filters from PdfArray', () => {
     const dict = new PdfDict();
-    dict.set(
-      '/Filter',
-      PdfArray.of([PdfName.of('/ASCIIHexDecode'), PdfName.of('/FlateDecode')]),
-    );
+    dict.set('/Filter', PdfArray.of([PdfName.of('/ASCIIHexDecode'), PdfName.of('/FlateDecode')]));
     const result = getStreamFilters(dict);
     expect(result.filters).toEqual(['ASCIIHexDecode', 'FlateDecode']);
     expect(result.decodeParms).toHaveLength(2);
@@ -962,10 +972,7 @@ describe('getStreamFilters()', () => {
 
   it('handles PdfArray of decode parameters', () => {
     const dict = new PdfDict();
-    dict.set(
-      '/Filter',
-      PdfArray.of([PdfName.of('/ASCIIHexDecode'), PdfName.of('/FlateDecode')]),
-    );
+    dict.set('/Filter', PdfArray.of([PdfName.of('/ASCIIHexDecode'), PdfName.of('/FlateDecode')]));
 
     const flateParms = new PdfDict();
     flateParms.set('/Predictor', PdfNumber.of(12));

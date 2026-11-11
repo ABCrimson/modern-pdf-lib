@@ -7,7 +7,12 @@ import type { PdfRef } from '../../../src/core/pdfObjects.js';
 function mockFont(charWidth: number) {
   return {
     name: 'F1',
-    ref: { kind: 'ref' as const, objectNumber: 1, generationNumber: 0, serialize: () => {} } as unknown as PdfRef,
+    ref: {
+      kind: 'ref' as const,
+      objectNumber: 1,
+      generationNumber: 0,
+      serialize: () => {},
+    } as unknown as PdfRef,
     widthOfTextAtSize: (text: string, size: number) => text.length * charWidth * (size / 12),
     heightAtSize: (size: number) => size * 1.2,
   };

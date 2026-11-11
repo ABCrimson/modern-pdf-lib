@@ -107,10 +107,7 @@ export function endMarkedContent(): string {
  * @param mcid  The marked-content identifier.
  * @returns     The PDF operator string.
  */
-export function beginMarkedContentSequence(
-  tag: StructureType,
-  mcid: number,
-): string {
+export function beginMarkedContentSequence(tag: StructureType, mcid: number): string {
   return `/${tag} <</MCID ${mcid}>> BDC\n`;
 }
 
@@ -125,11 +122,7 @@ export function beginMarkedContentSequence(
  * @param mcid       The marked-content identifier.
  * @returns          The wrapped operator string.
  */
-export function wrapInMarkedContent(
-  operators: string,
-  tag: StructureType,
-  mcid: number,
-): string {
+export function wrapInMarkedContent(operators: string, tag: StructureType, mcid: number): string {
   return beginMarkedContentSequence(tag, mcid) + operators + endMarkedContent();
 }
 
@@ -144,10 +137,7 @@ export function wrapInMarkedContent(
  * @param mcid  The marked-content identifier.
  * @returns     A {@link MarkedContentScope} object.
  */
-export function createMarkedContentScope(
-  tag: StructureType,
-  mcid: number,
-): MarkedContentScope {
+export function createMarkedContentScope(tag: StructureType, mcid: number): MarkedContentScope {
   return {
     mcid,
     tag,

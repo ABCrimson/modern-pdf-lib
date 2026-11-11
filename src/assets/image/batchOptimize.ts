@@ -200,15 +200,12 @@ async function processWithConcurrency<T>(
   processor: (item: T, index: number) => Promise<void>,
 ): Promise<void> {
   let nextIndex = 0;
-  const workers = Array.from(
-    { length: Math.min(concurrency, items.length) },
-    async () => {
-      while (nextIndex < items.length) {
-        const index = nextIndex++;
-        await processor(items[index]!, index);
-      }
-    },
-  );
+  const workers = Array.from({ length: Math.min(concurrency, items.length) }, async () => {
+    while (nextIndex < items.length) {
+      const index = nextIndex++;
+      await processor(items[index]!, index);
+    }
+  });
   await Promise.all(workers);
 }
 
@@ -261,9 +258,7 @@ export async function optimizeAllImages(
   const { pageRange, minImageSize, colorSpaces, namePattern } = options;
 
   // Dynamically import JPEG bridge to avoid circular deps
-  const { encodeJpegWasm, isJpegWasmReady } = await import(
-    '../../wasm/jpeg/bridge.js'
-  );
+  const { encodeJpegWasm, isJpegWasmReady } = await import('../../wasm/jpeg/bridge.js');
   const { decodeJpegWasm } = await import('../../wasm/jpeg/bridge.js');
 
   const images = extractImages(doc);
@@ -276,10 +271,7 @@ export async function optimizeAllImages(
   /** Process a single image and write the result into `results[index]`. */
   const processImage = async (img: (typeof images)[number], index: number): Promise<void> => {
     // Helper to record a skipped entry
-    const skip = (
-      skippedByFilter: boolean,
-      reason: string,
-    ): void => {
+    const skip = (skippedByFilter: boolean, reason: string): void => {
       results[index] = {
         name: img.name,
         pageIndex: img.pageIndex,
@@ -293,10 +285,16 @@ export async function optimizeAllImages(
 
     // Apply selective filters
     if (pageRange && (img.pageIndex < pageRange.start || img.pageIndex > pageRange.end)) {
-      return skip(true, `Page ${img.pageIndex} outside range [${pageRange.start}, ${pageRange.end}]`);
+      return skip(
+        true,
+        `Page ${img.pageIndex} outside range [${pageRange.start}, ${pageRange.end}]`,
+      );
     }
     if (minImageSize && img.compressedSize < minImageSize) {
-      return skip(true, `Compressed size ${img.compressedSize} below minimum ${minImageSize} bytes`);
+      return skip(
+        true,
+        `Compressed size ${img.compressedSize} below minimum ${minImageSize} bytes`,
+      );
     }
     if (colorSpaces && !colorSpaces.includes(img.colorSpace)) {
       return skip(true, `Color space '${img.colorSpace}' not in allowed list`);
@@ -358,7 +356,10 @@ export async function optimizeAllImages(
     // Validate pixel data length
     const expectedLen = img.width * img.height * channels;
     if (pixels.length !== expectedLen) {
-      return skip(false, `Pixel data length mismatch: got ${pixels.length}, expected ${expectedLen}`);
+      return skip(
+        false,
+        `Pixel data length mismatch: got ${pixels.length}, expected ${expectedLen}`,
+      );
     }
 
     // Handle CMYK conversion
@@ -370,9 +371,9 @@ export async function optimizeAllImages(
         const mi = 255 - pixels[i * 4 + 1]!;
         const yi = 255 - pixels[i * 4 + 2]!;
         const ki = 255 - pixels[i * 4 + 3]!;
-        rgb[i * 3] = (ci * ki + 127) / 255 | 0;
-        rgb[i * 3 + 1] = (mi * ki + 127) / 255 | 0;
-        rgb[i * 3 + 2] = (yi * ki + 127) / 255 | 0;
+        rgb[i * 3] = ((ci * ki + 127) / 255) | 0;
+        rgb[i * 3 + 1] = ((mi * ki + 127) / 255) | 0;
+        rgb[i * 3 + 2] = ((yi * ki + 127) / 255) | 0;
       }
       pixels = rgb;
       channels = 3;
@@ -404,11 +405,13 @@ export async function optimizeAllImages(
     }
 
     // Check if savings meet threshold
-    const savingsPercent =
-      ((img.compressedSize - jpegBytes.length) / img.compressedSize) * 100;
+    const savingsPercent = ((img.compressedSize - jpegBytes.length) / img.compressedSize) * 100;
 
     if (savingsPercent < minSavingsPercent) {
-      return skip(false, `Savings ${savingsPercent.toFixed(1)}% below threshold ${minSavingsPercent}%`);
+      return skip(
+        false,
+        `Savings ${savingsPercent.toFixed(1)}% below threshold ${minSavingsPercent}%`,
+      );
     }
 
     // Replace stream data in-place
@@ -425,18 +428,11 @@ export async function optimizeAllImages(
     if (channels === 1) {
       // Grayscale output: don't reattach an RGB/CMYK ICC profile
       dict.set('/ColorSpace', PdfName.of('/DeviceGray'));
-    } else if (
-      iccProfile &&
-      !convertedToGrayscale &&
-      iccProfile.components === channels
-    ) {
+    } else if (iccProfile && !convertedToGrayscale && iccProfile.components === channels) {
       // Preserve the ICC profile: create a new stream and set
       // /ColorSpace to [/ICCBased <profile ref>]
       const profileRef = embedIccProfile(iccProfile, registry);
-      dict.set(
-        '/ColorSpace',
-        PdfArray.of([PdfName.of('/ICCBased'), profileRef]),
-      );
+      dict.set('/ColorSpace', PdfArray.of([PdfName.of('/ICCBased'), profileRef]));
     } else if (img.colorSpace === 'DeviceCMYK' && channels === 3) {
       dict.set('/ColorSpace', PdfName.of('/DeviceRGB'));
     } else if (channels === 3) {
@@ -496,10 +492,7 @@ export async function optimizeAllImages(
     }
   }
 
-  const overallSavings =
-    totalOriginal > 0
-      ? ((totalOriginal - totalNew) / totalOriginal) * 100
-      : 0;
+  const overallSavings = totalOriginal > 0 ? ((totalOriginal - totalNew) / totalOriginal) * 100 : 0;
 
   return {
     totalImages: images.length,

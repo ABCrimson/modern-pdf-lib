@@ -17,7 +17,7 @@ describe('pdfPageSvg', () => {
     it('formats floats trimming trailing zeros', () => {
       expect(fmtN(1.5)).toBe('1.5');
       expect(fmtN(3.14159)).toBe('3.14159');
-      expect(fmtN(0.100000)).toBe('0.1');
+      expect(fmtN(0.1)).toBe('0.1');
     });
 
     it('converts -0 to "0"', () => {
@@ -86,9 +86,7 @@ describe('pdfPageSvg', () => {
 
   describe('svgCommandsToPdfOps', () => {
     it('converts moveTo commands to PDF m operator', () => {
-      const commands: SvgDrawCommand[] = [
-        { type: 'moveTo', params: [10, 20] },
-      ];
+      const commands: SvgDrawCommand[] = [{ type: 'moveTo', params: [10, 20] }];
       expect(svgCommandsToPdfOps(commands)).toBe('10 20 m\n');
     });
 
@@ -123,9 +121,7 @@ describe('pdfPageSvg', () => {
     });
 
     it('converts rect to PDF re operator', () => {
-      const commands: SvgDrawCommand[] = [
-        { type: 'rect', params: [10, 20, 100, 50] },
-      ];
+      const commands: SvgDrawCommand[] = [{ type: 'rect', params: [10, 20, 100, 50] }];
       expect(svgCommandsToPdfOps(commands)).toBe('10 20 100 50 re\n');
     });
 
@@ -145,9 +141,7 @@ describe('pdfPageSvg', () => {
     });
 
     it('handles circle commands', () => {
-      const commands: SvgDrawCommand[] = [
-        { type: 'circle', params: [50, 50, 25] },
-      ];
+      const commands: SvgDrawCommand[] = [{ type: 'circle', params: [50, 50, 25] }];
       const ops = svgCommandsToPdfOps(commands);
       // A circle is approximated with 4 cubic Bezier curves + a moveTo
       expect(ops).toContain('m\n');
@@ -156,9 +150,7 @@ describe('pdfPageSvg', () => {
     });
 
     it('handles ellipse commands', () => {
-      const commands: SvgDrawCommand[] = [
-        { type: 'ellipse', params: [50, 50, 30, 20] },
-      ];
+      const commands: SvgDrawCommand[] = [{ type: 'ellipse', params: [50, 50, 30, 20] }];
       const ops = svgCommandsToPdfOps(commands);
       expect(ops).toContain('m\n');
       const cCount = (ops.match(/ c\n/g) || []).length;

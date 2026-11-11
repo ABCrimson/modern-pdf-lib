@@ -7,10 +7,7 @@
  *            SS12.8 (Digital Signatures).
  */
 
-import {
-  PdfDict,
-  PdfStream,
-} from '../../core/pdfObjects.js';
+import { PdfDict, PdfStream } from '../../core/pdfObjects.js';
 import { PdfField } from '../pdfField.js';
 import type { FieldType } from '../pdfField.js';
 import { generateSignatureAppearance } from '../fieldAppearance.js';

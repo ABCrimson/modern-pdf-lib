@@ -26,7 +26,11 @@ import {
 // Helpers
 // ---------------------------------------------------------------------------
 
-function makeBuffer(width: number, height: number, fill: [number, number, number, number] = [0, 0, 0, 0]): RasterBuffer {
+function makeBuffer(
+  width: number,
+  height: number,
+  fill: [number, number, number, number] = [0, 0, 0, 0],
+): RasterBuffer {
   const rgba = new Uint8Array(width * height * 4);
   for (let i = 0; i < width * height; i++) {
     rgba[i * 4 + 0] = fill[0];
@@ -42,12 +46,7 @@ function px(buf: RasterBuffer, x: number, y: number): [number, number, number, n
   return [buf.rgba[i]!, buf.rgba[i + 1]!, buf.rgba[i + 2]!, buf.rgba[i + 3]!];
 }
 
-const IDENTITY: number[] = [
-  1, 0, 0, 0, 0,
-  0, 1, 0, 0, 0,
-  0, 0, 1, 0, 0,
-  0, 0, 0, 1, 0,
-];
+const IDENTITY: number[] = [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0];
 
 // ---------------------------------------------------------------------------
 // feFlood
@@ -90,12 +89,7 @@ describe('feColorMatrix', () => {
 
   it('applies a constant bias via the 5th column (a=1 term)', () => {
     // Row R: all zero except bias 0.5 -> R' = 0.5*255 ~= 128
-    const m = [
-      0, 0, 0, 0, 0.5,
-      0, 1, 0, 0, 0,
-      0, 0, 1, 0, 0,
-      0, 0, 0, 1, 0,
-    ];
+    const m = [0, 0, 0, 0, 0.5, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0];
     const src = makeBuffer(1, 1, [0, 80, 160, 255]);
     const out = feColorMatrix(src, m);
     const [r, g, b, a] = px(out, 0, 0);

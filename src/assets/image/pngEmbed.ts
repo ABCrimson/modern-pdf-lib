@@ -90,12 +90,14 @@ export interface PngEmbedResult {
    * dictionary with PNG predictor settings, enabling IDAT passthrough
    * (no decompression/recompression needed).
    */
-  readonly decodeParms?: {
-    readonly predictor: number;
-    readonly columns: number;
-    readonly colors: number;
-    readonly bitsPerComponent: number;
-  } | undefined;
+  readonly decodeParms?:
+    | {
+        readonly predictor: number;
+        readonly columns: number;
+        readonly colors: number;
+        readonly bitsPerComponent: number;
+      }
+    | undefined;
 }
 
 // ---------------------------------------------------------------------------
@@ -103,7 +105,7 @@ export interface PngEmbedResult {
 // ---------------------------------------------------------------------------
 
 /** PNG file signature (8 bytes). */
-const PNG_SIGNATURE = new Uint8Array([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]);
+const PNG_SIGNATURE = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
 
 /** Color type constants from the PNG spec. */
 const enum PngColorType {
@@ -194,11 +196,7 @@ function parseIhdr(chunk: PngChunk): IhdrData {
     throw new Error('Invalid PNG: missing or malformed IHDR chunk');
   }
 
-  const view = new DataView(
-    chunk.data.buffer,
-    chunk.data.byteOffset,
-    chunk.data.byteLength,
-  );
+  const view = new DataView(chunk.data.buffer, chunk.data.byteOffset, chunk.data.byteLength);
 
   return {
     width: view.getUint32(0, false),
@@ -260,12 +258,7 @@ interface PngWasm {
    * Decode a PNG image.
    * Returns the number of bytes written to outPtr, or -1 on error.
    */
-  decode_png(
-    dataPtr: number,
-    dataLen: number,
-    outPtr: number,
-    outMaxLen: number,
-  ): number;
+  decode_png(dataPtr: number, dataLen: number, outPtr: number, outMaxLen: number): number;
   memory: WebAssembly.Memory;
 }
 
@@ -355,19 +348,13 @@ function reconstructFilters(
     const scanline = decompressed.subarray(srcOffset, srcOffset + stride);
     srcOffset += stride;
 
-    const prevLine =
-      y > 0
-        ? result.subarray((y - 1) * stride, y * stride)
-        : new Uint8Array(stride);
+    const prevLine = y > 0 ? result.subarray((y - 1) * stride, y * stride) : new Uint8Array(stride);
 
     for (let x = 0; x < stride; x++) {
       const raw = scanline[x]!;
       const a = x >= bytesPerPixel ? result[dstOffset + x - bytesPerPixel]! : 0;
       const b = prevLine[x]!;
-      const c =
-        x >= bytesPerPixel && y > 0
-          ? result[(y - 1) * stride + x - bytesPerPixel]!
-          : 0;
+      const c = x >= bytesPerPixel && y > 0 ? result[(y - 1) * stride + x - bytesPerPixel]! : 0;
 
       let reconstructed: number;
 
@@ -376,16 +363,16 @@ function reconstructFilters(
           reconstructed = raw;
           break;
         case 1: // Sub
-          reconstructed = (raw + a) & 0xFF;
+          reconstructed = (raw + a) & 0xff;
           break;
         case 2: // Up
-          reconstructed = (raw + b) & 0xFF;
+          reconstructed = (raw + b) & 0xff;
           break;
         case 3: // Average
-          reconstructed = (raw + Math.floor((a + b) / 2)) & 0xFF;
+          reconstructed = (raw + Math.floor((a + b) / 2)) & 0xff;
           break;
         case 4: // Paeth
-          reconstructed = (raw + paethPredictor(a, b, c)) & 0xFF;
+          reconstructed = (raw + paethPredictor(a, b, c)) & 0xff;
           break;
         default:
           throw new Error(`Unknown PNG filter type: ${filterType}`);
@@ -420,12 +407,18 @@ function paethPredictor(a: number, b: number, c: number): number {
  * @internal
  */
 function bytesPerPixel(colorType: number, bitDepth: number): number {
-  const channels = colorType === PngColorType.Grayscale ? 1
-    : colorType === PngColorType.RGB ? 3
-    : colorType === PngColorType.Indexed ? 1
-    : colorType === PngColorType.GrayscaleAlpha ? 2
-    : colorType === PngColorType.RGBA ? 4
-    : 1;
+  const channels =
+    colorType === PngColorType.Grayscale
+      ? 1
+      : colorType === PngColorType.RGB
+        ? 3
+        : colorType === PngColorType.Indexed
+          ? 1
+          : colorType === PngColorType.GrayscaleAlpha
+            ? 2
+            : colorType === PngColorType.RGBA
+              ? 4
+              : 1;
 
   return Math.max(1, Math.ceil((channels * bitDepth) / 8));
 }
@@ -544,8 +537,7 @@ export function embedPng(pngData: Uint8Array): PngEmbedResult {
 
   // 6. Determine if we need full decompression or can pass through
   const hasAlpha =
-    ihdr.colorType === PngColorType.GrayscaleAlpha ||
-    ihdr.colorType === PngColorType.RGBA;
+    ihdr.colorType === PngColorType.GrayscaleAlpha || ihdr.colorType === PngColorType.RGBA;
 
   const isInterlaced = ihdr.interlaceMethod !== 0;
 
@@ -650,8 +642,7 @@ function embedDirectPng(
   idatData: Uint8Array,
   transparency: Uint8Array | undefined,
 ): PngEmbedResult {
-  const colorSpace =
-    ihdr.colorType === PngColorType.Grayscale ? 'DeviceGray' : 'DeviceRGB';
+  const colorSpace = ihdr.colorType === PngColorType.Grayscale ? 'DeviceGray' : 'DeviceRGB';
   const colors = ihdr.colorType === PngColorType.Grayscale ? 1 : 3;
 
   // Fast path: no transparency — pass IDAT data directly to PDF.
@@ -701,11 +692,7 @@ function embedDirectPng(
     const trnsB = (transparency[4]! << 8) | transparency[5]!;
     for (let i = 0; i < pixelCount; i++) {
       const idx = i * 3;
-      if (
-        pixels[idx] === trnsR &&
-        pixels[idx + 1] === trnsG &&
-        pixels[idx + 2] === trnsB
-      ) {
+      if (pixels[idx] === trnsR && pixels[idx + 1] === trnsG && pixels[idx + 2] === trnsB) {
         alpha[i] = 0;
       }
     }
@@ -751,8 +738,8 @@ function embedComplexPng(
     // Adam7 interlace: 7 passes with these parameters
     const startingRow = [0, 0, 4, 0, 2, 0, 1];
     const startingCol = [0, 4, 0, 2, 0, 1, 0];
-    const rowStride   = [8, 8, 8, 4, 4, 2, 2];
-    const colStride   = [8, 8, 4, 4, 2, 2, 1];
+    const rowStride = [8, 8, 8, 4, 4, 2, 2];
+    const colStride = [8, 8, 4, 4, 2, 2, 1];
 
     const stride = ihdr.width * bpp;
     const finalPixels = new Uint8Array(ihdr.height * stride);
@@ -765,12 +752,9 @@ function embedComplexPng(
       const cStride = colStride[pass]!;
 
       // Compute sub-image dimensions for this pass
-      const passWidth = ihdr.width <= startCol
-        ? 0
-        : Math.ceil((ihdr.width - startCol) / cStride);
-      const passHeight = ihdr.height <= startRow
-        ? 0
-        : Math.ceil((ihdr.height - startRow) / rStride);
+      const passWidth = ihdr.width <= startCol ? 0 : Math.ceil((ihdr.width - startCol) / cStride);
+      const passHeight =
+        ihdr.height <= startRow ? 0 : Math.ceil((ihdr.height - startRow) / rStride);
 
       // Skip empty passes
       if (passWidth === 0 || passHeight === 0) continue;
@@ -861,14 +845,12 @@ function embedComplexPng(
     height: ihdr.height,
     bitsPerComponent,
     colorSpace,
-    palette:
-      ihdr.colorType === PngColorType.Indexed ? palette : undefined,
+    palette: ihdr.colorType === PngColorType.Indexed ? palette : undefined,
     imageData,
     filter: 'FlateDecode',
     smaskData,
     smaskBitsPerComponent: smaskData ? 8 : undefined,
     hasTransparency:
-      smaskData !== undefined ||
-      (transparency !== undefined && transparency.length > 0),
+      smaskData !== undefined || (transparency !== undefined && transparency.length > 0),
   };
 }

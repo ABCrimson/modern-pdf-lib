@@ -91,12 +91,7 @@ function intersects(box: BBox, rect: RedactRect): boolean {
   const rMinY = rect.y;
   const rMaxX = rect.x + rect.width;
   const rMaxY = rect.y + rect.height;
-  return (
-    box.minX <= rMaxX &&
-    box.maxX >= rMinX &&
-    box.minY <= rMaxY &&
-    box.maxY >= rMinY
-  );
+  return box.minX <= rMaxX && box.maxX >= rMinX && box.minY <= rMaxY && box.maxY >= rMinY;
 }
 
 /** Whether a bounding box intersects *any* of the redaction rects. */
@@ -285,7 +280,14 @@ function filterOperators(
         state = {
           ...state,
           ctm: multiply(
-            [num(operands[0]), num(operands[1]), num(operands[2]), num(operands[3]), num(operands[4]), num(operands[5])],
+            [
+              num(operands[0]),
+              num(operands[1]),
+              num(operands[2]),
+              num(operands[3]),
+              num(operands[4]),
+              num(operands[5]),
+            ],
             state.ctm,
           ),
         };
@@ -324,7 +326,14 @@ function filterOperators(
         tm = tlm;
         break;
       case 'Tm':
-        tm = [num(operands[0]), num(operands[1]), num(operands[2]), num(operands[3]), num(operands[4]), num(operands[5])];
+        tm = [
+          num(operands[0]),
+          num(operands[1]),
+          num(operands[2]),
+          num(operands[3]),
+          num(operands[4]),
+          num(operands[5]),
+        ];
         tlm = tm;
         break;
       case 'T*':

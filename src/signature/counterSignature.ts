@@ -98,13 +98,7 @@ function encodeIntegerValue(value: number): Uint8Array {
   if (value < 0x8000) {
     return new Uint8Array([TAG_INTEGER, 2, (value >> 8) & 0xff, value & 0xff]);
   }
-  return new Uint8Array([
-    TAG_INTEGER,
-    3,
-    (value >> 16) & 0xff,
-    (value >> 8) & 0xff,
-    value & 0xff,
-  ]);
+  return new Uint8Array([TAG_INTEGER, 3, (value >> 16) & 0xff, (value >> 8) & 0xff, value & 0xff]);
 }
 
 /**
@@ -245,19 +239,12 @@ export async function addCounterSignature(
   const sigBytes = hexToBytes(targetSig.contentsHex);
 
   // Step 2: Hash the existing signature value
-  const sigHash = new Uint8Array(
-    await subtle.digest(
-      hashAlgorithm,
-      toBuffer(sigBytes),
-    ),
-  );
+  const sigHash = new Uint8Array(await subtle.digest(hashAlgorithm, toBuffer(sigBytes)));
 
   // Step 3: Extract certificate info
   const { issuerDer, serialDer } = extractIssuerAndSerial(signerInfo.certificate);
   const keyAlgo = detectKeyAlgorithm(signerInfo.certificate);
-  const namedCurve = keyAlgo === 'EC'
-    ? detectNamedCurve(signerInfo.certificate)
-    : undefined;
+  const namedCurve = keyAlgo === 'EC' ? detectNamedCurve(signerInfo.certificate) : undefined;
 
   // Step 4: Build counter-signature signed attributes
   const now = new Date();
@@ -307,9 +294,7 @@ export async function addCounterSignature(
     await subtle.sign(signAlgo, privateKey, toBuffer(signedAttrsForHash)),
   );
 
-  const finalSignature = keyAlgo === 'EC'
-    ? convertEcdsaToDer(rawSignature)
-    : rawSignature;
+  const finalSignature = keyAlgo === 'EC' ? convertEcdsaToDer(rawSignature) : rawSignature;
 
   // Step 6: Build the counter-signature SignerInfo
   const csSignerInfo = encodeSequence([
@@ -355,9 +340,7 @@ function buildCounterSignatureAppendix(
 
   // Find /Root reference
   const rootMatch = pdfText.match(/\/Root\s+(\d+)\s+(\d+)\s+R/);
-  const rootRef = rootMatch
-    ? `${rootMatch[1]} ${rootMatch[2]} R`
-    : '1 0 R';
+  const rootRef = rootMatch ? `${rootMatch[1]} ${rootMatch[2]} R` : '1 0 R';
 
   // Find startxref
   const startxrefIdx = pdfText.lastIndexOf('startxref');
@@ -450,8 +433,7 @@ export function getCounterSignatures(pdf: Uint8Array): CounterSignatureInfo[] {
                 if (child.tag === 0xa0 && child.children.length > 0) {
                   const certNode = child.children[0]!;
                   const certStart =
-                    certNode.offset +
-                    (child.data.byteOffset - pkcs7Bytes.byteOffset);
+                    certNode.offset + (child.data.byteOffset - pkcs7Bytes.byteOffset);
                   const certBytes = pkcs7Bytes.subarray(
                     certStart,
                     certStart + certNode.totalLength,
@@ -468,12 +450,8 @@ export function getCounterSignatures(pdf: Uint8Array): CounterSignatureInfo[] {
       }
 
       // Extract signing date
-      const reasonMatch = region.match(
-        /\/Reason\s*\(Counter-signature for signature \d+\)/,
-      );
-      const dateMatch = region.match(
-        /\/M\s*\(D:(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})/,
-      );
+      const reasonMatch = region.match(/\/Reason\s*\(Counter-signature for signature \d+\)/);
+      const dateMatch = region.match(/\/M\s*\(D:(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})/);
       let signedAt: Date | undefined;
       if (dateMatch) {
         const year = parseInt(dateMatch[1]!, 10);

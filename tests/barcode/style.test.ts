@@ -3,10 +3,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  renderStyledBarcode,
-  calculateBarcodeDimensions,
-} from '../../src/barcode/style.js';
+import { renderStyledBarcode, calculateBarcodeDimensions } from '../../src/barcode/style.js';
 
 import { encodeCode128 } from '../../src/barcode/code128.js';
 import { encodeEan13 } from '../../src/barcode/ean.js';

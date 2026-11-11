@@ -38,7 +38,13 @@ interface DeflateWasmExports {
    * Compress `inputLen` bytes at `inputPtr` with the given `level`.
    * Writes output starting at `outputPtr`. Returns actual output length.
    */
-  compress(inputPtr: number, inputLen: number, outputPtr: number, outputLen: number, level: number): number;
+  compress(
+    inputPtr: number,
+    inputLen: number,
+    outputPtr: number,
+    outputLen: number,
+    level: number,
+  ): number;
 
   /**
    * Decompress `inputLen` bytes at `inputPtr`.
@@ -234,10 +240,7 @@ export function deflateSync(input: Uint8Array, level: number = 6): Uint8Array {
  * const original = inflateSync(compressed, knownOriginalSize);
  * ```
  */
-export function inflateSync(
-  input: Uint8Array,
-  outputSize: number = input.length * 4,
-): Uint8Array {
+export function inflateSync(input: Uint8Array, outputSize: number = input.length * 4): Uint8Array {
   if (!wasmExports) {
     throw new Error('libdeflate WASM not initialized. Call initDeflateWasm() first.');
   }
@@ -250,12 +253,7 @@ export function inflateSync(
   try {
     copyToWasm(inputPtr, input);
 
-    const actualSize = wasmExports.decompress(
-      inputPtr,
-      input.length,
-      outputPtr,
-      maxOutput,
-    );
+    const actualSize = wasmExports.decompress(inputPtr, input.length, outputPtr, maxOutput);
 
     if (actualSize < 0) {
       throw new Error(

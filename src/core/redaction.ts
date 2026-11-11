@@ -93,10 +93,7 @@ const pageRedactions = new WeakMap<PdfPage, RedactionMark[]>();
  * @param page     The page to mark.
  * @param options  The redaction options.
  */
-export function markForRedaction(
-  page: PdfPage,
-  options: RedactionOptions,
-): void {
+export function markForRedaction(page: PdfPage, options: RedactionOptions): void {
   const marks = pageRedactions.get(page) ?? [];
   const fillColor = options.color ?? { r: 0, g: 0, b: 0 };
   marks.push({

@@ -64,9 +64,7 @@ describe('buildPdfA4Xmp', () => {
     const xmp = buildPdfA4Xmp({ extensionSchemas: [schema] });
 
     expect(xmp).toContain('<pdfaExtension:schemas>');
-    expect(xmp).toContain(
-      'xmlns:pdfaExtension="http://www.aiim.org/pdfa/ns/extension/"',
-    );
+    expect(xmp).toContain('xmlns:pdfaExtension="http://www.aiim.org/pdfa/ns/extension/"');
     expect(xmp).toContain('<pdfaSchema:schema>Custom Schema</pdfaSchema:schema>');
     expect(xmp).toContain(
       '<pdfaSchema:namespaceURI>http://example.com/ns/custom/</pdfaSchema:namespaceURI>',
@@ -128,18 +126,14 @@ describe('pdfA4Rules', () => {
     const rules = pdfA4Rules('PDF/A-4f');
     expect(
       rules.some(
-        (r) =>
-          r.toLowerCase().includes('embedded file') &&
-          r.toLowerCase().includes('allowed'),
+        (r) => r.toLowerCase().includes('embedded file') && r.toLowerCase().includes('allowed'),
       ),
     ).toBe(true);
   });
 
   it('mentions 3D / RichMedia for PDF/A-4e', () => {
     const rules = pdfA4Rules('PDF/A-4e');
-    expect(rules.some((r) => r.includes('3D') || r.includes('RichMedia'))).toBe(
-      true,
-    );
+    expect(rules.some((r) => r.includes('3D') || r.includes('RichMedia'))).toBe(true);
   });
 
   it('defaults to base level when no argument is given', () => {

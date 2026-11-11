@@ -15,9 +15,7 @@ import {
   formatDate,
   replaceTemplateVariables,
 } from '../../../src/layout/headerFooter.js';
-import type {
-  HeaderFooterOptions,
-} from '../../../src/layout/headerFooter.js';
+import type { HeaderFooterOptions } from '../../../src/layout/headerFooter.js';
 import { PdfPage, PageSizes } from '../../../src/core/pdfPage.js';
 import { PdfDocument, createPdf } from '../../../src/core/pdfDocument.js';
 import { PdfObjectRegistry } from '../../../src/core/pdfObjects.js';
@@ -119,7 +117,14 @@ describe('replaceTemplateVariables', () => {
   const date = new Date(2026, 2, 8);
 
   it('replaces {page} and {pages}', () => {
-    const result = replaceTemplateVariables('Page {page} of {pages}', 3, 10, date, 'YYYY-MM-DD', '');
+    const result = replaceTemplateVariables(
+      'Page {page} of {pages}',
+      3,
+      10,
+      date,
+      'YYYY-MM-DD',
+      '',
+    );
     expect(result).toBe('Page 3 of 10');
   });
 
@@ -146,7 +151,11 @@ describe('replaceTemplateVariables', () => {
   it('replaces multiple variables in one string', () => {
     const result = replaceTemplateVariables(
       '{title} | Page {page} of {pages} | {date}',
-      2, 5, date, 'YYYY-MM-DD', 'Report',
+      2,
+      5,
+      date,
+      'YYYY-MM-DD',
+      'Report',
     );
     expect(result).toBe('Report | Page 2 of 5 | 2026-03-08');
   });
@@ -165,9 +174,7 @@ describe('applyHeaderFooterToPage', () => {
   it('draws simple page number footer', () => {
     const page = makePage();
     const options: HeaderFooterOptions = {
-      footer: [
-        { text: 'Page {page}', position: 'center' },
-      ],
+      footer: [{ text: 'Page {page}', position: 'center' }],
     };
     applyHeaderFooterToPage(page, options, 3, 10);
     const ops = getOps(page);
@@ -208,9 +215,7 @@ describe('applyHeaderFooterToPage', () => {
   it('replaces Roman numeral page numbers', () => {
     const page = makePage();
     const options: HeaderFooterOptions = {
-      footer: [
-        { text: '{page:roman}', position: 'center' },
-      ],
+      footer: [{ text: '{page:roman}', position: 'center' }],
     };
     applyHeaderFooterToPage(page, options, 4, 10);
     const ops = getOps(page);
@@ -221,9 +226,7 @@ describe('applyHeaderFooterToPage', () => {
     const page = makePage();
     const customColor: Color = { type: 'rgb', r: 1, g: 0, b: 0 };
     const options: HeaderFooterOptions = {
-      footer: [
-        { text: 'Red footer', position: 'center', fontSize: 14, color: customColor },
-      ],
+      footer: [{ text: 'Red footer', position: 'center', fontSize: 14, color: customColor }],
     };
     applyHeaderFooterToPage(page, options, 1, 1);
     const ops = getOps(page);
@@ -237,9 +240,7 @@ describe('applyHeaderFooterToPage', () => {
   it('draws separator line for header', () => {
     const page = makePage();
     const options: HeaderFooterOptions = {
-      header: [
-        { text: 'Header', position: 'center' },
-      ],
+      header: [{ text: 'Header', position: 'center' }],
       separatorLine: { width: 1 },
     };
     applyHeaderFooterToPage(page, options, 1, 1);
@@ -255,9 +256,7 @@ describe('applyHeaderFooterToPage', () => {
   it('draws separator line for footer', () => {
     const page = makePage();
     const options: HeaderFooterOptions = {
-      footer: [
-        { text: 'Footer', position: 'center' },
-      ],
+      footer: [{ text: 'Footer', position: 'center' }],
       separatorLine: { width: 0.5 },
     };
     applyHeaderFooterToPage(page, options, 1, 1);
@@ -270,9 +269,7 @@ describe('applyHeaderFooterToPage', () => {
   it('draws separator with dash pattern', () => {
     const page = makePage();
     const options: HeaderFooterOptions = {
-      header: [
-        { text: 'Dashed', position: 'center' },
-      ],
+      header: [{ text: 'Dashed', position: 'center' }],
       separatorLine: { width: 1, dashPattern: [3, 2] },
     };
     applyHeaderFooterToPage(page, options, 1, 1);
@@ -283,9 +280,7 @@ describe('applyHeaderFooterToPage', () => {
   it('uses custom margins', () => {
     const page = makePage();
     const options: HeaderFooterOptions = {
-      footer: [
-        { text: 'Custom margins', position: 'left' },
-      ],
+      footer: [{ text: 'Custom margins', position: 'left' }],
       margins: { left: 100, bottom: 60 },
     };
     applyHeaderFooterToPage(page, options, 1, 1);

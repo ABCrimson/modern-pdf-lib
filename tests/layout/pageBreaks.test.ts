@@ -8,10 +8,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { renderMultiPageTable } from '../../src/layout/table.js';
-import type {
-  DrawTableOptions,
-  TableRow,
-} from '../../src/layout/table.js';
+import type { DrawTableOptions, TableRow } from '../../src/layout/table.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -21,10 +18,7 @@ import type {
  * Build a table with `n` data rows, each 30pt tall, plus optional
  * header rows.
  */
-function makeTable(
-  rowCount: number,
-  overrides?: Partial<DrawTableOptions>,
-): DrawTableOptions {
+function makeTable(rowCount: number, overrides?: Partial<DrawTableOptions>): DrawTableOptions {
   const rows: TableRow[] = [];
   for (let i = 0; i < rowCount; i++) {
     rows.push({ cells: [`R${i}C0`, `R${i}C1`], height: 30 });
@@ -78,9 +72,7 @@ describe('renderMultiPageTable', () => {
   // 3 — header rows repeated on new pages
   it('repeats header rows on each new page', () => {
     // Header = row 0, data = rows 1..9 (10 total)
-    const rows: TableRow[] = [
-      { cells: ['Name', 'Value'], height: 30 },
-    ];
+    const rows: TableRow[] = [{ cells: ['Name', 'Value'], height: 30 }];
     for (let i = 1; i < 10; i++) {
       rows.push({ cells: [`Item${i}`, `${i * 10}`], height: 30 });
     }

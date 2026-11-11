@@ -223,9 +223,7 @@ async function tryLoadLibdeflate(): Promise<CompressionEngine | null> {
 
   try {
     // Dynamic import so that the WASM module is not required at load time
-    const { LibdeflateWasm: LibdeflateCtor, initDeflateWasm } = await import(
-      './libdeflateWasm.js'
-    );
+    const { LibdeflateWasm: LibdeflateCtor, initDeflateWasm } = await import('./libdeflateWasm.js');
 
     // If the user configured custom WASM bytes via the universal loader,
     // retrieve them and pass through to initDeflateWasm.
@@ -283,9 +281,7 @@ async function loadFflate(): Promise<CompressionEngine> {
  * console.log(`Using: ${engine.name}`);
  * ```
  */
-export async function getCompressor(
-  options?: CompressionOptions,
-): Promise<CompressionEngine> {
+export async function getCompressor(options?: CompressionOptions): Promise<CompressionEngine> {
   const preference = options?.preferEngine ?? 'auto';
 
   switch (preference) {
@@ -305,9 +301,7 @@ export async function getCompressor(
       if (isBrowserCompressionAvailable()) {
         return new BrowserDeflateEngine();
       }
-      throw new Error(
-        'Browser CompressionStream requested but not available in this runtime.',
-      );
+      throw new Error('Browser CompressionStream requested but not available in this runtime.');
     }
 
     case 'auto':

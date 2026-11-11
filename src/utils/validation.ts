@@ -87,7 +87,9 @@ export class ModernPdfError extends Error {
     this.details = details;
 
     // Maintain proper stack trace in V8 environments
-    const ErrorWithCapture = Error as { captureStackTrace?: (target: object, ctor: Function) => void };
+    const ErrorWithCapture = Error as {
+      captureStackTrace?: (target: object, ctor: Function) => void;
+    };
     if (typeof ErrorWithCapture.captureStackTrace === 'function') {
       ErrorWithCapture.captureStackTrace(this, ModernPdfError);
     }
@@ -105,10 +107,7 @@ export class ModernPdfError extends Error {
  * @param name   Parameter name for the error message.
  * @throws {ModernPdfError}  If the assertion fails.
  */
-export function validateUint8Array(
-  value: unknown,
-  name: string,
-): asserts value is Uint8Array {
+export function validateUint8Array(value: unknown, name: string): asserts value is Uint8Array {
   if (!(value instanceof Uint8Array)) {
     throw new ModernPdfError(
       PdfErrorCode.INVALID_INPUT,
@@ -125,10 +124,7 @@ export function validateUint8Array(
  * @param name   Parameter name for the error message.
  * @throws {ModernPdfError}  If the assertion fails.
  */
-export function validatePositiveNumber(
-  value: unknown,
-  name: string,
-): asserts value is number {
+export function validatePositiveNumber(value: unknown, name: string): asserts value is number {
   if (typeof value !== 'number' || !Number.isFinite(value) || value <= 0) {
     throw new ModernPdfError(
       PdfErrorCode.INVALID_INPUT,
@@ -147,12 +143,7 @@ export function validatePositiveNumber(
  * @param name   Parameter name for the error message.
  * @throws {ModernPdfError}  If the value is out of range.
  */
-export function validateRange(
-  value: number,
-  min: number,
-  max: number,
-  name: string,
-): void {
+export function validateRange(value: number, min: number, max: number, name: string): void {
   if (!Number.isFinite(value) || value < min || value > max) {
     throw new ModernPdfError(
       PdfErrorCode.INVALID_INPUT,
@@ -217,12 +208,7 @@ export function validateColor(color: unknown): void {
  * Validate that a single colour component is a number in `[0, 1]`.
  */
 function validateComponent(value: unknown, name: string): void {
-  if (
-    typeof value !== 'number' ||
-    !Number.isFinite(value) ||
-    value < 0 ||
-    value > 1
-  ) {
+  if (typeof value !== 'number' || !Number.isFinite(value) || value < 0 || value > 1) {
     throw new ModernPdfError(
       PdfErrorCode.INVALID_INPUT,
       `Colour component \`${name}\` must be a number in [0, 1], but received ${String(value)}.`,
@@ -288,9 +274,20 @@ export function validatePageSize(size: unknown): void {
 
 /** Known predefined page-size names. */
 const KNOWN_PAGE_SIZES = new Set([
-  'A0', 'A1', 'A2', 'A3', 'A4', 'A5', 'A6',
-  'B4', 'B5',
-  'Letter', 'Legal', 'Tabloid', 'Ledger', 'Executive',
+  'A0',
+  'A1',
+  'A2',
+  'A3',
+  'A4',
+  'A5',
+  'A6',
+  'B4',
+  'B5',
+  'Letter',
+  'Legal',
+  'Tabloid',
+  'Ledger',
+  'Executive',
 ]);
 
 /**

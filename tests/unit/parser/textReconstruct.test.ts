@@ -1,19 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
 import type { TextItem } from '../../../src/parser/textExtractor.js';
-import {
-  reconstructLines,
-  reconstructParagraphs,
-} from '../../../src/parser/textReconstruct.js';
+import { reconstructLines, reconstructParagraphs } from '../../../src/parser/textReconstruct.js';
 
 /** Helper to build a TextItem with sensible defaults. */
-function item(
-  text: string,
-  x: number,
-  y: number,
-  width: number,
-  fontSize = 10,
-): TextItem {
+function item(text: string, x: number, y: number, width: number, fontSize = 10): TextItem {
   return {
     text,
     x,
@@ -94,10 +85,7 @@ describe('reconstructLines', () => {
 
   it('respects an explicit lineTolerance', () => {
     // Two baselines 4 apart. With tolerance 1, they are two lines.
-    const items: TextItem[] = [
-      item('a', 10, 100, 8),
-      item('b', 10, 96, 8),
-    ];
+    const items: TextItem[] = [item('a', 10, 100, 8), item('b', 10, 96, 8)];
     const tight = reconstructLines(items, { lineTolerance: 1 });
     expect(tight).toHaveLength(2);
     const loose = reconstructLines(items, { lineTolerance: 10 });
@@ -105,10 +93,7 @@ describe('reconstructLines', () => {
   });
 
   it('does not duplicate spaces when text already contains them', () => {
-    const items: TextItem[] = [
-      item('foo ', 10, 100, 24),
-      item('bar', 90, 100, 20),
-    ];
+    const items: TextItem[] = [item('foo ', 10, 100, 24), item('bar', 90, 100, 20)];
     const lines = reconstructLines(items);
     expect(lines[0]?.text).toBe('foo bar');
   });
@@ -152,11 +137,7 @@ describe('reconstructParagraphs', () => {
 
   it('splits more aggressively with a smaller paragraphGapFactor', () => {
     // Lines spaced 12 apart; with factor 0.5 even normal spacing splits.
-    const items: TextItem[] = [
-      item('a', 10, 200, 8),
-      item('b', 10, 188, 8),
-      item('c', 10, 176, 8),
-    ];
+    const items: TextItem[] = [item('a', 10, 200, 8), item('b', 10, 188, 8), item('c', 10, 176, 8)];
     const split = reconstructParagraphs(items, { paragraphGapFactor: 0.5 });
     expect(split.length).toBeGreaterThan(1);
   });

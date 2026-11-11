@@ -43,7 +43,15 @@ export type {
 // Colour helpers
 // ---------------------------------------------------------------------------
 
-export { rgb, cmyk, grayscale, componentsToColor, colorToComponents, setFillingColor, setStrokingColor } from './core/operators/color.js';
+export {
+  rgb,
+  cmyk,
+  grayscale,
+  componentsToColor,
+  colorToComponents,
+  setFillingColor,
+  setStrokingColor,
+} from './core/operators/color.js';
 export type { RgbColor, CmykColor, GrayscaleColor, Color } from './core/operators/color.js';
 
 // ---------------------------------------------------------------------------
@@ -57,7 +65,12 @@ export type { Degrees, Radians, Angle } from './core/operators/state.js';
 // Text layout helpers
 // ---------------------------------------------------------------------------
 
-export { layoutMultilineText, layoutCombedText, computeFontSize, layoutSinglelineText } from './core/layout.js';
+export {
+  layoutMultilineText,
+  layoutCombedText,
+  computeFontSize,
+  layoutSinglelineText,
+} from './core/layout.js';
 export type {
   LayoutMultilineOptions,
   LayoutMultilineResult,
@@ -71,7 +84,14 @@ export type {
 // Enums
 // ---------------------------------------------------------------------------
 
-export { BlendMode, TextRenderingMode, LineCapStyle, LineJoinStyle, TextAlignment, ImageAlignment } from './core/enums.js';
+export {
+  BlendMode,
+  TextRenderingMode,
+  LineCapStyle,
+  LineJoinStyle,
+  TextAlignment,
+  ImageAlignment,
+} from './core/enums.js';
 
 // ---------------------------------------------------------------------------
 // Save options
@@ -121,8 +141,23 @@ export type { EmbeddedPdfPage, DrawPageOptions, EmbedPageOptions } from './core/
 // Gradients & Patterns
 // ---------------------------------------------------------------------------
 
-export { linearGradient, radialGradient, tilingPattern, buildGradientObjects, buildPatternObjects } from './core/patterns.js';
-export type { ColorStop, LinearGradientOptions, RadialGradientOptions, TilingPatternOptions, GradientFill, PatternFill, RadialGradientFill, NormalizedStop } from './core/patterns.js';
+export {
+  linearGradient,
+  radialGradient,
+  tilingPattern,
+  buildGradientObjects,
+  buildPatternObjects,
+} from './core/patterns.js';
+export type {
+  ColorStop,
+  LinearGradientOptions,
+  RadialGradientOptions,
+  TilingPatternOptions,
+  GradientFill,
+  PatternFill,
+  RadialGradientFill,
+  NormalizedStop,
+} from './core/patterns.js';
 
 // ---------------------------------------------------------------------------
 // Document metadata types

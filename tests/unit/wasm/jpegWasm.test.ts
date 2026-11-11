@@ -39,7 +39,7 @@ describe('JPEG WASM bridge — initialization', () => {
 
   it('decodeJpegWasm() returns undefined when WASM is not loaded', () => {
     if (!isJpegWasmReady()) {
-      const fakeJpeg = new Uint8Array([0xFF, 0xD8, 0xFF, 0xD9]);
+      const fakeJpeg = new Uint8Array([0xff, 0xd8, 0xff, 0xd9]);
       const result = decodeJpegWasm(fakeJpeg);
       expect(result).toBeUndefined();
     }
@@ -58,18 +58,18 @@ describe('JPEG WASM bridge — initialization', () => {
         _chroma: number,
       ): Uint8Array => {
         // Return minimal JPEG: SOI + EOI
-        return new Uint8Array([0xFF, 0xD8, 0xFF, 0xD9]);
+        return new Uint8Array([0xff, 0xd8, 0xff, 0xd9]);
       },
       decode_jpeg: (_data: Uint8Array): Uint8Array => {
         // Return header (width=1, height=1, channels=3) + 3 pixel bytes
         const result = new Uint8Array(9 + 3);
         const view = new DataView(result.buffer);
-        view.setUint32(0, 1, true);  // width
-        view.setUint32(4, 1, true);  // height
-        result[8] = 3;               // channels
-        result[9] = 255;             // R
-        result[10] = 0;              // G
-        result[11] = 0;              // B
+        view.setUint32(0, 1, true); // width
+        view.setUint32(4, 1, true); // height
+        result[8] = 3; // channels
+        result[9] = 255; // R
+        result[10] = 0; // G
+        result[11] = 0; // B
         return result;
       },
     };
@@ -142,7 +142,7 @@ describe('JPEG WASM bridge — decoding (with mock)', () => {
   it('decodeJpegWasm() returns JpegDecodeResult when WASM is loaded', () => {
     if (!isJpegWasmReady()) return;
 
-    const fakeJpeg = new Uint8Array([0xFF, 0xD8, 0xFF, 0xD9]);
+    const fakeJpeg = new Uint8Array([0xff, 0xd8, 0xff, 0xd9]);
     const result = decodeJpegWasm(fakeJpeg);
     expect(result).toBeDefined();
     expect(result!.width).toBe(1);

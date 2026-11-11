@@ -19,7 +19,10 @@
  * @param tag  - The 4-character table tag (e.g. `'CFF '`, `'head'`).
  * @returns `{ offset, length }` or `undefined` if not found.
  */
-export function findTable(data: Uint8Array, tag: string): { offset: number; length: number } | undefined {
+export function findTable(
+  data: Uint8Array,
+  tag: string,
+): { offset: number; length: number } | undefined {
   if (data.length < 12) return undefined;
   const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
   const numTables = view.getUint16(4, false);

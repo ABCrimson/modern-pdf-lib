@@ -69,9 +69,8 @@ export interface WorkerPool<I, O> {
  * parallelism, falling back to `4` when unavailable.
  */
 function resolveDefaultConcurrency(): number {
-  const reported = (
-    globalThis as { navigator?: { hardwareConcurrency?: number } }
-  ).navigator?.hardwareConcurrency;
+  const reported = (globalThis as { navigator?: { hardwareConcurrency?: number } }).navigator
+    ?.hardwareConcurrency;
   if (typeof reported === 'number' && Number.isInteger(reported) && reported > 0) {
     return reported;
   }
@@ -97,9 +96,7 @@ export function createWorkerPool<I, O>(
 ): WorkerPool<I, O> {
   const concurrency = options?.concurrency ?? resolveDefaultConcurrency();
   if (!Number.isInteger(concurrency) || concurrency <= 0) {
-    throw new Error(
-      `workerPool: concurrency must be a positive integer, received ${concurrency}`,
-    );
+    throw new Error(`workerPool: concurrency must be a positive integer, received ${concurrency}`);
   }
 
   /** A queued task awaiting a free execution slot. */

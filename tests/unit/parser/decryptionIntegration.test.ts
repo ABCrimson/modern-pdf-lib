@@ -14,13 +14,7 @@ import { loadPdf } from '../../../src/parser/documentParser.js';
 import { PdfDocument, createPdf } from '../../../src/core/pdfDocument.js';
 import { PdfEncryptionHandler } from '../../../src/crypto/encryptionHandler.js';
 import type { EncryptAlgorithm } from '../../../src/crypto/encryptionHandler.js';
-import {
-  PdfDict,
-  PdfName,
-  PdfNumber,
-  PdfString,
-  PdfBool,
-} from '../../../src/core/pdfObjects.js';
+import { PdfDict, PdfName, PdfNumber, PdfString, PdfBool } from '../../../src/core/pdfObjects.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -241,27 +235,36 @@ async function buildEncryptedPdf(
   const startxrefBytes = toBytes(startxref);
 
   // Concatenate all parts
-  const totalLen = preStream.length
-    + streamHeaderBytes.length
-    + encryptedStreamBytes.length
-    + streamFooterBytes.length
-    + infoObjBytes.length
-    + encryptObjBytes.length
-    + xrefBytes.length
-    + trailerBytes.length
-    + startxrefBytes.length;
+  const totalLen =
+    preStream.length +
+    streamHeaderBytes.length +
+    encryptedStreamBytes.length +
+    streamFooterBytes.length +
+    infoObjBytes.length +
+    encryptObjBytes.length +
+    xrefBytes.length +
+    trailerBytes.length +
+    startxrefBytes.length;
 
   const result = new Uint8Array(totalLen);
   let offset = 0;
 
-  result.set(preStream, offset); offset += preStream.length;
-  result.set(streamHeaderBytes, offset); offset += streamHeaderBytes.length;
-  result.set(encryptedStreamBytes, offset); offset += encryptedStreamBytes.length;
-  result.set(streamFooterBytes, offset); offset += streamFooterBytes.length;
-  result.set(infoObjBytes, offset); offset += infoObjBytes.length;
-  result.set(encryptObjBytes, offset); offset += encryptObjBytes.length;
-  result.set(xrefBytes, offset); offset += xrefBytes.length;
-  result.set(trailerBytes, offset); offset += trailerBytes.length;
+  result.set(preStream, offset);
+  offset += preStream.length;
+  result.set(streamHeaderBytes, offset);
+  offset += streamHeaderBytes.length;
+  result.set(encryptedStreamBytes, offset);
+  offset += encryptedStreamBytes.length;
+  result.set(streamFooterBytes, offset);
+  offset += streamFooterBytes.length;
+  result.set(infoObjBytes, offset);
+  offset += infoObjBytes.length;
+  result.set(encryptObjBytes, offset);
+  offset += encryptObjBytes.length;
+  result.set(xrefBytes, offset);
+  offset += xrefBytes.length;
+  result.set(trailerBytes, offset);
+  offset += trailerBytes.length;
   result.set(startxrefBytes, offset);
 
   return { bytes: result, expectedTitle };
@@ -395,9 +398,7 @@ describe('Decryption integration: authentication failure', () => {
 
   it('throws when wrong password is provided', async () => {
     const { bytes } = await buildEncryptedPdf('correctpwd', 'ownerpwd', 'rc4-128');
-    await expect(
-      loadPdf(bytes, { password: 'wrongpassword' }),
-    ).rejects.toThrow(/password/i);
+    await expect(loadPdf(bytes, { password: 'wrongpassword' })).rejects.toThrow(/password/i);
   });
 
   it('succeeds when the correct user password is provided', async () => {

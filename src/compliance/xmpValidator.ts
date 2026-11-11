@@ -140,10 +140,7 @@ export function parseXmpMetadata(xmp: string): ParsedXmpMetadata {
  * @param level     The target PDF/A conformance level string (e.g. "1b", "2a").
  * @returns         Validation result with issues and parsed metadata.
  */
-export function validateXmpMetadata(
-  pdfBytes: Uint8Array,
-  level: string,
-): XmpValidationResult {
+export function validateXmpMetadata(pdfBytes: Uint8Array, level: string): XmpValidationResult {
   const issues: XmpIssue[] = [];
   const xmp = extractXmpMetadata(pdfBytes);
 

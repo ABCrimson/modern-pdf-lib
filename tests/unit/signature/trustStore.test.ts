@@ -58,11 +58,7 @@ function buildName(cn: string): Uint8Array {
 /**
  * Build a minimal test certificate with a given serial and CN.
  */
-function buildTestCert(
-  serial: Uint8Array,
-  subjectCn: string,
-  issuerCn?: string,
-): Uint8Array {
+function buildTestCert(serial: Uint8Array, subjectCn: string, issuerCn?: string): Uint8Array {
   const version = encodeContextTag(0, encodeSmallInteger(2));
   const serialNumber = encodeInteger(serial);
   const sigAlgo = encodeSequence([
@@ -72,29 +68,15 @@ function buildTestCert(
   const issuer = buildName(issuerCn ?? subjectCn);
   const now = new Date();
   const later = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000);
-  const validity = encodeSequence([
-    encodeUTCTime(now),
-    encodeUTCTime(later),
-  ]);
+  const validity = encodeSequence([encodeUTCTime(now), encodeUTCTime(later)]);
   const subject = buildName(subjectCn);
 
   const spki = encodeSequence([
-    encodeSequence([
-      encodeOID('1.2.840.113549.1.1.1'),
-      new Uint8Array([0x05, 0x00]),
-    ]),
+    encodeSequence([encodeOID('1.2.840.113549.1.1.1'), new Uint8Array([0x05, 0x00])]),
     encodeBitString(new Uint8Array(64)),
   ]);
 
-  const tbsCert = encodeSequence([
-    version,
-    serialNumber,
-    sigAlgo,
-    issuer,
-    validity,
-    subject,
-    spki,
-  ]);
+  const tbsCert = encodeSequence([version, serialNumber, sigAlgo, issuer, validity, subject, spki]);
 
   const sigBitString = encodeBitString(new Uint8Array(32));
   return encodeSequence([tbsCert, sigAlgo, sigBitString]);

@@ -3,18 +3,9 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  PdfDict,
-  PdfName,
-  PdfString,
-  PdfArray,
-} from '../../../src/core/pdfObjects.js';
+import { PdfDict, PdfName, PdfString, PdfArray } from '../../../src/core/pdfObjects.js';
 import { PdfTextField } from '../../../src/form/fields/textField.js';
-import {
-  validateFieldValue,
-  parseValidationScript,
-} from '../../../src/form/fieldValidation.js';
-
+import { validateFieldValue, parseValidationScript } from '../../../src/form/fieldValidation.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -46,36 +37,28 @@ describe('parseValidationScript', () => {
   });
 
   it('parses AFRange_Validate with both bounds', () => {
-    const result = parseValidationScript(
-      'AFRange_Validate(true, 0, true, 100)',
-    );
+    const result = parseValidationScript('AFRange_Validate(true, 0, true, 100)');
     expect(result).not.toBeNull();
     expect(result!.type).toBe('range');
     expect(result!.params).toEqual({ min: 0, max: 100 });
   });
 
   it('parses AFRange_Validate with only min', () => {
-    const result = parseValidationScript(
-      'AFRange_Validate(true, 5, false, 0)',
-    );
+    const result = parseValidationScript('AFRange_Validate(true, 5, false, 0)');
     expect(result).not.toBeNull();
     expect(result!.type).toBe('range');
     expect(result!.params).toEqual({ min: 5 });
   });
 
   it('parses AFRange_Validate with only max', () => {
-    const result = parseValidationScript(
-      'AFRange_Validate(false, 0, true, 50)',
-    );
+    const result = parseValidationScript('AFRange_Validate(false, 0, true, 50)');
     expect(result).not.toBeNull();
     expect(result!.type).toBe('range');
     expect(result!.params).toEqual({ max: 50 });
   });
 
   it('parses AFRange_Validate with negative values', () => {
-    const result = parseValidationScript(
-      'AFRange_Validate(true, -10, true, 10)',
-    );
+    const result = parseValidationScript('AFRange_Validate(true, -10, true, 10)');
     expect(result).not.toBeNull();
     expect(result!.type).toBe('range');
     expect(result!.params!['min']).toBe(-10);
@@ -92,9 +75,7 @@ describe('parseValidationScript', () => {
   });
 
   it('parses RegExp with flags', () => {
-    const result = parseValidationScript(
-      'var re = new RegExp("test", "i"); re.test(event.value);',
-    );
+    const result = parseValidationScript('var re = new RegExp("test", "i"); re.test(event.value);');
     expect(result).not.toBeNull();
     expect(result!.type).toBe('regex');
     expect(result!.params!['pattern']).toBe('test');
@@ -112,18 +93,14 @@ describe('parseValidationScript', () => {
   });
 
   it('parses length validation', () => {
-    const result = parseValidationScript(
-      'if (event.value.length < 5) { event.rc = false; }',
-    );
+    const result = parseValidationScript('if (event.value.length < 5) { event.rc = false; }');
     expect(result).not.toBeNull();
     expect(result!.type).toBe('length');
     expect(result!.params!['max']).toBe(4);
   });
 
   it('parses length validation with >= operator', () => {
-    const result = parseValidationScript(
-      'if (event.value.length >= 10) { /* ok */ }',
-    );
+    const result = parseValidationScript('if (event.value.length >= 10) { /* ok */ }');
     expect(result).not.toBeNull();
     expect(result!.type).toBe('length');
     expect(result!.params!['min']).toBe(10);
@@ -166,50 +143,30 @@ describe('validateFieldValue — range', () => {
   const field = makeTextField('age');
 
   it('accepts value within range', () => {
-    const result = validateFieldValue(
-      field,
-      '25',
-      'AFRange_Validate(true, 0, true, 100)',
-    );
+    const result = validateFieldValue(field, '25', 'AFRange_Validate(true, 0, true, 100)');
     expect(result.valid).toBe(true);
   });
 
   it('rejects value below min', () => {
-    const result = validateFieldValue(
-      field,
-      '-5',
-      'AFRange_Validate(true, 0, true, 100)',
-    );
+    const result = validateFieldValue(field, '-5', 'AFRange_Validate(true, 0, true, 100)');
     expect(result.valid).toBe(false);
     expect(result.message).toContain('below minimum');
   });
 
   it('rejects value above max', () => {
-    const result = validateFieldValue(
-      field,
-      '150',
-      'AFRange_Validate(true, 0, true, 100)',
-    );
+    const result = validateFieldValue(field, '150', 'AFRange_Validate(true, 0, true, 100)');
     expect(result.valid).toBe(false);
     expect(result.message).toContain('above maximum');
   });
 
   it('rejects non-numeric value', () => {
-    const result = validateFieldValue(
-      field,
-      'abc',
-      'AFRange_Validate(true, 0, true, 100)',
-    );
+    const result = validateFieldValue(field, 'abc', 'AFRange_Validate(true, 0, true, 100)');
     expect(result.valid).toBe(false);
     expect(result.message).toContain('not a number');
   });
 
   it('accepts empty value for range validation', () => {
-    const result = validateFieldValue(
-      field,
-      '',
-      'AFRange_Validate(true, 0, true, 100)',
-    );
+    const result = validateFieldValue(field, '', 'AFRange_Validate(true, 0, true, 100)');
     expect(result.valid).toBe(true);
   });
 });
@@ -269,11 +226,7 @@ describe('validateFieldValue — length', () => {
   const field = makeTextField('code');
 
   it('rejects value too short', () => {
-    const result = validateFieldValue(
-      field,
-      'ab',
-      'if (event.value.length >= 5) { /* ok */ }',
-    );
+    const result = validateFieldValue(field, 'ab', 'if (event.value.length >= 5) { /* ok */ }');
     // Script says length >= 5 → min=5
     // "ab" has length 2 → less than min
     expect(result.valid).toBe(false);
@@ -281,11 +234,7 @@ describe('validateFieldValue — length', () => {
   });
 
   it('accepts value meeting minimum length', () => {
-    const result = validateFieldValue(
-      field,
-      'abcde',
-      'if (event.value.length >= 5) { /* ok */ }',
-    );
+    const result = validateFieldValue(field, 'abcde', 'if (event.value.length >= 5) { /* ok */ }');
     expect(result.valid).toBe(true);
   });
 });

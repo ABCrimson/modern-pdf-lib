@@ -1,11 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { zlibSync } from 'fflate';
-import {
-  isWoff,
-  isWoff2,
-  readWoffHeader,
-  decodeWoff,
-} from '../../../../src/assets/font/woff.js';
+import { isWoff, isWoff2, readWoffHeader, decodeWoff } from '../../../../src/assets/font/woff.js';
 import type { WoffInfo } from '../../../../src/assets/font/woff.js';
 
 // ---------------------------------------------------------------------------
@@ -127,9 +122,7 @@ const TRUETYPE_FLAVOR = 0x00010000;
 
 describe('isWoff / isWoff2', () => {
   it('detects a WOFF1 signature', () => {
-    const woff = buildWoff1(TRUETYPE_FLAVOR, [
-      { tag: 'cmap', data: cmapData, compress: false },
-    ]);
+    const woff = buildWoff1(TRUETYPE_FLAVOR, [{ tag: 'cmap', data: cmapData, compress: false }]);
     expect(isWoff(woff)).toBe(true);
     expect(isWoff2(woff)).toBe(false);
   });
@@ -192,9 +185,7 @@ describe('readWoffHeader', () => {
 
 describe('decodeWoff (WOFF1)', () => {
   it('reconstructs a valid sfnt whose first 4 bytes are the flavor', () => {
-    const woff = buildWoff1(TRUETYPE_FLAVOR, [
-      { tag: 'cmap', data: cmapData, compress: false },
-    ]);
+    const woff = buildWoff1(TRUETYPE_FLAVOR, [{ tag: 'cmap', data: cmapData, compress: false }]);
     const sfnt = decodeWoff(woff);
 
     // First 4 bytes = sfnt version (the flavor).
@@ -205,9 +196,7 @@ describe('decodeWoff (WOFF1)', () => {
   });
 
   it('places the cmap table data into the reconstructed sfnt', () => {
-    const woff = buildWoff1(TRUETYPE_FLAVOR, [
-      { tag: 'cmap', data: cmapData, compress: false },
-    ]);
+    const woff = buildWoff1(TRUETYPE_FLAVOR, [{ tag: 'cmap', data: cmapData, compress: false }]);
     const sfnt = decodeWoff(woff);
 
     // The single table record sits right after the 12-byte header.
@@ -226,9 +215,7 @@ describe('decodeWoff (WOFF1)', () => {
     const big = new Uint8Array(64);
     for (let i = 0; i < big.length; i++) big[i] = i & 0x0f;
 
-    const woff = buildWoff1(TRUETYPE_FLAVOR, [
-      { tag: 'cmap', data: big, compress: true },
-    ]);
+    const woff = buildWoff1(TRUETYPE_FLAVOR, [{ tag: 'cmap', data: big, compress: true }]);
     const sfnt = decodeWoff(woff);
 
     const recordOffset = SFNT_HEADER_SIZE;
@@ -248,9 +235,7 @@ describe('decodeWoff (WOFF1)', () => {
 
     // 'cmap' < 'glyf', so cmap must come first.
     expect(readU32(sfnt, SFNT_HEADER_SIZE)).toBe(tagToUint32('cmap'));
-    expect(readU32(sfnt, SFNT_HEADER_SIZE + SFNT_RECORD_SIZE)).toBe(
-      tagToUint32('glyf'),
-    );
+    expect(readU32(sfnt, SFNT_HEADER_SIZE + SFNT_RECORD_SIZE)).toBe(tagToUint32('glyf'));
   });
 
   it('throws a clear error for WOFF2 input', () => {

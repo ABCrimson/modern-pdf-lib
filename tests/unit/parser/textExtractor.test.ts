@@ -15,11 +15,7 @@ import {
 } from '../../../src/parser/textExtractor.js';
 import { parseContentStream } from '../../../src/parser/contentStreamParser.js';
 import type { ContentStreamOperator } from '../../../src/parser/contentStreamParser.js';
-import {
-  PdfDict,
-  PdfName,
-  PdfStream,
-} from '../../../src/core/pdfObjects.js';
+import { PdfDict, PdfName, PdfStream } from '../../../src/core/pdfObjects.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -167,9 +163,7 @@ describe('extractText() — TJ array', () => {
 
 describe('extractText() — multiple text lines', () => {
   it('inserts newline for vertical Td movement', () => {
-    const operators = ops(
-      'BT /F1 12 Tf 72 700 Td (Line 1) Tj 0 -14 Td (Line 2) Tj ET',
-    );
+    const operators = ops('BT /F1 12 Tf 72 700 Td (Line 1) Tj 0 -14 Td (Line 2) Tj ET');
     const text = extractText(operators);
     expect(text).toContain('Line 1');
     expect(text).toContain('Line 2');
@@ -177,9 +171,7 @@ describe('extractText() — multiple text lines', () => {
   });
 
   it('inserts newline for T* operator', () => {
-    const operators = ops(
-      'BT /F1 12 Tf 14 TL 72 700 Td (Line 1) Tj T* (Line 2) Tj ET',
-    );
+    const operators = ops('BT /F1 12 Tf 14 TL 72 700 Td (Line 1) Tj T* (Line 2) Tj ET');
     const text = extractText(operators);
     expect(text).toContain('Line 1');
     expect(text).toContain('Line 2');
@@ -187,9 +179,7 @@ describe('extractText() — multiple text lines', () => {
   });
 
   it('inserts newline for TD operator', () => {
-    const operators = ops(
-      'BT /F1 12 Tf 72 700 Td (Line 1) Tj 0 -14 TD (Line 2) Tj ET',
-    );
+    const operators = ops('BT /F1 12 Tf 72 700 Td (Line 1) Tj 0 -14 TD (Line 2) Tj ET');
     const text = extractText(operators);
     expect(text).toContain('Line 1');
     expect(text).toContain('\n');
@@ -213,9 +203,7 @@ describe('extractText() — multiple text lines', () => {
   });
 
   it('handles " (double quote) operator', () => {
-    const operators = ops(
-      'BT /F1 12 Tf 14 TL 72 700 Td (Line 1) Tj 0 0 (Line 2) " ET',
-    );
+    const operators = ops('BT /F1 12 Tf 14 TL 72 700 Td (Line 1) Tj 0 0 (Line 2) " ET');
     const text = extractText(operators);
     expect(text).toContain('Line 1');
     expect(text).toContain('Line 2');
@@ -240,7 +228,10 @@ describe('extractText() — WinAnsi encoding', () => {
     const operators: ContentStreamOperator[] = [
       { operator: 'BT', operands: [] },
       { operator: 'Tf', operands: ['/F1', 12] },
-      { operator: 'Tj', operands: [String.fromCharCode(0x93) + 'Hello' + String.fromCharCode(0x94)] },
+      {
+        operator: 'Tj',
+        operands: [String.fromCharCode(0x93) + 'Hello' + String.fromCharCode(0x94)],
+      },
       { operator: 'ET', operands: [] },
     ];
     const resources = makeResources('/F1');
@@ -481,8 +472,10 @@ describe('extractText() — CID font with ToUnicode', () => {
       {
         operator: 'Tj',
         operands: [
-          String.fromCharCode(0x00) + String.fromCharCode(0x48) +
-          String.fromCharCode(0x00) + String.fromCharCode(0x69),
+          String.fromCharCode(0x00) +
+            String.fromCharCode(0x48) +
+            String.fromCharCode(0x00) +
+            String.fromCharCode(0x69),
         ],
       },
       { operator: 'ET', operands: [] },
@@ -549,9 +542,7 @@ describe('extractTextWithPositions()', () => {
 
 describe('extractTextWithPositions() — Td positioning', () => {
   it('updates position with Td', () => {
-    const operators = ops(
-      'BT /F1 12 Tf 100 700 Td (Line 1) Tj 0 -14 Td (Line 2) Tj ET',
-    );
+    const operators = ops('BT /F1 12 Tf 100 700 Td (Line 1) Tj 0 -14 Td (Line 2) Tj ET');
     const items = extractTextWithPositions(operators);
     expect(items).toHaveLength(2);
     expect(items[0]!.y).toBeCloseTo(700);
@@ -559,9 +550,7 @@ describe('extractTextWithPositions() — Td positioning', () => {
   });
 
   it('accumulates Td translations', () => {
-    const operators = ops(
-      'BT /F1 12 Tf 10 20 Td 30 40 Td (Text) Tj ET',
-    );
+    const operators = ops('BT /F1 12 Tf 10 20 Td 30 40 Td (Text) Tj ET');
     const items = extractTextWithPositions(operators);
     // First Td: textLineMatrix = identity * translate(10,20) => e=10,f=20
     // Second Td: textLineMatrix = translate(30,40) * prev => e=40, f=60
@@ -583,9 +572,7 @@ describe('extractTextWithPositions() — Tm transforms', () => {
   });
 
   it('Tm overrides previous Td positioning', () => {
-    const operators = ops(
-      'BT /F1 12 Tf 100 700 Td 1 0 0 1 200 500 Tm (Hello) Tj ET',
-    );
+    const operators = ops('BT /F1 12 Tf 100 700 Td 1 0 0 1 200 500 Tm (Hello) Tj ET');
     const items = extractTextWithPositions(operators);
     // Tm sets absolute position, overriding Td
     expect(items[0]!.x).toBeCloseTo(200);
@@ -616,9 +603,7 @@ describe('extractTextWithPositions() — TJ array', () => {
   });
 
   it('applies displacement between TJ items', () => {
-    const operators = ops(
-      'BT /F1 12 Tf 50 600 Td [(A) -1000 (B)] TJ ET',
-    );
+    const operators = ops('BT /F1 12 Tf 50 600 Td [(A) -1000 (B)] TJ ET');
     const items = extractTextWithPositions(operators);
     expect(items).toHaveLength(2);
     // The x position of 'B' should be different from 'A' due to width of 'A' + displacement
@@ -632,9 +617,7 @@ describe('extractTextWithPositions() — TJ array', () => {
 
 describe('extractTextWithPositions() — q/Q state management', () => {
   it('save/restore preserves font state', () => {
-    const operators = ops(
-      'BT /F1 12 Tf q /F2 24 Tf Q 50 600 Td (Hello) Tj ET',
-    );
+    const operators = ops('BT /F1 12 Tf q /F2 24 Tf Q 50 600 Td (Hello) Tj ET');
     const items = extractTextWithPositions(operators);
     // After Q, font should be restored to F1/12
     expect(items[0]!.fontName).toBe('/F1');
@@ -642,9 +625,7 @@ describe('extractTextWithPositions() — q/Q state management', () => {
   });
 
   it('nested q/Q restores correctly', () => {
-    const operators = ops(
-      'BT /F1 10 Tf q /F2 20 Tf q /F3 30 Tf Q Q 50 600 Td (Hello) Tj ET',
-    );
+    const operators = ops('BT /F1 10 Tf q /F2 20 Tf q /F3 30 Tf Q Q 50 600 Td (Hello) Tj ET');
     const items = extractTextWithPositions(operators);
     // After both Q's, font should be F1/10
     expect(items[0]!.fontName).toBe('/F1');
@@ -658,9 +639,7 @@ describe('extractTextWithPositions() — q/Q state management', () => {
 
 describe('extractTextWithPositions() — cm operator', () => {
   it('cm translation affects text position', () => {
-    const operators = ops(
-      'q 1 0 0 1 100 200 cm BT /F1 12 Tf 0 0 Td (Text) Tj ET Q',
-    );
+    const operators = ops('q 1 0 0 1 100 200 cm BT /F1 12 Tf 0 0 Td (Text) Tj ET Q');
     const items = extractTextWithPositions(operators);
     // CTM translates by (100, 200), text at (0,0) in text space
     // Position = textMatrix * CTM => (0,0) * CTM => (100, 200)
@@ -669,9 +648,7 @@ describe('extractTextWithPositions() — cm operator', () => {
   });
 
   it('cm + Td combine correctly', () => {
-    const operators = ops(
-      'q 1 0 0 1 50 100 cm BT /F1 12 Tf 10 20 Td (Text) Tj ET Q',
-    );
+    const operators = ops('q 1 0 0 1 50 100 cm BT /F1 12 Tf 10 20 Td (Text) Tj ET Q');
     const items = extractTextWithPositions(operators);
     // Text position: Td(10,20) => textMatrix=(1,0,0,1,10,20)
     // Combined: textMatrix * CTM = position at (10+50, 20+100) = (60, 120)
@@ -686,9 +663,7 @@ describe('extractTextWithPositions() — cm operator', () => {
 
 describe('extractText() — withPositions option', () => {
   it('returns space-separated text when withPositions=true', () => {
-    const operators = ops(
-      'BT /F1 12 Tf 100 700 Td (Hello) Tj 0 -14 Td (World) Tj ET',
-    );
+    const operators = ops('BT /F1 12 Tf 100 700 Td (Hello) Tj 0 -14 Td (World) Tj ET');
     const text = extractText(operators, undefined, { withPositions: true });
     expect(text).toContain('Hello');
     expect(text).toContain('World');
@@ -718,9 +693,7 @@ describe('extractTextWithPositions() — BT resets text matrix', () => {
 
 describe('extractTextWithPositions() — T* and TL', () => {
   it('T* moves down by leading amount', () => {
-    const operators = ops(
-      'BT /F1 12 Tf 14 TL 50 700 Td (Line 1) Tj T* (Line 2) Tj ET',
-    );
+    const operators = ops('BT /F1 12 Tf 14 TL 50 700 Td (Line 1) Tj T* (Line 2) Tj ET');
     const items = extractTextWithPositions(operators);
     expect(items).toHaveLength(2);
     // T* is equivalent to 0 -TL Td => y decreases by 14

@@ -23,13 +23,7 @@
  * - **NumCopies** — default number of copies
  */
 
-import {
-  PdfDict,
-  PdfName,
-  PdfNumber,
-  PdfBool,
-  PdfArray,
-} from '../core/pdfObjects.js';
+import { PdfDict, PdfName, PdfNumber, PdfBool, PdfArray } from '../core/pdfObjects.js';
 import type { PdfObject } from '../core/pdfObjects.js';
 
 // ---------------------------------------------------------------------------
@@ -200,11 +194,7 @@ export function parseViewerPreferences(dict: PdfDict): ViewerPreferences {
   }
 
   const duplex = extractName(dict.get('/Duplex'));
-  if (
-    duplex === 'Simplex' ||
-    duplex === 'DuplexFlipShortEdge' ||
-    duplex === 'DuplexFlipLongEdge'
-  ) {
+  if (duplex === 'Simplex' || duplex === 'DuplexFlipShortEdge' || duplex === 'DuplexFlipLongEdge') {
     prefs.duplex = duplex;
   }
 

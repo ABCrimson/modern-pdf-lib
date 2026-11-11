@@ -12,12 +12,7 @@ import { describe, it, expect } from 'vitest';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
-import {
-  createPdf,
-  loadPdf,
-  optimizeAllImages,
-  PageSizes,
-} from '../../../../src/index.js';
+import { createPdf, loadPdf, optimizeAllImages, PageSizes } from '../../../../src/index.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -101,9 +96,7 @@ describe('optimizeAllImages', () => {
     const loaded = await loadPdf(bytes);
 
     // Without WASM, all images should be skipped
-    const { isJpegWasmReady } = await import(
-      '../../../../src/wasm/jpeg/bridge.js'
-    );
+    const { isJpegWasmReady } = await import('../../../../src/wasm/jpeg/bridge.js');
     if (!isJpegWasmReady()) {
       const report = await optimizeAllImages(loaded);
       expect(report.optimizedImages).toBe(0);

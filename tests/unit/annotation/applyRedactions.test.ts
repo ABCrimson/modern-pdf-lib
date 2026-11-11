@@ -17,11 +17,7 @@
 import { describe, it, expect } from 'vitest';
 import { createPdf } from '../../../src/core/pdfDocument.js';
 import { PdfRedactAnnotation } from '../../../src/annotation/types/redactAnnotation.js';
-import {
-  applyRedactions,
-  applyRedaction,
-} from '../../../src/annotation/applyRedactions.js';
-
+import { applyRedactions, applyRedaction } from '../../../src/annotation/applyRedactions.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -67,9 +63,7 @@ describe('applyRedactions', () => {
   });
 
   it('applies a single redaction annotation', () => {
-    const doc = createDocWithRedactions([
-      { rect: [40, 690, 250, 720] },
-    ]);
+    const doc = createDocWithRedactions([{ rect: [40, 690, 250, 720] }]);
 
     const page = doc.getPage(0);
     expect(page.getAnnotations()).toHaveLength(1);
@@ -106,17 +100,11 @@ describe('applyRedactions', () => {
     const page2 = doc.addPage([612, 792]);
 
     // Page 0: 1 redaction
-    page0.addExistingAnnotation(
-      PdfRedactAnnotation.create({ rect: [10, 10, 200, 30] }),
-    );
+    page0.addExistingAnnotation(PdfRedactAnnotation.create({ rect: [10, 10, 200, 30] }));
     // Page 1: no redactions
     // Page 2: 2 redactions
-    page2.addExistingAnnotation(
-      PdfRedactAnnotation.create({ rect: [10, 10, 200, 30] }),
-    );
-    page2.addExistingAnnotation(
-      PdfRedactAnnotation.create({ rect: [10, 40, 200, 60] }),
-    );
+    page2.addExistingAnnotation(PdfRedactAnnotation.create({ rect: [10, 10, 200, 30] }));
+    page2.addExistingAnnotation(PdfRedactAnnotation.create({ rect: [10, 40, 200, 60] }));
 
     const result = applyRedactions(doc);
 
@@ -134,9 +122,7 @@ describe('applyRedactions', () => {
     // Add a text annotation
     page.addAnnotation('Text', { rect: [10, 10, 30, 30], contents: 'Note' });
     // Add a redaction
-    page.addExistingAnnotation(
-      PdfRedactAnnotation.create({ rect: [50, 50, 200, 70] }),
-    );
+    page.addExistingAnnotation(PdfRedactAnnotation.create({ rect: [50, 50, 200, 70] }));
 
     expect(page.getAnnotations()).toHaveLength(2);
 
@@ -149,9 +135,7 @@ describe('applyRedactions', () => {
   });
 
   it('handles redaction with overlay text', () => {
-    const doc = createDocWithRedactions([
-      { rect: [40, 690, 250, 720], overlayText: 'REDACTED' },
-    ]);
+    const doc = createDocWithRedactions([{ rect: [40, 690, 250, 720], overlayText: 'REDACTED' }]);
 
     const result = applyRedactions(doc);
 
@@ -177,9 +161,7 @@ describe('applyRedactions', () => {
   });
 
   it('uses black fill by default when no interior colour is set', () => {
-    const doc = createDocWithRedactions([
-      { rect: [40, 690, 250, 720] },
-    ]);
+    const doc = createDocWithRedactions([{ rect: [40, 690, 250, 720] }]);
 
     applyRedactions(doc);
 
@@ -245,9 +227,7 @@ describe('applyRedactions', () => {
 
 describe('applyRedaction', () => {
   it('applies a single redaction by index', () => {
-    const doc = createDocWithRedactions([
-      { rect: [40, 690, 250, 720] },
-    ]);
+    const doc = createDocWithRedactions([{ rect: [40, 690, 250, 720] }]);
 
     const result = applyRedaction(doc, 0, 0);
 
@@ -257,18 +237,14 @@ describe('applyRedaction', () => {
   });
 
   it('throws RangeError for invalid page index', () => {
-    const doc = createDocWithRedactions([
-      { rect: [40, 690, 250, 720] },
-    ]);
+    const doc = createDocWithRedactions([{ rect: [40, 690, 250, 720] }]);
 
     expect(() => applyRedaction(doc, 5, 0)).toThrow(RangeError);
     expect(() => applyRedaction(doc, -1, 0)).toThrow(RangeError);
   });
 
   it('throws RangeError for invalid annotation index', () => {
-    const doc = createDocWithRedactions([
-      { rect: [40, 690, 250, 720] },
-    ]);
+    const doc = createDocWithRedactions([{ rect: [40, 690, 250, 720] }]);
 
     expect(() => applyRedaction(doc, 0, 5)).toThrow(RangeError);
     expect(() => applyRedaction(doc, 0, -1)).toThrow(RangeError);
@@ -328,9 +304,7 @@ describe('annotation redaction — overlay text escaping', () => {
   });
 
   it('escapes multiple special characters together', () => {
-    const doc = createDocWithRedactions([
-      { rect: [40, 690, 250, 720], overlayText: 'a\\b(c)d' },
-    ]);
+    const doc = createDocWithRedactions([{ rect: [40, 690, 250, 720], overlayText: 'a\\b(c)d' }]);
 
     applyRedactions(doc);
 
@@ -341,9 +315,7 @@ describe('annotation redaction — overlay text escaping', () => {
 
 describe('annotation redaction — default rendering', () => {
   it('uses Helvetica font by default', () => {
-    const doc = createDocWithRedactions([
-      { rect: [40, 690, 250, 720], overlayText: 'REDACTED' },
-    ]);
+    const doc = createDocWithRedactions([{ rect: [40, 690, 250, 720], overlayText: 'REDACTED' }]);
 
     applyRedactions(doc);
 
@@ -352,9 +324,7 @@ describe('annotation redaction — default rendering', () => {
   });
 
   it('auto-calculates font size from rect height', () => {
-    const doc = createDocWithRedactions([
-      { rect: [40, 690, 250, 720], overlayText: 'REDACTED' },
-    ]);
+    const doc = createDocWithRedactions([{ rect: [40, 690, 250, 720], overlayText: 'REDACTED' }]);
 
     applyRedactions(doc);
 
@@ -364,9 +334,7 @@ describe('annotation redaction — default rendering', () => {
   });
 
   it('does not emit opacity operators at full opacity', () => {
-    const doc = createDocWithRedactions([
-      { rect: [40, 690, 250, 720] },
-    ]);
+    const doc = createDocWithRedactions([{ rect: [40, 690, 250, 720] }]);
 
     applyRedactions(doc);
 
@@ -376,9 +344,7 @@ describe('annotation redaction — default rendering', () => {
   });
 
   it('does not draw border by default', () => {
-    const doc = createDocWithRedactions([
-      { rect: [40, 690, 250, 720] },
-    ]);
+    const doc = createDocWithRedactions([{ rect: [40, 690, 250, 720] }]);
 
     applyRedactions(doc);
 

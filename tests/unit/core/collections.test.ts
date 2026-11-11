@@ -6,17 +6,8 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  buildCollection,
-  type CollectionSchemaField,
-} from '../../../src/core/collections.ts';
-import {
-  PdfDict,
-  PdfName,
-  PdfNumber,
-  PdfString,
-  PdfArray,
-} from '../../../src/core/pdfObjects.ts';
+import { buildCollection, type CollectionSchemaField } from '../../../src/core/collections.ts';
+import { PdfDict, PdfName, PdfNumber, PdfString, PdfArray } from '../../../src/core/pdfObjects.ts';
 
 /** Type guard asserting + narrowing a value to a {@link PdfDict}. */
 function asDict(value: unknown): PdfDict {
@@ -71,14 +62,10 @@ describe('buildCollection', () => {
 
     // /Schema present with both fields.
     const schemaDict = asDict(col.get('/Schema'));
-    expect((schemaDict.get('/Type') as PdfName).value).toBe(
-      '/CollectionSchema',
-    );
+    expect((schemaDict.get('/Type') as PdfName).value).toBe('/CollectionSchema');
 
     const nameField = asDict(schemaDict.get('/Name'));
-    expect((nameField.get('/Type') as PdfName).value).toBe(
-      '/CollectionField',
-    );
+    expect((nameField.get('/Type') as PdfName).value).toBe('/CollectionField');
     expect((nameField.get('/Subtype') as PdfName).value).toBe('/S');
     expect((nameField.get('/N') as PdfString).value).toBe('File Name');
     expect((nameField.get('/O') as PdfNumber).value).toBe(0);
@@ -145,15 +132,9 @@ describe('buildCollection', () => {
       ],
     });
     const schemaDict = asDict(col.get('/Schema'));
-    expect((asDict(schemaDict.get('/A')).get('/Subtype') as PdfName).value).toBe(
-      '/S',
-    );
-    expect((asDict(schemaDict.get('/B')).get('/Subtype') as PdfName).value).toBe(
-      '/D',
-    );
-    expect((asDict(schemaDict.get('/C')).get('/Subtype') as PdfName).value).toBe(
-      '/N',
-    );
+    expect((asDict(schemaDict.get('/A')).get('/Subtype') as PdfName).value).toBe('/S');
+    expect((asDict(schemaDict.get('/B')).get('/Subtype') as PdfName).value).toBe('/D');
+    expect((asDict(schemaDict.get('/C')).get('/Subtype') as PdfName).value).toBe('/N');
   });
 
   it('produces a serializable dictionary', () => {

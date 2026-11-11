@@ -53,8 +53,7 @@ const encoder = new TextEncoder();
 /** Search for a pattern in the PDF bytes. */
 function findPattern(data: Uint8Array, pattern: string, start: number = 0): number {
   const bytes = encoder.encode(pattern);
-  outer:
-  for (let i = start; i <= data.length - bytes.length; i++) {
+  outer: for (let i = start; i <= data.length - bytes.length; i++) {
     for (let j = 0; j < bytes.length; j++) {
       if (data[i + j] !== bytes[j]) continue outer;
     }
@@ -92,10 +91,7 @@ function extractBetween(data: Uint8Array, start: string, end: string): string | 
  * @param level     The target PDF/A conformance level.
  * @returns         A validation result with any issues found.
  */
-export function validatePdfA(
-  pdfBytes: Uint8Array,
-  level: PdfALevel,
-): PdfAValidationResult {
+export function validatePdfA(pdfBytes: Uint8Array, level: PdfALevel): PdfAValidationResult {
   const issues: PdfAIssue[] = [];
 
   // Parse the part number from the level
@@ -163,8 +159,11 @@ export function validatePdfA(
 
   // --- Check: No transparency (PDF/A-1 only) ---
   if (part === 1) {
-    if (containsPattern(pdfBytes, '/SMask') || containsPattern(pdfBytes, '/CA ') ||
-        containsPattern(pdfBytes, '/ca ')) {
+    if (
+      containsPattern(pdfBytes, '/SMask') ||
+      containsPattern(pdfBytes, '/CA ') ||
+      containsPattern(pdfBytes, '/ca ')
+    ) {
       // Be more lenient: /CA 1 and /ca 1 are fine
       const hasTransparency = checkTransparency(pdfBytes);
       if (hasTransparency) {
@@ -252,10 +251,20 @@ function checkFontEmbedding(data: Uint8Array, issues: PdfAIssue[]): void {
   // Find all font references with /Type1 subtype but without /FontFile
   const fontMatches = str.matchAll(/\/Subtype\s*\/Type1[\s\S]*?\/BaseFont\s*\/([\w-]+)/g);
   const standardFonts = new Set([
-    'Courier', 'Courier-Bold', 'Courier-Oblique', 'Courier-BoldOblique',
-    'Helvetica', 'Helvetica-Bold', 'Helvetica-Oblique', 'Helvetica-BoldOblique',
-    'Times-Roman', 'Times-Bold', 'Times-Italic', 'Times-BoldItalic',
-    'Symbol', 'ZapfDingbats',
+    'Courier',
+    'Courier-Bold',
+    'Courier-Oblique',
+    'Courier-BoldOblique',
+    'Helvetica',
+    'Helvetica-Bold',
+    'Helvetica-Oblique',
+    'Helvetica-BoldOblique',
+    'Times-Roman',
+    'Times-Bold',
+    'Times-Italic',
+    'Times-BoldItalic',
+    'Symbol',
+    'ZapfDingbats',
   ]);
 
   for (const m of fontMatches) {
@@ -313,10 +322,7 @@ function checkTransparency(data: Uint8Array): boolean {
  * @param level     The target PDF/A conformance level.
  * @returns         The modified PDF bytes.
  */
-export async function enforcePdfA(
-  pdfBytes: Uint8Array,
-  level: PdfALevel,
-): Promise<Uint8Array> {
+export async function enforcePdfA(pdfBytes: Uint8Array, level: PdfALevel): Promise<Uint8Array> {
   // Validate first to see what's needed
   const validation = validatePdfA(pdfBytes, level);
 
@@ -357,11 +363,7 @@ export async function enforcePdfA(
 }
 
 /** Generate XMP metadata with PDF/A identification and inject it. */
-function addPdfAXmpMetadata(
-  data: Uint8Array,
-  part: number,
-  conformance: string,
-): Uint8Array {
+function addPdfAXmpMetadata(data: Uint8Array, part: number, conformance: string): Uint8Array {
   const conformanceUpper = conformance.toUpperCase();
 
   const xmp = [

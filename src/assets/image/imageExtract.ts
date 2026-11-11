@@ -10,18 +10,8 @@
  */
 
 import type { PdfDocument } from '../../core/pdfDocument.js';
-import {
-  PdfDict,
-  PdfName,
-  PdfNumber,
-  PdfArray,
-  PdfRef,
-  PdfStream,
-} from '../../core/pdfObjects.js';
-import {
-  decodeStream,
-  getStreamFilters,
-} from '../../parser/streamDecode.js';
+import { PdfDict, PdfName, PdfNumber, PdfArray, PdfRef, PdfStream } from '../../core/pdfObjects.js';
+import { decodeStream, getStreamFilters } from '../../parser/streamDecode.js';
 
 // ---------------------------------------------------------------------------
 // Public interfaces
@@ -75,10 +65,7 @@ function resolveColorSpace(
   if (csEntry.kind === 'ref') {
     const resolved = registry.resolve(csEntry as PdfRef);
     if (!resolved) return 'DeviceRGB';
-    return resolveColorSpace(
-      resolved as PdfName | PdfArray,
-      registry,
-    );
+    return resolveColorSpace(resolved as PdfName | PdfArray, registry);
   }
 
   // Simple name: /DeviceRGB, /DeviceGray, /DeviceCMYK
@@ -227,19 +214,12 @@ export function extractImages(doc: PdfDocument): ImageInfo[] {
       const heightObj = stream.dict.get('/Height');
       const bpcObj = stream.dict.get('/BitsPerComponent');
 
-      const width = widthObj && widthObj.kind === 'number'
-        ? (widthObj as PdfNumber).value : 0;
-      const height = heightObj && heightObj.kind === 'number'
-        ? (heightObj as PdfNumber).value : 0;
-      const bitsPerComponent = bpcObj && bpcObj.kind === 'number'
-        ? (bpcObj as PdfNumber).value : 8;
+      const width = widthObj && widthObj.kind === 'number' ? (widthObj as PdfNumber).value : 0;
+      const height = heightObj && heightObj.kind === 'number' ? (heightObj as PdfNumber).value : 0;
+      const bitsPerComponent = bpcObj && bpcObj.kind === 'number' ? (bpcObj as PdfNumber).value : 8;
 
       // Resolve color space
-      const csEntry = stream.dict.get('/ColorSpace') as
-        | PdfName
-        | PdfArray
-        | PdfRef
-        | undefined;
+      const csEntry = stream.dict.get('/ColorSpace') as PdfName | PdfArray | PdfRef | undefined;
       const colorSpace = resolveColorSpace(csEntry, registry);
       const channels = channelsFromColorSpace(colorSpace);
 
@@ -283,9 +263,5 @@ export function decodeImageStream(imageInfo: ImageInfo): Uint8Array {
     return imageInfo.stream.data;
   }
 
-  return decodeStream(
-    imageInfo.stream.data,
-    imageInfo.filters as string[],
-    null,
-  );
+  return decodeStream(imageInfo.stream.data, imageInfo.filters as string[], null);
 }

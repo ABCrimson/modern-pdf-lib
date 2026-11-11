@@ -23,7 +23,6 @@ import {
   PageSizes,
 } from '../../src/index.js';
 
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const fixturesDir = resolve(__dirname, '../fixtures/images');
@@ -33,9 +32,7 @@ const fixturesDir = resolve(__dirname, '../fixtures/images');
 // ---------------------------------------------------------------------------
 
 async function createMultiImagePdf(pageCount: number): Promise<Uint8Array> {
-  const pngBytes = new Uint8Array(
-    await readFile(resolve(fixturesDir, 'sample.png')),
-  );
+  const pngBytes = new Uint8Array(await readFile(resolve(fixturesDir, 'sample.png')));
   const doc = createPdf();
 
   for (let i = 0; i < pageCount; i++) {
@@ -197,9 +194,7 @@ describe('selective filters — colorSpaces', () => {
 
     expect(report.skippedByFilter).toBe(2);
     expect(
-      report.perImage.every(
-        (e) => e.skippedByFilter && e.reason!.includes('not in allowed list'),
-      ),
+      report.perImage.every((e) => e.skippedByFilter && e.reason!.includes('not in allowed list')),
     ).toBe(true);
   });
 
@@ -330,9 +325,7 @@ describe('selective filters — combined (AND logic)', () => {
     // All images should be filtered by the colorSpaces filter
     expect(report.skippedByFilter).toBe(2);
     expect(
-      report.perImage.every(
-        (e) => e.skippedByFilter && e.reason!.includes('not in allowed list'),
-      ),
+      report.perImage.every((e) => e.skippedByFilter && e.reason!.includes('not in allowed list')),
     ).toBe(true);
   });
 });
@@ -379,9 +372,7 @@ describe('selective filters — report structure', () => {
       pageRange: { start: 1, end: 3 },
     });
 
-    const perImageFilteredCount = report.perImage.filter(
-      (e) => e.skippedByFilter,
-    ).length;
+    const perImageFilteredCount = report.perImage.filter((e) => e.skippedByFilter).length;
     expect(report.skippedByFilter).toBe(perImageFilteredCount);
   });
 

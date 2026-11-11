@@ -3,9 +3,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  getCounterSignatures,
-} from '../../../src/signature/counterSignature.js';
+import { getCounterSignatures } from '../../../src/signature/counterSignature.js';
 import type { CounterSignatureInfo } from '../../../src/signature/counterSignature.js';
 import { prepareForSigning, embedSignature } from '../../../src/signature/byteRange.js';
 
@@ -71,16 +69,16 @@ describe('getCounterSignatures', () => {
     // Append a counter-signature annotation manually
     const counterSigAppendix = encoder.encode(
       '\n20 0 obj\n' +
-      '<< /Type /Annot /Subtype /Widget /FT /Sig' +
-      ' /T (CounterSig_0)' +
-      ' /V << /Type /Sig /Filter /Adobe.PPKLite' +
-      ' /SubFilter /adbe.pkcs7.detached' +
-      ' /Reason (Counter-signature for signature 0)' +
-      ' /M (D:20260301120000Z)' +
-      ' /Contents <deadbeef>' +
-      ' /ByteRange [0 100 200 300] >>' +
-      ' /F 132 /Rect [0 0 0 0] >>\n' +
-      'endobj\n',
+        '<< /Type /Annot /Subtype /Widget /FT /Sig' +
+        ' /T (CounterSig_0)' +
+        ' /V << /Type /Sig /Filter /Adobe.PPKLite' +
+        ' /SubFilter /adbe.pkcs7.detached' +
+        ' /Reason (Counter-signature for signature 0)' +
+        ' /M (D:20260301120000Z)' +
+        ' /Contents <deadbeef>' +
+        ' /ByteRange [0 100 200 300] >>' +
+        ' /F 132 /Rect [0 0 0 0] >>\n' +
+        'endobj\n',
     );
 
     const modified = new Uint8Array(signedPdf.length + counterSigAppendix.length);
@@ -123,9 +121,7 @@ describe('getCounterSignatures', () => {
 describe('addCounterSignature', () => {
   it('should require a valid signature index', async () => {
     // We test the import works and the function signature is correct
-    const { addCounterSignature } = await import(
-      '../../../src/signature/counterSignature.js'
-    );
+    const { addCounterSignature } = await import('../../../src/signature/counterSignature.js');
 
     const pdf = createMinimalPdf();
 
@@ -139,9 +135,7 @@ describe('addCounterSignature', () => {
   });
 
   it('should reject out-of-range signature index', async () => {
-    const { addCounterSignature } = await import(
-      '../../../src/signature/counterSignature.js'
-    );
+    const { addCounterSignature } = await import('../../../src/signature/counterSignature.js');
 
     const signedPdf = createSignedPdf();
 

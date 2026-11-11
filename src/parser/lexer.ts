@@ -151,8 +151,16 @@ const isWhitespace: boolean[] = /* @__PURE__ */ (() => {
 const isDelimiter: boolean[] = /* @__PURE__ */ (() => {
   const t = new Array<boolean>(256).fill(false);
   for (const c of [
-    CH_LPAREN, CH_RPAREN, CH_LT, CH_GT, CH_LBRACKET, CH_RBRACKET,
-    CH_LBRACE, CH_RBRACE, CH_SLASH, CH_PERCENT,
+    CH_LPAREN,
+    CH_RPAREN,
+    CH_LT,
+    CH_GT,
+    CH_LBRACKET,
+    CH_RBRACKET,
+    CH_LBRACE,
+    CH_RBRACE,
+    CH_SLASH,
+    CH_PERCENT,
   ]) {
     t[c] = true;
   }
@@ -447,11 +455,7 @@ export class PdfLexer {
 
     // -- Numbers and signs -----------------------------------------------
 
-    if (
-      b === CH_PLUS || b === CH_MINUS ||
-      b === CH_DOT ||
-      (b >= CH_0 && b <= CH_9)
-    ) {
+    if (b === CH_PLUS || b === CH_MINUS || b === CH_DOT || (b >= CH_0 && b <= CH_9)) {
       return this.readNumber(startPos);
     }
 

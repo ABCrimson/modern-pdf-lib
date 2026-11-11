@@ -82,11 +82,7 @@ const PDFUA2_PART: number = 2;
 const PDFUA2_REV: number = 2024;
 
 /** Illustration types that require alternative text under PDF/UA-2. */
-const ILLUSTRATION_TYPES: ReadonlySet<string> = new Set<string>([
-  'Figure',
-  'Formula',
-  'Form',
-]);
+const ILLUSTRATION_TYPES: ReadonlySet<string> = new Set<string>(['Figure', 'Formula', 'Form']);
 
 // ---------------------------------------------------------------------------
 // validatePdfUa2
@@ -280,9 +276,7 @@ export function buildPdfUa2Xmp(): string {
  *
  * @internal
  */
-function hasDeclaredNamespaces(
-  tree: PdfStructureTree | undefined,
-): boolean {
+function hasDeclaredNamespaces(tree: PdfStructureTree | undefined): boolean {
   if (!tree) return false;
 
   const declared = (tree as unknown as { namespaces?: unknown }).namespaces;

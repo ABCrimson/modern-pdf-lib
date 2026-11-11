@@ -64,24 +64,16 @@ describe('generateCiiXml', () => {
 
   it('uses the EN16931 guideline URN by default', () => {
     const xml = generateCiiXml(makeInvoice());
-    expect(xml).toContain(
-      '<ram:ID>urn:cen.eu:en16931:2017</ram:ID>',
-    );
+    expect(xml).toContain('<ram:ID>urn:cen.eu:en16931:2017</ram:ID>');
   });
 
   it('selects the correct guideline URN per profile', () => {
     const cases: ReadonlyArray<readonly [FacturXProfile, string]> = [
       ['MINIMUM', 'urn:factur-x.eu:1p0:minimum'],
       ['BASIC-WL', 'urn:factur-x.eu:1p0:basicwl'],
-      [
-        'BASIC',
-        'urn:cen.eu:en16931:2017#compliant#urn:factur-x.eu:1p0:basic',
-      ],
+      ['BASIC', 'urn:cen.eu:en16931:2017#compliant#urn:factur-x.eu:1p0:basic'],
       ['EN16931', 'urn:cen.eu:en16931:2017'],
-      [
-        'EXTENDED',
-        'urn:cen.eu:en16931:2017#conformant#urn:factur-x.eu:1p0:extended',
-      ],
+      ['EXTENDED', 'urn:cen.eu:en16931:2017#conformant#urn:factur-x.eu:1p0:extended'],
     ];
     for (const [profile, urn] of cases) {
       const xml = generateCiiXml(makeInvoice(), profile);
@@ -97,9 +89,7 @@ describe('generateCiiXml', () => {
 
   it('emits the issue date as DateTimeString format 102 (YYYYMMDD)', () => {
     const xml = generateCiiXml(makeInvoice());
-    expect(xml).toContain(
-      '<udt:DateTimeString format="102">20260625</udt:DateTimeString>',
-    );
+    expect(xml).toContain('<udt:DateTimeString format="102">20260625</udt:DateTimeString>');
   });
 
   it('includes both party names and VAT ids', () => {
@@ -127,20 +117,14 @@ describe('generateCiiXml', () => {
 
   it('renders one line item per invoice line with net amounts', () => {
     const xml = generateCiiXml(makeInvoice());
-    const lineCount = (
-      xml.match(/<ram:IncludedSupplyChainTradeLineItem>/g) ?? []
-    ).length;
+    const lineCount = (xml.match(/<ram:IncludedSupplyChainTradeLineItem>/g) ?? []).length;
     expect(lineCount).toBe(2);
     expect(xml).toContain('<ram:Name>Widget A</ram:Name>');
     expect(xml).toContain('<ram:Name>Service B</ram:Name>');
     // Widget A: 2 * 10 = 20.00 net
-    expect(xml).toContain(
-      '<ram:LineTotalAmount currencyID="EUR">20.00</ram:LineTotalAmount>',
-    );
+    expect(xml).toContain('<ram:LineTotalAmount currencyID="EUR">20.00</ram:LineTotalAmount>');
     // Service B: 1 * 100 = 100.00 net
-    expect(xml).toContain(
-      '<ram:LineTotalAmount currencyID="EUR">100.00</ram:LineTotalAmount>',
-    );
+    expect(xml).toContain('<ram:LineTotalAmount currencyID="EUR">100.00</ram:LineTotalAmount>');
   });
 
   it('computes a correct grand total (line net sum plus tax)', () => {
@@ -150,16 +134,10 @@ describe('generateCiiXml', () => {
       '<ram:TaxBasisTotalAmount currencyID="EUR">120.00</ram:TaxBasisTotalAmount>',
     );
     // Tax: 120 * 19% = 22.80
-    expect(xml).toContain(
-      '<ram:TaxTotalAmount currencyID="EUR">22.80</ram:TaxTotalAmount>',
-    );
+    expect(xml).toContain('<ram:TaxTotalAmount currencyID="EUR">22.80</ram:TaxTotalAmount>');
     // Grand total: 120 + 22.80 = 142.80
-    expect(xml).toContain(
-      '<ram:GrandTotalAmount currencyID="EUR">142.80</ram:GrandTotalAmount>',
-    );
-    expect(xml).toContain(
-      '<ram:DuePayableAmount currencyID="EUR">142.80</ram:DuePayableAmount>',
-    );
+    expect(xml).toContain('<ram:GrandTotalAmount currencyID="EUR">142.80</ram:GrandTotalAmount>');
+    expect(xml).toContain('<ram:DuePayableAmount currencyID="EUR">142.80</ram:DuePayableAmount>');
   });
 
   it('groups tax subtotals by rate', () => {
@@ -173,23 +151,13 @@ describe('generateCiiXml', () => {
       }),
     );
     // 19% basis: 100 + 20 = 120.00, tax 22.80
-    expect(xml).toContain(
-      '<ram:BasisAmount currencyID="EUR">120.00</ram:BasisAmount>',
-    );
+    expect(xml).toContain('<ram:BasisAmount currencyID="EUR">120.00</ram:BasisAmount>');
     // 7% basis: 50.00, tax 3.50
-    expect(xml).toContain(
-      '<ram:BasisAmount currencyID="EUR">50.00</ram:BasisAmount>',
-    );
-    expect(xml).toContain(
-      '<ram:CalculatedAmount currencyID="EUR">22.80</ram:CalculatedAmount>',
-    );
-    expect(xml).toContain(
-      '<ram:CalculatedAmount currencyID="EUR">3.50</ram:CalculatedAmount>',
-    );
+    expect(xml).toContain('<ram:BasisAmount currencyID="EUR">50.00</ram:BasisAmount>');
+    expect(xml).toContain('<ram:CalculatedAmount currencyID="EUR">22.80</ram:CalculatedAmount>');
+    expect(xml).toContain('<ram:CalculatedAmount currencyID="EUR">3.50</ram:CalculatedAmount>');
     // grand total = 170 + 26.30 = 196.30
-    expect(xml).toContain(
-      '<ram:GrandTotalAmount currencyID="EUR">196.30</ram:GrandTotalAmount>',
-    );
+    expect(xml).toContain('<ram:GrandTotalAmount currencyID="EUR">196.30</ram:GrandTotalAmount>');
   });
 
   it('XML-escapes special characters in text values', () => {
@@ -203,31 +171,21 @@ describe('generateCiiXml', () => {
         invoiceNumber: 'A&B-"1"',
       }),
     );
-    expect(xml).toContain(
-      '<ram:Name>Smith &amp; Sons &lt;Trading&gt;</ram:Name>',
-    );
+    expect(xml).toContain('<ram:Name>Smith &amp; Sons &lt;Trading&gt;</ram:Name>');
     expect(xml).not.toContain('Smith & Sons');
     expect(xml).toContain('<ram:ID>A&amp;B-&quot;1&quot;</ram:ID>');
   });
 
   it('respects a non-EUR currency code throughout', () => {
     const xml = generateCiiXml(makeInvoice({ currency: 'USD' }));
-    expect(xml).toContain(
-      '<ram:InvoiceCurrencyCode>USD</ram:InvoiceCurrencyCode>',
-    );
-    expect(xml).toContain(
-      '<ram:GrandTotalAmount currencyID="USD">142.80</ram:GrandTotalAmount>',
-    );
+    expect(xml).toContain('<ram:InvoiceCurrencyCode>USD</ram:InvoiceCurrencyCode>');
+    expect(xml).toContain('<ram:GrandTotalAmount currencyID="USD">142.80</ram:GrandTotalAmount>');
   });
 
   it('handles an empty line list with zero totals', () => {
     const xml = generateCiiXml(makeInvoice({ lines: [] }));
-    expect(xml).toContain(
-      '<ram:LineTotalAmount currencyID="EUR">0.00</ram:LineTotalAmount>',
-    );
-    expect(xml).toContain(
-      '<ram:GrandTotalAmount currencyID="EUR">0.00</ram:GrandTotalAmount>',
-    );
+    expect(xml).toContain('<ram:LineTotalAmount currencyID="EUR">0.00</ram:LineTotalAmount>');
+    expect(xml).toContain('<ram:GrandTotalAmount currencyID="EUR">0.00</ram:GrandTotalAmount>');
     expect(xml).not.toContain('<ram:IncludedSupplyChainTradeLineItem>');
   });
 });

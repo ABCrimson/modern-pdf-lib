@@ -308,9 +308,7 @@ describe('table overflow integration', () => {
       content: 'This is a very long text that exceeds the cell',
       overflow: 'truncate',
     };
-    const { ops } = renderTable(
-      makeTableOpts({ rows: [{ cells: [cell] }] }),
-    );
+    const { ops } = renderTable(makeTableOpts({ rows: [{ cells: [cell] }] }));
     // truncate mode emits W (clip) and n (endPath)
     expect(ops).toContain('W\n');
     expect(ops).toContain('n\n');
@@ -396,9 +394,7 @@ describe('table overflow integration', () => {
     const modes = ['truncate', 'ellipsis', 'wrap', 'shrink'] as const;
     for (const mode of modes) {
       const cell: TableCell = { content: 'Hi', overflow: mode };
-      const { ops } = renderTable(
-        makeTableOpts({ rows: [{ cells: [cell] }] }),
-      );
+      const { ops } = renderTable(makeTableOpts({ rows: [{ cells: [cell] }] }));
       expect(ops).toContain('(Hi) Tj');
     }
   });
@@ -409,9 +405,7 @@ describe('table overflow integration', () => {
     const cell: TableCell = {
       content: 'This is a very long text that exceeds the cell width',
     };
-    const { ops } = renderTable(
-      makeTableOpts({ rows: [{ cells: [cell] }] }),
-    );
+    const { ops } = renderTable(makeTableOpts({ rows: [{ cells: [cell] }] }));
     // Default truncate mode emits clip operators
     expect(ops).toContain('W\n');
     expect(ops).toContain('n\n');

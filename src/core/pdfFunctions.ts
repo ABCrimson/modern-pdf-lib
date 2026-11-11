@@ -139,13 +139,7 @@ function clamp(x: number, lo: number, hi: number): number {
  * Matches the PDF `Interpolate(x, xmin, xmax, ymin, ymax)` operation
  * (ISO 32000-2 §7.10.2). A degenerate input interval maps to `yMin`.
  */
-function interpolate(
-  x: number,
-  xMin: number,
-  xMax: number,
-  yMin: number,
-  yMax: number,
-): number {
+function interpolate(x: number, xMin: number, xMax: number, yMin: number, yMax: number): number {
   if (xMax === xMin) {
     return yMin;
   }
@@ -168,10 +162,7 @@ function clampToRange(out: number[], range: readonly number[]): number[] {
 // Type 2 — exponential interpolation
 // ---------------------------------------------------------------------------
 
-function evaluateExponential(
-  fn: ExponentialFunction,
-  inputs: readonly number[],
-): number[] {
+function evaluateExponential(fn: ExponentialFunction, inputs: readonly number[]): number[] {
   const c0 = fn.c0 ?? [0];
   const c1 = fn.c1 ?? [1];
   const x = clamp(inputs[0] ?? 0, fn.domain[0] ?? 0, fn.domain[1] ?? 1);
@@ -190,10 +181,7 @@ function evaluateExponential(
 // Type 3 — stitching
 // ---------------------------------------------------------------------------
 
-function evaluateStitching(
-  fn: StitchingFunction,
-  inputs: readonly number[],
-): number[] {
+function evaluateStitching(fn: StitchingFunction, inputs: readonly number[]): number[] {
   const d0 = fn.domain[0] ?? 0;
   const d1 = fn.domain[1] ?? 1;
   const x = clamp(inputs[0] ?? 0, d0, d1);
@@ -228,10 +216,7 @@ function evaluateStitching(
 // Type 0 — sampled function (multilinear interpolation)
 // ---------------------------------------------------------------------------
 
-function evaluateSampled(
-  fn: SampledFunction,
-  inputs: readonly number[],
-): number[] {
+function evaluateSampled(fn: SampledFunction, inputs: readonly number[]): number[] {
   const m = fn.size.length;
   const maxSample = 2 ** fn.bitsPerSample - 1;
   const nOut = inferOutputCount(fn);
@@ -354,10 +339,7 @@ function tokenizePostScript(source: string): PsToken[] {
         }
       } else {
         let word = '';
-        while (
-          i < n &&
-          !' \t\n\r\f{}%'.includes(source[i] as string)
-        ) {
+        while (i < n && !' \t\n\r\f{}%'.includes(source[i] as string)) {
           word += source[i];
           i++;
         }
@@ -669,10 +651,7 @@ function equalTop(stack: PsToken[]): boolean {
   return an === bn;
 }
 
-function evaluatePostScript(
-  fn: PostScriptFunction,
-  inputs: readonly number[],
-): number[] {
+function evaluatePostScript(fn: PostScriptFunction, inputs: readonly number[]): number[] {
   const program = tokenizePostScript(fn.source);
   const stack: PsToken[] = [];
 
@@ -712,10 +691,7 @@ function evaluatePostScript(
  * @param inputs - the `m`-dimensional input vector.
  * @returns the `n`-dimensional output vector.
  */
-export function evaluateFunction(
-  fn: PdfFunctionDef,
-  inputs: readonly number[],
-): number[] {
+export function evaluateFunction(fn: PdfFunctionDef, inputs: readonly number[]): number[] {
   switch (fn.functionType) {
     case 0:
       return evaluateSampled(fn, inputs);
@@ -728,9 +704,7 @@ export function evaluateFunction(
     default: {
       // Exhaustiveness guard for future function types.
       const never: never = fn;
-      throw new Error(
-        `Unsupported PDF function type: ${JSON.stringify(never)}`,
-      );
+      throw new Error(`Unsupported PDF function type: ${JSON.stringify(never)}`);
     }
   }
 }

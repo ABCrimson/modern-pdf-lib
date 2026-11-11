@@ -191,10 +191,14 @@ function inlineDetect(): RuntimeAdapter {
   // crypto.getRandomValues, etc.) and throws for FS operations.
   return {
     readFile: () =>
-      Promise.reject(new Error('readFile is not available in this runtime. Import a concrete adapter.')),
+      Promise.reject(
+        new Error('readFile is not available in this runtime. Import a concrete adapter.'),
+      ),
 
     writeFile: () =>
-      Promise.reject(new Error('writeFile is not available in this runtime. Import a concrete adapter.')),
+      Promise.reject(
+        new Error('writeFile is not available in this runtime. Import a concrete adapter.'),
+      ),
 
     createWorker: () => {
       throw new Error('createWorker is not available in this runtime. Import a concrete adapter.');

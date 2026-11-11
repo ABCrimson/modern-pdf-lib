@@ -90,8 +90,8 @@ export function encodeToUtf16BE(str: string): Uint8Array {
   for (let i = 0; i < str.length; i++) {
     const code = str.charCodeAt(i);
     const offset = 2 + i * 2;
-    result[offset] = (code >> 8) & 0xff;     // high byte
-    result[offset + 1] = code & 0xff;        // low byte
+    result[offset] = (code >> 8) & 0xff; // high byte
+    result[offset + 1] = code & 0xff; // low byte
   }
 
   return result;
@@ -108,11 +108,7 @@ export function decodeUtf16BE(data: Uint8Array): string {
   let offset = 0;
 
   // Skip BOM if present
-  if (
-    data.length >= 2 &&
-    data[0] === 0xfe &&
-    data[1] === 0xff
-  ) {
+  if (data.length >= 2 && data[0] === 0xfe && data[1] === 0xff) {
     offset = 2;
   }
 
@@ -144,15 +140,33 @@ export function escapePdfString(str: string): string {
   for (let i = 0; i < str.length; i++) {
     const ch = str[i]!;
     switch (ch) {
-      case '\\': result += '\\\\'; break;
-      case '(':  result += '\\(';  break;
-      case ')':  result += '\\)';  break;
-      case '\n': result += '\\n';  break;
-      case '\r': result += '\\r';  break;
-      case '\t': result += '\\t';  break;
-      case '\b': result += '\\b';  break;
-      case '\f': result += '\\f';  break;
-      default:   result += ch;     break;
+      case '\\':
+        result += '\\\\';
+        break;
+      case '(':
+        result += '\\(';
+        break;
+      case ')':
+        result += '\\)';
+        break;
+      case '\n':
+        result += '\\n';
+        break;
+      case '\r':
+        result += '\\r';
+        break;
+      case '\t':
+        result += '\\t';
+        break;
+      case '\b':
+        result += '\\b';
+        break;
+      case '\f':
+        result += '\\f';
+        break;
+      default:
+        result += ch;
+        break;
     }
   }
   return result;
@@ -268,7 +282,9 @@ export function formatPdfDate(date: Date): string {
 
   const sign = tzOffset > 0 ? '-' : '+';
   const absOffset = Math.abs(tzOffset);
-  const tzHours = Math.floor(absOffset / 60).toString().padStart(2, '0');
+  const tzHours = Math.floor(absOffset / 60)
+    .toString()
+    .padStart(2, '0');
   const tzMinutes = (absOffset % 60).toString().padStart(2, '0');
 
   return `D:${year}${month}${day}${hours}${minutes}${seconds}${sign}${tzHours}'${tzMinutes}`;

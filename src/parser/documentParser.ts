@@ -489,7 +489,9 @@ export class PdfDocumentParser {
     genNum: number,
   ): Promise<void> {
     // Snapshot keys to avoid mutation during iteration
-    const keys = Iterator.from(dict).map(([key]) => key).toArray();
+    const keys = Iterator.from(dict)
+      .map(([key]) => key)
+      .toArray();
 
     for (const key of keys) {
       const val = dict.get(key);
@@ -616,8 +618,7 @@ export class PdfDocumentParser {
     if (pdfIdx === -1 || pdfIdx > 1024) {
       throw new PdfParseError({
         message:
-          'Invalid PDF: file does not start with "%PDF-" header. ' +
-          'This may not be a PDF file.',
+          'Invalid PDF: file does not start with "%PDF-" header. ' + 'This may not be a PDF file.',
         offset: 0,
         expected: '"%PDF-" header near start of file',
         actual: 'no "%PDF-" marker found',
@@ -652,9 +653,7 @@ export class PdfDocumentParser {
     }
 
     throw new PdfParseError({
-      message:
-        `Unsupported PDF version: ${this.pdfVersion}. ` +
-        'Expected PDF 1.0-1.9 or 2.0+.',
+      message: `Unsupported PDF version: ${this.pdfVersion}. ` + 'Expected PDF 1.0-1.9 or 2.0+.',
       offset: 0,
       expected: 'PDF version 1.0-1.9 or 2.0+',
       actual: `PDF version ${this.pdfVersion}`,
@@ -914,8 +913,7 @@ export class PdfDocumentParser {
     } catch (err) {
       throw new PdfParseError({
         message:
-          `Failed to parse object stream ${containerNum} at offset ` +
-          `${containerEntry.offset}`,
+          `Failed to parse object stream ${containerNum} at offset ` + `${containerEntry.offset}`,
         offset: containerEntry.offset,
         expected: `valid object stream ${containerNum}`,
         actual: 'parse failure',
@@ -996,9 +994,8 @@ export class PdfDocumentParser {
       const dataStart = first + objEntry.offset;
 
       // Determine the end of this object's data
-      const dataEnd = i + 1 < objEntries.length
-        ? first + objEntries[i + 1]!.offset
-        : decompressedData.length;
+      const dataEnd =
+        i + 1 < objEntries.length ? first + objEntries[i + 1]!.offset : decompressedData.length;
 
       try {
         // Create a sub-lexer for this object's data
@@ -1235,7 +1232,8 @@ export class PdfDocumentParser {
     for (const flatPage of this.flattenedPages) {
       const mediaBox = flatPage.mediaBox;
       const width = this.getMediaBoxDimension(mediaBox, 2) - this.getMediaBoxDimension(mediaBox, 0);
-      const height = this.getMediaBoxDimension(mediaBox, 3) - this.getMediaBoxDimension(mediaBox, 1);
+      const height =
+        this.getMediaBoxDimension(mediaBox, 3) - this.getMediaBoxDimension(mediaBox, 1);
 
       // Extract content stream references
       const contentRefs = this.extractContentRefs(flatPage.dict);
@@ -1424,11 +1422,7 @@ export class PdfDocumentParser {
    * E.g. for /Font with keys /F1, /F3, /F7 and prefix 'F', returns 7.
    * This ensures newly allocated names (F8, F9, …) don't collide.
    */
-  private scanMaxResourceIndex(
-    resources: PdfDict,
-    subKey: string,
-    prefix: string,
-  ): number {
+  private scanMaxResourceIndex(resources: PdfDict, subKey: string, prefix: string): number {
     const subObj = resources.get(subKey);
     if (subObj === undefined || subObj.kind !== 'dict') return 0;
 

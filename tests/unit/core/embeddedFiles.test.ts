@@ -186,11 +186,7 @@ describe('getAttachments', () => {
     const ref2 = attachFile(registry, file2);
 
     // Build name tree
-    const nameTree = buildEmbeddedFilesNameTree(
-      [ref1, ref2],
-      ['hello.txt', 'data.json'],
-      registry,
-    );
+    const nameTree = buildEmbeddedFilesNameTree([ref1, ref2], ['hello.txt', 'data.json'], registry);
 
     // Build a catalog-like dict
     const namesDict = new PdfDict();

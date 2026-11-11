@@ -3,10 +3,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  encodeItf,
-  itfToOperators,
-} from '../../src/barcode/itf.js';
+import { encodeItf, itfToOperators } from '../../src/barcode/itf.js';
 import { rgb } from '../../src/core/operators/color.js';
 
 // ---------------------------------------------------------------------------
@@ -45,10 +42,10 @@ describe('encodeItf', () => {
   it('has correct start pattern (4 narrow elements)', () => {
     const matrix = encodeItf('00');
     // Start pattern: narrow bar, narrow space, narrow bar, narrow space
-    expect(matrix.modules[0]).toBe(true);   // bar
-    expect(matrix.modules[1]).toBe(false);  // space
-    expect(matrix.modules[2]).toBe(true);   // bar
-    expect(matrix.modules[3]).toBe(false);  // space
+    expect(matrix.modules[0]).toBe(true); // bar
+    expect(matrix.modules[1]).toBe(false); // space
+    expect(matrix.modules[2]).toBe(true); // bar
+    expect(matrix.modules[3]).toBe(false); // space
   });
 
   it('has correct stop pattern (wide bar, narrow space, narrow bar)', () => {
@@ -95,16 +92,24 @@ describe('encodeItf', () => {
     // Check the interleaved portion (after start pattern, indices 4-21)
     const interleaved = matrix.modules.slice(4, 22);
     const expected = [
-      true,                  // bar N=1
-      false,                 // space N=1
-      true,                  // bar N=1
-      false,                 // space N=1
-      true, true, true,      // bar W=3
-      false, false, false,   // space W=3
-      true, true, true,      // bar W=3
-      false, false, false,   // space W=3
-      true,                  // bar N=1
-      false,                 // space N=1
+      true, // bar N=1
+      false, // space N=1
+      true, // bar N=1
+      false, // space N=1
+      true,
+      true,
+      true, // bar W=3
+      false,
+      false,
+      false, // space W=3
+      true,
+      true,
+      true, // bar W=3
+      false,
+      false,
+      false, // space W=3
+      true, // bar N=1
+      false, // space N=1
     ];
     expect(Array.from(interleaved)).toEqual(expected);
   });
@@ -152,10 +157,10 @@ describe('itfToOperators', () => {
     const matrix = encodeItf('12');
     const ops = itfToOperators(matrix, 0, 0);
 
-    expect(ops).toContain('q\n');  // save state
-    expect(ops).toContain('Q\n');  // restore state
+    expect(ops).toContain('q\n'); // save state
+    expect(ops).toContain('Q\n'); // restore state
     expect(ops).toContain('re\n'); // rectangle
-    expect(ops).toContain('f\n');  // fill
+    expect(ops).toContain('f\n'); // fill
   });
 
   it('applies quiet zone offset', () => {

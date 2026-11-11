@@ -3,13 +3,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  PdfDict,
-  PdfName,
-  PdfString,
-  PdfNumber,
-  PdfArray,
-} from '../../../src/core/pdfObjects.js';
+import { PdfDict, PdfName, PdfString, PdfNumber, PdfArray } from '../../../src/core/pdfObjects.js';
 import { PdfTextField } from '../../../src/form/fields/textField.js';
 import { PdfForm } from '../../../src/form/pdfForm.js';
 import {
@@ -207,7 +201,9 @@ describe('addVisibilityAction', () => {
     const field = makeTextField('target');
     addVisibilityAction(field, 'status', { operator: 'equals', value: 'active' });
 
-    const js = ((field.getWidgetDict().get('/AA') as PdfDict).get('/V') as PdfDict).get('/JS') as PdfString;
+    const js = ((field.getWidgetDict().get('/AA') as PdfDict).get('/V') as PdfDict).get(
+      '/JS',
+    ) as PdfString;
     expect(js.value).toContain('.value == "active"');
   });
 
@@ -215,7 +211,9 @@ describe('addVisibilityAction', () => {
     const field = makeTextField('target');
     addVisibilityAction(field, 'status', { operator: 'notEquals', value: 'inactive' });
 
-    const js = ((field.getWidgetDict().get('/AA') as PdfDict).get('/V') as PdfDict).get('/JS') as PdfString;
+    const js = ((field.getWidgetDict().get('/AA') as PdfDict).get('/V') as PdfDict).get(
+      '/JS',
+    ) as PdfString;
     expect(js.value).toContain('.value != "inactive"');
   });
 
@@ -223,7 +221,9 @@ describe('addVisibilityAction', () => {
     const field = makeTextField('target');
     addVisibilityAction(field, 'status', { operator: 'contains', value: 'yes' });
 
-    const js = ((field.getWidgetDict().get('/AA') as PdfDict).get('/V') as PdfDict).get('/JS') as PdfString;
+    const js = ((field.getWidgetDict().get('/AA') as PdfDict).get('/V') as PdfDict).get(
+      '/JS',
+    ) as PdfString;
     expect(js.value).toContain('.includes("yes")');
   });
 
@@ -231,7 +231,9 @@ describe('addVisibilityAction', () => {
     const field = makeTextField('target');
     addVisibilityAction(field, 'status', { operator: 'empty' });
 
-    const js = ((field.getWidgetDict().get('/AA') as PdfDict).get('/V') as PdfDict).get('/JS') as PdfString;
+    const js = ((field.getWidgetDict().get('/AA') as PdfDict).get('/V') as PdfDict).get(
+      '/JS',
+    ) as PdfString;
     expect(js.value).toContain('.value == ""');
   });
 
@@ -239,7 +241,9 @@ describe('addVisibilityAction', () => {
     const field = makeTextField('target');
     addVisibilityAction(field, 'status', { operator: 'notEmpty' });
 
-    const js = ((field.getWidgetDict().get('/AA') as PdfDict).get('/V') as PdfDict).get('/JS') as PdfString;
+    const js = ((field.getWidgetDict().get('/AA') as PdfDict).get('/V') as PdfDict).get(
+      '/JS',
+    ) as PdfString;
     expect(js.value).toContain('.value != ""');
   });
 

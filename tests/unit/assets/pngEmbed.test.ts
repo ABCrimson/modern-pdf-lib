@@ -29,8 +29,8 @@ function buildMinimalPng(width: number, height: number): Uint8Array {
   const ihdrView = new DataView(ihdrData.buffer);
   ihdrView.setUint32(0, width, false);
   ihdrView.setUint32(4, height, false);
-  ihdrData[8] = 8;  // bit depth
-  ihdrData[9] = 2;  // color type (RGB)
+  ihdrData[8] = 8; // bit depth
+  ihdrData[9] = 2; // color type (RGB)
   ihdrData[10] = 0; // compression
   ihdrData[11] = 0; // filter
   ihdrData[12] = 0; // interlace
@@ -40,9 +40,17 @@ function buildMinimalPng(width: number, height: number): Uint8Array {
   // Minimal IDAT chunk with some dummy compressed data
   // This is a minimal valid zlib stream (just enough to not crash parsers)
   const idatPayload = new Uint8Array([
-    0x78, 0x01, // zlib header (CMF, FLG)
-    0x01, 0x00, 0x00, 0xff, 0xff, // stored block (empty)
-    0x00, 0x00, 0x00, 0x01, // adler32
+    0x78,
+    0x01, // zlib header (CMF, FLG)
+    0x01,
+    0x00,
+    0x00,
+    0xff,
+    0xff, // stored block (empty)
+    0x00,
+    0x00,
+    0x00,
+    0x01, // adler32
   ]);
   const idatChunk = buildPngChunk('IDAT', idatPayload);
 
@@ -91,11 +99,7 @@ function buildPngChunk(type: string, data: Uint8Array): Uint8Array {
 // ---------------------------------------------------------------------------
 
 /** Build a minimal valid JPEG with SOF0 marker. */
-function buildMinimalJpeg(
-  width: number,
-  height: number,
-  components: number = 3,
-): Uint8Array {
+function buildMinimalJpeg(width: number, height: number, components: number = 3): Uint8Array {
   const parts: number[] = [];
 
   // SOI
@@ -109,14 +113,14 @@ function buildMinimalJpeg(
   parts.push((sofLength >> 8) & 0xff, sofLength & 0xff);
   parts.push(8); // precision (8 bits)
   parts.push((height >> 8) & 0xff, height & 0xff); // height
-  parts.push((width >> 8) & 0xff, width & 0xff);   // width
+  parts.push((width >> 8) & 0xff, width & 0xff); // width
   parts.push(components); // number of components
 
   // Component specifications (3 bytes each)
   for (let i = 0; i < components; i++) {
     parts.push(i + 1); // component ID
-    parts.push(0x11);  // sampling factors (1x1)
-    parts.push(0);     // quantization table ID
+    parts.push(0x11); // sampling factors (1x1)
+    parts.push(0); // quantization table ID
   }
 
   // EOI
@@ -177,7 +181,12 @@ describe('PNG embedding', () => {
   });
 
   it('parses IHDR for various dimensions', () => {
-    for (const [w, h] of [[1, 1], [100, 200], [1920, 1080], [4096, 4096]]) {
+    for (const [w, h] of [
+      [1, 1],
+      [100, 200],
+      [1920, 1080],
+      [4096, 4096],
+    ]) {
       const png = buildMinimalPng(w!, h!);
       const view = new DataView(png.buffer, png.byteOffset, png.byteLength);
       expect(view.getUint32(16, false)).toBe(w);
@@ -298,7 +307,12 @@ describe('JPEG embedding', () => {
   });
 
   it('handles various JPEG dimensions', () => {
-    for (const [w, h] of [[1, 1], [640, 480], [1920, 1080], [4000, 3000]]) {
+    for (const [w, h] of [
+      [1, 1],
+      [640, 480],
+      [1920, 1080],
+      [4000, 3000],
+    ]) {
       const jpeg = buildMinimalJpeg(w!, h!);
       const result = embedJpeg(jpeg);
       expect(result.width).toBe(w);

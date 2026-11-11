@@ -108,12 +108,14 @@ export interface EmbedPageOptions {
    * Clip the embedded page to a sub-region (bounding box).
    * Coordinates are in the source page's coordinate system.
    */
-  boundingBox?: {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-  } | undefined;
+  boundingBox?:
+    | {
+        x: number;
+        y: number;
+        width: number;
+        height: number;
+      }
+    | undefined;
 
   /**
    * Apply an affine transformation matrix to the Form XObject.

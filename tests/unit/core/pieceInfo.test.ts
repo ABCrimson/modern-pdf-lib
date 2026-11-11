@@ -85,14 +85,7 @@ describe('buildPieceInfo', () => {
     expect(m).not.toBeNull();
     if (m === null) throw new Error('unexpected date format');
     const [, y, mo, d, h, mi, s] = m;
-    const parsed = Date.UTC(
-      Number(y),
-      Number(mo) - 1,
-      Number(d),
-      Number(h),
-      Number(mi),
-      Number(s),
-    );
+    const parsed = Date.UTC(Number(y), Number(mo) - 1, Number(d), Number(h), Number(mi), Number(s));
     expect(parsed).toBeGreaterThanOrEqual(before - 1000);
     expect(parsed).toBeLessThanOrEqual(after + 1000);
   });

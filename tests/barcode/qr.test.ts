@@ -3,10 +3,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  encodeQrCode,
-  qrCodeToOperators,
-} from '../../src/barcode/qr.js';
+import { encodeQrCode, qrCodeToOperators } from '../../src/barcode/qr.js';
 
 import { rgb } from '../../src/core/operators/color.js';
 import { createPdf } from '../../src/core/pdfDocument.js';
@@ -170,10 +167,10 @@ describe('QR Code Encoder', () => {
     const ops = qrCodeToOperators(matrix, 50, 100);
 
     // Should contain PDF operator keywords
-    expect(ops).toContain('q\n');   // saveState
-    expect(ops).toContain('Q\n');   // restoreState
+    expect(ops).toContain('q\n'); // saveState
+    expect(ops).toContain('Q\n'); // restoreState
     expect(ops).toContain(' re\n'); // rectangle
-    expect(ops).toContain('f\n');   // fill
+    expect(ops).toContain('f\n'); // fill
   });
 
   // -----------------------------------------------------------------------
@@ -209,7 +206,7 @@ describe('QR Code Encoder', () => {
   it('handles custom colours', () => {
     const matrix = encodeQrCode('Color', 'L');
     const ops = qrCodeToOperators(matrix, 0, 0, {
-      color: rgb(1, 0, 0),           // red foreground
+      color: rgb(1, 0, 0), // red foreground
       backgroundColor: rgb(1, 1, 0), // yellow background
     });
 

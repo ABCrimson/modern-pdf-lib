@@ -74,9 +74,7 @@ function buildIsobmff(
 
   // optional pixi FullBox: version+flags(0) + num_channels(3) + 3 x bitDepth
   const pixi =
-    bitDepth === undefined
-      ? []
-      : box('pixi', [...u32(0), 3, bitDepth, bitDepth, bitDepth]);
+    bitDepth === undefined ? [] : box('pixi', [...u32(0), 3, bitDepth, bitDepth, bitDepth]);
 
   const ipco = box('ipco', [...ispe, ...pixi]);
   const iprp = box('iprp', ipco);
@@ -103,11 +101,7 @@ describe('detectNextGenFormat', () => {
 
   it('detects AVIF when "avif" is only a compatible brand', () => {
     // major brand 'mif1', compatible brand 'avif' → AVIF wins.
-    const ftyp = box('ftyp', [
-      ...fourcc('mif1'),
-      ...u32(0),
-      ...fourcc('avif'),
-    ]);
+    const ftyp = box('ftyp', [...fourcc('mif1'), ...u32(0), ...fourcc('avif')]);
     expect(detectNextGenFormat(new Uint8Array(ftyp))).toBe('avif');
   });
 
@@ -165,7 +159,14 @@ describe('detectNextGenFormat', () => {
 
   it('does not misfire when bytes 4..8 are not "ftyp"', () => {
     const notFtyp = new Uint8Array([
-      0x00, 0x00, 0x00, 0x18, 0x6d, 0x6f, 0x6f, 0x76, // 'moov'
+      0x00,
+      0x00,
+      0x00,
+      0x18,
+      0x6d,
+      0x6f,
+      0x6f,
+      0x76, // 'moov'
     ]);
     expect(detectNextGenFormat(notFtyp)).toBeNull();
   });
@@ -278,13 +279,7 @@ describe('probeNextGenImage', () => {
 
     // largesize box: size32==1, type, largesize64, payload
     const metaSize = 16 + metaPayload.length; // 8 (size+type) + 8 (largesize) + payload
-    const metaLarge = [
-      ...u32(1),
-      ...fourcc('meta'),
-      ...u32(0),
-      ...u32(metaSize),
-      ...metaPayload,
-    ];
+    const metaLarge = [...u32(1), ...fourcc('meta'), ...u32(0), ...u32(metaSize), ...metaPayload];
     const ftyp = box('ftyp', [...fourcc('avif'), ...u32(0), ...fourcc('avif')]);
     const bytes = new Uint8Array([...ftyp, ...metaLarge]);
 

@@ -8,10 +8,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  verifySignatures,
-  verifySignature,
-} from '../../../src/signature/signatureVerifier.js';
+import { verifySignatures, verifySignature } from '../../../src/signature/signatureVerifier.js';
 
 import { signPdf } from '../../../src/signature/signatureHandler.js';
 import {
@@ -91,7 +88,13 @@ async function generateExpiredCert(cn = 'Expired Signer'): Promise<{
   // Build cert with expired validity (notBefore: 2020-01-01, notAfter: 2021-01-01)
   const notBefore = new Date(Date.UTC(2020, 0, 1));
   const notAfter = new Date(Date.UTC(2021, 0, 1));
-  const certificate = await buildSelfSignedCert(spkiDer, keyPair.privateKey, cn, notBefore, notAfter);
+  const certificate = await buildSelfSignedCert(
+    spkiDer,
+    keyPair.privateKey,
+    cn,
+    notBefore,
+    notAfter,
+  );
 
   return { certificate, privateKey: privateKeyDer };
 }
@@ -123,16 +126,15 @@ async function buildSelfSignedCert(
   const later = notAfter ?? new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000);
   const validity = encodeSequence([encodeUTCTime(now), encodeUTCTime(later)]);
 
-  const tbsCert = encodeSequence([
-    version, serial, sigAlgo, name, validity, name, spkiDer,
-  ]);
+  const tbsCert = encodeSequence([version, serial, sigAlgo, name, validity, name, spkiDer]);
 
   const signature = new Uint8Array(
     await globalThis.crypto.subtle.sign(
       { name: 'RSASSA-PKCS1-v1_5' },
       privateKey,
       tbsCert.buffer.slice(
-        tbsCert.byteOffset, tbsCert.byteOffset + tbsCert.byteLength,
+        tbsCert.byteOffset,
+        tbsCert.byteOffset + tbsCert.byteLength,
       ) as ArrayBuffer,
     ),
   );
@@ -420,12 +422,7 @@ describe('verifySignature', () => {
     const pdfBytes = createMinimalPdf();
     const byteRange: [number, number, number, number] = [0, 100, 200, 100];
 
-    const result = await verifySignature(
-      pdfBytes,
-      byteRange,
-      new Uint8Array(0),
-      new Uint8Array(0),
-    );
+    const result = await verifySignature(pdfBytes, byteRange, new Uint8Array(0), new Uint8Array(0));
 
     expect(result).toBe(false);
   });
@@ -437,12 +434,7 @@ describe('verifySignature', () => {
     // Fixed bytes keep this test deterministic.
     const garbage = new Uint8Array(128).fill(0x5a);
 
-    const result = await verifySignature(
-      pdfBytes,
-      byteRange,
-      garbage,
-      garbage,
-    );
+    const result = await verifySignature(pdfBytes, byteRange, garbage, garbage);
 
     expect(result).toBe(false);
   });
@@ -455,12 +447,7 @@ describe('verifySignature', () => {
     const malformedSig = new Uint8Array([0x30, 0x82, 0x00, 0x10, 0x00]);
     const malformedCert = new Uint8Array([0x30, 0x03, 0x02, 0x01, 0x00]);
 
-    const result = await verifySignature(
-      pdfBytes,
-      byteRange,
-      malformedSig,
-      malformedCert,
-    );
+    const result = await verifySignature(pdfBytes, byteRange, malformedSig, malformedCert);
 
     expect(result).toBe(false);
   });
@@ -487,12 +474,7 @@ describe('verifySignature', () => {
     const sigBytes = Uint8Array.fromHex(sig.contentsHex.replace(/\s/g, ''));
 
     // Try to verify using cert1 (wrong certificate)
-    const result = await verifySignature(
-      signedPdf,
-      sig.byteRange,
-      sigBytes,
-      cert1,
-    );
+    const result = await verifySignature(signedPdf, sig.byteRange, sigBytes, cert1);
 
     expect(result).toBe(false);
   });

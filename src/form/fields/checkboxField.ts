@@ -6,11 +6,7 @@
  * Reference: PDF 1.7 spec, SS12.7.4.2.1 (Check Boxes).
  */
 
-import {
-  PdfDict,
-  PdfName,
-  PdfStream,
-} from '../../core/pdfObjects.js';
+import { PdfDict, PdfName, PdfStream } from '../../core/pdfObjects.js';
 import { PdfField, nameVal } from '../pdfField.js';
 import type { FieldType } from '../pdfField.js';
 import { generateCheckboxAppearance } from '../fieldAppearance.js';

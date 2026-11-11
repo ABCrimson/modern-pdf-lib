@@ -30,11 +30,11 @@ import { resolve, join } from 'node:path';
 /** All known WASM module names and their expected binary filenames. */
 const WASM_MODULES: ReadonlyArray<{ name: string; filename: string }> = [
   { name: 'libdeflate', filename: 'modern_pdf_libdeflate_bg.wasm' },
-  { name: 'png',        filename: 'modern_pdf_png_bg.wasm' },
-  { name: 'ttf',        filename: 'modern_pdf_ttf_bg.wasm' },
-  { name: 'shaping',    filename: 'modern_pdf_shaping_bg.wasm' },
-  { name: 'jbig2',      filename: 'modern_pdf_jbig2_bg.wasm' },
-  { name: 'jpeg',       filename: 'modern_pdf_jpeg_bg.wasm' },
+  { name: 'png', filename: 'modern_pdf_png_bg.wasm' },
+  { name: 'ttf', filename: 'modern_pdf_ttf_bg.wasm' },
+  { name: 'shaping', filename: 'modern_pdf_shaping_bg.wasm' },
+  { name: 'jbig2', filename: 'modern_pdf_jbig2_bg.wasm' },
+  { name: 'jpeg', filename: 'modern_pdf_jpeg_bg.wasm' },
 ];
 
 const ROOT_DIR = resolve(import.meta.dirname!, '..');
@@ -71,7 +71,7 @@ interface ModuleSizeEntry {
   name: string;
   binarySize: number;
   base64Size: number;
-  overhead: number;       // base64Size - binarySize
+  overhead: number; // base64Size - binarySize
   overheadPercent: number; // (overhead / binarySize) * 100
 }
 
@@ -139,8 +139,9 @@ async function main(): Promise<void> {
     ` *   Total base64: ${formatBytes(sizeReport.totalBase64Size)}`,
     ` *   Overhead: ${formatBytes(sizeReport.totalOverhead)} (+${sizeReport.totalOverheadPercent.toFixed(1)}%)`,
     ' *',
-    ...sizeReport.modules.map(m =>
-      ` *   - ${m.name}: ${formatBytes(m.binarySize)} binary -> ${formatBytes(m.base64Size)} base64 (+${m.overheadPercent.toFixed(1)}%)`
+    ...sizeReport.modules.map(
+      (m) =>
+        ` *   - ${m.name}: ${formatBytes(m.binarySize)} binary -> ${formatBytes(m.base64Size)} base64 (+${m.overheadPercent.toFixed(1)}%)`,
     ),
     ' */',
     '',
@@ -165,7 +166,9 @@ async function main(): Promise<void> {
     lines.push(` *`);
     lines.push(` * @remarks Tree-shakeable — only included in the bundle if imported.`);
     lines.push(` */`);
-    lines.push(`/* @__PURE__ */ export const WASM_${entry.name.toUpperCase()}_BASE64 = '${entry.base64}';`);
+    lines.push(
+      `/* @__PURE__ */ export const WASM_${entry.name.toUpperCase()}_BASE64 = '${entry.base64}';`,
+    );
     lines.push('');
   }
 
@@ -190,7 +193,9 @@ async function main(): Promise<void> {
 
   // Export the set of available module names
   lines.push('/** Names of all WASM modules that have inline binaries available. */');
-  lines.push(`export const INLINE_WASM_MODULE_NAMES: readonly string[] = [${entries.map(e => `'${e.name}'`).join(', ')}];`);
+  lines.push(
+    `export const INLINE_WASM_MODULE_NAMES: readonly string[] = [${entries.map((e) => `'${e.name}'`).join(', ')}];`,
+  );
   lines.push('');
 
   // Export size metadata
@@ -204,7 +209,9 @@ async function main(): Promise<void> {
   lines.push(' * - `binarySize`: original .wasm file size in bytes');
   lines.push(' * - `base64Size`: base64-encoded string length in characters');
   lines.push(' */');
-  lines.push('export const INLINE_WASM_SIZES: Readonly<Record<string, { binarySize: number; base64Size: number }>> = {');
+  lines.push(
+    'export const INLINE_WASM_SIZES: Readonly<Record<string, { binarySize: number; base64Size: number }>> = {',
+  );
   for (const entry of entries) {
     const b64Len = entry.base64.length;
     lines.push(`  ${entry.name}: { binarySize: ${entry.sizeBytes}, base64Size: ${b64Len} },`);
@@ -218,24 +225,10 @@ async function main(): Promise<void> {
   // Console report
   // -----------------------------------------------------------------------
 
-  
-  
-  
-  
-  
-  
-  
-
   for (const m of sizeReport.modules) {
-    
   }
 
-  
-  
-  
-
   if (skipped.length > 0) {
-    
   }
 }
 
@@ -246,7 +239,7 @@ async function main(): Promise<void> {
 function buildSizeReport(
   entries: ReadonlyArray<{ name: string; base64: string; sizeBytes: number }>,
 ): SizeReport {
-  const modules: ModuleSizeEntry[] = entries.map(entry => {
+  const modules: ModuleSizeEntry[] = entries.map((entry) => {
     const base64Size = entry.base64.length;
     const overhead = base64Size - entry.sizeBytes;
     return {
@@ -273,6 +266,5 @@ function buildSizeReport(
 }
 
 main().catch((err: unknown) => {
-  
   process.exitCode = 1;
 });

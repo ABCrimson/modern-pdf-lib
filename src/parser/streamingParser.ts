@@ -116,11 +116,7 @@ function concat(a: Uint8Array, b: Uint8Array): Uint8Array {
  * Scan backwards from `startPos` for a byte sequence (encoded as ASCII).
  * Returns the byte offset of the first character of `needle`, or -1.
  */
-function reverseIndexOf(
-  data: Uint8Array,
-  needle: string,
-  startPos: number,
-): number {
+function reverseIndexOf(data: Uint8Array, needle: string, startPos: number): number {
   const len = needle.length;
   for (let i = startPos; i >= 0; i--) {
     let match = true;
@@ -143,9 +139,16 @@ function isWhitespace(b: number): boolean {
 /** Check if a byte is a PDF delimiter. */
 function isDelimiter(b: number): boolean {
   return (
-    b === 0x28 || b === 0x29 || b === 0x3c || b === 0x3e ||
-    b === 0x5b || b === 0x5d || b === 0x7b || b === 0x7d ||
-    b === 0x2f || b === 0x25
+    b === 0x28 ||
+    b === 0x29 ||
+    b === 0x3c ||
+    b === 0x3e ||
+    b === 0x5b ||
+    b === 0x5d ||
+    b === 0x7b ||
+    b === 0x7d ||
+    b === 0x2f ||
+    b === 0x25
   );
 }
 
@@ -161,10 +164,7 @@ function skipWS(data: Uint8Array, pos: number): number {
  * Read a decimal integer from `data` starting at `pos`.
  * Returns `{ value, nextPos }`.
  */
-function readInt(
-  data: Uint8Array,
-  pos: number,
-): { value: number; nextPos: number } {
+function readInt(data: Uint8Array, pos: number): { value: number; nextPos: number } {
   let value = 0;
   let started = false;
   while (pos < data.length) {
@@ -187,10 +187,7 @@ function readInt(
  * Read a PDF token (name, number, keyword, string) at `pos`.
  * Simplified — only handles what we need for lightweight structure parsing.
  */
-function readToken(
-  data: Uint8Array,
-  pos: number,
-): { token: string; nextPos: number } {
+function readToken(data: Uint8Array, pos: number): { token: string; nextPos: number } {
   pos = skipWS(data, pos);
   if (pos >= data.length) return { token: '', nextPos: pos };
 
@@ -226,10 +223,7 @@ function readToken(
  * the function skips to the closing `]` and returns whatever numbers
  * it has collected so far.
  */
-function parseNumberArray(
-  data: Uint8Array,
-  pos: number,
-): { values: number[]; nextPos: number } {
+function parseNumberArray(data: Uint8Array, pos: number): { values: number[]; nextPos: number } {
   if (data[pos] !== 0x5b /* [ */) {
     return { values: [], nextPos: pos };
   }
@@ -246,10 +240,7 @@ function parseNumberArray(
 
     // Check if this looks like a number start (digit, sign, or dot)
     const isNumStart =
-      (b >= 0x30 && b <= 0x39) ||
-      b === 0x2d /* - */ ||
-      b === 0x2b /* + */ ||
-      b === 0x2e /* . */;
+      (b >= 0x30 && b <= 0x39) || b === 0x2d /* - */ || b === 0x2b /* + */ || b === 0x2e; /* . */
 
     if (!isNumStart) {
       // Non-numeric content — skip this byte and continue.
@@ -480,10 +471,7 @@ function getDictRef(
 /**
  * Get a number array from a LightDict.
  */
-function getDictNumberArray(
-  dict: Map<string, LightValue>,
-  key: string,
-): number[] | undefined {
+function getDictNumberArray(dict: Map<string, LightValue>, key: string): number[] | undefined {
   const v = dict.get(key);
   if (v?.kind === 'array') return v.values;
   return undefined;
@@ -539,7 +527,10 @@ export class StreamingPdfParser {
   private isLinearized = false;
   private pages: ParsedPage[] = [];
   private metadata: Record<string, string> | undefined;
-  private xrefEntries = new Map<number, { offset: number; gen: number; type: string; container?: number; index?: number }>();
+  private xrefEntries = new Map<
+    number,
+    { offset: number; gen: number; type: string; container?: number; index?: number }
+  >();
   private trailerDict: Map<string, LightValue> | undefined;
 
   // For getPageContent — stores the full data reference
@@ -709,18 +700,18 @@ export class StreamingPdfParser {
   ): Promise<StreamingParseResult> {
     // Try Node.js fs (dynamic import to avoid bundling issues)
     try {
-      type NodeFs = { createReadStream(p: string): {
-        on(event: string, cb: (...args: unknown[]) => void): void;
-      } };
+      type NodeFs = {
+        createReadStream(p: string): {
+          on(event: string, cb: (...args: unknown[]) => void): void;
+        };
+      };
       const fs = await (Function('return import("node:fs")')() as Promise<NodeFs>);
       const stream = fs.createReadStream(path);
       const parser = new StreamingPdfParser(options);
 
       await new Promise<void>((resolve, reject) => {
         stream.on('data', (chunk: unknown) => {
-          parser.feed(
-            chunk instanceof Uint8Array ? chunk : new Uint8Array(chunk as ArrayBuffer),
-          );
+          parser.feed(chunk instanceof Uint8Array ? chunk : new Uint8Array(chunk as ArrayBuffer));
         });
         stream.on('end', () => resolve());
         stream.on('error', (err: unknown) => reject(err));
@@ -798,9 +789,7 @@ export class StreamingPdfParser {
   // -----------------------------------------------------------------------
 
   private parseHeader(data: Uint8Array): void {
-    const headerText = TEXT_DECODER.decode(
-      data.subarray(0, Math.min(1024, data.length)),
-    );
+    const headerText = TEXT_DECODER.decode(data.subarray(0, Math.min(1024, data.length)));
     const pdfIdx = headerText.indexOf('%PDF-');
     if (pdfIdx === -1) {
       this.emit({
@@ -863,8 +852,7 @@ export class StreamingPdfParser {
         offset: startPos,
       });
       throw new PdfParseError({
-        message:
-          'Invalid PDF: could not find "startxref" marker in the last 2048 bytes.',
+        message: 'Invalid PDF: could not find "startxref" marker in the last 2048 bytes.',
         offset: startPos,
         expected: '"startxref" near end of file',
         actual: 'no "startxref" found',
@@ -914,9 +902,12 @@ export class StreamingPdfParser {
       // Check for "trailer"
       if (
         pos + 7 <= data.length &&
-        data[pos] === 0x74 && data[pos + 1] === 0x72 &&
-        data[pos + 2] === 0x61 && data[pos + 3] === 0x69 &&
-        data[pos + 4] === 0x6c && data[pos + 5] === 0x65 &&
+        data[pos] === 0x74 &&
+        data[pos + 1] === 0x72 &&
+        data[pos + 2] === 0x61 &&
+        data[pos + 3] === 0x69 &&
+        data[pos + 4] === 0x6c &&
+        data[pos + 5] === 0x65 &&
         data[pos + 6] === 0x72
       ) {
         break;
@@ -943,14 +934,20 @@ export class StreamingPdfParser {
           let valid = true;
           for (let k = 0; k < 10; k++) {
             const b = data[pos + k]!;
-            if (b < 0x30 || b > 0x39) { valid = false; break; }
+            if (b < 0x30 || b > 0x39) {
+              valid = false;
+              break;
+            }
             entryOffset = entryOffset * 10 + (b - 0x30);
           }
           if (valid && data[pos + 10] === 0x20) {
             let gen = 0;
             for (let k = 0; k < 5; k++) {
               const b = data[pos + 11 + k]!;
-              if (b < 0x30 || b > 0x39) { valid = false; break; }
+              if (b < 0x30 || b > 0x39) {
+                valid = false;
+                break;
+              }
               gen = gen * 10 + (b - 0x30);
             }
             if (valid) {
@@ -976,7 +973,10 @@ export class StreamingPdfParser {
 
               // Advance past the 18 significant bytes + trailing whitespace
               pos += 18;
-              while (pos < data.length && (data[pos] === 0x20 || data[pos] === 0x0d || data[pos] === 0x0a)) {
+              while (
+                pos < data.length &&
+                (data[pos] === 0x20 || data[pos] === 0x0d || data[pos] === 0x0a)
+              ) {
                 pos++;
               }
               continue;
@@ -998,9 +998,12 @@ export class StreamingPdfParser {
     // Skip past "trailer" keyword
     if (
       pos + 7 <= data.length &&
-      data[pos] === 0x74 && data[pos + 1] === 0x72 &&
-      data[pos + 2] === 0x61 && data[pos + 3] === 0x69 &&
-      data[pos + 4] === 0x6c && data[pos + 5] === 0x65 &&
+      data[pos] === 0x74 &&
+      data[pos + 1] === 0x72 &&
+      data[pos + 2] === 0x61 &&
+      data[pos + 3] === 0x69 &&
+      data[pos + 4] === 0x6c &&
+      data[pos + 5] === 0x65 &&
       data[pos + 6] === 0x72
     ) {
       pos += 7;
@@ -1045,7 +1048,9 @@ export class StreamingPdfParser {
     // Skip "obj" keyword
     if (
       pos + 3 <= data.length &&
-      data[pos] === 0x6f && data[pos + 1] === 0x62 && data[pos + 2] === 0x6a
+      data[pos] === 0x6f &&
+      data[pos + 1] === 0x62 &&
+      data[pos + 2] === 0x6a
     ) {
       pos += 3;
     }
@@ -1104,9 +1109,16 @@ export class StreamingPdfParser {
         const after = data[i + 3]!;
         if (
           after > 0x20 &&
-          after !== 0x25 && after !== 0x28 && after !== 0x29 &&
-          after !== 0x2f && after !== 0x3c && after !== 0x3e &&
-          after !== 0x5b && after !== 0x5d && after !== 0x7b && after !== 0x7d
+          after !== 0x25 &&
+          after !== 0x28 &&
+          after !== 0x29 &&
+          after !== 0x2f &&
+          after !== 0x3c &&
+          after !== 0x3e &&
+          after !== 0x5b &&
+          after !== 0x5d &&
+          after !== 0x7b &&
+          after !== 0x7d
         ) {
           continue;
         }
@@ -1195,10 +1207,7 @@ export class StreamingPdfParser {
    * Parse the dictionary of an indirect object at `offset`.
    * Returns the dictionary entries or undefined if parsing fails.
    */
-  private parseObjectDict(
-    data: Uint8Array,
-    offset: number,
-  ): Map<string, LightValue> | undefined {
+  private parseObjectDict(data: Uint8Array, offset: number): Map<string, LightValue> | undefined {
     let pos = skipWS(data, offset);
 
     // Skip "N G obj"
@@ -1213,7 +1222,9 @@ export class StreamingPdfParser {
     // "obj" keyword
     if (
       pos + 3 <= data.length &&
-      data[pos] === 0x6f && data[pos + 1] === 0x62 && data[pos + 2] === 0x6a
+      data[pos] === 0x6f &&
+      data[pos + 1] === 0x62 &&
+      data[pos + 2] === 0x6a
     ) {
       pos += 3;
     } else {
@@ -1421,10 +1432,7 @@ export class StreamingPdfParser {
    * Find the stream data (between "stream\n" and "endstream") within
    * an indirect object at `offset`.
    */
-  private findStreamData(
-    data: Uint8Array,
-    offset: number,
-  ): { offset: number; length: number } {
+  private findStreamData(data: Uint8Array, offset: number): { offset: number; length: number } {
     // Search for "stream" keyword after the dict
     const searchEnd = Math.min(offset + 8192, data.length);
     let pos = offset;
@@ -1436,9 +1444,12 @@ export class StreamingPdfParser {
     // Find "stream" keyword
     while (pos < searchEnd - 6) {
       if (
-        data[pos] === 0x73 && data[pos + 1] === 0x74 &&
-        data[pos + 2] === 0x72 && data[pos + 3] === 0x65 &&
-        data[pos + 4] === 0x61 && data[pos + 5] === 0x6d
+        data[pos] === 0x73 &&
+        data[pos + 1] === 0x74 &&
+        data[pos + 2] === 0x72 &&
+        data[pos + 3] === 0x65 &&
+        data[pos + 4] === 0x61 &&
+        data[pos + 5] === 0x6d
       ) {
         // Skip "stream" + line ending
         pos += 6;
@@ -1454,10 +1465,14 @@ export class StreamingPdfParser {
         // Find "endstream"
         while (pos < data.length - 9) {
           if (
-            data[pos] === 0x65 && data[pos + 1] === 0x6e &&
-            data[pos + 2] === 0x64 && data[pos + 3] === 0x73 &&
-            data[pos + 4] === 0x74 && data[pos + 5] === 0x72 &&
-            data[pos + 6] === 0x65 && data[pos + 7] === 0x61 &&
+            data[pos] === 0x65 &&
+            data[pos + 1] === 0x6e &&
+            data[pos + 2] === 0x64 &&
+            data[pos + 3] === 0x73 &&
+            data[pos + 4] === 0x74 &&
+            data[pos + 5] === 0x72 &&
+            data[pos + 6] === 0x65 &&
+            data[pos + 7] === 0x61 &&
             data[pos + 8] === 0x6d
           ) {
             // Trim trailing whitespace before endstream

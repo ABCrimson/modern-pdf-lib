@@ -10,11 +10,7 @@ import {
   MATHML_NAMESPACE,
 } from '../../../src/accessibility/namespaces.js';
 import type { NamespaceDef } from '../../../src/accessibility/namespaces.js';
-import {
-  PdfDict,
-  PdfName,
-  PdfString,
-} from '../../../src/core/pdfObjects.js';
+import { PdfDict, PdfName, PdfString } from '../../../src/core/pdfObjects.js';
 
 // ---------------------------------------------------------------------------
 // Common namespace constants
@@ -127,23 +123,14 @@ describe('buildNamespacesArray', () => {
   });
 
   it('each item is a /Namespace dictionary with the right /NS', () => {
-    const arr = buildNamespacesArray([
-      { ns: PDF2_NAMESPACE },
-      { ns: MATHML_NAMESPACE },
-    ]);
+    const arr = buildNamespacesArray([{ ns: PDF2_NAMESPACE }, { ns: MATHML_NAMESPACE }]);
     const first = arr.items[0];
     const second = arr.items[1];
     expect(first).toBeInstanceOf(PdfDict);
     expect(second).toBeInstanceOf(PdfDict);
-    expect(((first as PdfDict).get('/NS') as PdfString).value).toBe(
-      PDF2_NAMESPACE,
-    );
-    expect(((second as PdfDict).get('/NS') as PdfString).value).toBe(
-      MATHML_NAMESPACE,
-    );
-    expect(((first as PdfDict).get('/Type') as PdfName).value).toBe(
-      '/Namespace',
-    );
+    expect(((first as PdfDict).get('/NS') as PdfString).value).toBe(PDF2_NAMESPACE);
+    expect(((second as PdfDict).get('/NS') as PdfString).value).toBe(MATHML_NAMESPACE);
+    expect(((first as PdfDict).get('/Type') as PdfName).value).toBe('/Namespace');
   });
 
   it('produces an empty array for no descriptors', () => {

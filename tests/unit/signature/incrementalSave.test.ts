@@ -195,16 +195,12 @@ describe('parseExistingTrailer', () => {
   });
 
   it('should throw for PDF without /Size', () => {
-    const badPdf = encoder.encode(
-      '%PDF-1.7\ntrailer\n<< /Root 1 0 R >>\nstartxref\n0\n%%EOF\n',
-    );
+    const badPdf = encoder.encode('%PDF-1.7\ntrailer\n<< /Root 1 0 R >>\nstartxref\n0\n%%EOF\n');
     expect(() => parseExistingTrailer(badPdf)).toThrow('/Size');
   });
 
   it('should throw for PDF without /Root', () => {
-    const badPdf = encoder.encode(
-      '%PDF-1.7\ntrailer\n<< /Size 5 >>\nstartxref\n0\n%%EOF\n',
-    );
+    const badPdf = encoder.encode('%PDF-1.7\ntrailer\n<< /Size 5 >>\nstartxref\n0\n%%EOF\n');
     expect(() => parseExistingTrailer(badPdf)).toThrow('/Root');
   });
 });
@@ -337,10 +333,9 @@ describe('saveIncrementalWithSignaturePreservation', () => {
   it('should detect and append changed objects', () => {
     const pdf = createMinimalPdf();
     // Need a valid xref — just use a different /Producer value
-    const modifiedText = decoder.decode(pdf).replace(
-      '/Producer (modern-pdf)',
-      '/Producer (modified-pdf)',
-    );
+    const modifiedText = decoder
+      .decode(pdf)
+      .replace('/Producer (modern-pdf)', '/Producer (modified-pdf)');
     const modifiedPdf2 = encoder.encode(modifiedText);
 
     const result = saveIncrementalWithSignaturePreservation(pdf, modifiedPdf2);
@@ -363,17 +358,14 @@ describe('saveIncrementalWithSignaturePreservation', () => {
     expect(sigsBefore.length).toBeGreaterThanOrEqual(1);
 
     // Create a modification
-    const modifiedText = decoder.decode(preparedPdf).replace(
-      '/Producer (modern-pdf)',
-      '/Producer (modified-pdf)',
-    );
+    const modifiedText = decoder
+      .decode(preparedPdf)
+      .replace('/Producer (modern-pdf)', '/Producer (modified-pdf)');
     const modifiedPdf = encoder.encode(modifiedText);
 
-    const result = saveIncrementalWithSignaturePreservation(
-      preparedPdf,
-      modifiedPdf,
-      { preserveSignatures: true },
-    );
+    const result = saveIncrementalWithSignaturePreservation(preparedPdf, modifiedPdf, {
+      preserveSignatures: true,
+    });
 
     // Existing signature bytes should still be preserved
     for (let i = 0; i < preparedPdf.length; i++) {
@@ -383,18 +375,15 @@ describe('saveIncrementalWithSignaturePreservation', () => {
 
   it('should respect preserveSignatures: false', () => {
     const pdf = createMinimalPdf();
-    const modifiedText = decoder.decode(pdf).replace(
-      '/Producer (modern-pdf)',
-      '/Producer (modified-pdf)',
-    );
+    const modifiedText = decoder
+      .decode(pdf)
+      .replace('/Producer (modern-pdf)', '/Producer (modified-pdf)');
     const modifiedPdf = encoder.encode(modifiedText);
 
     // Should still work without signature preservation
-    const result = saveIncrementalWithSignaturePreservation(
-      pdf,
-      modifiedPdf,
-      { preserveSignatures: false },
-    );
+    const result = saveIncrementalWithSignaturePreservation(pdf, modifiedPdf, {
+      preserveSignatures: false,
+    });
 
     expect(result.length).toBeGreaterThan(pdf.length);
   });

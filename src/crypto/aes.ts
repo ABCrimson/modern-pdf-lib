@@ -34,7 +34,7 @@ function getSubtle(): SubtleCrypto {
   if (!subtle) {
     throw new Error(
       'Web Crypto API (crypto.subtle) is not available in this runtime. ' +
-      'AES encryption requires Node.js 18+, a modern browser, Deno, or Bun.',
+        'AES encryption requires Node.js 18+, a modern browser, Deno, or Bun.',
     );
   }
   return subtle;
@@ -45,19 +45,13 @@ function getSubtle(): SubtleCrypto {
  * so it satisfies the Web Crypto API's BufferSource requirement.
  */
 function toBuffer(data: Uint8Array): ArrayBuffer {
-  return data.buffer.slice(
-    data.byteOffset,
-    data.byteOffset + data.byteLength,
-  ) as ArrayBuffer;
+  return data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength) as ArrayBuffer;
 }
 
 /**
  * Import a raw AES key for CBC mode.
  */
-async function importKey(
-  key: Uint8Array,
-  usages: KeyUsage[],
-): Promise<CryptoKey> {
+async function importKey(key: Uint8Array, usages: KeyUsage[]): Promise<CryptoKey> {
   if (key.length !== 16 && key.length !== 32) {
     throw new RangeError(
       `AES key must be 16 bytes (AES-128) or 32 bytes (AES-256), got ${key.length}`,
@@ -97,7 +91,7 @@ function randomIv(): Uint8Array {
 export async function aesEncryptCBC(
   key: Uint8Array,
   data: Uint8Array,
-  iv?: Uint8Array  ,
+  iv?: Uint8Array,
 ): Promise<Uint8Array> {
   const actualIv = iv ?? randomIv();
   if (actualIv.length !== 16) {
@@ -130,10 +124,7 @@ export async function aesEncryptCBC(
  * @param data  IV (16 bytes) + ciphertext.
  * @returns     The decrypted plaintext.
  */
-export async function aesDecryptCBC(
-  key: Uint8Array,
-  data: Uint8Array,
-): Promise<Uint8Array> {
+export async function aesDecryptCBC(key: Uint8Array, data: Uint8Array): Promise<Uint8Array> {
   if (data.length < 32) {
     throw new RangeError(
       'AES-CBC ciphertext must be at least 32 bytes (16-byte IV + 16-byte minimum block)',

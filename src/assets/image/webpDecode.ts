@@ -38,8 +38,14 @@ export interface WebPImage {
 export function isWebP(data: Uint8Array): boolean {
   if (data.length < 12) return false;
   return (
-    data[0] === 0x52 && data[1] === 0x49 && data[2] === 0x46 && data[3] === 0x46 && // RIFF
-    data[8] === 0x57 && data[9] === 0x45 && data[10] === 0x42 && data[11] === 0x50   // WEBP
+    data[0] === 0x52 &&
+    data[1] === 0x49 &&
+    data[2] === 0x46 &&
+    data[3] === 0x46 && // RIFF
+    data[8] === 0x57 &&
+    data[9] === 0x45 &&
+    data[10] === 0x42 &&
+    data[11] === 0x50 // WEBP
   );
 }
 
@@ -47,7 +53,7 @@ export function isWebP(data: Uint8Array): boolean {
 export function isWebPLossless(data: Uint8Array): boolean {
   if (!isWebP(data)) return false;
   const chunks = parseRiffChunks(data);
-  return chunks.some(c => c.fourcc === 'VP8L');
+  return chunks.some((c) => c.fourcc === 'VP8L');
 }
 
 interface RiffChunk {
@@ -99,9 +105,9 @@ function parseRiffChunks(data: Uint8Array): RiffChunk[] {
 export function decodeWebP(data: Uint8Array): WebPImage {
   const chunks = parseRiffChunks(data);
 
-  const vp8lChunk = chunks.find(c => c.fourcc === 'VP8L');
-  const vp8Chunk = chunks.find(c => c.fourcc === 'VP8 ');
-  const alphChunk = chunks.find(c => c.fourcc === 'ALPH');
+  const vp8lChunk = chunks.find((c) => c.fourcc === 'VP8L');
+  const vp8Chunk = chunks.find((c) => c.fourcc === 'VP8 ');
+  const alphChunk = chunks.find((c) => c.fourcc === 'ALPH');
 
   if (vp8lChunk) {
     // VP8L lossless
@@ -143,7 +149,7 @@ class BoolDecoder {
     this.data = data;
     this.pos = offset;
     // Load initial value (big-endian 16-bit)
-    this.value = ((data[this.pos]! << 8) | (data[this.pos + 1] ?? 0)) & 0xFFFF;
+    this.value = ((data[this.pos]! << 8) | (data[this.pos + 1] ?? 0)) & 0xffff;
     this.pos += 2;
     this.bits = 0;
   }
@@ -153,7 +159,7 @@ class BoolDecoder {
     const split = 1 + (((this.range - 1) * prob) >> 8);
     let bit: number;
 
-    if (this.value < (split << 8)) {
+    if (this.value < split << 8) {
       this.range = split;
       bit = 0;
     } else {
@@ -199,8 +205,15 @@ function clamp255(v: number): number {
 }
 
 /** YUV420 to RGB conversion. */
-function yuvToRgb(yPlane: Uint8Array, uPlane: Uint8Array, vPlane: Uint8Array,
-  width: number, height: number, yStride: number, uvStride: number): Uint8Array {
+function yuvToRgb(
+  yPlane: Uint8Array,
+  uPlane: Uint8Array,
+  vPlane: Uint8Array,
+  width: number,
+  height: number,
+  yStride: number,
+  uvStride: number,
+): Uint8Array {
   const rgb = new Uint8Array(width * height * 3);
 
   for (let row = 0; row < height; row++) {
@@ -248,7 +261,7 @@ function decodeVP8(data: Uint8Array): WebPImage {
 
   // Keyframe header: 3 bytes signature (0x9D 0x01 0x2A) + 4 bytes dimensions
   let offset = 3;
-  if (data[offset] !== 0x9D || data[offset + 1] !== 0x01 || data[offset + 2] !== 0x2A) {
+  if (data[offset] !== 0x9d || data[offset + 1] !== 0x01 || data[offset + 2] !== 0x2a) {
     throw new Error('WebP VP8: invalid keyframe signature');
   }
   offset += 3;
@@ -256,8 +269,8 @@ function decodeVP8(data: Uint8Array): WebPImage {
   // Dimensions (little-endian 16-bit, with scale in upper 2 bits)
   const widthField = data[offset]! | (data[offset + 1]! << 8);
   const heightField = data[offset + 2]! | (data[offset + 3]! << 8);
-  const width = widthField & 0x3FFF;
-  const height = heightField & 0x3FFF;
+  const width = widthField & 0x3fff;
+  const height = heightField & 0x3fff;
   offset += 4;
 
   if (width === 0 || height === 0) {
@@ -297,9 +310,9 @@ function decodeVP8(data: Uint8Array): WebPImage {
   }
 
   // Filter type and strength
-  bd.readBool(128);   // filter_type
-  bd.readLiteral(6);  // loop_filter_level
-  bd.readLiteral(3);  // sharpness_level
+  bd.readBool(128); // filter_type
+  bd.readLiteral(6); // loop_filter_level
+  bd.readLiteral(3); // sharpness_level
 
   // Loop filter adjustments
   const lfAdjust = bd.readBool(128);
@@ -579,7 +592,7 @@ function decodeVP8L(data: Uint8Array): WebPImage {
   }
 
   // VP8L signature byte
-  if (data[0] !== 0x2F) {
+  if (data[0] !== 0x2f) {
     throw new Error('WebP VP8L: invalid signature byte (expected 0x2F)');
   }
 
@@ -627,9 +640,7 @@ function decodeVP8L(data: Uint8Array): WebPImage {
   // Read the main image (simplified: read raw ARGB data)
   // Read Huffman codes for the meta-Huffman code
   const numCodeLenCodes = 19;
-  const codeLenCodeOrder = [
-    17, 18, 0, 1, 2, 3, 4, 5, 16, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
-  ];
+  const codeLenCodeOrder = [17, 18, 0, 1, 2, 3, 4, 5, 16, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
 
   // Build Huffman trees for 5 symbol groups:
   // 0: Green/length, 1: Red, 2: Blue, 3: Alpha, 4: Distance
@@ -729,8 +740,8 @@ function decodeVP8L(data: Uint8Array): WebPImage {
       for (let i = 0; i < numPixels; i++) {
         const off = i * 4;
         const green = pixels[off + 1]!;
-        pixels[off] = (pixels[off]! + green) & 0xFF;
-        pixels[off + 2] = (pixels[off + 2]! + green) & 0xFF;
+        pixels[off] = (pixels[off]! + green) & 0xff;
+        pixels[off + 2] = (pixels[off + 2]! + green) & 0xff;
       }
     }
   }
@@ -742,7 +753,7 @@ function decodeVP8L(data: Uint8Array): WebPImage {
   for (let i = 0; i < numPixels; i++) {
     const srcOff = i * 4;
     const dstOff = i * outChannels;
-    output[dstOff] = pixels[srcOff]!;         // R
+    output[dstOff] = pixels[srcOff]!; // R
     output[dstOff + 1] = pixels[srcOff + 1]!; // G
     output[dstOff + 2] = pixels[srcOff + 2]!; // B
     if (hasAlpha) {
@@ -761,11 +772,11 @@ function decodeVP8L(data: Uint8Array): WebPImage {
 
 // LZ77 prefix code tables for VP8L
 const lz77LengthPrefixExtraBits = new Uint8Array([
-  0,0,0,0, 0,0,0,0, 1,1,1,1, 2,2,2,2, 3,3,3,3, 4,4,4,4,
+  0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4,
 ]);
 
 const lz77LengthPrefixOffset = new Uint8Array([
-  1,2,3,4, 5,6,7,8, 9,11,13,15, 17,21,25,29, 33,41,49,57, 65,81,97,113,
+  1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 13, 15, 17, 21, 25, 29, 33, 41, 49, 57, 65, 81, 97, 113,
 ]);
 
 function decodeLZ77Length(reader: VP8LBitReader, code: number): number {
@@ -778,14 +789,13 @@ function decodeLZ77Length(reader: VP8LBitReader, code: number): number {
 }
 
 const lz77DistPrefixExtraBits = new Uint8Array([
-  0,0,0,0, 1,1,1,1, 2,2,2,2, 3,3,3,3, 4,4,4,4,
-  5,5,5,5, 6,6,6,6, 7,7,7,7, 8,8,8,8, 9,9,9,9,
+  0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6, 7, 7, 7, 7, 8,
+  8, 8, 8, 9, 9, 9, 9,
 ]);
 
 const lz77DistPrefixOffset = new Uint16Array([
-  1,2,3,4, 5,7,9,11, 13,17,21,25, 29,37,45,53,
-  61,77,93,109, 125,157,189,221, 253,317,381,445,
-  509,637,765,893, 1021,1277,1533,1789, 2045,2557,3069,3581,
+  1, 2, 3, 4, 5, 7, 9, 11, 13, 17, 21, 25, 29, 37, 45, 53, 61, 77, 93, 109, 125, 157, 189, 221, 253,
+  317, 381, 445, 509, 637, 765, 893, 1021, 1277, 1533, 1789, 2045, 2557, 3069, 3581,
 ]);
 
 function decodeLZ77Distance(reader: VP8LBitReader, code: number, _width: number): number {
@@ -868,7 +878,12 @@ function decodeAlphaChunk(data: Uint8Array, width: number, height: number): Uint
   return alpha;
 }
 
-function applyAlphaFilter(alpha: Uint8Array, width: number, height: number, filtering: number): void {
+function applyAlphaFilter(
+  alpha: Uint8Array,
+  width: number,
+  height: number,
+  filtering: number,
+): void {
   if (filtering === 0) return; // No filtering
 
   // Process in raster order
@@ -877,17 +892,17 @@ function applyAlphaFilter(alpha: Uint8Array, width: number, height: number, filt
       const idx = row * width + col;
       const left = col > 0 ? alpha[idx - 1]! : 0;
       const top = row > 0 ? alpha[idx - width]! : 0;
-      const topLeft = (row > 0 && col > 0) ? alpha[idx - width - 1]! : 0;
+      const topLeft = row > 0 && col > 0 ? alpha[idx - width - 1]! : 0;
 
       switch (filtering) {
         case 1: // Horizontal
-          alpha[idx] = (alpha[idx]! + left) & 0xFF;
+          alpha[idx] = (alpha[idx]! + left) & 0xff;
           break;
         case 2: // Vertical
-          alpha[idx] = (alpha[idx]! + top) & 0xFF;
+          alpha[idx] = (alpha[idx]! + top) & 0xff;
           break;
         case 3: // Gradient
-          alpha[idx] = (alpha[idx]! + clamp255(left + top - topLeft)) & 0xFF;
+          alpha[idx] = (alpha[idx]! + clamp255(left + top - topLeft)) & 0xff;
           break;
       }
     }

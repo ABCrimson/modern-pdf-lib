@@ -69,12 +69,8 @@ async function main(): Promise<void> {
 
   // Write the file
   await writeFile(outputPath, bytes);
-
-  
-  
 }
 
 main().catch((err) => {
-  
   process.exit(1);
 });

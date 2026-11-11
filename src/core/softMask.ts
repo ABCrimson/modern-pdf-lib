@@ -84,9 +84,7 @@ export interface SoftMaskGroupOptions {
  * @param options - The soft-mask group description.
  * @returns A spec-shaped `ExtGState` {@link PdfDict}.
  */
-export function buildSoftMaskGroupExtGState(
-  options: SoftMaskGroupOptions,
-): PdfDict {
+export function buildSoftMaskGroupExtGState(options: SoftMaskGroupOptions): PdfDict {
   const subtype = options.type ?? 'Luminosity';
 
   const smask = new PdfDict();
@@ -107,9 +105,7 @@ export function buildSoftMaskGroupExtGState(
   if (options.transferFunction !== undefined) {
     smask.set(
       '/TR',
-      options.transferFunction === 'Identity'
-        ? PdfName.of('Identity')
-        : options.transferFunction,
+      options.transferFunction === 'Identity' ? PdfName.of('Identity') : options.transferFunction,
     );
   }
 

@@ -184,10 +184,7 @@ function parseBlocks(source: string): Block[] {
 
 /** Strip the most common inline emphasis markers for plain-text rendering. */
 function stripInline(text: string): string {
-  return text
-    .replaceAll('**', '')
-    .replaceAll('__', '')
-    .replaceAll('`', '');
+  return text.replaceAll('**', '').replaceAll('__', '').replaceAll('`', '');
 }
 
 // ---------------------------------------------------------------------------

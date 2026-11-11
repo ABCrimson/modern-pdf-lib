@@ -195,10 +195,7 @@ export interface OptimizeResult {
  * });
  * ```
  */
-export function downscaleImage(
-  image: RawImageData,
-  options: DownscaleOptions = {},
-): RawImageData {
+export function downscaleImage(image: RawImageData, options: DownscaleOptions = {}): RawImageData {
   // Compute target dimensions
   const target = computeTargetDimensions(image.width, image.height, options);
 
@@ -313,14 +310,9 @@ export async function optimizeImage(
  * @internal
  */
 const STANDARD_LUMINANCE_QT = new Uint8Array([
-  16, 11, 10, 16, 24, 40, 51, 61,
-  12, 12, 14, 19, 26, 58, 60, 55,
-  14, 13, 16, 24, 40, 57, 69, 56,
-  14, 17, 22, 29, 51, 87, 80, 62,
-  18, 22, 37, 56, 68, 109, 103, 77,
-  24, 35, 55, 64, 81, 104, 113, 92,
-  49, 64, 78, 87, 103, 121, 120, 101,
-  72, 92, 95, 98, 112, 100, 103, 99,
+  16, 11, 10, 16, 24, 40, 51, 61, 12, 12, 14, 19, 26, 58, 60, 55, 14, 13, 16, 24, 40, 57, 69, 56,
+  14, 17, 22, 29, 51, 87, 80, 62, 18, 22, 37, 56, 68, 109, 103, 77, 24, 35, 55, 64, 81, 104, 113,
+  92, 49, 64, 78, 87, 103, 121, 120, 101, 72, 92, 95, 98, 112, 100, 103, 99,
 ]);
 
 /**
@@ -349,7 +341,7 @@ const STANDARD_LUMINANCE_QT = new Uint8Array([
  */
 export function estimateJpegQuality(jpegBytes: Uint8Array): number | undefined {
   // Verify SOI marker
-  if (jpegBytes.length < 2 || jpegBytes[0] !== 0xFF || jpegBytes[1] !== 0xD8) {
+  if (jpegBytes.length < 2 || jpegBytes[0] !== 0xff || jpegBytes[1] !== 0xd8) {
     return undefined;
   }
 
@@ -359,7 +351,7 @@ export function estimateJpegQuality(jpegBytes: Uint8Array): number | undefined {
 
   while (offset < jpegBytes.length - 1) {
     // Find next marker
-    if (jpegBytes[offset] !== 0xFF) {
+    if (jpegBytes[offset] !== 0xff) {
       offset++;
       continue;
     }
@@ -367,33 +359,33 @@ export function estimateJpegQuality(jpegBytes: Uint8Array): number | undefined {
     const marker = jpegBytes[offset + 1]!;
 
     // Skip padding bytes (0xFF followed by 0xFF)
-    if (marker === 0xFF) {
+    if (marker === 0xff) {
       offset++;
       continue;
     }
 
     // Skip standalone markers (RST, SOI, EOI, TEM)
-    if (marker === 0x00 || marker === 0x01 || (marker >= 0xD0 && marker <= 0xD9)) {
+    if (marker === 0x00 || marker === 0x01 || (marker >= 0xd0 && marker <= 0xd9)) {
       offset += 2;
       continue;
     }
 
     // SOS — stop scanning (entropy-coded data follows)
-    if (marker === 0xDA) break;
+    if (marker === 0xda) break;
 
     // Read segment length (big-endian, includes the length bytes)
     if (offset + 3 >= jpegBytes.length) break;
     const segLen = (jpegBytes[offset + 2]! << 8) | jpegBytes[offset + 3]!;
 
-    if (marker === 0xDB) {
+    if (marker === 0xdb) {
       // DQT segment — parse quantization table(s)
       let pos = offset + 4;
       const segEnd = offset + 2 + segLen;
 
       while (pos < segEnd && pos + 1 < jpegBytes.length) {
         const pqTq = jpegBytes[pos]!;
-        const precision = (pqTq >> 4) & 0x0F; // 0=8-bit, 1=16-bit
-        const tableId = pqTq & 0x0F;
+        const precision = (pqTq >> 4) & 0x0f; // 0=8-bit, 1=16-bit
+        const tableId = pqTq & 0x0f;
         pos++;
 
         const entrySize = precision === 0 ? 1 : 2;
@@ -520,11 +512,7 @@ function computeTargetDimensions(
  * Nearest-neighbor resampling.
  * @internal
  */
-function resampleNearest(
-  src: RawImageData,
-  dstWidth: number,
-  dstHeight: number,
-): RawImageData {
+function resampleNearest(src: RawImageData, dstWidth: number, dstHeight: number): RawImageData {
   const channels = src.channels;
   const dst = new Uint8Array(dstWidth * dstHeight * channels);
 
@@ -558,11 +546,7 @@ function resampleNearest(
  * Bilinear interpolation resampling.
  * @internal
  */
-function resampleBilinear(
-  src: RawImageData,
-  dstWidth: number,
-  dstHeight: number,
-): RawImageData {
+function resampleBilinear(src: RawImageData, dstWidth: number, dstHeight: number): RawImageData {
   const channels = src.channels;
   const dst = new Uint8Array(dstWidth * dstHeight * channels);
 
@@ -636,11 +620,7 @@ function lanczos(x: number, a: number = 3): number {
  *
  * @internal
  */
-function resampleLanczos(
-  src: RawImageData,
-  dstWidth: number,
-  dstHeight: number,
-): RawImageData {
+function resampleLanczos(src: RawImageData, dstWidth: number, dstHeight: number): RawImageData {
   const channels = src.channels;
   const a = 3; // Lanczos-3 window radius
   const dst = new Uint8Array(dstWidth * dstHeight * channels);
@@ -721,10 +701,7 @@ function resampleLanczos(
  * Recompress image data using deflate (for PDF FlateDecode).
  * @internal
  */
-async function recompressDeflate(
-  image: RawImageData,
-  level: number,
-): Promise<OptimizeResult> {
+async function recompressDeflate(image: RawImageData, level: number): Promise<OptimizeResult> {
   // Try CompressionStream API
   if (typeof CompressionStream !== 'undefined') {
     const cs = new CompressionStream('deflate');
@@ -808,9 +785,7 @@ async function recompressJpeg(
   progressive: boolean = false,
   chromaSubsampling: ChromaSubsampling = '4:2:0',
 ): Promise<OptimizeResult> {
-  const { encodeJpegWasm, isJpegWasmReady } = await import(
-    '../../wasm/jpeg/bridge.js'
-  );
+  const { encodeJpegWasm, isJpegWasmReady } = await import('../../wasm/jpeg/bridge.js');
 
   if (isJpegWasmReady()) {
     // Convert CMYK to RGB before JPEG encoding
@@ -871,11 +846,7 @@ async function recompressJpeg(
  * @returns RGB pixel data (3 bytes per pixel).
  * @internal
  */
-function convertCmykToRgb(
-  pixels: Uint8Array,
-  width: number,
-  height: number,
-): Uint8Array {
+function convertCmykToRgb(pixels: Uint8Array, width: number, height: number): Uint8Array {
   const pixelCount = width * height;
   const rgb = new Uint8Array(pixelCount * 3);
 
@@ -885,9 +856,9 @@ function convertCmykToRgb(
     const yi = 255 - pixels[i * 4 + 2]!;
     const ki = 255 - pixels[i * 4 + 3]!;
 
-    rgb[i * 3] = (ci * ki + 127) / 255 | 0;
-    rgb[i * 3 + 1] = (mi * ki + 127) / 255 | 0;
-    rgb[i * 3 + 2] = (yi * ki + 127) / 255 | 0;
+    rgb[i * 3] = ((ci * ki + 127) / 255) | 0;
+    rgb[i * 3 + 1] = ((mi * ki + 127) / 255) | 0;
+    rgb[i * 3 + 2] = ((yi * ki + 127) / 255) | 0;
   }
 
   return rgb;

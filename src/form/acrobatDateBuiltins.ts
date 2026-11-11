@@ -31,23 +31,46 @@
 // ---------------------------------------------------------------------------
 
 const MONTH_NAMES_FULL = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December',
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
 ] as const;
 
 const MONTH_NAMES_SHORT = [
-  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
 ] as const;
 
 const DAY_NAMES_FULL = [
-  'Sunday', 'Monday', 'Tuesday', 'Wednesday',
-  'Thursday', 'Friday', 'Saturday',
+  'Sunday',
+  'Monday',
+  'Tuesday',
+  'Wednesday',
+  'Thursday',
+  'Friday',
+  'Saturday',
 ] as const;
 
-const DAY_NAMES_SHORT = [
-  'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat',
-] as const;
+const DAY_NAMES_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as const;
 
 // ---------------------------------------------------------------------------
 // Token types
@@ -117,8 +140,14 @@ function tokenizeFormat(format: string): FormatToken[] {
  */
 function isPatternLetter(ch: string): boolean {
   return (
-    ch === 'd' || ch === 'm' || ch === 'y' ||
-    ch === 'H' || ch === 'h' || ch === 'M' || ch === 's' || ch === 't'
+    ch === 'd' ||
+    ch === 'm' ||
+    ch === 'y' ||
+    ch === 'H' ||
+    ch === 'h' ||
+    ch === 'M' ||
+    ch === 's' ||
+    ch === 't'
   );
 }
 
@@ -430,11 +459,7 @@ export function parseAcrobatDate(text: string, format: string): Date | null {
   const date = new Date(year, month, day, hour, minute, second);
 
   // Verify the date is valid (e.g. Feb 30 → invalid)
-  if (
-    date.getFullYear() !== year ||
-    date.getMonth() !== month ||
-    date.getDate() !== day
-  ) {
+  if (date.getFullYear() !== year || date.getMonth() !== month || date.getDate() !== day) {
     return null;
   }
 
@@ -480,8 +505,10 @@ function readName(
 
   for (let i = 0; i < names.length; i++) {
     const name = names[i]!;
-    if (remaining.length >= name.length &&
-        remaining.slice(0, name.length).toLowerCase() === name.toLowerCase()) {
+    if (
+      remaining.length >= name.length &&
+      remaining.slice(0, name.length).toLowerCase() === name.toLowerCase()
+    ) {
       return { index: i, end: pos + name.length };
     }
   }
@@ -643,7 +670,9 @@ function smartParseDate(text: string): Date | null {
   }
 
   // Try slash or dash separated: mm/dd/yyyy or dd/mm/yyyy
-  const slashMatch = s.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{2,4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(AM|PM)?)?/i);
+  const slashMatch = s.match(
+    /^(\d{1,2})[/-](\d{1,2})[/-](\d{2,4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(AM|PM)?)?/i,
+  );
   if (slashMatch) {
     const a = parseInt(slashMatch[1]!, 10);
     const b = parseInt(slashMatch[2]!, 10);
@@ -709,8 +738,10 @@ function smartParseDate(text: string): Date | null {
 function findMonth(name: string): number {
   const lower = name.toLowerCase();
   for (let i = 0; i < 12; i++) {
-    if (MONTH_NAMES_FULL[i]!.toLowerCase().startsWith(lower) ||
-        MONTH_NAMES_SHORT[i]!.toLowerCase() === lower) {
+    if (
+      MONTH_NAMES_FULL[i]!.toLowerCase().startsWith(lower) ||
+      MONTH_NAMES_SHORT[i]!.toLowerCase() === lower
+    ) {
       return i;
     }
   }

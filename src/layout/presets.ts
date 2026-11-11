@@ -127,10 +127,7 @@ export function professionalPreset(): TablePreset {
  *                `width`, and `rows` at minimum).
  * @returns       A fully-merged {@link DrawTableOptions} object.
  */
-export function applyPreset(
-  preset: TablePreset,
-  options: DrawTableOptions,
-): DrawTableOptions {
+export function applyPreset(preset: TablePreset, options: DrawTableOptions): DrawTableOptions {
   return { ...preset, ...options };
 }
 

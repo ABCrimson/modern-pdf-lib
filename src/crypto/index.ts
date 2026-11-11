@@ -13,22 +13,14 @@
 // Encryption handler (primary public API)
 // ---------------------------------------------------------------------------
 
-export {
-  PdfEncryptionHandler,
-} from './encryptionHandler.js';
-export type {
-  EncryptOptions,
-  EncryptAlgorithm,
-} from './encryptionHandler.js';
+export { PdfEncryptionHandler } from './encryptionHandler.js';
+export type { EncryptOptions, EncryptAlgorithm } from './encryptionHandler.js';
 
 // ---------------------------------------------------------------------------
 // Permissions
 // ---------------------------------------------------------------------------
 
-export {
-  encodePermissions,
-  decodePermissions,
-} from './permissions.js';
+export { encodePermissions, decodePermissions } from './permissions.js';
 export type { PdfPermissionFlags } from './permissions.js';
 
 // ---------------------------------------------------------------------------

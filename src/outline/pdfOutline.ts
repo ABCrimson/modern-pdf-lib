@@ -111,11 +111,7 @@ export class PdfOutlineItem {
    * @param destination  Navigation target.
    * @param options      Visual style options.
    */
-  constructor(
-    title: string,
-    destination: OutlineDestination,
-    options?: OutlineItemOptions,
-  ) {
+  constructor(title: string, destination: OutlineDestination, options?: OutlineItemOptions) {
     this.title = title;
     this.destination = destination;
     this.children = [];
@@ -266,10 +262,7 @@ export class PdfOutlineTree {
    * @param pageRefs  Array of PdfRef for each page (indexed by page number).
    * @returns         The indirect reference to the /Outlines root dict.
    */
-  toDict(
-    registry: PdfObjectRegistry,
-    pageRefs: readonly PdfRef[],
-  ): PdfRef {
+  toDict(registry: PdfObjectRegistry, pageRefs: readonly PdfRef[]): PdfRef {
     if (this.items.length === 0) {
       // Empty outline — still create the dict (some viewers expect it)
       const dict = new PdfDict();
@@ -282,12 +275,7 @@ export class PdfOutlineTree {
     const outlinesRef = registry.allocate();
 
     // Serialize all top-level items
-    const topLevelRefs = this.serializeItems(
-      this.items,
-      outlinesRef,
-      registry,
-      pageRefs,
-    );
+    const topLevelRefs = this.serializeItems(this.items, outlinesRef, registry, pageRefs);
 
     // Build the root /Outlines dict
     const dict = new PdfDict();
@@ -420,12 +408,7 @@ export class PdfOutlineTree {
 
       // Children
       if (item.children.length > 0) {
-        const childRefs = this.serializeItems(
-          item.children,
-          itemRef,
-          registry,
-          pageRefs,
-        );
+        const childRefs = this.serializeItems(item.children, itemRef, registry, pageRefs);
         itemDict.set('/First', childRefs[0]!);
         itemDict.set('/Last', childRefs.at(-1)!);
 

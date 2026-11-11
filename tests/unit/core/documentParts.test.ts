@@ -133,9 +133,7 @@ describe('buildDPartRoot', () => {
 
   it('omits /DPM when metadata is an empty object', () => {
     const root = buildDPartRoot([{ startPage: 1, endPage: 4, metadata: {} }]);
-    const child = asDict(
-      asArray(asDict(root.get('/DPartRootNode')).get('/DParts')).items[0],
-    );
+    const child = asDict(asArray(asDict(root.get('/DPartRootNode')).get('/DParts')).items[0]);
     expect(child.has('/DPM')).toBe(false);
   });
 
@@ -152,9 +150,7 @@ describe('buildDPartRoot', () => {
       { startPage: 0, endPage: 1 },
       { startPage: 5, endPage: 9 },
     ];
-    const dparts = asArray(
-      asDict(buildDPartRoot(parts).get('/DPartRootNode')).get('/DParts'),
-    );
+    const dparts = asArray(asDict(buildDPartRoot(parts).get('/DPartRootNode')).get('/DParts'));
     expect(dparts.length).toBe(3);
     expect(numberOf(asDict(dparts.items[0]).get('/Start'))).toBe(10);
     expect(numberOf(asDict(dparts.items[1]).get('/Start'))).toBe(0);
@@ -162,21 +158,15 @@ describe('buildDPartRoot', () => {
   });
 
   it('handles a single part spanning a wide page range', () => {
-    const root = buildDPartRoot([
-      { startPage: 0, endPage: 999, metadata: { Title: 'Whole Doc' } },
-    ]);
-    const child = asDict(
-      asArray(asDict(root.get('/DPartRootNode')).get('/DParts')).items[0],
-    );
+    const root = buildDPartRoot([{ startPage: 0, endPage: 999, metadata: { Title: 'Whole Doc' } }]);
+    const child = asDict(asArray(asDict(root.get('/DPartRootNode')).get('/DParts')).items[0]);
     expect(numberOf(child.get('/Start'))).toBe(0);
     expect(numberOf(child.get('/End'))).toBe(999);
     expect(stringOf(asDict(child.get('/DPM')).get('/Title'))).toBe('Whole Doc');
   });
 
   it('serializes to spec-shaped PDF syntax', () => {
-    const out = serialize(
-      buildDPartRoot([{ startPage: 0, endPage: 1, metadata: { K: 'V' } }]),
-    );
+    const out = serialize(buildDPartRoot([{ startPage: 0, endPage: 1, metadata: { K: 'V' } }]));
     expect(out).toContain('/Type /DPartRoot');
     expect(out).toContain('/DPartRootNode');
     expect(out).toContain('/DParts');

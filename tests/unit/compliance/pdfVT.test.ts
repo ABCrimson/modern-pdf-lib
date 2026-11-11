@@ -12,11 +12,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  buildVtDpm,
-  buildPdfVtDParts,
-  gtsPdfVtVersion,
-} from '../../../src/compliance/pdfVT.js';
+import { buildVtDpm, buildPdfVtDParts, gtsPdfVtVersion } from '../../../src/compliance/pdfVT.js';
 import type { RecordMetadata } from '../../../src/compliance/pdfVT.js';
 import {
   PdfArray,
@@ -202,21 +198,13 @@ describe('buildPdfVtDParts', () => {
       { startPage: 5, endPage: 9, recordId: 'B' },
     ];
     const root = buildPdfVtDParts(records);
-    expect(stringOf(asDict(childAt(root, 0).get('/DPM')).get('/RecordID'))).toBe(
-      'C',
-    );
-    expect(stringOf(asDict(childAt(root, 1).get('/DPM')).get('/RecordID'))).toBe(
-      'A',
-    );
-    expect(stringOf(asDict(childAt(root, 2).get('/DPM')).get('/RecordID'))).toBe(
-      'B',
-    );
+    expect(stringOf(asDict(childAt(root, 0).get('/DPM')).get('/RecordID'))).toBe('C');
+    expect(stringOf(asDict(childAt(root, 1).get('/DPM')).get('/RecordID'))).toBe('A');
+    expect(stringOf(asDict(childAt(root, 2).get('/DPM')).get('/RecordID'))).toBe('B');
   });
 
   it('serializes a record with the VT namespace', () => {
-    const out = serialize(
-      buildPdfVtDParts([{ startPage: 0, endPage: 1, recordId: 'R9' }]),
-    );
+    const out = serialize(buildPdfVtDParts([{ startPage: 0, endPage: 1, recordId: 'R9' }]));
     expect(out).toContain('/Type /DPartRoot');
     expect(out).toContain('/Type /DPart');
     expect(out).toContain('/Type /DPM');

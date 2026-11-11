@@ -76,9 +76,7 @@ async function buildSelfSignedCert(
   const validity = encodeSequence([encodeUTCTime(now), encodeUTCTime(later)]);
 
   // TBSCertificate
-  const tbsCert = encodeSequence([
-    version, serial, sigAlgo, name, validity, name, spkiDer,
-  ]);
+  const tbsCert = encodeSequence([version, serial, sigAlgo, name, validity, name, spkiDer]);
 
   // Sign TBSCertificate
   const signature = new Uint8Array(
@@ -86,7 +84,8 @@ async function buildSelfSignedCert(
       { name: 'RSASSA-PKCS1-v1_5' },
       keyPair.privateKey,
       tbsCert.buffer.slice(
-        tbsCert.byteOffset, tbsCert.byteOffset + tbsCert.byteLength,
+        tbsCert.byteOffset,
+        tbsCert.byteOffset + tbsCert.byteLength,
       ) as ArrayBuffer,
     ),
   );

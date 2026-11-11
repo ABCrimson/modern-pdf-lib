@@ -15,10 +15,7 @@ import {
   type InvoiceLine,
   type InvoiceParty,
 } from '../../../src/compliance/facturX.js';
-import {
-  detectFacturXProfile,
-  parseCiiXml,
-} from '../../../src/compliance/ciiReader.js';
+import { detectFacturXProfile, parseCiiXml } from '../../../src/compliance/ciiReader.js';
 
 const seller: InvoiceParty = {
   name: 'Muster GmbH',

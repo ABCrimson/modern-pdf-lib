@@ -8,11 +8,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { renderTable } from '../../src/layout/table.js';
-import type {
-  DrawTableOptions,
-  TableCell,
-  NestedTableContent,
-} from '../../src/layout/table.js';
+import type { DrawTableOptions, TableCell, NestedTableContent } from '../../src/layout/table.js';
 import { PdfPage, PageSizes } from '../../src/core/pdfPage.js';
 import { PdfObjectRegistry } from '../../src/core/pdfObjects.js';
 import type { Color } from '../../src/core/operators/color.js';
@@ -31,10 +27,7 @@ function simpleTable(overrides?: Partial<DrawTableOptions>): DrawTableOptions {
     x: 50,
     y: 700,
     width: 500,
-    rows: [
-      { cells: ['A', 'B', 'C'] },
-      { cells: ['D', 'E', 'F'] },
-    ],
+    rows: [{ cells: ['A', 'B', 'C'] }, { cells: ['D', 'E', 'F'] }],
     ...overrides,
   };
 }
@@ -108,10 +101,7 @@ describe('renderTable', () => {
     const bg: Color = { type: 'rgb', r: 0.9, g: 0.9, b: 0.9 };
     const { ops } = renderTable(
       simpleTable({
-        rows: [
-          { cells: ['A', 'B', 'C'], backgroundColor: bg },
-          { cells: ['D', 'E', 'F'] },
-        ],
+        rows: [{ cells: ['A', 'B', 'C'], backgroundColor: bg }, { cells: ['D', 'E', 'F'] }],
       }),
     );
     // Should contain an RGB fill color operator for the row background
@@ -421,11 +411,7 @@ describe('renderTable – colspan / rowspan', () => {
       x: 0,
       y: 300,
       width: 300,
-      rows: [
-        { cells: [cellA, 'B'] },
-        { cells: [cellC, 'D', 'E'] },
-        { cells: ['F', 'G'] },
-      ],
+      rows: [{ cells: [cellA, 'B'] }, { cells: [cellC, 'D', 'E'] }, { cells: ['F', 'G'] }],
     });
     expect(ops).toContain('(A) Tj');
     expect(ops).toContain('(B) Tj');
@@ -483,12 +469,7 @@ describe('renderTable – alternating row colors & header styling', () => {
       x: 0,
       y: 200,
       width: 200,
-      rows: [
-        { cells: ['R0'] },
-        { cells: ['R1'] },
-        { cells: ['R2'] },
-        { cells: ['R3'] },
-      ],
+      rows: [{ cells: ['R0'] }, { cells: ['R1'] }, { cells: ['R2'] }, { cells: ['R3'] }],
       alternateRowColors: [even, odd],
     });
     // Even rows (0, 2) get 0.9 0.9 0.9 rg, odd rows (1, 3) get 1 1 1 rg
@@ -505,11 +486,7 @@ describe('renderTable – alternating row colors & header styling', () => {
       x: 0,
       y: 200,
       width: 200,
-      rows: [
-        { cells: ['Header'] },
-        { cells: ['Data1'] },
-        { cells: ['Data2'] },
-      ],
+      rows: [{ cells: ['Header'] }, { cells: ['Data1'] }, { cells: ['Data2'] }],
       headerRows: 1,
       alternateRowColors: [even, odd],
       headerBackgroundColor: headerBg,
@@ -528,10 +505,7 @@ describe('renderTable – alternating row colors & header styling', () => {
       x: 0,
       y: 200,
       width: 200,
-      rows: [
-        { cells: ['Header'] },
-        { cells: ['Data'] },
-      ],
+      rows: [{ cells: ['Header'] }, { cells: ['Data'] }],
       headerRows: 1,
       headerTextColor: headerTextCol,
     });
@@ -550,10 +524,7 @@ describe('renderTable – alternating row colors & header styling', () => {
       x: 0,
       y: 200,
       width: 200,
-      rows: [
-        { cells: ['A'], backgroundColor: rowBg },
-        { cells: ['B'] },
-      ],
+      rows: [{ cells: ['A'], backgroundColor: rowBg }, { cells: ['B'] }],
       alternateRowColors: [even, odd],
     });
     // Row 0 explicit bg (red) should appear
@@ -730,10 +701,7 @@ describe('PdfPage.drawTable', () => {
       x: 50,
       y: 700,
       width: 500,
-      rows: [
-        { cells: ['Name', 'Age'] },
-        { cells: ['Alice', '30'] },
-      ],
+      rows: [{ cells: ['Name', 'Age'] }, { cells: ['Alice', '30'] }],
     });
 
     expect(result).toBeDefined();

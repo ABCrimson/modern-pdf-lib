@@ -193,16 +193,32 @@ test.describe('Browser PDF creation', () => {
       const font = await doc.embedFont('Helvetica');
 
       p.drawText('Visual Regression Test', {
-        x: 50, y: 750, font: font.name, size: 28, color: rgb(0, 0, 0),
+        x: 50,
+        y: 750,
+        font: font.name,
+        size: 28,
+        color: rgb(0, 0, 0),
       });
       p.drawText('modern-pdf library', {
-        x: 50, y: 710, font: font.name, size: 18, color: rgb(0.5, 0, 0),
+        x: 50,
+        y: 710,
+        font: font.name,
+        size: 18,
+        color: rgb(0.5, 0, 0),
       });
       p.drawText('Small text at 10pt', {
-        x: 50, y: 680, font: font.name, size: 10, color: rgb(0, 0, 0.5),
+        x: 50,
+        y: 680,
+        font: font.name,
+        size: 10,
+        color: rgb(0, 0, 0.5),
       });
       p.drawText('The quick brown fox jumps over the lazy dog', {
-        x: 50, y: 650, font: font.name, size: 14, color: rgb(0.2, 0.2, 0.2),
+        x: 50,
+        y: 650,
+        font: font.name,
+        size: 14,
+        color: rgb(0.2, 0.2, 0.2),
       });
 
       const bytes = await doc.save();
@@ -239,12 +255,20 @@ test.describe('Browser PDF creation', () => {
 
       // Outlined rectangles
       p.drawRectangle({
-        x: 50, y: 620, width: 100, height: 60,
-        borderColor: rgb(1, 0, 0), borderWidth: 2,
+        x: 50,
+        y: 620,
+        width: 100,
+        height: 60,
+        borderColor: rgb(1, 0, 0),
+        borderWidth: 2,
       });
       p.drawRectangle({
-        x: 170, y: 620, width: 100, height: 60,
-        borderColor: rgb(0, 0.5, 0), borderWidth: 3,
+        x: 170,
+        y: 620,
+        width: 100,
+        height: 60,
+        borderColor: rgb(0, 0.5, 0),
+        borderWidth: 3,
       });
 
       // Circles
@@ -253,18 +277,26 @@ test.describe('Browser PDF creation', () => {
 
       // Lines
       p.drawLine({
-        start: { x: 50, y: 500 }, end: { x: 400, y: 500 },
-        thickness: 2, color: rgb(0, 0, 0),
+        start: { x: 50, y: 500 },
+        end: { x: 400, y: 500 },
+        thickness: 2,
+        color: rgb(0, 0, 0),
       });
       p.drawLine({
-        start: { x: 50, y: 480 }, end: { x: 400, y: 480 },
-        thickness: 1, color: rgb(0.5, 0.5, 0.5),
+        start: { x: 50, y: 480 },
+        end: { x: 400, y: 480 },
+        thickness: 1,
+        color: rgb(0.5, 0.5, 0.5),
       });
 
       // Semi-transparent overlay
       p.drawRectangle({
-        x: 100, y: 680, width: 200, height: 100,
-        color: rgb(0, 0, 0), opacity: 0.3,
+        x: 100,
+        y: 680,
+        width: 200,
+        height: 100,
+        color: rgb(0, 0, 0),
+        opacity: 0.3,
       });
 
       const bytes = await doc.save();
@@ -296,21 +328,33 @@ test.describe('Browser PDF creation', () => {
       // Page 1
       const p1 = doc.addPage(PageSizes.A4);
       p1.drawText('Page 1 of 3', {
-        x: 50, y: 750, font: font.name, size: 24, color: rgb(0, 0, 0),
+        x: 50,
+        y: 750,
+        font: font.name,
+        size: 24,
+        color: rgb(0, 0, 0),
       });
       p1.drawRectangle({ x: 50, y: 650, width: 200, height: 50, color: rgb(1, 0, 0) });
 
       // Page 2
       const p2 = doc.addPage(PageSizes.A4);
       p2.drawText('Page 2 of 3', {
-        x: 50, y: 750, font: font.name, size: 24, color: rgb(0, 0, 0),
+        x: 50,
+        y: 750,
+        font: font.name,
+        size: 24,
+        color: rgb(0, 0, 0),
       });
       p2.drawCircle({ x: 150, y: 675, size: 40, color: rgb(0, 1, 0) });
 
       // Page 3
       const p3 = doc.addPage(PageSizes.A4);
       p3.drawText('Page 3 of 3', {
-        x: 50, y: 750, font: font.name, size: 24, color: rgb(0, 0, 0),
+        x: 50,
+        y: 750,
+        font: font.name,
+        size: 24,
+        color: rgb(0, 0, 0),
       });
       p3.drawRectangle({ x: 50, y: 650, width: 200, height: 50, color: rgb(0, 0, 1) });
 

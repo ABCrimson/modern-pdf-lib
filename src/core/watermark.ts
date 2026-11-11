@@ -12,11 +12,7 @@
 import type { PdfDocument } from './pdfDocument.js';
 import type { PdfPage } from './pdfPage.js';
 import type { PdfObjectRegistry } from './pdfObjects.js';
-import {
-  PdfDict,
-  PdfName,
-  PdfNumber,
-} from './pdfObjects.js';
+import { PdfDict, PdfName, PdfNumber } from './pdfObjects.js';
 
 // ---------------------------------------------------------------------------
 // Public types
@@ -147,10 +143,7 @@ export function addWatermarkToPage(
   ops += `${n(a)} ${n(b)} ${n(c)} ${n(d)} ${n(tx)} ${n(ty)} Tm\n`;
 
   // Escape text for PDF string
-  const escaped = text
-    .replaceAll('\\', '\\\\')
-    .replaceAll('(', '\\(')
-    .replaceAll(')', '\\)');
+  const escaped = text.replaceAll('\\', '\\\\').replaceAll('(', '\\(').replaceAll(')', '\\)');
 
   ops += `(${escaped}) Tj\n`;
   ops += 'ET\n';

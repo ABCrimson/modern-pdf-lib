@@ -22,15 +22,7 @@
  */
 
 import type { Color } from './operators/color.js';
-import {
-  PdfDict,
-  PdfName,
-  PdfNumber,
-  PdfArray,
-  PdfStream,
-  PdfBool,
-  PdfRef,
-} from './pdfObjects.js';
+import { PdfDict, PdfName, PdfNumber, PdfArray, PdfStream, PdfBool, PdfRef } from './pdfObjects.js';
 import type { PdfObjectRegistry } from './pdfObjects.js';
 
 // ---------------------------------------------------------------------------
@@ -305,10 +297,7 @@ export function tilingPattern(options: TilingPatternOptions): PatternFill {
  * Build a Type 2 (exponential interpolation) function for a single
  * colour-transition segment between two RGB stops.
  */
-function buildType2Function(
-  c0: NormalizedStop,
-  c1: NormalizedStop,
-): PdfDict {
+function buildType2Function(c0: NormalizedStop, c1: NormalizedStop): PdfDict {
   const fn = new PdfDict();
   fn.set('/FunctionType', PdfNumber.of(2));
   fn.set('/Domain', PdfArray.fromNumbers([0, 1]));

@@ -15,12 +15,7 @@
  * @packageDocumentation
  */
 
-import {
-  deflateSync,
-  inflateSync,
-  deflate as deflateAsync,
-  inflate as inflateAsync,
-} from 'fflate';
+import { deflateSync, inflateSync, deflate as deflateAsync, inflate as inflateAsync } from 'fflate';
 import type { CompressionEngine } from './deflate.js';
 
 // ---------------------------------------------------------------------------
@@ -153,10 +148,7 @@ export async function compressAsync(data: Uint8Array, level: number = 6): Promis
  * @param outputSize - Optional output buffer size hint.
  * @returns            A Promise resolving to decompressed bytes.
  */
-export async function decompressAsync(
-  data: Uint8Array,
-  outputSize?: number,
-): Promise<Uint8Array> {
+export async function decompressAsync(data: Uint8Array, outputSize?: number): Promise<Uint8Array> {
   const opts: Record<string, unknown> = {};
   if (outputSize !== undefined && outputSize > 0) {
     opts['out'] = new Uint8Array(outputSize);

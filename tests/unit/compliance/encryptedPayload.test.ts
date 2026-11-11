@@ -17,12 +17,7 @@ import type {
   EncryptedPayloadOptions,
   WrapperPayloadOptions,
 } from '../../../src/compliance/encryptedPayload.js';
-import {
-  PdfObjectRegistry,
-  PdfDict,
-  PdfName,
-  PdfString,
-} from '../../../src/core/pdfObjects.js';
+import { PdfObjectRegistry, PdfDict, PdfName, PdfString } from '../../../src/core/pdfObjects.js';
 
 // ---------------------------------------------------------------------------
 // buildEncryptedPayload

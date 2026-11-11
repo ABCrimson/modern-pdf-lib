@@ -7,9 +7,7 @@ import {
   extractEmbeddedRevocationData,
   verifyOfflineRevocation,
 } from '../../../src/signature/offlineRevocation.js';
-import type {
-  EmbeddedRevocationData,
-} from '../../../src/signature/offlineRevocation.js';
+import type { EmbeddedRevocationData } from '../../../src/signature/offlineRevocation.js';
 import {
   encodeSequence,
   encodeSet,
@@ -93,10 +91,7 @@ function buildName(cn: string): Uint8Array {
 /**
  * Build a minimal self-signed certificate for testing.
  */
-function buildTestCertificate(
-  serial: Uint8Array,
-  cn: string,
-): Uint8Array {
+function buildTestCertificate(serial: Uint8Array, cn: string): Uint8Array {
   const version = encodeContextTag(0, encodeSmallInteger(2));
   const serialNumber = encodeInteger(serial);
   const sigAlgo = encodeSequence([
@@ -106,30 +101,16 @@ function buildTestCertificate(
   const issuer = buildName(cn);
   const now = new Date();
   const later = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000);
-  const validity = encodeSequence([
-    encodeUTCTime(now),
-    encodeUTCTime(later),
-  ]);
+  const validity = encodeSequence([encodeUTCTime(now), encodeUTCTime(later)]);
   const subject = buildName(cn);
 
   // Minimal SPKI (placeholder RSA)
   const spki = encodeSequence([
-    encodeSequence([
-      encodeOID('1.2.840.113549.1.1.1'),
-      new Uint8Array([0x05, 0x00]),
-    ]),
+    encodeSequence([encodeOID('1.2.840.113549.1.1.1'), new Uint8Array([0x05, 0x00])]),
     encodeBitString(new Uint8Array(64)),
   ]);
 
-  const tbsCert = encodeSequence([
-    version,
-    serialNumber,
-    sigAlgo,
-    issuer,
-    validity,
-    subject,
-    spki,
-  ]);
+  const tbsCert = encodeSequence([version, serialNumber, sigAlgo, issuer, validity, subject, spki]);
 
   const sigBitString = encodeBitString(new Uint8Array(32));
 
@@ -141,16 +122,10 @@ function buildTestCertificate(
  * @param serial - Serial number bytes of the cert
  * @param status - 0 = good, 1 = revoked, 2 = unknown
  */
-function buildOcspBasicResponse(
-  serial: Uint8Array,
-  status: 0 | 1 | 2,
-): Uint8Array {
+function buildOcspBasicResponse(serial: Uint8Array, status: 0 | 1 | 2): Uint8Array {
   // CertID: hashAlgo, issuerNameHash, issuerKeyHash, serialNumber
   const certId = encodeSequence([
-    encodeSequence([
-      encodeOID('2.16.840.1.101.3.4.2.1'),
-      new Uint8Array([0x05, 0x00]),
-    ]),
+    encodeSequence([encodeOID('2.16.840.1.101.3.4.2.1'), new Uint8Array([0x05, 0x00])]),
     encodeOctetString(new Uint8Array(32)), // issuerNameHash
     encodeOctetString(new Uint8Array(32)), // issuerKeyHash
     encodeInteger(serial), // serialNumber
@@ -186,11 +161,7 @@ function buildOcspBasicResponse(
   const producedAt = encodeGeneralizedTime(new Date());
 
   // tbsResponseData
-  const tbsResponseData = encodeSequence([
-    responderName,
-    producedAt,
-    responses,
-  ]);
+  const tbsResponseData = encodeSequence([responderName, producedAt, responses]);
 
   // signatureAlgorithm
   const sigAlgo = encodeSequence([
@@ -224,10 +195,7 @@ function buildOcspResponse(basicResponse: Uint8Array): Uint8Array {
 /**
  * Build a minimal CRL.
  */
-function buildTestCrl(
-  issuerCn: string,
-  revokedSerials: Uint8Array[],
-): Uint8Array {
+function buildTestCrl(issuerCn: string, revokedSerials: Uint8Array[]): Uint8Array {
   const version = encodeSmallInteger(1); // v2 CRL
   const sigAlgo = encodeSequence([
     encodeOID('1.2.840.113549.1.1.11'),
@@ -240,9 +208,7 @@ function buildTestCrl(
     encodeSequence([encodeInteger(serial), encodeUTCTime(new Date())]),
   );
   const revokedCerts =
-    revokedEntries.length > 0
-      ? encodeSequence(revokedEntries)
-      : encodeSequence([]);
+    revokedEntries.length > 0 ? encodeSequence(revokedEntries) : encodeSequence([]);
 
   const tbsCertList = encodeSequence([
     version,
@@ -267,14 +233,9 @@ function buildPkcs7WithRevocationData(
 ): Uint8Array {
   const version = encodeSmallInteger(1);
   const digestAlgorithms = encodeSet([
-    encodeSequence([
-      encodeOID('2.16.840.1.101.3.4.2.1'),
-      new Uint8Array([0x05, 0x00]),
-    ]),
+    encodeSequence([encodeOID('2.16.840.1.101.3.4.2.1'), new Uint8Array([0x05, 0x00])]),
   ]);
-  const encapContentInfo = encodeSequence([
-    encodeOID('1.2.840.113549.1.7.1'),
-  ]);
+  const encapContentInfo = encodeSequence([encodeOID('1.2.840.113549.1.7.1')]);
   const certificates = encodeContextTag(0, certificate);
 
   // Build the adbe-revocationInfoArchival attribute
@@ -305,10 +266,7 @@ function buildPkcs7WithRevocationData(
     encodeOID('1.2.840.113549.1.9.4'),
     encodeSet([encodeOctetString(new Uint8Array(32))]),
   ]);
-  const signedAttrs = encodeContextTag(
-    0,
-    concat(contentTypeAttr, messageDigestAttr, revInfoAttr),
-  );
+  const signedAttrs = encodeContextTag(0, concat(contentTypeAttr, messageDigestAttr, revInfoAttr));
 
   const sigAlgo = encodeSequence([
     encodeOID('1.2.840.113549.1.1.11'),
@@ -318,10 +276,7 @@ function buildPkcs7WithRevocationData(
   const signerInfo = encodeSequence([
     encodeSmallInteger(1),
     encodeSequence([buildName('Test'), encodeInteger(new Uint8Array([0x01]))]),
-    encodeSequence([
-      encodeOID('2.16.840.1.101.3.4.2.1'),
-      new Uint8Array([0x05, 0x00]),
-    ]),
+    encodeSequence([encodeOID('2.16.840.1.101.3.4.2.1'), new Uint8Array([0x05, 0x00])]),
     signedAttrs,
     sigAlgo,
     encodeOctetString(new Uint8Array(64)),
@@ -337,10 +292,7 @@ function buildPkcs7WithRevocationData(
     signerInfos,
   ]);
 
-  return encodeSequence([
-    encodeOID('1.2.840.113549.1.7.2'),
-    encodeContextTag(0, signedData),
-  ]);
+  return encodeSequence([encodeOID('1.2.840.113549.1.7.2'), encodeContextTag(0, signedData)]);
 }
 
 /**

@@ -7,13 +7,7 @@
  * Reference: PDF 1.7 spec, Section 12.5.6.5 (Link Annotations).
  */
 
-import {
-  PdfDict,
-  PdfArray,
-  PdfName,
-  PdfNumber,
-  PdfString,
-} from '../../core/pdfObjects.js';
+import { PdfDict, PdfArray, PdfName, PdfNumber, PdfString } from '../../core/pdfObjects.js';
 import type { PdfObject, PdfRef } from '../../core/pdfObjects.js';
 import { PdfAnnotation, buildAnnotationDict } from '../pdfAnnotation.js';
 import type { AnnotationOptions } from '../pdfAnnotation.js';
@@ -95,12 +89,13 @@ export class PdfLinkAnnotation extends PdfAnnotation {
     }
     if (obj.kind === 'array' && obj.items.length >= 2) {
       const fitObj = obj.items[1];
-      const fitName = fitObj && fitObj.kind === 'name'
-        ? (fitObj.value.startsWith('/') ? fitObj.value.slice(1) : fitObj.value)
-        : 'Fit';
-      const pageNum = obj.items[0] && obj.items[0].kind === 'number'
-        ? obj.items[0].value
-        : 0;
+      const fitName =
+        fitObj && fitObj.kind === 'name'
+          ? fitObj.value.startsWith('/')
+            ? fitObj.value.slice(1)
+            : fitObj.value
+          : 'Fit';
+      const pageNum = obj.items[0] && obj.items[0].kind === 'number' ? obj.items[0].value : 0;
       const extra: number[] = [];
       for (let i = 2; i < obj.items.length; i++) {
         const item = obj.items[i];
@@ -119,12 +114,9 @@ export class PdfLinkAnnotation extends PdfAnnotation {
    * @param pageIndex  Zero-based page index.
    * @param fit        Fit mode (defaults to 'Fit').
    */
-  setDestination(pageIndex: number, fit?: string  ): void {
+  setDestination(pageIndex: number, fit?: string): void {
     const fitName = fit ?? 'Fit';
-    this.dict.set(
-      '/Dest',
-      PdfArray.of([PdfNumber.of(pageIndex), PdfName.of(fitName)]),
-    );
+    this.dict.set('/Dest', PdfArray.of([PdfNumber.of(pageIndex), PdfName.of(fitName)]));
   }
 
   // -----------------------------------------------------------------------

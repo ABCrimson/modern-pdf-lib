@@ -20,14 +20,8 @@ import {
   estimateJpegQuality,
   PageSizes,
 } from '../../src/index.js';
-import {
-  isGrayscaleImage,
-  convertToGrayscale,
-} from '../../src/assets/image/grayscaleDetect.js';
-import {
-  computeImageDpi,
-  computeTargetDimensions,
-} from '../../src/assets/image/dpiAnalyze.js';
+import { isGrayscaleImage, convertToGrayscale } from '../../src/assets/image/grayscaleDetect.js';
+import { computeImageDpi, computeTargetDimensions } from '../../src/assets/image/dpiAnalyze.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -44,9 +38,9 @@ const SAMPLE_JPEG = new Uint8Array(readFileSync(resolve(fixturesDir, 'sample.jpg
 function buildRgbPixels(width: number, height: number): Uint8Array {
   const pixels = new Uint8Array(width * height * 3);
   for (let i = 0; i < width * height; i++) {
-    pixels[i * 3] = (i * 7) & 0xFF;
-    pixels[i * 3 + 1] = (i * 13) & 0xFF;
-    pixels[i * 3 + 2] = (i * 19) & 0xFF;
+    pixels[i * 3] = (i * 7) & 0xff;
+    pixels[i * 3 + 1] = (i * 13) & 0xff;
+    pixels[i * 3 + 2] = (i * 19) & 0xff;
   }
   return pixels;
 }
@@ -55,7 +49,7 @@ function buildRgbPixels(width: number, height: number): Uint8Array {
 function buildGrayRgbPixels(width: number, height: number): Uint8Array {
   const pixels = new Uint8Array(width * height * 3);
   for (let i = 0; i < width * height; i++) {
-    const v = i & 0xFF;
+    const v = i & 0xff;
     pixels[i * 3] = v;
     pixels[i * 3 + 1] = v;
     pixels[i * 3 + 2] = v;

@@ -3,10 +3,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  encodePdf417,
-  pdf417ToOperators,
-} from '../../src/barcode/pdf417.js';
+import { encodePdf417, pdf417ToOperators } from '../../src/barcode/pdf417.js';
 
 import { rgb } from '../../src/core/operators/color.js';
 
@@ -60,16 +57,17 @@ describe('PDF417 Encoder', () => {
   // 5. Handles longer text input
   // -----------------------------------------------------------------------
   it('handles longer text input', () => {
-    const longText = 'The quick brown fox jumps over the lazy dog. ' +
+    const longText =
+      'The quick brown fox jumps over the lazy dog. ' +
       'PDF417 is a stacked linear barcode format used in a variety of applications.';
     const matrix = encodePdf417(longText);
     expect(matrix.rows).toBeGreaterThanOrEqual(3);
     expect(matrix.modules.length).toBe(matrix.rows * matrix.moduleWidth);
     // Longer text should require more codewords
     const shortMatrix = encodePdf417('Hi');
-    expect(
-      matrix.rows * matrix.columns,
-    ).toBeGreaterThanOrEqual(shortMatrix.rows * shortMatrix.columns);
+    expect(matrix.rows * matrix.columns).toBeGreaterThanOrEqual(
+      shortMatrix.rows * shortMatrix.columns,
+    );
   });
 
   // -----------------------------------------------------------------------
@@ -105,10 +103,10 @@ describe('PDF417 Encoder', () => {
     const ops = pdf417ToOperators(matrix, 50, 100);
 
     // Should contain PDF operator keywords
-    expect(ops).toContain('q\n');    // saveState
-    expect(ops).toContain('Q\n');    // restoreState
-    expect(ops).toContain(' re\n');  // rectangle
-    expect(ops).toContain('f\n');    // fill
+    expect(ops).toContain('q\n'); // saveState
+    expect(ops).toContain('Q\n'); // restoreState
+    expect(ops).toContain(' re\n'); // rectangle
+    expect(ops).toContain('f\n'); // fill
   });
 
   // -----------------------------------------------------------------------

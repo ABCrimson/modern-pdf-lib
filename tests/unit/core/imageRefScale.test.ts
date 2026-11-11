@@ -19,28 +19,78 @@ function makeMinimalPng(width: number, height: number): Uint8Array {
   // Use a pre-built tiny 1x1 white RGBA PNG
   // This is a valid PNG that can be embedded.
   const base = new Uint8Array([
-    0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, // PNG signature
+    0x89,
+    0x50,
+    0x4e,
+    0x47,
+    0x0d,
+    0x0a,
+    0x1a,
+    0x0a, // PNG signature
     // IHDR chunk
-    0x00, 0x00, 0x00, 0x0d, // length = 13
-    0x49, 0x48, 0x44, 0x52, // "IHDR"
-    0x00, 0x00, 0x00, 0x01, // width = 1
-    0x00, 0x00, 0x00, 0x01, // height = 1
-    0x08,                   // bit depth = 8
-    0x02,                   // color type = 2 (RGB)
-    0x00,                   // compression method
-    0x00,                   // filter method
-    0x00,                   // interlace method
-    0x1f, 0x15, 0xc4, 0x89, // IHDR CRC
+    0x00,
+    0x00,
+    0x00,
+    0x0d, // length = 13
+    0x49,
+    0x48,
+    0x44,
+    0x52, // "IHDR"
+    0x00,
+    0x00,
+    0x00,
+    0x01, // width = 1
+    0x00,
+    0x00,
+    0x00,
+    0x01, // height = 1
+    0x08, // bit depth = 8
+    0x02, // color type = 2 (RGB)
+    0x00, // compression method
+    0x00, // filter method
+    0x00, // interlace method
+    0x1f,
+    0x15,
+    0xc4,
+    0x89, // IHDR CRC
     // IDAT chunk (zlib-compressed scanline: filter=0 + 3 bytes RGB)
-    0x00, 0x00, 0x00, 0x0c, // length = 12
-    0x49, 0x44, 0x41, 0x54, // "IDAT"
-    0x08, 0xd7, 0x63, 0xf8, 0xcf, 0xc0, 0x00, 0x00,
-    0x01, 0x01, 0x01, 0x00, // zlib data
-    0x18, 0xdd, 0x8d, 0xb4, // IDAT CRC
+    0x00,
+    0x00,
+    0x00,
+    0x0c, // length = 12
+    0x49,
+    0x44,
+    0x41,
+    0x54, // "IDAT"
+    0x08,
+    0xd7,
+    0x63,
+    0xf8,
+    0xcf,
+    0xc0,
+    0x00,
+    0x00,
+    0x01,
+    0x01,
+    0x01,
+    0x00, // zlib data
+    0x18,
+    0xdd,
+    0x8d,
+    0xb4, // IDAT CRC
     // IEND chunk
-    0x00, 0x00, 0x00, 0x00, // length = 0
-    0x49, 0x45, 0x4e, 0x44, // "IEND"
-    0xae, 0x42, 0x60, 0x82, // IEND CRC
+    0x00,
+    0x00,
+    0x00,
+    0x00, // length = 0
+    0x49,
+    0x45,
+    0x4e,
+    0x44, // "IEND"
+    0xae,
+    0x42,
+    0x60,
+    0x82, // IEND CRC
   ]);
 
   // Patch width/height into the IHDR
@@ -48,13 +98,13 @@ function makeMinimalPng(width: number, height: number): Uint8Array {
   // width at offset 16 (4 bytes big-endian)
   result[16] = (width >> 24) & 0xff;
   result[17] = (width >> 16) & 0xff;
-  result[18] = (width >>  8) & 0xff;
-  result[19] = (width)       & 0xff;
+  result[18] = (width >> 8) & 0xff;
+  result[19] = width & 0xff;
   // height at offset 20 (4 bytes big-endian)
   result[20] = (height >> 24) & 0xff;
   result[21] = (height >> 16) & 0xff;
-  result[22] = (height >>  8) & 0xff;
-  result[23] = (height)       & 0xff;
+  result[22] = (height >> 8) & 0xff;
+  result[23] = height & 0xff;
 
   return result;
 }
@@ -66,48 +116,36 @@ function makeMinimalPng(width: number, height: number): Uint8Array {
 function makeMinimalJpeg(width: number, height: number): Uint8Array {
   // Minimal JPEG: SOI + SOF0 + SOS + image data + EOI
   const sof0 = new Uint8Array([
-    0xff, 0xc0,             // SOF0 marker
-    0x00, 0x0b,             // length = 11
-    0x08,                   // precision = 8
-    (height >> 8) & 0xff,   // height high byte
-    height & 0xff,          // height low byte
-    (width >> 8) & 0xff,    // width high byte
-    width & 0xff,           // width low byte
-    0x01,                   // number of components = 1
-    0x01,                   // component ID
-    0x11,                   // sampling factors
-    0x00,                   // quantization table
+    0xff,
+    0xc0, // SOF0 marker
+    0x00,
+    0x0b, // length = 11
+    0x08, // precision = 8
+    (height >> 8) & 0xff, // height high byte
+    height & 0xff, // height low byte
+    (width >> 8) & 0xff, // width high byte
+    width & 0xff, // width low byte
+    0x01, // number of components = 1
+    0x01, // component ID
+    0x11, // sampling factors
+    0x00, // quantization table
   ]);
 
   // DHT (minimal Huffman table)
   const dht = new Uint8Array([
-    0xff, 0xc4,
-    0x00, 0x1f,
-    0x00,
-    0x00, 0x01, 0x05, 0x01, 0x01, 0x01, 0x01, 0x01,
-    0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
-    0x08, 0x09, 0x0a, 0x0b,
+    0xff, 0xc4, 0x00, 0x1f, 0x00, 0x00, 0x01, 0x05, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a,
+    0x0b,
   ]);
 
   // DQT (minimal quantization table)
-  const dqt = new Uint8Array([
-    0xff, 0xdb,
-    0x00, 0x43, 0x00,
-    ...new Array(64).fill(0x01),
-  ]);
+  const dqt = new Uint8Array([0xff, 0xdb, 0x00, 0x43, 0x00, ...new Array(64).fill(0x01)]);
 
   // SOS (Start of scan)
   const sos = new Uint8Array([
-    0xff, 0xda,
-    0x00, 0x08,
-    0x01,
-    0x01,
-    0x00,
-    0x00, 0x3f, 0x00,
+    0xff, 0xda, 0x00, 0x08, 0x01, 0x01, 0x00, 0x00, 0x3f, 0x00,
     // scan data (1 byte) + EOI
-    0x7f,
-    0xff, 0xd9,
+    0x7f, 0xff, 0xd9,
   ]);
 
   // Assemble: SOI + DQT + SOF0 + DHT + SOS
@@ -115,10 +153,14 @@ function makeMinimalJpeg(width: number, height: number): Uint8Array {
   const total = soi.length + dqt.length + sof0.length + dht.length + sos.length;
   const jpeg = new Uint8Array(total);
   let offset = 0;
-  jpeg.set(soi, offset); offset += soi.length;
-  jpeg.set(dqt, offset); offset += dqt.length;
-  jpeg.set(sof0, offset); offset += sof0.length;
-  jpeg.set(dht, offset); offset += dht.length;
+  jpeg.set(soi, offset);
+  offset += soi.length;
+  jpeg.set(dqt, offset);
+  offset += dqt.length;
+  jpeg.set(sof0, offset);
+  offset += sof0.length;
+  jpeg.set(dht, offset);
+  offset += dht.length;
   jpeg.set(sos, offset);
   return jpeg;
 }

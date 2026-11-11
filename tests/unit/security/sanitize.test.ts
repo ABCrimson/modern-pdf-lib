@@ -71,11 +71,7 @@ async function buildHostilePdf(): Promise<Uint8Array> {
   doc.addJavaScript('autoInit', 'app.alert("ACTIVE-CONTENT-PAYLOAD");');
 
   // Embedded file → /Names /EmbeddedFiles name tree.
-  doc.attachFile(
-    'secret.txt',
-    new TextEncoder().encode('EMBEDDED-FILE-PAYLOAD'),
-    'text/plain',
-  );
+  doc.attachFile('secret.txt', new TextEncoder().encode('EMBEDDED-FILE-PAYLOAD'), 'text/plain');
 
   // Metadata that should be strippable.
   doc.setTitle('Confidential Title');

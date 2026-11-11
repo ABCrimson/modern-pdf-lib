@@ -12,10 +12,7 @@ import { describe, it, expect } from 'vitest';
 import { PdfDocument } from '../../../src/core/pdfDocument.js';
 import { PdfDict, PdfName, PdfRef } from '../../../src/core/pdfObjects.js';
 import { PdfForm } from '../../../src/form/pdfForm.js';
-import {
-  buildFormFromJsonSchema,
-  type JsonSchemaLike,
-} from '../../../src/form/schemaForm.js';
+import { buildFormFromJsonSchema, type JsonSchemaLike } from '../../../src/form/schemaForm.js';
 
 /**
  * Read the AcroForm from a saved-then-loaded document via the public
@@ -79,11 +76,7 @@ describe('buildFormFromJsonSchema', () => {
     expect(byName.get('country')).toBe('dropdown');
 
     // Order is preserved (insertion order of properties).
-    expect(result.fields.map((f) => f.name)).toEqual([
-      'fullName',
-      'subscribe',
-      'country',
-    ]);
+    expect(result.fields.map((f) => f.name)).toEqual(['fullName', 'subscribe', 'country']);
 
     // The document is returned (not yet saved).
     expect(result.doc).toBeInstanceOf(PdfDocument);

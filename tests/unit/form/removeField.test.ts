@@ -3,10 +3,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  PdfDict,
-  PdfArray,
-} from '../../../src/core/pdfObjects.js';
+import { PdfDict, PdfArray } from '../../../src/core/pdfObjects.js';
 import { PdfForm } from '../../../src/form/pdfForm.js';
 
 // ---------------------------------------------------------------------------
@@ -52,9 +49,17 @@ describe('PdfForm.removeField', () => {
 
   it('removes a button by name', () => {
     const form = emptyForm();
-    form.createButton('submit', null, {
-      x: 10, y: 10, width: 80, height: 25,
-    }, 'Submit');
+    form.createButton(
+      'submit',
+      null,
+      {
+        x: 10,
+        y: 10,
+        width: 80,
+        height: 25,
+      },
+      'Submit',
+    );
 
     form.removeField('submit');
     expect(form.getFields()).toHaveLength(0);
@@ -62,9 +67,17 @@ describe('PdfForm.removeField', () => {
 
   it('removes a listbox by name', () => {
     const form = emptyForm();
-    form.createListbox('items', null, {
-      x: 10, y: 10, width: 100, height: 60,
-    }, ['A', 'B']);
+    form.createListbox(
+      'items',
+      null,
+      {
+        x: 10,
+        y: 10,
+        width: 100,
+        height: 60,
+      },
+      ['A', 'B'],
+    );
 
     form.removeField('items');
     expect(form.getFields()).toHaveLength(0);
@@ -72,10 +85,15 @@ describe('PdfForm.removeField', () => {
 
   it('removes a radio group by name', () => {
     const form = emptyForm();
-    form.createRadioGroup('choice', null, [
-      { x: 0, y: 0, width: 15, height: 15 },
-      { x: 0, y: 20, width: 15, height: 15 },
-    ], ['Yes', 'No']);
+    form.createRadioGroup(
+      'choice',
+      null,
+      [
+        { x: 0, y: 0, width: 15, height: 15 },
+        { x: 0, y: 20, width: 15, height: 15 },
+      ],
+      ['Yes', 'No'],
+    );
 
     form.removeField('choice');
     expect(form.getFields()).toHaveLength(0);

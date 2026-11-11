@@ -58,15 +58,53 @@ export type { EmbeddedPdfPage, DrawPageOptions, EmbedPageOptions } from './core/
 // Colour helpers
 // ---------------------------------------------------------------------------
 
-export { rgb, cmyk, grayscale, componentsToColor, colorToComponents, setFillingColor, setStrokingColor, spotColor, deviceNColor, rgbToCmyk, cmykToRgb, colorToHex, hexToColor, spotResourceName, deviceNResourceName } from './core/operators/color.js';
-export type { RgbColor, CmykColor, GrayscaleColor, SpotColor, DeviceNColor, Color } from './core/operators/color.js';
+export {
+  rgb,
+  cmyk,
+  grayscale,
+  componentsToColor,
+  colorToComponents,
+  setFillingColor,
+  setStrokingColor,
+  spotColor,
+  deviceNColor,
+  rgbToCmyk,
+  cmykToRgb,
+  colorToHex,
+  hexToColor,
+  spotResourceName,
+  deviceNResourceName,
+} from './core/operators/color.js';
+export type {
+  RgbColor,
+  CmykColor,
+  GrayscaleColor,
+  SpotColor,
+  DeviceNColor,
+  Color,
+} from './core/operators/color.js';
 
 // ---------------------------------------------------------------------------
 // Gradients & Patterns
 // ---------------------------------------------------------------------------
 
-export { linearGradient, radialGradient, tilingPattern, buildGradientObjects, buildPatternObjects } from './core/patterns.js';
-export type { ColorStop, LinearGradientOptions, RadialGradientOptions, TilingPatternOptions, GradientFill, PatternFill, RadialGradientFill, NormalizedStop } from './core/patterns.js';
+export {
+  linearGradient,
+  radialGradient,
+  tilingPattern,
+  buildGradientObjects,
+  buildPatternObjects,
+} from './core/patterns.js';
+export type {
+  ColorStop,
+  LinearGradientOptions,
+  RadialGradientOptions,
+  TilingPatternOptions,
+  GradientFill,
+  PatternFill,
+  RadialGradientFill,
+  NormalizedStop,
+} from './core/patterns.js';
 
 // ---------------------------------------------------------------------------
 // Angle helpers
@@ -79,13 +117,27 @@ export type { Degrees, Radians, Angle } from './core/operators/state.js';
 // PDF value helpers
 // ---------------------------------------------------------------------------
 
-export { asPDFName, asPDFNumber, asPdfName, asPdfNumber, asNumber } from './utils/pdfValueHelpers.js';
+export {
+  asPDFName,
+  asPDFNumber,
+  asPdfName,
+  asPdfNumber,
+  asNumber,
+} from './utils/pdfValueHelpers.js';
 
 // ---------------------------------------------------------------------------
 // Enums
 // ---------------------------------------------------------------------------
 
-export { BlendMode, TextRenderingMode, LineCapStyle, LineJoinStyle, TextAlignment, ImageAlignment, ParseSpeeds } from './core/enums.js';
+export {
+  BlendMode,
+  TextRenderingMode,
+  LineCapStyle,
+  LineJoinStyle,
+  TextAlignment,
+  ImageAlignment,
+  ParseSpeeds,
+} from './core/enums.js';
 
 // ---------------------------------------------------------------------------
 // Save options
@@ -111,18 +163,19 @@ export {
 } from './core/pageManipulation.js';
 export type { CropBox } from './core/pageManipulation.js';
 
-export {
-  mergePdfs,
-  splitPdf,
-  copyPages,
-} from './core/documentMerge.js';
+export { mergePdfs, splitPdf, copyPages } from './core/documentMerge.js';
 export type { PageRange } from './core/documentMerge.js';
 
 // ---------------------------------------------------------------------------
 // Text layout helpers
 // ---------------------------------------------------------------------------
 
-export { layoutMultilineText, layoutCombedText, computeFontSize, layoutSinglelineText } from './core/layout.js';
+export {
+  layoutMultilineText,
+  layoutCombedText,
+  computeFontSize,
+  layoutSinglelineText,
+} from './core/layout.js';
 export type {
   LayoutMultilineOptions,
   LayoutMultilineResult,
@@ -698,42 +751,90 @@ export {
   interpolateLinearRgb,
   applySpreadMethod,
 } from './assets/svg/index.js';
-export type { SvgDrawCommand, SvgElement, SvgRenderOptions, SvgGradient, SvgGradientStop } from './assets/svg/index.js';
+export type {
+  SvgDrawCommand,
+  SvgElement,
+  SvgRenderOptions,
+  SvgGradient,
+  SvgGradientStop,
+} from './assets/svg/index.js';
 
 // ---------------------------------------------------------------------------
 // Linearization
 // ---------------------------------------------------------------------------
 
-export { linearizePdf, isLinearized, delinearizePdf, getLinearizationInfo } from './core/linearization.js';
+export {
+  linearizePdf,
+  isLinearized,
+  delinearizePdf,
+  getLinearizationInfo,
+} from './core/linearization.js';
 export type { LinearizationOptions, LinearizationInfo } from './core/linearization.js';
 
 // ---------------------------------------------------------------------------
 // PDF/A compliance
 // ---------------------------------------------------------------------------
 
-export { validatePdfA, enforcePdfA, enforcePdfAFull, detectTransparency, flattenTransparency, generateSrgbIccProfile, SRGB_ICC_PROFILE, buildOutputIntent, generateWinAnsiToUnicodeCmap, generateSymbolToUnicodeCmap, generateZapfDingbatsToUnicodeCmap, getToUnicodeCmap, getProfile, getSupportedLevels, isValidLevel, extractXmpMetadata, parseXmpPdfAMetadata, validateXmpMetadata, createAssociatedFile, buildAfArray, stripProhibitedFeatures, countOccurrences, generatePdfAXmp, generatePdfAXmpBytes } from './compliance/index.js';
-export type { PdfALevel, PdfAValidationResult, PdfAIssue, TransparencyInfo, TransparencyFinding, OutputIntentOptions, PdfAProfile, XmpValidationResult, XmpIssue, ParsedXmpMetadata, AFRelationship, AssociatedFileOptions, AssociatedFileResult, StripResult, StrippedFeature, StripOptions, PdfAXmpOptions, EnforcePdfAOptions, EnforcePdfAResult, EnforcementAction } from './compliance/index.js';
+export {
+  validatePdfA,
+  enforcePdfA,
+  enforcePdfAFull,
+  detectTransparency,
+  flattenTransparency,
+  generateSrgbIccProfile,
+  SRGB_ICC_PROFILE,
+  buildOutputIntent,
+  generateWinAnsiToUnicodeCmap,
+  generateSymbolToUnicodeCmap,
+  generateZapfDingbatsToUnicodeCmap,
+  getToUnicodeCmap,
+  getProfile,
+  getSupportedLevels,
+  isValidLevel,
+  extractXmpMetadata,
+  parseXmpPdfAMetadata,
+  validateXmpMetadata,
+  createAssociatedFile,
+  buildAfArray,
+  stripProhibitedFeatures,
+  countOccurrences,
+  generatePdfAXmp,
+  generatePdfAXmpBytes,
+} from './compliance/index.js';
+export type {
+  PdfALevel,
+  PdfAValidationResult,
+  PdfAIssue,
+  TransparencyInfo,
+  TransparencyFinding,
+  OutputIntentOptions,
+  PdfAProfile,
+  XmpValidationResult,
+  XmpIssue,
+  ParsedXmpMetadata,
+  AFRelationship,
+  AssociatedFileOptions,
+  AssociatedFileResult,
+  StripResult,
+  StrippedFeature,
+  StripOptions,
+  PdfAXmpOptions,
+  EnforcePdfAOptions,
+  EnforcePdfAResult,
+  EnforcementAction,
+} from './compliance/index.js';
 
 // ---------------------------------------------------------------------------
 // Layers (Optional Content Groups)
 // ---------------------------------------------------------------------------
 
-export {
-  PdfLayer,
-  PdfLayerManager,
-  beginLayerContent,
-  endLayerContent,
-} from './layers/index.js';
+export { PdfLayer, PdfLayerManager, beginLayerContent, endLayerContent } from './layers/index.js';
 
 // ---------------------------------------------------------------------------
 // Embedded files (attachments)
 // ---------------------------------------------------------------------------
 
-export {
-  attachFile,
-  getAttachments,
-  buildEmbeddedFilesNameTree,
-} from './core/embeddedFiles.js';
+export { attachFile, getAttachments, buildEmbeddedFilesNameTree } from './core/embeddedFiles.js';
 export type { EmbeddedFile } from './core/embeddedFiles.js';
 
 // ---------------------------------------------------------------------------
@@ -751,7 +852,11 @@ export { markForRedaction, applyRedactions, getRedactionMarks } from './core/red
 export type { RedactionOptions, RedactionMark } from './core/redaction.js';
 
 export { applyRedaction } from './annotation/applyRedactions.js';
-export type { RedactionResult, OverlayAlignment, RedactionOperatorOptions } from './annotation/applyRedactions.js';
+export type {
+  RedactionResult,
+  OverlayAlignment,
+  RedactionOperatorOptions,
+} from './annotation/applyRedactions.js';
 
 // ---------------------------------------------------------------------------
 // Image optimization
@@ -777,11 +882,7 @@ export {
   encodeJpegWasm,
   decodeJpegWasm,
 } from './wasm/jpeg/bridge.js';
-export type {
-  ChromaSubsampling,
-  JpegDecodeResult,
-  JpegWasmModule,
-} from './wasm/jpeg/bridge.js';
+export type { ChromaSubsampling, JpegDecodeResult, JpegWasmModule } from './wasm/jpeg/bridge.js';
 
 export { extractImages, decodeImageStream } from './assets/image/imageExtract.js';
 export type { ImageInfo } from './assets/image/imageExtract.js';
@@ -797,22 +898,25 @@ export type {
 export { deduplicateImages } from './assets/image/deduplicateImages.js';
 export type { DeduplicationReport } from './assets/image/deduplicateImages.js';
 
-export {
-  isGrayscaleImage,
-  convertToGrayscale,
-} from './assets/image/grayscaleDetect.js';
+export { isGrayscaleImage, convertToGrayscale } from './assets/image/grayscaleDetect.js';
 
-export { extractIccProfile, embedIccProfile, parseIccColorSpace, parseIccDescription } from './assets/image/iccProfile.js';
+export {
+  extractIccProfile,
+  embedIccProfile,
+  parseIccColorSpace,
+  parseIccDescription,
+} from './assets/image/iccProfile.js';
 export type { IccProfile } from './assets/image/iccProfile.js';
 
-export {
-  computeImageDpi,
-  computeTargetDimensions,
-} from './assets/image/dpiAnalyze.js';
+export { computeImageDpi, computeTargetDimensions } from './assets/image/dpiAnalyze.js';
 export type { ImageDpi } from './assets/image/dpiAnalyze.js';
 
 export { analyzeImages } from './assets/image/compressionAnalysis.js';
-export type { ImageAnalysis, AnalysisReport, AnalyzeImagesOptions } from './assets/image/compressionAnalysis.js';
+export type {
+  ImageAnalysis,
+  AnalysisReport,
+  AnalyzeImagesOptions,
+} from './assets/image/compressionAnalysis.js';
 
 export { analyzeJpegMarkers } from './assets/image/jpegMarkers.js';
 export type { JpegMarkerInfo } from './assets/image/jpegMarkers.js';
@@ -824,11 +928,7 @@ export type { JpegMetadata } from './assets/image/imageMetadata.js';
 // TIFF CMYK support
 // ---------------------------------------------------------------------------
 
-export {
-  convertTiffCmykToRgb,
-  embedTiffCmyk,
-  isCmykTiff,
-} from './assets/image/tiffCmyk.js';
+export { convertTiffCmykToRgb, embedTiffCmyk, isCmykTiff } from './assets/image/tiffCmyk.js';
 export type { TiffIfdEntry, TiffCmykEmbedResult } from './assets/image/tiffCmyk.js';
 
 // ---------------------------------------------------------------------------
@@ -857,24 +957,14 @@ export {
 // TIFF direct embedding
 // ---------------------------------------------------------------------------
 
-export {
-  embedTiffDirect,
-  canDirectEmbed,
-} from './assets/image/tiffDirectEmbed.js';
-export type {
-  DirectEmbedOptions,
-  DirectEmbedResult,
-} from './assets/image/tiffDirectEmbed.js';
+export { embedTiffDirect, canDirectEmbed } from './assets/image/tiffDirectEmbed.js';
+export type { DirectEmbedOptions, DirectEmbedResult } from './assets/image/tiffDirectEmbed.js';
 
 // ---------------------------------------------------------------------------
 // WebP decoding
 // ---------------------------------------------------------------------------
 
-export {
-  decodeWebP,
-  isWebP,
-  isWebPLossless,
-} from './assets/image/webpDecode.js';
+export { decodeWebP, isWebP, isWebPLossless } from './assets/image/webpDecode.js';
 export type { WebPImage } from './assets/image/webpDecode.js';
 
 // ---------------------------------------------------------------------------
@@ -889,11 +979,7 @@ export {
   parseTiffIfd,
   isTiff,
 } from './assets/image/tiffDecode.js';
-export type {
-  TiffImage,
-  TiffDecodeOptions,
-  IfdEntry,
-} from './assets/image/tiffDecode.js';
+export type { TiffImage, TiffDecodeOptions, IfdEntry } from './assets/image/tiffDecode.js';
 
 // ---------------------------------------------------------------------------
 // WASM loader (streaming compilation, runtime detection, configuration)
@@ -962,7 +1048,24 @@ export {
   readCode39,
   readBarcode,
 } from './barcode/index.js';
-export type { Code128Options, Code39Options, ItfOptions, BarcodeMatrix, BarcodeOptions, EanOptions, UpcOptions, QrCodeOptions, QrCodeMatrix, ErrorCorrectionLevel, DataMatrixOptions, DataMatrixResult, Pdf417Options, Pdf417Matrix, StyledBarcodeOptions, BarcodeReadResult } from './barcode/index.js';
+export type {
+  Code128Options,
+  Code39Options,
+  ItfOptions,
+  BarcodeMatrix,
+  BarcodeOptions,
+  EanOptions,
+  UpcOptions,
+  QrCodeOptions,
+  QrCodeMatrix,
+  ErrorCorrectionLevel,
+  DataMatrixOptions,
+  DataMatrixResult,
+  Pdf417Options,
+  Pdf417Matrix,
+  StyledBarcodeOptions,
+  BarcodeReadResult,
+} from './barcode/index.js';
 
 // ---------------------------------------------------------------------------
 // Table layout
@@ -992,7 +1095,14 @@ export {
 } from './layout/index.js';
 export type { TablePreset, PresetName, PresetOptions } from './layout/index.js';
 
-export { estimateTextWidth, applyOverflow, wrapText, truncateText, ellipsisText, shrinkFontSize } from './layout/index.js';
+export {
+  estimateTextWidth,
+  applyOverflow,
+  wrapText,
+  truncateText,
+  ellipsisText,
+  shrinkFontSize,
+} from './layout/index.js';
 export type { OverflowMode, OverflowResult } from './layout/index.js';
 
 export {
@@ -1060,20 +1170,37 @@ export type { PageLabelRange, PageLabelStyle } from './core/pageLabels.js';
 // ---------------------------------------------------------------------------
 
 export { processBatch, batchMerge, batchFlatten } from './batch/batchProcessor.js';
-export type { BatchOptions, BatchResult, BatchProgressCallback, BatchErrorStrategy } from './batch/batchProcessor.js';
+export type {
+  BatchOptions,
+  BatchResult,
+  BatchProgressCallback,
+  BatchErrorStrategy,
+} from './batch/batchProcessor.js';
 
 // ---------------------------------------------------------------------------
 // PDF/UA validation
 // ---------------------------------------------------------------------------
 
 export { validatePdfUa, enforcePdfUa } from './accessibility/pdfUaValidator.js';
-export type { PdfUaValidationResult, PdfUaError, PdfUaWarning, PdfUaLevel, PdfUaEnforcementResult } from './accessibility/pdfUaValidator.js';
+export type {
+  PdfUaValidationResult,
+  PdfUaError,
+  PdfUaWarning,
+  PdfUaLevel,
+  PdfUaEnforcementResult,
+} from './accessibility/pdfUaValidator.js';
 
 // ---------------------------------------------------------------------------
 // Inline WASM
 // ---------------------------------------------------------------------------
 
-export { getInlineWasmBytes, hasInlineWasmData, isValidModuleName, getInlineWasmSize, preloadInlineWasm } from './wasm/inlineWasm.js';
+export {
+  getInlineWasmBytes,
+  hasInlineWasmData,
+  isValidModuleName,
+  getInlineWasmSize,
+  preloadInlineWasm,
+} from './wasm/inlineWasm.js';
 export type { WasmModuleName } from './wasm/inlineWasm.js';
 
 // ---------------------------------------------------------------------------
@@ -1087,7 +1214,12 @@ export { PdfDocumentBuilder } from './core/pdfDocumentBuilder.js';
 // ---------------------------------------------------------------------------
 
 export { StreamingPdfParser } from './parser/streamingParser.js';
-export type { StreamingParserOptions, ParsedPage, StreamingParseResult, StreamingParserEvent } from './parser/streamingParser.js';
+export type {
+  StreamingParserOptions,
+  ParsedPage,
+  StreamingParseResult,
+  StreamingParserEvent,
+} from './parser/streamingParser.js';
 
 // ---------------------------------------------------------------------------
 // Plugin system
@@ -1408,7 +1540,11 @@ export type { ThreatReport, ThreatFinding, ThreatSeverity } from './security/thr
 export { sanitizePdf } from './security/sanitize.js';
 export type { SanitizeOptions, SanitizeReport, SanitizeClass } from './security/sanitize.js';
 export { verifyRedactions } from './security/redactionVerifier.js';
-export type { RedactionRegion, RedactionLeak, RedactionVerificationReport } from './security/redactionVerifier.js';
+export type {
+  RedactionRegion,
+  RedactionLeak,
+  RedactionVerificationReport,
+} from './security/redactionVerifier.js';
 export { inspectEncryption } from './security/encryptionInspector.js';
 export type { EncryptionReport, PermissionFlags } from './security/encryptionInspector.js';
 
@@ -1424,7 +1560,12 @@ export {
   normalizeAxisCoordinate,
   resolveInstanceCoordinates,
 } from './assets/font/variableFont.js';
-export type { VariationAxis, NamedInstance, AvarSegmentMap, VariableFontInfo } from './assets/font/variableFont.js';
+export type {
+  VariationAxis,
+  NamedInstance,
+  AvarSegmentMap,
+  VariableFontInfo,
+} from './assets/font/variableFont.js';
 export { parseColorFont, getColorGlyphLayers } from './assets/font/colorFont.js';
 // NB: colorFont's internal `ColorStop` (gid + paletteIndex) is intentionally not
 // re-exported — `ColorStop` is already the gradient-stop type at the root, and
@@ -1517,9 +1658,17 @@ export {
   SharedRingBuffer,
 } from './runtime/sharedConcurrency.js';
 export type { SharedFlagWaitResult } from './runtime/sharedConcurrency.js';
-export { MemoryBudget, MemoryBudgetExceededError, createMemoryBudget } from './runtime/memoryBudget.js';
+export {
+  MemoryBudget,
+  MemoryBudgetExceededError,
+  createMemoryBudget,
+} from './runtime/memoryBudget.js';
 export type { MemoryBudgetOptions } from './runtime/memoryBudget.js';
-export { detectRuntimeCapabilities, isWasmSimdSupported, SIMD_NOTE } from './runtime/runtimeCapabilities.js';
+export {
+  detectRuntimeCapabilities,
+  isWasmSimdSupported,
+  SIMD_NOTE,
+} from './runtime/runtimeCapabilities.js';
 export type { RuntimeCapabilities } from './runtime/runtimeCapabilities.js';
 
 // ---------------------------------------------------------------------------
@@ -1546,10 +1695,6 @@ export {
   sendPdfToNodeResponse,
 } from './runtime/serverAdapters.js';
 export type { PdfResponseOptions, NodeServerResponseLike } from './runtime/serverAdapters.js';
-
-
-
-
 
 // ---------------------------------------------------------------------------
 // Rendering & rasterization (0.29.x): content-stream interpreter, pure-JS
@@ -1598,7 +1743,10 @@ export { attachAssociatedFiles, registerEmbeddedFile } from './compliance/afAtta
 export { attachOutputIntents, buildPageOutputIntent } from './compliance/pageOutputIntent.js';
 export type { PageOutputIntentOptions } from './compliance/pageOutputIntent.js';
 export { buildEncryptedPayload, buildUnencryptedWrapper } from './compliance/encryptedPayload.js';
-export type { EncryptedPayloadOptions, WrapperPayloadOptions } from './compliance/encryptedPayload.js';
+export type {
+  EncryptedPayloadOptions,
+  WrapperPayloadOptions,
+} from './compliance/encryptedPayload.js';
 export { buildSoftMaskGroupExtGState, buildSoftMaskNone } from './core/softMask.js';
 export type { SoftMaskGroupOptions } from './core/softMask.js';
 export {
@@ -1639,7 +1787,10 @@ export type { AutoTagOptions, AutoTagResult } from './accessibility/autoTag.js';
 // ---------------------------------------------------------------------------
 export { preflightPdfA, convertPdfAConformanceXmp } from './compliance/profileConvert.js';
 export type { PreflightIssue } from './compliance/profileConvert.js';
-export { buildWtpdfIdentificationXmp, buildPdfRIdentificationXmp } from './compliance/rasterProfile.js';
+export {
+  buildWtpdfIdentificationXmp,
+  buildPdfRIdentificationXmp,
+} from './compliance/rasterProfile.js';
 export type { ProfileXmpOptions } from './compliance/rasterProfile.js';
 
 // ---------------------------------------------------------------------------
@@ -1651,5 +1802,9 @@ export type { ProfileXmpOptions } from './compliance/rasterProfile.js';
 export { assembleFacturX, buildFacturXXmp } from './compliance/facturXAssemble.js';
 export type { FacturXAssembleOptions } from './compliance/facturXAssemble.js';
 export { validateEn16931 } from './compliance/eInvoiceValidate.js';
-export type { EInvoiceIssue, DeclaredInvoiceTotals, ValidatableInvoice } from './compliance/eInvoiceValidate.js';
+export type {
+  EInvoiceIssue,
+  DeclaredInvoiceTotals,
+  ValidatableInvoice,
+} from './compliance/eInvoiceValidate.js';
 export { parseCiiXml, detectFacturXProfile } from './compliance/ciiReader.js';

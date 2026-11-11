@@ -1,9 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  encodeUpcA,
-  calculateUpcCheckDigit,
-  upcAToOperators,
-} from '../../src/barcode/upc.js';
+import { encodeUpcA, calculateUpcCheckDigit, upcAToOperators } from '../../src/barcode/upc.js';
 import { encodeEan13 } from '../../src/barcode/ean.js';
 import { rgb } from '../../src/core/operators/color.js';
 

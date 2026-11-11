@@ -6,12 +6,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  createPdf,
-  PageSizes,
-  StandardFonts,
-  rgb,
-} from '../../src/index.js';
+import { createPdf, PageSizes, StandardFonts, rgb } from '../../src/index.js';
 
 // ---------------------------------------------------------------------------
 // Helpers

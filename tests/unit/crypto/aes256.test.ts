@@ -285,10 +285,10 @@ describe('AES-256 /Encrypt dictionary', () => {
     const p = (dict.get('/P') as PdfNumber).value;
     expect(typeof p).toBe('number');
     // The printing bit should be set
-    expect(p & (1 << 2)).not.toBe(0);   // bit 3
-    expect(p & (1 << 11)).not.toBe(0);  // bit 12 (high-quality print)
+    expect(p & (1 << 2)).not.toBe(0); // bit 3
+    expect(p & (1 << 11)).not.toBe(0); // bit 12 (high-quality print)
     // The copying bit should NOT be set
-    expect(p & (1 << 4)).toBe(0);       // bit 5
+    expect(p & (1 << 4)).toBe(0); // bit 5
   });
 });
 
@@ -404,9 +404,9 @@ describe('AES-256 wrong password rejection', () => {
     );
     const dict = h.buildEncryptDict();
 
-    await expect(
-      PdfEncryptionHandler.fromEncryptDict(dict, fid, 'wrong'),
-    ).rejects.toThrow(/ncorrect password/);
+    await expect(PdfEncryptionHandler.fromEncryptDict(dict, fid, 'wrong')).rejects.toThrow(
+      /ncorrect password/,
+    );
   });
 });
 
@@ -576,10 +576,14 @@ describe('AES-256 vs AES-128 interop isolation', () => {
 
   it('AES-128 uses V=4 R=4, AES-256 uses V=5 R=6', async () => {
     const h128 = await PdfEncryptionHandler.create({
-      userPassword: 'u', ownerPassword: 'o', algorithm: 'aes-128',
+      userPassword: 'u',
+      ownerPassword: 'o',
+      algorithm: 'aes-128',
     });
     const h256 = await PdfEncryptionHandler.create({
-      userPassword: 'u', ownerPassword: 'o', algorithm: 'aes-256',
+      userPassword: 'u',
+      ownerPassword: 'o',
+      algorithm: 'aes-256',
     });
 
     expect(h128.getVersion()).toBe(4);
@@ -791,9 +795,9 @@ describe('computeFileEncryptionKey for R=6', () => {
       encryptMetadata: true,
     };
 
-    await expect(
-      computeFileEncryptionKey('wrong', dictValues, fid),
-    ).rejects.toThrow(/ncorrect password/);
+    await expect(computeFileEncryptionKey('wrong', dictValues, fid)).rejects.toThrow(
+      /ncorrect password/,
+    );
   });
 });
 
@@ -840,11 +844,7 @@ describe('AES-256 PDF header version', () => {
       contentStreamRefs: contentStreamRef,
       resources,
     };
-    const structure = buildDocumentStructure(
-      [pageEntry],
-      { producer: 'test' },
-      registry,
-    );
+    const structure = buildDocumentStructure([pageEntry], { producer: 'test' }, registry);
 
     const handler = await PdfEncryptionHandler.create({
       userPassword: 'u',
@@ -873,11 +873,7 @@ describe('AES-256 PDF header version', () => {
       contentStreamRefs: contentStreamRef,
       resources,
     };
-    const structure = buildDocumentStructure(
-      [pageEntry],
-      { producer: 'test' },
-      registry,
-    );
+    const structure = buildDocumentStructure([pageEntry], { producer: 'test' }, registry);
 
     const handler = await PdfEncryptionHandler.create({
       userPassword: 'u',
@@ -912,11 +908,7 @@ describe('AES-256 trailer integration', () => {
       contentStreamRefs: contentStreamRef,
       resources,
     };
-    const structure = buildDocumentStructure(
-      [pageEntry],
-      { producer: 'test' },
-      registry,
-    );
+    const structure = buildDocumentStructure([pageEntry], { producer: 'test' }, registry);
 
     const handler = await PdfEncryptionHandler.create({
       userPassword: 'u',
@@ -949,11 +941,7 @@ describe('AES-256 trailer integration', () => {
       contentStreamRefs: contentStreamRef,
       resources,
     };
-    const structure = buildDocumentStructure(
-      [pageEntry],
-      { producer: 'test' },
-      registry,
-    );
+    const structure = buildDocumentStructure([pageEntry], { producer: 'test' }, registry);
 
     const bytes = await serializePdf(registry, structure, { compress: false });
     const text = dec.decode(bytes);
@@ -1013,8 +1001,14 @@ describe('AES-256 known-structure test', () => {
     const fileKey = h.getFileKey();
     // Use raw Web Crypto to decrypt
     const subtle = globalThis.crypto.subtle;
-    const keyBuf = fileKey.buffer.slice(fileKey.byteOffset, fileKey.byteOffset + fileKey.byteLength);
-    const cryptoKey = await subtle.importKey('raw', keyBuf, 'AES-CBC', false, ['encrypt', 'decrypt']);
+    const keyBuf = fileKey.buffer.slice(
+      fileKey.byteOffset,
+      fileKey.byteOffset + fileKey.byteLength,
+    );
+    const cryptoKey = await subtle.importKey('raw', keyBuf, 'AES-CBC', false, [
+      'encrypt',
+      'decrypt',
+    ]);
     const zeroIv = new Uint8Array(16);
 
     // To decrypt without padding, we need to handle the no-pad case
@@ -1050,16 +1044,13 @@ describe('AES-256 known-structure test', () => {
     expect(decBlock[8]).toBe(0x54);
 
     // Bytes 9-11: 'adb'
-    expect(decBlock[9]).toBe(0x61);  // 'a'
+    expect(decBlock[9]).toBe(0x61); // 'a'
     expect(decBlock[10]).toBe(0x64); // 'd'
     expect(decBlock[11]).toBe(0x62); // 'b'
 
     // Bytes 0-3: permissions as LE 32-bit — verify they match
     const pValue =
-      decBlock[0]! |
-      (decBlock[1]! << 8) |
-      (decBlock[2]! << 16) |
-      ((decBlock[3]! << 24) >>> 0);
+      decBlock[0]! | (decBlock[1]! << 8) | (decBlock[2]! << 16) | ((decBlock[3]! << 24) >>> 0);
     // Compare as signed 32-bit
     const pSigned = pValue | 0;
     expect(pSigned).toBe(h.getPermissionsValue());
@@ -1100,9 +1091,9 @@ describe('AES-256 empty password edge cases', () => {
     expect(await restoredOwner.decryptObject(1, 0, cipher)).toEqual(plain);
 
     // Wrong password should fail
-    await expect(
-      PdfEncryptionHandler.fromEncryptDict(dict, fid, 'wrong'),
-    ).rejects.toThrow(/ncorrect password/);
+    await expect(PdfEncryptionHandler.fromEncryptDict(dict, fid, 'wrong')).rejects.toThrow(
+      /ncorrect password/,
+    );
   });
 
   it('empty owner password with non-empty user password round-trips', async () => {
@@ -1349,7 +1340,7 @@ describe('AES-256 SASLprep edge cases', () => {
   });
 
   it('rejects ASCII control characters (U+0001-U+001F)', () => {
-    for (let cp = 1; cp <= 0x1F; cp++) {
+    for (let cp = 1; cp <= 0x1f; cp++) {
       expect(() => saslprep('a' + String.fromCodePoint(cp) + 'b')).toThrow(/prohibited/i);
     }
   });
@@ -1359,19 +1350,19 @@ describe('AES-256 SASLprep edge cases', () => {
   });
 
   it('rejects C0 control characters (U+0080-U+009F)', () => {
-    for (let cp = 0x80; cp <= 0x9F; cp++) {
+    for (let cp = 0x80; cp <= 0x9f; cp++) {
       expect(() => saslprep(String.fromCodePoint(cp))).toThrow(/prohibited/i);
     }
   });
 
   it('rejects private use area characters', () => {
-    expect(() => saslprep('test' + String.fromCodePoint(0xE000))).toThrow(/prohibited/i);
-    expect(() => saslprep('test' + String.fromCodePoint(0xF8FF))).toThrow(/prohibited/i);
+    expect(() => saslprep('test' + String.fromCodePoint(0xe000))).toThrow(/prohibited/i);
+    expect(() => saslprep('test' + String.fromCodePoint(0xf8ff))).toThrow(/prohibited/i);
   });
 
   it('rejects ideographic description characters (C.7: U+2FF0-U+2FFB)', () => {
-    expect(() => saslprep('test' + String.fromCodePoint(0x2FF0))).toThrow(/prohibited/i);
-    expect(() => saslprep('test' + String.fromCodePoint(0x2FFB))).toThrow(/prohibited/i);
+    expect(() => saslprep('test' + String.fromCodePoint(0x2ff0))).toThrow(/prohibited/i);
+    expect(() => saslprep('test' + String.fromCodePoint(0x2ffb))).toThrow(/prohibited/i);
   });
 
   it('removes multiple mapped-to-nothing characters', () => {
@@ -1390,9 +1381,8 @@ describe('AES-256 SASLprep edge cases', () => {
 
   it('maps all non-ASCII space types to U+0020', () => {
     const spaces = [
-      0x00A0, 0x1680, 0x2000, 0x2001, 0x2002, 0x2003, 0x2004,
-      0x2005, 0x2006, 0x2007, 0x2008, 0x2009, 0x200A, 0x202F,
-      0x205F, 0x3000,
+      0x00a0, 0x1680, 0x2000, 0x2001, 0x2002, 0x2003, 0x2004, 0x2005, 0x2006, 0x2007, 0x2008,
+      0x2009, 0x200a, 0x202f, 0x205f, 0x3000,
     ];
     for (const cp of spaces) {
       const result = saslprep('a' + String.fromCodePoint(cp) + 'b');
@@ -1553,7 +1543,7 @@ describe('Algorithm 2.B specification conformance', () => {
 
   it('produces consistent results across multiple calls', async () => {
     const pwd = enc.encode('consistency');
-    const salt = new Uint8Array([0xAA, 0xBB, 0xCC, 0xDD, 0x11, 0x22, 0x33, 0x44]);
+    const salt = new Uint8Array([0xaa, 0xbb, 0xcc, 0xdd, 0x11, 0x22, 0x33, 0x44]);
     const uKey = randomBytes(48);
 
     const results = await Promise.all(
@@ -1906,8 +1896,8 @@ describe('preparePasswordV5 edge cases', () => {
     const pwd = '\u00E9'; // e-acute, 2 bytes in UTF-8
     const prepared = preparePasswordV5(pwd);
     expect(prepared.length).toBe(2);
-    expect(prepared[0]).toBe(0xC3);
-    expect(prepared[1]).toBe(0xA9);
+    expect(prepared[0]).toBe(0xc3);
+    expect(prepared[1]).toBe(0xa9);
   });
 });
 

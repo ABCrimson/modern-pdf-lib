@@ -44,7 +44,7 @@ export class WorkerRuntimeAdapter implements RuntimeAdapter {
     return Promise.reject(
       new Error(
         'WorkerRuntimeAdapter.readFile: filesystem access is not available in Cloudflare Workers. ' +
-        'Use fetchBytes() or pass a Uint8Array from an R2/KV binding instead.',
+          'Use fetchBytes() or pass a Uint8Array from an R2/KV binding instead.',
       ),
     );
   }
@@ -58,7 +58,7 @@ export class WorkerRuntimeAdapter implements RuntimeAdapter {
     return Promise.reject(
       new Error(
         'WorkerRuntimeAdapter.writeFile: filesystem access is not available in Cloudflare Workers. ' +
-        'Write to R2 or KV directly from your handler code.',
+          'Write to R2 or KV directly from your handler code.',
       ),
     );
   }
@@ -75,7 +75,7 @@ export class WorkerRuntimeAdapter implements RuntimeAdapter {
   createWorker(_script: string | URL): WorkerLike {
     throw new Error(
       'WorkerRuntimeAdapter.createWorker: sub-workers are not supported in Cloudflare Workers. ' +
-      'Use Service Bindings or Durable Objects for inter-worker communication.',
+        'Use Service Bindings or Durable Objects for inter-worker communication.',
     );
   }
 

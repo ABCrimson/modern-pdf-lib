@@ -85,18 +85,11 @@ export {
   addDocumentSaveAction,
   removeDocumentScript,
 } from './documentScripts.js';
-export type {
-  DocumentScript,
-  PrintActionOptions,
-  SaveActionOptions,
-} from './documentScripts.js';
+export type { DocumentScript, PrintActionOptions, SaveActionOptions } from './documentScripts.js';
 
 // Sandboxed script execution
 export { FormScriptSandbox, createSandbox } from './scriptSandbox.js';
-export type {
-  SandboxOptions,
-  SandboxResult,
-} from './scriptSandbox.js';
+export type { SandboxOptions, SandboxResult } from './scriptSandbox.js';
 
 // JavaScript expression evaluator for form calculations
 export { evaluateExpression, parseCalculationScript } from './jsEvaluator.js';

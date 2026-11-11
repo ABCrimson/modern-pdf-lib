@@ -13,12 +13,6 @@ import {
 } from '../../../src/core/pdfObjects.js';
 import { PdfForm, type RefResolver } from '../../../src/form/pdfForm.js';
 
-
-
-
-
-
-
 import { FieldFlags } from '../../../src/form/pdfField.js';
 import {
   flattenForm,
@@ -26,7 +20,6 @@ import {
   flattenFields,
   _resetFlattenCounter,
 } from '../../../src/form/formFlatten.js';
-
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -337,9 +330,7 @@ describe('formFlatten', () => {
     it('throws when field is not found', () => {
       const form = buildForm([makeTextFieldDict('name', 'Test')]);
 
-      expect(() => flattenField(form, 'nonexistent')).toThrow(
-        'Form field "nonexistent" not found',
-      );
+      expect(() => flattenField(form, 'nonexistent')).toThrow('Form field "nonexistent" not found');
     });
 
     it('respects preserveReadOnly option', () => {
@@ -572,7 +563,8 @@ describe('formFlatten', () => {
     });
 
     it('uses /RV with font-size and color styling', () => {
-      const rv = '<body><p><span style="font-size: 16pt; color: rgb(255, 0, 0);">Red Large</span></p></body>';
+      const rv =
+        '<body><p><span style="font-size: 16pt; color: rgb(255, 0, 0);">Red Large</span></p></body>';
       const dict = makeRichTextFieldDict('styled_field', 'Red Large', rv);
       const form = buildForm([dict]);
 

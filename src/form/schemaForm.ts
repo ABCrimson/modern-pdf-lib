@@ -56,14 +56,7 @@
 import { createPdf, PdfDocument } from '../core/pdfDocument.js';
 import { PageSizes } from '../core/pdfPage.js';
 import { rgb } from '../core/operators/color.js';
-import {
-  PdfArray,
-  PdfBool,
-  PdfDict,
-  PdfName,
-  PdfRef,
-  PdfString,
-} from '../core/pdfObjects.js';
+import { PdfArray, PdfBool, PdfDict, PdfName, PdfRef, PdfString } from '../core/pdfObjects.js';
 import type { PdfPlugin } from '../plugins/pluginSystem.js';
 
 // ---------------------------------------------------------------------------
@@ -160,11 +153,7 @@ function mapPropertyToKind(prop: JsonSchemaLike): {
     return { kind: 'checkbox', options: [] };
   }
 
-  if (
-    type === 'string' &&
-    Array.isArray(prop.enum) &&
-    prop.enum.length > 0
-  ) {
+  if (type === 'string' && Array.isArray(prop.enum) && prop.enum.length > 0) {
     // string + enum → dropdown of the enum values rendered as strings.
     const options = prop.enum.map((v) => String(v));
     return { kind: 'dropdown', options };
@@ -268,13 +257,9 @@ export function buildFormFromJsonSchema(
   const doc = createPdf();
   const form = doc.getForm();
 
-  const pageSize: [number, number] = options?.pageSize ?? [
-    PageSizes.A4[0],
-    PageSizes.A4[1],
-  ];
+  const pageSize: [number, number] = options?.pageSize ?? [PageSizes.A4[0], PageSizes.A4[1]];
   const [pageWidth, pageHeight] = pageSize;
-  const labelWidth =
-    options?.labelWidth !== undefined ? options.labelWidth : DEFAULT_LABEL_WIDTH;
+  const labelWidth = options?.labelWidth !== undefined ? options.labelWidth : DEFAULT_LABEL_WIDTH;
 
   const fields: SchemaFormField[] = [];
 
@@ -361,21 +346,11 @@ export function buildFormFromJsonSchema(
           .getDict();
       } else if (kind === 'dropdown') {
         createdDict = form
-          .createDropdown(
-            name,
-            pageIndex,
-            [fieldX, y1, fieldX + fieldWidth, y2],
-            dropdownOptions,
-          )
+          .createDropdown(name, pageIndex, [fieldX, y1, fieldX + fieldWidth, y2], dropdownOptions)
           .getDict();
       } else {
         createdDict = form
-          .createTextField(name, pageIndex, [
-            fieldX,
-            y1,
-            fieldX + fieldWidth,
-            y2,
-          ])
+          .createTextField(name, pageIndex, [fieldX, y1, fieldX + fieldWidth, y2])
           .getDict();
         // Draw a thin baseline so the (empty) text field reads as a blank.
         page.drawLine({

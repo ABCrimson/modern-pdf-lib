@@ -11,13 +11,7 @@
  * Reference: PDF 1.7 spec, Section 12.5.6.15 (File Attachment Annotations).
  */
 
-import {
-  PdfDict,
-  PdfName,
-  PdfString,
-  PdfNumber,
-  PdfStream,
-} from '../../core/pdfObjects.js';
+import { PdfDict, PdfName, PdfString, PdfNumber, PdfStream } from '../../core/pdfObjects.js';
 import type { PdfObject, PdfRef, PdfObjectRegistry } from '../../core/pdfObjects.js';
 import { PdfAnnotation, buildAnnotationDict } from '../pdfAnnotation.js';
 import type { AnnotationOptions } from '../pdfAnnotation.js';
@@ -34,11 +28,7 @@ import type { AnnotationOptions } from '../pdfAnnotation.js';
  * - `'Paperclip'` — A paper clip.
  * - `'Tag'` — A tag label.
  */
-export type FileAttachmentIcon =
-  | 'GraphPushPin'
-  | 'PaperclipTag'
-  | 'Paperclip'
-  | 'Tag';
+export type FileAttachmentIcon = 'GraphPushPin' | 'PaperclipTag' | 'Paperclip' | 'Tag';
 
 // ---------------------------------------------------------------------------
 // PdfFileAttachmentAnnotation

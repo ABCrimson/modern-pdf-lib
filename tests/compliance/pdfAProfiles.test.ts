@@ -8,7 +8,6 @@
 import { describe, it, expect } from 'vitest';
 import { getProfile, getSupportedLevels, isValidLevel } from '../../src/compliance/pdfAProfiles.js';
 
-
 describe('PDF/A profile definitions', () => {
   // -----------------------------------------------------------------------
   // getProfile — basic retrieval

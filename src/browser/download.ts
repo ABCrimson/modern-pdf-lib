@@ -98,7 +98,9 @@ export function saveAsDataUrl(bytes: Uint8Array): string {
  * ```
  */
 export function openInNewTab(bytes: Uint8Array, target: string = '_blank'): Window | null {
-  const url = URL.createObjectURL(new Blob([bytes as unknown as BlobPart], { type: 'application/pdf' }));
+  const url = URL.createObjectURL(
+    new Blob([bytes as unknown as BlobPart], { type: 'application/pdf' }),
+  );
   const win = globalThis.open(url, target);
   // Revoke after a delay to allow the tab to load
   setTimeout(() => URL.revokeObjectURL(url), 60_000);

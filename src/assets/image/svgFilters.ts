@@ -243,10 +243,26 @@ export function feColorMatrixSaturate(src: RasterBuffer, s: number): RasterBuffe
   const gl = 0.715;
   const bl = 0.072;
   const matrix: number[] = [
-    rl + 0.787 * s, gl - gl * s, bl - bl * s, 0, 0,
-    rl - rl * s, gl + 0.285 * s, bl - bl * s, 0, 0,
-    rl - rl * s, gl - gl * s, bl + 0.928 * s, 0, 0,
-    0, 0, 0, 1, 0,
+    rl + 0.787 * s,
+    gl - gl * s,
+    bl - bl * s,
+    0,
+    0,
+    rl - rl * s,
+    gl + 0.285 * s,
+    bl - bl * s,
+    0,
+    0,
+    rl - rl * s,
+    gl - gl * s,
+    bl + 0.928 * s,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
   ];
   return feColorMatrix(src, matrix);
 }
@@ -435,15 +451,13 @@ function threeBoxBlurAxis(
  * @returns       A new, blurred buffer of the same size.
  * @throws If either standard deviation is negative.
  */
-export function feGaussianBlur(
-  src: RasterBuffer,
-  stdDevX: number,
-  stdDevY?: number,
-): RasterBuffer {
+export function feGaussianBlur(src: RasterBuffer, stdDevX: number, stdDevY?: number): RasterBuffer {
   const sx = stdDevX;
   const sy = stdDevY ?? stdDevX;
   if (sx < 0 || sy < 0 || Number.isNaN(sx) || Number.isNaN(sy)) {
-    throw new Error(`svgFilters.feGaussianBlur: standard deviation must be >= 0 (got ${sx}, ${sy})`);
+    throw new Error(
+      `svgFilters.feGaussianBlur: standard deviation must be >= 0 (got ${sx}, ${sy})`,
+    );
   }
   if (sx === 0 && sy === 0) {
     // No-op: return a copy to preserve the "new buffer" contract.

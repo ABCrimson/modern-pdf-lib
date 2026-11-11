@@ -6,11 +6,7 @@
  * Reference: PDF 1.7 spec, SS12.7.4.4 (Choice Fields).
  */
 
-import {
-  PdfString,
-  PdfArray,
-  PdfStream,
-} from '../../core/pdfObjects.js';
+import { PdfString, PdfArray, PdfStream } from '../../core/pdfObjects.js';
 import { PdfField, FieldFlags, strVal } from '../pdfField.js';
 import type { FieldType } from '../pdfField.js';
 import { generateDropdownAppearance } from '../fieldAppearance.js';

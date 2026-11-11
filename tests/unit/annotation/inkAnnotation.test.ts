@@ -4,11 +4,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { PdfInkAnnotation } from '../../../src/annotation/types/inkAnnotation.js';
-import {
-  PdfDict,
-  PdfName,
-  PdfArray,
-} from '../../../src/core/pdfObjects.js';
+import { PdfDict, PdfName, PdfArray } from '../../../src/core/pdfObjects.js';
 
 describe('PdfInkAnnotation', () => {
   describe('create', () => {

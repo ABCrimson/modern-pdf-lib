@@ -26,14 +26,7 @@
  *               present initially.
  */
 
-import {
-  PdfDict,
-  PdfName,
-  PdfNumber,
-  PdfString,
-  PdfArray,
-  type PdfObject,
-} from './pdfObjects.js';
+import { PdfDict, PdfName, PdfNumber, PdfString, PdfArray, type PdfObject } from './pdfObjects.js';
 
 /**
  * Collection view mode (ISO 32000-2, Table 43, `/View`):

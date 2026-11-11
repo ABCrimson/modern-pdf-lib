@@ -100,10 +100,7 @@ export interface Jpeg2000Info {
  * @param params - Optional decode parameters.
  * @returns Decoded image with raw pixel data.
  */
-export function decodeJpeg2000(
-  data: Uint8Array,
-  params?: Jpeg2000DecodeParams,
-): Jpeg2000Image {
+export function decodeJpeg2000(data: Uint8Array, params?: Jpeg2000DecodeParams): Jpeg2000Image {
   const reduce = params?.reduceResolution ?? 0;
   const maxComp = params?.maxComponents;
 
@@ -122,9 +119,7 @@ export function decodeJpeg2000(
   const cs = parseCodestream(codestream);
 
   // Apply component limit
-  const numComponents = maxComp
-    ? Math.min(cs.siz.numComponents, maxComp)
-    : cs.siz.numComponents;
+  const numComponents = maxComp ? Math.min(cs.siz.numComponents, maxComp) : cs.siz.numComponents;
 
   // Determine output dimensions with reduction
   const effectiveReduce = Math.min(reduce, cs.cod.numResolutions - 1);
@@ -196,12 +191,8 @@ export function getJpeg2000Info(data: Uint8Array): Jpeg2000Info {
   }
 
   const cs = parseCodestream(codestream);
-  const numTilesX = Math.ceil(
-    (cs.siz.width - cs.siz.tileOffsetX) / cs.siz.tileWidth,
-  );
-  const numTilesY = Math.ceil(
-    (cs.siz.height - cs.siz.tileOffsetY) / cs.siz.tileHeight,
-  );
+  const numTilesX = Math.ceil((cs.siz.width - cs.siz.tileOffsetX) / cs.siz.tileWidth);
+  const numTilesY = Math.ceil((cs.siz.height - cs.siz.tileOffsetY) / cs.siz.tileHeight);
 
   return {
     width: cs.siz.width,
@@ -323,12 +314,7 @@ function parseJP2Boxes(data: Uint8Array): JP2BoxInfo {
 /**
  * Parse sub-boxes within the JP2 header (jp2h) superbox.
  */
-function parseJP2HeaderBox(
-  data: Uint8Array,
-  start: number,
-  end: number,
-  result: JP2BoxInfo,
-): void {
+function parseJP2HeaderBox(data: Uint8Array, start: number, end: number, result: JP2BoxInfo): void {
   let offset = start;
   while (offset + 8 <= end) {
     let boxLength = readUint32BE(data, offset);
@@ -368,12 +354,7 @@ function parseJP2HeaderBox(
  * Method 2: Restricted ICC profile.
  * Method 3: Full ICC profile (treated same as method 2).
  */
-function parseColorSpecBox(
-  data: Uint8Array,
-  start: number,
-  end: number,
-  result: JP2BoxInfo,
-): void {
+function parseColorSpecBox(data: Uint8Array, start: number, end: number, result: JP2BoxInfo): void {
   if (start + 3 > end) return;
 
   const method = data[start]!;
@@ -921,10 +902,7 @@ function decodeTiles(
     }
   }
 
-  const numTilesX = Math.max(
-    1,
-    Math.ceil((siz.width - siz.tileOffsetX) / siz.tileWidth),
-  );
+  const numTilesX = Math.max(1, Math.ceil((siz.width - siz.tileOffsetX) / siz.tileWidth));
 
   for (const [tileIdx, parts] of tileGroups) {
     // Concatenate tile-part data
@@ -935,10 +913,7 @@ function decodeTiles(
     const tileData = new Uint8Array(totalLen);
     let writePos = 0;
     for (const p of parts) {
-      tileData.set(
-        cs.rawData.subarray(p.dataStart, p.dataEnd),
-        writePos,
-      );
+      tileData.set(cs.rawData.subarray(p.dataStart, p.dataEnd), writePos);
       writePos += p.dataEnd - p.dataStart;
     }
 
@@ -983,8 +958,7 @@ function decodeTiles(
           const outX = reducedTx0 + x;
           const outY = reducedTy0 + y;
           if (outX < outWidth && outY < outHeight) {
-            components[c]![outY * outWidth + outX] =
-              tileComponentSamples[y * reducedTileW + x]!;
+            components[c]![outY * outWidth + outX] = tileComponentSamples[y * reducedTileW + x]!;
           }
         }
       }
@@ -1043,13 +1017,7 @@ function decodeTileComponent(
   dequantize(subbands, qcd, bpc, cod.reversible);
 
   // Inverse DWT
-  const samples = inverseDWT(
-    subbands,
-    reducedW,
-    reducedH,
-    numResLevels - 1,
-    cod.reversible,
-  );
+  const samples = inverseDWT(subbands, reducedW, reducedH, numResLevels - 1, cod.reversible);
 
   return samples;
 }
@@ -1117,17 +1085,11 @@ function buildSubbands(
     const llH = Math.floor(h / 2) + (h % 2);
 
     // HL subband (horizontal high, vertical low)
-    subbands.push(
-      createSubband('HL', level, w - llW, llH, cod),
-    );
+    subbands.push(createSubband('HL', level, w - llW, llH, cod));
     // LH subband (horizontal low, vertical high)
-    subbands.push(
-      createSubband('LH', level, llW, h - llH, cod),
-    );
+    subbands.push(createSubband('LH', level, llW, h - llH, cod));
     // HH subband (horizontal high, vertical high)
-    subbands.push(
-      createSubband('HH', level, w - llW, h - llH, cod),
-    );
+    subbands.push(createSubband('HH', level, w - llW, h - llH, cod));
 
     w = llW;
     h = llH;
@@ -1294,10 +1256,7 @@ function decodePackets(
   // a single contribution and distribute coded data to code-blocks
   // using a sequential approach.
 
-  const totalBlocks = subbands.reduce(
-    (sum, sb) => sum + sb.codeBlocks.length,
-    0,
-  );
+  const totalBlocks = subbands.reduce((sum, sb) => sum + sb.codeBlocks.length, 0);
 
   if (totalBlocks === 0 || !reader.hasMore) return;
 
@@ -1315,17 +1274,11 @@ function decodePackets(
       // For simplified decoding, give each code-block a proportional
       // share of the remaining data
       const blockPixels = cb.width * cb.height;
-      const totalPixels = subbands.reduce(
-        (sum, sb) => sum + sb.width * sb.height,
-        0,
-      );
+      const totalPixels = subbands.reduce((sum, sb) => sum + sb.width * sb.height, 0);
       const proportion = totalPixels > 0 ? blockPixels / totalPixels : 0;
       const allocatedBytes = Math.max(
         1,
-        Math.min(
-          remainingData,
-          Math.ceil(remainingData * proportion),
-        ),
+        Math.min(remainingData, Math.ceil(remainingData * proportion)),
       );
 
       const startPos = reader.position;
@@ -1352,8 +1305,7 @@ function decodePackets(
             const sbX = cb.x0 + x;
             const sbY = cb.y0 + y;
             if (sbX < subband.width && sbY < subband.height) {
-              subband.coefficients[sbY * subband.width + sbX] =
-                cb.data[y * cb.width + x]!;
+              subband.coefficients[sbY * subband.width + sbX] = cb.data[y * cb.width + x]!;
             }
           }
         }
@@ -1396,9 +1348,7 @@ class MQDecoder {
    * nextLPS = next state index after LPS renormalization
    * switchFlag = whether to switch MPS/LPS sense
    */
-  static readonly QE_TABLE: ReadonlyArray<
-    readonly [number, number, number, number]
-  > = [
+  static readonly QE_TABLE: ReadonlyArray<readonly [number, number, number, number]> = [
     [0x5601, 1, 1, 1],
     [0x3401, 2, 6, 0],
     [0x1801, 3, 9, 0],
@@ -1531,7 +1481,7 @@ class MQDecoder {
 
     let d: number;
 
-    if ((this.c >>> 16) < this.a) {
+    if (this.c >>> 16 < this.a) {
       // MPS sub-interval
       if (this.a < 0x8000) {
         d = this.a < qe ? 1 - cx.mps : cx.mps;
@@ -1667,14 +1617,7 @@ function tier1Decode(cb: CodeBlock, subbandType: string): void {
 
               // Check if any neighbor is significant
               if (hasSignificantNeighbor(significance, x, y, w, h)) {
-                const cx = getSignificanceContext(
-                  significance,
-                  x,
-                  y,
-                  w,
-                  h,
-                  subbandType,
-                );
+                const cx = getSignificanceContext(significance, x, y, w, h, subbandType);
                 const bit = mq.decode(contexts[cx]!);
                 if (bit) {
                   significance[idx] = 1;
@@ -1715,10 +1658,7 @@ function tier1Decode(cb: CodeBlock, subbandType: string): void {
               let allInsig = true;
               for (let dy = 0; dy < stripH; dy++) {
                 const idx = (y + dy) * w + x;
-                if (
-                  significance[idx] ||
-                  hasSignificantNeighbor(significance, x, y + dy, w, h)
-                ) {
+                if (significance[idx] || hasSignificantNeighbor(significance, x, y + dy, w, h)) {
                   allInsig = false;
                   break;
                 }
@@ -1746,14 +1686,7 @@ function tier1Decode(cb: CodeBlock, subbandType: string): void {
                   const idx2 = (y + dy) * w + x;
                   if (significance[idx2]) continue;
 
-                  const cx = getSignificanceContext(
-                    significance,
-                    x,
-                    y + dy,
-                    w,
-                    h,
-                    subbandType,
-                  );
+                  const cx = getSignificanceContext(significance, x, y + dy, w, h, subbandType);
                   const bit = mq.decode(contexts[cx]!);
                   if (bit) {
                     significance[idx2] = 1;
@@ -1768,14 +1701,7 @@ function tier1Decode(cb: CodeBlock, subbandType: string): void {
                   const idx = (y + dy) * w + x;
                   if (significance[idx]) continue;
 
-                  const cx = getSignificanceContext(
-                    significance,
-                    x,
-                    y + dy,
-                    w,
-                    h,
-                    subbandType,
-                  );
+                  const cx = getSignificanceContext(significance, x, y + dy, w, h, subbandType);
                   const bit = mq.decode(contexts[cx]!);
                   if (bit) {
                     significance[idx] = 1;
@@ -1881,7 +1807,7 @@ function getSignificanceContext(
     const hvCount = hCount + vCount;
     if (dCount >= 3) return 8;
     if (dCount === 2) return hvCount >= 1 ? 7 : 6;
-    if (dCount === 1) return hvCount >= 2 ? 7 : (hvCount === 1 ? 6 : 5);
+    if (dCount === 1) return hvCount >= 2 ? 7 : hvCount === 1 ? 6 : 5;
     if (hvCount >= 2) return 6;
     if (hvCount === 1) return 5;
     return 0;
@@ -1936,10 +1862,7 @@ function dequantize(
         stepSize = base;
       } else {
         // Derive step size for this subband
-        const idx = Math.min(
-          subbandIndex,
-          qcd.stepSizes.length - 1,
-        );
+        const idx = Math.min(subbandIndex, qcd.stepSizes.length - 1);
         stepSize = qcd.stepSizes[idx] ?? base;
       }
     } else {
@@ -1949,8 +1872,7 @@ function dequantize(
     }
 
     // Step size = (1 + mu/2^11) * 2^(epsilon - bpc)
-    const delta =
-      (1 + stepSize.mu / 2048) * 2 ** (stepSize.epsilon - bpc);
+    const delta = (1 + stepSize.mu / 2048) * 2 ** (stepSize.epsilon - bpc);
 
     for (let i = 0; i < sb.coefficients.length; i++) {
       sb.coefficients[i]! *= delta;
@@ -2033,24 +1955,21 @@ function inverseDWT(
     // Place HL in top-right
     for (let y = 0; y < hl.height; y++) {
       for (let x = 0; x < hl.width; x++) {
-        result[y * outW + (currentW + x)] =
-          hl.coefficients[y * hl.width + x]!;
+        result[y * outW + (currentW + x)] = hl.coefficients[y * hl.width + x]!;
       }
     }
 
     // Place LH in bottom-left
     for (let y = 0; y < lh.height; y++) {
       for (let x = 0; x < lh.width; x++) {
-        result[(currentH + y) * outW + x] =
-          lh.coefficients[y * lh.width + x]!;
+        result[(currentH + y) * outW + x] = lh.coefficients[y * lh.width + x]!;
       }
     }
 
     // Place HH in bottom-right
     for (let y = 0; y < hh.height; y++) {
       for (let x = 0; x < hh.width; x++) {
-        result[(currentH + y) * outW + (currentW + x)] =
-          hh.coefficients[y * hh.width + x]!;
+        result[(currentH + y) * outW + (currentW + x)] = hh.coefficients[y * hh.width + x]!;
       }
     }
 
@@ -2093,11 +2012,7 @@ function inverseDWT(
  *
  * where s = low-pass samples, d = high-pass (detail) samples.
  */
-function inverseDWT53(
-  data: Float64Array,
-  width: number,
-  height: number,
-): void {
+function inverseDWT53(data: Float64Array, width: number, height: number): void {
   // Process columns first, then rows
   const temp = new Float64Array(Math.max(width, height));
 
@@ -2133,7 +2048,7 @@ function inverseDWT53(
 
     // Interleave back
     for (let i = 0; i < halfH; i++) {
-      data[(i * 2) * width + x] = low[i]!;
+      data[i * 2 * width + x] = low[i]!;
     }
     for (let i = 0; i < high.length; i++) {
       data[(i * 2 + 1) * width + x] = high[i]!;
@@ -2186,11 +2101,7 @@ function inverseDWT53(
  *   delta =  0.443506852
  *   K     =  1.230174105 (scaling factor)
  */
-function inverseDWT97(
-  data: Float64Array,
-  width: number,
-  height: number,
-): void {
+function inverseDWT97(data: Float64Array, width: number, height: number): void {
   const alpha = -1.586134342;
   const beta = -0.052980118;
   const gamma = 0.882911075;
@@ -2246,7 +2157,7 @@ function inverseDWT97(
 
     // Interleave
     for (let i = 0; i < halfH; i++) {
-      data[(i * 2) * width + x] = low[i]!;
+      data[i * 2 * width + x] = low[i]!;
     }
     for (let i = 0; i < high.length; i++) {
       data[(i * 2 + 1) * width + x] = high[i]!;
@@ -2365,11 +2276,7 @@ function applyInverseColorTransform(
  *
  * sYCC uses the same transform as ICT (BT.601 coefficients).
  */
-function applySyccToSrgb(
-  components: Float64Array[],
-  width: number,
-  height: number,
-): void {
+function applySyccToSrgb(components: Float64Array[], width: number, height: number): void {
   const c0 = components[0]!;
   const c1 = components[1]!;
   const c2 = components[2]!;

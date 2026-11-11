@@ -15,10 +15,7 @@ import { degrees } from '../../../src/core/operators/state.js';
 // Helpers
 // ---------------------------------------------------------------------------
 
-function makePage(
-  width?: number,
-  height?: number,
-): { page: PdfPage; registry: PdfObjectRegistry } {
+function makePage(width?: number, height?: number): { page: PdfPage; registry: PdfObjectRegistry } {
   const registry = new PdfObjectRegistry();
   const [w, h] = [width ?? PageSizes.A4[0], height ?? PageSizes.A4[1]];
   const page = new PdfPage(w, h, registry);
@@ -192,8 +189,8 @@ describe('PdfPage', () => {
     });
 
     const ops = page.getContentStreamData();
-    expect(ops).toContain('m');   // moveTo
-    expect(ops).toContain('l');   // lineTo
+    expect(ops).toContain('m'); // moveTo
+    expect(ops).toContain('l'); // lineTo
     expect(ops).toContain('S\n'); // stroke
     expect(ops).toContain('2 w'); // line width
     expect(ops).toContain('50');
@@ -265,11 +262,11 @@ describe('PdfPage', () => {
     page.drawImage(image, { x: 50, y: 400, width: 200, height: 150 });
 
     const ops = page.getContentStreamData();
-    expect(ops).toContain('cm');    // transformation matrix
-    expect(ops).toContain('Do');    // XObject invocation
-    expect(ops).toContain('/Im1');  // image resource name
-    expect(ops).toContain('q\n');   // save state
-    expect(ops).toContain('Q\n');   // restore state
+    expect(ops).toContain('cm'); // transformation matrix
+    expect(ops).toContain('Do'); // XObject invocation
+    expect(ops).toContain('/Im1'); // image resource name
+    expect(ops).toContain('q\n'); // save state
+    expect(ops).toContain('Q\n'); // restore state
   });
 
   it('drawImage registers the XObject resource on the page', () => {
@@ -362,15 +359,15 @@ describe('PdfPage', () => {
     expect(ops).toContain('Tj');
 
     // Graphics operators
-    expect(ops).toContain('re');   // rectangle
-    expect(ops).toContain('m\n');  // moveTo
-    expect(ops).toContain('l\n');  // lineTo
-    expect(ops).toContain('S\n');  // stroke
-    expect(ops).toContain('f\n');  // fill
+    expect(ops).toContain('re'); // rectangle
+    expect(ops).toContain('m\n'); // moveTo
+    expect(ops).toContain('l\n'); // lineTo
+    expect(ops).toContain('S\n'); // stroke
+    expect(ops).toContain('f\n'); // fill
 
     // State operators
-    expect(ops).toContain('q\n');  // save state
-    expect(ops).toContain('Q\n');  // restore state
+    expect(ops).toContain('q\n'); // save state
+    expect(ops).toContain('Q\n'); // restore state
   });
 
   // -------------------------------------------------------------------------

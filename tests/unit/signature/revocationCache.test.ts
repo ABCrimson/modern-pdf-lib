@@ -3,10 +3,7 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import {
-  RevocationCache,
-  deriveCacheKey,
-} from '../../../src/signature/revocationCache.js';
+import { RevocationCache, deriveCacheKey } from '../../../src/signature/revocationCache.js';
 import type {
   OcspCacheEntry,
   CrlCacheEntry,
@@ -35,7 +32,7 @@ function makeOcspEntry(
   return {
     result: makeOcspResult(status),
     cachedAt: now,
-    expiresAt: expiresAt ?? (now + 300_000),
+    expiresAt: expiresAt ?? now + 300_000,
   };
 }
 
@@ -59,7 +56,7 @@ function makeCrlEntry(cachedAt?: number, expiresAt?: number): CrlCacheEntry {
   return {
     data: makeCrlData(),
     cachedAt: now,
-    expiresAt: expiresAt ?? (now + 300_000),
+    expiresAt: expiresAt ?? now + 300_000,
   };
 }
 

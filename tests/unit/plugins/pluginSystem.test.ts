@@ -4,18 +4,9 @@
  */
 
 import { describe, it, expect, vi } from 'vitest';
-import {
-  createPdf,
-  PageSizes,
-} from '../../../src/index.js';
-import {
-  PdfPluginManager,
-} from '../../../src/plugins/pluginSystem.js';
-import type {
-  PdfPlugin,
-  PluginDocument,
-  PluginPage,
-} from '../../../src/plugins/pluginSystem.js';
+import { createPdf, PageSizes } from '../../../src/index.js';
+import { PdfPluginManager } from '../../../src/plugins/pluginSystem.js';
+import type { PdfPlugin, PluginDocument, PluginPage } from '../../../src/plugins/pluginSystem.js';
 import { timestampPlugin } from '../../../src/plugins/builtins/timestampPlugin.js';
 import { metadataPlugin } from '../../../src/plugins/builtins/metadataPlugin.js';
 import { accessibilityPlugin } from '../../../src/plugins/builtins/accessibilityPlugin.js';
@@ -64,17 +55,13 @@ describe('PdfPluginManager', () => {
       const mgr = new PdfPluginManager();
       mgr.register(noopPlugin('dup'));
 
-      expect(() => mgr.register(noopPlugin('dup'))).toThrow(
-        'Plugin "dup" is already registered',
-      );
+      expect(() => mgr.register(noopPlugin('dup'))).toThrow('Plugin "dup" is already registered');
     });
 
     it('rejects plugins with empty names', () => {
       const mgr = new PdfPluginManager();
 
-      expect(() => mgr.register(noopPlugin(''))).toThrow(
-        'Plugin must have a non-empty name',
-      );
+      expect(() => mgr.register(noopPlugin(''))).toThrow('Plugin must have a non-empty name');
     });
 
     it('registers multiple plugins in order', () => {
@@ -409,10 +396,7 @@ describe('PdfPluginManager', () => {
         },
       });
 
-      const result = mgr.executeOnBeforeEmbedFont(
-        new Uint8Array([1, 2, 3]),
-        { subset: true },
-      );
+      const result = mgr.executeOnBeforeEmbedFont(new Uint8Array([1, 2, 3]), { subset: true });
       expect(result.options.subset).toBe(false);
     });
   });
@@ -574,20 +558,44 @@ describe('PdfDocument plugin integration', () => {
 
     doc.use({
       name: 'plugin-a',
-      onRegister() { hooks.push('a:register'); },
-      onBeforeAddPage(size) { hooks.push('a:beforeAdd'); return size; },
-      onAfterAddPage() { hooks.push('a:afterAdd'); },
-      onBeforeSave() { hooks.push('a:beforeSave'); },
-      onAfterSave(b) { hooks.push('a:afterSave'); return b; },
+      onRegister() {
+        hooks.push('a:register');
+      },
+      onBeforeAddPage(size) {
+        hooks.push('a:beforeAdd');
+        return size;
+      },
+      onAfterAddPage() {
+        hooks.push('a:afterAdd');
+      },
+      onBeforeSave() {
+        hooks.push('a:beforeSave');
+      },
+      onAfterSave(b) {
+        hooks.push('a:afterSave');
+        return b;
+      },
     });
 
     doc.use({
       name: 'plugin-b',
-      onRegister() { hooks.push('b:register'); },
-      onBeforeAddPage(size) { hooks.push('b:beforeAdd'); return size; },
-      onAfterAddPage() { hooks.push('b:afterAdd'); },
-      onBeforeSave() { hooks.push('b:beforeSave'); },
-      onAfterSave(b) { hooks.push('b:afterSave'); return b; },
+      onRegister() {
+        hooks.push('b:register');
+      },
+      onBeforeAddPage(size) {
+        hooks.push('b:beforeAdd');
+        return size;
+      },
+      onAfterAddPage() {
+        hooks.push('b:afterAdd');
+      },
+      onBeforeSave() {
+        hooks.push('b:beforeSave');
+      },
+      onAfterSave(b) {
+        hooks.push('b:afterSave');
+        return b;
+      },
     });
 
     doc.addPage();

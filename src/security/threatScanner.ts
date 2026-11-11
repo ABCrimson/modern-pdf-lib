@@ -64,13 +64,7 @@
  */
 
 import type { PdfObject } from '../core/pdfObjects.js';
-import {
-  PdfDict,
-  PdfName,
-  PdfStream,
-  PdfString,
-  PdfRef,
-} from '../core/pdfObjects.js';
+import { PdfDict, PdfName, PdfStream, PdfString, PdfRef } from '../core/pdfObjects.js';
 import type { PdfObjectRegistry } from '../core/pdfObjects.js';
 import { loadPdf } from '../parser/documentParser.js';
 
@@ -121,15 +115,61 @@ const RANK_SEVERITY: readonly ThreatSeverity[] = ['low', 'medium', 'high'];
  * viewer's "open attachment" (or a `/Launch` action targeting it) can run it.
  */
 const EXECUTABLE_EXTENSIONS: ReadonlySet<string> = new Set([
-  'exe', 'com', 'scr', 'pif', 'cpl', 'msi', 'msp', 'mst',
-  'dll', 'sys', 'drv', 'ocx',
-  'bat', 'cmd', 'ps1', 'psm1', 'vbs', 'vbe', 'vb', 'wsf', 'wsh', 'js', 'jse',
-  'jar', 'class',
-  'sh', 'bash', 'zsh', 'ksh', 'csh', 'command',
-  'app', 'dmg', 'pkg',
-  'lnk', 'url', 'reg', 'hta', 'gadget', 'inf', 'scf',
-  'apk', 'deb', 'rpm', 'run', 'bin', 'elf', 'so', 'dylib',
-  'py', 'pyc', 'pyw', 'rb', 'pl', 'php',
+  'exe',
+  'com',
+  'scr',
+  'pif',
+  'cpl',
+  'msi',
+  'msp',
+  'mst',
+  'dll',
+  'sys',
+  'drv',
+  'ocx',
+  'bat',
+  'cmd',
+  'ps1',
+  'psm1',
+  'vbs',
+  'vbe',
+  'vb',
+  'wsf',
+  'wsh',
+  'js',
+  'jse',
+  'jar',
+  'class',
+  'sh',
+  'bash',
+  'zsh',
+  'ksh',
+  'csh',
+  'command',
+  'app',
+  'dmg',
+  'pkg',
+  'lnk',
+  'url',
+  'reg',
+  'hta',
+  'gadget',
+  'inf',
+  'scf',
+  'apk',
+  'deb',
+  'rpm',
+  'run',
+  'bin',
+  'elf',
+  'so',
+  'dylib',
+  'py',
+  'pyc',
+  'pyw',
+  'rb',
+  'pl',
+  'php',
 ]);
 
 // ---------------------------------------------------------------------------
@@ -160,10 +200,7 @@ function resolveRef(
  * Read a `PdfName` value (without the leading `/`) from a dict entry, resolving
  * an indirect reference through the registry first.
  */
-function nameValue(
-  obj: PdfObject | undefined,
-  registry: PdfObjectRegistry,
-): string | undefined {
+function nameValue(obj: PdfObject | undefined, registry: PdfObjectRegistry): string | undefined {
   const resolved = resolveRef(obj, registry);
   if (resolved !== undefined && resolved.kind === 'name') {
     const v = (resolved as PdfName).value;
@@ -176,10 +213,7 @@ function nameValue(
  * Read a `PdfString` value from a dict entry, resolving an indirect reference
  * through the registry first.
  */
-function stringValue(
-  obj: PdfObject | undefined,
-  registry: PdfObjectRegistry,
-): string | undefined {
+function stringValue(obj: PdfObject | undefined, registry: PdfObjectRegistry): string | undefined {
   const resolved = resolveRef(obj, registry);
   if (resolved !== undefined && resolved.kind === 'string') {
     return (resolved as PdfString).value;
@@ -196,7 +230,11 @@ function refString(ref: PdfRef | undefined): string | undefined {
 function extensionOf(name: string): string {
   // Strip any path separators a malicious name might embed, then take the
   // text after the final dot.
-  const base = name.replace(/[\\/]+/g, '/').split('/').pop() ?? name;
+  const base =
+    name
+      .replace(/[\\/]+/g, '/')
+      .split('/')
+      .pop() ?? name;
   const dot = base.lastIndexOf('.');
   if (dot < 0 || dot === base.length - 1) return '';
   return base.slice(dot + 1).toLowerCase();
@@ -250,10 +288,7 @@ export async function scanPdfThreats(pdf: Uint8Array): Promise<ThreatReport> {
  * streams' raw bytes are never substring-scanned here, which is what makes the
  * scan precise (drawn text that merely says "JavaScript" is not a finding).
  */
-function scanObjectGraph(
-  registry: PdfObjectRegistry,
-  findings: ThreatFinding[],
-): void {
+function scanObjectGraph(registry: PdfObjectRegistry, findings: ThreatFinding[]): void {
   // De-duplicate: a given action subtype reached from multiple parents should
   // still produce one finding per action object, keyed by its ref string.
   for (const entry of registry) {
@@ -369,17 +404,14 @@ function inspectDict(
       category: 'Movie',
       severity: 'low',
       detail:
-        'Movie annotation (/Subtype /Movie, ISO 32000 §13.4) embeds video/' +
-        'animation content.',
+        'Movie annotation (/Subtype /Movie, ISO 32000 §13.4) embeds video/' + 'animation content.',
       objectRef: refStr,
     });
   } else if (annotSubtype === 'Sound') {
     findings.push({
       category: 'Sound',
       severity: 'low',
-      detail:
-        'Sound annotation (/Subtype /Sound, ISO 32000 §13.3) embeds audio ' +
-        'content.',
+      detail: 'Sound annotation (/Subtype /Sound, ISO 32000 §13.3) embeds audio ' + 'content.',
       objectRef: refStr,
     });
   }
@@ -393,8 +425,7 @@ function inspectDict(
       category: 'RichMedia',
       severity: 'low',
       detail:
-        'Object references rich-media content via a /RichMedia entry ' +
-        '(ISO 32000-2 §13.6).',
+        'Object references rich-media content via a /RichMedia entry ' + '(ISO 32000-2 §13.6).',
       objectRef: refStr,
     });
   }
@@ -419,12 +450,10 @@ function inspectDict(
   // A file specification dictionary (/Type /Filespec) names the attachment in
   // /F and /UF. An executable/script extension means "open attachment" can run
   // it. High. We only inspect filespec dicts (key /EF or /Type /Filespec).
-  const isFilespec =
-    nameValue(dict.get('/Type'), registry) === 'Filespec' || dict.has('/EF');
+  const isFilespec = nameValue(dict.get('/Type'), registry) === 'Filespec' || dict.has('/EF');
   if (isFilespec) {
     const fileName =
-      stringValue(dict.get('/UF'), registry) ??
-      stringValue(dict.get('/F'), registry);
+      stringValue(dict.get('/UF'), registry) ?? stringValue(dict.get('/F'), registry);
     if (fileName !== undefined) {
       const ext = extensionOf(fileName);
       if (ext !== '' && EXECUTABLE_EXTENSIONS.has(ext)) {
@@ -514,8 +543,7 @@ function inspectActionSubtype(
         category: 'GoToR',
         severity: 'low',
         detail:
-          'Remote Go-To action (/S /GoToR, ISO 32000 §12.6.4.3) targets an ' +
-          'external document.',
+          'Remote Go-To action (/S /GoToR, ISO 32000 §12.6.4.3) targets an ' + 'external document.',
         objectRef: refStr,
       });
       break;
@@ -568,8 +596,7 @@ function scanRawBytesFallback(pdf: Uint8Array, findings: ThreatFinding[]): void 
   const text = new TextDecoder('latin1').decode(pdf);
 
   // Key-form detections: "/Key" followed by whitespace, '/', '(', '<', '[' or EOF.
-  const keyForm = (key: string): RegExp =>
-    new RegExp(`/${key}(?=[\\s/(<\\[\\]>]|$)`);
+  const keyForm = (key: string): RegExp => new RegExp(`/${key}(?=[\\s/(<\\[\\]>]|$)`);
 
   if (keyForm('OpenAction').test(text)) {
     findings.push({

@@ -157,12 +157,7 @@ export function renderStyledBarcode(
     ops += applyStrokeColor(borderColor);
     // Inset the stroke by half the border width so it sits on the edge
     const halfBW = borderWidth / 2;
-    ops += rectangle(
-      x + halfBW,
-      y + halfBW,
-      dims.width - borderWidth,
-      dims.height - borderWidth,
-    );
+    ops += rectangle(x + halfBW, y + halfBW, dims.width - borderWidth, dims.height - borderWidth);
     ops += stroke();
   }
 

@@ -30,11 +30,7 @@ import {
 // ---------------------------------------------------------------------------
 
 /** Assert two triples are equal within `tol`. */
-function expectClose(
-  got: readonly number[],
-  want: readonly number[],
-  tol: number,
-): void {
+function expectClose(got: readonly number[], want: readonly number[], tol: number): void {
   expect(got.length).toBe(want.length);
   const digits = -Math.log10(tol);
   for (const [i, gotValue] of got.entries()) {

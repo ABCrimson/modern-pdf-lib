@@ -95,16 +95,14 @@ describe('addFieldLock', () => {
 
   it('should throw for "Include" without fields', () => {
     const options = createMockSignOptions();
-    expect(() => addFieldLock(options, { action: 'Include' })).toThrow(
-      'at least one field name',
-    );
+    expect(() => addFieldLock(options, { action: 'Include' })).toThrow('at least one field name');
   });
 
   it('should throw for "Exclude" with empty fields', () => {
     const options = createMockSignOptions();
-    expect(() =>
-      addFieldLock(options, { action: 'Exclude', fields: [] }),
-    ).toThrow('at least one field name');
+    expect(() => addFieldLock(options, { action: 'Exclude', fields: [] })).toThrow(
+      'at least one field name',
+    );
   });
 
   it('should not throw for "All" without fields', () => {
@@ -195,14 +193,9 @@ describe('getFieldLocks', () => {
 
   it('should find field lock in a prepared PDF with lock', () => {
     const pdf = createMinimalPdf();
-    const { preparedPdf } = prepareForSigning(
-      pdf,
-      'ApprovalSig',
-      8192,
-      undefined,
-      undefined,
-      { action: 'All' },
-    );
+    const { preparedPdf } = prepareForSigning(pdf, 'ApprovalSig', 8192, undefined, undefined, {
+      action: 'All',
+    });
 
     const locks = getFieldLocks(preparedPdf);
 
@@ -216,14 +209,10 @@ describe('getFieldLocks', () => {
 
   it('should find field lock with "Include" action', () => {
     const pdf = createMinimalPdf();
-    const { preparedPdf } = prepareForSigning(
-      pdf,
-      'ReviewSig',
-      8192,
-      undefined,
-      undefined,
-      { action: 'Include', fields: ['Amount', 'Date'] },
-    );
+    const { preparedPdf } = prepareForSigning(pdf, 'ReviewSig', 8192, undefined, undefined, {
+      action: 'Include',
+      fields: ['Amount', 'Date'],
+    });
 
     const locks = getFieldLocks(preparedPdf);
 
@@ -237,14 +226,10 @@ describe('getFieldLocks', () => {
 
   it('should find field lock with "Exclude" action', () => {
     const pdf = createMinimalPdf();
-    const { preparedPdf } = prepareForSigning(
-      pdf,
-      'InitialSig',
-      8192,
-      undefined,
-      undefined,
-      { action: 'Exclude', fields: ['Comments'] },
-    );
+    const { preparedPdf } = prepareForSigning(pdf, 'InitialSig', 8192, undefined, undefined, {
+      action: 'Exclude',
+      fields: ['Comments'],
+    });
 
     const locks = getFieldLocks(preparedPdf);
 
@@ -257,14 +242,9 @@ describe('getFieldLocks', () => {
 
   it('should return signatureFieldName correctly', () => {
     const pdf = createMinimalPdf();
-    const { preparedPdf } = prepareForSigning(
-      pdf,
-      'MySigField',
-      8192,
-      undefined,
-      undefined,
-      { action: 'All' },
-    );
+    const { preparedPdf } = prepareForSigning(pdf, 'MySigField', 8192, undefined, undefined, {
+      action: 'All',
+    });
 
     const locks = getFieldLocks(preparedPdf);
 
@@ -281,14 +261,9 @@ describe('getFieldLocks', () => {
 describe('prepareForSigning with fieldLock', () => {
   it('should include /Lock dictionary in the signature field', () => {
     const pdf = createMinimalPdf();
-    const { preparedPdf } = prepareForSigning(
-      pdf,
-      'LockSig',
-      8192,
-      undefined,
-      undefined,
-      { action: 'All' },
-    );
+    const { preparedPdf } = prepareForSigning(pdf, 'LockSig', 8192, undefined, undefined, {
+      action: 'All',
+    });
 
     const text = decoder.decode(preparedPdf);
     expect(text).toContain('/Lock');
@@ -298,14 +273,10 @@ describe('prepareForSigning with fieldLock', () => {
 
   it('should include /Fields in lock dict for Include action', () => {
     const pdf = createMinimalPdf();
-    const { preparedPdf } = prepareForSigning(
-      pdf,
-      'LockSig',
-      8192,
-      undefined,
-      undefined,
-      { action: 'Include', fields: ['Name', 'Amount'] },
-    );
+    const { preparedPdf } = prepareForSigning(pdf, 'LockSig', 8192, undefined, undefined, {
+      action: 'Include',
+      fields: ['Name', 'Amount'],
+    });
 
     const text = decoder.decode(preparedPdf);
     expect(text).toContain('/Fields');

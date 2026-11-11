@@ -6,10 +6,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  decodeJpeg2000,
-  getJpeg2000Info,
-} from '../../../src/parser/jpeg2000Decode.js';
+import { decodeJpeg2000, getJpeg2000Info } from '../../../src/parser/jpeg2000Decode.js';
 import type {
   Jpeg2000Image,
   Jpeg2000DecodeParams,
@@ -44,9 +41,18 @@ function writeUint16BE(arr: number[], offset: number, value: number): void {
  */
 function buildJP2Signature(): number[] {
   return [
-    0x00, 0x00, 0x00, 0x0c, // box length = 12
-    0x6a, 0x50, 0x20, 0x20, // 'jP  '
-    0x0d, 0x0a, 0x87, 0x0a, // signature bytes
+    0x00,
+    0x00,
+    0x00,
+    0x0c, // box length = 12
+    0x6a,
+    0x50,
+    0x20,
+    0x20, // 'jP  '
+    0x0d,
+    0x0a,
+    0x87,
+    0x0a, // signature bytes
   ];
 }
 
@@ -55,9 +61,18 @@ function buildJP2Signature(): number[] {
  */
 function buildFileTypeBox(): number[] {
   const content = [
-    0x6a, 0x70, 0x32, 0x20, // brand: 'jp2 '
-    0x00, 0x00, 0x00, 0x00, // minor version
-    0x6a, 0x70, 0x32, 0x20, // compatibility: 'jp2 '
+    0x6a,
+    0x70,
+    0x32,
+    0x20, // brand: 'jp2 '
+    0x00,
+    0x00,
+    0x00,
+    0x00, // minor version
+    0x6a,
+    0x70,
+    0x32,
+    0x20, // compatibility: 'jp2 '
   ];
   const box: number[] = [];
   writeUint32BE(box, 0, content.length + 8);
@@ -222,11 +237,7 @@ function buildSIZMarker(
  * @param reversible      true = 5/3 (lossless), false = 9/7 (lossy)
  * @param mct             Multiple component transform (0 or 1)
  */
-function buildCODMarker(
-  numDecompLevels: number,
-  reversible: boolean,
-  mct: number = 0,
-): number[] {
+function buildCODMarker(numDecompLevels: number, reversible: boolean, mct: number = 0): number[] {
   const marker: number[] = [];
   // Marker: FF52
   marker.push(0xff, 0x52);
@@ -261,11 +272,7 @@ function buildCODMarker(
  * @param numSubbands Number of subbands to generate step sizes for
  * @param bpc Bits per component
  */
-function buildQCDMarker(
-  quantStyle: number,
-  numSubbands: number,
-  bpc: number,
-): number[] {
+function buildQCDMarker(quantStyle: number, numSubbands: number, bpc: number): number[] {
   const marker: number[] = [];
   marker.push(0xff, 0x5c);
 
@@ -362,16 +369,7 @@ function buildMinimalCodestream(
 
   const eoc = buildEOCMarker();
 
-  return [
-    ...soc,
-    ...siz,
-    ...cod,
-    ...qcd,
-    ...sot,
-    ...sod,
-    ...tilePayload,
-    ...eoc,
-  ];
+  return [...soc, ...siz, ...cod, ...qcd, ...sot, ...sod, ...tilePayload, ...eoc];
 }
 
 /**
@@ -390,14 +388,7 @@ function buildMinimalJP2(
   const ftyp = buildFileTypeBox();
   const colr = buildColorSpecBox(colorSpaceEnum);
   const jp2h = buildJP2HeaderBox(colr);
-  const cs = buildMinimalCodestream(
-    width,
-    height,
-    numComponents,
-    bpc,
-    reversible,
-    tileData,
-  );
+  const cs = buildMinimalCodestream(width, height, numComponents, bpc, reversible, tileData);
   const jp2c = buildCodestreamBox(cs);
 
   return [...sig, ...ftyp, ...jp2h, ...jp2c];
@@ -494,8 +485,10 @@ describe('J2K Codestream Marker Parsing', () => {
   it('throws on missing SIZ marker', () => {
     // SOC only, no SIZ
     const data = new Uint8Array([
-      0xff, 0x4f, // SOC
-      0xff, 0xd9, // EOC
+      0xff,
+      0x4f, // SOC
+      0xff,
+      0xd9, // EOC
     ]);
     expect(() => decodeJpeg2000(data)).toThrow('SIZ marker');
   });

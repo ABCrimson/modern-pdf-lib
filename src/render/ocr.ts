@@ -104,10 +104,7 @@ export interface ApplyOcrOptions {
  * remains well-formed.
  */
 function escapePdfLiteral(text: string): string {
-  return text
-    .replaceAll('\\', '\\\\')
-    .replaceAll('(', '\\(')
-    .replaceAll(')', '\\)');
+  return text.replaceAll('\\', '\\\\').replaceAll('(', '\\(').replaceAll(')', '\\)');
 }
 
 /**

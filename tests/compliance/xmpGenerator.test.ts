@@ -10,14 +10,8 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  generatePdfAXmp,
-  generatePdfAXmpBytes,
-} from '../../src/compliance/xmpGenerator.js';
-import {
-  parseXmpMetadata,
-  validateXmpMetadata,
-} from '../../src/compliance/xmpValidator.js';
+import { generatePdfAXmp, generatePdfAXmpBytes } from '../../src/compliance/xmpGenerator.js';
+import { parseXmpMetadata, validateXmpMetadata } from '../../src/compliance/xmpValidator.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -218,7 +212,7 @@ describe('generatePdfAXmp', () => {
       part: 1,
       conformance: 'B',
       title: 'A <b>bold</b> & "special" title',
-      author: 'O\'Brien & Associates',
+      author: "O'Brien & Associates",
       subject: '<script>alert("xss")</script>',
       keywords: 'a&b, c<d',
       creatorTool: 'Tool "Pro" <v2>',

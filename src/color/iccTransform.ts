@@ -104,12 +104,7 @@ const TAG_RECORD_SIZE = 12;
 
 /** Decode a 4-byte ASCII signature at `off`. */
 function readSig(data: Uint8Array, off: number): string {
-  return String.fromCharCode(
-    data[off]!,
-    data[off + 1]!,
-    data[off + 2]!,
-    data[off + 3]!,
-  );
+  return String.fromCharCode(data[off]!, data[off + 1]!, data[off + 2]!, data[off + 3]!);
 }
 
 /** s15Fixed16Number → JS number (ICC.1:2010 §4.2): signed int32 / 65536. */
@@ -138,9 +133,7 @@ function readTagTable(data: Uint8Array): Map<string, TagRecord> {
   const count = view.getUint32(TAG_COUNT_OFFSET, false);
   const tableEnd = TAG_TABLE_OFFSET + count * TAG_RECORD_SIZE;
   if (tableEnd > data.length) {
-    throw new Error(
-      `ICC tag table (${count} tags) overruns profile of ${data.length} bytes.`,
-    );
+    throw new Error(`ICC tag table (${count} tags) overruns profile of ${data.length} bytes.`);
   }
   const table = new Map<string, TagRecord>();
   for (let i = 0; i < count; i++) {
@@ -181,11 +174,7 @@ export function parseIccTransform(profile: Uint8Array): IccTransformInfo {
       `ICC profile too short: ${profile.length} bytes (need at least ${HEADER_SIZE}).`,
     );
   }
-  const view = new DataView(
-    profile.buffer,
-    profile.byteOffset,
-    profile.byteLength,
-  );
+  const view = new DataView(profile.buffer, profile.byteOffset, profile.byteLength);
   const version = view.getUint32(8, false);
   const deviceClass = readSig(profile, 12);
   const colorSpace = readSig(profile, 16);
@@ -320,9 +309,7 @@ function readXyzTag(data: Uint8Array, tag: TagRecord): [number, number, number] 
   const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
   const type = readSig(data, tag.offset);
   if (type !== 'XYZ ') {
-    throw new Error(
-      `Expected an 'XYZ ' colorant tag but found '${type}' (ICC.1:2010 §10.31).`,
-    );
+    throw new Error(`Expected an 'XYZ ' colorant tag but found '${type}' (ICC.1:2010 §10.31).`);
   }
   // sig(4) + reserved(4) then X,Y,Z s15Fixed16.
   return [
@@ -372,9 +359,7 @@ export function deviceRgbToXyz(
   if (info.colorSpace === 'GRAY') {
     const kTrc = table.get('kTRC');
     if (!kTrc) {
-      throw new Error(
-        "Gray ICC profile lacks a 'kTRC' tag; not a matrix/TRC profile.",
-      );
+      throw new Error("Gray ICC profile lacks a 'kTRC' tag; not a matrix/TRC profile.");
     }
     const lin = evalTrc(profile, kTrc, rgb[0]);
     const wtptRec = table.get('wtpt');
@@ -429,9 +414,7 @@ export function deviceRgbToXyz(
  * ```
  */
 function labF(t: number): number {
-  return t > LAB_DELTA_CUBED
-    ? Math.cbrt(t)
-    : t * LAB_LINEAR_SLOPE + LAB_LINEAR_INTERCEPT;
+  return t > LAB_DELTA_CUBED ? Math.cbrt(t) : t * LAB_LINEAR_SLOPE + LAB_LINEAR_INTERCEPT;
 }
 
 /**
@@ -460,11 +443,7 @@ function labF(t: number): number {
  */
 export function xyzToLab(
   xyz: [number, number, number],
-  whitePoint: [number, number, number] = [
-    D50_WHITE[0],
-    D50_WHITE[1],
-    D50_WHITE[2],
-  ],
+  whitePoint: [number, number, number] = [D50_WHITE[0], D50_WHITE[1], D50_WHITE[2]],
 ): [number, number, number] {
   const fx = labF(xyz[0] / whitePoint[0]);
   const fy = labF(xyz[1] / whitePoint[1]);

@@ -232,9 +232,7 @@ describe('isAccessible', () => {
   });
 
   it('returns false when there are errors', () => {
-    const issues: AccessibilityIssue[] = [
-      { severity: 'error', code: 'E', message: 'Error' },
-    ];
+    const issues: AccessibilityIssue[] = [{ severity: 'error', code: 'E', message: 'Error' }];
 
     expect(isAccessible(issues)).toBe(false);
   });

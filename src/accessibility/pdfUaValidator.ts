@@ -106,7 +106,12 @@ const HEADING_TYPES = new Set<string>(['H1', 'H2', 'H3', 'H4', 'H5', 'H6']);
 
 /** Heading level by type name. */
 const HEADING_LEVEL: Record<string, number> = {
-  H1: 1, H2: 2, H3: 3, H4: 4, H5: 5, H6: 6,
+  H1: 1,
+  H2: 2,
+  H3: 3,
+  H4: 4,
+  H5: 5,
+  H6: 6,
 };
 
 /**
@@ -116,19 +121,27 @@ const HEADING_LEVEL: Record<string, number> = {
  * inside Div elements are still validated against their enclosing
  * section scope.
  */
-const SECTION_TYPES = new Set<string>([
-  'Document', 'Part', 'Art', 'Sect', 'BlockQuote',
-]);
+const SECTION_TYPES = new Set<string>(['Document', 'Part', 'Art', 'Sect', 'BlockQuote']);
 
 /** Illustration types that require alt text per PDF/UA. */
 const ILLUSTRATION_TYPES = new Set<string>(['Figure', 'Formula', 'Form']);
 
 /** Standard 14 PDF fonts that must be embedded for PDF/UA. */
 const STANDARD_14_FONTS = new Set<string>([
-  'Courier', 'Courier-Bold', 'Courier-Oblique', 'Courier-BoldOblique',
-  'Helvetica', 'Helvetica-Bold', 'Helvetica-Oblique', 'Helvetica-BoldOblique',
-  'Times-Roman', 'Times-Bold', 'Times-Italic', 'Times-BoldItalic',
-  'Symbol', 'ZapfDingbats',
+  'Courier',
+  'Courier-Bold',
+  'Courier-Oblique',
+  'Courier-BoldOblique',
+  'Helvetica',
+  'Helvetica-Bold',
+  'Helvetica-Oblique',
+  'Helvetica-BoldOblique',
+  'Times-Roman',
+  'Times-Bold',
+  'Times-Italic',
+  'Times-BoldItalic',
+  'Symbol',
+  'ZapfDingbats',
 ]);
 
 /** Minimum number of pages before missing bookmarks triggers a warning. */
@@ -180,10 +193,7 @@ const TABLE_HEADER_SIZE_THRESHOLD = 3;
  * }
  * ```
  */
-export function validatePdfUa(
-  doc: PdfDocument,
-  level: PdfUaLevel = 'UA1',
-): PdfUaValidationResult {
+export function validatePdfUa(doc: PdfDocument, level: PdfUaLevel = 'UA1'): PdfUaValidationResult {
   const errors: PdfUaError[] = [];
   const warnings: PdfUaWarning[] = [];
 
@@ -331,9 +341,7 @@ export function enforcePdfUa(doc: PdfDocument): PdfUaEnforcementResult {
  *
  * @internal
  */
-function findSectionAncestor(
-  elem: PdfStructureElement,
-): PdfStructureElement | undefined {
+function findSectionAncestor(elem: PdfStructureElement): PdfStructureElement | undefined {
   let current: PdfStructureElement | undefined = elem.parent;
   while (current) {
     if (SECTION_TYPES.has(current.type)) return current;
@@ -348,9 +356,7 @@ function findSectionAncestor(
  *
  * @internal
  */
-function getTableDimensions(
-  table: PdfStructureElement,
-): { cols: number; rows: number } {
+function getTableDimensions(table: PdfStructureElement): { cols: number; rows: number } {
   const allRows = table.findAll('TR');
   const rows = allRows.length;
   let maxCols = 0;
@@ -433,8 +439,7 @@ function checkLanguage(doc: PdfDocument, errors: PdfUaError[]): void {
   } else if (!/^[a-zA-Z]{2,3}(-[a-zA-Z0-9]+)*$/.test(lang)) {
     errors.push({
       code: 'UA-META-003',
-      message:
-        `Document language "${lang}" does not appear to be a valid BCP 47 tag.`,
+      message: `Document language "${lang}" does not appear to be a valid BCP 47 tag.`,
       clause: '7.2',
     });
   }
@@ -445,18 +450,13 @@ function checkLanguage(doc: PdfDocument, errors: PdfUaError[]): void {
  *
  * @internal
  */
-function checkTitle(
-  doc: PdfDocument,
-  errors: PdfUaError[],
-  _warnings: PdfUaWarning[],
-): void {
+function checkTitle(doc: PdfDocument, errors: PdfUaError[], _warnings: PdfUaWarning[]): void {
   const title = doc.getTitle();
   if (title === undefined) {
     errors.push({
       code: 'UA-META-004',
       message:
-        'Document has no title. ' +
-        'PDF/UA requires a descriptive document title in the metadata.',
+        'Document has no title. ' + 'PDF/UA requires a descriptive document title in the metadata.',
       clause: '7.1',
     });
   } else if (title.trim().length === 0) {
@@ -519,10 +519,7 @@ function checkHeadingHierarchy(
 
   // Group headings by their nearest section ancestor so we can
   // validate each section independently.
-  const sectionMap = new Map<
-    PdfStructureElement | undefined,
-    PdfStructureElement[]
-  >();
+  const sectionMap = new Map<PdfStructureElement | undefined, PdfStructureElement[]>();
 
   for (const h of headings) {
     const section = findSectionAncestor(h);
@@ -604,20 +601,14 @@ function findPreviousHeadingInSection(
  *
  * @internal
  */
-function checkAltText(
-  elements: PdfStructureElement[],
-  errors: PdfUaError[],
-): void {
+function checkAltText(elements: PdfStructureElement[], errors: PdfUaError[]): void {
   for (const elem of elements) {
     if (!ILLUSTRATION_TYPES.has(elem.type)) continue;
 
     // Decorative images marked as artifacts do not require alt text
     if (elem.options.artifact) continue;
 
-    if (
-      elem.options.altText === undefined &&
-      elem.options.actualText === undefined
-    ) {
+    if (elem.options.altText === undefined && elem.options.actualText === undefined) {
       errors.push({
         code: 'UA-STRUCT-005',
         message:
@@ -627,10 +618,7 @@ function checkAltText(
         element: elem,
         pageIndex: elem.pageIndex,
       });
-    } else if (
-      elem.options.altText !== undefined &&
-      elem.options.altText.trim().length === 0
-    ) {
+    } else if (elem.options.altText !== undefined && elem.options.altText.trim().length === 0) {
       errors.push({
         code: 'UA-STRUCT-006',
         message:
@@ -672,8 +660,7 @@ function checkTableHeaders(
 
     // Check that the table has rows
     const hasRows = table.children.some(
-      (c) => c.type === 'TR' || c.type === 'THead' ||
-              c.type === 'TBody' || c.type === 'TFoot',
+      (c) => c.type === 'TR' || c.type === 'THead' || c.type === 'TBody' || c.type === 'TFoot',
     );
     if (!hasRows) {
       errors.push({
@@ -692,9 +679,7 @@ function checkTableHeaders(
     const headerCells = table.findAll('TH');
     if (headerCells.length === 0) {
       const { cols, rows } = getTableDimensions(table);
-      const isSmallTable =
-        cols < TABLE_HEADER_SIZE_THRESHOLD &&
-        rows < TABLE_HEADER_SIZE_THRESHOLD;
+      const isSmallTable = cols < TABLE_HEADER_SIZE_THRESHOLD && rows < TABLE_HEADER_SIZE_THRESHOLD;
 
       if (isSmallTable) {
         // Small simple tables: warning only
@@ -722,9 +707,7 @@ function checkTableHeaders(
     // Check that TR elements contain TH or TD
     const allRows = table.findAll('TR');
     for (const row of allRows) {
-      const hasCells = row.children.some(
-        (c) => c.type === 'TH' || c.type === 'TD',
-      );
+      const hasCells = row.children.some((c) => c.type === 'TH' || c.type === 'TD');
       if (!hasCells) {
         errors.push({
           code: 'UA-TABLE-003',
@@ -755,9 +738,7 @@ function checkListStructure(
     if (!hasItems) {
       errors.push({
         code: 'UA-LIST-001',
-        message:
-          'L (list) element has no LI children. ' +
-          'Lists must contain list item elements.',
+        message: 'L (list) element has no LI children. ' + 'Lists must contain list item elements.',
         clause: '7.4.3',
         element: list,
         pageIndex: list.pageIndex,
@@ -783,8 +764,7 @@ function checkListStructure(
     if (!item.parent || item.parent.type !== 'L') {
       errors.push({
         code: 'UA-LIST-003',
-        message:
-          'LI element is not a direct child of an L (list) element.',
+        message: 'LI element is not a direct child of an L (list) element.',
         clause: '7.4.3',
         element: item,
         pageIndex: item.pageIndex,
@@ -804,9 +784,7 @@ function checkReadingOrder(doc: PdfDocument, warnings: PdfUaWarning[]): void {
   if (!tree) return;
 
   const allElements = tree.getAllElements();
-  const withMcid = allElements.filter(
-    (e) => e.mcid !== undefined && e.pageIndex !== undefined,
-  );
+  const withMcid = allElements.filter((e) => e.mcid !== undefined && e.pageIndex !== undefined);
 
   if (withMcid.length === 0 && doc.getPageCount() > 0) {
     warnings.push({
@@ -863,9 +841,10 @@ function checkFontEmbedding(
   const pageCount = doc.getPageCount();
   for (let i = 0; i < pageCount; i++) {
     const page = doc.getPage(i);
-    const pageFonts = 'getFontNames' in page
-      ? (page as unknown as { getFontNames(): string[] }).getFontNames()
-      : undefined;
+    const pageFonts =
+      'getFontNames' in page
+        ? (page as unknown as { getFontNames(): string[] }).getFontNames()
+        : undefined;
     if (pageFonts) {
       for (const name of pageFonts) {
         pageFontNames.add(name);
@@ -937,10 +916,7 @@ function checkColorContrast(doc: PdfDocument, warnings: PdfUaWarning[]): void {
  */
 function checkBookmarks(doc: PdfDocument, warnings: PdfUaWarning[]): void {
   const outlines = doc.getOutlines();
-  if (
-    outlines.items.length === 0 &&
-    doc.getPageCount() > BOOKMARK_PAGE_THRESHOLD
-  ) {
+  if (outlines.items.length === 0 && doc.getPageCount() > BOOKMARK_PAGE_THRESHOLD) {
     warnings.push({
       code: 'UA-NAV-001',
       message:

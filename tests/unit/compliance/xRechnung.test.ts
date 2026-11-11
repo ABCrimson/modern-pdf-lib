@@ -4,11 +4,7 @@
 
 import { describe, expect, it } from 'vitest';
 
-import type {
-  Invoice,
-  InvoiceLine,
-  InvoiceParty,
-} from '../../../src/compliance/facturX.js';
+import type { Invoice, InvoiceLine, InvoiceParty } from '../../../src/compliance/facturX.js';
 import {
   generateOrderX,
   generateXRechnungCii,
@@ -55,9 +51,7 @@ describe('generateXRechnungCii', () => {
 
   it('contains the XRechnung 3.0 guideline URN', () => {
     const xml = generateXRechnungCii(makeInvoice());
-    expect(xml).toContain(
-      'urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0',
-    );
+    expect(xml).toContain('urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0');
   });
 
   it('includes the Leitweg-ID as BuyerReference when provided', () => {
@@ -65,9 +59,7 @@ describe('generateXRechnungCii', () => {
       leitwegId: '04011000-1234512345-06',
     };
     const xml = generateXRechnungCii(makeInvoice(), options);
-    expect(xml).toContain(
-      '<ram:BuyerReference>04011000-1234512345-06</ram:BuyerReference>',
-    );
+    expect(xml).toContain('<ram:BuyerReference>04011000-1234512345-06</ram:BuyerReference>');
   });
 
   it('omits BuyerReference when neither id is provided', () => {
@@ -88,20 +80,12 @@ describe('generateXRechnungCii', () => {
   it('computes totals from the invoice lines', () => {
     const xml = generateXRechnungCii(makeInvoice());
     // line total: 2*10 + 1*100 = 120.00
-    expect(xml).toContain(
-      '<ram:LineTotalAmount currencyID="EUR">120.00</ram:LineTotalAmount>',
-    );
+    expect(xml).toContain('<ram:LineTotalAmount currencyID="EUR">120.00</ram:LineTotalAmount>');
     // tax at 19%: 120 * 0.19 = 22.80
-    expect(xml).toContain(
-      '<ram:TaxTotalAmount currencyID="EUR">22.80</ram:TaxTotalAmount>',
-    );
+    expect(xml).toContain('<ram:TaxTotalAmount currencyID="EUR">22.80</ram:TaxTotalAmount>');
     // grand total: 142.80
-    expect(xml).toContain(
-      '<ram:GrandTotalAmount currencyID="EUR">142.80</ram:GrandTotalAmount>',
-    );
-    expect(xml).toContain(
-      '<ram:DuePayableAmount currencyID="EUR">142.80</ram:DuePayableAmount>',
-    );
+    expect(xml).toContain('<ram:GrandTotalAmount currencyID="EUR">142.80</ram:GrandTotalAmount>');
+    expect(xml).toContain('<ram:DuePayableAmount currencyID="EUR">142.80</ram:DuePayableAmount>');
   });
 
   it('XML-escapes party text', () => {
@@ -112,9 +96,7 @@ describe('generateXRechnungCii', () => {
 
   it('emits the issue date in UN/CEFACT format 102', () => {
     const xml = generateXRechnungCii(makeInvoice());
-    expect(xml).toContain(
-      '<udt:DateTimeString format="102">20260625</udt:DateTimeString>',
-    );
+    expect(xml).toContain('<udt:DateTimeString format="102">20260625</udt:DateTimeString>');
   });
 
   it('emits one tax group per distinct rate', () => {
@@ -126,12 +108,8 @@ describe('generateXRechnungCii', () => {
         ],
       }),
     );
-    expect(xml).toContain(
-      '<ram:RateApplicablePercent>19.00</ram:RateApplicablePercent>',
-    );
-    expect(xml).toContain(
-      '<ram:RateApplicablePercent>7.00</ram:RateApplicablePercent>',
-    );
+    expect(xml).toContain('<ram:RateApplicablePercent>19.00</ram:RateApplicablePercent>');
+    expect(xml).toContain('<ram:RateApplicablePercent>7.00</ram:RateApplicablePercent>');
   });
 });
 
@@ -166,19 +144,13 @@ describe('generateOrderX', () => {
 
   it('computes totals from the order lines', () => {
     const xml = generateOrderX(makeInvoice(), 'Order');
-    expect(xml).toContain(
-      '<ram:LineTotalAmount currencyID="EUR">120.00</ram:LineTotalAmount>',
-    );
-    expect(xml).toContain(
-      '<ram:GrandTotalAmount currencyID="EUR">142.80</ram:GrandTotalAmount>',
-    );
+    expect(xml).toContain('<ram:LineTotalAmount currencyID="EUR">120.00</ram:LineTotalAmount>');
+    expect(xml).toContain('<ram:GrandTotalAmount currencyID="EUR">142.80</ram:GrandTotalAmount>');
   });
 
   it('emits an order currency code', () => {
     const xml = generateOrderX(makeInvoice(), 'Order');
-    expect(xml).toContain(
-      '<ram:OrderCurrencyCode>EUR</ram:OrderCurrencyCode>',
-    );
+    expect(xml).toContain('<ram:OrderCurrencyCode>EUR</ram:OrderCurrencyCode>');
   });
 
   it('includes both buyer and seller parties', () => {

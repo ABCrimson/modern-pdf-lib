@@ -133,9 +133,7 @@ describe('diffSignedContent', () => {
     const fakeSig = new Uint8Array(256);
     const signedPdf = embedSignature(preparedPdf, fakeSig, byteRange);
 
-    await expect(diffSignedContent(signedPdf, 5)).rejects.toThrow(
-      'out of range',
-    );
+    await expect(diffSignedContent(signedPdf, 5)).rejects.toThrow('out of range');
   });
 
   it('should use the last signature by default', async () => {

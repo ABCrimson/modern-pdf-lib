@@ -9,12 +9,7 @@ import { describe, it, expect } from 'vitest';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
-import {
-  createPdf,
-  PageSizes,
-  StandardFonts,
-  rgb,
-} from '../../src/index.js';
+import { createPdf, PageSizes, StandardFonts, rgb } from '../../src/index.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -228,8 +223,8 @@ describe('Full pipeline integration', () => {
     // Circle (Bezier curves)
     expect(text).toContain(' c\n');
     // Color operators
-    expect(text).toContain('rg');  // fill color
-    expect(text).toContain('RG');  // stroke color
+    expect(text).toContain('rg'); // fill color
+    expect(text).toContain('RG'); // stroke color
     // Graphics state
     expect(text).toContain('q\n');
     expect(text).toContain('Q\n');

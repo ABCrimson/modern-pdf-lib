@@ -29,11 +29,7 @@ export {
   parseXmpMetadata as parseXmpPdfAMetadata,
   validateXmpMetadata,
 } from './xmpValidator.js';
-export type {
-  XmpValidationResult,
-  XmpIssue,
-  ParsedXmpMetadata,
-} from './xmpValidator.js';
+export type { XmpValidationResult, XmpIssue, ParsedXmpMetadata } from './xmpValidator.js';
 
 export { createAssociatedFile, buildAfArray } from './associatedFiles.js';
 export type {
@@ -49,11 +45,7 @@ export { generatePdfAXmp, generatePdfAXmpBytes } from './xmpGenerator.js';
 export type { PdfAXmpOptions } from './xmpGenerator.js';
 
 export { enforcePdfAFull } from './enforcePdfAv2.js';
-export type {
-  EnforcePdfAOptions,
-  EnforcePdfAResult,
-  EnforcementAction,
-} from './enforcePdfAv2.js';
+export type { EnforcePdfAOptions, EnforcePdfAResult, EnforcementAction } from './enforcePdfAv2.js';
 
 export { validatePdfX, enforcePdfX, buildPdfXOutputIntent } from './pdfxCompliance.js';
 export type {

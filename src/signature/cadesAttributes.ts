@@ -92,9 +92,12 @@ function encodeHashAlgorithmIdentifier(hashOid: string): Uint8Array {
 /** Map a Web Crypto hash name to its OID. */
 function hashNameToOid(hash: 'SHA-256' | 'SHA-384' | 'SHA-512'): string {
   switch (hash) {
-    case 'SHA-256': return SHA256_OID;
-    case 'SHA-384': return SHA384_OID;
-    case 'SHA-512': return SHA512_OID;
+    case 'SHA-256':
+      return SHA256_OID;
+    case 'SHA-384':
+      return SHA384_OID;
+    case 'SHA-512':
+      return SHA512_OID;
     default: {
       // Exhaustiveness guard — unreachable given the parameter type.
       const never: never = hash;
@@ -166,9 +169,10 @@ export async function buildSigningCertificateV2Attribute(
  * @param signedAttrsDer  DER bytes of a SET (or constructed container) of Attributes.
  * @returns               `{ present, certHash? }`.
  */
-export function extractSigningCertificateV2(
-  signedAttrsDer: Uint8Array,
-): { present: boolean; certHash?: Uint8Array | undefined } {
+export function extractSigningCertificateV2(signedAttrsDer: Uint8Array): {
+  present: boolean;
+  certHash?: Uint8Array | undefined;
+} {
   try {
     const container = parseDerTlv(signedAttrsDer, 0);
 

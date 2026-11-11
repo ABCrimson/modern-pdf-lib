@@ -3,12 +3,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  PdfDict,
-  PdfArray,
-  PdfBool,
-  PdfStream,
-} from '../../../src/core/pdfObjects.js';
+import { PdfDict, PdfArray, PdfBool, PdfStream } from '../../../src/core/pdfObjects.js';
 import { PdfForm } from '../../../src/form/pdfForm.js';
 
 // ---------------------------------------------------------------------------

@@ -19,21 +19,17 @@ import {
 
 /** Build a JP2 signature box. */
 function buildSignatureBox(): Uint8Array {
-  return new Uint8Array([
-    0x00, 0x00, 0x00, 0x0C,
-    0x6A, 0x50, 0x20, 0x20,
-    0x0D, 0x0A, 0x87, 0x0A,
-  ]);
+  return new Uint8Array([0x00, 0x00, 0x00, 0x0c, 0x6a, 0x50, 0x20, 0x20, 0x0d, 0x0a, 0x87, 0x0a]);
 }
 
 /** Build a JP2 box with the given type and payload. */
 function buildBox(type: string, payload: Uint8Array): Uint8Array {
   const totalLength = 8 + payload.length;
   const box = new Uint8Array(totalLength);
-  box[0] = (totalLength >>> 24) & 0xFF;
-  box[1] = (totalLength >>> 16) & 0xFF;
-  box[2] = (totalLength >>> 8) & 0xFF;
-  box[3] = totalLength & 0xFF;
+  box[0] = (totalLength >>> 24) & 0xff;
+  box[1] = (totalLength >>> 16) & 0xff;
+  box[2] = (totalLength >>> 8) & 0xff;
+  box[3] = totalLength & 0xff;
   for (let i = 0; i < 4; i++) {
     box[4 + i] = type.charCodeAt(i);
   }
@@ -46,16 +42,14 @@ function buildBox(type: string, payload: Uint8Array): Uint8Array {
  *
  * @param entries - Array of [channelIndex, type, association] tuples.
  */
-function buildCdefPayload(
-  entries: Array<[number, number, number]>,
-): Uint8Array {
+function buildCdefPayload(entries: Array<[number, number, number]>): Uint8Array {
   const data = new Uint8Array(2 + entries.length * 6);
   const view = new DataView(data.buffer);
   view.setUint16(0, entries.length, false);
 
   for (let i = 0; i < entries.length; i++) {
     const offset = 2 + i * 6;
-    view.setUint16(offset, entries[i]![0]!, false);     // channel index
+    view.setUint16(offset, entries[i]![0]!, false); // channel index
     view.setUint16(offset + 2, entries[i]![1]!, false); // type
     view.setUint16(offset + 4, entries[i]![2]!, false); // association
   }
@@ -66,9 +60,7 @@ function buildCdefPayload(
 /**
  * Build a minimal JP2 file with optional cdef box.
  */
-function buildJp2WithCdef(
-  entries?: Array<[number, number, number]>,
-): Uint8Array {
+function buildJp2WithCdef(entries?: Array<[number, number, number]>): Uint8Array {
   const parts: Uint8Array[] = [buildSignatureBox()];
 
   parts.push(buildBox('ftyp', new Uint8Array(8)));
@@ -77,7 +69,7 @@ function buildJp2WithCdef(
     parts.push(buildBox('cdef', buildCdefPayload(entries)));
   }
 
-  parts.push(buildBox('jp2c', new Uint8Array([0xFF, 0x4F, 0xFF, 0xD9])));
+  parts.push(buildBox('jp2c', new Uint8Array([0xff, 0x4f, 0xff, 0xd9])));
 
   const totalLen = parts.reduce((s, p) => s + p.length, 0);
   const result = new Uint8Array(totalLen);
@@ -184,7 +176,7 @@ describe('hasAlphaChannel', () => {
   });
 
   it('returns false for non-JP2 data', () => {
-    const rawCodestream = new Uint8Array([0xFF, 0x4F, 0xFF, 0xD9]);
+    const rawCodestream = new Uint8Array([0xff, 0x4f, 0xff, 0xd9]);
     expect(hasAlphaChannel(rawCodestream)).toBe(false);
   });
 });
@@ -214,7 +206,7 @@ describe('getAlphaChannelIndex', () => {
   });
 
   it('returns -1 for non-JP2 data', () => {
-    expect(getAlphaChannelIndex(new Uint8Array([0xFF, 0x4F]))).toBe(-1);
+    expect(getAlphaChannelIndex(new Uint8Array([0xff, 0x4f]))).toBe(-1);
   });
 });
 
@@ -226,20 +218,40 @@ describe('separateAlpha', () => {
   it('separates 4-component RGBA into RGB + alpha', () => {
     // 2x2 image: RGBA pixels
     const pixels = new Uint8Array([
-      255, 0, 0, 128,   // red, half alpha
-      0, 255, 0, 255,   // green, full alpha
-      0, 0, 255, 0,     // blue, zero alpha
-      100, 100, 100, 64, // gray, quarter alpha
+      255,
+      0,
+      0,
+      128, // red, half alpha
+      0,
+      255,
+      0,
+      255, // green, full alpha
+      0,
+      0,
+      255,
+      0, // blue, zero alpha
+      100,
+      100,
+      100,
+      64, // gray, quarter alpha
     ]);
 
     const { rgb, alpha } = separateAlpha(pixels, 2, 2, 4);
 
     // RGB should have 3 channels per pixel
     expect(rgb.length).toBe(12); // 4 pixels * 3 channels
-    expect(rgb[0]).toBe(255); expect(rgb[1]).toBe(0); expect(rgb[2]).toBe(0);
-    expect(rgb[3]).toBe(0); expect(rgb[4]).toBe(255); expect(rgb[5]).toBe(0);
-    expect(rgb[6]).toBe(0); expect(rgb[7]).toBe(0); expect(rgb[8]).toBe(255);
-    expect(rgb[9]).toBe(100); expect(rgb[10]).toBe(100); expect(rgb[11]).toBe(100);
+    expect(rgb[0]).toBe(255);
+    expect(rgb[1]).toBe(0);
+    expect(rgb[2]).toBe(0);
+    expect(rgb[3]).toBe(0);
+    expect(rgb[4]).toBe(255);
+    expect(rgb[5]).toBe(0);
+    expect(rgb[6]).toBe(0);
+    expect(rgb[7]).toBe(0);
+    expect(rgb[8]).toBe(255);
+    expect(rgb[9]).toBe(100);
+    expect(rgb[10]).toBe(100);
+    expect(rgb[11]).toBe(100);
 
     // Alpha should have 1 byte per pixel
     expect(alpha.length).toBe(4);
@@ -252,9 +264,12 @@ describe('separateAlpha', () => {
   it('separates 2-component grayscale+alpha', () => {
     // 3x1 image: GA pixels
     const pixels = new Uint8Array([
-      200, 255,  // gray=200, alpha=255
-      100, 128,  // gray=100, alpha=128
-      50, 0,     // gray=50, alpha=0
+      200,
+      255, // gray=200, alpha=255
+      100,
+      128, // gray=100, alpha=128
+      50,
+      0, // gray=50, alpha=0
     ]);
 
     const { rgb, alpha } = separateAlpha(pixels, 3, 1, 2);
@@ -272,15 +287,11 @@ describe('separateAlpha', () => {
   });
 
   it('throws for single-component input', () => {
-    expect(() => separateAlpha(new Uint8Array(4), 2, 2, 1)).toThrow(
-      'at least 2 components',
-    );
+    expect(() => separateAlpha(new Uint8Array(4), 2, 2, 1)).toThrow('at least 2 components');
   });
 
   it('throws for data that is too short', () => {
-    expect(() => separateAlpha(new Uint8Array(3), 2, 2, 4)).toThrow(
-      'expected 16 bytes',
-    );
+    expect(() => separateAlpha(new Uint8Array(3), 2, 2, 4)).toThrow('expected 16 bytes');
   });
 });
 
@@ -324,8 +335,12 @@ describe('premultiplyAlpha', () => {
 
   it('handles multiple pixels', () => {
     const rgb = new Uint8Array([
-      255, 0, 0,   // red
-      0, 255, 0,   // green
+      255,
+      0,
+      0, // red
+      0,
+      255,
+      0, // green
     ]);
     const alpha = new Uint8Array([128, 64]);
     const result = premultiplyAlpha(rgb, alpha, 2, 1);
@@ -342,13 +357,15 @@ describe('premultiplyAlpha', () => {
   });
 
   it('throws for short rgb input', () => {
-    expect(() => premultiplyAlpha(new Uint8Array(2), new Uint8Array(1), 1, 1))
-      .toThrow('rgb too short');
+    expect(() => premultiplyAlpha(new Uint8Array(2), new Uint8Array(1), 1, 1)).toThrow(
+      'rgb too short',
+    );
   });
 
   it('throws for short alpha input', () => {
-    expect(() => premultiplyAlpha(new Uint8Array(3), new Uint8Array(0), 1, 1))
-      .toThrow('alpha too short');
+    expect(() => premultiplyAlpha(new Uint8Array(3), new Uint8Array(0), 1, 1)).toThrow(
+      'alpha too short',
+    );
   });
 });
 
@@ -359,8 +376,14 @@ describe('premultiplyAlpha', () => {
 describe('extractAlphaChannel', () => {
   it('extracts the last component from 4-channel data', () => {
     const data = new Uint8Array([
-      10, 20, 30, 40,   // pixel 0
-      50, 60, 70, 80,   // pixel 1
+      10,
+      20,
+      30,
+      40, // pixel 0
+      50,
+      60,
+      70,
+      80, // pixel 1
     ]);
 
     const alpha = extractAlphaChannel(data, 2, 1, 4, 3);
@@ -370,10 +393,7 @@ describe('extractAlphaChannel', () => {
   });
 
   it('extracts the first component', () => {
-    const data = new Uint8Array([
-      10, 20, 30,
-      50, 60, 70,
-    ]);
+    const data = new Uint8Array([10, 20, 30, 50, 60, 70]);
 
     const result = extractAlphaChannel(data, 2, 1, 3, 0);
     expect(result.length).toBe(2);
@@ -382,10 +402,7 @@ describe('extractAlphaChannel', () => {
   });
 
   it('extracts middle component', () => {
-    const data = new Uint8Array([
-      10, 20, 30,
-      50, 60, 70,
-    ]);
+    const data = new Uint8Array([10, 20, 30, 50, 60, 70]);
 
     const result = extractAlphaChannel(data, 2, 1, 3, 1);
     expect(result.length).toBe(2);
@@ -395,12 +412,7 @@ describe('extractAlphaChannel', () => {
 
   it('works with 2D images', () => {
     // 2x2 image, 2 components each
-    const data = new Uint8Array([
-      100, 200,
-      110, 210,
-      120, 220,
-      130, 230,
-    ]);
+    const data = new Uint8Array([100, 200, 110, 210, 120, 220, 130, 230]);
 
     const result = extractAlphaChannel(data, 2, 2, 2, 1);
     expect(result.length).toBe(4);
@@ -411,17 +423,14 @@ describe('extractAlphaChannel', () => {
   });
 
   it('throws for negative component index', () => {
-    expect(() => extractAlphaChannel(new Uint8Array(12), 2, 2, 3, -1))
-      .toThrow('out of range');
+    expect(() => extractAlphaChannel(new Uint8Array(12), 2, 2, 3, -1)).toThrow('out of range');
   });
 
   it('throws for component index >= components', () => {
-    expect(() => extractAlphaChannel(new Uint8Array(12), 2, 2, 3, 3))
-      .toThrow('out of range');
+    expect(() => extractAlphaChannel(new Uint8Array(12), 2, 2, 3, 3)).toThrow('out of range');
   });
 
   it('throws for data too short', () => {
-    expect(() => extractAlphaChannel(new Uint8Array(3), 2, 2, 3, 0))
-      .toThrow('expected 12 bytes');
+    expect(() => extractAlphaChannel(new Uint8Array(3), 2, 2, 3, 0)).toThrow('expected 12 bytes');
   });
 });

@@ -102,10 +102,7 @@ export function extractText(
         break;
 
       case 'Tf':
-        state.setFont(
-          operandAsString(op.operands[0]),
-          operandAsNumber(op.operands[1]),
-        );
+        state.setFont(operandAsString(op.operands[0]), operandAsNumber(op.operands[1]));
         break;
 
       case 'Tc':
@@ -279,10 +276,7 @@ export function extractTextWithPositions(
         break;
 
       case 'Tf':
-        state.setFont(
-          operandAsString(op.operands[0]),
-          operandAsNumber(op.operands[1]),
-        );
+        state.setFont(operandAsString(op.operands[0]), operandAsNumber(op.operands[1]));
         break;
 
       case 'Tc':
@@ -306,10 +300,7 @@ export function extractTextWithPositions(
         break;
 
       case 'Td':
-        state.moveText(
-          operandAsNumber(op.operands[0]),
-          operandAsNumber(op.operands[1]),
-        );
+        state.moveText(operandAsNumber(op.operands[0]), operandAsNumber(op.operands[1]));
         break;
 
       case 'TD': {
@@ -521,8 +512,7 @@ function parseBfRangeSections(text: string, map: Map<number, string>): void {
     // Two forms:
     // 1. <srcLow> <srcHigh> <dstStart>
     // 2. <srcLow> <srcHigh> [<dst1> <dst2> ...]
-    const lineRegex =
-      /<([0-9a-fA-F]+)>\s*<([0-9a-fA-F]+)>\s*(?:<([0-9a-fA-F]+)>|\[([\s\S]*?)\])/g;
+    const lineRegex = /<([0-9a-fA-F]+)>\s*<([0-9a-fA-F]+)>\s*(?:<([0-9a-fA-F]+)>|\[([\s\S]*?)\])/g;
     let lineMatch: RegExpExecArray | null;
 
     while ((lineMatch = lineRegex.exec(body)) !== null) {
@@ -749,7 +739,9 @@ class TextState {
       const subtype = fontObj.get('/Subtype');
       const isCid =
         subtype instanceof PdfName &&
-        (subtype.value === '/Type0' || subtype.value === '/CIDFontType0' || subtype.value === '/CIDFontType2');
+        (subtype.value === '/Type0' ||
+          subtype.value === '/CIDFontType0' ||
+          subtype.value === '/CIDFontType2');
       this.cidFontCache.set(name, isCid);
 
       // Check encoding

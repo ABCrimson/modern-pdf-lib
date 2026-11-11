@@ -183,10 +183,7 @@ function childrenFromProps(props: Record<string, unknown>): {
  * @param props  Props object; children (if any) live under `props.children`.
  * @returns      A {@link PdfElement}.
  */
-export function jsx(
-  type: string | PdfComponent,
-  props: Record<string, unknown>,
-): PdfElement {
+export function jsx(type: string | PdfComponent, props: Record<string, unknown>): PdfElement {
   const { rest, children } = childrenFromProps(props);
   return { type, props: rest, children };
 }
@@ -201,10 +198,7 @@ export function jsx(
  * @param props  Props object; children live under `props.children`.
  * @returns      A {@link PdfElement}.
  */
-export function jsxs(
-  type: string | PdfComponent,
-  props: Record<string, unknown>,
-): PdfElement {
+export function jsxs(type: string | PdfComponent, props: Record<string, unknown>): PdfElement {
   return jsx(type, props);
 }
 
@@ -241,13 +235,20 @@ function numProp(props: Record<string, unknown>, key: string): number | undefine
 
 /** Resolve a `PageSize`-ish value into a concrete `[width, height]`. */
 function resolvePageSize(value: unknown, fallback: PageSize): PageSize {
-  if (Array.isArray(value) && value.length === 2 &&
-      typeof value[0] === 'number' && typeof value[1] === 'number') {
+  if (
+    Array.isArray(value) &&
+    value.length === 2 &&
+    typeof value[0] === 'number' &&
+    typeof value[1] === 'number'
+  ) {
     return [value[0], value[1]] as const;
   }
-  if (value && typeof value === 'object' &&
-      typeof (value as { width?: unknown }).width === 'number' &&
-      typeof (value as { height?: unknown }).height === 'number') {
+  if (
+    value &&
+    typeof value === 'object' &&
+    typeof (value as { width?: unknown }).width === 'number' &&
+    typeof (value as { height?: unknown }).height === 'number'
+  ) {
     return value as { width: number; height: number };
   }
   return fallback;
@@ -315,12 +316,7 @@ class RenderContext {
  * Draw a single text line. Returns the height consumed in the flow (0 when the
  * element was absolutely positioned and therefore does not advance the flow).
  */
-function renderText(
-  ctx: RenderContext,
-  page: PdfPage,
-  cursor: Cursor,
-  el: PdfElement,
-): number {
+function renderText(ctx: RenderContext, page: PdfPage, cursor: Cursor, el: PdfElement): number {
   const props = el.props;
   const size = numProp(props, 'size') ?? DEFAULT_FONT_SIZE;
   const bold = props['bold'] === true;
@@ -390,12 +386,7 @@ function renderRect(page: PdfPage, el: PdfElement): void {
  * Render a `view` block container. Returns the height consumed in the flow
  * (0 when absolutely positioned).
  */
-function renderView(
-  ctx: RenderContext,
-  page: PdfPage,
-  cursor: Cursor,
-  el: PdfElement,
-): number {
+function renderView(ctx: RenderContext, page: PdfPage, cursor: Cursor, el: PdfElement): number {
   const props = el.props;
   const padding = numProp(props, 'padding') ?? 0;
   const background = props['background'] as Color | undefined;
@@ -412,7 +403,11 @@ function renderView(
     const local: Cursor = { x: absX + padding, y: localTop - padding };
     if (background !== undefined && explicitWidth !== undefined && explicitHeight !== undefined) {
       page.drawRectangle({
-        x: absX, y: absY, width: explicitWidth, height: explicitHeight, color: background,
+        x: absX,
+        y: absY,
+        width: explicitWidth,
+        height: explicitHeight,
+        color: background,
       });
     }
     renderChildren(ctx, page, local, el.children);
@@ -426,11 +421,11 @@ function renderView(
 
   renderChildren(ctx, page, innerCursor, el.children);
 
-  const contentConsumed = (cursor.y - padding) - innerCursor.y; // >= 0
-  const blockHeight = explicitHeight ?? (contentConsumed + padding * 2);
+  const contentConsumed = cursor.y - padding - innerCursor.y; // >= 0
+  const blockHeight = explicitHeight ?? contentConsumed + padding * 2;
 
   if (background !== undefined) {
-    const blockWidth = explicitWidth ?? (page.width - cursor.x - MARGIN_LEFT);
+    const blockWidth = explicitWidth ?? page.width - cursor.x - MARGIN_LEFT;
     // Paint the background behind the block. (Drawn after children, so it can
     // overlap — acceptable for the simple model; documented as a limitation.)
     page.drawRectangle({
@@ -461,12 +456,7 @@ function renderChildren(
 }
 
 /** Render one already-resolved node into the current page's flow. */
-function renderFlowNode(
-  ctx: RenderContext,
-  page: PdfPage,
-  cursor: Cursor,
-  node: PdfNode,
-): void {
+function renderFlowNode(ctx: RenderContext, page: PdfPage, cursor: Cursor, node: PdfNode): void {
   if (node === null || node === undefined || typeof node === 'boolean') return;
 
   if (typeof node === 'string' || typeof node === 'number') {
@@ -517,9 +507,13 @@ function collectPages(children: readonly PdfNode[]): PdfElement[] {
   const pages: PdfElement[] = [];
   const visit = (node: PdfNode): void => {
     for (const resolved of resolveNode(node)) {
-      if (resolved === null || resolved === undefined ||
-          typeof resolved === 'boolean' || typeof resolved === 'string' ||
-          typeof resolved === 'number') {
+      if (
+        resolved === null ||
+        resolved === undefined ||
+        typeof resolved === 'boolean' ||
+        typeof resolved === 'string' ||
+        typeof resolved === 'number'
+      ) {
         continue;
       }
       if (typeof resolved.type === 'function') {
@@ -558,9 +552,7 @@ function collectPages(children: readonly PdfNode[]): PdfElement[] {
  * );
  * ```
  */
-export async function renderToPdf(
-  root: PdfNode | readonly PdfNode[],
-): Promise<Uint8Array> {
+export async function renderToPdf(root: PdfNode | readonly PdfNode[]): Promise<Uint8Array> {
   // Resolve the root down to a concrete `document` element (unwrapping any
   // component / fragment layers). An explicit `document` element wins outright;
   // otherwise we synthesize a single document whose children are ALL the
@@ -571,8 +563,13 @@ export async function renderToPdf(
   const stack = resolveNode(root);
   while (stack.length > 0) {
     const node = stack.shift();
-    if (node === null || node === undefined || typeof node === 'boolean' ||
-        typeof node === 'string' || typeof node === 'number') {
+    if (
+      node === null ||
+      node === undefined ||
+      typeof node === 'boolean' ||
+      typeof node === 'string' ||
+      typeof node === 'number'
+    ) {
       continue;
     }
     if (typeof node.type === 'function') {

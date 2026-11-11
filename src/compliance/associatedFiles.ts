@@ -24,14 +24,7 @@
  * Reference: ISO 19005-3:2012, PDF 2.0 (ISO 32000-2:2020) §14.13.
  */
 
-import {
-  PdfDict,
-  PdfArray,
-  PdfName,
-  PdfNumber,
-  PdfString,
-  PdfStream,
-} from '../core/pdfObjects.js';
+import { PdfDict, PdfArray, PdfName, PdfNumber, PdfString, PdfStream } from '../core/pdfObjects.js';
 import type { PdfObjectRegistry, PdfRef } from '../core/pdfObjects.js';
 
 // ---------------------------------------------------------------------------

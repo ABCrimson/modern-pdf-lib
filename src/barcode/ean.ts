@@ -120,7 +120,7 @@ export function calculateEanCheckDigit(data: string): number {
     // and the check digit is not yet included, the weight alternates
     // starting with 1 for even-length prefixes (12 digits for EAN-13)
     // and 3 for odd-length prefixes (7 digits for EAN-8).
-    const weight = ((data.length - 1 - i) % 2 === 0) ? 3 : 1;
+    const weight = (data.length - 1 - i) % 2 === 0 ? 3 : 1;
     sum += digit * weight;
   }
   const remainder = sum % 10;
@@ -150,14 +150,10 @@ export function encodeEan13(data: string): BarcodeMatrix {
   } else if (data.length === 13) {
     const expected = calculateEanCheckDigit(data.slice(0, 12));
     if (Number(data[12]) !== expected) {
-      throw new Error(
-        `EAN-13 check digit mismatch: expected ${expected}, got ${data[12]}`,
-      );
+      throw new Error(`EAN-13 check digit mismatch: expected ${expected}, got ${data[12]}`);
     }
   } else {
-    throw new Error(
-      `EAN-13 data must be 12 or 13 digits, got ${data.length}`,
-    );
+    throw new Error(`EAN-13 data must be 12 or 13 digits, got ${data.length}`);
   }
 
   const firstDigit = Number(data[0]);
@@ -205,14 +201,10 @@ export function encodeEan8(data: string): BarcodeMatrix {
   } else if (data.length === 8) {
     const expected = calculateEanCheckDigit(data.slice(0, 7));
     if (Number(data[7]) !== expected) {
-      throw new Error(
-        `EAN-8 check digit mismatch: expected ${expected}, got ${data[7]}`,
-      );
+      throw new Error(`EAN-8 check digit mismatch: expected ${expected}, got ${data[7]}`);
     }
   } else {
-    throw new Error(
-      `EAN-8 data must be 7 or 8 digits, got ${data.length}`,
-    );
+    throw new Error(`EAN-8 data must be 7 or 8 digits, got ${data.length}`);
   }
 
   let bits = START_END_GUARD; // 3 modules

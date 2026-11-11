@@ -162,7 +162,7 @@ export function computeCode39CheckDigit(data: string): string {
     if (idx === undefined) {
       throw new Error(
         `Code 39: invalid character '${data[i]}' at index ${i}. ` +
-        'Valid characters: 0-9, A-Z, space, - . $ / + %',
+          'Valid characters: 0-9, A-Z, space, - . $ / + %',
       );
     }
     sum += idx;
@@ -193,9 +193,7 @@ export function encodeCode39(
   wideToNarrowRatio: number = 3,
 ): BarcodeMatrix {
   if (wideToNarrowRatio < 2) {
-    throw new Error(
-      `Code 39: wideToNarrowRatio must be >= 2, got ${wideToNarrowRatio}`,
-    );
+    throw new Error(`Code 39: wideToNarrowRatio must be >= 2, got ${wideToNarrowRatio}`);
   }
 
   // Validate input
@@ -204,13 +202,13 @@ export function encodeCode39(
     if (ch === '*') {
       throw new Error(
         'Code 39: asterisk (*) is the start/stop character and must not ' +
-        `appear in data (index ${i})`,
+          `appear in data (index ${i})`,
       );
     }
     if (!CHAR_TO_INDEX.has(ch)) {
       throw new Error(
         `Code 39: invalid character '${ch}' at index ${i}. ` +
-        'Valid characters: 0-9, A-Z, space, - . $ / + %',
+          'Valid characters: 0-9, A-Z, space, - . $ / + %',
       );
     }
   }

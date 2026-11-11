@@ -135,8 +135,7 @@ export interface SarifLog {
 // ---------------------------------------------------------------------------
 
 /** Canonical SARIF 2.1.0 JSON schema URI. */
-export const SARIF_SCHEMA_URI: string =
-  'https://json.schemastore.org/sarif-2.1.0.json';
+export const SARIF_SCHEMA_URI: string = 'https://json.schemastore.org/sarif-2.1.0.json';
 
 /** Default tool name reported in SARIF runs. */
 export const DEFAULT_SARIF_TOOL_NAME: string = 'modern-pdf-lib';
@@ -157,9 +156,7 @@ const DEFAULT_ARTIFACT_URI = 'document.pdf';
  * @param findings - The validation findings to summarize.
  * @returns A structured JSON report.
  */
-export function toJsonReport(
-  findings: readonly ValidationFinding[],
-): JsonReport {
+export function toJsonReport(findings: readonly ValidationFinding[]): JsonReport {
   let errorCount = 0;
   let warningCount = 0;
   for (const finding of findings) {
@@ -187,9 +184,7 @@ export function toJsonReport(
  * A location is only emitted when the finding carries a page number, since that
  * is the only piece of information that maps naturally onto a SARIF region.
  */
-function buildLocations(
-  finding: ValidationFinding,
-): readonly SarifLocation[] | undefined {
+function buildLocations(finding: ValidationFinding): readonly SarifLocation[] | undefined {
   if (finding.page === undefined) {
     return undefined;
   }
@@ -206,9 +201,7 @@ function buildLocations(
  * `clause` and `objectRef` have no first-class SARIF representation, so they are
  * surfaced through the result-level property bag.
  */
-function buildProperties(
-  finding: ValidationFinding,
-): SarifResultProperties | undefined {
+function buildProperties(finding: ValidationFinding): SarifResultProperties | undefined {
   if (finding.clause === undefined && finding.objectRef === undefined) {
     return undefined;
   }

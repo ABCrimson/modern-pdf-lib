@@ -72,10 +72,7 @@ export async function initJpegWasm(
 
   try {
     // If the caller passed a pre-built wasm-bindgen module, use it directly
-    if (
-      wasmSource &&
-      typeof (wasmSource as JpegWasmModule).encode_jpeg === 'function'
-    ) {
+    if (wasmSource && typeof (wasmSource as JpegWasmModule).encode_jpeg === 'function') {
       wasmModule = wasmSource as JpegWasmModule;
       return;
     }
@@ -86,10 +83,7 @@ export async function initJpegWasm(
 
     // Attempt raw instantiation
     const imports = { env: {} };
-    const result = await WebAssembly.instantiate(
-      wasmBytes.buffer as ArrayBuffer,
-      imports,
-    );
+    const result = await WebAssembly.instantiate(wasmBytes.buffer as ArrayBuffer, imports);
     wasmModule = result.instance.exports as unknown as JpegWasmModule;
   } catch {
     // WASM unavailable — fall back to JS (no JPEG encoding).
@@ -174,9 +168,7 @@ export function encodeJpegWasm(
  * @returns Decoded pixel data with metadata, or `undefined` if WASM is not
  *          available or decoding failed.
  */
-export function decodeJpegWasm(
-  jpegBytes: Uint8Array,
-): JpegDecodeResult | undefined {
+export function decodeJpegWasm(jpegBytes: Uint8Array): JpegDecodeResult | undefined {
   if (!wasmModule) return undefined;
 
   try {

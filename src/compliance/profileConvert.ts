@@ -84,10 +84,7 @@ const PDFAID_NS = 'http://www.aiim.org/pdfa/ns/id/';
  *                level-agnostic prerequisites common to every PDF/A part.
  * @returns A (possibly empty) list of preflight issues. Never throws.
  */
-export function preflightPdfA(
-  doc: PdfDocument,
-  level?: string,
-): PreflightIssue[] {
+export function preflightPdfA(doc: PdfDocument, level?: string): PreflightIssue[] {
   const issues: PreflightIssue[] = [];
   const target = level !== undefined && level.length > 0 ? ` (${level})` : '';
 
@@ -111,8 +108,7 @@ export function preflightPdfA(
   } else if (!xmp.includes('pdfaid:part')) {
     issues.push({
       code: 'PDFA-002',
-      message:
-        'XMP metadata does not declare PDF/A identification (pdfaid:part).',
+      message: 'XMP metadata does not declare PDF/A identification (pdfaid:part).',
       severity: 'error',
       fixable: true,
       clause: 'ISO 19005 (PDF/A identification schema)',
@@ -147,8 +143,7 @@ export function preflightPdfA(
     issues.push({
       code: 'PDFA-011',
       message:
-        'The document language (/Lang) is not set; PDF/A recommends a ' +
-        'BCP 47 language tag.',
+        'The document language (/Lang) is not set; PDF/A recommends a ' + 'BCP 47 language tag.',
       severity: 'warning',
       fixable: true,
       clause: 'ISO 19005 (document language)',
@@ -274,10 +269,7 @@ export function convertPdfAConformanceXmp(
     if (confAttr.test(result)) {
       result = result.replace(confAttr, `pdfaid:conformance="${confVal}"`);
     } else if (confElem.test(result)) {
-      result = result.replace(
-        confElem,
-        `<pdfaid:conformance>${confVal}</pdfaid:conformance>`,
-      );
+      result = result.replace(confElem, `<pdfaid:conformance>${confVal}</pdfaid:conformance>`);
     } else {
       // No existing conformance — add it adjacent to the part we just set,
       // matching whichever form the part uses.
@@ -340,10 +332,7 @@ function addConformanceBesidePart(xmp: string, confVal: string): string {
   // Element-form part: append a sibling element.
   const partElem = /(<pdfaid:part>[^<]*<\/pdfaid:part>)/;
   if (partElem.test(xmp)) {
-    return xmp.replace(
-      partElem,
-      `$1<pdfaid:conformance>${confVal}</pdfaid:conformance>`,
-    );
+    return xmp.replace(partElem, `$1<pdfaid:conformance>${confVal}</pdfaid:conformance>`);
   }
 
   // Attribute-form part: append a sibling attribute. Quote-agnostic — the

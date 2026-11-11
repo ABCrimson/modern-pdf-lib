@@ -212,9 +212,18 @@ describe('getToUnicodeCmap', () => {
 
   it('returns WinAnsi CMap for all 12 Latin standard fonts', () => {
     const latinFonts = [
-      'Courier', 'Courier-Bold', 'Courier-Oblique', 'Courier-BoldOblique',
-      'Helvetica', 'Helvetica-Bold', 'Helvetica-Oblique', 'Helvetica-BoldOblique',
-      'Times-Roman', 'Times-Bold', 'Times-Italic', 'Times-BoldItalic',
+      'Courier',
+      'Courier-Bold',
+      'Courier-Oblique',
+      'Courier-BoldOblique',
+      'Helvetica',
+      'Helvetica-Bold',
+      'Helvetica-Oblique',
+      'Helvetica-BoldOblique',
+      'Times-Roman',
+      'Times-Bold',
+      'Times-Italic',
+      'Times-BoldItalic',
     ];
 
     const winAnsiCmap = generateWinAnsiToUnicodeCmap();
@@ -227,10 +236,20 @@ describe('getToUnicodeCmap', () => {
 
   it('works with all 14 standard font names', () => {
     const allFonts = [
-      'Courier', 'Courier-Bold', 'Courier-Oblique', 'Courier-BoldOblique',
-      'Helvetica', 'Helvetica-Bold', 'Helvetica-Oblique', 'Helvetica-BoldOblique',
-      'Times-Roman', 'Times-Bold', 'Times-Italic', 'Times-BoldItalic',
-      'Symbol', 'ZapfDingbats',
+      'Courier',
+      'Courier-Bold',
+      'Courier-Oblique',
+      'Courier-BoldOblique',
+      'Helvetica',
+      'Helvetica-Bold',
+      'Helvetica-Oblique',
+      'Helvetica-BoldOblique',
+      'Times-Roman',
+      'Times-Bold',
+      'Times-Italic',
+      'Times-BoldItalic',
+      'Symbol',
+      'ZapfDingbats',
     ];
 
     for (const fontName of allFonts) {

@@ -10,12 +10,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  PdfDict,
-  PdfName,
-  PdfString,
-  PdfArray,
-} from '../../../src/core/pdfObjects.js';
+import { PdfDict, PdfName, PdfString, PdfArray } from '../../../src/core/pdfObjects.js';
 import { PdfForm, type RefResolver } from '../../../src/form/pdfForm.js';
 
 import {
@@ -26,17 +21,12 @@ import {
   topologicalSort,
 } from '../../../src/form/calculationOrder.js';
 
-
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
 /** Create a text field dict with an optional calculation script. */
-function makeTextField(
-  name: string,
-  value: string,
-  calcScript?: string,
-): PdfDict {
+function makeTextField(name: string, value: string, calcScript?: string): PdfDict {
   const dict = new PdfDict();
   dict.set('/FT', PdfName.of('Tx'));
   dict.set('/T', PdfString.literal(name));
@@ -74,10 +64,7 @@ function buildForm(fieldDicts: PdfDict[]): PdfForm {
 
 describe('getCalculationOrder', () => {
   it('returns empty array when no fields have calculations', () => {
-    const form = buildForm([
-      makeTextField('name', 'Alice'),
-      makeTextField('age', '30'),
-    ]);
+    const form = buildForm([makeTextField('name', 'Alice'), makeTextField('age', '30')]);
     expect(getCalculationOrder(form)).toEqual([]);
   });
 
@@ -162,10 +149,7 @@ describe('executeCalculations', () => {
   });
 
   it('handles no calculated fields gracefully', () => {
-    const form = buildForm([
-      makeTextField('name', 'Alice'),
-      makeTextField('age', '30'),
-    ]);
+    const form = buildForm([makeTextField('name', 'Alice'), makeTextField('age', '30')]);
 
     // Should not throw
     executeCalculations(form);
@@ -206,9 +190,7 @@ describe('executeCalculations', () => {
 
 describe('buildDependencyGraph', () => {
   it('returns empty map when no calculations exist', () => {
-    const form = buildForm([
-      makeTextField('name', 'Alice'),
-    ]);
+    const form = buildForm([makeTextField('name', 'Alice')]);
     const graph = buildDependencyGraph(form);
     expect(graph.size).toBe(0);
   });

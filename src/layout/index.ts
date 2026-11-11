@@ -30,7 +30,14 @@ export {
 } from './presets.js';
 export type { TablePreset, PresetName, PresetOptions } from './presets.js';
 
-export { estimateTextWidth, applyOverflow, wrapText, truncateText, ellipsisText, shrinkFontSize } from './overflow.js';
+export {
+  estimateTextWidth,
+  applyOverflow,
+  wrapText,
+  truncateText,
+  ellipsisText,
+  shrinkFontSize,
+} from './overflow.js';
 export type { OverflowMode, OverflowResult } from './overflow.js';
 
 export {

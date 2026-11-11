@@ -16,10 +16,7 @@
  * @packageDocumentation
  */
 
-import {
-  parseDerTlv,
-  decodeOidBytes,
-} from './pkcs7.js';
+import { parseDerTlv, decodeOidBytes } from './pkcs7.js';
 import type { Asn1Node } from './pkcs7.js';
 
 // ---------------------------------------------------------------------------
@@ -76,7 +73,6 @@ const CRL_REASONS: Record<number, string> = {
 // ---------------------------------------------------------------------------
 // Internal helpers
 // ---------------------------------------------------------------------------
-
 
 /**
  * Parse a GeneralizedTime string (YYYYMMDDHHmmSS[.fff]Z) to Date.
@@ -244,10 +240,7 @@ export function parseCrl(data: Uint8Array): CrlData {
 
   // revokedCertificates SEQUENCE OF OPTIONAL
   const entries: CrlEntry[] = [];
-  if (
-    idx < tbsCertList.children.length &&
-    tbsCertList.children[idx]!.tag === 0x30
-  ) {
+  if (idx < tbsCertList.children.length && tbsCertList.children[idx]!.tag === 0x30) {
     const revokedSeq = tbsCertList.children[idx]!;
 
     for (const revokedCert of revokedSeq.children) {
@@ -291,20 +284,19 @@ export async function downloadCrl(url: string): Promise<CrlData> {
   const response = await fetch(url, {
     method: 'GET',
     headers: {
-      'Accept': 'application/pkix-crl, application/x-pkcs7-crl',
+      Accept: 'application/pkix-crl, application/x-pkcs7-crl',
     },
   });
 
   if (!response.ok) {
-    throw new Error(
-      `CRL download failed: HTTP ${response.status} ${response.statusText}`,
-    );
+    throw new Error(`CRL download failed: HTTP ${response.status} ${response.statusText}`);
   }
 
   let crlBytes = new Uint8Array(await response.arrayBuffer());
 
   // Check if this is PEM-encoded (starts with "-----BEGIN")
-  if (crlBytes[0] === 0x2d) { // '-'
+  if (crlBytes[0] === 0x2d) {
+    // '-'
     const textDecoder = new TextDecoder('ascii');
     const pem = textDecoder.decode(crlBytes);
     const base64 = pem

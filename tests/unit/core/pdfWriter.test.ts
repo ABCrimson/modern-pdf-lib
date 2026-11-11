@@ -5,10 +5,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  PdfWriter,
-  serializePdf,
-} from '../../../src/core/pdfWriter.js';
+import { PdfWriter, serializePdf } from '../../../src/core/pdfWriter.js';
 import {
   PdfObjectRegistry,
   PdfDict,
@@ -45,10 +42,7 @@ function buildMinimalDocument() {
 
   // Build a resources dict
   const resources = new PdfDict();
-  resources.set(
-    '/ProcSet',
-    PdfArray.of([PdfName.of('PDF'), PdfName.of('Text')]),
-  );
+  resources.set('/ProcSet', PdfArray.of([PdfName.of('PDF'), PdfName.of('Text')]));
 
   const pageEntry: PageEntry = {
     pageRef,
@@ -230,11 +224,7 @@ describe('PdfWriter', () => {
       resources,
     };
 
-    const structure = buildDocumentStructure(
-      [pageEntry],
-      { producer: 'modern-pdf' },
-      registry,
-    );
+    const structure = buildDocumentStructure([pageEntry], { producer: 'modern-pdf' }, registry);
 
     const bytes = await serializePdf(registry, structure, { compress: true });
     const text = pdfToString(bytes);
@@ -373,11 +363,7 @@ describe('PdfWriter', () => {
       resources,
     };
 
-    const structure = buildDocumentStructure(
-      [pageEntry],
-      { producer: 'modern-pdf' },
-      registry,
-    );
+    const structure = buildDocumentStructure([pageEntry], { producer: 'modern-pdf' }, registry);
 
     // Use threshold = 1 so even a small doc uses object streams
     const bytes = await serializePdf(registry, structure, {

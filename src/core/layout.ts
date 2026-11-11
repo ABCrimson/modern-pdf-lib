@@ -67,9 +67,7 @@ export function layoutMultilineText(
   }
 
   const height =
-    allLines.length > 0
-      ? font.heightAtSize(fontSize) + (allLines.length - 1) * lineHeight
-      : 0;
+    allLines.length > 0 ? font.heightAtSize(fontSize) + (allLines.length - 1) * lineHeight : 0;
 
   return { lines: allLines, height };
 }
@@ -127,10 +125,7 @@ export interface ComputeFontSizeOptions {
  * Uses binary search between `minSize` (default 4) and `maxSize`
  * (default 500), converging to within 0.1 pt.
  */
-export function computeFontSize(
-  text: string,
-  options: ComputeFontSizeOptions,
-): number {
+export function computeFontSize(text: string, options: ComputeFontSizeOptions): number {
   const { font, maxWidth, wordBreaks } = options;
   const maxHeight = options.maxHeight ?? Infinity;
   const minSize = options.minSize ?? 4;
@@ -149,9 +144,7 @@ export function computeFontSize(
       wordBreaks,
     });
 
-    const fits =
-      layout.height <= maxHeight &&
-      layout.lines.every((line) => line.width <= maxWidth);
+    const fits = layout.height <= maxHeight && layout.lines.every((line) => line.width <= maxWidth);
 
     if (fits) {
       lo = mid;

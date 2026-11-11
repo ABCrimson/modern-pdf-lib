@@ -98,11 +98,7 @@ const OID_AUTHORITY_KEY_IDENTIFIER = '2.5.29.35';
  * `parentNode.data` is a subarray of `certDer`; `child.offset` is the child's
  * offset within that parent value; `child.totalLength` covers header + value.
  */
-function sliceChild(
-  certDer: Uint8Array,
-  parentNode: Asn1Node,
-  child: Asn1Node,
-): Uint8Array {
+function sliceChild(certDer: Uint8Array, parentNode: Asn1Node, child: Asn1Node): Uint8Array {
   const start = child.offset + (parentNode.data.byteOffset - certDer.byteOffset);
   return certDer.subarray(start, start + child.totalLength);
 }

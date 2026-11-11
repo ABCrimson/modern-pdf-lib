@@ -4,11 +4,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { renderTable } from '../../src/layout/table.js';
-import type {
-  DrawTableOptions,
-  TableCell,
-  TextRun,
-} from '../../src/layout/table.js';
+import type { DrawTableOptions, TableCell, TextRun } from '../../src/layout/table.js';
 import type { Color } from '../../src/core/operators/color.js';
 
 // ---------------------------------------------------------------------------
@@ -34,22 +30,15 @@ describe('TextRun cell content', () => {
   it('renders a single TextRun with default styling', () => {
     const runs: TextRun[] = [{ text: 'Hello' }];
     const cell: TableCell = { content: runs };
-    const { ops } = renderTable(
-      simpleTable({ rows: [{ cells: [cell] }] }),
-    );
+    const { ops } = renderTable(simpleTable({ rows: [{ cells: [cell] }] }));
     expect(ops).toContain('(Hello) Tj');
   });
 
   // 2
   it('renders multiple TextRuns sequentially', () => {
-    const runs: TextRun[] = [
-      { text: 'First' },
-      { text: 'Second' },
-    ];
+    const runs: TextRun[] = [{ text: 'First' }, { text: 'Second' }];
     const cell: TableCell = { content: runs };
-    const { ops } = renderTable(
-      simpleTable({ rows: [{ cells: [cell] }] }),
-    );
+    const { ops } = renderTable(simpleTable({ rows: [{ cells: [cell] }] }));
     expect(ops).toContain('(First) Tj');
     expect(ops).toContain('(Second) Tj');
   });
@@ -61,9 +50,7 @@ describe('TextRun cell content', () => {
       { text: 'Small', fontSize: 8 },
     ];
     const cell: TableCell = { content: runs };
-    const { ops } = renderTable(
-      simpleTable({ rows: [{ cells: [cell] }] }),
-    );
+    const { ops } = renderTable(simpleTable({ rows: [{ cells: [cell] }] }));
     expect(ops).toContain('24 Tf');
     expect(ops).toContain('8 Tf');
   });
@@ -77,9 +64,7 @@ describe('TextRun cell content', () => {
       { text: 'Blue', color: blue },
     ];
     const cell: TableCell = { content: runs };
-    const { ops } = renderTable(
-      simpleTable({ rows: [{ cells: [cell] }] }),
-    );
+    const { ops } = renderTable(simpleTable({ rows: [{ cells: [cell] }] }));
     expect(ops).toContain('1 0 0 rg');
     expect(ops).toContain('0 0 1 rg');
   });
@@ -91,9 +76,7 @@ describe('TextRun cell content', () => {
       { text: 'Mono', fontName: 'Courier' },
     ];
     const cell: TableCell = { content: runs };
-    const { ops } = renderTable(
-      simpleTable({ rows: [{ cells: [cell] }] }),
-    );
+    const { ops } = renderTable(simpleTable({ rows: [{ cells: [cell] }] }));
     expect(ops).toContain('/Times-Roman');
     expect(ops).toContain('/Courier');
   });
@@ -103,9 +86,7 @@ describe('TextRun cell content', () => {
     const green: Color = { type: 'rgb', r: 0, g: 0.8, b: 0 };
     const runs: TextRun[] = [{ text: 'Green' }];
     const cell: TableCell = { content: runs, textColor: green };
-    const { ops } = renderTable(
-      simpleTable({ rows: [{ cells: [cell] }] }),
-    );
+    const { ops } = renderTable(simpleTable({ rows: [{ cells: [cell] }] }));
     expect(ops).toContain('0 0.8 0 rg');
   });
 
@@ -139,9 +120,7 @@ describe('TextRun cell content', () => {
   // 9
   it('empty TextRun array produces no text operators', () => {
     const cell: TableCell = { content: [] as TextRun[] };
-    const { ops } = renderTable(
-      simpleTable({ rows: [{ cells: [cell] }] }),
-    );
+    const { ops } = renderTable(simpleTable({ rows: [{ cells: [cell] }] }));
     expect(ops).not.toContain('Tj');
   });
 
@@ -182,12 +161,8 @@ describe('TextRun cell content', () => {
     const cell: TableCell = { content: runs, align: 'center' };
     const leftCell: TableCell = { content: runs, align: 'left' };
 
-    const { ops: centerOps } = renderTable(
-      simpleTable({ rows: [{ cells: [cell] }] }),
-    );
-    const { ops: leftOps } = renderTable(
-      simpleTable({ rows: [{ cells: [leftCell] }] }),
-    );
+    const { ops: centerOps } = renderTable(simpleTable({ rows: [{ cells: [cell] }] }));
+    const { ops: leftOps } = renderTable(simpleTable({ rows: [{ cells: [leftCell] }] }));
 
     // Extract Td x positions — they should differ
     const tdPattern = /(\S+) (\S+) Td/;
@@ -200,15 +175,9 @@ describe('TextRun cell content', () => {
 
   // 13
   it('three TextRuns produce text operators for all runs', () => {
-    const runs: TextRun[] = [
-      { text: 'A' },
-      { text: 'B' },
-      { text: 'C' },
-    ];
+    const runs: TextRun[] = [{ text: 'A' }, { text: 'B' }, { text: 'C' }];
     const cell: TableCell = { content: runs };
-    const { ops } = renderTable(
-      simpleTable({ rows: [{ cells: [cell] }] }),
-    );
+    const { ops } = renderTable(simpleTable({ rows: [{ cells: [cell] }] }));
 
     // All three runs should have their text rendered
     expect(ops).toContain('(A) Tj');
@@ -221,14 +190,9 @@ describe('TextRun cell content', () => {
 
   // 14
   it('TextRun runs are rendered sequentially in a single text block', () => {
-    const runs: TextRun[] = [
-      { text: 'AAAA' },
-      { text: 'BBBB' },
-    ];
+    const runs: TextRun[] = [{ text: 'AAAA' }, { text: 'BBBB' }];
     const cell: TableCell = { content: runs };
-    const { ops } = renderTable(
-      simpleTable({ rows: [{ cells: [cell] }] }),
-    );
+    const { ops } = renderTable(simpleTable({ rows: [{ cells: [cell] }] }));
 
     // Both runs rendered — uses single Td + sequential Tj calls
     expect(ops).toContain('(AAAA) Tj');

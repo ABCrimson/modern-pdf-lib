@@ -71,16 +71,16 @@ function validatePhone(value: string): ValidationResult {
   // Extract digits only
   const digits = value.replace(/\D/g, '');
   if (digits.length < 10) {
-    return { valid: false, message: `Invalid phone: expected at least 10 digits, got ${digits.length}` };
+    return {
+      valid: false,
+      message: `Invalid phone: expected at least 10 digits, got ${digits.length}`,
+    };
   }
   return { valid: true };
 }
 
 /** Validates that a numeric value falls within min/max bounds. */
-function validateRange(
-  value: string,
-  params: Record<string, string | number>,
-): ValidationResult {
+function validateRange(value: string, params: Record<string, string | number>): ValidationResult {
   if (value.length === 0) {
     return { valid: true };
   }
@@ -108,10 +108,7 @@ function validateRequired(value: string): ValidationResult {
 }
 
 /** Validates a value against a regex pattern. */
-function validateRegex(
-  value: string,
-  params: Record<string, string | number>,
-): ValidationResult {
+function validateRegex(value: string, params: Record<string, string | number>): ValidationResult {
   if (value.length === 0) {
     return { valid: true };
   }
@@ -128,10 +125,7 @@ function validateRegex(
 }
 
 /** Validates that a value's length falls within min/max bounds. */
-function validateLength(
-  value: string,
-  params: Record<string, string | number>,
-): ValidationResult {
+function validateLength(value: string, params: Record<string, string | number>): ValidationResult {
   const min = params['min'] !== undefined ? Number(params['min']) : 0;
   const max = params['max'] !== undefined ? Number(params['max']) : Infinity;
   if (value.length < min) {
@@ -150,10 +144,7 @@ function validateLength(
 /**
  * Run a built-in validation check based on a `ValidationType`.
  */
-function runBuiltInValidation(
-  value: string,
-  validation: ValidationType,
-): ValidationResult {
+function runBuiltInValidation(value: string, validation: ValidationType): ValidationResult {
   const params = validation.params ?? {};
 
   switch (validation.type) {
@@ -280,15 +271,13 @@ export function parseValidationScript(script: string): ValidationType | null {
   // Required patterns
   if (
     /required/i.test(trimmed) ||
-    /==\s*["']?\s*["']?/.test(trimmed) && /event\.rc\s*=\s*false/i.test(trimmed)
+    (/==\s*["']?\s*["']?/.test(trimmed) && /event\.rc\s*=\s*false/i.test(trimmed))
   ) {
     return { type: 'required' };
   }
 
   // Length patterns: e.g. "if (event.value.length < 5 || event.value.length > 20)"
-  const lengthMatch = trimmed.match(
-    /\.length\s*(?:[<>]=?|[!=]==?)\s*(\d+)/g,
-  );
+  const lengthMatch = trimmed.match(/\.length\s*(?:[<>]=?|[!=]==?)\s*(\d+)/g);
   if (lengthMatch && lengthMatch.length > 0) {
     const params: Record<string, string | number> = {};
     for (const m of lengthMatch) {

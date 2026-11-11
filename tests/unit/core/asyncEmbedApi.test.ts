@@ -117,10 +117,7 @@ describe('embedImages (parallel)', () => {
     const jpegBytes = new Uint8Array(await readFile(resolve(fixturesDir, 'sample.jpg')));
     const doc = createPdf();
 
-    const images = await doc.embedImages([
-      { data: pngBytes },
-      { data: jpegBytes },
-    ]);
+    const images = await doc.embedImages([{ data: pngBytes }, { data: jpegBytes }]);
 
     expect(images).toHaveLength(2);
     // PNG is 4x4
@@ -139,10 +136,7 @@ describe('embedImages (parallel)', () => {
     const doc = createPdf();
 
     // Embed in JPEG, PNG order
-    const images = await doc.embedImages([
-      { data: jpegBytes },
-      { data: pngBytes },
-    ]);
+    const images = await doc.embedImages([{ data: jpegBytes }, { data: pngBytes }]);
 
     // JPEG first (1x1)
     expect(images[0]!.width).toBe(1);
@@ -174,10 +168,7 @@ describe('embedImages (parallel)', () => {
     const doc = createPdf();
 
     // User can also do manual Promise.all with individual embedPng/embedJpeg
-    const [png, jpeg] = await Promise.all([
-      doc.embedPng(pngBytes),
-      doc.embedJpeg(jpegBytes),
-    ]);
+    const [png, jpeg] = await Promise.all([doc.embedPng(pngBytes), doc.embedJpeg(jpegBytes)]);
 
     expect(png!.width).toBe(4);
     expect(jpeg!.width).toBe(1);
@@ -188,10 +179,7 @@ describe('embedImages (parallel)', () => {
     const jpegBytes = new Uint8Array(await readFile(resolve(fixturesDir, 'sample.jpg')));
     const doc = createPdf();
 
-    const [png, jpeg] = await doc.embedImages([
-      { data: pngBytes },
-      { data: jpegBytes },
-    ]);
+    const [png, jpeg] = await doc.embedImages([{ data: pngBytes }, { data: jpegBytes }]);
 
     const page = doc.addPage(PageSizes.A4);
     page.drawImage(png!, { x: 50, y: 700, width: 100, height: 100 });
@@ -232,10 +220,7 @@ describe('embedFonts (parallel)', () => {
   it('preserves order of results', async () => {
     const doc = createPdf();
 
-    const fonts = await doc.embedFonts([
-      { data: 'Courier' },
-      { data: 'Helvetica' },
-    ]);
+    const fonts = await doc.embedFonts([{ data: 'Courier' }, { data: 'Helvetica' }]);
 
     // Verify each font measures text correctly for its type
     const courierWidth = fonts[0]!.widthOfTextAtSize('W', 12);
@@ -263,10 +248,7 @@ describe('embedFonts (parallel)', () => {
   it('produces valid PDF when fonts are used for text', async () => {
     const doc = createPdf();
 
-    const [helvetica, courier] = await doc.embedFonts([
-      { data: 'Helvetica' },
-      { data: 'Courier' },
-    ]);
+    const [helvetica, courier] = await doc.embedFonts([{ data: 'Helvetica' }, { data: 'Courier' }]);
 
     const page = doc.addPage(PageSizes.A4);
     page.drawText('Hello Helvetica', { x: 50, y: 750, size: 14, font: helvetica });
@@ -299,10 +281,7 @@ describe('embedFont (async consistency)', () => {
   it('works with Promise.all for multiple fonts', async () => {
     const doc = createPdf();
 
-    const [f1, f2] = await Promise.all([
-      doc.embedFont('Helvetica'),
-      doc.embedFont('Courier'),
-    ]);
+    const [f1, f2] = await Promise.all([doc.embedFont('Helvetica'), doc.embedFont('Courier')]);
 
     expect(f1!.name).toBeDefined();
     expect(f2!.name).toBeDefined();

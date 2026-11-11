@@ -35,9 +35,7 @@ function bytes(str: string): Uint8Array {
 }
 
 /** Create a parser (with a fresh registry) from a plain string. */
-function createParser(
-  str: string,
-): { parser: PdfObjectParser; registry: PdfObjectRegistry } {
+function createParser(str: string): { parser: PdfObjectParser; registry: PdfObjectRegistry } {
   const lexer = new PdfLexer(bytes(str));
   const registry = new PdfObjectRegistry();
   const parser = new PdfObjectParser(lexer, registry);
@@ -352,9 +350,7 @@ describe('PdfObjectParser - dictionary', () => {
   });
 
   it('throws on unterminated dictionary', () => {
-    expect(() => parse('<< /Key (value)')).toThrow(
-      /unterminated dictionary/i,
-    );
+    expect(() => parse('<< /Key (value)')).toThrow(/unterminated dictionary/i);
   });
 
   it('throws on non-name key', () => {
@@ -459,9 +455,7 @@ describe('PdfObjectParser - indirect object definitions', () => {
   });
 
   it('parses an indirect object containing a dictionary', () => {
-    const { parser } = createParser(
-      '6 0 obj << /Type /Page /Count 1 >> endobj',
-    );
+    const { parser } = createParser('6 0 obj << /Type /Page /Count 1 >> endobj');
     const { ref, object } = parser.parseIndirectObject();
     expect(ref.objectNumber).toBe(6);
     expect(object.kind).toBe('dict');
@@ -492,16 +486,12 @@ describe('PdfObjectParser - indirect object definitions', () => {
 
   it('throws when object number is not an integer', () => {
     const { parser } = createParser('3.5 0 obj 42 endobj');
-    expect(() => parser.parseIndirectObject()).toThrow(
-      /expected integer object number/i,
-    );
+    expect(() => parser.parseIndirectObject()).toThrow(/expected integer object number/i);
   });
 
   it('throws when generation number is not an integer', () => {
     const { parser } = createParser('3 0.5 obj 42 endobj');
-    expect(() => parser.parseIndirectObject()).toThrow(
-      /expected integer generation number/i,
-    );
+    expect(() => parser.parseIndirectObject()).toThrow(/expected integer generation number/i);
   });
 });
 
@@ -582,9 +572,7 @@ describe('PdfObjectParser - streams', () => {
   it('throws when /Length is missing from stream dict', () => {
     const input = '3 0 obj\n<< /Type /XObject >>\nstream\ndata\nendstream\nendobj';
     const { parser } = createParser(input);
-    expect(() => parser.parseIndirectObject()).toThrow(
-      /missing \/Length/i,
-    );
+    expect(() => parser.parseIndirectObject()).toThrow(/missing \/Length/i);
   });
 
   it('parses stream that appears as value inside parseObject flow', () => {
@@ -730,8 +718,7 @@ describe('PdfObjectParser - error handling', () => {
   });
 
   it('throws when /Length is a non-number in stream', () => {
-    const input =
-      '1 0 obj << /Length (five) >> stream\nHello\nendstream endobj';
+    const input = '1 0 obj << /Length (five) >> stream\nHello\nendstream endobj';
     const { parser } = createParser(input);
     expect(() => parser.parseIndirectObject()).toThrow(/\/Length/i);
   });
@@ -776,10 +763,7 @@ describe('PdfObjectParser - edge cases', () => {
   });
 
   it('handles consecutive indirect objects parsed sequentially', () => {
-    const input =
-      '1 0 obj /Foo endobj\n' +
-      '2 0 obj /Bar endobj\n' +
-      '3 0 obj /Baz endobj';
+    const input = '1 0 obj /Foo endobj\n' + '2 0 obj /Bar endobj\n' + '3 0 obj /Baz endobj';
     const { parser, registry } = createParser(input);
 
     parser.parseIndirectObject();
@@ -811,12 +795,9 @@ describe('PdfObjectParser - edge cases', () => {
 
   it('throws when /Length ref is not yet resolved', () => {
     // Object 99 is not in the registry
-    const input =
-      '1 0 obj << /Length 99 0 R >> stream\ndata\nendstream endobj';
+    const input = '1 0 obj << /Length 99 0 R >> stream\ndata\nendstream endobj';
     const { parser } = createParser(input);
-    expect(() => parser.parseIndirectObject()).toThrow(
-      /not yet.*resolved/i,
-    );
+    expect(() => parser.parseIndirectObject()).toThrow(/not yet.*resolved/i);
   });
 
   it('correctly parses number followed by non-ref context', () => {

@@ -16,13 +16,7 @@ import {
   parseViewerPreferences,
 } from '../../../src/metadata/viewerPreferences.js';
 import type { ViewerPreferences } from '../../../src/metadata/viewerPreferences.js';
-import {
-  PdfDict,
-  PdfName,
-  PdfNumber,
-  PdfBool,
-  PdfArray,
-} from '../../../src/core/pdfObjects.js';
+import { PdfDict, PdfName, PdfNumber, PdfBool, PdfArray } from '../../../src/core/pdfObjects.js';
 import type { ByteWriter } from '../../../src/core/pdfObjects.js';
 
 // ---------------------------------------------------------------------------
@@ -103,7 +97,10 @@ describe('buildViewerPreferencesDict', () => {
 
   it('builds print page range array', () => {
     const prefs: ViewerPreferences = {
-      printPageRange: [[1, 3], [5, 10]],
+      printPageRange: [
+        [1, 3],
+        [5, 10],
+      ],
     };
 
     const dict = buildViewerPreferencesDict(prefs);
@@ -210,15 +207,16 @@ describe('parseViewerPreferences', () => {
 
   it('parses print page range', () => {
     const dict = new PdfDict();
-    dict.set('/PrintPageRange', PdfArray.of([
-      PdfNumber.of(1),
-      PdfNumber.of(3),
-      PdfNumber.of(7),
-      PdfNumber.of(10),
-    ]));
+    dict.set(
+      '/PrintPageRange',
+      PdfArray.of([PdfNumber.of(1), PdfNumber.of(3), PdfNumber.of(7), PdfNumber.of(10)]),
+    );
 
     const prefs = parseViewerPreferences(dict);
-    expect(prefs.printPageRange).toEqual([[1, 3], [7, 10]]);
+    expect(prefs.printPageRange).toEqual([
+      [1, 3],
+      [7, 10],
+    ]);
   });
 
   it('parses numCopies', () => {
@@ -245,11 +243,7 @@ describe('parseViewerPreferences', () => {
 
   it('handles odd-length print page range gracefully', () => {
     const dict = new PdfDict();
-    dict.set('/PrintPageRange', PdfArray.of([
-      PdfNumber.of(1),
-      PdfNumber.of(3),
-      PdfNumber.of(5),
-    ]));
+    dict.set('/PrintPageRange', PdfArray.of([PdfNumber.of(1), PdfNumber.of(3), PdfNumber.of(5)]));
 
     const prefs = parseViewerPreferences(dict);
     // Should parse only complete pairs
@@ -274,7 +268,10 @@ describe('round-trip', () => {
       direction: 'R2L',
       printScaling: 'None',
       duplex: 'DuplexFlipShortEdge',
-      printPageRange: [[1, 5], [10, 15]],
+      printPageRange: [
+        [1, 5],
+        [10, 15],
+      ],
       numCopies: 3,
     };
 
@@ -309,7 +306,10 @@ describe('round-trip', () => {
 
   it('round-trips all NonFullScreenPageMode values', () => {
     const modes: Array<'UseNone' | 'UseOutlines' | 'UseThumbs' | 'UseOC'> = [
-      'UseNone', 'UseOutlines', 'UseThumbs', 'UseOC',
+      'UseNone',
+      'UseOutlines',
+      'UseThumbs',
+      'UseOC',
     ];
 
     for (const mode of modes) {
@@ -331,7 +331,9 @@ describe('round-trip', () => {
 
   it('round-trips all duplex values', () => {
     const dups: Array<'Simplex' | 'DuplexFlipShortEdge' | 'DuplexFlipLongEdge'> = [
-      'Simplex', 'DuplexFlipShortEdge', 'DuplexFlipLongEdge',
+      'Simplex',
+      'DuplexFlipShortEdge',
+      'DuplexFlipLongEdge',
     ];
 
     for (const dup of dups) {

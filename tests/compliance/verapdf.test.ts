@@ -39,20 +39,22 @@ async function createSimplePdf(): Promise<Uint8Array> {
 }
 
 /** Build a minimal synthetic PDF for pattern-based tests. */
-function buildSyntheticPdf(options: {
-  metadata?: boolean;
-  xmpPdfaId?: boolean;
-  encrypt?: boolean;
-  javascript?: boolean;
-  trailerId?: boolean;
-  lang?: boolean;
-  deviceRgb?: boolean;
-  outputIntents?: boolean;
-  structTree?: boolean;
-  markInfo?: boolean;
-  toUnicode?: boolean;
-  standardFont?: boolean;
-} = {}): Uint8Array {
+function buildSyntheticPdf(
+  options: {
+    metadata?: boolean;
+    xmpPdfaId?: boolean;
+    encrypt?: boolean;
+    javascript?: boolean;
+    trailerId?: boolean;
+    lang?: boolean;
+    deviceRgb?: boolean;
+    outputIntents?: boolean;
+    structTree?: boolean;
+    markInfo?: boolean;
+    toUnicode?: boolean;
+    standardFont?: boolean;
+  } = {},
+): Uint8Array {
   const lines: string[] = ['%PDF-1.7'];
 
   let catalog = '<< /Type /Catalog /Pages 2 0 R';
@@ -169,16 +171,16 @@ describe('PDF/A validation (internal)', () => {
     const bytes = await createSimplePdf();
     const result = validatePdfA(bytes, '1b');
     // Standard PDFs from createPdf() don't have /Metadata in the catalog
-    const xmpIssue = result.issues.find(
-      (i) => i.code === 'PDFA-001' || i.code === 'PDFA-002',
-    );
+    const xmpIssue = result.issues.find((i) => i.code === 'PDFA-001' || i.code === 'PDFA-002');
     expect(xmpIssue).toBeDefined();
   });
 
   it('validates all supported levels without crashing', () => {
     const levels: PdfALevel[] = ['1b', '2b', '3b', '1a', '2a', '3a', '2u', '3u'];
     // Minimal valid PDF header bytes
-    const pdfHeader = encoder.encode('%PDF-1.7\ntrailer\n<< /Size 0 /Root 1 0 R >>\nstartxref\n0\n%%EOF');
+    const pdfHeader = encoder.encode(
+      '%PDF-1.7\ntrailer\n<< /Size 0 /Root 1 0 R >>\nstartxref\n0\n%%EOF',
+    );
     for (const level of levels) {
       expect(() => validatePdfA(pdfHeader, level)).not.toThrow();
     }
@@ -348,9 +350,7 @@ describe('PDF/A validation (internal)', () => {
     const xmpMissingBefore = before.issues.some(
       (i) => i.code === 'PDFA-001' || i.code === 'PDFA-002',
     );
-    const xmpMissingAfter = after.issues.some(
-      (i) => i.code === 'PDFA-001',
-    );
+    const xmpMissingAfter = after.issues.some((i) => i.code === 'PDFA-001');
 
     // If XMP was missing before, it should not be missing after
     if (xmpMissingBefore) {

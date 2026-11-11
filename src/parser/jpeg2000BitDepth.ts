@@ -89,13 +89,12 @@ function findSizMarker(data: Uint8Array): number {
           (data[offset + 2]! << 8) |
           data[offset + 3]!) >>>
         0;
-      const boxType =
-        String.fromCharCode(
-          data[offset + 4]!,
-          data[offset + 5]!,
-          data[offset + 6]!,
-          data[offset + 7]!,
-        );
+      const boxType = String.fromCharCode(
+        data[offset + 4]!,
+        data[offset + 5]!,
+        data[offset + 6]!,
+        data[offset + 7]!,
+      );
 
       if (boxType === 'jp2c') {
         // Codestream starts at offset + 8 (after box header)
@@ -179,9 +178,7 @@ export function getComponentDepths(sizMarker: Uint8Array): ComponentDepth[] {
   // Each component entry is 3 bytes: Ssiz(1) + XRsiz(1) + YRsiz(1)
   const componentStart = base + 38;
   if (componentStart + csiz * 3 > sizMarker.length) {
-    throw new Error(
-      `JPEG2000 BitDepth: SIZ marker truncated — expected ${csiz} component entries`,
-    );
+    throw new Error(`JPEG2000 BitDepth: SIZ marker truncated — expected ${csiz} component entries`);
   }
 
   const depths: ComponentDepth[] = [];
@@ -211,10 +208,7 @@ export function getComponentDepths(sizMarker: Uint8Array): ComponentDepth[] {
  * @param bitsPerComponent - The source bit depth (must be > 8, up to 16).
  * @returns A new `Uint8Array` with one byte per sample, scaled to [0, 255].
  */
-export function downscale16To8(
-  data: Uint8Array,
-  bitsPerComponent: number,
-): Uint8Array {
+export function downscale16To8(data: Uint8Array, bitsPerComponent: number): Uint8Array {
   if (bitsPerComponent <= 8) {
     // Already 8-bit or less — return a copy
     return new Uint8Array(data);
@@ -338,10 +332,7 @@ export function normalizeComponentDepth(
  * @param bitsPerComponent - Component bit depth.
  * @returns A new `Uint8Array` with the offset applied.
  */
-export function offsetSignedToUnsigned(
-  data: Uint8Array,
-  bitsPerComponent: number,
-): Uint8Array {
+export function offsetSignedToUnsigned(data: Uint8Array, bitsPerComponent: number): Uint8Array {
   const offset = 1 << (bitsPerComponent - 1);
   const maxUnsigned = (1 << bitsPerComponent) - 1;
 

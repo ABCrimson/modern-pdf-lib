@@ -30,12 +30,7 @@
 // ---------------------------------------------------------------------------
 
 /** Factur-X / ZUGFeRD conformance profile. */
-export type FacturXProfile =
-  | 'MINIMUM'
-  | 'BASIC-WL'
-  | 'BASIC'
-  | 'EN16931'
-  | 'EXTENDED';
+export type FacturXProfile = 'MINIMUM' | 'BASIC-WL' | 'BASIC' | 'EN16931' | 'EXTENDED';
 
 /** A trading party (seller or buyer) on the invoice. */
 export interface InvoiceParty {
@@ -85,8 +80,7 @@ const GUIDELINE_URNS: Readonly<Record<FacturXProfile, string>> = {
   'BASIC-WL': 'urn:factur-x.eu:1p0:basicwl',
   BASIC: 'urn:cen.eu:en16931:2017#compliant#urn:factur-x.eu:1p0:basic',
   EN16931: 'urn:cen.eu:en16931:2017',
-  EXTENDED:
-    'urn:cen.eu:en16931:2017#conformant#urn:factur-x.eu:1p0:extended',
+  EXTENDED: 'urn:cen.eu:en16931:2017#conformant#urn:factur-x.eu:1p0:extended',
 };
 
 /** Invoice type code 380 = "Commercial invoice" (UNTDID 1001). */
@@ -196,26 +190,18 @@ function renderParty(party: InvoiceParty, indent: string): string {
   const lines: string[] = [];
   lines.push(`${indent}<ram:Name>${escapeXml(party.name)}</ram:Name>`);
   lines.push(`${indent}<ram:PostalTradeAddress>`);
-  lines.push(
-    `${indent}  <ram:CountryID>${escapeXml(party.countryCode)}</ram:CountryID>`,
-  );
+  lines.push(`${indent}  <ram:CountryID>${escapeXml(party.countryCode)}</ram:CountryID>`);
   lines.push(`${indent}</ram:PostalTradeAddress>`);
   if (party.vatId !== undefined && party.vatId !== '') {
     lines.push(`${indent}<ram:SpecifiedTaxRegistration>`);
-    lines.push(
-      `${indent}  <ram:ID schemeID="VA">${escapeXml(party.vatId)}</ram:ID>`,
-    );
+    lines.push(`${indent}  <ram:ID schemeID="VA">${escapeXml(party.vatId)}</ram:ID>`);
     lines.push(`${indent}</ram:SpecifiedTaxRegistration>`);
   }
   return lines.join('\n');
 }
 
 /** Render a single line item block. */
-function renderLine(
-  line: InvoiceLine,
-  index: number,
-  currency: string,
-): string {
+function renderLine(line: InvoiceLine, index: number, currency: string): string {
   const net = line.quantity * line.unitPrice;
   const out: string[] = [];
   out.push('    <ram:IncludedSupplyChainTradeLineItem>');
@@ -223,15 +209,11 @@ function renderLine(
   out.push(`        <ram:LineID>${index}</ram:LineID>`);
   out.push('      </ram:AssociatedDocumentLineDocument>');
   out.push('      <ram:SpecifiedTradeProduct>');
-  out.push(
-    `        <ram:Name>${escapeXml(line.description)}</ram:Name>`,
-  );
+  out.push(`        <ram:Name>${escapeXml(line.description)}</ram:Name>`);
   out.push('      </ram:SpecifiedTradeProduct>');
   out.push('      <ram:SpecifiedLineTradeAgreement>');
   out.push('        <ram:NetPriceProductTradePrice>');
-  out.push(
-    `          <ram:ChargeAmount>${formatAmount(line.unitPrice)}</ram:ChargeAmount>`,
-  );
+  out.push(`          <ram:ChargeAmount>${formatAmount(line.unitPrice)}</ram:ChargeAmount>`);
   out.push('        </ram:NetPriceProductTradePrice>');
   out.push('      </ram:SpecifiedLineTradeAgreement>');
   out.push('      <ram:SpecifiedLineTradeDelivery>');
@@ -242,9 +224,7 @@ function renderLine(
   out.push('      <ram:SpecifiedLineTradeSettlement>');
   out.push('        <ram:ApplicableTradeTax>');
   out.push('          <ram:TypeCode>VAT</ram:TypeCode>');
-  out.push(
-    `          <ram:CategoryCode>${VAT_CATEGORY_STANDARD}</ram:CategoryCode>`,
-  );
+  out.push(`          <ram:CategoryCode>${VAT_CATEGORY_STANDARD}</ram:CategoryCode>`);
   out.push(
     `          <ram:RateApplicablePercent>${formatPercent(line.taxPercent)}</ram:RateApplicablePercent>`,
   );
@@ -270,9 +250,7 @@ function renderTaxGroup(group: TaxGroup, currency: string): string {
   out.push(
     `        <ram:BasisAmount currencyID="${escapeXml(currency)}">${formatAmount(group.basisAmount)}</ram:BasisAmount>`,
   );
-  out.push(
-    `        <ram:CategoryCode>${VAT_CATEGORY_STANDARD}</ram:CategoryCode>`,
-  );
+  out.push(`        <ram:CategoryCode>${VAT_CATEGORY_STANDARD}</ram:CategoryCode>`);
   out.push(
     `        <ram:RateApplicablePercent>${formatPercent(group.taxPercent)}</ram:RateApplicablePercent>`,
   );
@@ -297,10 +275,7 @@ function renderTaxGroup(group: TaxGroup, currency: string): string {
  * @param profile - The Factur-X / ZUGFeRD profile. Default: 'EN16931'.
  * @returns The CII XML document as a string.
  */
-export function generateCiiXml(
-  invoice: Invoice,
-  profile: FacturXProfile = 'EN16931',
-): string {
+export function generateCiiXml(invoice: Invoice, profile: FacturXProfile = 'EN16931'): string {
   const totals = computeTotals(invoice.lines);
   const currency = invoice.currency;
   const guidelineUrn = GUIDELINE_URNS[profile];
@@ -324,9 +299,7 @@ export function generateCiiXml(
   // Exchanged document header.
   out.push('  <rsm:ExchangedDocument>');
   out.push(`    <ram:ID>${escapeXml(invoice.invoiceNumber)}</ram:ID>`);
-  out.push(
-    `    <ram:TypeCode>${COMMERCIAL_INVOICE_TYPE_CODE}</ram:TypeCode>`,
-  );
+  out.push(`    <ram:TypeCode>${COMMERCIAL_INVOICE_TYPE_CODE}</ram:TypeCode>`);
   out.push('    <ram:IssueDateTime>');
   out.push(
     `      <udt:DateTimeString format="102">${toDateString102(invoice.issueDate)}</udt:DateTimeString>`,
@@ -357,9 +330,7 @@ export function generateCiiXml(
 
   // Header trade settlement (tax + totals).
   out.push('    <ram:ApplicableHeaderTradeSettlement>');
-  out.push(
-    `      <ram:InvoiceCurrencyCode>${escapeXml(currency)}</ram:InvoiceCurrencyCode>`,
-  );
+  out.push(`      <ram:InvoiceCurrencyCode>${escapeXml(currency)}</ram:InvoiceCurrencyCode>`);
   for (const group of totals.taxGroups) {
     out.push(renderTaxGroup(group, currency));
   }

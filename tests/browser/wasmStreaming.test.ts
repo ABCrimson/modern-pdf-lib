@@ -13,8 +13,14 @@ import {
 
 // This is the smallest valid WASM module: magic bytes + version + no sections.
 const MINIMAL_WASM = new Uint8Array([
-  0x00, 0x61, 0x73, 0x6d, // magic: \0asm
-  0x01, 0x00, 0x00, 0x00, // version: 1
+  0x00,
+  0x61,
+  0x73,
+  0x6d, // magic: \0asm
+  0x01,
+  0x00,
+  0x00,
+  0x00, // version: 1
 ]);
 
 // ---------------------------------------------------------------------------

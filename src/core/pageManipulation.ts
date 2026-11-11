@@ -47,15 +47,9 @@ function resolveSize(size: PageSize | undefined): [number, number] {
  * @param operation  A description of the operation for error messages.
  * @throws RangeError if the index is out of bounds.
  */
-function validateIndex(
-  index: number,
-  pageCount: number,
-  operation: string,
-): void {
+function validateIndex(index: number, pageCount: number, operation: string): void {
   if (!Number.isInteger(index) || index < 0 || index >= pageCount) {
-    throw new RangeError(
-      `${operation}: index ${index} out of range [0, ${pageCount - 1}]`,
-    );
+    throw new RangeError(`${operation}: index ${index} out of range [0, ${pageCount - 1}]`);
   }
 }
 
@@ -67,15 +61,9 @@ function validateIndex(
  * @param operation  A description of the operation for error messages.
  * @throws RangeError if the index is out of bounds.
  */
-function validateInsertIndex(
-  index: number,
-  pageCount: number,
-  operation: string,
-): void {
+function validateInsertIndex(index: number, pageCount: number, operation: string): void {
   if (!Number.isInteger(index) || index < 0 || index > pageCount) {
-    throw new RangeError(
-      `${operation}: index ${index} out of range [0, ${pageCount}]`,
-    );
+    throw new RangeError(`${operation}: index ${index} out of range [0, ${pageCount}]`);
   }
 }
 
@@ -87,9 +75,7 @@ function validateInsertIndex(
  */
 function validateRotation(angle: number): void {
   if (angle % 90 !== 0) {
-    throw new Error(
-      `rotatePage: angle must be a multiple of 90, got ${angle}`,
-    );
+    throw new Error(`rotatePage: angle must be a multiple of 90, got ${angle}`);
   }
 }
 
@@ -137,11 +123,7 @@ export interface CropBox {
  * const newPage = insertPage(doc, 0, PageSizes.Letter); // insert at front
  * ```
  */
-export function insertPage(
-  doc: PdfDocument,
-  index: number,
-  size?: PageSize,
-): PdfPage {
+export function insertPage(doc: PdfDocument, index: number, size?: PageSize): PdfPage {
   const pages = doc.getInternalPages();
   const registry = doc.getRegistry();
 
@@ -194,11 +176,7 @@ export function removePage(doc: PdfDocument, index: number): void {
  * movePage(doc, 2, 0); // Move page 2 to the front
  * ```
  */
-export function movePage(
-  doc: PdfDocument,
-  fromIndex: number,
-  toIndex: number,
-): void {
+export function movePage(doc: PdfDocument, fromIndex: number, toIndex: number): void {
   const pages = doc.getInternalPages();
   validateIndex(fromIndex, pages.length, 'movePage (fromIndex)');
 
@@ -209,9 +187,7 @@ export function movePage(
   if (toIndex < 0 || toIndex > pages.length) {
     // Re-insert the page to restore state before throwing
     pages.splice(fromIndex, 0, page!);
-    throw new RangeError(
-      `movePage (toIndex): index ${toIndex} out of range [0, ${pages.length}]`,
-    );
+    throw new RangeError(`movePage (toIndex): index ${toIndex} out of range [0, ${pages.length}]`);
   }
 
   // Insert at new position
@@ -237,11 +213,7 @@ export function movePage(
  * rotatePage(doc, 0, 90); // Rotate first page 90 degrees clockwise
  * ```
  */
-export function rotatePage(
-  doc: PdfDocument,
-  index: number,
-  angle: number,
-): void {
+export function rotatePage(doc: PdfDocument, index: number, angle: number): void {
   const pages = doc.getInternalPages();
   validateIndex(index, pages.length, 'rotatePage');
   validateRotation(angle);
@@ -250,7 +222,7 @@ export function rotatePage(
 
   // Normalize the angle to 0, 90, 180, 270
   const currentRotation = page.getRotation?.() ?? 0;
-  const newRotation = ((currentRotation + angle) % 360 + 360) % 360;
+  const newRotation = (((currentRotation + angle) % 360) + 360) % 360;
 
   page.setRotation(newRotation);
 }
@@ -271,11 +243,7 @@ export function rotatePage(
  * cropPage(doc, 0, { x: 50, y: 50, width: 495, height: 742 });
  * ```
  */
-export function cropPage(
-  doc: PdfDocument,
-  index: number,
-  cropBox: CropBox,
-): void {
+export function cropPage(doc: PdfDocument, index: number, cropBox: CropBox): void {
   const pages = doc.getInternalPages();
   validateIndex(index, pages.length, 'cropPage');
 
@@ -294,10 +262,7 @@ export function cropPage(
  * @param index  Zero-based page index.
  * @returns      A `{ width, height }` object in PDF points.
  */
-export function getPageSize(
-  doc: PdfDocument,
-  index: number,
-): { width: number; height: number } {
+export function getPageSize(doc: PdfDocument, index: number): { width: number; height: number } {
   const pages = doc.getInternalPages();
   validateIndex(index, pages.length, 'getPageSize');
   const page = pages[index]!;
@@ -315,11 +280,7 @@ export function getPageSize(
  * @param index  Zero-based page index.
  * @param size   New page size.
  */
-export function resizePage(
-  doc: PdfDocument,
-  index: number,
-  size: PageSize,
-): void {
+export function resizePage(doc: PdfDocument, index: number, size: PageSize): void {
   const pages = doc.getInternalPages();
   validateIndex(index, pages.length, 'resizePage');
 
@@ -360,7 +321,10 @@ export function removePages(doc: PdfDocument, indices: number[]): void {
   }
 
   // Deduplicate and sort descending to avoid index shifting during removal
-  const sorted = new Set(indices).values().toArray().sort((a, b) => b - a);
+  const sorted = new Set(indices)
+    .values()
+    .toArray()
+    .sort((a, b) => b - a);
   for (const index of sorted) {
     pages.splice(index, 1);
   }
@@ -377,7 +341,7 @@ export function rotateAllPages(doc: PdfDocument, angle: number): void {
   const pages = doc.getInternalPages();
   for (const page of pages) {
     const current = page.getRotation?.() ?? 0;
-    const newRotation = ((current + angle) % 360 + 360) % 360;
+    const newRotation = (((current + angle) % 360) + 360) % 360;
     page.setRotation(newRotation);
   }
 }

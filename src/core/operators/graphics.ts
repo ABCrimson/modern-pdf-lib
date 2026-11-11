@@ -75,12 +75,7 @@ export function curveTo(
  * Append a cubic Bezier curve where the first control point coincides
  * with the current point (`v`).
  */
-export function curveToInitial(
-  x2: number,
-  y2: number,
-  x3: number,
-  y3: number,
-): string {
+export function curveToInitial(x2: number, y2: number, x3: number, y3: number): string {
   return `${n(x2)} ${n(y2)} ${n(x3)} ${n(y3)} v\n`;
 }
 
@@ -88,12 +83,7 @@ export function curveToInitial(
  * Append a cubic Bezier curve where the second control point coincides
  * with the final point (`y`).
  */
-export function curveToFinal(
-  x1: number,
-  y1: number,
-  x3: number,
-  y3: number,
-): string {
+export function curveToFinal(x1: number, y1: number, x3: number, y3: number): string {
   return `${n(x1)} ${n(y1)} ${n(x3)} ${n(y3)} y\n`;
 }
 

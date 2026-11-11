@@ -513,10 +513,7 @@ describe('PdfDocument', () => {
     const doc = createPdf();
     doc.addPage();
     const bytes = await doc.save();
-    const arrayBuffer = bytes.buffer.slice(
-      bytes.byteOffset,
-      bytes.byteOffset + bytes.byteLength,
-    );
+    const arrayBuffer = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength);
     const loaded = await PdfDocument.load(arrayBuffer);
     expect(loaded.getPageCount()).toBe(1);
   });

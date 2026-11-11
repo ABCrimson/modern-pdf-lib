@@ -338,9 +338,9 @@ describe('computeFileEncryptionKey', () => {
     const userKey = computeUserPasswordHash('user', dict, fileId);
     dict.userKey = userKey;
 
-    await expect(
-      computeFileEncryptionKey('completely-wrong', dict, fileId),
-    ).rejects.toThrow('Incorrect password');
+    await expect(computeFileEncryptionKey('completely-wrong', dict, fileId)).rejects.toThrow(
+      'Incorrect password',
+    );
   });
 
   it('should work with empty user password', async () => {

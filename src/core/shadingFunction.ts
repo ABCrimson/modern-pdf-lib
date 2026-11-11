@@ -16,13 +16,7 @@
  * object and preview / rasterise the same definition without re-deriving it.
  */
 
-import {
-  PdfArray,
-  PdfDict,
-  PdfName,
-  PdfNumber,
-  type PdfObject,
-} from './pdfObjects.js';
+import { PdfArray, PdfDict, PdfName, PdfNumber, type PdfObject } from './pdfObjects.js';
 import { evaluateFunction, type PdfFunctionDef } from './pdfFunctions.js';
 
 // ---------------------------------------------------------------------------
@@ -42,9 +36,7 @@ export interface FunctionShadingOptions {
    * The `/Matrix` mapping the domain into the target (pattern/user) space,
    * as `[a b c d e f]`. Defaults to the identity matrix.
    */
-  readonly matrix?:
-    | readonly [number, number, number, number, number, number]
-    | undefined;
+  readonly matrix?: readonly [number, number, number, number, number, number] | undefined;
   /**
    * The shading colour space name (e.g. `DeviceRGB`, `DeviceGray`,
    * `DeviceCMYK`). Defaults to `DeviceRGB`.
@@ -65,14 +57,9 @@ export interface FunctionShadingOptions {
 const DEFAULT_DOMAIN: readonly [number, number, number, number] = [0, 1, 0, 1];
 
 /** Default `/Matrix` — the identity transform `[1 0 0 1 0 0]`. */
-const DEFAULT_MATRIX: readonly [
-  number,
-  number,
-  number,
-  number,
-  number,
-  number,
-] = [1, 0, 0, 1, 0, 0];
+const DEFAULT_MATRIX: readonly [number, number, number, number, number, number] = [
+  1, 0, 0, 1, 0, 0,
+];
 
 /** Default shading colour space name. */
 const DEFAULT_COLOR_SPACE = 'DeviceRGB';

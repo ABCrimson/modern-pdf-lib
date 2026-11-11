@@ -42,7 +42,7 @@ export class BrowserRuntimeAdapter implements RuntimeAdapter {
     return Promise.reject(
       new Error(
         'BrowserRuntimeAdapter.readFile: filesystem access is not available in the browser. ' +
-        'Use fetchBytes() with a URL, or pass a Uint8Array directly.',
+          'Use fetchBytes() with a URL, or pass a Uint8Array directly.',
       ),
     );
   }
@@ -57,7 +57,7 @@ export class BrowserRuntimeAdapter implements RuntimeAdapter {
     return Promise.reject(
       new Error(
         'BrowserRuntimeAdapter.writeFile: filesystem access is not available in the browser. ' +
-        'To save a file, create a Blob URL and trigger a download via an <a> element.',
+          'To save a file, create a Blob URL and trigger a download via an <a> element.',
       ),
     );
   }

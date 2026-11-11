@@ -8,7 +8,10 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { generateSrgbIccProfile, SRGB_ICC_PROFILE } from '../../../src/compliance/srgbIccProfile.js';
+import {
+  generateSrgbIccProfile,
+  SRGB_ICC_PROFILE,
+} from '../../../src/compliance/srgbIccProfile.js';
 import { buildOutputIntent } from '../../../src/compliance/outputIntent.js';
 import type { OutputIntentOptions } from '../../../src/compliance/outputIntent.js';
 import {
@@ -87,7 +90,7 @@ describe('generateSrgbIccProfile', () => {
 
   it('has profile version 2.1.0 at offset 8', () => {
     const profile = generateSrgbIccProfile();
-    expect(profile[8]).toBe(2);   // major version
+    expect(profile[8]).toBe(2); // major version
     expect(profile[9]).toBe(0x10); // minor version 1.0
   });
 
