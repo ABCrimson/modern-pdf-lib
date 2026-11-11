@@ -6,8 +6,9 @@
  *
  * Key complexity: When copying pages, all referenced resources (fonts,
  * images, ExtGState, etc.) must be deeply cloned and re-registered in
- * the target document's object registry. Content hashing is used to
- * deduplicate identical resources.
+ * the target document's object registry. Within one copy call, a stream
+ * reuses an earlier copy only when its bytes and dictionary compare equal
+ * to that copy's source; otherwise it is copied again.
  *
  * @packageDocumentation
  */
@@ -28,15 +29,16 @@ import { PdfPage } from './pdfPage.js';
 import { PdfDocument, createPdf } from './pdfDocument.js';
 
 // ---------------------------------------------------------------------------
-// Content hashing for deduplication
+// Bucket hashing for stream deduplication
 // ---------------------------------------------------------------------------
 
 /**
- * Compute a simple hash of a Uint8Array for deduplication purposes.
+ * Compute a simple hash of a Uint8Array for use as a bucket key.
  *
- * Uses FNV-1a (32-bit) which is fast and produces good distribution for
- * deduplication. This is NOT cryptographic — it's used only to detect
- * likely-identical resource data.
+ * Uses FNV-1a (32-bit), which is fast but NOT cryptographic and not
+ * collision resistant. It is used only as a bucket key: two streams are
+ * treated as identical only after their bytes and dictionaries compare
+ * equal (see {@link remapRef}).
  *
  * @param data  The bytes to hash.
  * @returns     A hex string hash.
@@ -59,19 +61,110 @@ function hashBytes(data: Uint8Array): string {
  * Tracks the mapping of source object references to target references
  * during a cross-document copy operation.
  *
- * Also tracks content hashes to deduplicate identical resources.
+ * Also remembers copied streams so that a later stream of the same source
+ * whose bytes and dictionary compare equal can reuse the earlier copy. A context is
+ * bound to one source registry: refs inside compared dictionaries are
+ * matched by object number, so a context must never be shared across
+ * source documents.
  */
 class CopyContext {
   /** Maps source object number -> target PdfRef. */
   readonly refMap = new Map<number, PdfRef>();
 
-  /** Maps content hash -> target PdfRef (for deduplication). */
-  readonly hashMap = new Map<string, PdfRef>();
+  /**
+   * Streams already copied, bucketed by `length:hash` of their raw data.
+   * A bucket entry is reused only when the bytes and the dictionary of the
+   * source stream are equal (see {@link remapRef}); the hash only narrows
+   * the search.
+   */
+  readonly streamBuckets = new Map<
+    string,
+    { readonly ref: PdfRef; readonly source: PdfStream }[]
+  >();
 
   constructor(
     readonly sourceRegistry: PdfObjectRegistry,
     readonly targetRegistry: PdfObjectRegistry,
   ) {}
+}
+
+/** Byte-wise equality of two buffers. */
+function bytesEqual(a: Uint8Array, b: Uint8Array): boolean {
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) {
+    if (a[i] !== b[i]) return false;
+  }
+  return true;
+}
+
+/**
+ * Most candidate streams kept per bucket. Once a bucket is full, a later
+ * stream with the same key is still compared against the kept candidates
+ * but is not added to them, so a lookup compares at most this many streams;
+ * the only cost is a missed deduplication.
+ */
+const MAX_BUCKET_CANDIDATES = 16;
+
+/** Deepest nesting compared before two values are treated as unequal. */
+const MAX_COMPARE_DEPTH = 32;
+
+/**
+ * Structural equality of two source-document values. Dict key order is
+ * ignored; refs compare by object and generation number without being
+ * resolved. Anything uncertain compares unequal, which only costs a
+ * missed deduplication.
+ */
+function pdfValuesEqual(a: PdfObject, b: PdfObject, depth: number): boolean {
+  if (depth > MAX_COMPARE_DEPTH || a.kind !== b.kind) return false;
+  switch (a.kind) {
+    case 'null':
+      return true;
+    case 'bool':
+    case 'number':
+      return a.value === (b as typeof a).value;
+    case 'name':
+      return a.value === (b as PdfName).value;
+    case 'string':
+      return a.value === (b as PdfString).value && a.hex === (b as PdfString).hex;
+    case 'ref':
+      return (
+        a.objectNumber === (b as PdfRef).objectNumber &&
+        a.generationNumber === (b as PdfRef).generationNumber
+      );
+    case 'array': {
+      const items = (b as PdfArray).items;
+      return (
+        a.items.length === items.length &&
+        a.items.every((item, i) => {
+          const other = items[i];
+          return other !== undefined && pdfValuesEqual(item, other, depth + 1);
+        })
+      );
+    }
+    case 'dict':
+      return dictsEqual(a, b as PdfDict, depth, false);
+    default:
+      // A direct stream is never valid PDF; never treat it as equal.
+      return false;
+  }
+}
+
+/** Equality of two dictionaries, optionally ignoring the top-level `/Length`. */
+function dictsEqual(a: PdfDict, b: PdfDict, depth: number, skipLength: boolean): boolean {
+  const sizeA = skipLength && a.has('/Length') ? a.size - 1 : a.size;
+  const sizeB = skipLength && b.has('/Length') ? b.size - 1 : b.size;
+  if (sizeA !== sizeB) return false;
+  for (const [key, value] of a) {
+    if (skipLength && key === '/Length') continue;
+    const other = b.get(key);
+    if (other === undefined || !pdfValuesEqual(value, other, depth + 1)) return false;
+  }
+  return true;
+}
+
+/** Equality of two stream dictionaries, ignoring the derived `/Length`. */
+function streamDictsEqual(a: PdfDict, b: PdfDict): boolean {
+  return dictsEqual(a, b, 0, true);
 }
 
 // ---------------------------------------------------------------------------
@@ -82,9 +175,9 @@ class CopyContext {
  * Deep-clone a PdfObject, remapping all PdfRef references from the source
  * document to the target document.
  *
- * For PdfStream objects, the stream data is also cloned. Content hashing
- * is used to deduplicate identical streams (e.g., the same font file
- * embedded in multiple source documents).
+ * For PdfStream objects, the stream data is also cloned. A stream reached
+ * through an indirect reference reuses an earlier copy (in remapRef) only
+ * when its bytes and dictionary compare equal to that copy's source.
  *
  * @param obj      The source PdfObject to clone.
  * @param context  The copy context with reference mappings.
@@ -176,15 +269,23 @@ function remapRef(sourceRef: PdfRef, context: CopyContext): PdfRef {
     return placeholderRef;
   }
 
-  // For streams, try deduplication via content hash
-  let streamHash: string | undefined;
+  // For streams, reuse an earlier copy only when bytes and dictionary match
+  let bucket: { readonly ref: PdfRef; readonly source: PdfStream }[] | undefined;
   if (sourceObj.kind === 'stream') {
-    const stream = sourceObj as PdfStream;
-    streamHash = hashBytes(stream.data);
-    const dedup = context.hashMap.get(streamHash);
-    if (dedup) {
-      context.refMap.set(sourceRef.objectNumber, dedup);
-      return dedup;
+    const key = `${sourceObj.data.length}:${hashBytes(sourceObj.data)}`;
+    bucket = context.streamBuckets.get(key);
+    if (bucket === undefined) {
+      bucket = [];
+      context.streamBuckets.set(key, bucket);
+    }
+    const match = bucket.find(
+      (c) =>
+        streamDictsEqual(c.source.dict, sourceObj.dict) &&
+        bytesEqual(c.source.data, sourceObj.data),
+    );
+    if (match) {
+      context.refMap.set(sourceRef.objectNumber, match.ref);
+      return match.ref;
     }
   }
 
@@ -198,9 +299,9 @@ function remapRef(sourceRef: PdfRef, context: CopyContext): PdfRef {
   // Register in the target
   context.targetRegistry.assign(targetRef, clonedObj);
 
-  // Record hash for streams (reuse hash computed above)
-  if (streamHash !== undefined) {
-    context.hashMap.set(streamHash, targetRef);
+  // Remember this stream as a candidate for later identical streams
+  if (bucket !== undefined && bucket.length < MAX_BUCKET_CANDIDATES) {
+    bucket.push({ ref: targetRef, source: sourceObj as PdfStream });
   }
 
   return targetRef;
@@ -213,9 +314,11 @@ function remapRef(sourceRef: PdfRef, context: CopyContext): PdfRef {
 /**
  * Copy pages from a source document to a target document.
  *
- * This is the core implementation used by both `PdfDocument.copyPages()`
- * and `mergePdfs()`. It deeply clones all page content and referenced
- * resources, deduplicating identical resources via content hashing.
+ * This is the core implementation used by `copyPages()`,
+ * `PdfDocument.copyPages()`, `mergePdfs()` and `splitPdf()`. It deeply
+ * clones all page content and referenced resources; a stream reuses an
+ * earlier copy only when its bytes and dictionary compare equal to that
+ * copy's source.
  *
  * @param sourceDoc   The source document.
  * @param targetDoc   The target document.
@@ -316,9 +419,6 @@ export function copyPagesToTarget(
       for (const [gsName, gsRef] of gsDict as PdfDict) {
         if (gsRef.kind === 'ref') {
           const mappedRef = remapRef(gsRef as PdfRef, context);
-          // ExtGState registration on PdfPage is via extGStates map
-          // We use registerXObject as a workaround — but actually we need
-          // a proper registerExtGState method. For now, use the internal approach.
           newPage.registerExtGState(gsName.startsWith('/') ? gsName.slice(1) : gsName, mappedRef);
         }
       }
@@ -357,9 +457,10 @@ export function copyPages(
 /**
  * Merge multiple PDF documents into a single document.
  *
- * Pages from each source document are appended in order. Resources
- * are deduplicated: if two source documents contain the same font file
- * (byte-identical), only one copy is kept in the merged output.
+ * Pages from each source document are appended in order. Within each
+ * source document, a stream reuses an earlier copy only when its bytes and
+ * dictionary compare equal to that copy's source; streams are not shared
+ * between source documents.
  *
  * @param documents  Array of PdfDocument objects to merge.
  * @returns          A new PdfDocument containing all pages.
