@@ -43,7 +43,7 @@ jobs:
           cache: true
           require-lockfile: true
 
-      - name: TypeScript type-check (root, cli, scripts and tests projects)
+      - name: TypeScript type-check (root, cli, scripts, tests and security-tests projects)
         run: pnpm run typecheck
 
       - name: Lint (oxlint + tsgolint, type-aware)
@@ -241,6 +241,24 @@ jobs:
         with:
           name: wasm-modules
           path: src/wasm
+
+      # The encryption-guard tests decrypt our output with qpdf and fail in CI when it
+      # is missing. The release is pinned by the SHA-256 of its x86_64 AppImage (taken
+      # from the release's qpdf-<version>.sha256 asset); QPDF_VERSION and QPDF_SHA256
+      # move together. The AppImage is extracted, so no FUSE is needed.
+      - name: Install qpdf
+        env:
+          GH_TOKEN: ${{ github.token }}
+          QPDF_VERSION: 12.4.2
+          QPDF_SHA256: 907b5e86f289c92b382a02869eb9c5709b2e5ef6fb2f6a7ae56514915d06d5dd
+        run: |
+          mkdir -p "$RUNNER_TEMP/qpdf" && cd "$RUNNER_TEMP/qpdf"
+          appimage="qpdf-$QPDF_VERSION-x86_64.AppImage"
+          gh release download "v$QPDF_VERSION" -R qpdf/qpdf -p "$appimage"
+          echo "$QPDF_SHA256  $appimage" | sha256sum -c -
+          chmod +x "$appimage"
+          "./$appimage" --appimage-extract > /dev/null
+          echo "QPDF=$RUNNER_TEMP/qpdf/squashfs-root/AppRun" >> "$GITHUB_ENV"
 
       # Memory policy (pool, workers, heap) lives in vitest.config.ts; no NODE_OPTIONS here.
       - name: Run unit tests
