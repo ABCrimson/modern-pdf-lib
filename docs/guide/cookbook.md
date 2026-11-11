@@ -538,7 +538,7 @@ await doc.encrypt({
     contentAccessibility: true,
     documentAssembly: false,
   },
-  algorithm: 'aes-256',
+  algorithm: 'aes-128',
 });
 
 const bytes = await doc.save();
@@ -548,6 +548,9 @@ console.log('Encrypted PDF saved');
 
 > [!NOTE]
 > The `userPassword` is required to open the document. The `ownerPassword` grants full access, including the ability to change permissions. If you set `userPassword` to an empty string `''`, the document opens without a password prompt but still enforces the specified permissions.
+
+> [!NOTE]
+> Use `save()` for an encrypted document. `saveAsStream()`, a save with `objectStreamThreshold` other than `Infinity` and `saveDocumentIncremental()` throw `UnsupportedEncryptionError` (code `unsupported-encryption-path`), and so do `signPdf()` and the other functions that append an incremental update to an encrypted file. `isEncrypted()` is `true` only after `encrypt()` was called on the document in this session; a document loaded from an encrypted file reports `false`, and `save()` writes such a document without encryption. Earlier releases wrote `saveAsStream()` output of an encrypted document without encryption, packed objects unencrypted when `objectStreamThreshold` was set, appended incremental updates and signatures to an encrypted file without encryption, and encrypted already-encrypted content on a second `save()`. See the [security advisories published with 0.40.5](https://github.com/ABCrimson/modern-pdf-lib/security/advisories).
 
 Available permission flags:
 
@@ -631,7 +634,7 @@ console.log('Signed PDF saved to signed-contract.pdf');
 You can verify existing signatures on a PDF:
 
 ```ts
-import { loadPdf, verifySignatures } from 'modern-pdf-lib';
+import { verifySignatures } from 'modern-pdf-lib';
 import { readFile } from 'node:fs/promises';
 
 const pdfBytes = new Uint8Array(await readFile('signed-contract.pdf'));
@@ -640,7 +643,11 @@ const results = await verifySignatures(pdfBytes);
 for (const result of results) {
   console.log(`Field: ${result.fieldName}`);
   console.log(`  Integrity: ${result.integrityValid ? 'VALID' : 'INVALID'}`);
+  console.log(`  Covers whole file: ${result.coversWholeDocument}`);
+  console.log(`  Valid:     ${result.valid}`);
   console.log(`  Signer:    ${result.signedBy ?? 'unknown'}`);
-  console.log(`  Date:      ${result.signingDate ?? 'unknown'}`);
+  console.log(`  Claimed signing date: ${result.signingDate ?? 'unknown'}`);
 }
 ```
+
+`valid` is true only when the digest matches, the signature verifies and the ByteRange covers the whole file except `/Contents` (`coversWholeDocument`). `signingDate` is the time the signer claims; no timestamp authority attests it. Trust in the signer is a separate check: see the [verification guide](./verification.md).

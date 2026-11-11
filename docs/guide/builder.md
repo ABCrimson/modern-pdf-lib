@@ -201,6 +201,8 @@ const bytes = await PdfDocumentBuilder.create()
   .save();
 ```
 
+The builder applies encryption in `save()`. Saving an encrypted document with `objectStreamThreshold` set to any value other than `Infinity` throws `UnsupportedEncryptionError` (code `unsupported-encryption-path`); leave the option out. Each save encrypts a private copy of the document's objects, so saving the same document again does not encrypt already-encrypted content.
+
 ---
 
 ## Page Labels and Bookmarks

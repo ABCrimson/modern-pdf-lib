@@ -64,8 +64,8 @@ Unit Tests jobs; CI also runs the WASM build, Pack Check, integration, E2E,
 benchmark and bundle-size jobs, and the reporting-only Rust per-crate job.
 
 ```bash
-pnpm run typecheck   # tsc over the root, cli, scripts and tests projects
-pnpm run lint        # oxlint + tsgolint, type-aware, --max-warnings=1201
+pnpm run typecheck   # tsc over the root, cli, scripts, tests and security-tests projects
+pnpm run lint        # oxlint + tsgolint, type-aware, --max-warnings=1189
 pnpm test            # vitest run — the full suite
 pnpm run build       # tsdown + IIFE bundle + dist smoke test
 ```
@@ -92,9 +92,12 @@ Run each as `pnpm run <name>`.
 | `test:e2e` | Playwright browser E2E (`tests/e2e`) |
 | `test:bench` | `vitest bench` over the benchmark files |
 | `bench` | Benchmark suite via the tinybench harness |
-| `lint` / `lint:fix` | oxlint, type-aware; `lint` fails above 1,201 warnings |
+| `lint` / `lint:fix` | oxlint, type-aware; `lint` fails above 1,189 warnings |
 | `format` / `format:check` | oxfmt over `src`, `tests` and `scripts` |
-| `typecheck` | `tsc` over the root, `tsconfig.cli.json`, `tsconfig.scripts.json` and `tsconfig.tests.json` projects |
+| `typecheck` | `tsc` over the root, `tsconfig.cli.json`, `tsconfig.scripts.json`, `tsconfig.tests.json` and `tsconfig.security-tests.json` projects |
+| `typecheck:security-tests` | `tsc` over `tsconfig.security-tests.json` only (the 0.40.5 security test files and `tests/helpers`) |
+| `fixtures:legacy` | Rebuild `tests/fixtures/legacy-0.40.3/` from the published 0.40.3 tarball |
+| `fixtures:legacy:check` | Check that those fixtures regenerate byte for byte |
 | `dev` | Vite dev server |
 | `docs:dev` / `docs:build` | VitePress site |
 | `docs:api` | Regenerate the TypeDoc API reference + VitePress sanitizer |
@@ -159,8 +162,8 @@ rule is named so you know where it comes from.
 > annotation — TypeScript will not infer it across the declaration boundary.
 > `pnpm run typecheck` catches this.
 
-The `typescript/no-implied-eval` and `no-new-func` rules are off for the Acrobat
-form-script evaluator, the streaming parser and `src/runtime/*.ts`, and
+The `typescript/no-implied-eval` and `no-new-func` rules are off for the
+streaming parser and `src/runtime/*.ts`, and
 `no-console` is off for `src/cli/**` and the benchmark harness, via `overrides`
 in `.oxlintrc.json`.
 `typescript/no-non-null-assertion` is a warning that is off in `tests/**` and in
@@ -179,19 +182,27 @@ change and passes after, then run the full suite.
 
 | Directory | Contents | Count |
 |---|---|---|
-| `tests/unit/` | Per-module unit tests mirroring `src/` | 273 files |
+| `tests/unit/` | Per-module unit tests mirroring `src/` | 277 files |
 | `tests/layout/` | Table, header/footer, and text-layout behaviour | 11 files |
 | `tests/barcode/` | Symbology encoders (QR, Code 128, EAN, PDF417, …) | 10 files |
 | `tests/image/` | Image decoders and embedding | 9 files |
 | `tests/browser/` | Browser-surface APIs under a simulated DOM | 8 files |
 | `tests/compliance/` | PDF/A, PDF/X, PDF/UA, e-invoicing conformance | 8 files |
 | `tests/integration/` | Cross-module end-to-end document flows | 4 files |
+| `tests/oracle/` | Independent oracles: pdf.js and a raw byte search for redaction, and the read-old gate over the 0.40.3 fixtures | 2 files |
+| `tests/adversarial/` | Form-script escape probes against `FormScriptSandbox` | 1 file |
+| `tests/helpers/` | Shared fixtures for the signature-trust tests (no tests of its own) | — |
 | `tests/e2e/` | Playwright specs (`*.spec.ts`) driven through Vite | 1 spec |
 | `tests/benchmarks/` | Benchmark suites (`pnpm run bench`, `pnpm run test:bench`) | — |
-| `tests/fixtures/` | Shared sample PDFs and generated inputs | — |
+| `tests/fixtures/` | Shared sample PDFs and generated inputs; `legacy-0.40.3/` holds eight PDFs written by the published 0.40.3 and a `manifest.json` of their hashes (generator: `scripts/legacy-0.40.3/generate.ts`; regenerate with `pnpm run fixtures:legacy`, never edit by hand) | — |
 
 Naming: `*.test.ts` for Vitest, `*.spec.ts` for Playwright. Place new tests in
 the directory that matches the area under test, mirroring the `src/` layout.
+
+The encryption-guard tests (`tests/unit/core/encryption-guard.test.ts`) also
+decrypt the library's output with qpdf 12.4.2 when they find it (the `QPDF`
+environment variable, then `PATH`). Without qpdf those cases skip with a reason
+locally, and they fail when `CI` is set.
 
 ---
 
@@ -227,11 +238,11 @@ waits on WASM, so style and type failures surface first.
 
 | Job | Gate |
 |---|---|
-| Lint & Type-check | `pnpm run typecheck` (four projects) and `pnpm run lint` (type-aware oxlint, 0 errors, at most 1,201 warnings) |
+| Lint & Type-check | `pnpm run typecheck` (five projects) and `pnpm run lint` (type-aware oxlint, 0 errors, at most 1,189 warnings) |
 | Build WASM | All six crates compile for `wasm32-unknown-unknown` |
 | Build TypeScript | `pnpm run build` succeeds and `dist/` imports as ESM **and** CJS |
 | Pack Check | `pnpm run check:pack`: the tarball lists six WASM builds and the IIFE bundle and passes publint and attw |
-| Unit Tests | Full Vitest run with v8 coverage; Node 26 gates, the Node 24 and `devEngines` runtime legs are experimental and do not fail the workflow |
+| Unit Tests | Installs qpdf 12.4.2 (checked against the SHA-256 written in `ci.yml`, exported as `QPDF`), then a full Vitest run with v8 coverage; Node 26 gates, the Node 24 and `devEngines` runtime legs are experimental and do not fail the workflow |
 | Integration Tests | `tests/integration` green |
 | E2E Tests | Playwright specs green in a real browser |
 | Benchmarks | The benchmark harness runs without error |
@@ -287,8 +298,8 @@ Version numbers follow the project's own scheme — see [VERSIONING.md](./VERSIO
 | `src/parser/` | PDF parser, streaming parser, image decoders (CCITT, JBIG2, JPEG 2000) |
 | `src/assets/` | Font, image, SVG, Markdown, and virtual-DOM embedding |
 | `src/render/` | Content-stream interpreter, display list, rasterizer, Canvas adapter, OCR, diff |
-| `src/annotation/` | Annotation objects, appearance generation, redaction application |
-| `src/form/` | AcroForm fields, appearance streams, Acrobat JavaScript evaluator, JSON-Schema forms |
+| `src/annotation/` | Annotation objects, appearance generation, `/Redact` annotations (applying them throws `RedactionIncompleteError`, code `redaction-incomplete`, in this release) |
+| `src/form/` | AcroForm fields, appearance streams, an arithmetic evaluator for calculation scripts (not a JavaScript engine), `FormScriptSandbox` (its `execute()` throws `ScriptExecutionDisabledError`, code `script-execution-disabled`), JSON-Schema forms |
 | `src/signature/` | PKCS#7/CAdES signing, cert path building, CRL/OCSP, LTV, timestamping |
 | `src/crypto/` | RC4 and AES, key derivation, permission flags, MD5/SHA-256 |
 | `src/security/` | Threat scanner, sanitizer, redaction verifier, encryption inspector |

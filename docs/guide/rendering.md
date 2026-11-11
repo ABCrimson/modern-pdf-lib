@@ -5,7 +5,8 @@ stack: a content-stream **interpreter** produces a resolution-independent
 display list, which a pure-JS **rasterizer** turns into RGBA/PNG, or a **Canvas
 adapter** paints onto a 2D context (with native, pixel-accurate text in the
 browser). On top sit thumbnails, image/font extraction, visual diffing, an OCR
-overlay hook, and true content-removal redaction.
+overlay hook, and `redactRegions`, which is not available in this release (it
+throws `RedactionIncompleteError`, code `redaction-incomplete`).
 
 ## What's in the box
 
@@ -19,7 +20,7 @@ overlay hook, and true content-removal redaction.
 | Extract embedded images | `extractPageImages` | Everywhere |
 | Extract embedded fonts | `extractFonts` | Everywhere |
 | Searchable OCR text layer | `applyOcr` (+ your `OcrEngine`) | Everywhere |
-| Content-removal redaction | `redactRegions` | Everywhere |
+| Content-removal redaction (not available in this release: throws `RedactionIncompleteError`, code `redaction-incomplete`) | `redactRegions` | Everywhere |
 | Bounded-memory tiling | `computeTileGrid`, `renderPageTile`, `RenderCache` | Everywhere |
 
 ## Render a page to a PNG
@@ -139,15 +140,28 @@ const out = await doc.save(); // the page is now searchable
 
 ## Redaction by content removal
 
-Unlike a black box drawn on top, `redactRegions` re-emits the content stream with
-the underlying text/image operators in the rect **removed** — the data is gone:
+Not available in this release. `redactRegions(page, rects)` throws
+`RedactionIncompleteError` (code `redaction-incomplete`, reason
+`redaction-unavailable`) and leaves the page unchanged: nothing is drawn or
+removed. A later release adds redaction by removal.
+[See the security advisories published with 0.40.5](https://github.com/ABCrimson/modern-pdf-lib/security/advisories).
 
 ```ts
-import { redactRegions } from 'modern-pdf-lib';
+import { redactRegions, RedactionIncompleteError } from 'modern-pdf-lib';
 
-const { removedText, removedImages } = redactRegions(page, [{ x: 0, y: 90, width: 200, height: 30 }]);
-// extracted text from the saved PDF no longer contains the redacted runs
+try {
+  redactRegions(page, [{ x: 0, y: 90, width: 200, height: 30 }]);
+} catch (err) {
+  if (err instanceof RedactionIncompleteError) {
+    console.warn(err.code, err.reason); // 'redaction-incomplete' 'redaction-unavailable'
+  } else {
+    throw err;
+  }
+}
 ```
+
+To check a file for text that is still extractable under a region, use
+[`verifyRedactions`](./security.md#verifying-redactions).
 
 ## Tiling huge pages
 

@@ -153,7 +153,8 @@ fs.writeFileSync('output.pdf', pdfBytes);
 const bytes = await pdf.save();
 await writeFile('output.pdf', bytes);
 
-// modern-pdf-lib — or stream it
+// modern-pdf-lib — or stream it (unencrypted documents only; an encrypted
+// document throws UnsupportedEncryptionError, use save())
 const stream = pdf.saveAsStream();
 await stream.pipeTo(Writable.toWeb(createWriteStream('output.pdf')));
 ```

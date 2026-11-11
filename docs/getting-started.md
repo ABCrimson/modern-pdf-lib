@@ -102,6 +102,8 @@ const fileStream = createWriteStream('output.pdf');
 await stream.pipeTo(Writable.toWeb(fileStream));
 ```
 
+`saveAsStream()` does not encrypt. For a document with `encrypt()` configured it throws `UnsupportedEncryptionError` (code `unsupported-encryption-path`); use `save()` instead.
+
 ## Running in the Browser
 
 In a browser context you can trigger a download or display the PDF in an iframe:

@@ -3,14 +3,18 @@
 Beyond creating and signing PDFs, modern-pdf-lib ships a hardening layer for
 **auditing** untrusted documents: a static threat scanner, a content sanitizer,
 a redaction-leak verifier, and an encryption/permission inspector. These tools
-inspect or clean an existing PDF — active redaction itself lives in the
-[core redaction API](#see-also).
+inspect or clean an existing PDF. Applying redactions is not available in this
+release: the apply functions throw `RedactionIncompleteError` (code
+`redaction-incomplete`, reason `redaction-unavailable`) and change nothing (see
+[Redaction](#see-also)). Earlier releases could report a redaction as applied
+while text stayed in the file.
+[See the security advisories published with 0.40.5](https://github.com/ABCrimson/modern-pdf-lib/security/advisories).
 
 | Tool | Answers | Mutates the PDF? |
 |---|---|---|
 | [`scanPdfThreats`](#threat-scanning) | What dangerous active content is in here? | No — read-only report |
 | [`sanitizePdf`](#sanitizing-active-hidden-content) | Give me a copy with that content removed. | Returns a **new** document |
-| [`verifyRedactions`](#verifying-redactions) | Did anything survive my redactions? | No — read-only report |
+| [`verifyRedactions`](#verifying-redactions) | Is text still extractable in these regions? (It reports what it finds; it cannot prove a region empty.) | No — read-only report |
 | [`inspectEncryption`](#inspecting-encryption-permissions) | How is this protected, and what does it permit? | No — never decrypts content |
 
 > [!TIP]
@@ -99,35 +103,51 @@ common failure is a black rectangle drawn over text that remains extractable.
 `verifyRedactions` extracts text positions and reports any text whose bounding
 box intersects a redaction region — a **leak**.
 
+It reads only the page content stream: it does not follow Form XObjects,
+patterns or annotation appearances. The box of each text run is an estimate
+(0.5 em per character, height equal to the font size), and any overlap counts
+as a leak.
+
 ```ts
 import { verifyRedactions } from 'modern-pdf-lib';
 
 const report = await verifyRedactions(pdfBytes, [
   { page: 0, x: 72, y: 700, width: 200, height: 14 },
 ]);
-if (!report.clean) {
-  for (const leak of report.leaks) {
-    console.warn(`Leak on page ${leak.page}: "${leak.text}" at (${leak.x}, ${leak.y})`);
-  }
+for (const leak of report.leaks) {
+  console.warn(`Leak on page ${leak.page}: "${leak.text}" at (${leak.x}, ${leak.y})`);
 }
+console.warn(report.warnings[0]); // what the verifier cannot see
 ```
 
 ```ts
 interface RedactionRegion { page: number; x: number; y: number; width: number; height: number; }
 interface RedactionLeak { page: number; text: string; x: number; y: number; }
-interface RedactionVerificationReport { leaks: RedactionLeak[]; clean: boolean; regionsChecked: number; }
+interface RedactionVerificationReport {
+  leaks: RedactionLeak[];
+  clean: boolean;          // always false
+  regionsChecked: number;
+  warnings: string[];      // always one sentence on what the verifier cannot see
+}
 ```
 
 Coordinates are **PDF user space — origin bottom-left, y-up, units in points**,
 matching the rest of the library (a region's `(x, y)` is its lower-left corner).
-`clean === (leaks.length === 0)`.
+
+`clean` is always `false`: the verifier can find text in a region but cannot
+prove a region free of text (it does not follow Form XObjects, patterns or
+annotation appearances), and `warnings` always holds one sentence saying so. An
+empty `leaks` means only that no text was found.
+
+`verifyRedactions` throws a `TypeError` when `regions` is missing or empty, and
+a `RangeError` when a region names a page that does not exist.
 
 ::: tip `regions` is required
 You must pass the regions to check. Auto-detecting redaction rectangles from a
 loaded PDF is not reliable (a black fill is indistinguishable from legitimate
 graphics, and parsed `/Redact` annotations are not exposed through a stable
-accessor), so the verifier requires explicit regions rather than guessing. Use
-the same rectangles you passed to the redaction step.
+accessor), so the verifier requires explicit regions rather than guessing. Pass
+the rectangles that were meant to be redacted.
 :::
 
 ## Inspecting encryption & permissions
@@ -171,9 +191,23 @@ decrypts content (it only tests empty-password key derivation).
 
 ## See also
 
-- **Active redaction** — `markForRedaction` / `applyRedactions` burn redactions
-  into the page content (verify the result with `verifyRedactions` above).
-- **Encryption** — apply password or AES-256 protection when saving via the
-  `EncryptOptions` passed to `save()`; inspect an existing document with
-  `inspectEncryption` above.
+- **Redaction marks** — `markForRedaction` records regions; `applyRedactions`
+  throws `RedactionIncompleteError` (code `redaction-incomplete`, reason
+  `redaction-unavailable`) in this release and changes nothing. So do
+  `applyRedaction`, `PdfDocument.applyRedactions()` and
+  [`redactRegions`](./rendering.md#redaction-by-content-removal). A later
+  release adds redaction by removal.
+- **Encryption** — apply password protection (RC4 or AES-128; AES-256 output is not yet readable by other PDF readers) with
+  `await doc.encrypt(options)`, then `save()`; for an encrypted document,
+  `saveAsStream()`, a save with an `objectStreamThreshold` other than
+  `Infinity` (the default) and `saveDocumentIncremental()` throw
+  `UnsupportedEncryptionError` (code `unsupported-encryption-path`). The
+  functions that sign or append an incremental update to PDF bytes
+  (`signPdf`, `prepareForSigning`, `addCounterSignature`, `embedLtvData`,
+  `saveIncremental`, `saveIncrementalWithSignaturePreservation`,
+  `optimizeIncrementalSave` and `appendIncrementalUpdate`) throw the same
+  error for an encrypted file,
+  because they do not encrypt what they append. `linearizePdf` throws it for an
+  encrypted file too, and `delinearizePdf` for a linearized file that has `/Encrypt`. `flattenTransparency`, `stripProhibitedFeatures`, `enforcePdfA`, `enforcePdfAFull` and `enforcePdfX` throw it for an encrypted file too. For the sixteen functions named here that take PDF bytes (all of them except `saveAsStream()`), a file counts as encrypted when its bytes contain the name `/Encrypt` anywhere, whatever follows it; a name written with `#` escapes, such as `/Encr#79pt`, counts, and `/EncryptMetadata` and `/Encrypt2` do not, except in `enforcePdfA`, `enforcePdfAFull` and `enforcePdfX`, which also refuse any file whose text contains `/Encrypt`, so `/EncryptMetadata` and `/Encrypt2` as well. An unencrypted file that holds the name `/Encrypt` anywhere outside a compressed stream, for example inside an uncompressed content stream or as text that looks like a name, is refused as well. Inspect an existing document
+  with `inspectEncryption` above.
 - **Signatures** — [digital signatures & PAdES](./signatures.md).

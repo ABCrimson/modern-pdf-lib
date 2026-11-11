@@ -97,7 +97,7 @@ await writeFile('document-pdfa.pdf', compliant);
 It does not set `/Lang` and does not rewrite an existing XMP packet. `enforcePdfAFull` runs the same steps after stripping prohibited features and flattening transparency (PDF/A-1) and returns the bytes with a validation report. When they add XMP metadata, both insert the new objects by splicing bytes into the file without rewriting the cross-reference table, so the `startxref` offset of the output no longer points at the cross-reference table.
 
 ::: warning Limitations
-`enforcePdfA` cannot fix all compliance issues automatically. It will **throw** if the document is encrypted or contains JavaScript. Use `stripProhibitedFeatures` first to remove those. Font embedding and structure tree creation require manual intervention.
+`enforcePdfA` cannot fix all compliance issues automatically. It throws `UnsupportedEncryptionError` (code `unsupported-encryption-path`) if the document is encrypted, and a plain `Error` if it contains JavaScript. Use `stripProhibitedFeatures` first to remove JavaScript; it does not remove encryption and throws the same `UnsupportedEncryptionError` for an encrypted file. Font embedding and structure tree creation require manual intervention.
 :::
 
 ---

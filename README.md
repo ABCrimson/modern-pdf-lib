@@ -14,8 +14,8 @@ Create, parse, fill, merge, sign, and manipulate PDF documents<br />in Node 26.4
 <br />
 
 [![npm version](https://img.shields.io/npm/v/modern-pdf-lib?style=flat-square&color=cb3837)](https://www.npmjs.com/package/modern-pdf-lib)
-[![createPdf bundle](https://img.shields.io/badge/createPdf_bundle-108_KiB_gzip-blue?style=flat-square)](#install)
-[![tests](https://img.shields.io/badge/tests-6%2C969_passing-brightgreen?style=flat-square)](https://github.com/ABCrimson/modern-pdf-lib/actions/workflows/ci.yml)
+[![createPdf bundle](https://img.shields.io/badge/createPdf_bundle-109_KiB_gzip-blue?style=flat-square)](#install)
+[![tests](https://img.shields.io/badge/tests-7%2C177_passing-brightgreen?style=flat-square)](https://github.com/ABCrimson/modern-pdf-lib/actions/workflows/ci.yml)
 [![TypeScript](https://img.shields.io/badge/TypeScript-7.1_dev-3178c6?style=flat-square&logo=typescript&logoColor=white)](./tsconfig.json)
 [![License: MIT](https://img.shields.io/badge/license-MIT-yellow?style=flat-square)](LICENSE)
 
@@ -53,9 +53,11 @@ page.drawText('Hello from modern-pdf-lib', {
 });
 
 const bytes = await doc.save();          // Uint8Array
-const stream = doc.saveAsStream();       // ReadableStream
+const stream = doc.saveAsStream();       // ReadableStream (not after encrypt())
 const blob = await doc.saveAsBlob();     // Blob (browsers)
 ```
+
+`saveAsStream()` throws `UnsupportedEncryptionError` (code `unsupported-encryption-path`) for a document with `encrypt()` configured; use `save()` for an encrypted document.
 
 ### CDN (no install)
 
@@ -78,7 +80,7 @@ Also available via:
 - **unpkg:** `https://unpkg.com/modern-pdf-lib/dist/browser.mjs`
 - **esm.sh:** `https://esm.sh/modern-pdf-lib`
 
-Pin a version in production, for example `modern-pdf-lib@0.40.4`.
+Pin a version in production, for example `modern-pdf-lib@0.40.5`.
 
 ### Script Tag (no modules)
 
@@ -129,7 +131,7 @@ For a plain `<script>` tag without `type="module"`, use the IIFE bundle, which e
 - Render pages to PNG / Canvas (any DPI)
 - Thumbnails & visual diff (pixel + SSIM)
 - Extract embedded images & fonts
-- OCR overlay & true content-removal redaction
+- OCR overlay; redaction marking (applying redactions throws `RedactionIncompleteError`, code `redaction-incomplete`, in this release)
 - Fill & flatten AcroForm fields
 - Merge, split, copy pages (pages copied, merged or split from a loaded PDF are written without their content; pages created in the same session copy correctly); incremental saves
 
@@ -139,17 +141,17 @@ For a plain `<script>` tag without `type="module"`, use the IIFE bundle, which e
 <td width="50%" valign="top">
 
 **Secure & Compliant**
-- AES-256 / RC4 encryption & decryption
-- Digital signatures (PKCS#7, visible/invisible, timestamps)
-- CRL/OCSP revocation checking & certificate chain validation
+- RC4 and AES-128 encryption on `save()`; AES-256 (R6) can be selected, but its output is not yet readable by other PDF readers (`saveAsStream()`, `objectStreamThreshold` and `saveDocumentIncremental()` throw `UnsupportedEncryptionError`, code `unsupported-encryption-path`, for an encrypted document, and the functions that sign or append an incremental update to PDF bytes throw it for an encrypted file; a document loaded from an encrypted file is mostly not decrypted)
+- Digital signatures (PKCS#7, visible/invisible, timestamps; `requestTimestamp` checks the response's hash and nonce against the request, but the token's signature and the TSA certificate are not verified)
+- OCSP revocation checking (an answer that cannot be authenticated reports `unknown`), CRL lookup (a CRL's signature is not verified), certificate chain validation against `trustedCerts` (with none listed, no chain is valid)
 - Incremental save with signature preservation
-- Multi-signature chains, MDP certification, LTV archival
+- Multi-signature chains, MDP certification, LTV archival (a signature followed by a later update, such as a second signature or LTV data added with `embedLtvData`, reports `valid: false` with `coversWholeDocument: false`, and `detectModifications` reports a later signature as an `unknown` violation)
 - Counter-signatures & field locking
 - PDF/A-1b through PDF/A-3u validation, PDF/A-4/4e/4f (output is not validated against veraPDF; `enforcePdfA` and `enforcePdfX` output has an invalid cross-reference offset)
 - PDF/X-6, PDF/VT, Factur-X / ZUGFeRD e-invoicing
 - Tagged PDF / PDF/UA-1 & PDF/UA-2 accessibility
 - Structure tree & marked content
-- Redaction with content removal & overlay
+- Redaction marks and `/Redact` annotations (applying them throws `RedactionIncompleteError`, code `redaction-incomplete`, in this release)
 - PDF/UA validation & auto-enforcement
 
 </td>
@@ -165,7 +167,7 @@ For a plain `<script>` tag without `type="module"`, use the IIFE bundle, which e
 - WebP embedding (lossless and alpha; lossy VP8 images decode to a flat grey placeholder)
 - TIFF image embedding (multi-page)
 - Image format auto-detection (PNG/JPEG/WebP/TIFF)
-- Form field JavaScript evaluation & sandboxing
+- Form field JavaScript is not evaluated (`createSandbox().execute()` throws `ScriptExecutionDisabledError`, code `script-execution-disabled`); scripts in a document run only in a viewer
 - Outlines / bookmarks
 - Optional content layers (OCGs)
 - File attachments & watermarks
@@ -213,15 +215,15 @@ For a plain `<script>` tag without `type="module"`, use the IIFE bundle, which e
 <td align="center">No</td></tr>
 
 <tr><td><strong>Encryption</strong></td>
-<td align="center">AES-256 + RC4</td>
+<td align="center">RC4 + AES-128 on <code>save()</code>; AES-256 (R6) output not yet readable by other PDF readers (streaming, object streams and incremental saves throw <code>UnsupportedEncryptionError</code>, code <code>unsupported-encryption-path</code>, for an encrypted document, and so does signing an encrypted file)</td>
 <td align="center">No</td></tr>
 
 <tr><td><strong>Digital signatures</strong></td>
-<td align="center">PKCS#7, timestamps, CRL/OCSP, LTV, MDP</td>
+<td align="center">PKCS#7, timestamps, CRL/OCSP, LTV, MDP (chain trust needs <code>trustedCerts</code>; timestamp signatures and CRLs are not authenticated)</td>
 <td align="center">No</td></tr>
 
 <tr><td><strong>Incremental save</strong></td>
-<td align="center">Signature-preserving, multi-sig chains</td>
+<td align="center">Signature-preserving, multi-sig chains (not for an encrypted file)</td>
 <td align="center">No</td></tr>
 
 <tr><td><strong>WebP images</strong></td>
@@ -237,7 +239,7 @@ For a plain `<script>` tag without `type="module"`, use the IIFE bundle, which e
 <td align="center">No</td></tr>
 
 <tr><td><strong>Form JavaScript</strong></td>
-<td align="center">Sandboxed evaluation</td>
+<td align="center">Not evaluated (<code>execute()</code> throws <code>ScriptExecutionDisabledError</code>, code <code>script-execution-disabled</code>)</td>
 <td align="center">No</td></tr>
 
 <tr><td><strong>Forms</strong></td>
@@ -265,7 +267,7 @@ For a plain `<script>` tag without `type="module"`, use the IIFE bundle, which e
 <td align="center">No</td></tr>
 
 <tr><td><strong>Streaming output</strong></td>
-<td align="center">ReadableStream</td>
+<td align="center">ReadableStream (not for encrypted documents)</td>
 <td align="center">No</td></tr>
 
 <tr><td><strong>Layers (OCG)</strong></td>
@@ -281,7 +283,7 @@ For a plain `<script>` tag without `type="module"`, use the IIFE bundle, which e
 <td align="center">No</td></tr>
 
 <tr><td><strong>Redaction</strong></td>
-<td align="center">Yes</td>
+<td align="center">Marking only</td>
 <td align="center">No</td></tr>
 
 <tr><td><strong>Linearization</strong></td>
@@ -362,7 +364,7 @@ const existing = await loadPdf(pdfBytes, { password: 'secret' });
 
 // Save
 const bytes = await doc.save();
-const stream = doc.saveAsStream();
+const stream = doc.saveAsStream(); // throws UnsupportedEncryptionError (code 'unsupported-encryption-path') after doc.encrypt()
 ```
 </details>
 
@@ -429,7 +431,7 @@ Pages copied, merged or split from a loaded PDF are written without their conten
 </details>
 
 <details>
-<summary><strong>Encryption</strong> &mdash; AES-256, RC4, permissions</summary>
+<summary><strong>Encryption</strong> &mdash; RC4, AES-128, permissions</summary>
 
 ```ts
 // Configure encryption with doc.encrypt(), then save().
@@ -440,13 +442,15 @@ await doc.encrypt({
 });
 const bytes = await doc.save();
 ```
+
+For an encrypted document, `saveAsStream()` throws and a save with `objectStreamThreshold` or `saveDocumentIncremental()` rejects with `UnsupportedEncryptionError` (code `unsupported-encryption-path`). The functions that append an incremental update to PDF bytes (`signPdf`, `prepareForSigning`, `addCounterSignature`, `embedLtvData`, `saveIncremental`, `saveIncrementalWithSignaturePreservation`, `optimizeIncrementalSave` and `appendIncrementalUpdate`) throw the same error for an encrypted file, because they would append unencrypted objects to an encrypted file. `linearizePdf` throws it for an encrypted file too, and `delinearizePdf` does for a linearized file that has `/Encrypt`: their output would have no `/Encrypt` entry. `flattenTransparency`, `stripProhibitedFeatures`, `enforcePdfA`, `enforcePdfAFull` and `enforcePdfX` throw it for an encrypted file too. For the sixteen functions named here that take PDF bytes (all of them except `saveAsStream()`), a file counts as encrypted when its bytes contain the name `/Encrypt` anywhere, whatever follows it; a name written with `#` escapes, such as `/Encr#79pt`, counts, and `/EncryptMetadata` and `/Encrypt2` do not, except in `enforcePdfA`, `enforcePdfAFull` and `enforcePdfX`, which also refuse any file whose text contains `/Encrypt`, so `/EncryptMetadata` and `/Encrypt2` as well. An unencrypted file that holds the name `/Encrypt` anywhere outside a compressed stream, for example inside an uncompressed content stream or as text that looks like a name, is refused as well. A document loaded from an encrypted file reports `isEncrypted()` as `false`: most of its content is not decrypted on load, and `save()` does not encrypt it.
 </details>
 
 <details>
 <summary><strong>Digital Signatures</strong></summary>
 
 ```ts
-import { signPdf, verifySignatures } from 'modern-pdf-lib';
+import { signPdf, verifySignatures, validateCertificateChain } from 'modern-pdf-lib';
 
 const signed = await signPdf(pdfBytes, 'Signature1', {
   certificate: certDer,
@@ -458,8 +462,19 @@ const signed = await signPdf(pdfBytes, 'Signature1', {
   },
 });
 
+// valid = digest + signature + the ByteRange covers the whole file (coversWholeDocument).
+// It does not say the signer is trusted.
 const results = await verifySignatures(signed);
+
+// Trust: validate the signer's chain (leaf first) against the roots you trust.
+// Without trustedCerts no chain is valid.
+const trust = await validateCertificateChain([certDer, rootDer], { trustedCerts: [rootDer] });
+console.log(results[0]?.valid, trust.valid);
 ```
+
+A signature followed by a later incremental update (a second signature, or LTV data added with `embedLtvData`) reports `valid: false` with `coversWholeDocument: false`; its `integrityValid` and `certificateValid` still report the digest and signature checks.
+
+`signPdf`, `addCounterSignature` and `embedLtvData` do not encrypt what they append: for an encrypted PDF they throw `UnsupportedEncryptionError` (code `unsupported-encryption-path`).
 </details>
 
 <details>
@@ -620,14 +635,14 @@ modern-pdf-lib/
   src/
     core/           PDF document model, objects, writer, pages
     parser/         PDF loading, text extraction, content streams
-    render/         Content-stream interpreter, rasterizer, Canvas, thumbnails, OCR, redaction
+    render/         Content-stream interpreter, rasterizer, Canvas, thumbnails, OCR, redactRegions (throws RedactionIncompleteError, code redaction-incomplete)
     form/           AcroForm fields (7 types), appearances, JSON Schema forms
     annotation/     18 annotation types + appearance generators
     accessibility/  Structure tree, marked content, PDF/UA-1 & UA-2 checkers, auto-tagging
     compliance/     PDF/A & PDF/X validation, PDF/A-4, Factur-X / e-invoicing
     signature/      PKCS#7 signatures, timestamps, verification, CRL/OCSP, LTV
     security/       Threat scanner, sanitizer, redaction verifier, encryption inspector
-    crypto/         AES-256, RC4, MD5, SHA-256/384/512
+    crypto/         AES, RC4, MD5, SHA-256/384/512
     compression/    Deflate (fflate; WASM bridge not loaded)
     assets/         Font metrics/embed/subset, image embed, SVG
     text/           BiDi (UAX #9) text ordering
@@ -644,7 +659,7 @@ modern-pdf-lib/
     plugins/        Plugin manager & hooks
     wasm/           Rust crate sources (6 modules)
     cli/            CLI tool (modern-pdf optimize)
-  tests/            6,969 tests across 323 suites
+  tests/            7,199 tests in 330 files
   docs/             VitePress documentation
 ```
 
@@ -656,8 +671,8 @@ modern-pdf-lib/
 git clone https://github.com/ABCrimson/modern-pdf-lib.git
 cd modern-pdf-lib
 pnpm install
-pnpm test          # 6,969 tests in 323 files
-pnpm run typecheck # TypeScript 7.1 dev build: src, cli, scripts, tests
+pnpm test          # 330 files: 7,177 pass, 22 expected failures; without qpdf 7,174 pass, 21 expected failures, 4 skip
+pnpm run typecheck # TypeScript 7.1 dev build: src, cli, scripts, tests, security-tests
 pnpm run build     # ESM + CJS + declarations + IIFE
 ```
 

@@ -228,6 +228,8 @@ await stream.pipeTo(Writable.toWeb(createWriteStream('large-output.pdf')));
 console.log('Large PDF written to disk via streaming');
 ```
 
+`saveAsStream()` does not encrypt. For a document with `encrypt()` configured it throws `UnsupportedEncryptionError` (code `unsupported-encryption-path`); use `save()` instead. An encrypted document cannot use this fix in this release.
+
 > [!TIP]
 > In edge/serverless environments, you can return the `ReadableStream` directly as the HTTP response body, avoiding any in-memory buffering.
 
@@ -301,7 +303,7 @@ export default {
 ```
 
 > [!WARNING]
-> Cloudflare Workers have a 128 MB memory limit. For large PDFs, always use `saveAsStream()` instead of `save()`. This release's JavaScript does not load WebAssembly, so no `.wasm` file needs to be bundled for Workers.
+> Cloudflare Workers have a 128 MB memory limit. For large PDFs, use `saveAsStream()` instead of `save()` for an unencrypted document. This release's JavaScript does not load WebAssembly, so no `.wasm` file needs to be bundled for Workers.
 
 **Bun** works out of the box with no special configuration:
 

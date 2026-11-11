@@ -1368,7 +1368,7 @@ export { generateCiiXml } from './compliance/facturX.js';
 export type { FacturXProfile, Invoice, InvoiceParty, InvoiceLine } from './compliance/facturX.js';
 
 // ---------------------------------------------------------------------------
-// Developer-experience helpers — code frames + did-you-mean (0.40.7)
+// Developer-experience helpers — code frames + did-you-mean
 // ---------------------------------------------------------------------------
 export { renderCodeFrame, levenshtein, didYouMean } from './utils/codeframe.js';
 export type { CodeFrameOptions } from './utils/codeframe.js';

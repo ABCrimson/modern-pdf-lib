@@ -103,7 +103,7 @@ const raw = await pdf.save({ compress: false });
 
 ## Streaming Output
 
-For large documents, `saveAsStream()` emits the PDF as a stream of chunks instead of building the final byte array in one buffer. The document model (all pages, fonts and images) stays in memory, and each stream object is compressed and serialized into a temporary buffer.
+For large documents, `saveAsStream()` emits the PDF as a stream of chunks instead of building the final byte array in one buffer. The document model (all pages, fonts and images) stays in memory, and each stream object is compressed and serialized into a temporary buffer. `saveAsStream()` does not encrypt. For a document with `encrypt()` configured it throws `UnsupportedEncryptionError` (code `unsupported-encryption-path`); use `save()` instead.
 
 ### When to Use Streaming
 
@@ -217,7 +217,7 @@ for (let i = 0; i < 100; i++) {
 
 ### Large Documents (1000+ Pages)
 
-For documents with hundreds or thousands of pages, use `saveAsStream()` to avoid materializing the whole file in one buffer. The streaming serializer emits the serialized objects in chunks; the document model stays in memory.
+For documents with hundreds or thousands of pages, use `saveAsStream()` to avoid materializing the whole file in one buffer (not for an encrypted document: use `save()`). The streaming serializer emits the serialized objects in chunks; the document model stays in memory.
 
 ```ts
 const pdf = createPdf();
@@ -257,6 +257,8 @@ Image handling varies significantly by format:
 | Deno | 2-4 GB | Same as Node |
 | Cloudflare Workers | 128 MB | Use `saveAsStream()` for responses |
 | Browser | Device-dependent | Use `saveAsBlob()` for downloads; `saveAsStream()` for large docs |
+
+`saveAsStream()` throws `UnsupportedEncryptionError` for an encrypted document; an encrypted document has to go through `save()` and its memory cost.
 
 ## Concurrency & resource control
 
@@ -335,7 +337,7 @@ const caps = detectRuntimeCapabilities();
 | Browser | Yes | Playwright E2E on Chromium, Firefox and WebKit |
 
 > [!TIP]
-> For edge deployments, return `saveAsStream()` as the response body. In the browser, prefer `saveAsBlob()` for the simplest user experience.
+> For edge deployments, return `saveAsStream()` as the response body (unencrypted documents only). In the browser, prefer `saveAsBlob()` for the simplest user experience.
 
 ## Tree-Shaking and Bundle Size
 
@@ -347,8 +349,8 @@ Measured 2026-11-11 from the built `dist/` with esbuild 0.28.2 (`--bundle --mini
 
 | Scenario | Size (minified + gzipped) |
 |:---|:---:|
-| Minimal document (`export { createPdf } from 'modern-pdf-lib'`, `node:*` external) | ~108 KB (110,411 B) |
-| Entire library (`dist/modern-pdf-lib.iife.js`) | ~267 KB (273,001 B) |
+| Minimal document (`export { createPdf } from 'modern-pdf-lib'`, `node:*` external) | ~109 KB (111,459 B) |
+| Entire library (`dist/modern-pdf-lib.iife.js`) | ~267 KB (273,778 B) |
 
 ### Minimizing Bundle Size
 

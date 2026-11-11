@@ -8,13 +8,15 @@ PDF digital signatures use PKCS#7/CMS detached signatures to guarantee document 
 
 - **Signing** with RSA or ECDSA keys (SHA-256, SHA-384, SHA-512)
 - **Visible and invisible** signature appearances
-- **RFC 3161 timestamps** from external TSA servers
-- **Signature verification** (integrity + cryptographic validation)
+- **RFC 3161 timestamp requests** to external TSA servers (`requestTimestamp()`)
+- **Signature verification** (digest, cryptographic signature and ByteRange coverage; trust in the signer is a separate check)
 - **Multiple signatures** via incremental saves
 
 ## Signing a PDF
 
 The high-level `signPdf()` function handles the full workflow: preparing the ByteRange placeholder, hashing the document, building the PKCS#7 signature, and embedding it.
+
+`signPdf()` does not encrypt the signature update it appends. For an encrypted PDF (one whose bytes contain the name `/Encrypt`) it throws `UnsupportedEncryptionError` (code `unsupported-encryption-path`), and so does `PdfDocument.sign()` after `encrypt()`.
 
 ### Invisible Signature
 
@@ -85,7 +87,8 @@ for (const result of results) {
   console.log(`Field: ${result.fieldName}`);
   console.log(`Signed by: ${result.signedBy}`);
   console.log(`Integrity valid: ${result.integrityValid}`);
-  console.log(`Signature valid: ${result.valid}`);
+  console.log(`Covers whole file: ${result.coversWholeDocument}`);
+  console.log(`Valid: ${result.valid}`);
 }
 ```
 
@@ -95,11 +98,16 @@ Each `SignatureVerificationResult` includes:
 |---|---|
 | `fieldName` | The signature field name |
 | `signedBy` | Subject CN from the certificate |
-| `valid` | Overall validity (integrity AND signature) |
+| `valid` | `integrityValid` AND `certificateValid` AND `coversWholeDocument` |
 | `integrityValid` | Whether the ByteRange hash matches |
 | `certificateValid` | Whether the cryptographic signature verifies |
+| `coversWholeDocument` | Whether the ByteRange covers the whole file except the `/Contents` value |
 | `reason` | Signing reason, if present |
-| `signingDate` | Signing date, if present |
+| `signingDate` | The signing time the signer claims (the `signingTime` attribute), if present; no timestamp authority attests it |
+
+`valid` says nothing about trust. `verifySignatures()` checks the signature against the certificate embedded in it, so a self-signed certificate verifies like any other. To decide whether the signer is trusted, validate the certificate chain against trust anchors you chose, as described in the [verification guide](./verification.md).
+
+When a file has been updated after a signature (a later signature, a form fill, any incremental save), that signature's ByteRange no longer reaches the end of the file. It reports `valid: false` and `coversWholeDocument: false`, while `integrityValid` and `certificateValid` keep describing its own bytes. In a multi-signed file only the last signature can be `valid`. See the [multi-party signing guide](./multi-sign.md).
 
 ### Extracting Signature Info (Without Verification)
 
@@ -243,24 +251,27 @@ const { path, complete, anchor } = buildCertPath(leafDer, [intermediateDer], [ro
 
 ## RFC 3161 Timestamping
 
-Add a trusted timestamp from a TSA server:
+Request a timestamp token from a TSA server:
 
 ```ts
-import { requestTimestamp } from 'modern-pdf-lib';
+import { requestTimestamp, TimestampVerificationError } from 'modern-pdf-lib';
 
-const timestamp = await requestTimestamp(hash, 'https://tsa.example.com/timestamp');
-console.log(`Timestamp: ${timestamp.genTime}`);
+try {
+  const timestamp = await requestTimestamp(hash, 'https://tsa.example.com/timestamp');
+  console.log(`TSA time: ${timestamp.signingTime}`);
+} catch (error) {
+  if (error instanceof TimestampVerificationError) {
+    console.error(error.code); // 'timestamp-unverified'
+  }
+  throw error;
+}
 ```
 
-Or include it automatically during signing:
+`requestTimestamp()` sends a random nonce and checks that the TSTInfo in the answer carries the hash you sent and the same nonce. It throws `TimestampVerificationError` (code `timestamp-unverified`) when the TSTInfo cannot be parsed or its message imprint or nonce differs. It throws a plain `Error` when the request fails, the TSA reports an error status, or the answer carries no timestamp token; `parseTimestampResponse()` throws the same plain `Error` for an error status or a missing token. `parseTimestampResponse()` throws the same `TimestampVerificationError` when the TSTInfo cannot be parsed, or when its message imprint or nonce differs from the optional `expected` argument; without `expected` the token is parsed but not bound to a request.
 
-```ts
-const signedPdf = await signPdf(pdfBytes, 'Signature1', {
-  certificate,
-  privateKey,
-  timestampUrl: 'https://freetsa.org/tsr',
-});
-```
+The CMS signature of the token and the TSA certificate are not verified in this release. `signingTime` is the time written in the token; check the token yourself before relying on it as proof of time. The time a signer claims inside its own signature (`signingTime` on a verification result, `signingDate` on `verifySignatures()`) is not a timestamp: nothing attests it.
+
+The `timestampUrl` field of the `signPdf()` options is accepted by the type, but `signPdf()` does not read it: it does not request or embed a timestamp. A token from `requestTimestamp()` is not attached to a signature for you.
 
 ## Key Preparation
 
@@ -287,7 +298,7 @@ openssl pkcs8 -topk8 -inform PEM -outform DER \
 - **Signature schemes:** RSA PKCS#1 v1.5 (default), **RSASSA-PSS** (`signatureScheme: 'pss'`), and ECDSA (P-256, P-384, P-521). Digests: SHA-256/384/512.
 - **CAdES-BES / PAdES-B-B baseline:** the ESS signing-certificate-v2 attribute via `cades: true` (see above).
 - **Certificate chain & path building:** `buildCertPath` (RFC 5280 §6.1 path construction) and `validateCertificateChain` — see the [verification guide](./verification.md).
-- **Revocation:** CRL and OCSP checking, delta CRLs, OCSP stapling, and offline/embedded revocation (`src/signature/crl.ts`, `ocsp.ts`, `offlineRevocation.ts`).
+- **Revocation:** CRL and OCSP checking, delta CRLs, OCSP stapling, and offline/embedded revocation (`src/signature/crl.ts`, `ocsp.ts`, `offlineRevocation.ts`). Only an authenticated OCSP answer can report `good` or `revoked`; CRL lookups and embedded answers are not authenticated and offline results are `unknown`. See the [verification guide](./verification.md).
 - **LTV (Long-Term Validation):** DSS embedding (`embedLtvData`) and document timestamps for archival signatures.
 
 > **EdDSA (Ed25519)** and **deterministic ECDSA (RFC 6979)** are not currently implemented — standard randomized ECDSA and RSA (PKCS#1 v1.5 / PSS) cover the algorithms PDF signing relies on today.

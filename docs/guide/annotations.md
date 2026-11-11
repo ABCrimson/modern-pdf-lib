@@ -249,7 +249,7 @@ ink.clearInkLists();
 
 ## Redact Annotations
 
-Redact annotations mark regions for redaction. The actual content removal happens when the redaction is applied by a viewer:
+Redact annotations mark regions for redaction. Creating one builds a `/Redact` annotation (a marker) and removes nothing. Applying redaction annotations is not available in this release: `applyRedaction`, `applyRedactions` and `PdfDocument.applyRedactions()` throw `RedactionIncompleteError` (code `redaction-incomplete`, reason `redaction-unavailable`) and change nothing, so the annotation and the page content stay as they were. A viewer that supports redaction can apply the annotation itself. Creating and reading a `PdfRedactAnnotation` works as before:
 
 ```ts
 import { PdfRedactAnnotation } from 'modern-pdf-lib';

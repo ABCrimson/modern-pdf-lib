@@ -9,7 +9,7 @@ This guide covers the different ways to save a PDF document and how to use strea
 | Method | Return Type | Best For |
 |---|---|---|
 | `pdf.save()` | `Promise<Uint8Array>` | General use, small to medium documents |
-| `pdf.saveAsStream()` | `ReadableStream<Uint8Array>` | Large documents, server responses |
+| `pdf.saveAsStream()` | `ReadableStream<Uint8Array>` | Large documents, server responses; not for an encrypted document (throws `UnsupportedEncryptionError`) |
 | `pdf.saveAsBlob()` | `Promise<Blob>` | Browser downloads and display |
 | `pdf.saveAsBase64({ dataUri })` | `Promise<string>` | JSON payloads and data URIs |
 
@@ -37,11 +37,14 @@ await writeFile('report.pdf', bytes);
 
 Returns a standard `ReadableStream<Uint8Array>` that emits the serialized file object by object, so no single output `Uint8Array` is built. The document object graph (including image and font data) is still held in memory.
 
+`saveAsStream()` does not encrypt. For a document with `encrypt()` configured it throws `UnsupportedEncryptionError` (code `unsupported-encryption-path`); use `save()` instead.
+
 ```ts
 const stream = pdf.saveAsStream();
 ```
 
 This is the right choice when:
+- The document is not encrypted
 - Generating large documents (hundreds of pages, many images)
 - Serving PDFs over HTTP where you want to start sending bytes immediately
 - Working in memory-constrained environments (Cloudflare Workers, edge functions)
@@ -174,7 +177,7 @@ app.get('/report.pdf', async (req, res) => {
 `save()` returns the entire PDF as one `Uint8Array`. `saveAsStream()` emits the serialized file object by object, so no single output buffer is built and the first bytes can reach the consumer before the whole file is written. The document object graph (including image and font data) is still held in memory either way.
 
 > [!TIP]
-> Prefer `saveAsStream()` when you want to start sending bytes before the whole file is serialized or to avoid one large output buffer.
+> Prefer `saveAsStream()` when you want to start sending bytes before the whole file is serialized or to avoid one large output buffer. An encrypted document must use `save()`.
 
 ### Memory Tips
 
@@ -237,4 +240,4 @@ saveAsBlob()     ──►  Blob              Browser convenience
 saveAsBase64()   ──►  string            JSON payloads and data URIs
 ```
 
-Choose `save()` for simplicity, `saveAsStream()` to avoid one output buffer, `saveAsBlob()` for browser downloads, and `saveAsBase64()` for text channels.
+Choose `save()` for simplicity and for an encrypted document, `saveAsStream()` to avoid one output buffer, `saveAsBlob()` for browser downloads, and `saveAsBase64()` for text channels.

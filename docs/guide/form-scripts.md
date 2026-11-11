@@ -1,6 +1,6 @@
 # Form Scripting
 
-PDF forms can contain JavaScript that runs inside a PDF viewer (such as Adobe Acrobat or Foxit Reader) to automate calculations, validate input, format values, and respond to document-level events. **modern-pdf-lib** provides a comprehensive API for embedding these scripts and a secure sandbox for executing them server-side.
+PDF forms can contain JavaScript that runs inside a PDF viewer (such as Adobe Acrobat or Foxit Reader) to automate calculations, validate input, format values, and respond to document-level events. **modern-pdf-lib** provides an API for attaching these scripts to fields and to the document; they are stored in the saved file, and a field's actions can be read back from its widget dictionary (`field.getWidgetDict().get('/AA')`). It does not evaluate them: `createSandbox().execute()` throws `ScriptExecutionDisabledError` (code `script-execution-disabled`), and the scripts run only in a viewer. Earlier releases evaluated scripts through `execute()`, and a script could reach the host environment. [See the security advisories published with 0.40.5](https://github.com/ABCrimson/modern-pdf-lib/security/advisories).
 
 ## Overview
 
@@ -168,7 +168,7 @@ setFieldScript(birthDate, '/K', 'AFDate_KeystrokeEx("mm/dd/yyyy");');
 import { AFDate_FormatEx, parseAcrobatDate, formatAcrobatDate } from 'modern-pdf-lib';
 
 const date = parseAcrobatDate('03/07/2026', 'mm/dd/yyyy');
-const iso = formatAcrobatDate(date, 'yyyy-mm-dd'); // "2026-03-07"
+const iso = date ? formatAcrobatDate(date, 'yyyy-mm-dd') : null; // "2026-03-07"
 ```
 
 ---
@@ -222,9 +222,10 @@ setFieldScript(age, '/V', `
 ```ts
 import { validateFieldValue } from 'modern-pdf-lib';
 
-// validateFieldValue(field, value, script) inspects the Acrobat validation
-// script to decide which built-in check to run (email, phone, range, etc.).
-const emailField = form.getField('email');
+// validateFieldValue(field, value, script) matches the script text against
+// known patterns to pick a built-in check (email, phone, range, etc.). It does
+// not run the script. A script it does not recognise gives { valid: true }.
+const emailField = form.getField('email')!;
 const emailScript = 'if (!isValidEmail(event.value)) { app.alert("Invalid email@address"); }';
 
 const result = validateFieldValue(emailField, 'test@example.com', emailScript);
@@ -307,7 +308,7 @@ import { resolveFieldReference, getFieldValue, setFieldValue } from 'modern-pdf-
 
 // Programmatically read/write field values
 const value = getFieldValue(form, 'billingAddress');
-setFieldValue(form, 'shippingAddress', value);
+if (value !== null) setFieldValue(form, 'shippingAddress', value);
 ```
 
 ---
@@ -416,78 +417,40 @@ doc.addJavaScript('01_setup', `
 
 ---
 
-## Sandbox Security
+## Script execution is disabled
 
-When executing form scripts on the server (e.g., for pre-filling or validation), the sandbox prevents malicious scripts from accessing the host environment.
-
-### Creating a Sandbox
-
-```ts
-import { createSandbox } from 'modern-pdf-lib';
-
-const sandbox = createSandbox({
-  timeout: 1000,     // Max execution time (ms)
-  maxMemory: 10_000_000, // Memory limit (bytes, advisory)
-});
-```
-
-### Executing Scripts
+modern-pdf-lib does not evaluate PDF JavaScript. `createSandbox()` still
+returns a `FormScriptSandbox`, but its `execute()` method throws
+`ScriptExecutionDisabledError` (code `script-execution-disabled`) before it
+reads the script. The scripts you attach run in the viewer that opens the
+document, not in this library.
 
 ```ts
-sandbox.setFieldValues(new Map([
-  ['quantity', '5'],
-  ['unitPrice', '29.99'],
-]));
+import { createSandbox, ScriptExecutionDisabledError } from 'modern-pdf-lib';
 
-const result = sandbox.execute(`
-  var qty = parseFloat(getField("quantity").value);
-  var price = parseFloat(getField("unitPrice").value);
-  getField("total").value = String(qty * price);
-  return qty * price;
-`);
-
-if (result.success) {
-  console.log('Total:', result.returnValue); // 149.95
-  console.log('Time:', result.executionTimeMs, 'ms');
-} else {
-  console.error('Script error:', result.error);
+const sandbox = createSandbox();
+try {
+  sandbox.execute('AFSimple_Calculate("SUM", ["item1", "item2"]);');
+} catch (err) {
+  if (err instanceof ScriptExecutionDisabledError) {
+    console.warn(err.code); // 'script-execution-disabled'
+  } else {
+    throw err;
+  }
 }
-
-// Read updated values
-const values = sandbox.getFieldValues();
-console.log('total =', values.get('total')); // "149.95"
-```
-
-### What the Sandbox Blocks
-
-The sandbox prevents access to:
-
-| Category | Blocked APIs |
-|----------|-------------|
-| **Network** | `fetch()`, `XMLHttpRequest`, `WebSocket` |
-| **Code generation** | `eval()`, `Function()`, `import()` |
-| **Environment** | `globalThis`, `window`, `document`, `process` |
-| **Modules** | `require()`, dynamic `import()` |
-| **Concurrency** | `Worker`, `SharedWorker` |
-| **Metaprogramming** | `Proxy`, `Reflect`, `__proto__`, `.constructor` |
-
-### What the Sandbox Allows
-
-| Category | Available APIs |
-|----------|---------------|
-| **Math** | `Math.*`, `parseInt`, `parseFloat`, `isNaN`, `isFinite` |
-| **Types** | `String`, `Number`, `Boolean`, `Array`, `Date`, `RegExp` |
-| **Data** | `JSON.parse`, `JSON.stringify` |
-| **PDF** | `getField()`, `event`, `AFSimple_Calculate` |
-| **Acrobat** | `app.alert` (no-op), `console.println` (no-op) |
-
-### Cleanup
-
-Always destroy the sandbox when done:
-
-```ts
 sandbox.destroy();
 ```
+
+The options of `createSandbox` (`timeout`, `maxMemory`, `allowedGlobals`) are
+accepted and have no effect. The state methods keep working:
+`setFieldValues()` stores a copy of the values, `getFieldValues()` returns a
+copy of what was stored (no script changes it), `registerBuiltin()` and
+`reset()` change the held state, and `destroy()` clears it.
+
+To compute or check field values on the server, do it in your own code, or use
+the helpers on this page that run no script: `formatNumber`,
+`parseAcrobatDate` / `formatAcrobatDate`, `validateFieldValue`, and
+`getFieldValue` / `setFieldValue`.
 
 ---
 
@@ -643,49 +606,32 @@ const dob = form.createTextField('dob', 0, [150, 580, 270, 604]);
 setFieldScript(dob, '/F', 'AFDate_FormatEx("mm/dd/yyyy");');
 setFieldScript(dob, '/K', 'AFDate_KeystrokeEx("mm/dd/yyyy");');
 
-// Server-side pre-validation with sandbox
-import { createSandbox } from 'modern-pdf-lib';
-
-const sandbox = createSandbox();
-sandbox.setFieldValues(new Map([
-  ['fullName', 'Jane Doe'],
-  ['email', 'jane@example.com'],
-  ['phone', '5551234567'],
-]));
-
-const result = sandbox.execute(`
-  var name = getField("fullName").value;
-  var email = getField("email").value;
-  var re = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
-  return {
-    nameValid: name.trim() !== "",
-    emailValid: re.test(email),
-  };
-`);
-
-console.log(result.returnValue);
+// Server-side pre-validation in your own code (the library runs no script)
+const submitted = { fullName: 'Jane Doe', email: 'jane@example.com' };
+const checks = {
+  nameValid: submitted.fullName.trim() !== '',
+  emailValid: /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(submitted.email),
+};
+console.log(checks);
 // { nameValid: true, emailValid: true }
-
-sandbox.destroy();
 ```
 
 ---
 
 ## Limitations
 
-The form scripting system in modern-pdf-lib covers the most commonly used subset of the Acrobat JavaScript API. The following features are **not** currently supported:
+The library embeds scripts and does not evaluate them. What a script can do
+depends on the viewer that opens the document: every Acrobat JavaScript API a
+script uses (`app`, `this`, `util`, `event`, `getField()` and the rest) is
+provided by the viewer, not by modern-pdf-lib, and support differs between
+viewers.
 
-| Feature | Status | Notes |
-|---------|--------|-------|
-| Full `app` object | Partial | `app.alert` and `app.beep` are no-ops in sandbox |
-| `this` (document object) | Not supported | Use `getField()` for field access |
-| `util.printd` / `util.scand` | Not supported | Use `AFDate_FormatEx` instead |
-| `console.println` | No-op | Available but does not output |
-| `event.target` | Partial | Basic stub only |
-| `color` object | Not supported | Use CSS-style colors in appearances |
-| `Collab` / `SOAP` / `Net` | Not supported | Security-sensitive APIs |
-| `ADBC` (database) | Not supported | Server-side only in Acrobat |
-| Privileged context | Not supported | `app.trustedFunction` not available |
-| `spell` object | Not supported | Spell-check is viewer-dependent |
+- `createSandbox().execute()` throws `ScriptExecutionDisabledError` (code
+  `script-execution-disabled`) for every script.
+- `validateFieldValue` recognises a fixed set of script patterns and returns
+  `{ valid: true }` for a script it does not recognise.
+- The server-side helpers (`formatNumber`, `parseAcrobatDate`,
+  `formatAcrobatDate`, `AFDate_FormatEx`, `AFSpecial_Format`) are TypeScript
+  functions you call directly; they do not read script text.
 
-For features not listed here, scripts will still be embedded in the PDF and will work in viewers that support them (Adobe Acrobat, Foxit Reader). The sandbox only executes the subset described above.
+Scripts are stored in the saved PDF and run in viewers that support PDF JavaScript, such as Adobe Acrobat and Foxit Reader.

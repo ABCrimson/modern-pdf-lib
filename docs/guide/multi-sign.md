@@ -2,6 +2,8 @@
 
 This guide walks through a complete multi-party PDF signing workflow: from creating a contract to archiving with Long-Term Validation (LTV) data. Every step uses the `modern-pdf-lib` API and preserves all previous signatures via incremental save.
 
+The workflow needs an unencrypted PDF: `signPdf`, `addCounterSignature` and `embedLtvData` do not encrypt what they append, so for an encrypted file they throw `UnsupportedEncryptionError` (code `unsupported-encryption-path`).
+
 ---
 
 ## Prerequisites
@@ -141,7 +143,7 @@ const notarizedPdf = await signPdf(signerBPdf, 'Notary', {
 
 ### 6. Archive with LTV Data
 
-Embed Long-Term Validation data so signatures can be verified decades later, even if CAs expire or CRLs become unavailable.
+Embed Long-Term Validation data so that the certificates, OCSP responses and CRLs you collected stay in the document. `embedLtvData()` stores the certificates it finds in the signatures, your `extraCertificates`, and the OCSP responses and CRLs you pass; it fetches nothing and does not check that a response or a CRL is authentic or that it covers the signer.
 
 ```ts
 const archivedPdf = await embedLtvData(notarizedPdf, {
@@ -169,6 +171,8 @@ The MDP (Modification Detection and Prevention) system controls what changes are
 | 1 | `MdpPermission.NoChanges` | No changes allowed at all |
 | 2 | `MdpPermission.FormFillAndSign` | Form filling and additional signatures |
 | 3 | `MdpPermission.FormFillSignAnnotate` | Annotations, form filling, and signatures |
+
+`detectModifications()` reports a signature added after the certification as an `unknown` violation, so at levels 2 and 3 it returns `isCompliant: false` for it; see [Check MDP Compliance](#check-mdp-compliance).
 
 ```ts
 // Set the certification level on the sign options (mutated in place)
@@ -235,7 +239,7 @@ for (const cs of counterSigs) {
   if (cs.signedAt) {
     console.log(`  at: ${cs.signedAt.toISOString()}`);
   }
-  console.log(`  valid: ${cs.isValid}`);
+  console.log(`  structurally valid: ${cs.isValid}`); // parsed only; the counter-signature is not cryptographically verified
 }
 ```
 
@@ -243,18 +247,18 @@ for (const cs of counterSigs) {
 
 ## LTV Archival
 
-Long-Term Validation ensures that signatures remain verifiable even after certificates expire or revocation services go offline.
+Long-Term Validation keeps the validation material with the document, so that a verifier can read it after certificates expire or revocation services go offline.
 
 <details>
 <summary>What does LTV embed?</summary>
 
 The Document Security Store (DSS) dictionary is added to the PDF catalog and contains:
 
-- **Certificates**: The full certificate chain from signer to root CA
-- **OCSP responses**: Proof of certificate validity at signing time
-- **CRLs**: Certificate Revocation Lists showing the certificate was not revoked
+- **Certificates**: The certificates found in the signatures, plus any you pass as `extraCertificates`
+- **OCSP responses**: The responses you supplied for the certificates
+- **CRLs**: The Certificate Revocation Lists you supplied
 
-This data is embedded in the PDF itself, making the document self-contained for verification.
+This data is embedded in the PDF itself. The library does not authenticate it when it reads it back: `verifyOfflineRevocation()` reports a matching embedded answer as `unknown`, not as `good`.
 
 </details>
 
@@ -282,12 +286,25 @@ if (!hasLtvData(pdfBytes)) {
 const results = await verifySignatures(pdfBytes);
 
 for (const result of results) {
-  console.log(`${result.fieldName}: ${result.valid ? 'VALID' : 'INVALID'}`);
+  console.log(`${result.fieldName}: ${result.valid ? 'VALID' : 'NOT VALID'}`);
   console.log(`  Signed by: ${result.signedBy}`);
   console.log(`  Integrity: ${result.integrityValid}`);
   console.log(`  Certificate: ${result.certificateValid}`);
+  console.log(`  Covers whole file: ${result.coversWholeDocument}`);
 }
 ```
+
+`valid` requires the signature's ByteRange to cover the whole file except its `/Contents` value. Every signature that is followed by a later update (the next signer's signature, a form fill) does not, so for a file signed by `SignerA`, `SignerB` and the notary in turn, before the LTV step, the results are:
+
+| Signature | `integrityValid` | `certificateValid` | `coversWholeDocument` | `valid` |
+|-----------|------------------|--------------------|-----------------------|---------|
+| `SignerA` (followed by later signatures) | `true` | `true` | `false` | `false` |
+| `SignerB` (followed by the notary) | `true` | `true` | `false` | `false` |
+| `Notary` (last in the file) | `true` | `true` | `true` | `true` |
+
+`embedLtvData()` appends the Document Security Store as an incremental update after the last signature. After that step the notary signature also reports `coversWholeDocument: false` and `valid: false`, with `integrityValid` and `certificateValid` still `true`.
+
+An earlier signature that reports `valid: false` with `integrityValid: true` is the expected result for a multi-signed file, not a sign of tampering: its own bytes are intact and a later revision exists. Read `integrityValid` and `certificateValid` for each earlier signature and `valid` for the last one. Validating each signature against its own revision is not implemented in this release. `valid` is also not a trust decision: it does not check the signer's certificate chain, see the [verification guide](./verification.md).
 
 ### Validate Signature Chain
 
@@ -300,6 +317,8 @@ for (const entry of chainResult.signatures) {
   console.log(`  ${entry.fieldName}: ${entry.status === 'valid' ? 'OK' : 'BROKEN'}`);
 }
 ```
+
+`isChainValid` is true only when every entry has status `valid`: each signature's ByteRange is well formed and reaches past the previous signature, and each signature's digest and CMS signature verify over its covered bytes. It does not check the signers' certificates against trust anchors, and it says nothing about bytes after the last signature (check `coversWholeDocument` from `verifySignatures()`). A PDF without signatures gives `isChainValid: true`.
 
 ### Detect Modifications
 
@@ -325,6 +344,8 @@ if (report.violations.length > 0) {
   }
 }
 ```
+
+A violation of type `unknown` means that an object added or changed after a signed revision carries a signature key (`/Type /Sig`, `/FT /Sig` or `/SubFilter /adbe.pkcs7.detached`). The detector cannot tell a real added signature from a change that hides behind such a key, so it reports `unknown`; for a certified document that makes `isCompliant` false at every certification level, including a signature added at a level that allows signing. `isCompliant` is judged only when the document has a certification level. A report without violations comes from a pattern check over the object text of the revisions; it is not proof that nothing changed.
 
 ---
 
@@ -357,7 +378,9 @@ The PDF may be corrupted or not a valid PDF file. Ensure the file starts with `%
 <details>
 <summary>Previous signature becomes invalid after adding a new one</summary>
 
-Each signature uses incremental save, so previous signatures should remain valid. If a previous signature becomes invalid, it usually means:
+Each signature uses incremental save, so the bytes an earlier signature covers stay as they were: its `integrityValid` and `certificateValid` stay `true`. Its `valid` becomes `false` and `coversWholeDocument` becomes `false`, because the file now has bytes after the signed range. That is how this release reports every non-final signature of a multi-signed file.
+
+If `integrityValid` of an earlier signature is `false`, the covered bytes changed; if `certificateValid` is `false`, the signature does not verify with its embedded certificate. It usually means:
 
 1. The PDF was modified in a way that violates the MDP policy
 2. The tool used to add the new signature did not use incremental save
