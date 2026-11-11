@@ -571,6 +571,33 @@ export function embedSignature(
 }
 
 /**
+ * Whether a signature's ByteRange covers the whole file except the
+ * `/Contents` hex string: the first range starts at 0, the gap is exactly
+ * the `/Contents` string (`<` through `>`), and the second range ends at
+ * the end of the file.
+ *
+ * @param sig         A signature as returned by {@link findSignatures}.
+ * @param fileLength  The length of the PDF in bytes.
+ * @returns           `true` when no byte outside `/Contents` is unsigned.
+ */
+export function byteRangeCoversWholeFile(
+  sig: {
+    byteRange: [number, number, number, number];
+    contentsOffset: number;
+    contentsLength: number;
+  },
+  fileLength: number,
+): boolean {
+  const [start1, length1, start2, length2] = sig.byteRange;
+  return (
+    start1 === 0 &&
+    length1 === sig.contentsOffset &&
+    start2 === sig.contentsOffset + sig.contentsLength &&
+    start2 + length2 === fileLength
+  );
+}
+
+/**
  * Find all signature fields in a PDF and extract their ByteRange
  * and Contents information.
  *

@@ -895,3 +895,37 @@ describe('verifySignatures — RSASSA-PSS explicit params (RFC 4055)', () => {
     expect(results[0]!.valid).toBe(false);
   });
 });
+
+describe('verifySignatures — ByteRange coverage', () => {
+  it('reports valid and coversWholeDocument for a freshly signed PDF', async () => {
+    const { certificate, privateKey } = await generateTestCert('Alice');
+    const signed = await signPdf(createMinimalPdf(), 'Sig1', {
+      certificate,
+      privateKey,
+      hashAlgorithm: 'SHA-256',
+    });
+
+    const result = (await verifySignatures(signed))[0]!;
+    expect(result.coversWholeDocument).toBe(true);
+    expect(result.valid).toBe(true);
+  });
+
+  it('is not valid when bytes follow the signed range', async () => {
+    const { certificate, privateKey } = await generateTestCert('Alice');
+    const signed = await signPdf(createMinimalPdf(), 'Sig1', {
+      certificate,
+      privateKey,
+      hashAlgorithm: 'SHA-256',
+    });
+    const tail = new TextEncoder().encode('\n5 0 obj\n<< /Evil true >>\nendobj\n');
+    const appended = new Uint8Array(signed.length + tail.length);
+    appended.set(signed);
+    appended.set(tail, signed.length);
+
+    const result = (await verifySignatures(appended))[0]!;
+    expect(result.integrityValid).toBe(true);
+    expect(result.certificateValid).toBe(true);
+    expect(result.coversWholeDocument).toBe(false);
+    expect(result.valid).toBe(false);
+  });
+});

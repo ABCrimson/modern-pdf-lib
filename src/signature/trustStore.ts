@@ -127,18 +127,20 @@ interface StoredCert {
  * Certificates are stored in a Map keyed by a SHA-256 hash of their
  * DER-encoded subject Name, enabling O(1) issuer lookups.
  *
+ * All methods are async; only the `size` getter is synchronous.
+ *
  * @example
  * ```ts
  * import { TrustStore } from 'modern-pdf-lib';
  *
  * const store = new TrustStore();
- * store.addCertificate(rootCaDer);
+ * await store.addCertificate(rootCaDer);
  *
- * if (store.isTrusted(someCert)) {
+ * if (await store.isTrusted(someCert)) {
  *   console.log('Certificate is a trusted root');
  * }
  *
- * const issuer = store.findIssuer(leafCert);
+ * const issuer = await store.findIssuer(leafCert);
  * if (issuer) {
  *   console.log('Found issuer in trust store');
  * }

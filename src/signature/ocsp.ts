@@ -6,6 +6,10 @@
  *
  * Implements RFC 6960 OCSP request building, response parsing, and
  * certificate status checking via HTTP POST using `fetch()`.
+ * `checkCertificateStatus` reports `good` or `revoked` only for an
+ * answer that is signed by the issuer (or by a delegated responder the
+ * issuer certified for id-kp-OCSPSigning), matches the request CertID and
+ * is fresh; every other answer is reported as `unknown`.
  *
  * Uses the ASN.1 DER utilities from `./pkcs7.ts` for encoding and
  * the `parseDerTlv` parser for decoding.
@@ -28,6 +32,8 @@ import {
   toBuffer,
 } from './pkcs7.js';
 import type { Asn1Node } from './pkcs7.js';
+import { validateExtendedKeyUsage } from './certPolicy.js';
+import { verifySignedDer } from './chainValidator.js';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -69,9 +75,22 @@ export interface OcspSingleResponse {
  * Result of an OCSP certificate status check.
  */
 export interface OcspResult {
-  /** Certificate status. */
+  /**
+   * Certificate status. `good` and `revoked` come only from an
+   * authenticated, matching and fresh answer; anything else is `unknown`
+   * (see `unauthenticatedReason`).
+   */
   status: 'good' | 'revoked' | 'unknown';
-  /** Beginning of validity interval. */
+  /**
+   * Why the answer was not accepted (it is not a well-formed
+   * id-pkix-ocsp-basic response, is not signed by the issuer or an
+   * authorized delegated responder, matches no request CertID, or lies
+   * outside thisUpdate/nextUpdate), followed by the status the matching
+   * SingleResponse claims when one matched. Absent when the answer was
+   * accepted.
+   */
+  unauthenticatedReason?: string | undefined;
+  /** Beginning of validity interval (the response's producedAt when no answer matched). */
   thisUpdate: Date;
   /** End of validity interval (if present). */
   nextUpdate?: Date | undefined;
@@ -86,6 +105,11 @@ export interface OcspResult {
 // ---------------------------------------------------------------------------
 
 const OID_SHA1 = '1.3.14.3.2.26';
+const OID_PKIX_OCSP_BASIC = '1.3.6.1.5.5.7.48.1.1';
+const OID_KP_OCSP_SIGNING = '1.3.6.1.5.5.7.3.9';
+
+/** Clock skew tolerated around thisUpdate / nextUpdate (5 minutes). */
+const FRESHNESS_SKEW_MS = 5 * 60 * 1000;
 const OID_ID_AD_OCSP = '1.3.6.1.5.5.7.48.1';
 const OID_AIA = '1.3.6.1.5.5.7.1.1';
 
@@ -264,27 +288,48 @@ export async function buildOcspRequest(
   cert: Uint8Array,
   issuerCert: Uint8Array,
 ): Promise<Uint8Array> {
+  return encodeOcspRequest(await computeCertId(cert, issuerCert));
+}
+
+/**
+ * The CertID fields of an OCSP request (SHA-1 hashes, RFC 6960 4.1.1).
+ */
+interface CertIdFields {
+  /** SHA-1 of the issuer's subject Name DER. */
+  issuerNameHash: Uint8Array;
+  /** SHA-1 of the issuer's public key (BIT STRING content without the unused-bits byte). */
+  issuerKeyHash: Uint8Array;
+  /** Serial number content bytes of the certificate to check. */
+  serialNumber: Uint8Array;
+}
+
+/**
+ * Compute the CertID fields for `cert`, issued by `issuerCert`.
+ */
+async function computeCertId(cert: Uint8Array, issuerCert: Uint8Array): Promise<CertIdFields> {
   // Hash the issuer's distinguished name (the subject of the issuer cert)
-  const issuerNameDer = extractSubjectRawBytes(issuerCert);
-  const issuerNameHash = await sha1(issuerNameDer);
+  const issuerNameHash = await sha1(extractSubjectRawBytes(issuerCert));
 
-  // Hash the issuer's public key (BIT STRING content, skip unused-bits byte)
-  const issuerKeyBitString = extractPublicKeyBitString(issuerCert);
-  // Skip the first byte (unused bits count)
-  const issuerKeyBytes = issuerKeyBitString.subarray(1);
-  const issuerKeyHash = await sha1(issuerKeyBytes);
+  // Hash the issuer's public key (BIT STRING content, skip the unused-bits byte)
+  const issuerKeyHash = await sha1(extractPublicKeyBitString(issuerCert).subarray(1));
 
-  // Get the serial number of the certificate to check
+  // The serial number of the certificate to check
   const serialNumber = extractSerialNumber(cert);
 
-  // Build CertID
+  return { issuerNameHash, issuerKeyHash, serialNumber };
+}
+
+/**
+ * Encode an OCSPRequest holding one Request for `certId`.
+ */
+function encodeOcspRequest(certIdFields: CertIdFields): Uint8Array {
   const hashAlgorithm = encodeSequence([encodeOID(OID_SHA1), encodeNull()]);
 
   const certId = encodeSequence([
     hashAlgorithm,
-    encodeOctetString(issuerNameHash),
-    encodeOctetString(issuerKeyHash),
-    encodeInteger(serialNumber),
+    encodeOctetString(certIdFields.issuerNameHash),
+    encodeOctetString(certIdFields.issuerKeyHash),
+    encodeInteger(certIdFields.serialNumber),
   ]);
 
   // Build Request (just wraps CertID)
@@ -325,6 +370,11 @@ export async function buildOcspRequest(
  *   responses        SEQUENCE OF SingleResponse
  * }
  * ```
+ *
+ * Parse only: the BasicOCSPResponse signature, the CertID hashes and the
+ * thisUpdate/nextUpdate window are not checked, so the statuses returned
+ * here are what the response claims. `checkCertificateStatus` performs
+ * those checks.
  *
  * @param response  DER-encoded OCSP response bytes.
  * @returns         Parsed OCSP response.
@@ -553,16 +603,184 @@ export function extractOcspUrl(cert: Uint8Array): string | null {
   return null;
 }
 
+// ---------------------------------------------------------------------------
+// Response authentication (used by checkCertificateStatus)
+// ---------------------------------------------------------------------------
+
+/**
+ * The parts of a successful OCSPResponse that authentication needs.
+ */
+interface BasicResponseParts {
+  /** The BasicOCSPResponse DER (the content of responseBytes.response). */
+  der: Uint8Array;
+  /** The parsed BasicOCSPResponse. */
+  node: Asn1Node;
+  /** The `responses` SEQUENCE OF SingleResponse of tbsResponseData. */
+  responses: Asn1Node;
+}
+
+/**
+ * Locate the BasicOCSPResponse in an OCSPResponse. Returns `undefined`
+ * when the responseType is not id-pkix-ocsp-basic or the structure is
+ * not the expected one.
+ */
+function extractBasicResponse(response: Uint8Array): BasicResponseParts | undefined {
+  const root = parseDerTlv(response, 0);
+  const responseBytes = root.children[1]?.children[0];
+  const responseType = responseBytes?.children[0];
+  const responseOctet = responseBytes?.children[1];
+  if (responseType?.tag !== 0x06 || responseOctet?.tag !== 0x04) return undefined;
+  if (decodeOidBytes(responseType.data) !== OID_PKIX_OCSP_BASIC) return undefined;
+
+  const der = responseOctet.data;
+  const node = parseDerTlv(der, 0);
+  if (node.totalLength !== der.length) return undefined;
+
+  const tbsResponseData = node.children[0];
+  if (tbsResponseData === undefined) return undefined;
+  // version [0] is optional; then responderID, producedAt, responses
+  const base = tbsResponseData.children[0]?.tag === 0xa0 ? 1 : 0;
+  const responses = tbsResponseData.children[base + 2];
+  if (responses?.tag !== 0x30) return undefined;
+
+  return { der, node, responses };
+}
+
+/**
+ * Whether `certDer` is within its notBefore/notAfter window at `now`.
+ */
+function isCertCurrent(certDer: Uint8Array, now: number): boolean {
+  const tbsCert = parseDerTlv(certDer, 0).children[0];
+  if (tbsCert === undefined) return false;
+  const base = tbsCert.children[0]?.tag === 0xa0 ? 1 : 0;
+  const validity = tbsCert.children[base + 3];
+  const notBeforeNode = validity?.children[0];
+  const notAfterNode = validity?.children[1];
+  if (notBeforeNode === undefined || notAfterNode === undefined) return false;
+  const notBefore = parseAsn1Time(notBeforeNode).getTime();
+  const notAfter = parseAsn1Time(notAfterNode).getTime();
+  // NaN (an unparseable time) fails both comparisons
+  return notBefore <= now && now <= notAfter;
+}
+
+/**
+ * Whether `certDer` carries id-kp-OCSPSigning explicitly in its
+ * extendedKeyUsage extension (absence of the extension and
+ * anyExtendedKeyUsage do not count, RFC 6960 4.2.2.2).
+ */
+function hasOcspSigningEku(certDer: Uint8Array): boolean {
+  try {
+    return validateExtendedKeyUsage(certDer, []).presentOids.includes(OID_KP_OCSP_SIGNING);
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Whether the BasicOCSPResponse is signed by `issuerCert` itself, or by a
+ * delegated responder certificate in `certs [0]` that `issuerCert`
+ * signed, that carries id-kp-OCSPSigning and that is valid at `now`.
+ */
+async function authenticateOcspResponse(
+  basic: BasicResponseParts,
+  issuerCert: Uint8Array,
+  now: number,
+): Promise<boolean> {
+  if (await verifySignedDer(basic.der, issuerCert)) return true;
+
+  // certs [0] EXPLICIT SEQUENCE OF Certificate OPTIONAL (4th child)
+  const certsWrapper = basic.node.children[3];
+  const certsSeq = certsWrapper?.tag === 0xa0 ? certsWrapper.children[0] : undefined;
+  if (certsSeq === undefined) return false;
+
+  for (const certNode of certsSeq.children) {
+    const responderCert = certsSeq.data.subarray(
+      certNode.offset,
+      certNode.offset + certNode.totalLength,
+    );
+    try {
+      if (!(await verifySignedDer(responderCert, issuerCert))) continue;
+      if (!hasOcspSigningEku(responderCert)) continue;
+      if (!isCertCurrent(responderCert, now)) continue;
+      if (await verifySignedDer(basic.der, responderCert)) return true;
+    } catch {
+      // A malformed certificate authorizes nothing
+    }
+  }
+  return false;
+}
+
+/**
+ * Compare two INTEGER contents by value (leading 0x00 bytes ignored).
+ */
+function integerContentsEqual(a: Uint8Array, b: Uint8Array): boolean {
+  let i = 0;
+  while (i < a.length - 1 && a[i] === 0) i++;
+  let j = 0;
+  while (j < b.length - 1 && b[j] === 0) j++;
+  return bytesEqual(a.subarray(i), b.subarray(j));
+}
+
+/**
+ * Compare two byte arrays (length and content).
+ */
+function bytesEqual(a: Uint8Array, b: Uint8Array): boolean {
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) {
+    if (a[i] !== b[i]) return false;
+  }
+  return true;
+}
+
+/**
+ * Index of the SingleResponse whose CertID issuerNameHash, issuerKeyHash
+ * and serialNumber equal those of the request, or -1.
+ */
+function findMatchingSingleResponse(responses: Asn1Node, certId: CertIdFields): number {
+  return responses.children.findIndex((single) => {
+    const fields = single.children[0]?.children;
+    const nameHash = fields?.[1];
+    const keyHash = fields?.[2];
+    const serial = fields?.[3];
+    if (nameHash?.tag !== 0x04 || keyHash?.tag !== 0x04 || serial?.tag !== 0x02) return false;
+    return (
+      bytesEqual(nameHash.data, certId.issuerNameHash) &&
+      bytesEqual(keyHash.data, certId.issuerKeyHash) &&
+      integerContentsEqual(serial.data, certId.serialNumber)
+    );
+  });
+}
+
 /**
  * Check the revocation status of a certificate using OCSP.
  *
  * Builds an OCSP request, sends it to the specified OCSP responder
- * URL via HTTP POST (using `fetch()`), and parses the response.
+ * URL via HTTP POST (using `fetch()`), parses the response and accepts
+ * its answer only when all of these hold:
+ *
+ * 1. The BasicOCSPResponse signature verifies with `issuerCert`, or with
+ *    a delegated responder certificate from its `certs` field that
+ *    `issuerCert` signed, that lists id-kp-OCSPSigning in its
+ *    extendedKeyUsage and that is within its validity period now.
+ * 2. A SingleResponse's CertID (issuerNameHash, issuerKeyHash,
+ *    serialNumber) equals the request CertID; that SingleResponse is the
+ *    answer.
+ * 3. Its thisUpdate is at most 5 minutes in the future and, when present,
+ *    its nextUpdate at most 5 minutes in the past. A response without
+ *    nextUpdate is accepted (RFC 6960 allows it).
+ *
+ * Otherwise the result is `{ status: 'unknown', unauthenticatedReason }`,
+ * also when the response claims `revoked`; when a SingleResponse matched,
+ * its claimed status is quoted in `unauthenticatedReason`. The responder
+ * certificate's own revocation status is not checked, and no trust anchor
+ * beyond `issuerCert` is consulted.
  *
  * @param cert        DER-encoded certificate to check.
  * @param issuerCert  DER-encoded issuer certificate.
  * @param ocspUrl     URL of the OCSP responder.
  * @returns           The OCSP status result.
+ * @throws {Error}    When the HTTP request fails, the responder returns
+ *                    an error status, or the response cannot be parsed.
  */
 export async function checkCertificateStatus(
   cert: Uint8Array,
@@ -570,7 +788,8 @@ export async function checkCertificateStatus(
   ocspUrl: string,
 ): Promise<OcspResult> {
   // Build the OCSP request
-  const ocspReq = await buildOcspRequest(cert, issuerCert);
+  const certId = await computeCertId(cert, issuerCert);
+  const ocspReq = encodeOcspRequest(certId);
 
   // Send via fetch
   const bodyBuffer = toBuffer(ocspReq);
@@ -588,16 +807,42 @@ export async function checkCertificateStatus(
 
   const respBytes = new Uint8Array(await response.arrayBuffer());
   const parsed = parseOcspResponse(respBytes);
+  const now = Date.now();
 
-  // Return the first response (we only sent one cert in the request)
-  if (parsed.responses.length === 0) {
-    return {
-      status: 'unknown',
-      thisUpdate: parsed.producedAt,
-    };
+  const basic = extractBasicResponse(respBytes);
+  const matchIndex = basic === undefined ? -1 : findMatchingSingleResponse(basic.responses, certId);
+  const single = parsed.responses[matchIndex];
+
+  const unknown = (reason: string): OcspResult => ({
+    status: 'unknown',
+    thisUpdate: single?.thisUpdate ?? parsed.producedAt,
+    unauthenticatedReason:
+      single === undefined ? reason : `${reason}; the response claims ${single.status}`,
+  });
+
+  if (basic === undefined) {
+    return unknown('the response is not a well-formed id-pkix-ocsp-basic response');
+  }
+  if (!(await authenticateOcspResponse(basic, issuerCert, now))) {
+    return unknown(
+      'the response signature does not verify with the issuer certificate or an ' +
+        'issuer-certified delegated responder (id-kp-OCSPSigning)',
+    );
+  }
+  if (single === undefined) {
+    return unknown('no SingleResponse matches the request CertID');
   }
 
-  const single = parsed.responses[0]!;
+  const thisUpdate = single.thisUpdate.getTime();
+  const nextUpdate = single.nextUpdate?.getTime();
+  // NaN (an unparseable time) fails these comparisons, so it is not fresh
+  if (!(thisUpdate <= now + FRESHNESS_SKEW_MS)) {
+    return unknown('thisUpdate lies in the future');
+  }
+  if (nextUpdate !== undefined && !(nextUpdate >= now - FRESHNESS_SKEW_MS)) {
+    return unknown('nextUpdate has passed; the response is stale');
+  }
+
   return {
     status: single.status,
     thisUpdate: single.thisUpdate,

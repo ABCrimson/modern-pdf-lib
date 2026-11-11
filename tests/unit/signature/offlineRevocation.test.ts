@@ -377,7 +377,7 @@ describe('verifyOfflineRevocation', () => {
     expect(result.source).toBe('none');
   });
 
-  it('should check OCSP and report good status', () => {
+  it('reports an unauthenticated embedded OCSP good as unknown', () => {
     const serial = new Uint8Array([0x42]);
     const cert = buildTestCertificate(serial, 'Test Cert');
     const ocspBasic = buildOcspBasicResponse(serial, 0);
@@ -389,11 +389,12 @@ describe('verifyOfflineRevocation', () => {
 
     const result = verifyOfflineRevocation(cert, revData);
     expect(result.checked).toBe(true);
-    expect(result.status).toBe('good');
+    expect(result.status).toBe('unknown');
     expect(result.source).toBe('ocsp');
+    expect(result.details).toMatch(/claims good but its signature is not verified/);
   });
 
-  it('should check OCSP and report revoked status', () => {
+  it('reports an unauthenticated embedded OCSP revoked as unknown', () => {
     const serial = new Uint8Array([0x42]);
     const cert = buildTestCertificate(serial, 'Test Cert');
     const ocspBasic = buildOcspBasicResponse(serial, 1);
@@ -405,8 +406,9 @@ describe('verifyOfflineRevocation', () => {
 
     const result = verifyOfflineRevocation(cert, revData);
     expect(result.checked).toBe(true);
-    expect(result.status).toBe('revoked');
+    expect(result.status).toBe('unknown');
     expect(result.source).toBe('ocsp');
+    expect(result.details).toMatch(/claims revoked but its signature is not verified/);
   });
 
   it('should check OCSP and report unknown status', () => {
@@ -425,7 +427,7 @@ describe('verifyOfflineRevocation', () => {
     expect(result.source).toBe('ocsp');
   });
 
-  it('should fall back to CRL when OCSP has no match', () => {
+  it('falls back to the CRL when OCSP has no match and reports it as unknown', () => {
     const serial = new Uint8Array([0x42]);
     const cert = buildTestCertificate(serial, 'Test Cert');
 
@@ -442,11 +444,12 @@ describe('verifyOfflineRevocation', () => {
 
     const result = verifyOfflineRevocation(cert, revData);
     expect(result.checked).toBe(true);
-    expect(result.status).toBe('good');
+    expect(result.status).toBe('unknown');
     expect(result.source).toBe('crl');
+    expect(result.details).toMatch(/claims good but its signature is not verified/);
   });
 
-  it('should detect revoked certificate via CRL', () => {
+  it('reports an unauthenticated CRL listing the serial as unknown', () => {
     const serial = new Uint8Array([0x42]);
     const cert = buildTestCertificate(serial, 'Test Cert');
     const crl = buildTestCrl('Test Cert', [serial]);
@@ -458,8 +461,9 @@ describe('verifyOfflineRevocation', () => {
 
     const result = verifyOfflineRevocation(cert, revData);
     expect(result.checked).toBe(true);
-    expect(result.status).toBe('revoked');
+    expect(result.status).toBe('unknown');
     expect(result.source).toBe('crl');
+    expect(result.details).toMatch(/claims revoked but its signature is not verified/);
   });
 
   it('should return unknown when no data covers the certificate', () => {

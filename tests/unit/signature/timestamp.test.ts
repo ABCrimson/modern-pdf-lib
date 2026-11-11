@@ -10,6 +10,7 @@ import {
   encodeOctetString,
   encodeContextTag,
   encodeLength,
+  parseDerTlv,
 } from '../../../src/signature/pkcs7.js';
 
 // ---------------------------------------------------------------------------
@@ -182,6 +183,31 @@ describe('buildTimestampRequest', () => {
       .map((b) => b.toString(16).padStart(2, '0'))
       .join('');
     expect(hex).toContain('0101ff');
+  });
+
+  it('encodes a 200-byte caller nonce as one INTEGER and keeps certReq', () => {
+    const nonce = new Uint8Array(200).fill(0x11);
+    const req = parseDerTlv(buildTimestampRequest(new Uint8Array(32), 'SHA-256', nonce), 0);
+
+    expect(req.children).toHaveLength(4);
+    expect(req.children[2]?.tag).toBe(0x02);
+    expect(req.children[2]?.data).toEqual(nonce);
+    expect(req.children[3]?.tag).toBe(0x01);
+  });
+
+  it('encodes a caller nonce with the top bit set as a positive INTEGER', () => {
+    const req = parseDerTlv(
+      buildTimestampRequest(new Uint8Array(32), 'SHA-256', Uint8Array.of(0x80, 0x01)),
+      0,
+    );
+
+    expect(req.children[2]?.data).toEqual(Uint8Array.of(0x00, 0x80, 0x01));
+  });
+
+  it('rejects an empty caller nonce', () => {
+    expect(() => buildTimestampRequest(new Uint8Array(32), 'SHA-256', new Uint8Array(0))).toThrow(
+      RangeError,
+    );
   });
 });
 

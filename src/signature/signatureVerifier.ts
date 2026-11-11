@@ -8,6 +8,8 @@
  *    (integrity check by hashing the covered regions).
  * 2. The PKCS#7 signature is valid for the hash (cryptographic verification
  *    using the certificate's public key via Web Crypto).
+ * 3. The ByteRange covers the whole file except the /Contents hex string,
+ *    so no bytes are left unsigned.
  *
  * Limitations:
  * - Certificate chain validation (CA trust) is not performed because
@@ -18,7 +20,7 @@
  * @packageDocumentation
  */
 
-import { findSignatures, computeSignatureHash } from './byteRange.js';
+import { findSignatures, computeSignatureHash, byteRangeCoversWholeFile } from './byteRange.js';
 import {
   parseDerTlv,
   extractIssuerAndSerial,
@@ -45,15 +47,23 @@ export interface SignatureVerificationResult {
   fieldName: string;
   /** Subject CN from the certificate. */
   signedBy: string;
-  /** Overall validity (integrity AND signature). */
+  /** Overall validity: `integrityValid` AND `certificateValid` AND `coversWholeDocument`. */
   valid: boolean;
   /** Reason for signing (if present). */
   reason?: string | undefined;
   /** Whether the ByteRange hash matches the signed hash. */
   integrityValid: boolean;
+  /**
+   * Whether the ByteRange covers the whole file except the /Contents hex
+   * string. `false` when bytes follow the signed range (for example every
+   * signature but the last of an incrementally updated file), and also
+   * `false`, without the ranges being evaluated, when the /Contents PKCS#7
+   * cannot be parsed.
+   */
+  coversWholeDocument: boolean;
   /** Whether the cryptographic signature is valid. */
   certificateValid?: boolean | undefined;
-  /** Signing date (if present in signed attributes). */
+  /** Signing date from the signingTime signed attribute (if present); claimed by the signer, not attested by a timestamp authority. */
   signingDate?: Date | undefined;
   /**
    * Whether the ESS `signing-certificate-v2` attribute (RFC 5035,
@@ -494,6 +504,7 @@ export async function verifySignatures(
         signedBy: 'Unknown',
         valid: false,
         integrityValid: false,
+        coversWholeDocument: false,
         reason: fieldInfo.reason,
       });
       continue;
@@ -571,11 +582,14 @@ export async function verifySignatures(
       // Leave CAdES fields undefined on any error.
     }
 
+    const coversWholeDocument = byteRangeCoversWholeFile(sig, pdfBytes.length);
+
     results.push({
       fieldName: fieldInfo.fieldName,
       signedBy,
-      valid: integrityValid && certificateValid === true,
+      valid: integrityValid && certificateValid === true && coversWholeDocument,
       integrityValid,
+      coversWholeDocument,
       certificateValid,
       signingDate,
       reason: fieldInfo.reason,

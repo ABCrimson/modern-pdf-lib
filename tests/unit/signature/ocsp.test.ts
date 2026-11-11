@@ -3,12 +3,14 @@
  * status checking (RFC 6960).
  */
 
-import { describe, it, expect } from 'vitest';
+import { afterEach, describe, it, expect, vi } from 'vitest';
 import {
   buildOcspRequest,
+  checkCertificateStatus,
   parseOcspResponse,
   extractOcspUrl,
 } from '../../../src/signature/ocsp.js';
+import * as fx from '../../helpers/signature-trust-fixtures.js';
 import {
   encodeSequence,
   encodeSet,
@@ -687,5 +689,223 @@ describe('extractOcspUrl', () => {
 
     const url = extractOcspUrl(certificate);
     expect(url).toBeNull();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Tests: checkCertificateStatus (authenticated, matching and fresh answers only)
+// ---------------------------------------------------------------------------
+
+describe('checkCertificateStatus', () => {
+  const ocspUrl = 'http://ocsp.invalid/';
+  const serial = Uint8Array.of(0x0a, 0x0b, 0x0c);
+  const hourMs = 60 * 60 * 1000;
+  const OCSP_SIGNING = '1.3.6.1.5.5.7.3.9';
+  const ANY_EKU = '2.5.29.37.0';
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  async function setup(): Promise<{
+    ca: { certificate: Uint8Array; keyPair: CryptoKeyPair };
+    leaf: Uint8Array;
+    hashes: { issuerNameHash: Uint8Array; issuerKeyHash: Uint8Array };
+  }> {
+    const ca = await fx.generateTestCertWithOcsp(ocspUrl);
+    const leaf = await fx.generateIssuedCert(ca.certificate, ca.keyPair, 'Subject', serial);
+    return { ca, leaf, hashes: await fx.computeCertIdHashes(ca.certificate) };
+  }
+
+  function fresh(): { thisUpdate: Date; nextUpdate: Date; producedAt: Date } {
+    const now = Date.now();
+    return {
+      thisUpdate: new Date(now - hourMs),
+      nextUpdate: new Date(now + hourMs),
+      producedAt: new Date(now - hourMs),
+    };
+  }
+
+  function answerWith(basic: Uint8Array): void {
+    const body = fx.toArrayBuffer(fx.buildMockOcspResponse(0, basic));
+    vi.stubGlobal('fetch', async () => new Response(body, { status: 200 }));
+  }
+
+  it('reports revoked for an issuer-signed, fresh, matching revoked answer', async () => {
+    const { ca, leaf, hashes } = await setup();
+    answerWith(
+      await fx.buildMockBasicOcspResponse({
+        status: 'revoked',
+        serialNumber: serial,
+        ...fresh(),
+        ...hashes,
+        sign: ca.keyPair.privateKey,
+      }),
+    );
+
+    const result = await checkCertificateStatus(leaf, ca.certificate, ocspUrl);
+
+    expect(result.status).toBe('revoked');
+    expect(result.unauthenticatedReason).toBeUndefined();
+  });
+
+  it('reports an unsigned revoked answer as unknown and quotes the claim', async () => {
+    const { ca, leaf, hashes } = await setup();
+    answerWith(
+      await fx.buildMockBasicOcspResponse({
+        status: 'revoked',
+        serialNumber: serial,
+        ...fresh(),
+        ...hashes,
+      }),
+    );
+
+    const result = await checkCertificateStatus(leaf, ca.certificate, ocspUrl);
+
+    expect(result.status).toBe('unknown');
+    expect(result.unauthenticatedReason).toMatch(/claims revoked/);
+  });
+
+  it('accepts a signed, matching answer without nextUpdate whose thisUpdate is past', async () => {
+    const { ca, leaf, hashes } = await setup();
+    const { thisUpdate, producedAt } = fresh();
+    answerWith(
+      await fx.buildMockBasicOcspResponse({
+        status: 'good',
+        serialNumber: serial,
+        thisUpdate,
+        producedAt,
+        ...hashes,
+        sign: ca.keyPair.privateKey,
+      }),
+    );
+
+    const result = await checkCertificateStatus(leaf, ca.certificate, ocspUrl);
+
+    expect(result.status).toBe('good');
+  });
+
+  it('reports unknown for a signed answer whose thisUpdate lies in the future', async () => {
+    const { ca, leaf, hashes } = await setup();
+    const now = Date.now();
+    answerWith(
+      await fx.buildMockBasicOcspResponse({
+        status: 'good',
+        serialNumber: serial,
+        thisUpdate: new Date(now + hourMs),
+        nextUpdate: new Date(now + 2 * hourMs),
+        producedAt: new Date(now - hourMs),
+        ...hashes,
+        sign: ca.keyPair.privateKey,
+      }),
+    );
+
+    const result = await checkCertificateStatus(leaf, ca.certificate, ocspUrl);
+
+    expect(result.status).toBe('unknown');
+    expect(result.unauthenticatedReason).toBeDefined();
+  });
+
+  it('reports unknown for a signed answer whose CertID issuer hashes differ', async () => {
+    const { ca, leaf } = await setup();
+    answerWith(
+      await fx.buildMockBasicOcspResponse({
+        status: 'good',
+        serialNumber: serial,
+        ...fresh(),
+        sign: ca.keyPair.privateKey,
+      }),
+    );
+
+    const result = await checkCertificateStatus(leaf, ca.certificate, ocspUrl);
+
+    expect(result.status).toBe('unknown');
+  });
+
+  it('reports good for an answer signed by an issuer-signed delegated responder with id-kp-OCSPSigning', async () => {
+    const { ca, leaf, hashes } = await setup();
+    const responder = await fx.generateResponderCert('Responder', ca.certificate, ca.keyPair, [
+      OCSP_SIGNING,
+    ]);
+    answerWith(
+      await fx.buildMockBasicOcspResponse({
+        status: 'good',
+        serialNumber: serial,
+        ...fresh(),
+        ...hashes,
+        sign: responder.keyPair.privateKey,
+        certs: [responder.certificate],
+      }),
+    );
+
+    const result = await checkCertificateStatus(leaf, ca.certificate, ocspUrl);
+
+    expect(result.status).toBe('good');
+  });
+
+  it('reports unknown for a delegated responder without an extendedKeyUsage extension', async () => {
+    const { ca, leaf, hashes } = await setup();
+    const responder = await fx.generateResponderCert('Responder', ca.certificate, ca.keyPair);
+    answerWith(
+      await fx.buildMockBasicOcspResponse({
+        status: 'good',
+        serialNumber: serial,
+        ...fresh(),
+        ...hashes,
+        sign: responder.keyPair.privateKey,
+        certs: [responder.certificate],
+      }),
+    );
+
+    const result = await checkCertificateStatus(leaf, ca.certificate, ocspUrl);
+
+    expect(result.status).toBe('unknown');
+  });
+
+  it('reports unknown for a delegated responder whose only EKU is anyExtendedKeyUsage', async () => {
+    const { ca, leaf, hashes } = await setup();
+    const responder = await fx.generateResponderCert('Responder', ca.certificate, ca.keyPair, [
+      ANY_EKU,
+    ]);
+    answerWith(
+      await fx.buildMockBasicOcspResponse({
+        status: 'good',
+        serialNumber: serial,
+        ...fresh(),
+        ...hashes,
+        sign: responder.keyPair.privateKey,
+        certs: [responder.certificate],
+      }),
+    );
+
+    const result = await checkCertificateStatus(leaf, ca.certificate, ocspUrl);
+
+    expect(result.status).toBe('unknown');
+  });
+
+  it('reports unknown for a responder with id-kp-OCSPSigning that the issuer did not sign', async () => {
+    const { ca, leaf, hashes } = await setup();
+    const other = await fx.generateTestCertWithOcsp(ocspUrl);
+    // Same issuer Name as the real CA, different key.
+    const responder = await fx.generateResponderCert(
+      'Responder',
+      other.certificate,
+      other.keyPair,
+      [OCSP_SIGNING],
+    );
+    answerWith(
+      await fx.buildMockBasicOcspResponse({
+        status: 'good',
+        serialNumber: serial,
+        ...fresh(),
+        ...hashes,
+        sign: responder.keyPair.privateKey,
+        certs: [responder.certificate],
+      }),
+    );
+
+    const result = await checkCertificateStatus(leaf, ca.certificate, ocspUrl);
+
+    expect(result.status).toBe('unknown');
   });
 });

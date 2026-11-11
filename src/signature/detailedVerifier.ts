@@ -5,13 +5,13 @@
  *
  * Builds on top of the basic `verifySignatures()` in signatureVerifier.ts
  * to provide comprehensive verification results including certificate
- * chain information, revocation status, timestamps, and diagnostic
+ * chain information, revocation status, the signer-claimed signing time, and diagnostic
  * warnings/errors.
  *
  * @packageDocumentation
  */
 
-import { findSignatures, computeSignatureHash } from './byteRange.js';
+import { findSignatures, computeSignatureHash, byteRangeCoversWholeFile } from './byteRange.js';
 import {
   parseDerTlv,
   extractIssuerAndSerial,
@@ -58,10 +58,18 @@ export interface DetailedVerificationResult {
   fieldName: string;
   /** Subject CN of the signing certificate. */
   signedBy: string;
-  /** Overall validity (all checks passed). */
+  /** Overall validity: `integrityValid` AND `cryptoValid` AND `coversWholeDocument`. */
   valid: boolean;
   /** Whether the ByteRange hash matches the signed hash. */
   integrityValid: boolean;
+  /**
+   * Whether the ByteRange covers the whole file except the /Contents hex
+   * string. `false` when bytes follow the signed range (for example every
+   * signature but the last of an incrementally updated file), and also
+   * `false`, without the ranges being evaluated, when the /Contents PKCS#7
+   * cannot be parsed.
+   */
+  coversWholeDocument: boolean;
   /** Whether the cryptographic signature is valid. */
   cryptoValid: boolean;
   /** Certificate chain from signer to root. */
@@ -74,8 +82,14 @@ export interface DetailedVerificationResult {
   ocspResponse?: { status: string; thisUpdate: Date; nextUpdate?: Date } | undefined;
   /** Whether CRL was checked. */
   crlChecked: boolean;
-  /** Timestamp information, if present. */
+  /**
+   * Signer-claimed signing time; `valid` is always `false` in this release
+   * because no RFC 3161 token is verified. Read `signingTime` for the
+   * claimed value.
+   */
   timestamp?: { time: Date; valid: boolean } | undefined;
+  /** The signing time the signer claims (signingTime attribute); not attested. */
+  signingTime?: Date | undefined;
   /** Non-fatal warnings about the signature. */
   warnings: string[];
   /** Fatal errors encountered during verification. */
@@ -524,7 +538,8 @@ async function verifyCryptoSignature(
  * - Cryptographic signature validity
  * - Certificate chain (all certificates in the PKCS#7 structure)
  * - Revocation status (if `checkRevocation` is enabled)
- * - Timestamp information
+ * - The signer-claimed signing time (never a verified timestamp)
+ * - Whether the ByteRange covers the whole file except /Contents
  * - Diagnostic warnings and errors
  *
  * @param pdf      The PDF file bytes.
@@ -567,6 +582,7 @@ export async function verifySignatureDetailed(
         signedBy: 'Unknown',
         valid: false,
         integrityValid: false,
+        coversWholeDocument: false,
         cryptoValid: false,
         chain: [],
         revocationChecked: false,
@@ -646,10 +662,15 @@ export async function verifySignatureDetailed(
     }
 
     // Step 3: Extract timestamp
+    // The signingTime attribute is the signer's own claim, never a timestamp
+    // authority's attestation, so it is reported but never valid.
     let timestamp: { time: Date; valid: boolean } | undefined;
     const signingTime = extractSigningTime(parsed.signedAttrs);
     if (signingTime) {
-      timestamp = { time: signingTime, valid: true };
+      timestamp = { time: signingTime, valid: false };
+      warnings.push(
+        'Signing time is claimed by the signer (signingTime attribute), not attested by a timestamp authority',
+      );
     }
 
     // Step 4: Revocation checking
@@ -700,13 +721,22 @@ export async function verifySignatureDetailed(
       warnings.push('No trusted root certificates provided — chain trust not validated');
     }
 
-    const valid = integrityValid && cryptoValid;
+    const coversWholeDocument = byteRangeCoversWholeFile(sig, pdf.length);
+    if (!coversWholeDocument) {
+      const [, , start2, length2] = sig.byteRange;
+      errors.push(
+        `ByteRange does not cover the whole file except /Contents (signed bytes end at ${start2 + length2}, file length ${pdf.length})`,
+      );
+    }
+
+    const valid = integrityValid && cryptoValid && coversWholeDocument;
 
     results.push({
       fieldName: fieldInfo.fieldName,
       signedBy,
       valid,
       integrityValid,
+      coversWholeDocument,
       cryptoValid,
       chain,
       revocationChecked,
@@ -714,6 +744,7 @@ export async function verifySignatureDetailed(
       ocspResponse,
       crlChecked,
       timestamp,
+      signingTime,
       warnings,
       errors,
     });

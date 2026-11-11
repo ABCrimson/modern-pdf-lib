@@ -21,9 +21,11 @@ import {
   encodeSequence,
   encodeOID,
   encodeOctetString,
+  encodeInteger,
   parseDerTlv,
   decodeOidBytes,
 } from './pkcs7.js';
+import { TimestampVerificationError } from '../errors.js';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -31,12 +33,20 @@ import {
 
 /**
  * Result from a timestamp request.
+ *
+ * The token's CMS signature and the TSA certificate are not verified:
+ * the fields below are read from the TSTInfo, whose messageImprint and
+ * nonce are checked only against what the caller supplied.
  */
 export interface TimestampResult {
   /** The DER-encoded TimeStampToken (a CMS SignedData). */
   timestampToken: Uint8Array;
-  /** The signing time reported by the TSA. */
+  /** The signing time reported by the TSA (the TSTInfo genTime). */
   signingTime: Date;
+  /** The hash the TSTInfo messageImprint carries. */
+  hashedMessage: Uint8Array;
+  /** The nonce the TSTInfo carries (INTEGER content bytes), when it has one. */
+  nonce?: Uint8Array | undefined;
 }
 
 // ---------------------------------------------------------------------------
@@ -109,6 +119,34 @@ function parseUtcTime(timeStr: string): Date {
 // ---------------------------------------------------------------------------
 
 /**
+ * Generate 8 random nonce bytes that encode as a minimal, positive DER
+ * INTEGER: the top bit is cleared and the first byte is nonzero.
+ */
+function generateNonce(): Uint8Array {
+  const bytes = new Uint8Array(8);
+  globalThis.crypto.getRandomValues(bytes);
+  bytes[0] = (bytes[0] ?? 1) & 0x7f || 1;
+  return bytes;
+}
+
+/**
+ * Remove leading 0x00 bytes so two INTEGER encodings compare by value.
+ */
+function stripLeadingZeros(bytes: Uint8Array): Uint8Array {
+  let start = 0;
+  while (start < bytes.length - 1 && bytes[start] === 0) start++;
+  return bytes.subarray(start);
+}
+
+function bytesEqual(a: Uint8Array, b: Uint8Array): boolean {
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) {
+    if (a[i] !== b[i]) return false;
+  }
+  return true;
+}
+
+/**
  * Build a DER-encoded TimeStampReq (RFC 3161 SS2.4.1).
  *
  * ```
@@ -129,9 +167,18 @@ function parseUtcTime(timeStr: string): Date {
  *
  * @param dataHash       The hash of the data to timestamp.
  * @param hashAlgorithm  The hash algorithm used.
+ * @param nonce          The nonce to send, as unsigned big-endian bytes
+ *                       (encoded as a positive DER INTEGER; must not be
+ *                       empty). When omitted, a random 8-byte nonce is
+ *                       generated.
  * @returns              DER-encoded TimeStampReq.
+ * @throws               RangeError if `nonce` is empty.
  */
-export function buildTimestampRequest(dataHash: Uint8Array, hashAlgorithm: string): Uint8Array {
+export function buildTimestampRequest(
+  dataHash: Uint8Array,
+  hashAlgorithm: string,
+  nonce?: Uint8Array,
+): Uint8Array {
   const hashOid = HASH_OID_MAP[hashAlgorithm];
   if (!hashOid) {
     throw new Error(`Unsupported hash algorithm for timestamp: ${hashAlgorithm}`);
@@ -147,21 +194,16 @@ export function buildTimestampRequest(dataHash: Uint8Array, hashAlgorithm: strin
   ]);
   const messageImprint = encodeSequence([algorithmId, encodeOctetString(dataHash)]);
 
-  // Generate a random nonce (8 bytes)
-  const nonceBytes = new Uint8Array(8);
-  globalThis.crypto.getRandomValues(nonceBytes);
-  // Ensure positive by clearing the high bit
-  nonceBytes[0] = nonceBytes[0]! & 0x7f;
-  // Encode as INTEGER
-  const nonce = new Uint8Array(2 + nonceBytes.length);
-  nonce[0] = 0x02; // INTEGER tag
-  nonce[1] = nonceBytes.length;
-  nonce.set(nonceBytes, 2);
+  // Use the caller's nonce, or generate a random one (8 bytes)
+  if (nonce !== undefined && nonce.length === 0) {
+    throw new RangeError('Timestamp nonce must not be empty');
+  }
+  const nonceInteger = encodeInteger(nonce ?? generateNonce());
 
   // certReq: TRUE (request the TSA to include its certificate)
   const certReq = encodeBooleanTrue();
 
-  return encodeSequence([version, messageImprint, nonce, certReq]);
+  return encodeSequence([version, messageImprint, nonceInteger, certReq]);
 }
 
 /**
@@ -180,11 +222,29 @@ export function buildTimestampRequest(dataHash: Uint8Array, hashAlgorithm: strin
  * }
  * ```
  *
+ * The token's CMS signature and the TSA certificate are not verified in
+ * this release; `signingTime` is the TSTInfo genTime. Without
+ * `expected` the token is parsed but not bound to any request.
+ *
  * @param response  DER-encoded TimeStampResp.
+ * @param expected  What the request sent: `dataHash` is compared with the
+ *                  TSTInfo messageImprint hashedMessage, `hashAlgorithm`
+ *                  with its hashAlgorithm OID, and `nonce` (INTEGER content
+ *                  bytes) with the TSTInfo nonce; each only when supplied.
  * @returns         The parsed timestamp result.
  * @throws          Error if the TSA reported an error status.
+ * @throws          {@link TimestampVerificationError} if the TSTInfo cannot
+ *                  be parsed, or its messageImprint or nonce differs from
+ *                  `expected`.
  */
-export function parseTimestampResponse(response: Uint8Array): TimestampResult {
+export function parseTimestampResponse(
+  response: Uint8Array,
+  expected?: {
+    dataHash?: Uint8Array;
+    hashAlgorithm?: 'SHA-256' | 'SHA-384' | 'SHA-512';
+    nonce?: Uint8Array;
+  },
+): TimestampResult {
   const resp = parseDerTlv(response, 0);
 
   if (resp.children.length < 1) {
@@ -221,59 +281,109 @@ export function parseTimestampResponse(response: Uint8Array): TimestampResult {
   const tokenStart = tokenNode.offset;
   const timestampToken = response.subarray(tokenStart, tokenStart + tokenNode.totalLength);
 
-  // Extract the signing time from the TSTInfo inside the token
-  const signingTime = extractTstInfoTime(tokenNode);
+  const tst = parseTstInfo(tokenNode);
 
-  return { timestampToken, signingTime };
+  if (
+    expected?.hashAlgorithm !== undefined &&
+    tst.hashAlgorithmOid !== HASH_OID_MAP[expected.hashAlgorithm]
+  ) {
+    throw new TimestampVerificationError(
+      'TSTInfo messageImprint does not match the requested hash',
+    );
+  }
+  if (expected?.dataHash && !bytesEqual(expected.dataHash, tst.hashedMessage)) {
+    throw new TimestampVerificationError(
+      'TSTInfo messageImprint does not match the requested hash',
+    );
+  }
+  if (
+    expected?.nonce &&
+    (!tst.nonce || !bytesEqual(stripLeadingZeros(expected.nonce), stripLeadingZeros(tst.nonce)))
+  ) {
+    throw new TimestampVerificationError('TSTInfo nonce does not match the request nonce');
+  }
+
+  return {
+    timestampToken,
+    signingTime: tst.genTime,
+    hashedMessage: tst.hashedMessage,
+    nonce: tst.nonce,
+  };
 }
 
 /**
- * Extract the genTime from a TimeStampToken's TSTInfo.
+ * Read genTime, the messageImprint hash and the nonce from a
+ * TimeStampToken's TSTInfo.
  *
  * The token is a ContentInfo containing SignedData, which in turn
  * contains the TSTInfo as the encapsulated content.
+ *
+ * @throws TimestampVerificationError if the TSTInfo is absent or malformed.
  */
-function extractTstInfoTime(contentInfo: ReturnType<typeof parseDerTlv>): Date {
+function parseTstInfo(contentInfo: ReturnType<typeof parseDerTlv>): {
+  genTime: Date;
+  hashAlgorithmOid: string;
+  hashedMessage: Uint8Array;
+  nonce?: Uint8Array;
+} {
+  const fail = (reason: string, cause?: unknown): never => {
+    throw new TimestampVerificationError(`TSTInfo cannot be parsed: ${reason}`, { cause });
+  };
+
   try {
     // ContentInfo > [0] SignedData > encapContentInfo > [0] TSTInfo
-    const signedDataWrapper = contentInfo.children[1]!;
-    const signedData = signedDataWrapper.children[0]!;
-
-    // Find encapContentInfo (the SEQUENCE with data OID)
-    for (const child of signedData.children) {
-      if (child.tag === 0x30 && child.children.length >= 1) {
-        // Check if this is the encapContentInfo with eContent
-        const oidNode = child.children[0]!;
-        if (oidNode.tag === 0x06) {
-          const oid = decodeOidBytes(oidNode.data);
-          // OID for id-ct-TSTInfo: 1.2.840.113549.1.9.16.1.4
-          if (oid === '1.2.840.113549.1.9.16.1.4' && child.children.length >= 2) {
-            const eContentWrapper = child.children[1]!;
-            // [0] EXPLICIT OCTET STRING containing TSTInfo
-            const eContent = eContentWrapper.children[0]!;
-            const tstInfo = parseDerTlv(eContent.data, 0);
-
-            // TSTInfo: version, policy, messageImprint, serialNumber, genTime, ...
-            // genTime is at index 4
-            if (tstInfo.children.length >= 5) {
-              const genTimeNode = tstInfo.children[4]!;
-              const textDecoder = new TextDecoder('ascii');
-              const timeStr = textDecoder.decode(genTimeNode.data);
-              if (genTimeNode.tag === 0x18) {
-                return parseGeneralizedTime(timeStr);
-              }
-              return parseUtcTime(timeStr);
-            }
-          }
-        }
+    const signedData = contentInfo.children[1]?.children[0];
+    for (const child of signedData?.children ?? []) {
+      if (child.tag !== 0x30) continue;
+      const oidNode = child.children[0];
+      // OID for id-ct-TSTInfo: 1.2.840.113549.1.9.16.1.4
+      if (oidNode?.tag !== 0x06 || decodeOidBytes(oidNode.data) !== '1.2.840.113549.1.9.16.1.4') {
+        continue;
       }
-    }
-  } catch {
-    // Fall through
-  }
+      // [0] EXPLICIT OCTET STRING containing TSTInfo
+      const eContent = child.children[1]?.children[0];
+      if (!eContent) return fail('encapContentInfo has no eContent');
+      const tstInfo = parseDerTlv(eContent.data, 0);
 
-  // Default: return current time if parsing fails
-  return new Date();
+      // TSTInfo: version, policy, messageImprint, serialNumber, genTime,
+      // accuracy?, ordering?, nonce?, ...
+      const [, , imprint, , genTimeNode, ...rest] = tstInfo.children;
+      if (!imprint || !genTimeNode) return fail('fewer than 5 fields');
+      const hashedMessageNode = imprint.children[1];
+      if (
+        imprint.tag !== 0x30 ||
+        imprint.children.length !== 2 ||
+        imprint.children[0]?.tag !== 0x30 ||
+        hashedMessageNode?.tag !== 0x04
+      ) {
+        return fail('messageImprint is not SEQUENCE { AlgorithmIdentifier, OCTET STRING }');
+      }
+      const hashAlgorithmNode = imprint.children[0]?.children[0];
+      if (hashAlgorithmNode?.tag !== 0x06) {
+        return fail('messageImprint hashAlgorithm has no OID');
+      }
+      const hashAlgorithmOid = decodeOidBytes(hashAlgorithmNode.data);
+      if (genTimeNode.tag !== 0x18 && genTimeNode.tag !== 0x17) {
+        return fail('genTime is not a GeneralizedTime or UTCTime');
+      }
+      const timeStr = new TextDecoder('ascii').decode(genTimeNode.data);
+      const genTime =
+        genTimeNode.tag === 0x18 ? parseGeneralizedTime(timeStr) : parseUtcTime(timeStr);
+      if (Number.isNaN(genTime.getTime())) return fail('genTime is not a valid time');
+
+      const nonceNode = rest.find((n) => n.tag === 0x02);
+      return {
+        genTime,
+        hashAlgorithmOid,
+        hashedMessage: hashedMessageNode.data,
+        ...(nonceNode ? { nonce: nonceNode.data } : {}),
+      };
+    }
+  } catch (err) {
+    if (err instanceof TimestampVerificationError) throw err;
+    return fail(err instanceof Error ? err.message : 'malformed DER', err);
+  }
+  return fail('no id-ct-TSTInfo encapsulated content found');
 }
 
 /**
@@ -286,9 +396,15 @@ function extractTstInfoTime(contentInfo: ReturnType<typeof parseDerTlv>): Date {
  * @param dataHash       The hash of the data to timestamp.
  * @param tsaUrl         The URL of the TSA service.
  * @param hashAlgorithm  The hash algorithm. Default 'SHA-256'.
- * @returns              The timestamp result.
+ * @returns              The timestamp result. Its messageImprint equals
+ *                       `dataHash` and its nonce equals the nonce sent.
+ *                       The token's CMS signature and the TSA certificate
+ *                       are not verified in this release.
  * @throws               Error if the request fails or the TSA returns
  *                       an error status.
+ * @throws               {@link TimestampVerificationError} if the TSTInfo
+ *                       cannot be parsed, or its messageImprint or nonce
+ *                       differs from the request.
  *
  * @example
  * ```ts
@@ -305,7 +421,8 @@ export async function requestTimestamp(
   hashAlgorithm: 'SHA-256' | 'SHA-384' | 'SHA-512' = 'SHA-256',
 ): Promise<TimestampResult> {
   // Build the request
-  const tsReq = buildTimestampRequest(dataHash, hashAlgorithm);
+  const nonce = generateNonce();
+  const tsReq = buildTimestampRequest(dataHash, hashAlgorithm, nonce);
 
   // Send via fetch — convert to ArrayBuffer for universal BodyInit compatibility
   const bodyBuffer = tsReq.buffer.slice(
@@ -331,6 +448,6 @@ export async function requestTimestamp(
 
   const respBytes = new Uint8Array(await response.arrayBuffer());
 
-  // Parse the response
-  return parseTimestampResponse(respBytes);
+  // Parse the response and bind it to the request
+  return parseTimestampResponse(respBytes, { dataHash, hashAlgorithm, nonce });
 }

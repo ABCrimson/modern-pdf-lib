@@ -8,6 +8,11 @@
  * provides functions to download CRLs and check if a certificate
  * serial number has been revoked.
  *
+ * Nothing in this module verifies a CRL's signature, its issuer or its
+ * thisUpdate/nextUpdate window: a parsed CRL is unauthenticated data, and
+ * `isCertificateRevoked` returning `false` does not establish that a
+ * certificate is good.
+ *
  * Uses the ASN.1 DER utilities from `./pkcs7.ts` for decoding.
  *
  * References:
@@ -277,6 +282,10 @@ export function parseCrl(data: Uint8Array): CrlData {
  * Uses `fetch()` to retrieve the CRL and then parses it as DER.
  * If the response is PEM-encoded, it is automatically converted to DER.
  *
+ * The CRL is not authenticated: its signature is not verified against
+ * the issuing CA, and neither its issuer Name nor its nextUpdate is
+ * checked. Treat the result as unauthenticated data.
+ *
  * @param url  URL of the CRL (typically an HTTP URL from CRL Distribution Points).
  * @returns    Parsed CRL data.
  */
@@ -315,9 +324,14 @@ export async function downloadCrl(url: string): Promise<CrlData> {
  * Compares the certificate's serial number against all entries
  * in the CRL's revoked certificates list.
  *
+ * This is a lookup in unauthenticated data: the CRL's signature is not
+ * verified, and neither the CRL issuer nor its freshness is compared with
+ * the certificate. `false` therefore means only "not listed in this CRL",
+ * not "not revoked"; do not treat it as a good status.
+ *
  * @param cert  DER-encoded X.509 certificate to check.
  * @param crl   Parsed CRL data.
- * @returns     `true` if the certificate is listed as revoked.
+ * @returns     `true` if the certificate's serial is listed in `crl`.
  */
 export function isCertificateRevoked(cert: Uint8Array, crl: CrlData): boolean {
   // Extract serial number from the certificate

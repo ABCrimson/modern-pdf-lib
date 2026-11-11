@@ -22,13 +22,17 @@ import { findExistingSignatures } from './incrementalSave.js';
 // ---------------------------------------------------------------------------
 
 /**
- * Types of modifications that can be detected.
+ * Types of modifications that can be detected. `'unknown'` marks an object
+ * added or changed after a signed revision whose text carries a signature
+ * key (`/Type /Sig`, `/FT /Sig`, `/SubFilter /adbe.pkcs7.detached`); it is
+ * not compliant at any certification level.
  */
 export type ModificationViolationType =
   | 'content_changed'
   | 'annotation_added'
   | 'form_filled'
-  | 'page_added';
+  | 'page_added'
+  | 'unknown';
 
 /**
  * A single modification violation detected in the document.
@@ -110,13 +114,16 @@ function isPageAddition(oldContent: string, newContent: string): boolean {
 }
 
 /**
- * Check if a change looks like a signature addition.
+ * Check whether an object's text carries a signature key, with or without
+ * whitespace between key and value. This is a pattern test over the raw text
+ * (comments, strings and stream data included), so it only routes the
+ * object to the `'unknown'` violation; it never classifies a change as allowed.
  */
 function isSignatureChange(newContent: string): boolean {
   return (
-    newContent.includes('/Type /Sig') ||
-    newContent.includes('/FT /Sig') ||
-    newContent.includes('/SubFilter /adbe.pkcs7.detached')
+    /\/Type\s*\/Sig/.test(newContent) ||
+    /\/FT\s*\/Sig/.test(newContent) ||
+    /\/SubFilter\s*\/adbe\.pkcs7\.detached/.test(newContent)
   );
 }
 
@@ -134,7 +141,11 @@ function isSignatureChange(newContent: string): boolean {
  * Modification levels:
  * - MDP 1 (NoChanges): Any change is a violation
  * - MDP 2 (FormFillAndSign): Only form fills and new signatures allowed
+ *   (0.40.5: an added signature is reported as `'unknown'` and is not yet
+ *   recognised as permitted)
  * - MDP 3 (FormFillSignAnnotate): Form fills, signatures, and annotations allowed
+ *   (0.40.5: an added signature is reported as `'unknown'` and is not yet
+ *   recognised as permitted)
  *
  * @param pdf  The PDF bytes to analyze.
  * @returns    A detailed modification report.
@@ -183,7 +194,18 @@ export async function detectModifications(pdf: Uint8Array): Promise<Modification
 
         // Determine the type of change
         if (isSignatureChange(newContent)) {
-          // Signature additions are always allowed (they're part of the chain)
+          // Fail closed: a real added signature and a change disguised behind a
+          // signature key look the same to this pattern test, so neither is
+          // skipped. 'unknown' is non-compliant at every certification level
+          // (case 1 rejects every violation; cases 2 and 3 reject anything
+          // that is not form_filled / annotation_added).
+          violations.push({
+            type: 'unknown',
+            description:
+              `Object ${objNum} ${oldContent === undefined ? 'added' : 'modified'} after ` +
+              `signature at index ${i} carries a signature key; the change cannot be classified`,
+            affectedSignatureIndex: i,
+          });
           continue;
         }
 

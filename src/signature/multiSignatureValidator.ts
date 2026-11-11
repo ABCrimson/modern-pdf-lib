@@ -8,15 +8,20 @@
  *
  * 1. Each signature covers the correct byte range
  * 2. Each subsequent signature covers all content including previous signatures
- * 3. No signature's covered bytes have been tampered with
- * 4. The chain is ordered correctly (chronological signing order)
+ * 3. Each signature's message digest matches its covered bytes and its CMS
+ *    signature verifies against the embedded certificate (no trust
+ *    anchoring: use `validateCertificateChain` for that)
+ * 4. Signatures are ordered by the end offset of their byte range (not by
+ *    signing time)
  *
  * Reference: PDF 1.7 spec, SS12.8.1 (Signature Filtering).
  *
  * @packageDocumentation
  */
 
+import { findSignatures } from './byteRange.js';
 import { findExistingSignatures } from './incrementalSave.js';
+import { verifySignatures } from './signatureVerifier.js';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -46,7 +51,13 @@ export interface SignatureChainEntry {
 export interface SignatureChainResult {
   /** Ordered array of signature chain entries. */
   signatures: SignatureChainEntry[];
-  /** Whether the entire chain is valid (all entries valid, no breaks). */
+  /**
+   * Whether the entire chain is valid: every entry is valid, there are no
+   * breaks, and every signature's digest and CMS signature verify. It says
+   * nothing about bytes after the last signature (check
+   * `verifySignatures()` `coversWholeDocument`), and a PDF without
+   * signatures is vacuously valid.
+   */
   isChainValid: boolean;
   /** Descriptive error messages, if any. */
   errors: string[];
@@ -159,8 +170,11 @@ function extractSigningDate(pdfStr: string, sigOffset: number): Date | undefined
  * Validate the entire signature chain in a PDF.
  *
  * Finds all signatures, validates each one covers the correct byte range,
- * and verifies each subsequent signature covers all content including
- * previous signatures. Returns an ordered chain with status for each entry.
+ * verifies each subsequent signature covers all content including
+ * previous signatures, and checks that each signature's message digest and
+ * CMS signature verify over its covered bytes (a changed covered byte makes
+ * the entry `'invalid'` and the chain invalid). Returns an ordered chain
+ * with status for each entry.
  *
  * @param pdf  The PDF bytes to validate.
  * @returns    The signature chain validation result.
@@ -177,6 +191,22 @@ export async function validateSignatureChain(pdf: Uint8Array): Promise<Signature
       errors: [],
     };
   }
+
+  // Digest and CMS verification, keyed by byte range. `integrityValid` and
+  // `certificateValid` are used instead of `valid`: `valid` is false for every
+  // non-final signature of a multi-signed file (it does not cover the whole
+  // document), which is expected here.
+  // `verifySignatures` returns one result per `findSignatures` hit, in order,
+  // so the byte range of the same hit keys the result.
+  const verified = new Map<string, boolean>();
+  const verifyResults = await verifySignatures(pdf);
+  findSignatures(pdf).forEach((found, index) => {
+    const result = verifyResults[index];
+    verified.set(
+      found.byteRange.join(','),
+      result !== undefined && result.integrityValid && result.certificateValid === true,
+    );
+  });
 
   // Sort signatures by their byte range offset (first range start)
   // Earlier signatures appear first (they cover less of the document)
@@ -223,6 +253,15 @@ export async function validateSignatureChain(pdf: Uint8Array): Promise<Signature
     if (gapStart !== sig.contentsOffset || gapEnd - gapStart !== sig.contentsLength) {
       status = 'invalid';
       errors.push(`Signature "${fieldName}": byte range gap does not match /Contents placeholder`);
+      chainValid = false;
+    }
+
+    // Check: the digest and the CMS signature must verify over the covered bytes
+    if (verified.get(sig.byteRange.join(',')) !== true) {
+      status = 'invalid';
+      errors.push(
+        `Signature "${fieldName}": digest or signature over the covered bytes does not verify`,
+      );
       chainValid = false;
     }
 

@@ -5,12 +5,13 @@
  *
  * Extracts CRL and OCSP response data embedded within PKCS#7/CMS
  * signatures (from the adbe-revocationInfoArchival signed attribute
- * or CMS unsigned attributes) and verifies certificate revocation
- * status without any network access.
+ * or CMS unsigned attributes) and looks up the answer that covers a
+ * certificate, without any network access.
  *
- * This is essential for air-gapped environments and Long-Term
- * Validation (LTV) workflows where all revocation data is
- * pre-embedded in the PDF signature.
+ * The embedded answers are not authenticated: their signatures are not
+ * verified, because `verifyOfflineRevocation` has no issuer certificate.
+ * A matching answer is therefore reported as `'unknown'` (its claimed
+ * status is quoted in `details`), never as `'good'` or `'revoked'`.
  *
  * References:
  * - RFC 5652 (CMS SignedData)
@@ -48,7 +49,13 @@ export interface EmbeddedRevocationData {
 export interface OfflineRevocationResult {
   /** Whether a revocation check was actually performed. */
   checked: boolean;
-  /** Certificate status: good, revoked, unknown, or no-data. */
+  /**
+   * Certificate status. `'good'` and `'revoked'` are reserved for
+   * authenticated answers; `verifyOfflineRevocation` cannot authenticate (it
+   * has no issuer certificate), so it never returns them in this release: a
+   * matching embedded OCSP response or CRL yields `'unknown'` with the claimed
+   * status in `details`. `'no-data'` means nothing was embedded.
+   */
   status: 'good' | 'revoked' | 'unknown' | 'no-data';
   /** Source of the revocation information used. */
   source: 'ocsp' | 'crl' | 'none';
@@ -242,9 +249,15 @@ export function extractEmbeddedRevocationData(signatureBytes: Uint8Array): Embed
  * Verify the revocation status of a certificate using only
  * embedded revocation data (no network access).
  *
- * Checks OCSP responses first (preferred), then falls back to CRLs.
- * If no embedded revocation data covers the certificate, returns
- * status 'no-data'.
+ * Looks for an embedded OCSP response matching the certificate's serial
+ * number first, then for a CRL whose issuer Name matches the certificate's
+ * issuer. Neither signature is verified: the function receives no issuer
+ * certificate, so it cannot authenticate any answer. `'good'` and
+ * `'revoked'` are reserved for authenticated answers, so this function never
+ * returns them: a matching answer yields `{ checked: true, status: 'unknown' }`
+ * with the claimed status quoted in `details`. With no embedded data at all
+ * it returns status `'no-data'`; with data that does not cover the
+ * certificate, `{ checked: false, status: 'unknown' }`.
  *
  * @param cert            DER-encoded X.509 certificate to check.
  * @param revocationData  Embedded revocation data from `extractEmbeddedRevocationData`.
@@ -408,23 +421,13 @@ function checkOcspResponses(
         const certStatus = singleResponse.children[1]!;
 
         if (certStatus.tag === 0x80) {
-          // [0] IMPLICIT NULL = good
-          return {
-            checked: true,
-            status: 'good',
-            source: 'ocsp',
-            details: 'OCSP response indicates certificate is good',
-          };
+          // [0] IMPLICIT NULL = good (claimed; the signature is not verified)
+          return unauthenticatedAnswer('ocsp', 'good');
         }
 
         if (certStatus.tag === 0xa1) {
-          // [1] EXPLICIT RevokedInfo
-          return {
-            checked: true,
-            status: 'revoked',
-            source: 'ocsp',
-            details: 'OCSP response indicates certificate is revoked',
-          };
+          // [1] EXPLICIT RevokedInfo (claimed; the signature is not verified)
+          return unauthenticatedAnswer('ocsp', 'revoked');
         }
 
         if (certStatus.tag === 0x82) {
@@ -525,24 +528,14 @@ function checkCrls(
 
       // revokedCertificates SEQUENCE OF SEQUENCE (OPTIONAL)
       if (idx >= tbsCertList.children.length) {
-        // No revoked certificates — cert is not revoked by this CRL
-        return {
-          checked: true,
-          status: 'good',
-          source: 'crl',
-          details: 'CRL contains no revoked certificates; certificate is good',
-        };
+        // No revoked certificates: the CRL claims the cert is not revoked
+        return unauthenticatedAnswer('crl', 'good');
       }
 
       const revokedCerts = tbsCertList.children[idx]!;
       if (revokedCerts.tag !== 0x30) {
-        // Might be extensions [0] — no revoked certs
-        return {
-          checked: true,
-          status: 'good',
-          source: 'crl',
-          details: 'CRL contains no revoked certificates; certificate is good',
-        };
+        // Might be extensions [0]: no revoked certs, the CRL claims good
+        return unauthenticatedAnswer('crl', 'good');
       }
 
       // Search each revoked certificate entry
@@ -559,22 +552,8 @@ function checkCrls(
         }
       }
 
-      if (found) {
-        return {
-          checked: true,
-          status: 'revoked',
-          source: 'crl',
-          details: 'Certificate serial number found in CRL revoked list',
-        };
-      }
-
-      // Certificate not found in CRL's revoked list — it's good
-      return {
-        checked: true,
-        status: 'good',
-        source: 'crl',
-        details: 'Certificate serial number not found in CRL; certificate is good',
-      };
+      // Serial listed: the CRL claims revoked; not listed: it claims good
+      return unauthenticatedAnswer('crl', found ? 'revoked' : 'good');
     } catch {
       continue;
     }
@@ -591,6 +570,27 @@ function checkCrls(
 // ---------------------------------------------------------------------------
 // Utility
 // ---------------------------------------------------------------------------
+
+/**
+ * The result for an embedded OCSP response or CRL that matched the
+ * certificate. Its signature cannot be verified here (there is no issuer
+ * certificate), so its claimed status is reported as `'unknown'` and quoted
+ * in `details`.
+ */
+function unauthenticatedAnswer(
+  source: 'ocsp' | 'crl',
+  claimed: 'good' | 'revoked',
+): OfflineRevocationResult {
+  const what = source === 'ocsp' ? 'Embedded OCSP response' : 'Embedded CRL';
+  return {
+    checked: true,
+    status: 'unknown',
+    source,
+    details:
+      `${what} claims ${claimed} but its signature is not verified ` +
+      '(no issuer certificate); treated as unknown',
+  };
+}
 
 /**
  * Compare two byte arrays for equality.

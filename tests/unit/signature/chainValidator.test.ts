@@ -230,12 +230,12 @@ async function generateIntermediateCA(
 /**
  * Generate a leaf (end-entity) certificate signed by a CA.
  */
-async function generateLeafCert(
+async function generateLeafCertAndKey(
   name: string,
   issuerCert: Uint8Array,
   issuerKeyPair: CryptoKeyPair,
   options?: { notBefore?: Date; notAfter?: Date },
-): Promise<Uint8Array> {
+): Promise<{ certificate: Uint8Array; keyPair: CryptoKeyPair }> {
   const keyPair = await globalThis.crypto.subtle.generateKey(
     {
       name: 'RSASSA-PKCS1-v1_5',
@@ -287,7 +287,19 @@ async function generateLeafCert(
     ),
   );
 
-  return encodeSequence([tbsCert, SHA256_RSA_ALGO, encodeBitString(signature)]);
+  return {
+    certificate: encodeSequence([tbsCert, SHA256_RSA_ALGO, encodeBitString(signature)]),
+    keyPair,
+  };
+}
+
+async function generateLeafCert(
+  name: string,
+  issuerCert: Uint8Array,
+  issuerKeyPair: CryptoKeyPair,
+  options?: { notBefore?: Date; notAfter?: Date },
+): Promise<Uint8Array> {
+  return (await generateLeafCertAndKey(name, issuerCert, issuerKeyPair, options)).certificate;
 }
 
 /**
@@ -422,7 +434,9 @@ describe('validateCertificateChain', () => {
     const root = await generateRootCA('Root CA');
     const leaf = await generateLeafCert('End Entity', root.certificate, root.keyPair);
 
-    const result = await validateCertificateChain([leaf, root.certificate]);
+    const result = await validateCertificateChain([leaf, root.certificate], {
+      trustedCerts: [root.certificate],
+    });
 
     expect(result.valid).toBe(true);
     expect(result.certificates).toHaveLength(2);
@@ -445,11 +459,10 @@ describe('validateCertificateChain', () => {
       intermediate.keyPair,
     );
 
-    const result = await validateCertificateChain([
-      leaf,
-      intermediate.certificate,
-      root.certificate,
-    ]);
+    const result = await validateCertificateChain(
+      [leaf, intermediate.certificate, root.certificate],
+      { trustedCerts: [root.certificate] },
+    );
 
     expect(result.valid).toBe(true);
     expect(result.certificates).toHaveLength(3);
@@ -513,13 +526,97 @@ describe('validateCertificateChain', () => {
     expect(result.certificates[0]!.withinValidityPeriod).toBe(true);
   });
 
-  it('should verify self-signed root signature', async () => {
+  it('should accept a self-signed root that is listed in trustedCerts', async () => {
+    const root = await generateRootCA('Root CA');
+
+    const result = await validateCertificateChain([root.certificate], {
+      trustedCerts: [root.certificate],
+    });
+
+    expect(result.valid).toBe(true);
+    expect(result.certificates[0]!.signatureValid).toBe(true);
+    expect(result.errors).toHaveLength(0);
+  });
+
+  it('should reject a self-signed root when no trustedCerts are given', async () => {
     const root = await generateRootCA('Root CA');
 
     const result = await validateCertificateChain([root.certificate]);
 
-    expect(result.valid).toBe(true);
+    expect(result.valid).toBe(false);
+    // The self-signature still verifies and is reported truthfully.
     expect(result.certificates[0]!.signatureValid).toBe(true);
+    expect(result.errors).toContain('Root certificate is not in trustedCerts');
+  });
+
+  it('should reject a self-signed root that only shares its name with a trusted root', async () => {
+    const trusted = await generateRootCA('Root CA');
+    const impostor = await generateRootCA('Root CA');
+    const leaf = await generateLeafCert('Entity', impostor.certificate, impostor.keyPair);
+
+    const result = await validateCertificateChain([leaf, impostor.certificate], {
+      trustedCerts: [trusted.certificate],
+    });
+
+    expect(result.valid).toBe(false);
+    expect(result.certificates[0]!.signatureValid).toBe(true);
+    expect(result.certificates[1]!.signatureValid).toBe(true);
+    expect(result.certificates[1]!.errors).toContain('Root certificate is not in trustedCerts');
+  });
+
+  it('should try every trusted certificate whose Name matches the issuer', async () => {
+    // A re-keyed CA: two roots share one Name and differ in key.
+    const rootA = await generateRootCA('Anchor Root');
+    const rootB = await generateRootCA('Anchor Root');
+    const leaf = await generateLeafCert('Entity', rootB.certificate, rootB.keyPair);
+
+    const ab = await validateCertificateChain([leaf], {
+      trustedCerts: [rootA.certificate, rootB.certificate],
+    });
+    const ba = await validateCertificateChain([leaf], {
+      trustedCerts: [rootB.certificate, rootA.certificate],
+    });
+    expect(ab.valid).toBe(true);
+    expect(ba.valid).toBe(true);
+
+    // Control: the signing key must still be listed.
+    const onlyA = await validateCertificateChain([leaf], {
+      trustedCerts: [rootA.certificate],
+    });
+    expect(onlyA.valid).toBe(false);
+    expect(onlyA.errors.join('\n') + onlyA.certificates[0]!.errors.join('\n')).toContain(
+      'Certificate signature verification against trusted cert failed',
+    );
+  });
+
+  it('should skip a same-Name trusted certificate that is expired or not a CA', async () => {
+    const rootA = await generateRootCA('Anchor Root');
+    const oldB = await generateRootCA('Anchor Root', {
+      notBefore: new Date(Date.UTC(2015, 0, 1)),
+      notAfter: new Date(Date.UTC(2020, 0, 1)),
+    });
+    const leafOld = await generateLeafCert('Entity', oldB.certificate, oldB.keyPair);
+    const cases: [Uint8Array[], string][] = [
+      // rootA is usable but its key did not sign the leaf; oldB is skipped.
+      [
+        [rootA.certificate, oldB.certificate],
+        'Certificate signature verification against trusted cert failed',
+      ],
+      // The only same-Name entry is outside its validity period.
+      [[oldB.certificate], 'Trusted issuer certificate is outside its validity period or not a CA'],
+    ];
+    for (const [trustedCerts, message] of cases) {
+      const r = await validateCertificateChain([leafOld], { trustedCerts });
+      expect(r.valid).toBe(false);
+      expect([...r.errors, ...r.certificates[0]!.errors].join(' | ')).toContain(message);
+    }
+    const other = await generateRootCA('Other Root');
+    const ee = await generateLeafCertAndKey('Anchor Root', other.certificate, other.keyPair);
+    const leafEe = await generateLeafCert('Entity', ee.certificate, ee.keyPair);
+    const r2 = await validateCertificateChain([leafEe], {
+      trustedCerts: [rootA.certificate, ee.certificate],
+    });
+    expect(r2.valid).toBe(false);
   });
 
   it('should report errors for an empty chain', async () => {

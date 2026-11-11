@@ -371,7 +371,7 @@ describe('verifySignatureDetailed — warnings', () => {
 // ---------------------------------------------------------------------------
 
 describe('verifySignatureDetailed — timestamp', () => {
-  it('should extract signing time as timestamp', async () => {
+  it('reports the signer-claimed signing time as an unverified timestamp', async () => {
     const { certificate, privateKey } = await generateSelfSignedCert();
     const pdf = buildMinimalPdf();
     const signedPdf = await signPdf(pdf, 'Sig1', { certificate, privateKey });
@@ -382,7 +382,31 @@ describe('verifySignatureDetailed — timestamp', () => {
     // signPdf sets a signing time in signed attributes
     expect(result.timestamp).toBeDefined();
     expect(result.timestamp!.time).toBeInstanceOf(Date);
-    expect(result.timestamp!.valid).toBe(true);
+    expect(result.timestamp!.valid).toBe(false);
+    expect(result.signingTime).toBeInstanceOf(Date);
+    expect(result.signingTime).toEqual(result.timestamp!.time);
+    expect(result.warnings.some((w) => /claimed by the signer/.test(w))).toBe(true);
+  });
+});
+
+describe('verifySignatureDetailed — ByteRange coverage', () => {
+  it('is not valid when bytes follow the signed range', async () => {
+    const { certificate, privateKey } = await generateSelfSignedCert();
+    const signed = await signPdf(buildMinimalPdf(), 'Sig1', { certificate, privateKey });
+    const control = (await verifySignatureDetailed(signed))[0]!;
+    expect(control.coversWholeDocument).toBe(true);
+    expect(control.valid).toBe(true);
+
+    const tail = new TextEncoder().encode('\n5 0 obj\n<< /Evil true >>\nendobj\n');
+    const appended = new Uint8Array(signed.length + tail.length);
+    appended.set(signed);
+    appended.set(tail, signed.length);
+
+    const result = (await verifySignatureDetailed(appended))[0]!;
+    expect(result.integrityValid).toBe(true);
+    expect(result.coversWholeDocument).toBe(false);
+    expect(result.valid).toBe(false);
+    expect(result.errors.some((e) => /does not cover the whole file/.test(e))).toBe(true);
   });
 });
 

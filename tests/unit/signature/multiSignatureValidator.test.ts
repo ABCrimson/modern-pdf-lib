@@ -5,6 +5,8 @@
 import { describe, it, expect } from 'vitest';
 import { validateSignatureChain } from '../../../src/signature/multiSignatureValidator.js';
 import { prepareForSigning } from '../../../src/signature/byteRange.js';
+import { signPdf } from '../../../src/signature/signatureHandler.js';
+import { generateTestCert } from '../../helpers/signature-trust-fixtures.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -37,6 +39,20 @@ startxref
   return encoder.encode(pdf);
 }
 
+/** Sign `pdf` once per field name, each with its own freshly generated key. */
+async function signAll(pdf: Uint8Array, fieldNames: string[]): Promise<Uint8Array> {
+  let current = pdf;
+  for (const fieldName of fieldNames) {
+    const { certificate, privateKey } = await generateTestCert(`Signer ${fieldName}`);
+    current = await signPdf(current, fieldName, {
+      certificate,
+      privateKey,
+      hashAlgorithm: 'SHA-256',
+    });
+  }
+  return current;
+}
+
 // ---------------------------------------------------------------------------
 // Tests: validateSignatureChain
 // ---------------------------------------------------------------------------
@@ -52,12 +68,11 @@ describe('validateSignatureChain', () => {
   });
 
   it('should validate a single signature', async () => {
-    const pdf = createMinimalPdf();
-    const { preparedPdf } = prepareForSigning(pdf, 'Signature1');
+    const signed = await signAll(createMinimalPdf(), ['Signature1']);
 
-    const result = await validateSignatureChain(preparedPdf);
+    const result = await validateSignatureChain(signed);
 
-    expect(result.signatures.length).toBeGreaterThanOrEqual(1);
+    expect(result.signatures).toHaveLength(1);
     expect(result.isChainValid).toBe(true);
     expect(result.errors).toHaveLength(0);
 
@@ -67,12 +82,21 @@ describe('validateSignatureChain', () => {
     expect(entry.status).toBe('valid');
   });
 
-  it('should validate multiple signatures in chain', async () => {
-    const pdf = createMinimalPdf();
-    const { preparedPdf: pdf1 } = prepareForSigning(pdf, 'Sig1');
-    const { preparedPdf: pdf2 } = prepareForSigning(pdf1, 'Sig2');
+  it('should reject an unsigned placeholder (its digest cannot verify)', async () => {
+    const { preparedPdf } = prepareForSigning(createMinimalPdf(), 'Signature1');
 
-    const result = await validateSignatureChain(pdf2);
+    const result = await validateSignatureChain(preparedPdf);
+
+    expect(result.signatures).toHaveLength(1);
+    expect(result.isChainValid).toBe(false);
+    expect(result.signatures[0]!.status).toBe('invalid');
+    expect(result.errors.some((e) => e.includes('does not verify'))).toBe(true);
+  });
+
+  it('should validate multiple signatures in chain', async () => {
+    const signed = await signAll(createMinimalPdf(), ['Sig1', 'Sig2']);
+
+    const result = await validateSignatureChain(signed);
 
     expect(result.signatures.length).toBe(2);
     expect(result.isChainValid).toBe(true);
@@ -97,10 +121,9 @@ describe('validateSignatureChain', () => {
   });
 
   it('should set coversEntireDocument correctly', async () => {
-    const pdf = createMinimalPdf();
-    const { preparedPdf } = prepareForSigning(pdf, 'Sig1');
+    const signed = await signAll(createMinimalPdf(), ['Sig1']);
 
-    const result = await validateSignatureChain(preparedPdf);
+    const result = await validateSignatureChain(signed);
     expect(result.signatures.length).toBeGreaterThanOrEqual(1);
 
     // The last signature should cover the entire document
@@ -109,11 +132,9 @@ describe('validateSignatureChain', () => {
   });
 
   it('should return field names from signatures', async () => {
-    const pdf = createMinimalPdf();
-    const { preparedPdf: pdf1 } = prepareForSigning(pdf, 'AuthorSig');
-    const { preparedPdf: pdf2 } = prepareForSigning(pdf1, 'ApproverSig');
+    const signed = await signAll(createMinimalPdf(), ['AuthorSig', 'ApproverSig']);
 
-    const result = await validateSignatureChain(pdf2);
+    const result = await validateSignatureChain(signed);
 
     const fieldNames = result.signatures.map((s) => s.fieldName);
     expect(fieldNames).toContain('AuthorSig');
@@ -152,14 +173,12 @@ startxref
   });
 
   it('should handle three signatures in chain', async () => {
-    const pdf = createMinimalPdf();
-    const { preparedPdf: pdf1 } = prepareForSigning(pdf, 'Sig1');
-    const { preparedPdf: pdf2 } = prepareForSigning(pdf1, 'Sig2');
-    const { preparedPdf: pdf3 } = prepareForSigning(pdf2, 'Sig3');
+    const signed = await signAll(createMinimalPdf(), ['Sig1', 'Sig2', 'Sig3']);
 
-    const result = await validateSignatureChain(pdf3);
+    const result = await validateSignatureChain(signed);
 
     expect(result.signatures.length).toBe(3);
     expect(result.isChainValid).toBe(true);
+    expect(result.signatures.map((s) => s.status)).toEqual(['valid', 'valid', 'valid']);
   });
 });

@@ -7,8 +7,16 @@
  * and validates the chain by checking:
  * - Signature verification (issuer signed subject) via Web Crypto API
  * - Validity period (notBefore / notAfter)
- * - Basic constraints (CA flag, path length)
- * - Optional revocation checking via OCSP/CRL
+ * - Basic constraints (CA flag)
+ * - Trust anchoring: the chain must end in a self-signed certificate that is
+ *   byte-equal to a `trustedCerts` entry, or in a certificate that is not
+ *   self-signed and whose issuer (matched by Name) is a `trustedCerts` entry
+ *   that verifies its signature (every entry with that Name is tried; an entry
+ *   outside its validity period at the validation time, or one that is neither
+ *   self-signed nor CA-flagged, is skipped)
+ *
+ * No revocation check is performed here (see `checkCertificateStatus`
+ * in `./ocsp.ts`).
  *
  * Uses the ASN.1 DER utilities from `./pkcs7.ts` for parsing
  * certificate structures.
@@ -38,9 +46,22 @@ import type { Asn1Node } from './pkcs7.js';
  * Options for certificate chain validation.
  */
 export interface ChainValidationOptions {
-  /** Trusted root certificates (DER-encoded). If empty, self-signed roots are trusted. */
+  /**
+   * Trust anchors (DER). A chain is valid only if it ends in a self-signed
+   * certificate byte-equal to one of these, or in a certificate that is not
+   * self-signed, whose issuer Name matches one of these and whose signature
+   * one such entry verifies (every entry with that Name is tried, so a
+   * re-keyed anchor works in any order; an entry outside its validity period
+   * at the validation time, or one that is neither self-signed nor CA-flagged,
+   * is skipped). A listed certificate that is not self-signed anchors
+   * the certificates it signed, not itself: to anchor at an intermediate, end
+   * the chain below it. Empty or absent: no chain is valid.
+   */
   trustedCerts?: Uint8Array[] | undefined;
-  /** Whether to check certificate revocation via OCSP/CRL. Default: false. */
+  /**
+   * Reserved for revocation checking via OCSP/CRL. `validateCertificateChain`
+   * does not read it and performs no revocation check.
+   */
   checkRevocation?: boolean | undefined;
   /** The point in time for validity checking. Default: current time. */
   validationTime?: Date | undefined;
@@ -84,7 +105,11 @@ export interface CertificateChainResult {
  * Result of validating a certificate chain.
  */
 export interface ChainValidationResult {
-  /** Overall validity of the chain. */
+  /**
+   * Overall validity of the chain: every certificate is in its validity
+   * period, signed by the next one, CA-flagged where required, and the chain
+   * is anchored in `trustedCerts` (always false without `trustedCerts`).
+   */
   valid: boolean;
   /** Per-certificate validation status (leaf to root order). */
   certificates: CertificateStatus[];
@@ -255,6 +280,17 @@ function isSelfSigned(certDer: Uint8Array): boolean {
  * Compare two DER-encoded Name values for equality.
  */
 function namesEqual(a: Uint8Array, b: Uint8Array): boolean {
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) {
+    if (a[i] !== b[i]) return false;
+  }
+  return true;
+}
+
+/**
+ * Compare two DER encodings byte for byte (length and content).
+ */
+function bytesEqual(a: Uint8Array, b: Uint8Array): boolean {
   if (a.length !== b.length) return false;
   for (let i = 0; i < a.length; i++) {
     if (a[i] !== b[i]) return false;
@@ -456,6 +492,19 @@ async function verifyCertSignature(
   }
 }
 
+/**
+ * Verify the signature on any X.509-shaped signed SEQUENCE
+ * (`SEQUENCE { tbs, AlgorithmIdentifier, BIT STRING, ... }`), such as a
+ * Certificate, a BasicOCSPResponse or a CertificateList, with the public
+ * key of the certificate passed as the second argument (DER). Resolves to
+ * `false` (never rejects) when the
+ * structure cannot be parsed, the algorithm is unsupported or the
+ * signature does not verify.
+ *
+ * @internal Used by `./ocsp.ts`; not re-exported from a package entry.
+ */
+export { verifyCertSignature as verifySignedDer };
+
 // ---------------------------------------------------------------------------
 // Public API
 // ---------------------------------------------------------------------------
@@ -525,6 +574,17 @@ export function buildCertificateChain(
  *    and notAfter dates at the validation time.
  * 3. **Basic constraints** — intermediate/root certificates have
  *    the CA flag set in the BasicConstraints extension.
+ * 4. **Trust anchoring** — the last certificate is self-signed and
+ *    byte-equal to an entry of `options.trustedCerts`, or it is not
+ *    self-signed and its issuer (matched by Name) is an entry of
+ *    `trustedCerts` whose key verifies it (every entry with that Name is
+ *    tried; an entry outside its validity period at the validation time, or
+ *    one that is neither self-signed nor CA-flagged, is skipped; one verifying
+ *    entry is enough). A listed certificate that is not
+ *    self-signed does not anchor itself when it is last in the chain. A
+ *    self-signed last certificate that is not listed makes the chain invalid
+ *    (error `Root certificate is not in trustedCerts`), so without
+ *    `trustedCerts` no chain is valid.
  *
  * @param chain     Ordered array of DER-encoded certificates (leaf first, root last).
  * @param options   Validation options.
@@ -601,8 +661,9 @@ export async function validateCertificateChain(
       }
     }
 
-    // Check signature
+    // Check signature (and, for the last certificate, trust anchoring)
     let signatureValid = false;
+    let anchored = true;
     if (i < chain.length - 1) {
       // Verify this cert's signature using the next cert in chain (issuer)
       signatureValid = await verifyCertSignature(certDer, chain[i + 1]!);
@@ -617,27 +678,50 @@ export async function validateCertificateChain(
         if (!signatureValid) {
           certErrors.push('Root certificate self-signature verification failed');
         }
+        // A self-signature proves nothing about trust: the root must be
+        // listed (byte-equal) in trustedCerts.
+        anchored = trustedCerts.some((trusted) => bytesEqual(trusted, certDer));
+        if (!anchored) {
+          certErrors.push('Root certificate is not in trustedCerts');
+        }
       } else {
-        // Try to verify against trusted certs
+        // Anchored when the issuer is a usable trusted cert whose key verifies this cert
         let foundTrusted = false;
+        let usableTrusted = false;
         const certIssuerDer = extractIssuerDer(certDer);
         for (const trusted of trustedCerts) {
-          const trustedSubject = extractSubjectDer(trusted);
-          if (namesEqual(certIssuerDer, trustedSubject)) {
-            signatureValid = await verifyCertSignature(certDer, trusted);
-            foundTrusted = true;
+          if (!namesEqual(certIssuerDer, extractSubjectDer(trusted))) continue;
+          foundTrusted = true;
+          // Same rules as a certificate in the chain: in its validity period at
+          // validationTime, and CA-flagged unless self-signed.
+          let usable = false;
+          try {
+            const tv = extractValidity(trusted);
+            usable =
+              validationTime >= tv.notBefore &&
+              validationTime <= tv.notAfter &&
+              (isCA(trusted) || isSelfSigned(trusted));
+          } catch {
+            usable = false;
+          }
+          if (!usable) continue;
+          usableTrusted = true;
+          if (await verifyCertSignature(certDer, trusted)) {
+            signatureValid = true;
             break;
           }
         }
         if (!foundTrusted) {
           certErrors.push('Certificate issuer not found in trusted certificates');
+        } else if (!usableTrusted) {
+          certErrors.push('Trusted issuer certificate is outside its validity period or not a CA');
         } else if (!signatureValid) {
           certErrors.push('Certificate signature verification against trusted cert failed');
         }
       }
     }
 
-    const certValid = withinValidityPeriod && signatureValid && basicConstraintsValid;
+    const certValid = withinValidityPeriod && signatureValid && basicConstraintsValid && anchored;
     if (!certValid) allValid = false;
 
     certificates.push({

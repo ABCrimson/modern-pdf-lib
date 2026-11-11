@@ -7,6 +7,8 @@ import { detectModifications } from '../../../src/signature/modificationDetector
 import { MdpPermission } from '../../../src/signature/mdpPolicy.js';
 import { prepareForSigning } from '../../../src/signature/byteRange.js';
 import { appendIncrementalUpdate } from '../../../src/signature/incrementalSave.js';
+import { signPdf } from '../../../src/signature/signatureHandler.js';
+import { generateTestCert } from '../../helpers/signature-trust-fixtures.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -230,15 +232,34 @@ describe('detectModifications', () => {
     }
   });
 
-  it('should not flag signature additions as violations', async () => {
+  it('should report added signatures as unknown violations', async () => {
     const pdf = createMinimalPdf();
     const { preparedPdf: pdf1 } = prepareForSigning(pdf, 'Sig1');
     const { preparedPdf: pdf2 } = prepareForSigning(pdf1, 'Sig2');
 
     const report = await detectModifications(pdf2);
 
-    // Signature additions should not appear as violations
+    // An added signature is not skipped: it is reported as 'unknown' (not yet
+    // recognised as permitted), and the description does not quote the key.
+    expect(report.violations.some((v) => v.type === 'unknown')).toBe(true);
     const sigViolations = report.violations.filter((v) => v.description.includes('/Type /Sig'));
     expect(sigViolations).toHaveLength(0);
+  });
+
+  it('reports an added object with a compact /Type/Sig key as unknown', async () => {
+    const { certificate, privateKey } = await generateTestCert('Alice');
+    const signed = await signPdf(createMinimalPdf(), 'Sig1', {
+      certificate,
+      privateKey,
+      hashAlgorithm: 'SHA-256',
+    });
+    const suffix = encoder.encode('\n9 0 obj\n<</Type/Sig/Filter/Adobe.PPKLite>>\nendobj\n');
+    const appended = new Uint8Array(signed.length + suffix.length);
+    appended.set(signed);
+    appended.set(suffix, signed.length);
+
+    const report = await detectModifications(appended);
+
+    expect(report.violations.some((v) => v.type === 'unknown')).toBe(true);
   });
 });
