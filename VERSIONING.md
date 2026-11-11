@@ -1,6 +1,6 @@
 # Versioning Policy
 
-This project uses **MAJOR.MINOR.PATCH** versioning with strict single-digit limits.
+This project uses **MAJOR.MINOR.PATCH** versioning. PATCH is a single digit; MINOR is not capped.
 
 ## Format
 
@@ -11,34 +11,33 @@ MAJOR . MINOR . PATCH
 
 ## Rules
 
-**Each digit position maxes out at 9.** There is no `0.40.10` — instead it rolls over:
+**Only PATCH is capped at 9.** There is no `0.40.10`: after `x.y.9` comes `x.(y+1).0`. MINOR is not capped.
 
 | Current | Next |
 |---|---|
 | `0.40.8` | `0.40.9` |
 | `0.40.9` | `0.41.0` |
-| `0.99.9` | `1.0.0` |
 
 ## What Each Position Means
 
 ### PATCH (0.40.**2** → 0.40.**3**)
 
-Bug fixes, documentation updates, small improvements. Anything that doesn't add significant new functionality.
+Bug fixes, documentation, tests, CI, internal moves and dependency updates. A patch removes no export. It adds an export, a parameter or a result field only when a fix needs one, such as the error class a refused call now throws.
 
-*Examples: fix a typo, update a dependency, improve error message, add a test.*
+A patch may change what a call does where the earlier behaviour was a security defect, silent data corruption or output that conforming readers reject: the call may throw, report `false` or `unknown`, return or write what the specification requires, or emit a one-time runtime warning. Such a release describes each change in its changelog entry, under Breaking, Changed or Compatibility.
+
+*Examples: fix a typo, update a dependency, improve an error message, add a test, refuse an operation that left data unprotected.*
 
 ### MINOR (0.**40**.0 → 0.**41**.0)
 
-Something notable happened — a meaningful new feature, a non-trivial API addition, a significant performance improvement.
+New features and API additions. Before 1.0.0, every other breaking change and every export removal lands only in a minor `x.0`, listed under Breaking in its changelog entry.
 
-*Examples: add a new drawing method, add form field support, add a new image format.*
+*Examples: add a new drawing method, add form field support, add a new image format, change what a function returns (other than a fix as described under PATCH).*
 
 ### MAJOR (**0**.0.0 → **1**.0.0)
 
-Revolutionary changes that break existing consumer code. Once MAJOR increments, it signals that the library has undergone a fundamental shift.
-
-*Examples: rename core functions, change the output format, remove deprecated APIs, rewrite the architecture.*
+`1.0.0` freezes the public API. After it, a breaking change needs a new MAJOR.
 
 ## Current Version
 
-**0.40.3** — See [CHANGELOG.md](./CHANGELOG.md) for the full release history.
+**0.40.4** — See [CHANGELOG.md](./CHANGELOG.md) for the full release history.
