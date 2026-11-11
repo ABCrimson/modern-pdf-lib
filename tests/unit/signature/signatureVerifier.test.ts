@@ -613,9 +613,9 @@ const MGF1_OID = '1.2.840.113549.1.1.8';
  */
 function buildPssParams(opts: {
   hashName: string;
-  mgfHashName?: string;
+  mgfHashName?: string | undefined;
   saltLength: number;
-  mgfOid?: string;
+  mgfOid?: string | undefined;
 }): Uint8Array {
   const NULL = new Uint8Array([0x05, 0x00]);
   const hashOid = HASH_OID[opts.hashName]!;
@@ -644,8 +644,8 @@ async function buildPssSignedPdf(opts: {
   cn?: string;
   hashName: string;
   saltLength: number;
-  mgfHashName?: string;
-  mgfOid?: string;
+  mgfHashName?: string | undefined;
+  mgfOid?: string | undefined;
   fieldName: string;
 }): Promise<Uint8Array> {
   const { certificate, keyPair } = await generateTestCert(opts.cn ?? 'PSS Signer');

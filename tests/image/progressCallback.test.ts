@@ -248,6 +248,7 @@ describe('onProgress callback — not provided', () => {
     const bytes = await createMultiImagePdf(1);
     const doc = await loadPdf(bytes);
 
+    // @ts-expect-error exactOptionalPropertyTypes: the test passes an explicit undefined to exercise the runtime guard
     const report = await optimizeAllImages(doc, {
       onProgress: undefined,
     });

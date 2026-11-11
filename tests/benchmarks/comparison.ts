@@ -4,7 +4,9 @@
  * Tests every shared operation across both libraries to measure
  * throughput and latency differences.
  *
- * Run: npx vitest bench tests/benchmarks/comparison.bench.ts
+ * Run: pnpm run bench (standalone tinybench runner, tests/benchmarks/run.ts).
+ * Not named *.bench.ts on purpose: it registers through benchHarness.ts, so
+ * `vitest bench` has no test suite to collect from it.
  */
 
 import { describe, bench, beforeAll } from './benchHarness.js';
@@ -17,7 +19,6 @@ import {
   rgb,
   cmyk,
   grayscale,
-  degrees,
   layoutMultilineText,
   layoutCombedText,
   mergePdfs,
@@ -34,6 +35,7 @@ import {
   cmyk as pdfLibCmyk,
   grayscale as pdfLibGrayscale,
   degrees as pdfLibDegrees,
+  TextAlignment as PdfLibTextAlignment,
   layoutMultilineText as pdfLibLayoutMultilineText,
   layoutCombedText as pdfLibLayoutCombedText,
 } from 'pdf-lib';
@@ -746,7 +748,7 @@ describe('12a. Page rotation', () => {
     const doc = createPdf();
     for (let i = 0; i < 10; i++) {
       const page = doc.addPage(PageSizes.A4);
-      page.setRotation(degrees(90));
+      page.setRotation(90);
     }
   });
 
@@ -806,7 +808,7 @@ describe('13a. layoutMultilineText', () => {
     layoutMultilineText(LONG_TEXT, {
       font: font,
       fontSize: 12,
-      bounds: { x: 50, y: 50, width: 500, height: 700 },
+      maxWidth: 500,
     });
   });
 
@@ -816,6 +818,7 @@ describe('13a. layoutMultilineText', () => {
     pdfLibLayoutMultilineText(LONG_TEXT, {
       font,
       fontSize: 12,
+      alignment: PdfLibTextAlignment.Left,
       bounds: { x: 50, y: 50, width: 500, height: 700 },
     });
   });
@@ -829,7 +832,7 @@ describe('13b. layoutCombedText', () => {
       font: font,
       fontSize: 12,
       cellCount: 10,
-      bounds: { x: 50, y: 50, width: 300, height: 30 },
+      cellWidth: 30,
     });
   });
 
@@ -911,6 +914,7 @@ describe('16. Embed PDF page', () => {
     const doc = createPdf();
     const page = doc.addPage(PageSizes.A4);
     const [embeddedPage] = await doc.embedPdf(MODERN_SIMPLE);
+    if (!embeddedPage) throw new Error('embedPdf returned no page');
     page.drawPage(embeddedPage, { x: 50, y: 400, width: 200, height: 200 });
     await doc.save();
   });
@@ -920,6 +924,7 @@ describe('16. Embed PDF page', () => {
     const page = doc.addPage(PdfLibPageSizes.A4);
     const srcDoc = await PDFDocument.load(PDFLIB_SIMPLE);
     const [embeddedPage] = await doc.embedPdf(srcDoc, [0]);
+    if (!embeddedPage) throw new Error('embedPdf returned no page');
     page.drawPage(embeddedPage, { x: 50, y: 400, width: 200, height: 200 });
     await doc.save();
   });

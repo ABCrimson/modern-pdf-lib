@@ -4,16 +4,20 @@
  * Measures the performance of downscaleImage() across different algorithms,
  * image sizes, and channel counts.
  *
- * Run: npx vitest bench tests/image/optimization.bench.ts
+ * Run: pnpm exec vitest bench tests/image/optimization.bench.ts
  */
 
-import { bench, describe } from 'vitest';
+import { bench, describe } from '../benchmarks/vitestBench.js';
 import {
   downscaleImage,
   recompressImage,
   optimizeImage,
 } from '../../src/assets/image/imageOptimize.js';
 import type { RawImageData } from '../../src/assets/image/imageOptimize.js';
+
+// Bind once: Vitest's module runner adds a getter call to every imported-binding access.
+const downscale = downscaleImage;
+const optimize = optimizeImage;
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -53,15 +57,15 @@ const small_rgb = generateTestImage(256, 256, 3);
 
 describe('Downscale — Algorithm comparison (2000x1500 RGB -> 500x375)', () => {
   bench('Lanczos3', () => {
-    downscaleImage(large_rgb, { maxWidth: 500, algorithm: 'lanczos' });
+    downscale(large_rgb, { maxWidth: 500, algorithm: 'lanczos' });
   });
 
   bench('Bilinear', () => {
-    downscaleImage(large_rgb, { maxWidth: 500, algorithm: 'bilinear' });
+    downscale(large_rgb, { maxWidth: 500, algorithm: 'bilinear' });
   });
 
   bench('Nearest', () => {
-    downscaleImage(large_rgb, { maxWidth: 500, algorithm: 'nearest' });
+    downscale(large_rgb, { maxWidth: 500, algorithm: 'nearest' });
   });
 });
 
@@ -71,19 +75,19 @@ describe('Downscale — Algorithm comparison (2000x1500 RGB -> 500x375)', () => 
 
 describe('Downscale — Size comparison (Lanczos3)', () => {
   bench('2000x1500 -> 500x375', () => {
-    downscaleImage(large_rgb, { maxWidth: 500, algorithm: 'lanczos' });
+    downscale(large_rgb, { maxWidth: 500, algorithm: 'lanczos' });
   });
 
   bench('800x600 -> 200x150', () => {
-    downscaleImage(medium_rgb, { maxWidth: 200, algorithm: 'lanczos' });
+    downscale(medium_rgb, { maxWidth: 200, algorithm: 'lanczos' });
   });
 
   bench('2000x1500 -> 1000x750 (2x)', () => {
-    downscaleImage(large_rgb, { maxWidth: 1000, algorithm: 'lanczos' });
+    downscale(large_rgb, { maxWidth: 1000, algorithm: 'lanczos' });
   });
 
   bench('256x256 -> 64x64', () => {
-    downscaleImage(small_rgb, { maxWidth: 64, algorithm: 'lanczos' });
+    downscale(small_rgb, { maxWidth: 64, algorithm: 'lanczos' });
   });
 });
 
@@ -93,15 +97,15 @@ describe('Downscale — Size comparison (Lanczos3)', () => {
 
 describe('Downscale — Channel count (Lanczos3 2000x1500 -> 500)', () => {
   bench('Grayscale (1 channel)', () => {
-    downscaleImage(large_gray, { maxWidth: 500, algorithm: 'lanczos' });
+    downscale(large_gray, { maxWidth: 500, algorithm: 'lanczos' });
   });
 
   bench('RGB (3 channels)', () => {
-    downscaleImage(large_rgb, { maxWidth: 500, algorithm: 'lanczos' });
+    downscale(large_rgb, { maxWidth: 500, algorithm: 'lanczos' });
   });
 
   bench('RGBA (4 channels)', () => {
-    downscaleImage(large_rgba, { maxWidth: 500, algorithm: 'lanczos' });
+    downscale(large_rgba, { maxWidth: 500, algorithm: 'lanczos' });
   });
 });
 
@@ -111,11 +115,11 @@ describe('Downscale — Channel count (Lanczos3 2000x1500 -> 500)', () => {
 
 describe('Downscale — No-op (already within bounds)', () => {
   bench('256x256 with maxWidth: 512 (no scaling needed)', () => {
-    downscaleImage(small_rgb, { maxWidth: 512, algorithm: 'lanczos' });
+    downscale(small_rgb, { maxWidth: 512, algorithm: 'lanczos' });
   });
 
   bench('256x256 with maxHeight: 512 (no scaling needed)', () => {
-    downscaleImage(small_rgb, { maxHeight: 512, algorithm: 'lanczos' });
+    downscale(small_rgb, { maxHeight: 512, algorithm: 'lanczos' });
   });
 });
 
@@ -154,7 +158,7 @@ describe('Recompress — Deflate', () => {
 
 describe('Optimize pipeline — Downscale + deflate', () => {
   bench('800x600 -> 200x150 + deflate', async () => {
-    await optimizeImage(medium_rgb, {
+    await optimize(medium_rgb, {
       maxWidth: 200,
       algorithm: 'lanczos',
       format: 'deflate',
@@ -163,7 +167,7 @@ describe('Optimize pipeline — Downscale + deflate', () => {
   });
 
   bench('256x256 -> 64x64 + deflate', async () => {
-    await optimizeImage(small_rgb, {
+    await optimize(small_rgb, {
       maxWidth: 64,
       algorithm: 'lanczos',
       format: 'deflate',
@@ -172,7 +176,7 @@ describe('Optimize pipeline — Downscale + deflate', () => {
   });
 
   bench('800x600 -> skip (below bytes threshold)', async () => {
-    await optimizeImage(medium_rgb, {
+    await optimize(medium_rgb, {
       maxWidth: 200,
       skipBelowBytes: medium_rgb.pixels.length + 1,
     });
@@ -188,7 +192,7 @@ describe('Downscale — DPI-based targeting', () => {
     // Assume image is displayed at 2000/300*72 x 1500/300*72 points
     const printWidth = (2000 / 300) * 72;
     const printHeight = (1500 / 300) * 72;
-    downscaleImage(large_rgb, {
+    downscale(large_rgb, {
       targetDpi: 150,
       printWidth,
       printHeight,
@@ -199,7 +203,7 @@ describe('Downscale — DPI-based targeting', () => {
   bench('800x600 at 200dpi -> 72dpi (Bilinear)', () => {
     const printWidth = (800 / 200) * 72;
     const printHeight = (600 / 200) * 72;
-    downscaleImage(medium_rgb, {
+    downscale(medium_rgb, {
       targetDpi: 72,
       printWidth,
       printHeight,

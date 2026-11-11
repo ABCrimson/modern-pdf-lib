@@ -87,13 +87,13 @@ describe('renderCodeFrame', () => {
 
   it('handles a single-line source', () => {
     const frame = renderCodeFrame('hello world', 1, 7);
-    const out = frame.split('\n');
-    expect(out[0].startsWith('>')).toBe(true);
-    expect(out[0]).toContain('hello world');
-    expect(out[1]).toContain('^');
+    const [line0 = '', line1 = ''] = frame.split('\n');
+    expect(line0.startsWith('>')).toBe(true);
+    expect(line0).toContain('hello world');
+    expect(line1).toContain('^');
     // Caret under column 7 ('w' of "world").
-    const contentColumn = out[0].indexOf('hello world') + 6;
-    expect(out[1].indexOf('^')).toBe(contentColumn);
+    const contentColumn = line0.indexOf('hello world') + 6;
+    expect(line1.indexOf('^')).toBe(contentColumn);
   });
 
   it('widens the gutter for multi-digit line numbers', () => {

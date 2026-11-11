@@ -4,10 +4,10 @@
  * Covers: grayscale detection, DPI analysis, quality estimation,
  * image extraction, and batch optimization.
  *
- * Run with: npx vitest bench tests/benchmarks/imageOptimize.bench.ts
+ * Run with: pnpm exec vitest bench tests/benchmarks/imageOptimize.bench.ts
  */
 
-import { describe, bench } from 'vitest';
+import { describe, bench } from './vitestBench.js';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
@@ -22,6 +22,12 @@ import {
 } from '../../src/index.js';
 import { isGrayscaleImage, convertToGrayscale } from '../../src/assets/image/grayscaleDetect.js';
 import { computeImageDpi, computeTargetDimensions } from '../../src/assets/image/dpiAnalyze.js';
+
+// Bind once: Vitest's module runner adds a getter call to every imported-binding access.
+const isGray = isGrayscaleImage;
+const imageDpi = computeImageDpi;
+const targetDimensions = computeTargetDimensions;
+const jpegQuality = estimateJpegQuality;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -78,15 +84,15 @@ describe('Grayscale detection', () => {
   const gray1k = buildGrayRgbPixels(1000, 1000);
 
   bench('isGrayscaleImage 256x256 (gray)', () => {
-    isGrayscaleImage(gray256, 256, 256, 3);
+    isGray(gray256, 256, 256, 3);
   });
 
   bench('isGrayscaleImage 256x256 (color)', () => {
-    isGrayscaleImage(color256, 256, 256, 3);
+    isGray(color256, 256, 256, 3);
   });
 
   bench('isGrayscaleImage 1000x1000 (gray)', () => {
-    isGrayscaleImage(gray1k, 1000, 1000, 3);
+    isGray(gray1k, 1000, 1000, 3);
   });
 
   bench('convertToGrayscale 256x256', () => {
@@ -104,15 +110,15 @@ describe('Grayscale detection', () => {
 
 describe('DPI analysis', () => {
   bench('computeImageDpi', () => {
-    computeImageDpi(3000, 2000, 300, 200);
+    imageDpi(3000, 2000, 300, 200);
   });
 
   bench('computeTargetDimensions (downscale needed)', () => {
-    computeTargetDimensions(3000, 2000, 300, 200, 150);
+    targetDimensions(3000, 2000, 300, 200, 150);
   });
 
   bench('computeTargetDimensions (no downscale)', () => {
-    computeTargetDimensions(100, 100, 300, 200, 150);
+    targetDimensions(100, 100, 300, 200, 150);
   });
 });
 
@@ -122,7 +128,7 @@ describe('DPI analysis', () => {
 
 describe('JPEG quality estimation', () => {
   bench('estimateJpegQuality (real JPEG)', () => {
-    estimateJpegQuality(SAMPLE_JPEG);
+    jpegQuality(SAMPLE_JPEG);
   });
 });
 

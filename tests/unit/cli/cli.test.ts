@@ -21,9 +21,9 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
  * Returns the spy objects for assertions and a teardown function.
  */
 function installSpies() {
-  const exitSpy = vi.spyOn(process, 'exit').mockImplementation((_code?: number) => {
+  const exitSpy = vi.spyOn(process, 'exit').mockImplementation((code?: string | number | null) => {
     // Throw a sentinel so control flow stops where process.exit was called
-    throw new ExitSentinel(_code ?? 0);
+    throw new ExitSentinel(Number(code ?? 0));
   });
   const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
   const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});

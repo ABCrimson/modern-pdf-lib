@@ -1,22 +1,25 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach, type Mock } from 'vitest';
 
 // ---------------------------------------------------------------------------
 // Mock browser globals before importing the module
 // ---------------------------------------------------------------------------
 
-let mockAnchor: Record<string, unknown>;
+let mockAnchor: { href: string; download: string; click: Mock<() => void> };
+let clickSpy: Mock<() => void>;
+let createElementSpy: Mock<(tagName: string) => typeof mockAnchor>;
 let appendChildSpy: ReturnType<typeof vi.fn>;
 let removeChildSpy: ReturnType<typeof vi.fn>;
-let createObjectURLSpy: ReturnType<typeof vi.fn>;
+let createObjectURLSpy: Mock<(obj: Blob) => string>;
 let revokeObjectURLSpy: ReturnType<typeof vi.fn>;
-let openSpy: ReturnType<typeof vi.fn>;
+let openSpy: Mock<(url?: string | URL, target?: string) => unknown>;
 
 beforeEach(() => {
   // Mock anchor element
-  mockAnchor = { href: '', download: '', click: vi.fn() };
+  clickSpy = vi.fn();
+  mockAnchor = { href: '', download: '', click: clickSpy };
 
   // Mock document.createElement / body.appendChild / body.removeChild
-  const createElementSpy = vi.fn(() => mockAnchor);
+  createElementSpy = vi.fn((_tagName: string) => mockAnchor);
   appendChildSpy = vi.fn();
   removeChildSpy = vi.fn();
 
@@ -30,7 +33,7 @@ beforeEach(() => {
 
   // Mock URL.createObjectURL / revokeObjectURL
   let urlCounter = 0;
-  createObjectURLSpy = vi.fn(() => `blob:http://localhost/mock-${++urlCounter}`);
+  createObjectURLSpy = vi.fn((_obj: Blob) => `blob:http://localhost/mock-${++urlCounter}`);
   revokeObjectURLSpy = vi.fn();
 
   // Preserve the real URL constructor but replace the static methods
@@ -44,7 +47,7 @@ beforeEach(() => {
   );
 
   // Mock globalThis.open
-  openSpy = vi.fn(() => ({ closed: false }));
+  openSpy = vi.fn((_url?: string | URL, _target?: string): unknown => ({ closed: false }));
   vi.stubGlobal('open', openSpy);
 
   // Mock queueMicrotask to run synchronously in tests
@@ -120,9 +123,9 @@ describe('saveAsDataUrl', () => {
     const { saveAsDataUrl } = await getModule();
     saveAsDataUrl(PDF_BYTES);
     expect(createObjectURLSpy).toHaveBeenCalledTimes(1);
-    const arg = createObjectURLSpy.mock.calls[0][0];
+    const arg = createObjectURLSpy.mock.calls[0]?.[0];
     expect(arg).toBeInstanceOf(Blob);
-    expect(arg.type).toBe('application/pdf');
+    expect(arg?.type).toBe('application/pdf');
   });
 });
 
@@ -148,11 +151,11 @@ describe('saveAsDownload', () => {
     saveAsDownload(PDF_BYTES);
 
     // Should create an <a> element
-    expect(document.createElement).toHaveBeenCalledWith('a');
+    expect(createElementSpy).toHaveBeenCalledWith('a');
 
     // Should append to body, click, then remove
     expect(appendChildSpy).toHaveBeenCalledWith(mockAnchor);
-    expect(mockAnchor.click).toHaveBeenCalled();
+    expect(clickSpy).toHaveBeenCalled();
     expect(removeChildSpy).toHaveBeenCalledWith(mockAnchor);
   });
 
@@ -160,7 +163,7 @@ describe('saveAsDownload', () => {
     const { saveAsDownload } = await getModule();
     saveAsDownload(PDF_BYTES);
     expect(typeof mockAnchor.href).toBe('string');
-    expect((mockAnchor.href as string).startsWith('blob:')).toBe(true);
+    expect(mockAnchor.href.startsWith('blob:')).toBe(true);
   });
 
   it('revokes the object URL after download starts', async () => {
@@ -182,9 +185,9 @@ describe('openInNewTab', () => {
     openInNewTab(PDF_BYTES);
 
     expect(openSpy).toHaveBeenCalledTimes(1);
-    const [url, target] = openSpy.mock.calls[0];
+    const [url, target] = openSpy.mock.calls[0] ?? [];
     expect(typeof url).toBe('string');
-    expect(url.startsWith('blob:')).toBe(true);
+    expect(String(url).startsWith('blob:')).toBe(true);
     expect(target).toBe('_blank');
   });
 
@@ -192,7 +195,7 @@ describe('openInNewTab', () => {
     const { openInNewTab } = await getModule();
     openInNewTab(PDF_BYTES, '_self');
 
-    const [, target] = openSpy.mock.calls[0];
+    const [, target] = openSpy.mock.calls[0] ?? [];
     expect(target).toBe('_self');
   });
 
@@ -218,9 +221,9 @@ describe('openInNewTab', () => {
     const callsBefore = createObjectURLSpy.mock.calls.length;
     openInNewTab(PDF_BYTES);
     expect(createObjectURLSpy.mock.calls.length).toBe(callsBefore + 1);
-    const arg = createObjectURLSpy.mock.calls[createObjectURLSpy.mock.calls.length - 1][0];
+    const arg = createObjectURLSpy.mock.calls[createObjectURLSpy.mock.calls.length - 1]?.[0];
     expect(arg).toBeInstanceOf(Blob);
-    expect(arg.type).toBe('application/pdf');
+    expect(arg?.type).toBe('application/pdf');
   });
 });
 

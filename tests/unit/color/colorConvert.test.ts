@@ -23,7 +23,7 @@ import {
   xyzToRgb,
   rgbToLab,
   labToRgb,
-} from '../../../src/color/colorConvert.ts';
+} from '../../../src/color/colorConvert.js';
 
 // ---------------------------------------------------------------------------
 // Helpers

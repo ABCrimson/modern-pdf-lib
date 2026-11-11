@@ -12,7 +12,7 @@ import {
   type SampledFunction,
   type StitchingFunction,
   type PostScriptFunction,
-} from '../../../src/core/pdfFunctions.ts';
+} from '../../../src/core/pdfFunctions.js';
 
 /** Assert two numbers are equal within a small tolerance. */
 function close(actual: number, expected: number, eps = 1e-9): void {

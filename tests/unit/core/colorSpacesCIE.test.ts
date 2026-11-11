@@ -5,14 +5,14 @@
 
 import { describe, it, expect } from 'vitest';
 
-import { buildCalGray, buildCalRGB, buildLab, labToRgb } from '../../../src/core/colorSpacesCIE.ts';
+import { buildCalGray, buildCalRGB, buildLab, labToRgb } from '../../../src/core/colorSpacesCIE.js';
 import {
   PdfArray,
   PdfDict,
   PdfName,
   PdfNumber,
   type PdfObject,
-} from '../../../src/core/pdfObjects.ts';
+} from '../../../src/core/pdfObjects.js';
 
 const D65_WHITE: readonly [number, number, number] = [0.9505, 1.0, 1.089];
 

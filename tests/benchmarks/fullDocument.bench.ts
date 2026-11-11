@@ -10,8 +10,14 @@
  * - 100-page text document: < 50ms
  */
 
-import { describe, bench } from 'vitest';
+import { describe, bench } from './vitestBench.js';
 import { createPdf, PageSizes, StandardFonts, rgb } from '../../src/index.js';
+
+// Bind once: Vitest's module runner adds a getter call to every imported-binding access.
+const newPdf = createPdf;
+const pageSizes = PageSizes;
+const standardFonts = StandardFonts;
+const color = rgb;
 
 // ---------------------------------------------------------------------------
 // Empty document benchmarks
@@ -19,19 +25,19 @@ import { createPdf, PageSizes, StandardFonts, rgb } from '../../src/index.js';
 
 describe('empty document creation', () => {
   bench('createPdf() + addPage()', () => {
-    const doc = createPdf();
-    doc.addPage(PageSizes.A4);
+    const doc = newPdf();
+    doc.addPage(pageSizes.A4);
   });
 
   bench('empty 1-page PDF save (uncompressed)', async () => {
-    const doc = createPdf();
-    doc.addPage(PageSizes.A4);
+    const doc = newPdf();
+    doc.addPage(pageSizes.A4);
     await doc.save({ compress: false });
   });
 
   bench('empty 1-page PDF save (compressed)', async () => {
-    const doc = createPdf();
-    doc.addPage(PageSizes.A4);
+    const doc = newPdf();
+    doc.addPage(pageSizes.A4);
     await doc.save({ compress: true });
   });
 });
@@ -42,16 +48,16 @@ describe('empty document creation', () => {
 
 describe('text document creation', () => {
   bench('1-page with text (uncompressed)', async () => {
-    const doc = createPdf();
-    const page = doc.addPage(PageSizes.A4);
-    const font = await doc.embedFont(StandardFonts.Helvetica);
+    const doc = newPdf();
+    const page = doc.addPage(pageSizes.A4);
+    const font = await doc.embedFont(standardFonts.Helvetica);
 
     page.drawText('Hello, World!', {
       x: 50,
       y: 750,
       font: font.name,
       size: 24,
-      color: rgb(0, 0, 0),
+      color: color(0, 0, 0),
     });
     page.drawText('This is a test document with some text content.', {
       x: 50,
@@ -64,11 +70,11 @@ describe('text document creation', () => {
   });
 
   bench('10-page text document (uncompressed)', async () => {
-    const doc = createPdf();
-    const font = await doc.embedFont(StandardFonts.Helvetica);
+    const doc = newPdf();
+    const font = await doc.embedFont(standardFonts.Helvetica);
 
     for (let i = 0; i < 10; i++) {
-      const page = doc.addPage(PageSizes.A4);
+      const page = doc.addPage(pageSizes.A4);
       page.drawText(`Page ${i + 1}`, {
         x: 50,
         y: 750,
@@ -91,11 +97,11 @@ describe('text document creation', () => {
   });
 
   bench('10-page text document (compressed)', async () => {
-    const doc = createPdf();
-    const font = await doc.embedFont(StandardFonts.Helvetica);
+    const doc = newPdf();
+    const font = await doc.embedFont(standardFonts.Helvetica);
 
     for (let i = 0; i < 10; i++) {
-      const page = doc.addPage(PageSizes.A4);
+      const page = doc.addPage(pageSizes.A4);
       page.drawText(`Page ${i + 1}`, {
         x: 50,
         y: 750,
@@ -118,11 +124,11 @@ describe('text document creation', () => {
   });
 
   bench('100-page text document (compressed)', async () => {
-    const doc = createPdf();
-    const font = await doc.embedFont(StandardFonts.Helvetica);
+    const doc = newPdf();
+    const font = await doc.embedFont(standardFonts.Helvetica);
 
     for (let i = 0; i < 100; i++) {
-      const page = doc.addPage(PageSizes.A4);
+      const page = doc.addPage(pageSizes.A4);
       page.drawText(`Page ${i + 1}`, {
         x: 50,
         y: 750,
@@ -145,7 +151,7 @@ describe('text document creation', () => {
         y: 680,
         width: 495,
         height: 1,
-        color: rgb(0.8, 0.8, 0.8),
+        color: color(0.8, 0.8, 0.8),
       });
     }
 
@@ -159,8 +165,8 @@ describe('text document creation', () => {
 
 describe('drawing operations', () => {
   bench('1000 drawText calls on single page', async () => {
-    const doc = createPdf();
-    const page = doc.addPage(PageSizes.A4);
+    const doc = newPdf();
+    const page = doc.addPage(pageSizes.A4);
 
     for (let i = 0; i < 1000; i++) {
       page.drawText(`Line ${i}`, { x: 50, y: 800 - (i % 50) * 15, size: 10 });
@@ -170,8 +176,8 @@ describe('drawing operations', () => {
   });
 
   bench('1000 drawRectangle calls on single page', async () => {
-    const doc = createPdf();
-    const page = doc.addPage(PageSizes.A4);
+    const doc = newPdf();
+    const page = doc.addPage(pageSizes.A4);
 
     for (let i = 0; i < 1000; i++) {
       page.drawRectangle({
@@ -179,7 +185,7 @@ describe('drawing operations', () => {
         y: Math.floor(i / 20) * 15,
         width: 25,
         height: 10,
-        color: rgb((i % 256) / 255, 0, 0),
+        color: color((i % 256) / 255, 0, 0),
       });
     }
 
@@ -187,15 +193,15 @@ describe('drawing operations', () => {
   });
 
   bench('500 drawCircle calls on single page', async () => {
-    const doc = createPdf();
-    const page = doc.addPage(PageSizes.A4);
+    const doc = newPdf();
+    const page = doc.addPage(pageSizes.A4);
 
     for (let i = 0; i < 500; i++) {
       page.drawCircle({
         x: 50 + (i % 10) * 50,
         y: 50 + Math.floor(i / 10) * 15,
         size: 5,
-        color: rgb(0, 0, (i % 256) / 255),
+        color: color(0, 0, (i % 256) / 255),
       });
     }
 
@@ -210,11 +216,11 @@ describe('drawing operations', () => {
 describe('serialization only', () => {
   bench('serialize pre-built 10-page document', async () => {
     // Build the document once, then benchmark just the save
-    const doc = createPdf();
-    const font = await doc.embedFont(StandardFonts.Helvetica);
+    const doc = newPdf();
+    const font = await doc.embedFont(standardFonts.Helvetica);
 
     for (let i = 0; i < 10; i++) {
-      const page = doc.addPage(PageSizes.A4);
+      const page = doc.addPage(pageSizes.A4);
       page.drawText(`Page ${i + 1} with some content for serialization benchmark`, {
         x: 50,
         y: 750,
@@ -229,11 +235,11 @@ describe('serialization only', () => {
   });
 
   bench('stream serialization (saveAsStream) 10-page', async () => {
-    const doc = createPdf();
-    const font = await doc.embedFont(StandardFonts.Helvetica);
+    const doc = newPdf();
+    const font = await doc.embedFont(standardFonts.Helvetica);
 
     for (let i = 0; i < 10; i++) {
-      const page = doc.addPage(PageSizes.A4);
+      const page = doc.addPage(pageSizes.A4);
       page.drawText(`Page ${i + 1} for stream benchmark`, {
         x: 50,
         y: 750,

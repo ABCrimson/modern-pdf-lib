@@ -24,7 +24,9 @@ test.describe('Browser PDF creation', () => {
     const result = await page.evaluate(async () => {
       try {
         // Dynamic import from the Vite-served module
-        const { createPdf, PageSizes, rgb } = await import('/src/index.ts');
+        const { createPdf, PageSizes, rgb } = (await import(
+          '/src/index.ts' as string
+        )) as typeof import('../../src/index.js');
 
         const doc = createPdf();
         const p = doc.addPage(PageSizes.A4);
@@ -68,7 +70,9 @@ test.describe('Browser PDF creation', () => {
 
     const endsWithEof = await page.evaluate(async () => {
       try {
-        const { createPdf } = await import('/src/index.ts');
+        const { createPdf } = (await import(
+          '/src/index.ts' as string
+        )) as typeof import('../../src/index.js');
 
         const doc = createPdf();
         doc.addPage();
@@ -88,7 +92,9 @@ test.describe('Browser PDF creation', () => {
 
     const result = await page.evaluate(async () => {
       try {
-        const { createPdf } = await import('/src/index.ts');
+        const { createPdf } = (await import(
+          '/src/index.ts' as string
+        )) as typeof import('../../src/index.js');
 
         const doc = createPdf();
         doc.addPage();
@@ -122,7 +128,9 @@ test.describe('Browser PDF creation', () => {
 
     const result = await page.evaluate(async () => {
       try {
-        const { createPdf } = await import('/src/index.ts');
+        const { createPdf } = (await import(
+          '/src/index.ts' as string
+        )) as typeof import('../../src/index.js');
 
         const doc = createPdf();
         doc.addPage();
@@ -186,7 +194,9 @@ test.describe('Browser PDF creation', () => {
 
     // Generate a PDF with text at various sizes and colors
     const pdfBase64 = await page.evaluate(async () => {
-      const { createPdf, PageSizes, rgb } = await import('/src/index.ts');
+      const { createPdf, PageSizes, rgb } = (await import(
+        '/src/index.ts' as string
+      )) as typeof import('../../src/index.js');
 
       const doc = createPdf();
       const p = doc.addPage(PageSizes.A4);
@@ -243,7 +253,9 @@ test.describe('Browser PDF creation', () => {
 
     // Generate a PDF with rectangles, circles, lines, and colors
     const pdfBase64 = await page.evaluate(async () => {
-      const { createPdf, PageSizes, rgb } = await import('/src/index.ts');
+      const { createPdf, PageSizes, rgb } = (await import(
+        '/src/index.ts' as string
+      )) as typeof import('../../src/index.js');
 
       const doc = createPdf();
       const p = doc.addPage(PageSizes.A4);
@@ -320,7 +332,9 @@ test.describe('Browser PDF creation', () => {
 
     // Generate a 3-page PDF and verify page navigation
     const pdfBase64 = await page.evaluate(async () => {
-      const { createPdf, PageSizes, rgb } = await import('/src/index.ts');
+      const { createPdf, PageSizes, rgb } = (await import(
+        '/src/index.ts' as string
+      )) as typeof import('../../src/index.js');
 
       const doc = createPdf();
       const font = await doc.embedFont('Helvetica');

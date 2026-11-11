@@ -164,7 +164,7 @@ describe('createFieldProxy', () => {
     const form = makeForm([f1]);
     const proxy = createFieldProxy(form);
 
-    expect(proxy.getField).toBeDefined();
+    expect(proxy).toHaveProperty('getField');
     expect(typeof proxy.getField).toBe('function');
   });
 

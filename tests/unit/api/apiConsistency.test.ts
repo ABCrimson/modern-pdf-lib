@@ -18,6 +18,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import {
   createPdf,
+  PdfDocument,
   StandardFonts,
   PageSizes,
   rgb,
@@ -585,7 +586,7 @@ describe('integration: drawPage with Angle-typed rotate', async () => {
 
     // Save and reload to get a source for embedding
     const bytes1 = await doc.save();
-    const loaded = await createPdf().constructor.load(bytes1);
+    const loaded = await PdfDocument.load(bytes1);
 
     const doc2 = createPdf();
     const embedded = doc2.embedPage(loaded.getPage(0));

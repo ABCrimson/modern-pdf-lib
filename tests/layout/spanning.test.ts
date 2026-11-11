@@ -19,6 +19,7 @@ function simpleTable(overrides?: Partial<DrawTableOptions>): DrawTableOptions {
     y: 200,
     width: 300,
     borderWidth: 0,
+    rows: [],
     ...overrides,
   };
 }
