@@ -13,14 +13,14 @@ escape hatch) — not a full flexbox engine.
 ### Hyperscript (`jsxh`)
 
 ```ts
-import { jsxh, renderJsxToPdf, PageSizes } from 'modern-pdf-lib';
+import { jsxh, renderJsxToPdf, PageSizes, rgb } from 'modern-pdf-lib';
 
 const pdf = await renderJsxToPdf(
   jsxh('document', { size: PageSizes.A4 },
     jsxh('page', null,
       jsxh('text', { size: 24, bold: true }, 'Invoice'),
       jsxh('text', null, 'Thank you for your business.'),
-      jsxh('view', { padding: 12, background: [0.95, 0.95, 0.95] },
+      jsxh('view', { x: 50, y: 600, width: 200, height: 40, padding: 12, background: rgb(0.95, 0.95, 0.95) },
         jsxh('text', null, 'Total: $1,234.56'),
       ),
     ),
@@ -38,6 +38,8 @@ const pdf = await renderJsxToPdf(
 | `view` | `{ x?, y?, width?, height?, padding?, background? }` | A block container; indents and pads its children. |
 | `rect` | `{ x, y, width, height, color?, border? }` | Draws a rectangle. |
 
+`color`, `background` and `border` take `Color` values such as `rgb(0.95, 0.95, 0.95)`, not arrays of numbers.
+
 Function components are plain `(props) => PdfNode` functions — they receive
 their props (children as `props.children`) and their return value is rendered in
 place. `Fragment` groups children without adding a layout box. Standard-14
@@ -51,36 +53,35 @@ Layout is a deterministic **top-down block flow**, one cursor per page:
   *decreases* as blocks are placed.
 - A flowed `text` draws at `(x, y - ascent)` and advances y down by its line
   height (`size × LINE_HEIGHT_FACTOR`).
-- A flowed `view` optionally paints its `background`, indents x by `padding`,
-  flows its children, then restores x and advances y past the consumed block
-  plus padding.
+- A flowed `view` indents x by `padding`, flows its children, then restores x
+  and advances y past the consumed block plus padding. If it has a `background`,
+  the fill is drawn after the children and covers them; an absolute `view` with
+  `x`, `y`, `width` and `height` draws its `background` first.
 - **Absolute positioning:** an element that supplies both `x` *and* `y` is
   placed at exactly that PDF coordinate and neither consumes nor advances the
   flow cursor. `rect` requires explicit `x`/`y`, so it is always absolute.
 - Each `page` element resets both cursors and starts a fresh PDF page.
 :::
 
-### JSX syntax (automatic runtime)
+### Automatic-runtime factories (`jsx`, `jsxs`)
 
-For real JSX syntax, point your transform's automatic runtime at the package's
-`jsx`/`jsxs`/`Fragment` exports and render the result with `renderJsxToPdf`:
+The package exports the automatic-runtime functions `jsx`, `jsxs` and `Fragment`, but it has no `jsx-runtime` entry point and declares no JSX element types. `jsxImportSource: "modern-pdf-lib"` therefore does not resolve, and JSX tags such as `<document>` do not type-check. Call the factories directly, with children under `props.children`, and render the result with `renderJsxToPdf`:
 
-```tsx
-/** @jsxRuntime automatic */
-import { renderJsxToPdf } from 'modern-pdf-lib';
+```ts
+import { jsx, jsxs, renderJsxToPdf } from 'modern-pdf-lib';
 
-function Report({ title }: { title: string }) {
-  return (
-    <document>
-      <page>
-        <text size={24} bold>{title}</text>
-        <text>Generated with modern-pdf-lib.</text>
-      </page>
-    </document>
-  );
+function Report(props: Record<string, unknown>) {
+  return jsx('document', {
+    children: jsxs('page', {
+      children: [
+        jsx('text', { size: 24, bold: true, children: String(props['title']) }),
+        jsx('text', { children: 'Generated with modern-pdf-lib.' }),
+      ],
+    }),
+  });
 }
 
-const pdf = await renderJsxToPdf(<Report title="Q3 Summary" />);
+const pdf = await renderJsxToPdf(jsx(Report, { title: 'Q3 Summary' }));
 ```
 
 ::: warning Layout scope
@@ -125,29 +126,36 @@ const bytes = await doc.save();
 | `type: 'number'` / `type: 'integer'` | text field |
 | `type: 'object'` / `type: 'array'` / unknown | text field (placeholder) |
 
-Only `type`, `properties`, `required`, and `enum` are read; other keywords are
-ignored. `enum` is honoured for `type: 'string'` only. Required properties get an
+Only `type`, `properties`, `required`, `enum`, and `title` (used as the field
+label) are read; other keywords, including validation keywords such as
+`minLength` or `pattern`, are ignored, and sub-properties of a nested object are
+not expanded. `enum` is honoured for `type: 'string'` only. Required properties get an
 asterisk in their label. Fields stack top-down and paginate automatically.
 
 ## Serving PDFs from a server
 
-`pdfResponse` wraps PDF bytes in a Web-standard `Response` (Workers, Deno, Bun,
-Node ≥18) with the correct `Content-Type`, `Content-Length`, and RFC 6266
-`Content-Disposition`:
+`pdfResponse` wraps PDF bytes in a Web-standard `Response` with the correct `Content-Type`, `Content-Length`, and RFC 6266
+`Content-Disposition`. The package requires Node >=26.4 (`engines` in
+`package.json`); Deno, Bun and Cloudflare Workers are not tested in CI.
 
 ```ts
 import { pdfResponse, pdfStreamResponse, sendPdfToNodeResponse } from 'modern-pdf-lib';
 
 // Web standard (Hono, Workers, Deno, Bun, Next route handlers):
-export function GET() {
+export async function GET() {
+  const bytes = await buildReport(); // your function returning doc.save()
   return pdfResponse(bytes, { filename: 'report.pdf', download: true });
 }
 
 // Streaming (unknown length):
-return pdfStreamResponse(readableStream);
+function streamReport(): Response {
+  const readableStream = buildReportStream(); // a ReadableStream<Uint8Array>
+  return pdfStreamResponse(readableStream);
+}
 
 // Classic Node http / Express:
-app.get('/report.pdf', (req, res) => {
+app.get('/report.pdf', async (req, res) => { // app: your Express app
+  const bytes = await buildReport();
   sendPdfToNodeResponse(res, bytes, { filename: 'report.pdf' });
 });
 ```
@@ -172,5 +180,5 @@ app.get('/report.pdf', (req, res) => {
 | `lastModified` | `Date` | Serialised to the HTTP-date format for `Last-Modified` |
 | `headers` | `Record<string, string>` | Extra headers, merged **first** — the core PDF headers always win |
 
-Non-ASCII filenames are encoded with the RFC 5987 `filename*` form (with an ASCII
+Non-ASCII filenames are encoded with the RFC 8187 `filename*` form (with an ASCII
 fallback), so `résumé.pdf` downloads correctly everywhere.

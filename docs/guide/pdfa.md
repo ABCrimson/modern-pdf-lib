@@ -4,7 +4,7 @@ title: PDF/A Compliance
 
 # PDF/A Compliance Guide
 
-modern-pdf-lib provides comprehensive tools for creating, validating, and enforcing PDF/A compliance across all major conformance levels. Whether you need to archive documents for long-term preservation or embed machine-readable invoices with ZUGFeRD/Factur-X, the compliance module has you covered.
+modern-pdf-lib writes PDF/A metadata and structures and checks them against a byte-level rule list for PDF/A-1, -2 and -3. The checks are a heuristic scan of the raw file bytes, and the output is not validated against veraPDF; use veraPDF for a conformance verdict. The module also builds ZUGFeRD/Factur-X invoices (PDF/A-3 with an embedded XML file).
 
 ---
 
@@ -17,6 +17,9 @@ PDF/A is an ISO standard (ISO 19005) for long-term archival of electronic docume
 | **PDF/A-1** | ISO 19005-1:2005 | PDF 1.4 | No transparency, no JPEG2000, no embedded files |
 | **PDF/A-2** | ISO 19005-2:2011 | PDF 1.7 | Allows transparency, JPEG2000, layers |
 | **PDF/A-3** | ISO 19005-3:2012 | PDF 1.7 | Same as PDF/A-2 + embedded files of any type |
+| **PDF/A-4** | ISO 19005-4:2020 | PDF 2.0 | No a/b/u levels; 4e (engineering) and 4f (attachments) variants |
+
+`validatePdfA` and `enforcePdfA` take the levels `1a` to `3u` only. For PDF/A-4 the library provides `buildPdfA4Xmp`, `pdfA4Rules` and `convertPdfAConformanceXmp`.
 
 ### Conformance Levels
 
@@ -74,6 +77,8 @@ The validator checks for the following issues:
 | `PDFA-012` | Output intents for device-dependent color spaces | Warning |
 | `PDFA-013` | Standard 14 fonts must be embedded | Error |
 
+Each check is a substring or pattern match on the raw file bytes, so objects stored inside object streams are not seen. The validator does not inspect font programs, ICC profile contents, or whether the Info dictionary and the XMP agree.
+
 ### Enforcing PDF/A Compliance
 
 ```typescript
@@ -85,9 +90,11 @@ const compliant = await enforcePdfA(bytes, '2b');
 await writeFile('document-pdfa.pdf', compliant);
 ```
 
-`enforcePdfA` adds or corrects:
+`enforcePdfA` adds, when missing:
 - XMP metadata with PDF/A identification (`pdfaid:part`, `pdfaid:conformance`)
 - File identifier (`/ID`) in the trailer
+
+It does not set `/Lang` and does not rewrite an existing XMP packet. `enforcePdfAFull` runs the same steps after stripping prohibited features and flattening transparency (PDF/A-1) and returns the bytes with a validation report. When they add XMP metadata, both insert the new objects by splicing bytes into the file without rewriting the cross-reference table, so the `startxref` offset of the output no longer points at the cross-reference table.
 
 ::: warning Limitations
 `enforcePdfA` cannot fix all compliance issues automatically. It will **throw** if the document is encrypted or contains JavaScript. Use `stripProhibitedFeatures` first to remove those. Font embedding and structure tree creation require manual intervention.
@@ -125,7 +132,7 @@ Builds on PDF/A-1b while allowing modern PDF features.
 - Transparency and blend modes
 - JPEG2000 compression
 - Optional Content Groups (layers)
-- PDF packages
+- Embedded files that are themselves PDF/A (ISO 19005-2, clause 6.8); `validatePdfA` currently rejects any embedded file below part 3 (`PDFA-010`), which is stricter than the standard
 
 ### PDF/A-3b — Embedded Files
 
@@ -162,6 +169,8 @@ Flattening replaces:
 - `/ca <value>` (fill opacity) with `/ca 1`
 - `/SMask <ref>` with `/SMask /None`
 - `/BM /<mode>` with `/BM /Normal`
+
+`flattenTransparency` decodes the whole file as UTF-8 text, edits the string and encodes it again. Bytes that are not valid UTF-8, such as compressed streams, images and fonts, are replaced, so any change to a file with binary content corrupts it.
 
 ::: warning Lossy Operation
 Flattening is lossy — semi-transparent elements become fully opaque. For print-quality output, manual review is recommended. If your workflow allows it, target PDF/A-2b instead, which permits transparency.
@@ -247,6 +256,8 @@ if (result.modified) {
 }
 ```
 
+When it changes anything, `stripProhibitedFeatures` decodes the whole file as UTF-8 text and encodes it again, which replaces bytes that are not valid UTF-8 (compressed streams, images, fonts).
+
 You can selectively control which features to strip:
 
 ```typescript
@@ -329,10 +340,6 @@ import {
   createPdf,
   PageSizes,
   rgb,
-  createAssociatedFile,
-  buildAfArray,
-  buildOutputIntent,
-  generatePdfAXmpBytes,
   enforcePdfA,
 } from 'modern-pdf-lib';
 import { readFile, writeFile } from 'node:fs/promises';
@@ -408,20 +415,10 @@ const invoiceXml = `<?xml version="1.0" encoding="UTF-8"?>
 
 // --- Step 3: Embed the XML as an associated file ---
 const xmlBytes = new TextEncoder().encode(invoiceXml);
-const registry = doc.getRegistry();
 
-const { fileSpecRef } = createAssociatedFile(registry, {
-  data: xmlBytes,
-  filename: 'factur-x.xml',
-  mimeType: 'text/xml',
-  relationship: 'Alternative',
+doc.addAssociatedFile('factur-x.xml', xmlBytes, 'text/xml', 'Alternative', {
   description: 'Factur-X invoice data (Minimum profile)',
 });
-
-// Add the /AF array to the catalog
-const afArray = buildAfArray([fileSpecRef]);
-// (Wire afArray and fileSpecRef into the catalog's /AF and
-//  /Names/EmbeddedFiles — see your document's registry API)
 
 // --- Step 4: Save and enforce PDF/A-3b ---
 const pdfBytes = await doc.save();
@@ -442,6 +439,7 @@ import {
   PageSizes,
   assembleFacturX,    // generate CII XML + attach as an /AF (one call)
   buildFacturXXmp,    // the fx: XMP extension metadata for the document
+  generatePdfAXmp,    // the PDF/A identification XMP packet
   validateEn16931,    // EN 16931 business-rule check
   generateCiiXml,     // (lower-level) just the CII XML string
   enforcePdfA,
@@ -477,8 +475,12 @@ const xml = assembleFacturX(doc, invoice, { profile: 'EN16931' });
 // 4. Merge the Factur-X identification XMP into the document metadata, then
 //    enforce PDF/A-3b. buildFacturXXmp returns the <rdf:RDF> fragment whose
 //    fx: properties (DocumentType, DocumentFileName, Version, ConformanceLevel)
-//    let validators recognise the hybrid invoice.
-const xmpFragment = buildFacturXXmp('EN16931', 'factur-x.xml');
+//    let validators recognise the hybrid invoice. Its descriptions are spliced
+//    into the PDF/A identification packet before the packet is set.
+const fx = buildFacturXXmp('EN16931', 'factur-x.xml');
+const fxDescriptions = fx.slice(fx.indexOf('>') + 1, fx.lastIndexOf('</rdf:RDF>'));
+const packet = generatePdfAXmp({ part: 3, conformance: 'B', title: 'Invoice INV-2026-001' });
+doc.setXmpMetadata(packet.replace('</rdf:RDF>', `${fxDescriptions}</rdf:RDF>`));
 const compliant = await enforcePdfA(await doc.save(), '3b');
 ```
 
@@ -618,7 +620,7 @@ async function convertToPdfA(
   // Step 4: Validate the result
   const result = validatePdfA(bytes, level);
   if (result.valid) {
-    console.log(`Successfully converted to PDF/A-${level}`);
+    console.log(`Passes the built-in PDF/A checks for level ${level}`);
   } else {
     console.warn('Remaining issues:');
     for (const issue of result.issues) {
@@ -663,7 +665,8 @@ await convertToPdfA('input.pdf', 'output-pdfa.pdf', '2b');
 | Function | Description |
 |---|---|
 | `validatePdfA(bytes, level)` | Validate PDF bytes against a conformance level |
-| `enforcePdfA(bytes, level)` | Enforce compliance (adds XMP metadata + file ID) |
+| `enforcePdfA(bytes, level)` | Add missing XMP metadata and file ID (byte splice, not validated) |
+| `enforcePdfAFull(bytes, level, options?)` | Strip, flatten, add XMP metadata and file ID; returns bytes and a validation report |
 | `detectTransparency(bytes)` | Detect transparency features in PDF bytes |
 | `flattenTransparency(bytes)` | Remove transparency for PDF/A-1 compliance |
 | `stripProhibitedFeatures(bytes, options?)` | Remove prohibited actions and features |
@@ -678,6 +681,8 @@ await convertToPdfA('input.pdf', 'output-pdfa.pdf', '2b');
 | `createAssociatedFile(registry, options)` | Create a PDF/A-3 associated file entry |
 | `buildAfArray(refs)` | Build an `/AF` array from file spec references |
 | `getToUnicodeCmap(fontName)` | Get a ToUnicode CMap for a standard font |
+| `buildPdfA4Xmp(options?)` | Generate a PDF/A-4 XMP packet |
+| `pdfA4Rules(level?)` | List the requirements of a PDF/A-4 variant |
 
 ### Key Types
 
@@ -738,7 +743,7 @@ if (result.valid) {
 type PdfUaLevel = 'UA1';
 ```
 
-Currently only PDF/UA-1 (ISO 14289-1:2014) is supported. PDF/UA-2 (ISO 14289-2) may be added in a future release.
+PDF/UA-1 (ISO 14289-1) is checked by `validatePdfUa`; PDF/UA-2 (ISO 14289-2) by `validatePdfUa2(doc)`, with `buildPdfUa2Xmp()` for the identification metadata.
 
 ### Validation Checks
 
@@ -752,11 +757,14 @@ The validator performs the following checks:
 | `UA-STRUCT-004` | Heading levels sequential (no skips in same parent) | Error |
 | `UA-STRUCT-005` | Alt text on illustration elements (Figure, Formula, Form) | Error |
 | `UA-STRUCT-006` | Non-empty alt text | Error |
+| `UA-STRUCT-007` | Structure tree has elements with MCIDs assigned | Warning |
+| `UA-STRUCT-008` | MCIDs on a page appear in reading order | Warning |
 | `UA-META-001..003` | Document language (`/Lang`) present and valid BCP 47 | Error |
 | `UA-META-004..006` | Document title present and `/DisplayDocTitle` enabled | Error |
 | `UA-TABLE-001..003` | Table structure (TR/TH/TD hierarchy) | Error/Warning |
 | `UA-LIST-001..003` | List structure (L/LI/LBody hierarchy) | Error/Warning |
 | `UA-FONT-001` | All fonts embedded (standard 14 not exempt) | Error |
+| `UA-FONT-002` | Standard 14 font used only in form field appearances | Warning |
 | `UA-NAV-001` | Bookmarks present for multi-page documents | Warning |
 | `UA-PAGE-001` | Tab order set to structure order (`/Tabs /S`) | Warning |
 | `UA-CONTRAST-001` | Color contrast reminder (manual check needed) | Warning |

@@ -36,6 +36,7 @@ page.drawText('Important Notice', {
   x: 50,
   y: 750,
   size: 36,
+  font: helvetica,
   color: rgb(0.8, 0.1, 0.1),
 });
 
@@ -44,6 +45,7 @@ page.drawText('Please read the following terms carefully.', {
   x: 50,
   y: 710,
   size: 11,
+  font: helvetica,
   color: rgb(0.4, 0.4, 0.4),
 });
 ```
@@ -72,6 +74,7 @@ page.drawText('Line one\nLine two\nLine three', {
   x: 50,
   y: 700,
   size: 14,
+  font: helvetica,
   color: rgb(0, 0, 0),
   lineHeight: 20,
 });
@@ -119,6 +122,7 @@ page.drawText('Rotated!', {
   x: 200,
   y: 400,
   size: 20,
+  font: helvetica,
   color: rgb(0, 0, 0.7),
   rotate: degrees(45),
 });
@@ -128,6 +132,7 @@ page.drawText('Vertical', {
   x: 30,
   y: 300,
   size: 14,
+  font: helvetica,
   color: rgb(0, 0, 0),
   rotate: degrees(90),
 });
@@ -196,7 +201,7 @@ page.drawText('Custom font text with Unicode: cafe\u0301', {
 });
 ```
 
-See the [Fonts guide](/guide/fonts) for details on subsetting, complex script shaping, and font metrics.
+See the [Fonts guide](/guide/fonts) for details on subsetting, bidirectional text, and font metrics.
 
 ## Options Reference
 
@@ -206,7 +211,7 @@ See the [Fonts guide](/guide/fonts) for details on subsetting, complex script sh
 | `x` | `number` | Cursor position (initially `0`) | Horizontal position in points |
 | `y` | `number` | Cursor position (initially `0`) | Vertical position in points (from bottom) |
 | `size` | `number` | `12` (or page default) | Font size in points |
-| `font` | `FontRef \| string` | Page default font | Font to use — a `FontRef` from `embedFont()`, or a raw font resource name string |
+| `font` | `FontRef \| string` | `page.setFont()` value, else resource `F1` (the first embedded font) | Font to use — a `FontRef` from `embedFont()`, or a raw font resource name string |
 | `color` | `Color` | Black | Text color |
 | `rotate` | `Angle` | `degrees(0)` | Rotation angle |
 | `lineHeight` | `number` | `size * 1.2` | Vertical spacing for multi-line text |

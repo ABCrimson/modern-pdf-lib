@@ -1,115 +1,26 @@
 # Performance Tuning
 
-This guide covers performance optimization techniques for `modern-pdf-lib`, from WASM acceleration and font subsetting to streaming output and memory management.
+This guide covers performance optimization techniques for `modern-pdf-lib`, from compression settings and font subsetting to streaming output and memory management.
 
 ## Why Performance Matters
 
-PDF generation can be CPU-intensive and memory-hungry. A 500-page report with embedded fonts and images may take seconds to generate and consume hundreds of megabytes of memory. With the right settings, you can cut generation time by 5-10x and reduce peak memory by 80% or more.
+PDF generation can be CPU-intensive and memory-hungry. A 500-page report with embedded fonts and images may take seconds to generate and consume hundreds of megabytes of memory. Compression level, font subsetting, streaming output and reusing embedded fonts and images are the main levers.
 
 `modern-pdf-lib` is designed for performance out of the box: subsetting is automatic, compression is enabled by default, and the ESM-first architecture enables tree-shaking. This guide covers how to go further.
 
-## WASM Acceleration
+## WebAssembly Modules
 
-`modern-pdf-lib` ships with optional WASM modules that accelerate the most expensive operations. All WASM modules have pure-JS fallbacks, so your code runs everywhere -- WASM just makes it faster.
+The package ships WebAssembly builds of six Rust crates under `dist/wasm/` (libdeflate, png, ttf, shaping, jbig2 and jpeg, exposed through the `modern-pdf-lib/wasm/*` subpath export), but this release's JavaScript does not run them; all work runs in pure JavaScript.
 
-### When to Enable WASM
+### What runs today
 
-Enable WASM acceleration when:
+- Stream compression uses fflate.
+- PNG and JPEG decoding, font parsing and subsetting, and JBIG2 decoding run in JavaScript.
+- `initWasm()` without an argument returns at once. `initWasm({ deflate: true })` rejects with "Failed to initialize libdeflate WASM", and the `png`, `fonts` and `jpeg` options resolve without enabling anything.
+- `save({ useWasm: true })` is accepted, and fflate still produces the output.
+- JPEG recompression in `optimizeAllImages()` and `modern-pdf optimize` needs the JPEG WASM encoder, so it changes no image.
 
-- Generating large documents (100+ pages, many images)
-- Running server-side where throughput matters
-- Working with large fonts (CJK, Noto families)
-- File size is critical (libdeflate produces smaller output at high levels)
-
-### Initialization
-
-Call `initWasm()` once at startup, before any `save()` calls:
-
-#### Node / Bun
-
-```ts
-import { initWasm, createPdf, PageSizes, StandardFonts, rgb } from 'modern-pdf-lib';
-
-await initWasm({ deflate: true, fonts: true, png: true });
-
-const pdf = createPdf();
-const page = pdf.addPage(PageSizes.A4);
-const font = await pdf.embedFont(StandardFonts.Helvetica);
-page.drawText('WASM-accelerated PDF', { x: 50, y: 700, size: 24, font, color: rgb(0, 0, 0) });
-
-const bytes = await pdf.save({ useWasm: true });
-```
-
-#### Browser
-
-```ts
-import { initWasm, createPdf } from 'modern-pdf-lib';
-
-// Load WASM modules (fetched from your static assets)
-await initWasm({ deflate: true, fonts: true, png: true });
-
-const pdf = createPdf();
-// ... build document ...
-const blob = await pdf.saveAsBlob();
-```
-
-#### Deno
-
-```ts
-import { initWasm, createPdf } from 'modern-pdf-lib';
-
-await initWasm({ deflate: true, fonts: true });
-
-const pdf = createPdf();
-// ... build document ...
-const bytes = await pdf.save({ useWasm: true });
-await Deno.writeFile('output.pdf', bytes);
-```
-
-#### Cloudflare Workers
-
-```ts
-import { initWasm, createPdf } from 'modern-pdf-lib';
-
-// Initialize once at module scope (runs during cold start)
-await initWasm({ deflate: true });
-
-export default {
-  async fetch(): Promise<Response> {
-    const pdf = createPdf();
-    // ... build document ...
-
-    return new Response(pdf.saveAsStream(), {
-      headers: { 'Content-Type': 'application/pdf' },
-    });
-  },
-};
-```
-
-### Speedup by Module
-
-| WASM Module | Operation | Typical Speedup | Notes |
-|:---|:---|:---:|:---|
-| `deflate` | Stream compression | 2-4x | Uses libdeflate; supports levels 1-12 |
-| `fonts` | Font subsetting | 3-5x | Largest benefit with CJK fonts |
-| `png` | PNG decoding | ~5x | Decodes PNG alpha and filters in WASM |
-| `jbig2` | JBIG2 image decoding | ~3x | Bilevel image decompression |
-
-> [!TIP]
-> WASM is entirely optional. Every WASM module has a pure-JS fallback that produces identical output. You can ship without WASM and add it later as a performance optimization.
-
-### Pre-loading WASM Bytes
-
-If your environment does not support dynamic `import()` or you want to control how WASM files are loaded, pass the binary bytes directly:
-
-```ts
-import { initWasm } from 'modern-pdf-lib';
-import { readFile } from 'node:fs/promises';
-
-const deflateWasm = new Uint8Array(await readFile('node_modules/modern-pdf-lib/wasm/deflate.wasm'));
-
-await initWasm({ deflate: true, deflateWasm });
-```
+Application code does not need to call `initWasm()`.
 
 ## Font Subsetting
 
@@ -155,19 +66,16 @@ const font = await pdf.embedFont(fontBytes, { subset: false });
 
 ## Compression Levels
 
-`modern-pdf-lib` compresses streams with FlateDecode by default at level 6. You can tune the trade-off between speed and file size.
+`modern-pdf-lib` compresses streams with FlateDecode (fflate) by default at level 6. `compressionLevel` accepts 1 to 9, so you can tune the trade-off between speed and file size.
 
 ### Compression Level Table
 
 | Level | Speed | File Size | Engine |
 |:---|:---:|:---:|:---|
-| 1 | Fastest | Largest | fflate / libdeflate |
-| 3 | Fast | Large | fflate / libdeflate |
-| 6 (default) | Balanced | Balanced | fflate / libdeflate |
-| 9 | Slow | Smallest (deflate) | fflate / libdeflate |
-| 12 | Slowest | Smallest overall | libdeflate WASM only |
-
-Levels 10-12 are only available when the libdeflate WASM module is loaded. These levels use a more aggressive search algorithm that can squeeze out an additional 3-8% reduction compared to level 9.
+| 1 | Fastest | Largest | fflate |
+| 3 | Fast | Large | fflate |
+| 6 (default) | Balanced | Balanced | fflate |
+| 9 | Slowest | Smallest | fflate |
 
 ### Code Example
 
@@ -180,8 +88,8 @@ const pdf = createPdf();
 // Default: compress at level 6
 const balanced = await pdf.save();
 
-// Maximum compression with libdeflate WASM
-const smallest = await pdf.save({ compress: true, compressionLevel: 9, useWasm: true });
+// Smallest output: level 9
+const smallest = await pdf.save({ compress: true, compressionLevel: 9 });
 
 // Fastest: level 1 for quick previews
 const fast = await pdf.save({ compress: true, compressionLevel: 1 });
@@ -191,18 +99,11 @@ const raw = await pdf.save({ compress: false });
 ```
 
 > [!WARNING]
-> Disabling compression (`compress: false`) can increase file size by 3-10x. Only use this for debugging or when the output will be re-compressed by an outer container (e.g., gzip over HTTP).
+> Disabling compression (`compress: false`) can increase file size substantially. Only use this for debugging or when the output will be re-compressed by an outer container (e.g., gzip over HTTP).
 
 ## Streaming Output
 
-For large documents, `saveAsStream()` serializes the PDF incrementally instead of building the entire byte array in memory.
-
-### Memory Comparison
-
-| Method | Peak Memory (500 pages, 50 images) | Time to First Byte |
-|:---|:---:|:---:|
-| `save()` | ~120 MB | After full generation |
-| `saveAsStream()` | ~15 MB | Immediate |
+For large documents, `saveAsStream()` emits the PDF as a stream of chunks instead of building the final byte array in one buffer. The document model (all pages, fonts and images) stays in memory, and each stream object is compressed and serialized into a temporary buffer.
 
 ### When to Use Streaming
 
@@ -257,7 +158,7 @@ export default {
 
 The benefits of streaming:
 
-- **Lower peak memory** -- pages are serialized and flushed incrementally
+- **No single output buffer** -- objects are serialized and emitted in chunks
 - **Faster time-to-first-byte** -- the HTTP response starts before the entire PDF is generated
 - **Backpressure support** -- the stream pauses generation if the consumer is slower than the producer
 
@@ -316,7 +217,7 @@ for (let i = 0; i < 100; i++) {
 
 ### Large Documents (1000+ Pages)
 
-For documents with hundreds or thousands of pages, use `saveAsStream()` to avoid holding the entire PDF in memory. The streaming serializer flushes page data incrementally.
+For documents with hundreds or thousands of pages, use `saveAsStream()` to avoid materializing the whole file in one buffer. The streaming serializer emits the serialized objects in chunks; the document model stays in memory.
 
 ```ts
 const pdf = createPdf();
@@ -340,14 +241,12 @@ Image handling varies significantly by format:
 |:---|:---|:---|
 | JPEG | Zero-copy passthrough | Low -- raw JPEG bytes are embedded directly |
 | PNG | Decompressed, re-encoded | High -- full RGBA bitmap is held in memory during embedding |
-| PNG (WASM) | WASM-accelerated decode | Medium -- faster and slightly less memory than pure JS |
 
 **Recommendations:**
 
 1. **Use JPEG for photographs.** JPEG data is embedded as-is, with no decompression or recompression. This is the fastest and most memory-efficient path.
 2. **Scale images before embedding.** A 4000x3000 photograph displayed at 200x150 points wastes memory and file size. Resize images to the target display size before calling `embedPng()` or `embedJpeg()`.
-3. **Enable WASM for PNG-heavy documents.** The WASM PNG decoder uses less memory and runs ~5x faster than the pure-JS fallback.
-4. **Embed each image once.** Reuse the `ImageRef` across pages (see [Batch Operations](#batch-operations)).
+3. **Embed each image once.** Reuse the `ImageRef` across pages (see [Batch Operations](#batch-operations)).
 
 ### Memory Budget by Runtime
 
@@ -356,7 +255,7 @@ Image handling varies significantly by format:
 | Node.js | 2-4 GB (configurable) | Use `save()` for most documents; `saveAsStream()` for 500+ pages |
 | Bun | 2-4 GB | Same as Node |
 | Deno | 2-4 GB | Same as Node |
-| Cloudflare Workers | 128 MB | Always use `saveAsStream()`; keep documents under 100 pages |
+| Cloudflare Workers | 128 MB | Use `saveAsStream()` for responses |
 | Browser | Device-dependent | Use `saveAsBlob()` for downloads; `saveAsStream()` for large docs |
 
 ## Concurrency & resource control
@@ -425,34 +324,31 @@ const caps = detectRuntimeCapabilities();
 
 ## Cross-Runtime Performance
 
-`modern-pdf-lib` runs in every JavaScript runtime. Performance characteristics vary:
+`modern-pdf-lib` targets Node.js (`engines` `>=26.4`), browsers, Deno, Bun and Cloudflare Workers. The library calls `Uint8Array` base64 and hex methods without a guard; MDN browser-compat-data (read 2026-11-11) lists them from Node.js 25.0.0, Deno 2.5.0, Bun 1.1.22, Chrome 140, Firefox 133 and Safari 18.2.
 
-| Runtime | Throughput | WASM Support | Notes |
-|:---|:---:|:---:|:---|
-| Node.js | Best | Full | Best for server-side batch generation |
-| Bun | Comparable | Full | Slightly faster cold start than Node |
-| Deno | Comparable | Full | Comparable to Node for PDF generation |
-| Cloudflare Workers | Good | Full | 128 MB memory limit; use streaming |
-| Browser | Device-dependent | Full | Performance varies with device hardware |
+| Runtime | Tested in CI | Notes |
+|:---|:---:|:---|
+| Node.js | Yes | Unit tests gate on Node 26; Node 24 and the `devEngines` Node 28 nightly run as non-gating probes |
+| Bun | No | Not tested in CI |
+| Deno | No | Not tested in CI |
+| Cloudflare Workers | No | 128 MB memory limit; use streaming |
+| Browser | Yes | Playwright E2E on Chromium, Firefox and WebKit |
 
 > [!TIP]
-> For server-side generation, Node.js and Bun offer the best throughput. For edge deployments, Cloudflare Workers work well with streaming output and moderate document sizes. In the browser, prefer `saveAsBlob()` for the simplest user experience.
+> For edge deployments, return `saveAsStream()` as the response body. In the browser, prefer `saveAsBlob()` for the simplest user experience.
 
 ## Tree-Shaking and Bundle Size
 
-`modern-pdf-lib` ships pure-ESM builds with granular exports and `"sideEffects": false`, allowing bundlers (Vite, esbuild, Rollup, webpack 5) to tree-shake unused code.
+`modern-pdf-lib` ships ES module builds behind subpath exports (`.`, `./create`, `./parse`, `./forms`, `./browser`, `./wasm/*`), CommonJS builds for `.`, `./create`, `./parse` and `./forms`, and `"sideEffects": false`, allowing bundlers (Vite, esbuild, Rollup, webpack 5) to tree-shake unused code. The IIFE bundle (`dist/modern-pdf-lib.iife.js`) is for script tags and is not an export.
 
 ### Bundle Size Breakdown
 
-Measured against v0.40.2 with `esbuild --bundle --minify` + gzip:
+Measured 2026-11-11 from the built `dist/` with esbuild 0.28.2 (`--bundle --minify`) and gzip level 9:
 
 | Scenario | Size (minified + gzipped) |
 |:---|:---:|
-| Minimal document (`createPdf` + `drawText` + `save`) | ~108 KB |
-| Create + load existing (`createPdf` + `loadPdf`) | ~108 KB |
-| Parse + text extraction (`loadPdf` + `extractTextWithPositions`) | ~111 KB |
-| Signatures only (`signPdf` + `verifySignatures`) | ~10 KB |
-| Entire library (all 721 exports) | ~261 KB |
+| Minimal document (`export { createPdf } from 'modern-pdf-lib'`, `node:*` external) | ~108 KB (110,411 B) |
+| Entire library (`dist/modern-pdf-lib.iife.js`) | ~267 KB (273,001 B) |
 
 ### Minimizing Bundle Size
 
@@ -467,7 +363,7 @@ import { createPdf, PageSizes, StandardFonts, rgb } from 'modern-pdf-lib';
 ```
 
 > [!NOTE]
-> WASM modules are loaded lazily via `initWasm()` and are never included in the main bundle. They are fetched at runtime only when explicitly requested. If you never call `initWasm()`, zero WASM bytes are loaded.
+> The WebAssembly builds under `dist/wasm/` are separate files and are never part of the JavaScript bundles; this release's JavaScript does not run them.
 
 ## Benchmarking
 
@@ -476,7 +372,7 @@ import { createPdf, PageSizes, StandardFonts, rgb } from 'modern-pdf-lib';
 ### Running Benchmarks
 
 ```bash
-npx vitest bench tests/benchmarks/
+pnpm exec vitest bench tests/benchmarks/
 ```
 
 ### Available Benchmark Suites
@@ -486,35 +382,31 @@ npx vitest bench tests/benchmarks/
 | Full document | `tests/benchmarks/fullDocument.bench.ts` | End-to-end PDF creation: page creation, text drawing, serialization |
 | Compression | `tests/benchmarks/compression.bench.ts` | fflate compress/decompress at various levels and data sizes |
 | Font parsing | `tests/benchmarks/fontParsing.bench.ts` | Standard font lookup speed and text measurement throughput |
-| Comparison | `tests/benchmarks/comparison.bench.ts` | Head-to-head: modern-pdf-lib vs pdf-lib across shared operations |
+| Image optimization | `tests/benchmarks/imageOptimize.bench.ts` | Image optimization throughput |
+
+The `*.bench.ts` files use the `bench` fixture of vitest 5.1 (5.1.0, pinned in `package.json`) through `tests/benchmarks/vitestBench.ts`. The head-to-head comparison against `pdf-lib` (a devDependency, pinned in `package.json`) lives in `tests/benchmarks/comparison.ts` and runs on a standalone tinybench harness:
+
+```bash
+pnpm run bench
+```
+
+The comparison covers 37 operations. The harness prints how many of them each library wins on the machine that runs it; the counts vary by machine.
 
 ### Running a Single Suite
 
 ```bash
-npx vitest bench tests/benchmarks/compression.bench.ts
+pnpm exec vitest bench tests/benchmarks/compression.bench.ts
 ```
 
-### Performance Targets
-
-These are the baseline targets from the benchmark suite:
-
-| Operation | Target |
-|:---|:---:|
-| Empty 1-page PDF | < 1 ms |
-| 10-page text document | < 10 ms |
-| 100-page text document | < 50 ms |
-
-> [!TIP]
-> Run benchmarks before and after enabling WASM to measure the speedup on your specific workload. The benefit depends on document complexity -- image-heavy and font-heavy documents see the largest gains.
+The benchmarks report timings; no assertion or CI job enforces a time target.
 
 ## Quick Reference
 
 | Optimization | When to Use | Impact |
 |:---|:---|:---|
-| WASM acceleration | Large docs, server-side, CJK fonts | 2-10x faster |
-| Font subsetting (default) | Always (disable only for form templates) | 90-99% smaller fonts |
-| Compression level tuning | Adjust based on speed vs. size priority | 3-8% size difference |
-| Streaming output | 50+ pages, HTTP responses, edge runtimes | 80% less memory |
+| Font subsetting (default) | Always (disable only for form templates) | Smaller embedded fonts |
+| Compression level tuning | Adjust based on speed vs. size priority | Level 1 to 9 trade-off |
+| Streaming output | 50+ pages, HTTP responses, edge runtimes | No single output buffer |
 | Batch embedding | Multi-page docs with shared fonts/images | Avoid duplicate data |
 | JPEG over PNG | Photographs and complex images | Zero-copy, less memory |
 | Tree-shaking | Browser bundles, edge functions | Import only what you use |

@@ -50,8 +50,15 @@ const bytes = await doc.save();
 | `textColor` | `Color` | black | Default text color |
 | `borderColor` | `Color` | black | Border color |
 | `borderWidth` | `number` | `0.5` | Border line width |
-| `headerRows` | `number` | `0` | Rows repeated on page breaks |
+| `headerRows` | `number` | `0` | Rows styled as header (`headerBackgroundColor` / `headerTextColor`); `renderMultiPageTable` repeats them on each page. `drawTable` draws a single block and never breaks pages. |
 | `padding` | `number` | `4` | Default cell padding |
+| `alternateRowColors` | `[Color, Color]` | none | Alternating row background colors |
+| `headerBackgroundColor` | `Color` | none | Header row background color |
+| `headerTextColor` | `Color` | none | Header row text color |
+
+::: warning Text measurement is approximate
+Cell text is measured with a `0.5 × fontSize` per character estimate, not font metrics, so alignment, wrap, truncate, ellipsis, shrink and `autoFit` are approximate. Proportional and bold fonts can run wider than estimated.
+:::
 
 ## Cell Options
 
@@ -72,7 +79,7 @@ Cells can be simple strings or objects with styling:
 
 | Option | Type | Default | Description |
 |---|---|---|---|
-| `content` | `string` | `''` | Cell text content |
+| `content` | `string` or `TextRun[]` or `{ type: 'table', table }` | required | Cell text, styled runs or nested table |
 | `colSpan` | `number` | `1` | Columns to span |
 | `rowSpan` | `number` | `1` | Rows to span |
 | `backgroundColor` | `Color` | none | Cell background color |
@@ -81,6 +88,7 @@ Cells can be simple strings or objects with styling:
 | `align` | `'left' \| 'center' \| 'right'` | `'left'` | Horizontal alignment |
 | `verticalAlign` | `'top' \| 'middle' \| 'bottom'` | `'top'` | Vertical alignment |
 | `padding` | `number \| object` | inherited | Cell padding |
+| `overflow` | `'wrap' \| 'truncate' \| 'ellipsis' \| 'shrink'` | `'truncate'` | Overflow mode |
 
 ## Column Definitions
 
@@ -210,6 +218,7 @@ const result = page.drawTable({
   x: 50,
   y: 700,
   width: 500,
+  fontName: font.name,
   fontSize: 9,
   padding: 4,
   columns: [
@@ -247,7 +256,7 @@ Use this to position content below the table:
 ```typescript
 const result = page.drawTable({ x: 50, y: 700, ... });
 const belowTable = 700 - result.height - 20; // 20pt gap
-page.drawText('Notes:', { x: 50, y: belowTable, size: 12 });
+page.drawText('Notes:', { x: 50, y: belowTable, size: 12, font });
 ```
 
 ## Styling Presets
@@ -259,6 +268,7 @@ import { professionalPreset, applyPreset } from 'modern-pdf-lib';
 
 page.drawTable(applyPreset(professionalPreset(), {
   x: 50, y: 750, width: 495,
+  fontName: font.name,
   headerRows: 1,
   rows: [
     { cells: ['Product', 'Qty', 'Price'] },
@@ -275,7 +285,16 @@ page.drawTable(applyPreset(professionalPreset(), {
 | `borderedPreset()` | Full grid borders, dark header |
 | `professionalPreset()` | Dark blue header, subtle stripes |
 
-You can also use `applyTablePreset('professional', options)` by name.
+Or select by name and spread the returned partial options:
+
+```typescript
+page.drawTable({
+  ...applyTablePreset('professional', { fontSize: 10 }),
+  x: 50, y: 750, width: 495,
+  fontName: font.name,
+  rows,
+});
+```
 
 ## Alternating Row Colors
 
@@ -324,7 +343,7 @@ Control how text behaves when it exceeds cell width:
 
 ## Nested Tables
 
-Embed a table inside a cell:
+Embed a table inside a cell. The nested table fills the cell's inner width; `width` is required by the type but its value is ignored, and `fontName` is not inherited from the outer table:
 
 ```typescript
 {
@@ -334,6 +353,8 @@ Embed a table inside a cell:
       content: {
         type: 'table',
         table: {
+          width: 100,
+          fontName: font.name,
           rows: [
             { cells: ['A', 'B'] },
             { cells: ['1', '2'] },
@@ -347,7 +368,7 @@ Embed a table inside a cell:
 
 ## Multi-Page Tables
 
-For tables that span multiple pages with automatic header repetition:
+`renderMultiPageTable` splits a table across pages and repeats the `headerRows` on each page:
 
 ```typescript
 import { renderMultiPageTable } from 'modern-pdf-lib';
@@ -386,7 +407,7 @@ columns: [
 
 1. **Use presets** for consistent, professional styling out of the box
 2. **Set column widths explicitly** for predictable layouts
-3. **Use `headerRows`** for multi-page tables (headers repeat automatically)
+3. **Use `headerRows` with `renderMultiPageTable`** for tables that span pages
 4. **Right-align numeric columns** with `columns: [{ align: 'right' }]`
 5. **Use alternating backgrounds** for long tables to improve scannability
 6. **Use `overflow: 'ellipsis'`** for columns with potentially long content

@@ -1,6 +1,6 @@
 # Fonts
 
-This guide covers font handling in `modern-pdf-lib`, including standard fonts, custom font embedding, subsetting, and complex script support.
+This guide covers font handling in `modern-pdf-lib`, including standard fonts, custom font embedding, subsetting, and bidirectional text.
 
 ## Standard 14 PDF Fonts
 
@@ -64,7 +64,7 @@ import { readFile } from 'node:fs/promises';
 const fontBytes = new Uint8Array(await readFile('fonts/Inter-Regular.ttf'));
 const inter = await pdf.embedFont(fontBytes);
 
-page.drawText('Custom font with full Unicode: Aakenaargh 日本語', {
+page.drawText('Custom font with accented Latin text: Åre café naïve', {
   x: 50,
   y: 700,
   font: inter,
@@ -107,65 +107,35 @@ page.drawText('This is italic text.', {
 
 ## Font Subsetting
 
-By default, `modern-pdf-lib` embeds only the glyphs that are actually used in the document. This dramatically reduces file size when working with large fonts (CJK fonts can be 10+ MB).
+`modern-pdf-lib` keeps only the outlines of the glyphs a document uses. This reduces file size for large fonts (CJK fonts can be 10+ MB).
 
 ```ts
-// Only the glyphs for "Hello" are included in the PDF
+// Only the outlines for "Hello" are kept in the PDF
 const font = await pdf.embedFont(fontBytes);
 page.drawText('Hello', { x: 50, y: 700, font, size: 16 });
 ```
 
-The subsetter operates at the binary TrueType level — it rebuilds `glyf`, `loca`, `hmtx`, `maxp`, and `cmap` tables from scratch, resolves composite glyph dependencies, and produces a valid TrueType file with correct checksums and 4-byte alignment. This is a pure-JS implementation that works in every runtime without WASM.
+The subsetter works at the TrueType level. It keeps every glyph ID (so `CIDToGIDMap /Identity` stays valid), replaces the `glyf` outlines of unused glyphs (after resolving composite dependencies) with empty entries, rebuilds `loca`, and recomputes checksums. The 14 tables in the last row below are copied unchanged; any other table in the font (for example `kern`, `vhea`, `vmtx`, `fvar`, `gvar`, `COLR`, `CPAL`) is left out of the embedded font. The subsetter is pure JavaScript and needs no WebAssembly.
 
 ### What Gets Subsetted
 
 | Table | Action |
 |---|---|
-| `glyf` | Only referenced glyphs (including composites) |
-| `loca` | Rebuilt with new offsets |
-| `hmtx` | Only metrics for included glyphs |
-| `maxp` | Updated glyph count |
-| `cmap` | Minimal Format 4 subtable for the subset |
-| `head` | Checksum recalculated |
-| `name`, `post`, `OS/2`, `hhea` | Copied from original |
+| `glyf` | Outlines kept only for used glyphs (and composite components) |
+| `loca` | Rebuilt |
+| `head` | `indexToLocFormat` and checksum updated |
+| `hhea`, `maxp`, `OS/2`, `name`, `cmap`, `post`, `hmtx`, `cvt `, `fpgm`, `prep`, `gasp`, `GDEF`, `GPOS`, `GSUB` | Copied unchanged |
 
-### Disabling Subsetting
+### The `subset` Option
 
-In rare cases (such as when creating PDF form templates where users may enter arbitrary text), you may want to embed the full font:
-
-```ts
-const font = await pdf.embedFont(fontBytes, { subset: false });
-```
+`embedFont()` accepts `{ subset?: boolean }`, but the option is not read: TrueType fonts are always subset when the document is saved, and `{ subset: false }` does not embed the full font.
 
 > [!TIP]
-> Keep subsetting enabled for document generation. It typically reduces font data by 90% or more — a 10 MB CJK font embedding just 5 characters can drop to under 50 KB.
+> Dropping unused outlines usually removes most of a large font's size.
 
 ## Text Shaping for Complex Scripts
 
-For scripts that require ligatures, contextual forms, or right-to-left layout (Arabic, Hebrew, Devanagari, Thai, etc.), `modern-pdf-lib` uses the `rustybuzz` WASM module for text shaping.
-
-Text shaping handles:
-
-- **Ligatures** — Combining character sequences (e.g., "fi", "ffl" in Latin scripts)
-- **Contextual forms** — Arabic letters changing shape based on position
-- **Right-to-left layout** — Correct character ordering for RTL scripts
-- **Mark positioning** — Proper placement of diacritics and vowel marks
-
-```ts
-const arabicFont = await pdf.embedFont(arabicFontBytes);
-
-page.drawText('مرحبا بالعالم', {
-  x: 400,
-  y: 700,
-  font: arabicFont,
-  size: 24,
-  color: rgb(0, 0, 0),
-});
-```
-
-Basic text shaping (Latin ligatures, CJK mapping) works out of the box with pure JS. For full OpenType shaping of complex scripts (Arabic contextual forms, Devanagari conjuncts, Thai word breaking), initialize the rustybuzz WASM module:
-
-The text shaping WASM module is loaded automatically when complex script rendering is needed. No explicit initialization is required — the library detects when shaping is necessary and uses the WASM accelerator if available, falling back to the pure-JS implementation otherwise.
+`drawText` does not shape text. It maps each code point through the font `cmap` (no ligatures, no Arabic contextual forms, no mark positioning) and draws the glyphs in logical order. For mixed-direction text, reorder with `resolveBidi` / `reorderVisual` (below) before drawing. Complex-script shaping is not applied.
 
 ## Advanced typography
 
@@ -193,7 +163,7 @@ function resolveBidi(text: string, base?: 'ltr' | 'rtl' | 'auto'): BidiResult;
 interface BidiResult {
   runs: BidiRun[];
   levels: number[];        // embedding level per UTF-16 unit
-  visualOrder: number[];   // logical→visual index map
+  visualOrder: number[];   // visual→logical: visualOrder[v] is the logical index painted at visual position v
   baseLevel: number;       // 0 = LTR paragraph, 1 = RTL
 }
 ```
@@ -203,7 +173,7 @@ rules, paired-bracket resolution, L1/L2 reordering) is implemented. The
 `Bidi_Class` and bracket-pair tables are a range-based subset covering Latin,
 Hebrew, Arabic (+ Supplement), Syriac, and Thaana; code points outside those
 ranges fall back to the Unicode default classes. Line breaking is not performed
-(the paragraph is reordered as one line).
+(the paragraph is reordered as one line). `drawText` does not call `resolveBidi` or `reorderVisual`; apply them to the string before drawing.
 
 ### Variable fonts (`fvar` / `avar`)
 
@@ -227,7 +197,7 @@ if (info.isVariable) {
 ::: warning Scope
 This exposes the axis/instance model and coordinate normalization — the
 foundation for instancing. Baking the `gvar`/`glyf` outline deltas into a static
-instance font is not yet performed (a planned follow-up).
+instance font is not performed.
 :::
 
 ### Color fonts (`COLR` / `CPAL`)
@@ -304,20 +274,11 @@ function centerText(
 
 ## Performance Considerations
 
-| Operation | Pure JS | WASM (optional) | Notes |
-|---|---|---|---|
-| Font parsing | Built-in | ttf-parser | Metric extraction from large fonts |
-| Subsetting | Built-in | — | Pure JS handles all TrueType subsetting |
-| Text shaping | Latin/CJK | rustybuzz | WASM needed for Arabic, Devanagari, etc. |
-| Width measurement | Built-in | — | Computed from cached glyph metrics |
+| Operation | Implementation | Notes |
+|---|---|---|
+| Font parsing | Built-in JavaScript | Metric extraction from large fonts |
+| Subsetting | Built-in JavaScript | Handles all TrueType subsetting |
+| Text shaping | Not applied | See Text Shaping for Complex Scripts |
+| Width measurement | Built-in JavaScript | Computed from cached glyph metrics |
 
-The pure-JS subsetter and metric extractor work in every runtime. WASM modules are optional accelerators — they produce identical results, just faster for large fonts and complex scripts.
-
-```ts
-import { initWasm } from 'modern-pdf-lib';
-
-// Optionally load WASM for faster font parsing
-await initWasm({ fonts: true });
-
-const font = await pdf.embedFont(largeCjkFontBytes);
-```
+The package ships WebAssembly builds of six Rust crates under `dist/wasm/`, but this release's JavaScript does not run them; all work runs in pure JavaScript. `initWasm({ fonts: true })` loads nothing, and once any `initWasm` call with options resolves, later `initWasm` calls return without doing anything.

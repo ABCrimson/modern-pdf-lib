@@ -15,12 +15,14 @@ low-level builders that return PDF objects you register via
 | [Document parts](#document-parts-dpart-hierarchy) | §14.12 | `buildDPartRoot` |
 | [Per-page output intents](#per-page-per-stream-output-intents) | §14.11.5 | `buildPageOutputIntent`, `attachOutputIntents` |
 | [Structure namespaces](#structure-namespaces-processor-requirements) | §14.7.4 | `buildNamespace`, `PDF2_NAMESPACE`, `MATHML_NAMESPACE` |
-| [Processor requirements](#structure-namespaces-processor-requirements) | §7.12.7 | `buildRequirements` |
+| [Processor requirements](#structure-namespaces-processor-requirements) | §12.11 | `buildRequirements` |
 | [Encrypted-payload wrapper](#encrypted-payload-wrapper) | §7.6.7 | `buildUnencryptedWrapper`, `buildEncryptedPayload` |
 | [Soft-mask groups](#soft-mask-groups-luminosity-alpha) | §11.6.5.2 | `buildSoftMaskGroupExtGState`, `buildSoftMaskNone` |
 | [Image masks](#image-masks-black-point-compensation) | §8.9.6 | `buildStencilMask`, `buildColorKeyMask`, `buildImageSoftMask` |
 | [Black-point compensation](#image-masks-black-point-compensation) | §8.6.5.9 | `buildBlackPointCompensationExtGState` |
 | [Private application data](#private-application-data-pieceinfo) | §14.5 | `buildPieceInfo` |
+
+Only `addAssociatedFile` is end to end on `PdfDocument`. The other builders return objects; put catalog-level results (`/Requirements`, `/DPartRoot`, `/PieceInfo`) into the catalog with a plugin `onBuildCatalog` hook, for example `doc.use({ name: 'dpart', onBuildCatalog(catalog) { catalog.set('/DPartRoot', rootRef); } })`. Namespace dictionaries belong in the `/Namespaces` array of the structure tree root, not in the catalog.
 
 > [!NOTE]
 > These builders emit PDF 2.0 *structure*, but they do not change the file
@@ -81,6 +83,8 @@ const dpartRoot = buildDPartRoot([
 const rootRef = doc.getRegistry().register(dpartRoot);
 ```
 
+`buildDPartRoot` is a builder only, and its output is not ISO 32000-2 conformant: `/Start` and `/End` are numeric page indices instead of indirect page references, the part nodes are direct dictionaries, and they carry no `/Parent` entry.
+
 ## Per-page / per-stream output intents
 
 Doc-level output intents are part of PDF/A; PDF 2.0 also allows them per page and
@@ -102,7 +106,7 @@ attachOutputIntents(pageDict, [intentRef]); // page or Form-XObject stream dict
 import { buildNamespace, buildRequirements, PDF2_NAMESPACE, MATHML_NAMESPACE } from 'modern-pdf-lib';
 
 const mathmlNs = buildNamespace({ ns: MATHML_NAMESPACE, roleMap: { mtable: 'Table' } });
-const requirements = buildRequirements(['AcroForm', 'EnableJavaScripts']); // /Requirements array (§7.12.7)
+const requirements = buildRequirements(['AcroForm', 'EnableJavaScripts']); // /Requirements array (§12.11)
 ```
 
 ## Encrypted-payload wrapper

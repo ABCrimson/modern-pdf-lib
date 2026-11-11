@@ -13,14 +13,18 @@ modern-pdf-lib includes an advanced text layout engine with paragraph reflow, ju
 ### Simple Paragraph
 
 ```ts
-import { createPdf, PageSizes, layoutParagraph } from 'modern-pdf-lib';
+import { createPdf, PageSizes, StandardFonts, layoutParagraph } from 'modern-pdf-lib';
 
 const doc = createPdf();
 const page = doc.addPage(PageSizes.A4);
+const helvetica = await doc.embedFont(StandardFonts.Helvetica);
 
 const result = layoutParagraph(
-  'Lorem ipsum dolor sit amet, consectetur adipiscing elit. ' +
-  'Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+  [{
+    text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. ' +
+      'Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+    font: helvetica,
+  }],
   { x: 50, y: 750, width: 500, height: 600 },
   { alignment: 'justify', lineHeight: 1.4 },
 );
@@ -30,6 +34,14 @@ console.log(`Rendered ${result.lineCount} lines, used ${result.usedHeight}pt`);
 
 const bytes = await doc.save();
 ```
+
+::: warning Fonts
+Give every span a `font` from `embedFont()`. A span without one is drawn with the resource name `Helvetica`, which `embedFont()` never registers (fonts are registered as F1, F2, ...), so the text does not show. Text that overflows into the next column (`layoutColumns`) or frame (`layoutTextFlow`) is carried on as a plain string without its span's font, so only the first column or frame shows text. To flow text across frames, call `layoutParagraph` once per frame and wrap the previous result's overflow in a span: `layoutParagraph([{ text: prev.overflow, font: helvetica }], frame, options)`. The examples below assume `helvetica` is in scope.
+:::
+
+::: warning Word positions
+Within a line, each word after the first is moved by one space width from the start of the previous word, not from its end (`Td` is relative to the line start), so words on the same line overlap.
+:::
 
 ---
 
@@ -61,7 +73,7 @@ PDF coordinates place the origin at the bottom-left. The `y` value in a TextFram
 The `ParagraphOptions` interface controls all typographic behavior:
 
 ```ts
-const result = layoutParagraph(text, frame, {
+const result = layoutParagraph(spans, frame, {
   alignment: 'justify',       // 'left' | 'right' | 'center' | 'justify'
   lineHeight: 1.4,            // Multiplier (1.4 = 140% of font size)
   paragraphSpacing: 12,       // Extra points between paragraphs
@@ -69,7 +81,7 @@ const result = layoutParagraph(text, frame, {
   hangingIndent: 0,            // Indent continuation lines
   hyphenation: true,           // Enable automatic hyphenation
   hyphenChar: '-',             // Character used for hyphenation
-  locale: 'en',               // Locale for hyphenation rules
+  locale: 'en',               // Accepted but currently ignored
   orphanLines: 2,             // Minimum lines at bottom of frame
   widowLines: 2,              // Minimum lines at top of next frame
 });
@@ -84,7 +96,7 @@ const result = layoutParagraph(text, frame, {
 | `hangingIndent` | `number` | `0` | Continuation line indent |
 | `hyphenation` | `boolean` | `false` | Enable hyphenation |
 | `hyphenChar` | `string` | `'-'` | Hyphen character |
-| `locale` | `string` | -- | Hyphenation locale |
+| `locale` | `string` | -- | Accepted but currently ignored (English rules only) |
 | `orphanLines` | `number` | `2` | Orphan control threshold |
 | `widowLines` | `number` | `2` | Widow control threshold |
 
@@ -94,19 +106,19 @@ const result = layoutParagraph(text, frame, {
 
 ```ts
 // Left-aligned (default) -- ragged right edge
-layoutParagraph(text, frame, { alignment: 'left' });
+layoutParagraph(spans, frame, { alignment: 'left' });
 
 // Right-aligned -- ragged left edge
-layoutParagraph(text, frame, { alignment: 'right' });
+layoutParagraph(spans, frame, { alignment: 'right' });
 
 // Centered
-layoutParagraph(text, frame, { alignment: 'center' });
+layoutParagraph(spans, frame, { alignment: 'center' });
 
 // Justified -- adjusts word spacing to fill each line
-layoutParagraph(text, frame, { alignment: 'justify' });
+layoutParagraph(spans, frame, { alignment: 'justify' });
 ```
 
-The justified alignment uses a Knuth-Plass-inspired algorithm that adjusts inter-word spacing to fill each line. The last line of each paragraph is left-aligned (standard typographic practice). Word spacing is clamped between 50% and 250% of normal to prevent extreme stretching or compression.
+Justified text uses greedy line breaking and then widens inter-word spacing to fill each line. The last line of each paragraph is left-aligned (standard typographic practice). Word spacing is clamped between 50% and 250% of normal to prevent extreme stretching or compression.
 
 ---
 
@@ -115,17 +127,19 @@ The justified alignment uses a Knuth-Plass-inspired algorithm that adjusts inter
 For mixed styling within a paragraph, pass an array of `TextSpan` objects instead of a plain string:
 
 ```ts
-import { rgb, layoutParagraph } from 'modern-pdf-lib';
+import { StandardFonts, rgb, layoutParagraph } from 'modern-pdf-lib';
+
+const helveticaBold = await doc.embedFont(StandardFonts.HelveticaBold);
 
 const spans = [
-  { text: 'Important: ', bold: true, color: rgb(0.8, 0, 0) },
-  { text: 'This paragraph contains ' },
-  { text: 'mixed styles', italic: true, underline: true },
-  { text: ' including ' },
-  { text: 'superscript', superscript: true, fontSize: 8 },
-  { text: ' and ' },
-  { text: 'strikethrough', strikethrough: true },
-  { text: ' text.' },
+  { text: 'Important: ', font: helveticaBold, color: rgb(0.8, 0, 0) },
+  { text: 'This paragraph contains ', font: helvetica },
+  { text: 'mixed styles', font: helvetica, underline: true },
+  { text: ' including ', font: helvetica },
+  { text: 'small text', font: helvetica, fontSize: 8 },
+  { text: ' and ', font: helvetica },
+  { text: 'strikethrough', font: helvetica, strikethrough: true },
+  { text: ' text.', font: helvetica },
 ];
 
 const result = layoutParagraph(spans, frame, { alignment: 'left' });
@@ -140,12 +154,12 @@ page.pushOperators(result.operators);
 | `font` | `FontRef \| string` | Font reference or name |
 | `fontSize` | `number` | Font size in points |
 | `color` | `Color` | Text fill color |
-| `bold` | `boolean` | Bold styling |
-| `italic` | `boolean` | Italic styling |
+| `bold` | `boolean` | Reserved, currently no effect (set `font` to a bold `FontRef`) |
+| `italic` | `boolean` | Reserved, currently no effect (set `font` to an italic `FontRef`) |
 | `underline` | `boolean` | Underline decoration |
 | `strikethrough` | `boolean` | Strikethrough decoration |
-| `superscript` | `boolean` | Superscript positioning |
-| `subscript` | `boolean` | Subscript positioning |
+| `superscript` | `boolean` | Reserved, currently no effect |
+| `subscript` | `boolean` | Reserved, currently no effect |
 
 ---
 
@@ -155,13 +169,13 @@ Enable hyphenation to break long words at appropriate points when they do not fi
 
 ```ts
 const result = layoutParagraph(
-  'The extraordinarily complicated internationalization framework...',
+  [{ text: 'The extraordinarily complicated internationalization framework...', font: helvetica }],
   frame,
-  { hyphenation: true, locale: 'en' },
+  { hyphenation: true },
 );
 ```
 
-The hyphenation engine uses suffix and prefix pattern matching to find valid break points. It supports common English patterns (e.g., `-tion`, `-ment`, `-able`, `un-`, `re-`, `dis-`) and respects minimum prefix/suffix lengths of 2 characters.
+The hyphenation engine is a small English prefix/suffix heuristic, not dictionary or TeX-pattern hyphenation. It uses suffix and prefix pattern matching to find break points and supports common English patterns (e.g., `-tion`, `-ment`, `-able`, `un-`, `re-`, `dis-`) and respects minimum prefix/suffix lengths of 2 characters.
 
 You can query hyphenation points programmatically:
 
@@ -169,20 +183,20 @@ You can query hyphenation points programmatically:
 import { findHyphenationPoints } from 'modern-pdf-lib';
 
 const points = findHyphenationPoints('internationalization');
-// => [5, 10, 15] — possible break positions
+// => [2, 16]: after the prefix in- and before the suffix -tion
 ```
 
 ---
 
 ## Multi-Column Layout
 
-Use `layoutColumns()` to flow text across multiple columns within a single frame:
+Use `layoutColumns()` to split a frame into columns. Only the first column shows text, because the overflow passed to later columns loses the span font (see the Fonts warning above):
 
 ```ts
 import { layoutColumns, rgb } from 'modern-pdf-lib';
 
 const result = layoutColumns(
-  longArticleText,
+  [{ text: longArticleText, font: helvetica }],
   { x: 50, y: 750, width: 500, height: 650 },
   {
     columns: 3,
@@ -202,18 +216,19 @@ page.pushOperators(result.operators);
 
 ### Column Balancing
 
-When `balanceColumns` is `true` (the default), the engine pre-calculates the total number of lines and distributes them evenly across columns. This produces visually balanced output where all columns are approximately the same height.
+When `balanceColumns` is `true` (the default), the engine counts the total lines first and gives every column frame the same height.
 
 ---
 
 ## Multi-Page Text Flow
 
-Use `layoutTextFlow()` to flow text across multiple frames -- typically one frame per page:
+Frames after the first lose the span font in `layoutTextFlow()` (see the Fonts warning above), so lay out one frame at a time with `layoutParagraph`:
 
 ```ts
-import { createPdf, PageSizes, layoutTextFlow } from 'modern-pdf-lib';
+import { createPdf, PageSizes, StandardFonts, layoutParagraph } from 'modern-pdf-lib';
 
 const doc = createPdf();
+const helvetica = await doc.embedFont(StandardFonts.Helvetica);
 const frames = [];
 
 // Create 5 pages with identical text frames
@@ -222,17 +237,23 @@ for (let i = 0; i < 5; i++) {
   frames.push({ x: 72, y: 770, width: 451, height: 700 });
 }
 
-const results = layoutTextFlow(
-  veryLongText,
-  frames,
-  { alignment: 'justify', lineHeight: 1.4, hyphenation: true },
-);
+const results = [];
+let rest = veryLongText;
+for (const frame of frames) {
+  if (!rest) break;
+  const r = layoutParagraph(
+    [{ text: rest, font: helvetica }],
+    frame,
+    { alignment: 'justify', lineHeight: 1.4, hyphenation: true },
+  );
+  results.push(r);
+  rest = r.overflow;
+}
 
 // Apply operators to each page
-for (let i = 0; i < results.length; i++) {
-  const page = doc.getPage(i);
-  if (results[i].operators) {
-    page.pushOperators(results[i].operators);
+for (const [i, r] of results.entries()) {
+  if (r.operators) {
+    doc.getPage(i).pushOperators(r.operators);
   }
 }
 
@@ -273,7 +294,7 @@ The layout engine prevents isolated lines at frame boundaries:
 - **Widows**: Fewer than `widowLines` at the top of the next frame causes lines to be pulled back from the current frame.
 
 ```ts
-layoutParagraph(text, frame, {
+layoutParagraph([{ text, font: helvetica }], frame, {
   orphanLines: 3,  // At least 3 lines at the bottom of a frame
   widowLines: 3,   // At least 3 lines at the top of the next frame
 });
@@ -286,14 +307,15 @@ layoutParagraph(text, frame, {
 By default, the layout engine uses a character-count heuristic for text measurement (0.5 * fontSize per character). For accurate layout with embedded fonts, provide a custom measurement function:
 
 ```ts
+// The measurement function receives the font resource name, so map names back to FontRefs
+const fonts = new Map([[helvetica.name, helvetica]]);
+
 const result = layoutParagraph(
-  text,
+  [{ text, font: helvetica }],
   frame,
   { alignment: 'justify' },
-  (text, fontName, fontSize) => {
-    // Return the width in points for the given text string
-    return myFont.measureText(text, fontSize);
-  },
+  (t, fontName, fontSize) =>
+    (fonts.get(fontName) ?? helvetica).widthOfTextAtSize(t, fontSize),
 );
 ```
 
@@ -311,11 +333,9 @@ Without a custom measurement function, line breaks may not be perfectly accurate
 
 3. **Enable widow/orphan control** for multi-page documents to avoid single-line fragments at frame boundaries.
 
-4. **Use `layoutTextFlow` for long documents** -- it handles frame-to-frame continuation automatically and reports overflow.
+4. **Check `overflow`** for long documents -- `layoutTextFlow` reports text that did not fit, but frames after the first lose the span font (see the Fonts warning above).
 
 5. **Provide a custom measurement function** for production output -- the default heuristic is approximate and may produce suboptimal line breaks with proportional fonts.
-
-6. **Use `balanceColumns: true`** for multi-column layout to ensure columns are visually even.
 
 ---
 
@@ -326,7 +346,7 @@ Without a custom measurement function, line breaks may not be perfectly accurate
 | `layoutParagraph(spans, frame, options?, measureFn?)` | Lay out a paragraph in a single frame |
 | `layoutColumns(spans, frame, columnOpts, paraOpts?, measureFn?)` | Multi-column layout |
 | `layoutTextFlow(spans, frames, options?, measureFn?)` | Multi-frame text flow |
-| `findHyphenationPoints(word, locale?)` | Find valid hyphenation positions |
+| `findHyphenationPoints(word, locale?)` | Find hyphenation positions (`locale` is currently ignored) |
 | `TextFrame` | Rectangular layout region |
 | `TextAlignment` | `'left' \| 'right' \| 'center' \| 'justify'` |
 | `TextSpan` | Styled text segment |

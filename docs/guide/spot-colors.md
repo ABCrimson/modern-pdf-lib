@@ -62,9 +62,9 @@ const triInk = deviceNColor(
 The `colorants` and `tints` arrays must be the same length. An error is thrown if they differ.
 :::
 
-## Registering Colour Spaces as Page Resources
+## Building Colour Space Objects
 
-Spot and DeviceN colours require a corresponding colour space object registered in the page's resources. Use `buildSeparationColorSpace()` and `buildDeviceNColorSpace()` to create the PDF array objects:
+Spot and DeviceN colours need a corresponding colour space object in the page's resources. Use `buildSeparationColorSpace()` and `buildDeviceNColorSpace()` to create the PDF array objects:
 
 ```ts
 import {
@@ -96,13 +96,13 @@ const dnArray = buildDeviceNColorSpace(
 const dnName = deviceNResourceName(['WarmRed', 'CoolBlue']);
 ```
 
-`buildSeparationColorSpace()` and `buildDeviceNColorSpace()` return native `PdfArray` colour-space objects. Register each one in the page's `/Resources` `/ColorSpace` sub-dictionary under its derived resource name so the content-stream operators below can reference it.
+`buildSeparationColorSpace()` and `buildDeviceNColorSpace()` return native `PdfArray` colour-space objects. `PdfPage` has no public method that adds a colour space to the page's `/Resources` `/ColorSpace` sub-dictionary, so a page created with `addPage()` does not write these objects. The content-stream operators below name a resource that must already exist in the page resources; a loaded page keeps its original `/ColorSpace` entries.
 
 The `spotResourceName()` and `deviceNResourceName()` helpers sanitise colorant names into valid PDF name tokens by replacing spaces and special characters with underscores.
 
 ## Applying Spot Colors to Content
 
-Once the colour space is registered, use the standard `applyFillColor()` and `applyStrokeColor()` operators:
+When the page resources define the colour space, use the standard `applyFillColor()` and `applyStrokeColor()` operators:
 
 ```ts
 import {
@@ -212,6 +212,7 @@ meshes — for smooth multi-point colour blends. Each builder returns a
 
 ```ts
 import {
+  PdfName,
   buildFreeFormGouraudShading,   // type 4
   buildLatticeFormGouraudShading,// type 5
   buildCoonsPatchShading,        // type 6
@@ -224,9 +225,24 @@ const shading = buildCoonsPatchShading({
   bitsPerComponent: 8,
   bitsPerFlag: 8,
   decode: [0, 1, 0, 1, 0, 1, 0, 1, 0, 1],
-  patches: [/* one Coons patch: 12 control points + 4 corner colours */],
+  patches: [
+    {
+      flag: 0,
+      // 12 boundary control points as [x, y] pairs, mapped through /Decode
+      points: [
+        [0, 0], [0, 0.33], [0, 0.67], [0, 1],
+        [0.33, 1], [0.67, 1], [1, 1],
+        [1, 0.67], [1, 0.33], [1, 0],
+        [0.67, 0], [0.33, 0],
+      ],
+      // 4 corner colours, one RGB triple each
+      colors: [[1, 0, 0], [0, 1, 0], [0, 0, 1], [1, 1, 0]],
+    },
+  ],
 });
 ```
+
+The returned `PdfStream` must be registered under `/Shading` or a type-2 `/Pattern` by you; `PdfPage` has no helper for it.
 
 Values are packed big-endian, MSB-first, and mapped through `/Decode` exactly per
 ISO 32000-2 §8.7.4.5. Supply a `/Function` to drive colours from a single
@@ -301,7 +317,7 @@ colorToComponents(cmyk(0, 1, 1, 0)); // [0, 1, 1, 0]
 
 2. **Use CMYK fallbacks for print workflows** -- CMYK alternates produce more accurate print simulations than RGB alternates.
 
-3. **Register colour spaces before use** -- The Separation or DeviceN colour space array must be in the page's `/Resources/ColorSpace` dictionary before any content-stream operator references it.
+3. **Define colour spaces before use** -- The Separation or DeviceN colour space array must be in the page's `/Resources/ColorSpace` dictionary before any content-stream operator references it; `PdfPage` has no public method that adds it.
 
 4. **Use consistent colorant names** -- The name string must match exactly across all pages and colour space registrations. `'PANTONE 185 C'` and `'Pantone 185 C'` are treated as different inks.
 

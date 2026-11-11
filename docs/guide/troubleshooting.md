@@ -13,7 +13,7 @@ Find your symptom, jump to the fix:
 | Out-of-memory on a large document | [5. Large PDF Memory Issues](#_5-large-pdf-memory-issues) |
 | Works in Node, breaks in Deno / Workers / the browser | [6. Cross-Runtime Quirks](#_6-cross-runtime-quirks) |
 | Extracted text is mojibake | [7. Text Extraction Garbage](#_7-text-extraction-garbage) |
-| `NoSuchFieldError` when filling a form | [8. NoSuchFieldError](#_8-nosuchfielderror) |
+| `Form field "x" not found.` when filling a form | [8. Form Field Not Found](#_8-form-field-not-found) |
 | A real-world PDF fails to parse | [9. Common Parsing Failures](#_9-common-parsing-failures) |
 
 ## 1. EncryptedPdfError
@@ -177,36 +177,15 @@ const bytes = await doc.save();
 
 ### What happens
 
-`initWasm()` throws an error, or WASM-related features (compression, font subsetting acceleration) silently fail in restricted runtime environments like Cloudflare Workers or older browsers.
+`initWasm({ deflate: true })` rejects with an error such as `Failed to initialize libdeflate WASM`.
 
 ### Why it happens
 
-Some runtimes restrict dynamic WASM compilation (`WebAssembly.compile` / `WebAssembly.instantiate` from a fetched URL). Cloudflare Workers, for instance, only allow WASM modules that are pre-compiled and imported as bindings.
+The package ships WebAssembly builds of six Rust crates under `dist/wasm/`, but this release's JavaScript does not run them; all work runs in pure JavaScript. `initWasm()` without an argument returns at once, the `png`, `fonts` and `jpeg` options resolve without enabling anything, and `deflate` rejects. Passing bytes (`deflateWasm`) does not change this.
 
 ### How to fix it
 
-Pass pre-loaded WASM bytes directly to `initWasm()` instead of relying on dynamic loading:
-
-```ts
-import { createPdf, initWasm, PageSizes } from 'modern-pdf-lib';
-import { readFile } from 'node:fs/promises';
-
-// Load WASM bytes ahead of time
-const deflateWasm = new Uint8Array(await readFile('wasm/deflate.wasm'));
-
-await initWasm({
-  deflate: true,
-  deflateWasm,
-});
-
-// Now all save() calls will use WASM-accelerated compression
-const doc = createPdf();
-doc.addPage(PageSizes.A4);
-const bytes = await doc.save();
-```
-
-> [!TIP]
-> WASM modules are entirely optional. If `initWasm()` is never called, the library falls back to pure-JS implementations (fflate for compression, JS for font subsetting). The pure-JS path works in every runtime without restrictions.
+Remove the `initWasm()` call. Compression (fflate), image decoding, font subsetting and the other work run in JavaScript, so no `.wasm` file is needed in any runtime. `save({ useWasm: true })` is accepted, and fflate still produces the output.
 
 ## 5. Large PDF Memory Issues
 
@@ -220,7 +199,7 @@ Calling `doc.save()` on a document with hundreds of pages or many large images c
 
 ### How to fix it
 
-Use `saveAsStream()` to serialize the PDF as a `ReadableStream<Uint8Array>`, which emits chunks incrementally without holding the entire file in memory at once:
+Use `saveAsStream()` to serialize the PDF as a `ReadableStream<Uint8Array>`, which emits chunks incrementally without building the entire file in one buffer:
 
 ```ts
 import { createPdf, PageSizes, StandardFonts, rgb } from 'modern-pdf-lib';
@@ -244,15 +223,7 @@ for (let i = 0; i < 500; i++) {
 
 // Stream to disk instead of buffering the entire PDF in memory
 const stream = doc.saveAsStream();
-const fileStream = createWriteStream('large-output.pdf');
-
-const reader = stream.getReader();
-while (true) {
-  const { done, value } = await reader.read();
-  if (done) break;
-  fileStream.write(value);
-}
-fileStream.end();
+await stream.pipeTo(Writable.toWeb(createWriteStream('large-output.pdf')));
 
 console.log('Large PDF written to disk via streaming');
 ```
@@ -271,6 +242,16 @@ Code that works in Node.js fails or behaves differently in Deno, Bun, or Cloudfl
 Each runtime has its own security model, file system access rules, and module system constraints.
 
 ### How to fix it
+
+Runtime support (Node.js `engines` `>=26.4`; the other minimums are from MDN browser-compat-data, read 2026-11-11, for the `Uint8Array` base64 and hex methods the library calls without a guard):
+
+| Runtime | Minimum | Tested in CI |
+|---|---|---|
+| Node.js | 26.4 (`engines`); `Uint8Array` base64 from 25.0.0 | Yes (Node 26 gates; Node 24 and the `devEngines` Node 28 nightly are non-gating probes) |
+| Deno | 2.5.0 | No |
+| Bun | 1.1.22 | No |
+| Cloudflare Workers | none stated | No |
+| Browsers | Chrome 140, Firefox 133, Safari 18.2 (see the [Browser guide](./browser.md#browser-compatibility)) | Playwright E2E on Chromium, Firefox and WebKit |
 
 **Deno** requires explicit permissions:
 
@@ -320,7 +301,7 @@ export default {
 ```
 
 > [!WARNING]
-> Cloudflare Workers have a 128 MB memory limit. For large PDFs, always use `saveAsStream()` instead of `save()`. Also note that WASM modules must be pre-compiled — pass bytes directly to `initWasm({ deflateWasm: wasmBytes })`.
+> Cloudflare Workers have a 128 MB memory limit. For large PDFs, always use `saveAsStream()` instead of `save()`. This release's JavaScript does not load WebAssembly, so no `.wasm` file needs to be bundled for Workers.
 
 **Bun** works out of the box with no special configuration:
 
@@ -368,9 +349,9 @@ import { readFile } from 'node:fs/promises';
 const bytes = new Uint8Array(await readFile('encrypted-doc.pdf'));
 const doc = await loadPdf(bytes, { password: 'mypassword' });
 
-const page = doc.getPages()[0];
+const page = doc.getPage(0);
 const operators = parseContentStream(page.getContentStream());
-const items = extractTextWithPositions(operators);
+const items = extractTextWithPositions(operators, page.getOriginalResources());
 const text = items.map((item) => item.text).join(' ');
 console.log(text);
 ```
@@ -382,14 +363,14 @@ console.log(text);
 > [!NOTE]
 > You can detect whether a page contains actual text operators by checking the parsed content stream for `BT`/`ET` (begin/end text) operators. If a page has no text operators, it is likely image-only.
 
-## 8. NoSuchFieldError
+## 8. Form Field Not Found
 
 ### What happens
 
 You call `form.getTextField('fieldName')` and get:
 
 ```
-NoSuchFieldError: No form field named "fieldName" exists in this document.
+Error: Form field "fieldName" not found.
 ```
 
 ### Why it happens

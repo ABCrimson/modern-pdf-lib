@@ -9,19 +9,19 @@
 
 ### The PDF engine for modern JavaScript
 
-Create, parse, fill, merge, sign, and manipulate PDF documents<br />in Node, Deno, Bun, Cloudflare Workers, and every browser.
+Create, parse, fill, merge, sign, and manipulate PDF documents<br />in Node 26.4+ and current browsers (Deno, Bun, and Workers are not tested in CI).
 
 <br />
 
 [![npm version](https://img.shields.io/npm/v/modern-pdf-lib?style=flat-square&color=cb3837)](https://www.npmjs.com/package/modern-pdf-lib)
-[![bundle size](https://img.shields.io/badge/gzip-108kb_core-blue?style=flat-square)](https://bundlephobia.com/package/modern-pdf-lib)
-[![tests](https://img.shields.io/badge/tests-6%2C969_passing-brightgreen?style=flat-square)](#)
-[![TypeScript](https://img.shields.io/badge/TypeScript-7.0-3178c6?style=flat-square&logo=typescript&logoColor=white)](#)
+[![createPdf bundle](https://img.shields.io/badge/createPdf_bundle-108_KiB_gzip-blue?style=flat-square)](#install)
+[![tests](https://img.shields.io/badge/tests-6%2C969_passing-brightgreen?style=flat-square)](https://github.com/ABCrimson/modern-pdf-lib/actions/workflows/ci.yml)
+[![TypeScript](https://img.shields.io/badge/TypeScript-7.1_dev-3178c6?style=flat-square&logo=typescript&logoColor=white)](./tsconfig.json)
 [![License: MIT](https://img.shields.io/badge/license-MIT-yellow?style=flat-square)](LICENSE)
 
 <br />
 
-[Get Started](#quick-start) · [Features](#features) · [API](#api-surface) · [Why This?](#why-modern-pdf-lib)
+[Get Started](#quick-start) · [Features](#features) · [API](#api-surface) · [Why This?](#why-modern-pdf-lib) · [Docs](https://abcrimson.github.io/modern-pdf-lib/)
 
 <br />
 
@@ -78,9 +78,11 @@ Also available via:
 - **unpkg:** `https://unpkg.com/modern-pdf-lib/dist/browser.mjs`
 - **esm.sh:** `https://esm.sh/modern-pdf-lib`
 
+Pin a version in production, for example `modern-pdf-lib@0.40.4`.
+
 ### Script Tag (no modules)
 
-For environments without ES module support, use the IIFE bundle which exposes a `window.ModernPdf` global:
+For a plain `<script>` tag without `type="module"`, use the IIFE bundle, which exposes a `window.ModernPdf` global (shipped in the package from 0.40.4; same runtime minimums as the [Runtimes](#runtimes) table):
 
 ```html
 <script src="https://cdn.jsdelivr.net/npm/modern-pdf-lib/dist/modern-pdf-lib.iife.js"></script>
@@ -111,7 +113,7 @@ For environments without ES module support, use the IIFE bundle which exposes a 
 - TrueType & OpenType font embedding
 - Automatic font subsetting
 - JPEG / PNG image embedding
-- Image optimization (JPEG recompression, dedup, grayscale)
+- Image optimization (JPEG recompression leaves images unchanged: `initWasm({ jpeg: true })` does not initialise the JPEG WASM encoder; dedup works)
 - RGB, CMYK, grayscale, spot, DeviceN colors
 - Linear & radial gradients, tiling patterns
 - Text layout (multiline, combed, auto-size)
@@ -122,14 +124,14 @@ For environments without ES module support, use the IIFE bundle which exposes a 
 <td width="50%" valign="top">
 
 **Parse, Render & Modify**
-- Load existing PDFs (encrypted too)
-- Extract text with positions
+- Load existing PDFs (PDFs that keep objects in object streams, as pdf-lib and many PDF 1.5+ writers do, do not load; encrypted PDFs load, but most of their content is returned still encrypted)
+- Extract text with positions (text from fonts that use indirect references or compressed ToUnicode maps, most real-world PDFs, is not decoded correctly)
 - Render pages to PNG / Canvas (any DPI)
 - Thumbnails & visual diff (pixel + SSIM)
 - Extract embedded images & fonts
 - OCR overlay & true content-removal redaction
 - Fill & flatten AcroForm fields
-- Merge, split, copy pages; incremental saves
+- Merge, split, copy pages (pages copied, merged or split from a loaded PDF are written without their content; pages created in the same session copy correctly); incremental saves
 
 </td>
 </tr>
@@ -143,7 +145,7 @@ For environments without ES module support, use the IIFE bundle which exposes a 
 - Incremental save with signature preservation
 - Multi-signature chains, MDP certification, LTV archival
 - Counter-signatures & field locking
-- PDF/A-1b through PDF/A-3u validation, PDF/A-4/4e/4f
+- PDF/A-1b through PDF/A-3u validation, PDF/A-4/4e/4f (output is not validated against veraPDF; `enforcePdfA` and `enforcePdfX` output has an invalid cross-reference offset)
 - PDF/X-6, PDF/VT, Factur-X / ZUGFeRD e-invoicing
 - Tagged PDF / PDF/UA-1 & PDF/UA-2 accessibility
 - Structure tree & marked content
@@ -154,21 +156,21 @@ For environments without ES module support, use the IIFE bundle which exposes a 
 <td width="50%" valign="top">
 
 **Advanced**
-- QR codes & barcodes (9 formats)
+- QR codes & barcodes (9 formats; Code 128, QR version 7+, Data Matrix and PDF417 symbols are not readable by standard scanners)
 - Table layout engine with pagination
 - JSX / VDOM component renderer (`renderJsxToPdf`)
 - JSON Schema &rarr; AcroForm generation
 - Server adapters (`pdfResponse` for Workers/Deno/Bun/Node)
-- JPEG2000 (JPXDecode) image support
-- WebP image embedding (lossy, lossless, alpha)
-- TIFF image embedding (multi-page, CMYK, direct mapping)
+- JPEG2000 decoding (pure JavaScript; its arithmetic decoder does not pass the T.88 H.2 conformance vector, so decoded pixels can be wrong)
+- WebP embedding (lossless and alpha; lossy VP8 images decode to a flat grey placeholder)
+- TIFF image embedding (multi-page)
 - Image format auto-detection (PNG/JPEG/WebP/TIFF)
 - Form field JavaScript evaluation & sandboxing
 - Outlines / bookmarks
 - Optional content layers (OCGs)
 - File attachments & watermarks
 - PDF 2.0: associated files (Factur-X), document parts, soft masks
-- Linearization (fast web view)
+- Linearization (writes a /Linearized dictionary and reorders objects; output is not a conforming linearized file)
 - Browser helpers (download, blob, data URL)
 - Service Worker & Web Worker support
 - Batch processing with memory pressure handling
@@ -191,23 +193,23 @@ For environments without ES module support, use the IIFE bundle which exposes a 
 </tr>
 
 <tr><td><strong>Runtime</strong></td>
-<td align="center">Node, Deno, Bun, CF Workers, browsers</td>
-<td align="center">Node, browsers</td></tr>
+<td align="center">Node 26.4+, current browsers (Deno, Bun, Workers not tested in CI)</td>
+<td align="center">Node, browsers, Deno, React Native</td></tr>
 
 <tr><td><strong>Module format</strong></td>
 <td align="center">ESM + CJS</td>
-<td align="center">CJS (with ESM wrapper)</td></tr>
+<td align="center">CJS + ES module builds</td></tr>
 
 <tr><td><strong>TypeScript</strong></td>
-<td align="center">7.0 strict</td>
+<td align="center">7.1 dev build, strict</td>
 <td align="center">3.x</td></tr>
 
 <tr><td><strong>Parse existing PDFs</strong></td>
-<td align="center">Yes (with decryption)</td>
+<td align="center">Yes (encrypted content not decrypted; PDFs with object streams do not load)</td>
 <td align="center">Yes</td></tr>
 
 <tr><td><strong>Text extraction</strong></td>
-<td align="center">Yes (with positions)</td>
+<td align="center">Yes (with positions; indirect-reference fonts and compressed ToUnicode maps are not decoded)</td>
 <td align="center">No</td></tr>
 
 <tr><td><strong>Encryption</strong></td>
@@ -223,15 +225,15 @@ For environments without ES module support, use the IIFE bundle which exposes a 
 <td align="center">No</td></tr>
 
 <tr><td><strong>WebP images</strong></td>
-<td align="center">Lossy, lossless, alpha</td>
+<td align="center">Lossless, alpha (lossy decodes to a flat grey placeholder)</td>
 <td align="center">No</td></tr>
 
 <tr><td><strong>TIFF images</strong></td>
-<td align="center">Multi-page, CMYK, direct mapping</td>
+<td align="center">Multi-page</td>
 <td align="center">No</td></tr>
 
 <tr><td><strong>JPEG2000 decoding</strong></td>
-<td align="center">Full JPXDecode (JP2 + J2K)</td>
+<td align="center">JPXDecode (JP2 + J2K), pure JavaScript; fails the T.88 H.2 conformance vector</td>
 <td align="center">No</td></tr>
 
 <tr><td><strong>Form JavaScript</strong></td>
@@ -243,7 +245,7 @@ For environments without ES module support, use the IIFE bundle which exposes a 
 <td align="center">Full</td></tr>
 
 <tr><td><strong>PDF/A compliance</strong></td>
-<td align="center">1a/1b through 3a/3b/3u + 4/4e/4f</td>
+<td align="center">1a/1b through 3a/3b/3u + 4/4e/4f (writer, not validated)</td>
 <td align="center">No</td></tr>
 
 <tr><td><strong>JSX / VDOM rendering</strong></td>
@@ -255,7 +257,7 @@ For environments without ES module support, use the IIFE bundle which exposes a 
 <td align="center">No</td></tr>
 
 <tr><td><strong>Merge & split</strong></td>
-<td align="center">Built-in</td>
+<td align="center">Built-in (pages from loaded PDFs are written without their content)</td>
 <td align="center">Copy pages only</td></tr>
 
 <tr><td><strong>Annotations</strong></td>
@@ -283,11 +285,11 @@ For environments without ES module support, use the IIFE bundle which exposes a 
 <td align="center">No</td></tr>
 
 <tr><td><strong>Linearization</strong></td>
-<td align="center">Yes</td>
+<td align="center">Partial</td>
 <td align="center">No</td></tr>
 
 <tr><td><strong>QR codes & barcodes</strong></td>
-<td align="center">9 formats (QR, EAN, Code 128, PDF417…)</td>
+<td align="center">9 formats (QR, EAN, Code 128, PDF417…); Code 128, QR 7+, Data Matrix and PDF417 are not scanner-readable</td>
 <td align="center">No</td></tr>
 
 <tr><td><strong>Spot / DeviceN colors</strong></td>
@@ -307,16 +309,16 @@ For environments without ES module support, use the IIFE bundle which exposes a 
 <td align="center">No</td></tr>
 
 <tr><td><strong>Image optimization</strong></td>
-<td align="center">JPEG recompress, dedup, grayscale</td>
+<td align="center">Dedup; JPEG recompression leaves images unchanged (`initWasm({ jpeg: true })` does not initialise the JPEG WASM encoder)</td>
 <td align="center">No</td></tr>
 
-<tr><td><strong>WASM acceleration</strong></td>
-<td align="center">Optional (compression, PNG, fonts, JBIG2, JPEG)</td>
+<tr><td><strong>WASM modules</strong></td>
+<td align="center">Not run (modules ship in dist/wasm/)</td>
 <td align="center">No</td></tr>
 
 <tr><td><strong>Dependencies</strong></td>
 <td align="center">1 (fflate)</td>
-<td align="center">0</td></tr>
+<td align="center">4 (pako, tslib, @pdf-lib/standard-fonts, @pdf-lib/upng)</td></tr>
 
 <tr><td><strong>Maintained</strong></td>
 <td align="center">Active</td>
@@ -330,13 +332,15 @@ For environments without ES module support, use the IIFE bundle which exposes a 
 
 | Runtime | Version | Status |
 |:---|:---|:---:|
-| **Node.js** | 26.4+ | Fully supported |
-| **Deno** | 1.40+ | Fully supported |
-| **Bun** | 1.0+ | Fully supported |
-| **Cloudflare Workers** | &mdash; | Fully supported |
-| **Chrome / Edge** | 109+ | Fully supported |
-| **Firefox** | 115+ | Fully supported |
-| **Safari** | 16.4+ | Fully supported |
+| **Node.js** | 26.4+ | Tested in CI (Node 26) |
+| **Deno** | 2.5+ | Not tested in CI |
+| **Bun** | 1.1.31+ | Not tested in CI |
+| **Cloudflare Workers** | current workerd (V8 14.0+) | Not tested in CI |
+| **Chrome / Edge** | 140+ | Chromium tested in CI (Playwright); Edge not tested |
+| **Firefox** | 133+ | Tested in CI (Playwright) |
+| **Safari** | 18.4+ | WebKit tested in CI (Playwright); Safari not tested |
+
+The browser, Deno and Bun minimums are the first versions with both the Uint8Array base64/hex methods (`Uint8Array.prototype.toBase64`/`toHex`, `Uint8Array.fromBase64`/`fromHex`) and the iterator helpers (`Iterator.from`, `.map`, `.toArray`), which the library calls without a guard (MDN browser-compat-data, read 2026-11-11). The Node minimum is the `engines` range in package.json.
 
 <br />
 
@@ -370,6 +374,7 @@ const page = doc.addPage(PageSizes.LETTER);
 const font = await doc.embedFont(StandardFonts.Helvetica);
 
 page.drawText('Hello', { x: 50, y: 700, size: 24, font });
+const imageRef = await doc.embedPng(pngBytes);
 page.drawImage(imageRef, { x: 50, y: 400, width: 200, height: 200 });
 page.drawRectangle({ x: 50, y: 300, width: 100, height: 50, color: rgb(0, 0.5, 1) });
 page.drawCircle({ x: 200, y: 325, radius: 25 });
@@ -384,7 +389,7 @@ page.drawSvgPath('M 0 0 L 100 0 L 50 80 Z', { x: 300, y: 300 });
 // Standard fonts (no glyph data embedded — just a font dictionary)
 const helvetica = await doc.embedFont(StandardFonts.Helvetica);
 
-// Custom TrueType / OpenType
+// Custom TrueType / OpenType (readFile from 'node:fs/promises')
 const fontBytes = await readFile('Inter.ttf');
 const inter = await doc.embedFont(fontBytes, { subset: true });
 
@@ -419,6 +424,8 @@ const pages = await splitPdf(await loadPdf(pdfBytes), [
   [5, 9],   // Pages 6-10
 ]);
 ```
+
+Pages copied, merged or split from a loaded PDF are written without their content; pages created in the same session copy correctly.
 </details>
 
 <details>
@@ -470,6 +477,8 @@ for (const item of items) {
   console.log(`"${item.text}" at (${item.x}, ${item.y})`);
 }
 ```
+
+Text from fonts that use indirect references or compressed ToUnicode maps (most real-world PDFs) is not decoded correctly.
 </details>
 
 <details>
@@ -497,6 +506,8 @@ console.log(`Savings: ${report.savings.toFixed(1)}%`);
 
 const optimized = await doc.save();
 ```
+
+In this release `initWasm({ jpeg: true })` does not initialise the JPEG WASM encoder, and `optimizeAllImages` and `modern-pdf optimize` leave JPEG images unchanged (`deduplicateImages` still works).
 
 **CLI:**
 ```sh
@@ -547,16 +558,19 @@ import { encodeCode128, encodeEan13, renderStyledBarcode } from 'modern-pdf-lib'
 const barcode = encodeCode128('ABC-12345');
 const ops = renderStyledBarcode(barcode, 50, 500, 'ABC-12345', { height: 60 });
 ```
+
+Code 128, QR version 7+, Data Matrix and PDF417 symbols are not readable by standard scanners.
 </details>
 
 <details>
 <summary><strong>PDF/A & Accessibility</strong></summary>
 
 ```ts
-import { enforcePdfA, checkAccessibility } from 'modern-pdf-lib';
+import { enforcePdfA, loadPdf, checkAccessibility } from 'modern-pdf-lib';
 
 // Enforce PDF/A-2b compliance
-const archival = enforcePdfA(pdfBytes, '2b');
+const archival = await enforcePdfA(pdfBytes, '2b');
+const doc = await loadPdf(archival);
 
 // Check accessibility
 const issues = checkAccessibility(doc);
@@ -564,6 +578,8 @@ for (const issue of issues) {
   console.log(`[${issue.severity}] ${issue.code}: ${issue.message}`);
 }
 ```
+
+`enforcePdfA` output is not validated against veraPDF, and `enforcePdfA` and `enforcePdfX` output has an invalid cross-reference offset.
 </details>
 
 <br />
@@ -584,34 +600,16 @@ yarn add modern-pdf-lib
 bun add modern-pdf-lib
 
 # deno
-import { createPdf } from 'npm:modern-pdf-lib';
+deno add npm:modern-pdf-lib
 ```
 
 <br />
 
-## WASM Acceleration
+## WASM Modules
 
-All WASM modules are **optional**. Without them, identical output is produced using pure-JS fallbacks.
+The package ships WebAssembly builds of six Rust crates under `dist/wasm/` (libdeflate, png, ttf, shaping, jbig2, jpeg; exported as `modern-pdf-lib/wasm/*`), but this release's JavaScript does not run them; all work runs in pure JavaScript (fflate for Flate).
 
-```ts
-import { initWasm } from 'modern-pdf-lib';
-
-await initWasm({
-  deflate: true,   // Faster compression
-  png: true,       // Faster PNG decoding
-  fonts: true,     // Faster font subsetting
-  jpeg: true,      // JPEG encode/decode for image optimization
-});
-```
-
-| Module | Purpose | Speedup |
-|:---|:---|:---:|
-| libdeflate | Stream compression | ~2x |
-| png | PNG image decoding | ~5x |
-| ttf | Font parsing (feeds the JS subsetter) | ~3x |
-| shaping | Complex script layout | ~10x |
-| jbig2 | JBIG2 bilevel image decoding | ~3x |
-| jpeg | JPEG encode/decode for image optimization | Required |
+`initWasm()` with no argument returns at once. `initWasm({ deflate: true })` rejects, `png` and `jpeg` resolve without enabling a module, `fonts` does nothing, and ttf, shaping and jbig2 have no option. JPEG recompression (`optimizeAllImages`, `modern-pdf optimize`) needs the JPEG encoder, so it leaves JPEG images unchanged.
 
 <br />
 
@@ -630,7 +628,7 @@ modern-pdf-lib/
     signature/      PKCS#7 signatures, timestamps, verification, CRL/OCSP, LTV
     security/       Threat scanner, sanitizer, redaction verifier, encryption inspector
     crypto/         AES-256, RC4, MD5, SHA-256/384/512
-    compression/    Deflate (fflate + optional WASM)
+    compression/    Deflate (fflate; WASM bridge not loaded)
     assets/         Font metrics/embed/subset, image embed, SVG
     text/           BiDi (UAX #9) text ordering
     color/          Color conversion & ICC transforms
@@ -657,14 +655,14 @@ modern-pdf-lib/
 ```sh
 git clone https://github.com/ABCrimson/modern-pdf-lib.git
 cd modern-pdf-lib
-npm install
-npm test          # 6,969 tests
-npm run typecheck # TypeScript 7.0 strict
-npm run build     # ESM + CJS + declarations
+pnpm install
+pnpm test          # 6,969 tests in 323 files
+pnpm run typecheck # TypeScript 7.1 dev build: src, cli, scripts, tests
+pnpm run build     # ESM + CJS + declarations + IIFE
 ```
 
 <br />
 
 ## License
 
-[MIT](LICENSE) &copy; 2026
+[MIT](LICENSE) &copy; 2026 Albert Badalov

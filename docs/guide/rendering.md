@@ -112,7 +112,8 @@ for (const img of extractPageImages(page)) {
 
 for (const font of extractFonts(page)) {
   console.log(`${font.baseFont} (${font.format}${font.subset ? ', subset' : ''})`);
-  await writeFile(`${font.baseFont}.${font.format === 'cff' ? 'cff' : 'otf'}`, font.data);
+  const ext = { truetype: 'ttf', opentype: 'otf', cff: 'cff', type1: 'pfb' }[font.format];
+  await writeFile(`${font.baseFont}.${ext}`, font.data);
 }
 ```
 

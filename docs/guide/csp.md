@@ -8,7 +8,7 @@ modern-pdf-lib is designed to work in environments with strict Content Security 
 
 ## Minimum CSP Requirements
 
-### Core PDF Generation (No WASM)
+### Core PDF Generation
 
 The core library works with a minimal CSP:
 
@@ -16,32 +16,34 @@ The core library works with a minimal CSP:
 Content-Security-Policy: default-src 'self'
 ```
 
-No special directives are needed for creating PDFs, adding text, drawing shapes, or embedding fonts/images when using the pure-JS fallbacks.
+No special directives are needed for creating PDFs, adding text, drawing shapes, or embedding fonts/images.
 
-### With WASM Acceleration
+### WebAssembly
 
-WASM modules require the `wasm-unsafe-eval` directive:
+No WebAssembly module loads, so the library does not need `wasm-unsafe-eval`. Parsing a file with a compressed cross-reference stream still tries the libdeflate module once (in a browser it requests `/wasm/modern_pdf_deflate_bg.wasm`); without `wasm-unsafe-eval` that attempt can be reported as a CSP violation, and `disableWasm` (below) stops it. If your own code compiles WebAssembly, for example from the files under `modern-pdf-lib/wasm/*`, that code needs the `wasm-unsafe-eval` source expression:
 
 ```
 Content-Security-Policy: default-src 'self'; script-src 'self' 'wasm-unsafe-eval'
 ```
 
 > [!NOTE]
-> `wasm-unsafe-eval` is a narrowly-scoped directive that only allows WebAssembly compilation. It does **not** allow JavaScript `eval()`. It is supported in Chrome 97+, Firefox 102+, and Safari 16+.
+> `wasm-unsafe-eval` is a narrowly-scoped source expression that only allows WebAssembly compilation. It does **not** allow JavaScript `eval()`.
 
 ### With Web Workers
 
-If you use `PdfWorker` for off-main-thread PDF generation with inline workers:
+`PdfWorker` sends the task function to the worker as a string, and the worker evaluates it with `new Function`. The worker's policy therefore must include `script-src 'unsafe-eval'`. Pass a `workerUrl` (see [Browser Integration](./browser.md#web-workers)); a worker loaded from a URL gets its policy from its own response headers, for example:
 
 ```
-Content-Security-Policy: default-src 'self'; script-src 'self' blob:; worker-src blob:
+Content-Security-Policy: script-src 'self' 'unsafe-eval'
 ```
 
-For custom worker URLs (recommended for strict CSP):
+The page itself only needs to allow the worker script:
 
 ```
 Content-Security-Policy: default-src 'self'; worker-src 'self'
 ```
+
+Without `workerUrl`, `PdfWorker` builds a worker from a `blob:` URL that inherits the page policy and cannot resolve its `modern-pdf-lib` import.
 
 ### With CDN Loading
 
@@ -51,7 +53,7 @@ Content-Security-Policy: default-src 'self'; script-src 'self' https://cdn.jsdel
 
 ## CSP-Safe WASM Loading
 
-When `wasm-unsafe-eval` is not available, WASM instantiation fails and the library falls through to its pure-JavaScript implementation — compression, for example, drops from libdeflate to fflate and produces identical output. You can also disable WASM up front, which avoids the failed attempt entirely:
+Disable the WASM loader up front so that it refuses every module and makes no `.wasm` request or compile attempt:
 
 ```typescript
 import { configureWasmLoader } from 'modern-pdf-lib';
@@ -61,15 +63,15 @@ configureWasmLoader({ disableWasm: true });
 ```
 
 > [!TIP]
-> `disableWasm` is the deterministic choice for a locked-down deployment. Rather than attempting a WASM instantiation that the CSP will reject and then recovering, the loader skips WASM entirely and the pure-JS paths run from the first call. Output is byte-identical either way.
+> `disableWasm` is the deterministic choice for a locked-down deployment: unless you also pass `moduleBytes`, no `.wasm` request or compile attempt is made, and the pure-JS paths run from the first call.
 
 ## Strict CSP Checklist
 
 | Feature | Required Directive | Fallback Available |
 |---|---|---|
 | Core PDF generation | `default-src 'self'` | N/A (always works) |
-| WASM acceleration | `script-src 'wasm-unsafe-eval'` | Yes -- pure JS |
-| Inline Web Workers | `worker-src blob:` | Yes -- custom worker URL |
+| WebAssembly compiled by your own code | `script-src 'wasm-unsafe-eval'` | N/A -- not loaded by the library |
+| `PdfWorker` | `worker-src 'self'` (page) + `script-src 'unsafe-eval'` (worker) | Yes -- generate on the main thread |
 | CDN scripts | `script-src https://cdn...` | Yes -- self-hosted |
 | Data URL previews | `frame-src blob:` | Yes -- download only |
 
@@ -87,12 +89,12 @@ document.addEventListener('securitypolicyviolation', (e) => {
 
 ### Next.js
 
-In `next.config.js`:
+In `next.config.mjs`:
 
 ```javascript
-const cspHeader = "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self' blob:";
+const cspHeader = "default-src 'self'; worker-src 'self'";
 
-module.exports = {
+export default {
   async headers() {
     return [{ source: '/(.*)', headers: [{ key: 'Content-Security-Policy', value: cspHeader }] }];
   },
@@ -108,9 +110,11 @@ export default defineNuxtConfig({
   routeRules: {
     '/**': {
       headers: {
-        'Content-Security-Policy': "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self' blob:"
+        'Content-Security-Policy': "default-src 'self'; worker-src 'self'"
       }
     }
   }
 });
 ```
+
+Next.js and Nuxt inject inline scripts that `default-src 'self'` blocks; add a nonce or hash policy for them in your framework's CSP configuration.

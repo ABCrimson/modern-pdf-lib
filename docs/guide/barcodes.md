@@ -6,11 +6,14 @@ title: Barcodes & QR Codes
 
 modern-pdf-lib includes built-in barcode generation for 9 formats -- all rendered as native PDF vector graphics for crisp output at any zoom level. No external dependencies or image generation required.
 
+> [!WARNING]
+> Code 128, QR version 7 and above, Data Matrix and PDF417 symbols are not readable by standard scanners.
+
 ## Supported Formats
 
 | Format | Type | Data | Use Case |
 |---|---|---|---|
-| QR Code | 2D matrix | Up to 4296 chars | URLs, tickets, payments |
+| QR Code | 2D matrix | Up to 7089 digits, 4296 alphanumeric characters or 2953 bytes (level L, version 40) | URLs, tickets, payments |
 | PDF417 | 2D stacked | Text (multi-row symbol) | IDs, boarding passes, government forms |
 | Data Matrix | 2D matrix | Text (ASCII mode) | Small-part marking, electronics, pharma |
 | Code 128 | 1D linear | ASCII 0-127 | Shipping, logistics |
@@ -202,7 +205,7 @@ Bearer bars (horizontal bars above and below the barcode) help prevent partial r
 
 ### QR Code (ISO 18004)
 
-The most versatile 2D barcode. Supports URLs, text, vCards, WiFi configs, and more. The encoder supports versions 1-40 and auto-detects the best encoding mode (Numeric, Alphanumeric, or Byte).
+The most versatile 2D barcode. Supports URLs, text, vCards, WiFi configs, and more. The encoder supports versions 1-40 and auto-detects the best encoding mode (Numeric, Alphanumeric, or Byte). Capacity falls as the error correction level rises. Text that is not numeric or alphanumeric is written as UTF-8 bytes without an ECI header; there is no Kanji mode. Code 128, QR version 7 and above, Data Matrix and PDF417 symbols are not readable by standard scanners.
 
 #### High-level API
 
@@ -297,15 +300,17 @@ const result = readCode128(matrix.modules);
 const detected = readBarcode(matrix.modules); // BarcodeReadResult | null
 ```
 
-`readCode128`, `readEan13`, `readEan8`, `readCode39`, and the auto-detecting `readBarcode` are exported.
+`readCode128`, `readEan13`, `readEan8`, `readCode39`, and the auto-detecting `readBarcode` are exported. There are no readers for UPC-A, ITF, QR Code, PDF417 or Data Matrix. `BarcodeReadResult.format` is a plain `string`.
 
 ## Styled Rendering
 
 `renderStyledBarcode` wraps any 1D `BarcodeMatrix` with background, border, and human-readable text in one call:
 
 ```ts
-import { encodeCode128, renderStyledBarcode, StandardFonts, rgb } from 'modern-pdf-lib';
+import { createPdf, PageSizes, encodeCode128, renderStyledBarcode, StandardFonts, rgb } from 'modern-pdf-lib';
 
+const doc = createPdf();
+const page = doc.addPage(PageSizes.A4);
 const font = await doc.embedFont(StandardFonts.Helvetica); // for the human-readable line
 
 const matrix = encodeCode128('SHIP-2026-0042');
@@ -319,13 +324,13 @@ const ops = renderStyledBarcode(matrix, 50, 600, 'SHIP-2026-0042', {
 page.pushOperators(ops);
 ```
 
-The `fontName` option is a page font **resource name**; when `showText` is enabled, pass the `.name` of a font embedded with `doc.embedFont()` so the text references a registered font.
+The `fontName` option is a page font **resource name**; when `showText` is enabled, pass the `.name` of a font embedded with `doc.embedFont()` so the text references a registered font. When `fontName` is omitted it defaults to the literal `Helvetica`, which is not a registered resource name, so always pass `fontName` together with `showText`. The text is centred with an estimate of 0.5 em per character rather than the font's metrics, so it can sit off-centre.
 
 `calculateBarcodeDimensions(matrix, options)` returns the total rendered size for layout planning.
 
 ## Common Styling Options
 
-All 1D barcode renderers accept these options through their respective option types (`Code128Options`, `Code39Options`, `ItfOptions`, `BarcodeOptions`/`EanOptions`/`UpcOptions`):
+All 1D barcode renderers accept these options (except `showText` and `fontSize`, noted below) through their respective option types (`Code128Options`, `Code39Options`, `ItfOptions`, `BarcodeOptions`/`EanOptions`/`UpcOptions`):
 
 | Option | Type | Default | Description |
 |---|---|---|---|
@@ -333,8 +338,10 @@ All 1D barcode renderers accept these options through their respective option ty
 | `moduleWidth` | `number` | `1` | Width of a single narrow bar/module |
 | `quietZone` | `number` | `10` | Quiet zone width in modules (each side) |
 | `color` | `Color` | black | Bar colour |
-| `showText` | `boolean` | `false` | Human-readable text below the barcode |
-| `fontSize` | `number` | `10` | Font size for human-readable text |
+| `showText` | `boolean` | `false` | Human-readable text below the barcode (`renderStyledBarcode` only) |
+| `fontSize` | `number` | `10` | Font size for human-readable text (`renderStyledBarcode` only) |
+
+The per-format `*ToOperators` renderers draw bars only; use `renderStyledBarcode` for human-readable text.
 
 Code 39 and ITF additionally support `wideToNarrowRatio` (default `3`). ITF also supports `bearerBars` and `bearerBarWidth`.
 
@@ -342,7 +349,7 @@ QR codes use `QrCodeOptions` with `moduleSize` (default `2`), `quietZone` (defau
 
 ## Best Practices
 
-1. **Always include quiet zones** -- Most barcode scanners need whitespace around the barcode to detect the start and end of the symbol. The default quiet zones in modern-pdf-lib follow the minimum specifications for each format.
+1. **Always include quiet zones** -- Most barcode scanners need whitespace around the barcode to detect the start and end of the symbol. The default quiet zone is 10 modules for the linear codes (EAN-13 needs 11 on the left: pass `quietZone: 11`), 4 for QR Code, 2 for PDF417 and 1 for Data Matrix.
 
 2. **Use appropriate module sizes** -- Too small and scanners cannot read it; too large wastes space. For 1D barcodes, a `moduleWidth` of `1` to `2` points works well at standard print resolutions. For QR codes, a `moduleSize` of `2` to `4` points is recommended.
 

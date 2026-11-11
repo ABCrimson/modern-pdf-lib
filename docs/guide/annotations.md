@@ -32,6 +32,15 @@ annot.isPrintable();        // true
 annot.isLocked();           // false
 ```
 
+### Adding an annotation to a page
+
+An instance built with a typed `create()` is attached to a page with `addExistingAnnotation`. `page.addAnnotation(type, options)` builds a generic `PdfAnnotation` instead of the typed classes documented here.
+
+```ts
+const page = pdf.addPage();
+page.addExistingAnnotation(annot);
+```
+
 ## Text Annotations (Sticky Notes)
 
 A text annotation renders as an icon that opens a popup with the annotation text:
@@ -75,6 +84,8 @@ const pageLink = PdfLinkAnnotation.create({
 webLink.getUrl();                // 'https://example.com'
 pageLink.getDestination();       // [4, 'FitH']
 ```
+
+The destination is written as a page index in `/Dest` (`setDestination`, or the `pageIndex` option), not as an indirect page reference.
 
 ## FreeText Annotations
 
@@ -309,11 +320,10 @@ const attachment = PdfFileAttachmentAnnotation.create({
 });
 
 attachment.getIcon();      // 'Paperclip'
-attachment.getFileName();  // 'invoice.xml' (read from /FS dict after build)
-
-// Before serialization, build the file specification:
-// attachment.buildFileSpec(registry);
+attachment.getFileName();  // 'invoice.xml' (the name given to create())
 ```
+
+Serialization does not build the file specification: an annotation made with `create()` is written without `/FS`, so the page shows the icon without an embedded file.
 
 ## Appearance Generation
 
@@ -336,7 +346,7 @@ import {
 const stream = generateSquareAppearance(square);
 ```
 
-Appearance streams are generated automatically during serialization via `toDict(registry)` for types that have an appearance generator.
+Appearance streams are generated automatically during serialization via `toDict(registry)` for types that have an appearance generator: Line, Square, Circle, Highlight, Underline, Squiggly, StrikeOut, Ink and FreeText. The other types have no generator and are written without an appearance stream.
 
 ## Annotation Flags
 
@@ -374,12 +384,12 @@ console.log(annot.isLocked());     // true
 
 ## Parsing Annotations from Existing PDFs
 
-Use `annotationFromDict()` to reconstruct typed annotations from parsed PDF dictionaries:
+Use `annotationFromDict()` to wrap a parsed annotation dictionary. It returns a base `PdfAnnotation` whose `getType()` reports the `/Subtype`; for subtype methods call the class static, e.g. `PdfHighlightAnnotation.fromDict(dict)`.
 
 ```ts
 import { annotationFromDict } from 'modern-pdf-lib';
 
-// When parsing a PDF, annotation dicts are automatically typed:
-const annot = annotationFromDict(parsedDict, resolver);
+// Returns a base PdfAnnotation; getType() reports the subtype:
+const annot = annotationFromDict(parsedDict);
 console.log(annot.getType());  // e.g., 'Highlight', 'Text', 'Link'
 ```

@@ -4,7 +4,7 @@ This guide explains how the PDF coordinate system works, how it differs from scr
 
 ## PDF Coordinate System
 
-PDF uses a Cartesian coordinate system with the **origin at the bottom-left** corner of the page. The X axis increases to the right and the Y axis increases **upward**. Units are measured in **points** (1 point = 1/72 inch).
+PDF uses a Cartesian coordinate system with the **origin at the bottom-left** corner of the page. The X axis increases to the right and the Y axis increases **upward**. Units are measured in **points** (1 point = 1/72 inch, unless the page sets `/UserUnit`, which the library does not read).
 
 Here is the layout for a standard A4 page (595.28 x 841.89 points):
 
@@ -68,10 +68,12 @@ pdfY    = pageHeight - screenY
 screenY = pageHeight - pdfY
 ```
 
+These formulas assume the page box starts at `(0, 0)`. `page.getWidth()` and `page.getHeight()` return the MediaBox size (not the CropBox) and ignore `/Rotate` and `/UserUnit`. When a page has a CropBox, convert against it: `pdfY = box.y + box.height - screenY`, with `box = page.getCropBox()`. For a loaded page, `getMediaBox()` reports the origin as `(0, 0)` even when the file's MediaBox starts elsewhere. A CropBox inherited from the page tree is not read, so `getCropBox()` returns `undefined` for it.
+
 ### Screen to PDF
 
 ```ts
-import { createPdf, PageSizes, rgb } from 'modern-pdf-lib';
+import { createPdf, PageSizes, StandardFonts, rgb } from 'modern-pdf-lib';
 
 const pdf = createPdf();
 const page = pdf.addPage(PageSizes.A4);
@@ -137,6 +139,7 @@ for (const line of lines) {
     x: 50,
     y,
     size: fontSize,
+    font: helvetica,
     color: rgb(0, 0, 0),
   });
   y -= lineHeight; // Move DOWN the page (Y decreases)
@@ -162,8 +165,8 @@ const page = pdf.getPages()[0]!;
 const streamData = page.getContentStream();
 const operators = parseContentStream(streamData);
 
-// Extract positioned text items
-const items = extractTextWithPositions(operators);
+// Extract positioned text items (getOriginalResources() is marked internal; it supplies the page's font resources)
+const items = extractTextWithPositions(operators, page.getOriginalResources());
 
 // Sort top-to-bottom, then left-to-right
 const sorted = [...items].sort((a, b) => {
@@ -185,13 +188,17 @@ Each `TextItem` has the following properties:
 | `y` | `number` | Vertical position (PDF coordinates) |
 | `width` | `number` | Approximate text width in points |
 | `height` | `number` | Approximate text height in points |
+| `fontSize` | `number` | Font size in points |
+| `fontName` | `string` | Font resource name (for example `"/F1"`) |
 
 ## Page Rotation
 
 PDF pages can have a `/Rotate` entry (0, 90, 180, or 270 degrees). This is purely a **display hint** -- it tells viewers how to present the page to the user. The underlying coordinate system does **not** rotate.
 
 ```ts
-const page = pdf.addPage([595.28, 841.89], { rotation: 90 });
+const page = pdf.addPage([595.28, 841.89]);
+page.setRotation(90);
+const helvetica = await pdf.embedFont(StandardFonts.Helvetica);
 
 // Even with 90-degree rotation, (0, 0) is still the bottom-left
 // of the UNROTATED page. The viewer rotates the result for display.
@@ -199,6 +206,7 @@ page.drawText('Rotated page', {
   x: 50,
   y: 400,
   size: 16,
+  font: helvetica,
   color: rgb(0, 0, 0),
 });
 ```
@@ -236,7 +244,7 @@ if (trim) {
 ```
 
 > [!WARNING]
-> Do not assume the MediaBox origin is `(0, 0)`. Some PDFs use a non-zero origin (for example, `[-50, -50, 645.28, 891.89]`). Always read the box coordinates rather than assuming they start at zero. Use `page.getMediaBox()` to get the actual values.
+> Do not assume a page box starts at `(0, 0)`. Some PDFs use a non-zero origin (for example, `[-50, -50, 645.28, 891.89]`). `getCropBox()`, `getBleedBox()`, `getTrimBox()` and `getArtBox()` return the coordinates stored on the page; for a loaded page, `getMediaBox()` always reports `x: 0, y: 0`, so it does not show a non-zero MediaBox origin.
 
 ## Common Patterns
 
@@ -307,6 +315,8 @@ for (const line of bodyLines) {
 ### Centering Text Horizontally
 
 ```ts
+import type { PdfPage, FontRef } from 'modern-pdf-lib';
+
 function drawCenteredText(
   page: PdfPage,
   text: string,
@@ -323,6 +333,8 @@ function drawCenteredText(
 ```
 
 ### Centering Text Vertically
+
+`y` is the baseline. This helper puts the baseline at `(pageHeight - heightAtSize) / 2`, so the glyph box sits lower than centred by the font's descent, which `FontRef` does not expose.
 
 ```ts
 function drawVerticallyCentered(

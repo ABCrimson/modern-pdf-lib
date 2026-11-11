@@ -110,8 +110,8 @@ The `errorStrategy` option controls how failures are handled:
 | Strategy | Behaviour |
 |---|---|
 | `'continue'` | Skip failed items and keep processing (default). Errors are collected in `result.errors`. |
-| `'fail-fast'` | Stop on the first error and reject the promise immediately. Remaining items are cancelled. |
-| `'collect'` | Process all items, then throw an `AggregateError` containing every failure. |
+| `'fail-fast'` | Stop on the first error and reject with that error, without an item index. Items that have not started are cancelled; items already running finish and still call `onProgress`. |
+| `'collect'` | Process all items, then throw an `AggregateError` containing every failure. Each error's `message` is prefixed with `[Item #N] `. |
 
 ```ts
 // Fail on first error
@@ -185,7 +185,7 @@ Memory monitoring uses `process.memoryUsage()` on Node.js and `performance.memor
 
 ## Convenience: Batch Merge
 
-`batchMerge()` merges many PDFs into a single document using parallel chunk processing:
+`batchMerge()` merges many PDFs into a single document by merging chunks and then merging the chunk results (all on the calling thread):
 
 ```ts
 import { batchMerge } from 'modern-pdf-lib';
@@ -201,10 +201,10 @@ const mergedBytes = await batchMerge(pdfFiles, {
 The merge strategy:
 
 1. Input files are split into chunks (one chunk per concurrency slot)
-2. Each chunk is parsed and merged in parallel
+2. Each chunk is parsed and merged
 3. The resulting chunk documents are merged into the final output
 
-This is significantly faster than sequential merging for large collections because parsing and page-copying can overlap.
+`batchMerge()` honours `concurrency` (default 4) and `onProgress` only; any unreadable input rejects the call. With two or more inputs it merges through `mergePdfs()`, so their pages are written without their page content.
 
 ```ts
 // Merge 100 invoices into a single PDF
@@ -275,7 +275,7 @@ console.log(`\nDone: ${result.successCount} succeeded, ${result.errors.size} fai
 
 4. **Set per-item timeouts for untrusted input** -- if processing user-uploaded PDFs, a timeout prevents malformed files from blocking the entire batch.
 
-5. **Use `batchMerge()` instead of sequential merging** -- for 50+ files, parallel chunk merging can be 3-5x faster than a sequential loop.
+5. **`batchMerge()` runs on the calling thread** -- with two or more inputs it merges each chunk and then merges the chunk results, so every page is copied twice; it is not faster than a single `mergePdfs()` call.
 
 6. **Monitor progress for long-running batches** -- the `onProgress` callback enables progress bars, logging, and cancellation checks in your application.
 

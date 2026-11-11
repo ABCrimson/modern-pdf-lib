@@ -1,27 +1,17 @@
 # Image Optimization
 
-Reduce PDF file sizes by recompressing, deduplicating, and downscaling images — the single largest contributor to bloated PDFs.
+Reduce PDF file sizes by recompressing and deduplicating images — the single largest contributor to bloated PDFs.
 
 ## Prerequisites
 
-Image optimization requires the JPEG WASM module:
-
-```ts
-import { initWasm } from 'modern-pdf-lib';
-
-await initWasm({ jpeg: true });
-```
-
-Without it, images are skipped (no errors, no changes).
+Recompression needs the JPEG WASM encoder, and there is no JavaScript fallback. The library does not load the encoder by itself: `initWasm({ jpeg: true })` and `modern-pdf optimize` leave it unloaded, and every image that passes the filters is skipped with the reason `JPEG WASM encoder not initialized`. The package ships the encoder as a wasm-bindgen build under `dist/wasm/jpeg/`; initialize that module yourself and pass it to `initJpegWasm(module)` to enable recompression. Images that are already JPEG (`DCTDecode`) are still skipped. `deduplicateImages()`, `estimateJpegQuality()`, `computeImageDpi()` and the grayscale helpers are pure JavaScript.
 
 ## Batch Optimize All Images
 
 The simplest path: load a PDF, optimize everything, save.
 
 ```ts
-import { loadPdf, initWasm, optimizeAllImages } from 'modern-pdf-lib';
-
-await initWasm({ jpeg: true });
+import { loadPdf, optimizeAllImages } from 'modern-pdf-lib';
 
 const doc = await loadPdf(pdfBytes);
 const report = await optimizeAllImages(doc, {
@@ -40,12 +30,18 @@ const optimizedBytes = await doc.save();
 | Option | Type | Default | Description |
 |:---|:---|:---|:---|
 | `quality` | `number` | `80` | JPEG quality (1–100) |
-| `maxDpi` | `number` | `150` | Maximum DPI — images exceeding this are downscaled |
+| `maxDpi` | `number` | — | Reserved; ignored (images are never downscaled) |
 | `progressive` | `boolean` | `false` | Encode as progressive JPEG |
 | `chromaSubsampling` | `string` | `'4:2:0'` | Chroma subsampling: `'4:4:4'`, `'4:2:2'`, or `'4:2:0'` |
 | `skipSmallImages` | `boolean` | `false` | Skip images smaller than 10 KB |
 | `minSavingsPercent` | `number` | `10` | Only replace if savings exceed this percentage |
 | `autoGrayscale` | `boolean` | `false` | Auto-detect and convert pseudo-grayscale RGB images |
+| `pageRange` | `{ start: number; end: number }` | — | Only optimize images on pages in this range (0-based, inclusive) |
+| `minImageSize` | `number` | `0` | Skip images whose compressed size is below this many bytes |
+| `colorSpaces` | `readonly string[]` | — | Only optimize images in these color spaces |
+| `namePattern` | `RegExp` | — | Only optimize images whose resource name matches |
+| `concurrency` | `number` | `1` | Maximum number of images processed concurrently |
+| `onProgress` | `(info: ProgressInfo) => void` | — | Called once per image, in input order, after all images are processed |
 
 ### Report Structure
 
@@ -55,12 +51,13 @@ interface OptimizationReport {
   optimizedImages: number;
   originalTotalBytes: number;
   optimizedTotalBytes: number;
+  skippedByFilter: number;       // images skipped by pageRange, minImageSize, colorSpaces or namePattern
   savings: number;               // percentage
   perImage: ImageOptimizeEntry[];
 }
 ```
 
-Each `perImage` entry includes `name`, `pageIndex`, `originalSize`, `newSize`, `skipped`, and optional `reason`.
+Each `perImage` entry includes `name`, `pageIndex`, `originalSize`, `newSize`, `skipped`, `skippedByFilter`, and optional `reason`.
 
 ## Image Deduplication
 
@@ -157,6 +154,8 @@ Optimize images from the command line:
 npx modern-pdf optimize input.pdf output.pdf [options]
 ```
 
+`modern-pdf optimize` runs `optimizeAllImages()` without loading the JPEG encoder, so it recompresses no image; `--dedup` still removes duplicate images.
+
 ### Options
 
 ```
@@ -193,8 +192,8 @@ optimizeAllImages()
   ├── isGrayscaleImage()        Optional auto-detection
   ├── convertToGrayscale()      Optional RGB → grayscale
   ├── convertCmykToRgb()        CMYK → RGB conversion
-  ├── encodeJpegWasm()          JPEG encoding via WASM
+  ├── encodeJpegWasm()          JPEG encoding via the WASM encoder
   └── stream.data = jpegBytes   In-place stream replacement
 ```
 
-All WASM functions have JS fallbacks. Without the JPEG WASM module, images are simply skipped (not an error).
+There is no JS fallback for the JPEG encoder. Without it, every entry that passes the filters has `skipped: true` and the reason `JPEG WASM encoder not initialized`.

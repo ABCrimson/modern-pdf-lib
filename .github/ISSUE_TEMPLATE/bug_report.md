@@ -36,7 +36,7 @@ import { PdfDocument } from 'modern-pdf-lib';
 - **Runtime**: (Node / Deno / Bun / Browser / Cloudflare Workers)
 - **Runtime version**:
 - **OS**:
-- **WASM enabled**: (yes / no)
+- **`initWasm()` called**: (yes / no)
 
 ## Additional Context
 

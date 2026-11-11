@@ -51,7 +51,7 @@ page.drawText('456 Oak Avenue, Springfield, IL 62701', {
 
 // --- Line items table ---
 const tableTop = pageHeight - 210;
-const colX = [50, 280, 370, 460];
+const colX = [50, 280, 370, 460] as const;
 const colHeaders = ['Description', 'Qty', 'Unit Price', 'Amount'];
 const rowHeight = 24;
 
@@ -62,9 +62,9 @@ page.drawRectangle({
 });
 
 // Table header text
-for (let i = 0; i < colHeaders.length; i++) {
-  page.drawText(colHeaders[i], {
-    x: colX[i] + 4, y: tableTop + 2, size: 10, font: fontBold, color: rgb(1, 1, 1),
+for (const [i, header] of colHeaders.entries()) {
+  page.drawText(header, {
+    x: (colX[i] ?? 0) + 4, y: tableTop + 2, size: 10, font: fontBold, color: rgb(1, 1, 1),
   });
 }
 
@@ -77,8 +77,7 @@ const items = [
 ];
 
 let currentY = tableTop - rowHeight;
-for (let i = 0; i < items.length; i++) {
-  const item = items[i];
+for (const [i, item] of items.entries()) {
   const amount = item.qty * item.price;
   const rowY = currentY - i * rowHeight;
 
@@ -198,36 +197,33 @@ import { readFile } from 'node:fs/promises';
 
 const bytes = new Uint8Array(await readFile('document.pdf'));
 const doc = await loadPdf(bytes);
-const pages = doc.getPages();
 
-for (let pageIdx = 0; pageIdx < pages.length; pageIdx++) {
-  const page = pages[pageIdx];
+for (const [pageIdx, page] of doc.getPages().entries()) {
   const contentStream = page.getContentStream();
 
   // Parse the content stream into operators
   const operators = parseContentStream(contentStream);
 
-  // Extract text items with position information
-  const items = extractTextWithPositions(operators);
+  // Extract text items with position information (the page resources
+  // resolve fonts with ToUnicode CMaps or custom encodings)
+  const items = extractTextWithPositions(operators, page.getOriginalResources());
 
-  if (items.length === 0) {
+  // Sort by y descending (top of page first), then by x ascending (left to right)
+  const [first, ...rest] = [...items].sort((a, b) => b.y - a.y || a.x - b.x);
+
+  if (first === undefined) {
     console.log(`Page ${pageIdx + 1}: (no text found)`);
     continue;
   }
 
-  // Group items into lines by sorting by y descending (top of page first),
-  // then by x ascending (left to right)
+  // Group items into lines
   const LINE_THRESHOLD = 3; // points — items within this vertical distance are on the same line
-  const sorted = [...items].sort((a, b) => b.y - a.y || a.x - b.x);
 
-  const lines: typeof items[] = [];
-  let currentLine: typeof items = [sorted[0]];
+  const lines: (typeof first)[][] = [];
+  let currentLine = [first];
 
-  for (let i = 1; i < sorted.length; i++) {
-    const prev = currentLine[0];
-    const curr = sorted[i];
-
-    if (Math.abs(prev.y - curr.y) <= LINE_THRESHOLD) {
+  for (const curr of rest) {
+    if (Math.abs((currentLine[0]?.y ?? curr.y) - curr.y) <= LINE_THRESHOLD) {
       currentLine.push(curr);
     } else {
       lines.push(currentLine);
@@ -239,7 +235,7 @@ for (let pageIdx = 0; pageIdx < pages.length; pageIdx++) {
   console.log(`\n--- Page ${pageIdx + 1} ---`);
   for (const line of lines) {
     const lineText = line.map((item) => item.text).join(' ');
-    const y = line[0].y.toFixed(1);
+    const y = (line[0]?.y ?? 0).toFixed(1);
     console.log(`  [y=${y}] ${lineText}`);
   }
 }
@@ -295,6 +291,9 @@ console.log('Form filled and flattened');
 
 Combine several PDF files into a single document using `mergePdfs`, or selectively copy pages with `copyPages`.
 
+> [!NOTE]
+> Pages copied from a loaded document (with `mergePdfs` or `copyPages`) are written without their page content.
+
 **Approach A — Merge entire documents:**
 
 ```ts
@@ -315,7 +314,7 @@ console.log('Merged 3 PDFs into full-report.pdf');
 **Approach B — Copy specific pages:**
 
 ```ts
-import { loadPdf, createPdf, copyPages, PageSizes } from 'modern-pdf-lib';
+import { loadPdf, createPdf, copyPages } from 'modern-pdf-lib';
 import { readFile, writeFile } from 'node:fs/promises';
 
 const sourceBytes = new Uint8Array(await readFile('large-document.pdf'));
@@ -323,12 +322,8 @@ const sourceDoc = await loadPdf(sourceBytes);
 
 const targetDoc = createPdf();
 
-// Copy only pages 1, 3, and 5 (zero-indexed)
-const copiedPages = await copyPages(sourceDoc, targetDoc, [0, 2, 4]);
-
-for (const page of copiedPages) {
-  targetDoc.addPage(page);
-}
+// Copy only pages 1, 3, and 5 (zero-indexed); copyPages appends the copies to targetDoc
+copyPages(sourceDoc, targetDoc, [0, 2, 4]);
 
 const bytes = await targetDoc.save();
 await writeFile('selected-pages.pdf', bytes);
@@ -343,7 +338,7 @@ console.log('Copied 3 selected pages into selected-pages.pdf');
 Loop over all pages and draw centered page numbers at the bottom of each page.
 
 ```ts
-import { loadPdf, StandardFonts, rgb } from 'modern-pdf-lib';
+import { loadPdf, rgb } from 'modern-pdf-lib';
 import { readFile, writeFile } from 'node:fs/promises';
 
 const bytes = new Uint8Array(await readFile('document.pdf'));
@@ -352,13 +347,12 @@ const font = await doc.embedFont(
   new Uint8Array(await readFile('fonts/Inter-Regular.ttf'))
 );
 
-const pages = doc.getPages();
-const totalPages = pages.length;
+const totalPages = doc.getPageCount();
 const fontSize = 10;
 const bottomMargin = 30;
 
 for (let i = 0; i < totalPages; i++) {
-  const page = pages[i];
+  const page = doc.getPage(i);
   const pageWidth = page.getWidth();
 
   const text = `Page ${i + 1} of ${totalPages}`;
@@ -382,7 +376,7 @@ console.log(`Added page numbers to ${totalPages} pages`);
 ```
 
 > [!NOTE]
-> If you do not have a custom font file available, you can use a standard font instead. Replace the `embedFont` call with `StandardFonts.Helvetica` and use the standard font in `drawText`. Note that `widthOfTextAtSize` is only available on embedded `FontRef` objects; for standard fonts, you can estimate the width as `text.length * fontSize * 0.5` for Helvetica.
+> If you do not have a custom font file available, you can use a standard font instead. Replace the `embedFont` call with `await doc.embedFont(StandardFonts.Helvetica)` (import `StandardFonts` from `modern-pdf-lib`) and use that font in `drawText`. `widthOfTextAtSize` is available on the `FontRef` of both standard and embedded fonts.
 
 ## 7. Creating Accessible PDFs
 
@@ -394,10 +388,13 @@ import {
   PageSizes,
   StandardFonts,
   rgb,
+  tagHeading,
+  tagParagraph,
+  tagFigure,
   beginMarkedContentSequence,
   endMarkedContent,
 } from 'modern-pdf-lib';
-import { readFile, writeFile } from 'node:fs/promises';
+import { writeFile } from 'node:fs/promises';
 
 const doc = createPdf();
 
@@ -415,7 +412,7 @@ const helveticaOblique = await doc.embedFont(StandardFonts.HelveticaOblique);
 const tree = doc.createStructureTree();
 
 // --- Heading ---
-const h1Element = tree.addElement(null, 'H1', { altText: 'Report Title' });
+const h1Element = tagHeading(tree, null, 1);
 const h1Mcid = tree.assignMcid(h1Element, 0); // page index 0
 
 // Wrap heading content in marked content operators
@@ -430,7 +427,7 @@ page.drawText('Quarterly Sales Report', {
 page.pushOperators(endMarkedContent());
 
 // --- First paragraph ---
-const p1Element = tree.addElement(null, 'P');
+const p1Element = tagParagraph(tree, null);
 const p1Mcid = tree.assignMcid(p1Element, 0);
 
 page.pushOperators(beginMarkedContentSequence('P', p1Mcid));
@@ -444,7 +441,7 @@ page.drawText('This report covers Q4 2025 sales data across all regions.', {
 page.pushOperators(endMarkedContent());
 
 // --- Second paragraph ---
-const p2Element = tree.addElement(null, 'P');
+const p2Element = tagParagraph(tree, null);
 const p2Mcid = tree.assignMcid(p2Element, 0);
 
 page.pushOperators(beginMarkedContentSequence('P', p2Mcid));
@@ -458,9 +455,11 @@ page.drawText('Total revenue increased by 15% compared to the previous quarter.'
 page.pushOperators(endMarkedContent());
 
 // --- Figure with alt text ---
-const figureElement = tree.addElement(null, 'Figure', {
-  altText: 'Bar chart showing quarterly revenue by region: North $2.4M, South $1.8M, East $3.1M, West $2.7M',
-});
+const figureElement = tagFigure(
+  tree,
+  null,
+  'Bar chart showing quarterly revenue by region: North $2.4M, South $1.8M, East $3.1M, West $2.7M',
+);
 const figureMcid = tree.assignMcid(figureElement, 0);
 
 page.pushOperators(beginMarkedContentSequence('Figure', figureMcid));
@@ -484,7 +483,7 @@ page.drawText('[Chart: Revenue by Region]', {
 });
 
 // If you have a real image, add alt text to it:
-// const image = doc.embedPng(imageBytes);
+// const image = await doc.embedPng(imageBytes);
 // page.drawImage(image, { x: 50, y: pageHeight - 350, width: 400, height: 200 });
 // page.addAltText(image, 'Bar chart showing quarterly revenue by region');
 

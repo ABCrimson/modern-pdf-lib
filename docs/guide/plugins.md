@@ -47,22 +47,21 @@ doc.use(timestampPlugin({
 
 ### metadataPlugin
 
-Sets the producer string and optionally configures default metadata fields:
+Sets the producer string on register and again before every save:
 
 ```ts
 import { metadataPlugin } from 'modern-pdf-lib';
 
 doc.use(metadataPlugin({
   producer: 'My Application v3.0',   // Default: 'modern-pdf-lib'
-  creator: 'Report Engine',
-  defaultTitle: 'Untitled Document',
-  defaultAuthor: 'System',
 }));
 ```
 
+`MetadataPluginOptions` also declares `creator`, `defaultTitle` and `defaultAuthor`, but the plugin does not apply them; only `producer` takes effect. Because the producer is set again in `onBeforeSave`, a producer set on the document after `.use()` is overwritten at save.
+
 ### accessibilityPlugin
 
-Adds accessibility features automatically -- sets the document language, marks the catalog for tagged PDF, and enables `DisplayDocTitle` in viewer preferences:
+Sets the document language, writes `/MarkInfo` with `/Marked true` into the catalog when `markAsTagged` is `true` (the default), and enables `DisplayDocTitle` in viewer preferences. Entries already in the catalog are left as they are:
 
 ```ts
 import { accessibilityPlugin } from 'modern-pdf-lib';
@@ -72,6 +71,8 @@ doc.use(accessibilityPlugin({
   markAsTagged: true,       // Add /MarkInfo with /Marked true (default: true)
 }));
 ```
+
+The plugin sets `/Lang`, `/ViewerPreferences/DisplayDocTitle` and `/MarkInfo` only. It creates no structure tree (`/StructTreeRoot`) and does not make a document PDF/UA conformant.
 
 ::: tip Combine Plugins
 Plugins execute in registration order. Combining all three built-in plugins gives you automatic timestamps, metadata, and accessibility in a few lines:
@@ -92,15 +93,14 @@ A plugin is any object that implements the `PdfPlugin` interface. At minimum, it
 ### Basic Example
 
 ```ts
-import type { PdfPlugin, PluginDocument } from 'modern-pdf-lib';
+import type { PdfPlugin } from 'modern-pdf-lib';
 
-const watermarkPlugin: PdfPlugin = {
-  name: 'watermark',
+const pageLogPlugin: PdfPlugin = {
+  name: 'page-log',
   version: '1.0.0',
 
-  onAfterAddPage(page, doc) {
-    // Every new page gets a watermark notice
-    // (actual drawing would use the page's drawText API)
+  onAfterAddPage(page) {
+    // Hooks receive a PluginPage, which exposes getWidth() and getHeight() only
     console.log(`Page added: ${page.getWidth()}x${page.getHeight()}`);
   },
 
@@ -109,7 +109,7 @@ const watermarkPlugin: PdfPlugin = {
   },
 };
 
-doc.use(watermarkPlugin);
+doc.use(pageLogPlugin);
 ```
 
 ### Factory Function Pattern
@@ -155,11 +155,11 @@ The `PdfPlugin` interface defines the following hooks, all optional:
 |---|---|---|
 | `onRegister(doc)` | When `.use()` is called | Document metadata |
 | `onBeforeAddPage(size)` | Before a page is created | Page size (return modified size) |
-| `onAfterAddPage(page, doc)` | After a page is created | Page content |
-| `onBeforeEmbedFont(data, options)` | Before font embedding | Font data and options |
-| `onBeforeEmbedImage(data)` | Before image embedding | Image data |
-| `onBeforeSave(doc)` | Before serialization (may be async) | Document structure |
-| `onAfterSave(bytes)` | After serialization (may be async) | Final PDF bytes |
+| `onAfterAddPage(page, doc)` | After a page is created | Nothing on the page: `page` is a `PluginPage` with `getWidth()` and `getHeight()` |
+| `onBeforeEmbedFont(data, options)` | Before embedding font bytes (not called for standard font names) | Font data and options |
+| `onBeforeEmbedImage(data)` | In `embedImage()`, and in `embedImages()` and the builder's `withImage()`, which call it (not `embedPng()`, `embedJpeg()` and the other format-specific methods) | Image data |
+| `onBeforeSave(doc)` | Before serialization in `save()`, `saveAsBlob()` and `saveAsBase64()` (may be async) | Document structure |
+| `onAfterSave(bytes)` | After serialization in `save()`, `saveAsBlob()` and `saveAsBase64()` (may be async) | Final PDF bytes |
 | `onBuildCatalog(catalog)` | During catalog construction | Catalog dictionary entries |
 | `onBuildPageDict(pageDict, pageIndex)` | During page dict construction | Page dictionary entries |
 
@@ -171,7 +171,7 @@ Some hooks can transform their input. The return value replaces the original:
 const resizePlugin: PdfPlugin = {
   name: 'force-letter-size',
 
-  onBeforeAddPage(size) {
+  onBeforeAddPage() {
     // Force all pages to Letter size
     return [612, 792];
   },
@@ -226,7 +226,7 @@ manager.register(metadataPlugin());
 
 // List registered plugins
 for (const plugin of manager.list()) {
-  console.log(`${plugin.name} v${plugin.version}`);
+  console.log(`${plugin.name} v${plugin.version ?? 'n/a'}`);
 }
 
 // Check if any plugins are registered
@@ -258,6 +258,8 @@ doc.use(pluginC);  // onBeforeSave runs third
 ```
 
 For transform hooks (`onBeforeAddPage`, `onBeforeEmbedFont`, `onBeforeEmbedImage`, `onAfterSave`), each plugin receives the output of the previous plugin. This forms a pipeline where plugins can build on each other's transformations.
+
+`onRegister` runs after the plugin is registered, so a plugin whose `onRegister` throws stays registered. An error thrown by `onBeforeSave` aborts `save()`.
 
 ---
 
