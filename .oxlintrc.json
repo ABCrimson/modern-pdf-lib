@@ -19,7 +19,69 @@
   },
   "overrides": [
     {
-      "files": ["src/form/jsEvaluator.ts", "src/form/acrobatBuiltins.ts", "src/parser/streamingParser.ts", "src/runtime/*.ts"],
+      // Test code indexes fixtures after a length expect; the rule buys nothing there.
+      "files": ["tests/**"],
+      "rules": {
+        "typescript/no-non-null-assertion": "off"
+      }
+    },
+    {
+      // The standalone benchmark runner prints its results to the console by design.
+      "files": ["tests/benchmarks/benchHarness.ts"],
+      "rules": {
+        "no-console": "off"
+      }
+    },
+    {
+      // Hot numeric loops: the assertions are typed-array or fixed-table index reads
+      // inside decode/encode loops. Files are listed one by one so any new file keeps
+      // the rule on. Files whose assertions are regex groups, parsed DER children,
+      // Map.get or optional properties stay on until those sites are rewritten.
+      "files": [
+        // Parser codecs and byte-level stream readers
+        "src/parser/jpeg2000Alpha.ts",
+        "src/parser/jpeg2000BitDepth.ts",
+        "src/parser/jpeg2000Codestream.ts",
+        "src/parser/jpeg2000Decode.ts",
+        "src/parser/jpeg2000Tiles.ts",
+        "src/parser/jpeg2000Transcode.ts",
+        "src/parser/jbig2Decode.ts",
+        "src/parser/ccittDecode.ts",
+        "src/parser/streamDecode.ts",
+        "src/parser/lexer.ts",
+        // Image pixel and bitstream loops
+        "src/assets/image/webpDecode.ts",
+        "src/assets/image/webpOptimize.ts",
+        "src/assets/image/pngEmbed.ts",
+        "src/assets/image/tiffDecode.ts",
+        "src/assets/image/imageOptimize.ts",
+        "src/assets/image/grayscaleDetect.ts",
+        "src/assets/image/svgFilters.ts",
+        // Text and font tables
+        "src/text/bidi.ts",
+        "src/assets/font/ttfSubset.ts",
+        // Crypto block and key loops
+        "src/crypto/md5.ts",
+        "src/crypto/rc4.ts",
+        "src/crypto/keyDerivation.ts",
+        // Rendering pixel loops
+        "src/render/rasterizer.ts",
+        "src/render/diff.ts",
+        // Barcode Galois-field and placement loops
+        "src/barcode/qr.ts",
+        "src/barcode/dataMatrix.ts"
+      ],
+      "rules": {
+        "typescript/no-non-null-assertion": "off"
+      }
+    },
+    {
+      "files": [
+        "src/form/jsEvaluator.ts",
+        "src/form/acrobatBuiltins.ts",
+        "src/parser/streamingParser.ts",
+        "src/runtime/*.ts"
+      ],
       "rules": {
         "typescript/no-implied-eval": "off",
         "no-new-func": "off"
@@ -32,11 +94,5 @@
       }
     }
   ],
-  "ignorePatterns": [
-    "dist/**",
-    "node_modules/**",
-    "src/wasm/*/pkg/**",
-    "docs/**",
-    "coverage/**"
-  ]
+  "ignorePatterns": ["dist/**", "node_modules/**", "src/wasm/*/pkg/**", "docs/**", "coverage/**"]
 }

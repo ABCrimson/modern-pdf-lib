@@ -119,6 +119,6 @@ export class PdfCaretAnnotation extends PdfAnnotation {
 
   /** Set the inner rectangle differences (RD entry). */
   setCaretRect(rd: [number, number, number, number]): void {
-    this.dict.set('/RD', PdfArray.of(rd.map(PdfNumber.of)));
+    this.dict.set('/RD', PdfArray.of(rd.map((n) => PdfNumber.of(n))));
   }
 }
