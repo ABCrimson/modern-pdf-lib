@@ -24,13 +24,12 @@ fixed. See [CHANGELOG.md](./CHANGELOG.md) and [VERSIONING.md](./VERSIONING.md).
 ## Reporting a Vulnerability
 
 > [!CAUTION]
-> **Do not open a public GitHub issue for a security vulnerability.** Use one of
-> the private channels below.
+> **Do not open a public GitHub issue for a security vulnerability.** Use the
+> private channel below.
 
 | Channel | How |
 |---|---|
 | GitHub Security Advisory *(preferred)* | [Open a private advisory](https://github.com/ABCrimson/modern-pdf-lib/security/advisories/new) |
-| Email | The address listed on the [maintainer's GitHub profile](https://github.com/ABCrimson) |
 
 ### What to include
 
