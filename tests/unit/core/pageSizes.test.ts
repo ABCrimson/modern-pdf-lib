@@ -13,13 +13,13 @@ describe('PageSizes', () => {
     expect(PageSizes.A7).toEqual([209.76, 297.64]);
   });
   it('includes A8', () => {
-    expect(PageSizes.A8).toEqual([147.40, 209.76]);
+    expect(PageSizes.A8).toEqual([147.4, 209.76]);
   });
   it('includes A9', () => {
-    expect(PageSizes.A9).toEqual([104.88, 147.40]);
+    expect(PageSizes.A9).toEqual([104.88, 147.4]);
   });
   it('includes A10', () => {
-    expect(PageSizes.A10).toEqual([73.70, 104.88]);
+    expect(PageSizes.A10).toEqual([73.7, 104.88]);
   });
 
   // ISO B series
@@ -36,7 +36,7 @@ describe('PageSizes', () => {
     expect(PageSizes.B3).toEqual([1000.63, 1417.32]);
   });
   it('includes B6', () => {
-    expect(PageSizes.B6).toEqual([354.33, 498.90]);
+    expect(PageSizes.B6).toEqual([354.33, 498.9]);
   });
   it('includes B7', () => {
     expect(PageSizes.B7).toEqual([249.45, 354.33]);

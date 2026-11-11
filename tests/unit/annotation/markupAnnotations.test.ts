@@ -9,11 +9,7 @@ import {
   PdfSquigglyAnnotation,
   PdfStrikeOutAnnotation,
 } from '../../../src/annotation/types/markupAnnotations.js';
-import {
-  PdfDict,
-  PdfArray,
-  PdfName,
-} from '../../../src/core/pdfObjects.js';
+import { PdfDict, PdfArray, PdfName } from '../../../src/core/pdfObjects.js';
 
 describe('PdfHighlightAnnotation', () => {
   it('creates with auto-generated quad points from rect', () => {
@@ -47,10 +43,7 @@ describe('PdfHighlightAnnotation', () => {
   });
 
   it('createForRect uses custom color', () => {
-    const annot = PdfHighlightAnnotation.createForRect(
-      [10, 10, 100, 30],
-      { r: 0, g: 1, b: 0 },
-    );
+    const annot = PdfHighlightAnnotation.createForRect([10, 10, 100, 30], { r: 0, g: 1, b: 0 });
     expect(annot.getColor()).toEqual({ r: 0, g: 1, b: 0 });
   });
 

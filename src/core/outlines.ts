@@ -118,10 +118,7 @@ export interface AddBookmarkOptions {
  * @param options  Bookmark configuration (title, page, nesting, style).
  * @returns        A {@link BookmarkRef} identifying the new bookmark.
  */
-export function addBookmark(
-  doc: PdfDocument,
-  options: AddBookmarkOptions,
-): BookmarkRef {
+export function addBookmark(doc: PdfDocument, options: AddBookmarkOptions): BookmarkRef {
   const { title, pageIndex, parent, y, fit, left, zoom, bold, italic, color, isOpen } = options;
 
   // Build the destination — explicit `fit` takes priority, otherwise
@@ -238,10 +235,7 @@ function itemToNode(item: PdfOutlineItem): BookmarkNode {
  * Recursively search for and remove a target item from nested children.
  * @internal
  */
-function removeFromChildren(
-  items: PdfOutlineItem[],
-  target: PdfOutlineItem,
-): boolean {
+function removeFromChildren(items: PdfOutlineItem[], target: PdfOutlineItem): boolean {
   for (const item of items) {
     const childIndex = item.children.indexOf(target);
     if (childIndex !== -1) {

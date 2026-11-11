@@ -21,12 +21,10 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
  * Returns the spy objects for assertions and a teardown function.
  */
 function installSpies() {
-  const exitSpy = vi.spyOn(process, 'exit').mockImplementation(
-    (_code?: number) => {
-      // Throw a sentinel so control flow stops where process.exit was called
-      throw new ExitSentinel(_code ?? 0);
-    },
-  );
+  const exitSpy = vi.spyOn(process, 'exit').mockImplementation((_code?: number) => {
+    // Throw a sentinel so control flow stops where process.exit was called
+    throw new ExitSentinel(_code ?? 0);
+  });
   const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
   const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
   const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
@@ -76,7 +74,7 @@ describe('optimizeCommand', () => {
     await optimizeCommand(['--help']);
 
     // Should have printed help via console.log
-    const allOutput = spies.logSpy.mock.calls.map(c => String(c[0])).join('\n');
+    const allOutput = spies.logSpy.mock.calls.map((c) => String(c[0])).join('\n');
     expect(allOutput).toContain('modern-pdf optimize');
     expect(allOutput).toContain('Usage:');
     expect(allOutput).toContain('--quality');
@@ -91,7 +89,7 @@ describe('optimizeCommand', () => {
     const { optimizeCommand } = await import('../../../src/cli/optimize.js');
     await optimizeCommand(['-h']);
 
-    const allOutput = spies.logSpy.mock.calls.map(c => String(c[0])).join('\n');
+    const allOutput = spies.logSpy.mock.calls.map((c) => String(c[0])).join('\n');
     expect(allOutput).toContain('modern-pdf optimize');
     expect(allOutput).toContain('--help');
   });
@@ -111,7 +109,7 @@ describe('optimizeCommand', () => {
     await expect(optimizeCommand([])).rejects.toThrow(ExitSentinel);
 
     expect(spies.exitSpy).toHaveBeenCalledWith(1);
-    const errorOutput = spies.errorSpy.mock.calls.map(c => String(c[0])).join('\n');
+    const errorOutput = spies.errorSpy.mock.calls.map((c) => String(c[0])).join('\n');
     expect(errorOutput).toContain('input and output file paths are required');
   });
 
@@ -121,19 +119,17 @@ describe('optimizeCommand', () => {
     await expect(optimizeCommand(['input.pdf'])).rejects.toThrow(ExitSentinel);
 
     expect(spies.exitSpy).toHaveBeenCalledWith(1);
-    const errorOutput = spies.errorSpy.mock.calls.map(c => String(c[0])).join('\n');
+    const errorOutput = spies.errorSpy.mock.calls.map((c) => String(c[0])).join('\n');
     expect(errorOutput).toContain('input and output file paths are required');
   });
 
   it('exits with code 1 for unknown options', async () => {
     const { optimizeCommand } = await import('../../../src/cli/optimize.js');
 
-    await expect(
-      optimizeCommand(['--nonexistent-flag']),
-    ).rejects.toThrow(ExitSentinel);
+    await expect(optimizeCommand(['--nonexistent-flag'])).rejects.toThrow(ExitSentinel);
 
     expect(spies.exitSpy).toHaveBeenCalledWith(1);
-    const errorOutput = spies.errorSpy.mock.calls.map(c => String(c[0])).join('\n');
+    const errorOutput = spies.errorSpy.mock.calls.map((c) => String(c[0])).join('\n');
     expect(errorOutput).toContain('Unknown option');
   });
 
@@ -141,7 +137,7 @@ describe('optimizeCommand', () => {
     const { optimizeCommand } = await import('../../../src/cli/optimize.js');
     await optimizeCommand(['--help']);
 
-    const allOutput = spies.logSpy.mock.calls.map(c => String(c[0])).join('\n');
+    const allOutput = spies.logSpy.mock.calls.map((c) => String(c[0])).join('\n');
     expect(allOutput).toContain('Examples:');
     expect(allOutput).toContain('modern-pdf optimize');
   });
@@ -197,36 +193,36 @@ describe('optimize argument parsing', () => {
   it('--quality out of range (0) exits with error', async () => {
     const { optimizeCommand } = await import('../../../src/cli/optimize.js');
 
-    await expect(
-      optimizeCommand(['input.pdf', 'output.pdf', '--quality', '0']),
-    ).rejects.toThrow(ExitSentinel);
+    await expect(optimizeCommand(['input.pdf', 'output.pdf', '--quality', '0'])).rejects.toThrow(
+      ExitSentinel,
+    );
 
     expect(spies.exitSpy).toHaveBeenCalledWith(1);
-    const errorOutput = spies.errorSpy.mock.calls.map(c => String(c[0])).join('\n');
+    const errorOutput = spies.errorSpy.mock.calls.map((c) => String(c[0])).join('\n');
     expect(errorOutput).toContain('--quality must be between 1 and 100');
   });
 
   it('--quality out of range (101) exits with error', async () => {
     const { optimizeCommand } = await import('../../../src/cli/optimize.js');
 
-    await expect(
-      optimizeCommand(['input.pdf', 'output.pdf', '--quality', '101']),
-    ).rejects.toThrow(ExitSentinel);
+    await expect(optimizeCommand(['input.pdf', 'output.pdf', '--quality', '101'])).rejects.toThrow(
+      ExitSentinel,
+    );
 
     expect(spies.exitSpy).toHaveBeenCalledWith(1);
-    const errorOutput = spies.errorSpy.mock.calls.map(c => String(c[0])).join('\n');
+    const errorOutput = spies.errorSpy.mock.calls.map((c) => String(c[0])).join('\n');
     expect(errorOutput).toContain('--quality must be between 1 and 100');
   });
 
   it('--chroma with invalid value exits with error', async () => {
     const { optimizeCommand } = await import('../../../src/cli/optimize.js');
 
-    await expect(
-      optimizeCommand(['input.pdf', 'output.pdf', '--chroma', '4:3:0']),
-    ).rejects.toThrow(ExitSentinel);
+    await expect(optimizeCommand(['input.pdf', 'output.pdf', '--chroma', '4:3:0'])).rejects.toThrow(
+      ExitSentinel,
+    );
 
     expect(spies.exitSpy).toHaveBeenCalledWith(1);
-    const errorOutput = spies.errorSpy.mock.calls.map(c => String(c[0])).join('\n');
+    const errorOutput = spies.errorSpy.mock.calls.map((c) => String(c[0])).join('\n');
     expect(errorOutput).toContain('--chroma must be 4:4:4, 4:2:2, or 4:2:0');
   });
 

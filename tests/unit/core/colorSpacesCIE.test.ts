@@ -5,12 +5,7 @@
 
 import { describe, it, expect } from 'vitest';
 
-import {
-  buildCalGray,
-  buildCalRGB,
-  buildLab,
-  labToRgb,
-} from '../../../src/core/colorSpacesCIE.ts';
+import { buildCalGray, buildCalRGB, buildLab, labToRgb } from '../../../src/core/colorSpacesCIE.ts';
 import {
   PdfArray,
   PdfDict,
@@ -32,10 +27,7 @@ function numbersOf(obj: PdfObject | undefined): number[] {
 }
 
 /** Assert the space array shape `[/Name << dict >>]` and return both. */
-function destructureSpace(
-  space: PdfArray,
-  expectedName: string,
-): { name: PdfName; dict: PdfDict } {
+function destructureSpace(space: PdfArray, expectedName: string): { name: PdfName; dict: PdfDict } {
   expect(space).toBeInstanceOf(PdfArray);
   expect(space.length).toBe(2);
   const [name, dict] = space.items;
@@ -85,9 +77,7 @@ describe('buildCalRGB', () => {
   });
 
   it('includes per-component Gamma and 9-element Matrix', () => {
-    const matrix = [
-      0.4124, 0.2126, 0.0193, 0.3576, 0.7152, 0.1192, 0.1805, 0.0722, 0.9505,
-    ];
+    const matrix = [0.4124, 0.2126, 0.0193, 0.3576, 0.7152, 0.1192, 0.1805, 0.0722, 0.9505];
     const space = buildCalRGB({
       whitePoint: [0.9505, 1.0, 1.089],
       blackPoint: [0, 0, 0],

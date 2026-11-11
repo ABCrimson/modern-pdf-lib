@@ -9,10 +9,7 @@ import {
   isJBIG2WasmAvailable,
   disposeJBIG2Wasm,
 } from '../../../src/parser/jbig2WasmBridge.js';
-import {
-  decodeJBIG2Async,
-  resetJBIG2WasmBridge,
-} from '../../../src/parser/jbig2Decode.js';
+import { decodeJBIG2Async, resetJBIG2WasmBridge } from '../../../src/parser/jbig2Decode.js';
 import { PdfDict } from '../../../src/core/pdfObjects.js';
 
 // ---------------------------------------------------------------------------
@@ -81,11 +78,11 @@ function buildMinimalJbig2(width: number, height: number): Uint8Array {
 
   // Page information data (19 bytes)
   const pageInfoData: number[] = new Array(19).fill(0);
-  writeUint32BE(pageInfoData, 0, width);   // width
-  writeUint32BE(pageInfoData, 4, height);  // height
-  writeUint32BE(pageInfoData, 8, 72);      // x resolution
-  writeUint32BE(pageInfoData, 12, 72);     // y resolution
-  pageInfoData[16] = 0;                     // flags: default=white, op=OR
+  writeUint32BE(pageInfoData, 0, width); // width
+  writeUint32BE(pageInfoData, 4, height); // height
+  writeUint32BE(pageInfoData, 8, 72); // x resolution
+  writeUint32BE(pageInfoData, 12, 72); // y resolution
+  pageInfoData[16] = 0; // flags: default=white, op=OR
   pageInfoData[17] = 0;
   pageInfoData[18] = 0;
   segments.push(...pageInfoData);
@@ -129,7 +126,7 @@ describe('JBIG2 WASM bridge — availability', () => {
   });
 
   it('initJBIG2Wasm() throws for invalid WASM bytes', async () => {
-    const invalidBytes = new Uint8Array([0xDE, 0xAD, 0xBE, 0xEF]);
+    const invalidBytes = new Uint8Array([0xde, 0xad, 0xbe, 0xef]);
     await expect(initJBIG2Wasm(invalidBytes)).rejects.toThrow();
     expect(isJBIG2WasmAvailable()).toBe(false);
   });

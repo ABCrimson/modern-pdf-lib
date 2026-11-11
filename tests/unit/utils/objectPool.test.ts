@@ -11,11 +11,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  ObjectPool,
-  ByteArrayPool,
-  DataViewPool,
-} from '../../../src/utils/objectPool.js';
+import { ObjectPool, ByteArrayPool, DataViewPool } from '../../../src/utils/objectPool.js';
 
 // ---------------------------------------------------------------------------
 // ObjectPool
@@ -60,10 +56,11 @@ describe('ObjectPool', () => {
   });
 
   it('calls reset function on recycled items', () => {
-    const pool = new ObjectPool(
-      () => ({ count: 0 }),
-      { reset: (item) => { item.count = 0; } },
-    );
+    const pool = new ObjectPool(() => ({ count: 0 }), {
+      reset: (item) => {
+        item.count = 0;
+      },
+    });
     const item = pool.acquire();
     item.count = 42;
     pool.release(item);
@@ -73,10 +70,11 @@ describe('ObjectPool', () => {
 
   it('does not call reset on freshly created items', () => {
     let resetCalls = 0;
-    const pool = new ObjectPool(
-      () => ({ v: 0 }),
-      { reset: () => { resetCalls++; } },
-    );
+    const pool = new ObjectPool(() => ({ v: 0 }), {
+      reset: () => {
+        resetCalls++;
+      },
+    });
     pool.acquire(); // fresh, no reset
     expect(resetCalls).toBe(0);
   });
@@ -174,9 +172,9 @@ describe('ByteArrayPool', () => {
 
   it('drain() empties all buckets', () => {
     const pool = new ByteArrayPool();
-    pool.release(pool.acquire(10));    // 256 bucket
-    pool.release(pool.acquire(500));   // 1024 bucket
-    pool.release(pool.acquire(2000));  // 4096 bucket
+    pool.release(pool.acquire(10)); // 256 bucket
+    pool.release(pool.acquire(500)); // 1024 bucket
+    pool.release(pool.acquire(2000)); // 4096 bucket
     expect(pool.size).toBe(3);
     pool.drain();
     expect(pool.size).toBe(0);

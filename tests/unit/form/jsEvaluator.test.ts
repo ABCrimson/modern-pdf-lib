@@ -44,7 +44,7 @@ describe('cleanNumber', () => {
   });
 
   it('handles parenthesized negatives', () => {
-    expect(cleanNumber('(100.50)')).toBe(-100.50);
+    expect(cleanNumber('(100.50)')).toBe(-100.5);
     expect(cleanNumber('($1,200.00)')).toBe(-1200);
   });
 
@@ -56,7 +56,7 @@ describe('cleanNumber', () => {
 
   it('handles single comma with few digits after as decimal', () => {
     expect(cleanNumber('12,5')).toBe(12.5);
-    expect(cleanNumber('12,50')).toBe(12.50);
+    expect(cleanNumber('12,50')).toBe(12.5);
   });
 
   it('handles multiple commas as thousands', () => {
@@ -146,19 +146,14 @@ describe('evaluateExpression — field references', () => {
       ['Total', '200'],
       ['Tax', '16'],
     ]);
-    expect(
-      evaluateExpression(
-        'getField("Total").value + getField("Tax").value',
-        fields,
-      ),
-    ).toBe('216.00');
+    expect(evaluateExpression('getField("Total").value + getField("Tax").value', fields)).toBe(
+      '216.00',
+    );
   });
 
   it('resolves getField with single quotes', () => {
     const fields = new Map([['Amount', '50']]);
-    expect(
-      evaluateExpression("getField('Amount').value * 2", fields),
-    ).toBe('100.00');
+    expect(evaluateExpression("getField('Amount').value * 2", fields)).toBe('100.00');
   });
 
   it('treats missing fields as 0', () => {
@@ -187,51 +182,37 @@ describe('evaluateExpression — AFSimple_Calculate', () => {
   ]);
 
   it('computes SUM', () => {
-    expect(
-      evaluateExpression('AFSimple_Calculate("SUM", ["a", "b", "c"])', fields),
-    ).toBe('60.00');
+    expect(evaluateExpression('AFSimple_Calculate("SUM", ["a", "b", "c"])', fields)).toBe('60.00');
   });
 
   it('computes AVG', () => {
-    expect(
-      evaluateExpression('AFSimple_Calculate("AVG", ["a", "b", "c"])', fields),
-    ).toBe('20.00');
+    expect(evaluateExpression('AFSimple_Calculate("AVG", ["a", "b", "c"])', fields)).toBe('20.00');
   });
 
   it('computes PRD (product)', () => {
-    expect(
-      evaluateExpression('AFSimple_Calculate("PRD", ["a", "b", "c"])', fields),
-    ).toBe('6000.00');
+    expect(evaluateExpression('AFSimple_Calculate("PRD", ["a", "b", "c"])', fields)).toBe(
+      '6000.00',
+    );
   });
 
   it('computes MIN', () => {
-    expect(
-      evaluateExpression('AFSimple_Calculate("MIN", ["a", "b", "c"])', fields),
-    ).toBe('10.00');
+    expect(evaluateExpression('AFSimple_Calculate("MIN", ["a", "b", "c"])', fields)).toBe('10.00');
   });
 
   it('computes MAX', () => {
-    expect(
-      evaluateExpression('AFSimple_Calculate("MAX", ["a", "b", "c"])', fields),
-    ).toBe('30.00');
+    expect(evaluateExpression('AFSimple_Calculate("MAX", ["a", "b", "c"])', fields)).toBe('30.00');
   });
 
   it('handles single field', () => {
-    expect(
-      evaluateExpression('AFSimple_Calculate("SUM", ["a"])', fields),
-    ).toBe('10.00');
+    expect(evaluateExpression('AFSimple_Calculate("SUM", ["a"])', fields)).toBe('10.00');
   });
 
   it('handles missing fields in SUM (treated as 0)', () => {
-    expect(
-      evaluateExpression('AFSimple_Calculate("SUM", ["a", "missing"])', fields),
-    ).toBe('10.00');
+    expect(evaluateExpression('AFSimple_Calculate("SUM", ["a", "missing"])', fields)).toBe('10.00');
   });
 
   it('is case-insensitive for operation name', () => {
-    expect(
-      evaluateExpression('AFSimple_Calculate("sum", ["a", "b"])', fields),
-    ).toBe('30.00');
+    expect(evaluateExpression('AFSimple_Calculate("sum", ["a", "b"])', fields)).toBe('30.00');
   });
 });
 
@@ -241,9 +222,7 @@ describe('evaluateExpression — AFSimple_Calculate', () => {
 
 describe('parseCalculationScript', () => {
   it('parses AFSimple_Calculate with SUM', () => {
-    const result = parseCalculationScript(
-      'AFSimple_Calculate("SUM", ["field1", "field2"])',
-    );
+    const result = parseCalculationScript('AFSimple_Calculate("SUM", ["field1", "field2"])');
     expect(result).toEqual({
       operation: 'SUM',
       fieldNames: ['field1', 'field2'],
@@ -251,9 +230,7 @@ describe('parseCalculationScript', () => {
   });
 
   it('parses AFSimple_Calculate with AVG', () => {
-    const result = parseCalculationScript(
-      "AFSimple_Calculate('AVG', ['price', 'cost', 'fee'])",
-    );
+    const result = parseCalculationScript("AFSimple_Calculate('AVG', ['price', 'cost', 'fee'])");
     expect(result).toEqual({
       operation: 'AVG',
       fieldNames: ['price', 'cost', 'fee'],
@@ -267,9 +244,7 @@ describe('parseCalculationScript', () => {
     expect(result).not.toBeNull();
     expect(result!.operation).toBe('custom');
     expect(result!.fieldNames).toEqual(['price', 'qty']);
-    expect(result!.customExpression).toBe(
-      'getField("price").value * getField("qty").value',
-    );
+    expect(result!.customExpression).toBe('getField("price").value * getField("qty").value');
   });
 
   it('returns null for empty script', () => {
@@ -282,9 +257,7 @@ describe('parseCalculationScript', () => {
   });
 
   it('parses PRD operation', () => {
-    const result = parseCalculationScript(
-      'AFSimple_Calculate("PRD", ["x", "y"])',
-    );
+    const result = parseCalculationScript('AFSimple_Calculate("PRD", ["x", "y"])');
     expect(result).toEqual({
       operation: 'PRD',
       fieldNames: ['x', 'y'],
@@ -325,10 +298,7 @@ describe('evaluateExpression — edge cases', () => {
       ['qty', '5'],
     ]);
     expect(
-      evaluateExpression(
-        'event.value = getField("price").value * getField("qty").value',
-        fields,
-      ),
+      evaluateExpression('event.value = getField("price").value * getField("qty").value', fields),
     ).toBe('50.00');
   });
 });

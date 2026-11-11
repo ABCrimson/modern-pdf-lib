@@ -102,9 +102,7 @@ describe('buildDocTimeStampDict', () => {
     const dict = buildDocTimeStampDict();
     const contents = dict.get('/Contents') as PdfString;
     // 2 hex digits per byte.
-    expect(contents.value.length).toBe(
-      DEFAULT_DOC_TIMESTAMP_CONTENTS_SIZE * 2,
-    );
+    expect(contents.value.length).toBe(DEFAULT_DOC_TIMESTAMP_CONTENTS_SIZE * 2);
     expect(DEFAULT_DOC_TIMESTAMP_CONTENTS_SIZE).toBe(8192);
   });
 
@@ -166,15 +164,11 @@ describe('buildDocTimeStampDict', () => {
 
   it('rejects a non-positive contentsSize', () => {
     expect(() => buildDocTimeStampDict({ contentsSize: 0 })).toThrow(RangeError);
-    expect(() => buildDocTimeStampDict({ contentsSize: -1 })).toThrow(
-      RangeError,
-    );
+    expect(() => buildDocTimeStampDict({ contentsSize: -1 })).toThrow(RangeError);
   });
 
   it('rejects a non-integer contentsSize', () => {
-    expect(() => buildDocTimeStampDict({ contentsSize: 1024.5 })).toThrow(
-      RangeError,
-    );
+    expect(() => buildDocTimeStampDict({ contentsSize: 1024.5 })).toThrow(RangeError);
   });
 
   it('accepts an explicit options object typed as DocTimeStampOptions', () => {

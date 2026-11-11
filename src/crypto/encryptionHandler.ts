@@ -19,13 +19,7 @@
  * Reference: PDF 1.7 spec SS7.6, ISO 32000-1 SS7.6, ISO 32000-2 SS7.6.
  */
 
-import {
-  PdfDict,
-  PdfName,
-  PdfNumber,
-  PdfString,
-  PdfBool,
-} from '../core/pdfObjects.js';
+import { PdfDict, PdfName, PdfNumber, PdfString, PdfBool } from '../core/pdfObjects.js';
 import { md5 } from './md5.js';
 import { rc4 } from './rc4.js';
 import { aesEncryptCBC, aesDecryptCBC } from './aes.js';
@@ -70,8 +64,8 @@ export interface EncryptOptions {
 // ---------------------------------------------------------------------------
 
 interface AlgorithmParams {
-  version: number;   // /V
-  revision: number;  // /R
+  version: number; // /V
+  revision: number; // /R
   keyLength: number; // in bits
   useAes: boolean;
 }
@@ -194,10 +188,7 @@ export class PdfEncryptionHandler {
    * @param fileId   Optional file ID. If omitted, a random one is generated.
    * @returns        A configured PdfEncryptionHandler.
    */
-  static async create(
-    options: EncryptOptions,
-    fileId?: Uint8Array  ,
-  ): Promise<PdfEncryptionHandler> {
+  static async create(options: EncryptOptions, fileId?: Uint8Array): Promise<PdfEncryptionHandler> {
     const algorithm = options.algorithm ?? 'aes-128';
     const params = getAlgorithmParams(algorithm);
     const permFlags = options.permissions ?? {};
@@ -269,18 +260,10 @@ export class PdfEncryptionHandler {
     };
 
     // Compute file encryption key
-    const fileKey = computeEncryptionKeyR2R4(
-      options.userPassword,
-      dictValues,
-      fid,
-    );
+    const fileKey = computeEncryptionKeyR2R4(options.userPassword, dictValues, fid);
 
     // Compute /U value
-    const userKey = computeUserPasswordHash(
-      options.userPassword,
-      dictValues,
-      fid,
-    );
+    const userKey = computeUserPasswordHash(options.userPassword, dictValues, fid);
 
     return new PdfEncryptionHandler({
       fileKey,
@@ -459,11 +442,7 @@ export class PdfEncryptionHandler {
    * @param data    Plaintext data.
    * @returns       Encrypted data.
    */
-  async encryptObject(
-    objNum: number,
-    genNum: number,
-    data: Uint8Array,
-  ): Promise<Uint8Array> {
+  async encryptObject(objNum: number, genNum: number, data: Uint8Array): Promise<Uint8Array> {
     const key = this.deriveObjectKey(objNum, genNum);
 
     if (this.useAes) {
@@ -480,11 +459,7 @@ export class PdfEncryptionHandler {
    * @param data    Encrypted data.
    * @returns       Decrypted data.
    */
-  async decryptObject(
-    objNum: number,
-    genNum: number,
-    data: Uint8Array,
-  ): Promise<Uint8Array> {
+  async decryptObject(objNum: number, genNum: number, data: Uint8Array): Promise<Uint8Array> {
     const key = this.deriveObjectKey(objNum, genNum);
 
     if (this.useAes) {
@@ -506,11 +481,7 @@ export class PdfEncryptionHandler {
    * @param str     The string to encrypt.
    * @returns       An encrypted PdfString (hex-encoded).
    */
-  async encryptString(
-    objNum: number,
-    genNum: number,
-    str: PdfString,
-  ): Promise<PdfString> {
+  async encryptString(objNum: number, genNum: number, str: PdfString): Promise<PdfString> {
     const encoder = new TextEncoder();
     const plaintext = encoder.encode(str.value);
     const encrypted = await this.encryptObject(objNum, genNum, plaintext);
@@ -525,11 +496,7 @@ export class PdfEncryptionHandler {
    * @param streamData  Encrypted stream bytes.
    * @returns           Decrypted stream bytes.
    */
-  async decryptStream(
-    objNum: number,
-    genNum: number,
-    streamData: Uint8Array,
-  ): Promise<Uint8Array> {
+  async decryptStream(objNum: number, genNum: number, streamData: Uint8Array): Promise<Uint8Array> {
     return this.decryptObject(objNum, genNum, streamData);
   }
 

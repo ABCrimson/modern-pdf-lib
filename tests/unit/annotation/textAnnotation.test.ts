@@ -4,13 +4,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { PdfTextAnnotation } from '../../../src/annotation/types/textAnnotation.js';
-import {
-  PdfDict,
-  PdfName,
-  PdfString,
-  PdfBool,
-  PdfArray,
-} from '../../../src/core/pdfObjects.js';
+import { PdfDict, PdfName, PdfString, PdfBool, PdfArray } from '../../../src/core/pdfObjects.js';
 
 describe('PdfTextAnnotation', () => {
   describe('create', () => {
@@ -22,7 +16,7 @@ describe('PdfTextAnnotation', () => {
       expect(annot.getType()).toBe('Text');
       expect(annot.getRect()).toEqual([100, 200, 120, 220]);
       expect(annot.getIcon()).toBe('Note'); // default icon
-      expect(annot.isOpen()).toBe(false);   // default closed
+      expect(annot.isOpen()).toBe(false); // default closed
     });
 
     it('creates with custom icon and open state', () => {
@@ -39,7 +33,15 @@ describe('PdfTextAnnotation', () => {
     });
 
     it('creates with all icon types', () => {
-      const icons = ['Comment', 'Key', 'Note', 'Help', 'NewParagraph', 'Paragraph', 'Insert'] as const;
+      const icons = [
+        'Comment',
+        'Key',
+        'Note',
+        'Help',
+        'NewParagraph',
+        'Paragraph',
+        'Insert',
+      ] as const;
       for (const icon of icons) {
         const annot = PdfTextAnnotation.create({
           rect: [0, 0, 20, 20],

@@ -165,33 +165,39 @@ describe('tagList', () => {
   it('records the list numbering on the element options', () => {
     const tree = new PdfStructureTree();
     const list = tagList(tree, null, 'Decimal');
-    const numbering = (list.options as Record<string, unknown>)[
-      LIST_NUMBERING_KEY
-    ] as ListNumbering | undefined;
+    const numbering = (list.options as Record<string, unknown>)[LIST_NUMBERING_KEY] as
+      | ListNumbering
+      | undefined;
     expect(numbering).toBe('Decimal');
   });
 
   it('defaults numbering to None when not specified', () => {
     const tree = new PdfStructureTree();
     const list = tagList(tree, null);
-    const numbering = (list.options as Record<string, unknown>)[
-      LIST_NUMBERING_KEY
-    ] as ListNumbering | undefined;
+    const numbering = (list.options as Record<string, unknown>)[LIST_NUMBERING_KEY] as
+      | ListNumbering
+      | undefined;
     expect(numbering).toBe('None');
   });
 
   it('supports all ListNumbering values', () => {
     const tree = new PdfStructureTree();
     const values: ListNumbering[] = [
-      'None', 'Disc', 'Circle', 'Square',
-      'Decimal', 'UpperRoman', 'LowerRoman',
-      'UpperAlpha', 'LowerAlpha',
+      'None',
+      'Disc',
+      'Circle',
+      'Square',
+      'Decimal',
+      'UpperRoman',
+      'LowerRoman',
+      'UpperAlpha',
+      'LowerAlpha',
     ];
     for (const v of values) {
       const list = tagList(tree, null, v);
-      const numbering = (list.options as Record<string, unknown>)[
-        LIST_NUMBERING_KEY
-      ] as ListNumbering | undefined;
+      const numbering = (list.options as Record<string, unknown>)[LIST_NUMBERING_KEY] as
+        | ListNumbering
+        | undefined;
       expect(numbering).toBe(v);
     }
   });
@@ -217,9 +223,7 @@ describe('tagListItem', () => {
     expect(item.children).toContain(body);
 
     // Lbl comes before LBody
-    expect(item.children.indexOf(label)).toBeLessThan(
-      item.children.indexOf(body),
-    );
+    expect(item.children.indexOf(label)).toBeLessThan(item.children.indexOf(body));
   });
 
   it('forwards options to the LI element', () => {

@@ -46,10 +46,7 @@ import { buildAfArray } from './associatedFiles.js';
  * @param target        The object dictionary to attach the files to.
  * @param fileSpecRefs  Indirect references to file-specification dictionaries.
  */
-export function attachAssociatedFiles(
-  target: PdfDict,
-  fileSpecRefs: readonly PdfRef[],
-): void {
+export function attachAssociatedFiles(target: PdfDict, fileSpecRefs: readonly PdfRef[]): void {
   const existing = target.get('/AF');
   if (existing instanceof PdfArray) {
     for (const ref of fileSpecRefs) {
@@ -97,11 +94,7 @@ function ensureEmbeddedFilesNames(catalog: PdfDict): PdfArray {
  * array, keeping the array sorted by name.  The array is a flat sequence of
  * alternating key/value entries: `[ name0, ref0, name1, ref1, … ]`.
  */
-function insertNamePairSorted(
-  leaf: PdfArray,
-  name: string,
-  fileSpecRef: PdfRef,
-): void {
+function insertNamePairSorted(leaf: PdfArray, name: string, fileSpecRef: PdfRef): void {
   const items = leaf.items;
   // Find the first existing name (at even indices) that sorts after `name`.
   let insertAt = items.length;
@@ -134,11 +127,7 @@ function insertNamePairSorted(
  * @param name         The name under which the file is registered in the tree.
  * @param fileSpecRef  Indirect reference to the file-specification dictionary.
  */
-export function registerEmbeddedFile(
-  catalog: PdfDict,
-  name: string,
-  fileSpecRef: PdfRef,
-): void {
+export function registerEmbeddedFile(catalog: PdfDict, name: string, fileSpecRef: PdfRef): void {
   const leaf = ensureEmbeddedFilesNames(catalog);
   insertNamePairSorted(leaf, name, fileSpecRef);
   attachAssociatedFiles(catalog, [fileSpecRef]);

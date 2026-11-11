@@ -180,7 +180,14 @@ function bidiClass(cp: number): BC {
 
   // --- Hebrew block U+0590–05FF (default R) ----------------------------
   if (cp >= 0x0591 && cp <= 0x05bd) return 'NSM'; // Hebrew points (combining)
-  if (cp === 0x05bf || cp === 0x05c1 || cp === 0x05c2 || cp === 0x05c4 || cp === 0x05c5 || cp === 0x05c7)
+  if (
+    cp === 0x05bf ||
+    cp === 0x05c1 ||
+    cp === 0x05c2 ||
+    cp === 0x05c4 ||
+    cp === 0x05c5 ||
+    cp === 0x05c7
+  )
     return 'NSM';
   if (cp >= 0x0590 && cp <= 0x05ff) return 'R'; // Hebrew letters & default-R
 
@@ -314,12 +321,7 @@ function canonicalBracket(cp: number): number {
 /** True if `bc` is a removed-by-X9 explicit/BN type. */
 function isRemovedByX9(bc: BC): boolean {
   return (
-    bc === 'RLE' ||
-    bc === 'LRE' ||
-    bc === 'RLO' ||
-    bc === 'LRO' ||
-    bc === 'PDF' ||
-    bc === 'BN'
+    bc === 'RLE' || bc === 'LRE' || bc === 'RLO' || bc === 'LRO' || bc === 'PDF' || bc === 'BN'
   );
 }
 
@@ -650,7 +652,8 @@ function resolveWeak(seq: IsolatingRunSequence, types: BC[]): void {
         types[i] = seq.sos;
       } else {
         const prev = types[idx[k - 1]!]!;
-        types[i] = prev === 'LRI' || prev === 'RLI' || prev === 'FSI' || prev === 'PDI' ? 'ON' : prev;
+        types[i] =
+          prev === 'LRI' || prev === 'RLI' || prev === 'FSI' || prev === 'PDI' ? 'ON' : prev;
       }
     }
   }
@@ -731,7 +734,16 @@ function resolveWeak(seq: IsolatingRunSequence, types: BC[]): void {
 
 /** True if a working type counts as a "neutral or isolate formatting" char (NI). */
 function isNI(t: BC): boolean {
-  return t === 'B' || t === 'S' || t === 'WS' || t === 'ON' || t === 'FSI' || t === 'LRI' || t === 'RLI' || t === 'PDI';
+  return (
+    t === 'B' ||
+    t === 'S' ||
+    t === 'WS' ||
+    t === 'ON' ||
+    t === 'FSI' ||
+    t === 'LRI' ||
+    t === 'RLI' ||
+    t === 'PDI'
+  );
 }
 
 /** Apply N0 (paired brackets) then N1/N2 to one isolating run sequence. */

@@ -193,16 +193,12 @@ function parseIfd(data: Uint8Array, offset: number, le: boolean): IfdEntry[] {
  * Read tag value (short or long) from an IFD entry.
  * @internal
  */
-function readTagValue(
-  data: Uint8Array,
-  entry: IfdEntry,
-  _le: boolean,
-): number {
+function readTagValue(data: Uint8Array, entry: IfdEntry, _le: boolean): number {
   // SHORT (type 3): 2 bytes, LONG (type 4): 4 bytes
   if (entry.count === 1) {
     if (entry.type === 3) {
       // SHORT value is stored in the first 2 bytes of the value field
-      return entry.valueOrOffset & 0xFFFF;
+      return entry.valueOrOffset & 0xffff;
     }
     return entry.valueOrOffset;
   }
@@ -213,16 +209,12 @@ function readTagValue(
  * Read an array of offset values (LONG or SHORT) from a tag.
  * @internal
  */
-function readOffsetArray(
-  data: Uint8Array,
-  entry: IfdEntry,
-  le: boolean,
-): number[] {
+function readOffsetArray(data: Uint8Array, entry: IfdEntry, le: boolean): number[] {
   const values: number[] = [];
 
   if (entry.count === 1) {
     if (entry.type === 3) {
-      values.push(entry.valueOrOffset & 0xFFFF);
+      values.push(entry.valueOrOffset & 0xffff);
     } else {
       values.push(entry.valueOrOffset);
     }
@@ -336,7 +328,7 @@ export function canDirectEmbed(data: Uint8Array): boolean {
 
   // Validate TIFF header
   const isLE = data[0] === 0x49 && data[1] === 0x49;
-  const isBE = data[0] === 0x4D && data[1] === 0x4D;
+  const isBE = data[0] === 0x4d && data[1] === 0x4d;
   if (!isLE && !isBE) return false;
 
   const le = isLE;
@@ -373,10 +365,7 @@ export function canDirectEmbed(data: Uint8Array): boolean {
  * @returns        The embedding result with all data needed for a PDF image XObject.
  * @throws         If the TIFF format does not support direct embedding.
  */
-export function embedTiffDirect(
-  data: Uint8Array,
-  options?: DirectEmbedOptions  ,
-): DirectEmbedResult {
+export function embedTiffDirect(data: Uint8Array, options?: DirectEmbedOptions): DirectEmbedResult {
   if (data.length < 8) {
     throw new Error('TIFF data too short');
   }
@@ -484,7 +473,9 @@ function extractStrips(
     const count = counts[i]!;
 
     if (offset + count > data.length) {
-      throw new Error(`TIFF strip ${i} extends beyond file (offset=${offset}, count=${count}, fileSize=${data.length})`);
+      throw new Error(
+        `TIFF strip ${i} extends beyond file (offset=${offset}, count=${count}, fileSize=${data.length})`,
+      );
     }
 
     result.set(data.subarray(offset, offset + count), pos);
@@ -564,10 +555,7 @@ function extractTiles(
       const copyBytes = actualTileW * bytesPerPixel;
 
       if (srcOffset + copyBytes <= data.length) {
-        result.set(
-          data.subarray(srcOffset, srcOffset + copyBytes),
-          dstOffset,
-        );
+        result.set(data.subarray(srcOffset, srcOffset + copyBytes), dstOffset);
       }
     }
   }

@@ -385,9 +385,7 @@ export function saveIncrementalWithSignaturePreservation(
  * Parse object bodies from a PDF for comparison.
  * Returns a map of objectNumber -> { gen, data }.
  */
-function parseObjectBodies(
-  pdf: Uint8Array,
-): Map<number, { gen: number; data: Uint8Array }> {
+function parseObjectBodies(pdf: Uint8Array): Map<number, { gen: number; data: Uint8Array }> {
   const text = decoder.decode(pdf);
   const objects = new Map<number, { gen: number; data: Uint8Array }>();
 
@@ -468,7 +466,10 @@ export function appendIncrementalUpdate(
   // Write xref subsections
   const xrefOffset = originalPdf.length + buf.offset;
 
-  const sortedObjNums = xrefOffsets.keys().toArray().sort((a, b) => a - b);
+  const sortedObjNums = xrefOffsets
+    .keys()
+    .toArray()
+    .sort((a, b) => a - b);
   const subsections = buildSubsections(sortedObjNums, xrefOffsets);
 
   buf.writeString('xref\n');
@@ -522,17 +523,12 @@ interface Subsection {
 /**
  * Group consecutive object numbers into xref subsections.
  */
-function buildSubsections(
-  sortedObjNums: number[],
-  offsets: Map<number, number>,
-): Subsection[] {
+function buildSubsections(sortedObjNums: number[], offsets: Map<number, number>): Subsection[] {
   if (sortedObjNums.length === 0) return [];
 
   const subsections: Subsection[] = [];
   let currentStart = sortedObjNums[0]!;
-  let currentEntries: SubsectionEntry[] = [
-    { offset: offsets.get(currentStart)!, gen: 0 },
-  ];
+  let currentEntries: SubsectionEntry[] = [{ offset: offsets.get(currentStart)!, gen: 0 }];
 
   for (let i = 1; i < sortedObjNums.length; i++) {
     const objNum = sortedObjNums[i]!;

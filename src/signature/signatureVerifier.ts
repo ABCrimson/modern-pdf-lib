@@ -30,9 +30,7 @@ import {
   getSubtle,
 } from './pkcs7.js';
 import type { Asn1Node } from './pkcs7.js';
-import {
-  encodeSet,
-} from './pkcs7.js';
+import { encodeSet } from './pkcs7.js';
 import { extractSigningCertificateV2 } from './cadesAttributes.js';
 
 // ---------------------------------------------------------------------------
@@ -414,7 +412,9 @@ function extractFieldInfo(
   const tMatch = region.match(/\/T\s*\(([^)]*)\)/);
   if (tMatch) fieldName = tMatch[1]!;
 
-  const result: { fieldName: string; reason?: string; location?: string; contactInfo?: string } = { fieldName };
+  const result: { fieldName: string; reason?: string; location?: string; contactInfo?: string } = {
+    fieldName,
+  };
 
   const reasonMatch = region.match(/\/Reason\s*\(([^)]*)\)/);
   if (reasonMatch && reasonMatch[1] !== undefined) result.reason = reasonMatch[1];
@@ -554,7 +554,9 @@ export async function verifySignatures(
       if (ess.present && ess.certHash) {
         // certHash length disambiguates the algorithm (32/48/64 bytes).
         const algoByLen: Record<number, 'SHA-256' | 'SHA-384' | 'SHA-512'> = {
-          32: 'SHA-256', 48: 'SHA-384', 64: 'SHA-512',
+          32: 'SHA-256',
+          48: 'SHA-384',
+          64: 'SHA-512',
         };
         const algo = algoByLen[ess.certHash.length];
         if (algo) {
@@ -562,8 +564,7 @@ export async function verifySignatures(
             await getSubtle().digest(algo, toBuffer(parsed.certificate)),
           );
           cadesSigningCertHashValid =
-            digest.length === ess.certHash.length &&
-            digest.every((b, i) => b === ess.certHash![i]);
+            digest.length === ess.certHash.length && digest.every((b, i) => b === ess.certHash![i]);
         }
       }
     } catch {
@@ -573,7 +574,7 @@ export async function verifySignatures(
     results.push({
       fieldName: fieldInfo.fieldName,
       signedBy,
-      valid: integrityValid && (certificateValid === true),
+      valid: integrityValid && certificateValid === true,
       integrityValid,
       certificateValid,
       signingDate,
@@ -663,19 +664,10 @@ export async function verifySignature(
         'P-384': 48,
         'P-521': 66,
       };
-      sigBytes = convertEcdsaDerToP1363(
-        parsed.signatureValue,
-        keySizeMap[namedCurve] ?? 32,
-      );
+      sigBytes = convertEcdsaDerToP1363(parsed.signatureValue, keySizeMap[namedCurve] ?? 32);
     }
 
-    const publicKey = await subtle.importKey(
-      'spki',
-      toBuffer(spki),
-      importAlgo,
-      false,
-      ['verify'],
-    );
+    const publicKey = await subtle.importKey('spki', toBuffer(spki), importAlgo, false, ['verify']);
 
     // Verify the signature over the signed attributes
     const valid = await subtle.verify(

@@ -3,10 +3,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  validatePdfUa,
-  enforcePdfUa,
-} from '../../../src/accessibility/pdfUaValidator.js';
+import { validatePdfUa, enforcePdfUa } from '../../../src/accessibility/pdfUaValidator.js';
 
 import { createPdf } from '../../../src/core/pdfDocument.js';
 import type { PdfDocument } from '../../../src/core/pdfDocument.js';
@@ -120,8 +117,8 @@ describe('validatePdfUa — language', () => {
       doc.createStructureTree();
 
       const result = validatePdfUa(doc);
-      const langErrors = result.errors.filter((e) =>
-        e.code === 'UA-META-001' || e.code === 'UA-META-002' || e.code === 'UA-META-003',
+      const langErrors = result.errors.filter(
+        (e) => e.code === 'UA-META-001' || e.code === 'UA-META-002' || e.code === 'UA-META-003',
       );
       expect(langErrors).toHaveLength(0);
     }

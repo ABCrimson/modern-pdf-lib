@@ -10,11 +10,7 @@
  * Reference: PDF 1.7 spec, SS12.7.4.2.2 (Radio Buttons).
  */
 
-import {
-  PdfDict,
-  PdfName,
-  PdfStream,
-} from '../../core/pdfObjects.js';
+import { PdfDict, PdfName, PdfStream } from '../../core/pdfObjects.js';
 import { PdfField, nameVal } from '../pdfField.js';
 import type { FieldType, WidgetAnnotationHost } from '../pdfField.js';
 import { generateRadioAppearance } from '../fieldAppearance.js';

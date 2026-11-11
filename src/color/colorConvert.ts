@@ -67,9 +67,7 @@
  * CIE 1931 2° D65 reference white, normalised so `Yn = 1`.
  * (IEC 61966-2-1 / CIE 15.)
  */
-const D65_WHITE: readonly [number, number, number] = [
-  0.95047, 1.0, 1.08883,
-];
+const D65_WHITE: readonly [number, number, number] = [0.95047, 1.0, 1.08883];
 
 /** CIE Lab constant `δ = 6/29`. */
 const LAB_DELTA = 6 / 29;
@@ -107,12 +105,7 @@ function normalizeHue(h: number): number {
  * @param k - Black,   0..1.
  * @returns `[r, g, b]`, each 0..1.
  */
-export function cmykToRgb(
-  c: number,
-  m: number,
-  y: number,
-  k: number,
-): [number, number, number] {
+export function cmykToRgb(c: number, m: number, y: number, k: number): [number, number, number] {
   const r = (1 - c) * (1 - k);
   const g = (1 - m) * (1 - k);
   const b = (1 - y) * (1 - k);
@@ -130,11 +123,7 @@ export function cmykToRgb(
  * @param b - Blue,  0..1.
  * @returns `[c, m, y, k]`, each 0..1.
  */
-export function rgbToCmyk(
-  r: number,
-  g: number,
-  b: number,
-): [number, number, number, number] {
+export function rgbToCmyk(r: number, g: number, b: number): [number, number, number, number] {
   const k = 1 - Math.max(r, g, b);
   if (k >= 1) {
     // Pure black: avoid division by zero; no chromatic ink.
@@ -159,11 +148,7 @@ export function rgbToCmyk(
  * @param b - Blue,  0..1.
  * @returns `[h, s, l]` with `h` in `[0, 360)`, `s`/`l` in `0..1`.
  */
-export function rgbToHsl(
-  r: number,
-  g: number,
-  b: number,
-): [number, number, number] {
+export function rgbToHsl(r: number, g: number, b: number): [number, number, number] {
   const max = Math.max(r, g, b);
   const min = Math.min(r, g, b);
   const delta = max - min;
@@ -196,11 +181,7 @@ export function rgbToHsl(
  * @param l - Lightness,  0..1.
  * @returns `[r, g, b]`, each 0..1.
  */
-export function hslToRgb(
-  h: number,
-  s: number,
-  l: number,
-): [number, number, number] {
+export function hslToRgb(h: number, s: number, l: number): [number, number, number] {
   const hue = normalizeHue(h);
   const c = (1 - Math.abs(2 * l - 1)) * s;
   const x = c * (1 - Math.abs(((hue / 60) % 2) - 1));
@@ -244,11 +225,7 @@ export function hslToRgb(
  * @param b - Blue,  0..1.
  * @returns `[h, s, v]` with `h` in `[0, 360)`, `s`/`v` in `0..1`.
  */
-export function rgbToHsv(
-  r: number,
-  g: number,
-  b: number,
-): [number, number, number] {
+export function rgbToHsv(r: number, g: number, b: number): [number, number, number] {
   const max = Math.max(r, g, b);
   const min = Math.min(r, g, b);
   const delta = max - min;
@@ -281,11 +258,7 @@ export function rgbToHsv(
  * @param v - Value,      0..1.
  * @returns `[r, g, b]`, each 0..1.
  */
-export function hsvToRgb(
-  h: number,
-  s: number,
-  v: number,
-): [number, number, number] {
+export function hsvToRgb(h: number, s: number, v: number): [number, number, number] {
   const hue = normalizeHue(h);
   const c = v * s;
   const x = c * (1 - Math.abs(((hue / 60) % 2) - 1));
@@ -347,11 +320,7 @@ function linearToSrgb(c: number): number {
  * @param b - Blue,  0..1.
  * @returns `[X, Y, Z]` (D65, `Y = 1` for white).
  */
-export function rgbToXyz(
-  r: number,
-  g: number,
-  b: number,
-): [number, number, number] {
+export function rgbToXyz(r: number, g: number, b: number): [number, number, number] {
   const rl = srgbToLinear(r);
   const gl = srgbToLinear(g);
   const bl = srgbToLinear(b);
@@ -374,11 +343,7 @@ export function rgbToXyz(
  * @param z - CIE Z (D65).
  * @returns `[r, g, b]`, each clamped to 0..1.
  */
-export function xyzToRgb(
-  x: number,
-  y: number,
-  z: number,
-): [number, number, number] {
+export function xyzToRgb(x: number, y: number, z: number): [number, number, number] {
   const rl = 3.2404542 * x - 1.5371385 * y - 0.4985314 * z;
   const gl = -0.969266 * x + 1.8760108 * y + 0.041556 * z;
   const bl = 0.0556434 * x - 0.2040259 * y + 1.0572252 * z;
@@ -396,9 +361,7 @@ export function xyzToRgb(
 
 /** Forward CIE Lab nonlinearity `f(t)`. */
 function labF(t: number): number {
-  return t > LAB_DELTA_CUBED
-    ? Math.cbrt(t)
-    : t / LAB_3_DELTA_SQUARED + 4 / 29;
+  return t > LAB_DELTA_CUBED ? Math.cbrt(t) : t / LAB_3_DELTA_SQUARED + 4 / 29;
 }
 
 /** Inverse CIE Lab nonlinearity `f⁻¹(t)`. */
@@ -415,11 +378,7 @@ function labInvF(t: number): number {
  * @param b - Blue,  0..1.
  * @returns `[L, a, b]` with `L ∈ [0, 100]`, `a`/`b` in their natural ranges.
  */
-export function rgbToLab(
-  r: number,
-  g: number,
-  b: number,
-): [number, number, number] {
+export function rgbToLab(r: number, g: number, b: number): [number, number, number] {
   const [x, y, z] = rgbToXyz(r, g, b);
 
   const fx = labF(x / D65_WHITE[0]);
@@ -441,11 +400,7 @@ export function rgbToLab(
  * @param b - Blue–yellow component (typically −128..127).
  * @returns `[r, g, b]`, each clamped to 0..1.
  */
-export function labToRgb(
-  L: number,
-  a: number,
-  b: number,
-): [number, number, number] {
+export function labToRgb(L: number, a: number, b: number): [number, number, number] {
   const fy = (L + 16) / 116;
   const fx = fy + a / 500;
   const fz = fy - b / 200;

@@ -239,10 +239,7 @@ function offsetTableParams(numTables: number): {
  * @param usedGlyphIds Set of glyph IDs to retain (GID 0 is always kept).
  * @returns The subsetted font bytes.
  */
-export function subsetTtf(
-  fontData: Uint8Array,
-  usedGlyphIds: Set<number>,
-): Uint8Array {
+export function subsetTtf(fontData: Uint8Array, usedGlyphIds: Set<number>): Uint8Array {
   // Minimum valid TrueType: 12-byte header + at least one 16-byte record
   if (fontData.length < 28) {
     return new Uint8Array(fontData);
@@ -270,10 +267,7 @@ export function subsetTtf(
   const view = new DataView(fontData.buffer, fontData.byteOffset, fontData.byteLength);
 
   // Parse head for indexToLocFormat
-  const indexToLocFormat = view.getInt16(
-    headEntry.offset + 50,
-    false,
-  );
+  const indexToLocFormat = view.getInt16(headEntry.offset + 50, false);
 
   // Parse maxp for numGlyphs
   const numGlyphs = view.getUint16(maxpEntry.offset + 4, false);
@@ -292,12 +286,7 @@ export function subsetTtf(
   allUsed.add(0);
 
   // Resolve composite glyph dependencies
-  const retained = resolveCompositeDeps(
-    fontData,
-    glyfEntry.offset,
-    locaOffsets,
-    allUsed,
-  );
+  const retained = resolveCompositeDeps(fontData, glyfEntry.offset, locaOffsets, allUsed);
 
   // -----------------------------------------------------------------------
   // Build new glyf table
@@ -326,10 +315,7 @@ export function subsetTtf(
       const glyphLen = locaOffsets[gid + 1]! - locaOffsets[gid]!;
 
       if (glyphLen > 0) {
-        newGlyf.set(
-          fontData.subarray(srcStart, srcStart + glyphLen),
-          glyfPos,
-        );
+        newGlyf.set(fontData.subarray(srcStart, srcStart + glyphLen), glyfPos);
         // Align to 2 bytes
         glyfPos += (glyphLen + 1) & ~1;
       }
@@ -344,7 +330,7 @@ export function subsetTtf(
   // -----------------------------------------------------------------------
   // Use long format (uint32) — simpler and avoids the 128KB glyf limit of
   // short format. Update head.indexToLocFormat accordingly.
-  const useShortLoca = glyfPos <= 0x1FFFE; // max offset for short format
+  const useShortLoca = glyfPos <= 0x1fffe; // max offset for short format
   let newLocaSize: number;
   let newLoca: Uint8Array;
 
@@ -353,7 +339,7 @@ export function subsetTtf(
     newLoca = new Uint8Array(newLocaSize);
     const locaView = new DataView(newLoca.buffer);
     for (let i = 0; i <= numGlyphs; i++) {
-      locaView.setUint16(i * 2, (newLocaOffsets[i]! >>> 1), false);
+      locaView.setUint16(i * 2, newLocaOffsets[i]! >>> 1, false);
     }
   } else {
     newLocaSize = (numGlyphs + 1) * 4;
@@ -370,9 +356,20 @@ export function subsetTtf(
 
   // Tables to copy as-is (in preferred order)
   const copyTags = [
-    'hhea', 'maxp', 'OS/2', 'name', 'cmap', 'post',
-    'cvt ', 'fpgm', 'prep', 'hmtx', 'gasp', 'GDEF',
-    'GPOS', 'GSUB',
+    'hhea',
+    'maxp',
+    'OS/2',
+    'name',
+    'cmap',
+    'post',
+    'cvt ',
+    'fpgm',
+    'prep',
+    'hmtx',
+    'gasp',
+    'GDEF',
+    'GPOS',
+    'GSUB',
   ];
 
   interface OutputTable {
@@ -457,7 +454,7 @@ export function subsetTtf(
 
   // Calculate and set checkSumAdjustment in head table
   const wholeChecksum = calcTableChecksum(output, 0, output.length);
-  const adjustment = (0xB1B0AFBA - wholeChecksum) >>> 0;
+  const adjustment = (0xb1b0afba - wholeChecksum) >>> 0;
 
   // Find head table offset in output
   for (let i = 0; i < outputTables.length; i++) {

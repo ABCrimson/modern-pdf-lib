@@ -30,9 +30,7 @@ const INTERMEDIATE_CERT = new Uint8Array([0x30, 0x82, 0x02, 0x0b]);
 /**
  * Build a mock external signer that records the digest it was asked to sign.
  */
-function createMockSigner(
-  algorithm: SignatureAlgorithm = 'RSA',
-): {
+function createMockSigner(algorithm: SignatureAlgorithm = 'RSA'): {
   signer: ExternalSigner;
   seenDigests: Uint8Array[];
 } {
@@ -72,9 +70,7 @@ describe('signDeferred', () => {
     expect(Array.from(seen)).toStrictEqual(Array.from(result.digest));
 
     // The signer's signature bytes are passed through verbatim.
-    expect(Array.from(result.signature)).toStrictEqual(
-      Array.from(KNOWN_SIGNATURE),
-    );
+    expect(Array.from(result.signature)).toStrictEqual(Array.from(KNOWN_SIGNATURE));
 
     // The certificate chain is returned leaf-first.
     expect(result.certificateChain.length).toBe(2);
@@ -84,9 +80,7 @@ describe('signDeferred', () => {
       throw new Error('expected a two-element certificate chain');
     }
     expect(Array.from(leaf)).toStrictEqual(Array.from(LEAF_CERT));
-    expect(Array.from(intermediate)).toStrictEqual(
-      Array.from(INTERMEDIATE_CERT),
-    );
+    expect(Array.from(intermediate)).toStrictEqual(Array.from(INTERMEDIATE_CERT));
   });
 
   it('produces a known SHA-256 digest for known input', async () => {
@@ -97,9 +91,7 @@ describe('signDeferred', () => {
     const hex = Array.from(result.digest)
       .map((b) => b.toString(16).padStart(2, '0'))
       .join('');
-    expect(hex).toBe(
-      'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
-    );
+    expect(hex).toBe('e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855');
   });
 
   it('uses SHA-512 when requested, yielding a 64-byte digest', async () => {

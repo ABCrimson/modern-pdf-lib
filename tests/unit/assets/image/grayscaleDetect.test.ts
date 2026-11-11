@@ -16,11 +16,7 @@ import {
 // ---------------------------------------------------------------------------
 
 /** Build a flat RGB pixel buffer where all pixels are the same gray. */
-function buildGrayRgbImage(
-  width: number,
-  height: number,
-  grayValue: number,
-): Uint8Array {
+function buildGrayRgbImage(width: number, height: number, grayValue: number): Uint8Array {
   const pixels = new Uint8Array(width * height * 3);
   for (let i = 0; i < width * height; i++) {
     pixels[i * 3] = grayValue;
@@ -51,9 +47,9 @@ function buildGrayRgbaImage(
 function buildColorRgbImage(width: number, height: number): Uint8Array {
   const pixels = new Uint8Array(width * height * 3);
   for (let i = 0; i < width * height; i++) {
-    pixels[i * 3] = 255;     // R
-    pixels[i * 3 + 1] = 0;   // G
-    pixels[i * 3 + 2] = 0;   // B
+    pixels[i * 3] = 255; // R
+    pixels[i * 3 + 1] = 0; // G
+    pixels[i * 3 + 2] = 0; // B
   }
   return pixels;
 }
@@ -92,8 +88,8 @@ describe('isGrayscaleImage', () => {
     const pixels = new Uint8Array(4 * 4 * 3);
     for (let i = 0; i < 16; i++) {
       pixels[i * 3] = 128;
-      pixels[i * 3 + 1] = 129;   // within tolerance of 2
-      pixels[i * 3 + 2] = 127;   // within tolerance of 2
+      pixels[i * 3 + 1] = 129; // within tolerance of 2
+      pixels[i * 3 + 2] = 127; // within tolerance of 2
     }
     expect(isGrayscaleImage(pixels, 4, 4, 3)).toBe(true);
   });
@@ -102,7 +98,7 @@ describe('isGrayscaleImage', () => {
     const pixels = new Uint8Array(4 * 4 * 3);
     for (let i = 0; i < 16; i++) {
       pixels[i * 3] = 128;
-      pixels[i * 3 + 1] = 135;   // difference of 7
+      pixels[i * 3 + 1] = 135; // difference of 7
       pixels[i * 3 + 2] = 128;
     }
     expect(isGrayscaleImage(pixels, 4, 4, 3)).toBe(false);

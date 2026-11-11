@@ -15,10 +15,7 @@ import {
   glyphIdsFromShapingResult,
   shapingResultWidth,
 } from '../../../src/assets/font/textShaper.js';
-import type {
-  ShapingResult,
-  ShapingOptions,
-} from '../../../src/assets/font/textShaper.js';
+import type { ShapingResult, ShapingOptions } from '../../../src/assets/font/textShaper.js';
 import type { FontMetrics } from '../../../src/assets/font/fontMetrics.js';
 
 // ---------------------------------------------------------------------------
@@ -31,12 +28,14 @@ import type { FontMetrics } from '../../../src/assets/font/fontMetrics.js';
  * Maps ASCII codepoints (0x20–0x7E) to sequential glyph IDs (1–95),
  * each with a width of 600 design units (monospace style).
  */
-function buildMockMetrics(opts: {
-  defaultWidth?: number;
-  unitsPerEm?: number;
-  customWidths?: Map<number, number>;
-  customCmap?: Map<number, number>;
-} = {}): FontMetrics {
+function buildMockMetrics(
+  opts: {
+    defaultWidth?: number;
+    unitsPerEm?: number;
+    customWidths?: Map<number, number>;
+    customCmap?: Map<number, number>;
+  } = {},
+): FontMetrics {
   const defaultWidth = opts.defaultWidth ?? 600;
   const unitsPerEm = opts.unitsPerEm ?? 1000;
 
@@ -45,7 +44,7 @@ function buildMockMetrics(opts: {
 
   // Populate default ASCII mappings if no custom cmap provided
   if (!opts.customCmap) {
-    for (let cp = 0x20; cp <= 0x7E; cp++) {
+    for (let cp = 0x20; cp <= 0x7e; cp++) {
       const glyphId = cp - 0x20 + 1;
       cmapTable.set(cp, glyphId);
       if (!opts.customWidths) {
@@ -226,7 +225,10 @@ describe('shapeText', () => {
 
   it('accepts options with features list', async () => {
     const options: ShapingOptions = {
-      features: [['liga', true], ['kern', true]],
+      features: [
+        ['liga', true],
+        ['kern', true],
+      ],
     };
     const result = await shapeText('fi', dummyFontData, metrics, options);
     // Simple shaper ignores features — no ligature substitution
@@ -359,10 +361,16 @@ describe('shapingResultWidth', () => {
     // totalAdvance=600, fontSize=12, unitsPerEm=1000
     // width = (600 / 1000) * 12 = 7.2
     const result: ShapingResult = {
-      glyphs: [{
-        glyphId: 1, cluster: 0, xAdvance: 600,
-        yAdvance: 0, xOffset: 0, yOffset: 0,
-      }],
+      glyphs: [
+        {
+          glyphId: 1,
+          cluster: 0,
+          xAdvance: 600,
+          yAdvance: 0,
+          xOffset: 0,
+          yOffset: 0,
+        },
+      ],
       totalAdvance: 600,
     };
     const width = shapingResultWidth(result, 12, 1000);

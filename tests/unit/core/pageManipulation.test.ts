@@ -6,11 +6,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  createPdf,
-  PageSizes,
-  PdfDocument,
-} from '../../../src/index.js';
+import { createPdf, PageSizes, PdfDocument } from '../../../src/index.js';
 import {
   insertPage,
   removePage,

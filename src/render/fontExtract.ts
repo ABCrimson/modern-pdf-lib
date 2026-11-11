@@ -55,20 +55,13 @@ export interface ExtractedFont {
  * Resolve an object through the registry if it is an indirect reference,
  * otherwise return it unchanged.
  */
-function resolve(
-  obj: PdfObject | undefined,
-  registry: PdfObjectRegistry,
-): PdfObject | undefined {
+function resolve(obj: PdfObject | undefined, registry: PdfObjectRegistry): PdfObject | undefined {
   if (obj && obj.kind === 'ref') return registry.resolve(obj);
   return obj;
 }
 
 /** Resolve `dict[key]` and return it only if it is a dictionary. */
-function resolveDict(
-  dict: PdfDict,
-  key: string,
-  registry: PdfObjectRegistry,
-): PdfDict | undefined {
+function resolveDict(dict: PdfDict, key: string, registry: PdfObjectRegistry): PdfDict | undefined {
   const v = resolve(dict.get(key), registry);
   return v && v.kind === 'dict' ? (v as PdfDict) : undefined;
 }
@@ -84,10 +77,7 @@ function resolveStream(
 }
 
 /** Read a `/Name` value with the leading slash stripped, if present. */
-function nameValue(
-  obj: PdfObject | undefined,
-  registry: PdfObjectRegistry,
-): string | undefined {
+function nameValue(obj: PdfObject | undefined, registry: PdfObjectRegistry): string | undefined {
   const v = resolve(obj, registry);
   if (v && v.kind === 'name') {
     const raw = (v as PdfName).value;
@@ -102,10 +92,7 @@ function nameValue(
  * For simple fonts the descriptor is a direct child.  For composite
  * (Type0) fonts it lives on the first `/DescendantFonts` entry.
  */
-function findFontDescriptor(
-  fontDict: PdfDict,
-  registry: PdfObjectRegistry,
-): PdfDict | undefined {
+function findFontDescriptor(fontDict: PdfDict, registry: PdfObjectRegistry): PdfDict | undefined {
   const direct = resolveDict(fontDict, '/FontDescriptor', registry);
   if (direct) return direct;
 
@@ -221,8 +208,7 @@ export function extractFonts(page: PdfPage): ExtractedFont[] {
     }
     if (!extracted) continue; // descriptor with no embedded file → skip
 
-    const baseFont =
-      nameValue((dict as PdfDict).get('/BaseFont'), registry) ?? '';
+    const baseFont = nameValue((dict as PdfDict).get('/BaseFont'), registry) ?? '';
     const resourceName = key.startsWith('/') ? key.slice(1) : key;
 
     result.push({

@@ -39,14 +39,7 @@
  * No Buffer — uses Uint8Array exclusively.
  */
 
-import {
-  PdfArray,
-  PdfDict,
-  PdfName,
-  PdfNumber,
-  PdfStream,
-  type PdfObject,
-} from './pdfObjects.js';
+import { PdfArray, PdfDict, PdfName, PdfNumber, PdfStream, type PdfObject } from './pdfObjects.js';
 
 // ---------------------------------------------------------------------------
 // Public types
@@ -229,12 +222,7 @@ class BitPacker {
  *
  * @internal
  */
-function encodeValue(
-  decoded: number,
-  min: number,
-  max: number,
-  bits: number,
-): number {
+function encodeValue(decoded: number, min: number, max: number, bits: number): number {
   const maxRaw = bits >= 32 ? 0xffffffff : (1 << bits) - 1;
   if (max === min) return 0;
   const t = (decoded - min) / (max - min);
@@ -271,14 +259,8 @@ function packVertexData(
 ): void {
   const { decode, bitsPerCoordinate: bpcoord, bitsPerComponent: bpcomp } = common;
   // Coordinates: /Decode[0..3] = xmin xmax ymin ymax.
-  packer.push(
-    encodeValue(vertex.x, decode[0] ?? 0, decode[1] ?? 1, bpcoord),
-    bpcoord,
-  );
-  packer.push(
-    encodeValue(vertex.y, decode[2] ?? 0, decode[3] ?? 1, bpcoord),
-    bpcoord,
-  );
+  packer.push(encodeValue(vertex.x, decode[0] ?? 0, decode[1] ?? 1, bpcoord), bpcoord);
+  packer.push(encodeValue(vertex.y, decode[2] ?? 0, decode[3] ?? 1, bpcoord), bpcoord);
   // Colours: /Decode[4 + 2k .. 5 + 2k].
   for (let k = 0; k < nColor; k++) {
     const cmin = decode[4 + 2 * k] ?? 0;
@@ -293,20 +275,10 @@ function packVertexData(
  *
  * @internal
  */
-function packPoint(
-  packer: BitPacker,
-  point: [number, number],
-  common: MeshShadingCommon,
-): void {
+function packPoint(packer: BitPacker, point: [number, number], common: MeshShadingCommon): void {
   const { decode, bitsPerCoordinate: bpcoord } = common;
-  packer.push(
-    encodeValue(point[0], decode[0] ?? 0, decode[1] ?? 1, bpcoord),
-    bpcoord,
-  );
-  packer.push(
-    encodeValue(point[1], decode[2] ?? 0, decode[3] ?? 1, bpcoord),
-    bpcoord,
-  );
+  packer.push(encodeValue(point[0], decode[0] ?? 0, decode[1] ?? 1, bpcoord), bpcoord);
+  packer.push(encodeValue(point[1], decode[2] ?? 0, decode[3] ?? 1, bpcoord), bpcoord);
 }
 
 /**
@@ -379,9 +351,7 @@ export interface FreeFormGouraudOptions extends MeshShadingCommon {
  * @returns a {@link PdfStream} whose dict has /ShadingType 4 and whose body is
  *          the packed vertex stream.
  */
-export function buildFreeFormGouraudShading(
-  options: FreeFormGouraudOptions,
-): PdfStream {
+export function buildFreeFormGouraudShading(options: FreeFormGouraudOptions): PdfStream {
   const dict = buildCommonDict(4, options, true);
   const nColor = colorComponentCount(options);
   const packer = new BitPacker();
@@ -402,8 +372,7 @@ export function buildFreeFormGouraudShading(
 // ---------------------------------------------------------------------------
 
 /** Options for {@link buildLatticeFormGouraudShading}. */
-export interface LatticeFormGouraudOptions
-  extends Omit<MeshShadingCommon, 'bitsPerFlag'> {
+export interface LatticeFormGouraudOptions extends Omit<MeshShadingCommon, 'bitsPerFlag'> {
   /** Number of vertices in each row of the lattice (≥ 2). */
   verticesPerRow: number;
   /** All vertices in row-major order (no flags). */
@@ -421,9 +390,7 @@ export interface LatticeFormGouraudOptions
  *                   /VerticesPerRow and the row-major vertex list.
  * @returns a {@link PdfStream} with /ShadingType 5 and /VerticesPerRow.
  */
-export function buildLatticeFormGouraudShading(
-  options: LatticeFormGouraudOptions,
-): PdfStream {
+export function buildLatticeFormGouraudShading(options: LatticeFormGouraudOptions): PdfStream {
   // Type 5 has no /BitsPerFlag; synthesise a common record for the shared
   // helpers (the flag width is never consulted).
   const common: MeshShadingCommon = {
@@ -468,9 +435,7 @@ export interface CoonsPatchOptions extends MeshShadingCommon {
  * @param options - the common mesh keys plus the patch list.
  * @returns a {@link PdfStream} with /ShadingType 6.
  */
-export function buildCoonsPatchShading(
-  options: CoonsPatchOptions,
-): PdfStream {
+export function buildCoonsPatchShading(options: CoonsPatchOptions): PdfStream {
   const dict = buildCommonDict(6, options, true);
   const nColor = colorComponentCount(options);
   const packer = new BitPacker();
@@ -510,9 +475,7 @@ export interface TensorPatchOptions extends MeshShadingCommon {
  * @param options - the common mesh keys plus the patch list.
  * @returns a {@link PdfStream} with /ShadingType 7.
  */
-export function buildTensorPatchShading(
-  options: TensorPatchOptions,
-): PdfStream {
+export function buildTensorPatchShading(options: TensorPatchOptions): PdfStream {
   const dict = buildCommonDict(7, options, true);
   const nColor = colorComponentCount(options);
   const packer = new BitPacker();

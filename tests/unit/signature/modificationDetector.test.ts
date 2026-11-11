@@ -71,9 +71,7 @@ describe('detectModifications', () => {
       {
         objectNumber: 4,
         generationNumber: 0,
-        data: encoder.encode(
-          '<< /Producer (modified-pdf) /CreationDate (D:20260301120000Z) >>',
-        ),
+        data: encoder.encode('<< /Producer (modified-pdf) /CreationDate (D:20260301120000Z) >>'),
       },
     ]);
 
@@ -113,9 +111,7 @@ describe('detectModifications', () => {
       {
         objectNumber: 10,
         generationNumber: 0,
-        data: encoder.encode(
-          '<< /Type /Annot /Subtype /Widget /FT /Tx /V (John Doe) /T (Name) >>',
-        ),
+        data: encoder.encode('<< /Type /Annot /Subtype /Widget /FT /Tx /V (John Doe) /T (Name) >>'),
       },
     ]);
 
@@ -123,10 +119,7 @@ describe('detectModifications', () => {
 
     // Form fills should be compliant with MDP level 2
     // If there are only form fill violations, it should be compliant
-    if (
-      report.violations.length > 0 &&
-      report.violations.every((v) => v.type === 'form_filled')
-    ) {
+    if (report.violations.length > 0 && report.violations.every((v) => v.type === 'form_filled')) {
       expect(report.isCompliant).toBe(true);
     }
   });
@@ -146,9 +139,7 @@ describe('detectModifications', () => {
       {
         objectNumber: 4,
         generationNumber: 0,
-        data: encoder.encode(
-          '<< /Producer (modified!) >>',
-        ),
+        data: encoder.encode('<< /Producer (modified!) >>'),
       },
     ]);
 
@@ -168,9 +159,7 @@ describe('detectModifications', () => {
       {
         objectNumber: 20,
         generationNumber: 0,
-        data: encoder.encode(
-          '<< /Type /Annot /Subtype /Text /Annots /Contents (Note) >>',
-        ),
+        data: encoder.encode('<< /Type /Annot /Subtype /Text /Annots /Contents (Note) >>'),
       },
     ]);
 
@@ -226,9 +215,7 @@ describe('detectModifications', () => {
       {
         objectNumber: 20,
         generationNumber: 0,
-        data: encoder.encode(
-          '<< /Type /Annot /Subtype /Text /Contents (Note) >>',
-        ),
+        data: encoder.encode('<< /Type /Annot /Subtype /Text /Contents (Note) >>'),
       },
     ]);
 
@@ -251,9 +238,7 @@ describe('detectModifications', () => {
     const report = await detectModifications(pdf2);
 
     // Signature additions should not appear as violations
-    const sigViolations = report.violations.filter((v) =>
-      v.description.includes('/Type /Sig'),
-    );
+    const sigViolations = report.violations.filter((v) => v.description.includes('/Type /Sig'));
     expect(sigViolations).toHaveLength(0);
   });
 });

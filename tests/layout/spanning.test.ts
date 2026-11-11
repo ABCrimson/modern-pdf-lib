@@ -7,10 +7,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { renderTable } from '../../src/layout/table.js';
-import type {
-  DrawTableOptions,
-  TableCell,
-} from '../../src/layout/table.js';
+import type { DrawTableOptions, TableCell } from '../../src/layout/table.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -49,10 +46,7 @@ describe('colspan support', () => {
     const spanCell: TableCell = { content: 'Span2', colSpan: 2 };
     const { ops, result } = renderTable(
       simpleTable({
-        rows: [
-          { cells: [spanCell, 'C'] },
-          { cells: ['D', 'E', 'F'] },
-        ],
+        rows: [{ cells: [spanCell, 'C'] }, { cells: ['D', 'E', 'F'] }],
       }),
     );
 
@@ -74,10 +68,7 @@ describe('colspan support', () => {
     const spanCell: TableCell = { content: 'Wide', colSpan: 3 };
     const { ops, result } = renderTable(
       simpleTable({
-        rows: [
-          { cells: [spanCell] },
-          { cells: ['A', 'B', 'C'] },
-        ],
+        rows: [{ cells: [spanCell] }, { cells: ['A', 'B', 'C'] }],
       }),
     );
 
@@ -99,10 +90,7 @@ describe('colspan support', () => {
       simpleTable({
         width: 300,
         columns: [{ width: 100 }, { width: 80 }, { width: 120 }],
-        rows: [
-          { cells: [spanCell, 'Z'] },
-          { cells: ['A', 'B', 'C'] },
-        ],
+        rows: [{ cells: [spanCell, 'Z'] }, { cells: ['A', 'B', 'C'] }],
         borderWidth: 1,
       }),
     );
@@ -124,10 +112,7 @@ describe('colspan support', () => {
     const { ops } = renderTable(
       simpleTable({
         width: 400,
-        rows: [
-          { cells: [spanCell] },
-          { cells: ['A', 'B', 'C', 'D'] },
-        ],
+        rows: [{ cells: [spanCell] }, { cells: ['A', 'B', 'C', 'D'] }],
         borderWidth: 1,
       }),
     );
@@ -142,10 +127,7 @@ describe('colspan support', () => {
     const span: TableCell = { content: 'AB', colSpan: 2 };
     const { ops } = renderTable(
       simpleTable({
-        rows: [
-          { cells: [span, 'C', 'D'] },
-          { cells: ['W', 'X', 'Y', 'Z'] },
-        ],
+        rows: [{ cells: [span, 'C', 'D'] }, { cells: ['W', 'X', 'Y', 'Z'] }],
       }),
     );
 
@@ -210,10 +192,7 @@ describe('rowspan support', () => {
     const span: TableCell = { content: 'RS', rowSpan: 2 };
     const { ops } = renderTable(
       simpleTable({
-        rows: [
-          { cells: [span, 'A', 'B'] },
-          { cells: ['C', 'D'] },
-        ],
+        rows: [{ cells: [span, 'A', 'B'] }, { cells: ['C', 'D'] }],
       }),
     );
 
@@ -259,10 +238,7 @@ describe('mixed colspan and rowspan', () => {
     // A 3-col table where row 0 only has 2 cells (no cell for col 2)
     const { ops, result } = renderTable(
       simpleTable({
-        rows: [
-          { cells: ['A', 'B'] },
-          { cells: ['D', 'E', 'F'] },
-        ],
+        rows: [{ cells: ['A', 'B'] }, { cells: ['D', 'E', 'F'] }],
       }),
     );
 

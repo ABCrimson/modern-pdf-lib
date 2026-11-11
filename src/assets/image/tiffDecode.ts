@@ -133,7 +133,7 @@ class TiffReader {
 export function isTiff(data: Uint8Array): boolean {
   if (data.length < 4) return false;
   const bom = (data[0]! << 8) | data[1]!;
-  if (bom !== 0x4949 && bom !== 0x4D4D) return false;
+  if (bom !== 0x4949 && bom !== 0x4d4d) return false;
   const littleEndian = bom === 0x4949;
   const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
   const magic = view.getUint16(2, littleEndian);
@@ -152,11 +152,7 @@ export function isTiff(data: Uint8Array): boolean {
  * @param littleEndian  Whether the TIFF uses little-endian byte order.
  * @returns             Array of IFD entries.
  */
-export function parseTiffIfd(
-  data: Uint8Array,
-  offset: number,
-  littleEndian: boolean,
-): IfdEntry[] {
+export function parseTiffIfd(data: Uint8Array, offset: number, littleEndian: boolean): IfdEntry[] {
   const reader = new TiffReader(data, littleEndian);
   const numEntries = reader.u16(offset);
   const entries: IfdEntry[] = [];
@@ -223,7 +219,11 @@ export function parseTiffIfd(
 }
 
 /** Get the offset to the next IFD (0 = no more IFDs). */
-function getNextIfdOffset(data: Uint8Array, currentIfdOffset: number, littleEndian: boolean): number {
+function getNextIfdOffset(
+  data: Uint8Array,
+  currentIfdOffset: number,
+  littleEndian: boolean,
+): number {
   const reader = new TiffReader(data, littleEndian);
   const numEntries = reader.u16(currentIfdOffset);
   const nextOffset = currentIfdOffset + 2 + numEntries * 12;
@@ -232,7 +232,12 @@ function getNextIfdOffset(data: Uint8Array, currentIfdOffset: number, littleEndi
 }
 
 /** Find the IFD at a given page index by following the IFD chain. */
-function findIfdAtPage(data: Uint8Array, littleEndian: boolean, firstIfdOffset: number, pageIndex: number): number {
+function findIfdAtPage(
+  data: Uint8Array,
+  littleEndian: boolean,
+  firstIfdOffset: number,
+  pageIndex: number,
+): number {
   let offset = firstIfdOffset;
   for (let i = 0; i < pageIndex; i++) {
     offset = getNextIfdOffset(data, offset, littleEndian);
@@ -245,13 +250,13 @@ function findIfdAtPage(data: Uint8Array, littleEndian: boolean, firstIfdOffset: 
 
 /** Get a tag value from IFD entries. */
 function getTag(entries: IfdEntry[], tag: number): number | undefined {
-  const entry = entries.find(e => e.tag === tag);
+  const entry = entries.find((e) => e.tag === tag);
   return entry?.values[0];
 }
 
 /** Get all values for a tag from IFD entries. */
 function getTagValues(entries: IfdEntry[], tag: number): number[] | undefined {
-  const entry = entries.find(e => e.tag === tag);
+  const entry = entries.find((e) => e.tag === tag);
   return entry?.values;
 }
 
@@ -299,7 +304,7 @@ function decompressLzw(input: Uint8Array, expectedLength: number): Uint8Array {
   const EOI_CODE = 257;
   let codeSize = 9;
   let nextCode = 258;
-  let maxCode = (1 << codeSize);
+  let maxCode = 1 << codeSize;
 
   // Dictionary: each entry is the string (byte sequence) it represents
   // For efficiency, store as prefix + suffix
@@ -433,14 +438,19 @@ function decompressDeflate(input: Uint8Array, expectedLength: number): Uint8Arra
 // ---------------------------------------------------------------------------
 
 /** Convert 1-bit data to 8-bit (0 or 255). */
-function normalize1bit(data: Uint8Array, width: number, height: number, whiteIsZero: boolean): Uint8Array {
+function normalize1bit(
+  data: Uint8Array,
+  width: number,
+  height: number,
+  whiteIsZero: boolean,
+): Uint8Array {
   const output = new Uint8Array(width * height);
   for (let row = 0; row < height; row++) {
     for (let col = 0; col < width; col++) {
       const byteIdx = row * Math.ceil(width / 8) + (col >> 3);
       const bitIdx = 7 - (col & 7);
       const bit = (data[byteIdx]! >> bitIdx) & 1;
-      const val = whiteIsZero ? (bit === 0 ? 255 : 0) : (bit === 1 ? 255 : 0);
+      const val = whiteIsZero ? (bit === 0 ? 255 : 0) : bit === 1 ? 255 : 0;
       output[row * width + col] = val;
     }
   }
@@ -448,15 +458,18 @@ function normalize1bit(data: Uint8Array, width: number, height: number, whiteIsZ
 }
 
 /** Convert 4-bit data to 8-bit. */
-function normalize4bit(data: Uint8Array, width: number, height: number, whiteIsZero: boolean): Uint8Array {
+function normalize4bit(
+  data: Uint8Array,
+  width: number,
+  height: number,
+  whiteIsZero: boolean,
+): Uint8Array {
   const output = new Uint8Array(width * height);
   for (let row = 0; row < height; row++) {
     for (let col = 0; col < width; col++) {
       const byteIdx = row * Math.ceil(width / 2) + (col >> 1);
-      const nibble = (col & 1) === 0
-        ? (data[byteIdx]! >> 4) & 0x0F
-        : data[byteIdx]! & 0x0F;
-      let val = (nibble * 255 / 15) | 0;
+      const nibble = (col & 1) === 0 ? (data[byteIdx]! >> 4) & 0x0f : data[byteIdx]! & 0x0f;
+      let val = ((nibble * 255) / 15) | 0;
       if (whiteIsZero) val = 255 - val;
       output[row * width + col] = val;
     }
@@ -470,7 +483,7 @@ function normalize16bit(data: Uint8Array, numSamples: number, littleEndian: bool
   const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
   for (let i = 0; i < numSamples; i++) {
     const val16 = view.getUint16(i * 2, littleEndian);
-    output[i] = (val16 >> 8) & 0xFF;
+    output[i] = (val16 >> 8) & 0xff;
   }
   return output;
 }
@@ -509,8 +522,8 @@ function decodeJpegStrip(
 
     // Combine: SOI + tables + strip body
     fullJpeg = new Uint8Array(2 + tableData.length + stripBody.length);
-    fullJpeg[0] = 0xFF;
-    fullJpeg[1] = 0xD8; // SOI
+    fullJpeg[0] = 0xff;
+    fullJpeg[1] = 0xd8; // SOI
     fullJpeg.set(tableData, 2);
     fullJpeg.set(stripBody, 2 + tableData.length);
   } else {
@@ -523,7 +536,7 @@ function decodeJpegStrip(
   // Here we throw a descriptive error.
   throw new Error(
     'TIFF JPEG-in-TIFF compression: JPEG strip decoding requires a JPEG decoder. ' +
-    'This is supported when running with the JPEG WASM module initialized.',
+      'This is supported when running with the JPEG WASM module initialized.',
   );
 }
 
@@ -588,7 +601,7 @@ export function decodeTiffAll(data: Uint8Array): TiffImage[] {
  * @param options  Decode options (page selection).
  * @returns        Decoded image data.
  */
-export function decodeTiff(data: Uint8Array, options?: TiffDecodeOptions  ): TiffImage {
+export function decodeTiff(data: Uint8Array, options?: TiffDecodeOptions): TiffImage {
   if (!isTiff(data)) {
     throw new Error('TIFF: invalid TIFF header (expected II or MM byte order marker + 42)');
   }
@@ -609,7 +622,7 @@ export function decodeTiff(data: Uint8Array, options?: TiffDecodeOptions  ): Tif
   const photometric = getTag(entries, TAG_PHOTOMETRIC) ?? 1;
   const bitsPerSample = getTag(entries, TAG_BITS_PER_SAMPLE) ?? 8;
   const samplesPerPixel = getTag(entries, TAG_SAMPLES_PER_PIXEL) ?? 1;
-  const rowsPerStrip = getTag(entries, TAG_ROWS_PER_STRIP) ?? (height ?? 0);
+  const rowsPerStrip = getTag(entries, TAG_ROWS_PER_STRIP) ?? height ?? 0;
   const stripOffsets = getTagValues(entries, TAG_STRIP_OFFSETS);
   const stripByteCounts = getTagValues(entries, TAG_STRIP_BYTE_COUNTS);
 
@@ -623,7 +636,7 @@ export function decodeTiff(data: Uint8Array, options?: TiffDecodeOptions  ): Tif
 
   // JPEG tables (for JPEG-in-TIFF)
   let jpegTables: Uint8Array | undefined;
-  const jpegTablesEntry = entries.find(e => e.tag === TAG_JPEG_TABLES);
+  const jpegTablesEntry = entries.find((e) => e.tag === TAG_JPEG_TABLES);
   if (jpegTablesEntry) {
     // The values array contains individual bytes for UNDEFINED type
     const tablesOffset = jpegTablesEntry.values[0]!;
@@ -644,7 +657,7 @@ export function decodeTiff(data: Uint8Array, options?: TiffDecodeOptions  ): Tif
 
   for (let strip = 0; strip < numStrips; strip++) {
     const stripOffset = stripOffsets[strip]!;
-    const stripByteCount = stripByteCounts?.[strip] ?? (bytesPerRow * rowsPerStrip);
+    const stripByteCount = stripByteCounts?.[strip] ?? bytesPerRow * rowsPerStrip;
     const stripRows = Math.min(rowsPerStrip, height - strip * rowsPerStrip);
     const expectedStripBytes = stripRows * bytesPerRow;
 
@@ -671,7 +684,13 @@ export function decodeTiff(data: Uint8Array, options?: TiffDecodeOptions  ): Tif
         break;
       case COMPRESS_JPEG:
       case COMPRESS_JPEG_OLD:
-        decompressed = decodeJpegStrip(compressedData, jpegTables, width, stripRows, samplesPerPixel);
+        decompressed = decodeJpegStrip(
+          compressedData,
+          jpegTables,
+          width,
+          stripRows,
+          samplesPerPixel,
+        );
         break;
       default:
         throw new Error(`TIFF: unsupported compression type ${compression}`);
@@ -709,10 +728,8 @@ export function decodeTiff(data: Uint8Array, options?: TiffDecodeOptions  ): Tif
     throw new Error(`TIFF: unsupported BitsPerSample ${bitsPerSample}`);
   }
 
-  const channels = samplesPerPixel === 1 ? 1
-    : samplesPerPixel === 3 ? 3
-    : samplesPerPixel === 4 ? 4
-    : 1;
+  const channels =
+    samplesPerPixel === 1 ? 1 : samplesPerPixel === 3 ? 3 : samplesPerPixel === 4 ? 4 : 1;
 
   return {
     width,

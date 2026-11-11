@@ -7,27 +7,18 @@
 
 import { describe, it, expect } from 'vitest';
 import { renderTable } from '../../src/layout/table.js';
-import type {
-  DrawTableOptions,
-  TableCell,
-  NestedTableContent,
-} from '../../src/layout/table.js';
+import type { DrawTableOptions, TableCell, NestedTableContent } from '../../src/layout/table.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
-function nestedDef(
-  overrides?: Partial<Omit<DrawTableOptions, 'x' | 'y'>>,
-): NestedTableContent {
+function nestedDef(overrides?: Partial<Omit<DrawTableOptions, 'x' | 'y'>>): NestedTableContent {
   return {
     type: 'table',
     table: {
       width: 200,
-      rows: [
-        { cells: ['Inner1', 'Inner2'] },
-        { cells: ['Inner3', 'Inner4'] },
-      ],
+      rows: [{ cells: ['Inner1', 'Inner2'] }, { cells: ['Inner3', 'Inner4'] }],
       ...overrides,
     },
   };
@@ -40,10 +31,7 @@ function parentTable(overrides?: Partial<DrawTableOptions>): DrawTableOptions {
     width: 500,
     rows: [
       {
-        cells: [
-          { content: nestedDef() } as TableCell,
-          'TextCell',
-        ],
+        cells: [{ content: nestedDef() } as TableCell, 'TextCell'],
       },
     ],
     ...overrides,
@@ -120,10 +108,7 @@ describe('nested tables', () => {
       width: 500,
       rows: [
         {
-          cells: [
-            { content: nested1 } as TableCell,
-            { content: nested2 } as TableCell,
-          ],
+          cells: [{ content: nested1 } as TableCell, { content: nested2 } as TableCell],
         },
       ],
     });
@@ -140,11 +125,7 @@ describe('nested tables', () => {
       width: 600,
       rows: [
         {
-          cells: [
-            'Text1',
-            { content: nestedDef() } as TableCell,
-            'Text2',
-          ],
+          cells: ['Text1', { content: nestedDef() } as TableCell, 'Text2'],
         },
       ],
     });
@@ -171,10 +152,7 @@ describe('nested tables', () => {
       width: 500,
       rows: [
         {
-          cells: [
-            { content: emptyNested } as TableCell,
-            'Text',
-          ],
+          cells: [{ content: emptyNested } as TableCell, 'Text'],
         },
       ],
     });
@@ -201,9 +179,7 @@ describe('nested tables', () => {
         width: 150,
         rows: [
           {
-            cells: [
-              { content: level3 } as TableCell,
-            ],
+            cells: [{ content: level3 } as TableCell],
           },
         ],
       },
@@ -215,10 +191,7 @@ describe('nested tables', () => {
       width: 500,
       rows: [
         {
-          cells: [
-            { content: level2 } as TableCell,
-            'Sibling',
-          ],
+          cells: [{ content: level2 } as TableCell, 'Sibling'],
         },
       ],
     });
@@ -274,9 +247,7 @@ describe('nested tables', () => {
       padding: 5,
       rows: [
         {
-          cells: [
-            { content: nested } as TableCell,
-          ],
+          cells: [{ content: nested } as TableCell],
         },
       ],
     });

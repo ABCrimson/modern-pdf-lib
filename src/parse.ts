@@ -42,11 +42,25 @@ export type { ImageInfo } from './assets/image/imageExtract.js';
 // ---------------------------------------------------------------------------
 
 export { analyzeImages } from './assets/image/compressionAnalysis.js';
-export type { ImageAnalysis, AnalysisReport, AnalyzeImagesOptions } from './assets/image/compressionAnalysis.js';
+export type {
+  ImageAnalysis,
+  AnalysisReport,
+  AnalyzeImagesOptions,
+} from './assets/image/compressionAnalysis.js';
 
 // ---------------------------------------------------------------------------
 // Low-level objects (needed to inspect parsed PDFs)
 // ---------------------------------------------------------------------------
 
-export { PdfNull, PdfBool, PdfNumber, PdfString, PdfName, PdfArray, PdfDict, PdfStream, PdfRef } from './core/pdfObjects.js';
+export {
+  PdfNull,
+  PdfBool,
+  PdfNumber,
+  PdfString,
+  PdfName,
+  PdfArray,
+  PdfDict,
+  PdfStream,
+  PdfRef,
+} from './core/pdfObjects.js';
 export type { PdfObject } from './core/pdfObjects.js';

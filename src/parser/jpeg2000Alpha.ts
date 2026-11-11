@@ -13,12 +13,7 @@
  * @packageDocumentation
  */
 
-import {
-  isJp2Container,
-  parseJp2Boxes,
-  findBox,
-  JP2_BOX_TYPES,
-} from './jpeg2000Codestream.js';
+import { isJp2Container, parseJp2Boxes, findBox, JP2_BOX_TYPES } from './jpeg2000Codestream.js';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -74,16 +69,10 @@ export interface SeparatedImage {
  * @param cdefData - Raw data from a `cdef` box.
  * @returns Array of channel definitions.
  */
-export function parseChannelDefinitions(
-  cdefData: Uint8Array,
-): ChannelDefinition[] {
+export function parseChannelDefinitions(cdefData: Uint8Array): ChannelDefinition[] {
   if (cdefData.length < 2) return [];
 
-  const view = new DataView(
-    cdefData.buffer,
-    cdefData.byteOffset,
-    cdefData.byteLength,
-  );
+  const view = new DataView(cdefData.buffer, cdefData.byteOffset, cdefData.byteLength);
   const count = view.getUint16(0, false);
   const defs: ChannelDefinition[] = [];
 
@@ -213,18 +202,14 @@ export function separateAlpha(
   components: number,
 ): SeparatedImage {
   if (components < 2) {
-    throw new Error(
-      `separateAlpha: need at least 2 components, got ${components}`,
-    );
+    throw new Error(`separateAlpha: need at least 2 components, got ${components}`);
   }
 
   const pixelCount = width * height;
   const expectedLength = pixelCount * components;
 
   if (imageData.length < expectedLength) {
-    throw new Error(
-      `separateAlpha: expected ${expectedLength} bytes, got ${imageData.length}`,
-    );
+    throw new Error(`separateAlpha: expected ${expectedLength} bytes, got ${imageData.length}`);
   }
 
   const colorChannels = components - 1;
@@ -365,9 +350,7 @@ export function extractAlphaChannel(
   const expectedLength = pixelCount * components;
 
   if (data.length < expectedLength) {
-    throw new Error(
-      `extractAlphaChannel: expected ${expectedLength} bytes, got ${data.length}`,
-    );
+    throw new Error(`extractAlphaChannel: expected ${expectedLength} bytes, got ${data.length}`);
   }
 
   const result = new Uint8Array(pixelCount);

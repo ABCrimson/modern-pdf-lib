@@ -57,8 +57,10 @@ describe('markdownToPdf', () => {
 
   it('wraps very long lines and produces larger output for larger input', async () => {
     const short = await markdownToPdf('Hello world');
-    const longParagraph = Array.from({ length: 40 }, (_, i) =>
-      `Paragraph ${i} with several words that should wrap across the page width many times over and over.`,
+    const longParagraph = Array.from(
+      { length: 40 },
+      (_, i) =>
+        `Paragraph ${i} with several words that should wrap across the page width many times over and over.`,
     ).join('\n\n');
     const long = await markdownToPdf(longParagraph);
 

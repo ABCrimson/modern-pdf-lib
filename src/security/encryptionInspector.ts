@@ -143,9 +143,7 @@ const BIT_PRINT_HIGH_RES = 1 << 11; // bit 12
  *             `/Encrypt` entry (or the file is unparseable) the report is
  *             `{ encrypted: false }`.
  */
-export async function inspectEncryption(
-  pdf: Uint8Array,
-): Promise<EncryptionReport> {
+export async function inspectEncryption(pdf: Uint8Array): Promise<EncryptionReport> {
   // ---- Locate the trailer and the /Encrypt dictionary --------------------
   const located = await locateEncryptDict(pdf);
   if (located === undefined) {
@@ -215,9 +213,7 @@ interface LocatedEncrypt {
  * Returns `undefined` when the file has no `/Encrypt` entry or when it
  * cannot be parsed far enough to find one.
  */
-async function locateEncryptDict(
-  pdf: Uint8Array,
-): Promise<LocatedEncrypt | undefined> {
+async function locateEncryptDict(pdf: Uint8Array): Promise<LocatedEncrypt | undefined> {
   // A valid PDF needs at least a header; bail early on obviously-too-short
   // inputs rather than letting the parser throw.
   if (pdf.length < 8) return undefined;
@@ -316,9 +312,7 @@ function resolveCryptFilterMethod(dict: PdfDict): string | undefined {
   // /Identity is a built-in filter not listed in /CF.
   if (filterName === '/Identity') return '/Identity';
 
-  let stdCf: PdfObject | undefined = filterName !== undefined
-    ? cfDict.get(filterName)
-    : undefined;
+  let stdCf: PdfObject | undefined = filterName !== undefined ? cfDict.get(filterName) : undefined;
   if (stdCf === undefined || stdCf.kind !== 'dict') {
     // Fall back to the conventional /StdCF entry.
     stdCf = cfDict.get('/StdCF');

@@ -295,15 +295,15 @@ describe('evaluateFunction — type 4 (PostScript calculator)', () => {
 
   it('stack operators dup/pop/exch/copy/index/roll', () => {
     // exch then sub: inputs pushed as a then 7 → 7 exch a → a 7 ... use 2 args
-    close(evaluateFunction(ps('{ pop }', [-1e9, 1e9], [-1e9, 1e9, -1e9, 1e9]), [5, 9])[0] as number, 5);
+    close(
+      evaluateFunction(ps('{ pop }', [-1e9, 1e9], [-1e9, 1e9, -1e9, 1e9]), [5, 9])[0] as number,
+      5,
+    );
     // 3 4 exch sub → 4 - 3 = 1
     close(evaluateFunction(ps('{ 3 4 exch sub }'), [0])[0] as number, 1);
     // dup + index: 5 → 5 5 → (1 index dups again) 5 5 5 → add → 5 10
     close(
-      evaluateFunction(
-        ps('{ dup 1 index add }', [-1e9, 1e9, -1e9, 1e9]),
-        [5],
-      )[1] as number,
+      evaluateFunction(ps('{ dup 1 index add }', [-1e9, 1e9, -1e9, 1e9]), [5])[1] as number,
       10,
     );
     // index: a=5 ; 5 7 0 index → 5 7 7 ; add add → 19

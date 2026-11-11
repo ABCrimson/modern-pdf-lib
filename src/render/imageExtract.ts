@@ -579,10 +579,7 @@ function nameToColorSpace(rawName: string): ResolvedColorSpace {
  * stream.
  * @internal
  */
-function readIndexedPalette(
-  arr: PdfArray,
-  registry: PdfObjectRegistry,
-): Uint8Array | undefined {
+function readIndexedPalette(arr: PdfArray, registry: PdfObjectRegistry): Uint8Array | undefined {
   const lookup = deref(arr.items[3], registry);
 
   if (lookup instanceof PdfString) {
@@ -605,19 +602,13 @@ function readIndexedPalette(
 // ---------------------------------------------------------------------------
 
 /** Resolve a value to its target object, following one indirect reference. @internal */
-function deref(
-  obj: PdfObject | undefined,
-  registry: PdfObjectRegistry,
-): PdfObject | undefined {
+function deref(obj: PdfObject | undefined, registry: PdfObjectRegistry): PdfObject | undefined {
   if (obj instanceof PdfRef) return registry.resolve(obj);
   return obj;
 }
 
 /** Resolve a value (possibly a ref) to a `PdfDict`, or `undefined`. @internal */
-function resolveDict(
-  obj: PdfObject | undefined,
-  registry: PdfObjectRegistry,
-): PdfDict | undefined {
+function resolveDict(obj: PdfObject | undefined, registry: PdfObjectRegistry): PdfDict | undefined {
   const resolved = deref(obj, registry);
   return resolved instanceof PdfDict ? resolved : undefined;
 }

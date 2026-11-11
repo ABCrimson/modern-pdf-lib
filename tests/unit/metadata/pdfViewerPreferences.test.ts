@@ -67,8 +67,14 @@ describe('PdfViewerPreferences', () => {
 
   it('sets and gets printPageRange', () => {
     const prefs = new PdfViewerPreferences();
-    prefs.setPrintPageRange([[0, 3], [5, 7]]);
-    expect(prefs.getPrintPageRange()).toEqual([[0, 3], [5, 7]]);
+    prefs.setPrintPageRange([
+      [0, 3],
+      [5, 7],
+    ]);
+    expect(prefs.getPrintPageRange()).toEqual([
+      [0, 3],
+      [5, 7],
+    ]);
   });
 
   it('constructs from existing ViewerPreferences object', () => {

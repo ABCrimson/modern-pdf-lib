@@ -12,10 +12,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  attachAssociatedFiles,
-  registerEmbeddedFile,
-} from '../../../src/compliance/afAttach.js';
+import { attachAssociatedFiles, registerEmbeddedFile } from '../../../src/compliance/afAttach.js';
 import { createAssociatedFile } from '../../../src/compliance/associatedFiles.js';
 import {
   PdfObjectRegistry,

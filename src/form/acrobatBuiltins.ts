@@ -198,9 +198,7 @@ export function formatNumber(value: number, options: NumberFormatOptions = {}): 
   const formattedInt = insertThousandsSep(intPart, thousandsSep);
 
   // Assemble the number
-  let result = decimals > 0
-    ? formattedInt + decimalSep + decPart
-    : formattedInt;
+  let result = decimals > 0 ? formattedInt + decimalSep + decPart : formattedInt;
 
   // Apply currency
   if (currency) {

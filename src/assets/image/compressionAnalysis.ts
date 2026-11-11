@@ -196,10 +196,7 @@ function determineRecommendation(
  * }
  * ```
  */
-export function analyzeImages(
-  doc: PdfDocument,
-  options?: AnalyzeImagesOptions,
-): AnalysisReport {
+export function analyzeImages(doc: PdfDocument, options?: AnalyzeImagesOptions): AnalysisReport {
   const quality = options?.quality ?? 80;
   const maxDpi = options?.maxDpi ?? 150;
 
@@ -263,12 +260,7 @@ export function analyzeImages(
       (info.channels === 3 || info.channels === 4) &&
       pixels.length >= info.width * info.height * info.channels
     ) {
-      grayscale = isGrayscaleImage(
-        pixels,
-        info.width,
-        info.height,
-        info.channels as 3 | 4,
-      );
+      grayscale = isGrayscaleImage(pixels, info.width, info.height, info.channels as 3 | 4);
     } else if (info.channels === 1) {
       grayscale = true;
     }
@@ -284,18 +276,26 @@ export function analyzeImages(
         estimatedJpegSize = encoded.length;
       } else {
         // WASM encode failed — fall back to heuristic
-        estimatedJpegSize = estimateJpegSizeHeuristic(info.width, info.height, info.channels, quality);
+        estimatedJpegSize = estimateJpegSizeHeuristic(
+          info.width,
+          info.height,
+          info.channels,
+          quality,
+        );
       }
     } else {
       // No WASM — use heuristic estimate
-      estimatedJpegSize = estimateJpegSizeHeuristic(info.width, info.height, info.channels, quality);
+      estimatedJpegSize = estimateJpegSizeHeuristic(
+        info.width,
+        info.height,
+        info.channels,
+        quality,
+      );
     }
 
     // Compute savings (never report negative savings)
     const estimatedSavings = Math.max(0, currentSize - estimatedJpegSize);
-    const savingsPercent = currentSize > 0
-      ? (estimatedSavings / currentSize) * 100
-      : 0;
+    const savingsPercent = currentSize > 0 ? (estimatedSavings / currentSize) * 100 : 0;
 
     // Compute effective DPI (undefined if we can't determine display size)
     // We don't have display dimensions from ImageInfo alone, so DPI is
@@ -339,9 +339,7 @@ export function analyzeImages(
   const totalCurrentSize = analyses.reduce((sum, a) => sum + a.currentSize, 0);
   const totalEstimatedSize = analyses.reduce((sum, a) => sum + a.estimatedJpegSize, 0);
   const totalSavings = Math.max(0, totalCurrentSize - totalEstimatedSize);
-  const totalSavingsPercent = totalCurrentSize > 0
-    ? (totalSavings / totalCurrentSize) * 100
-    : 0;
+  const totalSavingsPercent = totalCurrentSize > 0 ? (totalSavings / totalCurrentSize) * 100 : 0;
 
   return {
     images: analyses,

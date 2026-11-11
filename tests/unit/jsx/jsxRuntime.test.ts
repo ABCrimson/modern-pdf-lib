@@ -11,14 +11,7 @@ import { PdfDocument } from '../../../src/core/pdfDocument.js';
 import { PageSizes } from '../../../src/core/pdfPage.js';
 import { parseContentStream } from '../../../src/parser/contentStreamParser.js';
 import { extractText } from '../../../src/parser/textExtractor.js';
-import {
-  h,
-  jsx,
-  jsxs,
-  Fragment,
-  renderToPdf,
-  type PdfNode,
-} from '../../../src/jsx/jsxRuntime.js';
+import { h, jsx, jsxs, Fragment, renderToPdf, type PdfNode } from '../../../src/jsx/jsxRuntime.js';
 
 /** Load rendered bytes and return the extracted text of every page. */
 async function pageTexts(bytes: Uint8Array): Promise<string[]> {
@@ -43,12 +36,7 @@ describe('jsxRuntime — renderToPdf', () => {
       h(
         'document',
         { size: PageSizes.A4 },
-        h(
-          'page',
-          null,
-          h('text', { size: 24 }, 'Hello'),
-          h('text', null, 'World'),
-        ),
+        h('page', null, h('text', { size: 24 }, 'Hello'), h('text', null, 'World')),
       ),
     );
 
@@ -94,11 +82,7 @@ describe('jsxRuntime — renderToPdf', () => {
       h(
         'document',
         null,
-        h(
-          'page',
-          null,
-          h(Fragment, null, h('text', null, 'Alpha'), h('text', null, 'Beta')),
-        ),
+        h('page', null, h(Fragment, null, h('text', null, 'Alpha'), h('text', null, 'Beta'))),
       ),
     );
 
@@ -119,9 +103,7 @@ describe('jsxRuntime — renderToPdf', () => {
 
     const doc = await PdfDocument.load(bytes);
     const page = doc.getPage(0);
-    const { extractTextWithPositions } = await import(
-      '../../../src/parser/textExtractor.js'
-    );
+    const { extractTextWithPositions } = await import('../../../src/parser/textExtractor.js');
     const ops = parseContentStream(page.getContentStream());
     const items = extractTextWithPositions(ops, page.getOriginalResources());
     const anchored = items.find((i) => i.text.includes('Anchored'));
@@ -181,15 +163,7 @@ describe('jsxRuntime — renderToPdf', () => {
       h(
         'document',
         null,
-        h(
-          'page',
-          null,
-          null,
-          undefined,
-          false,
-          true,
-          h('text', null, 'Survivor'),
-        ),
+        h('page', null, null, undefined, false, true, h('text', null, 'Survivor')),
       ),
     );
 
@@ -215,18 +189,14 @@ describe('jsxRuntime — renderToPdf', () => {
   });
 
   it('renders a bare string/number child of <page> as a text line', async () => {
-    const bytes = await renderToPdf(
-      h('document', null, h('page', null, 'BareString', 42)),
-    );
+    const bytes = await renderToPdf(h('document', null, h('page', null, 'BareString', 42)));
     const texts = await pageTexts(bytes);
     expect(texts[0]).toContain('BareString');
     expect(texts[0]).toContain('42');
   });
 
   it('keeps ALL pages when the root is a Fragment of <page> with no <document>', async () => {
-    const bytes = await renderToPdf(
-      h(Fragment, null, h('page', null, 'A'), h('page', null, 'B')),
-    );
+    const bytes = await renderToPdf(h(Fragment, null, h('page', null, 'A'), h('page', null, 'B')));
     const doc = await PdfDocument.load(bytes);
     expect(doc.getPageCount()).toBe(2);
     const texts = await pageTexts(bytes);
@@ -235,10 +205,7 @@ describe('jsxRuntime — renderToPdf', () => {
   });
 
   it('keeps ALL pages when the root is an array of <page> with no <document>', async () => {
-    const bytes = await renderToPdf([
-      h('page', null, 'A'),
-      h('page', null, 'B'),
-    ]);
+    const bytes = await renderToPdf([h('page', null, 'A'), h('page', null, 'B')]);
     const doc = await PdfDocument.load(bytes);
     expect(doc.getPageCount()).toBe(2);
     const texts = await pageTexts(bytes);

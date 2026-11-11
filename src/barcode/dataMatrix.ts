@@ -83,32 +83,272 @@ interface SymbolSize {
 
 const SYMBOL_SIZES: readonly SymbolSize[] = [
   // rows, cols, mappingRows, mappingCols, dataCW, ecCW, rsBlocks, hRegions, vRegions
-  { rows: 10, cols: 10, mappingRows: 8, mappingCols: 8, dataCodewords: 3, ecCodewords: 5, rsBlocks: 1, hRegions: 1, vRegions: 1 },
-  { rows: 12, cols: 12, mappingRows: 10, mappingCols: 10, dataCodewords: 5, ecCodewords: 7, rsBlocks: 1, hRegions: 1, vRegions: 1 },
-  { rows: 14, cols: 14, mappingRows: 12, mappingCols: 12, dataCodewords: 8, ecCodewords: 10, rsBlocks: 1, hRegions: 1, vRegions: 1 },
-  { rows: 16, cols: 16, mappingRows: 14, mappingCols: 14, dataCodewords: 12, ecCodewords: 12, rsBlocks: 1, hRegions: 1, vRegions: 1 },
-  { rows: 18, cols: 18, mappingRows: 16, mappingCols: 16, dataCodewords: 18, ecCodewords: 14, rsBlocks: 1, hRegions: 1, vRegions: 1 },
-  { rows: 20, cols: 20, mappingRows: 18, mappingCols: 18, dataCodewords: 22, ecCodewords: 18, rsBlocks: 1, hRegions: 1, vRegions: 1 },
-  { rows: 22, cols: 22, mappingRows: 20, mappingCols: 20, dataCodewords: 30, ecCodewords: 20, rsBlocks: 1, hRegions: 1, vRegions: 1 },
-  { rows: 24, cols: 24, mappingRows: 22, mappingCols: 22, dataCodewords: 36, ecCodewords: 24, rsBlocks: 1, hRegions: 1, vRegions: 1 },
-  { rows: 26, cols: 26, mappingRows: 24, mappingCols: 24, dataCodewords: 44, ecCodewords: 28, rsBlocks: 1, hRegions: 1, vRegions: 1 },
+  {
+    rows: 10,
+    cols: 10,
+    mappingRows: 8,
+    mappingCols: 8,
+    dataCodewords: 3,
+    ecCodewords: 5,
+    rsBlocks: 1,
+    hRegions: 1,
+    vRegions: 1,
+  },
+  {
+    rows: 12,
+    cols: 12,
+    mappingRows: 10,
+    mappingCols: 10,
+    dataCodewords: 5,
+    ecCodewords: 7,
+    rsBlocks: 1,
+    hRegions: 1,
+    vRegions: 1,
+  },
+  {
+    rows: 14,
+    cols: 14,
+    mappingRows: 12,
+    mappingCols: 12,
+    dataCodewords: 8,
+    ecCodewords: 10,
+    rsBlocks: 1,
+    hRegions: 1,
+    vRegions: 1,
+  },
+  {
+    rows: 16,
+    cols: 16,
+    mappingRows: 14,
+    mappingCols: 14,
+    dataCodewords: 12,
+    ecCodewords: 12,
+    rsBlocks: 1,
+    hRegions: 1,
+    vRegions: 1,
+  },
+  {
+    rows: 18,
+    cols: 18,
+    mappingRows: 16,
+    mappingCols: 16,
+    dataCodewords: 18,
+    ecCodewords: 14,
+    rsBlocks: 1,
+    hRegions: 1,
+    vRegions: 1,
+  },
+  {
+    rows: 20,
+    cols: 20,
+    mappingRows: 18,
+    mappingCols: 18,
+    dataCodewords: 22,
+    ecCodewords: 18,
+    rsBlocks: 1,
+    hRegions: 1,
+    vRegions: 1,
+  },
+  {
+    rows: 22,
+    cols: 22,
+    mappingRows: 20,
+    mappingCols: 20,
+    dataCodewords: 30,
+    ecCodewords: 20,
+    rsBlocks: 1,
+    hRegions: 1,
+    vRegions: 1,
+  },
+  {
+    rows: 24,
+    cols: 24,
+    mappingRows: 22,
+    mappingCols: 22,
+    dataCodewords: 36,
+    ecCodewords: 24,
+    rsBlocks: 1,
+    hRegions: 1,
+    vRegions: 1,
+  },
+  {
+    rows: 26,
+    cols: 26,
+    mappingRows: 24,
+    mappingCols: 24,
+    dataCodewords: 44,
+    ecCodewords: 28,
+    rsBlocks: 1,
+    hRegions: 1,
+    vRegions: 1,
+  },
   // Multi-region sizes (2×2 data regions)
-  { rows: 32, cols: 32, mappingRows: 28, mappingCols: 28, dataCodewords: 62, ecCodewords: 36, rsBlocks: 1, hRegions: 2, vRegions: 2 },
-  { rows: 36, cols: 36, mappingRows: 32, mappingCols: 32, dataCodewords: 86, ecCodewords: 42, rsBlocks: 1, hRegions: 2, vRegions: 2 },
-  { rows: 40, cols: 40, mappingRows: 36, mappingCols: 36, dataCodewords: 114, ecCodewords: 48, rsBlocks: 1, hRegions: 2, vRegions: 2 },
-  { rows: 44, cols: 44, mappingRows: 40, mappingCols: 40, dataCodewords: 144, ecCodewords: 56, rsBlocks: 1, hRegions: 2, vRegions: 2 },
-  { rows: 48, cols: 48, mappingRows: 44, mappingCols: 44, dataCodewords: 174, ecCodewords: 68, rsBlocks: 1, hRegions: 2, vRegions: 2 },
+  {
+    rows: 32,
+    cols: 32,
+    mappingRows: 28,
+    mappingCols: 28,
+    dataCodewords: 62,
+    ecCodewords: 36,
+    rsBlocks: 1,
+    hRegions: 2,
+    vRegions: 2,
+  },
+  {
+    rows: 36,
+    cols: 36,
+    mappingRows: 32,
+    mappingCols: 32,
+    dataCodewords: 86,
+    ecCodewords: 42,
+    rsBlocks: 1,
+    hRegions: 2,
+    vRegions: 2,
+  },
+  {
+    rows: 40,
+    cols: 40,
+    mappingRows: 36,
+    mappingCols: 36,
+    dataCodewords: 114,
+    ecCodewords: 48,
+    rsBlocks: 1,
+    hRegions: 2,
+    vRegions: 2,
+  },
+  {
+    rows: 44,
+    cols: 44,
+    mappingRows: 40,
+    mappingCols: 40,
+    dataCodewords: 144,
+    ecCodewords: 56,
+    rsBlocks: 1,
+    hRegions: 2,
+    vRegions: 2,
+  },
+  {
+    rows: 48,
+    cols: 48,
+    mappingRows: 44,
+    mappingCols: 44,
+    dataCodewords: 174,
+    ecCodewords: 68,
+    rsBlocks: 1,
+    hRegions: 2,
+    vRegions: 2,
+  },
   // Multi-region sizes (2×2 data regions, multiple RS blocks)
-  { rows: 52, cols: 52, mappingRows: 48, mappingCols: 48, dataCodewords: 204, ecCodewords: 84, rsBlocks: 2, hRegions: 2, vRegions: 2 },
-  { rows: 64, cols: 64, mappingRows: 56, mappingCols: 56, dataCodewords: 280, ecCodewords: 112, rsBlocks: 2, hRegions: 4, vRegions: 4 },
-  { rows: 72, cols: 72, mappingRows: 64, mappingCols: 64, dataCodewords: 368, ecCodewords: 144, rsBlocks: 4, hRegions: 4, vRegions: 4 },
-  { rows: 80, cols: 80, mappingRows: 72, mappingCols: 72, dataCodewords: 456, ecCodewords: 192, rsBlocks: 4, hRegions: 4, vRegions: 4 },
-  { rows: 88, cols: 88, mappingRows: 80, mappingCols: 80, dataCodewords: 576, ecCodewords: 224, rsBlocks: 4, hRegions: 4, vRegions: 4 },
-  { rows: 96, cols: 96, mappingRows: 88, mappingCols: 88, dataCodewords: 696, ecCodewords: 272, rsBlocks: 4, hRegions: 4, vRegions: 4 },
-  { rows: 104, cols: 104, mappingRows: 96, mappingCols: 96, dataCodewords: 816, ecCodewords: 336, rsBlocks: 6, hRegions: 4, vRegions: 4 },
-  { rows: 120, cols: 120, mappingRows: 108, mappingCols: 108, dataCodewords: 1050, ecCodewords: 408, rsBlocks: 6, hRegions: 6, vRegions: 6 },
-  { rows: 132, cols: 132, mappingRows: 120, mappingCols: 120, dataCodewords: 1304, ecCodewords: 496, rsBlocks: 8, hRegions: 6, vRegions: 6 },
-  { rows: 144, cols: 144, mappingRows: 132, mappingCols: 132, dataCodewords: 1558, ecCodewords: 620, rsBlocks: 10, hRegions: 6, vRegions: 6 },
+  {
+    rows: 52,
+    cols: 52,
+    mappingRows: 48,
+    mappingCols: 48,
+    dataCodewords: 204,
+    ecCodewords: 84,
+    rsBlocks: 2,
+    hRegions: 2,
+    vRegions: 2,
+  },
+  {
+    rows: 64,
+    cols: 64,
+    mappingRows: 56,
+    mappingCols: 56,
+    dataCodewords: 280,
+    ecCodewords: 112,
+    rsBlocks: 2,
+    hRegions: 4,
+    vRegions: 4,
+  },
+  {
+    rows: 72,
+    cols: 72,
+    mappingRows: 64,
+    mappingCols: 64,
+    dataCodewords: 368,
+    ecCodewords: 144,
+    rsBlocks: 4,
+    hRegions: 4,
+    vRegions: 4,
+  },
+  {
+    rows: 80,
+    cols: 80,
+    mappingRows: 72,
+    mappingCols: 72,
+    dataCodewords: 456,
+    ecCodewords: 192,
+    rsBlocks: 4,
+    hRegions: 4,
+    vRegions: 4,
+  },
+  {
+    rows: 88,
+    cols: 88,
+    mappingRows: 80,
+    mappingCols: 80,
+    dataCodewords: 576,
+    ecCodewords: 224,
+    rsBlocks: 4,
+    hRegions: 4,
+    vRegions: 4,
+  },
+  {
+    rows: 96,
+    cols: 96,
+    mappingRows: 88,
+    mappingCols: 88,
+    dataCodewords: 696,
+    ecCodewords: 272,
+    rsBlocks: 4,
+    hRegions: 4,
+    vRegions: 4,
+  },
+  {
+    rows: 104,
+    cols: 104,
+    mappingRows: 96,
+    mappingCols: 96,
+    dataCodewords: 816,
+    ecCodewords: 336,
+    rsBlocks: 6,
+    hRegions: 4,
+    vRegions: 4,
+  },
+  {
+    rows: 120,
+    cols: 120,
+    mappingRows: 108,
+    mappingCols: 108,
+    dataCodewords: 1050,
+    ecCodewords: 408,
+    rsBlocks: 6,
+    hRegions: 6,
+    vRegions: 6,
+  },
+  {
+    rows: 132,
+    cols: 132,
+    mappingRows: 120,
+    mappingCols: 120,
+    dataCodewords: 1304,
+    ecCodewords: 496,
+    rsBlocks: 8,
+    hRegions: 6,
+    vRegions: 6,
+  },
+  {
+    rows: 144,
+    cols: 144,
+    mappingRows: 132,
+    mappingCols: 132,
+    dataCodewords: 1558,
+    ecCodewords: 620,
+    rsBlocks: 10,
+    hRegions: 6,
+    vRegions: 6,
+  },
 ];
 
 // ---------------------------------------------------------------------------
@@ -203,8 +443,10 @@ function encodeAsciiMode(data: string): number[] {
     // Check for digit pair
     if (
       i + 1 < data.length &&
-      c >= 0x30 && c <= 0x39 &&
-      data.charCodeAt(i + 1) >= 0x30 && data.charCodeAt(i + 1) <= 0x39
+      c >= 0x30 &&
+      c <= 0x39 &&
+      data.charCodeAt(i + 1) >= 0x30 &&
+      data.charCodeAt(i + 1) <= 0x39
     ) {
       // Encode digit pair as (numeric value + 130)
       const num = (c - 0x30) * 10 + (data.charCodeAt(i + 1) - 0x30);
@@ -287,11 +529,7 @@ function padCodewords(codewords: number[], capacity: number): number[] {
  * diagonal pattern, handling corner cases for modules that would fall
  * outside the matrix bounds.
  */
-function placeModules(
-  mappingRows: number,
-  mappingCols: number,
-  codewords: Uint8Array,
-): Int8Array {
+function placeModules(mappingRows: number, mappingCols: number, codewords: Uint8Array): Int8Array {
   // The placement array: -1 = unset, 0 = light, 1 = dark
   const matrix = new Int8Array(mappingRows * mappingCols);
   matrix.fill(-1);
@@ -315,9 +553,8 @@ function placeModules(
     // Bounds check after wrapping
     if (row >= 0 && row < mappingRows && col >= 0 && col < mappingCols) {
       if (matrix[row * mappingCols + col] === -1) {
-        const bit = codewordIdx < codewords.length
-          ? ((codewords[codewordIdx]! & bitMask) !== 0 ? 1 : 0)
-          : 0;
+        const bit =
+          codewordIdx < codewords.length ? ((codewords[codewordIdx]! & bitMask) !== 0 ? 1 : 0) : 0;
         matrix[row * mappingCols + col] = bit;
       }
     }
@@ -333,10 +570,10 @@ function placeModules(
     placeModule(row - 2, col - 1, codewordIdx, 0x40);
     placeModule(row - 1, col - 2, codewordIdx, 0x20);
     placeModule(row - 1, col - 1, codewordIdx, 0x10);
-    placeModule(row - 1, col,     codewordIdx, 0x08);
-    placeModule(row,     col - 2, codewordIdx, 0x04);
-    placeModule(row,     col - 1, codewordIdx, 0x02);
-    placeModule(row,     col,     codewordIdx, 0x01);
+    placeModule(row - 1, col, codewordIdx, 0x08);
+    placeModule(row, col - 2, codewordIdx, 0x04);
+    placeModule(row, col - 1, codewordIdx, 0x02);
+    placeModule(row, col, codewordIdx, 0x01);
   }
 
   // Corner cases — special placement patterns for the 4 corners
@@ -447,15 +684,12 @@ function placeModules(
  * on bottom and left), clock pattern (alternating on top and right), and
  * alignment patterns for multi-region symbols.
  */
-function buildSymbol(
-  symbolSize: SymbolSize,
-  mappingMatrix: Int8Array,
-): boolean[] {
+function buildSymbol(symbolSize: SymbolSize, mappingMatrix: Int8Array): boolean[] {
   const { rows, cols, mappingRows, mappingCols, hRegions, vRegions } = symbolSize;
   const modules = new Array<boolean>(rows * cols).fill(false);
 
-  const regionWidth = mappingCols / hRegions;   // data cols per region
-  const regionHeight = mappingRows / vRegions;  // data rows per region
+  const regionWidth = mappingCols / hRegions; // data cols per region
+  const regionHeight = mappingRows / vRegions; // data rows per region
 
   // Helper to set a module in the full symbol
   function set(row: number, col: number, dark: boolean): void {
@@ -583,11 +817,7 @@ export function encodeDataMatrix(data: string): DataMatrixResult {
   }
 
   // Step 5: Place modules using the standard placement algorithm
-  const mappingMatrix = placeModules(
-    symbolSize.mappingRows,
-    symbolSize.mappingCols,
-    allCodewords,
-  );
+  const mappingMatrix = placeModules(symbolSize.mappingRows, symbolSize.mappingCols, allCodewords);
 
   // Step 6: Build the full symbol with finder/clock patterns
   const modules = buildSymbol(symbolSize, mappingMatrix);

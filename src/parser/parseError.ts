@@ -44,7 +44,7 @@ export function formatHexContext(data: Uint8Array, offset: number, windowSize = 
 
   for (let i = 0; i < slice.length; i++) {
     const byte = slice[i]!;
-    const isErrorByte = (start + i) === offset;
+    const isErrorByte = start + i === offset;
     const hex = byte.toString(16).padStart(2, '0');
     hexParts.push(isErrorByte ? `[${hex}]` : ` ${hex} `);
     asciiParts.push(byte >= 0x20 && byte <= 0x7e ? String.fromCharCode(byte) : '.');

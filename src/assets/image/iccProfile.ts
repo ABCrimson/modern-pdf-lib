@@ -12,14 +12,7 @@
  * No Buffer — uses Uint8Array exclusively.
  */
 
-import {
-  PdfArray,
-  PdfDict,
-  PdfName,
-  PdfNumber,
-  PdfRef,
-  PdfStream,
-} from '../../core/pdfObjects.js';
+import { PdfArray, PdfDict, PdfName, PdfNumber, PdfRef, PdfStream } from '../../core/pdfObjects.js';
 import type { PdfObjectRegistry } from '../../core/pdfObjects.js';
 
 // ---------------------------------------------------------------------------
@@ -50,12 +43,12 @@ export interface IccProfile {
  */
 const ICC_COLOR_SPACE_MAP: Record<string, string> = {
   'RGB ': 'RGB',
-  'CMYK': 'CMYK',
-  'GRAY': 'GRAY',
+  CMYK: 'CMYK',
+  GRAY: 'GRAY',
   'Lab ': 'Lab',
   'XYZ ': 'XYZ',
   'Luv ': 'Luv',
-  'YCbr': 'YCbCr',
+  YCbr: 'YCbCr',
   'Yxy ': 'Yxy',
   'HSV ': 'HSV',
   'HLS ': 'HLS',
@@ -142,7 +135,10 @@ export function parseIccDescription(data: Uint8Array): string | undefined {
     // Find the null terminator within the string range
     let nullIdx = strEnd;
     for (let j = tagOffset + 12; j < strEnd; j++) {
-      if (data[j] === 0) { nullIdx = j; break; }
+      if (data[j] === 0) {
+        nullIdx = j;
+        break;
+      }
     }
 
     const strBytes = data.subarray(tagOffset + 12, nullIdx);
@@ -227,8 +223,7 @@ export function extractIccProfile(
 
   // Read /N (number of components) from the profile stream's dictionary
   const nEntry = profileStream.dict.get('/N');
-  const components =
-    nEntry && nEntry.kind === 'number' ? (nEntry as PdfNumber).value : 0;
+  const components = nEntry && nEntry.kind === 'number' ? (nEntry as PdfNumber).value : 0;
 
   if (components < 1 || components > 4) return undefined;
 
@@ -273,10 +268,7 @@ export function extractIccProfile(
  * }
  * ```
  */
-export function embedIccProfile(
-  profile: IccProfile,
-  registry: PdfObjectRegistry,
-): PdfRef {
+export function embedIccProfile(profile: IccProfile, registry: PdfObjectRegistry): PdfRef {
   const dict = new PdfDict();
   dict.set('/N', PdfNumber.of(profile.components));
   dict.set('/Length', PdfNumber.of(profile.data.length));

@@ -105,11 +105,9 @@ async function generateRootCA(
   const subject = buildName(name);
 
   const notBefore = options?.notBefore ?? new Date();
-  const notAfter = options?.notAfter ?? new Date(notBefore.getTime() + 10 * 365 * 24 * 60 * 60 * 1000);
-  const validity = encodeSequence([
-    encodeUTCTime(notBefore),
-    encodeUTCTime(notAfter),
-  ]);
+  const notAfter =
+    options?.notAfter ?? new Date(notBefore.getTime() + 10 * 365 * 24 * 60 * 60 * 1000);
+  const validity = encodeSequence([encodeUTCTime(notBefore), encodeUTCTime(notAfter)]);
 
   // Basic Constraints: cA=TRUE
   const basicConstraints = encodeSequence([encodeBoolean(true)]);
@@ -122,8 +120,13 @@ async function generateRootCA(
   const extensionsWrapper = encodeContextTag(3, extSeq);
 
   const tbsCert = encodeSequence([
-    version, serialNumber, SHA256_RSA_ALGO,
-    issuer, validity, subject, spkiDer,
+    version,
+    serialNumber,
+    SHA256_RSA_ALGO,
+    issuer,
+    validity,
+    subject,
+    spkiDer,
     extensionsWrapper,
   ]);
 
@@ -138,11 +141,7 @@ async function generateRootCA(
     ),
   );
 
-  const certificate = encodeSequence([
-    tbsCert,
-    SHA256_RSA_ALGO,
-    encodeBitString(signature),
-  ]);
+  const certificate = encodeSequence([tbsCert, SHA256_RSA_ALGO, encodeBitString(signature)]);
 
   return { certificate, keyPair };
 }
@@ -187,11 +186,9 @@ async function generateIntermediateCA(
   const subject = buildName(name);
 
   const notBefore = options?.notBefore ?? new Date();
-  const notAfter = options?.notAfter ?? new Date(notBefore.getTime() + 5 * 365 * 24 * 60 * 60 * 1000);
-  const validity = encodeSequence([
-    encodeUTCTime(notBefore),
-    encodeUTCTime(notAfter),
-  ]);
+  const notAfter =
+    options?.notAfter ?? new Date(notBefore.getTime() + 5 * 365 * 24 * 60 * 60 * 1000);
+  const validity = encodeSequence([encodeUTCTime(notBefore), encodeUTCTime(notAfter)]);
 
   // Basic Constraints: cA=TRUE
   const basicConstraints = encodeSequence([encodeBoolean(true)]);
@@ -204,8 +201,13 @@ async function generateIntermediateCA(
   const extensionsWrapper = encodeContextTag(3, extSeq);
 
   const tbsCert = encodeSequence([
-    version, serialNumber, SHA256_RSA_ALGO,
-    issuerSubject, validity, subject, spkiDer,
+    version,
+    serialNumber,
+    SHA256_RSA_ALGO,
+    issuerSubject,
+    validity,
+    subject,
+    spkiDer,
     extensionsWrapper,
   ]);
 
@@ -220,11 +222,7 @@ async function generateIntermediateCA(
     ),
   );
 
-  const certificate = encodeSequence([
-    tbsCert,
-    SHA256_RSA_ALGO,
-    encodeBitString(signature),
-  ]);
+  const certificate = encodeSequence([tbsCert, SHA256_RSA_ALGO, encodeBitString(signature)]);
 
   return { certificate, keyPair };
 }
@@ -265,15 +263,17 @@ async function generateLeafCert(
 
   const notBefore = options?.notBefore ?? new Date();
   const notAfter = options?.notAfter ?? new Date(notBefore.getTime() + 365 * 24 * 60 * 60 * 1000);
-  const validity = encodeSequence([
-    encodeUTCTime(notBefore),
-    encodeUTCTime(notAfter),
-  ]);
+  const validity = encodeSequence([encodeUTCTime(notBefore), encodeUTCTime(notAfter)]);
 
   // No Basic Constraints (leaf cert)
   const tbsCert = encodeSequence([
-    version, serialNumber, SHA256_RSA_ALGO,
-    issuerSubject, validity, subject, spkiDer,
+    version,
+    serialNumber,
+    SHA256_RSA_ALGO,
+    issuerSubject,
+    validity,
+    subject,
+    spkiDer,
   ]);
 
   const signature = new Uint8Array(
@@ -287,11 +287,7 @@ async function generateLeafCert(
     ),
   );
 
-  return encodeSequence([
-    tbsCert,
-    SHA256_RSA_ALGO,
-    encodeBitString(signature),
-  ]);
+  return encodeSequence([tbsCert, SHA256_RSA_ALGO, encodeBitString(signature)]);
 }
 
 /**
@@ -336,10 +332,7 @@ describe('buildCertificateChain', () => {
       intermediate.keyPair,
     );
 
-    const result = buildCertificateChain(leaf, [
-      intermediate.certificate,
-      root.certificate,
-    ]);
+    const result = buildCertificateChain(leaf, [intermediate.certificate, root.certificate]);
 
     expect(result.chain).toHaveLength(3);
     expect(result.complete).toBe(true);
@@ -429,9 +422,7 @@ describe('validateCertificateChain', () => {
     const root = await generateRootCA('Root CA');
     const leaf = await generateLeafCert('End Entity', root.certificate, root.keyPair);
 
-    const result = await validateCertificateChain(
-      [leaf, root.certificate],
-    );
+    const result = await validateCertificateChain([leaf, root.certificate]);
 
     expect(result.valid).toBe(true);
     expect(result.certificates).toHaveLength(2);
@@ -454,9 +445,11 @@ describe('validateCertificateChain', () => {
       intermediate.keyPair,
     );
 
-    const result = await validateCertificateChain(
-      [leaf, intermediate.certificate, root.certificate],
-    );
+    const result = await validateCertificateChain([
+      leaf,
+      intermediate.certificate,
+      root.certificate,
+    ]);
 
     expect(result.valid).toBe(true);
     expect(result.certificates).toHaveLength(3);
@@ -475,9 +468,7 @@ describe('validateCertificateChain', () => {
       notAfter: expiredDate,
     });
 
-    const result = await validateCertificateChain(
-      [leaf, root.certificate],
-    );
+    const result = await validateCertificateChain([leaf, root.certificate]);
 
     expect(result.valid).toBe(false);
     expect(result.certificates[0]!.withinValidityPeriod).toBe(false);
@@ -494,9 +485,7 @@ describe('validateCertificateChain', () => {
       notAfter: farFuture,
     });
 
-    const result = await validateCertificateChain(
-      [leaf, root.certificate],
-    );
+    const result = await validateCertificateChain([leaf, root.certificate]);
 
     expect(result.valid).toBe(false);
     expect(result.certificates[0]!.withinValidityPeriod).toBe(false);
@@ -517,10 +506,9 @@ describe('validateCertificateChain', () => {
 
     // Validate at a time within the cert's validity period
     const validTime = new Date(Date.UTC(2020, 6, 1));
-    const result = await validateCertificateChain(
-      [leaf, root.certificate],
-      { validationTime: validTime },
-    );
+    const result = await validateCertificateChain([leaf, root.certificate], {
+      validationTime: validTime,
+    });
 
     expect(result.certificates[0]!.withinValidityPeriod).toBe(true);
   });
@@ -549,9 +537,7 @@ describe('validateCertificateChain', () => {
     const tampered = new Uint8Array(leaf);
     tampered[tampered.length - 10] ^= 0xff;
 
-    const result = await validateCertificateChain(
-      [tampered, root.certificate],
-    );
+    const result = await validateCertificateChain([tampered, root.certificate]);
 
     expect(result.certificates[0]!.signatureValid).toBe(false);
   });
@@ -561,10 +547,7 @@ describe('validateCertificateChain', () => {
     const leaf = await generateLeafCert('Entity', root.certificate, root.keyPair);
 
     // Provide the root as a trusted cert, but not in the chain
-    const result = await validateCertificateChain(
-      [leaf],
-      { trustedCerts: [root.certificate] },
-    );
+    const result = await validateCertificateChain([leaf], { trustedCerts: [root.certificate] });
 
     // The leaf's issuer should be found in trustedCerts
     expect(result.certificates[0]!.signatureValid).toBe(true);
@@ -578,15 +561,13 @@ describe('validateCertificateChain', () => {
       root.certificate,
       root.keyPair,
     );
-    const leaf = await generateLeafCert(
-      'Entity',
-      intermediate.certificate,
-      intermediate.keyPair,
-    );
+    const leaf = await generateLeafCert('Entity', intermediate.certificate, intermediate.keyPair);
 
-    const result = await validateCertificateChain(
-      [leaf, intermediate.certificate, root.certificate],
-    );
+    const result = await validateCertificateChain([
+      leaf,
+      intermediate.certificate,
+      root.certificate,
+    ]);
 
     // Intermediate should have valid basic constraints (cA=TRUE)
     expect(result.certificates[1]!.basicConstraintsValid).toBe(true);
@@ -596,9 +577,7 @@ describe('validateCertificateChain', () => {
     const root = await generateRootCA('My Root CA');
     const leaf = await generateLeafCert('My Leaf Cert', root.certificate, root.keyPair);
 
-    const result = await validateCertificateChain(
-      [leaf, root.certificate],
-    );
+    const result = await validateCertificateChain([leaf, root.certificate]);
 
     expect(result.certificates[0]!.subject).toBe('My Leaf Cert');
     expect(result.certificates[1]!.subject).toBe('My Root CA');
@@ -608,9 +587,7 @@ describe('validateCertificateChain', () => {
     const root = await generateRootCA('Root CA');
     const leaf = await generateLeafCert('Entity', root.certificate, root.keyPair);
 
-    const result = await validateCertificateChain(
-      [leaf, root.certificate],
-    );
+    const result = await validateCertificateChain([leaf, root.certificate]);
 
     expect(result.certificates[0]!.notBefore).toBeInstanceOf(Date);
     expect(result.certificates[0]!.notAfter).toBeInstanceOf(Date);
@@ -625,9 +602,7 @@ describe('validateCertificateChain', () => {
     const leaf = await generateLeafCert('Entity', root1.certificate, root1.keyPair);
 
     // Present root2 as the issuer (wrong key)
-    const result = await validateCertificateChain(
-      [leaf, root2.certificate],
-    );
+    const result = await validateCertificateChain([leaf, root2.certificate]);
 
     // Signature should fail because root2 didn't sign the leaf
     expect(result.certificates[0]!.signatureValid).toBe(false);

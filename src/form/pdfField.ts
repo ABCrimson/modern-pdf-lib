@@ -188,12 +188,7 @@ export abstract class PdfField {
   /** Parent field dictionary chain for building full names. */
   protected readonly parentNames: string[];
 
-  constructor(
-    name: string,
-    dict: PdfDict,
-    widgetDict: PdfDict,
-    parentNames: string[] = [],
-  ) {
+  constructor(name: string, dict: PdfDict, widgetDict: PdfDict, parentNames: string[] = []) {
     this.name = name;
     this.dict = dict;
     this.widgetDict = widgetDict;

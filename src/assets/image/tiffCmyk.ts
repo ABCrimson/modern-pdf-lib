@@ -80,7 +80,7 @@ export function convertTiffCmykToRgb(
   if (cmykPixels.length !== expectedLength) {
     throw new Error(
       `CMYK pixel data length mismatch: expected ${expectedLength} bytes ` +
-      `(${width}x${height}x4), got ${cmykPixels.length}`,
+        `(${width}x${height}x4), got ${cmykPixels.length}`,
     );
   }
 
@@ -127,7 +127,7 @@ export function embedTiffCmyk(
   if (pixels.length !== expectedLength) {
     throw new Error(
       `CMYK pixel data length mismatch: expected ${expectedLength} bytes ` +
-      `(${width}x${height}x4), got ${pixels.length}`,
+        `(${width}x${height}x4), got ${pixels.length}`,
     );
   }
 

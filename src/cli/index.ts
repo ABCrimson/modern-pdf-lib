@@ -42,7 +42,8 @@ main().catch((err: unknown) => {
 });
 
 function printHelp(): void {
-  console.log(`
+  console.log(
+    `
 modern-pdf-lib CLI
 
 Usage:
@@ -56,5 +57,6 @@ Options:
   --version, -v   Show version
 
 Run "modern-pdf optimize --help" for optimize options.
-`.trim());
+`.trim(),
+  );
 }

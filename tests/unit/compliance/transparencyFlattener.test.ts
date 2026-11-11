@@ -26,18 +26,12 @@ const encoder = new TextEncoder();
 const decoder = new TextDecoder();
 
 function makePdf(body: string): Uint8Array {
-  return encoder.encode(
-    `%PDF-1.4\n1 0 obj\n${body}\nendobj\ntrailer\n<< /Root 1 0 R >>\n%%EOF\n`,
-  );
+  return encoder.encode(`%PDF-1.4\n1 0 obj\n${body}\nendobj\ntrailer\n<< /Root 1 0 R >>\n%%EOF\n`);
 }
 
 function makeMultiObjPdf(...bodies: string[]): Uint8Array {
-  const objs = bodies.map(
-    (b, i) => `${i + 1} 0 obj\n${b}\nendobj`,
-  );
-  return encoder.encode(
-    '%PDF-1.4\n' + objs.join('\n') + '\ntrailer\n<< /Root 1 0 R >>\n%%EOF\n',
-  );
+  const objs = bodies.map((b, i) => `${i + 1} 0 obj\n${b}\nendobj`);
+  return encoder.encode('%PDF-1.4\n' + objs.join('\n') + '\ntrailer\n<< /Root 1 0 R >>\n%%EOF\n');
 }
 
 // ---------------------------------------------------------------------------
@@ -103,11 +97,9 @@ describe('detectTransparency — edge cases', () => {
   });
 
   it('returns correct type for each finding', () => {
-    const pdf = makePdf(
-      '<< /CA 0.5 /ca 0.3 /SMask 10 0 R /BM /Multiply >>',
-    );
+    const pdf = makePdf('<< /CA 0.5 /ca 0.3 /SMask 10 0 R /BM /Multiply >>');
     const info = detectTransparency(pdf);
-    const types = info.findings.map(f => f.type);
+    const types = info.findings.map((f) => f.type);
     expect(types).toContain('stroke-opacity');
     expect(types).toContain('fill-opacity');
     expect(types).toContain('soft-mask');
@@ -126,17 +118,11 @@ describe('detectTransparency — edge cases', () => {
   });
 
   it('positions are monotonically increasing for ordered findings', () => {
-    const pdf = makeMultiObjPdf(
-      '<< /CA 0.1 >>',
-      '<< /CA 0.2 >>',
-      '<< /CA 0.3 >>',
-    );
+    const pdf = makeMultiObjPdf('<< /CA 0.1 >>', '<< /CA 0.2 >>', '<< /CA 0.3 >>');
     const info = detectTransparency(pdf);
     expect(info.findings.length).toBe(3);
     for (let i = 1; i < info.findings.length; i++) {
-      expect(info.findings[i]!.position).toBeGreaterThan(
-        info.findings[i - 1]!.position,
-      );
+      expect(info.findings[i]!.position).toBeGreaterThan(info.findings[i - 1]!.position);
     }
   });
 });
@@ -193,10 +179,7 @@ describe('flattenTransparency — edge cases', () => {
   });
 
   it('flattens transparency across multiple objects', () => {
-    const pdf = makeMultiObjPdf(
-      '<< /CA 0.1 /BM /Multiply >>',
-      '<< /ca 0.2 /SMask 10 0 R >>',
-    );
+    const pdf = makeMultiObjPdf('<< /CA 0.1 /BM /Multiply >>', '<< /ca 0.2 /SMask 10 0 R >>');
     const result = flattenTransparency(pdf);
     const after = detectTransparency(result);
     expect(after.hasTransparency).toBe(false);

@@ -3,10 +3,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  PdfStructureElement,
-  PdfStructureTree,
-} from '../../../src/accessibility/structureTree.js';
+import { PdfStructureElement, PdfStructureTree } from '../../../src/accessibility/structureTree.js';
 import {
   PdfObjectRegistry,
   PdfRef,
@@ -236,9 +233,7 @@ describe('PdfStructureTree', () => {
 
   it('removeElement throws for the root', () => {
     const tree = new PdfStructureTree();
-    expect(() => tree.removeElement(tree.root)).toThrow(
-      'Cannot remove the root element',
-    );
+    expect(() => tree.removeElement(tree.root)).toThrow('Cannot remove the root element');
   });
 
   it('assignMcid assigns monotonically increasing MCIDs', () => {

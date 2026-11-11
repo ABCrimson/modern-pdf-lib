@@ -8,7 +8,6 @@
 import { describe, it, expect } from 'vitest';
 import { createSandbox, FormScriptSandbox } from '../../../src/form/scriptSandbox.js';
 
-
 // ---------------------------------------------------------------------------
 // Basic execution
 // ---------------------------------------------------------------------------
@@ -83,7 +82,9 @@ describe('FormScriptSandbox — basic execution', () => {
 
   it('tracks execution time', () => {
     const sandbox = createSandbox();
-    const result = sandbox.execute('var sum = 0; for (var i = 0; i < 1000; i++) sum += i; return sum;');
+    const result = sandbox.execute(
+      'var sum = 0; for (var i = 0; i < 1000; i++) sum += i; return sum;',
+    );
     expect(result.success).toBe(true);
     expect(result.executionTimeMs).toBeGreaterThanOrEqual(0);
     sandbox.destroy();
@@ -97,10 +98,12 @@ describe('FormScriptSandbox — basic execution', () => {
 describe('FormScriptSandbox — field values', () => {
   it('reads field values via getField()', () => {
     const sandbox = createSandbox();
-    sandbox.setFieldValues(new Map([
-      ['quantity', '5'],
-      ['price', '10.50'],
-    ]));
+    sandbox.setFieldValues(
+      new Map([
+        ['quantity', '5'],
+        ['price', '10.50'],
+      ]),
+    );
 
     const result = sandbox.execute(
       'return parseFloat(getField("quantity").value) * parseFloat(getField("price").value);',
@@ -166,15 +169,15 @@ describe('FormScriptSandbox — field values', () => {
 describe('FormScriptSandbox — AFSimple_Calculate', () => {
   it('calculates SUM', () => {
     const sandbox = createSandbox();
-    sandbox.setFieldValues(new Map([
-      ['a', '10'],
-      ['b', '20'],
-      ['c', '30'],
-    ]));
-
-    const result = sandbox.execute(
-      'return AFSimple_Calculate("SUM", ["a", "b", "c"]);',
+    sandbox.setFieldValues(
+      new Map([
+        ['a', '10'],
+        ['b', '20'],
+        ['c', '30'],
+      ]),
     );
+
+    const result = sandbox.execute('return AFSimple_Calculate("SUM", ["a", "b", "c"]);');
     expect(result.success).toBe(true);
     expect(result.returnValue).toBe(60);
     sandbox.destroy();
@@ -182,14 +185,14 @@ describe('FormScriptSandbox — AFSimple_Calculate', () => {
 
   it('calculates AVG', () => {
     const sandbox = createSandbox();
-    sandbox.setFieldValues(new Map([
-      ['x', '10'],
-      ['y', '20'],
-    ]));
-
-    const result = sandbox.execute(
-      'return AFSimple_Calculate("AVG", ["x", "y"]);',
+    sandbox.setFieldValues(
+      new Map([
+        ['x', '10'],
+        ['y', '20'],
+      ]),
     );
+
+    const result = sandbox.execute('return AFSimple_Calculate("AVG", ["x", "y"]);');
     expect(result.success).toBe(true);
     expect(result.returnValue).toBe(15);
     sandbox.destroy();
@@ -197,14 +200,14 @@ describe('FormScriptSandbox — AFSimple_Calculate', () => {
 
   it('calculates PRD (product)', () => {
     const sandbox = createSandbox();
-    sandbox.setFieldValues(new Map([
-      ['a', '3'],
-      ['b', '4'],
-    ]));
-
-    const result = sandbox.execute(
-      'return AFSimple_Calculate("PRD", ["a", "b"]);',
+    sandbox.setFieldValues(
+      new Map([
+        ['a', '3'],
+        ['b', '4'],
+      ]),
     );
+
+    const result = sandbox.execute('return AFSimple_Calculate("PRD", ["a", "b"]);');
     expect(result.success).toBe(true);
     expect(result.returnValue).toBe(12);
     sandbox.destroy();
@@ -212,15 +215,15 @@ describe('FormScriptSandbox — AFSimple_Calculate', () => {
 
   it('calculates MIN', () => {
     const sandbox = createSandbox();
-    sandbox.setFieldValues(new Map([
-      ['a', '5'],
-      ['b', '2'],
-      ['c', '8'],
-    ]));
-
-    const result = sandbox.execute(
-      'return AFSimple_Calculate("MIN", ["a", "b", "c"]);',
+    sandbox.setFieldValues(
+      new Map([
+        ['a', '5'],
+        ['b', '2'],
+        ['c', '8'],
+      ]),
     );
+
+    const result = sandbox.execute('return AFSimple_Calculate("MIN", ["a", "b", "c"]);');
     expect(result.success).toBe(true);
     expect(result.returnValue).toBe(2);
     sandbox.destroy();
@@ -228,15 +231,15 @@ describe('FormScriptSandbox — AFSimple_Calculate', () => {
 
   it('calculates MAX', () => {
     const sandbox = createSandbox();
-    sandbox.setFieldValues(new Map([
-      ['a', '5'],
-      ['b', '2'],
-      ['c', '8'],
-    ]));
-
-    const result = sandbox.execute(
-      'return AFSimple_Calculate("MAX", ["a", "b", "c"]);',
+    sandbox.setFieldValues(
+      new Map([
+        ['a', '5'],
+        ['b', '2'],
+        ['c', '8'],
+      ]),
     );
+
+    const result = sandbox.execute('return AFSimple_Calculate("MAX", ["a", "b", "c"]);');
     expect(result.success).toBe(true);
     expect(result.returnValue).toBe(8);
     sandbox.destroy();
@@ -246,9 +249,7 @@ describe('FormScriptSandbox — AFSimple_Calculate', () => {
     const sandbox = createSandbox();
     sandbox.setFieldValues(new Map([['a', '10']]));
 
-    const result = sandbox.execute(
-      'return AFSimple_Calculate("SUM", ["a", "missing"]);',
-    );
+    const result = sandbox.execute('return AFSimple_Calculate("SUM", ["a", "missing"]);');
     expect(result.success).toBe(true);
     expect(result.returnValue).toBe(10);
     sandbox.destroy();
@@ -276,7 +277,9 @@ describe('FormScriptSandbox — custom builtins', () => {
     const sandbox = createSandbox();
     const alerts: unknown[] = [];
     sandbox.registerBuiltin('app', {
-      alert: (msg: unknown) => { alerts.push(msg); },
+      alert: (msg: unknown) => {
+        alerts.push(msg);
+      },
     } as unknown as (...args: unknown[]) => unknown);
 
     sandbox.execute('app.alert("hello");');
@@ -507,13 +510,15 @@ describe('FormScriptSandbox — options', () => {
 describe('FormScriptSandbox — real-world patterns', () => {
   it('invoice total calculation', () => {
     const sandbox = createSandbox();
-    sandbox.setFieldValues(new Map([
-      ['item1_qty', '2'],
-      ['item1_price', '25.00'],
-      ['item2_qty', '3'],
-      ['item2_price', '15.50'],
-      ['total', '0'],
-    ]));
+    sandbox.setFieldValues(
+      new Map([
+        ['item1_qty', '2'],
+        ['item1_price', '25.00'],
+        ['item2_qty', '3'],
+        ['item2_price', '15.50'],
+        ['total', '0'],
+      ]),
+    );
 
     sandbox.execute(`
       var t1 = parseFloat(getField("item1_qty").value) * parseFloat(getField("item1_price").value);
@@ -528,10 +533,12 @@ describe('FormScriptSandbox — real-world patterns', () => {
 
   it('conditional field logic', () => {
     const sandbox = createSandbox();
-    sandbox.setFieldValues(new Map([
-      ['country', 'US'],
-      ['state_label', ''],
-    ]));
+    sandbox.setFieldValues(
+      new Map([
+        ['country', 'US'],
+        ['state_label', ''],
+      ]),
+    );
 
     sandbox.execute(`
       var country = getField("country").value;
@@ -548,7 +555,12 @@ describe('FormScriptSandbox — real-world patterns', () => {
 
   it('event.value pattern (common in Acrobat scripts)', () => {
     const sandbox = createSandbox();
-    sandbox.setFieldValues(new Map([['qty', '5'], ['price', '10']]));
+    sandbox.setFieldValues(
+      new Map([
+        ['qty', '5'],
+        ['price', '10'],
+      ]),
+    );
 
     const result = sandbox.execute(`
       var qty = parseFloat(getField("qty").value);
@@ -564,11 +576,13 @@ describe('FormScriptSandbox — real-world patterns', () => {
 
   it('AFSimple_Calculate SUM for invoice subtotal', () => {
     const sandbox = createSandbox();
-    sandbox.setFieldValues(new Map([
-      ['line1', '100'],
-      ['line2', '200'],
-      ['line3', '150'],
-    ]));
+    sandbox.setFieldValues(
+      new Map([
+        ['line1', '100'],
+        ['line2', '200'],
+        ['line3', '150'],
+      ]),
+    );
 
     const result = sandbox.execute(
       'return AFSimple_Calculate("SUM", ["line1", "line2", "line3"]);',

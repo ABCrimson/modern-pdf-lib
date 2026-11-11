@@ -300,8 +300,11 @@ class ContentStreamLexer {
       }
 
       // Check pattern: whitespace before E, 'I' after E, whitespace/EOF after EI
-      if (eIdx > dataStart && this.isWhitespace(this.data[eIdx - 1]!) &&
-          this.data[eIdx + 1] === 0x49 /* I */) {
+      if (
+        eIdx > dataStart &&
+        this.isWhitespace(this.data[eIdx - 1]!) &&
+        this.data[eIdx + 1] === 0x49 /* I */
+      ) {
         const afterEI = eIdx + 2;
         if (afterEI >= this.data.length || this.isWhitespace(this.data[afterEI]!)) {
           dataEnd = eIdx - 1;
@@ -367,7 +370,11 @@ class ContentStreamLexer {
     }
 
     // '>>' — dict close (shouldn't appear normally)
-    if (ch === 0x3e /* > */ && this.pos + 1 < this.data.length && this.data[this.pos + 1] === 0x3e) {
+    if (
+      ch === 0x3e /* > */ &&
+      this.pos + 1 < this.data.length &&
+      this.data[this.pos + 1] === 0x3e
+    ) {
       this.pos += 2;
       return this.nextToken();
     }
@@ -426,14 +433,38 @@ class ContentStreamLexer {
         const esc = this.data[this.pos]!;
 
         switch (esc) {
-          case 0x6e: parts.push('\n'); this.pos++; break; // \n
-          case 0x72: parts.push('\r'); this.pos++; break; // \r
-          case 0x74: parts.push('\t'); this.pos++; break; // \t
-          case 0x62: parts.push('\b'); this.pos++; break; // \b
-          case 0x66: parts.push('\f'); this.pos++; break; // \f
-          case 0x28: parts.push('('); this.pos++; break;  // \(
-          case 0x29: parts.push(')'); this.pos++; break;  // \)
-          case 0x5c: parts.push('\\'); this.pos++; break; // \\
+          case 0x6e:
+            parts.push('\n');
+            this.pos++;
+            break; // \n
+          case 0x72:
+            parts.push('\r');
+            this.pos++;
+            break; // \r
+          case 0x74:
+            parts.push('\t');
+            this.pos++;
+            break; // \t
+          case 0x62:
+            parts.push('\b');
+            this.pos++;
+            break; // \b
+          case 0x66:
+            parts.push('\f');
+            this.pos++;
+            break; // \f
+          case 0x28:
+            parts.push('(');
+            this.pos++;
+            break; // \(
+          case 0x29:
+            parts.push(')');
+            this.pos++;
+            break; // \)
+          case 0x5c:
+            parts.push('\\');
+            this.pos++;
+            break; // \\
           case 0x0a: // \<LF> — line continuation
             this.pos++;
             break;
@@ -628,7 +659,7 @@ class ContentStreamLexer {
       ch === 0x0a || // LF
       ch === 0x0c || // FF
       ch === 0x0d || // CR
-      ch === 0x20    // SPACE
+      ch === 0x20 // SPACE
     );
   }
 
@@ -644,7 +675,7 @@ class ContentStreamLexer {
       ch === 0x7b || // {
       ch === 0x7d || // }
       ch === 0x2f || // /
-      ch === 0x25    // %
+      ch === 0x25 // %
     );
   }
 
@@ -654,7 +685,7 @@ class ContentStreamLexer {
       (ch >= 0x30 && ch <= 0x39) || // 0-9
       ch === 0x2b || // +
       ch === 0x2d || // -
-      ch === 0x2e    // .
+      ch === 0x2e // .
     );
   }
 

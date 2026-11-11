@@ -110,9 +110,7 @@ describe('pdfResponse', () => {
       filename: 'doc.pdf',
       download: true,
     });
-    expect(res.headers.get('Content-Disposition')).toBe(
-      'attachment; filename="doc.pdf"',
-    );
+    expect(res.headers.get('Content-Disposition')).toBe('attachment; filename="doc.pdf"');
   });
 });
 
@@ -175,9 +173,7 @@ describe('sendPdfToNodeResponse', () => {
     expect(res.statusCode).toBe(200);
     expect(res.sentHeaders?.['Content-Type']).toBe('application/pdf');
     expect(res.sentHeaders?.['Content-Length']).toBe('3');
-    expect(res.sentHeaders?.['Content-Disposition']).toBe(
-      'attachment; filename="r.pdf"',
-    );
+    expect(res.sentHeaders?.['Content-Disposition']).toBe('attachment; filename="r.pdf"');
     expect(res.body).toEqual(bytes);
   });
 

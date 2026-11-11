@@ -30,12 +30,7 @@
  * @packageDocumentation
  */
 
-import {
-  PdfDict,
-  PdfName,
-  PdfArray,
-  PdfString,
-} from '../core/pdfObjects.js';
+import { PdfDict, PdfName, PdfArray, PdfString } from '../core/pdfObjects.js';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -105,13 +100,10 @@ export interface DocTimeStampOptions {
  * ```
  */
 export function buildDocTimeStampDict(options?: DocTimeStampOptions): PdfDict {
-  const contentsSize =
-    options?.contentsSize ?? DEFAULT_DOC_TIMESTAMP_CONTENTS_SIZE;
+  const contentsSize = options?.contentsSize ?? DEFAULT_DOC_TIMESTAMP_CONTENTS_SIZE;
 
   if (!Number.isInteger(contentsSize) || contentsSize <= 0) {
-    throw new RangeError(
-      `contentsSize must be a positive integer, got ${String(contentsSize)}`,
-    );
+    throw new RangeError(`contentsSize must be a positive integer, got ${String(contentsSize)}`);
   }
 
   const dict = new PdfDict();

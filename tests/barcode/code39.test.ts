@@ -50,7 +50,7 @@ describe('encodeCode39', () => {
   it('automatically includes start/stop asterisks', () => {
     const matrix = encodeCode39('A');
     // The barcode starts with bars (start *) and ends with bars (stop *)
-    expect(matrix.modules[0]).toBe(true);  // first module is a bar
+    expect(matrix.modules[0]).toBe(true); // first module is a bar
     expect(matrix.modules[matrix.width - 1]).toBe(true); // last module is a bar (from stop *)
   });
 
@@ -114,15 +114,21 @@ describe('encodeCode39', () => {
     // '1' widths: [2,1,1,2,1,1,1,1,2] with ratio 3
     // bar(3), space(1), bar(1), space(3), bar(1), space(1), bar(1), space(1), bar(3)
     const expected = [
-      true, true, true,     // bar width 3
-      false,                 // space width 1
-      true,                  // bar width 1
-      false, false, false,   // space width 3
-      true,                  // bar width 1
-      false,                 // space width 1
-      true,                  // bar width 1
-      false,                 // space width 1
-      true, true, true,      // bar width 3
+      true,
+      true,
+      true, // bar width 3
+      false, // space width 1
+      true, // bar width 1
+      false,
+      false,
+      false, // space width 3
+      true, // bar width 1
+      false, // space width 1
+      true, // bar width 1
+      false, // space width 1
+      true,
+      true,
+      true, // bar width 3
     ];
     expect(Array.from(oneModules)).toEqual(expected);
   });
@@ -183,10 +189,10 @@ describe('code39ToOperators', () => {
     const matrix = encodeCode39('A');
     const ops = code39ToOperators(matrix, 0, 0);
 
-    expect(ops).toContain('q\n');  // save state
-    expect(ops).toContain('Q\n');  // restore state
+    expect(ops).toContain('q\n'); // save state
+    expect(ops).toContain('Q\n'); // restore state
     expect(ops).toContain('re\n'); // rectangle
-    expect(ops).toContain('f\n');  // fill
+    expect(ops).toContain('f\n'); // fill
   });
 
   it('applies quiet zone offset', () => {

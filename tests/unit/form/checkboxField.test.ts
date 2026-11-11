@@ -3,13 +3,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  PdfDict,
-  PdfName,
-  PdfString,
-  PdfArray,
-  PdfStream,
-} from '../../../src/core/pdfObjects.js';
+import { PdfDict, PdfName, PdfString, PdfArray, PdfStream } from '../../../src/core/pdfObjects.js';
 import { PdfCheckboxField } from '../../../src/form/fields/checkboxField.js';
 
 // ---------------------------------------------------------------------------

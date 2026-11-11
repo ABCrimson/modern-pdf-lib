@@ -63,8 +63,7 @@ const DEFAULT_PROFILE: FacturXProfile = 'EN16931';
 const DEFAULT_FILENAME = 'factur-x.xml';
 
 /** Factur-X XMP extension-schema namespace URI (verified). */
-const FX_NAMESPACE_URI =
-  'urn:factur-x:pdfa:CrossIndustryDocument:invoice:1p0#';
+const FX_NAMESPACE_URI = 'urn:factur-x:pdfa:CrossIndustryDocument:invoice:1p0#';
 
 /** Factur-X XML schema version carried in `fx:Version` (verified: `1.0`). */
 const FX_VERSION = '1.0';
@@ -135,17 +134,11 @@ export function buildFacturXXmp(
   const fileName = escapeXml(documentFileName);
 
   const out: string[] = [];
-  out.push(
-    '<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">',
-  );
+  out.push('<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">');
 
   // 1. The actual Factur-X properties.
-  out.push(
-    `  <rdf:Description rdf:about="" xmlns:fx="${FX_NAMESPACE_URI}">`,
-  );
-  out.push(
-    `    <fx:ConformanceLevel>${escapeXml(conformanceLevel)}</fx:ConformanceLevel>`,
-  );
+  out.push(`  <rdf:Description rdf:about="" xmlns:fx="${FX_NAMESPACE_URI}">`);
+  out.push(`    <fx:ConformanceLevel>${escapeXml(conformanceLevel)}</fx:ConformanceLevel>`);
   out.push(`    <fx:DocumentFileName>${fileName}</fx:DocumentFileName>`);
   out.push('    <fx:DocumentType>INVOICE</fx:DocumentType>');
   out.push(`    <fx:Version>${FX_VERSION}</fx:Version>`);
@@ -153,22 +146,14 @@ export function buildFacturXXmp(
 
   // 2. The PDF/A extension-schema description (mandatory for PDF/A-3).
   out.push('  <rdf:Description rdf:about=""');
-  out.push(
-    '    xmlns:pdfaExtension="http://www.aiim.org/pdfa/ns/extension/"',
-  );
+  out.push('    xmlns:pdfaExtension="http://www.aiim.org/pdfa/ns/extension/"');
   out.push('    xmlns:pdfaSchema="http://www.aiim.org/pdfa/ns/schema#"');
-  out.push(
-    '    xmlns:pdfaProperty="http://www.aiim.org/pdfa/ns/property#">',
-  );
+  out.push('    xmlns:pdfaProperty="http://www.aiim.org/pdfa/ns/property#">');
   out.push('    <pdfaExtension:schemas>');
   out.push('      <rdf:Bag>');
   out.push('        <rdf:li rdf:parseType="Resource">');
-  out.push(
-    '          <pdfaSchema:schema>Factur-X PDFA Extension Schema</pdfaSchema:schema>',
-  );
-  out.push(
-    `          <pdfaSchema:namespaceURI>${FX_NAMESPACE_URI}</pdfaSchema:namespaceURI>`,
-  );
+  out.push('          <pdfaSchema:schema>Factur-X PDFA Extension Schema</pdfaSchema:schema>');
+  out.push(`          <pdfaSchema:namespaceURI>${FX_NAMESPACE_URI}</pdfaSchema:namespaceURI>`);
   out.push('          <pdfaSchema:prefix>fx</pdfaSchema:prefix>');
   out.push('          <pdfaSchema:property>');
   out.push('            <rdf:Seq>');
@@ -176,10 +161,7 @@ export function buildFacturXXmp(
     ['DocumentFileName', 'name of the embedded XML invoice file'],
     ['DocumentType', 'INVOICE'],
     ['Version', 'The actual version of the Factur-X XML schema'],
-    [
-      'ConformanceLevel',
-      'The conformance level of the embedded Factur-X data',
-    ],
+    ['ConformanceLevel', 'The conformance level of the embedded Factur-X data'],
   ] as const) {
     out.push('              <rdf:li rdf:parseType="Resource">');
     out.push(`                <pdfaProperty:name>${name}</pdfaProperty:name>`);

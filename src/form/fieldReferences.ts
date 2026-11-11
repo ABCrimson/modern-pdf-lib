@@ -80,10 +80,7 @@ const ANNOT_FLAG_NOVIEW = 1 << 5;
  * @param fieldName - The field name (partial or fully-qualified).
  * @returns The PdfField if found, or `null`.
  */
-export function resolveFieldReference(
-  form: PdfForm,
-  fieldName: string,
-): PdfField | null {
+export function resolveFieldReference(form: PdfForm, fieldName: string): PdfField | null {
   return form.getField(fieldName) ?? null;
 }
 
@@ -96,10 +93,7 @@ export function resolveFieldReference(
  * @param fieldName - The field name.
  * @returns The field's value as a string, or `null` if the field is not found.
  */
-export function getFieldValue(
-  form: PdfForm,
-  fieldName: string,
-): string | null {
+export function getFieldValue(form: PdfForm, fieldName: string): string | null {
   const field = form.getField(fieldName);
   if (field === undefined) return null;
 
@@ -120,11 +114,7 @@ export function getFieldValue(
  * @param value     - The value to set.
  * @returns `true` if the field was found and the value was set, `false` otherwise.
  */
-export function setFieldValue(
-  form: PdfForm,
-  fieldName: string,
-  value: string,
-): boolean {
+export function setFieldValue(form: PdfForm, fieldName: string, value: string): boolean {
   const field = form.getField(fieldName);
   if (field === undefined) return false;
 

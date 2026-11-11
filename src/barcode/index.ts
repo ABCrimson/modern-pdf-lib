@@ -20,18 +20,11 @@ export {
 export type { Code128Options } from './code128.js';
 
 // Code 39
-export {
-  encodeCode39,
-  computeCode39CheckDigit,
-  code39ToOperators,
-} from './code39.js';
+export { encodeCode39, computeCode39CheckDigit, code39ToOperators } from './code39.js';
 export type { Code39Options } from './code39.js';
 
 // ITF (Interleaved 2 of 5)
-export {
-  encodeItf,
-  itfToOperators,
-} from './itf.js';
+export { encodeItf, itfToOperators } from './itf.js';
 export type { ItfOptions } from './itf.js';
 
 // EAN-13 / EAN-8
@@ -45,57 +38,25 @@ export {
 export type { EanOptions } from './ean.js';
 
 // UPC-A
-export {
-  encodeUpcA,
-  calculateUpcCheckDigit,
-  upcAToOperators,
-} from './upc.js';
+export { encodeUpcA, calculateUpcCheckDigit, upcAToOperators } from './upc.js';
 export type { UpcOptions } from './upc.js';
 
 // QR Code (ISO 18004)
-export {
-  encodeQrCode,
-  qrCodeToOperators,
-} from './qr.js';
-export type {
-  QrCodeOptions,
-  QrCodeMatrix,
-  ErrorCorrectionLevel,
-} from './qr.js';
+export { encodeQrCode, qrCodeToOperators } from './qr.js';
+export type { QrCodeOptions, QrCodeMatrix, ErrorCorrectionLevel } from './qr.js';
 
 // Data Matrix (ISO/IEC 16022 ECC200)
-export {
-  encodeDataMatrix,
-  dataMatrixToOperators,
-} from './dataMatrix.js';
-export type {
-  DataMatrixOptions,
-  DataMatrixResult,
-} from './dataMatrix.js';
+export { encodeDataMatrix, dataMatrixToOperators } from './dataMatrix.js';
+export type { DataMatrixOptions, DataMatrixResult } from './dataMatrix.js';
 
 // PDF417 (ISO/IEC 15438)
-export {
-  encodePdf417,
-  pdf417ToOperators,
-} from './pdf417.js';
-export type {
-  Pdf417Options,
-  Pdf417Matrix,
-} from './pdf417.js';
+export { encodePdf417, pdf417ToOperators } from './pdf417.js';
+export type { Pdf417Options, Pdf417Matrix } from './pdf417.js';
 
 // Barcode styling
-export {
-  renderStyledBarcode,
-  calculateBarcodeDimensions,
-} from './style.js';
+export { renderStyledBarcode, calculateBarcodeDimensions } from './style.js';
 export type { StyledBarcodeOptions } from './style.js';
 
 // Barcode reader (round-trip verification)
-export {
-  readCode128,
-  readEan13,
-  readEan8,
-  readCode39,
-  readBarcode,
-} from './reader.js';
+export { readCode128, readEan13, readEan8, readCode39, readBarcode } from './reader.js';
 export type { BarcodeReadResult } from './reader.js';

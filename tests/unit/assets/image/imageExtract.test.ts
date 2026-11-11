@@ -95,7 +95,7 @@ describe('extractImages', () => {
     expect(images.length).toBe(3);
 
     // Each should be on a different page
-    const pageIndices = images.map(img => img.pageIndex);
+    const pageIndices = images.map((img) => img.pageIndex);
     expect(new Set(pageIndices).size).toBe(3);
   });
 
@@ -178,7 +178,7 @@ describe('decodeImageStream', () => {
     const decoded = decodeImageStream(images[0]!);
     expect(decoded).toBeInstanceOf(Uint8Array);
     // Should start with JPEG SOI marker
-    expect(decoded[0]).toBe(0xFF);
-    expect(decoded[1]).toBe(0xD8);
+    expect(decoded[0]).toBe(0xff);
+    expect(decoded[1]).toBe(0xd8);
   });
 });

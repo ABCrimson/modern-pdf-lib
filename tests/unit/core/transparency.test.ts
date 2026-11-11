@@ -23,11 +23,7 @@ import {
   PageSizes,
   rgb,
 } from '../../../src/index.js';
-import type {
-  TransparencyGroupOptions,
-  SoftMaskBuilder,
-  SoftMaskRef,
-} from '../../../src/index.js';
+import type { TransparencyGroupOptions, SoftMaskBuilder, SoftMaskRef } from '../../../src/index.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -218,9 +214,7 @@ describe('Transparency groups', () => {
   it('throws when endTransparencyGroup is called without begin', () => {
     const { page } = makePage();
 
-    expect(() => page.endTransparencyGroup()).toThrowError(
-      'No transparency group to end',
-    );
+    expect(() => page.endTransparencyGroup()).toThrowError('No transparency group to end');
   });
 
   it('group ops are extracted from the main content stream', () => {
@@ -480,8 +474,10 @@ describe('Soft masks', () => {
 
     // Draw a background
     page.drawRectangle({
-      x: 0, y: 0,
-      width: page.width, height: page.height,
+      x: 0,
+      y: 0,
+      width: page.width,
+      height: page.height,
       color: rgb(0.9, 0.9, 0.9),
     });
 
@@ -497,8 +493,10 @@ describe('Soft masks', () => {
     page.beginTransparencyGroup({ isolated: true, knockout: false });
     page.applySoftMask(mask);
     page.drawRectangle({
-      x: 100, y: 300,
-      width: 200, height: 200,
+      x: 100,
+      y: 300,
+      width: 200,
+      height: 200,
       color: rgb(1, 0, 0),
     });
     page.clearSoftMask();
@@ -575,7 +573,10 @@ describe('Soft masks', () => {
 
     page.applySoftMask(mask);
     page.drawRectangle({
-      x: 100, y: 100, width: 200, height: 200,
+      x: 100,
+      y: 100,
+      width: 200,
+      height: 200,
       color: rgb(0, 0, 1),
     });
     page.clearSoftMask();
@@ -587,8 +588,8 @@ describe('Soft masks', () => {
     expect(text).toContain('/CS /DeviceGray');
     expect(text).toContain('/S /Luminosity');
     // Should contain grayscale operators from the gradient strips
-    expect(text).toContain('0 g');  // First strip: black (transparent)
-    expect(text).toContain('1 g');  // Last strip: white (opaque)
+    expect(text).toContain('0 g'); // First strip: black (transparent)
+    expect(text).toContain('1 g'); // Last strip: white (opaque)
     // Should have the clear mask as well
     expect(text).toContain('/SMask /None');
   });
@@ -611,7 +612,10 @@ describe('Soft masks', () => {
 
     page.applySoftMask(mask);
     page.drawRectangle({
-      x: 50, y: 50, width: 100, height: 100,
+      x: 50,
+      y: 50,
+      width: 100,
+      height: 100,
       color: rgb(1, 0, 0),
     });
     page.clearSoftMask();
@@ -621,8 +625,8 @@ describe('Soft masks', () => {
 
     expect(text).toContain('/S /Luminosity');
     // Should contain some intermediate gray values
-    expect(text).toContain('0.0000 g');   // Start of gradient
-    expect(text).toContain('1.0000 g');   // End of gradient
+    expect(text).toContain('0.0000 g'); // Start of gradient
+    expect(text).toContain('1.0000 g'); // End of gradient
   });
 });
 
@@ -662,33 +666,46 @@ describe('Transparency round-trip', () => {
 
     // Background
     page.drawRectangle({
-      x: 0, y: 0, width: 595.28, height: 841.89,
+      x: 0,
+      y: 0,
+      width: 595.28,
+      height: 841.89,
       color: rgb(0.95, 0.95, 0.95),
     });
 
     // Transparency group with overlapping shapes
     page.beginTransparencyGroup({ isolated: true, knockout: false });
     page.drawRectangle({
-      x: 100, y: 400, width: 200, height: 200,
-      color: rgb(1, 0, 0), opacity: 0.7,
+      x: 100,
+      y: 400,
+      width: 200,
+      height: 200,
+      color: rgb(1, 0, 0),
+      opacity: 0.7,
     });
     page.drawCircle({
-      x: 250, y: 450, radius: 80,
-      color: rgb(0, 0, 1), opacity: 0.7,
+      x: 250,
+      y: 450,
+      radius: 80,
+      color: rgb(0, 0, 1),
+      opacity: 0.7,
     });
     page.endTransparencyGroup();
 
     // Soft-masked content with gradient mask
     const mask = doc.createSoftMask(300, 300, (b) => {
-      b.drawRectangle(0, 0, 300, 300, 0);     // black background (transparent)
-      b.drawCircle(150, 150, 140, 0.3);        // dim outer ring
-      b.drawCircle(150, 150, 100, 0.6);        // mid ring
-      b.drawCircle(150, 150, 60, 1);           // bright center (opaque)
+      b.drawRectangle(0, 0, 300, 300, 0); // black background (transparent)
+      b.drawCircle(150, 150, 140, 0.3); // dim outer ring
+      b.drawCircle(150, 150, 100, 0.6); // mid ring
+      b.drawCircle(150, 150, 60, 1); // bright center (opaque)
     });
 
     page.applySoftMask(mask);
     page.drawRectangle({
-      x: 150, y: 150, width: 300, height: 300,
+      x: 150,
+      y: 150,
+      width: 300,
+      height: 300,
       color: rgb(0, 0.5, 0),
     });
     page.clearSoftMask();

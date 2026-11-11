@@ -10,10 +10,7 @@
  */
 
 import type { PdfDocument } from '../../core/pdfDocument.js';
-import {
-  PdfDict,
-  PdfRef,
-} from '../../core/pdfObjects.js';
+import { PdfDict, PdfRef } from '../../core/pdfObjects.js';
 import { extractImages } from './imageExtract.js';
 
 // ---------------------------------------------------------------------------
@@ -68,9 +65,9 @@ function hashBytes(data: Uint8Array): string {
   const h3 = (data.length * 0x9e3779b9) | 0;
 
   return (
-    ((h1 >>> 0).toString(16).padStart(8, '0')) +
-    ((h2 >>> 0).toString(16).padStart(8, '0')) +
-    ((h3 >>> 0).toString(16).padStart(8, '0'))
+    (h1 >>> 0).toString(16).padStart(8, '0') +
+    (h2 >>> 0).toString(16).padStart(8, '0') +
+    (h3 >>> 0).toString(16).padStart(8, '0')
   );
 }
 
@@ -111,13 +108,11 @@ export function deduplicateImages(doc: PdfDocument): DeduplicationReport {
   // Build hash → canonical ref mapping
   // Hash includes dimensions, filter, and stream data for accuracy
   const hashToCanonical = new Map<string, { ref: PdfRef; size: number }>();
-  const duplicates: { image: typeof images[0]; canonicalRef: PdfRef }[] = [];
+  const duplicates: { image: (typeof images)[0]; canonicalRef: PdfRef }[] = [];
 
   for (const img of images) {
     // Build a composite hash key: dimensions + filter + data
-    const key =
-      `${img.width}x${img.height}:${img.filters.join(',')}:` +
-      hashBytes(img.stream.data);
+    const key = `${img.width}x${img.height}:${img.filters.join(',')}:` + hashBytes(img.stream.data);
 
     const existing = hashToCanonical.get(key);
     if (existing) {

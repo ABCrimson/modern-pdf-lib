@@ -29,11 +29,7 @@ export type PdfVersion = '1.7' | '2.0';
  * - `DeviceGray` — one component `[0, 1]`.
  * - `Indexed` — palette-based colour.
  */
-export type PdfColorSpace =
-  | 'DeviceRGB'
-  | 'DeviceCMYK'
-  | 'DeviceGray'
-  | 'Indexed';
+export type PdfColorSpace = 'DeviceRGB' | 'DeviceCMYK' | 'DeviceGray' | 'Indexed';
 
 /**
  * Stream compression / encoding filters the engine knows about.
@@ -201,11 +197,7 @@ export interface Jbig2DecodeParams {
  *
  * Each variant corresponds to a specific PDF stream filter.
  */
-export type DecodeParms =
-  | FlateDecodeParams
-  | DCTDecodeParams
-  | LZWDecodeParams
-  | Jbig2DecodeParams;
+export type DecodeParms = FlateDecodeParams | DCTDecodeParams | LZWDecodeParams | Jbig2DecodeParams;
 
 // ---------------------------------------------------------------------------
 // Font embedding

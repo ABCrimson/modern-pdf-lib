@@ -12,7 +12,10 @@
  */
 
 import { deflateSync as fflateDeflateSync } from 'fflate';
-import { isAvailable as isWasmDeflateAvailable, deflateSync as wasmDeflateSync } from '../compression/libdeflateWasm.js';
+import {
+  isAvailable as isWasmDeflateAvailable,
+  deflateSync as wasmDeflateSync,
+} from '../compression/libdeflateWasm.js';
 import type { PdfStream as PdfStreamObj } from './pdfObjects.js';
 import { PdfObjectRegistry, PdfName } from './pdfObjects.js';
 import type { DocumentStructure } from './pdfCatalog.js';
@@ -146,9 +149,7 @@ export class PdfStreamWriter {
     await w.write(new Uint8Array([0x25, 0xe2, 0xe3, 0xcf, 0xd3, 0x0a]));
   }
 
-  private async writeBody(
-    w: StreamByteCounter,
-  ): Promise<Map<number, number>> {
+  private async writeBody(w: StreamByteCounter): Promise<Map<number, number>> {
     const offsets = new Map<number, number>();
 
     for (const entry of this.registry) {
@@ -199,10 +200,7 @@ export class PdfStreamWriter {
     }
   }
 
-  private async writeXref(
-    w: StreamByteCounter,
-    offsets: Map<number, number>,
-  ): Promise<void> {
+  private async writeXref(w: StreamByteCounter, offsets: Map<number, number>): Promise<void> {
     const size = this.registry.nextNumber;
 
     await w.writeString('xref\n');
@@ -214,19 +212,14 @@ export class PdfStreamWriter {
     for (let i = 1; i < size; i++) {
       const offset = offsets.get(i);
       if (offset !== undefined) {
-        await w.writeString(
-          `${offset.toString().padStart(10, '0')} 00000 n \n`,
-        );
+        await w.writeString(`${offset.toString().padStart(10, '0')} 00000 n \n`);
       } else {
         await w.writeString('0000000000 00000 f \n');
       }
     }
   }
 
-  private async writeTrailer(
-    w: StreamByteCounter,
-    xrefOffset: number,
-  ): Promise<void> {
+  private async writeTrailer(w: StreamByteCounter, xrefOffset: number): Promise<void> {
     const size = this.registry.nextNumber;
 
     await w.writeString('trailer\n');

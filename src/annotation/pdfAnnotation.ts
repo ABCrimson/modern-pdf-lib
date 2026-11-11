@@ -29,11 +29,32 @@ import { formatPdfDate } from '../core/pdfCatalog.js';
  * All annotation subtypes defined in the PDF specification.
  */
 export type AnnotationType =
-  | 'Text' | 'Link' | 'FreeText' | 'Line' | 'Square' | 'Circle'
-  | 'Polygon' | 'PolyLine' | 'Highlight' | 'Underline' | 'Squiggly'
-  | 'StrikeOut' | 'Stamp' | 'Caret' | 'Ink' | 'Popup'
-  | 'FileAttachment' | 'Sound' | 'Movie' | 'Widget' | 'Screen'
-  | 'PrinterMark' | 'TrapNet' | 'Watermark' | 'Redact' | '3D';
+  | 'Text'
+  | 'Link'
+  | 'FreeText'
+  | 'Line'
+  | 'Square'
+  | 'Circle'
+  | 'Polygon'
+  | 'PolyLine'
+  | 'Highlight'
+  | 'Underline'
+  | 'Squiggly'
+  | 'StrikeOut'
+  | 'Stamp'
+  | 'Caret'
+  | 'Ink'
+  | 'Popup'
+  | 'FileAttachment'
+  | 'Sound'
+  | 'Movie'
+  | 'Widget'
+  | 'Screen'
+  | 'PrinterMark'
+  | 'TrapNet'
+  | 'Watermark'
+  | 'Redact'
+  | '3D';
 
 // ---------------------------------------------------------------------------
 // Annotation options
@@ -58,10 +79,12 @@ export interface AnnotationOptions {
   /** Annotation flags bitmask (PDF spec Table 165). */
   flags?: number | undefined;
   /** Border specification. */
-  border?: {
-    width: number;
-    style?: 'solid' | 'dashed' | 'beveled' | 'inset' | 'underline' | undefined;
-  } | undefined;
+  border?:
+    | {
+        width: number;
+        style?: 'solid' | 'dashed' | 'beveled' | 'inset' | 'underline' | undefined;
+      }
+    | undefined;
 }
 
 // ---------------------------------------------------------------------------
@@ -81,15 +104,15 @@ export const AnnotationFlags: {
   readonly ToggleNoView: number;
   readonly LockedContents: number;
 } = {
-  Invisible:      1 << 0,
-  Hidden:         1 << 1,
-  Print:          1 << 2,
-  NoZoom:         1 << 3,
-  NoRotate:       1 << 4,
-  NoView:         1 << 5,
-  ReadOnly:       1 << 6,
-  Locked:         1 << 7,
-  ToggleNoView:   1 << 8,
+  Invisible: 1 << 0,
+  Hidden: 1 << 1,
+  Print: 1 << 2,
+  NoZoom: 1 << 3,
+  NoRotate: 1 << 4,
+  NoView: 1 << 5,
+  ReadOnly: 1 << 6,
+  Locked: 1 << 7,
+  ToggleNoView: 1 << 8,
   LockedContents: 1 << 9,
 } as const;
 
@@ -134,9 +157,7 @@ export function annotationFromDict(
   let subtype: AnnotationType = 'Text';
   const subtypeObj = dict.get('/Subtype');
   if (subtypeObj && subtypeObj.kind === 'name') {
-    const val = subtypeObj.value.startsWith('/')
-      ? subtypeObj.value.slice(1)
-      : subtypeObj.value;
+    const val = subtypeObj.value.startsWith('/') ? subtypeObj.value.slice(1) : subtypeObj.value;
     subtype = val as AnnotationType;
   }
   return new PdfAnnotation(subtype, dict);
@@ -152,19 +173,13 @@ export function annotationFromDict(
  * @param options Creation options.
  * @returns       A populated PdfDict.
  */
-export function buildAnnotationDict(
-  type: AnnotationType,
-  options: AnnotationOptions,
-): PdfDict {
+export function buildAnnotationDict(type: AnnotationType, options: AnnotationOptions): PdfDict {
   const dict = new PdfDict();
 
   // Required entries
   dict.set('/Type', PdfName.of('Annot'));
   dict.set('/Subtype', PdfName.of(type));
-  dict.set(
-    '/Rect',
-    PdfArray.fromNumbers(options.rect),
-  );
+  dict.set('/Rect', PdfArray.fromNumbers(options.rect));
 
   // Unique name
   dict.set('/NM', PdfString.literal(generateUniqueName()));
@@ -180,10 +195,7 @@ export function buildAnnotationDict(
     dict.set('/M', PdfString.literal(formatPdfDate(options.modificationDate)));
   }
   if (options.color !== undefined) {
-    dict.set(
-      '/C',
-      PdfArray.fromNumbers([options.color.r, options.color.g, options.color.b]),
-    );
+    dict.set('/C', PdfArray.fromNumbers([options.color.r, options.color.g, options.color.b]));
   }
   if (options.opacity !== undefined) {
     dict.set('/CA', PdfNumber.of(options.opacity));
@@ -214,10 +226,7 @@ export function buildAnnotationDict(
  * @param options Creation options (rect, contents, etc.).
  * @returns       A new PdfAnnotation instance.
  */
-export function createAnnotation(
-  type: AnnotationType,
-  options: AnnotationOptions,
-): PdfAnnotation {
+export function createAnnotation(type: AnnotationType, options: AnnotationOptions): PdfAnnotation {
   const dict = buildAnnotationDict(type, options);
   return new PdfAnnotation(type, dict);
 }

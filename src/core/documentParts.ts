@@ -20,13 +20,7 @@
  * Reference: ISO 32000-2:2020, §14.12 (Document parts).
  */
 
-import {
-  PdfArray,
-  PdfDict,
-  PdfName,
-  PdfNumber,
-  PdfString,
-} from './pdfObjects.js';
+import { PdfArray, PdfDict, PdfName, PdfNumber, PdfString } from './pdfObjects.js';
 
 // ---------------------------------------------------------------------------
 // Public types

@@ -98,15 +98,11 @@ export async function signDeferred(
   signer: ExternalSigner,
   options?: DeferredSignOptions,
 ): Promise<DeferredSignResult> {
-  const hashAlgorithm: 'SHA-256' | 'SHA-384' | 'SHA-512' =
-    options?.hashAlgorithm ?? 'SHA-256';
+  const hashAlgorithm: 'SHA-256' | 'SHA-384' | 'SHA-512' = options?.hashAlgorithm ?? 'SHA-256';
 
   const digestBuffer: ArrayBuffer = await crypto.subtle.digest(
     hashAlgorithm,
-    data.buffer.slice(
-      data.byteOffset,
-      data.byteOffset + data.byteLength,
-    ) as ArrayBuffer,
+    data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength) as ArrayBuffer,
   );
   const digest: Uint8Array = new Uint8Array(digestBuffer);
 

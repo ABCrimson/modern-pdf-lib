@@ -17,7 +17,14 @@
  * ```
  */
 
-import type { PageSize, FontRef, FontRefInternal, ImageRef, SoftMaskRef, SoftMaskBuilder } from './pdfPage.js';
+import type {
+  PageSize,
+  FontRef,
+  FontRefInternal,
+  ImageRef,
+  SoftMaskRef,
+  SoftMaskBuilder,
+} from './pdfPage.js';
 import { PdfPage, PageSizes } from './pdfPage.js';
 import {
   PdfObjectRegistry,
@@ -35,7 +42,11 @@ import { buildDocumentStructure } from './pdfCatalog.js';
 import { serializePdf } from './pdfWriter.js';
 import type { PdfSaveOptions } from './pdfWriter.js';
 import { PdfStreamWriter } from './pdfStream.js';
-import { getStandardFont, measureStandardText, standardFontHeight } from '../assets/font/standardFonts.js';
+import {
+  getStandardFont,
+  measureStandardText,
+  standardFontHeight,
+} from '../assets/font/standardFonts.js';
 import type { StandardFontName as StdFontName } from '../assets/font/standardFonts.js';
 import type { EmbeddedFont } from '../assets/font/fontEmbed.js';
 import { embedFont as embedTtfFont } from '../assets/font/fontEmbed.js';
@@ -54,7 +65,11 @@ import { PdfEncryptionHandler } from '../crypto/encryptionHandler.js';
 import type { EncryptOptions } from '../crypto/encryptionHandler.js';
 import type { PdfPermissionFlags } from '../crypto/permissions.js';
 import { PdfOutlineTree } from '../outline/pdfOutline.js';
-import type { PdfOutlineItem, OutlineDestination, OutlineItemOptions } from '../outline/pdfOutline.js';
+import type {
+  PdfOutlineItem,
+  OutlineDestination,
+  OutlineItemOptions,
+} from '../outline/pdfOutline.js';
 
 import { buildViewerPreferencesDict } from '../metadata/viewerPreferences.js';
 import type { ViewerPreferences } from '../metadata/viewerPreferences.js';
@@ -316,8 +331,10 @@ export class PdfDocument {
 
     const [w, h] = Array.isArray(resolved)
       ? resolved
-      : [(resolved as { readonly width: number; readonly height: number }).width,
-         (resolved as { readonly width: number; readonly height: number }).height];
+      : [
+          (resolved as { readonly width: number; readonly height: number }).width,
+          (resolved as { readonly width: number; readonly height: number }).height,
+        ];
     const page = new PdfPage(w, h, this.registry);
 
     // Auto-register all currently embedded fonts on the new page
@@ -349,9 +366,7 @@ export class PdfDocument {
    */
   getPage(index: number): PdfPage {
     if (index < 0 || index >= this.pages.length) {
-      throw new RangeError(
-        `Page index ${index} out of range [0, ${this.pages.length - 1}]`,
-      );
+      throw new RangeError(`Page index ${index} out of range [0, ${this.pages.length - 1}]`);
     }
     return this.pages[index]!;
   }
@@ -465,13 +480,13 @@ export class PdfDocument {
     const resolved = size ?? PageSizes.A4;
     const [w, h] = Array.isArray(resolved)
       ? resolved
-      : [(resolved as { readonly width: number; readonly height: number }).width,
-         (resolved as { readonly width: number; readonly height: number }).height];
+      : [
+          (resolved as { readonly width: number; readonly height: number }).width,
+          (resolved as { readonly width: number; readonly height: number }).height,
+        ];
 
     if (!Number.isInteger(index) || index < 0 || index > this.pages.length) {
-      throw new RangeError(
-        `insertPage: index ${index} out of range [0, ${this.pages.length}]`,
-      );
+      throw new RangeError(`insertPage: index ${index} out of range [0, ${this.pages.length}]`);
     }
 
     const page = new PdfPage(w, h, this.registry);
@@ -488,9 +503,7 @@ export class PdfDocument {
    */
   removePage(index: number): void {
     if (!Number.isInteger(index) || index < 0 || index >= this.pages.length) {
-      throw new RangeError(
-        `removePage: index ${index} out of range [0, ${this.pages.length - 1}]`,
-      );
+      throw new RangeError(`removePage: index ${index} out of range [0, ${this.pages.length - 1}]`);
     }
     this.pages.splice(index, 1);
   }
@@ -513,9 +526,7 @@ export class PdfDocument {
     if (toIndex < 0 || toIndex > this.pages.length) {
       // Restore the page before throwing
       this.pages.splice(fromIndex, 0, page!);
-      throw new RangeError(
-        `movePage: toIndex ${toIndex} out of range [0, ${this.pages.length}]`,
-      );
+      throw new RangeError(`movePage: toIndex ${toIndex} out of range [0, ${this.pages.length}]`);
     }
 
     this.pages.splice(toIndex, 0, page!);
@@ -532,10 +543,7 @@ export class PdfDocument {
    * @param indices    Zero-based indices of pages to copy.
    * @returns          The newly created pages in this document.
    */
-  async copyPages(
-    sourceDoc: PdfDocument,
-    indices: number[],
-  ): Promise<PdfPage[]> {
+  async copyPages(sourceDoc: PdfDocument, indices: number[]): Promise<PdfPage[]> {
     return copyPagesToTarget(sourceDoc, this, indices);
   }
 
@@ -550,18 +558,21 @@ export class PdfDocument {
    * Maps TTF font resource name → EmbeddedFont and mutable PDF objects
    * that need to be updated at save time with subsetted data.
    */
-  private readonly ttfFonts = new Map<string, {
-    embeddedFont: EmbeddedFont;
-    fontRef: FontRef;
-    /** The /FontFile2 stream — its `.data` is replaced with subsetted bytes at save time. */
-    fontFileStream: PdfStream;
-    /** The /FontFile2 stream dict — its `/Length1` is updated at save time. */
-    fontFileDict: PdfDict;
-    /** The /ToUnicode stream — updated at save time with a CMap for used glyphs only. */
-    toUnicodeStream: PdfStream;
-    /** The CIDFont dict — its `/W` array is updated at save time. */
-    cidFontDict: PdfDict;
-  }>();
+  private readonly ttfFonts = new Map<
+    string,
+    {
+      embeddedFont: EmbeddedFont;
+      fontRef: FontRef;
+      /** The /FontFile2 stream — its `.data` is replaced with subsetted bytes at save time. */
+      fontFileStream: PdfStream;
+      /** The /FontFile2 stream dict — its `/Length1` is updated at save time. */
+      fontFileDict: PdfDict;
+      /** The /ToUnicode stream — updated at save time with a CMap for used glyphs only. */
+      toUnicodeStream: PdfStream;
+      /** The CIDFont dict — its `/W` array is updated at save time. */
+      cidFontDict: PdfDict;
+    }
+  >();
 
   /**
    * Embed a font in the document.
@@ -683,11 +694,15 @@ export class PdfDocument {
    * Embed a TrueType font from raw bytes as a CIDFont Type 2.
    * @internal
    */
-  private async embedTrueTypeFont(fontData: Uint8Array, options?: EmbedFontOptions): Promise<FontRef> {
+  private async embedTrueTypeFont(
+    fontData: Uint8Array,
+    options?: EmbedFontOptions,
+  ): Promise<FontRef> {
     // Parse metrics and create EmbeddedFont
     const embeddedFont = await embedTtfFont(fontData);
     const metrics = embeddedFont.metrics;
-    const psName = options?.customName ?? metrics.postScriptName ?? metrics.familyName ?? 'CustomFont';
+    const psName =
+      options?.customName ?? metrics.postScriptName ?? metrics.familyName ?? 'CustomFont';
 
     // De-duplicate by PostScript name
     const existing = this.embeddedFonts.get(`__ttf__${psName}`);
@@ -711,16 +726,22 @@ export class PdfDocument {
     fontDescDict.set('/Type', PdfName.of('FontDescriptor'));
     fontDescDict.set('/FontName', PdfName.of(psName));
     fontDescDict.set('/Flags', PdfNumber.of(metrics.flags));
-    fontDescDict.set('/FontBBox', PdfArray.fromNumbers([
-      Math.round((metrics.bbox[0] * 1000) / unitsPerEm),
-      Math.round((metrics.bbox[1] * 1000) / unitsPerEm),
-      Math.round((metrics.bbox[2] * 1000) / unitsPerEm),
-      Math.round((metrics.bbox[3] * 1000) / unitsPerEm),
-    ]));
+    fontDescDict.set(
+      '/FontBBox',
+      PdfArray.fromNumbers([
+        Math.round((metrics.bbox[0] * 1000) / unitsPerEm),
+        Math.round((metrics.bbox[1] * 1000) / unitsPerEm),
+        Math.round((metrics.bbox[2] * 1000) / unitsPerEm),
+        Math.round((metrics.bbox[3] * 1000) / unitsPerEm),
+      ]),
+    );
     fontDescDict.set('/ItalicAngle', PdfNumber.of(metrics.italicAngle));
     fontDescDict.set('/Ascent', PdfNumber.of(Math.round((metrics.ascender * 1000) / unitsPerEm)));
     fontDescDict.set('/Descent', PdfNumber.of(Math.round((metrics.descender * 1000) / unitsPerEm)));
-    fontDescDict.set('/CapHeight', PdfNumber.of(Math.round((metrics.capHeight * 1000) / unitsPerEm)));
+    fontDescDict.set(
+      '/CapHeight',
+      PdfNumber.of(Math.round((metrics.capHeight * 1000) / unitsPerEm)),
+    );
     fontDescDict.set('/StemV', PdfNumber.of(metrics.stemV));
     fontDescDict.set('/FontFile2', fontFileRef);
     const fontDescRef = this.registry.register(fontDescDict);
@@ -864,18 +885,24 @@ export class PdfDocument {
     fontDescDict.set('/Type', PdfName.of('FontDescriptor'));
     fontDescDict.set('/FontName', PdfName.of(psName));
     fontDescDict.set('/Flags', PdfNumber.of(metrics.flags));
-    fontDescDict.set('/FontBBox', PdfArray.fromNumbers([
-      Math.round((metrics.bbox[0] * 1000) / unitsPerEm),
-      Math.round((metrics.bbox[1] * 1000) / unitsPerEm),
-      Math.round((metrics.bbox[2] * 1000) / unitsPerEm),
-      Math.round((metrics.bbox[3] * 1000) / unitsPerEm),
-    ]));
+    fontDescDict.set(
+      '/FontBBox',
+      PdfArray.fromNumbers([
+        Math.round((metrics.bbox[0] * 1000) / unitsPerEm),
+        Math.round((metrics.bbox[1] * 1000) / unitsPerEm),
+        Math.round((metrics.bbox[2] * 1000) / unitsPerEm),
+        Math.round((metrics.bbox[3] * 1000) / unitsPerEm),
+      ]),
+    );
     fontDescDict.set('/ItalicAngle', PdfNumber.of(metrics.italicAngle));
     fontDescDict.set('/Ascent', PdfNumber.of(Math.round((metrics.ascender * 1000) / unitsPerEm)));
     fontDescDict.set('/Descent', PdfNumber.of(Math.round((metrics.descender * 1000) / unitsPerEm)));
-    fontDescDict.set('/CapHeight', PdfNumber.of(Math.round((metrics.capHeight * 1000) / unitsPerEm)));
+    fontDescDict.set(
+      '/CapHeight',
+      PdfNumber.of(Math.round((metrics.capHeight * 1000) / unitsPerEm)),
+    );
     fontDescDict.set('/StemV', PdfNumber.of(metrics.stemV));
-    fontDescDict.set('/FontFile3', fontFileRef);  // CFF uses FontFile3
+    fontDescDict.set('/FontFile3', fontFileRef); // CFF uses FontFile3
     const fontDescRef = this.registry.register(fontDescDict);
 
     // 3. CIDSystemInfo dictionary
@@ -904,7 +931,7 @@ export class PdfDocument {
     // 5. CIDFont Type 0 (DescendantFont) — CIDFontType0 for CFF
     const cidFontDict = new PdfDict();
     cidFontDict.set('/Type', PdfName.of('Font'));
-    cidFontDict.set('/Subtype', PdfName.of('CIDFontType0'));  // Type0 for CFF
+    cidFontDict.set('/Subtype', PdfName.of('CIDFontType0')); // Type0 for CFF
     cidFontDict.set('/BaseFont', PdfName.of(psName));
     cidFontDict.set('/CIDSystemInfo', cidSysInfoDict);
     cidFontDict.set('/FontDescriptor', fontDescRef);
@@ -1015,7 +1042,7 @@ export class PdfDocument {
     // Set color space
     if (result.colorSpace === 'Indexed' && result.palette) {
       // Indexed color space: [/Indexed /DeviceRGB hival <palette hex>]
-      const maxIndex = (result.palette.length / 3) - 1;
+      const maxIndex = result.palette.length / 3 - 1;
       dict.set(
         '/ColorSpace',
         PdfArray.of([
@@ -1070,7 +1097,9 @@ export class PdfDocument {
       ref,
       width: w,
       height: h,
-      scale(factor: number) { return { width: w * factor, height: h * factor }; },
+      scale(factor: number) {
+        return { width: w * factor, height: h * factor };
+      },
       scaleToFit(maxW: number, maxH: number) {
         const ratio = Math.min(maxW / w, maxH / h);
         return { width: w * ratio, height: h * ratio };
@@ -1096,9 +1125,8 @@ export class PdfDocument {
     this.imageCounter++;
     const resourceName = `Im${this.imageCounter}`;
 
-    const colorSpace = components === 1 ? 'DeviceGray'
-      : components === 4 ? 'DeviceCMYK'
-      : 'DeviceRGB';
+    const colorSpace =
+      components === 1 ? 'DeviceGray' : components === 4 ? 'DeviceCMYK' : 'DeviceRGB';
 
     const dict = new PdfDict();
     dict.set('/Type', PdfName.of('XObject'));
@@ -1118,7 +1146,9 @@ export class PdfDocument {
       ref,
       width,
       height,
-      scale(factor: number) { return { width: width * factor, height: height * factor }; },
+      scale(factor: number) {
+        return { width: width * factor, height: height * factor };
+      },
       scaleToFit(maxW: number, maxH: number) {
         const ratio = Math.min(maxW / width, maxH / height);
         return { width: width * ratio, height: height * ratio };
@@ -1200,7 +1230,9 @@ export class PdfDocument {
         ref,
         width: w,
         height: h,
-        scale(factor: number) { return { width: w * factor, height: h * factor }; },
+        scale(factor: number) {
+          return { width: w * factor, height: h * factor };
+        },
         scaleToFit(maxW: number, maxH: number) {
           const ratio = Math.min(maxW / w, maxH / h);
           return { width: w * ratio, height: h * ratio };
@@ -1227,7 +1259,9 @@ export class PdfDocument {
       ref,
       width: w,
       height: h,
-      scale(factor: number) { return { width: w * factor, height: h * factor }; },
+      scale(factor: number) {
+        return { width: w * factor, height: h * factor };
+      },
       scaleToFit(maxW: number, maxH: number) {
         const ratio = Math.min(maxW / w, maxH / h);
         return { width: w * ratio, height: h * ratio };
@@ -1248,11 +1282,10 @@ export class PdfDocument {
    * @param options   Options (e.g., `{ page: 0 }` for multi-page TIFFs).
    * @returns         An {@link ImageRef}.
    */
-  embedTiff(tiffData: Uint8Array | ArrayBuffer, options?: { page?: number | undefined }  ): ImageRef {
+  embedTiff(tiffData: Uint8Array | ArrayBuffer, options?: { page?: number | undefined }): ImageRef {
     const data = tiffData instanceof ArrayBuffer ? new Uint8Array(tiffData) : tiffData;
-    const tiffOptions: TiffDecodeOptions | undefined = options?.page !== undefined
-      ? { page: options.page }
-      : undefined;
+    const tiffOptions: TiffDecodeOptions | undefined =
+      options?.page !== undefined ? { page: options.page } : undefined;
     const decoded = decodeTiff(data, tiffOptions);
 
     this.imageCounter++;
@@ -1311,7 +1344,9 @@ export class PdfDocument {
         ref,
         width: w,
         height: h,
-        scale(factor: number) { return { width: w * factor, height: h * factor }; },
+        scale(factor: number) {
+          return { width: w * factor, height: h * factor };
+        },
         scaleToFit(maxW: number, maxH: number) {
           const ratio = Math.min(maxW / w, maxH / h);
           return { width: w * ratio, height: h * ratio };
@@ -1339,7 +1374,9 @@ export class PdfDocument {
       ref,
       width: w,
       height: h,
-      scale(factor: number) { return { width: w * factor, height: h * factor }; },
+      scale(factor: number) {
+        return { width: w * factor, height: h * factor };
+      },
       scaleToFit(maxW: number, maxH: number) {
         const ratio = Math.min(maxW / w, maxH / h);
         return { width: w * ratio, height: h * ratio };
@@ -1398,7 +1435,7 @@ export class PdfDocument {
       default:
         throw new Error(
           'Unsupported image format. Expected PNG, JPEG, WebP, or TIFF, ' +
-          `got ${data.subarray(0, 4).toHex().match(/.{2}/g)?.join(' ') ?? ''}.`,
+            `got ${data.subarray(0, 4).toHex().match(/.{2}/g)?.join(' ') ?? ''}.`,
         );
     }
   }
@@ -1532,13 +1569,7 @@ export class PdfDocument {
     this.formXObjectCounter++;
     const xObjectName = `XF${this.formXObjectCounter}`;
 
-    return embedPageAsFormXObject(
-      page,
-      sourceRegistry,
-      this.registry,
-      xObjectName,
-      options,
-    );
+    return embedPageAsFormXObject(page, sourceRegistry, this.registry, xObjectName, options);
   }
 
   /**
@@ -1735,15 +1766,9 @@ export class PdfDocument {
    * @param rect       Rectangle [x1, y1, x2, y2] for the visual appearance.
    * @param name       The signature field name (must be unique).
    */
-  addSignatureField(
-    pageIndex: number,
-    rect: [number, number, number, number],
-    name: string,
-  ): void {
+  addSignatureField(pageIndex: number, rect: [number, number, number, number], name: string): void {
     if (pageIndex < 0 || pageIndex >= this.pages.length) {
-      throw new RangeError(
-        `Page index ${pageIndex} out of range [0, ${this.pages.length - 1}]`,
-      );
+      throw new RangeError(`Page index ${pageIndex} out of range [0, ${this.pages.length - 1}]`);
     }
     // Store the signature field info for later use in sign()
     // The actual PDF structures are created during the signing process
@@ -1779,7 +1804,7 @@ export class PdfDocument {
    */
   async sign(fieldName: string, options: SignOptions): Promise<Uint8Array> {
     // Get the PDF bytes to sign
-    const pdfBytes = this.originalBytes ?? await this.save();
+    const pdfBytes = this.originalBytes ?? (await this.save());
     return signPdf(pdfBytes, fieldName, options);
   }
 
@@ -1836,7 +1861,12 @@ export class PdfDocument {
   addOutline(
     title: string,
     pageIndex: number,
-    options?: OutlineItemOptions & { fit?: OutlineDestination['fit']; top?: number; left?: number; zoom?: number },
+    options?: OutlineItemOptions & {
+      fit?: OutlineDestination['fit'];
+      top?: number;
+      left?: number;
+      zoom?: number;
+    },
   ): PdfOutlineItem {
     const tree = this.getOutlines();
     const dest: OutlineDestination = {
@@ -2431,9 +2461,7 @@ export class PdfDocument {
    * // dataUri === "data:application/pdf;base64,JVBERi0..."
    * ```
    */
-  async saveAsBase64(
-    options?: PdfSaveOptions & { dataUri?: boolean },
-  ): Promise<string> {
+  async saveAsBase64(options?: PdfSaveOptions & { dataUri?: boolean }): Promise<string> {
     const bytes = await this.save(options);
     const encoded = bytes.toBase64();
     if (options?.dataUri) {
@@ -2743,7 +2771,10 @@ export class PdfDocument {
       //    preserves original GIDs, we only need widths for the GIDs
       //    that were actually used.
       const scale = 1000 / metrics.unitsPerEm;
-      const usedGidsSorted = usedGlyphs.values().toArray().sort((a, b) => a - b);
+      const usedGidsSorted = usedGlyphs
+        .values()
+        .toArray()
+        .sort((a, b) => a - b);
       const wArrayItems: (PdfNumber | PdfArray)[] = [];
 
       // Group consecutive GIDs into chunks for the /W array
@@ -2791,4 +2822,3 @@ export class PdfDocument {
 export function createPdf(): PdfDocument {
   return new PdfDocument();
 }
-

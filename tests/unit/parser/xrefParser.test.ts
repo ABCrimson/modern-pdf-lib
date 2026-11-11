@@ -14,9 +14,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  XrefParser,
-} from '../../../src/parser/xrefParser.js';
+import { XrefParser } from '../../../src/parser/xrefParser.js';
 import { PdfLexer } from '../../../src/parser/lexer.js';
 import { PdfObjectParser } from '../../../src/parser/objectParser.js';
 import { PdfObjectRegistry } from '../../../src/core/pdfObjects.js';
@@ -47,11 +45,7 @@ function makeParser(str: string): XrefParser {
  * Build a minimal valid PDF string with precise byte offsets.
  * Returns the complete PDF string so tests can modify or inspect it.
  */
-function buildMinimalPdf(opts?: {
-  info?: boolean;
-  pages?: number;
-  mediaBox?: number[];
-}): string {
+function buildMinimalPdf(opts?: { info?: boolean; pages?: number; mediaBox?: number[] }): string {
   const pageCount = opts?.pages ?? 1;
   const mediaBox = opts?.mediaBox ?? [0, 0, 612, 792];
   const mediaBoxStr = `[${mediaBox.join(' ')}]`;
@@ -140,14 +134,15 @@ describe('XrefParser.findStartXref', () => {
   });
 
   it('handles startxref with extra whitespace', () => {
-    const pdfStr = '%PDF-1.4\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n'
-      + '2 0 obj<</Type/Pages/Kids[]/Count 0>>endobj\n'
-      + 'xref\n0 3\n'
-      + '0000000000 65535 f \r\n'
-      + '0000000009 00000 n \r\n'
-      + '0000000052 00000 n \r\n'
-      + 'trailer<</Size 3/Root 1 0 R>>\n'
-      + 'startxref\n  100  \n%%EOF\n';
+    const pdfStr =
+      '%PDF-1.4\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n' +
+      '2 0 obj<</Type/Pages/Kids[]/Count 0>>endobj\n' +
+      'xref\n0 3\n' +
+      '0000000000 65535 f \r\n' +
+      '0000000009 00000 n \r\n' +
+      '0000000052 00000 n \r\n' +
+      'trailer<</Size 3/Root 1 0 R>>\n' +
+      'startxref\n  100  \n%%EOF\n';
     const parser = makeParser(pdfStr);
     const offset = parser.findStartXref();
     expect(offset).toBe(100);
@@ -182,10 +177,7 @@ describe('XrefParser.findStartXref', () => {
     const afterXref = pdfStr.slice(xrefIdx);
     // Recalculate xref offset
     const newXrefPos = beforeXref.length + padding.length;
-    const modifiedAfter = afterXref.replace(
-      /startxref\n\d+/,
-      `startxref\n${newXrefPos}`,
-    );
+    const modifiedAfter = afterXref.replace(/startxref\n\d+/, `startxref\n${newXrefPos}`);
     const paddedPdf = beforeXref + padding + modifiedAfter;
     const parser = makeParser(paddedPdf);
     const offset = parser.findStartXref();
@@ -233,9 +225,9 @@ describe('XrefParser.parseTraditionalXref', () => {
       '5 0 obj<</Type/Pages/Kids[6 0 R]/Count 1>>endobj\n' +
       '6 0 obj<</Type/Page/Parent 5 0 R/MediaBox[0 0 612 792]>>endobj\n';
 
-    const catalogOffset = 9;   // '%PDF-1.4\n' is 9 bytes
-    const pagesOffset = 52;    // after catalog obj
-    const pageOffset = 101;    // after pages obj
+    const catalogOffset = 9; // '%PDF-1.4\n' is 9 bytes
+    const pagesOffset = 52; // after catalog obj
+    const pageOffset = 101; // after pages obj
     const xrefPos = pdfBody.length; // 164
 
     const xrefSection =
@@ -257,14 +249,14 @@ describe('XrefParser.parseTraditionalXref', () => {
     // Should have 4 entries: 0, 1, 5, 6
     expect(result.entries.length).toBe(4);
 
-    const objNums = result.entries.map(e => e.objectNumber);
+    const objNums = result.entries.map((e) => e.objectNumber);
     expect(objNums).toContain(0);
     expect(objNums).toContain(1);
     expect(objNums).toContain(5);
     expect(objNums).toContain(6);
 
     // Verify object 5 is in-use
-    const entry5 = result.entries.find(e => e.objectNumber === 5);
+    const entry5 = result.entries.find((e) => e.objectNumber === 5);
     expect(entry5).toBeDefined();
     expect(entry5!.type).toBe('in-use');
   });
@@ -290,10 +282,7 @@ describe('XrefParser.parseTraditionalXref', () => {
       '2 0 obj<</Type/Pages/Kids[]/Count 0>>endobj\n';
 
     const xrefPos = pdfStr.length;
-    const xrefSection =
-      'xref\n' +
-      '0 1\n' +
-      '0000000000 65535 f \r\n';
+    const xrefSection = 'xref\n' + '0 1\n' + '0000000000 65535 f \r\n';
     const trailer = `trailer<</Size 3/Root 1 0 R>>\nstartxref\n${xrefPos}\n%%EOF\n`;
 
     const fullPdf = pdfStr + xrefSection + trailer;
@@ -406,8 +395,7 @@ describe('XrefParser.parseXref', () => {
     xref2 += `${String(obj1v2Offset).padStart(10, '0')} 00000 n \r\n`;
     const trailer2 = `trailer<</Size 4/Root 1 0 R/Prev ${xref1Pos}>>\n`;
 
-    const fullPdf = afterXref1 + obj1v2 + xref2 + trailer2
-      + `startxref\n${xref2Pos}\n%%EOF\n`;
+    const fullPdf = afterXref1 + obj1v2 + xref2 + trailer2 + `startxref\n${xref2Pos}\n%%EOF\n`;
 
     const parser = makeParser(fullPdf);
     const { entries } = await parser.parseXref();
@@ -444,8 +432,7 @@ describe('XrefParser.parseXref', () => {
     // /Prev points back to the same xref section (loop!)
     const trailer = `trailer<</Size 3/Root 1 0 R/Prev ${xrefPos}>>\n`;
 
-    const fullPdf = header + obj1 + obj2 + xref + trailer
-      + `startxref\n${xrefPos}\n%%EOF\n`;
+    const fullPdf = header + obj1 + obj2 + xref + trailer + `startxref\n${xrefPos}\n%%EOF\n`;
 
     const parser = makeParser(fullPdf);
     // Should not hang; should complete and return valid data
@@ -593,8 +580,12 @@ describe('XrefParser edge cases', () => {
       `${String(obj1Offset).padStart(10, '0')} 00000 n \n` +
       `${String(obj2Offset).padStart(10, '0')} 00000 n \n`;
 
-    const fullPdf = header + obj1 + obj2 + xrefSection
-      + `trailer<</Size 3/Root 1 0 R>>\nstartxref\n${xrefPos}\n%%EOF\n`;
+    const fullPdf =
+      header +
+      obj1 +
+      obj2 +
+      xrefSection +
+      `trailer<</Size 3/Root 1 0 R>>\nstartxref\n${xrefPos}\n%%EOF\n`;
 
     const parser = makeParser(fullPdf);
     const result = parser.parseTraditionalXref(xrefPos);
@@ -609,7 +600,7 @@ describe('XrefParser edge cases', () => {
     const xrefOffset = parser.findStartXref();
     const { entries } = parser.parseTraditionalXref(xrefOffset);
 
-    const freeEntry = entries.find(e => e.type === 'free');
+    const freeEntry = entries.find((e) => e.type === 'free');
     expect(freeEntry).toBeDefined();
     expect(freeEntry!.offset).toBe(0);
   });
@@ -687,13 +678,13 @@ describe('XrefParser generation numbers', () => {
       '5 1\n' +
       `${String(objOffset).padStart(10, '0')} 00002 n \r\n`;
 
-    const fullPdf = header + obj + xrefSection
-      + `trailer<</Size 6/Root 5 2 R>>\nstartxref\n${xrefPos}\n%%EOF\n`;
+    const fullPdf =
+      header + obj + xrefSection + `trailer<</Size 6/Root 5 2 R>>\nstartxref\n${xrefPos}\n%%EOF\n`;
 
     const parser = makeParser(fullPdf);
     const result = parser.parseTraditionalXref(xrefPos);
 
-    const entry5 = result.entries.find(e => e.objectNumber === 5);
+    const entry5 = result.entries.find((e) => e.objectNumber === 5);
     expect(entry5).toBeDefined();
     expect(entry5!.generationNumber).toBe(2);
     expect(entry5!.type).toBe('in-use');

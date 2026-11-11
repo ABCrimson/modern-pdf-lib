@@ -137,10 +137,7 @@ export async function transcodeJp2ToJpeg(
  * console.log(`Estimated output: ${estimatedSize} bytes`);
  * ```
  */
-export function estimateTranscodedSize(
-  jp2Data: Uint8Array,
-  quality: number = 85,
-): number {
+export function estimateTranscodedSize(jp2Data: Uint8Array, quality: number = 85): number {
   const dims = extractDimensionsFromHeader(jp2Data);
   if (!dims) {
     // Can't determine dimensions — return a rough default
@@ -177,16 +174,20 @@ function extractDimensionsFromHeader(
   // Check for JP2 container
   if (
     data.length >= 12 &&
-    data[0] === 0x00 && data[1] === 0x00 &&
-    data[2] === 0x00 && data[3] === 0x0C &&
-    data[4] === 0x6A && data[5] === 0x50 &&
-    data[6] === 0x20 && data[7] === 0x20
+    data[0] === 0x00 &&
+    data[1] === 0x00 &&
+    data[2] === 0x00 &&
+    data[3] === 0x0c &&
+    data[4] === 0x6a &&
+    data[5] === 0x50 &&
+    data[6] === 0x20 &&
+    data[7] === 0x20
   ) {
     return extractDimensionsFromJp2(data);
   }
 
   // Check for raw codestream (SOC marker FF 4F)
-  if (data.length >= 2 && data[0] === 0xFF && data[1] === 0x4F) {
+  if (data.length >= 2 && data[0] === 0xff && data[1] === 0x4f) {
     return extractDimensionsFromCodestream(data);
   }
 
@@ -216,7 +217,7 @@ function extractDimensionsFromJp2(
     if (boxLength === 1 && offset + 16 <= data.length) {
       const high = view.getUint32(8, false);
       const low = view.getUint32(12, false);
-      boxLength = high > 0 ? (data.length - offset) : low;
+      boxLength = high > 0 ? data.length - offset : low;
     } else if (boxLength === 0) {
       boxLength = data.length - offset;
     }
@@ -292,10 +293,10 @@ function extractDimensionsFromCodestream(
   if (data.length < 4) return null;
 
   // SIZ must follow immediately after SOC
-  if (data[2] !== 0xFF || data[3] !== 0x51) {
+  if (data[2] !== 0xff || data[3] !== 0x51) {
     // Scan for SIZ marker
     for (let i = 2; i < Math.min(data.length - 40, 100); i++) {
-      if (data[i] === 0xFF && data[i + 1] === 0x51) {
+      if (data[i] === 0xff && data[i + 1] === 0x51) {
         return parseSizMarker(data, i + 2);
       }
     }
@@ -318,8 +319,8 @@ function parseSizMarker(
   const view = new DataView(data.buffer, data.byteOffset + offset);
 
   // Skip Lsiz (2 bytes) and Rsiz (2 bytes)
-  const xsiz = view.getUint32(4, false);   // Reference grid width
-  const ysiz = view.getUint32(8, false);   // Reference grid height
+  const xsiz = view.getUint32(4, false); // Reference grid width
+  const ysiz = view.getUint32(8, false); // Reference grid height
   const xosiz = view.getUint32(12, false); // Horizontal offset
   const yosiz = view.getUint32(16, false); // Vertical offset
 
@@ -362,7 +363,7 @@ function downscale16to8(
     // Read 16-bit big-endian value
     const value16 = (data[byteOffset]! << 8) | data[byteOffset + 1]!;
     // Map to 8-bit
-    result[i] = (value16 >> 8) & 0xFF;
+    result[i] = (value16 >> 8) & 0xff;
   }
 
   return result;
@@ -418,9 +419,7 @@ async function encodeAsJpeg(
 ): Promise<Uint8Array> {
   // Try WASM encoder first
   try {
-    const { encodeJpegWasm, isJpegWasmReady } = await import(
-      '../wasm/jpeg/bridge.js'
-    );
+    const { encodeJpegWasm, isJpegWasmReady } = await import('../wasm/jpeg/bridge.js');
 
     if (isJpegWasmReady()) {
       const channels = components as 1 | 3 | 4;
@@ -474,7 +473,7 @@ function encodeBaselineJpeg(
 
   // Compute scale factor from quality
   const q = Math.max(1, Math.min(100, quality));
-  const scaleFactor = q < 50 ? (5000 / q) : (200 - 2 * q);
+  const scaleFactor = q < 50 ? 5000 / q : 200 - 2 * q;
 
   // Scale standard luminance and chrominance quantization tables
   const lumQt = scaleQuantTable(STANDARD_LUM_QT, scaleFactor);
@@ -484,7 +483,7 @@ function encodeBaselineJpeg(
   const chunks: Uint8Array[] = [];
 
   // SOI
-  chunks.push(new Uint8Array([0xFF, 0xD8]));
+  chunks.push(new Uint8Array([0xff, 0xd8]));
 
   // APP0 (JFIF)
   chunks.push(buildApp0());
@@ -504,14 +503,11 @@ function encodeBaselineJpeg(
   chunks.push(buildStandardDht());
 
   // SOS + entropy-coded data
-  const scanData = encodeScanData(
-    pixels, width, height, components, jpegComponents,
-    lumQt, chrQt,
-  );
+  const scanData = encodeScanData(pixels, width, height, components, jpegComponents, lumQt, chrQt);
   chunks.push(scanData);
 
   // EOI
-  chunks.push(new Uint8Array([0xFF, 0xD9]));
+  chunks.push(new Uint8Array([0xff, 0xd9]));
 
   // Concatenate all chunks
   const totalLength = chunks.reduce((sum, c) => sum + c.length, 0);
@@ -527,38 +523,23 @@ function encodeBaselineJpeg(
 
 // Standard luminance quantization table (JPEG Annex K, Table K.1)
 const STANDARD_LUM_QT = [
-  16, 11, 10, 16, 24, 40, 51, 61,
-  12, 12, 14, 19, 26, 58, 60, 55,
-  14, 13, 16, 24, 40, 57, 69, 56,
-  14, 17, 22, 29, 51, 87, 80, 62,
-  18, 22, 37, 56, 68, 109, 103, 77,
-  24, 35, 55, 64, 81, 104, 113, 92,
-  49, 64, 78, 87, 103, 121, 120, 101,
-  72, 92, 95, 98, 112, 100, 103, 99,
+  16, 11, 10, 16, 24, 40, 51, 61, 12, 12, 14, 19, 26, 58, 60, 55, 14, 13, 16, 24, 40, 57, 69, 56,
+  14, 17, 22, 29, 51, 87, 80, 62, 18, 22, 37, 56, 68, 109, 103, 77, 24, 35, 55, 64, 81, 104, 113,
+  92, 49, 64, 78, 87, 103, 121, 120, 101, 72, 92, 95, 98, 112, 100, 103, 99,
 ];
 
 // Standard chrominance quantization table (JPEG Annex K, Table K.2)
 const STANDARD_CHR_QT = [
-  17, 18, 24, 47, 99, 99, 99, 99,
-  18, 21, 26, 66, 99, 99, 99, 99,
-  24, 26, 56, 99, 99, 99, 99, 99,
-  47, 66, 99, 99, 99, 99, 99, 99,
-  99, 99, 99, 99, 99, 99, 99, 99,
-  99, 99, 99, 99, 99, 99, 99, 99,
-  99, 99, 99, 99, 99, 99, 99, 99,
-  99, 99, 99, 99, 99, 99, 99, 99,
+  17, 18, 24, 47, 99, 99, 99, 99, 18, 21, 26, 66, 99, 99, 99, 99, 24, 26, 56, 99, 99, 99, 99, 99,
+  47, 66, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99,
+  99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99,
 ];
 
 // Zigzag scan order for 8x8 blocks
 const ZIGZAG = [
-  0,  1,  8,  16,  9,  2,  3, 10,
-  17, 24, 32, 25, 18, 11,  4,  5,
-  12, 19, 26, 33, 40, 48, 41, 34,
-  27, 20, 13,  6,  7, 14, 21, 28,
-  35, 42, 49, 56, 57, 50, 43, 36,
-  29, 22, 15, 23, 30, 37, 44, 51,
-  58, 59, 52, 45, 38, 31, 39, 46,
-  53, 60, 61, 54, 47, 55, 62, 63,
+  0, 1, 8, 16, 9, 2, 3, 10, 17, 24, 32, 25, 18, 11, 4, 5, 12, 19, 26, 33, 40, 48, 41, 34, 27, 20,
+  13, 6, 7, 14, 21, 28, 35, 42, 49, 56, 57, 50, 43, 36, 29, 22, 15, 23, 30, 37, 44, 51, 58, 59, 52,
+  45, 38, 31, 39, 46, 53, 60, 61, 54, 47, 55, 62, 63,
 ];
 
 /** Scale a quantization table by the given factor. @internal */
@@ -572,25 +553,35 @@ function scaleQuantTable(base: number[], scaleFactor: number): number[] {
 /** Build JFIF APP0 marker. @internal */
 function buildApp0(): Uint8Array {
   return new Uint8Array([
-    0xFF, 0xE0, // APP0 marker
-    0x00, 0x10, // Length = 16
-    0x4A, 0x46, 0x49, 0x46, 0x00, // "JFIF\0"
-    0x01, 0x01, // Version 1.1
-    0x00,       // No density units
-    0x00, 0x01, // X density = 1
-    0x00, 0x01, // Y density = 1
-    0x00, 0x00, // No thumbnail
+    0xff,
+    0xe0, // APP0 marker
+    0x00,
+    0x10, // Length = 16
+    0x4a,
+    0x46,
+    0x49,
+    0x46,
+    0x00, // "JFIF\0"
+    0x01,
+    0x01, // Version 1.1
+    0x00, // No density units
+    0x00,
+    0x01, // X density = 1
+    0x00,
+    0x01, // Y density = 1
+    0x00,
+    0x00, // No thumbnail
   ]);
 }
 
 /** Build DQT marker for one table. @internal */
 function buildDqt(tableId: number, table: number[]): Uint8Array {
   const data = new Uint8Array(2 + 2 + 1 + 64);
-  data[0] = 0xFF;
-  data[1] = 0xDB;
+  data[0] = 0xff;
+  data[1] = 0xdb;
   data[2] = 0x00;
   data[3] = 67; // Length = 67 (2 + 1 + 64)
-  data[4] = tableId & 0x0F; // 8-bit precision (0) + table ID
+  data[4] = tableId & 0x0f; // 8-bit precision (0) + table ID
   for (let i = 0; i < 64; i++) {
     data[5 + i] = table[ZIGZAG[i]!]!;
   }
@@ -598,28 +589,24 @@ function buildDqt(tableId: number, table: number[]): Uint8Array {
 }
 
 /** Build SOF0 marker. @internal */
-function buildSof0(
-  width: number,
-  height: number,
-  components: number,
-): Uint8Array {
+function buildSof0(width: number, height: number, components: number): Uint8Array {
   const length = 8 + components * 3;
   const data = new Uint8Array(2 + 2 + length - 2);
   let pos = 0;
 
-  data[pos++] = 0xFF;
-  data[pos++] = 0xC0; // SOF0
+  data[pos++] = 0xff;
+  data[pos++] = 0xc0; // SOF0
 
-  data[pos++] = (length >> 8) & 0xFF;
-  data[pos++] = length & 0xFF;
+  data[pos++] = (length >> 8) & 0xff;
+  data[pos++] = length & 0xff;
 
   data[pos++] = 8; // Precision (8 bits)
 
-  data[pos++] = (height >> 8) & 0xFF;
-  data[pos++] = height & 0xFF;
+  data[pos++] = (height >> 8) & 0xff;
+  data[pos++] = height & 0xff;
 
-  data[pos++] = (width >> 8) & 0xFF;
-  data[pos++] = width & 0xFF;
+  data[pos++] = (width >> 8) & 0xff;
+  data[pos++] = width & 0xff;
 
   data[pos++] = components;
 
@@ -655,54 +642,34 @@ const DC_LUM_VALS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
 const DC_CHR_BITS = [0, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0];
 const DC_CHR_VALS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
 
-const AC_LUM_BITS = [0, 2, 1, 3, 3, 2, 4, 3, 5, 5, 4, 4, 0, 0, 1, 0x7D];
+const AC_LUM_BITS = [0, 2, 1, 3, 3, 2, 4, 3, 5, 5, 4, 4, 0, 0, 1, 0x7d];
 const AC_LUM_VALS = [
-  0x01, 0x02, 0x03, 0x00, 0x04, 0x11, 0x05, 0x12,
-  0x21, 0x31, 0x41, 0x06, 0x13, 0x51, 0x61, 0x07,
-  0x22, 0x71, 0x14, 0x32, 0x81, 0x91, 0xA1, 0x08,
-  0x23, 0x42, 0xB1, 0xC1, 0x15, 0x52, 0xD1, 0xF0,
-  0x24, 0x33, 0x62, 0x72, 0x82, 0x09, 0x0A, 0x16,
-  0x17, 0x18, 0x19, 0x1A, 0x25, 0x26, 0x27, 0x28,
-  0x29, 0x2A, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39,
-  0x3A, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49,
-  0x4A, 0x53, 0x54, 0x55, 0x56, 0x57, 0x58, 0x59,
-  0x5A, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68, 0x69,
-  0x6A, 0x73, 0x74, 0x75, 0x76, 0x77, 0x78, 0x79,
-  0x7A, 0x83, 0x84, 0x85, 0x86, 0x87, 0x88, 0x89,
-  0x8A, 0x92, 0x93, 0x94, 0x95, 0x96, 0x97, 0x98,
-  0x99, 0x9A, 0xA2, 0xA3, 0xA4, 0xA5, 0xA6, 0xA7,
-  0xA8, 0xA9, 0xAA, 0xB2, 0xB3, 0xB4, 0xB5, 0xB6,
-  0xB7, 0xB8, 0xB9, 0xBA, 0xC2, 0xC3, 0xC4, 0xC5,
-  0xC6, 0xC7, 0xC8, 0xC9, 0xCA, 0xD2, 0xD3, 0xD4,
-  0xD5, 0xD6, 0xD7, 0xD8, 0xD9, 0xDA, 0xE1, 0xE2,
-  0xE3, 0xE4, 0xE5, 0xE6, 0xE7, 0xE8, 0xE9, 0xEA,
-  0xF1, 0xF2, 0xF3, 0xF4, 0xF5, 0xF6, 0xF7, 0xF8,
-  0xF9, 0xFA,
+  0x01, 0x02, 0x03, 0x00, 0x04, 0x11, 0x05, 0x12, 0x21, 0x31, 0x41, 0x06, 0x13, 0x51, 0x61, 0x07,
+  0x22, 0x71, 0x14, 0x32, 0x81, 0x91, 0xa1, 0x08, 0x23, 0x42, 0xb1, 0xc1, 0x15, 0x52, 0xd1, 0xf0,
+  0x24, 0x33, 0x62, 0x72, 0x82, 0x09, 0x0a, 0x16, 0x17, 0x18, 0x19, 0x1a, 0x25, 0x26, 0x27, 0x28,
+  0x29, 0x2a, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x3a, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49,
+  0x4a, 0x53, 0x54, 0x55, 0x56, 0x57, 0x58, 0x59, 0x5a, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68, 0x69,
+  0x6a, 0x73, 0x74, 0x75, 0x76, 0x77, 0x78, 0x79, 0x7a, 0x83, 0x84, 0x85, 0x86, 0x87, 0x88, 0x89,
+  0x8a, 0x92, 0x93, 0x94, 0x95, 0x96, 0x97, 0x98, 0x99, 0x9a, 0xa2, 0xa3, 0xa4, 0xa5, 0xa6, 0xa7,
+  0xa8, 0xa9, 0xaa, 0xb2, 0xb3, 0xb4, 0xb5, 0xb6, 0xb7, 0xb8, 0xb9, 0xba, 0xc2, 0xc3, 0xc4, 0xc5,
+  0xc6, 0xc7, 0xc8, 0xc9, 0xca, 0xd2, 0xd3, 0xd4, 0xd5, 0xd6, 0xd7, 0xd8, 0xd9, 0xda, 0xe1, 0xe2,
+  0xe3, 0xe4, 0xe5, 0xe6, 0xe7, 0xe8, 0xe9, 0xea, 0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7, 0xf8,
+  0xf9, 0xfa,
 ];
 
 const AC_CHR_BITS = [0, 2, 1, 2, 4, 4, 3, 4, 7, 5, 4, 4, 0, 1, 2, 0x77];
 const AC_CHR_VALS = [
-  0x00, 0x01, 0x02, 0x03, 0x11, 0x04, 0x05, 0x21,
-  0x31, 0x06, 0x12, 0x41, 0x51, 0x07, 0x61, 0x71,
-  0x13, 0x22, 0x32, 0x81, 0x08, 0x14, 0x42, 0x91,
-  0xA1, 0xB1, 0xC1, 0x09, 0x23, 0x33, 0x52, 0xF0,
-  0x15, 0x62, 0x72, 0xD1, 0x0A, 0x16, 0x24, 0x34,
-  0xE1, 0x25, 0xF1, 0x17, 0x18, 0x19, 0x1A, 0x26,
-  0x27, 0x28, 0x29, 0x2A, 0x35, 0x36, 0x37, 0x38,
-  0x39, 0x3A, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48,
-  0x49, 0x4A, 0x53, 0x54, 0x55, 0x56, 0x57, 0x58,
-  0x59, 0x5A, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68,
-  0x69, 0x6A, 0x73, 0x74, 0x75, 0x76, 0x77, 0x78,
-  0x79, 0x7A, 0x82, 0x83, 0x84, 0x85, 0x86, 0x87,
-  0x88, 0x89, 0x8A, 0x92, 0x93, 0x94, 0x95, 0x96,
-  0x97, 0x98, 0x99, 0x9A, 0xA2, 0xA3, 0xA4, 0xA5,
-  0xA6, 0xA7, 0xA8, 0xA9, 0xAA, 0xB2, 0xB3, 0xB4,
-  0xB5, 0xB6, 0xB7, 0xB8, 0xB9, 0xBA, 0xC2, 0xC3,
-  0xC4, 0xC5, 0xC6, 0xC7, 0xC8, 0xC9, 0xCA, 0xD2,
-  0xD3, 0xD4, 0xD5, 0xD6, 0xD7, 0xD8, 0xD9, 0xDA,
-  0xE2, 0xE3, 0xE4, 0xE5, 0xE6, 0xE7, 0xE8, 0xE9,
-  0xEA, 0xF2, 0xF3, 0xF4, 0xF5, 0xF6, 0xF7, 0xF8,
-  0xF9, 0xFA,
+  0x00, 0x01, 0x02, 0x03, 0x11, 0x04, 0x05, 0x21, 0x31, 0x06, 0x12, 0x41, 0x51, 0x07, 0x61, 0x71,
+  0x13, 0x22, 0x32, 0x81, 0x08, 0x14, 0x42, 0x91, 0xa1, 0xb1, 0xc1, 0x09, 0x23, 0x33, 0x52, 0xf0,
+  0x15, 0x62, 0x72, 0xd1, 0x0a, 0x16, 0x24, 0x34, 0xe1, 0x25, 0xf1, 0x17, 0x18, 0x19, 0x1a, 0x26,
+  0x27, 0x28, 0x29, 0x2a, 0x35, 0x36, 0x37, 0x38, 0x39, 0x3a, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48,
+  0x49, 0x4a, 0x53, 0x54, 0x55, 0x56, 0x57, 0x58, 0x59, 0x5a, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68,
+  0x69, 0x6a, 0x73, 0x74, 0x75, 0x76, 0x77, 0x78, 0x79, 0x7a, 0x82, 0x83, 0x84, 0x85, 0x86, 0x87,
+  0x88, 0x89, 0x8a, 0x92, 0x93, 0x94, 0x95, 0x96, 0x97, 0x98, 0x99, 0x9a, 0xa2, 0xa3, 0xa4, 0xa5,
+  0xa6, 0xa7, 0xa8, 0xa9, 0xaa, 0xb2, 0xb3, 0xb4, 0xb5, 0xb6, 0xb7, 0xb8, 0xb9, 0xba, 0xc2, 0xc3,
+  0xc4, 0xc5, 0xc6, 0xc7, 0xc8, 0xc9, 0xca, 0xd2, 0xd3, 0xd4, 0xd5, 0xd6, 0xd7, 0xd8, 0xd9, 0xda,
+  0xe2, 0xe3, 0xe4, 0xe5, 0xe6, 0xe7, 0xe8, 0xe9, 0xea, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7, 0xf8,
+  0xf9, 0xfa,
 ];
 
 /** Build all four standard DHT markers in one segment. @internal */
@@ -720,10 +687,10 @@ function buildStandardDht(): Uint8Array {
     const payloadLen = 1 + 16 + t.vals.length;
     const segLen = 2 + payloadLen;
     const seg = new Uint8Array(2 + segLen);
-    seg[0] = 0xFF;
-    seg[1] = 0xC4; // DHT marker
-    seg[2] = (segLen >> 8) & 0xFF;
-    seg[3] = segLen & 0xFF;
+    seg[0] = 0xff;
+    seg[1] = 0xc4; // DHT marker
+    seg[2] = (segLen >> 8) & 0xff;
+    seg[3] = segLen & 0xff;
     seg[4] = (t.cls << 4) | t.id;
     for (let i = 0; i < 16; i++) {
       seg[5 + i] = t.bits[i]!;
@@ -817,10 +784,10 @@ function encodeScanData(
 
     while (bitCount >= 8) {
       bitCount -= 8;
-      const byte = (bitBuffer >> bitCount) & 0xFF;
+      const byte = (bitBuffer >> bitCount) & 0xff;
       ensureCapacity(2);
       outBuf[outPos++] = byte;
-      if (byte === 0xFF) {
+      if (byte === 0xff) {
         outBuf[outPos++] = 0x00; // Byte stuffing
       }
     }
@@ -830,8 +797,8 @@ function encodeScanData(
     if (bitCount > 0) {
       const padded = (bitBuffer << (8 - bitCount)) | ((1 << (8 - bitCount)) - 1);
       ensureCapacity(2);
-      outBuf[outPos++] = padded & 0xFF;
-      if ((padded & 0xFF) === 0xFF) {
+      outBuf[outPos++] = padded & 0xff;
+      if ((padded & 0xff) === 0xff) {
         outBuf[outPos++] = 0x00;
       }
     }
@@ -880,7 +847,7 @@ function encodeScanData(
       }
 
       while (zeroCount >= 16) {
-        encodeValue(0xF0, huff); // ZRL (16 zeros)
+        encodeValue(0xf0, huff); // ZRL (16 zeros)
         zeroCount -= 16;
       }
 
@@ -901,14 +868,14 @@ function encodeScanData(
   const sosHeaderLen = 6 + jpegComponents * 2;
   const sosHeader = new Uint8Array(2 + sosHeaderLen);
   let hp = 0;
-  sosHeader[hp++] = 0xFF;
-  sosHeader[hp++] = 0xDA; // SOS marker
-  sosHeader[hp++] = (sosHeaderLen >> 8) & 0xFF;
-  sosHeader[hp++] = sosHeaderLen & 0xFF;
+  sosHeader[hp++] = 0xff;
+  sosHeader[hp++] = 0xda; // SOS marker
+  sosHeader[hp++] = (sosHeaderLen >> 8) & 0xff;
+  sosHeader[hp++] = sosHeaderLen & 0xff;
   sosHeader[hp++] = jpegComponents;
 
   if (jpegComponents === 1) {
-    sosHeader[hp++] = 1;    // Component ID
+    sosHeader[hp++] = 1; // Component ID
     sosHeader[hp++] = 0x00; // DC table 0, AC table 0
   } else {
     sosHeader[hp++] = 1;
@@ -920,7 +887,7 @@ function encodeScanData(
   }
 
   sosHeader[hp++] = 0x00; // Spectral selection start
-  sosHeader[hp++] = 0x3F; // Spectral selection end
+  sosHeader[hp++] = 0x3f; // Spectral selection end
   sosHeader[hp++] = 0x00; // Successive approximation
 
   // Encode MCUs (minimum coded units) — 8x8 blocks
@@ -934,7 +901,14 @@ function encodeScanData(
       // For each component, extract 8x8 block, DCT, quantize, encode
       for (let comp = 0; comp < jpegComponents; comp++) {
         const block = extractBlock(
-          pixels, width, height, srcComponents, bx, by, comp, jpegComponents,
+          pixels,
+          width,
+          height,
+          srcComponents,
+          bx,
+          by,
+          comp,
+          jpegComponents,
         );
 
         // Forward DCT
@@ -1056,7 +1030,7 @@ function forwardDCT(block: Float64Array): void {
     block[off] = (e0 + e1) * 0.125;
     block[off + 4] = (e0 - e1) * 0.125;
 
-    const z1 = (e2 + e3) * 0.541196100;
+    const z1 = (e2 + e3) * 0.5411961;
     block[off + 2] = (z1 + e2 * 0.765366865) * 0.125;
     block[off + 6] = (z1 - e3 * 1.847759065) * 0.125;
 
@@ -1069,11 +1043,11 @@ function forwardDCT(block: Float64Array): void {
     const t0 = d0 * 0.298631336;
     const t1 = d1 * 2.053119869;
     const t2 = d2 * 3.072711026;
-    const t3 = d3 * 1.501321110;
-    const z2 = f0 * (-1.961570560);
-    const z3 = f1 * (-0.390180644);
-    const z4 = z5 - (f2 * 0.899976223);
-    const zz5 = z5 - (f3 * 2.562915447);
+    const t3 = d3 * 1.50132111;
+    const z2 = f0 * -1.96157056;
+    const z3 = f1 * -0.390180644;
+    const z4 = z5 - f2 * 0.899976223;
+    const zz5 = z5 - f3 * 2.562915447;
 
     block[off + 1] = (t3 + z3 + zz5) * 0.125;
     block[off + 3] = (t2 + z2 + z4) * 0.125;
@@ -1100,7 +1074,7 @@ function forwardDCT(block: Float64Array): void {
     block[i] = e0 + e1;
     block[32 + i] = e0 - e1;
 
-    const z1 = (e2 + e3) * 0.541196100;
+    const z1 = (e2 + e3) * 0.5411961;
     block[16 + i] = z1 + e2 * 0.765366865;
     block[48 + i] = z1 - e3 * 1.847759065;
 
@@ -1113,11 +1087,11 @@ function forwardDCT(block: Float64Array): void {
     const t0 = d0 * 0.298631336;
     const t1 = d1 * 2.053119869;
     const t2 = d2 * 3.072711026;
-    const t3 = d3 * 1.501321110;
-    const z2 = f0 * (-1.961570560);
-    const z3 = f1 * (-0.390180644);
-    const z4 = z5 - (f2 * 0.899976223);
-    const zz5 = z5 - (f3 * 2.562915447);
+    const t3 = d3 * 1.50132111;
+    const z2 = f0 * -1.96157056;
+    const z3 = f1 * -0.390180644;
+    const z4 = z5 - f2 * 0.899976223;
+    const zz5 = z5 - f3 * 2.562915447;
 
     block[8 + i] = t3 + z3 + zz5;
     block[24 + i] = t2 + z2 + z4;

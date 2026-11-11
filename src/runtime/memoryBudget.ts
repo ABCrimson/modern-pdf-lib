@@ -93,9 +93,7 @@ export interface MemoryBudgetOptions {
    *
    * Per `exactOptionalPropertyTypes`, declared as `| undefined`.
    */
-  onExceed?:
-    | ((info: { requested: number; used: number; limit: number }) => void)
-    | undefined;
+  onExceed?: ((info: { requested: number; used: number; limit: number }) => void) | undefined;
 }
 
 // ---------------------------------------------------------------------------

@@ -4,13 +4,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { PdfPopupAnnotation } from '../../../src/annotation/types/popupAnnotation.js';
-import {
-  PdfDict,
-  PdfName,
-  PdfBool,
-  PdfArray,
-  PdfRef,
-} from '../../../src/core/pdfObjects.js';
+import { PdfDict, PdfName, PdfBool, PdfArray, PdfRef } from '../../../src/core/pdfObjects.js';
 
 describe('PdfPopupAnnotation', () => {
   describe('create', () => {

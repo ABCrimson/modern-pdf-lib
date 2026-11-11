@@ -186,13 +186,15 @@ function extractTrailer(dict: PdfDict): ParsedTrailer {
     if (idArr.length >= 2) {
       const id0 = idArr.items[0];
       const id1 = idArr.items[1];
-      if (id0 !== undefined && id0.kind === 'string' && id1 !== undefined && id1.kind === 'string') {
+      if (
+        id0 !== undefined &&
+        id0.kind === 'string' &&
+        id1 !== undefined &&
+        id1.kind === 'string'
+      ) {
         const s0 = id0 as PdfString;
         const s1 = id1 as PdfString;
-        trailer.id = [
-          stringToLatin1Bytes(s0.value),
-          stringToLatin1Bytes(s1.value),
-        ];
+        trailer.id = [stringToLatin1Bytes(s0.value), stringToLatin1Bytes(s1.value)];
       }
     }
   }
@@ -204,10 +206,7 @@ function extractTrailer(dict: PdfDict): ParsedTrailer {
  * Decode a FlateDecode-compressed stream. Handles the /DecodeParms
  * PNG predictor if present.
  */
-async function decodeStream(
-  streamData: Uint8Array,
-  dict: PdfDict,
-): Promise<Uint8Array> {
+async function decodeStream(streamData: Uint8Array, dict: PdfDict): Promise<Uint8Array> {
   const filter = dict.get('/Filter');
   if (filter === undefined) {
     return streamData;
@@ -416,9 +415,7 @@ export class XrefParser {
     // Search backwards from the end of the file for "startxref"
     const searchWindow = Math.min(this.data.length, 2048);
     const startPos = this.data.length - searchWindow;
-    const tail = TEXT_DECODER.decode(
-      this.data.subarray(startPos, this.data.length),
-    );
+    const tail = TEXT_DECODER.decode(this.data.subarray(startPos, this.data.length));
 
     const keyword = 'startxref';
     const idx = tail.lastIndexOf(keyword);
@@ -513,7 +510,7 @@ export class XrefParser {
           sectionEntries = result.entries;
           trailerDict = result.trailerDict;
         }
-      } catch  {
+      } catch {
         // If parsing this section fails but we already have a primary
         // trailer, stop following the chain
         if (primaryTrailer !== undefined) {
@@ -547,7 +544,8 @@ export class XrefParser {
 
     if (primaryTrailer === undefined) {
       throw new PdfParseError({
-        message: 'Invalid PDF: could not extract a valid trailer from the cross-reference structure.',
+        message:
+          'Invalid PDF: could not extract a valid trailer from the cross-reference structure.',
         offset: startOffset,
         expected: 'valid trailer dictionary in cross-reference structure',
         actual: 'no valid trailer found',
@@ -599,7 +597,7 @@ export class XrefParser {
     // Parse subsections until we hit "trailer"
     while (pos < this.data.length) {
       // Check for "trailer" keyword (byte comparison)
-      if (this.matchesBytes(pos, 0x74, 0x72, 0x61, 0x69, 0x6C, 0x65, 0x72)) {
+      if (this.matchesBytes(pos, 0x74, 0x72, 0x61, 0x69, 0x6c, 0x65, 0x72)) {
         break;
       }
 
@@ -639,9 +637,7 @@ export class XrefParser {
         } else {
           // Fallback: use text-based parsing for non-standard entries
           const entryText = this.readXrefEntryAt(pos);
-          const entryMatch = entryText.text.trim().match(
-            /^(\d{10})\s+(\d{5})\s+([fn])/,
-          );
+          const entryMatch = entryText.text.trim().match(/^(\d{10})\s+(\d{5})\s+([fn])/);
           if (!entryMatch) {
             throw new PdfParseError({
               message:
@@ -666,7 +662,7 @@ export class XrefParser {
 
     // Parse the trailer dictionary
     // Advance past "trailer" keyword
-    if (!this.matchesBytes(pos, 0x74, 0x72, 0x61, 0x69, 0x6C, 0x65, 0x72)) {
+    if (!this.matchesBytes(pos, 0x74, 0x72, 0x61, 0x69, 0x6c, 0x65, 0x72)) {
       const trailerTag = TEXT_DECODER.decode(this.data.subarray(pos, pos + 7));
       throw new PdfParseError({
         message: `Invalid PDF: expected "trailer" keyword at offset ${pos}, found "${trailerTag}".`,
@@ -723,7 +719,11 @@ export class XrefParser {
 
     // Verify /Type /XRef
     const typeObj = dict.get('/Type');
-    if (typeObj === undefined || typeObj.kind !== 'name' || (typeObj as PdfName).value !== '/XRef') {
+    if (
+      typeObj === undefined ||
+      typeObj.kind !== 'name' ||
+      (typeObj as PdfName).value !== '/XRef'
+    ) {
       throw new PdfParseError({
         message: `Invalid PDF: cross-reference stream at offset ${offset} does not have /Type /XRef.`,
         offset,
@@ -887,21 +887,34 @@ export class XrefParser {
     // Scan for "N G obj" patterns directly on bytes (avoids full-file TextDecoder)
     for (let i = 0; i < len - 2; i++) {
       // Match 'obj' (0x6F 0x62 0x6A)
-      if (d[i] !== 0x6F || d[i + 1] !== 0x62 || d[i + 2] !== 0x6A) continue;
+      if (d[i] !== 0x6f || d[i + 1] !== 0x62 || d[i + 2] !== 0x6a) continue;
 
       // Must be followed by whitespace, delimiter, or EOF
       if (i + 3 < len) {
         const after = d[i + 3]!;
-        if (after > 0x20 && after !== 0x25 && after !== 0x28 && after !== 0x29 &&
-            after !== 0x2F && after !== 0x3C && after !== 0x3E &&
-            after !== 0x5B && after !== 0x5D && after !== 0x7B && after !== 0x7D) {
+        if (
+          after > 0x20 &&
+          after !== 0x25 &&
+          after !== 0x28 &&
+          after !== 0x29 &&
+          after !== 0x2f &&
+          after !== 0x3c &&
+          after !== 0x3e &&
+          after !== 0x5b &&
+          after !== 0x5d &&
+          after !== 0x7b &&
+          after !== 0x7d
+        ) {
           continue;
         }
       }
 
       // Scan backwards: skip whitespace before 'obj'
       let j = i - 1;
-      while (j >= 0 && (d[j] === 0x20 || d[j] === 0x0A || d[j] === 0x0D || d[j] === 0x09 || d[j] === 0x00)) {
+      while (
+        j >= 0 &&
+        (d[j] === 0x20 || d[j] === 0x0a || d[j] === 0x0d || d[j] === 0x09 || d[j] === 0x00)
+      ) {
         j--;
       }
 
@@ -912,7 +925,10 @@ export class XrefParser {
       if (genStart >= genEnd) continue;
 
       // Skip whitespace between object number and generation number
-      while (j >= 0 && (d[j] === 0x20 || d[j] === 0x0A || d[j] === 0x0D || d[j] === 0x09 || d[j] === 0x00)) {
+      while (
+        j >= 0 &&
+        (d[j] === 0x20 || d[j] === 0x0a || d[j] === 0x0d || d[j] === 0x09 || d[j] === 0x00)
+      ) {
         j--;
       }
 
@@ -956,8 +972,15 @@ export class XrefParser {
     // First try: look for "trailer" keyword (byte scan, backwards)
     let trailerIdx = -1;
     for (let i = len - 7; i >= 0; i--) {
-      if (d[i] === 0x74 && d[i + 1] === 0x72 && d[i + 2] === 0x61 &&
-          d[i + 3] === 0x69 && d[i + 4] === 0x6C && d[i + 5] === 0x65 && d[i + 6] === 0x72) {
+      if (
+        d[i] === 0x74 &&
+        d[i + 1] === 0x72 &&
+        d[i + 2] === 0x61 &&
+        d[i + 3] === 0x69 &&
+        d[i + 4] === 0x6c &&
+        d[i + 5] === 0x65 &&
+        d[i + 6] === 0x72
+      ) {
         trailerIdx = i;
         break;
       }
@@ -1014,9 +1037,7 @@ export class XrefParser {
     }
 
     // Compute /Size as max object number + 1
-    const maxObjNum = entries.size > 0
-      ? entries.keys().reduce((max, n) => Math.max(max, n), 0)
-      : 0;
+    const maxObjNum = entries.size > 0 ? entries.keys().reduce((max, n) => Math.max(max, n), 0) : 0;
 
     const trailer: ParsedTrailer = {
       size: maxObjNum + 1,
@@ -1054,7 +1075,9 @@ export class XrefParser {
    *
    * Standard format: `OOOOOOOOOO GGGGG f/n` (18 significant bytes)
    */
-  private parseXrefEntryDirect(pos: number): { offset: number; gen: number; type: 'in-use' | 'free'; nextPos: number } | null {
+  private parseXrefEntryDirect(
+    pos: number,
+  ): { offset: number; gen: number; type: 'in-use' | 'free'; nextPos: number } | null {
     const d = this.data;
     if (pos + 18 > d.length) return null;
 
@@ -1082,15 +1105,18 @@ export class XrefParser {
 
     // Read f/n marker at pos+17
     const marker = d[pos + 17]!;
-    if (marker !== 0x6E /* n */ && marker !== 0x66 /* f */) return null;
+    if (marker !== 0x6e /* n */ && marker !== 0x66 /* f */) return null;
 
     // Skip trailing whitespace/line endings
     let nextPos = pos + 18;
-    while (nextPos < d.length && (d[nextPos] === 0x20 || d[nextPos] === 0x0D || d[nextPos] === 0x0A)) {
+    while (
+      nextPos < d.length &&
+      (d[nextPos] === 0x20 || d[nextPos] === 0x0d || d[nextPos] === 0x0a)
+    ) {
       nextPos++;
     }
 
-    return { offset, gen, type: marker === 0x6E ? 'in-use' : 'free', nextPos };
+    return { offset, gen, type: marker === 0x6e ? 'in-use' : 'free', nextPos };
   }
 
   private isTraditionalXref(offset: number): boolean {

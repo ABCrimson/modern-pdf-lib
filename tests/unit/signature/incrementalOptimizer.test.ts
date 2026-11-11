@@ -159,9 +159,7 @@ describe('findChangedObjects', () => {
   it('should detect new objects in modified version', () => {
     const original = createMinimalPdf();
     // Add a new object to the modified version
-    const appendix = encoder.encode(
-      '\n5 0 obj\n<< /Type /Font /BaseFont /Helvetica >>\nendobj\n',
-    );
+    const appendix = encoder.encode('\n5 0 obj\n<< /Type /Font /BaseFont /Helvetica >>\nendobj\n');
     const modified = new Uint8Array(original.length + appendix.length);
     modified.set(original, 0);
     modified.set(appendix, original.length);
@@ -189,9 +187,7 @@ describe('optimizeIncrementalSave', () => {
     const pdf = createMinimalPdf();
 
     // Create a change that matches the existing object content exactly
-    const existingContent = encoder.encode(
-      '<< /Type /Catalog /Pages 2 0 R >>',
-    );
+    const existingContent = encoder.encode('<< /Type /Catalog /Pages 2 0 R >>');
 
     const changes: IncrementalChange[] = [
       {
@@ -213,9 +209,7 @@ describe('optimizeIncrementalSave', () => {
   it('should include actually changed objects', () => {
     const pdf = createMinimalPdf();
 
-    const newContent = encoder.encode(
-      '<< /Type /Catalog /Pages 2 0 R /Metadata 10 0 R >>',
-    );
+    const newContent = encoder.encode('<< /Type /Catalog /Pages 2 0 R /Metadata 10 0 R >>');
 
     const changes: IncrementalChange[] = [
       {
@@ -240,9 +234,7 @@ describe('optimizeIncrementalSave', () => {
   it('should deduplicate identical changes', () => {
     const pdf = createMinimalPdf();
 
-    const newContent = encoder.encode(
-      '<< /Type /Catalog /Pages 2 0 R /Extra true >>',
-    );
+    const newContent = encoder.encode('<< /Type /Catalog /Pages 2 0 R /Extra true >>');
 
     const changes: IncrementalChange[] = [
       { objectNumber: 1, generationNumber: 0, newContent },

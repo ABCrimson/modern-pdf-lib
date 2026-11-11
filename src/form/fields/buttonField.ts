@@ -6,14 +6,7 @@
  * Reference: PDF 1.7 spec, SS12.7.4.2.3 (Push-Buttons).
  */
 
-import {
-  PdfDict,
-  PdfName,
-  PdfArray,
-  PdfString,
-  PdfStream,
-  PdfRef,
-} from '../../core/pdfObjects.js';
+import { PdfDict, PdfName, PdfArray, PdfString, PdfStream, PdfRef } from '../../core/pdfObjects.js';
 import { PdfField, strVal } from '../pdfField.js';
 import type { FieldType } from '../pdfField.js';
 import { generateButtonAppearance } from '../fieldAppearance.js';

@@ -64,12 +64,7 @@ export function drawImageXObject(
   height: number,
 ): string {
   const pdfName = name.startsWith('/') ? name : `/${name}`;
-  return (
-    'q\n' +
-    `${n(width)} 0 0 ${n(height)} ${n(x)} ${n(y)} cm\n` +
-    `${pdfName} Do\n` +
-    'Q\n'
-  );
+  return 'q\n' + `${n(width)} 0 0 ${n(height)} ${n(x)} ${n(y)} cm\n` + `${pdfName} Do\n` + 'Q\n';
 }
 
 /**
@@ -103,9 +98,6 @@ export function drawImageWithMatrix(
 ): string {
   const pdfName = name.startsWith('/') ? name : `/${name}`;
   return (
-    'q\n' +
-    `${n(a)} ${n(b)} ${n(c)} ${n(d)} ${n(tx)} ${n(ty)} cm\n` +
-    `${pdfName} Do\n` +
-    'Q\n'
+    'q\n' + `${n(a)} ${n(b)} ${n(c)} ${n(d)} ${n(tx)} ${n(ty)} cm\n` + `${pdfName} Do\n` + 'Q\n'
   );
 }

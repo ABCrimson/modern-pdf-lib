@@ -27,7 +27,10 @@ export function buildToUnicodeCmap(cmapTable: ReadonlyMap<number, number>): stri
     }
   }
 
-  const entries = gidToUnicode.entries().toArray().sort((a, b) => a[0] - b[0]);
+  const entries = gidToUnicode
+    .entries()
+    .toArray()
+    .sort((a, b) => a[0] - b[0]);
 
   const lines: string[] = [];
   lines.push('/CIDInit /ProcSet findresource begin');
@@ -110,9 +113,7 @@ export function parsePngDimensions(data: Uint8Array): { width: number; height: n
  * @param data  The raw PNG file bytes (signature already validated).
  * @returns     Array of chunk objects with type and data.
  */
-export function extractPngChunks(
-  data: Uint8Array,
-): Array<{ type: string; data: Uint8Array }> {
+export function extractPngChunks(data: Uint8Array): Array<{ type: string; data: Uint8Array }> {
   const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
   const chunks: Array<{ type: string; data: Uint8Array }> = [];
   let offset = 8; // Skip PNG signature
@@ -146,7 +147,7 @@ export function extractPngChunks(
  */
 export function extractPngIdatData(data: Uint8Array): Uint8Array {
   const chunks = extractPngChunks(data);
-  const idatChunks = chunks.filter(c => c.type === 'IDAT');
+  const idatChunks = chunks.filter((c) => c.type === 'IDAT');
 
   if (idatChunks.length === 0) {
     throw new Error('Invalid PNG: no IDAT chunks found');
@@ -185,9 +186,11 @@ export function validateJpegSignature(data: Uint8Array): void {
  * @param data  The raw JPEG file bytes.
  * @returns     Width, height, and number of color components.
  */
-export function parseJpegDimensions(
-  data: Uint8Array,
-): { width: number; height: number; components: number } {
+export function parseJpegDimensions(data: Uint8Array): {
+  width: number;
+  height: number;
+  components: number;
+} {
   validateJpegSignature(data);
 
   const view = new DataView(data.buffer, data.byteOffset, data.byteLength);

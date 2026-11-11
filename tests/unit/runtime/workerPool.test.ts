@@ -7,10 +7,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  createWorkerPool,
-  type TaskRunner,
-} from '../../../src/runtime/workerPool.js';
+import { createWorkerPool, type TaskRunner } from '../../../src/runtime/workerPool.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -170,26 +167,19 @@ describe('createWorkerPool error handling', () => {
 
 describe('createWorkerPool options', () => {
   it('defaults concurrency when none is supplied', async () => {
-    const runner: TaskRunner<number, number> = (input) =>
-      Promise.resolve(input);
+    const runner: TaskRunner<number, number> = (input) => Promise.resolve(input);
     const pool = createWorkerPool(runner);
     expect(await pool.runAll([1, 2, 3])).toEqual([1, 2, 3]);
   });
 
   it('rejects a non-positive concurrency', () => {
-    const runner: TaskRunner<number, number> = (input) =>
-      Promise.resolve(input);
-    expect(() => createWorkerPool(runner, { concurrency: 0 })).toThrow(
-      /positive integer/,
-    );
-    expect(() => createWorkerPool(runner, { concurrency: -2 })).toThrow(
-      /positive integer/,
-    );
+    const runner: TaskRunner<number, number> = (input) => Promise.resolve(input);
+    expect(() => createWorkerPool(runner, { concurrency: 0 })).toThrow(/positive integer/);
+    expect(() => createWorkerPool(runner, { concurrency: -2 })).toThrow(/positive integer/);
   });
 
   it('runAll over an empty input list resolves to an empty array', async () => {
-    const runner: TaskRunner<number, number> = (input) =>
-      Promise.resolve(input);
+    const runner: TaskRunner<number, number> = (input) => Promise.resolve(input);
     const pool = createWorkerPool(runner, { concurrency: 2 });
     expect(await pool.runAll([])).toEqual([]);
   });

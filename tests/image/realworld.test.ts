@@ -94,11 +94,7 @@ function buildChunk(type: string, data: Uint8Array): Uint8Array {
  * @param rgb   - RGB color to fill every pixel.
  * @returns A complete PNG file as a Uint8Array.
  */
-function createMinimalPng(
-  w: number,
-  h: number,
-  rgb: [number, number, number],
-): Uint8Array {
+function createMinimalPng(w: number, h: number, rgb: [number, number, number]): Uint8Array {
   // PNG signature (8 bytes)
   const signature = new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10]);
 
@@ -236,9 +232,7 @@ describe('Real-world: document with embedded PNG', () => {
   });
 
   it('extracts fixture PNG correctly', async () => {
-    const pngBytes = new Uint8Array(
-      await readFile(resolve(fixturesDir, 'sample.png')),
-    );
+    const pngBytes = new Uint8Array(await readFile(resolve(fixturesDir, 'sample.png')));
 
     const doc = createPdf();
     const img = await doc.embedPng(pngBytes);
@@ -354,9 +348,7 @@ describe('Real-world: analysis report', () => {
     expect(img0.colorSpace).toBeDefined();
     expect(img0.savingsPercent).toBeGreaterThanOrEqual(0);
     expect(img0.savingsPercent).toBeLessThanOrEqual(100);
-    expect(['recompress', 'keep', 'downscale', 'grayscale']).toContain(
-      img0.recommendation,
-    );
+    expect(['recompress', 'keep', 'downscale', 'grayscale']).toContain(img0.recommendation);
   });
 
   it('totalSavingsPercent stays in [0, 100]', async () => {
@@ -539,9 +531,7 @@ describe('Real-world: multi-page with images', () => {
   });
 
   it('round-trips: create -> save -> load -> extract -> verify', async () => {
-    const pngBytes = new Uint8Array(
-      await readFile(resolve(fixturesDir, 'sample.png')),
-    );
+    const pngBytes = new Uint8Array(await readFile(resolve(fixturesDir, 'sample.png')));
 
     // Create a document with the fixture image on two pages
     const doc = createPdf();

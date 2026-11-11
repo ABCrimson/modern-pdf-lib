@@ -287,9 +287,7 @@ describe('PdfLexer - Literal string tokens', () => {
   });
 
   it('throws on unterminated literal string', () => {
-    expect(() => lexer('(unterminated').nextToken()).toThrow(
-      /unterminated literal string/i,
-    );
+    expect(() => lexer('(unterminated').nextToken()).toThrow(/unterminated literal string/i);
   });
 
   it('handles unknown escape (backslash is ignored per spec)', () => {
@@ -412,15 +410,11 @@ describe('PdfLexer - Name tokens', () => {
   });
 
   it('throws on incomplete #XX escape', () => {
-    expect(() => lexer('/Foo#2').nextToken()).toThrow(
-      /incomplete.*escape/i,
-    );
+    expect(() => lexer('/Foo#2').nextToken()).toThrow(/incomplete.*escape/i);
   });
 
   it('throws on invalid #XX escape', () => {
-    expect(() => lexer('/Foo#GG').nextToken()).toThrow(
-      /invalid.*escape/i,
-    );
+    expect(() => lexer('/Foo#GG').nextToken()).toThrow(/invalid.*escape/i);
   });
 });
 
@@ -506,9 +500,7 @@ describe('PdfLexer - Structural tokens', () => {
   });
 
   it('throws on lone >', () => {
-    expect(() => lexer('> rest').nextToken()).toThrow(
-      /unexpected '>'/i,
-    );
+    expect(() => lexer('> rest').nextToken()).toThrow(/unexpected '>'/i);
   });
 });
 
@@ -642,9 +634,12 @@ describe('PdfLexer - Whitespace handling', () => {
 
   it('skips CRLF between tokens', () => {
     const input = new Uint8Array([
-      0x0d, 0x0a, // CRLF
-      0x34, 0x32, // 42
-      0x0d, 0x0a, // CRLF
+      0x0d,
+      0x0a, // CRLF
+      0x34,
+      0x32, // 42
+      0x0d,
+      0x0a, // CRLF
     ]);
     const lex = new PdfLexer(input);
     const tok = lex.nextToken();
@@ -734,10 +729,10 @@ describe('PdfLexer - peekToken()', () => {
   it('advances correctly after peek + next', () => {
     const lex = lexer('1 2 3');
     lex.peekToken(); // peek at 1
-    lex.nextToken();  // consume 1
+    lex.nextToken(); // consume 1
 
     lex.peekToken(); // peek at 2
-    lex.nextToken();  // consume 2
+    lex.nextToken(); // consume 2
 
     const tok = lex.nextToken(); // consume 3
     expect(tok.type).toBe(TokenType.Number);
@@ -844,9 +839,7 @@ describe('PdfLexer - readStreamData()', () => {
 
   it('throws when not enough bytes remain', () => {
     const lex = lexer('short');
-    expect(() => lex.readStreamData(100)).toThrow(
-      /requested 100 bytes/i,
-    );
+    expect(() => lex.readStreamData(100)).toThrow(/requested 100 bytes/i);
   });
 
   it('reads from current position (not always from 0)', () => {
@@ -1034,18 +1027,13 @@ describe('PdfLexer - Complex token sequences', () => {
   });
 
   it('tokenizes a complete PDF cross-reference footer', () => {
-    const input =
-      'xref\n0 1\n0000000000 65535 f \ntrailer\n<< /Size 1 >>\nstartxref\n9\n%%EOF';
+    const input = 'xref\n0 1\n0000000000 65535 f \ntrailer\n<< /Size 1 >>\nstartxref\n9\n%%EOF';
     const tokens = tokenize(input);
     expect(tokens[0]!.type).toBe(TokenType.XrefKeyword);
     // The rest of the xref data are numbers and keywords
-    const trailerIdx = tokens.findIndex(
-      (t) => t.type === TokenType.TrailerKeyword,
-    );
+    const trailerIdx = tokens.findIndex((t) => t.type === TokenType.TrailerKeyword);
     expect(trailerIdx).toBeGreaterThan(0);
-    const startxrefIdx = tokens.findIndex(
-      (t) => t.type === TokenType.StartXrefKeyword,
-    );
+    const startxrefIdx = tokens.findIndex((t) => t.type === TokenType.StartXrefKeyword);
     expect(startxrefIdx).toBeGreaterThan(trailerIdx);
   });
 });

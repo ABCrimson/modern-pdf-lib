@@ -14,19 +14,9 @@
  *            §7.10.2 (Type 4 PostScript Calculator Functions).
  */
 
-import {
-  PdfArray,
-  PdfDict,
-  PdfName,
-  PdfNumber,
-  PdfStream,
-} from '../pdfObjects.js';
+import { PdfArray, PdfDict, PdfName, PdfNumber, PdfStream } from '../pdfObjects.js';
 import type { PdfObject } from '../pdfObjects.js';
-import type {
-  RgbColor,
-  CmykColor,
-  GrayscaleColor,
-} from './color.js';
+import type { RgbColor, CmykColor, GrayscaleColor } from './color.js';
 
 // ---------------------------------------------------------------------------
 // Tint-transform function builders (Type 4 PostScript Calculator)
@@ -54,9 +44,7 @@ import type {
  * { <1-gray> mul 1 exch sub }
  * ```
  */
-function buildTintTransform(
-  alternate: RgbColor | CmykColor | GrayscaleColor,
-): PdfStream {
+function buildTintTransform(alternate: RgbColor | CmykColor | GrayscaleColor): PdfStream {
   const dict = new PdfDict();
   dict.set('/FunctionType', PdfNumber.of(4));
 
@@ -218,9 +206,7 @@ export function buildDeviceNColorSpace(
   colorants: string[],
   alternateSpace: 'DeviceCMYK' | 'DeviceRGB',
 ): PdfArray {
-  const nameArray = PdfArray.of(
-    colorants.map((c) => PdfName.of(`/${c}`)),
-  );
+  const nameArray = PdfArray.of(colorants.map((c) => PdfName.of(`/${c}`)));
 
   const items: PdfObject[] = [
     PdfName.of('/DeviceN'),
@@ -243,9 +229,7 @@ function pn(value: number): string {
 }
 
 /** Map a base colour type to its PDF device colour space name. */
-function alternateSpaceName(
-  color: RgbColor | CmykColor | GrayscaleColor,
-): string {
+function alternateSpaceName(color: RgbColor | CmykColor | GrayscaleColor): string {
   switch (color.type) {
     case 'rgb':
       return '/DeviceRGB';

@@ -100,10 +100,7 @@ export function checkAccessibility(doc: PdfDocument): AccessibilityIssue[] {
  *
  * @internal
  */
-function checkStructureTree(
-  doc: PdfDocument,
-  issues: AccessibilityIssue[],
-): void {
+function checkStructureTree(doc: PdfDocument, issues: AccessibilityIssue[]): void {
   const tree = doc.getStructureTree();
   if (!tree) {
     issues.push({
@@ -121,10 +118,7 @@ function checkStructureTree(
  *
  * @internal
  */
-function checkDocumentLanguage(
-  doc: PdfDocument,
-  issues: AccessibilityIssue[],
-): void {
+function checkDocumentLanguage(doc: PdfDocument, issues: AccessibilityIssue[]): void {
   const lang = doc.getLanguage();
   if (lang === undefined) {
     issues.push({
@@ -144,8 +138,7 @@ function checkDocumentLanguage(
     issues.push({
       severity: 'warning',
       code: 'INVALID_LANG',
-      message:
-        `Document language "${lang}" does not appear to be a valid BCP 47 tag.`,
+      message: `Document language "${lang}" does not appear to be a valid BCP 47 tag.`,
     });
   }
 }
@@ -155,17 +148,13 @@ function checkDocumentLanguage(
  *
  * @internal
  */
-function checkDocumentTitle(
-  doc: PdfDocument,
-  issues: AccessibilityIssue[],
-): void {
+function checkDocumentTitle(doc: PdfDocument, issues: AccessibilityIssue[]): void {
   const title = doc.getTitle();
   if (title === undefined) {
     issues.push({
       severity: 'warning',
       code: 'NO_TITLE',
-      message:
-        'Document has no title. Setting a descriptive title improves accessibility.',
+      message: 'Document has no title. Setting a descriptive title improves accessibility.',
     });
   } else if (title.trim().length === 0) {
     issues.push({
@@ -182,10 +171,7 @@ function checkDocumentTitle(
  *
  * @internal
  */
-function checkContentIsTagged(
-  doc: PdfDocument,
-  issues: AccessibilityIssue[],
-): void {
+function checkContentIsTagged(doc: PdfDocument, issues: AccessibilityIssue[]): void {
   const tree = doc.getStructureTree();
   if (!tree) return;
 
@@ -232,10 +218,7 @@ function checkContentIsTagged(
  *
  * @internal
  */
-function checkReadingOrder(
-  doc: PdfDocument,
-  issues: AccessibilityIssue[],
-): void {
+function checkReadingOrder(doc: PdfDocument, issues: AccessibilityIssue[]): void {
   const tree = doc.getStructureTree();
   if (!tree) return;
 
@@ -272,10 +255,7 @@ function checkReadingOrder(
  *
  * @internal
  */
-function checkPageCount(
-  doc: PdfDocument,
-  issues: AccessibilityIssue[],
-): void {
+function checkPageCount(doc: PdfDocument, issues: AccessibilityIssue[]): void {
   if (doc.getPageCount() === 0) {
     issues.push({
       severity: 'info',

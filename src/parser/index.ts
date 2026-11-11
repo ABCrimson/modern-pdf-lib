@@ -45,11 +45,7 @@ export { decodeStream } from './streamDecode.js';
 // ---------------------------------------------------------------------------
 
 export { decodeJBIG2Async } from './jbig2Decode.js';
-export {
-  initJBIG2Wasm,
-  isJBIG2WasmAvailable,
-  disposeJBIG2Wasm,
-} from './jbig2WasmBridge.js';
+export { initJBIG2Wasm, isJBIG2WasmAvailable, disposeJBIG2Wasm } from './jbig2WasmBridge.js';
 
 // ---------------------------------------------------------------------------
 // JPEG2000 (JPXDecode) decoding
@@ -74,10 +70,7 @@ export {
   decodeJpeg2000WithFallback,
   disposeJpeg2000Wasm,
 } from './jpeg2000WasmBridge.js';
-export type {
-  Jpeg2000WasmExports,
-  Jpeg2000DecodeResult,
-} from './jpeg2000WasmBridge.js';
+export type { Jpeg2000WasmExports, Jpeg2000DecodeResult } from './jpeg2000WasmBridge.js';
 
 // ---------------------------------------------------------------------------
 // JPEG2000 codestream / JP2 container parsing
@@ -108,19 +101,13 @@ export {
   extractAlphaChannel,
   parseChannelDefinitions,
 } from './jpeg2000Alpha.js';
-export type {
-  ChannelDefinition,
-  SeparatedImage,
-} from './jpeg2000Alpha.js';
+export type { ChannelDefinition, SeparatedImage } from './jpeg2000Alpha.js';
 
 // ---------------------------------------------------------------------------
 // JPEG2000 to JPEG transcoding
 // ---------------------------------------------------------------------------
 
-export {
-  transcodeJp2ToJpeg,
-  estimateTranscodedSize,
-} from './jpeg2000Transcode.js';
+export { transcodeJp2ToJpeg, estimateTranscodedSize } from './jpeg2000Transcode.js';
 export type { TranscodeOptions } from './jpeg2000Transcode.js';
 
 // ---------------------------------------------------------------------------

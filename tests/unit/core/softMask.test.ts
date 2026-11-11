@@ -12,17 +12,8 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  buildSoftMaskGroupExtGState,
-  buildSoftMaskNone,
-} from '../../../src/core/softMask.js';
-import {
-  PdfArray,
-  PdfDict,
-  PdfName,
-  PdfNumber,
-  PdfRef,
-} from '../../../src/core/pdfObjects.js';
+import { buildSoftMaskGroupExtGState, buildSoftMaskNone } from '../../../src/core/softMask.js';
+import { PdfArray, PdfDict, PdfName, PdfNumber, PdfRef } from '../../../src/core/pdfObjects.js';
 
 // ---------------------------------------------------------------------------
 // Helpers

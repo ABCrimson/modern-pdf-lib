@@ -42,10 +42,7 @@ import {
  *  - 12-byte tag table entries
  *  - tag data
  */
-function buildSyntheticIccProfile(
-  colorSpaceSig: string,
-  description?: string,
-): Uint8Array {
+function buildSyntheticIccProfile(colorSpaceSig: string, description?: string): Uint8Array {
   // Determine if we need a 'desc' tag
   const hasDesc = description !== undefined && description.length > 0;
 
@@ -57,9 +54,7 @@ function buildSyntheticIccProfile(
   const tagTableSize = numTags * tagEntrySize;
 
   // 'desc' tag data: type sig (4) + reserved (4) + length (4) + string + null
-  const descDataSize = hasDesc
-    ? 4 + 4 + 4 + description!.length + 1
-    : 0;
+  const descDataSize = hasDesc ? 4 + 4 + 4 + description!.length + 1 : 0;
 
   const totalSize = headerSize + tagCountSize + tagTableSize + descDataSize;
   const data = new Uint8Array(totalSize);
@@ -132,10 +127,7 @@ function createIccBasedImageStream(
   imageDict.set('/Width', PdfNumber.of(2));
   imageDict.set('/Height', PdfNumber.of(2));
   imageDict.set('/BitsPerComponent', PdfNumber.of(8));
-  imageDict.set(
-    '/ColorSpace',
-    PdfArray.of([PdfName.of('/ICCBased'), profileRef]),
-  );
+  imageDict.set('/ColorSpace', PdfArray.of([PdfName.of('/ICCBased'), profileRef]));
 
   const pixelData = new Uint8Array(2 * 2 * components);
   imageDict.set('/Length', PdfNumber.of(pixelData.length));
@@ -262,10 +254,7 @@ describe('extractIccProfile', () => {
   it('should return undefined when ColorSpace array does not start with /ICCBased', () => {
     const registry = new PdfObjectRegistry();
     const dict = new PdfDict();
-    dict.set(
-      '/ColorSpace',
-      PdfArray.of([PdfName.of('/Indexed'), PdfName.of('/DeviceRGB')]),
-    );
+    dict.set('/ColorSpace', PdfArray.of([PdfName.of('/Indexed'), PdfName.of('/DeviceRGB')]));
     const stream = new PdfStream(dict, new Uint8Array(10));
     registry.register(stream);
 
@@ -289,10 +278,7 @@ describe('extractIccProfile', () => {
     const bogusRef = PdfRef.of(9999);
 
     const dict = new PdfDict();
-    dict.set(
-      '/ColorSpace',
-      PdfArray.of([PdfName.of('/ICCBased'), bogusRef]),
-    );
+    dict.set('/ColorSpace', PdfArray.of([PdfName.of('/ICCBased'), bogusRef]));
     const stream = new PdfStream(dict, new Uint8Array(10));
     registry.register(stream);
 
@@ -310,10 +296,7 @@ describe('extractIccProfile', () => {
     const profileRef = registry.register(profileStream);
 
     const dict = new PdfDict();
-    dict.set(
-      '/ColorSpace',
-      PdfArray.of([PdfName.of('/ICCBased'), profileRef]),
-    );
+    dict.set('/ColorSpace', PdfArray.of([PdfName.of('/ICCBased'), profileRef]));
     const imageStream = new PdfStream(dict, new Uint8Array(10));
     registry.register(imageStream);
 
@@ -324,11 +307,7 @@ describe('extractIccProfile', () => {
     const registry = new PdfObjectRegistry();
     const profileData = buildSyntheticIccProfile('RGB ', 'sRGB Profile');
 
-    const { imageStream } = createIccBasedImageStream(
-      registry,
-      profileData,
-      3,
-    );
+    const { imageStream } = createIccBasedImageStream(registry, profileData, 3);
 
     const profile = extractIccProfile(imageStream, registry);
     expect(profile).toBeDefined();
@@ -342,11 +321,7 @@ describe('extractIccProfile', () => {
     const registry = new PdfObjectRegistry();
     const profileData = buildSyntheticIccProfile('GRAY', 'Gray Gamma 2.2');
 
-    const { imageStream } = createIccBasedImageStream(
-      registry,
-      profileData,
-      1,
-    );
+    const { imageStream } = createIccBasedImageStream(registry, profileData, 1);
 
     const profile = extractIccProfile(imageStream, registry);
     expect(profile).toBeDefined();
@@ -359,11 +334,7 @@ describe('extractIccProfile', () => {
     const registry = new PdfObjectRegistry();
     const profileData = buildSyntheticIccProfile('CMYK', 'FOGRA39');
 
-    const { imageStream } = createIccBasedImageStream(
-      registry,
-      profileData,
-      4,
-    );
+    const { imageStream } = createIccBasedImageStream(registry, profileData, 4);
 
     const profile = extractIccProfile(imageStream, registry);
     expect(profile).toBeDefined();
@@ -493,11 +464,7 @@ describe('round-trip: extract -> embed -> extract', () => {
     const profileData = buildSyntheticIccProfile('RGB ', 'Round Trip Test');
 
     // Step 1: Create image with ICC profile
-    const { imageStream } = createIccBasedImageStream(
-      registry,
-      profileData,
-      3,
-    );
+    const { imageStream } = createIccBasedImageStream(registry, profileData, 3);
 
     // Step 2: Extract the profile
     const extracted = extractIccProfile(imageStream, registry);
@@ -510,10 +477,7 @@ describe('round-trip: extract -> embed -> extract', () => {
     const newProfileRef = embedIccProfile(extracted!, registry);
 
     // Step 4: Update the image's color space to point to the new profile
-    imageStream.dict.set(
-      '/ColorSpace',
-      PdfArray.of([PdfName.of('/ICCBased'), newProfileRef]),
-    );
+    imageStream.dict.set('/ColorSpace', PdfArray.of([PdfName.of('/ICCBased'), newProfileRef]));
 
     // Step 5: Extract again and verify
     const reExtracted = extractIccProfile(imageStream, registry);

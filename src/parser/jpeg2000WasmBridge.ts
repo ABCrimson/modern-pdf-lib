@@ -184,9 +184,7 @@ export function decodeJpeg2000Wasm(data: Uint8Array): Jpeg2000DecodeResult {
  * @returns The decoded pixel data with metadata.
  * @throws If both WASM and JS decoding fail.
  */
-export async function decodeJpeg2000WithFallback(
-  data: Uint8Array,
-): Promise<Jpeg2000DecodeResult> {
+export async function decodeJpeg2000WithFallback(data: Uint8Array): Promise<Jpeg2000DecodeResult> {
   // Try WASM first
   if (available && wasmExports) {
     try {

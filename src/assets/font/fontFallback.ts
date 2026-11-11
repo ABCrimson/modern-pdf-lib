@@ -67,10 +67,7 @@ export interface ScriptRun {
  * @param fonts Ordered fallback chain; the last entry is the ultimate fallback.
  * @returns One run per maximal same-font slice, in document order.
  */
-export function resolveFallback(
-  text: string,
-  fonts: readonly FallbackFont[],
-): FallbackRun[] {
+export function resolveFallback(text: string, fonts: readonly FallbackFont[]): FallbackRun[] {
   const runs: FallbackRun[] = [];
   const ultimate = fonts.at(-1);
   if (ultimate === undefined) {

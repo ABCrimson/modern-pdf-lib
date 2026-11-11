@@ -41,12 +41,10 @@ function checkJava(): void {
     if (match) {
       const major = parseInt(match[1]!, 10);
       if (major < 11) {
-        
         process.exit(2);
       }
     }
   } catch {
-    
     process.exit(2);
   }
 }
@@ -87,7 +85,6 @@ async function ensureVeraPdf(): Promise<string> {
   const existing = await resolveVeraPdfBinary();
   if (existing) return existing;
 
-  
   await mkdir(CACHE_DIR, { recursive: true });
 
   const response = await fetch(VERAPDF_URL);
@@ -98,14 +95,16 @@ async function ensureVeraPdf(): Promise<string> {
   const zipPath = join(CACHE_DIR, 'verapdf.zip');
   const buffer = new Uint8Array(await response.arrayBuffer());
   await writeFile(zipPath, buffer);
-  
 
   // Extract — platform-dependent
   const isWindows = process.platform === 'win32';
   if (isWindows) {
-    execSync(`powershell -Command "Expand-Archive -Path '${zipPath}' -DestinationPath '${CACHE_DIR}' -Force"`, {
-      stdio: 'pipe',
-    });
+    execSync(
+      `powershell -Command "Expand-Archive -Path '${zipPath}' -DestinationPath '${CACHE_DIR}' -Force"`,
+      {
+        stdio: 'pipe',
+      },
+    );
   } else {
     execSync(`unzip -o "${zipPath}" -d "${CACHE_DIR}"`, { stdio: 'pipe' });
   }
@@ -120,7 +119,6 @@ async function ensureVeraPdf(): Promise<string> {
     execSync(`chmod +x "${verapdfPath}"`, { stdio: 'pipe' });
   }
 
-  
   return verapdfPath;
 }
 
@@ -148,10 +146,10 @@ async function validate(file: string, level: string): Promise<ValidationResult> 
   const flavour = mapLevelToFlavour(level);
 
   try {
-    const output = execSync(
-      `"${verapdf}" --format text --flavour ${flavour} "${file}"`,
-      { encoding: 'utf-8', timeout: 60_000 },
-    );
+    const output = execSync(`"${verapdf}" --format text --flavour ${flavour} "${file}"`, {
+      encoding: 'utf-8',
+      timeout: 60_000,
+    });
 
     const valid = output.includes('PASS') && !output.includes('FAIL');
     const errors = output
@@ -202,19 +200,13 @@ async function validate(file: string, level: string): Promise<ValidationResult> 
 const args = process.argv.slice(2);
 const file = args.find((a) => !a.startsWith('--'));
 const levelIdx = args.indexOf('--level');
-const level = levelIdx >= 0 ? args[levelIdx + 1] ?? '1b' : '1b';
+const level = levelIdx >= 0 ? (args[levelIdx + 1] ?? '1b') : '1b';
 
 if (!file) {
-  
-  
-  
-  
-  
   process.exit(1);
 }
 
 if (!existsSync(file)) {
-  
   process.exit(2);
 }
 
@@ -222,8 +214,5 @@ if (!existsSync(file)) {
 checkJava();
 
 const result = await validate(file, level);
-
-
-
 
 process.exit(result.valid ? 0 : 1);

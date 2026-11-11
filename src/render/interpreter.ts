@@ -20,7 +20,13 @@ import { type Matrix, identity, multiply, applyToPoint, translation, meanScale }
 import type { DisplayList, DisplayItem, SubPath, Rgba } from './displayList.js';
 import type { ContentStreamOperator, Operand } from '../parser/contentStreamParser.js';
 import { cmykToRgb } from '../core/operators/color.js';
-import { PdfName, PdfDict, PdfStream, type PdfObject, type PdfObjectRegistry } from '../core/pdfObjects.js';
+import {
+  PdfName,
+  PdfDict,
+  PdfStream,
+  type PdfObject,
+  type PdfObjectRegistry,
+} from '../core/pdfObjects.js';
 import { parseContentStream } from '../parser/contentStreamParser.js';
 import { decodeStreamData } from '../parser/streamDecode.js';
 import type { PdfPage } from '../core/pdfPage.js';
@@ -242,7 +248,14 @@ function interpretInto(
         gs = {
           ...gs,
           ctm: multiply(
-            [num(operands[0]), num(operands[1]), num(operands[2]), num(operands[3]), num(operands[4]), num(operands[5])],
+            [
+              num(operands[0]),
+              num(operands[1]),
+              num(operands[2]),
+              num(operands[3]),
+              num(operands[4]),
+              num(operands[5]),
+            ],
             gs.ctm,
           ),
         };
@@ -274,10 +287,16 @@ function interpretInto(
         gs = { ...gs, stroke: grayRgba(num(operands[0])) };
         break;
       case 'k':
-        gs = { ...gs, fill: cmykRgba(num(operands[0]), num(operands[1]), num(operands[2]), num(operands[3])) };
+        gs = {
+          ...gs,
+          fill: cmykRgba(num(operands[0]), num(operands[1]), num(operands[2]), num(operands[3])),
+        };
         break;
       case 'K':
-        gs = { ...gs, stroke: cmykRgba(num(operands[0]), num(operands[1]), num(operands[2]), num(operands[3])) };
+        gs = {
+          ...gs,
+          stroke: cmykRgba(num(operands[0]), num(operands[1]), num(operands[2]), num(operands[3])),
+        };
         break;
       case 'sc':
       case 'scn': {
@@ -431,7 +450,14 @@ function interpretInto(
         break;
       }
       case 'Tm':
-        tm = [num(operands[0]), num(operands[1]), num(operands[2]), num(operands[3]), num(operands[4]), num(operands[5])];
+        tm = [
+          num(operands[0]),
+          num(operands[1]),
+          num(operands[2]),
+          num(operands[3]),
+          num(operands[4]),
+          num(operands[5]),
+        ];
         tlm = tm;
         break;
       case 'T*':
@@ -496,7 +522,14 @@ function emitFill(
   gs: GraphicsState,
 ): void {
   if (!subs.length) return;
-  items.push({ type: 'fill', subpaths: freeze(subs), rule, color: gs.fill, alpha: gs.fillAlpha, clip: gs.clip });
+  items.push({
+    type: 'fill',
+    subpaths: freeze(subs),
+    rule,
+    color: gs.fill,
+    alpha: gs.fillAlpha,
+    clip: gs.clip,
+  });
 }
 
 function emitStroke(
@@ -530,7 +563,10 @@ function showText(items: DisplayItem[], text: string, tm: Matrix, gs: GraphicsSt
       text,
       font: gs.font,
       fontSize: gs.fontSize,
-      transform: multiply(multiply([gs.fontSize * gs.hScale, 0, 0, gs.fontSize, 0, gs.rise], tm), gs.ctm),
+      transform: multiply(
+        multiply([gs.fontSize * gs.hScale, 0, 0, gs.fontSize, 0, gs.rise], tm),
+        gs.ctm,
+      ),
       color: gs.fill,
       alpha: gs.fillAlpha,
       renderMode: gs.renderMode,
@@ -554,13 +590,21 @@ function resolve(obj: PdfObject | undefined, options: InterpretOptions): PdfObje
   return obj;
 }
 
-function subDict(resources: PdfDict | undefined, key: string, options: InterpretOptions): PdfDict | undefined {
+function subDict(
+  resources: PdfDict | undefined,
+  key: string,
+  options: InterpretOptions,
+): PdfDict | undefined {
   if (!resources) return undefined;
   const d = resolve(resources.get(key), options);
   return d && d.kind === 'dict' ? (d as PdfDict) : undefined;
 }
 
-function applyExtGState(gs: GraphicsState, name: string | undefined, options: InterpretOptions): GraphicsState {
+function applyExtGState(
+  gs: GraphicsState,
+  name: string | undefined,
+  options: InterpretOptions,
+): GraphicsState {
   if (!name) return gs;
   const egs = subDict(options.resources, '/ExtGState', options);
   const dict = egs ? resolve(egs.get('/' + name), options) : undefined;

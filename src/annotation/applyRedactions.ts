@@ -171,10 +171,7 @@ function buildRedactionOperators(
  *
  * @returns `true` if the annotation was a redaction and was applied.
  */
-function applyOneRedaction(
-  page: PdfPage,
-  annot: PdfAnnotation,
-): boolean {
+function applyOneRedaction(page: PdfPage, annot: PdfAnnotation): boolean {
   if (!isRedactAnnotation(annot)) return false;
 
   const rect = annot.getRect();

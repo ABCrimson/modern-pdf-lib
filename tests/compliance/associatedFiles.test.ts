@@ -27,10 +27,7 @@ import {
   PdfArray,
   PdfRef,
 } from '../../src/core/pdfObjects.js';
-import {
-  createAssociatedFile,
-  buildAfArray,
-} from '../../src/compliance/associatedFiles.js';
+import { createAssociatedFile, buildAfArray } from '../../src/compliance/associatedFiles.js';
 import type {
   AFRelationship,
   AssociatedFileOptions,
@@ -85,10 +82,7 @@ describe('createAssociatedFile', () => {
 
   it('sets /AFRelationship correctly', () => {
     const registry = makeRegistry();
-    const result = createAssociatedFile(
-      registry,
-      makeOptions({ relationship: 'Alternative' }),
-    );
+    const result = createAssociatedFile(registry, makeOptions({ relationship: 'Alternative' }));
 
     const fileSpec = registry.resolve(result.fileSpecRef) as PdfDict;
     const rel = fileSpec.get('/AFRelationship') as PdfName;
@@ -98,10 +92,7 @@ describe('createAssociatedFile', () => {
 
   it('sets /F and /UF filenames', () => {
     const registry = makeRegistry();
-    const result = createAssociatedFile(
-      registry,
-      makeOptions({ filename: 'invoice.xml' }),
-    );
+    const result = createAssociatedFile(registry, makeOptions({ filename: 'invoice.xml' }));
 
     const fileSpec = registry.resolve(result.fileSpecRef) as PdfDict;
 
@@ -147,10 +138,7 @@ describe('createAssociatedFile', () => {
 
   it('handles creation date', () => {
     const registry = makeRegistry();
-    const result = createAssociatedFile(
-      registry,
-      makeOptions({ creationDate: '20260301120000' }),
-    );
+    const result = createAssociatedFile(registry, makeOptions({ creationDate: '20260301120000' }));
 
     const stream = registry.resolve(result.streamRef) as PdfStream;
     const params = stream.dict.get('/Params') as PdfDict;
@@ -191,10 +179,7 @@ describe('createAssociatedFile', () => {
 
   it('sets the embedded file stream /Type and /Subtype correctly', () => {
     const registry = makeRegistry();
-    const result = createAssociatedFile(
-      registry,
-      makeOptions({ mimeType: 'text/xml' }),
-    );
+    const result = createAssociatedFile(registry, makeOptions({ mimeType: 'text/xml' }));
 
     const stream = registry.resolve(result.streamRef) as PdfStream;
     const type = stream.dict.get('/Type') as PdfName;
@@ -226,9 +211,9 @@ describe('createAssociatedFile', () => {
     const registry = makeRegistry();
     const xmlData = encoder.encode(
       '<?xml version="1.0" encoding="UTF-8"?>' +
-      '<rsm:CrossIndustryInvoice xmlns:rsm="urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100">' +
-      '<rsm:ExchangedDocument><ram:ID>INV-2026-001</ram:ID></rsm:ExchangedDocument>' +
-      '</rsm:CrossIndustryInvoice>',
+        '<rsm:CrossIndustryInvoice xmlns:rsm="urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100">' +
+        '<rsm:ExchangedDocument><ram:ID>INV-2026-001</ram:ID></rsm:ExchangedDocument>' +
+        '</rsm:CrossIndustryInvoice>',
     );
 
     const result = createAssociatedFile(registry, {
@@ -316,10 +301,7 @@ describe('AFRelationship values', () => {
     'creates a valid associated file with relationship "%s"',
     (relationship) => {
       const registry = makeRegistry();
-      const result = createAssociatedFile(
-        registry,
-        makeOptions({ relationship }),
-      );
+      const result = createAssociatedFile(registry, makeOptions({ relationship }));
 
       const fileSpec = registry.resolve(result.fileSpecRef) as PdfDict;
       const rel = fileSpec.get('/AFRelationship') as PdfName;

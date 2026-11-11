@@ -79,14 +79,7 @@ export interface NextGenImageInfo {
 const AVIF_BRANDS: ReadonlySet<string> = new Set(['avif', 'avis']);
 
 /** HEVC-coded HEIF brands (ISO/IEC 23008-12 Annex B). */
-const HEIC_BRANDS: ReadonlySet<string> = new Set([
-  'heic',
-  'heix',
-  'heim',
-  'heis',
-  'hevc',
-  'hevx',
-]);
+const HEIC_BRANDS: ReadonlySet<string> = new Set(['heic', 'heix', 'heim', 'heis', 'hevc', 'hevx']);
 
 /** Generic (codec-agnostic) HEIF brands (ISO/IEC 23008-12 Annex B). */
 const HEIF_BRANDS: ReadonlySet<string> = new Set(['mif1', 'msf1']);
@@ -133,11 +126,7 @@ interface BoxHeader {
  * and the to-EOF form (`size == 0`). Returns `null` on a malformed / truncated
  * header.
  */
-function parseBoxHeader(
-  bytes: Uint8Array,
-  offset: number,
-  end: number,
-): BoxHeader | null {
+function parseBoxHeader(bytes: Uint8Array, offset: number, end: number): BoxHeader | null {
   if (offset + 8 > end) {
     return null;
   }
@@ -232,11 +221,7 @@ function classifyFtypBrands(
     brands.push(readFourCC(bytes, ftyp.contentStart));
   }
   // compatible_brands start at contentStart + 8, each 4 bytes.
-  for (
-    let off = ftyp.contentStart + 8;
-    off + 4 <= ftyp.boxEnd;
-    off += 4
-  ) {
+  for (let off = ftyp.contentStart + 8; off + 4 <= ftyp.boxEnd; off += 4) {
     brands.push(readFourCC(bytes, off));
   }
 
@@ -297,9 +282,11 @@ export function detectNextGenFormat(bytes: Uint8Array): NextGenFormat {
  * Walk an ISOBMFF box tree to `meta` > `iprp` > `ipco` and read the first
  * `ispe` (dimensions) and `pixi` (bit depth) property boxes.
  */
-function probeIsobmffDimensions(
-  bytes: Uint8Array,
-): { width?: number; height?: number; bitDepth?: number } {
+function probeIsobmffDimensions(bytes: Uint8Array): {
+  width?: number;
+  height?: number;
+  bitDepth?: number;
+} {
   const result: { width?: number; height?: number; bitDepth?: number } = {};
 
   const ftyp = findFtyp(bytes);

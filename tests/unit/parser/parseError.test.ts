@@ -169,7 +169,7 @@ describe('formatHexContext', () => {
     const result = formatHexContext(data, 0, 16);
 
     expect(result).toContain('[ff]');
-    expect(result).toContain('.');  // 0xff is not printable ASCII
+    expect(result).toContain('.'); // 0xff is not printable ASCII
   });
 
   it('displays printable ASCII and dots for non-printable', () => {

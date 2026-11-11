@@ -40,7 +40,11 @@ function luma(data: Uint8Array, i: number): number {
 }
 
 /** Compare two equally-sized raster images. */
-export function compareImages(a: RasterImage, b: RasterImage, opts: CompareOptions = {}): DiffResult {
+export function compareImages(
+  a: RasterImage,
+  b: RasterImage,
+  opts: CompareOptions = {},
+): DiffResult {
   if (a.width !== b.width || a.height !== b.height) {
     throw new Error(
       `compareImages: size mismatch (${a.width}×${a.height} vs ${b.width}×${b.height}); render both at the same scale`,
@@ -115,7 +119,8 @@ function meanSsim(a: RasterImage, b: RasterImage, W: number, H: number): number 
       const va = saa / n - ma * ma;
       const vb = sbb / n - mb * mb;
       const cov = sab / n - ma * mb;
-      const ssim = ((2 * ma * mb + C1) * (2 * cov + C2)) / ((ma * ma + mb * mb + C1) * (va + vb + C2));
+      const ssim =
+        ((2 * ma * mb + C1) * (2 * cov + C2)) / ((ma * ma + mb * mb + C1) * (va + vb + C2));
       total += ssim;
       count++;
     }

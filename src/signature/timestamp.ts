@@ -70,12 +70,7 @@ function encodeIntegerValue(value: number): Uint8Array {
   if (value < 0x8000) {
     return new Uint8Array([0x02, 0x02, (value >> 8) & 0xff, value & 0xff]);
   }
-  return new Uint8Array([
-    0x02, 0x03,
-    (value >> 16) & 0xff,
-    (value >> 8) & 0xff,
-    value & 0xff,
-  ]);
+  return new Uint8Array([0x02, 0x03, (value >> 16) & 0xff, (value >> 8) & 0xff, value & 0xff]);
 }
 
 /**
@@ -136,10 +131,7 @@ function parseUtcTime(timeStr: string): Date {
  * @param hashAlgorithm  The hash algorithm used.
  * @returns              DER-encoded TimeStampReq.
  */
-export function buildTimestampRequest(
-  dataHash: Uint8Array,
-  hashAlgorithm: string,
-): Uint8Array {
+export function buildTimestampRequest(dataHash: Uint8Array, hashAlgorithm: string): Uint8Array {
   const hashOid = HASH_OID_MAP[hashAlgorithm];
   if (!hashOid) {
     throw new Error(`Unsupported hash algorithm for timestamp: ${hashAlgorithm}`);
@@ -153,10 +145,7 @@ export function buildTimestampRequest(
     encodeOID(hashOid),
     new Uint8Array([0x05, 0x00]), // NULL parameters
   ]);
-  const messageImprint = encodeSequence([
-    algorithmId,
-    encodeOctetString(dataHash),
-  ]);
+  const messageImprint = encodeSequence([algorithmId, encodeOctetString(dataHash)]);
 
   // Generate a random nonce (8 bytes)
   const nonceBytes = new Uint8Array(8);
@@ -230,10 +219,7 @@ export function parseTimestampResponse(response: Uint8Array): TimestampResult {
 
   const tokenNode = resp.children[1]!;
   const tokenStart = tokenNode.offset;
-  const timestampToken = response.subarray(
-    tokenStart,
-    tokenStart + tokenNode.totalLength,
-  );
+  const timestampToken = response.subarray(tokenStart, tokenStart + tokenNode.totalLength);
 
   // Extract the signing time from the TSTInfo inside the token
   const signingTime = extractTstInfoTime(tokenNode);
@@ -335,9 +321,7 @@ export async function requestTimestamp(
   });
 
   if (!response.ok) {
-    throw new Error(
-      `TSA request failed: HTTP ${response.status} ${response.statusText}`,
-    );
+    throw new Error(`TSA request failed: HTTP ${response.status} ${response.statusText}`);
   }
 
   const contentType = response.headers.get('Content-Type');

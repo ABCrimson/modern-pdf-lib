@@ -7,11 +7,7 @@
  * Reference: PDF 1.7 spec, Section 12.5.6.4 (Text Annotations).
  */
 
-import {
-  PdfDict,
-  PdfName,
-  PdfBool,
-} from '../../core/pdfObjects.js';
+import { PdfDict, PdfName, PdfBool } from '../../core/pdfObjects.js';
 import type { PdfObject, PdfRef } from '../../core/pdfObjects.js';
 import { PdfAnnotation, buildAnnotationDict } from '../pdfAnnotation.js';
 import type { AnnotationOptions } from '../pdfAnnotation.js';

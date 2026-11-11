@@ -103,10 +103,10 @@ export function stripProhibitedFeatures(
 
   // --- Strip JavaScript actions ---
   if (options.stripJavaScript !== false) {
-    const jsActionCount = countOccurrences(text, '/S /JavaScript')
-      + countOccurrences(text, '/S/JavaScript');
-    const jsEntryCount = countMatches(text, /\/JS\s*\([^)]*\)/g)
-      + countMatches(text, /\/JS\s*<[^>]*>/g);
+    const jsActionCount =
+      countOccurrences(text, '/S /JavaScript') + countOccurrences(text, '/S/JavaScript');
+    const jsEntryCount =
+      countMatches(text, /\/JS\s*\([^)]*\)/g) + countMatches(text, /\/JS\s*<[^>]*>/g);
     const totalJs = jsActionCount + jsEntryCount;
 
     if (totalJs > 0) {
@@ -123,8 +123,7 @@ export function stripProhibitedFeatures(
 
   // --- Strip Launch actions ---
   if (options.stripLaunch !== false) {
-    const launchCount = countOccurrences(text, '/S /Launch')
-      + countOccurrences(text, '/S/Launch');
+    const launchCount = countOccurrences(text, '/S /Launch') + countOccurrences(text, '/S/Launch');
     if (launchCount > 0) {
       text = text.replace(/\/S\s*\/Launch/g, '/S /URI   ');
       stripped.push({ type: 'Launch', count: launchCount });
@@ -134,8 +133,7 @@ export function stripProhibitedFeatures(
 
   // --- Strip Sound actions ---
   if (options.stripSound !== false) {
-    const soundCount = countOccurrences(text, '/S /Sound')
-      + countOccurrences(text, '/S/Sound');
+    const soundCount = countOccurrences(text, '/S /Sound') + countOccurrences(text, '/S/Sound');
     if (soundCount > 0) {
       text = text.replace(/\/S\s*\/Sound/g, '/S /URI  ');
       stripped.push({ type: 'Sound', count: soundCount });
@@ -145,8 +143,7 @@ export function stripProhibitedFeatures(
 
   // --- Strip Movie actions ---
   if (options.stripMovie !== false) {
-    const movieCount = countOccurrences(text, '/S /Movie')
-      + countOccurrences(text, '/S/Movie');
+    const movieCount = countOccurrences(text, '/S /Movie') + countOccurrences(text, '/S/Movie');
     if (movieCount > 0) {
       text = text.replace(/\/S\s*\/Movie/g, '/S /URI  ');
       stripped.push({ type: 'Movie', count: movieCount });
@@ -156,8 +153,8 @@ export function stripProhibitedFeatures(
 
   // --- Strip RichMedia annotations ---
   if (options.stripRichMedia !== false) {
-    const richCount = countOccurrences(text, '/Subtype /RichMedia')
-      + countOccurrences(text, '/Subtype/RichMedia');
+    const richCount =
+      countOccurrences(text, '/Subtype /RichMedia') + countOccurrences(text, '/Subtype/RichMedia');
     if (richCount > 0) {
       text = text.replace(/\/Subtype\s*\/RichMedia/g, '/Subtype /Link     ');
       stripped.push({ type: 'RichMedia', count: richCount });

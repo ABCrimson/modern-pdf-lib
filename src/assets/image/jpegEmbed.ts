@@ -76,13 +76,13 @@ export interface JpegEmbedResult {
 // ---------------------------------------------------------------------------
 
 /** JPEG Start of Image marker. */
-const SOI = 0xD8;
+const SOI = 0xd8;
 
 /** JPEG End of Image marker. */
-const EOI = 0xD9;
+const EOI = 0xd9;
 
 /** Start of Scan marker (payload follows; rest of data is entropy-coded). */
-const SOS = 0xDA;
+const SOS = 0xda;
 
 /**
  * SOF (Start of Frame) markers.
@@ -90,23 +90,23 @@ const SOS = 0xDA;
  */
 function isSofMarker(marker: number): boolean {
   return (
-    marker >= 0xC0 &&
-    marker <= 0xCF &&
-    marker !== 0xC4 && // DHT (Define Huffman Table)
-    marker !== 0xC8 && // JPG (reserved)
-    marker !== 0xCC    // DAC (Define Arithmetic Coding)
+    marker >= 0xc0 &&
+    marker <= 0xcf &&
+    marker !== 0xc4 && // DHT (Define Huffman Table)
+    marker !== 0xc8 && // JPG (reserved)
+    marker !== 0xcc // DAC (Define Arithmetic Coding)
   );
 }
 
 /**
  * APP14 Adobe marker identifier.
  */
-const ADOBE_APP14_TAG = new Uint8Array([0x41, 0x64, 0x6F, 0x62, 0x65]); // "Adobe"
+const ADOBE_APP14_TAG = new Uint8Array([0x41, 0x64, 0x6f, 0x62, 0x65]); // "Adobe"
 
 /**
  * JFIF identifier in APP0.
  */
-const JFIF_TAG = new Uint8Array([0x4A, 0x46, 0x49, 0x46, 0x00]); // "JFIF\0"
+const JFIF_TAG = new Uint8Array([0x4a, 0x46, 0x49, 0x46, 0x00]); // "JFIF\0"
 
 // ---------------------------------------------------------------------------
 // Internal: JPEG header parsing
@@ -135,7 +135,7 @@ interface JpegSofData {
  * @throws If the data is not a valid JPEG or no SOF marker is found.
  */
 function parseJpegSof(data: Uint8Array): JpegSofData {
-  if (data.length < 2 || data[0] !== 0xFF || data[1] !== SOI) {
+  if (data.length < 2 || data[0] !== 0xff || data[1] !== SOI) {
     throw new Error('Invalid JPEG: missing SOI marker (expected 0xFFD8)');
   }
 
@@ -144,14 +144,14 @@ function parseJpegSof(data: Uint8Array): JpegSofData {
 
   while (offset < data.length - 1) {
     // Find next marker
-    if (data[offset] !== 0xFF) {
+    if (data[offset] !== 0xff) {
       // Skip non-marker bytes (can happen after SOS)
       offset++;
       continue;
     }
 
     // Skip padding 0xFF bytes
-    while (offset < data.length && data[offset] === 0xFF) {
+    while (offset < data.length && data[offset] === 0xff) {
       offset++;
     }
 
@@ -166,7 +166,7 @@ function parseJpegSof(data: Uint8Array): JpegSofData {
     }
 
     // RST markers (0xD0–0xD7) — no length field
-    if (marker >= 0xD0 && marker <= 0xD7) {
+    if (marker >= 0xd0 && marker <= 0xd7) {
       continue;
     }
 
@@ -213,12 +213,12 @@ function findAdobeColorTransform(data: Uint8Array): number {
   let offset = 2;
 
   while (offset < data.length - 1) {
-    if (data[offset] !== 0xFF) {
+    if (data[offset] !== 0xff) {
       offset++;
       continue;
     }
 
-    while (offset < data.length && data[offset] === 0xFF) {
+    while (offset < data.length && data[offset] === 0xff) {
       offset++;
     }
 
@@ -228,13 +228,13 @@ function findAdobeColorTransform(data: Uint8Array): number {
     offset++;
 
     if (marker === 0x00 || marker === SOI || marker === EOI) continue;
-    if (marker >= 0xD0 && marker <= 0xD7) continue;
+    if (marker >= 0xd0 && marker <= 0xd7) continue;
 
     if (offset + 2 > data.length) break;
     const segmentLength = view.getUint16(offset, false);
 
     // APP14 = 0xEE
-    if (marker === 0xEE && segmentLength >= 14) {
+    if (marker === 0xee && segmentLength >= 14) {
       // Check for "Adobe" identifier at offset+2
       let isAdobe = true;
       for (let i = 0; i < ADOBE_APP14_TAG.length; i++) {
@@ -271,12 +271,12 @@ function hasJfifMarker(data: Uint8Array): boolean {
   let offset = 2;
 
   while (offset < data.length - 1) {
-    if (data[offset] !== 0xFF) {
+    if (data[offset] !== 0xff) {
       offset++;
       continue;
     }
 
-    while (offset < data.length && data[offset] === 0xFF) {
+    while (offset < data.length && data[offset] === 0xff) {
       offset++;
     }
 
@@ -286,13 +286,13 @@ function hasJfifMarker(data: Uint8Array): boolean {
     offset++;
 
     if (marker === 0x00 || marker === SOI || marker === EOI) continue;
-    if (marker >= 0xD0 && marker <= 0xD7) continue;
+    if (marker >= 0xd0 && marker <= 0xd7) continue;
 
     if (offset + 2 > data.length) break;
     const segmentLength = view.getUint16(offset, false);
 
     // APP0 = 0xE0
-    if (marker === 0xE0 && segmentLength >= 16) {
+    if (marker === 0xe0 && segmentLength >= 16) {
       let isJfif = true;
       for (let i = 0; i < JFIF_TAG.length; i++) {
         if (data[offset + 2 + i] !== JFIF_TAG[i]) {
@@ -386,7 +386,7 @@ export function embedJpeg(jpegData: Uint8Array): JpegEmbedResult {
  * @returns `true` if the data starts with the JPEG SOI marker (0xFFD8).
  */
 export function isJpeg(data: Uint8Array): boolean {
-  return data.length >= 2 && data[0] === 0xFF && data[1] === SOI;
+  return data.length >= 2 && data[0] === 0xff && data[1] === SOI;
 }
 
 /**

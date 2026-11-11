@@ -138,9 +138,7 @@ describe('validateBoxGeometry', () => {
       trimBox: [10, 10, 700, 832],
     };
     const errors = validateBoxGeometry(box);
-    expect(errors.some((e) => /TrimBox must be within the MediaBox/.test(e))).toBe(
-      true,
-    );
+    expect(errors.some((e) => /TrimBox must be within the MediaBox/.test(e))).toBe(true);
   });
 
   it('flags a BleedBox outside the MediaBox', () => {
@@ -150,9 +148,7 @@ describe('validateBoxGeometry', () => {
       trimBox: [20, 20, 575, 822],
     };
     const errors = validateBoxGeometry(box);
-    expect(
-      errors.some((e) => /BleedBox must be within the MediaBox/.test(e)),
-    ).toBe(true);
+    expect(errors.some((e) => /BleedBox must be within the MediaBox/.test(e))).toBe(true);
   });
 
   it('flags a TrimBox not within the BleedBox', () => {
@@ -162,9 +158,7 @@ describe('validateBoxGeometry', () => {
       trimBox: [20, 20, 575, 822],
     };
     const errors = validateBoxGeometry(box);
-    expect(
-      errors.some((e) => /TrimBox must be within the BleedBox/.test(e)),
-    ).toBe(true);
+    expect(errors.some((e) => /TrimBox must be within the BleedBox/.test(e))).toBe(true);
   });
 
   it('flags an invalid (zero-area) MediaBox and short-circuits', () => {
@@ -179,9 +173,7 @@ describe('validateBoxGeometry', () => {
       trimBox: [50, 50, 50, 100],
     };
     const errors = validateBoxGeometry(box);
-    expect(
-      errors.some((e) => /TrimBox must be a positive-area rectangle/.test(e)),
-    ).toBe(true);
+    expect(errors.some((e) => /TrimBox must be a positive-area rectangle/.test(e))).toBe(true);
   });
 });
 

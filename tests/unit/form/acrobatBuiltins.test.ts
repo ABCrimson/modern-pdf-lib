@@ -37,9 +37,7 @@ describe('formatNumber', () => {
   });
 
   it('formats negative with parentheses', () => {
-    expect(formatNumber(-1234.5, { negativeStyle: 'parens' })).toBe(
-      '(1,234.50)',
-    );
+    expect(formatNumber(-1234.5, { negativeStyle: 'parens' })).toBe('(1,234.50)');
   });
 
   it('formats with no thousands separator', () => {
@@ -47,9 +45,7 @@ describe('formatNumber', () => {
   });
 
   it('formats with period as thousands separator and comma as decimal', () => {
-    expect(
-      formatNumber(1234.56, { thousandsSep: '.', decimalSep: ',' }),
-    ).toBe('1.234,56');
+    expect(formatNumber(1234.56, { thousandsSep: '.', decimalSep: ',' })).toBe('1.234,56');
   });
 
   it('formats with 0 decimal places', () => {
@@ -61,15 +57,11 @@ describe('formatNumber', () => {
   });
 
   it('prepends currency symbol', () => {
-    expect(formatNumber(100, { currency: '$', currencyPrepend: true })).toBe(
-      '$100.00',
-    );
+    expect(formatNumber(100, { currency: '$', currencyPrepend: true })).toBe('$100.00');
   });
 
   it('appends currency symbol', () => {
-    expect(
-      formatNumber(100, { currency: ' EUR', currencyPrepend: false }),
-    ).toBe('100.00 EUR');
+    expect(formatNumber(100, { currency: ' EUR', currencyPrepend: false })).toBe('100.00 EUR');
   });
 
   it('handles negative with currency and parens', () => {

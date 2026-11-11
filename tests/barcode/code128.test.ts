@@ -247,7 +247,7 @@ describe('Code 128 Barcode', () => {
   it('encodes a two-digit string using Code C', () => {
     const values = encodeCode128Values('42');
     expect(values[0]).toBe(105); // START C
-    expect(values[1]).toBe(42);  // The pair "42"
+    expect(values[1]).toBe(42); // The pair "42"
   });
 
   // -----------------------------------------------------------------------
@@ -270,8 +270,8 @@ describe('Code 128 Barcode', () => {
   it('produces a valid module array with bars and spaces', () => {
     const matrix = encodeCode128('Test');
     // Should contain both true (bar) and false (space) values
-    expect(matrix.modules.some(m => m === true)).toBe(true);
-    expect(matrix.modules.some(m => m === false)).toBe(true);
+    expect(matrix.modules.some((m) => m === true)).toBe(true);
+    expect(matrix.modules.some((m) => m === false)).toBe(true);
     // First module should be a bar (all Code 128 symbols start with a bar)
     expect(matrix.modules[0]).toBe(true);
   });

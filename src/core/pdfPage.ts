@@ -45,11 +45,7 @@ import {
   endPath,
 } from './operators/graphics.js';
 import { drawXObject, drawImageXObject } from './operators/image.js';
-import {
-  applyFillColor,
-  applyStrokeColor,
-  setColorSpace,
-} from './operators/color.js';
+import { applyFillColor, applyStrokeColor, setColorSpace } from './operators/color.js';
 import {
   saveState,
   restoreState,
@@ -109,17 +105,17 @@ export const PageSizes = {
   A5: [419.53, 595.28] as const,
   A6: [297.64, 419.53] as const,
   A7: [209.76, 297.64] as const,
-  A8: [147.40, 209.76] as const,
-  A9: [104.88, 147.40] as const,
-  A10: [73.70, 104.88] as const,
+  A8: [147.4, 209.76] as const,
+  A9: [104.88, 147.4] as const,
+  A10: [73.7, 104.88] as const,
   // ISO B series
   B0: [2834.65, 4008.19] as const,
   B1: [2004.09, 2834.65] as const,
   B2: [1417.32, 2004.09] as const,
   B3: [1000.63, 1417.32] as const,
   B4: [708.66, 1000.63] as const,
-  B5: [498.90, 708.66] as const,
-  B6: [354.33, 498.90] as const,
+  B5: [498.9, 708.66] as const,
+  B6: [354.33, 498.9] as const,
   B7: [249.45, 354.33] as const,
   B8: [175.75, 249.45] as const,
   B9: [124.72, 175.75] as const,
@@ -144,17 +140,17 @@ export const PageSizes = {
   C9: [113.39, 161.57] as const,
   C10: [79.37, 113.39] as const,
   // RA series (untrimmed raw format A)
-  RA0: [2437.80, 3458.27] as const,
-  RA1: [1729.13, 2437.80] as const,
-  RA2: [1218.90, 1729.13] as const,
-  RA3: [864.57, 1218.90] as const,
+  RA0: [2437.8, 3458.27] as const,
+  RA1: [1729.13, 2437.8] as const,
+  RA2: [1218.9, 1729.13] as const,
+  RA3: [864.57, 1218.9] as const,
   RA4: [609.45, 864.57] as const,
   // SRA series (supplementary raw format A)
   SRA0: [2551.18, 3628.35] as const,
   SRA1: [1814.17, 2551.18] as const,
   SRA2: [1275.59, 1814.17] as const,
   SRA3: [907.09, 1275.59] as const,
-  SRA4: [637.80, 907.09] as const,
+  SRA4: [637.8, 907.09] as const,
 } as const;
 
 /** Type for a page-size input: a `[width, height]` tuple or `{ width, height }` object. */
@@ -1074,8 +1070,8 @@ export class PdfPage {
     gsDict.set('/Type', PdfName.of('ExtGState'));
 
     if (opacity !== undefined && opacity < 1) {
-      gsDict.set('/ca', PdfNumber.of(opacity));  // Fill opacity
-      gsDict.set('/CA', PdfNumber.of(opacity));  // Stroke opacity
+      gsDict.set('/ca', PdfNumber.of(opacity)); // Fill opacity
+      gsDict.set('/CA', PdfNumber.of(opacity)); // Stroke opacity
     }
 
     if (blendMode !== undefined && blendMode !== 'Normal') {
@@ -1106,8 +1102,7 @@ export class PdfPage {
     const size = options.size ?? this._defaultFontSize ?? 12;
 
     // Resolve the effective font: explicit option -> page default -> fallback 'F1'
-    const effectiveFont: FontRef | string | undefined =
-      options.font ?? this._defaultFont;
+    const effectiveFont: FontRef | string | undefined = options.font ?? this._defaultFont;
 
     // Resolve line height: explicit option -> page default -> computed from size
     const lineHeight = options.lineHeight ?? this._defaultLineHeight ?? size * 1.2;
@@ -1138,8 +1133,9 @@ export class PdfPage {
     this.ops += saveState();
 
     // Opacity and/or blend mode (via ExtGState)
-    const needsGS = (options.opacity !== undefined && options.opacity < 1) ||
-                    (options.blendMode !== undefined && options.blendMode !== 'Normal');
+    const needsGS =
+      (options.opacity !== undefined && options.opacity < 1) ||
+      (options.blendMode !== undefined && options.blendMode !== 'Normal');
     if (needsGS) {
       const gsName = this.getOrCreateExtGState(options.opacity, options.blendMode);
       this.ops += setGraphicsState(gsName);
@@ -1157,7 +1153,11 @@ export class PdfPage {
       this.ops += setTextRenderingMode(options.renderingMode);
     }
 
-    if (options.rotate !== undefined || options.xSkew !== undefined || options.ySkew !== undefined) {
+    if (
+      options.rotate !== undefined ||
+      options.xSkew !== undefined ||
+      options.ySkew !== undefined
+    ) {
       const rotRad = options.rotate !== undefined ? toRadians(options.rotate) : 0;
       const xSkewRad = options.xSkew !== undefined ? toRadians(options.xSkew) : 0;
       const ySkewRad = options.ySkew !== undefined ? toRadians(options.ySkew) : 0;
@@ -1191,11 +1191,18 @@ export class PdfPage {
     // Apply word-wrapping when maxWidth is specified
     const lines: string[] = [];
     if (options.maxWidth !== undefined && options.maxWidth > 0) {
-      const fontForWrapping = (effectiveFont && typeof effectiveFont === 'object' && 'name' in effectiveFont)
-        ? effectiveFont as FontRef
-        : fontName;
+      const fontForWrapping =
+        effectiveFont && typeof effectiveFont === 'object' && 'name' in effectiveFont
+          ? (effectiveFont as FontRef)
+          : fontName;
       for (const rawLine of rawLines) {
-        const wrapped = wrapText(rawLine, options.maxWidth, fontForWrapping, size, options.wordBreaks);
+        const wrapped = wrapText(
+          rawLine,
+          options.maxWidth,
+          fontForWrapping,
+          size,
+          options.wordBreaks,
+        );
         lines.push(...wrapped);
       }
     } else {
@@ -1238,8 +1245,9 @@ export class PdfPage {
     // Ensure the image is registered on this page
     this.registerXObject(image.name, image.ref);
 
-    const needsGS = (options.opacity !== undefined && options.opacity < 1) ||
-                    (options.blendMode !== undefined && options.blendMode !== 'Normal');
+    const needsGS =
+      (options.opacity !== undefined && options.opacity < 1) ||
+      (options.blendMode !== undefined && options.blendMode !== 'Normal');
     const hasRotate = !!options.rotate;
     const hasSkew = options.xSkew !== undefined || options.ySkew !== undefined;
 
@@ -1311,8 +1319,9 @@ export class PdfPage {
     this.ops += saveState();
 
     // Opacity and/or blend mode (via ExtGState)
-    const needsGS = (options.opacity !== undefined && options.opacity < 1) ||
-                    (options.blendMode !== undefined && options.blendMode !== 'Normal');
+    const needsGS =
+      (options.opacity !== undefined && options.opacity < 1) ||
+      (options.blendMode !== undefined && options.blendMode !== 'Normal');
     if (needsGS) {
       const gsName = this.getOrCreateExtGState(options.opacity, options.blendMode);
       this.ops += setGraphicsState(gsName);
@@ -1363,8 +1372,9 @@ export class PdfPage {
     this.ops += saveState();
 
     // Opacity and/or blend mode (via ExtGState)
-    const needsGS = (options.opacity !== undefined && options.opacity < 1) ||
-                    (options.blendMode !== undefined && options.blendMode !== 'Normal');
+    const needsGS =
+      (options.opacity !== undefined && options.opacity < 1) ||
+      (options.blendMode !== undefined && options.blendMode !== 'Normal');
     if (needsGS) {
       const gsName = this.getOrCreateExtGState(options.opacity, options.blendMode);
       this.ops += setGraphicsState(gsName);
@@ -1404,7 +1414,12 @@ export class PdfPage {
       this.ops += concatMatrix(a, b, c, d, tx, ty);
     }
 
-    if (hasFill && hasStroke && options.borderOpacity !== undefined && options.borderOpacity !== options.opacity) {
+    if (
+      hasFill &&
+      hasStroke &&
+      options.borderOpacity !== undefined &&
+      options.borderOpacity !== options.opacity
+    ) {
       // Separate fill and stroke passes for different opacities
       this.ops += rectangle(x, y, w, h);
       this.ops += fill();
@@ -1463,8 +1478,9 @@ export class PdfPage {
     this.ops += saveState();
 
     // Opacity and/or blend mode (via ExtGState)
-    const needsGS = (options.opacity !== undefined && options.opacity < 1) ||
-                    (options.blendMode !== undefined && options.blendMode !== 'Normal');
+    const needsGS =
+      (options.opacity !== undefined && options.opacity < 1) ||
+      (options.blendMode !== undefined && options.blendMode !== 'Normal');
     if (needsGS) {
       const gsName = this.getOrCreateExtGState(options.opacity, options.blendMode);
       this.ops += setGraphicsState(gsName);
@@ -1500,8 +1516,9 @@ export class PdfPage {
     this.ops += saveState();
 
     // Opacity and/or blend mode (via ExtGState)
-    const needsGS = (options.opacity !== undefined && options.opacity < 1) ||
-                    (options.blendMode !== undefined && options.blendMode !== 'Normal');
+    const needsGS =
+      (options.opacity !== undefined && options.opacity < 1) ||
+      (options.blendMode !== undefined && options.blendMode !== 'Normal');
     if (needsGS) {
       const gsName = this.getOrCreateExtGState(options.opacity, options.blendMode);
       this.ops += setGraphicsState(gsName);
@@ -1525,7 +1542,12 @@ export class PdfPage {
 
     this.ops += circlePath(cx, cy, r);
 
-    if (hasFill && hasStroke && options.borderOpacity !== undefined && options.borderOpacity !== options.opacity) {
+    if (
+      hasFill &&
+      hasStroke &&
+      options.borderOpacity !== undefined &&
+      options.borderOpacity !== options.opacity
+    ) {
       this.ops += fill();
       const borderGsName = this.getOrCreateExtGState(options.borderOpacity, options.blendMode);
       this.ops += setGraphicsState(borderGsName);
@@ -1558,8 +1580,9 @@ export class PdfPage {
     this.ops += saveState();
 
     // Opacity and/or blend mode (via ExtGState)
-    const needsGS = (options.opacity !== undefined && options.opacity < 1) ||
-                    (options.blendMode !== undefined && options.blendMode !== 'Normal');
+    const needsGS =
+      (options.opacity !== undefined && options.opacity < 1) ||
+      (options.blendMode !== undefined && options.blendMode !== 'Normal');
     if (needsGS) {
       const gsName = this.getOrCreateExtGState(options.opacity, options.blendMode);
       this.ops += setGraphicsState(gsName);
@@ -1583,7 +1606,12 @@ export class PdfPage {
 
     this.ops += ellipsePath(cx, cy, rx, ry);
 
-    if (hasFill && hasStroke && options.borderOpacity !== undefined && options.borderOpacity !== options.opacity) {
+    if (
+      hasFill &&
+      hasStroke &&
+      options.borderOpacity !== undefined &&
+      options.borderOpacity !== options.opacity
+    ) {
       this.ops += fill();
       const borderGsName = this.getOrCreateExtGState(options.borderOpacity, options.blendMode);
       this.ops += setGraphicsState(borderGsName);
@@ -1632,14 +1660,7 @@ export class PdfPage {
    * @param tx  Horizontal translation.
    * @param ty  Vertical translation.
    */
-  setTransform(
-    a: number,
-    b: number,
-    c: number,
-    d: number,
-    tx: number,
-    ty: number,
-  ): void {
+  setTransform(a: number, b: number, c: number, d: number, tx: number, ty: number): void {
     this.ops += concatMatrix(a, b, c, d, tx, ty);
   }
 
@@ -1760,12 +1781,7 @@ export class PdfPage {
     for (const annot of this.annotations) {
       const rect = annot.getRect();
       if (rect) {
-        annot.setRect([
-          rect[0] * xFactor,
-          rect[1] * yFactor,
-          rect[2] * xFactor,
-          rect[3] * yFactor,
-        ]);
+        annot.setRect([rect[0] * xFactor, rect[1] * yFactor, rect[2] * xFactor, rect[3] * yFactor]);
       }
     }
   }
@@ -2174,8 +2190,9 @@ export class PdfPage {
     this.ops += saveState();
 
     // Opacity and/or blend mode (via ExtGState)
-    const needsGS = (options.opacity !== undefined && options.opacity < 1) ||
-                    (options.blendMode !== undefined && options.blendMode !== 'Normal');
+    const needsGS =
+      (options.opacity !== undefined && options.opacity < 1) ||
+      (options.blendMode !== undefined && options.blendMode !== 'Normal');
     if (needsGS) {
       const gsName = this.getOrCreateExtGState(options.opacity, options.blendMode);
       this.ops += setGraphicsState(gsName);
@@ -2207,7 +2224,12 @@ export class PdfPage {
     this.ops += svgCommandsToPdfOps(commands);
 
     // Painting operator
-    if (hasFill && hasStroke && options.borderOpacity !== undefined && options.borderOpacity !== options.opacity) {
+    if (
+      hasFill &&
+      hasStroke &&
+      options.borderOpacity !== undefined &&
+      options.borderOpacity !== options.opacity
+    ) {
       this.ops += fill();
       const borderGsName = this.getOrCreateExtGState(options.borderOpacity, options.blendMode);
       this.ops += setGraphicsState(borderGsName);
@@ -2309,10 +2331,7 @@ export class PdfPage {
     gradient: GradientFill,
     rect: { x: number; y: number; width: number; height: number },
   ): void {
-    const { patternRef, patternName } = buildGradientObjects(
-      gradient,
-      this.registry,
-    );
+    const { patternRef, patternName } = buildGradientObjects(gradient, this.registry);
     this.patterns.set(patternName, patternRef);
 
     this.ops += saveState();
@@ -2342,10 +2361,7 @@ export class PdfPage {
     pattern: PatternFill,
     rect: { x: number; y: number; width: number; height: number },
   ): void {
-    const { patternRef, patternName } = buildPatternObjects(
-      pattern,
-      this.registry,
-    );
+    const { patternRef, patternName } = buildPatternObjects(pattern, this.registry);
     this.patterns.set(patternName, patternRef);
 
     this.ops += saveState();
@@ -2792,9 +2808,10 @@ export class PdfPage {
       contentStreamRefs = [...this._originalContentRefs, this.contentStreamRef];
     } else if (hasOriginal) {
       // Loaded page with no modifications — use original refs directly
-      contentStreamRefs = this._originalContentRefs.length === 1
-        ? this._originalContentRefs[0]!
-        : this._originalContentRefs;
+      contentStreamRefs =
+        this._originalContentRefs.length === 1
+          ? this._originalContentRefs[0]!
+          : this._originalContentRefs;
     } else {
       // New page (or empty) — current behavior
       const stream = PdfStream.fromString(this.ops);
@@ -2810,7 +2827,12 @@ export class PdfPage {
 
     return {
       pageRef: this.pageRef,
-      mediaBox: [this.mediaX, this.mediaY, this.mediaX + this.mediaWidth, this.mediaY + this.mediaHeight] as const,
+      mediaBox: [
+        this.mediaX,
+        this.mediaY,
+        this.mediaX + this.mediaWidth,
+        this.mediaY + this.mediaHeight,
+      ] as const,
       width: this.width,
       height: this.height,
       contentStreamRefs,
@@ -2825,4 +2847,3 @@ export class PdfPage {
     };
   }
 }
-

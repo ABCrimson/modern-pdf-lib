@@ -3,13 +3,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  PdfDict,
-  PdfName,
-  PdfString,
-  PdfNumber,
-  PdfArray,
-} from '../../../src/core/pdfObjects.js';
+import { PdfDict, PdfName, PdfString, PdfNumber, PdfArray } from '../../../src/core/pdfObjects.js';
 import { PdfTextField } from '../../../src/form/fields/textField.js';
 import { PdfCheckboxField } from '../../../src/form/fields/checkboxField.js';
 import { PdfForm } from '../../../src/form/pdfForm.js';
@@ -20,7 +14,6 @@ import {
   createFieldProxy,
 } from '../../../src/form/fieldReferences.js';
 
-
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
@@ -30,11 +23,7 @@ const HIDDEN = 1 << 1;
 const PRINT = 1 << 2;
 const NOVIEW = 1 << 5;
 
-function makeTextField(
-  name: string,
-  value?: string,
-  parentNames?: string[],
-): PdfTextField {
+function makeTextField(name: string, value?: string, parentNames?: string[]): PdfTextField {
   const dict = new PdfDict();
   dict.set('/FT', PdfName.of('Tx'));
   dict.set('/T', PdfString.literal(name));

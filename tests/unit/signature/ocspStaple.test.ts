@@ -4,10 +4,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  embedOcspResponse,
-  extractStapledOcsp,
-} from '../../../src/signature/ocspStaple.js';
+import { embedOcspResponse, extractStapledOcsp } from '../../../src/signature/ocspStaple.js';
 import {
   buildPkcs7Signature,
   encodeSequence,
@@ -74,9 +71,7 @@ async function buildSelfSignedCert(
   ]);
 
   const issuer = encodeSequence([
-    encodeSet([
-      encodeSequence([encodeOID('2.5.4.3'), encodeUtf8String('Test Signer')]),
-    ]),
+    encodeSet([encodeSequence([encodeOID('2.5.4.3'), encodeUtf8String('Test Signer')])]),
   ]);
 
   const now = new Date();
@@ -85,14 +80,23 @@ async function buildSelfSignedCert(
   const subject = issuer; // self-signed
 
   const tbsCert = encodeSequence([
-    version, serialNumber, sigAlgo, issuer, validity, subject, spkiDer,
+    version,
+    serialNumber,
+    sigAlgo,
+    issuer,
+    validity,
+    subject,
+    spkiDer,
   ]);
 
   const signature = new Uint8Array(
     await globalThis.crypto.subtle.sign(
       { name: 'RSASSA-PKCS1-v1_5' },
       privateKey,
-      tbsCert.buffer.slice(tbsCert.byteOffset, tbsCert.byteOffset + tbsCert.byteLength) as ArrayBuffer,
+      tbsCert.buffer.slice(
+        tbsCert.byteOffset,
+        tbsCert.byteOffset + tbsCert.byteLength,
+      ) as ArrayBuffer,
     ),
   );
 

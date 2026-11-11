@@ -14,10 +14,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  PdfOutlineItem,
-  PdfOutlineTree,
-} from '../../../src/outline/pdfOutline.js';
+import { PdfOutlineItem, PdfOutlineTree } from '../../../src/outline/pdfOutline.js';
 import type { OutlineDestination } from '../../../src/outline/pdfOutline.js';
 import {
   PdfDict,
@@ -89,7 +86,14 @@ describe('PdfOutlineItem', () => {
   });
 
   it('creates an item with all options', () => {
-    const dest: OutlineDestination = { type: 'page', pageIndex: 2, fit: 'XYZ', left: 0, top: 800, zoom: 1.5 };
+    const dest: OutlineDestination = {
+      type: 'page',
+      pageIndex: 2,
+      fit: 'XYZ',
+      left: 0,
+      top: 800,
+      zoom: 1.5,
+    };
     const item = new PdfOutlineItem('Styled Item', dest, {
       isOpen: false,
       color: { r: 1, g: 0, b: 0 },
@@ -276,11 +280,15 @@ describe('PdfOutlineTree', () => {
 
     it('serializes color and style flags', () => {
       const tree = new PdfOutlineTree();
-      tree.addItem('Red Bold Italic', { type: 'page', pageIndex: 0 }, {
-        color: { r: 1, g: 0, b: 0 },
-        bold: true,
-        italic: true,
-      });
+      tree.addItem(
+        'Red Bold Italic',
+        { type: 'page', pageIndex: 0 },
+        {
+          color: { r: 1, g: 0, b: 0 },
+          bold: true,
+          italic: true,
+        },
+      );
 
       const registry = new PdfObjectRegistry();
       const pageRefs = createPageRefs(1);
@@ -406,7 +414,14 @@ describe('PdfOutlineTree', () => {
     });
 
     it('serializes /XYZ destination with all params', () => {
-      const arr = serializeItemDest({ type: 'page', pageIndex: 0, fit: 'XYZ', left: 50, top: 800, zoom: 1.5 });
+      const arr = serializeItemDest({
+        type: 'page',
+        pageIndex: 0,
+        fit: 'XYZ',
+        left: 50,
+        top: 800,
+        zoom: 1.5,
+      });
       expect(arr.length).toBe(5);
       expect(serialize(arr.items[1]!)).toBe('/XYZ');
       expect(serialize(arr.items[2]!)).toBe('50');
@@ -470,11 +485,7 @@ describe('PdfOutlineTree', () => {
       dict.set('/Type', PdfName.of('Outlines'));
       dict.set('/Count', PdfNumber.of(0));
 
-      const tree = PdfOutlineTree.fromDict(
-        dict,
-        () => undefined,
-        new Map(),
-      );
+      const tree = PdfOutlineTree.fromDict(dict, () => undefined, new Map());
       expect(tree.items).toHaveLength(0);
     });
 
@@ -482,7 +493,10 @@ describe('PdfOutlineTree', () => {
       const registry = new PdfObjectRegistry();
       const pageRef0 = PdfRef.of(100);
       const pageRef1 = PdfRef.of(101);
-      const pageRefToIndex = new Map([[100, 0], [101, 1]]);
+      const pageRefToIndex = new Map([
+        [100, 0],
+        [101, 1],
+      ]);
 
       // Build item1 dict
       const item1Dict = new PdfDict();
@@ -525,7 +539,10 @@ describe('PdfOutlineTree', () => {
       const registry = new PdfObjectRegistry();
       const pageRef0 = PdfRef.of(100);
       const pageRef1 = PdfRef.of(101);
-      const pageRefToIndex = new Map([[100, 0], [101, 1]]);
+      const pageRefToIndex = new Map([
+        [100, 0],
+        [101, 1],
+      ]);
 
       // Child item
       const childDict = new PdfDict();
@@ -645,13 +662,16 @@ describe('PdfOutlineTree', () => {
 
       const itemDict = new PdfDict();
       itemDict.set('/Title', PdfString.literal('XYZ'));
-      itemDict.set('/Dest', PdfArray.of([
-        pageRef0,
-        PdfName.of('XYZ'),
-        PdfNumber.of(50),
-        PdfNumber.of(800),
-        PdfNumber.of(2),
-      ]));
+      itemDict.set(
+        '/Dest',
+        PdfArray.of([
+          pageRef0,
+          PdfName.of('XYZ'),
+          PdfNumber.of(50),
+          PdfNumber.of(800),
+          PdfNumber.of(2),
+        ]),
+      );
       const itemRef = registry.register(itemDict);
 
       const outlinesDict = new PdfDict();
@@ -680,11 +700,22 @@ describe('PdfOutlineTree', () => {
       const tree = new PdfOutlineTree();
       const ch1 = tree.addItem('Chapter 1', { type: 'page', pageIndex: 0, fit: 'Fit' });
       ch1.addChild('Section 1.1', { type: 'page', pageIndex: 1, fit: 'FitH', top: 600 });
-      ch1.addChild('Section 1.2', { type: 'page', pageIndex: 2, fit: 'XYZ', left: 0, top: 800, zoom: 1 });
-      tree.addItem('Chapter 2', { type: 'page', pageIndex: 3, fit: 'Fit' }, {
-        color: { r: 0, g: 0, b: 1 },
-        bold: true,
+      ch1.addChild('Section 1.2', {
+        type: 'page',
+        pageIndex: 2,
+        fit: 'XYZ',
+        left: 0,
+        top: 800,
+        zoom: 1,
       });
+      tree.addItem(
+        'Chapter 2',
+        { type: 'page', pageIndex: 3, fit: 'Fit' },
+        {
+          color: { r: 0, g: 0, b: 1 },
+          bold: true,
+        },
+      );
 
       // Serialize
       const registry = new PdfObjectRegistry();

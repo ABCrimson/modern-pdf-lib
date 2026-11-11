@@ -19,10 +19,7 @@
 import { describe, it, expect } from 'vitest';
 import { createPdf } from '../../../src/core/pdfDocument.js';
 import { redactRegions } from '../../../src/render/redactContent.js';
-import {
-  verifyRedactions,
-  type RedactionRegion,
-} from '../../../src/security/redactionVerifier.js';
+import { verifyRedactions, type RedactionRegion } from '../../../src/security/redactionVerifier.js';
 
 // ---------------------------------------------------------------------------
 // Fixtures
@@ -33,12 +30,7 @@ import {
  * and return the saved bytes.  `drawText` emits `BT /F1 <size> Tf <x> <y> Td
  * (<text>) Tj ET`, so the recovered text origin is exactly `(x, y)`.
  */
-async function pdfWithTextAt(
-  text: string,
-  x: number,
-  y: number,
-  size = 12,
-): Promise<Uint8Array> {
+async function pdfWithTextAt(text: string, x: number, y: number, size = 12): Promise<Uint8Array> {
   const doc = createPdf();
   const page = doc.addPage([400, 600]);
   page.drawText(text, { x, y, size });
@@ -55,9 +47,7 @@ describe('verifyRedactions() — leak detection', () => {
     const bytes = await pdfWithTextAt('SECRET', 50, 550);
 
     // A region squarely over the text origin.
-    const regions: RedactionRegion[] = [
-      { page: 0, x: 45, y: 545, width: 120, height: 25 },
-    ];
+    const regions: RedactionRegion[] = [{ page: 0, x: 45, y: 545, width: 120, height: 25 }];
 
     const report = await verifyRedactions(bytes, regions);
 
@@ -76,9 +66,7 @@ describe('verifyRedactions() — leak detection', () => {
     const bytes = await pdfWithTextAt('SECRET', 50, 550);
 
     // A region far from the text (lower-left corner of the page).
-    const regions: RedactionRegion[] = [
-      { page: 0, x: 10, y: 10, width: 100, height: 30 },
-    ];
+    const regions: RedactionRegion[] = [{ page: 0, x: 10, y: 10, width: 100, height: 30 }];
 
     const report = await verifyRedactions(bytes, regions);
 
@@ -115,9 +103,7 @@ describe('verifyRedactions() — region geometry', () => {
     const bytes = await pdfWithTextAt('CONFIDENTIAL', 100, 300, 14);
 
     // Region whose right edge clips into the left of the text box.
-    const regions: RedactionRegion[] = [
-      { page: 0, x: 60, y: 295, width: 50, height: 24 },
-    ];
+    const regions: RedactionRegion[] = [{ page: 0, x: 60, y: 295, width: 50, height: 24 }];
     const report = await verifyRedactions(bytes, regions);
     expect(report.clean).toBe(false);
     expect(report.leaks[0]!.text).toContain('CONFIDENTIAL');
@@ -127,9 +113,7 @@ describe('verifyRedactions() — region geometry', () => {
     const bytes = await pdfWithTextAt('VISIBLE', 100, 300, 12);
 
     // Region below the baseline, not reaching y=300.
-    const regions: RedactionRegion[] = [
-      { page: 0, x: 100, y: 200, width: 200, height: 50 },
-    ];
+    const regions: RedactionRegion[] = [{ page: 0, x: 100, y: 200, width: 200, height: 50 }];
     const report = await verifyRedactions(bytes, regions);
     expect(report.clean).toBe(true);
   });

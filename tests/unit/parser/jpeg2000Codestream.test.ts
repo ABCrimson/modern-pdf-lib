@@ -22,9 +22,18 @@ import {
 /** Build a JP2 signature box (12 bytes). */
 function buildSignatureBox(): Uint8Array {
   return new Uint8Array([
-    0x00, 0x00, 0x00, 0x0C, // length = 12
-    0x6A, 0x50, 0x20, 0x20, // type = 'jP  '
-    0x0D, 0x0A, 0x87, 0x0A, // JP2 magic
+    0x00,
+    0x00,
+    0x00,
+    0x0c, // length = 12
+    0x6a,
+    0x50,
+    0x20,
+    0x20, // type = 'jP  '
+    0x0d,
+    0x0a,
+    0x87,
+    0x0a, // JP2 magic
   ]);
 }
 
@@ -34,10 +43,10 @@ function buildBox(type: string, payload: Uint8Array): Uint8Array {
   const box = new Uint8Array(totalLength);
 
   // Length (big-endian)
-  box[0] = (totalLength >>> 24) & 0xFF;
-  box[1] = (totalLength >>> 16) & 0xFF;
-  box[2] = (totalLength >>> 8) & 0xFF;
-  box[3] = totalLength & 0xFF;
+  box[0] = (totalLength >>> 24) & 0xff;
+  box[1] = (totalLength >>> 16) & 0xff;
+  box[2] = (totalLength >>> 8) & 0xff;
+  box[3] = totalLength & 0xff;
 
   // Type (4 ASCII chars)
   for (let i = 0; i < 4; i++) {
@@ -62,7 +71,7 @@ function buildIhdrPayload(
   view.setUint32(0, height, false);
   view.setUint32(4, width, false);
   view.setUint16(8, components, false);
-  data[10] = (bpc - 1) & 0x7F; // bpc stored as value - 1
+  data[10] = (bpc - 1) & 0x7f; // bpc stored as value - 1
   data[11] = 7; // Compression type (always 7 for JP2)
   data[12] = 0; // Colorspace unknown = false
   data[13] = 0; // IP flag = false
@@ -72,10 +81,19 @@ function buildIhdrPayload(
 /** Build a minimal JP2 file with signature, ftyp, and jp2c boxes. */
 function buildMinimalJp2(codestreamData: Uint8Array): Uint8Array {
   const sig = buildSignatureBox();
-  const ftyp = buildBox('ftyp', new Uint8Array([
-    0x6A, 0x70, 0x32, 0x20, // brand 'jp2 '
-    0x00, 0x00, 0x00, 0x00, // minor version
-  ]));
+  const ftyp = buildBox(
+    'ftyp',
+    new Uint8Array([
+      0x6a,
+      0x70,
+      0x32,
+      0x20, // brand 'jp2 '
+      0x00,
+      0x00,
+      0x00,
+      0x00, // minor version
+    ]),
+  );
   const jp2c = buildBox('jp2c', codestreamData);
 
   const result = new Uint8Array(sig.length + ftyp.length + jp2c.length);
@@ -87,7 +105,7 @@ function buildMinimalJp2(codestreamData: Uint8Array): Uint8Array {
 
 /** Build a minimal raw J2K codestream (SOC + EOC). */
 function buildMinimalCodestream(): Uint8Array {
-  return new Uint8Array([0xFF, 0x4F, 0xFF, 0xD9]); // SOC + EOC
+  return new Uint8Array([0xff, 0x4f, 0xff, 0xd9]); // SOC + EOC
 }
 
 // ---------------------------------------------------------------------------
@@ -96,15 +114,15 @@ function buildMinimalCodestream(): Uint8Array {
 
 describe('JPEG2000 format detection', () => {
   it('isJpeg2000Codestream detects SOC marker (FF 4F)', () => {
-    const data = new Uint8Array([0xFF, 0x4F, 0xFF, 0x51]);
+    const data = new Uint8Array([0xff, 0x4f, 0xff, 0x51]);
     expect(isJpeg2000Codestream(data)).toBe(true);
   });
 
   it('isJpeg2000Codestream rejects non-J2K data', () => {
-    expect(isJpeg2000Codestream(new Uint8Array([0xFF, 0xD8]))).toBe(false); // JPEG
+    expect(isJpeg2000Codestream(new Uint8Array([0xff, 0xd8]))).toBe(false); // JPEG
     expect(isJpeg2000Codestream(new Uint8Array([0x89, 0x50]))).toBe(false); // PNG
     expect(isJpeg2000Codestream(new Uint8Array([]))).toBe(false);
-    expect(isJpeg2000Codestream(new Uint8Array([0xFF]))).toBe(false);
+    expect(isJpeg2000Codestream(new Uint8Array([0xff]))).toBe(false);
   });
 
   it('isJp2Container detects JP2 signature', () => {
@@ -113,16 +131,16 @@ describe('JPEG2000 format detection', () => {
   });
 
   it('isJp2Container rejects non-JP2 data', () => {
-    expect(isJp2Container(new Uint8Array([0xFF, 0x4F]))).toBe(false);
-    expect(isJp2Container(new Uint8Array([0xFF, 0xD8]))).toBe(false);
+    expect(isJp2Container(new Uint8Array([0xff, 0x4f]))).toBe(false);
+    expect(isJp2Container(new Uint8Array([0xff, 0xd8]))).toBe(false);
     expect(isJp2Container(new Uint8Array([]))).toBe(false);
     expect(isJp2Container(new Uint8Array(11))).toBe(false); // too short
   });
 
   it('isJpeg2000 detects both JP2 and J2K', () => {
-    expect(isJpeg2000(new Uint8Array([0xFF, 0x4F]))).toBe(true);
+    expect(isJpeg2000(new Uint8Array([0xff, 0x4f]))).toBe(true);
     expect(isJpeg2000(buildMinimalJp2(buildMinimalCodestream()))).toBe(true);
-    expect(isJpeg2000(new Uint8Array([0xFF, 0xD8]))).toBe(false);
+    expect(isJpeg2000(new Uint8Array([0xff, 0xd8]))).toBe(false);
   });
 });
 
@@ -173,9 +191,15 @@ describe('JP2 box parsing', () => {
     // Build a box where length = 0 (rest of file)
     const data = new Uint8Array(20);
     // Box length = 0
-    data[0] = 0; data[1] = 0; data[2] = 0; data[3] = 0;
+    data[0] = 0;
+    data[1] = 0;
+    data[2] = 0;
+    data[3] = 0;
     // Box type = 'test'
-    data[4] = 0x74; data[5] = 0x65; data[6] = 0x73; data[7] = 0x74;
+    data[4] = 0x74;
+    data[5] = 0x65;
+    data[6] = 0x73;
+    data[7] = 0x74;
     // Payload
     for (let i = 8; i < 20; i++) data[i] = i;
 
@@ -256,7 +280,7 @@ describe('Codestream extraction', () => {
   });
 
   it('returns raw codestream as-is', () => {
-    const cs = new Uint8Array([0xFF, 0x4F, 0xFF, 0x51, 0x00, 0x00]);
+    const cs = new Uint8Array([0xff, 0x4f, 0xff, 0x51, 0x00, 0x00]);
     const extracted = extractCodestream(cs);
     expect(extracted).toBe(cs); // Same reference
   });
@@ -339,10 +363,19 @@ describe('JP2_BOX_TYPES', () => {
 
   it('has all expected box types', () => {
     const expectedTypes = [
-      'SIGNATURE', 'FILE_TYPE', 'JP2_HEADER', 'CODESTREAM',
-      'COLOR', 'IMAGE_HEADER', 'BITS_PER_COMPONENT', 'PALETTE',
-      'COMPONENT_MAPPING', 'CHANNEL_DEFINITION', 'RESOLUTION',
-      'UUID', 'UUID_INFO',
+      'SIGNATURE',
+      'FILE_TYPE',
+      'JP2_HEADER',
+      'CODESTREAM',
+      'COLOR',
+      'IMAGE_HEADER',
+      'BITS_PER_COMPONENT',
+      'PALETTE',
+      'COMPONENT_MAPPING',
+      'CHANNEL_DEFINITION',
+      'RESOLUTION',
+      'UUID',
+      'UUID_INFO',
     ];
     for (const key of expectedTypes) {
       expect(JP2_BOX_TYPES).toHaveProperty(key);

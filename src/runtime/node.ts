@@ -33,8 +33,9 @@ import type { RuntimeAdapter, WorkerLike } from './adapter.js';
  * At runtime the string is passed straight through to the host's
  * module loader.
  */
-const dynamicImport = new Function('specifier', 'return import(specifier)') as
-  (specifier: string) => Promise<unknown>;
+const dynamicImport = new Function('specifier', 'return import(specifier)') as (
+  specifier: string,
+) => Promise<unknown>;
 
 // ---------------------------------------------------------------------------
 // Structural types for dynamically-imported Node modules
@@ -163,7 +164,7 @@ export class NodeRuntimeAdapter implements RuntimeAdapter {
     if (cache.workerThreads === undefined) {
       throw new Error(
         'NodeRuntimeAdapter.createWorker: node:worker_threads has not been loaded yet. ' +
-        'Call `await nodeAdapter.preload()` before using createWorker.',
+          'Call `await nodeAdapter.preload()` before using createWorker.',
       );
     }
 

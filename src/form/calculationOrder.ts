@@ -17,10 +17,7 @@
  *            Table 218 (/CO entry).
  */
 
-import {
-  PdfDict,
-  PdfString,
-} from '../core/pdfObjects.js';
+import { PdfDict, PdfString } from '../core/pdfObjects.js';
 
 import type { PdfForm } from './pdfForm.js';
 import type { PdfField } from './pdfField.js';

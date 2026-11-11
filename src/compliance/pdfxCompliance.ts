@@ -19,13 +19,7 @@
  */
 
 import { concatBytes } from '../utils/binary.js';
-import {
-  PdfDict,
-  PdfName,
-  PdfString,
-  PdfNumber,
-  PdfStream,
-} from '../core/pdfObjects.js';
+import { PdfDict, PdfName, PdfString, PdfNumber, PdfStream } from '../core/pdfObjects.js';
 import type { PdfObjectRegistry, PdfRef } from '../core/pdfObjects.js';
 
 // ---------------------------------------------------------------------------
@@ -79,8 +73,7 @@ const encoder = new TextEncoder();
 /** Search for a pattern in the PDF bytes. */
 function findPattern(data: Uint8Array, pattern: string, start: number = 0): number {
   const bytes = encoder.encode(pattern);
-  outer:
-  for (let i = start; i <= data.length - bytes.length; i++) {
+  outer: for (let i = start; i <= data.length - bytes.length; i++) {
     for (let j = 0; j < bytes.length; j++) {
       if (data[i + j] !== bytes[j]) continue outer;
     }
@@ -103,7 +96,7 @@ function parseBox(text: string, boxName: string): [number, number, number, numbe
   const match = regex.exec(text);
   if (!match) return undefined;
   const nums = match[1]!.trim().split(/\s+/).map(Number);
-  if (nums.length !== 4 || nums.some(n => Number.isNaN(n))) return undefined;
+  if (nums.length !== 4 || nums.some((n) => Number.isNaN(n))) return undefined;
   return nums as unknown as [number, number, number, number];
 }
 
@@ -183,10 +176,7 @@ function versionNumber(version: string): number {
  * @param level     The target PDF/X conformance level.
  * @returns         A validation result with errors and warnings.
  */
-export function validatePdfX(
-  pdfBytes: Uint8Array,
-  level: PdfXLevel,
-): PdfXValidationResult {
+export function validatePdfX(pdfBytes: Uint8Array, level: PdfXLevel): PdfXValidationResult {
   const errors: PdfXIssue[] = [];
   const warnings: PdfXIssue[] = [];
   const text = decoder.decode(pdfBytes);
@@ -244,7 +234,8 @@ export function validatePdfX(
     if (containsPattern(pdfBytes, '/DeviceRGB')) {
       errors.push({
         code: 'PDFX-005',
-        message: 'PDF/X-1a does not allow DeviceRGB color space. Only CMYK, Gray, and Spot colors are permitted.',
+        message:
+          'PDF/X-1a does not allow DeviceRGB color space. Only CMYK, Gray, and Spot colors are permitted.',
         clause: 'ISO 15930-4, §6.2.3',
       });
     }
@@ -256,7 +247,8 @@ export function validatePdfX(
         if (m[1] === '3') {
           errors.push({
             code: 'PDFX-005',
-            message: 'PDF/X-1a does not allow RGB ICC profiles. Only CMYK and Gray ICC profiles are permitted.',
+            message:
+              'PDF/X-1a does not allow RGB ICC profiles. Only CMYK and Gray ICC profiles are permitted.',
             clause: 'ISO 15930-4, §6.2.3',
           });
           break;
@@ -268,7 +260,8 @@ export function validatePdfX(
     if (containsPattern(pdfBytes, '/DeviceRGB') && !containsPattern(pdfBytes, '/ICCBased')) {
       warnings.push({
         code: 'PDFX-005W',
-        message: 'PDF/X-3 allows RGB but recommends ICC-based color management. DeviceRGB found without ICCBased profile.',
+        message:
+          'PDF/X-3 allows RGB but recommends ICC-based color management. DeviceRGB found without ICCBased profile.',
         clause: 'ISO 15930-6, §6.2.3',
       });
     }
@@ -299,8 +292,11 @@ export function validatePdfX(
   }
 
   // --- Check: No multimedia ---
-  if (containsPattern(pdfBytes, '/RichMedia') || containsPattern(pdfBytes, '/Movie') ||
-      containsPattern(pdfBytes, '/Sound')) {
+  if (
+    containsPattern(pdfBytes, '/RichMedia') ||
+    containsPattern(pdfBytes, '/Movie') ||
+    containsPattern(pdfBytes, '/Sound')
+  ) {
     errors.push({
       code: 'PDFX-010',
       message: 'PDF/X documents must not contain multimedia content (RichMedia, Movie, Sound).',
@@ -332,10 +328,20 @@ export function validatePdfX(
 function checkFontEmbedding(text: string, errors: PdfXIssue[]): void {
   const fontMatches = text.matchAll(/\/Subtype\s*\/Type1[\s\S]*?\/BaseFont\s*\/([\w-]+)/g);
   const standardFonts = new Set([
-    'Courier', 'Courier-Bold', 'Courier-Oblique', 'Courier-BoldOblique',
-    'Helvetica', 'Helvetica-Bold', 'Helvetica-Oblique', 'Helvetica-BoldOblique',
-    'Times-Roman', 'Times-Bold', 'Times-Italic', 'Times-BoldItalic',
-    'Symbol', 'ZapfDingbats',
+    'Courier',
+    'Courier-Bold',
+    'Courier-Oblique',
+    'Courier-BoldOblique',
+    'Helvetica',
+    'Helvetica-Bold',
+    'Helvetica-Oblique',
+    'Helvetica-BoldOblique',
+    'Times-Roman',
+    'Times-Bold',
+    'Times-Italic',
+    'Times-BoldItalic',
+    'Symbol',
+    'ZapfDingbats',
   ]);
 
   for (const m of fontMatches) {
@@ -436,10 +442,7 @@ function checkPageBoxes(text: string, errors: PdfXIssue[], warnings: PdfXIssue[]
  * @param options   PDF/X enforcement options.
  * @returns         The modified PDF bytes.
  */
-export function enforcePdfX(
-  pdfBytes: Uint8Array,
-  options: PdfXOptions,
-): Uint8Array {
+export function enforcePdfX(pdfBytes: Uint8Array, options: PdfXOptions): Uint8Array {
   const text = decoder.decode(pdfBytes);
 
   // Check for unfixable issues
@@ -502,9 +505,11 @@ export function buildPdfXOutputIntent(
 
   if (config.iccProfile !== undefined) {
     // Build ICC profile stream
-    const profileDict = new PdfDict(new Map<string, PdfNumber | PdfName>([
-      ['/N', new PdfNumber(4)], // CMYK by default
-    ]));
+    const profileDict = new PdfDict(
+      new Map<string, PdfNumber | PdfName>([
+        ['/N', new PdfNumber(4)], // CMYK by default
+      ]),
+    );
     const profileStream = new PdfStream(profileDict, config.iccProfile);
     const profileRef = registry.register(profileStream);
     intentDict.set('/DestOutputProfile', profileRef);
@@ -571,10 +576,7 @@ function setTrapped(data: Uint8Array, value: 'True' | 'False' | 'Unknown'): Uint
 
   // If /Trapped already exists, replace it
   if (text.includes('/Trapped')) {
-    const updated = text.replace(
-      /\/Trapped\s*\/\w+/,
-      `/Trapped /${value}`,
-    );
+    const updated = text.replace(/\/Trapped\s*\/\w+/, `/Trapped /${value}`);
     return encoder.encode(updated);
   }
 
@@ -636,31 +638,28 @@ function addMissingTrimBoxes(data: Uint8Array): Uint8Array {
   let text = decoder.decode(data);
 
   // Process each page dictionary
-  text = text.replace(
-    /(\/Type\s*\/Page\b(?!\s*s)[\s\S]*?)(?=\bendobj\b)/g,
-    (match) => {
-      // Skip if already has TrimBox or BleedBox
-      if (match.includes('/TrimBox') || match.includes('/BleedBox')) {
-        return match;
-      }
-
-      // Try to use CropBox as TrimBox, otherwise use MediaBox
-      const cropBox = parseBox(match, 'CropBox');
-      const mediaBox = parseBox(match, 'MediaBox');
-      const box = cropBox ?? mediaBox;
-
-      if (box) {
-        const trimBoxStr = `/TrimBox [${box.join(' ')}]`;
-        // Insert before the closing >> of the page dict
-        const lastClose = match.lastIndexOf('>>');
-        if (lastClose >= 0) {
-          return match.slice(0, lastClose) + ' ' + trimBoxStr + ' ' + match.slice(lastClose);
-        }
-      }
-
+  text = text.replace(/(\/Type\s*\/Page\b(?!\s*s)[\s\S]*?)(?=\bendobj\b)/g, (match) => {
+    // Skip if already has TrimBox or BleedBox
+    if (match.includes('/TrimBox') || match.includes('/BleedBox')) {
       return match;
-    },
-  );
+    }
+
+    // Try to use CropBox as TrimBox, otherwise use MediaBox
+    const cropBox = parseBox(match, 'CropBox');
+    const mediaBox = parseBox(match, 'MediaBox');
+    const box = cropBox ?? mediaBox;
+
+    if (box) {
+      const trimBoxStr = `/TrimBox [${box.join(' ')}]`;
+      // Insert before the closing >> of the page dict
+      const lastClose = match.lastIndexOf('>>');
+      if (lastClose >= 0) {
+        return match.slice(0, lastClose) + ' ' + trimBoxStr + ' ' + match.slice(lastClose);
+      }
+    }
+
+    return match;
+  });
 
   return encoder.encode(text);
 }

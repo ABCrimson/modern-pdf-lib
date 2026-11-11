@@ -111,7 +111,6 @@ const OID_ECDSA_WITH_SHA1 = '1.2.840.10045.4.1';
 // Internal helpers
 // ---------------------------------------------------------------------------
 
-
 /**
  * Parse a GeneralizedTime string to Date.
  */
@@ -299,7 +298,10 @@ function extractSignatureValue(certDer: Uint8Array): Uint8Array {
 /**
  * Map a signature algorithm OID to Web Crypto import/verify parameters.
  */
-function mapSignatureAlgorithm(oid: string, issuerCert: Uint8Array): {
+function mapSignatureAlgorithm(
+  oid: string,
+  issuerCert: Uint8Array,
+): {
   importAlgo: RsaHashedImportParams | EcKeyImportParams;
   verifyAlgo: AlgorithmIdentifier | RsaPssParams | EcdsaParams;
   hashAlgo: string;
@@ -574,12 +576,11 @@ export async function validateCertificateChain(
       const validity = extractValidity(certDer);
       notBefore = validity.notBefore;
       notAfter = validity.notAfter;
-      withinValidityPeriod =
-        validationTime >= notBefore && validationTime <= notAfter;
+      withinValidityPeriod = validationTime >= notBefore && validationTime <= notAfter;
       if (!withinValidityPeriod) {
         certErrors.push(
           `Certificate not valid at ${validationTime.toISOString()} ` +
-          `(valid: ${notBefore.toISOString()} to ${notAfter.toISOString()})`,
+            `(valid: ${notBefore.toISOString()} to ${notAfter.toISOString()})`,
         );
       }
     } catch {
@@ -636,8 +637,7 @@ export async function validateCertificateChain(
       }
     }
 
-    const certValid =
-      withinValidityPeriod && signatureValid && basicConstraintsValid;
+    const certValid = withinValidityPeriod && signatureValid && basicConstraintsValid;
     if (!certValid) allValid = false;
 
     certificates.push({

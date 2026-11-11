@@ -53,7 +53,11 @@ describe('BlendMode in drawing operations', () => {
 
   it('drawLine accepts blendMode', () => {
     const page = makePage();
-    page.drawLine({ start: { x: 0, y: 0 }, end: { x: 100, y: 100 }, blendMode: BlendMode.ColorDodge });
+    page.drawLine({
+      start: { x: 0, y: 0 },
+      end: { x: 100, y: 100 },
+      blendMode: BlendMode.ColorDodge,
+    });
     const ops = page.getContentStreamData();
     expect(ops).toContain('gs');
   });

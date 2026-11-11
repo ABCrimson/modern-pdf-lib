@@ -15,13 +15,7 @@ import { describe, it, expect } from 'vitest';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
-import {
-  createPdf,
-  loadPdf,
-  analyzeImages,
-  extractImages,
-  PageSizes,
-} from '../../src/index.js';
+import { createPdf, loadPdf, analyzeImages, extractImages, PageSizes } from '../../src/index.js';
 import type { ImageAnalysis, AnalysisReport } from '../../src/index.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -97,12 +91,8 @@ describe('analyzeImages — report structure', () => {
       expect(typeof entry.estimatedSavings).toBe('number');
       expect(typeof entry.savingsPercent).toBe('number');
       expect(typeof entry.isGrayscale).toBe('boolean');
-      expect(
-        entry.effectiveDpi === undefined || typeof entry.effectiveDpi === 'number',
-      ).toBe(true);
-      expect(['recompress', 'keep', 'downscale', 'grayscale']).toContain(
-        entry.recommendation,
-      );
+      expect(entry.effectiveDpi === undefined || typeof entry.effectiveDpi === 'number').toBe(true);
+      expect(['recompress', 'keep', 'downscale', 'grayscale']).toContain(entry.recommendation);
     }
   });
 

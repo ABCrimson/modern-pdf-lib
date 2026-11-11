@@ -35,11 +35,7 @@ import {
   buildSeparationColorSpace,
   buildDeviceNColorSpace,
 } from '../../../src/core/operators/spotColor.js';
-import {
-  PdfName,
-  PdfStream,
-  PdfArray,
-} from '../../../src/core/pdfObjects.js';
+import { PdfName, PdfStream, PdfArray } from '../../../src/core/pdfObjects.js';
 
 // ---------------------------------------------------------------------------
 // spotColor() constructor
@@ -92,11 +88,7 @@ describe('spotColor()', () => {
 
 describe('deviceNColor()', () => {
   it('creates a DeviceN colour with matching colorants and tints', () => {
-    const dn = deviceNColor(
-      ['Cyan', 'Magenta', 'Yellow', 'Black'],
-      'DeviceCMYK',
-      [1, 0.5, 0, 0],
-    );
+    const dn = deviceNColor(['Cyan', 'Magenta', 'Yellow', 'Black'], 'DeviceCMYK', [1, 0.5, 0, 0]);
 
     expect(dn.type).toBe('devicen');
     expect(dn.colorants).toEqual(['Cyan', 'Magenta', 'Yellow', 'Black']);
@@ -509,10 +501,7 @@ describe('buildSeparationColorSpace()', () => {
 
 describe('buildDeviceNColorSpace()', () => {
   it('builds [/DeviceN [names] /DeviceCMYK <function>]', () => {
-    const arr = buildDeviceNColorSpace(
-      ['Cyan', 'Magenta', 'Yellow', 'Black'],
-      'DeviceCMYK',
-    );
+    const arr = buildDeviceNColorSpace(['Cyan', 'Magenta', 'Yellow', 'Black'], 'DeviceCMYK');
 
     expect(arr.items.length).toBe(4);
 
@@ -538,10 +527,7 @@ describe('buildDeviceNColorSpace()', () => {
   });
 
   it('builds with DeviceRGB alternate', () => {
-    const arr = buildDeviceNColorSpace(
-      ['Red', 'Green', 'Blue'],
-      'DeviceRGB',
-    );
+    const arr = buildDeviceNColorSpace(['Red', 'Green', 'Blue'], 'DeviceRGB');
 
     const third = arr.items[2] as PdfName;
     expect(third.value).toBe('/DeviceRGB');
@@ -553,10 +539,7 @@ describe('buildDeviceNColorSpace()', () => {
   });
 
   it('domain has 2 entries per colorant', () => {
-    const arr = buildDeviceNColorSpace(
-      ['A', 'B', 'C'],
-      'DeviceCMYK',
-    );
+    const arr = buildDeviceNColorSpace(['A', 'B', 'C'], 'DeviceCMYK');
 
     const fn = arr.items[3] as PdfStream;
     const domain = fn.dict.get('/Domain') as PdfArray;

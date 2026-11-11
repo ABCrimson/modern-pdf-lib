@@ -155,7 +155,7 @@ export function encodePermissions(flags: PdfPermissionFlags): number {
   // only set bits 3-12 + 7-8 reserved, the value stays positive and small.
   // Some PDF viewers expect the /P to have bits 1-2 as 0 and bits 13-32
   // as 1 for backwards compat. Let's set the high bits per convention:
-  return (p | 0xfffff000) | 0;  // sign-extend to negative 32-bit int
+  return p | 0xfffff000 | 0; // sign-extend to negative 32-bit int
 }
 
 /**

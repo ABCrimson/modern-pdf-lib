@@ -11,7 +11,12 @@
  * @packageDocumentation
  */
 
-import { prepareForSigning, computeSignatureHash, embedSignature, findSignatures } from './byteRange.js';
+import {
+  prepareForSigning,
+  computeSignatureHash,
+  embedSignature,
+  findSignatures,
+} from './byteRange.js';
 import type { PrepareAppearanceOptions } from './byteRange.js';
 import { buildPkcs7Signature, extractIssuerAndSerial, parseDerTlv } from './pkcs7.js';
 import type { SignatureOptions } from './pkcs7.js';
@@ -129,7 +134,8 @@ function extractSigDictStrings(
   const searchEnd = Math.min(pdfStr.length, byteRangeOffset + 2000);
   const region = pdfStr.slice(searchStart, searchEnd);
 
-  const result: { reason?: string; location?: string; contactInfo?: string; signingDate?: Date } = {};
+  const result: { reason?: string; location?: string; contactInfo?: string; signingDate?: Date } =
+    {};
 
   const reasonMatch = region.match(/\/Reason\s*\(([^)]*)\)/);
   if (reasonMatch && reasonMatch[1] !== undefined) result.reason = reasonMatch[1];
@@ -210,9 +216,9 @@ function hexToBytes(hex: string): Uint8Array {
  *
  * Structure: ContentInfo { SignedData { ... certificates [0] { cert } ... } }
  */
-function parsePkcs7ForCert(
-  pkcs7Bytes: Uint8Array,
-): { extractCertificateFromPkcs7: Uint8Array | null } {
+function parsePkcs7ForCert(pkcs7Bytes: Uint8Array): {
+  extractCertificateFromPkcs7: Uint8Array | null;
+} {
   try {
     const contentInfo = parseDerTlv(pkcs7Bytes, 0);
     // contentInfo is a SEQUENCE with:
@@ -320,11 +326,7 @@ export async function signPdf(
   );
 
   // Step 2: Hash the PDF content (excluding the placeholder)
-  const dataHash = await computeSignatureHash(
-    preparedPdf,
-    byteRange.byteRange,
-    hashAlgorithm,
-  );
+  const dataHash = await computeSignatureHash(preparedPdf, byteRange.byteRange, hashAlgorithm);
 
   // Step 3: Build the PKCS#7 signature
   const sigOpts: SignatureOptions = {

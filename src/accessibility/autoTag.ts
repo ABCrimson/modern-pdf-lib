@@ -205,8 +205,7 @@ function collectTextItems(doc: PdfDocument, pageIndex: number): TextItem[] {
     const page = doc.getPage(pageIndex);
     const displayList = interpretPage(page);
     items = displayList.items.filter(
-      (it): it is TextItem =>
-        it.type === 'text' && it.text.trim().length > 0,
+      (it): it is TextItem => it.type === 'text' && it.text.trim().length > 0,
     );
   } catch {
     return [];
@@ -240,9 +239,7 @@ function groupIntoLines(items: readonly TextItem[]): InferredLine[] {
     const y = item.transform[5];
     // Use the run's effective vertical scale as its font size when the
     // declared fontSize is missing/zero (defensive).
-    const size = item.fontSize > 0
-      ? item.fontSize
-      : Math.abs(item.transform[3]) || 1;
+    const size = item.fontSize > 0 ? item.fontSize : Math.abs(item.transform[3]) || 1;
 
     const last = lines[lines.length - 1];
     const tolerance = size * SAME_LINE_FRACTION;
@@ -291,11 +288,7 @@ function buildHeadingLevelMap(
 ): Map<number, number> {
   // Distinct heading sizes, largest first.
   const distinct = [
-    ...new Set(
-      lines
-        .filter((l) => l.fontSize >= headingThreshold)
-        .map((l) => l.fontSize),
-    ),
+    ...new Set(lines.filter((l) => l.fontSize >= headingThreshold).map((l) => l.fontSize)),
   ].sort((a, b) => b - a);
 
   const map = new Map<number, number>();

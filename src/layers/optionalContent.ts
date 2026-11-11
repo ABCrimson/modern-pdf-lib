@@ -13,13 +13,7 @@
  * Reference: PDF 1.7 spec, §8.11 (Optional Content).
  */
 
-import {
-  PdfDict,
-  PdfArray,
-  PdfName,
-  PdfString,
-  PdfRef,
-} from '../core/pdfObjects.js';
+import { PdfDict, PdfArray, PdfName, PdfString, PdfRef } from '../core/pdfObjects.js';
 import type { PdfObjectRegistry, PdfObject } from '../core/pdfObjects.js';
 
 // ---------------------------------------------------------------------------
@@ -96,7 +90,11 @@ export class PdfLayer {
   static fromDict(dict: PdfDict): PdfLayer {
     const nameObj = dict.get('/Name');
     let name = 'Unnamed Layer';
-    if (nameObj && 'value' in nameObj && typeof (nameObj as { value: unknown }).value === 'string') {
+    if (
+      nameObj &&
+      'value' in nameObj &&
+      typeof (nameObj as { value: unknown }).value === 'string'
+    ) {
       name = (nameObj as { value: string }).value;
     }
 
@@ -223,10 +221,7 @@ export class PdfLayerManager {
    * @param resolver  A function that resolves indirect references.
    * @returns         A PdfLayerManager instance.
    */
-  static fromDict(
-    dict: PdfDict,
-    resolver: (ref: PdfRef) => PdfObject,
-  ): PdfLayerManager {
+  static fromDict(dict: PdfDict, resolver: (ref: PdfRef) => PdfObject): PdfLayerManager {
     const manager = new PdfLayerManager();
 
     const ocgsObj = dict.get('/OCGs');

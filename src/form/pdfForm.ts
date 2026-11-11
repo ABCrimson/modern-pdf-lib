@@ -49,10 +49,7 @@ export type RefResolver = (ref: PdfRef) => PdfObject;
  * Uses /FT (field type) and /Ff (field flags) to distinguish
  * between the various field subtypes.
  */
-function classifyField(
-  dict: PdfDict,
-  resolver: RefResolver,
-): FieldType | undefined {
+function classifyField(dict: PdfDict, resolver: RefResolver): FieldType | undefined {
   const ftObj = resolveIfRef(dict.get('/FT'), resolver);
   const ft = nameVal(ftObj);
 
@@ -222,12 +219,7 @@ export class PdfForm {
               widgets.push(kidPdfDict);
             } else if (classifyField(kidPdfDict, resolver) !== undefined) {
               // It's a child field — recurse
-              PdfForm.traverseFieldTree(
-                kidPdfDict,
-                resolver,
-                [...parentNames, name],
-                result,
-              );
+              PdfForm.traverseFieldTree(kidPdfDict, resolver, [...parentNames, name], result);
               continue;
             } else {
               widgets.push(kidPdfDict);
@@ -287,9 +279,7 @@ export class PdfForm {
       throw new Error(`Form field "${name}" not found.`);
     }
     if (field.fieldType !== 'text') {
-      throw new Error(
-        `Form field "${name}" is a ${field.fieldType} field, not a text field.`,
-      );
+      throw new Error(`Form field "${name}" is a ${field.fieldType} field, not a text field.`);
     }
     return field as PdfTextField;
   }
@@ -304,9 +294,7 @@ export class PdfForm {
       throw new Error(`Form field "${name}" not found.`);
     }
     if (field.fieldType !== 'checkbox') {
-      throw new Error(
-        `Form field "${name}" is a ${field.fieldType} field, not a checkbox.`,
-      );
+      throw new Error(`Form field "${name}" is a ${field.fieldType} field, not a checkbox.`);
     }
     return field as PdfCheckboxField;
   }
@@ -321,9 +309,7 @@ export class PdfForm {
       throw new Error(`Form field "${name}" not found.`);
     }
     if (field.fieldType !== 'radio') {
-      throw new Error(
-        `Form field "${name}" is a ${field.fieldType} field, not a radio group.`,
-      );
+      throw new Error(`Form field "${name}" is a ${field.fieldType} field, not a radio group.`);
     }
     return field as PdfRadioGroup;
   }
@@ -338,9 +324,7 @@ export class PdfForm {
       throw new Error(`Form field "${name}" not found.`);
     }
     if (field.fieldType !== 'dropdown') {
-      throw new Error(
-        `Form field "${name}" is a ${field.fieldType} field, not a dropdown.`,
-      );
+      throw new Error(`Form field "${name}" is a ${field.fieldType} field, not a dropdown.`);
     }
     return field as PdfDropdownField;
   }
@@ -355,9 +339,7 @@ export class PdfForm {
       throw new Error(`Form field "${name}" not found.`);
     }
     if (field.fieldType !== 'listbox') {
-      throw new Error(
-        `Form field "${name}" is a ${field.fieldType} field, not a listbox.`,
-      );
+      throw new Error(`Form field "${name}" is a ${field.fieldType} field, not a listbox.`);
     }
     return field as PdfListboxField;
   }
@@ -372,9 +354,7 @@ export class PdfForm {
       throw new Error(`Form field "${name}" not found.`);
     }
     if (field.fieldType !== 'button') {
-      throw new Error(
-        `Form field "${name}" is a ${field.fieldType} field, not a button.`,
-      );
+      throw new Error(`Form field "${name}" is a ${field.fieldType} field, not a button.`);
     }
     return field as PdfButtonField;
   }
@@ -389,9 +369,7 @@ export class PdfForm {
       throw new Error(`Form field "${name}" not found.`);
     }
     if (field.fieldType !== 'signature') {
-      throw new Error(
-        `Form field "${name}" is a ${field.fieldType} field, not a signature field.`,
-      );
+      throw new Error(`Form field "${name}" is a ${field.fieldType} field, not a signature field.`);
     }
     return field as PdfSignatureField;
   }
@@ -652,7 +630,10 @@ export class PdfForm {
     label?: string,
   ): PdfButtonField {
     const pdfRect: [number, number, number, number] = [
-      rect.x, rect.y, rect.x + rect.width, rect.y + rect.height,
+      rect.x,
+      rect.y,
+      rect.x + rect.width,
+      rect.y + rect.height,
     ];
     const dict = this.createFieldDict(name, 'Btn', pdfRect);
     dict.set('/Ff', PdfNumber.of(FieldFlags.Pushbutton));
@@ -689,7 +670,10 @@ export class PdfForm {
     options: string[],
   ): PdfListboxField {
     const pdfRect: [number, number, number, number] = [
-      rect.x, rect.y, rect.x + rect.width, rect.y + rect.height,
+      rect.x,
+      rect.y,
+      rect.x + rect.width,
+      rect.y + rect.height,
     ];
     const dict = this.createFieldDict(name, 'Ch', pdfRect);
     // No Combo flag → listbox (not dropdown)

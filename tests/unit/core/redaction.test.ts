@@ -243,7 +243,11 @@ describe('applyRedactions', () => {
     const page = doc.addPage();
 
     // Black background = dark -> white text
-    markForRedaction(page, { rect: [0, 0, 200, 30], overlayText: 'SECRET', color: { r: 0, g: 0, b: 0 } });
+    markForRedaction(page, {
+      rect: [0, 0, 200, 30],
+      overlayText: 'SECRET',
+      color: { r: 0, g: 0, b: 0 },
+    });
     applyRedactions(doc);
 
     const content = page.getContentStreamData();
@@ -256,7 +260,11 @@ describe('applyRedactions', () => {
     const page = doc.addPage();
 
     // White background = light -> black text
-    markForRedaction(page, { rect: [0, 0, 200, 30], overlayText: 'SECRET', color: { r: 1, g: 1, b: 1 } });
+    markForRedaction(page, {
+      rect: [0, 0, 200, 30],
+      overlayText: 'SECRET',
+      color: { r: 1, g: 1, b: 1 },
+    });
     applyRedactions(doc);
 
     const content = page.getContentStreamData();

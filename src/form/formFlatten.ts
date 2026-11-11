@@ -15,13 +15,7 @@
  *            SS12.7 (Interactive Forms).
  */
 
-import {
-  PdfDict,
-  PdfName,
-  PdfString,
-  PdfArray,
-  PdfStream,
-} from '../core/pdfObjects.js';
+import { PdfDict, PdfName, PdfString, PdfArray, PdfStream } from '../core/pdfObjects.js';
 import type { PdfField } from './pdfField.js';
 import { FieldFlags, numVal } from './pdfField.js';
 import type { PdfForm } from './pdfForm.js';
@@ -529,10 +523,7 @@ interface InlineStyleContext {
  *
  * Handles nested `<b>`, `<i>`, `<span style="...">`, and `<br/>`.
  */
-function parseInlineContent(
-  html: string,
-  inherited: InlineStyleContext,
-): RichTextSpan[] {
+function parseInlineContent(html: string, inherited: InlineStyleContext): RichTextSpan[] {
   const spans: RichTextSpan[] = [];
 
   // Tokenize: split on tags while keeping them
@@ -986,10 +977,7 @@ function flattenSingleField(field: PdfField, options: FlattenOptions = {}): Flat
  * @returns An object describing the flatten operations performed, suitable
  *          for the caller to apply to page content streams and resources.
  */
-export function flattenForm(
-  form: PdfForm,
-  options: FlattenOptions = {},
-): FlattenFormResult {
+export function flattenForm(form: PdfForm, options: FlattenOptions = {}): FlattenFormResult {
   const fields = form.getFields();
   return flattenFieldList(form, fields, options, true);
 }

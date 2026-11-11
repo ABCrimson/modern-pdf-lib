@@ -207,9 +207,8 @@ function renderPage(
     bottom: margin,
   };
 
-  const children = pageNode.type === 'page' || pageNode.type === 'document'
-    ? pageNode.children
-    : [];
+  const children =
+    pageNode.type === 'page' || pageNode.type === 'document' ? pageNode.children : [];
 
   for (const child of children) {
     switch (child.type) {

@@ -26,22 +26,24 @@ const encoder = new TextEncoder();
  * The PDF is just text bytes — not a fully valid PDF, but enough
  * for the pattern-based validation checks.
  */
-function buildPdf(options: {
-  metadata?: boolean;
-  xmpPdfaId?: boolean;
-  encrypt?: boolean;
-  javascript?: boolean;
-  trailerId?: boolean;
-  structTree?: boolean;
-  markInfo?: boolean;
-  toUnicode?: boolean;
-  embeddedFiles?: boolean;
-  lang?: boolean;
-  deviceRgb?: boolean;
-  outputIntents?: boolean;
-  transparency?: boolean;
-  standardFont?: boolean;
-} = {}): Uint8Array {
+function buildPdf(
+  options: {
+    metadata?: boolean;
+    xmpPdfaId?: boolean;
+    encrypt?: boolean;
+    javascript?: boolean;
+    trailerId?: boolean;
+    structTree?: boolean;
+    markInfo?: boolean;
+    toUnicode?: boolean;
+    embeddedFiles?: boolean;
+    lang?: boolean;
+    deviceRgb?: boolean;
+    outputIntents?: boolean;
+    transparency?: boolean;
+    standardFont?: boolean;
+  } = {},
+): Uint8Array {
   const lines: string[] = ['%PDF-1.7'];
 
   // Catalog
@@ -104,7 +106,11 @@ function buildPdf(options: {
 
   // Optional EmbeddedFiles
   if (options.embeddedFiles) {
-    lines.push('9 0 obj', '<< /Type /Filespec /EF << /F 10 0 R >> /EmbeddedFiles true >>', 'endobj');
+    lines.push(
+      '9 0 obj',
+      '<< /Type /Filespec /EF << /F 10 0 R >> /EmbeddedFiles true >>',
+      'endobj',
+    );
   }
 
   // Optional transparency
@@ -162,14 +168,26 @@ describe('validatePdfA', () => {
   });
 
   it('should report encryption', () => {
-    const pdf = buildPdf({ metadata: true, xmpPdfaId: true, encrypt: true, trailerId: true, lang: true });
+    const pdf = buildPdf({
+      metadata: true,
+      xmpPdfaId: true,
+      encrypt: true,
+      trailerId: true,
+      lang: true,
+    });
     const result = validatePdfA(pdf, '2b');
     expect(result.issues.some((i) => i.code === 'PDFA-003')).toBe(true);
     expect(result.valid).toBe(false);
   });
 
   it('should report JavaScript', () => {
-    const pdf = buildPdf({ metadata: true, xmpPdfaId: true, javascript: true, trailerId: true, lang: true });
+    const pdf = buildPdf({
+      metadata: true,
+      xmpPdfaId: true,
+      javascript: true,
+      trailerId: true,
+      lang: true,
+    });
     const result = validatePdfA(pdf, '2b');
     expect(result.issues.some((i) => i.code === 'PDFA-004')).toBe(true);
   });
@@ -201,8 +219,13 @@ describe('validatePdfA', () => {
 
   it('should accept StructTreeRoot and MarkInfo for "a" conformance', () => {
     const pdf = buildPdf({
-      metadata: true, xmpPdfaId: true, trailerId: true, lang: true,
-      structTree: true, markInfo: true, toUnicode: true,
+      metadata: true,
+      xmpPdfaId: true,
+      trailerId: true,
+      lang: true,
+      structTree: true,
+      markInfo: true,
+      toUnicode: true,
     });
     const result = validatePdfA(pdf, '2a');
     expect(result.issues.some((i) => i.code === 'PDFA-007')).toBe(false);
@@ -223,7 +246,10 @@ describe('validatePdfA', () => {
 
   it('should report embedded files for part 1', () => {
     const pdf = buildPdf({
-      metadata: true, xmpPdfaId: true, trailerId: true, lang: true,
+      metadata: true,
+      xmpPdfaId: true,
+      trailerId: true,
+      lang: true,
       embeddedFiles: true,
     });
     const result = validatePdfA(pdf, '1b');
@@ -232,7 +258,10 @@ describe('validatePdfA', () => {
 
   it('should report embedded files for part 2', () => {
     const pdf = buildPdf({
-      metadata: true, xmpPdfaId: true, trailerId: true, lang: true,
+      metadata: true,
+      xmpPdfaId: true,
+      trailerId: true,
+      lang: true,
       embeddedFiles: true,
     });
     const result = validatePdfA(pdf, '2b');
@@ -241,7 +270,10 @@ describe('validatePdfA', () => {
 
   it('should allow embedded files for part 3', () => {
     const pdf = buildPdf({
-      metadata: true, xmpPdfaId: true, trailerId: true, lang: true,
+      metadata: true,
+      xmpPdfaId: true,
+      trailerId: true,
+      lang: true,
       embeddedFiles: true,
     });
     const result = validatePdfA(pdf, '3b');
@@ -256,7 +288,10 @@ describe('validatePdfA', () => {
 
   it('should warn about device-dependent colorspace without OutputIntents', () => {
     const pdf = buildPdf({
-      metadata: true, xmpPdfaId: true, trailerId: true, lang: true,
+      metadata: true,
+      xmpPdfaId: true,
+      trailerId: true,
+      lang: true,
       deviceRgb: true,
     });
     const result = validatePdfA(pdf, '2b');
@@ -265,8 +300,12 @@ describe('validatePdfA', () => {
 
   it('should not warn about colorspace when OutputIntents present', () => {
     const pdf = buildPdf({
-      metadata: true, xmpPdfaId: true, trailerId: true, lang: true,
-      deviceRgb: true, outputIntents: true,
+      metadata: true,
+      xmpPdfaId: true,
+      trailerId: true,
+      lang: true,
+      deviceRgb: true,
+      outputIntents: true,
     });
     const result = validatePdfA(pdf, '2b');
     expect(result.issues.some((i) => i.code === 'PDFA-012')).toBe(false);
@@ -274,7 +313,10 @@ describe('validatePdfA', () => {
 
   it('should report standard font without embedding', () => {
     const pdf = buildPdf({
-      metadata: true, xmpPdfaId: true, trailerId: true, lang: true,
+      metadata: true,
+      xmpPdfaId: true,
+      trailerId: true,
+      lang: true,
       standardFont: true,
     });
     const result = validatePdfA(pdf, '2b');
@@ -283,7 +325,10 @@ describe('validatePdfA', () => {
 
   it('should report transparency issues for PDF/A-1', () => {
     const pdf = buildPdf({
-      metadata: true, xmpPdfaId: true, trailerId: true, lang: true,
+      metadata: true,
+      xmpPdfaId: true,
+      trailerId: true,
+      lang: true,
       transparency: true,
     });
     const result = validatePdfA(pdf, '1b');
@@ -292,7 +337,10 @@ describe('validatePdfA', () => {
 
   it('should not flag transparency for PDF/A-2', () => {
     const pdf = buildPdf({
-      metadata: true, xmpPdfaId: true, trailerId: true, lang: true,
+      metadata: true,
+      xmpPdfaId: true,
+      trailerId: true,
+      lang: true,
       transparency: true,
     });
     const result = validatePdfA(pdf, '2b');
@@ -335,7 +383,10 @@ describe('enforcePdfA', () => {
 
   it('should return as-is if already valid', async () => {
     const pdf = buildPdf({
-      metadata: true, xmpPdfaId: true, trailerId: true, lang: true,
+      metadata: true,
+      xmpPdfaId: true,
+      trailerId: true,
+      lang: true,
     });
     const preValidation = validatePdfA(pdf, '2b');
     if (preValidation.valid) {

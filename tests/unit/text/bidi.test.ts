@@ -141,7 +141,9 @@ describe('resolveBidi — all-RTL paragraph', () => {
     expect(rtlRuns).toHaveLength(1);
     expect(rtlRuns[0]?.level).toBe(1);
     // Pure RTL → fully reversed visual order.
-    expect(res.visualOrder).toEqual(Array.from({ length: SHALOM.length }, (_, i) => SHALOM.length - 1 - i));
+    expect(res.visualOrder).toEqual(
+      Array.from({ length: SHALOM.length }, (_, i) => SHALOM.length - 1 - i),
+    );
   });
 
   it('Arabic-only string auto-detects RTL base level 1', () => {

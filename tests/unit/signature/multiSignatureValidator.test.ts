@@ -80,10 +80,8 @@ describe('validateSignatureChain', () => {
 
     // First signature should be the one covering less
     // Second should cover more
-    const sig1End =
-      result.signatures[0]!.byteRange[2] + result.signatures[0]!.byteRange[3];
-    const sig2End =
-      result.signatures[1]!.byteRange[2] + result.signatures[1]!.byteRange[3];
+    const sig1End = result.signatures[0]!.byteRange[2] + result.signatures[0]!.byteRange[3];
+    const sig2End = result.signatures[1]!.byteRange[2] + result.signatures[1]!.byteRange[3];
     expect(sig2End).toBeGreaterThan(sig1End);
   });
 
@@ -147,9 +145,7 @@ startxref
 
     // Should report the non-zero start as an error
     if (result.signatures.length > 0) {
-      const hasInvalidStart = result.errors.some((e) =>
-        e.includes('does not start at 0'),
-      );
+      const hasInvalidStart = result.errors.some((e) => e.includes('does not start at 0'));
       expect(hasInvalidStart).toBe(true);
       expect(result.isChainValid).toBe(false);
     }

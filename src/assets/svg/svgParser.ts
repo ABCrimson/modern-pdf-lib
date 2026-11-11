@@ -119,48 +119,48 @@ export interface SvgElement {
 // ---------------------------------------------------------------------------
 
 const NAMED_COLORS: Record<string, [number, number, number]> = {
-  black:   [0, 0, 0],
-  white:   [255, 255, 255],
-  red:     [255, 0, 0],
-  green:   [0, 128, 0],
-  blue:    [0, 0, 255],
-  yellow:  [255, 255, 0],
-  cyan:    [0, 255, 255],
+  black: [0, 0, 0],
+  white: [255, 255, 255],
+  red: [255, 0, 0],
+  green: [0, 128, 0],
+  blue: [0, 0, 255],
+  yellow: [255, 255, 0],
+  cyan: [0, 255, 255],
   magenta: [255, 0, 255],
-  orange:  [255, 165, 0],
-  purple:  [128, 0, 128],
-  pink:    [255, 192, 203],
-  gray:    [128, 128, 128],
-  grey:    [128, 128, 128],
-  lime:    [0, 255, 0],
-  maroon:  [128, 0, 0],
-  navy:    [0, 0, 128],
-  olive:   [128, 128, 0],
-  teal:    [0, 128, 128],
-  aqua:    [0, 255, 255],
+  orange: [255, 165, 0],
+  purple: [128, 0, 128],
+  pink: [255, 192, 203],
+  gray: [128, 128, 128],
+  grey: [128, 128, 128],
+  lime: [0, 255, 0],
+  maroon: [128, 0, 0],
+  navy: [0, 0, 128],
+  olive: [128, 128, 0],
+  teal: [0, 128, 128],
+  aqua: [0, 255, 255],
   fuchsia: [255, 0, 255],
-  silver:  [192, 192, 192],
-  brown:   [165, 42, 42],
-  coral:   [255, 127, 80],
-  gold:    [255, 215, 0],
-  indigo:  [75, 0, 130],
-  violet:  [238, 130, 238],
-  salmon:  [250, 128, 114],
-  tan:     [210, 180, 140],
-  khaki:   [240, 230, 140],
+  silver: [192, 192, 192],
+  brown: [165, 42, 42],
+  coral: [255, 127, 80],
+  gold: [255, 215, 0],
+  indigo: [75, 0, 130],
+  violet: [238, 130, 238],
+  salmon: [250, 128, 114],
+  tan: [210, 180, 140],
+  khaki: [240, 230, 140],
   crimson: [220, 20, 60],
-  tomato:  [255, 99, 71],
+  tomato: [255, 99, 71],
   chocolate: [210, 105, 30],
-  darkblue:  [0, 0, 139],
+  darkblue: [0, 0, 139],
   darkgreen: [0, 100, 0],
-  darkred:   [139, 0, 0],
-  darkgray:  [169, 169, 169],
-  darkgrey:  [169, 169, 169],
-  lightblue:  [173, 216, 230],
+  darkred: [139, 0, 0],
+  darkgray: [169, 169, 169],
+  darkgrey: [169, 169, 169],
+  lightblue: [173, 216, 230],
   lightgreen: [144, 238, 144],
-  lightgray:  [211, 211, 211],
-  lightgrey:  [211, 211, 211],
-  transparent: [0, 0, 0],  // alpha = 0 handled separately
+  lightgray: [211, 211, 211],
+  lightgrey: [211, 211, 211],
+  transparent: [0, 0, 0], // alpha = 0 handled separately
 };
 
 // ---------------------------------------------------------------------------
@@ -181,12 +181,31 @@ function hslToRgb(h: number, s: number, l: number): { r: number; g: number; b: n
 
   let r1: number, g1: number, b1: number;
 
-  if (h < 60)       { r1 = c; g1 = x; b1 = 0; }
-  else if (h < 120) { r1 = x; g1 = c; b1 = 0; }
-  else if (h < 180) { r1 = 0; g1 = c; b1 = x; }
-  else if (h < 240) { r1 = 0; g1 = x; b1 = c; }
-  else if (h < 300) { r1 = x; g1 = 0; b1 = c; }
-  else              { r1 = c; g1 = 0; b1 = x; }
+  if (h < 60) {
+    r1 = c;
+    g1 = x;
+    b1 = 0;
+  } else if (h < 120) {
+    r1 = x;
+    g1 = c;
+    b1 = 0;
+  } else if (h < 180) {
+    r1 = 0;
+    g1 = c;
+    b1 = x;
+  } else if (h < 240) {
+    r1 = 0;
+    g1 = x;
+    b1 = c;
+  } else if (h < 300) {
+    r1 = x;
+    g1 = 0;
+    b1 = c;
+  } else {
+    r1 = c;
+    g1 = 0;
+    b1 = x;
+  }
 
   return {
     r: Math.round((r1 + m) * 255),
@@ -210,7 +229,10 @@ function hslToRgb(h: number, s: number, l: number): { r: number; g: number; b: n
  * @returns  RGB values (0-255) or `undefined` if not parseable.
  */
 /** Cache for parsed SVG colors — high hit rate since SVGs reuse colors. */
-const colorCache = new Map<string, { r: number; g: number; b: number; a?: number | undefined } | undefined>();
+const colorCache = new Map<
+  string,
+  { r: number; g: number; b: number; a?: number | undefined } | undefined
+>();
 
 export function parseSvgColor(
   colorStr: string,
@@ -253,7 +275,10 @@ export function parseSvgColor(
   }
 
   // rgba(r, g, b, a)
-  const rgbaMatch = /^rgba?\(\s*([\d.]+)\s*[,\s]\s*([\d.]+)\s*[,\s]\s*([\d.]+)(?:\s*[,/\s]\s*([\d.]+))?\s*\)$/.exec(s);
+  const rgbaMatch =
+    /^rgba?\(\s*([\d.]+)\s*[,\s]\s*([\d.]+)\s*[,\s]\s*([\d.]+)(?:\s*[,/\s]\s*([\d.]+))?\s*\)$/.exec(
+      s,
+    );
   if (rgbaMatch) {
     const r = Math.round(parseFloat(rgbaMatch[1]!));
     const g = Math.round(parseFloat(rgbaMatch[2]!));
@@ -265,7 +290,10 @@ export function parseSvgColor(
   }
 
   // hsl(h, s%, l%) / hsla(h, s%, l%, a)
-  const hslMatch = /^hsla?\(\s*([\d.]+)\s*[,\s]\s*([\d.]+)%?\s*[,\s]\s*([\d.]+)%?(?:\s*[,/\s]\s*([\d.]+))?\s*\)$/.exec(s);
+  const hslMatch =
+    /^hsla?\(\s*([\d.]+)\s*[,\s]\s*([\d.]+)%?\s*[,\s]\s*([\d.]+)%?(?:\s*[,/\s]\s*([\d.]+))?\s*\)$/.exec(
+      s,
+    );
   if (hslMatch) {
     const h = parseFloat(hslMatch[1]!) % 360;
     const sat = parseFloat(hslMatch[2]!) / 100;
@@ -325,14 +353,7 @@ export function parseSvgTransform(
 
     switch (fn) {
       case 'matrix':
-        m = [
-          args[0] ?? 1,
-          args[1] ?? 0,
-          args[2] ?? 0,
-          args[3] ?? 1,
-          args[4] ?? 0,
-          args[5] ?? 0,
-        ];
+        m = [args[0] ?? 1, args[1] ?? 0, args[2] ?? 0, args[3] ?? 1, args[4] ?? 0, args[5] ?? 0];
         break;
 
       case 'translate': {
@@ -752,7 +773,8 @@ function* tokenizeXml(xml: string): Generator<XmlToken> {
     .replace(/<\?[\s\S]*?\?>/g, '')
     .replace(/<!DOCTYPE[^>]*>/gi, '');
 
-  const re = /<\s*\/\s*([\w\-:]+)\s*>|<\s*([\w\-:]+)((?:\s+[\w\-:]+\s*=\s*(?:"[^"]*"|'[^']*'))*)\s*(\/?)>|([^<]+)/g;
+  const re =
+    /<\s*\/\s*([\w\-:]+)\s*>|<\s*([\w\-:]+)((?:\s+[\w\-:]+\s*=\s*(?:"[^"]*"|'[^']*'))*)\s*(\/?)>|([^<]+)/g;
   let m: RegExpExecArray | null;
 
   while ((m = re.exec(cleaned)) !== null) {
@@ -986,7 +1008,11 @@ function resolveStyles(el: SvgElement): void {
   // Stroke dasharray
   const dashStr = attrs['stroke-dasharray'];
   if (dashStr !== undefined && dashStr !== 'none') {
-    const dashes = dashStr.split(/[\s,]+/).filter(Boolean).map(Number).filter((x) => !Number.isNaN(x));
+    const dashes = dashStr
+      .split(/[\s,]+/)
+      .filter(Boolean)
+      .map(Number)
+      .filter((x) => !Number.isNaN(x));
     if (dashes.length > 0) {
       el.strokeDasharray = dashes;
     }
@@ -1166,8 +1192,12 @@ export function interpolateLinearRgb(
     return Math.round(Math.max(0, Math.min(255, s * 255)));
   };
 
-  const r0 = toLinear(c0.r), g0 = toLinear(c0.g), b0 = toLinear(c0.b);
-  const r1 = toLinear(c1.r), g1 = toLinear(c1.g), b1 = toLinear(c1.b);
+  const r0 = toLinear(c0.r),
+    g0 = toLinear(c0.g),
+    b0 = toLinear(c0.b);
+  const r1 = toLinear(c1.r),
+    g1 = toLinear(c1.g),
+    b1 = toLinear(c1.b);
 
   return {
     r: toSrgb(r0 + (r1 - r0) * t),
@@ -1183,10 +1213,7 @@ export function interpolateLinearRgb(
  * - `reflect`: mirror at boundaries (0->1->0->1...)
  * - `repeat`: wrap around (0->1, 0->1, ...)
  */
-export function applySpreadMethod(
-  t: number,
-  method: 'pad' | 'reflect' | 'repeat',
-): number {
+export function applySpreadMethod(t: number, method: 'pad' | 'reflect' | 'repeat'): number {
   if (method === 'pad') {
     return Math.max(0, Math.min(1, t));
   }
@@ -1297,11 +1324,13 @@ export function parseSvg(svgString: string): SvgElement {
   let root: SvgElement | undefined;
 
   // Track current gradient being parsed
-  let currentGradient: {
-    tag: 'lineargradient' | 'radialgradient';
-    attrs: Record<string, string>;
-    stops: Array<{ attrs: Record<string, string> }>;
-  } | undefined;
+  let currentGradient:
+    | {
+        tag: 'lineargradient' | 'radialgradient';
+        attrs: Record<string, string>;
+        stops: Array<{ attrs: Record<string, string> }>;
+      }
+    | undefined;
 
   // Collect all gradients
   const gradients = new Map<string, SvgGradient>();
@@ -1424,10 +1453,7 @@ export function parseSvg(svgString: string): SvgElement {
         const tagName = token.tag;
 
         // Finalize gradient on close
-        if (
-          currentGradient &&
-          (tagName === 'lineargradient' || tagName === 'radialgradient')
-        ) {
+        if (currentGradient && (tagName === 'lineargradient' || tagName === 'radialgradient')) {
           const grad = parseGradientElement(
             currentGradient.tag,
             currentGradient.attrs,

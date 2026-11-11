@@ -14,15 +14,8 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  extractTables,
-  tableToCsv,
-  tableToJson,
-} from '../../../src/parser/tableExtract.js';
-import type {
-  ExtractedTable,
-  TableExtractOptions,
-} from '../../../src/parser/tableExtract.js';
+import { extractTables, tableToCsv, tableToJson } from '../../../src/parser/tableExtract.js';
+import type { ExtractedTable, TableExtractOptions } from '../../../src/parser/tableExtract.js';
 import type { TextItem } from '../../../src/parser/textExtractor.js';
 
 /** Build a TextItem with sensible defaults for the geometric fields. */
@@ -125,11 +118,7 @@ describe('extractTables', () => {
   });
 
   it('does not emit a table for a single content row', () => {
-    const items: TextItem[] = [
-      item('Only', 50, 700),
-      item('One', 150, 700),
-      item('Row', 250, 700),
-    ];
+    const items: TextItem[] = [item('Only', 50, 700), item('One', 150, 700), item('Row', 250, 700)];
     expect(extractTables(items)).toEqual([]);
   });
 
@@ -171,10 +160,7 @@ describe('tableToCsv', () => {
 
   it('doubles embedded quotes and wraps the field', () => {
     const table: ExtractedTable = {
-      rows: [
-        ['Quote'],
-        ['She said "hi"'],
-      ],
+      rows: [['Quote'], ['She said "hi"']],
     };
     const csv = tableToCsv(table);
     expect(csv).toBe('Quote\r\n"She said ""hi"""');
@@ -182,10 +168,7 @@ describe('tableToCsv', () => {
 
   it('quotes fields containing newlines', () => {
     const table: ExtractedTable = {
-      rows: [
-        ['Multi'],
-        ['line1\nline2'],
-      ],
+      rows: [['Multi'], ['line1\nline2']],
     };
     const csv = tableToCsv(table);
     expect(csv).toBe('Multi\r\n"line1\nline2"');
@@ -197,9 +180,7 @@ describe('tableToJson', () => {
     const [table] = extractTables(gridItems());
     expect(table).toBeDefined();
     const json = tableToJson(table as ExtractedTable);
-    expect(json).toEqual([
-      { Name: 'Alice', Age: '30', City: 'Wonderland' },
-    ]);
+    expect(json).toEqual([{ Name: 'Alice', Age: '30', City: 'Wonderland' }]);
   });
 
   it('handles multiple data rows', () => {

@@ -21,13 +21,7 @@
  * (Output intents) and §14.11.2 (Page boundaries).
  */
 
-import {
-  PdfArray,
-  PdfDict,
-  PdfName,
-  PdfNumber,
-  PdfString,
-} from '../core/pdfObjects.js';
+import { PdfArray, PdfDict, PdfName, PdfNumber, PdfString } from '../core/pdfObjects.js';
 
 // ---------------------------------------------------------------------------
 // Public types
@@ -83,10 +77,7 @@ export function buildPdfX6OutputIntent(options: PdfX6Options): PdfDict {
   const dict = new PdfDict();
   dict.set('/Type', PdfName.of('/OutputIntent'));
   dict.set('/S', PdfName.of('/GTS_PDFX'));
-  dict.set(
-    '/OutputConditionIdentifier',
-    PdfString.literal(options.outputConditionIdentifier),
-  );
+  dict.set('/OutputConditionIdentifier', PdfString.literal(options.outputConditionIdentifier));
   if (options.outputCondition !== undefined) {
     dict.set('/OutputCondition', PdfString.literal(options.outputCondition));
   }

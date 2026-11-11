@@ -90,10 +90,7 @@ function buildMinimalCertificate(
   // validity { notBefore, notAfter }
   const now = new Date();
   const later = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000);
-  const validity = encodeSequence([
-    encodeUTCTime(now),
-    encodeUTCTime(later),
-  ]);
+  const validity = encodeSequence([encodeUTCTime(now), encodeUTCTime(later)]);
 
   // subject Name
   const subject = buildName('Test Signer');
@@ -115,10 +112,7 @@ function buildMinimalCertificate(
 /**
  * Sign the TBSCertificate and wrap it in a Certificate structure.
  */
-async function signCertificate(
-  tbsCert: Uint8Array,
-  privateKey: CryptoKey,
-): Promise<Uint8Array> {
+async function signCertificate(tbsCert: Uint8Array, privateKey: CryptoKey): Promise<Uint8Array> {
   // Sign the TBSCertificate
   const signature = new Uint8Array(
     await globalThis.crypto.subtle.sign(

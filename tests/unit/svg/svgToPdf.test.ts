@@ -322,9 +322,7 @@ describe('svgToPdfOperators — transforms', () => {
 
 describe('svgToPdfOperators — text elements', () => {
   it('should render <text> with BT/ET text object', () => {
-    const el = parseSvg(
-      '<svg width="200" height="100"><text x="10" y="50">Hello</text></svg>',
-    );
+    const el = parseSvg('<svg width="200" height="100"><text x="10" y="50">Hello</text></svg>');
     const ops = svgToPdfOperators(el);
     expect(ops).toContain('BT\n');
     expect(ops).toContain('ET\n');
@@ -339,9 +337,7 @@ describe('svgToPdfOperators — text elements', () => {
   });
 
   it('should position text with Td operator', () => {
-    const el = parseSvg(
-      '<svg width="200" height="100"><text x="10" y="50">Hello</text></svg>',
-    );
+    const el = parseSvg('<svg width="200" height="100"><text x="10" y="50">Hello</text></svg>');
     const ops = svgToPdfOperators(el);
     expect(ops).toContain('10 50 Td\n');
   });
@@ -355,9 +351,7 @@ describe('svgToPdfOperators — text elements', () => {
   });
 
   it('should use default font size of 16 when not specified', () => {
-    const el = parseSvg(
-      '<svg width="200" height="100"><text x="0" y="20">Test</text></svg>',
-    );
+    const el = parseSvg('<svg width="200" height="100"><text x="0" y="20">Test</text></svg>');
     const ops = svgToPdfOperators(el);
     expect(ops).toContain('/Helvetica 16 Tf\n');
   });
@@ -563,20 +557,20 @@ describe('svgToPdfOperators — complex SVG', () => {
     const ops = svgToPdfOperators(el);
 
     // Should contain all major operator types
-    expect(ops).toContain('re\n');   // rectangles
-    expect(ops).toContain('c\n');    // Bezier curves (circle, path)
-    expect(ops).toContain('m\n');    // moveTo
-    expect(ops).toContain('l\n');    // lineTo
-    expect(ops).toContain('rg\n');   // fill colour
-    expect(ops).toContain('RG\n');   // stroke colour
-    expect(ops).toContain('w\n');    // stroke width
-    expect(ops).toContain('cm\n');   // transform
-    expect(ops).toContain('BT\n');   // text begin
-    expect(ops).toContain('Tf\n');   // text font
-    expect(ops).toContain('Tj\n');   // text show
-    expect(ops).toContain('ET\n');   // text end
-    expect(ops).toContain('d\n');    // dash pattern
-    expect(ops).toContain('1 J\n');  // round linecap
+    expect(ops).toContain('re\n'); // rectangles
+    expect(ops).toContain('c\n'); // Bezier curves (circle, path)
+    expect(ops).toContain('m\n'); // moveTo
+    expect(ops).toContain('l\n'); // lineTo
+    expect(ops).toContain('rg\n'); // fill colour
+    expect(ops).toContain('RG\n'); // stroke colour
+    expect(ops).toContain('w\n'); // stroke width
+    expect(ops).toContain('cm\n'); // transform
+    expect(ops).toContain('BT\n'); // text begin
+    expect(ops).toContain('Tf\n'); // text font
+    expect(ops).toContain('Tj\n'); // text show
+    expect(ops).toContain('ET\n'); // text end
+    expect(ops).toContain('d\n'); // dash pattern
+    expect(ops).toContain('1 J\n'); // round linecap
   });
 });
 
@@ -601,9 +595,7 @@ describe('svgToPdfOperators — error handling', () => {
   });
 
   it('should handle malformed path d attribute', () => {
-    const el = parseSvg(
-      '<svg width="100" height="100"><path d="" fill="red"/></svg>',
-    );
+    const el = parseSvg('<svg width="100" height="100"><path d="" fill="red"/></svg>');
     const ops = svgToPdfOperators(el);
     // Empty path should not produce path operators
     expect(ops).toContain('q\n');
@@ -672,7 +664,10 @@ describe('drawSvgOnPage', () => {
     const registry = new PdfObjectRegistry();
     const page = new PdfPage(595, 842, registry);
 
-    drawSvgOnPage(page, '<svg width="100" height="100"><rect x="0" y="0" width="100" height="100" fill="red"/></svg>');
+    drawSvgOnPage(
+      page,
+      '<svg width="100" height="100"><rect x="0" y="0" width="100" height="100" fill="red"/></svg>',
+    );
 
     const content = page.getContentStreamData();
     expect(content).toContain('q\n');
@@ -684,7 +679,12 @@ describe('drawSvgOnPage', () => {
     const registry = new PdfObjectRegistry();
     const page = new PdfPage(595, 842, registry);
 
-    drawSvgOnPage(page, '<svg width="100" height="100"></svg>', { x: 50, y: 100, width: 200, height: 200 });
+    drawSvgOnPage(page, '<svg width="100" height="100"></svg>', {
+      x: 50,
+      y: 100,
+      width: 200,
+      height: 200,
+    });
 
     const content = page.getContentStreamData();
     expect(content).toContain('cm\n');

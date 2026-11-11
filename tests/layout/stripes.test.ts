@@ -76,10 +76,7 @@ describe('alternating row colors and header styling', () => {
   it('explicit row backgroundColor overrides alternateRowColors', () => {
     const { ops } = renderTable(
       stripedTable({
-        rows: [
-          { cells: ['A', 'B'], backgroundColor: red },
-          { cells: ['C', 'D'] },
-        ],
+        rows: [{ cells: ['A', 'B'], backgroundColor: red }, { cells: ['C', 'D'] }],
       }),
     );
     // Row 0 has explicit red background — should appear
@@ -94,11 +91,7 @@ describe('alternating row colors and header styling', () => {
       stripedTable({
         headerRows: 1,
         headerBackgroundColor: blue,
-        rows: [
-          { cells: ['Header1', 'Header2'] },
-          { cells: ['A', 'B'] },
-          { cells: ['C', 'D'] },
-        ],
+        rows: [{ cells: ['Header1', 'Header2'] }, { cells: ['A', 'B'] }, { cells: ['C', 'D'] }],
       }),
     );
     // Header should use blue (0 0 0.8 rg)
@@ -113,10 +106,7 @@ describe('alternating row colors and header styling', () => {
       width: 500,
       headerRows: 1,
       headerTextColor: white,
-      rows: [
-        { cells: ['Header'] },
-        { cells: ['Data'] },
-      ],
+      rows: [{ cells: ['Header'] }, { cells: ['Data'] }],
     });
     // The header text should use white fill color (1 1 1 rg)
     // followed by BT and then the header text
@@ -131,10 +121,10 @@ describe('alternating row colors and header styling', () => {
         headerRows: 1,
         headerBackgroundColor: blue,
         rows: [
-          { cells: ['H1', 'H2'] },     // header row (blue bg)
-          { cells: ['A', 'B'] },        // data row 0 -> even (white)
-          { cells: ['C', 'D'] },        // data row 1 -> odd (lightGray)
-          { cells: ['E', 'F'] },        // data row 2 -> even (white)
+          { cells: ['H1', 'H2'] }, // header row (blue bg)
+          { cells: ['A', 'B'] }, // data row 0 -> even (white)
+          { cells: ['C', 'D'] }, // data row 1 -> odd (lightGray)
+          { cells: ['E', 'F'] }, // data row 2 -> even (white)
         ],
       }),
     );
@@ -152,10 +142,7 @@ describe('alternating row colors and header styling', () => {
       x: 50,
       y: 700,
       width: 500,
-      rows: [
-        { cells: ['A', 'B'] },
-        { cells: ['C', 'D'] },
-      ],
+      rows: [{ cells: ['A', 'B'] }, { cells: ['C', 'D'] }],
     });
     // Without alternateRowColors and no explicit row bg, there should
     // be no row-level fill color. The only fill colors should come
@@ -202,10 +189,7 @@ describe('alternating row colors and header styling', () => {
       headerRows: 1,
       headerTextColor: headerWhite,
       textColor: { type: 'grayscale', gray: 0 },
-      rows: [
-        { cells: ['Header'] },
-        { cells: ['Data'] },
-      ],
+      rows: [{ cells: ['Header'] }, { cells: ['Data'] }],
     });
     // Header text uses white
     // Data text uses default black (0 g)
@@ -223,10 +207,7 @@ describe('alternating row colors and header styling', () => {
       width: 500,
       headerRows: 1,
       headerTextColor: white,
-      rows: [
-        { cells: [cell] },
-        { cells: ['Data'] },
-      ],
+      rows: [{ cells: [cell] }, { cells: ['Data'] }],
     });
     // Cell's own textColor (red) should override headerTextColor
     expect(ops).toContain('1 0 0 rg');

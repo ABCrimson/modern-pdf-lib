@@ -95,18 +95,14 @@ describe('embedPdf', () => {
     const sourceBytes = await createSourcePdfBytes();
     const doc = createPdf();
 
-    await expect(doc.embedPdf(sourceBytes, [5])).rejects.toThrow(
-      /page index 5 out of range/,
-    );
+    await expect(doc.embedPdf(sourceBytes, [5])).rejects.toThrow(/page index 5 out of range/);
   });
 
   it('throws on negative page index', async () => {
     const sourceBytes = await createSourcePdfBytes();
     const doc = createPdf();
 
-    await expect(doc.embedPdf(sourceBytes, [-1])).rejects.toThrow(
-      /page index -1 out of range/,
-    );
+    await expect(doc.embedPdf(sourceBytes, [-1])).rejects.toThrow(/page index -1 out of range/);
   });
 
   it('creates a form XObject with correct structure', async () => {
@@ -396,7 +392,13 @@ describe('round-trip embedding', () => {
     const srcDoc = createPdf();
     const srcPage = srcDoc.addPage([200, 300]);
     srcPage.drawText('Embed me!', { x: 10, y: 250, size: 12 });
-    srcPage.drawRectangle({ x: 5, y: 5, width: 190, height: 290, borderColor: { type: 'rgb', r: 1, g: 0, b: 0 } });
+    srcPage.drawRectangle({
+      x: 5,
+      y: 5,
+      width: 190,
+      height: 290,
+      borderColor: { type: 'rgb', r: 1, g: 0, b: 0 },
+    });
     const srcBytes = await srcDoc.save();
 
     // Embed into a new doc

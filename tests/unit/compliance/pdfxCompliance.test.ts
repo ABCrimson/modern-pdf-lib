@@ -31,28 +31,30 @@ const decoder = new TextDecoder();
  * The PDF is just text bytes — not a fully valid PDF, but enough
  * for the pattern-based validation checks.
  */
-function buildPdf(options: {
-  version?: string;
-  outputIntents?: boolean;
-  gtsPdfx?: boolean;
-  trapped?: 'True' | 'False' | 'Unknown' | false;
-  trimBox?: boolean;
-  bleedBox?: boolean;
-  artBox?: boolean;
-  mediaBox?: [number, number, number, number];
-  trimBoxValues?: [number, number, number, number];
-  bleedBoxValues?: [number, number, number, number];
-  artBoxValues?: [number, number, number, number];
-  transparency?: boolean;
-  deviceRgb?: boolean;
-  iccBasedRgb?: boolean;
-  deviceCmyk?: boolean;
-  encrypt?: boolean;
-  javascript?: boolean;
-  multimedia?: boolean;
-  standardFont?: boolean;
-  infoDict?: boolean;
-} = {}): Uint8Array {
+function buildPdf(
+  options: {
+    version?: string;
+    outputIntents?: boolean;
+    gtsPdfx?: boolean;
+    trapped?: 'True' | 'False' | 'Unknown' | false;
+    trimBox?: boolean;
+    bleedBox?: boolean;
+    artBox?: boolean;
+    mediaBox?: [number, number, number, number];
+    trimBoxValues?: [number, number, number, number];
+    bleedBoxValues?: [number, number, number, number];
+    artBoxValues?: [number, number, number, number];
+    transparency?: boolean;
+    deviceRgb?: boolean;
+    iccBasedRgb?: boolean;
+    deviceCmyk?: boolean;
+    encrypt?: boolean;
+    javascript?: boolean;
+    multimedia?: boolean;
+    standardFont?: boolean;
+    infoDict?: boolean;
+  } = {},
+): Uint8Array {
   const version = options.version ?? '1.7';
   const lines: string[] = [`%PDF-${version}`];
 
@@ -193,20 +195,20 @@ describe('validatePdfX — output intent', () => {
     const pdf = buildPdf({ trimBox: true, trapped: 'False' });
     const result = validatePdfX(pdf, 'X-1a:2003');
     expect(result.valid).toBe(false);
-    expect(result.errors.some(e => e.code === 'PDFX-001')).toBe(true);
+    expect(result.errors.some((e) => e.code === 'PDFX-001')).toBe(true);
   });
 
   it('should report missing /GTS_PDFX subtype', () => {
     const pdf = buildPdf({ outputIntents: true, gtsPdfx: false, trimBox: true, trapped: 'False' });
     const result = validatePdfX(pdf, 'X-1a:2003');
-    expect(result.errors.some(e => e.code === 'PDFX-002')).toBe(true);
+    expect(result.errors.some((e) => e.code === 'PDFX-002')).toBe(true);
   });
 
   it('should accept valid output intent', () => {
     const pdf = buildPdf({ outputIntents: true, gtsPdfx: true, trimBox: true, trapped: 'False' });
     const result = validatePdfX(pdf, 'X-3:2003');
-    expect(result.errors.some(e => e.code === 'PDFX-001')).toBe(false);
-    expect(result.errors.some(e => e.code === 'PDFX-002')).toBe(false);
+    expect(result.errors.some((e) => e.code === 'PDFX-001')).toBe(false);
+    expect(result.errors.some((e) => e.code === 'PDFX-002')).toBe(false);
   });
 });
 
@@ -218,25 +220,25 @@ describe('validatePdfX — trapped key', () => {
   it('should report missing /Trapped', () => {
     const pdf = buildPdf({ outputIntents: true, trimBox: true, trapped: false });
     const result = validatePdfX(pdf, 'X-1a:2003');
-    expect(result.errors.some(e => e.code === 'PDFX-003')).toBe(true);
+    expect(result.errors.some((e) => e.code === 'PDFX-003')).toBe(true);
   });
 
   it('should accept /Trapped /True', () => {
     const pdf = buildPdf({ outputIntents: true, trimBox: true, trapped: 'True' });
     const result = validatePdfX(pdf, 'X-1a:2003');
-    expect(result.errors.some(e => e.code === 'PDFX-003')).toBe(false);
+    expect(result.errors.some((e) => e.code === 'PDFX-003')).toBe(false);
   });
 
   it('should accept /Trapped /False', () => {
     const pdf = buildPdf({ outputIntents: true, trimBox: true, trapped: 'False' });
     const result = validatePdfX(pdf, 'X-1a:2003');
-    expect(result.errors.some(e => e.code === 'PDFX-003')).toBe(false);
+    expect(result.errors.some((e) => e.code === 'PDFX-003')).toBe(false);
   });
 
   it('should accept /Trapped /Unknown', () => {
     const pdf = buildPdf({ outputIntents: true, trimBox: true, trapped: 'Unknown' });
     const result = validatePdfX(pdf, 'X-1a:2003');
-    expect(result.errors.some(e => e.code === 'PDFX-003')).toBe(false);
+    expect(result.errors.some((e) => e.code === 'PDFX-003')).toBe(false);
   });
 });
 
@@ -247,37 +249,46 @@ describe('validatePdfX — trapped key', () => {
 describe('validatePdfX — transparency', () => {
   it('should report transparency for X-1a:2003', () => {
     const pdf = buildPdf({
-      outputIntents: true, trimBox: true, trapped: 'False',
+      outputIntents: true,
+      trimBox: true,
+      trapped: 'False',
       transparency: true,
     });
     const result = validatePdfX(pdf, 'X-1a:2003');
-    expect(result.errors.some(e => e.code === 'PDFX-004')).toBe(true);
+    expect(result.errors.some((e) => e.code === 'PDFX-004')).toBe(true);
   });
 
   it('should report transparency for X-3:2003', () => {
     const pdf = buildPdf({
-      outputIntents: true, trimBox: true, trapped: 'False',
+      outputIntents: true,
+      trimBox: true,
+      trapped: 'False',
       transparency: true,
     });
     const result = validatePdfX(pdf, 'X-3:2003');
-    expect(result.errors.some(e => e.code === 'PDFX-004')).toBe(true);
+    expect(result.errors.some((e) => e.code === 'PDFX-004')).toBe(true);
   });
 
   it('should allow transparency for X-4', () => {
     const pdf = buildPdf({
-      outputIntents: true, trimBox: true, trapped: 'False',
-      transparency: true, version: '1.6',
+      outputIntents: true,
+      trimBox: true,
+      trapped: 'False',
+      transparency: true,
+      version: '1.6',
     });
     const result = validatePdfX(pdf, 'X-4');
-    expect(result.errors.some(e => e.code === 'PDFX-004')).toBe(false);
+    expect(result.errors.some((e) => e.code === 'PDFX-004')).toBe(false);
   });
 
   it('should not report transparency when none present', () => {
     const pdf = buildPdf({
-      outputIntents: true, trimBox: true, trapped: 'False',
+      outputIntents: true,
+      trimBox: true,
+      trapped: 'False',
     });
     const result = validatePdfX(pdf, 'X-1a:2003');
-    expect(result.errors.some(e => e.code === 'PDFX-004')).toBe(false);
+    expect(result.errors.some((e) => e.code === 'PDFX-004')).toBe(false);
   });
 });
 
@@ -288,29 +299,35 @@ describe('validatePdfX — transparency', () => {
 describe('validatePdfX — color spaces (X-1a)', () => {
   it('should reject DeviceRGB for X-1a:2003', () => {
     const pdf = buildPdf({
-      outputIntents: true, trimBox: true, trapped: 'False',
+      outputIntents: true,
+      trimBox: true,
+      trapped: 'False',
       deviceRgb: true,
     });
     const result = validatePdfX(pdf, 'X-1a:2003');
-    expect(result.errors.some(e => e.code === 'PDFX-005')).toBe(true);
+    expect(result.errors.some((e) => e.code === 'PDFX-005')).toBe(true);
   });
 
   it('should reject ICC-based RGB (/N 3) for X-1a:2003', () => {
     const pdf = buildPdf({
-      outputIntents: true, trimBox: true, trapped: 'False',
+      outputIntents: true,
+      trimBox: true,
+      trapped: 'False',
       iccBasedRgb: true,
     });
     const result = validatePdfX(pdf, 'X-1a:2003');
-    expect(result.errors.some(e => e.code === 'PDFX-005')).toBe(true);
+    expect(result.errors.some((e) => e.code === 'PDFX-005')).toBe(true);
   });
 
   it('should accept DeviceCMYK for X-1a:2003', () => {
     const pdf = buildPdf({
-      outputIntents: true, trimBox: true, trapped: 'False',
+      outputIntents: true,
+      trimBox: true,
+      trapped: 'False',
       deviceCmyk: true,
     });
     const result = validatePdfX(pdf, 'X-1a:2003');
-    expect(result.errors.some(e => e.code === 'PDFX-005')).toBe(false);
+    expect(result.errors.some((e) => e.code === 'PDFX-005')).toBe(false);
   });
 });
 
@@ -321,22 +338,27 @@ describe('validatePdfX — color spaces (X-1a)', () => {
 describe('validatePdfX — color spaces (X-3)', () => {
   it('should warn about DeviceRGB without ICC for X-3:2003', () => {
     const pdf = buildPdf({
-      outputIntents: true, trimBox: true, trapped: 'False',
+      outputIntents: true,
+      trimBox: true,
+      trapped: 'False',
       deviceRgb: true,
     });
     const result = validatePdfX(pdf, 'X-3:2003');
-    expect(result.warnings.some(w => w.code === 'PDFX-005W')).toBe(true);
+    expect(result.warnings.some((w) => w.code === 'PDFX-005W')).toBe(true);
     // Not an error — just a warning
-    expect(result.errors.some(e => e.code === 'PDFX-005')).toBe(false);
+    expect(result.errors.some((e) => e.code === 'PDFX-005')).toBe(false);
   });
 
   it('should not warn about RGB when ICC profile is present for X-3:2003', () => {
     const pdf = buildPdf({
-      outputIntents: true, trimBox: true, trapped: 'False',
-      deviceRgb: true, iccBasedRgb: true,
+      outputIntents: true,
+      trimBox: true,
+      trapped: 'False',
+      deviceRgb: true,
+      iccBasedRgb: true,
     });
     const result = validatePdfX(pdf, 'X-3:2003');
-    expect(result.warnings.some(w => w.code === 'PDFX-005W')).toBe(false);
+    expect(result.warnings.some((w) => w.code === 'PDFX-005W')).toBe(false);
   });
 });
 
@@ -347,19 +369,23 @@ describe('validatePdfX — color spaces (X-3)', () => {
 describe('validatePdfX — font embedding', () => {
   it('should report unembedded standard font', () => {
     const pdf = buildPdf({
-      outputIntents: true, trimBox: true, trapped: 'False',
+      outputIntents: true,
+      trimBox: true,
+      trapped: 'False',
       standardFont: true,
     });
     const result = validatePdfX(pdf, 'X-1a:2003');
-    expect(result.errors.some(e => e.code === 'PDFX-006')).toBe(true);
+    expect(result.errors.some((e) => e.code === 'PDFX-006')).toBe(true);
   });
 
   it('should not report font issues when no standard fonts used', () => {
     const pdf = buildPdf({
-      outputIntents: true, trimBox: true, trapped: 'False',
+      outputIntents: true,
+      trimBox: true,
+      trapped: 'False',
     });
     const result = validatePdfX(pdf, 'X-1a:2003');
-    expect(result.errors.some(e => e.code === 'PDFX-006')).toBe(false);
+    expect(result.errors.some((e) => e.code === 'PDFX-006')).toBe(false);
   });
 });
 
@@ -370,11 +396,13 @@ describe('validatePdfX — font embedding', () => {
 describe('validatePdfX — encryption', () => {
   it('should reject encrypted PDFs', () => {
     const pdf = buildPdf({
-      outputIntents: true, trimBox: true, trapped: 'False',
+      outputIntents: true,
+      trimBox: true,
+      trapped: 'False',
       encrypt: true,
     });
     const result = validatePdfX(pdf, 'X-1a:2003');
-    expect(result.errors.some(e => e.code === 'PDFX-007')).toBe(true);
+    expect(result.errors.some((e) => e.code === 'PDFX-007')).toBe(true);
   });
 });
 
@@ -385,28 +413,31 @@ describe('validatePdfX — encryption', () => {
 describe('validatePdfX — page boxes', () => {
   it('should report missing TrimBox and BleedBox', () => {
     const pdf = buildPdf({
-      outputIntents: true, trapped: 'False',
+      outputIntents: true,
+      trapped: 'False',
     });
     const result = validatePdfX(pdf, 'X-1a:2003');
-    expect(result.errors.some(e => e.code === 'PDFX-008')).toBe(true);
+    expect(result.errors.some((e) => e.code === 'PDFX-008')).toBe(true);
   });
 
   it('should accept TrimBox', () => {
     const pdf = buildPdf({
-      outputIntents: true, trapped: 'False',
+      outputIntents: true,
+      trapped: 'False',
       trimBox: true,
     });
     const result = validatePdfX(pdf, 'X-1a:2003');
-    expect(result.errors.some(e => e.code === 'PDFX-008')).toBe(false);
+    expect(result.errors.some((e) => e.code === 'PDFX-008')).toBe(false);
   });
 
   it('should accept BleedBox (without TrimBox)', () => {
     const pdf = buildPdf({
-      outputIntents: true, trapped: 'False',
+      outputIntents: true,
+      trapped: 'False',
       bleedBox: true,
     });
     const result = validatePdfX(pdf, 'X-1a:2003');
-    expect(result.errors.some(e => e.code === 'PDFX-008')).toBe(false);
+    expect(result.errors.some((e) => e.code === 'PDFX-008')).toBe(false);
   });
 });
 
@@ -417,18 +448,20 @@ describe('validatePdfX — page boxes', () => {
 describe('validatePdfX — page box nesting', () => {
   it('should warn when BleedBox exceeds MediaBox', () => {
     const pdf = buildPdf({
-      outputIntents: true, trapped: 'False',
+      outputIntents: true,
+      trapped: 'False',
       mediaBox: [0, 0, 612, 792],
       bleedBox: true,
       bleedBoxValues: [-10, -10, 622, 802], // larger than MediaBox
     });
     const result = validatePdfX(pdf, 'X-1a:2003');
-    expect(result.warnings.some(w => w.code === 'PDFX-012')).toBe(true);
+    expect(result.warnings.some((w) => w.code === 'PDFX-012')).toBe(true);
   });
 
   it('should warn when TrimBox exceeds BleedBox', () => {
     const pdf = buildPdf({
-      outputIntents: true, trapped: 'False',
+      outputIntents: true,
+      trapped: 'False',
       mediaBox: [0, 0, 612, 792],
       bleedBox: true,
       bleedBoxValues: [10, 10, 602, 782],
@@ -436,23 +469,25 @@ describe('validatePdfX — page box nesting', () => {
       trimBoxValues: [5, 5, 607, 787], // larger than BleedBox
     });
     const result = validatePdfX(pdf, 'X-1a:2003');
-    expect(result.warnings.some(w => w.code === 'PDFX-013')).toBe(true);
+    expect(result.warnings.some((w) => w.code === 'PDFX-013')).toBe(true);
   });
 
   it('should warn when TrimBox exceeds MediaBox (no BleedBox)', () => {
     const pdf = buildPdf({
-      outputIntents: true, trapped: 'False',
+      outputIntents: true,
+      trapped: 'False',
       mediaBox: [0, 0, 612, 792],
       trimBox: true,
       trimBoxValues: [-5, -5, 617, 797], // larger than MediaBox
     });
     const result = validatePdfX(pdf, 'X-1a:2003');
-    expect(result.warnings.some(w => w.code === 'PDFX-014')).toBe(true);
+    expect(result.warnings.some((w) => w.code === 'PDFX-014')).toBe(true);
   });
 
   it('should warn when ArtBox exceeds TrimBox', () => {
     const pdf = buildPdf({
-      outputIntents: true, trapped: 'False',
+      outputIntents: true,
+      trapped: 'False',
       mediaBox: [0, 0, 612, 792],
       trimBox: true,
       trimBoxValues: [10, 10, 602, 782],
@@ -460,12 +495,13 @@ describe('validatePdfX — page box nesting', () => {
       artBoxValues: [5, 5, 607, 787], // larger than TrimBox
     });
     const result = validatePdfX(pdf, 'X-1a:2003');
-    expect(result.warnings.some(w => w.code === 'PDFX-015')).toBe(true);
+    expect(result.warnings.some((w) => w.code === 'PDFX-015')).toBe(true);
   });
 
   it('should not warn when boxes are properly nested', () => {
     const pdf = buildPdf({
-      outputIntents: true, trapped: 'False',
+      outputIntents: true,
+      trapped: 'False',
       mediaBox: [0, 0, 612, 792],
       bleedBox: true,
       bleedBoxValues: [5, 5, 607, 787],
@@ -475,10 +511,15 @@ describe('validatePdfX — page box nesting', () => {
       artBoxValues: [15, 15, 597, 777],
     });
     const result = validatePdfX(pdf, 'X-1a:2003');
-    expect(result.warnings.some(w =>
-      w.code === 'PDFX-012' || w.code === 'PDFX-013' ||
-      w.code === 'PDFX-014' || w.code === 'PDFX-015'
-    )).toBe(false);
+    expect(
+      result.warnings.some(
+        (w) =>
+          w.code === 'PDFX-012' ||
+          w.code === 'PDFX-013' ||
+          w.code === 'PDFX-014' ||
+          w.code === 'PDFX-015',
+      ),
+    ).toBe(false);
   });
 });
 
@@ -489,20 +530,24 @@ describe('validatePdfX — page box nesting', () => {
 describe('validatePdfX — prohibited features', () => {
   it('should reject JavaScript', () => {
     const pdf = buildPdf({
-      outputIntents: true, trimBox: true, trapped: 'False',
+      outputIntents: true,
+      trimBox: true,
+      trapped: 'False',
       javascript: true,
     });
     const result = validatePdfX(pdf, 'X-1a:2003');
-    expect(result.errors.some(e => e.code === 'PDFX-009')).toBe(true);
+    expect(result.errors.some((e) => e.code === 'PDFX-009')).toBe(true);
   });
 
   it('should reject multimedia content', () => {
     const pdf = buildPdf({
-      outputIntents: true, trimBox: true, trapped: 'False',
+      outputIntents: true,
+      trimBox: true,
+      trapped: 'False',
       multimedia: true,
     });
     const result = validatePdfX(pdf, 'X-1a:2003');
-    expect(result.errors.some(e => e.code === 'PDFX-010')).toBe(true);
+    expect(result.errors.some((e) => e.code === 'PDFX-010')).toBe(true);
   });
 });
 
@@ -513,38 +558,46 @@ describe('validatePdfX — prohibited features', () => {
 describe('validatePdfX — PDF version', () => {
   it('should reject PDF 1.4 for X-4', () => {
     const pdf = buildPdf({
-      outputIntents: true, trimBox: true, trapped: 'False',
+      outputIntents: true,
+      trimBox: true,
+      trapped: 'False',
       version: '1.4',
     });
     const result = validatePdfX(pdf, 'X-4');
-    expect(result.errors.some(e => e.code === 'PDFX-011')).toBe(true);
+    expect(result.errors.some((e) => e.code === 'PDFX-011')).toBe(true);
   });
 
   it('should accept PDF 1.6 for X-4', () => {
     const pdf = buildPdf({
-      outputIntents: true, trimBox: true, trapped: 'False',
+      outputIntents: true,
+      trimBox: true,
+      trapped: 'False',
       version: '1.6',
     });
     const result = validatePdfX(pdf, 'X-4');
-    expect(result.errors.some(e => e.code === 'PDFX-011')).toBe(false);
+    expect(result.errors.some((e) => e.code === 'PDFX-011')).toBe(false);
   });
 
   it('should accept PDF 1.7 for X-4', () => {
     const pdf = buildPdf({
-      outputIntents: true, trimBox: true, trapped: 'False',
+      outputIntents: true,
+      trimBox: true,
+      trapped: 'False',
       version: '1.7',
     });
     const result = validatePdfX(pdf, 'X-4');
-    expect(result.errors.some(e => e.code === 'PDFX-011')).toBe(false);
+    expect(result.errors.some((e) => e.code === 'PDFX-011')).toBe(false);
   });
 
   it('should not check version for X-1a:2003', () => {
     const pdf = buildPdf({
-      outputIntents: true, trimBox: true, trapped: 'False',
+      outputIntents: true,
+      trimBox: true,
+      trapped: 'False',
       version: '1.3',
     });
     const result = validatePdfX(pdf, 'X-1a:2003');
-    expect(result.errors.some(e => e.code === 'PDFX-011')).toBe(false);
+    expect(result.errors.some((e) => e.code === 'PDFX-011')).toBe(false);
   });
 });
 
@@ -610,7 +663,10 @@ describe('enforcePdfX — auto-enforcement', () => {
 
   it('should set /Trapped when missing', () => {
     const pdf = buildPdf({
-      outputIntents: true, trimBox: true, trapped: false, infoDict: true,
+      outputIntents: true,
+      trimBox: true,
+      trapped: false,
+      infoDict: true,
     });
     const result = enforcePdfX(pdf, defaultOptions);
     const resultStr = decoder.decode(result);
@@ -619,7 +675,8 @@ describe('enforcePdfX — auto-enforcement', () => {
 
   it('should add TrimBox when missing', () => {
     const pdf = buildPdf({
-      outputIntents: true, trapped: 'False',
+      outputIntents: true,
+      trapped: 'False',
       mediaBox: [0, 0, 612, 792],
     });
     const result = enforcePdfX(pdf, defaultOptions);
@@ -630,7 +687,8 @@ describe('enforcePdfX — auto-enforcement', () => {
 
   it('should not duplicate TrimBox if already present', () => {
     const pdf = buildPdf({
-      outputIntents: true, trapped: 'False',
+      outputIntents: true,
+      trapped: 'False',
       trimBox: true,
       trimBoxValues: [10, 10, 602, 782],
     });
@@ -643,7 +701,9 @@ describe('enforcePdfX — auto-enforcement', () => {
 
   it('should flatten transparency for X-1a enforcement', () => {
     const pdf = buildPdf({
-      outputIntents: true, trimBox: true, trapped: 'False',
+      outputIntents: true,
+      trimBox: true,
+      trapped: 'False',
       transparency: true,
     });
     const result = enforcePdfX(pdf, { ...defaultOptions, level: 'X-1a:2003' });
@@ -654,8 +714,11 @@ describe('enforcePdfX — auto-enforcement', () => {
 
   it('should not flatten transparency for X-4 enforcement', () => {
     const pdf = buildPdf({
-      outputIntents: true, trimBox: true, trapped: 'False',
-      transparency: true, version: '1.6',
+      outputIntents: true,
+      trimBox: true,
+      trapped: 'False',
+      transparency: true,
+      version: '1.6',
     });
     const result = enforcePdfX(pdf, { ...defaultOptions, level: 'X-4' });
     const resultStr = decoder.decode(result);
@@ -675,7 +738,10 @@ describe('enforcePdfX — auto-enforcement', () => {
 
   it('should set /Trapped /True when specified', () => {
     const pdf = buildPdf({
-      outputIntents: true, trimBox: true, trapped: false, infoDict: true,
+      outputIntents: true,
+      trimBox: true,
+      trapped: false,
+      infoDict: true,
     });
     const result = enforcePdfX(pdf, { ...defaultOptions, trapped: 'True' });
     const resultStr = decoder.decode(result);

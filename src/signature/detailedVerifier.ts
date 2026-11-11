@@ -281,9 +281,14 @@ function extractCertInfo(certDer: Uint8Array): CertificateInfo {
                 const bits = inner.data[1]!;
                 keyUsage = [];
                 const usageNames = [
-                  'digitalSignature', 'nonRepudiation', 'keyEncipherment',
-                  'dataEncipherment', 'keyAgreement', 'keyCertSign',
-                  'cRLSign', 'encipherOnly',
+                  'digitalSignature',
+                  'nonRepudiation',
+                  'keyEncipherment',
+                  'dataEncipherment',
+                  'keyAgreement',
+                  'keyCertSign',
+                  'cRLSign',
+                  'encipherOnly',
                 ];
                 for (let b = 0; b < 8 - unusedBits; b++) {
                   if (bits & (0x80 >> b)) {
@@ -494,13 +499,7 @@ async function verifyCryptoSignature(
       sigBytes = convertEcdsaDerToP1363(parsed.signatureValue, keySizeMap[namedCurve] ?? 32);
     }
 
-    const publicKey = await subtle.importKey(
-      'spki',
-      toBuffer(spki),
-      importAlgo,
-      false,
-      ['verify'],
-    );
+    const publicKey = await subtle.importKey('spki', toBuffer(spki), importAlgo, false, ['verify']);
 
     return await subtle.verify(
       verifyAlgo,
@@ -603,10 +602,14 @@ export async function verifySignatureDetailed(
     if (chain.length > 0) {
       const signerCert = chain[0]!;
       if (now < signerCert.validFrom) {
-        warnings.push(`Signing certificate not yet valid (valid from ${signerCert.validFrom.toISOString()})`);
+        warnings.push(
+          `Signing certificate not yet valid (valid from ${signerCert.validFrom.toISOString()})`,
+        );
       }
       if (now > signerCert.validTo) {
-        warnings.push(`Signing certificate has expired (expired ${signerCert.validTo.toISOString()})`);
+        warnings.push(
+          `Signing certificate has expired (expired ${signerCert.validTo.toISOString()})`,
+        );
       }
     }
 
@@ -668,7 +671,9 @@ export async function verifySignatureDetailed(
           ocspResponse = {
             status: cachedOcsp.result.status,
             thisUpdate: cachedOcsp.result.thisUpdate,
-            ...(cachedOcsp.result.nextUpdate !== undefined && { nextUpdate: cachedOcsp.result.nextUpdate }),
+            ...(cachedOcsp.result.nextUpdate !== undefined && {
+              nextUpdate: cachedOcsp.result.nextUpdate,
+            }),
           };
         }
       }
@@ -679,7 +684,7 @@ export async function verifySignatureDetailed(
         // not provide certificate chain validation.
         warnings.push(
           'Revocation checking requested but no OCSP responder or CRL distribution point available. ' +
-          'Certificate revocation status could not be determined.',
+            'Certificate revocation status could not be determined.',
         );
         revocationStatus = 'unknown';
         revocationChecked = true;

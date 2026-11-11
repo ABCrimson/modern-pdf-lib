@@ -153,7 +153,13 @@ function makeTree(): HuffmanNode {
   return { children: [null, null] };
 }
 
-function insertCode(root: HuffmanNode, code: number, codeLen: number, runLength: number, isMakeup: boolean): void {
+function insertCode(
+  root: HuffmanNode,
+  code: number,
+  codeLen: number,
+  runLength: number,
+  isMakeup: boolean,
+): void {
   let node = root;
   for (let i = codeLen - 1; i >= 0; i--) {
     const bit = (code >>> i) & 1;
@@ -763,7 +769,12 @@ function read2DMode(reader: BitReader): Mode2D {
  * line to the right of a0, whose color is opposite to the current
  * coding line color at a0.
  */
-function findB1(referenceLine: Uint8Array, a0: number, currentColor: number, columns: number): number {
+function findB1(
+  referenceLine: Uint8Array,
+  a0: number,
+  currentColor: number,
+  columns: number,
+): number {
   const oppositeColor = currentColor === 0 ? 1 : 0;
   let pos = a0 + 1;
   if (pos >= columns) return columns;
@@ -836,7 +847,7 @@ function decode2DLine(
 
         // Fill from a0 to b2 with current color (no color change)
         const fillEnd = Math.min(b2, columns);
-        for (let i = (a0IsBeforeLine ? 0 : a0); i < fillEnd; i++) {
+        for (let i = a0IsBeforeLine ? 0 : a0; i < fillEnd; i++) {
           line[i] = currentColor;
         }
         a0 = b2;

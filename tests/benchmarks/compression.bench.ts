@@ -5,10 +5,7 @@
  */
 
 import { describe, bench } from 'vitest';
-import {
-  compressSync,
-  decompressSync,
-} from '../../src/compression/fflateAdapter.js';
+import { compressSync, decompressSync } from '../../src/compression/fflateAdapter.js';
 
 // ---------------------------------------------------------------------------
 // Test data generators
@@ -18,7 +15,8 @@ const encoder = new TextEncoder();
 
 /** Generate compressible text data of approximately `size` bytes. */
 function makeTextData(size: number): Uint8Array {
-  const line = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ';
+  const line =
+    'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ';
   const repeated = line.repeat(Math.ceil(size / line.length));
   return encoder.encode(repeated.slice(0, size));
 }

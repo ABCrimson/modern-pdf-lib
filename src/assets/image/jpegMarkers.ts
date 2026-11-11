@@ -47,13 +47,7 @@ export interface JpegMarkerInfo {
  * - 0xCC (DAC — Define Arithmetic Coding conditioning)
  */
 function isSofMarker(marker: number): boolean {
-  return (
-    marker >= 0xc0 &&
-    marker <= 0xcf &&
-    marker !== 0xc4 &&
-    marker !== 0xc8 &&
-    marker !== 0xcc
-  );
+  return marker >= 0xc0 && marker <= 0xcf && marker !== 0xc4 && marker !== 0xc8 && marker !== 0xcc;
 }
 
 /** Arithmetic-coded SOF markers: SOF9, SOF10, SOF11. */
@@ -87,9 +81,7 @@ function isProgressiveSof(marker: number): boolean {
  * }
  * ```
  */
-export function analyzeJpegMarkers(
-  data: Uint8Array,
-): JpegMarkerInfo | undefined {
+export function analyzeJpegMarkers(data: Uint8Array): JpegMarkerInfo | undefined {
   // Need at least SOI (2 bytes) + one marker (2 bytes)
   if (data.length < 4) return undefined;
 

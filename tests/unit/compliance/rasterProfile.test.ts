@@ -119,8 +119,7 @@ describe('buildPdfRIdentificationXmp', () => {
   it('references ISO 23504 / PDF/R as the declared profile', () => {
     const xmp = buildPdfRIdentificationXmp().toLowerCase();
     // Either the ISO number or the profile short-name should be present.
-    const mentionsProfile =
-      xmp.includes('23504') || xmp.includes('pdf/r') || xmp.includes('pdfr');
+    const mentionsProfile = xmp.includes('23504') || xmp.includes('pdf/r') || xmp.includes('pdfr');
     expect(mentionsProfile).toBe(true);
   });
 

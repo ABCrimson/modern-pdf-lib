@@ -72,8 +72,8 @@ describe('Standard font metrics', () => {
     expect(font!.widths[0x41]).toBe(667); // A
     expect(font!.widths[0x48]).toBe(722); // H
     expect(font!.widths[0x65]).toBe(556); // e
-    expect(font!.widths[0x6C]).toBe(222); // l
-    expect(font!.widths[0x6F]).toBe(556); // o
+    expect(font!.widths[0x6c]).toBe(222); // l
+    expect(font!.widths[0x6f]).toBe(556); // o
   });
 
   it('Helvetica "Hello" width at 12pt matches expected value', () => {
@@ -323,7 +323,7 @@ function buildMinimalTtf(): Uint8Array {
   view.setUint32(0, 0x00010000, false); // sfVersion = 1.0
   view.setUint16(4, numTables, false);
   view.setUint16(6, 64, false); // searchRange
-  view.setUint16(8, 2, false);  // entrySelector
+  view.setUint16(8, 2, false); // entrySelector
   view.setUint16(10, 0, false); // rangeShift
 
   let recordOffset = headerSize;
@@ -340,14 +340,14 @@ function buildMinimalTtf(): Uint8Array {
   view.setUint32(headOffset, 0x00010000, false); // version
   view.setUint32(headOffset + 4, 0x00010000, false); // fontRevision
   view.setUint32(headOffset + 8, 0, false); // checkSumAdjustment
-  view.setUint32(headOffset + 12, 0x5F0F3CF5, false); // magicNumber
-  view.setUint16(headOffset + 16, 0x000B, false); // flags
+  view.setUint32(headOffset + 12, 0x5f0f3cf5, false); // magicNumber
+  view.setUint16(headOffset + 16, 0x000b, false); // flags
   view.setUint16(headOffset + 18, 1000, false); // unitsPerEm
   // skip created/modified (offsets 20-35)
-  view.setInt16(headOffset + 36, 0, false);   // xMin
+  view.setInt16(headOffset + 36, 0, false); // xMin
   view.setInt16(headOffset + 38, -200, false); // yMin
   view.setInt16(headOffset + 40, 1000, false); // xMax
-  view.setInt16(headOffset + 42, 800, false);  // yMax
+  view.setInt16(headOffset + 42, 800, false); // yMax
   // skip macStyle, lowestRecPPEM, fontDirectionHint
   view.setInt16(headOffset + 50, 0, false); // indexToLocFormat
 
@@ -362,9 +362,9 @@ function buildMinimalTtf(): Uint8Array {
 
   const hheaOffset = dataOffset;
   view.setUint32(hheaOffset, 0x00010000, false); // version
-  view.setInt16(hheaOffset + 4, 800, false);  // ascent
+  view.setInt16(hheaOffset + 4, 800, false); // ascent
   view.setInt16(hheaOffset + 6, -200, false); // descent
-  view.setInt16(hheaOffset + 8, 0, false);    // lineGap
+  view.setInt16(hheaOffset + 8, 0, false); // lineGap
   view.setUint16(hheaOffset + 10, 600, false); // advanceWidthMax
   // Fill remaining hhea fields with zeros
   view.setUint16(hheaOffset + 34, 2, false); // numberOfHMetrics

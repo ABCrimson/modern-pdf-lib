@@ -142,7 +142,7 @@ const START_B = 104;
 const START_C = 105;
 const CODE_A = 101; // Switch to Code A (value when in B or C)
 const CODE_B = 100; // Switch to Code B (value when in A or C)
-const CODE_C = 99;  // Switch to Code C (value when in A or B)
+const CODE_C = 99; // Switch to Code C (value when in A or B)
 const STOP = 106;
 
 // ---------------------------------------------------------------------------
@@ -270,9 +270,15 @@ export function encodeCode128Values(data: string): readonly number[] {
 
   // Emit START code
   switch (currentSet) {
-    case 'A': values.push(START_A); break;
-    case 'B': values.push(START_B); break;
-    case 'C': values.push(START_C); break;
+    case 'A':
+      values.push(START_A);
+      break;
+    case 'B':
+      values.push(START_B);
+      break;
+    case 'C':
+      values.push(START_C);
+      break;
   }
 
   let pos = 0;

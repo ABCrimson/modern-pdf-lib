@@ -5,14 +5,8 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  decodeJBIG2,
-  JBIG2_INTEGER_MAGNITUDE_CLASSES,
-} from '../../../src/parser/jbig2Decode.js';
-import {
-  PdfDict,
-  PdfNumber,
-} from '../../../src/core/pdfObjects.js';
+import { decodeJBIG2, JBIG2_INTEGER_MAGNITUDE_CLASSES } from '../../../src/parser/jbig2Decode.js';
+import { PdfDict, PdfNumber } from '../../../src/core/pdfObjects.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -85,10 +79,10 @@ function buildPageInfoData(
   combinationOp: number = 0,
 ): number[] {
   const data: number[] = new Array(19).fill(0);
-  writeUint32BE(data, 0, width);   // width
-  writeUint32BE(data, 4, height);  // height
-  writeUint32BE(data, 8, 72);      // x resolution (72 DPI)
-  writeUint32BE(data, 12, 72);     // y resolution (72 DPI)
+  writeUint32BE(data, 0, width); // width
+  writeUint32BE(data, 4, height); // height
+  writeUint32BE(data, 8, 72); // x resolution (72 DPI)
+  writeUint32BE(data, 12, 72); // y resolution (72 DPI)
   // Flags: bits 2 = default pixel, bits 3-4 = combination operator
   data[16] = ((defaultPixel & 1) << 2) | ((combinationOp & 3) << 3);
   // Striping info (2 bytes)
@@ -481,11 +475,11 @@ describe('JBIG2Decode symbol dictionary and text region', () => {
     // Text Region segment (type 6) with Huffman flag set
     const trData: number[] = new Array(24).fill(0);
     // Region info (17 bytes)
-    writeUint32BE(trData, 0, 8);   // width
-    writeUint32BE(trData, 4, 8);   // height
-    writeUint32BE(trData, 8, 0);   // x
-    writeUint32BE(trData, 12, 0);  // y
-    trData[16] = 0x00;              // region flags
+    writeUint32BE(trData, 0, 8); // width
+    writeUint32BE(trData, 4, 8); // height
+    writeUint32BE(trData, 8, 0); // x
+    writeUint32BE(trData, 12, 0); // y
+    trData[16] = 0x00; // region flags
     // Text region flags (2 bytes, big-endian): bit 0 = Huffman (1)
     trData[17] = 0x00;
     trData[18] = 0x01;
@@ -508,15 +502,15 @@ describe('JBIG2Decode symbol dictionary and text region', () => {
 
     // Text Region segment (type 6) with 0 instances and no referred-to segments
     const trData: number[] = new Array(30).fill(0);
-    writeUint32BE(trData, 0, 8);   // width
-    writeUint32BE(trData, 4, 8);   // height
-    writeUint32BE(trData, 8, 0);   // x
-    writeUint32BE(trData, 12, 0);  // y
-    trData[16] = 0x04;              // combination operator = REPLACE
+    writeUint32BE(trData, 0, 8); // width
+    writeUint32BE(trData, 4, 8); // height
+    writeUint32BE(trData, 8, 0); // x
+    writeUint32BE(trData, 12, 0); // y
+    trData[16] = 0x04; // combination operator = REPLACE
     // Text region flags: all 0 (arithmetic, no refine, etc.)
     trData[17] = 0x00;
     trData[18] = 0x00;
-    writeUint32BE(trData, 19, 0);  // 0 instances
+    writeUint32BE(trData, 19, 0); // 0 instances
 
     const trHeader = buildSegmentHeader(1, 6, 1, trData.length);
     const eopHeader = buildEndOfPageSegment(2, 1);
@@ -668,8 +662,6 @@ describe('JBIG2 arithmetic integer magnitude classes (ITU-T T.88 §A.3)', () => 
   });
 
   it('use the spec-defined magnitude bit widths', () => {
-    expect(JBIG2_INTEGER_MAGNITUDE_CLASSES.map((c) => c.width)).toEqual([
-      2, 4, 6, 8, 12, 32,
-    ]);
+    expect(JBIG2_INTEGER_MAGNITUDE_CLASSES.map((c) => c.width)).toEqual([2, 4, 6, 8, 12, 32]);
   });
 });

@@ -7,12 +7,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  embedJpeg,
-  isJpeg,
-  getJpegInfo,
-} from '../../../src/assets/image/jpegEmbed.js';
-
+import { embedJpeg, isJpeg, getJpegInfo } from '../../../src/assets/image/jpegEmbed.js';
 
 // ---------------------------------------------------------------------------
 // Helpers — JPEG builders
@@ -35,25 +30,25 @@ function buildMinimalJpeg(
   const parts: number[] = [];
 
   // SOI
-  parts.push(0xFF, 0xD8);
+  parts.push(0xff, 0xd8);
 
   // SOF0 marker
-  parts.push(0xFF, 0xC0);
+  parts.push(0xff, 0xc0);
   const sofLength = 8 + components * 3;
-  parts.push((sofLength >> 8) & 0xFF, sofLength & 0xFF);
+  parts.push((sofLength >> 8) & 0xff, sofLength & 0xff);
   parts.push(precision);
-  parts.push((height >> 8) & 0xFF, height & 0xFF);
-  parts.push((width >> 8) & 0xFF, width & 0xFF);
+  parts.push((height >> 8) & 0xff, height & 0xff);
+  parts.push((width >> 8) & 0xff, width & 0xff);
   parts.push(components);
 
   for (let i = 0; i < components; i++) {
     parts.push(i + 1); // component ID
-    parts.push(0x11);  // sampling factors (1x1)
-    parts.push(0);     // quantization table ID
+    parts.push(0x11); // sampling factors (1x1)
+    parts.push(0); // quantization table ID
   }
 
   // EOI
-  parts.push(0xFF, 0xD9);
+  parts.push(0xff, 0xd9);
 
   return new Uint8Array(parts);
 }
@@ -70,15 +65,15 @@ function buildJpegWithSofType(
   const parts: number[] = [];
 
   // SOI
-  parts.push(0xFF, 0xD8);
+  parts.push(0xff, 0xd8);
 
   // SOFn marker
-  parts.push(0xFF, sofMarker);
+  parts.push(0xff, sofMarker);
   const sofLength = 8 + components * 3;
-  parts.push((sofLength >> 8) & 0xFF, sofLength & 0xFF);
+  parts.push((sofLength >> 8) & 0xff, sofLength & 0xff);
   parts.push(8); // precision
-  parts.push((height >> 8) & 0xFF, height & 0xFF);
-  parts.push((width >> 8) & 0xFF, width & 0xFF);
+  parts.push((height >> 8) & 0xff, height & 0xff);
+  parts.push((width >> 8) & 0xff, width & 0xff);
   parts.push(components);
 
   for (let i = 0; i < components; i++) {
@@ -88,7 +83,7 @@ function buildJpegWithSofType(
   }
 
   // EOI
-  parts.push(0xFF, 0xD9);
+  parts.push(0xff, 0xd9);
 
   return new Uint8Array(parts);
 }
@@ -100,16 +95,16 @@ function buildJpegWithJfif(width: number, height: number): Uint8Array {
   const parts: number[] = [];
 
   // SOI
-  parts.push(0xFF, 0xD8);
+  parts.push(0xff, 0xd8);
 
   // APP0 (JFIF) marker
-  parts.push(0xFF, 0xE0);
+  parts.push(0xff, 0xe0);
   // Length = 2 (length field itself) + 5 (JFIF\0) + 2 (version) + 1 (units)
   //        + 2 (Xdensity) + 2 (Ydensity) + 1 (Xthumbnail) + 1 (Ythumbnail) = 16
   const app0Length = 16;
-  parts.push((app0Length >> 8) & 0xFF, app0Length & 0xFF);
+  parts.push((app0Length >> 8) & 0xff, app0Length & 0xff);
   // "JFIF\0"
-  parts.push(0x4A, 0x46, 0x49, 0x46, 0x00);
+  parts.push(0x4a, 0x46, 0x49, 0x46, 0x00);
   // Version 1.01
   parts.push(0x01, 0x01);
   // Units: 0 = no units
@@ -120,12 +115,12 @@ function buildJpegWithJfif(width: number, height: number): Uint8Array {
   parts.push(0x00, 0x00);
 
   // SOF0 marker
-  parts.push(0xFF, 0xC0);
+  parts.push(0xff, 0xc0);
   const sofLength = 8 + 3 * 3;
-  parts.push((sofLength >> 8) & 0xFF, sofLength & 0xFF);
+  parts.push((sofLength >> 8) & 0xff, sofLength & 0xff);
   parts.push(8); // precision
-  parts.push((height >> 8) & 0xFF, height & 0xFF);
-  parts.push((width >> 8) & 0xFF, width & 0xFF);
+  parts.push((height >> 8) & 0xff, height & 0xff);
+  parts.push((width >> 8) & 0xff, width & 0xff);
   parts.push(3); // components
 
   for (let i = 0; i < 3; i++) {
@@ -133,7 +128,7 @@ function buildJpegWithJfif(width: number, height: number): Uint8Array {
   }
 
   // EOI
-  parts.push(0xFF, 0xD9);
+  parts.push(0xff, 0xd9);
 
   return new Uint8Array(parts);
 }
@@ -152,14 +147,14 @@ function buildJpegWithAdobe(
   const parts: number[] = [];
 
   // SOI
-  parts.push(0xFF, 0xD8);
+  parts.push(0xff, 0xd8);
 
   // APP14 (Adobe) marker — 0xFFEE
-  parts.push(0xFF, 0xEE);
+  parts.push(0xff, 0xee);
   const app14Length = 14; // 2 + 5 ("Adobe") + 2 (version) + 2 (flags0) + 2 (flags1) + 1 (color transform)
-  parts.push((app14Length >> 8) & 0xFF, app14Length & 0xFF);
+  parts.push((app14Length >> 8) & 0xff, app14Length & 0xff);
   // "Adobe"
-  parts.push(0x41, 0x64, 0x6F, 0x62, 0x65);
+  parts.push(0x41, 0x64, 0x6f, 0x62, 0x65);
   // Version (2 bytes)
   parts.push(0x00, 0x64);
   // Flags0 (2 bytes)
@@ -170,12 +165,12 @@ function buildJpegWithAdobe(
   parts.push(colorTransform);
 
   // SOF0 marker
-  parts.push(0xFF, 0xC0);
+  parts.push(0xff, 0xc0);
   const sofLength = 8 + components * 3;
-  parts.push((sofLength >> 8) & 0xFF, sofLength & 0xFF);
+  parts.push((sofLength >> 8) & 0xff, sofLength & 0xff);
   parts.push(8); // precision
-  parts.push((height >> 8) & 0xFF, height & 0xFF);
-  parts.push((width >> 8) & 0xFF, width & 0xFF);
+  parts.push((height >> 8) & 0xff, height & 0xff);
+  parts.push((width >> 8) & 0xff, width & 0xff);
   parts.push(components);
 
   for (let i = 0; i < components; i++) {
@@ -183,7 +178,7 @@ function buildJpegWithAdobe(
   }
 
   // EOI
-  parts.push(0xFF, 0xD9);
+  parts.push(0xff, 0xd9);
 
   return new Uint8Array(parts);
 }
@@ -196,27 +191,27 @@ function buildJpegWithExtraMarkers(width: number, height: number): Uint8Array {
   const parts: number[] = [];
 
   // SOI
-  parts.push(0xFF, 0xD8);
+  parts.push(0xff, 0xd8);
 
   // DQT marker (0xFFDB) with dummy data
-  parts.push(0xFF, 0xDB);
+  parts.push(0xff, 0xdb);
   const dqtLength = 5; // just 3 bytes of dummy data + 2 for length
-  parts.push((dqtLength >> 8) & 0xFF, dqtLength & 0xFF);
+  parts.push((dqtLength >> 8) & 0xff, dqtLength & 0xff);
   parts.push(0x00, 0x10, 0x20); // dummy quantization data
 
   // DHT marker (0xFFC4) with dummy data
-  parts.push(0xFF, 0xC4);
+  parts.push(0xff, 0xc4);
   const dhtLength = 4;
-  parts.push((dhtLength >> 8) & 0xFF, dhtLength & 0xFF);
+  parts.push((dhtLength >> 8) & 0xff, dhtLength & 0xff);
   parts.push(0x00, 0x00); // dummy Huffman data
 
   // SOF0 marker
-  parts.push(0xFF, 0xC0);
+  parts.push(0xff, 0xc0);
   const sofLength = 8 + 3 * 3;
-  parts.push((sofLength >> 8) & 0xFF, sofLength & 0xFF);
+  parts.push((sofLength >> 8) & 0xff, sofLength & 0xff);
   parts.push(8);
-  parts.push((height >> 8) & 0xFF, height & 0xFF);
-  parts.push((width >> 8) & 0xFF, width & 0xFF);
+  parts.push((height >> 8) & 0xff, height & 0xff);
+  parts.push((width >> 8) & 0xff, width & 0xff);
   parts.push(3);
 
   for (let i = 0; i < 3; i++) {
@@ -224,7 +219,7 @@ function buildJpegWithExtraMarkers(width: number, height: number): Uint8Array {
   }
 
   // EOI
-  parts.push(0xFF, 0xD9);
+  parts.push(0xff, 0xd9);
 
   return new Uint8Array(parts);
 }
@@ -240,12 +235,12 @@ describe('isJpeg', () => {
   });
 
   it('returns true for data starting with 0xFFD8', () => {
-    const data = new Uint8Array([0xFF, 0xD8, 0x00, 0x00]);
+    const data = new Uint8Array([0xff, 0xd8, 0x00, 0x00]);
     expect(isJpeg(data)).toBe(true);
   });
 
   it('returns false for PNG signature', () => {
-    const png = new Uint8Array([0x89, 0x50, 0x4E, 0x47]);
+    const png = new Uint8Array([0x89, 0x50, 0x4e, 0x47]);
     expect(isJpeg(png)).toBe(false);
   });
 
@@ -254,12 +249,12 @@ describe('isJpeg', () => {
   });
 
   it('returns false for single byte', () => {
-    expect(isJpeg(new Uint8Array([0xFF]))).toBe(false);
+    expect(isJpeg(new Uint8Array([0xff]))).toBe(false);
   });
 
   it('returns false for 0xFF followed by non-D8', () => {
-    expect(isJpeg(new Uint8Array([0xFF, 0xD9]))).toBe(false);
-    expect(isJpeg(new Uint8Array([0xFF, 0x00]))).toBe(false);
+    expect(isJpeg(new Uint8Array([0xff, 0xd9]))).toBe(false);
+    expect(isJpeg(new Uint8Array([0xff, 0x00]))).toBe(false);
   });
 
   it('returns false for random bytes', () => {
@@ -281,21 +276,21 @@ describe('embedJpeg — SOF parsing', () => {
   });
 
   it('parses SOF2 (progressive) correctly', () => {
-    const jpeg = buildJpegWithSofType(0xC2, 1920, 1080);
+    const jpeg = buildJpegWithSofType(0xc2, 1920, 1080);
     const result = embedJpeg(jpeg);
     expect(result.width).toBe(1920);
     expect(result.height).toBe(1080);
   });
 
   it('parses SOF1 (extended sequential) correctly', () => {
-    const jpeg = buildJpegWithSofType(0xC1, 800, 600);
+    const jpeg = buildJpegWithSofType(0xc1, 800, 600);
     const result = embedJpeg(jpeg);
     expect(result.width).toBe(800);
     expect(result.height).toBe(600);
   });
 
   it('parses SOF3 (lossless) correctly', () => {
-    const jpeg = buildJpegWithSofType(0xC3, 256, 256);
+    const jpeg = buildJpegWithSofType(0xc3, 256, 256);
     const result = embedJpeg(jpeg);
     expect(result.width).toBe(256);
     expect(result.height).toBe(256);
@@ -431,28 +426,28 @@ describe('embedJpeg — error handling', () => {
   });
 
   it('throws for single byte', () => {
-    expect(() => embedJpeg(new Uint8Array([0xFF]))).toThrow(/Invalid JPEG|SOI/);
+    expect(() => embedJpeg(new Uint8Array([0xff]))).toThrow(/Invalid JPEG|SOI/);
   });
 
   it('throws for data with wrong SOI marker', () => {
-    const bad = new Uint8Array([0xFF, 0xD9]); // EOI, not SOI
+    const bad = new Uint8Array([0xff, 0xd9]); // EOI, not SOI
     expect(() => embedJpeg(bad)).toThrow(/Invalid JPEG|SOI/);
   });
 
   it('throws for non-JPEG data (PNG header)', () => {
-    const png = new Uint8Array([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]);
+    const png = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
     expect(() => embedJpeg(png)).toThrow(/Invalid JPEG|SOI/);
   });
 
   it('throws for JPEG with SOI but no SOF marker', () => {
     // SOI + EOI only — no SOF in between
-    const soiEoi = new Uint8Array([0xFF, 0xD8, 0xFF, 0xD9]);
+    const soiEoi = new Uint8Array([0xff, 0xd8, 0xff, 0xd9]);
     expect(() => embedJpeg(soiEoi)).toThrow(/no SOF|Invalid JPEG/);
   });
 
   it('throws for truncated data after SOI', () => {
     // SOI marker only, no markers after
-    const truncated = new Uint8Array([0xFF, 0xD8]);
+    const truncated = new Uint8Array([0xff, 0xd8]);
     expect(() => embedJpeg(truncated)).toThrow(/no SOF|Invalid JPEG/);
   });
 });

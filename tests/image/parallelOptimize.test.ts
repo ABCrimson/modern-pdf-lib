@@ -15,15 +15,8 @@ import { describe, it, expect } from 'vitest';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
-import {
-  createPdf,
-  loadPdf,
-  optimizeAllImages,
-  PageSizes,
-} from '../../src/index.js';
-import type {
-  OptimizationReport,
-} from '../../src/index.js';
+import { createPdf, loadPdf, optimizeAllImages, PageSizes } from '../../src/index.js';
+import type { OptimizationReport } from '../../src/index.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -34,9 +27,7 @@ const fixturesDir = resolve(__dirname, '../fixtures/images');
 // ---------------------------------------------------------------------------
 
 async function createMultiImagePdf(pageCount: number): Promise<Uint8Array> {
-  const pngBytes = new Uint8Array(
-    await readFile(resolve(fixturesDir, 'sample.png')),
-  );
+  const pngBytes = new Uint8Array(await readFile(resolve(fixturesDir, 'sample.png')));
   const doc = createPdf();
 
   for (let i = 0; i < pageCount; i++) {

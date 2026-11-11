@@ -32,7 +32,6 @@ import {
   removeAllBookmarks,
 } from '../../../src/core/outlines.js';
 
-
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
@@ -543,9 +542,7 @@ describe('removeBookmark', () => {
     const doc2 = createDocWithPages(1);
     const foreign = addBookmark(doc2, { title: 'Foreign', pageIndex: 0 });
 
-    expect(() => removeBookmark(doc, foreign)).toThrow(
-      'Bookmark not found in the outline tree',
-    );
+    expect(() => removeBookmark(doc, foreign)).toThrow('Bookmark not found in the outline tree');
   });
 });
 

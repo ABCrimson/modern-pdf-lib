@@ -92,8 +92,7 @@ describe('convertPdfAConformanceXmp', () => {
       '</x:xmpmeta>';
     const out = convertPdfAConformanceXmp(noId, 4);
     // a part value of 4 must now be present in some form
-    const hasPart =
-      out.includes('pdfaid:part="4"') || out.includes('<pdfaid:part>4</pdfaid:part>');
+    const hasPart = out.includes('pdfaid:part="4"') || out.includes('<pdfaid:part>4</pdfaid:part>');
     expect(hasPart).toBe(true);
     // the pdfaid namespace must have been declared
     expect(out).toContain('http://www.aiim.org/pdfa/ns/id/');
@@ -107,8 +106,7 @@ describe('convertPdfAConformanceXmp', () => {
       '  </rdf:RDF>\n' +
       '</x:xmpmeta>';
     const out = convertPdfAConformanceXmp(noId, 2, 'b');
-    const hasPart =
-      out.includes('pdfaid:part="2"') || out.includes('<pdfaid:part>2</pdfaid:part>');
+    const hasPart = out.includes('pdfaid:part="2"') || out.includes('<pdfaid:part>2</pdfaid:part>');
     const hasConf =
       out.includes('pdfaid:conformance="B"') ||
       out.includes('<pdfaid:conformance>B</pdfaid:conformance>');
@@ -203,18 +201,14 @@ describe('preflightPdfA', () => {
 
   it('flags a missing document title as a fixable issue', () => {
     const issues = preflightPdfA(createPdf());
-    const titleIssue = issues.find((i) =>
-      i.message.toLowerCase().includes('title'),
-    );
+    const titleIssue = issues.find((i) => i.message.toLowerCase().includes('title'));
     expect(titleIssue).toBeDefined();
     expect(titleIssue?.fixable).toBe(true);
   });
 
   it('flags a missing output intent as a fixable issue', () => {
     const issues = preflightPdfA(createPdf());
-    const oiIssue = issues.find((i) =>
-      i.message.toLowerCase().includes('output intent'),
-    );
+    const oiIssue = issues.find((i) => i.message.toLowerCase().includes('output intent'));
     expect(oiIssue).toBeDefined();
     expect(oiIssue?.fixable).toBe(true);
   });

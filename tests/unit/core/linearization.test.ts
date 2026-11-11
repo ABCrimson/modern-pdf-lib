@@ -329,7 +329,7 @@ function extractHintStream(result: Uint8Array): {
 
   // Extract /Length
   const lenMatch = /\/Length\s+(\d+)/.exec(hintObjStr);
-  const streamLength = lenMatch ? parseInt(lenMatch[1]!, 10) : (endStreamPos - dataStart);
+  const streamLength = lenMatch ? parseInt(lenMatch[1]!, 10) : endStreamPos - dataStart;
 
   const hintData = result.subarray(
     hintOffset + encoder.encode(hintObjStr.slice(0, dataStart)).length,
@@ -1631,8 +1631,8 @@ describe('readU32BE', () => {
   });
 
   it('should handle large values', () => {
-    const buf = new Uint8Array([0xFF, 0xFF, 0xFF, 0xFF]);
-    expect(readU32BE(buf, 0)).toBe(0xFFFFFFFF);
+    const buf = new Uint8Array([0xff, 0xff, 0xff, 0xff]);
+    expect(readU32BE(buf, 0)).toBe(0xffffffff);
   });
 
   it('should handle zero', () => {

@@ -3,9 +3,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  estimateTranscodedSize,
-} from '../../../src/parser/jpeg2000Transcode.js';
+import { estimateTranscodedSize } from '../../../src/parser/jpeg2000Transcode.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -13,21 +11,17 @@ import {
 
 /** Build a JP2 signature box. */
 function buildSignatureBox(): Uint8Array {
-  return new Uint8Array([
-    0x00, 0x00, 0x00, 0x0C,
-    0x6A, 0x50, 0x20, 0x20,
-    0x0D, 0x0A, 0x87, 0x0A,
-  ]);
+  return new Uint8Array([0x00, 0x00, 0x00, 0x0c, 0x6a, 0x50, 0x20, 0x20, 0x0d, 0x0a, 0x87, 0x0a]);
 }
 
 /** Build a JP2 box with the given type and payload. */
 function buildBox(type: string, payload: Uint8Array): Uint8Array {
   const totalLength = 8 + payload.length;
   const box = new Uint8Array(totalLength);
-  box[0] = (totalLength >>> 24) & 0xFF;
-  box[1] = (totalLength >>> 16) & 0xFF;
-  box[2] = (totalLength >>> 8) & 0xFF;
-  box[3] = totalLength & 0xFF;
+  box[0] = (totalLength >>> 24) & 0xff;
+  box[1] = (totalLength >>> 16) & 0xff;
+  box[2] = (totalLength >>> 8) & 0xff;
+  box[3] = totalLength & 0xff;
   for (let i = 0; i < 4; i++) {
     box[4 + i] = type.charCodeAt(i);
   }
@@ -36,11 +30,7 @@ function buildBox(type: string, payload: Uint8Array): Uint8Array {
 }
 
 /** Build a minimal JP2 header superbox containing an ihdr box. */
-function buildJp2hBox(
-  width: number,
-  height: number,
-  components: number,
-): Uint8Array {
+function buildJp2hBox(width: number, height: number, components: number): Uint8Array {
   const ihdrPayload = new Uint8Array(14);
   const view = new DataView(ihdrPayload.buffer);
   view.setUint32(0, height, false);
@@ -58,15 +48,11 @@ function buildJp2hBox(
 /**
  * Build a minimal JP2 with known dimensions for size estimation testing.
  */
-function buildJp2WithDimensions(
-  width: number,
-  height: number,
-  components: number,
-): Uint8Array {
+function buildJp2WithDimensions(width: number, height: number, components: number): Uint8Array {
   const sig = buildSignatureBox();
   const ftyp = buildBox('ftyp', new Uint8Array(8));
   const jp2h = buildJp2hBox(width, height, components);
-  const jp2c = buildBox('jp2c', new Uint8Array([0xFF, 0x4F, 0xFF, 0xD9]));
+  const jp2c = buildBox('jp2c', new Uint8Array([0xff, 0x4f, 0xff, 0xd9]));
 
   const total = sig.length + ftyp.length + jp2h.length + jp2c.length;
   const result = new Uint8Array(total);
@@ -96,37 +82,35 @@ function buildJp2WithDimensions(
  * - YTOsiz (4 bytes, tile vertical offset)
  * - Csiz (2 bytes, number of components)
  */
-function buildRawCodestreamWithSiz(
-  width: number,
-  height: number,
-  components: number,
-): Uint8Array {
+function buildRawCodestreamWithSiz(width: number, height: number, components: number): Uint8Array {
   const siz = new Uint8Array(2 + 2 + 2 + 38 + components * 3);
   const view = new DataView(siz.buffer);
 
   // SOC marker
-  siz[0] = 0xFF; siz[1] = 0x4F;
+  siz[0] = 0xff;
+  siz[1] = 0x4f;
 
   // SIZ marker
-  siz[2] = 0xFF; siz[3] = 0x51;
+  siz[2] = 0xff;
+  siz[3] = 0x51;
 
   const sizLen = 38 + components * 3;
-  view.setUint16(4, sizLen, false);  // Lsiz
-  view.setUint16(6, 0, false);       // Rsiz (capabilities)
-  view.setUint32(8, width, false);    // Xsiz
-  view.setUint32(12, height, false);  // Ysiz
-  view.setUint32(16, 0, false);       // XOsiz
-  view.setUint32(20, 0, false);       // YOsiz
-  view.setUint32(24, width, false);   // XTsiz (single tile)
-  view.setUint32(28, height, false);  // YTsiz (single tile)
-  view.setUint32(32, 0, false);       // XTOsiz
-  view.setUint32(36, 0, false);       // YTOsiz
+  view.setUint16(4, sizLen, false); // Lsiz
+  view.setUint16(6, 0, false); // Rsiz (capabilities)
+  view.setUint32(8, width, false); // Xsiz
+  view.setUint32(12, height, false); // Ysiz
+  view.setUint32(16, 0, false); // XOsiz
+  view.setUint32(20, 0, false); // YOsiz
+  view.setUint32(24, width, false); // XTsiz (single tile)
+  view.setUint32(28, height, false); // YTsiz (single tile)
+  view.setUint32(32, 0, false); // XTOsiz
+  view.setUint32(36, 0, false); // YTOsiz
   view.setUint16(40, components, false); // Csiz
 
   // Component info: Ssiz(1), XRsiz(1), YRsiz(1) for each
   for (let i = 0; i < components; i++) {
     const off = 42 + i * 3;
-    siz[off] = 7;  // Ssiz: 8 bits (stored as 7 = bpc-1)
+    siz[off] = 7; // Ssiz: 8 bits (stored as 7 = bpc-1)
     siz[off + 1] = 1; // XRsiz
     siz[off + 2] = 1; // YRsiz
   }

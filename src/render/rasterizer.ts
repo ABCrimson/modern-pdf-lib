@@ -88,10 +88,34 @@ export function rasterize(dl: DisplayList, opts: RenderOptions = {}): RasterImag
   for (const item of dl.items) {
     const clip = item.clip ? toPixelSubpaths(item.clip, toPx) : undefined;
     if (item.type === 'fill') {
-      fillSubpaths(data, W, H, toPixelSubpaths(item.subpaths, toPx), item.rule, item.color, item.alpha, clip);
+      fillSubpaths(
+        data,
+        W,
+        H,
+        toPixelSubpaths(item.subpaths, toPx),
+        item.rule,
+        item.color,
+        item.alpha,
+        clip,
+      );
     } else if (item.type === 'stroke') {
-      strokeSubpaths(data, W, H, item.subpaths, toPx, item.lineWidth * scale, item.color, item.alpha, clip);
-    } else if (item.type === 'text' && renderText && item.renderMode !== 3 && item.renderMode !== 7) {
+      strokeSubpaths(
+        data,
+        W,
+        H,
+        item.subpaths,
+        toPx,
+        item.lineWidth * scale,
+        item.color,
+        item.alpha,
+        clip,
+      );
+    } else if (
+      item.type === 'text' &&
+      renderText &&
+      item.renderMode !== 3 &&
+      item.renderMode !== 7
+    ) {
       fillTextBoxes(data, W, H, item, toPx, clip);
     }
     // image items: not rasterized here (see extractImages); skipped.
@@ -249,7 +273,10 @@ function crossings(edges: Edge[], sy: number): { x: number; dir: number }[] {
   return xs;
 }
 
-function rowSpans(xs: { x: number; dir: number }[], rule: 'nonzero' | 'evenodd'): [number, number][] {
+function rowSpans(
+  xs: { x: number; dir: number }[],
+  rule: 'nonzero' | 'evenodd',
+): [number, number][] {
   const spans: [number, number][] = [];
   let winding = 0;
   for (let i = 0; i + 1 < xs.length; i++) {

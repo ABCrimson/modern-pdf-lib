@@ -161,11 +161,7 @@ export function deviceNColor(
  *
  * @returns A tuple `[C, M, Y, K]` with values in `[0, 1]`.
  */
-export function rgbToCmyk(
-  r: number,
-  g: number,
-  b: number,
-): [number, number, number, number] {
+export function rgbToCmyk(r: number, g: number, b: number): [number, number, number, number] {
   r = clamp01(r);
   g = clamp01(g);
   b = clamp01(b);
@@ -174,12 +170,7 @@ export function rgbToCmyk(
   if (k >= 1) return [0, 0, 0, 1];
 
   const inv = 1 / (1 - k);
-  return [
-    (1 - r - k) * inv,
-    (1 - g - k) * inv,
-    (1 - b - k) * inv,
-    k,
-  ];
+  return [(1 - r - k) * inv, (1 - g - k) * inv, (1 - b - k) * inv, k];
 }
 
 /**
@@ -194,23 +185,14 @@ export function rgbToCmyk(
  *
  * @returns A tuple `[R, G, B]` with values in `[0, 1]`.
  */
-export function cmykToRgb(
-  c: number,
-  m: number,
-  y: number,
-  k: number,
-): [number, number, number] {
+export function cmykToRgb(c: number, m: number, y: number, k: number): [number, number, number] {
   c = clamp01(c);
   m = clamp01(m);
   y = clamp01(y);
   k = clamp01(k);
 
   const inv = 1 - k;
-  return [
-    (1 - c) * inv,
-    (1 - m) * inv,
-    (1 - y) * inv,
-  ];
+  return [(1 - c) * inv, (1 - m) * inv, (1 - y) * inv];
 }
 
 /**
@@ -279,7 +261,9 @@ function clamp01(v: number): number {
 
 /** Convert a `[0, 1]` component to a 2-digit hex string. */
 function hex2(v: number): string {
-  return Math.round(clamp01(v) * 255).toString(16).padStart(2, '0');
+  return Math.round(clamp01(v) * 255)
+    .toString(16)
+    .padStart(2, '0');
 }
 
 /** Format a number for PDF output. */
@@ -307,12 +291,7 @@ export function setFillColorRgb(r: number, g: number, b: number): string {
 /**
  * Set the fill colour in the DeviceCMYK colour space (`k`).
  */
-export function setFillColorCmyk(
-  c: number,
-  m: number,
-  y: number,
-  k: number,
-): string {
+export function setFillColorCmyk(c: number, m: number, y: number, k: number): string {
   return `${n(c)} ${n(m)} ${n(y)} ${n(k)} k\n`;
 }
 
@@ -337,12 +316,7 @@ export function setStrokeColorRgb(r: number, g: number, b: number): string {
 /**
  * Set the stroke colour in the DeviceCMYK colour space (`K`).
  */
-export function setStrokeColorCmyk(
-  c: number,
-  m: number,
-  y: number,
-  k: number,
-): string {
+export function setStrokeColorCmyk(c: number, m: number, y: number, k: number): string {
   return `${n(c)} ${n(m)} ${n(y)} ${n(k)} K\n`;
 }
 
@@ -446,7 +420,9 @@ export function applyStrokeColor(color: Color): string {
     case 'spot':
       return setStrokeColorSpace(spotResourceName(color.name)) + setStrokeColor(color.tint);
     case 'devicen':
-      return setStrokeColorSpace(deviceNResourceName(color.colorants)) + setStrokeColor(...color.tints);
+      return (
+        setStrokeColorSpace(deviceNResourceName(color.colorants)) + setStrokeColor(...color.tints)
+      );
   }
 }
 

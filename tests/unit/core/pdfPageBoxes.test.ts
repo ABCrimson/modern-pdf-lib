@@ -15,10 +15,7 @@ import { PdfObjectRegistry } from '../../../src/core/pdfObjects.js';
 // Helpers
 // ---------------------------------------------------------------------------
 
-function makePage(
-  width?: number,
-  height?: number,
-): { page: PdfPage; registry: PdfObjectRegistry } {
+function makePage(width?: number, height?: number): { page: PdfPage; registry: PdfObjectRegistry } {
   const registry = new PdfObjectRegistry();
   const [w, h] = [width ?? PageSizes.A4[0], height ?? PageSizes.A4[1]];
   const page = new PdfPage(w, h, registry);

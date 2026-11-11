@@ -24,20 +24,14 @@ import {
   circlePath,
   ellipsePath,
 } from '../../../src/core/operators/graphics.js';
-import {
-  rgb,
-  setFillColorRgb,
-  setStrokeColorRgb,
-} from '../../../src/core/operators/color.js';
+import { rgb, setFillColorRgb, setStrokeColorRgb } from '../../../src/core/operators/color.js';
 import {
   saveState,
   restoreState,
   concatMatrix,
   degrees,
 } from '../../../src/core/operators/state.js';
-import {
-  drawXObject,
-} from '../../../src/core/operators/image.js';
+import { drawXObject } from '../../../src/core/operators/image.js';
 
 // ---------------------------------------------------------------------------
 // Text operators

@@ -74,10 +74,13 @@ interface WorkerResponse {
 export class PdfWorker {
   private worker: Worker | null = null;
   private nextId = 0;
-  private readonly pending = new Map<number, {
-    resolve: (bytes: Uint8Array) => void;
-    reject: (error: Error) => void;
-  }>();
+  private readonly pending = new Map<
+    number,
+    {
+      resolve: (bytes: Uint8Array) => void;
+      reject: (error: Error) => void;
+    }
+  >();
   private readonly options: PdfWorkerOptions;
 
   constructor(options: PdfWorkerOptions = {}) {
@@ -147,10 +150,7 @@ export class PdfWorker {
     if (this.worker) return this.worker;
 
     if (this.options.workerUrl) {
-      this.worker = new Worker(
-        this.options.workerUrl,
-        { type: 'module' },
-      );
+      this.worker = new Worker(this.options.workerUrl, { type: 'module' });
     } else {
       const blob = new Blob([INLINE_WORKER_SCRIPT], {
         type: 'text/javascript',

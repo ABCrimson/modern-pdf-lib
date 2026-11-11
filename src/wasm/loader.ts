@@ -25,7 +25,14 @@ import { hasInlineWasmData, getInlineWasmBytes } from './inlineWasm.js';
 // ---------------------------------------------------------------------------
 
 /** Supported runtime environments. */
-export type RuntimeKind = 'browser' | 'node' | 'deno' | 'bun' | 'workerd' | 'service-worker' | 'unknown';
+export type RuntimeKind =
+  | 'browser'
+  | 'node'
+  | 'deno'
+  | 'bun'
+  | 'workerd'
+  | 'service-worker'
+  | 'unknown';
 
 /** Configuration for custom WASM module paths. */
 export interface WasmLoaderConfig {
@@ -135,8 +142,14 @@ export function detectRuntime(): RuntimeKind {
   // Node.js
   if (
     typeof (globalThis as Record<string, unknown>)['process'] === 'object' &&
-    typeof ((globalThis as Record<string, unknown>)['process'] as Record<string, unknown>)?.['versions'] === 'object' &&
-    typeof (((globalThis as Record<string, unknown>)['process'] as Record<string, unknown>)?.['versions'] as Record<string, unknown>)?.['node'] === 'string'
+    typeof ((globalThis as Record<string, unknown>)['process'] as Record<string, unknown>)?.[
+      'versions'
+    ] === 'object' &&
+    typeof (
+      ((globalThis as Record<string, unknown>)['process'] as Record<string, unknown>)?.[
+        'versions'
+      ] as Record<string, unknown>
+    )?.['node'] === 'string'
   ) {
     return 'node';
   }
@@ -146,7 +159,10 @@ export function detectRuntime(): RuntimeKind {
   if (
     typeof (globalThis as Record<string, unknown>)['ServiceWorkerGlobalScope'] === 'function' &&
     typeof self !== 'undefined' &&
-    self instanceof ((globalThis as Record<string, unknown>)['ServiceWorkerGlobalScope'] as new (...args: unknown[]) => unknown)
+    self instanceof
+      ((globalThis as Record<string, unknown>)['ServiceWorkerGlobalScope'] as new (
+        ...args: unknown[]
+      ) => unknown)
   ) {
     return 'service-worker';
   }
@@ -204,7 +220,9 @@ export function getWasmLoaderConfig(): Readonly<WasmLoaderConfig> {
 async function loadViaFetch(url: string): Promise<Uint8Array> {
   const response = await fetch(url);
   if (!response.ok) {
-    throw new Error(`Failed to fetch WASM module: ${response.status} ${response.statusText} (${url})`);
+    throw new Error(
+      `Failed to fetch WASM module: ${response.status} ${response.statusText} (${url})`,
+    );
   }
   const buffer = await response.arrayBuffer();
   return new Uint8Array(buffer);
@@ -223,7 +241,9 @@ async function loadViaNodeFs(filePath: string): Promise<Uint8Array> {
   try {
     // Use a variable to hide the specifier from TypeScript's static module resolution
     const fsModule = 'node:fs/promises';
-    const { readFile } = (await import(/* @vite-ignore */ fsModule)) as { readFile: (path: string) => Promise<Uint8Array> };
+    const { readFile } = (await import(/* @vite-ignore */ fsModule)) as {
+      readFile: (path: string) => Promise<Uint8Array>;
+    };
     const buffer = await readFile(filePath);
     // Node's readFile returns a Buffer (which extends Uint8Array),
     // but we convert to a plain Uint8Array to avoid Buffer dependency
@@ -248,11 +268,7 @@ async function loadViaNodeFs(filePath: string): Promise<Uint8Array> {
  * @param runtime - Detected runtime.
  * @returns        Resolved path or URL string.
  */
-function resolveModulePath(
-  name: string,
-  config: WasmLoaderConfig,
-  runtime: RuntimeKind,
-): string {
+function resolveModulePath(name: string, config: WasmLoaderConfig, runtime: RuntimeKind): string {
   // 1. Explicit module path
   if (config.modulePaths?.[name]) {
     return config.modulePaths[name]!;
@@ -261,7 +277,9 @@ function resolveModulePath(
   // 2. Base path + default filename
   const filename = DEFAULT_FILENAMES[name];
   if (!filename) {
-    throw new Error(`Unknown WASM module: "${name}". Known modules: ${Object.keys(DEFAULT_FILENAMES).join(', ')}`);
+    throw new Error(
+      `Unknown WASM module: "${name}". Known modules: ${Object.keys(DEFAULT_FILENAMES).join(', ')}`,
+    );
   }
 
   if (config.basePath) {
@@ -503,7 +521,10 @@ export async function instantiateWasmModuleStreaming(
 
   // Pre-provided bytes
   if (globalConfig.moduleBytes?.[name]) {
-    const result = await WebAssembly.instantiate(globalConfig.moduleBytes[name]! as BufferSource, imports);
+    const result = await WebAssembly.instantiate(
+      globalConfig.moduleBytes[name]! as BufferSource,
+      imports,
+    );
     return result.instance;
   }
 
@@ -562,7 +583,7 @@ export function provideWasmBytes(name: string, bytes: Uint8Array): void {
  * @returns      `true` if bytes are available without loading.
  */
 export function isWasmModuleCached(name: string): boolean {
-  return moduleCache.has(name) || (globalConfig.moduleBytes?.[name] !== undefined);
+  return moduleCache.has(name) || globalConfig.moduleBytes?.[name] !== undefined;
 }
 
 /**

@@ -18,10 +18,7 @@
  * so it satisfies the Web Crypto API's BufferSource requirement.
  */
 function toBuffer(data: Uint8Array): ArrayBuffer {
-  return data.buffer.slice(
-    data.byteOffset,
-    data.byteOffset + data.byteLength,
-  ) as ArrayBuffer;
+  return data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength) as ArrayBuffer;
 }
 
 /**
@@ -32,7 +29,7 @@ function getSubtle(): SubtleCrypto {
   if (!subtle) {
     throw new Error(
       'Web Crypto API (crypto.subtle) is not available in this runtime. ' +
-      'SHA hashing requires Node.js 18+, a modern browser, Deno, or Bun.',
+        'SHA hashing requires Node.js 18+, a modern browser, Deno, or Bun.',
     );
   }
   return subtle;

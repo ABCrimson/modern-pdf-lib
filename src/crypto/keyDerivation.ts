@@ -22,8 +22,6 @@ import { rc4 } from './rc4.js';
 // exactly 32 bytes with no padding.
 import { sha256, sha384, sha512 } from './sha256.js';
 
-
-
 // ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
@@ -33,10 +31,8 @@ import { sha256, sha384, sha512 } from './sha256.js';
  * This is defined in the PDF spec, Table 20.
  */
 const PASSWORD_PADDING: Uint8Array = new Uint8Array([
-  0x28, 0xbf, 0x4e, 0x5e, 0x4e, 0x75, 0x8a, 0x41,
-  0x64, 0x00, 0x4e, 0x56, 0xff, 0xfa, 0x01, 0x08,
-  0x2e, 0x2e, 0x00, 0xb6, 0xd0, 0x68, 0x3e, 0x80,
-  0x2f, 0x0c, 0xa9, 0xfe, 0x64, 0x53, 0x69, 0x7a,
+  0x28, 0xbf, 0x4e, 0x5e, 0x4e, 0x75, 0x8a, 0x41, 0x64, 0x00, 0x4e, 0x56, 0xff, 0xfa, 0x01, 0x08,
+  0x2e, 0x2e, 0x00, 0xb6, 0xd0, 0x68, 0x3e, 0x80, 0x2f, 0x0c, 0xa9, 0xfe, 0x64, 0x53, 0x69, 0x7a,
 ]);
 
 // ---------------------------------------------------------------------------
@@ -135,40 +131,40 @@ function saslprep(input: string): string {
 /** RFC 3454 Table B.1 — Commonly mapped to nothing. */
 function isMappedToNothing(cp: number): boolean {
   return (
-    cp === 0x00AD ||  // SOFT HYPHEN
-    cp === 0x1806 ||  // MONGOLIAN TODO SOFT HYPHEN
-    cp === 0x200B ||  // ZERO WIDTH SPACE
-    cp === 0x2060 ||  // WORD JOINER
-    cp === 0xFEFF ||  // ZERO WIDTH NO-BREAK SPACE (BOM)
-    cp === 0x034F ||  // COMBINING GRAPHEME JOINER
-    cp === 0x180B ||  // MONGOLIAN FREE VARIATION SELECTOR ONE
-    cp === 0x180C ||  // MONGOLIAN FREE VARIATION SELECTOR TWO
-    cp === 0x180D ||  // MONGOLIAN FREE VARIATION SELECTOR THREE
-    cp === 0x200C ||  // ZERO WIDTH NON-JOINER
-    cp === 0x200D ||  // ZERO WIDTH JOINER
-    (cp >= 0xFE00 && cp <= 0xFE0F)  // VARIATION SELECTORS 1-16
+    cp === 0x00ad || // SOFT HYPHEN
+    cp === 0x1806 || // MONGOLIAN TODO SOFT HYPHEN
+    cp === 0x200b || // ZERO WIDTH SPACE
+    cp === 0x2060 || // WORD JOINER
+    cp === 0xfeff || // ZERO WIDTH NO-BREAK SPACE (BOM)
+    cp === 0x034f || // COMBINING GRAPHEME JOINER
+    cp === 0x180b || // MONGOLIAN FREE VARIATION SELECTOR ONE
+    cp === 0x180c || // MONGOLIAN FREE VARIATION SELECTOR TWO
+    cp === 0x180d || // MONGOLIAN FREE VARIATION SELECTOR THREE
+    cp === 0x200c || // ZERO WIDTH NON-JOINER
+    cp === 0x200d || // ZERO WIDTH JOINER
+    (cp >= 0xfe00 && cp <= 0xfe0f) // VARIATION SELECTORS 1-16
   );
 }
 
 /** RFC 3454 Table C.1.2 — Non-ASCII space characters. */
 function isNonAsciiSpace(cp: number): boolean {
   return (
-    cp === 0x00A0 ||  // NO-BREAK SPACE
-    cp === 0x1680 ||  // OGHAM SPACE MARK
-    cp === 0x2000 ||  // EN QUAD
-    cp === 0x2001 ||  // EM QUAD
-    cp === 0x2002 ||  // EN SPACE
-    cp === 0x2003 ||  // EM SPACE
-    cp === 0x2004 ||  // THREE-PER-EM SPACE
-    cp === 0x2005 ||  // FOUR-PER-EM SPACE
-    cp === 0x2006 ||  // SIX-PER-EM SPACE
-    cp === 0x2007 ||  // FIGURE SPACE
-    cp === 0x2008 ||  // PUNCTUATION SPACE
-    cp === 0x2009 ||  // THIN SPACE
-    cp === 0x200A ||  // HAIR SPACE
-    cp === 0x202F ||  // NARROW NO-BREAK SPACE
-    cp === 0x205F ||  // MEDIUM MATHEMATICAL SPACE
-    cp === 0x3000     // IDEOGRAPHIC SPACE
+    cp === 0x00a0 || // NO-BREAK SPACE
+    cp === 0x1680 || // OGHAM SPACE MARK
+    cp === 0x2000 || // EN QUAD
+    cp === 0x2001 || // EM QUAD
+    cp === 0x2002 || // EN SPACE
+    cp === 0x2003 || // EM SPACE
+    cp === 0x2004 || // THREE-PER-EM SPACE
+    cp === 0x2005 || // FOUR-PER-EM SPACE
+    cp === 0x2006 || // SIX-PER-EM SPACE
+    cp === 0x2007 || // FIGURE SPACE
+    cp === 0x2008 || // PUNCTUATION SPACE
+    cp === 0x2009 || // THIN SPACE
+    cp === 0x200a || // HAIR SPACE
+    cp === 0x202f || // NARROW NO-BREAK SPACE
+    cp === 0x205f || // MEDIUM MATHEMATICAL SPACE
+    cp === 0x3000 // IDEOGRAPHIC SPACE
   );
 }
 
@@ -178,43 +174,58 @@ function isNonAsciiSpace(cp: number): boolean {
  */
 function isProhibited(cp: number): boolean {
   // C.2.1: ASCII control characters
-  if (cp <= 0x001F || cp === 0x007F) return true;
+  if (cp <= 0x001f || cp === 0x007f) return true;
 
   // C.2.2: Non-ASCII control characters
-  if ((cp >= 0x0080 && cp <= 0x009F) || cp === 0x06DD || cp === 0x070F ||
-      cp === 0x180E || (cp >= 0x200C && cp <= 0x200D) ||
-      (cp >= 0x2028 && cp <= 0x2029) ||
-      (cp >= 0x2060 && cp <= 0x2063) ||
-      (cp >= 0x206A && cp <= 0x206F) ||
-      cp === 0xFEFF ||
-      (cp >= 0xFFF9 && cp <= 0xFFFC) ||
-      (cp >= 0x1D173 && cp <= 0x1D17A)) return true;
+  if (
+    (cp >= 0x0080 && cp <= 0x009f) ||
+    cp === 0x06dd ||
+    cp === 0x070f ||
+    cp === 0x180e ||
+    (cp >= 0x200c && cp <= 0x200d) ||
+    (cp >= 0x2028 && cp <= 0x2029) ||
+    (cp >= 0x2060 && cp <= 0x2063) ||
+    (cp >= 0x206a && cp <= 0x206f) ||
+    cp === 0xfeff ||
+    (cp >= 0xfff9 && cp <= 0xfffc) ||
+    (cp >= 0x1d173 && cp <= 0x1d17a)
+  )
+    return true;
 
   // C.3: Private use
-  if ((cp >= 0xE000 && cp <= 0xF8FF) ||
-      (cp >= 0xF0000 && cp <= 0xFFFFD) ||
-      (cp >= 0x100000 && cp <= 0x10FFFD)) return true;
+  if (
+    (cp >= 0xe000 && cp <= 0xf8ff) ||
+    (cp >= 0xf0000 && cp <= 0xffffd) ||
+    (cp >= 0x100000 && cp <= 0x10fffd)
+  )
+    return true;
 
   // C.4: Non-character code points
-  if ((cp >= 0xFDD0 && cp <= 0xFDEF) ||
-      (cp & 0xFFFF) === 0xFFFE || (cp & 0xFFFF) === 0xFFFF) return true;
+  if ((cp >= 0xfdd0 && cp <= 0xfdef) || (cp & 0xffff) === 0xfffe || (cp & 0xffff) === 0xffff)
+    return true;
 
   // C.5: Surrogate codes (shouldn't appear after normalize but check anyway)
-  if (cp >= 0xD800 && cp <= 0xDFFF) return true;
+  if (cp >= 0xd800 && cp <= 0xdfff) return true;
 
   // C.6: Inappropriate for plain text
-  if (cp === 0xFFF9 || cp === 0xFFFA || cp === 0xFFFB || cp === 0xFFFC) return true;
+  if (cp === 0xfff9 || cp === 0xfffa || cp === 0xfffb || cp === 0xfffc) return true;
 
   // C.7: Inappropriate for canonical representation
-  if (cp >= 0x2FF0 && cp <= 0x2FFB) return true;
+  if (cp >= 0x2ff0 && cp <= 0x2ffb) return true;
 
   // C.8: Change display properties / deprecated
-  if (cp === 0x0340 || cp === 0x0341 || cp === 0x200E || cp === 0x200F ||
-      (cp >= 0x202A && cp <= 0x202E) ||
-      (cp >= 0x206A && cp <= 0x206F)) return true;
+  if (
+    cp === 0x0340 ||
+    cp === 0x0341 ||
+    cp === 0x200e ||
+    cp === 0x200f ||
+    (cp >= 0x202a && cp <= 0x202e) ||
+    (cp >= 0x206a && cp <= 0x206f)
+  )
+    return true;
 
   // C.9: Tagging characters
-  if (cp === 0xE0001 || (cp >= 0xE0020 && cp <= 0xE007F)) return true;
+  if (cp === 0xe0001 || (cp >= 0xe0020 && cp <= 0xe007f)) return true;
 
   return false;
 }
@@ -411,10 +422,7 @@ export function computeUserPasswordR2(fileKey: Uint8Array): Uint8Array {
  * @param fileId   The first element of the /ID array.
  * @returns        The 32-byte /U value.
  */
-export function computeUserPasswordR3R4(
-  fileKey: Uint8Array,
-  fileId: Uint8Array,
-): Uint8Array {
+export function computeUserPasswordR3R4(fileKey: Uint8Array, fileId: Uint8Array): Uint8Array {
   // Step a-b: MD5(padding + fileId)
   const hash = md5(concat(PASSWORD_PADDING, fileId));
 
@@ -532,7 +540,7 @@ export async function computeEncryptionKeyR5(
 export async function algorithm2B(
   password: Uint8Array,
   salt: Uint8Array,
-  uKey?: Uint8Array  ,
+  uKey?: Uint8Array,
 ): Promise<Uint8Array> {
   // Step a: SHA-256(password + salt + uKey)
   const input = uKey ? concat(password, salt, uKey) : concat(password, salt);
@@ -604,7 +612,10 @@ async function aesEncryptCBCNoPad(
   // Ensure plain ArrayBuffer for Web Crypto API compatibility
   const keyBuf = key.buffer.slice(key.byteOffset, key.byteOffset + key.byteLength) as ArrayBuffer;
   const ivBuf = iv.buffer.slice(iv.byteOffset, iv.byteOffset + iv.byteLength) as ArrayBuffer;
-  const dataBuf = data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength) as ArrayBuffer;
+  const dataBuf = data.buffer.slice(
+    data.byteOffset,
+    data.byteOffset + data.byteLength,
+  ) as ArrayBuffer;
 
   // Import key
   const cryptoKey = await subtle.importKey('raw', keyBuf, 'AES-CBC', false, ['encrypt']);
@@ -612,11 +623,7 @@ async function aesEncryptCBCNoPad(
   // We need to avoid PKCS#7 padding added by Web Crypto.
   // Strategy: encrypt data that is already block-aligned, then strip the
   // final padding block that Web Crypto adds.
-  const encrypted = await subtle.encrypt(
-    { name: 'AES-CBC', iv: ivBuf },
-    cryptoKey,
-    dataBuf,
-  );
+  const encrypted = await subtle.encrypt({ name: 'AES-CBC', iv: ivBuf }, cryptoKey, dataBuf);
 
   // Web Crypto adds one extra 16-byte block of PKCS#7 padding.
   // Remove it to get the raw CBC ciphertext.
@@ -679,11 +686,7 @@ async function aesDecryptCBCNoPad(
     combined.byteOffset + combined.byteLength,
   ) as ArrayBuffer;
 
-  const decrypted = await subtle.decrypt(
-    { name: 'AES-CBC', iv: ivBuf },
-    cryptoKey,
-    dataBuf,
-  );
+  const decrypted = await subtle.decrypt({ name: 'AES-CBC', iv: ivBuf }, cryptoKey, dataBuf);
 
   // Return only the original data length (strip the decrypted padding block)
   return new Uint8Array(decrypted).subarray(0, data.length);
@@ -789,20 +792,28 @@ export async function computeFileEncryptionKey(
   if (dict.revision >= 6) {
     // R=6: Try user first, then owner
     const userKey = await computeEncryptionKeyR6(password, dict, false);
-    if (userKey) { result = userKey; }
-    else {
+    if (userKey) {
+      result = userKey;
+    } else {
       const ownerKey = await computeEncryptionKeyR6(password, dict, true);
-      if (ownerKey) { result = ownerKey; }
-      else { throw new Error('Incorrect password for R=6 encryption'); }
+      if (ownerKey) {
+        result = ownerKey;
+      } else {
+        throw new Error('Incorrect password for R=6 encryption');
+      }
     }
   } else if (dict.revision === 5) {
     // R=5: Try user first, then owner
     const userKey = await computeEncryptionKeyR5(password, dict, false);
-    if (userKey) { result = userKey; }
-    else {
+    if (userKey) {
+      result = userKey;
+    } else {
       const ownerKey = await computeEncryptionKeyR5(password, dict, true);
-      if (ownerKey) { result = ownerKey; }
-      else { throw new Error('Incorrect password for R=5 encryption'); }
+      if (ownerKey) {
+        result = ownerKey;
+      } else {
+        throw new Error('Incorrect password for R=5 encryption');
+      }
     }
   } else {
     // R=2, 3, 4: Verify user password first
@@ -859,10 +870,7 @@ function computeEncryptionKeyR2R4Bytes(
  * Recover the padded user password from the /O value using the owner password.
  * (Reverse of Algorithm 3.)
  */
-function recoverUserKeyFromOwner(
-  ownerPassword: string,
-  dict: EncryptDictValues,
-): Uint8Array {
+function recoverUserKeyFromOwner(ownerPassword: string, dict: EncryptDictValues): Uint8Array {
   const keyByteLength = dict.keyLength / 8;
   let hash = md5(padPassword(ownerPassword));
 
@@ -923,19 +931,13 @@ export async function verifyUserPassword(
   }
 
   // R=3/4: Compare first 16 bytes only
-  return arraysEqual(
-    computedU.subarray(0, 16),
-    dict.userKey.subarray(0, 16),
-  );
+  return arraysEqual(computedU.subarray(0, 16), dict.userKey.subarray(0, 16));
 }
 
 /**
  * Verify a user password for V=5 (R=5 or R=6).
  */
-async function verifyUserPasswordV5(
-  password: string,
-  dict: EncryptDictValues,
-): Promise<boolean> {
+async function verifyUserPasswordV5(password: string, dict: EncryptDictValues): Promise<boolean> {
   const pwd = preparePasswordV5(password);
   const uValSalt = dict.userKey.subarray(32, 40);
 
@@ -987,19 +989,13 @@ export async function verifyOwnerPassword(
     return arraysEqual(computedU, dict.userKey);
   }
 
-  return arraysEqual(
-    computedU.subarray(0, 16),
-    dict.userKey.subarray(0, 16),
-  );
+  return arraysEqual(computedU.subarray(0, 16), dict.userKey.subarray(0, 16));
 }
 
 /**
  * Verify an owner password for V=5 (R=5 or R=6).
  */
-async function verifyOwnerPasswordV5(
-  password: string,
-  dict: EncryptDictValues,
-): Promise<boolean> {
+async function verifyOwnerPasswordV5(password: string, dict: EncryptDictValues): Promise<boolean> {
   const pwd = preparePasswordV5(password);
   const oValSalt = dict.ownerKey.subarray(32, 40);
 
@@ -1112,7 +1108,7 @@ export async function generatePermsV5(
   // Byte 8: 'T' or 'F' for metadata encryption
   block[8] = encryptMetadata ? 0x54 : 0x46; // 'T' or 'F'
   // Bytes 9-11: 'adb'
-  block[9] = 0x61;  // 'a'
+  block[9] = 0x61; // 'a'
   block[10] = 0x64; // 'd'
   block[11] = 0x62; // 'b'
   // Bytes 12-15: random

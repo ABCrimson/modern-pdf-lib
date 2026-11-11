@@ -18,10 +18,7 @@ function makeOptions(overrides?: Partial<DrawTableOptions>): DrawTableOptions {
     x: 0,
     y: 700,
     width: 500,
-    rows: [
-      { cells: ['A', 'B', 'C'] },
-      { cells: ['D', 'E', 'F'] },
-    ],
+    rows: [{ cells: ['A', 'B', 'C'] }, { cells: ['D', 'E', 'F'] }],
     ...overrides,
   };
 }
@@ -196,9 +193,7 @@ describe('resolveColumnWidths', () => {
 
   // 13
   it('no column definitions produce equal widths', () => {
-    const widths = resolveColumnWidths(
-      makeOptions({ width: 300 }),
-    );
+    const widths = resolveColumnWidths(makeOptions({ width: 300 }));
     expect(widths).toHaveLength(3);
     expect(widths[0]).toBeCloseTo(100, 5);
     expect(widths[1]).toBeCloseTo(100, 5);
@@ -213,7 +208,7 @@ describe('resolveColumnWidths', () => {
         columns: [{ width: 200 }, { percentage: '30%' }, {}],
       }),
     );
-    expect(widths[0]).toBe(200);         // fixed
+    expect(widths[0]).toBe(200); // fixed
     expect(widths[1]).toBeCloseTo(300, 5); // 30% of 1000
     expect(widths[2]).toBeCloseTo(500, 5); // remaining flex
   });
@@ -226,8 +221,8 @@ describe('resolveColumnWidths', () => {
         fontSize: 10,
         padding: 5,
         rows: [
-          { cells: ['AB', 'X', 'Y'] },         // col0: 2*10*0.5 + 10 = 20
-          { cells: ['ABCDEFGH', 'X', 'Y'] },   // col0: 8*10*0.5 + 10 = 50
+          { cells: ['AB', 'X', 'Y'] }, // col0: 2*10*0.5 + 10 = 20
+          { cells: ['ABCDEFGH', 'X', 'Y'] }, // col0: 8*10*0.5 + 10 = 50
         ],
         columns: [{ autoFit: true }, {}, {}],
       }),

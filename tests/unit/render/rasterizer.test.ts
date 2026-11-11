@@ -3,7 +3,11 @@ import { rasterize, renderPageToImage } from '../../../src/render/rasterizer.js'
 import type { DisplayList } from '../../../src/render/displayList.js';
 import { PdfDocument } from '../../../src/core/pdfDocument.js';
 
-function px(img: { data: Uint8Array; width: number }, x: number, y: number): [number, number, number, number] {
+function px(
+  img: { data: Uint8Array; width: number },
+  x: number,
+  y: number,
+): [number, number, number, number] {
   const i = (y * img.width + x) * 4;
   return [img.data[i]!, img.data[i + 1]!, img.data[i + 2]!, img.data[i + 3]!];
 }
@@ -98,7 +102,13 @@ describe('rasterize — scanline display-list renderer', () => {
   it('renderPageToImage() produces a valid PNG of a created page', async () => {
     const doc = PdfDocument.create();
     const page = doc.addPage([120, 120]);
-    page.drawRectangle({ x: 20, y: 20, width: 80, height: 80, color: { type: 'rgb', r: 0, g: 0, b: 1 } as never });
+    page.drawRectangle({
+      x: 20,
+      y: 20,
+      width: 80,
+      height: 80,
+      color: { type: 'rgb', r: 0, g: 0, b: 1 } as never,
+    });
     const bytes = await doc.save();
     const loaded = await PdfDocument.load(bytes);
 

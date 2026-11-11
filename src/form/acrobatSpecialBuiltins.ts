@@ -83,10 +83,7 @@ function addThousands(intPart: string, sep: string): string {
  * @param sepStyle - Separator style (0–3).
  * @returns A function that formats a numeric string as a percentage.
  */
-export function AFPercent_Format(
-  nDec: number,
-  sepStyle: number,
-): (value: string) => string {
+export function AFPercent_Format(nDec: number, sepStyle: number): (value: string) => string {
   const sep = getSepConfig(sepStyle);
 
   return (value: string): string => {
@@ -122,10 +119,7 @@ export function AFPercent_Format(
  * @param _sepStyle - Separator style (used for context).
  * @returns A function that validates keystroke input.
  */
-export function AFPercent_Keystroke(
-  _nDec: number,
-  _sepStyle: number,
-): (value: string) => boolean {
+export function AFPercent_Keystroke(_nDec: number, _sepStyle: number): (value: string) => boolean {
   return (value: string): boolean => {
     if (value === '' || value === '-' || value === '.') return true;
     // Allow partial numeric input: optional minus, digits, optional decimal+digits, optional %
@@ -139,10 +133,10 @@ export function AFPercent_Keystroke(
 
 /** Predefined special format masks. */
 const SPECIAL_MASKS: Record<number, string> = {
-  0: '99999',           // ZIP Code (5 digits)
-  1: '99999-9999',      // ZIP+4 (9 digits)
-  2: '(999) 999-9999',  // Phone
-  3: '999-99-9999',     // SSN
+  0: '99999', // ZIP Code (5 digits)
+  1: '99999-9999', // ZIP+4 (9 digits)
+  2: '(999) 999-9999', // Phone
+  3: '999-99-9999', // SSN
 };
 
 /**
@@ -158,9 +152,7 @@ const SPECIAL_MASKS: Record<number, string> = {
  * @param psf - The predefined special format type (0–3).
  * @returns A function that formats a digit string using the special mask.
  */
-export function AFSpecial_Format(
-  psf: number,
-): (value: string) => string {
+export function AFSpecial_Format(psf: number): (value: string) => string {
   const mask = SPECIAL_MASKS[psf];
   if (mask === undefined) {
     return (value: string) => value;
@@ -185,9 +177,7 @@ export function AFSpecial_Format(
  * @param psf - The predefined special format type (0–3).
  * @returns A function that validates keystroke input.
  */
-export function AFSpecial_Keystroke(
-  psf: number,
-): (value: string) => boolean {
+export function AFSpecial_Keystroke(psf: number): (value: string) => boolean {
   const mask = SPECIAL_MASKS[psf];
   if (mask === undefined) {
     return () => true;

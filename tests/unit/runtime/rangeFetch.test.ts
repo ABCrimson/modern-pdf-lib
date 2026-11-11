@@ -64,10 +64,7 @@ function makeMockFetch(body: Uint8Array): {
         }),
         arrayBuffer: () =>
           Promise.resolve(
-            body.buffer.slice(
-              body.byteOffset,
-              body.byteOffset + body.byteLength,
-            ) as ArrayBuffer,
+            body.buffer.slice(body.byteOffset, body.byteOffset + body.byteLength) as ArrayBuffer,
           ),
       };
       return Promise.resolve(response);
@@ -86,10 +83,7 @@ function makeMockFetch(body: Uint8Array): {
       }),
       arrayBuffer: () =>
         Promise.resolve(
-          slice.buffer.slice(
-            slice.byteOffset,
-            slice.byteOffset + slice.byteLength,
-          ) as ArrayBuffer,
+          slice.buffer.slice(slice.byteOffset, slice.byteOffset + slice.byteLength) as ArrayBuffer,
         ),
     };
     return Promise.resolve(response);

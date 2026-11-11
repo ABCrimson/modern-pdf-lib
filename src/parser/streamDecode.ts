@@ -59,9 +59,10 @@ export function decodeStream(
  * @param dict - The stream's metadata dictionary.
  * @returns An object with parallel arrays of filter names and parameters.
  */
-export function getStreamFilters(
-  dict: PdfDict,
-): { filters: string[]; decodeParms: (PdfDict | null)[] } {
+export function getStreamFilters(dict: PdfDict): {
+  filters: string[];
+  decodeParms: (PdfDict | null)[];
+} {
   const filterObj = dict.get('/Filter');
   if (!filterObj) {
     return { filters: [], decodeParms: [] };
@@ -82,7 +83,10 @@ export function getStreamFilters(
   }
 
   const dpObj = dict.get('/DecodeParms');
-  const decodeParms = normalizeDecodeParms(dpObj as PdfDict | PdfDict[] | PdfArray | null, filters.length);
+  const decodeParms = normalizeDecodeParms(
+    dpObj as PdfDict | PdfDict[] | PdfArray | null,
+    filters.length,
+  );
 
   return { filters, decodeParms };
 }
@@ -118,14 +122,10 @@ function normalizeDecodeParms(
     return new Array<PdfDict | null>(count).fill(null);
   }
   if (parms instanceof PdfArray) {
-    return parms.items.map((item) =>
-      item instanceof PdfDict ? item : null,
-    );
+    return parms.items.map((item) => (item instanceof PdfDict ? item : null));
   }
   if (Array.isArray(parms)) {
-    return (parms as (PdfDict | null)[]).map((p) =>
-      p instanceof PdfDict ? p : null,
-    );
+    return (parms as (PdfDict | null)[]).map((p) => (p instanceof PdfDict ? p : null));
   }
   if (parms instanceof PdfDict) {
     // Single dict applies to the single (or first) filter
@@ -154,9 +154,7 @@ const FILTER_ABBREVIATIONS: Readonly<Record<string, string>> = {
 
 function normalizeFilterName(name: string): string {
   const n = name.startsWith('/') ? name.slice(1) : name;
-  return Object.hasOwn(FILTER_ABBREVIATIONS, n)
-    ? FILTER_ABBREVIATIONS[n]!
-    : n;
+  return Object.hasOwn(FILTER_ABBREVIATIONS, n) ? FILTER_ABBREVIATIONS[n]! : n;
 }
 
 // ---------------------------------------------------------------------------
@@ -181,11 +179,7 @@ function dictInt(dict: PdfDict | null, key: string, fallback: number): number {
 /**
  * Apply a single filter to the data.
  */
-function applyFilter(
-  filterName: string,
-  data: Uint8Array,
-  parms: PdfDict | null,
-): Uint8Array {
+function applyFilter(filterName: string, data: Uint8Array, parms: PdfDict | null): Uint8Array {
   switch (filterName) {
     case 'FlateDecode':
       return decodeFlateDecode(data, parms);
@@ -310,10 +304,9 @@ function applyTiffPredictor2(
       const offset = row * rowBytes;
       for (let col = bytesPerPixel; col < rowBytes; col += 2) {
         const prev =
-          ((out[offset + col - bytesPerPixel]! << 8) |
-            out[offset + col - bytesPerPixel + 1]!) >>> 0;
-        const curr =
-          ((out[offset + col]! << 8) | out[offset + col + 1]!) >>> 0;
+          ((out[offset + col - bytesPerPixel]! << 8) | out[offset + col - bytesPerPixel + 1]!) >>>
+          0;
+        const curr = ((out[offset + col]! << 8) | out[offset + col + 1]!) >>> 0;
         const sum = (prev + curr) & 0xffff;
         out[offset + col] = (sum >> 8) & 0xff;
         out[offset + col + 1] = sum & 0xff;
@@ -346,7 +339,7 @@ function applyTiffPredictor2(
           val = (out[byteIdx]! >> shift) & mask;
         } else {
           // Value spans two bytes
-          val = ((out[byteIdx]! << (-shift)) | (out[byteIdx + 1]! >> (8 + shift))) & mask;
+          val = ((out[byteIdx]! << -shift) | (out[byteIdx + 1]! >> (8 + shift))) & mask;
         }
 
         val = (val + prev[c]!) & mask;
@@ -358,10 +351,11 @@ function applyTiffPredictor2(
         } else {
           const highBits = bpc + shift;
           const highMask = (1 << highBits) - 1;
-          out[byteIdx] = (out[byteIdx]! & ~highMask) | (val >> (-shift));
+          out[byteIdx] = (out[byteIdx]! & ~highMask) | (val >> -shift);
           const lowBits = -shift;
           const lowMask = ((1 << lowBits) - 1) << (8 - lowBits);
-          out[byteIdx + 1] = (out[byteIdx + 1]! & ~lowMask) | ((val & ((1 << lowBits) - 1)) << (8 - lowBits));
+          out[byteIdx + 1] =
+            (out[byteIdx + 1]! & ~lowMask) | ((val & ((1 << lowBits) - 1)) << (8 - lowBits));
         }
       }
     }
@@ -436,10 +430,8 @@ function applyPngPredictors(
         for (let i = 0; i < rowBytes; i++) {
           const left = i >= bytesPerPixel ? out[dstOffset + i - bytesPerPixel]! : 0;
           const up = prevRow[i]!;
-          const upLeft =
-            i >= bytesPerPixel ? prevRow[i - bytesPerPixel]! : 0;
-          out[dstOffset + i] =
-            (data[srcOffset + 1 + i]! + paethPredictor(left, up, upLeft)) & 0xff;
+          const upLeft = i >= bytesPerPixel ? prevRow[i - bytesPerPixel]! : 0;
+          out[dstOffset + i] = (data[srcOffset + 1 + i]! + paethPredictor(left, up, upLeft)) & 0xff;
         }
         break;
 
@@ -519,9 +511,9 @@ function decodeASCIIHex(data: Uint8Array): Uint8Array {
  * Returns -1 for non-hex characters.
  */
 function hexValue(ch: number): number {
-  if (ch >= 0x30 && ch <= 0x39) return ch - 0x30;       // 0-9
-  if (ch >= 0x41 && ch <= 0x46) return ch - 0x41 + 10;   // A-F
-  if (ch >= 0x61 && ch <= 0x66) return ch - 0x61 + 10;   // a-f
+  if (ch >= 0x30 && ch <= 0x39) return ch - 0x30; // 0-9
+  if (ch >= 0x41 && ch <= 0x46) return ch - 0x41 + 10; // A-F
+  if (ch >= 0x61 && ch <= 0x66) return ch - 0x61 + 10; // a-f
   return -1;
 }
 
@@ -538,7 +530,7 @@ function hexValue(ch: number): number {
  */
 function decodeASCII85(data: Uint8Array): Uint8Array {
   // Pre-allocate output (ASCII85 expands 5->4 bytes, so output <= input * 0.8)
-  let out = new Uint8Array(Math.max((data.length * 4 / 5) | 0, 256));
+  let out = new Uint8Array(Math.max(((data.length * 4) / 5) | 0, 256));
   let outPos = 0;
   const group = new Uint8Array(5);
   let groupLen = 0;

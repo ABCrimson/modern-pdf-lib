@@ -18,11 +18,7 @@ import {
   createXmpStream,
 } from '../../../src/metadata/xmpMetadata.js';
 import type { DocumentMetadata } from '../../../src/core/pdfCatalog.js';
-import {
-  PdfName,
-  PdfStream,
-  PdfObjectRegistry,
-} from '../../../src/core/pdfObjects.js';
+import { PdfName, PdfStream, PdfObjectRegistry } from '../../../src/core/pdfObjects.js';
 
 // ---------------------------------------------------------------------------
 // buildXmpMetadata

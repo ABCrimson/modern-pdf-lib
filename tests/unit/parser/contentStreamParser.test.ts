@@ -27,18 +27,12 @@ function stream(str: string): Uint8Array {
 }
 
 /** Find an operator by name from parsed results. */
-function findOps(
-  ops: ContentStreamOperator[],
-  name: string,
-): ContentStreamOperator[] {
+function findOps(ops: ContentStreamOperator[], name: string): ContentStreamOperator[] {
   return ops.filter((op) => op.operator === name);
 }
 
 /** Find the first operator by name. */
-function findOp(
-  ops: ContentStreamOperator[],
-  name: string,
-): ContentStreamOperator | undefined {
+function findOp(ops: ContentStreamOperator[], name: string): ContentStreamOperator | undefined {
   return ops.find((op) => op.operator === name);
 }
 
@@ -104,9 +98,7 @@ describe('Text operators', () => {
   });
 
   it('parses TJ (show string array)', () => {
-    const ops = parseContentStream(
-      stream('BT [(Hello) -100 (World)] TJ ET'),
-    );
+    const ops = parseContentStream(stream('BT [(Hello) -100 (World)] TJ ET'));
     const tj = findOp(ops, 'TJ')!;
     expect(tj).toBeDefined();
     expect(tj.operands).toHaveLength(1);
@@ -634,26 +626,20 @@ describe('Marked content operators', () => {
 
 describe('Multiple operators in sequence', () => {
   it('parses a complete text block', () => {
-    const ops = parseContentStream(
-      stream('BT /F1 12 Tf 100 700 Td (Hello World) Tj ET'),
-    );
+    const ops = parseContentStream(stream('BT /F1 12 Tf 100 700 Td (Hello World) Tj ET'));
     const operators = ops.map((op) => op.operator);
     expect(operators).toEqual(['BT', 'Tf', 'Td', 'Tj', 'ET']);
   });
 
   it('parses a drawing sequence', () => {
-    const ops = parseContentStream(
-      stream('q 1 0 0 RG 2 w 100 100 m 200 200 l S Q'),
-    );
+    const ops = parseContentStream(stream('q 1 0 0 RG 2 w 100 100 m 200 200 l S Q'));
     const operators = ops.map((op) => op.operator);
     expect(operators).toEqual(['q', 'RG', 'w', 'm', 'l', 'S', 'Q']);
   });
 
   it('parses multiple text blocks', () => {
     const ops = parseContentStream(
-      stream(
-        'BT /F1 12 Tf 72 700 Td (Line 1) Tj ET BT /F1 12 Tf 72 680 Td (Line 2) Tj ET',
-      ),
+      stream('BT /F1 12 Tf 72 700 Td (Line 1) Tj ET BT /F1 12 Tf 72 680 Td (Line 2) Tj ET'),
     );
     const btOps = findOps(ops, 'BT');
     const etOps = findOps(ops, 'ET');

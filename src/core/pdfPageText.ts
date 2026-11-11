@@ -41,7 +41,7 @@ export function wrapText(
 
   // Build a regex that splits text into segments (word + trailing break char).
   // Using a capturing group in split keeps the separators in the result array.
-  const escaped = breaks.map(c => c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+  const escaped = breaks.map((c) => c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
   const pattern = new RegExp(`(${escaped.join('|')})`);
   const parts = text.split(pattern);
 
@@ -93,9 +93,8 @@ export function wrapText(
       // no extra space is needed.  Otherwise join with a space (when space
       // is a break character) or directly concatenate.
       const lastChar = currentLine.at(-1)!;
-      const glue = breaks.includes(' ') && !breaks.some(b => b !== ' ' && lastChar === b)
-        ? ' '
-        : '';
+      const glue =
+        breaks.includes(' ') && !breaks.some((b) => b !== ' ' && lastChar === b) ? ' ' : '';
       const candidate = currentLine + glue + token;
       if (font.widthOfTextAtSize(candidate, size) <= maxWidth) {
         currentLine = candidate;
@@ -140,12 +139,7 @@ export function wrapText(
  * @param size      Font size in points.
  * @returns         Array of character-level fragments.
  */
-export function breakWord(
-  word: string,
-  maxWidth: number,
-  font: FontRef,
-  size: number,
-): string[] {
+export function breakWord(word: string, maxWidth: number, font: FontRef, size: number): string[] {
   const fragments: string[] = [];
   let current = '';
 

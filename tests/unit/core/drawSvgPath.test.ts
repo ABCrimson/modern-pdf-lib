@@ -11,10 +11,7 @@ import { rgb } from '../../../src/core/operators/color.js';
 // Helpers
 // ---------------------------------------------------------------------------
 
-function makePage(
-  width?: number,
-  height?: number,
-): { page: PdfPage; registry: PdfObjectRegistry } {
+function makePage(width?: number, height?: number): { page: PdfPage; registry: PdfObjectRegistry } {
   const registry = new PdfObjectRegistry();
   const [w, h] = [width ?? PageSizes.A4[0], height ?? PageSizes.A4[1]];
   const page = new PdfPage(w, h, registry);
@@ -43,10 +40,10 @@ describe('PdfPage.drawSvgPath()', () => {
     expect(ops).toContain('Q\n');
 
     // Should contain the path operators
-    expect(ops).toContain('0 0 m\n');     // moveTo
-    expect(ops).toContain('100 0 l\n');   // lineTo
+    expect(ops).toContain('0 0 m\n'); // moveTo
+    expect(ops).toContain('100 0 l\n'); // lineTo
     expect(ops).toContain('100 100 l\n'); // lineTo
-    expect(ops).toContain('h\n');         // closePath
+    expect(ops).toContain('h\n'); // closePath
 
     // Default painting: fill
     expect(ops).toContain('f\n');

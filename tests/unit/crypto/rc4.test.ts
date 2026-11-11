@@ -90,11 +90,15 @@ describe('rc4', () => {
   });
 
   it('should throw for empty key', () => {
-    expect(() => rc4(new Uint8Array(0), new Uint8Array([1]))).toThrow('RC4 key length must be 1-256 bytes');
+    expect(() => rc4(new Uint8Array(0), new Uint8Array([1]))).toThrow(
+      'RC4 key length must be 1-256 bytes',
+    );
   });
 
   it('should throw for key longer than 256 bytes', () => {
-    expect(() => rc4(new Uint8Array(257), new Uint8Array([1]))).toThrow('RC4 key length must be 1-256 bytes');
+    expect(() => rc4(new Uint8Array(257), new Uint8Array([1]))).toThrow(
+      'RC4 key length must be 1-256 bytes',
+    );
   });
 
   it('should produce different ciphertext with different keys', () => {

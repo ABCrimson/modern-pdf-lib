@@ -24,16 +24,18 @@ import { createPdf, PageSizes, rgb } from '../../src/index.js';
 const encoder = new TextEncoder();
 
 /** Build a full valid XMP block with PDF/A identification. */
-function buildXmpBlock(options: {
-  part?: number;
-  conformance?: string;
-  creatorTool?: string;
-  createDate?: string;
-  modifyDate?: string;
-  producer?: string;
-  title?: string;
-  includeNamespace?: boolean;
-} = {}): string {
+function buildXmpBlock(
+  options: {
+    part?: number;
+    conformance?: string;
+    creatorTool?: string;
+    createDate?: string;
+    modifyDate?: string;
+    producer?: string;
+    title?: string;
+    includeNamespace?: boolean;
+  } = {},
+): string {
   const {
     part,
     conformance,
@@ -51,17 +53,23 @@ function buildXmpBlock(options: {
     'xmlns:dc="http://purl.org/dc/elements/1.1/"',
     'xmlns:xmp="http://ns.adobe.com/xap/1.0/"',
     'xmlns:pdf="http://ns.adobe.com/pdf/1.3/"',
-  ].filter(Boolean).join('\n      ');
+  ]
+    .filter(Boolean)
+    .join('\n      ');
 
   const fields: string[] = [];
   if (part !== undefined) fields.push(`      <pdfaid:part>${part}</pdfaid:part>`);
-  if (conformance !== undefined) fields.push(`      <pdfaid:conformance>${conformance}</pdfaid:conformance>`);
-  if (creatorTool !== undefined) fields.push(`      <xmp:CreatorTool>${creatorTool}</xmp:CreatorTool>`);
+  if (conformance !== undefined)
+    fields.push(`      <pdfaid:conformance>${conformance}</pdfaid:conformance>`);
+  if (creatorTool !== undefined)
+    fields.push(`      <xmp:CreatorTool>${creatorTool}</xmp:CreatorTool>`);
   if (createDate !== undefined) fields.push(`      <xmp:CreateDate>${createDate}</xmp:CreateDate>`);
   if (modifyDate !== undefined) fields.push(`      <xmp:ModifyDate>${modifyDate}</xmp:ModifyDate>`);
   if (producer !== undefined) fields.push(`      <pdf:Producer>${producer}</pdf:Producer>`);
   if (title !== undefined) {
-    fields.push(`      <dc:title><rdf:Alt><rdf:li xml:lang="x-default">${title}</rdf:li></rdf:Alt></dc:title>`);
+    fields.push(
+      `      <dc:title><rdf:Alt><rdf:li xml:lang="x-default">${title}</rdf:li></rdf:Alt></dc:title>`,
+    );
   }
 
   return [

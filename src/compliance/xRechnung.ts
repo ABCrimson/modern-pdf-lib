@@ -64,8 +64,7 @@ const XRECHNUNG_GUIDELINE_URN =
   'urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0';
 
 /** Order-X EN 16931 guideline URN (Cross Industry Order, BASIC profile). */
-const ORDER_X_GUIDELINE_URN =
-  'urn:order-x.eu:1p0:basic';
+const ORDER_X_GUIDELINE_URN = 'urn:order-x.eu:1p0:basic';
 
 /** Invoice type code 380 = "Commercial invoice" (UNTDID 1001). */
 const COMMERCIAL_INVOICE_TYPE_CODE = '380';
@@ -189,26 +188,18 @@ function renderParty(party: InvoiceParty, indent: string): string {
   const out: string[] = [];
   out.push(`${indent}<ram:Name>${escapeXml(party.name)}</ram:Name>`);
   out.push(`${indent}<ram:PostalTradeAddress>`);
-  out.push(
-    `${indent}  <ram:CountryID>${escapeXml(party.countryCode)}</ram:CountryID>`,
-  );
+  out.push(`${indent}  <ram:CountryID>${escapeXml(party.countryCode)}</ram:CountryID>`);
   out.push(`${indent}</ram:PostalTradeAddress>`);
   if (party.vatId !== undefined && party.vatId !== '') {
     out.push(`${indent}<ram:SpecifiedTaxRegistration>`);
-    out.push(
-      `${indent}  <ram:ID schemeID="VA">${escapeXml(party.vatId)}</ram:ID>`,
-    );
+    out.push(`${indent}  <ram:ID schemeID="VA">${escapeXml(party.vatId)}</ram:ID>`);
     out.push(`${indent}</ram:SpecifiedTaxRegistration>`);
   }
   return out.join('\n');
 }
 
 /** Render a single line item block. */
-function renderLine(
-  line: InvoiceLine,
-  index: number,
-  currency: string,
-): string {
+function renderLine(line: InvoiceLine, index: number, currency: string): string {
   const net = line.quantity * line.unitPrice;
   const out: string[] = [];
   out.push('    <ram:IncludedSupplyChainTradeLineItem>');
@@ -220,9 +211,7 @@ function renderLine(
   out.push('      </ram:SpecifiedTradeProduct>');
   out.push('      <ram:SpecifiedLineTradeAgreement>');
   out.push('        <ram:NetPriceProductTradePrice>');
-  out.push(
-    `          <ram:ChargeAmount>${formatAmount(line.unitPrice)}</ram:ChargeAmount>`,
-  );
+  out.push(`          <ram:ChargeAmount>${formatAmount(line.unitPrice)}</ram:ChargeAmount>`);
   out.push('        </ram:NetPriceProductTradePrice>');
   out.push('      </ram:SpecifiedLineTradeAgreement>');
   out.push('      <ram:SpecifiedLineTradeDelivery>');
@@ -233,9 +222,7 @@ function renderLine(
   out.push('      <ram:SpecifiedLineTradeSettlement>');
   out.push('        <ram:ApplicableTradeTax>');
   out.push('          <ram:TypeCode>VAT</ram:TypeCode>');
-  out.push(
-    `          <ram:CategoryCode>${VAT_CATEGORY_STANDARD}</ram:CategoryCode>`,
-  );
+  out.push(`          <ram:CategoryCode>${VAT_CATEGORY_STANDARD}</ram:CategoryCode>`);
   out.push(
     `          <ram:RateApplicablePercent>${formatPercent(line.taxPercent)}</ram:RateApplicablePercent>`,
   );
@@ -261,9 +248,7 @@ function renderTaxGroup(group: TaxGroup, currency: string): string {
   out.push(
     `        <ram:BasisAmount currencyID="${escapeXml(currency)}">${formatAmount(group.basisAmount)}</ram:BasisAmount>`,
   );
-  out.push(
-    `        <ram:CategoryCode>${VAT_CATEGORY_STANDARD}</ram:CategoryCode>`,
-  );
+  out.push(`        <ram:CategoryCode>${VAT_CATEGORY_STANDARD}</ram:CategoryCode>`);
   out.push(
     `        <ram:RateApplicablePercent>${formatPercent(group.taxPercent)}</ram:RateApplicablePercent>`,
   );
@@ -272,10 +257,7 @@ function renderTaxGroup(group: TaxGroup, currency: string): string {
 }
 
 /** Render the monetary summation block for the header settlement. */
-function renderMonetarySummation(
-  totals: DocumentTotals,
-  currency: string,
-): string {
+function renderMonetarySummation(totals: DocumentTotals, currency: string): string {
   const out: string[] = [];
   out.push('      <ram:SpecifiedTradeSettlementHeaderMonetarySummation>');
   out.push(
@@ -312,10 +294,7 @@ function renderMonetarySummation(
  * @param options - XRechnung-specific options (Leitweg-ID, buyer reference).
  * @returns A well-formed CII XML document string.
  */
-export function generateXRechnungCii(
-  invoice: Invoice,
-  options: XRechnungOptions = {},
-): string {
+export function generateXRechnungCii(invoice: Invoice, options: XRechnungOptions = {}): string {
   const totals = computeTotals(invoice.lines);
   const currency = invoice.currency;
   const buyerReference = options.buyerReference ?? options.leitwegId;
@@ -357,9 +336,7 @@ export function generateXRechnungCii(
   // Header trade agreement (BuyerReference / Leitweg-ID + parties).
   out.push('    <ram:ApplicableHeaderTradeAgreement>');
   if (buyerReference !== undefined && buyerReference !== '') {
-    out.push(
-      `      <ram:BuyerReference>${escapeXml(buyerReference)}</ram:BuyerReference>`,
-    );
+    out.push(`      <ram:BuyerReference>${escapeXml(buyerReference)}</ram:BuyerReference>`);
   }
   out.push('      <ram:SellerTradeParty>');
   out.push(renderParty(invoice.seller, '        '));
@@ -373,9 +350,7 @@ export function generateXRechnungCii(
 
   // Header trade settlement (tax + totals).
   out.push('    <ram:ApplicableHeaderTradeSettlement>');
-  out.push(
-    `      <ram:InvoiceCurrencyCode>${escapeXml(currency)}</ram:InvoiceCurrencyCode>`,
-  );
+  out.push(`      <ram:InvoiceCurrencyCode>${escapeXml(currency)}</ram:InvoiceCurrencyCode>`);
   for (const group of totals.taxGroups) {
     out.push(renderTaxGroup(group, currency));
   }
@@ -406,10 +381,7 @@ export function generateXRechnungCii(
  * @param orderType - The kind of Order-X document to produce.
  * @returns A well-formed Order-X CII XML document string.
  */
-export function generateOrderX(
-  invoice: Invoice,
-  orderType: OrderXType,
-): string {
+export function generateOrderX(invoice: Invoice, orderType: OrderXType): string {
   const totals = computeTotals(invoice.lines);
   const currency = invoice.currency;
   const typeCode = ORDER_X_TYPE_CODES[orderType];
@@ -462,9 +434,7 @@ export function generateOrderX(
 
   // Header trade settlement (currency + tax + totals).
   out.push('    <ram:ApplicableHeaderTradeSettlement>');
-  out.push(
-    `      <ram:OrderCurrencyCode>${escapeXml(currency)}</ram:OrderCurrencyCode>`,
-  );
+  out.push(`      <ram:OrderCurrencyCode>${escapeXml(currency)}</ram:OrderCurrencyCode>`);
   for (const group of totals.taxGroups) {
     out.push(renderTaxGroup(group, currency));
   }

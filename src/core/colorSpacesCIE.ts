@@ -14,13 +14,7 @@
  * L*a*b* colour to sRGB for previewing / rasterisation purposes.
  */
 
-import {
-  PdfArray,
-  PdfDict,
-  PdfName,
-  PdfNumber,
-  type PdfObject,
-} from './pdfObjects.js';
+import { PdfArray, PdfDict, PdfName, PdfNumber, type PdfObject } from './pdfObjects.js';
 
 // ---------------------------------------------------------------------------
 // Parameter interfaces
@@ -71,11 +65,7 @@ function spaceArray(name: string, dict: PdfDict): PdfArray {
 }
 
 /** Set a `[number, number, number]` triple entry on a dict. */
-function setTriple(
-  dict: PdfDict,
-  key: string,
-  value: readonly [number, number, number],
-): void {
+function setTriple(dict: PdfDict, key: string, value: readonly [number, number, number]): void {
   dict.set(key, PdfArray.fromNumbers([value[0], value[1], value[2]]));
 }
 
@@ -140,10 +130,7 @@ export function buildLab(p: LabParams): PdfArray {
     setTriple(dict, '/BlackPoint', p.blackPoint);
   }
   if (p.range !== undefined) {
-    dict.set(
-      '/Range',
-      PdfArray.fromNumbers([p.range[0], p.range[1], p.range[2], p.range[3]]),
-    );
+    dict.set('/Range', PdfArray.fromNumbers([p.range[0], p.range[1], p.range[2], p.range[3]]));
   }
   return spaceArray('/Lab', dict);
 }
@@ -156,9 +143,7 @@ export function buildLab(p: LabParams): PdfArray {
  * The CIE standard D50 white point (the default for ICC / PDF Lab data),
  * normalised so that `Y = 1`.
  */
-const D50_WHITE_POINT: readonly [number, number, number] = [
-  0.9642, 1.0, 0.8249,
-];
+const D50_WHITE_POINT: readonly [number, number, number] = [0.9642, 1.0, 0.8249];
 
 /** CIE constant δ = 6/29; the linear/cubic break is at t ≤ δ. */
 const LAB_DELTA = 6 / 29;
@@ -173,10 +158,7 @@ function labInverseF(t: number): number {
 /** Apply the sRGB transfer function (linear → companded), input clamped 0..1. */
 function linearToSrgb(c: number): number {
   const clamped = c < 0 ? 0 : c > 1 ? 1 : c;
-  const v =
-    clamped <= 0.0031308
-      ? 12.92 * clamped
-      : 1.055 * clamped ** (1 / 2.4) - 0.055;
+  const v = clamped <= 0.0031308 ? 12.92 * clamped : 1.055 * clamped ** (1 / 2.4) - 0.055;
   return v < 0 ? 0 : v > 1 ? 1 : v;
 }
 

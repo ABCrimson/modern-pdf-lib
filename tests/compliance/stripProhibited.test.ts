@@ -15,10 +15,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  stripProhibitedFeatures,
-  countOccurrences,
-} from '../../src/compliance/stripProhibited.js';
+import { stripProhibitedFeatures, countOccurrences } from '../../src/compliance/stripProhibited.js';
 import { validatePdfA } from '../../src/compliance/pdfA.js';
 
 // ---------------------------------------------------------------------------
@@ -61,9 +58,7 @@ function buildPdf(extraObjects: string = ''): Uint8Array {
 describe('stripProhibitedFeatures', () => {
   // 1. Strips /JavaScript actions
   it('strips /S /JavaScript action entries', () => {
-    const pdf = buildPdf(
-      '4 0 obj\n<< /Type /Action /S /JavaScript /JS (alert("hi")) >>\nendobj',
-    );
+    const pdf = buildPdf('4 0 obj\n<< /Type /Action /S /JavaScript /JS (alert("hi")) >>\nendobj');
     const result = stripProhibitedFeatures(pdf);
 
     expect(result.modified).toBe(true);
@@ -75,9 +70,7 @@ describe('stripProhibitedFeatures', () => {
 
   // 2. Strips /JS entries (hex-string variant)
   it('strips /JS hex-string entries', () => {
-    const pdf = buildPdf(
-      '4 0 obj\n<< /Type /Action /S /JavaScript /JS <616C657274> >>\nendobj',
-    );
+    const pdf = buildPdf('4 0 obj\n<< /Type /Action /S /JavaScript /JS <616C657274> >>\nendobj');
     const result = stripProhibitedFeatures(pdf);
 
     expect(result.modified).toBe(true);
@@ -87,9 +80,7 @@ describe('stripProhibitedFeatures', () => {
 
   // 3. Strips /Launch actions
   it('strips /S /Launch action entries', () => {
-    const pdf = buildPdf(
-      '4 0 obj\n<< /Type /Action /S /Launch /F (cmd.exe) >>\nendobj',
-    );
+    const pdf = buildPdf('4 0 obj\n<< /Type /Action /S /Launch /F (cmd.exe) >>\nendobj');
     const result = stripProhibitedFeatures(pdf);
 
     expect(result.modified).toBe(true);
@@ -100,9 +91,7 @@ describe('stripProhibitedFeatures', () => {
 
   // 4. Strips /Sound actions
   it('strips /S /Sound action entries', () => {
-    const pdf = buildPdf(
-      '4 0 obj\n<< /Type /Action /S /Sound /Sound 5 0 R >>\nendobj',
-    );
+    const pdf = buildPdf('4 0 obj\n<< /Type /Action /S /Sound /Sound 5 0 R >>\nendobj');
     const result = stripProhibitedFeatures(pdf);
 
     expect(result.modified).toBe(true);
@@ -113,9 +102,7 @@ describe('stripProhibitedFeatures', () => {
 
   // 5. Strips /Movie actions
   it('strips /S /Movie action entries', () => {
-    const pdf = buildPdf(
-      '4 0 obj\n<< /Type /Action /S /Movie /T (clip) >>\nendobj',
-    );
+    const pdf = buildPdf('4 0 obj\n<< /Type /Action /S /Movie /T (clip) >>\nendobj');
     const result = stripProhibitedFeatures(pdf);
 
     expect(result.modified).toBe(true);
@@ -126,9 +113,7 @@ describe('stripProhibitedFeatures', () => {
 
   // 6. Strips /RichMedia
   it('strips /Subtype /RichMedia annotation entries', () => {
-    const pdf = buildPdf(
-      '4 0 obj\n<< /Type /Annot /Subtype /RichMedia >>\nendobj',
-    );
+    const pdf = buildPdf('4 0 obj\n<< /Type /Annot /Subtype /RichMedia >>\nendobj');
     const result = stripProhibitedFeatures(pdf);
 
     expect(result.modified).toBe(true);
@@ -153,11 +138,13 @@ describe('stripProhibitedFeatures', () => {
 
   // 8. Returns correct strip report
   it('returns accurate strip report with type and count', () => {
-    const pdf = buildPdf([
-      '4 0 obj\n<< /S /JavaScript /JS (a) >>\nendobj',
-      '5 0 obj\n<< /S /Launch /F (x) >>\nendobj',
-      '6 0 obj\n<< /Subtype /RichMedia >>\nendobj',
-    ].join('\n'));
+    const pdf = buildPdf(
+      [
+        '4 0 obj\n<< /S /JavaScript /JS (a) >>\nendobj',
+        '5 0 obj\n<< /S /Launch /F (x) >>\nendobj',
+        '6 0 obj\n<< /Subtype /RichMedia >>\nendobj',
+      ].join('\n'),
+    );
     const result = stripProhibitedFeatures(pdf);
 
     expect(result.modified).toBe(true);
@@ -176,9 +163,7 @@ describe('stripProhibitedFeatures', () => {
 
   // 9. Respects options (can disable individual stripping)
   it('respects stripJavaScript: false option', () => {
-    const pdf = buildPdf(
-      '4 0 obj\n<< /S /JavaScript /JS (code) >>\nendobj',
-    );
+    const pdf = buildPdf('4 0 obj\n<< /S /JavaScript /JS (code) >>\nendobj');
     const result = stripProhibitedFeatures(pdf, { stripJavaScript: false });
 
     // JavaScript should NOT be stripped
@@ -188,9 +173,7 @@ describe('stripProhibitedFeatures', () => {
   });
 
   it('respects stripLaunch: false option', () => {
-    const pdf = buildPdf(
-      '4 0 obj\n<< /S /Launch /F (x) >>\nendobj',
-    );
+    const pdf = buildPdf('4 0 obj\n<< /S /Launch /F (x) >>\nendobj');
     const result = stripProhibitedFeatures(pdf, { stripLaunch: false });
 
     const text = decoder.decode(result.bytes);
@@ -199,9 +182,7 @@ describe('stripProhibitedFeatures', () => {
   });
 
   it('respects stripSound: false option', () => {
-    const pdf = buildPdf(
-      '4 0 obj\n<< /S /Sound /Sound 5 0 R >>\nendobj',
-    );
+    const pdf = buildPdf('4 0 obj\n<< /S /Sound /Sound 5 0 R >>\nendobj');
     const result = stripProhibitedFeatures(pdf, { stripSound: false });
 
     const text = decoder.decode(result.bytes);
@@ -209,9 +190,7 @@ describe('stripProhibitedFeatures', () => {
   });
 
   it('respects stripMovie: false option', () => {
-    const pdf = buildPdf(
-      '4 0 obj\n<< /S /Movie /T (clip) >>\nendobj',
-    );
+    const pdf = buildPdf('4 0 obj\n<< /S /Movie /T (clip) >>\nendobj');
     const result = stripProhibitedFeatures(pdf, { stripMovie: false });
 
     const text = decoder.decode(result.bytes);
@@ -219,9 +198,7 @@ describe('stripProhibitedFeatures', () => {
   });
 
   it('respects stripRichMedia: false option', () => {
-    const pdf = buildPdf(
-      '4 0 obj\n<< /Subtype /RichMedia >>\nendobj',
-    );
+    const pdf = buildPdf('4 0 obj\n<< /Subtype /RichMedia >>\nendobj');
     const result = stripProhibitedFeatures(pdf, { stripRichMedia: false });
 
     const text = decoder.decode(result.bytes);
@@ -254,11 +231,13 @@ describe('stripProhibitedFeatures', () => {
 
   // 12. Handles multiple JS actions
   it('strips multiple JavaScript actions in the same document', () => {
-    const pdf = buildPdf([
-      '4 0 obj\n<< /S /JavaScript /JS (alert(1)) >>\nendobj',
-      '5 0 obj\n<< /S /JavaScript /JS (alert(2)) >>\nendobj',
-      '6 0 obj\n<< /S /JavaScript /JS <48656C6C6F> >>\nendobj',
-    ].join('\n'));
+    const pdf = buildPdf(
+      [
+        '4 0 obj\n<< /S /JavaScript /JS (alert(1)) >>\nendobj',
+        '5 0 obj\n<< /S /JavaScript /JS (alert(2)) >>\nendobj',
+        '6 0 obj\n<< /S /JavaScript /JS <48656C6C6F> >>\nendobj',
+      ].join('\n'),
+    );
     const result = stripProhibitedFeatures(pdf);
 
     expect(result.modified).toBe(true);

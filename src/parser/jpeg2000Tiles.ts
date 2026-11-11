@@ -196,25 +196,23 @@ export function parseTileInfo(data: Uint8Array): TileGridInfo {
   // Parse SIZ fields
   // const lsiz = readU16(data, base);      // marker length
   // const rsiz = readU16(data, base + 2);  // capabilities
-  const xsiz = readU32(data, base + 4);    // image width (reference grid)
-  const ysiz = readU32(data, base + 8);    // image height
-  const xosiz = readU32(data, base + 12);  // image origin X
-  const yosiz = readU32(data, base + 16);  // image origin Y
-  const xtsiz = readU32(data, base + 20);  // tile width
-  const ytsiz = readU32(data, base + 24);  // tile height
+  const xsiz = readU32(data, base + 4); // image width (reference grid)
+  const ysiz = readU32(data, base + 8); // image height
+  const xosiz = readU32(data, base + 12); // image origin X
+  const yosiz = readU32(data, base + 16); // image origin Y
+  const xtsiz = readU32(data, base + 20); // tile width
+  const ytsiz = readU32(data, base + 24); // tile height
   const xtosiz = readU32(data, base + 28); // tile origin X
   const ytosiz = readU32(data, base + 32); // tile origin Y
-  const csiz = readU16(data, base + 36);   // number of components
+  const csiz = readU16(data, base + 36); // number of components
 
   // Actual image dimensions
   const imageWidth = xsiz - xosiz;
   const imageHeight = ysiz - yosiz;
 
   // Number of tiles
-  const tilesX =
-    xtsiz > 0 ? Math.ceil((xsiz - xtosiz) / xtsiz) : 1;
-  const tilesY =
-    ytsiz > 0 ? Math.ceil((ysiz - ytosiz) / ytsiz) : 1;
+  const tilesX = xtsiz > 0 ? Math.ceil((xsiz - xtosiz) / xtsiz) : 1;
+  const tilesY = ytsiz > 0 ? Math.ceil((ysiz - ytosiz) / ytsiz) : 1;
 
   // Read first component Ssiz for bitsPerComponent
   let bitsPerComponent = 8;
@@ -303,8 +301,7 @@ function findTileParts(data: Uint8Array, csStart: number): TilePartEntry[] {
         }
         // Skip other markers between SOT and SOD
         if (data[sodOffset] === 0xff && data[sodOffset + 1] !== 0x93) {
-          const mLen =
-            sodOffset + 3 < data.length ? readU16(data, sodOffset + 2) : 0;
+          const mLen = sodOffset + 3 < data.length ? readU16(data, sodOffset + 2) : 0;
           sodOffset += 2 + mLen;
         } else {
           sodOffset++;
@@ -315,8 +312,7 @@ function findTileParts(data: Uint8Array, csStart: number): TilePartEntry[] {
 
       // Tile-part length: if psot > 0 it covers from SOT start; if 0
       // it means "until end of codestream"
-      const totalTilePartLen =
-        psot > 0 ? psot : data.length - offset;
+      const totalTilePartLen = psot > 0 ? psot : data.length - offset;
       const dataEnd = offset + totalTilePartLen;
       const tileDataLength = Math.max(0, dataEnd - dataStart);
 
@@ -374,12 +370,7 @@ function rectsOverlap(
   a: { x: number; y: number; width: number; height: number },
   b: { x: number; y: number; width: number; height: number },
 ): boolean {
-  return (
-    a.x < b.x + b.width &&
-    a.x + a.width > b.x &&
-    a.y < b.y + b.height &&
-    a.y + a.height > b.y
-  );
+  return a.x < b.x + b.width && a.x + a.width > b.x && a.y < b.y + b.height && a.y + a.height > b.y;
 }
 
 // ---------------------------------------------------------------------------
@@ -410,9 +401,7 @@ export function decodeTile(data: Uint8Array, tileIndex: number): TileData {
   const totalTiles = gridInfo.tilesX * gridInfo.tilesY;
 
   if (tileIndex < 0 || tileIndex >= totalTiles) {
-    throw new Error(
-      `JPEG2000 Tiles: tile index ${tileIndex} out of range (0–${totalTiles - 1})`,
-    );
+    throw new Error(`JPEG2000 Tiles: tile index ${tileIndex} out of range (0–${totalTiles - 1})`);
   }
 
   const col = tileIndex % gridInfo.tilesX;
@@ -435,24 +424,19 @@ export function decodeTile(data: Uint8Array, tileIndex: number): TileData {
   let writeOffset = 0;
   for (const p of parts) {
     if (p.dataOffset + p.dataLength <= data.length) {
-      tileRawData.set(
-        data.subarray(p.dataOffset, p.dataOffset + p.dataLength),
-        writeOffset,
-      );
+      tileRawData.set(data.subarray(p.dataOffset, p.dataOffset + p.dataLength), writeOffset);
     }
     writeOffset += p.dataLength;
   }
 
   // Compute expected decoded size
   const bytesPerSample = gridInfo.bitsPerComponent > 8 ? 2 : 1;
-  const decodedSize =
-    rect.width * rect.height * gridInfo.components * bytesPerSample;
+  const decodedSize = rect.width * rect.height * gridInfo.components * bytesPerSample;
 
   // If we have tile data from the codestream, return it as-is (the caller
   // or WASM bridge performs wavelet decoding).  For the JS-only path,
   // return a zero-filled buffer representing decoded pixels.
-  const decodedData =
-    tileRawData.length > 0 ? tileRawData : new Uint8Array(decodedSize);
+  const decodedData = tileRawData.length > 0 ? tileRawData : new Uint8Array(decodedSize);
 
   return {
     index: tileIndex,
@@ -484,10 +468,7 @@ export function decodeTile(data: Uint8Array, tileIndex: number): TileData {
  * @returns Decoded pixel data covering the requested region.
  * @throws If the region is entirely outside the image bounds.
  */
-export function decodeTileRegion(
-  data: Uint8Array,
-  region: Region,
-): Uint8Array {
+export function decodeTileRegion(data: Uint8Array, region: Region): Uint8Array {
   const gridInfo = parseTileInfo(data);
 
   // Clamp region to image bounds
@@ -497,9 +478,7 @@ export function decodeTileRegion(
   const rh = Math.min(region.height, gridInfo.imageHeight - ry);
 
   if (rw <= 0 || rh <= 0) {
-    throw new Error(
-      'JPEG2000 Tiles: requested region is outside image bounds',
-    );
+    throw new Error('JPEG2000 Tiles: requested region is outside image bounds');
   }
 
   const regionRect = { x: rx, y: ry, width: rw, height: rh };
@@ -548,10 +527,7 @@ export function decodeTileRegion(
       // Only copy if tile data is large enough (decoded tile)
       if (srcRowStart + srcColStart + copyLen <= tile.data.length) {
         output.set(
-          tile.data.subarray(
-            srcRowStart + srcColStart,
-            srcRowStart + srcColStart + copyLen,
-          ),
+          tile.data.subarray(srcRowStart + srcColStart, srcRowStart + srcColStart + copyLen),
           dstRowStart + dstColStart,
         );
       }
@@ -576,10 +552,7 @@ export function decodeTileRegion(
  * @returns A `Uint8Array` containing the assembled image pixels
  *   (interleaved components, row-major order).
  */
-export function assembleTiles(
-  tiles: TileData[],
-  gridInfo: TileGridInfo,
-): Uint8Array {
+export function assembleTiles(tiles: TileData[], gridInfo: TileGridInfo): Uint8Array {
   const bytesPerSample = gridInfo.bitsPerComponent > 8 ? 2 : 1;
   const bytesPerPixel = gridInfo.components * bytesPerSample;
   const rowBytes = gridInfo.imageWidth * bytesPerPixel;
@@ -594,10 +567,7 @@ export function assembleTiles(
       const copyLen = Math.min(tileRowBytes, tile.data.length - srcStart);
 
       if (copyLen > 0 && srcStart < tile.data.length) {
-        output.set(
-          tile.data.subarray(srcStart, srcStart + copyLen),
-          dstStart,
-        );
+        output.set(tile.data.subarray(srcStart, srcStart + copyLen), dstStart);
       }
     }
   }

@@ -125,9 +125,7 @@ const HELVETICA_BOLD_OBLIQUE_WIDTHS: readonly number[] = HELVETICA_BOLD_WIDTHS;
 // Width data — Courier family (all fixed-width 600)
 // ---------------------------------------------------------------------------
 
-const COURIER_WIDTHS: readonly number[] = Array.from({ length: 256 }, (_, i) =>
-  i < 32 ? 0 : 600,
-);
+const COURIER_WIDTHS: readonly number[] = Array.from({ length: 256 }, (_, i) => (i < 32 ? 0 : 600));
 
 const COURIER_BOLD_WIDTHS: readonly number[] = COURIER_WIDTHS;
 const COURIER_OBLIQUE_WIDTHS: readonly number[] = COURIER_WIDTHS;
@@ -310,73 +308,179 @@ function def(
 export const STANDARD_FONTS: ReadonlyMap<string, StandardFont> = new Map<string, StandardFont>([
   [
     'Helvetica',
-    def('Helvetica', HELVETICA_WIDTHS, 718, -207, 0, 718, 523,
-      [-166, -225, 1000, 931], 88, 0, 32),
+    def('Helvetica', HELVETICA_WIDTHS, 718, -207, 0, 718, 523, [-166, -225, 1000, 931], 88, 0, 32),
   ],
   [
     'Helvetica-Bold',
-    def('Helvetica-Bold', HELVETICA_BOLD_WIDTHS, 718, -207, 0, 718, 532,
-      [-170, -228, 1003, 962], 140, 0, 32),
+    def(
+      'Helvetica-Bold',
+      HELVETICA_BOLD_WIDTHS,
+      718,
+      -207,
+      0,
+      718,
+      532,
+      [-170, -228, 1003, 962],
+      140,
+      0,
+      32,
+    ),
   ],
   [
     'Helvetica-Oblique',
-    def('Helvetica-Oblique', HELVETICA_OBLIQUE_WIDTHS, 718, -207, 0, 718, 523,
-      [-170, -225, 1116, 931], 88, -12, 96),
+    def(
+      'Helvetica-Oblique',
+      HELVETICA_OBLIQUE_WIDTHS,
+      718,
+      -207,
+      0,
+      718,
+      523,
+      [-170, -225, 1116, 931],
+      88,
+      -12,
+      96,
+    ),
   ],
   [
     'Helvetica-BoldOblique',
-    def('Helvetica-BoldOblique', HELVETICA_BOLD_OBLIQUE_WIDTHS, 718, -207, 0, 718, 532,
-      [-174, -228, 1114, 962], 140, -12, 96),
+    def(
+      'Helvetica-BoldOblique',
+      HELVETICA_BOLD_OBLIQUE_WIDTHS,
+      718,
+      -207,
+      0,
+      718,
+      532,
+      [-174, -228, 1114, 962],
+      140,
+      -12,
+      96,
+    ),
   ],
   [
     'Courier',
-    def('Courier', COURIER_WIDTHS, 629, -157, 0, 562, 426,
-      [-23, -250, 715, 805], 51, 0, 33),
+    def('Courier', COURIER_WIDTHS, 629, -157, 0, 562, 426, [-23, -250, 715, 805], 51, 0, 33),
   ],
   [
     'Courier-Bold',
-    def('Courier-Bold', COURIER_BOLD_WIDTHS, 629, -157, 0, 562, 439,
-      [-113, -250, 749, 801], 106, 0, 33),
+    def(
+      'Courier-Bold',
+      COURIER_BOLD_WIDTHS,
+      629,
+      -157,
+      0,
+      562,
+      439,
+      [-113, -250, 749, 801],
+      106,
+      0,
+      33,
+    ),
   ],
   [
     'Courier-Oblique',
-    def('Courier-Oblique', COURIER_OBLIQUE_WIDTHS, 629, -157, 0, 562, 426,
-      [-27, -250, 849, 805], 51, -12, 97),
+    def(
+      'Courier-Oblique',
+      COURIER_OBLIQUE_WIDTHS,
+      629,
+      -157,
+      0,
+      562,
+      426,
+      [-27, -250, 849, 805],
+      51,
+      -12,
+      97,
+    ),
   ],
   [
     'Courier-BoldOblique',
-    def('Courier-BoldOblique', COURIER_BOLD_OBLIQUE_WIDTHS, 629, -157, 0, 562, 439,
-      [-57, -250, 869, 801], 106, -12, 97),
+    def(
+      'Courier-BoldOblique',
+      COURIER_BOLD_OBLIQUE_WIDTHS,
+      629,
+      -157,
+      0,
+      562,
+      439,
+      [-57, -250, 869, 801],
+      106,
+      -12,
+      97,
+    ),
   ],
   [
     'Times-Roman',
-    def('Times-Roman', TIMES_ROMAN_WIDTHS, 683, -217, 0, 662, 450,
-      [-168, -218, 1000, 898], 84, 0, 34),
+    def(
+      'Times-Roman',
+      TIMES_ROMAN_WIDTHS,
+      683,
+      -217,
+      0,
+      662,
+      450,
+      [-168, -218, 1000, 898],
+      84,
+      0,
+      34,
+    ),
   ],
   [
     'Times-Bold',
-    def('Times-Bold', TIMES_BOLD_WIDTHS, 683, -217, 0, 676, 461,
-      [-168, -218, 1000, 935], 139, 0, 34),
+    def(
+      'Times-Bold',
+      TIMES_BOLD_WIDTHS,
+      683,
+      -217,
+      0,
+      676,
+      461,
+      [-168, -218, 1000, 935],
+      139,
+      0,
+      34,
+    ),
   ],
   [
     'Times-Italic',
-    def('Times-Italic', TIMES_ITALIC_WIDTHS, 683, -217, 0, 653, 441,
-      [-169, -217, 1010, 883], 76, -15.5, 98),
+    def(
+      'Times-Italic',
+      TIMES_ITALIC_WIDTHS,
+      683,
+      -217,
+      0,
+      653,
+      441,
+      [-169, -217, 1010, 883],
+      76,
+      -15.5,
+      98,
+    ),
   ],
   [
     'Times-BoldItalic',
-    def('Times-BoldItalic', TIMES_BOLD_ITALIC_WIDTHS, 683, -217, 0, 669, 462,
-      [-200, -218, 996, 921], 121, -15, 98),
+    def(
+      'Times-BoldItalic',
+      TIMES_BOLD_ITALIC_WIDTHS,
+      683,
+      -217,
+      0,
+      669,
+      462,
+      [-200, -218, 996, 921],
+      121,
+      -15,
+      98,
+    ),
   ],
   [
     'Symbol',
-    def('Symbol', SYMBOL_WIDTHS, 1010, -293, 0, 1010, 0,
-      [-180, -293, 1090, 1010], 85, 0, 4),
+    def('Symbol', SYMBOL_WIDTHS, 1010, -293, 0, 1010, 0, [-180, -293, 1090, 1010], 85, 0, 4),
   ],
   [
     'ZapfDingbats',
-    def('ZapfDingbats', ZAPFDINGBATS_WIDTHS, 820, -143, 0, 820, 0,
-      [-1, -143, 981, 820], 90, 0, 4),
+    def('ZapfDingbats', ZAPFDINGBATS_WIDTHS, 820, -143, 0, 820, 0, [-1, -143, 981, 820], 90, 0, 4),
   ],
 ]);
 
@@ -484,10 +588,7 @@ export function measureStandardText(
  * @param fontSize - The font size in points.
  * @returns The height (ascender - descender) in points.
  */
-export function standardFontHeight(
-  fontName: StandardFontName,
-  fontSize: number,
-): number {
+export function standardFontHeight(fontName: StandardFontName, fontSize: number): number {
   const font = STANDARD_FONTS.get(fontName);
   if (!font) {
     throw new Error(`Unknown standard font: ${fontName}`);

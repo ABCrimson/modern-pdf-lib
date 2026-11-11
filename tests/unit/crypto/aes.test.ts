@@ -148,9 +148,7 @@ describe('aesEncryptCBC / aesDecryptCBC', () => {
     // 16 (IV) + 17 (not a multiple of 16)
     const badData = randomBytes(33);
 
-    await expect(aesDecryptCBC(key, badData)).rejects.toThrow(
-      'AES-CBC ciphertext length',
-    );
+    await expect(aesDecryptCBC(key, badData)).rejects.toThrow('AES-CBC ciphertext length');
   });
 
   it('should handle binary data with all byte values', async () => {

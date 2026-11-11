@@ -31,9 +31,7 @@ export function calculateUpcCheckDigit(data: string): number {
     throw new Error(`UPC-A data must contain only digits: "${data}"`);
   }
   if (data.length !== 11) {
-    throw new Error(
-      `UPC-A check digit calculation requires 11 digits, got ${data.length}`,
-    );
+    throw new Error(`UPC-A check digit calculation requires 11 digits, got ${data.length}`);
   }
   // UPC-A is EAN-13 with a leading 0, so the check digit is the same
   // as for the 12-digit EAN-13 prefix "0" + data.
@@ -69,9 +67,7 @@ export function encodeUpcA(data: string): BarcodeMatrix {
     // Prepend '0' to get 13-digit EAN-13, let encodeEan13 validate check
     return encodeEan13('0' + data);
   } else {
-    throw new Error(
-      `UPC-A data must be 11 or 12 digits, got ${data.length}`,
-    );
+    throw new Error(`UPC-A data must be 11 or 12 digits, got ${data.length}`);
   }
 }
 

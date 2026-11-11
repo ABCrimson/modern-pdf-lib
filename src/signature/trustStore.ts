@@ -15,10 +15,7 @@
  */
 
 import { sha256 } from '../crypto/sha256.js';
-import {
-  parseDerTlv,
-} from './pkcs7.js';
-
+import { parseDerTlv } from './pkcs7.js';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -51,9 +48,7 @@ function extractSubjectDer(certDer: Uint8Array): Uint8Array {
   // serialNumber (idx), signature (idx+1), issuer (idx+2),
   // validity (idx+3), subject (idx+4)
   const subjectNode = tbsCert.children[idx + 4]!;
-  const subjectStart =
-    subjectNode.offset +
-    (tbsCert.data.byteOffset - certDer.byteOffset);
+  const subjectStart = subjectNode.offset + (tbsCert.data.byteOffset - certDer.byteOffset);
   return certDer.subarray(subjectStart, subjectStart + subjectNode.totalLength);
 }
 
@@ -70,9 +65,7 @@ function extractIssuerDer(certDer: Uint8Array): Uint8Array {
   }
 
   const issuerNode = tbsCert.children[idx + 2]!;
-  const issuerStart =
-    issuerNode.offset +
-    (tbsCert.data.byteOffset - certDer.byteOffset);
+  const issuerStart = issuerNode.offset + (tbsCert.data.byteOffset - certDer.byteOffset);
   return certDer.subarray(issuerStart, issuerStart + issuerNode.totalLength);
 }
 
@@ -215,9 +208,7 @@ export class TrustStore {
     await this._ready;
 
     for (const [key, entries] of this._certs) {
-      const idx = entries.findIndex((e) =>
-        compareBytes(e.serialBytes, serialNumber),
-      );
+      const idx = entries.findIndex((e) => compareBytes(e.serialBytes, serialNumber));
       if (idx !== -1) {
         entries.splice(idx, 1);
         this._size--;

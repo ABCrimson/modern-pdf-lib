@@ -29,17 +29,13 @@ export async function optimizeCommand(args: string[]): Promise<void> {
   }
 
   // Dynamic import to avoid loading the library at module scope
-  const [
-    { loadPdf },
-    { initJpegWasm },
-    { optimizeAllImages },
-    { deduplicateImages },
-  ] = await Promise.all([
-    import('../index.js'),
-    import('../wasm/jpeg/bridge.js'),
-    import('../assets/image/batchOptimize.js'),
-    import('../assets/image/deduplicateImages.js'),
-  ]);
+  const [{ loadPdf }, { initJpegWasm }, { optimizeAllImages }, { deduplicateImages }] =
+    await Promise.all([
+      import('../index.js'),
+      import('../wasm/jpeg/bridge.js'),
+      import('../assets/image/batchOptimize.js'),
+      import('../assets/image/deduplicateImages.js'),
+    ]);
 
   // Read input PDF
   const inputBytes = new Uint8Array(await readFile(parsed.input));
@@ -55,10 +51,7 @@ export async function optimizeCommand(args: string[]): Promise<void> {
   try {
     await initJpegWasm();
   } catch {
-    console.warn(
-      'Warning: JPEG WASM module not available. ' +
-        'Images will not be recompressed.',
-    );
+    console.warn('Warning: JPEG WASM module not available. ' + 'Images will not be recompressed.');
   }
 
   // Parse PDF
@@ -133,12 +126,8 @@ export async function optimizeCommand(args: string[]): Promise<void> {
   console.log('');
   console.log(`Images found:     ${report.totalImages}`);
   console.log(`Images optimized: ${report.optimizedImages}`);
-  console.log(
-    `Original size:    ${formatBytes(report.originalTotalBytes)}`,
-  );
-  console.log(
-    `Optimized size:   ${formatBytes(report.optimizedTotalBytes)}`,
-  );
+  console.log(`Original size:    ${formatBytes(report.originalTotalBytes)}`);
+  console.log(`Optimized size:   ${formatBytes(report.optimizedTotalBytes)}`);
   console.log(`Savings:          ${report.savings.toFixed(1)}%`);
   console.log(`Elapsed:          ${elapsedTotal}s`);
 
@@ -147,14 +136,9 @@ export async function optimizeCommand(args: string[]): Promise<void> {
     console.log('Per-image details:');
     for (const entry of report.perImage) {
       if (entry.skipped) {
-        console.log(
-          `  ${entry.name} (p${entry.pageIndex}): SKIP -- ${entry.reason}`,
-        );
+        console.log(`  ${entry.name} (p${entry.pageIndex}): SKIP -- ${entry.reason}`);
       } else {
-        const pct = (
-          ((entry.originalSize - entry.newSize) / entry.originalSize) *
-          100
-        ).toFixed(1);
+        const pct = (((entry.originalSize - entry.newSize) / entry.originalSize) * 100).toFixed(1);
         console.log(
           `  ${entry.name} (p${entry.pageIndex}): ` +
             `${formatBytes(entry.originalSize)} -> ${formatBytes(entry.newSize)} (-${pct}%)`,
@@ -169,13 +153,9 @@ export async function optimizeCommand(args: string[]): Promise<void> {
 
   const outputSize = outputBytes.length;
   const totalSavings =
-    inputSize > 0
-      ? (((inputSize - outputSize) / inputSize) * 100).toFixed(1)
-      : '0.0';
+    inputSize > 0 ? (((inputSize - outputSize) / inputSize) * 100).toFixed(1) : '0.0';
 
-  console.log(
-    `\n${formatBytes(inputSize)} → ${formatBytes(outputSize)} (−${totalSavings}%)`,
-  );
+  console.log(`\n${formatBytes(inputSize)} → ${formatBytes(outputSize)} (−${totalSavings}%)`);
 }
 
 // ---------------------------------------------------------------------------
@@ -284,7 +264,8 @@ function formatBytes(bytes: number): string {
 }
 
 function printOptimizeHelp(): void {
-  console.log(`
+  console.log(
+    `
 modern-pdf optimize — Optimize images in a PDF file
 
 Usage:
@@ -302,5 +283,6 @@ Options:
 Examples:
   modern-pdf optimize report.pdf report-opt.pdf
   modern-pdf optimize scan.pdf scan-opt.pdf --quality 60 --grayscale --dedup -v
-`.trim());
+`.trim(),
+  );
 }

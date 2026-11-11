@@ -17,9 +17,9 @@ describe('pdfDocumentEmbed', () => {
     it('produces a valid CMap for a small mapping', () => {
       const cmap = new Map<number, number>();
       // Unicode codepoint -> glyph ID
-      cmap.set(0x0041, 1);  // 'A' -> GID 1
-      cmap.set(0x0042, 2);  // 'B' -> GID 2
-      cmap.set(0x0043, 3);  // 'C' -> GID 3
+      cmap.set(0x0041, 1); // 'A' -> GID 1
+      cmap.set(0x0042, 2); // 'B' -> GID 2
+      cmap.set(0x0043, 3); // 'C' -> GID 3
 
       const result = buildToUnicodeCmap(cmap);
 
@@ -34,9 +34,9 @@ describe('pdfDocumentEmbed', () => {
       expect(result).toContain('endbfchar');
 
       // Should contain mappings: GID -> Unicode
-      expect(result).toContain('<0001> <0041>');  // GID 1 -> U+0041
-      expect(result).toContain('<0002> <0042>');  // GID 2 -> U+0042
-      expect(result).toContain('<0003> <0043>');  // GID 3 -> U+0043
+      expect(result).toContain('<0001> <0041>'); // GID 1 -> U+0041
+      expect(result).toContain('<0002> <0042>'); // GID 2 -> U+0042
+      expect(result).toContain('<0003> <0043>'); // GID 3 -> U+0043
     });
 
     it('handles an empty mapping', () => {
@@ -54,8 +54,8 @@ describe('pdfDocumentEmbed', () => {
     it('prefers lower codepoints for duplicate glyph IDs', () => {
       const cmap = new Map<number, number>();
       // Two codepoints map to the same GID
-      cmap.set(0x0041, 5);  // 'A' -> GID 5  (first)
-      cmap.set(0x0061, 5);  // 'a' -> GID 5  (second, should be ignored)
+      cmap.set(0x0041, 5); // 'A' -> GID 5  (first)
+      cmap.set(0x0061, 5); // 'a' -> GID 5  (second, should be ignored)
 
       const result = buildToUnicodeCmap(cmap);
 
@@ -72,12 +72,35 @@ describe('pdfDocumentEmbed', () => {
     it('does not throw for a valid PNG signature', () => {
       // Minimal PNG: signature + IHDR chunk (13 bytes data) + CRC
       const sig = new Uint8Array([
-        0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, // PNG signature
-        0x00, 0x00, 0x00, 0x0d, // IHDR length = 13
-        0x49, 0x48, 0x44, 0x52, // "IHDR"
-        0x00, 0x00, 0x00, 0x01, // width = 1
-        0x00, 0x00, 0x00, 0x01, // height = 1
-        0x08, 0x02, 0x00, 0x00, 0x00, // bitdepth=8, colortype=2, etc.
+        0x89,
+        0x50,
+        0x4e,
+        0x47,
+        0x0d,
+        0x0a,
+        0x1a,
+        0x0a, // PNG signature
+        0x00,
+        0x00,
+        0x00,
+        0x0d, // IHDR length = 13
+        0x49,
+        0x48,
+        0x44,
+        0x52, // "IHDR"
+        0x00,
+        0x00,
+        0x00,
+        0x01, // width = 1
+        0x00,
+        0x00,
+        0x00,
+        0x01, // height = 1
+        0x08,
+        0x02,
+        0x00,
+        0x00,
+        0x00, // bitdepth=8, colortype=2, etc.
       ]);
       expect(() => validatePngSignature(sig)).not.toThrow();
     });
@@ -96,12 +119,35 @@ describe('pdfDocumentEmbed', () => {
   describe('parsePngDimensions', () => {
     it('parses width and height from IHDR', () => {
       const png = new Uint8Array([
-        0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, // PNG signature
-        0x00, 0x00, 0x00, 0x0d, // IHDR length = 13
-        0x49, 0x48, 0x44, 0x52, // "IHDR"
-        0x00, 0x00, 0x01, 0x00, // width = 256
-        0x00, 0x00, 0x00, 0x80, // height = 128
-        0x08, 0x02, 0x00, 0x00, 0x00, // bitdepth=8, colortype=2
+        0x89,
+        0x50,
+        0x4e,
+        0x47,
+        0x0d,
+        0x0a,
+        0x1a,
+        0x0a, // PNG signature
+        0x00,
+        0x00,
+        0x00,
+        0x0d, // IHDR length = 13
+        0x49,
+        0x48,
+        0x44,
+        0x52, // "IHDR"
+        0x00,
+        0x00,
+        0x01,
+        0x00, // width = 256
+        0x00,
+        0x00,
+        0x00,
+        0x80, // height = 128
+        0x08,
+        0x02,
+        0x00,
+        0x00,
+        0x00, // bitdepth=8, colortype=2
       ]);
       const { width, height } = parsePngDimensions(png);
       expect(width).toBe(256);
@@ -114,18 +160,53 @@ describe('pdfDocumentEmbed', () => {
       // Build a minimal PNG with IHDR + IEND
       const png = new Uint8Array([
         // Signature
-        0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
+        0x89,
+        0x50,
+        0x4e,
+        0x47,
+        0x0d,
+        0x0a,
+        0x1a,
+        0x0a,
         // IHDR chunk: length=13, type="IHDR", data=13 bytes, CRC=4 bytes
-        0x00, 0x00, 0x00, 0x0d,
-        0x49, 0x48, 0x44, 0x52,
-        0x00, 0x00, 0x00, 0x01, // width
-        0x00, 0x00, 0x00, 0x01, // height
-        0x08, 0x02, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x00, 0x00, // CRC (dummy)
+        0x00,
+        0x00,
+        0x00,
+        0x0d,
+        0x49,
+        0x48,
+        0x44,
+        0x52,
+        0x00,
+        0x00,
+        0x00,
+        0x01, // width
+        0x00,
+        0x00,
+        0x00,
+        0x01, // height
+        0x08,
+        0x02,
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+        0x00, // CRC (dummy)
         // IEND chunk: length=0, type="IEND", CRC=4 bytes
-        0x00, 0x00, 0x00, 0x00,
-        0x49, 0x45, 0x4e, 0x44,
-        0x00, 0x00, 0x00, 0x00, // CRC (dummy)
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+        0x49,
+        0x45,
+        0x4e,
+        0x44,
+        0x00,
+        0x00,
+        0x00,
+        0x00, // CRC (dummy)
       ]);
 
       const chunks = extractPngChunks(png);
@@ -167,7 +248,8 @@ describe('pdfDocumentEmbed', () => {
         // SOF0 marker (0xFFC0)
         0xff, 0xc0,
         // Length of SOF0 segment (11 bytes: 2 length + 1 precision + 2 height + 2 width + 1 components + 3 component data)
-        0x00, 0x0b,
+        0x00,
+        0x0b,
         // Precision: 8 bits
         0x08,
         // Height: 480

@@ -204,10 +204,7 @@ export async function initShapingWasm(
     // If only raw WASM bytes are available (no glue), this will fail
     // and we fall back to the JS shaper.
     const imports = { env: {} };
-    const result = await WebAssembly.instantiate(
-      wasmBytes.buffer as ArrayBuffer,
-      imports,
-    );
+    const result = await WebAssembly.instantiate(wasmBytes.buffer as ArrayBuffer, imports);
     wasmModule = result.instance.exports as unknown as RustybuzzWasmModule;
   } catch {
     // WASM unavailable — fall back to simple cmap-based shaping.
@@ -239,22 +236,12 @@ export function isShapingWasmReady(): boolean {
  *
  * @internal Only called when `wasmModule` is defined.
  */
-function shapeWithWasm(
-  fontData: Uint8Array,
-  text: string,
-  options: ShapingOptions,
-): ShapingResult {
+function shapeWithWasm(fontData: Uint8Array, text: string, options: ShapingOptions): ShapingResult {
   const direction = options.direction === 'rtl' ? 1 : 0;
   const script = options.script ?? '';
   const language = options.language ?? '';
 
-  const result = wasmModule!.shape_text_with_features(
-    fontData,
-    text,
-    direction,
-    script,
-    language,
-  );
+  const result = wasmModule!.shape_text_with_features(fontData, text, direction, script, language);
 
   const count = result.glyph_count;
   const glyphIdBytes = result.glyph_ids;
@@ -268,20 +255,28 @@ function shapeWithWasm(
   let totalAdvance = 0;
 
   // Parse parallel LE byte arrays into ShapedGlyph objects
-  const glyphIdView = new DataView(glyphIdBytes.buffer, glyphIdBytes.byteOffset, glyphIdBytes.byteLength);
+  const glyphIdView = new DataView(
+    glyphIdBytes.buffer,
+    glyphIdBytes.byteOffset,
+    glyphIdBytes.byteLength,
+  );
   const xAdvView = new DataView(xAdvBytes.buffer, xAdvBytes.byteOffset, xAdvBytes.byteLength);
   const yAdvView = new DataView(yAdvBytes.buffer, yAdvBytes.byteOffset, yAdvBytes.byteLength);
   const xOffView = new DataView(xOffBytes.buffer, xOffBytes.byteOffset, xOffBytes.byteLength);
   const yOffView = new DataView(yOffBytes.buffer, yOffBytes.byteOffset, yOffBytes.byteLength);
-  const clusterView = new DataView(clusterBytes.buffer, clusterBytes.byteOffset, clusterBytes.byteLength);
+  const clusterView = new DataView(
+    clusterBytes.buffer,
+    clusterBytes.byteOffset,
+    clusterBytes.byteLength,
+  );
 
   for (let i = 0; i < count; i++) {
     const glyphId = glyphIdView.getUint16(i * 2, true); // LE u16
-    const xAdvance = xAdvView.getInt32(i * 4, true);     // LE i32
-    const yAdvance = yAdvView.getInt32(i * 4, true);     // LE i32
-    const xOffset = xOffView.getInt32(i * 4, true);      // LE i32
-    const yOffset = yOffView.getInt32(i * 4, true);      // LE i32
-    const cluster = clusterView.getUint32(i * 4, true);  // LE u32
+    const xAdvance = xAdvView.getInt32(i * 4, true); // LE i32
+    const yAdvance = yAdvView.getInt32(i * 4, true); // LE i32
+    const xOffset = xOffView.getInt32(i * 4, true); // LE i32
+    const yOffset = yOffView.getInt32(i * 4, true); // LE i32
+    const cluster = clusterView.getUint32(i * 4, true); // LE u32
 
     glyphs.push({ glyphId, cluster, xAdvance, yAdvance, xOffset, yOffset });
     totalAdvance += xAdvance;
@@ -310,11 +305,7 @@ function shapeWithWasm(
  *
  * @internal
  */
-function shapeSimple(
-  text: string,
-  metrics: FontMetrics,
-  options: ShapingOptions,
-): ShapingResult {
+function shapeSimple(text: string, metrics: FontMetrics, options: ShapingOptions): ShapingResult {
   const direction = options.direction ?? 'ltr';
   const glyphs: ShapedGlyph[] = [];
   let totalAdvance = 0;

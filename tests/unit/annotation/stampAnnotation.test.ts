@@ -4,11 +4,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { PdfStampAnnotation } from '../../../src/annotation/types/stampAnnotation.js';
-import {
-  PdfDict,
-  PdfName,
-  PdfArray,
-} from '../../../src/core/pdfObjects.js';
+import { PdfDict, PdfName, PdfArray } from '../../../src/core/pdfObjects.js';
 
 describe('PdfStampAnnotation', () => {
   describe('create', () => {
@@ -33,10 +29,20 @@ describe('PdfStampAnnotation', () => {
 
     it('creates with all standard stamp names', () => {
       const names = [
-        'Approved', 'Experimental', 'NotApproved', 'AsIs',
-        'Expired', 'NotForPublicRelease', 'Confidential', 'Final',
-        'Sold', 'Departmental', 'ForComment', 'TopSecret',
-        'Draft', 'ForPublicRelease',
+        'Approved',
+        'Experimental',
+        'NotApproved',
+        'AsIs',
+        'Expired',
+        'NotForPublicRelease',
+        'Confidential',
+        'Final',
+        'Sold',
+        'Departmental',
+        'ForComment',
+        'TopSecret',
+        'Draft',
+        'ForPublicRelease',
       ] as const;
 
       for (const name of names) {

@@ -12,10 +12,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  downscaleImage,
-  type RawImageData,
-} from '../../src/assets/image/imageOptimize.js';
+import { downscaleImage, type RawImageData } from '../../src/assets/image/imageOptimize.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -44,11 +41,7 @@ function makeRgbImage(
  * Create a checkerboard pattern (alternating black and white pixels).
  * Useful for testing edge-preservation quality of resampling algorithms.
  */
-function makeCheckerboard(
-  width: number,
-  height: number,
-  channels: 1 | 3 | 4 = 3,
-): RawImageData {
+function makeCheckerboard(width: number, height: number, channels: 1 | 3 | 4 = 3): RawImageData {
   const pixels = new Uint8Array(width * height * channels);
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
@@ -71,10 +64,7 @@ function makeCheckerboard(
 /**
  * Create a grayscale image (1 channel) with a gradient.
  */
-function makeGrayscaleGradient(
-  width: number,
-  height: number,
-): RawImageData {
+function makeGrayscaleGradient(width: number, height: number): RawImageData {
   const pixels = new Uint8Array(width * height);
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
@@ -87,18 +77,15 @@ function makeGrayscaleGradient(
 /**
  * Create an RGBA image with a gradient and varying alpha.
  */
-function makeRgbaGradient(
-  width: number,
-  height: number,
-): RawImageData {
+function makeRgbaGradient(width: number, height: number): RawImageData {
   const pixels = new Uint8Array(width * height * 4);
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       const idx = (y * width + x) * 4;
-      pixels[idx] = Math.round((x / Math.max(1, width - 1)) * 255);     // R
+      pixels[idx] = Math.round((x / Math.max(1, width - 1)) * 255); // R
       pixels[idx + 1] = Math.round((y / Math.max(1, height - 1)) * 255); // G
-      pixels[idx + 2] = 128;                                              // B
-      pixels[idx + 3] = 255;                                              // A
+      pixels[idx + 2] = 128; // B
+      pixels[idx + 3] = 255; // A
     }
   }
   return { pixels, width, height, channels: 4, bitsPerChannel: 8 };
@@ -337,10 +324,8 @@ describe('Lanczos3 multi-channel support', () => {
     }
 
     // Verify the gradient is roughly preserved (left side darker than right)
-    const leftAvg =
-      (result.pixels[0]! + result.pixels[50]! + result.pixels[100]!) / 3;
-    const rightAvg =
-      (result.pixels[49]! + result.pixels[99]! + result.pixels[149]!) / 3;
+    const leftAvg = (result.pixels[0]! + result.pixels[50]! + result.pixels[100]!) / 3;
+    const rightAvg = (result.pixels[49]! + result.pixels[99]! + result.pixels[149]!) / 3;
     expect(rightAvg).toBeGreaterThan(leftAvg);
   });
 

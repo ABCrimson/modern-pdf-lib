@@ -8,11 +8,7 @@
 
 import { describe, expect, it } from 'vitest';
 
-import type {
-  Invoice,
-  InvoiceLine,
-  InvoiceParty,
-} from '../../../src/compliance/facturX.js';
+import type { Invoice, InvoiceLine, InvoiceParty } from '../../../src/compliance/facturX.js';
 import {
   validateEn16931,
   type EInvoiceIssue,
@@ -89,16 +85,12 @@ describe('validateEn16931', () => {
   });
 
   it('flags a missing seller name with BR-06', () => {
-    const issues = validateEn16931(
-      makeInvoice({ seller: { name: '', countryCode: 'DE' } }),
-    );
+    const issues = validateEn16931(makeInvoice({ seller: { name: '', countryCode: 'DE' } }));
     expect(hasRule(issues, 'BR-06')).toBe(true);
   });
 
   it('flags a missing buyer name with BR-07', () => {
-    const issues = validateEn16931(
-      makeInvoice({ buyer: { name: '', countryCode: 'FR' } }),
-    );
+    const issues = validateEn16931(makeInvoice({ buyer: { name: '', countryCode: 'FR' } }));
     expect(hasRule(issues, 'BR-07')).toBe(true);
   });
 
@@ -120,9 +112,7 @@ describe('validateEn16931', () => {
   });
 
   it('accumulates multiple violations at once', () => {
-    const issues = validateEn16931(
-      makeInvoice({ invoiceNumber: '', issueDate: '', currency: '' }),
-    );
+    const issues = validateEn16931(makeInvoice({ invoiceNumber: '', issueDate: '', currency: '' }));
     expect(hasRule(issues, 'BR-02')).toBe(true);
     expect(hasRule(issues, 'BR-03')).toBe(true);
     expect(hasRule(issues, 'BR-05')).toBe(true);

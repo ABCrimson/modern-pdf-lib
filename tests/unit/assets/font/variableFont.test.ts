@@ -187,8 +187,12 @@ function wrapSfnt(tables: Array<{ tag: string; data: Uint8Array }>): Uint8Array 
   view.setUint32(0, 0x00010000, false); // sfnt version (TrueType)
   view.setUint16(4, numTables, false);
   // searchRange / entrySelector / rangeShift
-  let sr = 1, es = 0;
-  while (sr * 2 <= numTables) { sr *= 2; es++; }
+  let sr = 1,
+    es = 0;
+  while (sr * 2 <= numTables) {
+    sr *= 2;
+    es++;
+  }
   sr *= 16;
   view.setUint16(6, sr, false);
   view.setUint16(8, es, false);
@@ -263,9 +267,7 @@ describe('parseVariableFont', () => {
   });
 
   it('omits postScriptNameId when instanceSize = axisCount*4 + 4', () => {
-    const font = wrapSfnt([
-      { tag: 'fvar', data: buildFvarTable({ omitPostScriptNameId: true }) },
-    ]);
+    const font = wrapSfnt([{ tag: 'fvar', data: buildFvarTable({ omitPostScriptNameId: true }) }]);
     const info = parseVariableFont(font);
 
     expect(info.namedInstances).toHaveLength(1);

@@ -3,10 +3,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  buildTimestampRequest,
-  parseTimestampResponse,
-} from '../../../src/signature/timestamp.js';
+import { buildTimestampRequest, parseTimestampResponse } from '../../../src/signature/timestamp.js';
 import {
   encodeSequence,
   encodeOID,
@@ -64,13 +61,7 @@ function buildMockTimestampResponse(signingTime: Date): Uint8Array {
   genTime.set(genTimeLen, 1);
   genTime.set(genTimeBytes, 1 + genTimeLen.length);
 
-  const tstInfo = encodeSequence([
-    tstVersion,
-    tstPolicy,
-    msgImprint,
-    serialNum,
-    genTime,
-  ]);
+  const tstInfo = encodeSequence([tstVersion, tstPolicy, msgImprint, serialNum, genTime]);
 
   // Wrap TSTInfo as encapContentInfo
   const tstInfoOctet = encodeOctetString(tstInfo);
@@ -82,12 +73,7 @@ function buildMockTimestampResponse(signingTime: Date): Uint8Array {
   const digestAlgos = new Uint8Array([0x31, 0x00]); // empty SET
   const signerInfos = new Uint8Array([0x31, 0x00]); // empty SET
 
-  const signedData = encodeSequence([
-    sdVersion,
-    digestAlgos,
-    encapContentInfo,
-    signerInfos,
-  ]);
+  const signedData = encodeSequence([sdVersion, digestAlgos, encapContentInfo, signerInfos]);
 
   // ContentInfo wrapping SignedData
   const signedDataOid = encodeOID('1.2.840.113549.1.7.2');
@@ -102,9 +88,7 @@ function buildMockTimestampResponse(signingTime: Date): Uint8Array {
  * Build a TimeStampResp with an error status.
  */
 function buildErrorTimestampResponse(status: number): Uint8Array {
-  const statusInfo = encodeSequence([
-    new Uint8Array([0x02, 0x01, status]),
-  ]);
+  const statusInfo = encodeSequence([new Uint8Array([0x02, 0x01, status])]);
   return encodeSequence([statusInfo]);
 }
 
@@ -254,8 +238,7 @@ describe('parseTimestampResponse', () => {
 // ---------------------------------------------------------------------------
 
 function findByteSequence(data: Uint8Array, needle: number[]): number {
-  outer:
-  for (let i = 0; i <= data.length - needle.length; i++) {
+  outer: for (let i = 0; i <= data.length - needle.length; i++) {
     for (let j = 0; j < needle.length; j++) {
       if (data[i + j] !== needle[j]) continue outer;
     }

@@ -14,10 +14,7 @@
  * @packageDocumentation
  */
 
-import {
-  parseDerTlv,
-  decodeOidBytes,
-} from './pkcs7.js';
+import { parseDerTlv, decodeOidBytes } from './pkcs7.js';
 import type { Asn1Node } from './pkcs7.js';
 import type { CrlData } from './revocationCache.js';
 
@@ -146,7 +143,7 @@ function extractIssuerName(nameNode: Asn1Node): string {
 function parseIntegerValue(data: Uint8Array): number {
   let value = 0;
   for (let i = 0; i < data.length; i++) {
-    value = (value * 256) + data[i]!;
+    value = value * 256 + data[i]!;
   }
   return value;
 }
@@ -252,7 +249,13 @@ function parseTbsCertList(data: Uint8Array): {
     }
   }
 
-  return { issuer, thisUpdate, ...(nextUpdate !== undefined && { nextUpdate }), entries, extensions };
+  return {
+    issuer,
+    thisUpdate,
+    ...(nextUpdate !== undefined && { nextUpdate }),
+    entries,
+    extensions,
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -378,9 +381,16 @@ export function parseDeltaCrl(data: Uint8Array): DeltaCrlData {
 export function mergeCrls(baseCrl: CrlData, deltaCrl: DeltaCrlData): CrlData {
   // Build a map of serial number -> entry from the base CRL
   // Use hex string of serial as map key for reliable comparison
-  const entryMap = new Map<string, { serialNumber: Uint8Array; revocationDate: Date; reason?: string | undefined }>();
+  const entryMap = new Map<
+    string,
+    { serialNumber: Uint8Array; revocationDate: Date; reason?: string | undefined }
+  >();
 
-  const copyEntry = (e: { serialNumber: Uint8Array; revocationDate: Date; reason?: string | undefined }): { serialNumber: Uint8Array; revocationDate: Date; reason?: string | undefined } => ({
+  const copyEntry = (e: {
+    serialNumber: Uint8Array;
+    revocationDate: Date;
+    reason?: string | undefined;
+  }): { serialNumber: Uint8Array; revocationDate: Date; reason?: string | undefined } => ({
     serialNumber: e.serialNumber,
     revocationDate: e.revocationDate,
     ...(e.reason !== undefined && { reason: e.reason }),

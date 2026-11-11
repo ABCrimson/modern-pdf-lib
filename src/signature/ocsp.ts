@@ -164,7 +164,6 @@ function parseAsn1Time(node: Asn1Node): Date {
   return parseUtcTime(timeStr);
 }
 
-
 /**
  * Extract the subject Name bytes from a DER-encoded certificate's
  * TBSCertificate.
@@ -279,10 +278,7 @@ export async function buildOcspRequest(
   const serialNumber = extractSerialNumber(cert);
 
   // Build CertID
-  const hashAlgorithm = encodeSequence([
-    encodeOID(OID_SHA1),
-    encodeNull(),
-  ]);
+  const hashAlgorithm = encodeSequence([encodeOID(OID_SHA1), encodeNull()]);
 
   const certId = encodeSequence([
     hashAlgorithm,
@@ -390,7 +386,8 @@ export function parseOcspResponse(response: Uint8Array): OcspResponse {
   } else if (responderIdNode.tag === 0xa2) {
     // byKey — contains an OCTET STRING with key hash
     const keyHashNode = responderIdNode.children[0];
-    responderId = 'keyHash:' + (keyHashNode ? keyHashNode.data.toHex() : responderIdNode.data.toHex());
+    responderId =
+      'keyHash:' + (keyHashNode ? keyHashNode.data.toHex() : responderIdNode.data.toHex());
   } else {
     responderId = 'unknown';
   }
@@ -586,9 +583,7 @@ export async function checkCertificateStatus(
   });
 
   if (!response.ok) {
-    throw new Error(
-      `OCSP request failed: HTTP ${response.status} ${response.statusText}`,
-    );
+    throw new Error(`OCSP request failed: HTTP ${response.status} ${response.statusText}`);
   }
 
   const respBytes = new Uint8Array(await response.arrayBuffer());

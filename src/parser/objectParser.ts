@@ -263,7 +263,11 @@ export class PdfObjectParser {
 
     // Peek at the next token
     const second = this.lexer.peekToken();
-    if (second.type !== TokenType.Number || !Number.isInteger(second.value as number) || (second.value as number) < 0) {
+    if (
+      second.type !== TokenType.Number ||
+      !Number.isInteger(second.value as number) ||
+      (second.value as number) < 0
+    ) {
       return PdfNumber.of(firstValue);
     }
 
@@ -642,5 +646,4 @@ export class PdfObjectParser {
       data: this.lexer.rawData,
     });
   }
-
 }

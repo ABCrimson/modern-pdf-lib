@@ -60,10 +60,7 @@ export interface EmbeddedFile {
  * @param file      The file to embed.
  * @returns         The indirect reference to the filespec dictionary.
  */
-export function attachFile(
-  registry: PdfObjectRegistry,
-  file: EmbeddedFile,
-): PdfRef {
+export function attachFile(registry: PdfObjectRegistry, file: EmbeddedFile): PdfRef {
   // 1. Build the embedded file stream
   const efDict = new PdfDict();
   efDict.set('/Type', PdfName.of('EmbeddedFile'));

@@ -16,10 +16,7 @@
  * @packageDocumentation
  */
 
-import {
-  parseDerTlv,
-  decodeOidBytes,
-} from './pkcs7.js';
+import { parseDerTlv, decodeOidBytes } from './pkcs7.js';
 import type { Asn1Node } from './pkcs7.js';
 
 // ---------------------------------------------------------------------------
@@ -200,10 +197,7 @@ function extractExtensions(certDer: Uint8Array): Asn1Node[] {
  *   extnValue OCTET STRING
  * }
  */
-function findExtension(
-  extensions: Asn1Node[],
-  oid: string,
-): Asn1Node | null {
+function findExtension(extensions: Asn1Node[], oid: string): Asn1Node | null {
   for (const ext of extensions) {
     if (ext.tag !== 0x30 || ext.children.length < 2) continue;
 
@@ -458,9 +452,7 @@ export function validateKeyUsage(
   }
 
   const presentFlags = parseKeyUsageBits(kuValue);
-  const missingFlags = requiredUsage.filter(
-    (flag) => !presentFlags.includes(flag),
-  );
+  const missingFlags = requiredUsage.filter((flag) => !presentFlags.includes(flag));
 
   return {
     valid: missingFlags.length === 0,
@@ -519,9 +511,7 @@ export function validateExtendedKeyUsage(
     };
   }
 
-  const missingOids = requiredEku.filter(
-    (oid) => !presentOids.includes(oid),
-  );
+  const missingOids = requiredEku.filter((oid) => !presentOids.includes(oid));
 
   return {
     valid: missingOids.length === 0,
@@ -589,13 +579,11 @@ export function validateCertificatePolicy(
         EKU_OIDS.msDocumentSigning,
         EKU_OIDS.anyExtendedKeyUsage,
       ];
-      const hasSigningEku = presentOids.some((oid) =>
-        (signingEkus as string[]).includes(oid),
-      );
+      const hasSigningEku = presentOids.some((oid) => (signingEkus as string[]).includes(oid));
       if (!hasSigningEku) {
         warnings.push(
           'Certificate does not have a document-signing EKU; ' +
-          'it may not be intended for PDF signing',
+            'it may not be intended for PDF signing',
         );
       }
     }
@@ -610,9 +598,7 @@ export function validateCertificatePolicy(
     overallValid = false;
   }
   if (!periodValid && opts.allowExpired) {
-    warnings.push(
-      'Certificate has expired or is not yet valid, but allowExpired is set',
-    );
+    warnings.push('Certificate has expired or is not yet valid, but allowExpired is set');
   }
 
   // 4. Basic Constraints
@@ -627,9 +613,7 @@ export function validateCertificatePolicy(
   }
 
   if (isCA) {
-    warnings.push(
-      'Certificate is a CA certificate; it should not be used directly for signing',
-    );
+    warnings.push('Certificate is a CA certificate; it should not be used directly for signing');
   }
 
   return {

@@ -8,11 +8,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { decodeStream } from '../../../src/parser/streamDecode.js';
-import {
-  PdfDict,
-  PdfNumber,
-  PdfBool,
-} from '../../../src/core/pdfObjects.js';
+import { PdfDict, PdfNumber, PdfBool } from '../../../src/core/pdfObjects.js';
 
 // ---------------------------------------------------------------------------
 // Helpers

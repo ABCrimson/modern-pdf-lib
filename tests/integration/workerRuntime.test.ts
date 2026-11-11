@@ -89,9 +89,7 @@ describe('WorkerRuntimeAdapter', () => {
 
   it('createWorker() throws with a helpful message', () => {
     const adapter = new WorkerRuntimeAdapter();
-    expect(() => adapter.createWorker('test-script.js')).toThrow(
-      /sub-workers are not supported/,
-    );
+    expect(() => adapter.createWorker('test-script.js')).toThrow(/sub-workers are not supported/);
     expect(() => adapter.createWorker('test-script.js')).toThrow(
       /WorkerRuntimeAdapter\.createWorker/,
     );

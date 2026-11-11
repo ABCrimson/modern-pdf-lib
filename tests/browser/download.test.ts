@@ -35,10 +35,13 @@ beforeEach(() => {
 
   // Preserve the real URL constructor but replace the static methods
   const RealURL = globalThis.URL;
-  vi.stubGlobal('URL', Object.assign(RealURL, {
-    createObjectURL: createObjectURLSpy,
-    revokeObjectURL: revokeObjectURLSpy,
-  }));
+  vi.stubGlobal(
+    'URL',
+    Object.assign(RealURL, {
+      createObjectURL: createObjectURLSpy,
+      revokeObjectURL: revokeObjectURLSpy,
+    }),
+  );
 
   // Mock globalThis.open
   openSpy = vi.fn(() => ({ closed: false }));

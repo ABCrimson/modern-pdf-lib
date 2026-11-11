@@ -28,5 +28,8 @@ const PDF2_SYMBOLS = [
 ] as const;
 
 test.each(PDF2_SYMBOLS)("package root re-exports PDF 2.0 symbol '%s'", (name) => {
-  expect((lib as Record<string, unknown>)[name], `${name} must be exported from 'modern-pdf-lib'`).toBeDefined();
+  expect(
+    (lib as Record<string, unknown>)[name],
+    `${name} must be exported from 'modern-pdf-lib'`,
+  ).toBeDefined();
 });

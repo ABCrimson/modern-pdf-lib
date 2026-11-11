@@ -10,11 +10,7 @@ import {
   PdfPolygonAnnotation,
   PdfPolyLineAnnotation,
 } from '../../../src/annotation/types/shapeAnnotations.js';
-import {
-  PdfDict,
-  PdfArray,
-  PdfName,
-} from '../../../src/core/pdfObjects.js';
+import { PdfDict, PdfArray, PdfName } from '../../../src/core/pdfObjects.js';
 
 // ---------------------------------------------------------------------------
 // PdfLineAnnotation

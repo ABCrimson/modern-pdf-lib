@@ -159,14 +159,13 @@ function arcToOps(
     rySq = ry * ry;
   }
 
-  let sq = (rxSq * rySq - rxSq * y1pSq - rySq * x1pSq) /
-           (rxSq * y1pSq + rySq * x1pSq);
+  let sq = (rxSq * rySq - rxSq * y1pSq - rySq * x1pSq) / (rxSq * y1pSq + rySq * x1pSq);
   if (sq < 0) sq = 0;
   sq = Math.sqrt(sq);
   if (largeArcFlag === sweepFlag) sq = -sq;
 
-  const cxp = sq * rx * y1p / ry;
-  const cyp = -sq * ry * x1p / rx;
+  const cxp = (sq * rx * y1p) / ry;
+  const cyp = (-sq * ry * x1p) / rx;
 
   // Step 3: Compute (cx, cy)
   const cx = cosPhi * cxp - sinPhi * cyp + (fromX + toX) / 2;
@@ -356,18 +355,24 @@ function commandsToPathOps(commands: SvgDrawCommand[]): string {
 /** Map SVG stroke-linecap value to PDF line cap integer. */
 function linecapToInt(cap: 'butt' | 'round' | 'square'): 0 | 1 | 2 {
   switch (cap) {
-    case 'butt':   return 0;
-    case 'round':  return 1;
-    case 'square': return 2;
+    case 'butt':
+      return 0;
+    case 'round':
+      return 1;
+    case 'square':
+      return 2;
   }
 }
 
 /** Map SVG stroke-linejoin value to PDF line join integer. */
 function linejoinToInt(join: 'miter' | 'round' | 'bevel'): 0 | 1 | 2 {
   switch (join) {
-    case 'miter': return 0;
-    case 'round': return 1;
-    case 'bevel': return 2;
+    case 'miter':
+      return 0;
+    case 'round':
+      return 1;
+    case 'bevel':
+      return 2;
   }
 }
 
@@ -409,17 +414,18 @@ function paintingOperator(
  * The returned string can be injected directly into a PDF page's
  * content stream.
  */
-export function svgToPdfOperators(
-  element: SvgElement,
-  options?: SvgRenderOptions,
-): string {
+export function svgToPdfOperators(element: SvgElement, options?: SvgRenderOptions): string {
   let ops = '';
 
   // Get SVG dimensions for coordinate mapping
-  const svgWidth = parseFloat(element.attributes['width'] ?? '') ||
-    parseFloat(element.attributes['viewBox']?.split(/[\s,]+/)[2] ?? '') || 100;
-  const svgHeight = parseFloat(element.attributes['height'] ?? '') ||
-    parseFloat(element.attributes['viewBox']?.split(/[\s,]+/)[3] ?? '') || 100;
+  const svgWidth =
+    parseFloat(element.attributes['width'] ?? '') ||
+    parseFloat(element.attributes['viewBox']?.split(/[\s,]+/)[2] ?? '') ||
+    100;
+  const svgHeight =
+    parseFloat(element.attributes['height'] ?? '') ||
+    parseFloat(element.attributes['viewBox']?.split(/[\s,]+/)[3] ?? '') ||
+    100;
 
   const targetWidth = options?.width ?? svgWidth;
   const targetHeight = options?.height ?? svgHeight;
@@ -469,18 +475,25 @@ export function svgToPdfOperators(
 }
 
 /** Recursively render an SVG element to PDF operators. */
-function renderElement(
-  el: SvgElement,
-  gradients?: Map<string, SvgGradient>,
-): string {
+function renderElement(el: SvgElement, gradients?: Map<string, SvgGradient>): string {
   let ops = '';
 
   // Skip non-renderable elements
   const tag = el.tag;
-  if (tag === 'defs' || tag === 'title' || tag === 'desc' ||
-      tag === 'metadata' || tag === 'style' || tag === 'clipPath' ||
-      tag === 'mask' || tag === 'symbol' || tag === 'marker' ||
-      tag === 'lineargradient' || tag === 'radialgradient' || tag === 'stop') {
+  if (
+    tag === 'defs' ||
+    tag === 'title' ||
+    tag === 'desc' ||
+    tag === 'metadata' ||
+    tag === 'style' ||
+    tag === 'clipPath' ||
+    tag === 'mask' ||
+    tag === 'symbol' ||
+    tag === 'marker' ||
+    tag === 'lineargradient' ||
+    tag === 'radialgradient' ||
+    tag === 'stop'
+  ) {
     return '';
   }
 
@@ -507,7 +520,8 @@ function renderElement(
 
   // Draw this element's path commands
   if (el.commands && el.commands.length > 0) {
-    const hasFillGradient = el.fillGradientId !== undefined && (effectiveGradients?.has(el.fillGradientId) ?? false);
+    const hasFillGradient =
+      el.fillGradientId !== undefined && (effectiveGradients?.has(el.fillGradientId) ?? false);
     const hasFill = el.fill !== undefined || hasFillGradient;
     const hasStroke = el.stroke !== undefined;
 
@@ -723,11 +737,7 @@ function resolveStandardFont(
  * Parses the SVG, converts it to PDF operators, and appends them
  * to the page's content stream.
  */
-export function drawSvgOnPage(
-  page: PdfPage,
-  svgString: string,
-  options?: SvgRenderOptions,
-): void {
+export function drawSvgOnPage(page: PdfPage, svgString: string, options?: SvgRenderOptions): void {
   const svgElement = parseSvg(svgString);
   const ops = svgToPdfOperators(svgElement, options);
   page.pushOperators(ops);

@@ -132,7 +132,8 @@ for (const { file, expect } of ESM_ENTRIES) {
     const mod = await import(pathToFileURL(path).href);
     const missing = expect.filter((k) => typeof mod[k] === 'undefined');
     if (missing.length) fail(`ESM ${file}: linked but missing exports: ${missing.join(', ')}`);
-    else ok(`ESM ${file}: links, ${Object.keys(mod).length} exports, [${expect.join(', ')}] present`);
+    else
+      ok(`ESM ${file}: links, ${Object.keys(mod).length} exports, [${expect.join(', ')}] present`);
   } catch (e) {
     fail(`ESM ${file}: ${e.message}`);
   }
@@ -177,7 +178,11 @@ try {
 }
 
 if (failures > 0) {
-  console.error(`\n✗ dist smoke FAILED: ${failures} check(s) failed — the published package would be broken.`);
+  console.error(
+    `\n✗ dist smoke FAILED: ${failures} check(s) failed — the published package would be broken.`,
+  );
   process.exit(1);
 }
-console.log('\n✓ dist smoke passed: every built entry links, every package.json target exists, and the CLI starts.');
+console.log(
+  '\n✓ dist smoke passed: every built entry links, every package.json target exists, and the CLI starts.',
+);

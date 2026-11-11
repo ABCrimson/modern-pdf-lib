@@ -4,13 +4,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { PdfLinkAnnotation } from '../../../src/annotation/types/linkAnnotation.js';
-import {
-  PdfDict,
-  PdfArray,
-  PdfName,
-  PdfNumber,
-  PdfString,
-} from '../../../src/core/pdfObjects.js';
+import { PdfDict, PdfArray, PdfName, PdfNumber, PdfString } from '../../../src/core/pdfObjects.js';
 
 describe('PdfLinkAnnotation', () => {
   describe('create with URL', () => {
@@ -101,10 +95,7 @@ describe('PdfLinkAnnotation', () => {
       const dict = new PdfDict();
       dict.set('/Subtype', PdfName.of('Link'));
       dict.set('/Rect', PdfArray.fromNumbers([0, 0, 100, 20]));
-      dict.set('/Dest', PdfArray.of([
-        PdfNumber.of(5),
-        PdfName.of('FitH'),
-      ]));
+      dict.set('/Dest', PdfArray.of([PdfNumber.of(5), PdfName.of('FitH')]));
 
       const annot = PdfLinkAnnotation.fromDict(dict);
       const dest = annot.getDestination() as [number, string];

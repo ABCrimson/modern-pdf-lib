@@ -91,7 +91,7 @@ export function cleanNumber(raw: string): number {
     // Only commas — could be thousands or decimal.
     // If exactly one comma and <=2 digits after it, treat as decimal.
     const parts = s.split(',');
-    if (parts.length === 2 && (parts[1]!.length <= 2)) {
+    if (parts.length === 2 && parts[1]!.length <= 2) {
       s = s.replace(',', '.');
     } else {
       s = s.replaceAll(',', '');
@@ -135,9 +135,15 @@ function tokenize(expression: string, fieldNames: Set<string>): Token[] {
     }
 
     // Number literal
-    if ((ch >= '0' && ch <= '9') || (ch === '.' && i + 1 < len && expression[i + 1]! >= '0' && expression[i + 1]! <= '9')) {
+    if (
+      (ch >= '0' && ch <= '9') ||
+      (ch === '.' && i + 1 < len && expression[i + 1]! >= '0' && expression[i + 1]! <= '9')
+    ) {
       let numStr = '';
-      while (i < len && ((expression[i]! >= '0' && expression[i]! <= '9') || expression[i] === '.')) {
+      while (
+        i < len &&
+        ((expression[i]! >= '0' && expression[i]! <= '9') || expression[i] === '.')
+      ) {
         numStr += expression[i]!;
         i++;
       }
@@ -196,7 +202,8 @@ function tokenize(expression: string, fieldNames: Set<string>): Token[] {
         ((expression[i]! >= 'a' && expression[i]! <= 'z') ||
           (expression[i]! >= 'A' && expression[i]! <= 'Z') ||
           (expression[i]! >= '0' && expression[i]! <= '9') ||
-          expression[i] === '_' || expression[i] === '.')
+          expression[i] === '_' ||
+          expression[i] === '.')
       ) {
         ident += expression[i]!;
         i++;
@@ -386,8 +393,7 @@ export function parseCalculationScript(script: string): CalculationInfo | null {
   if (typeof script !== 'string' || script.trim() === '') return null;
 
   // Pattern 1: AFSimple_Calculate("OP", ["f1", "f2", ...])
-  const afPattern =
-    /AFSimple_Calculate\s*\(\s*["'](\w+)["']\s*,\s*\[([^\]]*)\]\s*\)/;
+  const afPattern = /AFSimple_Calculate\s*\(\s*["'](\w+)["']\s*,\s*\[([^\]]*)\]\s*\)/;
   const afMatch = script.match(afPattern);
   if (afMatch) {
     const opStr = afMatch[1]!.toUpperCase();

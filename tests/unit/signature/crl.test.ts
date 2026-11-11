@@ -3,11 +3,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  parseCrl,
-  isCertificateRevoked,
-  extractCrlUrls,
-} from '../../../src/signature/crl.js';
+import { parseCrl, isCertificateRevoked, extractCrlUrls } from '../../../src/signature/crl.js';
 import {
   encodeSequence,
   encodeSet,
@@ -129,10 +125,7 @@ function buildMockCrl(options: {
         const reasonOid = encodeOID('2.5.29.21');
         // CRLReason is an ENUMERATED value wrapped in OCTET STRING
         const reasonEnum = new Uint8Array([0x0a, 0x01, rc.reason]);
-        const reasonExt = encodeSequence([
-          reasonOid,
-          encodeOctetString(reasonEnum),
-        ]);
+        const reasonExt = encodeSequence([reasonOid, encodeOctetString(reasonEnum)]);
         const entryExts = encodeSequence([reasonExt]);
         entryChildren.push(entryExts);
       }
@@ -193,7 +186,13 @@ async function generateTestCertWithSerial(
   const subject = buildName('Test Subject');
 
   const tbsChildren: Uint8Array[] = [
-    version, serialNumber, sigAlgo, issuer, validity, subject, spkiDer,
+    version,
+    serialNumber,
+    sigAlgo,
+    issuer,
+    validity,
+    subject,
+    spkiDer,
   ];
 
   // Add CRL Distribution Points extension if provided
@@ -316,9 +315,7 @@ describe('parseCrl', () => {
       issuerName: 'Test CA',
       thisUpdate,
       version: 1,
-      revokedCerts: [
-        { serial: new Uint8Array([0x01]), revocationDate: revDate, reason: 1 },
-      ],
+      revokedCerts: [{ serial: new Uint8Array([0x01]), revocationDate: revDate, reason: 1 }],
     });
 
     const parsed = parseCrl(crl);
@@ -335,9 +332,7 @@ describe('parseCrl', () => {
       issuerName: 'Test CA',
       thisUpdate,
       version: 1,
-      revokedCerts: [
-        { serial: new Uint8Array([0x01]), revocationDate: revDate, reason: 5 },
-      ],
+      revokedCerts: [{ serial: new Uint8Array([0x01]), revocationDate: revDate, reason: 5 }],
     });
 
     const parsed = parseCrl(crl);
@@ -352,9 +347,7 @@ describe('parseCrl', () => {
       issuerName: 'Test CA',
       thisUpdate,
       version: 1,
-      revokedCerts: [
-        { serial: new Uint8Array([0x42]), revocationDate: revDate },
-      ],
+      revokedCerts: [{ serial: new Uint8Array([0x42]), revocationDate: revDate }],
     });
 
     const parsed = parseCrl(crl);
@@ -385,9 +378,7 @@ describe('parseCrl', () => {
       issuerName: 'Test CA',
       thisUpdate,
       version: 1,
-      revokedCerts: [
-        { serial: bigSerial, revocationDate: revDate },
-      ],
+      revokedCerts: [{ serial: bigSerial, revocationDate: revDate }],
     });
 
     const parsed = parseCrl(crl);
@@ -411,9 +402,7 @@ describe('isCertificateRevoked', () => {
       issuerName: 'Test CA',
       thisUpdate,
       version: 1,
-      revokedCerts: [
-        { serial: new Uint8Array([0x0a, 0x0b, 0x0c]), revocationDate: revDate },
-      ],
+      revokedCerts: [{ serial: new Uint8Array([0x0a, 0x0b, 0x0c]), revocationDate: revDate }],
     });
 
     const crlData = parseCrl(crl);
@@ -431,9 +420,7 @@ describe('isCertificateRevoked', () => {
       issuerName: 'Test CA',
       thisUpdate,
       version: 1,
-      revokedCerts: [
-        { serial: new Uint8Array([0x0a, 0x0b, 0x0c]), revocationDate: revDate },
-      ],
+      revokedCerts: [{ serial: new Uint8Array([0x0a, 0x0b, 0x0c]), revocationDate: revDate }],
     });
 
     const crlData = parseCrl(crl);
@@ -486,10 +473,9 @@ describe('isCertificateRevoked', () => {
 
 describe('extractCrlUrls', () => {
   it('should extract CRL URLs from certificate', async () => {
-    const cert = await generateTestCertWithSerial(
-      new Uint8Array([0x01]),
-      ['http://crl.example.com/ca.crl'],
-    );
+    const cert = await generateTestCertWithSerial(new Uint8Array([0x01]), [
+      'http://crl.example.com/ca.crl',
+    ]);
 
     const urls = extractCrlUrls(cert);
     expect(urls).toHaveLength(1);
@@ -497,13 +483,10 @@ describe('extractCrlUrls', () => {
   });
 
   it('should extract multiple CRL URLs', async () => {
-    const cert = await generateTestCertWithSerial(
-      new Uint8Array([0x01]),
-      [
-        'http://crl1.example.com/ca.crl',
-        'http://crl2.example.com/ca.crl',
-      ],
-    );
+    const cert = await generateTestCertWithSerial(new Uint8Array([0x01]), [
+      'http://crl1.example.com/ca.crl',
+      'http://crl2.example.com/ca.crl',
+    ]);
 
     const urls = extractCrlUrls(cert);
     expect(urls).toHaveLength(2);
@@ -512,19 +495,16 @@ describe('extractCrlUrls', () => {
   });
 
   it('should return empty array when no CRL DP extension exists', async () => {
-    const cert = await generateTestCertWithSerial(
-      new Uint8Array([0x01]),
-    );
+    const cert = await generateTestCertWithSerial(new Uint8Array([0x01]));
 
     const urls = extractCrlUrls(cert);
     expect(urls).toHaveLength(0);
   });
 
   it('should handle HTTPS CRL URLs', async () => {
-    const cert = await generateTestCertWithSerial(
-      new Uint8Array([0x01]),
-      ['https://crl.secure.example.com/revocations.crl'],
-    );
+    const cert = await generateTestCertWithSerial(new Uint8Array([0x01]), [
+      'https://crl.secure.example.com/revocations.crl',
+    ]);
 
     const urls = extractCrlUrls(cert);
     expect(urls).toHaveLength(1);

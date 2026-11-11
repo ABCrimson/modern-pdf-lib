@@ -42,18 +42,8 @@ import type { PdfSaveOptions } from '../core/pdfWriter.js';
 import type { DocumentStructure } from '../core/pdfCatalog.js';
 import { buildInfoDict } from '../core/pdfCatalog.js';
 import type { DocumentMetadata } from '../core/pdfCatalog.js';
-import {
-  PdfDict,
-  PdfName,
-  PdfRef,
-  PdfArray,
-  PdfStream,
-  PdfString,
-} from '../core/pdfObjects.js';
-import type {
-  PdfObject,
-  PdfObjectRegistry,
-} from '../core/pdfObjects.js';
+import { PdfDict, PdfName, PdfRef, PdfArray, PdfStream, PdfString } from '../core/pdfObjects.js';
+import type { PdfObject, PdfObjectRegistry } from '../core/pdfObjects.js';
 
 // ---------------------------------------------------------------------------
 // Public interfaces
@@ -77,11 +67,7 @@ export interface SanitizeOptions {
 }
 
 /** Identifies a class of content that the sanitizer can remove. */
-export type SanitizeClass =
-  | 'javascript'
-  | 'openActions'
-  | 'embeddedFiles'
-  | 'metadata';
+export type SanitizeClass = 'javascript' | 'openActions' | 'embeddedFiles' | 'metadata';
 
 /** A human-readable summary of what {@link sanitizePdf} actually removed. */
 export interface SanitizeReport {
@@ -102,20 +88,14 @@ export interface SanitizeReport {
  * underlying value using the registry. Non-refs are returned as-is.
  * Returns `undefined` if a ref cannot be resolved.
  */
-function resolve(
-  obj: PdfObject | undefined,
-  registry: PdfObjectRegistry,
-): PdfObject | undefined {
+function resolve(obj: PdfObject | undefined, registry: PdfObjectRegistry): PdfObject | undefined {
   if (obj === undefined) return undefined;
   if (obj instanceof PdfRef) return registry.resolve(obj);
   return obj;
 }
 
 /** Resolve `obj` and return it only if it is a {@link PdfDict}. */
-function asDict(
-  obj: PdfObject | undefined,
-  registry: PdfObjectRegistry,
-): PdfDict | undefined {
+function asDict(obj: PdfObject | undefined, registry: PdfObjectRegistry): PdfDict | undefined {
   const resolved = resolve(obj, registry);
   return resolved instanceof PdfDict ? resolved : undefined;
 }
@@ -217,10 +197,7 @@ function nameTreeHasEntries(
 }
 
 /** Return the catalog's resolved `/Names` sub-dictionary, if present. */
-function getNamesDict(
-  catalog: PdfDict,
-  registry: PdfObjectRegistry,
-): PdfDict | undefined {
+function getNamesDict(catalog: PdfDict, registry: PdfObjectRegistry): PdfDict | undefined {
   return asDict(catalog.get('/Names'), registry);
 }
 
@@ -233,10 +210,7 @@ function getNamesDict(
  * action whose `/S` (action type) is `/JavaScript`. Each value in an `/AA`
  * dictionary is itself an action dictionary (§12.6.3).
  */
-function aaHasJavaScript(
-  aa: PdfDict | undefined,
-  registry: PdfObjectRegistry,
-): boolean {
+function aaHasJavaScript(aa: PdfDict | undefined, registry: PdfObjectRegistry): boolean {
   if (aa === undefined) return false;
   for (const [, value] of aa) {
     const action = asDict(value, registry);
@@ -258,13 +232,7 @@ function aaHasJavaScript(
  * carries those by default and must still be considered clean. (When
  * metadata removal runs, the entire `/Info` dict is dropped regardless.)
  */
-const DESCRIPTIVE_INFO_KEYS = [
-  '/Title',
-  '/Author',
-  '/Subject',
-  '/Keywords',
-  '/Creator',
-] as const;
+const DESCRIPTIVE_INFO_KEYS = ['/Title', '/Author', '/Subject', '/Keywords', '/Creator'] as const;
 
 /**
  * Locate the trailer's `/Info` dictionary in the registry. The parser does
@@ -448,10 +416,7 @@ export async function sanitizePdf(
         metadataPresent = true;
       }
     }
-    if (
-      infoDict !== undefined &&
-      DESCRIPTIVE_INFO_KEYS.some((k) => infoDict.has(k))
-    ) {
+    if (infoDict !== undefined && DESCRIPTIVE_INFO_KEYS.some((k) => infoDict.has(k))) {
       metadataPresent = true;
     }
     if (metadataPresent) removed.add('metadata');

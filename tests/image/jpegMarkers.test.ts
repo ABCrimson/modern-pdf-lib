@@ -139,18 +139,12 @@ describe('analyzeJpegMarkers — invalid input', () => {
   it('returns undefined for data shorter than 4 bytes', () => {
     expect(analyzeJpegMarkers(new Uint8Array([0xff]))).toBeUndefined();
     expect(analyzeJpegMarkers(new Uint8Array([0xff, 0xd8]))).toBeUndefined();
-    expect(
-      analyzeJpegMarkers(new Uint8Array([0xff, 0xd8, 0xff])),
-    ).toBeUndefined();
+    expect(analyzeJpegMarkers(new Uint8Array([0xff, 0xd8, 0xff]))).toBeUndefined();
   });
 
   it('returns undefined for non-JPEG data (wrong magic)', () => {
-    expect(
-      analyzeJpegMarkers(new Uint8Array([0x89, 0x50, 0x4e, 0x47])),
-    ).toBeUndefined(); // PNG magic
-    expect(
-      analyzeJpegMarkers(new Uint8Array([0x00, 0x00, 0x00, 0x00])),
-    ).toBeUndefined();
+    expect(analyzeJpegMarkers(new Uint8Array([0x89, 0x50, 0x4e, 0x47]))).toBeUndefined(); // PNG magic
+    expect(analyzeJpegMarkers(new Uint8Array([0x00, 0x00, 0x00, 0x00]))).toBeUndefined();
   });
 
   it('returns undefined for JPEG with no SOF marker', () => {

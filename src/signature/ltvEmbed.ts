@@ -20,10 +20,7 @@
  */
 
 import { findSignatures } from './byteRange.js';
-import {
-  parseDerTlv,
-} from './pkcs7.js';
-
+import { parseDerTlv } from './pkcs7.js';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -99,12 +96,8 @@ function extractCertsFromPkcs7(pkcs7Bytes: Uint8Array): Uint8Array[] {
       if (child.tag === 0xa0) {
         // certificates [0] IMPLICIT
         for (const certChild of child.children) {
-          const certStart =
-            certChild.offset +
-            (child.data.byteOffset - pkcs7Bytes.byteOffset);
-          certs.push(
-            pkcs7Bytes.subarray(certStart, certStart + certChild.totalLength),
-          );
+          const certStart = certChild.offset + (child.data.byteOffset - pkcs7Bytes.byteOffset);
+          certs.push(pkcs7Bytes.subarray(certStart, certStart + certChild.totalLength));
         }
         // If no children parsed, treat the raw data as a single cert
         if (child.children.length === 0 && child.data.length > 0) {
@@ -195,10 +188,7 @@ export function hasLtvData(pdf: Uint8Array): boolean {
  * });
  * ```
  */
-export async function embedLtvData(
-  pdf: Uint8Array,
-  options?: LtvOptions  ,
-): Promise<Uint8Array> {
+export async function embedLtvData(pdf: Uint8Array, options?: LtvOptions): Promise<Uint8Array> {
   const includeOcsp = options?.includeOcsp !== false;
   const includeCrl = options?.includeCrl !== false;
   const includeCerts = options?.includeCerts !== false;
@@ -264,17 +254,12 @@ export async function embedLtvData(
  * Build the incremental update appendix containing the DSS dictionary
  * and its referenced stream objects.
  */
-function buildDssIncrementalUpdate(
-  pdf: Uint8Array,
-  data: DssData,
-): Uint8Array {
+function buildDssIncrementalUpdate(pdf: Uint8Array, data: DssData): Uint8Array {
   const pdfText = decoder.decode(pdf);
 
   // Find /Size
   const sizeMatches = pdfText.match(/\/Size\s+(\d+)/g);
-  const lastSizeMatch = sizeMatches?.[sizeMatches.length - 1]?.match(
-    /\/Size\s+(\d+)/,
-  );
+  const lastSizeMatch = sizeMatches?.[sizeMatches.length - 1]?.match(/\/Size\s+(\d+)/);
   const currentSize = lastSizeMatch ? parseInt(lastSizeMatch[1]!, 10) : 100;
 
   // Find /Root reference

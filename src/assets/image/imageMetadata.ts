@@ -96,21 +96,13 @@ function isAppMarker(marker: number): boolean {
  * RST0-RST7 (0xD0-0xD7), SOI (0xD8), EOI (0xD9), TEM (0x01).
  */
 function isStandaloneMarker(marker: number): boolean {
-  return (
-    marker === 0x00 ||
-    marker === 0x01 ||
-    (marker >= 0xd0 && marker <= 0xd9)
-  );
+  return marker === 0x00 || marker === 0x01 || (marker >= 0xd0 && marker <= 0xd9);
 }
 
 /**
  * Compare a region of a Uint8Array against an ASCII string.
  */
-function matchesAscii(
-  data: Uint8Array,
-  offset: number,
-  expected: string,
-): boolean {
+function matchesAscii(data: Uint8Array, offset: number, expected: string): boolean {
   if (offset + expected.length > data.length) return false;
   for (let i = 0; i < expected.length; i++) {
     if (data[offset + i] !== expected.charCodeAt(i)) return false;
@@ -215,11 +207,7 @@ function parseExif(segmentData: Uint8Array): ExifInfo {
     return {};
   }
 
-  const view = new DataView(
-    tiffData.buffer,
-    tiffData.byteOffset,
-    tiffData.byteLength,
-  );
+  const view = new DataView(tiffData.buffer, tiffData.byteOffset, tiffData.byteLength);
 
   // Verify magic number 42
   const magic = view.getUint16(2, littleEndian);
@@ -284,7 +272,10 @@ function parseExif(segmentData: Uint8Array): ExifInfo {
             // Read ASCII string, stopping at null terminator
             let nullIdx = count;
             for (let j = 0; j < count; j++) {
-              if (tiffData[valueOffset + j] === 0) { nullIdx = j; break; }
+              if (tiffData[valueOffset + j] === 0) {
+                nullIdx = j;
+                break;
+              }
             }
             if (nullIdx > 0) {
               result.copyright = new TextDecoder('ascii').decode(
@@ -331,11 +322,7 @@ export function extractJpegMetadata(jpegBytes: Uint8Array): JpegMetadata {
   const emptyResult: JpegMetadata = { appMarkers: [] };
 
   // Verify SOI marker
-  if (
-    jpegBytes.length < 4 ||
-    jpegBytes[0] !== MARKER_SOI_0 ||
-    jpegBytes[1] !== MARKER_SOI_1
-  ) {
+  if (jpegBytes.length < 4 || jpegBytes[0] !== MARKER_SOI_0 || jpegBytes[1] !== MARKER_SOI_1) {
     return emptyResult;
   }
 
@@ -447,21 +434,14 @@ export function extractJpegMetadata(jpegBytes: Uint8Array): JpegMetadata {
  * const withMetadata = injectJpegMetadata(recompressed, metadata);
  * ```
  */
-export function injectJpegMetadata(
-  jpegBytes: Uint8Array,
-  metadata: JpegMetadata,
-): Uint8Array {
+export function injectJpegMetadata(jpegBytes: Uint8Array, metadata: JpegMetadata): Uint8Array {
   // Nothing to inject
   if (!metadata.appMarkers.length) {
     return jpegBytes;
   }
 
   // Verify SOI marker
-  if (
-    jpegBytes.length < 2 ||
-    jpegBytes[0] !== MARKER_SOI_0 ||
-    jpegBytes[1] !== MARKER_SOI_1
-  ) {
+  if (jpegBytes.length < 2 || jpegBytes[0] !== MARKER_SOI_0 || jpegBytes[1] !== MARKER_SOI_1) {
     return jpegBytes;
   }
 

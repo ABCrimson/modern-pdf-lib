@@ -36,12 +36,7 @@
  * - Factur-X 1.0 / ZUGFeRD 2.x specification
  */
 
-import type {
-  FacturXProfile,
-  Invoice,
-  InvoiceLine,
-  InvoiceParty,
-} from './facturX.js';
+import type { FacturXProfile, Invoice, InvoiceLine, InvoiceParty } from './facturX.js';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -59,8 +54,7 @@ const GUIDELINE_URNS: Readonly<Record<FacturXProfile, string>> = {
   'BASIC-WL': 'urn:factur-x.eu:1p0:basicwl',
   BASIC: 'urn:cen.eu:en16931:2017#compliant#urn:factur-x.eu:1p0:basic',
   EN16931: 'urn:cen.eu:en16931:2017',
-  EXTENDED:
-    'urn:cen.eu:en16931:2017#conformant#urn:factur-x.eu:1p0:extended',
+  EXTENDED: 'urn:cen.eu:en16931:2017#conformant#urn:factur-x.eu:1p0:extended',
 };
 
 // ---------------------------------------------------------------------------
@@ -93,9 +87,7 @@ function elementRegExp(localName: string): RegExp {
   // (?:[\w.-]+:)?  optional namespace prefix
   // [^>]*          any attributes on the open tag
   // ([\s\S]*?)     inner content (non-greedy, may span lines)
-  return new RegExp(
-    `<(?:[\\w.-]+:)?${n}(?:\\s[^>]*)?>([\\s\\S]*?)</(?:[\\w.-]+:)?${n}>`,
-  );
+  return new RegExp(`<(?:[\\w.-]+:)?${n}(?:\\s[^>]*)?>([\\s\\S]*?)</(?:[\\w.-]+:)?${n}>`);
 }
 
 /**
@@ -127,10 +119,7 @@ function firstFragment(xml: string, localName: string): string | undefined {
  */
 function allFragments(xml: string, localName: string): string[] {
   const n = escapeRegExp(localName);
-  const re = new RegExp(
-    `<(?:[\\w.-]+:)?${n}(?:\\s[^>]*)?>([\\s\\S]*?)</(?:[\\w.-]+:)?${n}>`,
-    'g',
-  );
+  const re = new RegExp(`<(?:[\\w.-]+:)?${n}(?:\\s[^>]*)?>([\\s\\S]*?)</(?:[\\w.-]+:)?${n}>`, 'g');
   const out: string[] = [];
   let match: RegExpExecArray | null = re.exec(xml);
   while (match !== null) {
@@ -175,13 +164,10 @@ function parseParty(fragment: string): InvoiceParty {
   // Restrict the ID lookup to the tax-registration sub-fragment so we do
   // not accidentally pick up an unrelated ID elsewhere in the party.
   const taxReg = firstFragment(fragment, 'SpecifiedTaxRegistration');
-  const vatId =
-    taxReg !== undefined ? firstText(taxReg, 'ID') : undefined;
+  const vatId = taxReg !== undefined ? firstText(taxReg, 'ID') : undefined;
 
   // Honour exactOptionalPropertyTypes: only include vatId when present.
-  return vatId !== undefined && vatId !== ''
-    ? { name, countryCode, vatId }
-    : { name, countryCode };
+  return vatId !== undefined && vatId !== '' ? { name, countryCode, vatId } : { name, countryCode };
 }
 
 /** Parse a single line-item fragment into an {@link InvoiceLine}. */
@@ -195,10 +181,7 @@ function parseLine(fragment: string): InvoiceLine {
       : firstText(fragment, 'Name')) ?? '';
 
   // Unit price: NetPriceProductTradePrice/ChargeAmount.
-  const priceFragment = firstFragment(
-    fragment,
-    'NetPriceProductTradePrice',
-  );
+  const priceFragment = firstFragment(fragment, 'NetPriceProductTradePrice');
   const unitPrice = parseNumber(
     priceFragment !== undefined
       ? firstText(priceFragment, 'ChargeAmount')
@@ -209,9 +192,7 @@ function parseLine(fragment: string): InvoiceLine {
   const quantity = parseNumber(firstText(fragment, 'BilledQuantity'));
 
   // Tax rate: ApplicableTradeTax/RateApplicablePercent.
-  const taxPercent = parseNumber(
-    firstText(fragment, 'RateApplicablePercent'),
-  );
+  const taxPercent = parseNumber(firstText(fragment, 'RateApplicablePercent'));
 
   return { description, quantity, unitPrice, taxPercent };
 }
@@ -246,8 +227,7 @@ export function parseCiiXml(xml: string): Invoice {
   const docFragment = firstFragment(root, 'ExchangedDocument') ?? root;
   const invoiceNumber = firstText(docFragment, 'ID') ?? '';
   const issueRaw = firstText(docFragment, 'DateTimeString') ?? '';
-  const issueDate =
-    issueRaw === '' ? '' : fromDateString102(issueRaw);
+  const issueDate = issueRaw === '' ? '' : fromDateString102(issueRaw);
 
   // Currency.
   const currency = firstText(root, 'InvoiceCurrencyCode') ?? '';
@@ -256,19 +236,12 @@ export function parseCiiXml(xml: string): Invoice {
   const sellerFragment = firstFragment(root, 'SellerTradeParty');
   const buyerFragment = firstFragment(root, 'BuyerTradeParty');
   const seller: InvoiceParty =
-    sellerFragment !== undefined
-      ? parseParty(sellerFragment)
-      : { name: '', countryCode: '' };
+    sellerFragment !== undefined ? parseParty(sellerFragment) : { name: '', countryCode: '' };
   const buyer: InvoiceParty =
-    buyerFragment !== undefined
-      ? parseParty(buyerFragment)
-      : { name: '', countryCode: '' };
+    buyerFragment !== undefined ? parseParty(buyerFragment) : { name: '', countryCode: '' };
 
   // Line items.
-  const lineFragments = allFragments(
-    root,
-    'IncludedSupplyChainTradeLineItem',
-  );
+  const lineFragments = allFragments(root, 'IncludedSupplyChainTradeLineItem');
   const lines: readonly InvoiceLine[] = lineFragments.map(parseLine);
 
   return {
@@ -290,13 +263,8 @@ export function parseCiiXml(xml: string): Invoice {
  * @returns The matching {@link FacturXProfile}, or `undefined` if no
  *   guideline URN is present or it does not match a known profile.
  */
-export function detectFacturXProfile(
-  xml: string,
-): FacturXProfile | undefined {
-  const contextFragment = firstFragment(
-    xml,
-    'GuidelineSpecifiedDocumentContextParameter',
-  );
+export function detectFacturXProfile(xml: string): FacturXProfile | undefined {
+  const contextFragment = firstFragment(xml, 'GuidelineSpecifiedDocumentContextParameter');
   if (contextFragment === undefined) return undefined;
 
   const urn = firstText(contextFragment, 'ID');

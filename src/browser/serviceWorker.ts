@@ -36,9 +36,7 @@
  * The handler function receives the full modern-pdf-lib module and must
  * return the generated PDF bytes.
  */
-type PdfGeneratorHandler = (
-  pdf: typeof import('../index.js'),
-) => Promise<Uint8Array>;
+type PdfGeneratorHandler = (pdf: typeof import('../index.js')) => Promise<Uint8Array>;
 
 // ---------------------------------------------------------------------------
 // Public API
@@ -105,10 +103,7 @@ export async function handlePdfRequest(
  * const response = createPdfResponse(bytes, 'invoice.pdf');
  * ```
  */
-export function createPdfResponse(
-  bytes: Uint8Array,
-  filename?: string,
-): Response {
+export function createPdfResponse(bytes: Uint8Array, filename?: string): Response {
   const headers: Record<string, string> = {
     'content-type': 'application/pdf',
     'content-length': String(bytes.byteLength),

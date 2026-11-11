@@ -61,12 +61,8 @@ export function computeImageDpi(
   displayHeight: number,
 ): ImageDpi {
   // Prevent division by zero
-  const xDpi = displayWidth > 0
-    ? (imageWidth / displayWidth) * 72
-    : Infinity;
-  const yDpi = displayHeight > 0
-    ? (imageHeight / displayHeight) * 72
-    : Infinity;
+  const xDpi = displayWidth > 0 ? (imageWidth / displayWidth) * 72 : Infinity;
+  const yDpi = displayHeight > 0 ? (imageHeight / displayHeight) * 72 : Infinity;
 
   return {
     xDpi,
@@ -94,12 +90,7 @@ export function computeTargetDimensions(
   displayHeight: number,
   maxDpi: number,
 ): { width: number; height: number; downscaled: boolean } {
-  const dpi = computeImageDpi(
-    imageWidth,
-    imageHeight,
-    displayWidth,
-    displayHeight,
-  );
+  const dpi = computeImageDpi(imageWidth, imageHeight, displayWidth, displayHeight);
 
   if (dpi.effectiveDpi <= maxDpi || !Number.isFinite(dpi.effectiveDpi)) {
     return { width: imageWidth, height: imageHeight, downscaled: false };

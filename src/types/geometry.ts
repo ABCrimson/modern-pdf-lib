@@ -49,14 +49,7 @@ export interface Rect {
  *
  * Indices: `[a, b, c, d, e, f]`
  */
-export type TransformMatrix = [
-  a: number,
-  b: number,
-  c: number,
-  d: number,
-  e: number,
-  f: number,
-];
+export type TransformMatrix = [a: number, b: number, c: number, d: number, e: number, f: number];
 
 // ---------------------------------------------------------------------------
 // Angle types (mirrors core/operators/state but with a discriminant)
@@ -94,9 +87,7 @@ export function radiansAngle(rad: number): Angle {
  * Convert any {@link Angle} to a numeric value in radians.
  */
 export function angleToRadians(angle: Angle): number {
-  return angle.kind === 'radians'
-    ? angle.value
-    : (angle.value * Math.PI) / 180;
+  return angle.kind === 'radians' ? angle.value : (angle.value * Math.PI) / 180;
 }
 
 // ---------------------------------------------------------------------------
@@ -124,20 +115,17 @@ export function identityMatrix(): TransformMatrix {
  * The result `C = A * B` is computed by standard 3x3 matrix
  * multiplication with the implicit third row `[0, 0, 1]`.
  */
-export function multiplyMatrices(
-  a: TransformMatrix,
-  b: TransformMatrix,
-): TransformMatrix {
+export function multiplyMatrices(a: TransformMatrix, b: TransformMatrix): TransformMatrix {
   const [a0, a1, a2, a3, a4, a5] = a;
   const [b0, b1, b2, b3, b4, b5] = b;
 
   return [
-    a0 * b0 + a1 * b2,          // a
-    a0 * b1 + a1 * b3,          // b
-    a2 * b0 + a3 * b2,          // c
-    a2 * b1 + a3 * b3,          // d
-    a4 * b0 + a5 * b2 + b4,     // e
-    a4 * b1 + a5 * b3 + b5,     // f
+    a0 * b0 + a1 * b2, // a
+    a0 * b1 + a1 * b3, // b
+    a2 * b0 + a3 * b2, // c
+    a2 * b1 + a3 * b3, // d
+    a4 * b0 + a5 * b2 + b4, // e
+    a4 * b1 + a5 * b3 + b5, // f
   ];
 }
 

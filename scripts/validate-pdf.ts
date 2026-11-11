@@ -236,24 +236,16 @@ async function main(): Promise<void> {
   const args = process.argv.slice(2);
 
   if (args.length === 0) {
-    
     process.exit(2);
   }
 
   const filePath = resolve(args[0]!);
 
   if (!existsSync(filePath)) {
-    
     process.exit(2);
   }
 
-  
-  
-
   const bytes = new Uint8Array(await readFile(filePath));
-
-  
-  
 
   // Run all validators
   const results: ValidationResult[] = [
@@ -272,20 +264,15 @@ async function main(): Promise<void> {
     const status = result.passed ? 'PASS' : 'FAIL';
     const icon = result.passed ? '[ok]' : '[!!]';
     const paddedName = result.name.padEnd(maxNameLen);
-    
   }
-
-  
 
   const passed = results.filter((r) => r.passed).length;
   const failed = results.filter((r) => !r.passed).length;
   const total = results.length;
 
   if (failed === 0) {
-    
     process.exit(0);
   } else {
-    
     process.exit(1);
   }
 }

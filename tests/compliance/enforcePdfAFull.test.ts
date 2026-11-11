@@ -20,7 +20,6 @@
 import { describe, it, expect } from 'vitest';
 import { enforcePdfAFull } from '../../src/compliance/enforcePdfAv2.js';
 
-
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
@@ -115,7 +114,7 @@ describe('enforcePdfAFull', () => {
     expect(text).toContain('pdfaid:part');
     expect(text).toContain('pdfaid:conformance');
     expect(text).toContain('/Type /Metadata');
-    expect(result.actions.some(a => a.action === 'add-xmp')).toBe(true);
+    expect(result.actions.some((a) => a.action === 'add-xmp')).toBe(true);
   });
 
   // 2. Adds file ID
@@ -125,55 +124,47 @@ describe('enforcePdfAFull', () => {
 
     const text = decoder.decode(result.bytes);
     expect(text).toContain('/ID [<');
-    expect(result.actions.some(a => a.action === 'add-file-id')).toBe(true);
+    expect(result.actions.some((a) => a.action === 'add-file-id')).toBe(true);
   });
 
   // 3. Strips JavaScript when present
   it('strips JavaScript actions', async () => {
-    const pdf = buildPdf(
-      '4 0 obj\n<< /Type /Action /S /JavaScript /JS (alert("hi")) >>\nendobj',
-    );
+    const pdf = buildPdf('4 0 obj\n<< /Type /Action /S /JavaScript /JS (alert("hi")) >>\nendobj');
     const result = await enforcePdfAFull(pdf, '2b');
 
     const text = decoder.decode(result.bytes);
     expect(text).not.toContain('/S /JavaScript');
     expect(text).not.toContain('/JS (alert');
-    expect(result.actions.some(a => a.action === 'strip')).toBe(true);
+    expect(result.actions.some((a) => a.action === 'strip')).toBe(true);
   });
 
   // 4. Flattens transparency for PDF/A-1
   it('flattens transparency for PDF/A-1b', async () => {
-    const pdf = buildPdf(
-      '4 0 obj\n<< /Type /ExtGState /CA 0.5 /ca 0.3 >>\nendobj',
-    );
+    const pdf = buildPdf('4 0 obj\n<< /Type /ExtGState /CA 0.5 /ca 0.3 >>\nendobj');
     const result = await enforcePdfAFull(pdf, '1b');
 
     const text = decoder.decode(result.bytes);
     // Opacity values should be flattened to 1
     expect(text).not.toContain('/CA 0.5');
     expect(text).not.toContain('/ca 0.3');
-    expect(result.actions.some(a => a.action === 'flatten-transparency')).toBe(true);
+    expect(result.actions.some((a) => a.action === 'flatten-transparency')).toBe(true);
   });
 
   // 5. Does NOT flatten transparency for PDF/A-2
   it('does NOT flatten transparency for PDF/A-2b', async () => {
-    const pdf = buildPdf(
-      '4 0 obj\n<< /Type /ExtGState /CA 0.5 /ca 0.3 >>\nendobj',
-    );
+    const pdf = buildPdf('4 0 obj\n<< /Type /ExtGState /CA 0.5 /ca 0.3 >>\nendobj');
     const result = await enforcePdfAFull(pdf, '2b');
 
     // Transparency should remain for PDF/A-2 (which allows it)
     const text = decoder.decode(result.bytes);
     expect(text).toContain('/CA 0.5');
     expect(text).toContain('/ca 0.3');
-    expect(result.actions.some(a => a.action === 'flatten-transparency')).toBe(false);
+    expect(result.actions.some((a) => a.action === 'flatten-transparency')).toBe(false);
   });
 
   // 6. Throws on encrypted PDFs
   it('throws on encrypted PDFs', async () => {
-    const pdf = buildPdf(
-      '4 0 obj\n<< /Type /Encrypt /Filter /Standard >>\nendobj',
-    );
+    const pdf = buildPdf('4 0 obj\n<< /Type /Encrypt /Filter /Standard >>\nendobj');
     await expect(enforcePdfAFull(pdf, '2b')).rejects.toThrow(
       'Cannot enforce PDF/A: document is encrypted',
     );
@@ -181,15 +172,12 @@ describe('enforcePdfAFull', () => {
 
   // 7. Returns actions taken
   it('returns a list of actions taken', async () => {
-    const pdf = buildPdf(
-      '4 0 obj\n<< /S /JavaScript /JS (code) >>\nendobj',
-      { noId: true },
-    );
+    const pdf = buildPdf('4 0 obj\n<< /S /JavaScript /JS (code) >>\nendobj', { noId: true });
     const result = await enforcePdfAFull(pdf, '2b');
 
     // Should have at least: strip, add-xmp, add-file-id
     expect(result.actions.length).toBeGreaterThanOrEqual(3);
-    const actionTypes = result.actions.map(a => a.action);
+    const actionTypes = result.actions.map((a) => a.action);
     expect(actionTypes).toContain('strip');
     expect(actionTypes).toContain('add-xmp');
     expect(actionTypes).toContain('add-file-id');
@@ -219,9 +207,7 @@ describe('enforcePdfAFull', () => {
 
   // 10. Respects stripProhibited: false
   it('respects stripProhibited: false option', async () => {
-    const pdf = buildPdf(
-      '4 0 obj\n<< /S /JavaScript /JS (code) >>\nendobj',
-    );
+    const pdf = buildPdf('4 0 obj\n<< /S /JavaScript /JS (code) >>\nendobj');
     const result = await enforcePdfAFull(pdf, '2b', {
       stripProhibited: false,
     });
@@ -229,14 +215,12 @@ describe('enforcePdfAFull', () => {
     const text = decoder.decode(result.bytes);
     // JavaScript should still be present
     expect(text).toContain('/S /JavaScript');
-    expect(result.actions.some(a => a.action === 'strip')).toBe(false);
+    expect(result.actions.some((a) => a.action === 'strip')).toBe(false);
   });
 
   // 11. Respects flattenTransparency: false
   it('respects flattenTransparency: false option', async () => {
-    const pdf = buildPdf(
-      '4 0 obj\n<< /Type /ExtGState /CA 0.5 >>\nendobj',
-    );
+    const pdf = buildPdf('4 0 obj\n<< /Type /ExtGState /CA 0.5 >>\nendobj');
     const result = await enforcePdfAFull(pdf, '1b', {
       flattenTransparency: false,
     });
@@ -244,7 +228,7 @@ describe('enforcePdfAFull', () => {
     const text = decoder.decode(result.bytes);
     // Transparency should remain
     expect(text).toContain('/CA 0.5');
-    expect(result.actions.some(a => a.action === 'flatten-transparency')).toBe(false);
+    expect(result.actions.some((a) => a.action === 'flatten-transparency')).toBe(false);
   });
 
   // 12. Respects addXmpMetadata: false
@@ -254,7 +238,7 @@ describe('enforcePdfAFull', () => {
       addXmpMetadata: false,
     });
 
-    expect(result.actions.some(a => a.action === 'add-xmp')).toBe(false);
+    expect(result.actions.some((a) => a.action === 'add-xmp')).toBe(false);
   });
 
   // 13. Respects addFileId: false
@@ -264,7 +248,7 @@ describe('enforcePdfAFull', () => {
       addFileId: false,
     });
 
-    expect(result.actions.some(a => a.action === 'add-file-id')).toBe(false);
+    expect(result.actions.some((a) => a.action === 'add-file-id')).toBe(false);
   });
 
   // 14. Includes title and author in XMP
@@ -282,10 +266,7 @@ describe('enforcePdfAFull', () => {
 
   // 15. Idempotent — running twice gives equivalent result
   it('is idempotent (running twice gives consistent result)', async () => {
-    const pdf = buildPdf(
-      '4 0 obj\n<< /S /JavaScript /JS (x) >>\nendobj',
-      { noId: true },
-    );
+    const pdf = buildPdf('4 0 obj\n<< /S /JavaScript /JS (x) >>\nendobj', { noId: true });
 
     const first = await enforcePdfAFull(pdf, '2b', {
       title: 'Idem',
@@ -298,19 +279,21 @@ describe('enforcePdfAFull', () => {
 
     // Second run should produce no additional strip or add-xmp actions
     // because those were already handled in the first pass
-    expect(second.actions.some(a => a.action === 'strip')).toBe(false);
-    expect(second.actions.some(a => a.action === 'add-xmp')).toBe(false);
+    expect(second.actions.some((a) => a.action === 'strip')).toBe(false);
+    expect(second.actions.some((a) => a.action === 'add-xmp')).toBe(false);
     // File ID should already be present from first run
-    expect(second.actions.some(a => a.action === 'add-file-id')).toBe(false);
+    expect(second.actions.some((a) => a.action === 'add-file-id')).toBe(false);
   });
 
   // 16. Handles multiple prohibited feature types simultaneously
   it('strips multiple prohibited feature types at once', async () => {
-    const pdf = buildPdf([
-      '4 0 obj\n<< /S /JavaScript /JS (x) >>\nendobj',
-      '5 0 obj\n<< /S /Launch /F (cmd) >>\nendobj',
-      '6 0 obj\n<< /S /Sound /Sound 7 0 R >>\nendobj',
-    ].join('\n'));
+    const pdf = buildPdf(
+      [
+        '4 0 obj\n<< /S /JavaScript /JS (x) >>\nendobj',
+        '5 0 obj\n<< /S /Launch /F (cmd) >>\nendobj',
+        '6 0 obj\n<< /S /Sound /Sound 7 0 R >>\nendobj',
+      ].join('\n'),
+    );
 
     const result = await enforcePdfAFull(pdf, '2b');
 
@@ -318,7 +301,7 @@ describe('enforcePdfAFull', () => {
     expect(text).not.toContain('/S /JavaScript');
     expect(text).not.toContain('/S /Launch');
     expect(text).not.toContain('/S /Sound');
-    expect(result.actions.filter(a => a.action === 'strip').length).toBeGreaterThanOrEqual(3);
+    expect(result.actions.filter((a) => a.action === 'strip').length).toBeGreaterThanOrEqual(3);
   });
 
   // 17. Handles PDF with XMP already present
@@ -327,7 +310,7 @@ describe('enforcePdfAFull', () => {
     const result = await enforcePdfAFull(pdf, '2b');
 
     // Should NOT add XMP because it already exists with pdfaid:part
-    expect(result.actions.some(a => a.action === 'add-xmp')).toBe(false);
+    expect(result.actions.some((a) => a.action === 'add-xmp')).toBe(false);
   });
 
   // 18. Language option is used in XMP
@@ -344,14 +327,12 @@ describe('enforcePdfAFull', () => {
 
   // 19. Does not flatten transparency for PDF/A-3
   it('does NOT flatten transparency for PDF/A-3b', async () => {
-    const pdf = buildPdf(
-      '4 0 obj\n<< /Type /ExtGState /CA 0.5 >>\nendobj',
-    );
+    const pdf = buildPdf('4 0 obj\n<< /Type /ExtGState /CA 0.5 >>\nendobj');
     const result = await enforcePdfAFull(pdf, '3b');
 
     const text = decoder.decode(result.bytes);
     expect(text).toContain('/CA 0.5');
-    expect(result.actions.some(a => a.action === 'flatten-transparency')).toBe(false);
+    expect(result.actions.some((a) => a.action === 'flatten-transparency')).toBe(false);
   });
 
   // 20. Returns remaining issues count
@@ -361,7 +342,7 @@ describe('enforcePdfAFull', () => {
 
     expect(result.remainingIssues).toBeGreaterThanOrEqual(0);
     expect(result.remainingIssues).toBe(
-      result.validation.issues.filter(i => i.severity === 'error').length,
+      result.validation.issues.filter((i) => i.severity === 'error').length,
     );
   });
 });

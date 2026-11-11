@@ -17,11 +17,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  parseIccTransform,
-  deviceRgbToXyz,
-  xyzToLab,
-} from '../../../src/color/iccTransform.js';
+import { parseIccTransform, deviceRgbToXyz, xyzToLab } from '../../../src/color/iccTransform.js';
 import { SRGB_ICC_PROFILE } from '../../../src/compliance/srgbIccProfile.js';
 
 // ---------------------------------------------------------------------------

@@ -22,11 +22,7 @@
  * @packageDocumentation
  */
 
-import {
-  parseDerTlv,
-  decodeOidBytes,
-  extractIssuerAndSerial,
-} from './pkcs7.js';
+import { parseDerTlv, decodeOidBytes, extractIssuerAndSerial } from './pkcs7.js';
 import type { Asn1Node } from './pkcs7.js';
 
 // ---------------------------------------------------------------------------
@@ -145,16 +141,12 @@ function parseAdobeRevocationInfo(
     if (child.tag === 0xa0) {
       // [0] CRLs — SEQUENCE OF CRL
       for (const crlNode of child.children) {
-        result.crls.push(
-          extractNodeBytes(fullBuffer, parentData, crlNode),
-        );
+        result.crls.push(extractNodeBytes(fullBuffer, parentData, crlNode));
       }
     } else if (child.tag === 0xa1) {
       // [1] OCSP responses — SEQUENCE OF OCSPResponse
       for (const ocspNode of child.children) {
-        result.ocsps.push(
-          extractNodeBytes(fullBuffer, parentData, ocspNode),
-        );
+        result.ocsps.push(extractNodeBytes(fullBuffer, parentData, ocspNode));
       }
     }
   }
@@ -177,9 +169,7 @@ function parseAdobeRevocationInfo(
  * @param signatureBytes  DER-encoded PKCS#7 signature bytes.
  * @returns               Extracted CRLs and OCSP responses.
  */
-export function extractEmbeddedRevocationData(
-  signatureBytes: Uint8Array,
-): EmbeddedRevocationData {
+export function extractEmbeddedRevocationData(signatureBytes: Uint8Array): EmbeddedRevocationData {
   const result: EmbeddedRevocationData = { ocsps: [], crls: [] };
 
   try {
@@ -218,11 +208,7 @@ export function extractEmbeddedRevocationData(
         );
 
         for (const valueNode of adobeRevAttrs) {
-          const revData = parseAdobeRevocationInfo(
-            valueNode,
-            signatureBytes,
-            signatureBytes,
-          );
+          const revData = parseAdobeRevocationInfo(valueNode, signatureBytes, signatureBytes);
           result.ocsps.push(...revData.ocsps);
           result.crls.push(...revData.crls);
         }
@@ -239,11 +225,7 @@ export function extractEmbeddedRevocationData(
           //   crlVals [0] SEQUENCE OF CRL OPTIONAL,
           //   ocspVals [1] SEQUENCE OF BasicOCSPResponse OPTIONAL
           // }
-          const parsed = parseAdobeRevocationInfo(
-            valueNode,
-            signatureBytes,
-            signatureBytes,
-          );
+          const parsed = parseAdobeRevocationInfo(valueNode, signatureBytes, signatureBytes);
           result.ocsps.push(...parsed.ocsps);
           result.crls.push(...parsed.crls);
         }
@@ -304,11 +286,7 @@ export function verifyOfflineRevocation(
 
   // Try OCSP responses first
   if (revocationData.ocsps.length > 0) {
-    const ocspResult = checkOcspResponses(
-      serialBytes,
-      issuerDer,
-      revocationData.ocsps,
-    );
+    const ocspResult = checkOcspResponses(serialBytes, issuerDer, revocationData.ocsps);
     if (ocspResult.checked) return ocspResult;
   }
 
@@ -322,8 +300,7 @@ export function verifyOfflineRevocation(
     checked: false,
     status: 'unknown',
     source: 'none',
-    details:
-      'Embedded revocation data does not cover this certificate',
+    details: 'Embedded revocation data does not cover this certificate',
   };
 }
 
@@ -368,19 +345,13 @@ function checkOcspResponses(
       if (ocspResponse.tag === 0x30) {
         // Could be OCSPResponse wrapper or direct BasicOCSPResponse
         // Check if first child is an ENUMERATED (responseStatus) or SEQUENCE
-        if (
-          ocspResponse.children.length >= 1 &&
-          ocspResponse.children[0]!.tag === 0x0a
-        ) {
+        if (ocspResponse.children.length >= 1 && ocspResponse.children[0]!.tag === 0x0a) {
           // This is an OCSPResponse; look for [0] responseBytes
           for (const child of ocspResponse.children) {
             if (child.tag === 0xa0 && child.children.length > 0) {
               const respBytes = child.children[0]!;
               // responseBytes = SEQUENCE { responseType, response }
-              if (
-                respBytes.children.length >= 2 &&
-                respBytes.children[1]!.tag === 0x04
-              ) {
+              if (respBytes.children.length >= 2 && respBytes.children[1]!.tag === 0x04) {
                 // OCTET STRING containing BasicOCSPResponse
                 const innerBytes = respBytes.children[1]!.data;
                 basicResponse = parseDerTlv(innerBytes, 0);
@@ -420,8 +391,7 @@ function checkOcspResponses(
 
       // Check each SingleResponse
       for (const singleResponse of responsesNode.children) {
-        if (singleResponse.tag !== 0x30 || singleResponse.children.length < 3)
-          continue;
+        if (singleResponse.tag !== 0x30 || singleResponse.children.length < 3) continue;
 
         // certID is the first SEQUENCE
         const certId = singleResponse.children[0]!;
@@ -539,11 +509,7 @@ function checkCrls(
       idx++;
 
       // Check if the CRL issuer matches the certificate's issuer
-      const crlIssuerBytes = extractNodeBytesFromParent(
-        crlBytes,
-        tbsCertList,
-        crlIssuerNode,
-      );
+      const crlIssuerBytes = extractNodeBytesFromParent(crlBytes, tbsCertList, crlIssuerNode);
       if (!compareBytes(crlIssuerBytes, issuerDer)) continue;
 
       // thisUpdate Time
@@ -552,8 +518,7 @@ function checkCrls(
       // nextUpdate Time (OPTIONAL)
       if (
         idx < tbsCertList.children.length &&
-        (tbsCertList.children[idx]!.tag === 0x17 ||
-          tbsCertList.children[idx]!.tag === 0x18)
+        (tbsCertList.children[idx]!.tag === 0x17 || tbsCertList.children[idx]!.tag === 0x18)
       ) {
         idx++;
       }
@@ -608,8 +573,7 @@ function checkCrls(
         checked: true,
         status: 'good',
         source: 'crl',
-        details:
-          'Certificate serial number not found in CRL; certificate is good',
+        details: 'Certificate serial number not found in CRL; certificate is good',
       };
     } catch {
       continue;

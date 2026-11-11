@@ -46,10 +46,7 @@ import { buildOutputIntent } from './outputIntent.js';
  * @param target      The page or Form XObject dictionary to mutate.
  * @param intentRefs  Indirect references to `/OutputIntent` dictionaries.
  */
-export function attachOutputIntents(
-  target: PdfDict,
-  intentRefs: readonly PdfRef[],
-): void {
+export function attachOutputIntents(target: PdfDict, intentRefs: readonly PdfRef[]): void {
   const existing = target.get('/OutputIntents');
   const array = existing instanceof PdfArray ? existing : new PdfArray();
 

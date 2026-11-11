@@ -113,11 +113,7 @@ function parseTableDirectory(data: Uint8Array): Map<string, TableEntry> {
  * Create a DataView into a specific table.  Throws if the table does not
  * exist.
  */
-function getTableView(
-  data: Uint8Array,
-  tables: Map<string, TableEntry>,
-  tag: string,
-): DataView {
+function getTableView(data: Uint8Array, tables: Map<string, TableEntry>, tag: string): DataView {
   const entry = tables.get(tag);
   if (!entry) {
     throw new Error(`Required TrueType table '${tag}' not found`);
@@ -323,11 +319,7 @@ function parseCmap(
   cmapTableOffset: number,
   cmapTableLength: number,
 ): Map<number, number> {
-  const view = new DataView(
-    data.buffer,
-    data.byteOffset + cmapTableOffset,
-    cmapTableLength,
-  );
+  const view = new DataView(data.buffer, data.byteOffset + cmapTableOffset, cmapTableLength);
 
   const numSubtables = view.getUint16(2, false);
 
@@ -414,25 +406,22 @@ function parseCmapFormat4(view: DataView, offset: number): Map<number, number> {
     const idDelta = view.getInt16(idDeltaOffset + seg * 2, false);
     const idRangeOffset = view.getUint16(idRangeOffsetOffset + seg * 2, false);
 
-    if (startCode === 0xFFFF) break;
+    if (startCode === 0xffff) break;
 
     for (let code = startCode; code <= endCode; code++) {
       let glyphId: number;
 
       if (idRangeOffset === 0) {
-        glyphId = (code + idDelta) & 0xFFFF;
+        glyphId = (code + idDelta) & 0xffff;
       } else {
         // Index into glyphIdArray
         const glyphIdArrayOffset =
-          idRangeOffsetOffset +
-          seg * 2 +
-          idRangeOffset +
-          (code - startCode) * 2;
+          idRangeOffsetOffset + seg * 2 + idRangeOffset + (code - startCode) * 2;
 
         if (glyphIdArrayOffset + 1 < view.byteLength) {
           glyphId = view.getUint16(glyphIdArrayOffset, false);
           if (glyphId !== 0) {
-            glyphId = (glyphId + idDelta) & 0xFFFF;
+            glyphId = (glyphId + idDelta) & 0xffff;
           }
         } else {
           glyphId = 0;
@@ -493,11 +482,7 @@ function parseNameTable(
   nameTableOffset: number,
   nameTableLength: number,
 ): { familyName: string; postScriptName: string } {
-  const view = new DataView(
-    data.buffer,
-    data.byteOffset + nameTableOffset,
-    nameTableLength,
-  );
+  const view = new DataView(data.buffer, data.byteOffset + nameTableOffset, nameTableLength);
 
   const count = view.getUint16(2, false);
   const stringOffset = view.getUint16(4, false);
@@ -523,11 +508,7 @@ function parseNameTable(
 
     if (platformId === 3 && encodingId === 1) {
       // UTF-16BE
-      const nameView = new DataView(
-        data.buffer,
-        data.byteOffset + absOffset,
-        length,
-      );
+      const nameView = new DataView(data.buffer, data.byteOffset + absOffset, length);
       for (let j = 0; j < length; j += 2) {
         decoded += String.fromCharCode(nameView.getUint16(j, false));
       }
@@ -561,11 +542,7 @@ function parseNameTable(
  *
  * Reference: PDF spec §9.8.2, Table 123.
  */
-function computeFontFlags(
-  os2: Os2Data,
-  italicAngle: number,
-  isSymbolic: boolean,
-): number {
+function computeFontFlags(os2: Os2Data, italicAngle: number, isSymbolic: boolean): number {
   let flags = 0;
 
   // Bit 1 (value 1): FixedPitch — check panose[3]
@@ -609,7 +586,7 @@ function computeFontFlags(
  */
 function estimateStemV(usWeightClass: number): number {
   // Rough mapping: weight 400 → ~80, weight 700 → ~140
-  return Math.round(10 + 220 * ((usWeightClass / 1000) ** 2));
+  return Math.round(10 + 220 * (usWeightClass / 1000) ** 2);
 }
 
 // ---------------------------------------------------------------------------
@@ -749,11 +726,7 @@ export function getGlyphWidth(
  * @param metrics  - The font metrics (from {@link extractMetrics}).
  * @returns The total advance width of the string in points.
  */
-export function measureText(
-  text: string,
-  fontSize: number,
-  metrics: FontMetrics,
-): number {
+export function measureText(text: string, fontSize: number, metrics: FontMetrics): number {
   const scale = fontSize / metrics.unitsPerEm;
   let totalWidth = 0;
 

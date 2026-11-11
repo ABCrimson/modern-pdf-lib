@@ -117,10 +117,7 @@ async function generateTestCertWithOcsp(ocspUrl?: string): Promise<{
 
   const now = new Date();
   const later = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000);
-  const validity = encodeSequence([
-    encodeUTCTime(now),
-    encodeUTCTime(later),
-  ]);
+  const validity = encodeSequence([encodeUTCTime(now), encodeUTCTime(later)]);
 
   const subject = buildName('Test Subject');
 
@@ -167,11 +164,7 @@ async function generateTestCertWithOcsp(ocspUrl?: string): Promise<{
     ),
   );
 
-  const certificate = encodeSequence([
-    tbsCert,
-    sigAlgo,
-    encodeBitString(signature),
-  ]);
+  const certificate = encodeSequence([tbsCert, sigAlgo, encodeBitString(signature)]);
 
   return { certificate, privateKey: privateKeyDer, publicKey: keyPair.publicKey, keyPair };
 }
@@ -206,8 +199,12 @@ async function generateIssuedCert(
   let iIdx = 0;
   if (issuerTbs.children[0]!.tag === 0xa0) iIdx = 1;
   const issuerSubjectNode = issuerTbs.children[iIdx + 4]!;
-  const issuerSubjectStart = issuerSubjectNode.offset + (issuerTbs.data.byteOffset - issuerCert.byteOffset);
-  const issuerName = issuerCert.subarray(issuerSubjectStart, issuerSubjectStart + issuerSubjectNode.totalLength);
+  const issuerSubjectStart =
+    issuerSubjectNode.offset + (issuerTbs.data.byteOffset - issuerCert.byteOffset);
+  const issuerName = issuerCert.subarray(
+    issuerSubjectStart,
+    issuerSubjectStart + issuerSubjectNode.totalLength,
+  );
 
   const version = encodeContextTag(0, encodeSmallInteger(2));
   const serialNumber = encodeInteger(serialBytes);
@@ -218,16 +215,18 @@ async function generateIssuedCert(
 
   const now = new Date();
   const later = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000);
-  const validity = encodeSequence([
-    encodeUTCTime(now),
-    encodeUTCTime(later),
-  ]);
+  const validity = encodeSequence([encodeUTCTime(now), encodeUTCTime(later)]);
 
   const subject = buildName(subjectName);
 
   const tbsCert = encodeSequence([
-    version, serialNumber, sigAlgo,
-    issuerName, validity, subject, spkiDer,
+    version,
+    serialNumber,
+    sigAlgo,
+    issuerName,
+    validity,
+    subject,
+    spkiDer,
   ]);
 
   const signature = new Uint8Array(
@@ -241,11 +240,7 @@ async function generateIssuedCert(
     ),
   );
 
-  return encodeSequence([
-    tbsCert,
-    sigAlgo,
-    encodeBitString(signature),
-  ]);
+  return encodeSequence([tbsCert, sigAlgo, encodeBitString(signature)]);
 }
 
 // ---------------------------------------------------------------------------
@@ -322,9 +317,7 @@ function buildMockBasicOcspResponse(options: {
     encodeGeneralizedTime(options.thisUpdate),
   ];
   if (options.nextUpdate) {
-    singleRespChildren.push(
-      encodeContextTag(0, encodeGeneralizedTime(options.nextUpdate)),
-    );
+    singleRespChildren.push(encodeContextTag(0, encodeGeneralizedTime(options.nextUpdate)));
   }
   const singleResponse = encodeSequence(singleRespChildren);
 
@@ -346,11 +339,7 @@ function buildMockBasicOcspResponse(options: {
   ]);
   const dummySig = encodeBitString(new Uint8Array(256));
 
-  const basicResp = encodeSequence([
-    responseData,
-    sigAlgo,
-    dummySig,
-  ]);
+  const basicResp = encodeSequence([responseData, sigAlgo, dummySig]);
 
   return basicResp;
 }
@@ -358,10 +347,7 @@ function buildMockBasicOcspResponse(options: {
 /**
  * Build a mock OCSPResponse (the outer wrapper).
  */
-function buildMockOcspResponse(
-  responseStatus: number,
-  basicResp?: Uint8Array,
-): Uint8Array {
+function buildMockOcspResponse(responseStatus: number, basicResp?: Uint8Array): Uint8Array {
   const statusEnum = encodeEnumerated(responseStatus);
 
   if (!basicResp || responseStatus !== 0) {
@@ -374,10 +360,7 @@ function buildMockOcspResponse(
     encodeOctetString(basicResp),
   ]);
 
-  return encodeSequence([
-    statusEnum,
-    encodeContextTag(0, responseBytes),
-  ]);
+  return encodeSequence([statusEnum, encodeContextTag(0, responseBytes)]);
 }
 
 // ---------------------------------------------------------------------------
@@ -620,9 +603,7 @@ describe('parseOcspResponse', () => {
 
 describe('extractOcspUrl', () => {
   it('should extract OCSP URL from certificate AIA extension', async () => {
-    const { certificate } = await generateTestCertWithOcsp(
-      'http://ocsp.example.com',
-    );
+    const { certificate } = await generateTestCertWithOcsp('http://ocsp.example.com');
 
     const url = extractOcspUrl(certificate);
     expect(url).toBe('http://ocsp.example.com');
@@ -635,9 +616,7 @@ describe('extractOcspUrl', () => {
   });
 
   it('should extract HTTPS OCSP URL', async () => {
-    const { certificate } = await generateTestCertWithOcsp(
-      'https://ocsp.secure.example.com/check',
-    );
+    const { certificate } = await generateTestCertWithOcsp('https://ocsp.secure.example.com/check');
 
     const url = extractOcspUrl(certificate);
     expect(url).toBe('https://ocsp.secure.example.com/check');
@@ -683,16 +662,24 @@ describe('extractOcspUrl', () => {
     const validity = encodeSequence([encodeUTCTime(now), encodeUTCTime(later)]);
 
     const tbsCert = encodeSequence([
-      version, serialNumber, sigAlgo,
-      buildName('Issuer'), validity, buildName('Subject'),
-      spkiDer, extensionsWrapper,
+      version,
+      serialNumber,
+      sigAlgo,
+      buildName('Issuer'),
+      validity,
+      buildName('Subject'),
+      spkiDer,
+      extensionsWrapper,
     ]);
 
     const signature = new Uint8Array(
       await globalThis.crypto.subtle.sign(
         { name: 'RSASSA-PKCS1-v1_5' },
         keyPair.privateKey,
-        tbsCert.buffer.slice(tbsCert.byteOffset, tbsCert.byteOffset + tbsCert.byteLength) as ArrayBuffer,
+        tbsCert.buffer.slice(
+          tbsCert.byteOffset,
+          tbsCert.byteOffset + tbsCert.byteLength,
+        ) as ArrayBuffer,
       ),
     );
 

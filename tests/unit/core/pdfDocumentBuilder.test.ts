@@ -200,7 +200,9 @@ describe('PdfDocumentBuilder', () => {
     const sourceBytes = await source.save();
 
     // Load into builder and modify
-    const bytes = await (await PdfDocumentBuilder.load(sourceBytes))
+    const bytes = await (
+      await PdfDocumentBuilder.load(sourceBytes)
+    )
       .setTitle('Modified')
       .setAuthor('Builder')
       .addPage(PageSizes.Letter, (page) => {
@@ -402,9 +404,7 @@ describe('PdfDocumentBuilder', () => {
   // -------------------------------------------------------------------------
 
   it('save() can be called multiple times', async () => {
-    const builder = PdfDocumentBuilder.create()
-      .setTitle('Idempotent')
-      .addPage(PageSizes.A4);
+    const builder = PdfDocumentBuilder.create().setTitle('Idempotent').addPage(PageSizes.A4);
 
     const bytes1 = await builder.save();
     const bytes2 = await builder.save();

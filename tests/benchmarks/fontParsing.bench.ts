@@ -17,7 +17,8 @@ import {
 // ---------------------------------------------------------------------------
 
 const shortText = 'Hello, World!';
-const mediumText = 'The quick brown fox jumps over the lazy dog. Pack my box with five dozen liquor jugs.';
+const mediumText =
+  'The quick brown fox jumps over the lazy dog. Pack my box with five dozen liquor jugs.';
 const longText = mediumText.repeat(20); // ~1720 chars
 
 // ---------------------------------------------------------------------------
@@ -83,8 +84,10 @@ describe('text measurement', () => {
 // ---------------------------------------------------------------------------
 
 describe('batch text measurement (simulated layout)', () => {
-  const paragraphs = Array.from({ length: 50 }, (_, i) =>
-    `Paragraph ${i + 1}: This is a sample paragraph for benchmarking text measurement performance in the modern-pdf library.`,
+  const paragraphs = Array.from(
+    { length: 50 },
+    (_, i) =>
+      `Paragraph ${i + 1}: This is a sample paragraph for benchmarking text measurement performance in the modern-pdf library.`,
   );
 
   bench('measure 50 paragraphs in Helvetica', () => {
@@ -106,7 +109,11 @@ describe('batch text measurement (simulated layout)', () => {
 // ---------------------------------------------------------------------------
 
 import { isFontParserWasmReady } from '../../src/assets/font/fontEmbed.js';
-import { isSubsetWasmReady, subsetFont, computeSubsetTag } from '../../src/assets/font/fontSubset.js';
+import {
+  isSubsetWasmReady,
+  subsetFont,
+  computeSubsetTag,
+} from '../../src/assets/font/fontSubset.js';
 import { isShapingWasmReady } from '../../src/assets/font/textShaper.js';
 
 const wasmFontReady = isFontParserWasmReady();

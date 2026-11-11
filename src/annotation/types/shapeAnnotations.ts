@@ -6,13 +6,7 @@
  * Reference: PDF 1.7 spec, Sections 12.5.6.7-12.5.6.9.
  */
 
-import {
-  PdfDict,
-  PdfArray,
-  PdfName,
-  PdfNumber,
-  PdfStream,
-} from '../../core/pdfObjects.js';
+import { PdfDict, PdfArray, PdfName, PdfNumber, PdfStream } from '../../core/pdfObjects.js';
 import type { PdfObject, PdfRef } from '../../core/pdfObjects.js';
 import { PdfAnnotation, buildAnnotationDict } from '../pdfAnnotation.js';
 import type { AnnotationOptions } from '../pdfAnnotation.js';
@@ -55,10 +49,7 @@ function getInteriorColor(dict: PdfDict): { r: number; g: number; b: number } | 
   return undefined;
 }
 
-function setInteriorColor(
-  dict: PdfDict,
-  color: { r: number; g: number; b: number },
-): void {
+function setInteriorColor(dict: PdfDict, color: { r: number; g: number; b: number }): void {
   dict.set('/IC', PdfArray.fromNumbers([color.r, color.g, color.b]));
 }
 
@@ -92,10 +83,7 @@ export class PdfLineAnnotation extends PdfAnnotation {
       annot.setLinePoints(options.linePoints);
     }
     if (options.lineEndingStart !== undefined || options.lineEndingEnd !== undefined) {
-      annot.setLineEndingStyles(
-        options.lineEndingStart ?? 'None',
-        options.lineEndingEnd ?? 'None',
-      );
+      annot.setLineEndingStyles(options.lineEndingStart ?? 'None', options.lineEndingEnd ?? 'None');
     }
     return annot;
   }
@@ -132,12 +120,18 @@ export class PdfLineAnnotation extends PdfAnnotation {
     if (obj && obj.kind === 'array' && obj.items.length >= 2) {
       const start = obj.items[0];
       const end = obj.items[1];
-      const sVal = start && start.kind === 'name'
-        ? (start.value.startsWith('/') ? start.value.slice(1) : start.value)
-        : 'None';
-      const eVal = end && end.kind === 'name'
-        ? (end.value.startsWith('/') ? end.value.slice(1) : end.value)
-        : 'None';
+      const sVal =
+        start && start.kind === 'name'
+          ? start.value.startsWith('/')
+            ? start.value.slice(1)
+            : start.value
+          : 'None';
+      const eVal =
+        end && end.kind === 'name'
+          ? end.value.startsWith('/')
+            ? end.value.slice(1)
+            : end.value
+          : 'None';
       return [sVal, eVal];
     }
     return ['None', 'None'];

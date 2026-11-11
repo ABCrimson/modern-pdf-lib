@@ -38,10 +38,7 @@ import { createPdf } from '../../../src/core/pdfDocument.js';
 // Helpers
 // ---------------------------------------------------------------------------
 
-function makePage(
-  width?: number,
-  height?: number,
-): { page: PdfPage; registry: PdfObjectRegistry } {
+function makePage(width?: number, height?: number): { page: PdfPage; registry: PdfObjectRegistry } {
   const registry = new PdfObjectRegistry();
   const [w, h] = [width ?? 500, height ?? 500];
   const page = new PdfPage(w, h, registry);
@@ -60,7 +57,10 @@ function pdfToString(bytes: Uint8Array): string {
 describe('linearGradient', () => {
   it('creates a descriptor with 2 bare RGB stops', () => {
     const grad = linearGradient({
-      x1: 0, y1: 0, x2: 100, y2: 0,
+      x1: 0,
+      y1: 0,
+      x2: 100,
+      y2: 0,
       stops: [rgb(1, 0, 0), rgb(0, 0, 1)],
     });
 
@@ -75,7 +75,10 @@ describe('linearGradient', () => {
 
   it('creates a descriptor with 3+ explicit ColorStop objects', () => {
     const grad = linearGradient({
-      x1: 0, y1: 0, x2: 300, y2: 0,
+      x1: 0,
+      y1: 0,
+      x2: 300,
+      y2: 0,
       stops: [
         { offset: 0, color: rgb(1, 0, 0) },
         { offset: 0.25, color: rgb(1, 1, 0) },
@@ -96,7 +99,10 @@ describe('linearGradient', () => {
 
   it('creates a descriptor with 3 bare color stops (evenly distributed)', () => {
     const grad = linearGradient({
-      x1: 0, y1: 0, x2: 300, y2: 0,
+      x1: 0,
+      y1: 0,
+      x2: 300,
+      y2: 0,
       stops: [rgb(1, 0, 0), rgb(0, 1, 0), rgb(0, 0, 1)],
     });
 
@@ -108,11 +114,14 @@ describe('linearGradient', () => {
 
   it('handles mixed bare Color and ColorStop entries', () => {
     const grad = linearGradient({
-      x1: 0, y1: 0, x2: 200, y2: 0,
+      x1: 0,
+      y1: 0,
+      x2: 200,
+      y2: 0,
       stops: [
-        rgb(1, 0, 0),                          // bare at index 0 -> offset 0
-        { offset: 0.3, color: rgb(0, 1, 0) },  // explicit offset 0.3
-        rgb(0, 0, 1),                           // bare at index 2 -> offset 1 (2/(3-1))
+        rgb(1, 0, 0), // bare at index 0 -> offset 0
+        { offset: 0.3, color: rgb(0, 1, 0) }, // explicit offset 0.3
+        rgb(0, 0, 1), // bare at index 2 -> offset 1 (2/(3-1))
       ],
     });
 
@@ -128,7 +137,10 @@ describe('linearGradient', () => {
 
   it('converts grayscale stops to RGB', () => {
     const grad = linearGradient({
-      x1: 0, y1: 0, x2: 100, y2: 0,
+      x1: 0,
+      y1: 0,
+      x2: 100,
+      y2: 0,
       stops: [grayscale(0), grayscale(0.5), grayscale(1)],
     });
 
@@ -139,7 +151,10 @@ describe('linearGradient', () => {
 
   it('converts CMYK stops to RGB', () => {
     const grad = linearGradient({
-      x1: 0, y1: 0, x2: 100, y2: 0,
+      x1: 0,
+      y1: 0,
+      x2: 100,
+      y2: 0,
       stops: [cmyk(1, 0, 0, 0), cmyk(0, 0, 0, 0)],
     });
 
@@ -157,7 +172,10 @@ describe('linearGradient', () => {
   it('converts CMYK with non-zero black key to RGB correctly', () => {
     // magenta=1, k=0.5 -> r=(1-0)*(1-0.5)=0.5, g=(1-1)*(1-0.5)=0, b=(1-0)*(1-0.5)=0.5
     const grad = linearGradient({
-      x1: 0, y1: 0, x2: 100, y2: 0,
+      x1: 0,
+      y1: 0,
+      x2: 100,
+      y2: 0,
       stops: [cmyk(0, 1, 0, 0.5), cmyk(0, 0, 0, 1)],
     });
 
@@ -173,7 +191,10 @@ describe('linearGradient', () => {
 
   it('respects extend: false', () => {
     const grad = linearGradient({
-      x1: 0, y1: 0, x2: 100, y2: 0,
+      x1: 0,
+      y1: 0,
+      x2: 100,
+      y2: 0,
       stops: [rgb(0, 0, 0), rgb(1, 1, 1)],
       extend: false,
     });
@@ -183,7 +204,10 @@ describe('linearGradient', () => {
 
   it('defaults extend to true', () => {
     const grad = linearGradient({
-      x1: 0, y1: 0, x2: 100, y2: 0,
+      x1: 0,
+      y1: 0,
+      x2: 100,
+      y2: 0,
       stops: [rgb(0, 0, 0), rgb(1, 1, 1)],
     });
 
@@ -193,7 +217,10 @@ describe('linearGradient', () => {
   it('throws if fewer than 2 stops', () => {
     expect(() =>
       linearGradient({
-        x1: 0, y1: 0, x2: 100, y2: 0,
+        x1: 0,
+        y1: 0,
+        x2: 100,
+        y2: 0,
         stops: [rgb(1, 0, 0)],
       }),
     ).toThrow('at least 2');
@@ -202,7 +229,10 @@ describe('linearGradient', () => {
   it('throws on empty stops array', () => {
     expect(() =>
       linearGradient({
-        x1: 0, y1: 0, x2: 100, y2: 0,
+        x1: 0,
+        y1: 0,
+        x2: 100,
+        y2: 0,
         stops: [],
       }),
     ).toThrow('at least 2');
@@ -210,7 +240,10 @@ describe('linearGradient', () => {
 
   it('sorts stops by offset when provided out of order', () => {
     const grad = linearGradient({
-      x1: 0, y1: 0, x2: 100, y2: 0,
+      x1: 0,
+      y1: 0,
+      x2: 100,
+      y2: 0,
       stops: [
         { offset: 1, color: rgb(0, 0, 1) },
         { offset: 0, color: rgb(1, 0, 0) },
@@ -228,7 +261,10 @@ describe('linearGradient', () => {
 
   it('preserves explicit offsets for ColorStop entries', () => {
     const grad = linearGradient({
-      x1: 0, y1: 0, x2: 100, y2: 0,
+      x1: 0,
+      y1: 0,
+      x2: 100,
+      y2: 0,
       stops: [
         { offset: 0, color: rgb(1, 0, 0) },
         { offset: 0.3, color: rgb(0, 1, 0) },
@@ -249,8 +285,12 @@ describe('linearGradient', () => {
 describe('radialGradient', () => {
   it('creates a descriptor with 2 stops and correct shadingType', () => {
     const grad = radialGradient({
-      x0: 50, y0: 50, r0: 0,
-      x1: 50, y1: 50, r1: 100,
+      x0: 50,
+      y0: 50,
+      r0: 0,
+      x1: 50,
+      y1: 50,
+      r1: 100,
       stops: [rgb(1, 1, 0), rgb(0, 0, 0.5)],
     });
 
@@ -262,8 +302,12 @@ describe('radialGradient', () => {
 
   it('includes all 6 radial coordinates (x0,y0,r0,x1,y1,r1)', () => {
     const grad = radialGradient({
-      x0: 10, y0: 20, r0: 5,
-      x1: 100, y1: 200, r1: 150,
+      x0: 10,
+      y0: 20,
+      r0: 5,
+      x1: 100,
+      y1: 200,
+      r1: 150,
       stops: [rgb(1, 0, 0), rgb(0, 1, 0)],
     });
 
@@ -272,8 +316,12 @@ describe('radialGradient', () => {
 
   it('supports extend: false', () => {
     const grad = radialGradient({
-      x0: 0, y0: 0, r0: 10,
-      x1: 100, y1: 100, r1: 50,
+      x0: 0,
+      y0: 0,
+      r0: 10,
+      x1: 100,
+      y1: 100,
+      r1: 50,
       stops: [rgb(1, 0, 0), rgb(0, 1, 0)],
       extend: false,
     });
@@ -283,8 +331,12 @@ describe('radialGradient', () => {
 
   it('supports multi-stop gradients', () => {
     const grad = radialGradient({
-      x0: 50, y0: 50, r0: 0,
-      x1: 50, y1: 50, r1: 100,
+      x0: 50,
+      y0: 50,
+      r0: 0,
+      x1: 50,
+      y1: 50,
+      r1: 100,
       stops: [rgb(1, 0, 0), rgb(0, 1, 0), rgb(0, 0, 1), rgb(1, 1, 1)],
     });
 
@@ -297,8 +349,12 @@ describe('radialGradient', () => {
 
   it('normalizes stop colours to RGB', () => {
     const grad = radialGradient({
-      x0: 0, y0: 0, r0: 0,
-      x1: 0, y1: 0, r1: 50,
+      x0: 0,
+      y0: 0,
+      r0: 0,
+      x1: 0,
+      y1: 0,
+      r1: 50,
       stops: [grayscale(0), grayscale(1)],
     });
 
@@ -390,7 +446,10 @@ describe('tilingPattern', () => {
 describe('normalizeStops', () => {
   it('evenly distributes bare colors across 0..1', () => {
     const grad = linearGradient({
-      x1: 0, y1: 0, x2: 100, y2: 0,
+      x1: 0,
+      y1: 0,
+      x2: 100,
+      y2: 0,
       stops: [rgb(1, 0, 0), rgb(0, 1, 0), rgb(0, 0, 1), rgb(1, 1, 1)],
     });
 
@@ -403,14 +462,11 @@ describe('normalizeStops', () => {
 
   it('evenly distributes 5 bare colors', () => {
     const grad = linearGradient({
-      x1: 0, y1: 0, x2: 100, y2: 0,
-      stops: [
-        rgb(1, 0, 0),
-        rgb(0.75, 0.25, 0),
-        rgb(0.5, 0.5, 0),
-        rgb(0.25, 0.75, 0),
-        rgb(0, 1, 0),
-      ],
+      x1: 0,
+      y1: 0,
+      x2: 100,
+      y2: 0,
+      stops: [rgb(1, 0, 0), rgb(0.75, 0.25, 0), rgb(0.5, 0.5, 0), rgb(0.25, 0.75, 0), rgb(0, 1, 0)],
     });
 
     expect(grad.normalizedStops[0]!.offset).toBeCloseTo(0);
@@ -422,7 +478,10 @@ describe('normalizeStops', () => {
 
   it('preserves explicit offsets from ColorStop objects', () => {
     const grad = linearGradient({
-      x1: 0, y1: 0, x2: 100, y2: 0,
+      x1: 0,
+      y1: 0,
+      x2: 100,
+      y2: 0,
       stops: [
         { offset: 0, color: rgb(1, 0, 0) },
         { offset: 0.1, color: rgb(0.5, 0, 0) },
@@ -439,7 +498,10 @@ describe('normalizeStops', () => {
 
   it('sorts stops by offset regardless of input order', () => {
     const grad = linearGradient({
-      x1: 0, y1: 0, x2: 100, y2: 0,
+      x1: 0,
+      y1: 0,
+      x2: 100,
+      y2: 0,
       stops: [
         { offset: 0.8, color: rgb(0, 0, 0.8) },
         { offset: 0.2, color: rgb(0.2, 0, 0) },
@@ -468,7 +530,10 @@ describe('buildGradientObjects', () => {
   it('creates valid PDF objects for a 2-stop linear gradient', () => {
     const registry = new PdfObjectRegistry();
     const grad = linearGradient({
-      x1: 0, y1: 0, x2: 200, y2: 0,
+      x1: 0,
+      y1: 0,
+      x2: 200,
+      y2: 0,
       stops: [rgb(1, 0, 0), rgb(0, 0, 1)],
     });
 
@@ -544,7 +609,10 @@ describe('buildGradientObjects', () => {
   it('creates a stitching function (Type 3) for 3-stop linear gradient', () => {
     const registry = new PdfObjectRegistry();
     const grad = linearGradient({
-      x1: 0, y1: 0, x2: 300, y2: 0,
+      x1: 0,
+      y1: 0,
+      x2: 300,
+      y2: 0,
       stops: [rgb(1, 0, 0), rgb(0, 1, 0), rgb(0, 0, 1)],
     });
 
@@ -589,7 +657,10 @@ describe('buildGradientObjects', () => {
   it('creates correct stitching for 4 stops (3 segments)', () => {
     const registry = new PdfObjectRegistry();
     const grad = linearGradient({
-      x1: 0, y1: 0, x2: 300, y2: 0,
+      x1: 0,
+      y1: 0,
+      x2: 300,
+      y2: 0,
       stops: [rgb(1, 0, 0), rgb(0, 1, 0), rgb(0, 0, 1), rgb(1, 1, 1)],
     });
 
@@ -620,8 +691,12 @@ describe('buildGradientObjects', () => {
   it('creates a radial gradient with ShadingType 3', () => {
     const registry = new PdfObjectRegistry();
     const grad = radialGradient({
-      x0: 50, y0: 50, r0: 0,
-      x1: 50, y1: 50, r1: 100,
+      x0: 50,
+      y0: 50,
+      r0: 0,
+      x1: 50,
+      y1: 50,
+      r1: 100,
       stops: [rgb(1, 0, 0), rgb(0, 0, 1)],
     });
 
@@ -642,7 +717,10 @@ describe('buildGradientObjects', () => {
   it('respects extend: false in the Extend array', () => {
     const registry = new PdfObjectRegistry();
     const grad = linearGradient({
-      x1: 0, y1: 0, x2: 100, y2: 0,
+      x1: 0,
+      y1: 0,
+      x2: 100,
+      y2: 0,
       stops: [rgb(0, 0, 0), rgb(1, 1, 1)],
       extend: false,
     });
@@ -662,11 +740,17 @@ describe('buildGradientObjects', () => {
     const registry = new PdfObjectRegistry();
 
     const grad1 = linearGradient({
-      x1: 0, y1: 0, x2: 100, y2: 0,
+      x1: 0,
+      y1: 0,
+      x2: 100,
+      y2: 0,
       stops: [rgb(1, 0, 0), rgb(0, 0, 1)],
     });
     const grad2 = linearGradient({
-      x1: 0, y1: 0, x2: 200, y2: 0,
+      x1: 0,
+      y1: 0,
+      x2: 200,
+      y2: 0,
       stops: [rgb(0, 1, 0), rgb(1, 1, 0)],
     });
 
@@ -795,7 +879,10 @@ describe('PdfPage.drawGradient', () => {
   it('emits correct operators for a linear gradient fill', () => {
     const { page } = makePage();
     const grad = linearGradient({
-      x1: 0, y1: 0, x2: 200, y2: 0,
+      x1: 0,
+      y1: 0,
+      x2: 200,
+      y2: 0,
       stops: [rgb(1, 0, 0), rgb(0, 0, 1)],
     });
 
@@ -825,7 +912,10 @@ describe('PdfPage.drawGradient', () => {
   it('registers the pattern in page resources', () => {
     const { page } = makePage();
     const grad = linearGradient({
-      x1: 0, y1: 0, x2: 100, y2: 0,
+      x1: 0,
+      y1: 0,
+      x2: 100,
+      y2: 0,
       stops: [rgb(1, 0, 0), rgb(0, 0, 1)],
     });
 
@@ -840,8 +930,12 @@ describe('PdfPage.drawGradient', () => {
   it('supports radial gradients via drawGradient', () => {
     const { page } = makePage();
     const grad = radialGradient({
-      x0: 50, y0: 50, r0: 0,
-      x1: 50, y1: 50, r1: 100,
+      x0: 50,
+      y0: 50,
+      r0: 0,
+      x1: 50,
+      y1: 50,
+      r1: 100,
       stops: [rgb(1, 1, 0), rgb(0, 0, 1)],
     });
 
@@ -856,12 +950,19 @@ describe('PdfPage.drawGradient', () => {
     const { page } = makePage();
 
     const grad1 = linearGradient({
-      x1: 0, y1: 0, x2: 100, y2: 0,
+      x1: 0,
+      y1: 0,
+      x2: 100,
+      y2: 0,
       stops: [rgb(1, 0, 0), rgb(0, 0, 1)],
     });
     const grad2 = radialGradient({
-      x0: 250, y0: 250, r0: 0,
-      x1: 250, y1: 250, r1: 100,
+      x0: 250,
+      y0: 250,
+      r0: 0,
+      x1: 250,
+      y1: 250,
+      r1: 100,
       stops: [rgb(0, 1, 0), rgb(1, 1, 0)],
     });
 
@@ -932,7 +1033,10 @@ describe('gradient round-trip', () => {
     const page = doc.addPage([500, 500]);
 
     const grad = linearGradient({
-      x1: 0, y1: 0, x2: 200, y2: 0,
+      x1: 0,
+      y1: 0,
+      x2: 200,
+      y2: 0,
       stops: [rgb(1, 0, 0), rgb(0, 0, 1)],
     });
 
@@ -953,8 +1057,12 @@ describe('gradient round-trip', () => {
     const page = doc.addPage([500, 500]);
 
     const grad = radialGradient({
-      x0: 250, y0: 250, r0: 0,
-      x1: 250, y1: 250, r1: 200,
+      x0: 250,
+      y0: 250,
+      r0: 0,
+      x1: 250,
+      y1: 250,
+      r1: 200,
       stops: [rgb(1, 1, 0), rgb(0, 0, 0.5)],
     });
 
@@ -971,7 +1079,10 @@ describe('gradient round-trip', () => {
     const page = doc.addPage([500, 500]);
 
     const grad = linearGradient({
-      x1: 0, y1: 0, x2: 400, y2: 0,
+      x1: 0,
+      y1: 0,
+      x2: 400,
+      y2: 0,
       stops: [rgb(1, 0, 0), rgb(0, 1, 0), rgb(0, 0, 1)],
     });
 
@@ -1012,7 +1123,10 @@ describe('gradient round-trip', () => {
     const page = doc.addPage([500, 500]);
 
     const grad = linearGradient({
-      x1: 0, y1: 0, x2: 100, y2: 0,
+      x1: 0,
+      y1: 0,
+      x2: 100,
+      y2: 0,
       stops: [rgb(0, 0, 0), rgb(1, 1, 1)],
     });
 

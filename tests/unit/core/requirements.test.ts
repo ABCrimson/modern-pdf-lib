@@ -15,12 +15,7 @@
 import { describe, it, expect } from 'vitest';
 import { buildRequirement, buildRequirements } from '../../../src/core/requirements.js';
 import type { RequirementType } from '../../../src/core/requirements.js';
-import {
-  PdfArray,
-  PdfDict,
-  PdfName,
-  type ByteWriter,
-} from '../../../src/core/pdfObjects.js';
+import { PdfArray, PdfDict, PdfName, type ByteWriter } from '../../../src/core/pdfObjects.js';
 
 // ---------------------------------------------------------------------------
 // Helpers

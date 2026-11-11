@@ -108,10 +108,7 @@ function isSfnt(data: Uint8Array): boolean {
   const magic = (data[0]! << 24) | (data[1]! << 16) | (data[2]! << 8) | data[3]!;
   // 0x00010000 (TrueType), 'true' (0x74727565), 'OTTO' (0x4f54544f), 'ttcf'
   return (
-    magic === 0x00010000 ||
-    magic === 0x74727565 ||
-    magic === 0x4f54544f ||
-    magic === 0x74746366
+    magic === 0x00010000 || magic === 0x74727565 || magic === 0x4f54544f || magic === 0x74746366
   );
 }
 

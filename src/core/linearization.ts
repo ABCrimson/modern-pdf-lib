@@ -124,8 +124,7 @@ export function getLinearizationInfo(pdfBytes: Uint8Array): LinearizationInfo | 
 /** Find a string in the byte array, starting from `start`. */
 function findString(data: Uint8Array, str: string, start: number = 0): number {
   const bytes = encoder.encode(str);
-  outer:
-  for (let i = start; i <= data.length - bytes.length; i++) {
+  outer: for (let i = start; i <= data.length - bytes.length; i++) {
     for (let j = 0; j < bytes.length; j++) {
       if (data[i + j] !== bytes[j]) continue outer;
     }
@@ -179,7 +178,10 @@ interface TrailerInfo {
   infoGenNum: number;
 }
 
-function parseXrefTable(data: Uint8Array, xrefOffset: number): {
+function parseXrefTable(
+  data: Uint8Array,
+  xrefOffset: number,
+): {
   entries: Map<number, XrefEntry>;
   trailer: TrailerInfo;
 } {
@@ -312,10 +314,7 @@ interface PageInfo {
 /**
  * Find all page object numbers from the /Pages tree.
  */
-function findPageObjectNumbers(
-  pagesObjNum: number,
-  objects: Map<number, Uint8Array>,
-): number[] {
+function findPageObjectNumbers(pagesObjNum: number, objects: Map<number, Uint8Array>): number[] {
   const pageNums: number[] = [];
 
   function walkPages(objNum: number): void {
@@ -526,30 +525,29 @@ function buildPageOffsetHintTable(
   const pageStats = computePageStats(pages, offsets, serializedSizes, objects);
 
   // Header values
-  const leastObjCount = Math.min(...pageStats.map(p => p.objCount));
-  const maxObjDiff = Math.max(...pageStats.map(p => p.objCount - leastObjCount));
+  const leastObjCount = Math.min(...pageStats.map((p) => p.objCount));
+  const maxObjDiff = Math.max(...pageStats.map((p) => p.objCount - leastObjCount));
   const bitsForObjDiff = maxObjDiff > 0 ? Math.ceil(Math.log2(maxObjDiff + 1)) : 0;
 
-  const leastPageLen = Math.min(...pageStats.map(p => p.totalBytes));
-  const maxLenDiff = Math.max(...pageStats.map(p => p.totalBytes - leastPageLen));
+  const leastPageLen = Math.min(...pageStats.map((p) => p.totalBytes));
+  const maxLenDiff = Math.max(...pageStats.map((p) => p.totalBytes - leastPageLen));
   const bitsForLenDiff = maxLenDiff > 0 ? Math.ceil(Math.log2(maxLenDiff + 1)) : 0;
 
-  const contentOffsets = pageStats.map(p => p.contentStreamOffset);
+  const contentOffsets = pageStats.map((p) => p.contentStreamOffset);
   const leastContentOffset = Math.min(...contentOffsets);
   const maxContentOffDiff = Math.max(...contentOffsets) - leastContentOffset;
-  const bitsForContentOffDiff = maxContentOffDiff > 0
-    ? Math.ceil(Math.log2(maxContentOffDiff + 1)) : 0;
+  const bitsForContentOffDiff =
+    maxContentOffDiff > 0 ? Math.ceil(Math.log2(maxContentOffDiff + 1)) : 0;
 
-  const contentLengths = pageStats.map(p => p.contentStreamLength);
+  const contentLengths = pageStats.map((p) => p.contentStreamLength);
   const leastContentLen = Math.min(...contentLengths);
   const maxContentLenDiff = Math.max(...contentLengths) - leastContentLen;
-  const bitsForContentLenDiff = maxContentLenDiff > 0
-    ? Math.ceil(Math.log2(maxContentLenDiff + 1)) : 0;
+  const bitsForContentLenDiff =
+    maxContentLenDiff > 0 ? Math.ceil(Math.log2(maxContentLenDiff + 1)) : 0;
 
-  const sharedRefCounts = pageStats.map(p => p.sharedObjRefCount);
+  const sharedRefCounts = pageStats.map((p) => p.sharedObjRefCount);
   const maxSharedRefs = Math.max(...sharedRefCounts);
-  const bitsForSharedRefs = maxSharedRefs > 0
-    ? Math.ceil(Math.log2(maxSharedRefs + 1)) : 0;
+  const bitsForSharedRefs = maxSharedRefs > 0 ? Math.ceil(Math.log2(maxSharedRefs + 1)) : 0;
 
   const firstPageObjOffset = offsets.get(pages[0]!.pageObjNum) ?? 0;
 
@@ -562,24 +560,39 @@ function buildPageOffsetHintTable(
   let pos = 0;
 
   // Write 13 header fields
-  writeU32BE(data, pos, leastObjCount); pos += 4;           // 1
-  writeU32BE(data, pos, firstPageObjOffset); pos += 4;       // 2
-  writeU32BE(data, pos, bitsForObjDiff); pos += 4;           // 3
-  writeU32BE(data, pos, leastPageLen); pos += 4;             // 4
-  writeU32BE(data, pos, bitsForLenDiff); pos += 4;           // 5
-  writeU32BE(data, pos, leastContentOffset); pos += 4;       // 6
-  writeU32BE(data, pos, bitsForContentOffDiff); pos += 4;    // 7
-  writeU32BE(data, pos, leastContentLen); pos += 4;          // 8
-  writeU32BE(data, pos, bitsForContentLenDiff); pos += 4;    // 9
-  writeU32BE(data, pos, bitsForSharedRefs); pos += 4;        // 10
-  writeU32BE(data, pos, bitsForSharedRefs); pos += 4;        // 11
-  writeU32BE(data, pos, 0); pos += 4;                        // 12 numerator bits
-  writeU32BE(data, pos, 1); pos += 4;                        // 13 denominator
+  writeU32BE(data, pos, leastObjCount);
+  pos += 4; // 1
+  writeU32BE(data, pos, firstPageObjOffset);
+  pos += 4; // 2
+  writeU32BE(data, pos, bitsForObjDiff);
+  pos += 4; // 3
+  writeU32BE(data, pos, leastPageLen);
+  pos += 4; // 4
+  writeU32BE(data, pos, bitsForLenDiff);
+  pos += 4; // 5
+  writeU32BE(data, pos, leastContentOffset);
+  pos += 4; // 6
+  writeU32BE(data, pos, bitsForContentOffDiff);
+  pos += 4; // 7
+  writeU32BE(data, pos, leastContentLen);
+  pos += 4; // 8
+  writeU32BE(data, pos, bitsForContentLenDiff);
+  pos += 4; // 9
+  writeU32BE(data, pos, bitsForSharedRefs);
+  pos += 4; // 10
+  writeU32BE(data, pos, bitsForSharedRefs);
+  pos += 4; // 11
+  writeU32BE(data, pos, 0);
+  pos += 4; // 12 numerator bits
+  writeU32BE(data, pos, 1);
+  pos += 4; // 13 denominator
 
   // Write per-page entries with exact deltas
   for (const stat of pageStats) {
-    writeU32BE(data, pos, stat.objCount - leastObjCount); pos += 4;
-    writeU32BE(data, pos, stat.totalBytes - leastPageLen); pos += 4;
+    writeU32BE(data, pos, stat.objCount - leastObjCount);
+    pos += 4;
+    writeU32BE(data, pos, stat.totalBytes - leastPageLen);
+    pos += 4;
   }
 
   return data;
@@ -615,7 +628,7 @@ function buildSharedObjectHintTable(
   let pos = 0;
 
   // Compute sizes using exact serialized sizes
-  const sizes = sharedObjectNums.map(n => serializedSizes.get(n) ?? 0);
+  const sizes = sharedObjectNums.map((n) => serializedSizes.get(n) ?? 0);
   const leastLen = sizes.length > 0 ? Math.min(...sizes) : 0;
   const maxLenDiff = sizes.length > 0 ? Math.max(...sizes) - leastLen : 0;
   const bitsForLenDiff = maxLenDiff > 0 ? Math.ceil(Math.log2(maxLenDiff + 1)) : 0;
@@ -624,20 +637,29 @@ function buildSharedObjectHintTable(
   const firstIsPageObj = sharedObjectNums.includes(firstPageObjNum) ? 1 : 0;
 
   // 7 header fields
-  writeU32BE(data, pos, firstObjNum); pos += 4;          // 1
-  writeU32BE(data, pos, firstObjOffset); pos += 4;       // 2
-  writeU32BE(data, pos, nShared); pos += 4;              // 3
-  writeU32BE(data, pos, leastLen); pos += 4;             // 4
-  writeU32BE(data, pos, bitsForLenDiff); pos += 4;       // 5
-  writeU32BE(data, pos, firstIsPageObj); pos += 4;       // 6
-  writeU32BE(data, pos, nShared); pos += 4;              // 7
+  writeU32BE(data, pos, firstObjNum);
+  pos += 4; // 1
+  writeU32BE(data, pos, firstObjOffset);
+  pos += 4; // 2
+  writeU32BE(data, pos, nShared);
+  pos += 4; // 3
+  writeU32BE(data, pos, leastLen);
+  pos += 4; // 4
+  writeU32BE(data, pos, bitsForLenDiff);
+  pos += 4; // 5
+  writeU32BE(data, pos, firstIsPageObj);
+  pos += 4; // 6
+  writeU32BE(data, pos, nShared);
+  pos += 4; // 7
 
   // Per-object entries with exact offsets and sizes
   for (let i = 0; i < nShared; i++) {
     const off = offsets.get(sharedObjectNums[i]!) ?? 0;
     const size = serializedSizes.get(sharedObjectNums[i]!) ?? 0;
-    writeU32BE(data, pos, off); pos += 4;
-    writeU32BE(data, pos, size); pos += 4;
+    writeU32BE(data, pos, off);
+    pos += 4;
+    writeU32BE(data, pos, size);
+    pos += 4;
   }
 
   return data;
@@ -657,7 +679,8 @@ export function readU32BE(buf: Uint8Array, offset: number): number {
     ((buf[offset]! << 24) |
       (buf[offset + 1]! << 16) |
       (buf[offset + 2]! << 8) |
-      buf[offset + 3]!) >>> 0
+      buf[offset + 3]!) >>>
+    0
   );
 }
 
@@ -713,20 +736,29 @@ function buildXrefStream(
   let pos = 0;
 
   // Object 0: free entry
-  writeIntBE(streamData, pos, w0, 0); pos += w0;
-  writeIntBE(streamData, pos, w1, 0); pos += w1;
-  writeIntBE(streamData, pos, w2, 65535); pos += w2;
+  writeIntBE(streamData, pos, w0, 0);
+  pos += w0;
+  writeIntBE(streamData, pos, w1, 0);
+  pos += w1;
+  writeIntBE(streamData, pos, w2, 65535);
+  pos += w2;
 
   for (let i = 1; i < totalSize; i++) {
     const entry = entries.get(i);
     if (entry) {
-      writeIntBE(streamData, pos, w0, entry.type); pos += w0;
-      writeIntBE(streamData, pos, w1, entry.field2); pos += w1;
-      writeIntBE(streamData, pos, w2, entry.field3); pos += w2;
+      writeIntBE(streamData, pos, w0, entry.type);
+      pos += w0;
+      writeIntBE(streamData, pos, w1, entry.field2);
+      pos += w1;
+      writeIntBE(streamData, pos, w2, entry.field3);
+      pos += w2;
     } else {
-      writeIntBE(streamData, pos, w0, 0); pos += w0;
-      writeIntBE(streamData, pos, w1, 0); pos += w1;
-      writeIntBE(streamData, pos, w2, 0); pos += w2;
+      writeIntBE(streamData, pos, w0, 0);
+      pos += w0;
+      writeIntBE(streamData, pos, w1, 0);
+      pos += w1;
+      writeIntBE(streamData, pos, w2, 0);
+      pos += w2;
     }
   }
 
@@ -839,7 +871,9 @@ function serializationPass(
   writeStr(`   /E ${prev.endOfFirstPage.toString().padStart(10, '0')}\n`);
   writeStr(`   /N ${pageCount}\n`);
   writeStr(`   /T ${prev.mainXrefOffset.toString().padStart(10, '0')}\n`);
-  writeStr(`   /H [${prev.hintStreamStart.toString().padStart(10, '0')} ${prev.hintStreamLength.toString().padStart(10, '0')}]\n`);
+  writeStr(
+    `   /H [${prev.hintStreamStart.toString().padStart(10, '0')} ${prev.hintStreamLength.toString().padStart(10, '0')}]\n`,
+  );
   writeStr('>>\n');
   writeStr('endobj\n');
   newOffsets.set(linObjNum, linDictOffset);
@@ -1053,12 +1087,7 @@ export async function linearizePdf(
   const firstPageObjNum = pageObjNums[firstPageIdx]!;
 
   // Classify objects by page ownership
-  const classification = classifyObjects(
-    pageObjNums,
-    rootObjNum,
-    pagesObjNum,
-    objects,
-  );
+  const classification = classifyObjects(pageObjNums, rootObjNum, pagesObjNum, objects);
 
   // Get first-page exclusive objects
   const firstPageInfo = classification.pages[firstPageIdx]!;
@@ -1302,10 +1331,12 @@ export async function delinearizePdf(pdfBytes: Uint8Array): Promise<Uint8Array> 
 function isHintStream(objStr: string): boolean {
   // Hint streams are bare stream objects with /S and /Length
   // but no /Type. They follow immediately after first-page objects.
-  return /<<[^>]*\/S\s+\d+[^>]*>>[\s\S]*\bstream\b/.test(objStr) &&
-         !/\/Type\s*\//.test(objStr) &&
-         !/\/Subtype\s*\//.test(objStr) &&
-         !/\/Filter\s*\//.test(objStr);
+  return (
+    /<<[^>]*\/S\s+\d+[^>]*>>[\s\S]*\bstream\b/.test(objStr) &&
+    !/\/Type\s*\//.test(objStr) &&
+    !/\/Subtype\s*\//.test(objStr) &&
+    !/\/Filter\s*\//.test(objStr)
+  );
 }
 
 /**
@@ -1404,10 +1435,7 @@ function delinearizeByScanning(pdfBytes: Uint8Array): Uint8Array {
 /**
  * Rebuild a normal (non-linearized) PDF from collected objects.
  */
-function rebuildNormalPdf(
-  objects: Map<number, Uint8Array>,
-  trailer: TrailerInfo,
-): Uint8Array {
+function rebuildNormalPdf(objects: Map<number, Uint8Array>, trailer: TrailerInfo): Uint8Array {
   const chunks: Uint8Array[] = [];
   const newOffsets = new Map<number, number>();
   let currentOffset = 0;

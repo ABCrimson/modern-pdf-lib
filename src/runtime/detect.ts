@@ -97,9 +97,7 @@ function isCloudflareWorker(): boolean {
 
 function isDeno(): boolean {
   try {
-    return (
-      typeof (globalThis as Record<string, unknown>)['Deno'] !== 'undefined'
-    );
+    return typeof (globalThis as Record<string, unknown>)['Deno'] !== 'undefined';
   } catch {
     return false;
   }
@@ -107,9 +105,7 @@ function isDeno(): boolean {
 
 function isBun(): boolean {
   try {
-    return (
-      typeof (globalThis as Record<string, unknown>)['Bun'] !== 'undefined'
-    );
+    return typeof (globalThis as Record<string, unknown>)['Bun'] !== 'undefined';
   } catch {
     return false;
   }

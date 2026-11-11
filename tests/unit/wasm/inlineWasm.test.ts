@@ -67,7 +67,10 @@ function toBase64(data: Uint8Array): string {
  * Build a mock generated module that simulates the output of
  * `scripts/generate-inline-wasm.ts`.
  */
-function createMockGeneratedModule(moduleNames: readonly string[], wasmData?: Uint8Array): {
+function createMockGeneratedModule(
+  moduleNames: readonly string[],
+  wasmData?: Uint8Array,
+): {
   INLINE_WASM_MODULES: Readonly<Record<string, string>>;
   INLINE_WASM_MODULE_NAMES: readonly string[];
 } {
@@ -86,9 +89,7 @@ function createMockGeneratedModule(moduleNames: readonly string[], wasmData?: Ui
 /**
  * Build a mock generated module with different data per module.
  */
-function createMockWithPerModuleData(
-  entries: ReadonlyArray<{ name: string; data: Uint8Array }>,
-): {
+function createMockWithPerModuleData(entries: ReadonlyArray<{ name: string; data: Uint8Array }>): {
   INLINE_WASM_MODULES: Readonly<Record<string, string>>;
   INLINE_WASM_MODULE_NAMES: readonly string[];
 } {
@@ -98,7 +99,7 @@ function createMockWithPerModuleData(
   }
   return {
     INLINE_WASM_MODULES: modules,
-    INLINE_WASM_MODULE_NAMES: entries.map(e => e.name),
+    INLINE_WASM_MODULE_NAMES: entries.map((e) => e.name),
   };
 }
 
@@ -186,9 +187,7 @@ describe('inlineWasm -- getInlineWasmBytes', () => {
   });
 
   it('throws for an unknown module name', () => {
-    expect(() => getInlineWasmBytes('nonexistent')).toThrow(
-      /Unknown WASM module: "nonexistent"/,
-    );
+    expect(() => getInlineWasmBytes('nonexistent')).toThrow(/Unknown WASM module: "nonexistent"/);
   });
 
   it('throws descriptive error mentioning valid module names', () => {
@@ -243,9 +242,7 @@ describe('inlineWasm -- getInlineWasmBytes', () => {
     provideInlineWasmModule(mock);
 
     // 'png' is a valid name but not in the generated data
-    expect(() => getInlineWasmBytes('png')).toThrow(
-      /not available in the generated inline data/,
-    );
+    expect(() => getInlineWasmBytes('png')).toThrow(/not available in the generated inline data/);
   });
 
   it('correctly decodes larger binary data', () => {

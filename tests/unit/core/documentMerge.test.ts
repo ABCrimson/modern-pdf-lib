@@ -6,16 +6,8 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  createPdf,
-  PdfDocument,
-  PageSizes,
-} from '../../../src/index.js';
-import {
-  mergePdfs,
-  splitPdf,
-  copyPages,
-} from '../../../src/core/documentMerge.js';
+import { createPdf, PdfDocument, PageSizes } from '../../../src/index.js';
+import { mergePdfs, splitPdf, copyPages } from '../../../src/core/documentMerge.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -149,7 +141,10 @@ describe('mergePdfs', () => {
 describe('splitPdf', () => {
   it('splits a document into two parts', async () => {
     const doc = createDocWithContent(4);
-    const [part1, part2] = await splitPdf(doc, [[0, 1], [2, 3]]);
+    const [part1, part2] = await splitPdf(doc, [
+      [0, 1],
+      [2, 3],
+    ]);
 
     expect(part1!.getPageCount()).toBe(2);
     expect(part2!.getPageCount()).toBe(2);
@@ -157,7 +152,11 @@ describe('splitPdf', () => {
 
   it('splits into single pages', async () => {
     const doc = createDocWithContent(3);
-    const parts = await splitPdf(doc, [[0, 0], [1, 1], [2, 2]]);
+    const parts = await splitPdf(doc, [
+      [0, 0],
+      [1, 1],
+      [2, 2],
+    ]);
 
     expect(parts).toHaveLength(3);
     expect(parts[0]!.getPageCount()).toBe(1);
@@ -167,7 +166,10 @@ describe('splitPdf', () => {
 
   it('allows overlapping ranges', async () => {
     const doc = createDocWithContent(3);
-    const parts = await splitPdf(doc, [[0, 2], [1, 2]]);
+    const parts = await splitPdf(doc, [
+      [0, 2],
+      [1, 2],
+    ]);
 
     expect(parts[0]!.getPageCount()).toBe(3);
     expect(parts[1]!.getPageCount()).toBe(2);
@@ -187,7 +189,10 @@ describe('splitPdf', () => {
 
   it('produces valid PDFs that can be saved', async () => {
     const doc = createDocWithContent(4, 'Split');
-    const parts = await splitPdf(doc, [[0, 1], [2, 3]]);
+    const parts = await splitPdf(doc, [
+      [0, 1],
+      [2, 3],
+    ]);
 
     for (const part of parts) {
       const bytes = await part.save();
@@ -198,7 +203,10 @@ describe('splitPdf', () => {
 
   it('preserves content in split parts', async () => {
     const doc = createDocWithContent(2, 'Section');
-    const [part1, part2] = await splitPdf(doc, [[0, 0], [1, 1]]);
+    const [part1, part2] = await splitPdf(doc, [
+      [0, 0],
+      [1, 1],
+    ]);
 
     const bytes1 = await part1!.save({ compress: false });
     const bytes2 = await part2!.save({ compress: false });

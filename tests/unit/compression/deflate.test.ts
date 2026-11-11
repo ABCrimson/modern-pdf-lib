@@ -57,7 +57,9 @@ afterEach(() => {
 
 describe('fflate adapter (sync)', () => {
   it('compresses and decompresses roundtrip', () => {
-    const original = encoder.encode('Hello, compression world! This is a test of the deflate algorithm.');
+    const original = encoder.encode(
+      'Hello, compression world! This is a test of the deflate algorithm.',
+    );
     const compressed = compressSync(original);
     const decompressed = decompressSync(compressed);
 
@@ -86,9 +88,7 @@ describe('fflate adapter (sync)', () => {
     for (let level = 1; level <= 9; level++) {
       const compressed = compressSync(data, level);
       const decompressed = decompressSync(compressed);
-      expect(decoder.decode(decompressed)).toBe(
-        'Test data for all levels of compression.',
-      );
+      expect(decoder.decode(decompressed)).toBe('Test data for all levels of compression.');
     }
   });
 

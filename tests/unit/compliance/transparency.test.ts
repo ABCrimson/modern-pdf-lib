@@ -25,7 +25,6 @@ import {
   flattenTransparency,
 } from '../../../src/compliance/transparencyFlattener.js';
 
-
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
@@ -35,9 +34,7 @@ const decoder = new TextDecoder();
 
 /** Build a minimal PDF fragment with specific transparency features. */
 function makePdf(body: string): Uint8Array {
-  return encoder.encode(
-    `%PDF-1.4\n1 0 obj\n${body}\nendobj\ntrailer\n<< /Root 1 0 R >>\n%%EOF\n`,
-  );
+  return encoder.encode(`%PDF-1.4\n1 0 obj\n${body}\nendobj\ntrailer\n<< /Root 1 0 R >>\n%%EOF\n`);
 }
 
 // ---------------------------------------------------------------------------
@@ -253,9 +250,9 @@ describe('integration: detect + flatten', () => {
   it('flattens multiple CA/ca values in the same document', () => {
     const pdf = encoder.encode(
       '%PDF-1.4\n' +
-      '1 0 obj\n<< /Type /ExtGState /CA 0.5 /ca 0.2 >>\nendobj\n' +
-      '2 0 obj\n<< /Type /ExtGState /CA 0.8 /ca 0.9 >>\nendobj\n' +
-      'trailer\n<< /Root 1 0 R >>\n%%EOF\n',
+        '1 0 obj\n<< /Type /ExtGState /CA 0.5 /ca 0.2 >>\nendobj\n' +
+        '2 0 obj\n<< /Type /ExtGState /CA 0.8 /ca 0.9 >>\nendobj\n' +
+        'trailer\n<< /Root 1 0 R >>\n%%EOF\n',
     );
 
     const before = detectTransparency(pdf);

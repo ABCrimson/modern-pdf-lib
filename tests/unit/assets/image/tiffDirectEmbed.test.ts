@@ -6,10 +6,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  canDirectEmbed,
-  embedTiffDirect,
-} from '../../../../src/assets/image/tiffDirectEmbed.js';
+import { canDirectEmbed, embedTiffDirect } from '../../../../src/assets/image/tiffDirectEmbed.js';
 
 // ---------------------------------------------------------------------------
 // Helpers: build minimal TIFF files for testing
@@ -39,8 +36,9 @@ function buildUncompressedTiff(width: number, height: number, pixelData: Uint8Ar
   const view = new DataView(buf.buffer);
 
   // TIFF header (little-endian)
-  buf[0] = 0x49; buf[1] = 0x49; // II
-  view.setUint16(2, 42, true);   // Magic number
+  buf[0] = 0x49;
+  buf[1] = 0x49; // II
+  view.setUint16(2, 42, true); // Magic number
   view.setUint32(4, ifdOffset, true); // Offset to first IFD
 
   let pos = ifdOffset;
@@ -59,13 +57,13 @@ function buildUncompressedTiff(width: number, height: number, pixelData: Uint8Ar
   }
 
   // Tags (type 3 = SHORT, type 4 = LONG)
-  writeTag(256, 3, 1, width);        // ImageWidth
-  writeTag(257, 3, 1, height);       // ImageLength
-  writeTag(258, 3, 1, 8);            // BitsPerSample
-  writeTag(259, 3, 1, 1);            // Compression (none)
-  writeTag(262, 3, 1, 2);            // PhotometricInterpretation (RGB)
-  writeTag(273, 4, 1, dataOffset);   // StripOffsets
-  writeTag(277, 3, 1, 3);            // SamplesPerPixel
+  writeTag(256, 3, 1, width); // ImageWidth
+  writeTag(257, 3, 1, height); // ImageLength
+  writeTag(258, 3, 1, 8); // BitsPerSample
+  writeTag(259, 3, 1, 1); // Compression (none)
+  writeTag(262, 3, 1, 2); // PhotometricInterpretation (RGB)
+  writeTag(273, 4, 1, dataOffset); // StripOffsets
+  writeTag(277, 3, 1, 3); // SamplesPerPixel
   writeTag(279, 4, 1, pixelData.length); // StripByteCounts
 
   // Next IFD offset (0 = last)
@@ -91,7 +89,8 @@ function buildJpegTiff(width: number, height: number, jpegData: Uint8Array): Uin
   const view = new DataView(buf.buffer);
 
   // TIFF header (little-endian)
-  buf[0] = 0x49; buf[1] = 0x49;
+  buf[0] = 0x49;
+  buf[1] = 0x49;
   view.setUint16(2, 42, true);
   view.setUint32(4, ifdOffset, true);
 
@@ -110,9 +109,9 @@ function buildJpegTiff(width: number, height: number, jpegData: Uint8Array): Uin
   writeTag(256, 3, 1, width);
   writeTag(257, 3, 1, height);
   writeTag(258, 3, 1, 8);
-  writeTag(259, 3, 1, 7);            // Compression = JPEG (new-style)
-  writeTag(262, 3, 1, 2);            // RGB
-  writeTag(273, 4, 1, dataOffset);   // StripOffsets
+  writeTag(259, 3, 1, 7); // Compression = JPEG (new-style)
+  writeTag(262, 3, 1, 2); // RGB
+  writeTag(273, 4, 1, dataOffset); // StripOffsets
   writeTag(277, 3, 1, 3);
   writeTag(279, 4, 1, jpegData.length);
 
@@ -135,7 +134,8 @@ function buildDeflateTiff(width: number, height: number, deflateData: Uint8Array
   const buf = new Uint8Array(totalSize);
   const view = new DataView(buf.buffer);
 
-  buf[0] = 0x49; buf[1] = 0x49;
+  buf[0] = 0x49;
+  buf[1] = 0x49;
   view.setUint16(2, 42, true);
   view.setUint32(4, ifdOffset, true);
 
@@ -154,7 +154,7 @@ function buildDeflateTiff(width: number, height: number, deflateData: Uint8Array
   writeTag(256, 3, 1, width);
   writeTag(257, 3, 1, height);
   writeTag(258, 3, 1, 8);
-  writeTag(259, 3, 1, 8);            // Compression = Deflate
+  writeTag(259, 3, 1, 8); // Compression = Deflate
   writeTag(262, 3, 1, 2);
   writeTag(273, 4, 1, dataOffset);
   writeTag(277, 3, 1, 3);
@@ -180,7 +180,8 @@ function buildUncompressedTiffBE(width: number, height: number, pixelData: Uint8
   const view = new DataView(buf.buffer);
 
   // TIFF header (big-endian)
-  buf[0] = 0x4D; buf[1] = 0x4D;
+  buf[0] = 0x4d;
+  buf[1] = 0x4d;
   view.setUint16(2, 42, false);
   view.setUint32(4, ifdOffset, false);
 
@@ -224,13 +225,13 @@ describe('canDirectEmbed', () => {
 
   it('returns true for JPEG-compressed TIFF', () => {
     // Fake JPEG data (just SOI + EOI markers)
-    const jpegData = new Uint8Array([0xFF, 0xD8, 0xFF, 0xD9]);
+    const jpegData = new Uint8Array([0xff, 0xd8, 0xff, 0xd9]);
     const tiff = buildJpegTiff(4, 4, jpegData);
     expect(canDirectEmbed(tiff)).toBe(true);
   });
 
   it('returns true for Deflate-compressed TIFF', () => {
-    const deflateData = new Uint8Array([0x78, 0x9C, 0x63, 0x00, 0x00, 0x00, 0x01, 0x00, 0x01]);
+    const deflateData = new Uint8Array([0x78, 0x9c, 0x63, 0x00, 0x00, 0x00, 0x01, 0x00, 0x01]);
     const tiff = buildDeflateTiff(4, 4, deflateData);
     expect(canDirectEmbed(tiff)).toBe(true);
   });
@@ -240,7 +241,7 @@ describe('canDirectEmbed', () => {
   });
 
   it('returns false for non-TIFF data', () => {
-    const notTiff = new Uint8Array([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]);
+    const notTiff = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
     expect(canDirectEmbed(notTiff)).toBe(false);
   });
 
@@ -257,7 +258,8 @@ describe('canDirectEmbed', () => {
 
 describe('embedTiffDirect', () => {
   it('embeds uncompressed TIFF with correct dimensions', () => {
-    const w = 10, h = 8;
+    const w = 10,
+      h = 8;
     const pixelData = new Uint8Array(w * h * 3);
     // Fill with red
     for (let i = 0; i < w * h; i++) {
@@ -288,19 +290,19 @@ describe('embedTiffDirect', () => {
   });
 
   it('embeds JPEG-in-TIFF with DCTDecode filter', () => {
-    const fakeJpeg = new Uint8Array([0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x10, 0xFF, 0xD9]);
+    const fakeJpeg = new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0xff, 0xd9]);
     const tiff = buildJpegTiff(100, 50, fakeJpeg);
     const result = embedTiffDirect(tiff);
 
     expect(result.width).toBe(100);
     expect(result.height).toBe(50);
     expect(result.filter).toBe('DCTDecode');
-    expect(result.data[0]).toBe(0xFF); // JPEG SOI
-    expect(result.data[1]).toBe(0xD8);
+    expect(result.data[0]).toBe(0xff); // JPEG SOI
+    expect(result.data[1]).toBe(0xd8);
   });
 
   it('embeds Deflate TIFF with FlateDecode filter', () => {
-    const deflateData = new Uint8Array([0x78, 0x9C, 0x63, 0x00, 0x00, 0x00, 0x01, 0x00, 0x01]);
+    const deflateData = new Uint8Array([0x78, 0x9c, 0x63, 0x00, 0x00, 0x00, 0x01, 0x00, 0x01]);
     const tiff = buildDeflateTiff(4, 4, deflateData);
     const result = embedTiffDirect(tiff);
 
@@ -323,7 +325,7 @@ describe('embedTiffDirect', () => {
   });
 
   it('throws on invalid magic number', () => {
-    const invalid = new Uint8Array([0x49, 0x49, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00]);
+    const invalid = new Uint8Array([0x49, 0x49, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00]);
     expect(() => embedTiffDirect(invalid)).toThrow('bad magic');
   });
 
@@ -338,7 +340,8 @@ describe('embedTiffDirect', () => {
     const buf = new Uint8Array(totalSize);
     const view = new DataView(buf.buffer);
 
-    buf[0] = 0x49; buf[1] = 0x49;
+    buf[0] = 0x49;
+    buf[1] = 0x49;
     view.setUint16(2, 42, true);
     view.setUint32(4, ifdOffset, true);
 
@@ -357,10 +360,10 @@ describe('embedTiffDirect', () => {
     writeTag(256, 3, 1, 4);
     writeTag(257, 3, 1, 4);
     writeTag(258, 3, 1, 8);
-    writeTag(259, 3, 1, 1);    // No compression
-    writeTag(262, 3, 1, 1);    // BlackIsZero (grayscale)
+    writeTag(259, 3, 1, 1); // No compression
+    writeTag(262, 3, 1, 1); // BlackIsZero (grayscale)
     writeTag(273, 4, 1, dataOffset);
-    writeTag(277, 3, 1, 1);    // 1 sample per pixel
+    writeTag(277, 3, 1, 1); // 1 sample per pixel
     writeTag(279, 4, 1, pixelData.length);
 
     view.setUint32(pos, 0, true);
@@ -382,7 +385,8 @@ describe('embedTiffDirect', () => {
     const buf = new Uint8Array(totalSize);
     const view = new DataView(buf.buffer);
 
-    buf[0] = 0x49; buf[1] = 0x49;
+    buf[0] = 0x49;
+    buf[1] = 0x49;
     view.setUint16(2, 42, true);
     view.setUint32(4, ifdOffset, true);
 
@@ -402,9 +406,9 @@ describe('embedTiffDirect', () => {
     writeTag(257, 3, 1, 4);
     writeTag(258, 3, 1, 8);
     writeTag(259, 3, 1, 1);
-    writeTag(262, 3, 1, 5);    // Separated (CMYK)
+    writeTag(262, 3, 1, 5); // Separated (CMYK)
     writeTag(273, 4, 1, dataOffset);
-    writeTag(277, 3, 1, 4);    // 4 samples per pixel
+    writeTag(277, 3, 1, 4); // 4 samples per pixel
     writeTag(279, 4, 1, pixelData.length);
 
     view.setUint32(pos, 0, true);

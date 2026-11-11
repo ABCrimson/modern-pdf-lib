@@ -15,12 +15,7 @@
  * Reference: PDF 1.7 spec, SS12.5.3 (Annotation Flags).
  */
 
-import {
-  PdfDict,
-  PdfName,
-  PdfNumber,
-  PdfString,
-} from '../core/pdfObjects.js';
+import { PdfDict, PdfName, PdfNumber, PdfString } from '../core/pdfObjects.js';
 import type { PdfField } from './pdfField.js';
 import { numVal } from './pdfField.js';
 import type { PdfForm } from './pdfForm.js';
@@ -125,11 +120,7 @@ export function isFieldVisible(field: PdfField): boolean {
  * @param fieldNames - Array of field names (partial or fully-qualified).
  * @param visible    - Whether the fields should be visible.
  */
-export function toggleFieldGroup(
-  form: PdfForm,
-  fieldNames: string[],
-  visible: boolean,
-): void {
+export function toggleFieldGroup(form: PdfForm, fieldNames: string[], visible: boolean): void {
   for (const name of fieldNames) {
     const field = form.getField(name);
     if (field !== undefined) {
@@ -178,10 +169,7 @@ export function addVisibilityAction(
 /**
  * Build a JavaScript snippet for conditional visibility.
  */
-function buildVisibilityScript(
-  triggerField: string,
-  condition: VisibilityCondition,
-): string {
+function buildVisibilityScript(triggerField: string, condition: VisibilityCondition): string {
   const escaped = triggerField.replaceAll('\\', '\\\\').replaceAll('"', '\\"');
   const fieldRef = `this.getField("${escaped}")`;
   let condExpr: string;

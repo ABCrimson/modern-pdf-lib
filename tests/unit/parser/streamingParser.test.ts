@@ -16,9 +16,7 @@
  */
 
 import { describe, it, expect, vi } from 'vitest';
-import {
-  StreamingPdfParser,
-} from '../../../src/parser/streamingParser.js';
+import { StreamingPdfParser } from '../../../src/parser/streamingParser.js';
 import type {
   StreamingParserOptions,
   StreamingParseResult,
@@ -416,7 +414,12 @@ describe('StreamingPdfParser', () => {
       // At minimum: catalog, pages, page = 3 objects
       expect(events.length).toBeGreaterThanOrEqual(3);
       for (const event of events) {
-        const objEvent = event as { type: 'object'; number: number; generation: number; offset: number };
+        const objEvent = event as {
+          type: 'object';
+          number: number;
+          generation: number;
+          offset: number;
+        };
         expect(objEvent.type).toBe('object');
         expect(objEvent.number).toBeGreaterThan(0);
         expect(objEvent.generation).toBeGreaterThanOrEqual(0);

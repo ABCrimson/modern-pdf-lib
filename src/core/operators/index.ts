@@ -77,16 +77,20 @@ export {
   setFillingColor,
   setStrokingColor,
 } from './color.js';
-export type { RgbColor, CmykColor, GrayscaleColor, SpotColor, DeviceNColor, Color } from './color.js';
+export type {
+  RgbColor,
+  CmykColor,
+  GrayscaleColor,
+  SpotColor,
+  DeviceNColor,
+  Color,
+} from './color.js';
 
 // ---------------------------------------------------------------------------
 // Spot / Separation / DeviceN colour space builders
 // ---------------------------------------------------------------------------
 
-export {
-  buildSeparationColorSpace,
-  buildDeviceNColorSpace,
-} from './spotColor.js';
+export { buildSeparationColorSpace, buildDeviceNColorSpace } from './spotColor.js';
 
 // ---------------------------------------------------------------------------
 // Graphics state & transformations
@@ -151,11 +155,7 @@ export { setCharacterSpacing as setCharacterSqueeze } from './text.js';
 // Image / XObject
 // ---------------------------------------------------------------------------
 
-export {
-  drawXObject,
-  drawImageXObject,
-  drawImageWithMatrix,
-} from './image.js';
+export { drawXObject, drawImageXObject, drawImageWithMatrix } from './image.js';
 
 // Alias matching pdf-lib naming
 export { drawXObject as drawObject } from './image.js';
@@ -164,10 +164,7 @@ export { drawXObject as drawObject } from './image.js';
 // Marked content (re-exported for convenience)
 // ---------------------------------------------------------------------------
 
-export {
-  beginMarkedContent,
-  endMarkedContent,
-} from '../../accessibility/markedContent.js';
+export { beginMarkedContent, endMarkedContent } from '../../accessibility/markedContent.js';
 
 // ---------------------------------------------------------------------------
 // PDFOperator — first-class operator wrapper

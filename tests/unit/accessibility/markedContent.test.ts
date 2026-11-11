@@ -108,11 +108,7 @@ describe('wrapInMarkedContent', () => {
     const ops = 'BT /F1 12 Tf (Hello) Tj ET\n';
     const result = wrapInMarkedContent(ops, 'P', 0);
 
-    expect(result).toBe(
-      '/P <</MCID 0>> BDC\n' +
-      'BT /F1 12 Tf (Hello) Tj ET\n' +
-      'EMC\n',
-    );
+    expect(result).toBe('/P <</MCID 0>> BDC\n' + 'BT /F1 12 Tf (Hello) Tj ET\n' + 'EMC\n');
   });
 
   it('handles empty operators', () => {

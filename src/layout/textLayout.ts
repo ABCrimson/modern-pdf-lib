@@ -73,23 +73,23 @@ export interface TextSpan {
 /** Options controlling paragraph layout. */
 export interface ParagraphOptions {
   alignment?: TextAlignment;
-  lineHeight?: number;          // Multiplier (e.g., 1.2 = 120%)
-  paragraphSpacing?: number;    // Points between paragraphs
-  firstLineIndent?: number;     // Points
-  hangingIndent?: number;       // Points
-  hyphenation?: boolean;        // Enable automatic hyphenation
-  hyphenChar?: string;          // Default: '-'
-  locale?: string;              // For hyphenation rules
-  orphanLines?: number;         // Minimum lines at bottom of frame (default: 2)
-  widowLines?: number;          // Minimum lines at top of next frame (default: 2)
+  lineHeight?: number; // Multiplier (e.g., 1.2 = 120%)
+  paragraphSpacing?: number; // Points between paragraphs
+  firstLineIndent?: number; // Points
+  hangingIndent?: number; // Points
+  hyphenation?: boolean; // Enable automatic hyphenation
+  hyphenChar?: string; // Default: '-'
+  locale?: string; // For hyphenation rules
+  orphanLines?: number; // Minimum lines at bottom of frame (default: 2)
+  widowLines?: number; // Minimum lines at top of next frame (default: 2)
 }
 
 /** Options for multi-column layout. */
 export interface MultiColumnOptions {
-  columns: number;              // Number of columns
-  columnGap?: number;           // Gap between columns in points (default: 18)
+  columns: number; // Number of columns
+  columnGap?: number; // Gap between columns in points (default: 18)
   columnRule?: { width: number; color: Color; style: 'solid' | 'dashed' };
-  balanceColumns?: boolean;     // Try to equalize column heights (default: true)
+  balanceColumns?: boolean; // Try to equalize column heights (default: true)
 }
 
 /** Result of a text layout operation. */
@@ -436,9 +436,7 @@ function breakIntoLines(
     const avail = effectiveWidth(isFirstLineOfPara && currentWords.length === 0);
 
     // Calculate the space width between words
-    const spaceWidth = currentWords.length > 0
-      ? measure(' ', token.fontName, token.fontSize)
-      : 0;
+    const spaceWidth = currentWords.length > 0 ? measure(' ', token.fontName, token.fontSize) : 0;
 
     const candidateWidth = currentWidth + spaceWidth + token.width;
 
@@ -455,8 +453,13 @@ function breakIntoLines(
       // Single word exceeds line width — try hyphenation
       if (hyphenation && token.width > avail) {
         const result = tryHyphenate(
-          token.text, avail, measure, token.fontName, token.fontSize,
-          hyphenChar, options.locale,
+          token.text,
+          avail,
+          measure,
+          token.fontName,
+          token.fontSize,
+          hyphenChar,
+          options.locale,
         );
         if (result) {
           const [prefix, suffix] = result;
@@ -493,8 +496,13 @@ function breakIntoLines(
         const remainingWidth = avail - currentWidth - spaceWidth;
         if (remainingWidth > 0) {
           const result = tryHyphenate(
-            token.text, remainingWidth, measure, token.fontName, token.fontSize,
-            hyphenChar, options.locale,
+            token.text,
+            remainingWidth,
+            measure,
+            token.fontName,
+            token.fontSize,
+            hyphenChar,
+            options.locale,
           );
           if (result) {
             const [prefix, suffix] = result;
@@ -830,8 +838,14 @@ export function layoutParagraph(
     const effectiveWidth = frame.width - indent;
 
     ops += renderLine(
-      line, effectiveX, currentY, effectiveWidth,
-      alignment, measure, defaultFontName, defaultFontSize,
+      line,
+      effectiveX,
+      currentY,
+      effectiveWidth,
+      alignment,
+      measure,
+      defaultFontName,
+      defaultFontSize,
     );
 
     linesRendered++;
@@ -956,9 +970,7 @@ export function layoutColumns(
     if (typeof remainingText === 'string' && remainingText === '') break;
     if (Array.isArray(remainingText) && remainingText.every((s) => s.text === '')) break;
 
-    const result = layoutParagraph(
-      remainingText, effectiveFrames[c]!, paragraphOptions, measureFn,
-    );
+    const result = layoutParagraph(remainingText, effectiveFrames[c]!, paragraphOptions, measureFn);
 
     combinedOps += result.operators;
     totalLineCount += result.lineCount;
@@ -996,9 +1008,8 @@ export function layoutColumns(
     combinedOps += restoreState();
   }
 
-  const finalOverflow = typeof remainingText === 'string'
-    ? remainingText
-    : remainingText.map((s) => s.text).join('');
+  const finalOverflow =
+    typeof remainingText === 'string' ? remainingText : remainingText.map((s) => s.text).join('');
 
   return {
     operators: combinedOps,
@@ -1039,9 +1050,10 @@ export function layoutTextFlow(
 
   for (const frame of frames) {
     // Check if there's still text to lay out
-    const hasText = typeof remainingText === 'string'
-      ? remainingText.length > 0
-      : remainingText.some((s) => s.text.length > 0);
+    const hasText =
+      typeof remainingText === 'string'
+        ? remainingText.length > 0
+        : remainingText.some((s) => s.text.length > 0);
 
     if (!hasText) {
       results.push({

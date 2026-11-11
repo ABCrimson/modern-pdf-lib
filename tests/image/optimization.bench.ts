@@ -24,11 +24,7 @@ import type { RawImageData } from '../../src/assets/image/imageOptimize.js';
  * The pattern produces realistic pixel variation (not all zeros) so that
  * resampling kernels do meaningful work.
  */
-function generateTestImage(
-  w: number,
-  h: number,
-  channels: 1 | 2 | 3 | 4,
-): RawImageData {
+function generateTestImage(w: number, h: number, channels: 1 | 2 | 3 | 4): RawImageData {
   const pixels = new Uint8Array(w * h * channels);
   for (let y = 0; y < h; y++) {
     for (let x = 0; x < w; x++) {

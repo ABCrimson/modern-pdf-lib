@@ -160,12 +160,7 @@ function intersects(
   const rMinY = region.y;
   const rMaxX = region.x + region.width;
   const rMaxY = region.y + region.height;
-  return (
-    box.minX <= rMaxX &&
-    box.maxX >= rMinX &&
-    box.minY <= rMaxY &&
-    box.maxY >= rMinY
-  );
+  return box.minX <= rMaxX && box.maxX >= rMinX && box.minY <= rMaxY && box.maxY >= rMinY;
 }
 
 // ---------------------------------------------------------------------------

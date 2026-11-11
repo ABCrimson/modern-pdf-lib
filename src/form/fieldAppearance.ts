@@ -10,12 +10,7 @@
  *            SS12.7.3.3 (Variable Text).
  */
 
-import {
-  PdfDict,
-  PdfName,
-  PdfArray,
-  PdfStream,
-} from '../core/pdfObjects.js';
+import { PdfDict, PdfName, PdfArray, PdfStream } from '../core/pdfObjects.js';
 import type { FieldType } from './pdfField.js';
 
 // ---------------------------------------------------------------------------
@@ -34,15 +29,21 @@ import type { FieldType } from './pdfField.js';
  * };
  * ```
  */
-export type AppearanceProviderFor<T extends FieldType> =
-  T extends 'text' ? (options: TextAppearanceOptions) => PdfStream
-  : T extends 'checkbox' ? (options: CheckboxAppearanceOptions) => PdfStream
-  : T extends 'radio' ? (options: RadioAppearanceOptions) => PdfStream
-  : T extends 'dropdown' ? (options: DropdownAppearanceOptions) => PdfStream
-  : T extends 'listbox' ? (options: ListboxAppearanceOptions) => PdfStream
-  : T extends 'button' ? (options: ButtonAppearanceOptions) => PdfStream
-  : T extends 'signature' ? (options: SignatureAppearanceOptions) => PdfStream
-  : never;
+export type AppearanceProviderFor<T extends FieldType> = T extends 'text'
+  ? (options: TextAppearanceOptions) => PdfStream
+  : T extends 'checkbox'
+    ? (options: CheckboxAppearanceOptions) => PdfStream
+    : T extends 'radio'
+      ? (options: RadioAppearanceOptions) => PdfStream
+      : T extends 'dropdown'
+        ? (options: DropdownAppearanceOptions) => PdfStream
+        : T extends 'listbox'
+          ? (options: ListboxAppearanceOptions) => PdfStream
+          : T extends 'button'
+            ? (options: ButtonAppearanceOptions) => PdfStream
+            : T extends 'signature'
+              ? (options: SignatureAppearanceOptions) => PdfStream
+              : never;
 
 // ---------------------------------------------------------------------------
 // Number formatter
@@ -343,13 +344,7 @@ export interface ListboxAppearanceOptions {
  * Renders visible options with highlighting for selected items.
  */
 export function generateListboxAppearance(options: ListboxAppearanceOptions): PdfStream {
-  const {
-    options: items,
-    selected,
-    rect,
-    fontName = 'Helv',
-    fontSize = 10,
-  } = options;
+  const { options: items, selected, rect, fontName = 'Helv', fontSize = 10 } = options;
 
   const width = rect[2] - rect[0];
   const height = rect[3] - rect[1];
@@ -415,12 +410,7 @@ export interface ButtonAppearanceOptions {
  * Renders a 3D-ish raised button with centered caption text.
  */
 export function generateButtonAppearance(options: ButtonAppearanceOptions): PdfStream {
-  const {
-    caption,
-    rect,
-    fontName = 'Helv',
-    fontSize: requestedSize = 0,
-  } = options;
+  const { caption, rect, fontName = 'Helv', fontSize: requestedSize = 0 } = options;
 
   const width = rect[2] - rect[0];
   const height = rect[3] - rect[1];
@@ -515,11 +505,7 @@ export function generateSignatureAppearance(options: SignatureAppearanceOptions)
 /**
  * Build a PdfStream from content stream operators with proper BBox.
  */
-function buildAppearanceStream(
-  operators: string,
-  width: number,
-  height: number,
-): PdfStream {
+function buildAppearanceStream(operators: string, width: number, height: number): PdfStream {
   const dict = new PdfDict();
   dict.set('/Type', PdfName.of('XObject'));
   dict.set('/Subtype', PdfName.of('Form'));

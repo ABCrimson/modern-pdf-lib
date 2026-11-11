@@ -93,9 +93,7 @@ export interface RangeFetchOptions {
 function resolveDefaultFetch(): FetchLike {
   const globalFetch = (globalThis as { fetch?: unknown }).fetch;
   if (typeof globalFetch !== 'function') {
-    throw new Error(
-      'rangeFetch: no fetch implementation available; pass options.fetchImpl',
-    );
+    throw new Error('rangeFetch: no fetch implementation available; pass options.fetchImpl');
   }
   return (globalFetch as FetchLike).bind(globalThis);
 }
@@ -144,10 +142,7 @@ function parseContentLength(value: string | null): number | undefined {
  * @param options - Optional {@link RangeFetchOptions}.
  * @returns A {@link RangeFetcher}.
  */
-export function createRangeFetcher(
-  url: string,
-  options?: RangeFetchOptions,
-): RangeFetcher {
+export function createRangeFetcher(url: string, options?: RangeFetchOptions): RangeFetcher {
   const fetchImpl: FetchLike = options?.fetchImpl ?? resolveDefaultFetch();
 
   let cachedLength: number | undefined;
@@ -158,10 +153,7 @@ export function createRangeFetcher(
    * opportunistically populates the length / support caches from the
    * response headers.
    */
-  async function requestRange(
-    start: number,
-    end: number,
-  ): Promise<FetchLikeResponse> {
+  async function requestRange(start: number, end: number): Promise<FetchLikeResponse> {
     const response = await fetchImpl(url, {
       headers: { Range: `bytes=${start}-${end}` },
     });
@@ -170,18 +162,14 @@ export function createRangeFetcher(
     if (response.status === 206) {
       cachedSupportsRanges = true;
       if (cachedLength === undefined) {
-        const total = parseTotalFromContentRange(
-          response.headers.get('Content-Range'),
-        );
+        const total = parseTotalFromContentRange(response.headers.get('Content-Range'));
         if (total !== undefined) cachedLength = total;
       }
     } else if (response.status === 200) {
       // Server ignored the range header.
       cachedSupportsRanges = false;
       if (cachedLength === undefined) {
-        const length = parseContentLength(
-          response.headers.get('Content-Length'),
-        );
+        const length = parseContentLength(response.headers.get('Content-Length'));
         if (length !== undefined) cachedLength = length;
       }
     }
@@ -199,9 +187,7 @@ export function createRangeFetcher(
 
     const response = await requestRange(start, end);
     if (response.status !== 206) {
-      throw new Error(
-        `rangeFetch: expected 206 Partial Content, received ${response.status}`,
-      );
+      throw new Error(`rangeFetch: expected 206 Partial Content, received ${response.status}`);
     }
 
     const buffer = await response.arrayBuffer();
@@ -216,9 +202,7 @@ export function createRangeFetcher(
     const response = await requestRange(0, 0);
 
     if (response.status === 206) {
-      const total = parseTotalFromContentRange(
-        response.headers.get('Content-Range'),
-      );
+      const total = parseTotalFromContentRange(response.headers.get('Content-Range'));
       if (total !== undefined) {
         cachedLength = total;
         return total;
@@ -232,9 +216,7 @@ export function createRangeFetcher(
       return length;
     }
 
-    throw new Error(
-      'rangeFetch: unable to determine resource length from response headers',
-    );
+    throw new Error('rangeFetch: unable to determine resource length from response headers');
   }
 
   async function supportsRanges(): Promise<boolean> {
@@ -251,8 +233,7 @@ export function createRangeFetcher(
     // Otherwise consult Accept-Ranges. `bytes` => supported, `none` or
     // absent => not supported.
     const acceptRanges = response.headers.get('Accept-Ranges');
-    const supported =
-      acceptRanges !== null && acceptRanges.trim().toLowerCase() === 'bytes';
+    const supported = acceptRanges !== null && acceptRanges.trim().toLowerCase() === 'bytes';
     cachedSupportsRanges = supported;
     return supported;
   }

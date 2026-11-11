@@ -9,18 +9,8 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  asPDFName,
-  asPDFNumber,
-  asNumber,
-} from '../../../src/utils/pdfValueHelpers.js';
-import {
-  PdfName,
-  PdfNumber,
-  PdfNull,
-  PdfBool,
-  PdfString,
-} from '../../../src/core/pdfObjects.js';
+import { asPDFName, asPDFNumber, asNumber } from '../../../src/utils/pdfValueHelpers.js';
+import { PdfName, PdfNumber, PdfNull, PdfBool, PdfString } from '../../../src/core/pdfObjects.js';
 
 // ---------------------------------------------------------------------------
 // asPDFName

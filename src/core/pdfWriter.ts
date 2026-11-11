@@ -17,9 +17,19 @@
  */
 
 import { deflateSync as fflateDeflateSync } from 'fflate';
-import { isAvailable as isWasmDeflateAvailable, deflateSync as wasmDeflateSync } from '../compression/libdeflateWasm.js';
+import {
+  isAvailable as isWasmDeflateAvailable,
+  deflateSync as wasmDeflateSync,
+} from '../compression/libdeflateWasm.js';
 import type { PdfRef, PdfStream, ByteWriter } from './pdfObjects.js';
-import { PdfObjectRegistry, PdfNumber, PdfName, PdfDict, PdfArray, PdfString } from './pdfObjects.js';
+import {
+  PdfObjectRegistry,
+  PdfNumber,
+  PdfName,
+  PdfDict,
+  PdfArray,
+  PdfString,
+} from './pdfObjects.js';
 import type { RegistryEntry } from './pdfObjects.js';
 import type { DocumentStructure } from './pdfCatalog.js';
 import type { PdfEncryptionHandler } from '../crypto/encryptionHandler.js';
@@ -136,7 +146,7 @@ export class PdfWriter {
     /** Document structure references. */
     private readonly structure: DocumentStructure,
     options?: PdfSaveOptions,
-    encryptionHandler?: PdfEncryptionHandler  ,
+    encryptionHandler?: PdfEncryptionHandler,
   ) {
     this.compress = options?.compress ?? true;
     this.compressionLevel = options?.compressionLevel ?? 6;
@@ -192,9 +202,7 @@ export class PdfWriter {
   private writeHeader(): void {
     // PDF version header — use 2.0 for AES-256 (V=5 R=6), 1.7 otherwise
     const version =
-      this.encryptionHandler && this.encryptionHandler.getVersion() === 5
-        ? '2.0'
-        : '1.7';
+      this.encryptionHandler && this.encryptionHandler.getVersion() === 5 ? '2.0' : '1.7';
     this.buf.writeString(`%PDF-${version}\n`);
     // Binary comment — four bytes > 127 to signal binary content to
     // transfer programs.
@@ -226,8 +234,7 @@ export class PdfWriter {
 
     // Encrypt if handler is present and this is not the /Encrypt dict itself
     const isEncryptDict =
-      this.encryptDictRef &&
-      entry.ref.objectNumber === this.encryptDictRef.objectNumber;
+      this.encryptDictRef && entry.ref.objectNumber === this.encryptDictRef.objectNumber;
 
     if (this.encryptionHandler && !isEncryptDict) {
       await this.encryptEntry(entry);
@@ -282,11 +289,7 @@ export class PdfWriter {
   /**
    * Recursively encrypt all PdfString values inside a PdfDict.
    */
-  private async encryptDictStrings(
-    dict: PdfDict,
-    objNum: number,
-    genNum: number,
-  ): Promise<void> {
+  private async encryptDictStrings(dict: PdfDict, objNum: number, genNum: number): Promise<void> {
     const handler = this.encryptionHandler!;
 
     for (const [key, value] of dict) {
@@ -304,11 +307,7 @@ export class PdfWriter {
   /**
    * Recursively encrypt all PdfString values inside a PdfArray.
    */
-  private async encryptArrayStrings(
-    arr: PdfArray,
-    objNum: number,
-    genNum: number,
-  ): Promise<void> {
+  private async encryptArrayStrings(arr: PdfArray, objNum: number, genNum: number): Promise<void> {
     const handler = this.encryptionHandler!;
     const items = arr.items;
 
@@ -527,7 +526,21 @@ export class PdfWriter {
     objStmDict.set('/Length', PdfNumber.of(streamData.length));
 
     // Create the PdfStream and optionally compress it
-    const objStm: PdfStream = { kind: 'stream', dict: objStmDict, data: streamData, syncLength() { this.dict.set('/Length', PdfNumber.of(this.data.length)); }, serialize(w: ByteWriter) { this.syncLength(); this.dict.serialize(w); w.writeString('\nstream\n'); w.write(this.data); w.writeString('\nendstream'); } };
+    const objStm: PdfStream = {
+      kind: 'stream',
+      dict: objStmDict,
+      data: streamData,
+      syncLength() {
+        this.dict.set('/Length', PdfNumber.of(this.data.length));
+      },
+      serialize(w: ByteWriter) {
+        this.syncLength();
+        this.dict.serialize(w);
+        w.writeString('\nstream\n');
+        w.write(this.data);
+        w.writeString('\nendstream');
+      },
+    };
 
     if (this.compress) {
       this.compressStream(objStm);
@@ -596,22 +609,31 @@ export class PdfWriter {
     let offset = 0;
 
     // Object 0: free entry
-    writeIntBE(data, offset, w0, 0); offset += w0;       // type=0 (free)
-    writeIntBE(data, offset, w1, 0); offset += w1;       // next free=0
-    writeIntBE(data, offset, w2, 65535); offset += w2;    // gen=65535
+    writeIntBE(data, offset, w0, 0);
+    offset += w0; // type=0 (free)
+    writeIntBE(data, offset, w1, 0);
+    offset += w1; // next free=0
+    writeIntBE(data, offset, w2, 65535);
+    offset += w2; // gen=65535
 
     // Objects 1 .. size-1
     for (let i = 1; i < size; i++) {
       const entry = xrefEntries.get(i);
       if (entry) {
-        writeIntBE(data, offset, w0, entry.type); offset += w0;
-        writeIntBE(data, offset, w1, entry.field2); offset += w1;
-        writeIntBE(data, offset, w2, entry.field3); offset += w2;
+        writeIntBE(data, offset, w0, entry.type);
+        offset += w0;
+        writeIntBE(data, offset, w1, entry.field2);
+        offset += w1;
+        writeIntBE(data, offset, w2, entry.field3);
+        offset += w2;
       } else {
         // Free entry
-        writeIntBE(data, offset, w0, 0); offset += w0;
-        writeIntBE(data, offset, w1, 0); offset += w1;
-        writeIntBE(data, offset, w2, 0); offset += w2;
+        writeIntBE(data, offset, w0, 0);
+        offset += w0;
+        writeIntBE(data, offset, w1, 0);
+        offset += w1;
+        writeIntBE(data, offset, w2, 0);
+        offset += w2;
       }
     }
 
@@ -629,7 +651,9 @@ export class PdfWriter {
       kind: 'stream',
       dict: xrefDict,
       data: data,
-      syncLength() { this.dict.set('/Length', PdfNumber.of(this.data.length)); },
+      syncLength() {
+        this.dict.set('/Length', PdfNumber.of(this.data.length));
+      },
       serialize(w: ByteWriter) {
         this.syncLength();
         this.dict.serialize(w);
@@ -669,9 +693,7 @@ export class PdfWriter {
     for (let i = 1; i < size; i++) {
       const offset = this.xrefOffsets[i];
       if (offset !== undefined && offset > 0) {
-        this.buf.writeString(
-          `${offset.toString().padStart(10, '0')} 00000 n \n`,
-        );
+        this.buf.writeString(`${offset.toString().padStart(10, '0')} 00000 n \n`);
       } else {
         // Missing object — mark as free
         this.buf.writeString('0000000000 00000 f \n');
@@ -794,7 +816,7 @@ export async function serializePdf(
   registry: PdfObjectRegistry,
   structure: DocumentStructure,
   options?: PdfSaveOptions,
-  encryptionHandler?: PdfEncryptionHandler  ,
+  encryptionHandler?: PdfEncryptionHandler,
 ): Promise<Uint8Array> {
   return new PdfWriter(registry, structure, options, encryptionHandler).write();
 }

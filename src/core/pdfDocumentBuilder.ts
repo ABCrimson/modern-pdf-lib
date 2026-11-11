@@ -200,11 +200,7 @@ export class PdfDocumentBuilder {
    * @param setup  Optional callback invoked for each page with its
    *               zero-based index within this batch.
    */
-  addPages(
-    count: number,
-    size?: PageSize,
-    setup?: (page: PdfPage, index: number) => void,
-  ): this {
+  addPages(count: number, size?: PageSize, setup?: (page: PdfPage, index: number) => void): this {
     for (let i = 0; i < count; i++) {
       const page = this.doc.addPage(size);
       setup?.(page, i);

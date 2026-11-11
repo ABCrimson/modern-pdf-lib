@@ -4,11 +4,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { renderTable } from '../../src/layout/table.js';
-import type {
-  DrawTableOptions,
-  TableCell,
-  TextRun,
-} from '../../src/layout/table.js';
+import type { DrawTableOptions, TableCell, TextRun } from '../../src/layout/table.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -31,62 +27,43 @@ function simpleTable(overrides?: Partial<DrawTableOptions>): DrawTableOptions {
 describe('rich cell content (TextRun[])', () => {
   // 1
   it('TextRun array renders multiple styled segments', () => {
-    const runs: TextRun[] = [
-      { text: 'Hello' },
-      { text: ' World' },
-    ];
+    const runs: TextRun[] = [{ text: 'Hello' }, { text: ' World' }];
     const cell: TableCell = { content: runs };
-    const { ops } = renderTable(
-      simpleTable({ rows: [{ cells: [cell] }] }),
-    );
+    const { ops } = renderTable(simpleTable({ rows: [{ cells: [cell] }] }));
     expect(ops).toContain('(Hello) Tj');
     expect(ops).toContain('( World) Tj');
   });
 
   // 2
   it('TextRun with custom font size', () => {
-    const runs: TextRun[] = [
-      { text: 'Big', fontSize: 24 },
-    ];
+    const runs: TextRun[] = [{ text: 'Big', fontSize: 24 }];
     const cell: TableCell = { content: runs };
-    const { ops } = renderTable(
-      simpleTable({ rows: [{ cells: [cell] }] }),
-    );
+    const { ops } = renderTable(simpleTable({ rows: [{ cells: [cell] }] }));
     expect(ops).toContain('24 Tf');
     expect(ops).toContain('(Big) Tj');
   });
 
   // 3
   it('TextRun with custom color', () => {
-    const runs: TextRun[] = [
-      { text: 'Red', color: { type: 'rgb', r: 1, g: 0, b: 0 } },
-    ];
+    const runs: TextRun[] = [{ text: 'Red', color: { type: 'rgb', r: 1, g: 0, b: 0 } }];
     const cell: TableCell = { content: runs };
-    const { ops } = renderTable(
-      simpleTable({ rows: [{ cells: [cell] }] }),
-    );
+    const { ops } = renderTable(simpleTable({ rows: [{ cells: [cell] }] }));
     expect(ops).toContain('1 0 0 rg');
     expect(ops).toContain('(Red) Tj');
   });
 
   // 4
   it('TextRun with custom font name', () => {
-    const runs: TextRun[] = [
-      { text: 'Mono', fontName: 'Courier' },
-    ];
+    const runs: TextRun[] = [{ text: 'Mono', fontName: 'Courier' }];
     const cell: TableCell = { content: runs };
-    const { ops } = renderTable(
-      simpleTable({ rows: [{ cells: [cell] }] }),
-    );
+    const { ops } = renderTable(simpleTable({ rows: [{ cells: [cell] }] }));
     expect(ops).toContain('/Courier');
     expect(ops).toContain('(Mono) Tj');
   });
 
   // 5
   it('mixed string and TextRun cells in same row', () => {
-    const runs: TextRun[] = [
-      { text: 'Styled' },
-    ];
+    const runs: TextRun[] = [{ text: 'Styled' }];
     const { ops } = renderTable(
       simpleTable({
         rows: [{ cells: ['Plain', { content: runs }] }],
@@ -99,9 +76,7 @@ describe('rich cell content (TextRun[])', () => {
   // 6
   it('empty TextRun array handled gracefully', () => {
     const cell: TableCell = { content: [] as TextRun[] };
-    const { ops, result } = renderTable(
-      simpleTable({ rows: [{ cells: [cell] }] }),
-    );
+    const { ops, result } = renderTable(simpleTable({ rows: [{ cells: [cell] }] }));
     // Should not contain any Tj for this cell
     expect(ops).not.toContain('Tj');
     // Should still produce a valid result
@@ -112,9 +87,7 @@ describe('rich cell content (TextRun[])', () => {
   it('single TextRun renders correctly', () => {
     const runs: TextRun[] = [{ text: 'Solo' }];
     const cell: TableCell = { content: runs };
-    const { ops } = renderTable(
-      simpleTable({ rows: [{ cells: [cell] }] }),
-    );
+    const { ops } = renderTable(simpleTable({ rows: [{ cells: [cell] }] }));
     expect(ops).toContain('(Solo) Tj');
     // Should be within BT/ET
     expect(ops).toContain('BT\n');
@@ -123,9 +96,7 @@ describe('rich cell content (TextRun[])', () => {
 
   // 8
   it('TextRun inherits defaults from table options', () => {
-    const runs: TextRun[] = [
-      { text: 'Default' },
-    ];
+    const runs: TextRun[] = [{ text: 'Default' }];
     const cell: TableCell = { content: runs };
     const { ops } = renderTable(
       simpleTable({
@@ -148,9 +119,7 @@ describe('rich cell content (TextRun[])', () => {
       { text: 'Colored', color: { type: 'grayscale', gray: 0.5 } },
     ];
     const cell: TableCell = { content: runs };
-    const { ops } = renderTable(
-      simpleTable({ rows: [{ cells: [cell] }] }),
-    );
+    const { ops } = renderTable(simpleTable({ rows: [{ cells: [cell] }] }));
     expect(ops).toContain('(Normal) Tj');
     expect(ops).toContain('(Bold) Tj');
     expect(ops).toContain('(Colored) Tj');

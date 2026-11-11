@@ -29,14 +29,7 @@
  *            (Black-point compensation).
  */
 
-import {
-  PdfArray,
-  PdfBool,
-  PdfDict,
-  PdfName,
-  PdfNumber,
-  PdfStream,
-} from './pdfObjects.js';
+import { PdfArray, PdfBool, PdfDict, PdfName, PdfNumber, PdfStream } from './pdfObjects.js';
 import type { PdfObjectRegistry, PdfRef } from './pdfObjects.js';
 
 // ---------------------------------------------------------------------------
@@ -165,9 +158,7 @@ export function buildImageSoftMask(
  * @param mode - The `/UseBlackPtComp` mode.
  * @returns An ExtGState {@link PdfDict}.
  */
-export function buildBlackPointCompensationExtGState(
-  mode: 'Default' | 'ON' | 'OFF',
-): PdfDict {
+export function buildBlackPointCompensationExtGState(mode: 'Default' | 'ON' | 'OFF'): PdfDict {
   const gs = new PdfDict();
   gs.set('/Type', PdfName.of('ExtGState'));
   gs.set('/UseBlackPtComp', PdfName.of(mode));

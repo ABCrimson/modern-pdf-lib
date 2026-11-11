@@ -72,10 +72,7 @@ const decoder = new TextDecoder('latin1');
  * const signedPdf = await signPdf(pdfBytes, 'CertSig', options);
  * ```
  */
-export function setCertificationLevel(
-  options: SignOptions,
-  level: MdpPermission,
-): void {
+export function setCertificationLevel(options: SignOptions, level: MdpPermission): void {
   // Store the MDP permission on the options object
   // The prepareForSigning function will read this when building the sig dict
   (options as SignOptions & { mdpPermission: MdpPermission }).mdpPermission = level;
@@ -140,10 +137,7 @@ export function getCertificationLevel(pdf: Uint8Array): MdpPermission | undefine
  *
  * @internal
  */
-export function buildDocMdpReference(
-  sigValueObjNum: number,
-  level: MdpPermission,
-): string {
+export function buildDocMdpReference(sigValueObjNum: number, level: MdpPermission): string {
   return (
     ` /Reference [<< /Type /SigRef /TransformMethod /DocMDP` +
     ` /TransformParams << /Type /TransformParams /P ${level} /V /1.2 >> >>]`

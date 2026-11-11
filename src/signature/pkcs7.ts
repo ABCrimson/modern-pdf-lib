@@ -160,12 +160,7 @@ export function encodeLength(length: number): Uint8Array {
     return new Uint8Array([0x82, (length >> 8) & 0xff, length & 0xff]);
   }
   if (length < 0x1000000) {
-    return new Uint8Array([
-      0x83,
-      (length >> 16) & 0xff,
-      (length >> 8) & 0xff,
-      length & 0xff,
-    ]);
+    return new Uint8Array([0x83, (length >> 16) & 0xff, (length >> 8) & 0xff, length & 0xff]);
   }
   return new Uint8Array([
     0x84,
@@ -293,11 +288,10 @@ function encodeIntegerValue(value: number): Uint8Array {
   if (value < 0x8000) {
     return encodeTlv(TAG.INTEGER, new Uint8Array([(value >> 8) & 0xff, value & 0xff]));
   }
-  return encodeTlv(TAG.INTEGER, new Uint8Array([
-    (value >> 16) & 0xff,
-    (value >> 8) & 0xff,
-    value & 0xff,
-  ]));
+  return encodeTlv(
+    TAG.INTEGER,
+    new Uint8Array([(value >> 16) & 0xff, (value >> 8) & 0xff, value & 0xff]),
+  );
 }
 
 /**
@@ -414,20 +408,34 @@ function encodeSignatureAlgorithm(keyAlgo: string, hashAlgo: string): Uint8Array
 
   if (keyAlgo === 'RSA' || keyAlgo === 'RSASSA-PKCS1-v1_5') {
     switch (hashAlgo) {
-      case 'SHA-256': oid = OID.sha256WithRSA; break;
-      case 'SHA-384': oid = OID.sha384WithRSA; break;
-      case 'SHA-512': oid = OID.sha512WithRSA; break;
-      default: throw new Error(`Unsupported hash for RSA: ${hashAlgo}`);
+      case 'SHA-256':
+        oid = OID.sha256WithRSA;
+        break;
+      case 'SHA-384':
+        oid = OID.sha384WithRSA;
+        break;
+      case 'SHA-512':
+        oid = OID.sha512WithRSA;
+        break;
+      default:
+        throw new Error(`Unsupported hash for RSA: ${hashAlgo}`);
     }
     return encodeSequence([encodeOID(oid), encodeTlv(TAG.NULL, new Uint8Array(0))]);
   }
 
   if (keyAlgo === 'EC' || keyAlgo === 'ECDSA') {
     switch (hashAlgo) {
-      case 'SHA-256': oid = OID.ecdsaWithSHA256; break;
-      case 'SHA-384': oid = OID.ecdsaWithSHA384; break;
-      case 'SHA-512': oid = OID.ecdsaWithSHA512; break;
-      default: throw new Error(`Unsupported hash for ECDSA: ${hashAlgo}`);
+      case 'SHA-256':
+        oid = OID.ecdsaWithSHA256;
+        break;
+      case 'SHA-384':
+        oid = OID.ecdsaWithSHA384;
+        break;
+      case 'SHA-512':
+        oid = OID.ecdsaWithSHA512;
+        break;
+      default:
+        throw new Error(`Unsupported hash for ECDSA: ${hashAlgo}`);
     }
     return encodeSequence([encodeOID(oid)]);
   }
@@ -472,16 +480,10 @@ function encodeRsaPssSignatureAlgorithm(hashAlgo: string): Uint8Array {
   }
 
   // hashAlgorithm AlgorithmIdentifier = SEQUENCE { hashOid, NULL }
-  const hashAlgId = encodeSequence([
-    encodeOID(hashOid),
-    encodeTlv(TAG.NULL, new Uint8Array(0)),
-  ]);
+  const hashAlgId = encodeSequence([encodeOID(hashOid), encodeTlv(TAG.NULL, new Uint8Array(0))]);
 
   // maskGenAlgorithm AlgorithmIdentifier = SEQUENCE { id-mgf1, hashAlgId }
-  const mgfAlgId = encodeSequence([
-    encodeOID(OID.mgf1),
-    hashAlgId,
-  ]);
+  const mgfAlgId = encodeSequence([encodeOID(OID.mgf1), hashAlgId]);
 
   // RSASSA-PSS-params SEQUENCE with EXPLICIT [0],[1],[2] (trailerField omitted).
   const params = encodeSequence([
@@ -608,10 +610,7 @@ function extractIssuerAndSerial(certDer: Uint8Array): {
   // issuer Name is at idx+2
   const issuerNode = tbsCert.children[idx + 2]!;
   const issuerStart = issuerNode.offset + (tbsCert.data.byteOffset - certDer.byteOffset);
-  const issuerDer = certDer.subarray(
-    issuerStart,
-    issuerStart + issuerNode.totalLength,
-  );
+  const issuerDer = certDer.subarray(issuerStart, issuerStart + issuerNode.totalLength);
 
   // subject Name is at idx+4
   const subjectNode = tbsCert.children[idx + 4]!;
@@ -726,10 +725,14 @@ function detectNamedCurve(certDer: Uint8Array): string {
 
   // Map well-known curve OIDs to Web Crypto names
   switch (curveOid) {
-    case '1.2.840.10045.3.1.7': return 'P-256';
-    case '1.3.132.0.34': return 'P-384';
-    case '1.3.132.0.35': return 'P-521';
-    default: return 'P-256';
+    case '1.2.840.10045.3.1.7':
+      return 'P-256';
+    case '1.3.132.0.34':
+      return 'P-384';
+    case '1.3.132.0.35':
+      return 'P-521';
+    default:
+      return 'P-256';
   }
 }
 
@@ -741,10 +744,7 @@ function detectNamedCurve(certDer: Uint8Array): string {
  * Ensure a Uint8Array backed by a plain ArrayBuffer.
  */
 function toBuffer(data: Uint8Array): ArrayBuffer {
-  return data.buffer.slice(
-    data.byteOffset,
-    data.byteOffset + data.byteLength,
-  ) as ArrayBuffer;
+  return data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength) as ArrayBuffer;
 }
 
 /**
@@ -755,7 +755,7 @@ function getSubtle(): SubtleCrypto {
   if (!subtle) {
     throw new Error(
       'Web Crypto API (crypto.subtle) is not available. ' +
-      'Requires Node.js 18+, a modern browser, Deno, or Bun.',
+        'Requires Node.js 18+, a modern browser, Deno, or Bun.',
     );
   }
   return subtle;
@@ -786,13 +786,7 @@ async function importPrivateKey(
     };
   }
 
-  return subtle.importKey(
-    'pkcs8',
-    toBuffer(pkcs8Der),
-    algorithm,
-    false,
-    ['sign'],
-  );
+  return subtle.importKey('pkcs8', toBuffer(pkcs8Der), algorithm, false, ['sign']);
 }
 
 /**
@@ -851,20 +845,14 @@ export async function buildPkcs7Signature(
 
   // Detect key type from certificate
   const keyAlgo = detectKeyAlgorithm(signerInfoOpts.certificate);
-  const namedCurve = keyAlgo === 'EC'
-    ? detectNamedCurve(signerInfoOpts.certificate)
-    : undefined;
+  const namedCurve = keyAlgo === 'EC' ? detectNamedCurve(signerInfoOpts.certificate) : undefined;
 
   // RSA signature scheme (PSS only meaningful for RSA keys).
   const rsaScheme: 'pkcs1v15' | 'pss' =
-    keyAlgo === 'RSA' && signerInfoOpts.signatureScheme === 'pss'
-      ? 'pss'
-      : 'pkcs1v15';
+    keyAlgo === 'RSA' && signerInfoOpts.signatureScheme === 'pss' ? 'pss' : 'pkcs1v15';
 
   // Extract issuer and serial from certificate
-  const { issuerDer, serialDer } = extractIssuerAndSerial(
-    signerInfoOpts.certificate,
-  );
+  const { issuerDer, serialDer } = extractIssuerAndSerial(signerInfoOpts.certificate);
 
   // Import private key
   const privateKey = await importPrivateKey(
@@ -900,9 +888,7 @@ export async function buildPkcs7Signature(
   );
 
   // Convert ECDSA signature from IEEE P1363 to DER format if needed
-  const finalSignature = keyAlgo === 'EC'
-    ? convertEcdsaToDer(signatureValue)
-    : signatureValue;
+  const finalSignature = keyAlgo === 'EC' ? convertEcdsaToDer(signatureValue) : signatureValue;
 
   // Build the SignerInfo
   const signerInfoValue = buildSignerInfo(
@@ -916,17 +902,10 @@ export async function buildPkcs7Signature(
   );
 
   // Build the SignedData
-  const signedData = buildSignedData(
-    hashAlgorithm,
-    signerInfoOpts.certificate,
-    signerInfoValue,
-  );
+  const signedData = buildSignedData(hashAlgorithm, signerInfoOpts.certificate, signerInfoValue);
 
   // Wrap in ContentInfo
-  const contentInfo = encodeSequence([
-    encodeOID(OID.signedData),
-    encodeContextTag(0, signedData),
-  ]);
+  const contentInfo = encodeSequence([encodeOID(OID.signedData), encodeContextTag(0, signedData)]);
 
   return contentInfo;
 }
@@ -984,12 +963,7 @@ async function buildSignedAttributes(
     _hashAlgorithm as 'SHA-256' | 'SHA-384' | 'SHA-512',
   );
 
-  const attrs = [
-    contentTypeAttr,
-    signingTimeAttr,
-    messageDigestAttr,
-    signingCertAttr,
-  ];
+  const attrs = [contentTypeAttr, signingTimeAttr, messageDigestAttr, signingCertAttr];
 
   // A SET OF must be DER-ordered by the full encoding of each member
   // (X.690 §11.6). Sort lexicographically over the encoded bytes.
@@ -1047,9 +1021,10 @@ function buildSignerInfo(
   // signatureAlgorithm AlgorithmIdentifier.
   // For RSA-PSS emit id-RSASSA-PSS with parameters; otherwise the
   // classic sha*WithRSAEncryption / ecdsa-with-SHA* identifier.
-  const sigAlgo = keyAlgorithm === 'RSA' && rsaScheme === 'pss'
-    ? encodeRsaPssSignatureAlgorithm(hashAlgorithm)
-    : encodeSignatureAlgorithm(keyAlgorithm, hashAlgorithm);
+  const sigAlgo =
+    keyAlgorithm === 'RSA' && rsaScheme === 'pss'
+      ? encodeRsaPssSignatureAlgorithm(hashAlgorithm)
+      : encodeSignatureAlgorithm(keyAlgorithm, hashAlgorithm);
 
   // signature OCTET STRING
   const sigOctetStr = encodeOctetString(signatureValue);
@@ -1080,9 +1055,7 @@ function buildSignedData(
 
   // encapContentInfo SEQUENCE { contentType OID }
   // For detached signatures, we include the content type but no content
-  const encapContentInfo = encodeSequence([
-    encodeOID(OID.data),
-  ]);
+  const encapContentInfo = encodeSequence([encodeOID(OID.data)]);
 
   // certificates [0] IMPLICIT SET OF Certificate
   const certificates = encodeContextTag(0, certificate);
@@ -1090,13 +1063,7 @@ function buildSignedData(
   // signerInfos SET OF SignerInfo
   const signerInfos = encodeSet([signerInfo]);
 
-  return encodeSequence([
-    version,
-    digestAlgorithms,
-    encapContentInfo,
-    certificates,
-    signerInfos,
-  ]);
+  return encodeSequence([version, digestAlgorithms, encapContentInfo, certificates, signerInfos]);
 }
 
 /**
@@ -1110,10 +1077,7 @@ function convertEcdsaToDer(p1363Sig: Uint8Array): Uint8Array {
   const r = p1363Sig.subarray(0, halfLen);
   const s = p1363Sig.subarray(halfLen);
 
-  return encodeSequence([
-    encodeInteger(r),
-    encodeInteger(s),
-  ]);
+  return encodeSequence([encodeInteger(r), encodeInteger(s)]);
 }
 
 // ---------------------------------------------------------------------------

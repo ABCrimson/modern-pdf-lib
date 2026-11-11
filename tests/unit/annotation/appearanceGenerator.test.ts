@@ -21,11 +21,7 @@ import { PdfLineAnnotation } from '../../../src/annotation/types/shapeAnnotation
 import { PdfHighlightAnnotation } from '../../../src/annotation/types/markupAnnotations.js';
 import { PdfInkAnnotation } from '../../../src/annotation/types/inkAnnotation.js';
 import { PdfFreeTextAnnotation } from '../../../src/annotation/types/freeTextAnnotation.js';
-import {
-  PdfDict,
-  PdfName,
-  PdfStream,
-} from '../../../src/core/pdfObjects.js';
+import { PdfDict, PdfName, PdfStream } from '../../../src/core/pdfObjects.js';
 
 // Helper to decode stream content
 function streamContent(stream: PdfStream): string {
@@ -242,15 +238,24 @@ describe('appearance stream structure', () => {
   it('all generated streams have /Type, /Subtype, /BBox', () => {
     const generators = [
       () => {
-        const a = PdfSquareAnnotation.create({ rect: [0, 0, 100, 100], color: { r: 0, g: 0, b: 0 } });
+        const a = PdfSquareAnnotation.create({
+          rect: [0, 0, 100, 100],
+          color: { r: 0, g: 0, b: 0 },
+        });
         return generateSquareAppearance(a);
       },
       () => {
-        const a = PdfCircleAnnotation.create({ rect: [0, 0, 100, 100], color: { r: 0, g: 0, b: 0 } });
+        const a = PdfCircleAnnotation.create({
+          rect: [0, 0, 100, 100],
+          color: { r: 0, g: 0, b: 0 },
+        });
         return generateCircleAppearance(a);
       },
       () => {
-        const a = PdfLineAnnotation.create({ rect: [0, 0, 100, 100], linePoints: [0, 0, 100, 100] });
+        const a = PdfLineAnnotation.create({
+          rect: [0, 0, 100, 100],
+          linePoints: [0, 0, 100, 100],
+        });
         return generateLineAppearance(a);
       },
       () => {

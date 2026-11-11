@@ -233,13 +233,7 @@ describe('prepareForSigning with MDP', () => {
 
   it('should still produce valid ByteRange with MDP', () => {
     const pdf = createMinimalPdf();
-    const { preparedPdf, byteRange } = prepareForSigning(
-      pdf,
-      'CertSig',
-      8192,
-      undefined,
-      1,
-    );
+    const { preparedPdf, byteRange } = prepareForSigning(pdf, 'CertSig', 8192, undefined, 1);
 
     const [off1, len1, off2, len2] = byteRange.byteRange;
     expect(off1).toBe(0);
