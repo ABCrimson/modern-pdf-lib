@@ -2553,8 +2553,8 @@ export class PdfPage {
   /**
    * Mark a rectangular region on this page for redaction.
    *
-   * The mark is stored but not applied until `doc.applyRedactions()`
-   * is called.
+   * The mark is stored and nothing else changes.  `doc.applyRedactions()`
+   * does not apply marks in this release: it throws.
    *
    * @param rect     The region to redact: [x, y, width, height].
    * @param options  Additional redaction options (overlay text, colour).

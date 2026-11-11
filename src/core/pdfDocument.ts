@@ -2338,11 +2338,16 @@ export class PdfDocument {
   // -----------------------------------------------------------------------
 
   /**
-   * Apply all pending redactions across all pages.
+   * Apply all pending redactions.  Not available in this release: the call
+   * always throws.
    *
    * Redaction marks are added to individual pages using
-   * `page.markForRedaction()`.  This method draws the redaction
-   * rectangles on all pages that have pending marks.
+   * `page.markForRedaction()`.  Nothing is drawn, removed or cleared, so the
+   * marks and the page content stay as they were.  A later release adds
+   * redaction by removal.
+   *
+   * @throws {RedactionIncompleteError} Always, with reason
+   *   `'redaction-unavailable'` and `pageIndex` `undefined`.
    */
   applyRedactions(): void {
     applyRedactionsImpl(this);

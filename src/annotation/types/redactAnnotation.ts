@@ -2,8 +2,9 @@
  * @module annotation/types/redactAnnotation
  *
  * Redact annotation — marks a region of the page for redaction.
- * When applied, the redacted content is permanently removed and
- * the area is covered with an overlay.
+ * The annotation is a marker only: applying redaction annotations is not
+ * available in this release (the apply functions throw), so the annotation
+ * and the page content stay as they were.
  *
  * Reference: PDF 1.7 spec, Section 12.5.6.23 (Redaction Annotations).
  */
@@ -20,8 +21,8 @@ import type { AnnotationOptions } from '../pdfAnnotation.js';
 /**
  * A redaction annotation (subtype /Redact).
  *
- * Marks content for redaction.  The annotation itself is a marker;
- * the actual redaction (content removal) must be applied separately.
+ * Marks content for redaction.  The annotation itself is a marker; it
+ * removes nothing.  A later release adds redaction by removal.
  */
 export class PdfRedactAnnotation extends PdfAnnotation {
   constructor(dict: PdfDict) {
@@ -63,7 +64,7 @@ export class PdfRedactAnnotation extends PdfAnnotation {
   // Overlay text
   // -----------------------------------------------------------------------
 
-  /** Get the overlay text displayed after redaction is applied. */
+  /** Get the overlay text stored for display after redaction. */
   getOverlayText(): string | undefined {
     const obj = this.dict.get('/OverlayText');
     if (obj && obj.kind === 'string') {
@@ -81,7 +82,7 @@ export class PdfRedactAnnotation extends PdfAnnotation {
   // Interior color
   // -----------------------------------------------------------------------
 
-  /** Get the interior (fill) color used after redaction. */
+  /** Get the interior (fill) color stored for use after redaction. */
   getInteriorColor(): { r: number; g: number; b: number } | undefined {
     const obj = this.dict.get('/IC');
     if (obj && obj.kind === 'array' && obj.items.length >= 3) {

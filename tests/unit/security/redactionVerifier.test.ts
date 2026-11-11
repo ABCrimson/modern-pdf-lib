@@ -1,13 +1,13 @@
 /**
  * Tests for the redaction verifier (MODULE 0.35).
  *
- * The verifier detects FAILED / fake redactions: text that is still present
- * (and therefore extractable) underneath a redaction region.  A real, secure
- * redaction physically removes the underlying text-showing operators; a fake
- * one merely paints an opaque box over text that is still in the byte stream.
+ * The verifier finds text that is still present (and therefore extractable)
+ * underneath a redaction region.  It cannot prove a region free of text (it
+ * does not follow Form XObjects, patterns or annotation appearances), so
+ * `clean` is always false and `warnings` holds one standing sentence.
  *
  * Coordinate convention under test (confirmed against
- * `extractTextWithPositions` and `src/render/redactContent.ts`):
+ * `extractTextWithPositions`):
  *   - PDF user space, **origin bottom-left, y-up**, units in PDF points.
  *   - A glyph run's box is `[x, y, x + width, y + height]` where `(x, y)` is
  *     the text origin (baseline-left), `width` extends +x and `height`
@@ -19,7 +19,12 @@
 import { describe, it, expect } from 'vitest';
 import { createPdf } from '../../../src/core/pdfDocument.js';
 import { redactRegions } from '../../../src/render/redactContent.js';
+import { RedactionIncompleteError } from '../../../src/errors.js';
 import { verifyRedactions, type RedactionRegion } from '../../../src/security/redactionVerifier.js';
+
+const STANDING_WARNING =
+  'The verifier finds text in a region but cannot prove a region free of text: ' +
+  'it does not follow Form XObjects, patterns or annotation appearances.';
 
 // ---------------------------------------------------------------------------
 // Fixtures
@@ -62,7 +67,7 @@ describe('verifyRedactions() — leak detection', () => {
     expect(leak.y).toBeCloseTo(550);
   });
 
-  it('reports clean when the region is over empty space', async () => {
+  it('reports no leak, and still not clean, when the region is over empty space', async () => {
     const bytes = await pdfWithTextAt('SECRET', 50, 550);
 
     // A region far from the text (lower-left corner of the page).
@@ -70,27 +75,58 @@ describe('verifyRedactions() — leak detection', () => {
 
     const report = await verifyRedactions(bytes, regions);
 
-    expect(report.clean).toBe(true);
+    expect(report.clean).toBe(false);
     expect(report.leaks).toEqual([]);
     expect(report.regionsChecked).toBe(1);
   });
 
-  it('reports clean after a real (content-removing) redaction', async () => {
-    // Build the doc, then PHYSICALLY remove the text in the region before save.
+  it('still reports the text after redactRegions refuses', async () => {
     const doc = createPdf();
     const page = doc.addPage([400, 600]);
     page.drawText('SECRET', { x: 50, y: 550, size: 12 });
 
     const region = { x: 45, y: 545, width: 120, height: 25 };
-    const result = redactRegions(page, [region]);
-    expect(result.removedText).toBeGreaterThanOrEqual(1);
+    expect(() => redactRegions(page, [region])).toThrow(RedactionIncompleteError);
 
-    const bytes = await doc.save();
+    const report = await verifyRedactions(await doc.save(), [{ page: 0, ...region }]);
+    expect(report.clean).toBe(false);
+    expect(report.leaks).toHaveLength(1);
+    expect(report.leaks[0]!.text).toContain('SECRET');
+  });
+});
 
-    // Verifying the SAME region must now be clean — the text is gone.
-    const report = await verifyRedactions(bytes, [{ page: 0, ...region }]);
-    expect(report.clean).toBe(true);
+// ===========================================================================
+// clean and warnings — the verifier never certifies a region
+// ===========================================================================
+
+describe('verifyRedactions() — clean and warnings', () => {
+  it('has clean false and the one standing warning when text leaks', async () => {
+    const bytes = await pdfWithTextAt('SECRET', 50, 550);
+    const report = await verifyRedactions(bytes, [
+      { page: 0, x: 45, y: 545, width: 120, height: 25 },
+    ]);
+    expect(report.leaks).toHaveLength(1);
+    expect(report.clean).toBe(false);
+    expect(report.warnings).toEqual([STANDING_WARNING]);
+  });
+
+  it('has clean false and the one standing warning when nothing leaks', async () => {
+    const bytes = await pdfWithTextAt('SECRET', 50, 550);
+    const report = await verifyRedactions(bytes, [
+      { page: 0, x: 10, y: 10, width: 100, height: 30 },
+    ]);
     expect(report.leaks).toEqual([]);
+    expect(report.clean).toBe(false);
+    expect(report.warnings).toEqual([STANDING_WARNING]);
+  });
+
+  it('keeps one warning for any number of regions', async () => {
+    const bytes = await pdfWithTextAt('SECRET', 50, 550);
+    const report = await verifyRedactions(bytes, [
+      { page: 0, x: 45, y: 545, width: 120, height: 25 },
+      { page: 0, x: 0, y: 0, width: 5, height: 5 },
+    ]);
+    expect(report.warnings).toHaveLength(1);
   });
 });
 
@@ -115,7 +151,8 @@ describe('verifyRedactions() — region geometry', () => {
     // Region below the baseline, not reaching y=300.
     const regions: RedactionRegion[] = [{ page: 0, x: 100, y: 200, width: 200, height: 50 }];
     const report = await verifyRedactions(bytes, regions);
-    expect(report.clean).toBe(true);
+    expect(report.leaks).toEqual([]);
+    expect(report.clean).toBe(false);
   });
 
   it('counts every region that is checked', async () => {
@@ -165,14 +202,14 @@ describe('verifyRedactions() — required regions', () => {
     await expect(verifyRedactions(bytes, [])).rejects.toThrow(/region/i);
   });
 
-  it('treats a clean document with valid regions as clean', async () => {
+  it('reports no leaks for a document without text, and still not clean', async () => {
     const doc = createPdf();
     doc.addPage([400, 600]); // page with no text at all
     const bytes = await doc.save();
     const report = await verifyRedactions(bytes, [
       { page: 0, x: 0, y: 0, width: 400, height: 600 },
     ]);
-    expect(report.clean).toBe(true);
+    expect(report.clean).toBe(false);
     expect(report.leaks).toEqual([]);
     expect(report.regionsChecked).toBe(1);
   });
@@ -185,17 +222,17 @@ describe('verifyRedactions() — required regions', () => {
 // Regression for a dangerous false-negative: when a region named a page index
 // outside [0, pageCount) the verifier silently extracted nothing for that page
 // (getItems() guards the index and returns []), found no leak, and reported
-// `clean: true`. For a SECURITY tool that means "this page contains no leaked
+// an empty leak list. For a SECURITY tool that means "this page contains no leaked
 // text under your redaction" — a guarantee it never actually checked. The
 // out-of-range page must instead be rejected loudly so a caller can never
-// mistake an uninspected page for a verified-clean one.
+// mistake an uninspected page for an inspected one.
 describe('verifyRedactions() — page-range validation', () => {
-  it('throws (not clean:true) when a region names a page >= pageCount', async () => {
+  it('throws (never an inspected-looking report) when a region names a page >= pageCount', async () => {
     // One-page doc (only page index 0 exists) with extractable text on it.
     const bytes = await pdfWithTextAt('SECRET', 50, 550);
 
     // Region points at page 1, which does NOT exist. The page was never
-    // inspected, so reporting it clean would be a false-negative.
+    // inspected, so reporting no leak for it would be a false-negative.
     await expect(
       verifyRedactions(bytes, [{ page: 1, x: 0, y: 0, width: 400, height: 600 }]),
     ).rejects.toThrow(RangeError);

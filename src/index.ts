@@ -1537,8 +1537,9 @@ export type { CertPathResult } from './signature/certPathBuilder.js';
 
 // ---------------------------------------------------------------------------
 // Security & redaction (0.35.x): static threat scanning, content sanitization,
-// redaction-leak verification, and an encryption/permission inspector. (Active
-// redaction itself ships in core/annotation; these are the audit/hardening layer.)
+// redaction-leak verification, and an encryption/permission inspector. (Applying
+// redactions is not available in this release: the core and annotation apply
+// functions throw RedactionIncompleteError; these are the audit/hardening layer.)
 // ---------------------------------------------------------------------------
 export { scanPdfThreats } from './security/threatScanner.js';
 export type { ThreatReport, ThreatFinding, ThreatSeverity } from './security/threatScanner.js';
@@ -1704,7 +1705,7 @@ export type { PdfResponseOptions, NodeServerResponseLike } from './runtime/serve
 // ---------------------------------------------------------------------------
 // Rendering & rasterization (0.29.x): content-stream interpreter, pure-JS
 // rasterizer, Canvas adapter, thumbnails, image/font extraction, visual diff,
-// OCR overlay, redaction-by-removal, and tiling/cache.
+// OCR overlay, redactRegions (not available in this release: it throws), and tiling/cache.
 // ---------------------------------------------------------------------------
 export { interpretContentStream, interpretPage } from './render/interpreter.js';
 export type { InterpretOptions } from './render/interpreter.js';

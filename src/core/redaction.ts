@@ -1,24 +1,19 @@
 /**
  * @module core/redaction
  *
- * Content redaction for PDF documents.
+ * Content redaction marks for PDF documents.
  *
- * Redaction is a two-step process:
- * 1. **Mark** areas for redaction — this records the regions but does
- *    not remove content yet.
- * 2. **Apply** redactions — this draws opaque rectangles over the
- *    marked areas and (in a full implementation) removes the
- *    underlying content stream operators.
- *
- * Note: This implementation draws redaction rectangles but does not
- * remove the actual content-stream operators underneath. For secure
- * redaction, the content stream should be parsed and modified to
- * remove text/graphics within the redacted regions.  This is a visual
- * redaction that covers content for viewing/printing purposes.
+ * Marking records the regions on a page: {@link markForRedaction} stores a
+ * mark and {@link getRedactionMarks} reads the marks back.  Applying the marks
+ * is not available in this release: {@link applyRedactions} throws
+ * {@link RedactionIncompleteError} with reason `'redaction-unavailable'` and
+ * changes nothing, so the marks and the page content stay as they were.  A
+ * later release adds redaction by removal.
  *
  * Reference: PDF 1.7 spec, §12.5.6.23 (Redact Annotations).
  */
 
+import { RedactionIncompleteError } from '../errors.js';
 import type { PdfDocument } from './pdfDocument.js';
 import type { PdfPage } from './pdfPage.js';
 
@@ -39,7 +34,7 @@ export interface RedactionOptions {
   color?: { r: number; g: number; b: number } | undefined;
   /** Custom font name for overlay text (default: 'Helvetica'). */
   overlayFont?: string | undefined;
-  /** Custom font size for overlay text. When omitted, auto-calculated from rect height. */
+  /** Custom font size for overlay text, stored with the mark (no overlay is drawn in this release). */
   overlayFontSize?: number | undefined;
   /** Horizontal alignment for overlay text (default: 'left'). */
   overlayAlignment?: OverlayAlignment | undefined;
@@ -47,7 +42,7 @@ export interface RedactionOptions {
   borderWidth?: number | undefined;
   /** Border colour (default: same as fill colour). */
   borderColor?: { r: number; g: number; b: number } | undefined;
-  /** Opacity for the redaction overlay, 0–1 (default: 1 — fully opaque). Useful for preview/draft mode. */
+  /** Opacity for the redaction overlay, 0–1 (default: 1 — fully opaque), stored with the mark. */
   opacity?: number | undefined;
 }
 
@@ -65,16 +60,6 @@ export interface RedactionMark {
 }
 
 // ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-function n(value: number): string {
-  if (Number.isInteger(value)) return value.toString();
-  const s = value.toFixed(6).replace(/\.?0+$/, '');
-  return s === '-0' ? '0' : s;
-}
-
-// ---------------------------------------------------------------------------
 // Storage — use a WeakMap keyed by PdfPage to store redaction marks
 // ---------------------------------------------------------------------------
 
@@ -87,8 +72,8 @@ const pageRedactions = new WeakMap<PdfPage, RedactionMark[]>();
 /**
  * Mark a rectangular region on a page for redaction.
  *
- * This does not immediately modify the page.  Call
- * {@link applyRedactions} to draw the redaction rectangles.
+ * The mark is recorded and nothing else changes: the page content is
+ * untouched.  {@link applyRedactions} does not apply marks in this release.
  *
  * @param page     The page to mark.
  * @param options  The redaction options.
@@ -111,94 +96,18 @@ export function markForRedaction(page: PdfPage, options: RedactionOptions): void
 }
 
 /**
- * Apply all pending redactions across all pages in a document.
+ * Apply all pending redactions across all pages in a document.  Not available
+ * in this release: the call always throws.
  *
- * For each redaction mark, this draws an opaque filled rectangle
- * over the marked region.  If overlay text is specified, it is
- * drawn on top of the rectangle in a contrasting colour.
+ * Nothing is drawn, removed or cleared, so the marks and the page content stay
+ * as they were.
  *
- * @param doc  The PDF document.
+ * @param _doc  The PDF document (left unchanged).
+ * @throws {RedactionIncompleteError} Always, with reason
+ *   `'redaction-unavailable'` and `pageIndex` `undefined`.
  */
-export function applyRedactions(doc: PdfDocument): void {
-  const pages = doc.getPages();
-
-  for (const page of pages) {
-    const marks = pageRedactions.get(page);
-    if (!marks || marks.length === 0) continue;
-
-    let ops = '';
-
-    for (const mark of marks) {
-      const [x, y, w, h] = mark.rect;
-      const { r, g, b } = mark.color;
-
-      // Save graphics state
-      ops += 'q\n';
-
-      // Apply opacity via extended graphics state if not fully opaque
-      if (mark.opacity < 1) {
-        ops += `/GS_R gs\n`;
-        ops += `${n(mark.opacity)} ca\n`;
-      }
-
-      // Draw filled rectangle
-      ops += `${n(r)} ${n(g)} ${n(b)} rg\n`;
-      ops += `${n(x)} ${n(y)} ${n(w)} ${n(h)} re\n`;
-      ops += 'f\n';
-
-      // Draw border if borderWidth > 0
-      if (mark.borderWidth > 0) {
-        const { r: br, g: bg, b: bb } = mark.borderColor;
-        ops += `${n(br)} ${n(bg)} ${n(bb)} RG\n`;
-        ops += `${n(mark.borderWidth)} w\n`;
-        ops += `${n(x)} ${n(y)} ${n(w)} ${n(h)} re\n`;
-        ops += 'S\n';
-      }
-
-      // Draw overlay text if provided
-      if (mark.overlayText) {
-        // Use a contrasting colour (white if dark background, black if light)
-        const brightness = r * 0.299 + g * 0.587 + b * 0.114;
-        const textColor = brightness > 0.5 ? 0 : 1;
-
-        const fontSize = mark.overlayFontSize ?? Math.min(h * 0.6, 10);
-
-        // Estimate text width (~0.5 * fontSize per character for Helvetica)
-        const estimatedTextWidth = mark.overlayText.length * fontSize * 0.5;
-
-        let textX: number;
-        if (mark.overlayAlignment === 'center') {
-          textX = x + (w - estimatedTextWidth) / 2;
-        } else if (mark.overlayAlignment === 'right') {
-          textX = x + w - estimatedTextWidth - 2;
-        } else {
-          textX = x + 2;
-        }
-
-        const textY = y + h / 2 - fontSize / 3;
-
-        ops += `${n(textColor)} ${n(textColor)} ${n(textColor)} rg\n`;
-        ops += 'BT\n';
-        ops += `/${mark.overlayFont} ${n(fontSize)} Tf\n`;
-        ops += `${n(textX)} ${n(textY)} Td\n`;
-
-        const escaped = mark.overlayText
-          .replaceAll('\\', '\\\\')
-          .replaceAll('(', '\\(')
-          .replaceAll(')', '\\)');
-
-        ops += `(${escaped}) Tj\n`;
-        ops += 'ET\n';
-      }
-
-      ops += 'Q\n';
-    }
-
-    page.pushOperators(ops);
-
-    // Clear applied marks
-    pageRedactions.delete(page);
-  }
+export function applyRedactions(_doc: PdfDocument): void {
+  throw new RedactionIncompleteError('redaction-unavailable');
 }
 
 /**

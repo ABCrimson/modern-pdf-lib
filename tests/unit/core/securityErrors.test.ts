@@ -45,7 +45,7 @@ describe.each(simple)('%o', (Ctor, name, code) => {
 
 describe('RedactionIncompleteError', () => {
   it('has the documented name and code', () => {
-    const err = new RedactionIncompleteError('text-remains', 'text remains');
+    const err = new RedactionIncompleteError('redaction-unavailable', 'unavailable');
     expect(err.name).toBe('RedactionIncompleteError');
     expect(err.code).toBe('redaction-incomplete');
     expect(err).toBeInstanceOf(Error);
@@ -53,32 +53,32 @@ describe('RedactionIncompleteError', () => {
   });
 
   it('carries the reason and page index', () => {
-    const err = new RedactionIncompleteError('inline-image', 'inline image', { pageIndex: 2 });
-    expect(err.reason).toBe('inline-image');
+    const err = new RedactionIncompleteError('redaction-unavailable', 'unavailable', {
+      pageIndex: 2,
+    });
+    expect(err.reason).toBe('redaction-unavailable');
     expect(err.pageIndex).toBe(2);
-    expect(err.message).toBe('inline image');
+    expect(err.message).toBe('unavailable');
   });
 
   it('leaves the page index undefined when none is given', () => {
-    expect(new RedactionIncompleteError('annotation', 'm').pageIndex).toBeUndefined();
+    expect(new RedactionIncompleteError('redaction-unavailable', 'm').pageIndex).toBeUndefined();
+  });
+
+  it('says redaction by removal is not available and nothing was changed by default', () => {
+    const { message } = new RedactionIncompleteError('redaction-unavailable');
+    expect(message).toMatch(/not available in this release/);
+    expect(message).toMatch(/Nothing was changed/);
   });
 
   it('keeps the cause', () => {
     const cause = new Error('root');
-    const err = new RedactionIncompleteError('form-xobject', 'm', { cause, pageIndex: 0 });
+    const err = new RedactionIncompleteError('redaction-unavailable', 'm', { cause, pageIndex: 0 });
     expect(err.cause).toBe(cause);
   });
 
-  it('accepts every reason', () => {
-    const reasons: RedactionIncompleteReason[] = [
-      'text-remains',
-      'form-xobject',
-      'image-xobject',
-      'unresolved-xobject',
-      'inline-image',
-      'annotation',
-      'unreachable-redact-annotation',
-    ];
+  it('accepts the one reason of this release', () => {
+    const reasons: RedactionIncompleteReason[] = ['redaction-unavailable'];
     for (const reason of reasons) {
       expect(new RedactionIncompleteError(reason, 'm').reason).toBe(reason);
     }

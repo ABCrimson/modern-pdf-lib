@@ -351,31 +351,30 @@ export class ScriptExecutionDisabledError extends Error {
   }
 }
 
-/** Why a redaction was refused because it could not be applied completely. */
-export type RedactionIncompleteReason =
-  | 'text-remains'
-  | 'form-xobject'
-  | 'image-xobject'
-  | 'unresolved-xobject'
-  | 'inline-image'
-  | 'annotation'
-  | 'unreachable-redact-annotation';
+/**
+ * Why a redaction was refused.  The one reason of this release is
+ * `'redaction-unavailable'`: redaction by removal is not available, so every
+ * redaction entry point refuses.  A later release adds reasons.
+ */
+export type RedactionIncompleteReason = 'redaction-unavailable';
 
 /**
- * Thrown when a redaction cannot be shown to remove everything under the
- * marked regions, instead of reporting success.
+ * Thrown by every redaction entry point (`redactRegions`, `applyRedactions`,
+ * `applyRedaction`, `PdfDocument.applyRedactions()`) because redaction by
+ * removal is not available in this release.  Nothing is drawn, removed or
+ * cleared: marks, annotations and page content stay as they were.
  */
 export class RedactionIncompleteError extends Error {
   override readonly name = 'RedactionIncompleteError';
   /** Machine-readable code, stable across releases. */
   readonly code = 'redaction-incomplete' as const;
-  /** The kind of content that blocked the redaction. */
+  /** Why the redaction was refused. */
   readonly reason: RedactionIncompleteReason;
   /** Zero-based page index, or `undefined` when no page is known. */
   readonly pageIndex: number | undefined;
   constructor(
     reason: RedactionIncompleteReason,
-    message = `Redaction incomplete (${reason}). Nothing was changed.`,
+    message = 'Redaction by removal is not available in this release. Nothing was changed.',
     options?: ErrorOptions & { pageIndex?: number | undefined },
   ) {
     super(message, options);

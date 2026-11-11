@@ -1,16 +1,15 @@
 /**
  * @module security/redactionVerifier
  *
- * Detect FAILED / fake redactions — text that is still extractable underneath
- * a redaction region.
+ * Find text that is still extractable underneath a redaction region.
  *
- * A *secure* redaction physically removes the underlying text-showing
- * operators from the page content stream (see `redactRegions` in
- * `../render/redactContent.js`), so the redacted text cannot be recovered by
- * copy/paste, text extraction, or raw stream inspection.  A *fake* redaction
- * merely paints an opaque black box on top of the page while the original text
- * remains in the byte stream — a genuine, well-documented security failure
- * (the "select-all-and-copy" leak).  This verifier finds those leaks.
+ * A fake redaction paints an opaque box on top of the page while the original
+ * text remains in the byte stream — the "select-all-and-copy" leak.  This
+ * verifier finds such text in page content and reports it.  It cannot prove a
+ * region free of text: it does not follow Form XObjects, patterns or
+ * annotation appearances, so {@link RedactionVerificationReport.clean} is
+ * always `false` and {@link RedactionVerificationReport.warnings} holds one
+ * standing sentence saying so.
  *
  * ## How it works
  *
@@ -21,17 +20,18 @@
  *    yields one positioned {@link import('../parser/textExtractor.js').TextItem}
  *    per shown text run, with its page-space origin and size.
  * 3. Every text item whose bounding box intersects a region rectangle is
- *    reported as a leak.  `clean` is true iff there are no leaks.
+ *    reported as a leak.  `clean` is always false: finding no text is not a
+ *    proof that none remains.
  *
  * ## Coordinate / encoding conventions (confirmed, not assumed)
  *
  * - **Space:** PDF user space — the coordinate space produced by
  *   `extractTextWithPositions`.  Origin is **bottom-left**, the y-axis points
- *   **up**, and units are **PDF points** (1/72 inch).  This matches
- *   `RedactRect` in `../render/redactContent.js` ("page space, PDF points,
- *   y-up, lower-left origin"), so a {@link RedactionRegion} uses exactly the
- *   same convention: `(x, y)` is the lower-left corner and `width` / `height`
- *   extend in the +x / +y directions.
+ *   **up**, and units are **PDF points** (1/72 inch).  This is the
+ *   same convention as `RedactRect` in `../render/redactContent.js` ("page
+ *   space, PDF points, y-up, lower-left origin"): in a
+ *   {@link RedactionRegion}, `(x, y)` is the lower-left corner and `width` /
+ *   `height` extend in the +x / +y directions.
  * - **Glyph box:** a `TextItem` reports `(x, y)` = the text origin
  *   (baseline-left), `width` extending +x, and `height` (equal to the font
  *   size) extending +y.  The run's axis-aligned box is therefore
@@ -110,11 +110,25 @@ export interface RedactionLeak {
 export interface RedactionVerificationReport {
   /** Every text run found still present under a region. */
   leaks: RedactionLeak[];
-  /** True iff {@link leaks} is empty (no failed redactions detected). */
+  /**
+   * Always `false`: the verifier can find text in a region but cannot prove a
+   * region free of text, so it never certifies one.  An empty {@link leaks}
+   * means only that no text was found.
+   */
   clean: boolean;
   /** Number of regions that were checked. */
   regionsChecked: number;
+  /**
+   * Standing caveats about what the verifier cannot see.  Always holds the one
+   * sentence {@link VERIFIER_LIMITATION}.
+   */
+  warnings: string[];
 }
+
+/** The one standing sentence in every report's `warnings`. */
+const VERIFIER_LIMITATION =
+  'The verifier finds text in a region but cannot prove a region free of text: ' +
+  'it does not follow Form XObjects, patterns or annotation appearances.';
 
 // ---------------------------------------------------------------------------
 // Geometry
@@ -149,8 +163,7 @@ function itemBox(item: TextItem): {
  *
  * Uses the standard separating-axis test for axis-aligned rectangles: they
  * overlap unless one is entirely to the left/right/above/below the other.
- * Touching edges count as overlap (inclusive bounds), matching the intersection
- * test in `../render/redactContent.js`.
+ * Touching edges count as overlap (inclusive bounds).
  */
 function intersects(
   box: { minX: number; minY: number; maxX: number; maxY: number },
@@ -168,22 +181,23 @@ function intersects(
 // ---------------------------------------------------------------------------
 
 /**
- * Verify that the given regions of a PDF contain no still-extractable text,
- * detecting fake / failed redactions.
+ * Find text that is still extractable under the given regions of a PDF.
  *
  * For each region, the corresponding page's text is extracted with positions
  * and any text run whose bounding box intersects the region is reported as a
- * {@link RedactionLeak}.  A clean result means no text was found under any
- * region (the redactions truly removed the content, or there was none to begin
- * with).
+ * {@link RedactionLeak}.  The report is never clean: the verifier can find
+ * text in a region but cannot prove a region free of text (it does not follow
+ * Form XObjects, patterns or annotation appearances), so `clean` is always
+ * `false`, an empty `leaks` means only that no text was found, and `warnings`
+ * holds the one standing sentence saying so.
  *
  * @param pdf      The PDF file bytes to inspect.
  * @param regions  The regions to check (REQUIRED — see the module docs for why
  *                 automatic region detection is not performed).  Coordinates are
  *                 in PDF user space: origin bottom-left, y-up, units in points;
  *                 `(x, y)` is the lower-left corner.
- * @returns        A report listing every leak; `clean` is true iff there are
- *                 none.
+ * @returns        A report listing every leak found; `clean` is always `false`
+ *                 and `warnings` holds the standing sentence.
  * @throws         `TypeError` if `regions` is omitted or empty.
  *
  * @example
@@ -191,11 +205,10 @@ function intersects(
  * const report = await verifyRedactions(pdfBytes, [
  *   { page: 0, x: 45, y: 545, width: 120, height: 25 },
  * ]);
- * if (!report.clean) {
- *   for (const leak of report.leaks) {
- *     console.warn(`Leak on page ${leak.page}: "${leak.text}"`);
- *   }
+ * for (const leak of report.leaks) {
+ *   console.warn(`Leak on page ${leak.page}: "${leak.text}"`);
  * }
+ * console.warn(report.warnings[0]);
  * ```
  */
 export async function verifyRedactions(
@@ -221,11 +234,11 @@ export async function verifyRedactions(
   // This is a security guarantee, not a convenience check: if a region named a
   // page outside [0, pageCount) we would otherwise extract nothing for it (the
   // per-page lookup guards the index and yields no text items), find no leak,
-  // and report `clean: true`. For a redaction *verifier* that is a dangerous
+  // and report no leak for it. For a redaction *verifier* that is a dangerous
   // false-negative — it would tell the caller "this page has no leaked text
   // under your redaction" about a page that was never inspected. Mirror the
   // module's loud empty-`regions` guard and reject the whole call instead, so
-  // an uninspected page can never be mistaken for a verified-clean one. A
+  // an uninspected page can never be mistaken for an inspected one. A
   // degenerate (zero-area) region is normally skipped later, but its page is
   // validated here too so a bad index can't hide behind a zero-area region.
   for (const region of regions) {
@@ -235,7 +248,7 @@ export async function verifyRedactions(
         `verifyRedactions: region page index ${page} is out of range. ` +
           `The document has ${pageCount} page(s) (valid indices 0..${pageCount - 1}). ` +
           'Every region must name a real, inspectable page — an out-of-range page ' +
-          'cannot be verified and must not be silently reported clean.',
+          'cannot be inspected and must not be silently skipped.',
       );
     }
   }
@@ -287,7 +300,8 @@ export async function verifyRedactions(
 
   return {
     leaks,
-    clean: leaks.length === 0,
+    clean: false,
     regionsChecked: regions.length,
+    warnings: [VERIFIER_LIMITATION],
   };
 }

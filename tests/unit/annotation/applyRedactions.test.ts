@@ -1,21 +1,14 @@
 /**
  * Tests for annotation-based redaction application.
  *
- * Covers:
- * - Applying a single redaction annotation
- * - Applying multiple redactions across pages
- * - Redaction with overlay text
- * - Redaction with interior colour
- * - No redactions — no-op
- * - Redaction removes annotation from page
- * - Error cases (out of range, wrong type)
- * - Overlay text with special characters (escaping)
- * - Contrasting text colour selection
- * - Multiple redactions on same page
+ * Both entry points throw RedactionIncompleteError (redaction by removal is
+ * not available in this release).  The tests check the error, and that the
+ * page content and the /Redact annotations stay exactly as they were.
  */
 
 import { describe, it, expect } from 'vitest';
 import { createPdf } from '../../../src/core/pdfDocument.js';
+import { RedactionIncompleteError } from '../../../src/errors.js';
 import { PdfRedactAnnotation } from '../../../src/annotation/types/redactAnnotation.js';
 import { applyRedactions, applyRedaction } from '../../../src/annotation/applyRedactions.js';
 
@@ -51,173 +44,58 @@ function createDocWithRedactions(
 // applyRedactions (bulk)
 // ---------------------------------------------------------------------------
 
+function expectUnavailable(run: () => unknown): void {
+  let caught: unknown;
+  try {
+    run();
+  } catch (err) {
+    caught = err;
+  }
+  expect(caught).toBeInstanceOf(RedactionIncompleteError);
+  const error = caught as RedactionIncompleteError;
+  expect(error.code).toBe('redaction-incomplete');
+  expect(error.reason).toBe('redaction-unavailable');
+  expect(error.pageIndex).toBeUndefined();
+}
+
 describe('applyRedactions', () => {
-  it('returns zero count when no redactions exist', () => {
+  it('throws redaction-unavailable', () => {
+    const doc = createDocWithRedactions([{ rect: [40, 690, 250, 720] }]);
+    expectUnavailable(() => applyRedactions(doc));
+  });
+
+  it('throws when the document has no redaction annotations', () => {
     const doc = createPdf();
     doc.addPage([612, 792]);
-
-    const result = applyRedactions(doc);
-
-    expect(result.appliedCount).toBe(0);
-    expect(result.pages).toEqual([]);
+    expectUnavailable(() => applyRedactions(doc));
   });
 
-  it('applies a single redaction annotation', () => {
-    const doc = createDocWithRedactions([{ rect: [40, 690, 250, 720] }]);
-
-    const page = doc.getPage(0);
-    expect(page.getAnnotations()).toHaveLength(1);
-
-    const result = applyRedactions(doc);
-
-    expect(result.appliedCount).toBe(1);
-    expect(result.pages).toEqual([0]);
-    // Annotation should be removed
-    expect(page.getAnnotations()).toHaveLength(0);
-  });
-
-  it('applies multiple redactions on one page', () => {
+  it('keeps every annotation and the page content', () => {
     const doc = createDocWithRedactions([
-      { rect: [40, 690, 250, 720] },
-      { rect: [40, 650, 250, 680] },
-      { rect: [40, 610, 250, 640] },
+      { rect: [40, 690, 250, 720], overlayText: 'REDACTED' },
+      { rect: [40, 600, 250, 630], interiorColor: { r: 1, g: 0, b: 0 } },
     ]);
-
     const page = doc.getPage(0);
-    expect(page.getAnnotations()).toHaveLength(3);
+    const contentBefore = page.getContentStreamData();
+    const annotationsBefore = [...page.getAnnotations()];
 
-    const result = applyRedactions(doc);
+    expectUnavailable(() => applyRedactions(doc));
 
-    expect(result.appliedCount).toBe(3);
-    expect(result.pages).toEqual([0]);
-    expect(page.getAnnotations()).toHaveLength(0);
-  });
-
-  it('applies redactions across multiple pages', () => {
-    const doc = createPdf();
-    const page0 = doc.addPage([612, 792]);
-    const page1 = doc.addPage([612, 792]);
-    const page2 = doc.addPage([612, 792]);
-
-    // Page 0: 1 redaction
-    page0.addExistingAnnotation(PdfRedactAnnotation.create({ rect: [10, 10, 200, 30] }));
-    // Page 1: no redactions
-    // Page 2: 2 redactions
-    page2.addExistingAnnotation(PdfRedactAnnotation.create({ rect: [10, 10, 200, 30] }));
-    page2.addExistingAnnotation(PdfRedactAnnotation.create({ rect: [10, 40, 200, 60] }));
-
-    const result = applyRedactions(doc);
-
-    expect(result.appliedCount).toBe(3);
-    expect(result.pages).toEqual([0, 2]);
-    expect(page0.getAnnotations()).toHaveLength(0);
-    expect(page1.getAnnotations()).toHaveLength(0);
-    expect(page2.getAnnotations()).toHaveLength(0);
-  });
-
-  it('preserves non-redact annotations', () => {
-    const doc = createPdf();
-    const page = doc.addPage([612, 792]);
-
-    // Add a text annotation
-    page.addAnnotation('Text', { rect: [10, 10, 30, 30], contents: 'Note' });
-    // Add a redaction
-    page.addExistingAnnotation(PdfRedactAnnotation.create({ rect: [50, 50, 200, 70] }));
-
+    expect(page.getContentStreamData()).toBe(contentBefore);
     expect(page.getAnnotations()).toHaveLength(2);
-
-    const result = applyRedactions(doc);
-
-    expect(result.appliedCount).toBe(1);
-    // Text annotation still present
-    expect(page.getAnnotations()).toHaveLength(1);
-    expect(page.getAnnotations()[0]!.getType()).toBe('Text');
+    expect(page.getAnnotations()).toEqual(annotationsBefore);
+    expect(page.getContentStreamData()).not.toContain(' re\n');
   });
 
-  it('handles redaction with overlay text', () => {
-    const doc = createDocWithRedactions([{ rect: [40, 690, 250, 720], overlayText: 'REDACTED' }]);
-
-    const result = applyRedactions(doc);
-
-    expect(result.appliedCount).toBe(1);
-    // Verify operators were pushed (contains overlay text rendering)
-    const ops = doc.getPage(0).getContentStreamData();
-    expect(ops).toContain('(REDACTED) Tj');
-    expect(ops).toContain('BT');
-    expect(ops).toContain('ET');
-  });
-
-  it('handles redaction with interior colour', () => {
-    const doc = createDocWithRedactions([
-      { rect: [40, 690, 250, 720], interiorColor: { r: 1, g: 0, b: 0 } },
-    ]);
-
-    const result = applyRedactions(doc);
-
-    expect(result.appliedCount).toBe(1);
-    const ops = doc.getPage(0).getContentStreamData();
-    // Red fill colour
-    expect(ops).toContain('1 0 0 rg');
-  });
-
-  it('uses black fill by default when no interior colour is set', () => {
+  it('keeps the annotations of every page', () => {
     const doc = createDocWithRedactions([{ rect: [40, 690, 250, 720] }]);
+    const second = doc.addPage([612, 792]);
+    second.addExistingAnnotation(PdfRedactAnnotation.create({ rect: [10, 10, 100, 40] }));
 
-    applyRedactions(doc);
+    expectUnavailable(() => applyRedactions(doc));
 
-    const ops = doc.getPage(0).getContentStreamData();
-    expect(ops).toContain('0 0 0 rg');
-  });
-
-  it('handles overlay text with special characters', () => {
-    const doc = createDocWithRedactions([
-      { rect: [40, 690, 250, 720], overlayText: 'Re(da)ct\\ed' },
-    ]);
-
-    applyRedactions(doc);
-
-    const ops = doc.getPage(0).getContentStreamData();
-    expect(ops).toContain('Re\\(da\\)ct\\\\ed');
-  });
-
-  it('handles document with no pages gracefully', () => {
-    const doc = createPdf();
-    const result = applyRedactions(doc);
-
-    expect(result.appliedCount).toBe(0);
-    expect(result.pages).toEqual([]);
-  });
-
-  it('uses contrasting text colour for light backgrounds', () => {
-    const doc = createDocWithRedactions([
-      {
-        rect: [40, 690, 250, 720],
-        overlayText: 'REMOVED',
-        interiorColor: { r: 1, g: 1, b: 1 }, // white background
-      },
-    ]);
-
-    applyRedactions(doc);
-
-    const ops = doc.getPage(0).getContentStreamData();
-    // White background => dark (black) text
-    expect(ops).toContain('0 0 0 rg');
-  });
-
-  it('uses contrasting text colour for dark backgrounds', () => {
-    const doc = createDocWithRedactions([
-      {
-        rect: [40, 690, 250, 720],
-        overlayText: 'REMOVED',
-        interiorColor: { r: 0, g: 0, b: 0 }, // black background
-      },
-    ]);
-
-    applyRedactions(doc);
-
-    const ops = doc.getPage(0).getContentStreamData();
-    // Black background => white text
-    expect(ops).toContain('1 1 1 rg');
+    expect(doc.getPage(0).getAnnotations()).toHaveLength(1);
+    expect(doc.getPage(1).getAnnotations()).toHaveLength(1);
   });
 });
 
@@ -226,156 +104,20 @@ describe('applyRedactions', () => {
 // ---------------------------------------------------------------------------
 
 describe('applyRedaction', () => {
-  it('applies a single redaction by index', () => {
+  it('throws redaction-unavailable and keeps the annotation', () => {
     const doc = createDocWithRedactions([{ rect: [40, 690, 250, 720] }]);
-
-    const result = applyRedaction(doc, 0, 0);
-
-    expect(result.appliedCount).toBe(1);
-    expect(result.pages).toEqual([0]);
-    expect(doc.getPage(0).getAnnotations()).toHaveLength(0);
-  });
-
-  it('throws RangeError for invalid page index', () => {
-    const doc = createDocWithRedactions([{ rect: [40, 690, 250, 720] }]);
-
-    expect(() => applyRedaction(doc, 5, 0)).toThrow(RangeError);
-    expect(() => applyRedaction(doc, -1, 0)).toThrow(RangeError);
-  });
-
-  it('throws RangeError for invalid annotation index', () => {
-    const doc = createDocWithRedactions([{ rect: [40, 690, 250, 720] }]);
-
-    expect(() => applyRedaction(doc, 0, 5)).toThrow(RangeError);
-    expect(() => applyRedaction(doc, 0, -1)).toThrow(RangeError);
-  });
-
-  it('throws TypeError when annotation is not a Redact type', () => {
-    const doc = createPdf();
-    const page = doc.addPage([612, 792]);
-    page.addAnnotation('Text', { rect: [10, 10, 30, 30] });
-
-    expect(() => applyRedaction(doc, 0, 0)).toThrow(TypeError);
-    expect(() => applyRedaction(doc, 0, 0)).toThrow(/not 'Redact'/);
-  });
-
-  it('applies only the targeted redaction, leaving others', () => {
-    const doc = createDocWithRedactions([
-      { rect: [40, 690, 250, 720] },
-      { rect: [40, 650, 250, 680] },
-    ]);
-
     const page = doc.getPage(0);
-    expect(page.getAnnotations()).toHaveLength(2);
+    const contentBefore = page.getContentStreamData();
 
-    // Apply only the first redaction
-    applyRedaction(doc, 0, 0);
+    expectUnavailable(() => applyRedaction(doc, 0, 0));
 
-    // One redaction removed, one remains
     expect(page.getAnnotations()).toHaveLength(1);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// Overlay text escaping and alignment (annotation path)
-// ---------------------------------------------------------------------------
-
-describe('annotation redaction — overlay text escaping', () => {
-  it('escapes backslashes in overlay text', () => {
-    const doc = createDocWithRedactions([
-      { rect: [40, 690, 250, 720], overlayText: 'path\\to\\file' },
-    ]);
-
-    applyRedactions(doc);
-
-    const ops = doc.getPage(0).getContentStreamData();
-    expect(ops).toContain('path\\\\to\\\\file');
+    expect(page.getContentStreamData()).toBe(contentBefore);
   });
 
-  it('escapes parentheses in overlay text', () => {
-    const doc = createDocWithRedactions([
-      { rect: [40, 690, 250, 720], overlayText: 'Text (with) parens' },
-    ]);
-
-    applyRedactions(doc);
-
-    const ops = doc.getPage(0).getContentStreamData();
-    expect(ops).toContain('Text \\(with\\) parens');
-  });
-
-  it('escapes multiple special characters together', () => {
-    const doc = createDocWithRedactions([{ rect: [40, 690, 250, 720], overlayText: 'a\\b(c)d' }]);
-
-    applyRedactions(doc);
-
-    const ops = doc.getPage(0).getContentStreamData();
-    expect(ops).toContain('a\\\\b\\(c\\)d');
-  });
-});
-
-describe('annotation redaction — default rendering', () => {
-  it('uses Helvetica font by default', () => {
-    const doc = createDocWithRedactions([{ rect: [40, 690, 250, 720], overlayText: 'REDACTED' }]);
-
-    applyRedactions(doc);
-
-    const ops = doc.getPage(0).getContentStreamData();
-    expect(ops).toContain('/Helvetica');
-  });
-
-  it('auto-calculates font size from rect height', () => {
-    const doc = createDocWithRedactions([{ rect: [40, 690, 250, 720], overlayText: 'REDACTED' }]);
-
-    applyRedactions(doc);
-
-    const ops = doc.getPage(0).getContentStreamData();
-    // rect height = |720 - 690| = 30, fontSize = min(30*0.6, 10) = 10
-    expect(ops).toContain('/Helvetica 10 Tf');
-  });
-
-  it('does not emit opacity operators at full opacity', () => {
+  it('throws redaction-unavailable before it checks the indices', () => {
     const doc = createDocWithRedactions([{ rect: [40, 690, 250, 720] }]);
-
-    applyRedactions(doc);
-
-    const ops = doc.getPage(0).getContentStreamData();
-    expect(ops).not.toContain('ca\n');
-    expect(ops).not.toContain('/GS_R gs');
-  });
-
-  it('does not draw border by default', () => {
-    const doc = createDocWithRedactions([{ rect: [40, 690, 250, 720] }]);
-
-    applyRedactions(doc);
-
-    const ops = doc.getPage(0).getContentStreamData();
-    expect(ops).not.toContain('S\n');
-    expect(ops).not.toContain(' w\n');
-  });
-
-  it('handles multiple redactions on same page with different colours', () => {
-    const doc = createDocWithRedactions([
-      { rect: [40, 690, 250, 720], interiorColor: { r: 1, g: 0, b: 0 } },
-      { rect: [40, 650, 250, 680], interiorColor: { r: 0, g: 0, b: 1 } },
-    ]);
-
-    applyRedactions(doc);
-
-    const ops = doc.getPage(0).getContentStreamData();
-    expect(ops).toContain('1 0 0 rg');
-    expect(ops).toContain('0 0 1 rg');
-  });
-
-  it('handles multiple redactions on same page with overlay text', () => {
-    const doc = createDocWithRedactions([
-      { rect: [40, 690, 250, 720], overlayText: 'FIRST' },
-      { rect: [40, 650, 250, 680], overlayText: 'SECOND' },
-    ]);
-
-    applyRedactions(doc);
-
-    const ops = doc.getPage(0).getContentStreamData();
-    expect(ops).toContain('(FIRST) Tj');
-    expect(ops).toContain('(SECOND) Tj');
+    expectUnavailable(() => applyRedaction(doc, 5, 0));
+    expectUnavailable(() => applyRedaction(doc, 0, 9));
   });
 });
