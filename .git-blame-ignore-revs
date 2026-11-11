@@ -1,0 +1,3 @@
+# Commits that only reformat code. Used by `git blame --ignore-revs-file` and by GitHub blame.
+# style: reformat src, tests and scripts with oxfmt 0.78.0
+ef5f2c944f50abf672817089013a68cc4e2aaa9f
