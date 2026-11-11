@@ -25,16 +25,20 @@ deno add npm:modern-pdf-lib
 :::
 
 > [!NOTE]
-> `modern-pdf-lib` is ESM-first and also ships CJS compatibility builds (`require('modern-pdf-lib')` works). It requires Node 26.4 or later, or any runtime with native ES module support.
+> `modern-pdf-lib` is ESM-first and also ships CJS compatibility builds (`require('modern-pdf-lib')` works). It requires Node 26.4 or later, or one of the runtimes listed below.
 
 ::: details Supported Runtimes
 | Runtime | Minimum Version | Notes |
 |---|---|---|
-| Node.js | 26.4+ | Full support including WASM acceleration |
-| Deno | Latest | Full support via `npm:` specifier |
-| Bun | Latest | Full support |
-| Cloudflare Workers | — | Streaming output, no file system |
-| Browsers | ES2024+ | All modern browsers via bundler |
+| Node.js | 26.4+ | Unit tests gate on Node 26 in CI |
+| Deno | 2.5+ | Via the `npm:` specifier; not tested in CI |
+| Bun | 1.1.22+ | Not tested in CI |
+| Cloudflare Workers | current workerd (V8 14.0+) | Streaming output, no file system; not tested in CI |
+| Chrome / Edge | 140+ | End-to-end tests run in Chromium |
+| Firefox | 133+ | End-to-end tests run in Firefox |
+| Safari | 18.2+ | End-to-end tests run in WebKit |
+
+The Deno, Bun and browser minimums are the first versions with `Uint8Array.prototype.toBase64`/`toHex` and `Uint8Array.fromBase64`/`fromHex`, which the library calls without a guard (MDN browser-compat-data, read 2026-11-11).
 :::
 
 ## Your First PDF
@@ -126,8 +130,8 @@ a.href = url;
 a.download = 'document.pdf';
 a.click();
 
-// Clean up
-URL.revokeObjectURL(url);
+// Revoke after the download has started
+setTimeout(() => URL.revokeObjectURL(url), 0);
 ```
 
 ## Running in Cloudflare Workers
@@ -163,64 +167,11 @@ export default {
 };
 ```
 
-## WASM Initialization
+## WebAssembly Builds
 
-`modern-pdf-lib` ships optional WebAssembly modules that accelerate the hot paths. Without WASM, the library falls back to pure-JavaScript implementations that produce **identical output** — just slower on large documents.
+The package ships WebAssembly builds of six Rust crates under `dist/wasm/`, but this release's JavaScript does not run them; all work runs in pure JavaScript. Compression, image decoding and font handling need no setup.
 
-### Modules you can enable
-
-`initWasm` takes one flag per module, plus an optional byte-array override for each:
-
-| Flag | Byte override | Accelerates |
-|---|---|---|
-| `deflate` | `deflateWasm` | Stream compression (`FlateDecode`) on save |
-| `png` | `pngWasm` | PNG decoding during image embedding |
-| `fonts` | `fontWasm` | TrueType/OpenType parsing and subsetting |
-| `jpeg` | `jpegWasm` | JPEG encoding and decoding |
-
-All four default to `false`.
-
-### How It Works
-
-WASM modules are **not** loaded automatically — you must ask for them by name. `initWasm` is idempotent, so calling it more than once is safe.
-
-```ts
-import { initWasm } from 'modern-pdf-lib';
-
-// Load specific WASM modules during app startup
-await initWasm({ deflate: true, png: true, fonts: true });
-
-// All subsequent operations use WASM-accelerated paths
-const bytes = await pdf.save();
-```
-
-Pass pre-loaded bytes when your deployment controls where assets live — the required approach on Cloudflare Workers and other runtimes without a filesystem. The binaries are published under the `modern-pdf-lib/wasm/*` subpath export, one directory per crate:
-
-::: code-group
-
-```ts [Node.js]
-import { readFile } from 'node:fs/promises';
-import { initWasm } from 'modern-pdf-lib';
-
-const [deflateWasm, pngWasm] = await Promise.all([
-  readFile(new URL(import.meta.resolve('modern-pdf-lib/wasm/libdeflate/modern_pdf_libdeflate_bg.wasm'))),
-  readFile(new URL(import.meta.resolve('modern-pdf-lib/wasm/png/modern_pdf_png_bg.wasm'))),
-]);
-
-await initWasm({ deflateWasm, pngWasm });
-```
-
-```ts [Vite / browser]
-import { initWasm } from 'modern-pdf-lib';
-// Vite's `?url` suffix emits the binary as a hashed asset and gives you its URL.
-// (webpack 5 users: copy the file into your asset pipeline and fetch it by path.)
-import deflateUrl from 'modern-pdf-lib/wasm/libdeflate/modern_pdf_libdeflate_bg.wasm?url';
-
-const deflateWasm = new Uint8Array(await fetch(deflateUrl).then((r) => r.arrayBuffer()));
-await initWasm({ deflateWasm });
-```
-
-:::
+The binaries are published under the `modern-pdf-lib/wasm/*` subpath export, one directory per crate, each with a `.js` glue file next to the binary:
 
 | Crate directory | Binary |
 |---|---|
@@ -231,8 +182,10 @@ await initWasm({ deflateWasm });
 | `shaping` | `modern_pdf_shaping_bg.wasm` |
 | `jbig2` | `modern_pdf_jbig2_bg.wasm` |
 
+`initWasm` still exists, but it does not enable a WASM path: `initWasm({ deflate: true })` rejects, `png`, `fonts` and `jpeg` resolve without effect, and a call with no argument returns at once.
+
 > [!TIP]
-> WASM acceleration is entirely optional. The pure-JS fallback produces identical PDFs — just slightly slower for large documents. To rule WASM out entirely (strict CSP without `wasm-unsafe-eval`, for example), call `configureWasmLoader({ disableWasm: true })`. See the [CSP guide](/guide/csp).
+> To rule WASM out entirely (strict CSP without `wasm-unsafe-eval`, for example), call `configureWasmLoader({ disableWasm: true })`. See the [CSP guide](/guide/csp).
 
 ## Next Steps
 

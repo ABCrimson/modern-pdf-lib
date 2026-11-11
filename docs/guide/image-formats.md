@@ -8,8 +8,8 @@ modern-pdf-lib supports embedding images in all major raster formats. Each forma
 |--------|-----------|-------------|--------------|--------------|---------------|
 | **PNG** | `.png` | Lossless (Deflate) | Yes (alpha channel) | Gray, RGB, Indexed, RGBA | FlateDecode |
 | **JPEG** | `.jpg`, `.jpeg` | Lossy (DCT) | No | Gray, RGB, CMYK | DCTDecode (passthrough) |
-| **WebP** | `.webp` | Lossy (VP8) or Lossless (VP8L) | Yes (alpha) | RGB, RGBA | Re-encoded as JPEG/PNG |
-| **TIFF** | `.tif`, `.tiff` | None, Deflate, JPEG, LZW, CCITT | No (per-channel only) | Gray, RGB, CMYK, Palette | Direct mapping or re-encode |
+| **WebP** | `.webp` | Lossy (VP8) or Lossless (VP8L) | Yes (alpha) | RGB, RGBA | Decoded; FlateDecode RGB (+ `/SMask` for alpha) |
+| **TIFF** | `.tif`, `.tiff` | None, PackBits, LZW, Deflate, JPEG | Alpha from a 4th sample | Gray, RGB, RGBA (`embedTiff`); CMYK via `embedTiffDirect` (see [TIFF](#tiff)) | Decoded + FlateDecode (`embedTiff`) or passthrough (`embedTiffDirect`) |
 
 ## Auto-Detection
 
@@ -96,10 +96,9 @@ page.drawImage(image, { x: 50, y: 400, width: 300, height: 200 });
 ### Features
 
 - Zero-copy passthrough: raw JPEG bytes become the PDF stream with `/DCTDecode`
-- All SOF variants supported: Baseline (SOF0), Progressive (SOF2), Lossless (SOF3)
-- CMYK JPEGs detected and embedded with `/DeviceCMYK` color space
-- Adobe APP14 marker detection for YCCK color transform handling
-- JFIF marker detection
+- Baseline (SOF0) and progressive (SOF2) JPEGs
+- 1, 3 and 4 components map to `/DeviceGray`, `/DeviceRGB` and `/DeviceCMYK`
+- Adobe (APP14) CMYK/YCCK JPEGs are not detected; they may render inverted
 
 ### Quality Estimation
 
@@ -121,7 +120,7 @@ const quality = estimateJpegQuality(jpegBytes);
 
 ## WebP
 
-WebP is a modern format developed by Google that offers both lossy and lossless compression. Since PDF does not natively support WebP, images are decoded and re-encoded for embedding.
+WebP is a modern format developed by Google that offers both lossy and lossless compression. Since PDF does not natively support WebP, images are decoded to RGB(A) pixels and stored losslessly with FlateDecode. Lossy WebP decodes to a flat grey placeholder; lossless and alpha decode.
 
 ### Embedding
 
@@ -136,36 +135,30 @@ const image = await doc.embedWebP(webpBytes);
 ### Conversion Utilities
 
 ```ts
-import { recompressWebP, webpToJpeg, webpToPng } from 'modern-pdf-lib';
+import { recompressWebP } from 'modern-pdf-lib';
 
-// Re-encode decoded WebP pixels as JPEG (for PDF embedding)
+// Re-encode decoded WebP pixels as JPEG
 const jpegBytes = recompressWebP(decodedPixels, width, height, 85);
-
-// Full pipeline: WebP file -> JPEG file
-const jpegBytes = webpToJpeg(webpFileBytes, 90);
-
-// Full pipeline: WebP file -> PNG file (lossless)
-const pngBytes = webpToPng(webpFileBytes);
 ```
 
 ### Features
 
-- VP8 (lossy) and VP8L (lossless) decoding
+- VP8L (lossless) decoding; VP8 (lossy) decodes to a flat grey placeholder
 - Alpha channel support
-- Automatic re-encoding to JPEG for efficient PDF embedding
-- Customizable JPEG quality for output
+- Decoded pixels stored losslessly (FlateDecode); alpha becomes a soft mask
+- `recompressWebP()` encodes decoded pixels as JPEG with a quality setting; `embedWebP()` does not use it
 
 ### When to Use WebP
 
 - Web-sourced images already in WebP format
 - Migrating web content to PDF
-- Note: If you have the choice, prefer PNG or JPEG for new content since they embed more efficiently (no re-encoding needed)
+- Note: If you have the choice, prefer JPEG, or 8-bit PNG without alpha, `tRNS` transparency or interlacing, for new content: they embed without decoding to raw pixels
 
 ---
 
 ## TIFF
 
-TIFF is a versatile container format common in publishing, scanning, and professional photography. modern-pdf-lib supports direct embedding for many TIFF variants.
+TIFF is a versatile container format common in publishing, scanning, and professional photography. modern-pdf-lib embeds TIFFs by decoding them (`embedTiff`) or, for some variants, by direct passthrough (`embedTiffDirect`).
 
 ### Embedding
 
@@ -177,9 +170,11 @@ const image = await doc.embedImage(tiffBytes);
 const image = await doc.embedTiff(tiffBytes);
 ```
 
+`embedTiff()` decodes every TIFF to 8-bit pixels and re-compresses them with FlateDecode. It treats a 1-sample TIFF as `/DeviceGray` and a 4-sample TIFF as RGB plus alpha, so CMYK and palette TIFFs come out with wrong colours.
+
 ### Direct Embedding
 
-For optimal performance, TIFFs with certain compression types can be mapped directly to PDF image XObjects without a decode-re-encode cycle:
+TIFFs with certain compression types can be mapped directly to PDF image XObjects without a decode-re-encode cycle:
 
 ```ts
 import { canDirectEmbed, embedTiffDirect } from 'modern-pdf-lib';
@@ -196,8 +191,9 @@ if (canDirectEmbed(tiffBytes)) {
 | Uncompressed | None | No |
 | Deflate | FlateDecode | No |
 | JPEG-in-TIFF | DCTDecode | No |
-| LZW | FlateDecode | Yes (decode + re-compress) |
-| CCITT Group 3/4 | CCITTFaxDecode | Yes |
+| LZW, PackBits | FlateDecode (via `embedTiff`) | Yes (decode + re-compress) |
+
+Direct passthrough is reliable for uncompressed TIFFs and single-strip Deflate TIFFs without a predictor. Deflate TIFFs with several strips or tiles, or with a predictor, are not reassembled and can produce a wrong image.
 
 ### Multi-Page TIFF
 
@@ -212,14 +208,14 @@ const page2 = embedTiffDirect(tiffBytes, { page: 1 }); // 0-indexed
 
 - Little-endian and big-endian byte order support
 - Strip-based and tile-based image organization
-- Uncompressed, Deflate, JPEG, LZW, and CCITT compression
+- Uncompressed, PackBits, LZW, Deflate and JPEG compression (CCITT is not supported)
 - Multi-page TIFF support
-- Direct strip/tile-to-PDF mapping for zero-loss, zero-overhead embedding
+- Direct strip/tile-to-PDF mapping for uncompressed and single-strip Deflate TIFFs
 
 ### When to Use TIFF
 
 - Scanned documents and archival content
-- Professional photography (especially CMYK)
+- Professional photography
 - Multi-page document imports
 - Any workflow where TIFF is the source format
 
@@ -227,7 +223,7 @@ const page2 = embedTiffDirect(tiffBytes, { page: 1 }); // 0-indexed
 
 ## CMYK Workflow
 
-Both JPEG and TIFF support CMYK color spaces. PDF natively supports CMYK, so no conversion to RGB is needed for accurate color reproduction.
+Both JPEG and TIFF support CMYK color spaces. PDF natively supports CMYK, so no conversion to RGB is needed for accurate color reproduction. `embedTiff()` does not preserve CMYK: it embeds 4-sample TIFFs as RGB plus alpha.
 
 ### CMYK Detection
 
@@ -289,10 +285,10 @@ Is it a photograph?
        |         |    |-- No --> Use JPEG (good enough quality)
        |
        |-- Is it already WebP?
-       |    |-- Yes --> Use embedImage() (auto-converts)
+       |    |-- Yes --> Use embedImage() (decodes to RGB)
        |
        |-- Is it a scanned document?
-            |-- TIFF source? --> Use embedTiff() (direct mapping)
+            |-- TIFF source? --> canDirectEmbed() ? embedTiffDirect() : embedTiff() (decode + FlateDecode)
             |-- Other? --> Use JPEG or PNG based on content
 ```
 
@@ -300,8 +296,8 @@ Is it a photograph?
 
 | Approach | Speed | Quality | Supported Formats |
 |----------|-------|---------|-------------------|
-| **Direct passthrough** | Fastest | No loss | JPEG, PNG (no alpha, no interlace), TIFF (uncompressed, Deflate, JPEG) |
-| **Decode + re-encode** | Slower | Possible loss (JPEG) | WebP, TIFF (LZW, CCITT), PNG (alpha, interlaced) |
+| **Direct passthrough** | Fastest | No loss | JPEG, PNG (no alpha, no interlace), TIFF (uncompressed, single-strip Deflate without predictor, JPEG) |
+| **Decode + Flate** | Slower | Lossless (decoded pixels) | WebP, TIFF (LZW, PackBits), PNG (alpha, interlaced) |
 
 For the fastest PDF generation, prefer formats that support direct embedding.
 
@@ -324,10 +320,11 @@ For documents with many images, use batch optimization:
 import { optimizeAllImages } from 'modern-pdf-lib';
 
 const report = await optimizeAllImages(doc, {
-  maxDpi: 150,
   quality: 80,
 });
 ```
+
+Recompression needs the JPEG WASM encoder, which the library does not load by itself; see [Image Optimization](./image-optimization.md).
 
 ## Next-generation formats (AVIF, HEIC, JPEG XL)
 
@@ -406,7 +403,7 @@ matrix and blend modes follow SVG 1.1 §15.
 - `PdfDocument.embedImage(data)` -- Auto-detect and embed any supported format
 - `PdfDocument.embedPng(data)` -- Embed PNG image
 - `PdfDocument.embedJpeg(data)` -- Embed JPEG image
-- `PdfDocument.embedWebP(data)` -- Embed WebP image (re-encoded)
+- `PdfDocument.embedWebP(data)` -- Embed WebP image (decoded, FlateDecode)
 - `PdfDocument.embedTiff(data)` -- Embed TIFF image
 
 ### Format Detection
@@ -425,9 +422,7 @@ matrix and blend modes follow SVG 1.1 §15.
 
 ### WebP-Specific
 
-- `recompressWebP(pixels, w, h, quality)` -- Re-encode as JPEG
-- `webpToJpeg(webpData, quality)` -- WebP file to JPEG
-- `webpToPng(webpData)` -- WebP file to PNG
+- `recompressWebP(pixels, w, h, quality)` -- Re-encode decoded pixels as JPEG
 
 ### Optimization
 

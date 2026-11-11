@@ -4,15 +4,15 @@ title: Streaming Parser
 
 # Streaming Parser
 
-modern-pdf-lib includes a streaming PDF parser that can process large PDF files incrementally without loading the entire document into memory at once. Built on the Web Streams API (`ReadableStream`), it works across all supported runtimes -- browsers, Node.js, Deno, Bun, and Cloudflare Workers.
+modern-pdf-lib includes a streaming PDF parser that accepts a PDF as chunks and performs a structure-only parse. It buffers the whole file and parses it when `end()` is called; it skips content-stream decoding and object-graph construction. It reads input through the Web Streams API (`ReadableStream`). Deno, Bun and Cloudflare Workers are not tested in CI.
 
 ---
 
 ## Why Streaming?
 
-The standard `PdfDocument.load()` method reads the entire PDF into memory before parsing. For multi-GB PDFs (e.g., scanned archives, large print files), this can exhaust available memory. The `StreamingPdfParser` solves this by:
+The standard `PdfDocument.load()` method reads the entire PDF and builds the full object graph. The `StreamingPdfParser` also buffers the whole file, but it does less work on it:
 
-1. **Buffering chunks incrementally** via the `feed()` method or a `ReadableStream`
+1. **Accepting chunks** via the `feed()` method or a `ReadableStream` and buffering them until `end()`
 2. **Parsing structure only** -- extracting page metadata, cross-reference tables, and document info without decoding every content stream
 3. **Loading page content on demand** via `getPageContent()` after the structural parse completes
 
@@ -78,16 +78,15 @@ import { StreamingPdfParser } from 'modern-pdf-lib';
 
 const parser = new StreamingPdfParser({
   maxBufferSize: 128 * 1024 * 1024,  // 128 MB (default: 64 MB)
-  parseContentStreams: false,          // Skip content stream parsing (default)
-  pageRange: { start: 0, end: 9 },    // Only parse the first 10 pages
+  pageRange: { start: 0, end: 10 },   // Pages 0-9 (end is exclusive)
 });
 ```
 
 | Option | Type | Default | Description |
 |---|---|---|---|
 | `maxBufferSize` | `number` | `64 * 1024 * 1024` | Maximum bytes to buffer before throwing |
-| `parseContentStreams` | `boolean` | `false` | Whether to parse content streams (increases memory) |
-| `pageRange` | `{ start?, end? }` | all pages | Restrict which pages to extract metadata for |
+| `parseContentStreams` | `boolean` | `false` | Reserved; currently ignored |
+| `pageRange` | `{ start?, end? }` | all pages | Restrict which pages to extract metadata for; `end` is exclusive. Pages outside the range still appear in `result.pages` with zero content offsets, and `pageCount` is the full count |
 
 ::: tip Selective Page Loading
 Use `pageRange` when you only need metadata for a subset of pages. This reduces the work done during the structure phase but does not reduce the amount of data that must be buffered (the full file is still needed to locate `startxref`).
@@ -168,7 +167,7 @@ parser.on('page', (event) => {
 
 parser.on('progress', (event) => {
   if (event.type === 'progress') {
-    console.log(`Read ${event.bytesRead} / ${event.totalBytes} bytes`);
+    console.log(`Read ${event.bytesRead} bytes`);
   }
 });
 
@@ -191,7 +190,7 @@ const result = parser.end();
 | `trailer` | `dict` | Trailer dictionary parsed |
 | `page` | `index`, `page` | Page metadata extracted |
 | `object` | `number`, `generation`, `offset` | Indirect object located |
-| `progress` | `bytesRead`, `totalBytes` | Data ingestion progress |
+| `progress` | `bytesRead`, `totalBytes` | Data ingestion progress; both fields are the running total so far (the total size is unknown while streaming) |
 | `error` | `message`, `offset` | Non-fatal parse issue |
 
 ---
@@ -204,7 +203,7 @@ const result = parser.end();
 
 3. **Use `fromFile()` for server-side batch processing** -- it handles Node.js/Deno/Bun file reading automatically.
 
-4. **Prefer the streaming parser for metadata extraction** -- if you only need page counts, dimensions, or document info, the streaming parser is significantly faster and more memory-efficient than a full `PdfDocument.load()`.
+4. **Prefer the streaming parser for metadata extraction** -- if you only need page counts, dimensions, or document info, the streaming parser skips content-stream decoding and object-graph construction, so it does less work than a full `PdfDocument.load()`.
 
 5. **Check `isEncrypted` before accessing content** -- encrypted PDFs require decryption before content streams can be read. The streaming parser detects encryption but does not decrypt.
 

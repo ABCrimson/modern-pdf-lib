@@ -168,6 +168,20 @@ const bytes = await PdfDocumentBuilder.create()
 `withFont()` and `withImage()` queue their work internally. The actual embedding happens when `save()` is called, in the order the methods were chained. This keeps the builder chain synchronous while supporting async operations.
 :::
 
+### Execution Order
+
+Every other builder method (`addPage()`, `addPages()`, `setPageLabels()`, `addBookmark()` and the metadata setters) runs immediately when it is called. Only `withFont()`, `withImage()` and `encrypt()` are deferred to `save()`. A page added inside a `withFont()` callback therefore lands after pages added by later chained `addPage()` calls:
+
+```ts
+PdfDocumentBuilder.create()
+  .withFont(StandardFonts.Helvetica, (font, builder) => {
+    builder.addPage(PageSizes.A4); // runs at save(): page index 1
+  })
+  .addPage(PageSizes.A4);         // runs now: page index 0
+```
+
+Put all page content inside the `withFont()` / `withImage()` callbacks to keep the pages in the order written.
+
 ---
 
 ## Encryption
@@ -195,17 +209,23 @@ const bytes = await PdfDocumentBuilder.create()
 const bytes = await PdfDocumentBuilder.create()
   .setPageLabels([
     { startPage: 0, style: 'roman', prefix: '' },
-    { startPage: 3, style: 'decimal', prefix: '' },
+    { startPage: 1, style: 'decimal', prefix: '' },
   ])
   .withFont(StandardFonts.Helvetica, (font, builder) => {
-    builder.addPage(PageSizes.A4, (page) => {
-      page.drawText('Cover', { x: 50, y: 700, size: 24, font });
-    });
+    builder
+      .addPage(PageSizes.A4, (page) => {
+        page.drawText('Cover', { x: 50, y: 700, size: 24, font });
+      })
+      .addPage(PageSizes.A4, (page) => {
+        page.drawText('Chapter 1', { x: 50, y: 700, size: 24, font });
+      });
   })
   .addBookmark({ title: 'Cover Page', pageIndex: 0 })
   .addBookmark({ title: 'Chapter 1', pageIndex: 1 })
   .save();
 ```
+
+`addBookmark()` does not check `pageIndex` against the page count, so every index must refer to a page that exists when the document is saved. The pages above are added in the `withFont()` callback at `save()`.
 
 ---
 
@@ -237,7 +257,7 @@ Deferred operations (from `withFont`, `withImage`, `encrypt`) are NOT executed w
 | Style | Declarative, fluent chaining | Imperative, step-by-step |
 | Async handling | Deferred via callbacks | Explicit `await` |
 | Best for | Simple documents, templates | Complex workflows, page manipulation |
-| Feature coverage | Core operations | Full API surface |
+| Feature coverage | Metadata, pages, fonts, images, page labels, bookmarks, encryption | Full API surface |
 | Escape hatch | `getDocument()` | N/A |
 
 **Use the builder when:**

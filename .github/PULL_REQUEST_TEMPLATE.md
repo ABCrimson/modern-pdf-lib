@@ -11,8 +11,8 @@
 
 ## Checklist
 
-- [ ] Tests pass (`npm test`)
-- [ ] Type checking passes (`npm run typecheck`)
-- [ ] Linting passes (`npm run lint`)
+- [ ] Tests pass (`pnpm test`)
+- [ ] Type checking passes (`pnpm run typecheck`)
+- [ ] Linting passes (`pnpm run lint`)
 - [ ] Documentation updated (if applicable)
 - [ ] New tests added for new functionality

@@ -213,7 +213,7 @@ page.drawRectangle({
 
 ### Opacity
 
-All shapes support an `opacity` option for the fill color and a `borderOpacity` option for the border:
+Rectangles, squares, circles and ellipses accept `opacity` and `borderOpacity`; `drawLine` accepts `opacity` only. `opacity` applies to both the fill and the border. `borderOpacity` sets a separate border opacity only when both `color` and `borderColor` are set and its value is below 1; `borderOpacity: 1` does not make the border more opaque than `opacity`:
 
 ```ts
 page.drawRectangle({
@@ -267,6 +267,7 @@ page.drawText('DRAFT', {
   x: 150,
   y: 400,
   size: 72,
+  font: helvetica, // a FontRef from pdf.embedFont()
   color: rgb(0.5, 0.5, 0.5),
   opacity: 0.15,
   rotate: degrees(45),
@@ -313,8 +314,8 @@ function drawCard(page: PdfPage, font: FontRef, x: number, y: number): void {
 | `color` | `Color` | — | Fill color (omit for no fill) |
 | `borderColor` | `Color` | — | Border color (omit for no stroke) |
 | `borderWidth` | `number` | `1` | Border thickness |
-| `opacity` | `number` | `1` | Fill opacity |
-| `borderOpacity` | `number` | `1` | Border opacity |
+| `opacity` | `number` | `1` | Fill and border opacity |
+| `borderOpacity` | `number` | `1` | Border opacity (applies only when both `color` and `borderColor` are set) |
 | `rotate` | `Angle` | `degrees(0)` | Rotation angle |
 | `xSkew` / `ySkew` | `Angle` | `degrees(0)` | Skew angles |
 | `blendMode` | `BlendMode` | `'Normal'` | Blend mode for compositing |
@@ -345,8 +346,8 @@ function drawCard(page: PdfPage, font: FontRef, x: number, y: number): void {
 | `color` | `Color` | — | Fill color |
 | `borderColor` | `Color` | — | Border color |
 | `borderWidth` | `number` | `1` | Border thickness |
-| `opacity` | `number` | `1` | Fill opacity |
-| `borderOpacity` | `number` | `1` | Border opacity |
+| `opacity` | `number` | `1` | Fill and border opacity |
+| `borderOpacity` | `number` | `1` | Border opacity (applies only when both `color` and `borderColor` are set) |
 | `blendMode` | `BlendMode` | `'Normal'` | Blend mode for compositing |
 | `borderDashArray` / `borderDashPhase` / `borderLineCap` | — | — | Border dash controls (as for `drawRectangle`) |
 
@@ -361,8 +362,8 @@ function drawCard(page: PdfPage, font: FontRef, x: number, y: number): void {
 | `color` | `Color` | — | Fill color |
 | `borderColor` | `Color` | — | Border color |
 | `borderWidth` | `number` | `1` | Border thickness |
-| `opacity` | `number` | `1` | Fill opacity |
-| `borderOpacity` | `number` | `1` | Border opacity |
+| `opacity` | `number` | `1` | Fill and border opacity |
+| `borderOpacity` | `number` | `1` | Border opacity (applies only when both `color` and `borderColor` are set) |
 | `blendMode` | `BlendMode` | `'Normal'` | Blend mode for compositing |
 | `borderDashArray` / `borderDashPhase` / `borderLineCap` | — | — | Border dash controls (as for `drawRectangle`) |
 

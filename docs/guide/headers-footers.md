@@ -47,6 +47,13 @@ Header and footer text supports template variables that are replaced at render t
 | `{page:roman}` | Page number as lowercase Roman numeral | `i`, `ii`, `iii` |
 | `{page:alpha}` | Page number as lowercase letter | `a`, `b`, `c` |
 
+Behaviour notes:
+
+- `{title}` renders an empty string when no title is given: `applyHeaderFooter` reads the document title (see `setTitle()`), while `applyHeaderFooterToPage` uses its fifth `title` argument.
+- `{date}` uses the local time zone at render time.
+- An unknown variable such as `{section}` is written out literally.
+- A `font` that is omitted or given as a string cannot be measured, so centre and right alignment use a `0.5 × fontSize` per character estimate (see the warning above).
+
 ```ts
 // Roman numeral front matter, Arabic body pages
 applyHeaderFooter(doc, {
@@ -160,12 +167,16 @@ applyHeaderFooter(doc, {
   pageRange: { start: 4, end: 20 },
 });
 
-// Appendices: Alphabetic numbering
-applyHeaderFooter(doc, {
-  footer: [{ text: 'Appendix {page:alpha}', position: 'center' }],
-  pageRange: { start: 21 },
+// Appendices: Alphabetic numbering restarting at a, using the per-page call
+const pages = doc.getPages();
+pages.slice(20).forEach((p, i) => {
+  applyHeaderFooterToPage(p, {
+    footer: [{ text: 'Appendix {page:alpha}', position: 'center', font }],
+  }, i + 1, pages.length - 20);
 });
 ```
+
+`{page}`, `{page:roman}` and `{page:alpha}` always use the physical 1-based page index; `pageRange` only selects pages. To restart numbering per section, loop over the pages and call `applyHeaderFooterToPage(page, options, sectionPageNumber, sectionPageCount)` as above.
 
 ## Per-Page Control
 

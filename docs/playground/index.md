@@ -14,11 +14,12 @@ The whole library is handed to you as `pdf`, so destructure what you need and
 return the bytes:
 
 ```js
-const { createPdf, PageSizes, rgb } = pdf;
+const { createPdf, PageSizes, StandardFonts, rgb } = pdf;
 
 const doc = createPdf();
 const page = doc.addPage(PageSizes.A4);
-page.drawText('Hello from the playground', { x: 50, y: 760, size: 24, color: rgb(0.1, 0.1, 0.1) });
+const font = await doc.embedFont(StandardFonts.Helvetica);
+page.drawText('Hello from the playground', { x: 50, y: 760, size: 24, font, color: rgb(0.1, 0.1, 0.1) });
 
 return await doc.save(); // Uint8Array → rendered in the preview pane
 ```

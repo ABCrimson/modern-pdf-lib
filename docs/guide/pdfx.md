@@ -4,7 +4,7 @@ title: PDF/X Compliance
 
 # PDF/X Compliance
 
-modern-pdf-lib includes validation and enforcement tools for PDF/X, the ISO 15930 standard for reliable exchange of print-ready PDF files. PDF/X restricts certain PDF features and mandates others to ensure predictable reproduction in commercial print workflows.
+modern-pdf-lib includes validation and enforcement tools for PDF/X, the ISO 15930 standard for reliable exchange of print-ready PDF files. PDF/X restricts certain PDF features and mandates others to ensure predictable reproduction in commercial print workflows. The module writes PDF/X structures and is not validated against a preflight tool: `validatePdfX` checks a byte-level rule list, and the output of `enforcePdfX` is not checked by an external validator.
 
 ---
 
@@ -36,7 +36,7 @@ const bytes = new Uint8Array(await readFile('print-ready.pdf'));
 const result = validatePdfX(bytes, 'X-4');
 
 if (result.valid) {
-  console.log(`Document is PDF/X-4 compliant!`);
+  console.log(`Passes the built-in PDF/X-4 checks`);
 } else {
   for (const error of result.errors) {
     console.error(`[${error.code}] ${error.message}`);
@@ -57,8 +57,10 @@ The validator performs the following structural checks on the raw PDF bytes:
 | `PDFX-001` | `/OutputIntents` array present in catalog | All levels |
 | `PDFX-002` | Output intent uses `/S /GTS_PDFX` subtype | All levels |
 | `PDFX-003` | `/Trapped` key in Info dictionary | All levels |
+| `PDFX-003W` | `/Trapped` value is `/True`, `/False` or `/Unknown` (warning) | All levels |
 | `PDFX-004` | No transparency (SMask, CA/ca, blend modes) | X-1a, X-3 |
 | `PDFX-005` | Color space restrictions (no DeviceRGB for X-1a) | X-1a, X-3 |
+| `PDFX-005W` | DeviceRGB used without an ICCBased profile (warning) | X-3 |
 | `PDFX-006` | All fonts embedded | All levels |
 | `PDFX-007` | No encryption | All levels |
 | `PDFX-008` | TrimBox or BleedBox on every page | All levels |
@@ -82,9 +84,9 @@ const bytes = new Uint8Array(await readFile('document.pdf'));
 const compliant = enforcePdfX(bytes, {
   level: 'X-4',
   outputIntent: {
-    condition: 'CGATS TR 001',
+    condition: 'FOGRA39',
     registryName: 'http://www.color.org',
-    info: 'sRGB IEC61966-2.1',
+    info: 'Coated FOGRA39 (ISO 12647-2:2004)',
   },
   trapped: 'False',
 });
@@ -100,6 +102,8 @@ await writeFile('print-ready.pdf', compliant);
 | Trapped key | Sets `/Trapped` in the Info dictionary |
 | TrimBox | Copies CropBox (or MediaBox) to TrimBox on pages missing both TrimBox and BleedBox |
 | Transparency flattening | Resets CA/ca to 1, SMask to /None, BM to /Normal (X-1a and X-3 only) |
+
+`enforcePdfX()` re-encodes the whole file as UTF-8 text, which replaces bytes that are not valid UTF-8 (compressed streams, images, fonts), and when it adds an entry it splices bytes in without rewriting the cross-reference table, so the `startxref` offset of the output no longer points at the cross-reference table. It writes only the `/OutputIntent` dictionary, without `/DestOutputProfile`, so an `iccProfile` in `outputIntent` is ignored. It does not write the PDF/X identification (`/GTS_PDFXVersion` in the Info dictionary and `pdfxid:GTS_PDFXVersion` in the XMP), and `validatePdfX()` does not check for it, so the output is not identified as PDF/X.
 
 ::: warning Limitations
 `enforcePdfX()` cannot fix all issues automatically:
@@ -164,9 +168,9 @@ async function prepareForPrint(inputPath: string, outputPath: string) {
   bytes = enforcePdfX(bytes, {
     level: 'X-4',
     outputIntent: {
-      condition: 'CGATS TR 001',
+      condition: 'FOGRA39',
       registryName: 'http://www.color.org',
-      info: 'sRGB IEC61966-2.1',
+      info: 'Coated FOGRA39 (ISO 12647-2:2004)',
     },
   });
 
@@ -174,7 +178,7 @@ async function prepareForPrint(inputPath: string, outputPath: string) {
   const result = validatePdfX(bytes, 'X-4');
 
   if (result.valid) {
-    console.log('Document is print-ready (PDF/X-4)');
+    console.log('Passes the built-in PDF/X-4 checks');
   } else {
     console.warn(`${result.errors.length} errors remain:`);
     for (const error of result.errors) {

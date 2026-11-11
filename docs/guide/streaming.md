@@ -4,13 +4,14 @@ This guide covers the different ways to save a PDF document and how to use strea
 
 ## Output Methods
 
-`modern-pdf-lib` provides three methods for saving a PDF document:
+`modern-pdf-lib` provides four methods for saving a PDF document:
 
 | Method | Return Type | Best For |
 |---|---|---|
 | `pdf.save()` | `Promise<Uint8Array>` | General use, small to medium documents |
 | `pdf.saveAsStream()` | `ReadableStream<Uint8Array>` | Large documents, server responses |
 | `pdf.saveAsBlob()` | `Promise<Blob>` | Browser downloads and display |
+| `pdf.saveAsBase64({ dataUri })` | `Promise<string>` | JSON payloads and data URIs |
 
 ## `save()` — Full Buffer
 
@@ -34,7 +35,7 @@ await writeFile('report.pdf', bytes);
 
 ## `saveAsStream()` — Streaming
 
-Returns a standard `ReadableStream<Uint8Array>` that emits PDF chunks as they are generated. The document is never fully buffered in memory.
+Returns a standard `ReadableStream<Uint8Array>` that emits the serialized file object by object, so no single output `Uint8Array` is built. The document object graph (including image and font data) is still held in memory.
 
 ```ts
 const stream = pdf.saveAsStream();
@@ -120,6 +121,8 @@ export default {
 ```ts
 import { createServer } from 'node:http';
 import { Readable } from 'node:stream';
+import { pipeline } from 'node:stream/promises';
+import { createPdf } from 'modern-pdf-lib';
 
 createServer(async (req, res) => {
   const pdf = createPdf();
@@ -128,21 +131,26 @@ createServer(async (req, res) => {
   res.writeHead(200, {
     'Content-Type': 'application/pdf',
     'Content-Disposition': 'attachment; filename="report.pdf"',
-    'Transfer-Encoding': 'chunked',
   });
 
   const stream = pdf.saveAsStream();
-  const nodeStream = Readable.fromWeb(stream);
-  nodeStream.pipe(res);
+  try {
+    await pipeline(Readable.fromWeb(stream), res);
+  } catch {
+    // pipeline() destroys `res` when the source stream errors
+  }
 }).listen(3000);
 ```
 
-### Node with Express/Hono/Fastify
+### Node with Express
 
-Most Node frameworks accept a `ReadableStream` or a Node `Readable` as a response body:
+Express writes to a Node response, so convert the web stream with `Readable.fromWeb()`:
 
 ```ts
-// Express
+import { Readable } from 'node:stream';
+import { pipeline } from 'node:stream/promises';
+import { createPdf } from 'modern-pdf-lib';
+
 app.get('/report.pdf', async (req, res) => {
   const pdf = createPdf();
   // ... build document ...
@@ -151,8 +159,11 @@ app.get('/report.pdf', async (req, res) => {
   res.setHeader('Content-Disposition', 'attachment; filename="report.pdf"');
 
   const stream = pdf.saveAsStream();
-  const nodeStream = Readable.fromWeb(stream);
-  nodeStream.pipe(res);
+  try {
+    await pipeline(Readable.fromWeb(stream), res);
+  } catch {
+    // pipeline() destroys `res` when the source stream errors
+  }
 });
 ```
 
@@ -160,22 +171,17 @@ app.get('/report.pdf', async (req, res) => {
 
 ### Why Streaming Matters
 
-When generating a 500-page report with embedded images, `save()` must hold the entire PDF in memory at once. With `saveAsStream()`, pages are serialized and flushed incrementally:
-
-| Method | Peak Memory (500 pages, 50 images) |
-|---|---|
-| `save()` | ~120 MB |
-| `saveAsStream()` | ~15 MB |
+`save()` returns the entire PDF as one `Uint8Array`. `saveAsStream()` emits the serialized file object by object, so no single output buffer is built and the first bytes can reach the consumer before the whole file is written. The document object graph (including image and font data) is still held in memory either way.
 
 > [!TIP]
-> For documents with more than 50 pages or more than 10 MB of embedded images, prefer `saveAsStream()`.
+> Prefer `saveAsStream()` when you want to start sending bytes before the whole file is serialized or to avoid one large output buffer.
 
 ### Memory Tips
 
 1. **Embed images before adding pages.** Image data is compressed during embedding, not during save.
 2. **Reuse font and image references.** Embedding the same image twice doubles memory usage.
 3. **Use JPEG for photographs.** JPEG passthrough avoids decompression and recompression.
-4. **Enable WASM.** The WASM compressor uses less memory than the pure-JS fallback.
+4. **Compression is pure JavaScript.** The package ships WebAssembly builds of six Rust crates under `dist/wasm/`, but this release's JavaScript does not run them; `useWasm: true` falls back to the pure-JS compressor.
 
 ## Backpressure Handling
 
@@ -226,8 +232,9 @@ console.log(`Total: ${(totalBytes / 1024).toFixed(1)} KB`);
 
 ```
 save()           ──►  Uint8Array        Simple, entire PDF in memory
-saveAsStream()   ──►  ReadableStream    Incremental, low memory
+saveAsStream()   ──►  ReadableStream    Emitted object by object, no single output buffer
 saveAsBlob()     ──►  Blob              Browser convenience
+saveAsBase64()   ──►  string            JSON payloads and data URIs
 ```
 
-Choose `save()` for simplicity, `saveAsStream()` for scalability, and `saveAsBlob()` for browser downloads.
+Choose `save()` for simplicity, `saveAsStream()` to avoid one output buffer, `saveAsBlob()` for browser downloads, and `saveAsBase64()` for text channels.

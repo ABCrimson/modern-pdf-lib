@@ -3,9 +3,9 @@ import { defineConfig, type DefaultTheme } from 'vitepress';
 /**
  * The guide sidebar.
  *
- * Shared by the site root (`/`) and `/guide/` so that Getting Started and the
- * Playground are navigable too — a page whose path matches no sidebar key
- * renders with no sidebar at all.
+ * Shared by `/guide/`, `/getting-started` and `/playground/` so that Getting
+ * Started and the Playground are navigable too — a page whose path matches no
+ * sidebar key renders with no sidebar at all.
  *
  * Every file in `docs/guide/` appears here exactly once. When you add a guide,
  * add it to the group it belongs to.
@@ -99,8 +99,7 @@ const guideSidebar: DefaultTheme.SidebarItem[] = [
 
 export default defineConfig({
   title: 'Modern PDF',
-  description:
-    'A modern, WASM-accelerated PDF creation engine for every JavaScript runtime',
+  description: 'A modern TypeScript PDF engine for Node 26.4+ and current browsers',
   base: '/modern-pdf-lib/',
 
   head: [
@@ -110,15 +109,14 @@ export default defineConfig({
       'meta',
       {
         property: 'og:title',
-        content: 'Modern PDF — WASM-Accelerated PDF Creation',
+        content: 'Modern PDF — TypeScript PDF Engine',
       },
     ],
     [
       'meta',
       {
         property: 'og:description',
-        content:
-          'A modern, WASM-accelerated PDF creation engine for every JavaScript runtime',
+        content: 'A modern TypeScript PDF engine for Node 26.4+ and current browsers',
       },
     ],
     ['meta', { property: 'og:type', content: 'website' }],
@@ -130,10 +128,7 @@ export default defineConfig({
       },
     ],
     ['meta', { name: 'twitter:card', content: 'summary_large_image' }],
-    [
-      'link',
-      { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
-    ],
+    ['link', { rel: 'preconnect', href: 'https://fonts.googleapis.com' }],
     [
       'link',
       {
@@ -157,8 +152,7 @@ export default defineConfig({
     // cross-references can dangle when the snapshot is generated on Windows.
     // Generated output must never fail the site build; every hand-written page
     // is still dead-link checked.
-    (_link: string, source: string) =>
-      source.replaceAll('\\', '/').includes('/docs/api/'),
+    (_link: string, source: string) => source.replaceAll('\\', '/').includes('/docs/api/'),
   ],
 
   themeConfig: {
@@ -171,7 +165,7 @@ export default defineConfig({
       { text: 'Migration', link: '/migration/from-pdf-lib' },
       { text: 'Playground', link: '/playground/' },
       {
-        text: 'v0.40.2',
+        text: 'v0.40.4',
         items: [
           {
             text: 'Changelog',
@@ -249,9 +243,7 @@ export default defineConfig({
       '/migration/': [
         {
           text: 'Migration',
-          items: [
-            { text: 'From pdf-lib', link: '/migration/from-pdf-lib' },
-          ],
+          items: [{ text: 'From pdf-lib', link: '/migration/from-pdf-lib' }],
         },
       ],
     },
@@ -269,8 +261,7 @@ export default defineConfig({
     },
 
     editLink: {
-      pattern:
-        'https://github.com/ABCrimson/modern-pdf-lib/edit/master/docs/:path',
+      pattern: 'https://github.com/ABCrimson/modern-pdf-lib/edit/master/docs/:path',
       text: 'Edit this page on GitHub',
     },
 

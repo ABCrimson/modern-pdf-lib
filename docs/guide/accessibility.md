@@ -65,7 +65,7 @@ Always embed fonts rather than relying on standard fonts when producing accessib
 import { readFile } from 'node:fs/promises';
 
 const fontBytes = await readFile('NotoSans-Regular.ttf');
-const font = pdf.embedFont(fontBytes);
+const font = await pdf.embedFont(fontBytes);
 
 const page = pdf.addPage();
 page.drawText('Accessible text with proper Unicode mappings', {
@@ -81,9 +81,9 @@ Verify that text can be extracted correctly from your generated PDFs:
 import { loadPdf, extractText, parseContentStream } from 'modern-pdf-lib';
 
 const doc = await loadPdf(pdfBytes);
-const page = doc.getPages()[0];
+const page = doc.getPage(0);
 const operators = parseContentStream(page.getContentStream());
-const text = extractText(operators);
+const text = extractText(operators, page.getOriginalResources());
 console.log(text);
 // Should output the exact text content, not garbled characters
 ```
@@ -93,9 +93,9 @@ console.log(text);
 For documents with multiple languages, embed the appropriate fonts for each script:
 
 ```ts
-const latinFont = pdf.embedFont(await readFile('NotoSans-Regular.ttf'));
-const cjkFont = pdf.embedFont(await readFile('NotoSansCJK-Regular.ttf'));
-const arabicFont = pdf.embedFont(await readFile('NotoSansArabic-Regular.ttf'));
+const latinFont = await pdf.embedFont(await readFile('NotoSans-Regular.ttf'));
+const cjkFont = await pdf.embedFont(await readFile('NotoSansCJK-Regular.ttf'));
+const arabicFont = await pdf.embedFont(await readFile('NotoSansArabic-Regular.ttf'));
 
 page.drawText('English text', { x: 50, y: 700, font: latinFont, size: 12 });
 page.drawText('中文内容',     { x: 50, y: 670, font: cjkFont,   size: 12 });
@@ -119,7 +119,7 @@ page.drawText('Readable text', {
 // page.drawText('Hard to read', { color: rgb(0.8, 0.8, 0.8) });
 ```
 
-The WCAG 2.1 guideline requires a minimum contrast ratio of 4.5:1 for normal text and 3:1 for large text (18pt+ or 14pt+ bold).
+WCAG 2.2 success criterion 1.4.3 requires a minimum contrast ratio of 4.5:1 for normal text and 3:1 for large text (18pt+ or 14pt+ bold).
 
 ## Images and Alt Text
 
@@ -138,7 +138,7 @@ page.drawText('Figure 1: Revenue growth by quarter, showing 15% YoY increase', {
 
 ## PDF/UA Compliance Checklist
 
-PDF/UA (ISO 14289) defines requirements for universally accessible PDFs. Every requirement below is supported today:
+PDF/UA (ISO 14289) defines requirements for universally accessible PDFs. The library provides tooling for each requirement below; color contrast is checked manually:
 
 | Requirement | Status | How |
 |---|---|---|
@@ -155,16 +155,14 @@ PDF/UA (ISO 14289) defines requirements for universally accessible PDFs. Every r
 
 ## XMP Metadata
 
-The library writes XMP metadata for PDF/A and accessibility tool compatibility:
+The Info dictionary is written from `setTitle` / `setAuthor`; an XMP `/Metadata` stream is written only when you pass a packet to `pdf.setXmpMetadata()` (build one with `buildXmpMetadata()`, or `buildPdfUa2Xmp()` for PDF/UA-2):
 
 ```ts
-// XMP metadata is automatically generated from the document properties
-// when you set title, author, subject, etc.
+import { buildXmpMetadata } from 'modern-pdf-lib';
+
 pdf.setTitle('My Document');
 pdf.setAuthor('Author Name');
-
-// The resulting PDF will contain both the Info dictionary and
-// an XMP metadata stream with dc:title, dc:creator, etc.
+pdf.setXmpMetadata(buildXmpMetadata({ title: 'My Document', author: 'Author Name' }));
 ```
 
 ## Tagged PDF (structure trees)
@@ -180,7 +178,7 @@ import {
 const doc = createPdf();
 const tree = doc.createStructureTree();
 
-tagHeading(tree, null, 1, { altText: 'Annual report' }); // H1
+const h1 = tagHeading(tree, null, 1, { title: 'Annual report' }); // H1
 tagParagraph(tree, null);                                 // P
 tagFigure(tree, null, 'Revenue chart 2026');              // Figure with /Alt
 
@@ -193,6 +191,17 @@ const table = tagTable(tree, null);
 const row = tagTableRow(tree, table);
 tagTableHeaderCell(tree, row, 'Column');                  // TH /Scope /Column
 tagTableDataCell(tree, row, { colSpan: 2 });              // TD
+```
+
+The helpers create structure elements only; they do not link an element to page content. Each element that holds page content must own marked content (an MCID) on that page: assign one with `tree.assignMcid()` and draw the content between `beginMarkedContent()` and `endMarkedContentSequence()`:
+
+```ts
+const page = doc.addPage();
+const font = await doc.embedFont(await readFile('NotoSans-Regular.ttf'));
+const mcid = tree.assignMcid(h1, 0);                      // 0 = page index
+page.beginMarkedContent('H1', mcid);
+page.drawText('Annual report', { x: 50, y: 750, size: 24, font });
+page.endMarkedContentSequence();
 ```
 
 ### Heuristic auto-tagging
