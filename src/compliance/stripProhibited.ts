@@ -13,9 +13,12 @@
  * - ResetForm actions (/ResetForm)
  * - ImportData actions (/ImportData)
  * - Named actions except NextPage, PrevPage, FirstPage, LastPage
- * - Encryption (/Encrypt)
  * - Embedded multimedia (/RichMedia)
+ *
+ * Encrypted input is not changed: it throws `UnsupportedEncryptionError` (code `unsupported-encryption-path`).
  */
+
+import { assertUnencryptedInput } from '../core/incrementalWriter.js';
 
 // ---------------------------------------------------------------------------
 // Public types
@@ -92,11 +95,17 @@ export function countOccurrences(text: string, pattern: string): number {
  * @param pdfBytes - Raw PDF bytes.
  * @param options  - What to strip. All categories enabled by default.
  * @returns Modified bytes and a strip report.
+ * @throws {UnsupportedEncryptionError} When `pdfBytes` contain the name `/Encrypt` (an encrypted file).
  */
 export function stripProhibitedFeatures(
   pdfBytes: Uint8Array,
   options: StripOptions = {},
 ): StripResult {
+  assertUnencryptedInput(
+    pdfBytes,
+    'stripProhibitedFeatures()',
+    'the rewritten file would be damaged',
+  );
   const stripped: StrippedFeature[] = [];
   let text = decoder.decode(pdfBytes);
   let modified = false;

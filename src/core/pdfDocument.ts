@@ -1795,6 +1795,9 @@ export class PdfDocument {
    * @param fieldName  The signature field name.
    * @param options    Signing options (certificate, private key, etc.).
    * @returns          The signed PDF bytes.
+   * @throws {UnsupportedEncryptionError} When encryption is configured
+   *         (`encrypt()` was called): `signPdf()` refuses the encrypted
+   *         bytes because the signature update would not be encrypted.
    *
    * @example
    * ```ts

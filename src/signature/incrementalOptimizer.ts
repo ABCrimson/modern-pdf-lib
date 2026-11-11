@@ -12,6 +12,8 @@
  * @packageDocumentation
  */
 
+import { assertUnencryptedInput } from '../core/incrementalWriter.js';
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -161,6 +163,10 @@ function bytesEqual(a: Uint8Array, b: Uint8Array): boolean {
  * @param originalPdf  The original PDF bytes.
  * @param changes      The list of proposed changes.
  * @returns            The optimized PDF bytes with minimal incremental update.
+ * @throws {UnsupportedEncryptionError} When `originalPdf` is an encrypted
+ *         PDF (its bytes contain the name `/Encrypt`) and
+ *         `changes` is not empty: the appended objects and trailer would not
+ *         be encrypted.
  *
  * @example
  * ```ts
@@ -179,6 +185,7 @@ export function optimizeIncrementalSave(
   if (changes.length === 0) {
     return originalPdf;
   }
+  assertUnencryptedInput(originalPdf, 'optimizeIncrementalSave()');
 
   const originalObjs = extractObjectContents(originalPdf);
 

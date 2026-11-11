@@ -25,6 +25,8 @@ import {
   detectTransparency,
 } from './transparencyFlattener.js';
 import { concatBytes } from '../utils/binary.js';
+import { UnsupportedEncryptionError } from '../errors.js';
+import { assertUnencryptedInput } from '../core/incrementalWriter.js';
 
 // ---------------------------------------------------------------------------
 // Public types
@@ -207,7 +209,7 @@ function addTrailerId(data: Uint8Array): Uint8Array {
  * @returns         The enforcement result including modified bytes,
  *                  validation report, and actions taken.
  *
- * @throws {Error}  If the PDF is encrypted (cannot be fixed automatically).
+ * @throws {UnsupportedEncryptionError}  If the PDF is encrypted (cannot be fixed automatically).
  *
  * @example
  * ```ts
@@ -237,8 +239,12 @@ export async function enforcePdfAFull(
   const initialValidation = validatePdfA(bytes, level);
   const hasEncryption = initialValidation.issues.some((i) => i.code === 'PDFA-003');
   if (hasEncryption) {
-    throw new Error('Cannot enforce PDF/A: document is encrypted. Remove encryption first.');
+    throw new UnsupportedEncryptionError(
+      'Cannot enforce PDF/A: document is encrypted. Remove encryption first.',
+    );
   }
+  // Fail-closed guard: also catches an /Encrypt key the text check misses (a #-escaped name).
+  assertUnencryptedInput(bytes, 'enforcePdfAFull()', 'the rewritten file would be damaged');
 
   // Step 1: Strip prohibited features
   if (options.stripProhibited !== false) {

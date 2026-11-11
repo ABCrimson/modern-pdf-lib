@@ -19,6 +19,8 @@
  * @packageDocumentation
  */
 
+import { assertUnencryptedInput } from '../core/incrementalWriter.js';
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -318,12 +320,16 @@ export function parseExistingTrailer(pdf: Uint8Array): TrailerInfo {
  * @param modifiedPdf  The modified PDF bytes with changes.
  * @param options      Options for the incremental save.
  * @returns            The incrementally saved PDF bytes.
+ * @throws {UnsupportedEncryptionError} When `originalPdf` is an encrypted
+ *         PDF (its bytes contain the name `/Encrypt`): the
+ *         appended objects and trailer would not be encrypted.
  */
 export function saveIncrementalWithSignaturePreservation(
   originalPdf: Uint8Array,
   modifiedPdf: Uint8Array,
   options?: IncrementalSaveOptions,
 ): Uint8Array {
+  assertUnencryptedInput(originalPdf, 'saveIncrementalWithSignaturePreservation()');
   const preserveSignatures = options?.preserveSignatures ?? true;
 
   // Step 1: Find existing signatures in the original PDF
@@ -423,6 +429,10 @@ function parseObjectBodies(pdf: Uint8Array): Map<number, { gen: number; data: Ui
  * @param newObjects   Objects to append (new or modified).
  * @param options      Options for the append operation.
  * @returns            The updated PDF bytes.
+ * @throws {UnsupportedEncryptionError} When `originalPdf` is an encrypted
+ *         PDF (its bytes contain the name `/Encrypt`) and
+ *         `newObjects` is not empty: the appended objects and trailer would
+ *         not be encrypted.
  */
 export function appendIncrementalUpdate(
   originalPdf: Uint8Array,
@@ -432,6 +442,7 @@ export function appendIncrementalUpdate(
   if (newObjects.length === 0) {
     return originalPdf;
   }
+  assertUnencryptedInput(originalPdf, 'appendIncrementalUpdate()');
 
   // Parse existing trailer
   const trailer = parseExistingTrailer(originalPdf);

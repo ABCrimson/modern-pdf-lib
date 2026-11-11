@@ -18,6 +18,7 @@ import {
   findSignatures,
 } from './byteRange.js';
 import type { PrepareAppearanceOptions } from './byteRange.js';
+import { assertUnencryptedInput } from '../core/incrementalWriter.js';
 import { buildPkcs7Signature, extractIssuerAndSerial, parseDerTlv } from './pkcs7.js';
 import type { SignatureOptions } from './pkcs7.js';
 
@@ -269,6 +270,9 @@ function parsePkcs7ForCert(pkcs7Bytes: Uint8Array): {
  * @param fieldName  The name for the signature field.
  * @param options    Signing options (certificate, key, etc.).
  * @returns          The signed PDF bytes.
+ * @throws {UnsupportedEncryptionError} When `pdfBytes` is an encrypted PDF
+ *         (its bytes contain the name `/Encrypt`): the
+ *         appended signature objects and trailer would not be encrypted.
  *
  * @example
  * ```ts
@@ -285,6 +289,7 @@ export async function signPdf(
   fieldName: string,
   options: SignOptions,
 ): Promise<Uint8Array> {
+  assertUnencryptedInput(pdfBytes, 'signPdf()');
   const hashAlgorithm = options.hashAlgorithm ?? 'SHA-256';
 
   // Build appearance options if visible signature requested

@@ -25,6 +25,8 @@
  * @packageDocumentation
  */
 
+import { assertUnencryptedInput } from '../core/incrementalWriter.js';
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -224,23 +226,6 @@ function n(value: number): string {
 // ---------------------------------------------------------------------------
 
 /**
- * Prepare a PDF for signing by appending a signature dictionary
- * via incremental update.
- *
- * This function:
- * 1. Appends a new signature field and value to the PDF
- * 2. Inserts an empty `/Contents` placeholder of the specified size
- * 3. Computes the `/ByteRange` that excludes the `/Contents` value
- *
- * The resulting PDF bytes can be hashed (excluding the placeholder gap)
- * and the hash can be signed.
- *
- * @param pdfBytes           The original PDF file bytes.
- * @param signatureFieldName The name for the signature field.
- * @param placeholderSize    Size in bytes for the signature. Default 8192.
- * @returns                  The prepared PDF and ByteRange info.
- */
-/**
  * Options for visible signature appearance within the byte-range preparation.
  * @internal
  */
@@ -259,6 +244,26 @@ export interface PrepareAppearanceOptions {
   borderWidth?: number | undefined;
 }
 
+/**
+ * Prepare a PDF for signing by appending a signature dictionary
+ * via incremental update.
+ *
+ * This function:
+ * 1. Appends a new signature field and value to the PDF
+ * 2. Inserts an empty `/Contents` placeholder of the specified size
+ * 3. Computes the `/ByteRange` that excludes the `/Contents` value
+ *
+ * The resulting PDF bytes can be hashed (excluding the placeholder gap)
+ * and the hash can be signed.
+ *
+ * @param pdfBytes           The original PDF file bytes.
+ * @param signatureFieldName The name for the signature field.
+ * @param placeholderSize    Size in bytes for the signature. Default 8192.
+ * @returns                  The prepared PDF and ByteRange info.
+ * @throws {UnsupportedEncryptionError} When `pdfBytes` is an encrypted PDF
+ *         (its bytes contain the name `/Encrypt`): the
+ *         appended signature objects and trailer would not be encrypted.
+ */
 export function prepareForSigning(
   pdfBytes: Uint8Array,
   signatureFieldName: string,
@@ -267,6 +272,7 @@ export function prepareForSigning(
   mdpPermission?: number,
   fieldLock?: { action: 'All' | 'Include' | 'Exclude'; fields?: string[] | undefined },
 ): { preparedPdf: Uint8Array; byteRange: ByteRangeResult } {
+  assertUnencryptedInput(pdfBytes, 'prepareForSigning()');
   // Step 1: Find the original trailer/xref info
   const pdfStr = decoder.decode(pdfBytes);
 

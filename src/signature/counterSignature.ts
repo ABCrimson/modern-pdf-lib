@@ -17,6 +17,7 @@
  */
 
 import { findSignatures } from './byteRange.js';
+import { assertUnencryptedInput } from '../core/incrementalWriter.js';
 import {
   parseDerTlv,
   extractIssuerAndSerial,
@@ -200,6 +201,8 @@ function convertEcdsaToDer(p1363Sig: Uint8Array): Uint8Array {
  * @param targetSignatureIndex   Zero-based index of the signature to counter-sign.
  * @param signerInfo             The counter-signer's certificate, private key, and hash algorithm.
  * @returns                      The PDF with the counter-signature appended.
+ * @throws {UnsupportedEncryptionError} When `pdf` is an encrypted PDF (its bytes contain the name `/Encrypt`): the appended
+ *         objects and trailer would not be encrypted.
  *
  * @example
  * ```ts
@@ -219,6 +222,7 @@ export async function addCounterSignature(
     hashAlgorithm?: string | undefined;
   },
 ): Promise<Uint8Array> {
+  assertUnencryptedInput(pdf, 'addCounterSignature()');
   const signatures = findSignatures(pdf);
 
   if (signatures.length === 0) {

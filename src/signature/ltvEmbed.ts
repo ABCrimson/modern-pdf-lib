@@ -20,6 +20,7 @@
  */
 
 import { findSignatures } from './byteRange.js';
+import { assertUnencryptedInput } from '../core/incrementalWriter.js';
 import { parseDerTlv } from './pkcs7.js';
 
 // ---------------------------------------------------------------------------
@@ -176,6 +177,8 @@ export function hasLtvData(pdf: Uint8Array): boolean {
  * @param pdf      The PDF bytes.
  * @param options  LTV embedding options.
  * @returns        The PDF with embedded LTV data.
+ * @throws {UnsupportedEncryptionError} When `pdf` is an encrypted PDF (its bytes contain the name `/Encrypt`): the appended
+ *         /DSS objects and trailer would not be encrypted.
  *
  * @example
  * ```ts
@@ -189,6 +192,7 @@ export function hasLtvData(pdf: Uint8Array): boolean {
  * ```
  */
 export async function embedLtvData(pdf: Uint8Array, options?: LtvOptions): Promise<Uint8Array> {
+  assertUnencryptedInput(pdf, 'embedLtvData()');
   const includeOcsp = options?.includeOcsp !== false;
   const includeCrl = options?.includeCrl !== false;
   const includeCerts = options?.includeCerts !== false;

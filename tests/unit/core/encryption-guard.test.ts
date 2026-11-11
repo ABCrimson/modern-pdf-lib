@@ -5,6 +5,11 @@
  * - An encrypted save that asks for object streams is refused.
  * - Saving an encrypted document again encrypts nothing twice: the writer
  *   works on a private copy of the registry.
+ * - `linearizePdf()` and `delinearizePdf()` refuse encrypted input bytes: it would write a file
+ *   without /Encrypt whose objects are still ciphertext.
+ * - The incremental writers and the signing functions do not encrypt what
+ *   they append, so they refuse a document with encryption configured and
+ *   input bytes that contain the name /Encrypt.
  *
  * Decrypted content is checked with an oracle written here from ISO 32000-1
  * Algorithms 1 and 2 on `node:crypto` (it imports nothing from src/), and,
@@ -19,7 +24,17 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
+  addCounterSignature,
+  appendIncrementalUpdate,
   createPdf,
+  delinearizePdf,
+  embedLtvData,
+  enforcePdfA,
+  enforcePdfAFull,
+  enforcePdfX,
+  flattenTransparency,
+  linearizePdf,
+  optimizeIncrementalSave,
   PdfDict,
   PdfEncryptionHandler,
   PdfName,
@@ -29,10 +44,17 @@ import {
   PdfString,
   PdfArray,
   PdfWriter,
+  prepareForSigning,
+  saveDocumentIncremental,
+  saveIncremental,
+  saveIncrementalWithSignaturePreservation,
   serializePdf,
+  signPdf,
+  stripProhibitedFeatures,
   UnsupportedEncryptionError,
 } from '../../../src/index.js';
 import type { EncryptOptions, PdfDocument, PdfObject } from '../../../src/index.js';
+import { generateTestCert } from '../../helpers/signature-trust-fixtures.js';
 
 type Algorithm = NonNullable<EncryptOptions['algorithm']>;
 
@@ -67,6 +89,15 @@ async function rejectionOf(promise: Promise<unknown>): Promise<unknown> {
     return err;
   }
   throw new Error('expected the promise to reject');
+}
+
+function thrownBy(call: () => unknown): unknown {
+  try {
+    call();
+  } catch (err) {
+    return err;
+  }
+  throw new Error('expected the call to throw');
 }
 
 function expectGuardError(err: unknown, fragment: string): void {
@@ -562,5 +593,306 @@ describe('qpdf cross-check', () => {
     const s1 = await doc.save({ compress: false });
     const s2 = await doc.save({ compress: false });
     expect(s2).toEqual(s1);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// 10-11. incremental updates and signing on encrypted input
+// ---------------------------------------------------------------------------
+
+/** A hand-written PDF whose trailer is a cross-reference stream carrying /Encrypt. */
+function xrefStreamPdfWithEncrypt(): Uint8Array {
+  const head =
+    '%PDF-1.7\n' +
+    '1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n' +
+    '2 0 obj\n<< /Type /Pages /Kids [] /Count 0 >>\nendobj\n';
+  const xref =
+    '3 0 obj\n<< /Type /XRef /Size 4 /Root 1 0 R /Encrypt 5 0 R /ID [<00> <00>]' +
+    ' /W [1 2 1] /Index [0 4] /Length 0 >>\nstream\n\nendstream\nendobj\n';
+  return new TextEncoder().encode(`${head}${xref}startxref\n${head.length}\n%%EOF\n`);
+}
+
+describe('incremental saves of an encrypted document', () => {
+  it.for(['aes-128', 'rc4-128'] as const)(
+    '%s: saveDocumentIncremental() rejects a document with encryption configured',
+    async (algorithm) => {
+      const doc = await buildRichDoc(algorithm);
+      const first = await doc.save();
+      doc.addPage().drawText('IncrementalSecret', { x: 50, y: 700, size: 12 });
+      expectGuardError(
+        await rejectionOf(saveDocumentIncremental(first, doc)),
+        'saveDocumentIncremental()',
+      );
+    },
+  );
+
+  it('saveDocumentIncremental() rejects encrypted original bytes for a document without encryption', async () => {
+    const encrypted = await (await buildRichDoc('aes-128')).save();
+    const plain = createPdf();
+    plain.addPage().drawText('IncrementalSecret', { x: 50, y: 700, size: 12 });
+    expectGuardError(
+      await rejectionOf(saveDocumentIncremental(encrypted, plain)),
+      'saveDocumentIncremental()',
+    );
+  });
+
+  it('saveIncremental() throws for encrypted original bytes', async () => {
+    const encrypted = await (await buildRichDoc('rc4-128')).save();
+    const registry = new PdfObjectRegistry();
+    const ref = registry.register(PdfString.literal('IncrementalSecret'));
+    expectGuardError(
+      thrownBy(() =>
+        saveIncremental(
+          encrypted,
+          registry,
+          { catalogRef: ref, infoRef: ref, pagesRef: ref },
+          new Set([ref.objectNumber]),
+        ),
+      ),
+      'saveIncremental()',
+    );
+  });
+
+  it('an unencrypted document still saves incrementally', async () => {
+    const doc = await buildRichDoc();
+    const first = await doc.save();
+    doc.addPage();
+    const { bytes } = await saveDocumentIncremental(first, doc);
+    expect(bytes.subarray(0, first.length)).toEqual(first);
+    expect(latin1.decode(bytes)).not.toContain('/Encrypt');
+  });
+});
+
+describe('signing and appending to an encrypted PDF', () => {
+  let signer: { certificate: Uint8Array; privateKey: Uint8Array };
+  let encrypted: Uint8Array;
+
+  beforeAll(async () => {
+    signer = await generateTestCert('Guard Signer');
+    encrypted = await (await buildRichDoc('aes-128')).save();
+  });
+
+  it('prepareForSigning() throws', () => {
+    expectGuardError(
+      thrownBy(() => prepareForSigning(encrypted, 'Signature1')),
+      'prepareForSigning()',
+    );
+  });
+
+  it('signPdf() rejects', async () => {
+    expectGuardError(await rejectionOf(signPdf(encrypted, 'Signature1', signer)), 'signPdf()');
+  });
+
+  it('PdfDocument.sign() rejects for a document with encryption configured', async () => {
+    const doc = await buildRichDoc('rc4-128');
+    expectGuardError(await rejectionOf(doc.sign('Signature1', signer)), 'signPdf()');
+  });
+
+  it('addCounterSignature() rejects', async () => {
+    expectGuardError(
+      await rejectionOf(addCounterSignature(encrypted, 0, signer)),
+      'addCounterSignature()',
+    );
+  });
+
+  it('embedLtvData() rejects', async () => {
+    expectGuardError(
+      await rejectionOf(embedLtvData(encrypted, { extraCertificates: [signer.certificate] })),
+      'embedLtvData()',
+    );
+  });
+
+  it('optimizeIncrementalSave() throws', () => {
+    const change = {
+      objectNumber: 999,
+      generationNumber: 0,
+      newContent: new TextEncoder().encode('(IncrementalSecret)'),
+    };
+    expectGuardError(
+      thrownBy(() => optimizeIncrementalSave(encrypted, [change])),
+      'optimizeIncrementalSave()',
+    );
+  });
+
+  it('saveIncrementalWithSignaturePreservation() throws', async () => {
+    const modified = await (await buildRichDoc()).save();
+    expectGuardError(
+      thrownBy(() => saveIncrementalWithSignaturePreservation(encrypted, modified)),
+      'saveIncrementalWithSignaturePreservation()',
+    );
+  });
+
+  it('appendIncrementalUpdate() throws', () => {
+    const object = {
+      objectNumber: 999,
+      generationNumber: 0,
+      data: new TextEncoder().encode('(IncrementalSecret)'),
+    };
+    expectGuardError(
+      thrownBy(() => appendIncrementalUpdate(encrypted, [object])),
+      'appendIncrementalUpdate()',
+    );
+  });
+
+  it('finds /Encrypt in a cross-reference stream dictionary', () => {
+    expectGuardError(
+      thrownBy(() => prepareForSigning(xrefStreamPdfWithEncrypt(), 'Signature1')),
+      'prepareForSigning()',
+    );
+  });
+
+  const appendOne = (bytes: Uint8Array): Uint8Array =>
+    appendIncrementalUpdate(bytes, [
+      { objectNumber: 900, generationNumber: 0, data: new TextEncoder().encode('(x)') },
+    ]);
+  const toBytes = (text: string): Uint8Array => Uint8Array.from(text, (c) => c.charCodeAt(0));
+
+  it.for([
+    ['a signed object number', '/Encrypt +$1 $2 R'],
+    ['a signed generation number', '/Encrypt $1 +$2 R'],
+    ['a real object number', '/Encrypt $1.0 $2 R'],
+    ['a line break before the reference', '/Encrypt\n$1 $2 R'],
+    ['an escaped letter with a lower-case hex digit', '/E#6ecrypt $1 $2 R'],
+    ['an escaped letter with an upper-case hex digit', '/E#6Ecrypt $1 $2 R'],
+    ['a vertical tab after the name', '/Encrypt\v$1 $2 R'],
+    ['a comment before the reference', '/Encrypt%c\n$1 $2 R'],
+    ['an escaped name', '/Encr#79pt $1 $2 R'],
+    ['an escaped first letter', '/#45ncrypt $1 $2 R'],
+    ['a dictionary with no space before it', '/Encrypt<</Filter/Standard/V 4>>'],
+    ['a malformed value', '/Encrypt['],
+  ] as const)(
+    'appendIncrementalUpdate() finds /Encrypt written with %s',
+    async ([, replacement]) => {
+      const doc = await buildRichDoc('rc4-128');
+      const text = latin1.decode(await doc.save()).replace(/\/Encrypt (\d+) (\d+) R/, replacement);
+      expect(text).not.toMatch(/\/Encrypt \d+ \d+ R/);
+      expectGuardError(
+        thrownBy(() => appendOne(toBytes(text))),
+        'appendIncrementalUpdate()',
+      );
+    },
+  );
+
+  it.for([
+    ['/EncryptMetadata', 'the name /EncryptMetadata'],
+    ['/Encrypt2', 'the name /Encrypt2'],
+    ['/encrypt', 'the name /encrypt in lower case'],
+    ['Encrypt', 'the text Encrypt without a solidus'],
+  ] as const)(
+    'appendIncrementalUpdate() does not refuse an unencrypted file that holds %s',
+    async ([text]) => {
+      const doc = createPdf();
+      doc.setTitle(`title ${text} end`);
+      doc.addPage();
+      const bytes = await doc.save();
+      expect(latin1.decode(bytes)).toContain(text);
+      expect(() => appendOne(bytes)).not.toThrow();
+    },
+  );
+
+  it('appendIncrementalUpdate() refuses an unencrypted file with the name /Encrypt in an uncompressed content stream', async () => {
+    const doc = createPdf();
+    doc.addPage().drawText('/Encrypt', { x: 50, y: 700, size: 12 });
+    const bytes = await doc.save();
+    expect(latin1.decode(bytes)).toContain('/Encrypt');
+    expectGuardError(
+      thrownBy(() => appendOne(bytes)),
+      'appendIncrementalUpdate()',
+    );
+  });
+
+  it('enforcePdfA(), enforcePdfAFull() and enforcePdfX() find /Encrypt written as an escaped name', async () => {
+    const text = latin1
+      .decode(await (await buildRichDoc('rc4-128')).save())
+      .replace(/\/Encrypt (\d+ 0 R)/, '/Encr#79pt $1');
+    expect(text).not.toContain('/Encrypt');
+    const bytes = toBytes(text);
+    const withJs = toBytes(
+      text.replace('/Type /Catalog', '/Type /Catalog /OpenAction << /S /JavaScript /JS (x) >>'),
+    );
+    expectGuardError(await rejectionOf(enforcePdfA(withJs, '2b')), 'enforcePdfA()');
+    expectGuardError(await rejectionOf(enforcePdfA(bytes, '2b')), 'enforcePdfA()');
+    expectGuardError(await rejectionOf(enforcePdfAFull(bytes, '2b')), 'enforcePdfAFull()');
+    expectGuardError(
+      thrownBy(() => enforcePdfX(bytes, { level: 'X-4', outputIntent: { condition: 'FOGRA39' } })),
+      'enforcePdfX()',
+    );
+  });
+
+  it.for(['rc4-128', 'aes-128'] as const)(
+    '%s: flattenTransparency() and stripProhibitedFeatures() throw',
+    async (algorithm) => {
+      const encrypted = await (await buildRichDoc(algorithm)).save();
+      expectGuardError(
+        thrownBy(() => flattenTransparency(encrypted)),
+        'flattenTransparency()',
+      );
+      expectGuardError(
+        thrownBy(() => stripProhibitedFeatures(encrypted)),
+        'stripProhibitedFeatures()',
+      );
+    },
+  );
+
+  it.for(['rc4-128', 'aes-128'] as const)(
+    '%s: enforcePdfA(), enforcePdfAFull() and enforcePdfX() throw UnsupportedEncryptionError',
+    async (algorithm) => {
+      const encrypted = await (await buildRichDoc(algorithm)).save();
+      expectGuardError(await rejectionOf(enforcePdfA(encrypted, '2b')), 'enforcePdfA()');
+      expectGuardError(
+        await rejectionOf(enforcePdfAFull(encrypted, '2b')),
+        'document is encrypted',
+      );
+      expectGuardError(
+        thrownBy(() =>
+          enforcePdfX(encrypted, {
+            level: 'X-4',
+            outputIntent: { condition: 'FOGRA39' },
+          }),
+        ),
+        'document is encrypted',
+      );
+    },
+  );
+
+  it('the linearization message says the rewritten file would have no /Encrypt entry', async () => {
+    const encrypted = await (await buildRichDoc('rc4-128')).save();
+    expectGuardError(
+      await rejectionOf(linearizePdf(encrypted)),
+      'the rewritten file would have no /Encrypt entry',
+    );
+  });
+
+  it('an unencrypted PDF is still signed', async () => {
+    const plain = await (await buildRichDoc()).save();
+    const signed = await signPdf(plain, 'Signature1', signer);
+    expect(signed.subarray(0, plain.length)).toEqual(plain);
+    expect(latin1.decode(signed)).toContain('/ByteRange');
+  });
+});
+
+describe('linearizePdf() on an encrypted PDF', () => {
+  it.for(['rc4-128', 'aes-128'] as const)('%s: rejects', async (algorithm) => {
+    const encrypted = await (await buildRichDoc(algorithm)).save();
+    expectGuardError(await rejectionOf(linearizePdf(encrypted)), 'linearizePdf()');
+  });
+
+  it('finds /Encrypt in a cross-reference stream dictionary', async () => {
+    expectGuardError(await rejectionOf(linearizePdf(xrefStreamPdfWithEncrypt())), 'linearizePdf()');
+  });
+
+  it('delinearizePdf() rejects a linearized input that has /Encrypt', async () => {
+    const linearized = await linearizePdf(await (await buildRichDoc()).save());
+    const tampered = latin1.decode(linearized).replace('/Root', '/Encrypt 99 0 R /Root');
+    expect(tampered).toContain('/Encrypt');
+    const bytes = Uint8Array.from(tampered, (ch) => ch.charCodeAt(0));
+    expectGuardError(await rejectionOf(delinearizePdf(bytes)), 'delinearizePdf()');
+  });
+
+  it('an unencrypted PDF is still linearized', async () => {
+    const plain = await (await buildRichDoc()).save();
+    const out = await linearizePdf(plain);
+    expect(latin1.decode(out)).toContain('/Linearized');
+    expect(latin1.decode(out)).not.toContain('/Encrypt');
   });
 });

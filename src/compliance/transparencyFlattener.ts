@@ -11,6 +11,8 @@
  * to remove or flatten it for PDF/A-1 compliance.
  */
 
+import { assertUnencryptedInput } from '../core/incrementalWriter.js';
+
 // ---------------------------------------------------------------------------
 // Public types
 // ---------------------------------------------------------------------------
@@ -146,8 +148,10 @@ export function detectTransparency(pdfBytes: Uint8Array): TransparencyInfo {
  *
  * @param pdfBytes  The raw PDF bytes.
  * @returns         Modified PDF bytes with transparency removed.
+ * @throws {UnsupportedEncryptionError} When `pdfBytes` contain the name `/Encrypt` (an encrypted file).
  */
 export function flattenTransparency(pdfBytes: Uint8Array): Uint8Array {
+  assertUnencryptedInput(pdfBytes, 'flattenTransparency()', 'the rewritten file would be damaged');
   let text = decoder.decode(pdfBytes);
 
   // Replace non-1.0 CA with /CA 1

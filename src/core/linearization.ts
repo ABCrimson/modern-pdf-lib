@@ -35,6 +35,8 @@
  * Reference: PDF 1.7 spec, Appendix F (Linearized PDF).
  */
 
+import { assertUnencryptedInput } from './incrementalWriter.js';
+
 // ---------------------------------------------------------------------------
 // Public types
 // ---------------------------------------------------------------------------
@@ -1019,11 +1021,19 @@ function serializationPass(
  * @param pdfBytes  The raw PDF bytes.
  * @param options   Linearization options.
  * @returns         The linearized PDF bytes.
+ * @throws {UnsupportedEncryptionError} When the input's bytes contain the name
+ *   `/Encrypt`: the output would have no
+ *   `/Encrypt` entry while its objects stayed encrypted.
  */
 export async function linearizePdf(
   pdfBytes: Uint8Array,
   options?: LinearizationOptions,
 ): Promise<Uint8Array> {
+  assertUnencryptedInput(
+    pdfBytes,
+    'linearizePdf()',
+    'the rewritten file would have no /Encrypt entry',
+  );
   const _firstPage = options?.firstPage ?? 0;
 
   // If already linearized, return as-is
@@ -1231,11 +1241,18 @@ export async function linearizePdf(
  *
  * @param pdfBytes  The raw PDF bytes.
  * @returns         A non-linearized PDF.
+ * @throws {UnsupportedEncryptionError} When a linearized input's bytes contain the name
+ *   `/Encrypt`: the rebuilt trailer would drop it.
  */
 export async function delinearizePdf(pdfBytes: Uint8Array): Promise<Uint8Array> {
   if (!isLinearized(pdfBytes)) {
     return pdfBytes;
   }
+  assertUnencryptedInput(
+    pdfBytes,
+    'delinearizePdf()',
+    'the rewritten file would have no /Encrypt entry',
+  );
 
   // Find all xref sections (there may be multiple in a linearized PDF)
   const startXref = findStartXref(pdfBytes);

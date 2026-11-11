@@ -19,6 +19,8 @@
  */
 
 import { concatBytes } from '../utils/binary.js';
+import { UnsupportedEncryptionError } from '../errors.js';
+import { assertUnencryptedInput } from '../core/incrementalWriter.js';
 import { PdfDict, PdfName, PdfString, PdfNumber, PdfStream } from '../core/pdfObjects.js';
 import type { PdfObjectRegistry, PdfRef } from '../core/pdfObjects.js';
 
@@ -441,14 +443,19 @@ function checkPageBoxes(text: string, errors: PdfXIssue[], warnings: PdfXIssue[]
  * @param pdfBytes  The raw PDF bytes.
  * @param options   PDF/X enforcement options.
  * @returns         The modified PDF bytes.
+ * @throws {UnsupportedEncryptionError} If the PDF is encrypted.
  */
 export function enforcePdfX(pdfBytes: Uint8Array, options: PdfXOptions): Uint8Array {
   const text = decoder.decode(pdfBytes);
 
   // Check for unfixable issues
   if (text.includes('/Encrypt')) {
-    throw new Error('Cannot enforce PDF/X: document is encrypted. Remove encryption first.');
+    throw new UnsupportedEncryptionError(
+      'Cannot enforce PDF/X: document is encrypted. Remove encryption first.',
+    );
   }
+  // Fail-closed guard: also catches an /Encrypt key the text check misses (a #-escaped name).
+  assertUnencryptedInput(pdfBytes, 'enforcePdfX()', 'the rewritten file would be damaged');
   if (text.includes('/JavaScript') || text.includes('/JS')) {
     throw new Error('Cannot enforce PDF/X: document contains JavaScript. Remove it first.');
   }

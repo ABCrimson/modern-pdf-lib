@@ -26,6 +26,100 @@ import { PdfObjectRegistry, PdfName, PdfStream } from './pdfObjects.js';
 import type { DocumentStructure } from './pdfCatalog.js';
 import type { PdfSaveOptions } from './pdfWriter.js';
 import type { PdfDocument } from './pdfDocument.js';
+import { UnsupportedEncryptionError } from '../errors.js';
+
+// ---------------------------------------------------------------------------
+// Encrypted-input guard
+// ---------------------------------------------------------------------------
+
+/**
+ * Bytes that end a name token: PDF whitespace (NUL, HT, LF, FF, CR, SP), the
+ * vertical tab (VT), which some readers also treat as whitespace, and the delimiters.
+ */
+const NAME_END = new Uint8Array(256);
+for (const byte of [0, 9, 10, 11, 12, 13, 32, 40, 41, 60, 62, 91, 93, 123, 125, 47, 37]) {
+  NAME_END[byte] = 1;
+}
+
+/** The bytes of the name `Encrypt`. */
+const ENCRYPT = Uint8Array.of(0x45, 0x6e, 0x63, 0x72, 0x79, 0x70, 0x74);
+
+function hexValue(byte: number | undefined): number {
+  if (byte === undefined) return -1;
+  if (byte >= 0x30 && byte <= 0x39) return byte - 0x30;
+  if (byte >= 0x41 && byte <= 0x46) return byte - 0x41 + 10;
+  if (byte >= 0x61 && byte <= 0x66) return byte - 0x61 + 10;
+  return -1;
+}
+
+/**
+ * Whether `bytes` contain the PDF name `/Encrypt` anywhere.
+ *
+ * One linear scan. At every solidus the name is read up to the next whitespace
+ * (including VT) or delimiter byte, each `#XX` pair of hex digits is decoded to its byte, and
+ * the decoded bytes are compared with `Encrypt` exactly. Names are
+ * case-sensitive, so `/EncryptMetadata`, `/Encrypt2` and `/encrypt` do not
+ * count. The value after the name is not looked at, and neither is where the
+ * name sits: a name inside an uncompressed content stream or in text that looks
+ * like a name counts as well.
+ *
+ * @param bytes  The PDF bytes to scan.
+ * @returns `true` when the name `Encrypt` is present.
+ * @internal
+ */
+export function hasEncryptName(bytes: Uint8Array): boolean {
+  const length = bytes.length;
+  for (let i = bytes.indexOf(0x2f); i !== -1; i = bytes.indexOf(0x2f, i + 1)) {
+    let matched = 0;
+    let j = i + 1;
+    while (j < length) {
+      const byte = bytes[j] as number;
+      if (NAME_END[byte] === 1) break;
+      let decoded = byte;
+      let step = 1;
+      if (byte === 0x23) {
+        const high = hexValue(bytes[j + 1]);
+        const low = hexValue(bytes[j + 2]);
+        if (high !== -1 && low !== -1) {
+          decoded = high * 16 + low;
+          step = 3;
+        }
+      }
+      matched = matched < ENCRYPT.length && decoded === ENCRYPT[matched] ? matched + 1 : -1;
+      if (matched === -1) break;
+      j += step;
+    }
+    if (matched === ENCRYPT.length) return true;
+  }
+  return false;
+}
+
+/**
+ * Refuse PDF bytes that contain the name `/Encrypt` (see {@link hasEncryptName}).
+ *
+ * The incremental writers, the signing functions, the linearization functions
+ * and the compliance functions do not encrypt what they write; each of them
+ * calls this before it writes anything. An unencrypted file that holds the name
+ * `/Encrypt` anywhere outside a compressed stream is refused too.
+ *
+ * @param bytes        The PDF bytes the caller would write from.
+ * @param caller       The public function name, used in the error message.
+ * @param consequence  What the caller would write wrongly, used in the error message.
+ * @throws {UnsupportedEncryptionError} When `bytes` contain the name `/Encrypt`.
+ * @internal
+ */
+export function assertUnencryptedInput(
+  bytes: Uint8Array,
+  caller: string,
+  consequence = 'the update would append plaintext objects and a trailer without /Encrypt',
+): void {
+  // Fail-closed guard: nothing appended here is encrypted, so encrypted input is refused.
+  if (hasEncryptName(bytes)) {
+    throw new UnsupportedEncryptionError(
+      `${caller} cannot encrypt; the input PDF is encrypted and ${consequence}.`,
+    );
+  }
+}
 
 // ---------------------------------------------------------------------------
 // Result type
@@ -223,6 +317,9 @@ function findOriginalTrailerSize(data: Uint8Array): number {
  * @param changedObjects Set of object numbers that are new or modified.
  * @param options        Optional save options (compression, etc.).
  * @returns              The complete incremental save result.
+ * @throws {UnsupportedEncryptionError} When `originalBytes` is an encrypted
+ *         PDF (its bytes contain the name `/Encrypt`): the
+ *         appended objects and trailer would not be encrypted.
  *
  * @example
  * ```ts
@@ -237,6 +334,7 @@ export function saveIncremental(
   changedObjects: Set<number>,
   options?: PdfSaveOptions,
 ): IncrementalSaveResult {
+  assertUnencryptedInput(originalBytes, 'saveIncremental()');
   const compress = options?.compress ?? true;
   const compressionLevel = options?.compressionLevel ?? 6;
 
@@ -456,12 +554,24 @@ function compressStream(stream: PdfStream, level: number): void {
  * @param doc            The modified PdfDocument.
  * @param options        Optional save options.
  * @returns              The incremental save result.
+ * @throws {UnsupportedEncryptionError} When encryption is configured
+ *         (`encrypt()` was called), or when `originalBytes` is an encrypted
+ *         PDF: the incremental writer does not encrypt and would append
+ *         plaintext objects and a trailer without `/Encrypt`. Use `save()`
+ *         for an encrypted document.
  */
 export async function saveDocumentIncremental(
   originalBytes: Uint8Array,
   doc: PdfDocument,
   options?: PdfSaveOptions,
 ): Promise<IncrementalSaveResult> {
+  // Fail-closed guard: the incremental writer does not encrypt, so an encrypted document is refused here.
+  if (doc.isEncrypted()) {
+    throw new UnsupportedEncryptionError(
+      'saveDocumentIncremental() cannot encrypt; the incremental writer would append plaintext objects and a trailer without /Encrypt. Use save() for an encrypted document.',
+    );
+  }
+  assertUnencryptedInput(originalBytes, 'saveDocumentIncremental()');
   // Import buildDocumentStructure to get the structure
   const { buildDocumentStructure } = await import('./pdfCatalog.js');
 

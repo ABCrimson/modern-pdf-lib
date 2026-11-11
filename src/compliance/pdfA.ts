@@ -21,6 +21,8 @@
  */
 
 import { concatBytes } from '../utils/binary.js';
+import { UnsupportedEncryptionError } from '../errors.js';
+import { assertUnencryptedInput } from '../core/incrementalWriter.js';
 
 // ---------------------------------------------------------------------------
 // Public types
@@ -321,15 +323,20 @@ function checkTransparency(data: Uint8Array): boolean {
  * @param pdfBytes  The raw PDF bytes.
  * @param level     The target PDF/A conformance level.
  * @returns         The modified PDF bytes.
+ * @throws {UnsupportedEncryptionError} If the PDF is encrypted.
  */
 export async function enforcePdfA(pdfBytes: Uint8Array, level: PdfALevel): Promise<Uint8Array> {
   // Validate first to see what's needed
   const validation = validatePdfA(pdfBytes, level);
+  // Fail-closed guard: also catches an /Encrypt key the text check misses (a #-escaped name).
+  assertUnencryptedInput(pdfBytes, 'enforcePdfA()', 'the rewritten file would be damaged');
 
   // Check for unfixable issues
   for (const issue of validation.issues) {
     if (issue.code === 'PDFA-003') {
-      throw new Error('Cannot enforce PDF/A: document is encrypted. Remove encryption first.');
+      throw new UnsupportedEncryptionError(
+        'Cannot enforce PDF/A: document is encrypted. Remove encryption first.',
+      );
     }
     if (issue.code === 'PDFA-004') {
       throw new Error('Cannot enforce PDF/A: document contains JavaScript. Remove it first.');
