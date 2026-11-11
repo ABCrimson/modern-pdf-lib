@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.tests.json",
+  "include": [
+    "tests/adversarial/formScript.test.ts",
+    "tests/oracle/redaction-leak.test.ts",
+    "tests/unit/signature/trust-anchors.test.ts",
+    "tests/unit/core/encryption-guard.test.ts",
+    "tests/unit/core/merge-dedupe.test.ts",
+    "tests/oracle/legacy-0.40.3.test.ts",
+    "tests/unit/core/securityErrors.test.ts",
+    "tests/helpers/**/*.ts"
+  ],
+  "exclude": ["node_modules", "dist"]
+}

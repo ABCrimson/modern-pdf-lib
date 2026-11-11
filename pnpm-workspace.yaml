@@ -35,6 +35,8 @@ allowBuilds:
 # One Vue runtime for vitepress and docs/.vitepress/components (PdfPlayground.vue imports vue).
 overrides:
   vue: 3.6.0-rc.14
+  # pdfjs-dist (test oracle) lists a native canvas as optional; getTextContent does not need it.
+  '@napi-rs/canvas': '-'
 
 # Agent skills shipped by dependencies are denied: this repo wires none into an agent (tsdown 0.23.7 ships a skills/ folder, pnpm 12.19 lists it as awaiting approval).
 permissions:

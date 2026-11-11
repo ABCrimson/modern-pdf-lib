@@ -76,12 +76,7 @@
       }
     },
     {
-      "files": [
-        "src/form/jsEvaluator.ts",
-        "src/form/acrobatBuiltins.ts",
-        "src/parser/streamingParser.ts",
-        "src/runtime/*.ts"
-      ],
+      "files": ["src/parser/streamingParser.ts", "src/runtime/*.ts"],
       "rules": {
         "typescript/no-implied-eval": "off",
         "no-new-func": "off"

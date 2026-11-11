@@ -327,3 +327,87 @@ export class BatchProcessingError extends Error {
     this.failures = failures;
   }
 }
+
+// ---------------------------------------------------------------------------
+// Fail-closed errors (0.40.5)
+//
+// These classes also carry a machine-readable `code` that is stable across
+// releases.
+// ---------------------------------------------------------------------------
+
+/**
+ * Thrown by `FormScriptSandbox.execute()`: modern-pdf-lib does not evaluate
+ * PDF JavaScript, so no script text is compiled or run.
+ */
+export class ScriptExecutionDisabledError extends Error {
+  override readonly name = 'ScriptExecutionDisabledError';
+  /** Machine-readable code, stable across releases. */
+  readonly code = 'script-execution-disabled' as const;
+  constructor(
+    message = 'Form script execution is disabled: FormScriptSandbox.execute() does not evaluate PDF JavaScript.',
+    options?: ErrorOptions,
+  ) {
+    super(message, options);
+  }
+}
+
+/** Why a redaction was refused because it could not be applied completely. */
+export type RedactionIncompleteReason =
+  | 'text-remains'
+  | 'form-xobject'
+  | 'image-xobject'
+  | 'unresolved-xobject'
+  | 'inline-image'
+  | 'annotation'
+  | 'unreachable-redact-annotation';
+
+/**
+ * Thrown when a redaction cannot be shown to remove everything under the
+ * marked regions, instead of reporting success.
+ */
+export class RedactionIncompleteError extends Error {
+  override readonly name = 'RedactionIncompleteError';
+  /** Machine-readable code, stable across releases. */
+  readonly code = 'redaction-incomplete' as const;
+  /** The kind of content that blocked the redaction. */
+  readonly reason: RedactionIncompleteReason;
+  /** Zero-based page index, or `undefined` when no page is known. */
+  readonly pageIndex: number | undefined;
+  constructor(
+    reason: RedactionIncompleteReason,
+    message = `Redaction incomplete (${reason}). Nothing was changed.`,
+    options?: ErrorOptions & { pageIndex?: number | undefined },
+  ) {
+    super(message, options);
+    this.reason = reason;
+    this.pageIndex = options?.pageIndex;
+  }
+}
+
+/**
+ * Thrown when a timestamp response cannot be tied to the data it claims to
+ * timestamp.
+ */
+export class TimestampVerificationError extends Error {
+  override readonly name = 'TimestampVerificationError';
+  /** Machine-readable code, stable across releases. */
+  readonly code = 'timestamp-unverified' as const;
+  constructor(message = 'The timestamp response could not be verified.', options?: ErrorOptions) {
+    super(message, options);
+  }
+}
+
+/**
+ * Thrown when an output path cannot apply the document's encryption.
+ */
+export class UnsupportedEncryptionError extends Error {
+  override readonly name = 'UnsupportedEncryptionError';
+  /** Machine-readable code, stable across releases. */
+  readonly code = 'unsupported-encryption-path' as const;
+  constructor(
+    message = 'This output path cannot apply the document encryption.',
+    options?: ErrorOptions,
+  ) {
+    super(message, options);
+  }
+}

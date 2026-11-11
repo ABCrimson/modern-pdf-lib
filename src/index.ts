@@ -1142,7 +1142,12 @@ export {
   PluginError,
   StreamingParseError,
   BatchProcessingError,
+  ScriptExecutionDisabledError,
+  RedactionIncompleteError,
+  TimestampVerificationError,
+  UnsupportedEncryptionError,
 } from './errors.js';
+export type { RedactionIncompleteReason } from './errors.js';
 
 // ---------------------------------------------------------------------------
 // Form flattening
