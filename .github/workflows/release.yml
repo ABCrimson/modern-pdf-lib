@@ -5,53 +5,76 @@ on:
     tags:
       - 'v*'
 
+# Jobs elevate individually (publish: id-token; github-release: contents).
 permissions:
-  contents: write
-  pages: write
-  id-token: write
+  contents: read
 
 env:
-  NODE_VERSION: '26.4'
-  RUST_TOOLCHAIN: 'beta'
+  # Must equal `channel` in rust-toolchain.toml; bump both together. A dated
+  # toolchain input needs a commit of the dtolnay/rust-toolchain master branch (see .peak-modern-holds.json).
+  RUST_TOOLCHAIN: nightly-2026-11-11
 
 jobs:
   # ---------------------------------------------------------------------------
-  # Full build (WASM + TypeScript)
+  # Full build (WASM + TypeScript) and the one tarball that gets published
   # ---------------------------------------------------------------------------
   build:
     name: Build
     runs-on: ubuntu-latest
+    timeout-minutes: 90
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+
+      # The tarball takes its version from package.json, the release from the tag.
+      - name: Require the tag to match the package.json version
+        run: |
+          version="$(jq -r .version package.json)"
+          if [ "${GITHUB_REF_NAME#v}" != "$version" ]; then
+            echo "::error::Tag ${GITHUB_REF_NAME} does not match package.json version ${version}."
+            exit 1
+          fi
 
       - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@beta
+        uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # master
         with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
           targets: wasm32-unknown-unknown
 
-      - name: Cache Cargo registry
-        uses: actions/cache@v6
+      # Each crate is its own Cargo root until the workspace migration.
+      - name: Cache Cargo registry & build artifacts
+        uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-          key: cargo-release-${{ runner.os }}-${{ hashFiles('src/wasm/*/Cargo.toml') }}
-          restore-keys: |
-            cargo-release-${{ runner.os }}-
+          workspaces: |
+            src/wasm/libdeflate -> target
+            src/wasm/png -> target
+            src/wasm/ttf -> target
+            src/wasm/shaping -> target
+            src/wasm/jbig2 -> target
+            src/wasm/jpeg -> target
 
-      - name: Install wasm-pack
-        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+      # build-wasm.sh downloads the binaryen release named by its BINARYEN_VERSION
+      # into .cache/binaryen and verifies its SHA-256; the key reads that variable.
+      - name: Read binaryen version
+        id: binaryen
+        run: echo "version=$(sed -n 's/^BINARYEN_VERSION=//p' scripts/build-wasm.sh)" >> "$GITHUB_OUTPUT"
 
-      - uses: actions/setup-node@v7
+      - name: Cache binaryen
+        uses: actions/cache@v6.1.0
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-          registry-url: https://registry.npmjs.org
+          path: .cache/binaryen
+          key: binaryen-${{ runner.os }}-${{ steps.binaryen.outputs.version }}
 
-      - run: npm ci --legacy-peer-deps
+      # wasm-pack is a pinned devDependency, installed by this step.
+      - uses: pnpm/setup@fa36a5ef7dcdefc3a7cb25655c122e00cf6e636e # v3.1.2
+        with:
+          runtime: node@26
+          cache: true
+          require-lockfile: true
 
       - name: Build WASM crates
-        run: bash scripts/build-wasm.sh --release
+        run: pnpm run build:wasm
 
       - name: Verify WASM binaries
         run: |
@@ -63,42 +86,56 @@ jobs:
           done
           echo "All WASM binaries verified."
 
-      - name: Build TypeScript
-        run: npm run build
+      # `pnpm run build` is tsdown + IIFE bundle + the ESM/CJS smoke of every BUILT
+      # dist entry. The smoke is the check that guards the published artifact (it
+      # catches the v0.28.0-class "unimportable package" bug that the unit suite,
+      # running on src/, cannot). The full unit/integration suite is gated by ci.yml
+      # on this exact commit (a tag is cut from a master commit that ci.yml tests),
+      # so re-running the whole suite here is redundant. Tests live in ci.yml; this
+      # job builds, smokes, packs and inspects.
+      - name: Build TypeScript (tsdown, IIFE, smoke)
+        run: pnpm run build
 
-      - name: Verify dist is importable (ESM + CJS smoke)
-        # The smoke gate imports every BUILT dist entry and asserts it links +
-        # exposes its API — the check that actually guards the published artifact
-        # (it catches the v0.28.0-class "unimportable package" bug that the unit
-        # suite, running on src/, cannot). The full unit/integration suite is
-        # gated by ci.yml on this exact commit (a tag is cut from a master commit
-        # that ci.yml tests), so re-running the whole 6,900-test suite here is
-        # redundant — and doing it in this same job (after the WASM+TS build) OOM'd
-        # a fork worker. Tests live in ci.yml; this job builds, smokes, publishes.
-        run: npm run smoke
+      - name: Copy WASM binaries into dist/wasm
+        run: pnpm run copy:wasm
 
-      - name: Upload dist
-        uses: actions/upload-artifact@v7
+      - name: Pack the npm tarball
+        run: pnpm pack --pack-destination pack
+
+      # Inspect the exact file the publish job will upload: six wasm + IIFE listed,
+      # publint, are-the-types-wrong.
+      - name: Inspect the tarball
+        run: |
+          tarballs=(pack/*.tgz)
+          if [ "${#tarballs[@]}" -ne 1 ] || [ ! -f "${tarballs[0]}" ]; then
+            echo "::error::Expected exactly one tarball in pack/, found: ${tarballs[*]}"
+            exit 1
+          fi
+          pnpm run check:pack "./${tarballs[0]}"
+
+      - name: Upload npm tarball
+        uses: actions/upload-artifact@v7.0.2
         with:
-          name: dist
-          path: dist
+          name: npm-tarball
+          path: pack/*.tgz
+          if-no-files-found: error
 
       - name: Upload WASM modules
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: wasm-modules
           path: src/wasm/*/pkg
 
   # ---------------------------------------------------------------------------
   # Require CI (full test + coverage suite) to be green on THIS commit before
-  # publishing. The release build job runs only build + smoke (re-running the
-  # whole suite there OOM'd a fork worker), so this fail-closed gate enforces the
-  # invariant that the unit/integration suite passed — a tag is cut from a master
-  # commit that ci.yml tests, so we wait for that run to conclude success.
+  # publishing. The release build job runs only build + smoke + pack, so this
+  # fail-closed gate enforces the invariant that the unit/integration suite passed —
+  # a tag is cut from a master commit that ci.yml tests, so we wait for that run to conclude success.
   # ---------------------------------------------------------------------------
   require-ci:
     name: Require CI green on this commit
     runs-on: ubuntu-latest
+    timeout-minutes: 90
     permissions:
       actions: read
     steps:
@@ -109,7 +146,7 @@ jobs:
           REPO: ${{ github.repository }}
         run: |
           echo "Waiting for ci.yml to conclude on $SHA ..."
-          for i in $(seq 1 90); do
+          for i in $(seq 1 180); do
             run=$(gh api "/repos/$REPO/actions/workflows/ci.yml/runs?head_sha=$SHA&per_page=1" \
               --jq 'if (.workflow_runs | length) > 0 then "\(.workflow_runs[0].status) \(.workflow_runs[0].conclusion)" else "none none" end' \
               2>/dev/null || echo "none none")
@@ -130,56 +167,69 @@ jobs:
           exit 1
 
   # ---------------------------------------------------------------------------
-  # Publish to npm
+  # Publish to npm: the tarball the build job inspected, with no rebuild
   # ---------------------------------------------------------------------------
   publish:
     name: Publish to npm
     needs: [build, require-ci]
     runs-on: ubuntu-latest
+    timeout-minutes: 90
     permissions:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@v7
-
-      - uses: actions/setup-node@v7
+      # The checkout supplies package.json so pnpm/setup can resolve the pinned pnpm.
+      - uses: actions/checkout@v7.0.1
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-          registry-url: https://registry.npmjs.org
+          persist-credentials: false
 
-      - run: npm ci --legacy-peer-deps
-
-      - name: Download dist
-        uses: actions/download-artifact@v8
+      - uses: pnpm/setup@fa36a5ef7dcdefc3a7cb25655c122e00cf6e636e # v3.1.2
         with:
-          name: dist
-          path: dist
+          runtime: node@26
+          install: false
 
-      - name: Download WASM modules
-        uses: actions/download-artifact@v8
+      - name: Download npm tarball
+        uses: actions/download-artifact@v8.0.2
         with:
-          name: wasm-modules
-          path: src/wasm
+          name: npm-tarball
+          path: pack
 
-      - name: Update npm for trusted publishing
-        run: npm install -g npm@latest
-
-      - name: Publish to npm
-        run: npm publish --provenance --access public
+      # npm trusted publishing (OIDC): no token. --provenance makes the step fail
+      # when no provenance attestation can be made. A tag checkout is a detached
+      # HEAD, so the git checks are skipped.
+      - name: Publish the inspected tarball
+        run: |
+          tarballs=(pack/*.tgz)
+          if [ "${#tarballs[@]}" -ne 1 ] || [ ! -f "${tarballs[0]}" ]; then
+            echo "::error::Expected exactly one tarball in pack/, found: ${tarballs[*]}"
+            exit 1
+          fi
+          pnpm publish "./${tarballs[0]}" --access public --provenance --no-git-checks
 
   # ---------------------------------------------------------------------------
-  # GitHub Release with WASM binaries
+  # GitHub Release with the npm tarball and WASM binaries
   # ---------------------------------------------------------------------------
   github-release:
     name: GitHub Release
-    needs: [build, require-ci]
+    # After publish: a GitHub release never announces a version that is not on npm.
+    needs: [build, require-ci, publish]
     runs-on: ubuntu-latest
+    timeout-minutes: 90
+    permissions:
+      contents: write
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Download npm tarball
+        uses: actions/download-artifact@v8.0.2
+        with:
+          name: npm-tarball
+          path: pack
 
       - name: Download WASM modules
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@v8.0.2
         with:
           name: wasm-modules
           path: wasm-artifacts
@@ -204,11 +254,14 @@ jobs:
           echo "EOF" >> "$GITHUB_OUTPUT"
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v3.0.2
+        uses: softprops/action-gh-release@8a0cd651e5b2365bd640854a3fa5dfc70e4875f3 # v3.0.4
         with:
           body: ${{ steps.changelog.outputs.body }}
-          files: modern-pdf-wasm-*.tar.gz
+          files: |
+            pack/*.tgz
+            modern-pdf-wasm-*.tar.gz
           generate_release_notes: true
+          make_latest: legacy
 
 # Docs are deployed by the dedicated docs.yml workflow on every push to master
 # (decoupled from version tags), so there is no docs job here.

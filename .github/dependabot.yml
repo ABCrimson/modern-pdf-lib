@@ -1,11 +1,28 @@
 version: 2
 
+# Every ecosystem waits one day before proposing a release, matching pnpm's
+# minimumReleaseAge of 1440 minutes in pnpm-workspace.yaml. Security updates are
+# not delayed by `cooldown`.
+# The labels below (dependencies, ci, wasm) are created by the repo-settings phase.
 updates:
+  # pnpm 12 via the `npm` ecosystem; this root entry also covers the tools/docs workspace package.
   - package-ecosystem: npm
     directory: /
     schedule:
       interval: weekly
     open-pull-requests-limit: 10
+    cooldown:
+      default-days: 1
+    # Root typescript (7.x dev) and tools/docs typescript (held at 6.0.3, TypeStrong/typedoc#3098)
+    # merge into one Dependabot dependency, so typescript is bumped by hand (peak-modern sweep).
+    ignore:
+      - dependency-name: typescript
+    # At most two PRs: devDependencies (root and tools/docs) and dependencies.
+    groups:
+      dev-dependencies:
+        dependency-type: development
+      prod-dependencies:
+        dependency-type: production
     labels:
       - dependencies
 
@@ -13,53 +30,48 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    cooldown:
+      default-days: 1
+    # All action bumps in one PR.
+    groups:
+      actions:
+        patterns:
+          - '*'
     labels:
       - ci
 
+  # The six wasm crates are separate Cargo roots until the workspace migration;
+  # `group-by: dependency-name` opens one PR per dependency across all six directories,
+  # so shared crates (wasm-bindgen, js-sys) move in lockstep.
   - package-ecosystem: cargo
-    directory: /src/wasm/libdeflate
+    directories:
+      - /src/wasm/libdeflate
+      - /src/wasm/png
+      - /src/wasm/ttf
+      - /src/wasm/shaping
+      - /src/wasm/jbig2
+      - /src/wasm/jpeg
     schedule:
       interval: weekly
+    cooldown:
+      default-days: 1
+    groups:
+      wasm-crates:
+        group-by: dependency-name
+        patterns:
+          - '*'
     labels:
       - dependencies
       - wasm
 
-  - package-ecosystem: cargo
-    directory: /src/wasm/png
+  # rust-toolchain.toml carries the dated nightly; ci.yml and release.yml env
+  # RUST_TOOLCHAIN must be bumped to the same date in that PR.
+  - package-ecosystem: rust-toolchain
+    directory: /
     schedule:
       interval: weekly
-    labels:
-      - dependencies
-      - wasm
-
-  - package-ecosystem: cargo
-    directory: /src/wasm/ttf
-    schedule:
-      interval: weekly
-    labels:
-      - dependencies
-      - wasm
-
-  - package-ecosystem: cargo
-    directory: /src/wasm/shaping
-    schedule:
-      interval: weekly
-    labels:
-      - dependencies
-      - wasm
-
-  - package-ecosystem: cargo
-    directory: /src/wasm/jbig2
-    schedule:
-      interval: weekly
-    labels:
-      - dependencies
-      - wasm
-
-  - package-ecosystem: cargo
-    directory: /src/wasm/jpeg
-    schedule:
-      interval: weekly
+    cooldown:
+      default-days: 1
     labels:
       - dependencies
       - wasm
