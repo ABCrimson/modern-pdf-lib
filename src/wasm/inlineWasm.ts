@@ -268,7 +268,7 @@ function requireGenerated(): GeneratedModule {
     // by the caller using dynamic import or a pre-loaded reference.
     throw new Error(
       'Inline WASM data not loaded. ' +
-        'Call loadInlineWasmModule() first, or run `npm run generate:wasm-inline`.',
+        'Call loadInlineWasmModule() first, or run `pnpm run generate:wasm-inline`.',
     );
   } catch (err) {
     if (generatedModule) return generatedModule;
@@ -288,7 +288,7 @@ function getBase64Data(name: string): string {
     if (!moduleData) {
       throw new Error(
         `WASM module "${name}" is not available in the generated inline data. ` +
-          `Run \`npm run generate:wasm-inline\` to regenerate.`,
+          `Run \`pnpm run generate:wasm-inline\` to regenerate.`,
       );
     }
     return moduleData;
@@ -299,7 +299,7 @@ function getBase64Data(name: string): string {
     throw new Error(
       `Failed to load inline WASM data for module "${name}". ` +
         `The generated file may not exist. ` +
-        `Run \`npm run generate:wasm-inline\` to generate it. ` +
+        `Run \`pnpm run generate:wasm-inline\` to generate it. ` +
         `Original error: ${err instanceof Error ? err.message : String(err)}`,
     );
   }

@@ -43,7 +43,7 @@ jobs:
           cache: true
           require-lockfile: true
 
-      - name: TypeScript type-check (root, cli and scripts projects)
+      - name: TypeScript type-check (root, cli, scripts and tests projects)
         run: pnpm run typecheck
 
       - name: Lint (oxlint + tsgolint, type-aware)

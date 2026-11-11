@@ -3,7 +3,7 @@
  *
  * AUTO-GENERATED FILE -- DO NOT EDIT MANUALLY.
  *
- * Placeholder stub. Run `npm run generate:wasm-inline` to populate this
+ * Placeholder stub. Run `pnpm run generate:wasm-inline` to populate this
  * file with base64-encoded WASM module binaries.
  *
  * When no WASM binaries have been compiled, this file exports empty
