@@ -26,6 +26,8 @@ function makeFontRef(name: string, objNum = 42): FontRef {
     ref: PdfRef.of(objNum),
     widthOfTextAtSize: (text: string, size: number) => text.length * size * 0.5,
     heightAtSize: (size: number) => size,
+    sizeAtHeight: (height: number) => height,
+    getCharacterSet: () => [],
   };
 }
 

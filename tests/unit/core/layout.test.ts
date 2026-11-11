@@ -5,8 +5,9 @@ import {
   computeFontSize,
 } from '../../../src/core/layout.js';
 import type { PdfRef } from '../../../src/core/pdfObjects.js';
+import type { FontRef } from '../../../src/core/pdfPage.js';
 
-function mockFont(charWidth: number) {
+function mockFont(charWidth: number): FontRef {
   return {
     name: 'F1',
     ref: {
@@ -17,6 +18,8 @@ function mockFont(charWidth: number) {
     } as unknown as PdfRef,
     widthOfTextAtSize: (text: string, size: number) => text.length * charWidth * (size / 12),
     heightAtSize: (size: number) => size * 1.2,
+    sizeAtHeight: (height: number) => height / 1.2,
+    getCharacterSet: () => [],
   };
 }
 
@@ -45,9 +48,9 @@ describe('layoutMultilineText', () => {
       maxWidth: 1000,
     });
     expect(result.lines).toHaveLength(3);
-    expect(result.lines[0].text).toBe('line1');
-    expect(result.lines[1].text).toBe('line2');
-    expect(result.lines[2].text).toBe('line3');
+    expect(result.lines[0]?.text).toBe('line1');
+    expect(result.lines[1]?.text).toBe('line2');
+    expect(result.lines[2]?.text).toBe('line3');
   });
 
   it('accepts custom wordBreaks', () => {
@@ -69,7 +72,7 @@ describe('layoutMultilineText', () => {
       maxWidth: 1000,
     });
     expect(result.lines).toHaveLength(1);
-    expect(result.lines[0].text).toBe('hi');
+    expect(result.lines[0]?.text).toBe('hi');
   });
 });
 
@@ -83,10 +86,10 @@ describe('layoutCombedText', () => {
       cellWidth: 20,
     });
     expect(result).toHaveLength(4);
-    expect(result[0].char).toBe('A');
-    expect(typeof result[0].x).toBe('number');
-    expect(typeof result[0].width).toBe('number');
-    expect(result[1].x).toBeGreaterThan(result[0].x);
+    expect(result[0]?.char).toBe('A');
+    expect(typeof result[0]?.x).toBe('number');
+    expect(typeof result[0]?.width).toBe('number');
+    expect(result[1]?.x).toBeGreaterThan(result[0]?.x ?? 0);
   });
 
   it('truncates to cellCount', () => {

@@ -6,8 +6,8 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { buildCollection, type CollectionSchemaField } from '../../../src/core/collections.ts';
-import { PdfDict, PdfName, PdfNumber, PdfString, PdfArray } from '../../../src/core/pdfObjects.ts';
+import { buildCollection, type CollectionSchemaField } from '../../../src/core/collections.js';
+import { PdfDict, PdfName, PdfNumber, PdfString, PdfArray } from '../../../src/core/pdfObjects.js';
 
 /** Type guard asserting + narrowing a value to a {@link PdfDict}. */
 function asDict(value: unknown): PdfDict {

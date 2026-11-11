@@ -535,7 +535,8 @@ describe('validateCertificateChain', () => {
 
     // Tamper with the leaf by flipping a byte in the signature area
     const tampered = new Uint8Array(leaf);
-    tampered[tampered.length - 10] ^= 0xff;
+    const tamperIndex = tampered.length - 10;
+    tampered[tamperIndex] = (tampered[tamperIndex] ?? 0) ^ 0xff;
 
     const result = await validateCertificateChain([tampered, root.certificate]);
 

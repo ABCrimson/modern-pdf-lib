@@ -4,13 +4,19 @@
  * Measures standard font lookup speed and text measurement throughput.
  */
 
-import { describe, bench } from 'vitest';
+import { describe, bench } from './vitestBench.js';
 import {
   getStandardFont,
   measureStandardText,
   standardFontHeight,
   STANDARD_FONT_NAMES,
 } from '../../src/assets/font/standardFonts.js';
+
+// Bind once: Vitest's module runner adds a getter call to every imported-binding access.
+const measureText = measureStandardText;
+const fontHeight = standardFontHeight;
+const getFont = getStandardFont;
+const fontNames = STANDARD_FONT_NAMES;
 
 // ---------------------------------------------------------------------------
 // Test data
@@ -27,25 +33,25 @@ const longText = mediumText.repeat(20); // ~1720 chars
 
 describe('standard font lookup', () => {
   bench('getStandardFont("Helvetica")', () => {
-    getStandardFont('Helvetica');
+    getFont('Helvetica');
   });
 
   bench('getStandardFont("Courier")', () => {
-    getStandardFont('Courier');
+    getFont('Courier');
   });
 
   bench('getStandardFont("Times-Roman")', () => {
-    getStandardFont('Times-Roman');
+    getFont('Times-Roman');
   });
 
   bench('getStandardFont for all 14 fonts', () => {
-    for (const name of STANDARD_FONT_NAMES) {
-      getStandardFont(name);
+    for (const name of fontNames) {
+      getFont(name);
     }
   });
 
   bench('getStandardFont for unknown font', () => {
-    getStandardFont('NonexistentFont');
+    getFont('NonexistentFont');
   });
 });
 
@@ -55,27 +61,27 @@ describe('standard font lookup', () => {
 
 describe('text measurement', () => {
   bench('measureStandardText short (13 chars)', () => {
-    measureStandardText(shortText, 'Helvetica', 12);
+    measureText(shortText, 'Helvetica', 12);
   });
 
   bench('measureStandardText medium (86 chars)', () => {
-    measureStandardText(mediumText, 'Helvetica', 12);
+    measureText(mediumText, 'Helvetica', 12);
   });
 
   bench('measureStandardText long (~1720 chars)', () => {
-    measureStandardText(longText, 'Helvetica', 12);
+    measureText(longText, 'Helvetica', 12);
   });
 
   bench('measureStandardText Courier (monospace)', () => {
-    measureStandardText(mediumText, 'Courier', 12);
+    measureText(mediumText, 'Courier', 12);
   });
 
   bench('measureStandardText Times-Roman', () => {
-    measureStandardText(mediumText, 'Times-Roman', 12);
+    measureText(mediumText, 'Times-Roman', 12);
   });
 
   bench('standardFontHeight', () => {
-    standardFontHeight('Helvetica', 12);
+    fontHeight('Helvetica', 12);
   });
 });
 
@@ -92,69 +98,54 @@ describe('batch text measurement (simulated layout)', () => {
 
   bench('measure 50 paragraphs in Helvetica', () => {
     for (const text of paragraphs) {
-      measureStandardText(text, 'Helvetica', 12);
+      measureText(text, 'Helvetica', 12);
     }
   });
 
   bench('measure 50 paragraphs + heights', () => {
     for (const text of paragraphs) {
-      measureStandardText(text, 'Helvetica', 12);
-      standardFontHeight('Helvetica', 12);
+      measureText(text, 'Helvetica', 12);
+      fontHeight('Helvetica', 12);
     }
   });
 });
 
 // ---------------------------------------------------------------------------
-// WASM font parsing benchmarks (skip if WASM not available)
+// WASM font parsing benchmarks (skipped when the WASM module cannot load)
 // ---------------------------------------------------------------------------
 
-import { isFontParserWasmReady } from '../../src/assets/font/fontEmbed.js';
-import {
-  isSubsetWasmReady,
-  subsetFont,
-  computeSubsetTag,
-} from '../../src/assets/font/fontSubset.js';
-import { isShapingWasmReady } from '../../src/assets/font/textShaper.js';
+import { initFontParserWasm, isFontParserWasmReady } from '../../src/assets/font/fontEmbed.js';
+import { initShapingWasm, isShapingWasmReady } from '../../src/assets/font/textShaper.js';
+
+await initFontParserWasm();
+await initShapingWasm().catch(() => {});
 
 const wasmFontReady = isFontParserWasmReady();
-const wasmSubsetReady = isSubsetWasmReady();
 const wasmShapingReady = isShapingWasmReady();
 
 describe.skipIf(!wasmFontReady)('WASM font metric extraction', () => {
   bench('parse TrueType font metrics (WASM)', () => {
     // When WASM is loaded, extractMetrics() uses WASM path automatically.
     // This bench would require a real font file.
-    getStandardFont('Helvetica');
+    getFont('Helvetica');
   });
 
   bench('measure text width with WASM metrics', () => {
-    measureStandardText(mediumText, 'Helvetica', 12);
+    measureText(mediumText, 'Helvetica', 12);
   });
 });
 
-describe.skipIf(!wasmSubsetReady)('WASM font subsetting', () => {
-  // Create a minimal test font for subsetting benchmarks
-  const minimalFont = new Uint8Array(256);
-  const usedGlyphs = new Set([0, 32, 65, 66, 67]);
-
-  bench('subset font (5 glyphs)', () => {
-    subsetFont(minimalFont, usedGlyphs);
-  });
-
-  bench('compute subset tag', () => {
-    computeSubsetTag(usedGlyphs);
-  });
-});
+// No WASM subsetter exists (fontSubset.ts initSubsetWasm); the JS subsetter is not benchmarked here.
 
 describe.skipIf(!wasmShapingReady)('WASM text shaping', () => {
   bench('shape short text (WASM)', () => {
     // Would use shapeText() with WASM shaper.
     // Requires loaded font data + WASM module.
     // Placeholder: measure standard text as proxy
-    measureStandardText(shortText, 'Helvetica', 12);
+    measureText(shortText, 'Helvetica', 12);
   });
 
   bench('shape medium text (WASM)', () => {
-    measureStandardText(mediumText, 'Helvetica', 12);
+    measureText(mediumText, 'Helvetica', 12);
   });
 });

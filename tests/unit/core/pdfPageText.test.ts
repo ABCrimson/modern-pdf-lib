@@ -17,6 +17,12 @@ function mockFont(charWidth: number = 6, baseFontSize: number = 12): FontRef {
     heightAtSize(size: number): number {
       return size;
     },
+    sizeAtHeight(height: number): number {
+      return height;
+    },
+    getCharacterSet(): number[] {
+      return [];
+    },
   };
 }
 

@@ -199,7 +199,7 @@ describe('RuntimeAdapter interface contract', () => {
 
   it('writeFile returns a Promise<void>', async () => {
     let writtenPath = '';
-    let writtenData = new Uint8Array(0);
+    let writtenData: Uint8Array = new Uint8Array(0);
     const mock = createMockAdapter({
       writeFile: (path: string, data: Uint8Array) => {
         writtenPath = path;

@@ -112,8 +112,8 @@ describe('toSarif', () => {
   it('maps ruleId and message text for each result', () => {
     const log = toSarif(findings);
     const first = log.runs[0].results[0];
-    expect(first.ruleId).toBe('PDFA-6.1.2');
-    expect(first.message.text).toBe('File header missing %PDF version comment.');
+    expect(first?.ruleId).toBe('PDFA-6.1.2');
+    expect(first?.message.text).toBe('File header missing %PDF version comment.');
   });
 
   it('de-duplicates rule descriptors by id (first-seen order)', () => {
@@ -125,28 +125,28 @@ describe('toSarif', () => {
   it('maps page onto a physical-location region', () => {
     const log = toSarif(findings);
     const first = log.runs[0].results[0];
-    expect(first.locations).toBeDefined();
-    const region = first.locations?.[0].physicalLocation.region;
+    expect(first?.locations).toBeDefined();
+    const region = first?.locations?.[0]?.physicalLocation.region;
     expect(region?.startLine).toBe(1);
   });
 
   it('omits locations when the finding has no page', () => {
     const log = toSarif(findings);
     // Second finding has clause but no page.
-    expect(log.runs[0].results[1].locations).toBeUndefined();
+    expect(log.runs[0].results[1]?.locations).toBeUndefined();
   });
 
   it('surfaces clause and objectRef through the property bag', () => {
     const log = toSarif(findings);
     const first = log.runs[0].results[0];
-    expect(first.properties?.clause).toBe('6.1.2');
-    expect(first.properties?.objectRef).toBe('3 0 R');
+    expect(first?.properties?.clause).toBe('6.1.2');
+    expect(first?.properties?.objectRef).toBe('3 0 R');
   });
 
   it('omits properties when neither clause nor objectRef is present', () => {
     const log = toSarif(findings);
     // Third finding has only a page, no clause/objectRef.
-    expect(log.runs[0].results[2].properties).toBeUndefined();
+    expect(log.runs[0].results[2]?.properties).toBeUndefined();
   });
 
   it('uses the default tool name when none is supplied', () => {

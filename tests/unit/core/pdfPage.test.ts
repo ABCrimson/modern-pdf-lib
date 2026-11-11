@@ -6,7 +6,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { PdfPage, PageSizes } from '../../../src/core/pdfPage.js';
+import { PdfPage, PageSizes, type FontRef, type ImageRef } from '../../../src/core/pdfPage.js';
 import { PdfObjectRegistry, PdfRef } from '../../../src/core/pdfObjects.js';
 import { rgb } from '../../../src/core/operators/color.js';
 import { degrees } from '../../../src/core/operators/state.js';
@@ -20,6 +20,20 @@ function makePage(width?: number, height?: number): { page: PdfPage; registry: P
   const [w, h] = [width ?? PageSizes.A4[0], height ?? PageSizes.A4[1]];
   const page = new PdfPage(w, h, registry);
   return { page, registry };
+}
+
+function mockImage(name: string, ref: PdfRef, width: number, height: number): ImageRef {
+  return {
+    name,
+    ref,
+    width,
+    height,
+    scale: (factor) => ({ width: width * factor, height: height * factor }),
+    scaleToFit: (maxWidth, maxHeight) => {
+      const factor = Math.min(maxWidth / width, maxHeight / height);
+      return { width: width * factor, height: height * factor };
+    },
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -257,7 +271,7 @@ describe('PdfPage', () => {
   it('drawImage queues image XObject operators', () => {
     const { page } = makePage();
     const imgRef = PdfRef.of(99);
-    const image = { name: 'Im1', ref: imgRef, width: 200, height: 150 };
+    const image = mockImage('Im1', imgRef, 200, 150);
 
     page.drawImage(image, { x: 50, y: 400, width: 200, height: 150 });
 
@@ -272,7 +286,7 @@ describe('PdfPage', () => {
   it('drawImage registers the XObject resource on the page', () => {
     const { page } = makePage();
     const imgRef = PdfRef.of(99);
-    const image = { name: 'Im1', ref: imgRef, width: 100, height: 100 };
+    const image = mockImage('Im1', imgRef, 100, 100);
 
     page.drawImage(image);
 
@@ -406,11 +420,13 @@ describe('PdfPage', () => {
   it('drawText accepts FontRef object', () => {
     const { page } = makePage();
     const imgRef = PdfRef.of(42);
-    const fontRef = {
+    const fontRef: FontRef = {
       name: 'F7',
       ref: imgRef,
       widthOfTextAtSize: (text: string, size: number) => text.length * size * 0.5,
       heightAtSize: (size: number) => size,
+      sizeAtHeight: (height: number) => height,
+      getCharacterSet: () => [],
     };
 
     page.drawText('FontRef test', { x: 100, y: 500, font: fontRef, size: 18 });
@@ -464,7 +480,7 @@ describe('PdfPage', () => {
   it('drawImage registers XObject on the page', () => {
     const { page } = makePage();
     const imgRef = PdfRef.of(50);
-    const image = { name: 'Im5', ref: imgRef, width: 120, height: 80 };
+    const image = mockImage('Im5', imgRef, 120, 80);
 
     page.drawImage(image, { x: 10, y: 20, width: 120, height: 80 });
 
@@ -475,7 +491,7 @@ describe('PdfPage', () => {
   it('drawImage with rotation wraps in q/Q', () => {
     const { page } = makePage();
     const imgRef = PdfRef.of(60);
-    const image = { name: 'Im6', ref: imgRef, width: 200, height: 100 };
+    const image = mockImage('Im6', imgRef, 200, 100);
 
     page.drawImage(image, {
       x: 50,
@@ -553,11 +569,13 @@ describe('PdfPage', () => {
 
     // Create a FontRef with a simple width measurement:
     // Each character is 6 points at size 12 (0.5 * size per char)
-    const fontRef = {
+    const fontRef: FontRef = {
       name: 'F1',
       ref: PdfRef.of(42),
       widthOfTextAtSize: (text: string, size: number) => text.length * size * 0.5,
       heightAtSize: (size: number) => size,
+      sizeAtHeight: (height: number) => height,
+      getCharacterSet: () => [],
     };
 
     // "Hello World Test" is 16 chars => 16 * 6 = 96pt at size 12
@@ -588,11 +606,13 @@ describe('PdfPage', () => {
     const { page } = makePage();
 
     // Each character is 10 points at size 10 (1.0 * size per char)
-    const fontRef = {
+    const fontRef: FontRef = {
       name: 'F1',
       ref: PdfRef.of(42),
       widthOfTextAtSize: (text: string, size: number) => text.length * size * 1.0,
       heightAtSize: (size: number) => size,
+      sizeAtHeight: (height: number) => height,
+      getCharacterSet: () => [],
     };
 
     // "ABCDEFGHIJ" = 10 chars at 10pt each = 100pt
@@ -618,11 +638,13 @@ describe('PdfPage', () => {
   it('drawText without maxWidth does not wrap', () => {
     const { page } = makePage();
 
-    const fontRef = {
+    const fontRef: FontRef = {
       name: 'F1',
       ref: PdfRef.of(42),
       widthOfTextAtSize: (text: string, size: number) => text.length * size * 0.5,
       heightAtSize: (size: number) => size,
+      sizeAtHeight: (height: number) => height,
+      getCharacterSet: () => [],
     };
 
     // Long text without maxWidth should NOT be wrapped

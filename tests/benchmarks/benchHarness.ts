@@ -3,12 +3,13 @@
  *
  * Provides `describe`/`bench`/`beforeAll` with the same shape the benchmark
  * files already use, so they run standalone via `tsx` — decoupled from
- * Vitest's experimental (and, in v5, currently-removed) `bench` export.
+ * Vitest, where `bench` is a test-context fixture rather than an export (see
+ * vitestBench.ts for the `vitest bench` flavour).
  *
  * Run via `tests/benchmarks/run.ts`.
  */
 
-import { Bench } from 'tinybench';
+import { Bench, type TaskResult } from 'tinybench';
 
 type BenchFn = () => unknown;
 
@@ -42,10 +43,9 @@ export function beforeAll(fn: BenchFn): void {
   globalSetup.push(fn);
 }
 
-/** tinybench exposes throughput under different shapes across versions. */
-function opsPerSecond(result: unknown): number {
-  const r = result as { throughput?: { mean?: number }; hz?: number } | undefined;
-  return r?.throughput?.mean ?? r?.hz ?? 0;
+/** Mean operations per second of a task; 0 unless the task completed. */
+function opsPerSecond(result: TaskResult): number {
+  return result.state === 'completed' ? result.throughput.mean : 0;
 }
 
 /** Run every registered group, printing per-group results + a speedup summary. */

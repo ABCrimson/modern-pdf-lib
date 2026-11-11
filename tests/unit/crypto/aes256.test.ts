@@ -1001,10 +1001,7 @@ describe('AES-256 known-structure test', () => {
     const fileKey = h.getFileKey();
     // Use raw Web Crypto to decrypt
     const subtle = globalThis.crypto.subtle;
-    const keyBuf = fileKey.buffer.slice(
-      fileKey.byteOffset,
-      fileKey.byteOffset + fileKey.byteLength,
-    );
+    const keyBuf = fileKey.slice().buffer;
     const cryptoKey = await subtle.importKey('raw', keyBuf, 'AES-CBC', false, [
       'encrypt',
       'decrypt',

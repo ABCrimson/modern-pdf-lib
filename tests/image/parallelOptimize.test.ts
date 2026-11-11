@@ -46,7 +46,7 @@ async function createMultiImagePdf(pageCount: number): Promise<Uint8Array> {
 function stripReasons(report: OptimizationReport): OptimizationReport {
   return {
     ...report,
-    perImage: report.perImage.map((e) => ({ ...e, reason: undefined })),
+    perImage: report.perImage.map(({ reason: _reason, ...entry }) => entry),
   };
 }
 

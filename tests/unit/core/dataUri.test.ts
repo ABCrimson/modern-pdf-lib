@@ -47,8 +47,8 @@ describe('embedPages', () => {
     const embedded = target.embedPages([p1, p2]);
 
     expect(embedded).toHaveLength(2);
-    expect(embedded[0].width).toBe(200);
-    expect(embedded[1].width).toBe(400);
+    expect(embedded[0]?.width).toBe(200);
+    expect(embedded[1]?.width).toBe(400);
   });
 
   it('returns empty array for empty input', async () => {

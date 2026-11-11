@@ -462,7 +462,8 @@ describe('decodeTiff — LZW compression', () => {
     const lzwData = new Uint8Array(byteCount);
     for (let i = 0; i < bits.length; i++) {
       if (bits[i]) {
-        lzwData[Math.floor(i / 8)] |= 1 << (i % 8);
+        const byteIndex = Math.floor(i / 8);
+        lzwData[byteIndex] = (lzwData[byteIndex] ?? 0) | (1 << (i % 8));
       }
     }
 
