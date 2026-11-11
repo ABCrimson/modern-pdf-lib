@@ -1,29 +1,33 @@
 /**
  * @module form/scriptSandbox
  *
- * Sandboxed execution environment for PDF form JavaScript.
- *
- * PDF forms can contain JavaScript for calculations, validation, and
- * formatting (a subset of the Acrobat JavaScript API). This module
- * provides a secure sandbox that executes those scripts without
- * granting access to the host environment.
+ * Holder for PDF form script state. Since 0.40.5 no script is evaluated:
+ * PDF JavaScript from a document is never compiled or run, and
+ * {@link FormScriptSandbox.execute} throws {@link ScriptExecutionDisabledError}.
+ * The field values and builtins the class holds are kept for API
+ * compatibility.
  */
+
+import { ScriptExecutionDisabledError } from '../errors.js';
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
-/** Options for creating a sandbox. */
+/** Options for creating a sandbox. Every field is accepted and ignored. */
 export interface SandboxOptions {
-  /** Maximum execution time in milliseconds (default: 1000). */
+  /** Ignored since 0.40.5 (no script is executed). */
   timeout?: number | undefined;
-  /** Maximum memory usage in bytes (advisory, default: 10 MB). */
+  /** Ignored since 0.40.5 (no script is executed); it was never enforced. */
   maxMemory?: number | undefined;
-  /** Additional global names to allow in the sandbox scope. */
+  /** Ignored since 0.40.5 (no script is executed). */
   allowedGlobals?: string[] | undefined;
 }
 
-/** Result of executing a script in the sandbox. */
+/**
+ * Kept for type compatibility; since 0.40.5 `execute` throws and never
+ * returns one.
+ */
 export interface SandboxResult {
   /** Whether the script executed without errors. */
   success: boolean;
@@ -36,190 +40,41 @@ export interface SandboxResult {
 }
 
 // ---------------------------------------------------------------------------
-// Dangerous pattern stripping
-// ---------------------------------------------------------------------------
-
-const DANGEROUS_PATTERNS: readonly RegExp[] = [
-  /\bimport\s*\(/g,
-  /\brequire\s*\(/g,
-  /\bfetch\s*\(/g,
-  /\beval\s*\(/g,
-  /\bFunction\s*\(/g,
-  /\b__proto__\b/g,
-  /\bconstructor\s*\[/g,
-  /\.constructor\b/g,
-  /\bprototype\b/g,
-];
-
-function sanitizeScript(script: string): string {
-  let s = script;
-  for (const p of DANGEROUS_PATTERNS) {
-    p.lastIndex = 0;
-    s = s.replace(p, '/* blocked */');
-  }
-  return s;
-}
-
-// ---------------------------------------------------------------------------
-// Reserved words — cannot be used as `new Function(...)` parameter names
-// ---------------------------------------------------------------------------
-
-const RESERVED = new Set([
-  'break',
-  'case',
-  'catch',
-  'continue',
-  'debugger',
-  'default',
-  'delete',
-  'do',
-  'else',
-  'finally',
-  'for',
-  'function',
-  'if',
-  'in',
-  'instanceof',
-  'new',
-  'return',
-  'switch',
-  'this',
-  'throw',
-  'try',
-  'typeof',
-  'var',
-  'void',
-  'while',
-  'with',
-  'class',
-  'const',
-  'enum',
-  'export',
-  'extends',
-  'import',
-  'super',
-  'implements',
-  'interface',
-  'let',
-  'package',
-  'private',
-  'protected',
-  'public',
-  'static',
-  'yield',
-  'null',
-  'true',
-  'false',
-  'eval',
-  'arguments',
-  'undefined',
-  'NaN',
-  'Infinity',
-]);
-
-// ---------------------------------------------------------------------------
-// Field proxy
-// ---------------------------------------------------------------------------
-
-interface FieldProxy {
-  readonly name: string;
-  value: string;
-  valueAsString: string;
-}
-
-// ---------------------------------------------------------------------------
 // FormScriptSandbox
 // ---------------------------------------------------------------------------
 
 /**
- * A sandboxed execution environment for PDF form JavaScript.
+ * Holds form field values and builtins. Script evaluation is disabled since
+ * 0.40.5: `execute` throws {@link ScriptExecutionDisabledError}.
  * Create via {@link createSandbox}.
  */
 export class FormScriptSandbox {
-  private readonly timeout: number;
-  private readonly allowedGlobals: string[];
   private fieldValues: Map<string, string>;
   private builtins: Map<string, unknown>;
   private destroyed = false;
 
-  constructor(options?: SandboxOptions) {
-    this.timeout = options?.timeout ?? 1000;
-    this.allowedGlobals = options?.allowedGlobals ? [...options.allowedGlobals] : [];
+  constructor(_options?: SandboxOptions) {
     this.fieldValues = new Map();
     this.builtins = new Map();
     this.registerDefaultBuiltins();
   }
 
-  /** Execute a script in the sandbox. */
-  execute(script: string): SandboxResult {
-    if (this.destroyed) {
-      return { success: false, error: 'Sandbox has been destroyed', executionTimeMs: 0 };
-    }
-    const t0 = performance.now();
-    try {
-      const sanitized = sanitizeScript(script);
-      const scope = this.buildScope();
-
-      // Filter out reserved words from scope keys
-      const entries = Object.entries(scope).filter(
-        ([k]) => /^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(k) && !RESERVED.has(k),
-      );
-      const names = entries.map(([k]) => k);
-      const vals = entries.map(([, v]) => v);
-
-      // Build function — expression first, then statement fallback.
-      // Prepend "use strict" for security (blocks arguments.callee, etc.)
-      const strict = '"use strict";\n';
-      let fn: (...a: unknown[]) => unknown;
-      if (/\breturn\b/.test(sanitized)) {
-        // eslint-disable-next-line @typescript-eslint/no-implied-eval
-        fn = new Function(...names, `${strict}${sanitized}`) as (...a: unknown[]) => unknown;
-      } else {
-        try {
-          // eslint-disable-next-line @typescript-eslint/no-implied-eval
-          fn = new Function(...names, `${strict}return (\n${sanitized}\n);`) as (
-            ...a: unknown[]
-          ) => unknown;
-        } catch {
-          // eslint-disable-next-line @typescript-eslint/no-implied-eval
-          fn = new Function(...names, `${strict}${sanitized}`) as (...a: unknown[]) => unknown;
-        }
-      }
-
-      let ret: unknown;
-      let timedOut = false;
-      const tid = setTimeout(() => {
-        timedOut = true;
-      }, this.timeout);
-      try {
-        ret = fn(...vals);
-      } finally {
-        clearTimeout(tid);
-      }
-
-      if (timedOut) {
-        return {
-          success: false,
-          error: `Script exceeded ${this.timeout}ms timeout`,
-          executionTimeMs: performance.now() - t0,
-        };
-      }
-      return { success: true, returnValue: ret, executionTimeMs: performance.now() - t0 };
-    } catch (err) {
-      return {
-        success: false,
-        error: err instanceof Error ? err.message : String(err),
-        executionTimeMs: performance.now() - t0,
-      };
-    }
+  /**
+   * Script execution is disabled since 0.40.5: modern-pdf-lib does not
+   * evaluate PDF JavaScript. The script text is not read.
+   *
+   * @throws {ScriptExecutionDisabledError} Always.
+   */
+  execute(_script: string): SandboxResult {
+    throw new ScriptExecutionDisabledError();
   }
 
-  /** Set field values available to scripts. */
+  /** Store a copy of the given field values. No script reads them: `execute` throws since 0.40.5. */
   setFieldValues(values: Map<string, string>): void {
     if (!this.destroyed) this.fieldValues = new Map(values);
   }
 
-  /** Get field values (possibly modified by scripts). */
+  /** Get a copy of the stored field values. */
   getFieldValues(): Map<string, string> {
     return new Map(this.fieldValues);
   }
@@ -274,71 +129,11 @@ export class FormScriptSandbox {
     this.builtins.set('event', { value: '', target: { name: '' }, targetName: '', rc: true });
     /* eslint-enable @typescript-eslint/no-empty-function */
   }
-
-  private buildScope(): Record<string, unknown> {
-    const fv = this.fieldValues;
-    const getField = (name: unknown): FieldProxy | null => {
-      const n = String(name);
-      if (!fv.has(n)) return null;
-      return {
-        get name() {
-          return n;
-        },
-        get value() {
-          return fv.get(n) ?? '';
-        },
-        set value(v: string) {
-          fv.set(n, String(v));
-        },
-        get valueAsString() {
-          return fv.get(n) ?? '';
-        },
-        set valueAsString(v: string) {
-          fv.set(n, String(v));
-        },
-      };
-    };
-
-    const scope: Record<string, unknown> = {
-      Math,
-      parseInt,
-      parseFloat,
-      String,
-      Number,
-      Boolean,
-      Array,
-      JSON: Object.freeze({ parse: JSON.parse, stringify: JSON.stringify }),
-      isNaN,
-      isFinite,
-      Date,
-      RegExp,
-      getField,
-      globalThis: undefined,
-      window: undefined,
-      self: undefined,
-      global: undefined,
-      process: undefined,
-      document: undefined,
-      XMLHttpRequest: undefined,
-      WebSocket: undefined,
-      Worker: undefined,
-      SharedWorker: undefined,
-      Proxy: undefined,
-      Reflect: undefined,
-    };
-
-    for (const [k, v] of this.builtins) scope[k] = v;
-    for (const g of this.allowedGlobals) {
-      if (g in globalThis && !(g in scope)) {
-        scope[g] = (globalThis as Record<string, unknown>)[g];
-      }
-    }
-    return scope;
-  }
 }
 
 /**
- * Create a new sandboxed execution environment for PDF form scripts.
+ * Create a {@link FormScriptSandbox}. Its `execute` throws
+ * {@link ScriptExecutionDisabledError} since 0.40.5.
  */
 export function createSandbox(options?: SandboxOptions): FormScriptSandbox {
   return new FormScriptSandbox(options);

@@ -87,7 +87,7 @@ export {
 } from './documentScripts.js';
 export type { DocumentScript, PrintActionOptions, SaveActionOptions } from './documentScripts.js';
 
-// Sandboxed script execution
+// Form script sandbox (evaluation disabled since 0.40.5; execute() throws)
 export { FormScriptSandbox, createSandbox } from './scriptSandbox.js';
 export type { SandboxOptions, SandboxResult } from './scriptSandbox.js';
 
