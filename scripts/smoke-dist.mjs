@@ -10,12 +10,16 @@
  * build all still pass. v0.28.0 shipped exactly that bug. This script makes the
  * published artifact a first-class, verified gate.
  *
- * Usage: `node scripts/smoke-dist.mjs` (run after `npm run build`).
- * Exits non-zero on the first failure.
+ * It also asserts that every `exports` / `bin` / `main` / `module` / `types`
+ * target of package.json exists and that `modern-pdf --help` runs.
+ *
+ * Usage: `pnpm run smoke` (`node scripts/smoke-dist.mjs`, run after
+ * `pnpm run build`). Exits non-zero if any check fails.
  */
+import { execFileSync } from 'node:child_process';
 import { createRequire } from 'node:module';
 import { pathToFileURL } from 'node:url';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 const require = createRequire(import.meta.url);
@@ -100,6 +104,17 @@ const CJS_ENTRIES = [
   { file: 'forms.cjs', expect: ['PdfForm'] },
 ];
 
+const pkg = JSON.parse(readFileSync(resolve(process.cwd(), 'package.json'), 'utf8'));
+
+/** String targets of an `exports` value, nested conditions included. Wildcard targets
+ *  (`./wasm/*`) are skipped: `dist/wasm/` is filled by `pnpm run copy:wasm`, after the build. */
+const collectTargets = (value) =>
+  typeof value === 'string'
+    ? value.includes('*')
+      ? []
+      : [value]
+    : Object.values(value ?? {}).flatMap(collectTargets);
+
 let failures = 0;
 const fail = (msg) => {
   failures++;
@@ -139,8 +154,30 @@ for (const { file, expect } of CJS_ENTRIES) {
   }
 }
 
+// Every path package.json publishes must exist.
+const targets = new Set([
+  ...collectTargets(pkg.exports),
+  ...Object.values(pkg.bin ?? {}),
+  ...[pkg.main, pkg.module, pkg.types, pkg.unpkg, pkg.jsdelivr].filter(Boolean),
+]);
+const absent = [...targets].filter((target) => !existsSync(resolve(process.cwd(), target)));
+if (absent.length) fail(`package.json targets missing from dist/: ${absent.join(', ')}`);
+else ok(`all ${targets.size} package.json export/bin/main/module/types targets exist`);
+
+// The CLI entry must start.
+try {
+  const help = execFileSync(process.execPath, [resolve(root, 'cli', 'index.mjs'), '--help'], {
+    encoding: 'utf8',
+    stdio: ['ignore', 'pipe', 'pipe'],
+  });
+  if (help.trim().length === 0) fail('modern-pdf --help printed nothing');
+  else ok('modern-pdf --help runs');
+} catch (e) {
+  fail(`modern-pdf --help: ${e.message}`);
+}
+
 if (failures > 0) {
-  console.error(`\n✗ dist smoke FAILED: ${failures} entry/entries broken — the published package would be unimportable.`);
+  console.error(`\n✗ dist smoke FAILED: ${failures} check(s) failed — the published package would be broken.`);
   process.exit(1);
 }
-console.log('\n✓ dist smoke passed: every built entry links and exposes its public API.');
+console.log('\n✓ dist smoke passed: every built entry links, every package.json target exists, and the CLI starts.');

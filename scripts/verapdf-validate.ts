@@ -1,11 +1,11 @@
-#!/usr/bin/env tsx
+#!/usr/bin/env node
 /**
  * veraPDF validation wrapper for CI.
  *
  * Downloads the veraPDF CLI (requires Java 11+) and validates
  * PDF files against PDF/A conformance levels.
  *
- * Usage: npx tsx scripts/verapdf-validate.ts <file.pdf> [--level 1b]
+ * Usage: node scripts/verapdf-validate.ts <file.pdf> [--level 1b]
  */
 
 import { existsSync } from 'node:fs';

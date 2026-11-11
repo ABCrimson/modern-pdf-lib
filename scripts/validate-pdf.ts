@@ -1,4 +1,4 @@
-#!/usr/bin/env tsx
+#!/usr/bin/env node
 /**
  * validate-pdf.ts — PDF structure validation utility
  *
@@ -10,8 +10,8 @@
  *   - Basic object structure
  *
  * Usage:
- *   npx tsx scripts/validate-pdf.ts <file.pdf>
- *   npm run validate-pdf -- <file.pdf>
+ *   node scripts/validate-pdf.ts <file.pdf>
+ *   pnpm run validate-pdf <file.pdf>
  *
  * Exit codes:
  *   0 — All validations passed
@@ -219,7 +219,7 @@ function validateStartxref(bytes: Uint8Array): ValidationResult {
     };
   }
 
-  const offset = parseInt(match[1], 10);
+  const offset = parseInt(match[1] ?? '', 10);
 
   return {
     name: 'startxref Pointer',

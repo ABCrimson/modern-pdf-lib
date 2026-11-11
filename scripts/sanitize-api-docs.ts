@@ -8,25 +8,19 @@
  * "Duplicate attribute" / parse errors.
  *
  * This pass HTML-escapes those characters in prose only, leaving fenced code
- * blocks (```) and inline code spans (`) untouched so signatures still render.
- * Run automatically after `docs:api`.
+ * blocks (``` or ~~~) and inline code spans (`) untouched so signatures still
+ * render. Runs as the second step of `pnpm run docs:api`, after typedoc.
  */
 
-import { readdir, readFile, writeFile } from 'node:fs/promises';
-import { join } from 'node:path';
+import { glob, readFile, writeFile } from 'node:fs/promises';
 
 const API_DIR = 'docs/api';
 
-async function* walk(dir: string): AsyncGenerator<string> {
-  for (const entry of await readdir(dir, { withFileTypes: true })) {
-    const full = join(dir, entry.name);
-    if (entry.isDirectory()) {
-      yield* walk(full);
-    } else if (entry.name.endsWith('.md')) {
-      yield full;
-    }
-  }
-}
+/**
+ * Code-fence line: three or more backticks or tildes, up to 3 spaces of indent.
+ * Group 1 is the marker, group 2 the info string (trailing CR dropped).
+ */
+const FENCE = /^ {0,3}(`{3,}|~{3,})(.*?)\r?$/;
 
 const ESCAPES: Readonly<Record<string, string>> = {
   '{': '&#123;',
@@ -38,15 +32,27 @@ const ESCAPES: Readonly<Record<string, string>> = {
 /** Escape Vue/markdown-hostile chars in prose, preserving fenced + inline code. */
 function sanitize(markdown: string): string {
   const out: string[] = [];
-  let inFence = false;
+  // The marker (e.g. "```" or "~~~~") that opened the current fenced block, if any.
+  let openFence: string | undefined;
 
   for (const line of markdown.split('\n')) {
-    if (line.trimStart().startsWith('```')) {
-      inFence = !inFence;
+    const [, marker, rest = ''] = FENCE.exec(line) ?? [];
+    if (openFence !== undefined) {
+      // A closing fence uses the same character, is at least as long as the opener, and has no info string.
+      if (
+        marker !== undefined &&
+        marker[0] === openFence[0] &&
+        marker.length >= openFence.length &&
+        /^[ \t]*$/.test(rest)
+      ) {
+        openFence = undefined;
+      }
       out.push(line);
       continue;
     }
-    if (inFence) {
+    // A backtick opener whose info string contains a backtick is inline code, not a fence.
+    if (marker !== undefined && !(marker[0] === '`' && rest.includes('`'))) {
+      openFence = marker;
       out.push(line);
       continue;
     }
@@ -70,7 +76,7 @@ function sanitize(markdown: string): string {
 }
 
 let changed = 0;
-for await (const file of walk(API_DIR)) {
+for await (const file of glob(`${API_DIR}/**/*.md`)) {
   const original = await readFile(file, 'utf8');
   const fixed = sanitize(original);
   if (fixed !== original) {

@@ -1,7 +1,7 @@
 /**
  * Generate a reference "Hello, World!" PDF for testing.
  *
- * Run with: npx tsx scripts/gen-reference-pdf.ts
+ * Run with: pnpm exec tsx scripts/gen-reference-pdf.ts
  *
  * The PDF contains:
  * - An A4 page

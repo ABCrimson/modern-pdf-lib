@@ -10,17 +10,19 @@ publish = false
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-wasm-bindgen = "0.2.127"
-rustybuzz = "0.20.1"
-ttf-parser = "0.25.1"
+wasm-bindgen = "=0.2.130"
+rustybuzz = "=0.20.1"
 
 [package.metadata.wasm-pack.profile.release]
-wasm-opt = ["-O", "--enable-bulk-memory", "--enable-nontrapping-float-to-int", "--enable-sign-ext"]
+# wasm-pack skips wasm-opt (its bundled binaryen is version_130); scripts/build-wasm.sh
+# runs the pinned newest binaryen on pkg/*_bg.wasm instead.
+wasm-opt = false
 
 [profile.release]
 # Optimize for small binary size -- critical for WASM delivery
 opt-level = "z"
 lto = true
 codegen-units = 1
-strip = true
+# Keep the target_features section (wasm-bindgen warns against strip = true).
+strip = "debuginfo"
 panic = "abort"
