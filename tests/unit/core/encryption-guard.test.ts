@@ -54,6 +54,7 @@ import {
   UnsupportedEncryptionError,
 } from '../../../src/index.js';
 import type { EncryptOptions, PdfDocument, PdfObject } from '../../../src/index.js';
+import { defectKey, knownDefect } from '../../helpers/known-defect.js';
 import { generateTestCert } from '../../helpers/signature-trust-fixtures.js';
 
 type Algorithm = NonNullable<EncryptOptions['algorithm']>;
@@ -583,17 +584,27 @@ describe('qpdf cross-check', () => {
     },
   );
 
-  it.fails('two saves of one AES-256 (R6) document give identical qpdf --decrypt --qdf output (crypto-security-01 until 0.40.9)', async (ctx) => {
-    if (qpdfVersion === undefined) ctx.skip(QPDF_SKIP);
-    await twoSavesDecryptIdentically('aes-256');
-  });
+  knownDefect(
+    defectKey('crypto-security-01', '0.40.9'),
+    'two saves of one AES-256 (R6) document give identical qpdf --decrypt --qdf output',
+    { failsWith: /^qpdf: .*: invalid password$/m },
+    async (ctx) => {
+      if (qpdfVersion === undefined) ctx.skip(QPDF_SKIP);
+      await twoSavesDecryptIdentically('aes-256');
+    },
+  );
 
-  it.fails('two doc.save() calls of one RC4 (R3) document give identical bytes (core-document-08 until 0.41.2)', async () => {
-    const doc = await buildRichDoc('rc4-128');
-    const s1 = await doc.save({ compress: false });
-    const s2 = await doc.save({ compress: false });
-    expect(s2).toEqual(s1);
-  });
+  knownDefect(
+    defectKey('core-document-08', '0.41.2'),
+    'two doc.save() calls of one RC4 (R3) document give identical bytes',
+    { failsWith: /^AssertionError: expected Uint8Array\[.*\] to deeply equal Uint8Array\[/ },
+    async () => {
+      const doc = await buildRichDoc('rc4-128');
+      const s1 = await doc.save({ compress: false });
+      const s2 = await doc.save({ compress: false });
+      expect(s2).toEqual(s1);
+    },
+  );
 });
 
 // ---------------------------------------------------------------------------

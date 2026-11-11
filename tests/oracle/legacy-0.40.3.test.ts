@@ -10,9 +10,11 @@
  * pattern the independent-reader check uses for the `agree` box and the reader's error messages
  * are literals in this file.
  *
- * A check that fails today because of a known open defect is a `test.fails` whose title starts
- * with the defect id and the release that fixes it. When that defect is fixed the `test.fails`
- * turns red; the fixing release flips the entry in KNOWN to a plain `test` by deleting it.
+ * A check that fails today because of a known open defect is a knownDefect marker
+ * (tests/helpers/known-defect.ts): a `test.fails` whose title starts with the defect id and the
+ * release that fixes it, and which passes only while the check fails with the error KNOWN names.
+ * When that defect is fixed the marker turns red; the fixing release flips the entry in KNOWN to
+ * a plain `test` by deleting it.
  */
 import { Buffer } from 'node:buffer';
 import { createHash } from 'node:crypto';
@@ -28,6 +30,8 @@ import {
   verifySignatures,
 } from '../../src/index.js';
 import type { PdfDocument } from '../../src/index.js';
+import { defectKey, knownDefect } from '../helpers/known-defect.js';
+import type { DefectKey } from '../helpers/known-defect.js';
 
 type Check =
   | 'info'
@@ -77,45 +81,71 @@ const entryOf = (file: string): LegacyEntry => {
   return entry;
 };
 
-// Known open defects, one place, so each id appears once. fixture -> check -> id.
-// A listed check runs as test.fails; delete the entry in the release that fixes the defect.
-const DUPLICATE_OBJECTS = 'legacy-M01 (until 0.41.2)';
-const ENCRYPTED_LOAD = 'parser-syntax-01 (until 0.40.9)';
-const KNOWN: Readonly<Record<string, Partial<Record<Check, string>>>> = {
+// Known open defects, one place, so each id appears once. fixture -> check -> key and the
+// error the check shows while the defect is open (knownDefect passes only on that error).
+// A listed check runs as a knownDefect marker; delete the entry in the release that fixes the defect.
+interface Known {
+  readonly key: DefectKey;
+  readonly failsWith: RegExp;
+}
+const TITLE_DIFFERS = /^AssertionError: expected .* to be '/;
+const TEXT_DIFFERS = /^AssertionError: expected .* to contain '/;
+const DUPLICATE_OBJECTS: Known = {
+  key: defectKey('legacy-M01', '0.41.2'),
+  failsWith: /^AssertionError: expected \d+ to be \d+/,
+};
+const ENCRYPTED_LOAD = defectKey('parser-syntax-01', '0.40.9');
+const ENCRYPTED_INFO: Known = { key: ENCRYPTED_LOAD, failsWith: TITLE_DIFFERS };
+const ENCRYPTED_TEXT: Known = {
+  key: ENCRYPTED_LOAD,
+  failsWith: /^Error: FlateDecode: failed to decompress data/,
+};
+const UTF8_INFO: Known = { key: defectKey('core-document-01', '0.41.0'), failsWith: TITLE_DIFFERS };
+const UTF8_TEXT: Known = { key: defectKey('core-page-01', '0.41.0'), failsWith: TEXT_DIFFERS };
+const KNOWN: Readonly<Record<string, Partial<Record<Check, Known>>>> = {
   'raw-deflate.pdf': { resaveUniqueObjects: DUPLICATE_OBJECTS },
   'raw-deflate-objstm.pdf': { resaveUniqueObjects: DUPLICATE_OBJECTS },
   'linearized.pdf': { resaveUniqueObjects: DUPLICATE_OBJECTS },
   'signed.pdf': {
-    signatureFieldName: 'signature-cms-38 (until 0.45.0)',
+    signatureFieldName: {
+      key: defectKey('signature-cms-38', '0.45.0'),
+      failsWith: /^AssertionError: expected 'Signature' to be 'Signature1'/,
+    },
     resaveUniqueObjects: DUPLICATE_OBJECTS,
   },
-  'forms.pdf': { fields: 'forms-34 (until 0.41.5)', resaveUniqueObjects: DUPLICATE_OBJECTS },
+  'forms.pdf': {
+    fields: {
+      key: defectKey('forms-34', '0.41.5'),
+      failsWith: /^AssertionError: expected false to be true/,
+    },
+    resaveUniqueObjects: DUPLICATE_OBJECTS,
+  },
   'encrypted-r4.pdf': {
-    info: ENCRYPTED_LOAD,
-    text: ENCRYPTED_LOAD,
-    resaveInfo: ENCRYPTED_LOAD,
-    resaveText: ENCRYPTED_LOAD,
+    info: ENCRYPTED_INFO,
+    text: ENCRYPTED_TEXT,
+    resaveInfo: ENCRYPTED_INFO,
+    resaveText: ENCRYPTED_TEXT,
   },
   'encrypted-r6.pdf': {
-    info: ENCRYPTED_LOAD,
-    text: ENCRYPTED_LOAD,
-    resaveInfo: ENCRYPTED_LOAD,
-    resaveText: ENCRYPTED_LOAD,
+    info: ENCRYPTED_INFO,
+    text: ENCRYPTED_TEXT,
+    resaveInfo: ENCRYPTED_INFO,
+    resaveText: ENCRYPTED_TEXT,
   },
   'utf8-strings.pdf': {
-    info: 'core-document-01 (until 0.41.0)',
-    text: 'core-page-01 (until 0.41.0)',
-    resaveInfo: 'core-document-01 (until 0.41.0)',
-    resaveText: 'core-page-01 (until 0.41.0)',
+    info: UTF8_INFO,
+    text: UTF8_TEXT,
+    resaveInfo: UTF8_INFO,
+    resaveText: UTF8_TEXT,
     resaveUniqueObjects: DUPLICATE_OBJECTS,
   },
 };
 
-/** `test` for a passing check, `test.fails` (with the id in the title) for a known defect. */
+/** `test` for a passing check, a knownDefect marker (key in the title) for a known defect. */
 function check(file: string, c: Check, what: string, body: () => Promise<void> | void): void {
-  const id = KNOWN[file]?.[c];
-  if (id === undefined) test(`${file} ${what}`, body);
-  else test.fails(`${id}: ${file} ${what}`, body);
+  const known = KNOWN[file]?.[c];
+  if (known === undefined) test(`${file} ${what}`, body);
+  else knownDefect(known.key, `${file} ${what}`, { failsWith: known.failsWith }, body);
 }
 
 const loadOptions = (entry: LegacyEntry): { password: string } | undefined =>

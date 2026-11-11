@@ -7,22 +7,78 @@ import { defineConfig } from 'vitest/config';
 // count applies (cores - 1 for `vitest run`, half the cores in watch mode).
 const WORKER_HEAP_MB = 3072;
 
+// The crypto suites generate random keypairs and sign/verify under heavy
+// concurrent fork-pool load; a rare WebCrypto-under-load timing flake can
+// make a freshly-signed signature momentarily fail to verify (observed only
+// under full-suite concurrency, never in isolation). The unit and integration
+// projects retry transient failures so the pipeline is reliable: a genuinely
+// broken test fails all three attempts and still surfaces. The oracle and
+// adversarial projects never retry: a failure there is a result, not a flake.
+const FLAKE_RETRY = 2;
+
+// `vitest bench` adds a "<name> (bench)" variant of every project, collecting
+// that project's `benchmark.include` (Vitest's default matches every
+// *.bench.ts). The unit project owns the bench files; the others list none,
+// so each bench file runs once.
+const NO_BENCHMARKS = { include: [] };
+
+// Four projects, selected by include glob; no test file moves between
+// directories. `node scripts/dev/test-projects.ts --check` fails when a
+// tests/**/*.test.ts file matches no project or more than one.
+// `extends: true` (the Vitest 5.1 default, written out) gives every project
+// the root options below: pool, execArgv and the CI worker cap.
 export default defineConfig({
   test: {
-    include: ['tests/**/*.test.ts'],
     pool: 'forks',
     execArgv: [`--max-old-space-size=${WORKER_HEAP_MB}`],
     ...(process.env.CI ? { maxWorkers: 3 } : {}),
-    // The crypto suites generate random keypairs and sign/verify under heavy
-    // concurrent fork-pool load; a rare WebCrypto-under-load timing flake can
-    // make a freshly-signed signature momentarily fail to verify (observed only
-    // under full-suite concurrency, never in isolation). Retry transient
-    // failures so the pipeline is reliable — a genuinely broken test fails all
-    // three attempts and still surfaces, so this never masks a real defect.
-    retry: 2,
-    benchmark: {
-      include: ['tests/benchmarks/**/*.bench.ts', 'tests/image/**/*.bench.ts'],
-    },
+    projects: [
+      {
+        extends: true,
+        test: {
+          name: 'unit',
+          include: [
+            'tests/unit/**/*.test.ts',
+            'tests/barcode/**/*.test.ts',
+            'tests/compliance/**/*.test.ts',
+            'tests/image/**/*.test.ts',
+            'tests/layout/**/*.test.ts',
+            'tests/browser/**/*.test.ts',
+          ],
+          retry: FLAKE_RETRY,
+          benchmark: {
+            include: ['tests/benchmarks/**/*.bench.ts', 'tests/image/**/*.bench.ts'],
+          },
+        },
+      },
+      {
+        extends: true,
+        test: {
+          name: 'integration',
+          include: ['tests/integration/**/*.test.ts'],
+          retry: FLAKE_RETRY,
+          benchmark: NO_BENCHMARKS,
+        },
+      },
+      {
+        extends: true,
+        test: {
+          name: 'oracle',
+          include: ['tests/oracle/**/*.test.ts'],
+          retry: 0,
+          benchmark: NO_BENCHMARKS,
+        },
+      },
+      {
+        extends: true,
+        test: {
+          name: 'adversarial',
+          include: ['tests/adversarial/**/*.test.ts'],
+          retry: 0,
+          benchmark: NO_BENCHMARKS,
+        },
+      },
+    ],
     coverage: {
       provider: 'v8',
       include: ['src/**/*.ts'],
