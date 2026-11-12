@@ -13,11 +13,12 @@
  */
 
 import { inflateFlate, inflateRaw } from '../compression/pdfFlate.js';
+import { INTERNAL_LIMITS, assertWithinLimit } from '../core/limits.js';
+import { UnsupportedFilterError } from '../errors.js';
 import type { PdfObject, PdfStream } from '../core/pdfObjects.js';
 import { PdfDict, PdfName, PdfArray, PdfNumber } from '../core/pdfObjects.js';
 import { decodeCCITT } from './ccittDecode.js';
 import { decodeJBIG2 } from './jbig2Decode.js';
-import { decodeJpeg2000 } from './jpeg2000Decode.js';
 
 // ---------------------------------------------------------------------------
 // Public API
@@ -35,6 +36,11 @@ import { decodeJpeg2000 } from './jpeg2000Decode.js';
  * @param decodeParms - Optional decode parameters — a single `PdfDict` or
  *                      an array of `PdfDict | null` parallel to `filters`.
  * @returns The fully decoded bytes.
+ * @throws {ResourceLimitError} `maxDecodedStreamBytes` when the output of any
+ *   one filter of the chain is longer than 256 MiB (268,435,456 bytes); an
+ *   output of exactly that length is accepted.
+ * @throws {ResourceLimitError} `maxPredictorSamples` when a `/Predictor 2`
+ *   with `/BitsPerComponent` 1, 2 or 4 covers more than 2^28 samples.
  */
 export function decodeStream(
   data: Uint8Array,
@@ -49,6 +55,8 @@ export function decodeStream(
     const filterName = normalizeFilterName(filterList[i]!);
     const parms = parmsList[i] ?? null;
     result = applyFilter(filterName, result, parms);
+    // Each filter's output is held to the ceiling, so a chain's output is too.
+    assertWithinLimit('maxDecodedStreamBytes', result.length);
   }
   return result;
 }
@@ -147,12 +155,22 @@ export function firstFilterName(dict: PdfDict): string | undefined {
  * The predictors undone are `/Predictor 2` (TIFF) and `/Predictor` 10 to
  * 15 (PNG); a `/Predictor` above 15 is undone as a PNG predictor too. A
  * `/DecodeParms` array is read only when `/Filter` is a one-entry array.
+ * For those predictors `/Columns` must be an integer of at least 1,
+ * `/Colors` an integer from 1 to 32 and `/BitsPerComponent` 1, 2, 4, 8 or
+ * 16 (each defaulting to 1, 1 and 8); `/Predictor 1` and the values 3 to 9
+ * leave the data as inflated.
  *
  * @param stream - The stream to decode.
  * @returns The decoded bytes, or `undefined` for any other `/Filter`.
  * @throws {Error} `FlateDecode: failed to decompress data` when the data
  *   does not inflate: neither as zlib nor as raw DEFLATE for the name and
  *   the one-entry array, and not as raw DEFLATE for a longer array.
+ * @throws {Error} `Predictor: unsupported decode parameters (...)` when the
+ *   predictor's parameters are outside the ranges above.
+ * @throws {ResourceLimitError} `maxDecodedStreamBytes` when the inflated
+ *   data or one predictor row is longer than 256 MiB.
+ * @throws {ResourceLimitError} `maxPredictorSamples` when a `/Predictor 2`
+ *   with `/BitsPerComponent` 1, 2 or 4 covers more than 2^28 samples.
  */
 export function decodeFlateOnly(stream: PdfStream): Uint8Array | undefined {
   const filter = stream.dict.get('/Filter');
@@ -181,18 +199,21 @@ export function decodeFlateOnly(stream: PdfStream): Uint8Array | undefined {
   return applyFlateOnlyPredictor(inflateFlate(stream.data), parms);
 }
 
+// ---------------------------------------------------------------------------
+// Internal: ceiling on one filter's output
+// ---------------------------------------------------------------------------
+
+/** The ceiling on the output of one filter: INTERNAL_LIMITS.maxDecodedStreamBytes. */
+const MAX_OUTPUT = INTERNAL_LIMITS.maxDecodedStreamBytes;
+
 /**
  * Undo the predictor of {@link decodeFlateOnly}: as `applyPredictor`, except that a `/Predictor`
  * above 15 is undone as a PNG predictor.
  */
 function applyFlateOnlyPredictor(data: Uint8Array, parms: PdfDict | null): Uint8Array {
   if (dictInt(parms, '/Predictor', 1) > 15) {
-    return applyPngPredictors(
-      data,
-      dictInt(parms, '/Columns', 1),
-      dictInt(parms, '/Colors', 1),
-      dictInt(parms, '/BitsPerComponent', 8),
-    );
+    const { columns, colors, bpc } = readPredictorParms(parms);
+    return applyPngPredictors(data, columns, colors, bpc);
   }
   return applyPredictor(data, parms);
 }
@@ -288,6 +309,7 @@ function applyFilter(filterName: string, data: Uint8Array, parms: PdfDict | null
       return decodeJPX(data, parms);
     case 'CCITTFaxDecode':
       return decodeCCITT(data, parms);
+    // JBIG2Decode: throws UnsupportedFilterError (see decodeJBIG2).
     case 'JBIG2Decode':
       return decodeJBIG2(data, parms);
     case 'Crypt':
@@ -327,32 +349,70 @@ function decodeFlateDecode(data: Uint8Array, parms: PdfDict | null): Uint8Array 
  *
  * Reference: PDF 1.7 spec, §7.4.4.4 (LZWDecode and FlateDecode
  * Parameters).
+ *
+ * The predictor is undone in place: `data` must be a buffer the calling
+ * decoder allocated in the same call (the output of `inflateFlate`,
+ * `inflateRaw` or `lzwDecompress`), never an array the caller of a public
+ * function owns.  Every caller in this module passes such a buffer; the
+ * result is `data` itself, or a view of it.
  */
 function applyPredictor(data: Uint8Array, parms: PdfDict | null): Uint8Array {
   const predictor = dictInt(parms, '/Predictor', 1);
-  if (predictor === 1) return data; // No prediction
-
-  const columns = dictInt(parms, '/Columns', 1);
-  const colors = dictInt(parms, '/Colors', 1);
-  const bpc = dictInt(parms, '/BitsPerComponent', 8);
 
   if (predictor === 2) {
+    const { columns, colors, bpc } = readPredictorParms(parms);
     return applyTiffPredictor2(data, columns, colors, bpc);
   }
 
   if (predictor >= 10 && predictor <= 15) {
+    const { columns, colors, bpc } = readPredictorParms(parms);
     return applyPngPredictors(data, columns, colors, bpc);
   }
 
-  // Unknown predictor — return data as-is
+  // No prediction (1) or an unknown predictor — return data as-is
   return data;
+}
+
+/**
+ * Read and validate the parameters of predictor 2 or 10 to 15 (and, for
+ * decodeFlateOnly, any /Predictor above 15).
+ *
+ * A row longer than the decoded-size ceiling throws `ResourceLimitError`.
+ */
+function readPredictorParms(parms: PdfDict | null): {
+  columns: number;
+  colors: number;
+  bpc: number;
+} {
+  const columns = dictInt(parms, '/Columns', 1);
+  const colors = dictInt(parms, '/Colors', 1);
+  const bpc = dictInt(parms, '/BitsPerComponent', 8);
+  // /Columns >= 1, /Colors 1-32 and /BitsPerComponent 1, 2, 4, 8 or 16 are accepted; anything else throws.
+  if (
+    !Number.isInteger(columns) ||
+    columns < 1 ||
+    !Number.isInteger(colors) ||
+    colors < 1 ||
+    colors > 32 ||
+    !(bpc === 1 || bpc === 2 || bpc === 4 || bpc === 8 || bpc === 16)
+  ) {
+    throw new Error(
+      `Predictor: unsupported decode parameters (/Columns ${columns}, /Colors ${colors}, /BitsPerComponent ${bpc})`,
+    );
+  }
+  assertWithinLimit('maxDecodedStreamBytes', Math.ceil((columns * colors * bpc) / 8));
+  return { columns, colors, bpc };
 }
 
 /**
  * TIFF Predictor 2: horizontal differencing.
  *
  * Each row's samples store the difference from the previous sample
- * (within the same row).  This reverses that encoding.
+ * (within the same row).  This reverses that encoding in place and returns
+ * `data`, so the caller must pass a buffer its own decoder allocated.
+ * Samples of 1, 2 or 4 bits are visited one by one; more than
+ * `maxPredictorSamples` of them throw `ResourceLimitError` before the first
+ * is read.
  */
 function applyTiffPredictor2(
   data: Uint8Array,
@@ -364,51 +424,47 @@ function applyTiffPredictor2(
     const bytesPerPixel = colors;
     const rowBytes = columns * bytesPerPixel;
     const rows = Math.floor(data.length / rowBytes);
-    const out = new Uint8Array(data.length);
-    out.set(data);
 
     for (let row = 0; row < rows; row++) {
       const offset = row * rowBytes;
       for (let col = bytesPerPixel; col < rowBytes; col++) {
-        out[offset + col] = (out[offset + col]! + out[offset + col - bytesPerPixel]!) & 0xff;
+        data[offset + col] = (data[offset + col]! + data[offset + col - bytesPerPixel]!) & 0xff;
       }
     }
-    return out;
+    return data;
   }
 
   if (bpc === 16) {
     const bytesPerPixel = colors * 2;
     const rowBytes = columns * bytesPerPixel;
     const rows = Math.floor(data.length / rowBytes);
-    const out = new Uint8Array(data.length);
-    out.set(data);
 
     for (let row = 0; row < rows; row++) {
       const offset = row * rowBytes;
       for (let col = bytesPerPixel; col < rowBytes; col += 2) {
         const prev =
-          ((out[offset + col - bytesPerPixel]! << 8) | out[offset + col - bytesPerPixel + 1]!) >>>
+          ((data[offset + col - bytesPerPixel]! << 8) | data[offset + col - bytesPerPixel + 1]!) >>>
           0;
-        const curr = ((out[offset + col]! << 8) | out[offset + col + 1]!) >>> 0;
+        const curr = ((data[offset + col]! << 8) | data[offset + col + 1]!) >>> 0;
         const sum = (prev + curr) & 0xffff;
-        out[offset + col] = (sum >> 8) & 0xff;
-        out[offset + col + 1] = sum & 0xff;
+        data[offset + col] = (sum >> 8) & 0xff;
+        data[offset + col + 1] = sum & 0xff;
       }
     }
-    return out;
+    return data;
   }
 
   // For sub-byte bpc, work at the bit level
   const totalBitsPerRow = columns * colors * bpc;
   const rowBytes = Math.ceil(totalBitsPerRow / 8);
   const rows = Math.floor(data.length / rowBytes);
-  const out = new Uint8Array(data.length);
-  out.set(data);
+  assertWithinLimit('maxPredictorSamples', rows * columns * colors);
+  const prev = new Array<number>(colors);
 
   for (let row = 0; row < rows; row++) {
     const offset = row * rowBytes;
     // Accumulate per-color-component
-    const prev = new Array<number>(colors).fill(0);
+    prev.fill(0);
     for (let col = 0; col < columns; col++) {
       for (let c = 0; c < colors; c++) {
         const bitPos = (col * colors + c) * bpc;
@@ -419,10 +475,10 @@ function applyTiffPredictor2(
 
         let val: number;
         if (shift >= 0) {
-          val = (out[byteIdx]! >> shift) & mask;
+          val = (data[byteIdx]! >> shift) & mask;
         } else {
           // Value spans two bytes
-          val = ((out[byteIdx]! << -shift) | (out[byteIdx + 1]! >> (8 + shift))) & mask;
+          val = ((data[byteIdx]! << -shift) | (data[byteIdx + 1]! >> (8 + shift))) & mask;
         }
 
         val = (val + prev[c]!) & mask;
@@ -430,20 +486,20 @@ function applyTiffPredictor2(
 
         // Write back
         if (shift >= 0) {
-          out[byteIdx] = (out[byteIdx]! & ~(mask << shift)) | (val << shift);
+          data[byteIdx] = (data[byteIdx]! & ~(mask << shift)) | (val << shift);
         } else {
           const highBits = bpc + shift;
           const highMask = (1 << highBits) - 1;
-          out[byteIdx] = (out[byteIdx]! & ~highMask) | (val >> -shift);
+          data[byteIdx] = (data[byteIdx]! & ~highMask) | (val >> -shift);
           const lowBits = -shift;
           const lowMask = ((1 << lowBits) - 1) << (8 - lowBits);
-          out[byteIdx + 1] =
-            (out[byteIdx + 1]! & ~lowMask) | ((val & ((1 << lowBits) - 1)) << (8 - lowBits));
+          data[byteIdx + 1] =
+            (data[byteIdx + 1]! & ~lowMask) | ((val & ((1 << lowBits) - 1)) << (8 - lowBits));
         }
       }
     }
   }
-  return out;
+  return data;
 }
 
 /**
@@ -462,6 +518,12 @@ function applyTiffPredictor2(
  * row (0-4 respectively).  Predictor 15 means "optimum" — each row has
  * its own filter byte.  In practice, most encoders write the filter byte
  * even for fixed-predictor streams, so we always check for it.
+ *
+ * The rows are undone in place, and the result is a view of the first
+ * `rows * rowBytes` bytes of `data`, so the caller must pass a buffer its
+ * own decoder allocated.  Row `r` is read from `r * stride + 1` and written
+ * to `r * rowBytes`, which is always below the bytes still to be read, and
+ * the row above is read from the output already written.
  */
 function applyPngPredictors(
   data: Uint8Array,
@@ -474,61 +536,54 @@ function applyPngPredictors(
   // Each row in PNG-predicted data is: 1 filter byte + rowBytes data bytes
   const stride = rowBytes + 1;
   const rows = Math.floor(data.length / stride);
-
-  const out = new Uint8Array(rows * rowBytes);
-  const prevRow = new Uint8Array(rowBytes); // initialized to zero
+  if (rows === 0) return new Uint8Array(0); // no full row: nothing to undo
 
   for (let row = 0; row < rows; row++) {
-    const srcOffset = row * stride;
-    const dstOffset = row * rowBytes;
-    const filterType = data[srcOffset]!;
+    const src = row * stride + 1;
+    const dst = row * rowBytes;
+    const up = dst - rowBytes; // the row above; read only when row > 0
+    const filterType = data[src - 1]!;
 
     switch (filterType) {
-      case 0: // None
-        out.set(data.subarray(srcOffset + 1, srcOffset + 1 + rowBytes), dstOffset);
-        break;
-
       case 1: // Sub
         for (let i = 0; i < rowBytes; i++) {
-          const left = i >= bytesPerPixel ? out[dstOffset + i - bytesPerPixel]! : 0;
-          out[dstOffset + i] = (data[srcOffset + 1 + i]! + left) & 0xff;
+          const left = i >= bytesPerPixel ? data[dst + i - bytesPerPixel]! : 0;
+          data[dst + i] = (data[src + i]! + left) & 0xff;
         }
         break;
 
       case 2: // Up
         for (let i = 0; i < rowBytes; i++) {
-          out[dstOffset + i] = (data[srcOffset + 1 + i]! + prevRow[i]!) & 0xff;
+          const above = row > 0 ? data[up + i]! : 0;
+          data[dst + i] = (data[src + i]! + above) & 0xff;
         }
         break;
 
       case 3: // Average
         for (let i = 0; i < rowBytes; i++) {
-          const left = i >= bytesPerPixel ? out[dstOffset + i - bytesPerPixel]! : 0;
-          const up = prevRow[i]!;
-          out[dstOffset + i] = (data[srcOffset + 1 + i]! + ((left + up) >>> 1)) & 0xff;
+          const left = i >= bytesPerPixel ? data[dst + i - bytesPerPixel]! : 0;
+          const above = row > 0 ? data[up + i]! : 0;
+          data[dst + i] = (data[src + i]! + ((left + above) >>> 1)) & 0xff;
         }
         break;
 
       case 4: // Paeth
         for (let i = 0; i < rowBytes; i++) {
-          const left = i >= bytesPerPixel ? out[dstOffset + i - bytesPerPixel]! : 0;
-          const up = prevRow[i]!;
-          const upLeft = i >= bytesPerPixel ? prevRow[i - bytesPerPixel]! : 0;
-          out[dstOffset + i] = (data[srcOffset + 1 + i]! + paethPredictor(left, up, upLeft)) & 0xff;
+          const left = i >= bytesPerPixel ? data[dst + i - bytesPerPixel]! : 0;
+          const above = row > 0 ? data[up + i]! : 0;
+          const upLeft = row > 0 && i >= bytesPerPixel ? data[up + i - bytesPerPixel]! : 0;
+          data[dst + i] = (data[src + i]! + paethPredictor(left, above, upLeft)) & 0xff;
         }
         break;
 
       default:
-        // Unknown filter type — treat as None
-        out.set(data.subarray(srcOffset + 1, srcOffset + 1 + rowBytes), dstOffset);
+        // None (0), and an unknown filter type treated as None
+        for (let i = 0; i < rowBytes; i++) data[dst + i] = data[src + i]!;
         break;
     }
-
-    // Copy current decoded row into prevRow for the next iteration
-    prevRow.set(out.subarray(dstOffset, dstOffset + rowBytes));
   }
 
-  return out;
+  return data.subarray(0, rows * rowBytes);
 }
 
 /**
@@ -556,7 +611,18 @@ function paethPredictor(a: number, b: number, c: number): number {
  * (e.g. `A` becomes `A0`).
  */
 function decodeASCIIHex(data: Uint8Array): Uint8Array {
-  const result: number[] = [];
+  // One pass counts the digits, so the output is checked against the ceiling and
+  // allocated once at its exact size.
+  let digits = 0;
+  for (let i = 0; i < data.length; i++) {
+    const ch = data[i]!;
+    if (ch === 0x3e /* > */) break;
+    if (hexValue(ch) >= 0) digits++;
+  }
+  const size = Math.ceil(digits / 2);
+  assertWithinLimit('maxDecodedStreamBytes', size);
+  const result = new Uint8Array(size);
+  let outPos = 0;
   let high: number | null = null;
 
   for (let i = 0; i < data.length; i++) {
@@ -565,28 +631,23 @@ function decodeASCIIHex(data: Uint8Array): Uint8Array {
     // End-of-data marker
     if (ch === 0x3e /* > */) break;
 
-    // Skip whitespace
-    if (ch === 0x20 || ch === 0x09 || ch === 0x0a || ch === 0x0d || ch === 0x0c || ch === 0x00) {
-      continue;
-    }
-
     const nibble = hexValue(ch);
-    if (nibble < 0) continue; // Skip invalid characters
+    if (nibble < 0) continue; // Skip whitespace and invalid characters
 
     if (high === null) {
       high = nibble;
     } else {
-      result.push((high << 4) | nibble);
+      result[outPos++] = (high << 4) | nibble;
       high = null;
     }
   }
 
   // Odd trailing digit — pad with 0
   if (high !== null) {
-    result.push(high << 4);
+    result[outPos++] = high << 4;
   }
 
-  return new Uint8Array(result);
+  return result;
 }
 
 /**
@@ -612,20 +673,25 @@ function hexValue(ch: number): number {
  * `~>` marks end-of-data.
  */
 function decodeASCII85(data: Uint8Array): Uint8Array {
-  // Pre-allocate output (ASCII85 expands 5->4 bytes, so output <= input * 0.8)
-  let out = new Uint8Array(Math.max(((data.length * 4) / 5) | 0, 256));
+  // One pass counts the digits and `z` characters, so the output is checked against the
+  // ceiling and allocated once at its exact size (a final group of n digits gives n - 1 bytes).
+  let zeroGroups = 0;
+  let digits = 0;
+  for (let i = 0; i < data.length; i++) {
+    const ch = data[i]!;
+    if (ch === 0x7e /* ~ */) break;
+    if (ch === 0x7a /* z */) zeroGroups++;
+    else if (ch >= 0x21 && ch <= 0x75) digits++;
+  }
+  const tail = digits % 5;
+  const size = zeroGroups * 4 + Math.floor(digits / 5) * 4 + (tail >= 2 ? tail - 1 : 0);
+  assertWithinLimit('maxDecodedStreamBytes', size);
+
+  const out = new Uint8Array(size);
   let outPos = 0;
   const group = new Uint8Array(5);
   let groupLen = 0;
   let i = 0;
-
-  function ensureOut(needed: number): void {
-    if (outPos + needed > out.length) {
-      const newBuf = new Uint8Array(Math.max(out.length * 2, outPos + needed));
-      newBuf.set(out.subarray(0, outPos));
-      out = newBuf;
-    }
-  }
 
   function decodeGroup(count: number): void {
     // Pad remaining slots with 84 ('u')
@@ -637,7 +703,6 @@ function decodeASCII85(data: Uint8Array): Uint8Array {
       group[3]! * 85 +
       group[4]!;
     const numBytes = count === 5 ? 4 : count - 1;
-    ensureOut(numBytes);
     if (numBytes >= 1) out[outPos++] = (val >>> 24) & 0xff;
     if (numBytes >= 2) out[outPos++] = (val >>> 16) & 0xff;
     if (numBytes >= 3) out[outPos++] = (val >>> 8) & 0xff;
@@ -661,7 +726,6 @@ function decodeASCII85(data: Uint8Array): Uint8Array {
       if (groupLen > 0) {
         throw new Error('ASCII85Decode: "z" inside a group');
       }
-      ensureOut(4);
       out[outPos++] = 0;
       out[outPos++] = 0;
       out[outPos++] = 0;
@@ -691,7 +755,7 @@ function decodeASCII85(data: Uint8Array): Uint8Array {
     decodeGroup(groupLen);
   }
 
-  return out.subarray(0, outPos);
+  return out;
 }
 
 // ---------------------------------------------------------------------------
@@ -722,7 +786,9 @@ function decodeLZW(data: Uint8Array, parms: PdfDict | null): Uint8Array {
  *
  * Uses a flat pooled buffer for the code table instead of per-entry
  * Uint8Array allocations, and a pre-allocated output buffer with
- * manual growth instead of `number[]` + push.
+ * manual growth instead of `number[]` + push. The output never grows past
+ * the decoded-size ceiling (`ResourceLimitError` above it), and the code
+ * table stops at 4096 entries.
  */
 function lzwDecompress(data: Uint8Array, earlyChange: number): Uint8Array {
   const CLEAR_TABLE = 256;
@@ -779,13 +845,16 @@ function lzwDecompress(data: Uint8Array, earlyChange: number): Uint8Array {
     codeSize = 9;
   }
 
-  // Output buffer with manual growth
-  let out = new Uint8Array(Math.max(data.length * 3, 4096));
+  // Output buffer with manual growth, never past the decoded-size ceiling
+  let out = new Uint8Array(Math.min(Math.max(data.length * 3, 4096), MAX_OUTPUT));
   let outPos = 0;
 
   function ensureOut(needed: number): void {
     if (outPos + needed > out.length) {
-      const newBuf = new Uint8Array(Math.max(out.length * 2, outPos + needed));
+      assertWithinLimit('maxDecodedStreamBytes', outPos + needed);
+      const newBuf = new Uint8Array(
+        Math.min(Math.max(out.length * 2, outPos + needed), MAX_OUTPUT),
+      );
       newBuf.set(out.subarray(0, outPos));
       out = newBuf;
     }
@@ -808,6 +877,8 @@ function lzwDecompress(data: Uint8Array, earlyChange: number): Uint8Array {
   }
 
   function addEntry(prevCode: number, firstByte: number): void {
+    // The code table holds 4096 entries; codes stay 12 bits wide until a Clear code.
+    if (nextCode >= 4096) return;
     const prevOff = tableOff[prevCode]!;
     const prevLen = tableLen[prevCode]!;
     const newLen = prevLen + 1;
@@ -888,7 +959,21 @@ function lzwDecompress(data: Uint8Array, earlyChange: number): Uint8Array {
  * - 129-255: repeat the next single byte `257 - N` times
  */
 function decodeRunLength(data: Uint8Array): Uint8Array {
-  const result: number[] = [];
+  // The first pass sizes the output, which is checked against the ceiling and
+  // allocated once; the second pass writes it.
+  const size = runLengthPass(data, null);
+  assertWithinLimit('maxDecodedStreamBytes', size);
+  const out = new Uint8Array(size);
+  runLengthPass(data, out);
+  return out;
+}
+
+/**
+ * One pass over RunLengthDecode data: returns the decoded length, and writes
+ * the decoded bytes into `out` when it is given.
+ */
+function runLengthPass(data: Uint8Array, out: Uint8Array | null): number {
+  let pos = 0;
   let i = 0;
 
   while (i < data.length) {
@@ -901,25 +986,22 @@ function decodeRunLength(data: Uint8Array): Uint8Array {
     }
 
     if (n <= 127) {
-      // Copy next n+1 bytes literally
-      const count = n + 1;
-      for (let j = 0; j < count && i < data.length; j++) {
-        result.push(data[i]!);
-        i++;
-      }
+      // Copy next n+1 bytes literally (fewer when the data ends first)
+      const count = Math.min(n + 1, data.length - i);
+      out?.set(data.subarray(i, i + count), pos);
+      pos += count;
+      i += count;
     } else {
       // Repeat next byte (257 - n) times
       if (i >= data.length) break;
       const repeatCount = 257 - n;
-      const byte = data[i]!;
+      out?.fill(data[i]!, pos, pos + repeatCount);
+      pos += repeatCount;
       i++;
-      for (let j = 0; j < repeatCount; j++) {
-        result.push(byte);
-      }
     }
   }
 
-  return new Uint8Array(result);
+  return pos;
 }
 
 // ---------------------------------------------------------------------------
@@ -927,13 +1009,9 @@ function decodeRunLength(data: Uint8Array): Uint8Array {
 // ---------------------------------------------------------------------------
 
 /**
- * Decode a JPXDecode (JPEG2000) stream.
- *
- * Calls the JPEG2000 decoder and returns raw pixel bytes.  The
- * `/DecodeParms` dictionary may specify a color space override, but
- * the decoded data is always raw interleaved component bytes.
+ * JPXDecode: throws UnsupportedFilterError. The stream stays encoded; a
+ * document that contains it is still loaded and saved unchanged.
  */
-function decodeJPX(data: Uint8Array, _parms: PdfDict | null): Uint8Array {
-  const decoded = decodeJpeg2000(data);
-  return decoded.data;
+function decodeJPX(_data: Uint8Array, _parms: PdfDict | null): never {
+  throw new UnsupportedFilterError('JPXDecode');
 }

@@ -28,6 +28,7 @@ import {
 import type { PdfObjectParser } from './objectParser.js';
 import { decodeFlateOnly, firstFilterName } from './streamDecode.js';
 import { PdfParseError } from './parseError.js';
+import { ResourceLimitError } from '../errors.js';
 
 // ---------------------------------------------------------------------------
 // Public interfaces
@@ -357,7 +358,9 @@ export class XrefParser {
           sectionEntries = result.entries;
           trailerDict = result.trailerDict;
         }
-      } catch {
+      } catch (err) {
+        // A decode refused by an internal limit is neither a damaged section nor a reason to scan
+        if (err instanceof ResourceLimitError) throw err;
         // If parsing this section fails but we already have a primary
         // trailer, stop following the chain
         if (primaryTrailer !== undefined) {

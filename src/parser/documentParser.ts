@@ -41,6 +41,8 @@ import { decodeFlateOnly } from './streamDecode.js';
 import { base64Decode } from '../utils/base64.js';
 import { PdfEncryptionHandler } from '../crypto/encryptionHandler.js';
 import { PdfParseError } from './parseError.js';
+import { ResourceLimitError } from '../errors.js';
+import { assertWithinLimit } from '../core/limits.js';
 
 // ---------------------------------------------------------------------------
 // Public interfaces
@@ -749,7 +751,7 @@ export class PdfDocumentParser {
     }
 
     const pages: FlattenedPage[] = [];
-    this.traversePageTree(pagesObj as PdfDict, {}, pages, new Set());
+    this.traversePageTree(pagesObj as PdfDict, {}, pages, new Set(), 1);
     return pages;
   }
 
@@ -759,14 +761,21 @@ export class PdfDocumentParser {
    * @param node       Current tree node (/Pages or /Page dict).
    * @param inherited  Attributes inherited from parent nodes.
    * @param result     Accumulator for flattened page entries.
-   * @param visited    Set of visited object numbers to prevent cycles.
+   * @param visited    Set of visited object numbers to prevent cycles; a kid
+   *                   already in it is not entered again.
+   * @param depth      Level of `node` in the tree (the root is level 1); a
+   *                   node deeper than `maxTreeDepth` throws
+   *                   {@link ResourceLimitError}.
    */
   private traversePageTree(
     node: PdfDict,
     inherited: InheritedPageAttrs,
     result: FlattenedPage[],
     visited: Set<number>,
+    depth: number,
   ): void {
+    assertWithinLimit('maxTreeDepth', depth);
+
     // Determine if this is a /Pages (intermediate) or /Page (leaf) node
     const typeObj = node.get('/Type');
     let typeName = '';
@@ -870,7 +879,7 @@ export class PdfDocumentParser {
         continue; // Skip invalid kids
       }
 
-      this.traversePageTree(kidObj as PdfDict, currentInherited, result, visited);
+      this.traversePageTree(kidObj as PdfDict, currentInherited, result, visited, depth + 1);
     }
   }
 
@@ -979,14 +988,19 @@ export class PdfDocumentParser {
     // Decode the object stream's data (/FlateDecode and its predictor only)
     const decompressedData = this.decompressStreamSync(containerStream);
 
-    // Parse the header: N pairs of (objNumber byteOffset)
+    // Parse the header: N pairs of (objNumber byteOffset). The tokens are read one
+    // pair at a time and the scan stops after N pairs, so the cost follows /N,
+    // not the length of the header.
     const headerText = TEXT_DECODER.decode(decompressedData.subarray(0, first));
-    const headerTokens = headerText.trim().split(/\s+/);
+    const token = /\S+/g;
 
     const objEntries: Array<{ objNum: number; offset: number }> = [];
-    for (let i = 0; i + 1 < headerTokens.length && objEntries.length < n; i += 2) {
-      const objNum = parseInt(headerTokens[i]!, 10);
-      const offset = parseInt(headerTokens[i + 1]!, 10);
+    while (objEntries.length < n) {
+      const objToken = token.exec(headerText);
+      const offsetToken = token.exec(headerText);
+      if (objToken === null || offsetToken === null) break;
+      const objNum = parseInt(objToken[0], 10);
+      const offset = parseInt(offsetToken[0], 10);
       if (!Number.isNaN(objNum) && !Number.isNaN(offset)) {
         objEntries.push({ objNum, offset });
       }
@@ -1045,11 +1059,14 @@ export class PdfDocumentParser {
    * dictionary, and the later entries are not applied.
    * Returns the data unchanged when the stream has no filter, when
    * `/Filter` is anything else, and when the data does not inflate.
+   * A stream that decodes to more than the decoded-stream limit throws
+   * `ResourceLimitError`; it is not returned undecoded.
    */
   private decompressStreamSync(stream: PdfStream): Uint8Array {
     try {
       return decodeFlateOnly(stream) ?? stream.data;
-    } catch {
+    } catch (err) {
+      if (err instanceof ResourceLimitError) throw err;
       // If synchronous decompression fails, return raw data
       // The caller will handle the error
       return stream.data;
@@ -1092,7 +1109,7 @@ export class PdfDocumentParser {
     try {
       infoObj = this.resolveRef(this.trailer.infoRef);
     } catch (err) {
-      if (this.throwOnInvalidObject) {
+      if (this.throwOnInvalidObject || err instanceof ResourceLimitError) {
         throw err instanceof Error ? err : new Error(String(err));
       }
       return metadata; // Info dict not parseable
@@ -1169,7 +1186,7 @@ export class PdfDocumentParser {
             this.registry.registerWithRef(ref, obj);
           }
         } catch (err) {
-          if (this.throwOnInvalidObject) {
+          if (this.throwOnInvalidObject || err instanceof ResourceLimitError) {
             throw err instanceof Error ? err : new Error(String(err));
           }
           // Skip objects that fail to resolve

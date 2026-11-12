@@ -15,11 +15,14 @@ import {
   adler32,
   flateEncode,
   inflateFlate,
+  inflateFlateUpTo,
   inflateRaw,
   inflateRawBounded,
   isZlibHeader,
   wrapRawDeflate,
 } from '../../../src/compression/pdfFlate.js';
+import { INTERNAL_LIMITS } from '../../../src/core/limits.js';
+import { ResourceLimitError } from '../../../src/errors.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -399,5 +402,198 @@ describe('wrapRawDeflate', () => {
     const data = byteRamp(1000);
     const wrapped = wrapRawDeflate(bytes(deflateRawSync(data, { level: 0 })), data);
     expect(bytes(inflateSync(wrapped))).toEqual(data);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Decoded-size limit
+// ---------------------------------------------------------------------------
+
+/** A few MiB of mixed data: pseudo-random runs, repeated text and noise, so every block type occurs. */
+function variedData(size: number): Uint8Array {
+  const data = new Uint8Array(size);
+  let state = 12345;
+  const next = (): number => {
+    state = (Math.imul(state, 1103515245) + 12345) >>> 0;
+    return state >>> 16;
+  };
+  const line = encoder.encode('BT /F1 12 Tf 72 700 Td (A line of the sample page) Tj ET\n');
+  let at = 0;
+  while (at < size) {
+    const kind = next() % 3;
+    const run = 1 + (next() % 4096);
+    for (let i = 0; i < run && at < size; i++, at++) {
+      data[at] = kind === 0 ? next() & 0xff : kind === 1 ? (line[i % line.length] ?? 0) : 0x20;
+    }
+  }
+  return data;
+}
+
+describe('decoded-size limit', () => {
+  const VARIED = variedData(4 * 1024 * 1024);
+  const ZLIB = bytes(deflateSync(VARIED));
+  const RAW = bytes(deflateRawSync(VARIED));
+
+  it('decodes a few MiB of varied data as node:zlib does, in zlib and raw form', () => {
+    expect(inflateFlate(ZLIB)).toEqual(VARIED);
+    expect(inflateFlate(RAW)).toEqual(VARIED);
+    expect(inflateRaw(RAW)).toEqual(VARIED);
+  });
+
+  it('decodes zlib data whose Adler-32 trailer is missing as node:zlib decodes its payload', () => {
+    const cut = ZLIB.subarray(0, ZLIB.length - 4);
+    expect(inflateFlate(cut)).toEqual(VARIED);
+    expect(inflateFlate(cut)).toEqual(bytes(inflateRawSync(cut.subarray(2))));
+  });
+
+  it('stops reading at the final block and ignores 16 MiB of bytes after it, in less than a second', () => {
+    const zlib = bytes(deflateSync(encoder.encode('hello world')));
+    const raw = bytes(deflateRawSync(encoder.encode('hello world')));
+    for (const [call, stream] of [
+      [inflateFlate, zlib],
+      [inflateFlate, raw],
+      [inflateRaw, raw],
+    ] as const) {
+      const data = new Uint8Array(stream.length + 16 * 1024 * 1024).fill(0x41);
+      data.set(stream);
+      const start = performance.now();
+      const result = call(data);
+      const elapsed = performance.now() - start;
+      expect(result).toEqual(encoder.encode('hello world'));
+      expect(elapsed).toBeLessThan(1000);
+    }
+  });
+
+  it('keeps the FlateDecode error for data that is cut short, below the limit', () => {
+    expect(() => inflateFlate(RAW.subarray(0, RAW.length >> 1))).toThrow(FAILURE);
+    expect(() => inflateRaw(RAW.subarray(0, RAW.length >> 1))).toThrow(FAILURE);
+  });
+
+  it('throws the FlateDecode error when 1 MB of empty stored blocks comes before the data', () => {
+    const tail = bytes(deflateRawSync(new Uint8Array(1024)));
+    const data = new Uint8Array(200_000 * 5 + tail.length);
+    for (let i = 0; i < 200_000; i++) data.set([0, 0, 0, 0xff, 0xff], i * 5);
+    data.set(tail, 200_000 * 5);
+    expect(() => inflateRaw(data)).toThrow(FAILURE);
+    expect(() => inflateFlate(data)).toThrow(FAILURE);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// inflateFlateUpTo
+// ---------------------------------------------------------------------------
+
+describe('inflateFlateUpTo', () => {
+  const VARIED = variedData(4 * 1024 * 1024);
+  const ZLIB = bytes(deflateSync(VARIED));
+  const RAW = bytes(deflateRawSync(VARIED));
+  const ZEROS = bytes(deflateSync(new Uint8Array(4 * 1024 * 1024)));
+
+  it('returns all the data and no stop flag when the decoded size is under or equals the bound', () => {
+    for (const stream of [ZLIB, RAW]) {
+      for (const bound of [VARIED.length, VARIED.length + 1, 64 * 1024 * 1024]) {
+        const result = inflateFlateUpTo(stream, bound);
+        expect(result.truncated).toBe(false);
+        expect(result.data).toEqual(VARIED);
+      }
+    }
+  });
+
+  it('returns the first N bytes and the stop flag when the data decodes to more than N', () => {
+    for (const stream of [ZLIB, RAW]) {
+      for (const bound of [0, 1, 1000, VARIED.length - 1]) {
+        const result = inflateFlateUpTo(stream, bound);
+        expect(result.truncated).toBe(true);
+        expect(result.data.length).toBe(bound);
+        expect(result.data).toEqual(VARIED.subarray(0, bound));
+      }
+    }
+  });
+
+  it('matches node:zlib on the prefix it returns, for zlib data with a missing trailer', () => {
+    const cut = ZLIB.subarray(0, ZLIB.length - 4);
+    const result = inflateFlateUpTo(cut, 100_000);
+    expect(result.data).toEqual(bytes(inflateRawSync(cut.subarray(2))).subarray(0, 100_000));
+  });
+
+  it('reads no further input once a step has decoded more than N bytes, zlib form', () => {
+    // 64 MiB of zeros: about 64 KB of zlib data, more than one 16 KiB step.
+    const stream = bytes(deflateSync(new Uint8Array(64 * 1024 * 1024)));
+    const push = vi.spyOn(Inflate.prototype, 'push');
+    try {
+      expect(stream.length).toBeGreaterThan(16 * 1024);
+      expect(inflateFlateUpTo(stream, 1024).truncated).toBe(true);
+      // One push: the zlib read stopped, and the data was not read again as raw DEFLATE.
+      expect(push).toHaveBeenCalledTimes(1);
+    } finally {
+      push.mockRestore();
+    }
+  });
+
+  it('reads no further input once a step has decoded more than N bytes, raw form', () => {
+    // 64 MiB of zeros: about 64 KB of DEFLATE, whose first 16 KiB step decodes to more than 1 MiB.
+    const zeros = bytes(deflateRawSync(new Uint8Array(64 * 1024 * 1024)));
+    expect(zeros.length).toBeGreaterThan(16 * 1024);
+    expect(isZlibHeader(zeros)).toBe(false);
+    const push = vi.spyOn(Inflate.prototype, 'push');
+    try {
+      const result = inflateFlateUpTo(zeros, 1024 * 1024);
+      expect(result.truncated).toBe(true);
+      expect(result.data.length).toBe(1024 * 1024);
+      expect(push).toHaveBeenCalledTimes(1);
+    } finally {
+      push.mockRestore();
+    }
+  });
+
+  it('ignores 16 MiB of bytes after the final block, in less than a second', () => {
+    const zlib = bytes(deflateSync(encoder.encode('hello world')));
+    const data = new Uint8Array(zlib.length + 16 * 1024 * 1024).fill(0x41);
+    data.set(zlib);
+    const start = performance.now();
+    const result = inflateFlateUpTo(data, 1024 * 1024);
+    const elapsed = performance.now() - start;
+    expect(result).toEqual({ data: encoder.encode('hello world'), truncated: false });
+    expect(elapsed).toBeLessThan(1000);
+  });
+
+  it('refuses a bound above maxDecodedStreamBytes, or not a number, with ResourceLimitError', () => {
+    for (const bound of [INTERNAL_LIMITS.maxDecodedStreamBytes + 1, Number.NaN, Infinity]) {
+      let caught: unknown;
+      try {
+        inflateFlateUpTo(ZEROS, bound);
+      } catch (err) {
+        caught = err;
+      }
+      expect(caught).toBeInstanceOf(ResourceLimitError);
+      expect(caught).toMatchObject({
+        code: 'resource-limit-exceeded',
+        limit: 'maxDecodedStreamBytes',
+        max: INTERNAL_LIMITS.maxDecodedStreamBytes,
+      });
+    }
+    expect(() => inflateFlateUpTo(ZEROS, INTERNAL_LIMITS.maxDecodedStreamBytes + 1)).toThrow(
+      'Input exceeds the internal limit maxDecodedStreamBytes (268435456 bytes).',
+    );
+  });
+
+  it('accepts a bound equal to maxDecodedStreamBytes', () => {
+    expect(inflateFlateUpTo(ZEROS, INTERNAL_LIMITS.maxDecodedStreamBytes).truncated).toBe(false);
+  });
+
+  it('keeps the FlateDecode error for data that does not inflate, or is cut short', () => {
+    expect(() => inflateFlateUpTo(encoder.encode('plain text, never compressed\n'), 100)).toThrow(
+      FAILURE,
+    );
+    expect(() => inflateFlateUpTo(RAW.subarray(0, RAW.length >> 1), VARIED.length)).toThrow(
+      FAILURE,
+    );
+  });
+
+  it('returns empty output for empty input', () => {
+    expect(inflateFlateUpTo(new Uint8Array(0), 10)).toEqual({
+      data: new Uint8Array(0),
+      truncated: false,
+    });
   });
 });

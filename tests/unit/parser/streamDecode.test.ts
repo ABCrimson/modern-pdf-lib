@@ -12,6 +12,7 @@ import { describe, it, expect } from 'vitest';
 import { zlibSync, deflateSync } from 'fflate';
 import { decodeStream, getStreamFilters } from '../../../src/parser/streamDecode.js';
 import { PdfDict, PdfName, PdfArray, PdfNumber } from '../../../src/core/pdfObjects.js';
+import { UnsupportedFilterError } from '../../../src/errors.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -857,9 +858,9 @@ describe('Passthrough filters', () => {
     expect(result).toEqual(data);
   });
 
-  it('JPXDecode decodes JPEG2000 data to raw pixels', () => {
-    // JPXDecode now actually decodes JPEG2000 data via decodeJpeg2000().
-    // This test verifies that valid J2K data is decoded to pixel bytes.
+  it('JPXDecode throws UnsupportedFilterError', () => {
+    // A minimal 2x2 greyscale J2K codestream: the data is not read, so the
+    // error is the same for any bytes.
     // Build a minimal 2x2 greyscale J2K codestream:
     const cs: number[] = [];
     // SOC
@@ -898,10 +899,11 @@ describe('Passthrough filters', () => {
     cs.push(0xff, 0xd9);
 
     const data = new Uint8Array(cs);
-    const result = decodeStream(data, 'JPXDecode');
-    // 2x2 with 1 component = 4 bytes
-    expect(result.length).toBe(4);
-    expect(result).toBeInstanceOf(Uint8Array);
+    expect(() => decodeStream(data, 'JPXDecode')).toThrow(UnsupportedFilterError);
+    expect(() => decodeStream(data, 'JPXDecode')).toThrow(
+      expect.objectContaining({ code: 'unsupported-filter', filter: 'JPXDecode' }),
+    );
+    expect(() => decodeStream(new Uint8Array([]), 'JPXDecode')).toThrow(UnsupportedFilterError);
   });
 
   it('Crypt filter returns data unchanged', () => {
@@ -957,10 +959,11 @@ describe('Error handling', () => {
     expect(result).toBeInstanceOf(Uint8Array);
   });
 
-  it('handles JBIG2Decode without throwing', () => {
-    // JBIG2Decode is now implemented — empty data returns empty result
-    const result = decodeStream(new Uint8Array([]), 'JBIG2Decode');
-    expect(result).toBeInstanceOf(Uint8Array);
+  it('JBIG2Decode throws UnsupportedFilterError, empty data included', () => {
+    expect(() => decodeStream(new Uint8Array([]), 'JBIG2Decode')).toThrow(UnsupportedFilterError);
+    expect(() => decodeStream(new Uint8Array([0, 0, 0, 0]), 'JBIG2Decode')).toThrow(
+      expect.objectContaining({ code: 'unsupported-filter', filter: 'JBIG2Decode' }),
+    );
   });
 });
 

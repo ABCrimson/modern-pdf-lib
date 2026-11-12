@@ -64,6 +64,7 @@ import {
   PdfObjectRegistry,
 } from './pdfObjects.js';
 import { decodeStreamData } from '../parser/streamDecode.js';
+import { assertWithinLimit } from './limits.js';
 import type { StructureType } from '../accessibility/structureTree.js';
 import {
   wrapInMarkedContent,
@@ -2580,7 +2581,10 @@ export class PdfPage {
    * For a page parsed from a loaded PDF, the original (possibly compressed)
    * content stream(s) are resolved and decompressed; any operators added
    * afterwards (via {@link drawText}, {@link drawImage}, …) are appended.
-   * Multiple content streams are joined with newline separators.
+   * Multiple content streams are joined with newline separators. The decoded
+   * streams and the appended operators together may hold at most
+   * `maxDecodedStreamBytes` (256 MiB) bytes, not counting the separators; a
+   * page whose content decodes to more throws.
    *
    * This is the public entry point for the text-extraction pipeline:
    *
@@ -2593,21 +2597,30 @@ export class PdfPage {
    * ```
    *
    * @returns The decoded content-stream bytes (`Uint8Array`).
+   * @throws {ResourceLimitError} When the content streams of the page decode to
+   *   more than 256 MiB in total.
    */
   getContentStream(): Uint8Array {
     const chunks: Uint8Array[] = [];
+    let decodedTotal = 0;
 
     // Original content streams from a loaded PDF (decode each).
     for (const ref of this._originalContentRefs) {
       const obj = this.registry.resolve(ref);
       if (obj && obj.kind === 'stream') {
-        chunks.push(decodeStreamData(obj as PdfStream));
+        const decoded = decodeStreamData(obj as PdfStream);
+        decodedTotal += decoded.length;
+        assertWithinLimit('maxDecodedStreamBytes', decodedTotal);
+        chunks.push(decoded);
       }
     }
 
     // Operators added in-memory after load (or on a freshly created page).
     if (this.ops.length > 0) {
-      chunks.push(new TextEncoder().encode(this.ops));
+      const added = new TextEncoder().encode(this.ops);
+      decodedTotal += added.length;
+      assertWithinLimit('maxDecodedStreamBytes', decodedTotal);
+      chunks.push(added);
     }
 
     let totalLen = 0;
