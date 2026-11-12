@@ -126,17 +126,16 @@
       "id": "cap-feat-load",
       "region": "readme-features",
       "doc": "README.md",
-      "text": "Load existing PDFs (encrypted PDFs load, but most of their content is returned still encrypted, and AES-256 (revision 6) files from other producers do not open with the right password)",
+      "text": "Load existing PDFs (an encrypted PDF opens with its password and its objects are decrypted, including AES-256 files written by qpdf; saving it needs encrypt() first)",
       "grade": "qualified",
       "tests": [],
       "limits": [
-        "parser-syntax-01",
-        "crypto-security-01",
         "api-surface-utils-25"
       ],
-      "stated": true,
+      "stated": false,
       "exports": [
-        "ResourceLimitError"
+        "ResourceLimitError",
+        "UnsupportedEncryptionError"
       ]
     },
     {
@@ -234,14 +233,12 @@
       "id": "cap-feat-encryption",
       "region": "readme-features",
       "doc": "README.md",
-      "text": "RC4 and AES-128 encryption on save(); AES-256 (R6) can be selected, but its output is not yet readable by other PDF readers (saveAsStream(), objectStreamThreshold and saveDocumentIncremental() throw UnsupportedEncryptionError, code unsupported-encryption-path, for an encrypted document, and the functions that sign or append an incremental update to PDF bytes throw it for an encrypted file; a document loaded from an encrypted file is mostly not decrypted)",
+      "text": "RC4, AES-128 and AES-256 (R6) encryption on save(); AES-256 files open in qpdf and pdf.js (saveAsStream(), objectStreamThreshold and saveDocumentIncremental() throw UnsupportedEncryptionError, code unsupported-encryption-path, for an encrypted document, and the functions that sign or append an incremental update to PDF bytes throw it for an encrypted file; a document loaded from an encrypted file cannot be written until encrypt() is called on it)",
       "grade": "qualified",
       "tests": [],
       "limits": [
-        "crypto-security-01",
         "core-document-03",
-        "core-document-06",
-        "parser-syntax-01"
+        "core-document-06"
       ],
       "stated": true
     },
@@ -249,11 +246,12 @@
       "id": "cap-feat-signatures",
       "region": "readme-features",
       "doc": "README.md",
-      "text": "Digital signatures (PKCS#7, visible/invisible, timestamps; requestTimestamp checks the response's hash and nonce against the request, but the token's signature and the TSA certificate are not verified)",
+      "text": "Digital signatures (PKCS#7, visible/invisible; requestTimestamp checks the response's hash and nonce against the request, but the token's signature and the TSA certificate are not verified, and signPdf does not embed a timestamp: its timestampUrl option has no effect)",
       "grade": "qualified",
       "tests": [],
       "limits": [
         "signature-cms-23",
+        "signature-cms-08",
         "docs-guide-3-03"
       ],
       "stated": false
@@ -288,12 +286,13 @@
       "id": "cap-feat-multi-signature",
       "region": "readme-features",
       "doc": "README.md",
-      "text": "Multi-signature chains, MDP certification, LTV archival (a signature followed by a later update, such as a second signature or LTV data added with embedLtvData, reports valid: false with coversWholeDocument: false, and detectModifications reports a later signature as an unknown violation)",
+      "text": "Multi-signature chains, MDP certification reading (setCertificationLevel has no effect: signPdf writes no DocMDP), LTV archival (a signature followed by a later update, such as a second signature or LTV data added with embedLtvData, reports valid: false with coversWholeDocument: false, and detectModifications reports a later signature as an unknown violation)",
       "grade": "qualified",
       "tests": [],
       "limits": [
         "signature-pki-12",
-        "signature-pki-11"
+        "signature-pki-11",
+        "signature-pki-09"
       ],
       "stated": true
     },
@@ -301,10 +300,13 @@
       "id": "cap-feat-counter-signatures",
       "region": "readme-features",
       "doc": "README.md",
-      "text": "Counter-signatures & field locking",
-      "grade": "pending",
+      "text": "Counter-signatures; field locks are read, not written (addFieldLock has no effect: signPdf writes no /Lock dictionary)",
+      "grade": "qualified",
       "tests": [],
-      "limits": []
+      "limits": [
+        "signature-pki-10"
+      ],
+      "stated": true
     },
     {
       "id": "cap-feat-pdfa",
@@ -683,14 +685,17 @@
       "id": "cap-cmp-parse",
       "region": "readme-comparison",
       "doc": "README.md",
-      "text": "Parse existing PDFs | Yes (encrypted content not decrypted; AES-256 (R6) files from other producers do not open with the right password)",
+      "text": "Parse existing PDFs | Yes (an encrypted file opens with its password and its objects are decrypted; saving it needs encrypt() first)",
       "grade": "qualified",
       "tests": [],
       "limits": [
-        "parser-syntax-01",
-        "crypto-security-01"
+        "api-surface-utils-25"
       ],
-      "stated": true
+      "stated": false,
+      "exports": [
+        "ResourceLimitError",
+        "UnsupportedEncryptionError"
+      ]
     },
     {
       "id": "cap-cmp-text-extraction",
@@ -709,11 +714,10 @@
       "id": "cap-cmp-encryption",
       "region": "readme-comparison",
       "doc": "README.md",
-      "text": "Encryption | RC4 + AES-128 on save(); AES-256 (R6) output not yet readable by other PDF readers (streaming, object streams and incremental saves throw UnsupportedEncryptionError, code unsupported-encryption-path, for an encrypted document, and so does signing an encrypted file)",
+      "text": "Encryption | RC4 + AES-128 + AES-256 on save(); AES-256 output opens in qpdf and pdf.js (streaming, object streams and incremental saves throw UnsupportedEncryptionError, code unsupported-encryption-path, for an encrypted document, and so does signing an encrypted file)",
       "grade": "qualified",
       "tests": [],
       "limits": [
-        "crypto-security-01",
         "core-document-03",
         "core-document-06"
       ],
@@ -723,12 +727,15 @@
       "id": "cap-cmp-signatures",
       "region": "readme-comparison",
       "doc": "README.md",
-      "text": "Digital signatures | PKCS#7, timestamps, CRL/OCSP, LTV, MDP (chain trust needs trustedCerts; timestamp signatures and CRLs are not authenticated)",
+      "text": "Digital signatures | PKCS#7, CRL/OCSP, LTV, MDP reading; signPdf embeds no timestamp and writes no DocMDP or field lock (chain trust needs trustedCerts; timestamp signatures and CRLs are not authenticated)",
       "grade": "qualified",
       "tests": [],
       "limits": [
         "signature-pki-01",
-        "signature-cms-23"
+        "signature-cms-23",
+        "signature-cms-08",
+        "signature-pki-09",
+        "signature-pki-10"
       ],
       "stated": true
     },
@@ -1229,13 +1236,13 @@
       "id": "cap-a11y-table-headers",
       "region": "guide-accessibility-pdfua",
       "doc": "docs/guide/accessibility.md",
-      "text": "Table headers marked | Supported | tagTableHeaderCell writes TH with /Scope",
+      "text": "Table headers marked | Partial | tagTableHeaderCell writes a TH element; its scope is not written as an attribute",
       "grade": "qualified",
       "tests": [],
       "limits": [
         "accessibility-metadata-04"
       ],
-      "stated": false
+      "stated": true
     },
     {
       "id": "cap-a11y-validation",

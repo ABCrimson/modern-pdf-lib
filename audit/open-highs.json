@@ -1,16 +1,15 @@
 {
   "$schema": "./open-highs.schema.json",
-  "release": "0.40.8",
+  "release": "0.40.9",
   "generated": "2026-11-12",
   "source": "audit of 0.40.3 (2026-10/11) plus the 0.40.6 re-check and the 2026-11-12 re-check",
   "counts": {
-    "open": 226,
-    "closedThisRelease": 33,
+    "open": 212,
+    "closedThisRelease": 15,
     "byTarget": {
-      "0.40.9": 16,
-      "0.41.0": 15,
+      "0.41.0": 16,
       "0.41.1": 18,
-      "0.41.2": 13,
+      "0.41.2": 14,
       "0.41.3": 5,
       "0.41.4": 8,
       "0.41.5": 7,
@@ -475,15 +474,6 @@
       "summary": "A full save of a loaded PDF drops catalog entries such as names, forms, outlines and the structure tree."
     },
     {
-      "id": "core-document-M03",
-      "area": "core-document",
-      "severity": "high",
-      "status": "missed",
-      "path": "src/parser/documentParser.ts",
-      "target": "0.40.9",
-      "summary": "Decryption decodes the bytes of hex strings twice, producing wrong text."
-    },
-    {
       "id": "core-graphics-15",
       "area": "core-graphics",
       "severity": "high",
@@ -597,44 +587,8 @@
       "severity": "medium",
       "status": "confirmed",
       "path": "src/core/pdfWriter.ts",
-      "target": "0.40.9",
+      "target": "0.41.0",
       "summary": "A save of a loaded PDF copies its Flate streams that already hold zlib data byte for byte, so qpdf --check warns on the output about the same damaged streams it warns on in the input."
-    },
-    {
-      "id": "crypto-security-01",
-      "area": "crypto-security",
-      "severity": "high",
-      "status": "confirmed",
-      "path": "src/crypto/keyDerivation.ts",
-      "target": "0.40.9",
-      "summary": "AES-256 (revision 6) key derivation deviates from ISO 32000-2, so files from other producers do not open with the right password."
-    },
-    {
-      "id": "crypto-security-02",
-      "area": "crypto-security",
-      "severity": "high",
-      "status": "confirmed",
-      "path": "src/crypto/keyDerivation.ts",
-      "target": "0.40.9",
-      "summary": "Revision 6 key derivation runs a different number of rounds than ISO 32000-2 specifies."
-    },
-    {
-      "id": "crypto-security-03",
-      "area": "crypto-security",
-      "severity": "high",
-      "status": "confirmed",
-      "path": "src/crypto/encryptionHandler.ts",
-      "target": "0.40.9",
-      "summary": "Per-object encryption keys are wrong for objects numbered 65,536 and above."
-    },
-    {
-      "id": "crypto-security-05",
-      "area": "crypto-security",
-      "severity": "high",
-      "status": "confirmed",
-      "path": "src/parser/documentParser.ts",
-      "target": "0.40.9",
-      "summary": "Some strings and streams of an encrypted document, such as the Info dictionary, are not decrypted on load."
     },
     {
       "id": "crypto-security-38",
@@ -646,24 +600,6 @@
       "summary": "sanitizePdf can take an outline item, or another dictionary without /Type that has a /Title, for the document information dictionary and empty it, so bookmark titles are lost."
     },
     {
-      "id": "crypto-security-M01",
-      "area": "crypto-security",
-      "severity": "high",
-      "status": "missed",
-      "path": "src/parser/documentParser.ts",
-      "target": "0.40.9",
-      "summary": "Hex strings in encrypted documents are decoded twice during decryption."
-    },
-    {
-      "id": "crypto-security-M03",
-      "area": "crypto-security",
-      "severity": "high",
-      "status": "missed",
-      "path": "src/parser/documentParser.ts",
-      "target": "0.40.9",
-      "summary": "Object streams of encrypted documents are read without decryption, so their objects are lost."
-    },
-    {
       "id": "crypto-security-M04",
       "area": "crypto-security",
       "severity": "high",
@@ -671,6 +607,15 @@
       "path": "src/core/pdfObjects.ts",
       "target": "0.41.2",
       "summary": "The object registry can hold two entries for one object number."
+    },
+    {
+      "id": "crypto-security-M05",
+      "area": "crypto-security",
+      "severity": "high",
+      "status": "missed",
+      "path": "src/crypto/encryptionHandler.ts",
+      "target": "0.41.2",
+      "summary": "The /Perms entry of an AES-256 document is carried through load but never checked against the permissions in /P, so altered permission flags go unnoticed."
     },
     {
       "id": "docs-guide-1-11",
@@ -1087,33 +1032,6 @@
       "summary": "CCITT Group 3 two-dimensional images with end-of-line codes decode wrongly."
     },
     {
-      "id": "parser-syntax-01",
-      "area": "parser-syntax",
-      "severity": "high",
-      "status": "confirmed",
-      "path": "src/parser/documentParser.ts",
-      "target": "0.40.9",
-      "summary": "Loading an encrypted PDF leaves most objects encrypted, so text and metadata read as ciphertext."
-    },
-    {
-      "id": "parser-syntax-03",
-      "area": "parser-syntax",
-      "severity": "high",
-      "status": "confirmed",
-      "path": "tests/unit/parser/decryptionIntegration.test.ts",
-      "target": "0.40.9",
-      "summary": "Decryption tests pass without checking the decrypted content."
-    },
-    {
-      "id": "parser-syntax-44",
-      "area": "parser-syntax",
-      "severity": "high",
-      "status": "confirmed",
-      "path": "src/parser/objectParser.ts",
-      "target": "0.40.9",
-      "summary": "A stream with a wrong /Length is lost instead of recovered."
-    },
-    {
       "id": "parser-syntax-62",
       "area": "parser-syntax",
       "severity": "high",
@@ -1139,15 +1057,6 @@
       "path": "src/parser/streamingParser.ts",
       "target": "0.42.7",
       "summary": "StreamingPdfParser reads the whole file before parsing; its documentation describes incremental processing."
-    },
-    {
-      "id": "parser-syntax-M03",
-      "area": "parser-syntax",
-      "severity": "high",
-      "status": "missed",
-      "path": "src/parser/objectParser.ts",
-      "target": "0.40.9",
-      "summary": "A stream whose /Length is an indirect object defined later in the file fails to parse."
     },
     {
       "id": "parser-syntax-M04",
@@ -1888,15 +1797,6 @@
       "summary": "Hex strings are written back with different bytes after a load and save."
     },
     {
-      "id": "tests-unit-crypto-02",
-      "area": "tests-unit-crypto",
-      "severity": "high",
-      "status": "confirmed",
-      "path": "tests/unit/crypto/aes256.test.ts",
-      "target": "0.40.9",
-      "summary": "The Algorithm 2.B known-answer tests in tests/oracle/aes.test.ts are expected-fail markers against the library's algorithm2B until 0.40.9, and the unit tests check only output length and determinism."
-    },
-    {
       "id": "tests-unit-crypto-23",
       "area": "tests-unit-crypto",
       "severity": "high",
@@ -1904,33 +1804,6 @@
       "path": "tests/unit/crypto/encryptionHandler.test.ts",
       "target": "0.41.0",
       "summary": "encryptString encodes hex and literal string values as UTF-8 text, altering their bytes."
-    },
-    {
-      "id": "tests-unit-crypto-M01",
-      "area": "tests-unit-crypto",
-      "severity": "high",
-      "status": "missed",
-      "path": "src/crypto/keyDerivation.ts",
-      "target": "0.40.9",
-      "summary": "Revision 6 key derivation truncates an intermediate value that ISO 32000-2 keeps in full."
-    },
-    {
-      "id": "tests-unit-crypto-M02",
-      "area": "tests-unit-crypto",
-      "severity": "high",
-      "status": "missed",
-      "path": "src/crypto/keyDerivation.ts",
-      "target": "0.40.9",
-      "summary": "Revision 6 key derivation stops one round off compared with ISO 32000-2."
-    },
-    {
-      "id": "tests-unit-crypto-M03",
-      "area": "tests-unit-crypto",
-      "severity": "high",
-      "status": "missed",
-      "path": "src/crypto/encryptionHandler.ts",
-      "target": "0.40.9",
-      "summary": "Per-object encryption keys are wrong in documents with more than 65,535 objects."
     },
     {
       "id": "tests-unit-form-06",
@@ -2128,8 +2001,36 @@
       "fixedIn": "0.40.5"
     },
     {
+      "id": "core-document-M03",
+      "fixedIn": "0.40.9"
+    },
+    {
       "id": "core-page-07",
       "fixedIn": "0.40.5"
+    },
+    {
+      "id": "crypto-security-01",
+      "fixedIn": "0.40.9"
+    },
+    {
+      "id": "crypto-security-02",
+      "fixedIn": "0.40.9"
+    },
+    {
+      "id": "crypto-security-03",
+      "fixedIn": "0.40.9"
+    },
+    {
+      "id": "crypto-security-05",
+      "fixedIn": "0.40.9"
+    },
+    {
+      "id": "crypto-security-M01",
+      "fixedIn": "0.40.9"
+    },
+    {
+      "id": "crypto-security-M03",
+      "fixedIn": "0.40.9"
     },
     {
       "id": "docs-guide-1-01",
@@ -2364,8 +2265,20 @@
       "fixedIn": "0.40.4"
     },
     {
+      "id": "parser-syntax-01",
+      "fixedIn": "0.40.9"
+    },
+    {
       "id": "parser-syntax-02",
       "fixedIn": "0.40.4"
+    },
+    {
+      "id": "parser-syntax-03",
+      "fixedIn": "0.40.9"
+    },
+    {
+      "id": "parser-syntax-44",
+      "fixedIn": "0.40.9"
     },
     {
       "id": "parser-syntax-51",
@@ -2378,6 +2291,10 @@
     {
       "id": "parser-syntax-M02",
       "fixedIn": "0.40.7"
+    },
+    {
+      "id": "parser-syntax-M03",
+      "fixedIn": "0.40.9"
     },
     {
       "id": "render-01",
@@ -2446,6 +2363,22 @@
     {
       "id": "tests-unit-crypto-01",
       "fixedIn": "0.40.6"
+    },
+    {
+      "id": "tests-unit-crypto-02",
+      "fixedIn": "0.40.9"
+    },
+    {
+      "id": "tests-unit-crypto-M01",
+      "fixedIn": "0.40.9"
+    },
+    {
+      "id": "tests-unit-crypto-M02",
+      "fixedIn": "0.40.9"
+    },
+    {
+      "id": "tests-unit-crypto-M03",
+      "fixedIn": "0.40.9"
     },
     {
       "id": "tests-unit-form-01",
