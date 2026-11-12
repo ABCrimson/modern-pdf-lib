@@ -13,6 +13,7 @@
  */
 
 import type { ChromaSubsampling } from '../../wasm/jpeg/bridge.js';
+import { flateEncode } from '../../compression/pdfFlate.js';
 
 // ---------------------------------------------------------------------------
 // Public interfaces
@@ -63,7 +64,7 @@ export interface RecompressOptions {
   /**
    * Output format.
    * - `'jpeg'`: JPEG compression (lossy, good for photographs)
-   * - `'deflate'`: Deflate/zlib compression (lossless, used in PDF FlateDecode)
+   * - `'deflate'`: zlib data (RFC 1950), lossless; the data PDF FlateDecode requires
    *
    * Default: `'deflate'`.
    */
@@ -698,71 +699,20 @@ function resampleLanczos(src: RawImageData, dstWidth: number, dstHeight: number)
 // ---------------------------------------------------------------------------
 
 /**
- * Recompress image data using deflate (for PDF FlateDecode).
+ * Recompress image data as zlib data (RFC 1950), the format PDF
+ * FlateDecode requires, with fflate at `level` (rounded and clamped to
+ * 1-9). The output is the same in every runtime.
  * @internal
  */
-async function recompressDeflate(image: RawImageData, level: number): Promise<OptimizeResult> {
-  // Try CompressionStream API
-  if (typeof CompressionStream !== 'undefined') {
-    const cs = new CompressionStream('deflate');
-    const writer = cs.writable.getWriter();
-    const reader = cs.readable.getReader();
-
-    const chunks: Uint8Array[] = [];
-
-    writer.write(new Uint8Array(image.pixels) as Uint8Array<ArrayBuffer>).catch(() => {});
-    writer.close().catch(() => {});
-
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      chunks.push(value);
-    }
-
-    const totalLength = chunks.reduce((sum, c) => sum + c.length, 0);
-    const result = new Uint8Array(totalLength);
-    let pos = 0;
-    for (const chunk of chunks) {
-      result.set(chunk, pos);
-      pos += chunk.length;
-    }
-
-    return {
-      data: result,
-      width: image.width,
-      height: image.height,
-      channels: image.channels,
-      format: 'deflate',
-      wasOptimized: true,
-    };
-  }
-
-  // Fallback: try fflate
-  try {
-    const { deflateSync } = await import('fflate');
-    const compressed = deflateSync(image.pixels, {
-      level: level as 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
-    });
-
-    return {
-      data: compressed,
-      width: image.width,
-      height: image.height,
-      channels: image.channels,
-      format: 'deflate',
-      wasOptimized: true,
-    };
-  } catch {
-    // Return uncompressed
-    return {
-      data: image.pixels,
-      width: image.width,
-      height: image.height,
-      channels: image.channels,
-      format: 'raw',
-      wasOptimized: false,
-    };
-  }
+function recompressDeflate(image: RawImageData, level: number): OptimizeResult {
+  return {
+    data: flateEncode(image.pixels, level),
+    width: image.width,
+    height: image.height,
+    channels: image.channels,
+    format: 'deflate',
+    wasOptimized: true,
+  };
 }
 
 /**

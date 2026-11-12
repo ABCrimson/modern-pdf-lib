@@ -4,7 +4,12 @@
  * Covers header, xref table, trailer, compression, and overall structure.
  */
 
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { inflateSync } from 'node:zlib';
 import { describe, it, expect } from 'vitest';
+import { createPdf, loadPdf } from '../../../src/index.js';
+import type { PdfDocument } from '../../../src/index.js';
 import { PdfWriter, serializePdf } from '../../../src/core/pdfWriter.js';
 import {
   PdfObjectRegistry,
@@ -384,4 +389,134 @@ describe('PdfWriter', () => {
     // Should have a valid PDF header
     expect(text.startsWith('%PDF-1.7')).toBe(true);
   });
+});
+
+// ---------------------------------------------------------------------------
+// FlateDecode data is zlib (RFC 1950)
+// ---------------------------------------------------------------------------
+
+const LEGACY = join(import.meta.dirname, '../../fixtures/legacy-0.40.3');
+const latin1 = new TextDecoder('latin1');
+
+/** The still-compressed bytes of every /FlateDecode stream (the writer emits a direct /Length). */
+function flateStreams(bytes: Uint8Array): Uint8Array[] {
+  const text = latin1.decode(bytes);
+  const found: Uint8Array[] = [];
+  for (const m of text.matchAll(/(?<!end)stream\r?\n/g)) {
+    const start = m.index + m[0].length;
+    const header = text.slice(text.lastIndexOf(' obj', m.index), m.index);
+    if (!header.includes('/FlateDecode')) continue;
+    const length = /\/Length (\d+)/.exec(header)?.[1];
+    if (length === undefined) throw new Error('FlateDecode stream without a direct /Length');
+    found.push(bytes.subarray(start, start + Number(length)));
+  }
+  return found;
+}
+
+/** Asserts that the file holds at least one /FlateDecode stream and node:zlib inflates each. */
+function expectZlibStreams(bytes: Uint8Array): void {
+  const streams = flateStreams(bytes);
+  expect(streams.length).toBeGreaterThan(0);
+  for (const s of streams) expect(() => inflateSync(s)).not.toThrow();
+}
+
+/** An uncompressed little-endian TIFF with 8-bit samples (3 = RGB, 4 = RGB with alpha). */
+function uncompressedTiff(width: number, height: number, channels: 3 | 4): Uint8Array {
+  const pixels = new Uint8Array(width * height * channels).map((_, i) => (i * 37) & 0xff);
+  const tags: [number, number, number][] = [
+    [256, 3, width],
+    [257, 3, height],
+    [258, 3, 0], // BitsPerSample: offset of the per-sample values, set below
+    [259, 3, 1],
+    [262, 3, 2],
+    [273, 4, 0], // StripOffsets, set below
+    [277, 3, channels],
+    [278, 4, height],
+    [279, 4, pixels.length],
+    ...(channels === 4 ? [[338, 3, 2] as [number, number, number]] : []),
+  ];
+  const ifdEnd = 8 + 2 + tags.length * 12 + 4;
+  const bpsOffset = ifdEnd;
+  const dataOffset = bpsOffset + channels * 2;
+  const out = new Uint8Array(dataOffset + pixels.length);
+  const view = new DataView(out.buffer);
+  out.set([0x49, 0x49]);
+  view.setUint16(2, 42, true);
+  view.setUint32(4, 8, true);
+  view.setUint16(8, tags.length, true);
+  tags.forEach(([tag, type, value], i) => {
+    const at = 10 + i * 12;
+    view.setUint16(at, tag, true);
+    view.setUint16(at + 2, type, true);
+    view.setUint32(at + 4, tag === 258 ? channels : 1, true);
+    const v = tag === 258 ? bpsOffset : tag === 273 ? dataOffset : value;
+    if (type === 3 && tag !== 258) view.setUint16(at + 8, v, true);
+    else view.setUint32(at + 8, v, true);
+  });
+  for (let c = 0; c < channels; c++) view.setUint16(bpsOffset + c * 2, 8, true);
+  out.set(pixels, dataOffset);
+  return out;
+}
+
+function textDocument(): PdfDocument {
+  const doc = createPdf();
+  doc.setCreationDate(new Date('2026-01-01T00:00:00Z'));
+  doc.setModDate(new Date('2026-01-01T00:00:00Z'));
+  const page = doc.addPage();
+  for (let i = 0; i < 20; i++) page.drawText(`Zlib line ${i + 1}`, { x: 50, y: 750 - i * 16 });
+  return doc;
+}
+
+async function streamBytes(stream: ReadableStream<Uint8Array>): Promise<Uint8Array> {
+  return new Uint8Array(await new Response(stream).arrayBuffer());
+}
+
+describe('FlateDecode output is zlib data', () => {
+  it('save() writes every /FlateDecode stream as zlib data', async () => {
+    expectZlibStreams(await textDocument().save());
+  });
+
+  it('save() with objectStreamThreshold writes zlib object and xref streams and reloads', async () => {
+    const bytes = await textDocument().save({ objectStreamThreshold: 1 });
+    const text = latin1.decode(bytes);
+    expect(text).toContain('/Type /ObjStm');
+    expect(text).toContain('/Type /XRef');
+    expectZlibStreams(bytes);
+    const reloaded = await loadPdf(bytes);
+    expect(reloaded.getPageCount()).toBe(1);
+  });
+
+  it('saveAsStream() writes zlib data and the same bytes as save()', async () => {
+    const streamed = await streamBytes(textDocument().saveAsStream());
+    expectZlibStreams(streamed);
+    expect(streamed).toEqual(await textDocument().save());
+  });
+
+  it.each([true, false])(
+    're-saving raw-deflate.pdf (compress: %s) writes its loaded streams as zlib data',
+    async (compress) => {
+      for (const file of ['raw-deflate.pdf', 'raw-deflate-objstm.pdf']) {
+        const doc = await loadPdf(new Uint8Array(readFileSync(join(LEGACY, file))));
+        const bytes = await doc.save({ compress });
+        expectZlibStreams(bytes);
+        expect((await loadPdf(bytes)).getPageCount()).toBe(doc.getPageCount());
+      }
+    },
+  );
+
+  it.each([3, 4] as const)(
+    'embedTiff (%i channels) writes zlib image data under compress: false',
+    async (channels) => {
+      const doc = createPdf();
+      const image = doc.embedTiff(uncompressedTiff(4, 4, channels));
+      const embedded = doc.getRegistry().resolve(image.ref);
+      if (embedded?.kind !== 'stream') throw new Error('image XObject is not a stream');
+      expect(inflateSync(embedded.data)).toHaveLength(4 * 4 * 3);
+
+      doc.addPage().drawImage(image, { x: 10, y: 10, width: 40, height: 40 });
+      const bytes = await doc.save({ compress: false });
+      const lengths = flateStreams(bytes).map((s) => inflateSync(s).length);
+      expect(lengths.sort((a, b) => a - b)).toEqual(channels === 4 ? [16, 48] : [48]);
+    },
+  );
 });

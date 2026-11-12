@@ -8,7 +8,9 @@ import { describe, it, expect } from 'vitest';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
+import { crc32, deflateSync as zlibDeflateSync, inflateSync } from 'node:zlib';
 import { embedJpeg, isJpeg, getJpegInfo } from '../../../src/assets/image/jpegEmbed.js';
+import { embedPng as decodePng } from '../../../src/assets/image/pngEmbed.js';
 import { createPdf } from '../../../src/index.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -318,5 +320,95 @@ describe('JPEG embedding', () => {
       expect(result.width).toBe(w);
       expect(result.height).toBe(h);
     }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// PNG stream data is zlib (RFC 1950); 16-bit samples with alpha
+// ---------------------------------------------------------------------------
+
+/** A PNG chunk with its CRC from node:zlib. */
+function zlibPngChunk(type: string, data: Uint8Array): Uint8Array {
+  const body = new Uint8Array([...new TextEncoder().encode(type), ...data]);
+  const out = new Uint8Array(8 + data.length + 4);
+  const view = new DataView(out.buffer);
+  view.setUint32(0, data.length, false);
+  out.set(body, 4);
+  view.setUint32(8 + data.length, crc32(body), false);
+  return out;
+}
+
+/** A non-interlaced PNG whose IDAT holds `rows` (each with its filter byte) compressed by node:zlib. */
+function pngFromRows(
+  width: number,
+  height: number,
+  bitDepth: number,
+  colorType: number,
+  rows: Uint8Array,
+): Uint8Array {
+  const ihdr = new Uint8Array(13);
+  const view = new DataView(ihdr.buffer);
+  view.setUint32(0, width, false);
+  view.setUint32(4, height, false);
+  ihdr.set([bitDepth, colorType, 0, 0, 0], 8);
+  return new Uint8Array([
+    0x89,
+    0x50,
+    0x4e,
+    0x47,
+    0x0d,
+    0x0a,
+    0x1a,
+    0x0a,
+    ...zlibPngChunk('IHDR', ihdr),
+    ...zlibPngChunk('IDAT', new Uint8Array(zlibDeflateSync(rows))),
+    ...zlibPngChunk('IEND', new Uint8Array(0)),
+  ]);
+}
+
+/** Every IDAT payload of a PNG file, concatenated. */
+function idatOf(png: Uint8Array): Uint8Array {
+  const view = new DataView(png.buffer, png.byteOffset, png.byteLength);
+  const parts: number[] = [];
+  for (let at = 8; at < png.length;) {
+    const length = view.getUint32(at, false);
+    const type = String.fromCharCode(...png.subarray(at + 4, at + 8));
+    if (type === 'IDAT') parts.push(...png.subarray(at + 8, at + 8 + length));
+    at += 12 + length;
+  }
+  return new Uint8Array(parts);
+}
+
+describe('PNG stream data for /FlateDecode', () => {
+  it('compresses sample-rgba.png image and soft mask data as zlib data', async () => {
+    const result = decodePng(
+      new Uint8Array(await readFile(resolve(fixturesDir, 'sample-rgba.png'))),
+    );
+    expect(result.smaskData).toBeDefined();
+    expect(inflateSync(result.imageData)).toHaveLength(4 * 4 * 3);
+    expect(inflateSync(result.smaskData ?? new Uint8Array(0))).toHaveLength(4 * 4);
+  });
+
+  it('passes the IDAT data of sample.png through unchanged', async () => {
+    const png = new Uint8Array(await readFile(resolve(fixturesDir, 'sample.png')));
+    expect(decodePng(png).imageData).toEqual(idatOf(png));
+  });
+
+  it('takes the high byte of each 16-bit sample of an RGBA PNG', () => {
+    // 2x1 pixels; every sample has a distinct high byte and the low byte 0xee.
+    const samples = [0x10, 0x20, 0x30, 0x40, 0x50, 0x60, 0x70, 0x80];
+    const rows = new Uint8Array([0, ...samples.flatMap((s) => [s, 0xee])]);
+    const result = decodePng(pngFromRows(2, 1, 16, 6, rows));
+    expect([...inflateSync(result.imageData)]).toEqual([0x10, 0x20, 0x30, 0x50, 0x60, 0x70]);
+    expect([...inflateSync(result.smaskData ?? new Uint8Array(0))]).toEqual([0x40, 0x80]);
+    expect(result.bitsPerComponent).toBe(8);
+  });
+
+  it('takes the high byte of each 16-bit sample of a gray and alpha PNG', () => {
+    const samples = [0x11, 0x22, 0x33, 0x44];
+    const rows = new Uint8Array([0, ...samples.flatMap((s) => [s, 0xee])]);
+    const result = decodePng(pngFromRows(2, 1, 16, 4, rows));
+    expect([...inflateSync(result.imageData)]).toEqual([0x11, 0x33]);
+    expect([...inflateSync(result.smaskData ?? new Uint8Array(0))]).toEqual([0x22, 0x44]);
   });
 });

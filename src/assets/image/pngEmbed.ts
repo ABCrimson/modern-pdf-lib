@@ -25,7 +25,8 @@
  * No require() — ESM import only.
  */
 
-import { unzlibSync, deflateSync } from 'fflate';
+import { unzlibSync } from 'fflate';
+import { flateEncode } from '../../compression/pdfFlate.js';
 
 // ---------------------------------------------------------------------------
 // Public interfaces
@@ -56,9 +57,9 @@ export interface PngEmbedResult {
   readonly palette?: Uint8Array | undefined;
   /**
    * The raw image data for the PDF stream.
-   * For FlateDecode, this is the deflate-compressed pixel data
-   * (the concatenated IDAT chunks with the zlib wrapper removed
-   * or preserved depending on the processing).
+   * For FlateDecode, this is zlib data (RFC 1950): either the
+   * concatenated IDAT chunks unchanged (decoded with a PNG predictor),
+   * or the decoded pixels compressed again.
    */
   readonly imageData: Uint8Array;
   /**
@@ -310,10 +311,10 @@ export function isPngWasmReady(): boolean {
 // ---------------------------------------------------------------------------
 
 /**
- * Decompress the zlib data from IDAT chunks.
- *
- * Uses the DecompressionStream API (available in modern browsers,
- * Node 18+, Deno) or falls back to a manual inflate.
+ * Decompress the concatenated IDAT data, which PNG requires to be zlib
+ * data (RFC 1950), with fflate's `unzlibSync`: the zlib header is
+ * required and a preset dictionary is rejected; the Adler-32 trailer is
+ * not checked.
  *
  * @internal
  */
@@ -428,46 +429,57 @@ function bytesPerPixel(colorType: number, bitDepth: number): number {
 // ---------------------------------------------------------------------------
 
 /**
- * Separate RGBA pixels into RGB data + alpha mask.
+ * Separate RGBA pixels into 8-bit RGB data + 8-bit alpha mask.
+ *
+ * With 16-bit samples (two bytes each, most significant first) the high
+ * byte of each sample is kept.
  * @internal
  */
 function separateRgba(
   pixels: Uint8Array,
   width: number,
   height: number,
+  bitDepth: number,
 ): { rgb: Uint8Array; alpha: Uint8Array } {
   const pixelCount = width * height;
+  const sampleBytes = bitDepth === 16 ? 2 : 1;
   const rgb = new Uint8Array(pixelCount * 3);
   const alpha = new Uint8Array(pixelCount);
 
   for (let i = 0; i < pixelCount; i++) {
-    const srcIdx = i * 4;
+    const srcIdx = i * 4 * sampleBytes;
     const dstIdx = i * 3;
-    rgb[dstIdx] = pixels[srcIdx]!;
-    rgb[dstIdx + 1] = pixels[srcIdx + 1]!;
-    rgb[dstIdx + 2] = pixels[srcIdx + 2]!;
-    alpha[i] = pixels[srcIdx + 3]!;
+    rgb[dstIdx] = pixels[srcIdx] ?? 0;
+    rgb[dstIdx + 1] = pixels[srcIdx + sampleBytes] ?? 0;
+    rgb[dstIdx + 2] = pixels[srcIdx + 2 * sampleBytes] ?? 0;
+    alpha[i] = pixels[srcIdx + 3 * sampleBytes] ?? 0;
   }
 
   return { rgb, alpha };
 }
 
 /**
- * Separate Grayscale+Alpha pixels into gray data + alpha mask.
+ * Separate Grayscale+Alpha pixels into 8-bit gray data + 8-bit alpha mask.
+ *
+ * With 16-bit samples (two bytes each, most significant first) the high
+ * byte of each sample is kept.
  * @internal
  */
 function separateGrayscaleAlpha(
   pixels: Uint8Array,
   width: number,
   height: number,
+  bitDepth: number,
 ): { gray: Uint8Array; alpha: Uint8Array } {
   const pixelCount = width * height;
+  const sampleBytes = bitDepth === 16 ? 2 : 1;
   const gray = new Uint8Array(pixelCount);
   const alpha = new Uint8Array(pixelCount);
 
   for (let i = 0; i < pixelCount; i++) {
-    gray[i] = pixels[i * 2]!;
-    alpha[i] = pixels[i * 2 + 1]!;
+    const srcIdx = i * 2 * sampleBytes;
+    gray[i] = pixels[srcIdx] ?? 0;
+    alpha[i] = pixels[srcIdx + sampleBytes] ?? 0;
   }
 
   return { gray, alpha };
@@ -478,11 +490,11 @@ function separateGrayscaleAlpha(
 // ---------------------------------------------------------------------------
 
 /**
- * Compress data using deflate for FlateDecode.
+ * Compress data as zlib data (RFC 1950) for FlateDecode, at level 6.
  * @internal
  */
 function compressForPdf(data: Uint8Array): Uint8Array {
-  return deflateSync(data, { level: 6 });
+  return flateEncode(data, 6);
 }
 
 // ---------------------------------------------------------------------------
@@ -797,7 +809,7 @@ function embedComplexPng(
 
   switch (ihdr.colorType) {
     case PngColorType.RGBA: {
-      const { rgb, alpha } = separateRgba(pixels, ihdr.width, ihdr.height);
+      const { rgb, alpha } = separateRgba(pixels, ihdr.width, ihdr.height, ihdr.bitDepth);
       imageData = compressForPdf(rgb);
       smaskData = compressForPdf(alpha);
       colorSpace = 'DeviceRGB';
@@ -806,7 +818,12 @@ function embedComplexPng(
     }
 
     case PngColorType.GrayscaleAlpha: {
-      const { gray, alpha } = separateGrayscaleAlpha(pixels, ihdr.width, ihdr.height);
+      const { gray, alpha } = separateGrayscaleAlpha(
+        pixels,
+        ihdr.width,
+        ihdr.height,
+        ihdr.bitDepth,
+      );
       imageData = compressForPdf(gray);
       smaskData = compressForPdf(alpha);
       colorSpace = 'DeviceGray';

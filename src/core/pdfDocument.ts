@@ -59,7 +59,7 @@ import { detectImageFormat } from '../assets/image/formatDetect.js';
 import { decodeWebP } from '../assets/image/webpDecode.js';
 import { decodeTiff } from '../assets/image/tiffDecode.js';
 import type { TiffDecodeOptions } from '../assets/image/tiffDecode.js';
-import { deflateSync } from 'fflate';
+import { flateEncode } from '../compression/pdfFlate.js';
 import type { LoadPdfOptions } from '../parser/documentParser.js';
 import { loadPdf } from '../parser/documentParser.js';
 import { PdfEncryptionHandler } from '../crypto/encryptionHandler.js';
@@ -1199,8 +1199,8 @@ export class PdfDocument {
         alpha[i] = decoded.pixels[srcIdx + 3]!;
       }
 
-      const compressedRgb = deflateSync(rgb, { level: 6 });
-      const compressedAlpha = deflateSync(alpha, { level: 6 });
+      const compressedRgb = flateEncode(rgb, 6);
+      const compressedAlpha = flateEncode(alpha, 6);
 
       dict.set('/ColorSpace', PdfName.of('DeviceRGB'));
       dict.set('/Filter', PdfName.of('FlateDecode'));
@@ -1244,7 +1244,7 @@ export class PdfDocument {
     }
 
     // RGB only (no alpha)
-    const compressedRgb = deflateSync(decoded.pixels, { level: 6 });
+    const compressedRgb = flateEncode(decoded.pixels, 6);
 
     dict.set('/ColorSpace', PdfName.of('DeviceRGB'));
     dict.set('/Filter', PdfName.of('FlateDecode'));
@@ -1314,8 +1314,8 @@ export class PdfDocument {
         alpha[i] = decoded.pixels[srcIdx + 3]!;
       }
 
-      const compressedRgb = deflateSync(rgb, { level: 6 });
-      const compressedAlpha = deflateSync(alpha, { level: 6 });
+      const compressedRgb = flateEncode(rgb, 6);
+      const compressedAlpha = flateEncode(alpha, 6);
 
       dict.set('/ColorSpace', PdfName.of('DeviceRGB'));
       dict.set('/Filter', PdfName.of('FlateDecode'));
@@ -1359,7 +1359,7 @@ export class PdfDocument {
 
     // Grayscale or RGB (no alpha)
     const colorSpace = decoded.channels === 1 ? 'DeviceGray' : 'DeviceRGB';
-    const compressed = deflateSync(decoded.pixels, { level: 6 });
+    const compressed = flateEncode(decoded.pixels, 6);
 
     dict.set('/ColorSpace', PdfName.of(colorSpace));
     dict.set('/Filter', PdfName.of('FlateDecode'));

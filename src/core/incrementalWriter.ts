@@ -21,8 +21,8 @@
  * @packageDocumentation
  */
 
-import { deflateSync as fflateDeflateSync } from 'fflate';
-import { PdfObjectRegistry, PdfName, PdfStream } from './pdfObjects.js';
+import { compressPdfStream, isLoadedFromEncryptedFile, rewrapLegacyStream } from './flateStream.js';
+import { PdfObjectRegistry } from './pdfObjects.js';
 import type { DocumentStructure } from './pdfCatalog.js';
 import type { PdfSaveOptions } from './pdfWriter.js';
 import type { PdfDocument } from './pdfDocument.js';
@@ -365,9 +365,12 @@ export function saveIncremental(
       continue;
     }
 
-    // Optionally compress streams
-    if (compress && entry.object.kind === 'stream') {
-      compressStream(entry.object as PdfStream, compressionLevel);
+    // Write raw DEFLATE /FlateDecode data back as zlib data (not for a
+    // document loaded from an encrypted file), then optionally compress
+    // (only objects this update appends)
+    if (entry.object.kind === 'stream') {
+      if (!isLoadedFromEncryptedFile(registry)) rewrapLegacyStream(entry.object);
+      if (compress) compressPdfStream(entry.object, compressionLevel);
     }
 
     // Record the byte offset (relative to the start of the appendix,
@@ -516,28 +519,6 @@ function buildXrefSubsections(
   });
 
   return subsections;
-}
-
-// ---------------------------------------------------------------------------
-// Stream compression helper
-// ---------------------------------------------------------------------------
-
-/**
- * Apply FlateDecode compression to a stream if it's not already compressed.
- */
-function compressStream(stream: PdfStream, level: number): void {
-  if (stream.dict.has('/Filter')) return;
-  if (stream.data.length === 0) return;
-
-  const compressed = fflateDeflateSync(stream.data, {
-    level: level as 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
-  });
-
-  if (compressed.length < stream.data.length) {
-    stream.dict.set('/Filter', PdfName.of('FlateDecode'));
-    stream.data = compressed;
-    stream.syncLength();
-  }
 }
 
 // ---------------------------------------------------------------------------

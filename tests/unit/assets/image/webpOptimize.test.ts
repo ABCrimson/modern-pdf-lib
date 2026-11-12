@@ -5,6 +5,7 @@
  * from the webpOptimize module.
  */
 
+import { crc32, inflateSync } from 'node:zlib';
 import { describe, it, expect } from 'vitest';
 import {
   recompressWebP,
@@ -281,5 +282,38 @@ describe('encodePngFromPixels', () => {
       png[iendStart + 7]!,
     );
     expect(iendType).toBe('IEND');
+  });
+});
+
+describe('encodePngFromPixels IDAT data', () => {
+  /** The chunks of a PNG file, each with its type, data and stored CRC. */
+  function chunksOf(png: Uint8Array): { type: string; data: Uint8Array; crc: number }[] {
+    const view = new DataView(png.buffer, png.byteOffset, png.byteLength);
+    const chunks: { type: string; data: Uint8Array; crc: number }[] = [];
+    for (let at = 8; at < png.length;) {
+      const length = view.getUint32(at, false);
+      chunks.push({
+        type: String.fromCharCode(...png.subarray(at + 4, at + 8)),
+        data: png.subarray(at + 8, at + 8 + length),
+        crc: view.getUint32(at + 8 + length, false),
+      });
+      at += 12 + length;
+    }
+    return chunks;
+  }
+
+  it('writes zlib IDAT data that node:zlib inflates to the filtered scanlines', () => {
+    const pixels = buildRgbaImage(3, 2, 10, 20, 30, 255);
+    const png = encodePngFromPixels(pixels, 3, 2, 4);
+    const chunks = chunksOf(png);
+    const idat = new Uint8Array(
+      chunks.filter((c) => c.type === 'IDAT').flatMap((c) => [...c.data]),
+    );
+    const scanlines = inflateSync(idat);
+    expect(scanlines).toHaveLength(2 * (1 + 3 * 4));
+    expect([...scanlines.subarray(0, 5)]).toEqual([0, 10, 20, 30, 255]);
+    for (const c of chunks) {
+      expect(c.crc).toBe(crc32(new Uint8Array([...new TextEncoder().encode(c.type), ...c.data])));
+    }
   });
 });

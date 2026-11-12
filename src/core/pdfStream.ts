@@ -13,13 +13,9 @@
  * encryption configured.
  */
 
-import { deflateSync as fflateDeflateSync } from 'fflate';
-import {
-  isAvailable as isWasmDeflateAvailable,
-  deflateSync as wasmDeflateSync,
-} from '../compression/libdeflateWasm.js';
+import { compressPdfStream, isLoadedFromEncryptedFile, rewrapLegacyStream } from './flateStream.js';
 import type { PdfStream as PdfStreamObj } from './pdfObjects.js';
-import { PdfObjectRegistry, PdfName } from './pdfObjects.js';
+import { PdfObjectRegistry } from './pdfObjects.js';
 import type { DocumentStructure } from './pdfCatalog.js';
 import type { PdfSaveOptions } from './pdfWriter.js';
 
@@ -155,9 +151,14 @@ export class PdfStreamWriter {
     const offsets = new Map<number, number>();
 
     for (const entry of this.registry) {
-      // Optionally compress
-      if (this.compress && entry.object.kind === 'stream') {
-        this.compressStream(entry.object as PdfStreamObj);
+      // Write raw DEFLATE /FlateDecode data back as zlib data (not for a
+      // document loaded from an encrypted file), then optionally compress
+      // (the same bytes PdfWriter writes)
+      if (entry.object.kind === 'stream') {
+        if (!isLoadedFromEncryptedFile(this.registry)) rewrapLegacyStream(entry.object);
+        if (this.compress) {
+          this.compressStream(entry.object);
+        }
       }
 
       // Record offset
@@ -180,26 +181,7 @@ export class PdfStreamWriter {
   }
 
   private compressStream(stream: PdfStreamObj): void {
-    if (stream.dict.has('/Filter')) return;
-    if (stream.data.length === 0) return;
-
-    let compressed: Uint8Array;
-
-    if (this.useWasm && isWasmDeflateAvailable()) {
-      // Use WASM-accelerated compression
-      compressed = wasmDeflateSync(stream.data, this.compressionLevel);
-    } else {
-      // Fall back to fflate (pure JS)
-      compressed = fflateDeflateSync(stream.data, {
-        level: this.compressionLevel as 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
-      });
-    }
-
-    if (compressed.length < stream.data.length) {
-      stream.dict.set('/Filter', PdfName.of('FlateDecode'));
-      stream.data = compressed;
-      stream.syncLength();
-    }
+    compressPdfStream(stream, this.compressionLevel, this.useWasm);
   }
 
   private async writeXref(w: StreamByteCounter, offsets: Map<number, number>): Promise<void> {

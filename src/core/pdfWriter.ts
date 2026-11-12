@@ -12,15 +12,15 @@
  * 5. `startxref` pointer
  * 6. `%%EOF`
  *
- * Supports optional FlateDecode compression for streams via `fflate`
- * and optional encryption via a {@link PdfEncryptionHandler}.
+ * Supports optional FlateDecode compression for streams (zlib data, through
+ * `core/flateStream`) and optional encryption via a
+ * {@link PdfEncryptionHandler}. A loaded `/FlateDecode` stream that holds
+ * raw DEFLATE data is written back as zlib data in both compress modes,
+ * except in a document loaded from a file whose trailer has `/Encrypt`,
+ * whose `/FlateDecode` data is not re-wrapped.
  */
 
-import { deflateSync as fflateDeflateSync } from 'fflate';
-import {
-  isAvailable as isWasmDeflateAvailable,
-  deflateSync as wasmDeflateSync,
-} from '../compression/libdeflateWasm.js';
+import { compressPdfStream, isLoadedFromEncryptedFile, rewrapLegacyStream } from './flateStream.js';
 import type { PdfRef, ByteWriter } from './pdfObjects.js';
 import {
   PdfObjectRegistry,
@@ -259,10 +259,13 @@ export class PdfWriter {
   }
 
   private async writeIndirectObject(entry: RegistryEntry): Promise<void> {
-    // Optionally compress stream data (before encryption — per the spec,
-    // compression is applied first, then encryption)
-    if (this.compress && entry.object.kind === 'stream') {
-      this.compressStream(entry.object as PdfStream);
+    // Write raw DEFLATE /FlateDecode data back as zlib data (not for a
+    // document loaded from an encrypted file), then optionally compress
+    // stream data (both before encryption — per the spec, compression is
+    // applied first, then encryption)
+    if (entry.object.kind === 'stream') {
+      if (!isLoadedFromEncryptedFile(this.source)) rewrapLegacyStream(entry.object);
+      if (this.compress) this.compressStream(entry.object);
     }
 
     // Encrypt if handler is present and this is not the /Encrypt dict itself
@@ -359,33 +362,11 @@ export class PdfWriter {
   }
 
   /**
-   * Apply FlateDecode compression to a stream's data if it is not
-   * already compressed.
+   * Apply FlateDecode compression (zlib data) to a stream that has no
+   * filter yet, when the compressed form is shorter.
    */
   private compressStream(stream: PdfStream): void {
-    // Skip if already has a filter
-    if (stream.dict.has('/Filter')) return;
-    // Skip empty streams
-    if (stream.data.length === 0) return;
-
-    let compressed: Uint8Array;
-
-    if (this.useWasm && isWasmDeflateAvailable()) {
-      // Use WASM-accelerated compression
-      compressed = wasmDeflateSync(stream.data, this.compressionLevel);
-    } else {
-      // Fall back to fflate (pure JS)
-      compressed = fflateDeflateSync(stream.data, {
-        level: this.compressionLevel as 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
-      });
-    }
-
-    // Only use compressed version if it's actually smaller
-    if (compressed.length < stream.data.length) {
-      stream.dict.set('/Filter', PdfName.of('FlateDecode'));
-      stream.data = compressed;
-      stream.syncLength();
-    }
+    compressPdfStream(stream, this.compressionLevel, this.useWasm);
   }
 
   // -----------------------------------------------------------------------

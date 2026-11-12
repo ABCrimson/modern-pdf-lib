@@ -15,7 +15,7 @@
  * No require() — ESM import only.
  */
 
-import { deflateSync } from 'fflate';
+import { flateEncode } from '../../compression/pdfFlate.js';
 
 // ---------------------------------------------------------------------------
 // Internal: minimal JPEG encoder (baseline, quality-scaled quantization)
@@ -610,8 +610,8 @@ function encodePngFromPixels(
     offset += width * bytesPerPixel;
   }
 
-  // Compress with deflate
-  const compressed = deflateSync(rawScanlines, { level: 6 });
+  // Compress as zlib data (RFC 1950), as PNG requires
+  const compressed = flateEncode(rawScanlines, 6);
 
   // Build PNG chunks
   const chunks: Uint8Array[] = [];

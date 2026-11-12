@@ -5,9 +5,14 @@
  * xref subsection building, and integration with PDF structure.
  */
 
+import { deflateRawSync, inflateSync } from 'node:zlib';
 import { describe, it, expect } from 'vitest';
 import { createPdf, PageSizes, PdfDocument } from '../../../src/index.js';
-import { saveIncremental, ChangeTracker } from '../../../src/core/incrementalWriter.js';
+import {
+  saveIncremental,
+  saveDocumentIncremental,
+  ChangeTracker,
+} from '../../../src/core/incrementalWriter.js';
 import {
   PdfObjectRegistry,
   PdfDict,
@@ -466,5 +471,75 @@ describe('incremental save integration', () => {
 
     // Should contain our updated title
     expect(fullText).toContain('Updated Document');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// FlateDecode data in the appended part is zlib (RFC 1950)
+// ---------------------------------------------------------------------------
+
+describe('incremental save writes zlib FlateDecode data', () => {
+  const latin1 = new TextDecoder('latin1');
+
+  /** The still-compressed bytes of every /FlateDecode stream after `from`. */
+  function appendedFlateStreams(bytes: Uint8Array, from: number): Uint8Array[] {
+    const text = latin1.decode(bytes);
+    const found: Uint8Array[] = [];
+    for (const m of text.matchAll(/(?<!end)stream\r?\n/g)) {
+      if (m.index < from) continue;
+      const start = m.index + m[0].length;
+      const header = text.slice(text.lastIndexOf(' obj', m.index), m.index);
+      if (!header.includes('/FlateDecode')) continue;
+      const length = /\/Length (\d+)/.exec(header)?.[1];
+      if (length === undefined) throw new Error('FlateDecode stream without a direct /Length');
+      found.push(bytes.subarray(start, start + Number(length)));
+    }
+    return found;
+  }
+
+  it('saveDocumentIncremental compresses the appended content stream as zlib data', async () => {
+    const { bytes: originalBytes } = await createBasePdf();
+    const doc = await PdfDocument.load(originalBytes);
+    const page = doc.addPage(PageSizes.A4);
+    for (let i = 0; i < 20; i++)
+      page.drawText(`Appended line ${i + 1}`, { x: 50, y: 750 - i * 16 });
+
+    const result = await saveDocumentIncremental(originalBytes, doc);
+    const streams = appendedFlateStreams(result.bytes, originalBytes.length);
+    expect(streams.length).toBeGreaterThan(0);
+    for (const s of streams) expect(() => inflateSync(s)).not.toThrow();
+  });
+
+  it('saveIncremental writes a changed raw DEFLATE /FlateDecode stream back as zlib data', async () => {
+    const { bytes: originalBytes } = await createBasePdf();
+    const registry = new PdfObjectRegistry();
+    const plain = new TextEncoder().encode('BT /F1 12 Tf 50 700 Td (Legacy) Tj ET\n'.repeat(20));
+    const dict = new PdfDict();
+    dict.set('/Filter', PdfName.of('FlateDecode'));
+    const streamRef = registry.register(
+      PdfStream.fromBytes(new Uint8Array(deflateRawSync(plain)), dict),
+    );
+    const pagesDict = new PdfDict();
+    pagesDict.set('/Type', PdfName.of('Pages'));
+    const pagesRef = registry.register(pagesDict);
+    const catalogDict = new PdfDict();
+    catalogDict.set('/Type', PdfName.of('Catalog'));
+    const catalogRef = registry.register(catalogDict);
+    const infoRef = registry.register(new PdfDict());
+
+    for (const compress of [true, false]) {
+      const result = saveIncremental(
+        originalBytes,
+        registry,
+        { catalogRef, infoRef, pagesRef },
+        new Set([streamRef.objectNumber]),
+        { compress },
+      );
+      const streams = appendedFlateStreams(result.bytes, originalBytes.length);
+      expect(streams).toHaveLength(1);
+      expect(new Uint8Array(inflateSync(streams[0] ?? new Uint8Array(0)))).toEqual(
+        new Uint8Array(plain),
+      );
+    }
   });
 });
