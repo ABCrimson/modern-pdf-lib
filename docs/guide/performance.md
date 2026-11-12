@@ -349,12 +349,12 @@ const caps = detectRuntimeCapabilities();
 
 ### Bundle Size Breakdown
 
-Measured 2026-11-11 from the built `dist/` with esbuild 0.28.2 (`--bundle --minify`) and gzip level 9:
+Measured 2026-11-12 from the built `dist/` with esbuild 0.28.2 (`--bundle --minify`) and gzip level 9:
 
 | Scenario | Size (minified + gzipped) |
 |:---|:---:|
-| Minimal document (`export { createPdf } from 'modern-pdf-lib'`, `node:*` external) | ~109 KB (111,459 B) |
-| Entire library (`dist/modern-pdf-lib.iife.js`) | ~267 KB (273,778 B) |
+| Minimal document (`export { createPdf } from 'modern-pdf-lib'`, `node:*` external) | ~106 KB (108,131 B) |
+| Entire library (`dist/modern-pdf-lib.iife.js`) | ~259 KB (265,157 B) |
 
 ### Minimizing Bundle Size
 

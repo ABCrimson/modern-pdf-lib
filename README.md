@@ -14,8 +14,8 @@ Create, parse, fill, merge, sign, and manipulate PDF documents<br />in Node 26.4
 <br />
 
 [![npm version](https://img.shields.io/npm/v/modern-pdf-lib?style=flat-square&color=cb3837)](https://www.npmjs.com/package/modern-pdf-lib)
-[![createPdf bundle](https://img.shields.io/badge/createPdf_bundle-109_KiB_gzip-blue?style=flat-square)](#install)
-[![tests](https://img.shields.io/badge/tests-7%2C311_passing-brightgreen?style=flat-square)](https://github.com/ABCrimson/modern-pdf-lib/actions/workflows/ci.yml)
+[![createPdf bundle](https://img.shields.io/badge/createPdf_bundle-106_KiB_gzip-blue?style=flat-square)](#install)
+[![tests](https://img.shields.io/badge/tests-7%2C577_passing-brightgreen?style=flat-square)](https://github.com/ABCrimson/modern-pdf-lib/actions/workflows/ci.yml)
 [![TypeScript](https://img.shields.io/badge/TypeScript-7.1_dev-3178c6?style=flat-square&logo=typescript&logoColor=white)](./tsconfig.json)
 [![License: MIT](https://img.shields.io/badge/license-MIT-yellow?style=flat-square)](LICENSE)
 
@@ -59,9 +59,6 @@ const blob = await doc.saveAsBlob();     // Blob (browsers)
 
 `saveAsStream()` throws `UnsupportedEncryptionError` (code `unsupported-encryption-path`) for a document with `encrypt()` configured; use `save()` for an encrypted document.
 
-> [!WARNING]
-> A default `save()` (`compress: true`) writes raw DEFLATE data under `/FlateDecode` for every stream long enough to be kept compressed, without the zlib wrapper the PDF format requires: qpdf rejects such a file and pdf.js reads no text from it. Until a later release fixes the writer, save with `{ compress: false }`, as in `doc.save({ compress: false })`; `saveAsStream()`, `saveAsBlob()` and `saveAsBase64()` take the same option. `saveDocumentIncremental()` and `saveIncremental()` write the same raw data into the streams they append; pass them `{ compress: false }` too.
-
 ### CDN (no install)
 
 Use directly in the browser via CDN — no bundler required:
@@ -83,7 +80,7 @@ Also available via:
 - **unpkg:** `https://unpkg.com/modern-pdf-lib/dist/browser.mjs`
 - **esm.sh:** `https://esm.sh/modern-pdf-lib`
 
-Pin a version in production, for example `modern-pdf-lib@0.40.6`.
+Pin a version in production, for example `modern-pdf-lib@0.40.7`.
 
 ### Script Tag (no modules)
 
@@ -131,7 +128,7 @@ For a plain `<script>` tag without `type="module"`, use the IIFE bundle, which e
 <td width="50%" valign="top">
 
 **Parse, Render & Modify**
-- Load existing PDFs (PDFs that keep objects in object streams, as pdf-lib and many PDF 1.5+ writers do, do not load; encrypted PDFs load, but most of their content is returned still encrypted)
+- Load existing PDFs (encrypted PDFs load, but most of their content is returned still encrypted, and AES-256 (revision 6) files from other producers do not open with the right password)
 - Extract text with positions (text from fonts that use indirect references or compressed ToUnicode maps, most real-world PDFs, is not decoded correctly)
 - Render pages to PNG / Canvas (any DPI)
 - Thumbnails & visual diff (pixel + SSIM)
@@ -190,7 +187,7 @@ For a plain `<script>` tag without `type="module"`, use the IIFE bundle, which e
 
 <!-- capabilities:end -->
 
-**Known limits.** A default `save()` writes streams that qpdf rejects and from which pdf.js reads no text (see [Quick Start](#quick-start)); save with `{ compress: false }` until a later release fixes the writer. This includes the page content into which the header/footer engine and watermarks draw their text: once that content is long enough to be kept compressed, pdf.js reads none of that text after a default save. Images that the library decodes and compresses itself (PNG images with alpha or interlacing, WebP images, and TIFF images embedded with `embedTiff`) carry the same raw data whatever the option. The open findings that are safe to publish, with the release planned to close each one, are listed in [`audit/open-highs.json`](./audit/open-highs.json).
+**Known limits.** A file written by modern-pdf-lib 0.40.6 or earlier holds raw DEFLATE data under `/FlateDecode`. It loads, and `save()` writes those streams back as zlib data, but `saveDocumentIncremental()`, `saveIncremental()` and `signPdf()` keep the file's existing bytes and `linearizePdf()` and `enforcePdfA()` copy its objects as they are, so load such a file and `save()` it before you pass it to them. AES-256 (revision 6) files written by other producers, such as the pyHanko and qpdf files of the test corpus, throw `Failed to decrypt PDF: the provided password is incorrect` with the right password. The open findings that are safe to publish, with the release planned to close each one, are listed in [`audit/open-highs.json`](./audit/open-highs.json).
 
 <br />
 
@@ -218,7 +215,7 @@ For a plain `<script>` tag without `type="module"`, use the IIFE bundle, which e
 <td align="center">3.x</td></tr>
 
 <tr><td><strong>Parse existing PDFs</strong></td>
-<td align="center">Yes (encrypted content not decrypted; PDFs with object streams do not load)</td>
+<td align="center">Yes (encrypted content not decrypted; AES-256 (R6) files from other producers do not open with the right password)</td>
 <td align="center">Yes</td></tr>
 
 <tr><td><strong>Text extraction</strong></td>
@@ -340,8 +337,6 @@ For a plain `<script>` tag without `type="module"`, use the IIFE bundle, which e
 <td align="center">Inactive since 2021</td></tr>
 
 </table>
-
-Watermarks and the header / footer engine draw into page content, which a default `save()` writes, once it is long enough to be kept compressed, as raw DEFLATE data that qpdf rejects and from which pdf.js reads no text; save with `{ compress: false }` (see the Known limits under [Features](#features)).
 
 <br />
 
@@ -678,7 +673,7 @@ modern-pdf-lib/
     plugins/        Plugin manager & hooks
     wasm/           Rust crate sources (6 modules)
     cli/            CLI tool (modern-pdf optimize)
-  tests/            7,484 tests in 329 files (projects unit, integration, oracle, adversarial)
+  tests/            7,683 tests in 334 files (projects unit, integration, oracle, adversarial)
   audit/            open-highs.json: the public ledger of open audit findings
   docs/             VitePress documentation
 ```
@@ -691,7 +686,7 @@ modern-pdf-lib/
 git clone https://github.com/ABCrimson/modern-pdf-lib.git
 cd modern-pdf-lib
 pnpm install
-pnpm test          # 329 files, 7,484 tests: with qpdf 7,311 pass, 173 expected failures; without qpdf 7,181 pass, 74 expected failures, 229 skip
+pnpm test          # 334 files, 7,683 tests: with qpdf 7,577 pass, 106 expected failures; without qpdf 7,375 pass, 52 expected failures, 256 skip
 pnpm run typecheck # TypeScript 7.1 dev build: src, cli, scripts, tests, security-tests
 pnpm run build     # ESM + CJS + declarations + IIFE
 ```

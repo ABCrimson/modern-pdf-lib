@@ -20,7 +20,7 @@ No special directives are needed for creating PDFs, adding text, drawing shapes,
 
 ### WebAssembly
 
-No WebAssembly module loads, so the library does not need `wasm-unsafe-eval`. Parsing a file with a compressed cross-reference stream still tries the libdeflate module once (in a browser it requests `/wasm/modern_pdf_deflate_bg.wasm`); without `wasm-unsafe-eval` that attempt can be reported as a CSP violation, and `disableWasm` (below) stops it. If your own code compiles WebAssembly, for example from the files under `modern-pdf-lib/wasm/*`, that code needs the `wasm-unsafe-eval` source expression:
+No WebAssembly module loads, so the library does not need `wasm-unsafe-eval`. If your own code compiles WebAssembly, for example from the files under `modern-pdf-lib/wasm/*`, that code needs the `wasm-unsafe-eval` source expression:
 
 ```
 Content-Security-Policy: default-src 'self'; script-src 'self' 'wasm-unsafe-eval'

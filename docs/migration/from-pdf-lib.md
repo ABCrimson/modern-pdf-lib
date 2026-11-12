@@ -277,8 +277,6 @@ const doc = createPdf(); // synchronous, no await needed
 const pdf = await loadPdf(existingPdfBytes);
 ```
 
-PDFs that use object streams or cross-reference streams, including pdf-lib's default output, do not load in this release; files saved with `useObjectStreams: false` do.
-
 ### 2. `Uint8Array` in and out
 
 APIs accept `Uint8Array`; a Node `Buffer` is a `Uint8Array` and is accepted as-is. Outputs such as `save()` are plain `Uint8Array`; wrap with `Buffer.from(bytes.buffer, bytes.byteOffset, bytes.byteLength)` only where an API demands a `Buffer`.

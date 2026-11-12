@@ -17,10 +17,6 @@ This guide covers the different ways to save a PDF document and how to use strea
 
 <!-- capabilities:end -->
 
-::: warning Default compression
-With the default `compress: true`, all four methods write raw DEFLATE data under `/FlateDecode` for every stream long enough to be kept compressed, without the zlib wrapper the PDF format requires: qpdf rejects such a file and pdf.js reads no text from it. Until a later release fixes the writer, pass `{ compress: false }` to `save()`, `saveAsStream()`, `saveAsBlob()` or `saveAsBase64()`.
-:::
-
 ## `save()` — Full Buffer
 
 The simplest method. The entire PDF is generated in memory and returned as a `Uint8Array`:
