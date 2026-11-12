@@ -4,12 +4,16 @@ modern-pdf-lib supports embedding images in all major raster formats. Each forma
 
 ## Overview
 
+<!-- capabilities:begin guide-image-formats-overview -->
+
 | Format | Extension | Compression | Transparency | Color Spaces | PDF Embedding |
 |--------|-----------|-------------|--------------|--------------|---------------|
 | **PNG** | `.png` | Lossless (Deflate) | Yes (alpha channel) | Gray, RGB, Indexed, RGBA | FlateDecode |
 | **JPEG** | `.jpg`, `.jpeg` | Lossy (DCT) | No | Gray, RGB, CMYK | DCTDecode (passthrough) |
 | **WebP** | `.webp` | Lossy (VP8) or Lossless (VP8L) | Yes (alpha) | RGB, RGBA | Decoded; FlateDecode RGB (+ `/SMask` for alpha) |
 | **TIFF** | `.tif`, `.tiff` | None, PackBits, LZW, Deflate, JPEG | Alpha from a 4th sample | Gray, RGB, RGBA (`embedTiff`); CMYK via `embedTiffDirect` (see [TIFF](#tiff)) | Decoded + FlateDecode (`embedTiff`) or passthrough (`embedTiffDirect`) |
+
+<!-- capabilities:end -->
 
 ## Auto-Detection
 
@@ -186,12 +190,16 @@ if (canDirectEmbed(tiffBytes)) {
 }
 ```
 
+<!-- capabilities:begin guide-image-formats-tiff -->
+
 | TIFF Compression | PDF Filter | Re-encoding? |
 |------------------|-----------|-------------|
 | Uncompressed | None | No |
 | Deflate | FlateDecode | No |
 | JPEG-in-TIFF | DCTDecode | No |
 | LZW, PackBits | FlateDecode (via `embedTiff`) | Yes (decode + re-compress) |
+
+<!-- capabilities:end -->
 
 Direct passthrough is reliable for uncompressed TIFFs and single-strip Deflate TIFFs without a predictor. Deflate TIFFs with several strips or tiles, or with a predictor, are not reassembled and can produce a wrong image.
 
@@ -294,10 +302,14 @@ Is it a photograph?
 
 ### Performance: Direct Embedding vs Decode/Re-encode
 
+<!-- capabilities:begin guide-image-formats-embedding -->
+
 | Approach | Speed | Quality | Supported Formats |
 |----------|-------|---------|-------------------|
 | **Direct passthrough** | Fastest | No loss | JPEG, PNG (no alpha, no interlace), TIFF (uncompressed, single-strip Deflate without predictor, JPEG) |
 | **Decode + Flate** | Slower | Lossless (decoded pixels) | WebP, TIFF (LZW, PackBits), PNG (alpha, interlaced) |
+
+<!-- capabilities:end -->
 
 For the fastest PDF generation, prefer formats that support direct embedding.
 

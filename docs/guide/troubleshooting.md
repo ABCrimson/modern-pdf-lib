@@ -247,6 +247,8 @@ Each runtime has its own security model, file system access rules, and module sy
 
 Runtime support (Node.js `engines` `>=26.4`; the other minimums are from MDN browser-compat-data, read 2026-11-11, for the `Uint8Array` base64 and hex methods the library calls without a guard):
 
+<!-- capabilities:begin guide-troubleshooting-runtimes -->
+
 | Runtime | Minimum | Tested in CI |
 |---|---|---|
 | Node.js | 26.4 (`engines`); `Uint8Array` base64 from 25.0.0 | Yes (Node 26 gates; Node 24 and the `devEngines` Node 28 nightly are non-gating probes) |
@@ -254,6 +256,8 @@ Runtime support (Node.js `engines` `>=26.4`; the other minimums are from MDN bro
 | Bun | 1.1.22 | No |
 | Cloudflare Workers | none stated | No |
 | Browsers | Chrome 140, Firefox 133, Safari 18.2 (see the [Browser guide](./browser.md#browser-compatibility)) | Playwright E2E on Chromium, Firefox and WebKit |
+
+<!-- capabilities:end -->
 
 **Deno** requires explicit permissions:
 

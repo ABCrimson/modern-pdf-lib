@@ -67,6 +67,8 @@ configureWasmLoader({ disableWasm: true });
 
 ## Strict CSP Checklist
 
+<!-- capabilities:begin guide-csp-checklist -->
+
 | Feature | Required Directive | Fallback Available |
 |---|---|---|
 | Core PDF generation | `default-src 'self'` | N/A (always works) |
@@ -74,6 +76,8 @@ configureWasmLoader({ disableWasm: true });
 | `PdfWorker` | `worker-src 'self'` (page) + `script-src 'unsafe-eval'` (worker) | Yes -- generate on the main thread |
 | CDN scripts | `script-src https://cdn...` | Yes -- self-hosted |
 | Data URL previews | `frame-src blob:` | Yes -- download only |
+
+<!-- capabilities:end -->
 
 ## Testing Your CSP
 

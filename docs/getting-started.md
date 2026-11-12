@@ -63,7 +63,11 @@ page.drawText('Hello, Modern PDF!', {
 const bytes = await pdf.save();
 ```
 
-The `bytes` variable is a `Uint8Array` containing a valid PDF document.
+The `bytes` variable is a `Uint8Array` that holds the PDF document.
+
+::: warning Default compression
+A default `save()` (`compress: true`) writes raw DEFLATE data under `/FlateDecode` for every stream long enough to be kept compressed, without the zlib wrapper the PDF format requires: qpdf rejects such a file and pdf.js reads no text from it. Until a later release fixes the writer, save with `pdf.save({ compress: false })`; `saveAsStream()`, `saveAsBlob()` and `saveAsBase64()` take the same option. `saveDocumentIncremental()` and `saveIncremental()` write the same raw data into the streams they append; pass them `{ compress: false }` too. Images that the library decodes and compresses itself (PNG images with alpha or interlacing, WebP images, and TIFF images embedded with `embedTiff`) carry the same raw data whatever the option.
+:::
 
 ## Running in Node
 

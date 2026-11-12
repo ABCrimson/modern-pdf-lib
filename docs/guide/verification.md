@@ -116,6 +116,8 @@ for (const url of crlUrls) {
 
 ### Online vs Offline
 
+<!-- capabilities:begin guide-verification-revocation -->
+
 | Aspect | Online | Offline |
 |--------|--------|---------|
 | Network required | Yes | No |
@@ -123,6 +125,8 @@ for (const url of crlUrls) {
 | Use case | Standard verification | Air-gapped environments, LTV |
 | API | `checkCertificateStatus()`, `downloadCrl()` | `verifyOfflineRevocation()` |
 | Can report `good` or `revoked` | Yes, for an authenticated OCSP answer | No: a matching answer is reported as `unknown` |
+
+<!-- capabilities:end -->
 
 ## Trust Stores
 

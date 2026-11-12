@@ -140,6 +140,8 @@ page.drawText('Figure 1: Revenue growth by quarter, showing 15% YoY increase', {
 
 PDF/UA (ISO 14289) defines requirements for universally accessible PDFs. The library provides tooling for each requirement below; color contrast is checked manually:
 
+<!-- capabilities:begin guide-accessibility-pdfua -->
+
 | Requirement | Status | How |
 |---|---|---|
 | Document language set | Supported | `pdf.setLanguage('en')` |
@@ -152,6 +154,12 @@ PDF/UA (ISO 14289) defines requirements for universally accessible PDFs. The lib
 | Reading order tags | Supported | Structure-tree order defines logical reading order |
 | Table headers marked | Supported | `tagTableHeaderCell` writes `TH` with `/Scope` |
 | Validation | Supported | `validatePdfUa` (UA-1), `validatePdfUa2` (UA-2), `checkAccessibility` |
+
+<!-- capabilities:end -->
+
+Document language: loading a PDF does not read its `/Lang` entry, so `getLanguage()` returns `undefined` for a loaded document and the validators judge it as having no language; call `setLanguage()` on it before you validate or save it.
+
+Document title: `setTitle()` writes a title with characters outside ASCII in the wrong encoding, and loading a PDF does not read its `DisplayDocTitle` viewer preference, so call `setTitle(title, { showInWindowTitleBar: true })` again on a loaded document.
 
 ## XMP Metadata
 

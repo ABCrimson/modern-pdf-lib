@@ -1,0 +1,1673 @@
+{
+  "format": 1,
+  "rows": [
+    {
+      "id": "cap-feat-pages",
+      "region": "readme-features",
+      "doc": "README.md",
+      "text": "Pages, text, images, shapes, SVG paths",
+      "grade": "qualified",
+      "tests": [
+        "cap-feat-pages"
+      ],
+      "limits": [
+        "images-46",
+        "images-49",
+        "images-50",
+        "images-57"
+      ],
+      "stated": false
+    },
+    {
+      "id": "cap-feat-font-embedding",
+      "region": "readme-features",
+      "doc": "README.md",
+      "text": "TrueType & OpenType font embedding",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "core-document-12",
+        "fonts-text-03"
+      ],
+      "stated": false
+    },
+    {
+      "id": "cap-feat-font-subsetting",
+      "region": "readme-features",
+      "doc": "README.md",
+      "text": "Automatic font subsetting",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "fonts-text-01",
+        "core-document-11"
+      ],
+      "stated": false
+    },
+    {
+      "id": "cap-feat-jpeg-png",
+      "region": "readme-features",
+      "doc": "README.md",
+      "text": "JPEG / PNG image embedding",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "images-46",
+        "images-49",
+        "images-50",
+        "images-57"
+      ],
+      "stated": false
+    },
+    {
+      "id": "cap-feat-image-optimization",
+      "region": "readme-features",
+      "doc": "README.md",
+      "text": "Image optimization (JPEG recompression leaves images unchanged: initWasm({ jpeg: true }) does not initialise the JPEG WASM encoder; dedup works)",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "api-surface-utils-11",
+        "images-12"
+      ],
+      "stated": false
+    },
+    {
+      "id": "cap-feat-colors",
+      "region": "readme-features",
+      "doc": "README.md",
+      "text": "RGB, CMYK, grayscale, spot, DeviceN colors",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "core-page-M01"
+      ],
+      "stated": false
+    },
+    {
+      "id": "cap-feat-gradients",
+      "region": "readme-features",
+      "doc": "README.md",
+      "text": "Linear & radial gradients, tiling patterns",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "core-graphics-31",
+        "core-graphics-15"
+      ],
+      "stated": false
+    },
+    {
+      "id": "cap-feat-text-layout",
+      "region": "readme-features",
+      "doc": "README.md",
+      "text": "Text layout (multiline, combed, auto-size)",
+      "grade": "pending",
+      "tests": [],
+      "limits": []
+    },
+    {
+      "id": "cap-feat-header-footer",
+      "region": "readme-features",
+      "doc": "README.md",
+      "text": "Header/footer engine with templates",
+      "grade": "qualified",
+      "tests": [
+        "cap-header-footer"
+      ],
+      "limits": [
+        "color-compression-35",
+        "parser-syntax-M02"
+      ],
+      "stated": false
+    },
+    {
+      "id": "cap-feat-advanced-text-layout",
+      "region": "readme-features",
+      "doc": "README.md",
+      "text": "Advanced text layout (Knuth-Plass, hyphenation)",
+      "grade": "pending",
+      "tests": [],
+      "limits": []
+    },
+    {
+      "id": "cap-feat-load",
+      "region": "readme-features",
+      "doc": "README.md",
+      "text": "Load existing PDFs (PDFs that keep objects in object streams, as pdf-lib and many PDF 1.5+ writers do, do not load; encrypted PDFs load, but most of their content is returned still encrypted)",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "color-compression-36",
+        "parser-syntax-M01",
+        "parser-syntax-01"
+      ],
+      "stated": true
+    },
+    {
+      "id": "cap-feat-extract-text",
+      "region": "readme-features",
+      "doc": "README.md",
+      "text": "Extract text with positions (text from fonts that use indirect references or compressed ToUnicode maps, most real-world PDFs, is not decoded correctly)",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "parser-text-01",
+        "parser-text-02"
+      ],
+      "stated": true
+    },
+    {
+      "id": "cap-feat-render",
+      "region": "readme-features",
+      "doc": "README.md",
+      "text": "Render pages to PNG / Canvas (any DPI)",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "render-12",
+        "render-13",
+        "render-M02"
+      ],
+      "stated": false
+    },
+    {
+      "id": "cap-feat-thumbnails",
+      "region": "readme-features",
+      "doc": "README.md",
+      "text": "Thumbnails & visual diff (pixel + SSIM)",
+      "grade": "pending",
+      "tests": [],
+      "limits": []
+    },
+    {
+      "id": "cap-feat-extract-images-fonts",
+      "region": "readme-features",
+      "doc": "README.md",
+      "text": "Extract embedded images & fonts",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "tests-unit-assets-28",
+        "tests-unit-parser-a-M03"
+      ],
+      "stated": false
+    },
+    {
+      "id": "cap-feat-ocr-redaction-marking",
+      "region": "readme-features",
+      "doc": "README.md",
+      "text": "OCR overlay; redaction marking (applying redactions throws RedactionIncompleteError, code redaction-incomplete, in this release)",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "render-07",
+        "render-08",
+        "render-M01",
+        "annotation-03"
+      ],
+      "stated": false
+    },
+    {
+      "id": "cap-feat-forms-fill-flatten",
+      "region": "readme-features",
+      "doc": "README.md",
+      "text": "Fill & flatten AcroForm fields",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "forms-34",
+        "forms-36",
+        "forms-53"
+      ],
+      "stated": false
+    },
+    {
+      "id": "cap-feat-merge-split",
+      "region": "readme-features",
+      "doc": "README.md",
+      "text": "Merge, split, copy pages (pages copied, merged or split from a loaded PDF are written without their content; pages created in the same session copy correctly); incremental saves",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "core-document-10",
+        "core-document-14"
+      ],
+      "stated": false
+    },
+    {
+      "id": "cap-feat-encryption",
+      "region": "readme-features",
+      "doc": "README.md",
+      "text": "RC4 and AES-128 encryption on save(); AES-256 (R6) can be selected, but its output is not yet readable by other PDF readers (saveAsStream(), objectStreamThreshold and saveDocumentIncremental() throw UnsupportedEncryptionError, code unsupported-encryption-path, for an encrypted document, and the functions that sign or append an incremental update to PDF bytes throw it for an encrypted file; a document loaded from an encrypted file is mostly not decrypted)",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "crypto-security-01",
+        "core-document-03",
+        "core-document-06",
+        "parser-syntax-01"
+      ],
+      "stated": true
+    },
+    {
+      "id": "cap-feat-signatures",
+      "region": "readme-features",
+      "doc": "README.md",
+      "text": "Digital signatures (PKCS#7, visible/invisible, timestamps; requestTimestamp checks the response's hash and nonce against the request, but the token's signature and the TSA certificate are not verified)",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "signature-cms-23",
+        "docs-guide-3-03"
+      ],
+      "stated": false
+    },
+    {
+      "id": "cap-feat-revocation",
+      "region": "readme-features",
+      "doc": "README.md",
+      "text": "OCSP revocation checking (an answer that cannot be authenticated reports unknown), CRL lookup (a CRL's signature is not verified), certificate chain validation against trustedCerts (with none listed, no chain is valid)",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "signature-pki-03",
+        "signature-pki-07",
+        "signature-pki-01"
+      ],
+      "stated": true
+    },
+    {
+      "id": "cap-feat-incremental-signature-preservation",
+      "region": "readme-features",
+      "doc": "README.md",
+      "text": "Incremental save with signature preservation",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "legacy-M01"
+      ],
+      "stated": false
+    },
+    {
+      "id": "cap-feat-multi-signature",
+      "region": "readme-features",
+      "doc": "README.md",
+      "text": "Multi-signature chains, MDP certification, LTV archival (a signature followed by a later update, such as a second signature or LTV data added with embedLtvData, reports valid: false with coversWholeDocument: false, and detectModifications reports a later signature as an unknown violation)",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "signature-pki-12",
+        "signature-pki-11"
+      ],
+      "stated": true
+    },
+    {
+      "id": "cap-feat-counter-signatures",
+      "region": "readme-features",
+      "doc": "README.md",
+      "text": "Counter-signatures & field locking",
+      "grade": "pending",
+      "tests": [],
+      "limits": []
+    },
+    {
+      "id": "cap-feat-pdfa",
+      "region": "readme-features",
+      "doc": "README.md",
+      "text": "PDF/A-1b through PDF/A-3u validation, PDF/A-4/4e/4f (output is not validated against veraPDF; enforcePdfA and enforcePdfX output has an invalid cross-reference offset)",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "compliance-07",
+        "docs-guide-2-33",
+        "tests-suites-compliance-barcode-browser-M01"
+      ],
+      "stated": true
+    },
+    {
+      "id": "cap-feat-pdfx-einvoice",
+      "region": "readme-features",
+      "doc": "README.md",
+      "text": "PDF/X-6, PDF/VT, Factur-X / ZUGFeRD e-invoicing",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "docs-guide-2-42",
+        "compliance-03",
+        "compliance-01"
+      ],
+      "stated": false
+    },
+    {
+      "id": "cap-feat-tagged-pdf",
+      "region": "readme-features",
+      "doc": "README.md",
+      "text": "Tagged PDF / PDF/UA-1 & PDF/UA-2 accessibility",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "accessibility-metadata-01",
+        "accessibility-metadata-04",
+        "accessibility-metadata-23"
+      ],
+      "stated": false
+    },
+    {
+      "id": "cap-feat-structure-tree",
+      "region": "readme-features",
+      "doc": "README.md",
+      "text": "Structure tree & marked content",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "accessibility-metadata-01",
+        "core-page-05",
+        "tests-unit-accessibility-24"
+      ],
+      "stated": false
+    },
+    {
+      "id": "cap-feat-redaction-marks",
+      "region": "readme-features",
+      "doc": "README.md",
+      "text": "Redaction marks and /Redact annotations (applying them throws RedactionIncompleteError, code redaction-incomplete, in this release)",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "annotation-03"
+      ],
+      "stated": true
+    },
+    {
+      "id": "cap-feat-pdfua-validation",
+      "region": "readme-features",
+      "doc": "README.md",
+      "text": "PDF/UA validation & auto-enforcement",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "accessibility-metadata-M01",
+        "accessibility-metadata-23"
+      ],
+      "stated": false
+    },
+    {
+      "id": "cap-feat-barcodes",
+      "region": "readme-features",
+      "doc": "README.md",
+      "text": "QR codes & barcodes (9 formats; Code 128, QR version 7+, Data Matrix and PDF417 symbols are not readable by standard scanners)",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "barcode-01",
+        "barcode-13",
+        "barcode-20",
+        "barcode-29"
+      ],
+      "stated": true
+    },
+    {
+      "id": "cap-feat-table-layout",
+      "region": "readme-features",
+      "doc": "README.md",
+      "text": "Table layout engine with pagination",
+      "grade": "pending",
+      "tests": [],
+      "limits": []
+    },
+    {
+      "id": "cap-feat-jsx",
+      "region": "readme-features",
+      "doc": "README.md",
+      "text": "JSX / VDOM component renderer (renderJsxToPdf)",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "svg-markdown-vdom-jsx-layout-37",
+        "svg-markdown-vdom-jsx-layout-44"
+      ],
+      "stated": false
+    },
+    {
+      "id": "cap-feat-json-schema-forms",
+      "region": "readme-features",
+      "doc": "README.md",
+      "text": "JSON Schema → AcroForm generation",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "forms-35",
+        "tests-integration-e2e-bench-fixtures-M02"
+      ],
+      "stated": false
+    },
+    {
+      "id": "cap-feat-server-adapters",
+      "region": "readme-features",
+      "doc": "README.md",
+      "text": "Server adapters (pdfResponse for Workers/Deno/Bun/Node)",
+      "grade": "qualified",
+      "tests": [
+        "cap-server-adapters"
+      ],
+      "limits": [
+        "color-compression-35",
+        "parser-syntax-M02"
+      ],
+      "stated": false
+    },
+    {
+      "id": "cap-feat-jpeg2000",
+      "region": "readme-features",
+      "doc": "README.md",
+      "text": "JPEG2000 decoding (pure JavaScript; its arithmetic decoder does not pass the T.88 H.2 conformance vector, so decoded pixels can be wrong)",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "parser-codecs-61",
+        "parser-codecs-60"
+      ],
+      "stated": true
+    },
+    {
+      "id": "cap-feat-webp",
+      "region": "readme-features",
+      "doc": "README.md",
+      "text": "WebP embedding (lossless and alpha; lossy VP8 images decode to a flat grey placeholder)",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "images-86",
+        "images-87",
+        "images-88"
+      ],
+      "stated": false
+    },
+    {
+      "id": "cap-feat-tiff",
+      "region": "readme-features",
+      "doc": "README.md",
+      "text": "TIFF image embedding (multi-page)",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "images-69",
+        "images-70",
+        "images-72"
+      ],
+      "stated": false
+    },
+    {
+      "id": "cap-feat-image-autodetect",
+      "region": "readme-features",
+      "doc": "README.md",
+      "text": "Image format auto-detection (PNG/JPEG/WebP/TIFF)",
+      "grade": "qualified",
+      "tests": [
+        "cap-image-autodetect"
+      ],
+      "limits": [
+        "images-86",
+        "images-69",
+        "images-57"
+      ],
+      "stated": false
+    },
+    {
+      "id": "cap-feat-form-javascript",
+      "region": "readme-features",
+      "doc": "README.md",
+      "text": "Form field JavaScript is not evaluated (createSandbox().execute() throws ScriptExecutionDisabledError, code script-execution-disabled); scripts in a document run only in a viewer",
+      "grade": "behaviour",
+      "tests": [
+        "cap-form-javascript"
+      ],
+      "limits": []
+    },
+    {
+      "id": "cap-feat-outlines",
+      "region": "readme-features",
+      "doc": "README.md",
+      "text": "Outlines / bookmarks",
+      "grade": "qualified",
+      "tests": [
+        "cap-outlines"
+      ],
+      "limits": [
+        "core-document-M01",
+        "crypto-security-38"
+      ],
+      "stated": false
+    },
+    {
+      "id": "cap-feat-layers",
+      "region": "readme-features",
+      "doc": "README.md",
+      "text": "Optional content layers (OCGs)",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "accessibility-metadata-40"
+      ],
+      "stated": false
+    },
+    {
+      "id": "cap-feat-attachments-watermarks",
+      "region": "readme-features",
+      "doc": "README.md",
+      "text": "File attachments & watermarks",
+      "grade": "qualified",
+      "tests": [
+        "cap-attachments-watermarks"
+      ],
+      "limits": [
+        "core-document-05",
+        "annotation-07"
+      ],
+      "stated": false
+    },
+    {
+      "id": "cap-feat-pdf20",
+      "region": "readme-features",
+      "doc": "README.md",
+      "text": "PDF 2.0: associated files (Factur-X), document parts, soft masks",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "compliance-01",
+        "docs-guide-2-29"
+      ],
+      "stated": false
+    },
+    {
+      "id": "cap-feat-linearization",
+      "region": "readme-features",
+      "doc": "README.md",
+      "text": "Linearization (writes a /Linearized dictionary and reorders objects; output is not a conforming linearized file)",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "core-graphics-37",
+        "core-graphics-38",
+        "core-graphics-39",
+        "core-graphics-41"
+      ],
+      "stated": true
+    },
+    {
+      "id": "cap-feat-browser-helpers",
+      "region": "readme-features",
+      "doc": "README.md",
+      "text": "Browser helpers (download, blob, data URL)",
+      "grade": "pending",
+      "tests": [],
+      "limits": []
+    },
+    {
+      "id": "cap-feat-workers",
+      "region": "readme-features",
+      "doc": "README.md",
+      "text": "Service Worker & Web Worker support",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "runtime-platform-18",
+        "docs-guide-1-30"
+      ],
+      "stated": false
+    },
+    {
+      "id": "cap-feat-batch",
+      "region": "readme-features",
+      "doc": "README.md",
+      "text": "Batch processing with memory pressure handling",
+      "grade": "qualified",
+      "tests": [
+        "cap-batch"
+      ],
+      "limits": [
+        "color-compression-35",
+        "parser-syntax-M02"
+      ],
+      "stated": false
+    },
+    {
+      "id": "cap-feat-spot-colors",
+      "region": "readme-features",
+      "doc": "README.md",
+      "text": "Spot colors (Separation) & DeviceN",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "core-page-M01"
+      ],
+      "stated": false
+    },
+    {
+      "id": "cap-feat-cli",
+      "region": "readme-features",
+      "doc": "README.md",
+      "text": "CLI: npx modern-pdf optimize",
+      "grade": "qualified",
+      "tests": [
+        "cap-cli"
+      ],
+      "limits": [
+        "images-19",
+        "images-12",
+        "api-surface-utils-11"
+      ],
+      "stated": false
+    },
+    {
+      "id": "cap-cmp-runtime",
+      "region": "readme-comparison",
+      "doc": "README.md",
+      "text": "Runtime | Node 26.4+, current browsers (Deno, Bun, Workers not tested in CI)",
+      "grade": "behaviour",
+      "tests": [
+        "cap-ci-runtimes",
+        "cap-package"
+      ],
+      "limits": []
+    },
+    {
+      "id": "cap-cmp-module-format",
+      "region": "readme-comparison",
+      "doc": "README.md",
+      "text": "Module format | ESM + CJS",
+      "grade": "behaviour",
+      "tests": [
+        "cap-package"
+      ],
+      "limits": []
+    },
+    {
+      "id": "cap-cmp-typescript",
+      "region": "readme-comparison",
+      "doc": "README.md",
+      "text": "TypeScript | 7.1 dev build, strict",
+      "grade": "behaviour",
+      "tests": [
+        "cap-package"
+      ],
+      "limits": []
+    },
+    {
+      "id": "cap-cmp-parse",
+      "region": "readme-comparison",
+      "doc": "README.md",
+      "text": "Parse existing PDFs | Yes (encrypted content not decrypted; PDFs with object streams do not load)",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "color-compression-36",
+        "parser-syntax-01"
+      ],
+      "stated": true
+    },
+    {
+      "id": "cap-cmp-text-extraction",
+      "region": "readme-comparison",
+      "doc": "README.md",
+      "text": "Text extraction | Yes (with positions; indirect-reference fonts and compressed ToUnicode maps are not decoded)",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "parser-text-01",
+        "parser-text-02"
+      ],
+      "stated": true
+    },
+    {
+      "id": "cap-cmp-encryption",
+      "region": "readme-comparison",
+      "doc": "README.md",
+      "text": "Encryption | RC4 + AES-128 on save(); AES-256 (R6) output not yet readable by other PDF readers (streaming, object streams and incremental saves throw UnsupportedEncryptionError, code unsupported-encryption-path, for an encrypted document, and so does signing an encrypted file)",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "crypto-security-01",
+        "core-document-03",
+        "core-document-06"
+      ],
+      "stated": true
+    },
+    {
+      "id": "cap-cmp-signatures",
+      "region": "readme-comparison",
+      "doc": "README.md",
+      "text": "Digital signatures | PKCS#7, timestamps, CRL/OCSP, LTV, MDP (chain trust needs trustedCerts; timestamp signatures and CRLs are not authenticated)",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "signature-pki-01",
+        "signature-cms-23"
+      ],
+      "stated": true
+    },
+    {
+      "id": "cap-cmp-incremental",
+      "region": "readme-comparison",
+      "doc": "README.md",
+      "text": "Incremental save | Signature-preserving, multi-sig chains (not for an encrypted file)",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "core-document-14"
+      ],
+      "stated": false
+    },
+    {
+      "id": "cap-cmp-webp",
+      "region": "readme-comparison",
+      "doc": "README.md",
+      "text": "WebP images | Lossless, alpha (lossy decodes to a flat grey placeholder)",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "images-86",
+        "images-87",
+        "images-88"
+      ],
+      "stated": false
+    },
+    {
+      "id": "cap-cmp-tiff",
+      "region": "readme-comparison",
+      "doc": "README.md",
+      "text": "TIFF images | Multi-page",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "images-69",
+        "images-72",
+        "images-78"
+      ],
+      "stated": false
+    },
+    {
+      "id": "cap-cmp-jpeg2000",
+      "region": "readme-comparison",
+      "doc": "README.md",
+      "text": "JPEG2000 decoding | JPXDecode (JP2 + J2K), pure JavaScript; fails the T.88 H.2 conformance vector",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "parser-codecs-61"
+      ],
+      "stated": true
+    },
+    {
+      "id": "cap-cmp-form-javascript",
+      "region": "readme-comparison",
+      "doc": "README.md",
+      "text": "Form JavaScript | Not evaluated (execute() throws ScriptExecutionDisabledError, code script-execution-disabled)",
+      "grade": "behaviour",
+      "tests": [
+        "cap-form-javascript"
+      ],
+      "limits": []
+    },
+    {
+      "id": "cap-cmp-forms",
+      "region": "readme-comparison",
+      "doc": "README.md",
+      "text": "Forms | Full (7 field types)",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "forms-35",
+        "forms-34",
+        "forms-36"
+      ],
+      "stated": false
+    },
+    {
+      "id": "cap-cmp-pdfa",
+      "region": "readme-comparison",
+      "doc": "README.md",
+      "text": "PDF/A compliance | 1a/1b through 3a/3b/3u + 4/4e/4f (writer, not validated)",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "compliance-07",
+        "docs-guide-2-33"
+      ],
+      "stated": false
+    },
+    {
+      "id": "cap-cmp-jsx",
+      "region": "readme-comparison",
+      "doc": "README.md",
+      "text": "JSX / VDOM rendering | JSX runtime + component renderer",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "svg-markdown-vdom-jsx-layout-37",
+        "svg-markdown-vdom-jsx-layout-44"
+      ],
+      "stated": false
+    },
+    {
+      "id": "cap-cmp-accessibility",
+      "region": "readme-comparison",
+      "doc": "README.md",
+      "text": "Accessibility (PDF/UA) | Structure tree, checker",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "accessibility-metadata-01",
+        "accessibility-metadata-M01"
+      ],
+      "stated": false
+    },
+    {
+      "id": "cap-cmp-merge-split",
+      "region": "readme-comparison",
+      "doc": "README.md",
+      "text": "Merge & split | Built-in (pages from loaded PDFs are written without their content)",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "core-document-10"
+      ],
+      "stated": true
+    },
+    {
+      "id": "cap-cmp-annotations",
+      "region": "readme-comparison",
+      "doc": "README.md",
+      "text": "Annotations | 18 types + appearances",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "annotation-01",
+        "annotation-02",
+        "annotation-M01"
+      ],
+      "stated": false
+    },
+    {
+      "id": "cap-cmp-streaming",
+      "region": "readme-comparison",
+      "doc": "README.md",
+      "text": "Streaming output | ReadableStream (not for encrypted documents)",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "core-document-03"
+      ],
+      "stated": true
+    },
+    {
+      "id": "cap-cmp-layers",
+      "region": "readme-comparison",
+      "doc": "README.md",
+      "text": "Layers (OCG) | Yes",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "accessibility-metadata-40"
+      ],
+      "stated": false
+    },
+    {
+      "id": "cap-cmp-outlines",
+      "region": "readme-comparison",
+      "doc": "README.md",
+      "text": "Outlines | Yes",
+      "grade": "qualified",
+      "tests": [
+        "cap-outlines"
+      ],
+      "limits": [
+        "core-document-M01",
+        "crypto-security-38"
+      ],
+      "stated": false
+    },
+    {
+      "id": "cap-cmp-watermarks",
+      "region": "readme-comparison",
+      "doc": "README.md",
+      "text": "Watermarks | Yes",
+      "grade": "qualified",
+      "tests": [
+        "cap-watermarks"
+      ],
+      "limits": [
+        "color-compression-35",
+        "parser-syntax-M02"
+      ],
+      "stated": false
+    },
+    {
+      "id": "cap-cmp-redaction",
+      "region": "readme-comparison",
+      "doc": "README.md",
+      "text": "Redaction | Marking only",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "annotation-03"
+      ],
+      "stated": true
+    },
+    {
+      "id": "cap-cmp-linearization",
+      "region": "readme-comparison",
+      "doc": "README.md",
+      "text": "Linearization | Partial",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "core-graphics-38",
+        "core-graphics-39"
+      ],
+      "stated": true
+    },
+    {
+      "id": "cap-cmp-barcodes",
+      "region": "readme-comparison",
+      "doc": "README.md",
+      "text": "QR codes & barcodes | 9 formats (QR, EAN, Code 128, PDF417…); Code 128, QR 7+, Data Matrix and PDF417 are not scanner-readable",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "barcode-01",
+        "barcode-13",
+        "barcode-20",
+        "barcode-29"
+      ],
+      "stated": true
+    },
+    {
+      "id": "cap-cmp-spot-colors",
+      "region": "readme-comparison",
+      "doc": "README.md",
+      "text": "Spot / DeviceN colors | Separation, multi-ink, conversion",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "core-page-M01"
+      ],
+      "stated": false
+    },
+    {
+      "id": "cap-cmp-header-footer",
+      "region": "readme-comparison",
+      "doc": "README.md",
+      "text": "Header / footer engine | Templates, page numbers, dates",
+      "grade": "qualified",
+      "tests": [
+        "cap-header-footer"
+      ],
+      "limits": [
+        "color-compression-35",
+        "parser-syntax-M02"
+      ],
+      "stated": false
+    },
+    {
+      "id": "cap-cmp-table-layout",
+      "region": "readme-comparison",
+      "doc": "README.md",
+      "text": "Table layout | Spanning, pagination, presets, overflow",
+      "grade": "pending",
+      "tests": [],
+      "limits": []
+    },
+    {
+      "id": "cap-cmp-browser-utilities",
+      "region": "readme-comparison",
+      "doc": "README.md",
+      "text": "Browser utilities | Download, blob, Web Worker, Service Worker",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "runtime-platform-18",
+        "docs-guide-1-30"
+      ],
+      "stated": false
+    },
+    {
+      "id": "cap-cmp-image-optimization",
+      "region": "readme-comparison",
+      "doc": "README.md",
+      "text": "Image optimization | Dedup; JPEG recompression leaves images unchanged (initWasm({ jpeg: true }) does not initialise the JPEG WASM encoder)",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "api-surface-utils-11",
+        "images-12"
+      ],
+      "stated": false
+    },
+    {
+      "id": "cap-cmp-wasm",
+      "region": "readme-comparison",
+      "doc": "README.md",
+      "text": "WASM modules | Not run (modules ship in dist/wasm/)",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "wasm-generated-M01",
+        "api-surface-utils-02"
+      ],
+      "stated": true
+    },
+    {
+      "id": "cap-cmp-dependencies",
+      "region": "readme-comparison",
+      "doc": "README.md",
+      "text": "Dependencies | 1 (fflate)",
+      "grade": "behaviour",
+      "tests": [
+        "cap-package"
+      ],
+      "limits": []
+    },
+    {
+      "id": "cap-rt-node",
+      "region": "readme-runtimes",
+      "doc": "README.md",
+      "text": "Node.js | 26.4+ | Tested in CI (Node 26)",
+      "grade": "behaviour",
+      "tests": [
+        "cap-ci-runtimes",
+        "cap-package"
+      ],
+      "limits": []
+    },
+    {
+      "id": "cap-rt-deno",
+      "region": "readme-runtimes",
+      "doc": "README.md",
+      "text": "Deno | 2.5+ | Not tested in CI",
+      "grade": "behaviour",
+      "tests": [
+        "cap-ci-runtimes"
+      ],
+      "limits": []
+    },
+    {
+      "id": "cap-rt-bun",
+      "region": "readme-runtimes",
+      "doc": "README.md",
+      "text": "Bun | 1.1.31+ | Not tested in CI",
+      "grade": "behaviour",
+      "tests": [
+        "cap-ci-runtimes"
+      ],
+      "limits": []
+    },
+    {
+      "id": "cap-rt-workers",
+      "region": "readme-runtimes",
+      "doc": "README.md",
+      "text": "Cloudflare Workers | current workerd (V8 14.0+) | Not tested in CI",
+      "grade": "behaviour",
+      "tests": [
+        "cap-ci-runtimes"
+      ],
+      "limits": []
+    },
+    {
+      "id": "cap-rt-chrome",
+      "region": "readme-runtimes",
+      "doc": "README.md",
+      "text": "Chrome / Edge | 140+ | Chromium tested in CI (Playwright); Edge not tested",
+      "grade": "behaviour",
+      "tests": [
+        "cap-ci-runtimes"
+      ],
+      "limits": []
+    },
+    {
+      "id": "cap-rt-firefox",
+      "region": "readme-runtimes",
+      "doc": "README.md",
+      "text": "Firefox | 133+ | Tested in CI (Playwright)",
+      "grade": "behaviour",
+      "tests": [
+        "cap-ci-runtimes"
+      ],
+      "limits": []
+    },
+    {
+      "id": "cap-rt-safari",
+      "region": "readme-runtimes",
+      "doc": "README.md",
+      "text": "Safari | 18.4+ | WebKit tested in CI (Playwright); Safari not tested",
+      "grade": "behaviour",
+      "tests": [
+        "cap-ci-runtimes"
+      ],
+      "limits": []
+    },
+    {
+      "id": "cap-a11y-language",
+      "region": "guide-accessibility-pdfua",
+      "doc": "docs/guide/accessibility.md",
+      "text": "Document language set | Supported | pdf.setLanguage('en')",
+      "grade": "qualified",
+      "tests": [
+        "cap-a11y-language"
+      ],
+      "limits": [
+        "tests-unit-accessibility-M01",
+        "accessibility-metadata-M01"
+      ],
+      "stated": false
+    },
+    {
+      "id": "cap-a11y-title",
+      "region": "guide-accessibility-pdfua",
+      "doc": "docs/guide/accessibility.md",
+      "text": "Document title set | Supported | pdf.setTitle('...', { showInWindowTitleBar: true })",
+      "grade": "qualified",
+      "tests": [
+        "cap-a11y-title"
+      ],
+      "limits": [
+        "tests-unit-core-b-M02",
+        "core-document-01",
+        "tests-unit-accessibility-M01"
+      ],
+      "stated": false
+    },
+    {
+      "id": "cap-a11y-fonts-unicode",
+      "region": "guide-accessibility-pdfua",
+      "doc": "docs/guide/accessibility.md",
+      "text": "Fonts embedded with Unicode mappings | Supported | pdf.embedFont(ttfBytes)",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "fonts-text-01",
+        "core-document-11"
+      ],
+      "stated": false
+    },
+    {
+      "id": "cap-a11y-text-extractable",
+      "region": "guide-accessibility-pdfua",
+      "doc": "docs/guide/accessibility.md",
+      "text": "Text is extractable | Supported | Verified via extractText()",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "fonts-text-01",
+        "parser-text-01"
+      ],
+      "stated": false
+    },
+    {
+      "id": "cap-a11y-color-contrast",
+      "region": "guide-accessibility-pdfua",
+      "doc": "docs/guide/accessibility.md",
+      "text": "Sufficient color contrast | Manual | Use rgb() with WCAG ratios",
+      "grade": "pending",
+      "tests": [],
+      "limits": []
+    },
+    {
+      "id": "cap-a11y-structure-tags",
+      "region": "guide-accessibility-pdfua",
+      "doc": "docs/guide/accessibility.md",
+      "text": "Structure tags (headings, paragraphs, lists) | Supported | tagHeading / tagParagraph / tagList — see Tagged PDF",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "accessibility-metadata-01"
+      ],
+      "stated": false
+    },
+    {
+      "id": "cap-a11y-alt-text",
+      "region": "guide-accessibility-pdfua",
+      "doc": "docs/guide/accessibility.md",
+      "text": "Alt text on images | Supported | tagFigure(tree, parent, altText) writes /Figure + /Alt",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "accessibility-metadata-01"
+      ],
+      "stated": false
+    },
+    {
+      "id": "cap-a11y-reading-order",
+      "region": "guide-accessibility-pdfua",
+      "doc": "docs/guide/accessibility.md",
+      "text": "Reading order tags | Supported | Structure-tree order defines logical reading order",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "accessibility-metadata-01"
+      ],
+      "stated": false
+    },
+    {
+      "id": "cap-a11y-table-headers",
+      "region": "guide-accessibility-pdfua",
+      "doc": "docs/guide/accessibility.md",
+      "text": "Table headers marked | Supported | tagTableHeaderCell writes TH with /Scope",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "accessibility-metadata-04"
+      ],
+      "stated": false
+    },
+    {
+      "id": "cap-a11y-validation",
+      "region": "guide-accessibility-pdfua",
+      "doc": "docs/guide/accessibility.md",
+      "text": "Validation | Supported | validatePdfUa (UA-1), validatePdfUa2 (UA-2), checkAccessibility",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "accessibility-metadata-23",
+        "accessibility-metadata-M01"
+      ],
+      "stated": false
+    },
+    {
+      "id": "cap-csp-core",
+      "region": "guide-csp-checklist",
+      "doc": "docs/guide/csp.md",
+      "text": "Core PDF generation | default-src 'self' | N/A (always works)",
+      "grade": "pending",
+      "tests": [],
+      "limits": []
+    },
+    {
+      "id": "cap-csp-wasm",
+      "region": "guide-csp-checklist",
+      "doc": "docs/guide/csp.md",
+      "text": "WebAssembly compiled by your own code | script-src 'wasm-unsafe-eval' | N/A -- not loaded by the library",
+      "grade": "pending",
+      "tests": [],
+      "limits": []
+    },
+    {
+      "id": "cap-csp-worker",
+      "region": "guide-csp-checklist",
+      "doc": "docs/guide/csp.md",
+      "text": "PdfWorker | worker-src 'self' (page) + script-src 'unsafe-eval' (worker) | Yes -- generate on the main thread",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "runtime-platform-18"
+      ],
+      "stated": false
+    },
+    {
+      "id": "cap-csp-cdn",
+      "region": "guide-csp-checklist",
+      "doc": "docs/guide/csp.md",
+      "text": "CDN scripts | script-src https://cdn... | Yes -- self-hosted",
+      "grade": "pending",
+      "tests": [],
+      "limits": []
+    },
+    {
+      "id": "cap-csp-data-url",
+      "region": "guide-csp-checklist",
+      "doc": "docs/guide/csp.md",
+      "text": "Data URL previews | frame-src blob: | Yes -- download only",
+      "grade": "pending",
+      "tests": [],
+      "limits": []
+    },
+    {
+      "id": "cap-img-png",
+      "region": "guide-image-formats-overview",
+      "doc": "docs/guide/image-formats.md",
+      "text": "PNG | .png | Lossless (Deflate) | Yes (alpha channel) | Gray, RGB, Indexed, RGBA | FlateDecode",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "images-49",
+        "images-50"
+      ],
+      "stated": false
+    },
+    {
+      "id": "cap-img-jpeg",
+      "region": "guide-image-formats-overview",
+      "doc": "docs/guide/image-formats.md",
+      "text": "JPEG | .jpg, .jpeg | Lossy (DCT) | No | Gray, RGB, CMYK | DCTDecode (passthrough)",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "images-46"
+      ],
+      "stated": false
+    },
+    {
+      "id": "cap-img-webp",
+      "region": "guide-image-formats-overview",
+      "doc": "docs/guide/image-formats.md",
+      "text": "WebP | .webp | Lossy (VP8) or Lossless (VP8L) | Yes (alpha) | RGB, RGBA | Decoded; FlateDecode RGB (+ /SMask for alpha)",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "images-86",
+        "images-87",
+        "images-88"
+      ],
+      "stated": false
+    },
+    {
+      "id": "cap-img-tiff",
+      "region": "guide-image-formats-overview",
+      "doc": "docs/guide/image-formats.md",
+      "text": "TIFF | .tif, .tiff | None, PackBits, LZW, Deflate, JPEG | Alpha from a 4th sample | Gray, RGB, RGBA (embedTiff); CMYK via embedTiffDirect (see TIFF) | Decoded + FlateDecode (embedTiff) or passthrough (embedTiffDirect)",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "images-69",
+        "images-70",
+        "images-72",
+        "docs-guide-2-04"
+      ],
+      "stated": false
+    },
+    {
+      "id": "cap-tiff-uncompressed",
+      "region": "guide-image-formats-tiff",
+      "doc": "docs/guide/image-formats.md",
+      "text": "Uncompressed | None | No",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "images-77",
+        "tests-unit-assets-04"
+      ],
+      "stated": false
+    },
+    {
+      "id": "cap-tiff-deflate",
+      "region": "guide-image-formats-tiff",
+      "doc": "docs/guide/image-formats.md",
+      "text": "Deflate | FlateDecode | No",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "images-78"
+      ],
+      "stated": false
+    },
+    {
+      "id": "cap-tiff-jpeg",
+      "region": "guide-image-formats-tiff",
+      "doc": "docs/guide/image-formats.md",
+      "text": "JPEG-in-TIFF | DCTDecode | No",
+      "grade": "pending",
+      "tests": [],
+      "limits": []
+    },
+    {
+      "id": "cap-tiff-lzw-packbits",
+      "region": "guide-image-formats-tiff",
+      "doc": "docs/guide/image-formats.md",
+      "text": "LZW, PackBits | FlateDecode (via embedTiff) | Yes (decode + re-compress)",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "images-69"
+      ],
+      "stated": false
+    },
+    {
+      "id": "cap-embed-passthrough",
+      "region": "guide-image-formats-embedding",
+      "doc": "docs/guide/image-formats.md",
+      "text": "Direct passthrough | Fastest | No loss | JPEG, PNG (no alpha, no interlace), TIFF (uncompressed, single-strip Deflate without predictor, JPEG)",
+      "grade": "pending",
+      "tests": [],
+      "limits": []
+    },
+    {
+      "id": "cap-embed-decode-flate",
+      "region": "guide-image-formats-embedding",
+      "doc": "docs/guide/image-formats.md",
+      "text": "Decode + Flate | Slower | Lossless (decoded pixels) | WebP, TIFF (LZW, PackBits), PNG (alpha, interlaced)",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "images-87",
+        "images-69",
+        "images-50"
+      ],
+      "stated": false
+    },
+    {
+      "id": "cap-perf-rt-node",
+      "region": "guide-performance-runtimes",
+      "doc": "docs/guide/performance.md",
+      "text": "Node.js | Yes | Unit tests gate on Node 26; Node 24 and the devEngines Node 28 nightly run as non-gating probes",
+      "grade": "behaviour",
+      "tests": [
+        "cap-ci-runtimes"
+      ],
+      "limits": []
+    },
+    {
+      "id": "cap-perf-rt-bun",
+      "region": "guide-performance-runtimes",
+      "doc": "docs/guide/performance.md",
+      "text": "Bun | No | Not tested in CI",
+      "grade": "behaviour",
+      "tests": [
+        "cap-ci-runtimes"
+      ],
+      "limits": []
+    },
+    {
+      "id": "cap-perf-rt-deno",
+      "region": "guide-performance-runtimes",
+      "doc": "docs/guide/performance.md",
+      "text": "Deno | No | Not tested in CI",
+      "grade": "behaviour",
+      "tests": [
+        "cap-ci-runtimes"
+      ],
+      "limits": []
+    },
+    {
+      "id": "cap-perf-rt-workers",
+      "region": "guide-performance-runtimes",
+      "doc": "docs/guide/performance.md",
+      "text": "Cloudflare Workers | No | 128 MB memory limit; use streaming",
+      "grade": "behaviour",
+      "tests": [
+        "cap-ci-runtimes"
+      ],
+      "limits": []
+    },
+    {
+      "id": "cap-perf-rt-browser",
+      "region": "guide-performance-runtimes",
+      "doc": "docs/guide/performance.md",
+      "text": "Browser | Yes | Playwright E2E on Chromium, Firefox and WebKit",
+      "grade": "behaviour",
+      "tests": [
+        "cap-ci-runtimes"
+      ],
+      "limits": []
+    },
+    {
+      "id": "cap-stream-save",
+      "region": "guide-streaming-methods",
+      "doc": "docs/guide/streaming.md",
+      "text": "pdf.save() | Promise<Uint8Array> | General use, small to medium documents",
+      "grade": "qualified",
+      "tests": [
+        "cap-save"
+      ],
+      "limits": [
+        "color-compression-35",
+        "parser-syntax-M02"
+      ],
+      "stated": false
+    },
+    {
+      "id": "cap-stream-save-as-stream",
+      "region": "guide-streaming-methods",
+      "doc": "docs/guide/streaming.md",
+      "text": "pdf.saveAsStream() | ReadableStream<Uint8Array> | Large documents, server responses; not for an encrypted document (throws UnsupportedEncryptionError)",
+      "grade": "qualified",
+      "tests": [
+        "cap-save-stream"
+      ],
+      "limits": [
+        "color-compression-35",
+        "parser-syntax-M02",
+        "oracle-gates-R02",
+        "tests-integration-e2e-bench-fixtures-M01"
+      ],
+      "stated": false
+    },
+    {
+      "id": "cap-stream-save-as-blob",
+      "region": "guide-streaming-methods",
+      "doc": "docs/guide/streaming.md",
+      "text": "pdf.saveAsBlob() | Promise<Blob> | Browser downloads and display",
+      "grade": "qualified",
+      "tests": [
+        "cap-save-blob"
+      ],
+      "limits": [
+        "color-compression-35",
+        "parser-syntax-M02"
+      ],
+      "stated": false
+    },
+    {
+      "id": "cap-stream-save-as-base64",
+      "region": "guide-streaming-methods",
+      "doc": "docs/guide/streaming.md",
+      "text": "pdf.saveAsBase64({ dataUri }) | Promise<string> | JSON payloads and data URIs",
+      "grade": "qualified",
+      "tests": [
+        "cap-save-base64"
+      ],
+      "limits": [
+        "color-compression-35",
+        "parser-syntax-M02"
+      ],
+      "stated": false
+    },
+    {
+      "id": "cap-ts-rt-node",
+      "region": "guide-troubleshooting-runtimes",
+      "doc": "docs/guide/troubleshooting.md",
+      "text": "Node.js | 26.4 (engines); Uint8Array base64 from 25.0.0 | Yes (Node 26 gates; Node 24 and the devEngines Node 28 nightly are non-gating probes)",
+      "grade": "behaviour",
+      "tests": [
+        "cap-ci-runtimes",
+        "cap-package"
+      ],
+      "limits": []
+    },
+    {
+      "id": "cap-ts-rt-deno",
+      "region": "guide-troubleshooting-runtimes",
+      "doc": "docs/guide/troubleshooting.md",
+      "text": "Deno | 2.5.0 | No",
+      "grade": "behaviour",
+      "tests": [
+        "cap-ci-runtimes"
+      ],
+      "limits": []
+    },
+    {
+      "id": "cap-ts-rt-bun",
+      "region": "guide-troubleshooting-runtimes",
+      "doc": "docs/guide/troubleshooting.md",
+      "text": "Bun | 1.1.22 | No",
+      "grade": "behaviour",
+      "tests": [
+        "cap-ci-runtimes"
+      ],
+      "limits": []
+    },
+    {
+      "id": "cap-ts-rt-workers",
+      "region": "guide-troubleshooting-runtimes",
+      "doc": "docs/guide/troubleshooting.md",
+      "text": "Cloudflare Workers | none stated | No",
+      "grade": "behaviour",
+      "tests": [
+        "cap-ci-runtimes"
+      ],
+      "limits": []
+    },
+    {
+      "id": "cap-ts-rt-browsers",
+      "region": "guide-troubleshooting-runtimes",
+      "doc": "docs/guide/troubleshooting.md",
+      "text": "Browsers | Chrome 140, Firefox 133, Safari 18.2 (see the Browser guide) | Playwright E2E on Chromium, Firefox and WebKit",
+      "grade": "behaviour",
+      "tests": [
+        "cap-ci-runtimes"
+      ],
+      "limits": []
+    },
+    {
+      "id": "cap-rev-network",
+      "region": "guide-verification-revocation",
+      "doc": "docs/guide/verification.md",
+      "text": "Network required | Yes | No",
+      "grade": "pending",
+      "tests": [],
+      "limits": []
+    },
+    {
+      "id": "cap-rev-freshness",
+      "region": "guide-verification-revocation",
+      "doc": "docs/guide/verification.md",
+      "text": "Data freshness | Real-time | As fresh as embedded data",
+      "grade": "pending",
+      "tests": [],
+      "limits": []
+    },
+    {
+      "id": "cap-rev-use-case",
+      "region": "guide-verification-revocation",
+      "doc": "docs/guide/verification.md",
+      "text": "Use case | Standard verification | Air-gapped environments, LTV",
+      "grade": "pending",
+      "tests": [],
+      "limits": []
+    },
+    {
+      "id": "cap-rev-api",
+      "region": "guide-verification-revocation",
+      "doc": "docs/guide/verification.md",
+      "text": "API | checkCertificateStatus(), downloadCrl() | verifyOfflineRevocation()",
+      "grade": "behaviour",
+      "tests": [
+        "cap-revocation-api"
+      ],
+      "limits": []
+    },
+    {
+      "id": "cap-rev-good-revoked",
+      "region": "guide-verification-revocation",
+      "doc": "docs/guide/verification.md",
+      "text": "Can report good or revoked | Yes, for an authenticated OCSP answer | No: a matching answer is reported as unknown",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "signature-pki-03",
+        "signature-pki-07"
+      ],
+      "stated": true
+    }
+  ]
+}

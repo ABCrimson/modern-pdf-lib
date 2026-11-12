@@ -328,6 +328,8 @@ const caps = detectRuntimeCapabilities();
 
 `modern-pdf-lib` targets Node.js (`engines` `>=26.4`), browsers, Deno, Bun and Cloudflare Workers. The library calls `Uint8Array` base64 and hex methods without a guard; MDN browser-compat-data (read 2026-11-11) lists them from Node.js 25.0.0, Deno 2.5.0, Bun 1.1.22, Chrome 140, Firefox 133 and Safari 18.2.
 
+<!-- capabilities:begin guide-performance-runtimes -->
+
 | Runtime | Tested in CI | Notes |
 |:---|:---:|:---|
 | Node.js | Yes | Unit tests gate on Node 26; Node 24 and the `devEngines` Node 28 nightly run as non-gating probes |
@@ -335,6 +337,8 @@ const caps = detectRuntimeCapabilities();
 | Deno | No | Not tested in CI |
 | Cloudflare Workers | No | 128 MB memory limit; use streaming |
 | Browser | Yes | Playwright E2E on Chromium, Firefox and WebKit |
+
+<!-- capabilities:end -->
 
 > [!TIP]
 > For edge deployments, return `saveAsStream()` as the response body (unencrypted documents only). In the browser, prefer `saveAsBlob()` for the simplest user experience.

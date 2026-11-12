@@ -15,7 +15,7 @@ Create, parse, fill, merge, sign, and manipulate PDF documents<br />in Node 26.4
 
 [![npm version](https://img.shields.io/npm/v/modern-pdf-lib?style=flat-square&color=cb3837)](https://www.npmjs.com/package/modern-pdf-lib)
 [![createPdf bundle](https://img.shields.io/badge/createPdf_bundle-109_KiB_gzip-blue?style=flat-square)](#install)
-[![tests](https://img.shields.io/badge/tests-7%2C177_passing-brightgreen?style=flat-square)](https://github.com/ABCrimson/modern-pdf-lib/actions/workflows/ci.yml)
+[![tests](https://img.shields.io/badge/tests-7%2C311_passing-brightgreen?style=flat-square)](https://github.com/ABCrimson/modern-pdf-lib/actions/workflows/ci.yml)
 [![TypeScript](https://img.shields.io/badge/TypeScript-7.1_dev-3178c6?style=flat-square&logo=typescript&logoColor=white)](./tsconfig.json)
 [![License: MIT](https://img.shields.io/badge/license-MIT-yellow?style=flat-square)](LICENSE)
 
@@ -59,6 +59,9 @@ const blob = await doc.saveAsBlob();     // Blob (browsers)
 
 `saveAsStream()` throws `UnsupportedEncryptionError` (code `unsupported-encryption-path`) for a document with `encrypt()` configured; use `save()` for an encrypted document.
 
+> [!WARNING]
+> A default `save()` (`compress: true`) writes raw DEFLATE data under `/FlateDecode` for every stream long enough to be kept compressed, without the zlib wrapper the PDF format requires: qpdf rejects such a file and pdf.js reads no text from it. Until a later release fixes the writer, save with `{ compress: false }`, as in `doc.save({ compress: false })`; `saveAsStream()`, `saveAsBlob()` and `saveAsBase64()` take the same option. `saveDocumentIncremental()` and `saveIncremental()` write the same raw data into the streams they append; pass them `{ compress: false }` too.
+
 ### CDN (no install)
 
 Use directly in the browser via CDN — no bundler required:
@@ -80,7 +83,7 @@ Also available via:
 - **unpkg:** `https://unpkg.com/modern-pdf-lib/dist/browser.mjs`
 - **esm.sh:** `https://esm.sh/modern-pdf-lib`
 
-Pin a version in production, for example `modern-pdf-lib@0.40.5`.
+Pin a version in production, for example `modern-pdf-lib@0.40.6`.
 
 ### Script Tag (no modules)
 
@@ -105,6 +108,8 @@ For a plain `<script>` tag without `type="module"`, use the IIFE bundle, which e
 <br />
 
 ## Features
+
+<!-- capabilities:begin readme-features -->
 
 <table>
 <tr>
@@ -183,9 +188,15 @@ For a plain `<script>` tag without `type="module"`, use the IIFE bundle, which e
 </tr>
 </table>
 
+<!-- capabilities:end -->
+
+**Known limits.** A default `save()` writes streams that qpdf rejects and from which pdf.js reads no text (see [Quick Start](#quick-start)); save with `{ compress: false }` until a later release fixes the writer. This includes the page content into which the header/footer engine and watermarks draw their text: once that content is long enough to be kept compressed, pdf.js reads none of that text after a default save. Images that the library decodes and compresses itself (PNG images with alpha or interlacing, WebP images, and TIFF images embedded with `embedTiff`) carry the same raw data whatever the option. The open findings that are safe to publish, with the release planned to close each one, are listed in [`audit/open-highs.json`](./audit/open-highs.json).
+
 <br />
 
 ## Why modern-pdf-lib?
+
+<!-- capabilities:begin readme-comparison -->
 
 <table>
 <tr>
@@ -322,15 +333,21 @@ For a plain `<script>` tag without `type="module"`, use the IIFE bundle, which e
 <td align="center">1 (fflate)</td>
 <td align="center">4 (pako, tslib, @pdf-lib/standard-fonts, @pdf-lib/upng)</td></tr>
 
+<!-- capabilities:end -->
+
 <tr><td><strong>Maintained</strong></td>
 <td align="center">Active</td>
 <td align="center">Inactive since 2021</td></tr>
 
 </table>
 
+Watermarks and the header / footer engine draw into page content, which a default `save()` writes, once it is long enough to be kept compressed, as raw DEFLATE data that qpdf rejects and from which pdf.js reads no text; save with `{ compress: false }` (see the Known limits under [Features](#features)).
+
 <br />
 
 ## Runtimes
+
+<!-- capabilities:begin readme-runtimes -->
 
 | Runtime | Version | Status |
 |:---|:---|:---:|
@@ -341,6 +358,8 @@ For a plain `<script>` tag without `type="module"`, use the IIFE bundle, which e
 | **Chrome / Edge** | 140+ | Chromium tested in CI (Playwright); Edge not tested |
 | **Firefox** | 133+ | Tested in CI (Playwright) |
 | **Safari** | 18.4+ | WebKit tested in CI (Playwright); Safari not tested |
+
+<!-- capabilities:end -->
 
 The browser, Deno and Bun minimums are the first versions with both the Uint8Array base64/hex methods (`Uint8Array.prototype.toBase64`/`toHex`, `Uint8Array.fromBase64`/`fromHex`) and the iterator helpers (`Iterator.from`, `.map`, `.toArray`), which the library calls without a guard (MDN browser-compat-data, read 2026-11-11). The Node minimum is the `engines` range in package.json.
 
@@ -659,7 +678,8 @@ modern-pdf-lib/
     plugins/        Plugin manager & hooks
     wasm/           Rust crate sources (6 modules)
     cli/            CLI tool (modern-pdf optimize)
-  tests/            7,199 tests in 330 files
+  tests/            7,484 tests in 329 files (projects unit, integration, oracle, adversarial)
+  audit/            open-highs.json: the public ledger of open audit findings
   docs/             VitePress documentation
 ```
 
@@ -671,7 +691,7 @@ modern-pdf-lib/
 git clone https://github.com/ABCrimson/modern-pdf-lib.git
 cd modern-pdf-lib
 pnpm install
-pnpm test          # 330 files: 7,177 pass, 22 expected failures; without qpdf 7,174 pass, 21 expected failures, 4 skip
+pnpm test          # 329 files, 7,484 tests: with qpdf 7,311 pass, 173 expected failures; without qpdf 7,181 pass, 74 expected failures, 229 skip
 pnpm run typecheck # TypeScript 7.1 dev build: src, cli, scripts, tests, security-tests
 pnpm run build     # ESM + CJS + declarations + IIFE
 ```

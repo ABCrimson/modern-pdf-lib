@@ -39,7 +39,7 @@ pnpm test
 |---|---|---|
 | Node.js | **>= 26.4** (`engines.node`); `devEngines` pins `28.0.0-nightly20261111e8c1160d20`, which pnpm can download | Everything |
 | pnpm | **12.19.0** (`packageManager`) | Dependency install, all scripts |
-| Rust + `wasm32-unknown-unknown` | `nightly-2026-11-11` (`rust-toolchain.toml`; rustup picks it up) | Only for `src/wasm/**` changes |
+| Rust + `wasm32-unknown-unknown` | `nightly-2026-11-12` (`rust-toolchain.toml`; rustup picks it up) | Only for `src/wasm/**` changes |
 | `wasm-pack` | 0.15.1, a devDependency (no global install) | Only for `src/wasm/**` changes |
 | Bash | Git Bash on Windows | `build:wasm` (shell script) |
 
@@ -59,16 +59,23 @@ pnpm test
 
 ### The local gate
 
-Run these before pushing. They cover the Lint & Type-check, Build TypeScript and
-Unit Tests jobs; CI also runs the WASM build, Pack Check, integration, E2E,
-benchmark and bundle-size jobs, and the reporting-only Rust per-crate job.
+Run these before pushing. They cover the type-check and lint steps of the Lint &
+Type-check job, the Build TypeScript job and the tests of the unit-test and
+oracle jobs; CI also runs the WASM build, Pack Check, E2E, benchmark and
+bundle-size jobs, the gates of the lint and oracle jobs, and the reporting-only
+Rust per-crate job.
 
 ```bash
 pnpm run typecheck   # tsc over the root, cli, scripts, tests and security-tests projects
 pnpm run lint        # oxlint + tsgolint, type-aware, --max-warnings=1189
-pnpm test            # vitest run — the full suite
+pnpm test            # vitest run: all four test projects
 pnpm run build       # tsdown + IIFE bundle + dist smoke test
 ```
+
+Install qpdf 12.4.2 and point `QPDF` at it (or put it on `PATH`) to run the
+oracle tests locally; without it they skip with a reason (see
+[Testing](#testing)). Run `pnpm run build` and `pnpm run copy:wasm` before
+`pnpm test` for the API snapshot test, which skips without `dist/`.
 
 ### All scripts
 
@@ -86,18 +93,32 @@ Run each as `pnpm run <name>`.
 | `copy:wasm` | Copy each crate's `pkg/` output into `dist/wasm/<crate>/` |
 | `check:pack` | Pack the tarball and check its file list, publint and attw |
 | `smoke` | Import-check the built `dist/` as both ESM and CJS |
-| `test` | Full Vitest run |
+| `test` | Full Vitest run: all four projects |
 | `test:watch` | Vitest in watch mode |
-| `test:integration` | Only `tests/integration` |
+| `test:unit` | Only the `unit` project |
+| `test:integration` | Only the `integration` project (`tests/integration`) |
+| `test:oracle` | Only the `oracle` project (`tests/oracle`; needs qpdf, see [Testing](#testing)) |
+| `test:adversarial` | Only the `adversarial` project (`tests/adversarial`) |
 | `test:e2e` | Playwright browser E2E (`tests/e2e`) |
 | `test:bench` | `vitest bench` over the benchmark files |
 | `bench` | Benchmark suite via the tinybench harness |
 | `lint` / `lint:fix` | oxlint, type-aware; `lint` fails above 1,189 warnings |
 | `format` / `format:check` | oxfmt over `src`, `tests` and `scripts` |
 | `typecheck` | `tsc` over the root, `tsconfig.cli.json`, `tsconfig.scripts.json`, `tsconfig.tests.json` and `tsconfig.security-tests.json` projects |
-| `typecheck:security-tests` | `tsc` over `tsconfig.security-tests.json` only (the 0.40.5 security test files and `tests/helpers`) |
+| `typecheck:security-tests` | `tsc` over `tsconfig.security-tests.json` only (the files it lists: the 0.40.5 security tests, the qpdf cross-check of encrypted saves, the known-defect helper tests, and `tests/helpers`) |
 | `fixtures:legacy` | Rebuild `tests/fixtures/legacy-0.40.3/` from the published 0.40.3 tarball |
 | `fixtures:legacy:check` | Check that those fixtures regenerate byte for byte |
+| `fixtures:encrypted` | Write `tests/fixtures/encrypted/`: a source PDF and five copies encrypted by qpdf 12.4.2 |
+| `fixtures:encrypted:check` | Regenerate them in a temp directory and fail on any difference (needs qpdf) |
+| `check:test-projects` | Fail when a `tests/**/*.test.ts` file belongs to no Vitest project or to more than one |
+| `check:known-defects` | Census of the known-defect markers; fails on a `fails` test without ledger ids, a malformed key or title, or a duplicate title |
+| `corpus:check` | The corpus gate: manifest, sizes, licences and contact-data scan of `tests/fixtures/corpus/`, then the corpus tests (set `QPDF` for the qpdf checks) |
+| `api:check` / `api:update` | Run the API snapshot test, `tests/oracle/packaging/exports.test.ts` (it needs `dist/`; `api:update` adds `-u` to rewrite the snapshot) |
+| `gate:surface` | The findings ledger `audit/open-highs.json` against its schema, the markers against the ledger, and new exports against open findings |
+| `gate:cap` | Match the capability rows of the README and the guides with `docs/capabilities.json` (report-only in this release) |
+| `gate:size` | Bundle sizes of `dist/` (gzip and brotli) against `scripts/dev/size-budget.json`, and the README bundle badge; run after `build` |
+| `conformance:generate` | Write the inputs of the nightly conformance workflow (runs under `tsx`; pass `--out <dir>`) |
+| `conformance:verapdf` | Run an installed veraPDF (`VERAPDF` or `--verapdf`) over PDF files and print the conformance table |
 | `dev` | Vite dev server |
 | `docs:dev` / `docs:build` | VitePress site |
 | `docs:api` | Regenerate the TypeDoc API reference + VitePress sanitizer |
@@ -174,35 +195,83 @@ discussion in the PR.
 
 ## Testing
 
-We use [Vitest](https://vitest.dev/) for unit, integration, and compliance
-tests, and [Playwright](https://playwright.dev/) for browser E2E.
+We use [Vitest](https://vitest.dev/) for unit, integration, oracle and
+adversarial tests, and [Playwright](https://playwright.dev/) for browser E2E.
 
 When adding a feature or fixing a bug: write a test that fails before your
 change and passes after, then run the full suite.
 
+### Test projects
+
+`vitest.config.ts` defines four projects by include glob; `pnpm test` runs
+all four, and `pnpm run test:<project>` runs one.
+
+| Project | Files | What it holds | Retries |
+|---|---|---|---|
+| `unit` | `tests/unit`, `tests/barcode`, `tests/compliance`, `tests/image`, `tests/layout`, `tests/browser` (314 files) | Module tests; it also owns the benchmark files | 2 |
+| `integration` | `tests/integration` (4 files) | Cross-module document flows | 2 |
+| `oracle` | `tests/oracle` (10 files) | The library's output judged by tools outside it (qpdf, pdf.js, an independent hash port), the real-world corpus, the API snapshot | 0 |
+| `adversarial` | `tests/adversarial` (1 file) | Form-script escape probes | 0 |
+
+The unit and integration projects retry a failed test twice, so a rare
+timing flake under full-suite load does not fail the run; a genuinely broken
+test fails all three attempts. The oracle and adversarial projects never
+retry: a failure there is a result. Every test file must match exactly one
+project (`pnpm run check:test-projects`).
+
 | Directory | Contents | Count |
 |---|---|---|
-| `tests/unit/` | Per-module unit tests mirroring `src/` | 277 files |
+| `tests/unit/` | Per-module unit tests mirroring `src/` | 268 files |
 | `tests/layout/` | Table, header/footer, and text-layout behaviour | 11 files |
 | `tests/barcode/` | Symbology encoders (QR, Code 128, EAN, PDF417, …) | 10 files |
 | `tests/image/` | Image decoders and embedding | 9 files |
 | `tests/browser/` | Browser-surface APIs under a simulated DOM | 8 files |
 | `tests/compliance/` | PDF/A, PDF/X, PDF/UA, e-invoicing conformance | 8 files |
 | `tests/integration/` | Cross-module end-to-end document flows | 4 files |
-| `tests/oracle/` | Independent oracles: pdf.js and a raw byte search for redaction, and the read-old gate over the 0.40.3 fixtures | 2 files |
+| `tests/oracle/` | Outside oracles: the writer matrix (qpdf and pdf.js on each writer path); AES and RC4 in both directions, with the PDF 2.0 password hash checked against qpdf-generated cases; `saveAsStream()` output; a 10,000-field document; the qpdf cross-check of encrypted saves; the read-old gate over the 0.40.3 fixtures; redaction leaks (pdf.js and a raw byte search); the corpus; the capability evidence; and `packaging/` (the API snapshot `exports.api.json` and its test) | 10 files |
 | `tests/adversarial/` | Form-script escape probes against `FormScriptSandbox` | 1 file |
-| `tests/helpers/` | Shared fixtures for the signature-trust tests (no tests of its own) | — |
+| `tests/helpers/` | `known-defect.ts` (the known-defect marker), `oracle/` (the qpdf and pdf.js wrappers, the setup file that fails an oracle test whose saved PDF did not go through qpdf, and the independent hash port) and the signature-trust fixtures (no tests of its own) | — |
 | `tests/e2e/` | Playwright specs (`*.spec.ts`) driven through Vite | 1 spec |
 | `tests/benchmarks/` | Benchmark suites (`pnpm run bench`, `pnpm run test:bench`) | — |
 | `tests/fixtures/` | Shared sample PDFs and generated inputs; `legacy-0.40.3/` holds eight PDFs written by the published 0.40.3 and a `manifest.json` of their hashes (generator: `scripts/legacy-0.40.3/generate.ts`; regenerate with `pnpm run fixtures:legacy`, never edit by hand) | — |
+| `tests/fixtures/corpus/` | Unmodified PDF files written by other producers, with `manifest.json` (source, licence, SHA-256, contact-data result, admission values), `LICENSES/` and a README of its rules; add a file only with `node scripts/dev/corpus.ts --add` | 33 PDF files |
+| `tests/fixtures/encrypted/` | A source PDF and five copies encrypted by qpdf 12.4.2, with `manifest.json` (`pnpm run fixtures:encrypted`) | 6 PDF files |
+| `tests/fixtures/pdf20-hash/` | `cases.json`: 512 PDF 2.0 password hash cases from 256 documents qpdf encrypted (`node scripts/oracle/pdf20-hash-cases.ts`) | — |
+
+Supporting directories of the test suite:
+
+| Directory | Contents |
+|---|---|
+| `audit/` | `open-highs.json`, the public ledger of open audit findings (schema `open-highs.schema.json`, described in `audit/README.md`) |
+| `scripts/dev/` | The checks and gates: `test-projects.ts`, `known-defects.ts`, `corpus.ts`, `surface-gate.ts`, `capability-gate.ts`, `size-gate.ts` (budgets in `size-budget.json`) and `api-snapshot.ts` |
+| `scripts/oracle/` | The generators of the qpdf fixture sets: `encrypted-fixtures.ts` and `pdf20-hash-cases.ts` |
+| `scripts/conformance/` | The nightly conformance workflow: `generate.ts` (inputs), `summarize.ts` (tables and comparison), `hanko-report.py` (pyHanko reports) and `expected.json` (the expected results); `scripts/verapdf-validate.ts` runs veraPDF |
 
 Naming: `*.test.ts` for Vitest, `*.spec.ts` for Playwright. Place new tests in
-the directory that matches the area under test, mirroring the `src/` layout.
+the directory that matches the area under test, mirroring the `src/` layout,
+so that each file falls in exactly one project.
 
-The encryption-guard tests (`tests/unit/core/encryption-guard.test.ts`) also
-decrypt the library's output with qpdf 12.4.2 when they find it (the `QPDF`
-environment variable, then `PATH`). Without qpdf those cases skip with a reason
-locally, and they fail when `CI` is set.
+A test that shows a known open defect is a known-defect marker, never a plain
+`test.fails`: `knownDefect(defectKey('<id>', '<until>'), title, { failsWith }, body)`
+from `tests/helpers/known-defect.ts`, with the ledger id and the release that
+fixes it written as literals. It counts as an expected failure only when the
+body fails with an error that matches `failsWith`. Its id must be an open entry
+of `audit/open-highs.json` whose target equals `until` (`pnpm run gate:surface`).
+The fixing commit replaces the marker with a plain test.
+
+The qpdf-backed tests (the oracle project, which `corpus:check` also runs for
+the corpus) use qpdf 12.x from the `QPDF` environment variable, then `PATH`.
+Locally, without qpdf, each such test skips with a reason, and `corpus:check`
+also counts the encrypted corpus entries as unconfirmed; when `CI` is set, a
+missing qpdf fails the test. The fixture generators under `scripts/oracle/`
+need qpdf 12.4.2 and refuse any other version. In CI the oracle job installs
+the checksum-pinned qpdf and exports `QPDF`. The API snapshot test needs
+`dist/` and `dist/wasm/` (`pnpm run build`, `pnpm run copy:wasm`) and the
+release tags: locally it skips without them, and in CI it fails.
+
+With qpdf and a built `dist/`, `pnpm test` reports 329 files and 7,484
+tests: 7,311 passed and 173 expected failures (the markers). Without qpdf,
+7,181 pass, 74 are expected failures and 229 skip.
 
 ---
 
@@ -217,17 +286,17 @@ flowchart LR
   W["Build WASM<br/>cargo, wasm-pack"]
   T["Build TypeScript<br/>tsdown + IIFE + dist smoke"]
   P["Pack Check<br/>tarball, publint, attw"]
-  U["Unit Tests<br/>vitest + coverage"]
-  I["Integration Tests"]
+  U["Tests (unit, integration)<br/>vitest + coverage"]
+  O["Oracle and adversarial tests<br/>qpdf, pdf.js, gates"]
   E["E2E Tests<br/>Playwright"]
   B["Benchmarks"]
-  S["Bundle Size<br/>50 KB gzip budget"]
+  S["Bundle Size<br/>size gate"]
   R["Rust per crate<br/>clippy, cargo test"]
 
   W --> T
   T --> P
   T --> U
-  T --> I
+  T --> O
   T --> E
   T --> B
   T --> S
@@ -238,16 +307,21 @@ waits on WASM, so style and type failures surface first.
 
 | Job | Gate |
 |---|---|
-| Lint & Type-check | `pnpm run typecheck` (five projects) and `pnpm run lint` (type-aware oxlint, 0 errors, at most 1,189 warnings) |
+| Lint & Type-check | `pnpm run typecheck` (five projects), `pnpm run lint` (type-aware oxlint, 0 errors, at most 1,189 warnings), `pnpm run check:test-projects` and `pnpm run check:known-defects` |
 | Build WASM | All six crates compile for `wasm32-unknown-unknown` |
 | Build TypeScript | `pnpm run build` succeeds and `dist/` imports as ESM **and** CJS |
 | Pack Check | `pnpm run check:pack`: the tarball lists six WASM builds and the IIFE bundle and passes publint and attw |
-| Unit Tests | Installs qpdf 12.4.2 (checked against the SHA-256 written in `ci.yml`, exported as `QPDF`), then a full Vitest run with v8 coverage; Node 26 gates, the Node 24 and `devEngines` runtime legs are experimental and do not fail the workflow |
-| Integration Tests | `tests/integration` green |
+| Tests (unit, integration) | The unit and integration projects with v8 coverage, without qpdf; Node 26 gates, the Node 24 and `devEngines` runtime legs are experimental and do not fail the workflow |
+| Oracle and adversarial tests | On the built `dist/` and a full clone: installs qpdf 12.4.2 (checked against the SHA-256 written in `ci.yml`, exported as `QPDF`), runs the adversarial and oracle projects, lists the markers of the oracle run (fails on a marker that did not fail for its stated reason), checks both qpdf fixture sets, and runs the corpus gate, the surface gate and the capability gate (report-only) |
 | E2E Tests | Playwright specs green in a real browser |
 | Benchmarks | The benchmark harness runs without error |
-| Bundle Size | `dist/index.mjs` stays at or under **50 KB gzipped** |
+| Bundle Size | The size gate: the `createPdf`, `loadPdf`, root, per-entry and IIFE bundles stay within their gzip and brotli budgets in `scripts/dev/size-budget.json`, and the README badge states the `createPdf` figure |
 | Rust (per crate) | Clippy and `cargo test` per crate; reports only (`continue-on-error`) |
+
+The conformance workflow [`.github/workflows/conformance.yml`](.github/workflows/conformance.yml)
+runs veraPDF and pyHanko over inputs written by the public writers, nightly, on
+version tags and on demand. It never runs on pull requests and is report-only:
+no verdict fails a job, and neither a merge nor a release waits for it.
 
 Releases run separately from [`.github/workflows/release.yml`](.github/workflows/release.yml)
 on a version tag: it rebuilds WASM + TypeScript, packs and inspects the tarball,
@@ -328,10 +402,11 @@ Supporting directories:
 | Directory | Contents |
 |---|---|
 | `tests/` | The full test suite (see [Testing](#testing)) |
-| `scripts/` | Build, codegen, fixture, and validation scripts |
+| `audit/` | The public ledger of open audit findings (see [Testing](#testing)) |
+| `scripts/` | Build, codegen, fixture, and validation scripts; `scripts/dev/`, `scripts/oracle/` and `scripts/conformance/` hold the test gates and fixture generators |
 | `tools/docs/` | Isolated TypeScript 6 sidecar for TypeDoc (a pnpm workspace member; no TS 7 path yet) |
 | `docs/` | VitePress site source and guides; `docs/api/` is generated and git-ignored |
-| `.github/` | CI, release, and docs workflows; issue and PR templates |
+| `.github/` | CI, conformance, release, and docs workflows; the pins of the conformance tools (`conformance/`); issue and PR templates |
 
 See the [README's project structure](./README.md#project-structure) for the
 published module map.
