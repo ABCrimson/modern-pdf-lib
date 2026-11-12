@@ -105,9 +105,10 @@ encryption dropped or doubled on save.
   `saveIncrementalWithSignaturePreservation`, `optimizeIncrementalSave` and
   `appendIncrementalUpdate`) throw the same error for an encrypted file, instead of
   appending unencrypted objects and a trailer without `/Encrypt`. `linearizePdf` throws it for an encrypted file too, and `delinearizePdf` does for a linearized file that has `/Encrypt`: their output would have no `/Encrypt` entry. `flattenTransparency`, `stripProhibitedFeatures`, `enforcePdfA`, `enforcePdfAFull` and `enforcePdfX` throw it for an encrypted file too. For the sixteen functions named here that take PDF bytes (all of them except `saveAsStream()`), a file counts as encrypted when its bytes contain the name `/Encrypt` anywhere, whatever follows it; a name written with `#` escapes, such as `/Encr#79pt`, counts, and `/EncryptMetadata` and `/Encrypt2` do not, except in `enforcePdfA`, `enforcePdfAFull` and `enforcePdfX`, which also refuse any file whose text contains `/Encrypt`, so `/EncryptMetadata` and `/Encrypt2` as well. An unencrypted file that holds the name `/Encrypt` anywhere outside a compressed stream, for example inside an uncompressed content stream or as text that looks like a name, is refused as well. A document
-  loaded from an encrypted file is not covered by the guards on
-  `saveAsStream()` and `objectStreamThreshold`: its `isEncrypted()` returns
-  `false`, and `save()` writes it without encryption.
+  loaded from an encrypted file is covered from 0.40.9 on: it is decrypted on
+  load, and every route that writes it throws `UnsupportedEncryptionError` until
+  `encrypt()` is called on the document being saved (see
+  [Loading and saving encrypted documents](./docs/guide/security.md#loading-and-saving-encrypted-documents)).
 
 ---
 

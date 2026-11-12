@@ -14,8 +14,8 @@ Create, parse, fill, merge, sign, and manipulate PDF documents<br />in Node 26.4
 <br />
 
 [![npm version](https://img.shields.io/npm/v/modern-pdf-lib?style=flat-square&color=cb3837)](https://www.npmjs.com/package/modern-pdf-lib)
-[![createPdf bundle](https://img.shields.io/badge/createPdf_bundle-96_KiB_gzip-blue?style=flat-square)](#install)
-[![tests](https://img.shields.io/badge/tests-8%2C103_passing-brightgreen?style=flat-square)](https://github.com/ABCrimson/modern-pdf-lib/actions/workflows/ci.yml)
+[![createPdf bundle](https://img.shields.io/badge/createPdf_bundle-101_KiB_gzip-blue?style=flat-square)](#install)
+[![tests](https://img.shields.io/badge/tests-9%2C084_passing-brightgreen?style=flat-square)](https://github.com/ABCrimson/modern-pdf-lib/actions/workflows/ci.yml)
 [![TypeScript](https://img.shields.io/badge/TypeScript-7.1_dev-3178c6?style=flat-square&logo=typescript&logoColor=white)](./tsconfig.json)
 [![License: MIT](https://img.shields.io/badge/license-MIT-yellow?style=flat-square)](LICENSE)
 
@@ -80,7 +80,7 @@ Also available via:
 - **unpkg:** `https://unpkg.com/modern-pdf-lib/dist/browser.mjs`
 - **esm.sh:** `https://esm.sh/modern-pdf-lib`
 
-Pin a version in production, for example `modern-pdf-lib@0.40.8`.
+Pin a version in production, for example `modern-pdf-lib@0.40.9`.
 
 ### Script Tag (no modules)
 
@@ -128,7 +128,7 @@ For a plain `<script>` tag without `type="module"`, use the IIFE bundle, which e
 <td width="50%" valign="top">
 
 **Parse, Render & Modify**
-- Load existing PDFs (encrypted PDFs load, but most of their content is returned still encrypted, and AES-256 (revision 6) files from other producers do not open with the right password)
+- Load existing PDFs (an encrypted PDF opens with its password and its objects are decrypted, including AES-256 files written by qpdf; saving it needs `encrypt()` first)
 - Extract text with positions (text from fonts that use indirect references or compressed ToUnicode maps, most real-world PDFs, is not decoded correctly)
 - Render pages to PNG / Canvas (any DPI)
 - Thumbnails & visual diff (pixel + SSIM)
@@ -143,12 +143,12 @@ For a plain `<script>` tag without `type="module"`, use the IIFE bundle, which e
 <td width="50%" valign="top">
 
 **Secure & Compliant**
-- RC4 and AES-128 encryption on `save()`; AES-256 (R6) can be selected, but its output is not yet readable by other PDF readers (`saveAsStream()`, `objectStreamThreshold` and `saveDocumentIncremental()` throw `UnsupportedEncryptionError`, code `unsupported-encryption-path`, for an encrypted document, and the functions that sign or append an incremental update to PDF bytes throw it for an encrypted file; a document loaded from an encrypted file is mostly not decrypted)
-- Digital signatures (PKCS#7, visible/invisible, timestamps; `requestTimestamp` checks the response's hash and nonce against the request, but the token's signature and the TSA certificate are not verified)
+- RC4, AES-128 and AES-256 (R6) encryption on `save()`; AES-256 files open in qpdf and pdf.js (`saveAsStream()`, `objectStreamThreshold` and `saveDocumentIncremental()` throw `UnsupportedEncryptionError`, code `unsupported-encryption-path`, for an encrypted document, and the functions that sign or append an incremental update to PDF bytes throw it for an encrypted file; a document loaded from an encrypted file cannot be written until `encrypt()` is called on it)
+- Digital signatures (PKCS#7, visible/invisible; `requestTimestamp` checks the response's hash and nonce against the request, but the token's signature and the TSA certificate are not verified, and `signPdf` does not embed a timestamp: its `timestampUrl` option has no effect)
 - OCSP revocation checking (an answer that cannot be authenticated reports `unknown`), CRL lookup (a CRL's signature is not verified), certificate chain validation against `trustedCerts` (with none listed, no chain is valid)
 - Incremental save with signature preservation
-- Multi-signature chains, MDP certification, LTV archival (a signature followed by a later update, such as a second signature or LTV data added with `embedLtvData`, reports `valid: false` with `coversWholeDocument: false`, and `detectModifications` reports a later signature as an `unknown` violation)
-- Counter-signatures & field locking
+- Multi-signature chains, MDP certification reading (`setCertificationLevel` has no effect: `signPdf` writes no DocMDP), LTV archival (a signature followed by a later update, such as a second signature or LTV data added with `embedLtvData`, reports `valid: false` with `coversWholeDocument: false`, and `detectModifications` reports a later signature as an `unknown` violation)
+- Counter-signatures; field locks are read, not written (`addFieldLock` has no effect: `signPdf` writes no `/Lock` dictionary)
 - PDF/A-1b through PDF/A-3u validation, PDF/A-4/4e/4f (output is not validated against veraPDF; `enforcePdfA` and `enforcePdfX` output has an invalid cross-reference offset)
 - PDF/X-6, PDF/VT, Factur-X / ZUGFeRD e-invoicing
 - Tagged PDF / PDF/UA-1 & PDF/UA-2 accessibility
@@ -189,7 +189,7 @@ For a plain `<script>` tag without `type="module"`, use the IIFE bundle, which e
 
 **Input limits.** Decode paths refuse input above internal limits with `ResourceLimitError` (code `resource-limit-exceeded`, with `limit`, `max` and `actual`). The limits are per stream, per table and per call, they are fixed in this release, and every file of the test corpus uses at most a quarter of each of them; the values, and what a decode at a limit costs, are in the [Performance guide](./docs/guide/performance.md#input-limits). JPEG 2000 (`/JPXDecode`), JBIG2 (`/JBIG2Decode`) and lossy WebP (VP8) data is not decoded: `decodeStream()`, `decodeImageStream()` and the decoders of those formats throw `UnsupportedFilterError`, while `extractImages()` still returns such images with their encoded bytes and a PDF that holds them loads, saves, merges and copies with those streams unchanged. `extractPageImages()` leaves out an image it cannot decode, and rendering draws no images in this release. See the security advisory published with 0.40.8 on the [advisories page](https://github.com/ABCrimson/modern-pdf-lib/security/advisories). A service that handles untrusted files should still run each file under operating-system limits on time and memory.
 
-**Known limits.** A file written by modern-pdf-lib 0.40.6 or earlier holds raw DEFLATE data under `/FlateDecode`. It loads, and `save()` writes those streams back as zlib data, but `saveDocumentIncremental()`, `saveIncremental()` and `signPdf()` keep the file's existing bytes and `linearizePdf()` and `enforcePdfA()` copy its objects as they are, so load such a file and `save()` it before you pass it to them. AES-256 (revision 6) files written by other producers, such as the pyHanko and qpdf files of the test corpus, throw `Failed to decrypt PDF: the provided password is incorrect` with the right password. The open findings that are safe to publish, with the release planned to close each one, are listed in [`audit/open-highs.json`](./audit/open-highs.json).
+**Known limits.** A file written by modern-pdf-lib 0.40.6 or earlier holds raw DEFLATE data under `/FlateDecode`. It loads, and `save()` writes those streams back as zlib data, but `saveDocumentIncremental()`, `saveIncremental()` and `signPdf()` keep the file's existing bytes and `linearizePdf()` and `enforcePdfA()` copy its objects as they are, so load such a file and `save()` it before you pass it to them. A document loaded from an encrypted file is decrypted, and it can be written only after `encrypt()` is called on it. Strings with bytes above 0x7F are rewritten on save (planned for 0.41.0), which also applies to a decrypted document that is re-encrypted and saved; incremental and streamed encrypted saves are planned for 0.41.2. AES-256 files written by modern-pdf-lib 0.26.0 to 0.40.8 open with their passwords and emit one `MPL_LEGACY_R6_KEY` warning per process; AES-256 files written from 0.40.9 on cannot be opened by 0.40.3 to 0.40.8. The open findings that are safe to publish, with the release planned to close each one, are listed in [`audit/open-highs.json`](./audit/open-highs.json).
 
 <br />
 
@@ -217,7 +217,7 @@ For a plain `<script>` tag without `type="module"`, use the IIFE bundle, which e
 <td align="center">3.x</td></tr>
 
 <tr><td><strong>Parse existing PDFs</strong></td>
-<td align="center">Yes (encrypted content not decrypted; AES-256 (R6) files from other producers do not open with the right password)</td>
+<td align="center">Yes (an encrypted file opens with its password and its objects are decrypted; saving it needs <code>encrypt()</code> first)</td>
 <td align="center">Yes</td></tr>
 
 <tr><td><strong>Text extraction</strong></td>
@@ -225,11 +225,11 @@ For a plain `<script>` tag without `type="module"`, use the IIFE bundle, which e
 <td align="center">No</td></tr>
 
 <tr><td><strong>Encryption</strong></td>
-<td align="center">RC4 + AES-128 on <code>save()</code>; AES-256 (R6) output not yet readable by other PDF readers (streaming, object streams and incremental saves throw <code>UnsupportedEncryptionError</code>, code <code>unsupported-encryption-path</code>, for an encrypted document, and so does signing an encrypted file)</td>
+<td align="center">RC4 + AES-128 + AES-256 on <code>save()</code>; AES-256 output opens in qpdf and pdf.js (streaming, object streams and incremental saves throw <code>UnsupportedEncryptionError</code>, code <code>unsupported-encryption-path</code>, for an encrypted document, and so does signing an encrypted file)</td>
 <td align="center">No</td></tr>
 
 <tr><td><strong>Digital signatures</strong></td>
-<td align="center">PKCS#7, timestamps, CRL/OCSP, LTV, MDP (chain trust needs <code>trustedCerts</code>; timestamp signatures and CRLs are not authenticated)</td>
+<td align="center">PKCS#7, CRL/OCSP, LTV, MDP reading; <code>signPdf</code> embeds no timestamp and writes no DocMDP or field lock (chain trust needs <code>trustedCerts</code>; timestamp signatures and CRLs are not authenticated)</td>
 <td align="center">No</td></tr>
 
 <tr><td><strong>Incremental save</strong></td>
@@ -409,7 +409,7 @@ const helvetica = await doc.embedFont(StandardFonts.Helvetica);
 
 // Custom TrueType / OpenType (readFile from 'node:fs/promises')
 const fontBytes = await readFile('Inter.ttf');
-const inter = await doc.embedFont(fontBytes, { subset: true });
+const inter = await doc.embedFont(fontBytes);
 
 page.drawText('Custom font', { x: 50, y: 500, font: inter, size: 18 });
 ```
@@ -447,7 +447,7 @@ Pages copied, merged or split from a loaded PDF are written without their conten
 </details>
 
 <details>
-<summary><strong>Encryption</strong> &mdash; RC4, AES-128, permissions</summary>
+<summary><strong>Encryption</strong> &mdash; RC4, AES-128, AES-256, permissions</summary>
 
 ```ts
 // Configure encryption with doc.encrypt(), then save().
@@ -459,7 +459,7 @@ await doc.encrypt({
 const bytes = await doc.save();
 ```
 
-For an encrypted document, `saveAsStream()` throws and a save with `objectStreamThreshold` or `saveDocumentIncremental()` rejects with `UnsupportedEncryptionError` (code `unsupported-encryption-path`). The functions that append an incremental update to PDF bytes (`signPdf`, `prepareForSigning`, `addCounterSignature`, `embedLtvData`, `saveIncremental`, `saveIncrementalWithSignaturePreservation`, `optimizeIncrementalSave` and `appendIncrementalUpdate`) throw the same error for an encrypted file, because they would append unencrypted objects to an encrypted file. `linearizePdf` throws it for an encrypted file too, and `delinearizePdf` does for a linearized file that has `/Encrypt`: their output would have no `/Encrypt` entry. `flattenTransparency`, `stripProhibitedFeatures`, `enforcePdfA`, `enforcePdfAFull` and `enforcePdfX` throw it for an encrypted file too. For the sixteen functions named here that take PDF bytes (all of them except `saveAsStream()`), a file counts as encrypted when its bytes contain the name `/Encrypt` anywhere, whatever follows it; a name written with `#` escapes, such as `/Encr#79pt`, counts, and `/EncryptMetadata` and `/Encrypt2` do not, except in `enforcePdfA`, `enforcePdfAFull` and `enforcePdfX`, which also refuse any file whose text contains `/Encrypt`, so `/EncryptMetadata` and `/Encrypt2` as well. An unencrypted file that holds the name `/Encrypt` anywhere outside a compressed stream, for example inside an uncompressed content stream or as text that looks like a name, is refused as well. A document loaded from an encrypted file reports `isEncrypted()` as `false`: most of its content is not decrypted on load, and `save()` does not encrypt it.
+For an encrypted document, `saveAsStream()` throws and a save with `objectStreamThreshold` or `saveDocumentIncremental()` rejects with `UnsupportedEncryptionError` (code `unsupported-encryption-path`). The functions that append an incremental update to PDF bytes (`signPdf`, `prepareForSigning`, `addCounterSignature`, `embedLtvData`, `saveIncremental`, `saveIncrementalWithSignaturePreservation`, `optimizeIncrementalSave` and `appendIncrementalUpdate`) throw the same error for an encrypted file, because they would append unencrypted objects to an encrypted file. `linearizePdf` throws it for an encrypted file too, and `delinearizePdf` does for a linearized file that has `/Encrypt`: their output would have no `/Encrypt` entry. `flattenTransparency`, `stripProhibitedFeatures`, `enforcePdfA`, `enforcePdfAFull` and `enforcePdfX` throw it for an encrypted file too. For the sixteen functions named here that take PDF bytes (all of them except `saveAsStream()`), a file counts as encrypted when its bytes contain the name `/Encrypt` anywhere, whatever follows it; a name written with `#` escapes, such as `/Encr#79pt`, counts, and `/EncryptMetadata` and `/Encrypt2` do not, except in `enforcePdfA`, `enforcePdfAFull` and `enforcePdfX`, which also refuse any file whose text contains `/Encrypt`, so `/EncryptMetadata` and `/Encrypt2` as well. An unencrypted file that holds the name `/Encrypt` anywhere outside a compressed stream, for example inside an uncompressed content stream or as text that looks like a name, is refused as well. A document loaded from an encrypted file has its objects decrypted and reports `isEncrypted()` as `false`; `save()`, `saveAsStream()`, `saveAsBlob()`, `saveAsBase64()` and the other writers throw `UnsupportedEncryptionError` until `encrypt()` is called on it, and then `save()` writes it encrypted with the new parameters. The [security guide](./docs/guide/security.md#loading-and-saving-encrypted-documents) has the rules, a sample and the compatibility table.
 </details>
 
 <details>
@@ -675,7 +675,7 @@ modern-pdf-lib/
     plugins/        Plugin manager & hooks
     wasm/           Rust crate sources (6 modules)
     cli/            CLI tool (modern-pdf optimize)
-  tests/            8,209 tests in 360 files (projects unit, integration, oracle, adversarial)
+  tests/            9,133 tests in 381 files (projects unit, integration, oracle, adversarial)
   audit/            open-highs.json: the public ledger of open audit findings
   docs/             VitePress documentation
 ```
@@ -688,7 +688,7 @@ modern-pdf-lib/
 git clone https://github.com/ABCrimson/modern-pdf-lib.git
 cd modern-pdf-lib
 pnpm install
-pnpm test          # 360 files, 8,209 tests: with qpdf 8,103 pass, 106 expected failures; without qpdf 7,896 pass, 52 expected failures, 261 skip
+pnpm test          # 381 files, 9,133 tests: with qpdf 9,084 pass, 49 expected failures; without qpdf 8,715 pass, 11 expected failures, 407 skip
 pnpm run typecheck # TypeScript 7.1 dev build: src, cli, scripts, tests, security-tests
 pnpm run build     # ESM + CJS + declarations + IIFE
 ```

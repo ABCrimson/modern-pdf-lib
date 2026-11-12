@@ -85,7 +85,7 @@ const parser = new StreamingPdfParser({
 | Option | Type | Default | Description |
 |---|---|---|---|
 | `maxBufferSize` | `number` | `64 * 1024 * 1024` | Maximum bytes to buffer before throwing |
-| `parseContentStreams` | `boolean` | `false` | Reserved; currently ignored |
+| `parseContentStreams` | `boolean` | `false` | Has no effect; passing `true` emits one `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`) per process |
 | `pageRange` | `{ start?, end? }` | all pages | Restrict which pages to extract metadata for; `end` is exclusive. Pages outside the range still appear in `result.pages` with zero content offsets, and `pageCount` is the full count |
 
 ::: tip Selective Page Loading

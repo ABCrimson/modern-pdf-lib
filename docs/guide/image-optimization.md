@@ -30,7 +30,7 @@ const optimizedBytes = await doc.save();
 | Option | Type | Default | Description |
 |:---|:---|:---|:---|
 | `quality` | `number` | `80` | JPEG quality (1–100) |
-| `maxDpi` | `number` | — | Reserved; ignored (images are never downscaled) |
+| `maxDpi` | `number` | — | Has no effect (images are never downscaled); passing it emits one `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`) per process |
 | `progressive` | `boolean` | `false` | Encode as progressive JPEG |
 | `chromaSubsampling` | `string` | `'4:2:0'` | Chroma subsampling: `'4:4:4'`, `'4:2:2'`, or `'4:2:0'` |
 | `skipSmallImages` | `boolean` | `false` | Skip images smaller than 10 KB |

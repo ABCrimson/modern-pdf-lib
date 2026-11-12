@@ -128,7 +128,7 @@ The subsetter works at the TrueType level. It keeps every glyph ID (so `CIDToGID
 
 ### The `subset` Option
 
-`embedFont()` accepts `{ subset?: boolean }`, but the option is not read: TrueType fonts are always subset when the document is saved, and `{ subset: false }` does not embed the full font.
+`embedFont()` accepts `{ subset?: boolean }`, but the option has no effect: TrueType fonts are always subset when the document is saved, and `{ subset: false }` does not embed the full font. Passing `subset: false` emits one `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`) per process. The `features` option has no effect and warns the same way.
 
 > [!TIP]
 > Dropping unused outlines usually removes most of a large font's size.

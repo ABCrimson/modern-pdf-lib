@@ -30,8 +30,7 @@ Only `addAssociatedFile` is end to end on `PdfDocument`. The other builders retu
 > (V5/R6), where it writes `%PDF-2.0`. That matches how readers behave in
 > practice — PDF 2.0 constructs are ignored rather than rejected by 1.7
 > consumers — but if a downstream validator insists on a 2.0 header,
-> post-process the header yourself. AES-256 output is not yet readable by
-> other PDF readers, so do not select it for this purpose.
+> post-process the header yourself.
 
 ## Associated files
 

@@ -167,16 +167,7 @@ const matrixCustom = encodeCode39('HELLO', false, 2.5);
 const checkChar = computeCode39CheckDigit('PART-A1234');
 ```
 
-The `code39ToOperators` function accepts a `Code39Options` object with a `wideToNarrowRatio` property for controlling bar widths:
-
-```ts
-const operators = code39ToOperators(matrix, 50, 300, {
-  height: 50,
-  moduleWidth: 1,
-  quietZone: 10,
-  wideToNarrowRatio: 3,
-});
-```
+The wide-to-narrow ratio belongs to the encoder: `encodeCode39(data, includeCheckDigit, wideToNarrowRatio)` takes it as its third argument, as in the example above. The `wideToNarrowRatio` and `includeCheckDigit` fields of `Code39Options` have no effect in this version, and neither has `showText`: passing `showText: true`, `includeCheckDigit: true` or a `wideToNarrowRatio` to `code39ToOperators()` emits one `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`) per option and process.
 
 ### ITF (Interleaved 2 of 5)
 
@@ -341,9 +332,9 @@ All 1D barcode renderers accept these options (except `showText` and `fontSize`,
 | `showText` | `boolean` | `false` | Human-readable text below the barcode (`renderStyledBarcode` only) |
 | `fontSize` | `number` | `10` | Font size for human-readable text (`renderStyledBarcode` only) |
 
-The per-format `*ToOperators` renderers draw bars only; use `renderStyledBarcode` for human-readable text.
+The per-format `*ToOperators` renderers draw bars only; use `renderStyledBarcode` for human-readable text. Passing `showText: true` or a `fontSize` to `code128ToOperators()`, `code39ToOperators()`, `itfToOperators()`, `ean13ToOperators()`, `ean8ToOperators()` or `upcAToOperators()` has no effect and emits one `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`) per option and process. The same holds for `errorCorrection` in the options of `qrCodeToOperators()` (use the argument of `encodeQrCode()`) and for `columns` and `errorLevel` in the options of `pdf417ToOperators()` (use the options of `encodePdf417()`).
 
-Code 39 and ITF additionally support `wideToNarrowRatio` (default `3`). ITF also supports `bearerBars` and `bearerBarWidth`.
+Code 39 and ITF take `wideToNarrowRatio` (default `3`) as an argument of `encodeCode39()` and `encodeItf()`; the field of the same name in the options of `code39ToOperators()` and `itfToOperators()` has no effect. ITF also supports `bearerBars` and `bearerBarWidth`.
 
 QR codes use `QrCodeOptions` with `moduleSize` (default `2`), `quietZone` (default `4`), `color`, and `backgroundColor`.
 

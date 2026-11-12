@@ -65,6 +65,8 @@ const builder = await PdfDocumentBuilder.load(encryptedPdf, {
 });
 ```
 
+The loaded document holds decrypted objects, so `save()` throws `UnsupportedEncryptionError` unless you call `.encrypt({ ... })` on the builder first (see [Encryption](#encryption)).
+
 ---
 
 ## Metadata Methods

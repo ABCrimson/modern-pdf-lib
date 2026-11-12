@@ -197,6 +197,96 @@ AES-256 (V5/R6, `/AESV3`), and distinguishes the `/Standard` (password) handler
 from `/Adobe.PubSec` (public-key). The inspector is read-only — it never
 decrypts content (it only tests empty-password key derivation).
 
+## Loading and saving encrypted documents
+
+`loadPdf()` of an encrypted file with the right password returns the document with its objects decrypted. This covers RC4 with 40-bit and 128-bit keys, AES-128 and AES-256, files that keep objects in object streams, crypt filters, and `/EncryptMetadata false`. In the oracle tests the decrypted objects equal the output of `qpdf --decrypt --qdf` object by object. The one documented difference is the `/Contents` of a signature dictionary, which stays as stored in the file.
+
+The password rules:
+
+- Either the user password or the owner password opens a file. The owner password of a file whose `/U` entry is longer than 48 bytes is accepted.
+- For AES-256 the library writes the SASLprep form of a password. On reading it tries the SASLprep form first, then the raw UTF-8 bytes, which is what qpdf and pdf.js hash.
+- A wrong password throws a `PdfParseError` whose message says the password is incorrect.
+
+### What fails closed
+
+These cases throw `UnsupportedEncryptionError` (code `unsupported-encryption-path`) instead of returning data that is still encrypted:
+
+- a security handler other than Standard;
+- an unknown `/V` or crypt filter method, or a crypt filter name that the file does not define;
+- a direct or recovered `/Encrypt` dictionary that the library cannot honour;
+- AES data that is damaged, for example too short to hold an initialization vector and a block.
+
+A `ResourceLimitError` is never swallowed on this path.
+
+### Saving a decrypted document
+
+A document decrypted on load cannot be written until `encrypt()` has been called on the document being saved. `isEncrypted()` stays `false` after the load, because no protection is configured for the output until you call `encrypt()`. Until `encrypt()` is called, every route that produces bytes throws `UnsupportedEncryptionError`, so plaintext never leaves by accident:
+
+- `save()`, `saveAsStream()`, `saveAsBlob()`, `saveAsBase64()`, `serializePdf()`, `PdfWriter` and `PdfStreamWriter`;
+- `saveIncremental()` and `saveDocumentIncremental()`;
+- `sanitizePdf()` on an encrypted file that opens with the empty user password;
+- a document that received pages, objects or metadata from such a document through `copy()`, `copyPages()`, `mergePdfs()`, `splitPdf()` or the embed calls;
+- a document that received a page of such a document through `addPage()`.
+- a document that holds a string or stream decrypted on load, whatever route put it there.
+
+`copy()` of such a document does not call the `onAfterSave` hooks of registered plugins, because it would hand them the unencrypted bytes.
+
+After `encrypt()`, `save()`, `saveAsBlob()`, `saveAsBase64()`, `serializePdf()` and `PdfWriter` write the document encrypted with the new parameters. `saveAsStream()`, `PdfStreamWriter`, `saveIncremental()`, `saveDocumentIncremental()` and `sanitizePdf()` stay refused, because they cannot encrypt what they write. A load with `ignoreEncryption: true` is a different case: it returns the streams as stored in the file, and saving it writes them as loaded.
+
+```ts
+import { readFile, writeFile } from 'node:fs/promises';
+import { loadPdf } from 'modern-pdf-lib';
+
+// Load with the password the file was encrypted with.
+const source = new Uint8Array(await readFile('protected.pdf'));
+const doc = await loadPdf(source, { password: 'old-password' });
+
+// ... read, extract or edit the document here ...
+
+// Choose the protection of the output. Without this call, save() throws.
+await doc.encrypt({
+  userPassword: 'new-user-password',
+  ownerPassword: 'new-owner-password',
+  algorithm: 'aes-256',
+});
+await writeFile('re-encrypted.pdf', await doc.save());
+```
+
+The saved file is a new encryption of the decrypted objects, not a byte copy of the source: strings that hold bytes above 0x7F are rewritten on save until 0.41.0 (see Known limits below). The re-encrypted document does not keep the permissions of the source. Called without a `permissions` argument, `encrypt()` denies every permission: measured with qpdf 12.4.2, a source that allowed printing and everything else came out with `/P` -3904, all denied. To grant some, pass them, for example `permissions: { printing: true, copying: true }`, which gave `/P` -1836 (printing and extraction allowed, the rest denied).
+
+The save rule covers what the library itself writes. It does not cover content that you read from a decrypted document and feed back through the API, or content the library derives from it, such as extracted text; what you do with those is up to the code that handles them.
+
+The same code opens an AES-256 file written by qpdf, and a file this library wrote with any version from 0.26.0 on.
+
+### Files written by 0.26.0 to 0.40.8
+
+Versions 0.26.0 to 0.40.8 wrote AES-256 (revision 6) files with a password hash that deviates from ISO 32000-2 Algorithm 2.B. Other PDF software, such as qpdf and pdf.js, does not accept those files. This version writes the standard derivation, and still opens the older files with their passwords. Opening one emits a single warning per process:
+
+```
+[MPL_LEGACY_R6_KEY] ModernPdfLibWarning: The AES-256 key of this document was derived the way
+modern-pdf-lib 0.26.0 to 0.40.8 wrote it, which other PDF software does not accept. Call
+encrypt() and save to write it with the standard derivation.
+```
+
+To act on it, call `encrypt()` on the loaded document, as in the sample above, and save. The new file uses the standard derivation and is never written with the old one. To silence the warning in Node, start the process with `--disable-warning=MPL_LEGACY_R6_KEY` (or `--disable-warning=ModernPdfLibWarning` for every warning of this library), or set it in `NODE_OPTIONS`. The library has no hook of its own for warnings.
+
+### Compatibility of AES-256 files
+
+Every cell was measured: the published 0.40.3 package, the 0.40.8 code, this version, qpdf 12.4.2 and pdf.js 6.5.438, each opening the file with its user password. Versions 0.40.4 to 0.40.7 have the same key derivation code as 0.40.3 and 0.40.8 and were not run separately.
+
+| File written by | This version | 0.40.3 and 0.40.8 | qpdf | pdf.js |
+|---|---|---|---|---|
+| This version (0.40.9 on) | Opens | Refused: the password is reported as incorrect | Opens, `--check` clean | Opens, text correct |
+| This library, 0.26.0 to 0.40.8 | Opens with one `MPL_LEGACY_R6_KEY` warning | Opens, but the content stays encrypted, so text extraction throws (compressed streams) or returns no text | Refused: invalid password | Refused: incorrect password |
+| qpdf (AES-256, revision 6) | Opens | Refused: the password is reported as incorrect | Opens | Opens |
+
+An AES-256 file written from 0.40.9 on therefore cannot be opened by 0.40.3 to 0.40.8. Files written with RC4 or AES-128 are not affected.
+
+### Known limits
+
+- Strings that hold bytes above 0x7F are rewritten on save. This applies to a decrypted document that is re-encrypted and saved. A fix is planned for 0.41.0.
+- Incremental and streamed saves of an encrypted document are planned for 0.41.2. Until then they throw, as listed above.
+
 ## See also
 
 - **Redaction marks** — `markForRedaction` records regions; `applyRedactions`
@@ -205,8 +295,8 @@ decrypts content (it only tests empty-password key derivation).
   `applyRedaction`, `PdfDocument.applyRedactions()` and
   [`redactRegions`](./rendering.md#redaction-by-content-removal). A later
   release adds redaction by removal.
-- **Encryption** — apply password protection (RC4 or AES-128; AES-256 output is not yet readable by other PDF readers) with
-  `await doc.encrypt(options)`, then `save()`; for an encrypted document,
+- **Encryption** — apply password protection (RC4, AES-128 or AES-256) with
+  `await doc.encrypt(options)`, then `save()`; see [Loading and saving encrypted documents](#loading-and-saving-encrypted-documents) for a document loaded from an encrypted file; for an encrypted document,
   `saveAsStream()`, a save with an `objectStreamThreshold` other than
   `Infinity` (the default) and `saveDocumentIncremental()` throw
   `UnsupportedEncryptionError` (code `unsupported-encryption-path`). The

@@ -67,7 +67,7 @@ Rust per-crate job.
 
 ```bash
 pnpm run typecheck   # tsc over the root, cli, scripts, tests and security-tests projects
-pnpm run lint        # oxlint + tsgolint, type-aware, --max-warnings=1175
+pnpm run lint        # oxlint + tsgolint, type-aware, --max-warnings=1173
 pnpm test            # vitest run: all four test projects
 pnpm run build       # tsdown + IIFE bundle + dist smoke test
 ```
@@ -108,8 +108,10 @@ Run each as `pnpm run <name>`.
 | `typecheck:security-tests` | `tsc` over `tsconfig.security-tests.json` only (the files it lists: the 0.40.5 security tests, the qpdf cross-check of encrypted saves, the known-defect helper tests, and `tests/helpers`) |
 | `fixtures:legacy` | Rebuild `tests/fixtures/legacy-0.40.3/` from the published 0.40.3 tarball |
 | `fixtures:legacy:check` | Check that those fixtures regenerate byte for byte |
-| `fixtures:encrypted` | Write `tests/fixtures/encrypted/`: a source PDF and five copies encrypted by qpdf 12.4.2 |
+| `node scripts/legacy-0.26.0/generate.ts` (`--check` to verify; no package script) | Rebuild `tests/fixtures/legacy-0.26.0/` from the published 0.26.0 tarball, or check that it regenerates byte for byte |
+| `fixtures:encrypted` | Write `tests/fixtures/encrypted/`: a source PDF and five copies encrypted by qpdf 12.4.2, and the `extra/` and `load/` sets the encrypted-load tests read |
 | `fixtures:encrypted:check` | Regenerate them in a temp directory and fail on any difference (needs qpdf) |
+| `fixtures:streams:check` | Check the raw data of every stream that the parser reads from `tests/fixtures` against the record `tests/fixtures/expected/stream-digests.json` (needs qpdf 12.4.2) |
 | `check:test-projects` | Fail when a `tests/**/*.test.ts` file belongs to no Vitest project or to more than one |
 | `check:known-defects` | Census of the known-defect markers; fails on a `fails` test without ledger ids, a malformed key or title, or a duplicate title |
 | `corpus:check` | The corpus gate: manifest, sizes, licences and contact-data scan of `tests/fixtures/corpus/`, then the corpus tests (set `QPDF` for the qpdf checks) |
@@ -208,10 +210,10 @@ all four, and `pnpm run test:<project>` runs one.
 
 | Project | Files | What it holds | Retries |
 |---|---|---|---|
-| `unit` | `tests/unit`, `tests/barcode`, `tests/compliance`, `tests/image`, `tests/layout`, `tests/browser` (329 files) | Module tests; it also owns the benchmark files | 2 |
+| `unit` | `tests/unit`, `tests/barcode`, `tests/compliance`, `tests/image`, `tests/layout`, `tests/browser` (346 files) | Module tests; it also owns the benchmark files | 2 |
 | `integration` | `tests/integration` (4 files) | Cross-module document flows | 2 |
-| `oracle` | `tests/oracle` (14 files) | The library's output judged by tools outside it (qpdf, pdf.js, an independent hash port), the real-world corpus, the API snapshot | 0 |
-| `adversarial` | `tests/adversarial` (12 files) | Form-script escape probes, and inputs that must end in their error inside the budget of `tests/helpers/budget.ts` | 0 |
+| `oracle` | `tests/oracle` (17 files) | The library's output judged by tools outside it (qpdf, pdf.js, an independent hash port), the real-world corpus, the API snapshot | 0 |
+| `adversarial` | `tests/adversarial` (14 files) | Form-script escape probes, and inputs that must end in their error inside the budget of `tests/helpers/budget.ts` | 0 |
 
 The unit and integration projects retry a failed test twice, so a rare
 timing flake under full-suite load does not fail the run; a genuinely broken
@@ -234,22 +236,22 @@ cost of a decode at a limit fails there.
 
 | Directory | Contents | Count |
 |---|---|---|
-| `tests/unit/` | Per-module unit tests mirroring `src/` | 283 files |
+| `tests/unit/` | Per-module unit tests mirroring `src/` | 300 files |
 | `tests/layout/` | Table, header/footer, and text-layout behaviour | 11 files |
 | `tests/barcode/` | Symbology encoders (QR, Code 128, EAN, PDF417, …) | 10 files |
 | `tests/image/` | Image decoders and embedding | 9 files |
 | `tests/browser/` | Browser-surface APIs under a simulated DOM | 8 files |
 | `tests/compliance/` | PDF/A, PDF/X, PDF/UA, e-invoicing conformance | 8 files |
 | `tests/integration/` | Cross-module end-to-end document flows | 4 files |
-| `tests/oracle/` | Outside oracles: the writer matrix (qpdf and pdf.js on each writer path); AES and RC4 in both directions, with the PDF 2.0 password hash checked against qpdf-generated cases; `saveAsStream()` output; a 10,000-field document; the qpdf cross-check of encrypted saves; the read-old gate over the 0.40.3 fixtures; redaction leaks (pdf.js and a raw byte search); the corpus; the capability evidence; the zlib form of every `/FlateDecode` stream the writers and image encoders produce, judged by node:zlib, qpdf and pdf.js; the limits headroom over every corpus, legacy and fixture file; the byte-for-byte copy of JPX and JBIG2 streams on save, merge and copy, judged by qpdf; and `packaging/` (the API snapshot `exports.api.json` and its test) | 13 files |
-| `tests/adversarial/` | Form-script escape probes against `FormScriptSandbox`; the `<name>.test.ts` and `<name>.bodies.ts` pairs that run decode, parse and render inputs under the budget runner | 12 files |
+| `tests/oracle/` | Outside oracles: the writer matrix (qpdf and pdf.js on each writer path); AES and RC4 in both directions, with the PDF 2.0 password hash checked against qpdf-generated cases; `saveAsStream()` output; a 10,000-field document; the qpdf cross-check of encrypted saves; the read-old gates over the 0.40.3 and 0.26.0 fixtures; the comparison of decrypted objects with `qpdf --decrypt --qdf` object by object (`encrypted-qdf.test.ts`); the recovery of streams with a wrong, missing or late `/Length` (`stream-length.test.ts`); redaction leaks (pdf.js and a raw byte search); the corpus; the capability evidence; the zlib form of every `/FlateDecode` stream the writers and image encoders produce, judged by node:zlib, qpdf and pdf.js; the limits headroom over every corpus, legacy and fixture file; the byte-for-byte copy of JPX and JBIG2 streams on save, merge and copy, judged by qpdf; and `packaging/` (the API snapshot `exports.api.json` and its test) | 17 files |
+| `tests/adversarial/` | Form-script escape probes against `FormScriptSandbox`; the `<name>.test.ts` and `<name>.bodies.ts` pairs that run decode, parse and render inputs under the budget runner | 14 files |
 | `tests/helpers/` | `budget.ts`, `budget-child.ts` and `budget-worker.ts` (the budget runner: `runWithinBudget()`, `DEFAULT_BUDGET`, `AT_LIMIT_BUDGET`), `known-defect.ts` (the known-defect marker), `oracle/` (the qpdf and pdf.js wrappers, the setup file that fails an oracle test whose saved PDF did not go through qpdf, and the independent hash port) and the signature-trust fixtures (no tests of its own) | — |
 | `tests/e2e/` | Playwright specs (`*.spec.ts`) driven through Vite | 1 spec |
 | `tests/benchmarks/` | Benchmark suites (`pnpm run bench`, `pnpm run test:bench`) | — |
-| `tests/fixtures/` | Shared sample PDFs and generated inputs; `legacy-0.40.3/` holds eight PDFs written by the published 0.40.3 and a `manifest.json` of their hashes (generator: `scripts/legacy-0.40.3/generate.ts`; regenerate with `pnpm run fixtures:legacy`, never edit by hand) | — |
+| `tests/fixtures/` | Shared sample PDFs and generated inputs; `legacy-0.40.3/` holds eight PDFs written by the published 0.40.3 and a `manifest.json` of their hashes (generator: `scripts/legacy-0.40.3/generate.ts`; regenerate with `pnpm run fixtures:legacy`, never edit by hand); `legacy-0.26.0/` holds one AES-256 PDF written by the published 0.26.0 with its `manifest.json` (generator: `scripts/legacy-0.26.0/generate.ts`, never edit by hand); `expected/stream-digests.json` records the stream data of every fixture (check it with `pnpm run fixtures:streams:check`) | — |
 | `tests/fixtures/corpus/` | Unmodified PDF files written by other producers, with `manifest.json` (source, licence, SHA-256, contact-data result, admission values), `LICENSES/` and a README of its rules; add a file only with `node scripts/dev/corpus.ts --add` | 33 PDF files |
 | `tests/fixtures/flate/` | Two PDFs written by qpdf 12.4.2 whose cross-reference streams, object streams and content streams hold zlib data, with a README of how they were made; `tests/unit/parser/flateRead.test.ts` loads them | 2 PDF files |
-| `tests/fixtures/encrypted/` | A source PDF and five copies encrypted by qpdf 12.4.2, with `manifest.json` (`pnpm run fixtures:encrypted`) | 6 PDF files |
+| `tests/fixtures/encrypted/` | A source PDF and five copies encrypted by qpdf 12.4.2, with `manifest.json` (`pnpm run fixtures:encrypted`); `extra/` holds two more AES-256 copies (revision 5, and revision 6 with a password that SASLprep changes), and `load/` holds the files the encrypted-load tests read: copies with object streams, an empty user password, crypt filter and signature-shaped variants (listed in `manifest.json`) | 25 PDF files |
 | `tests/fixtures/pdf20-hash/` | `cases.json`: 512 PDF 2.0 password hash cases from 256 documents qpdf encrypted (`node scripts/oracle/pdf20-hash-cases.ts`) | — |
 
 Supporting directories of the test suite:
@@ -258,7 +260,7 @@ Supporting directories of the test suite:
 |---|---|
 | `audit/` | `open-highs.json`, the public ledger of open audit findings (schema `open-highs.schema.json`, described in `audit/README.md`) |
 | `scripts/dev/` | The checks and gates: `test-projects.ts`, `known-defects.ts`, `corpus.ts`, `surface-gate.ts`, `capability-gate.ts`, `size-gate.ts` (budgets in `size-budget.json`) and `api-snapshot.ts` |
-| `scripts/oracle/` | The generators of the qpdf fixture sets: `encrypted-fixtures.ts` and `pdf20-hash-cases.ts` |
+| `scripts/oracle/` | The generators of the qpdf fixture sets: `encrypted-fixtures.ts` and `pdf20-hash-cases.ts`; and `stream-digests.ts`, which records and checks the stream data of every fixture |
 | `scripts/conformance/` | The nightly conformance workflow: `generate.ts` (inputs), `summarize.ts` (tables and comparison), `hanko-report.py` (pyHanko reports) and `expected.json` (the expected results); `scripts/verapdf-validate.ts` runs veraPDF |
 
 Naming: `*.test.ts` for Vitest, `*.spec.ts` for Playwright. Place new tests in
@@ -283,9 +285,9 @@ the checksum-pinned qpdf and exports `QPDF`. The API snapshot test needs
 `dist/` and `dist/wasm/` (`pnpm run build`, `pnpm run copy:wasm`) and the
 release tags: locally it skips without them, and in CI it fails.
 
-With qpdf and a built `dist/`, `pnpm test` reports 360 files and 8,209
-tests: 8,103 passed and 106 expected failures (the markers). Without qpdf,
-7,896 pass, 52 are expected failures and 261 skip.
+With qpdf and a built `dist/`, `pnpm test` reports 381 files and 9,133
+tests: 9,084 passed and 49 expected failures (the markers). Without qpdf,
+8,715 pass, 11 are expected failures and 407 skip.
 
 ---
 

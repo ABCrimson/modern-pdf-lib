@@ -67,6 +67,8 @@ console.log(`Chain valid: ${result.valid}`);
 
 `validateCertificateChain()` trusts a self-signed root only when its bytes equal a certificate listed in `trustedCerts`. A chain that ends below the root can be valid when the issuer of its last certificate is a listed certificate that is within its validity period, is a CA certificate or self-signed, and verifies the last certificate's signature. With `trustedCerts` empty or absent no chain is valid, so `result.valid` is `false` even when every signature in the chain verifies; `result.errors` reports it. A certificate in `trustedCerts` that is not self-signed anchors the certificates it signed, not itself. `complete` from `buildCertificateChain()` only reports that a chain was assembled; it is not a trust decision.
 
+`validateCertificateChain()` performs no revocation check: its `checkRevocation` option has no effect, and passing `true` emits one `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`) per process.
+
 `verifySignatures()` and `verifySignatureDetailed()` do not run this check on a signature's certificate. To decide trust for a signature, build the signer's chain and pass it to `validateCertificateChain()` yourself.
 
 ## Revocation Checking
@@ -181,11 +183,8 @@ import { verifySignatureDetailed } from 'modern-pdf-lib';
 import { readFile } from 'node:fs/promises';
 
 const pdfBytes = new Uint8Array(await readFile('signed.pdf'));
-const rootCa = new Uint8Array(await readFile('root-ca.der'));
-
 // verifySignatureDetailed returns one result per signature in the document
 const results = await verifySignatureDetailed(pdfBytes, {
-  trustedCerts: [rootCa],
   checkRevocation: true,
 });
 
@@ -201,7 +200,7 @@ for (const result of results) {
 }
 ```
 
-`valid` is `integrityValid` AND `cryptoValid` AND `coversWholeDocument`. It is not a trust decision. `trustedCerts` is not used to decide `valid`; when it is empty a warning says that chain trust was not validated, and `chain` only describes the certificates found in the signature. With `checkRevocation: true` the function makes no network request. It reads an OCSP result from `revocationCache` when you pass one, and otherwise reports `revocationStatus: 'unknown'` with a warning. `crlChecked` is `false`.
+`valid` is `integrityValid` AND `cryptoValid` AND `coversWholeDocument`. It is not a trust decision. `verifySignatureDetailed()` validates no chain: `chain` only describes the certificates found in the signature, and a warning says that chain trust was not validated. Its `trustedCerts` option has no effect: listing certificates only removes that one warning, and passing a non-empty list emits one `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`) per process. The `timeout` option has no effect either and warns the same way. Use `validateCertificateChain()` to decide trust. With `checkRevocation: true` the function makes no network request. It reads an OCSP result from `revocationCache` when you pass one, and otherwise reports `revocationStatus: 'unknown'` with a warning. `crlChecked` is `false`.
 
 The `DetailedVerificationResult` provides:
 

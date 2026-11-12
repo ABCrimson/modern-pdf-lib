@@ -16,6 +16,9 @@ Find your symptom, jump to the fix:
 | `Form field "x" not found.` when filling a form | [8. Form Field Not Found](#_8-form-field-not-found) |
 | A real-world PDF fails to parse | [9. Common Parsing Failures](#_9-common-parsing-failures) |
 | `ResourceLimitError` or `UnsupportedFilterError` is thrown | [10. ResourceLimitError and UnsupportedFilterError](#_10-resourcelimiterror-and-unsupportedfiltererror) |
+| `UnsupportedEncryptionError` on `save()` of a loaded encrypted document | [11. UnsupportedEncryptionError when saving a loaded document](#_11-unsupportedencryptionerror-when-saving-a-loaded-document) |
+| `ModernPdfLibWarning` in the console (`MPL_LEGACY_R6_KEY`, `MPL_IGNORED_OPTION`) | [12. ModernPdfLibWarning](#_12-modernpdflibwarning-mpl-legacy-r6-key-and-mpl-ignored-option) |
+| `throwOnInvalidObject: true` throws on a file that loads otherwise | [13. Strict mode throws on a recovered stream](#_13-strict-mode-throws-on-a-recovered-stream) |
 
 ## 1. EncryptedPdfError
 
@@ -48,9 +51,11 @@ console.log(`Loaded ${pages.length} pages from encrypted PDF`);
 ```
 
 > [!TIP]
-> If you only know the owner password (not the user password), pass it in the same `password` field. The parser tries both owner and user password verification automatically.
+> If you only know the owner password (not the user password), pass it in the same `password` field. The parser tries both owner and user password verification automatically. A wrong password throws a `PdfParseError` ("Failed to decrypt PDF: the provided password is incorrect").
 
-If you want to load the document structure without decrypting streams (for inspection only), use the `ignoreEncryption` option:
+The loaded document holds decrypted objects. To write it, call `encrypt()` on it first (see [11. UnsupportedEncryptionError when saving a loaded document](#_11-unsupportedencryptionerror-when-saving-a-loaded-document)).
+
+If you want to load the document structure without decrypting streams (for inspection only), use the `ignoreEncryption` option; such a document keeps its streams as stored when it is written:
 
 ```ts
 const doc = await loadPdf(bytes, { ignoreEncryption: true });
@@ -472,7 +477,7 @@ try {
 ```
 
 > [!NOTE]
-> The default behavior (`throwOnInvalidObject: false`) silently skips unparseable objects. This is usually what you want for production code, since many real-world PDFs contain minor structural errors that do not affect the visible content. Enable `throwOnInvalidObject: true` only when you need strict validation. A `ResourceLimitError` is never skipped, in either mode: `loadPdf()` throws it (see [10. ResourceLimitError and UnsupportedFilterError](#_10-resourcelimiterror-and-unsupportedfiltererror)).
+> The default behavior (`throwOnInvalidObject: false`) silently skips unparseable objects. This is usually what you want for production code, since many real-world PDFs contain minor structural errors that do not affect the visible content. Enable `throwOnInvalidObject: true` only when you need strict validation. Strict mode also throws on a stream whose `/Length` had to be recovered (see [13. Strict mode throws on a recovered stream](#_13-strict-mode-throws-on-a-recovered-stream)). A `ResourceLimitError` is never skipped, in either mode: `loadPdf()` throws it (see [10. ResourceLimitError and UnsupportedFilterError](#_10-resourcelimiterror-and-unsupportedfiltererror)).
 
 
 ## 10. ResourceLimitError and UnsupportedFilterError
@@ -528,3 +533,80 @@ For `UnsupportedFilterError`:
 
 > [!WARNING]
 > The limits keep one call bounded; they do not bound a process, and nothing caps the total over many streams or files. For untrusted files, run each one in a worker or child process with its own time and memory limit.
+
+## 11. UnsupportedEncryptionError when saving a loaded document
+
+### What happens
+
+You load an encrypted PDF with its password, change it, and `save()` throws:
+
+```
+UnsupportedEncryptionError: save() would write content decrypted from an encrypted PDF without encryption; call encrypt() on this document before saving it.
+```
+
+`saveAsStream()`, `saveAsBlob()`, `saveAsBase64()`, `serializePdf()`, the writers, `saveIncremental()`, `saveDocumentIncremental()` and `sanitizePdf()` throw it too, and so does the save of a document that received pages, objects or metadata from the loaded one through `copy()`, `copyPages()`, `addPage()` with one of its pages, `mergePdfs()`, `splitPdf()` or the embed calls. `copy()` of such a document does not call the `onAfterSave` hooks of registered plugins.
+
+### Why it happens
+
+`loadPdf()` decrypts the objects of the file with the password, so the document holds plaintext. The library does not write that plaintext without protection by accident: there is no silent plaintext save and no option that turns the check off.
+
+### How to fix it
+
+Call `encrypt()` on the document you save, with the passwords and algorithm you want for the output, then `save()`:
+
+```ts
+import { loadPdf } from 'modern-pdf-lib';
+import { readFile } from 'node:fs/promises';
+
+const bytes = new Uint8Array(await readFile('protected.pdf'));
+const doc = await loadPdf(bytes, { password: 'old-password' });
+
+await doc.encrypt({ userPassword: 'new-user', ownerPassword: 'new-owner', algorithm: 'aes-256' });
+const saved = await doc.save();
+```
+
+The result is a new encryption of the decrypted objects, not a byte copy: strings that hold bytes above 0x7F are rewritten on save until 0.41.0. The re-encrypted document does not keep the permissions of the source: without a `permissions` argument `encrypt()` denies every permission (measured with qpdf 12.4.2: `/P` -3904, all denied, for a source that allowed everything). Pass them to grant some, for example `permissions: { printing: true, copying: true }`. The save rule covers what the library writes; it does not cover content you read from the document and feed back, or content the library derives from it, such as extracted text.
+
+For a merge or a copy, call `encrypt()` on the target document. After `encrypt()`, `save()`, `saveAsBlob()`, `saveAsBase64()`, `serializePdf()` and `PdfWriter` write the document encrypted; `saveAsStream()`, `PdfStreamWriter`, `saveIncremental()` and `saveDocumentIncremental()` stay refused because they cannot encrypt, so use `save()`. A load with `{ ignoreEncryption: true }` is a different case: its streams are written as loaded. The full rules are in [Loading and saving encrypted documents](./security.md#loading-and-saving-encrypted-documents).
+
+The same error type is thrown on load, instead of returning data that is still encrypted, for a security handler other than Standard, an unknown `/V` or crypt filter method, a crypt filter name the file does not define, an `/Encrypt` dictionary that cannot be honoured, and damaged AES data. No password fixes those files.
+
+## 12. ModernPdfLibWarning: MPL_LEGACY_R6_KEY and MPL_IGNORED_OPTION
+
+### What happens
+
+Node prints a warning of type `ModernPdfLibWarning` once per process, for example:
+
+```
+(node:1234) [MPL_LEGACY_R6_KEY] ModernPdfLibWarning: The AES-256 key of this document was derived the way modern-pdf-lib 0.26.0 to 0.40.8 wrote it, which other PDF software does not accept. Call encrypt() and save to write it with the standard derivation.
+(node:1234) [MPL_IGNORED_OPTION] ModernPdfLibWarning: `embedFont()`: the option `features` has no effect in this version.
+```
+
+### Why it happens
+
+- **`MPL_LEGACY_R6_KEY`:** the file is AES-256 and was written by modern-pdf-lib 0.26.0 to 0.40.8, whose password hash deviates from ISO 32000-2 Algorithm 2.B. The file opens with its passwords, but qpdf and pdf.js do not open it. The warning is emitted once per process, however many such files you load.
+- **`MPL_IGNORED_OPTION`:** you passed an option that the function accepts and does not act on in this version. The message names the function and the option, never the value. Each option warns once per process. The options are: `signPdf` (`timestampUrl`, `contactInfo`, and `reason` and `location` unless a visible appearance shows them), `setCertificationLevel()`, `addFieldLock()`, `verifySignatureDetailed` (`timeout`, a non-empty `trustedCerts`), `validateCertificateChain` (`checkRevocation: true`), `saveIncrementalWithSignaturePreservation` and `appendIncrementalUpdate` (`compress: true`), `saveIncremental` (`objectStreamThreshold`, `useWasm: true`), `saveAsStream` (a finite `objectStreamThreshold`), `embedFont` (`subset: false`, `features`), `StreamingPdfParser` (`parseContentStreams: true`), `optimizeAllImages` (`maxDpi`), `metadataPlugin` (`creator`, `defaultTitle`, `defaultAuthor`), `applyTablePreset` (`hasHeader`), `buildPdfX6OutputIntent` (`variant`), the structure elements of the accessibility helpers (`scope`, `rowSpan`), and the barcode renderers (`showText: true`, `fontSize`, `includeCheckDigit: true`, `wideToNarrowRatio`, `errorCorrection`, `columns` and `errorLevel` in the options of the `*ToOperators()` functions).
+
+### How to fix it
+
+- For `MPL_LEGACY_R6_KEY`, call `encrypt()` on the loaded document and `save()` it (see [11](#_11-unsupportedencryptionerror-when-saving-a-loaded-document)). The new file uses the standard derivation.
+- For `MPL_IGNORED_OPTION`, remove the option from the call, or move it to the function that uses it (for example the encoder instead of the `*ToOperators()` renderer). The guide of the feature says what the option would have done.
+- To silence the warnings in Node, start the process with `--disable-warning=ModernPdfLibWarning` (every warning of the library), `--disable-warning=MPL_LEGACY_R6_KEY` or `--disable-warning=MPL_IGNORED_OPTION`, or put the flag in `NODE_OPTIONS`. The library has no hook of its own for them. In a runtime without `process.emitWarning` the message goes to `console.warn`.
+
+## 13. Strict mode throws on a recovered stream
+
+### What happens
+
+`loadPdf(bytes, { throwOnInvalidObject: true })` throws a parse error for a file that loads without it:
+
+```
+PdfParseError: Failed to parse indirect object 4 0 at offset 202
+```
+
+### Why it happens
+
+The `/Length` of a stream can be wrong, missing, or an indirect reference defined later in the file. A lenient load does not drop such a stream: when the declared length does not end at `endstream`, the data ends at the first `endstream` (or `endobj`), less at most one end-of-line marker. An indirect `/Length` is resolved even when its object comes later in the file. Strict mode treats a recovered stream as a malformed object and throws. A lenient load emits no warning for a recovered stream.
+
+### How to fix it
+
+Use strict mode only to detect a malformed file. To read the file, load it without `throwOnInvalidObject` (the default). A well-formed file, where `/Length` is correct and followed by `endstream`, loads in both modes with the same stream data.

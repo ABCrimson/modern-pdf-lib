@@ -32,13 +32,13 @@ const pdfBytes = await readFile('document.pdf');
 const signedPdf = await signPdf(pdfBytes, 'Signature1', {
   certificate,
   privateKey,
-  reason: 'Document approval',
-  location: 'New York, NY',
   hashAlgorithm: 'SHA-256',
 });
 
 await writeFile('document-signed.pdf', signedPdf);
 ```
+
+The signature dictionary does not carry `reason`, `location` or `contactInfo`. `reason` and `location` appear only in the text of a visible signature whose `appearance` has no `text` of its own (see below); `contactInfo` appears nowhere. Passing one of them anywhere else has no effect in this version and emits one `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`) per option and process.
 
 ### Visible Signature
 
@@ -271,7 +271,7 @@ try {
 
 The CMS signature of the token and the TSA certificate are not verified in this release. `signingTime` is the time written in the token; check the token yourself before relying on it as proof of time. The time a signer claims inside its own signature (`signingTime` on a verification result, `signingDate` on `verifySignatures()`) is not a timestamp: nothing attests it.
 
-The `timestampUrl` field of the `signPdf()` options is accepted by the type, but `signPdf()` does not read it: it does not request or embed a timestamp. A token from `requestTimestamp()` is not attached to a signature for you.
+The `timestampUrl` field of the `signPdf()` options has no effect in this version: `signPdf()` does not request or embed a timestamp, and passing the field emits one `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`) per process. A token from `requestTimestamp()` is not attached to a signature for you.
 
 ## Key Preparation
 

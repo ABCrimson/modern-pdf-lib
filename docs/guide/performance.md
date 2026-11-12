@@ -55,11 +55,7 @@ const bytes = await pdf.save();
 
 ### Disabling Subsetting
 
-In rare cases, such as PDF form templates where users may enter arbitrary text at view time, embed the full font:
-
-```ts
-const font = await pdf.embedFont(fontBytes, { subset: false });
-```
+Subsetting cannot be turned off in this version. `embedFont()` accepts `{ subset: false }`, but a TrueType font is subset at save time whatever the option says, so the full font is not embedded. Passing `subset: false` emits one `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`) per process; the `features` option has no effect and warns the same way. Silence the warnings in Node with `--disable-warning=ModernPdfLibWarning`.
 
 > [!NOTE]
 > Standard 14 PDF fonts (Helvetica, Times Roman, Courier, etc.) never require embedding or subsetting. They are built into every PDF viewer and add zero bytes to the output. Use them when Unicode support is not needed.
@@ -465,7 +461,7 @@ The benchmarks report timings; no assertion or CI job enforces a time target.
 
 | Optimization | When to Use | Impact |
 |:---|:---|:---|
-| Font subsetting (default) | Always (disable only for form templates) | Smaller embedded fonts |
+| Font subsetting (always on) | Nothing to do; it cannot be disabled | Smaller embedded fonts |
 | Compression level tuning | Adjust based on speed vs. size priority | Level 1 to 9 trade-off |
 | Streaming output | 50+ pages, HTTP responses, edge runtimes | No single output buffer |
 | Batch embedding | Multi-page docs with shared fonts/images | Avoid duplicate data |

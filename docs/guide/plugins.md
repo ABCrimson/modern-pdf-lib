@@ -57,7 +57,7 @@ doc.use(metadataPlugin({
 }));
 ```
 
-`MetadataPluginOptions` also declares `creator`, `defaultTitle` and `defaultAuthor`, but the plugin does not apply them; only `producer` takes effect. Because the producer is set again in `onBeforeSave`, a producer set on the document after `.use()` is overwritten at save.
+`MetadataPluginOptions` also declares `creator`, `defaultTitle` and `defaultAuthor`, but the plugin does not apply them; only `producer` takes effect. Passing one of the three emits one `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`) per option and process. Because the producer is set again in `onBeforeSave`, a producer set on the document after `.use()` is overwritten at save.
 
 ### accessibilityPlugin
 

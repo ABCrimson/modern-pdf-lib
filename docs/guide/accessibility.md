@@ -152,7 +152,7 @@ PDF/UA (ISO 14289) defines requirements for universally accessible PDFs. The lib
 | Structure tags (headings, paragraphs, lists) | Supported | `tagHeading` / `tagParagraph` / `tagList` — see [Tagged PDF](#tagged-pdf-structure-trees) |
 | Alt text on images | Supported | `tagFigure(tree, parent, altText)` writes `/Figure` + `/Alt` |
 | Reading order tags | Supported | Structure-tree order defines logical reading order |
-| Table headers marked | Supported | `tagTableHeaderCell` writes `TH` with `/Scope` |
+| Table headers marked | Partial | `tagTableHeaderCell` writes a `TH` element; its scope is not written as an attribute |
 | Validation | Supported | `validatePdfUa` (UA-1), `validatePdfUa2` (UA-2), `checkAccessibility` |
 
 <!-- capabilities:end -->
@@ -194,12 +194,14 @@ tagFigure(tree, null, 'Revenue chart 2026');              // Figure with /Alt
 const list = tagList(tree, null, 'Decimal');
 const { item, label, body } = tagListItem(tree, list);    // LI → Lbl + LBody
 
-// Tables with header scope + cell spans
+// Tables with header and data cells
 const table = tagTable(tree, null);
 const row = tagTableRow(tree, table);
-tagTableHeaderCell(tree, row, 'Column');                  // TH /Scope /Column
+tagTableHeaderCell(tree, row);                            // TH
 tagTableDataCell(tree, row, { colSpan: 2 });              // TD
 ```
+
+A scope passed to `tagTableHeaderCell()` (`Row`, `Column` or `Both`), and the `scope` and `rowSpan` element options, have no effect in this version: no attribute dictionary is written, and passing one emits one `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`) per option and process.
 
 The helpers create structure elements only; they do not link an element to page content. Each element that holds page content must own marked content (an MCID) on that page: assign one with `tree.assignMcid()` and draw the content between `beginMarkedContent()` and `endMarkedContentSequence()`:
 

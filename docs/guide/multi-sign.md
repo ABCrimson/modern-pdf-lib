@@ -18,16 +18,15 @@ import {
   addCounterSignature,
   embedLtvData,
   hasLtvData,
-  setCertificationLevel,
   getCertificationLevel,
-  MdpPermission,
-  addFieldLock,
   getFieldLocks,
   validateSignatureChain,
   detectModifications,
   optimizeIncrementalSave,
 } from 'modern-pdf-lib';
 ```
+
+In this version `signPdf()` writes no DocMDP certification and no `/Lock` dictionary. `setCertificationLevel()` and `addFieldLock()` have no effect: each emits one `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`) per process, and the signature that follows carries no certification level and no locked fields. `getCertificationLevel()` and `getFieldLocks()` read what files from other producers hold. The `reason`, `location` and `contactInfo` options are not written into the signature dictionary either (see the [signature guide](./signatures.md)), so the signatures below set them only where a visible appearance shows them.
 
 You will also need DER-encoded X.509 certificates and PKCS#8 private keys for each signer. These can be loaded from PEM files by stripping headers and base64-decoding.
 
@@ -52,46 +51,26 @@ const contractPdf = await doc.save();
 
 ### 2. Signer A Signs the Contract
 
-The first signer typically certifies the document, setting the MDP (Modification Detection and Prevention) level to control what subsequent signers can do.
+The first signer signs the contract with a visible signature:
 
 ```ts
 const signerAOptions = {
   certificate: signerACert,
   privateKey: signerAKey,
-  reason: 'Approval of terms',
-  location: 'New York, NY',
   appearance: {
     rect: [50, 50, 200, 80],
     text: ['Signed by: Alice Smith', 'Role: Authorized Representative'],
   },
 };
 
-// Certify with MDP level 2 (allow form filling and signing).
-// setCertificationLevel mutates the sign options in place.
-setCertificationLevel(signerAOptions, MdpPermission.FormFillAndSign);
-
-// Sign the certified document
 const signerAPdf = await signPdf(contractPdf, 'SignerA', signerAOptions);
 ```
 
-### 3. Lock Specific Fields (Optional)
+This signature is not a certification signature: `signPdf()` has no option that writes a DocMDP level (see [MDP Permission Levels](#mdp-permission-levels)).
 
-To lock specific form fields when a signature is applied, attach a field lock to
-the sign options *before* signing. `addFieldLock` mutates the options in place.
+### 3. Field Locks
 
-```ts
-const lockingOptions = {
-  certificate: signerACert,
-  privateKey: signerAKey,
-  reason: 'Approval of terms',
-};
-addFieldLock(lockingOptions, {
-  action: 'Include',
-  fields: ['ContractAmount', 'EffectiveDate'],
-});
-
-const lockedPdf = await signPdf(contractPdf, 'SignerA', lockingOptions);
-```
+`signPdf()` writes no `/Lock` dictionary, so a signature cannot lock form fields in this version. `addFieldLock()` stores the lock on the sign options and nothing reads it (see [Field Locking](#field-locking)). Fields stay editable after the signature, and `detectModifications()` reports changes made after it.
 
 ### 4. Signer B Counter-Signs
 
@@ -115,8 +94,6 @@ Alternatively, Signer B can add their own independent signature:
 const signerBPdf = await signPdf(counterSignedPdf, 'SignerB', {
   certificate: signerBCert,
   privateKey: signerBKey,
-  reason: 'Acceptance of terms',
-  location: 'San Francisco, CA',
   appearance: {
     rect: [300, 50, 200, 80],
     text: ['Signed by: Bob Jones', 'Role: Client'],
@@ -124,16 +101,14 @@ const signerBPdf = await signPdf(counterSignedPdf, 'SignerB', {
 });
 ```
 
-### 5. Notary Certifies
+### 5. Notary Signs
 
-A notary can add a final certification signature:
+A notary can add a final signature:
 
 ```ts
 const notarizedPdf = await signPdf(signerBPdf, 'Notary', {
   certificate: notaryCert,
   privateKey: notaryKey,
-  reason: 'Notarization',
-  location: 'County Clerk Office',
   appearance: {
     rect: [50, 150, 200, 80],
     text: ['Notarized by: Carol Williams', 'Commission #12345'],
@@ -164,7 +139,9 @@ console.log('Has LTV data:', hasLtvData(archivedPdf));
 
 ## MDP Permission Levels
 
-The MDP (Modification Detection and Prevention) system controls what changes are allowed after a certification signature.
+The MDP (Modification Detection and Prevention) system of ISO 32000 controls what changes are allowed after a certification signature. `signPdf()` does not write one in this version, so a signature made here carries no level. `setCertificationLevel()` has no effect: it stores the level on the options object, nothing reads it, and it emits one `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`) per process.
+
+The levels, as they appear in files from other producers:
 
 | Level | Constant | Allowed Changes |
 |-------|----------|-----------------|
@@ -172,45 +149,24 @@ The MDP (Modification Detection and Prevention) system controls what changes are
 | 2 | `MdpPermission.FormFillAndSign` | Form filling and additional signatures |
 | 3 | `MdpPermission.FormFillSignAnnotate` | Annotations, form filling, and signatures |
 
-`detectModifications()` reports a signature added after the certification as an `unknown` violation, so at levels 2 and 3 it returns `isCompliant: false` for it; see [Check MDP Compliance](#check-mdp-compliance).
+`detectModifications()` reports a signature added after a certification as an `unknown` violation, so at levels 2 and 3 it returns `isCompliant: false` for it; see [Check MDP Compliance](#check-mdp-compliance).
 
 ```ts
-// Set the certification level on the sign options (mutated in place)
-// before applying the first signature.
-const options = { certificate: certDer, privateKey: keyDer };
-setCertificationLevel(options, MdpPermission.FormFillAndSign);
-const certified = await signPdf(pdfBytes, 'CertSig', options);
-
-// Read the current certification level from the signed PDF
-const level = getCertificationLevel(certified);
-// level === MdpPermission.FormFillAndSign
+// Read the certification level of a PDF that carries a DocMDP signature
+const level = getCertificationLevel(certifiedPdfBytes);
+// level is an MdpPermission, or undefined when the file has no certification
 ```
 
 ---
 
 ## Field Locking
 
-Lock form fields after signing to prevent tampering:
+`signPdf()` writes no `/Lock` dictionary in this version. `addFieldLock()` validates its arguments, stores the lock on the options object, and emits one `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`) per process; nothing reads the stored lock, so no field is locked.
+
+To read the field locks of a file that has them:
 
 ```ts
-// Lock specific fields: attach the lock to the sign options before signing
-const lockOptions = { certificate: certDer, privateKey: keyDer };
-addFieldLock(lockOptions, {
-  action: 'Include',
-  fields: ['Amount', 'Date', 'Terms'],
-});
-const locked = await signPdf(pdfBytes, 'SignerA', lockOptions);
-
-// Lock all fields except specified ones
-const partialLockOptions = { certificate: certDer, privateKey: keyDer };
-addFieldLock(partialLockOptions, {
-  action: 'Exclude',
-  fields: ['Comments'], // only Comments remains editable
-});
-const partialLock = await signPdf(pdfBytes, 'SignerB', partialLockOptions);
-
-// Read existing field locks
-const locks = getFieldLocks(locked);
+const locks = getFieldLocks(signedPdfBytes);
 for (const lock of locks) {
   console.log(`Signature "${lock.signatureFieldName}" locks: ${lock.lockedFields.join(', ')}`);
 }
