@@ -1,0 +1,268 @@
+{
+  "$comment": [
+    "Day-one verdicts of the conformance oracles (veraPDF 1.31.221, the development build the workflow pins, with the same verdicts as release 1.30.4; pyHanko 0.38.1), measured on 2026-11-11, read by scripts/conformance/summarize.ts.",
+    "Keys: <file>#<flavour> for veraPDF, <file> for pyHanko. failed: veraPDF rules as <clause>-<test>, or the pyHanko checks named in summarize.ts.",
+    "ids: open ids of audit/open-highs.json, or unfiled:<slug> keys for findings that have no ledger id yet (described under unfiled). A fix that makes a row pass removes its expectation.",
+    "A row for a finding whose ledger id is not public is written as {\"withheld\": true} with no verdict, failures or ids; summarize.ts then reports it only as differing from expected."
+  ],
+  "schema": 1,
+  "unfiled": {
+    "unfiled:facturx-metadata": "assembleFacturX output has no catalog /Metadata stream (PDF/A-3 6.6.2.1-1).",
+    "unfiled:facturx-id": "assembleFacturX output has no trailer /ID (PDF/A-3 6.1.3-1).",
+    "unfiled:facturx-output-intent": "assembleFacturX output uses DeviceRGB without a PDF/A OutputIntent (PDF/A-3 6.2.4.3-2).",
+    "unfiled:pdfa4-file-structure": "setXmpMetadata(buildPdfA4Xmp()) + save declares PDF/A-4 in the XMP but writes a %PDF-1.7 header, a trailer /Info dictionary, no trailer /ID and no OutputIntent (PDF/A-4 6.1.2-1, 6.1.3-1, 6.1.3-4, 6.1.3-5, 6.2.4.3-2).",
+    "unfiled:drawtext-default-font": "page.drawText without a font writes \"/F1 24 Tf\" with no /Font entry in the page /Resources (PDF/A-4 6.2.2-3).",
+    "unfiled:pdfua-metadata": "enforcePdfUa output has no catalog /Metadata stream (PDF/UA-1 7.1-8, PDF/UA-2 8.11.1-2).",
+    "unfiled:incremental-prior-revision": "pyHanko cannot read the earlier revision of a file that embedLtvData, a second signPdf or addCounterSignature updated ('Encountered unexpected non-dictionary object in prior revision'), so the first signature does not validate."
+  },
+  "verapdf": {
+    "enforcePdfA-1a.pdf#1a": {
+      "verdict": "parse-failure",
+      "failed": [],
+      "ids": ["compliance-07", "docs-guide-2-33"]
+    },
+    "enforcePdfA-1b.pdf#1b": {
+      "verdict": "parse-failure",
+      "failed": [],
+      "ids": ["compliance-07", "docs-guide-2-33"]
+    },
+    "enforcePdfA-2a.pdf#2a": {
+      "verdict": "parse-failure",
+      "failed": [],
+      "ids": ["compliance-07", "docs-guide-2-33"]
+    },
+    "enforcePdfA-2b.pdf#2b": {
+      "verdict": "parse-failure",
+      "failed": [],
+      "ids": ["compliance-07", "docs-guide-2-33"]
+    },
+    "enforcePdfA-2u.pdf#2u": {
+      "verdict": "parse-failure",
+      "failed": [],
+      "ids": ["compliance-07", "docs-guide-2-33"]
+    },
+    "enforcePdfA-3a.pdf#3a": {
+      "verdict": "parse-failure",
+      "failed": [],
+      "ids": ["compliance-07", "docs-guide-2-33"]
+    },
+    "enforcePdfA-3b.pdf#3b": {
+      "verdict": "parse-failure",
+      "failed": [],
+      "ids": ["compliance-07", "docs-guide-2-33"]
+    },
+    "enforcePdfA-3u.pdf#3u": {
+      "verdict": "parse-failure",
+      "failed": [],
+      "ids": ["compliance-07", "docs-guide-2-33"]
+    },
+    "enforcePdfAFull-1a.pdf#1a": {
+      "verdict": "parse-failure",
+      "failed": [],
+      "ids": [
+        "compliance-07",
+        "tests-unit-compliance-03",
+        "tests-suites-compliance-barcode-browser-M01"
+      ]
+    },
+    "enforcePdfAFull-1b.pdf#1b": {
+      "verdict": "parse-failure",
+      "failed": [],
+      "ids": [
+        "compliance-07",
+        "tests-unit-compliance-03",
+        "tests-suites-compliance-barcode-browser-M01"
+      ]
+    },
+    "enforcePdfAFull-2a.pdf#2a": {
+      "verdict": "parse-failure",
+      "failed": [],
+      "ids": [
+        "compliance-07",
+        "tests-unit-compliance-03",
+        "tests-suites-compliance-barcode-browser-M01"
+      ]
+    },
+    "enforcePdfAFull-2b.pdf#2b": {
+      "verdict": "parse-failure",
+      "failed": [],
+      "ids": [
+        "compliance-07",
+        "tests-unit-compliance-03",
+        "tests-suites-compliance-barcode-browser-M01"
+      ]
+    },
+    "enforcePdfAFull-2u.pdf#2u": {
+      "verdict": "parse-failure",
+      "failed": [],
+      "ids": [
+        "compliance-07",
+        "tests-unit-compliance-03",
+        "tests-suites-compliance-barcode-browser-M01"
+      ]
+    },
+    "enforcePdfAFull-3a.pdf#3a": {
+      "verdict": "parse-failure",
+      "failed": [],
+      "ids": [
+        "compliance-07",
+        "tests-unit-compliance-03",
+        "tests-suites-compliance-barcode-browser-M01"
+      ]
+    },
+    "enforcePdfAFull-3b.pdf#3b": {
+      "verdict": "parse-failure",
+      "failed": [],
+      "ids": [
+        "compliance-07",
+        "tests-unit-compliance-03",
+        "tests-suites-compliance-barcode-browser-M01"
+      ]
+    },
+    "enforcePdfAFull-3u.pdf#3u": {
+      "verdict": "parse-failure",
+      "failed": [],
+      "ids": [
+        "compliance-07",
+        "tests-unit-compliance-03",
+        "tests-suites-compliance-barcode-browser-M01"
+      ]
+    },
+    "enforcePdfAFull-softmask-1b.pdf#1b": {
+      "verdict": "parse-failure",
+      "failed": [],
+      "ids": [
+        "compliance-07",
+        "tests-unit-compliance-03",
+        "tests-suites-compliance-barcode-browser-M01",
+        "compliance-06",
+        "tests-unit-compliance-02"
+      ],
+      "note": "The parse failure hides the transparency flattening of the soft mask."
+    },
+    "enforcePdfUa-tagged.pdf#ua1": {
+      "verdict": "non-compliant",
+      "failed": ["7.1-3", "7.1-8"],
+      "ids": ["accessibility-metadata-01", "tests-unit-accessibility-19", "unfiled:pdfua-metadata"]
+    },
+    "enforcePdfUa-tagged.pdf#ua2": {
+      "verdict": "non-compliant",
+      "failed": [
+        "6.1-1",
+        "8.11.1-2",
+        "8.2.2-1",
+        "8.2.5.2-1",
+        "Table 5. StructTreeRoot-Document-1",
+        "Table 5. StructTreeRoot-Hn-1",
+        "Table 5. StructTreeRoot-P-1"
+      ],
+      "ids": [
+        "accessibility-metadata-23",
+        "accessibility-metadata-01",
+        "tests-unit-accessibility-19",
+        "unfiled:pdfua-metadata"
+      ]
+    },
+    "enforcePdfUa-untagged.pdf#ua1": {
+      "verdict": "non-compliant",
+      "failed": ["7.1-3", "7.1-8"],
+      "ids": ["unfiled:pdfua-metadata"],
+      "note": "7.1-3: the page content is untagged by design of the input."
+    },
+    "enforcePdfUa-untagged.pdf#ua2": {
+      "verdict": "non-compliant",
+      "failed": ["6.1-1", "8.11.1-2", "8.2.2-1", "8.2.5.2-1", "Table 5. StructTreeRoot-Document-1"],
+      "ids": ["accessibility-metadata-23", "unfiled:pdfua-metadata"],
+      "note": "8.2.2-1: the page content is untagged by design of the input."
+    },
+    "facturx-en16931.pdf#3b": {
+      "verdict": "non-compliant",
+      "failed": ["6.1.3-1", "6.2.4.3-2", "6.6.2.1-1", "6.8-1"],
+      "ids": [
+        "compliance-01",
+        "unfiled:facturx-metadata",
+        "unfiled:facturx-id",
+        "unfiled:facturx-output-intent"
+      ]
+    },
+    "pdfa4.pdf#4": {
+      "verdict": "non-compliant",
+      "failed": ["6.1.2-1", "6.1.3-1", "6.1.3-4", "6.1.3-5", "6.2.2-3", "6.2.4.3-2"],
+      "ids": ["unfiled:pdfa4-file-structure", "unfiled:drawtext-default-font"]
+    },
+    "pdfa4e.pdf#4e": {
+      "verdict": "non-compliant",
+      "failed": ["6.1.2-1", "6.1.3-1", "6.1.3-4", "6.1.3-5", "6.2.2-3", "6.2.4.3-2"],
+      "ids": ["unfiled:pdfa4-file-structure", "unfiled:drawtext-default-font"]
+    },
+    "pdfa4f.pdf#4f": {
+      "verdict": "non-compliant",
+      "failed": ["6.1.2-1", "6.1.3-1", "6.1.3-4", "6.1.3-5", "6.2.2-3", "6.2.4.3-2", "6.9-5"],
+      "ids": ["unfiled:pdfa4-file-structure", "unfiled:drawtext-default-font"],
+      "note": "6.9-5: the input embeds no file, which PDF/A-4f requires."
+    },
+    "plain.pdf#2b": {
+      "verdict": "non-compliant",
+      "failed": ["6.1.3-1", "6.2.4.3-2", "6.6.2.1-1"],
+      "ids": [],
+      "note": "Control: createPdf + save is not a PDF/A writer."
+    }
+  },
+  "pyhanko": {
+    "sign-certified-docmdp.pdf": {
+      "verdict": "no-signature-found",
+      "failed": ["field-not-in-acroform", "no-docmdp"],
+      "ids": ["signature-cms-10", "signature-pki-09"]
+    },
+    "sign-countersignature.pdf": {
+      "verdict": "no-signature-found",
+      "failed": ["extra-signature-field", "field-not-in-acroform", "field-scan-invalid"],
+      "ids": ["signature-cms-10", "signature-cms-47", "unfiled:incremental-prior-revision"]
+    },
+    "sign-field-lock.pdf": {
+      "verdict": "no-signature-found",
+      "failed": ["field-not-in-acroform", "no-fieldmdp"],
+      "ids": ["signature-cms-10", "signature-pki-10"]
+    },
+    "sign-invisible-sha256.pdf": {
+      "verdict": "no-signature-found",
+      "failed": ["field-not-in-acroform"],
+      "ids": ["signature-cms-10"]
+    },
+    "sign-invisible-sha384.pdf": {
+      "verdict": "no-signature-found",
+      "failed": ["field-not-in-acroform"],
+      "ids": ["signature-cms-10"]
+    },
+    "sign-invisible-sha512.pdf": {
+      "verdict": "no-signature-found",
+      "failed": ["field-not-in-acroform"],
+      "ids": ["signature-cms-10"]
+    },
+    "sign-ltv.pdf": {
+      "verdict": "no-signature-found",
+      "failed": ["field-not-in-acroform", "field-scan-invalid", "no-dss"],
+      "ids": ["signature-cms-10", "signature-cms-63", "unfiled:incremental-prior-revision"]
+    },
+    "sign-reason-location-contact.pdf": {
+      "verdict": "no-signature-found",
+      "failed": ["field-not-in-acroform", "no-reason-location-contact"],
+      "ids": ["signature-cms-10", "signature-cms-09"]
+    },
+    "sign-second-signature.pdf": {
+      "verdict": "no-signature-found",
+      "failed": ["field-not-in-acroform", "field-scan-invalid"],
+      "ids": ["signature-cms-10", "unfiled:incremental-prior-revision"]
+    },
+    "sign-visible-page0.pdf": {
+      "verdict": "no-signature-found",
+      "failed": ["field-not-in-acroform", "widget-not-on-page-0"],
+      "ids": ["signature-cms-10", "docs-guide-3-03"]
+    },
+    "sign-visible-page1.pdf": {
+      "verdict": "no-signature-found",
+      "failed": ["field-not-in-acroform", "widget-not-on-page-1"],
+      "ids": ["signature-cms-10", "docs-guide-3-03"]
+    }
+  }
+}

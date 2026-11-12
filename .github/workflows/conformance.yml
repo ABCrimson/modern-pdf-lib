@@ -1,0 +1,206 @@
+# Conformance oracles: veraPDF (PDF/A, PDF/UA) and pyHanko (signatures) judge ordinary outputs of
+# the public writers, nightly, on version tags and on demand.
+#
+# Report-only. The workflow never runs on pull requests, no required status check names its jobs,
+# and release.yml does not wait for it, so it can neither block a merge nor delay a publish. A
+# tool's exit code never decides a job: veraPDF exits 1 for a non-compliant file and 7 for a file it
+# cannot parse, and pyHanko exits 0 when it finds no signature. scripts/verapdf-validate.ts ignores
+# veraPDF's exit code and scripts/conformance/hanko-report.py runs with continue-on-error; both feed
+# scripts/conformance/summarize.ts, which compares every row with scripts/conformance/expected.json
+# (as expected, better, worse) and exits 1 only when it finds no report at all, so a broken harness
+# (a failed download, an install that wrote nothing) turns the job red and a verdict never does.
+# The gates turn blocking later: G-HANKO in 0.45.0, G-VERA in 0.46.0 (moved into ci.yml's PR set
+# with expected.json as assertions).
+#
+# Budget (estimate until the first hosted runs): about 2.5-3 min wall (generate about 1 min, then
+# the veraPDF and pyHanko jobs in parallel, about 1.5 min each), about 3.5 runner-minutes a night;
+# the release checklist holds it under 5 min.
+#
+# Pins: every download has a version variable and a SHA-256 checked with `sha256sum -c -` before
+# use; the variables of one tool move together. veraPDF is the newest build on any channel that
+# completes the pipeline, today a development build (software.verapdf.org/dev/, newer than the
+# newest release under /releases/); it publishes a PGP signature and no checksum, so VERAPDF_SHA256
+# was computed from the downloaded installer. The Temurin JRE is the newest build
+# on any channel that veraPDF was tested on; Adoptium prunes old EA builds, so the freshness sweep
+# moves JRE_RELEASE, JRE_ASSET and JRE_SHA256 together. Python 3.14 is held below the newest line for
+# wheel coverage (.peak-modern-holds.json); the pyHanko closure is hash-pinned in
+# .github/conformance/pyhanko-requirements.txt.
+#
+# Actions keep ci.yml's convention. First-party actions, from GitHub's own actions organisation
+# (actions/checkout, actions/setup-python, actions/upload-artifact, actions/download-artifact), are
+# pinned by exact version tag. Third-party actions (pnpm/setup) are pinned by commit SHA with the
+# version in a comment. A bump in ci.yml moves the same action here in the same commit.
+
+name: Conformance
+
+on:
+  schedule:
+    - cron: '17 3 * * *'
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+concurrency:
+  group: conformance-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  generate:
+    name: Generate inputs
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: pnpm/setup@fa36a5ef7dcdefc3a7cb25655c122e00cf6e636e # v3.1.2
+        with:
+          runtime: node@26
+          cache: true
+          require-lockfile: true
+
+      # Public barrel from src through tsx: no build, no dist, no WASM artifacts.
+      - name: Generate the conformance inputs
+        run: pnpm exec tsx scripts/conformance/generate.ts --out "$RUNNER_TEMP/conformance"
+
+      - name: Upload inputs
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: conformance-inputs
+          path: ${{ runner.temp }}/conformance
+          retention-days: 7
+          if-no-files-found: error
+
+  verapdf:
+    name: veraPDF
+    needs: generate
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+
+      # Node 26 runs the TypeScript wrapper and summarize.ts through its type stripping.
+      - uses: pnpm/setup@fa36a5ef7dcdefc3a7cb25655c122e00cf6e636e # v3.1.2
+        with:
+          runtime: node@26
+          cache: true
+          require-lockfile: true
+
+      - name: Download inputs
+        uses: actions/download-artifact@v8.0.2
+        with:
+          name: conformance-inputs
+          path: ${{ runner.temp }}/conformance
+
+      - name: Install the Temurin JRE
+        env:
+          GH_TOKEN: ${{ github.token }}
+          JRE_RELEASE: jdk-28+23-ea-beta
+          JRE_ASSET: OpenJDK-jre_x64_linux_hotspot_28_23-ea.tar.gz
+          JRE_SHA256: b95395db6acc6aa4ff46495b0c58814356676787d2f50f64dbfed77d76ae9523
+        run: |
+          mkdir -p "$RUNNER_TEMP/jre-download" "$RUNNER_TEMP/jre"
+          cd "$RUNNER_TEMP/jre-download"
+          gh release download "$JRE_RELEASE" -R adoptium/temurin28-binaries -p "$JRE_ASSET"
+          echo "$JRE_SHA256  $JRE_ASSET" | sha256sum -c -
+          tar -xzf "$JRE_ASSET" -C "$RUNNER_TEMP/jre" --strip-components=1
+          "$RUNNER_TEMP/jre/bin/java" -version
+          echo "JAVA_HOME=$RUNNER_TEMP/jre" >> "$GITHUB_ENV"
+
+      # VERAPDF_CHANNEL is `dev` for a development build, `releases` for a release; both keep one
+      # directory per minor line (dev/1.31/, releases/1.30/).
+      - name: Install veraPDF
+        env:
+          VERAPDF_CHANNEL: dev
+          VERAPDF_VERSION: 1.31.221
+          VERAPDF_SHA256: 6e3a532bf1691004504fb74c6acbf49fa30fa86317cd35fa30a90efbc8d5c4fe
+        run: |
+          mkdir -p "$RUNNER_TEMP/verapdf-download"
+          cd "$RUNNER_TEMP/verapdf-download"
+          zip="verapdf-greenfield-$VERAPDF_VERSION-installer.zip"
+          curl -fsSL --retry 3 -o "$zip" \
+            "https://software.verapdf.org/$VERAPDF_CHANNEL/${VERAPDF_VERSION%.*}/$zip"
+          echo "$VERAPDF_SHA256  $zip" | sha256sum -c -
+          unzip -q "$zip"
+          sed "s|@INSTALL_PATH@|$RUNNER_TEMP/verapdf|" \
+            "$GITHUB_WORKSPACE/.github/conformance/verapdf-auto-install.xml" > auto-install.xml
+          "$JAVA_HOME/bin/java" -jar \
+            "verapdf-greenfield-$VERAPDF_VERSION/verapdf-izpack-installer-$VERAPDF_VERSION.jar" \
+            auto-install.xml
+          "$RUNNER_TEMP/verapdf/verapdf" --version
+          echo "VERAPDF=$RUNNER_TEMP/verapdf/verapdf" >> "$GITHUB_ENV"
+
+      # The wrapper ignores veraPDF's exit codes (1 non-compliant, 7 parse failure) and exits with
+      # summarize.ts's code, which is 1 only when no report was written.
+      - name: Validate with veraPDF and summarize
+        run: >-
+          node scripts/verapdf-validate.ts --verapdf "$VERAPDF"
+          --manifest "$RUNNER_TEMP/conformance/manifest.json"
+          --out "$RUNNER_TEMP/verapdf-report"
+
+      - name: Upload veraPDF report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: verapdf-report
+          path: ${{ runner.temp }}/verapdf-report
+          retention-days: 30
+
+  pyhanko:
+    name: pyHanko
+    needs: generate
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+
+      # Node 26 runs summarize.ts through its type stripping.
+      - uses: pnpm/setup@fa36a5ef7dcdefc3a7cb25655c122e00cf6e636e # v3.1.2
+        with:
+          runtime: node@26
+          cache: true
+          require-lockfile: true
+
+      - name: Download inputs
+        uses: actions/download-artifact@v8.0.2
+        with:
+          name: conformance-inputs
+          path: ${{ runner.temp }}/conformance
+
+      - uses: actions/setup-python@v7.1.0
+        with:
+          python-version: '3.14.10'
+
+      - name: Install pyHanko (hash-pinned)
+        run: |
+          python -m pip install --require-hashes --only-binary :all: --no-deps \
+            -r .github/conformance/pyhanko-requirements.txt
+          python -m pip check
+          pyhanko --version
+
+      # Report-only: the verdicts are read by the next step, never from this exit code.
+      - name: Validate with pyHanko
+        continue-on-error: true
+        run: >-
+          python -I scripts/conformance/hanko-report.py
+          --manifest "$RUNNER_TEMP/conformance/manifest.json"
+          --out "$RUNNER_TEMP/pyhanko-report"
+
+      - name: Summarize
+        run: node scripts/conformance/summarize.ts pyhanko "$RUNNER_TEMP/pyhanko-report"
+
+      - name: Upload pyHanko report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: pyhanko-report
+          path: ${{ runner.temp }}/pyhanko-report
+          retention-days: 30

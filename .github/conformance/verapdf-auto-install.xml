@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+  Headless IzPack install of the veraPDF CLI for .github/workflows/conformance.yml:
+    java -jar verapdf-izpack-installer-<version>.jar <copy of this file>
+  The workflow copies this file and replaces @INSTALL_PATH@ with the install directory
+  ($RUNNER_TEMP/verapdf) before the run; the file itself never names a path.
+  Packs: GUI, batch files (the `verapdf` launcher) and validation model, as in the install
+  tested on 2026-11-11; documentation and sample plugins are left out.
+-->
+<AutomatedInstallation langpack="eng">
+  <com.izforge.izpack.panels.htmlhello.HTMLHelloPanel id="welcome"/>
+  <com.izforge.izpack.panels.target.TargetPanel id="install_dir">
+    <installpath>@INSTALL_PATH@</installpath>
+  </com.izforge.izpack.panels.target.TargetPanel>
+  <com.izforge.izpack.panels.packs.PacksPanel id="sdk_pack_select">
+    <pack index="0" name="veraPDF GUI" selected="true"/>
+    <pack index="1" name="veraPDF Batch files" selected="true"/>
+    <pack index="2" name="veraPDF Validation model" selected="true"/>
+    <pack index="3" name="veraPDF Documentation" selected="false"/>
+    <pack index="4" name="veraPDF Sample Plugins" selected="false"/>
+  </com.izforge.izpack.panels.packs.PacksPanel>
+  <com.izforge.izpack.panels.install.InstallPanel id="install"/>
+  <com.izforge.izpack.panels.finish.FinishPanel id="finish"/>
+</AutomatedInstallation>

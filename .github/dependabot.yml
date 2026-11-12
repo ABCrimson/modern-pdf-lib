@@ -64,6 +64,23 @@ updates:
       - dependencies
       - wasm
 
+  # The pyHanko closure of the conformance workflow: pyhanko.in holds the three top-level pins,
+  # pyhanko-requirements.txt the hash-pinned closure that uv compiled from it (its header names
+  # the command). One grouped PR for every bump.
+  - package-ecosystem: pip
+    directory: /.github/conformance
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 1
+    groups:
+      pyhanko:
+        patterns:
+          - '*'
+    labels:
+      - dependencies
+      - ci
+
   # rust-toolchain.toml carries the dated nightly; ci.yml and release.yml env
   # RUST_TOOLCHAIN must be bumped to the same date in that PR.
   - package-ecosystem: rust-toolchain
