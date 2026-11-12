@@ -13,6 +13,8 @@
  *            hmtx, cmap, OS/2, maxp, name, post.
  */
 
+import { assertWithinLimit } from '../../core/limits.js';
+
 // ---------------------------------------------------------------------------
 // Public interfaces
 // ---------------------------------------------------------------------------
@@ -318,6 +320,7 @@ function parseCmap(
   data: Uint8Array,
   cmapTableOffset: number,
   cmapTableLength: number,
+  numGlyphs: number,
 ): Map<number, number> {
   const view = new DataView(data.buffer, data.byteOffset + cmapTableOffset, cmapTableLength);
 
@@ -355,7 +358,7 @@ function parseCmap(
   if (format12Offset !== -1) {
     const fmt = view.getUint16(format12Offset, false);
     if (fmt === 12) {
-      return parseCmapFormat12(view, format12Offset);
+      return parseCmapFormat12(view, format12Offset, numGlyphs);
     }
   }
 
@@ -363,7 +366,7 @@ function parseCmap(
   if (format4Offset !== -1) {
     const fmt = view.getUint16(format4Offset, false);
     if (fmt === 4) {
-      return parseCmapFormat4(view, format4Offset);
+      return parseCmapFormat4(view, format4Offset, numGlyphs);
     }
   }
 
@@ -371,10 +374,10 @@ function parseCmap(
   if (fallbackOffset !== -1) {
     const fmt = view.getUint16(fallbackOffset, false);
     if (fmt === 4) {
-      return parseCmapFormat4(view, fallbackOffset);
+      return parseCmapFormat4(view, fallbackOffset, numGlyphs);
     }
     if (fmt === 12) {
-      return parseCmapFormat12(view, fallbackOffset);
+      return parseCmapFormat12(view, fallbackOffset, numGlyphs);
     }
   }
 
@@ -385,10 +388,14 @@ function parseCmap(
 /**
  * Parse cmap format 4 — segment mapping to delta values.
  *
- * This handles the BMP (codepoints 0x0000–0xFFFF).
+ * This handles the BMP (codepoints 0x0000–0xFFFF). Glyph ids at or above
+ * `numGlyphs` are not stored; the codes the segments name count toward
+ * `INTERNAL_LIMITS.maxFontCmapMappings` (0x110000), and a subtable that names
+ * more is refused with `ResourceLimitError`.
  */
-function parseCmapFormat4(view: DataView, offset: number): Map<number, number> {
+function parseCmapFormat4(view: DataView, offset: number, numGlyphs: number): Map<number, number> {
   const map = new Map<number, number>();
+  let named = 0;
 
   const segCountX2 = view.getUint16(offset + 6, false);
   const segCount = segCountX2 >> 1;
@@ -407,6 +414,12 @@ function parseCmapFormat4(view: DataView, offset: number): Map<number, number> {
     const idRangeOffset = view.getUint16(idRangeOffsetOffset + seg * 2, false);
 
     if (startCode === 0xffff) break;
+    if (endCode < startCode) continue;
+
+    // The codes a segment names count before any is stored, so overlapping segments reach the
+    // limit without a walk over every code.
+    named += endCode - startCode + 1;
+    assertWithinLimit('maxFontCmapMappings', named);
 
     for (let code = startCode; code <= endCode; code++) {
       let glyphId: number;
@@ -428,7 +441,7 @@ function parseCmapFormat4(view: DataView, offset: number): Map<number, number> {
         }
       }
 
-      if (glyphId !== 0) {
+      if (glyphId !== 0 && glyphId < numGlyphs) {
         map.set(code, glyphId);
       }
     }
@@ -439,9 +452,16 @@ function parseCmapFormat4(view: DataView, offset: number): Map<number, number> {
 
 /**
  * Parse cmap format 12 — segmented coverage (full 32-bit codepoints).
+ *
+ * Reads at most the groups that fit between the subtable's start and the end
+ * of the cmap table, ends each group at 0x10FFFF, skips a group whose start is
+ * past its end, and stores no glyph id at or above `numGlyphs`. The codes the
+ * groups name count toward `INTERNAL_LIMITS.maxFontCmapMappings` (0x110000), and
+ * a subtable that names more is refused with `ResourceLimitError`.
  */
-function parseCmapFormat12(view: DataView, offset: number): Map<number, number> {
+function parseCmapFormat12(view: DataView, offset: number, numGlyphs: number): Map<number, number> {
   const map = new Map<number, number>();
+  let named = 0;
 
   // format 12 layout:
   // offset+0:  format (uint16)  — 12
@@ -452,20 +472,27 @@ function parseCmapFormat12(view: DataView, offset: number): Map<number, number> 
   // offset+16: groups[numGroups] — each 12 bytes:
   //   startCharCode (uint32), endCharCode (uint32), startGlyphID (uint32)
 
-  const numGroups = view.getUint32(offset + 12, false);
+  const groupsThatFit = Math.max(0, Math.floor((view.byteLength - offset - 16) / 12));
+  const numGroups = Math.min(view.getUint32(offset + 12, false), groupsThatFit);
   let groupOffset = offset + 16;
 
   for (let i = 0; i < numGroups; i++) {
     const startCharCode = view.getUint32(groupOffset, false);
-    const endCharCode = view.getUint32(groupOffset + 4, false);
+    const endCharCode = Math.min(view.getUint32(groupOffset + 4, false), 0x10ffff);
     const startGlyphId = view.getUint32(groupOffset + 8, false);
+    groupOffset += 12;
+
+    if (startCharCode > endCharCode) continue;
+
+    named += endCharCode - startCharCode + 1;
+    assertWithinLimit('maxFontCmapMappings', named);
 
     for (let code = startCharCode; code <= endCharCode; code++) {
       const glyphId = startGlyphId + (code - startCharCode);
+      // Glyph ids rise with the code: none past this one is below numGlyphs.
+      if (glyphId >= numGlyphs) break;
       map.set(code, glyphId);
     }
-
-    groupOffset += 12;
   }
 
   return map;
@@ -638,7 +665,7 @@ export function extractMetrics(fontData: Uint8Array): FontMetrics {
   // Parse cmap
   const cmapEntry = tables.get('cmap');
   const cmapTable = cmapEntry
-    ? parseCmap(fontData, cmapEntry.offset, cmapEntry.length)
+    ? parseCmap(fontData, cmapEntry.offset, cmapEntry.length, numGlyphs)
     : new Map<number, number>();
 
   // Parse name table

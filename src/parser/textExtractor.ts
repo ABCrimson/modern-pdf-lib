@@ -18,7 +18,9 @@
  * @packageDocumentation
  */
 
+import { assertWithinLimit } from '../core/limits.js';
 import { PdfDict, PdfName, PdfNumber, PdfStream } from '../core/pdfObjects.js';
+import { ResourceLimitError } from '../errors.js';
 import type { ContentStreamOperator, Operand } from './contentStreamParser.js';
 
 // ---------------------------------------------------------------------------
@@ -462,31 +464,48 @@ export interface ToUnicodeCMap {
  * - `beginbfchar` / `endbfchar` — single code-to-Unicode mappings
  * - `beginbfrange` / `endbfrange` — range-based mappings
  *
+ * Each mapping written (one per bfchar entry, one per code of a bfrange, in
+ * both range forms) counts toward `INTERNAL_LIMITS.maxCMapMappings` (2^20);
+ * the codes of a range are counted before the range is written.
+ *
  * @param data - The raw CMap stream bytes (already decompressed).
  * @returns A parsed CMap.
+ * @throws {ResourceLimitError} When the CMap writes more than 1,048,576
+ *   mappings (limit `maxCMapMappings`).
  */
 export function parseToUnicodeCMap(data: Uint8Array): ToUnicodeCMap {
   const text = decodeText(data);
   const map = new Map<number, string>();
+  const written = { count: 0 };
 
   // Parse beginbfchar / endbfchar sections
-  parseBfCharSections(text, map);
+  parseBfCharSections(text, map, written);
 
   // Parse beginbfrange / endbfrange sections
-  parseBfRangeSections(text, map);
+  parseBfRangeSections(text, map, written);
 
   return { map };
 }
 
 /**
- * Parse all `beginbfchar`/`endbfchar` sections in a CMap.
+ * Parse all `beginbfchar`/`endbfchar` sections in a CMap. Sections are found
+ * with `indexOf`, so a marker without its end marker costs one scan of the rest
+ * of the text.
  */
-function parseBfCharSections(text: string, map: Map<number, string>): void {
-  const regex = /beginbfchar\s*([\s\S]*?)\s*endbfchar/g;
-  let match: RegExpExecArray | null;
+function parseBfCharSections(
+  text: string,
+  map: Map<number, string>,
+  written: { count: number },
+): void {
+  let at = 0;
 
-  while ((match = regex.exec(text)) !== null) {
-    const body = match[1]!;
+  for (;;) {
+    const begin = text.indexOf('beginbfchar', at);
+    if (begin === -1) break;
+    const end = text.indexOf('endbfchar', begin + 'beginbfchar'.length);
+    if (end === -1) break;
+    const body = text.slice(begin + 'beginbfchar'.length, end);
+    at = end + 'endbfchar'.length;
     // Each line: <srcCode> <dstString>
     const lineRegex = /<([0-9a-fA-F]+)>\s*<([0-9a-fA-F]+)>/g;
     let lineMatch: RegExpExecArray | null;
@@ -494,20 +513,32 @@ function parseBfCharSections(text: string, map: Map<number, string>): void {
     while ((lineMatch = lineRegex.exec(body)) !== null) {
       const srcCode = parseInt(lineMatch[1]!, 16);
       const dstString = hexToUnicode(lineMatch[2]!);
+      // Each mapping written counts toward INTERNAL_LIMITS.maxCMapMappings.
+      assertWithinLimit('maxCMapMappings', ++written.count);
       map.set(srcCode, dstString);
     }
   }
 }
 
 /**
- * Parse all `beginbfrange`/`endbfrange` sections in a CMap.
+ * Parse all `beginbfrange`/`endbfrange` sections in a CMap. Sections are found
+ * with `indexOf`, so a marker without its end marker costs one scan of the rest
+ * of the text.
  */
-function parseBfRangeSections(text: string, map: Map<number, string>): void {
-  const regex = /beginbfrange\s*([\s\S]*?)\s*endbfrange/g;
-  let match: RegExpExecArray | null;
+function parseBfRangeSections(
+  text: string,
+  map: Map<number, string>,
+  written: { count: number },
+): void {
+  let at = 0;
 
-  while ((match = regex.exec(text)) !== null) {
-    const body = match[1]!;
+  for (;;) {
+    const begin = text.indexOf('beginbfrange', at);
+    if (begin === -1) break;
+    const end = text.indexOf('endbfrange', begin + 'beginbfrange'.length);
+    if (end === -1) break;
+    const body = text.slice(begin + 'beginbfrange'.length, end);
+    at = end + 'endbfrange'.length;
 
     // Two forms:
     // 1. <srcLow> <srcHigh> <dstStart>
@@ -520,7 +551,13 @@ function parseBfRangeSections(text: string, map: Map<number, string>): void {
       const srcHigh = parseInt(lineMatch[2]!, 16);
 
       if (lineMatch[3]) {
-        // Form 1: sequential mapping starting at dstStart
+        // Form 1: sequential mapping starting at dstStart. The range's codes
+        // count before any is written; a range whose high code is below its
+        // low code writes nothing.
+        if (srcHigh >= srcLow) {
+          written.count += srcHigh - srcLow + 1;
+          assertWithinLimit('maxCMapMappings', written.count);
+        }
         let dstCode = parseInt(lineMatch[3], 16);
         for (let code = srcLow; code <= srcHigh; code++) {
           map.set(code, codePointToString(dstCode));
@@ -533,6 +570,7 @@ function parseBfRangeSections(text: string, map: Map<number, string>): void {
         let code = srcLow;
 
         while ((arrMatch = arrRegex.exec(lineMatch[4])) !== null && code <= srcHigh) {
+          assertWithinLimit('maxCMapMappings', ++written.count);
           map.set(code, hexToUnicode(arrMatch[1]!));
           code++;
         }
@@ -756,7 +794,9 @@ class TextState {
         try {
           const cmap = parseToUnicodeCMap(toUnicode.data);
           this.cmapCache.set(name, cmap);
-        } catch {
+        } catch (error) {
+          // A limit error is never read as "no CMap"; any other error is.
+          if (error instanceof ResourceLimitError) throw error;
           this.cmapCache.set(name, null);
         }
       }
