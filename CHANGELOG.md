@@ -5,6 +5,64 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 See [VERSIONING.md](./VERSIONING.md) for this project's versioning policy.
 
+## [0.40.7] - 2026-11-15
+
+**Conformant Flate.** The library now writes and reads conformant Flate data. Every stream it compresses under `/FlateDecode` is zlib data (RFC 1950), as ISO 32000 requires: for the documents the oracle tests build, the default output passes `qpdf --check`, except where a known-defect marker records another open defect, and pdf.js reads their text. Until now it wrote raw DEFLATE data without the zlib wrapper. On read it takes zlib data, which is what other producers write, and still reads the raw DEFLATE data of files written by earlier versions. No export is added, removed or changed. Read Compatibility before you mix 0.40.7 output with earlier versions of this library.
+
+### API
+
+<!-- api-diff:begin -->
+```
+No export added, removed or changed.
+```
+<!-- api-diff:end -->
+
+### Fixed
+
+- **Compressed streams are zlib data:** `save()`, `saveAsStream()`, `saveAsBlob()` and `saveAsBase64()`, with the default `compress: true`, and `saveDocumentIncremental()` and `saveIncremental()` for the streams they write, now write every `/FlateDecode` stream, object streams and cross-reference streams (`objectStreamThreshold`) included, as zlib data that node:zlib `inflateSync` (which checks the Adler-32 trailer) accepts. `tests/oracle/flate-header.test.ts` checks each output kind with node:zlib and `qpdf --check`, and pdf.js reads the text back.
+- **Cross-reference streams and object streams of other producers:** PDFs whose cross-reference streams and object streams hold zlib data now load through their cross-reference stream, without the recovery scan. In the corpus, `irs-fw4.pdf`, `irs-fw9.pdf`, `irs-p1-chinese.pdf`, `qpdf-objstm-xref.pdf` and `qpdf-signed.pdf` now load; they did not load before. Cross-reference streams and object streams are read with `/FlateDecode` only, zlib or raw DEFLATE; a stream with any other filter, or with `/FlateDecode` followed by other filters, is handled as in 0.40.6.
+- **TIFF Deflate images:** TIFF images with Deflate-compressed strips decode; the zlib wrapper was not expected and they failed. `embedTiff()` writes the image as zlib data.
+- **PNG stream data:** PNG images that the library decodes and compresses again (alpha or interlacing) are written as zlib data. 16-bit PNG images with alpha (RGBA, and gray with alpha) embed at 8 bits per sample, from the high byte of each source sample; they were decoded wrongly.
+- **PNG encoder:** `encodePngFromPixels()`, and with it the PNG output of `renderPageToImage()` and `generateThumbnail()`, writes IDAT data as zlib data, so its files are valid PNG files. `embedWebP()` makes the same encoder call as the PNG and TIFF paths.
+- **`recompressImage()` with `format: 'deflate'`:** it returns zlib data in every runtime and honours `compressionLevel`. It returned raw DEFLATE data where the `CompressionStream` API was missing and ignored the level where it was present.
+- **Decompression with a size hint:** the internal decompression call that takes an output size hint returned only as many bytes as the hint when the data held more; it now returns every byte.
+
+### Changed
+
+- **Compressed stream bytes:** every compressed stream's bytes change, since the data now carries the zlib header and the Adler-32 trailer, so a document saved by 0.40.7 and by 0.40.6 gives different bytes. Files written by earlier versions still load, and their streams are rewritten with conformant data when saved, except in a document loaded from an encrypted file, whose `/FlateDecode` stream data is written as loaded: `save()`, `saveAsStream()`, `saveAsBlob()` and `saveAsBase64()`, in both compress modes, inflate a loaded `/FlateDecode` stream that holds raw DEFLATE data and write it back as zlib data with the same decoded bytes. A stream that inflates neither way is copied unchanged, and the save does not throw. A stream written by an earlier version whose decoded data is larger than 64 MiB is copied as loaded. So is one in which 128 KiB of input in a row before its final block decode to no bytes. `save()` and `saveAsStream()` still give the same bytes for two documents built the same way and saved with the same options, except `objectStreamThreshold`, which `saveAsStream()` still ignores; for a document on which `encrypt()` was called, `saveAsStream()` throws `UnsupportedEncryptionError`.
+- **Compression only when shorter:** a stream is kept compressed only when its zlib data, header and trailer counted, is shorter than the uncompressed data; otherwise it stays unfiltered.
+- **`{ compress: false }` advice withdrawn:** the advice of 0.40.6 to save with `{ compress: false }` is withdrawn; the default `compress: true` gives conformant output.
+- **Lint:** `pnpm run lint` runs with `--max-warnings=1187` (down from 1,189).
+- **Size budget:** `scripts/dev/size-budget.json` is measured again after a build and lowered. The `createPdf` bundle is 108,131 bytes gzip (budget 109,568, down from 114,688), the root entry 260,317 bytes (budget 265,216, down from 274,432) and the IIFE bundle 265,157 bytes (budget 270,336, down from 279,552); the other entries' gzip and brotli budgets are lowered the same way, except `forms`, which is unchanged. The README badge reads 106 KiB (was 109 KiB).
+- **Playwright:** `@playwright/test` 1.66.0-alpha-2026-11-11 → 1.66.0-alpha-2026-11-12 (newest pre-release channel, exact-pinned).
+
+### Compatibility
+
+- **Earlier versions reading 0.40.7 output:** the object streams and the cross-reference stream of a file saved with `objectStreamThreshold` now hold zlib data, and modern-pdf-lib 0.40.3 and 0.40.6 read such a file as having no pages, as they do with the object streams other producers write. Those two versions load every other output that was checked, and 0.40.3 extracts the same text from it.
+- **Incremental saves of earlier files:** `saveDocumentIncremental()`, `saveIncremental()` and `signPdf()` append to the file and leave its existing bytes as they are, so the raw DEFLATE streams of a file written by 0.40.6 or earlier stay in the output; only the objects the update writes hold zlib data. To convert such a file, load it and `save()` it first (before you sign it).
+- **`linearizePdf()` and `enforcePdfA()`:** they copy the input's object bytes and do not rewrite raw DEFLATE streams; run a file written by 0.40.6 or earlier through `loadPdf(...)` and `save()` first.
+
+### Known limits
+
+- **AES-256 (revision 6) files:** AES-256 (revision 6) files whose cross-reference stream holds zlib data now reach the password check and throw `Failed to decrypt PDF: the provided password is incorrect` with the right password, until the revision-6 key derivation is fixed in a later release. The corpus file `pyhanko-aes256.pdf` is one of them: 0.40.6 loaded it through the recovery scan with its content still encrypted, and it now fails at the password step. The two revision-6 corpus files written by qpdf did not load before either.
+- **PNG images with 1, 2 or 4 bits per sample:** they are still decoded with a wrong row length; a later release fixes them.
+- **Documents loaded from an encrypted file:** their `/FlateDecode` streams are saved without being rewritten, since their data can still be encrypted. Such a document keeps the raw DEFLATE streams of a file written by 0.40.6 or earlier. The rule follows the loaded document: streams copied from it into another document (with `copyPages()`, `mergePdfs()` or `embedPage()`), and the document returned by its `copy()`, are rewritten like any other loaded content.
+- **WebP embedding:** `embedWebP()` has no input fixture, so no test judges its output with a tool outside the library.
+- **Streams that already hold zlib data:** a save of a loaded PDF copies its Flate streams that already hold zlib data byte for byte, so `qpdf --check` warns on the output about the same damaged streams it warns on in the input.
+
+### Tests
+
+- **Counts:** 334 test files (up from 329), 7,683 tests. With qpdf (as in CI) and a built `dist/`, the suite reports 7,577 passed and 106 expected failures, none skipped; without qpdf, 7,375 passed, 52 expected failures and 256 skipped (the qpdf cases).
+- **New files:** `tests/unit/compression/pdfFlate.test.ts` (the codec against node:zlib), `tests/unit/core/flateStream.test.ts` (the writers' stream compression, the rewrite of raw DEFLATE streams, and documents loaded from an encrypted file), `tests/unit/parser/flateRead.test.ts` (loading cross-reference streams and object streams that hold zlib data, and those with other filters), `tests/unit/assets/image/recompressDeflate.test.ts` and `tests/oracle/flate-header.test.ts` (every output kind through node:zlib, qpdf and pdf.js). `tests/fixtures/flate/` holds two PDFs written by qpdf 12.4.2 whose cross-reference streams, object streams and content streams hold zlib data.
+- **Corpus:** of the 33 corpus files, 29 load (25 before) and 19 pass every check (8 before).
+- **Known-defect markers:** 106 markers on 35 ledger ids in 9 files (173 before). 70 became plain tests: 28 on the raw DEFLATE output, 35 on loading cross-reference streams and object streams, 6 on default re-saves through `qpdf --check` and 1 on PNG stream data. 19 are keyed to another open entry with the failure they now show (the revision-6 key derivation, or text extraction), and the 3 checks of `pyhanko-aes256.pdf` that passed before are markers of the revision-6 key derivation.
+- **Ledger:** `audit/open-highs.json` closes the 9 entries this release fixes; it lists 253 open entries (262 before) and 71 closed. In `docs/capabilities.json` 6 rows are now graded `oracle` (none before), 26 `behaviour`, 84 `qualified` and 17 `pending`.
+
+### Documentation
+
+- **Default-compression warning withdrawn:** the README, `docs/getting-started.md` and `docs/guide/streaming.md` no longer advise `{ compress: false }`, and the README states the limits of incremental saves of files written by earlier versions and of AES-256 (revision 6) files. The README and `docs/migration/from-pdf-lib.md` no longer say that PDFs with object streams do not load, and `docs/guide/csp.md` no longer says that parsing tries the libdeflate module.
+- **Counts and versions:** the README, `CONTRIBUTING.md`, `docs/guide/performance.md` and `docs/index.md` carry the test counts, the lint budget and the measured bundle sizes; `CONTRIBUTING.md` lists `tests/fixtures/flate/`. `VERSIONING.md`, `docs/plans/ROADMAP.md`, `docs/.vitepress/config.ts` and `package.json` carry the version 0.40.7.
+
 ## [0.40.6] - 2026-11-15
 
 **Oracles, corpora, ledger.** This release changes tests, scripts, CI, fixtures, the findings ledger and the documentation only; no library source changed, so the library behaves as 0.40.5 does. The test suite now judges the library's output with tools outside the library (qpdf and pdf.js), runs against PDF files written by other producers, and records the known open defects it shows as marked expected failures, each tied to a public ledger entry. Read the first Known limits entry before you rely on a default `save()`.
