@@ -5,8 +5,11 @@
  *
  * This provides optional high-performance JBIG2 decoding via a WASM
  * module compiled from Rust.  When WASM is not available or fails to
- * load, the caller falls back to the pure-JS decoder in
- * {@link jbig2Decode}.
+ * load, {@link decodeJBIG2Async} reaches {@link decodeJBIG2} in
+ * {@link jbig2Decode}, which throws {@link UnsupportedFilterError}.
+ * The bundled module cannot be instantiated by this bridge, so in a default
+ * install {@link decodeJBIG2Async} always rejects with
+ * {@link UnsupportedFilterError}.
  *
  * The WASM module uses `wasm-bindgen` and returns structured results
  * (width, height, bitmap data) rather than raw memory pointers.
@@ -81,16 +84,14 @@ let available = false;
  * This must be called before using {@link decodeJBIG2Wasm}.  It is safe
  * to call multiple times -- subsequent calls are no-ops.
  *
- * @param wasmBytes - Optional pre-loaded WASM binary.  When omitted,
- *                    the module is loaded via the universal WASM loader.
+ * @param wasmBytes - The compiled module.  When omitted, the module bundled
+ *                    under `dist/wasm/jbig2` is loaded, but it needs
+ *                    `wasm-bindgen` imports that this bridge does not
+ *                    supply, so loading it without bytes throws.
  * @throws If the WASM module cannot be loaded or instantiated.
  *
  * @example
  * ```ts
- * // Auto-load from default location
- * await initJBIG2Wasm();
- *
- * // Or provide bytes directly (e.g. bundled)
  * await initJBIG2Wasm(myWasmBytes);
  * ```
  */

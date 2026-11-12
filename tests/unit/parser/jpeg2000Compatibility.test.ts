@@ -2,8 +2,9 @@
  * JPEG2000 compatibility and integration tests.
  *
  * Covers the codestream parser (SIZ / SOT markers), box parser (JP2 wrapper),
- * bit-depth conversion, tiled decoding, region-of-interest decoding, and
- * error handling for various JPEG2000 configurations.
+ * bit-depth conversion, and the tile and region entry points, which throw
+ * UnsupportedFilterError (each rewritten test keeps its input and asserts the
+ * refusal), for various JPEG2000 configurations.
  *
  * Because real JP2 files are not included in the test fixtures, all test
  * data is constructed programmatically by writing the correct JPEG2000
@@ -27,6 +28,7 @@ import {
   assembleTiles,
 } from '../../../src/parser/jpeg2000Tiles.js';
 import type { TileGridInfo, TileData } from '../../../src/parser/jpeg2000Tiles.js';
+import { UnsupportedFilterError } from '../../../src/errors.js';
 
 // ===========================================================================
 // Helpers — synthetic JPEG2000 byte sequence builders
@@ -396,7 +398,7 @@ describe('JPEG2000 single-tile lossless (8-bit RGB)', () => {
     expect(info.bitsPerComponent).toBe(8);
   });
 
-  it('decodes a single tile successfully', () => {
+  it('input of "decodes a single tile successfully" is refused with UnsupportedFilterError', () => {
     const cs = new Uint8Array(
       buildSingleTileCodestream(
         8,
@@ -410,14 +412,7 @@ describe('JPEG2000 single-tile lossless (8-bit RGB)', () => {
       ),
     );
 
-    const tile = decodeTile(cs, 0);
-    expect(tile.index).toBe(0);
-    expect(tile.x).toBe(0);
-    expect(tile.y).toBe(0);
-    expect(tile.width).toBe(8);
-    expect(tile.height).toBe(4);
-    expect(tile.components).toBe(3);
-    expect(tile.data.length).toBeGreaterThan(0);
+    expect(() => decodeTile(cs, 0)).toThrow(UnsupportedFilterError);
   });
 });
 
@@ -448,7 +443,7 @@ describe('JPEG2000 single-tile lossy (8-bit RGB)', () => {
     expect(info.components).toBe(3);
   });
 
-  it('correctly decodes tile index 0', () => {
+  it('input of "correctly decodes tile index 0" is refused with UnsupportedFilterError', () => {
     const cs = new Uint8Array(
       buildSingleTileCodestream(
         32,
@@ -462,10 +457,7 @@ describe('JPEG2000 single-tile lossy (8-bit RGB)', () => {
       ),
     );
 
-    const tile = decodeTile(cs, 0);
-    expect(tile.index).toBe(0);
-    expect(tile.width).toBe(32);
-    expect(tile.height).toBe(32);
+    expect(() => decodeTile(cs, 0)).toThrow(UnsupportedFilterError);
   });
 });
 
@@ -502,50 +494,24 @@ describe('JPEG2000 multi-tile image', () => {
     expect(info.tilesY).toBe(2); // ceil(75/64) = 2
   });
 
-  it('decodes individual tiles by index', () => {
+  it('input of "decodes individual tiles by index" is refused with UnsupportedFilterError', () => {
     const cs = new Uint8Array(
       buildMultiTileCodestream(100, 80, 50, 40, [{ bits: 8, isSigned: false }]),
     );
 
     // Tile 0 (top-left)
-    const tile0 = decodeTile(cs, 0);
-    expect(tile0.x).toBe(0);
-    expect(tile0.y).toBe(0);
-    expect(tile0.width).toBe(50);
-    expect(tile0.height).toBe(40);
-
-    // Tile 1 (top-right)
-    const tile1 = decodeTile(cs, 1);
-    expect(tile1.x).toBe(50);
-    expect(tile1.y).toBe(0);
-    expect(tile1.width).toBe(50);
-    expect(tile1.height).toBe(40);
-
-    // Tile 2 (bottom-left)
-    const tile2 = decodeTile(cs, 2);
-    expect(tile2.x).toBe(0);
-    expect(tile2.y).toBe(40);
-    expect(tile2.width).toBe(50);
-    expect(tile2.height).toBe(40);
-
-    // Tile 3 (bottom-right)
-    const tile3 = decodeTile(cs, 3);
-    expect(tile3.x).toBe(50);
-    expect(tile3.y).toBe(40);
-    expect(tile3.width).toBe(50);
-    expect(tile3.height).toBe(40);
+    expect(() => decodeTile(cs, 0)).toThrow(UnsupportedFilterError);
   });
 
-  it('throws for out-of-range tile index', () => {
+  it('input of "throws for out-of-range tile index" is refused with UnsupportedFilterError', () => {
     const cs = new Uint8Array(
       buildMultiTileCodestream(100, 80, 50, 40, [{ bits: 8, isSigned: false }]),
     );
 
-    expect(() => decodeTile(cs, 4)).toThrow('out of range');
-    expect(() => decodeTile(cs, -1)).toThrow('out of range');
+    expect(() => decodeTile(cs, 4)).toThrow(UnsupportedFilterError);
   });
 
-  it('assembles tiles into a full image', () => {
+  it('input of "assembles tiles into a full image" is refused with UnsupportedFilterError', () => {
     const gridInfo: TileGridInfo = {
       imageWidth: 4,
       imageHeight: 4,
@@ -598,10 +564,7 @@ describe('JPEG2000 multi-tile image', () => {
       },
     ];
 
-    const assembled = assembleTiles(tiles, gridInfo);
-    expect(assembled).toEqual(
-      new Uint8Array([1, 2, 5, 6, 3, 4, 7, 8, 9, 10, 13, 14, 11, 12, 15, 16]),
-    );
+    expect(() => assembleTiles(tiles, gridInfo)).toThrow(UnsupportedFilterError);
   });
 });
 
@@ -835,15 +798,12 @@ describe('JPEG2000 raw J2K codestream', () => {
     expect(info.imageHeight).toBe(240);
   });
 
-  it('decodes tile from raw codestream', () => {
+  it('input of "decodes tile from raw codestream" is refused with UnsupportedFilterError', () => {
     const cs = new Uint8Array(
       buildSingleTileCodestream(16, 16, [{ bits: 8, isSigned: false }], [0xaa, 0xbb]),
     );
 
-    const tile = decodeTile(cs, 0);
-    expect(tile.width).toBe(16);
-    expect(tile.height).toBe(16);
-    expect(tile.data.length).toBeGreaterThan(0);
+    expect(() => decodeTile(cs, 0)).toThrow(UnsupportedFilterError);
   });
 });
 
@@ -873,7 +833,7 @@ describe('JPEG2000 JP2 with wrapper', () => {
     expect(info.imageHeight).toBe(150);
   });
 
-  it('decodes a tile from a JP2-wrapped codestream', () => {
+  it('input of "decodes a tile from a JP2-wrapped codestream" is refused with UnsupportedFilterError', () => {
     const rawCs = buildSingleTileCodestream(
       32,
       32,
@@ -886,11 +846,7 @@ describe('JPEG2000 JP2 with wrapper', () => {
     );
     const jp2 = new Uint8Array(wrapInJp2(rawCs));
 
-    const tile = decodeTile(jp2, 0);
-    expect(tile.index).toBe(0);
-    expect(tile.width).toBe(32);
-    expect(tile.height).toBe(32);
-    expect(tile.components).toBe(3);
+    expect(() => decodeTile(jp2, 0)).toThrow(UnsupportedFilterError);
   });
 });
 
@@ -1016,47 +972,46 @@ describe('JPEG2000 reduced resolution', () => {
 // ===========================================================================
 
 describe('JPEG2000 region-of-interest decoding', () => {
-  it('decodes a region that spans a single tile', () => {
+  it('input of "decodes a region that spans a single tile" is refused with UnsupportedFilterError', () => {
     const cs = new Uint8Array(
       buildMultiTileCodestream(100, 80, 50, 40, [{ bits: 8, isSigned: false }]),
     );
 
     // Region entirely within tile 0 (0,0)-(50,40)
-    const regionData = decodeTileRegion(cs, { x: 10, y: 5, width: 20, height: 15 });
-    expect(regionData).toBeInstanceOf(Uint8Array);
-    // 20 * 15 * 1 component * 1 byte = 300 bytes
-    expect(regionData.length).toBe(300);
+    expect(() => decodeTileRegion(cs, { x: 10, y: 5, width: 20, height: 15 })).toThrow(
+      UnsupportedFilterError,
+    );
   });
 
-  it('decodes a region spanning multiple tiles', () => {
+  it('input of "decodes a region spanning multiple tiles" is refused with UnsupportedFilterError', () => {
     const cs = new Uint8Array(
       buildMultiTileCodestream(100, 80, 50, 40, [{ bits: 8, isSigned: false }]),
     );
 
     // Region that spans all 4 tiles
-    const regionData = decodeTileRegion(cs, { x: 25, y: 20, width: 50, height: 40 });
-    expect(regionData).toBeInstanceOf(Uint8Array);
-    expect(regionData.length).toBe(50 * 40 * 1);
+    expect(() => decodeTileRegion(cs, { x: 25, y: 20, width: 50, height: 40 })).toThrow(
+      UnsupportedFilterError,
+    );
   });
 
-  it('clamps region to image bounds', () => {
+  it('input of "clamps region to image bounds" is refused with UnsupportedFilterError', () => {
     const cs = new Uint8Array(
       buildMultiTileCodestream(100, 80, 50, 40, [{ bits: 8, isSigned: false }]),
     );
 
     // Region extending beyond image bounds
-    const regionData = decodeTileRegion(cs, { x: 80, y: 60, width: 100, height: 100 });
-    // Should be clamped to (80,60)-(100,80), so 20x20
-    expect(regionData.length).toBe(20 * 20 * 1);
+    expect(() => decodeTileRegion(cs, { x: 80, y: 60, width: 100, height: 100 })).toThrow(
+      UnsupportedFilterError,
+    );
   });
 
-  it('throws for a region entirely outside the image', () => {
+  it('input of "throws for a region entirely outside the image" is refused with UnsupportedFilterError', () => {
     const cs = new Uint8Array(
       buildMultiTileCodestream(100, 80, 50, 40, [{ bits: 8, isSigned: false }]),
     );
 
     expect(() => decodeTileRegion(cs, { x: 200, y: 200, width: 50, height: 50 })).toThrow(
-      'outside image bounds',
+      UnsupportedFilterError,
     );
   });
 });
@@ -1320,5 +1275,50 @@ describe('JPEG2000 JP2 box parser', () => {
     const depths = getComponentDepths(jp2);
     expect(depths).toHaveLength(3);
     expect(depths[0]!.bits).toBe(12);
+  });
+});
+
+describe('JPEG2000 tile entries (error identity): the error carries its class, code and filter', () => {
+  it('decodeTile throws UnsupportedFilterError with its code and filter', () => {
+    expect(() => decodeTile(new Uint8Array(0), 0)).toThrow(
+      expect.objectContaining({
+        name: 'UnsupportedFilterError',
+        code: 'unsupported-filter',
+        filter: 'JPXDecode',
+      }),
+    );
+  });
+
+  it('decodeTileRegion throws UnsupportedFilterError with its code and filter', () => {
+    expect(() => decodeTileRegion(new Uint8Array(0), { x: 0, y: 0, width: 1, height: 1 })).toThrow(
+      expect.objectContaining({
+        name: 'UnsupportedFilterError',
+        code: 'unsupported-filter',
+        filter: 'JPXDecode',
+      }),
+    );
+  });
+
+  it('assembleTiles throws UnsupportedFilterError with its code and filter', () => {
+    expect(() =>
+      assembleTiles([], {
+        imageWidth: 8,
+        imageHeight: 8,
+        tileWidth: 8,
+        tileHeight: 8,
+        tilesX: 1,
+        tilesY: 1,
+        originX: 0,
+        originY: 0,
+        components: 1,
+        bitsPerComponent: 8,
+      }),
+    ).toThrow(
+      expect.objectContaining({
+        name: 'UnsupportedFilterError',
+        code: 'unsupported-filter',
+        filter: 'JPXDecode',
+      }),
+    );
   });
 });

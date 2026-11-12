@@ -12,6 +12,7 @@
 
 import type { PdfDocument } from '../../core/pdfDocument.js';
 import { PdfArray, PdfName } from '../../core/pdfObjects.js';
+import { ResourceLimitError, UnsupportedFilterError } from '../../errors.js';
 import { extractImages, decodeImageStream } from './imageExtract.js';
 import type { ChromaSubsampling } from '../../wasm/jpeg/bridge.js';
 import { isGrayscaleImage, convertToGrayscale } from './grayscaleDetect.js';
@@ -349,7 +350,13 @@ export async function optimizeAllImages(
         // FlateDecode or other — decode to raw pixels
         pixels = decodeImageStream(img);
       }
-    } catch {
+    } catch (err) {
+      // An image above an internal size limit is an error, not a skip.
+      if (err instanceof ResourceLimitError) throw err;
+      // JPXDecode and JBIG2Decode images are not decoded: the stream and its dictionary stay as they are.
+      if (err instanceof UnsupportedFilterError) {
+        return skip(false, `Image filter ${err.filter} is not decoded in this release`);
+      }
       return skip(false, 'Failed to decode image stream');
     }
 

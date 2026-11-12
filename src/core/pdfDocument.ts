@@ -1160,12 +1160,9 @@ export class PdfDocument {
   }
 
   /**
-   * Embed a WebP image.
-   *
-   * WebP cannot be directly embedded in PDF. This method decodes the
-   * WebP image to raw pixels (VP8/lossy, VP8L/lossless, or VP8+ALPH),
-   * then embeds as a FlateDecode image XObject. If the WebP has
-   * transparency, the alpha channel is embedded as a soft mask.
+   * Embed a lossless WebP image (VP8L, with or without alpha) as
+   * FlateDecode RGB plus an /SMask for alpha. Lossy (VP8) WebP throws
+   * `UnsupportedFilterError`; convert it to PNG or JPEG first.
    *
    * @param webpData  Raw WebP file bytes as a `Uint8Array` or `ArrayBuffer`.
    * @returns         An {@link ImageRef}.

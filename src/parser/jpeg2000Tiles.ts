@@ -1,7 +1,12 @@
 /**
  * @module parser/jpeg2000Tiles
  *
- * Tiled decoding for JPEG2000 (JP2 / J2K) images.
+ * Tile grid geometry for JPEG2000 (JP2 / J2K) images.
+ *
+ * {@link parseTileInfo} reads the tile grid from the codestream's SIZ
+ * marker. This release does not decode tiles: {@link decodeTile},
+ * {@link decodeTileRegion} and {@link assembleTiles} throw
+ * {@link UnsupportedFilterError}.
  *
  * JPEG2000 supports partitioning an image into rectangular tiles that can
  * be independently decoded.  This is critical for:
@@ -20,6 +25,8 @@
  *
  * @packageDocumentation
  */
+
+import { UnsupportedFilterError } from '../errors.js';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -80,19 +87,6 @@ export interface Region {
   width: number;
   height: number;
 }
-
-// ---------------------------------------------------------------------------
-// JPEG2000 marker constants
-// ---------------------------------------------------------------------------
-
-/** Start of Codestream. */
-const MARKER_SOC = 0xff4f;
-
-/** Start of tile-part. */
-const MARKER_SOT = 0xff90;
-
-/** End of codestream. */
-const MARKER_EOC = 0xffd9;
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -237,340 +231,53 @@ export function parseTileInfo(data: Uint8Array): TileGridInfo {
 }
 
 // ---------------------------------------------------------------------------
-// SOT marker parsing — tile part locations
-// ---------------------------------------------------------------------------
-
-/**
- * Describes a tile part found in the codestream.
- */
-interface TilePartEntry {
-  /** Tile index. */
-  tileIndex: number;
-  /** Byte offset of the SOT marker in the data. */
-  sotOffset: number;
-  /** Total length of this tile part (including the SOT marker segment). */
-  tilePartLength: number;
-  /** Byte offset where the tile data (after SOD) begins. */
-  dataOffset: number;
-  /** Length of just the tile data bytes. */
-  dataLength: number;
-}
-
-/**
- * Scan the codestream to find all SOT (Start of Tile-Part) markers and
- * their associated tile data regions.
- *
- * @param data    - Full codestream bytes.
- * @param csStart - Offset where the codestream begins.
- * @returns Array of tile-part entries, sorted by tile index.
- */
-function findTileParts(data: Uint8Array, csStart: number): TilePartEntry[] {
-  const entries: TilePartEntry[] = [];
-  let offset = csStart;
-
-  while (offset + 1 < data.length) {
-    const marker = readU16(data, offset);
-
-    if (marker === MARKER_EOC) break;
-
-    if (marker === MARKER_SOT) {
-      // SOT marker segment:
-      // [0-1]  marker (0xFF90)
-      // [2-3]  Lsot (length of marker segment = 10)
-      // [4-5]  Isot (tile index)
-      // [6-9]  Psot (total tile-part length, 0 = until EOC)
-      // [10]   TPsot (tile-part index)
-      // [11]   TNsot (number of tile-parts for this tile)
-
-      if (offset + 12 > data.length) break;
-
-      const lsot = readU16(data, offset + 2);
-      const isot = readU16(data, offset + 4);
-      const psot = readU32(data, offset + 6);
-
-      // Find SOD marker within this tile part
-      // SOD immediately follows the SOT marker segment
-      const sotHeaderEnd = offset + 2 + lsot;
-      let sodOffset = sotHeaderEnd;
-
-      // The SOD marker should appear right after the SOT segment's
-      // marker-segment body plus any other marker segments
-      while (sodOffset + 1 < data.length) {
-        if (data[sodOffset] === 0xff && data[sodOffset + 1] === 0x93) {
-          break;
-        }
-        // Skip other markers between SOT and SOD
-        if (data[sodOffset] === 0xff && data[sodOffset + 1] !== 0x93) {
-          const mLen = sodOffset + 3 < data.length ? readU16(data, sodOffset + 2) : 0;
-          sodOffset += 2 + mLen;
-        } else {
-          sodOffset++;
-        }
-      }
-
-      const dataStart = sodOffset + 2; // skip SOD marker bytes
-
-      // Tile-part length: if psot > 0 it covers from SOT start; if 0
-      // it means "until end of codestream"
-      const totalTilePartLen = psot > 0 ? psot : data.length - offset;
-      const dataEnd = offset + totalTilePartLen;
-      const tileDataLength = Math.max(0, dataEnd - dataStart);
-
-      entries.push({
-        tileIndex: isot,
-        sotOffset: offset,
-        tilePartLength: totalTilePartLen,
-        dataOffset: dataStart,
-        dataLength: tileDataLength,
-      });
-
-      // Advance past this tile part
-      offset += totalTilePartLen;
-    } else if (marker === MARKER_SOC) {
-      offset += 2;
-    } else if ((marker & 0xff00) === 0xff00 && marker !== 0xff00) {
-      // Other marker segment — skip by reading its length
-      if (offset + 4 <= data.length) {
-        const segLen = readU16(data, offset + 2);
-        offset += 2 + segLen;
-      } else {
-        offset += 2;
-      }
-    } else {
-      offset++;
-    }
-  }
-
-  return entries;
-}
-
-// ---------------------------------------------------------------------------
-// Tile geometry helpers
-// ---------------------------------------------------------------------------
-
-/**
- * Compute the pixel rectangle for a tile at the given grid position.
- */
-function tileRect(
-  gridInfo: TileGridInfo,
-  col: number,
-  row: number,
-): { x: number; y: number; width: number; height: number } {
-  const x = col * gridInfo.tileWidth;
-  const y = row * gridInfo.tileHeight;
-  const width = Math.min(gridInfo.tileWidth, gridInfo.imageWidth - x);
-  const height = Math.min(gridInfo.tileHeight, gridInfo.imageHeight - y);
-  return { x, y, width, height };
-}
-
-/**
- * Check if two rectangles overlap.
- */
-function rectsOverlap(
-  a: { x: number; y: number; width: number; height: number },
-  b: { x: number; y: number; width: number; height: number },
-): boolean {
-  return a.x < b.x + b.width && a.x + a.width > b.x && a.y < b.y + b.height && a.y + a.height > b.y;
-}
-
-// ---------------------------------------------------------------------------
-// Public API — single tile decoding
+// Public API — entries that throw
 // ---------------------------------------------------------------------------
 
 /**
  * Decode a single tile from a JPEG2000 codestream.
  *
- * This extracts the tile data for the given tile index by locating its
- * SOT marker(s) in the codestream.  The actual decoding produces
- * uncompressed pixel data for that tile.
+ * Throws {@link UnsupportedFilterError} (filter `'JPXDecode'`): JPEG 2000
+ * image data is not decoded in this release, and no part of `data` is read.
+ * {@link parseTileInfo} is unaffected.
  *
- * Note: Full wavelet / entropy decoding of JPEG2000 tile data is
- * extremely complex.  This implementation provides the tile extraction
- * and framing layer.  For production use, the WASM bridge should be
- * used for the actual decompression.  When WASM is not available, this
- * returns a zero-filled buffer matching the tile dimensions (useful for
- * layout / testing purposes).
- *
- * @param data      - Full JPEG2000 codestream or JP2 file bytes.
- * @param tileIndex - Zero-based tile index (row-major order).
- * @returns Decoded tile data.
- * @throws If the tile index is out of range or the codestream is invalid.
+ * @param data      - Full JPEG2000 codestream or JP2 file bytes (not read).
+ * @param tileIndex - Zero-based tile index (not read).
+ * @throws {UnsupportedFilterError} Always.
  */
+// oxlint-disable-next-line no-unused-vars -- the parameter names are part of the declared API
 export function decodeTile(data: Uint8Array, tileIndex: number): TileData {
-  const gridInfo = parseTileInfo(data);
-  const totalTiles = gridInfo.tilesX * gridInfo.tilesY;
-
-  if (tileIndex < 0 || tileIndex >= totalTiles) {
-    throw new Error(`JPEG2000 Tiles: tile index ${tileIndex} out of range (0–${totalTiles - 1})`);
-  }
-
-  const col = tileIndex % gridInfo.tilesX;
-  const row = Math.floor(tileIndex / gridInfo.tilesX);
-  const rect = tileRect(gridInfo, col, row);
-
-  const csStart = findCodestreamStart(data);
-  const tileParts = findTileParts(data, csStart);
-
-  // Collect tile-part data for this tile
-  const parts = tileParts.filter((tp) => tp.tileIndex === tileIndex);
-
-  // Concatenate tile-part data
-  let totalDataLen = 0;
-  for (const p of parts) {
-    totalDataLen += p.dataLength;
-  }
-
-  const tileRawData = new Uint8Array(totalDataLen);
-  let writeOffset = 0;
-  for (const p of parts) {
-    if (p.dataOffset + p.dataLength <= data.length) {
-      tileRawData.set(data.subarray(p.dataOffset, p.dataOffset + p.dataLength), writeOffset);
-    }
-    writeOffset += p.dataLength;
-  }
-
-  // Compute expected decoded size
-  const bytesPerSample = gridInfo.bitsPerComponent > 8 ? 2 : 1;
-  const decodedSize = rect.width * rect.height * gridInfo.components * bytesPerSample;
-
-  // If we have tile data from the codestream, return it as-is (the caller
-  // or WASM bridge performs wavelet decoding).  For the JS-only path,
-  // return a zero-filled buffer representing decoded pixels.
-  const decodedData = tileRawData.length > 0 ? tileRawData : new Uint8Array(decodedSize);
-
-  return {
-    index: tileIndex,
-    x: rect.x,
-    y: rect.y,
-    width: rect.width,
-    height: rect.height,
-    data: decodedData,
-    components: gridInfo.components,
-  };
+  throw new UnsupportedFilterError('JPXDecode');
 }
 
-// ---------------------------------------------------------------------------
-// Public API — region decoding
-// ---------------------------------------------------------------------------
-
 /**
- * Decode only the tiles that intersect the given rectangular region.
+ * Decode only the tiles that intersect a rectangular region.
  *
- * This is the key API for efficient region-of-interest decoding — only
- * tiles overlapping the requested region are decoded, which can save
- * significant time for large tiled images.
+ * Throws {@link UnsupportedFilterError} (filter `'JPXDecode'`): JPEG 2000
+ * image data is not decoded in this release, and no part of `data` is read.
+ * {@link parseTileInfo} is unaffected.
  *
- * The returned data covers exactly the requested region, cropped from
- * the relevant tiles.
- *
- * @param data   - Full JPEG2000 codestream or JP2 file bytes.
- * @param region - The rectangular region to decode.
- * @returns Decoded pixel data covering the requested region.
- * @throws If the region is entirely outside the image bounds.
+ * @param data   - Full JPEG2000 codestream or JP2 file bytes (not read).
+ * @param region - The rectangular region (not read).
+ * @throws {UnsupportedFilterError} Always.
  */
+// oxlint-disable-next-line no-unused-vars -- the parameter names are part of the declared API
 export function decodeTileRegion(data: Uint8Array, region: Region): Uint8Array {
-  const gridInfo = parseTileInfo(data);
-
-  // Clamp region to image bounds
-  const rx = Math.max(0, region.x);
-  const ry = Math.max(0, region.y);
-  const rw = Math.min(region.width, gridInfo.imageWidth - rx);
-  const rh = Math.min(region.height, gridInfo.imageHeight - ry);
-
-  if (rw <= 0 || rh <= 0) {
-    throw new Error('JPEG2000 Tiles: requested region is outside image bounds');
-  }
-
-  const regionRect = { x: rx, y: ry, width: rw, height: rh };
-
-  // Find overlapping tiles
-  const overlapping: number[] = [];
-  for (let row = 0; row < gridInfo.tilesY; row++) {
-    for (let col = 0; col < gridInfo.tilesX; col++) {
-      const rect = tileRect(gridInfo, col, row);
-      if (rectsOverlap(rect, regionRect)) {
-        overlapping.push(row * gridInfo.tilesX + col);
-      }
-    }
-  }
-
-  // Decode overlapping tiles
-  const tiles: TileData[] = [];
-  for (const idx of overlapping) {
-    tiles.push(decodeTile(data, idx));
-  }
-
-  // Assemble cropped region
-  const bytesPerSample = gridInfo.bitsPerComponent > 8 ? 2 : 1;
-  const bytesPerPixel = gridInfo.components * bytesPerSample;
-  const outRowBytes = rw * bytesPerPixel;
-  const output = new Uint8Array(rh * outRowBytes);
-
-  for (const tile of tiles) {
-    // Compute the intersection of this tile with the region
-    const ix0 = Math.max(tile.x, rx);
-    const iy0 = Math.max(tile.y, ry);
-    const ix1 = Math.min(tile.x + tile.width, rx + rw);
-    const iy1 = Math.min(tile.y + tile.height, ry + rh);
-
-    if (ix0 >= ix1 || iy0 >= iy1) continue;
-
-    const tileRowBytes = tile.width * bytesPerPixel;
-
-    for (let y = iy0; y < iy1; y++) {
-      const srcRowStart = (y - tile.y) * tileRowBytes;
-      const srcColStart = (ix0 - tile.x) * bytesPerPixel;
-      const dstRowStart = (y - ry) * outRowBytes;
-      const dstColStart = (ix0 - rx) * bytesPerPixel;
-      const copyLen = (ix1 - ix0) * bytesPerPixel;
-
-      // Only copy if tile data is large enough (decoded tile)
-      if (srcRowStart + srcColStart + copyLen <= tile.data.length) {
-        output.set(
-          tile.data.subarray(srcRowStart + srcColStart, srcRowStart + srcColStart + copyLen),
-          dstRowStart + dstColStart,
-        );
-      }
-    }
-  }
-
-  return output;
+  throw new UnsupportedFilterError('JPXDecode');
 }
 
-// ---------------------------------------------------------------------------
-// Public API — tile assembly
-// ---------------------------------------------------------------------------
-
 /**
- * Assemble an array of decoded tiles into a full (or partial) image.
+ * Assemble decoded tiles into an image.
  *
- * The tiles are placed onto a canvas matching the full image dimensions
- * described by `gridInfo`.  Missing tiles result in zero-filled regions.
+ * Throws {@link UnsupportedFilterError} (filter `'JPXDecode'`): no tile is
+ * decoded in this release, so there is nothing to assemble, and neither
+ * argument is read.
  *
- * @param tiles    - Array of decoded tile data.
- * @param gridInfo - The tile grid geometry from {@link parseTileInfo}.
- * @returns A `Uint8Array` containing the assembled image pixels
- *   (interleaved components, row-major order).
+ * @param tiles    - Tile data (not read).
+ * @param gridInfo - The tile grid geometry from {@link parseTileInfo} (not read).
+ * @throws {UnsupportedFilterError} Always.
  */
+// oxlint-disable-next-line no-unused-vars -- the parameter names are part of the declared API
 export function assembleTiles(tiles: TileData[], gridInfo: TileGridInfo): Uint8Array {
-  const bytesPerSample = gridInfo.bitsPerComponent > 8 ? 2 : 1;
-  const bytesPerPixel = gridInfo.components * bytesPerSample;
-  const rowBytes = gridInfo.imageWidth * bytesPerPixel;
-  const output = new Uint8Array(gridInfo.imageHeight * rowBytes);
-
-  for (const tile of tiles) {
-    const tileRowBytes = tile.width * bytesPerPixel;
-
-    for (let y = 0; y < tile.height; y++) {
-      const srcStart = y * tileRowBytes;
-      const dstStart = (tile.y + y) * rowBytes + tile.x * bytesPerPixel;
-      const copyLen = Math.min(tileRowBytes, tile.data.length - srcStart);
-
-      if (copyLen > 0 && srcStart < tile.data.length) {
-        output.set(tile.data.subarray(srcStart, srcStart + copyLen), dstStart);
-      }
-    }
-  }
-
-  return output;
+  throw new UnsupportedFilterError('JPXDecode');
 }

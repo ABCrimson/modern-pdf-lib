@@ -3,15 +3,16 @@
  *
  * Covers:
  * - RIFF/WebP container parsing
- * - VP8 (lossy) decoding
+ * - VP8 (lossy) data throws UnsupportedFilterError
  * - VP8L (lossless) decoding
- * - ALPH chunk (alpha channel) decoding
+ * - ALPH chunk with VP8 data throws UnsupportedFilterError
  * - Format detection (isWebP, isWebPLossless)
  * - Error handling for invalid/unsupported data
  */
 
 import { describe, it, expect } from 'vitest';
 import { decodeWebP, isWebP, isWebPLossless } from '../../../../src/assets/image/webpDecode.js';
+import { ResourceLimitError, UnsupportedFilterError } from '../../../../src/errors.js';
 
 // ---------------------------------------------------------------------------
 // Helpers — minimal valid WebP construction
@@ -304,44 +305,35 @@ describe('isWebPLossless', () => {
 // Tests: VP8 (lossy) decoding
 // ---------------------------------------------------------------------------
 
-describe('decodeWebP — VP8 (lossy)', () => {
-  it('decodes a minimal VP8 keyframe', () => {
+describe('decodeWebP — VP8 (lossy) is refused', () => {
+  it('refuses VP8 with filter VP8 and code unsupported-filter', () => {
+    expect(() => decodeWebP(buildMinimalWebP_VP8(4, 4))).toThrow(
+      expect.objectContaining({
+        name: 'UnsupportedFilterError',
+        code: 'unsupported-filter',
+        filter: 'VP8',
+      }),
+    );
+  });
+
+  it('input of "decodes a minimal VP8 keyframe" is refused with UnsupportedFilterError', () => {
     const webp = buildMinimalWebP_VP8(4, 4);
-    const result = decodeWebP(webp);
-
-    expect(result.width).toBe(4);
-    expect(result.height).toBe(4);
-    expect(result.channels).toBe(3);
-    expect(result.hasAlpha).toBe(false);
-    expect(result.pixels.length).toBe(4 * 4 * 3);
+    expect(() => decodeWebP(webp)).toThrow(UnsupportedFilterError);
   });
 
-  it('decodes a larger VP8 image', () => {
+  it('input of "decodes a larger VP8 image" is refused with UnsupportedFilterError', () => {
     const webp = buildMinimalWebP_VP8(16, 16);
-    const result = decodeWebP(webp);
-
-    expect(result.width).toBe(16);
-    expect(result.height).toBe(16);
-    expect(result.pixels.length).toBe(16 * 16 * 3);
+    expect(() => decodeWebP(webp)).toThrow(UnsupportedFilterError);
   });
 
-  it('decodes non-macroblock-aligned dimensions', () => {
+  it('input of "decodes non-macroblock-aligned dimensions" is refused with UnsupportedFilterError', () => {
     const webp = buildMinimalWebP_VP8(7, 5);
-    const result = decodeWebP(webp);
-
-    expect(result.width).toBe(7);
-    expect(result.height).toBe(5);
-    expect(result.pixels.length).toBe(7 * 5 * 3);
+    expect(() => decodeWebP(webp)).toThrow(UnsupportedFilterError);
   });
 
-  it('pixel values are valid RGB bytes', () => {
+  it('input of "pixel values are valid RGB bytes" is refused with UnsupportedFilterError', () => {
     const webp = buildMinimalWebP_VP8(2, 2);
-    const result = decodeWebP(webp);
-
-    for (let i = 0; i < result.pixels.length; i++) {
-      expect(result.pixels[i]!).toBeGreaterThanOrEqual(0);
-      expect(result.pixels[i]!).toBeLessThanOrEqual(255);
-    }
+    expect(() => decodeWebP(webp)).toThrow(UnsupportedFilterError);
   });
 });
 
@@ -350,6 +342,24 @@ describe('decodeWebP — VP8 (lossy)', () => {
 // ---------------------------------------------------------------------------
 
 describe('decodeWebP — VP8L (lossless)', () => {
+  it('refuses a VP8L image above the size limits with ResourceLimitError before allocating', () => {
+    // 16384 x 16384 is the largest size the 14-bit header fields allow: 2^30 RGBA bytes,
+    // above maxImageBytes (2^28), so the check fires on the header alone.
+    const webp = buildMinimalWebP_VP8L(16384, 16384, 1, 2, 3);
+    let caught: unknown;
+    try {
+      decodeWebP(webp);
+    } catch (err) {
+      caught = err;
+    }
+    expect(caught).toBeInstanceOf(ResourceLimitError);
+    expect(caught).toMatchObject({ code: 'resource-limit-exceeded', limit: 'maxImageBytes' });
+  });
+
+  it('decodes a VP8L image at 8192 x 1 inside the limits', () => {
+    expect(decodeWebP(buildMinimalWebP_VP8L(8192, 1, 1, 2, 3)).width).toBe(8192);
+  });
+
   it('decodes a single-pixel VP8L image', () => {
     const webp = buildMinimalWebP_VP8L(1, 1, 128, 64, 32);
     const result = decodeWebP(webp);
@@ -385,32 +395,15 @@ describe('decodeWebP — VP8L (lossless)', () => {
 // Tests: Alpha channel (ALPH chunk)
 // ---------------------------------------------------------------------------
 
-describe('decodeWebP — alpha channel', () => {
-  it('decodes VP8 with ALPH chunk', () => {
+describe('decodeWebP — VP8 with an alpha chunk is refused', () => {
+  it('input of "decodes VP8 with ALPH chunk" is refused with UnsupportedFilterError', () => {
     const webp = buildWebP_WithAlpha(4, 4);
-    const result = decodeWebP(webp);
-
-    expect(result.width).toBe(4);
-    expect(result.height).toBe(4);
-    expect(result.channels).toBe(4);
-    expect(result.hasAlpha).toBe(true);
-    expect(result.pixels.length).toBe(4 * 4 * 4);
-
-    // Check alpha values
-    for (let i = 0; i < 4 * 4; i++) {
-      expect(result.pixels[i * 4 + 3]).toBe(200);
-    }
+    expect(() => decodeWebP(webp)).toThrow(UnsupportedFilterError);
   });
 
-  it('handles uncompressed alpha with no filtering', () => {
+  it('input of "handles uncompressed alpha with no filtering" is refused with UnsupportedFilterError', () => {
     const webp = buildWebP_WithAlpha(2, 2);
-    const result = decodeWebP(webp);
-
-    expect(result.hasAlpha).toBe(true);
-    // All alpha values should be 200
-    for (let i = 0; i < 2 * 2; i++) {
-      expect(result.pixels[i * 4 + 3]).toBe(200);
-    }
+    expect(() => decodeWebP(webp)).toThrow(UnsupportedFilterError);
   });
 });
 
@@ -439,7 +432,7 @@ describe('decodeWebP — error handling', () => {
     expect(() => decodeWebP(new Uint8Array(0))).toThrow();
   });
 
-  it('throws on VP8 non-keyframe', () => {
+  it('input of "throws on VP8 non-keyframe" is refused with UnsupportedFilterError', () => {
     // Build a VP8 with non-keyframe bit set
     const vp8Data = new Uint8Array(20);
     vp8Data[0] = 0x01; // bit0=1 = not a keyframe
@@ -450,7 +443,7 @@ describe('decodeWebP — error handling', () => {
     data.set(header, 0);
     data.set(vp8Chunk, 12);
 
-    expect(() => decodeWebP(data)).toThrow('keyframe');
+    expect(() => decodeWebP(data)).toThrow(UnsupportedFilterError);
   });
 });
 
@@ -459,21 +452,14 @@ describe('decodeWebP — error handling', () => {
 // ---------------------------------------------------------------------------
 
 describe('WebPImage interface', () => {
-  it('has correct shape for RGB image', () => {
+  it('input of "has correct shape for RGB image" is refused with UnsupportedFilterError', () => {
     const webp = buildMinimalWebP_VP8(8, 8);
-    const img = decodeWebP(webp);
-
-    expect(typeof img.width).toBe('number');
-    expect(typeof img.height).toBe('number');
-    expect(img.pixels).toBeInstanceOf(Uint8Array);
-    expect(img.channels === 3 || img.channels === 4).toBe(true);
-    expect(typeof img.hasAlpha).toBe('boolean');
+    expect(() => decodeWebP(webp)).toThrow(UnsupportedFilterError);
   });
 
-  it('pixels length matches width * height * channels', () => {
+  it('input of "pixels length matches width * height * channels" is refused with UnsupportedFilterError', () => {
     const webp = buildMinimalWebP_VP8(10, 6);
-    const img = decodeWebP(webp);
-    expect(img.pixels.length).toBe(img.width * img.height * img.channels);
+    expect(() => decodeWebP(webp)).toThrow(UnsupportedFilterError);
   });
 
   it('VP8L pixels length matches dimensions', () => {

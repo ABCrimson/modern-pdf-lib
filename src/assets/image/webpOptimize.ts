@@ -7,8 +7,9 @@
  * convert decoded WebP pixel data to JPEG or PNG format for embedding.
  *
  * - `recompressWebP()` — re-encode decoded pixels as JPEG
- * - `webpToJpeg()` — decode WebP then encode as JPEG (convenience)
- * - `webpToPng()` — decode WebP then encode as PNG (lossless, convenience)
+ * - `webpToJpeg()`, `webpToPng()` — placeholders that check the header and throw;
+ *   decode lossless WebP with `decodeWebP()` instead (lossy VP8 data throws
+ *   `UnsupportedFilterError`)
  *
  * No Buffer — uses Uint8Array exclusively.
  * No fs — no file system access.
@@ -725,15 +726,16 @@ export function recompressWebP(
 }
 
 /**
- * Decode a WebP file and re-encode as JPEG.
+ * Placeholder for decoding a lossless WebP and encoding it as JPEG.
  *
- * Convenience function that combines WebP decoding with JPEG encoding.
- * Imports the WebP decoder dynamically from the webpDecode module
- * (provided by v0.24.0).
+ * Checks the RIFF/WEBP header and then throws a plain `Error` that points to
+ * {@link recompressWebP}: this function does not decode. Decode with
+ * `decodeWebP()` (lossless VP8L only; lossy VP8 data throws
+ * `UnsupportedFilterError`) and pass the pixels to {@link recompressWebP}.
  *
  * @param webpData  Raw WebP file bytes.
- * @param quality   JPEG quality (1-100). Default: 85.
- * @returns         JPEG-encoded bytes.
+ * @param quality   JPEG quality (1-100); not read.
+ * @throws {Error}  Always: invalid header, or the decoder is not wired in.
  */
 export function webpToJpeg(webpData: Uint8Array, _quality?: number): Uint8Array {
   // Validate WebP magic bytes
@@ -751,11 +753,7 @@ export function webpToJpeg(webpData: Uint8Array, _quality?: number): Uint8Array 
     throw new Error('Invalid WebP data: missing RIFF/WEBP header');
   }
 
-  // Lazy import to avoid circular dependency — the webpDecode module
-  // is provided by v0.24.0 and may not be available at compile time.
-  // We use a dynamic require pattern that works at runtime.
-  // For now, use the pixel data directly by parsing VP8 header minimally.
-  // This is a simplified pass-through that expects pre-decoded pixel data.
+  // No decoder is wired in: callers decode with decodeWebP() and use recompressWebP().
   throw new Error(
     'webpToJpeg requires the WebP decoder module (webpDecode.ts). ' +
       'Use recompressWebP() with pre-decoded pixel data instead.',
@@ -763,14 +761,15 @@ export function webpToJpeg(webpData: Uint8Array, _quality?: number): Uint8Array 
 }
 
 /**
- * Decode a WebP file and re-encode as PNG.
+ * Placeholder for decoding a lossless WebP and encoding it as PNG.
  *
- * Convenience function that combines WebP decoding with PNG encoding.
- * Produces lossless output suitable for images requiring transparency
- * or exact color reproduction.
+ * Checks the RIFF/WEBP header and then throws a plain `Error` that points to
+ * `decodeWebP()` and `encodePngFromPixels()`: this function does not decode.
+ * Lossy (VP8) input is refused by `decodeWebP()` with
+ * `UnsupportedFilterError`.
  *
  * @param webpData  Raw WebP file bytes.
- * @returns         PNG-encoded bytes.
+ * @throws {Error}  Always: invalid header, or the decoder is not wired in.
  */
 export function webpToPng(webpData: Uint8Array): Uint8Array {
   // Validate WebP magic bytes
@@ -788,7 +787,7 @@ export function webpToPng(webpData: Uint8Array): Uint8Array {
     throw new Error('Invalid WebP data: missing RIFF/WEBP header');
   }
 
-  // Lazy import — same rationale as webpToJpeg.
+  // No decoder is wired in: callers decode with decodeWebP() and encodePngFromPixels().
   throw new Error(
     'webpToPng requires the WebP decoder module (webpDecode.ts). ' +
       'Use the WebP decoder directly and then encodePngFromPixels().',

@@ -1,12 +1,14 @@
 /**
- * Tests for basic JBIG2 decoding — segment header parsing, page
- * information processing, immediate generic region (MMR mode), and
- * error handling for unsupported segment types.
+ * Tests for the JBIG2 entry point: decodeJBIG2 throws UnsupportedFilterError
+ * for every input, including the segment streams the decoder used to turn
+ * into bitmaps or into its own errors (each rewritten test keeps its input and
+ * asserts the refusal).
  */
 
 import { describe, it, expect } from 'vitest';
-import { decodeJBIG2, JBIG2_INTEGER_MAGNITUDE_CLASSES } from '../../../src/parser/jbig2Decode.js';
+import { decodeJBIG2 } from '../../../src/parser/jbig2Decode.js';
 import { PdfDict, PdfNumber } from '../../../src/core/pdfObjects.js';
+import { UnsupportedFilterError } from '../../../src/errors.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -176,7 +178,7 @@ function assembleStream(segments: { header: number[]; data: number[] }[]): Uint8
 // ===========================================================================
 
 describe('JBIG2Decode segment parsing', () => {
-  it('parses and processes a Page Information segment', () => {
+  it('input of "parses and processes a Page Information segment" is refused with UnsupportedFilterError', () => {
     // Build: Page Info segment + End of Page segment
     const pageInfoData = buildPageInfoData(8, 1);
     const pageInfoHeader = buildSegmentHeader(0, 48, 1, pageInfoData.length);
@@ -188,34 +190,29 @@ describe('JBIG2Decode segment parsing', () => {
       { header: eopHeader, data: [] },
     ]);
 
-    // Should not throw -- just parses successfully
-    const result = decodeJBIG2(stream, null);
-    // Page is 8 pixels wide, 1 pixel tall => 1 byte
-    expect(result.length).toBe(1);
+    // A page-information-only stream is refused like any other
+    expect(() => decodeJBIG2(stream, null)).toThrow(UnsupportedFilterError);
   });
 
-  it('handles empty data gracefully', () => {
-    const result = decodeJBIG2(new Uint8Array(0), null);
-    expect(result.length).toBe(0);
+  it('input of "handles empty data gracefully" is refused with UnsupportedFilterError', () => {
+    expect(() => decodeJBIG2(new Uint8Array(0), null)).toThrow(UnsupportedFilterError);
   });
 
-  it('throws for malformed Symbol Dictionary segment (too short)', () => {
+  it('input of "throws for malformed Symbol Dictionary segment (too short)" is refused with UnsupportedFilterError', () => {
     // Symbol Dictionary segment (type 0) with too-short data
     const header = buildSegmentHeader(0, 0, 1, 4);
     const data = [0, 0, 0, 0];
     const stream = assembleStream([{ header, data }]);
 
-    expect(() => decodeJBIG2(stream, null)).toThrow('Symbol Dictionary');
-    expect(() => decodeJBIG2(stream, null)).toThrow('too short');
+    expect(() => decodeJBIG2(stream, null)).toThrow(UnsupportedFilterError);
   });
 
-  it('throws for malformed Immediate Text Region segment (too short)', () => {
+  it('input of "throws for malformed Immediate Text Region segment (too short)" is refused with UnsupportedFilterError', () => {
     const header = buildSegmentHeader(0, 6, 1, 4);
     const data = [0, 0, 0, 0];
     const stream = assembleStream([{ header, data }]);
 
-    expect(() => decodeJBIG2(stream, null)).toThrow('Text Region');
-    expect(() => decodeJBIG2(stream, null)).toThrow('too short');
+    expect(() => decodeJBIG2(stream, null)).toThrow(UnsupportedFilterError);
   });
 });
 
@@ -224,7 +221,7 @@ describe('JBIG2Decode segment parsing', () => {
 // ===========================================================================
 
 describe('JBIG2Decode MMR generic region', () => {
-  it('decodes an all-white 8x1 bitmap', () => {
+  it('input of "decodes an all-white 8x1 bitmap" is refused with UnsupportedFilterError', () => {
     // Build Page Info
     const pageInfoData = buildPageInfoData(8, 1);
     const pageInfoHeader = buildSegmentHeader(0, 48, 1, pageInfoData.length);
@@ -244,13 +241,10 @@ describe('JBIG2Decode MMR generic region', () => {
       { header: eopHeader, data: [] },
     ]);
 
-    const result = decodeJBIG2(stream, null);
-    expect(result.length).toBe(1);
-    // All white = all bits 0
-    expect(result[0]).toBe(0x00);
+    expect(() => decodeJBIG2(stream, null)).toThrow(UnsupportedFilterError);
   });
 
-  it('decodes an all-black 8x1 bitmap using horizontal mode', () => {
+  it('input of "decodes an all-black 8x1 bitmap using horizontal mode" is refused with UnsupportedFilterError', () => {
     const pageInfoData = buildPageInfoData(8, 1);
     const pageInfoHeader = buildSegmentHeader(0, 48, 1, pageInfoData.length);
 
@@ -267,13 +261,10 @@ describe('JBIG2Decode MMR generic region', () => {
       { header: eopHeader, data: [] },
     ]);
 
-    const result = decodeJBIG2(stream, null);
-    expect(result.length).toBe(1);
-    // All black = all bits 1
-    expect(result[0]).toBe(0xff);
+    expect(() => decodeJBIG2(stream, null)).toThrow(UnsupportedFilterError);
   });
 
-  it('decodes a two-row all-white bitmap', () => {
+  it('input of "decodes a two-row all-white bitmap" is refused with UnsupportedFilterError', () => {
     const pageInfoData = buildPageInfoData(8, 2);
     const pageInfoHeader = buildSegmentHeader(0, 48, 1, pageInfoData.length);
 
@@ -290,10 +281,7 @@ describe('JBIG2Decode MMR generic region', () => {
       { header: eopHeader, data: [] },
     ]);
 
-    const result = decodeJBIG2(stream, null);
-    expect(result.length).toBe(2);
-    expect(result[0]).toBe(0x00);
-    expect(result[1]).toBe(0x00);
+    expect(() => decodeJBIG2(stream, null)).toThrow(UnsupportedFilterError);
   });
 });
 
@@ -302,7 +290,7 @@ describe('JBIG2Decode MMR generic region', () => {
 // ===========================================================================
 
 describe('JBIG2Decode page composition', () => {
-  it('respects default pixel value (white)', () => {
+  it('input of "respects default pixel value (white)" is refused with UnsupportedFilterError', () => {
     // Page with default pixel = 0 (white)
     const pageInfoData = buildPageInfoData(8, 1, 0);
     const pageInfoHeader = buildSegmentHeader(0, 48, 1, pageInfoData.length);
@@ -313,13 +301,10 @@ describe('JBIG2Decode page composition', () => {
       { header: eopHeader, data: [] },
     ]);
 
-    const result = decodeJBIG2(stream, null);
-    expect(result.length).toBe(1);
-    // Default pixel 0 = white, so the page should be all zeros
-    expect(result[0]).toBe(0x00);
+    expect(() => decodeJBIG2(stream, null)).toThrow(UnsupportedFilterError);
   });
 
-  it('respects default pixel value (black)', () => {
+  it('input of "respects default pixel value (black)" is refused with UnsupportedFilterError', () => {
     // Page with default pixel = 1 (black)
     const pageInfoData = buildPageInfoData(8, 1, 1);
     const pageInfoHeader = buildSegmentHeader(0, 48, 1, pageInfoData.length);
@@ -330,10 +315,7 @@ describe('JBIG2Decode page composition', () => {
       { header: eopHeader, data: [] },
     ]);
 
-    const result = decodeJBIG2(stream, null);
-    expect(result.length).toBe(1);
-    // Default pixel 1 = black, so the page should be all ones
-    expect(result[0]).toBe(0xff);
+    expect(() => decodeJBIG2(stream, null)).toThrow(UnsupportedFilterError);
   });
 });
 
@@ -342,7 +324,7 @@ describe('JBIG2Decode page composition', () => {
 // ===========================================================================
 
 describe('JBIG2Decode globals support', () => {
-  it('accepts null parms without error', () => {
+  it('input of "accepts null parms without error" is refused with UnsupportedFilterError', () => {
     // Page Info + End of Page, no globals
     const pageInfoData = buildPageInfoData(8, 1);
     const pageInfoHeader = buildSegmentHeader(0, 48, 1, pageInfoData.length);
@@ -353,10 +335,10 @@ describe('JBIG2Decode globals support', () => {
       { header: eopHeader, data: [] },
     ]);
 
-    expect(() => decodeJBIG2(stream, null)).not.toThrow();
+    expect(() => decodeJBIG2(stream, null)).toThrow(UnsupportedFilterError);
   });
 
-  it('accepts parms without JBIG2Globals', () => {
+  it('input of "accepts parms without JBIG2Globals" is refused with UnsupportedFilterError', () => {
     const parms = new PdfDict();
     parms.set('/SomeOtherKey', PdfNumber.of(42));
 
@@ -369,7 +351,7 @@ describe('JBIG2Decode globals support', () => {
       { header: eopHeader, data: [] },
     ]);
 
-    expect(() => decodeJBIG2(stream, parms)).not.toThrow();
+    expect(() => decodeJBIG2(stream, parms)).toThrow(UnsupportedFilterError);
   });
 });
 
@@ -378,7 +360,7 @@ describe('JBIG2Decode globals support', () => {
 // ===========================================================================
 
 describe('JBIG2Decode file header', () => {
-  it('skips standalone JBIG2 file header if present', () => {
+  it('input of "skips standalone JBIG2 file header if present" is refused with UnsupportedFilterError', () => {
     // File header: 0x97 4A 42 32 0D 0A 1A 0A + flags(1) + pages(4)
     const fileHeader = [0x97, 0x4a, 0x42, 0x32, 0x0d, 0x0a, 0x1a, 0x0a];
     const flags = 0x00; // bit 0 = 0 means number of pages follows
@@ -391,8 +373,7 @@ describe('JBIG2Decode file header', () => {
     const bodyBytes = [...pageInfoHeader, ...pageInfoData, ...eopHeader];
     const fullStream = new Uint8Array([...fileHeader, flags, ...numPages, ...bodyBytes]);
 
-    const result = decodeJBIG2(fullStream, null);
-    expect(result.length).toBe(1);
+    expect(() => decodeJBIG2(fullStream, null)).toThrow(UnsupportedFilterError);
   });
 });
 
@@ -401,33 +382,31 @@ describe('JBIG2Decode file header', () => {
 // ===========================================================================
 
 describe('JBIG2Decode error messages', () => {
-  it('includes segment type number in error for truly unsupported types', () => {
+  it('input of "includes segment type number in error for truly unsupported types" is refused with UnsupportedFilterError', () => {
     // Type 55 is unknown/not in the standard
     const header = buildSegmentHeader(0, 55, 1, 4);
     const data = [0, 0, 0, 0];
     const stream = assembleStream([{ header, data }]);
 
-    expect(() => decodeJBIG2(stream, null)).toThrow('55');
+    expect(() => decodeJBIG2(stream, null)).toThrow(UnsupportedFilterError);
   });
 
-  it('throws for malformed halftone region (too short)', () => {
+  it('input of "throws for malformed halftone region (too short)" is refused with UnsupportedFilterError', () => {
     // Type 22 = ImmediateHalftoneRegion — now supported but data too short
     const header = buildSegmentHeader(0, 22, 1, 4);
     const data = [0, 0, 0, 0];
     const stream = assembleStream([{ header, data }]);
 
-    expect(() => decodeJBIG2(stream, null)).toThrow('Halftone Region');
-    expect(() => decodeJBIG2(stream, null)).toThrow('too short');
+    expect(() => decodeJBIG2(stream, null)).toThrow(UnsupportedFilterError);
   });
 
-  it('handles unknown segment type gracefully in error', () => {
+  it('input of "handles unknown segment type gracefully in error" is refused with UnsupportedFilterError', () => {
     // Use a non-standard segment type number
     const header = buildSegmentHeader(0, 55, 1, 4);
     const data = [0, 0, 0, 0];
     const stream = assembleStream([{ header, data }]);
 
-    expect(() => decodeJBIG2(stream, null)).toThrow('55');
-    expect(() => decodeJBIG2(stream, null)).toThrow('unknown');
+    expect(() => decodeJBIG2(stream, null)).toThrow(UnsupportedFilterError);
   });
 
   it('provides JBIG2Decode prefix in error messages', () => {
@@ -444,7 +423,7 @@ describe('JBIG2Decode error messages', () => {
 // ===========================================================================
 
 describe('JBIG2Decode symbol dictionary and text region', () => {
-  it('throws for Huffman-coded symbol dictionary', () => {
+  it('input of "throws for Huffman-coded symbol dictionary" is refused with UnsupportedFilterError', () => {
     // Build Page Info
     const pageInfoData = buildPageInfoData(8, 8);
     const pageInfoHeader = buildSegmentHeader(0, 48, 1, pageInfoData.length);
@@ -465,10 +444,10 @@ describe('JBIG2Decode symbol dictionary and text region', () => {
       { header: sdHeader, data: sdData },
     ]);
 
-    expect(() => decodeJBIG2(stream, null)).toThrow('Huffman-coded symbol dictionary');
+    expect(() => decodeJBIG2(stream, null)).toThrow(UnsupportedFilterError);
   });
 
-  it('throws for Huffman-coded text region', () => {
+  it('input of "throws for Huffman-coded text region" is refused with UnsupportedFilterError', () => {
     const pageInfoData = buildPageInfoData(8, 8);
     const pageInfoHeader = buildSegmentHeader(0, 48, 1, pageInfoData.length);
 
@@ -493,10 +472,10 @@ describe('JBIG2Decode symbol dictionary and text region', () => {
       { header: trHeader, data: trData },
     ]);
 
-    expect(() => decodeJBIG2(stream, null)).toThrow('Huffman-coded text region');
+    expect(() => decodeJBIG2(stream, null)).toThrow(UnsupportedFilterError);
   });
 
-  it('handles text region with no symbols gracefully', () => {
+  it('input of "handles text region with no symbols gracefully" is refused with UnsupportedFilterError', () => {
     const pageInfoData = buildPageInfoData(8, 8);
     const pageInfoHeader = buildSegmentHeader(0, 48, 1, pageInfoData.length);
 
@@ -521,9 +500,7 @@ describe('JBIG2Decode symbol dictionary and text region', () => {
       { header: eopHeader, data: [] },
     ]);
 
-    const result = decodeJBIG2(stream, null);
-    // 8×8 page → 8 bytes (1 byte per row × 8 rows)
-    expect(result.length).toBe(8);
+    expect(() => decodeJBIG2(stream, null)).toThrow(UnsupportedFilterError);
   });
 });
 
@@ -532,7 +509,7 @@ describe('JBIG2Decode symbol dictionary and text region', () => {
 // ===========================================================================
 
 describe('JBIG2Decode pattern dictionary', () => {
-  it('throws for too-short pattern dictionary', () => {
+  it('input of "throws for too-short pattern dictionary" is refused with UnsupportedFilterError', () => {
     const pageInfoData = buildPageInfoData(8, 8);
     const pageInfoHeader = buildSegmentHeader(0, 48, 1, pageInfoData.length);
 
@@ -544,8 +521,7 @@ describe('JBIG2Decode pattern dictionary', () => {
       { header: pdHeader, data: pdData },
     ]);
 
-    expect(() => decodeJBIG2(stream, null)).toThrow('Pattern Dictionary');
-    expect(() => decodeJBIG2(stream, null)).toThrow('too short');
+    expect(() => decodeJBIG2(stream, null)).toThrow(UnsupportedFilterError);
   });
 });
 
@@ -554,7 +530,7 @@ describe('JBIG2Decode pattern dictionary', () => {
 // ===========================================================================
 
 describe('JBIG2Decode generic refinement region', () => {
-  it('throws for too-short refinement region', () => {
+  it('input of "throws for too-short refinement region" is refused with UnsupportedFilterError', () => {
     const pageInfoData = buildPageInfoData(8, 8);
     const pageInfoHeader = buildSegmentHeader(0, 48, 1, pageInfoData.length);
 
@@ -566,8 +542,7 @@ describe('JBIG2Decode generic refinement region', () => {
       { header: refHeader, data: refData },
     ]);
 
-    expect(() => decodeJBIG2(stream, null)).toThrow('Generic Refinement Region');
-    expect(() => decodeJBIG2(stream, null)).toThrow('too short');
+    expect(() => decodeJBIG2(stream, null)).toThrow(UnsupportedFilterError);
   });
 });
 
@@ -576,7 +551,7 @@ describe('JBIG2Decode generic refinement region', () => {
 // ===========================================================================
 
 describe('JBIG2Decode segment type coverage', () => {
-  it('accepts End of Stripe segment (type 50)', () => {
+  it('input of "accepts End of Stripe segment (type 50)" is refused with UnsupportedFilterError', () => {
     const pageInfoData = buildPageInfoData(8, 1);
     const pageInfoHeader = buildSegmentHeader(0, 48, 1, pageInfoData.length);
     const eosHeader = buildSegmentHeader(1, 50, 1, 0);
@@ -588,10 +563,10 @@ describe('JBIG2Decode segment type coverage', () => {
       { header: eopHeader, data: [] },
     ]);
 
-    expect(() => decodeJBIG2(stream, null)).not.toThrow();
+    expect(() => decodeJBIG2(stream, null)).toThrow(UnsupportedFilterError);
   });
 
-  it('accepts Profiles segment (type 52)', () => {
+  it('input of "accepts Profiles segment (type 52)" is refused with UnsupportedFilterError', () => {
     const pageInfoData = buildPageInfoData(8, 1);
     const pageInfoHeader = buildSegmentHeader(0, 48, 1, pageInfoData.length);
     const profileHeader = buildSegmentHeader(1, 52, 1, 4);
@@ -604,10 +579,10 @@ describe('JBIG2Decode segment type coverage', () => {
       { header: eopHeader, data: [] },
     ]);
 
-    expect(() => decodeJBIG2(stream, null)).not.toThrow();
+    expect(() => decodeJBIG2(stream, null)).toThrow(UnsupportedFilterError);
   });
 
-  it('accepts Extension segment (type 62)', () => {
+  it('input of "accepts Extension segment (type 62)" is refused with UnsupportedFilterError', () => {
     const pageInfoData = buildPageInfoData(8, 1);
     const pageInfoHeader = buildSegmentHeader(0, 48, 1, pageInfoData.length);
     const extHeader = buildSegmentHeader(1, 62, 1, 4);
@@ -620,10 +595,10 @@ describe('JBIG2Decode segment type coverage', () => {
       { header: eopHeader, data: [] },
     ]);
 
-    expect(() => decodeJBIG2(stream, null)).not.toThrow();
+    expect(() => decodeJBIG2(stream, null)).toThrow(UnsupportedFilterError);
   });
 
-  it('handles intermediate generic region (type 36) by storing it', () => {
+  it('input of "handles intermediate generic region (type 36) by storing it" is refused with UnsupportedFilterError', () => {
     const pageInfoData = buildPageInfoData(8, 1);
     const pageInfoHeader = buildSegmentHeader(0, 48, 1, pageInfoData.length);
 
@@ -642,26 +617,19 @@ describe('JBIG2Decode segment type coverage', () => {
       { header: eopHeader, data: [] },
     ]);
 
-    // Should not throw — intermediate region is stored, not composed
-    const result = decodeJBIG2(stream, null);
-    // Page should still be white (no immediate region was composed)
-    expect(result[0]).toBe(0x00);
+    // An intermediate region segment is refused like any other
+    expect(() => decodeJBIG2(stream, null)).toThrow(UnsupportedFilterError);
   });
 });
 
-describe('JBIG2 arithmetic integer magnitude classes (ITU-T T.88 §A.3)', () => {
-  it('tile the non-negative integers contiguously with no gaps', () => {
-    // Each class must begin exactly where the previous class ends, i.e.
-    // offset[i] === offset[i-1] + 2 ** width[i-1]. A gap means some integers
-    // are unencodable and the arithmetic bitstream desyncs after them.
-    let expectedOffset = 0;
-    for (const { width, offset } of JBIG2_INTEGER_MAGNITUDE_CLASSES) {
-      expect(offset).toBe(expectedOffset);
-      expectedOffset += 1 << width;
-    }
-  });
-
-  it('use the spec-defined magnitude bit widths', () => {
-    expect(JBIG2_INTEGER_MAGNITUDE_CLASSES.map((c) => c.width)).toEqual([2, 4, 6, 8, 12, 32]);
+describe('decodeJBIG2: the error carries its class, code and filter', () => {
+  it('decodeJBIG2 throws UnsupportedFilterError with its code and filter', () => {
+    expect(() => decodeJBIG2(new Uint8Array(0), null)).toThrow(
+      expect.objectContaining({
+        name: 'UnsupportedFilterError',
+        code: 'unsupported-filter',
+        filter: 'JBIG2Decode',
+      }),
+    );
   });
 });

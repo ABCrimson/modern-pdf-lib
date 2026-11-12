@@ -1,6 +1,7 @@
 /**
  * Tests for the JBIG2 WASM bridge — initialization, availability checks,
- * graceful fallback behavior, and the async decode path.
+ * the async decode path, which rejects with UnsupportedFilterError when the
+ * WASM module is unavailable.
  */
 
 import { describe, it, expect, afterEach } from 'vitest';
@@ -11,6 +12,7 @@ import {
 } from '../../../src/parser/jbig2WasmBridge.js';
 import { decodeJBIG2Async, resetJBIG2WasmBridge } from '../../../src/parser/jbig2Decode.js';
 import { PdfDict } from '../../../src/core/pdfObjects.js';
+import { UnsupportedFilterError } from '../../../src/errors.js';
 
 // ---------------------------------------------------------------------------
 // Reset state between tests
@@ -170,28 +172,23 @@ describe('JBIG2 WASM bridge — availability', () => {
 // ---------------------------------------------------------------------------
 
 describe('JBIG2 WASM bridge — async decode with fallback', () => {
-  it('decodeJBIG2Async falls back to JS when WASM unavailable', async () => {
+  it('input of "decodeJBIG2Async falls back to JS when WASM unavailable" is refused with UnsupportedFilterError', async () => {
     // Build a minimal JBIG2 with just page info (empty bitmap)
     const jbig2Data = buildMinimalJbig2(8, 4);
 
     // This should fall back to the JS decoder since WASM is not loaded
-    const result = await decodeJBIG2Async(jbig2Data, null);
-    expect(result).toBeInstanceOf(Uint8Array);
-    // 8 pixels wide * 4 rows = 4 bytes (1 byte per row for 8-pixel width)
-    expect(result.length).toBeGreaterThan(0);
+    await expect(decodeJBIG2Async(jbig2Data, null)).rejects.toBeInstanceOf(UnsupportedFilterError);
   });
 
-  it('decodeJBIG2Async works with null parms', async () => {
+  it('input of "decodeJBIG2Async works with null parms" is refused with UnsupportedFilterError', async () => {
     const jbig2Data = buildMinimalJbig2(16, 8);
-    const result = await decodeJBIG2Async(jbig2Data, null);
-    expect(result).toBeInstanceOf(Uint8Array);
+    await expect(decodeJBIG2Async(jbig2Data, null)).rejects.toBeInstanceOf(UnsupportedFilterError);
   });
 
-  it('decodeJBIG2Async works with empty parms dict', async () => {
+  it('input of "decodeJBIG2Async works with empty parms dict" is refused with UnsupportedFilterError', async () => {
     const jbig2Data = buildMinimalJbig2(8, 8);
     const parms = new PdfDict();
-    const result = await decodeJBIG2Async(jbig2Data, parms);
-    expect(result).toBeInstanceOf(Uint8Array);
+    await expect(decodeJBIG2Async(jbig2Data, parms)).rejects.toBeInstanceOf(UnsupportedFilterError);
   });
 });
 
@@ -218,5 +215,15 @@ describe('JBIG2 WASM bridge — module exports', () => {
 
   it('exports resetJBIG2WasmBridge function', () => {
     expect(typeof resetJBIG2WasmBridge).toBe('function');
+  });
+});
+
+describe('decodeJBIG2Async: the error carries its class, code and filter', () => {
+  it('decodeJBIG2Async rejects with UnsupportedFilterError with its code and filter', async () => {
+    await expect(decodeJBIG2Async(new Uint8Array(0), null)).rejects.toMatchObject({
+      name: 'UnsupportedFilterError',
+      code: 'unsupported-filter',
+      filter: 'JBIG2Decode',
+    });
   });
 });

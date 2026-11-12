@@ -4,13 +4,14 @@
  * WebP image decoder — pure TypeScript, no WASM, no Buffer.
  *
  * Supports:
- * - VP8 (lossy) bitstream decoding with macroblock processing
- * - VP8L (lossless) bitstream decoding with Huffman coding, LZ77, color cache, spatial prediction
- * - ALPH chunk (alpha channel) with filtering and compression
+ * - VP8L (lossless) decoding. VP8 (lossy) data throws UnsupportedFilterError.
  * - RIFF/WebP container parsing
  *
  * Magic bytes: 52 49 46 46 (RIFF) + offset 8-11: 57 45 42 50 (WEBP)
  */
+
+import { assertWithinLimit } from '../../core/limits.js';
+import { UnsupportedFilterError } from '../../errors.js';
 
 // ---------------------------------------------------------------------------
 // Public interfaces
@@ -94,10 +95,11 @@ function parseRiffChunks(data: Uint8Array): RiffChunk[] {
 // ---------------------------------------------------------------------------
 
 /**
- * Decode a WebP image to raw pixel data.
+ * Decode a lossless WebP image (VP8L) to raw pixel data.
  *
- * Supports VP8 (lossy), VP8L (lossless), and VP8+ALPH (lossy with alpha).
- * Auto-detects the format from chunk headers.
+ * A lossy (VP8) image chunk, with or without an ALPH chunk, throws
+ * {@link UnsupportedFilterError} (filter 'VP8') before any of its bytes are read.
+ * Images above the internal size limits throw {@link ResourceLimitError}.
  *
  * @param data  Raw WebP file bytes.
  * @returns     Decoded image with width, height, and pixel data.
@@ -106,305 +108,17 @@ export function decodeWebP(data: Uint8Array): WebPImage {
   const chunks = parseRiffChunks(data);
 
   const vp8lChunk = chunks.find((c) => c.fourcc === 'VP8L');
-  const vp8Chunk = chunks.find((c) => c.fourcc === 'VP8 ');
-  const alphChunk = chunks.find((c) => c.fourcc === 'ALPH');
 
   if (vp8lChunk) {
     // VP8L lossless
     return decodeVP8L(vp8lChunk.data);
   }
 
-  if (vp8Chunk) {
-    // VP8 lossy
-    const rgb = decodeVP8(vp8Chunk.data);
-
-    if (alphChunk) {
-      // Merge alpha channel with RGB
-      const alphaPlane = decodeAlphaChunk(alphChunk.data, rgb.width, rgb.height);
-      return mergeRgbAlpha(rgb, alphaPlane);
-    }
-
-    return rgb;
+  if (chunks.some((c) => c.fourcc === 'VP8 ')) {
+    throw new UnsupportedFilterError('VP8');
   }
 
   throw new Error('WebP: no VP8 or VP8L chunk found');
-}
-
-// ---------------------------------------------------------------------------
-// VP8 (lossy) decoder
-// ---------------------------------------------------------------------------
-
-/**
- * VP8 bitstream reader — reads bits from a VP8 boolean decoder (arithmetic coding).
- * VP8 uses a range-based boolean arithmetic coder (bool decoder).
- */
-class BoolDecoder {
-  private data: Uint8Array;
-  private pos: number;
-  private range = 255;
-  private value = 0;
-  private bits = -8; // Negative means we need to load bits
-
-  constructor(data: Uint8Array, offset: number) {
-    this.data = data;
-    this.pos = offset;
-    // Load initial value (big-endian 16-bit)
-    this.value = ((data[this.pos]! << 8) | (data[this.pos + 1] ?? 0)) & 0xffff;
-    this.pos += 2;
-    this.bits = 0;
-  }
-
-  /** Read a single boolean with given probability (0-255, 128 = 50/50). */
-  readBool(prob: number): number {
-    const split = 1 + (((this.range - 1) * prob) >> 8);
-    let bit: number;
-
-    if (this.value < split << 8) {
-      this.range = split;
-      bit = 0;
-    } else {
-      this.range -= split;
-      this.value -= split << 8;
-      bit = 1;
-    }
-
-    // Renormalize
-    while (this.range < 128) {
-      this.range <<= 1;
-      this.value <<= 1;
-      if (++this.bits === 8) {
-        this.bits = 0;
-        if (this.pos < this.data.length) {
-          this.value |= this.data[this.pos]!;
-        }
-        this.pos++;
-      }
-    }
-
-    return bit;
-  }
-
-  /** Read a literal value of the given number of bits. */
-  readLiteral(nBits: number): number {
-    let value = 0;
-    for (let i = nBits - 1; i >= 0; i--) {
-      value |= this.readBool(128) << i;
-    }
-    return value;
-  }
-
-  /** Read a signed literal. */
-  readSignedLiteral(nBits: number): number {
-    const value = this.readLiteral(nBits);
-    return this.readBool(128) ? -value : value;
-  }
-}
-
-function clamp255(v: number): number {
-  return v < 0 ? 0 : v > 255 ? 255 : v;
-}
-
-/** YUV420 to RGB conversion. */
-function yuvToRgb(
-  yPlane: Uint8Array,
-  uPlane: Uint8Array,
-  vPlane: Uint8Array,
-  width: number,
-  height: number,
-  yStride: number,
-  uvStride: number,
-): Uint8Array {
-  const rgb = new Uint8Array(width * height * 3);
-
-  for (let row = 0; row < height; row++) {
-    for (let col = 0; col < width; col++) {
-      const y = yPlane[row * yStride + col]!;
-      const u = uPlane[(row >> 1) * uvStride + (col >> 1)]!;
-      const v = vPlane[(row >> 1) * uvStride + (col >> 1)]!;
-
-      const c = y - 16;
-      const d = u - 128;
-      const e = v - 128;
-
-      const idx = (row * width + col) * 3;
-      rgb[idx] = clamp255((298 * c + 409 * e + 128) >> 8);
-      rgb[idx + 1] = clamp255((298 * c - 100 * d - 208 * e + 128) >> 8);
-      rgb[idx + 2] = clamp255((298 * c + 516 * d + 128) >> 8);
-    }
-  }
-
-  return rgb;
-}
-
-/**
- * Decode a VP8 (lossy) bitstream to RGB pixels.
- *
- * This is a simplified VP8 decoder that handles the common case:
- * - Keyframes only (no inter-frame prediction)
- * - Basic intra prediction modes
- * - DCT coefficient decoding with dequantization
- */
-function decodeVP8(data: Uint8Array): WebPImage {
-  if (data.length < 10) {
-    throw new Error('WebP VP8: data too short');
-  }
-
-  // Parse frame tag (3 bytes, little-endian)
-  const frameTag = data[0]! | (data[1]! << 8) | (data[2]! << 16);
-  const isKeyframe = (frameTag & 1) === 0;
-  // const version = (frameTag >> 1) & 7;
-  // const showFrame = (frameTag >> 4) & 1;
-
-  if (!isKeyframe) {
-    throw new Error('WebP VP8: only keyframes are supported (not an animation frame)');
-  }
-
-  // Keyframe header: 3 bytes signature (0x9D 0x01 0x2A) + 4 bytes dimensions
-  let offset = 3;
-  if (data[offset] !== 0x9d || data[offset + 1] !== 0x01 || data[offset + 2] !== 0x2a) {
-    throw new Error('WebP VP8: invalid keyframe signature');
-  }
-  offset += 3;
-
-  // Dimensions (little-endian 16-bit, with scale in upper 2 bits)
-  const widthField = data[offset]! | (data[offset + 1]! << 8);
-  const heightField = data[offset + 2]! | (data[offset + 3]! << 8);
-  const width = widthField & 0x3fff;
-  const height = heightField & 0x3fff;
-  offset += 4;
-
-  if (width === 0 || height === 0) {
-    throw new Error('WebP VP8: invalid dimensions (zero width or height)');
-  }
-
-  // Number of macroblocks
-  const mbWidth = Math.ceil(width / 16);
-  const mbHeight = Math.ceil(height / 16);
-
-  // The bool decoder starts at the first partition
-  const bd = new BoolDecoder(data, offset);
-
-  // Color space and clamping (ignored for simple decoding)
-  bd.readBool(128); // color_space
-  bd.readBool(128); // clamping_type
-
-  // Segmentation
-  const segmentationEnabled = bd.readBool(128);
-  if (segmentationEnabled) {
-    const updateMap = bd.readBool(128);
-    const updateData = bd.readBool(128);
-    if (updateData) {
-      bd.readBool(128); // abs_delta
-      for (let i = 0; i < 4; i++) {
-        if (bd.readBool(128)) bd.readSignedLiteral(7);
-      }
-      for (let i = 0; i < 4; i++) {
-        if (bd.readBool(128)) bd.readSignedLiteral(6);
-      }
-    }
-    if (updateMap) {
-      for (let i = 0; i < 3; i++) {
-        if (bd.readBool(128)) bd.readLiteral(8);
-      }
-    }
-  }
-
-  // Filter type and strength
-  bd.readBool(128); // filter_type
-  bd.readLiteral(6); // loop_filter_level
-  bd.readLiteral(3); // sharpness_level
-
-  // Loop filter adjustments
-  const lfAdjust = bd.readBool(128);
-  if (lfAdjust) {
-    const lfDelta = bd.readBool(128);
-    if (lfDelta) {
-      for (let i = 0; i < 4; i++) {
-        if (bd.readBool(128)) bd.readSignedLiteral(6);
-      }
-      for (let i = 0; i < 4; i++) {
-        if (bd.readBool(128)) bd.readSignedLiteral(6);
-      }
-    }
-  }
-
-  // Number of DCT partitions (value unused; read to advance the bitstream)
-  bd.readLiteral(2);
-
-  // Quantization indices (values unused in simplified decode; reads advance the bitstream)
-  bd.readLiteral(7);
-  if (bd.readBool(128)) bd.readSignedLiteral(4);
-  if (bd.readBool(128)) bd.readSignedLiteral(4);
-  if (bd.readBool(128)) bd.readSignedLiteral(4);
-  if (bd.readBool(128)) bd.readSignedLiteral(4);
-  if (bd.readBool(128)) bd.readSignedLiteral(4);
-
-  // Token probability update
-  // VP8 default probabilities (simplified: all 128)
-  const tokenProbs = new Uint8Array(4 * 8 * 3 * 11);
-  tokenProbs.fill(128);
-  for (let i = 0; i < 4; i++) {
-    for (let j = 0; j < 8; j++) {
-      for (let k = 0; k < 3; k++) {
-        for (let l = 0; l < 11; l++) {
-          if (bd.readBool(128)) {
-            tokenProbs[((i * 8 + j) * 3 + k) * 11 + l] = bd.readLiteral(8);
-          }
-        }
-      }
-    }
-  }
-
-  // Skip MB_NO_COEFF update
-  bd.readBool(128); // prob_skip_false
-
-  // Now decode macroblocks
-  // Allocate YUV planes with macroblock-aligned dimensions
-  const yStride = mbWidth * 16;
-  const uvStride = mbWidth * 8;
-  const yPlane = new Uint8Array(mbHeight * 16 * yStride);
-  const uPlane = new Uint8Array(mbHeight * 8 * uvStride);
-  const vPlane = new Uint8Array(mbHeight * 8 * uvStride);
-
-  // Fill with default values (128 for UV, 127 for Y)
-  yPlane.fill(127);
-  uPlane.fill(128);
-  vPlane.fill(128);
-
-  // Simplified macroblock decoding:
-  // For each macroblock, use DC prediction (fill with 128)
-  // This produces a valid but simplified image
-  // A full VP8 decoder would decode all DCT coefficients
-  for (let mbRow = 0; mbRow < mbHeight; mbRow++) {
-    for (let mbCol = 0; mbCol < mbWidth; mbCol++) {
-      // Simple: fill Y with 128 (mid-gray), U/V with 128 (neutral)
-      const yBase = mbRow * 16 * yStride + mbCol * 16;
-      const uvBase = mbRow * 8 * uvStride + mbCol * 8;
-
-      for (let r = 0; r < 16; r++) {
-        for (let c = 0; c < 16; c++) {
-          yPlane[yBase + r * yStride + c] = 128;
-        }
-      }
-      for (let r = 0; r < 8; r++) {
-        for (let c = 0; c < 8; c++) {
-          uPlane[uvBase + r * uvStride + c] = 128;
-          vPlane[uvBase + r * uvStride + c] = 128;
-        }
-      }
-    }
-  }
-
-  // Convert YUV to RGB
-  const pixels = yuvToRgb(yPlane, uPlane, vPlane, width, height, yStride, uvStride);
-
-  return {
-    width,
-    height,
-    pixels,
-    channels: 3,
-    hasAlpha: false,
-  };
 }
 
 // ---------------------------------------------------------------------------
@@ -608,6 +322,11 @@ function decodeVP8L(data: Uint8Array): WebPImage {
     throw new Error(`WebP VP8L: unsupported version ${versionBits}`);
   }
 
+  // Refuse an image above the size limits before any buffer is sized from the header.
+  assertWithinLimit('maxImageDimension', Math.max(width, height));
+  assertWithinLimit('maxImagePixels', width * height);
+  assertWithinLimit('maxImageBytes', width * height * 4);
+
   // Read transforms
   const transforms: Array<{ type: number; data: unknown }> = [];
   while (reader.readBit() === 1) {
@@ -805,129 +524,4 @@ function decodeLZ77Distance(reader: VP8LBitReader, code: number, _width: number)
     return base + (extra > 0 ? reader.readBits(extra) : 0);
   }
   return 1;
-}
-
-// ---------------------------------------------------------------------------
-// Alpha channel decoding (ALPH chunk)
-// ---------------------------------------------------------------------------
-
-/**
- * Decode a WebP ALPH chunk to a flat alpha plane.
- *
- * The ALPH chunk format:
- * - 1 byte header: [preprocessing:2][filtering:2][compression:2][unused:2]
- * - Remaining bytes: alpha data
- *
- * Compression:
- * - 0 = uncompressed
- * - 1 = VP8L-compressed (lossless)
- *
- * Filtering:
- * - 0 = none
- * - 1 = horizontal
- * - 2 = vertical
- * - 3 = gradient
- */
-function decodeAlphaChunk(data: Uint8Array, width: number, height: number): Uint8Array {
-  if (data.length < 1) {
-    throw new Error('WebP ALPH: chunk too short');
-  }
-
-  const header = data[0]!;
-  const filtering = (header >> 2) & 0x03;
-  const compression = (header >> 0) & 0x03;
-
-  let alphaData: Uint8Array;
-
-  if (compression === 0) {
-    // Uncompressed
-    alphaData = data.subarray(1);
-  } else if (compression === 1) {
-    // VP8L-compressed alpha
-    // The compressed data is a VP8L bitstream but for a single-channel image
-    // Simplified: try to decode as raw VP8L
-    try {
-      const lossless = decodeVP8L(data.subarray(1));
-      // Extract green channel as alpha (VP8L stores single-channel as green)
-      alphaData = new Uint8Array(width * height);
-      for (let i = 0; i < width * height; i++) {
-        alphaData[i] = lossless.pixels[i * lossless.channels + 1] ?? 255;
-      }
-    } catch {
-      // Fallback: fill with opaque
-      alphaData = new Uint8Array(width * height);
-      alphaData.fill(255);
-    }
-  } else {
-    throw new Error(`WebP ALPH: unsupported compression method ${compression}`);
-  }
-
-  // Apply inverse filtering
-  const numPixels = width * height;
-  const alpha = new Uint8Array(numPixels);
-
-  if (alphaData.length < numPixels) {
-    // Pad short data
-    alpha.set(alphaData.subarray(0, numPixels));
-  } else {
-    alpha.set(alphaData.subarray(0, numPixels));
-  }
-
-  applyAlphaFilter(alpha, width, height, filtering);
-
-  return alpha;
-}
-
-function applyAlphaFilter(
-  alpha: Uint8Array,
-  width: number,
-  height: number,
-  filtering: number,
-): void {
-  if (filtering === 0) return; // No filtering
-
-  // Process in raster order
-  for (let row = 0; row < height; row++) {
-    for (let col = 0; col < width; col++) {
-      const idx = row * width + col;
-      const left = col > 0 ? alpha[idx - 1]! : 0;
-      const top = row > 0 ? alpha[idx - width]! : 0;
-      const topLeft = row > 0 && col > 0 ? alpha[idx - width - 1]! : 0;
-
-      switch (filtering) {
-        case 1: // Horizontal
-          alpha[idx] = (alpha[idx]! + left) & 0xff;
-          break;
-        case 2: // Vertical
-          alpha[idx] = (alpha[idx]! + top) & 0xff;
-          break;
-        case 3: // Gradient
-          alpha[idx] = (alpha[idx]! + clamp255(left + top - topLeft)) & 0xff;
-          break;
-      }
-    }
-  }
-}
-
-/** Merge RGB image with separate alpha plane to produce RGBA. */
-function mergeRgbAlpha(rgb: WebPImage, alphaPlane: Uint8Array): WebPImage {
-  const { width, height } = rgb;
-  const pixels = new Uint8Array(width * height * 4);
-
-  for (let i = 0; i < width * height; i++) {
-    const srcIdx = i * rgb.channels;
-    const dstIdx = i * 4;
-    pixels[dstIdx] = rgb.pixels[srcIdx]!;
-    pixels[dstIdx + 1] = rgb.pixels[srcIdx + 1]!;
-    pixels[dstIdx + 2] = rgb.pixels[srcIdx + 2]!;
-    pixels[dstIdx + 3] = alphaPlane[i] ?? 255;
-  }
-
-  return {
-    width,
-    height,
-    pixels,
-    channels: 4,
-    hasAlpha: true,
-  };
 }

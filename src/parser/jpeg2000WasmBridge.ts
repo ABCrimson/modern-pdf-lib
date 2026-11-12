@@ -3,10 +3,11 @@
  *
  * WASM-backed JPEG2000 decoder using a Rust-compiled module.
  *
- * This provides optional high-performance JPEG2000 decoding via a WASM
- * module compiled from Rust.  When WASM is not available or fails to
- * load, the caller falls back to the pure-JS decoder in
- * {@link jpeg2000Decode}.
+ * The caller supplies the compiled WASM binary to {@link initJpeg2000Wasm}:
+ * this package ships no JPEG2000 WASM module, and the universal WASM loader
+ * has no `'jpeg2000'` entry. Without an initialised module,
+ * {@link decodeJpeg2000WithFallback} reaches {@link decodeJpeg2000} in
+ * {@link jpeg2000Decode}, which throws {@link UnsupportedFilterError}.
  *
  * The WASM module uses `wasm-bindgen` and returns structured results
  * (width, height, pixel data, component count) rather than raw memory
@@ -93,16 +94,12 @@ let available = false;
  * This must be called before using {@link decodeJpeg2000Wasm}.  It is safe
  * to call multiple times -- subsequent calls are no-ops.
  *
- * @param wasmBytes - Optional pre-loaded WASM binary.  When omitted,
- *                    the module is loaded via the universal WASM loader.
+ * @param wasmBytes - The compiled module.  Without it this throws: the
+ *                    package ships no JPEG2000 module.
  * @throws If the WASM module cannot be loaded or instantiated.
  *
  * @example
  * ```ts
- * // Auto-load from default location
- * await initJpeg2000Wasm();
- *
- * // Or provide bytes directly (e.g. bundled)
  * await initJpeg2000Wasm(myWasmBytes);
  * ```
  */
@@ -178,11 +175,14 @@ export function decodeJpeg2000Wasm(data: Uint8Array): Jpeg2000DecodeResult {
  * Decode JPEG2000 data with automatic WASM-to-JS fallback.
  *
  * If the WASM module is initialized, it is used for decoding.  Otherwise,
- * the pure-JS decoder from `jpeg2000Decode.ts` is used as a fallback.
+ * or when the WASM decode fails, the call reaches {@link decodeJpeg2000},
+ * which throws {@link UnsupportedFilterError} (filter `'JPXDecode'`): the
+ * JavaScript JPEG 2000 decoder is not used in this release, so without an
+ * initialised WASM module this rejects with that error.
  *
  * @param data - JPEG2000-encoded bytes (JP2 container or raw J2K codestream).
  * @returns The decoded pixel data with metadata.
- * @throws If both WASM and JS decoding fail.
+ * @throws {UnsupportedFilterError} When the WASM module is not initialised or fails to decode.
  */
 export async function decodeJpeg2000WithFallback(data: Uint8Array): Promise<Jpeg2000DecodeResult> {
   // Try WASM first
@@ -194,7 +194,7 @@ export async function decodeJpeg2000WithFallback(data: Uint8Array): Promise<Jpeg
     }
   }
 
-  // Fall back to the pure-JS decoder
+  // The JavaScript decoder throws UnsupportedFilterError
   const { decodeJpeg2000 } = await import('./jpeg2000Decode.js');
   return decodeJpeg2000(data);
 }

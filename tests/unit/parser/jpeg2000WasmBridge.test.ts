@@ -9,7 +9,9 @@ import {
   isJpeg2000WasmReady,
   disposeJpeg2000Wasm,
   decodeJpeg2000Wasm,
+  decodeJpeg2000WithFallback,
 } from '../../../src/parser/jpeg2000WasmBridge.js';
+import { UnsupportedFilterError } from '../../../src/errors.js';
 
 // ---------------------------------------------------------------------------
 // Reset state between tests
@@ -116,5 +118,20 @@ describe('JPEG2000 WASM bridge — module exports', () => {
 
   it('exports decodeJpeg2000Wasm function', () => {
     expect(typeof decodeJpeg2000Wasm).toBe('function');
+  });
+});
+
+describe('JPEG2000 WASM bridge — fallback', () => {
+  it('decodeJpeg2000WithFallback rejects with UnsupportedFilterError without an initialised module', async () => {
+    await expect(
+      decodeJpeg2000WithFallback(new Uint8Array([0xff, 0x4f, 0xff, 0xd9])),
+    ).rejects.toMatchObject({
+      name: 'UnsupportedFilterError',
+      code: 'unsupported-filter',
+      filter: 'JPXDecode',
+    });
+    await expect(decodeJpeg2000WithFallback(new Uint8Array([]))).rejects.toBeInstanceOf(
+      UnsupportedFilterError,
+    );
   });
 });

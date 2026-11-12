@@ -1,6 +1,7 @@
 /**
- * Tests for JPEG2000 tile grid parsing, single-tile decoding,
- * region decoding, and tile assembly.
+ * Tests for JPEG2000 tile grid parsing. The single-tile, region and assembly
+ * entry points throw UnsupportedFilterError (each rewritten test keeps its
+ * input and asserts the refusal).
  *
  * Covers:
  * - parseTileInfo: extracts correct tile grid geometry from SIZ marker
@@ -24,6 +25,7 @@ import {
   assembleTiles,
 } from '../../../src/parser/jpeg2000Tiles.js';
 import type { TileGridInfo, TileData } from '../../../src/parser/jpeg2000Tiles.js';
+import { UnsupportedFilterError } from '../../../src/errors.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -263,7 +265,7 @@ describe('parseTileInfo', () => {
 // ---------------------------------------------------------------------------
 
 describe('decodeTile', () => {
-  it('returns tile data with correct index and position for tile 0', () => {
+  it('input of "returns tile data with correct index and position for tile 0" is refused with UnsupportedFilterError', () => {
     const data = buildJ2K({
       width: 128,
       height: 128,
@@ -271,16 +273,10 @@ describe('decodeTile', () => {
       tileHeight: 64,
       addSOT: true,
     });
-    const tile = decodeTile(data, 0);
-    expect(tile.index).toBe(0);
-    expect(tile.x).toBe(0);
-    expect(tile.y).toBe(0);
-    expect(tile.width).toBe(64);
-    expect(tile.height).toBe(64);
-    expect(tile.components).toBe(3);
+    expect(() => decodeTile(data, 0)).toThrow(UnsupportedFilterError);
   });
 
-  it('returns correct position for tile at col=1, row=0', () => {
+  it('input of "returns correct position for tile at col=1, row=0" is refused with UnsupportedFilterError', () => {
     const data = buildJ2K({
       width: 128,
       height: 128,
@@ -288,13 +284,10 @@ describe('decodeTile', () => {
       tileHeight: 64,
       addSOT: true,
     });
-    const tile = decodeTile(data, 1);
-    expect(tile.index).toBe(1);
-    expect(tile.x).toBe(64);
-    expect(tile.y).toBe(0);
+    expect(() => decodeTile(data, 1)).toThrow(UnsupportedFilterError);
   });
 
-  it('returns correct position for tile at row=1', () => {
+  it('input of "returns correct position for tile at row=1" is refused with UnsupportedFilterError', () => {
     const data = buildJ2K({
       width: 128,
       height: 128,
@@ -303,13 +296,10 @@ describe('decodeTile', () => {
       addSOT: true,
     });
     // Tile 2 = row 1, col 0
-    const tile = decodeTile(data, 2);
-    expect(tile.index).toBe(2);
-    expect(tile.x).toBe(0);
-    expect(tile.y).toBe(64);
+    expect(() => decodeTile(data, 2)).toThrow(UnsupportedFilterError);
   });
 
-  it('returns tile data as a Uint8Array', () => {
+  it('input of "returns tile data as a Uint8Array" is refused with UnsupportedFilterError', () => {
     const data = buildJ2K({
       width: 64,
       height: 64,
@@ -317,11 +307,10 @@ describe('decodeTile', () => {
       tileHeight: 64,
       addSOT: true,
     });
-    const tile = decodeTile(data, 0);
-    expect(tile.data).toBeInstanceOf(Uint8Array);
+    expect(() => decodeTile(data, 0)).toThrow(UnsupportedFilterError);
   });
 
-  it('throws for negative tile index', () => {
+  it('input of "throws for negative tile index" is refused with UnsupportedFilterError', () => {
     const data = buildJ2K({
       width: 64,
       height: 64,
@@ -329,10 +318,10 @@ describe('decodeTile', () => {
       tileHeight: 64,
       addSOT: true,
     });
-    expect(() => decodeTile(data, -1)).toThrow(/out of range/i);
+    expect(() => decodeTile(data, -1)).toThrow(UnsupportedFilterError);
   });
 
-  it('throws for tile index beyond total tiles', () => {
+  it('input of "throws for tile index beyond total tiles" is refused with UnsupportedFilterError', () => {
     const data = buildJ2K({
       width: 128,
       height: 128,
@@ -341,10 +330,10 @@ describe('decodeTile', () => {
       addSOT: true,
     });
     // Total tiles = 4 (2x2), so index 4 is out of range
-    expect(() => decodeTile(data, 4)).toThrow(/out of range/i);
+    expect(() => decodeTile(data, 4)).toThrow(UnsupportedFilterError);
   });
 
-  it('handles edge tile with reduced width', () => {
+  it('input of "handles edge tile with reduced width" is refused with UnsupportedFilterError', () => {
     const data = buildJ2K({
       width: 100,
       height: 64,
@@ -353,9 +342,7 @@ describe('decodeTile', () => {
       addSOT: true,
     });
     // Tile 1 at col=1 should have width 36 (100-64)
-    const tile = decodeTile(data, 1);
-    expect(tile.width).toBe(36);
-    expect(tile.height).toBe(64);
+    expect(() => decodeTile(data, 1)).toThrow(UnsupportedFilterError);
   });
 });
 
@@ -364,7 +351,7 @@ describe('decodeTile', () => {
 // ---------------------------------------------------------------------------
 
 describe('decodeTileRegion', () => {
-  it('returns pixel data for the requested region', () => {
+  it('input of "returns pixel data for the requested region" is refused with UnsupportedFilterError', () => {
     const data = buildJ2K({
       width: 128,
       height: 128,
@@ -372,13 +359,12 @@ describe('decodeTileRegion', () => {
       tileHeight: 64,
       addSOT: true,
     });
-    const result = decodeTileRegion(data, { x: 0, y: 0, width: 32, height: 32 });
-    expect(result).toBeInstanceOf(Uint8Array);
-    // For 8-bit, 3 components: 32 * 32 * 3 = 3072 bytes
-    expect(result.length).toBe(32 * 32 * 3);
+    expect(() => decodeTileRegion(data, { x: 0, y: 0, width: 32, height: 32 })).toThrow(
+      UnsupportedFilterError,
+    );
   });
 
-  it('returns data matching clamped region size', () => {
+  it('input of "returns data matching clamped region size" is refused with UnsupportedFilterError', () => {
     const data = buildJ2K({
       width: 128,
       height: 128,
@@ -387,12 +373,12 @@ describe('decodeTileRegion', () => {
       addSOT: true,
     });
     // Region extends beyond image: should be clamped
-    const result = decodeTileRegion(data, { x: 100, y: 100, width: 100, height: 100 });
-    // Clamped: x=100, y=100, width=28, height=28
-    expect(result.length).toBe(28 * 28 * 3);
+    expect(() => decodeTileRegion(data, { x: 100, y: 100, width: 100, height: 100 })).toThrow(
+      UnsupportedFilterError,
+    );
   });
 
-  it('throws when region is entirely outside image bounds', () => {
+  it('input of "throws when region is entirely outside image bounds" is refused with UnsupportedFilterError', () => {
     const data = buildJ2K({
       width: 128,
       height: 128,
@@ -401,7 +387,7 @@ describe('decodeTileRegion', () => {
       addSOT: true,
     });
     expect(() => decodeTileRegion(data, { x: 200, y: 200, width: 50, height: 50 })).toThrow(
-      /outside image bounds/i,
+      UnsupportedFilterError,
     );
   });
 });
@@ -411,7 +397,7 @@ describe('decodeTileRegion', () => {
 // ---------------------------------------------------------------------------
 
 describe('assembleTiles', () => {
-  it('produces output matching full image dimensions', () => {
+  it('input of "produces output matching full image dimensions" is refused with UnsupportedFilterError', () => {
     const gridInfo: TileGridInfo = {
       imageWidth: 128,
       imageHeight: 64,
@@ -444,11 +430,10 @@ describe('assembleTiles', () => {
       components: 3,
     };
 
-    const result = assembleTiles([tile0, tile1], gridInfo);
-    expect(result.length).toBe(128 * 64 * 3);
+    expect(() => assembleTiles([tile0, tile1], gridInfo)).toThrow(UnsupportedFilterError);
   });
 
-  it('places tile data at correct positions', () => {
+  it('input of "places tile data at correct positions" is refused with UnsupportedFilterError', () => {
     const gridInfo: TileGridInfo = {
       imageWidth: 4,
       imageHeight: 2,
@@ -481,20 +466,10 @@ describe('assembleTiles', () => {
       components: 1,
     };
 
-    const result = assembleTiles([tile0, tile1], gridInfo);
-    // Row 0: [10, 20, 50, 60]
-    // Row 1: [30, 40, 70, 80]
-    expect(result[0]).toBe(10);
-    expect(result[1]).toBe(20);
-    expect(result[2]).toBe(50);
-    expect(result[3]).toBe(60);
-    expect(result[4]).toBe(30);
-    expect(result[5]).toBe(40);
-    expect(result[6]).toBe(70);
-    expect(result[7]).toBe(80);
+    expect(() => assembleTiles([tile0, tile1], gridInfo)).toThrow(UnsupportedFilterError);
   });
 
-  it('handles empty tile array (all zeros)', () => {
+  it('input of "handles empty tile array (all zeros)" is refused with UnsupportedFilterError', () => {
     const gridInfo: TileGridInfo = {
       imageWidth: 64,
       imageHeight: 64,
@@ -508,13 +483,10 @@ describe('assembleTiles', () => {
       bitsPerComponent: 8,
     };
 
-    const result = assembleTiles([], gridInfo);
-    expect(result.length).toBe(64 * 64 * 3);
-    // All zeros since no tiles were provided
-    expect(result.every((b) => b === 0)).toBe(true);
+    expect(() => assembleTiles([], gridInfo)).toThrow(UnsupportedFilterError);
   });
 
-  it('handles 16-bit depth (2 bytes per sample)', () => {
+  it('input of "handles 16-bit depth (2 bytes per sample)" is refused with UnsupportedFilterError', () => {
     const gridInfo: TileGridInfo = {
       imageWidth: 2,
       imageHeight: 1,
@@ -538,12 +510,51 @@ describe('assembleTiles', () => {
       components: 1,
     };
 
-    const result = assembleTiles([tile], gridInfo);
-    // 2 pixels * 1 component * 2 bytes = 4 bytes
-    expect(result.length).toBe(4);
-    expect(result[0]).toBe(0x01);
-    expect(result[1]).toBe(0x00);
-    expect(result[2]).toBe(0x02);
-    expect(result[3]).toBe(0x00);
+    expect(() => assembleTiles([tile], gridInfo)).toThrow(UnsupportedFilterError);
+  });
+});
+
+describe('JPEG2000 tile entries: the error carries its class, code and filter', () => {
+  it('decodeTile throws UnsupportedFilterError with its code and filter', () => {
+    expect(() => decodeTile(new Uint8Array(0), 0)).toThrow(
+      expect.objectContaining({
+        name: 'UnsupportedFilterError',
+        code: 'unsupported-filter',
+        filter: 'JPXDecode',
+      }),
+    );
+  });
+
+  it('decodeTileRegion throws UnsupportedFilterError with its code and filter', () => {
+    expect(() => decodeTileRegion(new Uint8Array(0), { x: 0, y: 0, width: 1, height: 1 })).toThrow(
+      expect.objectContaining({
+        name: 'UnsupportedFilterError',
+        code: 'unsupported-filter',
+        filter: 'JPXDecode',
+      }),
+    );
+  });
+
+  it('assembleTiles throws UnsupportedFilterError with its code and filter', () => {
+    expect(() =>
+      assembleTiles([], {
+        imageWidth: 8,
+        imageHeight: 8,
+        tileWidth: 8,
+        tileHeight: 8,
+        tilesX: 1,
+        tilesY: 1,
+        originX: 0,
+        originY: 0,
+        components: 1,
+        bitsPerComponent: 8,
+      }),
+    ).toThrow(
+      expect.objectContaining({
+        name: 'UnsupportedFilterError',
+        code: 'unsupported-filter',
+        filter: 'JPXDecode',
+      }),
+    );
   });
 });

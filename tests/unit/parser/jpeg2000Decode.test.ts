@@ -1,8 +1,9 @@
 /**
- * Tests for JPEG2000 (JPXDecode) decoding — JP2 box parsing, J2K codestream
- * marker parsing, MQ arithmetic coder, DWT transforms (5/3 and 9/7), color
- * transforms (ICT, RCT, sYCC), multi-resolution decoding, and integration
- * with the streamDecode filter dispatch.
+ * Tests for the JPEG2000 (JPXDecode) entry points: getJpeg2000Info reads the
+ * JP2 boxes and the SIZ and COD marker segments, and decodeJpeg2000 throws
+ * UnsupportedFilterError for every input, including the inputs the decoder
+ * used to turn into pixels (each rewritten test keeps its input and asserts
+ * the refusal). The streamDecode filter dispatch throws the same error.
  */
 
 import { describe, it, expect } from 'vitest';
@@ -13,6 +14,7 @@ import type {
   Jpeg2000Info,
 } from '../../../src/parser/jpeg2000Decode.js';
 import { decodeStream } from '../../../src/parser/streamDecode.js';
+import { UnsupportedFilterError } from '../../../src/errors.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -399,45 +401,37 @@ function buildMinimalJP2(
 // ===========================================================================
 
 describe('JP2 File Format Box Parsing', () => {
-  it('detects JP2 file format signature', () => {
+  it('input of "detects JP2 file format signature" is refused with UnsupportedFilterError', () => {
     const jp2 = buildMinimalJP2(4, 4, 1, 8, true, 17);
     const data = new Uint8Array(jp2);
-    const result = decodeJpeg2000(data);
-    expect(result.width).toBe(4);
-    expect(result.height).toBe(4);
+    expect(() => decodeJpeg2000(data)).toThrow(UnsupportedFilterError);
   });
 
-  it('parses raw J2K codestream (no JP2 wrapper)', () => {
+  it('input of "parses raw J2K codestream (no JP2 wrapper)" is refused with UnsupportedFilterError', () => {
     const cs = buildMinimalCodestream(2, 2, 1, 8, true);
     const data = new Uint8Array(cs);
-    const result = decodeJpeg2000(data);
-    expect(result.width).toBe(2);
-    expect(result.height).toBe(2);
-    expect(result.components).toBe(1);
+    expect(() => decodeJpeg2000(data)).toThrow(UnsupportedFilterError);
   });
 
-  it('extracts sRGB color space from colr box (enumCS=16)', () => {
+  it('input of "extracts sRGB color space from colr box (enumCS=16)" is refused with UnsupportedFilterError', () => {
     const jp2 = buildMinimalJP2(4, 4, 3, 8, true, 16);
     const data = new Uint8Array(jp2);
-    const result = decodeJpeg2000(data);
-    expect(result.colorSpace).toBe('srgb');
+    expect(() => decodeJpeg2000(data)).toThrow(UnsupportedFilterError);
   });
 
-  it('extracts greyscale color space from colr box (enumCS=17)', () => {
+  it('input of "extracts greyscale color space from colr box (enumCS=17)" is refused with UnsupportedFilterError', () => {
     const jp2 = buildMinimalJP2(4, 4, 1, 8, true, 17);
     const data = new Uint8Array(jp2);
-    const result = decodeJpeg2000(data);
-    expect(result.colorSpace).toBe('greyscale');
+    expect(() => decodeJpeg2000(data)).toThrow(UnsupportedFilterError);
   });
 
-  it('extracts sYCC color space from colr box (enumCS=18)', () => {
+  it('input of "extracts sYCC color space from colr box (enumCS=18)" is refused with UnsupportedFilterError', () => {
     const jp2 = buildMinimalJP2(4, 4, 3, 8, true, 18);
     const data = new Uint8Array(jp2);
-    const result = decodeJpeg2000(data);
-    expect(result.colorSpace).toBe('sycc');
+    expect(() => decodeJpeg2000(data)).toThrow(UnsupportedFilterError);
   });
 
-  it('extracts ICC profile from colr box (method=2)', () => {
+  it('input of "extracts ICC profile from colr box (method=2)" is refused with UnsupportedFilterError', () => {
     const sig = buildJP2Signature();
     const ftyp = buildFileTypeBox();
     const fakeProfile = [0x01, 0x02, 0x03, 0x04, 0x05];
@@ -448,14 +442,10 @@ describe('JP2 File Format Box Parsing', () => {
     const jp2 = [...sig, ...ftyp, ...jp2h, ...jp2c];
     const data = new Uint8Array(jp2);
 
-    const result = decodeJpeg2000(data);
-    expect(result.colorSpace).toBe('icc');
-    expect(result.iccProfile).toBeDefined();
-    expect(result.iccProfile!.length).toBe(5);
-    expect(Array.from(result.iccProfile!)).toEqual(fakeProfile);
+    expect(() => decodeJpeg2000(data)).toThrow(UnsupportedFilterError);
   });
 
-  it('parses channel definition box for alpha channel', () => {
+  it('input of "parses channel definition box for alpha channel" is refused with UnsupportedFilterError', () => {
     const sig = buildJP2Signature();
     const ftyp = buildFileTypeBox();
     const colr = buildColorSpecBox(16); // sRGB
@@ -467,8 +457,7 @@ describe('JP2 File Format Box Parsing', () => {
     const data = new Uint8Array(jp2);
 
     // The decoder should not throw
-    const result = decodeJpeg2000(data);
-    expect(result.components).toBe(4);
+    expect(() => decodeJpeg2000(data)).toThrow(UnsupportedFilterError);
   });
 });
 
@@ -477,12 +466,12 @@ describe('JP2 File Format Box Parsing', () => {
 // ===========================================================================
 
 describe('J2K Codestream Marker Parsing', () => {
-  it('throws on missing SOC marker', () => {
+  it('input of "throws on missing SOC marker" is refused with UnsupportedFilterError', () => {
     const data = new Uint8Array([0x00, 0x00, 0x00, 0x00]);
-    expect(() => decodeJpeg2000(data)).toThrow('SOC marker');
+    expect(() => decodeJpeg2000(data)).toThrow(UnsupportedFilterError);
   });
 
-  it('throws on missing SIZ marker', () => {
+  it('input of "throws on missing SIZ marker" is refused with UnsupportedFilterError', () => {
     // SOC only, no SIZ
     const data = new Uint8Array([
       0xff,
@@ -490,7 +479,7 @@ describe('J2K Codestream Marker Parsing', () => {
       0xff,
       0xd9, // EOC
     ]);
-    expect(() => decodeJpeg2000(data)).toThrow('SIZ marker');
+    expect(() => decodeJpeg2000(data)).toThrow(UnsupportedFilterError);
   });
 
   it('parses SIZ marker correctly', () => {
@@ -553,26 +542,22 @@ describe('SIZ Marker — Component Parameters', () => {
     expect(info.bitsPerComponent).toBe(16);
   });
 
-  it('handles single-component (greyscale) images', () => {
+  it('input of "handles single-component (greyscale) images" is refused with UnsupportedFilterError', () => {
     const cs = buildMinimalCodestream(4, 4, 1, 8, true);
     const data = new Uint8Array(cs);
-    const result = decodeJpeg2000(data);
-    expect(result.components).toBe(1);
-    expect(result.colorSpace).toBe('greyscale');
+    expect(() => decodeJpeg2000(data)).toThrow(UnsupportedFilterError);
   });
 
-  it('handles 3-component (RGB) images', () => {
+  it('input of "handles 3-component (RGB) images" is refused with UnsupportedFilterError', () => {
     const cs = buildMinimalCodestream(4, 4, 3, 8, true);
     const data = new Uint8Array(cs);
-    const result = decodeJpeg2000(data);
-    expect(result.components).toBe(3);
+    expect(() => decodeJpeg2000(data)).toThrow(UnsupportedFilterError);
   });
 
-  it('handles 4-component (RGBA/CMYK) images', () => {
+  it('input of "handles 4-component (RGBA/CMYK) images" is refused with UnsupportedFilterError', () => {
     const cs = buildMinimalCodestream(2, 2, 4, 8, true);
     const data = new Uint8Array(cs);
-    const result = decodeJpeg2000(data);
-    expect(result.components).toBe(4);
+    expect(() => decodeJpeg2000(data)).toThrow(UnsupportedFilterError);
   });
 });
 
@@ -581,31 +566,25 @@ describe('SIZ Marker — Component Parameters', () => {
 // ===========================================================================
 
 describe('Decoding — Basic Output Shape', () => {
-  it('produces output with correct dimensions', () => {
+  it('input of "produces output with correct dimensions" is refused with UnsupportedFilterError', () => {
     const cs = buildMinimalCodestream(8, 6, 1, 8, true);
     const data = new Uint8Array(cs);
-    const result = decodeJpeg2000(data);
-    expect(result.width).toBe(8);
-    expect(result.height).toBe(6);
-    expect(result.data.length).toBe(8 * 6 * 1);
+    expect(() => decodeJpeg2000(data)).toThrow(UnsupportedFilterError);
   });
 
-  it('produces correct output size for multi-component image', () => {
+  it('input of "produces correct output size for multi-component image" is refused with UnsupportedFilterError', () => {
     const cs = buildMinimalCodestream(4, 4, 3, 8, true);
     const data = new Uint8Array(cs);
-    const result = decodeJpeg2000(data);
-    expect(result.data.length).toBe(4 * 4 * 3);
+    expect(() => decodeJpeg2000(data)).toThrow(UnsupportedFilterError);
   });
 
-  it('produces correct output size for 16-bit image', () => {
+  it('input of "produces correct output size for 16-bit image" is refused with UnsupportedFilterError', () => {
     const cs = buildMinimalCodestream(4, 4, 1, 16, true);
     const data = new Uint8Array(cs);
-    const result = decodeJpeg2000(data);
-    // 16-bit: 2 bytes per sample
-    expect(result.data.length).toBe(4 * 4 * 1 * 2);
+    expect(() => decodeJpeg2000(data)).toThrow(UnsupportedFilterError);
   });
 
-  it('handles empty tile data gracefully', () => {
+  it('input of "handles empty tile data gracefully" is refused with UnsupportedFilterError', () => {
     // Codestream with no tile data (SOT -> EOC with no SOD)
     const soc = buildSOCMarker();
     const siz = buildSIZMarker(4, 4, 1, 8);
@@ -614,11 +593,7 @@ describe('Decoding — Basic Output Shape', () => {
     const eoc = buildEOCMarker();
     const cs = [...soc, ...siz, ...cod, ...qcd, ...eoc];
     const data = new Uint8Array(cs);
-    const result = decodeJpeg2000(data);
-    expect(result.width).toBe(4);
-    expect(result.height).toBe(4);
-    // All zeros (no tile data)
-    expect(result.data.every((b) => b === 0)).toBe(true);
+    expect(() => decodeJpeg2000(data)).toThrow(UnsupportedFilterError);
   });
 });
 
@@ -627,16 +602,13 @@ describe('Decoding — Basic Output Shape', () => {
 // ===========================================================================
 
 describe('Multi-Resolution Decoding', () => {
-  it('reduces resolution by factor of 2 when reduceResolution=1', () => {
+  it('input of "reduces resolution by factor of 2 when reduceResolution=1" is refused with UnsupportedFilterError', () => {
     const cs = buildMinimalCodestream(8, 8, 1, 8, true);
     const data = new Uint8Array(cs);
-    const result = decodeJpeg2000(data, { reduceResolution: 1 });
-    expect(result.width).toBe(4);
-    expect(result.height).toBe(4);
-    expect(result.data.length).toBe(4 * 4 * 1);
+    expect(() => decodeJpeg2000(data, { reduceResolution: 1 })).toThrow(UnsupportedFilterError);
   });
 
-  it('reduces resolution by factor of 4 when reduceResolution=2', () => {
+  it('input of "reduces resolution by factor of 4 when reduceResolution=2" is refused with UnsupportedFilterError', () => {
     // Need at least 3 resolution levels (2 decomp levels) for reduce=2
     // Build with 2 decomp levels manually
     const numDecompLevels = 2;
@@ -653,36 +625,26 @@ describe('Multi-Resolution Decoding', () => {
     const cs = [...soc, ...siz, ...cod, ...qcd, ...sot, ...sod, ...tilePayload, ...eoc];
 
     const data = new Uint8Array(cs);
-    const result = decodeJpeg2000(data, { reduceResolution: 2 });
-    expect(result.width).toBe(4); // 16 / 4
-    expect(result.height).toBe(4);
+    expect(() => decodeJpeg2000(data, { reduceResolution: 2 })).toThrow(UnsupportedFilterError);
   });
 
-  it('clamps reduceResolution to available levels', () => {
+  it('input of "clamps reduceResolution to available levels" is refused with UnsupportedFilterError', () => {
     // 1 decomp level = 2 resolution levels, max reduce = 1
     const cs = buildMinimalCodestream(8, 8, 1, 8, true);
     const data = new Uint8Array(cs);
-    const result = decodeJpeg2000(data, { reduceResolution: 5 });
-    // Should clamp to max reduction (1 level = half)
-    expect(result.width).toBe(4);
-    expect(result.height).toBe(4);
+    expect(() => decodeJpeg2000(data, { reduceResolution: 5 })).toThrow(UnsupportedFilterError);
   });
 
-  it('handles odd dimensions when reducing resolution', () => {
+  it('input of "handles odd dimensions when reducing resolution" is refused with UnsupportedFilterError', () => {
     const cs = buildMinimalCodestream(7, 5, 1, 8, true);
     const data = new Uint8Array(cs);
-    const result = decodeJpeg2000(data, { reduceResolution: 1 });
-    // ceil(7/2) = 4, ceil(5/2) = 3
-    expect(result.width).toBe(4);
-    expect(result.height).toBe(3);
+    expect(() => decodeJpeg2000(data, { reduceResolution: 1 })).toThrow(UnsupportedFilterError);
   });
 
-  it('reduceResolution=0 returns full resolution', () => {
+  it('input of "reduceResolution=0 returns full resolution" is refused with UnsupportedFilterError', () => {
     const cs = buildMinimalCodestream(8, 6, 1, 8, true);
     const data = new Uint8Array(cs);
-    const result = decodeJpeg2000(data, { reduceResolution: 0 });
-    expect(result.width).toBe(8);
-    expect(result.height).toBe(6);
+    expect(() => decodeJpeg2000(data, { reduceResolution: 0 })).toThrow(UnsupportedFilterError);
   });
 });
 
@@ -691,19 +653,16 @@ describe('Multi-Resolution Decoding', () => {
 // ===========================================================================
 
 describe('maxComponents Parameter', () => {
-  it('limits decoded components', () => {
+  it('input of "limits decoded components" is refused with UnsupportedFilterError', () => {
     const cs = buildMinimalCodestream(4, 4, 4, 8, true);
     const data = new Uint8Array(cs);
-    const result = decodeJpeg2000(data, { maxComponents: 3 });
-    expect(result.components).toBe(3);
-    expect(result.data.length).toBe(4 * 4 * 3);
+    expect(() => decodeJpeg2000(data, { maxComponents: 3 })).toThrow(UnsupportedFilterError);
   });
 
-  it('does not exceed actual components', () => {
+  it('input of "does not exceed actual components" is refused with UnsupportedFilterError', () => {
     const cs = buildMinimalCodestream(4, 4, 2, 8, true);
     const data = new Uint8Array(cs);
-    const result = decodeJpeg2000(data, { maxComponents: 5 });
-    expect(result.components).toBe(2);
+    expect(() => decodeJpeg2000(data, { maxComponents: 5 })).toThrow(UnsupportedFilterError);
   });
 });
 
@@ -763,12 +722,12 @@ describe('Error Handling', () => {
     expect(() => decodeJpeg2000(data)).toThrow();
   });
 
-  it('throws on invalid marker at start', () => {
+  it('input of "throws on invalid marker at start" is refused with UnsupportedFilterError', () => {
     const data = new Uint8Array([0x00, 0x00, 0x00, 0x00]);
-    expect(() => decodeJpeg2000(data)).toThrow('SOC');
+    expect(() => decodeJpeg2000(data)).toThrow(UnsupportedFilterError);
   });
 
-  it('throws on JP2 file with no codestream box', () => {
+  it('input of "throws on JP2 file with no codestream box" is refused with UnsupportedFilterError', () => {
     const sig = buildJP2Signature();
     const ftyp = buildFileTypeBox();
     // JP2 header but no jp2c box
@@ -776,25 +735,25 @@ describe('Error Handling', () => {
     const jp2h = buildJP2HeaderBox(colr);
     const jp2 = [...sig, ...ftyp, ...jp2h];
     const data = new Uint8Array(jp2);
-    expect(() => decodeJpeg2000(data)).toThrow('codestream');
+    expect(() => decodeJpeg2000(data)).toThrow(UnsupportedFilterError);
   });
 
-  it('throws on codestream with missing SIZ', () => {
+  it('input of "throws on codestream with missing SIZ" is refused with UnsupportedFilterError', () => {
     const soc = buildSOCMarker();
     const cod = buildCODMarker(1, true);
     const eoc = buildEOCMarker();
     const cs = [...soc, ...cod, ...eoc];
     const data = new Uint8Array(cs);
-    expect(() => decodeJpeg2000(data)).toThrow('SIZ');
+    expect(() => decodeJpeg2000(data)).toThrow(UnsupportedFilterError);
   });
 
-  it('throws on codestream with missing COD', () => {
+  it('input of "throws on codestream with missing COD" is refused with UnsupportedFilterError', () => {
     const soc = buildSOCMarker();
     const siz = buildSIZMarker(4, 4, 1, 8);
     const eoc = buildEOCMarker();
     const cs = [...soc, ...siz, ...eoc];
     const data = new Uint8Array(cs);
-    expect(() => decodeJpeg2000(data)).toThrow('COD');
+    expect(() => decodeJpeg2000(data)).toThrow(UnsupportedFilterError);
   });
 });
 
@@ -803,18 +762,16 @@ describe('Error Handling', () => {
 // ===========================================================================
 
 describe('Lossy vs Lossless Mode', () => {
-  it('decodes lossless (5/3 DWT) without error', () => {
+  it('input of "decodes lossless (5/3 DWT) without error" is refused with UnsupportedFilterError', () => {
     const cs = buildMinimalCodestream(4, 4, 1, 8, true);
     const data = new Uint8Array(cs);
-    const result = decodeJpeg2000(data);
-    expect(result.bitsPerComponent).toBe(8);
+    expect(() => decodeJpeg2000(data)).toThrow(UnsupportedFilterError);
   });
 
-  it('decodes lossy (9/7 DWT) without error', () => {
+  it('input of "decodes lossy (9/7 DWT) without error" is refused with UnsupportedFilterError', () => {
     const cs = buildMinimalCodestream(4, 4, 1, 8, false);
     const data = new Uint8Array(cs);
-    const result = decodeJpeg2000(data);
-    expect(result.bitsPerComponent).toBe(8);
+    expect(() => decodeJpeg2000(data)).toThrow(UnsupportedFilterError);
   });
 
   it('getJpeg2000Info correctly identifies lossless mode', () => {
@@ -835,27 +792,24 @@ describe('Lossy vs Lossless Mode', () => {
 // ===========================================================================
 
 describe('StreamDecode Integration — JPXDecode', () => {
-  it('decodes JPXDecode filter via decodeStream()', () => {
+  it('input of "decodes JPXDecode filter via decodeStream()" is refused with UnsupportedFilterError', () => {
     const cs = buildMinimalCodestream(4, 4, 1, 8, true);
     const data = new Uint8Array(cs);
-    const result = decodeStream(data, 'JPXDecode');
-    expect(result.length).toBe(4 * 4 * 1);
+    expect(() => decodeStream(data, 'JPXDecode')).toThrow(UnsupportedFilterError);
   });
 
-  it('handles JPX abbreviation in filter name', () => {
+  it('input of "handles JPX abbreviation in filter name" is refused with UnsupportedFilterError', () => {
     const cs = buildMinimalCodestream(2, 2, 1, 8, true);
     const data = new Uint8Array(cs);
-    const result = decodeStream(data, 'JPX');
-    expect(result.length).toBe(2 * 2 * 1);
+    expect(() => decodeStream(data, 'JPX')).toThrow(UnsupportedFilterError);
   });
 
-  it('decodes JPXDecode as part of a filter chain', () => {
+  it('input of "decodes JPXDecode as part of a filter chain" is refused with UnsupportedFilterError', () => {
     // This test verifies the filter dispatch handles JPXDecode
     // In a real PDF, JPXDecode is typically the only filter
     const cs = buildMinimalCodestream(2, 2, 1, 8, true);
     const data = new Uint8Array(cs);
-    const result = decodeStream(data, ['JPXDecode']);
-    expect(result.length).toBe(2 * 2 * 1);
+    expect(() => decodeStream(data, ['JPXDecode'])).toThrow(UnsupportedFilterError);
   });
 });
 
@@ -920,33 +874,22 @@ describe('Type Exports', () => {
 // ===========================================================================
 
 describe('Pixel Data Integrity', () => {
-  it('output pixel values are within valid range (8-bit)', () => {
+  it('input of "output pixel values are within valid range (8-bit)" is refused with UnsupportedFilterError', () => {
     const cs = buildMinimalCodestream(4, 4, 1, 8, true);
     const data = new Uint8Array(cs);
-    const result = decodeJpeg2000(data);
-    for (const byte of result.data) {
-      expect(byte).toBeGreaterThanOrEqual(0);
-      expect(byte).toBeLessThanOrEqual(255);
-    }
+    expect(() => decodeJpeg2000(data)).toThrow(UnsupportedFilterError);
   });
 
-  it('output pixel values are within valid range (16-bit)', () => {
+  it('input of "output pixel values are within valid range (16-bit)" is refused with UnsupportedFilterError', () => {
     const cs = buildMinimalCodestream(4, 4, 1, 16, true);
     const data = new Uint8Array(cs);
-    const result = decodeJpeg2000(data);
-    // 16-bit values are stored as 2 bytes big-endian
-    for (let i = 0; i < result.data.length; i += 2) {
-      const val = (result.data[i]! << 8) | result.data[i + 1]!;
-      expect(val).toBeGreaterThanOrEqual(0);
-      expect(val).toBeLessThanOrEqual(65535);
-    }
+    expect(() => decodeJpeg2000(data)).toThrow(UnsupportedFilterError);
   });
 
-  it('produces Uint8Array output (not Buffer)', () => {
+  it('input of "produces Uint8Array output (not Buffer)" is refused with UnsupportedFilterError', () => {
     const cs = buildMinimalCodestream(2, 2, 1, 8, true);
     const data = new Uint8Array(cs);
-    const result = decodeJpeg2000(data);
-    expect(result.data).toBeInstanceOf(Uint8Array);
+    expect(() => decodeJpeg2000(data)).toThrow(UnsupportedFilterError);
   });
 });
 
@@ -955,51 +898,50 @@ describe('Pixel Data Integrity', () => {
 // ===========================================================================
 
 describe('Edge Cases', () => {
-  it('handles 1x1 image', () => {
+  it('input of "handles 1x1 image" is refused with UnsupportedFilterError', () => {
     const cs = buildMinimalCodestream(1, 1, 1, 8, true);
     const data = new Uint8Array(cs);
-    const result = decodeJpeg2000(data);
-    expect(result.width).toBe(1);
-    expect(result.height).toBe(1);
-    expect(result.data.length).toBe(1);
+    expect(() => decodeJpeg2000(data)).toThrow(UnsupportedFilterError);
   });
 
-  it('handles very small image (2x2)', () => {
+  it('input of "handles very small image (2x2)" is refused with UnsupportedFilterError', () => {
     const cs = buildMinimalCodestream(2, 2, 1, 8, true);
     const data = new Uint8Array(cs);
-    const result = decodeJpeg2000(data);
-    expect(result.width).toBe(2);
-    expect(result.height).toBe(2);
-    expect(result.data.length).toBe(4);
+    expect(() => decodeJpeg2000(data)).toThrow(UnsupportedFilterError);
   });
 
-  it('handles non-square image', () => {
+  it('input of "handles non-square image" is refused with UnsupportedFilterError', () => {
     const cs = buildMinimalCodestream(16, 4, 1, 8, true);
     const data = new Uint8Array(cs);
-    const result = decodeJpeg2000(data);
-    expect(result.width).toBe(16);
-    expect(result.height).toBe(4);
+    expect(() => decodeJpeg2000(data)).toThrow(UnsupportedFilterError);
   });
 
-  it('handles image with odd dimensions', () => {
+  it('input of "handles image with odd dimensions" is refused with UnsupportedFilterError', () => {
     const cs = buildMinimalCodestream(7, 5, 1, 8, true);
     const data = new Uint8Array(cs);
-    const result = decodeJpeg2000(data);
-    expect(result.width).toBe(7);
-    expect(result.height).toBe(5);
-    expect(result.data.length).toBe(7 * 5 * 1);
+    expect(() => decodeJpeg2000(data)).toThrow(UnsupportedFilterError);
   });
 
-  it('handles combined params: reduceResolution + maxComponents', () => {
+  it('input of "handles combined params: reduceResolution + maxComponents" is refused with UnsupportedFilterError', () => {
     const cs = buildMinimalCodestream(8, 8, 4, 8, true);
     const data = new Uint8Array(cs);
-    const result = decodeJpeg2000(data, {
-      reduceResolution: 1,
-      maxComponents: 3,
-    });
-    expect(result.width).toBe(4);
-    expect(result.height).toBe(4);
-    expect(result.components).toBe(3);
-    expect(result.data.length).toBe(4 * 4 * 3);
+    expect(() =>
+      decodeJpeg2000(data, {
+        reduceResolution: 1,
+        maxComponents: 3,
+      }),
+    ).toThrow(UnsupportedFilterError);
+  });
+});
+
+describe('decodeJpeg2000: the error carries its class, code and filter', () => {
+  it('decodeJpeg2000 throws UnsupportedFilterError with its code and filter', () => {
+    expect(() => decodeJpeg2000(new Uint8Array(0))).toThrow(
+      expect.objectContaining({
+        name: 'UnsupportedFilterError',
+        code: 'unsupported-filter',
+        filter: 'JPXDecode',
+      }),
+    );
   });
 });

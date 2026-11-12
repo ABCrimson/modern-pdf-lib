@@ -255,6 +255,9 @@ export function extractImages(doc: PdfDocument): ImageInfo[] {
  *
  * For FlateDecode and other filters, fully decodes the stream.
  *
+ * JPXDecode and JBIG2Decode images throw `UnsupportedFilterError`; images
+ * above the internal size limits throw `ResourceLimitError`.
+ *
  * @param imageInfo - An `ImageInfo` from `extractImages()`.
  * @returns The decoded stream data.
  */

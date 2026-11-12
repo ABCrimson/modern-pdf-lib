@@ -3,7 +3,11 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { estimateTranscodedSize } from '../../../src/parser/jpeg2000Transcode.js';
+import {
+  estimateTranscodedSize,
+  transcodeJp2ToJpeg,
+} from '../../../src/parser/jpeg2000Transcode.js';
+import { UnsupportedFilterError } from '../../../src/errors.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -206,6 +210,19 @@ describe('estimateTranscodedSize', () => {
 // ---------------------------------------------------------------------------
 // TranscodeOptions type checks
 // ---------------------------------------------------------------------------
+
+describe('transcodeJp2ToJpeg', () => {
+  it('rejects with UnsupportedFilterError for any input', async () => {
+    await expect(transcodeJp2ToJpeg(buildJp2WithDimensions(8, 8, 3))).rejects.toMatchObject({
+      name: 'UnsupportedFilterError',
+      code: 'unsupported-filter',
+      filter: 'JPXDecode',
+    });
+    await expect(transcodeJp2ToJpeg(new Uint8Array([]), { quality: 90 })).rejects.toBeInstanceOf(
+      UnsupportedFilterError,
+    );
+  });
+});
 
 describe('TranscodeOptions', () => {
   it('exports transcodeJp2ToJpeg function', async () => {
