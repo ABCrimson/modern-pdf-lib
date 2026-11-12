@@ -185,6 +185,27 @@ describe('bytesToHex / hexToBytes', () => {
 });
 
 // ---------------------------------------------------------------------------
+// GrowableBuffer: capacity argument
+// ---------------------------------------------------------------------------
+
+describe('GrowableBuffer initial capacity', () => {
+  it('refuses a non-finite initial capacity', () => {
+    for (const capacity of [Number.NaN, Infinity, -Infinity]) {
+      expect(() => new GrowableBuffer(capacity)).toThrow(
+        new RangeError('GrowableBuffer: initial capacity must be a finite number'),
+      );
+    }
+  });
+
+  it('raises a finite capacity below 1 to 1 and keeps growing', () => {
+    const buf = new GrowableBuffer(0);
+    expect(buf.capacity).toBe(1);
+    buf.write(new Uint8Array([1, 2, 3]));
+    expect(buf.length).toBe(3);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // GrowableBuffer
 // ---------------------------------------------------------------------------
 

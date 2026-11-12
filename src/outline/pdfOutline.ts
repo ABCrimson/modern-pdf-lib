@@ -30,6 +30,7 @@ import {
   PdfNull,
 } from '../core/pdfObjects.js';
 import type { PdfObject, PdfObjectRegistry } from '../core/pdfObjects.js';
+import { assertWithinLimit } from '../core/limits.js';
 
 // ---------------------------------------------------------------------------
 // Destination types
@@ -305,6 +306,9 @@ export class PdfOutlineTree {
    * @param resolver  Function to resolve indirect references to objects.
    * @param pageRefToIndex  Mapping from page ref object numbers to page indices.
    * @returns         A fully populated PdfOutlineTree.
+   * @throws {ResourceLimitError}  When items nest more than 256 levels deep.
+   *   An item reached a second time (a loop in /First or /Next) is not read
+   *   again, and the tree read so far is kept.
    */
   static fromDict(
     dict: PdfDict,
@@ -318,21 +322,8 @@ export class PdfOutlineTree {
       return tree; // No items
     }
 
-    // Walk the linked list of top-level items
-    let currentRef: PdfRef | undefined = firstRef;
-    while (currentRef) {
-      const itemObj = resolver(currentRef);
-      if (!itemObj || !(itemObj instanceof PdfDict)) break;
-
-      const item = parseOutlineItem(itemObj, resolver, pageRefToIndex);
-      if (item) {
-        tree.items.push(item);
-      }
-
-      // Move to next sibling
-      const nextRef = itemObj.get('/Next');
-      currentRef = nextRef instanceof PdfRef ? nextRef : undefined;
-    }
+    // Each object is read once; nesting deeper than INTERNAL_LIMITS.maxTreeDepth throws.
+    parseOutlineLevel(firstRef, resolver, pageRefToIndex, new Set<number>(), 1, tree.items);
 
     return tree;
   }
@@ -513,6 +504,8 @@ export class PdfOutlineTree {
  * @param dict            The outline item dict.
  * @param resolver        Function to resolve indirect references.
  * @param pageRefToIndex  Maps page ref object numbers to page indices.
+ * @param visited         Object numbers of the items already read.
+ * @param depth           Level of this item (top-level items are level 1).
  * @returns               The parsed PdfOutlineItem, or undefined if invalid.
  *
  * @internal
@@ -521,6 +514,8 @@ function parseOutlineItem(
   dict: PdfDict,
   resolver: (ref: PdfRef) => PdfObject | undefined,
   pageRefToIndex: ReadonlyMap<number, number>,
+  visited: Set<number>,
+  depth: number,
 ): PdfOutlineItem | undefined {
   // /Title — required
   const titleObj = dict.get('/Title');
@@ -572,22 +567,45 @@ function parseOutlineItem(
   // Parse children
   const firstRef = dict.get('/First');
   if (firstRef instanceof PdfRef) {
-    let currentRef: PdfRef | undefined = firstRef;
-    while (currentRef) {
-      const childObj = resolver(currentRef);
-      if (!childObj || !(childObj instanceof PdfDict)) break;
-
-      const childItem = parseOutlineItem(childObj, resolver, pageRefToIndex);
-      if (childItem) {
-        item.children.push(childItem);
-      }
-
-      const nextRef = childObj.get('/Next');
-      currentRef = nextRef instanceof PdfRef ? nextRef : undefined;
-    }
+    parseOutlineLevel(firstRef, resolver, pageRefToIndex, visited, depth + 1, item.children);
   }
 
   return item;
+}
+
+/**
+ * Walk one linked list of sibling items starting at `firstRef`. An object
+ * already in `visited` ends the walk; `depth` is the level of these items,
+ * and an item found at a level above INTERNAL_LIMITS.maxTreeDepth throws.
+ * The items are appended to `out`, one at a time, so a wide level costs no
+ * argument list.
+ *
+ * @internal
+ */
+function parseOutlineLevel(
+  firstRef: PdfRef,
+  resolver: (ref: PdfRef) => PdfObject | undefined,
+  pageRefToIndex: ReadonlyMap<number, number>,
+  visited: Set<number>,
+  depth: number,
+  out: PdfOutlineItem[],
+): void {
+  let currentRef: PdfRef | undefined = firstRef;
+  while (currentRef) {
+    if (visited.has(currentRef.objectNumber)) break;
+    const itemObj = resolver(currentRef);
+    if (!itemObj || !(itemObj instanceof PdfDict)) break;
+    assertWithinLimit('maxTreeDepth', depth);
+    visited.add(currentRef.objectNumber);
+
+    const item = parseOutlineItem(itemObj, resolver, pageRefToIndex, visited, depth);
+    if (item) {
+      out.push(item);
+    }
+
+    const nextRef = itemObj.get('/Next');
+    currentRef = nextRef instanceof PdfRef ? nextRef : undefined;
+  }
 }
 
 /**

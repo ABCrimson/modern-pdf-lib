@@ -19,6 +19,7 @@
 
 import { PdfArray, PdfDict, PdfName, PdfNumber, PdfRef, PdfString } from '../core/pdfObjects.js';
 import type { PdfObject, PdfObjectRegistry } from '../core/pdfObjects.js';
+import { assertWithinLimit } from '../core/limits.js';
 
 // ---------------------------------------------------------------------------
 // Structure type
@@ -642,6 +643,9 @@ export class PdfStructureTree {
    * @param resolver  A function that resolves indirect references to
    *                  their underlying PDF objects.
    * @returns         A new {@link PdfStructureTree}.
+   * @throws {ResourceLimitError}  When elements nest more than 256 levels
+   *   deep; an array reached by reference in /K counts as one level. A dictionary or array reached a second time by reference (a loop
+   *   in /K) is not read again, and the tree read so far is kept.
    */
   static fromDict(
     dict: PdfDict,
@@ -653,12 +657,20 @@ export class PdfStructureTree {
     const kids = dict.get('/K');
     if (!kids) return tree;
 
-    const parseElement = (obj: PdfObject, parent: PdfStructureElement): void => {
+    // Each object is read once; nesting deeper than INTERNAL_LIMITS.maxTreeDepth throws.
+    const visited = new Set<number>();
+
+    const parseElement = (obj: PdfObject, parent: PdfStructureElement, depth: number): void => {
       // Resolve indirect reference
       let resolved: PdfObject | undefined = obj;
       if (resolved.kind === 'ref') {
-        resolved = resolver(resolved);
+        const ref = resolved;
+        resolved = resolver(ref);
         if (!resolved) return;
+        if (resolved.kind === 'dict' || resolved.kind === 'array') {
+          if (visited.has(ref.objectNumber)) return;
+          visited.add(ref.objectNumber);
+        }
       }
 
       if (resolved.kind === 'number') {
@@ -723,6 +735,7 @@ export class PdfStructureTree {
           elemOptions.id = idObj.value;
         }
 
+        assertWithinLimit('maxTreeDepth', depth);
         const child = parent.addChild(typeName, elemOptions);
 
         // Parse /K of the child
@@ -730,27 +743,28 @@ export class PdfStructureTree {
         if (childKids) {
           if (childKids.kind === 'array') {
             for (const item of childKids.items) {
-              parseElement(item, child);
+              parseElement(item, child, depth + 1);
             }
           } else {
-            parseElement(childKids, child);
+            parseElement(childKids, child, depth + 1);
           }
         }
       }
 
       if (resolved.kind === 'array') {
+        assertWithinLimit('maxTreeDepth', depth);
         for (const item of resolved.items) {
-          parseElement(item, parent);
+          parseElement(item, parent, depth + 1);
         }
       }
     };
 
     if (kids.kind === 'array') {
       for (const item of kids.items) {
-        parseElement(item, tree.root);
+        parseElement(item, tree.root, 1);
       }
     } else {
-      parseElement(kids, tree.root);
+      parseElement(kids, tree.root, 1);
     }
 
     return tree;

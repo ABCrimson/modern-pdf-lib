@@ -215,9 +215,14 @@ export class GrowableBuffer {
 
   /**
    * @param initialCapacity  Starting capacity in bytes (default:
-   *                         `1024`).
+   *                         `1024`; a value below 1 becomes 1).
+   * @throws {RangeError}  When `initialCapacity` is not finite.
    */
   constructor(initialCapacity: number = DEFAULT_INITIAL_CAPACITY) {
+    // A non-finite initial capacity is refused.
+    if (!Number.isFinite(initialCapacity)) {
+      throw new RangeError('GrowableBuffer: initial capacity must be a finite number');
+    }
     this._buf = new Uint8Array(Math.max(1, initialCapacity));
   }
 

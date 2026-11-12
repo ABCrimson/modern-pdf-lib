@@ -432,6 +432,9 @@ function multiplyMatrices(
  *
  * Supports all SVG path commands (absolute and relative):
  * M, L, H, V, C, S, Q, T, A, Z.
+ *
+ * Path data ends at the first error (SVG 2): a number after a closepath ends
+ * it, and the commands before it are returned.
  */
 export function parseSvgPath(d: string): SvgDrawCommand[] {
   const commands: SvgDrawCommand[] = [];
@@ -477,6 +480,7 @@ export function parseSvgPath(d: string): SvgDrawCommand[] {
 
   while (i < tokens.length) {
     const token = tokens[i];
+    const start = i;
 
     if (typeof token === 'string') {
       prevCmd = token;
@@ -728,6 +732,8 @@ export function parseSvgPath(d: string): SvgDrawCommand[] {
 
       case 'Z':
       case 'z':
+        // Path data ends at the first error (SVG 2): a number after closepath ends it.
+        if (typeof token !== 'string') return commands;
         commands.push({ type: 'closePath', params: [] });
         curX = startX;
         curY = startY;
@@ -738,6 +744,9 @@ export function parseSvgPath(d: string): SvgDrawCommand[] {
         i++;
         break;
     }
+
+    // An iteration that read nothing ends the path data.
+    if (i === start) break;
   }
 
   return commands;
