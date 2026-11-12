@@ -5,6 +5,108 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 See [VERSIONING.md](./VERSIONING.md) for this project's versioning policy.
 
+## [0.40.8] - 2026-11-15
+
+**Bounded decode.** The code that decodes streams, images, fonts, ToUnicode CMaps, SVG paths, outlines, structure trees, content streams and signature data now refuses input above internal limits and malformed size fields, instead of trusting the sizes and links the input states. Input above a limit throws `ResourceLimitError`; JPEG 2000 (`/JPXDecode`), JBIG2 (`/JBIG2Decode`) and lossy WebP (VP8) decoding throw `UnsupportedFilterError` instead of returning wrong pixels. Ordinary documents behave as in 0.40.7: each limit is at least four times the largest value measured on the test corpus, the legacy fixtures and the other fixtures. This is a patch release that contains breaking changes: calls that returned a result for input above a limit, or wrong pixels for the three formats, now throw, and a signature the DER reader refuses is reported as not valid. Each change is listed under Breaking. Two error classes are added; no export is removed. See the security advisory published with 0.40.8 on the repository's [advisories page](https://github.com/ABCrimson/modern-pdf-lib/security/advisories).
+
+### Security
+
+- **Decoding is bounded:** one input could make a decode, a load, a text extraction, a render or a signature check allocate far more memory than the input is long, or keep running, because sizes and links the input states were followed as written. Each of these paths now stops at an internal limit (the table below) or at a malformed size field. A size the input states is checked before anything is allocated from it; a size known only by decoding (Flate, LZW, a page's content streams together) is checked as the output grows, so the memory of a decode up to the limit can be in use when the error is thrown. The limits apply to one stream, one table or one call: `INTERNAL_LIMITS` in `src/core/limits.ts` holds them, they are fixed in this version, and no package entry exports them or an option that changes them. An input equal to a limit is accepted; only a value above it is refused.
+- **What a limit error does on each path:** `loadPdf()`, text extraction, rendering, `inspectEncryption()`, `scanPdfThreats()` and `autoTagPage()` rethrow `ResourceLimitError`; they do not turn it into an undecoded stream, a recovery scan, a skipped object, a blank page or an unencrypted file. `verifySignatures()` and `verifySignatureDetailed()` report the one signature as not valid and still verify the others. `extractPageImages()` skips the one image it cannot decode.
+- **The limits:** a limit error carries `code` `'resource-limit-exceeded'`, `limit` (the internal name), `max` (the value below) and `actual` (`undefined` when the size is not a finite number). The names are not a stable API in this version.
+
+| Limit | Value | What it bounds |
+|---|---|---|
+| `maxDecodedStreamBytes` | 256 MiB | The output of one stream filter, and each stage of a filter chain; the sum of a page's content streams; one predictor row |
+| `maxRewrapDecodedBytes` | 64 MiB | A raw DEFLATE stream that `save()` writes back as zlib data; a larger one is copied as loaded and nothing is thrown |
+| `maxCMapMappings` | 2^20 (1,048,576) codes | The codes one ToUnicode CMap names |
+| `maxFontCmapMappings` | 0x110000 (1,114,112) codes | The codes one font cmap subtable names |
+| `maxDerDepth` | 128 levels | Nesting of constructed DER values in a signature |
+| `maxTreeDepth` | 256 levels | Nesting of page-tree nodes, outline items and structure elements |
+| `maxFormOperators` | 2^20 (1,048,576) | Operators, plus operand elements, interpreted inside Form XObjects in one page interpretation |
+| `maxPredictorSamples` | 2^28 (268,435,456) samples | The sub-byte (1, 2 or 4 bits) TIFF predictor of one stream |
+| `maxImageDimension` | 65,536 pixels | The width or height of one image, and a CCITT `/Columns` or `/Rows` |
+| `maxImagePixels` | 2^28 (268,435,456) pixels | Width times height of one decoded image |
+| `maxImageBytes` | 256 MiB | The decoded sample bytes of one image |
+| `maxImageFrames` | 4,096 frames | The IFDs read from one TIFF file |
+| `maxFontBytes` | 128 MiB | The decoded tables of one font file (WOFF) |
+
+- **Malformed sizes and links:** a DER length that runs past the data, an indefinite DER length and a DER length of more than four bytes, a predictor with `/Columns` below 1, a TIFF IFD chain that returns to an offset it has read, TIFF strips and tags that lie outside the file, a negative TIFF ImageWidth, ImageLength or sample size, a CCITT `/Columns` below 1, a non-finite buffer capacity and a `maxBufferSize` of `NaN` now throw the module's own error with a fixed message, listed under Breaking.
+- **Formats that are not decoded:** JPEG 2000, JBIG2 and lossy WebP data throw `UnsupportedFilterError` (code `'unsupported-filter'`, `filter` `'JPXDecode'`, `'JBIG2Decode'` or `'VP8'`) before any of its bytes are read. The JBIG2 decoder did not match the ITU-T T.88 H.2 test sequence, the JPEG 2000 decoder was not a conformant decoder, and the lossy WebP path did not decode, so each returned wrong pixels. A PDF that holds such an image stream still loads, and `save()`, `mergePdfs()` and `copyPages()` copy the stream unchanged; `tests/oracle/unsupportedFilterCopy.test.ts` checks this with qpdf.
+
+### Breaking
+
+| Call | Before | Now |
+|---|---|---|
+| `decodeJpeg2000()`; `decodeStream()` and `decodeImageStream()` on a `/JPXDecode` stream | Returned pixels from a decoder that was not a conformant JPEG 2000 decoder, so they could be wrong | Throw `UnsupportedFilterError` (code `unsupported-filter`, `filter` `'JPXDecode'`) |
+| `decodeTile()`, `decodeTileRegion()`, `assembleTiles()` | Returned compressed tile bytes in place of pixels | Throw `UnsupportedFilterError` (`filter` `'JPXDecode'`) |
+| `decodeStream()` and `decodeImageStream()` on a `/JBIG2Decode` stream | Returned pixels from a decoder that does not match the T.88 H.2 test vector, so they could be wrong | Throw `UnsupportedFilterError` (`filter` `'JBIG2Decode'`) |
+| `embedWebP()`, `embedImage()` and `decodeWebP()` on lossy (VP8) WebP data, with or without an `ALPH` chunk | Returned a flat grey image of the stated size | Throw `UnsupportedFilterError` (`filter` `'VP8'`). Lossless (VP8L) WebP is decoded as before up to the image limits (next row). |
+| `embedWebP()`, `embedImage()` and `decodeWebP()` on lossless (VP8L) WebP data | Decoded any size the header states | Throw `ResourceLimitError` (`limit` `'maxImageBytes'`) when width times height times 4 is above 256 MiB, that is above 67,108,864 pixels |
+| `extractPageImages()` | Decoded every image it found | Leaves out, without throwing, an image above `maxImageDimension`, `maxImagePixels` or `maxImageBytes` |
+| `loadPdf()`, `decodeStream()`, `decodeImageStream()`, `PdfPage.getContentStream()`, `analyzeImages()` and the text extraction, rendering, `inspectEncryption()`, `scanPdfThreats()` and `autoTagPage()` calls that load or decode a stream | Decoded a stream of any size | Throw `ResourceLimitError` (`limit` `'maxDecodedStreamBytes'`) when one filter's output, or the sum of a page's content streams, is above 256 MiB |
+| `loadPdf()` | Walked a page tree of any depth | Throws `ResourceLimitError` (`limit` `'maxTreeDepth'`) for a page tree deeper than 256 levels |
+| `decodeStream()` on a `/FlateDecode` or `/LZWDecode` stream with `/Predictor` 2 or 10 to 15 | Accepted any `/Columns`, `/Colors` and `/BitsPerComponent` | Throws `Error` with the message `Predictor: unsupported decode parameters (/Columns N, /Colors N, /BitsPerComponent N)` when `/Columns` is not an integer of at least 1, `/Colors` is not an integer from 1 to 32 or `/BitsPerComponent` is not 1, 2, 4, 8 or 16; a row longer than 256 MiB throws `ResourceLimitError` (`maxDecodedStreamBytes`), and a `/Predictor 2` stream of 1, 2 or 4 bits per sample with more than 2^28 samples throws `ResourceLimitError` (`maxPredictorSamples`) |
+| `decodeStream()` on a `/CCITTFaxDecode` stream | Allocated the size the stream states | Throws `RangeError` with the message `CCITTFaxDecode: /Columns must be an integer of at least 1` for `/Columns` below 1, and `ResourceLimitError` for `/Columns` or `/Rows` above 65,536 (`maxImageDimension`) or `/Columns` times `/Rows` above 2^28 (`maxImagePixels`) |
+| `extractText()`, `extractTextWithPositions()` | Expanded every range of a ToUnicode CMap | Throw `ResourceLimitError` (`limit` `'maxCMapMappings'`) for a CMap that names more than 2^20 codes; any other CMap error still means no CMap |
+| `extractMetrics()`, `embedFont()` | Read the cmap subtables a font states | Throw `ResourceLimitError` (`limit` `'maxFontCmapMappings'`) for a subtable that names more than 0x110000 codes. A format 12 group is read up to code 0x10FFFF, a segment or group whose end is before its start is skipped, and no glyph id at or above the font's glyph count is stored. |
+| `decodeWoff()` | Allocated the table sizes the file states | Throws `ResourceLimitError` (`limit` `'maxFontBytes'`) when the table lengths or `totalSfntSize` it states are above 128 MiB; throws `Error` `WOFF1: inflated table size mismatch` when a table inflates to more than its stated length, and `WOFF1: table data overlaps` for overlapping tables |
+| `embedPng()`, `embedImage()` of a PNG | Allocated the sizes the header implies | Throw `ResourceLimitError` for a width or height above 65,536 (`maxImageDimension`), width times height above 2^28 (`maxImagePixels`), decoded bytes above 256 MiB (`maxImageBytes`) or an implied scanline size above 256 MiB (`maxDecodedStreamBytes`). Image data past the size the header implies is ignored, as before. |
+| `decodeTiff()`, `decodeTiffPage()`, `decodeTiffAll()`, `getTiffPageCount()`, `embedTiff()` | Followed the IFD chain and the strip, tile and tag offsets the file states | Throw `Error` `TIFF: the IFD chain repeats offset N` for a chain that returns to an offset, `ResourceLimitError` (`maxImageFrames`) above 4,096 IFDs, and `ResourceLimitError` (`maxImageDimension`, `maxImagePixels`, `maxImageBytes`) for a decoded image above those limits. An ImageWidth, ImageLength or sample size stated as a negative signed value throws `Error` `TIFF: negative ImageWidth, ImageLength or sample size` (before, a `RangeError`). Strips, tiles and tags that lie outside the file, overlapping strips, a strip or tile offset count that does not match, and a tile width or length that is not a positive multiple of 16 throw `Error` with a `TIFF` message. |
+| `embedTiffDirect()` | Trusted the strip, tile and tag offsets and sizes the file states | Throws `ResourceLimitError` (`maxImageDimension`, `maxImagePixels`, `maxImageBytes`) for an image above those limits, and `Error` with a `TIFF` message for strips, tiles or tags outside the file, a strip or tile offset count that does not match, or a tile width or length that is not a positive multiple of 16 |
+| `PdfOutlineTree.fromDict()`, `PdfStructureTree.fromDict()` | Followed `/Next`, `/First` and `/K` links as written | Read each item once, so a link back to an item already read ends that branch and keeps the tree read so far; throw `ResourceLimitError` (`maxTreeDepth`) above 256 levels |
+| `renderPageToImage()`, `renderPageToCanvas()`, `renderPageTile()`, `generateThumbnail()`, `autoTagPage()` | Drew nested Form XObjects to a depth of 12 with no bound on the operators they run | Do not enter a form that is already on the invocation path, and throw `ResourceLimitError` (`maxFormOperators`) when the forms of one page pass 2^20, counting one per operator plus one per operand beyond six, the bytes of each string operand and the elements of each array operand. The depth of 12 is unchanged. |
+| `verifySignatures()`, `verifySignatureDetailed()` | Read the DER of a signature at any depth | A signature whose DER is nested above 128 levels, has an indefinite length, has more than four length bytes or has a length that runs past the data is reported as not valid, exactly as an unparsable signature is: `valid: false`, `integrityValid: false`, `signedBy` `'Unknown'`. `verifySignatureDetailed()` adds `Failed to parse PKCS#7 signature structure: <message>` to its `errors`. The call does not throw, and the other signatures are verified. |
+| `StreamingPdfParser` constructor | Accepted any `maxBufferSize` | Throws `RangeError` with the message `StreamingPdfParser: maxBufferSize must be a number` for `NaN` |
+| `GrowableBuffer` constructor | Accepted any `initialCapacity` | Throws `RangeError` with the message `GrowableBuffer: initial capacity must be a finite number` for `NaN`, `Infinity` and `-Infinity` |
+### API
+
+<!-- api-diff:begin -->
+```
++ . ResourceLimitError (class)
++ . UnsupportedFilterError (class)
++ ./browser ResourceLimitError (class)
++ ./browser UnsupportedFilterError (class)
+```
+<!-- api-diff:end -->
+
+- **Error classes** (root exports, each with a literal `code`): `ResourceLimitError` (`resource-limit-exceeded`, with `limit`, `max` and `actual`) and `UnsupportedFilterError` (`unsupported-filter`, with `filter`: `'JPXDecode'`, `'JBIG2Decode'` or `'VP8'`).
+
+### Fixed
+
+- **Flate and filter output:** `inflateFlate` and `inflateRaw` decode in steps and stop reading input at the bound; trailing bytes after the final block cost no more than their length. The LZW table stops growing at 4,096 entries, as the format specifies. The RunLength, ASCIIHex and ASCII85 filters size their output before they allocate it. PNG and TIFF predictors undo in place on the decoder's own buffer and never change a caller's array; a PNG predictor stream with no complete row returns no bytes.
+- **Object-stream headers:** the header of an object stream is read one pair at a time and stops after `/N` pairs, so its cost follows `/N` and not the length of the header text.
+- **Signature data:** `hexToBytes` in the signature verifiers strips trailing zero padding in time linear in the length of `/Contents`.
+- **Signature contents:** the bytes of `/Contents` are cut to the length the DER header states, so a signature whose data ends in zero bytes keeps them; only the padding after the data is dropped.
+- **SVG paths:** `parseSvgPath()` ends the path data at the first error, as SVG 2 specifies, and returns the commands before it; a number after a closepath ends the data. An iteration that reads nothing ends the path data.
+- **`StreamingPdfParser`:** `feed()` copies each chunk into one buffer that doubles as it fills, so the cost is linear in the input; before, it copied the whole buffer on every chunk. The events, the `maxBufferSize` check and its `PdfParseError` text are unchanged. The parser holds the whole input in memory from the first `feed()` until the instance is dropped, and its documentation now says so.
+- **Page content:** `PdfPage.getContentStream()` counts the decoded bytes of the streams as it reads them and stops at the first stream that takes the sum above the limit.
+
+### Changed
+
+- **Adversarial test project:** the `adversarial` project of `vitest.config.ts` runs its files one at a time (`fileParallelism: false`, `retry: 0`). `tests/helpers/budget.ts`, `budget-child.ts` and `budget-worker.ts` run one input in a worker of a child process that samples its own resident memory and ends itself over budget, with the parent ending it at the time budget. An input above a limit, and a malformed input, must end in its error within 2 s and 512 MiB (`DEFAULT_BUDGET`), except a page whose content streams pass the limit only together, which is held to `AT_LIMIT_BUDGET` because the streams before the crossing one are decoded first; an input at a limit must complete within 5 s and 1,536 MiB (`AT_LIMIT_BUDGET`). Each area has a pair, `tests/adversarial/<name>.test.ts` and `<name>.bodies.ts`, and the inputs are built in code.
+- **Limits headroom:** `tests/oracle/limits-headroom.test.ts` loads every corpus, legacy and fixture file through load, text extraction and image decoding and asserts that no `ResourceLimitError` occurs and that the largest value of each limited quantity is at most a quarter of its limit.
+- **Decoder code removed:** the JPEG 2000 and JBIG2 pixel decoders, and the lossy WebP path, are deleted, since their entry points throw first. The declared signatures of `decodeJpeg2000`, `decodeTile`, `decodeTileRegion` and `assembleTiles` are unchanged.
+- **Version strings:** `docs/plans/ROADMAP.md`, `docs/.vitepress/config.ts` and `package.json` carry the version 0.40.8.
+
+### Compatibility
+
+- **Output:** nothing changes in what the writers emit. A file that 0.40.7 decoded within the limits decodes to the same bytes, except the cases listed under Fixed and Breaking.
+- **Images that are copied:** a JPEG 2000 or JBIG2 image stream is copied byte for byte by `save()`, `mergePdfs()` and `copyPages()`, as before.
+
+### Known limits
+
+- **The limits bound one stream, one table or one call.** They are not totals over a file or a process, and they cannot be changed in this version; a later version adds a public `limits` option. Process untrusted files under the limits of your operating system as well.
+- **Input at a limit costs what a decode of that size costs.** A decode at a limit takes a small multiple of the limit in memory: about 2.5 times the output for Flate and about 4 times for an RGBA PNG.
+- **JPEG 2000, JBIG2 and lossy WebP are not decoded** until a later version brings conformant decoders; the streams are still copied unchanged on save, merge and copy.
+
+### Tests
+
+- **Counts:** 360 test files (up from 334), 8,209 tests. With qpdf (as in CI) and a built `dist/`, the suite reports 8,103 passed and 106 expected failures, none skipped; without qpdf, 7,896 passed, 52 expected failures and 261 skipped (the qpdf cases).
+- **Corpus:** of the 33 corpus files, 29 load and 19 pass every check, as before.
+- **Known-defect markers:** 106 markers on 35 ledger ids in 9 files, as before.
+- **Ledger:** `audit/open-highs.json` lists 226 open entries (253 before): 19 are closed in this release and 8 that the 2026-11-12 re-check regraded below high leave the list; the file closes 33 ids in this release, 14 of them held until now. In `docs/capabilities.json` 6 rows are graded `oracle`, 26 `behaviour`, 84 `qualified` and 17 `pending`, as before.
+
 ## [0.40.7] - 2026-11-15
 
 **Conformant Flate.** The library now writes and reads conformant Flate data. Every stream it compresses under `/FlateDecode` is zlib data (RFC 1950), as ISO 32000 requires: for the documents the oracle tests build, the default output passes `qpdf --check`, except where a known-defect marker records another open defect, and pdf.js reads their text. Until now it wrote raw DEFLATE data without the zlib wrapper. On read it takes zlib data, which is what other producers write, and still reads the raw DEFLATE data of files written by earlier versions. No export is added, removed or changed. Read Compatibility before you mix 0.40.7 output with earlier versions of this library.

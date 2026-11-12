@@ -40,4 +40,4 @@ New features and API additions. Before 1.0.0, every other breaking change and ev
 
 ## Current Version
 
-**0.40.7** — See [CHANGELOG.md](./CHANGELOG.md) for the full release history.
+**0.40.8** — See [CHANGELOG.md](./CHANGELOG.md) for the full release history.
