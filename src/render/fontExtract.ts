@@ -15,7 +15,8 @@
  *
  * Standard-14 fonts (Helvetica, Times-Roman, …) have no `/FontDescriptor`
  * and no embedded file; they are skipped.  Malformed entries are tolerated
- * rather than throwing.
+ * rather than throwing; a font file whose decoded size passes an internal
+ * limit throws `ResourceLimitError`.
  *
  * @packageDocumentation
  */
@@ -30,6 +31,7 @@ import {
   type PdfObjectRegistry,
 } from '../core/pdfObjects.js';
 import { decodeStreamData } from '../parser/streamDecode.js';
+import { ResourceLimitError } from '../errors.js';
 
 /** The on-disk format of an embedded font program. */
 export type FontFileFormat = 'truetype' | 'cff' | 'opentype' | 'type1';
@@ -169,6 +171,8 @@ function hasSubsetTag(baseFont: string): boolean {
  * `/FontFile3`) — directly or via a Type0 descendant — the standalone,
  * filter-decoded font bytes are returned.  Standard-14 fonts with no
  * embedded file are omitted, and malformed entries are skipped silently.
+ * A font file that decodes to more than the internal stream limit throws
+ * `ResourceLimitError`.
  *
  * @param page  The page to scan (typically from a loaded PDF).
  * @returns     One {@link ExtractedFont} per embedded font program.
@@ -202,8 +206,9 @@ export function extractFonts(page: PdfPage): ExtractedFont[] {
     let extracted: { format: FontFileFormat; data: Uint8Array } | undefined;
     try {
       extracted = extractFromDescriptor(descriptor, registry);
-    } catch {
-      // Malformed font file / filter — tolerate and skip.
+    } catch (err) {
+      // A limit error leaves the call; a malformed font file or filter is tolerated and skipped.
+      if (err instanceof ResourceLimitError) throw err;
       continue;
     }
     if (!extracted) continue; // descriptor with no embedded file → skip

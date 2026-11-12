@@ -13,6 +13,17 @@
  * and XObjects (`Do`, recursing into form XObjects). Bézier curves are
  * flattened to polylines.
  *
+ * Form XObjects are bounded per call: a form already being interpreted is not
+ * entered again, forms nest at most 12 deep, and the operators interpreted
+ * inside forms count toward `maxFormOperators` (2^20); past it the call throws
+ * `ResourceLimitError`, also while a single large form is still being parsed.
+ * An operator counts one, plus one for each operand beyond six, plus the
+ * length of each string operand and the elements of each array operand (so a
+ * `TJ` of many strings or a `Tj` of a long string costs what it holds); the
+ * operands count as they are parsed, whether or not an operator follows. A form
+ * whose data cannot be decoded or parsed counts as empty and is read once per
+ * call. Operators of the page's own content stream are not counted.
+ *
  * @packageDocumentation
  */
 
@@ -27,8 +38,10 @@ import {
   type PdfObject,
   type PdfObjectRegistry,
 } from '../core/pdfObjects.js';
-import { parseContentStream } from '../parser/contentStreamParser.js';
+import { parseContentStream, parseContentStreamCounted } from '../parser/contentStreamParser.js';
 import { decodeStreamData } from '../parser/streamDecode.js';
+import { assertWithinLimit } from '../core/limits.js';
+import { ResourceLimitError } from '../errors.js';
 import type { PdfPage } from '../core/pdfPage.js';
 
 /** Options for {@link interpretContentStream}. */
@@ -175,11 +188,28 @@ export function interpretContentStream(
 ): DisplayList {
   const items: DisplayItem[] = [];
   const origin = options.origin ?? [0, 0];
-  interpretInto(items, operators, initialState(), options, 0);
+  const run: FormRun = { formOperators: 0, active: new Set(), parsed: new WeakMap() };
+  interpretInto(items, operators, initialState(), options, 0, run);
   return { items, width: options.width, height: options.height, origin };
 }
 
 const MAX_FORM_DEPTH = 12;
+
+/** State of the Form XObjects of one {@link interpretContentStream} call. */
+interface FormRun {
+  /** Cost of the forms interpreted so far (see the module header); it counts toward `maxFormOperators`. */
+  formOperators: number;
+  /** The forms being interpreted now: a form in this set is not entered again. */
+  readonly active: Set<PdfStream>;
+  /** The parsed operators of each form stream and their cost, read once per call. */
+  readonly parsed: WeakMap<PdfStream, ParsedForm>;
+}
+
+/** The operators of one form stream and what they count toward `maxFormOperators`. */
+interface ParsedForm {
+  readonly operators: readonly ContentStreamOperator[];
+  readonly cost: number;
+}
 
 function interpretInto(
   items: DisplayItem[],
@@ -187,6 +217,7 @@ function interpretInto(
   startState: GraphicsState,
   options: InterpretOptions,
   depth: number,
+  run: FormRun,
 ): void {
   const stack: GraphicsState[] = [];
   let gs = startState;
@@ -498,7 +529,7 @@ function interpretInto(
 
       // --- XObjects ---
       case 'Do':
-        doXObject(items, nameOf(operands[0]), gs, options, depth);
+        doXObject(items, nameOf(operands[0]), gs, options, depth, run);
         break;
 
       default:
@@ -626,6 +657,7 @@ function doXObject(
   gs: GraphicsState,
   options: InterpretOptions,
   depth: number,
+  run: FormRun,
 ): void {
   if (!name) return;
   const xobjects = subDict(options.resources, '/XObject', options);
@@ -640,6 +672,8 @@ function doXObject(
   const subtypeName = subtype instanceof PdfName ? subtype.value.replace(/^\//, '') : '';
 
   if (subtypeName === 'Form' && depth < MAX_FORM_DEPTH) {
+    // A form already being interpreted is not entered again.
+    if (run.active.has(stream)) return;
     // Recurse into the form: concat its /Matrix, swap in its /Resources.
     const matrixObj = resolve(stream.dict.get('/Matrix'), options);
     let formCtm = gs.ctm;
@@ -650,12 +684,42 @@ function doXObject(
       if (m.length === 6) formCtm = multiply(m as unknown as Matrix, gs.ctm);
     }
     const formResources = subDict(stream.dict, '/Resources', options) ?? options.resources;
+    run.active.add(stream);
     try {
-      const formOps = parseContentStream(decodeStreamData(stream));
+      let form = run.parsed.get(stream);
+      if (!form) {
+        // The count runs while the operands and operators are parsed; a form whose data cannot be decoded or
+        // parsed draws nothing and is remembered as empty, so its data is read once per call.
+        try {
+          let cost = 0;
+          const operators = parseContentStreamCounted(decodeStreamData(stream), (running) => {
+            cost = running;
+            assertWithinLimit('maxFormOperators', run.formOperators + running);
+          });
+          form = { operators, cost };
+        } catch (err) {
+          if (err instanceof ResourceLimitError) throw err;
+          form = { operators: [], cost: 0 };
+        }
+        run.parsed.set(stream, form);
+      }
+      // Operators inside forms count toward maxFormOperators per interpretation.
+      run.formOperators += form.cost;
+      assertWithinLimit('maxFormOperators', run.formOperators);
       const formState: GraphicsState = { ...gs, ctm: formCtm };
-      interpretInto(items, formOps, formState, { ...options, resources: formResources }, depth + 1);
-    } catch {
-      // ignore malformed form content
+      interpretInto(
+        items,
+        form.operators,
+        formState,
+        { ...options, resources: formResources },
+        depth + 1,
+        run,
+      );
+    } catch (err) {
+      // A limit error leaves the call; any other error is malformed form content and is ignored.
+      if (err instanceof ResourceLimitError) throw err;
+    } finally {
+      run.active.delete(stream);
     }
     return;
   }

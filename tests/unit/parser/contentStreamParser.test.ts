@@ -7,7 +7,10 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { parseContentStream } from '../../../src/parser/contentStreamParser.js';
+import {
+  parseContentStream,
+  parseContentStreamCounted,
+} from '../../../src/parser/contentStreamParser.js';
 import type {
   ContentStreamOperator,
   InlineImageData,
@@ -738,5 +741,68 @@ describe('Edge cases', () => {
     const ops = parseContentStream(stream('[] TJ'));
     const arr = ops[0]!.operands[0] as Operand[];
     expect(arr).toEqual([]);
+  });
+});
+
+describe('Deeply repeated delimiters', () => {
+  it.each([
+    ['unknown bytes', ')'],
+    ['braces', '{'],
+    ['dictionary starts', '<<'],
+    ['dictionary ends', '>>'],
+  ])('skips 20000 %s without overflowing the stack', (_label, unit) => {
+    const ops = parseContentStream(stream(`${unit.repeat(20_000)} n`));
+    expect(ops).toHaveLength(1);
+    expect(ops[0]!.operator).toBe('n');
+    expect(ops[0]!.operands).toEqual([]);
+  });
+
+  it('parses 20000 unclosed arrays without overflowing the stack', () => {
+    expect(parseContentStream(stream(`${'['.repeat(20_000)} n`))).toEqual([]);
+  });
+
+  it('parses nested arrays 20000 deep that are closed', () => {
+    const ops = parseContentStream(stream(`${'['.repeat(20_000)}${']'.repeat(20_000)} n`));
+    expect(ops).toHaveLength(1);
+    let depth = 0;
+    let node: Operand = ops[0]!.operands[0]!;
+    while (Array.isArray(node)) {
+      depth++;
+      node = node[0] as Operand;
+    }
+    expect(depth).toBe(20_000);
+  });
+
+  it('keeps the nesting of small arrays', () => {
+    const ops = parseContentStream(stream('[1 [2 [3] 4] (a) /N] TJ'));
+    expect(ops[0]!.operands).toEqual([[1, [2, [3], 4], 'a', PdfName.of('/N')]]);
+  });
+});
+
+describe('Counted parse', () => {
+  it('reports the cost as operands are parsed, whether or not an operator follows', () => {
+    const seen: number[] = [];
+    parseContentStreamCounted(stream('1 2 3 4 5 6 7 8 (abc) [1 (xy) []]'), (cost) =>
+      seen.push(cost),
+    );
+    // Six operands are free, the seventh and eighth cost one each, the string its length plus
+    // one, and the array one plus each of its elements.
+    expect(seen.at(-1)).toBe(1 + 1 + (1 + 3) + 1 + 1 + (1 + 2) + 1);
+  });
+
+  it('adds one per operator and the pending operands when the operator arrives', () => {
+    const seen: number[] = [];
+    parseContentStreamCounted(stream('(abc) Tj n'), (cost) => seen.push(cost));
+    expect(seen).toEqual([3, 4, 5]);
+  });
+
+  it('stops parsing when the callback throws', () => {
+    let calls = 0;
+    expect(() =>
+      parseContentStreamCounted(stream('[] '.repeat(1000)), () => {
+        if (++calls > 10) throw new Error('stop');
+      }),
+    ).toThrow('stop');
+    expect(calls).toBe(11);
   });
 });

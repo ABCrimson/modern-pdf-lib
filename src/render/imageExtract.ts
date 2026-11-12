@@ -18,7 +18,11 @@
  *   interpreted by `/ColorSpace` (`/DeviceRGB`, `/DeviceGray`,
  *   `/DeviceCMYK`, `/Indexed`) and `/BitsPerComponent`.
  *
- * Unsupported or malformed images are skipped — this function never throws.
+ * Images that cannot be decoded here are skipped — this function never throws:
+ * a JPEG when the WASM decoder is not ready, `JPXDecode` and `JBIG2Decode`
+ * images (the stream filters throw `UnsupportedFilterError`, which is caught
+ * per image), images above the internal size limits (`ResourceLimitError`,
+ * caught per image), and malformed data.
  *
  * No Buffer — uses Uint8Array exclusively.
  */
@@ -36,6 +40,7 @@ import {
   PdfObjectRegistry,
 } from '../core/pdfObjects.js';
 import { decodeStreamData, getStreamFilters } from '../parser/streamDecode.js';
+import { assertWithinLimit } from '../core/limits.js';
 import { cmykToRgb } from '../core/operators/color.js';
 import { decodeJpegWasm } from '../wasm/jpeg/bridge.js';
 
@@ -79,8 +84,9 @@ export interface ExtractedImage {
  *
  * @param page - The page whose `/Resources /XObject` images are extracted.
  * @returns One {@link ExtractedImage} per successfully decoded image XObject.
- *          Images that cannot be decoded (unsupported filters/colour spaces,
- *          missing WASM, malformed data) are skipped silently.
+ *          Images that cannot be decoded (JPXDecode and JBIG2Decode images,
+ *          other unsupported filters or colour spaces, missing WASM, images
+ *          above the internal size limits, malformed data) are skipped silently.
  *
  * @example
  * ```ts
@@ -116,7 +122,8 @@ export function extractImages(page: PdfPage): ExtractedImage[] {
       const extracted = decodeImage(name, stream, registry);
       if (extracted) out.push(extracted);
     } catch {
-      // Skip unsupported / malformed images gracefully.
+      // Skip images that cannot be decoded, including JPXDecode / JBIG2Decode
+      // (UnsupportedFilterError) and images above an internal limit.
       continue;
     }
   }
@@ -148,6 +155,9 @@ function decodeImage(
   // Resolve the colour space (handles ICCBased, Indexed, CalRGB, etc.).
   const cs = resolveColorSpace(stream.dict.get('/ColorSpace'), registry);
 
+  // The dictionary's size decides what is allocated below, whatever the data holds.
+  assertImageSize(width, height, cs.name === 'DeviceGray' || cs.name === 'CalGray' ? 1 : 3);
+
   const { filters } = getStreamFilters(stream.dict);
   const isJpeg = filters.includes('DCTDecode');
 
@@ -168,6 +178,7 @@ function decodeImage(
   const alpha = extractSoftMask(stream, registry, width, height);
 
   if (alpha) {
+    assertWithinLimit('maxImageBytes', width * height * 4);
     const pixels = compositeAlpha(base.pixels, base.channels, width, height, alpha);
     return {
       name: stripSlash(name),
@@ -191,6 +202,19 @@ function decodeImage(
     bitsPerComponent,
     hasAlpha: false,
   };
+}
+
+/**
+ * Refuse an image whose declared size is above the internal limits, before anything is allocated.
+ * @throws {ResourceLimitError} A side above `maxImageDimension`, more than `maxImagePixels`
+ *   pixels, or more than `maxImageBytes` bytes of output.
+ * @internal
+ */
+function assertImageSize(width: number, height: number, outputChannels: number): void {
+  assertWithinLimit('maxImageDimension', width);
+  assertWithinLimit('maxImageDimension', height);
+  assertWithinLimit('maxImagePixels', width * height);
+  assertWithinLimit('maxImageBytes', width * height * outputChannels);
 }
 
 /**
@@ -427,6 +451,7 @@ function extractSoftMask(
   const mw = readInt(smask.dict.get('/Width'), 0);
   const mh = readInt(smask.dict.get('/Height'), 0);
   if (mw <= 0 || mh <= 0) return undefined;
+  assertImageSize(mw, mh, 1);
 
   const mbpc = readInt(smask.dict.get('/BitsPerComponent'), 8);
 

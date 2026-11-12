@@ -70,6 +70,26 @@ export function parseContentStream(data: Uint8Array): ContentStreamOperator[] {
   return parser.parse();
 }
 
+/**
+ * {@link parseContentStream}, calling `onCost` with the running cost of the stream each time an
+ * operand or an operator has been read. The cost is one per operator, one per operand beyond the
+ * sixth that the same operator takes (the most any operator takes; an inline image leaves the
+ * operands before it to the next operator), the length of each string and one
+ * per array element, nested arrays included. Operands count as they are parsed, whether or not an
+ * operator follows them; an inline image counts one. An error thrown by `onCost` leaves the
+ * parse, so a caller can stop a stream that costs more than it will accept before the rest of it
+ * is built.
+ *
+ * @internal Not exported from any package entry.
+ */
+export function parseContentStreamCounted(
+  data: Uint8Array,
+  onCost: (cost: number) => void,
+): ContentStreamOperator[] {
+  const parser = new ContentStreamLexer(data);
+  return parser.parse(onCost);
+}
+
 // ---------------------------------------------------------------------------
 // Token types
 // ---------------------------------------------------------------------------
@@ -135,11 +155,21 @@ class ContentStreamLexer {
   // -----------------------------------------------------------------------
 
   /**
-   * Parse the entire stream and return all operators.
+   * Parse the entire stream and return all operators; `onCost`, when given, sees the running
+   * cost (see {@link parseContentStreamCounted}) after each operand and operator.
    */
-  parse(): ContentStreamOperator[] {
+  parse(onCost?: (cost: number) => void): ContentStreamOperator[] {
     const result: ContentStreamOperator[] = [];
     const operandStack: Operand[] = [];
+    // Cost of the operators parsed so far, and of the operands waiting for their operator.
+    let done = 0;
+    let pending = 0;
+    const add = (cost: number): void => {
+      pending += cost;
+      onCost?.(done + pending);
+    };
+    // An operand beyond the sixth that the same operator takes costs one (BI leaves the operands before it on the stack).
+    const extra = (): number => (operandStack.length >= 6 ? 1 : 0);
 
     while (true) {
       const token = this.nextToken();
@@ -152,11 +182,13 @@ class ContentStreamLexer {
         case TokenType.Bool:
         case TokenType.Null:
         case TokenType.Name:
+          add(extra() + (typeof token.value === 'string' ? token.value.length : 0));
           operandStack.push(token.value as Operand);
           break;
 
         case TokenType.ArrayStart: {
-          const arr = this.parseArray();
+          add(extra());
+          const arr = this.parseArray(add);
           operandStack.push(arr);
           break;
         }
@@ -170,15 +202,22 @@ class ContentStreamLexer {
           if (op === 'BI') {
             // Inline image — parse dict + binary data
             const inlineImg = this.parseInlineImage();
-            result.push({
+            const parsed: ContentStreamOperator = {
               operator: 'BI',
               operands: [inlineImg as unknown as Operand],
-            });
+            };
+            result.push(parsed);
+            done += 1;
+            onCost?.(done + pending);
           } else {
-            result.push({
+            const parsed: ContentStreamOperator = {
               operator: op,
               operands: operandStack.splice(0, operandStack.length),
-            });
+            };
+            result.push(parsed);
+            done += 1 + pending;
+            pending = 0;
+            onCost?.(done);
           }
           break;
         }
@@ -198,15 +237,23 @@ class ContentStreamLexer {
   // -----------------------------------------------------------------------
 
   /**
-   * Parse a PDF array `[…]`.  Called after the `[` token has been consumed.
+   * Parse a PDF array `[…]`.  Called after the `[` token has been consumed.  The nesting is kept
+   * on an explicit stack, so the depth of the input does not grow the call stack; `add` is told
+   * the cost of each element as it is read (one, plus the length of a string).
    */
-  private parseArray(): Operand[] {
-    const items: Operand[] = [];
+  private parseArray(add: (cost: number) => void): Operand[] {
+    const root: Operand[] = [];
+    const open: Operand[][] = [root];
 
-    while (true) {
+    while (open.length > 0) {
       const token = this.nextToken();
       if (token.type === TokenType.EOF) break;
-      if (token.type === TokenType.ArrayEnd) break;
+      if (token.type === TokenType.ArrayEnd) {
+        open.pop();
+        continue;
+      }
+      const items = open.at(-1);
+      if (!items) break;
 
       switch (token.type) {
         case TokenType.Number:
@@ -215,18 +262,23 @@ class ContentStreamLexer {
         case TokenType.Bool:
         case TokenType.Null:
         case TokenType.Name:
+          add(1 + (typeof token.value === 'string' ? token.value.length : 0));
           items.push(token.value as Operand);
           break;
-        case TokenType.ArrayStart:
-          items.push(this.parseArray());
+        case TokenType.ArrayStart: {
+          add(1);
+          const child: Operand[] = [];
+          items.push(child);
+          open.push(child);
           break;
+        }
         default:
           // Operators should not appear inside arrays — skip
           break;
       }
     }
 
-    return items;
+    return root;
   }
 
   // -----------------------------------------------------------------------
@@ -344,71 +396,74 @@ class ContentStreamLexer {
    * Read and return the next token from the stream.
    */
   private nextToken(): Token {
-    this.skipWhitespaceAndComments();
+    // Bytes that are skipped loop here rather than recurse, so a long run of them is no deeper.
+    for (;;) {
+      this.skipWhitespaceAndComments();
 
-    if (this.pos >= this.data.length) {
-      return { type: TokenType.EOF, value: null };
-    }
-
-    const ch = this.data[this.pos]!;
-
-    // Literal string
-    if (ch === 0x28 /* ( */) {
-      return this.readLiteralString();
-    }
-
-    // Hex string or dictionary start (but dicts shouldn't appear in
-    // content streams — except inline-image key-value syntax)
-    if (ch === 0x3c /* < */) {
-      if (this.pos + 1 < this.data.length && this.data[this.pos + 1] === 0x3c) {
-        // '<<' — should not appear normally in content streams.
-        // Skip it.
-        this.pos += 2;
-        return this.nextToken();
+      if (this.pos >= this.data.length) {
+        return { type: TokenType.EOF, value: null };
       }
-      return this.readHexString();
-    }
 
-    // '>>' — dict close (shouldn't appear normally)
-    if (
-      ch === 0x3e /* > */ &&
-      this.pos + 1 < this.data.length &&
-      this.data[this.pos + 1] === 0x3e
-    ) {
-      this.pos += 2;
-      return this.nextToken();
-    }
+      const ch = this.data[this.pos]!;
 
-    // Array start
-    if (ch === 0x5b /* [ */) {
+      // Literal string
+      if (ch === 0x28 /* ( */) {
+        return this.readLiteralString();
+      }
+
+      // Hex string or dictionary start (but dicts shouldn't appear in
+      // content streams — except inline-image key-value syntax)
+      if (ch === 0x3c /* < */) {
+        if (this.pos + 1 < this.data.length && this.data[this.pos + 1] === 0x3c) {
+          // '<<' — should not appear normally in content streams.
+          // Skip it.
+          this.pos += 2;
+          continue;
+        }
+        return this.readHexString();
+      }
+
+      // '>>' — dict close (shouldn't appear normally)
+      if (
+        ch === 0x3e /* > */ &&
+        this.pos + 1 < this.data.length &&
+        this.data[this.pos + 1] === 0x3e
+      ) {
+        this.pos += 2;
+        continue;
+      }
+
+      // Array start
+      if (ch === 0x5b /* [ */) {
+        this.pos++;
+        return { type: TokenType.ArrayStart, value: null };
+      }
+
+      // Array end
+      if (ch === 0x5d /* ] */) {
+        this.pos++;
+        return { type: TokenType.ArrayEnd, value: null };
+      }
+
+      // Name
+      if (ch === 0x2f /* / */) {
+        return this.readName();
+      }
+
+      // Number (digit, sign, or decimal point)
+      if (this.isNumberStart(ch)) {
+        return this.readNumber();
+      }
+
+      // Keyword (operator, true, false, null)
+      if (this.isRegularChar(ch)) {
+        return this.readKeyword();
+      }
+
+      // Unknown byte — skip
       this.pos++;
-      return { type: TokenType.ArrayStart, value: null };
+      continue;
     }
-
-    // Array end
-    if (ch === 0x5d /* ] */) {
-      this.pos++;
-      return { type: TokenType.ArrayEnd, value: null };
-    }
-
-    // Name
-    if (ch === 0x2f /* / */) {
-      return this.readName();
-    }
-
-    // Number (digit, sign, or decimal point)
-    if (this.isNumberStart(ch)) {
-      return this.readNumber();
-    }
-
-    // Keyword (operator, true, false, null)
-    if (this.isRegularChar(ch)) {
-      return this.readKeyword();
-    }
-
-    // Unknown byte — skip
-    this.pos++;
-    return this.nextToken();
   }
 
   // -----------------------------------------------------------------------
