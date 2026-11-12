@@ -19,7 +19,7 @@ env:
   # Must equal `channel` in rust-toolchain.toml (the dated nightly every Rust gate
   # resolves to); bump both together. A dated toolchain input needs
   # a commit of the dtolnay/rust-toolchain master branch (see .peak-modern-holds.json).
-  RUST_TOOLCHAIN: nightly-2026-11-11
+  RUST_TOOLCHAIN: nightly-2026-11-12
   CARGO_TERM_COLOR: always
 
 jobs:
@@ -48,6 +48,15 @@ jobs:
 
       - name: Lint (oxlint + tsgolint, type-aware)
         run: pnpm run lint
+
+      # Both checks load vitest.config.ts through the installed vitest/node API, so they run
+      # after the install. The first fails when a tests/**/*.test.ts file belongs to no Vitest
+      # project or to more than one; the second is the census of the known-defect markers.
+      - name: Every test file in exactly one Vitest project
+        run: pnpm run check:test-projects
+
+      - name: Known-defect marker census
+        run: pnpm run check:known-defects
 
   # ---------------------------------------------------------------------------
   # Build WASM modules
@@ -190,10 +199,10 @@ jobs:
         run: pnpm run check:pack
 
   # ---------------------------------------------------------------------------
-  # Unit tests
+  # Unit and integration tests (Vitest projects unit and integration)
   # ---------------------------------------------------------------------------
   test-unit:
-    name: Unit Tests (${{ matrix.name }})
+    name: Tests (unit, integration; ${{ matrix.name }})
     needs: build-ts
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -242,27 +251,12 @@ jobs:
           name: wasm-modules
           path: src/wasm
 
-      # The encryption-guard tests decrypt our output with qpdf and fail in CI when it
-      # is missing. The release is pinned by the SHA-256 of its x86_64 AppImage (taken
-      # from the release's qpdf-<version>.sha256 asset); QPDF_VERSION and QPDF_SHA256
-      # move together. The AppImage is extracted, so no FUSE is needed.
-      - name: Install qpdf
-        env:
-          GH_TOKEN: ${{ github.token }}
-          QPDF_VERSION: 12.4.2
-          QPDF_SHA256: 907b5e86f289c92b382a02869eb9c5709b2e5ef6fb2f6a7ae56514915d06d5dd
-        run: |
-          mkdir -p "$RUNNER_TEMP/qpdf" && cd "$RUNNER_TEMP/qpdf"
-          appimage="qpdf-$QPDF_VERSION-x86_64.AppImage"
-          gh release download "v$QPDF_VERSION" -R qpdf/qpdf -p "$appimage"
-          echo "$QPDF_SHA256  $appimage" | sha256sum -c -
-          chmod +x "$appimage"
-          "./$appimage" --appimage-extract > /dev/null
-          echo "QPDF=$RUNNER_TEMP/qpdf/squashfs-root/AppRun" >> "$GITHUB_ENV"
-
-      # Memory policy (pool, workers, heap) lives in vitest.config.ts; no NODE_OPTIONS here.
-      - name: Run unit tests
-        run: pnpm exec vitest run --coverage
+      # The unit and integration projects need no qpdf: the qpdf and pdf.js checks run in the
+      # oracle project, in job test-oracle. The coverage thresholds in
+      # vitest.config.ts apply to these two projects. Memory policy (pool, workers, heap) lives
+      # in vitest.config.ts; no NODE_OPTIONS here.
+      - name: Run the unit and integration projects with coverage
+        run: pnpm exec vitest run --project unit --project integration --coverage
 
       - name: Upload coverage
         if: always()
@@ -273,16 +267,23 @@ jobs:
           retention-days: 7
 
   # ---------------------------------------------------------------------------
-  # Integration tests
+  # Oracle and adversarial tests, fixture checks, corpus and ledger gates
   # ---------------------------------------------------------------------------
-  test-integration:
-    name: Integration Tests
+  # Gating Node line only. The oracle project judges the library's output with tools outside it
+  # (qpdf, installed below, and the pdfjs-dist devDependency); its packaging snapshot test needs
+  # dist/ and dist/wasm/ (the build-ts artifact) and the previous release tag, hence the full
+  # clone. Every step after the adversarial run has `if: !cancelled()`, so one red gate does not
+  # hide the next. fixtures:legacy:check does not run in this workflow: it installs the published
+  # 0.40.3 package from the npm registry.
+  test-oracle:
+    name: Oracle and adversarial tests
     needs: build-ts
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v7.0.1
         with:
+          fetch-depth: 0
           persist-credentials: false
 
       - uses: pnpm/setup@fa36a5ef7dcdefc3a7cb25655c122e00cf6e636e # v3.1.2
@@ -303,8 +304,85 @@ jobs:
           name: wasm-modules
           path: src/wasm
 
-      - name: Run integration tests
-        run: pnpm exec vitest run tests/integration
+      # The oracle project, the corpus gate and the fixture checks below run qpdf; with CI set,
+      # the oracle tests fail when it is missing instead of skipping. The release is pinned by the
+      # SHA-256 of its x86_64 AppImage (taken from the release's qpdf-<version>.sha256 asset);
+      # QPDF_VERSION and QPDF_SHA256 move together, and the scripts under scripts/oracle/ refuse
+      # any other qpdf version. The AppImage is extracted, so no FUSE is needed.
+      - name: Install qpdf
+        env:
+          GH_TOKEN: ${{ github.token }}
+          QPDF_VERSION: 12.4.2
+          QPDF_SHA256: 907b5e86f289c92b382a02869eb9c5709b2e5ef6fb2f6a7ae56514915d06d5dd
+        run: |
+          mkdir -p "$RUNNER_TEMP/qpdf" && cd "$RUNNER_TEMP/qpdf"
+          appimage="qpdf-$QPDF_VERSION-x86_64.AppImage"
+          gh release download "v$QPDF_VERSION" -R qpdf/qpdf -p "$appimage"
+          echo "$QPDF_SHA256  $appimage" | sha256sum -c -
+          chmod +x "$appimage"
+          "./$appimage" --appimage-extract > /dev/null
+          echo "QPDF=$RUNNER_TEMP/qpdf/squashfs-root/AppRun" >> "$GITHUB_ENV"
+
+      - name: Run the adversarial project
+        run: pnpm exec vitest run --project adversarial
+
+      # The JSON report feeds the marker list and the capability gate below.
+      - name: Run the oracle project (JSON report)
+        if: ${{ !cancelled() }}
+        run: >-
+          pnpm exec vitest run --project oracle --reporter=default --reporter=json
+          --outputFile="$RUNNER_TEMP/vitest-oracle.json"
+
+      # One line per known-defect marker with its status in the report; fails on a marker that
+      # did not fail for its stated reason. The list is uploaded as the marker baseline.
+      - name: Known-defect markers of the oracle run
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: node scripts/dev/known-defects.ts --list "$RUNNER_TEMP/vitest-oracle.json" | tee "$RUNNER_TEMP/known-defects.tsv"
+
+      - name: Encrypted fixtures equal a fresh qpdf run
+        if: ${{ !cancelled() }}
+        run: node scripts/oracle/encrypted-fixtures.ts --check
+
+      - name: qpdf accepts every PDF 2.0 password hash case
+        if: ${{ !cancelled() }}
+        run: node scripts/oracle/pdf20-hash-cases.ts --check
+
+      # corpus.ts --check runs tests/oracle/corpus.test.ts again (retry 0, its own JSON report) to
+      # build the per-file summary, so that file runs twice in this job: in the oracle project
+      # above and here.
+      - name: Corpus gate (manifest, contact-data scan, corpus tests)
+        if: ${{ !cancelled() }}
+        run: node scripts/dev/corpus.ts --check --summary "$RUNNER_TEMP/corpus-summary.json"
+
+      - name: Findings ledger and markers (surface gate)
+        if: ${{ !cancelled() }}
+        run: node scripts/dev/surface-gate.ts
+
+      # Report-only in this release: a pending row or a row without passing evidence in the
+      # report is printed, and the job does not fail on it.
+      - name: Capability gate (report-only)
+        if: ${{ !cancelled() }}
+        continue-on-error: true
+        run: node scripts/dev/capability-gate.ts --report "$RUNNER_TEMP/vitest-oracle.json"
+
+      - name: Upload the oracle report and the marker list
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: oracle-report
+          path: |
+            ${{ runner.temp }}/vitest-oracle.json
+            ${{ runner.temp }}/known-defects.tsv
+          retention-days: 30
+
+      - name: Upload the corpus summary
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: corpus-summary
+          path: ${{ runner.temp }}/corpus-summary.json
+          retention-days: 30
 
   # ---------------------------------------------------------------------------
   # E2E tests (Playwright)
@@ -387,10 +465,13 @@ jobs:
         run: pnpm run bench
 
   # ---------------------------------------------------------------------------
-  # Bundle size check
+  # Bundle size (size gate)
   # ---------------------------------------------------------------------------
-  # Measures dist/index.mjs only (the core ESM entry), not the full tarball; the
-  # README badge figures are reconciled in the docs phase (P4).
+  # Job id and name are kept so a required status check that names them still matches.
+  # scripts/dev/size-gate.ts bundles the built package (the build-ts dist artifact) with the
+  # installed esbuild: the createPdf, loadPdf, root, per-entry and IIFE bundles, gzip and
+  # brotli, each against its ratchet budget in scripts/dev/size-budget.json, and checks the
+  # README bundle badge. The table goes to the job summary, the verdict to the log.
   bundle-size:
     name: Bundle Size
     needs: build-ts
@@ -401,36 +482,20 @@ jobs:
         with:
           persist-credentials: false
 
+      - uses: pnpm/setup@fa36a5ef7dcdefc3a7cb25655c122e00cf6e636e # v3.1.2
+        with:
+          runtime: node@26
+          cache: true
+          require-lockfile: true
+
       - name: Download dist
         uses: actions/download-artifact@v8.0.2
         with:
           name: dist
           path: dist
 
-      - name: Measure bundle size
-        run: |
-          echo "## Bundle Size Report" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-
-          # Measure raw size
-          RAW_SIZE=$(wc -c < dist/index.mjs)
-          echo "Raw ESM bundle: ${RAW_SIZE} bytes" >> "$GITHUB_STEP_SUMMARY"
-
-          # Measure gzipped size
-          GZIP_SIZE=$(gzip -c dist/index.mjs | wc -c)
-          echo "Gzipped ESM bundle: ${GZIP_SIZE} bytes" >> "$GITHUB_STEP_SUMMARY"
-
-          # Budget check: 50 KB gzipped max for core bundle
-          BUDGET=51200
-          if [ "$GZIP_SIZE" -gt "$BUDGET" ]; then
-            echo "" >> "$GITHUB_STEP_SUMMARY"
-            echo "**OVER BUDGET**: ${GZIP_SIZE} bytes > ${BUDGET} bytes (50 KB)" >> "$GITHUB_STEP_SUMMARY"
-            echo "::error::Bundle size ${GZIP_SIZE} bytes exceeds budget of ${BUDGET} bytes (50 KB gzipped)"
-            exit 1
-          else
-            echo "" >> "$GITHUB_STEP_SUMMARY"
-            echo "Within budget (${GZIP_SIZE} / ${BUDGET} bytes)" >> "$GITHUB_STEP_SUMMARY"
-          fi
+      - name: Size gate
+        run: node scripts/dev/size-gate.ts >> "$GITHUB_STEP_SUMMARY"
 
   # ---------------------------------------------------------------------------
   # Rust checks (per crate)
