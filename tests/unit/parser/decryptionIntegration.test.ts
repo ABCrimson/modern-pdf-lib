@@ -6,7 +6,9 @@
  * - Loading a PDF encrypted with empty user password works without providing
  *   a password
  * - Error is thrown for encrypted PDFs when authentication fails
- * - Decrypted content is accessible after loading
+ * - Decrypted content is accessible after loading: the /Info /Title and the content stream equal
+ *   their plaintext for RC4-40, RC4-128, AES-128 and AES-256, and the document saves only after
+ *   encrypt()
  */
 
 import { describe, it, expect } from 'vitest';
@@ -15,6 +17,7 @@ import { PdfDocument, createPdf } from '../../../src/core/pdfDocument.js';
 import { PdfEncryptionHandler } from '../../../src/crypto/encryptionHandler.js';
 import type { EncryptAlgorithm } from '../../../src/crypto/encryptionHandler.js';
 import { PdfDict, PdfName, PdfNumber, PdfString, PdfBool } from '../../../src/core/pdfObjects.js';
+import { UnsupportedEncryptionError } from '../../../src/errors.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -421,42 +424,28 @@ describe('Decryption integration: authentication failure', () => {
 // ---------------------------------------------------------------------------
 
 describe('Decryption integration: decrypted content accessible', () => {
-  it('decrypts /Title string in the /Info dictionary (RC4-128, empty password)', async () => {
-    const { bytes } = await buildEncryptedPdf('', 'ownerpass', 'rc4-128');
-    const doc = await loadPdf(bytes);
+  for (const algorithm of ['rc4-40', 'rc4-128', 'aes-128', 'aes-256'] as const) {
+    it(`decrypts the /Info /Title and the content stream (${algorithm}, empty password)`, async () => {
+      const { bytes, expectedTitle } = await buildEncryptedPdf('', 'ownerpass', algorithm);
+      const doc = await loadPdf(bytes);
+      expect(doc.getTitle()).toBe(expectedTitle);
+      expect(new TextDecoder('latin1').decode(doc.getPage(0).getContentStream()).trim()).toBe(
+        'BT /F1 12 Tf (Hello) Tj ET',
+      );
+    });
 
-    // The document was parsed and strings were decrypted, so the title
-    // should match the original plaintext.
-    // PdfDocument stores parsed title internally from the info dict.
-    // We verify by re-saving and re-loading: the title should survive.
-    const savedBytes = await doc.save();
-    const reloaded = await loadPdf(savedBytes);
-    expect(reloaded.getPageCount()).toBe(1);
-  });
-
-  it('decrypts /Title string in the /Info dictionary (RC4-40, empty password)', async () => {
-    const { bytes } = await buildEncryptedPdf('', 'ownerpass', 'rc4-40');
-    const doc = await loadPdf(bytes);
-    expect(doc).toBeInstanceOf(PdfDocument);
-    expect(doc.getPageCount()).toBe(1);
-  });
-
-  it('decrypts stream data (content stream) from encrypted PDF', async () => {
-    const { bytes } = await buildEncryptedPdf('', 'ownerpass', 'rc4-128');
-    const doc = await loadPdf(bytes);
-
-    // If the stream was properly decrypted, the page should load without
-    // errors and the document should be valid.
-    expect(doc.getPageCount()).toBe(1);
-
-    // Re-save the document -- this should succeed and produce valid bytes
-    const savedBytes = await doc.save();
-    expect(savedBytes.length).toBeGreaterThan(0);
-
-    // Verify the re-saved document is valid
-    const reloaded = await loadPdf(savedBytes);
-    expect(reloaded.getPageCount()).toBe(1);
-  });
+    it(`saves the decrypted document only after encrypt() (${algorithm})`, async () => {
+      const { bytes, expectedTitle } = await buildEncryptedPdf('', 'ownerpass', algorithm);
+      const doc = await loadPdf(bytes);
+      await expect(doc.save()).rejects.toBeInstanceOf(UnsupportedEncryptionError);
+      await doc.encrypt({ userPassword: 'again', ownerPassword: 'owner', algorithm });
+      const reloaded = await loadPdf(await doc.save(), { password: 'again' });
+      expect(reloaded.getTitle()).toBe(expectedTitle);
+      expect(new TextDecoder('latin1').decode(reloaded.getPage(0).getContentStream()).trim()).toBe(
+        'BT /F1 12 Tf (Hello) Tj ET',
+      );
+    });
+  }
 
   it('ignores encryption when ignoreEncryption option is set', async () => {
     const { bytes } = await buildEncryptedPdf('secretpwd', 'ownerpwd', 'rc4-128');

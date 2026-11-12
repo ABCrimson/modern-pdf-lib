@@ -11,6 +11,7 @@
 import { describe, it, expect } from 'vitest';
 import { PdfLexer } from '../../../src/parser/lexer.js';
 import { PdfObjectParser } from '../../../src/parser/objectParser.js';
+import { ResourceLimitError } from '../../../src/errors.js';
 import {
   PdfNull,
   PdfBool,
@@ -35,10 +36,13 @@ function bytes(str: string): Uint8Array {
 }
 
 /** Create a parser (with a fresh registry) from a plain string. */
-function createParser(str: string): { parser: PdfObjectParser; registry: PdfObjectRegistry } {
+function createParser(
+  str: string,
+  options?: ConstructorParameters<typeof PdfObjectParser>[2],
+): { parser: PdfObjectParser; registry: PdfObjectRegistry } {
   const lexer = new PdfLexer(bytes(str));
   const registry = new PdfObjectRegistry();
-  const parser = new PdfObjectParser(lexer, registry);
+  const parser = new PdfObjectParser(lexer, registry, options);
   return { parser, registry };
 }
 
@@ -569,10 +573,19 @@ describe('PdfObjectParser - streams', () => {
     expect(stream.data).toHaveLength(0);
   });
 
-  it('throws when /Length is missing from stream dict', () => {
+  it('recovers the data when /Length is missing from the stream dict', () => {
     const input = '3 0 obj\n<< /Type /XObject >>\nstream\ndata\nendstream\nendobj';
     const { parser } = createParser(input);
-    expect(() => parser.parseIndirectObject()).toThrow(/missing \/Length/i);
+    const stream = parser.parseIndirectObject().object as PdfStream;
+    expect(new TextDecoder().decode(stream.data)).toBe('data');
+  });
+
+  it('throws when /Length is missing and recovery is off', () => {
+    const input = '3 0 obj\n<< /Type /XObject >>\nstream\ndata\nendstream\nendobj';
+    const { parser } = createParser(input, { recover: false });
+    expect(() => parser.parseIndirectObject()).toThrow(
+      /object 3 0.*no usable \/Length.*would end after 4 bytes/is,
+    );
   });
 
   it('parses stream that appears as value inside parseObject flow', () => {
@@ -717,9 +730,16 @@ describe('PdfObjectParser - error handling', () => {
     expect(() => parse('<< true (value) >>')).toThrow(/expected name/i);
   });
 
-  it('throws when /Length is a non-number in stream', () => {
+  it('recovers the data when /Length is a non-number in a stream', () => {
     const input = '1 0 obj << /Length (five) >> stream\nHello\nendstream endobj';
     const { parser } = createParser(input);
+    const stream = parser.parseIndirectObject().object as PdfStream;
+    expect(new TextDecoder().decode(stream.data)).toBe('Hello');
+  });
+
+  it('throws on a non-number /Length when recovery is off', () => {
+    const input = '1 0 obj << /Length (five) >> stream\nHello\nendstream endobj';
+    const { parser } = createParser(input, { recover: false });
     expect(() => parser.parseIndirectObject()).toThrow(/\/Length/i);
   });
 });
@@ -793,11 +813,17 @@ describe('PdfObjectParser - edge cases', () => {
     expect(new TextDecoder().decode(stream.data)).toBe('12345');
   });
 
-  it('throws when /Length ref is not yet resolved', () => {
-    // Object 99 is not in the registry
+  it('recovers the data when the /Length ref resolves nowhere', () => {
     const input = '1 0 obj << /Length 99 0 R >> stream\ndata\nendstream endobj';
     const { parser } = createParser(input);
-    expect(() => parser.parseIndirectObject()).toThrow(/not yet.*resolved/i);
+    const stream = parser.parseIndirectObject().object as PdfStream;
+    expect(new TextDecoder().decode(stream.data)).toBe('data');
+  });
+
+  it('throws when the /Length ref resolves nowhere and recovery is off', () => {
+    const input = '1 0 obj << /Length 99 0 R >> stream\ndata\nendstream endobj';
+    const { parser } = createParser(input, { recover: false });
+    expect(() => parser.parseIndirectObject()).toThrow(/99 0 R/);
   });
 
   it('correctly parses number followed by non-ref context', () => {
@@ -809,5 +835,160 @@ describe('PdfObjectParser - edge cases', () => {
 
     const obj2 = parser.parseObject();
     expect(obj2.kind).toBe('name');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Stream /Length: resolver, recovery and strict mode
+// ---------------------------------------------------------------------------
+
+describe('PdfObjectParser - stream /Length resolution', () => {
+  const FILE =
+    '1 0 obj\n<< /Length 2 0 R >>\nstream\nHello\nendstream\nendobj\n2 0 obj\n5\nendobj\n';
+  const decode = (stream: PdfStream): string => new TextDecoder().decode(stream.data);
+
+  it('resolves a forward /Length reference through a resolver given after construction', () => {
+    const { parser } = createParser(FILE);
+    // The resolver parses the later object with the lexer the stream is being read with.
+    parser.resolveLength = (ref) =>
+      parser.parseIndirectObjectAt(FILE.indexOf(`${ref.objectNumber} 0 obj`)).object;
+    const stream = parser.parseIndirectObject().object as PdfStream;
+    expect(decode(stream)).toBe('Hello');
+    // The outer parse goes on to endobj and the next object.
+    expect(parser.parseIndirectObject().ref.objectNumber).toBe(2);
+  });
+
+  it('resolves a /Length met while resolving another one, once per object', () => {
+    const input =
+      '1 0 obj << /Length 2 0 R >> stream\nabc\nendstream endobj\n' +
+      '2 0 obj << /Length 3 0 R >> stream\n4\nendstream endobj\n';
+    const { parser } = createParser(input);
+    const calls: number[] = [];
+    parser.resolveLength = (ref) => {
+      calls.push(ref.objectNumber);
+      // Parsing a stream whose own /Length is a reference calls the resolver for that one.
+      if (ref.objectNumber === 2) parser.parseIndirectObjectAt(input.indexOf('2 0 obj'));
+      return PdfNumber.of(ref.objectNumber === 2 ? 3 : 1);
+    };
+    expect(decode(parser.parseIndirectObject().object as PdfStream)).toBe('abc');
+    expect(calls).toEqual([2, 3]);
+  });
+
+  it('does not call the resolver again for a /Length target that is being resolved', () => {
+    const input =
+      '1 0 obj << /Length 2 0 R >> stream\nabc\nendstream endobj\n' +
+      '2 0 obj << /Length 2 0 R >> stream\n4\nendstream endobj\n';
+    const { parser } = createParser(input);
+    const calls: number[] = [];
+    parser.resolveLength = (ref) => {
+      calls.push(ref.objectNumber);
+      parser.parseIndirectObjectAt(input.indexOf('2 0 obj'));
+      return PdfNumber.of(3);
+    };
+    expect(decode(parser.parseIndirectObject().object as PdfStream)).toBe('abc');
+    expect(calls).toEqual([2]);
+  });
+
+  it('stops a chain of nested /Length targets at eight levels', () => {
+    // Object n holds a stream whose /Length is object n + 1.
+    const count = 20;
+    let input = '';
+    const offsets: number[] = [];
+    for (let n = 1; n <= count; n++) {
+      offsets[n] = input.length;
+      input += `${n} 0 obj << /Length ${n + 1} 0 R >> stream\nab\nendstream endobj\n`;
+    }
+    const { parser } = createParser(input);
+    let depth = 0;
+    let deepest = 0;
+    parser.resolveLength = (ref) => {
+      depth++;
+      deepest = Math.max(deepest, depth);
+      try {
+        parser.parseIndirectObjectAt(offsets[ref.objectNumber] ?? 0);
+      } finally {
+        depth--;
+      }
+      return PdfNumber.of(2);
+    };
+    expect(decode(parser.parseIndirectObject().object as PdfStream)).toBe('ab');
+    expect(deepest).toBe(8);
+  });
+
+  it('propagates a ResourceLimitError that the resolver throws', () => {
+    const input = '1 0 obj << /Length 9 0 R >>\nstream\nabc\nendstream\nendobj';
+    const { parser } = createParser(input);
+    parser.resolveLength = () => {
+      throw new ResourceLimitError('maxDecodedStreamBytes', 1, 'bytes');
+    };
+    expect(() => parser.parseIndirectObjectAt(0)).toThrow(ResourceLimitError);
+  });
+
+  it('treats any other error of the resolver as an unusable /Length', () => {
+    const input = '1 0 obj << /Length 9 0 R >>\nstream\nabc\nendstream\nendobj';
+    const { parser } = createParser(input);
+    parser.resolveLength = () => {
+      throw new Error('x');
+    };
+    const stream = parser.parseIndirectObjectAt(0).object as PdfStream;
+    expect(decode(stream)).toBe('abc');
+  });
+
+  it('tries a /Length target that failed once only once', () => {
+    const input =
+      '1 0 obj << /Length 9 0 R >>\nstream\nabc\nendstream\nendobj\n' +
+      '2 0 obj << /Length 9 0 R >>\nstream\nxyz\nendstream\nendobj\n';
+    const { parser } = createParser(input);
+    let calls = 0;
+    parser.resolveLength = () => {
+      calls++;
+      throw new Error('9 0 obj does not parse');
+    };
+    expect(decode(parser.parseIndirectObject().object as PdfStream)).toBe('abc');
+    expect(decode(parser.parseIndirectObject().object as PdfStream)).toBe('xyz');
+    expect(calls).toBe(1);
+  });
+
+  it('writes the strict-mode message of a declared length as a sentence', () => {
+    const { parser } = createParser('1 0 obj << /Length 7 >>\nstream\nabc\nendstream\nendobj', {
+      recover: false,
+    });
+    expect(() => parser.parseIndirectObjectAt(0)).toThrow(
+      /the stream of object 1 0 has \/Length 7, which endstream does not follow; the data would end/,
+    );
+  });
+
+  it('falls back to the registry when there is no resolver', () => {
+    const { parser, registry } = createParser(
+      '1 0 obj << /Length 10 0 R >> stream\n12345\nendstream endobj',
+    );
+    registry.registerWithRef(PdfRef.of(10), PdfNumber.of(5));
+    expect(decode(parser.parseIndirectObject().object as PdfStream)).toBe('12345');
+  });
+
+  it.each([
+    ['a self reference', '1 0 R'],
+    ['a reference loop', '2 0 R'],
+  ])('ends %s without recursing', (_name, target) => {
+    const { parser } = createParser(
+      `1 0 obj << /Length ${target} >> stream\nabc\nendstream endobj\n2 0 obj 1 0 R endobj\n`,
+    );
+    // A reference as the resolved value is not followed: one hop only.
+    parser.resolveLength = (ref) => PdfRef.of(ref.objectNumber === 1 ? 2 : 1);
+    expect(decode(parser.parseIndirectObject().object as PdfStream)).toBe('abc');
+  });
+
+  it('reports each recovery through onRecovered', () => {
+    const seen: Array<{ objectNumber: number | undefined; length: number }> = [];
+    const { parser } = createParser('7 0 obj << /Length 1 >> stream\nabcdef\nendstream endobj', {
+      onRecovered: (info) => seen.push({ objectNumber: info.objectNumber, length: info.length }),
+    });
+    parser.parseIndirectObject();
+    expect(seen).toEqual([{ objectNumber: 7, length: 6 }]);
+  });
+
+  it('throws when neither endstream nor endobj follows', () => {
+    const { parser } = createParser('1 0 obj << /Length 1 >> stream\nabc');
+    expect(() => parser.parseIndirectObject()).toThrow(/no endstream or endobj/i);
   });
 });

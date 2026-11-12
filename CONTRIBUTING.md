@@ -325,7 +325,7 @@ waits on WASM, so style and type failures surface first.
 | Build WASM | All six crates compile for `wasm32-unknown-unknown` |
 | Build TypeScript | `pnpm run build` succeeds and `dist/` imports as ESM **and** CJS |
 | Pack Check | `pnpm run check:pack`: the tarball lists six WASM builds and the IIFE bundle and passes publint and attw |
-| Tests (unit, integration) | The unit and integration projects with v8 coverage, without qpdf; Node 26 gates, the Node 24 and `devEngines` runtime legs are experimental and do not fail the workflow |
+| Tests (unit, integration) | The unit and integration projects with v8 coverage and the checksum-pinned qpdf; Node 26 gates, the Node 24 and `devEngines` runtime legs are experimental and do not fail the workflow |
 | Oracle and adversarial tests | On the built `dist/` and a full clone: installs qpdf 12.4.2 (checked against the SHA-256 written in `ci.yml`, exported as `QPDF`), runs the adversarial and oracle projects, lists the markers of the oracle run (fails on a marker that did not fail for its stated reason), checks both qpdf fixture sets, and runs the corpus gate, the surface gate and the capability gate (report-only) |
 | E2E Tests | Playwright specs green in a real browser |
 | Benchmarks | The benchmark harness runs without error |

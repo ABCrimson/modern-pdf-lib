@@ -1,0 +1,29 @@
+[
+  {
+    "file": "encrypted-r6.pdf",
+    "sha256": "cadae3885ed7acce96dc735320618ab24f72cdf793ba62128297f17e77a08be7",
+    "bytes": 1975,
+    "producer": "modern-pdf-lib@0.26.0",
+    "api": "createPdf(); setTitle/setAuthor/setProducer/setCreationDate; addPage([612, 792]); drawText x21; await encrypt({ userPassword, ownerPassword, algorithm: 'aes-256' }); save()",
+    "inputs": {
+      "pages": ["Encrypted R6 page"],
+      "algorithm": "aes-256"
+    },
+    "expect": {
+      "pageCount": 1,
+      "info": {
+        "Title": "aes-256",
+        "Author": "legacy-0.26.0 generator"
+      },
+      "pageText": ["Encrypted R6 page"],
+      "encryption": {
+        "V": 5,
+        "R": 6,
+        "CFM": "AESV3",
+        "userPassword": "user-0260",
+        "ownerPassword": "owner-0260"
+      }
+    },
+    "notes": "Salts and IVs come from the pinned RNG: predictable, test fixtures only."
+  }
+]

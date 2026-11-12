@@ -310,6 +310,11 @@ function readInfoMetadata(
  * @param pdf      The source PDF bytes.
  * @param options  Which classes to remove (each defaults to `true`).
  * @returns        The cleaned PDF bytes and a {@link SanitizeReport}.
+ * @throws {UnsupportedEncryptionError} When the input is an encrypted PDF
+ *         that opens with the empty user password: its objects are
+ *         decrypted on load, and the writer refuses to write them without
+ *         encryption. (An encrypted PDF that needs a password fails to load
+ *         with a `PdfParseError`.)
  *
  * @example
  * ```ts

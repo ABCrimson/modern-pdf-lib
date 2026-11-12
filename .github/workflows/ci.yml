@@ -251,10 +251,25 @@ jobs:
           name: wasm-modules
           path: src/wasm
 
-      # The unit and integration projects need no qpdf: the qpdf and pdf.js checks run in the
-      # oracle project, in job test-oracle. The coverage thresholds in
-      # vitest.config.ts apply to these two projects. Memory policy (pool, workers, heap) lives
-      # in vitest.config.ts; no NODE_OPTIONS here.
+      # Unit tests of the encrypted load path compare with qpdf, so this job installs the same
+      # checksum-pinned qpdf as job test-oracle (QPDF_VERSION and QPDF_SHA256 move together in
+      # both jobs). The AppImage is extracted, so no FUSE is needed.
+      - name: Install qpdf
+        env:
+          GH_TOKEN: ${{ github.token }}
+          QPDF_VERSION: 12.4.2
+          QPDF_SHA256: 907b5e86f289c92b382a02869eb9c5709b2e5ef6fb2f6a7ae56514915d06d5dd
+        run: |
+          mkdir -p "$RUNNER_TEMP/qpdf" && cd "$RUNNER_TEMP/qpdf"
+          appimage="qpdf-$QPDF_VERSION-x86_64.AppImage"
+          gh release download "v$QPDF_VERSION" -R qpdf/qpdf -p "$appimage"
+          echo "$QPDF_SHA256  $appimage" | sha256sum -c -
+          chmod +x "$appimage"
+          "./$appimage" --appimage-extract > /dev/null
+          echo "QPDF=$RUNNER_TEMP/qpdf/squashfs-root/AppRun" >> "$GITHUB_ENV"
+
+      # The coverage thresholds in vitest.config.ts apply to these two projects. Memory policy
+      # (pool, workers, heap) lives in vitest.config.ts; no NODE_OPTIONS here.
       - name: Run the unit and integration projects with coverage
         run: pnpm exec vitest run --project unit --project integration --coverage
 

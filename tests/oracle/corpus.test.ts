@@ -2,7 +2,8 @@
  * G-CORPUS: every third-party file of tests/fixtures/corpus/ goes through the public load
  * surface, and both of its re-saves go through qpdf.
  *
- * One `describe(<id>)` per manifest.json entry, eight checks each, in order:
+ * One `describe(<id>)` per manifest.json entry, eight checks each (ten for an encrypted file), in
+ * order:
  *   1. sha256: the committed bytes hash to the manifest value (never keyed).
  *   2. loads: `loadPdf(bytes, { password })` resolves.
  *   3. no fallback (category real): that load called `XrefParser#rebuildXrefFromScan` zero times
@@ -17,6 +18,13 @@
  *      for the input (manifest `oracle.qpdfCheck`), never for this library's output. Skipped
  *      where qpdf is absent locally; required in CI (tests/helpers/oracle/qpdf.ts).
  *   8. qpdf --check of the default save (`save()`, compress true), with the same rule as check 7.
+ *
+ * An encrypted file (a manifest feature `encrypted-*`) is decrypted on load, and a document
+ * decrypted on load is never saved in clear: a bare `save()` throws UnsupportedEncryptionError
+ * (check 9). Its saves of checks 6-8 come after `encrypt()` with new passwords (AES-256), so
+ * they reload and pass qpdf with the new user password, and check 10 compares the plaintext of
+ * the `compress: false` save (`qpdf --decrypt`, loaded by the library) with the source: the same
+ * page count and, page by page, the same extracted text.
  *
  * The library work for one file (load, scan count, strict load, text, both saves, reload) runs
  * once in the file's beforeAll and each check asserts on its recorded outcome; a failed step
@@ -36,18 +44,24 @@ import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { beforeAll, describe, expect, test, vi } from 'vitest';
 import type { TestContext } from 'vitest';
-import { extractText, loadPdf, parseContentStream } from '../../src/index.js';
+import {
+  extractText,
+  loadPdf,
+  parseContentStream,
+  UnsupportedEncryptionError,
+} from '../../src/index.js';
 import type { PdfDocument } from '../../src/index.js';
 import { XrefParser } from '../../src/parser/xrefParser.js';
 import { defectKey, knownDefect } from '../helpers/known-defect.js';
 import type { DefectKey } from '../helpers/known-defect.js';
-import { expectQpdfClean, requireQpdf } from '../helpers/oracle/qpdf.js';
+import { expectQpdfClean, qpdfDecryptQdf, requireQpdf } from '../helpers/oracle/qpdf.js';
 
 interface CorpusEntry {
   readonly id: string;
   readonly file: string;
   readonly sha256: string;
   readonly category: 'real' | 'damaged';
+  readonly features: readonly string[];
   readonly password: string | null;
   readonly oracle: {
     readonly qpdfCheck: 0 | 3;
@@ -57,7 +71,16 @@ interface CorpusEntry {
   };
 }
 
-type Check = 'loads' | 'fallback' | 'pages' | 'text' | 'save' | 'qpdf' | 'qpdfDefault';
+type Check =
+  | 'loads'
+  | 'fallback'
+  | 'pages'
+  | 'text'
+  | 'save'
+  | 'qpdf'
+  | 'qpdfDefault'
+  | 'bareSave'
+  | 'plaintext';
 
 const DIR = new URL('../fixtures/corpus/', import.meta.url);
 const manifest = JSON.parse(
@@ -87,36 +110,6 @@ interface Known {
 
 const TEXT_MISSING = /^AssertionError: expected '.*' to contain '/;
 
-// Revision 6 (AES-256) files from other producers do not open with their password: the load
-// throws at the password check.
-const R6_PASSWORD: Known = {
-  key: defectKey('crypto-security-01', '0.40.9'),
-  failsWith: /^PdfParseError: Failed to decrypt PDF: the provided password is incorrect/,
-};
-/** Every check after sha256 fails with the load error. */
-const cascade = (known: Known): Record<Check, Known> => ({
-  loads: known,
-  fallback: known,
-  pages: known,
-  text: known,
-  save: known,
-  qpdf: known,
-  qpdfDefault: known,
-});
-
-// A stream whose /Length is an indirect object defined later is dropped on load (the strict
-// load throws), so the page content it held is empty.
-const FORWARD_LENGTH = defectKey('parser-syntax-M03', '0.40.9');
-const STRICT_LOAD_THROWS: Known = {
-  key: FORWARD_LENGTH,
-  failsWith: /^PdfParseError: Failed to parse indirect object \d+ 0 at offset \d+/,
-};
-const CONTENT_DROPPED: Known = {
-  key: FORWARD_LENGTH,
-  failsWith: /^AssertionError: expected '' to contain '/,
-};
-const FORWARD_LENGTH_FILE = { fallback: STRICT_LOAD_THROWS, text: CONTENT_DROPPED };
-
 /** The failsWith patterns that qpdfFindsOnly built. */
 const QPDF_PATTERNS = new WeakSet<RegExp>();
 
@@ -137,34 +130,6 @@ function qpdfFindsOnly(exit: 2 | 3, ...kinds: readonly RegExp[]): RegExp {
   return pattern;
 }
 
-/** qpdf cannot inflate a /FlateDecode stream of the output, for one of `causes`. */
-const inflateFails = (causes: RegExp): RegExp =>
-  new RegExp(
-    `WARNING: in\\.pdf \\(offset \\d+\\): error decoding stream data for object \\d+ 0: stream inflate: inflate: data: (?:${causes.source})`,
-  );
-const REPROCESSED =
-  /WARNING: in\.pdf \(offset \d+\): stream will be re-processed without filtering to avoid data loss/;
-const CONTENT_UNDECODABLE =
-  /ERROR: page \d+: content stream \(content stream object \d+ 0\): errors while decoding content stream/;
-
-// An encrypted file loads with its streams still encrypted: text extraction cannot inflate them,
-// and the re-save writes the ciphertext under /FlateDecode without /Encrypt.
-const CIPHERTEXT = defectKey('parser-syntax-01', '0.40.9');
-const CIPHERTEXT_SAVED: Known = {
-  key: CIPHERTEXT,
-  failsWith: qpdfFindsOnly(
-    2,
-    inflateFails(/incorrect header check|zlib unknown error \(2\)/),
-    REPROCESSED,
-    CONTENT_UNDECODABLE,
-  ),
-};
-const CIPHERTEXT_FILE = {
-  text: { key: CIPHERTEXT, failsWith: /^Error: FlateDecode: failed to decompress data/ },
-  qpdf: CIPHERTEXT_SAVED,
-  qpdfDefault: CIPHERTEXT_SAVED,
-};
-
 // Fonts given as indirect references are skipped, so their ToUnicode maps are not applied.
 const INDIRECT_FONTS: Known = {
   key: defectKey('parser-text-01', '0.41.6'),
@@ -174,39 +139,45 @@ const INDIRECT_FONTS: Known = {
 // The saved file keeps an input stream that qpdf warns about unchanged (exit 3 is accepted only
 // for an input, never for this library's output).
 const COPIED_DAMAGED_STREAMS: Known = {
-  key: defectKey('corpus-P02', '0.40.9'),
+  key: defectKey('corpus-P02', '0.41.0'),
   failsWith: qpdfFindsOnly(
     3,
     /WARNING: in\.pdf \(offset \d+\): input stream is complete but output may still be valid/,
   ),
 };
 
+// A name that holds a delimiter (the /Subtype /text/plain of an embedded file) is written
+// without escaping it, so qpdf ends the dictionary early and warns.
+const UNESCAPED_NAME = defectKey('tests-unit-core-b-22', '0.41.0');
+const DICTIONARY_ENDED =
+  /WARNING: in\.pdf \(object \d+ 0, offset \d+\): dictionary ended prematurely; using null as value for last key/;
+const UNESCAPED_NAME_SAVED: Known = {
+  key: UNESCAPED_NAME,
+  failsWith: qpdfFindsOnly(3, DICTIONARY_ENDED),
+};
+
 const KNOWN: Readonly<Record<string, Partial<Record<Check, Known>>>> = {
   'irs-p1-chinese': { text: INDIRECT_FONTS },
   'pdfjs-cid-truetype': { text: INDIRECT_FONTS },
-  'pyhanko-aes256': cascade(R6_PASSWORD),
-  'pyhanko-rc4': CIPHERTEXT_FILE,
-  'pyhanko-ua-and-a': FORWARD_LENGTH_FILE,
-  // Category damaged (qpdf warns about its streams): no strict-load check, but the dropped
-  // content still empties page 1. Both saves keep the three Flate streams qpdf warns about in
-  // the input byte for byte, so qpdf warns on them in the output too.
+  'pyhanko-ua-and-a': { text: INDIRECT_FONTS },
+  // Category damaged (qpdf warns about its streams). Both saves keep the three Flate streams qpdf
+  // warns about in the input byte for byte, so qpdf warns on them in the output too.
   'qpdf-form-acrobat': {
-    text: CONTENT_DROPPED,
+    text: INDIRECT_FONTS,
     qpdf: COPIED_DAMAGED_STREAMS,
     qpdfDefault: COPIED_DAMAGED_STREAMS,
   },
-  'qpdf-form-odt': FORWARD_LENGTH_FILE,
-  'qpdf-hybrid-xref': FORWARD_LENGTH_FILE,
-  // Category damaged: no strict-load check, but the dropped content still empties page 1.
-  'qpdf-labels-damaged': { text: CONTENT_DROPPED },
-  'qpdf-r3-rc4': FORWARD_LENGTH_FILE,
-  'qpdf-r4-aes': cascade({
-    key: defectKey('crypto-security-M01', '0.40.9'),
-    failsWith: /^SyntaxError: Input string must contain hex characters in even length/,
-  }),
-  'qpdf-r4-rc4': CIPHERTEXT_FILE,
-  'qpdf-r6-acrobat-xi': cascade(R6_PASSWORD),
-  'qpdf-r6-attachments': cascade(R6_PASSWORD),
+  'qpdf-form-odt': { text: INDIRECT_FONTS },
+  'qpdf-r6-attachments': {
+    qpdf: UNESCAPED_NAME_SAVED,
+    qpdfDefault: UNESCAPED_NAME_SAVED,
+    plaintext: {
+      key: UNESCAPED_NAME,
+      failsWith: new RegExp(
+        `^QpdfError: qpdf --decrypt exit 3: (?:(?:${DICTIONARY_ENDED.source}) \\| )+qpdf: operation succeeded with warnings; resulting file may have some problems$`,
+      ),
+    },
+  },
 };
 
 // ---------------------------------------------------------------------------------------------
@@ -238,6 +209,8 @@ function unwrap<T>(outcome: Outcome<T>): T {
 
 interface Pass {
   readonly load: Outcome<PdfDocument>;
+  /** A bare `save()` of an encrypted file's load, before encrypt() (it must throw). */
+  readonly bare: Outcome<Uint8Array>;
   /** Calls of the full-file recovery scan during `load`. */
   readonly scans: number;
   readonly strict: Outcome<PdfDocument>;
@@ -255,6 +228,21 @@ const bytesOf = (entry: CorpusEntry): Uint8Array =>
   new Uint8Array(readFileSync(new URL(entry.file, DIR)));
 const loadOptions = (entry: CorpusEntry): { password?: string } =>
   entry.password === null ? {} : { password: entry.password };
+const isEncrypted = (entry: CorpusEntry): boolean =>
+  entry.features.some((f) => f.startsWith('encrypted-'));
+/** The new passwords an encrypted file's saves are encrypted with. */
+const RESAVE_USER = 'user-resave';
+const RESAVE_OWNER = 'owner-resave';
+/** The options that open a save of `entry`: the RESAVE user password when it is encrypted. */
+const savedOptions = (entry: CorpusEntry): { password?: string } =>
+  isEncrypted(entry) ? { password: RESAVE_USER } : loadOptions(entry);
+
+/** The text of every page of `doc`, extracted with each page's resources. */
+const pagesText = (doc: PdfDocument): string[] =>
+  Array.from({ length: doc.getPageCount() }, (_, i) => {
+    const page = doc.getPage(i);
+    return extractText(parseContentStream(page.getContentStream()), page.getOriginalResources());
+  });
 
 async function runLibrary(entry: CorpusEntry): Promise<Pass> {
   const bytes = bytesOf(entry);
@@ -275,18 +263,26 @@ async function runLibrary(entry: CorpusEntry): Promise<Pass> {
   const strict = await attempt(() => loadPdf(bytes, { ...options, throwOnInvalidObject: true }));
   const pageCount = await after(load, (doc) => doc.getPageCount());
   // Text comes before save: save rewrites the loaded content stream objects.
-  const text = await after(load, (doc) =>
-    Array.from({ length: doc.getPageCount() }, (_, i) => {
-      const page = doc.getPage(i);
-      return extractText(parseContentStream(page.getContentStream()), page.getOriginalResources());
-    }),
-  );
-  const saved = await after(load, (doc) => doc.save({ compress: false }));
-  const savedDefault = await after(load, (doc) => doc.save());
+  const text = await after(load, pagesText);
+  let bare: Outcome<Uint8Array> = { ok: false, error: new Error('not an encrypted file') };
+  let ready = load;
+  if (isEncrypted(entry)) {
+    bare = await after(load, (doc) => doc.save());
+    ready = await after(load, async (doc) => {
+      await doc.encrypt({
+        userPassword: RESAVE_USER,
+        ownerPassword: RESAVE_OWNER,
+        algorithm: 'aes-256',
+      });
+      return doc;
+    });
+  }
+  const saved = await after(ready, (doc) => doc.save({ compress: false }));
+  const savedDefault = await after(ready, (doc) => doc.save());
   const reloadedPages = await after(saved, async (out) =>
-    (await loadPdf(out, options)).getPageCount(),
+    (await loadPdf(out, savedOptions(entry))).getPageCount(),
   );
-  return { load, scans, strict, pageCount, text, saved, savedDefault, reloadedPages };
+  return { load, bare, scans, strict, pageCount, text, saved, savedDefault, reloadedPages };
 }
 
 /**
@@ -294,7 +290,7 @@ async function runLibrary(entry: CorpusEntry): Promise<Pass> {
  * `oracle.qpdfCheck`), never for this library's output, so a save that draws warnings is a marker.
  */
 function qpdfCheck(bytes: Uint8Array, entry: CorpusEntry): void {
-  expectQpdfClean(bytes, loadOptions(entry));
+  expectQpdfClean(bytes, savedOptions(entry));
 }
 
 /** A plain `test`, or a knownDefect marker when KNOWN lists the file and check. */
@@ -397,6 +393,21 @@ describe('corpus', () => {
         requireQpdf(ctx);
         qpdfCheck(unwrap(pass.savedDefault), entry);
       });
+
+      if (isEncrypted(entry)) {
+        check(entry, 'bareSave', 'a bare save() throws UnsupportedEncryptionError', () => {
+          unwrap(pass.load);
+          expect(pass.bare.ok, 'bare save() resolved').toBe(false);
+          if (!pass.bare.ok) expect(pass.bare.error).toBeInstanceOf(UnsupportedEncryptionError);
+        });
+
+        check(entry, 'plaintext', 'plaintext of the saved file equals the source', async (ctx) => {
+          requireQpdf(ctx);
+          const plain = await loadPdf(qpdfDecryptQdf(unwrap(pass.saved), RESAVE_USER));
+          expect(plain.getPageCount()).toBe(entry.oracle.pages);
+          expect(pagesText(plain).map(normalise)).toEqual(unwrap(pass.text).map(normalise));
+        });
+      }
     });
   }
 });

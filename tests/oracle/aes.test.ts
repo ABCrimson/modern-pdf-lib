@@ -6,9 +6,13 @@
  *   decrypt with `qpdf --decrypt --qdf` to a file that shows the drawn text, and give pdf.js the
  *   same text. The library's AES output differs per save (random IVs), so every assertion here
  *   is semantic, never byte equality.
- * - Read direction: tests/fixtures/encrypted holds a plain source and five copies encrypted by
- *   qpdf 12.4.2 (scripts/oracle/encrypted-fixtures.ts). qpdf and pdf.js read each copy with the
- *   user password (which pins the fixture), then the library must read the same text.
+ * - Read direction: tests/fixtures/encrypted holds a plain source, five copies encrypted by qpdf
+ *   12.4.2 and, under extra/ and load/, further copies (R5, an R6 password that SASLprep changes,
+ *   object streams, RC4 under V4, an empty user password) and built files
+ *   (scripts/oracle/encrypted-fixtures.ts; each user password is in manifest.json). qpdf and
+ *   pdf.js read each copy of the source with its user password (which pins the fixture), then the
+ *   library must read the same text. A document decrypted on load is not saved without encrypt():
+ *   a bare save() throws UnsupportedEncryptionError.
  * - Algorithm 2.B (ISO 32000-2 7.6.4.3.4): tests/helpers/oracle/pdf20-hash.ts is an independent
  *   port. It must agree with qpdf on all 512 cases of tests/fixtures/pdf20-hash/cases.json: the
  *   /U and /O hashes (user password with the /U salt; owner password with the /O salt and /U)
@@ -19,7 +23,8 @@
  *   with salt 0102030405060708, which are its own output, not published values. The library's
  *   algorithm2B is then held to the known answers.
  *
- * A path that fails today is a knownDefect() marker keyed to its ledger id. qpdf comes from
+ * A path that fails because of an open defect is a knownDefect() marker keyed to its ledger id.
+ * qpdf comes from
  * `QPDF`, then `PATH`; a test that runs qpdf skips with a reason where qpdf is absent locally and
  * fails when `CI` is set.
  */
@@ -28,9 +33,14 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 import { algorithm2B } from '../../src/crypto/keyDerivation.js';
-import { createPdf, extractText, loadPdf, parseContentStream } from '../../src/index.js';
+import {
+  createPdf,
+  extractText,
+  loadPdf,
+  parseContentStream,
+  UnsupportedEncryptionError,
+} from '../../src/index.js';
 import type { EncryptOptions } from '../../src/index.js';
-import { defectKey, knownDefect } from '../helpers/known-defect.js';
 import { fromHex, pdf20Hash, toHex } from '../helpers/oracle/pdf20-hash.js';
 import { expectPdfjsText } from '../helpers/oracle/pdfjs.js';
 import { expectQpdfClean, qpdfDecryptQdf, requireQpdf } from '../helpers/oracle/qpdf.js';
@@ -48,11 +58,24 @@ interface FixtureEntry {
   readonly file: string;
   readonly sha256: string;
   readonly bytes: number;
+  readonly made: string;
+  /** The user password as code points (`U+FB01 U+0078 ...`, or empty) when it is not USER. */
+  readonly userPasswordCodePoints?: string;
   readonly encryption?: Readonly<Record<string, string>>;
 }
 const manifest = JSON.parse(readFileSync(join(FIXTURES, 'manifest.json'), 'utf8')) as {
   readonly files: readonly FixtureEntry[];
+  readonly extra: readonly FixtureEntry[];
+  readonly load: readonly FixtureEntry[];
 };
+
+/** The user password of `entry`: its code points when listed, else USER. */
+function userPasswordOf(entry: FixtureEntry): string {
+  const points = entry.userPasswordCodePoints;
+  if (points === undefined) return USER;
+  if (points === '') return '';
+  return String.fromCodePoint(...points.split(' ').map((u) => Number.parseInt(u.slice(2), 16)));
+}
 const fixture = (file: string): Uint8Array => new Uint8Array(readFileSync(join(FIXTURES, file)));
 
 /** The text the library extracts from page 1 of `bytes`, opened with `password` when given. */
@@ -126,8 +149,6 @@ const QPDF_CASES = (
   ];
 });
 
-const R6_KEY = defectKey(['crypto-security-01', 'crypto-security-02'], '0.40.9');
-
 describe('write direction: library encryption read by qpdf and pdf.js', () => {
   test.for([
     ['rc4-40', 2],
@@ -146,45 +167,44 @@ describe('write direction: library encryption read by qpdf and pdf.js', () => {
     },
   );
 
-  knownDefect(
-    R6_KEY,
-    'aes-256 (R6): qpdf --check accepts the user password',
-    { failsWith: /^QpdfError: qpdf --check exit 2: .*invalid password/ },
-    async (ctx) => {
-      requireQpdf(ctx);
-      expectQpdfClean(await libraryEncrypted('aes-256'), { password: USER });
-    },
-  );
+  test('aes-256 (R6): qpdf --check accepts the user password', async (ctx) => {
+    requireQpdf(ctx);
+    expectQpdfClean(await libraryEncrypted('aes-256'), { password: USER });
+  });
 
-  knownDefect(
-    R6_KEY,
-    'aes-256 (R6): qpdf --decrypt shows the drawn text',
-    { failsWith: /^QpdfError: qpdf --decrypt exit 2: .*invalid password/ },
-    async (ctx) => {
-      requireQpdf(ctx);
-      const qdf = qpdfDecryptQdf(await libraryEncrypted('aes-256'), USER);
-      expect(latin1.decode(qdf)).toContain(`(${TEXT})`);
-    },
-  );
+  test('aes-256 (R6): qpdf --decrypt shows the drawn text', async (ctx) => {
+    requireQpdf(ctx);
+    const bytes = await libraryEncrypted('aes-256');
+    expectQpdfClean(bytes, { password: USER });
+    const qdf = qpdfDecryptQdf(bytes, USER);
+    expect(latin1.decode(qdf)).toContain(`(${TEXT})`);
+  });
 
-  knownDefect(
-    R6_KEY,
-    'aes-256 (R6): pdf.js reads the text with the user password',
-    { failsWith: /^PasswordException: Incorrect Password/ },
-    async () => {
-      await expectPdfjsText(await libraryEncrypted('aes-256'), [TEXT], { password: USER });
-    },
-  );
+  test('aes-256 (R6): pdf.js reads the text with the user password', async (ctx) => {
+    requireQpdf(ctx);
+    const bytes = await libraryEncrypted('aes-256');
+    expectQpdfClean(bytes, { password: USER });
+    await expectPdfjsText(bytes, [TEXT], { password: USER });
+  });
 });
 
 describe('read direction: qpdf-encrypted fixtures read by the library', () => {
-  test('the manifest matches the directory and every file hash', () => {
-    const onDisk = readdirSync(FIXTURES)
-      .filter((n) => n.endsWith('.pdf'))
-      .sort();
-    expect(manifest.files.map((f) => f.file).sort()).toEqual(onDisk);
-    expect(onDisk).toHaveLength(6);
-    for (const entry of manifest.files) {
+  test('the manifest matches the directories and every file hash', () => {
+    const pdfsIn = (dir: string, prefix: string): string[] =>
+      readdirSync(join(FIXTURES, dir))
+        .filter((n) => n.endsWith('.pdf'))
+        .map((n) => `${prefix}${n}`)
+        .sort();
+    const sets = [
+      { entries: manifest.files, onDisk: pdfsIn('.', ''), count: 6 },
+      { entries: manifest.extra, onDisk: pdfsIn('extra', 'extra/'), count: 2 },
+      { entries: manifest.load, onDisk: pdfsIn('load', 'load/'), count: 20 },
+    ];
+    for (const { entries, onDisk, count } of sets) {
+      expect(entries.map((f) => f.file).sort()).toEqual(onDisk);
+      expect(onDisk).toHaveLength(count);
+    }
+    for (const entry of [...manifest.files, ...manifest.extra, ...manifest.load]) {
       const bytes = fixture(entry.file);
       expect(bytes.length, `${entry.file} size`).toBe(entry.bytes);
       expect(createHash('sha256').update(bytes).digest('hex'), `${entry.file} sha256`).toBe(
@@ -201,40 +221,41 @@ describe('read direction: qpdf-encrypted fixtures read by the library', () => {
     expect(await libraryText(bytes)).toBe(TEXT);
   });
 
-  const encrypted = manifest.files.filter((f) => f.encryption !== undefined);
+  // The encrypted copies of source.pdf (the built and signed files of load/ have other content).
+  const copies = [...manifest.files, ...manifest.extra, ...manifest.load].filter(
+    (f) => f.encryption !== undefined && f.made.includes('source.pdf'),
+  );
 
-  test.for(encrypted.map((f) => f.file))(
-    '%s: qpdf accepts the user password and pdf.js reads the text',
-    async (file, ctx) => {
+  test('the copies of source.pdf: five in the top directory, two in extra/, eight in load/', () => {
+    expect(copies.map((f) => f.file.split('/').at(-2) ?? '.').sort()).toEqual([
+      ...Array<string>(5).fill('.'),
+      ...Array<string>(2).fill('extra'),
+      ...Array<string>(8).fill('load'),
+    ]);
+  });
+
+  test.for(copies)(
+    '$file: qpdf accepts the user password and pdf.js reads the text',
+    async (entry, ctx) => {
       requireQpdf(ctx);
-      const bytes = fixture(file);
-      expectQpdfClean(bytes, { password: USER });
-      await expectPdfjsText(bytes, [TEXT], { password: USER });
+      const bytes = fixture(entry.file);
+      const password = userPasswordOf(entry);
+      expectQpdfClean(bytes, { password });
+      await expectPdfjsText(bytes, [TEXT], { password });
     },
   );
 
-  // Every copy decrypts to garbage in the library today; the R6 copy fails earlier, at the
-  // password check.
-  for (const { file } of encrypted) {
-    const known =
-      file === 'aes-256-r6.pdf'
-        ? {
-            key: defectKey(['crypto-security-01', 'parser-syntax-01'], '0.40.9'),
-            failsWith: /^PdfParseError: Failed to decrypt PDF: the provided password is incorrect/,
-          }
-        : {
-            key: defectKey('parser-syntax-01', '0.40.9'),
-            failsWith: /^Error: FlateDecode: failed to decompress data/,
-          };
-    knownDefect(
-      known.key,
-      `${file}: the library reads the text with the user password`,
-      { failsWith: known.failsWith },
-      async () => {
-        expect(await libraryText(fixture(file), USER)).toBe(TEXT);
-      },
-    );
-  }
+  test.for(copies)('$file: the library reads the text with the user password', async (entry) => {
+    expect(await libraryText(fixture(entry.file), userPasswordOf(entry))).toBe(TEXT);
+  });
+
+  test.for(copies)(
+    '$file: a bare save() of the decrypted document throws UnsupportedEncryptionError',
+    async (entry) => {
+      const doc = await loadPdf(fixture(entry.file), { password: userPasswordOf(entry) });
+      await expect(doc.save()).rejects.toThrow(UnsupportedEncryptionError);
+    },
+  );
 });
 
 describe('Algorithm 2.B known answers', () => {
@@ -265,30 +286,11 @@ describe('Algorithm 2.B known answers', () => {
     );
   });
 
-  // These markers are the known-answer conformance tests of src algorithm2B. It truncates the
-  // intermediate key to 32 bytes each round and stops one round late; it agrees with none of the three answers.
-  for (const { password, hash } of KNOWN_ANSWERS) {
-    knownDefect(
-      defectKey(
-        [
-          'crypto-security-01',
-          'crypto-security-02',
-          'tests-unit-crypto-02',
-          'tests-unit-crypto-M01',
-          'tests-unit-crypto-M02',
-        ],
-        '0.40.9',
-      ),
-      `src algorithm2B: password "${password}", salt 0102030405060708 gives the known answer`,
-      // The message names this answer; Vitest shortens long strings in it with an ellipsis.
-      {
-        failsWith: new RegExp(
-          `^AssertionError: expected '[0-9a-f]+…?' to be '${hash.slice(0, 16)}[0-9a-f]*…?'`,
-        ),
-      },
-      async () => {
-        expect(toHex(await algorithm2B(utf8.encode(password), SALT))).toBe(hash);
-      },
-    );
-  }
+  // The known-answer conformance tests of src algorithm2B.
+  test.for(KNOWN_ANSWERS)(
+    'src algorithm2B: password "$password", salt 0102030405060708 gives the known answer',
+    async ({ password, hash }) => {
+      expect(toHex(await algorithm2B(utf8.encode(password), SALT))).toBe(hash);
+    },
+  );
 });

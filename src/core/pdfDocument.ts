@@ -39,10 +39,17 @@ import {
 } from './pdfObjects.js';
 import type { DocumentMetadata, PageEntry } from './pdfCatalog.js';
 import { buildDocumentStructure } from './pdfCatalog.js';
-import { serializePdf } from './pdfWriter.js';
+import { serializePdf, serializePdfForCopy } from './pdfWriter.js';
 import type { PdfSaveOptions } from './pdfWriter.js';
 import { PdfStreamWriter } from './pdfStream.js';
 import { UnsupportedEncryptionError } from '../errors.js';
+import {
+  assertSavableDecryptedContent,
+  carryDecryptedFromEncryptedFile,
+  holdsDecryptedObject,
+  isDecryptedFromEncryptedFile,
+  recordDecryptedContent,
+} from './flateStream.js';
 import {
   getStandardFont,
   measureStandardText,
@@ -52,6 +59,7 @@ import type { StandardFontName as StdFontName } from '../assets/font/standardFon
 import type { EmbeddedFont } from '../assets/font/fontEmbed.js';
 import { embedFont as embedTtfFont } from '../assets/font/fontEmbed.js';
 import { subsetFont, buildSubsetCmap } from '../assets/font/fontSubset.js';
+import { warnOnce } from '../utils/warnings.js';
 import { isOpenTypeCFF } from '../assets/font/otfDetect.js';
 import { findTable } from '../assets/font/cffEmbed.js';
 import { embedPng as decodePng } from '../assets/image/pngEmbed.js';
@@ -133,9 +141,15 @@ export type StandardFontName = (typeof StandardFonts)[keyof typeof StandardFonts
  * Options for font embedding.
  */
 export interface EmbedFontOptions {
-  /** Whether to subset the font to reduce file size. Default: true. */
+  /**
+   * Has no effect in this version: a font is subset at save time whatever this says, and
+   * passing `false` emits a one-time `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`).
+   */
   subset?: boolean | undefined;
-  /** OpenType feature flags. e.g., { kern: true, liga: true }. */
+  /**
+   * Has no effect in this version: embedding applies no OpenType feature flags, and passing a
+   * value emits a one-time `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`).
+   */
   features?: Record<string, boolean> | undefined;
   /** Custom name to use in the font dictionary's /BaseFont instead of the font's PostScript name. */
   customName?: string | undefined;
@@ -152,6 +166,22 @@ export interface SetTitleOptions {
 // ---------------------------------------------------------------------------
 // PdfDocument
 // ---------------------------------------------------------------------------
+
+/**
+ * Documents whose `save()` call is the one `copy()` makes: that call writes
+ * through the serializer that skips the writer's checks for decrypted content.
+ * `save()` consumes the mark with its first statement, so it applies to the
+ * call `copy()` makes and to no other, also not to a `save()` that a plugin
+ * hook starts during that call. A module-level set keeps the class's member
+ * list (part of its declaration) unchanged.
+ */
+const savingForCopy = new WeakSet<PdfDocument>();
+
+/** True when an object of `registry` is or holds a string or stream decrypted on load. */
+function registryHoldsDecryptedObject(registry: PdfObjectRegistry): boolean {
+  for (const { object } of registry) if (holdsDecryptedObject(object)) return true;
+  return false;
+}
 
 /**
  * The root document object.  Create via {@link createPdf}.
@@ -310,6 +340,8 @@ export class PdfDocument {
   addPage(sizeOrPage?: PageSize | PdfPage): PdfPage {
     // If the argument is an existing PdfPage, insert it directly.
     if (sizeOrPage instanceof PdfPage) {
+      // A page of a document decrypted on load makes this document's save refuse until encrypt().
+      carryDecryptedFromEncryptedFile(sizeOrPage.getRegistry(), this.registry);
       const existingPage = sizeOrPage;
       this.pages.push(existingPage);
 
@@ -436,6 +468,7 @@ export class PdfDocument {
    * it inserts a PdfPage that already carries original content.
    */
   _addLoadedPage(page: PdfPage): void {
+    carryDecryptedFromEncryptedFile(page.getRegistry(), this.registry);
     this.pages.push(page);
   }
 
@@ -596,6 +629,16 @@ export class PdfDocument {
     fontNameOrData: string | Uint8Array,
     options?: EmbedFontOptions,
   ): Promise<FontRef> {
+    for (const name of ['subset', 'features'] as const) {
+      const value = options?.[name];
+      if (name === 'subset' ? value === false : value !== undefined) {
+        warnOnce(
+          `ignored-option:embedFont ${name}`,
+          'MPL_IGNORED_OPTION',
+          `\`embedFont()\`: the option \`${name}\` has no effect in this version.`,
+        );
+      }
+    }
     if (typeof fontNameOrData === 'string') {
       return this.embedStandardFont(fontNameOrData);
     }
@@ -2365,6 +2408,11 @@ export class PdfDocument {
    * `PdfDocument` is completely independent — mutations to the copy
    * do not affect the original, and vice versa.
    *
+   * A copy of a document that holds content decrypted from an encrypted PDF
+   * holds it too and refuses to save until `encrypt()` is called on it. The
+   * `onAfterSave` hooks of plugins do not run when such a document is
+   * copied, so they never receive its bytes in clear.
+   *
    * @returns  A new `PdfDocument` that is a deep copy of this one.
    *
    * @example
@@ -2376,8 +2424,19 @@ export class PdfDocument {
    * ```
    */
   async copy(): Promise<PdfDocument> {
-    const bytes = await this.save({ addDefaultPage: false });
-    return PdfDocument.load(bytes);
+    // The bytes are loaded straight back; the copy is recorded as holding decrypted content when
+    // this document does, and its objects are recorded when this document holds recorded ones.
+    savingForCopy.add(this);
+    const pending = this.save({ addDefaultPage: false });
+    savingForCopy.delete(this);
+    const bytes = await pending;
+    const holdsDecrypted = registryHoldsDecryptedObject(this.registry);
+    const clone = await PdfDocument.load(bytes);
+    carryDecryptedFromEncryptedFile(this.registry, clone.registry);
+    if (holdsDecrypted) {
+      for (const { object } of clone.registry) recordDecryptedContent(object);
+    }
+    return clone;
   }
 
   // -----------------------------------------------------------------------
@@ -2389,8 +2448,21 @@ export class PdfDocument {
    *
    * @param options  Compression and serialization options.
    * @returns        The complete PDF file as bytes.
+   * @throws {UnsupportedEncryptionError} When the document holds content
+   *         decrypted from an encrypted PDF (loaded from one, or with pages,
+   *         embedded pages or metadata brought in from such a document) and
+   *         `encrypt()` has not been called on it; the writer refuses it.
+   *         Also when an object it writes holds a string or stream decrypted
+   *         on load, whatever document it came from, and `encrypt()` has not
+   *         been called on this document.
    */
   async save(options?: PdfSaveOptions): Promise<Uint8Array> {
+    // Consumed by the first statement: copy() marks only the call it makes.
+    const forCopy = savingForCopy.delete(this);
+    if (!forCopy) {
+      assertSavableDecryptedContent(this.registry, this.encryptionHandler !== undefined, 'save()');
+    }
+    const serializer = forCopy ? serializePdfForCopy : serializePdf;
     if ((options?.addDefaultPage ?? true) && this.getPageCount() === 0) {
       this.addPage();
     }
@@ -2406,10 +2478,15 @@ export class PdfDocument {
     }
 
     const structure = this.buildStructure();
-    let bytes = await serializePdf(this.registry, structure, options, this.encryptionHandler);
+    // The clear bytes copy() writes of a document that holds decrypted content reach no plugin.
+    const plaintextForCopy =
+      forCopy &&
+      this.encryptionHandler === undefined &&
+      (isDecryptedFromEncryptedFile(this.registry) || registryHoldsDecryptedObject(this.registry));
+    let bytes = await serializer(this.registry, structure, options, this.encryptionHandler);
 
     // Plugin hook: onAfterSave
-    if (this.pluginManager.hasPlugins) {
+    if (this.pluginManager.hasPlugins && !plaintextForCopy) {
       bytes = await this.pluginManager.executeOnAfterSave(bytes);
     }
 
@@ -2423,15 +2500,33 @@ export class PdfDocument {
    * The stream writer does not encrypt, so a document with encryption
    * configured is refused before anything is changed or written.
    *
-   * @param options  Compression and serialization options.
+   * @param options  Compression and serialization options. `objectStreamThreshold` has
+   *         no effect here (the stream writer writes no object streams), and a finite
+   *         value emits a one-time `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`).
    * @throws {UnsupportedEncryptionError} When encryption is configured
-   *         (`encrypt()` was called); use `save()` instead.
+   *         (`encrypt()` was called); use `save()` instead. Also when the
+   *         document holds content decrypted from an encrypted PDF, which
+   *         only `save()` after `encrypt()` writes. An object that holds a
+   *         string or stream decrypted on load, in a document not recorded as
+   *         holding decrypted content, makes the returned stream error with
+   *         `UnsupportedEncryptionError` instead.
    */
   saveAsStream(options?: PdfSaveOptions): ReadableStream<Uint8Array> {
     // Fail-closed guard: the stream writer does not encrypt, so an encrypted document is refused here.
     if (this.encryptionHandler !== undefined) {
       throw new UnsupportedEncryptionError(
         'saveAsStream() cannot encrypt; the stream writer would emit plaintext. Use save() for an encrypted document.',
+      );
+    }
+    assertSavableDecryptedContent(this.registry, false, 'saveAsStream()');
+    if (
+      options?.objectStreamThreshold !== undefined &&
+      options.objectStreamThreshold !== Infinity
+    ) {
+      warnOnce(
+        'ignored-option:saveAsStream objectStreamThreshold',
+        'MPL_IGNORED_OPTION',
+        '`saveAsStream()`: the option `objectStreamThreshold` has no effect in this version.',
       );
     }
     if ((options?.addDefaultPage ?? true) && this.getPageCount() === 0) {
@@ -2511,6 +2606,11 @@ export class PdfDocument {
     this.meta.modDate ??= new Date();
 
     const structure = buildDocumentStructure(pageEntries, this.meta, this.registry);
+    // loadPdf passes the decrypted /Info strings to the setters, so this dict holds copies of them.
+    if (isDecryptedFromEncryptedFile(this.registry)) {
+      const info = this.registry.resolve(structure.infoRef);
+      if (info !== undefined) recordDecryptedContent(info);
+    }
 
     // Post-process the catalog to add outlines, XMP metadata, and
     // viewer preferences.

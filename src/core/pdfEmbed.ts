@@ -30,6 +30,12 @@ import type { PdfObjectRegistry } from './pdfObjects.js';
 import type { PdfPage } from './pdfPage.js';
 import type { Angle } from './operators/state.js';
 import { decodeStreamData } from '../parser/streamDecode.js';
+import {
+  carryDecryptedFromEncryptedFile,
+  holdsDecryptedObject,
+  recordCloneOfDecrypted,
+  recordDecryptedObject,
+} from './flateStream.js';
 
 // ---------------------------------------------------------------------------
 // EmbeddedPdfPage interface
@@ -144,7 +150,8 @@ class CloneContext {
 
 /**
  * Deep-clone a PdfObject, remapping all PdfRef references from the source
- * to the target registry.
+ * to the target registry. The copy of a string or stream decrypted on load
+ * is recorded as decrypted too (`recordCloneOfDecrypted` in core/flateStream).
  */
 function deepClone(obj: PdfObject, ctx: CloneContext): PdfObject {
   switch (obj.kind) {
@@ -159,7 +166,9 @@ function deepClone(obj: PdfObject, ctx: CloneContext): PdfObject {
 
     case 'string': {
       const s = obj as PdfString;
-      return s.hex ? PdfString.hex(s.value) : PdfString.literal(s.value);
+      const clonedString = s.hex ? PdfString.hex(s.value) : PdfString.literal(s.value);
+      recordCloneOfDecrypted(s, clonedString);
+      return clonedString;
     }
 
     case 'name':
@@ -192,6 +201,7 @@ function deepClone(obj: PdfObject, ctx: CloneContext): PdfObject {
       const clonedData = new Uint8Array(stream.data);
       const clonedStream = new PdfStream(clonedDict, clonedData);
       clonedStream.syncLength();
+      recordCloneOfDecrypted(stream, clonedStream);
       return clonedStream;
     }
 
@@ -259,6 +269,10 @@ export function embedPageAsFormXObject(
   xObjectName: string,
   options?: EmbedPageOptions,
 ): EmbeddedPdfPage {
+  // Decrypted content embedded in the target makes its save refuse until encrypt() is called; the
+  // page's own document counts too, whatever source registry the caller passes.
+  carryDecryptedFromEncryptedFile(sourceRegistry, targetRegistry);
+  carryDecryptedFromEncryptedFile(page.getRegistry(), targetRegistry);
   const pageWidth = page.width;
   const pageHeight = page.height;
 
@@ -267,9 +281,12 @@ export function embedPageAsFormXObject(
 
   // Original content streams from parsed PDF
   const originalRefs = page.getOriginalContentRefs();
+  // Whether a content stream was decrypted on load: the Form XObject then holds its data.
+  let decryptedContent = false;
   for (const ref of originalRefs) {
     const obj = sourceRegistry.resolve(ref);
     if (obj && obj.kind === 'stream') {
+      if (holdsDecryptedObject(obj)) decryptedContent = true;
       const decoded = decodeStreamData(obj as PdfStream);
       contentChunks.push(decoded);
     }
@@ -338,6 +355,7 @@ export function embedPageAsFormXObject(
   }
 
   const formStream = PdfStream.fromBytes(concatenated, formDict);
+  if (decryptedContent) recordDecryptedObject(formStream);
   const formRef = targetRegistry.register(formStream);
 
   // The effective dimensions for the handle use the bounding box if provided

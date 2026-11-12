@@ -359,6 +359,8 @@ const CHECK_TITLES: readonly (readonly [check: string, suffix: string])[] = [
   ['save', ' save and reload'],
   ['qpdf', ' qpdf --check of the saved file'],
   ['qpdfDefault', ' qpdf --check of the default save'],
+  ['bareSave', ' a bare save() throws UnsupportedEncryptionError'],
+  ['plaintext', ' plaintext of the saved file equals the source'],
 ];
 const CHECKS = [
   'sha256',
@@ -370,6 +372,8 @@ const CHECKS = [
   'qpdf',
   'qpdfDefault',
 ] as const;
+/** The checks that only an encrypted file (a feature starting `encrypted-`) runs, as well. */
+const ENCRYPTED_CHECKS = ['bareSave', 'plaintext'] as const;
 
 /**
  * Open ids of the ledger file: its `open` array (audit/open-highs.json, `{ open: [{ id }] }`) or,
@@ -483,10 +487,13 @@ function runTests(entries: readonly Entry[], summaryPath?: string, ledgerPath?: 
   let unkeyedFallbacks = 0;
   for (const entry of entries) {
     const results = perFile[entry.id] ?? {};
-    const missing = CHECKS.filter((c) => results[c] === undefined);
+    const required: readonly string[] = entry.features.some((f) => f.startsWith('encrypted-'))
+      ? [...CHECKS, ...ENCRYPTED_CHECKS]
+      : CHECKS;
+    const missing = required.filter((c) => results[c] === undefined);
     if (missing.length > 0) problems.push(`${entry.id}: no result for ${missing.join(', ')}`);
     if (results['loads'] === 'pass') loads++;
-    if (CHECKS.every((c) => results[c] === 'pass')) passAll++;
+    if (required.every((c) => results[c] === 'pass')) passAll++;
     if (entry.category === 'real' && results['fallback'] === 'fail') unkeyedFallbacks++;
   }
   if (unkeyedFallbacks > 0) problems.push(`${unkeyedFallbacks} unkeyed fallbacks`);

@@ -73,14 +73,9 @@ describe('qpdf cross-check', () => {
     },
   );
 
-  knownDefect(
-    defectKey('crypto-security-01', '0.40.9'),
-    'two saves of one AES-256 (R6) document give identical qpdf --decrypt --qdf output',
-    { failsWith: /^QpdfError: qpdf --check exit 2: .*invalid password/ },
-    async () => {
-      await twoSavesDecryptIdentically('aes-256');
-    },
-  );
+  test('two saves of one AES-256 (R6) document give identical qpdf --decrypt --qdf output', async () => {
+    await twoSavesDecryptIdentically('aes-256');
+  });
 
   knownDefect(
     defectKey('core-document-08', '0.41.2'),

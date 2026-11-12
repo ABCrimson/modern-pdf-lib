@@ -70,9 +70,11 @@ function padPassword(password: string): Uint8Array {
  *    "commonly mapped to nothing" characters (RFC 3454 B.1).
  * 2. Normalize: Apply Unicode NFKC normalization.
  * 3. Prohibit: Reject characters from RFC 3454 prohibited tables.
- * 4. Bidi: Check bidirectional string rules.
+ * The bidirectional check of RFC 3454 is not run (see {@link saslprep}).
  *
- * The result is truncated to 127 UTF-8 bytes per the PDF spec.
+ * The result is truncated to 127 UTF-8 bytes per the PDF spec. Writing uses
+ * this form only and throws on a prohibited code point; reading also tries the
+ * raw UTF-8 bytes (see {@link readPasswordForms}).
  */
 function preparePasswordV5(password: string): Uint8Array {
   const prepared = saslprep(password);
@@ -92,6 +94,19 @@ function preparePasswordV5(password: string): Uint8Array {
  * @internal
  */
 function saslprep(input: string): string {
+  const normalized = saslprepMapAndNormalize(input);
+  // Step 3: Prohibited characters -- reject if any are present
+  const cp = firstProhibited(normalized);
+  if (cp !== undefined) {
+    throw new Error(
+      `Password contains prohibited character U+${cp.toString(16).toUpperCase().padStart(4, '0')} (SASLprep)`,
+    );
+  }
+  return normalized;
+}
+
+/** SASLprep steps 1 and 2: the mapping and NFKC normalization. */
+function saslprepMapAndNormalize(input: string): string {
   // Step 1: Mapping
   // B.1 — "Commonly mapped to nothing" (zero-width joiners, soft hyphen, etc.)
   // C.1.2 — Non-ASCII space characters → U+0020
@@ -112,20 +127,16 @@ function saslprep(input: string): string {
   }
 
   // Step 2: NFKC normalization
-  // String.prototype.normalize('NFKC') is available in all modern runtimes.
-  const normalized = mapped.normalize('NFKC');
+  return mapped.normalize('NFKC');
+}
 
-  // Step 3: Prohibited characters — reject if any are present
-  for (const ch of normalized) {
+/** The first code point of `text` that SASLprep prohibits, or undefined. */
+function firstProhibited(text: string): number | undefined {
+  for (const ch of text) {
     const cp = ch.codePointAt(0)!;
-    if (isProhibited(cp)) {
-      throw new Error(
-        `Password contains prohibited character U+${cp.toString(16).toUpperCase().padStart(4, '0')} (SASLprep)`,
-      );
-    }
+    if (isProhibited(cp)) return cp;
   }
-
-  return normalized;
+  return undefined;
 }
 
 /** RFC 3454 Table B.1 — Commonly mapped to nothing. */
@@ -462,17 +473,220 @@ export function computeUserPasswordHash(
 }
 
 // ---------------------------------------------------------------------------
-// Algorithm 2.A: Computing the encryption key for R=5 (AES-256)
+// AES-256 (V=5): password hashes of revisions 5 and 6
 // ---------------------------------------------------------------------------
 
 /**
- * Compute the file encryption key for V=5 R=5 (ISO 32000-1 extension).
+ * Which hash a V=5 password matched. `'iso'` is the standard one (Algorithm 2.A for R=5,
+ * ISO 32000-2 Algorithm 2.B for R=6; R=2-4 keys, which have one derivation, report it too).
+ * `'legacy'` is the R=6 variant of Algorithm 2.B that modern-pdf-lib 0.26.0 to 0.40.8 wrote.
  *
- * Algorithm 2.A:
- * 1. Compute SHA-256(password + validation salt + [owner key if owner])
- * 2. If hash matches /U or /O (first 32 bytes), this is the right password
- * 3. Compute SHA-256(password + key salt + [owner key if owner])
- * 4. Use that hash as AES-256 key to unwrap the /UE or /OE value
+ * @internal
+ */
+export type KeyDerivation = 'iso' | 'legacy';
+
+/**
+ * A file encryption key and the derivation that the password matched.
+ *
+ * @internal
+ */
+export interface DerivedFileKey {
+  readonly fileKey: Uint8Array;
+  readonly derivation: KeyDerivation;
+}
+
+/** The most bytes of a prepared V=5 password that the hashes take (ISO 32000-2 7.6.4.3.2). */
+const MAX_V5_PASSWORD_BYTES = 127;
+
+/** The UTF-8 bytes of `text`, cut to 127 bytes. */
+function utf8V5(text: string): Uint8Array {
+  const encoded = new TextEncoder().encode(text);
+  return encoded.length > MAX_V5_PASSWORD_BYTES
+    ? encoded.subarray(0, MAX_V5_PASSWORD_BYTES)
+    : encoded;
+}
+
+/**
+ * The byte forms of `password` that reading tries, in order: the SASLprep form (ISO 32000-2),
+ * then the raw UTF-8 bytes when they differ (what qpdf hashes; pdf.js tries both). When SASLprep finds a
+ * prohibited code point, only the raw bytes are tried; nothing is thrown.
+ */
+function readPasswordForms(password: string): Uint8Array[] {
+  const raw = utf8V5(password);
+  const mapped = saslprepMapAndNormalize(password);
+  if (firstProhibited(mapped) !== undefined) return [raw];
+  const prepared = utf8V5(mapped);
+  return arraysEqual(prepared, raw) ? [prepared] : [prepared, raw];
+}
+
+/** The password hash family of a V=5 dictionary: R=5 uses Algorithm 2.A, R>=6 Algorithm 2.B. */
+type V5Scheme = 'r5' | 'r6';
+
+const schemeOf = (dict: EncryptDictValues): V5Scheme => (dict.revision === 5 ? 'r5' : 'r6');
+
+/** The user or owner half of a V=5 dictionary. */
+type V5Role = 'user' | 'owner';
+
+/** One password attempt: which half, which byte form, which derivation. */
+interface V5Attempt {
+  readonly role: V5Role;
+  readonly password: Uint8Array;
+  readonly derivation: KeyDerivation;
+}
+
+/**
+ * Every attempt for `password` against `roles`, in the order reading tries them:
+ * 1. the standard hash for each role (user before owner), SASLprep form then raw UTF-8;
+ * 2. R=6 only, the legacy hash: for each byte form (SASLprep, then raw), user then owner.
+ * So the legacy hash is tried only after every standard attempt has failed.
+ */
+function v5Attempts(password: string, scheme: V5Scheme, roles: readonly V5Role[]): V5Attempt[] {
+  const forms = readPasswordForms(password);
+  const attempts: V5Attempt[] = [];
+  for (const role of roles) {
+    for (const form of forms) attempts.push({ role, password: form, derivation: 'iso' });
+  }
+  if (scheme === 'r6') {
+    for (const form of forms) {
+      for (const role of roles) attempts.push({ role, password: form, derivation: 'legacy' });
+    }
+  }
+  return attempts;
+}
+
+/** The pieces of /U or /O that a role hashes with; null when /U or the role's string is short. */
+function v5Parts(
+  dict: EncryptDictValues,
+  role: V5Role,
+): {
+  hash: Uint8Array;
+  validationSalt: Uint8Array;
+  keySalt: Uint8Array;
+  udata: Uint8Array | undefined;
+  wrappedKey: Uint8Array | undefined;
+} | null {
+  const own = role === 'user' ? dict.userKey : dict.ownerKey;
+  if (own.length < 48 || dict.userKey.length < 48) return null;
+  return {
+    hash: own.subarray(0, 32),
+    validationSalt: own.subarray(32, 40),
+    keySalt: own.subarray(40, 48),
+    // The owner hashes take the 48-byte /U, also when the file stores a longer string.
+    udata: role === 'owner' ? dict.userKey.subarray(0, 48) : undefined,
+    wrappedKey: role === 'user' ? dict.userEncryptionKey : dict.ownerEncryptionKey,
+  };
+}
+
+/** The 32-byte V=5 hash of `password` with `salt` (and `udata` for the owner). */
+async function v5Hash(
+  scheme: V5Scheme,
+  derivation: KeyDerivation,
+  password: Uint8Array,
+  salt: Uint8Array,
+  udata: Uint8Array | undefined,
+): Promise<Uint8Array> {
+  if (scheme === 'r5') {
+    return sha256(udata ? concat(password, salt, udata) : concat(password, salt));
+  }
+  return hashAlgorithm2B(password, salt, udata, derivation === 'legacy');
+}
+
+/** Whether `attempt` reproduces the /U or /O hash of `dict`. */
+async function v5Validates(
+  dict: EncryptDictValues,
+  scheme: V5Scheme,
+  attempt: V5Attempt,
+): Promise<boolean> {
+  const parts = v5Parts(dict, attempt.role);
+  if (parts === null) return false;
+  const hash = await v5Hash(
+    scheme,
+    attempt.derivation,
+    attempt.password,
+    parts.validationSalt,
+    parts.udata,
+  );
+  return arraysEqual(hash, parts.hash);
+}
+
+/** The file key /UE or /OE wraps for a validated `attempt`; null when that string is unusable. */
+async function v5Unwrap(
+  dict: EncryptDictValues,
+  scheme: V5Scheme,
+  attempt: V5Attempt,
+): Promise<Uint8Array | null> {
+  const parts = v5Parts(dict, attempt.role);
+  if (parts?.wrappedKey?.length !== 32) return null;
+  const keyHash = await v5Hash(
+    scheme,
+    attempt.derivation,
+    attempt.password,
+    parts.keySalt,
+    parts.udata,
+  );
+  // AES-256-CBC with a zero IV and no padding.
+  return aesDecryptCBCNoPad(keyHash, new Uint8Array(16), parts.wrappedKey);
+}
+
+/** The first attempt of `roles` that validates and unwraps a key, or null. */
+async function v5FileKey(
+  password: string,
+  dict: EncryptDictValues,
+  scheme: V5Scheme,
+  roles: readonly V5Role[],
+): Promise<DerivedFileKey | null> {
+  for (const attempt of v5Attempts(password, scheme, roles)) {
+    if (!(await v5Validates(dict, scheme, attempt))) continue;
+    const fileKey = await v5Unwrap(dict, scheme, attempt);
+    if (fileKey !== null) return { fileKey, derivation: attempt.derivation };
+  }
+  return null;
+}
+
+/** Whether some attempt for `role` reproduces its /U or /O hash. */
+async function v5PasswordMatches(
+  password: string,
+  dict: EncryptDictValues,
+  role: V5Role,
+): Promise<boolean> {
+  const scheme = schemeOf(dict);
+  for (const attempt of v5Attempts(password, scheme, [role])) {
+    if (await v5Validates(dict, scheme, attempt)) return true;
+  }
+  return false;
+}
+
+/**
+ * The file encryption key of a V=5 (R=5 or R=6) document for `password`, and the derivation
+ * that matched; null when no attempt matches.
+ *
+ * Tries, in order, stopping at the first /U or /O hash that matches, and only then computes the
+ * key hash and unwraps /UE or /OE:
+ * 1. the user password with the standard hash, its SASLprep form, then its raw UTF-8 bytes
+ *    (only when they differ);
+ * 2. the owner password the same way, with the first 48 bytes of /U as udata;
+ * 3. R=6 only: the legacy hash (as modern-pdf-lib 0.26.0 to 0.40.8 wrote it), SASLprep form
+ *    as user then owner, then the raw UTF-8 bytes as user then owner.
+ *
+ * R=5 uses Algorithm 2.A and has no legacy attempts. A password with a code point SASLprep
+ * prohibits is tried in its raw form only. Nothing here throws for a wrong password.
+ *
+ * @internal
+ */
+export async function deriveFileKeyV5(
+  password: string,
+  dict: EncryptDictValues,
+): Promise<DerivedFileKey | null> {
+  return v5FileKey(password, dict, schemeOf(dict), ['user', 'owner']);
+}
+
+/**
+ * Compute the file encryption key for V=5 R=5 (Adobe extension level 3).
+ *
+ * Algorithm 2.A: SHA-256(password || validation salt [|| /U for the owner]) must equal the
+ * first 32 bytes of /U (or /O); SHA-256(password || key salt [|| /U]) then unwraps /UE (or
+ * /OE) with AES-256-CBC, a zero IV and no padding. The owner hashes take the first 48 bytes of
+ * /U. The password is tried in its SASLprep form, then as raw UTF-8 bytes.
  *
  * @param password     The password to try.
  * @param dict         Encryption dictionary values.
@@ -484,41 +698,8 @@ export async function computeEncryptionKeyR5(
   dict: EncryptDictValues,
   isOwner: boolean,
 ): Promise<Uint8Array | null> {
-  const pwd = preparePasswordV5(password);
-
-  if (isOwner) {
-    // Owner path: /O has 48 bytes: hash(32) + validationSalt(8) + keySalt(8)
-    const oHash = dict.ownerKey.subarray(0, 32);
-    const oValSalt = dict.ownerKey.subarray(32, 40);
-    const oKeySalt = dict.ownerKey.subarray(40, 48);
-
-    // Validate
-    const testHash = await sha256(concat(pwd, oValSalt, dict.userKey));
-    if (!arraysEqual(testHash, oHash)) return null;
-
-    // Derive key
-    const keyHash = await sha256(concat(pwd, oKeySalt, dict.userKey));
-    const iv = new Uint8Array(16); // all zeros
-    if (!dict.ownerEncryptionKey) return null;
-    // AES-256-CBC decrypt /OE with zero IV (no PKCS#7 padding)
-    return aesDecryptCBCNoPad(keyHash, iv, dict.ownerEncryptionKey);
-  } else {
-    // User path: /U has 48 bytes: hash(32) + validationSalt(8) + keySalt(8)
-    const uHash = dict.userKey.subarray(0, 32);
-    const uValSalt = dict.userKey.subarray(32, 40);
-    const uKeySalt = dict.userKey.subarray(40, 48);
-
-    // Validate
-    const testHash = await sha256(concat(pwd, uValSalt));
-    if (!arraysEqual(testHash, uHash)) return null;
-
-    // Derive key
-    const keyHash = await sha256(concat(pwd, uKeySalt));
-    const iv = new Uint8Array(16);
-    if (!dict.userEncryptionKey) return null;
-    // AES-256-CBC decrypt /UE with zero IV (no PKCS#7 padding)
-    return aesDecryptCBCNoPad(keyHash, iv, dict.userEncryptionKey);
-  }
+  const found = await v5FileKey(password, dict, 'r5', [isOwner ? 'owner' : 'user']);
+  return found?.fileKey ?? null;
 }
 
 // ---------------------------------------------------------------------------
@@ -526,15 +707,23 @@ export async function computeEncryptionKeyR5(
 // ---------------------------------------------------------------------------
 
 /**
- * Algorithm 2.B: compute hash for R=6 (extended key derivation).
+ * ISO 32000-2 Algorithm 2.B (7.6.4.3.4): the 32-byte hash of revision 6.
  *
- * This is the iterative hash algorithm from ISO 32000-2 SS7.6.3.3.3.
- * It uses SHA-256, SHA-384, and SHA-512 in a round-based scheme with
- * AES-128-CBC encryption.
+ * 1. K = SHA-256(password || salt || udata); udata is the 48-byte /U for the owner hashes and
+ *    empty otherwise.
+ * 2. Each round: K1 = (password || K || udata) repeated 64 times; E = AES-128-CBC of K1 with
+ *    key K[0..16), IV K[16..32) and no padding; the first 16 bytes of E as a big-endian number
+ *    modulo 3 pick SHA-256 (0), SHA-384 (1) or SHA-512 (2), and the new K is that hash of E,
+ *    kept whole (32, 48 or 64 bytes).
+ * 3. After round n, counted from 1: when n >= 64 and the last byte of E is at most n - 32,
+ *    stop; otherwise run another round.
+ * 4. The result is K[0..32).
  *
- * @param password  The password bytes (max 127).
+ * Writing uses only this function.
+ *
+ * @param password  The prepared password bytes (at most 127).
  * @param salt      8-byte salt (validation or key salt).
- * @param uKey      The /U value (48 bytes). Only needed for owner path.
+ * @param uKey      The 48-byte /U value for the owner hashes; omitted for the user hashes.
  * @returns         A 32-byte hash.
  */
 export async function algorithm2B(
@@ -542,56 +731,54 @@ export async function algorithm2B(
   salt: Uint8Array,
   uKey?: Uint8Array,
 ): Promise<Uint8Array> {
-  // Step a: SHA-256(password + salt + uKey)
-  const input = uKey ? concat(password, salt, uKey) : concat(password, salt);
-  let K = await sha256(input);
+  return hashAlgorithm2B(password, salt, uKey, false);
+}
 
-  let round = 0;
-  // eslint-disable-next-line no-constant-condition
-  while (true) {
-    // Step b.i: Build K1 = password + K + uKey, repeated 64 times
+/**
+ * Algorithm 2.B, or with `legacy` the variant that modern-pdf-lib 0.26.0 to 0.40.8 wrote: it
+ * cuts K to 32 bytes after every round and stops when the last byte of E is at most n - 33.
+ * Reading reaches the variant only through {@link deriveFileKeyV5},
+ * {@link computeEncryptionKeyR6} and the password checks,
+ * after every standard attempt failed; nothing that writes calls it.
+ */
+async function hashAlgorithm2B(
+  password: Uint8Array,
+  salt: Uint8Array,
+  udata: Uint8Array | undefined,
+  legacy: boolean,
+): Promise<Uint8Array> {
+  // Step 1: SHA-256(password || salt || udata)
+  let K = await sha256(udata ? concat(password, salt, udata) : concat(password, salt));
+  const uLen = udata?.length ?? 0;
+
+  for (let round = 1; ; round++) {
+    // Step 2: K1 = (password || K || udata) repeated 64 times
     const pLen = password.length;
-    const kLen = K.length;
-    const uLen = uKey ? uKey.length : 0;
-    const blockLen = pLen + kLen + uLen;
+    const blockLen = pLen + K.length + uLen;
     const K1 = new Uint8Array(blockLen * 64);
     for (let i = 0; i < 64; i++) {
       const base = i * blockLen;
       K1.set(password, base);
       K1.set(K, base + pLen);
-      if (uKey) K1.set(uKey, base + pLen + kLen);
+      if (udata) K1.set(udata, base + pLen + K.length);
     }
 
-    // Step b.ii: AES-128-CBC encrypt K1 with key=K[0..15], iv=K[16..31]
-    const aesKey = K.subarray(0, 16);
-    const aesIv = K.subarray(16, 32);
-    const E = await aesEncryptCBCNoPad(aesKey, aesIv, K1);
+    // AES-128-CBC of K1 with key K[0..16) and IV K[16..32), no padding
+    const E = await aesEncryptCBCNoPad(K.subarray(0, 16), K.subarray(16, 32), K1);
 
-    // Step b.iii: Determine hash based on first 16 bytes mod 3
-    let bigModVal = 0;
+    // The first 16 bytes of E as a big-endian number, modulo 3, pick the hash
+    let pick = 0;
     for (let i = 0; i < 16; i++) {
-      bigModVal = (bigModVal * 256 + E[i]!) % 3;
+      pick = (pick * 256 + E[i]!) % 3;
     }
+    const next = await (pick === 0 ? sha256(E) : pick === 1 ? sha384(E) : sha512(E));
+    K = legacy ? next.subarray(0, 32) : next;
 
-    let hashResult: Uint8Array;
-    if (bigModVal === 0) {
-      hashResult = await sha256(E);
-    } else if (bigModVal === 1) {
-      hashResult = await sha384(E);
-    } else {
-      hashResult = await sha512(E);
-    }
-
-    K = hashResult.subarray(0, 32);
-
-    // Step b.iv: Check termination. After round 63, if the last byte
-    // of E is <= round - 32, stop.
-    if (round >= 63 && E.at(-1)! <= round - 32) {
-      break;
-    }
-    round++;
+    // Step 3: after round n >= 64, stop when the last byte of E <= n - 32 (legacy: n - 33)
+    if (round >= 64 && E.at(-1)! <= round - (legacy ? 33 : 32)) break;
   }
 
+  // Step 4
   return K.subarray(0, 32);
 }
 
@@ -695,6 +882,10 @@ async function aesDecryptCBCNoPad(
 /**
  * Compute the file encryption key for V=5 R=6 (ISO 32000-2).
  *
+ * Tries the standard Algorithm 2.B first and the legacy variant (as modern-pdf-lib 0.26.0 to
+ * 0.40.8 wrote it) only after it, each with the SASLprep form of the password and then its raw
+ * UTF-8 bytes; the owner hashes take the first 48 bytes of /U.
+ *
  * @param password  The password to try.
  * @param dict      Encryption dictionary values.
  * @param isOwner   Whether to use the owner password path.
@@ -705,35 +896,8 @@ export async function computeEncryptionKeyR6(
   dict: EncryptDictValues,
   isOwner: boolean,
 ): Promise<Uint8Array | null> {
-  const pwd = preparePasswordV5(password);
-
-  if (isOwner) {
-    const oValSalt = dict.ownerKey.subarray(32, 40);
-    const oKeySalt = dict.ownerKey.subarray(40, 48);
-
-    // Validate using Algorithm 2.B
-    const validationHash = await algorithm2B(pwd, oValSalt, dict.userKey);
-    if (!arraysEqual(validationHash, dict.ownerKey.subarray(0, 32))) return null;
-
-    // Derive file key using Algorithm 2.B with key salt
-    const keyHash = await algorithm2B(pwd, oKeySalt, dict.userKey);
-    if (!dict.ownerEncryptionKey) return null;
-    const iv = new Uint8Array(16);
-    return aesDecryptCBCNoPad(keyHash, iv, dict.ownerEncryptionKey);
-  } else {
-    const uValSalt = dict.userKey.subarray(32, 40);
-    const uKeySalt = dict.userKey.subarray(40, 48);
-
-    // Validate using Algorithm 2.B
-    const validationHash = await algorithm2B(pwd, uValSalt);
-    if (!arraysEqual(validationHash, dict.userKey.subarray(0, 32))) return null;
-
-    // Derive file key using Algorithm 2.B with key salt
-    const keyHash = await algorithm2B(pwd, uKeySalt);
-    if (!dict.userEncryptionKey) return null;
-    const iv = new Uint8Array(16);
-    return aesDecryptCBCNoPad(keyHash, iv, dict.userEncryptionKey);
-  }
+  const found = await v5FileKey(password, dict, 'r6', [isOwner ? 'owner' : 'user']);
+  return found?.fileKey ?? null;
 }
 
 // ---------------------------------------------------------------------------
@@ -741,32 +905,113 @@ export async function computeEncryptionKeyR6(
 // ---------------------------------------------------------------------------
 
 /**
- * LRU cache for file encryption keys.
+ * First-in, first-out cache of file encryption keys (at most 32), so that re-opening a document
+ * with the same password skips the key derivation (R=6 runs 64 or more rounds of AES and SHA-2).
  *
- * Keyed on a hash derived from password + encryption dict parameters,
- * so re-opening the same PDF with the same password skips the expensive
- * key derivation (especially for R=6 which runs 64+ rounds of AES+SHA).
+ * The key is a SHA-256 digest of everything the file key depends on (the password and every
+ * value of the dictionary and the file ID that a derivation reads), never the password itself.
+ * The value keeps the derivation beside the key.
  */
-const fileKeyCache = new Map<string, Uint8Array>();
+const fileKeyCache = new Map<string, DerivedFileKey>();
 const FILE_KEY_CACHE_MAX = 32;
 
+/** The cache key: SHA-256 over every input of the derivation, each with its length. */
+async function buildCacheKey(
+  password: string,
+  dict: EncryptDictValues,
+  fileId: Uint8Array,
+): Promise<string> {
+  const fields: (Uint8Array | undefined)[] = [
+    new TextEncoder().encode(password),
+    int32LE(dict.version),
+    int32LE(dict.revision),
+    int32LE(dict.keyLength),
+    int32LE(dict.permissions),
+    new Uint8Array([dict.encryptMetadata ? 1 : 0]),
+    dict.ownerKey,
+    dict.userKey,
+    dict.ownerEncryptionKey,
+    dict.userEncryptionKey,
+    dict.perms,
+    fileId,
+  ];
+  const parts: Uint8Array[] = [];
+  for (const field of fields) {
+    // An absent field and an empty one differ: absent is the flag 0 alone.
+    if (field === undefined) {
+      parts.push(new Uint8Array([0]));
+    } else {
+      parts.push(new Uint8Array([1]), int32LE(field.length), field);
+    }
+  }
+  return (await sha256(concat(...parts))).toHex();
+}
+
 /**
- * Build a cache key string from the inputs that uniquely identify
- * a key derivation result.
+ * Compute the file encryption key from a password and encryption dict, and report which
+ * derivation the password matched.
+ *
+ * R=5 and R=6 run {@link deriveFileKeyV5} (standard first, the legacy R=6 hash last); R=2-4
+ * try the user password, then the owner password, and always report `'iso'`.
+ *
+ * @param password  The password to try.
+ * @param dict      Encryption dictionary values.
+ * @param fileId    The first element of the /ID array (unused for R>=5).
+ * @returns         The file encryption key and its derivation.
+ * @throws          If the password is incorrect.
+ * @internal
  */
-function buildCacheKey(password: string, dict: EncryptDictValues, fileId: Uint8Array): string {
-  // Use first 16 bytes of O, U, and fileId for uniqueness (collision is practically impossible)
-  const oHex = dict.ownerKey.subarray(0, 16).toHex();
-  const uHex = dict.userKey.subarray(0, 16).toHex();
-  const fHex = fileId.subarray(0, 16).toHex();
-  return `${dict.revision}:${dict.permissions}:${password}:${oHex}:${uHex}:${fHex}`;
+export async function deriveFileEncryptionKey(
+  password: string,
+  dict: EncryptDictValues,
+  fileId: Uint8Array,
+): Promise<DerivedFileKey> {
+  const ck = await buildCacheKey(password, dict, fileId);
+  const cached = fileKeyCache.get(ck);
+  // Return a copy so that the caller cannot change the cached key.
+  if (cached) return { fileKey: cached.fileKey.slice(), derivation: cached.derivation };
+
+  let result: DerivedFileKey;
+
+  if (dict.revision >= 5) {
+    const found = await deriveFileKeyV5(password, dict);
+    if (found === null) {
+      throw new Error(`Incorrect password for R=${dict.revision === 5 ? 5 : 6} encryption`);
+    }
+    result = found;
+  } else {
+    // R=2, 3, 4: Verify user password first
+    if (await verifyUserPassword(password, dict, fileId)) {
+      result = { fileKey: computeEncryptionKeyR2R4(password, dict, fileId), derivation: 'iso' };
+    } else if (await verifyOwnerPassword(password, dict, fileId)) {
+      // Recover the user password from the /O value and use that
+      const recoveredKey = recoverUserKeyFromOwner(password, dict);
+      result = {
+        fileKey: computeEncryptionKeyR2R4Bytes(recoveredKey, dict, fileId),
+        derivation: 'iso',
+      };
+    } else {
+      throw new Error('Incorrect password');
+    }
+  }
+
+  // Store in cache; evict the oldest entry when full
+  if (fileKeyCache.size >= FILE_KEY_CACHE_MAX) {
+    const firstKey = fileKeyCache.keys().next().value;
+    if (firstKey !== undefined) fileKeyCache.delete(firstKey);
+  }
+  fileKeyCache.set(ck, { fileKey: result.fileKey.slice(), derivation: result.derivation });
+
+  return result;
 }
 
 /**
  * Compute the file encryption key from a password and encryption dict.
  *
  * Tries the password as both user and owner password. Returns the key
- * on the first successful match, or throws if neither works.
+ * on the first successful match, or throws if neither works. For R=6 it
+ * accepts the standard Algorithm 2.B and, after it, the legacy variant
+ * that modern-pdf-lib 0.26.0 to 0.40.8 wrote; it emits no warning.
  *
  * Results are cached so that re-opening the same PDF with the same
  * password skips the expensive key derivation.
@@ -782,60 +1027,7 @@ export async function computeFileEncryptionKey(
   dict: EncryptDictValues,
   fileId: Uint8Array,
 ): Promise<Uint8Array> {
-  // Check cache first
-  const ck = buildCacheKey(password, dict, fileId);
-  const cached = fileKeyCache.get(ck);
-  if (cached) return cached.slice(); // Return a copy to prevent mutation
-
-  let result: Uint8Array;
-
-  if (dict.revision >= 6) {
-    // R=6: Try user first, then owner
-    const userKey = await computeEncryptionKeyR6(password, dict, false);
-    if (userKey) {
-      result = userKey;
-    } else {
-      const ownerKey = await computeEncryptionKeyR6(password, dict, true);
-      if (ownerKey) {
-        result = ownerKey;
-      } else {
-        throw new Error('Incorrect password for R=6 encryption');
-      }
-    }
-  } else if (dict.revision === 5) {
-    // R=5: Try user first, then owner
-    const userKey = await computeEncryptionKeyR5(password, dict, false);
-    if (userKey) {
-      result = userKey;
-    } else {
-      const ownerKey = await computeEncryptionKeyR5(password, dict, true);
-      if (ownerKey) {
-        result = ownerKey;
-      } else {
-        throw new Error('Incorrect password for R=5 encryption');
-      }
-    }
-  } else {
-    // R=2, 3, 4: Verify user password first
-    if (await verifyUserPassword(password, dict, fileId)) {
-      result = computeEncryptionKeyR2R4(password, dict, fileId);
-    } else if (await verifyOwnerPassword(password, dict, fileId)) {
-      // Recover the user password from the /O value and use that
-      const recoveredKey = recoverUserKeyFromOwner(password, dict);
-      result = computeEncryptionKeyR2R4Bytes(recoveredKey, dict, fileId);
-    } else {
-      throw new Error('Incorrect password');
-    }
-  }
-
-  // Store in cache, evict oldest if full
-  if (fileKeyCache.size >= FILE_KEY_CACHE_MAX) {
-    const firstKey = fileKeyCache.keys().next().value;
-    if (firstKey !== undefined) fileKeyCache.delete(firstKey);
-  }
-  fileKeyCache.set(ck, result.slice());
-
-  return result;
+  return (await deriveFileEncryptionKey(password, dict, fileId)).fileKey;
 }
 
 /**
@@ -901,7 +1093,7 @@ function recoverUserKeyFromOwner(ownerPassword: string, dict: EncryptDictValues)
 }
 
 // ---------------------------------------------------------------------------
-// Password verification (R=2-4)
+// Password verification
 // ---------------------------------------------------------------------------
 
 /**
@@ -909,6 +1101,9 @@ function recoverUserKeyFromOwner(ownerPassword: string, dict: EncryptDictValues)
  *
  * For R=2: Compare the entire 32 bytes.
  * For R=3/4: Compare only the first 16 bytes (the rest is arbitrary).
+ * For R=5/6: Compare the first 32 bytes with the password hash. For R=6 it
+ * accepts the standard Algorithm 2.B and, after it, the legacy variant that
+ * modern-pdf-lib 0.26.0 to 0.40.8 wrote; it emits no warning.
  *
  * @param password  The password to verify.
  * @param dict      Encryption dictionary values.
@@ -935,20 +1130,11 @@ export async function verifyUserPassword(
 }
 
 /**
- * Verify a user password for V=5 (R=5 or R=6).
+ * Verify a user password for V=5 (R=5 or R=6): the standard hash first, for R=6 the legacy
+ * one after it; SASLprep form, then raw UTF-8 bytes.
  */
 async function verifyUserPasswordV5(password: string, dict: EncryptDictValues): Promise<boolean> {
-  const pwd = preparePasswordV5(password);
-  const uValSalt = dict.userKey.subarray(32, 40);
-
-  if (dict.revision === 6) {
-    const hash = await algorithm2B(pwd, uValSalt);
-    return arraysEqual(hash, dict.userKey.subarray(0, 32));
-  }
-
-  // R=5
-  const hash = await sha256(concat(pwd, uValSalt));
-  return arraysEqual(hash, dict.userKey.subarray(0, 32));
+  return v5PasswordMatches(password, dict, 'user');
 }
 
 /**
@@ -956,6 +1142,10 @@ async function verifyUserPasswordV5(password: string, dict: EncryptDictValues): 
  *
  * For R=2-4: Recover the user password from /O using the owner password,
  * then verify it can produce the correct /U.
+ * For R=5/6: Compare the first 32 bytes of /O with the password hash, which
+ * takes the first 48 bytes of /U. For R=6 it accepts the standard Algorithm
+ * 2.B and, after it, the legacy variant that modern-pdf-lib 0.26.0 to 0.40.8
+ * wrote; it emits no warning.
  *
  * @param password  The owner password to verify.
  * @param dict      Encryption dictionary values.
@@ -993,20 +1183,11 @@ export async function verifyOwnerPassword(
 }
 
 /**
- * Verify an owner password for V=5 (R=5 or R=6).
+ * Verify an owner password for V=5 (R=5 or R=6), with the first 48 bytes of /U as udata: the
+ * standard hash first, for R=6 the legacy one after it; SASLprep form, then raw UTF-8 bytes.
  */
 async function verifyOwnerPasswordV5(password: string, dict: EncryptDictValues): Promise<boolean> {
-  const pwd = preparePasswordV5(password);
-  const oValSalt = dict.ownerKey.subarray(32, 40);
-
-  if (dict.revision === 6) {
-    const hash = await algorithm2B(pwd, oValSalt, dict.userKey);
-    return arraysEqual(hash, dict.ownerKey.subarray(0, 32));
-  }
-
-  // R=5
-  const hash = await sha256(concat(pwd, oValSalt, dict.userKey));
-  return arraysEqual(hash, dict.ownerKey.subarray(0, 32));
+  return v5PasswordMatches(password, dict, 'owner');
 }
 
 // ---------------------------------------------------------------------------

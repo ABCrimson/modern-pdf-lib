@@ -9,11 +9,20 @@
  *
  * Reference: same PDF structure as {@link PdfWriter} but written chunk
  * by chunk through a `TransformStream`.  The stream writer does not
- * encrypt; `PdfDocument.saveAsStream()` refuses a document with
- * encryption configured.
+ * encrypt: its constructor refuses a registry that holds content decrypted
+ * from an encrypted file, its body writer refuses an object that holds a
+ * string or stream decrypted on load (the stream then errors with
+ * `UnsupportedEncryptionError`), and `PdfDocument.saveAsStream()` refuses a
+ * document with encryption configured.
  */
 
-import { compressPdfStream, isLoadedFromEncryptedFile, rewrapLegacyStream } from './flateStream.js';
+import {
+  assertNoDecryptedObject,
+  assertSavableDecryptedContent,
+  compressPdfStream,
+  isLoadedFromEncryptedFile,
+  rewrapLegacyStream,
+} from './flateStream.js';
 import type { PdfStream as PdfStreamObj } from './pdfObjects.js';
 import { PdfObjectRegistry } from './pdfObjects.js';
 import type { DocumentStructure } from './pdfCatalog.js';
@@ -70,6 +79,11 @@ export class PdfStreamWriter {
   private readonly compressionLevel: number;
   private readonly useWasm: boolean;
 
+  /**
+   * @throws {UnsupportedEncryptionError} When the registry holds content
+   *         decrypted from an encrypted PDF: the stream writer cannot
+   *         encrypt it.
+   */
   constructor(
     /** All indirect objects. */
     private readonly registry: PdfObjectRegistry,
@@ -77,6 +91,7 @@ export class PdfStreamWriter {
     private readonly structure: DocumentStructure,
     options?: PdfSaveOptions,
   ) {
+    assertSavableDecryptedContent(registry, false, 'PdfStreamWriter');
     this.compress = options?.compress ?? true;
     this.compressionLevel = options?.compressionLevel ?? 6;
     this.useWasm = options?.useWasm ?? false;
@@ -151,8 +166,10 @@ export class PdfStreamWriter {
     const offsets = new Map<number, number>();
 
     for (const entry of this.registry) {
+      assertNoDecryptedObject(entry.object, 'PdfStreamWriter');
       // Write raw DEFLATE /FlateDecode data back as zlib data (not for a
-      // document loaded from an encrypted file), then optionally compress
+      // document loaded with ignoreEncryption from an encrypted file, whose
+      // stream data is still encrypted), then optionally compress
       // (the same bytes PdfWriter writes)
       if (entry.object.kind === 'stream') {
         if (!isLoadedFromEncryptedFile(this.registry)) rewrapLegacyStream(entry.object);

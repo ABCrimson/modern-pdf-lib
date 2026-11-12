@@ -2,12 +2,13 @@
  * Tests for the stream compression shared by the PDF writers.
  *
  * Every /FlateDecode result is judged by node:zlib `inflateSync`, which checks the zlib header
- * and the Adler-32 trailer. A document loaded from a file whose trailer has /Encrypt keeps its
- * /FlateDecode data on save: the tests build such a file around data from a fixed seed that
- * node:zlib `inflateRawSync` accepts, with the /Encrypt entry indirect or direct and with a
- * cross-reference table the loader rebuilds by a scan, and a control file without /Encrypt. Two
- * encrypted files written by qpdf, loaded with their password and with `ignoreEncryption`, keep
- * the stream data of the input file.
+ * and the Adler-32 trailer. A document loaded with `ignoreEncryption` from a file whose trailer
+ * has /Encrypt keeps its /FlateDecode data on save: the tests build such a file around data from
+ * a fixed seed that node:zlib `inflateRawSync` accepts, with the /Encrypt entry indirect or
+ * direct and with a cross-reference table the loader rebuilds by a scan, and a control file
+ * without /Encrypt. Without `ignoreEncryption` a direct or recovered /Encrypt throws on load.
+ * Two encrypted files written by qpdf, loaded with `ignoreEncryption`, keep the stream data of
+ * the input file; loaded with their password they refuse save until `encrypt()` is called.
  */
 
 import { readFileSync } from 'node:fs';
@@ -21,6 +22,7 @@ import {
 import { describe, expect, it } from 'vitest';
 import { deflateSync as fflateRaw } from 'fflate';
 import { compressPdfStream, rewrapLegacyStream } from '../../../src/core/flateStream.js';
+import { UnsupportedEncryptionError } from '../../../src/errors.js';
 import { INTERNAL_LIMITS } from '../../../src/core/limits.js';
 import { PdfArray, PdfDict, PdfName, PdfNumber, PdfStream } from '../../../src/core/pdfObjects.js';
 import { loadPdf } from '../../../src/index.js';
@@ -356,14 +358,14 @@ describe('save() of a document loaded from a file whose trailer has /Encrypt', (
     { encrypt: 'ref', startxrefShift: 3 },
     { encrypt: 'direct' },
   ];
-  const loads = [{ ignoreEncryption: true }, { password: '' }, {}];
   const variantCases = variants.flatMap((file) =>
-    loads.flatMap((load) => [true, false].map((compress) => ({ file, load, compress }))),
+    [true, false].map((compress) => ({ file, compress })),
   );
 
   it.each(variantCases)(
-    'writes such /FlateDecode data byte for byte as loaded ($file, loaded with $load, compress: $compress)',
-    async ({ file, load, compress }) => {
+    'writes such /FlateDecode data byte for byte as loaded with ignoreEncryption ($file, compress: $compress)',
+    async ({ file, compress }) => {
+      const load = { ignoreEncryption: true };
       const doc = await loadPdf(onePagePdf(OPAQUE, file), load);
       const saved = contentStreams(await doc.save({ compress }));
       expect(saved.length).toBeGreaterThan(0);
@@ -376,24 +378,34 @@ describe('save() of a document loaded from a file whose trailer has /Encrypt', (
     },
   );
 
-  // Files written by qpdf: the expectation is each stream's data as it is in the input file.
+  // A direct or recovered /Encrypt cannot be honoured: the load throws unless the caller opts out.
+  const refusedLoads = variants.flatMap((file) =>
+    [{ password: '' }, {}].map((load) => ({ file, load })),
+  );
+
+  it.each(refusedLoads)(
+    'refuses to load such a file instead of keeping its data ($file, loaded with $load)',
+    async ({ file, load }) => {
+      await expect(loadPdf(onePagePdf(OPAQUE, file), load)).rejects.toThrow(
+        UnsupportedEncryptionError,
+      );
+    },
+  );
+
+  // Files written by qpdf: with ignoreEncryption the expectation is each stream's data as it is in
+  // the input file.
   const FILES = [
     { file: '../../fixtures/encrypted/aes-128-r4.pdf', password: 'user' },
     { file: '../../fixtures/corpus/qpdf-r4-rc4.pdf', password: '' },
   ];
-  const cases = FILES.flatMap(({ file, password }) =>
-    [{ password }, { ignoreEncryption: true }].flatMap((load) => [
-      { file, load, compress: true },
-      { file, load, compress: false },
-    ]),
-  );
+  const cases = FILES.flatMap(({ file }) => [true, false].map((compress) => ({ file, compress })));
 
   it.each(cases)(
-    '$file loaded with $load and saved with compress: $compress keeps the stream data of the file',
-    async ({ file, load, compress }) => {
+    '$file loaded with ignoreEncryption and saved with compress: $compress keeps the stream data of the file',
+    async ({ file, compress }) => {
       const input = new Uint8Array(readFileSync(join(import.meta.dirname, file)));
       const before = streamsByObject(input);
-      const doc = await loadPdf(input, load);
+      const doc = await loadPdf(input, { ignoreEncryption: true });
       const after = streamsByObject(await doc.save({ compress }));
 
       // Default compression still compresses a stream that has no /Filter.
@@ -406,6 +418,25 @@ describe('save() of a document loaded from a file whose trailer has /Encrypt', (
         for (const data of written)
           expect(data, `stream data of object ${object}`).toEqual(expected);
       }
+    },
+  );
+
+  // Loaded with the password, the objects are plaintext: no save writes them without encryption.
+  const decryptedCases = FILES.flatMap(({ file, password }) =>
+    [true, false].map((compress) => ({ file, password, compress })),
+  );
+
+  it.each(decryptedCases)(
+    '$file loaded with its password refuses save() and saveAsStream() until encrypt() is called (compress: $compress)',
+    async ({ file, password, compress }) => {
+      const input = new Uint8Array(readFileSync(join(import.meta.dirname, file)));
+      const doc = await loadPdf(input, { password });
+      await expect(doc.save({ compress })).rejects.toThrow(UnsupportedEncryptionError);
+      expect(() => doc.saveAsStream({ compress })).toThrow(UnsupportedEncryptionError);
+
+      await doc.encrypt({ userPassword: 'new-user', ownerPassword: 'new-owner' });
+      const written = await doc.save({ compress });
+      expect(latin1.decode(written)).toContain('/Encrypt');
     },
   );
 

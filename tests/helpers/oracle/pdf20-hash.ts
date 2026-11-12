@@ -28,6 +28,31 @@ export function pdf20Hash(
   salt: Uint8Array,
   udata: Uint8Array = new Uint8Array(0),
 ): Uint8Array {
+  return hash2B(password, salt, udata, false);
+}
+
+/**
+ * The variant of Algorithm 2.B that modern-pdf-lib 0.26.0 to 0.40.8 wrote into AES-256 files.
+ * It differs from {@link pdf20Hash} in two places: the new K is cut to its first 32 bytes after
+ * every round, and the stop test runs one round late (after round n >= 64 it stops when the last
+ * byte of E <= n - 33). Its correctness is pinned by an outside file: it reproduces the /U hash
+ * (password `user-0403`) and the /O hash (password `owner-0403`) of
+ * tests/fixtures/legacy-0.40.3/encrypted-r6.pdf, which the published 0.40.3 wrote.
+ */
+export function pdf20HashLegacy(
+  password: Uint8Array,
+  salt: Uint8Array,
+  udata: Uint8Array = new Uint8Array(0),
+): Uint8Array {
+  return hash2B(password, salt, udata, true);
+}
+
+function hash2B(
+  password: Uint8Array,
+  salt: Uint8Array,
+  udata: Uint8Array,
+  legacy: boolean,
+): Uint8Array {
   let k: Uint8Array = createHash('sha256').update(password).update(salt).update(udata).digest();
   for (let round = 0; ; round++) {
     const unit = new Uint8Array(password.length + k.length + udata.length);
@@ -48,10 +73,11 @@ export function pdf20Hash(
     k = createHash(pick === 0 ? 'sha256' : pick === 1 ? 'sha384' : 'sha512')
       .update(e)
       .digest();
+    if (legacy) k = k.subarray(0, 32);
     const last = e.at(-1) ?? 0;
     // Rounds counted from 1 (pdf.js PDF20._hash, qpdf): after round n >= 64, stop when the last
-    // byte of E <= n - 32. `round` counts from 0, so n is round + 1.
-    if (round >= 63 && last <= round + 1 - 32) break;
+    // byte of E <= n - 32 (n - 33 for the legacy variant). `round` counts from 0, so n is round + 1.
+    if (round >= 63 && last <= round + 1 - (legacy ? 33 : 32)) break;
   }
   return k.subarray(0, 32);
 }

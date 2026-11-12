@@ -31,7 +31,12 @@ import {
   PdfObjectRegistry,
 } from '../core/pdfObjects.js';
 import { PdfDocument } from '../core/pdfDocument.js';
-import { markLoadedFromEncryptedFile } from '../core/flateStream.js';
+import {
+  markDecryptedFromEncryptedFile,
+  markLoadedFromEncryptedFile,
+  recordDecryptedContent,
+  recordDecryptedObject,
+} from '../core/flateStream.js';
 import { PdfPage } from '../core/pdfPage.js';
 import { PdfLexer } from './lexer.js';
 import { PdfObjectParser } from './objectParser.js';
@@ -39,9 +44,15 @@ import { XrefParser } from './xrefParser.js';
 import type { XrefEntry, ParsedTrailer } from './xrefParser.js';
 import { decodeFlateOnly } from './streamDecode.js';
 import { base64Decode } from '../utils/base64.js';
-import { PdfEncryptionHandler } from '../crypto/encryptionHandler.js';
+import {
+  PdfEncryptionHandler,
+  decryptStreamBytes,
+  decryptStringBytes,
+  embeddedFileFilterName,
+} from '../crypto/encryptionHandler.js';
+import { contentsLeftAsStored } from '../crypto/signatureContents.js';
 import { PdfParseError } from './parseError.js';
-import { ResourceLimitError } from '../errors.js';
+import { ResourceLimitError, UnsupportedEncryptionError } from '../errors.js';
 import { assertWithinLimit } from '../core/limits.js';
 
 // ---------------------------------------------------------------------------
@@ -132,6 +143,55 @@ function numVal(obj: PdfObject | undefined): number | undefined {
   return undefined;
 }
 
+/** Bytes as a string of one code unit per byte (the form the lexer gives string values). */
+function latin1String(bytes: Uint8Array): string {
+  let out = '';
+  for (let i = 0; i < bytes.length; i += 0x2000) {
+    out += String.fromCharCode(...bytes.subarray(i, i + 0x2000));
+  }
+  return out;
+}
+
+/** How many strings of one object the decryption pass decrypts at a time. */
+const STRINGS_AT_ONCE = 4096;
+
+/** Whether `obj` is a stream with `/Type /Metadata`. */
+function isMetadataStream(obj: PdfObject): boolean {
+  if (obj.kind !== 'stream') return false;
+  const type = (obj as PdfStream).dict.get('/Type');
+  return type?.kind === 'name' && (type as PdfName).value === '/Metadata';
+}
+
+/**
+ * Remove a leading `/Crypt` entry from a stream's `/Filter` (and its `/DecodeParms` entry) and
+ * return the crypt filter name it selects: its decode parameters' `/Name`, else `/Identity`
+ * (ISO 32000-2, 7.4.10). Returns undefined when the stream has no `/Crypt` filter.
+ */
+function takeCryptFilter(dict: PdfDict): string | undefined {
+  const filter = dict.get('/Filter');
+  const parms = dict.get('/DecodeParms');
+  const isCrypt = (f: PdfObject | undefined): boolean =>
+    f?.kind === 'name' && (f as PdfName).value === '/Crypt';
+  let cryptParms: PdfObject | undefined;
+  if (isCrypt(filter)) {
+    cryptParms = parms?.kind === 'array' ? (parms as PdfArray).items[0] : parms;
+    dict.delete('/Filter');
+    dict.delete('/DecodeParms');
+  } else if (filter?.kind === 'array' && isCrypt((filter as PdfArray).items[0])) {
+    const filters = (filter as PdfArray).items;
+    filters.shift();
+    if (parms?.kind === 'array') cryptParms = (parms as PdfArray).items.shift();
+    if (filters.length === 0) {
+      dict.delete('/Filter');
+      dict.delete('/DecodeParms');
+    }
+  } else {
+    return undefined;
+  }
+  const name = cryptParms?.kind === 'dict' ? (cryptParms as PdfDict).get('/Name') : undefined;
+  return name?.kind === 'name' ? (name as PdfName).value : '/Identity';
+}
+
 // ---------------------------------------------------------------------------
 // PdfDocumentParser
 // ---------------------------------------------------------------------------
@@ -198,11 +258,17 @@ export class PdfDocumentParser {
   /** Object number of the /Encrypt dictionary (excluded from decryption). */
   private encryptDictObjNum?: number | undefined;
 
+  /** Numbers of the in-use objects the decryption pass has decrypted. */
+  private readonly decryptedObjects = new Set<number>();
+
   /** When true, throw on malformed objects instead of silently skipping. */
   private throwOnInvalidObject = false;
 
   /** When true, clamp extreme numbers to single-precision float range. */
   private capNumbers = false;
+
+  /** Numbers of the objects whose parse is in progress (see {@link resolveLengthRef}). */
+  private readonly inProgress = new Set<number>();
 
   /**
    * Create a new PdfDocumentParser.
@@ -246,37 +312,46 @@ export class PdfDocumentParser {
     if (this.capNumbers) {
       this.lexer.capNumbers = true;
     }
-    this.objectParser = new PdfObjectParser(this.lexer, this.registry);
+    this.objectParser = new PdfObjectParser(this.lexer, this.registry, {
+      recover: !this.throwOnInvalidObject,
+    });
     this.xrefParser = new XrefParser(this.data, this.objectParser);
 
     // Step 3: Parse the cross-reference structure
     const xrefResult = await this.xrefParser.parseXref();
     this.xrefEntries = xrefResult.entries;
     this.trailer = xrefResult.trailer;
+    // From here on an indirect stream /Length resolves through the document, in any order.
+    this.objectParser.resolveLength = (ref) => this.resolveLengthRef(ref);
 
-    // Step 4: Check for encryption and set up decryption handler. The writers
-    // do not re-wrap the /FlateDecode data of a file whose trailer has
-    // /Encrypt, direct or indirect, also when the trailer comes from a
-    // recovery scan, and whether or not the file is decrypted here. Only an
-    // indirect /Encrypt in a trailer read from the cross-reference table or
-    // stream is decrypted; after a recovery scan nothing is.
-    if (this.trailer.encryptRef !== undefined || this.trailer.hasEncrypt === true) {
+    // Step 4: Encryption. An indirect /Encrypt is decrypted: the handler is set up and every
+    // object is decrypted once, before anything is read from the document, and the registry is
+    // marked as decrypted from an encrypted file (its save refuses until encrypt() is called).
+    // An /Encrypt that is not an indirect reference of the trailer (a direct dictionary, or a
+    // trailer rebuilt by the recovery scan) cannot be decrypted and is refused. With
+    // ignoreEncryption the objects stay as stored, and the registry is marked as loaded from an
+    // encrypted file, so the writers copy its /FlateDecode data as loaded.
+    const hasEncrypt = this.trailer.encryptRef !== undefined || this.trailer.hasEncrypt === true;
+    if (hasEncrypt && options?.ignoreEncryption === true) {
       markLoadedFromEncryptedFile(this.registry);
-    }
-    if (this.trailer.encryptRef !== undefined && options?.ignoreEncryption !== true) {
-      await this.setupDecryption(options?.password);
+    } else if (this.trailer.encryptRef !== undefined) {
+      const handler = await this.setupDecryption(options?.password);
+      await this.decryptEveryObject(handler, options);
+      markDecryptedFromEncryptedFile(this.registry);
+    } else if (hasEncrypt) {
+      throw new UnsupportedEncryptionError(
+        'This PDF has an /Encrypt entry that is not an indirect reference in the trailer of its ' +
+          'cross-reference section (a direct dictionary, or a trailer rebuilt by the recovery ' +
+          'scan), so it cannot be decrypted. Pass ignoreEncryption: true to load its objects ' +
+          'as stored.',
+      );
     }
 
     // Step 5: Resolve the catalog and page tree
     const catalogDict = this.resolveCatalog();
     this.flattenedPages = this.resolvePageTree(catalogDict);
 
-    // Step 6: Decrypt all resolved objects if encrypted
-    if (this.encryptionHandler !== undefined) {
-      await this.decryptAllObjects();
-    }
-
-    // Step 7: Build the PdfDocument
+    // Step 6: Build the PdfDocument
     const doc = await this.buildDocument(options);
 
     return doc;
@@ -311,31 +386,58 @@ export class PdfDocumentParser {
 
     let resolved: PdfObject;
 
-    if (entry.type === 'compressed') {
-      // Object is inside an object stream
-      resolved = this.resolveCompressedObject(entry);
-    } else {
-      // Standard in-use object -- parse at the byte offset
-      try {
-        const { object } = this.objectParser.parseIndirectObjectAt(entry.offset);
-        resolved = object;
-      } catch (err) {
-        throw new PdfParseError({
-          message:
-            `Failed to parse indirect object ${objNum} ${entry.generationNumber} at ` +
-            `offset ${entry.offset}`,
-          offset: entry.offset,
-          expected: `valid indirect object ${objNum} ${entry.generationNumber}`,
-          actual: 'parse failure',
-          data: this.data,
-          cause: err instanceof Error ? err : undefined,
-        });
+    this.inProgress.add(objNum);
+    try {
+      if (entry.type === 'compressed') {
+        // Object is inside an object stream
+        resolved = this.resolveCompressedObject(entry);
+      } else {
+        // Standard in-use object -- parse at the byte offset
+        try {
+          const { object } = this.objectParser.parseIndirectObjectAt(entry.offset);
+          resolved = object;
+        } catch (err) {
+          if (err instanceof ResourceLimitError) throw err;
+          throw new PdfParseError({
+            message:
+              `Failed to parse indirect object ${objNum} ${entry.generationNumber} at ` +
+              `offset ${entry.offset}`,
+            offset: entry.offset,
+            expected: `valid indirect object ${objNum} ${entry.generationNumber}`,
+            actual: 'parse failure',
+            data: this.data,
+            cause: err instanceof Error ? err : undefined,
+          });
+        }
       }
+    } finally {
+      this.inProgress.delete(objNum);
     }
 
     // Cache the result
     this.objectCache.set(objNum, resolved);
     return resolved;
+  }
+
+  /**
+   * Resolve the target of an indirect stream `/Length` for the object parser.
+   *
+   * An object whose parse is in progress, and a compressed object whose
+   * object stream is being parsed, give `undefined`: their value cannot be
+   * known before the stream they are the length of has been framed.
+   */
+  private resolveLengthRef(ref: PdfRef): PdfObject | undefined {
+    const objNum = ref.objectNumber;
+    if (this.inProgress.has(objNum)) return undefined;
+    const entry = this.xrefEntries.get(objNum);
+    if (
+      entry?.type === 'compressed' &&
+      (this.inProgress.has(entry.containerObjectNumber ?? -1) ||
+        !this.containerReadable(entry.containerObjectNumber ?? -1))
+    ) {
+      return undefined;
+    }
+    return this.resolveRef(ref);
   }
 
   /**
@@ -358,14 +460,23 @@ export class PdfDocumentParser {
    * and authenticating with the provided password (or empty password).
    *
    * @param password  Optional user/owner password.
-   * @throws          If authentication fails.
+   * @throws {UnsupportedEncryptionError} When the handler or a crypt filter is not supported
+   *         (before any password is tried).
+   * @throws {ResourceLimitError} When an internal limit is exceeded.
+   * @throws          PdfParseError when no password opens the file.
+   * @returns         The handler, also kept as the parser's encryption handler.
    */
-  private async setupDecryption(password?: string): Promise<void> {
+  private async setupDecryption(password?: string): Promise<PdfEncryptionHandler> {
     const encryptRef = this.trailer.encryptRef!;
     this.encryptDictObjNum = encryptRef.objectNumber;
 
-    // Resolve the /Encrypt dictionary
-    const encryptObj = this.resolveRef(encryptRef);
+    // Parse the /Encrypt dictionary outside the document's registry: it is not an object of the
+    // decrypted document.
+    const encryptEntry = this.xrefEntries.get(encryptRef.objectNumber);
+    const encryptObj =
+      encryptEntry?.type === 'in-use'
+        ? this.parseOutsideRegistry(encryptRef, encryptEntry)
+        : this.resolveRef(encryptRef);
     if (encryptObj.kind !== 'dict') {
       throw new PdfParseError({
         message: 'Invalid PDF: /Encrypt entry is not a dictionary.',
@@ -402,8 +513,11 @@ export class PdfDocumentParser {
           fileId,
           pwd,
         );
-        return; // Authentication succeeded
+        return this.encryptionHandler; // Authentication succeeded
       } catch (err) {
+        if (err instanceof UnsupportedEncryptionError || err instanceof ResourceLimitError) {
+          throw err;
+        }
         lastError = err instanceof Error ? err : new Error(String(err));
       }
     }
@@ -431,41 +545,135 @@ export class PdfDocumentParser {
     }
   }
 
-  /**
-   * Decrypt all resolved objects in the object cache.
-   *
-   * Walks every cached object and decrypts PdfString values and
-   * PdfStream data in place. The /Encrypt dictionary itself and its
-   * sub-objects are excluded from decryption per the PDF spec.
-   */
-  private async decryptAllObjects(): Promise<void> {
-    const handler = this.encryptionHandler!;
-
-    for (const [objNum, obj] of this.objectCache) {
-      // Skip the /Encrypt dictionary -- it is never encrypted
-      if (objNum === this.encryptDictObjNum) continue;
-
-      const entry = this.xrefEntries.get(objNum);
-      const genNum = entry?.generationNumber ?? 0;
-
-      await this.decryptObject(handler, obj, objNum, genNum);
+  /** Parse the in-use object `ref` with a parser whose registry is not the document's. */
+  private parseOutsideRegistry(ref: PdfRef, entry: XrefEntry): PdfObject {
+    const parser = new PdfObjectParser(this.lexer, new PdfObjectRegistry(), {
+      recover: !this.throwOnInvalidObject,
+    });
+    try {
+      return parser.parseIndirectObjectAt(entry.offset).object;
+    } catch (err) {
+      if (err instanceof ResourceLimitError) throw err;
+      throw new PdfParseError({
+        message:
+          `Failed to parse indirect object ${ref.objectNumber} ${entry.generationNumber} at ` +
+          `offset ${entry.offset}`,
+        offset: entry.offset,
+        expected: `valid indirect object ${ref.objectNumber} ${entry.generationNumber}`,
+        actual: 'parse failure',
+        data: this.data,
+        cause: err instanceof Error ? err : undefined,
+      });
     }
   }
 
   /**
-   * Recursively decrypt a parsed PDF object in place.
-   *
-   * - PdfString: decrypted via the handler and replaced in the parent
-   * - PdfStream: stream data is decrypted in place
-   * - PdfDict: recursively decrypt all values
-   * - PdfArray: recursively decrypt all items
-   *
-   * @param handler  The encryption handler.
-   * @param obj      The PDF object to decrypt.
-   * @param objNum   The object number (for key derivation).
-   * @param genNum   The generation number (for key derivation).
+   * Whether the members of object stream `containerNum` can be read: always for a file that is
+   * not decrypted, and after the decryption pass has decrypted the container otherwise.
    */
-  private async decryptObject(
+  private containerReadable(containerNum: number): boolean {
+    return this.encryptionHandler === undefined || this.decryptedObjects.has(containerNum);
+  }
+
+  /**
+   * Decrypt every in-use object once, right after the handler is set up.
+   *
+   * Each in-use object is parsed and decrypted in place with its own object number and the
+   * generation number of its xref entry; object streams are among them, so their members are
+   * read later (by {@link resolveCompressedObject}) from decrypted data and are not decrypted
+   * themselves. The object streams that hold compressed objects are decrypted first, before
+   * every other object, so a stream whose /Length is an integer in one of them is framed by that
+   * /Length (an object stream's own /Length is never in an object stream, ISO 32000-2 7.5.7).
+   * Every string and stream the pass decrypts is recorded ({@link recordDecryptedObject}). Exempt: the /Encrypt dictionary, cross-reference streams, the data of the
+   * document-level metadata stream (the one the catalog's /Metadata names) of a file with
+   * /EncryptMetadata false, and the /Contents of signature dictionaries (see
+   * {@link decryptStrings}). An object that does not parse is skipped as {@link buildDocument}
+   * skips it (thrown with `throwOnInvalidObject`); a `ResourceLimitError` and data that cannot be
+   * decrypted (`UnsupportedEncryptionError`) propagate.
+   */
+  private async decryptEveryObject(
+    handler: PdfEncryptionHandler,
+    options?: LoadPdfOptions,
+  ): Promise<void> {
+    const objectsPerTick = options?.objectsPerTick ?? Infinity;
+    let objectsThisTick = 0;
+    // With /EncryptMetadata false, the /Type /Metadata streams whose data waits until the catalog
+    // can be read (it may be in an object stream not decrypted yet).
+    const metadataStreams: { stream: PdfStream; objNum: number; genNum: number }[] = [];
+    // The object-stream containers come first: a stream /Length may be an integer stored in one.
+    const containers = new Set<number>();
+    for (const e of this.xrefEntries.values()) {
+      if (e.type === 'compressed' && e.containerObjectNumber !== undefined) {
+        containers.add(e.containerObjectNumber);
+      }
+    }
+    const ordered = [
+      ...Iterator.from(this.xrefEntries).filter(([n]) => containers.has(n)),
+      ...Iterator.from(this.xrefEntries).filter(([n]) => !containers.has(n)),
+    ];
+
+    for (const [objNum, entry] of ordered) {
+      if (entry.type !== 'in-use' || objNum === this.encryptDictObjNum) continue;
+      let obj: PdfObject;
+      try {
+        obj = this.resolveRef(PdfRef.of(objNum, entry.generationNumber));
+      } catch (err) {
+        if (this.throwOnInvalidObject || err instanceof ResourceLimitError) throw err;
+        continue;
+      }
+      if (!this.decryptedObjects.has(objNum)) {
+        this.decryptedObjects.add(objNum);
+        const genNum = entry.generationNumber;
+        if (!handler.isMetadataEncrypted() && isMetadataStream(obj)) {
+          metadataStreams.push({ stream: obj as PdfStream, objNum, genNum });
+          await this.decryptStrings(handler, (obj as PdfStream).dict, objNum, genNum);
+        } else {
+          await this.decryptIndirectObject(handler, obj, objNum, genNum);
+        }
+      }
+
+      objectsThisTick++;
+      if (objectsThisTick >= objectsPerTick) {
+        await new Promise<void>((r) => setTimeout(r, 0));
+        objectsThisTick = 0;
+      }
+    }
+
+    if (metadataStreams.length > 0) {
+      const documentLevel = this.catalogMetadataNumber();
+      for (const { stream, objNum, genNum } of metadataStreams) {
+        if (objNum !== documentLevel) {
+          await this.decryptStreamData(handler, stream, objNum, genNum, '/Metadata');
+        }
+      }
+    }
+  }
+
+  /**
+   * The object number of the stream the catalog's /Metadata names, or `undefined` when the
+   * catalog cannot be read or names none (a catalog that does not parse is reported later, by
+   * {@link resolveCatalog}).
+   */
+  private catalogMetadataNumber(): number | undefined {
+    let catalog: PdfObject;
+    try {
+      catalog = this.resolveRef(this.trailer.rootRef);
+    } catch (err) {
+      if (err instanceof ResourceLimitError || err instanceof UnsupportedEncryptionError) {
+        throw err;
+      }
+      return undefined;
+    }
+    if (catalog.kind !== 'dict') return undefined;
+    const metadata = (catalog as PdfDict).get('/Metadata');
+    return metadata?.kind === 'ref' ? (metadata as PdfRef).objectNumber : undefined;
+  }
+
+  /**
+   * Decrypt one indirect object in place: a stream's data (with the stream filter, the
+   * embedded-file filter, or its own /Crypt filter) and every string it holds.
+   */
+  private async decryptIndirectObject(
     handler: PdfEncryptionHandler,
     obj: PdfObject,
     objNum: number,
@@ -473,83 +681,107 @@ export class PdfDocumentParser {
   ): Promise<void> {
     if (obj.kind === 'stream') {
       const stream = obj as PdfStream;
-
-      // Decrypt the stream data
-      if (stream.data.length > 0) {
-        stream.data = await handler.decryptStream(objNum, genNum, stream.data);
-      }
-
-      // Also decrypt any string values in the stream's dictionary
-      await this.decryptDict(handler, stream.dict, objNum, genNum);
-    } else if (obj.kind === 'dict') {
-      await this.decryptDict(handler, obj as PdfDict, objNum, genNum);
-    } else if (obj.kind === 'array') {
-      await this.decryptArray(handler, obj as PdfArray, objNum, genNum);
+      const type = stream.dict.get('/Type');
+      const typeName = type?.kind === 'name' ? (type as PdfName).value : undefined;
+      if (typeName === '/XRef') return;
+      await this.decryptStreamData(handler, stream, objNum, genNum, typeName);
+      await this.decryptStrings(handler, stream.dict, objNum, genNum);
+    } else if (obj.kind === 'dict' || obj.kind === 'array') {
+      await this.decryptStrings(handler, obj as PdfDict | PdfArray, objNum, genNum);
+    } else if (obj.kind === 'string') {
+      // A string as the whole indirect object is immutable: the decrypted string replaces it in
+      // the cache and in the registry entry the object parser made.
+      const decrypted = await this.decryptString(handler, obj as PdfString, objNum, genNum);
+      this.objectCache.set(objNum, decrypted);
+      this.registry.assign(PdfRef.of(objNum, genNum), decrypted);
     }
-    // PdfString values are handled at the dict/array level where they can
-    // be replaced, since PdfString is immutable.
   }
 
   /**
-   * Decrypt all string values in a PdfDict (in place).
+   * Decrypt the data of `stream` in place, with its own /Crypt filter, else the embedded-file
+   * filter for a stream of `/Type` `typeName` /EmbeddedFile, else the stream filter.
    */
-  private async decryptDict(
+  private async decryptStreamData(
     handler: PdfEncryptionHandler,
-    dict: PdfDict,
+    stream: PdfStream,
+    objNum: number,
+    genNum: number,
+    typeName: string | undefined,
+  ): Promise<void> {
+    const filterName =
+      takeCryptFilter(stream.dict) ??
+      (typeName === '/EmbeddedFile' ? embeddedFileFilterName(handler) : undefined);
+    if (stream.data.length > 0) {
+      stream.data = await decryptStreamBytes(handler, objNum, genNum, stream.data, filterName);
+      recordDecryptedObject(stream);
+    }
+  }
+
+  /**
+   * Decrypt in place every string `root` holds, in its own entries and in the dictionaries and
+   * arrays nested in it. The /Contents of a signature dictionary (see
+   * {@link contentsLeftAsStored}) is not encrypted and is left as it is.
+   *
+   * The strings are decrypted concurrently, {@link STRINGS_AT_ONCE} at a time. The results are
+   * those of decrypting them one after another, and so is the error when one cannot be
+   * decrypted: the first such string in the order of the entries.
+   */
+  private async decryptStrings(
+    handler: PdfEncryptionHandler,
+    root: PdfDict | PdfArray,
     objNum: number,
     genNum: number,
   ): Promise<void> {
-    // Snapshot keys to avoid mutation during iteration
-    const keys = Iterator.from(dict)
-      .map(([key]) => key)
-      .toArray();
+    const slots: { holder: PdfDict | PdfArray; at: string | number; str: PdfString }[] = [];
+    const visit = (container: PdfDict | PdfArray): void => {
+      if (container.kind === 'dict') {
+        const dict = container as PdfDict;
+        const signature = contentsLeftAsStored(dict);
+        for (const [key, value] of dict) {
+          if (value.kind === 'string') {
+            if (!(signature && key === '/Contents')) {
+              slots.push({ holder: dict, at: key, str: value as PdfString });
+            }
+          } else if (value.kind === 'dict' || value.kind === 'array') {
+            visit(value as PdfDict | PdfArray);
+          }
+        }
+        return;
+      }
+      const arr = container as PdfArray;
+      for (const [index, item] of arr.items.entries()) {
+        if (item.kind === 'string') {
+          slots.push({ holder: arr, at: index, str: item as PdfString });
+        } else if (item.kind === 'dict' || item.kind === 'array') {
+          visit(item as PdfDict | PdfArray);
+        }
+      }
+    };
+    visit(root);
 
-    for (const key of keys) {
-      const val = dict.get(key);
-      if (val === undefined) continue;
-
-      if (val.kind === 'string') {
-        const decrypted = await this.decryptString(handler, val as PdfString, objNum, genNum);
-        dict.set(key, decrypted);
-      } else if (val.kind === 'dict') {
-        await this.decryptDict(handler, val as PdfDict, objNum, genNum);
-      } else if (val.kind === 'array') {
-        await this.decryptArray(handler, val as PdfArray, objNum, genNum);
-      } else if (val.kind === 'stream') {
-        await this.decryptObject(handler, val, objNum, genNum);
+    for (let start = 0; start < slots.length; start += STRINGS_AT_ONCE) {
+      const chunk = slots.slice(start, start + STRINGS_AT_ONCE);
+      const settled = await Promise.allSettled(
+        chunk.map(async (slot) => ({
+          slot,
+          plain: await this.decryptString(handler, slot.str, objNum, genNum),
+        })),
+      );
+      for (const outcome of settled) {
+        if (outcome.status === 'rejected') throw outcome.reason;
+        const { slot, plain } = outcome.value;
+        if (slot.holder.kind === 'dict') (slot.holder as PdfDict).set(slot.at as string, plain);
+        else (slot.holder as PdfArray).items[slot.at as number] = plain;
       }
     }
   }
 
   /**
-   * Decrypt all string values in a PdfArray (in place).
-   */
-  private async decryptArray(
-    handler: PdfEncryptionHandler,
-    arr: PdfArray,
-    objNum: number,
-    genNum: number,
-  ): Promise<void> {
-    for (let i = 0; i < arr.length; i++) {
-      const item = arr.items[i];
-      if (item === undefined) continue;
-
-      if (item.kind === 'string') {
-        const decrypted = await this.decryptString(handler, item as PdfString, objNum, genNum);
-        arr.items[i] = decrypted;
-      } else if (item.kind === 'dict') {
-        await this.decryptDict(handler, item as PdfDict, objNum, genNum);
-      } else if (item.kind === 'array') {
-        await this.decryptArray(handler, item as PdfArray, objNum, genNum);
-      } else if (item.kind === 'stream') {
-        await this.decryptObject(handler, item, objNum, genNum);
-      }
-    }
-  }
-
-  /**
-   * Decrypt a PdfString value and return a new PdfString with decrypted
-   * content.
+   * Decrypt a PdfString with the string filter and return a new PdfString of the same form.
+   *
+   * The lexer stores a string's bytes as one code unit per byte, for hex and literal strings
+   * alike, so the bytes are the code units; the plaintext is rebuilt the same way, byte for
+   * byte.
    */
   private async decryptString(
     handler: PdfEncryptionHandler,
@@ -557,26 +789,12 @@ export class PdfDocumentParser {
     objNum: number,
     genNum: number,
   ): Promise<PdfString> {
-    // Convert the string value to bytes for decryption
-    let encrypted: Uint8Array;
-    if (str.hex) {
-      // Hex string: decode hex pairs to bytes
-      const clean = str.value.replace(/\s/g, '');
-      encrypted = Uint8Array.fromHex(clean.length % 2 === 0 ? clean : clean + '0');
-    } else {
-      // Literal string: character codes as bytes (Latin-1)
-      encrypted = new Uint8Array(str.value.length);
-      for (let i = 0; i < str.value.length; i++) {
-        encrypted[i] = str.value.charCodeAt(i) & 0xff;
-      }
-    }
-
-    if (encrypted.length === 0) return str;
-
-    const decrypted = await handler.decryptObject(objNum, genNum, encrypted);
-
-    // Reconstruct as a literal string from the decrypted bytes (Latin-1)
-    return PdfString.literal(new TextDecoder('latin1').decode(decrypted));
+    if (str.value.length === 0) return str;
+    const encrypted = Uint8Array.from(str.value, (c) => c.charCodeAt(0) & 0xff);
+    const plain = latin1String(await decryptStringBytes(handler, objNum, genNum, encrypted));
+    const decrypted = str.hex ? PdfString.hex(plain) : PdfString.literal(plain);
+    recordDecryptedObject(decrypted);
+    return decrypted;
   }
 
   /**
@@ -893,6 +1111,10 @@ export class PdfDocumentParser {
    * Object streams (PDF 1.5+) pack multiple objects into a single
    * FlateDecode stream. The stream has a header section listing
    * (objNumber, byteOffset) pairs, followed by the objects themselves.
+   * The container is taken through {@link resolveRef}, so in an encrypted
+   * file it is the container the decryption pass decrypted; its members are
+   * not decrypted again. Before that pass has decrypted the container, its
+   * members resolve to null.
    *
    * @param entry  The xref entry for the compressed object.
    * @returns      The resolved PDF object.
@@ -924,11 +1146,14 @@ export class PdfDocumentParser {
       });
     }
 
+    if (!this.containerReadable(containerNum)) return PdfNull.instance;
+
     let containerObj: PdfObject;
+    this.inProgress.add(containerNum);
     try {
-      const { object } = this.objectParser.parseIndirectObjectAt(containerEntry.offset);
-      containerObj = object;
+      containerObj = this.resolveRef(PdfRef.of(containerNum, containerEntry.generationNumber));
     } catch (err) {
+      if (err instanceof ResourceLimitError) throw err;
       throw new PdfParseError({
         message:
           `Failed to parse object stream ${containerNum} at offset ` + `${containerEntry.offset}`,
@@ -938,6 +1163,8 @@ export class PdfDocumentParser {
         data: this.data,
         cause: err instanceof Error ? err : undefined,
       });
+    } finally {
+      this.inProgress.delete(containerNum);
     }
 
     if (containerObj.kind !== 'stream') {
@@ -1026,6 +1253,8 @@ export class PdfDocumentParser {
         }
         const subParser = new PdfObjectParser(subLexer, this.registry);
         const parsedObj = subParser.parseObject();
+        // The members of a decrypted object stream hold its plaintext: their strings are recorded.
+        if (this.encryptionHandler !== undefined) recordDecryptedContent(parsedObj);
 
         streamObjects.set(i, parsedObj);
 
@@ -1178,6 +1407,8 @@ export class PdfDocumentParser {
     let objectsThisTick = 0;
 
     for (const [objNum, entry] of this.xrefEntries) {
+      // The /Encrypt dictionary of a decrypted file is not an object of the document.
+      if (this.encryptionHandler !== undefined && objNum === this.encryptDictObjNum) continue;
       if (entry.type === 'in-use' || entry.type === 'compressed') {
         try {
           const obj = this.resolveRef(PdfRef.of(objNum, entry.generationNumber));

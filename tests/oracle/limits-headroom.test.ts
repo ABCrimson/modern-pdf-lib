@@ -73,16 +73,11 @@ const FORM_DEPTH = 12;
 
 /**
  * Files that do not load, with the reason the corpus test records for them (KNOWN in
- * tests/oracle/corpus.test.ts). A file listed here that loads is measured like any other; a file
+ * tests/oracle/corpus.test.ts). No file is expected to fail to load now, so the map is empty; it
+ * stays for a later defect. A file listed here that loads is measured like any other; a file
  * that fails to load and is not listed fails this test.
  */
-const LOAD_DEFECTS: ReadonlyMap<string, string> = new Map([
-  ['corpus/pyhanko-aes256.pdf', 'R6 password check (crypto-security-01)'],
-  ['corpus/qpdf-r6-acrobat-xi.pdf', 'R6 password check (crypto-security-01)'],
-  ['corpus/qpdf-r6-attachments.pdf', 'R6 password check (crypto-security-01)'],
-  ['encrypted/aes-256-r6.pdf', 'R6 password check (crypto-security-01)'],
-  ['corpus/qpdf-r4-aes.pdf', 'hex string parse (crypto-security-M01)'],
-]);
+const LOAD_DEFECTS: ReadonlyMap<string, string> = new Map([]);
 
 /**
  * The font cmap quantity is the size of the parsed map, a lower bound of what
@@ -202,20 +197,45 @@ function passwords(): Map<string, string> {
     password: string | null;
   }[];
   for (const e of corpus) if (e.password !== null) map.set(`corpus/${e.file}`, e.password);
+  // Its three lists carry paths relative to encrypted/ (`extra/...`, `load/...`). An entry's own
+  // user password, when it differs from the shared one, is listed as code points
+  // (`U+FB01 U+0078 ...`, or empty for the empty password), as tests/oracle/aes.test.ts reads it.
+  interface EncryptedEntry {
+    file: string;
+    userPasswordCodePoints?: string;
+    encryption?: unknown;
+  }
   const encrypted = readJson(join(FIXTURES, 'encrypted/manifest.json')) as {
     userPassword: string;
-    files: { file: string; encryption?: unknown }[];
+    files: EncryptedEntry[];
+    extra: EncryptedEntry[];
+    load: EncryptedEntry[];
   };
-  for (const e of encrypted.files) {
-    if (e.encryption !== undefined) map.set(`encrypted/${e.file}`, encrypted.userPassword);
+  for (const e of [...encrypted.files, ...encrypted.extra, ...encrypted.load]) {
+    if (e.encryption === undefined) continue;
+    const points = e.userPasswordCodePoints;
+    const password =
+      points === undefined
+        ? encrypted.userPassword
+        : points === ''
+          ? ''
+          : String.fromCodePoint(...points.split(' ').map((u) => Number.parseInt(u.slice(2), 16)));
+    map.set(`encrypted/${e.file}`, password);
   }
-  const legacy = readJson(join(FIXTURES, 'legacy-0.40.3/manifest.json')) as {
-    file: string;
-    expect: { encryption?: { userPassword: string } };
-  }[];
-  for (const e of legacy) {
-    if (e.expect.encryption !== undefined) {
-      map.set(`legacy-0.40.3/${e.file}`, e.expect.encryption.userPassword);
+  // Every legacy-<version>/ directory: its manifest records each encrypted file's user password.
+  const legacyDirs = readdirSync(FIXTURES, { withFileTypes: true })
+    .filter((d) => d.isDirectory() && d.name.startsWith('legacy-'))
+    .map((d) => d.name)
+    .sort();
+  for (const dir of legacyDirs) {
+    const legacy = readJson(join(FIXTURES, dir, 'manifest.json')) as {
+      file: string;
+      expect: { encryption?: { userPassword: string } };
+    }[];
+    for (const e of legacy) {
+      if (e.expect.encryption !== undefined) {
+        map.set(`${dir}/${e.file}`, e.expect.encryption.userPassword);
+      }
     }
   }
   return map;

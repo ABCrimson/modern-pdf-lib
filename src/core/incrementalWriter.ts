@@ -21,12 +21,19 @@
  * @packageDocumentation
  */
 
-import { compressPdfStream, isLoadedFromEncryptedFile, rewrapLegacyStream } from './flateStream.js';
+import {
+  assertNoDecryptedObject,
+  assertSavableDecryptedContent,
+  compressPdfStream,
+  isLoadedFromEncryptedFile,
+  rewrapLegacyStream,
+} from './flateStream.js';
 import { PdfObjectRegistry } from './pdfObjects.js';
 import type { DocumentStructure } from './pdfCatalog.js';
 import type { PdfSaveOptions } from './pdfWriter.js';
 import type { PdfDocument } from './pdfDocument.js';
 import { UnsupportedEncryptionError } from '../errors.js';
+import { warnOnce } from '../utils/warnings.js';
 
 // ---------------------------------------------------------------------------
 // Encrypted-input guard
@@ -315,11 +322,17 @@ function findOriginalTrailerSize(data: Uint8Array): number {
  *                       (original + new/modified).
  * @param structure      Document structure references (catalog, info, pages).
  * @param changedObjects Set of object numbers that are new or modified.
- * @param options        Optional save options (compression, etc.).
+ * @param options        Optional save options (`compress` and `compressionLevel`). The
+ *                       incremental writer writes no object streams and does not use WASM, so
+ *                       a finite `objectStreamThreshold` and `useWasm: true` have no effect and
+ *                       each emits a one-time `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`).
  * @returns              The complete incremental save result.
  * @throws {UnsupportedEncryptionError} When `originalBytes` is an encrypted
  *         PDF (its bytes contain the name `/Encrypt`): the
- *         appended objects and trailer would not be encrypted.
+ *         appended objects and trailer would not be encrypted. Also when the
+ *         registry holds content decrypted from an encrypted PDF, or an object
+ *         it appends holds a string or stream decrypted on load: the incremental
+ *         writer does not encrypt.
  *
  * @example
  * ```ts
@@ -334,7 +347,18 @@ export function saveIncremental(
   changedObjects: Set<number>,
   options?: PdfSaveOptions,
 ): IncrementalSaveResult {
+  assertSavableDecryptedContent(registry, false, 'saveIncremental()');
   assertUnencryptedInput(originalBytes, 'saveIncremental()');
+  for (const name of ['objectStreamThreshold', 'useWasm'] as const) {
+    const value = options?.[name];
+    if (name === 'useWasm' ? value === true : value !== undefined && value !== Infinity) {
+      warnOnce(
+        `ignored-option:saveIncremental ${name}`,
+        'MPL_IGNORED_OPTION',
+        `\`saveIncremental()\`: the option \`${name}\` has no effect in this version.`,
+      );
+    }
+  }
   const compress = options?.compress ?? true;
   const compressionLevel = options?.compressionLevel ?? 6;
 
@@ -364,9 +388,11 @@ export function saveIncremental(
     if (!changedObjects.has(entry.ref.objectNumber)) {
       continue;
     }
+    assertNoDecryptedObject(entry.object, 'saveIncremental()');
 
     // Write raw DEFLATE /FlateDecode data back as zlib data (not for a
-    // document loaded from an encrypted file), then optionally compress
+    // document loaded with ignoreEncryption from an encrypted file, whose
+    // stream data is still encrypted), then optionally compress
     // (only objects this update appends)
     if (entry.object.kind === 'stream') {
       if (!isLoadedFromEncryptedFile(registry)) rewrapLegacyStream(entry.object);
@@ -539,7 +565,9 @@ function buildXrefSubsections(
  *         (`encrypt()` was called), or when `originalBytes` is an encrypted
  *         PDF: the incremental writer does not encrypt and would append
  *         plaintext objects and a trailer without `/Encrypt`. Use `save()`
- *         for an encrypted document.
+ *         for an encrypted document. Also when the document holds content
+ *         decrypted from an encrypted PDF: the incremental writer does not
+ *         encrypt.
  */
 export async function saveDocumentIncremental(
   originalBytes: Uint8Array,
@@ -552,6 +580,7 @@ export async function saveDocumentIncremental(
       'saveDocumentIncremental() cannot encrypt; the incremental writer would append plaintext objects and a trailer without /Encrypt. Use save() for an encrypted document.',
     );
   }
+  assertSavableDecryptedContent(doc.getRegistry(), false, 'saveDocumentIncremental()');
   assertUnencryptedInput(originalBytes, 'saveDocumentIncremental()');
   // Import buildDocumentStructure to get the structure
   const { buildDocumentStructure } = await import('./pdfCatalog.js');

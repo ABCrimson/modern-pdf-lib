@@ -8,11 +8,14 @@
  * - V=1 R=2: 40-bit RC4
  * - V=2 R=3: 128-bit RC4
  * - V=4 R=4: 128-bit AES-CBC
- * - V=5 R=6: 256-bit AES-CBC (ISO 32000-2)
+ * - V=5 R=6: 256-bit AES-CBC (ISO 32000-2); revision 5 files are read, never written
  *
  * The handler manages:
  * - Per-object key derivation (V=1-4)
  * - Object encryption/decryption
+ * - Crypt filters on the read side (V=4-5): `/StmF`, `/StrF` and `/EFF` name a `/CF` entry
+ *   (`/CFM` `/None`, `/V2`, `/AESV2` or `/AESV3`) or `/Identity`, and a stream's own `/Crypt`
+ *   filter names one the same way
  * - Building the /Encrypt dictionary for the PDF trailer
  * - Password verification and file key computation
  *
@@ -29,12 +32,14 @@ import {
   computeEncryptionKeyR2R4,
   computeOwnerPasswordValue,
   computeUserPasswordHash,
-  computeFileEncryptionKey,
+  deriveFileEncryptionKey,
   generateUserKeyV5,
   generateOwnerKeyV5,
   generatePermsV5,
 } from './keyDerivation.js';
 import type { EncryptDictValues } from './keyDerivation.js';
+import { warnOnce } from '../utils/warnings.js';
+import { UnsupportedEncryptionError } from '../errors.js';
 
 // ---------------------------------------------------------------------------
 // Public types
@@ -49,14 +54,123 @@ export type EncryptAlgorithm = 'rc4-40' | 'rc4-128' | 'aes-128' | 'aes-256';
  * Options for encrypting a PDF document.
  */
 export interface EncryptOptions {
-  /** The user password (may be empty string for open access). */
+  /**
+   * The user password (may be empty string for open access).
+   *
+   * With `algorithm: 'aes-256'` the password is prepared with SASLprep (ISO 32000-2) and cut
+   * to 127 UTF-8 bytes. A password that SASLprep changes (compatibility characters such as
+   * ligatures or fullwidth letters, a soft hyphen, non-ASCII spaces, text not in NFC) opens in
+   * qpdf only in its prepared form (pdf.js accepts most such passwords as typed too, but not one
+   * with a zero-width space); NFC text without such characters opens as typed everywhere.
+   */
   userPassword: string;
-  /** The owner password (restricts editing). */
+  /**
+   * The owner password (restricts editing). Prepared like {@link EncryptOptions.userPassword}
+   * for `algorithm: 'aes-256'`.
+   */
   ownerPassword: string;
   /** Permission flags. */
   permissions?: PdfPermissionFlags | undefined;
   /** Encryption algorithm. Default: `'aes-128'`. */
   algorithm?: EncryptAlgorithm | undefined;
+}
+
+/**
+ * The warning a document opened through the legacy AES-256 key derivation emits, once per realm.
+ */
+const LEGACY_R6_WARNING =
+  'The AES-256 key of this document was derived the way modern-pdf-lib 0.26.0 to 0.40.8 wrote it, ' +
+  'which other PDF software does not accept. Call encrypt() and save to write it with the ' +
+  'standard derivation.';
+
+// ---------------------------------------------------------------------------
+// Crypt filters
+// ---------------------------------------------------------------------------
+
+/** What a crypt filter does to the data: nothing, RC4, or AES-CBC with a leading IV. */
+type CryptMethod = 'none' | 'rc4' | 'aes';
+
+/** The crypt filters of a handler: the methods by filter name and the default filter names. */
+interface CryptFilters {
+  /** Methods keyed by filter name with its slash (`/StdCF`); `/Identity` is not listed. */
+  readonly methods: ReadonlyMap<string, CryptMethod>;
+  /** The filter of streams (`/StmF`). */
+  readonly stream: string;
+  /** The filter of strings (`/StrF`). */
+  readonly string: string;
+  /** The filter of embedded file streams (`/EFF`, else `/StmF`). */
+  readonly embeddedFile: string;
+}
+
+/** The one filter of a handler that applies the same method to everything (V=1-2, and writing). */
+function singleFilter(useAes: boolean): CryptFilters {
+  return {
+    methods: new Map([['/StdCF', useAes ? 'aes' : 'rc4']]),
+    stream: '/StdCF',
+    string: '/StdCF',
+    embeddedFile: '/StdCF',
+  };
+}
+
+/**
+ * Read `/CF`, `/StmF`, `/StrF` and `/EFF` of a V=4 or V=5 dictionary.
+ *
+ * An absent `/StmF` or `/StrF` is `/Identity`, and an absent `/EFF` is the `/StmF` filter
+ * (ISO 32000-2, 7.6.6). An absent `/CFM` is `/None`.
+ *
+ * @throws {UnsupportedEncryptionError} For a `/CFM` other than `/None`, `/V2`, `/AESV2` and
+ *         `/AESV3`, and for a filter name that names no `/CF` entry and is not `/Identity`.
+ */
+function readCryptFilters(dict: PdfDict): CryptFilters {
+  const methods = new Map<string, CryptMethod>();
+  const cf = dict.get('/CF');
+  if (cf?.kind === 'dict') {
+    for (const [name, entry] of cf as PdfDict) {
+      if (entry.kind !== 'dict') continue;
+      const cfm = (entry as PdfDict).get('/CFM');
+      const method = cfm?.kind === 'name' ? (cfm as PdfName).value : '/None';
+      switch (method) {
+        case '/None':
+          methods.set(name, 'none');
+          break;
+        case '/V2':
+          methods.set(name, 'rc4');
+          break;
+        case '/AESV2':
+        case '/AESV3':
+          methods.set(name, 'aes');
+          break;
+        default:
+          throw new UnsupportedEncryptionError(
+            `The crypt filter ${name} uses the method ${method}, which is not supported; ` +
+              'the supported methods are /None, /V2, /AESV2 and /AESV3.',
+          );
+      }
+    }
+  }
+  const nameOf = (key: string): string | undefined => {
+    const value = dict.get(key);
+    return value?.kind === 'name' ? (value as PdfName).value : undefined;
+  };
+  const stream = nameOf('/StmF') ?? '/Identity';
+  const filters: CryptFilters = {
+    methods,
+    stream,
+    string: nameOf('/StrF') ?? '/Identity',
+    embeddedFile: nameOf('/EFF') ?? stream,
+  };
+  for (const [key, name] of [
+    ['/StmF', filters.stream],
+    ['/StrF', filters.string],
+    ['/EFF', filters.embeddedFile],
+  ] as const) {
+    if (name !== '/Identity' && !methods.has(name)) {
+      throw new UnsupportedEncryptionError(
+        `The ${key} crypt filter ${name} is not defined in /CF of the /Encrypt dictionary.`,
+      );
+    }
+  }
+  return filters;
 }
 
 // ---------------------------------------------------------------------------
@@ -86,6 +200,35 @@ function getAlgorithmParams(algorithm: EncryptAlgorithm): AlgorithmParams {
 // ---------------------------------------------------------------------------
 // PdfEncryptionHandler
 // ---------------------------------------------------------------------------
+
+/**
+ * The crypt filters of each handler. Kept outside the class, with
+ * {@link otherObjectKeyCaches}, so that the class declares the same members it declared before
+ * crypt filters were read.
+ */
+const handlerFilters = new WeakMap<PdfEncryptionHandler, CryptFilters>();
+
+/**
+ * Per handler, the per-object key cache of the method the handler's own method is not (keys
+ * with "sAlT" when the handler uses RC4, without it when it uses AES), for crypt filters that
+ * mix RC4 and AES. Keyed like the handler's own cache.
+ */
+const otherObjectKeyCaches = new WeakMap<PdfEncryptionHandler, Map<number, Uint8Array>>();
+
+/** The crypt filters of `handler` (set by its constructor). */
+function filtersOf(handler: PdfEncryptionHandler): CryptFilters {
+  return handlerFilters.get(handler) ?? singleFilter(handler.isAes());
+}
+
+/** The other-method key cache of `handler`, made on first use. */
+function otherObjectKeyCache(handler: PdfEncryptionHandler): Map<number, Uint8Array> {
+  let cache = otherObjectKeyCaches.get(handler);
+  if (cache === undefined) {
+    cache = new Map();
+    otherObjectKeyCaches.set(handler, cache);
+  }
+  return cache;
+}
 
 /**
  * Handles encryption and decryption of PDF objects according to the
@@ -137,7 +280,8 @@ export class PdfEncryptionHandler {
 
   /**
    * Cache for per-object derived keys (V=1-4 only).
-   * Key: `(objNum << 16) | genNum` — unique integer per object.
+   * Key: `(objNum & 0xffffff) * 0x10000 + (genNum & 0xffff)`, the exact integer of the
+   * 3-byte object number and 2-byte generation number that the key derivation hashes.
    * Value: the derived encryption key.
    *
    * Avoids recomputing MD5(fileKey + objNum + genNum [+ sAlT]) for
@@ -159,6 +303,7 @@ export class PdfEncryptionHandler {
     userEncryptionKey?: Uint8Array | undefined;
     perms?: Uint8Array | undefined;
     fileId: Uint8Array;
+    filters?: CryptFilters | undefined;
   }) {
     this.fileKey = params.fileKey;
     this.version = params.version;
@@ -173,6 +318,7 @@ export class PdfEncryptionHandler {
     this.userEncryptionKey = params.userEncryptionKey;
     this.perms = params.perms;
     this.fileId = params.fileId;
+    handlerFilters.set(this, params.filters ?? singleFilter(params.useAes));
   }
 
   // -----------------------------------------------------------------------
@@ -290,6 +436,10 @@ export class PdfEncryptionHandler {
    * @param fileId    The first element of the /ID array.
    * @param password  The password to try (user or owner).
    * @returns         A configured PdfEncryptionHandler.
+   * @throws {UnsupportedEncryptionError} Before any password is tried, when `/Filter` is not
+   *         `/Standard`, `/V` is not 1, 2, 4 or 5, a `/CF` entry has a `/CFM` other than
+   *         `/None`, `/V2`, `/AESV2` and `/AESV3`, or `/StmF`, `/StrF` or `/EFF` names no `/CF`
+   *         entry and is not `/Identity`.
    * @throws          If the password is incorrect or the dict is invalid.
    */
   static async fromEncryptDict(
@@ -297,8 +447,22 @@ export class PdfEncryptionHandler {
     fileId: Uint8Array,
     password: string,
   ): Promise<PdfEncryptionHandler> {
+    const handlerName = dict.get('/Filter');
+    if (handlerName?.kind !== 'name' || (handlerName as PdfName).value !== '/Standard') {
+      throw new UnsupportedEncryptionError(
+        `The security handler ${handlerName?.kind === 'name' ? (handlerName as PdfName).value : '(none)'} ` +
+          'is not supported; only the standard security handler (/Standard) is.',
+      );
+    }
+
     // Extract values from the dictionary
     const version = getNumber(dict, '/V') ?? 0;
+    if (version !== 1 && version !== 2 && version !== 4 && version !== 5) {
+      throw new UnsupportedEncryptionError(
+        `The encryption algorithm /V ${version} is not supported; /V 1, 2, 4 and 5 are.`,
+      );
+    }
+    const filters = version >= 4 ? readCryptFilters(dict) : singleFilter(false);
     const revision = getNumber(dict, '/R') ?? 0;
     const keyLength = getNumber(dict, '/Length') ?? 40;
     const permissions = getNumber(dict, '/P') ?? 0;
@@ -312,23 +476,13 @@ export class PdfEncryptionHandler {
 
     const encryptMetadata = getBool(dict, '/EncryptMetadata') ?? true;
 
-    // Determine if AES is used
-    let useAes = false;
-    if (version === 4) {
-      // Check /CF -> /StdCF -> /CFM for AESV2
-      const cf = dict.get('/CF');
-      if (cf?.kind === 'dict') {
-        const stdCF = (cf as PdfDict).get('/StdCF');
-        if (stdCF?.kind === 'dict') {
-          const cfm = (stdCF as PdfDict).get('/CFM');
-          if (cfm?.kind === 'name' && (cfm as PdfName).value === '/AESV2') {
-            useAes = true;
-          }
-        }
-      }
-    } else if (version === 5) {
-      useAes = true;
-    }
+    // AES for V=5, and for V=4 when the stream or string filter is AES. The crypt filters
+    // choose the method of each string and stream; this flag is the method of decryptObject.
+    const useAes =
+      version === 5 ||
+      (version === 4 &&
+        (filters.methods.get(filters.stream) === 'aes' ||
+          filters.methods.get(filters.string) === 'aes'));
 
     // V=5 specific values
     let ownerEncryptionKey: Uint8Array | undefined;
@@ -354,8 +508,12 @@ export class PdfEncryptionHandler {
       encryptMetadata,
     };
 
-    // Compute the file encryption key
-    const fileKey = await computeFileEncryptionKey(password, dictValues, fileId);
+    // Compute the file encryption key. An R=6 file whose password matches only the legacy
+    // derivation opens, with one warning per realm; the handler writes nothing back.
+    const { fileKey, derivation } = await deriveFileEncryptionKey(password, dictValues, fileId);
+    if (derivation === 'legacy') {
+      warnOnce('legacy-r6-key', 'MPL_LEGACY_R6_KEY', LEGACY_R6_WARNING);
+    }
 
     return new PdfEncryptionHandler({
       fileKey,
@@ -371,6 +529,7 @@ export class PdfEncryptionHandler {
       userEncryptionKey,
       perms,
       fileId,
+      filters,
     });
   }
 
@@ -386,21 +545,24 @@ export class PdfEncryptionHandler {
    *
    * @param objNum  Object number.
    * @param genNum  Generation number.
+   * @param aes     Derive the AES key ("sAlT" appended); defaults to the handler's method.
    * @returns       The per-object key.
    */
-  private deriveObjectKey(objNum: number, genNum: number): Uint8Array {
+  private deriveObjectKey(objNum: number, genNum: number, aes = this.useAes): Uint8Array {
     if (this.version === 5) {
       // V=5: no per-object key derivation; use file key directly
       return this.fileKey;
     }
 
-    // Check cache first — same (objNum, genNum) always yields the same key
-    const cacheKey = (objNum << 16) | genNum;
-    const cached = this.objectKeyCache.get(cacheKey);
+    // Check cache first. The key is the exact integer of the bytes Algorithm 1 hashes (3 bytes
+    // of objNum, 2 of genNum), below 2^40, so two pairs share an entry only when they share a key.
+    const cache = aes === this.useAes ? this.objectKeyCache : otherObjectKeyCache(this);
+    const cacheKey = (objNum & 0xffffff) * 0x10000 + (genNum & 0xffff);
+    const cached = cache.get(cacheKey);
     if (cached) return cached;
 
     // Build input: fileKey + objNum(3 bytes LE) + genNum(2 bytes LE)
-    const extra = this.useAes ? 4 : 0; // "sAlT" for AES
+    const extra = aes ? 4 : 0; // "sAlT" for AES
     const input = new Uint8Array(this.fileKey.length + 5 + extra);
     input.set(this.fileKey, 0);
 
@@ -412,7 +574,7 @@ export class PdfEncryptionHandler {
     input[offset++] = (genNum >> 8) & 0xff;
 
     // Append "sAlT" for AES (V=4)
-    if (this.useAes) {
+    if (aes) {
       input[offset++] = 0x73; // 's'
       input[offset++] = 0x41; // 'A'
       input[offset++] = 0x6c; // 'l'
@@ -426,7 +588,7 @@ export class PdfEncryptionHandler {
     const key = hash.subarray(0, keyLen);
 
     // Cache for subsequent calls with the same object
-    this.objectKeyCache.set(cacheKey, key);
+    cache.set(cacheKey, key);
     return key;
   }
 
@@ -452,22 +614,18 @@ export class PdfEncryptionHandler {
   }
 
   /**
-   * Decrypt raw data for a specific object.
+   * Decrypt raw data for a specific object with the handler's method (AES when
+   * {@link isAes}, else RC4), whatever the crypt filters say.
    *
    * @param objNum  Object number.
    * @param genNum  Generation number.
    * @param data    Encrypted data.
    * @returns       Decrypted data.
+   * @throws {UnsupportedEncryptionError} For AES data that is not a 16-byte IV followed by
+   *         whole 16-byte blocks with valid padding.
    */
   async decryptObject(objNum: number, genNum: number, data: Uint8Array): Promise<Uint8Array> {
-    const key = this.deriveObjectKey(objNum, genNum);
-
-    if (this.useAes) {
-      // For AES, data must be at least 32 bytes (IV + one block)
-      if (data.length < 32) return data; // Not encrypted or corrupted
-      return aesDecryptCBC(key, data);
-    }
-    return rc4(key, data);
+    return decryptWith(this, this.useAes ? 'aes' : 'rc4', objNum, genNum, data);
   }
 
   /**
@@ -489,7 +647,7 @@ export class PdfEncryptionHandler {
   }
 
   /**
-   * Decrypt a stream's data.
+   * Decrypt a stream's data with the stream filter (`/StmF`); see {@link decryptStreamBytes}.
    *
    * @param objNum      Object number.
    * @param genNum      Generation number.
@@ -497,7 +655,7 @@ export class PdfEncryptionHandler {
    * @returns           Decrypted stream bytes.
    */
   async decryptStream(objNum: number, genNum: number, streamData: Uint8Array): Promise<Uint8Array> {
-    return this.decryptObject(objNum, genNum, streamData);
+    return decryptStreamBytes(this, objNum, genNum, streamData);
   }
 
   // -----------------------------------------------------------------------
@@ -622,6 +780,109 @@ export class PdfEncryptionHandler {
   /** Whether metadata streams are encrypted. */
   isMetadataEncrypted(): boolean {
     return this.encryptMetadata;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Decryption by crypt filter (the load path; no package entry exports these)
+// ---------------------------------------------------------------------------
+
+/**
+ * Decrypt the bytes of a string of an object with the string filter (`/StrF`) of `handler`.
+ *
+ * @param handler  The handler of the document.
+ * @param objNum   Object number.
+ * @param genNum   Generation number.
+ * @param data     The string's bytes as stored in the file.
+ * @returns        The plaintext bytes; the input itself for the `/Identity` and `/None` filters.
+ * @throws {UnsupportedEncryptionError} For AES data that cannot be decrypted (see
+ *         {@link PdfEncryptionHandler.decryptObject}).
+ */
+export async function decryptStringBytes(
+  handler: PdfEncryptionHandler,
+  objNum: number,
+  genNum: number,
+  data: Uint8Array,
+): Promise<Uint8Array> {
+  const method = methodOf(handler, filtersOf(handler).string);
+  return decryptWith(handler, method, objNum, genNum, data);
+}
+
+/**
+ * Decrypt the data of a stream object with the stream filter (`/StmF`) of `handler`, or with
+ * the crypt filter `filterName` names (a stream's own `/Crypt` filter, or
+ * {@link embeddedFileFilterName} for an embedded file stream).
+ *
+ * @param handler     The handler of the document.
+ * @param objNum      Object number.
+ * @param genNum      Generation number.
+ * @param data        The stream data as stored in the file.
+ * @param filterName  A crypt filter name with its slash (`/Identity`, `/StdCF`).
+ * @returns           The plaintext data; the input itself for `/Identity` and `/None`.
+ * @throws {UnsupportedEncryptionError} When `filterName` names no `/CF` entry and is not
+ *         `/Identity`, and for AES data that cannot be decrypted.
+ */
+export async function decryptStreamBytes(
+  handler: PdfEncryptionHandler,
+  objNum: number,
+  genNum: number,
+  data: Uint8Array,
+  filterName?: string,
+): Promise<Uint8Array> {
+  const method = methodOf(handler, filterName ?? filtersOf(handler).stream);
+  return decryptWith(handler, method, objNum, genNum, data);
+}
+
+/** The crypt filter name of embedded file streams (`/EFF`, else `/StmF`) of `handler`, with its slash. */
+export function embeddedFileFilterName(handler: PdfEncryptionHandler): string {
+  return filtersOf(handler).embeddedFile;
+}
+
+/** The method of the crypt filter `name` of `handler`; `/Identity` is no decryption. */
+function methodOf(handler: PdfEncryptionHandler, name: string): CryptMethod {
+  if (name === '/Identity') return 'none';
+  const method = filtersOf(handler).methods.get(name);
+  if (method === undefined) {
+    throw new UnsupportedEncryptionError(
+      `The crypt filter ${name} is not defined in /CF of the /Encrypt dictionary.`,
+    );
+  }
+  return method;
+}
+
+/**
+ * Decrypt `data` of object `objNum` `genNum` with `method`, with the per-object key of
+ * `handler`.
+ *
+ * AES data is a 16-byte IV followed by whole blocks with padding: the IV alone is the empty
+ * string, and any other length, or wrong padding, cannot be decrypted.
+ */
+async function decryptWith(
+  handler: PdfEncryptionHandler,
+  method: CryptMethod,
+  objNum: number,
+  genNum: number,
+  data: Uint8Array,
+): Promise<Uint8Array> {
+  if (method === 'none') return data;
+  // The per-object key derivation is a private method of the class; element access reaches it
+  // without adding a member to the class's declared surface.
+  const objectKey = (aes: boolean): Uint8Array => handler['deriveObjectKey'](objNum, genNum, aes);
+  if (method === 'rc4') return rc4(objectKey(false), data);
+  if (data.length === 16) return new Uint8Array(0);
+  if (data.length < 32 || data.length % 16 !== 0) {
+    throw new UnsupportedEncryptionError(
+      `The AES data of object ${objNum} ${genNum} cannot be decrypted: ${data.length} bytes ` +
+        'is not a 16-byte IV followed by whole 16-byte blocks.',
+    );
+  }
+  try {
+    return await aesDecryptCBC(objectKey(true), data);
+  } catch (err) {
+    throw new UnsupportedEncryptionError(
+      `The AES data of object ${objNum} ${genNum} cannot be decrypted (wrong padding).`,
+      { cause: err },
+    );
   }
 }
 

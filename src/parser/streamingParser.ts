@@ -28,6 +28,8 @@
  */
 
 import { PdfParseError } from './parseError.js';
+import { warnOnce } from '../utils/warnings.js';
+import { frameStreamData, keywordIndexFor } from './streamFraming.js';
 
 // ---------------------------------------------------------------------------
 // Public interfaces
@@ -44,7 +46,10 @@ export interface StreamingParserOptions {
    * @throws {RangeError} The constructor throws when this is `NaN`.
    */
   maxBufferSize?: number;
-  /** Whether to parse content streams. Default: false. */
+  /**
+   * Has no effect in this version: the parser never reads content streams, and passing `true`
+   * emits a one-time `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`).
+   */
   parseContentStreams?: boolean;
   /** Pages to parse (for selective loading). Default: all. */
   pageRange?: { start?: number; end?: number };
@@ -541,6 +546,13 @@ export class StreamingPdfParser {
     const maxBufferSize = options?.maxBufferSize ?? 64 * 1024 * 1024;
     if (Number.isNaN(maxBufferSize)) {
       throw new RangeError('StreamingPdfParser: maxBufferSize must be a number');
+    }
+    if (options?.parseContentStreams === true) {
+      warnOnce(
+        'ignored-option:StreamingPdfParser parseContentStreams',
+        'MPL_IGNORED_OPTION',
+        '`StreamingPdfParser`: the option `parseContentStreams` has no effect in this version.',
+      );
     }
     this.options = {
       maxBufferSize,
@@ -1448,7 +1460,7 @@ export class StreamingPdfParser {
 
   /**
    * Find the stream data (between "stream\n" and "endstream") within
-   * an indirect object at `offset`.
+   * an indirect object at `offset`, framed by {@link frameStreamData}.
    */
   private findStreamData(data: Uint8Array, offset: number): { offset: number; length: number } {
     // Search for "stream" keyword after the dict
@@ -1476,34 +1488,12 @@ export class StreamingPdfParser {
 
         const streamStart = pos;
 
-        if (declaredLength !== undefined && declaredLength > 0) {
-          return { offset: streamStart, length: declaredLength };
-        }
-
-        // Find "endstream"
-        while (pos < data.length - 9) {
-          if (
-            data[pos] === 0x65 &&
-            data[pos + 1] === 0x6e &&
-            data[pos + 2] === 0x64 &&
-            data[pos + 3] === 0x73 &&
-            data[pos + 4] === 0x74 &&
-            data[pos + 5] === 0x72 &&
-            data[pos + 6] === 0x65 &&
-            data[pos + 7] === 0x61 &&
-            data[pos + 8] === 0x6d
-          ) {
-            // Trim trailing whitespace before endstream
-            let streamEnd = pos;
-            while (streamEnd > streamStart && isWhitespace(data[streamEnd - 1]!)) {
-              streamEnd--;
-            }
-            return { offset: streamStart, length: streamEnd - streamStart };
-          }
-          pos++;
-        }
-
-        return { offset: streamStart, length: 0 };
+        // The one framing rule of the library: a direct /Length that endstream follows, else the
+        // first endstream minus one EOL. An indirect /Length is not declared here (no resolver).
+        const frame = frameStreamData(data, streamStart, declaredLength, keywordIndexFor(data));
+        return frame === undefined
+          ? { offset: streamStart, length: 0 }
+          : { offset: frame.start, length: frame.end - frame.start };
       }
       pos++;
     }

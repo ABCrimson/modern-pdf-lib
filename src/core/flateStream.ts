@@ -14,14 +14,34 @@
  *   so the decoded bytes do not change. A stream whose decoded data is
  *   larger than {@link INTERNAL_LIMITS}.maxRewrapDecodedBytes (64 MiB) is copied
  *   as loaded.
- * - A document loaded from a file whose trailer has `/Encrypt` is never
- *   re-wrapped: its stream data can still be encrypted, and encrypted data
- *   can inflate as raw DEFLATE by chance. The loader records such a
- *   document's registry with {@link markLoadedFromEncryptedFile}, and the
- *   writers skip {@link rewrapLegacyStream} when
- *   {@link isLoadedFromEncryptedFile} says so. A document that was created,
- *   or loaded from a file without `/Encrypt`, is re-wrapped as usual, also
- *   when `encrypt()` is called on it.
+ * - A document loaded with `ignoreEncryption: true` from a file whose
+ *   trailer has `/Encrypt` is never re-wrapped: its stream data is still
+ *   encrypted, and encrypted data can inflate as raw DEFLATE by chance. The
+ *   loader records such a document's registry with
+ *   {@link markLoadedFromEncryptedFile}, and the writers skip
+ *   {@link rewrapLegacyStream} when {@link isLoadedFromEncryptedFile} says
+ *   so. A document whose objects the loader decrypted holds plaintext and is
+ *   re-wrapped like any other, as is a document that was created or loaded
+ *   from a file without `/Encrypt`, also when `encrypt()` is called on it.
+ * - A document whose objects were decrypted on load is recorded with
+ *   {@link markDecryptedFromEncryptedFile}; so is a document that pages,
+ *   embedded pages, metadata or a copy of such a document were brought into
+ *   ({@link carryDecryptedFromEncryptedFile}). `PdfWriter` (and with it
+ *   `serializePdf()` and every save) refuses to write such a registry unless
+ *   it is given an encryption handler (`encrypt()` was called), and
+ *   `PdfStreamWriter`, which never encrypts, refuses it always
+ *   ({@link assertSavableDecryptedContent}); so do `saveIncremental()` and
+ *   `saveDocumentIncremental()`, which never encrypt, and `save()`,
+ *   `saveAsStream()`, `saveAsBlob()` and `saveAsBase64()`, which check before they change
+ *   the document or run a plugin hook.
+ * - The strings and streams themselves that the decrypt pass produced are
+ *   recorded too ({@link recordDecryptedObject}), and so are the copies the
+ *   library's object copiers make of them ({@link recordCloneOfDecrypted}).
+ *   Whatever registry such an object sits in, `PdfWriter`, `PdfStreamWriter`
+ *   and `saveIncremental()` refuse to write, without an encryption handler,
+ *   an object body that holds one ({@link assertNoDecryptedObject}); the
+ *   writer `copy()` makes is the one exempt. Both records are shared by the
+ *   ESM, CJS and IIFE builds loaded into one realm.
  *
  * @packageDocumentation
  */
@@ -37,16 +57,45 @@ import {
   deflateSync as wasmDeflateSync,
 } from '../compression/libdeflateWasm.js';
 import { INTERNAL_LIMITS } from './limits.js';
+import { UnsupportedEncryptionError } from '../errors.js';
 import { PdfName } from './pdfObjects.js';
-import type { PdfObjectRegistry, PdfStream } from './pdfObjects.js';
+import type { PdfObject, PdfObjectRegistry, PdfStream, PdfString } from './pdfObjects.js';
 
-/** Registries of documents loaded from a file whose trailer has `/Encrypt`. */
+/** Registries of documents loaded, not decrypted, from a file whose trailer has `/Encrypt`. */
 const encryptedSources = new WeakSet<PdfObjectRegistry>();
 
 /**
+ * The set stored on `globalThis` under `Symbol.for(name)`, created there on first use, so the
+ * ESM, CJS and IIFE builds loaded into one realm share it, as in utils/warnings. Where
+ * `globalThis` is frozen or not extensible, the set this call creates stays this module's own.
+ */
+function sharedWeakSet<T extends object>(name: string): WeakSet<T> {
+  const realm = globalThis as Record<symbol, unknown>;
+  const key = Symbol.for(name);
+  const existing = realm[key];
+  if (existing instanceof WeakSet) return existing as WeakSet<T>;
+  const created = new WeakSet<T>();
+  // Reflect.set returns false instead of throwing on a frozen or non-extensible globalThis.
+  Reflect.set(realm, key, created);
+  return created;
+}
+
+/**
+ * Registries that hold content decrypted from a file whose trailer has `/Encrypt`. Shared by
+ * the ESM, CJS and IIFE builds through `globalThis`, as in utils/warnings ({@link sharedWeakSet}).
+ */
+const decryptedSources = sharedWeakSet<PdfObjectRegistry>('modern-pdf-lib.decryptedSources');
+
+/**
+ * The strings and streams the decrypt pass of a load produced, and the copies the library's
+ * object copiers made of them. Shared like {@link decryptedSources}.
+ */
+const decryptedObjects = sharedWeakSet<PdfString | PdfStream>('modern-pdf-lib.decryptedObjects');
+
+/**
  * Record that a registry holds the objects of a file whose trailer has
- * `/Encrypt`, whether or not the loader decrypted them. The writers then
- * do not re-wrap its `/FlateDecode` stream data (see
+ * `/Encrypt`, as stored, without decryption (`ignoreEncryption: true`). The
+ * writers then do not re-wrap its `/FlateDecode` stream data (see
  * {@link rewrapLegacyStream}).
  *
  * @param registry - The registry the loader filled.
@@ -63,6 +112,162 @@ export function markLoadedFromEncryptedFile(registry: PdfObjectRegistry): void {
  */
 export function isLoadedFromEncryptedFile(registry: PdfObjectRegistry): boolean {
   return encryptedSources.has(registry);
+}
+
+/**
+ * Record that a registry holds content the loader decrypted from a file
+ * whose trailer has `/Encrypt`.
+ *
+ * @param registry - The registry the loader filled.
+ */
+export function markDecryptedFromEncryptedFile(registry: PdfObjectRegistry): void {
+  decryptedSources.add(registry);
+}
+
+/**
+ * True when the registry was recorded with
+ * {@link markDecryptedFromEncryptedFile} or
+ * {@link carryDecryptedFromEncryptedFile}.
+ *
+ * @param registry - A document's registry.
+ */
+export function isDecryptedFromEncryptedFile(registry: PdfObjectRegistry): boolean {
+  return decryptedSources.has(registry);
+}
+
+/**
+ * Record `target` as holding decrypted content when `source` does: called
+ * when pages, embedded pages, metadata or a copy of a document are brought
+ * into another document.
+ *
+ * @param source - The registry content is copied from.
+ * @param target - The registry content is copied into.
+ */
+export function carryDecryptedFromEncryptedFile(
+  source: PdfObjectRegistry,
+  target: PdfObjectRegistry,
+): void {
+  if (decryptedSources.has(source)) decryptedSources.add(target);
+}
+
+/**
+ * Refuse to write a document that holds content decrypted from an encrypted
+ * file without encryption: the check of `PdfWriter.write()`, the
+ * `PdfStreamWriter` constructor, `saveIncremental()`, `saveDocumentIncremental()` and the
+ * first statement of `save()` and `saveAsStream()`.
+ *
+ * @param registry  - The registry the writer serializes from.
+ * @param encrypted - Whether the writer was given an encryption handler.
+ * @param caller    - The writer's name for the message, such as `'PdfWriter'`.
+ * @throws {UnsupportedEncryptionError} When the registry holds decrypted
+ *         content ({@link isDecryptedFromEncryptedFile}) and `encrypted` is
+ *         false.
+ */
+export function assertSavableDecryptedContent(
+  registry: PdfObjectRegistry,
+  encrypted: boolean,
+  caller: string,
+): void {
+  if (encrypted || !decryptedSources.has(registry)) return;
+  throw new UnsupportedEncryptionError(
+    `${caller} would write content decrypted from an encrypted PDF without encryption; ` +
+      'call encrypt() on this document before saving it.',
+  );
+}
+
+/**
+ * Record a string or stream that the decrypt pass of a load produced. The record follows the
+ * object into whatever registry it is put in: a writer that emits it without encryption throws
+ * ({@link assertNoDecryptedObject}).
+ *
+ * @param object - The decrypted string, or the stream whose data was decrypted.
+ */
+export function recordDecryptedObject(object: PdfString | PdfStream): void {
+  decryptedObjects.add(object);
+}
+
+/**
+ * Record every string and stream `object` is or holds, in its entries and in the dictionaries,
+ * arrays and stream dictionaries nested in it (references are not followed): the members of an
+ * object stream the decrypt pass decrypted, and the objects of the copy `copy()` loads from the
+ * bytes of a document that holds recorded objects.
+ *
+ * @param object - The object to walk.
+ */
+export function recordDecryptedContent(object: PdfObject): void {
+  switch (object.kind) {
+    case 'string':
+      decryptedObjects.add(object);
+      return;
+    case 'stream':
+      decryptedObjects.add(object);
+      recordDecryptedContent(object.dict);
+      return;
+    case 'dict':
+      for (const [, value] of object) recordDecryptedContent(value);
+      return;
+    case 'array':
+      for (const item of object.items) recordDecryptedContent(item);
+      return;
+    default:
+      return;
+  }
+}
+
+/**
+ * Record `clone` when `source` is a recorded string or stream: called by the object copiers that
+ * `copyPages()`, `mergePdfs()`, `splitPdf()` and the embed calls use, for every string and stream
+ * they copy.
+ *
+ * @param source - The object copied.
+ * @param clone  - Its copy.
+ */
+export function recordCloneOfDecrypted(source: PdfObject, clone: PdfString | PdfStream): void {
+  if ((source.kind === 'string' || source.kind === 'stream') && decryptedObjects.has(source)) {
+    decryptedObjects.add(clone);
+  }
+}
+
+/**
+ * True when `object` is or holds a recorded string or stream, in its entries and in the
+ * dictionaries, arrays and stream dictionaries nested in it (references are not followed). One
+ * set lookup per string and stream.
+ *
+ * @param object - The object to walk.
+ */
+export function holdsDecryptedObject(object: PdfObject): boolean {
+  switch (object.kind) {
+    case 'string':
+      return decryptedObjects.has(object);
+    case 'stream':
+      return decryptedObjects.has(object) || holdsDecryptedObject(object.dict);
+    case 'dict':
+      for (const [, value] of object) if (holdsDecryptedObject(value)) return true;
+      return false;
+    case 'array':
+      for (const item of object.items) if (holdsDecryptedObject(item)) return true;
+      return false;
+    default:
+      return false;
+  }
+}
+
+/**
+ * Refuse to emit, without encryption, an object body that is or holds a string or stream the
+ * decrypt pass of a load produced ({@link recordDecryptedObject}), whatever registry it now sits
+ * in: the check `PdfWriter`, `PdfStreamWriter` and `saveIncremental()` make for each object body
+ * they write without an encryption handler. The one writer exempt is the one `copy()` makes.
+ *
+ * @param object - The object whose body is about to be written.
+ * @param caller - The writer's name for the message, such as `'PdfWriter'`.
+ * @throws {UnsupportedEncryptionError} When `object` holds a recorded string or stream.
+ */
+export function assertNoDecryptedObject(object: PdfObject, caller: string): void {
+  if (!holdsDecryptedObject(object)) return;
+  throw new UnsupportedEncryptionError(
+    `${caller} would write a string or stream decrypted from an encrypted PDF without ` +
+      'encryption; call encrypt() on the document that holds it before saving it.',
+  );
 }
 
 /**
@@ -126,10 +331,10 @@ function firstFilterIsFlate(stream: PdfStream): boolean {
  * decode to no bytes, is left alone too (inflating stops once the decoded
  * size passes it), and no error is thrown.
  *
- * The writers never call this for a document loaded from a file whose
- * trailer has `/Encrypt` ({@link isLoadedFromEncryptedFile}): the stream
- * data of such a document can still be encrypted, and encrypted data can
- * inflate as raw DEFLATE by chance, which would replace it for good.
+ * The writers never call this for a document loaded without decryption
+ * from a file whose trailer has `/Encrypt` ({@link isLoadedFromEncryptedFile}):
+ * the stream data of such a document is still encrypted, and encrypted data
+ * can inflate as raw DEFLATE by chance, which would replace it for good.
  *
  * @param stream - The stream to update in place.
  */

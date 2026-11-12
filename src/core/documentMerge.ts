@@ -27,6 +27,7 @@ import {
 import type { PdfObject, PdfObjectRegistry } from './pdfObjects.js';
 import { PdfPage } from './pdfPage.js';
 import { PdfDocument, createPdf } from './pdfDocument.js';
+import { carryDecryptedFromEncryptedFile, recordCloneOfDecrypted } from './flateStream.js';
 
 // ---------------------------------------------------------------------------
 // Bucket hashing for stream deduplication
@@ -175,7 +176,9 @@ function streamDictsEqual(a: PdfDict, b: PdfDict): boolean {
  * Deep-clone a PdfObject, remapping all PdfRef references from the source
  * document to the target document.
  *
- * For PdfStream objects, the stream data is also cloned. A stream reached
+ * For PdfStream objects, the stream data is also cloned. The copy of a string
+ * or stream decrypted on load is recorded as decrypted too
+ * (`recordCloneOfDecrypted` in core/flateStream). A stream reached
  * through an indirect reference reuses an earlier copy (in remapRef) only
  * when its bytes and dictionary compare equal to that copy's source.
  *
@@ -196,7 +199,9 @@ function deepClone(obj: PdfObject, context: CopyContext): PdfObject {
 
     case 'string': {
       const s = obj as PdfString;
-      return s.hex ? PdfString.hex(s.value) : PdfString.literal(s.value);
+      const clonedString = s.hex ? PdfString.hex(s.value) : PdfString.literal(s.value);
+      recordCloneOfDecrypted(s, clonedString);
+      return clonedString;
     }
 
     case 'name':
@@ -230,6 +235,7 @@ function deepClone(obj: PdfObject, context: CopyContext): PdfObject {
       const clonedData = new Uint8Array(stream.data);
       const clonedStream = new PdfStream(clonedDict, clonedData);
       clonedStream.syncLength();
+      recordCloneOfDecrypted(stream, clonedStream);
       return clonedStream;
     }
 
@@ -343,6 +349,8 @@ export function copyPagesToTarget(
     }
   }
 
+  // Decrypted content copied into the target makes its save refuse until encrypt() is called.
+  carryDecryptedFromEncryptedFile(sourceRegistry, targetRegistry);
   const context = new CopyContext(sourceRegistry, targetRegistry);
   const newPages: PdfPage[] = [];
 
@@ -506,6 +514,8 @@ export async function mergePdfs(documents: PdfDocument[]): Promise<PdfDocument> 
 
   // Copy pages from each source document
   for (const doc of documents) {
+    // Also a source without pages: the result's metadata may be its decrypted metadata.
+    carryDecryptedFromEncryptedFile(doc.getRegistry(), result.getRegistry());
     const pageCount = doc.getPageCount();
     if (pageCount === 0) continue;
     const indices = Array.from({ length: pageCount }, (_, i) => i);

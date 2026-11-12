@@ -16,11 +16,24 @@
  * `core/flateStream`) and optional encryption via a
  * {@link PdfEncryptionHandler}. A loaded `/FlateDecode` stream that holds
  * raw DEFLATE data is written back as zlib data in both compress modes,
- * except in a document loaded from a file whose trailer has `/Encrypt`,
- * whose `/FlateDecode` data is not re-wrapped.
+ * except in a document loaded with `ignoreEncryption: true` from a file
+ * whose trailer has `/Encrypt`, whose stream data is still encrypted and is
+ * written as loaded. A registry that holds content decrypted from an
+ * encrypted file is refused with `UnsupportedEncryptionError` unless the
+ * writer is given an encryption handler; when it is, the `/Contents` of a
+ * signature dictionary is written as stored, as the reader left it. Without
+ * an encryption handler, an object body that holds a string or stream the
+ * decrypt pass of a load produced is refused too, whatever registry it now
+ * sits in (`assertNoDecryptedObject` in core/flateStream).
  */
 
-import { compressPdfStream, isLoadedFromEncryptedFile, rewrapLegacyStream } from './flateStream.js';
+import {
+  assertNoDecryptedObject,
+  assertSavableDecryptedContent,
+  compressPdfStream,
+  isLoadedFromEncryptedFile,
+  rewrapLegacyStream,
+} from './flateStream.js';
 import type { PdfRef, ByteWriter } from './pdfObjects.js';
 import {
   PdfObjectRegistry,
@@ -34,6 +47,7 @@ import {
 import type { PdfObject, RegistryEntry } from './pdfObjects.js';
 import type { DocumentStructure } from './pdfCatalog.js';
 import type { PdfEncryptionHandler } from '../crypto/encryptionHandler.js';
+import { contentsLeftAsStored } from '../crypto/signatureContents.js';
 import { UnsupportedEncryptionError } from '../errors.js';
 
 // ---------------------------------------------------------------------------
@@ -52,6 +66,8 @@ export interface PdfSaveOptions {
   /**
    * When `true`, attempt to use WASM-accelerated compression if the
    * WASM module has been initialized.  Default: `false`.
+   *
+   * Has no effect in `saveIncremental()`, which does not use WASM.
    */
   useWasm?: boolean | undefined;
   /**
@@ -64,6 +80,9 @@ export interface PdfSaveOptions {
    * A useful value for size reduction is `100`.
    * Any other value combined with encryption (`doc.encrypt()`) throws
    * `UnsupportedEncryptionError`.
+   *
+   * Has no effect in `saveAsStream()` and `saveIncremental()`, which write
+   * no object streams.
    *
    * Default: `Infinity` (disabled for backward compatibility).
    */
@@ -116,6 +135,12 @@ class ByteBuffer {
 }
 
 const encoder = new TextEncoder();
+
+/**
+ * The writers {@link serializePdfForCopy} made: they skip both checks for decrypted content (of
+ * the registry and of each object body).
+ */
+const copyWriters = new WeakSet<PdfWriter>();
 
 // ---------------------------------------------------------------------------
 // PdfWriter
@@ -186,12 +211,19 @@ export class PdfWriter {
    * and all stream data are encrypted, except the /Encrypt dictionary
    * itself, and the /Encrypt dictionary + /ID array are added to the
    * trailer.  All of that happens on a private copy of the registry taken
-   * when write() starts; the caller's registry is left as it was.
+   * when write() starts; the caller's registry is left as it was. The
+   * `/Contents` of a signature dictionary is not encrypted.
    *
-   * @throws {UnsupportedEncryptionError} When an encryption handler is
-   *         present and `objectStreamThreshold` is not `Infinity`.
+   * @throws {UnsupportedEncryptionError} When the registry holds content
+   *         decrypted from an encrypted PDF, or an object body holds a string
+   *         or stream decrypted on load, and no encryption handler is
+   *         present. Also when an encryption handler is present and
+   *         `objectStreamThreshold` is not `Infinity`.
    */
   async write(): Promise<Uint8Array> {
+    if (!copyWriters.has(this)) {
+      assertSavableDecryptedContent(this.source, this.encryptionHandler !== undefined, 'PdfWriter');
+    }
     // Fail-closed guard: object streams are not encrypted, so an encrypted document with them is refused here.
     if (this.encryptionHandler !== undefined && this.objectStreamThreshold !== Infinity) {
       throw new UnsupportedEncryptionError(
@@ -259,8 +291,12 @@ export class PdfWriter {
   }
 
   private async writeIndirectObject(entry: RegistryEntry): Promise<void> {
+    if (this.encryptionHandler === undefined && !copyWriters.has(this)) {
+      assertNoDecryptedObject(entry.object, 'PdfWriter');
+    }
     // Write raw DEFLATE /FlateDecode data back as zlib data (not for a
-    // document loaded from an encrypted file), then optionally compress
+    // document loaded with ignoreEncryption from an encrypted file, whose
+    // stream data is still encrypted), then optionally compress
     // stream data (both before encryption — per the spec, compression is
     // applied first, then encryption)
     if (entry.object.kind === 'stream') {
@@ -325,13 +361,16 @@ export class PdfWriter {
   }
 
   /**
-   * Recursively encrypt all PdfString values inside a PdfDict.
+   * Recursively encrypt all PdfString values inside a PdfDict, except the
+   * `/Contents` of a signature dictionary ({@link contentsLeftAsStored}).
    */
   private async encryptDictStrings(dict: PdfDict, objNum: number, genNum: number): Promise<void> {
     const handler = this.encryptionHandler!;
+    const signature = contentsLeftAsStored(dict);
 
     for (const [key, value] of dict) {
       if (value.kind === 'string') {
+        if (signature && key === '/Contents') continue;
         const encrypted = await handler.encryptString(objNum, genNum, value as PdfString);
         dict.set(key, encrypted);
       } else if (value.kind === 'dict') {
@@ -493,6 +532,9 @@ export class PdfWriter {
     const serializedObjects: Uint8Array[] = [];
 
     for (const entry of entries) {
+      if (this.encryptionHandler === undefined && !copyWriters.has(this)) {
+        assertNoDecryptedObject(entry.object, 'PdfWriter');
+      }
       const objWriter = new StringByteWriter();
       entry.object.serialize(objWriter);
       serializedObjects.push(objWriter.toUint8Array());
@@ -871,8 +913,11 @@ function copyRegistryForWrite(source: PdfObjectRegistry): PdfObjectRegistry {
  *                            all objects and adding /Encrypt + /ID to
  *                            the trailer.
  * @returns                   The raw PDF bytes.
- * @throws {UnsupportedEncryptionError} When `encryptionHandler` is given
- *         together with an `objectStreamThreshold` other than `Infinity`.
+ * @throws {UnsupportedEncryptionError} When the registry holds content
+ *         decrypted from an encrypted PDF, or an object body holds a string
+ *         or stream decrypted on load, and no `encryptionHandler` is
+ *         given. Also when `encryptionHandler` is given together with an
+ *         `objectStreamThreshold` other than `Infinity`.
  */
 export async function serializePdf(
   registry: PdfObjectRegistry,
@@ -881,4 +926,24 @@ export async function serializePdf(
   encryptionHandler?: PdfEncryptionHandler,
 ): Promise<Uint8Array> {
   return new PdfWriter(registry, structure, options, encryptionHandler).write();
+}
+
+/**
+ * {@link serializePdf} for `PdfDocument.copy()`, which loads the bytes
+ * straight back into a document recorded as holding decrypted content.
+ * Only the one writer it makes skips the checks for decrypted content, so a
+ * write of the same registry that runs meanwhile is still refused. No
+ * package entry exports it.
+ *
+ * @internal
+ */
+export async function serializePdfForCopy(
+  registry: PdfObjectRegistry,
+  structure: DocumentStructure,
+  options?: PdfSaveOptions,
+  encryptionHandler?: PdfEncryptionHandler,
+): Promise<Uint8Array> {
+  const writer = new PdfWriter(registry, structure, options, encryptionHandler);
+  copyWriters.add(writer);
+  return writer.write();
 }

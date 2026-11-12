@@ -14,6 +14,8 @@
 import type { PdfLexer, Token } from './lexer.js';
 import { TokenType } from './lexer.js';
 import { PdfParseError } from './parseError.js';
+import { KeywordIndex, frameStreamData } from './streamFraming.js';
+import { ResourceLimitError } from '../errors.js';
 import {
   type PdfObject,
   PdfNull,
@@ -28,6 +30,49 @@ import {
   type PdfObjectRegistry,
 } from '../core/pdfObjects.js';
 
+/** Most `/Length` targets that are resolved inside one another before the next one is refused. */
+const MAX_LENGTH_DEPTH = 8;
+
+// ---------------------------------------------------------------------------
+// Options
+// ---------------------------------------------------------------------------
+
+/** A stream whose data was found by searching for its end instead of by its `/Length`. */
+export interface StreamRecovery {
+  /** The number of the indirect object that holds the stream, when the parser is inside one. */
+  readonly objectNumber: number | undefined;
+  /** The generation number of that object. */
+  readonly generationNumber: number | undefined;
+  /** Offset of the first data byte. */
+  readonly offset: number;
+  /** The usable declared `/Length`, or `undefined` when there was none. */
+  readonly declared: number | undefined;
+  /** The length of the data that the search gave. */
+  readonly length: number;
+}
+
+/** Options of {@link PdfObjectParser}. */
+export interface ObjectParserOptions {
+  /**
+   * Resolves the target of an indirect `/Length`. It returns the object, or `undefined` when
+   * there is none. A {@link ResourceLimitError} it throws propagates; any other error means that
+   * the `/Length` has no usable value. It is not called again for a target that is already being
+   * resolved or whose resolution failed before, nor more than eight levels deep (a chain of
+   * `/Length` values that sit in streams whose own `/Length` is indirect); a cycle through the
+   * stream objects themselves is closed by the resolver. Without a resolver,
+   * the registry is consulted. May also be set later through {@link PdfObjectParser.resolveLength}.
+   */
+  readonly resolveLength?: ((ref: PdfRef) => PdfObject | undefined) | undefined;
+  /**
+   * When `true` (the default), a stream whose `/Length` is missing, unusable or wrong gets the
+   * data that ends at its `endstream` (or `endobj`). When `false`, such a stream throws a
+   * {@link PdfParseError}.
+   */
+  readonly recover?: boolean | undefined;
+  /** Called for every stream that was recovered. */
+  readonly onRecovered?: ((info: StreamRecovery) => void) | undefined;
+}
+
 // ---------------------------------------------------------------------------
 // PdfObjectParser
 // ---------------------------------------------------------------------------
@@ -36,8 +81,8 @@ import {
  * A recursive-descent parser that transforms PDF tokens into the library's
  * object model.
  *
- * The parser is stateless apart from its reference to the shared lexer and
- * object registry. It can be used to parse objects at arbitrary offsets in
+ * The parser holds the shared lexer, the object registry and, for stream
+ * framing, the resolver of indirect `/Length` values. It can be used to parse objects at arbitrary offsets in
  * the PDF file by combining {@link PdfLexer.seek} with the `*At` methods.
  *
  * @example
@@ -51,15 +96,38 @@ import {
  */
 export class PdfObjectParser {
   /**
+   * Resolves the target of an indirect stream `/Length` (see {@link ObjectParserOptions}).
+   * Assigned by the document parser once the cross-reference data is read.
+   */
+  resolveLength: ((ref: PdfRef) => PdfObject | undefined) | undefined;
+
+  private readonly recover: boolean;
+  private readonly onRecovered: ((info: StreamRecovery) => void) | undefined;
+  /** The keyword index of the input, scanned on the first recovery. */
+  private keywords: KeywordIndex | undefined;
+  /** Numbers of the `/Length` targets being resolved, outermost first. */
+  private readonly lengthsInProgress = new Set<number>();
+  /** Numbers of the `/Length` targets whose resolution failed; they are not resolved again. */
+  private readonly failedLengths = new Set<number>();
+  /** The indirect object being parsed, innermost first. */
+  private current: PdfRef | undefined;
+
+  /**
    * @param lexer     The lexer that provides the token stream.
    * @param registry  The object registry used for resolving stream
-   *                  `/Length` references and for registering indirect
-   *                  objects when they are parsed.
+   *                  `/Length` references when there is no resolver and for
+   *                  registering indirect objects when they are parsed.
+   * @param options   Resolver, recovery and reporting of stream framing.
    */
   constructor(
     private readonly lexer: PdfLexer,
     private readonly registry: PdfObjectRegistry,
-  ) {}
+    options?: ObjectParserOptions,
+  ) {
+    this.resolveLength = options?.resolveLength;
+    this.recover = options?.recover !== false;
+    this.onRecovered = options?.onRecovered;
+  }
 
   // -----------------------------------------------------------------------
   // Public API
@@ -325,16 +393,23 @@ export class PdfObjectParser {
     genNum: number,
   ): { ref: PdfRef; object: PdfObject } {
     const ref = PdfRef.of(objNum, genNum);
-    const object = this.parseObject();
+    const outer = this.current;
+    this.current = ref;
+    let finalObject: PdfObject;
+    try {
+      const object = this.parseObject();
 
-    // If the object is a dict and the next token is `stream`, upgrade to
-    // a PdfStream.
-    let finalObject = object;
-    if (object.kind === 'dict') {
-      const peek = this.lexer.peekToken();
-      if (peek.type === TokenType.StreamKeyword) {
-        finalObject = this.readStream(object);
+      // If the object is a dict and the next token is `stream`, upgrade to
+      // a PdfStream.
+      finalObject = object;
+      if (object.kind === 'dict') {
+        const peek = this.lexer.peekToken();
+        if (peek.type === TokenType.StreamKeyword) {
+          finalObject = this.readStream(object);
+        }
       }
+    } finally {
+      this.current = outer;
     }
 
     // Consume `endobj`
@@ -478,8 +553,11 @@ export class PdfObjectParser {
    * Read stream data following a dictionary.
    *
    * The `stream` keyword is consumed here. After the keyword, the spec
-   * requires a single newline (LF or CRLF) before the data bytes. The
-   * `/Length` entry in the dictionary determines how many bytes to read.
+   * requires a single newline (LF or CRLF) before the data bytes. Where the
+   * data ends is decided by {@link frameStreamData}: the declared `/Length`
+   * when `endstream` follows it, else the first `endstream` (or `endobj`)
+   * minus one EOL. With `recover: false` a stream that needs the search
+   * throws instead.
    *
    * @param dict  The stream's metadata dictionary (already parsed).
    * @returns     A `PdfStream` instance.
@@ -504,32 +582,56 @@ export class PdfObjectParser {
     // single EOL marker (either CR+LF or just LF). We also tolerate
     // a lone CR for robustness.
     this.skipStreamEol();
+    const dataStart = this.lexer.position;
 
-    // Resolve /Length
-    const length = this.resolveStreamLength(dict);
-
-    // Read raw bytes
-    const data = this.lexer.readStreamData(length);
-
-    // After the data, skip optional whitespace/EOL before `endstream`
-    this.skipEndstreamWhitespace();
-
-    // Consume 'endstream'
-    const endKw = this.lexer.nextToken();
-    if (endKw.type !== TokenType.EndStreamKeyword) {
+    const declared = this.resolveStreamLength(dict);
+    const bytes = this.lexer.rawData;
+    this.keywords ??= new KeywordIndex(bytes);
+    const frame = frameStreamData(bytes, dataStart, declared, this.keywords);
+    if (frame === undefined) {
       throw new PdfParseError({
         message:
-          `PdfObjectParser.readStream: expected 'endstream' keyword at offset ` +
-          `${endKw.offset}, got ${TokenType[endKw.type]} ` +
-          `(${String(endKw.value)})`,
-        offset: endKw.offset,
+          `PdfObjectParser.readStream: no endstream or endobj after the stream data at ` +
+          `offset ${dataStart}`,
+        offset: dataStart,
         expected: "'endstream' keyword",
-        actual: `${TokenType[endKw.type]} (${String(endKw.value)})`,
-        data: this.lexer.rawData,
+        actual: 'end of input',
+        data: bytes,
       });
     }
 
-    return new PdfStream(dict, data);
+    if (frame.recovered) {
+      const length = frame.end - frame.start;
+      if (!this.recover) {
+        const owner =
+          this.current === undefined
+            ? `the stream at offset ${dataStart}`
+            : `the stream of object ${this.current.objectNumber} ${this.current.generationNumber}`;
+        const why =
+          declared === undefined
+            ? `no usable /Length (${this.describeLength(dict)})`
+            : `/Length ${declared}, which endstream does not follow`;
+        throw new PdfParseError({
+          message:
+            `PdfObjectParser.readStream: ${owner} has ${why}; the data would end after ` +
+            `${length} bytes, and repairing it is off`,
+          offset: dataStart,
+          expected: 'a /Length that ends at endstream',
+          actual: declared === undefined ? 'no usable /Length' : `/Length ${declared}`,
+          data: bytes,
+        });
+      }
+      this.onRecovered?.({
+        objectNumber: this.current?.objectNumber,
+        generationNumber: this.current?.generationNumber,
+        offset: dataStart,
+        declared,
+        length,
+      });
+    }
+
+    this.lexer.seek(frame.resumeAt);
+    return new PdfStream(dict, bytes.subarray(frame.start, frame.end));
   }
 
   /**
@@ -552,98 +654,66 @@ export class PdfObjectParser {
   }
 
   /**
-   * Skip whitespace between the stream data and the `endstream` keyword.
+   * The declared length of a stream: the `/Length` entry when it is a safe
+   * integer `>= 0`, one hop through the resolver (or the registry) when it is
+   * an indirect reference. A missing, negative, fractional, oversized or
+   * non-numeric value, a reference that resolves to anything but such a
+   * number (a second reference included), a reference to a target that is
+   * already being resolved, a reference to an object whose
+   * resolution failed before (it is not tried again, so many streams that
+   * name one broken object cost one attempt), and a reference met more than
+   * {@link MAX_LENGTH_DEPTH} levels down all give `undefined`.
    *
-   * The spec says there should be an EOL before `endstream`, but many
-   * producers put extra whitespace. We only skip EOL characters (CR, LF)
-   * to avoid eating into data.
+   * @param dict  The stream dictionary.
+   * @returns     The declared length, or `undefined` when there is none.
+   * @throws      {@link ResourceLimitError} raised while resolving the reference.
    */
-  private skipEndstreamWhitespace(): void {
-    while (this.lexer.position < this.lexer.length) {
-      const b = this.lexer.byteAt(this.lexer.position);
-      if (b === 0x0a || b === 0x0d || b === 0x20) {
-        this.lexer.position++;
-      } else {
-        break;
-      }
+  private resolveStreamLength(dict: PdfDict): number | undefined {
+    let value: PdfObject | undefined = dict.get('/Length');
+    if (value?.kind === 'ref') {
+      value = this.resolveLengthRef(value as PdfRef);
     }
+    if (value?.kind !== 'number') return undefined;
+    const length = (value as PdfNumber).value;
+    return Number.isSafeInteger(length) && length >= 0 ? length : undefined;
   }
 
   /**
-   * Resolve the `/Length` value from a stream dictionary.
-   *
-   * The value may be a direct integer or an indirect reference. If it is
-   * an indirect reference, the registry is consulted. If the referenced
-   * object has not been parsed yet, we save the lexer position, parse it,
-   * and restore the position.
-   *
-   * @param dict  The stream dictionary.
-   * @returns     The integer length.
-   * @throws      If `/Length` is missing or cannot be resolved.
+   * Resolve the target of an indirect `/Length`. The lexer position is saved
+   * and restored, because resolving parses another object with the lexer the
+   * stream is being read with.
    */
-  private resolveStreamLength(dict: PdfDict): number {
-    const lengthObj = dict.get('/Length');
-    if (lengthObj === undefined) {
-      throw new PdfParseError({
-        message: 'PdfObjectParser.resolveStreamLength: stream dictionary is missing /Length',
-        offset: this.lexer.position,
-        expected: '/Length entry in stream dictionary',
-        actual: 'no /Length entry',
-        data: this.lexer.rawData,
-      });
+  private resolveLengthRef(ref: PdfRef): PdfObject | undefined {
+    if (this.resolveLength === undefined) return this.registry.resolve(ref);
+    const { objectNumber } = ref;
+    if (this.lengthsInProgress.has(objectNumber) || this.failedLengths.has(objectNumber)) {
+      return undefined;
     }
-
-    // Direct integer
-    if (lengthObj.kind === 'number') {
-      return (lengthObj as PdfNumber).value;
+    if (this.lengthsInProgress.size >= MAX_LENGTH_DEPTH) return undefined;
+    const position = this.lexer.position;
+    this.lengthsInProgress.add(objectNumber);
+    try {
+      return this.resolveLength(ref);
+    } catch (err) {
+      if (err instanceof ResourceLimitError) throw err;
+      this.failedLengths.add(objectNumber);
+      return undefined;
+    } finally {
+      this.lengthsInProgress.delete(objectNumber);
+      this.lexer.seek(position);
     }
+  }
 
-    // Indirect reference
-    if (lengthObj.kind === 'ref') {
-      const ref = lengthObj as PdfRef;
-
-      // Try to resolve from the registry first
-      const resolved = this.registry.resolve(ref);
-      if (resolved !== undefined) {
-        if (resolved.kind !== 'number') {
-          throw new PdfParseError({
-            message:
-              `PdfObjectParser.resolveStreamLength: /Length reference ` +
-              `${ref.objectNumber} ${ref.generationNumber} R resolved to ` +
-              `${resolved.kind}, expected number`,
-            offset: this.lexer.position,
-            expected: 'number for /Length reference',
-            actual: `${resolved.kind}`,
-            data: this.lexer.rawData,
-          });
-        }
-        return (resolved as PdfNumber).value;
-      }
-
-      // The referenced object has not been parsed yet. This can happen
-      // when parsing objects in file order and the /Length object appears
-      // after the stream. For now, throw — the caller should ensure
-      // /Length objects are parsed first (e.g. via xref table order).
-      throw new PdfParseError({
-        message:
-          `PdfObjectParser.resolveStreamLength: /Length reference ` +
-          `${ref.objectNumber} ${ref.generationNumber} R is not yet ` +
-          `resolved in the registry. Parse the referenced object first.`,
-        offset: this.lexer.position,
-        expected: 'resolved /Length reference',
-        actual: `unresolved reference ${ref.objectNumber} ${ref.generationNumber} R`,
-        data: this.lexer.rawData,
-      });
+  /** Why a stream dictionary has no usable `/Length`, for the strict-mode message. */
+  private describeLength(dict: PdfDict): string {
+    const value = dict.get('/Length');
+    if (value === undefined) return 'the entry is missing';
+    if (value.kind === 'ref') {
+      const ref = value as PdfRef;
+      return `${ref.objectNumber} ${ref.generationNumber} R is not resolved to a non-negative integer`;
     }
-
-    throw new PdfParseError({
-      message:
-        `PdfObjectParser.resolveStreamLength: /Length must be a number or ` +
-        `indirect reference, got ${lengthObj.kind}`,
-      offset: this.lexer.position,
-      expected: 'number or indirect reference for /Length',
-      actual: `${lengthObj.kind}`,
-      data: this.lexer.rawData,
-    });
+    if (value.kind === 'number')
+      return `${(value as PdfNumber).value} is not a non-negative integer`;
+    return `the entry is ${value.kind}, not a number`;
   }
 }

@@ -15,6 +15,14 @@
  * re-saves with `compress: false` and asks qpdf and then pdf.js for the page text. A test that
  * runs qpdf skips with a reason where qpdf is absent locally and fails when `CI` is set.
  *
+ * The encrypted fixtures open with their user and with their owner password. A document
+ * decrypted on load is never saved in clear: a bare save() throws UnsupportedEncryptionError, so
+ * each re-save of an encrypted fixture first calls encrypt() with new passwords and its own
+ * algorithm; the output then opens in qpdf and pdf.js with the new user password, and its
+ * plaintext (`qpdf --decrypt`, loaded by the library) holds the source's page text and Title.
+ * encrypted-r6.pdf is AES-256 with the key derivation 0.40.3 wrote: opening it emits exactly one
+ * MPL_LEGACY_R6_KEY warning per realm, and no other fixture emits one.
+ *
  * A check that fails today because of a known open defect is a knownDefect marker
  * (tests/helpers/known-defect.ts): a `test.fails` whose title starts with the defect id and the
  * release that fixes it, and which passes only while the check fails with the error KNOWN names.
@@ -26,20 +34,22 @@ import { createHash } from 'node:crypto';
 import { readdirSync, readFileSync } from 'node:fs';
 import { inflateRawSync, inflateSync } from 'node:zlib';
 import { PDFDocument } from 'pdf-lib';
-import { describe, expect, test } from 'vitest';
-import type { TestContext } from 'vitest';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
+import type { MockInstance, TestContext } from 'vitest';
 import {
   extractText,
   isLinearized,
   loadPdf,
   parseContentStream,
+  UnsupportedEncryptionError,
   verifySignatures,
 } from '../../src/index.js';
 import type { PdfDocument } from '../../src/index.js';
+import { resetWarningsForTesting } from '../../src/utils/warnings.js';
 import { defectKey, knownDefect } from '../helpers/known-defect.js';
 import type { DefectKey } from '../helpers/known-defect.js';
 import { pdfjsText } from '../helpers/oracle/pdfjs.js';
-import { expectQpdfClean, requireQpdf } from '../helpers/oracle/qpdf.js';
+import { expectQpdfClean, qpdfDecryptQdf, requireQpdf } from '../helpers/oracle/qpdf.js';
 
 type Check =
   | 'info'
@@ -106,19 +116,8 @@ const DUPLICATE_OBJECTS: Known = {
   key: defectKey('legacy-M01', '0.41.2'),
   failsWith: /^AssertionError: distinct object numbers: expected \d+ to be \d+/,
 };
-const ENCRYPTED_LOAD = defectKey('parser-syntax-01', '0.40.9');
-const ENCRYPTED_INFO: Known = { key: ENCRYPTED_LOAD, failsWith: TITLE_DIFFERS };
-const ENCRYPTED_TEXT: Known = {
-  key: ENCRYPTED_LOAD,
-  failsWith: /^Error: FlateDecode: failed to decompress data/,
-};
 const UTF8_INFO: Known = { key: defectKey('core-document-01', '0.41.0'), failsWith: TITLE_DIFFERS };
 const UTF8_TEXT: Known = { key: defectKey('core-page-01', '0.41.0'), failsWith: TEXT_DIFFERS };
-/** qpdf cannot inflate a /FlateDecode stream of the re-save. */
-const QPDF_INFLATE = /^QpdfError: qpdf --check exit 2: .*inflate: data: incorrect header check/;
-// The reader leaves the streams encrypted, and the re-save writes them, still encrypted, into a
-// file without an Encrypt dictionary.
-const ENCRYPTED_RESAVE: Known = { key: ENCRYPTED_LOAD, failsWith: QPDF_INFLATE };
 const KNOWN: Readonly<Record<string, Partial<Record<Check, Known>>>> = {
   'raw-deflate.pdf': { resaveUniqueObjects: DUPLICATE_OBJECTS },
   'raw-deflate-objstm.pdf': { resaveUniqueObjects: DUPLICATE_OBJECTS },
@@ -136,22 +135,6 @@ const KNOWN: Readonly<Record<string, Partial<Record<Check, Known>>>> = {
       failsWith: /^AssertionError: hasForm\(\): expected false to be true/,
     },
     resaveUniqueObjects: DUPLICATE_OBJECTS,
-  },
-  'encrypted-r4.pdf': {
-    info: ENCRYPTED_INFO,
-    text: ENCRYPTED_TEXT,
-    resaveCount: ENCRYPTED_RESAVE,
-    resaveInfo: ENCRYPTED_INFO,
-    resaveText: ENCRYPTED_TEXT,
-    resaveOracles: ENCRYPTED_RESAVE,
-  },
-  'encrypted-r6.pdf': {
-    info: ENCRYPTED_INFO,
-    text: ENCRYPTED_TEXT,
-    resaveCount: ENCRYPTED_RESAVE,
-    resaveInfo: ENCRYPTED_INFO,
-    resaveText: ENCRYPTED_TEXT,
-    resaveOracles: ENCRYPTED_RESAVE,
   },
   'utf8-strings.pdf': {
     info: UTF8_INFO,
@@ -186,6 +169,30 @@ async function load(entry: LegacyEntry): Promise<PdfDocument> {
   const bytes = bytesOf(entry.file);
   return options === undefined ? loadPdf(bytes) : loadPdf(bytes, options);
 }
+
+/** The new passwords a re-save of an encrypted fixture is encrypted with. */
+const RESAVE_USER = 'user-resave';
+const RESAVE_OWNER = 'owner-resave';
+
+/**
+ * A re-save of `entry`. An encrypted fixture is given encrypt() with the RESAVE passwords and
+ * the algorithm it was written with first: a bare save() of a decrypted document throws.
+ */
+async function resave(entry: LegacyEntry, options?: { compress: false }): Promise<Uint8Array> {
+  const doc = await load(entry);
+  if (entry.expect.encryption !== undefined) {
+    await doc.encrypt({
+      userPassword: RESAVE_USER,
+      ownerPassword: RESAVE_OWNER,
+      algorithm: entry.inputs['algorithm'] as 'aes-128' | 'aes-256',
+    });
+  }
+  return options === undefined ? doc.save() : doc.save(options);
+}
+
+/** The options that open a re-save of `entry`: the RESAVE user password when it is encrypted. */
+const resaveOptions = (entry: LegacyEntry): { password?: string } =>
+  entry.expect.encryption === undefined ? {} : { password: RESAVE_USER };
 
 function pageText(doc: PdfDocument, index: number): string {
   return extractText(parseContentStream(doc.getPage(index).getContentStream()));
@@ -291,26 +298,28 @@ describe('legacy-0.40.3 fixture set', () => {
 
       check(file, 'resaveCount', 're-save loads again with the same page count', async (ctx) => {
         requireQpdf(ctx);
-        const out = await (await load(entry)).save();
-        expect((await loadPdf(out)).getPageCount()).toBe(want.pageCount);
-        expectQpdfClean(out);
+        const out = await resave(entry);
+        expect((await loadPdf(out, resaveOptions(entry))).getPageCount()).toBe(want.pageCount);
+        expectQpdfClean(out, resaveOptions(entry));
       });
 
       check(file, 'resaveText', 're-save keeps page text', async (ctx) => {
         requireQpdf(ctx);
-        const out = await (await load(entry)).save();
-        const reloaded = await loadPdf(out);
+        const out = await resave(entry);
+        const reloaded = await loadPdf(out, resaveOptions(entry));
         want.pageText.forEach((t, i) => {
           expect(pageText(reloaded, i), `page ${i + 1} text (library)`).toContain(t);
         });
-        expectQpdfClean(out);
+        expectQpdfClean(out, resaveOptions(entry));
       });
 
       check(file, 'resaveInfo', 're-save keeps the Title', async (ctx) => {
         requireQpdf(ctx);
-        const out = await (await load(entry)).save();
-        expect((await loadPdf(out)).getTitle(), 'Info Title').toBe(want.info?.Title);
-        expectQpdfClean(out);
+        const out = await resave(entry);
+        expect((await loadPdf(out, resaveOptions(entry))).getTitle(), 'Info Title').toBe(
+          want.info?.Title,
+        );
+        expectQpdfClean(out, resaveOptions(entry));
       });
 
       check(
@@ -319,9 +328,9 @@ describe('legacy-0.40.3 fixture set', () => {
         're-save (compress: false) passes qpdf --check and pdf.js shows the page text',
         async (ctx) => {
           requireQpdf(ctx);
-          const out = await (await load(entry)).save({ compress: false });
-          expectQpdfClean(out);
-          const text = await pdfjsText(out);
+          const out = await resave(entry, { compress: false });
+          expectQpdfClean(out, resaveOptions(entry));
+          const text = await pdfjsText(out, resaveOptions(entry));
           expect(text).toHaveLength(want.pageCount);
           want.pageText.forEach((t, i) => {
             expect(text[i], `page ${i + 1} text (pdf.js)`).toContain(t);
@@ -329,7 +338,31 @@ describe('legacy-0.40.3 fixture set', () => {
         },
       );
 
-      if (want.encryption === undefined) {
+      const encryption = want.encryption;
+      if (encryption !== undefined) {
+        test(`${file} opens with its owner password`, async () => {
+          const doc = await loadPdf(bytesOf(file), { password: encryption.ownerPassword });
+          expect(doc.getTitle(), 'Info Title').toBe(want.info?.Title);
+          want.pageText.forEach((t, i) => {
+            expect(pageText(doc, i), `page ${i + 1} text (library)`).toContain(t);
+          });
+        });
+
+        test(`${file} a bare save() of the decrypted document throws UnsupportedEncryptionError`, async () => {
+          await expect((await load(entry)).save()).rejects.toThrow(UnsupportedEncryptionError);
+        });
+
+        test(`${file} re-save: its plaintext (qpdf --decrypt) holds the page text and the Title`, async (ctx) => {
+          requireQpdf(ctx);
+          const out = await resave(entry);
+          expectQpdfClean(out, resaveOptions(entry));
+          const plain = await loadPdf(qpdfDecryptQdf(out, RESAVE_USER));
+          expect(plain.getTitle(), 'Info Title').toBe(want.info?.Title);
+          want.pageText.forEach((t, i) => {
+            expect(pageText(plain, i), `page ${i + 1} text (qpdf plaintext)`).toContain(t);
+          });
+        });
+      } else {
         check(
           file,
           'resaveUniqueObjects',
@@ -386,6 +419,53 @@ describe('legacy-0.40.3 fixture set', () => {
   check('signed.pdf', 'signatureFieldName', 'signature field name', async () => {
     const [signature] = await verifySignatures(bytesOf('signed.pdf'));
     expect(signature?.fieldName).toBe(entryOf('signed.pdf').expect.signature?.fieldName);
+  });
+
+  describe('MPL_LEGACY_R6_KEY', () => {
+    let emitWarning: MockInstance<typeof process.emitWarning>;
+    beforeEach(() => {
+      resetWarningsForTesting();
+      emitWarning = vi.spyOn(process, 'emitWarning').mockImplementation(() => {});
+    });
+    afterEach(() => {
+      vi.restoreAllMocks();
+      resetWarningsForTesting();
+    });
+    const legacyCalls = (): unknown[][] =>
+      emitWarning.mock.calls.filter(
+        (call: unknown[]) =>
+          (call[1] as { code?: string } | undefined)?.code === 'MPL_LEGACY_R6_KEY',
+      );
+
+    test('encrypted-r6.pdf opens with its user and its owner password and warns once per realm', async () => {
+      const enc = entryOf('encrypted-r6.pdf').expect.encryption;
+      const bytes = bytesOf('encrypted-r6.pdf');
+      await loadPdf(bytes, { password: enc?.userPassword ?? '' });
+      expect(legacyCalls()).toHaveLength(1);
+      await loadPdf(bytes, { password: enc?.ownerPassword ?? '' });
+      expect(legacyCalls()).toHaveLength(1);
+      expect(legacyCalls()[0]?.[1]).toEqual({
+        type: 'ModernPdfLibWarning',
+        code: 'MPL_LEGACY_R6_KEY',
+      });
+    });
+
+    test('encrypted-r6.pdf opened with its owner password alone warns once', async () => {
+      const enc = entryOf('encrypted-r6.pdf').expect.encryption;
+      await loadPdf(bytesOf('encrypted-r6.pdf'), { password: enc?.ownerPassword ?? '' });
+      expect(legacyCalls()).toHaveLength(1);
+    });
+
+    test('no other fixture warns', async () => {
+      const others = manifest.filter((m) => m.file !== 'encrypted-r6.pdf');
+      expect(others).toHaveLength(7);
+      for (const entry of others) {
+        await load(entry);
+        const enc = entry.expect.encryption;
+        if (enc !== undefined) await loadPdf(bytesOf(entry.file), { password: enc.ownerPassword });
+      }
+      expect(legacyCalls()).toEqual([]);
+    });
   });
 
   check('forms.pdf', 'fields', 'field values through the current reader', async () => {
