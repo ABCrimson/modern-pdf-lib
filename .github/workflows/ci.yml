@@ -271,8 +271,8 @@ jobs:
   # ---------------------------------------------------------------------------
   # Gating Node line only. The oracle project judges the library's output with tools outside it
   # (qpdf, installed below, and the pdfjs-dist devDependency); its packaging snapshot test needs
-  # dist/ and dist/wasm/ (the build-ts artifact) and the previous release tag, hence the full
-  # clone. Every step after the adversarial run has `if: !cancelled()`, so one red gate does not
+  # dist/ and dist/wasm/ (the build-ts artifact) and the history back to the previous release
+  # (its tag or the commit that set its version), hence the full clone. Every step after the adversarial run has `if: !cancelled()`, so one red gate does not
   # hide the next. fixtures:legacy:check does not run in this workflow: it installs the published
   # 0.40.3 package from the npm registry.
   test-oracle:

@@ -22,8 +22,10 @@
  *   node scripts/dev/surface-gate.ts --surface         every export the snapshot
  *                                                      (tests/oracle/packaging/exports.api.json) adds
  *                                                      since the previous release (api-snapshot.ts
- *                                                      previousReleaseTag(); none when that tag has no
- *                                                      snapshot) must not reach the path of an open
+ *                                                      previousReleaseRef(): its tag, else the commit
+ *                                                      that set its version; the working-tree file
+ *                                                      when that ref has no snapshot) must not reach
+ *                                                      the path of an open
  *                                                      ledger entry: esbuild bundles
  *                                                      `export { <name> } from './src/<entry>.ts'`
  *                                                      with tree shaking and the metafile, and every
@@ -379,9 +381,9 @@ async function snapshotAdditions(): Promise<{ since: string; additions: Addition
   const api = (await import(
     new URL('./api-snapshot.ts', import.meta.url).href
   )) as ApiSnapshotModule;
-  const tag = api.previousReleaseTag(ROOT);
+  const ref = api.previousReleaseRef(ROOT);
   const current = api.workingSnapshot(ROOT);
-  const baseline = (tag === undefined ? undefined : api.snapshotAtRef(tag, ROOT)) ?? current;
+  const baseline = (ref === undefined ? undefined : api.snapshotAtRef(ref, ROOT)) ?? current;
   const additions: Addition[] = [];
   for (const [entry, e] of Object.entries(current.entries)) {
     if (!('names' in e)) continue;
@@ -392,11 +394,11 @@ async function snapshotAdditions(): Promise<{ since: string; additions: Addition
     }
   }
   const since =
-    tag === undefined
-      ? 'no previous release tag'
+    ref === undefined
+      ? 'no previous release'
       : baseline === current
-        ? `${tag} (no snapshot at that tag: baseline is the working-tree file)`
-        : tag;
+        ? `${ref} (no snapshot at that ref: baseline is the working-tree file)`
+        : ref;
   return { since, additions };
 }
 

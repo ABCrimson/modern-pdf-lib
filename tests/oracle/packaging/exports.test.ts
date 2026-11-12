@@ -7,12 +7,13 @@
  * with `CI` set it fails instead (the CI job builds first). After an intended surface change:
  * `pnpm run build`, `pnpm run copy:wasm`, then this file with `-u`, and the CHANGELOG block below.
  *
- * The second test needs no dist/: it diffs the snapshot file at the previous release tag
- * (previousReleaseTag() in the script) against the working-tree file and requires the api-diff
- * block of the topmost CHANGELOG.md release to equal that diff. When the tag has no snapshot, the
- * baseline is the working-tree file, so the diff is empty. The topmost release must carry the
- * block; for an empty diff it reads `No export added, removed or changed.`. In a shallow clone
- * (no tags) it skips with a reason locally and fails with `CI` set.
+ * The second test needs no dist/: it diffs the snapshot file at the previous release, tagged or
+ * not (previousReleaseRef() in the script: its tag, else the commit that set its version),
+ * against the working-tree file and requires the api-diff block of the topmost CHANGELOG.md
+ * release to equal that diff. When that ref has no snapshot, the baseline is the working-tree
+ * file, so the diff is empty. The topmost release must carry the block; for an empty diff it
+ * reads `No export added, removed or changed.`. In a shallow clone (no history) it skips with a
+ * reason locally and fails with `CI` set.
  */
 import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
@@ -24,7 +25,7 @@ import {
   changelogApiBlock,
   diffSnapshots,
   formatDiff,
-  previousReleaseTag,
+  previousReleaseRef,
   snapshotAtRef,
   workingSnapshot,
 } from '../../../scripts/dev/api-snapshot.js';
@@ -62,14 +63,15 @@ test('the topmost CHANGELOG api-diff block equals the snapshot diff against the 
     if (process.env.CI) throw new Error(`${reason} (check out with fetch-depth: 0)`);
     ctx.skip(reason);
   }
-  const tag = previousReleaseTag();
+  const ref = previousReleaseRef();
   const current = workingSnapshot();
-  const baseline = (tag === undefined ? undefined : snapshotAtRef(tag)) ?? current;
+  const baseline = (ref === undefined ? undefined : snapshotAtRef(ref)) ?? current;
   const diff = diffSnapshots(baseline, current);
   const block = changelogApiBlock(readFileSync(join(ROOT, 'CHANGELOG.md'), 'utf8'));
+  const against = ref ?? 'no previous release';
   expect(
     block,
-    `the topmost CHANGELOG.md release needs an api-diff block (diff against ${tag ?? 'no tag'})`,
+    `the topmost CHANGELOG.md release needs an api-diff block (diff against ${against})`,
   ).toBeDefined();
-  expect(block, `CHANGELOG.md api-diff block against ${tag ?? 'no tag'}`).toBe(formatDiff(diff));
+  expect(block, `CHANGELOG.md api-diff block against ${against}`).toBe(formatDiff(diff));
 });

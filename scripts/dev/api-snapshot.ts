@@ -5,8 +5,8 @@
  *                                                    tests/oracle/packaging/exports.api.json)
  *   node scripts/dev/api-snapshot.ts --stats         one line per entry: runtime and type-only counts
  *   node scripts/dev/api-snapshot.ts --diff [<ref>]  the diff of the snapshot file at <ref> (default:
- *                                                    the previous release tag, see
- *                                                    previousReleaseTag()) against the snapshot file
+ *                                                    the previous release, tagged or not, see
+ *                                                    previousReleaseRef()) against the snapshot file
  *                                                    in the working tree; the text the CHANGELOG
  *                                                    block between <!-- api-diff:begin --> and
  *                                                    <!-- api-diff:end --> carries
@@ -490,21 +490,85 @@ const versionLess = (a: readonly number[], b: readonly number[]): boolean => {
   return false;
 };
 
+/** The `vX.Y.Z` tags merged into HEAD, by tag name. */
+const mergedReleaseTags = (root: string): Map<string, readonly number[]> => {
+  const tags = new Map<string, readonly number[]>();
+  for (const line of git(root, ['tag', '--merged', 'HEAD', '--list', 'v*']).split('\n')) {
+    const tag = line.trim();
+    const v = parseVersion(tag);
+    if (v !== undefined) tags.set(tag, v);
+  }
+  return tags;
+};
+
 /**
- * The previous release: the highest `vX.Y.Z` tag merged into HEAD whose version is below
- * package.json's version (so a tag on HEAD for the version being released is not its own
- * baseline). Undefined when there is none.
+ * The newest `vX.Y.Z` tag merged into HEAD whose version is below package.json's version (so a
+ * tag on HEAD for the version being released is not its own baseline). Undefined when there is
+ * none. Releases not yet tagged are invisible here: previousReleaseRef() sees them.
  */
-export function previousReleaseTag(root = ROOT): string | undefined {
+function previousReleaseTag(root = ROOT): string | undefined {
   const current = parseVersion(readPackageJson(root).version);
   if (current === undefined) return undefined;
   let best: { tag: string; v: readonly number[] } | undefined;
-  for (const tag of git(root, ['tag', '--merged', 'HEAD', '--list', 'v*']).split('\n')) {
-    const v = parseVersion(tag.trim());
-    if (v === undefined || !versionLess(v, current)) continue;
-    if (best === undefined || versionLess(best.v, v)) best = { tag: tag.trim(), v };
+  for (const [tag, v] of mergedReleaseTags(root)) {
+    if (!versionLess(v, current)) continue;
+    if (best === undefined || versionLess(best.v, v)) best = { tag, v };
   }
   return best?.tag;
+}
+
+/**
+ * The git ref of the release before package.json's version, tagged or not. The previous release
+ * is the highest version below the current one among the `vX.Y.Z` tags merged into HEAD and the
+ * `## [X.Y.Z]` headings of CHANGELOG.md. Its ref is its tag `vX.Y.Z` when that tag is merged into
+ * HEAD, else the oldest commit reachable from HEAD in which package.json's `"version"` is that
+ * version (releases stack up untagged until their tag is cut, and a CI checkout may lack the
+ * tag); when no such commit exists, the newest merged tag below the current version. Undefined
+ * when there is no previous release.
+ */
+export function previousReleaseRef(root = ROOT): string | undefined {
+  const current = parseVersion(readPackageJson(root).version);
+  if (current === undefined) return undefined;
+  const tags = mergedReleaseTags(root);
+  const candidates = new Map<string, readonly number[]>();
+  const consider = (v: readonly number[] | undefined): void => {
+    if (v !== undefined && versionLess(v, current)) candidates.set(v.join('.'), v);
+  };
+  for (const v of tags.values()) consider(v);
+  const changelog = join(root, 'CHANGELOG.md');
+  if (existsSync(changelog)) {
+    for (const m of readFileSync(changelog, 'utf8').matchAll(/^## \[([^\]]+)\]/gm)) {
+      consider(parseVersion(m[1] ?? ''));
+    }
+  }
+  let best: { version: string; v: readonly number[] } | undefined;
+  for (const [version, v] of candidates) {
+    if (best === undefined || versionLess(best.v, v)) best = { version, v };
+  }
+  if (best === undefined) return undefined;
+  const tag = `v${best.version}`;
+  if (tags.has(tag)) return tag;
+  const hashes = git(root, [
+    'log',
+    '--format=%H',
+    '-S',
+    `"version": "${best.version}"`,
+    '--',
+    'package.json',
+  ])
+    .split('\n')
+    .map((h) => h.trim())
+    .filter((h) => h !== '')
+    .reverse();
+  for (const hash of hashes) {
+    try {
+      const pkg = JSON.parse(git(root, ['show', `${hash}:package.json`])) as { version?: unknown };
+      if (pkg.version === best.version) return hash;
+    } catch {
+      // A commit whose package.json is absent or unparseable is not a release commit.
+    }
+  }
+  return previousReleaseTag(root);
 }
 
 /** The snapshot file at a git ref, or undefined when the ref has none. */
@@ -557,12 +621,13 @@ async function main(): Promise<number> {
     },
   });
   if (values.diff) {
-    const ref = positionals[0] ?? previousReleaseTag();
+    const ref = positionals[0] ?? previousReleaseRef();
     const before = ref === undefined ? undefined : snapshotAtRef(ref);
     const after = workingSnapshot();
+    console.error(`api-snapshot: baseline ${ref ?? 'none (no previous release)'}`);
     if (before === undefined) {
       console.error(
-        `api-snapshot: ${ref ?? 'no previous release tag'} has no ${SNAPSHOT_PATH}; the baseline is the working-tree file`,
+        `api-snapshot: ${ref ?? 'no previous release'} has no ${SNAPSHOT_PATH}; the baseline is the working-tree file`,
       );
     }
     console.log(formatDiff(diffSnapshots(before ?? after, after)));
