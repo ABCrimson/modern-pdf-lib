@@ -11,10 +11,17 @@
  * The engine manages a shared memory region for data transfers between
  * JS and WASM, minimizing allocations on the hot path.
  *
+ * The WASM module writes and reads raw DEFLATE (RFC 1951), and so do the
+ * sync helpers {@link deflateSync} and {@link inflateSync}. The
+ * {@link LibdeflateWasm} engine wraps its output as zlib data (RFC 1950),
+ * the format `/FlateDecode` requires, and decompresses through the
+ * FlateDecode codec (`./pdfFlate.ts`) without the WASM module.
+ *
  * @packageDocumentation
  */
 
 import type { CompressionEngine } from './deflate.js';
+import { inflateFlate, wrapRawDeflate } from './pdfFlate.js';
 
 // ---------------------------------------------------------------------------
 // WASM module interface
@@ -316,27 +323,31 @@ export class LibdeflateWasm implements CompressionEngine {
   readonly maxLevel = 12;
 
   /**
-   * Compress data using libdeflate WASM.
+   * Compress data using libdeflate WASM and wrap the raw DEFLATE output
+   * as zlib data.
    *
    * @param data  - Uncompressed input bytes.
    * @param level - Compression level 1-12 (clamped). Default: `6`.
-   * @returns       Compressed bytes (raw deflate).
+   * @returns       Compressed bytes: zlib data (RFC 1950).
+   * @throws If WASM is not initialized.
    */
   async compress(data: Uint8Array, level: number = 6): Promise<Uint8Array> {
     // The underlying implementation is synchronous, but we wrap it in
     // a Promise to conform to the CompressionEngine interface.
-    return deflateSync(data, level);
+    return wrapRawDeflate(deflateSync(data, level), data);
   }
 
   /**
-   * Decompress raw deflate data using libdeflate WASM.
+   * Decompress zlib data, or raw DEFLATE as a fallback, through the
+   * FlateDecode codec. The WASM module is not used, so this works before
+   * {@link initDeflateWasm} has run.
    *
-   * @param data       - Compressed bytes (raw deflate).
-   * @param outputSize - Expected output size hint. Default: `data.length * 4`.
-   * @returns            Decompressed bytes.
+   * @param data        - Compressed bytes: zlib data or raw DEFLATE.
+   * @param _outputSize - Ignored; the result always holds every byte.
+   * @returns             Decompressed bytes.
    */
-  async decompress(data: Uint8Array, outputSize?: number): Promise<Uint8Array> {
-    return inflateSync(data, outputSize);
+  async decompress(data: Uint8Array, _outputSize?: number): Promise<Uint8Array> {
+    return inflateFlate(data);
   }
 
   /**

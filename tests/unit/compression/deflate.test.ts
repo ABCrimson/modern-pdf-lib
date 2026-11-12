@@ -2,10 +2,13 @@
  * Tests for the compression subsystem — fflate adapter and unified deflate API.
  *
  * Covers compress/decompress roundtrip, empty input, compression levels,
- * and engine selection.
+ * engine selection, the zlib (RFC 1950) format every engine writes and
+ * reads, the raw DEFLATE fallback on read, and output size hints that never
+ * truncate. node:zlib is the oracle for the format.
  */
 
-import { describe, it, expect, afterEach } from 'vitest';
+import { describe, it, expect, afterEach, vi } from 'vitest';
+import { deflateRawSync, deflateSync, inflateSync } from 'node:zlib';
 import {
   compressSync,
   decompressSync,
@@ -21,6 +24,7 @@ import {
   clampLevel,
 } from '../../../src/compression/deflate.js';
 import type { CompressionEngine } from '../../../src/compression/deflate.js';
+import { LibdeflateWasm } from '../../../src/compression/libdeflateWasm.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -276,5 +280,152 @@ describe('Unified deflate API', () => {
       expect(err instanceof Error).toBe(true);
       expect((err as Error).message).toBeTruthy();
     }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Format: every engine writes zlib and reads zlib or raw DEFLATE
+// ---------------------------------------------------------------------------
+
+/** A page-sized content stream, compressible and deterministic. */
+const STREAM = encoder.encode(
+  Array.from({ length: 40 }, (_, i) => `BT /F1 12 Tf 72 ${700 - i * 14} Td (Line ${i}) Tj ET`).join(
+    '\n',
+  ),
+);
+
+/** Copy any byte view (Buffer included) into a plain Uint8Array. */
+function bytes(view: Uint8Array): Uint8Array {
+  return Uint8Array.from(view);
+}
+
+/** node:zlib output: zlib data, raw DEFLATE, and zlib data without its Adler-32 trailer. */
+function encodings(data: Uint8Array): Array<[string, Uint8Array]> {
+  const zlib = bytes(deflateSync(data));
+  return [
+    ['zlib', zlib],
+    ['raw DEFLATE', bytes(deflateRawSync(data))],
+    ['zlib without the Adler-32 trailer', zlib.subarray(0, zlib.length - 4)],
+  ];
+}
+
+/** The engines a caller can obtain, each with a name for the test title. */
+async function engines(): Promise<Array<[string, CompressionEngine]>> {
+  return [
+    ['fflate (async)', new FflateEngine()],
+    ['fflate (sync)', new FflateEngine({ useAsync: false })],
+    ['browser', await getCompressor({ preferEngine: 'browser' })],
+  ];
+}
+
+describe('compress output is zlib data', () => {
+  it('compressSync output passes node:zlib inflateSync at every level', () => {
+    for (let level = 1; level <= 9; level++) {
+      expect(bytes(inflateSync(compressSync(STREAM, level)))).toEqual(STREAM);
+    }
+  });
+
+  it('compressAsync output passes node:zlib inflateSync', async () => {
+    expect(bytes(inflateSync(await compressAsync(STREAM)))).toEqual(STREAM);
+    expect(bytes(inflateSync(await compressAsync(STREAM, 9)))).toEqual(STREAM);
+  });
+
+  it('every engine writes zlib data', async () => {
+    for (const [name, engine] of await engines()) {
+      const out = await engine.compress(STREAM, 6);
+      expect(bytes(inflateSync(out)), name).toEqual(STREAM);
+    }
+  });
+
+  it('the browser engine needs only CompressionStream', async () => {
+    vi.stubGlobal('DecompressionStream', undefined);
+    try {
+      const engine = await getCompressor({ preferEngine: 'browser' });
+      expect(engine.name).toBe('browser-compression-stream');
+      const out = await engine.compress(STREAM, 6);
+      expect(bytes(inflateSync(out))).toEqual(STREAM);
+      expect(await engine.decompress(out)).toEqual(STREAM);
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it('compress() writes zlib data', async () => {
+    const out = await compress(STREAM, { level: 6, preferEngine: 'fflate' });
+    expect(bytes(inflateSync(out))).toEqual(STREAM);
+  });
+
+  it('empty input compresses to zlib data', async () => {
+    const empty = new Uint8Array(0);
+    expect(bytes(inflateSync(compressSync(empty))).length).toBe(0);
+    expect(bytes(inflateSync(await compressAsync(empty))).length).toBe(0);
+  });
+});
+
+describe('decompress reads zlib data and raw DEFLATE', () => {
+  it('decompressSync reads each encoding', () => {
+    for (const [name, data] of encodings(STREAM)) {
+      expect(decompressSync(data), name).toEqual(STREAM);
+    }
+  });
+
+  it('decompressAsync reads each encoding', async () => {
+    for (const [name, data] of encodings(STREAM)) {
+      expect(await decompressAsync(data), name).toEqual(STREAM);
+    }
+  });
+
+  it('every engine reads each encoding', async () => {
+    for (const [engineName, engine] of await engines()) {
+      for (const [name, data] of encodings(STREAM)) {
+        expect(await engine.decompress(data), `${engineName}: ${name}`).toEqual(STREAM);
+      }
+    }
+  });
+
+  it('the libdeflate engine reads each encoding', async () => {
+    const engine = new LibdeflateWasm();
+    for (const [name, data] of encodings(STREAM)) {
+      expect(await engine.decompress(data), name).toEqual(STREAM);
+    }
+  });
+
+  it('decompress() reads each encoding', async () => {
+    for (const [name, data] of encodings(STREAM)) {
+      expect(await decompress(data, undefined, { preferEngine: 'fflate' }), name).toEqual(STREAM);
+    }
+  });
+
+  it('rejects data that is neither zlib nor raw DEFLATE', async () => {
+    const text = encoder.encode('plain text, never compressed\n');
+    expect(() => decompressSync(text)).toThrow(/^FlateDecode: failed to decompress data$/);
+    await expect(decompressAsync(text)).rejects.toThrow(/^FlateDecode: failed to decompress data$/);
+  });
+});
+
+describe('an output size hint never truncates', () => {
+  const original = makeCompressibleData(1000);
+
+  it('decompressSync returns every byte when the hint is too small', () => {
+    expect(decompressSync(compressSync(original), 100)).toEqual(original);
+    expect(decompressSync(bytes(deflateRawSync(original)), 100)).toEqual(original);
+  });
+
+  it('decompressAsync returns every byte when the hint is too small', async () => {
+    expect(await decompressAsync(compressSync(original), 100)).toEqual(original);
+    expect(await decompressAsync(bytes(deflateRawSync(original)), 100)).toEqual(original);
+  });
+
+  it('every engine returns every byte when the hint is too small', async () => {
+    const zlib = bytes(deflateSync(original));
+    for (const [name, engine] of await engines()) {
+      expect(await engine.decompress(zlib, 100), name).toEqual(original);
+    }
+    expect(await new LibdeflateWasm().decompress(zlib, 100)).toEqual(original);
+  });
+
+  it('decompress() returns every byte when the hint is too small', async () => {
+    const zlib = bytes(deflateSync(original));
+    expect(await decompress(zlib, 100, { preferEngine: 'fflate' })).toEqual(original);
   });
 });

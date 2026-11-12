@@ -10,6 +10,10 @@
  * 2. **fflate** (pure JS) -- good fallback, levels 1-9
  * 3. **CompressionStream** (browser built-in) -- last resort, no level control
  *
+ * Every engine compresses to zlib data (RFC 1950), the format
+ * `/FlateDecode` requires, and decompresses through the FlateDecode codec
+ * (`./pdfFlate.ts`): zlib data, or raw DEFLATE as a fallback.
+ *
  * Usage:
  * ```ts
  * import { compress, decompress, getCompressor } from './deflate.js';
@@ -24,6 +28,8 @@
  *
  * @packageDocumentation
  */
+
+import { inflateFlate } from './pdfFlate.js';
 
 // ---------------------------------------------------------------------------
 // Public interfaces
@@ -79,20 +85,22 @@ export interface CompressionEngine {
   readonly maxLevel: number;
 
   /**
-   * Compress raw data using the deflate algorithm.
+   * Compress data with the deflate algorithm.
    *
    * @param data  - Uncompressed input bytes.
    * @param level - Compression level (clamped to engine range).
-   * @returns       Compressed bytes (raw deflate, no zlib/gzip wrapper).
+   * @returns       Compressed bytes: zlib data (RFC 1950).
    */
   compress(data: Uint8Array, level?: number): Promise<Uint8Array>;
 
   /**
    * Decompress deflate-compressed data.
    *
-   * @param data       - Compressed input bytes (raw deflate).
-   * @param outputSize - Optional hint for output buffer size.
-   *                     Required by some engines for optimal performance.
+   * @param data       - Compressed input bytes: zlib data (RFC 1950), or raw
+   *                     DEFLATE as a fallback.
+   * @param outputSize - Optional output size hint. The engines in this
+   *                     module ignore it: the result always holds every
+   *                     decompressed byte.
    * @returns            Decompressed bytes.
    */
   decompress(data: Uint8Array, outputSize?: number): Promise<Uint8Array>;
@@ -122,11 +130,13 @@ let libdeflateAttempted = false;
 // ---------------------------------------------------------------------------
 
 /**
- * Compression engine backed by the browser's built-in
- * `CompressionStream` / `DecompressionStream` APIs.
+ * Compression engine backed by the browser's built-in `CompressionStream` API.
  *
  * This is the lowest-priority fallback -- it does not support
  * compression levels and may not be available in all runtimes.
+ * It compresses with `CompressionStream('deflate')` (zlib data) and
+ * decompresses through the FlateDecode codec, which also reads raw
+ * DEFLATE and zlib data whose Adler-32 trailer is missing or wrong.
  */
 class BrowserDeflateEngine implements CompressionEngine {
   readonly name = 'browser-compression-stream';
@@ -135,14 +145,13 @@ class BrowserDeflateEngine implements CompressionEngine {
 
   /** @inheritdoc */
   async compress(data: Uint8Array, _level?: number): Promise<Uint8Array> {
-    const cs = new CompressionStream('deflate-raw');
+    const cs = new CompressionStream('deflate');
     return this.pipeThroughStream(cs, data);
   }
 
   /** @inheritdoc */
   async decompress(data: Uint8Array, _outputSize?: number): Promise<Uint8Array> {
-    const ds = new DecompressionStream('deflate-raw');
-    return this.pipeThroughStream(ds, data);
+    return inflateFlate(data);
   }
 
   /** @inheritdoc */
@@ -151,11 +160,11 @@ class BrowserDeflateEngine implements CompressionEngine {
   }
 
   /**
-   * Pipe data through a compression/decompression transform stream
-   * and collect the result.
+   * Pipe data through a compression transform stream and collect the
+   * result.
    */
   private async pipeThroughStream(
-    transform: CompressionStream | DecompressionStream,
+    transform: CompressionStream,
     data: Uint8Array,
   ): Promise<Uint8Array> {
     const writer = transform.writable.getWriter();
@@ -202,10 +211,7 @@ class BrowserDeflateEngine implements CompressionEngine {
  * Check whether the browser CompressionStream API is available.
  */
 function isBrowserCompressionAvailable(): boolean {
-  return (
-    typeof globalThis.CompressionStream === 'function' &&
-    typeof globalThis.DecompressionStream === 'function'
-  );
+  return typeof globalThis.CompressionStream === 'function';
 }
 
 /**
@@ -323,9 +329,9 @@ export async function getCompressor(options?: CompressionOptions): Promise<Compr
  * internally. For repeated use, prefer obtaining an engine via
  * `getCompressor()` and calling its `compress()` method directly.
  *
- * @param data    - Raw bytes to compress.
+ * @param data    - Uncompressed bytes.
  * @param options - Compression options.
- * @returns         Compressed bytes (raw deflate format).
+ * @returns         Compressed bytes: zlib data (RFC 1950).
  *
  * @example
  * ```ts
@@ -344,8 +350,11 @@ export async function compress(
 /**
  * Decompress deflate-compressed data using the best available engine.
  *
- * @param data       - Compressed bytes (raw deflate format).
- * @param outputSize - Optional output size hint for buffer pre-allocation.
+ * @param data       - Compressed bytes: zlib data (RFC 1950), or raw DEFLATE
+ *                     as a fallback.
+ * @param outputSize - Optional output size hint, passed to the engine. The
+ *                     engines in this module ignore it: the result always
+ *                     holds every decompressed byte.
  * @param options    - Engine preference.
  * @returns            Decompressed bytes.
  *

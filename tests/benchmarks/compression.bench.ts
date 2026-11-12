@@ -108,10 +108,6 @@ describe('fflate decompress', () => {
   bench('100KB text', () => {
     decompressSync(compressed100KB);
   });
-
-  bench('10KB text with size hint', () => {
-    decompressSync(compressed10KB, 10240);
-  });
 });
 
 // ---------------------------------------------------------------------------
