@@ -92,7 +92,7 @@
     "test:e2e": "playwright test",
     "test:bench": "vitest bench",
     "bench": "tsx tests/benchmarks/run.ts",
-    "lint": "oxlint --max-warnings=1187 src tests",
+    "lint": "oxlint --max-warnings=1175 src tests",
     "lint:fix": "oxlint --fix src tests",
     "format": "oxfmt src tests scripts",
     "format:check": "oxfmt --check src tests scripts",
@@ -138,11 +138,11 @@
     "tinybench": "6.2.3",
     "tsdown": "0.23.7",
     "tsx": "4.23.15",
-    "typescript": "7.1.0-dev.20261111.1",
+    "typescript": "7.1.0-dev.20261112.1",
     "vite": "8.3.8",
     "vitepress": "2.0.0-alpha.21",
     "vitest": "5.1.0",
-    "vue": "3.6.0-rc.14",
+    "vue": "3.6.0-rc.15",
     "wasm-pack": "0.15.1"
   },
   "keywords": [

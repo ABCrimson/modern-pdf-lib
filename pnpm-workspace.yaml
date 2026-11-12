@@ -6,20 +6,33 @@ packages:
 # Supply-chain delay: a version must be at least 24 h old (minutes). Never lower this;
 # add an exact name@version to minimumReleaseAgeExclude instead.
 minimumReleaseAge: 1440
-# Exact pins younger than 1440 min on 2026-11-12 (06:52Z): the TypeScript 7.1 dev build
-# (published 2026-11-11 08:45Z) with its seven per-platform native packages (published
-# 08:37Z onward), and the Playwright 1.66.0-alpha-2026-11-12 trio (playwright 05:19Z,
+# Exact pins younger than 1440 min on 2026-11-12 (09:55Z): the TypeScript 7.1 dev build
+# (published 2026-11-12 08:23Z) with its seven per-platform native packages, the Vue
+# 3.6.0-rc.15 runtime set (vue and eleven @vue/* packages, published 2026-11-12 08:51Z to
+# 08:56Z), and the Playwright 1.66.0-alpha-2026-11-12 trio (playwright 05:19Z,
 # @playwright/test 05:21Z, playwright-core 06:41Z). These entries go stale on the next bump;
 # drop each one once its version is older than 24 h.
 minimumReleaseAgeExclude:
-  - 'typescript@7.1.0-dev.20261111.1'
-  - '@typescript/typescript-darwin-arm64@7.1.0-dev.20261111.1'
-  - '@typescript/typescript-darwin-x64@7.1.0-dev.20261111.1'
-  - '@typescript/typescript-linux-arm64@7.1.0-dev.20261111.1'
-  - '@typescript/typescript-linux-arm@7.1.0-dev.20261111.1'
-  - '@typescript/typescript-linux-x64@7.1.0-dev.20261111.1'
-  - '@typescript/typescript-win32-arm64@7.1.0-dev.20261111.1'
-  - '@typescript/typescript-win32-x64@7.1.0-dev.20261111.1'
+  - 'typescript@7.1.0-dev.20261112.1'
+  - '@typescript/typescript-darwin-arm64@7.1.0-dev.20261112.1'
+  - '@typescript/typescript-darwin-x64@7.1.0-dev.20261112.1'
+  - '@typescript/typescript-linux-arm64@7.1.0-dev.20261112.1'
+  - '@typescript/typescript-linux-arm@7.1.0-dev.20261112.1'
+  - '@typescript/typescript-linux-x64@7.1.0-dev.20261112.1'
+  - '@typescript/typescript-win32-arm64@7.1.0-dev.20261112.1'
+  - '@typescript/typescript-win32-x64@7.1.0-dev.20261112.1'
+  - '@vue/compiler-core@3.6.0-rc.15'
+  - '@vue/compiler-dom@3.6.0-rc.15'
+  - '@vue/compiler-sfc@3.6.0-rc.15'
+  - '@vue/compiler-ssr@3.6.0-rc.15'
+  - '@vue/compiler-vapor@3.6.0-rc.15'
+  - '@vue/reactivity@3.6.0-rc.15'
+  - '@vue/runtime-core@3.6.0-rc.15'
+  - '@vue/runtime-dom@3.6.0-rc.15'
+  - '@vue/runtime-vapor@3.6.0-rc.15'
+  - '@vue/server-renderer@3.6.0-rc.15'
+  - '@vue/shared@3.6.0-rc.15'
+  - 'vue@3.6.0-rc.15'
   - '@playwright/test@1.66.0-alpha-2026-11-12'
   - 'playwright@1.66.0-alpha-2026-11-12'
   - 'playwright-core@1.66.0-alpha-2026-11-12'
@@ -33,7 +46,7 @@ allowBuilds:
 
 # One Vue runtime for vitepress and docs/.vitepress/components (PdfPlayground.vue imports vue).
 overrides:
-  vue: 3.6.0-rc.14
+  vue: 3.6.0-rc.15
   # pdfjs-dist (test oracle) lists a native canvas as optional; getTextContent does not need it.
   '@napi-rs/canvas': '-'
 
