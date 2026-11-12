@@ -38,6 +38,8 @@
  * @packageDocumentation
  */
 
+import { assertWithinLimit } from '../core/limits.js';
+import { ResourceLimitError } from '../errors.js';
 import { buildSigningCertificateV2Attribute } from './cadesAttributes.js';
 
 // ---------------------------------------------------------------------------
@@ -521,17 +523,31 @@ interface Asn1Node {
 
 /**
  * Parse a single DER TLV from a byte array at the given offset.
+ *
+ * Long-form lengths take 1 to 4 bytes and must fit in the data: the length bytes and the content
+ * lie inside `data`, and an indefinite length (0x80) is refused. Each violation throws an `Error`
+ * whose message starts with `DER: `, except a value cut off before its length byte, which throws
+ * `Unexpected end of DER data`. Nesting of constructed values deeper than
+ * `INTERNAL_LIMITS.maxDerDepth` throws {@link ResourceLimitError}.
+ *
+ * @param data    The bytes holding the value.
+ * @param offset  Where the value's tag byte is.
+ * @param depth   Constructed values already open around this one (callers leave it at 0).
  */
-function parseDerTlv(data: Uint8Array, offset: number): Asn1Node {
+function parseDerTlv(data: Uint8Array, offset: number, depth = 0): Asn1Node {
   if (offset >= data.length) {
     throw new Error('Unexpected end of DER data');
   }
 
   const tag = data[offset]!;
   const constructed = !!(tag & 0x20);
+  if (constructed) assertWithinLimit('maxDerDepth', depth + 1);
   let pos = offset + 1;
 
   // Parse length
+  if (pos >= data.length) {
+    throw new Error('Unexpected end of DER data');
+  }
   let length: number;
   const firstLenByte = data[pos]!;
   pos++;
@@ -540,11 +556,24 @@ function parseDerTlv(data: Uint8Array, offset: number): Asn1Node {
     length = firstLenByte;
   } else {
     const numLenBytes = firstLenByte & 0x7f;
+    if (numLenBytes === 0) {
+      throw new Error('DER: indefinite length is not supported');
+    }
+    if (numLenBytes > 4) {
+      throw new Error('DER: more than 4 length bytes');
+    }
+    if (pos + numLenBytes > data.length) {
+      throw new Error('DER: length bytes run past the end of the data');
+    }
     length = 0;
     for (let i = 0; i < numLenBytes; i++) {
-      length = (length << 8) | data[pos]!;
+      length = length * 256 + data[pos]!;
       pos++;
     }
+  }
+
+  if (pos + length > data.length) {
+    throw new Error('DER: length runs past the end of the data');
   }
 
   const headerLength = pos - offset;
@@ -555,7 +584,7 @@ function parseDerTlv(data: Uint8Array, offset: number): Asn1Node {
   if (constructed) {
     let childOffset = 0;
     while (childOffset < nodeData.length) {
-      const child = parseDerTlv(nodeData, childOffset);
+      const child = parseDerTlv(nodeData, childOffset, depth + 1);
       children.push(child);
       childOffset += child.totalLength;
     }
@@ -570,6 +599,22 @@ function parseDerTlv(data: Uint8Array, offset: number): Asn1Node {
     headerLength,
     totalLength: headerLength + length,
   };
+}
+
+/**
+ * The message of an error that {@link parseDerTlv} throws for input it refuses (a length rule or
+ * the depth limit), or `undefined` for any other error. Both verifiers report such a signature as
+ * not valid, like an unparsable one; `verifySignatureDetailed` adds this message to `errors`.
+ */
+function derRefusalMessage(error: unknown): string | undefined {
+  if (error instanceof ResourceLimitError) return error.message;
+  if (
+    error instanceof Error &&
+    (error.message.startsWith('DER: ') || error.message === 'Unexpected end of DER data')
+  ) {
+    return error.message;
+  }
+  return undefined;
 }
 
 /**
@@ -1084,7 +1129,7 @@ function convertEcdsaToDer(p1363Sig: Uint8Array): Uint8Array {
 // Public re-exports of parsing utilities (for verification)
 // ---------------------------------------------------------------------------
 
-export { parseDerTlv, extractIssuerAndSerial, extractSubjectPublicKeyInfo };
+export { parseDerTlv, derRefusalMessage, extractIssuerAndSerial, extractSubjectPublicKeyInfo };
 export { detectKeyAlgorithm, detectNamedCurve, extractCommonName };
 export { decodeOidBytes, toBuffer, getSubtle };
 export type { Asn1Node };

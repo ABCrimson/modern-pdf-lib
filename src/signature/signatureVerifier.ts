@@ -23,6 +23,7 @@
 import { findSignatures, computeSignatureHash, byteRangeCoversWholeFile } from './byteRange.js';
 import {
   parseDerTlv,
+  derRefusalMessage,
   extractIssuerAndSerial,
   extractSubjectPublicKeyInfo,
   detectKeyAlgorithm,
@@ -86,18 +87,53 @@ export interface SignatureVerificationResult {
 const decoder = new TextDecoder('latin1');
 
 /**
- * Convert hex string to bytes.
+ * Cut decoded bytes to the length the outer DER header states, or return
+ * undefined when the header cannot be read or runs past the data.
+ */
+function cutToOuterTlv(all: Uint8Array): Uint8Array | undefined {
+  if (all.length < 2) return undefined;
+  const f = all[1] ?? 0;
+  let hdr = 2;
+  let len = f;
+  if (f & 0x80) {
+    const n = f & 0x7f;
+    len = -1;
+    if (n >= 1 && n <= 4 && 2 + n <= all.length) {
+      len = 0;
+      for (let i = 0; i < n; i++) len = len * 256 + (all[2 + i] ?? 0);
+      hdr = 2 + n;
+    }
+  }
+  if (len >= 0 && hdr + len <= all.length) return all.subarray(0, hdr + len);
+  return undefined;
+}
+
+/**
+ * Convert hex string to bytes, cut to the length the outer DER header states;
+ * when that header cannot be read, trailing zero padding is stripped instead.
  */
 function hexToBytes(hex: string): Uint8Array {
   let clean = hex.replace(/\s/g, '');
   if (clean.length % 2 !== 0) clean = '0' + clean;
 
+  // The data ends where the outer DER header says: real 0x00 bytes at the end
+  // of the CMS are kept, only the padding after it is dropped.
+  const whole = cutToOuterTlv(Uint8Array.fromHex(clean));
+  if (whole) return whole;
+
   // Find the end of actual data (remove trailing zero padding)
   let endIdx = clean.length;
   // Check if there's a large run of trailing zeros (padding)
-  const trailingMatch = clean.match(/(00)+$/);
-  if (trailingMatch && trailingMatch[0]!.length > 4) {
-    endIdx = clean.length - trailingMatch[0]!.length;
+  let zeros = 0;
+  while (
+    zeros + 2 <= clean.length &&
+    clean.charCodeAt(clean.length - zeros - 1) === 0x30 &&
+    clean.charCodeAt(clean.length - zeros - 2) === 0x30
+  ) {
+    zeros += 2;
+  }
+  if (zeros > 4) {
+    endIdx = clean.length - zeros;
     // Ensure we don't trim actual data
     if (endIdx < 2) endIdx = clean.length;
   }
@@ -324,7 +360,9 @@ function parsePkcs7Structure(pkcs7Bytes: Uint8Array): {
       signatureAlgorithmOid,
       pssParams,
     };
-  } catch {
+  } catch (error) {
+    // A length rule or the depth limit is reported by the callers; any other failure is "unparsable".
+    if (derRefusalMessage(error) !== undefined) throw error;
     return null;
   }
 }
@@ -495,8 +533,15 @@ export async function verifySignatures(
     const fieldInfo = extractFieldInfo(pdfStr, sig.contentsOffset);
     const pkcs7Bytes = hexToBytes(sig.contentsHex);
 
-    // Parse the PKCS#7 structure
-    const parsed = parsePkcs7Structure(pkcs7Bytes);
+    // Parse the PKCS#7 structure. A signature whose bytes break a DER length rule or the depth
+    // limit is reported exactly like an unparsable one; the other signatures are still verified.
+    let parsed: ReturnType<typeof parsePkcs7Structure>;
+    try {
+      parsed = parsePkcs7Structure(pkcs7Bytes);
+    } catch (error) {
+      if (derRefusalMessage(error) === undefined) throw error;
+      parsed = null;
+    }
 
     if (!parsed) {
       results.push({

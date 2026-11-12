@@ -65,13 +65,47 @@ const encoder = new TextEncoder();
 const decoder = new TextDecoder('latin1');
 
 /**
- * Convert hex string to bytes, stripping trailing zero padding.
+ * Cut decoded bytes to the length the outer DER header states, or return
+ * undefined when the header cannot be read or runs past the data.
+ */
+function cutToOuterTlv(all: Uint8Array): Uint8Array | undefined {
+  if (all.length < 2) return undefined;
+  const f = all[1] ?? 0;
+  let hdr = 2;
+  let len = f;
+  if (f & 0x80) {
+    const n = f & 0x7f;
+    len = -1;
+    if (n >= 1 && n <= 4 && 2 + n <= all.length) {
+      len = 0;
+      for (let i = 0; i < n; i++) len = len * 256 + (all[2 + i] ?? 0);
+      hdr = 2 + n;
+    }
+  }
+  if (len >= 0 && hdr + len <= all.length) return all.subarray(0, hdr + len);
+  return undefined;
+}
+
+/**
+ * Convert hex string to bytes, cut to the length the outer DER header states;
+ * when that header cannot be read, trailing zero padding is stripped instead.
  */
 function hexToBytes(hex: string): Uint8Array {
   let clean = hex.replace(/\s/g, '');
-  const trailingMatch = clean.match(/(00)+$/);
-  if (trailingMatch && trailingMatch[0]!.length > 4) {
-    const endIdx = clean.length - trailingMatch[0]!.length;
+  // The data ends where the outer DER header says: real 0x00 bytes at the end
+  // of the CMS are kept, only the padding after it is dropped.
+  const whole = cutToOuterTlv(Uint8Array.fromHex(clean.length % 2 !== 0 ? '0' + clean : clean));
+  if (whole) return whole;
+  let zeros = 0;
+  while (
+    zeros + 2 <= clean.length &&
+    clean.charCodeAt(clean.length - zeros - 1) === 0x30 &&
+    clean.charCodeAt(clean.length - zeros - 2) === 0x30
+  ) {
+    zeros += 2;
+  }
+  if (zeros > 4) {
+    const endIdx = clean.length - zeros;
     if (endIdx > 0 && endIdx % 2 === 0) {
       clean = clean.slice(0, endIdx);
     }
