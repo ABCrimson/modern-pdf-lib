@@ -31,7 +31,11 @@ const NO_BENCHMARKS = { include: [] };
 export default defineConfig({
   test: {
     pool: 'forks',
-    execArgv: [`--max-old-space-size=${WORKER_HEAP_MB}`],
+    // Tests pass options that have no effect and open legacy files on purpose, so the library's
+    // runtime warnings (type ModernPdfLibWarning) would print on stderr. The flag stops Node from
+    // printing that type only: `process.emitWarning` is still called, so a test asserts on a spy
+    // of it (or on a `process.on('warning')` listener, which still fires).
+    execArgv: [`--max-old-space-size=${WORKER_HEAP_MB}`, '--disable-warning=ModernPdfLibWarning'],
     // The hosted runners are slower than a developer machine, and coverage slows the heaviest
     // tests further: under CI a test may run 60 s (Vitest's default is 5 s).
     ...(process.env.CI ? { maxWorkers: 3, testTimeout: 60_000 } : {}),
