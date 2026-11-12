@@ -10,6 +10,10 @@
 
 import { describe, it, expect } from 'vitest';
 
+import { ResourceLimitError } from '../../../src/errors.js';
+import { loadPdf } from '../../../src/index.js';
+import { pageWithFormChain } from '../../adversarial/load-limits.bodies.js';
+
 import { autoTagPage } from '../../../src/accessibility/autoTag.js';
 import { createPdf } from '../../../src/core/pdfDocument.js';
 import { PdfDocument } from '../../../src/core/pdfDocument.js';
@@ -116,4 +120,22 @@ describe('autoTagPage', () => {
     expect(all.some((e) => e.type === 'H1')).toBe(true);
     expect(all.some((e) => e.type === 'H2')).toBe(true);
   });
+});
+
+// ---------------------------------------------------------------------------
+// autoTagPage — internal limits
+// ---------------------------------------------------------------------------
+
+describe('autoTagPage — internal limits', () => {
+  it('tags a page with text and no forms', async () => {
+    const result = autoTagPage(await loadPdf(pageWithFormChain(0, 0)), 0);
+    expect(result).toMatchObject({ paragraphs: 1, elements: 1 });
+  });
+
+  it('throws ResourceLimitError for a page whose forms pass the operator limit, not a blank result', async () => {
+    // The page shows text and then a chain of 12 distinct forms, each calling the next 4 times.
+    const doc = await loadPdf(pageWithFormChain(12, 4));
+    expect(() => autoTagPage(doc, 0)).toThrow(ResourceLimitError);
+    expect(doc.getStructureTree()).toBeUndefined();
+  }, 30_000);
 });

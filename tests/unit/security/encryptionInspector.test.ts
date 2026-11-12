@@ -10,6 +10,8 @@
  */
 
 import { describe, it, expect } from 'vitest';
+import { ResourceLimitError } from '../../../src/errors.js';
+import { encryptedFileWithXrefStream, zlibOf } from '../../adversarial/load-limits.bodies.js';
 import { createPdf } from '../../../src/core/pdfDocument.js';
 import {
   inspectEncryption,
@@ -187,4 +189,28 @@ describe('inspectEncryption — AES-128 & RC4', () => {
     const report = await inspectEncryption(pdf);
     expect(report.emptyUserPassword).not.toBe(true);
   });
+});
+
+// ---------------------------------------------------------------------------
+// Internal limits
+// ---------------------------------------------------------------------------
+
+describe('inspectEncryption — internal limits', () => {
+  // The newest section is a classic table whose trailer names /Encrypt; its /Prev is a
+  // cross-reference stream. A file refused by a limit is not reported as unencrypted.
+  it('reports an encrypted file whose older cross-reference stream is small', async () => {
+    const file = encryptedFileWithXrefStream(await zlibOf(new Uint8Array(1024), 0, 0));
+    expect((await inspectEncryption(file)).encrypted).toBe(true);
+  });
+
+  it('rejects with ResourceLimitError when the cross-reference stream decodes above the limit', async () => {
+    const file = encryptedFileWithXrefStream(await zlibOf(new Uint8Array(0), 257, 0));
+    expect(file.length).toBeLessThan(2 * 1024 * 1024);
+    const error = await inspectEncryption(file).then(
+      () => undefined,
+      (caught: unknown) => caught,
+    );
+    expect(error).toBeInstanceOf(ResourceLimitError);
+    expect(error).toMatchObject({ limit: 'maxDecodedStreamBytes', max: 256 * 1024 * 1024 });
+  }, 60_000);
 });

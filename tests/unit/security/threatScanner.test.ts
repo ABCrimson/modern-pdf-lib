@@ -12,6 +12,11 @@
  */
 
 import { describe, it, expect } from 'vitest';
+import { ResourceLimitError } from '../../../src/errors.js';
+import {
+  openActionFileWithSecondObjectStream,
+  zlibOf,
+} from '../../adversarial/load-limits.bodies.js';
 import { createPdf } from '../../../src/core/pdfDocument.js';
 import { PageSizes } from '../../../src/core/pdfPage.js';
 import {
@@ -265,4 +270,32 @@ describe('scanPdfThreats — indirect-reference evasion', () => {
     expect(fileFindings.some((f) => f.severity === 'high')).toBe(true);
     expect(report.riskLevel).toBe('high');
   });
+});
+
+// ---------------------------------------------------------------------------
+// Internal limits
+// ---------------------------------------------------------------------------
+
+describe('scanPdfThreats — internal limits', () => {
+  // The JavaScript /OpenAction sits in one object stream; a second object stream is the one
+  // that is over the limit. The raw-byte fallback cannot see inside the first, so the scan
+  // refuses the file instead of reporting "nothing found".
+  it('reports the open action when the second object stream is small', async () => {
+    const report = await scanPdfThreats(
+      openActionFileWithSecondObjectStream(await zlibOf(new Uint8Array(1024), 0, 0)),
+    );
+    expect(report.riskLevel).toBe('medium');
+    expect(byCategory(report, 'OpenAction')).toHaveLength(1);
+  });
+
+  it('rejects with ResourceLimitError when an object stream decodes above the limit', async () => {
+    const file = openActionFileWithSecondObjectStream(await zlibOf(new Uint8Array(0), 257, 0));
+    expect(file.length).toBeLessThan(2 * 1024 * 1024);
+    const error = await scanPdfThreats(file).then(
+      () => undefined,
+      (caught: unknown) => caught,
+    );
+    expect(error).toBeInstanceOf(ResourceLimitError);
+    expect(error).toMatchObject({ limit: 'maxDecodedStreamBytes', max: 256 * 1024 * 1024 });
+  }, 60_000);
 });

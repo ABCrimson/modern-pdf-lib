@@ -58,6 +58,7 @@ import { PdfObjectRegistry } from '../core/pdfObjects.js';
 import { PdfLexer } from '../parser/lexer.js';
 import { PdfObjectParser } from '../parser/objectParser.js';
 import { XrefParser } from '../parser/xrefParser.js';
+import { ResourceLimitError } from '../errors.js';
 import type { XrefEntry } from '../parser/xrefParser.js';
 import { verifyUserPassword } from '../crypto/keyDerivation.js';
 import type { EncryptDictValues } from '../crypto/keyDerivation.js';
@@ -142,6 +143,8 @@ const BIT_PRINT_HIGH_RES = 1 << 11; // bit 12
  * @returns    A {@link EncryptionReport}.  If the trailer has no
  *             `/Encrypt` entry (or the file is unparseable) the report is
  *             `{ encrypted: false }`.
+ * @throws {ResourceLimitError} When the cross-reference data decodes past an
+ *             internal limit: the file is refused, not reported as unencrypted.
  */
 export async function inspectEncryption(pdf: Uint8Array): Promise<EncryptionReport> {
   // ---- Locate the trailer and the /Encrypt dictionary --------------------
@@ -211,7 +214,9 @@ interface LocatedEncrypt {
  * `/Encrypt` dictionary and the first element of the `/ID` array.
  *
  * Returns `undefined` when the file has no `/Encrypt` entry or when it
- * cannot be parsed far enough to find one.
+ * cannot be parsed far enough to find one. A {@link ResourceLimitError} from
+ * the cross-reference data is rethrown: a file refused by a limit is not a
+ * file without encryption.
  */
 async function locateEncryptDict(pdf: Uint8Array): Promise<LocatedEncrypt | undefined> {
   // A valid PDF needs at least a header; bail early on obviously-too-short
@@ -234,7 +239,8 @@ async function locateEncryptDict(pdf: Uint8Array): Promise<LocatedEncrypt | unde
 
     fileIdFirst = trailer.id?.[0] ?? new Uint8Array(0);
     entry = entries.get(encryptRef.objectNumber);
-  } catch {
+  } catch (error) {
+    if (error instanceof ResourceLimitError) throw error;
     return undefined;
   }
 

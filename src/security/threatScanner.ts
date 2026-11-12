@@ -67,6 +67,7 @@ import type { PdfObject } from '../core/pdfObjects.js';
 import { PdfDict, PdfName, PdfStream, PdfString, PdfRef } from '../core/pdfObjects.js';
 import type { PdfObjectRegistry } from '../core/pdfObjects.js';
 import { loadPdf } from '../parser/documentParser.js';
+import { ResourceLimitError } from '../errors.js';
 
 // ---------------------------------------------------------------------------
 // Public types
@@ -250,9 +251,13 @@ function extensionOf(name: string): string {
  * The scan never executes any document content. It parses the PDF and walks
  * the parsed object graph (see the module header for the precise method and
  * ISO 32000 references). When parsing fails, a guarded raw-byte fallback runs.
+ * An input refused by an internal limit throws {@link ResourceLimitError}
+ * instead: the fallback cannot see inside compressed object streams, so its
+ * report would be incomplete.
  *
  * @param pdf  Raw PDF bytes.
  * @returns    A report of findings plus the aggregate `riskLevel`.
+ * @throws {ResourceLimitError} When loading the file passes an internal limit (a stream that decodes past its limit, a page tree deeper than its limit).
  */
 export async function scanPdfThreats(pdf: Uint8Array): Promise<ThreatReport> {
   const findings: ThreatFinding[] = [];
@@ -263,7 +268,8 @@ export async function scanPdfThreats(pdf: Uint8Array): Promise<ThreatReport> {
     const registry = doc.getRegistry();
     scanObjectGraph(registry, findings);
     scannedGraph = true;
-  } catch {
+  } catch (error) {
+    if (error instanceof ResourceLimitError) throw error;
     // Parsing failed entirely — fall through to the raw-byte fallback.
     scannedGraph = false;
   }
