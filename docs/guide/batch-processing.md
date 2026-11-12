@@ -151,7 +151,7 @@ The callback is invoked after each item completes (success or failure), making i
 
 ## Per-Item Timeout
 
-Set a maximum execution time per PDF to prevent runaway operations:
+Set a maximum time per PDF for an item that is waiting on asynchronous work:
 
 ```ts
 const result = await processBatch(files, operation, {
@@ -160,7 +160,7 @@ const result = await processBatch(files, operation, {
 });
 ```
 
-Items that exceed the timeout are treated as errors (with the message `Batch item #N timed out after 30000ms`) and handled according to the configured `errorStrategy`.
+Items that exceed the timeout are treated as errors (with the message `Batch item #N timed out after 30000ms`) and handled according to the configured `errorStrategy`. The timer runs on the same thread as the item, so the timeout cannot interrupt synchronous work that is already running; see [Best Practices](#best-practices).
 
 ## Memory Management
 
@@ -273,7 +273,7 @@ console.log(`\nDone: ${result.successCount} succeeded, ${result.errors.size} fai
 
 3. **Use `'continue'` for fault-tolerant pipelines** -- the default error strategy skips bad files and lets you inspect failures afterward. Use `'fail-fast'` only when every file must succeed.
 
-4. **Set per-item timeouts for untrusted input** -- if processing user-uploaded PDFs, a timeout prevents malformed files from blocking the entire batch.
+4. **Set per-item timeouts, and isolate untrusted input** -- each decode stops at the library's internal limits and throws `ResourceLimitError`, which the batch collects under your `errorStrategy` (the values are listed under [Input limits](./performance.md#input-limits)). A per-item `timeout` rejects the item's promise when its timer fires, but it cannot stop synchronous work that is already running on the thread, and the limits bound one stream or call, not the batch. For user-uploaded PDFs, run each item in a worker or child process that you can end, with its own time and memory limit.
 
 5. **`batchMerge()` runs on the calling thread** -- with two or more inputs it merges each chunk and then merges the chunk results, so every page is copied twice; it is not faster than a single `mergePdfs()` call.
 

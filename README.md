@@ -14,8 +14,8 @@ Create, parse, fill, merge, sign, and manipulate PDF documents<br />in Node 26.4
 <br />
 
 [![npm version](https://img.shields.io/npm/v/modern-pdf-lib?style=flat-square&color=cb3837)](https://www.npmjs.com/package/modern-pdf-lib)
-[![createPdf bundle](https://img.shields.io/badge/createPdf_bundle-106_KiB_gzip-blue?style=flat-square)](#install)
-[![tests](https://img.shields.io/badge/tests-7%2C577_passing-brightgreen?style=flat-square)](https://github.com/ABCrimson/modern-pdf-lib/actions/workflows/ci.yml)
+[![createPdf bundle](https://img.shields.io/badge/createPdf_bundle-96_KiB_gzip-blue?style=flat-square)](#install)
+[![tests](https://img.shields.io/badge/tests-8%2C103_passing-brightgreen?style=flat-square)](https://github.com/ABCrimson/modern-pdf-lib/actions/workflows/ci.yml)
 [![TypeScript](https://img.shields.io/badge/TypeScript-7.1_dev-3178c6?style=flat-square&logo=typescript&logoColor=white)](./tsconfig.json)
 [![License: MIT](https://img.shields.io/badge/license-MIT-yellow?style=flat-square)](LICENSE)
 
@@ -80,7 +80,7 @@ Also available via:
 - **unpkg:** `https://unpkg.com/modern-pdf-lib/dist/browser.mjs`
 - **esm.sh:** `https://esm.sh/modern-pdf-lib`
 
-Pin a version in production, for example `modern-pdf-lib@0.40.7`.
+Pin a version in production, for example `modern-pdf-lib@0.40.8`.
 
 ### Script Tag (no modules)
 
@@ -165,8 +165,8 @@ For a plain `<script>` tag without `type="module"`, use the IIFE bundle, which e
 - JSX / VDOM component renderer (`renderJsxToPdf`)
 - JSON Schema &rarr; AcroForm generation
 - Server adapters (`pdfResponse` for Workers/Deno/Bun/Node)
-- JPEG2000 decoding (pure JavaScript; its arithmetic decoder does not pass the T.88 H.2 conformance vector, so decoded pixels can be wrong)
-- WebP embedding (lossless and alpha; lossy VP8 images decode to a flat grey placeholder)
+- JPEG2000 header reading (`parseTileInfo`); decoding throws `UnsupportedFilterError` (code `unsupported-filter`) in this release
+- WebP embedding (lossless and alpha; lossy VP8 images throw `UnsupportedFilterError`, code `unsupported-filter`)
 - TIFF image embedding (multi-page)
 - Image format auto-detection (PNG/JPEG/WebP/TIFF)
 - Form field JavaScript is not evaluated (`createSandbox().execute()` throws `ScriptExecutionDisabledError`, code `script-execution-disabled`); scripts in a document run only in a viewer
@@ -186,6 +186,8 @@ For a plain `<script>` tag without `type="module"`, use the IIFE bundle, which e
 </table>
 
 <!-- capabilities:end -->
+
+**Input limits.** Decode paths refuse input above internal limits with `ResourceLimitError` (code `resource-limit-exceeded`, with `limit`, `max` and `actual`). The limits are per stream, per table and per call, they are fixed in this release, and every file of the test corpus uses at most a quarter of each of them; the values, and what a decode at a limit costs, are in the [Performance guide](./docs/guide/performance.md#input-limits). JPEG 2000 (`/JPXDecode`), JBIG2 (`/JBIG2Decode`) and lossy WebP (VP8) data is not decoded: `decodeStream()`, `decodeImageStream()` and the decoders of those formats throw `UnsupportedFilterError`, while `extractImages()` still returns such images with their encoded bytes and a PDF that holds them loads, saves, merges and copies with those streams unchanged. `extractPageImages()` leaves out an image it cannot decode, and rendering draws no images in this release. See the security advisory published with 0.40.8 on the [advisories page](https://github.com/ABCrimson/modern-pdf-lib/security/advisories). A service that handles untrusted files should still run each file under operating-system limits on time and memory.
 
 **Known limits.** A file written by modern-pdf-lib 0.40.6 or earlier holds raw DEFLATE data under `/FlateDecode`. It loads, and `save()` writes those streams back as zlib data, but `saveDocumentIncremental()`, `saveIncremental()` and `signPdf()` keep the file's existing bytes and `linearizePdf()` and `enforcePdfA()` copy its objects as they are, so load such a file and `save()` it before you pass it to them. AES-256 (revision 6) files written by other producers, such as the pyHanko and qpdf files of the test corpus, throw `Failed to decrypt PDF: the provided password is incorrect` with the right password. The open findings that are safe to publish, with the release planned to close each one, are listed in [`audit/open-highs.json`](./audit/open-highs.json).
 
@@ -235,7 +237,7 @@ For a plain `<script>` tag without `type="module"`, use the IIFE bundle, which e
 <td align="center">No</td></tr>
 
 <tr><td><strong>WebP images</strong></td>
-<td align="center">Lossless, alpha (lossy decodes to a flat grey placeholder)</td>
+<td align="center">Lossless, alpha (lossy throws <code>UnsupportedFilterError</code>)</td>
 <td align="center">No</td></tr>
 
 <tr><td><strong>TIFF images</strong></td>
@@ -243,7 +245,7 @@ For a plain `<script>` tag without `type="module"`, use the IIFE bundle, which e
 <td align="center">No</td></tr>
 
 <tr><td><strong>JPEG2000 decoding</strong></td>
-<td align="center">JPXDecode (JP2 + J2K), pure JavaScript; fails the T.88 H.2 conformance vector</td>
+<td align="center">JPXDecode (JP2 + J2K) is recognised; decoding throws <code>UnsupportedFilterError</code> in this release</td>
 <td align="center">No</td></tr>
 
 <tr><td><strong>Form JavaScript</strong></td>
@@ -673,7 +675,7 @@ modern-pdf-lib/
     plugins/        Plugin manager & hooks
     wasm/           Rust crate sources (6 modules)
     cli/            CLI tool (modern-pdf optimize)
-  tests/            7,683 tests in 334 files (projects unit, integration, oracle, adversarial)
+  tests/            8,209 tests in 360 files (projects unit, integration, oracle, adversarial)
   audit/            open-highs.json: the public ledger of open audit findings
   docs/             VitePress documentation
 ```
@@ -686,7 +688,7 @@ modern-pdf-lib/
 git clone https://github.com/ABCrimson/modern-pdf-lib.git
 cd modern-pdf-lib
 pnpm install
-pnpm test          # 334 files, 7,683 tests: with qpdf 7,577 pass, 106 expected failures; without qpdf 7,375 pass, 52 expected failures, 256 skip
+pnpm test          # 360 files, 8,209 tests: with qpdf 8,103 pass, 106 expected failures; without qpdf 7,896 pass, 52 expected failures, 261 skip
 pnpm run typecheck # TypeScript 7.1 dev build: src, cli, scripts, tests, security-tests
 pnpm run build     # ESM + CJS + declarations + IIFE
 ```

@@ -21,6 +21,14 @@ while text stayed in the file.
 > A useful pipeline for untrusted uploads: `scanPdfThreats` to decide whether to
 > accept the file at all, then `sanitizePdf` on everything you do accept.
 
+> [!NOTE]
+> `scanPdfThreats` and `inspectEncryption` throw `ResourceLimitError` (code
+> `resource-limit-exceeded`) for a file that an internal limit refuses, because a
+> refused file is not a file without findings: treat it as rejected. The limits
+> bound one stream, table or call, not a process, so run each untrusted file in a
+> worker or child process with its own time and memory limit. The values are
+> listed under [Input limits](./performance.md#input-limits).
+
 ## Threat scanning
 
 `scanPdfThreats` walks a PDF's **parsed object graph** (not its raw bytes) and

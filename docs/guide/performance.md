@@ -15,7 +15,7 @@ The package ships WebAssembly builds of six Rust crates under `dist/wasm/` (libd
 ### What runs today
 
 - Stream compression uses fflate.
-- PNG and JPEG decoding, font parsing and subsetting, and JBIG2 decoding run in JavaScript.
+- PNG and JPEG decoding, and font parsing and subsetting, run in JavaScript. JPEG 2000, JBIG2 and lossy WebP data is not decoded (see [Input limits](#input-limits)).
 - `initWasm()` without an argument returns at once. `initWasm({ deflate: true })` rejects with "Failed to initialize libdeflate WASM", and the `png`, `fonts` and `jpeg` options resolve without enabling anything.
 - `save({ useWasm: true })` is accepted, and fflate still produces the output.
 - JPEG recompression in `optimizeAllImages()` and `modern-pdf optimize` needs the JPEG WASM encoder, so it changes no image.
@@ -260,29 +260,84 @@ Image handling varies significantly by format:
 
 `saveAsStream()` throws `UnsupportedEncryptionError` for an encrypted document; an encrypted document has to go through `save()` and its memory cost.
 
+## Input limits
+
+Decode, parse and render paths refuse input above internal limits with `ResourceLimitError` (code `resource-limit-exceeded`). The error carries `limit` (the name of the limit), `max` (its value) and `actual` (the size the input needed, or `undefined` when that is not a finite number). A value equal to a limit is accepted; only a value above it is refused. See the security advisory published with 0.40.8 on the [advisories page](https://github.com/ABCrimson/modern-pdf-lib/security/advisories).
+
+| Limit (`error.limit`) | Value | Bounds | Where it throws |
+|:---|---:|:---|:---|
+| `maxDecodedStreamBytes` | 268,435,456 bytes (256 MiB) | The decoded output of one stream filter stage; the decoded content streams of one page together; one predictor row | `loadPdf()`, `decodeStream()`, `decodeImageStream()`, text extraction, rendering, `getContentStream()`, `analyzeImages()` |
+| `maxRewrapDecodedBytes` | 67,108,864 bytes (64 MiB) | The decoded size up to which `save()` rewrites a raw DEFLATE `/FlateDecode` stream as zlib data | Nothing: a larger stream is saved as loaded |
+| `maxCMapMappings` | 1,048,576 mappings | The codes one ToUnicode CMap names | `extractText()`, `extractTextWithPositions()` |
+| `maxFontCmapMappings` | 1,114,112 entries | The codes one font cmap subtable names | Font parsing, such as `embedFont()` with TrueType or OpenType data |
+| `maxDerDepth` | 128 levels | The nesting of constructed DER values in a signature | `verifySignatures()` and `verifySignatureDetailed()` report that signature as not valid (the error is not thrown) |
+| `maxTreeDepth` | 256 levels | The nesting of page-tree nodes, outline items and structure elements | `loadPdf()`, outline reading, structure-tree reading |
+| `maxFormOperators` | 1,048,576 operators | The operators, plus their operand elements, that one page interpretation runs inside Form XObjects | Rendering, `autoTagPage()` |
+| `maxPredictorSamples` | 268,435,456 samples | The samples the sub-byte TIFF predictor visits in one stream | `decodeStream()` and the loading, extraction and rendering that decode streams |
+| `maxImageDimension` | 65,536 pixels | The width or height of one image, or a CCITT `/Columns` or `/Rows` value | `embedPng()`, `decodeTiff()`, `embedTiff()`, `embedTiffDirect()`, `decodeWebP()`, `embedWebP()`, CCITT decoding in `decodeStream()`; `extractPageImages()` skips such an image |
+| `maxImagePixels` | 268,435,456 pixels | Width times height of one decoded image | The same calls |
+| `maxImageBytes` | 268,435,456 bytes (256 MiB) | The decoded sample bytes of one image | The same calls |
+| `maxImageFrames` | 4,096 frames | The frames (TIFF IFDs) read from one file | `decodeTiff()`, `decodeTiffAll()`, `getTiffPageCount()` |
+| `maxFontBytes` | 134,217,728 bytes (128 MiB) | The decoded bytes of one font program, such as the tables of a WOFF file | `decodeWoff()` |
+
+The limits are fixed in this version: no option changes them, and the names in the first column are not a stable API, so test for `error.code` or `instanceof ResourceLimitError` and not for a name. No file of the test corpus uses more than a quarter of any limit.
+
+```ts
+import { loadPdf, ResourceLimitError } from 'modern-pdf-lib';
+
+try {
+  const doc = await loadPdf(bytes);
+  // ... work with doc ...
+} catch (err) {
+  if (err instanceof ResourceLimitError) {
+    // The file needs more than `err.limit` allows (`err.max`); treat it as a file this version does not process.
+    console.error(err.code, err.limit, err.max, err.actual);
+  } else {
+    throw err;
+  }
+}
+```
+
+### What the limits bound
+
+- **Each limit bounds one stream, one table or one call.** A limit is not a total over a file or a process.
+- **A decode at a limit costs what a decode of that size costs.** Input at or just under a limit is accepted, and the memory it takes is larger than the decoded size: a Flate stream that decodes to exactly 256 MiB can use about 2.5 times that (roughly 640 MiB of resident memory), and a large RGBA PNG about four times its decoded size. Input above a limit ends in the error, but when its size is known only by decoding it can already have used as much memory as a decode at the limit by then.
+- **Which calls throw.** `loadPdf()`, text extraction, rendering, `inspectEncryption()`, `scanPdfThreats()` and `autoTagPage()` let a `ResourceLimitError` through. Signature verification reports the one signature as not valid and still checks the others (`verifySignatureDetailed()` puts the refusal in its `errors`). `extractPageImages()` skips the one image it cannot decode.
+- **Run untrusted files under operating-system limits.** The limits keep one call bounded, but they do not bound a process. A service that handles untrusted files should run each file in a worker or a child process with its own wall-clock and memory limit, and end it when either runs out. A promise timeout cannot do this: it cannot stop synchronous work that is already running (see [Batch Processing](./batch-processing.md#best-practices)).
+
+### Formats this version does not decode
+
+JPEG 2000 (`/JPXDecode`), JBIG2 (`/JBIG2Decode`) and lossy WebP (VP8) data throws `UnsupportedFilterError` (code `unsupported-filter`, `filter` `'JPXDecode'`, `'JBIG2Decode'` or `'VP8'`) instead of returning pixels. A PDF that holds such image streams still loads, saves, merges and copies, and the streams are written back unchanged. See [Troubleshooting](./troubleshooting.md#_10-resourcelimiterror-and-unsupportedfiltererror).
+
 ## Concurrency & resource control
 
-### Memory budget (untrusted input)
+### Memory budget (caller accounting)
 
-When processing PDFs from untrusted sources, a `MemoryBudget` rejects work that
-would exceed a ceiling **before** the allocation happens — a guard against
-decompression bombs. It is a pure accounting guard (callers report the size they
-are about to allocate); it does not measure real RSS.
+`MemoryBudget` is an accounting helper for your own code: you report the size you are about to allocate, and it throws `MemoryBudgetExceededError` before you go over a ceiling. It does not measure real memory, and the library's decoders do not use it: they stop at their own internal limits and throw `ResourceLimitError` (see [Input limits](#input-limits)).
 
 ```ts
 import { createMemoryBudget, MemoryBudgetExceededError } from 'modern-pdf-lib';
 
 const budget = createMemoryBudget(256 * 1024 * 1024); // 256 MB ceiling
-try {
-  budget.allocate(expectedInflatedLength); // throws if it would exceed
-  // … decode the stream …
-} catch (e) {
-  if (e instanceof MemoryBudgetExceededError) { /* reject the document */ }
-} finally {
-  budget.release(expectedInflatedLength);
+
+function processItem(expectedLength: number): void {
+  try {
+    // Throws MemoryBudgetExceededError, and reserves nothing, when it would exceed the ceiling.
+    budget.allocate(expectedLength);
+  } catch (e) {
+    if (e instanceof MemoryBudgetExceededError) return; // skip this item
+    throw e;
+  }
+  // Reached only after a successful allocate(), so the release matches a reservation.
+  try {
+    // … your work …
+  } finally {
+    budget.release(expectedLength);
+  }
 }
-// Or scope it automatically:
-budget.withAllocation(size, () => decodeStream(/* … */));
+
+// Or scope it: the reservation is released when the callback returns or throws.
+budget.withAllocation(256, () => { /* … your work … */ });
 ```
 
 ### Shared-memory primitives
@@ -353,8 +408,8 @@ Measured 2026-11-12 from the built `dist/` with esbuild 0.28.2 (`--bundle --mini
 
 | Scenario | Size (minified + gzipped) |
 |:---|:---:|
-| Minimal document (`export { createPdf } from 'modern-pdf-lib'`, `node:*` external) | ~106 KB (108,131 B) |
-| Entire library (`dist/modern-pdf-lib.iife.js`) | ~259 KB (265,157 B) |
+| Minimal document (`export { createPdf } from 'modern-pdf-lib'`, `node:*` external) | ~96 KB (98,217 B) |
+| Entire library (`dist/modern-pdf-lib.iife.js`) | ~249 KB (255,259 B) |
 
 ### Minimizing Bundle Size
 

@@ -197,7 +197,7 @@ const result = parser.end();
 
 ## Best Practices
 
-1. **Set `maxBufferSize` appropriately** -- the default 64 MB limit prevents runaway memory usage, but multi-GB PDFs will need a higher limit. Set it to the maximum file size you expect to handle.
+1. **Set `maxBufferSize` to the largest file you expect** -- the parser holds the whole file in memory until the instance is dropped, and `feed()` throws a `PdfParseError` once the bytes fed would pass `maxBufferSize` (default 64 MB). While chunks are fed, the buffer's capacity is up to twice the bytes fed, and `feed()` takes time linear in the bytes fed whatever the chunk size. Raising `maxBufferSize` raises the memory the parser may hold by the same amount, so a service that handles untrusted files should also run the parser under operating-system limits.
 
 2. **Use `fromStream()` for network data** -- it handles the `ReadableStream` reader lifecycle automatically and is the most ergonomic API for `fetch` responses.
 

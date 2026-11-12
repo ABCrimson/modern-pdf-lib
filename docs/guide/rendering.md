@@ -118,6 +118,8 @@ for (const font of extractFonts(page)) {
 }
 ```
 
+`extractPageImages()` skips an image it cannot decode: JPEG 2000 and JBIG2 images (not decoded in this release), an image above the internal size limits, and malformed data. Rendering does not draw image XObjects in this release, whether or not they decode; composite them from `extractPageImages()`. A page whose Form XObjects run more operators than the internal limit allows makes rendering throw `ResourceLimitError` (code `resource-limit-exceeded`), and so does a font file that decodes to more than the stream limit in `extractFonts()`; see [Input limits](./performance.md#input-limits).
+
 ## OCR overlay (make scans searchable)
 
 Provide any `OcrEngine`; `applyOcr` rasterizes the page, runs recognition, and

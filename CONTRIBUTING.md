@@ -67,7 +67,7 @@ Rust per-crate job.
 
 ```bash
 pnpm run typecheck   # tsc over the root, cli, scripts, tests and security-tests projects
-pnpm run lint        # oxlint + tsgolint, type-aware, --max-warnings=1187
+pnpm run lint        # oxlint + tsgolint, type-aware, --max-warnings=1175
 pnpm test            # vitest run: all four test projects
 pnpm run build       # tsdown + IIFE bundle + dist smoke test
 ```
@@ -102,7 +102,7 @@ Run each as `pnpm run <name>`.
 | `test:e2e` | Playwright browser E2E (`tests/e2e`) |
 | `test:bench` | `vitest bench` over the benchmark files |
 | `bench` | Benchmark suite via the tinybench harness |
-| `lint` / `lint:fix` | oxlint, type-aware; `lint` fails above 1,187 warnings |
+| `lint` / `lint:fix` | oxlint, type-aware; `lint` fails above 1,175 warnings |
 | `format` / `format:check` | oxfmt over `src`, `tests` and `scripts` |
 | `typecheck` | `tsc` over the root, `tsconfig.cli.json`, `tsconfig.scripts.json`, `tsconfig.tests.json` and `tsconfig.security-tests.json` projects |
 | `typecheck:security-tests` | `tsc` over `tsconfig.security-tests.json` only (the files it lists: the 0.40.5 security tests, the qpdf cross-check of encrypted saves, the known-defect helper tests, and `tests/helpers`) |
@@ -208,10 +208,10 @@ all four, and `pnpm run test:<project>` runs one.
 
 | Project | Files | What it holds | Retries |
 |---|---|---|---|
-| `unit` | `tests/unit`, `tests/barcode`, `tests/compliance`, `tests/image`, `tests/layout`, `tests/browser` (318 files) | Module tests; it also owns the benchmark files | 2 |
+| `unit` | `tests/unit`, `tests/barcode`, `tests/compliance`, `tests/image`, `tests/layout`, `tests/browser` (329 files) | Module tests; it also owns the benchmark files | 2 |
 | `integration` | `tests/integration` (4 files) | Cross-module document flows | 2 |
-| `oracle` | `tests/oracle` (11 files) | The library's output judged by tools outside it (qpdf, pdf.js, an independent hash port), the real-world corpus, the API snapshot | 0 |
-| `adversarial` | `tests/adversarial` (1 file) | Form-script escape probes | 0 |
+| `oracle` | `tests/oracle` (14 files) | The library's output judged by tools outside it (qpdf, pdf.js, an independent hash port), the real-world corpus, the API snapshot | 0 |
+| `adversarial` | `tests/adversarial` (12 files) | Form-script escape probes, and inputs that must end in their error inside the budget of `tests/helpers/budget.ts` | 0 |
 
 The unit and integration projects retry a failed test twice, so a rare
 timing flake under full-suite load does not fail the run; a genuinely broken
@@ -219,18 +219,31 @@ test fails all three attempts. The oracle and adversarial projects never
 retry: a failure there is a result. Every test file must match exactly one
 project (`pnpm run check:test-projects`).
 
+The adversarial project runs one file at a time (`fileParallelism: false`, so no
+other file competes for the CPU) with retry 0. A file that checks a limit is a
+pair: `tests/adversarial/<name>.test.ts` holds the assertions, and
+`tests/adversarial/<name>.bodies.ts` holds the entries the runner loads, which
+build their inputs in code. `runWithinBudget()` in `tests/helpers/budget.ts` runs
+one entry on one input in a worker inside a child process, samples the child's
+resident memory and reports `completed`, `threw` (error name, code and limit) or
+`killed` (time, memory or crash). `DEFAULT_BUDGET` is 2000 ms and 512 MiB of
+resident-memory growth: an input above a limit, and a malformed input, must end
+in its error inside it (a page whose content streams pass the limit only together is held to `AT_LIMIT_BUDGET`). `AT_LIMIT_BUDGET` (5000 ms, 1536 MiB) is for an input at
+or just under a limit, which is accepted and must complete; a regression in the
+cost of a decode at a limit fails there.
+
 | Directory | Contents | Count |
 |---|---|---|
-| `tests/unit/` | Per-module unit tests mirroring `src/` | 272 files |
+| `tests/unit/` | Per-module unit tests mirroring `src/` | 283 files |
 | `tests/layout/` | Table, header/footer, and text-layout behaviour | 11 files |
 | `tests/barcode/` | Symbology encoders (QR, Code 128, EAN, PDF417, …) | 10 files |
 | `tests/image/` | Image decoders and embedding | 9 files |
 | `tests/browser/` | Browser-surface APIs under a simulated DOM | 8 files |
 | `tests/compliance/` | PDF/A, PDF/X, PDF/UA, e-invoicing conformance | 8 files |
 | `tests/integration/` | Cross-module end-to-end document flows | 4 files |
-| `tests/oracle/` | Outside oracles: the writer matrix (qpdf and pdf.js on each writer path); AES and RC4 in both directions, with the PDF 2.0 password hash checked against qpdf-generated cases; `saveAsStream()` output; a 10,000-field document; the qpdf cross-check of encrypted saves; the read-old gate over the 0.40.3 fixtures; redaction leaks (pdf.js and a raw byte search); the corpus; the capability evidence; the zlib form of every `/FlateDecode` stream the writers and image encoders produce, judged by node:zlib, qpdf and pdf.js; and `packaging/` (the API snapshot `exports.api.json` and its test) | 11 files |
-| `tests/adversarial/` | Form-script escape probes against `FormScriptSandbox` | 1 file |
-| `tests/helpers/` | `known-defect.ts` (the known-defect marker), `oracle/` (the qpdf and pdf.js wrappers, the setup file that fails an oracle test whose saved PDF did not go through qpdf, and the independent hash port) and the signature-trust fixtures (no tests of its own) | — |
+| `tests/oracle/` | Outside oracles: the writer matrix (qpdf and pdf.js on each writer path); AES and RC4 in both directions, with the PDF 2.0 password hash checked against qpdf-generated cases; `saveAsStream()` output; a 10,000-field document; the qpdf cross-check of encrypted saves; the read-old gate over the 0.40.3 fixtures; redaction leaks (pdf.js and a raw byte search); the corpus; the capability evidence; the zlib form of every `/FlateDecode` stream the writers and image encoders produce, judged by node:zlib, qpdf and pdf.js; the limits headroom over every corpus, legacy and fixture file; the byte-for-byte copy of JPX and JBIG2 streams on save, merge and copy, judged by qpdf; and `packaging/` (the API snapshot `exports.api.json` and its test) | 13 files |
+| `tests/adversarial/` | Form-script escape probes against `FormScriptSandbox`; the `<name>.test.ts` and `<name>.bodies.ts` pairs that run decode, parse and render inputs under the budget runner | 12 files |
+| `tests/helpers/` | `budget.ts`, `budget-child.ts` and `budget-worker.ts` (the budget runner: `runWithinBudget()`, `DEFAULT_BUDGET`, `AT_LIMIT_BUDGET`), `known-defect.ts` (the known-defect marker), `oracle/` (the qpdf and pdf.js wrappers, the setup file that fails an oracle test whose saved PDF did not go through qpdf, and the independent hash port) and the signature-trust fixtures (no tests of its own) | — |
 | `tests/e2e/` | Playwright specs (`*.spec.ts`) driven through Vite | 1 spec |
 | `tests/benchmarks/` | Benchmark suites (`pnpm run bench`, `pnpm run test:bench`) | — |
 | `tests/fixtures/` | Shared sample PDFs and generated inputs; `legacy-0.40.3/` holds eight PDFs written by the published 0.40.3 and a `manifest.json` of their hashes (generator: `scripts/legacy-0.40.3/generate.ts`; regenerate with `pnpm run fixtures:legacy`, never edit by hand) | — |
@@ -270,9 +283,9 @@ the checksum-pinned qpdf and exports `QPDF`. The API snapshot test needs
 `dist/` and `dist/wasm/` (`pnpm run build`, `pnpm run copy:wasm`) and the
 release tags: locally it skips without them, and in CI it fails.
 
-With qpdf and a built `dist/`, `pnpm test` reports 334 files and 7,683
-tests: 7,577 passed and 106 expected failures (the markers). Without qpdf,
-7,375 pass, 52 are expected failures and 256 skip.
+With qpdf and a built `dist/`, `pnpm test` reports 360 files and 8,209
+tests: 8,103 passed and 106 expected failures (the markers). Without qpdf,
+7,896 pass, 52 are expected failures and 261 skip.
 
 ---
 
@@ -308,7 +321,7 @@ waits on WASM, so style and type failures surface first.
 
 | Job | Gate |
 |---|---|
-| Lint & Type-check | `pnpm run typecheck` (five projects), `pnpm run lint` (type-aware oxlint, 0 errors, at most 1,187 warnings), `pnpm run check:test-projects` and `pnpm run check:known-defects` |
+| Lint & Type-check | `pnpm run typecheck` (five projects), `pnpm run lint` (type-aware oxlint, 0 errors, at most 1,175 warnings), `pnpm run check:test-projects` and `pnpm run check:known-defects` |
 | Build WASM | All six crates compile for `wasm32-unknown-unknown` |
 | Build TypeScript | `pnpm run build` succeeds and `dist/` imports as ESM **and** CJS |
 | Pack Check | `pnpm run check:pack`: the tarball lists six WASM builds and the IIFE bundle and passes publint and attw |
@@ -369,8 +382,8 @@ Version numbers follow the project's own scheme — see [VERSIONING.md](./VERSIO
 
 | Module | Responsibility |
 |---|---|
-| `src/core/` | Document model, pages, object registry, writer, incremental save, merging |
-| `src/parser/` | PDF parser, streaming parser, image decoders (CCITT, JBIG2, JPEG 2000) |
+| `src/core/` | Document model, pages, object registry, writer, incremental save, merging, the internal limits (`limits.ts`) |
+| `src/parser/` | PDF parser, streaming parser, stream filters and the CCITT decoder (JPEG 2000 and JBIG2 data throws `UnsupportedFilterError`) |
 | `src/assets/` | Font, image, SVG, Markdown, and virtual-DOM embedding |
 | `src/render/` | Content-stream interpreter, display list, rasterizer, Canvas adapter, OCR, diff |
 | `src/annotation/` | Annotation objects, appearance generation, `/Redact` annotations (applying them throws `RedactionIncompleteError`, code `redaction-incomplete`, in this release) |

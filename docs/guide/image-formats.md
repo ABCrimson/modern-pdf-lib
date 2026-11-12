@@ -10,7 +10,7 @@ modern-pdf-lib supports embedding images in all major raster formats. Each forma
 |--------|-----------|-------------|--------------|--------------|---------------|
 | **PNG** | `.png` | Lossless (Deflate) | Yes (alpha channel) | Gray, RGB, Indexed, RGBA | FlateDecode |
 | **JPEG** | `.jpg`, `.jpeg` | Lossy (DCT) | No | Gray, RGB, CMYK | DCTDecode (passthrough) |
-| **WebP** | `.webp` | Lossy (VP8) or Lossless (VP8L) | Yes (alpha) | RGB, RGBA | Decoded; FlateDecode RGB (+ `/SMask` for alpha) |
+| **WebP** | `.webp` | Lossless (VP8L); lossy (VP8) throws `UnsupportedFilterError` | Yes (alpha) | RGB, RGBA | Decoded; FlateDecode RGB (+ `/SMask` for alpha) |
 | **TIFF** | `.tif`, `.tiff` | None, PackBits, LZW, Deflate, JPEG | Alpha from a 4th sample | Gray, RGB, RGBA (`embedTiff`); CMYK via `embedTiffDirect` (see [TIFF](#tiff)) | Decoded + FlateDecode (`embedTiff`) or passthrough (`embedTiffDirect`) |
 
 <!-- capabilities:end -->
@@ -124,7 +124,7 @@ const quality = estimateJpegQuality(jpegBytes);
 
 ## WebP
 
-WebP is a modern format developed by Google that offers both lossy and lossless compression. Since PDF does not natively support WebP, images are decoded to RGB(A) pixels and stored losslessly with FlateDecode. Lossy WebP decodes to a flat grey placeholder; lossless and alpha decode.
+WebP is a modern format developed by Google that offers both lossy and lossless compression. Since PDF does not natively support WebP, images are decoded to RGB(A) pixels and stored losslessly with FlateDecode. Lossy WebP (VP8) is not decoded in this release: every call that decodes it (`embedWebP()`, `embedImage()`, `decodeWebP()`) throws `UnsupportedFilterError` (code `unsupported-filter`, `filter` `'VP8'`). Lossless WebP and its alpha decode.
 
 ### Embedding
 
@@ -147,7 +147,7 @@ const jpegBytes = recompressWebP(decodedPixels, width, height, 85);
 
 ### Features
 
-- VP8L (lossless) decoding; VP8 (lossy) decodes to a flat grey placeholder
+- VP8L (lossless) decoding; VP8 (lossy) throws `UnsupportedFilterError`, so convert a lossy image to PNG or JPEG before embedding it
 - Alpha channel support
 - Decoded pixels stored losslessly (FlateDecode); alpha becomes a soft mask
 - `recompressWebP()` encodes decoded pixels as JPEG with a quality setting; `embedWebP()` does not use it
@@ -307,7 +307,7 @@ Is it a photograph?
 | Approach | Speed | Quality | Supported Formats |
 |----------|-------|---------|-------------------|
 | **Direct passthrough** | Fastest | No loss | JPEG, PNG (no alpha, no interlace), TIFF (uncompressed, single-strip Deflate without predictor, JPEG) |
-| **Decode + Flate** | Slower | Lossless (decoded pixels) | WebP, TIFF (LZW, PackBits), PNG (alpha, interlaced) |
+| **Decode + Flate** | Slower | Lossless (decoded pixels) | WebP (lossless), TIFF (LZW, PackBits), PNG (alpha, interlaced) |
 
 <!-- capabilities:end -->
 
@@ -337,6 +337,12 @@ const report = await optimizeAllImages(doc, {
 ```
 
 Recompression needs the JPEG WASM encoder, which the library does not load by itself; see [Image Optimization](./image-optimization.md).
+
+## Size limits
+
+Image decoding and embedding refuse an image whose width or height is above 65,536 pixels, whose width times height is above 268,435,456 pixels, or whose decoded samples take more than 268,435,456 bytes (256 MiB), and a TIFF file that holds more than 4,096 frames. The call throws `ResourceLimitError` (code `resource-limit-exceeded`); `extractPageImages()` skips the one image instead. An image at a limit is accepted, and decoding it takes a multiple of its decoded size in memory (about four times for a large RGBA PNG). See [Input limits](./performance.md#input-limits) and [Troubleshooting](./troubleshooting.md#_10-resourcelimiterror-and-unsupportedfiltererror).
+
+---
 
 ## Next-generation formats (AVIF, HEIC, JPEG XL)
 

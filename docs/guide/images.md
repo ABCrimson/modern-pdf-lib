@@ -4,15 +4,15 @@ This guide covers embedding and drawing images in PDF documents with `modern-pdf
 
 ## Overview
 
-`modern-pdf-lib` embeds four raster formats (PNG, JPEG, WebP, TIFF). JPEG 2000 is decode-only:
+`modern-pdf-lib` embeds four raster formats (PNG, JPEG, WebP, TIFF). JPEG 2000 is not decoded in this release:
 
 | Format | Method | Notes |
 |---|---|---|
 | **PNG** | `pdf.embedPng()` | Full support including alpha transparency; 8-bit PNGs without alpha, `tRNS` transparency or interlacing keep their IDAT data, others are decoded in pure JavaScript |
 | **JPEG** | `pdf.embedJpeg()` | Zero-copy passthrough — the raw JPEG bytes are written directly into the PDF |
-| **WebP** | `pdf.embedWebP()` | Lossless and alpha decode; lossy WebP decodes to a flat grey placeholder — see [Image Formats](./image-formats.md) |
+| **WebP** | `pdf.embedWebP()` | Lossless and alpha decode; lossy WebP throws `UnsupportedFilterError` — see [Image Formats](./image-formats.md) |
 | **TIFF** | `pdf.embedTiff()` | Multi-page aware (`{ page }` option) — see [Image Formats](./image-formats.md) |
-| **JPEG 2000** | `decodeJpeg2000()` | Decode-only (returns pixels); there is no embed method — see [JPEG 2000 Support](./jpeg2000.md) |
+| **JPEG 2000** | `decodeJpeg2000()` | Throws `UnsupportedFilterError` in this release; there is no embed method — see [JPEG 2000 Support](./jpeg2000.md) |
 
 Don't know the format ahead of time? `pdf.embedImage()` sniffs the magic bytes and dispatches to the right decoder automatically.
 

@@ -4,6 +4,11 @@ modern-pdf-lib parses, decrypts, and renders **untrusted binary input**. We take
 reports against that surface seriously and will work with you on a coordinated
 disclosure.
 
+The decoders, parsers and renderer refuse input above internal limits (see
+[Input limits](./docs/guide/performance.md#input-limits)). Those limits bound one
+stream, one table or one call, not a process, so a service that handles untrusted
+files should still run each file under operating-system limits on time and memory.
+
 ---
 
 ## Supported Versions
@@ -18,6 +23,38 @@ support branches while the project is pre-1.0.
 
 If you are on an older release, upgrade before filing — the issue may already be
 fixed. See [CHANGELOG.md](./CHANGELOG.md) and [VERSIONING.md](./VERSIONING.md).
+
+---
+
+## Fixed in 0.40.8
+
+0.40.8 closes one class of defect: crafted PDF, image, font, SVG or signature data
+that made a decoder, parser, text extractor, renderer or signature parser run
+without end or allocate memory without bound.
+[See the security advisory published with 0.40.8](https://github.com/ABCrimson/modern-pdf-lib/security/advisories).
+
+- **Limits.** Stream decoding, image decoding, fonts, CMaps, SVG paths, outlines,
+  structure trees, page trees, rendering and signature parsing refuse input above
+  internal limits and throw `ResourceLimitError` (code `resource-limit-exceeded`,
+  with `limit`, `max` and `actual`). The values are listed under
+  [Input limits](./docs/guide/performance.md#input-limits). They are per stream,
+  per table and per call, they are fixed in this version, and no option changes
+  them. A decode that stops at a limit can still use about 2.5 times the decoded
+  size in memory for Flate data and about four times for a large RGBA PNG.
+- **Where the error goes.** `loadPdf()`, text extraction, rendering,
+  `inspectEncryption()`, `scanPdfThreats()` and `autoTagPage()` let it through.
+  Signature verification reports the one signature as not valid and still checks
+  the others. `extractPageImages()` skips the one image it cannot decode.
+- **Malformed sizes.** A malformed size field throws the module's parse error
+  instead of making the call loop or allocate from it.
+- **Formats that are not decoded.** JPEG 2000 (`/JPXDecode`), JBIG2
+  (`/JBIG2Decode`) and lossy WebP (VP8) decoding throws `UnsupportedFilterError`
+  (code `unsupported-filter`) instead of returning wrong pixels. A PDF that holds
+  such image streams still loads, saves, merges and copies, and the streams are
+  written back unchanged.
+- **Streaming parser.** `StreamingPdfParser` holds the whole input in memory (at
+  most `maxBufferSize`, default 64 MB), and `feed()` takes time linear in the bytes
+  fed whatever the chunk size.
 
 ---
 
@@ -109,7 +146,7 @@ These areas are security-sensitive. A report against any of them is in scope.
 |---|---|---|
 | Encryption | `src/crypto/` | RC4 and AES encrypt/decrypt, key derivation, permission flags |
 | Digital signatures | `src/signature/` | PKCS#7/CAdES signing, certificate chain validation, CRL/OCSP revocation, LTV |
-| PDF parsing | `src/parser/` | Document parser and image decoders (CCITT, JBIG2, JPEG 2000) — the primary untrusted-input surface |
+| PDF parsing | `src/parser/` | Document parser and image decoders (CCITT; JBIG2 and JPEG 2000 throw `UnsupportedFilterError`), with internal limits that throw `ResourceLimitError` — the primary untrusted-input surface |
 | Form scripting | `src/form/` | Arithmetic calculation evaluator and script attachment; script execution is disabled (`createSandbox().execute()` throws `ScriptExecutionDisabledError`, code `script-execution-disabled`) |
 | Security tooling | `src/security/` | Threat scanner, sanitizer, redaction verifier, encryption inspector |
 | WASM modules | `src/wasm/` | Rust crates for deflate, PNG, TTF, shaping, JBIG2, and JPEG |
@@ -125,6 +162,11 @@ These areas are security-sensitive. A report against any of them is in scope.
 ### Particularly valuable reports
 
 - Memory-exhaustion or infinite-loop denial of service reachable from a crafted PDF.
+  In particular, a decode, parse or render call that, on one input above a limit
+  or one malformed, runs longer than 2 s or uses more than 512 MiB of memory
+  without throwing `ResourceLimitError` (the budget of the adversarial tests); an input whose
+  size is known only by decoding can use the memory of a decode at the limit before the error
+  (see Input limits).
 - A signature that verifies when it should not (chain, revocation, or byte-range confusion).
 - Encryption or permission checks that can be bypassed.
 - A redaction entry point (`redactRegions`, `applyRedactions`,

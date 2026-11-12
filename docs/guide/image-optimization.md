@@ -123,10 +123,12 @@ for (const img of images) {
   console.log(`${img.name}: ${img.width}x${img.height} ${img.colorSpace}`);
   console.log(`  Page ${img.pageIndex}, ${img.compressedSize} bytes, filter: ${img.filters.join(',')}`);
 
-  // Decode to raw bytes if needed
+  // Decode to raw bytes if needed; JPXDecode and JBIG2Decode images throw UnsupportedFilterError
   const raw = decodeImageStream(img);
 }
 ```
+
+`extractImages()` returns every image with its encoded bytes. `decodeImageStream()` throws `UnsupportedFilterError` (code `unsupported-filter`) for a `JPXDecode` or `JBIG2Decode` image, and `ResourceLimitError` (code `resource-limit-exceeded`) when the decoded data passes an internal limit (see [Input limits](./performance.md#input-limits)). Once the JPEG encoder is initialised, `optimizeAllImages()` skips a `JPXDecode` or `JBIG2Decode` image with the reason `Image filter JPXDecode is not decoded in this release` (or `JBIG2Decode`), and it rethrows a `ResourceLimitError`.
 
 ## DPI Analysis
 

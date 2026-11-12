@@ -15,6 +15,7 @@ Find your symptom, jump to the fix:
 | Extracted text is mojibake | [7. Text Extraction Garbage](#_7-text-extraction-garbage) |
 | `Form field "x" not found.` when filling a form | [8. Form Field Not Found](#_8-form-field-not-found) |
 | A real-world PDF fails to parse | [9. Common Parsing Failures](#_9-common-parsing-failures) |
+| `ResourceLimitError` or `UnsupportedFilterError` is thrown | [10. ResourceLimitError and UnsupportedFilterError](#_10-resourcelimiterror-and-unsupportedfiltererror) |
 
 ## 1. EncryptedPdfError
 
@@ -191,7 +192,7 @@ Remove the `initWasm()` call. Compression (fflate), image decoding, font subsett
 
 ### What happens
 
-Calling `doc.save()` on a document with hundreds of pages or many large images causes the process to run out of memory (OOM), or the browser tab crashes.
+Calling `doc.save()` on a document with hundreds of pages or many large images causes the process to run out of memory (OOM), or the browser tab crashes. If the memory runs out while loading or decoding a file you did not write, see [10. ResourceLimitError and UnsupportedFilterError](#_10-resourcelimiterror-and-unsupportedfiltererror).
 
 ### Why it happens
 
@@ -471,4 +472,59 @@ try {
 ```
 
 > [!NOTE]
-> The default behavior (`throwOnInvalidObject: false`) silently skips unparseable objects. This is usually what you want for production code, since many real-world PDFs contain minor structural errors that do not affect the visible content. Enable `throwOnInvalidObject: true` only when you need strict validation.
+> The default behavior (`throwOnInvalidObject: false`) silently skips unparseable objects. This is usually what you want for production code, since many real-world PDFs contain minor structural errors that do not affect the visible content. Enable `throwOnInvalidObject: true` only when you need strict validation. A `ResourceLimitError` is never skipped, in either mode: `loadPdf()` throws it (see [10. ResourceLimitError and UnsupportedFilterError](#_10-resourcelimiterror-and-unsupportedfiltererror)).
+
+
+## 10. ResourceLimitError and UnsupportedFilterError
+
+### What happens
+
+A load, decode, text-extraction, rendering or embedding call throws `ResourceLimitError` (code `resource-limit-exceeded`):
+
+```
+ResourceLimitError: Input exceeds the internal limit maxImageDimension (65536 pixels).
+```
+
+Or a decode call throws `UnsupportedFilterError` (code `unsupported-filter`):
+
+```
+UnsupportedFilterError: JPEG 2000 (JPXDecode) image data is not decoded in this release.
+```
+
+`ResourceLimitError` carries `limit` (the name of the limit), `max` (its value) and `actual` (the size the input needed, or `undefined` when that is not a finite number). `UnsupportedFilterError` carries `filter`, which is `'JPXDecode'`, `'JBIG2Decode'` or `'VP8'`.
+
+Two calls do not throw for these errors: signature verification reports the one signature as not valid and still checks the others, and `extractPageImages()` skips the one image it cannot decode. Rendering draws no images in this release.
+
+### Why it happens
+
+- **`ResourceLimitError`:** the input needs more than one of the library's internal limits allows. The limits bound one stream, one table or one call, they are fixed in this version, and every file of the test corpus stays at or below a quarter of each of them. The values are listed under [Input limits](./performance.md#input-limits).
+- **`UnsupportedFilterError`:** the data uses a format this release does not decode: JPEG 2000 (`/JPXDecode`), JBIG2 (`/JBIG2Decode`) or lossy WebP (VP8). The error is thrown before any of the data is read, so no wrong pixels are returned.
+
+### How to fix it
+
+The limits cannot be changed in this version. Treat a file that throws `ResourceLimitError` as one this version does not process: reject it, or hand it to a tool that does. For an image above the size limits, scale it down before you embed it. Do not retry the same call on the same bytes.
+
+```ts
+import { loadPdf, ResourceLimitError, UnsupportedFilterError } from 'modern-pdf-lib';
+
+try {
+  const doc = await loadPdf(bytes);
+  // ... work with doc ...
+} catch (err) {
+  if (err instanceof ResourceLimitError) {
+    console.error(`Refused by ${err.limit}: the input needs more than ${err.max}`);
+  } else if (err instanceof UnsupportedFilterError) {
+    console.error(`Not decoded in this release: ${err.filter}`);
+  } else {
+    throw err;
+  }
+}
+```
+
+For `UnsupportedFilterError`:
+
+- **Lossy WebP:** convert the image to PNG or JPEG before embedding it. Lossless WebP still embeds.
+- **A PDF that holds JPEG 2000 or JBIG2 images:** the file still loads, saves, merges and copies, and those streams are written back unchanged. `extractImages()` returns such images with their encoded bytes, which a dedicated decoder can read. `decodeImageStream()` and `decodeStream()` throw for them.
+
+> [!WARNING]
+> The limits keep one call bounded; they do not bound a process, and nothing caps the total over many streams or files. For untrusted files, run each one in a worker or child process with its own time and memory limit.
