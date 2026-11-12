@@ -16,6 +16,11 @@
  *   and to the raw search, and `verifyRedactions` reports it where it is in
  *   page content, never clean.
  *
+ * Every file a test writes with `compress: false` (the saves inside the Form
+ * XObject and loaded fixtures included) goes through `qpdf --check`
+ * (expectQpdfClean); a test that writes one skips with a reason where qpdf is
+ * absent locally and fails when `CI` is set (requireQpdf).
+ *
  * pdf.js is the legacy build for Node (no worker setup, no canvas).
  */
 
@@ -32,6 +37,7 @@ import {
   verifyRedactions,
 } from '../../src/index.js';
 import type { PdfDocument, PdfPage, PdfRef, RedactRect } from '../../src/index.js';
+import { expectQpdfClean, requireQpdf } from '../helpers/oracle/qpdf.js';
 
 // ---------------------------------------------------------------------------
 // Oracle helpers
@@ -203,7 +209,9 @@ const plainFixture = (): Promise<Fixture> =>
 async function formFixture(): Promise<Fixture> {
   const a = await helvetica([['SECRET', 10, 100]]);
   const doc = createPdf();
-  const [embedded] = await doc.embedPdf(await a.doc.save({ compress: false }), [0]);
+  const source = await a.doc.save({ compress: false });
+  expectQpdfClean(source);
+  const [embedded] = await doc.embedPdf(source, [0]);
   if (!embedded) throw new Error('embedPdf returned no page');
   const page = doc.addPage([300, 300]);
   page.drawPage(embedded, { x: 0, y: 0 });
@@ -220,7 +228,9 @@ async function imageFixture(): Promise<Fixture> {
 
 /** The plain page saved, then loaded: a page whose content comes from a file. */
 async function loadedFixture(): Promise<Fixture> {
-  const doc = await loadPdf(await (await plainFixture()).doc.save({ compress: false }));
+  const source = await (await plainFixture()).doc.save({ compress: false });
+  expectQpdfClean(source);
+  const doc = await loadPdf(source);
   return { doc, page: doc.getPage(0) };
 }
 
@@ -230,11 +240,36 @@ async function loadedFixture(): Promise<Fixture> {
 
 const rect: RedactRect = { x: 0, y: 90, width: 200, height: 40 };
 
+/** `savesWhileBuilt`: build() writes a file (and checks it with qpdf). */
 const KINDS = [
-  { kind: 'plain-text page', build: plainFixture, text: true, inPageContent: true },
-  { kind: 'Form XObject page', build: formFixture, text: true, inPageContent: false },
-  { kind: 'image page', build: imageFixture, text: false, inPageContent: false },
-  { kind: 'loaded page', build: loadedFixture, text: true, inPageContent: true },
+  {
+    kind: 'plain-text page',
+    build: plainFixture,
+    text: true,
+    inPageContent: true,
+    savesWhileBuilt: false,
+  },
+  {
+    kind: 'Form XObject page',
+    build: formFixture,
+    text: true,
+    inPageContent: false,
+    savesWhileBuilt: true,
+  },
+  {
+    kind: 'image page',
+    build: imageFixture,
+    text: false,
+    inPageContent: false,
+    savesWhileBuilt: false,
+  },
+  {
+    kind: 'loaded page',
+    build: loadedFixture,
+    text: true,
+    inPageContent: true,
+    savesWhileBuilt: true,
+  },
 ] as const;
 
 /** Assert the secret (or the image) is still in the saved `bytes`. */
@@ -248,15 +283,19 @@ async function expectContentPresent(bytes: Uint8Array, text: boolean): Promise<v
   }
 }
 
-for (const { kind, build, text, inPageContent } of KINDS) {
+for (const { kind, build, text, inPageContent, savesWhileBuilt } of KINDS) {
   describe(`redaction exit gate: ${kind}`, () => {
-    it('control: the content is in the saved file', async () => {
+    it('control: the content is in the saved file', async (ctx) => {
+      requireQpdf(ctx);
       const { doc } = await build();
-      await expectContentPresent(await doc.save({ compress: false }), text);
+      const bytes = await doc.save({ compress: false });
+      expectQpdfClean(bytes);
+      await expectContentPresent(bytes, text);
     });
 
     for (const entry of ENTRY_POINTS) {
-      it(`${entry} throws redaction-unavailable and leaves the page unchanged`, async () => {
+      it(`${entry} throws redaction-unavailable and leaves the page unchanged`, async (ctx) => {
+        if (savesWhileBuilt) requireQpdf(ctx);
         const { doc, page } = await build();
         const apply = stage(entry, doc, page, rect);
         const before = snapshot(page);
@@ -264,12 +303,14 @@ for (const { kind, build, text, inPageContent } of KINDS) {
         expect(snapshot(page)).toEqual(before);
       });
 
-      it(`${entry} leaves the secret in the saved file, and the verifier reports it`, async () => {
+      it(`${entry} leaves the secret in the saved file, and the verifier reports it`, async (ctx) => {
+        requireQpdf(ctx);
         const { doc, page } = await build();
         const apply = stage(entry, doc, page, rect);
         expectUnavailable(apply);
 
         const bytes = await doc.save({ compress: false });
+        expectQpdfClean(bytes);
         await expectContentPresent(bytes, text);
 
         const report = await verifyRedactions(bytes, [{ page: 0, ...rect }]);

@@ -1,0 +1,130 @@
+{
+  "producer": "qpdf version 12.4.2",
+  "userPassword": "user",
+  "ownerPassword": "owner",
+  "text": "Oracle text",
+  "title": "Oracle fixture",
+  "files": [
+    {
+      "file": "source.pdf",
+      "sha256": "e7f1ed8f67dea9ad0bf5d289e931f1dce025dad7997e987042490a8cc857eccb",
+      "bytes": 1191,
+      "made": "literals in scripts/oracle/encrypted-fixtures.ts",
+      "check": "sha256"
+    },
+    {
+      "file": "rc4-40-r2.pdf",
+      "sha256": "30b395c1bd3997345ce2da9b3a9c360715a9f625aabb93e6b58e2445f7156c55",
+      "bytes": 1451,
+      "made": "qpdf --static-id --static-aes-iv --allow-weak-crypto source.pdf --encrypt --user-password=user --owner-password=owner --bits=40 -- rc4-40-r2.pdf",
+      "check": "sha256",
+      "encryption": {
+        "R": "2",
+        "P": "-4",
+        "User password": "user",
+        "extract for accessibility": "allowed",
+        "extract for any purpose": "allowed",
+        "print low resolution": "allowed",
+        "print high resolution": "allowed",
+        "modify document assembly": "allowed",
+        "modify forms": "allowed",
+        "modify annotations": "allowed",
+        "modify other": "allowed",
+        "modify anything": "allowed"
+      }
+    },
+    {
+      "file": "rc4-128-r3.pdf",
+      "sha256": "441945d6acbd4e36094a2c5cb90b8e9ff8839b6b03ad3067e703110f5befd3b4",
+      "bytes": 1452,
+      "made": "qpdf --static-id --static-aes-iv --allow-weak-crypto source.pdf --encrypt --user-password=user --owner-password=owner --bits=128 --use-aes=n -- rc4-128-r3.pdf",
+      "check": "sha256",
+      "encryption": {
+        "R": "3",
+        "P": "-4",
+        "User password": "user",
+        "extract for accessibility": "allowed",
+        "extract for any purpose": "allowed",
+        "print low resolution": "allowed",
+        "print high resolution": "allowed",
+        "modify document assembly": "allowed",
+        "modify forms": "allowed",
+        "modify annotations": "allowed",
+        "modify other": "allowed",
+        "modify anything": "allowed"
+      }
+    },
+    {
+      "file": "aes-128-r4.pdf",
+      "sha256": "09e41f97e76de01220dad7d218f7a0a4835fde4d853d4ddcbc03d295ab19cf61",
+      "bytes": 1657,
+      "made": "qpdf --static-id --static-aes-iv source.pdf --encrypt --user-password=user --owner-password=owner --bits=128 --use-aes=y -- aes-128-r4.pdf",
+      "check": "sha256",
+      "encryption": {
+        "R": "4",
+        "P": "-4",
+        "User password": "user",
+        "extract for accessibility": "allowed",
+        "extract for any purpose": "allowed",
+        "print low resolution": "allowed",
+        "print high resolution": "allowed",
+        "modify document assembly": "allowed",
+        "modify forms": "allowed",
+        "modify annotations": "allowed",
+        "modify other": "allowed",
+        "modify anything": "allowed",
+        "stream encryption method": "AESv2",
+        "string encryption method": "AESv2",
+        "file encryption method": "AESv2"
+      }
+    },
+    {
+      "file": "aes-128-r4-nometa.pdf",
+      "sha256": "592f3bfb2583c35186abfc96c1740620ef3be5c1985f75966f2c6b9bb88a85f0",
+      "bytes": 1755,
+      "made": "qpdf --static-id --static-aes-iv source.pdf --encrypt --user-password=user --owner-password=owner --bits=128 --use-aes=y --cleartext-metadata -- aes-128-r4-nometa.pdf",
+      "check": "sha256",
+      "encryption": {
+        "R": "4",
+        "P": "-4",
+        "User password": "user",
+        "extract for accessibility": "allowed",
+        "extract for any purpose": "allowed",
+        "print low resolution": "allowed",
+        "print high resolution": "allowed",
+        "modify document assembly": "allowed",
+        "modify forms": "allowed",
+        "modify annotations": "allowed",
+        "modify other": "allowed",
+        "modify anything": "allowed",
+        "stream encryption method": "AESv2",
+        "string encryption method": "AESv2",
+        "file encryption method": "AESv2"
+      }
+    },
+    {
+      "file": "aes-256-r6.pdf",
+      "sha256": "5348476753ab46c6357557496022223dd2d3be3291961a445f14929a6b51a1e8",
+      "bytes": 1957,
+      "made": "qpdf --static-id --static-aes-iv source.pdf --encrypt --user-password=user --owner-password=owner --bits=256 -- aes-256-r6.pdf",
+      "check": "decrypted-qdf",
+      "encryption": {
+        "R": "6",
+        "P": "-4",
+        "User password": "user",
+        "extract for accessibility": "allowed",
+        "extract for any purpose": "allowed",
+        "print low resolution": "allowed",
+        "print high resolution": "allowed",
+        "modify document assembly": "allowed",
+        "modify forms": "allowed",
+        "modify annotations": "allowed",
+        "modify other": "allowed",
+        "modify anything": "allowed",
+        "stream encryption method": "AESv3",
+        "string encryption method": "AESv3",
+        "file encryption method": "AESv3"
+      }
+    }
+  ]
+}

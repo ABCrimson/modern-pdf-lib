@@ -1,8 +1,11 @@
 /**
  * Tests for saveAsStream() — streaming PDF output.
  *
- * Validates that ReadableStream-based output produces the same result
- * as the synchronous save() method.
+ * Checks the stream API of saveAsStream(): the ReadableStream, its chunk type, for-await
+ * consumption, the envelope of the bytes, and the structure of compressed output (header,
+ * trailer, a FlateDecode stream, a length below the uncompressed output's). Byte equality with
+ * save() and the qpdf and pdf.js checks (compressed output included) live in
+ * tests/oracle/stream-output.test.ts.
  */
 
 import { describe, it, expect } from 'vitest';
@@ -179,24 +182,37 @@ describe('saveAsStream()', () => {
     expect(text.trimEnd().endsWith('%%EOF')).toBe(true);
   });
 
-  it('stream with compression produces valid output', async () => {
-    const doc = createPdf();
-    const page = doc.addPage();
-    const font = await doc.embedFont(StandardFonts.Helvetica);
-    page.drawText('Compressed stream test', {
-      x: 50,
-      y: 700,
-      font: font.name,
-      size: 16,
-    });
+  // Structure only: whether another reader accepts this output is tests/oracle/stream-output.test.ts
+  // (a known-defect marker there records that qpdf rejects the raw deflate data today).
+  it('stream with compression writes a FlateDecode content stream that hides the text and is shorter than the uncompressed output', async () => {
+    const build = async () => {
+      const doc = createPdf();
+      const page = doc.addPage();
+      const font = await doc.embedFont(StandardFonts.Helvetica);
+      for (let line = 0; line < 20; line++) {
+        page.drawText('Compressed stream test', {
+          x: 50,
+          y: 700 - line * 20,
+          font: font.name,
+          size: 16,
+        });
+      }
+      return doc;
+    };
 
-    const stream = doc.saveAsStream({ compress: true });
-    const bytes = await collectStream(stream);
+    const bytes = await collectStream((await build()).saveAsStream({ compress: true }));
+    const plain = await collectStream((await build()).saveAsStream({ compress: false }));
     const text = decoder.decode(bytes);
 
     expect(text.startsWith('%PDF-1.7')).toBe(true);
     expect(text.trimEnd().endsWith('%%EOF')).toBe(true);
     expect(text).toContain('trailer');
+    // The page content stream is written compressed: the filter is named and the drawn text
+    // no longer appears in the bytes.
+    expect(text).toMatch(/\/Filter \/FlateDecode/);
+    expect(text).not.toContain('Compressed stream test');
+    expect(bytes.length).toBeGreaterThan(200);
+    expect(bytes.length).toBeLessThan(plain.length);
   });
 
   it('stream output has non-zero length', async () => {
@@ -220,49 +236,6 @@ describe('saveAsStream()', () => {
     const text = decoder.decode(bytes);
 
     expect(text).toContain('/Count 3');
-  });
-
-  it('streaming output produces valid PDF structure', async () => {
-    const doc = createPdf();
-    const page = doc.addPage(PageSizes.A4);
-    const font = await doc.embedFont(StandardFonts.Helvetica);
-
-    page.drawText('Streaming structure test', {
-      x: 50,
-      y: 700,
-      font: font.name,
-      size: 16,
-    });
-    page.drawRectangle({
-      x: 50,
-      y: 680,
-      width: 200,
-      height: 2,
-      color: rgb(0, 0, 0),
-    });
-    page.drawCircle({
-      x: 150,
-      y: 600,
-      size: 40,
-      borderColor: rgb(0, 0, 0.8),
-    });
-
-    const stream = doc.saveAsStream({ compress: false });
-    const bytes = await collectStream(stream);
-    const text = decoder.decode(bytes);
-
-    // Valid PDF structure checks
-    expect(text.startsWith('%PDF-1.7')).toBe(true);
-    expect(text.trimEnd().endsWith('%%EOF')).toBe(true);
-    expect(text).toContain('/Type /Catalog');
-    expect(text).toContain('/Type /Pages');
-    expect(text).toContain('/Type /Page\n');
-    expect(text).toContain('/Type /Font');
-    expect(text).toContain('/BaseFont /Helvetica');
-    expect(text).toContain('xref');
-    expect(text).toContain('trailer');
-    expect(text).toContain('startxref');
-    expect(text).toContain('/Count 1');
   });
 
   it('save() and saveAsStream() produce structurally identical output', async () => {

@@ -1524,10 +1524,11 @@ describe('AES-256 key derivation with all-zero salt', () => {
 });
 
 // ---------------------------------------------------------------------------
-// 29. Algorithm 2.B specification conformance (PDF 2.0)
+// 29. Algorithm 2.B output properties (PDF 2.0): length, determinism, input sensitivity.
+// Known-answer conformance is tests/oracle/aes.test.ts.
 // ---------------------------------------------------------------------------
 
-describe('Algorithm 2.B specification conformance', () => {
+describe('Algorithm 2.B output properties', () => {
   it('initial hash is SHA-256(password + salt [+ uKey])', async () => {
     const pwd = enc.encode('test');
     const salt = new Uint8Array([0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08]);

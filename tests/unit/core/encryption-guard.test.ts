@@ -12,17 +12,14 @@
  *   input bytes that contain the name /Encrypt.
  *
  * Decrypted content is checked with an oracle written here from ISO 32000-1
- * Algorithms 1 and 2 on `node:crypto` (it imports nothing from src/), and,
- * where qpdf 12.4.2 is available (`QPDF` env var, then `PATH`), with
- * `qpdf --decrypt --qdf`. qpdf cases skip locally with a reason when qpdf is
- * absent and fail when `CI` is set.
+ * Algorithms 1 and 2 on `node:crypto` (it imports nothing from src/). The
+ * qpdf cross-check of repeated encrypted saves runs in the oracle project:
+ * tests/oracle/encryption-qpdf.test.ts.
  */
 import { createDecipheriv, createHash } from 'node:crypto';
-import { execFileSync } from 'node:child_process';
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
 import {
   addCounterSignature,
   appendIncrementalUpdate,
@@ -54,7 +51,6 @@ import {
   UnsupportedEncryptionError,
 } from '../../../src/index.js';
 import type { EncryptOptions, PdfDocument, PdfObject } from '../../../src/index.js';
-import { defectKey, knownDefect } from '../../helpers/known-defect.js';
 import { generateTestCert } from '../../helpers/signature-trust-fixtures.js';
 
 type Algorithm = NonNullable<EncryptOptions['algorithm']>;
@@ -236,63 +232,6 @@ function decryptOnce(
     embeddedFile: latin1.decode(decrypt(fileNum, need(file.stream, 'embedded file data'))),
     description: latin1.decode(decrypt(specNum, Uint8Array.fromHex(descHex))),
   };
-}
-
-// ---------------------------------------------------------------------------
-// qpdf (QPDF env var, then PATH)
-// ---------------------------------------------------------------------------
-
-const QPDF_BIN = process.env['QPDF'] ?? 'qpdf';
-const QPDF_SKIP = 'qpdf not found: set QPDF=<path> or put qpdf 12.4.2 on PATH; required in CI';
-let qpdfVersion: string | undefined;
-let workDir: string | undefined;
-
-beforeAll(() => {
-  try {
-    qpdfVersion = execFileSync(QPDF_BIN, ['--version'], { encoding: 'utf8' }).split('\n')[0];
-  } catch {
-    qpdfVersion = undefined;
-  }
-});
-
-afterAll(() => {
-  if (workDir !== undefined) rmSync(workDir, { recursive: true, force: true });
-});
-
-function qdfOf(bytes: Uint8Array, name: string): Uint8Array {
-  workDir ??= mkdtempSync(join(tmpdir(), 'encryption-guard-'));
-  const input = join(workDir, `${name}.pdf`);
-  const output = join(workDir, `${name}.qdf`);
-  writeFileSync(input, bytes);
-  // execFileSync throws on any non-zero exit (qpdf exits 3 on warnings), with stderr attached.
-  execFileSync(
-    QPDF_BIN,
-    [
-      '--password=u',
-      '--decrypt',
-      '--qdf',
-      '--no-original-object-ids',
-      '--static-id',
-      input,
-      output,
-    ],
-    { stdio: 'pipe' },
-  );
-  return new Uint8Array(readFileSync(output));
-}
-
-async function twoSavesDecryptIdentically(algorithm: Algorithm): Promise<void> {
-  const doc = await buildRichDoc(algorithm);
-  const s1 = await doc.save({ compress: false });
-  const s2 = await doc.save({ compress: false });
-  const q1 = qdfOf(s1, `${algorithm}-1`);
-  const q2 = qdfOf(s2, `${algorithm}-2`);
-  expect(q2).toEqual(q1);
-  for (const qdf of [q1, q2]) {
-    const text = latin1.decode(qdf);
-    expect(text).toContain('AttachmentSecret');
-    expect(text).toContain('DescSecret');
-  }
 }
 
 // ---------------------------------------------------------------------------
@@ -555,54 +494,6 @@ describe('repeated saves of an encrypted document', () => {
           description: 'DescSecret',
         });
       }
-    },
-  );
-});
-
-// ---------------------------------------------------------------------------
-// 6-9. qpdf and the release-gate wording
-// ---------------------------------------------------------------------------
-
-describe('qpdf cross-check', () => {
-  it('qpdf is available', (ctx) => {
-    if (qpdfVersion === undefined) {
-      if (process.env['CI']) {
-        throw new Error(
-          'qpdf 12.4.2 is required in CI (set QPDF or install it; see the ci.yml step)',
-        );
-      }
-      ctx.skip(QPDF_SKIP);
-    }
-    expect(qpdfVersion).toMatch(/^qpdf version 12\./);
-  });
-
-  it.for(['aes-128', 'rc4-128'] as const)(
-    '%s: two saves give identical qpdf --decrypt --qdf output',
-    async (algorithm, ctx) => {
-      if (qpdfVersion === undefined) ctx.skip(QPDF_SKIP);
-      await twoSavesDecryptIdentically(algorithm);
-    },
-  );
-
-  knownDefect(
-    defectKey('crypto-security-01', '0.40.9'),
-    'two saves of one AES-256 (R6) document give identical qpdf --decrypt --qdf output',
-    { failsWith: /^qpdf: .*: invalid password$/m },
-    async (ctx) => {
-      if (qpdfVersion === undefined) ctx.skip(QPDF_SKIP);
-      await twoSavesDecryptIdentically('aes-256');
-    },
-  );
-
-  knownDefect(
-    defectKey('core-document-08', '0.41.2'),
-    'two doc.save() calls of one RC4 (R3) document give identical bytes',
-    { failsWith: /^AssertionError: expected Uint8Array\[.*\] to deeply equal Uint8Array\[/ },
-    async () => {
-      const doc = await buildRichDoc('rc4-128');
-      const s1 = await doc.save({ compress: false });
-      const s2 = await doc.save({ compress: false });
-      expect(s2).toEqual(s1);
     },
   );
 });

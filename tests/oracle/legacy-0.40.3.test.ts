@@ -10,6 +10,11 @@
  * pattern the independent-reader check uses for the `agree` box and the reader's error messages
  * are literals in this file.
  *
+ * Every re-save ("write new") goes to outside readers as well: each re-save test passes its
+ * output to `qpdf --check` (expectQpdfClean, after its own assertions), and one test per fixture
+ * re-saves with `compress: false` and asks qpdf and then pdf.js for the page text. A test that
+ * runs qpdf skips with a reason where qpdf is absent locally and fails when `CI` is set.
+ *
  * A check that fails today because of a known open defect is a knownDefect marker
  * (tests/helpers/known-defect.ts): a `test.fails` whose title starts with the defect id and the
  * release that fixes it, and which passes only while the check fails with the error KNOWN names.
@@ -22,6 +27,7 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { inflateRawSync, inflateSync } from 'node:zlib';
 import { PDFDocument } from 'pdf-lib';
 import { describe, expect, test } from 'vitest';
+import type { TestContext } from 'vitest';
 import {
   extractText,
   isLinearized,
@@ -32,10 +38,14 @@ import {
 import type { PdfDocument } from '../../src/index.js';
 import { defectKey, knownDefect } from '../helpers/known-defect.js';
 import type { DefectKey } from '../helpers/known-defect.js';
+import { pdfjsText } from '../helpers/oracle/pdfjs.js';
+import { expectQpdfClean, requireQpdf } from '../helpers/oracle/qpdf.js';
 
 type Check =
   | 'info'
   | 'text'
+  | 'resaveCount'
+  | 'resaveOracles'
   | 'resaveInfo'
   | 'resaveText'
   | 'resaveUniqueObjects'
@@ -88,11 +98,13 @@ interface Known {
   readonly key: DefectKey;
   readonly failsWith: RegExp;
 }
-const TITLE_DIFFERS = /^AssertionError: expected .* to be '/;
-const TEXT_DIFFERS = /^AssertionError: expected .* to contain '/;
+// Each pattern names the labelled assertion it comes from (the second argument of expect()).
+const TITLE_DIFFERS = /^AssertionError: Info Title: expected .* to be '/;
+const TEXT_DIFFERS =
+  /^AssertionError: page \d+ text \((?:library|pdf\.js)\): expected .* to contain '/;
 const DUPLICATE_OBJECTS: Known = {
   key: defectKey('legacy-M01', '0.41.2'),
-  failsWith: /^AssertionError: expected \d+ to be \d+/,
+  failsWith: /^AssertionError: distinct object numbers: expected \d+ to be \d+/,
 };
 const ENCRYPTED_LOAD = defectKey('parser-syntax-01', '0.40.9');
 const ENCRYPTED_INFO: Known = { key: ENCRYPTED_LOAD, failsWith: TITLE_DIFFERS };
@@ -102,47 +114,80 @@ const ENCRYPTED_TEXT: Known = {
 };
 const UTF8_INFO: Known = { key: defectKey('core-document-01', '0.41.0'), failsWith: TITLE_DIFFERS };
 const UTF8_TEXT: Known = { key: defectKey('core-page-01', '0.41.0'), failsWith: TEXT_DIFFERS };
+/** qpdf cannot inflate a /FlateDecode stream of the re-save. */
+const QPDF_INFLATE = /^QpdfError: qpdf --check exit 2: .*inflate: data: incorrect header check/;
+// The re-save writes a /FlateDecode stream that is not zlib data: the raw DEFLATE the 0.40.3
+// file carries, passed through, or a stream the current writer compresses.
+const RAW_DEFLATE_RESAVE: Known = {
+  key: defectKey('color-compression-35', '0.40.8'),
+  failsWith: QPDF_INFLATE,
+};
+// The reader leaves the streams encrypted, and the re-save writes them, still encrypted, into a
+// file without an Encrypt dictionary.
+const ENCRYPTED_RESAVE: Known = { key: ENCRYPTED_LOAD, failsWith: QPDF_INFLATE };
+/** The four re-save checks, when each one fails only in qpdf. */
+const RESAVES_RAW_DEFLATE = {
+  resaveCount: RAW_DEFLATE_RESAVE,
+  resaveText: RAW_DEFLATE_RESAVE,
+  resaveInfo: RAW_DEFLATE_RESAVE,
+  resaveOracles: RAW_DEFLATE_RESAVE,
+} as const;
 const KNOWN: Readonly<Record<string, Partial<Record<Check, Known>>>> = {
-  'raw-deflate.pdf': { resaveUniqueObjects: DUPLICATE_OBJECTS },
-  'raw-deflate-objstm.pdf': { resaveUniqueObjects: DUPLICATE_OBJECTS },
-  'linearized.pdf': { resaveUniqueObjects: DUPLICATE_OBJECTS },
+  'raw-deflate.pdf': { ...RESAVES_RAW_DEFLATE, resaveUniqueObjects: DUPLICATE_OBJECTS },
+  'raw-deflate-objstm.pdf': { ...RESAVES_RAW_DEFLATE, resaveUniqueObjects: DUPLICATE_OBJECTS },
+  'linearized.pdf': { ...RESAVES_RAW_DEFLATE, resaveUniqueObjects: DUPLICATE_OBJECTS },
   'signed.pdf': {
     signatureFieldName: {
       key: defectKey('signature-cms-38', '0.45.0'),
       failsWith: /^AssertionError: expected 'Signature' to be 'Signature1'/,
     },
+    ...RESAVES_RAW_DEFLATE,
     resaveUniqueObjects: DUPLICATE_OBJECTS,
   },
   'forms.pdf': {
     fields: {
       key: defectKey('forms-34', '0.41.5'),
-      failsWith: /^AssertionError: expected false to be true/,
+      failsWith: /^AssertionError: hasForm\(\): expected false to be true/,
     },
+    ...RESAVES_RAW_DEFLATE,
     resaveUniqueObjects: DUPLICATE_OBJECTS,
   },
   'encrypted-r4.pdf': {
     info: ENCRYPTED_INFO,
     text: ENCRYPTED_TEXT,
+    resaveCount: ENCRYPTED_RESAVE,
     resaveInfo: ENCRYPTED_INFO,
     resaveText: ENCRYPTED_TEXT,
+    resaveOracles: ENCRYPTED_RESAVE,
   },
   'encrypted-r6.pdf': {
     info: ENCRYPTED_INFO,
     text: ENCRYPTED_TEXT,
+    resaveCount: ENCRYPTED_RESAVE,
     resaveInfo: ENCRYPTED_INFO,
     resaveText: ENCRYPTED_TEXT,
+    resaveOracles: ENCRYPTED_RESAVE,
   },
   'utf8-strings.pdf': {
     info: UTF8_INFO,
     text: UTF8_TEXT,
+    // The default save compresses the content stream (filler lines) and hits the writer side.
+    resaveCount: RAW_DEFLATE_RESAVE,
     resaveInfo: UTF8_INFO,
     resaveText: UTF8_TEXT,
+    // compress: false passes qpdf; pdf.js then shows the UTF-8 bytes as WinAnsi characters.
+    resaveOracles: UTF8_TEXT,
     resaveUniqueObjects: DUPLICATE_OBJECTS,
   },
 };
 
 /** `test` for a passing check, a knownDefect marker (key in the title) for a known defect. */
-function check(file: string, c: Check, what: string, body: () => Promise<void> | void): void {
+function check(
+  file: string,
+  c: Check,
+  what: string,
+  body: (ctx: TestContext) => Promise<void> | void,
+): void {
   const known = KNOWN[file]?.[c];
   if (known === undefined) test(`${file} ${what}`, body);
   else knownDefect(known.key, `${file} ${what}`, { failsWith: known.failsWith }, body);
@@ -249,7 +294,7 @@ describe('legacy-0.40.3 fixture set', () => {
           expect(doc.getTitle()).toBeUndefined();
           return;
         }
-        expect(doc.getTitle()).toBe(want.info.Title);
+        expect(doc.getTitle(), 'Info Title').toBe(want.info.Title);
         expect(doc.getAuthor()).toBe(want.info.Author);
         if (want.info.Subject !== undefined) expect(doc.getSubject()).toBe(want.info.Subject);
       });
@@ -257,34 +302,64 @@ describe('legacy-0.40.3 fixture set', () => {
       check(file, 'text', 'page text', async () => {
         const doc = await load(entry);
         want.pageText.forEach((t, i) => {
-          expect(pageText(doc, i)).toContain(t);
+          expect(pageText(doc, i), `page ${i + 1} text (library)`).toContain(t);
         });
       });
 
-      test(`${file} re-save loads again with the same page count`, async () => {
-        const reloaded = await loadPdf(await (await load(entry)).save());
-        expect(reloaded.getPageCount()).toBe(want.pageCount);
+      check(file, 'resaveCount', 're-save loads again with the same page count', async (ctx) => {
+        requireQpdf(ctx);
+        const out = await (await load(entry)).save();
+        expect((await loadPdf(out)).getPageCount()).toBe(want.pageCount);
+        expectQpdfClean(out);
       });
 
-      check(file, 'resaveText', 're-save keeps page text', async () => {
-        const reloaded = await loadPdf(await (await load(entry)).save());
+      check(file, 'resaveText', 're-save keeps page text', async (ctx) => {
+        requireQpdf(ctx);
+        const out = await (await load(entry)).save();
+        const reloaded = await loadPdf(out);
         want.pageText.forEach((t, i) => {
-          expect(pageText(reloaded, i)).toContain(t);
+          expect(pageText(reloaded, i), `page ${i + 1} text (library)`).toContain(t);
         });
+        expectQpdfClean(out);
       });
 
-      check(file, 'resaveInfo', 're-save keeps the Title', async () => {
-        const reloaded = await loadPdf(await (await load(entry)).save());
-        expect(reloaded.getTitle()).toBe(want.info?.Title);
+      check(file, 'resaveInfo', 're-save keeps the Title', async (ctx) => {
+        requireQpdf(ctx);
+        const out = await (await load(entry)).save();
+        expect((await loadPdf(out)).getTitle(), 'Info Title').toBe(want.info?.Title);
+        expectQpdfClean(out);
       });
+
+      check(
+        file,
+        'resaveOracles',
+        're-save (compress: false) passes qpdf --check and pdf.js shows the page text',
+        async (ctx) => {
+          requireQpdf(ctx);
+          const out = await (await load(entry)).save({ compress: false });
+          expectQpdfClean(out);
+          const text = await pdfjsText(out);
+          expect(text).toHaveLength(want.pageCount);
+          want.pageText.forEach((t, i) => {
+            expect(text[i], `page ${i + 1} text (pdf.js)`).toContain(t);
+          });
+        },
+      );
 
       if (want.encryption === undefined) {
-        check(file, 'resaveUniqueObjects', 're-save defines each object number once', async () => {
-          const out = await (await load(entry)).save({ compress: false });
-          const numbers = objectNumbers(out);
-          expect(numbers.length).toBeGreaterThan(0);
-          expect(new Set(numbers).size).toBe(numbers.length);
-        });
+        check(
+          file,
+          'resaveUniqueObjects',
+          're-save defines each object number once',
+          async (ctx) => {
+            requireQpdf(ctx);
+            const out = await (await load(entry)).save({ compress: false });
+            const numbers = objectNumbers(out);
+            expect(numbers.length).toBeGreaterThan(0);
+            expect(new Set(numbers).size, 'distinct object numbers').toBe(numbers.length);
+            expectQpdfClean(out);
+          },
+        );
       }
     });
   }
@@ -333,7 +408,7 @@ describe('legacy-0.40.3 fixture set', () => {
   check('forms.pdf', 'fields', 'field values through the current reader', async () => {
     const want = entryOf('forms.pdf').expect.fields;
     const doc = await load(entryOf('forms.pdf'));
-    expect(doc.hasForm()).toBe(true);
+    expect(doc.hasForm(), 'hasForm()').toBe(true);
     const form = doc.getForm();
     expect(form.getTextField('name').getText()).toBe(want?.['name']);
     expect(form.getCheckbox('agree').isChecked()).toBe(want?.['agree']);

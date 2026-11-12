@@ -7,8 +7,10 @@
     "tests/unit/core/encryption-guard.test.ts",
     "tests/unit/core/merge-dedupe.test.ts",
     "tests/oracle/legacy-0.40.3.test.ts",
+    "tests/oracle/encryption-qpdf.test.ts",
     "tests/unit/core/securityErrors.test.ts",
     "tests/unit/helpers/known-defect.test.ts",
+    "tests/unit/helpers/known-defects-census.test.ts",
     "tests/helpers/**/*.ts"
   ],
   "exclude": ["node_modules", "dist"]

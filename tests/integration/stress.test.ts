@@ -1,8 +1,10 @@
 /**
- * Stress / scale tests — verify the library handles large documents,
- * many fields, deep merges, and heavy content without errors.
+ * Stress / scale tests — time and size scale for large documents, many fields, deep merges
+ * and heavy content, within a 30 s timeout each.
  *
- * All tests create real PDFs and verify the output structurally.
+ * Each test checks counts and string markers in the bytes it writes, and the PDF envelope
+ * (header and `%%EOF`). It does not show that another reader accepts the file: that is
+ * tests/oracle/scale.test.ts (qpdf and pdf.js on the 10,000-field document and the reload).
  */
 
 import { describe, it, expect } from 'vitest';
@@ -25,8 +27,8 @@ function pdfToString(bytes: Uint8Array): string {
   return decoder.decode(bytes);
 }
 
-/** Verify that the byte array is a structurally valid PDF. */
-function assertValidPdf(bytes: Uint8Array): void {
+/** Check only the envelope: a Uint8Array that starts with a PDF header and ends with `%%EOF`. */
+function assertPdfEnvelope(bytes: Uint8Array): void {
   expect(bytes).toBeInstanceOf(Uint8Array);
   expect(bytes.length).toBeGreaterThan(100);
   const text = pdfToString(bytes);
@@ -61,7 +63,7 @@ describe('Stress tests', () => {
     expect(doc.getPageCount()).toBe(1000);
 
     const bytes = await doc.save();
-    assertValidPdf(bytes);
+    assertPdfEnvelope(bytes);
 
     const text = pdfToString(bytes);
     expect(text).toContain('/Count 1000');
@@ -88,7 +90,7 @@ describe('Stress tests', () => {
     expect(form.getFields().length).toBe(10_000);
 
     const bytes = await doc.save();
-    assertValidPdf(bytes);
+    assertPdfEnvelope(bytes);
   }, 30_000);
 
   // -------------------------------------------------------------------------
@@ -119,7 +121,7 @@ describe('Stress tests', () => {
     }
 
     const bytes = await doc.save({ compress: false });
-    assertValidPdf(bytes);
+    assertPdfEnvelope(bytes);
     // Uncompressed output with 100KB of text should produce significant output
     expect(bytes.length).toBeGreaterThan(10_000);
   }, 30_000);
@@ -142,7 +144,7 @@ describe('Stress tests', () => {
     expect(doc.getPageCount()).toBe(1000);
 
     const bytes = await doc.save();
-    assertValidPdf(bytes);
+    assertPdfEnvelope(bytes);
 
     const text = pdfToString(bytes);
     expect(text).toContain('/Count 1000');
@@ -171,7 +173,7 @@ describe('Stress tests', () => {
     expect(merged.getPageCount()).toBe(500);
 
     const bytes = await merged.save();
-    assertValidPdf(bytes);
+    assertPdfEnvelope(bytes);
 
     const text = pdfToString(bytes);
     expect(text).toContain('/Count 500');
@@ -194,7 +196,7 @@ describe('Stress tests', () => {
       color: rgb(0, 0, 0),
     });
     const bytes1 = await doc1.save();
-    assertValidPdf(bytes1);
+    assertPdfEnvelope(bytes1);
 
     // Step 2: Reload and add a new page
     const doc2 = await loadPdf(bytes1);
@@ -212,7 +214,7 @@ describe('Stress tests', () => {
 
     // Step 3: Save again and verify
     const bytes2 = await doc2.save();
-    assertValidPdf(bytes2);
+    assertPdfEnvelope(bytes2);
 
     // The reloaded doc should have 2 pages
     const doc3 = await loadPdf(bytes2);
@@ -239,7 +241,7 @@ describe('Stress tests', () => {
     expect(page.getAnnotations().length).toBe(500);
 
     const bytes = await doc.save({ compress: false });
-    assertValidPdf(bytes);
+    assertPdfEnvelope(bytes);
 
     // The output should contain annotation dictionaries
     const text = pdfToString(bytes);
@@ -277,7 +279,7 @@ describe('Stress tests', () => {
     expect(doc.getPageCount()).toBe(14);
 
     const bytes = await doc.save({ compress: false });
-    assertValidPdf(bytes);
+    assertPdfEnvelope(bytes);
 
     const text = pdfToString(bytes);
     expect(text).toContain('/Count 14');
@@ -367,7 +369,7 @@ describe('Stress tests', () => {
     page3.drawCircle({ x: 100, y: 500, size: 40, color: rgb(0, 0, 1) });
 
     const bytes = await doc.save({ compress: false });
-    assertValidPdf(bytes);
+    assertPdfEnvelope(bytes);
 
     const text = pdfToString(bytes);
     expect(text).toContain('/Count 3');
@@ -421,7 +423,7 @@ describe('Stress tests', () => {
     expect(doc.getPageCount()).toBe(500);
 
     const bytes = await doc.save({ compress: false });
-    assertValidPdf(bytes);
+    assertPdfEnvelope(bytes);
 
     // With compress: false, the raw content streams should push us well over 10MB
     expect(bytes.length).toBeGreaterThan(10 * 1024 * 1024);

@@ -1,12 +1,13 @@
 /**
- * The one way a test marks a known open defect (0.40.6 ruling I3).
+ * The one way a test marks a known open defect.
  *
  *   knownDefect(defectKey('core-document-08', '0.41.2'), 'two doc.save() calls ... give identical bytes',
  *     { failsWith: /expected .* to deeply equal/ }, async () => { ... });
  *
  * - `defectKey(id | ids, until)` names the ledger id(s) and the release that fixes them. Write
  *   both as string literals at the call, so `node scripts/dev/known-defects.ts --check` can read
- *   them from the source text.
+ *   them from the source text. The key it returns is frozen, and knownDefect() takes no other:
+ *   a hand-built or copied key throws at collection time.
  * - `knownDefect(key, title, { failsWith, timeout? }, body)` registers a Vitest `test` with
  *   `fails: true`. Its title is `<id>[, <id>...] (until <x.y.z>): <title>`, and its task meta
  *   holds `ledger: { ids, until }`, which the JSON reporter writes per test and the census reads.
@@ -61,6 +62,8 @@ const VERSION = /^\d+\.\d+\.\d+$/;
 const DEADLINE_SHARE = 0.9;
 /** The `code` of the error `ctx.skip()` throws (PendingError in the installed Vitest runner). */
 const SKIP_CODE = 'VITEST_PENDING';
+/** Every key defectKey() returned; knownDefect() accepts no other. */
+const ISSUED = new WeakSet<DefectKey>();
 // Kept at import time, before any test can install fake timers.
 const { setTimeout: realSetTimeout, clearTimeout: realClearTimeout } = globalThis;
 
@@ -73,7 +76,13 @@ export function defectKey(id: string | readonly string[], until: string): Defect
   for (const one of ids) if (!ID.test(one)) throw bad(`malformed id ${JSON.stringify(one)}`);
   if (new Set(ids).size !== ids.length) throw bad('an id is listed twice');
   if (!VERSION.test(until)) throw bad('until must be a version x.y.z');
-  return { ids, until, prefix: `${ids.join(', ')} (until ${until})` };
+  const key: DefectKey = Object.freeze({
+    ids: Object.freeze([...ids]),
+    until,
+    prefix: `${ids.join(', ')} (until ${until})`,
+  });
+  ISSUED.add(key);
+  return key;
 }
 
 /** The Vitest options of a marker: an expected failure with the key in the task meta. */
@@ -167,7 +176,8 @@ export async function runKnownDefect(
 
 /**
  * Registers a known-defect marker: a `test.fails` titled `<key.prefix>: <title>` meant to pass
- * only while `body` fails with an error matching `failsWith`. Its task meta says whether the
+ * only while `body` fails with an error matching `failsWith`. Throws when `key` is not one
+ * defectKey() returned. Its task meta says whether the
  * failure matched (`knownDefectMatched`), which `known-defects.ts --list <report.json>` checks.
  */
 export function knownDefect(
@@ -176,6 +186,11 @@ export function knownDefect(
   options: { readonly failsWith: RegExp; readonly timeout?: number },
   body: DefectBody,
 ): void {
+  if (!ISSUED.has(key)) {
+    throw new Error(
+      `known-defect key ${JSON.stringify({ ids: key.ids, until: key.until })} was not made by defectKey()`,
+    );
+  }
   test(`${key.prefix}: ${title}`, markerOptions(key, options.timeout), (ctx) =>
     runKnownDefect(key, options.failsWith, body, ctx),
   );

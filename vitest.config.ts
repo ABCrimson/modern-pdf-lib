@@ -66,6 +66,10 @@ export default defineConfig({
           name: 'oracle',
           include: ['tests/oracle/**/*.test.ts'],
           retry: 0,
+          // Fails a plain test whose written PDFs did not all go through qpdf.
+          setupFiles: ['tests/helpers/oracle/setup.ts'],
+          // Each case spawns qpdf and opens pdf.js.
+          testTimeout: 30_000,
           benchmark: NO_BENCHMARKS,
         },
       },

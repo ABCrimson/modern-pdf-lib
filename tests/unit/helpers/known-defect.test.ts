@@ -9,7 +9,12 @@
  */
 import type { TestContext } from 'vitest';
 import { describe, expect, it } from 'vitest';
-import { defectKey, markerOptions, runKnownDefect } from '../../helpers/known-defect.js';
+import {
+  defectKey,
+  knownDefect,
+  markerOptions,
+  runKnownDefect,
+} from '../../helpers/known-defect.js';
 
 interface Annotation {
   readonly message: string;
@@ -68,12 +73,28 @@ describe('defectKey', () => {
   ] as const)('rejects %s', ([, ids, until]) => {
     expect(() => defectKey(ids, until)).toThrow(/known-defect key/);
   });
+
+  it('returns a frozen key, so a test cannot move its until', () => {
+    expect(Object.isFrozen(KEY)).toBe(true);
+    expect(Object.isFrozen(KEY.ids)).toBe(true);
+  });
+});
+
+describe('knownDefect', () => {
+  it.for([
+    ['a spread copy of a key', () => ({ ...KEY, until: '0.40.1' })],
+    ['an Object.assign copy', () => Object.assign({}, KEY)],
+  ] as const)('throws at collection time for a key defectKey() did not make: %s', ([, make]) => {
+    expect(() => knownDefect(make(), 'never registered', { failsWith: /x/ }, () => {})).toThrow(
+      /was not made by defectKey\(\)/,
+    );
+  });
 });
 
 describe('markerOptions', () => {
   it('marks the test as an expected failure and puts the key in the task meta', () => {
     const options = markerOptions(KEY, undefined);
-    expect(options.fails).toBe(true);
+    expect(options).toHaveProperty('fails', true);
     expect(options.meta).toEqual({ ledger: { ids: ['core-document-08'], until: '0.41.2' } });
     expect(Object.keys(options).sort()).toEqual(['fails', 'meta']);
     expect(markerOptions(KEY, 30_000).timeout).toBe(30_000);
