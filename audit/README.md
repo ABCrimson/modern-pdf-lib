@@ -32,4 +32,5 @@ until its advisory is published or its fix ships, whichever comes first. See
 
 The commit that fixes a finding replaces its marker with a plain test and moves the entry from
 `open` to `closed` with `fixedIn` set to the release it ships in. Ids are permanent: a closed id
-is never reused.
+is never reused. An entry that a re-check regrades below `high` is removed from the file, unless a
+known-defect marker uses it.

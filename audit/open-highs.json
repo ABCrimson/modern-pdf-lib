@@ -1,14 +1,14 @@
 {
   "$schema": "./open-highs.schema.json",
-  "release": "0.40.7",
-  "generated": "2026-11-11",
-  "source": "audit of 0.40.3 (2026-10/11) plus the 0.40.6 re-check",
+  "release": "0.40.8",
+  "generated": "2026-11-12",
+  "source": "audit of 0.40.3 (2026-10/11) plus the 0.40.6 re-check and the 2026-11-12 re-check",
   "counts": {
-    "open": 253,
-    "closedThisRelease": 9,
+    "open": 226,
+    "closedThisRelease": 33,
     "byTarget": {
       "0.40.9": 16,
-      "0.41.0": 22,
+      "0.41.0": 15,
       "0.41.1": 18,
       "0.41.2": 13,
       "0.41.3": 5,
@@ -40,10 +40,9 @@
       "0.46.2": 1,
       "0.46.4": 1,
       "0.47.0": 15,
-      "0.48.0": 19,
       "0.48.1": 2,
       "0.48.2": 8,
-      "0.48.3": 4,
+      "0.48.3": 3,
       "0.48.4": 2,
       "0.49.0": 1,
       "0.49.2": 1,
@@ -176,7 +175,7 @@
       "status": "confirmed",
       "path": "src/errors.ts",
       "target": "0.41.0",
-      "summary": "Eighteen of the 22 typed error classes in src/errors.ts, such as EncryptedPdfError, NoSuchFieldError, InvalidPageSizeError and PluginError, are exported but never thrown, and the library throws generic Error in their place; only the four classes added in 0.40.5 are thrown."
+      "summary": "Eighteen of the 24 typed error classes in src/errors.ts, such as EncryptedPdfError, NoSuchFieldError, InvalidPageSizeError and PluginError, are exported but never thrown, and the library throws generic Error in their place; only the six classes added in 0.40.5 and 0.40.8 are thrown."
     },
     {
       "id": "api-surface-utils-M02",
@@ -1007,15 +1006,6 @@
       "summary": "TIFF Deflate pass-through joins independently compressed strips into one stream, producing invalid image data."
     },
     {
-      "id": "images-86",
-      "area": "images",
-      "severity": "high",
-      "status": "confirmed",
-      "path": "src/assets/image/webpDecode.ts",
-      "target": "0.48.3",
-      "summary": "The lossy WebP decoder does not decode image data and returns a flat grey image."
-    },
-    {
       "id": "images-87",
       "area": "images",
       "severity": "high",
@@ -1095,150 +1085,6 @@
       "path": "src/parser/ccittDecode.ts",
       "target": "0.48.1",
       "summary": "CCITT Group 3 two-dimensional images with end-of-line codes decode wrongly."
-    },
-    {
-      "id": "parser-codecs-100",
-      "area": "parser-codecs",
-      "severity": "high",
-      "status": "unverified",
-      "path": "tests/unit/parser/jbig2Decode.test.ts",
-      "target": "0.48.0",
-      "summary": "No test decodes arithmetic-coded JBIG2 data or real global data."
-    },
-    {
-      "id": "parser-codecs-39",
-      "area": "parser-codecs",
-      "severity": "high",
-      "status": "confirmed",
-      "path": "src/parser/jpeg2000Tiles.ts",
-      "target": "0.48.0",
-      "summary": "JPEG 2000 tile decoding returns compressed bytes instead of pixels."
-    },
-    {
-      "id": "parser-codecs-40",
-      "area": "parser-codecs",
-      "severity": "high",
-      "status": "confirmed",
-      "path": "docs/guide/jpeg2000.md",
-      "target": "0.48.0",
-      "summary": "The JPEG 2000 guide says the tile functions return pixels; they return compressed data."
-    },
-    {
-      "id": "parser-codecs-60",
-      "area": "parser-codecs",
-      "severity": "high",
-      "status": "confirmed",
-      "path": "src/parser/jpeg2000Decode.ts",
-      "target": "0.48.0",
-      "summary": "The JPEG 2000 decoder does not parse packet headers."
-    },
-    {
-      "id": "parser-codecs-61",
-      "area": "parser-codecs",
-      "severity": "high",
-      "status": "confirmed",
-      "path": "src/parser/jpeg2000Decode.ts",
-      "target": "0.48.0",
-      "summary": "The JPEG 2000 arithmetic decoder does not match the standard's test sequence."
-    },
-    {
-      "id": "parser-codecs-62",
-      "area": "parser-codecs",
-      "severity": "high",
-      "status": "confirmed",
-      "path": "src/parser/jpeg2000Decode.ts",
-      "target": "0.48.0",
-      "summary": "The JPEG 2000 inverse wavelet transform reads subbands in the wrong order."
-    },
-    {
-      "id": "parser-codecs-63",
-      "area": "parser-codecs",
-      "severity": "high",
-      "status": "unverified",
-      "path": "src/parser/jpeg2000Decode.ts",
-      "target": "0.48.0",
-      "summary": "JPEG 2000 coefficient context modelling deviates from the standard."
-    },
-    {
-      "id": "parser-codecs-64",
-      "area": "parser-codecs",
-      "severity": "high",
-      "status": "unverified",
-      "path": "src/parser/jpeg2000Decode.ts",
-      "target": "0.48.0",
-      "summary": "JPEG 2000 dequantisation uses a wrong exponent."
-    },
-    {
-      "id": "parser-codecs-65",
-      "area": "parser-codecs",
-      "severity": "high",
-      "status": "unverified",
-      "path": "src/parser/jpeg2000Decode.ts",
-      "target": "0.48.0",
-      "summary": "The JPEG 2000 DC level shift is applied to the wrong components."
-    },
-    {
-      "id": "parser-codecs-76",
-      "area": "parser-codecs",
-      "severity": "high",
-      "status": "unverified",
-      "path": "tests/unit/parser/jpeg2000Decode.test.ts",
-      "target": "0.48.0",
-      "summary": "JPEG 2000 decoder tests use synthetic data and check only the output shape."
-    },
-    {
-      "id": "parser-codecs-82",
-      "area": "parser-codecs",
-      "severity": "high",
-      "status": "unverified",
-      "path": "src/parser/jbig2Decode.ts",
-      "target": "0.48.0",
-      "summary": "The JBIG2 arithmetic decoder does not match the standard's test sequence."
-    },
-    {
-      "id": "parser-codecs-83",
-      "area": "parser-codecs",
-      "severity": "high",
-      "status": "unverified",
-      "path": "src/parser/jbig2Decode.ts",
-      "target": "0.48.0",
-      "summary": "JBIG2 generic regions use wrong context pixels."
-    },
-    {
-      "id": "parser-codecs-84",
-      "area": "parser-codecs",
-      "severity": "high",
-      "status": "unverified",
-      "path": "src/parser/jbig2Decode.ts",
-      "target": "0.48.0",
-      "summary": "JBIG2 text-region symbol placement is wrong."
-    },
-    {
-      "id": "parser-codecs-86",
-      "area": "parser-codecs",
-      "severity": "high",
-      "status": "unverified",
-      "path": "src/parser/jbig2Decode.ts",
-      "target": "0.48.0",
-      "summary": "JBIG2 halftone regions are composed wrongly."
-    },
-    {
-      "id": "parser-codecs-87",
-      "area": "parser-codecs",
-      "severity": "high",
-      "status": "unverified",
-      "path": "src/parser/jbig2Decode.ts",
-      "target": "0.48.0",
-      "summary": "The JBIG2 pattern dictionary reads header fields the segment does not contain."
-    },
-    {
-      "id": "parser-codecs-89",
-      "area": "parser-codecs",
-      "severity": "high",
-      "status": "unverified",
-      "path": "src/parser/jbig2Decode.ts",
-      "target": "0.48.0",
-      "summary": "JBIG2 global data given as an indirect stream, as in real PDFs, is not used."
     },
     {
       "id": "parser-syntax-01",
@@ -2123,15 +1969,6 @@
       "summary": "Document close, print and save actions are also registered as document-level scripts."
     },
     {
-      "id": "tests-unit-parser-a-21",
-      "area": "tests-unit-parser-a",
-      "severity": "high",
-      "status": "confirmed",
-      "path": "tests/unit/parser/jbig2Decode.test.ts",
-      "target": "0.48.0",
-      "summary": "No test drives the arithmetic-coded JBIG2 paths that real PDFs use."
-    },
-    {
       "id": "tests-unit-parser-a-28",
       "area": "tests-unit-parser-a",
       "severity": "high",
@@ -2139,33 +1976,6 @@
       "path": "src/parser/jbig2WasmBridge.ts",
       "target": "0.47.0",
       "summary": "The JBIG2 WASM bridge cannot instantiate its module."
-    },
-    {
-      "id": "tests-unit-parser-a-49",
-      "area": "tests-unit-parser-a",
-      "severity": "high",
-      "status": "confirmed",
-      "path": "src/parser/jpeg2000Tiles.ts",
-      "target": "0.48.0",
-      "summary": "JPEG 2000 tile region decoding returns compressed bytes instead of pixels."
-    },
-    {
-      "id": "tests-unit-parser-a-M01",
-      "area": "tests-unit-parser-a",
-      "severity": "high",
-      "status": "missed",
-      "path": "src/parser/jbig2Decode.ts",
-      "target": "0.48.0",
-      "summary": "JBIG2 global data given as an indirect stream is ignored."
-    },
-    {
-      "id": "tests-unit-parser-a-M02",
-      "area": "tests-unit-parser-a",
-      "severity": "high",
-      "status": "missed",
-      "path": "src/parser/jpeg2000WasmBridge.ts",
-      "target": "0.41.0",
-      "summary": "The JPEG 2000 WASM bridge targets a crate that does not exist."
     },
     {
       "id": "tests-unit-parser-a-M03",
@@ -2258,79 +2068,29 @@
       "summary": "The inline WASM loaders are not reachable from the public entry."
     },
     {
-      "id": "wiki-09",
-      "area": "wiki",
-      "severity": "high",
-      "status": "unverified",
-      "path": "wiki:WASM-Acceleration.md",
-      "target": "0.41.0",
-      "summary": "The wiki says a failed WASM load never throws; initWasm rejects."
-    },
-    {
       "id": "wiki-21",
       "area": "wiki",
       "severity": "high",
-      "status": "unverified",
+      "status": "confirmed",
       "path": "wiki:Advanced-Features.md",
       "target": "0.41.0",
       "summary": "The wiki layers sample writes a layer marker that the page resources do not define."
     },
     {
-      "id": "wiki-26",
-      "area": "wiki",
-      "severity": "high",
-      "status": "unverified",
-      "path": "wiki:Annotations.md",
-      "target": "0.41.0",
-      "summary": "Wiki annotation samples that pass an annotation instance to addAnnotation throw."
-    },
-    {
       "id": "wiki-27",
       "area": "wiki",
       "severity": "high",
-      "status": "unverified",
+      "status": "confirmed",
       "path": "wiki:Annotations.md",
       "target": "0.41.0",
       "summary": "Wiki annotation samples use option names that do not exist."
-    },
-    {
-      "id": "wiki-28",
-      "area": "wiki",
-      "severity": "high",
-      "status": "unverified",
-      "path": "wiki:Annotations.md",
-      "target": "0.41.0",
-      "summary": "The wiki redaction sample calls a method that does not exist."
-    },
-    {
-      "id": "wiki-33",
-      "area": "wiki",
-      "severity": "high",
-      "status": "unverified",
-      "path": "wiki:Image-Optimization.md",
-      "target": "0.41.0",
-      "summary": "The wiki says maxDpi downscales images; the option is not read."
-    },
-    {
-      "id": "wiki-38",
-      "area": "wiki",
-      "severity": "high",
-      "status": "unverified",
-      "path": "wiki:Merge-and-Split.md",
-      "target": "0.41.0",
-      "summary": "The wiki says merged documents share one copy of identical resources; each copy operation deduplicates on its own."
-    },
-    {
-      "id": "wiki-44",
-      "area": "wiki",
-      "severity": "high",
-      "status": "unverified",
-      "path": "wiki:PDF-A-Compliance.md",
-      "target": "0.41.0",
-      "summary": "The wiki PDF/A example says XMP metadata and /ID are written automatically; they are not."
     }
   ],
   "closed": [
+    {
+      "id": "accessibility-metadata-57",
+      "fixedIn": "0.40.8"
+    },
     {
       "id": "annotation-04",
       "fixedIn": "0.40.5"
@@ -2436,6 +2196,10 @@
       "fixedIn": "0.40.4"
     },
     {
+      "id": "docs-guide-3-17",
+      "fixedIn": "0.40.8"
+    },
+    {
       "id": "docs-guide-3-19",
       "fixedIn": "0.40.4"
     },
@@ -2516,6 +2280,10 @@
       "fixedIn": "0.40.7"
     },
     {
+      "id": "images-86",
+      "fixedIn": "0.40.8"
+    },
+    {
       "id": "images-94",
       "fixedIn": "0.40.7"
     },
@@ -2524,12 +2292,84 @@
       "fixedIn": "0.40.4"
     },
     {
+      "id": "parser-codecs-39",
+      "fixedIn": "0.40.8"
+    },
+    {
+      "id": "parser-codecs-40",
+      "fixedIn": "0.40.8"
+    },
+    {
+      "id": "parser-codecs-60",
+      "fixedIn": "0.40.8"
+    },
+    {
+      "id": "parser-codecs-61",
+      "fixedIn": "0.40.8"
+    },
+    {
+      "id": "parser-codecs-62",
+      "fixedIn": "0.40.8"
+    },
+    {
+      "id": "parser-codecs-63",
+      "fixedIn": "0.40.8"
+    },
+    {
+      "id": "parser-codecs-64",
+      "fixedIn": "0.40.8"
+    },
+    {
+      "id": "parser-codecs-65",
+      "fixedIn": "0.40.8"
+    },
+    {
+      "id": "parser-codecs-70",
+      "fixedIn": "0.40.8"
+    },
+    {
+      "id": "parser-codecs-76",
+      "fixedIn": "0.40.8"
+    },
+    {
+      "id": "parser-codecs-82",
+      "fixedIn": "0.40.8"
+    },
+    {
+      "id": "parser-codecs-83",
+      "fixedIn": "0.40.8"
+    },
+    {
+      "id": "parser-codecs-84",
+      "fixedIn": "0.40.8"
+    },
+    {
+      "id": "parser-codecs-86",
+      "fixedIn": "0.40.8"
+    },
+    {
+      "id": "parser-codecs-87",
+      "fixedIn": "0.40.8"
+    },
+    {
+      "id": "parser-codecs-89",
+      "fixedIn": "0.40.8"
+    },
+    {
+      "id": "parser-codecs-94",
+      "fixedIn": "0.40.8"
+    },
+    {
       "id": "parser-codecs-M03",
       "fixedIn": "0.40.4"
     },
     {
       "id": "parser-syntax-02",
       "fixedIn": "0.40.4"
+    },
+    {
+      "id": "parser-syntax-51",
+      "fixedIn": "0.40.8"
     },
     {
       "id": "parser-syntax-M01",
@@ -2560,12 +2400,20 @@
       "fixedIn": "0.40.5"
     },
     {
+      "id": "render-09",
+      "fixedIn": "0.40.8"
+    },
+    {
       "id": "research-github-npm-surface-M01",
       "fixedIn": "0.40.4"
     },
     {
       "id": "research-github-npm-surface-M02",
       "fixedIn": "0.40.4"
+    },
+    {
+      "id": "signature-cms-01",
+      "fixedIn": "0.40.8"
     },
     {
       "id": "signature-cms-04",
@@ -2580,12 +2428,20 @@
       "fixedIn": "0.40.5"
     },
     {
+      "id": "svg-markdown-vdom-jsx-layout-09",
+      "fixedIn": "0.40.8"
+    },
+    {
       "id": "tests-integration-e2e-bench-fixtures-19",
       "fixedIn": "0.40.6"
     },
     {
       "id": "tests-integration-e2e-bench-fixtures-22",
       "fixedIn": "0.40.6"
+    },
+    {
+      "id": "tests-unit-assets-03",
+      "fixedIn": "0.40.8"
     },
     {
       "id": "tests-unit-crypto-01",
@@ -2604,8 +2460,40 @@
       "fixedIn": "0.40.5"
     },
     {
+      "id": "tests-unit-parser-a-21",
+      "fixedIn": "0.40.8"
+    },
+    {
+      "id": "tests-unit-parser-a-49",
+      "fixedIn": "0.40.8"
+    },
+    {
+      "id": "tests-unit-parser-a-M01",
+      "fixedIn": "0.40.8"
+    },
+    {
+      "id": "tests-unit-parser-b-01",
+      "fixedIn": "0.40.8"
+    },
+    {
+      "id": "tests-unit-parser-b-03",
+      "fixedIn": "0.40.8"
+    },
+    {
+      "id": "tests-unit-parser-b-05",
+      "fixedIn": "0.40.8"
+    },
+    {
+      "id": "tests-unit-parser-b-06",
+      "fixedIn": "0.40.8"
+    },
+    {
       "id": "tests-unit-signature-b-10",
       "fixedIn": "0.40.5"
+    },
+    {
+      "id": "tests-unit-signature-b-12",
+      "fixedIn": "0.40.8"
     },
     {
       "id": "tests-unit-signature-b-16",

@@ -131,9 +131,13 @@
       "tests": [],
       "limits": [
         "parser-syntax-01",
-        "crypto-security-01"
+        "crypto-security-01",
+        "api-surface-utils-25"
       ],
-      "stated": true
+      "stated": true,
+      "exports": [
+        "ResourceLimitError"
+      ]
     },
     {
       "id": "cap-feat-extract-text",
@@ -448,24 +452,25 @@
       "id": "cap-feat-jpeg2000",
       "region": "readme-features",
       "doc": "README.md",
-      "text": "JPEG2000 decoding (pure JavaScript; its arithmetic decoder does not pass the T.88 H.2 conformance vector, so decoded pixels can be wrong)",
+      "text": "JPEG2000 header reading (parseTileInfo); decoding throws UnsupportedFilterError (code unsupported-filter) in this release",
       "grade": "qualified",
       "tests": [],
       "limits": [
-        "parser-codecs-61",
-        "parser-codecs-60"
+        "api-surface-utils-25"
       ],
-      "stated": true
+      "stated": true,
+      "exports": [
+        "UnsupportedFilterError"
+      ]
     },
     {
       "id": "cap-feat-webp",
       "region": "readme-features",
       "doc": "README.md",
-      "text": "WebP embedding (lossless and alpha; lossy VP8 images decode to a flat grey placeholder)",
+      "text": "WebP embedding (lossless and alpha; lossy VP8 images throw UnsupportedFilterError, code unsupported-filter)",
       "grade": "qualified",
       "tests": [],
       "limits": [
-        "images-86",
         "images-87",
         "images-88"
       ],
@@ -494,7 +499,6 @@
         "cap-image-autodetect"
       ],
       "limits": [
-        "images-86",
         "images-69"
       ],
       "stated": false
@@ -744,11 +748,10 @@
       "id": "cap-cmp-webp",
       "region": "readme-comparison",
       "doc": "README.md",
-      "text": "WebP images | Lossless, alpha (lossy decodes to a flat grey placeholder)",
+      "text": "WebP images | Lossless, alpha (lossy throws UnsupportedFilterError)",
       "grade": "qualified",
       "tests": [],
       "limits": [
-        "images-86",
         "images-87",
         "images-88"
       ],
@@ -772,11 +775,11 @@
       "id": "cap-cmp-jpeg2000",
       "region": "readme-comparison",
       "doc": "README.md",
-      "text": "JPEG2000 decoding | JPXDecode (JP2 + J2K), pure JavaScript; fails the T.88 H.2 conformance vector",
+      "text": "JPEG2000 decoding | JPXDecode (JP2 + J2K) is recognised; decoding throws UnsupportedFilterError in this release",
       "grade": "qualified",
       "tests": [],
       "limits": [
-        "parser-codecs-61"
+        "api-surface-utils-25"
       ],
       "stated": true
     },
@@ -1323,11 +1326,10 @@
       "id": "cap-img-webp",
       "region": "guide-image-formats-overview",
       "doc": "docs/guide/image-formats.md",
-      "text": "WebP | .webp | Lossy (VP8) or Lossless (VP8L) | Yes (alpha) | RGB, RGBA | Decoded; FlateDecode RGB (+ /SMask for alpha)",
+      "text": "WebP | .webp | Lossless (VP8L); lossy (VP8) throws UnsupportedFilterError | Yes (alpha) | RGB, RGBA | Decoded; FlateDecode RGB (+ /SMask for alpha)",
       "grade": "qualified",
       "tests": [],
       "limits": [
-        "images-86",
         "images-87",
         "images-88"
       ],
@@ -1406,7 +1408,7 @@
       "id": "cap-embed-decode-flate",
       "region": "guide-image-formats-embedding",
       "doc": "docs/guide/image-formats.md",
-      "text": "Decode + Flate | Slower | Lossless (decoded pixels) | WebP, TIFF (LZW, PackBits), PNG (alpha, interlaced)",
+      "text": "Decode + Flate | Slower | Lossless (decoded pixels) | WebP (lossless), TIFF (LZW, PackBits), PNG (alpha, interlaced)",
       "grade": "qualified",
       "tests": [],
       "limits": [
