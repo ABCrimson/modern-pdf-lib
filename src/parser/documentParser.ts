@@ -31,12 +31,13 @@ import {
   PdfObjectRegistry,
 } from '../core/pdfObjects.js';
 import { PdfDocument } from '../core/pdfDocument.js';
+import { markLoadedFromEncryptedFile } from '../core/flateStream.js';
 import { PdfPage } from '../core/pdfPage.js';
 import { PdfLexer } from './lexer.js';
 import { PdfObjectParser } from './objectParser.js';
 import { XrefParser } from './xrefParser.js';
 import type { XrefEntry, ParsedTrailer } from './xrefParser.js';
-import { decompressSync as inflateSync } from '../compression/fflateAdapter.js';
+import { decodeFlateOnly } from './streamDecode.js';
 import { base64Decode } from '../utils/base64.js';
 import { PdfEncryptionHandler } from '../crypto/encryptionHandler.js';
 import { PdfParseError } from './parseError.js';
@@ -251,7 +252,15 @@ export class PdfDocumentParser {
     this.xrefEntries = xrefResult.entries;
     this.trailer = xrefResult.trailer;
 
-    // Step 4: Check for encryption and set up decryption handler
+    // Step 4: Check for encryption and set up decryption handler. The writers
+    // do not re-wrap the /FlateDecode data of a file whose trailer has
+    // /Encrypt, direct or indirect, also when the trailer comes from a
+    // recovery scan, and whether or not the file is decrypted here. Only an
+    // indirect /Encrypt in a trailer read from the cross-reference table or
+    // stream is decrypted; after a recovery scan nothing is.
+    if (this.trailer.encryptRef !== undefined || this.trailer.hasEncrypt === true) {
+      markLoadedFromEncryptedFile(this.registry);
+    }
     if (this.trailer.encryptRef !== undefined && options?.ignoreEncryption !== true) {
       await this.setupDecryption(options?.password);
     }
@@ -967,10 +976,7 @@ export class PdfDocumentParser {
       });
     }
 
-    // Decompress the stream data
-    // Note: We perform synchronous resolution here but the data is already
-    // decompressed during the async parse() flow. For simplicity, we do a
-    // synchronous inflate via fflate if available.
+    // Decode the object stream's data (/FlateDecode and its predictor only)
     const decompressedData = this.decompressStreamSync(containerStream);
 
     // Parse the header: N pairs of (objNumber byteOffset)
@@ -1029,50 +1035,20 @@ export class PdfDocumentParser {
   }
 
   /**
-   * Decompress a PdfStream synchronously.
+   * Decode an object stream's data synchronously.
    *
-   * Checks the /Filter and applies FlateDecode decompression.
-   * Falls back to returning raw data if no filter is specified.
+   * Reads no filter, or `/FlateDecode` (zlib or raw DEFLATE) and its
+   * predictor (`decodeFlateOnly`): `/Filter` is `/FlateDecode` or an array
+   * whose first entry is `/FlateDecode`, and no other filter is applied.
+   * An array of more than one entry that starts with `/FlateDecode` is
+   * inflated as raw DEFLATE only, with `/DecodeParms` read only as a
+   * dictionary, and the later entries are not applied.
+   * Returns the data unchanged when the stream has no filter, when
+   * `/Filter` is anything else, and when the data does not inflate.
    */
   private decompressStreamSync(stream: PdfStream): Uint8Array {
-    const filter = stream.dict.get('/Filter');
-    if (filter === undefined) {
-      return stream.data;
-    }
-
-    let filterName: string | undefined;
-    if (filter.kind === 'name') {
-      filterName = (filter as PdfName).value;
-    } else if (filter.kind === 'array') {
-      const arr = filter as PdfArray;
-      if (arr.length > 0 && arr.items[0]!.kind === 'name') {
-        filterName = (arr.items[0] as PdfName).value;
-      }
-    }
-
-    if (filterName !== '/FlateDecode') {
-      // For non-FlateDecode filters, return raw data
-      // (ASCIIHexDecode, ASCII85Decode, etc. would need additional handlers)
-      return stream.data;
-    }
-
-    // Use synchronous fflate decompression (imported at module level)
     try {
-      let decompressed = inflateSync(stream.data);
-
-      // Handle predictor
-      const decodeParms = stream.dict.get('/DecodeParms');
-      if (decodeParms !== undefined && decodeParms.kind === 'dict') {
-        const parms = decodeParms as PdfDict;
-        const predictor = numVal(parms.get('/Predictor')) ?? 1;
-        const columns = numVal(parms.get('/Columns')) ?? 1;
-
-        if (predictor >= 10) {
-          decompressed = undoPngPredictorSync(decompressed, columns);
-        }
-      }
-
-      return decompressed;
+      return decodeFlateOnly(stream) ?? stream.data;
     } catch {
       // If synchronous decompression fails, return raw data
       // The caller will handle the error
@@ -1502,88 +1478,6 @@ function parsePdfDate(dateStr: string): Date | undefined {
   // 'Z' or undefined means UTC -- no adjustment needed
 
   return date;
-}
-
-// ---------------------------------------------------------------------------
-// Synchronous PNG predictor (used in object stream decompression)
-// ---------------------------------------------------------------------------
-
-/**
- * Undo PNG-style row prediction synchronously.
- * Same logic as in xrefParser but duplicated here to avoid async dependency.
- */
-function undoPngPredictorSync(data: Uint8Array, columns: number): Uint8Array {
-  const rowBytes = columns;
-  const srcRowLen = rowBytes + 1;
-  const rows = Math.floor(data.length / srcRowLen);
-  const result = new Uint8Array(rows * rowBytes);
-  const prevRow = new Uint8Array(rowBytes);
-
-  for (let r = 0; r < rows; r++) {
-    const srcOff = r * srcRowLen;
-    const dstOff = r * rowBytes;
-    const filterType = data[srcOff] ?? 0;
-
-    switch (filterType) {
-      case 0: // None
-        for (let i = 0; i < rowBytes; i++) {
-          result[dstOff + i] = data[srcOff + 1 + i] ?? 0;
-        }
-        break;
-
-      case 1: // Sub
-        for (let i = 0; i < rowBytes; i++) {
-          const raw = data[srcOff + 1 + i] ?? 0;
-          const left = i > 0 ? (result[dstOff + i - 1] ?? 0) : 0;
-          result[dstOff + i] = (raw + left) & 0xff;
-        }
-        break;
-
-      case 2: // Up
-        for (let i = 0; i < rowBytes; i++) {
-          const raw = data[srcOff + 1 + i] ?? 0;
-          const up = prevRow[i] ?? 0;
-          result[dstOff + i] = (raw + up) & 0xff;
-        }
-        break;
-
-      case 3: // Average
-        for (let i = 0; i < rowBytes; i++) {
-          const raw = data[srcOff + 1 + i] ?? 0;
-          const left = i > 0 ? (result[dstOff + i - 1] ?? 0) : 0;
-          const up = prevRow[i] ?? 0;
-          result[dstOff + i] = (raw + Math.floor((left + up) / 2)) & 0xff;
-        }
-        break;
-
-      case 4: // Paeth
-        for (let i = 0; i < rowBytes; i++) {
-          const raw = data[srcOff + 1 + i] ?? 0;
-          const a = i > 0 ? (result[dstOff + i - 1] ?? 0) : 0;
-          const b = prevRow[i] ?? 0;
-          const c = i > 0 ? (prevRow[i - 1] ?? 0) : 0;
-          const p = a + b - c;
-          const pa = Math.abs(p - a);
-          const pb = Math.abs(p - b);
-          const pc = Math.abs(p - c);
-          const pr = pa <= pb && pa <= pc ? a : pb <= pc ? b : c;
-          result[dstOff + i] = (raw + pr) & 0xff;
-        }
-        break;
-
-      default:
-        for (let i = 0; i < rowBytes; i++) {
-          result[dstOff + i] = data[srcOff + 1 + i] ?? 0;
-        }
-        break;
-    }
-
-    for (let i = 0; i < rowBytes; i++) {
-      prevRow[i] = result[dstOff + i] ?? 0;
-    }
-  }
-
-  return result;
 }
 
 // ---------------------------------------------------------------------------

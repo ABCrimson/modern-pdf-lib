@@ -26,7 +26,7 @@ import {
   PdfString,
 } from '../core/pdfObjects.js';
 import type { PdfObjectParser } from './objectParser.js';
-import { decompress } from '../compression/deflate.js';
+import { decodeFlateOnly, firstFilterName } from './streamDecode.js';
 import { PdfParseError } from './parseError.js';
 
 // ---------------------------------------------------------------------------
@@ -73,6 +73,12 @@ export interface ParsedTrailer {
   infoRef?: PdfRef;
   /** /Encrypt: indirect reference to the encryption dictionary. */
   encryptRef?: PdfRef;
+  /**
+   * True when the trailer has an /Encrypt entry, direct or indirect. After a recovery scan: when
+   * the last trailer dictionary in the file, or a cross-reference stream dictionary the scan
+   * finds, has one.
+   */
+  hasEncrypt?: true;
   /** /ID: file identifier array (two byte strings). */
   id?: [Uint8Array, Uint8Array];
   /** /Prev: byte offset of the previous cross-reference section. */
@@ -173,6 +179,7 @@ function extractTrailer(dict: PdfDict): ParsedTrailer {
   if (encryptRef !== undefined) {
     trailer.encryptRef = encryptRef;
   }
+  if (dict.has('/Encrypt')) trailer.hasEncrypt = true;
 
   const prevVal = numVal(dict.get('/Prev'));
   if (prevVal !== undefined) {
@@ -200,166 +207,6 @@ function extractTrailer(dict: PdfDict): ParsedTrailer {
   }
 
   return trailer;
-}
-
-/**
- * Decode a FlateDecode-compressed stream. Handles the /DecodeParms
- * PNG predictor if present.
- */
-async function decodeStream(streamData: Uint8Array, dict: PdfDict): Promise<Uint8Array> {
-  const filter = dict.get('/Filter');
-  if (filter === undefined) {
-    return streamData;
-  }
-
-  // Determine the filter name
-  let filterName: string | undefined;
-  if (filter.kind === 'name') {
-    filterName = (filter as PdfName).value;
-  } else if (filter.kind === 'array') {
-    const arr = filter as PdfArray;
-    if (arr.length > 0 && arr.items[0]!.kind === 'name') {
-      filterName = (arr.items[0] as PdfName).value;
-    }
-  }
-
-  if (filterName !== '/FlateDecode') {
-    throw new PdfParseError({
-      message:
-        `Unsupported xref stream filter: ${filterName ?? 'unknown'}. ` +
-        'Only /FlateDecode is supported for cross-reference streams.',
-      offset: 0,
-      expected: '/FlateDecode filter',
-      actual: `${filterName ?? 'unknown'} filter`,
-    });
-  }
-
-  // Decompress using the library's deflate engine
-  let decompressed = await decompress(streamData);
-
-  // Handle predictor (PNG Up predictor is common for xref streams)
-  const decodeParms = dict.get('/DecodeParms');
-  if (decodeParms !== undefined && decodeParms.kind === 'dict') {
-    const parms = decodeParms as PdfDict;
-    const predictor = numVal(parms.get('/Predictor')) ?? 1;
-    const columns = numVal(parms.get('/Columns')) ?? 1;
-
-    if (predictor >= 10) {
-      // PNG predictor: each row starts with a filter byte
-      decompressed = undoPngPredictor(decompressed, columns);
-    } else if (predictor === 2) {
-      // TIFF predictor 2 (horizontal differencing)
-      decompressed = undoTiffPredictor(decompressed, columns);
-    }
-    // predictor === 1 means no prediction
-  }
-
-  return decompressed;
-}
-
-/**
- * Undo PNG-style row prediction.
- *
- * Each row has `columns + 1` bytes: 1 byte filter type + `columns` data bytes.
- * The most common filters for xref streams are:
- * - 0: None
- * - 1: Sub
- * - 2: Up
- */
-function undoPngPredictor(data: Uint8Array, columns: number): Uint8Array {
-  const rowBytes = columns; // number of data bytes per row (not counting filter byte)
-  const srcRowLen = rowBytes + 1; // +1 for filter byte
-  const rows = Math.floor(data.length / srcRowLen);
-  const result = new Uint8Array(rows * rowBytes);
-
-  // Previous row (starts as all zeros)
-  const prevRow = new Uint8Array(rowBytes);
-
-  for (let r = 0; r < rows; r++) {
-    const srcOff = r * srcRowLen;
-    const dstOff = r * rowBytes;
-    const filterType = data[srcOff] ?? 0;
-
-    switch (filterType) {
-      case 0: // None
-        for (let i = 0; i < rowBytes; i++) {
-          result[dstOff + i] = data[srcOff + 1 + i] ?? 0;
-        }
-        break;
-
-      case 1: // Sub: each byte depends on the previous byte in the same row
-        for (let i = 0; i < rowBytes; i++) {
-          const raw = data[srcOff + 1 + i] ?? 0;
-          const left = i > 0 ? (result[dstOff + i - 1] ?? 0) : 0;
-          result[dstOff + i] = (raw + left) & 0xff;
-        }
-        break;
-
-      case 2: // Up: each byte depends on the byte directly above
-        for (let i = 0; i < rowBytes; i++) {
-          const raw = data[srcOff + 1 + i] ?? 0;
-          const up = prevRow[i] ?? 0;
-          result[dstOff + i] = (raw + up) & 0xff;
-        }
-        break;
-
-      case 3: // Average
-        for (let i = 0; i < rowBytes; i++) {
-          const raw = data[srcOff + 1 + i] ?? 0;
-          const left = i > 0 ? (result[dstOff + i - 1] ?? 0) : 0;
-          const up = prevRow[i] ?? 0;
-          result[dstOff + i] = (raw + Math.floor((left + up) / 2)) & 0xff;
-        }
-        break;
-
-      case 4: // Paeth
-        for (let i = 0; i < rowBytes; i++) {
-          const raw = data[srcOff + 1 + i] ?? 0;
-          const a = i > 0 ? (result[dstOff + i - 1] ?? 0) : 0; // left
-          const b = prevRow[i] ?? 0; // above
-          const c = i > 0 ? (prevRow[i - 1] ?? 0) : 0; // upper-left
-          const p = a + b - c;
-          const pa = Math.abs(p - a);
-          const pb = Math.abs(p - b);
-          const pc = Math.abs(p - c);
-          const pr = pa <= pb && pa <= pc ? a : pb <= pc ? b : c;
-          result[dstOff + i] = (raw + pr) & 0xff;
-        }
-        break;
-
-      default:
-        // Unknown filter type -- treat as None
-        for (let i = 0; i < rowBytes; i++) {
-          result[dstOff + i] = data[srcOff + 1 + i] ?? 0;
-        }
-        break;
-    }
-
-    // Save current row as previous for next iteration
-    for (let i = 0; i < rowBytes; i++) {
-      prevRow[i] = result[dstOff + i] ?? 0;
-    }
-  }
-
-  return result;
-}
-
-/**
- * Undo TIFF predictor 2 (horizontal differencing).
- */
-function undoTiffPredictor(data: Uint8Array, columns: number): Uint8Array {
-  const result = new Uint8Array(data.length);
-  const rows = Math.floor(data.length / columns);
-
-  for (let r = 0; r < rows; r++) {
-    const off = r * columns;
-    result[off] = data[off] ?? 0;
-    for (let i = 1; i < columns; i++) {
-      result[off + i] = ((data[off + i] ?? 0) + (result[off + i - 1] ?? 0)) & 0xff;
-    }
-  }
-
-  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -696,6 +543,19 @@ export class XrefParser {
    * `/Type /XRef`. The stream data is binary, decoded using `/W [w0 w1 w2]`
    * widths.
    *
+   * The stream data is read with no filter, or with `/FlateDecode` (zlib or
+   * raw DEFLATE) and its predictor (`decodeFlateOnly`): `/Filter` is
+   * `/FlateDecode` or an array whose first entry is `/FlateDecode`, and no
+   * other filter is applied. An array of more than one entry that starts
+   * with `/FlateDecode` is inflated as raw DEFLATE only, with
+   * `/DecodeParms` read only as a dictionary, and the later entries are not
+   * applied. Any other `/Filter` throws a `PdfParseError`
+   * (`Unsupported xref stream filter`), and data that does not inflate
+   * throws `FlateDecode: failed to decompress data`. For either error, for
+   * the newest section, `parseXref()` then rebuilds the
+   * cross-reference table with a recovery scan; for an earlier section of
+   * the `/Prev` chain, it stops following the chain.
+   *
    * @param offset  Byte offset where the xref stream object begins.
    * @returns       The parsed entries and the stream's dictionary (which
    *                serves as the trailer).
@@ -797,8 +657,19 @@ export class XrefParser {
       subsections = [{ start: 0, count: size }];
     }
 
-    // Decompress the stream data
-    const decodedData = await decodeStream(stream.data, dict);
+    // No filter, or /FlateDecode and its predictor; any other /Filter is not read
+    const decodedData = decodeFlateOnly(stream);
+    if (decodedData === undefined) {
+      const filterName = firstFilterName(dict) ?? 'unknown';
+      throw new PdfParseError({
+        message:
+          `Unsupported xref stream filter: ${filterName}. ` +
+          'Only /FlateDecode is supported for cross-reference streams.',
+        offset,
+        expected: '/FlateDecode filter',
+        actual: `${filterName} filter`,
+      });
+    }
 
     // Parse the binary entries
     const entries: XrefEntry[] = [];
@@ -968,6 +839,7 @@ export class XrefParser {
     // or by looking at dictionaries that contain /Type /Catalog
     let rootRef: PdfRef | undefined;
     let infoRef: PdfRef | undefined;
+    let hasEncrypt = false;
 
     // First try: look for "trailer" keyword (byte scan, backwards)
     let trailerIdx = -1;
@@ -992,6 +864,7 @@ export class XrefParser {
           const dict = trailerObj as PdfDict;
           rootRef = refVal(dict.get('/Root'));
           infoRef = refVal(dict.get('/Info'));
+          if (dict.has('/Encrypt')) hasEncrypt = true;
         }
       } catch {
         // Trailer dictionary is corrupt -- continue scanning
@@ -1036,6 +909,29 @@ export class XrefParser {
       });
     }
 
+    // A cross-reference stream dictionary found in the file may carry /Encrypt too
+    if (!hasEncrypt) {
+      for (const entry of entries.values()) {
+        try {
+          const { object } = this.objectParser.parseIndirectObjectAt(entry.offset);
+          if (object.kind !== 'stream') continue;
+          const dict = (object as PdfStream).dict;
+          const typeVal = dict.get('/Type');
+          if (
+            typeVal !== undefined &&
+            typeVal.kind === 'name' &&
+            (typeVal as PdfName).value === '/XRef' &&
+            dict.has('/Encrypt')
+          ) {
+            hasEncrypt = true;
+            break;
+          }
+        } catch {
+          // Skip unparseable objects
+        }
+      }
+    }
+
     // Compute /Size as max object number + 1
     const maxObjNum = entries.size > 0 ? entries.keys().reduce((max, n) => Math.max(max, n), 0) : 0;
 
@@ -1046,6 +942,7 @@ export class XrefParser {
     if (infoRef !== undefined) {
       trailer.infoRef = infoRef;
     }
+    if (hasEncrypt) trailer.hasEncrypt = true;
 
     return { entries, trailer };
   }

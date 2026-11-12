@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { deflateRawSync, deflateSync } from 'node:zlib';
 import { zlibSync } from 'fflate';
 import { isWoff, isWoff2, readWoffHeader, decodeWoff } from '../../../../src/assets/font/woff.js';
 import type { WoffInfo } from '../../../../src/assets/font/woff.js';
@@ -31,6 +32,8 @@ interface SyntheticTable {
   readonly tag: string;
   readonly data: Uint8Array;
   readonly compress: boolean;
+  /** Stored bytes to write instead of the zlib data `compress` makes. */
+  readonly stored?: Uint8Array;
 }
 
 /**
@@ -50,6 +53,9 @@ function buildWoff1(flavor: number, tables: readonly SyntheticTable[]): Uint8Arr
 
   // Prepare each table's stored (possibly compressed) bytes.
   const stored = tables.map((t) => {
+    if (t.stored !== undefined) {
+      return t.stored;
+    }
     if (t.compress) {
       return zlibSync(t.data);
     }
@@ -224,6 +230,40 @@ describe('decodeWoff (WOFF1)', () => {
     expect(dataLength).toBe(big.length);
     const extracted = sfnt.subarray(dataOffset, dataOffset + dataLength);
     expect(Array.from(extracted)).toEqual(Array.from(big));
+  });
+
+  describe('table data from node:zlib', () => {
+    const big = new Uint8Array(256);
+    for (let i = 0; i < big.length; i++) big[i] = i & 0x0f;
+    const zlib = new Uint8Array(deflateSync(big));
+
+    const tableOf = (stored: Uint8Array): Uint8Array => {
+      const sfnt = decodeWoff(
+        buildWoff1(TRUETYPE_FLAVOR, [{ tag: 'cmap', data: big, compress: true, stored }]),
+      );
+      const dataOffset = readU32(sfnt, SFNT_HEADER_SIZE + 8);
+      const dataLength = readU32(sfnt, SFNT_HEADER_SIZE + 12);
+      return sfnt.subarray(dataOffset, dataOffset + dataLength);
+    };
+
+    it('inflates a zlib table whose Adler-32 trailer is missing', () => {
+      expect(Array.from(tableOf(zlib.subarray(0, zlib.length - 4)))).toEqual(Array.from(big));
+    });
+
+    it('inflates a zlib table whose Adler-32 trailer is wrong', () => {
+      const wrong = zlib.slice();
+      wrong[wrong.length - 1] = (wrong[wrong.length - 1] ?? 0) ^ 0xff;
+      expect(Array.from(tableOf(wrong))).toEqual(Array.from(big));
+    });
+
+    it('inflates a raw DEFLATE table without the zlib wrapper', () => {
+      expect(Array.from(tableOf(new Uint8Array(deflateRawSync(big))))).toEqual(Array.from(big));
+    });
+
+    it('throws its own error for a table that does not inflate', () => {
+      const garbage = new Uint8Array([0x12, 0x34, 0x56, 0x78, 0x9a]);
+      expect(() => tableOf(garbage)).toThrow(/^WOFF1: failed to inflate table data$/);
+    });
   });
 
   it('sorts table records by tag', () => {

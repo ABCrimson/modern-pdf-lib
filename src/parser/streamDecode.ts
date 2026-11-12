@@ -4,13 +4,15 @@
  * Decode / decompress PDF stream data.  Supports all standard PDF 1.7
  * filter types (Table 6 in the spec) including chained (multi-filter)
  * streams and predictor post-processing for FlateDecode and LZWDecode.
+ * {@link decodeFlateOnly} applies `/FlateDecode` and its predictor only;
+ * cross-reference streams and object streams are read with it.
  *
  * Reference: PDF 1.7 spec, §7.4 (Filters).
  *
  * @packageDocumentation
  */
 
-import { unzlibSync, inflateSync } from 'fflate';
+import { inflateFlate, inflateRaw } from '../compression/pdfFlate.js';
 import type { PdfObject, PdfStream } from '../core/pdfObjects.js';
 import { PdfDict, PdfName, PdfArray, PdfNumber } from '../core/pdfObjects.js';
 import { decodeCCITT } from './ccittDecode.js';
@@ -105,6 +107,94 @@ export function decodeStreamData(stream: PdfStream): Uint8Array {
     return stream.data;
   }
   return decodeStream(stream.data, filters, decodeParms as PdfDict[]);
+}
+
+/**
+ * The name a stream's `/Filter` starts with, as written (with its leading
+ * slash, abbreviations not expanded): the name itself, or the first entry
+ * of an array when that entry is a name.
+ *
+ * @param dict - The stream's metadata dictionary.
+ * @returns The name, or `undefined` when `/Filter` is absent, an empty
+ *   array, an array whose first entry is not a name, or any other value.
+ */
+export function firstFilterName(dict: PdfDict): string | undefined {
+  const filter = dict.get('/Filter');
+  const first = filter?.kind === 'array' ? filter.items[0] : filter;
+  return first?.kind === 'name' ? first.value : undefined;
+}
+
+/**
+ * Decode a stream with `/FlateDecode` as the only filter applied, as
+ * cross-reference streams and object streams are read.
+ *
+ * - No `/Filter`: the data is returned unchanged.
+ * - `/Filter` is the name `/FlateDecode`, or a one-entry array holding
+ *   that name: the data is inflated by `inflateFlate` (zlib, or raw
+ *   DEFLATE as modern-pdf-lib 0.40.6 and earlier wrote it), and the
+ *   predictor its decode parameters declare is undone. The decode
+ *   parameters are `/DecodeParms` when it is a dictionary, and, for the
+ *   one-entry array, also the first entry of a `/DecodeParms` array when
+ *   that entry is a dictionary.
+ * - `/Filter` is an array of more than one entry that starts with
+ *   `/FlateDecode`: the data is inflated as raw DEFLATE only
+ *   (`inflateRaw`), and the predictor is undone with `/DecodeParms` read
+ *   only as a dictionary. The later entries are not applied.
+ * - Any other `/Filter` (another filter name, an abbreviation such as
+ *   `/Fl`, or an array that starts with anything else): `undefined`, and
+ *   the caller decides what to do with the data.
+ *
+ * The predictors undone are `/Predictor 2` (TIFF) and `/Predictor` 10 to
+ * 15 (PNG); a `/Predictor` above 15 is undone as a PNG predictor too. A
+ * `/DecodeParms` array is read only when `/Filter` is a one-entry array.
+ *
+ * @param stream - The stream to decode.
+ * @returns The decoded bytes, or `undefined` for any other `/Filter`.
+ * @throws {Error} `FlateDecode: failed to decompress data` when the data
+ *   does not inflate: neither as zlib nor as raw DEFLATE for the name and
+ *   the one-entry array, and not as raw DEFLATE for a longer array.
+ */
+export function decodeFlateOnly(stream: PdfStream): Uint8Array | undefined {
+  const filter = stream.dict.get('/Filter');
+  if (filter === undefined) return stream.data;
+  if (firstFilterName(stream.dict) !== '/FlateDecode') return undefined;
+  if (filter instanceof PdfArray && filter.length > 1) {
+    // First of several filters: raw DEFLATE only; later entries are not applied
+    const dictParms = stream.dict.get('/DecodeParms');
+    return applyFlateOnlyPredictor(
+      inflateRaw(stream.data),
+      dictParms instanceof PdfDict ? dictParms : null,
+    );
+  }
+
+  const decodeParms = stream.dict.get('/DecodeParms');
+  let parms: PdfDict | null = null;
+  if (decodeParms instanceof PdfDict) {
+    parms = decodeParms;
+  } else if (
+    filter instanceof PdfArray &&
+    decodeParms instanceof PdfArray &&
+    decodeParms.items[0] instanceof PdfDict
+  ) {
+    parms = decodeParms.items[0];
+  }
+  return applyFlateOnlyPredictor(inflateFlate(stream.data), parms);
+}
+
+/**
+ * Undo the predictor of {@link decodeFlateOnly}: as `applyPredictor`, except that a `/Predictor`
+ * above 15 is undone as a PNG predictor.
+ */
+function applyFlateOnlyPredictor(data: Uint8Array, parms: PdfDict | null): Uint8Array {
+  if (dictInt(parms, '/Predictor', 1) > 15) {
+    return applyPngPredictors(
+      data,
+      dictInt(parms, '/Columns', 1),
+      dictInt(parms, '/Colors', 1),
+      dictInt(parms, '/BitsPerComponent', 8),
+    );
+  }
+  return applyPredictor(data, parms);
 }
 
 // ---------------------------------------------------------------------------
@@ -213,24 +303,17 @@ function applyFilter(filterName: string, data: Uint8Array, parms: PdfDict | null
 // ---------------------------------------------------------------------------
 
 /**
- * Decode a FlateDecode (zlib/deflate) stream.  After decompression, apply
- * any predictor specified in the decode parameters.
+ * Decode a FlateDecode stream, then apply any predictor specified in the
+ * decode parameters.
+ *
+ * Decompression is `inflateFlate`: zlib data (RFC 1950 header checked,
+ * Adler-32 trailer not checked), with raw DEFLATE as the fallback for data
+ * that has no zlib wrapper, such as the streams modern-pdf-lib 0.40.6 and
+ * earlier wrote. It throws `FlateDecode: failed to decompress data` when
+ * neither works.
  */
 function decodeFlateDecode(data: Uint8Array, parms: PdfDict | null): Uint8Array {
-  // fflate's unzlibSync handles zlib-wrapped data (with header).
-  // Some PDFs omit the zlib header, so we fall back to raw inflateSync.
-  let decompressed: Uint8Array;
-  try {
-    decompressed = unzlibSync(data);
-  } catch {
-    // Raw deflate (no zlib header) — use inflateSync
-    try {
-      decompressed = inflateSync(data);
-    } catch {
-      throw new Error('FlateDecode: failed to decompress data');
-    }
-  }
-  return applyPredictor(decompressed, parms);
+  return applyPredictor(inflateFlate(data), parms);
 }
 
 // ---------------------------------------------------------------------------

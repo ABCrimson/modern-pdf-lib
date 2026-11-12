@@ -7,6 +7,7 @@
  * mapping, chained (multi-filter) decoding, and error paths.
  */
 
+import { deflateSync as nodeDeflateSync, gzipSync } from 'node:zlib';
 import { describe, it, expect } from 'vitest';
 import { zlibSync, deflateSync } from 'fflate';
 import { decodeStream, getStreamFilters } from '../../../src/parser/streamDecode.js';
@@ -328,7 +329,42 @@ describe('FlateDecode', () => {
 
   it('throws on invalid compressed data', () => {
     const garbage = new Uint8Array([0x12, 0x34, 0x56, 0x78, 0x9a]);
-    expect(() => decodeStream(garbage, 'FlateDecode')).toThrow('FlateDecode');
+    expect(() => decodeStream(garbage, 'FlateDecode')).toThrow(
+      /^FlateDecode: failed to decompress data$/,
+    );
+  });
+
+  describe('zlib data from node:zlib', () => {
+    const original = ascii('zlib data whose trailer is not what RFC 1950 asks for. '.repeat(20));
+    const zlib = new Uint8Array(nodeDeflateSync(original));
+
+    it('decodes zlib data whose Adler-32 trailer is missing', () => {
+      expect(decodeStream(zlib.subarray(0, zlib.length - 4), 'FlateDecode')).toEqual(original);
+    });
+
+    it('decodes zlib data whose Adler-32 trailer is cut short', () => {
+      expect(decodeStream(zlib.subarray(0, zlib.length - 2), 'FlateDecode')).toEqual(original);
+    });
+
+    it('decodes zlib data whose Adler-32 trailer is wrong', () => {
+      const wrong = zlib.slice();
+      wrong[wrong.length - 1] = (wrong[wrong.length - 1] ?? 0) ^ 0xff;
+      expect(decodeStream(wrong, 'FlateDecode')).toEqual(original);
+    });
+
+    it('decodes zlib data followed by an end-of-line', () => {
+      const withEol = new Uint8Array(zlib.length + 2);
+      withEol.set(zlib);
+      withEol.set([0x0d, 0x0a], zlib.length);
+      expect(decodeStream(withEol, 'FlateDecode')).toEqual(original);
+    });
+
+    it('rejects gzip data', () => {
+      const gzip = new Uint8Array(gzipSync(original));
+      expect(() => decodeStream(gzip, 'FlateDecode')).toThrow(
+        /^FlateDecode: failed to decompress data$/,
+      );
+    });
   });
 });
 

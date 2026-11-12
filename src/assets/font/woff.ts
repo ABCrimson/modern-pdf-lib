@@ -22,13 +22,14 @@
  * - WOFF File Format 1.0 (W3C Recommendation).
  * - OpenType / sfnt table directory layout.
  *
- * No external runtime dependencies beyond `fflate` for zlib inflation.
+ * Table data is inflated by the library's Flate codec
+ * (`compression/pdfFlate`, built on `fflate`); no other runtime dependency.
  * No Buffer — uses Uint8Array and DataView throughout.
  *
  * @packageDocumentation
  */
 
-import { unzlibSync, inflateSync } from 'fflate';
+import { inflateFlate } from '../../compression/pdfFlate.js';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -233,18 +234,17 @@ export function decodeWoff(data: Uint8Array): Uint8Array {
 }
 
 /**
- * Inflate zlib-wrapped table data, falling back to raw deflate when the
- * zlib header is absent.
+ * Inflate zlib-wrapped table data. The Adler-32 trailer is not checked, and
+ * data without the zlib header is read as raw DEFLATE.
+ *
+ * @throws {Error} `WOFF1: failed to inflate table data` when the data
+ *   inflates neither way.
  */
 function inflateZlib(data: Uint8Array): Uint8Array {
   try {
-    return unzlibSync(data);
+    return inflateFlate(data);
   } catch {
-    try {
-      return inflateSync(data);
-    } catch {
-      throw new Error('WOFF1: failed to inflate table data');
-    }
+    throw new Error('WOFF1: failed to inflate table data');
   }
 }
 

@@ -15,7 +15,7 @@
  * Magic bytes: 49 49 (II, little-endian) or 4D 4D (MM, big-endian) + 42 (0x002A)
  */
 
-import { inflateSync } from 'fflate';
+import { inflateFlate } from '../../compression/pdfFlate.js';
 
 // ---------------------------------------------------------------------------
 // Public interfaces
@@ -427,9 +427,14 @@ function decompressLzw(input: Uint8Array, expectedLength: number): Uint8Array {
   return output.subarray(0, Math.min(outPos, expectedLength));
 }
 
-/** Deflate decompression (compression=8). */
+/**
+ * Deflate decompression (compression=8).
+ *
+ * TIFF Deflate strips are zlib data (RFC 1950); the Adler-32 trailer is not
+ * checked. A strip without the zlib wrapper is read as raw DEFLATE.
+ */
 function decompressDeflate(input: Uint8Array, expectedLength: number): Uint8Array {
-  const decompressed = inflateSync(input);
+  const decompressed = inflateFlate(input);
   return decompressed.subarray(0, expectedLength);
 }
 

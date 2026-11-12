@@ -26,7 +26,7 @@ import {
   isTiff,
 } from '../../../../src/assets/image/tiffDecode.js';
 
-import { deflateSync } from 'fflate';
+import { deflateRawSync, deflateSync } from 'node:zlib';
 
 // ---------------------------------------------------------------------------
 // Helpers — minimal valid TIFF construction
@@ -500,7 +500,8 @@ describe('decodeTiff — LZW compression', () => {
 describe('decodeTiff — Deflate compression', () => {
   it('decompresses deflate-compressed grayscale image', () => {
     const rawPixels = new Uint8Array([50, 100, 150, 200]);
-    const compressed = deflateSync(rawPixels);
+    // TIFF Deflate (compression 8) strips are zlib data (RFC 1950).
+    const compressed = new Uint8Array(deflateSync(rawPixels));
 
     const tags: TiffTag[] = [
       { tag: 256, type: 3, values: [2] },
@@ -527,7 +528,7 @@ describe('decodeTiff — Deflate compression', () => {
 
   it('decompresses deflate-compressed RGB image', () => {
     const rawPixels = new Uint8Array([255, 0, 0, 0, 255, 0, 0, 0, 255, 128, 128, 128]);
-    const compressed = deflateSync(rawPixels);
+    const compressed = new Uint8Array(deflateSync(rawPixels));
 
     const tags: TiffTag[] = [
       { tag: 256, type: 3, values: [2] },
@@ -553,6 +554,26 @@ describe('decodeTiff — Deflate compression', () => {
     expect(result.pixels[3]).toBe(0); // Green pixel
     expect(result.pixels[4]).toBe(255);
     expect(result.pixels[5]).toBe(0);
+  });
+
+  it('decompresses a raw DEFLATE strip without the zlib wrapper (legacy data)', () => {
+    const rawPixels = new Uint8Array([50, 100, 150, 200]);
+    const compressed = new Uint8Array(deflateRawSync(rawPixels));
+
+    const tags: TiffTag[] = [
+      { tag: 256, type: 3, values: [2] },
+      { tag: 257, type: 3, values: [2] },
+      { tag: 258, type: 3, values: [8] },
+      { tag: 259, type: 3, values: [8] },
+      { tag: 262, type: 3, values: [1] },
+      { tag: 273, type: 4, values: [0] },
+      { tag: 277, type: 3, values: [1] },
+      { tag: 278, type: 4, values: [2] },
+      { tag: 279, type: 4, values: [compressed.length] },
+    ];
+
+    const result = decodeTiff(buildTiff(tags, compressed));
+    expect(Array.from(result.pixels)).toEqual([50, 100, 150, 200]);
   });
 });
 
