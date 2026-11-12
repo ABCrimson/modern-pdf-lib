@@ -19,6 +19,7 @@
  */
 
 import type { SignOptions } from './signatureHandler.js';
+import { warnOnce } from '../utils/warnings.js';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -52,12 +53,10 @@ const decoder = new TextDecoder('latin1');
 /**
  * Set the certification level (MDP permission) on sign options.
  *
- * When applied, the resulting signature will include a /DocMDP
- * transform method in its /TransformParams, which certifies the
- * document and restricts future modifications to the specified level.
- *
- * This should only be used for the FIRST (certification) signature
- * in a document. Subsequent approval signatures should not set MDP.
+ * Has no effect in this version: `signPdf()` does not write a DocMDP
+ * certification, so the signature carries no /DocMDP transform method.
+ * Calling this function emits a one-time `ModernPdfLibWarning` (code
+ * `MPL_IGNORED_OPTION`).
  *
  * @param options  The sign options to modify (mutated in place).
  * @param level    The MDP permission level to set.
@@ -68,13 +67,17 @@ const decoder = new TextDecoder('latin1');
  *   certificate: certDer,
  *   privateKey: keyDer,
  * };
- * setCertificationLevel(options, MdpPermission.FormFillAndSign);
+ * setCertificationLevel(options, MdpPermission.FormFillAndSign); // has no effect
  * const signedPdf = await signPdf(pdfBytes, 'CertSig', options);
  * ```
  */
 export function setCertificationLevel(options: SignOptions, level: MdpPermission): void {
-  // Store the MDP permission on the options object
-  // The prepareForSigning function will read this when building the sig dict
+  warnOnce(
+    'ignored-option:setCertificationLevel',
+    'MPL_IGNORED_OPTION',
+    '`setCertificationLevel()` has no effect in this version: `signPdf()` does not write a DocMDP certification.',
+  );
+  // Stored on the options object; nothing reads it.
   (options as SignOptions & { mdpPermission: MdpPermission }).mdpPermission = level;
 }
 

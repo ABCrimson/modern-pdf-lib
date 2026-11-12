@@ -22,6 +22,7 @@
 import type { Color } from '../core/operators/color.js';
 import { applyFillColor } from '../core/operators/color.js';
 import type { BarcodeMatrix } from './types.js';
+import { warnOnce } from '../utils/warnings.js';
 
 export type { BarcodeMatrix };
 
@@ -109,15 +110,32 @@ export interface Code39Options {
   readonly height?: number | undefined;
   /** Width of a narrow module in user-space units. Default: `1`. */
   readonly moduleWidth?: number | undefined;
-  /** Wide-to-narrow ratio. Default: `3`. Must be >= 2. */
+  /**
+   * Wide-to-narrow ratio. Must be >= 2.
+   *
+   * Has no effect in this version in `code39ToOperators()`, which takes an already-encoded
+   * matrix; passing it there emits a one-time `ModernPdfLibWarning` (code
+   * `MPL_IGNORED_OPTION`). `encodeCode39()` takes the value as its own argument.
+   */
   readonly wideToNarrowRatio?: number | undefined;
   /** Quiet-zone width in narrow modules on each side. Default: `10`. */
   readonly quietZone?: number | undefined;
   /** Bar colour. Default: grayscale black. */
   readonly color?: Color | undefined;
-  /** Show human-readable text below the barcode. Default: `false`. */
+  /**
+   * Show human-readable text below the barcode. Default: `false`.
+   *
+   * Has no effect in this version: the text is not drawn; passing `true` emits a one-time
+   * `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`).
+   */
   readonly showText?: boolean | undefined;
-  /** Include a modulo-43 check digit. Default: `false`. */
+  /**
+   * Include a modulo-43 check digit.
+   *
+   * Has no effect in this version in `code39ToOperators()`, which takes an already-encoded
+   * matrix; passing `true` there emits a one-time `ModernPdfLibWarning` (code
+   * `MPL_IGNORED_OPTION`). `encodeCode39()` takes the value as its own argument.
+   */
   readonly includeCheckDigit?: boolean | undefined;
 }
 
@@ -270,6 +288,27 @@ export function code39ToOperators(
   y: number,
   options?: Code39Options,
 ): string {
+  if (options?.showText === true) {
+    warnOnce(
+      'ignored-option:code39ToOperators showText',
+      'MPL_IGNORED_OPTION',
+      '`code39ToOperators()`: the option `showText` has no effect in this version.',
+    );
+  }
+  if (options?.includeCheckDigit === true) {
+    warnOnce(
+      'ignored-option:code39ToOperators includeCheckDigit',
+      'MPL_IGNORED_OPTION',
+      '`code39ToOperators()`: the option `includeCheckDigit` has no effect in this version.',
+    );
+  }
+  if (options?.wideToNarrowRatio !== undefined) {
+    warnOnce(
+      'ignored-option:code39ToOperators wideToNarrowRatio',
+      'MPL_IGNORED_OPTION',
+      '`code39ToOperators()`: the option `wideToNarrowRatio` has no effect in this version.',
+    );
+  }
   const height = options?.height ?? 50;
   const moduleWidth = options?.moduleWidth ?? 1;
   const quietZone = options?.quietZone ?? 10;

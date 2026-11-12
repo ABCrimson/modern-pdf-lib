@@ -15,6 +15,7 @@ import { saveState, restoreState } from '../core/operators/state.js';
 import { applyFillColor } from '../core/operators/color.js';
 import type { Color } from '../core/operators/color.js';
 import type { BarcodeMatrix, BarcodeOptions } from './types.js';
+import { warnOnce } from '../utils/warnings.js';
 
 // Re-export the options type under an EAN-specific alias for convenience.
 export type { BarcodeOptions as EanOptions } from './types.js';
@@ -241,6 +242,27 @@ const DEFAULTS = {
 } as const;
 
 /**
+ * Warn once per entry and option that `showText` or `fontSize` was passed to
+ * an entry that draws no text.
+ *
+ * @internal
+ */
+export function warnIgnoredTextOptions(entry: string, options: BarcodeOptions | undefined): void {
+  for (const [name, passed] of [
+    ['showText', options?.showText === true],
+    ['fontSize', options?.fontSize !== undefined],
+  ] as const) {
+    if (passed) {
+      warnOnce(
+        `ignored-option:${entry} ${name}`,
+        'MPL_IGNORED_OPTION',
+        `\`${entry}()\`: the option \`${name}\` has no effect in this version.`,
+      );
+    }
+  }
+}
+
+/**
  * Generate PDF content-stream operators for an EAN-13 barcode.
  *
  * The barcode is rendered as filled rectangles (one per contiguous run
@@ -259,6 +281,7 @@ export function ean13ToOperators(
   y: number,
   options?: BarcodeOptions,
 ): string {
+  warnIgnoredTextOptions('ean13ToOperators', options);
   return matrixToOperators(matrix, x, y, options);
 }
 
@@ -277,6 +300,7 @@ export function ean8ToOperators(
   y: number,
   options?: BarcodeOptions,
 ): string {
+  warnIgnoredTextOptions('ean8ToOperators', options);
   return matrixToOperators(matrix, x, y, options);
 }
 

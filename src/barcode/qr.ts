@@ -13,6 +13,7 @@ import type { Color } from '../core/operators/color.js';
 import { applyFillColor } from '../core/operators/color.js';
 import { saveState, restoreState } from '../core/operators/state.js';
 import { rectangle, fill } from '../core/operators/graphics.js';
+import { warnOnce } from '../utils/warnings.js';
 
 // ---------------------------------------------------------------------------
 // Public types
@@ -23,7 +24,13 @@ export type ErrorCorrectionLevel = 'L' | 'M' | 'Q' | 'H';
 
 /** Options for rendering a QR code to PDF operators. */
 export interface QrCodeOptions {
-  /** Error correction level. Default: `'M'`. */
+  /**
+   * Error correction level.
+   *
+   * Has no effect in this version in `qrCodeToOperators()`, which takes an already-encoded
+   * matrix; passing it there emits a one-time `ModernPdfLibWarning` (code
+   * `MPL_IGNORED_OPTION`). `encodeQrCode()` takes the value as its own argument.
+   */
   readonly errorCorrection?: ErrorCorrectionLevel;
   /** Size of each module in PDF points. Default: `2`. */
   readonly moduleSize?: number;
@@ -1430,6 +1437,13 @@ export function qrCodeToOperators(
   y: number,
   options: QrCodeOptions = {},
 ): string {
+  if (options.errorCorrection !== undefined) {
+    warnOnce(
+      'ignored-option:qrCodeToOperators errorCorrection',
+      'MPL_IGNORED_OPTION',
+      '`qrCodeToOperators()`: the option `errorCorrection` has no effect in this version.',
+    );
+  }
   const moduleSize = options.moduleSize ?? 2;
   const quietZone = options.quietZone ?? 4;
   const fgColor = options.color ?? { type: 'grayscale' as const, gray: 0 };

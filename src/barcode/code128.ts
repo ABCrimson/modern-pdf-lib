@@ -18,6 +18,7 @@
 import type { Color } from '../core/operators/color.js';
 import { applyFillColor } from '../core/operators/color.js';
 import type { BarcodeMatrix } from './types.js';
+import { warnOnce } from '../utils/warnings.js';
 
 // ---------------------------------------------------------------------------
 // Code 128 bar patterns (107 symbols: values 0-106)
@@ -161,9 +162,19 @@ export interface Code128Options {
   readonly quietZone?: number;
   /** Bar colour. Default: black (grayscale 0). */
   readonly color?: Color;
-  /** Show human-readable text below the barcode. Default: `false`. */
+  /**
+   * Show human-readable text below the barcode. Default: `false`.
+   *
+   * Has no effect in this version: the text is not drawn; passing `true` emits a one-time
+   * `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`).
+   */
   readonly showText?: boolean;
-  /** Font size for the human-readable text. Default: `10`. */
+  /**
+   * Font size for the human-readable text.
+   *
+   * Has no effect in this version: no text is drawn; passing it emits a one-time
+   * `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`).
+   */
   readonly fontSize?: number;
 }
 
@@ -441,6 +452,20 @@ export function code128ToOperators(
   y: number,
   options?: Code128Options,
 ): string {
+  if (options?.showText === true) {
+    warnOnce(
+      'ignored-option:code128ToOperators showText',
+      'MPL_IGNORED_OPTION',
+      '`code128ToOperators()`: the option `showText` has no effect in this version.',
+    );
+  }
+  if (options?.fontSize !== undefined) {
+    warnOnce(
+      'ignored-option:code128ToOperators fontSize',
+      'MPL_IGNORED_OPTION',
+      '`code128ToOperators()`: the option `fontSize` has no effect in this version.',
+    );
+  }
   const height = options?.height ?? 50;
   const moduleWidth = options?.moduleWidth ?? 1;
   const quietZone = options?.quietZone ?? 10;

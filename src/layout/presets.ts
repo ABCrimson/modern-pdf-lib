@@ -10,6 +10,7 @@
 
 import type { DrawTableOptions } from './table.js';
 import type { Color } from '../core/operators/color.js';
+import { warnOnce } from '../utils/warnings.js';
 
 // ---------------------------------------------------------------------------
 // Public types
@@ -144,7 +145,12 @@ export interface PresetOptions {
   readonly fontSize?: number;
   /** Primary color (used for headers, accents). */
   readonly primaryColor?: Color;
-  /** Whether table has header row(s). Default: true. */
+  /**
+   * Whether table has header row(s).
+   *
+   * Has no effect in this version in `applyTablePreset`: no preset reads it; passing it emits a one-time
+   * `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`).
+   */
   readonly hasHeader?: boolean;
 }
 
@@ -161,6 +167,13 @@ export function applyTablePreset(
   preset: PresetName,
   options?: PresetOptions,
 ): Partial<DrawTableOptions> {
+  if (options?.hasHeader !== undefined) {
+    warnOnce(
+      'ignored-option:applyTablePreset hasHeader',
+      'MPL_IGNORED_OPTION',
+      '`applyTablePreset()`: the option `hasHeader` has no effect in this version.',
+    );
+  }
   switch (preset) {
     case 'minimal':
       return {

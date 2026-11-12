@@ -33,10 +33,18 @@ export interface BarcodeOptions {
   readonly color?: Color | undefined;
   /**
    * Whether to render human-readable text below the barcode.
-   * Note: text rendering requires a font to be set in the content stream
-   * beforehand.  Default: `false`.
+   *
+   * Has no effect in `ean13ToOperators`, `ean8ToOperators` and
+   * `upcAToOperators`: the text is not drawn. Passing `true` there emits a
+   * one-time `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`).
    */
   readonly showText?: boolean | undefined;
-  /** Font size for human-readable text. Default: `10`. */
+  /**
+   * Font size for human-readable text.
+   *
+   * Has no effect in `ean13ToOperators`, `ean8ToOperators` and
+   * `upcAToOperators`: no text is drawn. Passing it there emits a one-time
+   * `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`).
+   */
   readonly fontSize?: number | undefined;
 }

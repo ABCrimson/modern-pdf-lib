@@ -20,6 +20,7 @@
 import { PdfArray, PdfDict, PdfName, PdfNumber, PdfRef, PdfString } from '../core/pdfObjects.js';
 import type { PdfObject, PdfObjectRegistry } from '../core/pdfObjects.js';
 import { assertWithinLimit } from '../core/limits.js';
+import { warnOnce } from '../utils/warnings.js';
 
 // ---------------------------------------------------------------------------
 // Structure type
@@ -133,7 +134,10 @@ export interface StructureElementOptions {
   role?: 'presentation' | (string & {}) | undefined;
   /**
    * Header scope for TH cells (`"Row"`, `"Column"`, or `"Both"`).
-   * Used by table header validation.
+   *
+   * Has no effect in this version: no attribute dictionary is written and
+   * no validator reads it. Passing it emits a one-time
+   * `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`).
    */
   scope?: 'Row' | 'Column' | 'Both' | undefined;
   /**
@@ -143,7 +147,10 @@ export interface StructureElementOptions {
   colSpan?: number | undefined;
   /**
    * Number of rows this cell spans (for TH/TD elements).
-   * Defaults to 1 when not specified.
+   *
+   * Has no effect in this version: no attribute dictionary is written and
+   * no validator reads it. Passing it emits a one-time
+   * `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`).
    */
   rowSpan?: number | undefined;
 }
@@ -231,8 +238,24 @@ export class PdfStructureElement {
    * @param options  Optional attributes for the element.
    */
   constructor(type: StructureType, options: StructureElementOptions = {}) {
+    // Copy first: a `null` argument spreads to `{}`, so the checks read the copy.
+    const copy: StructureElementOptions = { ...options };
+    if (copy.scope !== undefined) {
+      warnOnce(
+        'ignored-option:PdfStructureElement scope',
+        'MPL_IGNORED_OPTION',
+        '`PdfStructureElement`: the option `scope` has no effect in this version.',
+      );
+    }
+    if (copy.rowSpan !== undefined) {
+      warnOnce(
+        'ignored-option:PdfStructureElement rowSpan',
+        'MPL_IGNORED_OPTION',
+        '`PdfStructureElement`: the option `rowSpan` has no effect in this version.',
+      );
+    }
     this.type = type;
-    this.options = { ...options };
+    this.options = copy;
   }
 
   /**

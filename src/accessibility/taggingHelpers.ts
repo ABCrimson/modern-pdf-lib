@@ -292,9 +292,11 @@ export function tagTableRow(
 /**
  * Tag a table header cell (`TH`) under a row, recording its scope.
  *
- * The `scope` is stored in the element's options (`/Scope` attribute,
- * one of `Row`, `Column`, or `Both`) and is used by table-header
- * validation to associate header cells with the cells they describe.
+ * The `scope` (one of `Row`, `Column`, or `Both`) is stored in the element's
+ * options. It has no effect in this version: no attribute dictionary is
+ * written and no validator reads it. Passing a `scope` (or `options.scope`)
+ * emits a one-time `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`); the
+ * default does not.
  *
  * @param tree    The structure tree to add the element to.
  * @param row     The parent `TR` element.
@@ -308,8 +310,17 @@ export function tagTableHeaderCell(
   scope: 'Row' | 'Column' | 'Both' = 'Column',
   options?: StructureElementOptions,
 ): PdfStructureElement {
-  const merged: StructureElementOptions = { ...options, scope };
-  return tree.addElement(row, 'TH', merged);
+  // The declared default is part of the declared API, so a passed scope is told from it through `arguments`.
+  const scopePassed = arguments[2] !== undefined;
+  // One copy, so that a getter on the caller's `options.scope` is read once.
+  const copy: StructureElementOptions = { ...options };
+  if (scopePassed || copy.scope !== undefined) {
+    return tree.addElement(row, 'TH', { ...copy, scope });
+  }
+  // The default scope is recorded after construction so that it is not reported as a passed option.
+  const header = tree.addElement(row, 'TH', copy);
+  header.options.scope = 'Column';
+  return header;
 }
 
 /**

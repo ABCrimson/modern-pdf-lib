@@ -19,6 +19,7 @@ import {
 } from './byteRange.js';
 import type { PrepareAppearanceOptions } from './byteRange.js';
 import { assertUnencryptedInput } from '../core/incrementalWriter.js';
+import { warnOnce } from '../utils/warnings.js';
 import { buildPkcs7Signature, extractIssuerAndSerial, parseDerTlv } from './pkcs7.js';
 import type { SignatureOptions } from './pkcs7.js';
 
@@ -64,13 +65,37 @@ export interface SignOptions {
   privateKey: Uint8Array;
   /** Hash algorithm. Default: 'SHA-256'. */
   hashAlgorithm?: 'SHA-256' | 'SHA-384' | 'SHA-512' | undefined;
-  /** Reason for signing. */
+  /**
+   * Reason for signing. The signature dictionary does not carry it. It only
+   * appears in the text of a visible appearance that has no `text` of its own.
+   *
+   * Has no effect in this version; passing it emits a one-time
+   * `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`) unless it is shown in
+   * that appearance text.
+   */
   reason?: string | undefined;
-  /** Location of signing. */
+  /**
+   * Location of signing. The signature dictionary does not carry it. It only
+   * appears in the text of a visible appearance that has no `text` of its own.
+   *
+   * Has no effect in this version; passing it emits a one-time
+   * `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`) unless it is shown in
+   * that appearance text.
+   */
   location?: string | undefined;
-  /** Contact information. */
+  /**
+   * Contact information.
+   *
+   * Has no effect in this version; passing it emits a one-time
+   * `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`).
+   */
   contactInfo?: string | undefined;
-  /** RFC 3161 TSA URL for timestamping (optional). */
+  /**
+   * RFC 3161 TSA URL for timestamping.
+   *
+   * Has no effect in this version: no timestamp request is made. Passing it
+   * emits a one-time `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`).
+   */
   timestampUrl?: string | undefined;
   /**
    * Visible signature appearance options. When provided, the signature
@@ -107,6 +132,24 @@ export interface PdfSignatureInfo {
 // ---------------------------------------------------------------------------
 
 const decoder = new TextDecoder('latin1');
+
+/** Warn once per option that `signPdf` accepts and does not act on. */
+function warnIgnoredSignOptions(options: SignOptions): void {
+  const warn = (name: string): void => {
+    warnOnce(
+      `ignored-option:signPdf ${name}`,
+      'MPL_IGNORED_OPTION',
+      `\`signPdf()\`: the option \`${name}\` has no effect in this version.`,
+    );
+  };
+  if (options.timestampUrl !== undefined) warn('timestampUrl');
+  // `reason` and `location` are read when a visible appearance builds its own text.
+  // `signPdf` tests the appearance by truthiness, so a `null` appearance is absent here too.
+  const shownInAppearance = options.appearance ? !options.appearance.text : false;
+  if (options.reason !== undefined && !shownInAppearance) warn('reason');
+  if (options.location !== undefined && !shownInAppearance) warn('location');
+  if (options.contactInfo !== undefined) warn('contactInfo');
+}
 
 /**
  * Extract the field name from the signature dictionary context.
@@ -290,6 +333,7 @@ export async function signPdf(
   options: SignOptions,
 ): Promise<Uint8Array> {
   assertUnencryptedInput(pdfBytes, 'signPdf()');
+  warnIgnoredSignOptions(options);
   const hashAlgorithm = options.hashAlgorithm ?? 'SHA-256';
 
   // Build appearance options if visible signature requested

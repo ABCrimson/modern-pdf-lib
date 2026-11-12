@@ -15,6 +15,7 @@
  */
 
 import type { PdfPlugin, PluginDocument } from '../pluginSystem.js';
+import { warnOnce } from '../../utils/warnings.js';
 
 /** Options for the metadata plugin. */
 export interface MetadataPluginOptions {
@@ -24,13 +25,28 @@ export interface MetadataPluginOptions {
    */
   producer?: string | undefined;
 
-  /** Optional creator string (e.g. application name). */
+  /**
+   * Optional creator string (e.g. application name).
+   *
+   * Has no effect in this version; passing it emits a one-time
+   * `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`).
+   */
   creator?: string | undefined;
 
-  /** Optional default title. Only set if the document has no title. */
+  /**
+   * Optional default title.
+   *
+   * Has no effect in this version; passing it emits a one-time
+   * `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`).
+   */
   defaultTitle?: string | undefined;
 
-  /** Optional default author. Only set if the document has no author. */
+  /**
+   * Optional default author.
+   *
+   * Has no effect in this version; passing it emits a one-time
+   * `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`).
+   */
   defaultAuthor?: string | undefined;
 }
 
@@ -41,6 +57,15 @@ export interface MetadataPluginOptions {
  * @returns        A {@link PdfPlugin} that manages document metadata.
  */
 export function metadataPlugin(options?: MetadataPluginOptions): PdfPlugin {
+  for (const name of ['creator', 'defaultTitle', 'defaultAuthor'] as const) {
+    if (options?.[name] !== undefined) {
+      warnOnce(
+        `ignored-option:metadataPlugin ${name}`,
+        'MPL_IGNORED_OPTION',
+        `\`metadataPlugin()\`: the option \`${name}\` has no effect in this version.`,
+      );
+    }
+  }
   const producer = options?.producer ?? 'modern-pdf-lib';
 
   return {
@@ -49,11 +74,6 @@ export function metadataPlugin(options?: MetadataPluginOptions): PdfPlugin {
 
     onRegister(doc: PluginDocument): void {
       doc.setProducer(producer);
-      if (options?.creator) {
-        // Creator is set via the same metadata channel
-        // We use setProducer for producer; creator would need a
-        // separate API. For now we note it as a convention.
-      }
     },
 
     onBeforeSave(doc: PluginDocument): void {

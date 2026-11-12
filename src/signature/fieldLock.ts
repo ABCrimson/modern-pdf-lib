@@ -19,6 +19,7 @@
  */
 
 import type { SignOptions } from './signatureHandler.js';
+import { warnOnce } from '../utils/warnings.js';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -66,9 +67,9 @@ function escapePdfString(str: string): string {
 /**
  * Add a field lock dictionary to sign options.
  *
- * When applied, the resulting signature field will include a /Lock
- * dictionary that specifies which form fields should be locked after
- * this signature is applied.
+ * Has no effect in this version: `signPdf()` does not write a /Lock
+ * dictionary. Calling this function emits a one-time `ModernPdfLibWarning`
+ * (code `MPL_IGNORED_OPTION`) after the lock has been validated.
  *
  * @param options  The sign options to modify (mutated in place).
  * @param lock     The field lock configuration.
@@ -83,7 +84,7 @@ function escapePdfString(str: string): string {
  *   action: 'Include',
  *   fields: ['Name', 'Address', 'Amount'],
  * });
- * const signedPdf = await signPdf(pdfBytes, 'ApprovalSig', options);
+ * const signedPdf = await signPdf(pdfBytes, 'ApprovalSig', options); // writes no /Lock
  * ```
  */
 export function addFieldLock(options: SignOptions, lock: FieldLockOptions): void {
@@ -91,7 +92,12 @@ export function addFieldLock(options: SignOptions, lock: FieldLockOptions): void
     throw new Error(`Field lock action "${lock.action}" requires at least one field name`);
   }
 
-  // Store on the options object for prepareForSigning to read
+  warnOnce(
+    'ignored-option:addFieldLock',
+    'MPL_IGNORED_OPTION',
+    '`addFieldLock()` has no effect in this version: `signPdf()` does not write a /Lock dictionary.',
+  );
+  // Stored on the options object; nothing reads it.
   (options as SignOptions & { fieldLock: FieldLockOptions }).fieldLock = lock;
 }
 

@@ -22,6 +22,7 @@
  */
 
 import { PdfArray, PdfDict, PdfName, PdfNumber, PdfString } from '../core/pdfObjects.js';
+import { warnOnce } from '../utils/warnings.js';
 
 // ---------------------------------------------------------------------------
 // Public types
@@ -32,7 +33,13 @@ export type PdfX6Variant = 'PDF/X-6' | 'PDF/X-6p' | 'PDF/X-6n';
 
 /** Options describing the PDF/X-6 output intent and conformance. */
 export interface PdfX6Options {
-  /** Conformance variant. Defaults to `'PDF/X-6'`. */
+  /**
+   * Conformance variant.
+   *
+   * Has no effect in this version in `buildPdfX6OutputIntent()`, which does not record it in the
+   * output intent; passing it there emits a one-time `ModernPdfLibWarning` (code
+   * `MPL_IGNORED_OPTION`). `buildGtsPdfxVersion()` takes the variant as its own argument.
+   */
   readonly variant?: PdfX6Variant | undefined;
   /**
    * Output condition identifier — a registered name (e.g. a registry
@@ -74,6 +81,13 @@ export interface BoxGeometry {
  * @returns A freshly-built `/Type /OutputIntent` dictionary.
  */
 export function buildPdfX6OutputIntent(options: PdfX6Options): PdfDict {
+  if (options.variant !== undefined) {
+    warnOnce(
+      'ignored-option:buildPdfX6OutputIntent variant',
+      'MPL_IGNORED_OPTION',
+      '`buildPdfX6OutputIntent()`: the option `variant` has no effect in this version.',
+    );
+  }
   const dict = new PdfDict();
   dict.set('/Type', PdfName.of('/OutputIntent'));
   dict.set('/S', PdfName.of('/GTS_PDFX'));

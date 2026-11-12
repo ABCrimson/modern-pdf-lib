@@ -10,7 +10,12 @@
  * Reference: GS1 General Specifications, Section 5.2.
  */
 
-import { encodeEan13, calculateEanCheckDigit, matrixToOperators } from './ean.js';
+import {
+  encodeEan13,
+  calculateEanCheckDigit,
+  matrixToOperators,
+  warnIgnoredTextOptions,
+} from './ean.js';
 import type { BarcodeMatrix, BarcodeOptions } from './types.js';
 
 // Re-export the options type under a UPC-specific alias.
@@ -90,5 +95,6 @@ export function upcAToOperators(
   y: number,
   options?: BarcodeOptions,
 ): string {
+  warnIgnoredTextOptions('upcAToOperators', options);
   return matrixToOperators(matrix, x, y, options);
 }

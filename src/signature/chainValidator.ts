@@ -37,6 +37,7 @@ import {
   getSubtle,
 } from './pkcs7.js';
 import type { Asn1Node } from './pkcs7.js';
+import { warnOnce } from '../utils/warnings.js';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -61,6 +62,9 @@ export interface ChainValidationOptions {
   /**
    * Reserved for revocation checking via OCSP/CRL. `validateCertificateChain`
    * does not read it and performs no revocation check.
+   *
+   * Has no effect in this version; passing `true` emits a one-time
+   * `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`).
    */
   checkRevocation?: boolean | undefined;
   /** The point in time for validity checking. Default: current time. */
@@ -594,6 +598,13 @@ export async function validateCertificateChain(
   chain: Uint8Array[],
   options?: ChainValidationOptions,
 ): Promise<ChainValidationResult> {
+  if (options?.checkRevocation === true) {
+    warnOnce(
+      'ignored-option:validateCertificateChain checkRevocation',
+      'MPL_IGNORED_OPTION',
+      '`validateCertificateChain()`: the option `checkRevocation` has no effect in this version.',
+    );
+  }
   const validationTime = options?.validationTime ?? new Date();
   const trustedCerts = options?.trustedCerts ?? [];
 

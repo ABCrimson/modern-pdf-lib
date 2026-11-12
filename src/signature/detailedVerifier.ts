@@ -26,6 +26,7 @@ import {
 } from './pkcs7.js';
 import type { Asn1Node } from './pkcs7.js';
 import type { RevocationCache } from './revocationCache.js';
+import { warnOnce } from '../utils/warnings.js';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -103,11 +104,23 @@ export interface DetailedVerificationResult {
 export interface DetailedVerifyOptions {
   /** Whether to check certificate revocation status. Default: false. */
   checkRevocation?: boolean | undefined;
-  /** Trusted root certificates (DER-encoded) for chain validation. */
+  /**
+   * Trusted root certificates (DER-encoded) for chain validation.
+   *
+   * Has no effect in this version: `verifySignatureDetailed()` validates no
+   * chain, and listing certificates only drops one result warning. Passing a
+   * non-empty array emits a one-time `ModernPdfLibWarning` (code
+   * `MPL_IGNORED_OPTION`).
+   */
   trustedCerts?: Uint8Array[] | undefined;
   /** Revocation cache for OCSP/CRL responses. */
   revocationCache?: RevocationCache | undefined;
-  /** Timeout in milliseconds for network operations. Default: 10000. */
+  /**
+   * Timeout in milliseconds for network operations.
+   *
+   * Has no effect in this version: nothing reads it. Passing it emits a
+   * one-time `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`).
+   */
   timeout?: number | undefined;
 }
 
@@ -602,6 +615,18 @@ export async function verifySignatureDetailed(
   options?: DetailedVerifyOptions,
 ): Promise<DetailedVerificationResult[]> {
   const opts = options ?? {};
+  for (const [name, passed] of [
+    ['timeout', opts.timeout !== undefined],
+    ['trustedCerts', (opts.trustedCerts?.length ?? 0) > 0],
+  ] as const) {
+    if (passed) {
+      warnOnce(
+        `ignored-option:verifySignatureDetailed ${name}`,
+        'MPL_IGNORED_OPTION',
+        `\`verifySignatureDetailed()\`: the option \`${name}\` has no effect in this version.`,
+      );
+    }
+  }
   const pdfStr = decoder.decode(pdf);
   const rawSigs = findSignatures(pdf);
   const results: DetailedVerificationResult[] = [];

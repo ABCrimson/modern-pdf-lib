@@ -20,6 +20,7 @@
  */
 
 import { assertUnencryptedInput } from '../core/incrementalWriter.js';
+import { warnOnce } from '../utils/warnings.js';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -41,7 +42,13 @@ export interface SignatureByteRange {
  * Options for incremental save with signature preservation.
  */
 export interface IncrementalSaveOptions {
-  /** Apply FlateDecode compression to new stream objects. Default: true. */
+  /**
+   * Apply FlateDecode compression to new stream objects.
+   *
+   * Has no effect in this version: the appended objects are written as they
+   * are. Passing `true` emits a one-time `ModernPdfLibWarning` (code
+   * `MPL_IGNORED_OPTION`).
+   */
   compress?: boolean | undefined;
   /** Preserve existing signatures by verifying byte ranges. Default: true. */
   preserveSignatures?: boolean | undefined;
@@ -51,7 +58,13 @@ export interface IncrementalSaveOptions {
  * Options for pure append-only incremental updates.
  */
 export interface AppendOptions {
-  /** Apply FlateDecode compression. Default: false. */
+  /**
+   * Apply FlateDecode compression.
+   *
+   * Has no effect in this version: the appended objects are written as they
+   * are. Passing `true` emits a one-time `ModernPdfLibWarning` (code
+   * `MPL_IGNORED_OPTION`).
+   */
   compress?: boolean | undefined;
 }
 
@@ -330,6 +343,13 @@ export function saveIncrementalWithSignaturePreservation(
   options?: IncrementalSaveOptions,
 ): Uint8Array {
   assertUnencryptedInput(originalPdf, 'saveIncrementalWithSignaturePreservation()');
+  if (options?.compress === true) {
+    warnOnce(
+      'ignored-option:saveIncrementalWithSignaturePreservation compress',
+      'MPL_IGNORED_OPTION',
+      '`saveIncrementalWithSignaturePreservation()`: the option `compress` has no effect in this version.',
+    );
+  }
   const preserveSignatures = options?.preserveSignatures ?? true;
 
   // Step 1: Find existing signatures in the original PDF
@@ -382,9 +402,7 @@ export function saveIncrementalWithSignaturePreservation(
   }
 
   // Step 6: Append the incremental update
-  return appendIncrementalUpdate(originalPdf, incrementalObjects, {
-    compress: options?.compress,
-  });
+  return appendIncrementalUpdate(originalPdf, incrementalObjects);
 }
 
 /**
@@ -439,6 +457,14 @@ export function appendIncrementalUpdate(
   newObjects: IncrementalObject[],
   _options?: AppendOptions,
 ): Uint8Array {
+  // The declared parameter names are part of the declared API, so `_options` keeps its name.
+  if (_options?.compress === true) {
+    warnOnce(
+      'ignored-option:appendIncrementalUpdate compress',
+      'MPL_IGNORED_OPTION',
+      '`appendIncrementalUpdate()`: the option `compress` has no effect in this version.',
+    );
+  }
   if (newObjects.length === 0) {
     return originalPdf;
   }

@@ -19,6 +19,7 @@
 import type { Color } from '../core/operators/color.js';
 import { applyFillColor } from '../core/operators/color.js';
 import type { BarcodeMatrix } from './types.js';
+import { warnOnce } from '../utils/warnings.js';
 
 export type { BarcodeMatrix };
 
@@ -61,13 +62,24 @@ export interface ItfOptions {
   readonly height?: number | undefined;
   /** Width of a narrow module in user-space units. Default: `1`. */
   readonly moduleWidth?: number | undefined;
-  /** Wide-to-narrow ratio. Default: `3`. Must be >= 2. */
+  /**
+   * Wide-to-narrow ratio. Must be >= 2.
+   *
+   * Has no effect in this version in `itfToOperators()`, which takes an already-encoded
+   * matrix; passing it there emits a one-time `ModernPdfLibWarning` (code
+   * `MPL_IGNORED_OPTION`). `encodeItf()` takes the value as its own argument.
+   */
   readonly wideToNarrowRatio?: number | undefined;
   /** Quiet-zone width in narrow modules on each side. Default: `10`. */
   readonly quietZone?: number | undefined;
   /** Bar colour. Default: grayscale black. */
   readonly color?: Color | undefined;
-  /** Show human-readable text below the barcode. Default: `false`. */
+  /**
+   * Show human-readable text below the barcode. Default: `false`.
+   *
+   * Has no effect in this version: the text is not drawn; passing `true` emits a one-time
+   * `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`).
+   */
   readonly showText?: boolean | undefined;
   /**
    * Add horizontal bearer bars at the top and bottom of the barcode.
@@ -192,6 +204,20 @@ export function itfToOperators(
   y: number,
   options?: ItfOptions,
 ): string {
+  if (options?.showText === true) {
+    warnOnce(
+      'ignored-option:itfToOperators showText',
+      'MPL_IGNORED_OPTION',
+      '`itfToOperators()`: the option `showText` has no effect in this version.',
+    );
+  }
+  if (options?.wideToNarrowRatio !== undefined) {
+    warnOnce(
+      'ignored-option:itfToOperators wideToNarrowRatio',
+      'MPL_IGNORED_OPTION',
+      '`itfToOperators()`: the option `wideToNarrowRatio` has no effect in this version.',
+    );
+  }
   const height = options?.height ?? 50;
   const moduleWidth = options?.moduleWidth ?? 1;
   const quietZone = options?.quietZone ?? 10;

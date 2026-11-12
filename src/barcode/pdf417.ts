@@ -22,6 +22,7 @@ import type { Color } from '../core/operators/color.js';
 import { applyFillColor } from '../core/operators/color.js';
 import { saveState, restoreState } from '../core/operators/state.js';
 import { fill } from '../core/operators/graphics.js';
+import { warnOnce } from '../utils/warnings.js';
 
 // ---------------------------------------------------------------------------
 // Public types
@@ -29,9 +30,21 @@ import { fill } from '../core/operators/graphics.js';
 
 /** Options for encoding a PDF417 barcode. */
 export interface Pdf417Options {
-  /** Number of data columns (1-30). Default: auto-calculated. */
+  /**
+   * Number of data columns (1-30).
+   *
+   * Has no effect in this version in `pdf417ToOperators()`, which takes an already-encoded
+   * matrix; passing it there emits a one-time `ModernPdfLibWarning` (code
+   * `MPL_IGNORED_OPTION`). `encodePdf417()` takes the value in its own options argument.
+   */
   readonly columns?: number;
-  /** Error correction level (0-8). Default: `2`. */
+  /**
+   * Error correction level (0-8).
+   *
+   * Has no effect in this version in `pdf417ToOperators()`, which takes an already-encoded
+   * matrix; passing it there emits a one-time `ModernPdfLibWarning` (code
+   * `MPL_IGNORED_OPTION`). `encodePdf417()` takes the value in its own options argument.
+   */
   readonly errorLevel?: number;
   /** Row height in PDF points. Default: `8`. */
   readonly rowHeight?: number;
@@ -782,6 +795,20 @@ export function pdf417ToOperators(
   y: number,
   options: Pdf417Options = {},
 ): string {
+  if (options.columns !== undefined) {
+    warnOnce(
+      'ignored-option:pdf417ToOperators columns',
+      'MPL_IGNORED_OPTION',
+      '`pdf417ToOperators()`: the option `columns` has no effect in this version.',
+    );
+  }
+  if (options.errorLevel !== undefined) {
+    warnOnce(
+      'ignored-option:pdf417ToOperators errorLevel',
+      'MPL_IGNORED_OPTION',
+      '`pdf417ToOperators()`: the option `errorLevel` has no effect in this version.',
+    );
+  }
   const moduleWidth = options.moduleWidth ?? 1;
   const rowHeight = options.rowHeight ?? 8;
   const quietZone = options.quietZone ?? 2;

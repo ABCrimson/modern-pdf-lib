@@ -200,51 +200,6 @@ export interface DrawEllipseOptions {
 }
 
 // ---------------------------------------------------------------------------
-// WASM initialization
-// ---------------------------------------------------------------------------
-
-/**
- * Options for `initWasm()`.
- *
- * Allows the caller to provide custom WASM binary locations or
- * pre-compiled modules for each subsystem.
- */
-export interface InitWasmOptions {
-  /**
-   * URL or path to the deflate WASM binary.
-   * When omitted the library attempts auto-detection relative to the
-   * package installation.
-   */
-  deflateWasm?: string | URL | undefined;
-  /**
-   * URL or path to the PNG decoder WASM binary.
-   */
-  pngWasm?: string | URL | undefined;
-  /**
-   * URL or path to the font subsetter WASM binary.
-   */
-  fontWasm?: string | URL | undefined;
-  /**
-   * General WASM path prefix.  Individual `*Wasm` options override
-   * this prefix for their respective modules.
-   */
-  wasmPath?: string | URL | undefined;
-  /**
-   * Pre-compiled `WebAssembly.Module` for deflate.
-   * Skips the fetch + compile step.
-   */
-  deflate?: WebAssembly.Module | undefined;
-  /**
-   * Pre-compiled `WebAssembly.Module` for the PNG decoder.
-   */
-  png?: WebAssembly.Module | undefined;
-  /**
-   * Pre-compiled `WebAssembly.Module` for the font subsetter.
-   */
-  fonts?: WebAssembly.Module | undefined;
-}
-
-// ---------------------------------------------------------------------------
 // Page size input
 // ---------------------------------------------------------------------------
 
