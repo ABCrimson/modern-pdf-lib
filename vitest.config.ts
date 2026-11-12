@@ -26,7 +26,8 @@ const NO_BENCHMARKS = { include: [] };
 // directories. `node scripts/dev/test-projects.ts --check` fails when a
 // tests/**/*.test.ts file matches no project or more than one.
 // `extends: true` (the Vitest 5.1 default, written out) gives every project
-// the root options below: pool, execArgv, the CI test timeout and the CI worker cap.
+// the root options below: pool, execArgv, the CI test timeout and the CI worker cap (which the
+// adversarial project's `fileParallelism: false` replaces with one worker).
 export default defineConfig({
   test: {
     pool: 'forks',
@@ -81,6 +82,10 @@ export default defineConfig({
           name: 'adversarial',
           include: ['tests/adversarial/**/*.test.ts'],
           retry: 0,
+          // One file at a time (Vitest sets this project's maxWorkers to 1, over the CI
+          // cap): the budgeted runner (tests/helpers/budget.ts) measures time and resident
+          // memory, so no other adversarial file may compete with it for the CPU.
+          fileParallelism: false,
           benchmark: NO_BENCHMARKS,
         },
       },

@@ -1146,6 +1146,8 @@ export {
   RedactionIncompleteError,
   TimestampVerificationError,
   UnsupportedEncryptionError,
+  ResourceLimitError,
+  UnsupportedFilterError,
 } from './errors.js';
 export type { RedactionIncompleteReason } from './errors.js';
 

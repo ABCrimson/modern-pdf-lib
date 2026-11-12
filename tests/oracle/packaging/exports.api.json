@@ -3,7 +3,7 @@
   "package": "modern-pdf-lib",
   "entries": {
     ".": {
-      "runtime": 725,
+      "runtime": 727,
       "typeOnly": 417,
       "names": {
         "AFDate_FormatEx": {
@@ -1602,6 +1602,10 @@
           "kind": "type",
           "decl": "sha256:f2e017048b37"
         },
+        "ResourceLimitError": {
+          "kind": "class",
+          "decl": "sha256:46026c134a3c"
+        },
         "RgbColor": {
           "kind": "interface",
           "decl": "sha256:d554d430511b"
@@ -2029,6 +2033,10 @@
         "UnsupportedEncryptionError": {
           "kind": "class",
           "decl": "sha256:ca2b0779b9b3"
+        },
+        "UnsupportedFilterError": {
+          "kind": "class",
+          "decl": "sha256:22f7c6e0611e"
         },
         "UpcOptions": {
           "kind": "interface",
@@ -5207,7 +5215,7 @@
       }
     },
     "./browser": {
-      "runtime": 732,
+      "runtime": 734,
       "typeOnly": 417,
       "names": {
         "AFDate_FormatEx": {
@@ -6806,6 +6814,10 @@
           "kind": "type",
           "decl": "sha256:f2e017048b37"
         },
+        "ResourceLimitError": {
+          "kind": "class",
+          "decl": "sha256:46026c134a3c"
+        },
         "RgbColor": {
           "kind": "interface",
           "decl": "sha256:d554d430511b"
@@ -7233,6 +7245,10 @@
         "UnsupportedEncryptionError": {
           "kind": "class",
           "decl": "sha256:ca2b0779b9b3"
+        },
+        "UnsupportedFilterError": {
+          "kind": "class",
+          "decl": "sha256:22f7c6e0611e"
         },
         "UpcOptions": {
           "kind": "interface",

@@ -410,3 +410,69 @@ export class UnsupportedEncryptionError extends Error {
     super(message, options);
   }
 }
+
+// ---------------------------------------------------------------------------
+// Bounded decode (0.40.8)
+// ---------------------------------------------------------------------------
+
+/**
+ * Thrown when input needs more than one of the library's internal limits
+ * allows: more decoded bytes, mappings, nesting levels, operators, pixels,
+ * frames or font bytes.  A value equal to the limit is accepted; only a value
+ * above it (or a size that is not a finite number) is refused.  The limits
+ * are fixed in this release; their names are not a stable API.
+ */
+export class ResourceLimitError extends Error {
+  override readonly name = 'ResourceLimitError';
+  /** Machine-readable code, stable across releases. */
+  readonly code = 'resource-limit-exceeded' as const;
+  /** The name of the internal limit, such as `'maxDecodedStreamBytes'`. */
+  readonly limit: string;
+  /** The value of that limit. */
+  readonly max: number;
+  /** The size the input needed, or `undefined` when it is not a finite number or not known. */
+  readonly actual: number | undefined;
+  /**
+   * @param limit - The name of the internal limit.
+   * @param max - The value of that limit.
+   * @param unit - What the limit counts (`bytes`, `levels`, ...), for the message.
+   * @param actual - The size the input needed, when known.
+   */
+  constructor(limit: string, max: number, unit: string, actual?: number, options?: ErrorOptions) {
+    super(`Input exceeds the internal limit ${limit} (${max} ${unit}).`, options);
+    this.limit = limit;
+    this.max = max;
+    this.actual = actual;
+  }
+}
+
+/** A stream filter or image format this release does not decode. */
+export type UnsupportedFilterName = 'JPXDecode' | 'JBIG2Decode' | 'VP8';
+
+const UNSUPPORTED_FILTER_MESSAGES: Readonly<Record<UnsupportedFilterName, string>> = {
+  JPXDecode: 'JPEG 2000 (JPXDecode) image data is not decoded in this release.',
+  JBIG2Decode: 'JBIG2 (JBIG2Decode) image data is not decoded in this release.',
+  VP8: 'Lossy WebP (VP8) images are not decoded in this release; lossless WebP (VP8L) is supported. Convert the image to PNG or JPEG first.',
+};
+
+/**
+ * Thrown when image data is in a format this release does not decode:
+ * JPEG 2000 (`/JPXDecode`), JBIG2 (`/JBIG2Decode`) and lossy WebP (VP8).
+ * Nothing of the data is read.  A document that holds such a stream is still
+ * loaded and saved with the stream unchanged.
+ */
+export class UnsupportedFilterError extends Error {
+  override readonly name = 'UnsupportedFilterError';
+  /** Machine-readable code, stable across releases. */
+  readonly code = 'unsupported-filter' as const;
+  /** The filter or format that is not decoded. */
+  readonly filter: UnsupportedFilterName;
+  constructor(
+    filter: UnsupportedFilterName,
+    message: string = UNSUPPORTED_FILTER_MESSAGES[filter],
+    options?: ErrorOptions,
+  ) {
+    super(message, options);
+    this.filter = filter;
+  }
+}

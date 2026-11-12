@@ -12,7 +12,8 @@
  *   holds raw DEFLATE data (as modern-pdf-lib 0.40.6 and earlier wrote it)
  *   back as zlib data: the data is inflated and compressed again at level 6,
  *   so the decoded bytes do not change. A stream whose decoded data is
- *   larger than {@link LEGACY_REWRAP_MAX_SIZE} (64 MiB) is copied as loaded.
+ *   larger than {@link INTERNAL_LIMITS}.maxRewrapDecodedBytes (64 MiB) is copied
+ *   as loaded.
  * - A document loaded from a file whose trailer has `/Encrypt` is never
  *   re-wrapped: its stream data can still be encrypted, and encrypted data
  *   can inflate as raw DEFLATE by chance. The loader records such a
@@ -35,6 +36,7 @@ import {
   isAvailable as isWasmDeflateAvailable,
   deflateSync as wasmDeflateSync,
 } from '../compression/libdeflateWasm.js';
+import { INTERNAL_LIMITS } from './limits.js';
 import { PdfName } from './pdfObjects.js';
 import type { PdfObjectRegistry, PdfStream } from './pdfObjects.js';
 
@@ -102,21 +104,15 @@ function firstFilterIsFlate(stream: PdfStream): boolean {
 }
 
 /**
- * The largest decoded size, in bytes (64 MiB), of a stream that
- * {@link rewrapLegacyStream} writes back as zlib data. Larger streams are
- * copied as loaded.
- */
-export const LEGACY_REWRAP_MAX_SIZE: number = 64 * 1024 * 1024;
-
-/**
  * Write a raw DEFLATE `/FlateDecode` stream back as zlib data.
  *
  * Applies when the stream's `/Filter` is `/FlateDecode`, or an array whose
  * first entry is `/FlateDecode`, and its data does not start with a zlib
  * header. Such data is inflated as raw DEFLATE, step by step
  * (`inflateRawBounded`); when that succeeds with at most
- * {@link LEGACY_REWRAP_MAX_SIZE} decoded bytes, they are compressed again
- * as zlib data at level 6 and replace the data, and `/Length` is updated.
+ * {@link INTERNAL_LIMITS}.maxRewrapDecodedBytes (64 MiB) decoded bytes, they
+ * are compressed again as zlib data at level 6 and replace the data, and
+ * `/Length` is updated.
  * Bytes after the final DEFLATE block (such as an end-of-line counted in
  * `/Length`) are not carried over. `/DecodeParms` stays as it is, since the
  * decoded bytes do not change.
@@ -125,10 +121,10 @@ export const LEGACY_REWRAP_MAX_SIZE: number = 64 * 1024 * 1024;
  * alone: raw DEFLATE can start with such a header only when its first
  * block is a stored block whose padding bits are not zero, which DEFLATE
  * encoders do not write. Data that does not inflate as raw DEFLATE, and
- * data that decodes to more than {@link LEGACY_REWRAP_MAX_SIZE} bytes, and
- * data in which 128 KiB of input in a row before its final block decode to
- * no bytes, is left alone too (inflating stops once the decoded size passes
- * it), and no error is thrown.
+ * data that decodes to more than {@link INTERNAL_LIMITS}.maxRewrapDecodedBytes
+ * bytes, and data in which 128 KiB of input in a row before its final block
+ * decode to no bytes, is left alone too (inflating stops once the decoded
+ * size passes it), and no error is thrown.
  *
  * The writers never call this for a document loaded from a file whose
  * trailer has `/Encrypt` ({@link isLoadedFromEncryptedFile}): the stream
@@ -143,7 +139,7 @@ export function rewrapLegacyStream(stream: PdfStream): void {
 
   let plain: Uint8Array | undefined;
   try {
-    plain = inflateRawBounded(stream.data, LEGACY_REWRAP_MAX_SIZE);
+    plain = inflateRawBounded(stream.data, INTERNAL_LIMITS.maxRewrapDecodedBytes);
   } catch {
     return;
   }

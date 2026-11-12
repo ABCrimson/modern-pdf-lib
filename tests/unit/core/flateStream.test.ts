@@ -20,11 +20,8 @@ import {
 } from 'node:zlib';
 import { describe, expect, it } from 'vitest';
 import { deflateSync as fflateRaw } from 'fflate';
-import {
-  LEGACY_REWRAP_MAX_SIZE,
-  compressPdfStream,
-  rewrapLegacyStream,
-} from '../../../src/core/flateStream.js';
+import { compressPdfStream, rewrapLegacyStream } from '../../../src/core/flateStream.js';
+import { INTERNAL_LIMITS } from '../../../src/core/limits.js';
 import { PdfArray, PdfDict, PdfName, PdfNumber, PdfStream } from '../../../src/core/pdfObjects.js';
 import { loadPdf } from '../../../src/index.js';
 
@@ -168,19 +165,23 @@ describe('rewrapLegacyStream', () => {
 
   // Zero-filled buffers keep the raw DEFLATE data of the next two cases at about 64 KB.
   it('re-wraps a stream whose decoded data is just under 64 MiB', () => {
-    expect(LEGACY_REWRAP_MAX_SIZE).toBe(64 * 1024 * 1024);
-    const under = new Uint8Array(deflateRawSync(new Uint8Array(LEGACY_REWRAP_MAX_SIZE - 1)));
+    expect(INTERNAL_LIMITS.maxRewrapDecodedBytes).toBe(64 * 1024 * 1024);
+    const under = new Uint8Array(
+      deflateRawSync(new Uint8Array(INTERNAL_LIMITS.maxRewrapDecodedBytes - 1)),
+    );
     const rewrapped = streamOf(under, PdfName.of('FlateDecode'));
     rewrapLegacyStream(rewrapped);
     expect([rewrapped.data[0], rewrapped.data[1]]).toEqual([0x78, 0x9c]);
     const plain = new Uint8Array(inflateSync(rewrapped.data));
-    expect(plain.length).toBe(LEGACY_REWRAP_MAX_SIZE - 1);
+    expect(plain.length).toBe(INTERNAL_LIMITS.maxRewrapDecodedBytes - 1);
     expect(plain.every((b) => b === 0)).toBe(true);
     expect(lengthOf(rewrapped)).toBe(rewrapped.data.length);
   });
 
   it('copies a stream whose decoded data is just over 64 MiB as loaded', () => {
-    const over = new Uint8Array(deflateRawSync(new Uint8Array(LEGACY_REWRAP_MAX_SIZE + 1)));
+    const over = new Uint8Array(
+      deflateRawSync(new Uint8Array(INTERNAL_LIMITS.maxRewrapDecodedBytes + 1)),
+    );
     const copied = streamOf(over, PdfName.of('FlateDecode'));
     rewrapLegacyStream(copied);
     expect(copied.data).toBe(over);
