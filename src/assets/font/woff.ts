@@ -29,7 +29,8 @@
  * @packageDocumentation
  */
 
-import { inflateFlate } from '../../compression/pdfFlate.js';
+import { inflateFlateUpTo } from '../../compression/pdfFlate.js';
+import { assertWithinLimit } from '../../core/limits.js';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -172,6 +173,11 @@ export function readWoffHeader(data: Uint8Array): WoffInfo {
  * @returns The reconstructed raw sfnt bytes.
  * @throws `'WOFF2 decode not yet supported'` for WOFF2 input, or a
  *         descriptive error when a WOFF1 container is malformed.
+ * @throws `'WOFF1: table data overlaps'` when the stored data of two tables
+ *         overlaps; thrown before any table is inflated.
+ * @throws {ResourceLimitError} `maxFontBytes` when the table lengths the
+ *         directory states, or `totalSfntSize`, are above 128 MiB; thrown
+ *         before any table is inflated.
  */
 export function decodeWoff(data: Uint8Array): Uint8Array {
   if (isWoff2(data)) {
@@ -204,6 +210,22 @@ export function decodeWoff(data: Uint8Array): Uint8Array {
     entries.push({ tag, offset: tableOffset, compLength, origLength });
   }
 
+  // The tables' stored data may not overlap: tables that share data would be inflated once each.
+  // A table of length 0 holds no data and is left out.
+  const byOffset = entries.filter((e) => e.compLength > 0).sort((a, b) => a.offset - b.offset);
+  let storedEnd = 0;
+  for (const entry of byOffset) {
+    if (entry.offset < storedEnd) throw new Error('WOFF1: table data overlaps');
+    storedEnd = entry.offset + entry.compLength;
+  }
+
+  // The sizes the file states are checked before any table is inflated.
+  assertWithinLimit(
+    'maxFontBytes',
+    entries.reduce((sum, entry) => sum + entry.origLength, 0),
+  );
+  assertWithinLimit('maxFontBytes', header.totalSfntSize);
+
   // Decode each table's data (inflate when compressed, else copy).
   const tableData: Uint8Array[] = [];
   for (let i = 0; i < numTables; i++) {
@@ -222,7 +244,7 @@ export function decodeWoff(data: Uint8Array): Uint8Array {
       // Stored uncompressed.
       decoded = raw;
     } else {
-      decoded = inflateZlib(raw);
+      decoded = inflateZlib(raw, entry.origLength);
       if (decoded.length !== entry.origLength) {
         throw new Error('WOFF1: inflated table size mismatch');
       }
@@ -234,18 +256,34 @@ export function decodeWoff(data: Uint8Array): Uint8Array {
 }
 
 /**
- * Inflate zlib-wrapped table data. The Adler-32 trailer is not checked, and
- * data without the zlib header is read as raw DEFLATE.
+ * Inflate zlib-wrapped table data that must be exactly `origLength` bytes.
+ * At most `origLength` bytes are kept: a table that inflates to more is
+ * refused as soon as a step of the read decodes past `origLength`, without
+ * inflating the rest. The Adler-32 trailer is not checked, and data without
+ * the zlib header is read as raw DEFLATE.
  *
+ * @throws {Error} `WOFF1: inflated table size mismatch` when the data
+ *   inflates to more than `origLength` bytes.
  * @throws {Error} `WOFF1: failed to inflate table data` when the data
  *   inflates neither way.
+ * @throws {ResourceLimitError} `maxDecodedStreamBytes` when `origLength` is
+ *   above it; not reachable from `decodeWoff`, which refuses such a length
+ *   first.
  */
-function inflateZlib(data: Uint8Array): Uint8Array {
+function inflateZlib(data: Uint8Array, origLength: number): Uint8Array {
+  // `decodeWoff` has checked the table lengths against `maxFontBytes`, which is below the
+  // decoded-stream limit; checking here keeps a limit error out of the catch below.
+  assertWithinLimit('maxDecodedStreamBytes', origLength);
+  let inflated: ReturnType<typeof inflateFlateUpTo>;
   try {
-    return inflateFlate(data);
+    inflated = inflateFlateUpTo(data, origLength);
   } catch {
     throw new Error('WOFF1: failed to inflate table data');
   }
+  if (inflated.truncated) {
+    throw new Error('WOFF1: inflated table size mismatch');
+  }
+  return inflated.data;
 }
 
 /**

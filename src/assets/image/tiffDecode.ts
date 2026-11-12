@@ -15,7 +15,8 @@
  * Magic bytes: 49 49 (II, little-endian) or 4D 4D (MM, big-endian) + 42 (0x002A)
  */
 
-import { inflateFlate } from '../../compression/pdfFlate.js';
+import { inflateFlateUpTo } from '../../compression/pdfFlate.js';
+import { assertWithinLimit } from '../../core/limits.js';
 
 // ---------------------------------------------------------------------------
 // Public interfaces
@@ -151,11 +152,16 @@ export function isTiff(data: Uint8Array): boolean {
  * @param offset        Byte offset to the IFD.
  * @param littleEndian  Whether the TIFF uses little-endian byte order.
  * @returns             Array of IFD entries.
+ * @throws {Error} `TIFF: tag data overlaps` when the entries together hold
+ *   more values than twice the file length.
  */
 export function parseTiffIfd(data: Uint8Array, offset: number, littleEndian: boolean): IfdEntry[] {
   const reader = new TiffReader(data, littleEndian);
   const numEntries = reader.u16(offset);
   const entries: IfdEntry[] = [];
+  // Values of different entries occupy different bytes, so an IFD holds at most one value per byte;
+  // one entry that points back into the file may read the whole file once more, hence twice the length.
+  let valuesRead = 0;
 
   for (let i = 0; i < numEntries; i++) {
     const entryOffset = offset + 2 + i * 12;
@@ -165,7 +171,10 @@ export function parseTiffIfd(data: Uint8Array, offset: number, littleEndian: boo
     const type = reader.u16(entryOffset + 2);
     const count = reader.u32(entryOffset + 4);
 
-    const typeSize = TYPE_SIZES[type] ?? 1;
+    // Type 0 and types past the table step one byte at a time, so the value loop below ends at the
+    // end of the file; a value of such a type is read as a LONG, which needs four bytes.
+    const typeSize = TYPE_SIZES[type] || 1;
+    const readSize = type >= 1 && type <= 10 ? typeSize : Math.max(typeSize, 4);
     const totalSize = typeSize * count;
 
     const values: number[] = [];
@@ -175,7 +184,8 @@ export function parseTiffIfd(data: Uint8Array, offset: number, littleEndian: boo
 
     for (let j = 0; j < count; j++) {
       const pos = valueOffset + j * typeSize;
-      if (pos + typeSize > data.length) break;
+      if (pos + readSize > data.length) break;
+      if (++valuesRead > 2 * data.length) throw new Error('TIFF: tag data overlaps');
 
       switch (type) {
         case 1: // BYTE
@@ -231,7 +241,14 @@ function getNextIfdOffset(
   return reader.u32(nextOffset);
 }
 
-/** Find the IFD at a given page index by following the IFD chain. */
+/**
+ * Find the IFD at a given page index by following the IFD chain.
+ *
+ * @throws {Error} `TIFF: the IFD chain repeats offset N` when the walk
+ *   reaches an offset it has already read.
+ * @throws {ResourceLimitError} `maxImageFrames` when the walk would read
+ *   more than 4,096 IFDs.
+ */
 function findIfdAtPage(
   data: Uint8Array,
   littleEndian: boolean,
@@ -239,11 +256,17 @@ function findIfdAtPage(
   pageIndex: number,
 ): number {
   let offset = firstIfdOffset;
+  const seen = new Set<number>([offset]);
   for (let i = 0; i < pageIndex; i++) {
+    assertWithinLimit('maxImageFrames', i + 2);
     offset = getNextIfdOffset(data, offset, littleEndian);
     if (offset === 0) {
       throw new Error(`TIFF: page index ${pageIndex} out of range (only ${i + 1} pages)`);
     }
+    if (seen.has(offset)) {
+      throw new Error(`TIFF: the IFD chain repeats offset ${offset}`);
+    }
+    seen.add(offset);
   }
   return offset;
 }
@@ -431,11 +454,13 @@ function decompressLzw(input: Uint8Array, expectedLength: number): Uint8Array {
  * Deflate decompression (compression=8).
  *
  * TIFF Deflate strips are zlib data (RFC 1950); the Adler-32 trailer is not
- * checked. A strip without the zlib wrapper is read as raw DEFLATE.
+ * checked. A strip without the zlib wrapper is read as raw DEFLATE. At most
+ * `expectedLength` bytes are returned: the read stops once a 16 KiB step of
+ * input decodes past them, so data past the strip's implied size is ignored
+ * and the rest of it is not inflated.
  */
 function decompressDeflate(input: Uint8Array, expectedLength: number): Uint8Array {
-  const decompressed = inflateFlate(input);
-  return decompressed.subarray(0, expectedLength);
+  return inflateFlateUpTo(input, Math.max(0, expectedLength)).data;
 }
 
 // ---------------------------------------------------------------------------
@@ -552,8 +577,15 @@ function decodeJpegStrip(
 /**
  * Get the number of pages in a multi-page TIFF.
  *
+ * Each IFD offset is read once, and at most `INTERNAL_LIMITS.maxImageFrames`
+ * (4,096) IFDs are read.
+ *
  * @param data  Raw TIFF bytes.
  * @returns     Number of IFDs (pages).
+ * @throws {Error} `TIFF: the IFD chain repeats offset N` when an IFD points
+ *   back to an offset already read.
+ * @throws {ResourceLimitError} `maxImageFrames` when the chain has more than
+ *   4,096 IFDs.
  */
 export function getTiffPageCount(data: Uint8Array): number {
   if (!isTiff(data)) {
@@ -564,8 +596,14 @@ export function getTiffPageCount(data: Uint8Array): number {
   const reader = new TiffReader(data, littleEndian);
   let offset = reader.u32(4);
   let count = 0;
+  const seen = new Set<number>();
 
   while (offset !== 0 && offset < data.length) {
+    if (seen.has(offset)) {
+      throw new Error(`TIFF: the IFD chain repeats offset ${offset}`);
+    }
+    seen.add(offset);
+    assertWithinLimit('maxImageFrames', count + 1);
     count++;
     offset = getNextIfdOffset(data, offset, littleEndian);
   }
@@ -605,6 +643,18 @@ export function decodeTiffAll(data: Uint8Array): TiffImage[] {
  * @param data     Raw TIFF bytes.
  * @param options  Decode options (page selection).
  * @returns        Decoded image data.
+ * @throws {ResourceLimitError} `maxImageDimension` when the width or height
+ *   is above 65,536; `maxImagePixels` when width times height is above 2^28;
+ *   `maxImageBytes` when the decoded samples are above 256 MiB; `maxImageFrames`
+ *   when the IFD chain walked to the page is longer than 4,096.
+ * @throws {Error} `TIFF: the IFD chain repeats offset N` when the chain walked
+ *   to the page revisits an offset.
+ * @throws {Error} `TIFF: negative ImageWidth, ImageLength or sample size` when
+ *   a tag stated as a signed type holds a negative value.
+ * @throws {Error} `TIFF: strip data overlaps` when the Deflate strips together
+ *   are longer than the file.
+ * @throws {Error} `TIFF: tag data overlaps` when the entries of an IFD together
+ *   hold more values than twice the file length.
  */
 export function decodeTiff(data: Uint8Array, options?: TiffDecodeOptions): TiffImage {
   if (!isTiff(data)) {
@@ -656,14 +706,28 @@ export function decodeTiff(data: Uint8Array, options?: TiffDecodeOptions): TiffI
   const bytesPerRow = Math.ceil((width * samplesPerPixel * bitsPerSample) / 8);
   const numStrips = stripOffsets.length;
 
+  // The sizes the tags state are checked before anything is allocated from them.
+  if (width < 0 || height < 0 || bytesPerRow < 0) {
+    throw new Error('TIFF: negative ImageWidth, ImageLength or sample size');
+  }
+  assertWithinLimit('maxImageDimension', width);
+  assertWithinLimit('maxImageDimension', height);
+  assertWithinLimit('maxImagePixels', width * height);
+  assertWithinLimit('maxImageBytes', height * bytesPerRow);
+
   // Read and decompress all strips
   const rawData = new Uint8Array(height * bytesPerRow);
   let outOffset = 0;
+  // The Deflate strips together may not be longer than the file, so strips that share data cannot
+  // make the decoder read more input than the file holds.
+  let deflateBytesRead = 0;
 
   for (let strip = 0; strip < numStrips; strip++) {
     const stripOffset = stripOffsets[strip]!;
     const stripByteCount = stripByteCounts?.[strip] ?? bytesPerRow * rowsPerStrip;
     const stripRows = Math.min(rowsPerStrip, height - strip * rowsPerStrip);
+    // Strips past the image's rows hold no pixels and are not read.
+    if (stripRows <= 0) break;
     const expectedStripBytes = stripRows * bytesPerRow;
 
     if (stripOffset + stripByteCount > data.length) {
@@ -685,6 +749,8 @@ export function decodeTiff(data: Uint8Array, options?: TiffDecodeOptions): TiffI
         decompressed = decompressLzw(compressedData, expectedStripBytes);
         break;
       case COMPRESS_DEFLATE:
+        deflateBytesRead += stripByteCount;
+        if (deflateBytesRead > data.length) throw new Error('TIFF: strip data overlaps');
         decompressed = decompressDeflate(compressedData, expectedStripBytes);
         break;
       case COMPRESS_JPEG:

@@ -25,8 +25,8 @@
  * No require() — ESM import only.
  */
 
-import { unzlibSync } from 'fflate';
-import { flateEncode } from '../../compression/pdfFlate.js';
+import { flateEncode, inflateFlateUpTo } from '../../compression/pdfFlate.js';
+import { assertWithinLimit } from '../../core/limits.js';
 
 // ---------------------------------------------------------------------------
 // Public interfaces
@@ -311,15 +311,60 @@ export function isPngWasmReady(): boolean {
 // ---------------------------------------------------------------------------
 
 /**
- * Decompress the concatenated IDAT data, which PNG requires to be zlib
- * data (RFC 1950), with fflate's `unzlibSync`: the zlib header is
- * required and a preset dictionary is rejected; the Adler-32 trailer is
- * not checked.
+ * Inflates the concatenated IDAT data, which PNG requires to be zlib data
+ * (RFC 1950), through `inflateFlateUpTo` with `expected` as the most bytes
+ * kept: the number of bytes the IHDR implies ({@link expectedIdatLength}).
+ * Data past those bytes is ignored and its input is not read, so a PNG
+ * whose data decodes to more than the image needs embeds from the bytes it
+ * needs. The Adler-32 trailer is not checked, and data without a zlib header
+ * is read as raw DEFLATE.
  *
+ * @throws {ResourceLimitError} `maxDecodedStreamBytes` when `expected` is
+ *   above that limit (the filter bytes of an image at the `maxImageBytes`
+ *   limit can take it past).
+ * @throws {Error} `FlateDecode: failed to decompress data` when the data
+ *   does not inflate.
  * @internal
  */
-function decompressZlib(compressed: Uint8Array): Uint8Array {
-  return unzlibSync(compressed);
+function decompressZlib(compressed: Uint8Array, expected: number): Uint8Array {
+  return inflateFlateUpTo(compressed, expected).data;
+}
+
+/**
+ * Adam7 pass origins and strides: first row, first column, row stride and
+ * column stride of each of the seven passes.
+ * @internal
+ */
+const ADAM7_START_ROW = [0, 0, 4, 0, 2, 0, 1];
+const ADAM7_START_COL = [0, 4, 0, 2, 0, 1, 0];
+const ADAM7_ROW_STRIDE = [8, 8, 8, 4, 4, 2, 2];
+const ADAM7_COL_STRIDE = [8, 8, 4, 4, 2, 2, 1];
+
+/**
+ * The inflated size the IHDR implies, in the geometry the reconstruction
+ * below reads: one filter byte plus `width * bytesPerPixel` bytes per row;
+ * for Adam7 the sum over the seven passes.
+ * @internal
+ */
+function expectedIdatLength(ihdr: IhdrData): number {
+  const bpp = bytesPerPixel(ihdr.colorType, ihdr.bitDepth);
+  if (ihdr.interlaceMethod === 0) {
+    return ihdr.height * (1 + ihdr.width * bpp);
+  }
+  let total = 0;
+  for (let pass = 0; pass < 7; pass++) {
+    const passWidth =
+      ihdr.width <= ADAM7_START_COL[pass]!
+        ? 0
+        : Math.ceil((ihdr.width - ADAM7_START_COL[pass]!) / ADAM7_COL_STRIDE[pass]!);
+    const passHeight =
+      ihdr.height <= ADAM7_START_ROW[pass]!
+        ? 0
+        : Math.ceil((ihdr.height - ADAM7_START_ROW[pass]!) / ADAM7_ROW_STRIDE[pass]!);
+    if (passWidth === 0 || passHeight === 0) continue;
+    total += passHeight * (1 + passWidth * bpp);
+  }
+  return total;
 }
 
 /**
@@ -510,6 +555,13 @@ function compressForPdf(data: Uint8Array): Uint8Array {
  *
  * @param pngData - The raw PNG file as a Uint8Array.
  * @returns The embedding result with all data needed for a PDF image XObject.
+ * @throws {ResourceLimitError} `maxImageDimension` when the width or height is
+ *   above 65,536; `maxImagePixels` when width times height is above 2^28;
+ *   `maxImageBytes` when the decoded bytes are above 256 MiB; and
+ *   `maxDecodedStreamBytes` when the scanlines the header implies are above
+ *   256 MiB. All of them are thrown before the bytes are allocated. Image
+ *   data that inflates to more bytes than the header implies is not an
+ *   error: the extra bytes are ignored and are not inflated.
  *
  * @example
  * ```ts
@@ -539,6 +591,14 @@ export function embedPng(pngData: Uint8Array): PngEmbedResult {
 
   // 3. Parse IHDR
   const ihdr = parseIhdr(chunks[0]!);
+  // The IHDR sizes are checked before any inflate or allocation sized from them.
+  assertWithinLimit('maxImageDimension', ihdr.width);
+  assertWithinLimit('maxImageDimension', ihdr.height);
+  assertWithinLimit('maxImagePixels', ihdr.width * ihdr.height);
+  assertWithinLimit(
+    'maxImageBytes',
+    ihdr.height * ihdr.width * bytesPerPixel(ihdr.colorType, ihdr.bitDepth),
+  );
 
   // 4. Concatenate IDAT data
   const idatData = concatenateIdatChunks(chunks);
@@ -613,7 +673,7 @@ function embedIndexedPng(
   }
 
   // Slow path: transparency requires decompression to build SMask
-  const decompressed = decompressZlib(idatData);
+  const decompressed = decompressZlib(idatData, expectedIdatLength(ihdr));
   const bpp = bytesPerPixel(ihdr.colorType, ihdr.bitDepth);
   const pixels = reconstructFilters(decompressed, ihdr.width, ihdr.height, bpp);
   const imageData = compressForPdf(pixels);
@@ -679,7 +739,7 @@ function embedDirectPng(
   }
 
   // Slow path: transparency requires decompression to build SMask
-  const decompressed = decompressZlib(idatData);
+  const decompressed = decompressZlib(idatData, expectedIdatLength(ihdr));
   const bpp = bytesPerPixel(ihdr.colorType, ihdr.bitDepth);
   const pixels = reconstructFilters(decompressed, ihdr.width, ihdr.height, bpp);
   const imageData = compressForPdf(pixels);
@@ -740,7 +800,7 @@ function embedComplexPng(
   transparency: Uint8Array | undefined,
 ): PngEmbedResult {
   // Decompress IDAT
-  const decompressed = decompressZlib(idatData);
+  const decompressed = decompressZlib(idatData, expectedIdatLength(ihdr));
 
   const bpp = bytesPerPixel(ihdr.colorType, ihdr.bitDepth);
 
@@ -748,10 +808,10 @@ function embedComplexPng(
   let pixels: Uint8Array;
   if (ihdr.interlaceMethod !== 0) {
     // Adam7 interlace: 7 passes with these parameters
-    const startingRow = [0, 0, 4, 0, 2, 0, 1];
-    const startingCol = [0, 4, 0, 2, 0, 1, 0];
-    const rowStride = [8, 8, 8, 4, 4, 2, 2];
-    const colStride = [8, 8, 4, 4, 2, 2, 1];
+    const startingRow = ADAM7_START_ROW;
+    const startingCol = ADAM7_START_COL;
+    const rowStride = ADAM7_ROW_STRIDE;
+    const colStride = ADAM7_COL_STRIDE;
 
     const stride = ihdr.width * bpp;
     const finalPixels = new Uint8Array(ihdr.height * stride);

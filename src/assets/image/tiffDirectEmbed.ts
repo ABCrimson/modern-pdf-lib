@@ -21,6 +21,8 @@
  * No require() — ESM import only.
  */
 
+import { assertWithinLimit } from '../../core/limits.js';
+
 // ---------------------------------------------------------------------------
 // TIFF tag and compression constants
 // ---------------------------------------------------------------------------
@@ -207,6 +209,9 @@ function readTagValue(data: Uint8Array, entry: IfdEntry, _le: boolean): number {
 
 /**
  * Read an array of offset values (LONG or SHORT) from a tag.
+ *
+ * @throws {Error} `TIFF: tag data out of bounds` when a tag with more than
+ *   one value stores them past the end of the file.
  * @internal
  */
 function readOffsetArray(data: Uint8Array, entry: IfdEntry, le: boolean): number[] {
@@ -225,9 +230,13 @@ function readOffsetArray(data: Uint8Array, entry: IfdEntry, le: boolean): number
   const offset = entry.valueOrOffset;
   const elementSize = entry.type === 3 ? 2 : 4;
 
+  // The whole array must lie inside the file; its length is read before the values are.
+  if (offset + entry.count * elementSize > data.length) {
+    throw new Error('TIFF: tag data out of bounds');
+  }
+
   for (let i = 0; i < entry.count; i++) {
     const pos = offset + i * elementSize;
-    if (pos + elementSize > data.length) break;
     if (entry.type === 3) {
       values.push(readU16(data, pos, le));
     } else {
@@ -364,6 +373,11 @@ export function canDirectEmbed(data: Uint8Array): boolean {
  * @param options  Optional settings (page index for multi-page TIFFs).
  * @returns        The embedding result with all data needed for a PDF image XObject.
  * @throws         If the TIFF format does not support direct embedding.
+ * @throws {ResourceLimitError} `maxImageDimension` when the width or height is above 65,536;
+ *   `maxImagePixels` when width times height is above 2^28; `maxImageBytes` when the strips or
+ *   tiles together are above 256 MiB.
+ * @throws {Error} `TIFF: tile width and length must be positive multiples of 16` for a tiled
+ *   image whose tile sides are not.
  */
 export function embedTiffDirect(data: Uint8Array, options?: DirectEmbedOptions): DirectEmbedResult {
   if (data.length < 8) {
@@ -392,6 +406,11 @@ export function embedTiffDirect(data: Uint8Array, options?: DirectEmbedOptions):
   if (width === undefined || height === undefined) {
     throw new Error('Invalid TIFF: missing width or height tags');
   }
+
+  // The sizes the tags state are checked before anything is allocated or looped over from them.
+  assertWithinLimit('maxImageDimension', width);
+  assertWithinLimit('maxImageDimension', height);
+  assertWithinLimit('maxImagePixels', width * height);
 
   const colorSpace = getColorSpace(photometric, samplesPerPixel);
 
@@ -459,30 +478,39 @@ function extractStrips(
     throw new Error('TIFF strip offset/count mismatch');
   }
 
-  // Calculate total size
-  let totalSize = 0;
-  for (const count of counts) {
-    totalSize += count;
-  }
-
-  const result = new Uint8Array(totalSize);
+  const result = new Uint8Array(sumStripBytes(data, offsets, counts));
   let pos = 0;
 
   for (let i = 0; i < offsets.length; i++) {
     const offset = offsets[i]!;
     const count = counts[i]!;
-
-    if (offset + count > data.length) {
-      throw new Error(
-        `TIFF strip ${i} extends beyond file (offset=${offset}, count=${count}, fileSize=${data.length})`,
-      );
-    }
-
     result.set(data.subarray(offset, offset + count), pos);
     pos += count;
   }
 
   return result;
+}
+
+/**
+ * Checks every strip or tile against the file and returns the total bytes.
+ * Called before the output buffer exists.
+ *
+ * @throws {Error} `TIFF: strip data out of bounds` when a strip or tile
+ *   extends past the end of the file.
+ * @throws {ResourceLimitError} `maxImageBytes` when the total is above 256 MiB.
+ * @internal
+ */
+function sumStripBytes(data: Uint8Array, offsets: number[], counts: number[]): number {
+  let total = 0;
+  for (let i = 0; i < offsets.length; i++) {
+    const count = counts[i] ?? 0;
+    if ((offsets[i] ?? 0) + count > data.length) {
+      throw new Error('TIFF: strip data out of bounds');
+    }
+    total += count;
+    assertWithinLimit('maxImageBytes', total);
+  }
+  return total;
 }
 
 /**
@@ -507,6 +535,12 @@ function extractTiles(
     throw new Error('Invalid TIFF: missing tile tags');
   }
 
+  // TIFF 6.0 requires the tile sides to be multiples of 16; a side of 0 or a small one would make
+  // the tile loop below copy the image a row, or a pixel, at a time.
+  if (!(tileWidth >= 16 && tileHeight >= 16 && tileWidth % 16 === 0 && tileHeight % 16 === 0)) {
+    throw new Error('TIFF: tile width and length must be positive multiples of 16');
+  }
+
   const offsets = readOffsetArray(data, offsetEntry, le);
   const counts = readOffsetArray(data, countEntry, le);
 
@@ -517,17 +551,14 @@ function extractTiles(
 
   if (compression === COMPRESSION_DEFLATE || compression === COMPRESSION_DEFLATE_PKZIP) {
     // Concatenate compressed tiles
-    let totalSize = 0;
-    for (const count of counts) totalSize += count;
-
-    const result = new Uint8Array(totalSize);
+    if (offsets.length !== counts.length) {
+      throw new Error('TIFF tile offset/count mismatch');
+    }
+    const result = new Uint8Array(sumStripBytes(data, offsets, counts));
     let pos = 0;
     for (let i = 0; i < offsets.length; i++) {
       const offset = offsets[i]!;
       const count = counts[i]!;
-      if (offset + count > data.length) {
-        throw new Error(`TIFF tile ${i} extends beyond file`);
-      }
       result.set(data.subarray(offset, offset + count), pos);
       pos += count;
     }
@@ -537,6 +568,7 @@ function extractTiles(
   // Uncompressed tiles: reassemble into scanline order
   const bytesPerPixel = Math.ceil((samplesPerPixel * bitsPerSample) / 8);
   const rowBytes = width * bytesPerPixel;
+  assertWithinLimit('maxImageBytes', height * rowBytes);
   const result = new Uint8Array(height * rowBytes);
 
   const tilesAcross = Math.ceil(width / tileWidth);
@@ -658,17 +690,14 @@ function embedJpegInTiff(
   }
 
   // Multiple JPEG strips — concatenate (each strip should be a complete JPEG scan)
-  let totalSize = 0;
-  for (const count of counts) totalSize += count;
-
-  const jpegData = new Uint8Array(totalSize);
+  if (offsets.length !== counts.length) {
+    throw new Error('TIFF strip offset/count mismatch');
+  }
+  const jpegData = new Uint8Array(sumStripBytes(data, offsets, counts));
   let pos = 0;
   for (let i = 0; i < offsets.length; i++) {
     const offset = offsets[i]!;
     const count = counts[i]!;
-    if (offset + count > data.length) {
-      throw new Error(`TIFF JPEG strip ${i} extends beyond file`);
-    }
     jpegData.set(data.subarray(offset, offset + count), pos);
     pos += count;
   }

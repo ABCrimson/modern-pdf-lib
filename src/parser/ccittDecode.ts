@@ -14,6 +14,7 @@
  * @packageDocumentation
  */
 
+import { assertWithinLimit } from '../core/limits.js';
 import type { PdfDict } from '../core/pdfObjects.js';
 import { PdfNumber, PdfBool } from '../core/pdfObjects.js';
 
@@ -28,6 +29,12 @@ import { PdfNumber, PdfBool } from '../core/pdfObjects.js';
  * @param parms - Optional `/DecodeParms` dictionary with CCITT parameters.
  * @returns The decoded bilevel image data (one bit per pixel, packed into
  *          bytes, with rows padded to byte boundaries).
+ * @throws {RangeError} `CCITTFaxDecode: /Columns must be an integer of at
+ *   least 1` when `/Columns` is below 1.
+ * @throws {ResourceLimitError} `maxImageDimension` when `/Columns` or
+ *   `/Rows` is above 65,536; `maxImagePixels` when `/Columns` times `/Rows`,
+ *   or the pixels of the rows decoded so far when `/Rows` is absent, are
+ *   above 2^28.
  */
 export function decodeCCITT(data: Uint8Array, parms: PdfDict | null): Uint8Array {
   const params = readCCITTParams(parms);
@@ -60,11 +67,28 @@ interface CCITTParams {
   endOfBlock: boolean;
 }
 
+/**
+ * Reads the parameters. `/Columns` and `/Rows` are checked against
+ * `INTERNAL_LIMITS` before any row is decoded: `/Columns` below 1 throws
+ * `RangeError`; `/Columns` or `/Rows` above `maxImageDimension`, or
+ * `/Columns` times `/Rows` above `maxImagePixels`, throws
+ * `ResourceLimitError`. A `/Rows` below 1 means the row count is not given.
+ */
 function readCCITTParams(parms: PdfDict | null): CCITTParams {
+  const columns = dictInt(parms, '/Columns', 1728);
+  const rows = dictInt(parms, '/Rows', 0);
+  if (!(columns >= 1)) {
+    throw new RangeError('CCITTFaxDecode: /Columns must be an integer of at least 1');
+  }
+  assertWithinLimit('maxImageDimension', columns);
+  if (rows > 0) {
+    assertWithinLimit('maxImageDimension', rows);
+    assertWithinLimit('maxImagePixels', columns * rows);
+  }
   return {
     k: dictInt(parms, '/K', 0),
-    columns: dictInt(parms, '/Columns', 1728),
-    rows: dictInt(parms, '/Rows', 0),
+    columns,
+    rows,
     blackIs1: dictBool(parms, '/BlackIs1', false),
     encodedByteAlign: dictBool(parms, '/EncodedByteAlign', false),
     endOfBlock: dictBool(parms, '/EndOfBlock', true),
@@ -85,6 +109,43 @@ function dictBool(dict: PdfDict | null, key: string, fallback: boolean): boolean
   // Some generators encode booleans as PdfNumber 0/1
   if (v instanceof PdfNumber) return v.value !== 0;
   return fallback;
+}
+
+// ---------------------------------------------------------------------------
+// Output rows
+// ---------------------------------------------------------------------------
+
+/**
+ * The packed rows decoded so far, in a `Uint8Array` that doubles when it
+ * is full. Before a row is appended, the pixels of all rows including it
+ * are checked against `maxImagePixels`, so the output never grows past
+ * 2^28 pixels (32 MiB packed) whatever the data says.
+ */
+class RowSink {
+  private buffer = new Uint8Array(1 << 16);
+  private used = 0;
+  private rows = 0;
+
+  constructor(private readonly columns: number) {}
+
+  /** Appends one packed row. @throws {ResourceLimitError} `maxImagePixels`. */
+  push(packed: Uint8Array): void {
+    assertWithinLimit('maxImagePixels', (this.rows + 1) * this.columns);
+    const needed = this.used + packed.length;
+    if (needed > this.buffer.length) {
+      const grown = new Uint8Array(Math.max(needed, this.buffer.length * 2));
+      grown.set(this.buffer.subarray(0, this.used));
+      this.buffer = grown;
+    }
+    this.buffer.set(packed, this.used);
+    this.used = needed;
+    this.rows++;
+  }
+
+  /** The packed rows appended so far. */
+  finish(): Uint8Array {
+    return this.buffer.slice(0, this.used);
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -492,8 +553,7 @@ function readRunLength(reader: BitReader, tree: HuffmanNode): number {
 function decodeGroup3_1D(data: Uint8Array, params: CCITTParams): Uint8Array {
   const { columns, rows, blackIs1, encodedByteAlign, endOfBlock } = params;
   const reader = new BitReader(data);
-  const rowBytes = Math.ceil(columns / 8);
-  const output: number[] = [];
+  const output = new RowSink(columns);
   let rowCount = 0;
   const maxRows = rows > 0 ? rows : 100000; // safety limit
 
@@ -511,10 +571,7 @@ function decodeGroup3_1D(data: Uint8Array, params: CCITTParams): Uint8Array {
       break; // EOL without data or EOF
     }
 
-    const packed = packBits(line, columns, blackIs1);
-    for (let i = 0; i < rowBytes; i++) {
-      output.push(packed[i] ?? 0);
-    }
+    output.push(packBits(line, columns, blackIs1));
     rowCount++;
 
     if (!endOfBlock && rows > 0 && rowCount >= rows) {
@@ -522,7 +579,7 @@ function decodeGroup3_1D(data: Uint8Array, params: CCITTParams): Uint8Array {
     }
   }
 
-  return new Uint8Array(output);
+  return output.finish();
 }
 
 function skipEOL(_reader: BitReader): void {
@@ -568,13 +625,12 @@ function decodeGroup3_2D(data: Uint8Array, params: CCITTParams): Uint8Array {
   // A tag bit before each line indicates: 1 = 1D, 0 = 2D.
   const { columns, rows, blackIs1, encodedByteAlign, endOfBlock } = params;
   const reader = new BitReader(data);
-  const rowBytes = Math.ceil(columns / 8);
-  const output: number[] = [];
+  const output = new RowSink(columns);
   let rowCount = 0;
   const maxRows = rows > 0 ? rows : 100000;
 
   // First reference line is all white
-  let referenceLine = new Uint8Array(columns); // all 0 = white
+  let referenceLine: Uint8Array = new Uint8Array(columns); // all 0 = white
 
   while (rowCount < maxRows) {
     if (reader.eof) break;
@@ -596,11 +652,8 @@ function decodeGroup3_2D(data: Uint8Array, params: CCITTParams): Uint8Array {
 
     if (!line) break;
 
-    const packed = packBits(line, columns, blackIs1);
-    for (let i = 0; i < rowBytes; i++) {
-      output.push(packed[i] ?? 0);
-    }
-    referenceLine = new Uint8Array(line);
+    output.push(packBits(line, columns, blackIs1));
+    referenceLine = line;
     rowCount++;
 
     if (!endOfBlock && rows > 0 && rowCount >= rows) {
@@ -608,7 +661,7 @@ function decodeGroup3_2D(data: Uint8Array, params: CCITTParams): Uint8Array {
     }
   }
 
-  return new Uint8Array(output);
+  return output.finish();
 }
 
 // ---------------------------------------------------------------------------
@@ -618,13 +671,12 @@ function decodeGroup3_2D(data: Uint8Array, params: CCITTParams): Uint8Array {
 function decodeGroup4(data: Uint8Array, params: CCITTParams): Uint8Array {
   const { columns, rows, blackIs1, encodedByteAlign, endOfBlock } = params;
   const reader = new BitReader(data);
-  const rowBytes = Math.ceil(columns / 8);
-  const output: number[] = [];
+  const output = new RowSink(columns);
   let rowCount = 0;
   const maxRows = rows > 0 ? rows : 100000;
 
   // First reference line is an imaginary all-white line
-  let referenceLine = new Uint8Array(columns); // all 0 = white
+  let referenceLine: Uint8Array = new Uint8Array(columns); // all 0 = white
 
   while (rowCount < maxRows) {
     if (reader.eof) break;
@@ -635,11 +687,8 @@ function decodeGroup4(data: Uint8Array, params: CCITTParams): Uint8Array {
     const line = decode2DLine(reader, referenceLine, columns);
     if (!line) break;
 
-    const packed = packBits(line, columns, blackIs1);
-    for (let i = 0; i < rowBytes; i++) {
-      output.push(packed[i] ?? 0);
-    }
-    referenceLine = new Uint8Array(line);
+    output.push(packBits(line, columns, blackIs1));
+    referenceLine = line;
     rowCount++;
 
     if (!endOfBlock && rows > 0 && rowCount >= rows) {
@@ -647,7 +696,7 @@ function decodeGroup4(data: Uint8Array, params: CCITTParams): Uint8Array {
     }
   }
 
-  return new Uint8Array(output);
+  return output.finish();
 }
 
 // ---------------------------------------------------------------------------
@@ -969,23 +1018,17 @@ function decode2DLine(
 function packBits(pixels: Uint8Array, columns: number, blackIs1: boolean): Uint8Array {
   const rowBytes = Math.ceil(columns / 8);
   const packed = new Uint8Array(rowBytes);
+  // Internal pixels are 0 or 1; the PDF default writes the inverse.
+  const flip = blackIs1 ? 0 : 1;
 
-  for (let i = 0; i < columns; i++) {
-    const byteIdx = i >>> 3;
-    const bitIdx = 7 - (i & 7);
-    let bit: number;
-
-    if (blackIs1) {
-      // 1=black in output; our internal 1=black matches
-      bit = pixels[i]!;
-    } else {
-      // 0=black in output (PDF default); our internal 1=black -> output 0
-      bit = pixels[i]! === 0 ? 1 : 0;
+  for (let byteIdx = 0; byteIdx < rowBytes; byteIdx++) {
+    const first = byteIdx << 3;
+    const last = Math.min(first + 8, columns);
+    let value = 0;
+    for (let i = first; i < last; i++) {
+      value |= ((pixels[i]! ^ flip) & 1) << (7 - (i - first));
     }
-
-    if (bit) {
-      packed[byteIdx] = (packed[byteIdx]! | (1 << bitIdx)) & 0xff;
-    }
+    packed[byteIdx] = value;
   }
 
   return packed;

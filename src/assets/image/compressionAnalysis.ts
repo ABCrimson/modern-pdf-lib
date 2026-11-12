@@ -11,6 +11,7 @@
  */
 
 import type { PdfDocument } from '../../core/pdfDocument.js';
+import { ResourceLimitError } from '../../errors.js';
 import { extractImages, decodeImageStream } from './imageExtract.js';
 import { isJpegWasmReady, encodeJpegWasm } from '../../wasm/jpeg/bridge.js';
 import { isGrayscaleImage } from './grayscaleDetect.js';
@@ -234,7 +235,9 @@ export function analyzeImages(doc: PdfDocument, options?: AnalyzeImagesOptions):
     let pixels: Uint8Array | undefined;
     try {
       pixels = decodeImageStream(info);
-    } catch {
+    } catch (err) {
+      // An image refused by an internal limit is reported, not kept
+      if (err instanceof ResourceLimitError) throw err;
       // Decoding failed — can't analyze
       analyses.push({
         name: info.name,
