@@ -92,7 +92,7 @@
     "test:e2e": "playwright test",
     "test:bench": "vitest bench",
     "bench": "tsx tests/benchmarks/run.ts",
-    "lint": "oxlint --max-warnings=1189 src tests",
+    "lint": "oxlint --max-warnings=1187 src tests",
     "lint:fix": "oxlint --fix src tests",
     "format": "oxfmt src tests scripts",
     "format:check": "oxfmt --check src tests scripts",
@@ -124,7 +124,7 @@
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "0.18.5",
-    "@playwright/test": "1.66.0-alpha-2026-11-11",
+    "@playwright/test": "1.66.0-alpha-2026-11-12",
     "@types/node": "26.6.6",
     "@vitest/coverage-v8": "5.1.0",
     "esbuild": "0.28.2",

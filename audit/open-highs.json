@@ -1,23 +1,21 @@
 {
   "$schema": "./open-highs.schema.json",
-  "release": "0.40.6",
+  "release": "0.40.7",
   "generated": "2026-11-11",
   "source": "audit of 0.40.3 (2026-10/11) plus the 0.40.6 re-check",
   "counts": {
-    "open": 262,
-    "closedThisRelease": 4,
+    "open": 253,
+    "closedThisRelease": 9,
     "byTarget": {
-      "0.40.7": 9,
-      "0.40.8": 10,
       "0.40.9": 16,
-      "0.41.0": 13,
+      "0.41.0": 22,
       "0.41.1": 18,
       "0.41.2": 13,
       "0.41.3": 5,
       "0.41.4": 8,
       "0.41.5": 7,
       "0.41.6": 6,
-      "0.41.7": 2,
+      "0.41.7": 3,
       "0.42.0": 1,
       "0.42.1": 8,
       "0.42.2": 2,
@@ -305,33 +303,6 @@
       "path": "src/compression/libdeflateWasm.ts",
       "target": "0.47.0",
       "summary": "After a failed initDeflateWasm call, later calls resolve without loading the module."
-    },
-    {
-      "id": "color-compression-35",
-      "area": "color-compression",
-      "severity": "high",
-      "status": "confirmed",
-      "path": "src/compression/deflate.ts",
-      "target": "0.40.8",
-      "summary": "Streams written under /FlateDecode contain raw deflate data without the zlib wrapper the PDF format requires."
-    },
-    {
-      "id": "color-compression-36",
-      "area": "color-compression",
-      "severity": "high",
-      "status": "confirmed",
-      "path": "src/compression/fflateAdapter.ts",
-      "target": "0.40.8",
-      "summary": "Decompression of cross-reference streams and object streams expects raw deflate, while PDF files carry zlib-wrapped data."
-    },
-    {
-      "id": "color-compression-M01",
-      "area": "color-compression",
-      "severity": "high",
-      "status": "missed",
-      "path": "src/assets/image/webpOptimize.ts",
-      "target": "0.40.8",
-      "summary": "encodePngFromPixels writes PNG image data without the zlib wrapper PNG requires."
     },
     {
       "id": "compliance-01",
@@ -628,7 +599,7 @@
       "status": "confirmed",
       "path": "src/core/pdfWriter.ts",
       "target": "0.40.9",
-      "summary": "A save of a loaded PDF copies its Flate streams byte for byte, so qpdf --check warns on the output about the same damaged streams it warns on in the input."
+      "summary": "A save of a loaded PDF copies its Flate streams that already hold zlib data byte for byte, so qpdf --check warns on the output about the same damaged streams it warns on in the input."
     },
     {
       "id": "crypto-security-01",
@@ -996,26 +967,8 @@
       "severity": "high",
       "status": "confirmed",
       "path": "src/assets/image/pngEmbed.ts",
-      "target": "0.40.8",
+      "target": "0.41.7",
       "summary": "PNG images with 1, 2 or 4 bits per sample are decoded with a wrong row length."
-    },
-    {
-      "id": "images-50",
-      "area": "images",
-      "severity": "high",
-      "status": "confirmed",
-      "path": "src/assets/image/pngEmbed.ts",
-      "target": "0.40.8",
-      "summary": "16-bit PNG images with alpha are decoded wrongly."
-    },
-    {
-      "id": "images-57",
-      "area": "images",
-      "severity": "high",
-      "status": "confirmed",
-      "path": "src/assets/image/pngEmbed.ts",
-      "target": "0.40.8",
-      "summary": "Embedded PNG data is compressed without the zlib wrapper the /FlateDecode filter requires."
     },
     {
       "id": "images-69",
@@ -1025,15 +978,6 @@
       "path": "src/assets/image/tiffDecode.ts",
       "target": "0.48.2",
       "summary": "TIFF LZW images are decoded with the wrong bit order."
-    },
-    {
-      "id": "images-70",
-      "area": "images",
-      "severity": "high",
-      "status": "confirmed",
-      "path": "src/assets/image/tiffDecode.ts",
-      "target": "0.40.8",
-      "summary": "TIFF Deflate images fail to decode, because the zlib wrapper is not expected."
     },
     {
       "id": "images-72",
@@ -1088,15 +1032,6 @@
       "path": "src/assets/image/webpDecode.ts",
       "target": "0.48.3",
       "summary": "The lossless WebP decoder uses wrong length and distance prefix tables."
-    },
-    {
-      "id": "images-94",
-      "area": "images",
-      "severity": "high",
-      "status": "confirmed",
-      "path": "src/assets/image/webpOptimize.ts",
-      "target": "0.40.8",
-      "summary": "PNG files written by encodePngFromPixels are not valid PNG files."
     },
     {
       "id": "images-95",
@@ -1358,24 +1293,6 @@
       "path": "src/parser/streamingParser.ts",
       "target": "0.42.7",
       "summary": "StreamingPdfParser reads the whole file before parsing; its documentation describes incremental processing."
-    },
-    {
-      "id": "parser-syntax-M01",
-      "area": "parser-syntax",
-      "severity": "high",
-      "status": "missed",
-      "path": "src/parser/xrefParser.ts",
-      "target": "0.40.8",
-      "summary": "Cross-reference streams and object streams are inflated as raw deflate instead of zlib data."
-    },
-    {
-      "id": "parser-syntax-M02",
-      "area": "parser-syntax",
-      "severity": "high",
-      "status": "missed",
-      "path": "src/core/pdfWriter.ts",
-      "target": "0.40.8",
-      "summary": "The writer emits raw deflate data under /FlateDecode."
     },
     {
       "id": "parser-syntax-M03",
@@ -2247,7 +2164,7 @@
       "severity": "high",
       "status": "missed",
       "path": "src/parser/jpeg2000WasmBridge.ts",
-      "target": "0.40.7",
+      "target": "0.41.0",
       "summary": "The JPEG 2000 WASM bridge targets a crate that does not exist."
     },
     {
@@ -2346,7 +2263,7 @@
       "severity": "high",
       "status": "unverified",
       "path": "wiki:WASM-Acceleration.md",
-      "target": "0.40.7",
+      "target": "0.41.0",
       "summary": "The wiki says a failed WASM load never throws; initWasm rejects."
     },
     {
@@ -2355,7 +2272,7 @@
       "severity": "high",
       "status": "unverified",
       "path": "wiki:Advanced-Features.md",
-      "target": "0.40.7",
+      "target": "0.41.0",
       "summary": "The wiki layers sample writes a layer marker that the page resources do not define."
     },
     {
@@ -2364,7 +2281,7 @@
       "severity": "high",
       "status": "unverified",
       "path": "wiki:Annotations.md",
-      "target": "0.40.7",
+      "target": "0.41.0",
       "summary": "Wiki annotation samples that pass an annotation instance to addAnnotation throw."
     },
     {
@@ -2373,7 +2290,7 @@
       "severity": "high",
       "status": "unverified",
       "path": "wiki:Annotations.md",
-      "target": "0.40.7",
+      "target": "0.41.0",
       "summary": "Wiki annotation samples use option names that do not exist."
     },
     {
@@ -2382,7 +2299,7 @@
       "severity": "high",
       "status": "unverified",
       "path": "wiki:Annotations.md",
-      "target": "0.40.7",
+      "target": "0.41.0",
       "summary": "The wiki redaction sample calls a method that does not exist."
     },
     {
@@ -2391,7 +2308,7 @@
       "severity": "high",
       "status": "unverified",
       "path": "wiki:Image-Optimization.md",
-      "target": "0.40.7",
+      "target": "0.41.0",
       "summary": "The wiki says maxDpi downscales images; the option is not read."
     },
     {
@@ -2400,7 +2317,7 @@
       "severity": "high",
       "status": "unverified",
       "path": "wiki:Merge-and-Split.md",
-      "target": "0.40.7",
+      "target": "0.41.0",
       "summary": "The wiki says merged documents share one copy of identical resources; each copy operation deduplicates on its own."
     },
     {
@@ -2409,7 +2326,7 @@
       "severity": "high",
       "status": "unverified",
       "path": "wiki:PDF-A-Compliance.md",
-      "target": "0.40.7",
+      "target": "0.41.0",
       "summary": "The wiki PDF/A example says XMP metadata and /ID are written automatically; they are not."
     }
   ],
@@ -2429,6 +2346,18 @@
     {
       "id": "color-compression-02",
       "fixedIn": "0.40.4"
+    },
+    {
+      "id": "color-compression-35",
+      "fixedIn": "0.40.7"
+    },
+    {
+      "id": "color-compression-36",
+      "fixedIn": "0.40.7"
+    },
+    {
+      "id": "color-compression-M01",
+      "fixedIn": "0.40.7"
     },
     {
       "id": "compliance-73",
@@ -2575,6 +2504,22 @@
       "fixedIn": "0.40.5"
     },
     {
+      "id": "images-50",
+      "fixedIn": "0.40.7"
+    },
+    {
+      "id": "images-57",
+      "fixedIn": "0.40.7"
+    },
+    {
+      "id": "images-70",
+      "fixedIn": "0.40.7"
+    },
+    {
+      "id": "images-94",
+      "fixedIn": "0.40.7"
+    },
+    {
       "id": "parser-codecs-14",
       "fixedIn": "0.40.4"
     },
@@ -2585,6 +2530,14 @@
     {
       "id": "parser-syntax-02",
       "fixedIn": "0.40.4"
+    },
+    {
+      "id": "parser-syntax-M01",
+      "fixedIn": "0.40.7"
+    },
+    {
+      "id": "parser-syntax-M02",
+      "fixedIn": "0.40.7"
     },
     {
       "id": "render-01",

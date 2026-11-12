@@ -12,9 +12,7 @@
       ],
       "limits": [
         "images-46",
-        "images-49",
-        "images-50",
-        "images-57"
+        "images-49"
       ],
       "stated": false
     },
@@ -53,9 +51,7 @@
       "tests": [],
       "limits": [
         "images-46",
-        "images-49",
-        "images-50",
-        "images-57"
+        "images-49"
       ],
       "stated": false
     },
@@ -111,15 +107,11 @@
       "region": "readme-features",
       "doc": "README.md",
       "text": "Header/footer engine with templates",
-      "grade": "qualified",
+      "grade": "oracle",
       "tests": [
         "cap-header-footer"
       ],
-      "limits": [
-        "color-compression-35",
-        "parser-syntax-M02"
-      ],
-      "stated": false
+      "limits": []
     },
     {
       "id": "cap-feat-advanced-text-layout",
@@ -134,13 +126,12 @@
       "id": "cap-feat-load",
       "region": "readme-features",
       "doc": "README.md",
-      "text": "Load existing PDFs (PDFs that keep objects in object streams, as pdf-lib and many PDF 1.5+ writers do, do not load; encrypted PDFs load, but most of their content is returned still encrypted)",
+      "text": "Load existing PDFs (encrypted PDFs load, but most of their content is returned still encrypted, and AES-256 (revision 6) files from other producers do not open with the right password)",
       "grade": "qualified",
       "tests": [],
       "limits": [
-        "color-compression-36",
-        "parser-syntax-M01",
-        "parser-syntax-01"
+        "parser-syntax-01",
+        "crypto-security-01"
       ],
       "stated": true
     },
@@ -447,15 +438,11 @@
       "region": "readme-features",
       "doc": "README.md",
       "text": "Server adapters (pdfResponse for Workers/Deno/Bun/Node)",
-      "grade": "qualified",
+      "grade": "behaviour",
       "tests": [
         "cap-server-adapters"
       ],
-      "limits": [
-        "color-compression-35",
-        "parser-syntax-M02"
-      ],
-      "stated": false
+      "limits": []
     },
     {
       "id": "cap-feat-jpeg2000",
@@ -493,7 +480,6 @@
       "tests": [],
       "limits": [
         "images-69",
-        "images-70",
         "images-72"
       ],
       "stated": false
@@ -509,8 +495,7 @@
       ],
       "limits": [
         "images-86",
-        "images-69",
-        "images-57"
+        "images-69"
       ],
       "stated": false
     },
@@ -622,15 +607,11 @@
       "region": "readme-features",
       "doc": "README.md",
       "text": "Batch processing with memory pressure handling",
-      "grade": "qualified",
+      "grade": "behaviour",
       "tests": [
         "cap-batch"
       ],
-      "limits": [
-        "color-compression-35",
-        "parser-syntax-M02"
-      ],
-      "stated": false
+      "limits": []
     },
     {
       "id": "cap-feat-spot-colors",
@@ -698,12 +679,12 @@
       "id": "cap-cmp-parse",
       "region": "readme-comparison",
       "doc": "README.md",
-      "text": "Parse existing PDFs | Yes (encrypted content not decrypted; PDFs with object streams do not load)",
+      "text": "Parse existing PDFs | Yes (encrypted content not decrypted; AES-256 (R6) files from other producers do not open with the right password)",
       "grade": "qualified",
       "tests": [],
       "limits": [
-        "color-compression-36",
-        "parser-syntax-01"
+        "parser-syntax-01",
+        "crypto-security-01"
       ],
       "stated": true
     },
@@ -933,15 +914,11 @@
       "region": "readme-comparison",
       "doc": "README.md",
       "text": "Watermarks | Yes",
-      "grade": "qualified",
+      "grade": "oracle",
       "tests": [
         "cap-watermarks"
       ],
-      "limits": [
-        "color-compression-35",
-        "parser-syntax-M02"
-      ],
-      "stated": false
+      "limits": []
     },
     {
       "id": "cap-cmp-redaction",
@@ -1000,15 +977,11 @@
       "region": "readme-comparison",
       "doc": "README.md",
       "text": "Header / footer engine | Templates, page numbers, dates",
-      "grade": "qualified",
+      "grade": "oracle",
       "tests": [
         "cap-header-footer"
       ],
-      "limits": [
-        "color-compression-35",
-        "parser-syntax-M02"
-      ],
-      "stated": false
+      "limits": []
     },
     {
       "id": "cap-cmp-table-layout",
@@ -1330,8 +1303,7 @@
       "grade": "qualified",
       "tests": [],
       "limits": [
-        "images-49",
-        "images-50"
+        "images-49"
       ],
       "stated": false
     },
@@ -1370,7 +1342,6 @@
       "tests": [],
       "limits": [
         "images-69",
-        "images-70",
         "images-72",
         "docs-guide-2-04"
       ],
@@ -1440,8 +1411,7 @@
       "tests": [],
       "limits": [
         "images-87",
-        "images-69",
-        "images-50"
+        "images-69"
       ],
       "stated": false
     },
@@ -1505,15 +1475,11 @@
       "region": "guide-streaming-methods",
       "doc": "docs/guide/streaming.md",
       "text": "pdf.save() | Promise<Uint8Array> | General use, small to medium documents",
-      "grade": "qualified",
+      "grade": "oracle",
       "tests": [
         "cap-save"
       ],
-      "limits": [
-        "color-compression-35",
-        "parser-syntax-M02"
-      ],
-      "stated": false
+      "limits": []
     },
     {
       "id": "cap-stream-save-as-stream",
@@ -1525,8 +1491,6 @@
         "cap-save-stream"
       ],
       "limits": [
-        "color-compression-35",
-        "parser-syntax-M02",
         "oracle-gates-R02",
         "tests-integration-e2e-bench-fixtures-M01"
       ],
@@ -1537,30 +1501,22 @@
       "region": "guide-streaming-methods",
       "doc": "docs/guide/streaming.md",
       "text": "pdf.saveAsBlob() | Promise<Blob> | Browser downloads and display",
-      "grade": "qualified",
+      "grade": "oracle",
       "tests": [
         "cap-save-blob"
       ],
-      "limits": [
-        "color-compression-35",
-        "parser-syntax-M02"
-      ],
-      "stated": false
+      "limits": []
     },
     {
       "id": "cap-stream-save-as-base64",
       "region": "guide-streaming-methods",
       "doc": "docs/guide/streaming.md",
       "text": "pdf.saveAsBase64({ dataUri }) | Promise<string> | JSON payloads and data URIs",
-      "grade": "qualified",
+      "grade": "oracle",
       "tests": [
         "cap-save-base64"
       ],
-      "limits": [
-        "color-compression-35",
-        "parser-syntax-M02"
-      ],
-      "stated": false
+      "limits": []
     },
     {
       "id": "cap-ts-rt-node",

@@ -6,16 +6,12 @@ packages:
 # Supply-chain delay: a version must be at least 24 h old (minutes). Never lower this;
 # add an exact name@version to minimumReleaseAgeExclude instead.
 minimumReleaseAge: 1440
-# Exact pins younger than 1440 min on 2026-11-11, when they were adopted: vite 8.3.8
-# (published 02:49Z, ~170 min), the TypeScript 7.1 dev build (published 2026-11-11 08:45Z,
-# ~7 h) with its seven per-platform native packages, and the Playwright 1.66.0-alpha-2026-11-11
-# trio (playwright-core published 06:10Z). These entries go stale on the next bump;
+# Exact pins younger than 1440 min on 2026-11-12 (06:52Z): the TypeScript 7.1 dev build
+# (published 2026-11-11 08:45Z) with its seven per-platform native packages (published
+# 08:37Z onward), and the Playwright 1.66.0-alpha-2026-11-12 trio (playwright 05:19Z,
+# @playwright/test 05:21Z, playwright-core 06:41Z). These entries go stale on the next bump;
 # drop each one once its version is older than 24 h.
 minimumReleaseAgeExclude:
-  - 'vite@8.3.8'
-  - '@playwright/test@1.66.0-alpha-2026-11-11'
-  - 'playwright@1.66.0-alpha-2026-11-11'
-  - 'playwright-core@1.66.0-alpha-2026-11-11'
   - 'typescript@7.1.0-dev.20261111.1'
   - '@typescript/typescript-darwin-arm64@7.1.0-dev.20261111.1'
   - '@typescript/typescript-darwin-x64@7.1.0-dev.20261111.1'
@@ -24,6 +20,9 @@ minimumReleaseAgeExclude:
   - '@typescript/typescript-linux-x64@7.1.0-dev.20261111.1'
   - '@typescript/typescript-win32-arm64@7.1.0-dev.20261111.1'
   - '@typescript/typescript-win32-x64@7.1.0-dev.20261111.1'
+  - '@playwright/test@1.66.0-alpha-2026-11-12'
+  - 'playwright@1.66.0-alpha-2026-11-12'
+  - 'playwright-core@1.66.0-alpha-2026-11-12'
 
 # Dependency build scripts are reviewed, not trusted: unlisted packages fail the install.
 strictDepBuilds: true

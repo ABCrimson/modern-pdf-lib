@@ -187,8 +187,8 @@ importers:
         specifier: 0.18.5
         version: 0.18.5
       '@playwright/test':
-        specifier: 1.66.0-alpha-2026-11-11
-        version: 1.66.0-alpha-2026-11-11
+        specifier: 1.66.0-alpha-2026-11-12
+        version: 1.66.0-alpha-2026-11-12
       '@types/node':
         specifier: 26.6.6
         version: 26.6.6
@@ -922,8 +922,8 @@ packages:
   '@pdf-lib/upng@1.0.1':
     resolution: {integrity: sha512-dQK2FUMQtowVP00mtIksrlZhdFXQZPC+taih1q4CvPZ5vqdxR/LKBaFg0oAfzd1GlHZXXSPdQfzQnt+ViGvEIQ==}
 
-  '@playwright/test@1.66.0-alpha-2026-11-11':
-    resolution: {integrity: sha512-qAvrL0z6UswTr5Jj1MN1sCAwmimhrvAiYVQBqYULprK8Gaq89JOvETdOEHLD5y994kXD6MfjxNfEmPkJ34EyWA==}
+  '@playwright/test@1.66.0-alpha-2026-11-12':
+    resolution: {integrity: sha512-CFKXuleiKhTnYbUd0HhdmT5U33MxaeS1m4cEjVwu3t0T3h61ZNd7f7wIULgU0DuDcpoUSvtdr4lqGLTd/k+qvw==}
     engines: {node: '>=20'}
     hasBin: true
 
@@ -1998,13 +1998,13 @@ packages:
     resolution: {integrity: sha512-qcJu88Q2IWqJsDD529JKMdwGm/dvInW4HvQnRwiH9JtihJvzGOscDtHE3x1pBKeUOTysQ8kVmLnJ2kJu7yhcGA==}
     engines: {node: '>=12'}
 
-  playwright-core@1.66.0-alpha-2026-11-11:
-    resolution: {integrity: sha512-naxGgUWkGyzL+n2WvytoEMqOV6gycFlLm42KCYVU9k+SNvIrTxEQCpEl2DQb7/E+fWZoRjhk10ea7b3pXWIFNA==}
+  playwright-core@1.66.0-alpha-2026-11-12:
+    resolution: {integrity: sha512-UblzHXkbReibPnQsyLsM91k5IAdqCpbPJ9hjWdHWZWEIh1h9q3/rdOy1/hPiEeOmGD8H5arf6KLtlzXR6o1SLg==}
     engines: {node: '>=20'}
     hasBin: true
 
-  playwright@1.66.0-alpha-2026-11-11:
-    resolution: {integrity: sha512-0Q9JyY9UzhmNNoTW1Ed0J0Fkz2puT1/QeL0LIJnBmSudfhnzZrONSl9hBm4rARlB0sk/AX9ewn+quD+Yjfq9rg==}
+  playwright@1.66.0-alpha-2026-11-12:
+    resolution: {integrity: sha512-rlHR99g3vPtPLf0qEFdgg98rAfcisFwjf4azN0HWUHRwDCEfy4dnJFId8K/RUig7IM8Ynxjroi8oP1aZcINrLw==}
     engines: {node: '>=20'}
     hasBin: true
 
@@ -2813,9 +2813,9 @@ snapshots:
     dependencies:
       pako: 1.0.11
 
-  '@playwright/test@1.66.0-alpha-2026-11-11':
+  '@playwright/test@1.66.0-alpha-2026-11-12':
     dependencies:
-      playwright: 1.66.0-alpha-2026-11-11
+      playwright: 1.66.0-alpha-2026-11-12
 
   '@publint/pack@0.1.7':
     dependencies:
@@ -3691,11 +3691,11 @@ snapshots:
 
   picomatch@4.0.7: {}
 
-  playwright-core@1.66.0-alpha-2026-11-11: {}
+  playwright-core@1.66.0-alpha-2026-11-12: {}
 
-  playwright@1.66.0-alpha-2026-11-11:
+  playwright@1.66.0-alpha-2026-11-12:
     dependencies:
-      playwright-core: 1.66.0-alpha-2026-11-11
+      playwright-core: 1.66.0-alpha-2026-11-12
 
   postcss@8.5.32:
     dependencies:
