@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/ABCrimson/modern-pdf-lib/blob/master/audit/open-highs.schema.json",
+  "title": "modern-pdf-lib open findings ledger",
+  "description": "Open and closed audit findings of modern-pdf-lib. Checked by scripts/dev/surface-gate.ts, which also recomputes counts and checks that every path exists.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["$schema", "release", "generated", "source", "counts", "open", "closed"],
+  "properties": {
+    "$schema": { "const": "./open-highs.schema.json" },
+    "release": { "$ref": "#/$defs/version", "description": "The release this file describes." },
+    "generated": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+      "description": "Date the file was last generated (YYYY-MM-DD)."
+    },
+    "source": { "type": "string", "minLength": 1 },
+    "counts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["open", "closedThisRelease", "byTarget"],
+      "properties": {
+        "open": { "type": "integer", "minimum": 0, "description": "Length of `open`." },
+        "closedThisRelease": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Entries of `closed` whose fixedIn equals `release`."
+        },
+        "byTarget": {
+          "type": "object",
+          "description": "Number of open entries per target version, in ascending version order.",
+          "propertyNames": { "$ref": "#/$defs/version" },
+          "additionalProperties": { "type": "integer", "minimum": 1 }
+        }
+      }
+    },
+    "open": { "type": "array", "items": { "$ref": "#/$defs/openEntry" } },
+    "closed": { "type": "array", "items": { "$ref": "#/$defs/closedEntry" } }
+  },
+  "$defs": {
+    "version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*-[A-Z]?\\d{2,}$",
+      "description": "Stable finding id: the audit area, then a number with an optional one-letter series."
+    },
+    "openEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "area", "severity", "status", "path", "target", "summary"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "area": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+          "description": "The audit area that reported the finding."
+        },
+        "severity": {
+          "enum": ["high", "medium"],
+          "description": "Medium entries appear only when a known-defect test marker uses their id."
+        },
+        "status": {
+          "enum": ["confirmed", "missed", "unverified"],
+          "description": "confirmed: reproduced by a second reviewer; missed: found by the reviewer, not the first pass; unverified: not yet reproduced."
+        },
+        "path": {
+          "type": "string",
+          "pattern": "^(wiki:[A-Za-z0-9-]+\\.md|[A-Za-z0-9._-]+(/[A-Za-z0-9._-]+)*)$",
+          "description": "Repository-relative path of the file the finding is about, or wiki:<Page>.md for a wiki page."
+        },
+        "target": { "$ref": "#/$defs/version", "description": "The release planned to close it." },
+        "summary": {
+          "type": "string",
+          "minLength": 1,
+          "description": "One neutral line in user terms."
+        }
+      }
+    },
+    "closedEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id"],
+      "oneOf": [{ "required": ["fixedIn"] }, { "required": ["refuted"] }],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "fixedIn": { "$ref": "#/$defs/version", "description": "The release that fixed it." },
+        "refuted": {
+          "const": true,
+          "description": "Two independent re-checks found that the finding does not hold."
+        }
+      }
+    }
+  }
+}

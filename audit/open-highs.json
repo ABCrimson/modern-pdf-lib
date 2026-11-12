@@ -1,0 +1,2666 @@
+{
+  "$schema": "./open-highs.schema.json",
+  "release": "0.40.6",
+  "generated": "2026-11-11",
+  "source": "audit of 0.40.3 (2026-10/11) plus the 0.40.6 re-check",
+  "counts": {
+    "open": 262,
+    "closedThisRelease": 4,
+    "byTarget": {
+      "0.40.7": 9,
+      "0.40.8": 10,
+      "0.40.9": 16,
+      "0.41.0": 13,
+      "0.41.1": 18,
+      "0.41.2": 13,
+      "0.41.3": 5,
+      "0.41.4": 8,
+      "0.41.5": 7,
+      "0.41.6": 6,
+      "0.41.7": 2,
+      "0.42.0": 1,
+      "0.42.1": 8,
+      "0.42.2": 2,
+      "0.42.3": 1,
+      "0.42.4": 3,
+      "0.42.5": 7,
+      "0.42.6": 5,
+      "0.42.7": 4,
+      "0.42.8": 13,
+      "0.43.0": 2,
+      "0.43.1": 4,
+      "0.43.4": 1,
+      "0.43.5": 1,
+      "0.44.0": 1,
+      "0.44.1": 9,
+      "0.44.3": 1,
+      "0.45.0": 21,
+      "0.45.3": 4,
+      "0.45.4": 2,
+      "0.45.5": 1,
+      "0.46.0": 7,
+      "0.46.2": 1,
+      "0.46.4": 1,
+      "0.47.0": 15,
+      "0.48.0": 19,
+      "0.48.1": 2,
+      "0.48.2": 8,
+      "0.48.3": 4,
+      "0.48.4": 2,
+      "0.49.0": 1,
+      "0.49.2": 1,
+      "0.49.3": 2,
+      "0.49.4": 1
+    }
+  },
+  "open": [
+    {
+      "id": "accessibility-metadata-01",
+      "area": "accessibility-metadata",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/accessibility/structureTree.ts",
+      "target": "0.46.0",
+      "summary": "The structure tree's ParentTree points to placeholder elements instead of the real structure elements, so readers cannot map content to its tags."
+    },
+    {
+      "id": "accessibility-metadata-04",
+      "area": "accessibility-metadata",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/accessibility/structureTree.ts",
+      "target": "0.46.0",
+      "summary": "Structure element options such as role, scope, column span and row span are not written to the output."
+    },
+    {
+      "id": "accessibility-metadata-23",
+      "area": "accessibility-metadata",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/accessibility/pdfUa2.ts",
+      "target": "0.46.0",
+      "summary": "The PDF/UA-2 namespace check cannot pass for documents built through the public API."
+    },
+    {
+      "id": "accessibility-metadata-40",
+      "area": "accessibility-metadata",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/layers/optionalContent.ts",
+      "target": "0.42.1",
+      "summary": "beginLayerContent writes a layer marker that the page resources do not define, so readers cannot associate the content with its layer."
+    },
+    {
+      "id": "accessibility-metadata-M01",
+      "area": "accessibility-metadata",
+      "severity": "high",
+      "status": "missed",
+      "path": "src/accessibility/pdfUaValidator.ts",
+      "target": "0.42.0",
+      "summary": "Accessibility validators report wrong results for loaded PDFs, because the structure tree, language and viewer preferences are not read on load."
+    },
+    {
+      "id": "annotation-01",
+      "area": "annotation",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/annotation/appearanceGenerator.ts",
+      "target": "0.44.1",
+      "summary": "Annotation appearance streams express opacity with operators that do not exist, so translucent annotations get malformed appearances."
+    },
+    {
+      "id": "annotation-02",
+      "area": "annotation",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/annotation/appearanceGenerator.ts",
+      "target": "0.44.1",
+      "summary": "Highlight annotation appearances are opaque and hide the text they mark."
+    },
+    {
+      "id": "annotation-03",
+      "area": "annotation",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/annotation/applyRedactions.ts",
+      "target": "0.43.0",
+      "summary": "Since 0.40.5, applying redactions throws RedactionIncompleteError and leaves the document as it was (covered by the 0.40.5 security advisory on redaction); redaction by content removal is not available."
+    },
+    {
+      "id": "annotation-07",
+      "area": "annotation",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/annotation/types/fileAttachmentAnnotation.ts",
+      "target": "0.44.1",
+      "summary": "File attachment annotations are written without their embedded file."
+    },
+    {
+      "id": "annotation-09",
+      "area": "annotation",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/annotation/applyRedactions.ts",
+      "target": "0.42.2",
+      "summary": "PdfPage.getAnnotations() returns only annotations added in the current session, so a loaded PDF's annotations, including /Redact ones, are not visible through it; since 0.40.5 applying redactions throws for every document."
+    },
+    {
+      "id": "annotation-M01",
+      "area": "annotation",
+      "severity": "high",
+      "status": "missed",
+      "path": "src/core/pdfPage.ts",
+      "target": "0.44.1",
+      "summary": "page.addAnnotation(type, options) builds a generic annotation instead of the requested annotation type."
+    },
+    {
+      "id": "api-surface-utils-02",
+      "area": "api-surface-utils",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/wasm/loader.ts",
+      "target": "0.47.0",
+      "summary": "Automatic loading of the deflate WASM module names a file that does not exist, so the module never loads."
+    },
+    {
+      "id": "api-surface-utils-11",
+      "area": "api-surface-utils",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/wasm/jpeg/bridge.ts",
+      "target": "0.47.0",
+      "summary": "initJpegWasm without a pre-built module cannot instantiate the JPEG WASM module."
+    },
+    {
+      "id": "api-surface-utils-25",
+      "area": "api-surface-utils",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/errors.ts",
+      "target": "0.41.0",
+      "summary": "Eighteen of the 22 typed error classes in src/errors.ts, such as EncryptedPdfError, NoSuchFieldError, InvalidPageSizeError and PluginError, are exported but never thrown, and the library throws generic Error in their place; only the four classes added in 0.40.5 are thrown."
+    },
+    {
+      "id": "api-surface-utils-M02",
+      "area": "api-surface-utils",
+      "severity": "high",
+      "status": "missed",
+      "path": "src/compression/libdeflateWasm.ts",
+      "target": "0.47.0",
+      "summary": "initDeflateWasm cannot instantiate the shipped deflate WASM module and always rejects."
+    },
+    {
+      "id": "barcode-01",
+      "area": "barcode",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/barcode/code128.ts",
+      "target": "0.42.3",
+      "summary": "Code 128 symbols use wrong start patterns, so scanners cannot decode them."
+    },
+    {
+      "id": "barcode-13",
+      "area": "barcode",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/barcode/qr.ts",
+      "target": "0.42.4",
+      "summary": "QR codes of version 7 and above reserve the wrong area for version information, so some data cells are misplaced."
+    },
+    {
+      "id": "barcode-14",
+      "area": "barcode",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/barcode/qr.ts",
+      "target": "0.42.4",
+      "summary": "QR codes of versions 35 to 40 carry blank version information and are invalid."
+    },
+    {
+      "id": "barcode-15",
+      "area": "barcode",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/barcode/qr.ts",
+      "target": "0.42.4",
+      "summary": "QR codes of versions 20 to 22 at some error-correction levels use wrong block sizes."
+    },
+    {
+      "id": "barcode-20",
+      "area": "barcode",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/barcode/dataMatrix.ts",
+      "target": "0.42.5",
+      "summary": "Data Matrix error-correction codewords are computed wrongly, so symbols do not decode."
+    },
+    {
+      "id": "barcode-21",
+      "area": "barcode",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/barcode/dataMatrix.ts",
+      "target": "0.42.5",
+      "summary": "Data Matrix symbols are written vertically mirrored."
+    },
+    {
+      "id": "barcode-29",
+      "area": "barcode",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/barcode/pdf417.ts",
+      "target": "0.42.5",
+      "summary": "PDF417 symbols use codeword tables that do not match ISO/IEC 15438."
+    },
+    {
+      "id": "barcode-30",
+      "area": "barcode",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/barcode/pdf417.ts",
+      "target": "0.42.5",
+      "summary": "The PDF417 error-correction generator does not match ISO/IEC 15438."
+    },
+    {
+      "id": "barcode-31",
+      "area": "barcode",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/barcode/pdf417.ts",
+      "target": "0.42.5",
+      "summary": "PDF417 text compaction encodes mixed-mode characters and mode switches wrongly."
+    },
+    {
+      "id": "barcode-47",
+      "area": "barcode",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "tests/barcode/qr.test.ts",
+      "target": "0.42.5",
+      "summary": "No test reads generated barcodes with an independent decoder."
+    },
+    {
+      "id": "barcode-M01",
+      "area": "barcode",
+      "severity": "high",
+      "status": "missed",
+      "path": "src/barcode/pdf417.ts",
+      "target": "0.42.5",
+      "summary": "PDF417 punctuation sub-mode assigns wrong values to '(', ')' and '*'."
+    },
+    {
+      "id": "color-compression-01",
+      "area": "color-compression",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/compression/libdeflateWasm.ts",
+      "target": "0.47.0",
+      "summary": "The libdeflate WASM wrapper does not match the interface of the module it ships with and cannot initialise."
+    },
+    {
+      "id": "color-compression-05",
+      "area": "color-compression",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/compression/libdeflateWasm.ts",
+      "target": "0.47.0",
+      "summary": "After a failed initDeflateWasm call, later calls resolve without loading the module."
+    },
+    {
+      "id": "color-compression-35",
+      "area": "color-compression",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/compression/deflate.ts",
+      "target": "0.40.8",
+      "summary": "Streams written under /FlateDecode contain raw deflate data without the zlib wrapper the PDF format requires."
+    },
+    {
+      "id": "color-compression-36",
+      "area": "color-compression",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/compression/fflateAdapter.ts",
+      "target": "0.40.8",
+      "summary": "Decompression of cross-reference streams and object streams expects raw deflate, while PDF files carry zlib-wrapped data."
+    },
+    {
+      "id": "color-compression-M01",
+      "area": "color-compression",
+      "severity": "high",
+      "status": "missed",
+      "path": "src/assets/image/webpOptimize.ts",
+      "target": "0.40.8",
+      "summary": "encodePngFromPixels writes PNG image data without the zlib wrapper PNG requires."
+    },
+    {
+      "id": "compliance-01",
+      "area": "compliance",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/compliance/associatedFiles.ts",
+      "target": "0.41.1",
+      "summary": "Embedded file MIME subtypes are escaped twice in the output."
+    },
+    {
+      "id": "compliance-03",
+      "area": "compliance",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/compliance/pdfxCompliance.ts",
+      "target": "0.41.1",
+      "summary": "enforcePdfX rewrites the file through a text round trip that damages binary content."
+    },
+    {
+      "id": "compliance-04",
+      "area": "compliance",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/compliance/transparencyFlattener.ts",
+      "target": "0.41.1",
+      "summary": "flattenTransparency rewrites the file through a text round trip that damages binary content."
+    },
+    {
+      "id": "compliance-05",
+      "area": "compliance",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/compliance/stripProhibited.ts",
+      "target": "0.41.1",
+      "summary": "stripProhibitedFeatures rewrites the file through a text round trip that damages binary content."
+    },
+    {
+      "id": "compliance-06",
+      "area": "compliance",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/compliance/transparencyFlattener.ts",
+      "target": "0.46.0",
+      "summary": "Transparency flattening rewrites an indirect /SMask reference into a malformed dictionary entry."
+    },
+    {
+      "id": "compliance-07",
+      "area": "compliance",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/compliance/enforcePdfAv2.ts",
+      "target": "0.41.1",
+      "summary": "PDF/A enforcement inserts metadata without updating the cross-reference data, so the output has wrong offsets."
+    },
+    {
+      "id": "core-document-01",
+      "area": "core-document",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/core/pdfWriter.ts",
+      "target": "0.41.0",
+      "summary": "Non-ASCII text in document strings such as the Info title is written in the wrong encoding."
+    },
+    {
+      "id": "core-document-02",
+      "area": "core-document",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/core/pdfObjects.ts",
+      "target": "0.41.0",
+      "summary": "Hex strings can be written back with different bytes after a load and save."
+    },
+    {
+      "id": "core-document-03",
+      "area": "core-document",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/core/pdfDocument.ts",
+      "target": "0.41.2",
+      "summary": "Since 0.40.5, saveAsStream() throws UnsupportedEncryptionError for a document with encrypt() configured (covered by the 0.40.5 security advisory on saveAsStream), so save() is the only way to write an encrypted document."
+    },
+    {
+      "id": "core-document-04",
+      "area": "core-document",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/core/pdfDocument.ts",
+      "target": "0.41.2",
+      "summary": "Signing a loaded document re-saves it instead of appending to the original bytes."
+    },
+    {
+      "id": "core-document-05",
+      "area": "core-document",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/core/pdfDocument.ts",
+      "target": "0.44.1",
+      "summary": "getAttachments() returns an empty list even after attachFile()."
+    },
+    {
+      "id": "core-document-06",
+      "area": "core-document",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/core/pdfWriter.ts",
+      "target": "0.41.2",
+      "summary": "Since 0.40.5, a save that combines encryption with objectStreamThreshold throws UnsupportedEncryptionError (covered by the 0.40.5 security advisory on encrypted saving); encrypted object streams are not supported."
+    },
+    {
+      "id": "core-document-08",
+      "area": "core-document",
+      "severity": "medium",
+      "status": "confirmed",
+      "path": "src/core/pdfDocument.ts",
+      "target": "0.41.2",
+      "summary": "Saving one document twice gives different output, because each save adds new catalog and page objects."
+    },
+    {
+      "id": "core-document-10",
+      "area": "core-document",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/core/documentMerge.ts",
+      "target": "0.41.3",
+      "summary": "Copying pages from a loaded PDF produces blank pages without their original content."
+    },
+    {
+      "id": "core-document-11",
+      "area": "core-document",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/core/pdfDocument.ts",
+      "target": "0.41.6",
+      "summary": "Subset TrueType fonts get a /ToUnicode map with wrong code mappings, so text extraction from the output is wrong."
+    },
+    {
+      "id": "core-document-12",
+      "area": "core-document",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/core/pdfDocument.ts",
+      "target": "0.41.6",
+      "summary": "Embedding a CFF-based OpenType font replaces its font program with invalid data on save."
+    },
+    {
+      "id": "core-document-13",
+      "area": "core-document",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/core/pdfDocument.ts",
+      "target": "0.41.4",
+      "summary": "A form created through getForm() is not written to the saved file."
+    },
+    {
+      "id": "core-document-14",
+      "area": "core-document",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/core/incrementalWriter.ts",
+      "target": "0.41.2",
+      "summary": "saveDocumentIncremental writes a new catalog and page tree instead of a true incremental update."
+    },
+    {
+      "id": "core-document-M01",
+      "area": "core-document",
+      "severity": "high",
+      "status": "missed",
+      "path": "src/core/pdfDocument.ts",
+      "target": "0.41.2",
+      "summary": "A full save of a loaded PDF drops catalog entries such as names, forms, outlines and the structure tree."
+    },
+    {
+      "id": "core-document-M03",
+      "area": "core-document",
+      "severity": "high",
+      "status": "missed",
+      "path": "src/parser/documentParser.ts",
+      "target": "0.40.9",
+      "summary": "Decryption decodes the bytes of hex strings twice, producing wrong text."
+    },
+    {
+      "id": "core-graphics-15",
+      "area": "core-graphics",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/core/shadingFunction.ts",
+      "target": "0.42.1",
+      "summary": "Function-based shadings of types 0, 3 and 4 are written as invalid function objects."
+    },
+    {
+      "id": "core-graphics-31",
+      "area": "core-graphics",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/core/patterns.ts",
+      "target": "0.42.1",
+      "summary": "Gradient stop offsets are ignored or misapplied."
+    },
+    {
+      "id": "core-graphics-37",
+      "area": "core-graphics",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/core/linearization.ts",
+      "target": "0.42.6",
+      "summary": "Linearization assigns every object to the first page in multi-page documents."
+    },
+    {
+      "id": "core-graphics-38",
+      "area": "core-graphics",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/core/linearization.ts",
+      "target": "0.42.6",
+      "summary": "Linearization hint tables do not follow the layout ISO 32000 specifies."
+    },
+    {
+      "id": "core-graphics-39",
+      "area": "core-graphics",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/core/linearization.ts",
+      "target": "0.42.6",
+      "summary": "Linearized output lacks the first-page cross-reference section."
+    },
+    {
+      "id": "core-graphics-41",
+      "area": "core-graphics",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/core/linearization.ts",
+      "target": "0.42.6",
+      "summary": "linearizePdf and delinearizePdf drop every trailer entry except /Size, /Root and /Info, including /ID, from the file they rewrite; since 0.40.5 they refuse encrypted input instead of dropping /Encrypt."
+    },
+    {
+      "id": "core-page-01",
+      "area": "core-page",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/core/pdfPage.ts",
+      "target": "0.41.0",
+      "summary": "drawText with a standard font writes non-ASCII characters in the wrong encoding, so they render as wrong glyphs."
+    },
+    {
+      "id": "core-page-02",
+      "area": "core-page",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/core/pdfPage.ts",
+      "target": "0.41.3",
+      "summary": "Widget annotations are dropped from pages that have no other annotation."
+    },
+    {
+      "id": "core-page-03",
+      "area": "core-page",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/core/pdfPage.ts",
+      "target": "0.41.3",
+      "summary": "Scaling or translating a loaded page affects only new content, not the original content."
+    },
+    {
+      "id": "core-page-04",
+      "area": "core-page",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/core/pdfPage.ts",
+      "target": "0.41.3",
+      "summary": "Graphics state names added to a loaded page can replace existing entries of the same name."
+    },
+    {
+      "id": "core-page-05",
+      "area": "core-page",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/core/pdfPage.ts",
+      "target": "0.42.1",
+      "summary": "Repeated markContent() calls nest earlier marked content inside later elements."
+    },
+    {
+      "id": "core-page-M01",
+      "area": "core-page",
+      "severity": "high",
+      "status": "missed",
+      "path": "src/core/pdfPage.ts",
+      "target": "0.42.1",
+      "summary": "Spot and DeviceN colours are used in page content without registering their colour space in the page resources."
+    },
+    {
+      "id": "corpus-P02",
+      "area": "corpus",
+      "severity": "medium",
+      "status": "confirmed",
+      "path": "src/core/pdfWriter.ts",
+      "target": "0.40.9",
+      "summary": "A save of a loaded PDF copies its Flate streams byte for byte, so qpdf --check warns on the output about the same damaged streams it warns on in the input."
+    },
+    {
+      "id": "crypto-security-01",
+      "area": "crypto-security",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/crypto/keyDerivation.ts",
+      "target": "0.40.9",
+      "summary": "AES-256 (revision 6) key derivation deviates from ISO 32000-2, so files from other producers do not open with the right password."
+    },
+    {
+      "id": "crypto-security-02",
+      "area": "crypto-security",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/crypto/keyDerivation.ts",
+      "target": "0.40.9",
+      "summary": "Revision 6 key derivation runs a different number of rounds than ISO 32000-2 specifies."
+    },
+    {
+      "id": "crypto-security-03",
+      "area": "crypto-security",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/crypto/encryptionHandler.ts",
+      "target": "0.40.9",
+      "summary": "Per-object encryption keys are wrong for objects numbered 65,536 and above."
+    },
+    {
+      "id": "crypto-security-05",
+      "area": "crypto-security",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/parser/documentParser.ts",
+      "target": "0.40.9",
+      "summary": "Some strings and streams of an encrypted document, such as the Info dictionary, are not decrypted on load."
+    },
+    {
+      "id": "crypto-security-38",
+      "area": "crypto-security",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/security/sanitize.ts",
+      "target": "0.43.4",
+      "summary": "sanitizePdf can take an outline item, or another dictionary without /Type that has a /Title, for the document information dictionary and empty it, so bookmark titles are lost."
+    },
+    {
+      "id": "crypto-security-M01",
+      "area": "crypto-security",
+      "severity": "high",
+      "status": "missed",
+      "path": "src/parser/documentParser.ts",
+      "target": "0.40.9",
+      "summary": "Hex strings in encrypted documents are decoded twice during decryption."
+    },
+    {
+      "id": "crypto-security-M03",
+      "area": "crypto-security",
+      "severity": "high",
+      "status": "missed",
+      "path": "src/parser/documentParser.ts",
+      "target": "0.40.9",
+      "summary": "Object streams of encrypted documents are read without decryption, so their objects are lost."
+    },
+    {
+      "id": "crypto-security-M04",
+      "area": "crypto-security",
+      "severity": "high",
+      "status": "missed",
+      "path": "src/core/pdfObjects.ts",
+      "target": "0.41.2",
+      "summary": "The object registry can hold two entries for one object number."
+    },
+    {
+      "id": "docs-guide-1-11",
+      "area": "docs-guide-1",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/annotation/types/fileAttachmentAnnotation.ts",
+      "target": "0.44.1",
+      "summary": "File attachment annotations created with create() are written without their file specification."
+    },
+    {
+      "id": "docs-guide-1-30",
+      "area": "docs-guide-1",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/browser/worker.ts",
+      "target": "0.42.8",
+      "summary": "PdfWorker without a workerUrl cannot start its inline worker."
+    },
+    {
+      "id": "docs-guide-1-64",
+      "area": "docs-guide-1",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "docs/guide/fonts.md",
+      "target": "0.41.0",
+      "summary": "The subset option of embedFont is not read, so TrueType fonts are always subset at save; the fonts guide says so, but the option's JSDoc still describes it as working with a default of true."
+    },
+    {
+      "id": "docs-guide-1-72",
+      "area": "docs-guide-1",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/form/pdfForm.ts",
+      "target": "0.41.4",
+      "summary": "createTextField, createCheckbox and createDropdown ignore their page argument, so the widget appears on no page."
+    },
+    {
+      "id": "docs-guide-2-04",
+      "area": "docs-guide-2",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/core/pdfDocument.ts",
+      "target": "0.48.2",
+      "summary": "embedTiff treats four-sample TIFFs as RGBA, so CMYK TIFFs render wrongly."
+    },
+    {
+      "id": "docs-guide-2-23",
+      "area": "docs-guide-2",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/signature/signatureHandler.ts",
+      "target": "0.45.0",
+      "summary": "signPdf does not apply the certification level, field lock or timestampUrl set on its options, so the signed file has no DocMDP certification, no /Lock and no timestamp, although the multi-signature guide shows certification and locking taking effect."
+    },
+    {
+      "id": "docs-guide-2-29",
+      "area": "docs-guide-2",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/core/embeddedFiles.ts",
+      "target": "0.41.1",
+      "summary": "The embedded-file /Subtype name is escaped twice."
+    },
+    {
+      "id": "docs-guide-2-33",
+      "area": "docs-guide-2",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/compliance/pdfA.ts",
+      "target": "0.41.1",
+      "summary": "enforcePdfA() inserts content without updating cross-reference offsets."
+    },
+    {
+      "id": "docs-guide-2-34",
+      "area": "docs-guide-2",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/compliance/stripProhibited.ts",
+      "target": "0.41.1",
+      "summary": "stripProhibitedFeatures() and flattenTransparency() damage binary content through a text round trip."
+    },
+    {
+      "id": "docs-guide-2-41",
+      "area": "docs-guide-2",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/compliance/pdfxCompliance.ts",
+      "target": "0.41.1",
+      "summary": "enforcePdfX() always rewrites the file through a text round trip, damaging binary content."
+    },
+    {
+      "id": "docs-guide-2-42",
+      "area": "docs-guide-2",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/compliance/pdfxCompliance.ts",
+      "target": "0.46.4",
+      "summary": "PDF/X validation and enforcement neither check nor write the PDF/X version identification."
+    },
+    {
+      "id": "docs-guide-2-46",
+      "area": "docs-guide-2",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/core/pdfDocument.ts",
+      "target": "0.41.2",
+      "summary": "Since 0.40.5, saveAsStream() throws UnsupportedEncryptionError for a document with encrypt() configured (covered by the 0.40.5 security advisory on saveAsStream), so save() is the only way to write an encrypted document."
+    },
+    {
+      "id": "docs-guide-3-03",
+      "area": "docs-guide-3",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "docs/guide/signatures.md",
+      "target": "0.45.0",
+      "summary": "The visible signature pageIndex option is not applied, and the widget is attached to no page."
+    },
+    {
+      "id": "docs-guide-3-27",
+      "area": "docs-guide-3",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/core/pdfDocument.ts",
+      "target": "0.41.2",
+      "summary": "Since 0.40.5, saveAsStream() refuses a document with encryption configured, but it does not run the plugin save hooks and does not honour the objectStreamThreshold save option."
+    },
+    {
+      "id": "docs-guide-3-54",
+      "area": "docs-guide-3",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "docs/guide/troubleshooting.md",
+      "target": "0.41.0",
+      "summary": "The troubleshooting guide documents an EncryptedPdfError from loadPdf that loadPdf does not throw."
+    },
+    {
+      "id": "docs-guide-3-66",
+      "area": "docs-guide-3",
+      "severity": "high",
+      "status": "unverified",
+      "path": "src/signature/ocsp.ts",
+      "target": "0.45.0",
+      "summary": "downloadCrl and isCertificateRevoked do not verify a CRL's signature, issuer or freshness, and false from isCertificateRevoked means only that the serial is not listed; OCSP answers are authenticated since 0.40.5."
+    },
+    {
+      "id": "docs-guide-3-M01",
+      "area": "docs-guide-3",
+      "severity": "high",
+      "status": "missed",
+      "path": "src/layout/textLayout.ts",
+      "target": "0.42.8",
+      "summary": "Laid-out text positions later words of a line from the line start, so words overlap."
+    },
+    {
+      "id": "docs-guide-3-M02",
+      "area": "docs-guide-3",
+      "severity": "high",
+      "status": "missed",
+      "path": "src/parser/streamingParser.ts",
+      "target": "0.42.7",
+      "summary": "An error raised while StreamingPdfParser.fromFile reads a file escapes the returned promise."
+    },
+    {
+      "id": "fonts-text-01",
+      "area": "fonts-text",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/assets/font/fontSubset.ts",
+      "target": "0.41.6",
+      "summary": "Subset fonts get a ToUnicode map keyed by the wrong codes, so text extraction from the output is wrong."
+    },
+    {
+      "id": "fonts-text-03",
+      "area": "fonts-text",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/assets/font/ttfSubset.ts",
+      "target": "0.41.6",
+      "summary": "CFF-based OpenType fonts are not subset and are written with a wrong font program."
+    },
+    {
+      "id": "fonts-text-08",
+      "area": "fonts-text",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/text/bidi.ts",
+      "target": "0.44.3",
+      "summary": "The bidirectional text algorithm classifies many punctuation and symbol characters as left-to-right."
+    },
+    {
+      "id": "forms-34",
+      "area": "forms",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/core/pdfDocument.ts",
+      "target": "0.41.5",
+      "summary": "Forms of loaded PDFs are not read: hasForm() and getForm() do not reflect an existing AcroForm."
+    },
+    {
+      "id": "forms-35",
+      "area": "forms",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/form/pdfForm.ts",
+      "target": "0.41.4",
+      "summary": "Fields created through the form API are not written to the saved file."
+    },
+    {
+      "id": "forms-36",
+      "area": "forms",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/form/pdfForm.ts",
+      "target": "0.41.5",
+      "summary": "PdfForm.flatten() removes fields without drawing their appearance into the page."
+    },
+    {
+      "id": "forms-37",
+      "area": "forms",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/core/pdfDocument.ts",
+      "target": "0.41.4",
+      "summary": "Saving discards regenerated field appearances, so updateFieldAppearances has no effect."
+    },
+    {
+      "id": "forms-43",
+      "area": "forms",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/form/fields/radioGroup.ts",
+      "target": "0.41.5",
+      "summary": "After the first select() on a radio group, getOptions() no longer returns its options."
+    },
+    {
+      "id": "forms-53",
+      "area": "forms",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/form/formFlatten.ts",
+      "target": "0.41.5",
+      "summary": "flattenForm and related functions do not embed field appearances into page content as documented."
+    },
+    {
+      "id": "forms-M01",
+      "area": "forms",
+      "severity": "high",
+      "status": "missed",
+      "path": "src/form/pdfForm.ts",
+      "target": "0.41.5",
+      "summary": "createRadioGroup builds a direct-object cycle between the field and its widgets."
+    },
+    {
+      "id": "forms-M02",
+      "area": "forms",
+      "severity": "high",
+      "status": "missed",
+      "path": "src/core/pdfPage.ts",
+      "target": "0.41.4",
+      "summary": "Widgets added with addToPage are written only when the page also has another annotation."
+    },
+    {
+      "id": "images-12",
+      "area": "images",
+      "severity": "medium",
+      "status": "confirmed",
+      "path": "src/assets/image/deduplicateImages.ts",
+      "target": "0.41.2",
+      "summary": "deduplicateImages merges images whose data match but whose image dictionaries differ, for example in /Decode or /ColorSpace."
+    },
+    {
+      "id": "images-19",
+      "area": "images",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/assets/image/iccProfile.ts",
+      "target": "0.43.1",
+      "summary": "ICC profiles are read from their still-compressed bytes, so optimised images get a corrupt profile."
+    },
+    {
+      "id": "images-46",
+      "area": "images",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/assets/image/jpegEmbed.ts",
+      "target": "0.41.7",
+      "summary": "CMYK JPEGs with an Adobe marker are embedded without the inversion they need."
+    },
+    {
+      "id": "images-49",
+      "area": "images",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/assets/image/pngEmbed.ts",
+      "target": "0.40.8",
+      "summary": "PNG images with 1, 2 or 4 bits per sample are decoded with a wrong row length."
+    },
+    {
+      "id": "images-50",
+      "area": "images",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/assets/image/pngEmbed.ts",
+      "target": "0.40.8",
+      "summary": "16-bit PNG images with alpha are decoded wrongly."
+    },
+    {
+      "id": "images-57",
+      "area": "images",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/assets/image/pngEmbed.ts",
+      "target": "0.40.8",
+      "summary": "Embedded PNG data is compressed without the zlib wrapper the /FlateDecode filter requires."
+    },
+    {
+      "id": "images-69",
+      "area": "images",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/assets/image/tiffDecode.ts",
+      "target": "0.48.2",
+      "summary": "TIFF LZW images are decoded with the wrong bit order."
+    },
+    {
+      "id": "images-70",
+      "area": "images",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/assets/image/tiffDecode.ts",
+      "target": "0.40.8",
+      "summary": "TIFF Deflate images fail to decode, because the zlib wrapper is not expected."
+    },
+    {
+      "id": "images-72",
+      "area": "images",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/assets/image/tiffDecode.ts",
+      "target": "0.48.2",
+      "summary": "TIFF predictor and planar configuration tags are not read, so such images decode wrongly."
+    },
+    {
+      "id": "images-77",
+      "area": "images",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/assets/image/tiffDirectEmbed.ts",
+      "target": "0.48.2",
+      "summary": "Inline SHORT tag values of big-endian TIFFs are read from the wrong half of the field."
+    },
+    {
+      "id": "images-78",
+      "area": "images",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/assets/image/tiffDirectEmbed.ts",
+      "target": "0.48.2",
+      "summary": "TIFF Deflate pass-through joins independently compressed strips into one stream, producing invalid image data."
+    },
+    {
+      "id": "images-86",
+      "area": "images",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/assets/image/webpDecode.ts",
+      "target": "0.48.3",
+      "summary": "The lossy WebP decoder does not decode image data and returns a flat grey image."
+    },
+    {
+      "id": "images-87",
+      "area": "images",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/assets/image/webpDecode.ts",
+      "target": "0.48.3",
+      "summary": "The lossless WebP decoder skips the format's transforms and decodes images wrongly."
+    },
+    {
+      "id": "images-88",
+      "area": "images",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/assets/image/webpDecode.ts",
+      "target": "0.48.3",
+      "summary": "The lossless WebP decoder uses wrong length and distance prefix tables."
+    },
+    {
+      "id": "images-94",
+      "area": "images",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/assets/image/webpOptimize.ts",
+      "target": "0.40.8",
+      "summary": "PNG files written by encodePngFromPixels are not valid PNG files."
+    },
+    {
+      "id": "images-95",
+      "area": "images",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/assets/image/webpOptimize.ts",
+      "target": "0.48.4",
+      "summary": "The JPEG encoder used for WebP optimisation computes a wrong DCT."
+    },
+    {
+      "id": "images-96",
+      "area": "images",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/assets/image/webpOptimize.ts",
+      "target": "0.48.4",
+      "summary": "The JPEG encoder used for WebP optimisation writes quantisation tables in the wrong order."
+    },
+    {
+      "id": "legacy-M01",
+      "area": "legacy",
+      "severity": "medium",
+      "status": "confirmed",
+      "path": "src/core/pdfDocument.ts",
+      "target": "0.41.2",
+      "summary": "Re-saving a loaded file can define one object number more than once."
+    },
+    {
+      "id": "oracle-gates-R01",
+      "area": "oracle-gates",
+      "severity": "medium",
+      "status": "confirmed",
+      "path": "src/compliance/pdfA.ts",
+      "target": "0.41.1",
+      "summary": "enforcePdfA writes the XMP metadata it adds outside the file's cross-reference data, so qpdf --check does not find a valid cross-reference table in its output."
+    },
+    {
+      "id": "oracle-gates-R02",
+      "area": "oracle-gates",
+      "severity": "medium",
+      "status": "confirmed",
+      "path": "src/core/pdfStream.ts",
+      "target": "0.41.2",
+      "summary": "saveAsStream() ignores the objectStreamThreshold save option, so its bytes differ from those save() writes for the same document and options."
+    },
+    {
+      "id": "parser-codecs-01",
+      "area": "parser-codecs",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/parser/ccittDecode.ts",
+      "target": "0.48.1",
+      "summary": "CCITT Group 3 one-dimensional images with end-of-line codes decode to empty output."
+    },
+    {
+      "id": "parser-codecs-02",
+      "area": "parser-codecs",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/parser/ccittDecode.ts",
+      "target": "0.48.1",
+      "summary": "CCITT Group 3 two-dimensional images with end-of-line codes decode wrongly."
+    },
+    {
+      "id": "parser-codecs-100",
+      "area": "parser-codecs",
+      "severity": "high",
+      "status": "unverified",
+      "path": "tests/unit/parser/jbig2Decode.test.ts",
+      "target": "0.48.0",
+      "summary": "No test decodes arithmetic-coded JBIG2 data or real global data."
+    },
+    {
+      "id": "parser-codecs-39",
+      "area": "parser-codecs",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/parser/jpeg2000Tiles.ts",
+      "target": "0.48.0",
+      "summary": "JPEG 2000 tile decoding returns compressed bytes instead of pixels."
+    },
+    {
+      "id": "parser-codecs-40",
+      "area": "parser-codecs",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "docs/guide/jpeg2000.md",
+      "target": "0.48.0",
+      "summary": "The JPEG 2000 guide says the tile functions return pixels; they return compressed data."
+    },
+    {
+      "id": "parser-codecs-60",
+      "area": "parser-codecs",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/parser/jpeg2000Decode.ts",
+      "target": "0.48.0",
+      "summary": "The JPEG 2000 decoder does not parse packet headers."
+    },
+    {
+      "id": "parser-codecs-61",
+      "area": "parser-codecs",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/parser/jpeg2000Decode.ts",
+      "target": "0.48.0",
+      "summary": "The JPEG 2000 arithmetic decoder does not match the standard's test sequence."
+    },
+    {
+      "id": "parser-codecs-62",
+      "area": "parser-codecs",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/parser/jpeg2000Decode.ts",
+      "target": "0.48.0",
+      "summary": "The JPEG 2000 inverse wavelet transform reads subbands in the wrong order."
+    },
+    {
+      "id": "parser-codecs-63",
+      "area": "parser-codecs",
+      "severity": "high",
+      "status": "unverified",
+      "path": "src/parser/jpeg2000Decode.ts",
+      "target": "0.48.0",
+      "summary": "JPEG 2000 coefficient context modelling deviates from the standard."
+    },
+    {
+      "id": "parser-codecs-64",
+      "area": "parser-codecs",
+      "severity": "high",
+      "status": "unverified",
+      "path": "src/parser/jpeg2000Decode.ts",
+      "target": "0.48.0",
+      "summary": "JPEG 2000 dequantisation uses a wrong exponent."
+    },
+    {
+      "id": "parser-codecs-65",
+      "area": "parser-codecs",
+      "severity": "high",
+      "status": "unverified",
+      "path": "src/parser/jpeg2000Decode.ts",
+      "target": "0.48.0",
+      "summary": "The JPEG 2000 DC level shift is applied to the wrong components."
+    },
+    {
+      "id": "parser-codecs-76",
+      "area": "parser-codecs",
+      "severity": "high",
+      "status": "unverified",
+      "path": "tests/unit/parser/jpeg2000Decode.test.ts",
+      "target": "0.48.0",
+      "summary": "JPEG 2000 decoder tests use synthetic data and check only the output shape."
+    },
+    {
+      "id": "parser-codecs-82",
+      "area": "parser-codecs",
+      "severity": "high",
+      "status": "unverified",
+      "path": "src/parser/jbig2Decode.ts",
+      "target": "0.48.0",
+      "summary": "The JBIG2 arithmetic decoder does not match the standard's test sequence."
+    },
+    {
+      "id": "parser-codecs-83",
+      "area": "parser-codecs",
+      "severity": "high",
+      "status": "unverified",
+      "path": "src/parser/jbig2Decode.ts",
+      "target": "0.48.0",
+      "summary": "JBIG2 generic regions use wrong context pixels."
+    },
+    {
+      "id": "parser-codecs-84",
+      "area": "parser-codecs",
+      "severity": "high",
+      "status": "unverified",
+      "path": "src/parser/jbig2Decode.ts",
+      "target": "0.48.0",
+      "summary": "JBIG2 text-region symbol placement is wrong."
+    },
+    {
+      "id": "parser-codecs-86",
+      "area": "parser-codecs",
+      "severity": "high",
+      "status": "unverified",
+      "path": "src/parser/jbig2Decode.ts",
+      "target": "0.48.0",
+      "summary": "JBIG2 halftone regions are composed wrongly."
+    },
+    {
+      "id": "parser-codecs-87",
+      "area": "parser-codecs",
+      "severity": "high",
+      "status": "unverified",
+      "path": "src/parser/jbig2Decode.ts",
+      "target": "0.48.0",
+      "summary": "The JBIG2 pattern dictionary reads header fields the segment does not contain."
+    },
+    {
+      "id": "parser-codecs-89",
+      "area": "parser-codecs",
+      "severity": "high",
+      "status": "unverified",
+      "path": "src/parser/jbig2Decode.ts",
+      "target": "0.48.0",
+      "summary": "JBIG2 global data given as an indirect stream, as in real PDFs, is not used."
+    },
+    {
+      "id": "parser-syntax-01",
+      "area": "parser-syntax",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/parser/documentParser.ts",
+      "target": "0.40.9",
+      "summary": "Loading an encrypted PDF leaves most objects encrypted, so text and metadata read as ciphertext."
+    },
+    {
+      "id": "parser-syntax-03",
+      "area": "parser-syntax",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "tests/unit/parser/decryptionIntegration.test.ts",
+      "target": "0.40.9",
+      "summary": "Decryption tests pass without checking the decrypted content."
+    },
+    {
+      "id": "parser-syntax-44",
+      "area": "parser-syntax",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/parser/objectParser.ts",
+      "target": "0.40.9",
+      "summary": "A stream with a wrong /Length is lost instead of recovered."
+    },
+    {
+      "id": "parser-syntax-62",
+      "area": "parser-syntax",
+      "severity": "high",
+      "status": "unverified",
+      "path": "src/parser/contentStreamParser.ts",
+      "target": "0.43.0",
+      "summary": "The content stream parser loses array values in an inline image dictionary, such as /F [/AHx /Fl] or /D [1 0], and stores wrong keys in their place."
+    },
+    {
+      "id": "parser-syntax-73",
+      "area": "parser-syntax",
+      "severity": "high",
+      "status": "unverified",
+      "path": "src/parser/streamingParser.ts",
+      "target": "0.42.7",
+      "summary": "The streaming parser reports zero pages for files with cross-reference streams or object streams."
+    },
+    {
+      "id": "parser-syntax-74",
+      "area": "parser-syntax",
+      "severity": "high",
+      "status": "unverified",
+      "path": "src/parser/streamingParser.ts",
+      "target": "0.42.7",
+      "summary": "StreamingPdfParser reads the whole file before parsing; its documentation describes incremental processing."
+    },
+    {
+      "id": "parser-syntax-M01",
+      "area": "parser-syntax",
+      "severity": "high",
+      "status": "missed",
+      "path": "src/parser/xrefParser.ts",
+      "target": "0.40.8",
+      "summary": "Cross-reference streams and object streams are inflated as raw deflate instead of zlib data."
+    },
+    {
+      "id": "parser-syntax-M02",
+      "area": "parser-syntax",
+      "severity": "high",
+      "status": "missed",
+      "path": "src/core/pdfWriter.ts",
+      "target": "0.40.8",
+      "summary": "The writer emits raw deflate data under /FlateDecode."
+    },
+    {
+      "id": "parser-syntax-M03",
+      "area": "parser-syntax",
+      "severity": "high",
+      "status": "missed",
+      "path": "src/parser/objectParser.ts",
+      "target": "0.40.9",
+      "summary": "A stream whose /Length is an indirect object defined later in the file fails to parse."
+    },
+    {
+      "id": "parser-syntax-M04",
+      "area": "parser-syntax",
+      "severity": "high",
+      "status": "missed",
+      "path": "src/parser/documentParser.ts",
+      "target": "0.41.3",
+      "summary": "Fonts and images added to a loaded page can reuse resource names already in use."
+    },
+    {
+      "id": "parser-text-01",
+      "area": "parser-text",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/parser/textExtractor.ts",
+      "target": "0.41.6",
+      "summary": "Text extraction ignores fonts given as indirect references, so their ToUnicode maps are not applied."
+    },
+    {
+      "id": "parser-text-02",
+      "area": "parser-text",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/parser/textExtractor.ts",
+      "target": "0.41.6",
+      "summary": "Text extraction reads compressed ToUnicode streams without decompressing them."
+    },
+    {
+      "id": "parser-text-18",
+      "area": "parser-text",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/parser/tableExtract.ts",
+      "target": "0.43.5",
+      "summary": "Table extraction does not detect tables as documented."
+    },
+    {
+      "id": "render-07",
+      "area": "render",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/render/ocr.ts",
+      "target": "0.49.3",
+      "summary": "applyOcr gives the OCR engine a blank page for scanned PDFs, because the rasteriser skips images."
+    },
+    {
+      "id": "render-08",
+      "area": "render",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/render/ocr.ts",
+      "target": "0.49.3",
+      "summary": "OCR box coordinates are not mapped back to page space."
+    },
+    {
+      "id": "render-12",
+      "area": "render",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/render/interpreter.ts",
+      "target": "0.49.2",
+      "summary": "Rendering ignores the page /Rotate and /UserUnit entries."
+    },
+    {
+      "id": "render-13",
+      "area": "render",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/render/imageExtract.ts",
+      "target": "0.49.4",
+      "summary": "Rendering reads 1, 2 and 4-bit image samples without row padding, distorting such images."
+    },
+    {
+      "id": "render-M01",
+      "area": "render",
+      "severity": "high",
+      "status": "missed",
+      "path": "src/render/ocr.ts",
+      "target": "0.42.1",
+      "summary": "applyOcr leaves an invisible text mode active, which hides content drawn afterwards."
+    },
+    {
+      "id": "render-M02",
+      "area": "render",
+      "severity": "high",
+      "status": "missed",
+      "path": "src/render/interpreter.ts",
+      "target": "0.49.0",
+      "summary": "Rendering misses resources of pages built or extended in the current session."
+    },
+    {
+      "id": "runtime-platform-18",
+      "area": "runtime-platform",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/browser/worker.ts",
+      "target": "0.42.8",
+      "summary": "The default inline PdfWorker cannot resolve its own package import."
+    },
+    {
+      "id": "rust-crates-01",
+      "area": "rust-crates",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/wasm/jbig2/src/lib.rs",
+      "target": "0.47.0",
+      "summary": "The JBIG2 WASM arithmetic decoder is wrong, so arithmetic-coded images decode wrongly."
+    },
+    {
+      "id": "rust-crates-02",
+      "area": "rust-crates",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/wasm/jbig2/src/lib.rs",
+      "target": "0.47.0",
+      "summary": "The JBIG2 WASM crate reads generic-region flags from the wrong byte."
+    },
+    {
+      "id": "rust-crates-03",
+      "area": "rust-crates",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/wasm/jbig2/src/lib.rs",
+      "target": "0.47.0",
+      "summary": "The JBIG2 WASM crate does not implement symbol dictionaries and text regions."
+    },
+    {
+      "id": "rust-crates-04",
+      "area": "rust-crates",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/wasm/jbig2/src/lib.rs",
+      "target": "0.47.0",
+      "summary": "The JBIG2 WASM MMR run-length tables are wrong and incomplete."
+    },
+    {
+      "id": "rust-crates-06",
+      "area": "rust-crates",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/wasm/jpeg/src/lib.rs",
+      "target": "0.47.0",
+      "summary": "The JPEG WASM crate writes its image header in a different layout than the TypeScript bridge reads."
+    },
+    {
+      "id": "rust-crates-07",
+      "area": "rust-crates",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/compression/libdeflateWasm.ts",
+      "target": "0.47.0",
+      "summary": "The libdeflate bridge expects exports the WASM crate does not provide."
+    },
+    {
+      "id": "rust-crates-08",
+      "area": "rust-crates",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/parser/jbig2WasmBridge.ts",
+      "target": "0.47.0",
+      "summary": "WASM modules are instantiated without the imports they need and cannot link."
+    },
+    {
+      "id": "rust-crates-49",
+      "area": "rust-crates",
+      "severity": "high",
+      "status": "confirmed",
+      "path": ".github/workflows/ci.yml",
+      "target": "0.47.0",
+      "summary": "CI runs clippy and native cargo test for each of the six Rust crates in a non-gating job (continue-on-error), and runs no cargo fmt check or dependency audit."
+    },
+    {
+      "id": "signature-cms-05",
+      "area": "signature-cms",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/signature/detailedVerifier.ts",
+      "target": "0.45.0",
+      "summary": "verifySignatureDetailed does not validate the signer's chain against its trustedCerts option and does not use its timeout option, and with checkRevocation it sets revocationChecked to true also when the status could not be determined and is reported as 'unknown'."
+    },
+    {
+      "id": "signature-cms-06",
+      "area": "signature-cms",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/signature/detailedVerifier.ts",
+      "target": "0.45.0",
+      "summary": "verifySignatureDetailed verifies every RSA signature as RSASSA-PKCS1-v1_5, so valid RSA-PSS signatures, including those signPdf makes with signatureScheme 'pss', are reported as cryptographically invalid."
+    },
+    {
+      "id": "signature-cms-08",
+      "area": "signature-cms",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/signature/signatureHandler.ts",
+      "target": "0.45.0",
+      "summary": "signPdf does not read SignOptions.timestampUrl, so no timestamp is requested or embedded in the signature."
+    },
+    {
+      "id": "signature-cms-09",
+      "area": "signature-cms",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/signature/signatureHandler.ts",
+      "target": "0.45.0",
+      "summary": "signPdf does not write the reason, location and contact information it is given, or a signing date, into the signature dictionary (/Reason, /Location, /ContactInfo, /M)."
+    },
+    {
+      "id": "signature-cms-10",
+      "area": "signature-cms",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/signature/byteRange.ts",
+      "target": "0.45.0",
+      "summary": "prepareForSigning does not link the signature widget into the form or the page."
+    },
+    {
+      "id": "signature-cms-23",
+      "area": "signature-cms",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/signature/timestamp.ts",
+      "target": "0.45.0",
+      "summary": "Since 0.40.5, requestTimestamp throws TimestampVerificationError when the token's message imprint or nonce does not match the request, and parseTimestampResponse does so for the values passed in expected (covered by the 0.40.5 security advisory on signature trust); full timestamp verification ships in 0.45.0."
+    },
+    {
+      "id": "signature-cms-38",
+      "area": "signature-cms",
+      "severity": "medium",
+      "status": "confirmed",
+      "path": "src/signature/signatureHandler.ts",
+      "target": "0.45.0",
+      "summary": "Field names of signatures made by this library are read back as a default name."
+    },
+    {
+      "id": "signature-cms-47",
+      "area": "signature-cms",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/signature/counterSignature.ts",
+      "target": "0.45.3",
+      "summary": "addCounterSignature appends a separate signature field whose /Contents holds a bare attribute without a /ByteRange, instead of adding an RFC 5652 countersignature to the signer it targets."
+    },
+    {
+      "id": "signature-cms-49",
+      "area": "signature-cms",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/signature/counterSignature.ts",
+      "target": "0.45.3",
+      "summary": "getCounterSignatures does not find the counter-signatures that addCounterSignature writes."
+    },
+    {
+      "id": "signature-cms-52",
+      "area": "signature-cms",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "tests/unit/signature/counterSignature.test.ts",
+      "target": "0.45.3",
+      "summary": "No test covers a successful addCounterSignature call; its tests cover only the two rejection cases."
+    },
+    {
+      "id": "signature-cms-53",
+      "area": "signature-cms",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/signature/incrementalOptimizer.ts",
+      "target": "0.41.1",
+      "summary": "optimizeIncrementalSave damages binary object content through a text round trip."
+    },
+    {
+      "id": "signature-cms-63",
+      "area": "signature-cms",
+      "severity": "high",
+      "status": "unverified",
+      "path": "src/signature/ltvEmbed.ts",
+      "target": "0.45.0",
+      "summary": "embedLtvData writes a /DSS dictionary that the document catalog does not reference, so readers do not find the Document Security Store."
+    },
+    {
+      "id": "signature-cms-64",
+      "area": "signature-cms",
+      "severity": "high",
+      "status": "unverified",
+      "path": "src/signature/ltvEmbed.ts",
+      "target": "0.45.0",
+      "summary": "embedLtvData writes the certificate, OCSP and CRL streams of the DSS as hexadecimal text without a decode filter and with a /Length of half the bytes written."
+    },
+    {
+      "id": "signature-cms-M01",
+      "area": "signature-cms",
+      "severity": "high",
+      "status": "missed",
+      "path": "src/signature/timestamp.ts",
+      "target": "0.45.0",
+      "summary": "parseTimestampResponse and requestTimestamp return a timestampToken cut from the response at a wrong offset, so the returned bytes are not the token the response holds."
+    },
+    {
+      "id": "signature-pki-01",
+      "area": "signature-pki",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/signature/chainValidator.ts",
+      "target": "0.45.0",
+      "summary": "Since 0.40.5, a self-signed root is trusted only when listed in trustedCerts (covered by the 0.40.5 security advisory on signature trust); full path validation ships in 0.45.0."
+    },
+    {
+      "id": "signature-pki-02",
+      "area": "signature-pki",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/signature/chainValidator.ts",
+      "target": "0.45.0",
+      "summary": "validateCertificateChain performs no revocation check; its checkRevocation option is reserved and not read."
+    },
+    {
+      "id": "signature-pki-03",
+      "area": "signature-pki",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/signature/ocsp.ts",
+      "target": "0.45.0",
+      "summary": "checkCertificateStatus returns good or revoked only for a fresh OCSP answer that matches the request and is signed by the issuer or an issuer-certified id-kp-OCSPSigning responder, otherwise unknown; it sends no nonce and does not check the responder certificate's revocation."
+    },
+    {
+      "id": "signature-pki-06",
+      "area": "signature-pki",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/signature/offlineRevocation.ts",
+      "target": "0.45.0",
+      "summary": "extractEmbeddedRevocationData does not follow the adbe-revocationInfoArchival structure, so it returns wrong bytes for embedded OCSP responses and CRLs; verifyOfflineRevocation reports embedded answers only as 'unknown'."
+    },
+    {
+      "id": "signature-pki-07",
+      "area": "signature-pki",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/signature/offlineRevocation.ts",
+      "target": "0.45.0",
+      "summary": "Since 0.40.5, every embedded OCSP or CRL answer read offline reports unknown (covered by the 0.40.5 security advisory on signature trust); full checks ship in 0.45.0."
+    },
+    {
+      "id": "signature-pki-08",
+      "area": "signature-pki",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/signature/ocspStaple.ts",
+      "target": "0.45.3",
+      "summary": "embedOcspResponse replaces all existing unsigned attributes of the signer, including a signature timestamp token, with the revocation attribute alone."
+    },
+    {
+      "id": "signature-pki-09",
+      "area": "signature-pki",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/signature/mdpPolicy.ts",
+      "target": "0.45.0",
+      "summary": "setCertificationLevel only stores a property on the sign options that signPdf does not read, and no code writes a catalog /Perms DocMDP entry, so the signature is not a certification signature."
+    },
+    {
+      "id": "signature-pki-10",
+      "area": "signature-pki",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/signature/fieldLock.ts",
+      "target": "0.45.0",
+      "summary": "addFieldLock only stores a property on the sign options that signPdf does not read, so the signed file has no /Lock dictionary."
+    },
+    {
+      "id": "signature-pki-11",
+      "area": "signature-pki",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/signature/modificationDetector.ts",
+      "target": "0.45.4",
+      "summary": "Since 0.40.5, modification detection reports an object that carries a signature key and was added or modified after a signed revision as unknown, not as allowed (covered by the 0.40.5 security advisory on signature trust); exact detection ships in 0.45.4."
+    },
+    {
+      "id": "signature-pki-12",
+      "area": "signature-pki",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/signature/multiSignatureValidator.ts",
+      "target": "0.45.4",
+      "summary": "Since 0.40.5, the multi-signature validator reports a chain valid only when every signature's digest and CMS signature verify (covered by the 0.40.5 security advisory on signature trust); the remaining checks its documentation lists ship in 0.45.4."
+    },
+    {
+      "id": "signature-pki-M01",
+      "area": "signature-pki",
+      "severity": "high",
+      "status": "missed",
+      "path": "src/signature/offlineRevocation.ts",
+      "target": "0.45.5",
+      "summary": "extractEmbeddedRevocationData computes the position of each embedded OCSP response and CRL from the wrong base offset, so the bytes it returns are not the embedded data."
+    },
+    {
+      "id": "svg-markdown-vdom-jsx-layout-24",
+      "area": "svg-markdown-vdom-jsx-layout",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/assets/svg/svgToPdf.ts",
+      "target": "0.42.8",
+      "summary": "SVG fill and stroke are not inherited from parent groups, and the value none is not handled."
+    },
+    {
+      "id": "svg-markdown-vdom-jsx-layout-25",
+      "area": "svg-markdown-vdom-jsx-layout",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/assets/svg/svgToPdf.ts",
+      "target": "0.42.8",
+      "summary": "SVG graphics state settings leak into following elements."
+    },
+    {
+      "id": "svg-markdown-vdom-jsx-layout-26",
+      "area": "svg-markdown-vdom-jsx-layout",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/assets/svg/svgToPdf.ts",
+      "target": "0.42.8",
+      "summary": "SVG opacity attributes are parsed but not rendered."
+    },
+    {
+      "id": "svg-markdown-vdom-jsx-layout-27",
+      "area": "svg-markdown-vdom-jsx-layout",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/assets/svg/svgToPdf.ts",
+      "target": "0.42.8",
+      "summary": "SVG text is rendered mirrored."
+    },
+    {
+      "id": "svg-markdown-vdom-jsx-layout-37",
+      "area": "svg-markdown-vdom-jsx-layout",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/assets/vdom/reconciler.ts",
+      "target": "0.42.8",
+      "summary": "Virtual DOM rendering drops content that does not fit on the page instead of adding a page."
+    },
+    {
+      "id": "svg-markdown-vdom-jsx-layout-44",
+      "area": "svg-markdown-vdom-jsx-layout",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/jsx/jsxRuntime.ts",
+      "target": "0.42.8",
+      "summary": "A JSX view's background is painted over its children."
+    },
+    {
+      "id": "svg-markdown-vdom-jsx-layout-45",
+      "area": "svg-markdown-vdom-jsx-layout",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/jsx/jsxRuntime.ts",
+      "target": "0.44.0",
+      "summary": "The JSX setup instructions need package exports that do not exist."
+    },
+    {
+      "id": "svg-markdown-vdom-jsx-layout-76",
+      "area": "svg-markdown-vdom-jsx-layout",
+      "severity": "high",
+      "status": "unverified",
+      "path": "src/layout/textLayout.ts",
+      "target": "0.42.8",
+      "summary": "Words in a laid-out line overlap."
+    },
+    {
+      "id": "svg-markdown-vdom-jsx-layout-77",
+      "area": "svg-markdown-vdom-jsx-layout",
+      "severity": "high",
+      "status": "unverified",
+      "path": "src/layout/textLayout.ts",
+      "target": "0.42.8",
+      "summary": "Per-span bold, italic, superscript and subscript are accepted by TextSpan but have no effect on the output; the text-layout guide marks them reserved."
+    },
+    {
+      "id": "tests-integration-e2e-bench-fixtures-M01",
+      "area": "tests-integration-e2e-bench-fixtures",
+      "severity": "high",
+      "status": "missed",
+      "path": "src/core/pdfDocument.ts",
+      "target": "0.41.2",
+      "summary": "saveAsStream() does not run the plugin onBeforeSave and onAfterSave hooks; since 0.40.5 it throws UnsupportedEncryptionError for a document on which encrypt() was called (covered by the 0.40.5 security advisory on saveAsStream)."
+    },
+    {
+      "id": "tests-integration-e2e-bench-fixtures-M02",
+      "area": "tests-integration-e2e-bench-fixtures",
+      "severity": "high",
+      "status": "missed",
+      "path": "src/form/pdfForm.ts",
+      "target": "0.41.4",
+      "summary": "Fields created on a new document never reach the output."
+    },
+    {
+      "id": "tests-suites-compliance-barcode-browser-M01",
+      "area": "tests-suites-compliance-barcode-browser",
+      "severity": "high",
+      "status": "missed",
+      "path": "src/compliance/enforcePdfAv2.ts",
+      "target": "0.41.1",
+      "summary": "enforcePdfAFull reports full compliance for output with broken cross-reference data."
+    },
+    {
+      "id": "tests-suites-compliance-barcode-browser-M02",
+      "area": "tests-suites-compliance-barcode-browser",
+      "severity": "high",
+      "status": "missed",
+      "path": "tests/compliance/associatedFiles.test.ts",
+      "target": "0.41.1",
+      "summary": "A test asserts the double-escaped embedded-file MIME subtype."
+    },
+    {
+      "id": "tests-suites-image-layout-M01",
+      "area": "tests-suites-image-layout",
+      "severity": "high",
+      "status": "missed",
+      "path": "src/assets/image/iccProfile.ts",
+      "target": "0.43.1",
+      "summary": "ICC profiles are extracted still compressed."
+    },
+    {
+      "id": "tests-suites-image-layout-M02",
+      "area": "tests-suites-image-layout",
+      "severity": "high",
+      "status": "missed",
+      "path": "src/layout/table.ts",
+      "target": "0.41.0",
+      "summary": "Non-ASCII table cell text is written in the wrong encoding."
+    },
+    {
+      "id": "tests-unit-accessibility-03",
+      "area": "tests-unit-accessibility",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/accessibility/pdfUa2.ts",
+      "target": "0.46.0",
+      "summary": "PDF/UA-2 namespaces cannot be written to the structure tree root."
+    },
+    {
+      "id": "tests-unit-accessibility-19",
+      "area": "tests-unit-accessibility",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/accessibility/structureTree.ts",
+      "target": "0.46.0",
+      "summary": "The structure tree IDTree and ParentTree point to placeholder elements instead of the real ones."
+    },
+    {
+      "id": "tests-unit-accessibility-24",
+      "area": "tests-unit-accessibility",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/accessibility/markedContent.ts",
+      "target": "0.42.1",
+      "summary": "Marked-content property values are written without escaping, producing malformed content for some values."
+    },
+    {
+      "id": "tests-unit-accessibility-M01",
+      "area": "tests-unit-accessibility",
+      "severity": "high",
+      "status": "missed",
+      "path": "src/core/pdfDocument.ts",
+      "target": "0.42.2",
+      "summary": "Loading a PDF does not read its structure tree, language or display-title preference."
+    },
+    {
+      "id": "tests-unit-annotation-01",
+      "area": "tests-unit-annotation",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "tests/unit/annotation/appearanceGenerator.test.ts",
+      "target": "0.44.1",
+      "summary": "Annotation appearance streams write opacity with invalid operators."
+    },
+    {
+      "id": "tests-unit-annotation-03",
+      "area": "tests-unit-annotation",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "tests/unit/annotation/fileAttachmentAnnotation.test.ts",
+      "target": "0.44.1",
+      "summary": "File attachment annotations are serialised without their file specification."
+    },
+    {
+      "id": "tests-unit-annotation-13",
+      "area": "tests-unit-annotation",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "tests/unit/annotation/linkAnnotation.test.ts",
+      "target": "0.44.1",
+      "summary": "Link annotation destinations use a page index where a page reference is required."
+    },
+    {
+      "id": "tests-unit-assets-01",
+      "area": "tests-unit-assets",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/assets/image/tiffDecode.ts",
+      "target": "0.48.2",
+      "summary": "TIFF LZW images are decoded with the wrong bit order and code-width rule."
+    },
+    {
+      "id": "tests-unit-assets-04",
+      "area": "tests-unit-assets",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/assets/image/tiffDirectEmbed.ts",
+      "target": "0.48.2",
+      "summary": "Out-of-line TIFF tag values such as BitsPerSample are read as offsets."
+    },
+    {
+      "id": "tests-unit-assets-05",
+      "area": "tests-unit-assets",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/assets/image/webpDecode.ts",
+      "target": "0.48.3",
+      "summary": "The lossless WebP decoder deviates from the specification, and its test fixture matches the deviation."
+    },
+    {
+      "id": "tests-unit-assets-28",
+      "area": "tests-unit-assets",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/assets/image/imageExtract.ts",
+      "target": "0.43.1",
+      "summary": "Image decoding ignores /DecodeParms, so predictor-coded images decode with extra bytes."
+    },
+    {
+      "id": "tests-unit-assets-M01",
+      "area": "tests-unit-assets",
+      "severity": "high",
+      "status": "missed",
+      "path": "src/assets/image/tiffDirectEmbed.ts",
+      "target": "0.48.2",
+      "summary": "Big-endian TIFFs lose single SHORT tag values."
+    },
+    {
+      "id": "tests-unit-compliance-01",
+      "area": "tests-unit-compliance",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/compliance/transparencyFlattener.ts",
+      "target": "0.41.1",
+      "summary": "flattenTransparency damages binary content through a text round trip."
+    },
+    {
+      "id": "tests-unit-compliance-02",
+      "area": "tests-unit-compliance",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/compliance/transparencyFlattener.ts",
+      "target": "0.46.0",
+      "summary": "Transparency flattening leaves an unbalanced dictionary when /SMask is a direct dictionary."
+    },
+    {
+      "id": "tests-unit-compliance-03",
+      "area": "tests-unit-compliance",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/compliance/enforcePdfAv2.ts",
+      "target": "0.41.1",
+      "summary": "enforcePdfAFull inserts content without updating the cross-reference table."
+    },
+    {
+      "id": "tests-unit-compliance-M01",
+      "area": "tests-unit-compliance",
+      "severity": "high",
+      "status": "missed",
+      "path": "src/compliance/pdfxCompliance.ts",
+      "target": "0.41.1",
+      "summary": "enforcePdfX always rewrites the file through a text round trip, even when nothing is altered."
+    },
+    {
+      "id": "tests-unit-core-a-01",
+      "area": "tests-unit-core-a",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "tests/unit/core/linearization.test.ts",
+      "target": "0.42.6",
+      "summary": "Linearization tests assert a hint-table layout that does not follow ISO 32000."
+    },
+    {
+      "id": "tests-unit-core-b-22",
+      "area": "tests-unit-core-b",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/core/pdfObjects.ts",
+      "target": "0.41.0",
+      "summary": "PdfName serialisation does not escape delimiter characters."
+    },
+    {
+      "id": "tests-unit-core-b-24",
+      "area": "tests-unit-core-b",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/core/pdfObjects.ts",
+      "target": "0.41.0",
+      "summary": "PdfString.hex() guesses whether its input is hex digits or text."
+    },
+    {
+      "id": "tests-unit-core-b-55",
+      "area": "tests-unit-core-b",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/core/shadingFunction.ts",
+      "target": "0.42.1",
+      "summary": "Function-based shadings are written as invalid function objects."
+    },
+    {
+      "id": "tests-unit-core-b-M01",
+      "area": "tests-unit-core-b",
+      "severity": "high",
+      "status": "missed",
+      "path": "src/core/pdfWriter.ts",
+      "target": "0.41.0",
+      "summary": "The writer encodes strings as UTF-8 where the format needs bytes, so non-ASCII literals are altered."
+    },
+    {
+      "id": "tests-unit-core-b-M02",
+      "area": "tests-unit-core-b",
+      "severity": "high",
+      "status": "missed",
+      "path": "src/core/pdfCatalog.ts",
+      "target": "0.41.0",
+      "summary": "Info text strings are written without PDF text-string encoding."
+    },
+    {
+      "id": "tests-unit-core-b-M03",
+      "area": "tests-unit-core-b",
+      "severity": "high",
+      "status": "missed",
+      "path": "src/parser/objectParser.ts",
+      "target": "0.41.0",
+      "summary": "Hex strings are written back with different bytes after a load and save."
+    },
+    {
+      "id": "tests-unit-crypto-02",
+      "area": "tests-unit-crypto",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "tests/unit/crypto/aes256.test.ts",
+      "target": "0.40.9",
+      "summary": "The Algorithm 2.B known-answer tests in tests/oracle/aes.test.ts are expected-fail markers against the library's algorithm2B until 0.40.9, and the unit tests check only output length and determinism."
+    },
+    {
+      "id": "tests-unit-crypto-23",
+      "area": "tests-unit-crypto",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "tests/unit/crypto/encryptionHandler.test.ts",
+      "target": "0.41.0",
+      "summary": "encryptString encodes hex and literal string values as UTF-8 text, altering their bytes."
+    },
+    {
+      "id": "tests-unit-crypto-M01",
+      "area": "tests-unit-crypto",
+      "severity": "high",
+      "status": "missed",
+      "path": "src/crypto/keyDerivation.ts",
+      "target": "0.40.9",
+      "summary": "Revision 6 key derivation truncates an intermediate value that ISO 32000-2 keeps in full."
+    },
+    {
+      "id": "tests-unit-crypto-M02",
+      "area": "tests-unit-crypto",
+      "severity": "high",
+      "status": "missed",
+      "path": "src/crypto/keyDerivation.ts",
+      "target": "0.40.9",
+      "summary": "Revision 6 key derivation stops one round off compared with ISO 32000-2."
+    },
+    {
+      "id": "tests-unit-crypto-M03",
+      "area": "tests-unit-crypto",
+      "severity": "high",
+      "status": "missed",
+      "path": "src/crypto/encryptionHandler.ts",
+      "target": "0.40.9",
+      "summary": "Per-object encryption keys are wrong in documents with more than 65,535 objects."
+    },
+    {
+      "id": "tests-unit-form-06",
+      "area": "tests-unit-form",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/form/fieldValidation.ts",
+      "target": "0.41.5",
+      "summary": "Regex validation scripts are read without unescaping, so correct values are rejected."
+    },
+    {
+      "id": "tests-unit-form-14",
+      "area": "tests-unit-form",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/core/pdfDocument.ts",
+      "target": "0.41.5",
+      "summary": "hasForm() and getForm() do not reflect the form of a loaded PDF."
+    },
+    {
+      "id": "tests-unit-form-M01",
+      "area": "tests-unit-form",
+      "severity": "high",
+      "status": "missed",
+      "path": "src/form/pdfForm.ts",
+      "target": "0.41.4",
+      "summary": "Fields created through getForm() are not saved and ignore their page argument."
+    },
+    {
+      "id": "tests-unit-form-M02",
+      "area": "tests-unit-form",
+      "severity": "high",
+      "status": "missed",
+      "path": "src/form/documentScripts.ts",
+      "target": "0.41.4",
+      "summary": "Document close, print and save actions are also registered as document-level scripts."
+    },
+    {
+      "id": "tests-unit-parser-a-21",
+      "area": "tests-unit-parser-a",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "tests/unit/parser/jbig2Decode.test.ts",
+      "target": "0.48.0",
+      "summary": "No test drives the arithmetic-coded JBIG2 paths that real PDFs use."
+    },
+    {
+      "id": "tests-unit-parser-a-28",
+      "area": "tests-unit-parser-a",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/parser/jbig2WasmBridge.ts",
+      "target": "0.47.0",
+      "summary": "The JBIG2 WASM bridge cannot instantiate its module."
+    },
+    {
+      "id": "tests-unit-parser-a-49",
+      "area": "tests-unit-parser-a",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/parser/jpeg2000Tiles.ts",
+      "target": "0.48.0",
+      "summary": "JPEG 2000 tile region decoding returns compressed bytes instead of pixels."
+    },
+    {
+      "id": "tests-unit-parser-a-M01",
+      "area": "tests-unit-parser-a",
+      "severity": "high",
+      "status": "missed",
+      "path": "src/parser/jbig2Decode.ts",
+      "target": "0.48.0",
+      "summary": "JBIG2 global data given as an indirect stream is ignored."
+    },
+    {
+      "id": "tests-unit-parser-a-M02",
+      "area": "tests-unit-parser-a",
+      "severity": "high",
+      "status": "missed",
+      "path": "src/parser/jpeg2000WasmBridge.ts",
+      "target": "0.40.7",
+      "summary": "The JPEG 2000 WASM bridge targets a crate that does not exist."
+    },
+    {
+      "id": "tests-unit-parser-a-M03",
+      "area": "tests-unit-parser-a",
+      "severity": "high",
+      "status": "missed",
+      "path": "src/assets/image/imageExtract.ts",
+      "target": "0.43.1",
+      "summary": "Image decoding drops /DecodeParms, so CCITT images decode with wrong parameters."
+    },
+    {
+      "id": "tests-unit-parser-b-04",
+      "area": "tests-unit-parser-b",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/parser/streamingParser.ts",
+      "target": "0.42.7",
+      "summary": "The streaming parser cannot find pages whose page tree lives in an object stream."
+    },
+    {
+      "id": "tests-unit-signature-a-03",
+      "area": "tests-unit-signature-a",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/signature/incrementalOptimizer.ts",
+      "target": "0.41.1",
+      "summary": "optimizeIncrementalSave damages bytes at or above 0x80 through a text round trip."
+    },
+    {
+      "id": "tests-unit-signature-b-17",
+      "area": "tests-unit-signature-b",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/signature/timestamp.ts",
+      "target": "0.45.0",
+      "summary": "Since 0.40.5, a timestamp token whose time cannot be read throws TimestampVerificationError instead of reporting the local clock (covered by the 0.40.5 security advisory on signature trust); full timestamp verification ships in 0.45.0."
+    },
+    {
+      "id": "tests-unit-small-03",
+      "area": "tests-unit-small",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/core/pdfDocument.ts",
+      "target": "0.41.7",
+      "summary": "CMYK JPEGs from Adobe software render inverted."
+    },
+    {
+      "id": "tests-unit-svg-M01",
+      "area": "tests-unit-svg",
+      "severity": "high",
+      "status": "missed",
+      "path": "src/assets/svg/svgToPdf.ts",
+      "target": "0.42.8",
+      "summary": "The SVG font-family sans-serif is mapped to a serif font."
+    },
+    {
+      "id": "tests-unit-svg-M02",
+      "area": "tests-unit-svg",
+      "severity": "high",
+      "status": "missed",
+      "path": "src/assets/svg/svgToPdf.ts",
+      "target": "0.42.8",
+      "summary": "SVG text glyphs render vertically mirrored."
+    },
+    {
+      "id": "tscbb-01",
+      "area": "tests-suites-compliance-barcode-browser",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "src/compliance/stripProhibited.ts",
+      "target": "0.41.1",
+      "summary": "stripProhibitedFeatures damages binary streams through a text round trip."
+    },
+    {
+      "id": "tscbb-23",
+      "area": "tests-suites-compliance-barcode-browser",
+      "severity": "high",
+      "status": "confirmed",
+      "path": "tests/compliance/associatedFiles.test.ts",
+      "target": "0.46.2",
+      "summary": "Associated-files tests cover no edge-case input such as invalid dates or non-ASCII names."
+    },
+    {
+      "id": "wasm-generated-M01",
+      "area": "wasm-generated",
+      "severity": "high",
+      "status": "missed",
+      "path": "src/wasm/inlineWasm.ts",
+      "target": "0.47.0",
+      "summary": "The inline WASM loaders are not reachable from the public entry."
+    },
+    {
+      "id": "wiki-09",
+      "area": "wiki",
+      "severity": "high",
+      "status": "unverified",
+      "path": "wiki:WASM-Acceleration.md",
+      "target": "0.40.7",
+      "summary": "The wiki says a failed WASM load never throws; initWasm rejects."
+    },
+    {
+      "id": "wiki-21",
+      "area": "wiki",
+      "severity": "high",
+      "status": "unverified",
+      "path": "wiki:Advanced-Features.md",
+      "target": "0.40.7",
+      "summary": "The wiki layers sample writes a layer marker that the page resources do not define."
+    },
+    {
+      "id": "wiki-26",
+      "area": "wiki",
+      "severity": "high",
+      "status": "unverified",
+      "path": "wiki:Annotations.md",
+      "target": "0.40.7",
+      "summary": "Wiki annotation samples that pass an annotation instance to addAnnotation throw."
+    },
+    {
+      "id": "wiki-27",
+      "area": "wiki",
+      "severity": "high",
+      "status": "unverified",
+      "path": "wiki:Annotations.md",
+      "target": "0.40.7",
+      "summary": "Wiki annotation samples use option names that do not exist."
+    },
+    {
+      "id": "wiki-28",
+      "area": "wiki",
+      "severity": "high",
+      "status": "unverified",
+      "path": "wiki:Annotations.md",
+      "target": "0.40.7",
+      "summary": "The wiki redaction sample calls a method that does not exist."
+    },
+    {
+      "id": "wiki-33",
+      "area": "wiki",
+      "severity": "high",
+      "status": "unverified",
+      "path": "wiki:Image-Optimization.md",
+      "target": "0.40.7",
+      "summary": "The wiki says maxDpi downscales images; the option is not read."
+    },
+    {
+      "id": "wiki-38",
+      "area": "wiki",
+      "severity": "high",
+      "status": "unverified",
+      "path": "wiki:Merge-and-Split.md",
+      "target": "0.40.7",
+      "summary": "The wiki says merged documents share one copy of identical resources; each copy operation deduplicates on its own."
+    },
+    {
+      "id": "wiki-44",
+      "area": "wiki",
+      "severity": "high",
+      "status": "unverified",
+      "path": "wiki:PDF-A-Compliance.md",
+      "target": "0.40.7",
+      "summary": "The wiki PDF/A example says XMP metadata and /ID are written automatically; they are not."
+    }
+  ],
+  "closed": [
+    {
+      "id": "annotation-04",
+      "fixedIn": "0.40.5"
+    },
+    {
+      "id": "api-surface-utils-M01",
+      "fixedIn": "0.40.4"
+    },
+    {
+      "id": "build-tooling-01",
+      "fixedIn": "0.40.4"
+    },
+    {
+      "id": "color-compression-02",
+      "fixedIn": "0.40.4"
+    },
+    {
+      "id": "compliance-73",
+      "fixedIn": "0.40.6"
+    },
+    {
+      "id": "core-document-07",
+      "fixedIn": "0.40.5"
+    },
+    {
+      "id": "core-page-07",
+      "fixedIn": "0.40.5"
+    },
+    {
+      "id": "docs-guide-1-01",
+      "fixedIn": "0.40.4"
+    },
+    {
+      "id": "docs-guide-1-02",
+      "fixedIn": "0.40.4"
+    },
+    {
+      "id": "docs-guide-1-31",
+      "fixedIn": "0.40.4"
+    },
+    {
+      "id": "docs-guide-1-43",
+      "fixedIn": "0.40.4"
+    },
+    {
+      "id": "docs-guide-1-57",
+      "fixedIn": "0.40.4"
+    },
+    {
+      "id": "docs-guide-1-63",
+      "fixedIn": "0.40.4"
+    },
+    {
+      "id": "docs-guide-1-70",
+      "fixedIn": "0.40.5"
+    },
+    {
+      "id": "docs-guide-1-71",
+      "fixedIn": "0.40.5"
+    },
+    {
+      "id": "docs-guide-1-80",
+      "fixedIn": "0.40.4"
+    },
+    {
+      "id": "docs-guide-1-81",
+      "fixedIn": "0.40.4"
+    },
+    {
+      "id": "docs-guide-2-01",
+      "fixedIn": "0.40.4"
+    },
+    {
+      "id": "docs-guide-2-48",
+      "fixedIn": "0.40.4"
+    },
+    {
+      "id": "docs-guide-2-60",
+      "fixedIn": "0.40.5"
+    },
+    {
+      "id": "docs-guide-3-01",
+      "fixedIn": "0.40.5"
+    },
+    {
+      "id": "docs-guide-3-02",
+      "fixedIn": "0.40.5"
+    },
+    {
+      "id": "docs-guide-3-13",
+      "fixedIn": "0.40.4"
+    },
+    {
+      "id": "docs-guide-3-19",
+      "fixedIn": "0.40.4"
+    },
+    {
+      "id": "docs-guide-3-28",
+      "fixedIn": "0.40.4"
+    },
+    {
+      "id": "docs-guide-3-42",
+      "fixedIn": "0.40.4"
+    },
+    {
+      "id": "docs-guide-3-55",
+      "fixedIn": "0.40.4"
+    },
+    {
+      "id": "docs-guide-3-63",
+      "fixedIn": "0.40.5"
+    },
+    {
+      "id": "docs-guide-3-64",
+      "fixedIn": "0.40.5"
+    },
+    {
+      "id": "docs-guide-3-65",
+      "fixedIn": "0.40.5"
+    },
+    {
+      "id": "docs-guide-3-M03",
+      "fixedIn": "0.40.4"
+    },
+    {
+      "id": "docs-root-github-02",
+      "fixedIn": "0.40.4"
+    },
+    {
+      "id": "docs-root-github-03",
+      "fixedIn": "0.40.4"
+    },
+    {
+      "id": "docs-root-github-06",
+      "fixedIn": "0.40.4"
+    },
+    {
+      "id": "docs-root-github-11",
+      "fixedIn": "0.40.5"
+    },
+    {
+      "id": "docs-root-github-13",
+      "fixedIn": "0.40.5"
+    },
+    {
+      "id": "docs-site-plans-02",
+      "fixedIn": "0.40.4"
+    },
+    {
+      "id": "docs-site-plans-M01",
+      "fixedIn": "0.40.4"
+    },
+    {
+      "id": "forms-60",
+      "fixedIn": "0.40.5"
+    },
+    {
+      "id": "forms-61",
+      "fixedIn": "0.40.5"
+    },
+    {
+      "id": "parser-codecs-14",
+      "fixedIn": "0.40.4"
+    },
+    {
+      "id": "parser-codecs-M03",
+      "fixedIn": "0.40.4"
+    },
+    {
+      "id": "parser-syntax-02",
+      "fixedIn": "0.40.4"
+    },
+    {
+      "id": "render-01",
+      "fixedIn": "0.40.5"
+    },
+    {
+      "id": "render-02",
+      "fixedIn": "0.40.5"
+    },
+    {
+      "id": "render-03",
+      "fixedIn": "0.40.5"
+    },
+    {
+      "id": "render-04",
+      "fixedIn": "0.40.5"
+    },
+    {
+      "id": "render-05",
+      "fixedIn": "0.40.5"
+    },
+    {
+      "id": "research-github-npm-surface-M01",
+      "fixedIn": "0.40.4"
+    },
+    {
+      "id": "research-github-npm-surface-M02",
+      "fixedIn": "0.40.4"
+    },
+    {
+      "id": "signature-cms-04",
+      "fixedIn": "0.40.5"
+    },
+    {
+      "id": "signature-cms-07",
+      "fixedIn": "0.40.5"
+    },
+    {
+      "id": "signature-pki-15",
+      "fixedIn": "0.40.5"
+    },
+    {
+      "id": "tests-integration-e2e-bench-fixtures-19",
+      "fixedIn": "0.40.6"
+    },
+    {
+      "id": "tests-integration-e2e-bench-fixtures-22",
+      "fixedIn": "0.40.6"
+    },
+    {
+      "id": "tests-unit-crypto-01",
+      "fixedIn": "0.40.6"
+    },
+    {
+      "id": "tests-unit-form-01",
+      "fixedIn": "0.40.5"
+    },
+    {
+      "id": "tests-unit-form-02",
+      "fixedIn": "0.40.5"
+    },
+    {
+      "id": "tests-unit-form-03",
+      "fixedIn": "0.40.5"
+    },
+    {
+      "id": "tests-unit-signature-b-10",
+      "fixedIn": "0.40.5"
+    },
+    {
+      "id": "tests-unit-signature-b-16",
+      "fixedIn": "0.40.5"
+    },
+    {
+      "id": "wiki-39",
+      "fixedIn": "0.40.5"
+    }
+  ]
+}
