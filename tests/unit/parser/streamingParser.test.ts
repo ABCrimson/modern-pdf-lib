@@ -329,6 +329,64 @@ describe('StreamingPdfParser', () => {
       const result = parser.end();
       expect(result.pageCount).toBe(3);
     });
+
+    it('gives identical results and events for 1-byte, 4 KiB and whole-file chunks', async () => {
+      const pdfStr = buildMinimalPdf({
+        pages: 40,
+        info: true,
+        contentStream: 'BT /F1 12 Tf (control) Tj ET\n'.repeat(200),
+      });
+      const data = toBytes(pdfStr);
+      expect(data.length).toBeGreaterThan(4096);
+
+      const run = async (size: number) => {
+        const parser = new StreamingPdfParser();
+        const events: StreamingParserEvent[] = [];
+        for (const type of ['header', 'xref', 'page', 'trailer', 'error'] as const) {
+          parser.on(type, (event) => events.push(event));
+        }
+        for (let at = 0; at < data.length; at += size) {
+          parser.feed(data.slice(at, at + size));
+        }
+        const result = parser.end();
+        const content = await parser.getPageContent(39);
+        return { result, events, content };
+      };
+
+      const whole = await run(data.length);
+      expect(whole.result.pageCount).toBe(40);
+      expect(whole.content.length).toBeGreaterThan(0);
+      for (const size of [1, 4096]) {
+        expect(await run(size)).toEqual(whole);
+      }
+    });
+
+    it('copies each chunk, so a caller that reuses its array changes nothing', () => {
+      const data = toBytes(buildMinimalPdf({ pages: 2 }));
+      const reused = new Uint8Array(64);
+      const parser = new StreamingPdfParser();
+      for (let at = 0; at < data.length; at += reused.length) {
+        const part = data.subarray(at, at + reused.length);
+        reused.fill(0x7a);
+        reused.set(part);
+        parser.feed(reused.subarray(0, part.length));
+      }
+      reused.fill(0x7a);
+      expect(parser.end().pageCount).toBe(2);
+    });
+
+    it('accepts input of exactly maxBufferSize and refuses one byte more', () => {
+      const parser = new StreamingPdfParser({ maxBufferSize: 100 });
+      parser.feed(new Uint8Array(60));
+      parser.feed(new Uint8Array(40));
+      expect(() => parser.feed(new Uint8Array(1))).toThrow(PdfParseError);
+    });
+
+    it('refuses a maxBufferSize that is not a number', () => {
+      expect(() => new StreamingPdfParser({ maxBufferSize: Number.NaN })).toThrow(
+        new RangeError('StreamingPdfParser: maxBufferSize must be a number'),
+      );
+    });
   });
 
   // -------------------------------------------------------------------------

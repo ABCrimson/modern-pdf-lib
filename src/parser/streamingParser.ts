@@ -1,17 +1,21 @@
 /**
  * @module parser/streamingParser
  *
- * Streaming / incremental PDF parser that processes PDF data without
- * loading the entire file into memory.
+ * Accepts a PDF in chunks, holds it in memory, and parses its structure
+ * when `end()` is called.
  *
- * Useful for multi-GB PDFs where loading everything into memory is
- * impractical. The parser operates in two phases:
+ * The parser keeps the whole input in one buffer until the instance is
+ * dropped: while chunks are fed the buffer's capacity is up to twice the
+ * bytes fed (never more than `maxBufferSize`), and `feed()` throws once
+ * the bytes fed would pass `maxBufferSize` (default 64 MB). Feeding costs
+ * time linear in the bytes fed whatever the chunk size. The parser
+ * operates in two phases:
  *
  * 1. **Structure phase** — reads the header, locates `startxref`,
  *    parses the cross-reference table/stream, and builds the page
- *    tree skeleton (offsets only, no content loaded).
+ *    tree skeleton (offsets only, no content parsed).
  *
- * 2. **Content phase** — individual page content is loaded on demand
+ * 2. **Content phase** — individual page content is returned on demand
  *    via {@link StreamingPdfParser.getPageContent}.
  *
  * Uses the Web Streams API (`ReadableStream`) for universal runtime
@@ -33,7 +37,12 @@ import { PdfParseError } from './parseError.js';
  * Options for the streaming PDF parser.
  */
 export interface StreamingParserOptions {
-  /** Maximum bytes to buffer at once. Default: 64 MB. */
+  /**
+   * Maximum bytes the parser holds, which is the whole input; `feed()` throws a
+   * `PdfParseError` for a chunk that would pass it. Default: 64 MB.
+   *
+   * @throws {RangeError} The constructor throws when this is `NaN`.
+   */
   maxBufferSize?: number;
   /** Whether to parse content streams. Default: false. */
   parseContentStreams?: boolean;
@@ -101,16 +110,6 @@ export type StreamingParserEvent =
 // ---------------------------------------------------------------------------
 
 const TEXT_DECODER = new TextDecoder('latin1');
-
-/**
- * Concatenate two Uint8Arrays into a new one.
- */
-function concat(a: Uint8Array, b: Uint8Array): Uint8Array {
-  const result = new Uint8Array(a.length + b.length);
-  result.set(a, 0);
-  result.set(b, a.length);
-  return result;
-}
 
 /**
  * Scan backwards from `startPos` for a byte sequence (encoded as ASCII).
@@ -487,11 +486,9 @@ function getDictNumberArray(dict: Map<string, LightValue>, key: string): number[
 type EventHandler = (event: StreamingParserEvent) => void;
 
 /**
- * A streaming PDF parser that processes PDF data incrementally without
- * loading the entire file into memory.
- *
- * Useful for multi-GB PDFs where loading everything into memory is
- * impractical.
+ * A PDF parser that accepts its input in chunks. It holds the whole input
+ * in memory (at most `maxBufferSize` bytes, default 64 MB) and parses it
+ * when `end()` is called.
  *
  * @example
  * ```ts
@@ -515,6 +512,7 @@ type EventHandler = (event: StreamingParserEvent) => void;
  */
 export class StreamingPdfParser {
   private readonly options: Required<StreamingParserOptions>;
+  /** Backing store of the fed bytes; the first `totalBytesRead` bytes are valid. */
   private buffer: Uint8Array = new Uint8Array(0);
   private totalBytesRead = 0;
   private readonly handlers = new Map<StreamingParserEvent['type'], EventHandler[]>();
@@ -536,9 +534,16 @@ export class StreamingPdfParser {
   // For getPageContent — stores the full data reference
   private fullData: Uint8Array | undefined;
 
+  /**
+   * @throws {RangeError} When `options.maxBufferSize` is `NaN`.
+   */
   constructor(options?: StreamingParserOptions) {
+    const maxBufferSize = options?.maxBufferSize ?? 64 * 1024 * 1024;
+    if (Number.isNaN(maxBufferSize)) {
+      throw new RangeError('StreamingPdfParser: maxBufferSize must be a number');
+    }
     this.options = {
-      maxBufferSize: options?.maxBufferSize ?? 64 * 1024 * 1024,
+      maxBufferSize,
       parseContentStreams: options?.parseContentStreams ?? false,
       pageRange: options?.pageRange ?? {},
     };
@@ -576,12 +581,18 @@ export class StreamingPdfParser {
   /**
    * Feed a chunk of data to the parser.
    *
-   * Chunks are buffered internally. The parser does not process data
-   * until {@link end} is called (the PDF structure requires knowing
-   * the full file to locate startxref).
+   * The chunk is copied into one growing buffer, so the caller may reuse its array. The buffer
+   * at least doubles when it is full, which keeps the total copying linear in the bytes fed
+   * whatever the chunk size; its capacity never passes `maxBufferSize`. The parser does not
+   * process data until {@link end} is called (the PDF structure requires knowing the full file to
+   * locate startxref).
+   *
+   * @throws {PdfParseError} When the bytes fed so far plus this chunk would pass
+   *   `maxBufferSize`; the chunk is not buffered.
    */
   feed(chunk: Uint8Array): void {
-    if (this.buffer.length + chunk.length > this.options.maxBufferSize) {
+    const needed = this.totalBytesRead + chunk.length;
+    if (needed > this.options.maxBufferSize) {
       this.emit({
         type: 'error',
         message: `Buffer size would exceed maximum of ${this.options.maxBufferSize} bytes`,
@@ -591,12 +602,19 @@ export class StreamingPdfParser {
         message: `Streaming parser buffer exceeded maximum size of ${this.options.maxBufferSize} bytes`,
         offset: this.totalBytesRead,
         expected: `data within ${this.options.maxBufferSize} bytes`,
-        actual: `${this.buffer.length + chunk.length} bytes`,
+        actual: `${needed} bytes`,
       });
     }
 
-    this.buffer = concat(this.buffer, chunk);
-    this.totalBytesRead += chunk.length;
+    if (needed > this.buffer.length) {
+      const doubled = Math.min(this.options.maxBufferSize, this.buffer.length * 2);
+      const capacity = doubled >= needed ? doubled : needed;
+      const grown = new Uint8Array(capacity);
+      grown.set(this.buffer.subarray(0, this.totalBytesRead), 0);
+      this.buffer = grown;
+    }
+    this.buffer.set(chunk, this.totalBytesRead);
+    this.totalBytesRead = needed;
 
     this.emit({
       type: 'progress',
@@ -612,7 +630,7 @@ export class StreamingPdfParser {
    * @throws  If the PDF is malformed or cannot be parsed.
    */
   end(): StreamingParseResult {
-    const data = this.buffer;
+    const data = this.buffer.subarray(0, this.totalBytesRead);
     this.fullData = data;
 
     if (data.length < 8) {
