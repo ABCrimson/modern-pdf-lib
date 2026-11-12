@@ -1,0 +1,847 @@
+[
+  {
+    "id": "irs-fw4",
+    "file": "irs-fw4.pdf",
+    "sha256": "92444d8856ce55d9e25dca8b6d1420634fc68b11e1ab1f760916ea29ddd312b2",
+    "bytes": 208845,
+    "source": {
+      "project": "IRS",
+      "url": "https://www.irs.gov/pub/irs-prior/fw4--2026.pdf",
+      "retrieved": "2026-11-11"
+    },
+    "licence": "US-PD",
+    "attribution": "U.S. Internal Revenue Service, Form W-4 (2026); a work of the U.S. federal government (17 U.S.C. 105), unmodified",
+    "contactData": "institutional",
+    "contactDataReason": "the Social Security Administration's public telephone line (800-772-1213), printed in the form instructions",
+    "pdfVersion": "1.7",
+    "producer": "Designer 6.5",
+    "features": [
+      "xref-stream",
+      "object-streams",
+      "linearized",
+      "incremental",
+      "acroform",
+      "tagged",
+      "cid-font"
+    ],
+    "category": "real",
+    "password": null,
+    "oracle": {
+      "qpdfCheck": 0,
+      "pages": 5,
+      "pdfjsChars": 25260,
+      "textSample": "Withholding Certificate"
+    }
+  },
+  {
+    "id": "irs-fw9",
+    "file": "irs-fw9.pdf",
+    "sha256": "2d420cbb4123dcf1fb82595b2359cfbb5d81f00b9df9d359fcc7af361d093f53",
+    "bytes": 140815,
+    "source": {
+      "project": "IRS",
+      "url": "https://www.irs.gov/pub/irs-prior/fw9--2024.pdf",
+      "retrieved": "2026-11-11"
+    },
+    "licence": "US-PD",
+    "attribution": "U.S. Internal Revenue Service, Form W-9 (Rev. March 2024); a work of the U.S. federal government (17 U.S.C. 105), unmodified",
+    "contactData": "institutional",
+    "contactDataReason": "IRS and FTC role mailboxes for reporting phishing and spam, and the public telephone lines of the SSA (800-772-1213), the IRS Identity Theft Hotline (800-908-4490), the Taxpayer Advocate Service (877-777-4778, TTY/TDD 800-829-4059), TIGTA (800-366-4484) and the FTC (877-438-4338), printed in the form instructions",
+    "pdfVersion": "1.7",
+    "producer": "Designer 6.5",
+    "features": [
+      "xref-stream",
+      "object-streams",
+      "linearized",
+      "incremental",
+      "acroform",
+      "tagged"
+    ],
+    "category": "real",
+    "password": null,
+    "oracle": {
+      "qpdfCheck": 0,
+      "pages": 6,
+      "pdfjsChars": 37000,
+      "textSample": "Request for Taxpayer Identification Number"
+    }
+  },
+  {
+    "id": "irs-p1-chinese",
+    "file": "irs-p1-chinese.pdf",
+    "sha256": "ddc9463616f224865e2dd60637fd03869572a4f04d7ac55f7fa863cef9da446e",
+    "bytes": 164978,
+    "source": {
+      "project": "IRS",
+      "url": "https://www.irs.gov/pub/irs-pdf/p1zhs.pdf",
+      "retrieved": "2026-11-11",
+      "fetchStable": false
+    },
+    "licence": "US-PD",
+    "attribution": "U.S. Internal Revenue Service, Publication 1 (Simplified Chinese), Your Rights as a Taxpayer; a work of the U.S. federal government (17 U.S.C. 105), unmodified",
+    "contactData": "institutional",
+    "contactDataReason": "the public telephone lines of the IRS (1-800-829-1040, 1-800-829-3676, TTY/TDD 1-800-829-4059), the Taxpayer Advocate Service (1-877-777-4778), TIGTA (1-800-366-4484) and the federal relay service (1-800-877-8339), printed in the publication",
+    "pdfVersion": "1.6",
+    "producer": "Adobe PDF Library 15.0",
+    "features": ["xref-stream", "object-streams", "linearized", "tagged", "cid-font", "cjk"],
+    "category": "real",
+    "password": null,
+    "oracle": {
+      "qpdfCheck": 3,
+      "pages": 2,
+      "pdfjsChars": 4065,
+      "textSample": "纳税人权利法案"
+    }
+  },
+  {
+    "id": "pdfjs-ccitt",
+    "file": "pdfjs-ccitt.pdf",
+    "sha256": "8b262e6df39f1d66151830911b1371ccdb98cedc53b50589a209143293c98221",
+    "bytes": 38113,
+    "source": {
+      "project": "pdf.js",
+      "url": "https://raw.githubusercontent.com/mozilla/pdf.js/421ff37ca8672bb53f7572461012afbd0f47b7e8/test/pdfs/perf_codecs_ccitt.pdf",
+      "retrieved": "2026-11-11"
+    },
+    "licence": "Apache-2.0",
+    "attribution": "pdf.js test suite (github.com/mozilla/pdf.js), Apache-2.0, unmodified",
+    "contactData": "none",
+    "pdfVersion": "1.7",
+    "producer": null,
+    "features": ["classic-xref", "ccitt"],
+    "category": "real",
+    "password": null,
+    "oracle": {
+      "qpdfCheck": 0,
+      "pages": 1,
+      "pdfjsChars": 0
+    }
+  },
+  {
+    "id": "pdfjs-cid-truetype",
+    "file": "pdfjs-cid-truetype.pdf",
+    "sha256": "3cde3809d45249e086b2ad4b7efd950c9e59658024b7d0d68df2d8b0f413340f",
+    "bytes": 192207,
+    "source": {
+      "project": "pdf.js",
+      "url": "https://raw.githubusercontent.com/mozilla/pdf.js/421ff37ca8672bb53f7572461012afbd0f47b7e8/test/pdfs/perf_text_cid_truetype.pdf",
+      "retrieved": "2026-11-11"
+    },
+    "licence": "Apache-2.0",
+    "attribution": "pdf.js test suite (github.com/mozilla/pdf.js), Apache-2.0, unmodified",
+    "contactData": "none",
+    "pdfVersion": "1.7",
+    "producer": null,
+    "features": ["classic-xref", "cid-font"],
+    "category": "real",
+    "password": null,
+    "oracle": {
+      "qpdfCheck": 0,
+      "pages": 1,
+      "pdfjsChars": 9666,
+      "textSample": "alneunsu bervinequa"
+    }
+  },
+  {
+    "id": "pdfjs-cjk-nonembedded",
+    "file": "pdfjs-cjk-nonembedded.pdf",
+    "sha256": "347456be3aceb9131bceaec25ef8eef9565c32335bdc1f50f22d53b9aeaa2775",
+    "bytes": 7521,
+    "source": {
+      "project": "pdf.js",
+      "url": "https://raw.githubusercontent.com/mozilla/pdf.js/421ff37ca8672bb53f7572461012afbd0f47b7e8/test/pdfs/perf_text_cjk_nonembedded.pdf",
+      "retrieved": "2026-11-11"
+    },
+    "licence": "Apache-2.0",
+    "attribution": "pdf.js test suite (github.com/mozilla/pdf.js), Apache-2.0, unmodified",
+    "contactData": "none",
+    "pdfVersion": "1.7",
+    "producer": null,
+    "features": ["classic-xref", "cid-font", "cjk"],
+    "category": "real",
+    "password": null,
+    "oracle": {
+      "qpdfCheck": 0,
+      "pages": 1,
+      "pdfjsChars": 2912
+    }
+  },
+  {
+    "id": "pdfjs-cmap-mixed",
+    "file": "pdfjs-cmap-mixed.pdf",
+    "sha256": "1802c3dbd062817a17f57a2e2c192a083c01675c5b969f9529b46b4ff57697e3",
+    "bytes": 189345,
+    "source": {
+      "project": "pdf.js",
+      "url": "https://raw.githubusercontent.com/mozilla/pdf.js/421ff37ca8672bb53f7572461012afbd0f47b7e8/test/pdfs/perf_text_cmap_mixed.pdf",
+      "retrieved": "2026-11-11"
+    },
+    "licence": "Apache-2.0",
+    "attribution": "pdf.js test suite (github.com/mozilla/pdf.js), Apache-2.0, unmodified",
+    "contactData": "none",
+    "pdfVersion": "1.7",
+    "producer": null,
+    "features": ["classic-xref", "cid-font"],
+    "category": "real",
+    "password": null,
+    "oracle": {
+      "qpdfCheck": 0,
+      "pages": 1,
+      "pdfjsChars": 8506,
+      "textSample": "tor tolona"
+    }
+  },
+  {
+    "id": "pdfjs-jbig2",
+    "file": "pdfjs-jbig2.pdf",
+    "sha256": "c7cdfb036282939f6a5461d67c34c895910856266c598f118cc41c9b7ca1d82e",
+    "bytes": 9909,
+    "source": {
+      "project": "pdf.js",
+      "url": "https://raw.githubusercontent.com/mozilla/pdf.js/421ff37ca8672bb53f7572461012afbd0f47b7e8/test/pdfs/perf_codecs_jbig2.pdf",
+      "retrieved": "2026-11-11"
+    },
+    "licence": "Apache-2.0",
+    "attribution": "pdf.js test suite (github.com/mozilla/pdf.js), Apache-2.0, unmodified",
+    "contactData": "none",
+    "pdfVersion": "1.7",
+    "producer": null,
+    "features": ["classic-xref", "jbig2"],
+    "category": "real",
+    "password": null,
+    "oracle": {
+      "qpdfCheck": 0,
+      "pages": 1,
+      "pdfjsChars": 0
+    }
+  },
+  {
+    "id": "pdfjs-jpx-subsampling",
+    "file": "pdfjs-jpx-subsampling.pdf",
+    "sha256": "01f92ae453f8f6d2e8c61574054c1ca3160e3481a3f9c8cc365aa1ff7cd3e1f3",
+    "bytes": 5146,
+    "source": {
+      "project": "pdf.js",
+      "url": "https://raw.githubusercontent.com/mozilla/pdf.js/421ff37ca8672bb53f7572461012afbd0f47b7e8/test/pdfs/jpx_subsampling.pdf",
+      "retrieved": "2026-11-11"
+    },
+    "licence": "Apache-2.0",
+    "attribution": "pdf.js test suite (github.com/mozilla/pdf.js), Apache-2.0, unmodified",
+    "contactData": "none",
+    "pdfVersion": "1.5",
+    "producer": null,
+    "features": ["classic-xref", "jpx"],
+    "category": "real",
+    "password": null,
+    "oracle": {
+      "qpdfCheck": 0,
+      "pages": 1,
+      "pdfjsChars": 0
+    }
+  },
+  {
+    "id": "pdfjs-structure-forms",
+    "file": "pdfjs-structure-forms.pdf",
+    "sha256": "ca5755a52655abc11fbcc8c18bab9cbaea68f285fb9364145700565969b94bd2",
+    "bytes": 103794,
+    "source": {
+      "project": "pdf.js",
+      "url": "https://raw.githubusercontent.com/mozilla/pdf.js/421ff37ca8672bb53f7572461012afbd0f47b7e8/test/pdfs/perf_structure_forms.pdf",
+      "retrieved": "2026-11-11"
+    },
+    "licence": "Apache-2.0",
+    "attribution": "pdf.js test suite (github.com/mozilla/pdf.js), Apache-2.0, unmodified",
+    "contactData": "none",
+    "pdfVersion": "1.7",
+    "producer": null,
+    "features": ["classic-xref"],
+    "category": "real",
+    "password": null,
+    "oracle": {
+      "qpdfCheck": 0,
+      "pages": 1,
+      "pdfjsChars": 2780
+    }
+  },
+  {
+    "id": "pyhanko-aes256",
+    "file": "pyhanko-aes256.pdf",
+    "sha256": "eda8c19fae7b63e715f0936d0359b698bc81ab69107e159507842f08dce8b69a",
+    "bytes": 1403,
+    "source": {
+      "project": "pyHanko",
+      "url": "https://raw.githubusercontent.com/MatthiasValvekens/pyHanko/0b27455d49ecde3d2853f598558f76d1af38cbf1/internal/common-test-utils/src/pyhanko_testing_commons/test_data/data/pdf/minimal-aes256.pdf",
+      "retrieved": "2026-11-11"
+    },
+    "licence": "MIT",
+    "attribution": "pyHanko test suite (github.com/MatthiasValvekens/pyHanko), Copyright (c) 2020-2026 Matthias Valvekens, MIT, unmodified",
+    "contactData": "none",
+    "pdfVersion": "2.0",
+    "producer": "pyhanko",
+    "features": ["xref-stream", "encrypted-r6"],
+    "category": "real",
+    "password": "usersecret",
+    "oracle": {
+      "qpdfCheck": 0,
+      "pages": 1,
+      "pdfjsChars": 11,
+      "textSample": "Hello World"
+    }
+  },
+  {
+    "id": "pyhanko-hybrid-msword",
+    "file": "pyhanko-hybrid-msword.pdf",
+    "sha256": "29dd43dae03397973f9c17c7a19338b683d85552bac0ec54a64b4e9909d9156d",
+    "bytes": 970,
+    "source": {
+      "project": "pyHanko",
+      "url": "https://raw.githubusercontent.com/MatthiasValvekens/pyHanko/0b27455d49ecde3d2853f598558f76d1af38cbf1/internal/common-test-utils/src/pyhanko_testing_commons/test_data/data/pdf/minimal-hybrid-xref-mswordstyle.pdf",
+      "retrieved": "2026-11-11"
+    },
+    "licence": "MIT",
+    "attribution": "pyHanko test suite (github.com/MatthiasValvekens/pyHanko), Copyright (c) 2020-2026 Matthias Valvekens, MIT, unmodified",
+    "contactData": "none",
+    "pdfVersion": "1.7",
+    "producer": null,
+    "features": ["xref-stream", "hybrid-xref", "incremental"],
+    "category": "real",
+    "password": null,
+    "oracle": {
+      "qpdfCheck": 0,
+      "pages": 1,
+      "pdfjsChars": 11,
+      "textSample": "Hello World"
+    }
+  },
+  {
+    "id": "pyhanko-rc4",
+    "file": "pyhanko-rc4.pdf",
+    "sha256": "36b8102cae82fb5edc9425361f1a8ab4b81791cb6606068cc106c4d871351136",
+    "bytes": 904,
+    "source": {
+      "project": "pyHanko",
+      "url": "https://raw.githubusercontent.com/MatthiasValvekens/pyHanko/0b27455d49ecde3d2853f598558f76d1af38cbf1/internal/common-test-utils/src/pyhanko_testing_commons/test_data/data/pdf/minimal-rc4.pdf",
+      "retrieved": "2026-11-11"
+    },
+    "licence": "MIT",
+    "attribution": "pyHanko test suite (github.com/MatthiasValvekens/pyHanko), Copyright (c) 2020-2026 Matthias Valvekens, MIT, unmodified",
+    "contactData": "none",
+    "pdfVersion": "1.7",
+    "producer": null,
+    "features": ["classic-xref", "encrypted-r3-rc4"],
+    "category": "real",
+    "password": "usersecret",
+    "oracle": {
+      "qpdfCheck": 0,
+      "pages": 1,
+      "pdfjsChars": 11,
+      "textSample": "Hello World"
+    }
+  },
+  {
+    "id": "pyhanko-signed-twice",
+    "file": "pyhanko-signed-twice.pdf",
+    "sha256": "1c0810f8ff4623120f276488b9ddfb01f1c6f56344df7646317d6799df7ba408",
+    "bytes": 20792,
+    "source": {
+      "project": "pyHanko",
+      "url": "https://raw.githubusercontent.com/MatthiasValvekens/pyHanko/0b27455d49ecde3d2853f598558f76d1af38cbf1/internal/common-test-utils/src/pyhanko_testing_commons/test_data/data/pdf/minimal-signed-twice-no-sig-type.pdf",
+      "retrieved": "2026-11-11"
+    },
+    "licence": "MIT",
+    "attribution": "pyHanko test suite (github.com/MatthiasValvekens/pyHanko), Copyright (c) 2020-2026 Matthias Valvekens, MIT, unmodified",
+    "contactData": "institutional",
+    "contactDataReason": "a placeholder identity: the e-mail address alice@example.com in the subject of pyHanko's test signing certificate (signature /Contents)",
+    "pdfVersion": "2.0",
+    "producer": null,
+    "features": ["classic-xref", "incremental", "acroform", "signature"],
+    "category": "real",
+    "password": null,
+    "oracle": {
+      "qpdfCheck": 0,
+      "pages": 1,
+      "pdfjsChars": 11,
+      "textSample": "Hello World"
+    }
+  },
+  {
+    "id": "pyhanko-ua-and-a",
+    "file": "pyhanko-ua-and-a.pdf",
+    "sha256": "eb92b44f14101a98169418c56f84cf99a2092fe3692424b4f9fccd9bc9918719",
+    "bytes": 30381,
+    "source": {
+      "project": "pyHanko",
+      "url": "https://raw.githubusercontent.com/MatthiasValvekens/pyHanko/0b27455d49ecde3d2853f598558f76d1af38cbf1/internal/common-test-utils/src/pyhanko_testing_commons/test_data/data/pdf/minimal-pdf-ua-and-a.pdf",
+      "retrieved": "2026-11-11"
+    },
+    "licence": "MIT",
+    "attribution": "pyHanko test suite (github.com/MatthiasValvekens/pyHanko), Copyright (c) 2020-2026 Matthias Valvekens, MIT, unmodified",
+    "contactData": "none",
+    "pdfVersion": "1.6",
+    "producer": "LibreOffice 7.3",
+    "features": ["classic-xref", "tagged"],
+    "category": "real",
+    "password": null,
+    "oracle": {
+      "qpdfCheck": 0,
+      "pages": 1,
+      "pdfjsChars": 31,
+      "textSample": "This is a document."
+    }
+  },
+  {
+    "id": "qpdf-bad-xref",
+    "file": "qpdf-bad-xref.pdf",
+    "sha256": "5895dfedf978f600b12e29643617dbb111869b60526d957878e349571e1467d1",
+    "bytes": 819,
+    "source": {
+      "project": "qpdf",
+      "url": "https://raw.githubusercontent.com/qpdf/qpdf/4eba95899886e851cc41d76886483b347612f2a8/qpdf/qtest/qpdf/bad-xref.pdf",
+      "retrieved": "2026-11-11"
+    },
+    "licence": "Apache-2.0",
+    "attribution": "qpdf test suite (github.com/qpdf/qpdf), Copyright Jay Berkenbilt and Manfred Holger, Apache-2.0, unmodified",
+    "contactData": "none",
+    "pdfVersion": "1.3",
+    "producer": null,
+    "features": ["classic-xref"],
+    "category": "damaged",
+    "password": null,
+    "oracle": {
+      "qpdfCheck": 3,
+      "pages": 1,
+      "pdfjsChars": 6,
+      "textSample": "Potato"
+    }
+  },
+  {
+    "id": "qpdf-damaged-stream",
+    "file": "qpdf-damaged-stream.pdf",
+    "sha256": "91e119f2db2e9f738f696ddacea90498d460b0afda0fcdf71bb6281fc5085819",
+    "bytes": 77635,
+    "source": {
+      "project": "qpdf",
+      "url": "https://raw.githubusercontent.com/qpdf/qpdf/4eba95899886e851cc41d76886483b347612f2a8/qpdf/qtest/qpdf/damaged-stream.pdf",
+      "retrieved": "2026-11-11"
+    },
+    "licence": "Apache-2.0",
+    "attribution": "qpdf test suite (github.com/qpdf/qpdf), Copyright Jay Berkenbilt and Manfred Holger, Apache-2.0, unmodified",
+    "contactData": "none",
+    "pdfVersion": "1.3",
+    "producer": null,
+    "features": ["classic-xref"],
+    "category": "damaged",
+    "password": null,
+    "oracle": {
+      "qpdfCheck": 3,
+      "pages": 1,
+      "pdfjsChars": 6,
+      "textSample": "Potato"
+    }
+  },
+  {
+    "id": "qpdf-form-acrobat",
+    "file": "qpdf-form-acrobat.pdf",
+    "sha256": "465e30fe69d3b53d883ea1f01ea56a225ff0498f231ecda6f6fc986b9c5676ff",
+    "bytes": 61841,
+    "source": {
+      "project": "qpdf",
+      "url": "https://raw.githubusercontent.com/qpdf/qpdf/4eba95899886e851cc41d76886483b347612f2a8/qpdf/qtest/qpdf/form-filled-by-acrobat.pdf",
+      "retrieved": "2026-11-11"
+    },
+    "licence": "Apache-2.0",
+    "attribution": "qpdf test suite (github.com/qpdf/qpdf), Copyright Jay Berkenbilt and Manfred Holger, Apache-2.0, unmodified",
+    "contactData": "none",
+    "pdfVersion": "1.4",
+    "producer": "LibreOffice 6.0",
+    "features": ["classic-xref", "incremental", "acroform"],
+    "category": "damaged",
+    "password": null,
+    "oracle": {
+      "qpdfCheck": 3,
+      "pages": 3,
+      "pdfjsChars": 351,
+      "textSample": "Other stuff"
+    }
+  },
+  {
+    "id": "qpdf-form-odt",
+    "file": "qpdf-form-odt.pdf",
+    "sha256": "599304a4c47fa25155fc732cb9bffe2882ea39894e14f812905c4ec2f5826c14",
+    "bytes": 54848,
+    "source": {
+      "project": "qpdf",
+      "url": "https://raw.githubusercontent.com/qpdf/qpdf/4eba95899886e851cc41d76886483b347612f2a8/qpdf/qtest/qpdf/form-empty-from-odt.pdf",
+      "retrieved": "2026-11-11"
+    },
+    "licence": "Apache-2.0",
+    "attribution": "qpdf test suite (github.com/qpdf/qpdf), Copyright Jay Berkenbilt and Manfred Holger, Apache-2.0, unmodified",
+    "contactData": "none",
+    "pdfVersion": "1.4",
+    "producer": "LibreOffice 6.0",
+    "features": ["classic-xref", "acroform"],
+    "category": "real",
+    "password": null,
+    "oracle": {
+      "qpdfCheck": 0,
+      "pages": 3,
+      "pdfjsChars": 351,
+      "textSample": "Other stuff"
+    }
+  },
+  {
+    "id": "qpdf-hybrid-xref",
+    "file": "qpdf-hybrid-xref.pdf",
+    "sha256": "df1ae8b9cb2378aaeda6fdc11146dd37328737fd050941390d2c6bd188eea0e4",
+    "bytes": 16902,
+    "source": {
+      "project": "qpdf",
+      "url": "https://raw.githubusercontent.com/qpdf/qpdf/4eba95899886e851cc41d76886483b347612f2a8/qpdf/qtest/qpdf/hybrid-xref.pdf",
+      "retrieved": "2026-11-11"
+    },
+    "licence": "Apache-2.0",
+    "attribution": "qpdf test suite (github.com/qpdf/qpdf), Copyright Jay Berkenbilt and Manfred Holger, Apache-2.0, unmodified",
+    "contactData": "institutional",
+    "contactDataReason": "no contact data: the IPv4 pattern matches the section numbers 1.1.1.1, 1.1.1.2 and 1.1.2.1 in the titles of qpdf's made-up test outline",
+    "pdfVersion": "1.5",
+    "producer": null,
+    "features": ["xref-stream", "object-streams", "hybrid-xref", "incremental"],
+    "category": "real",
+    "password": null,
+    "oracle": {
+      "qpdfCheck": 0,
+      "pages": 30,
+      "pdfjsChars": 260,
+      "textSample": "Potato"
+    }
+  },
+  {
+    "id": "qpdf-incremental",
+    "file": "qpdf-incremental.pdf",
+    "sha256": "f40a2393e3272a2e037af195570f2339561e1285038cdb501d6881b75c6c7291",
+    "bytes": 944,
+    "source": {
+      "project": "qpdf",
+      "url": "https://raw.githubusercontent.com/qpdf/qpdf/4eba95899886e851cc41d76886483b347612f2a8/qpdf/qtest/qpdf/incremental-3.pdf",
+      "retrieved": "2026-11-11"
+    },
+    "licence": "Apache-2.0",
+    "attribution": "qpdf test suite (github.com/qpdf/qpdf), Copyright Jay Berkenbilt and Manfred Holger, Apache-2.0, unmodified",
+    "contactData": "none",
+    "pdfVersion": "1.3",
+    "producer": null,
+    "features": ["classic-xref", "incremental"],
+    "category": "real",
+    "password": null,
+    "oracle": {
+      "qpdfCheck": 0,
+      "pages": 1,
+      "pdfjsChars": 0
+    }
+  },
+  {
+    "id": "qpdf-labels-damaged",
+    "file": "qpdf-labels-damaged.pdf",
+    "sha256": "627289eb59d519c9774df220dc011f674c6cf7a57472d161b87f6d27bc9ded55",
+    "bytes": 14092,
+    "source": {
+      "project": "qpdf",
+      "url": "https://raw.githubusercontent.com/qpdf/qpdf/4eba95899886e851cc41d76886483b347612f2a8/qpdf/qtest/qpdf/page-labels-num-tree-damaged.pdf",
+      "retrieved": "2026-11-11"
+    },
+    "licence": "Apache-2.0",
+    "attribution": "qpdf test suite (github.com/qpdf/qpdf), Copyright Jay Berkenbilt and Manfred Holger, Apache-2.0, unmodified",
+    "contactData": "none",
+    "pdfVersion": "1.3",
+    "producer": null,
+    "features": ["classic-xref"],
+    "category": "damaged",
+    "password": null,
+    "oracle": {
+      "qpdfCheck": 3,
+      "pages": 30,
+      "pdfjsChars": 260,
+      "textSample": "Potato"
+    }
+  },
+  {
+    "id": "qpdf-linearized",
+    "file": "qpdf-linearized.pdf",
+    "sha256": "135cee6bd018c06d40c8c46c4a0230b2799adb90f502e214a347b3855039a24e",
+    "bytes": 11325,
+    "source": {
+      "project": "qpdf",
+      "url": "https://raw.githubusercontent.com/qpdf/qpdf/4eba95899886e851cc41d76886483b347612f2a8/qpdf/qtest/qpdf/c-linearized.pdf",
+      "retrieved": "2026-11-11"
+    },
+    "licence": "Apache-2.0",
+    "attribution": "qpdf test suite (github.com/qpdf/qpdf), Copyright Jay Berkenbilt and Manfred Holger, Apache-2.0, unmodified",
+    "contactData": "institutional",
+    "contactDataReason": "no contact data: the IPv4 pattern matches the section numbers 1.1.1.1, 1.1.1.2 and 1.1.2.1 in the titles of qpdf's made-up test outline",
+    "pdfVersion": "1.5",
+    "producer": null,
+    "features": ["xref-stream", "object-streams", "linearized"],
+    "category": "real",
+    "password": null,
+    "oracle": {
+      "qpdfCheck": 0,
+      "pages": 30,
+      "pdfjsChars": 260,
+      "textSample": "Potato"
+    }
+  },
+  {
+    "id": "qpdf-objstm-xref",
+    "file": "qpdf-objstm-xref.pdf",
+    "sha256": "7aa4aea24328616ce247cc4132efa3b8f53d2844179d17b51383f8771d2de358",
+    "bytes": 743,
+    "source": {
+      "project": "qpdf",
+      "url": "https://raw.githubusercontent.com/qpdf/qpdf/4eba95899886e851cc41d76886483b347612f2a8/qpdf/qtest/qpdf/compress-objstm-xref.pdf",
+      "retrieved": "2026-11-11"
+    },
+    "licence": "Apache-2.0",
+    "attribution": "qpdf test suite (github.com/qpdf/qpdf), Copyright Jay Berkenbilt and Manfred Holger, Apache-2.0, unmodified",
+    "contactData": "none",
+    "pdfVersion": "1.5",
+    "producer": null,
+    "features": ["xref-stream", "object-streams"],
+    "category": "real",
+    "password": null,
+    "oracle": {
+      "qpdfCheck": 0,
+      "pages": 1,
+      "pdfjsChars": 6,
+      "textSample": "Potato"
+    }
+  },
+  {
+    "id": "qpdf-r3-rc4",
+    "file": "qpdf-r3-rc4.pdf",
+    "sha256": "5c0683d687e2e020fe172b1dcb7c29fe94f67bc40f038fee2391de610053fc16",
+    "bytes": 17139,
+    "source": {
+      "project": "qpdf",
+      "url": "https://raw.githubusercontent.com/qpdf/qpdf/4eba95899886e851cc41d76886483b347612f2a8/qpdf/qtest/qpdf/enc-R3,V2,U=view,O=master.pdf",
+      "retrieved": "2026-11-11"
+    },
+    "licence": "Apache-2.0",
+    "attribution": "qpdf test suite (github.com/qpdf/qpdf), Copyright Jay Berkenbilt and Manfred Holger, Apache-2.0, unmodified",
+    "contactData": "institutional",
+    "contactDataReason": "no contact data: the IPv4 pattern matches the section numbers 1.1.1.1, 1.1.1.2 and 1.1.2.1 in the titles of qpdf's made-up test outline",
+    "pdfVersion": "1.4",
+    "producer": null,
+    "features": ["classic-xref", "linearized", "encrypted-r3-rc4"],
+    "category": "real",
+    "password": "view",
+    "oracle": {
+      "qpdfCheck": 3,
+      "pages": 30,
+      "pdfjsChars": 260,
+      "textSample": "Potato"
+    }
+  },
+  {
+    "id": "qpdf-r4-aes",
+    "file": "qpdf-r4-aes.pdf",
+    "sha256": "1d8a812844b8d8c7ba085a627eb3b7ab52aa651c6143ca07315084220a113240",
+    "bytes": 16474,
+    "source": {
+      "project": "qpdf",
+      "url": "https://raw.githubusercontent.com/qpdf/qpdf/4eba95899886e851cc41d76886483b347612f2a8/qpdf/qtest/qpdf/V4-aes.pdf",
+      "retrieved": "2026-11-11"
+    },
+    "licence": "Apache-2.0",
+    "attribution": "qpdf test suite (github.com/qpdf/qpdf), Copyright Jay Berkenbilt and Manfred Holger, Apache-2.0, unmodified",
+    "contactData": "institutional",
+    "contactDataReason": "no contact data: the IPv4 pattern matches the section numbers 1.1.1.1, 1.1.1.2 and 1.1.2.1 in the titles of qpdf's made-up test outline",
+    "pdfVersion": "1.6",
+    "producer": null,
+    "features": ["classic-xref", "encrypted-r4-aes128"],
+    "category": "real",
+    "password": null,
+    "oracle": {
+      "qpdfCheck": 0,
+      "pages": 30,
+      "pdfjsChars": 260,
+      "textSample": "Potato"
+    }
+  },
+  {
+    "id": "qpdf-r4-rc4",
+    "file": "qpdf-r4-rc4.pdf",
+    "sha256": "d82598d67a99b412c19f3a841a23b69bb74c4e4db716ed21f4f61b90ee7d05e7",
+    "bytes": 14781,
+    "source": {
+      "project": "qpdf",
+      "url": "https://raw.githubusercontent.com/qpdf/qpdf/4eba95899886e851cc41d76886483b347612f2a8/qpdf/qtest/qpdf/V4.pdf",
+      "retrieved": "2026-11-11"
+    },
+    "licence": "Apache-2.0",
+    "attribution": "qpdf test suite (github.com/qpdf/qpdf), Copyright Jay Berkenbilt and Manfred Holger, Apache-2.0, unmodified",
+    "contactData": "institutional",
+    "contactDataReason": "no contact data: the IPv4 pattern matches the section numbers 1.1.1.1, 1.1.1.2 and 1.1.2.1 in the titles of qpdf's made-up test outline",
+    "pdfVersion": "1.5",
+    "producer": null,
+    "features": ["classic-xref", "encrypted-r4-rc4"],
+    "category": "real",
+    "password": null,
+    "oracle": {
+      "qpdfCheck": 0,
+      "pages": 30,
+      "pdfjsChars": 260,
+      "textSample": "Potato"
+    }
+  },
+  {
+    "id": "qpdf-r6-acrobat-xi",
+    "file": "qpdf-r6-acrobat-xi.pdf",
+    "sha256": "96b9262bfacf1358c7a68ab46c11563677e858888950237fdac8f3a227210edf",
+    "bytes": 15670,
+    "source": {
+      "project": "qpdf",
+      "url": "https://raw.githubusercontent.com/qpdf/qpdf/4eba95899886e851cc41d76886483b347612f2a8/qpdf/qtest/qpdf/enc-XI-R6,V5,U=view,O=master.pdf",
+      "retrieved": "2026-11-11"
+    },
+    "licence": "Apache-2.0",
+    "attribution": "qpdf test suite (github.com/qpdf/qpdf), Copyright Jay Berkenbilt and Manfred Holger, Apache-2.0, unmodified",
+    "contactData": "institutional",
+    "contactDataReason": "no contact data: the IPv4 pattern matches the section numbers 1.1.1.1, 1.1.1.2 and 1.1.2.1 in the titles of qpdf's made-up test outline",
+    "pdfVersion": "1.7",
+    "producer": null,
+    "features": ["xref-stream", "object-streams", "linearized", "encrypted-r6"],
+    "category": "real",
+    "password": "view",
+    "oracle": {
+      "qpdfCheck": 3,
+      "pages": 30,
+      "pdfjsChars": 260,
+      "textSample": "Potato"
+    }
+  },
+  {
+    "id": "qpdf-r6-attachments",
+    "file": "qpdf-r6-attachments.pdf",
+    "sha256": "d0d7d6d37a4c1e551dabb45532b3b077d973cf8f84ac04d865fd9a5e5fca1d68",
+    "bytes": 22400,
+    "source": {
+      "project": "qpdf",
+      "url": "https://raw.githubusercontent.com/qpdf/qpdf/4eba95899886e851cc41d76886483b347612f2a8/qpdf/qtest/qpdf/enc-XI-R6,V5,U=view,attachments,cleartext-metadata.pdf",
+      "retrieved": "2026-11-11"
+    },
+    "licence": "Apache-2.0",
+    "attribution": "qpdf test suite (github.com/qpdf/qpdf), Copyright Jay Berkenbilt and Manfred Holger, Apache-2.0, unmodified",
+    "contactData": "institutional",
+    "contactDataReason": "no contact data: the IPv4 pattern matches the section numbers 1.1.1.1, 1.1.1.2 and 1.1.2.1 in the titles of qpdf's made-up test outline",
+    "pdfVersion": "1.7",
+    "producer": null,
+    "features": ["xref-stream", "object-streams", "linearized", "encrypted-r6"],
+    "category": "real",
+    "password": "view",
+    "oracle": {
+      "qpdfCheck": 3,
+      "pages": 30,
+      "pdfjsChars": 260,
+      "textSample": "Potato"
+    }
+  },
+  {
+    "id": "qpdf-signed",
+    "file": "qpdf-signed.pdf",
+    "sha256": "05e969415b03d9782b0b132f147b86cb42eafddf6176aaf2710334a9cc643c3c",
+    "bytes": 68846,
+    "source": {
+      "project": "qpdf",
+      "url": "https://raw.githubusercontent.com/qpdf/qpdf/4eba95899886e851cc41d76886483b347612f2a8/qpdf/qtest/qpdf/digitally-signed.pdf",
+      "retrieved": "2026-11-11"
+    },
+    "licence": "Apache-2.0",
+    "attribution": "qpdf test suite (github.com/qpdf/qpdf), Copyright Jay Berkenbilt and Manfred Holger, Apache-2.0, unmodified",
+    "contactData": "institutional",
+    "contactDataReason": "a placeholder identity: the e-mail address jdoe@example.org in the subject of the test signing certificate (signature /Contents)",
+    "pdfVersion": "1.6",
+    "producer": null,
+    "features": ["xref-stream", "object-streams", "linearized", "acroform", "signature"],
+    "category": "real",
+    "password": null,
+    "oracle": {
+      "qpdfCheck": 3,
+      "pages": 1,
+      "pdfjsChars": 6,
+      "textSample": "Potato"
+    }
+  },
+  {
+    "id": "vera-pdfa2b-annot",
+    "file": "vera-pdfa2b-annot.pdf",
+    "sha256": "1410253738a30c0dbe2e84cedb25bf0e15188eca7b8c52e4b3abebde7b41fa9f",
+    "bytes": 3086,
+    "source": {
+      "project": "veraPDF corpus",
+      "url": "https://raw.githubusercontent.com/veraPDF/veraPDF-corpus/bb75f4f0073d9350dfd058c0162a367e6fadf25e/PDF_A-2b/6.3%20Annotations/6.3.3%20Annotation%20appearances/veraPDF%20test%20suite%206-3-3-t01-pass-c.pdf",
+      "retrieved": "2026-11-11"
+    },
+    "licence": "CC-BY-4.0",
+    "attribution": "veraPDF corpus (github.com/veraPDF/veraPDF-corpus), CC BY 4.0, unmodified",
+    "contactData": "none",
+    "pdfVersion": "1.7",
+    "producer": null,
+    "features": ["classic-xref"],
+    "category": "real",
+    "password": null,
+    "oracle": {
+      "qpdfCheck": 0,
+      "pages": 1,
+      "pdfjsChars": 0
+    }
+  },
+  {
+    "id": "vera-pdfa4-trailer",
+    "file": "vera-pdfa4-trailer.pdf",
+    "sha256": "70487db85b5504ce5700c1a39a3cba30f4ca3adff48bce1c5386529d2bee111d",
+    "bytes": 3032,
+    "source": {
+      "project": "veraPDF corpus",
+      "url": "https://raw.githubusercontent.com/veraPDF/veraPDF-corpus/bb75f4f0073d9350dfd058c0162a367e6fadf25e/PDF_A-4/6.1%20File%20structure/6.1.3%20File%20trailer/veraPDF%20test%20suite%206-1-3-t03-pass-a.pdf",
+      "retrieved": "2026-11-11"
+    },
+    "licence": "CC-BY-4.0",
+    "attribution": "veraPDF corpus (github.com/veraPDF/veraPDF-corpus), CC BY 4.0, unmodified",
+    "contactData": "none",
+    "pdfVersion": "2.0",
+    "producer": null,
+    "features": ["classic-xref"],
+    "category": "real",
+    "password": null,
+    "oracle": {
+      "qpdfCheck": 0,
+      "pages": 1,
+      "pdfjsChars": 0
+    }
+  },
+  {
+    "id": "vera-ua1-tagged",
+    "file": "vera-ua1-tagged.pdf",
+    "sha256": "8ad01889b85e05cc20efbe2f26a1a26ffab3784bd64fb316c311e884d5cbb98e",
+    "bytes": 18602,
+    "source": {
+      "project": "veraPDF corpus",
+      "url": "https://raw.githubusercontent.com/veraPDF/veraPDF-corpus/bb75f4f0073d9350dfd058c0162a367e6fadf25e/PDF_UA-1/7.21%20Fonts/7.21.7%20Unicode%20character%20maps/7.21.7-t01-pass-c.pdf",
+      "retrieved": "2026-11-11"
+    },
+    "licence": "CC-BY-4.0",
+    "attribution": "veraPDF corpus (github.com/veraPDF/veraPDF-corpus), CC BY 4.0, unmodified",
+    "contactData": "none",
+    "pdfVersion": "1.6",
+    "producer": "veraPDF Test Builder 1.0",
+    "features": ["xref-stream", "incremental", "tagged"],
+    "category": "real",
+    "password": null,
+    "oracle": {
+      "qpdfCheck": 0,
+      "pages": 1,
+      "pdfjsChars": 9,
+      "textSample": "Font test"
+    }
+  }
+]
