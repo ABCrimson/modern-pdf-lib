@@ -5,6 +5,112 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 See [VERSIONING.md](./VERSIONING.md) for this project's versioning policy.
 
+## [0.40.9] - 2026-11-15
+
+**Load path.** AES-256 files now follow the key derivation of ISO 32000-2 (Algorithm 2.B): files this library writes with AES-256 open in qpdf and pdf.js, and AES-256 files written by qpdf open here. `loadPdf()` of an encrypted file now returns decrypted objects, and a stream whose `/Length` is wrong, missing or defined later in the file keeps its data. This is a patch release that contains breaking changes: AES-256 output bytes change, a document decrypted on load cannot be written until `encrypt()` is called on the document being saved, and a file whose security handler this library cannot honour now throws `UnsupportedEncryptionError`. Each change is listed under Breaking. Options that are accepted and have no effect now emit a warning, once each per process (listed under Changed). No export is added, removed or changed. Read Compatibility before you mix 0.40.9 output with earlier versions of this library.
+
+### Breaking
+
+| Call | Before | Now |
+|---|---|---|
+| `encrypt()` with `algorithm: 'aes-256'`, then `save()` (and `PdfEncryptionHandler.create()` with that algorithm) | The `/U`, `/O`, `/UE` and `/OE` values came from a variant of Algorithm 2.B that qpdf and pdf.js reject: both report an incorrect password | The values follow Algorithm 2.B. qpdf and pdf.js open the file. Modern-pdf-lib 0.26.0 to 0.40.8 cannot open it: they report an incorrect password. The password is written in SASLprep form (qpdf accepts that form). RC4 and AES-128 output is unchanged. |
+| `loadPdf()` of an encrypted file with the right password | Returned objects whose strings and stream data were as stored in the file, still encrypted | Returns decrypted objects: RC4 40 and 128, AES-128 and AES-256, object streams, crypt filters, `/EncryptMetadata false`. A signature dictionary keeps its `/Contents` as stored. |
+| `loadPdf()` of a file with a security handler other than `/Standard`, a `/V` other than 1, 2, 4 and 5, a crypt filter method other than `/None`, `/V2`, `/AESV2` and `/AESV3`, or a `/StmF`, `/StrF`, `/EFF` or stream `/Crypt` name that no `/CF` entry defines | Loaded the file with its data still encrypted, or threw a `SyntaxError` (`Input string must contain hex characters in even length`) when a hex string was decrypted, whatever the handler or `/V` | Throws `UnsupportedEncryptionError` before a password is tried |
+| `loadPdf()` of a file whose `/Encrypt` is a direct dictionary or is recovered by the recovery scan, and of a file with AES data that is shorter than an IV and a block or has wrong padding | Loaded the file with its data still encrypted | Throws `UnsupportedEncryptionError`. A missing or wrong password keeps its `PdfParseError`. `ignoreEncryption: true` still loads the file, and writes its streams as loaded. |
+| `save()`, `saveAsStream()`, `saveAsBlob()`, `saveAsBase64()`, `serializePdf()`, `PdfWriter`, `PdfStreamWriter`, `saveIncremental()` and `saveDocumentIncremental()` on a document loaded from an encrypted file (without `ignoreEncryption: true`) | Wrote the objects as loaded, with no `/Encrypt` entry | Throw `UnsupportedEncryptionError` before any byte is written. After `encrypt()` on that document, `save()`, `saveAsBlob()`, `saveAsBase64()`, `serializePdf()` and `PdfWriter` write it encrypted with the new parameters. `saveAsStream()`, `PdfStreamWriter`, `saveIncremental()` and `saveDocumentIncremental()` still throw after `encrypt()`. |
+| `copy()`, `copyPages()`, `addPage()` with a page of the source, `mergePdfs()`, `splitPdf()`, `embedPage()`, `embedPages()`, `embedPdf()` and `embedPageAsFormXObject()` with a document decrypted on load as the source | Moved the objects as loaded into a document that saved without `/Encrypt` | The call returns. The document that received pages, objects or only the metadata (a source with no pages) throws `UnsupportedEncryptionError` on every write until `encrypt()` is called on it; then it saves encrypted. `copy()` of such a document does not call `onAfterSave` hooks. |
+| A string or stream decrypted on load, placed into another document by any other route (such as `getRegistry().register()` or `assign()`) | Written as loaded | Every writer of that document (`save()` family, `serializePdf()`, `PdfWriter`, `PdfStreamWriter`, `saveIncremental()`, `saveDocumentIncremental()`) throws `UnsupportedEncryptionError` until `encrypt()` is called on it. |
+| `sanitizePdf()` of an encrypted file that opens with the empty user password | Returned a file with no `/Encrypt` entry | Throws `UnsupportedEncryptionError` |
+
+### API
+
+<!-- api-diff:begin -->
+```
+No export added, removed or changed.
+```
+<!-- api-diff:end -->
+
+### Fixed
+
+- **AES-256 key derivation:** the key derivation of revision 6 follows ISO 32000-2 Algorithm 2.B. Files written with AES-256 by 0.26.0 to 0.40.8 still open here with their user or owner password; opening one emits one `MPL_LEGACY_R6_KEY` warning per process, and a save of that document without `encrypt()` throws, so the old derivation is never written again. Calling `encrypt()` and saving writes the standard derivation.
+- **Passwords:** an AES-256 password is written in SASLprep form. On reading, the SASLprep form is tried, then the raw UTF-8 bytes of the password. The owner password of a file whose `/U` is longer than 48 bytes is accepted, as qpdf accepts it.
+- **Encrypted load:** the objects of an encrypted file are decrypted once, right after the handler is set up: object-stream containers before their members, and the strings inside object streams only once. The `/Encrypt` dictionary, the document `/ID`, cross-reference streams, `/Identity` crypt filters and a signature dictionary's `/Contents` stay as stored, and with `/EncryptMetadata false` the metadata stream the catalog names stays as stored. Hex strings are decoded once, and a string is decrypted byte for byte (no windows-1252 decoding). In the oracle tests the decrypted objects equal the plaintext objects of `qpdf --decrypt --qdf`, object by object, for every encrypted fixture (RC4 40 and 128, AES-128, AES-256, with and without object streams). The one documented difference is which signature dictionaries keep `/Contents` as stored: this library follows ISO 32000-2 (`/Type /Sig` or `/DocTimeStamp`, or no `/Type` with `/ByteRange` and `/Contents`), qpdf only `/Type /Sig` with `/ByteRange`.
+- **Stream lengths:** a stream whose `/Length` is wrong, missing, or an indirect reference defined later in the file no longer drops the stream. A `/Length` that `endstream` follows is trusted; otherwise the data ends at the first `endstream`, or `endobj`, less one end-of-line marker, found in time linear in the file. `loadPdf()` and `StreamingPdfParser` use the same code. 149 objects of six corpus files (`pyhanko-ua-and-a.pdf`, `qpdf-form-acrobat.pdf`, `qpdf-form-odt.pdf`, `qpdf-hybrid-xref.pdf`, `qpdf-labels-damaged.pdf`, `qpdf-r3-rc4.pdf`) that 0.40.8 dropped now load, with stream data equal to qpdf's; the raw stream data of every other stream of the fixture files is unchanged (`pnpm run fixtures:streams:check`). With `throwOnInvalidObject: true`, a file whose `/Length` is an indirect reference defined later in the file now loads (0.40.8 threw `PdfParseError`; the five corpus files `pyhanko-ua-and-a.pdf`, `qpdf-form-acrobat.pdf`, `qpdf-form-odt.pdf`, `qpdf-hybrid-xref.pdf` and `qpdf-labels-damaged.pdf` change from throwing to loading); a stream whose `/Length` is wrong, missing or cannot be resolved still throws `PdfParseError` there, as in 0.40.8.
+- **Object keys:** objects whose numbers differ by a multiple of 65,536 no longer share one object key.
+- **Object streams on save:** saving a file that uses object streams writes one copy fewer of each object-stream container: 0.40.8 registered one more copy on every read of an object inside a container. A save still defines each container twice, like the other stream objects read from the file (open finding `legacy-M01`, planned for 0.41.2). For `irs-fw4.pdf` the output is 821,063 bytes, down from 874,040.
+
+### Changed
+
+- **Runtime warnings:** the library emits a warning of type `ModernPdfLibWarning` through `process.emitWarning` (through `console.warn` where a runtime has no `process.emitWarning`), once per process for each key (once per worker thread in a worker). The message never contains a value the caller passed. There are two codes:
+  - `MPL_LEGACY_R6_KEY`: `loadPdf()` opened an AES-256 file through the derivation of 0.26.0 to 0.40.8. It fires once per process, whatever the file.
+  - `MPL_IGNORED_OPTION`: a call passed an option that is accepted and has no effect. It fires once for each function and option in the table below, when the option has the value the table names; the message reads "`<function>`: the option `<name>` has no effect in this version." For `setCertificationLevel()` and `addFieldLock()` it reads "`<function>` has no effect in this version: `signPdf()` does not write a DocMDP certification." or "... a /Lock dictionary." The JSDoc of each such option says the same.
+  - There is no hook of the library's own. In Node, `--disable-warning=ModernPdfLibWarning` silences both codes, `--disable-warning=MPL_LEGACY_R6_KEY` or `--disable-warning=MPL_IGNORED_OPTION` one, and `--no-warnings` all warnings; each can be set in `NODE_OPTIONS`.
+
+| Function | Option | Warns when |
+|---|---|---|
+| `signPdf()` | `timestampUrl`, `contactInfo` | passed |
+| `signPdf()` | `reason`, `location` | passed, unless a visible appearance without its own text shows them |
+| `setCertificationLevel()` | the whole call | called (`signPdf()` writes no DocMDP certification) |
+| `addFieldLock()` | the whole call | called, after its own validation (`signPdf()` writes no `/Lock` dictionary) |
+| `verifySignatureDetailed()` | `timeout` | passed |
+| `verifySignatureDetailed()` | `trustedCerts` | not empty |
+| `validateCertificateChain()` | `checkRevocation` | `true` |
+| `saveIncrementalWithSignaturePreservation()`, `appendIncrementalUpdate()` | `compress` | `true` |
+| `saveIncremental()` | `objectStreamThreshold` | passed and not `Infinity` |
+| `saveIncremental()` | `useWasm` | `true` |
+| `saveAsStream()` | `objectStreamThreshold` | passed and not `Infinity` |
+| `embedFont()` | `subset` | `false` |
+| `embedFont()` | `features` | passed |
+| `StreamingPdfParser` | `parseContentStreams` | `true` |
+| `metadataPlugin()` | `creator`, `defaultTitle`, `defaultAuthor` | passed |
+| `code128ToOperators()`, `ean13ToOperators()`, `ean8ToOperators()`, `upcAToOperators()` | `showText` | `true` |
+| `code128ToOperators()`, `ean13ToOperators()`, `ean8ToOperators()`, `upcAToOperators()` | `fontSize` | passed |
+| `code39ToOperators()` | `showText`, `includeCheckDigit` | `true` |
+| `code39ToOperators()`, `itfToOperators()` | `wideToNarrowRatio` | passed |
+| `itfToOperators()` | `showText` | `true` |
+| `qrCodeToOperators()` | `errorCorrection` | passed |
+| `pdf417ToOperators()` | `columns`, `errorLevel` | passed |
+| `buildPdfX6OutputIntent()` | `variant` | passed |
+| `applyTablePreset()` | `hasHeader` | passed |
+| `PdfStructureElement` (also through the tagging helpers that build one) | `scope`, `rowSpan` | passed |
+| `optimizeAllImages()` | `maxDpi` | passed |
+
+- **Test suite:** the root `execArgv` of `vitest.config.ts` disables the `ModernPdfLibWarning` type, so the suite stays quiet; the tests that check a warning spy on `process.emitWarning`.
+- **Fixtures and oracles:** `tests/fixtures/encrypted/load/` and `extra/` hold encrypted files for the load path (R5 and R6 written by qpdf, object streams, crypt filters, signature shapes). `tests/fixtures/legacy-0.26.0/` holds an AES-256 file written by the published 0.26.0 (`scripts/legacy-0.26.0/generate.ts` records the command that wrote it). `tests/oracle/encrypted-qdf.test.ts` compares decrypted objects with qpdf's, and `tests/fixtures/expected/stream-digests.json`, checked by `pnpm run fixtures:streams:check`, records the stream data of every fixture as 0.40.8 read it.
+- **Version strings:** `docs/plans/ROADMAP.md`, `docs/.vitepress/config.ts`, `VERSIONING.md` and `package.json` carry the version 0.40.9.
+- **CI:** the `pnpm/setup` action is pinned to v3.2.0 in the four workflows. The unit-test job installs the checksum-pinned qpdf, which the unit tests of the encrypted load path compare with.
+
+### Compatibility
+
+- **Who opens an AES-256 file** (measured with modern-pdf-lib 0.26.0, 0.40.3 and 0.40.8 for the password step, qpdf 12.4.2 `--check` and `--decrypt`, and pdf.js 6.5.438). The other versions of the range have the same key derivation code and were not run separately:
+
+| Written by | 0.26.0 to 0.40.8 | 0.40.9 | qpdf | pdf.js |
+|---|---|---|---|---|
+| qpdf 12.4.2 | incorrect password | opens | opens | opens |
+| modern-pdf-lib 0.26.0, 0.40.3 or 0.40.8 | password accepted | opens, one `MPL_LEGACY_R6_KEY` warning | rejects (exit status 2) | incorrect password |
+| modern-pdf-lib 0.40.9 | incorrect password | opens | opens | opens |
+
+- **Earlier versions as readers:** 0.40.8 and earlier do not decrypt the content of an encrypted file on load, so text extraction from an encrypted file there throws or returns no text; that is unchanged. Only the password check differs for AES-256, as the table shows.
+- **Re-saving an old AES-256 file:** load it with its password, call `encrypt()` with the password you want, and save; the result is written with the standard derivation and opens everywhere above.
+- **RC4 and AES-128:** the `/O` and `/U` values of the writers are unchanged from 0.40.8 (a seeded test pins them), and files written by any earlier version open here.
+- **Unencrypted files:** what a save writes differs from 0.40.8 only where the load differs: one copy fewer of each object-stream container is written, and the 149 stream objects listed under Fixed are written because they now load. Streams and bytes of every other fixture file are unchanged.
+- **Documents decrypted on load:** to keep working with one, read it (`getPage()`, text extraction, form and metadata reads), or call `encrypt()` on the document you save. The 0.40.5 refusals of encrypted input in sixteen functions are unchanged.
+
+### Known limits
+
+- **There is no "save decrypted" option and no public warning hook in this version.** A document decrypted on load is written only encrypted; the warnings go to `process.emitWarning` and cannot be intercepted through the library.
+- **Strings with bytes above 0x7F are rewritten on save,** as in 0.40.8; a later version (0.41.0) writes them byte for byte. This also applies to a document decrypted on load, re-encrypted and saved.
+- **Encrypted incremental and streamed saves** (`saveIncremental()`, `saveDocumentIncremental()`, `saveAsStream()` of a document that is encrypted or was decrypted on load) are planned for 0.41.2; they throw until then.
+
+### Tests
+
+- **Counts:** 381 test files (up from 360), 9,133 tests. With qpdf (as in CI) and a built `dist/`, the suite reports 9,084 passed and 49 expected failures, none skipped; without qpdf, 8,715 passed, 11 expected failures and 407 skipped (the qpdf cases).
+- **Corpus:** of the 33 corpus files, 33 load and 27 pass every check (29 and 19 before). The two checks that only an encrypted file runs, a bare `save()` that throws `UnsupportedEncryptionError` and the plaintext of the saved file, are part of the gate.
+- **Known-defect markers:** 49 markers on 29 ledger ids in 10 files (106 on 35 ids in 9 files before).
+- **Ledger:** `audit/open-highs.json` lists 212 open entries (226 before). In `docs/capabilities.json` 6 rows are graded `oracle`, 26 `behaviour`, 85 `qualified` (84 before) and 16 `pending` (17 before).
+- **Lint:** `pnpm run lint` runs with `--max-warnings=1173` (down from 1,175).
+- **Size budgets:** the bundles grew with the load path, so `scripts/dev/size-budget.json` holds new budgets and the README badge says 100 KiB gzip for `createPdf`.
+
 ## [0.40.8] - 2026-11-15
 
 **Bounded decode.** The code that decodes streams, images, fonts, ToUnicode CMaps, SVG paths, outlines, structure trees, content streams and signature data now refuses input above internal limits and malformed size fields, instead of trusting the sizes and links the input states. Input above a limit throws `ResourceLimitError`; JPEG 2000 (`/JPXDecode`), JBIG2 (`/JBIG2Decode`) and lossy WebP (VP8) decoding throw `UnsupportedFilterError` instead of returning wrong pixels. Ordinary documents behave as in 0.40.7: each limit is at least four times the largest value measured on the test corpus, the legacy fixtures and the other fixtures. This is a patch release that contains breaking changes: calls that returned a result for input above a limit, or wrong pixels for the three formats, now throw, and a signature the DER reader refuses is reported as not valid. Each change is listed under Breaking. Two error classes are added; no export is removed. See the security advisory published with 0.40.8 on the repository's [advisories page](https://github.com/ABCrimson/modern-pdf-lib/security/advisories).
