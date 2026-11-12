@@ -116,32 +116,18 @@ const UTF8_INFO: Known = { key: defectKey('core-document-01', '0.41.0'), failsWi
 const UTF8_TEXT: Known = { key: defectKey('core-page-01', '0.41.0'), failsWith: TEXT_DIFFERS };
 /** qpdf cannot inflate a /FlateDecode stream of the re-save. */
 const QPDF_INFLATE = /^QpdfError: qpdf --check exit 2: .*inflate: data: incorrect header check/;
-// The re-save writes a /FlateDecode stream that is not zlib data: the raw DEFLATE the 0.40.3
-// file carries, passed through, or a stream the current writer compresses.
-const RAW_DEFLATE_RESAVE: Known = {
-  key: defectKey('color-compression-35', '0.40.8'),
-  failsWith: QPDF_INFLATE,
-};
 // The reader leaves the streams encrypted, and the re-save writes them, still encrypted, into a
 // file without an Encrypt dictionary.
 const ENCRYPTED_RESAVE: Known = { key: ENCRYPTED_LOAD, failsWith: QPDF_INFLATE };
-/** The four re-save checks, when each one fails only in qpdf. */
-const RESAVES_RAW_DEFLATE = {
-  resaveCount: RAW_DEFLATE_RESAVE,
-  resaveText: RAW_DEFLATE_RESAVE,
-  resaveInfo: RAW_DEFLATE_RESAVE,
-  resaveOracles: RAW_DEFLATE_RESAVE,
-} as const;
 const KNOWN: Readonly<Record<string, Partial<Record<Check, Known>>>> = {
-  'raw-deflate.pdf': { ...RESAVES_RAW_DEFLATE, resaveUniqueObjects: DUPLICATE_OBJECTS },
-  'raw-deflate-objstm.pdf': { ...RESAVES_RAW_DEFLATE, resaveUniqueObjects: DUPLICATE_OBJECTS },
-  'linearized.pdf': { ...RESAVES_RAW_DEFLATE, resaveUniqueObjects: DUPLICATE_OBJECTS },
+  'raw-deflate.pdf': { resaveUniqueObjects: DUPLICATE_OBJECTS },
+  'raw-deflate-objstm.pdf': { resaveUniqueObjects: DUPLICATE_OBJECTS },
+  'linearized.pdf': { resaveUniqueObjects: DUPLICATE_OBJECTS },
   'signed.pdf': {
     signatureFieldName: {
       key: defectKey('signature-cms-38', '0.45.0'),
       failsWith: /^AssertionError: expected 'Signature' to be 'Signature1'/,
     },
-    ...RESAVES_RAW_DEFLATE,
     resaveUniqueObjects: DUPLICATE_OBJECTS,
   },
   'forms.pdf': {
@@ -149,7 +135,6 @@ const KNOWN: Readonly<Record<string, Partial<Record<Check, Known>>>> = {
       key: defectKey('forms-34', '0.41.5'),
       failsWith: /^AssertionError: hasForm\(\): expected false to be true/,
     },
-    ...RESAVES_RAW_DEFLATE,
     resaveUniqueObjects: DUPLICATE_OBJECTS,
   },
   'encrypted-r4.pdf': {
@@ -171,8 +156,6 @@ const KNOWN: Readonly<Record<string, Partial<Record<Check, Known>>>> = {
   'utf8-strings.pdf': {
     info: UTF8_INFO,
     text: UTF8_TEXT,
-    // The default save compresses the content stream (filler lines) and hits the writer side.
-    resaveCount: RAW_DEFLATE_RESAVE,
     resaveInfo: UTF8_INFO,
     resaveText: UTF8_TEXT,
     // compress: false passes qpdf; pdf.js then shows the UTF-8 bytes as WinAnsi characters.

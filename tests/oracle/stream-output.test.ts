@@ -5,12 +5,12 @@
  * For a text document, an image document and a multi-page document,
  * the bytes of `saveAsStream()` equal the bytes of `save()` of a document built alike (fixed
  * dates, `compress: false`), and the streamed bytes pass `qpdf --check` and show the expected
- * text in pdf.js. An encrypted document's `saveAsStream()` throws UnsupportedEncryptionError
- * (the 0.40.5 behaviour); the markers record what is still open: the same three checks with
- * `compress: true` (qpdf rejects the raw deflate data under /FlateDecode), the streamed output of
- * an encrypted document, the save hooks of `doc.use()` plugins, and byte equality with `save()`
- * when `objectStreamThreshold` is set. qpdf comes from `QPDF`, then `PATH`; each test skips
- * with a reason where qpdf is absent locally and fails when `CI` is set.
+ * text in pdf.js; the same three checks hold with `compress: true` for a document whose content
+ * stream the writer compresses. An encrypted document's `saveAsStream()` throws
+ * UnsupportedEncryptionError (the 0.40.5 behaviour); the markers record what is still open: the
+ * streamed output of an encrypted document, the save hooks of `doc.use()` plugins, and byte
+ * equality with `save()` when `objectStreamThreshold` is set. qpdf comes from `QPDF`, then
+ * `PATH`; each test skips with a reason where qpdf is absent locally and fails when `CI` is set.
  */
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -142,25 +142,14 @@ describe('saveAsStream() with compression', () => {
     return doc;
   };
 
-  // One marker: the oracle guard fails any plain test whose output skips expectQpdfClean(), and
-  // qpdf rejects this output today. The byte equality runs first, so a difference from save()
-  // is a failure for another reason than failsWith.
-  knownDefect(
-    defectKey('color-compression-35', '0.40.8'),
-    'stream bytes equal save() bytes of a document built alike; qpdf clean, pdf.js text equal',
-    {
-      failsWith:
-        /^QpdfError: qpdf --check exit 2: .*error decoding stream data for object \d+ 0: stream inflate: inflate: data: incorrect header check/,
-    },
-    async () => {
-      const saved = await build().save(options);
-      const streamed = await collect(build().saveAsStream(options));
-      expect(latin1.decode(streamed)).toContain('/FlateDecode');
-      expect(streamed).toEqual(saved);
-      expectQpdfClean(streamed);
-      await expectPdfjsText(streamed, [Array(20).fill('Streamed compressed text').join(' ')]);
-    },
-  );
+  test('stream bytes equal save() bytes of a document built alike; qpdf clean, pdf.js text equal', async () => {
+    const saved = await build().save(options);
+    const streamed = await collect(build().saveAsStream(options));
+    expect(latin1.decode(streamed)).toContain('/FlateDecode');
+    expect(streamed).toEqual(saved);
+    expectQpdfClean(streamed);
+    await expectPdfjsText(streamed, [Array(20).fill('Streamed compressed text').join(' ')]);
+  });
 });
 
 describe('saveAsStream() on an encrypted document', () => {

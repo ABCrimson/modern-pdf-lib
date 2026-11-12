@@ -87,20 +87,11 @@ interface Known {
 
 const TEXT_MISSING = /^AssertionError: expected '.*' to contain '/;
 
-// Xref streams and object streams are read as raw DEFLATE: the load falls into the recovery
-// scan and then misses /Pages or /Root inside the object streams, or loads only through it.
-const RAW_XREF = defectKey('parser-syntax-M01', '0.40.8');
-const PAGES_IN_OBJSTM: Known = {
-  key: RAW_XREF,
-  failsWith: /^PdfParseError: Invalid PDF: \/Pages entry is not a dictionary \(got null\)/,
-};
-const ROOT_IN_OBJSTM: Known = {
-  key: RAW_XREF,
-  failsWith: /^PdfParseError: Invalid PDF: recovery scan could not locate the document catalog/,
-};
-const SCANNED: Known = {
-  key: RAW_XREF,
-  failsWith: /^AssertionError: recovery scans: expected 1 to be \+0/,
+// Revision 6 (AES-256) files from other producers do not open with their password: the load
+// throws at the password check.
+const R6_PASSWORD: Known = {
+  key: defectKey('crypto-security-01', '0.40.9'),
+  failsWith: /^PdfParseError: Failed to decrypt PDF: the provided password is incorrect/,
 };
 /** Every check after sha256 fails with the load error. */
 const cascade = (known: Known): Record<Check, Known> => ({
@@ -174,19 +165,6 @@ const CIPHERTEXT_FILE = {
   qpdfDefault: CIPHERTEXT_SAVED,
 };
 
-// The default save (compress true) writes the loaded content streams as raw DEFLATE under
-// /FlateDecode, so qpdf cannot inflate them.
-const RAW_DEFLATE_WRITER: Known = {
-  key: defectKey('parser-syntax-M02', '0.40.8'),
-  failsWith: qpdfFindsOnly(
-    2,
-    inflateFails(/unknown compression method|incorrect header check/),
-    REPROCESSED,
-    CONTENT_UNDECODABLE,
-  ),
-};
-const RAW_DEFLATE_FILE = { qpdfDefault: RAW_DEFLATE_WRITER };
-
 // Fonts given as indirect references are skipped, so their ToUnicode maps are not applied.
 const INDIRECT_FONTS: Known = {
   key: defectKey('parser-text-01', '0.41.6'),
@@ -203,36 +181,12 @@ const COPIED_DAMAGED_STREAMS: Known = {
   ),
 };
 
-// The re-saved content stream still holds the ciphertext: qpdf parses it as content and warns
-// on the tokens it cannot read.
-const CIPHERTEXT_CONTENT_PARSED: Known = {
-  key: RAW_XREF,
-  failsWith: qpdfFindsOnly(
-    3,
-    /WARNING: page object \d+ 0 stream \d+ 0 \(content, offset \d+\): (?:unexpected >|EOF while reading token)/,
-  ),
-};
-
 const KNOWN: Readonly<Record<string, Partial<Record<Check, Known>>>> = {
-  'irs-fw4': cascade(PAGES_IN_OBJSTM),
-  'irs-fw9': cascade(PAGES_IN_OBJSTM),
-  'irs-p1-chinese': cascade(PAGES_IN_OBJSTM),
+  'irs-p1-chinese': { text: INDIRECT_FONTS },
   'pdfjs-cid-truetype': { text: INDIRECT_FONTS },
-  'pdfjs-jpx-subsampling': RAW_DEFLATE_FILE,
-  // Loaded through the recovery scan, whose trailer has no /Encrypt: the content stays
-  // ciphertext, so the text is empty and qpdf warns on both re-saved content streams.
-  'pyhanko-aes256': {
-    fallback: SCANNED,
-    text: { key: RAW_XREF, failsWith: /^AssertionError: expected '' to contain '/ },
-    qpdf: CIPHERTEXT_CONTENT_PARSED,
-    qpdfDefault: CIPHERTEXT_CONTENT_PARSED,
-  },
-  'pyhanko-hybrid-msword': RAW_DEFLATE_FILE,
+  'pyhanko-aes256': cascade(R6_PASSWORD),
   'pyhanko-rc4': CIPHERTEXT_FILE,
-  'pyhanko-signed-twice': RAW_DEFLATE_FILE,
   'pyhanko-ua-and-a': FORWARD_LENGTH_FILE,
-  'qpdf-bad-xref': RAW_DEFLATE_FILE,
-  'qpdf-damaged-stream': RAW_DEFLATE_FILE,
   // Category damaged (qpdf warns about its streams): no strict-load check, but the dropped
   // content still empties page 1. Both saves keep the three Flate streams qpdf warns about in
   // the input byte for byte, so qpdf warns on them in the output too.
@@ -245,18 +199,14 @@ const KNOWN: Readonly<Record<string, Partial<Record<Check, Known>>>> = {
   'qpdf-hybrid-xref': FORWARD_LENGTH_FILE,
   // Category damaged: no strict-load check, but the dropped content still empties page 1.
   'qpdf-labels-damaged': { text: CONTENT_DROPPED },
-  'qpdf-linearized': RAW_DEFLATE_FILE,
-  'qpdf-objstm-xref': cascade(ROOT_IN_OBJSTM),
   'qpdf-r3-rc4': FORWARD_LENGTH_FILE,
   'qpdf-r4-aes': cascade({
     key: defectKey('crypto-security-M01', '0.40.9'),
     failsWith: /^SyntaxError: Input string must contain hex characters in even length/,
   }),
   'qpdf-r4-rc4': CIPHERTEXT_FILE,
-  'qpdf-r6-acrobat-xi': cascade(PAGES_IN_OBJSTM),
-  'qpdf-r6-attachments': cascade(PAGES_IN_OBJSTM),
-  'qpdf-signed': cascade(PAGES_IN_OBJSTM),
-  'vera-ua1-tagged': { fallback: SCANNED },
+  'qpdf-r6-acrobat-xi': cascade(R6_PASSWORD),
+  'qpdf-r6-attachments': cascade(R6_PASSWORD),
 };
 
 // ---------------------------------------------------------------------------------------------

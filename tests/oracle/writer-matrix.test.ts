@@ -130,17 +130,12 @@ describe('text in a standard 14 font', () => {
     await expectPdfjsText(bytes, [LINES.join(' ')]);
   });
 
-  knownDefect(
-    defectKey('color-compression-35', '0.40.8'),
-    'twenty lines, default save (a compressed content stream): qpdf clean, pdf.js text equal',
-    { failsWith: /^QpdfError: qpdf --check exit 2: .*inflate: data: unknown compression method/ },
-    async () => {
-      const bytes = await textDoc(LINES).save();
-      expect(latin1.decode(bytes)).toContain('/FlateDecode');
-      expectQpdfClean(bytes);
-      await expectPdfjsText(bytes, [LINES.join(' ')]);
-    },
-  );
+  test('twenty lines, default save (a compressed content stream): qpdf clean, pdf.js text equal', async () => {
+    const bytes = await textDoc(LINES).save();
+    expect(latin1.decode(bytes)).toContain('/FlateDecode');
+    expectQpdfClean(bytes);
+    await expectPdfjsText(bytes, [LINES.join(' ')]);
+  });
 });
 
 describe('images', () => {
@@ -158,46 +153,31 @@ describe('images', () => {
     expect(await pageCount(bytes)).toBe(1);
   });
 
-  knownDefect(
-    defectKey('color-compression-35', '0.40.8'),
-    'PNG, default save: the compressed page content stream passes qpdf --check',
-    {
-      failsWith:
-        /^QpdfError: qpdf --check exit 2: .*error decoding stream data for object \d+ 0: stream inflate/,
-    },
-    async () => {
-      expectQpdfClean(await (await pngDoc()).save());
-    },
-  );
+  test('PNG, default save: the compressed page content stream passes qpdf --check', async () => {
+    expectQpdfClean(await (await pngDoc()).save());
+  });
 
   // An alpha channel sends the image and its soft mask through the PNG embedder's own
-  // compression; with compress: false no other stream of the file is compressed.
-  knownDefect(
-    defectKey('images-57', '0.40.8'),
-    'PNG with an alpha channel, compress: false: the image and soft mask streams pass qpdf --check',
-    {
-      failsWith:
-        /^QpdfError: qpdf --check exit 3: .*error decoding stream data for object \d+ 0: stream inflate/,
-    },
-    async () => {
-      const bytes = await (await pngDoc('sample-rgba.png')).save(PLAIN);
-      try {
-        expectQpdfClean(bytes);
-      } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
-        const failing = new Set(
-          Array.from(message.matchAll(/error decoding stream data for object (\d+) 0/g), (m) =>
-            Number(m[1]),
-          ),
-        );
-        expect(failing.size).toBeGreaterThan(0);
-        for (const objectNumber of failing) {
-          expect(streamDictionary(bytes, objectNumber)).toMatch(/\/Subtype\s*\/Image\b/);
-        }
-        throw error;
+  // compression; with compress: false no other stream of the file is compressed. When qpdf
+  // fails, the streams it names must be the image streams.
+  test('PNG with an alpha channel, compress: false: the image and soft mask streams pass qpdf --check', async () => {
+    const bytes = await (await pngDoc('sample-rgba.png')).save(PLAIN);
+    try {
+      expectQpdfClean(bytes);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      const failing = new Set(
+        Array.from(message.matchAll(/error decoding stream data for object (\d+) 0/g), (m) =>
+          Number(m[1]),
+        ),
+      );
+      expect(failing.size).toBeGreaterThan(0);
+      for (const objectNumber of failing) {
+        expect(streamDictionary(bytes, objectNumber)).toMatch(/\/Subtype\s*\/Image\b/);
       }
-    },
-  );
+      throw error;
+    }
+  });
 
   // pillow-16x16.jpg comes from an outside encoder (tests/fixtures/images/README.md).
   test('JPEG: qpdf clean, pdf.js decodes the 16x16 image, the stream holds the file bytes unchanged', async () => {
@@ -310,14 +290,9 @@ describe('object streams', () => {
     await expectPdfjsText(bytes, ['Object streams']);
   });
 
-  knownDefect(
-    defectKey('color-compression-35', '0.40.8'),
-    'objectStreamThreshold: 1 with a default save passes qpdf --check',
-    { failsWith: /^QpdfError: qpdf --check exit 2: .*incorrect header check/ },
-    async () => {
-      expectQpdfClean(await textDoc(['Object streams']).save({ objectStreamThreshold: 1 }));
-    },
-  );
+  test('objectStreamThreshold: 1 with a default save passes qpdf --check', async () => {
+    expectQpdfClean(await textDoc(['Object streams']).save({ objectStreamThreshold: 1 }));
+  });
 });
 
 describe('saveAsStream', () => {

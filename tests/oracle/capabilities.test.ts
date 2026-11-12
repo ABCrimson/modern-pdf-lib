@@ -7,9 +7,10 @@
  * with `compress: false` and judges the bytes with `qpdf --check` (expectQpdfClean) and pdf.js;
  * a test about packaging, CI or a non-PDF return value (the `behaviour` grade) asserts the claim
  * directly. A claim the outside reader shows false is a knownDefect() marker keyed to its ledger
- * id (it carries no capability tag: a marker is not evidence for a row). The same output written
- * with the default save options (`compress: true`) is a marker keyed to the ledger entry for raw DEFLATE output, so
- * a row whose claim needs that default stays `qualified`. qpdf comes from `QPDF`,
+ * id (it carries no capability tag: a marker is not evidence for a row). The header and footer,
+ * watermark, save(), saveAsBlob() and saveAsBase64() claims are also checked on output written
+ * with the default save options (`compress: true`), whose /FlateDecode streams qpdf and pdf.js
+ * read the same way. qpdf comes from `QPDF`,
  * then `PATH`; each test skips with a reason where qpdf is absent locally and fails when `CI` is
  * set.
  */
@@ -270,23 +271,33 @@ describe('writer rows judged by qpdf and pdf.js', () => {
     },
   );
 
-  // The default save writes raw deflate under /FlateDecode, so pdf.js reads no page content.
-  knownDefect(
-    defectKey('color-compression-35', '0.40.8'),
+  test(
     'header, footer and watermark with default options and a default save(): pdf.js extracts their text',
-    { failsWith: /^AssertionError: expected '' to contain 'Page 1 of 2'/ },
+    { meta: { capability: ['cap-header-footer', 'cap-watermarks'] } },
     async () => {
       const doc = textDoc('Body one');
       doc.addPage().drawText('Body two', { x: 50, y: 750, size: 12 });
       doc.setTitle('Report');
+      // {date} in the default format (YYYY-MM-DD, local time), read just before and just after
+      // the call: a call across midnight may write either date.
+      const ymd = (d: Date): string =>
+        `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      const before = ymd(new Date());
       applyHeaderFooter(doc, {
-        header: [{ text: '{title}', position: 'left' }],
+        header: [{ text: '{title} {date}', position: 'left' }],
         footer: [{ text: 'Page {page} of {pages}', position: 'center' }],
       });
+      const after = ymd(new Date());
       doc.addWatermark({ text: 'DRAFT' });
-      const pages = await pdfjsText(await doc.save());
+      const bytes = await doc.save();
+      expect(new TextDecoder('latin1').decode(bytes)).toContain('/FlateDecode');
+      expectQpdfClean(bytes);
+      const pages = await pdfjsText(bytes);
+      expect(pages).toHaveLength(2);
+      expect([`Report ${before}`, `Report ${after}`].some((h) => pages[0]?.includes(h))).toBe(true);
       expect(pages[0]).toContain('Page 1 of 2');
       expect(pages[0]).toContain('DRAFT');
+      expect(pages[1]).toContain('Page 2 of 2');
     },
   );
 
@@ -397,32 +408,53 @@ describe('save methods (positive path)', () => {
     },
   );
 
-  // The default is compress: true, and the writer puts raw deflate data (no zlib header) under
-  // /FlateDecode. qpdf's zlib reads the first two bytes as the header, so it reports either
-  // "incorrect header check" or "unknown compression method", depending on those bytes.
-  const ZLIB_HEADER_FAILURE =
-    /^QpdfError: qpdf --check exit 2: .*error decoding stream data for object \d+ 0: stream inflate: inflate: data: (?:incorrect header check|unknown compression method)/;
+  /**
+   * Checks that the bytes hold a /FlateDecode stream and that pdf.js reads the twenty lines
+   * longTextDoc(text) draws on its one page.
+   */
+  async function expectLongText(bytes: Uint8Array, text: string): Promise<void> {
+    expect(new TextDecoder('latin1').decode(bytes)).toContain('/FlateDecode');
+    const pages = await pdfjsText(bytes);
+    expect(pages).toHaveLength(1);
+    expect(pages[0]).toContain(`${text} 0`);
+    expect(pages[0]).toContain(`${text} 19`);
+  }
 
-  knownDefect(
-    defectKey('color-compression-35', '0.40.8'),
-    'save() with default options: qpdf --check reads the FlateDecode streams',
-    {
-      failsWith: ZLIB_HEADER_FAILURE,
-    },
+  // The default is compress: true: the long text compresses, so qpdf and pdf.js have
+  // FlateDecode streams to inflate.
+  test(
+    'save() with default options: qpdf --check and pdf.js read the FlateDecode streams',
+    { meta: { capability: ['cap-save'] } },
     async () => {
-      expectQpdfClean(await longTextDoc('Default save').save());
+      const bytes = await longTextDoc('Default save').save();
+      expect(bytes).toBeInstanceOf(Uint8Array);
+      expectQpdfClean(bytes);
+      await expectLongText(bytes, 'Default save');
     },
   );
 
-  knownDefect(
-    defectKey('color-compression-35', '0.40.8'),
-    'saveAsBlob() and saveAsBase64() with default options: qpdf --check reads the FlateDecode streams',
-    {
-      failsWith: ZLIB_HEADER_FAILURE,
-    },
+  test(
+    'saveAsBlob() and saveAsBase64() with default options: qpdf --check and pdf.js read the FlateDecode streams',
+    { meta: { capability: ['cap-save-blob', 'cap-save-base64'] } },
     async () => {
-      expectQpdfClean(await (await longTextDoc('Default blob').saveAsBlob()).bytes());
-      expectQpdfClean(Uint8Array.fromBase64(await longTextDoc('Default base64').saveAsBase64()));
+      const blob = await longTextDoc('Default blob').saveAsBlob();
+      expect(blob).toBeInstanceOf(Blob);
+      expect(blob.type).toBe('application/pdf');
+      const fromBlob = await blob.bytes();
+      expectQpdfClean(fromBlob);
+      await expectLongText(fromBlob, 'Default blob');
+
+      const base64 = await longTextDoc('Default base64').saveAsBase64();
+      expect(typeof base64).toBe('string');
+      const fromBase64 = Uint8Array.fromBase64(base64);
+      expectQpdfClean(fromBase64);
+      await expectLongText(fromBase64, 'Default base64');
+
+      const uri = await longTextDoc('Default data URI').saveAsBase64({ dataUri: true });
+      expect(uri.startsWith('data:application/pdf;base64,')).toBe(true);
+      const fromUri = Uint8Array.fromBase64(uri.slice('data:application/pdf;base64,'.length));
+      expectQpdfClean(fromUri);
+      await expectLongText(fromUri, 'Default data URI');
     },
   );
 

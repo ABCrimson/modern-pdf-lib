@@ -182,8 +182,8 @@ describe('saveAsStream()', () => {
     expect(text.trimEnd().endsWith('%%EOF')).toBe(true);
   });
 
-  // Structure only: whether another reader accepts this output is tests/oracle/stream-output.test.ts
-  // (a known-defect marker there records that qpdf rejects the raw deflate data today).
+  // Structure only: tests/oracle/stream-output.test.ts judges the compressed output with qpdf and
+  // pdf.js, and tests/oracle/flate-header.test.ts checks that its /FlateDecode data is zlib.
   it('stream with compression writes a FlateDecode content stream that hides the text and is shorter than the uncompressed output', async () => {
     const build = async () => {
       const doc = createPdf();
