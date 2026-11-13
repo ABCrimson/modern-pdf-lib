@@ -25,7 +25,7 @@ pnpm test
 ```
 
 > [!NOTE]
-> The package manager is pnpm 12.19.0, pinned by `packageManager` in
+> The package manager is pnpm 12.20.0, pinned by `packageManager` in
 > `package.json`. `pnpm-workspace.yaml` sets `minimumReleaseAge: 1440` (a
 > version must be 24 hours old before it installs; exact exceptions are listed
 > in `minimumReleaseAgeExclude`) and `strictDepBuilds: true` with `allowBuilds`
@@ -38,7 +38,7 @@ pnpm test
 | Tool | Version | Required for |
 |---|---|---|
 | Node.js | **>= 26.4** (`engines.node`); `devEngines` pins `28.0.0-nightly20261111e8c1160d20`, which pnpm can download | Everything |
-| pnpm | **12.19.0** (`packageManager`) | Dependency install, all scripts |
+| pnpm | **12.20.0** (`packageManager`) | Dependency install, all scripts |
 | Rust + `wasm32-unknown-unknown` | `nightly-2026-11-12` (`rust-toolchain.toml`; rustup picks it up) | Only for `src/wasm/**` changes |
 | `wasm-pack` | 0.15.1, a devDependency (no global install) | Only for `src/wasm/**` changes |
 | Bash | Git Bash on Windows | `build:wasm` (shell script) |

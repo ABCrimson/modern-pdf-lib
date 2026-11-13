@@ -79,6 +79,7 @@ No export added, removed or changed.
 - **Fixtures and oracles:** `tests/fixtures/encrypted/load/` and `extra/` hold encrypted files for the load path (R5 and R6 written by qpdf, object streams, crypt filters, signature shapes). `tests/fixtures/legacy-0.26.0/` holds an AES-256 file written by the published 0.26.0 (`scripts/legacy-0.26.0/generate.ts` records the command that wrote it). `tests/oracle/encrypted-qdf.test.ts` compares decrypted objects with qpdf's, and `tests/fixtures/expected/stream-digests.json`, checked by `pnpm run fixtures:streams:check`, records the stream data of every fixture as 0.40.8 read it.
 - **Version strings:** `docs/plans/ROADMAP.md`, `docs/.vitepress/config.ts`, `VERSIONING.md` and `package.json` carry the version 0.40.9.
 - **CI:** the `pnpm/setup` action is pinned to v3.2.0 in the four workflows. The unit-test job installs the checksum-pinned qpdf, which the unit tests of the encrypted load path compare with.
+- **Tooling pins:** pnpm 12.20.0 (`packageManager`; 12.19.0 before) and oxlint-tsgolint 7.0.2007 (7.0.2006 before). pnpm 12.20.0 is past the 24-hour `minimumReleaseAge`, so its entry in `.peak-modern-holds.json` is removed; oxlint-tsgolint 7.0.2007 and its six platform packages are listed in `minimumReleaseAgeExclude` until they are 24 hours old.
 
 ### Compatibility
 

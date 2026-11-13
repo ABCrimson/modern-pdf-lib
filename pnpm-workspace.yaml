@@ -6,12 +6,14 @@ packages:
 # Supply-chain delay: a version must be at least 24 h old (minutes). Never lower this;
 # add an exact name@version to minimumReleaseAgeExclude instead.
 minimumReleaseAge: 1440
-# Exact pins younger than 1440 min on 2026-11-12 (09:55Z): the TypeScript 7.1 dev build
-# (published 2026-11-12 08:23Z) with its seven per-platform native packages, the Vue
+# Exact pins younger than 1440 min. Listed on 2026-11-12 (09:55Z): the TypeScript 7.1 dev
+# build (published 2026-11-12 08:23Z) with its seven per-platform native packages, the Vue
 # 3.6.0-rc.15 runtime set (vue and eleven @vue/* packages, published 2026-11-12 08:51Z to
 # 08:56Z), and the Playwright 1.66.0-alpha-2026-11-12 trio (playwright 05:19Z,
-# @playwright/test 05:21Z, playwright-core 06:41Z). These entries go stale on the next bump;
-# drop each one once its version is older than 24 h.
+# @playwright/test 05:21Z, playwright-core 06:41Z). Listed on 2026-11-13: oxlint-tsgolint
+# 7.0.2007 with its six @oxlint-tsgolint/* platform packages (published 2026-11-12 17:04Z
+# to 17:17Z). These entries go stale on the next bump; drop each one once its version is
+# older than 24 h.
 minimumReleaseAgeExclude:
   - 'typescript@7.1.0-dev.20261112.1'
   - '@typescript/typescript-darwin-arm64@7.1.0-dev.20261112.1'
@@ -36,6 +38,13 @@ minimumReleaseAgeExclude:
   - '@playwright/test@1.66.0-alpha-2026-11-12'
   - 'playwright@1.66.0-alpha-2026-11-12'
   - 'playwright-core@1.66.0-alpha-2026-11-12'
+  - 'oxlint-tsgolint@7.0.2007'
+  - '@oxlint-tsgolint/darwin-arm64@7.0.2007'
+  - '@oxlint-tsgolint/darwin-x64@7.0.2007'
+  - '@oxlint-tsgolint/linux-arm64@7.0.2007'
+  - '@oxlint-tsgolint/linux-x64@7.0.2007'
+  - '@oxlint-tsgolint/win32-arm64@7.0.2007'
+  - '@oxlint-tsgolint/win32-x64@7.0.2007'
 
 # Dependency build scripts are reviewed, not trusted: unlisted packages fail the install.
 strictDepBuilds: true
@@ -50,7 +59,7 @@ overrides:
   # pdfjs-dist (test oracle) lists a native canvas as optional; getTextContent does not need it.
   '@napi-rs/canvas': '-'
 
-# Agent skills shipped by dependencies are denied: this repo wires none into an agent (tsdown 0.23.7 ships a skills/ folder, pnpm 12.19 lists it as awaiting approval).
+# Agent skills shipped by dependencies are denied: this repo wires none into an agent (tsdown 0.23.7 ships a skills/ folder, pnpm 12.20 lists it as awaiting approval).
 permissions:
   tsdown:
     skills: false

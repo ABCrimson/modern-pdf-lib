@@ -132,7 +132,7 @@
     "oxc-parser": "0.158.0",
     "oxfmt": "0.78.0",
     "oxlint": "1.93.0",
-    "oxlint-tsgolint": "7.0.2006",
+    "oxlint-tsgolint": "7.0.2007",
     "pdf-lib": "1.17.1",
     "pdfjs-dist": "6.5.438",
     "publint": "0.3.25",
@@ -169,7 +169,7 @@
   "bugs": {
     "url": "https://github.com/ABCrimson/modern-pdf-lib/issues"
   },
-  "packageManager": "pnpm@12.19.0",
+  "packageManager": "pnpm@12.20.0",
   "devEngines": {
     "runtime": {
       "name": "node",
