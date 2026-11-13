@@ -12,7 +12,7 @@ permissions:
 env:
   # Must equal `channel` in rust-toolchain.toml; bump both together. A dated
   # toolchain input needs a commit of the dtolnay/rust-toolchain master branch (see .peak-modern-holds.json).
-  RUST_TOOLCHAIN: nightly-2026-11-12
+  RUST_TOOLCHAIN: nightly-2026-11-13
 
 jobs:
   # ---------------------------------------------------------------------------

@@ -125,7 +125,7 @@
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "0.18.5",
-    "@playwright/test": "1.66.0-alpha-2026-11-12",
+    "@playwright/test": "1.66.0-alpha-2026-11-13",
     "@types/node": "26.6.6",
     "@vitest/coverage-v8": "5.1.0",
     "esbuild": "0.28.2",
@@ -139,7 +139,7 @@
     "tinybench": "6.2.3",
     "tsdown": "0.23.7",
     "tsx": "4.23.15",
-    "typescript": "7.1.0-dev.20261112.1",
+    "typescript": "7.1.0-dev.20261113.1",
     "vite": "8.3.8",
     "vitepress": "2.0.0-alpha.21",
     "vitest": "5.1.0",
