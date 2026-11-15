@@ -103,7 +103,13 @@ describe('decrypted objects equal qpdf --decrypt --qdf, object by object', () =>
             .filter(([name]) => !SHAPES[name as keyof typeof SHAPES].exemptInQpdf)
             .map(([, num]) => `object ${num} 0: /Contents`)
         : [];
-      expect(differences.map((d) => d.split(': library')[0]).sort()).toEqual(documented.sort());
+      expect(
+        differences
+          .map((d) => d.split(': library')[0])
+          .sort((x, y) =>
+            x === y ? 0 : x === undefined ? 1 : y === undefined ? -1 : x < y ? -1 : 1,
+          ),
+      ).toEqual(documented.sort());
     });
   }
 });
