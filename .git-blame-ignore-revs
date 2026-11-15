@@ -1,3 +1,33 @@
-# Commits that only reformat code. Used by `git blame --ignore-revs-file` and by GitHub blame.
+# Commits that only reformat or move code. Used by `git blame --ignore-revs-file` and by GitHub blame.
 # style: reformat src, tests and scripts with oxfmt 0.78.0
 3049c9eb106c56d3172bef163d8f860b0f5c9ef8
+# move: Rust crates from src/wasm/<crate>/ to crates/<crate>/
+920a39801778d242b2a959771e7d586f6cce6ba6
+# move: limits and warnings to src/internal/
+c76aab3c8e4b83546f07b331c2976bc17bbcca1a
+# move: stream codecs to src/codecs/
+891154e6655a8d19edfed193a19d32c5954dc8e8
+# move: parser text extraction to parser/text, syntax layer to parser/internal
+ff2db12f48f71598acdbcbbf969f3fe0d28b9cd0
+# move: core writers to core/io, internal modules to core/internal, graphics and color
+cfcfee1a901d22f172aa698d49bc08e22556e035
+# move: assets by format, with the font and image tests
+dcc840e1e1090fc0bf56db251688655f73406a94
+# move: signature modules by standard into cms, pki, ltv and pades
+e1a29e2ecad7d386e8284098047b889bc19c2e21
+# move: compliance modules by standard, crypto internals
+70f8610bd12735675880fdfedb7197a51befd9d3
+# move: barcodes by symbology family, WASM TypeScript internals
+9ac0487b0076413da784b889c6a03339c01b3346
+# move: form modules that no package entry exports from to src/form/internal/
+0e18c09f568e0e239b43afdac92502ea44a8356f
+# move: test layout mirrors src
+ffbe2911149ccd301477a14bda350db34ebebf1e
+# move: scripts by purpose into build, dev, fixtures and conformance
+d8e5beaafae2b9390da8d7aefc1d79fdf6930b91
+# move: extra tsconfig files and typedoc.json beside what they check, renames only
+f7403dd9ff7821bce5160293a133adf4a0ec22d3
+# move: rebase the moved tsconfig files and typedoc.json on their folders
+9eaeb2b3787c27048baf97e4811a0538c16bc47b
+# move: docs/plans/ROADMAP.md to the repository root
+fd54b50483a4a177f34ffd5b4ced678a3bfb2e51
