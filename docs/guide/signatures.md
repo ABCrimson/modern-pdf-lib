@@ -298,7 +298,7 @@ openssl pkcs8 -topk8 -inform PEM -outform DER \
 - **Signature schemes:** RSA PKCS#1 v1.5 (default), **RSASSA-PSS** (`signatureScheme: 'pss'`), and ECDSA (P-256, P-384, P-521). Digests: SHA-256/384/512.
 - **CAdES-BES / PAdES-B-B baseline:** the ESS signing-certificate-v2 attribute via `cades: true` (see above).
 - **Certificate chain & path building:** `buildCertPath` (RFC 5280 §6.1 path construction) and `validateCertificateChain` — see the [verification guide](./verification.md).
-- **Revocation:** CRL and OCSP checking, delta CRLs, OCSP stapling, and offline/embedded revocation (`src/signature/crl.ts`, `ocsp.ts`, `offlineRevocation.ts`). Only an authenticated OCSP answer can report `good` or `revoked`; CRL lookups and embedded answers are not authenticated and offline results are `unknown`. See the [verification guide](./verification.md).
+- **Revocation:** CRL and OCSP checking, delta CRLs, OCSP stapling, and offline/embedded revocation (`src/signature/pki/crl.ts`, `ocsp.ts`, `offlineRevocation.ts`). Only an authenticated OCSP answer can report `good` or `revoked`; CRL lookups and embedded answers are not authenticated and offline results are `unknown`. See the [verification guide](./verification.md).
 - **LTV (Long-Term Validation):** DSS embedding (`embedLtvData`) and document timestamps for archival signatures.
 
 > **EdDSA (Ed25519)** and **deterministic ECDSA (RFC 6979)** are not currently implemented — standard randomized ECDSA and RSA (PKCS#1 v1.5 / PSS) cover the algorithms PDF signing relies on today.

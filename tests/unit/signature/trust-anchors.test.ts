@@ -11,18 +11,18 @@
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { TimestampVerificationError } from '../../../src/errors.js';
-import { prepareForSigning } from '../../../src/signature/byteRange.js';
-import { validateCertificateChain } from '../../../src/signature/chainValidator.js';
-import { verifySignatureDetailed } from '../../../src/signature/detailedVerifier.js';
-import { appendIncrementalUpdate } from '../../../src/signature/incrementalSave.js';
-import { detectModifications } from '../../../src/signature/modificationDetector.js';
-import { validateSignatureChain } from '../../../src/signature/multiSignatureValidator.js';
-import { checkCertificateStatus } from '../../../src/signature/ocsp.js';
-import { verifyOfflineRevocation } from '../../../src/signature/offlineRevocation.js';
-import { encodeInteger, encodeOID, encodeSequence } from '../../../src/signature/pkcs7.js';
-import { signPdf } from '../../../src/signature/signatureHandler.js';
-import { verifySignatures } from '../../../src/signature/signatureVerifier.js';
-import { parseTimestampResponse, requestTimestamp } from '../../../src/signature/timestamp.js';
+import { prepareForSigning } from '../../../src/signature/pades/byteRange.js';
+import { validateCertificateChain } from '../../../src/signature/pki/chainValidator.js';
+import { verifySignatureDetailed } from '../../../src/signature/pades/detailedVerifier.js';
+import { appendIncrementalUpdate } from '../../../src/signature/pades/incrementalSave.js';
+import { detectModifications } from '../../../src/signature/pades/modificationDetector.js';
+import { validateSignatureChain } from '../../../src/signature/pades/multiSignatureValidator.js';
+import { checkCertificateStatus } from '../../../src/signature/pki/ocsp.js';
+import { verifyOfflineRevocation } from '../../../src/signature/pki/offlineRevocation.js';
+import { encodeInteger, encodeOID, encodeSequence } from '../../../src/signature/cms/pkcs7.js';
+import { signPdf } from '../../../src/signature/pades/signatureHandler.js';
+import { verifySignatures } from '../../../src/signature/pades/signatureVerifier.js';
+import { parseTimestampResponse, requestTimestamp } from '../../../src/signature/cms/timestamp.js';
 import {
   ascii,
   bodyBytes,

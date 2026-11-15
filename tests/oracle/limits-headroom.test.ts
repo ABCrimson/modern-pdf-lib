@@ -60,8 +60,8 @@ import { embedPng } from '../../src/assets/image/internal/pngEmbed.js';
 import { embedJpeg } from '../../src/assets/image/jpeg/jpegEmbed.js';
 import { decodeWebP, isWebP } from '../../src/assets/image/webp/webpDecode.js';
 import { getTiffPageCount, isTiff } from '../../src/assets/image/tiff/tiffDecode.js';
-import { parseDerTlv } from '../../src/signature/pkcs7.js';
-import type { Asn1Node } from '../../src/signature/pkcs7.js';
+import { parseDerTlv } from '../../src/signature/cms/pkcs7.js';
+import type { Asn1Node } from '../../src/signature/cms/pkcs7.js';
 
 /** The factor between a measured maximum and its limit. */
 const HEADROOM = 4;

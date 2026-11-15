@@ -1,10 +1,10 @@
 /**
- * Entries for tests/adversarial/der-limits.test.ts: the DER reader of src/signature/pkcs7.ts on
+ * Entries for tests/adversarial/der-limits.test.ts: the DER reader of src/signature/cms/pkcs7.ts on
  * inputs built in code. The runner loads this module in a worker and calls one named export.
  */
 import type { JsonValue } from '../helpers/budget.js';
-import { parseDerTlv } from '../../src/signature/pkcs7.js';
-import { verifySignatures } from '../../src/signature/signatureVerifier.js';
+import { parseDerTlv } from '../../src/signature/cms/pkcs7.js';
+import { verifySignatures } from '../../src/signature/pades/signatureVerifier.js';
 
 /** Reads the input as one DER value and returns its tag and its number of children. */
 export function parse(bytes: Uint8Array, _args: JsonValue): JsonValue {

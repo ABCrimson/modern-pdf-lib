@@ -7,9 +7,9 @@
  */
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { verifySignatures } from '../../../src/signature/signatureVerifier.js';
-import { verifySignatureDetailed } from '../../../src/signature/detailedVerifier.js';
-import { embedLtvData } from '../../../src/signature/ltvEmbed.js';
+import { verifySignatures } from '../../../src/signature/pades/signatureVerifier.js';
+import { verifySignatureDetailed } from '../../../src/signature/pades/detailedVerifier.js';
+import { embedLtvData } from '../../../src/signature/ltv/ltvEmbed.js';
 
 interface Node {
   tag: number;

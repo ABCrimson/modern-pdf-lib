@@ -1,5 +1,5 @@
 /**
- * Tests for the DER reader `parseDerTlv` (src/signature/pkcs7.ts): the length rules, the depth
+ * Tests for the DER reader `parseDerTlv` (src/signature/cms/pkcs7.ts): the length rules, the depth
  * limit, a reference comparison on real certificates, and the verifiers' handling of a signature
  * whose bytes break a rule (it is reported exactly like an unparsable signature, its reason stays
  * the signing reason, and only verifySignatureDetailed names the refusal in errors).
@@ -9,12 +9,12 @@ import { runInNewContext } from 'node:vm';
 import { describe, expect, it } from 'vitest';
 import { INTERNAL_LIMITS } from '../../../src/internal/limits.js';
 import { ResourceLimitError } from '../../../src/errors.js';
-import { findSignatures } from '../../../src/signature/byteRange.js';
-import { verifySignatureDetailed } from '../../../src/signature/detailedVerifier.js';
-import { parseDerTlv } from '../../../src/signature/pkcs7.js';
-import type { Asn1Node } from '../../../src/signature/pkcs7.js';
-import { signPdf } from '../../../src/signature/signatureHandler.js';
-import { verifySignatures } from '../../../src/signature/signatureVerifier.js';
+import { findSignatures } from '../../../src/signature/pades/byteRange.js';
+import { verifySignatureDetailed } from '../../../src/signature/pades/detailedVerifier.js';
+import { parseDerTlv } from '../../../src/signature/cms/pkcs7.js';
+import type { Asn1Node } from '../../../src/signature/cms/pkcs7.js';
+import { signPdf } from '../../../src/signature/pades/signatureHandler.js';
+import { verifySignatures } from '../../../src/signature/pades/signatureVerifier.js';
 import {
   buildTestCrl,
   buildTestCertificate,
@@ -340,7 +340,7 @@ describe('verifiers and DER failures', () => {
 describe('hexToBytes in the four signature modules', () => {
   /** The trimming rules the modules had before the backward scan, written with the regex. */
   const references: Record<string, (hex: string) => Uint8Array> = {
-    'signatureVerifier.ts': (hex) => {
+    'pades/signatureVerifier.ts': (hex) => {
       let clean = hex.replace(/\s/g, '');
       if (clean.length % 2 !== 0) clean = '0' + clean;
       let endIdx = clean.length;
@@ -351,7 +351,7 @@ describe('hexToBytes in the four signature modules', () => {
       }
       return Uint8Array.fromHex(clean.slice(0, endIdx));
     },
-    'detailedVerifier.ts': (hex) => {
+    'pades/detailedVerifier.ts': (hex) => {
       let clean = hex.replace(/\s/g, '');
       if (clean.length % 2 !== 0) clean = '0' + clean;
       const m = clean.match(/(00)+$/);
@@ -362,7 +362,7 @@ describe('hexToBytes in the four signature modules', () => {
       }
       return Uint8Array.fromHex(clean);
     },
-    'counterSignature.ts': (hex) => {
+    'cms/counterSignature.ts': (hex) => {
       let clean = hex.replace(/\s/g, '');
       const m = clean.match(/(00)+$/);
       if (m && m[0].length > 4) {
@@ -372,7 +372,7 @@ describe('hexToBytes in the four signature modules', () => {
       if (clean.length % 2 !== 0) clean = '0' + clean;
       return Uint8Array.fromHex(clean);
     },
-    'ltvEmbed.ts': (hex) => references['counterSignature.ts']!(hex),
+    'ltv/ltvEmbed.ts': (hex) => references['cms/counterSignature.ts']!(hex),
   };
 
   /**

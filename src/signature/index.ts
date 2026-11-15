@@ -13,15 +13,19 @@
 // Signature handler (primary public API)
 // ---------------------------------------------------------------------------
 
-export { signPdf, getSignatures } from './signatureHandler.js';
-export type { SignOptions, VisibleSignatureOptions, PdfSignatureInfo } from './signatureHandler.js';
+export { signPdf, getSignatures } from './pades/signatureHandler.js';
+export type {
+  SignOptions,
+  VisibleSignatureOptions,
+  PdfSignatureInfo,
+} from './pades/signatureHandler.js';
 
 // ---------------------------------------------------------------------------
 // Signature verification
 // ---------------------------------------------------------------------------
 
-export { verifySignatures, verifySignature } from './signatureVerifier.js';
-export type { SignatureVerificationResult } from './signatureVerifier.js';
+export { verifySignatures, verifySignature } from './pades/signatureVerifier.js';
+export type { SignatureVerificationResult } from './pades/signatureVerifier.js';
 
 // ---------------------------------------------------------------------------
 // ByteRange utilities
@@ -32,8 +36,8 @@ export {
   computeSignatureHash,
   embedSignature,
   findSignatures,
-} from './byteRange.js';
-export type { ByteRangeResult, PrepareAppearanceOptions } from './byteRange.js';
+} from './pades/byteRange.js';
+export type { ByteRangeResult, PrepareAppearanceOptions } from './pades/byteRange.js';
 
 // ---------------------------------------------------------------------------
 // PKCS#7 / CMS builder
@@ -51,15 +55,19 @@ export {
   encodePrintableString,
   encodeUTCTime,
   encodeContextTag,
-} from './pkcs7.js';
-export type { SignerInfo, SignatureOptions } from './pkcs7.js';
+} from './cms/pkcs7.js';
+export type { SignerInfo, SignatureOptions } from './cms/pkcs7.js';
 
 // ---------------------------------------------------------------------------
 // Timestamp (RFC 3161)
 // ---------------------------------------------------------------------------
 
-export { requestTimestamp, buildTimestampRequest, parseTimestampResponse } from './timestamp.js';
-export type { TimestampResult } from './timestamp.js';
+export {
+  requestTimestamp,
+  buildTimestampRequest,
+  parseTimestampResponse,
+} from './cms/timestamp.js';
+export type { TimestampResult } from './cms/timestamp.js';
 
 // ---------------------------------------------------------------------------
 // OCSP (RFC 6960)
@@ -70,41 +78,41 @@ export {
   parseOcspResponse,
   checkCertificateStatus,
   extractOcspUrl,
-} from './ocsp.js';
-export type { OcspResponse, OcspSingleResponse, OcspResult } from './ocsp.js';
+} from './pki/ocsp.js';
+export type { OcspResponse, OcspSingleResponse, OcspResult } from './pki/ocsp.js';
 
 // ---------------------------------------------------------------------------
 // CRL (X.509 v2)
 // ---------------------------------------------------------------------------
 
-export { parseCrl, downloadCrl, isCertificateRevoked, extractCrlUrls } from './crl.js';
-export type { CrlData, CrlEntry } from './crl.js';
+export { parseCrl, downloadCrl, isCertificateRevoked, extractCrlUrls } from './pki/crl.js';
+export type { CrlData, CrlEntry } from './pki/crl.js';
 
 // ---------------------------------------------------------------------------
 // Certificate chain validation
 // ---------------------------------------------------------------------------
 
-export { buildCertificateChain, validateCertificateChain } from './chainValidator.js';
+export { buildCertificateChain, validateCertificateChain } from './pki/chainValidator.js';
 export type {
   CertificateChainResult,
   ChainValidationResult,
   ChainValidationOptions,
   CertificateStatus,
-} from './chainValidator.js';
+} from './pki/chainValidator.js';
 
 // ---------------------------------------------------------------------------
 // Offline revocation checking
 // ---------------------------------------------------------------------------
 
-export { extractEmbeddedRevocationData, verifyOfflineRevocation } from './offlineRevocation.js';
-export type { EmbeddedRevocationData, OfflineRevocationResult } from './offlineRevocation.js';
+export { extractEmbeddedRevocationData, verifyOfflineRevocation } from './pki/offlineRevocation.js';
+export type { EmbeddedRevocationData, OfflineRevocationResult } from './pki/offlineRevocation.js';
 
 // ---------------------------------------------------------------------------
 // Custom trust store
 // ---------------------------------------------------------------------------
 
-export { TrustStore } from './trustStore.js';
-export type { TrustStoreOptions } from './trustStore.js';
+export { TrustStore } from './pki/trustStore.js';
+export type { TrustStoreOptions } from './pki/trustStore.js';
 
 // ---------------------------------------------------------------------------
 // Certificate policy validation
@@ -115,52 +123,56 @@ export {
   validateExtendedKeyUsage,
   validateCertificatePolicy,
   EKU_OIDS,
-} from './certPolicy.js';
+} from './pki/certPolicy.js';
 export type {
   KeyUsageFlag,
   KeyUsageValidationResult,
   EkuValidationResult,
   PolicyValidationOptions,
   PolicyValidationResult,
-} from './certPolicy.js';
+} from './pki/certPolicy.js';
 
 // ---------------------------------------------------------------------------
 // Revocation cache
 // ---------------------------------------------------------------------------
 
-export { RevocationCache, deriveCacheKey } from './revocationCache.js';
-export type { OcspCacheEntry, CrlCacheEntry, RevocationCacheOptions } from './revocationCache.js';
+export { RevocationCache, deriveCacheKey } from './internal/revocationCache.js';
+export type {
+  OcspCacheEntry,
+  CrlCacheEntry,
+  RevocationCacheOptions,
+} from './internal/revocationCache.js';
 
 // Re-export cache-specific types under qualified names to avoid conflict
 // with the OCSP/CRL module types that share the same base names.
 export type {
   OcspResult as CachedOcspResult,
   CrlData as CachedCrlData,
-} from './revocationCache.js';
+} from './internal/revocationCache.js';
 
 // ---------------------------------------------------------------------------
 // OCSP stapling
 // ---------------------------------------------------------------------------
 
-export { embedOcspResponse, extractStapledOcsp } from './ocspStaple.js';
+export { embedOcspResponse, extractStapledOcsp } from './internal/ocspStaple.js';
 
 // ---------------------------------------------------------------------------
 // Delta CRL
 // ---------------------------------------------------------------------------
 
-export { parseDeltaCrl, mergeCrls, isDeltaCrl } from './deltaCrl.js';
-export type { DeltaCrlData } from './deltaCrl.js';
+export { parseDeltaCrl, mergeCrls, isDeltaCrl } from './internal/deltaCrl.js';
+export type { DeltaCrlData } from './internal/deltaCrl.js';
 
 // ---------------------------------------------------------------------------
 // Detailed verification
 // ---------------------------------------------------------------------------
 
-export { verifySignatureDetailed } from './detailedVerifier.js';
+export { verifySignatureDetailed } from './pades/detailedVerifier.js';
 export type {
   DetailedVerificationResult,
   DetailedVerifyOptions,
   CertificateInfo,
-} from './detailedVerifier.js';
+} from './pades/detailedVerifier.js';
 
 // ---------------------------------------------------------------------------
 // Incremental save with signature preservation
@@ -172,21 +184,21 @@ export {
   findExistingSignatures,
   validateByteRangeIntegrity,
   parseExistingTrailer,
-} from './incrementalSave.js';
+} from './pades/incrementalSave.js';
 export type {
   SignatureByteRange,
   IncrementalSaveOptions,
   AppendOptions,
   IncrementalObject,
   TrailerInfo,
-} from './incrementalSave.js';
+} from './pades/incrementalSave.js';
 
 // ---------------------------------------------------------------------------
 // Multi-signature chain validation
 // ---------------------------------------------------------------------------
 
-export { validateSignatureChain } from './multiSignatureValidator.js';
-export type { SignatureChainEntry, SignatureChainResult } from './multiSignatureValidator.js';
+export { validateSignatureChain } from './pades/multiSignatureValidator.js';
+export type { SignatureChainEntry, SignatureChainResult } from './pades/multiSignatureValidator.js';
 
 // ---------------------------------------------------------------------------
 // MDP (DocMDP) certification policy
@@ -197,46 +209,46 @@ export {
   setCertificationLevel,
   getCertificationLevel,
   buildDocMdpReference,
-} from './mdpPolicy.js';
+} from './pades/mdpPolicy.js';
 
 // ---------------------------------------------------------------------------
 // Modification detection
 // ---------------------------------------------------------------------------
 
-export { detectModifications } from './modificationDetector.js';
+export { detectModifications } from './pades/modificationDetector.js';
 export type {
   ModificationViolationType,
   ModificationViolation,
   ModificationReport,
-} from './modificationDetector.js';
+} from './pades/modificationDetector.js';
 
 // ---------------------------------------------------------------------------
 // Signature field lock
 // ---------------------------------------------------------------------------
 
-export { addFieldLock, getFieldLocks, buildFieldLockDict } from './fieldLock.js';
-export type { FieldLockOptions, FieldLockInfo } from './fieldLock.js';
+export { addFieldLock, getFieldLocks, buildFieldLockDict } from './pades/fieldLock.js';
+export type { FieldLockOptions, FieldLockInfo } from './pades/fieldLock.js';
 
 // ---------------------------------------------------------------------------
 // Document diff (signed vs current content)
 // ---------------------------------------------------------------------------
 
-export { diffSignedContent } from './documentDiff.js';
-export type { DocumentDiff, DiffEntry } from './documentDiff.js';
+export { diffSignedContent } from './pades/documentDiff.js';
+export type { DocumentDiff, DiffEntry } from './pades/documentDiff.js';
 
 // ---------------------------------------------------------------------------
 // Counter-signatures
 // ---------------------------------------------------------------------------
 
-export { addCounterSignature, getCounterSignatures } from './counterSignature.js';
-export type { CounterSignatureInfo } from './counterSignature.js';
+export { addCounterSignature, getCounterSignatures } from './cms/counterSignature.js';
+export type { CounterSignatureInfo } from './cms/counterSignature.js';
 
 // ---------------------------------------------------------------------------
 // LTV (Long-Term Validation) embedding
 // ---------------------------------------------------------------------------
 
-export { embedLtvData, buildDssDictionary, hasLtvData } from './ltvEmbed.js';
-export type { LtvOptions, DssData } from './ltvEmbed.js';
+export { embedLtvData, buildDssDictionary, hasLtvData } from './ltv/ltvEmbed.js';
+export type { LtvOptions, DssData } from './ltv/ltvEmbed.js';
 
 // ---------------------------------------------------------------------------
 // Incremental save optimization
@@ -246,5 +258,5 @@ export {
   optimizeIncrementalSave,
   computeObjectHash,
   findChangedObjects,
-} from './incrementalOptimizer.js';
-export type { IncrementalChange } from './incrementalOptimizer.js';
+} from './pades/incrementalOptimizer.js';
+export type { IncrementalChange } from './pades/incrementalOptimizer.js';

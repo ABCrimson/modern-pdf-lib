@@ -1303,8 +1303,8 @@ export type { CalGrayParams, CalRGBParams, LabParams } from './color/colorSpaces
 export {
   buildDocTimeStampDict,
   DEFAULT_DOC_TIMESTAMP_CONTENTS_SIZE,
-} from './signature/docTimeStamp.js';
-export type { DocTimeStampOptions } from './signature/docTimeStamp.js';
+} from './signature/ltv/docTimeStamp.js';
+export type { DocTimeStampOptions } from './signature/ltv/docTimeStamp.js';
 
 // ---------------------------------------------------------------------------
 // Word/line/paragraph reconstruction (0.28.3)
@@ -1442,13 +1442,13 @@ export type { TaskRunner, WorkerPool, WorkerPoolOptions } from './runtime/worker
 // ---------------------------------------------------------------------------
 // External (HSM/KMS) deferred-hash signer (0.34.4)
 // ---------------------------------------------------------------------------
-export { signDeferred } from './signature/externalSigner.js';
+export { signDeferred } from './signature/pades/externalSigner.js';
 export type {
   SignatureAlgorithm,
   ExternalSigner,
   DeferredSignOptions,
   DeferredSignResult,
-} from './signature/externalSigner.js';
+} from './signature/pades/externalSigner.js';
 
 // ---------------------------------------------------------------------------
 // WOFF / WOFF2 font input (0.36.3)
@@ -1476,10 +1476,10 @@ export { createSandbox } from './form/scriptSandbox.js';
 // ---------------------------------------------------------------------------
 // Signature verification, revocation & trust (docs/guide/verification.md)
 // ---------------------------------------------------------------------------
-export { checkCertificateStatus, extractOcspUrl } from './signature/ocsp.js';
-export { downloadCrl, isCertificateRevoked, extractCrlUrls } from './signature/crl.js';
-export { TrustStore } from './signature/trustStore.js';
-export { verifySignatureDetailed } from './signature/detailedVerifier.js';
+export { checkCertificateStatus, extractOcspUrl } from './signature/pki/ocsp.js';
+export { downloadCrl, isCertificateRevoked, extractCrlUrls } from './signature/pki/crl.js';
+export { TrustStore } from './signature/pki/trustStore.js';
+export { verifySignatureDetailed } from './signature/pades/detailedVerifier.js';
 
 // ---------------------------------------------------------------------------
 // JPEG 2000 decoding internals (docs/guide/jpeg2000.md)
@@ -1518,17 +1518,17 @@ export {
 // ---------------------------------------------------------------------------
 // Certificate chain / policy / offline revocation (docs/guide/verification.md)
 // ---------------------------------------------------------------------------
-export { buildCertificateChain, validateCertificateChain } from './signature/chainValidator.js';
+export { buildCertificateChain, validateCertificateChain } from './signature/pki/chainValidator.js';
 export {
   validateCertificatePolicy,
   validateKeyUsage,
   validateExtendedKeyUsage,
   EKU_OIDS,
-} from './signature/certPolicy.js';
+} from './signature/pki/certPolicy.js';
 export {
   extractEmbeddedRevocationData,
   verifyOfflineRevocation,
-} from './signature/offlineRevocation.js';
+} from './signature/pki/offlineRevocation.js';
 
 // ---------------------------------------------------------------------------
 // Advanced signatures & cryptography (0.34.x): CAdES-BES / PAdES-B-B baseline
@@ -1539,9 +1539,9 @@ export {
 export {
   buildSigningCertificateV2Attribute,
   extractSigningCertificateV2,
-} from './signature/cadesAttributes.js';
-export { buildCertPath } from './signature/certPathBuilder.js';
-export type { CertPathResult } from './signature/certPathBuilder.js';
+} from './signature/cms/cadesAttributes.js';
+export { buildCertPath } from './signature/pki/certPathBuilder.js';
+export type { CertPathResult } from './signature/pki/certPathBuilder.js';
 
 // ---------------------------------------------------------------------------
 // Security & redaction (0.35.x): static threat scanning, content sanitization,

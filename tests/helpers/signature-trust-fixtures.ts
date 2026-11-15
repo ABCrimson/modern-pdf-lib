@@ -1,6 +1,6 @@
 /**
  * Fixture builders for tests/unit/signature/trust-anchors.test.ts and the
- * `checkCertificateStatus` cases of tests/unit/signature/ocsp.test.ts.
+ * `checkCertificateStatus` cases of tests/unit/signature/pki/ocsp.test.ts.
  *
  * The builders are copied from the signature unit tests (chainValidator,
  * ocsp, offlineRevocation, signatureVerifier and timestamp) and typed
@@ -20,8 +20,8 @@ import {
   encodeUTCTime,
   encodeUtf8String,
   parseDerTlv,
-} from '../../src/signature/pkcs7.js';
-import type { Asn1Node } from '../../src/signature/pkcs7.js';
+} from '../../src/signature/cms/pkcs7.js';
+import type { Asn1Node } from '../../src/signature/cms/pkcs7.js';
 
 // ---------------------------------------------------------------------------
 // Byte and DER utilities

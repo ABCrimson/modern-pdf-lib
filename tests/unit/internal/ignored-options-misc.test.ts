@@ -13,7 +13,7 @@ import { metadataPlugin } from '../../../src/plugins/builtins/metadataPlugin.js'
 import {
   appendIncrementalUpdate,
   saveIncrementalWithSignaturePreservation,
-} from '../../../src/signature/incrementalSave.js';
+} from '../../../src/signature/pades/incrementalSave.js';
 import { buildPdfX6OutputIntent } from '../../../src/compliance/pdfX6.js';
 import { applyTablePreset } from '../../../src/layout/presets.js';
 import { PdfStructureTree } from '../../../src/accessibility/structureTree.js';

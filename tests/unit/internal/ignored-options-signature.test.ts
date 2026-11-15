@@ -8,12 +8,12 @@
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { MockInstance } from 'vitest';
 import { createPdf } from '../../../src/index.js';
-import { signPdf } from '../../../src/signature/signatureHandler.js';
-import { addFieldLock } from '../../../src/signature/fieldLock.js';
-import { MdpPermission, setCertificationLevel } from '../../../src/signature/mdpPolicy.js';
-import { verifySignatureDetailed } from '../../../src/signature/detailedVerifier.js';
-import { validateCertificateChain } from '../../../src/signature/chainValidator.js';
-import type { SignOptions } from '../../../src/signature/signatureHandler.js';
+import { signPdf } from '../../../src/signature/pades/signatureHandler.js';
+import { addFieldLock } from '../../../src/signature/pades/fieldLock.js';
+import { MdpPermission, setCertificationLevel } from '../../../src/signature/pades/mdpPolicy.js';
+import { verifySignatureDetailed } from '../../../src/signature/pades/detailedVerifier.js';
+import { validateCertificateChain } from '../../../src/signature/pki/chainValidator.js';
+import type { SignOptions } from '../../../src/signature/pades/signatureHandler.js';
 import { resetWarningsForTesting } from '../../../src/internal/warnings.js';
 import { generateTestCert } from '../../helpers/signature-trust-fixtures.js';
 

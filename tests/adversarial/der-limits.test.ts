@@ -1,12 +1,12 @@
 /**
- * The DER reader of src/signature/pkcs7.ts on constructed inputs, under the budgeted runner
+ * The DER reader of src/signature/cms/pkcs7.ts on constructed inputs, under the budgeted runner
  * (2 s, 512 MiB over the baseline): each ends in the asserted error, or completes with the right
  * result, and none is ended by the runner.
  */
 import { describe, expect, it } from 'vitest';
 import { INTERNAL_LIMITS } from '../../src/internal/limits.js';
-import { findSignatures } from '../../src/signature/byteRange.js';
-import { signPdf } from '../../src/signature/signatureHandler.js';
+import { findSignatures } from '../../src/signature/pades/byteRange.js';
+import { signPdf } from '../../src/signature/pades/signatureHandler.js';
 import { createMinimalPdf, generateTestCert } from '../helpers/signature-trust-fixtures.js';
 import { DEFAULT_BUDGET, runWithinBudget, timeLimitMs } from '../helpers/budget.js';
 import type { BudgetOutcome } from '../helpers/budget.js';
