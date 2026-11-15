@@ -21,7 +21,7 @@ Security fixes ship only in a new release of the latest line; there are no backp
 | 0.40.8 | :x: (upgrade) |
 | 0.40.5 – 0.40.7 | :x: (affected by the advisory published with 0.40.8; upgrade) |
 | 0.40.0 – 0.40.4 | :x: (affected by the advisories published with 0.40.5 and 0.40.8; upgrade) |
-| < 0.40.0 | :x: |
+| < 0.40.0 | :x: (affected by the advisories published with 0.40.5 and 0.40.8; 0.9.0 to 0.25.0 are also affected by [GHSA-8cr5-5xhg-x4jh](https://github.com/ABCrimson/modern-pdf-lib/security/advisories/GHSA-8cr5-5xhg-x4jh), where `encrypt()` had no effect, fixed in 0.26.0; upgrade) |
 
 If you are on an older release, upgrade before filing — the issue may already be
 fixed. See [CHANGELOG.md](./CHANGELOG.md) and [VERSIONING.md](./VERSIONING.md).

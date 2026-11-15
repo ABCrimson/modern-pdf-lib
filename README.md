@@ -388,7 +388,7 @@ const stream = doc.saveAsStream(); // throws UnsupportedEncryptionError (code 'u
 <summary><strong>Pages</strong> &mdash; draw text, images, shapes, SVG</summary>
 
 ```ts
-const page = doc.addPage(PageSizes.LETTER);
+const page = doc.addPage(PageSizes.Letter);
 const font = await doc.embedFont(StandardFonts.Helvetica);
 
 page.drawText('Hello', { x: 50, y: 700, size: 24, font });
@@ -580,8 +580,10 @@ import { createPdf, PageSizes } from 'modern-pdf-lib';
 const doc = createPdf();
 const page = doc.addPage(PageSizes.A4);
 
-// QR code
-page.drawQrCode('https://example.com', { x: 50, y: 700, size: 120 });
+// QR code: moduleSize is the width of one square in points, so the printed
+// width is (modules + 2 * quietZone) * moduleSize; for this URL (25 modules,
+// default quiet zone of 4) a moduleSize of 3.6 gives about 119 pt.
+page.drawQrCode('https://example.com', { x: 50, y: 700, moduleSize: 3.6 });
 
 // Barcodes (Code 128, EAN-13, UPC-A, Code 39, ITF, PDF417, Data Matrix)
 import { encodeCode128, encodeEan13, renderStyledBarcode } from 'modern-pdf-lib';

@@ -1428,7 +1428,7 @@
       "id": "cap-perf-rt-node",
       "region": "guide-performance-runtimes",
       "doc": "docs/guide/performance.md",
-      "text": "Node.js | Yes | Unit tests gate on Node 26; Node 24 and the devEngines Node 28 nightly run as non-gating probes",
+      "text": "Node.js | Yes | Unit tests gate on Node 26; the devEngines Node 28 nightly runs as a non-gating probe",
       "grade": "behaviour",
       "tests": [
         "cap-ci-runtimes"
@@ -1531,7 +1531,7 @@
       "id": "cap-ts-rt-node",
       "region": "guide-troubleshooting-runtimes",
       "doc": "docs/guide/troubleshooting.md",
-      "text": "Node.js | 26.4 (engines); Uint8Array base64 from 25.0.0 | Yes (Node 26 gates; Node 24 and the devEngines Node 28 nightly are non-gating probes)",
+      "text": "Node.js | 26.4 (engines); Uint8Array base64 from 25.0.0 | Yes (Node 26 gates; the devEngines Node 28 nightly is a non-gating probe)",
       "grade": "behaviour",
       "tests": [
         "cap-ci-runtimes",

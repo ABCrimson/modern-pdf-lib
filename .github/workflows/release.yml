@@ -261,7 +261,11 @@ jobs:
             pack/*.tgz
             modern-pdf-wasm-*.tar.gz
           generate_release_notes: true
-          make_latest: legacy
+          # Mark each new release as Latest. `legacy` would let GitHub pick by commit date, which
+          # can leave an older release marked Latest. A re-run for an older tag marks that older
+          # release Latest too, so after re-running an old tag, restore the mark with
+          # `gh release edit <newest tag> --latest`.
+          make_latest: true
 
 # Docs are deployed by the dedicated docs.yml workflow on every push to master
 # (decoupled from version tags), so there is no docs job here.

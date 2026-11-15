@@ -257,7 +257,7 @@ Runtime support (Node.js `engines` `>=26.4`; the other minimums are from MDN bro
 
 | Runtime | Minimum | Tested in CI |
 |---|---|---|
-| Node.js | 26.4 (`engines`); `Uint8Array` base64 from 25.0.0 | Yes (Node 26 gates; Node 24 and the `devEngines` Node 28 nightly are non-gating probes) |
+| Node.js | 26.4 (`engines`); `Uint8Array` base64 from 25.0.0 | Yes (Node 26 gates; the `devEngines` Node 28 nightly is a non-gating probe) |
 | Deno | 2.5.0 | No |
 | Bun | 1.1.31 | No |
 | Cloudflare Workers | none stated | No |

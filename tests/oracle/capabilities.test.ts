@@ -606,13 +606,14 @@ describe('rows that are not about PDF bytes', () => {
   );
 
   test(
-    'CI: unit tests gate on Node 26 with Node 24 as a probe; Playwright runs Chromium, Firefox and WebKit; no Deno, Bun or workerd job',
+    'CI: unit tests gate on Node 26 with the devEngines runtime as a probe; Playwright runs Chromium, Firefox and WebKit; no Deno, Bun or workerd job',
     { meta: { capability: ['cap-ci-runtimes'] } },
     () => {
       const ci = readFileSync(join(ROOT, '.github/workflows/ci.yml'), 'utf8');
       const playwright = readFileSync(join(ROOT, 'playwright.config.ts'), 'utf8');
       expect(ci).toMatch(/runtime: node@26/);
-      expect(ci).toMatch(/runtime: node@24/);
+      expect(ci).not.toMatch(/runtime: node@24/);
+      expect(ci).toMatch(/name: devEngines runtime/);
       expect(ci).toMatch(/playwright install/);
       for (const name of ['chromium', 'firefox', 'webkit']) {
         expect(playwright).toContain(`name: '${name}'`);

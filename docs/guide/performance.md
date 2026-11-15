@@ -383,7 +383,7 @@ const caps = detectRuntimeCapabilities();
 
 | Runtime | Tested in CI | Notes |
 |:---|:---:|:---|
-| Node.js | Yes | Unit tests gate on Node 26; Node 24 and the `devEngines` Node 28 nightly run as non-gating probes |
+| Node.js | Yes | Unit tests gate on Node 26; the `devEngines` Node 28 nightly runs as a non-gating probe |
 | Bun | No | Not tested in CI |
 | Deno | No | Not tested in CI |
 | Cloudflare Workers | No | 128 MB memory limit; use streaming |

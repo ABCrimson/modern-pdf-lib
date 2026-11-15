@@ -208,7 +208,8 @@ jobs:
     needs: build-ts
     runs-on: ubuntu-latest
     timeout-minutes: 45
-    # Experimental legs report but never fail the workflow.
+    # An experimental leg reports but never fails the workflow. The suite is not run below the
+    # engines floor (Node 24 fails by design), so there is no leg for it.
     continue-on-error: ${{ matrix.experimental }}
     strategy:
       fail-fast: false
@@ -219,11 +220,6 @@ jobs:
             id: node-26
             runtime: node@26
             experimental: false
-          # Probe: the older line, to see how far below the engines floor the suite holds.
-          - name: node 24
-            id: node-24
-            runtime: node@24
-            experimental: true
           # Probe: the runtime pinned in package.json devEngines.runtime. An empty
           # `runtime` makes pnpm/setup install every devEngines.runtime entry.
           - name: devEngines runtime
