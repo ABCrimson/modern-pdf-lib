@@ -125,7 +125,7 @@
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "0.18.5",
-    "@playwright/test": "1.66.0-alpha-2026-11-15",
+    "@playwright/test": "1.66.0-alpha-1794252756000",
     "@types/node": "26.6.6",
     "@vitest/coverage-v8": "5.1.0",
     "esbuild": "0.28.2",
