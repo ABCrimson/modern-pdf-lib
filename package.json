@@ -111,6 +111,8 @@
     "gate:surface": "node scripts/dev/surface-gate.ts",
     "gate:cap": "node scripts/dev/capability-gate.ts",
     "gate:size": "node scripts/dev/size-gate.ts",
+    "gate:layout": "node scripts/dev/surface-gate.ts --layout",
+    "check:docs": "node scripts/dev/metrics.ts --check",
     "conformance:generate": "tsx scripts/conformance/generate.ts",
     "conformance:verapdf": "node scripts/conformance/verapdf-validate.ts",
     "docs:dev": "vitepress dev docs",

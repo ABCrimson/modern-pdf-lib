@@ -119,6 +119,8 @@ Run each as `pnpm run <name>`.
 | `gate:surface` | The findings ledger `audit/open-highs.json` against its schema, the markers against the ledger, and new exports against open findings |
 | `gate:cap` | Match the capability rows of the README and the guides with `docs/capabilities.json` (report-only in this release) |
 | `gate:size` | Bundle sizes of `dist/` (gzip and brotli) against `scripts/dev/size-budget.json`, and the README bundle badge; run after `build` |
+| `gate:layout` | The internal-folder rule of the src layout: a module that no package entry exports from lives in an `internal/` folder, and no entry exports from one, except the modules listed in `LAYOUT_EXCEPTIONS` with their reason and the end the gate checks: the open ledger entry whose closing ends the exception, no src module importing it, or no other module in its folder (a closed or unknown id, an importer or a second module fails the gate). Which `internal/` folder a module sits in and who imports it are not checked; `src/internal/` for a module that three or more domains use is placement advice (`surface-gate.ts --layout`; each problem names a move that fixes it) |
+| `check:docs` | Every repository path that a tracked document, config or script names resolves, so does every relative path in a comment of a code file under `src/`, `tests/` or `scripts/` (from its folder), and the src folders of the README tree and of the module table below equal the tree (`scripts/dev/metrics.ts --check`; `--self-test` checks the checker) |
 | `conformance:generate` | Write the inputs of the nightly conformance workflow (runs under `tsx`; pass `--out <dir>`) |
 | `conformance:verapdf` | Run an installed veraPDF (`VERAPDF` or `--verapdf`) over PDF files and print the conformance table |
 | `dev` | Vite dev server |
@@ -261,7 +263,7 @@ Supporting directories of the test suite:
 |---|---|
 | `audit/` | `open-highs.json`, the public ledger of open audit findings (schema `open-highs.schema.json`, described in `audit/README.md`) |
 | `scripts/build/` | The build steps: `build-iife.ts`, `smoke-dist.mjs`, `build-wasm.sh`, `copy-wasm.mjs`, `check-pack.mjs`, `generate-inline-wasm.ts`, and `sanitize-api-docs.ts` (the `docs:api` step) |
-| `scripts/dev/` | The checks and gates: `test-projects.ts`, `known-defects.ts`, `corpus.ts`, `surface-gate.ts`, `capability-gate.ts`, `size-gate.ts` (budgets in `size-budget.json`) and `api-snapshot.ts`; and `validate-pdf.ts`, the structural validation of a generated PDF |
+| `scripts/dev/` | The checks and gates: `test-projects.ts`, `known-defects.ts`, `corpus.ts`, `surface-gate.ts`, `capability-gate.ts`, `size-gate.ts` (budgets in `size-budget.json`), `api-snapshot.ts` and `metrics.ts` (the paths the documents name); and `validate-pdf.ts`, the structural validation of a generated PDF |
 | `scripts/fixtures/` | The generators of `tests/fixtures/`: the qpdf fixture sets (`encrypted-fixtures.ts` and `pdf20-hash-cases.ts`), the fixtures written by published versions (`legacy-0.26.0/` and `legacy-0.40.3/`), `gen-fixtures.ts` and `gen-reference-pdf.ts`; and `stream-digests.ts`, which records and checks the stream data of every fixture |
 | `scripts/conformance/` | The nightly conformance workflow: `generate.ts` (inputs), `summarize.ts` (tables and comparison), `hanko-report.py` (pyHanko reports) and `expected.json` (the expected results); `scripts/conformance/verapdf-validate.ts` runs veraPDF |
 
@@ -326,7 +328,7 @@ waits on WASM, so style and type failures surface first.
 
 | Job | Gate |
 |---|---|
-| Lint & Type-check | `pnpm run typecheck` (five projects), `pnpm run lint` (type-aware oxlint, 0 errors, at most 1,169 warnings), `pnpm run check:test-projects` and `pnpm run check:known-defects` |
+| Lint & Type-check | `pnpm run typecheck` (five projects), `pnpm run lint` (type-aware oxlint, 0 errors, at most 1,169 warnings), `pnpm run check:test-projects`, `pnpm run check:known-defects`, `pnpm run gate:layout` and `pnpm run check:docs` |
 | Build WASM | All six crates compile for `wasm32-unknown-unknown` |
 | Build TypeScript | `pnpm run build` succeeds and `dist/` imports as ESM **and** CJS |
 | Pack Check | `pnpm run check:pack`: the tarball lists six WASM builds and the IIFE bundle and passes publint and attw |

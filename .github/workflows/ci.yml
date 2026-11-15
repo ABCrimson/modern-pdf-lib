@@ -58,6 +58,15 @@ jobs:
       - name: Known-defect marker census
         run: pnpm run check:known-defects
 
+      # Both read tracked sources only and need no build: the first checks the internal-folder
+      # rule of the src layout against the exports of the package entries, the second that every
+      # repository path a tracked document, config or script names resolves.
+      - name: Layout gate
+        run: pnpm run gate:layout
+
+      - name: Paths named in documents and comments
+        run: pnpm run check:docs
+
   # ---------------------------------------------------------------------------
   # Build WASM modules
   # ---------------------------------------------------------------------------

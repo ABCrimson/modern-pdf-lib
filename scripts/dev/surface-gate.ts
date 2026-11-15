@@ -35,11 +35,39 @@
  *                                                      `qualified` and whose `limits` names that
  *                                                      entry's id. Type-only additions carry no code
  *                                                      and are not bundled
+ *   node scripts/dev/surface-gate.ts --layout          the internal-folder rule of the src layout, as the
+ *                                                      exports show it, in both directions: a module that
+ *                                                      no package entry exports from lives in an
+ *                                                      internal/ folder, and no entry exports from a
+ *                                                      module in an internal/ folder, which is flat.
+ *                                                      Not checked: which internal/ folder a module sits
+ *                                                      in and which modules import it. Placement advice
+ *                                                      only: src/<domain>/internal/, or src/internal/
+ *                                                      when three or more domains use it. "Exports from":
+ *                                                      an export of src/{index,create,parse,forms,
+ *                                                      browser}.ts resolves, through `export ... from`,
+ *                                                      `export *`, `export * as` and imported bindings
+ *                                                      it re-exports (types included), to a declaration
+ *                                                      of that module or passes through it. Exempt: the
+ *                                                      five entries, folder barrels (index.ts), src/cli
+ *                                                      (the bin entry), .d.ts files and the modules of
+ *                                                      LAYOUT_EXCEPTIONS (each with its reason and the
+ *                                                      end the gate checks: the id of the open ledger
+ *                                                      entry whose closing ends it, no src module
+ *                                                      importing it, or no other module in its folder; a
+ *                                                      listed path that is missing or that an entry
+ *                                                      exports from, a listed id that is not open in the
+ *                                                      ledger, a src module that imports a module listed
+ *                                                      as unimported, and a second module in the folder
+ *                                                      of a module listed as alone in it are problems).
+ *                                                      Each problem names a move that fixes it
  *   node scripts/dev/surface-gate.ts --self-test       runs the --surface code path on a fake addition
  *                                                      (createPdf of `.`): its reached set must hold
  *                                                      src/core/pdfDocument.ts, a fake open entry on
  *                                                      that path must fail it, and a qualified
- *                                                      capability row must exempt it
+ *                                                      capability row must exempt it; and runs the
+ *                                                      --layout rules on a synthetic tree, which must
+ *                                                      report exactly its nine planted problems
  *   --ledger <file>   another ledger file (default: audit/open-highs.json)
  *   --root <dir>      another checkout to scan and resolve paths in (default: this repo)
  *
@@ -47,16 +75,19 @@
  * markers are known-defects.ts --check's early warning, not this gate's. Node strips the types,
  * so only erasable syntax is used.
  */
+import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
-import { relative, resolve } from 'node:path';
+import { posix, relative, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
 import { build } from 'esbuild';
+import { parseSync } from 'oxc-parser';
 
 const { values } = parseArgs({
   options: {
     paths: { type: 'boolean', default: false },
     markers: { type: 'boolean', default: false },
     surface: { type: 'boolean', default: false },
+    layout: { type: 'boolean', default: false },
     'self-test': { type: 'boolean', default: false },
     ledger: { type: 'string' },
     root: { type: 'string', default: resolve(import.meta.dirname, '../..') },
@@ -430,9 +461,331 @@ async function selfTest(): Promise<void> {
   if (exempt.problems.length !== 0)
     problems.push(`self-test: a qualified capability row did not exempt createPdf`);
   console.log(`self-test: createPdf reaches ${reached.length} src files, ${target} among them`);
+  // metrics: synthetic paths start
+  const fakeTree = new Map<string, string>([
+    [
+      'src/index.ts',
+      [
+        "export { a } from './dom/a.js';",
+        "export * from './dom/fwd.js';",
+        "import { d } from './dom/d.js';",
+        'export { d };',
+        "export { leak } from './dom/internal/leak.js';",
+        "export * as ns from './dom/ns.js';",
+        "export type { T } from './dom/t.js';",
+        "export { other } from './dom/solo/other.js';",
+      ].join('\n'),
+    ],
+    ['src/dom/a.ts', 'export const a = 1;'],
+    ['src/dom/fwd.ts', "export { b } from './b.js';"],
+    ['src/dom/b.ts', 'export const b = 2;'],
+    ['src/dom/d.ts', "import { s } from './shaper.js';\nexport const d = s;"],
+    ['src/dom/shaper.ts', 'export const s = 3;'],
+    ['src/dom/solo/only.ts', 'export const only = 12;'],
+    ['src/dom/solo/other.ts', 'export const other = 13;'],
+    ['src/dom/lone/one.ts', 'export const one = 14;'],
+    ['src/dom/ns.ts', "export { n } from './n.js';"],
+    ['src/dom/n.ts', 'export const n = 4;'],
+    ['src/dom/t.ts', 'export interface T { readonly x: number }'],
+    ['src/dom/internal/leak.ts', 'export const leak = 5;'],
+    ['src/dom/internal/helper.ts', 'export const helper = 6;'],
+    ['src/dom/internal/deep/x.ts', 'export const x = 7;'],
+    ['src/dom/orphan.ts', 'export const orphan = 8;'],
+    ['src/dom/kept.ts', 'export const kept = 9;'],
+    ['src/dom/held.ts', 'export const held = 10;'],
+    ['src/dom/stale.ts', 'export const stale = 11;'],
+  ]);
+  const fakeExceptions: readonly LayoutException[] = [
+    { path: 'src/dom/kept.ts', reason: 'a valid exception', ledger: 'dom-01', unimported: true },
+    { path: 'src/dom/gone.ts', reason: 'a missing path' },
+    { path: 'src/dom/a.ts', reason: 'a path an entry exports from' },
+    { path: 'src/dom/held.ts', reason: 'its ledger entry is closed', ledger: 'dom-02' },
+    { path: 'src/dom/stale.ts', reason: 'its ledger id is in neither list', ledger: 'dom-03' },
+    { path: 'src/dom/shaper.ts', reason: 'a src module imports it', unimported: true },
+    {
+      path: 'src/dom/solo/only.ts',
+      reason: 'its folder holds another module',
+      aloneIn: 'src/dom/solo/',
+    },
+    { path: 'src/dom/lone/one.ts', reason: 'alone in its folder, valid', aloneIn: 'src/dom/lone/' },
+  ];
+  const fakeLedger = { open: new Set(['dom-01']), closed: new Set(['dom-02']) };
+  const layout = layoutProblems(fakeTree, fakeLedger, fakeExceptions);
+  const flagged = layout.map((p) => p.slice(0, p.indexOf(':'))).join(' ');
+  const want =
+    'src/dom/a.ts src/dom/gone.ts src/dom/held.ts src/dom/internal/deep/x.ts src/dom/internal/leak.ts src/dom/orphan.ts src/dom/shaper.ts src/dom/solo/only.ts src/dom/stale.ts';
+  // metrics: synthetic paths end
+  if (flagged !== want)
+    problems.push(`self-test: --layout flagged "${flagged}", expected "${want}"`);
+  console.log(
+    `self-test: --layout finds the ${layout.length} planted problems of a synthetic tree`,
+  );
 }
 
-const all = !values.paths && !values.markers && !values.surface && !values['self-test'];
+/** A src module that stays outside an internal/ folder although no package entry exports from it. */
+interface LayoutException {
+  readonly path: string;
+  readonly reason: string;
+  /** the id of the open entry of the ledger (audit/open-highs.json) whose closing ends the exception */
+  readonly ledger?: string;
+  /** the exception ends when a src module imports it (an import, a re-export or a dynamic import of a literal) */
+  readonly unimported?: true;
+  /** the exception ends when this folder holds another module */
+  readonly aloneIn?: string;
+}
+
+/**
+ * The exceptions of --layout; a listed path that is missing or that an entry exports from is a
+ * problem, and so is an end that has come (a closed or unknown ledger id, an importer of an
+ * unimported module, a second module in the folder of a module alone in it).
+ */
+const LAYOUT_EXCEPTIONS: readonly LayoutException[] = [
+  {
+    path: 'src/assets/font/textShaper.ts',
+    reason: 'kept until the WASM shaping tier is either wired into text layout or removed',
+    unimported: true,
+  },
+  {
+    path: 'src/assets/image/jpeg/jpegEmbed.ts',
+    reason: 'kept until its Adobe APP14 handling moves into the live JPEG embed path',
+    ledger: 'images-46',
+  },
+  {
+    path: 'src/codecs/jbig2/jbig2Decode.ts',
+    reason: 'the conformant JBIG2 decoder that replaces it lands in this folder',
+    aloneIn: 'src/codecs/jbig2/',
+  },
+];
+
+/** The five package entries (ENTRY_SOURCES). */
+const ENTRY_FILES: readonly string[] = Object.values(ENTRY_SOURCES);
+
+/** A module of --layout: its exports by name and the targets of its `export *`. */
+interface LayoutModule {
+  /** export name -> the module and name it forwards to (`*`: the namespace), or null: declared here */
+  readonly named: Map<string, { readonly from: string; readonly name: string } | null>;
+  readonly stars: readonly string[];
+  /** the src modules it imports or re-exports from, and those it imports dynamically by a literal */
+  readonly imports: ReadonlySet<string>;
+}
+
+/** A relative specifier of `from` as a module of `files` (.js -> .ts, a folder -> its index.ts). */
+function resolveModule(from: string, spec: string, files: ReadonlySet<string>): string | undefined {
+  if (!spec.startsWith('.')) return undefined;
+  const base = posix.join(posix.dirname(from), spec);
+  const stem = base.replace(/\.(js|ts|mjs|mts)$/, '');
+  for (const c of [`${stem}.ts`, `${stem}.mts`, `${base}/index.ts`, `${stem}/index.ts`])
+    if (files.has(c)) return c;
+  return undefined;
+}
+
+/** The kind of an oxc-parser name (a const enum in its types, a string at run time). */
+const kindOf = (k: unknown): string => String(k);
+
+function layoutModules(
+  sources: ReadonlyMap<string, string>,
+  out: string[],
+): Map<string, LayoutModule> {
+  const files = new Set(sources.keys());
+  const mods = new Map<string, LayoutModule>();
+  for (const [file, text] of sources) {
+    const { module, errors } = parseSync(file, text, { lang: 'ts', sourceType: 'module' });
+    if (errors.length > 0) out.push(`${file}: parse error: ${errors[0]?.message ?? ''}`);
+    const imports = new Map<string, { readonly from: string; readonly name: string }>();
+    const deps = new Set<string>();
+    for (const dyn of module.dynamicImports) {
+      const literal = /^(['"`])([^'"`$]*)\1$/.exec(
+        text.slice(dyn.moduleRequest.start, dyn.moduleRequest.end),
+      );
+      const from = literal === null ? undefined : resolveModule(file, literal[2] ?? '', files);
+      if (from !== undefined) deps.add(from);
+    }
+    for (const imp of module.staticImports) {
+      const from = resolveModule(file, imp.moduleRequest.value, files);
+      if (from === undefined) continue;
+      deps.add(from);
+      for (const e of imp.entries) {
+        const kind = kindOf(e.importName.kind);
+        const name =
+          kind === 'Name' ? (e.importName.name ?? 'default') : kind === 'Default' ? 'default' : '*';
+        imports.set(e.localName.value, { from, name });
+      }
+    }
+    const named = new Map<string, { readonly from: string; readonly name: string } | null>();
+    const stars: string[] = [];
+    for (const exp of module.staticExports)
+      for (const e of exp.entries) {
+        const from =
+          e.moduleRequest === null ? undefined : resolveModule(file, e.moduleRequest.value, files);
+        if (e.moduleRequest !== null && from === undefined) continue; // a package, not a src module
+        if (from !== undefined) deps.add(from);
+        const importKind = kindOf(e.importName.kind);
+        if (importKind === 'AllButDefault') {
+          if (from !== undefined) stars.push(from);
+          continue;
+        }
+        const exportName = kindOf(e.exportName.kind) === 'Default' ? 'default' : e.exportName.name;
+        if (exportName === null) continue;
+        if (from !== undefined)
+          named.set(exportName, {
+            from,
+            name: importKind === 'All' ? '*' : (e.importName.name ?? 'default'),
+          });
+        else {
+          const local = e.localName.name;
+          named.set(exportName, local === null ? null : (imports.get(local) ?? null));
+        }
+      }
+    mods.set(file, { named, stars, imports: deps });
+  }
+  return mods;
+}
+
+/** The internal-folder rule on a set of src modules (path -> source text): one line per problem, with its fix. */
+function layoutProblems(
+  sources: ReadonlyMap<string, string>,
+  ledger: { readonly open: ReadonlySet<string>; readonly closed: ReadonlySet<string> },
+  exceptions: readonly LayoutException[] = LAYOUT_EXCEPTIONS,
+): string[] {
+  const out: string[] = [];
+  const mods = layoutModules(sources, out);
+  const namesOf = (file: string, seen = new Set<string>()): Set<string> => {
+    const names = new Set<string>();
+    const m = mods.get(file);
+    if (m === undefined || seen.has(file)) return names;
+    seen.add(file);
+    for (const n of m.named.keys()) names.add(n);
+    for (const s of m.stars) for (const n of namesOf(s, seen)) if (n !== 'default') names.add(n);
+    return names;
+  };
+  // every module an export passes through or ends in
+  const pathOf = (file: string, name: string, seen: Set<string>): string[] => {
+    const key = `${file}#${name}`;
+    const m = mods.get(file);
+    if (m === undefined || seen.has(key)) return [];
+    seen.add(key);
+    if (name === '*') return [file, ...[...namesOf(file)].flatMap((n) => pathOf(file, n, seen))];
+    if (m.named.has(name)) {
+      const origin = m.named.get(name);
+      return origin === null || origin === undefined
+        ? [file]
+        : [file, ...pathOf(origin.from, origin.name, seen)];
+    }
+    if (name === 'default') return [];
+    for (const s of m.stars) {
+      const found = pathOf(s, name, seen);
+      if (found.length > 0) return [file, ...found];
+    }
+    return [];
+  };
+  const reach = new Map<string, Set<string>>();
+  for (const entry of ENTRY_FILES)
+    for (const name of namesOf(entry))
+      for (const file of pathOf(entry, name, new Set())) {
+        const by = reach.get(file) ?? new Set<string>();
+        by.add(entry);
+        reach.set(file, by);
+      }
+  for (const file of [...mods.keys()].toSorted()) {
+    if (
+      ENTRY_FILES.includes(file) ||
+      file.startsWith('src/cli/') ||
+      posix.basename(file) === 'index.ts'
+    )
+      continue;
+    const parts = file.split('/');
+    const at = parts.indexOf('internal');
+    const by = reach.get(file);
+    if (exceptions.some((e) => e.path === file)) continue;
+    if (at >= 0) {
+      if (at !== parts.length - 2)
+        out.push(
+          `${file}: internal/ is flat; fix: move it to ${parts.slice(0, at + 1).join('/')}/${parts.at(-1)}`,
+        );
+      else if (by !== undefined)
+        out.push(
+          `${file}: ${[...by].toSorted().join(', ')} exports from this internal module; fix: move it to ${[...parts.slice(0, at), parts.at(-1)].join('/')}`,
+        );
+    } else if (by === undefined) {
+      const domain =
+        parts.length === 2
+          ? 'src'
+          : parts[1] === 'assets' && parts.length > 3
+            ? parts.slice(0, 3).join('/')
+            : parts.slice(0, 2).join('/');
+      out.push(
+        `${file}: no package entry exports from it; fix: move it into an internal/ folder, such as ${domain}/internal/${parts.at(-1)} (placement advice, not checked: src/internal/ when three or more domains use it)`,
+      );
+    }
+  }
+  for (const e of exceptions) {
+    const by = reach.get(e.path);
+    if (!sources.has(e.path))
+      out.push(
+        `${e.path}: listed layout exception is missing; fix: remove it from LAYOUT_EXCEPTIONS`,
+      );
+    else if (by !== undefined)
+      out.push(
+        `${e.path}: listed layout exception, but ${[...by].toSorted().join(', ')} exports from it; fix: remove it from LAYOUT_EXCEPTIONS`,
+      );
+    if (e.ledger !== undefined && !ledger.open.has(e.ledger))
+      out.push(
+        ledger.closed.has(e.ledger)
+          ? `${e.path}: listed layout exception ends with ledger entry ${e.ledger}, which is closed; fix: move the module or remove the exception`
+          : `${e.path}: listed layout exception names ledger entry ${e.ledger}, which the ledger does not hold; fix: name an open entry or state the condition in words`,
+      );
+    if (e.unimported === true) {
+      const importers = [...mods]
+        .filter(([f, m]) => f !== e.path && m.imports.has(e.path))
+        .map(([f]) => f)
+        .toSorted();
+      if (importers.length > 0)
+        out.push(
+          `${e.path}: listed layout exception ends when a src module imports it, and ${importers.join(', ')} imports it; fix: move the module or remove the exception`,
+        );
+    }
+    if (e.aloneIn !== undefined) {
+      const folder = e.aloneIn;
+      const others = [...sources.keys()]
+        .filter((f) => f.startsWith(folder) && f !== e.path)
+        .toSorted();
+      if (others.length > 0)
+        out.push(
+          `${e.path}: listed layout exception ends when ${folder} holds another module, and it holds ${others.join(', ')}; fix: move the module or remove the exception`,
+        );
+    }
+  }
+  return out.toSorted();
+}
+
+/** --layout on this checkout: the tracked .ts modules of src. */
+function checkLayout(): void {
+  const files = execFileSync('git', ['ls-files', '-z', 'src'], { cwd: ROOT, encoding: 'utf8' })
+    .split('\0')
+    .filter((f) => /\.m?ts$/.test(f) && !f.endsWith('.d.ts'));
+  const sources = new Map(files.map((f) => [f, readFileSync(resolve(ROOT, f), 'utf8')]));
+  const ledgerFile = JSON.parse(readFileSync(LEDGER, 'utf8')) as {
+    readonly open: readonly { readonly id: string }[];
+    readonly closed: readonly { readonly id: string }[];
+  };
+  const ids = (list: readonly { readonly id: string }[]): Set<string> =>
+    new Set(list.map((x) => x.id));
+  const found = layoutProblems(sources, {
+    open: ids(ledgerFile.open),
+    closed: ids(ledgerFile.closed),
+  });
+  problems.push(...found);
+  for (const e of LAYOUT_EXCEPTIONS)
+    console.log(
+      `layout exception: ${e.path} (${e.reason}${e.ledger === undefined ? '' : `; ends with ledger entry ${e.ledger}`}${e.unimported === true ? '; ends when a src module imports it' : ''}${e.aloneIn === undefined ? '' : `; ends when ${e.aloneIn} holds another module`})`,
+    );
+  console.log(
+    `layout: ${sources.size} src modules, ${LAYOUT_EXCEPTIONS.length} listed exceptions, ${found.length} outside the internal-folder rule`,
+  );
+}
+
+const all =
+  !values.paths && !values.markers && !values.surface && !values.layout && !values['self-test'];
 const open = readLedger(all || values.paths);
 let census = '';
 if (all || values.markers) {
@@ -481,6 +834,7 @@ if (all || values.surface) {
     console.log(`${name}: reaches ${files.length} src files`);
   console.log(`surface: ${additions.length} exports added since ${since}`);
 }
+if (values.layout) checkLayout();
 if (values['self-test']) await selfTest();
 for (const p of problems) console.error(p);
 console.log(
