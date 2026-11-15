@@ -125,7 +125,7 @@
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "0.18.5",
-    "@playwright/test": "1.66.0-alpha-2026-11-13",
+    "@playwright/test": "1.66.0-alpha-2026-11-15",
     "@types/node": "26.6.6",
     "@vitest/coverage-v8": "5.1.0",
     "esbuild": "0.28.2",
@@ -139,7 +139,7 @@
     "tinybench": "6.2.3",
     "tsdown": "0.23.7",
     "tsx": "4.23.15",
-    "typescript": "7.1.0-dev.20261113.1",
+    "typescript": "7.1.0-dev.20261115.1",
     "vite": "8.3.8",
     "vitepress": "2.0.0-alpha.21",
     "vitest": "5.1.0",
@@ -168,7 +168,7 @@
   "bugs": {
     "url": "https://github.com/ABCrimson/modern-pdf-lib/issues"
   },
-  "packageManager": "pnpm@12.20.0",
+  "packageManager": "pnpm@12.21.0",
   "devEngines": {
     "runtime": {
       "name": "node",

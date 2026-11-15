@@ -6,23 +6,23 @@ packages:
 # Supply-chain delay: a version must be at least 24 h old (minutes). Never lower this;
 # add an exact name@version to minimumReleaseAgeExclude instead.
 minimumReleaseAge: 1440
-# Exact pins younger than 1440 min. Listed on 2026-11-13: the TypeScript 7.1 dev build
-# (published 2026-11-13 08:12Z) with its seven per-platform native packages (published
-# 08:05Z to 08:11Z), and the Playwright 1.66.0-alpha-2026-11-13 trio (@playwright/test
-# 05:17Z, playwright 05:19Z, playwright-core 05:20Z). These entries go stale on the next
+# Exact pins younger than 1440 min. Listed on 2026-11-15: the TypeScript 7.1 dev build
+# 7.1.0-dev.20261115.1 (published 2026-11-15 08:24Z) with its seven per-platform native
+# packages (published 08:18Z to 08:21Z), and the Playwright 1.66.0-alpha-2026-11-15 trio
+# (@playwright/test 05:17Z, playwright 05:17Z, playwright-core 06:43Z). These entries go stale on the next
 # bump; drop each one once its version is older than 24 h.
 minimumReleaseAgeExclude:
-  - 'typescript@7.1.0-dev.20261113.1'
-  - '@typescript/typescript-darwin-arm64@7.1.0-dev.20261113.1'
-  - '@typescript/typescript-darwin-x64@7.1.0-dev.20261113.1'
-  - '@typescript/typescript-linux-arm64@7.1.0-dev.20261113.1'
-  - '@typescript/typescript-linux-arm@7.1.0-dev.20261113.1'
-  - '@typescript/typescript-linux-x64@7.1.0-dev.20261113.1'
-  - '@typescript/typescript-win32-arm64@7.1.0-dev.20261113.1'
-  - '@typescript/typescript-win32-x64@7.1.0-dev.20261113.1'
-  - '@playwright/test@1.66.0-alpha-2026-11-13'
-  - 'playwright@1.66.0-alpha-2026-11-13'
-  - 'playwright-core@1.66.0-alpha-2026-11-13'
+  - 'typescript@7.1.0-dev.20261115.1'
+  - '@typescript/typescript-darwin-arm64@7.1.0-dev.20261115.1'
+  - '@typescript/typescript-darwin-x64@7.1.0-dev.20261115.1'
+  - '@typescript/typescript-linux-arm64@7.1.0-dev.20261115.1'
+  - '@typescript/typescript-linux-arm@7.1.0-dev.20261115.1'
+  - '@typescript/typescript-linux-x64@7.1.0-dev.20261115.1'
+  - '@typescript/typescript-win32-arm64@7.1.0-dev.20261115.1'
+  - '@typescript/typescript-win32-x64@7.1.0-dev.20261115.1'
+  - '@playwright/test@1.66.0-alpha-2026-11-15'
+  - 'playwright@1.66.0-alpha-2026-11-15'
+  - 'playwright-core@1.66.0-alpha-2026-11-15'
 
 # Dependency build scripts are reviewed, not trusted: unlisted packages fail the install.
 strictDepBuilds: true
@@ -37,7 +37,7 @@ overrides:
   # pdfjs-dist (test oracle) lists a native canvas as optional; getTextContent does not need it.
   '@napi-rs/canvas': '-'
 
-# Agent skills shipped by dependencies are denied: this repo wires none into an agent (tsdown 0.23.7 ships a skills/ folder, pnpm 12.20 lists it as awaiting approval).
+# Agent skills shipped by dependencies are denied: this repo wires none into an agent (tsdown 0.23.7 ships a skills/ folder, pnpm 12.21 lists it as awaiting approval).
 permissions:
   tsdown:
     skills: false
