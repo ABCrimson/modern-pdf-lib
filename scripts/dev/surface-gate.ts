@@ -244,7 +244,7 @@ function readLedger(full: boolean): OpenEntry[] {
 
 /**
  * known-defects.ts, loaded by URL like api-snapshot.ts below: node runs the .ts file itself, while
- * tsconfig.scripts.json (no allowImportingTsExtensions) types it through the `.js` specifier.
+ * scripts/tsconfig.json (no allowImportingTsExtensions) types it through the `.js` specifier.
  */
 type KnownDefectsModule = typeof import('./known-defects.js');
 
@@ -269,7 +269,7 @@ async function runtimeMarkers(): Promise<
 // ---------------------------------------------------------------------------
 
 /**
- * api-snapshot.ts, loaded by URL: node runs the .ts file itself, while tsconfig.scripts.json
+ * api-snapshot.ts, loaded by URL: node runs the .ts file itself, while scripts/tsconfig.json
  * (no allowImportingTsExtensions) types it through the `.js` specifier.
  */
 type ApiSnapshotModule = typeof import('./api-snapshot.js');

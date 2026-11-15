@@ -602,7 +602,7 @@ interface ScanTarget {
 }
 
 async function admitChild(file: string, password: string | undefined): Promise<void> {
-  // The specifiers are computed so that tsc -p tsconfig.scripts.json does not pull src/ into
+  // The specifiers are computed so that tsc -p scripts/tsconfig.json does not pull src/ into
   // this program; the child always runs under tsx, which compiles the .ts sources.
   const lib = (await import(pathToFileURL(join(REPO, 'src/index.ts')).href)) as Library;
   const { XrefParser } = (await import(

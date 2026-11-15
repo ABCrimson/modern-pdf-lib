@@ -104,8 +104,8 @@ Run each as `pnpm run <name>`.
 | `bench` | Benchmark suite via the tinybench harness |
 | `lint` / `lint:fix` | oxlint, type-aware; `lint` fails above 1,169 warnings |
 | `format` / `format:check` | oxfmt over `src`, `tests` and `scripts` |
-| `typecheck` | `tsc` over the root, `tsconfig.cli.json`, `tsconfig.scripts.json`, `tsconfig.tests.json` and `tsconfig.security-tests.json` projects |
-| `typecheck:security-tests` | `tsc` over `tsconfig.security-tests.json` only (the files it lists: the 0.40.5 security tests, the qpdf cross-check of encrypted saves, the known-defect helper tests, and `tests/helpers`) |
+| `typecheck` | `tsc` over the root, `src/cli/tsconfig.json`, `scripts/tsconfig.json`, `tests/tsconfig.json` and `tests/tsconfig.security.json` projects |
+| `typecheck:security-tests` | `tsc` over `tests/tsconfig.security.json` only (the files it lists: the 0.40.5 security tests, the qpdf cross-check of encrypted saves, the known-defect helper tests, and `tests/helpers`) |
 | `fixtures:legacy` | Rebuild `tests/fixtures/legacy-0.40.3/` from the published 0.40.3 tarball |
 | `fixtures:legacy:check` | Check that those fixtures regenerate byte for byte |
 | `node scripts/fixtures/legacy-0.26.0/generate.ts` (`--check` to verify; no package script) | Rebuild `tests/fixtures/legacy-0.26.0/` from the published 0.26.0 tarball, or check that it regenerates byte for byte |

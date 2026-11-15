@@ -1,14 +1,14 @@
 {
-  "extends": "./tsconfig.json",
+  "extends": "../../tsconfig.json",
   "compilerOptions": {
     "noEmit": true,
     "declaration": false,
     "declarationMap": false,
     "sourceMap": false,
     "isolatedDeclarations": false,
-    "rootDir": ".",
+    "rootDir": "../..",
     "types": ["node"]
   },
-  "include": ["src/cli/**/*.ts"],
-  "exclude": ["node_modules", "dist"]
+  "include": ["**/*.ts"],
+  "exclude": ["../../node_modules", "../../dist"]
 }

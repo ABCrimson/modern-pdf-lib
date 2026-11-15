@@ -1,28 +1,28 @@
 {
-  "extends": "./tsconfig.json",
+  "extends": "../tsconfig.json",
   "compilerOptions": {
     "noEmit": true,
     "declaration": false,
     "declarationMap": false,
     "sourceMap": false,
     "isolatedDeclarations": false,
-    "rootDir": ".",
+    "rootDir": "..",
     "types": ["node"]
   },
-  "include": ["tests/**/*.ts"],
+  "include": ["**/*.ts"],
   "exclude": [
-    "node_modules",
-    "dist",
-    "tests/adversarial/form-script.test.ts",
-    "tests/oracle/redaction-leak.test.ts",
-    "tests/unit/signature/trust-anchors.test.ts",
-    "tests/unit/core/encryption-guard.test.ts",
-    "tests/unit/core/merge-dedupe.test.ts",
-    "tests/oracle/legacy-0.40.3.test.ts",
-    "tests/oracle/encryption-qpdf.test.ts",
-    "tests/unit/core/securityErrors.test.ts",
-    "tests/unit/helpers/known-defect.test.ts",
-    "tests/unit/helpers/known-defects-census.test.ts",
-    "tests/helpers/**/*.ts"
+    "../node_modules",
+    "../dist",
+    "adversarial/form-script.test.ts",
+    "oracle/redaction-leak.test.ts",
+    "unit/signature/trust-anchors.test.ts",
+    "unit/core/encryption-guard.test.ts",
+    "unit/core/merge-dedupe.test.ts",
+    "oracle/legacy-0.40.3.test.ts",
+    "oracle/encryption-qpdf.test.ts",
+    "unit/core/securityErrors.test.ts",
+    "unit/helpers/known-defect.test.ts",
+    "unit/helpers/known-defects-census.test.ts",
+    "helpers/**/*.ts"
   ]
 }
