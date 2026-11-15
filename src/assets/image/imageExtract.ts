@@ -11,7 +11,7 @@
 
 import type { PdfDocument } from '../../core/pdfDocument.js';
 import { PdfDict, PdfName, PdfNumber, PdfArray, PdfRef, PdfStream } from '../../core/pdfObjects.js';
-import { decodeStream, getStreamFilters } from '../../parser/streamDecode.js';
+import { decodeStream, getStreamFilters } from '../../codecs/streamDecode.js';
 
 // ---------------------------------------------------------------------------
 // Public interfaces

@@ -6,9 +6,9 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { decodeJBIG2 } from '../../../src/parser/jbig2Decode.js';
-import { PdfDict, PdfNumber } from '../../../src/core/pdfObjects.js';
-import { UnsupportedFilterError } from '../../../src/errors.js';
+import { decodeJBIG2 } from '../../../../src/codecs/jbig2/jbig2Decode.js';
+import { PdfDict, PdfNumber } from '../../../../src/core/pdfObjects.js';
+import { UnsupportedFilterError } from '../../../../src/errors.js';
 
 // ---------------------------------------------------------------------------
 // Helpers

@@ -7,14 +7,14 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { decodeJpeg2000, getJpeg2000Info } from '../../../src/parser/jpeg2000Decode.js';
+import { decodeJpeg2000, getJpeg2000Info } from '../../../../src/codecs/jpeg2000/jpeg2000Decode.js';
 import type {
   Jpeg2000Image,
   Jpeg2000DecodeParams,
   Jpeg2000Info,
-} from '../../../src/parser/jpeg2000Decode.js';
-import { decodeStream } from '../../../src/parser/streamDecode.js';
-import { UnsupportedFilterError } from '../../../src/errors.js';
+} from '../../../../src/codecs/jpeg2000/jpeg2000Decode.js';
+import { decodeStream } from '../../../../src/codecs/streamDecode.js';
+import { UnsupportedFilterError } from '../../../../src/errors.js';
 
 // ---------------------------------------------------------------------------
 // Helpers

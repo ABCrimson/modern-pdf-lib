@@ -39,7 +39,7 @@ import {
   PdfString,
   PdfObjectRegistry,
 } from '../core/pdfObjects.js';
-import { decodeStreamData, getStreamFilters } from '../parser/streamDecode.js';
+import { decodeStreamData, getStreamFilters } from '../codecs/streamDecode.js';
 import { assertWithinLimit } from '../internal/limits.js';
 import { cmykToRgb } from '../core/operators/color.js';
 import { decodeJpegWasm } from '../wasm/jpeg/bridge.js';

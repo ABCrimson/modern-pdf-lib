@@ -42,7 +42,7 @@ import { PdfLexer } from './lexer.js';
 import { PdfObjectParser } from './objectParser.js';
 import { XrefParser } from './xrefParser.js';
 import type { XrefEntry, ParsedTrailer } from './xrefParser.js';
-import { decodeFlateOnly } from './streamDecode.js';
+import { decodeFlateOnly } from '../codecs/streamDecode.js';
 import { base64Decode } from '../utils/base64.js';
 import {
   PdfEncryptionHandler,

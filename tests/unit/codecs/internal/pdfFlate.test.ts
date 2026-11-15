@@ -1,5 +1,5 @@
 /**
- * Tests for the FlateDecode codec (src/compression/pdfFlate.ts).
+ * Tests for the FlateDecode codec (src/codecs/internal/pdfFlate.ts).
  *
  * node:zlib is the oracle: its `inflateSync` checks the RFC 1950 header and
  * the Adler-32 trailer, so output it accepts is zlib data as ISO 32000
@@ -20,9 +20,9 @@ import {
   inflateRawBounded,
   isZlibHeader,
   wrapRawDeflate,
-} from '../../../src/compression/pdfFlate.js';
-import { INTERNAL_LIMITS } from '../../../src/internal/limits.js';
-import { ResourceLimitError } from '../../../src/errors.js';
+} from '../../../../src/codecs/internal/pdfFlate.js';
+import { INTERNAL_LIMITS } from '../../../../src/internal/limits.js';
+import { ResourceLimitError } from '../../../../src/errors.js';
 
 // ---------------------------------------------------------------------------
 // Helpers

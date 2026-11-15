@@ -17,8 +17,8 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { crc32, deflateRawSync, deflateSync as zlibDeflateSync, inflateSync } from 'node:zlib';
 import { beforeEach, describe, expect, test } from 'vitest';
-import { decompress } from '../../src/compression/deflate.js';
-import { decompressSync } from '../../src/compression/fflateAdapter.js';
+import { decompress } from '../../src/codecs/internal/deflate.js';
+import { decompressSync } from '../../src/codecs/internal/fflateAdapter.js';
 import {
   createPdf,
   encodePngFromPixels,

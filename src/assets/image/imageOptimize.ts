@@ -13,7 +13,7 @@
  */
 
 import type { ChromaSubsampling } from '../../wasm/jpeg/bridge.js';
-import { flateEncode } from '../../compression/pdfFlate.js';
+import { flateEncode } from '../../codecs/internal/pdfFlate.js';
 
 // ---------------------------------------------------------------------------
 // Public interfaces

@@ -16,7 +16,7 @@
  * No require() — ESM import only.
  */
 
-import { flateEncode } from '../../compression/pdfFlate.js';
+import { flateEncode } from '../../codecs/internal/pdfFlate.js';
 
 // ---------------------------------------------------------------------------
 // Internal: minimal JPEG encoder (baseline, quality-scaled quantization)

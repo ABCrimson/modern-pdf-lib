@@ -63,7 +63,7 @@ import {
   PdfStream,
   PdfObjectRegistry,
 } from './pdfObjects.js';
-import { decodeStreamData } from '../parser/streamDecode.js';
+import { decodeStreamData } from '../codecs/streamDecode.js';
 import { assertWithinLimit } from '../internal/limits.js';
 import type { StructureType } from '../accessibility/structureTree.js';
 import {

@@ -30,7 +30,7 @@ import {
   type PdfObject,
   type PdfObjectRegistry,
 } from '../core/pdfObjects.js';
-import { decodeStreamData } from '../parser/streamDecode.js';
+import { decodeStreamData } from '../codecs/streamDecode.js';
 import { ResourceLimitError } from '../errors.js';
 
 /** The on-disk format of an embedded font program. */

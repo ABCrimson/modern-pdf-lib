@@ -25,7 +25,7 @@
  * No require() — ESM import only.
  */
 
-import { flateEncode, inflateFlateUpTo } from '../../compression/pdfFlate.js';
+import { flateEncode, inflateFlateUpTo } from '../../codecs/internal/pdfFlate.js';
 import { assertWithinLimit } from '../../internal/limits.js';
 
 // ---------------------------------------------------------------------------

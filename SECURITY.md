@@ -149,7 +149,7 @@ These areas are security-sensitive. A report against any of them is in scope.
 |---|---|---|
 | Encryption | `src/crypto/` | RC4 and AES encrypt/decrypt, key derivation, permission flags |
 | Digital signatures | `src/signature/` | PKCS#7/CAdES signing, certificate chain validation, CRL/OCSP revocation, LTV |
-| PDF parsing | `src/parser/` | Document parser and image decoders (CCITT; JBIG2 and JPEG 2000 throw `UnsupportedFilterError`), with internal limits that throw `ResourceLimitError` — the primary untrusted-input surface |
+| PDF parsing | `src/parser/`, `src/codecs/` | Document parser (`src/parser/`) and the stream and image decoders (`src/codecs/`: CCITT; JBIG2 and JPEG 2000 throw `UnsupportedFilterError`), with internal limits that throw `ResourceLimitError` — the primary untrusted-input surface |
 | Form scripting | `src/form/` | Arithmetic calculation evaluator and script attachment; script execution is disabled (`createSandbox().execute()` throws `ScriptExecutionDisabledError`, code `script-execution-disabled`) |
 | Security tooling | `src/security/` | Threat scanner, sanitizer, redaction verifier, encryption inspector |
 | WASM modules | `crates/` | Rust crates for deflate, PNG, TTF, shaping, JBIG2, and JPEG |

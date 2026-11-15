@@ -1,5 +1,5 @@
 /**
- * @module compression/pdfFlate
+ * @module codecs/internal/pdfFlate
  *
  * The FlateDecode codec: one place that writes and reads the data a PDF
  * stream carries under `/FlateDecode`.
@@ -33,7 +33,7 @@
  */
 
 import { Inflate, zlibSync } from 'fflate';
-import { INTERNAL_LIMITS, assertWithinLimit } from '../internal/limits.js';
+import { INTERNAL_LIMITS, assertWithinLimit } from '../../internal/limits.js';
 
 // ---------------------------------------------------------------------------
 // Levels

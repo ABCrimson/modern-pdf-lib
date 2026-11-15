@@ -1,5 +1,5 @@
 /**
- * @module compression/libdeflateWasm
+ * @module codecs/internal/libdeflateWasm
  *
  * WASM-backed compression engine using a Rust-compiled libdeflate module.
  *
@@ -152,7 +152,7 @@ export async function initDeflateWasm(wasmBytes?: Uint8Array): Promise<void> {
       bytes = wasmBytes;
     } else {
       // Load WASM bytes via the universal loader
-      const { loadWasmModule } = await import('../wasm/loader.js');
+      const { loadWasmModule } = await import('../../wasm/loader.js');
       bytes = await loadWasmModule('libdeflate');
     }
 

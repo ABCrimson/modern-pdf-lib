@@ -5,7 +5,7 @@
  */
 
 import { describe, bench } from './vitestBench.js';
-import { compressSync, decompressSync } from '../../src/compression/fflateAdapter.js';
+import { compressSync, decompressSync } from '../../src/codecs/internal/fflateAdapter.js';
 
 // ---------------------------------------------------------------------------
 // Test data generators
@@ -141,7 +141,7 @@ import {
   deflateSync,
   inflateSync,
   isAvailable,
-} from '../../src/compression/libdeflateWasm.js';
+} from '../../src/codecs/internal/libdeflateWasm.js';
 
 // initDeflateWasm() throws when the module cannot be loaded or instantiated.
 try {

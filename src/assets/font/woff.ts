@@ -23,13 +23,13 @@
  * - OpenType / sfnt table directory layout.
  *
  * Table data is inflated by the library's Flate codec
- * (`compression/pdfFlate`, built on `fflate`); no other runtime dependency.
+ * (`codecs/internal/pdfFlate`, built on `fflate`); no other runtime dependency.
  * No Buffer — uses Uint8Array and DataView throughout.
  *
  * @packageDocumentation
  */
 
-import { inflateFlateUpTo } from '../../compression/pdfFlate.js';
+import { inflateFlateUpTo } from '../../codecs/internal/pdfFlate.js';
 import { assertWithinLimit } from '../../internal/limits.js';
 
 // ---------------------------------------------------------------------------

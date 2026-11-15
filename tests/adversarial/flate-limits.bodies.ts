@@ -3,10 +3,10 @@
  * named export with the input bytes and the task's args. Each entry decodes its input through one
  * public or internal Flate path and returns the decoded length.
  */
-import { inflateFlate, inflateRaw } from '../../src/compression/pdfFlate.js';
+import { inflateFlate, inflateRaw } from '../../src/codecs/internal/pdfFlate.js';
 import { PdfDict, PdfName, PdfStream } from '../../src/core/pdfObjects.js';
 import { loadPdf } from '../../src/index.js';
-import { decodeFlateOnly, decodeStream } from '../../src/parser/streamDecode.js';
+import { decodeFlateOnly, decodeStream } from '../../src/codecs/streamDecode.js';
 import type { JsonValue } from '../helpers/budget.js';
 
 /** `inflateFlate` on zlib data. */

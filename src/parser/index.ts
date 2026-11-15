@@ -38,33 +38,36 @@ export type { ContentStreamOperator, Operand } from './contentStreamParser.js';
 // Stream decoding
 // ---------------------------------------------------------------------------
 
-export { decodeStream } from './streamDecode.js';
+export { decodeStream } from '../codecs/streamDecode.js';
 
 // ---------------------------------------------------------------------------
 // JBIG2 WASM acceleration
 // ---------------------------------------------------------------------------
 
-export { decodeJBIG2Async } from './jbig2Decode.js';
+export { decodeJBIG2Async } from '../codecs/jbig2/jbig2Decode.js';
 export { initJBIG2Wasm, isJBIG2WasmAvailable, disposeJBIG2Wasm } from './jbig2WasmBridge.js';
 
 // ---------------------------------------------------------------------------
 // JPEG2000 (JPXDecode) decoding
 // ---------------------------------------------------------------------------
 
-export { decodeJpeg2000, getJpeg2000Info } from './jpeg2000Decode.js';
+export { decodeJpeg2000, getJpeg2000Info } from '../codecs/jpeg2000/jpeg2000Decode.js';
 export type {
   Jpeg2000Image,
   Jpeg2000DecodeParams,
   Jpeg2000ColorSpace,
   Jpeg2000Info,
-} from './jpeg2000Decode.js';
+} from '../codecs/jpeg2000/jpeg2000Decode.js';
 
 // ---------------------------------------------------------------------------
 // JPEG2000 to JPEG transcoding
 // ---------------------------------------------------------------------------
 
-export { transcodeJp2ToJpeg, estimateTranscodedSize } from './jpeg2000Transcode.js';
-export type { TranscodeOptions } from './jpeg2000Transcode.js';
+export {
+  transcodeJp2ToJpeg,
+  estimateTranscodedSize,
+} from '../codecs/internal/jpeg2000Transcode.js';
+export type { TranscodeOptions } from '../codecs/internal/jpeg2000Transcode.js';
 
 // ---------------------------------------------------------------------------
 // Parse errors

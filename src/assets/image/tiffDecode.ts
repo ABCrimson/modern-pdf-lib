@@ -15,7 +15,7 @@
  * Magic bytes: 49 49 (II, little-endian) or 4D 4D (MM, big-endian) + 42 (0x002A)
  */
 
-import { inflateFlateUpTo } from '../../compression/pdfFlate.js';
+import { inflateFlateUpTo } from '../../codecs/internal/pdfFlate.js';
 import { assertWithinLimit } from '../../internal/limits.js';
 
 // ---------------------------------------------------------------------------

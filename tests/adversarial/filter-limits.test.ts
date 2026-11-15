@@ -137,7 +137,7 @@ describe('chains under the budget', () => {
     'throws ResourceLimitError when the second FlateDecode of a chain passes the limit',
     async () => {
       // 300 MiB of zeros inside two zlib layers: the first stage gives about 300 KiB, the second
-      // would give 300 MiB. This case also needs the cap in inflateFlate (src/compression/pdfFlate.ts).
+      // would give 300 MiB. This case also needs the cap in inflateFlate (src/codecs/internal/pdfFlate.ts).
       const twice = deflateSync(zlibOfZeros(300 * MIB), { level: 9 });
       const outcome = await run('decodeChain', { filters: ['FlateDecode', 'FlateDecode'] }, twice);
       expect(outcome).toMatchObject(LIMIT_ERROR);

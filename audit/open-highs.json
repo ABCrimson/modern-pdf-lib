@@ -181,7 +181,7 @@
       "area": "api-surface-utils",
       "severity": "high",
       "status": "missed",
-      "path": "src/compression/libdeflateWasm.ts",
+      "path": "src/codecs/internal/libdeflateWasm.ts",
       "target": "0.47.0",
       "summary": "initDeflateWasm cannot instantiate the shipped deflate WASM module and always rejects."
     },
@@ -289,7 +289,7 @@
       "area": "color-compression",
       "severity": "high",
       "status": "confirmed",
-      "path": "src/compression/libdeflateWasm.ts",
+      "path": "src/codecs/internal/libdeflateWasm.ts",
       "target": "0.47.0",
       "summary": "The libdeflate WASM wrapper does not match the interface of the module it ships with and cannot initialise."
     },
@@ -298,7 +298,7 @@
       "area": "color-compression",
       "severity": "high",
       "status": "confirmed",
-      "path": "src/compression/libdeflateWasm.ts",
+      "path": "src/codecs/internal/libdeflateWasm.ts",
       "target": "0.47.0",
       "summary": "After a failed initDeflateWasm call, later calls resolve without loading the module."
     },
@@ -1018,7 +1018,7 @@
       "area": "parser-codecs",
       "severity": "high",
       "status": "confirmed",
-      "path": "src/parser/ccittDecode.ts",
+      "path": "src/codecs/internal/ccittDecode.ts",
       "target": "0.48.1",
       "summary": "CCITT Group 3 one-dimensional images with end-of-line codes decode to empty output."
     },
@@ -1027,7 +1027,7 @@
       "area": "parser-codecs",
       "severity": "high",
       "status": "confirmed",
-      "path": "src/parser/ccittDecode.ts",
+      "path": "src/codecs/internal/ccittDecode.ts",
       "target": "0.48.1",
       "summary": "CCITT Group 3 two-dimensional images with end-of-line codes decode wrongly."
     },
@@ -1207,7 +1207,7 @@
       "area": "rust-crates",
       "severity": "high",
       "status": "confirmed",
-      "path": "src/compression/libdeflateWasm.ts",
+      "path": "src/codecs/internal/libdeflateWasm.ts",
       "target": "0.47.0",
       "summary": "The libdeflate bridge expects exports the WASM crate does not provide."
     },

@@ -6,8 +6,8 @@ import { describe, it, expect } from 'vitest';
 import {
   estimateTranscodedSize,
   transcodeJp2ToJpeg,
-} from '../../../src/parser/jpeg2000Transcode.js';
-import { UnsupportedFilterError } from '../../../src/errors.js';
+} from '../../../../src/codecs/internal/jpeg2000Transcode.js';
+import { UnsupportedFilterError } from '../../../../src/errors.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -226,12 +226,12 @@ describe('transcodeJp2ToJpeg', () => {
 
 describe('TranscodeOptions', () => {
   it('exports transcodeJp2ToJpeg function', async () => {
-    const mod = await import('../../../src/parser/jpeg2000Transcode.js');
+    const mod = await import('../../../../src/codecs/internal/jpeg2000Transcode.js');
     expect(typeof mod.transcodeJp2ToJpeg).toBe('function');
   });
 
   it('exports estimateTranscodedSize function', async () => {
-    const mod = await import('../../../src/parser/jpeg2000Transcode.js');
+    const mod = await import('../../../../src/codecs/internal/jpeg2000Transcode.js');
     expect(typeof mod.estimateTranscodedSize).toBe('function');
   });
 });

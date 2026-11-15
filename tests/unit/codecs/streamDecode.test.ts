@@ -10,7 +10,7 @@
 import { deflateSync as nodeDeflateSync, gzipSync } from 'node:zlib';
 import { describe, it, expect } from 'vitest';
 import { zlibSync, deflateSync } from 'fflate';
-import { decodeStream, getStreamFilters } from '../../../src/parser/streamDecode.js';
+import { decodeStream, getStreamFilters } from '../../../src/codecs/streamDecode.js';
 import { PdfDict, PdfName, PdfArray, PdfNumber } from '../../../src/core/pdfObjects.js';
 import { UnsupportedFilterError } from '../../../src/errors.js';
 

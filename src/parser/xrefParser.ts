@@ -26,7 +26,7 @@ import {
   PdfString,
 } from '../core/pdfObjects.js';
 import type { PdfObjectParser } from './objectParser.js';
-import { decodeFlateOnly, firstFilterName } from './streamDecode.js';
+import { decodeFlateOnly, firstFilterName } from '../codecs/streamDecode.js';
 import { PdfParseError } from './parseError.js';
 import { ResourceLimitError } from '../errors.js';
 

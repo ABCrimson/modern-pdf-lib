@@ -67,7 +67,7 @@ import { detectImageFormat } from '../assets/image/formatDetect.js';
 import { decodeWebP } from '../assets/image/webpDecode.js';
 import { decodeTiff } from '../assets/image/tiffDecode.js';
 import type { TiffDecodeOptions } from '../assets/image/tiffDecode.js';
-import { flateEncode } from '../compression/pdfFlate.js';
+import { flateEncode } from '../codecs/internal/pdfFlate.js';
 import type { LoadPdfOptions } from '../parser/documentParser.js';
 import { loadPdf } from '../parser/documentParser.js';
 import { PdfEncryptionHandler } from '../crypto/encryptionHandler.js';

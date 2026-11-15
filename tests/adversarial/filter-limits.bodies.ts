@@ -6,7 +6,7 @@
  */
 import { zlibSync } from 'fflate';
 import { PdfArray, PdfDict, PdfName, PdfNumber, PdfStream } from '../../src/core/pdfObjects.js';
-import { decodeFlateOnly, decodeStream } from '../../src/parser/streamDecode.js';
+import { decodeFlateOnly, decodeStream } from '../../src/codecs/streamDecode.js';
 import type { JsonValue } from '../helpers/budget.js';
 
 const CLEAR = 256;
@@ -155,7 +155,7 @@ export function predictorOnZeros(_bytes: Uint8Array, args: JsonValue): JsonValue
 
 // ---------------------------------------------------------------------------
 // Control streams: ordinary input whose output is unchanged by the limits. The unit tests
-// (tests/unit/parser/streamDecodeLimits.test.ts) decode them and compare SHA-256 hashes.
+// (tests/unit/codecs/streamDecodeLimits.test.ts) decode them and compare SHA-256 hashes.
 // ---------------------------------------------------------------------------
 
 /** One ordinary stream for the unit tests: its filters, parameters and encoded bytes. */

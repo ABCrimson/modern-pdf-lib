@@ -1,5 +1,5 @@
 /**
- * @module compression/fflateAdapter
+ * @module codecs/internal/fflateAdapter
  *
  * Compression engine adapter for the `fflate` npm package.
  *

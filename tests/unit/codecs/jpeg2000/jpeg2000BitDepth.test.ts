@@ -20,8 +20,8 @@ import {
   normalizeComponentDepth,
   offsetSignedToUnsigned,
   summarizeBitDepth,
-} from '../../../src/parser/jpeg2000BitDepth.js';
-import type { ComponentDepth } from '../../../src/parser/jpeg2000BitDepth.js';
+} from '../../../../src/codecs/jpeg2000/jpeg2000BitDepth.js';
+import type { ComponentDepth } from '../../../../src/codecs/jpeg2000/jpeg2000BitDepth.js';
 
 // ---------------------------------------------------------------------------
 // Helpers

@@ -12,7 +12,7 @@ import { embedTiffDirect } from '../../src/assets/image/tiffDirectEmbed.js';
 import { decodeTiff, decodeTiffAll, getTiffPageCount } from '../../src/assets/image/tiffDecode.js';
 import { PdfDict, PdfNumber } from '../../src/core/pdfObjects.js';
 import { createPdf } from '../../src/index.js';
-import { decodeStream } from '../../src/parser/streamDecode.js';
+import { decodeStream } from '../../src/codecs/streamDecode.js';
 import type { JsonValue } from '../helpers/budget.js';
 
 // ---------------------------------------------------------------------------

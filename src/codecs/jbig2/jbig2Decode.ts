@@ -1,5 +1,5 @@
 /**
- * @module parser/jbig2Decode
+ * @module codecs/jbig2/jbig2Decode
  *
  * Entry points for the PDF JBIG2Decode filter.
  *
@@ -14,8 +14,8 @@
  * @packageDocumentation
  */
 
-import { UnsupportedFilterError } from '../errors.js';
-import type { PdfDict } from '../core/pdfObjects.js';
+import { UnsupportedFilterError } from '../../errors.js';
+import type { PdfDict } from '../../core/pdfObjects.js';
 
 // ---------------------------------------------------------------------------
 // WASM bridge (optional acceleration)
@@ -34,7 +34,7 @@ async function tryLoadJBIG2Wasm(): Promise<boolean> {
   wasmAttempted = true;
 
   try {
-    const { initJBIG2Wasm, isJBIG2WasmAvailable } = await import('./jbig2WasmBridge.js');
+    const { initJBIG2Wasm, isJBIG2WasmAvailable } = await import('../../parser/jbig2WasmBridge.js');
     await initJBIG2Wasm();
     wasmAvailable = isJBIG2WasmAvailable();
     return wasmAvailable;
@@ -91,7 +91,7 @@ export async function decodeJBIG2Async(
   // Try WASM first
   if (await tryLoadJBIG2Wasm()) {
     try {
-      const { decodeJBIG2Wasm } = await import('./jbig2WasmBridge.js');
+      const { decodeJBIG2Wasm } = await import('../../parser/jbig2WasmBridge.js');
       const result = decodeJBIG2Wasm(data, globalsData);
       return result.bitmapData;
     } catch {

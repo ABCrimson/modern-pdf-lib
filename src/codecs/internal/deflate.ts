@@ -1,5 +1,5 @@
 /**
- * @module compression/deflate
+ * @module codecs/internal/deflate
  *
  * Unified compression interface for the modern-pdf library.
  *
@@ -235,7 +235,7 @@ async function tryLoadLibdeflate(): Promise<CompressionEngine | null> {
     // retrieve them and pass through to initDeflateWasm.
     let customBytes: Uint8Array | undefined;
     try {
-      const { getWasmLoaderConfig } = await import('../wasm/loader.js');
+      const { getWasmLoaderConfig } = await import('../../wasm/loader.js');
       const config = getWasmLoaderConfig();
       customBytes = config.moduleBytes?.['libdeflate'];
     } catch {

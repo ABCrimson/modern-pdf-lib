@@ -661,7 +661,7 @@ modern-pdf-lib/
     signature/      PKCS#7 signatures, timestamps, verification, CRL/OCSP, LTV
     security/       Threat scanner, sanitizer, redaction verifier, encryption inspector
     crypto/         AES, RC4, MD5, SHA-256/384/512
-    compression/    Deflate (fflate; WASM bridge not loaded)
+    codecs/         Stream filters, Deflate (fflate; WASM bridge not loaded), CCITT, JPEG 2000 and JBIG2 entry modules
     assets/         Font metrics/embed/subset, image embed, SVG
     text/           BiDi (UAX #9) text ordering
     color/          Color conversion & ICC transforms

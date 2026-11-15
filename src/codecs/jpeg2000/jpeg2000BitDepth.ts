@@ -1,5 +1,5 @@
 /**
- * @module parser/jpeg2000BitDepth
+ * @module codecs/jpeg2000/jpeg2000BitDepth
  *
  * 16-bit and variable bit depth support for JPEG2000 (JP2 / J2K) images.
  *

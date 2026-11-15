@@ -23,9 +23,9 @@ import {
   decodeTile,
   decodeTileRegion,
   assembleTiles,
-} from '../../../src/parser/jpeg2000Tiles.js';
-import type { TileGridInfo, TileData } from '../../../src/parser/jpeg2000Tiles.js';
-import { UnsupportedFilterError } from '../../../src/errors.js';
+} from '../../../../src/codecs/jpeg2000/jpeg2000Tiles.js';
+import type { TileGridInfo, TileData } from '../../../../src/codecs/jpeg2000/jpeg2000Tiles.js';
+import { UnsupportedFilterError } from '../../../../src/errors.js';
 
 // ---------------------------------------------------------------------------
 // Helpers

@@ -2,7 +2,7 @@
 //!
 //! Provides raw deflate compression and decompression via the `flate2` crate.
 //! Compiled to WebAssembly and consumed by the TypeScript wrapper in
-//! `src/compression/libdeflateWasm.ts`.
+//! `src/codecs/internal/libdeflateWasm.ts`.
 //!
 //! # Exported Functions
 //!

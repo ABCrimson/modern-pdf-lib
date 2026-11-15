@@ -6,11 +6,15 @@
  */
 import { PdfDict, PdfName } from '../../src/core/pdfObjects.js';
 import { decodeWebP } from '../../src/assets/image/webpDecode.js';
-import { decodeJBIG2, decodeJBIG2Async } from '../../src/parser/jbig2Decode.js';
-import { decodeJpeg2000 } from '../../src/parser/jpeg2000Decode.js';
-import { assembleTiles, decodeTile, decodeTileRegion } from '../../src/parser/jpeg2000Tiles.js';
-import { transcodeJp2ToJpeg } from '../../src/parser/jpeg2000Transcode.js';
-import { decodeStream } from '../../src/parser/streamDecode.js';
+import { decodeJBIG2, decodeJBIG2Async } from '../../src/codecs/jbig2/jbig2Decode.js';
+import { decodeJpeg2000 } from '../../src/codecs/jpeg2000/jpeg2000Decode.js';
+import {
+  assembleTiles,
+  decodeTile,
+  decodeTileRegion,
+} from '../../src/codecs/jpeg2000/jpeg2000Tiles.js';
+import { transcodeJp2ToJpeg } from '../../src/codecs/internal/jpeg2000Transcode.js';
+import { decodeStream } from '../../src/codecs/streamDecode.js';
 import type { JsonValue } from '../helpers/budget.js';
 
 /** `decodeJpeg2000` on the input. */

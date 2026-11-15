@@ -275,7 +275,7 @@ export async function initWasm(options?: string | URL | InitWasmOptions): Promis
   if (options.deflate || options.deflateWasm) {
     inits.push(
       (async () => {
-        const { initDeflateWasm } = await import('./compression/libdeflateWasm.js');
+        const { initDeflateWasm } = await import('./codecs/internal/libdeflateWasm.js');
         await initDeflateWasm(options.deflateWasm);
       })(),
     );
@@ -1484,13 +1484,13 @@ export { verifySignatureDetailed } from './signature/detailedVerifier.js';
 // ---------------------------------------------------------------------------
 // JPEG 2000 decoding internals (docs/guide/jpeg2000.md)
 // ---------------------------------------------------------------------------
-export { decodeJpeg2000 } from './parser/jpeg2000Decode.js';
+export { decodeJpeg2000 } from './codecs/jpeg2000/jpeg2000Decode.js';
 export {
   parseTileInfo,
   decodeTile,
   decodeTileRegion,
   assembleTiles,
-} from './parser/jpeg2000Tiles.js';
+} from './codecs/jpeg2000/jpeg2000Tiles.js';
 export {
   getComponentDepths,
   summarizeBitDepth,
@@ -1498,7 +1498,7 @@ export {
   downscale16To8,
   upscale8To16,
   offsetSignedToUnsigned,
-} from './parser/jpeg2000BitDepth.js';
+} from './codecs/jpeg2000/jpeg2000BitDepth.js';
 
 // ---------------------------------------------------------------------------
 // PDF/X validation & enforcement (docs/guide/pdfx.md)

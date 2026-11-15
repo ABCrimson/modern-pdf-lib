@@ -1,5 +1,5 @@
 /**
- * @module parser/jpeg2000Transcode
+ * @module codecs/internal/jpeg2000Transcode
  *
  * JPEG2000 to JPEG transcoding entry points.
  *
@@ -13,7 +13,7 @@
  * @packageDocumentation
  */
 
-import { UnsupportedFilterError } from '../errors.js';
+import { UnsupportedFilterError } from '../../errors.js';
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------

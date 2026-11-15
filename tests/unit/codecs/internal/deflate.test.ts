@@ -15,16 +15,16 @@ import {
   compressAsync,
   decompressAsync,
   FflateEngine,
-} from '../../../src/compression/fflateAdapter.js';
+} from '../../../../src/codecs/internal/fflateAdapter.js';
 import {
   compress,
   decompress,
   getCompressor,
   resetEngines,
   clampLevel,
-} from '../../../src/compression/deflate.js';
-import type { CompressionEngine } from '../../../src/compression/deflate.js';
-import { LibdeflateWasm } from '../../../src/compression/libdeflateWasm.js';
+} from '../../../../src/codecs/internal/deflate.js';
+import type { CompressionEngine } from '../../../../src/codecs/internal/deflate.js';
+import { LibdeflateWasm } from '../../../../src/codecs/internal/libdeflateWasm.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -253,19 +253,20 @@ describe('Unified deflate API', () => {
   // -------------------------------------------------------------------------
 
   it('isAvailable() returns false when WASM has not been initialized', async () => {
-    const { isAvailable } = await import('../../../src/compression/libdeflateWasm.js');
+    const { isAvailable } = await import('../../../../src/codecs/internal/libdeflateWasm.js');
     // After resetEngines() in afterEach, WASM should not be available
     expect(isAvailable()).toBe(false);
   });
 
   it('deflateSync() throws when WASM is not initialized', async () => {
-    const { deflateSync } = await import('../../../src/compression/libdeflateWasm.js');
+    const { deflateSync } = await import('../../../../src/codecs/internal/libdeflateWasm.js');
     const input = encoder.encode('Test data');
     expect(() => deflateSync(input)).toThrow(/not initialized/);
   });
 
   it('initDeflateWasm() throws a meaningful error when no WASM binary exists', async () => {
-    const { initDeflateWasm, dispose } = await import('../../../src/compression/libdeflateWasm.js');
+    const { initDeflateWasm, dispose } =
+      await import('../../../../src/codecs/internal/libdeflateWasm.js');
     // Ensure clean state
     dispose();
 

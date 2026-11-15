@@ -29,7 +29,7 @@ import {
 import type { PdfObjectRegistry } from './pdfObjects.js';
 import type { PdfPage } from './pdfPage.js';
 import type { Angle } from './operators/state.js';
-import { decodeStreamData } from '../parser/streamDecode.js';
+import { decodeStreamData } from '../codecs/streamDecode.js';
 import {
   carryDecryptedFromEncryptedFile,
   holdsDecryptedObject,

@@ -51,11 +51,11 @@ import {
   inflateRawBounded,
   isZlibHeader,
   wrapRawDeflate,
-} from '../compression/pdfFlate.js';
+} from '../codecs/internal/pdfFlate.js';
 import {
   isAvailable as isWasmDeflateAvailable,
   deflateSync as wasmDeflateSync,
-} from '../compression/libdeflateWasm.js';
+} from '../codecs/internal/libdeflateWasm.js';
 import { INTERNAL_LIMITS } from '../internal/limits.js';
 import { UnsupportedEncryptionError } from '../errors.js';
 import { PdfName } from './pdfObjects.js';

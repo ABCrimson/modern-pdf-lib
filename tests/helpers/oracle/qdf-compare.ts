@@ -33,7 +33,7 @@ import type {
   PdfObjectRegistry,
   PdfStream,
 } from '../../../src/core/pdfObjects.js';
-import { decodeStreamData } from '../../../src/parser/streamDecode.js';
+import { decodeStreamData } from '../../../src/codecs/streamDecode.js';
 import { QPDF_BIN, QpdfError } from './qpdf.js';
 
 /** The QDF form of `bytes` and the original object number and generation of each QDF object. */

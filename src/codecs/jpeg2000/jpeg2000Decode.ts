@@ -1,5 +1,5 @@
 /**
- * @module parser/jpeg2000Decode
+ * @module codecs/jpeg2000/jpeg2000Decode
  *
  * JPEG2000 (JPX / JP2) stream entry points for the PDF JPXDecode filter.
  *
@@ -15,7 +15,7 @@
  * @packageDocumentation
  */
 
-import { UnsupportedFilterError } from '../errors.js';
+import { UnsupportedFilterError } from '../../errors.js';
 
 // ---------------------------------------------------------------------------
 // Public types

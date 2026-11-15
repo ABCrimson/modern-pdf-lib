@@ -54,7 +54,7 @@ import type { PdfDocument, PdfObject, PdfObjectRegistry, PdfRef } from '../../sr
 import { INTERNAL_LIMITS } from '../../src/internal/limits.js';
 import type { ResourceLimitName } from '../../src/internal/limits.js';
 import { decodeWoff, isWoff } from '../../src/assets/font/woff.js';
-import { decodeStream, getStreamFilters } from '../../src/parser/streamDecode.js';
+import { decodeStream, getStreamFilters } from '../../src/codecs/streamDecode.js';
 import { parseToUnicodeCMap } from '../../src/parser/textExtractor.js';
 import { embedPng } from '../../src/assets/image/pngEmbed.js';
 import { embedJpeg } from '../../src/assets/image/jpegEmbed.js';

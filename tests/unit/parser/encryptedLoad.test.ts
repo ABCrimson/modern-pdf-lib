@@ -35,7 +35,7 @@ import { mergePdfs } from '../../../src/core/documentMerge.js';
 import { PdfEncryptionHandler } from '../../../src/crypto/encryptionHandler.js';
 import { PdfRef } from '../../../src/core/pdfObjects.js';
 import type { PdfDict, PdfObject, PdfStream, PdfString } from '../../../src/core/pdfObjects.js';
-import { decodeStreamData } from '../../../src/parser/streamDecode.js';
+import { decodeStreamData } from '../../../src/codecs/streamDecode.js';
 import { extractText, parseContentStream } from '../../../src/index.js';
 import { PdfParseError } from '../../../src/parser/parseError.js';
 import { UnsupportedEncryptionError } from '../../../src/errors.js';

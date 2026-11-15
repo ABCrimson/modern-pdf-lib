@@ -1,5 +1,5 @@
 /**
- * @module parser/streamDecode
+ * @module codecs/streamDecode
  *
  * Decode / decompress PDF stream data.  Supports all standard PDF 1.7
  * filter types (Table 6 in the spec) including chained (multi-filter)
@@ -12,13 +12,13 @@
  * @packageDocumentation
  */
 
-import { inflateFlate, inflateRaw } from '../compression/pdfFlate.js';
+import { inflateFlate, inflateRaw } from './internal/pdfFlate.js';
 import { INTERNAL_LIMITS, assertWithinLimit } from '../internal/limits.js';
 import { UnsupportedFilterError } from '../errors.js';
 import type { PdfObject, PdfStream } from '../core/pdfObjects.js';
 import { PdfDict, PdfName, PdfArray, PdfNumber } from '../core/pdfObjects.js';
-import { decodeCCITT } from './ccittDecode.js';
-import { decodeJBIG2 } from './jbig2Decode.js';
+import { decodeCCITT } from './internal/ccittDecode.js';
+import { decodeJBIG2 } from './jbig2/jbig2Decode.js';
 
 // ---------------------------------------------------------------------------
 // Public API

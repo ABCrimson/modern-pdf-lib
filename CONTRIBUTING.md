@@ -390,7 +390,7 @@ Version numbers follow the project's own scheme — see [VERSIONING.md](./VERSIO
 | Module | Responsibility |
 |---|---|
 | `src/core/` | Document model, pages, object registry, writer, incremental save, merging |
-| `src/parser/` | PDF parser, streaming parser, stream filters and the CCITT decoder (JPEG 2000 and JBIG2 data throws `UnsupportedFilterError`) |
+| `src/parser/` | PDF parser and streaming parser (the stream filters live in `src/codecs/`) |
 | `src/assets/` | Font, image, SVG, Markdown, and virtual-DOM embedding |
 | `src/render/` | Content-stream interpreter, display list, rasterizer, Canvas adapter, OCR, diff |
 | `src/annotation/` | Annotation objects, appearance generation, `/Redact` annotations (applying them throws `RedactionIncompleteError`, code `redaction-incomplete`, in this release) |
@@ -402,7 +402,7 @@ Version numbers follow the project's own scheme — see [VERSIONING.md](./VERSIO
 | `src/accessibility/` | Structure tree, auto-tagging, marked content, PDF/UA validation |
 | `src/layout/` | Tables, headers/footers, Knuth–Plass text layout, overflow, presets |
 | `src/barcode/` | QR, Code 128, Code 39, EAN, ITF, PDF417, Data Matrix |
-| `src/compression/` | Deflate: the `/FlateDecode` codec (`pdfFlate.ts`: zlib out; zlib, or raw DEFLATE as a fallback, in), the fflate adapter and the libdeflate WASM bridge |
+| `src/codecs/` | The stream filter pipeline (`streamDecode.ts`; JPEG 2000 and JBIG2 data throws `UnsupportedFilterError`), the JPEG 2000 and JBIG2 entry modules; under `internal/`, the CCITT decoder and Deflate: the `/FlateDecode` codec (`pdfFlate.ts`: zlib out; zlib, or raw DEFLATE as a fallback, in), the fflate adapter and the libdeflate WASM bridge |
 | `src/color/` | Color-space conversion and ICC transforms |
 | `src/metadata/` | XMP metadata, document info, viewer preferences |
 | `src/outline/` | Bookmark / outline tree |

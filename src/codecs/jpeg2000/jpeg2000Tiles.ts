@@ -1,5 +1,5 @@
 /**
- * @module parser/jpeg2000Tiles
+ * @module codecs/jpeg2000/jpeg2000Tiles
  *
  * Tile grid geometry for JPEG2000 (JP2 / J2K) images.
  *
@@ -26,7 +26,7 @@
  * @packageDocumentation
  */
 
-import { UnsupportedFilterError } from '../errors.js';
+import { UnsupportedFilterError } from '../../errors.js';
 
 // ---------------------------------------------------------------------------
 // Types
