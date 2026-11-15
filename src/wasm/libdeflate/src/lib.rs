@@ -27,9 +27,14 @@ use wasm_bindgen::prelude::*;
 // Error helper
 // ---------------------------------------------------------------------------
 
+/// Format a Rust error as the message text of a module error.
+fn err_message<E: std::fmt::Display>(err: E) -> String {
+    format!("modern-pdf-deflate: {}", err)
+}
+
 /// Convert a Rust error into a JsValue for wasm-bindgen.
 fn to_js_err<E: std::fmt::Display>(err: E) -> JsValue {
-    JsValue::from_str(&format!("modern-pdf-deflate: {}", err))
+    JsValue::from_str(&err_message(err))
 }
 
 // ---------------------------------------------------------------------------
@@ -98,6 +103,12 @@ pub fn compress(data: &[u8], level: u32) -> Result<Vec<u8>, JsValue> {
 /// - The decompressed output exceeds `max_output_size`.
 #[wasm_bindgen]
 pub fn decompress(data: &[u8], max_output_size: usize) -> Result<Vec<u8>, JsValue> {
+    decompress_inner(data, max_output_size).map_err(|message| JsValue::from_str(&message))
+}
+
+/// Decompression logic of [`decompress`]; the error is the plain message text
+/// so that native tests can inspect it (a `JsValue` cannot be built off wasm32).
+fn decompress_inner(data: &[u8], max_output_size: usize) -> Result<Vec<u8>, String> {
     use std::io::Read;
 
     // Pre-allocate with a reasonable initial capacity
@@ -111,17 +122,17 @@ pub fn decompress(data: &[u8], max_output_size: usize) -> Result<Vec<u8>, JsValu
     let mut chunk = [0u8; 16384]; // 16 KiB read buffer
 
     loop {
-        let n = decoder.read(&mut chunk).map_err(to_js_err)?;
+        let n = decoder.read(&mut chunk).map_err(err_message)?;
         if n == 0 {
             break;
         }
 
         total_read += n;
         if total_read > max_output_size {
-            return Err(JsValue::from_str(&format!(
+            return Err(format!(
                 "modern-pdf-deflate: decompressed size ({}) exceeds max_output_size ({})",
                 total_read, max_output_size
-            )));
+            ));
         }
 
         output.extend_from_slice(&chunk[..n]);
@@ -172,9 +183,11 @@ mod tests {
         let input = vec![0u8; 10000];
         let compressed = compress(&input, 1).expect("compress failed");
 
-        // Try to decompress with a too-small limit
-        let result = decompress(&compressed, 100);
-        assert!(result.is_err());
+        // Try to decompress with a too-small limit. Test the inner function:
+        // a JsValue error cannot be built natively.
+        let message = decompress_inner(&compressed, 100)
+            .expect_err("output above the limit must be rejected");
+        assert!(message.contains("exceeds max_output_size (100)"), "unexpected message: {message}");
     }
 
     #[test]

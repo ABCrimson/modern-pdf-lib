@@ -18,9 +18,13 @@ use wasm_bindgen::prelude::*;
 // Error helper
 // ---------------------------------------------------------------------------
 
-/// Convert a Rust error into a JsValue for wasm-bindgen.
-fn to_js_err<E: std::fmt::Display>(err: E) -> JsValue {
-    JsValue::from_str(&format!("modern-pdf-jpeg: {}", err))
+/// Format a Rust error as the message text of a module error.
+///
+/// The encoding and decoding logic returns these plain messages; only the
+/// exported functions turn them into a `JsValue`, which cannot be built on a
+/// non-wasm32 target (so native tests work on the messages).
+fn err_message<E: std::fmt::Display>(err: E) -> String {
+    format!("modern-pdf-jpeg: {}", err)
 }
 
 // ---------------------------------------------------------------------------
@@ -60,17 +64,39 @@ pub fn encode_jpeg(
     progressive: bool,
     chroma_subsampling: u8,
 ) -> Result<Vec<u8>, JsValue> {
+    encode_jpeg_inner(
+        pixels,
+        width,
+        height,
+        channels,
+        quality,
+        progressive,
+        chroma_subsampling,
+    )
+    .map_err(|message| JsValue::from_str(&message))
+}
+
+/// Encoding logic of [`encode_jpeg`]; the error is the plain message text.
+fn encode_jpeg_inner(
+    pixels: &[u8],
+    width: u32,
+    height: u32,
+    channels: u8,
+    quality: u8,
+    progressive: bool,
+    chroma_subsampling: u8,
+) -> Result<Vec<u8>, String> {
     // Validate pixel data length
     let expected_len = (width as usize) * (height as usize) * (channels as usize);
     if pixels.len() != expected_len {
-        return Err(JsValue::from_str(&format!(
+        return Err(format!(
             "modern-pdf-jpeg: pixel data length {} does not match {}x{}x{}={}",
             pixels.len(),
             width,
             height,
             channels,
             expected_len,
-        )));
+        ));
     }
 
     // Map channel count to jpeg-encoder ColorType
@@ -79,10 +105,10 @@ pub fn encode_jpeg(
         3 => jpeg_encoder::ColorType::Rgb,
         4 => jpeg_encoder::ColorType::Rgba,
         _ => {
-            return Err(JsValue::from_str(&format!(
+            return Err(format!(
                 "modern-pdf-jpeg: unsupported channel count {}; expected 1, 3, or 4",
                 channels,
-            )));
+            ));
         }
     };
 
@@ -110,7 +136,7 @@ pub fn encode_jpeg(
 
         encoder
             .encode(pixels, width as u16, height as u16, color_type)
-            .map_err(to_js_err)?;
+            .map_err(err_message)?;
     }
 
     Ok(output)
@@ -137,11 +163,17 @@ pub fn encode_jpeg(
 /// Returns a `JsValue` error string if the input is not valid JPEG data.
 #[wasm_bindgen]
 pub fn decode_jpeg(data: &[u8]) -> Result<Vec<u8>, JsValue> {
+    decode_jpeg_inner(data).map_err(|message| JsValue::from_str(&message))
+}
+
+/// Decoding logic of [`decode_jpeg`]; the error is the plain message text so
+/// that native tests can inspect it (a `JsValue` cannot be built off wasm32).
+fn decode_jpeg_inner(data: &[u8]) -> Result<Vec<u8>, String> {
     let mut decoder = jpeg_decoder::Decoder::new(std::io::Cursor::new(data));
 
-    let pixels = decoder.decode().map_err(to_js_err)?;
+    let pixels = decoder.decode().map_err(err_message)?;
     let info = decoder.info().ok_or_else(|| {
-        JsValue::from_str("modern-pdf-jpeg: failed to read JPEG metadata after decoding")
+        String::from("modern-pdf-jpeg: failed to read JPEG metadata after decoding")
     })?;
 
     let channels: u8 = match info.pixel_format {
@@ -296,15 +328,17 @@ mod tests {
     #[test]
     fn encode_invalid_pixel_length() {
         let pixels = vec![255, 0]; // too short for 2x2 RGB
-        let result = encode_jpeg(&pixels, 2, 2, 3, 80, false, 0);
-        assert!(result.is_err());
+        let result = encode_jpeg_inner(&pixels, 2, 2, 3, 80, false, 0);
+        let message = result.expect_err("a short pixel buffer must be rejected");
+        assert!(message.contains("does not match 2x2x3=12"), "unexpected message: {message}");
     }
 
     #[test]
     fn encode_invalid_channels() {
         let pixels = vec![0; 2 * 2 * 2]; // 2 channels
-        let result = encode_jpeg(&pixels, 2, 2, 2, 80, false, 0);
-        assert!(result.is_err());
+        let result = encode_jpeg_inner(&pixels, 2, 2, 2, 80, false, 0);
+        let message = result.expect_err("two channels must be rejected");
+        assert!(message.contains("unsupported channel count 2"), "unexpected message: {message}");
     }
 
     #[test]
@@ -351,8 +385,9 @@ mod tests {
 
     #[test]
     fn decode_invalid_data() {
-        let result = decode_jpeg(&[0, 1, 2, 3]);
-        assert!(result.is_err());
+        let result = decode_jpeg_inner(&[0, 1, 2, 3]);
+        let message = result.expect_err("invalid JPEG data must fail to decode");
+        assert!(message.starts_with("modern-pdf-jpeg: "), "unexpected message: {message}");
     }
 
     #[test]
