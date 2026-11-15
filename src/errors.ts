@@ -1,31 +1,370 @@
 /**
  * @module errors
  *
- * Typed error classes for common failure modes in the modern-pdf library.
- * Each error class extends the native `Error` and carries a descriptive
- * `name` so callers can use `instanceof` checks or `error.name` comparisons.
+ * The error classes of modern-pdf-lib. Every class derives from the abstract
+ * {@link PdfError}, which carries a machine-readable `code`. Five kind classes
+ * sit under it ({@link InvalidArgumentError}, {@link InvalidStateError},
+ * {@link MalformedInputError}, {@link UnsupportedFeatureError},
+ * {@link EnvironmentError}); the named classes sit under a kind or directly
+ * under `PdfError`. Class names follow pdf-lib where pdf-lib has the class.
  *
- * All constructors accept an optional `ErrorOptions` parameter to support
- * error chaining via the standard `{ cause }` option (ES2022+).
+ * `code` and `name` are the contract: stable across releases, identical in
+ * every build, never minified. `instanceof` with any class of this module
+ * also holds for an error made by another copy of the library (the ESM and
+ * CJS builds of one install, an IIFE in another realm): see the static
+ * `[Symbol.hasInstance]` of {@link PdfError}.
  *
- * These match the pdf-lib error hierarchy for API compatibility.
+ * All constructors accept the standard `ErrorOptions` (`{ cause }`).
  */
+
+// ---------------------------------------------------------------------------
+// The base class
+// ---------------------------------------------------------------------------
+
+/** Every code a {@link PdfError} can carry. Stable across releases: a code is never renamed or reused. */
+export type PdfErrorCode =
+  | 'invalid-argument'
+  | 'invalid-state'
+  | 'malformed-input'
+  | 'unsupported-feature'
+  | 'environment-unavailable'
+  | 'encrypted-pdf'
+  | 'resource-limit-exceeded'
+  | 'malformed-pdf'
+  | 'streaming-parse'
+  | 'unsupported-filter'
+  | 'unsupported-encryption-path'
+  | 'script-execution-disabled'
+  | 'unsupported-option'
+  | 'redaction-incomplete'
+  | 'timestamp-unverified'
+  | 'plugin-failed'
+  | 'batch-failed'
+  | 'memory-budget-exceeded'
+  | 'font-not-embedded'
+  | 'remove-page-from-empty-document'
+  | 'no-such-field'
+  | 'unexpected-field-type'
+  | 'missing-on-value'
+  | 'field-already-exists'
+  | 'invalid-field-name-part'
+  | 'combed-text-layout'
+  | 'exceeded-max-length'
+  | 'invalid-page-size'
+  | 'invalid-color'
+  | 'unencodable-text';
+
+/** The codes, as a table the compiler checks against {@link PdfErrorCode} in both directions. */
+const KNOWN_CODES: Readonly<Record<PdfErrorCode, true>> = {
+  'invalid-argument': true,
+  'invalid-state': true,
+  'malformed-input': true,
+  'unsupported-feature': true,
+  'environment-unavailable': true,
+  'encrypted-pdf': true,
+  'resource-limit-exceeded': true,
+  'malformed-pdf': true,
+  'streaming-parse': true,
+  'unsupported-filter': true,
+  'unsupported-encryption-path': true,
+  'script-execution-disabled': true,
+  'unsupported-option': true,
+  'redaction-incomplete': true,
+  'timestamp-unverified': true,
+  'plugin-failed': true,
+  'batch-failed': true,
+  'memory-budget-exceeded': true,
+  'font-not-embedded': true,
+  'remove-page-from-empty-document': true,
+  'no-such-field': true,
+  'unexpected-field-type': true,
+  'missing-on-value': true,
+  'field-already-exists': true,
+  'invalid-field-name-part': true,
+  'combed-text-layout': true,
+  'exceeded-max-length': true,
+  'invalid-page-size': true,
+  'invalid-color': true,
+  'unencodable-text': true,
+};
+
+/**
+ * The key of the brand of each class: a registered symbol, so every copy of
+ * the library in every realm of one agent uses the same key.
+ */
+const BRAND: unique symbol = Symbol.for('modern-pdf-lib.errorClass');
+
+/**
+ * Stores `name` as the brand of `cls`: an own, non-enumerable, read-only
+ * prototype property.  Every error class of the library calls it once, from
+ * a static block, with its own name.
+ *
+ * @internal Used by the error classes outside this module; no package entry exports it.
+ */
+export function brandErrorClass(
+  cls: abstract new (...args: never[]) => PdfError,
+  name: string,
+): void {
+  Object.defineProperty(cls.prototype, BRAND, { value: name });
+}
+
+/** The brand `target` holds as an own property, or `undefined`. */
+function ownBrand(target: object): unknown {
+  return Object.getOwnPropertyDescriptor(target, BRAND)?.value;
+}
+
+/**
+ * The base of every error this library throws on purpose.  It is abstract:
+ * each error is an instance of one of its subclasses.
+ *
+ * - `code` and `name` are stable across releases, identical in every build,
+ *   and never minified.
+ * - `instanceof` holds across copies of the library (see the static
+ *   `[Symbol.hasInstance]` below).
+ * - {@link PdfError.is} checks the code alone, so it also accepts the errors of
+ *   an older copy that carry a code.
+ *
+ * @example
+ * ```ts
+ * try {
+ *   await loadPdf(bytes);
+ * } catch (e) {
+ *   if (e instanceof MalformedInputError) console.error('not a PDF:', e.message);
+ *   else if (PdfError.is(e, 'resource-limit-exceeded')) console.error('too large');
+ *   else throw e;
+ * }
+ * ```
+ */
+export abstract class PdfError extends Error {
+  static {
+    brandErrorClass(this, 'PdfError');
+  }
+
+  /** Machine-readable, stable across releases and identical in every build; never minified. */
+  abstract readonly code: PdfErrorCode;
+
+  /**
+   * True when `value` is an instance of this class: by the ordinary prototype
+   * check, or, for an error made by another copy of the library (another
+   * build, another realm), when some prototype of `value` carries the same
+   * brand as this class.  Each class of this module stores its name as its
+   * brand under `Symbol.for("modern-pdf-lib.errorClass")`.  The check reads
+   * the brand of the class it is called on, so a sibling class never
+   * matches, and a subclass made outside the library (which has no brand of
+   * its own) matches only by the ordinary check.
+   */
+  static override [Symbol.hasInstance](value: unknown): boolean {
+    if (Function.prototype[Symbol.hasInstance].call(this, value)) return true;
+    const wanted = ownBrand(this.prototype);
+    if (wanted === undefined) return false;
+    if (value === null || (typeof value !== 'object' && typeof value !== 'function')) return false;
+    for (
+      let proto: object | null = Object.getPrototypeOf(value);
+      proto !== null;
+      proto = Object.getPrototypeOf(proto)
+    ) {
+      if (ownBrand(proto) === wanted) return true;
+    }
+    return false;
+  }
+
+  /**
+   * True when `value` is an object whose `code` is a {@link PdfErrorCode},
+   * and equals `code` when one is given.  It reads only the code, so it also
+   * accepts an error of an older copy of the library that carries a code.
+   */
+  static is<C extends PdfErrorCode>(
+    value: unknown,
+    code?: C,
+  ): value is PdfError & { readonly code: C } {
+    if (typeof value !== 'object' || value === null || !('code' in value)) return false;
+    const actual = value.code;
+    if (code !== undefined) return actual === code;
+    return typeof actual === 'string' && Object.hasOwn(KNOWN_CODES, actual);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Kind classes
+// ---------------------------------------------------------------------------
+
+/**
+ * Thrown when an argument of a call is not valid: out of range, of the wrong
+ * type, or naming something that does not exist.  The named subclasses
+ * (field, page, color and text errors) carry their own code.
+ */
+export class InvalidArgumentError extends PdfError {
+  static {
+    brandErrorClass(this, 'InvalidArgumentError');
+  }
+
+  override readonly name:
+    | 'InvalidArgumentError'
+    | 'UnencodableTextError'
+    | 'NoSuchFieldError'
+    | 'UnexpectedFieldTypeError'
+    | 'FieldAlreadyExistsError'
+    | 'InvalidFieldNamePartError'
+    | 'CombedTextLayoutError'
+    | 'ExceededMaxLengthError'
+    | 'RemovePageFromEmptyDocumentError'
+    | 'InvalidPageSizeError'
+    | 'InvalidColorError' = 'InvalidArgumentError';
+  override readonly code:
+    | 'invalid-argument'
+    | 'unencodable-text'
+    | 'no-such-field'
+    | 'unexpected-field-type'
+    | 'field-already-exists'
+    | 'invalid-field-name-part'
+    | 'combed-text-layout'
+    | 'exceeded-max-length'
+    | 'remove-page-from-empty-document'
+    | 'invalid-page-size'
+    | 'invalid-color' = 'invalid-argument';
+  /** The argument at fault, as `index` or `options.width`; `undefined` when not named. */
+  readonly argument: string | undefined;
+
+  constructor(message: string, options?: ErrorOptions & { argument?: string | undefined }) {
+    super(message, options);
+    this.argument = options?.argument;
+  }
+}
+
+/**
+ * Thrown when a call is valid in itself but not in the current state of the
+ * object, such as a call before the required set-up.
+ */
+export class InvalidStateError extends PdfError {
+  static {
+    brandErrorClass(this, 'InvalidStateError');
+  }
+
+  override readonly name: 'InvalidStateError' | 'FontNotEmbeddedError' = 'InvalidStateError';
+  override readonly code: 'invalid-state' | 'font-not-embedded' = 'invalid-state';
+
+  constructor(message: string, options?: ErrorOptions) {
+    super(message, options);
+  }
+}
+
+/** The format whose rules the input of a {@link MalformedInputError} breaks. */
+export type MalformedInputFormat =
+  | 'pdf'
+  | 'png'
+  | 'jpeg'
+  | 'tiff'
+  | 'webp'
+  | 'woff'
+  | 'sfnt'
+  | 'cmap'
+  | 'der'
+  | 'icc'
+  | 'other';
+
+/** Thrown when input bytes break the rules of their format. */
+export class MalformedInputError extends PdfError {
+  static {
+    brandErrorClass(this, 'MalformedInputError');
+  }
+
+  override readonly name:
+    | 'MalformedInputError'
+    | 'PdfParseError'
+    | 'StreamingParseError'
+    | 'MissingOnValueCheckError' = 'MalformedInputError';
+  override readonly code:
+    | 'malformed-input'
+    | 'malformed-pdf'
+    | 'streaming-parse'
+    | 'missing-on-value' = 'malformed-input';
+  /** The format the input breaks; `'other'` when none of the listed formats. */
+  readonly format: MalformedInputFormat;
+
+  constructor(
+    message: string,
+    options?: ErrorOptions & { format?: MalformedInputFormat | undefined },
+  ) {
+    super(message, options);
+    this.format = options?.format ?? 'other';
+  }
+}
+
+/**
+ * Thrown when input is valid but uses a feature this release does not
+ * handle.  The named subclasses (filters, encryption paths, scripts, options)
+ * carry their own code.
+ */
+export class UnsupportedFeatureError extends PdfError {
+  static {
+    brandErrorClass(this, 'UnsupportedFeatureError');
+  }
+
+  override readonly name:
+    | 'UnsupportedFeatureError'
+    | 'UnsupportedOptionError'
+    | 'UnsupportedFilterError'
+    | 'UnsupportedEncryptionError'
+    | 'ScriptExecutionDisabledError' = 'UnsupportedFeatureError';
+  override readonly code:
+    | 'unsupported-feature'
+    | 'unsupported-option'
+    | 'unsupported-filter'
+    | 'unsupported-encryption-path'
+    | 'script-execution-disabled' = 'unsupported-feature';
+
+  constructor(message: string, options?: ErrorOptions) {
+    super(message, options);
+  }
+}
+
+/** What the runtime of an {@link EnvironmentError} lacks. */
+export type EnvironmentErrorReason = 'web-crypto' | 'wasm' | 'network' | 'runtime-api';
+
+/** Thrown when the runtime lacks something a call needs: Web Crypto, WebAssembly, the network or another API. */
+export class EnvironmentError extends PdfError {
+  static {
+    brandErrorClass(this, 'EnvironmentError');
+  }
+
+  override readonly name = 'EnvironmentError';
+  override readonly code = 'environment-unavailable' as const;
+  /** What the runtime lacks. */
+  readonly reason: EnvironmentErrorReason;
+
+  constructor(message: string, options: ErrorOptions & { reason: EnvironmentErrorReason }) {
+    super(message, options);
+    this.reason = options.reason;
+  }
+}
 
 // ---------------------------------------------------------------------------
 // Encryption
 // ---------------------------------------------------------------------------
 
+/** Why an encrypted PDF could not be opened. */
+export type EncryptedPdfReason = 'password-required' | 'incorrect-password';
+
 /**
  * Thrown when attempting to load or manipulate an encrypted PDF without
  * providing the correct password.
  */
-export class EncryptedPdfError extends Error {
+export class EncryptedPdfError extends PdfError {
+  static {
+    brandErrorClass(this, 'EncryptedPdfError');
+  }
+
   override readonly name = 'EncryptedPdfError';
+  override readonly code = 'encrypted-pdf' as const;
+  /** Why the PDF could not be opened; `'password-required'` unless the constructor was told otherwise. */
+  readonly reason: EncryptedPdfReason;
+
   constructor(
     message = 'The PDF is encrypted. Please provide a password.',
-    options?: ErrorOptions,
+    options?: ErrorOptions & { reason?: EncryptedPdfReason | undefined },
   ) {
     super(message, options);
+    this.reason = options?.reason ?? 'password-required';
   }
 }
 
@@ -37,8 +376,13 @@ export class EncryptedPdfError extends Error {
  * Thrown when a font operation requires an embedded font but none has been
  * registered or the font reference is invalid.
  */
-export class FontNotEmbeddedError extends Error {
+export class FontNotEmbeddedError extends InvalidStateError {
+  static {
+    brandErrorClass(this, 'FontNotEmbeddedError');
+  }
+
   override readonly name = 'FontNotEmbeddedError';
+  override readonly code = 'font-not-embedded' as const;
   constructor(fontName?: string, options?: ErrorOptions) {
     super(
       fontName
@@ -71,8 +415,13 @@ export class ForeignPageError extends Error {
 /**
  * Thrown when attempting to remove a page from a document that has no pages.
  */
-export class RemovePageFromEmptyDocumentError extends Error {
+export class RemovePageFromEmptyDocumentError extends InvalidArgumentError {
+  static {
+    brandErrorClass(this, 'RemovePageFromEmptyDocumentError');
+  }
+
   override readonly name = 'RemovePageFromEmptyDocumentError';
+  override readonly code = 'remove-page-from-empty-document' as const;
   constructor(options?: ErrorOptions) {
     super('Cannot remove a page from a document with no pages.', options);
   }
@@ -85,8 +434,13 @@ export class RemovePageFromEmptyDocumentError extends Error {
 /**
  * Thrown when looking up a form field by name that does not exist.
  */
-export class NoSuchFieldError extends Error {
+export class NoSuchFieldError extends InvalidArgumentError {
+  static {
+    brandErrorClass(this, 'NoSuchFieldError');
+  }
+
   override readonly name = 'NoSuchFieldError';
+  override readonly code = 'no-such-field' as const;
   constructor(fieldName: string, options?: ErrorOptions) {
     super(`No form field named "${fieldName}" exists in this document.`, options);
   }
@@ -96,8 +450,13 @@ export class NoSuchFieldError extends Error {
  * Thrown when a form field is accessed via the wrong typed getter
  * (e.g. calling `getTextField()` on a checkbox field).
  */
-export class UnexpectedFieldTypeError extends Error {
+export class UnexpectedFieldTypeError extends InvalidArgumentError {
+  static {
+    brandErrorClass(this, 'UnexpectedFieldTypeError');
+  }
+
   override readonly name = 'UnexpectedFieldTypeError';
+  override readonly code = 'unexpected-field-type' as const;
   constructor(fieldName: string, expected: string, actual: string, options?: ErrorOptions) {
     super(
       `Expected field "${fieldName}" to be of type "${expected}", ` +
@@ -111,13 +470,18 @@ export class UnexpectedFieldTypeError extends Error {
  * Thrown when a checkbox or radio button is checked but no "on" value
  * can be determined from its appearance dictionary.
  */
-export class MissingOnValueCheckError extends Error {
+export class MissingOnValueCheckError extends MalformedInputError {
+  static {
+    brandErrorClass(this, 'MissingOnValueCheckError');
+  }
+
   override readonly name = 'MissingOnValueCheckError';
+  override readonly code = 'missing-on-value' as const;
   constructor(fieldName: string, options?: ErrorOptions) {
     super(
       `Cannot determine the "on" value for checkbox/radio "${fieldName}". ` +
         'The field is missing an /AP /N appearance dictionary with a non-/Off key.',
-      options,
+      { ...options, format: 'pdf' },
     );
   }
 }
@@ -125,8 +489,13 @@ export class MissingOnValueCheckError extends Error {
 /**
  * Thrown when creating a form field with a name that is already in use.
  */
-export class FieldAlreadyExistsError extends Error {
+export class FieldAlreadyExistsError extends InvalidArgumentError {
+  static {
+    brandErrorClass(this, 'FieldAlreadyExistsError');
+  }
+
   override readonly name = 'FieldAlreadyExistsError';
+  override readonly code = 'field-already-exists' as const;
   constructor(fieldName: string, options?: ErrorOptions) {
     super(`A form field named "${fieldName}" already exists.`, options);
   }
@@ -136,8 +505,13 @@ export class FieldAlreadyExistsError extends Error {
  * Thrown when a field name part (between dots in a qualified name) is
  * empty or contains invalid characters.
  */
-export class InvalidFieldNamePartError extends Error {
+export class InvalidFieldNamePartError extends InvalidArgumentError {
+  static {
+    brandErrorClass(this, 'InvalidFieldNamePartError');
+  }
+
   override readonly name = 'InvalidFieldNamePartError';
+  override readonly code = 'invalid-field-name-part' as const;
   constructor(namePart: string, options?: ErrorOptions) {
     super(`Invalid field name part: "${namePart}".`, options);
   }
@@ -185,8 +559,13 @@ export class RichTextFieldReadError extends Error {
  * Thrown when a combed text field receives more characters than its
  * maximum length allows.
  */
-export class CombedTextLayoutError extends Error {
+export class CombedTextLayoutError extends InvalidArgumentError {
+  static {
+    brandErrorClass(this, 'CombedTextLayoutError');
+  }
+
   override readonly name = 'CombedTextLayoutError';
+  override readonly code = 'combed-text-layout' as const;
   constructor(textLength: number, maxLength: number, options?: ErrorOptions) {
     super(
       `Combed text has ${textLength} characters but the field only ` +
@@ -200,8 +579,13 @@ export class CombedTextLayoutError extends Error {
  * Thrown when a text field value exceeds the field's declared
  * maximum length (/MaxLen).
  */
-export class ExceededMaxLengthError extends Error {
+export class ExceededMaxLengthError extends InvalidArgumentError {
+  static {
+    brandErrorClass(this, 'ExceededMaxLengthError');
+  }
+
   override readonly name = 'ExceededMaxLengthError';
+  override readonly code = 'exceeded-max-length' as const;
   constructor(textLength: number, maxLength: number, fieldName: string, options?: ErrorOptions) {
     super(
       `The value for field "${fieldName}" is ${textLength} characters long, ` +
@@ -224,8 +608,13 @@ export class ExceededMaxLengthError extends Error {
  * throw new InvalidPageSizeError(0, 842);
  * ```
  */
-export class InvalidPageSizeError extends Error {
+export class InvalidPageSizeError extends InvalidArgumentError {
+  static {
+    brandErrorClass(this, 'InvalidPageSizeError');
+  }
+
   override readonly name = 'InvalidPageSizeError';
+  override readonly code = 'invalid-page-size' as const;
   constructor(width: number, height: number, options?: ErrorOptions) {
     super(
       `Invalid page size: width=${width}, height=${height}. ` +
@@ -248,8 +637,13 @@ export class InvalidPageSizeError extends Error {
  * throw new InvalidColorError('RGB component out of range: r=1.5');
  * ```
  */
-export class InvalidColorError extends Error {
+export class InvalidColorError extends InvalidArgumentError {
+  static {
+    brandErrorClass(this, 'InvalidColorError');
+  }
+
   override readonly name = 'InvalidColorError';
+  override readonly code = 'invalid-color' as const;
   constructor(message: string, options?: ErrorOptions) {
     super(message, options);
   }
@@ -268,8 +662,13 @@ export class InvalidColorError extends Error {
  * throw new PluginError('myPlugin', 'Failed to initialize WASM module');
  * ```
  */
-export class PluginError extends Error {
+export class PluginError extends PdfError {
+  static {
+    brandErrorClass(this, 'PluginError');
+  }
+
   override readonly name = 'PluginError';
+  override readonly code = 'plugin-failed' as const;
   /** Name of the plugin that caused the error. */
   readonly pluginName: string;
   constructor(pluginName: string, message: string, options?: ErrorOptions) {
@@ -279,8 +678,83 @@ export class PluginError extends Error {
 }
 
 // ---------------------------------------------------------------------------
-// Streaming parse errors
+// Parse errors
 // ---------------------------------------------------------------------------
+
+/**
+ * Thrown when the bytes of a PDF break its syntax.  The message names what
+ * was expected and what was found, with a hex dump around the offset when
+ * the data is given.
+ */
+export class PdfParseError extends MalformedInputError {
+  static {
+    brandErrorClass(this, 'PdfParseError');
+  }
+
+  override readonly name: 'PdfParseError' | 'StreamingParseError' = 'PdfParseError';
+  override readonly code: 'malformed-pdf' | 'streaming-parse' = 'malformed-pdf';
+  /**
+   * Byte offset of the error.  Always a number for a PdfParseError;
+   * `undefined` only for a {@link StreamingParseError} made without one.
+   */
+  readonly offset: number | undefined;
+  readonly expected: string;
+  readonly actual: string;
+  readonly hexContext: string;
+
+  constructor(options: {
+    message: string;
+    offset: number | undefined;
+    expected?: string | undefined;
+    actual?: string | undefined;
+    data?: Uint8Array | undefined;
+    cause?: Error | undefined;
+  }) {
+    // Build multi-line message with context
+    const hexCtx =
+      options.data && options.offset !== undefined
+        ? formatHexContext(options.data, options.offset)
+        : '';
+    const parts = [options.message];
+    if (options.expected) parts.push(`  Expected: ${options.expected}`);
+    if (options.actual) parts.push(`  Got: ${options.actual}`);
+    if (hexCtx) parts.push(`  Context:\n${hexCtx}`);
+
+    super(
+      parts.join('\n'),
+      options.cause ? { cause: options.cause, format: 'pdf' } : { format: 'pdf' },
+    );
+    this.offset = options.offset;
+    this.expected = options.expected ?? '';
+    this.actual = options.actual ?? '';
+    this.hexContext = hexCtx;
+  }
+}
+
+/** The hex and ASCII dump of `data` around `offset` that a {@link PdfParseError} message shows. */
+export function formatHexContext(data: Uint8Array, offset: number, windowSize = 16): string {
+  const start = Math.max(0, offset - windowSize);
+  const end = Math.min(data.length, offset + windowSize);
+  const slice = data.subarray(start, end);
+
+  const hexParts: string[] = [];
+  const asciiParts: string[] = [];
+
+  for (let i = 0; i < slice.length; i++) {
+    const byte = slice[i]!;
+    const isErrorByte = start + i === offset;
+    const hex = byte.toString(16).padStart(2, '0');
+    hexParts.push(isErrorByte ? `[${hex}]` : ` ${hex} `);
+    asciiParts.push(byte >= 0x20 && byte <= 0x7e ? String.fromCharCode(byte) : '.');
+  }
+
+  return [
+    `    Offset ${start}:`,
+    `    Hex:   ${hexParts.join('')}`,
+    `    ASCII: ${asciiParts.join(' ')}`,
+    `    Error at offset ${offset} (marked with [])`,
+  ].join('\n');
+}
 
 /**
  * Thrown when a streaming (incremental) parse operation encounters
@@ -291,13 +765,26 @@ export class PluginError extends Error {
  * throw new StreamingParseError('Unexpected EOF at byte offset 4096');
  * ```
  */
-export class StreamingParseError extends Error {
+export class StreamingParseError extends PdfParseError {
+  static {
+    brandErrorClass(this, 'StreamingParseError');
+  }
+
   override readonly name = 'StreamingParseError';
-  /** Byte offset where the error occurred, if known. */
-  readonly offset?: number | undefined;
+  override readonly code = 'streaming-parse' as const;
   constructor(message: string, offset?: number, options?: ErrorOptions) {
-    super(offset !== undefined ? `${message} (at byte offset ${offset})` : message, options);
-    this.offset = offset;
+    super({
+      message: offset !== undefined ? `${message} (at byte offset ${offset})` : message,
+      offset,
+    });
+    // ErrorOptions installs any cause, as the Error constructor does; the parent takes only an Error.
+    if (options !== undefined && 'cause' in options) {
+      Object.defineProperty(this, 'cause', {
+        value: options.cause,
+        writable: true,
+        configurable: true,
+      });
+    }
   }
 }
 
@@ -314,8 +801,13 @@ export class StreamingParseError extends Error {
  * throw new BatchProcessingError('2 of 5 documents failed', failures);
  * ```
  */
-export class BatchProcessingError extends Error {
+export class BatchProcessingError extends PdfError {
+  static {
+    brandErrorClass(this, 'BatchProcessingError');
+  }
+
   override readonly name = 'BatchProcessingError';
+  override readonly code = 'batch-failed' as const;
   /** Details of individual item failures. */
   readonly failures: ReadonlyArray<{ readonly index: number; readonly error: Error }>;
   constructor(
@@ -329,20 +821,21 @@ export class BatchProcessingError extends Error {
 }
 
 // ---------------------------------------------------------------------------
-// Fail-closed errors (0.40.5)
-//
-// These classes also carry a machine-readable `code` that is stable across
-// releases.
+// Fail-closed errors (0.40.5; their codes are unchanged since then)
 // ---------------------------------------------------------------------------
 
 /**
  * Thrown by `FormScriptSandbox.execute()`: modern-pdf-lib does not evaluate
  * PDF JavaScript, so no script text is compiled or run.
  */
-export class ScriptExecutionDisabledError extends Error {
+export class ScriptExecutionDisabledError extends UnsupportedFeatureError {
+  static {
+    brandErrorClass(this, 'ScriptExecutionDisabledError');
+  }
+
   override readonly name = 'ScriptExecutionDisabledError';
   /** Machine-readable code, stable across releases. */
-  readonly code = 'script-execution-disabled' as const;
+  override readonly code = 'script-execution-disabled' as const;
   constructor(
     message = 'Form script execution is disabled: FormScriptSandbox.execute() does not evaluate PDF JavaScript.',
     options?: ErrorOptions,
@@ -364,10 +857,14 @@ export type RedactionIncompleteReason = 'redaction-unavailable';
  * removal is not available in this release.  Nothing is drawn, removed or
  * cleared: marks, annotations and page content stay as they were.
  */
-export class RedactionIncompleteError extends Error {
+export class RedactionIncompleteError extends PdfError {
+  static {
+    brandErrorClass(this, 'RedactionIncompleteError');
+  }
+
   override readonly name = 'RedactionIncompleteError';
   /** Machine-readable code, stable across releases. */
-  readonly code = 'redaction-incomplete' as const;
+  override readonly code = 'redaction-incomplete' as const;
   /** Why the redaction was refused. */
   readonly reason: RedactionIncompleteReason;
   /** Zero-based page index, or `undefined` when no page is known. */
@@ -387,10 +884,14 @@ export class RedactionIncompleteError extends Error {
  * Thrown when a timestamp response cannot be tied to the data it claims to
  * timestamp.
  */
-export class TimestampVerificationError extends Error {
+export class TimestampVerificationError extends PdfError {
+  static {
+    brandErrorClass(this, 'TimestampVerificationError');
+  }
+
   override readonly name = 'TimestampVerificationError';
   /** Machine-readable code, stable across releases. */
-  readonly code = 'timestamp-unverified' as const;
+  override readonly code = 'timestamp-unverified' as const;
   constructor(message = 'The timestamp response could not be verified.', options?: ErrorOptions) {
     super(message, options);
   }
@@ -399,10 +900,14 @@ export class TimestampVerificationError extends Error {
 /**
  * Thrown when an output path cannot apply the document's encryption.
  */
-export class UnsupportedEncryptionError extends Error {
+export class UnsupportedEncryptionError extends UnsupportedFeatureError {
+  static {
+    brandErrorClass(this, 'UnsupportedEncryptionError');
+  }
+
   override readonly name = 'UnsupportedEncryptionError';
   /** Machine-readable code, stable across releases. */
-  readonly code = 'unsupported-encryption-path' as const;
+  override readonly code = 'unsupported-encryption-path' as const;
   constructor(
     message = 'This output path cannot apply the document encryption.',
     options?: ErrorOptions,
@@ -422,10 +927,14 @@ export class UnsupportedEncryptionError extends Error {
  * above it (or a size that is not a finite number) is refused.  The limits
  * are fixed in this release; their names are not a stable API.
  */
-export class ResourceLimitError extends Error {
+export class ResourceLimitError extends PdfError {
+  static {
+    brandErrorClass(this, 'ResourceLimitError');
+  }
+
   override readonly name = 'ResourceLimitError';
   /** Machine-readable code, stable across releases. */
-  readonly code = 'resource-limit-exceeded' as const;
+  override readonly code = 'resource-limit-exceeded' as const;
   /** The name of the internal limit, such as `'maxDecodedStreamBytes'`. */
   readonly limit: string;
   /** The value of that limit. */
@@ -461,10 +970,14 @@ const UNSUPPORTED_FILTER_MESSAGES: Readonly<Record<UnsupportedFilterName, string
  * Nothing of the data is read.  A document that holds such a stream is still
  * loaded and saved with the stream unchanged.
  */
-export class UnsupportedFilterError extends Error {
+export class UnsupportedFilterError extends UnsupportedFeatureError {
+  static {
+    brandErrorClass(this, 'UnsupportedFilterError');
+  }
+
   override readonly name = 'UnsupportedFilterError';
   /** Machine-readable code, stable across releases. */
-  readonly code = 'unsupported-filter' as const;
+  override readonly code = 'unsupported-filter' as const;
   /** The filter or format that is not decoded. */
   readonly filter: UnsupportedFilterName;
   constructor(
@@ -474,5 +987,148 @@ export class UnsupportedFilterError extends Error {
   ) {
     super(message, options);
     this.filter = filter;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Text encoding
+// ---------------------------------------------------------------------------
+
+/** How text is turned into bytes where an {@link UnencodableTextError} is thrown. */
+export type TextEncodingName =
+  /** The 12 Latin standard fonts. */
+  | 'WinAnsiEncoding'
+  /** The built-in encoding of Symbol. */
+  | 'SymbolEncoding'
+  /** The built-in encoding of ZapfDingbats. */
+  | 'ZapfDingbatsEncoding'
+  /** Embedded fonts: Unicode to glyph id through the font cmap. */
+  | 'Identity-H'
+  /** A byte string, such as the operand of a low-level text operator: each character is U+0000 to U+00FF. */
+  | 'PDF byte string'
+  /** A PDF text string (PDFDocEncoding or UTF-16BE): every Unicode scalar value. */
+  | 'PDF text string';
+
+/** What the message of an {@link UnencodableTextError} adds after the character, per encoding. */
+const UNENCODABLE_TEXT_HINTS: Readonly<Record<TextEncodingName, string>> = {
+  WinAnsiEncoding: '; embed a font that has this character: doc.embedFont(fontBytes)',
+  SymbolEncoding: '; embed a font that has this character: doc.embedFont(fontBytes)',
+  ZapfDingbatsEncoding: '; embed a font that has this character: doc.embedFont(fontBytes)',
+  'Identity-H': ': the font has no glyph for it',
+  'PDF byte string': ': it holds only U+0000 to U+00FF',
+  'PDF text string': ': it holds only Unicode scalar values, not a lone surrogate',
+};
+
+/**
+ * Thrown when a font (or a byte-level operator) cannot encode a character
+ * of the text.  Nothing of the text is written.
+ *
+ * @example
+ * ```ts
+ * // Helvetica (WinAnsiEncoding) cannot encode "日" (U+65E5) at index 6; embed a font that has this character: doc.embedFont(fontBytes)
+ * ```
+ */
+export class UnencodableTextError extends InvalidArgumentError {
+  static {
+    brandErrorClass(this, 'UnencodableTextError');
+  }
+
+  override readonly name = 'UnencodableTextError';
+  override readonly code = 'unencodable-text' as const;
+  /** The first character that cannot be encoded: one whole code point (a surrogate pair stays whole). */
+  readonly character: string;
+  /** Its code point; a lone surrogate reports its own value (0xD800 to 0xDFFF). */
+  readonly codePoint: number;
+  /** UTF-16 index of the character in the text given. */
+  readonly index: number;
+  /** BaseFont of the font (`Helvetica`, the PostScript name of an embedded font); `undefined` for an operator. */
+  readonly fontName: string | undefined;
+  /** The encoding that has no code for the character. */
+  readonly encoding: TextEncodingName;
+
+  constructor(
+    init: {
+      readonly character: string;
+      readonly index: number;
+      readonly fontName: string | undefined;
+      readonly encoding: TextEncodingName;
+    },
+    options?: ErrorOptions,
+  ) {
+    const codePoint = init.character.codePointAt(0) ?? Number.NaN;
+    const hex = codePoint.toString(16).toUpperCase().padStart(4, '0');
+    const writer =
+      init.fontName === undefined ? `A ${init.encoding}` : `${init.fontName} (${init.encoding})`;
+    super(
+      `${writer} cannot encode "${init.character}" (U+${hex}) at index ${init.index}` +
+        UNENCODABLE_TEXT_HINTS[init.encoding],
+      options,
+    );
+    this.character = init.character;
+    this.codePoint = codePoint;
+    this.index = init.index;
+    this.fontName = init.fontName;
+    this.encoding = init.encoding;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Options
+// ---------------------------------------------------------------------------
+
+/** A release number, as `0.45.0`. */
+export type PdfLibVersion = `${number}.${number}.${number}`;
+
+/**
+ * Thrown when a call passes an option, or makes a call, that this release
+ * does not carry out.  The message names the entry, the option and the
+ * release, never a value the caller passed.
+ *
+ * @example
+ * ```ts
+ * // `signPdf()`: the option `timestampUrl` is not supported in this release; it is planned for 0.45.0.
+ * ```
+ */
+export class UnsupportedOptionError extends UnsupportedFeatureError {
+  static {
+    brandErrorClass(this, 'UnsupportedOptionError');
+  }
+
+  override readonly name = 'UnsupportedOptionError';
+  /** Machine-readable code, stable across releases. */
+  override readonly code = 'unsupported-option' as const;
+  /** The function or constructor, as `signPdf()` or `new StreamingPdfParser()`. */
+  readonly entry: string;
+  /** The option; `undefined` when the whole call is unsupported. */
+  readonly option: string | undefined;
+  /** The release planned to implement it; `undefined` when it was removed. */
+  readonly plannedFor: PdfLibVersion | undefined;
+
+  /**
+   * @param entry - The function or constructor, as `signPdf()`.
+   * @param option - The option, or `undefined` for the whole call.
+   * @param plannedFor - The release planned to implement it, or `undefined` when it was removed.
+   * @param options - `cause`, and `hint`: a fixed sentence the message ends with.
+   */
+  constructor(
+    entry: string,
+    option: string | undefined,
+    plannedFor: PdfLibVersion | undefined,
+    options?: ErrorOptions & { hint?: string | undefined },
+  ) {
+    const subject =
+      option === undefined ? `\`${entry}\`` : `\`${entry}\`: the option \`${option}\``;
+    let fate: string;
+    if (plannedFor !== undefined) {
+      fate = ` is not supported in this release; it is planned for ${plannedFor}.`;
+    } else if (option === undefined) {
+      fate = ' is not supported in this release.';
+    } else {
+      fate = ' was removed in 0.41.0.';
+    }
+    super(subject + fate + (options?.hint === undefined ? '' : ` ${options.hint}`), options);
+    this.entry = entry;
+    this.option = option;
+    this.plannedFor = plannedFor;
   }
 }

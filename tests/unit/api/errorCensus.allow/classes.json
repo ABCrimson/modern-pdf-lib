@@ -88,5 +88,40 @@
     "name": "BatchProcessingError",
     "decision": "throw",
     "where": "src/batch/batchProcessor.ts, errorStrategy collect, in place of the AggregateError"
+  },
+  {
+    "name": "InvalidArgumentError",
+    "decision": "throw",
+    "where": "the generic throws whose allowlist row names InvalidArgumentError, as they are converted"
+  },
+  {
+    "name": "InvalidStateError",
+    "decision": "throw",
+    "where": "the generic throws whose allowlist row names InvalidStateError, as they are converted"
+  },
+  {
+    "name": "MalformedInputError",
+    "decision": "throw",
+    "where": "the generic throws whose allowlist row names MalformedInputError, as they are converted"
+  },
+  {
+    "name": "UnsupportedFeatureError",
+    "decision": "throw",
+    "where": "the generic throws whose allowlist row names UnsupportedFeatureError, as they are converted"
+  },
+  {
+    "name": "EnvironmentError",
+    "decision": "throw",
+    "where": "the generic throws whose allowlist row names EnvironmentError, as they are converted"
+  },
+  {
+    "name": "UnencodableTextError",
+    "decision": "throw",
+    "where": "the text writers (drawText, the low-level text operators, the font encoders), on a character the font or the byte string cannot encode"
+  },
+  {
+    "name": "UnsupportedOptionError",
+    "decision": "throw",
+    "where": "the calls that pass an option this release does not carry out, in place of the ignored-option warning"
   }
 ]

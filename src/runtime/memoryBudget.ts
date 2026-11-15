@@ -32,6 +32,8 @@
  * Cloudflare Workers, and browsers.
  */
 
+import { PdfError, brandErrorClass } from '../errors.js';
+
 // ---------------------------------------------------------------------------
 // Error
 // ---------------------------------------------------------------------------
@@ -46,7 +48,13 @@
  * - {@link used} — the tracked usage *before* the rejected allocation.
  * - {@link limit} — the configured ceiling.
  */
-export class MemoryBudgetExceededError extends Error {
+export class MemoryBudgetExceededError extends PdfError {
+  static {
+    brandErrorClass(this, 'MemoryBudgetExceededError');
+  }
+
+  /** Machine-readable code, stable across releases. */
+  override readonly code = 'memory-budget-exceeded' as const;
   /** The allocation size, in bytes, that was rejected. */
   readonly requested: number;
   /** The configured budget ceiling, in bytes. */
