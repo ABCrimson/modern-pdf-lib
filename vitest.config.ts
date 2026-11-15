@@ -44,17 +44,10 @@ export default defineConfig({
         extends: true,
         test: {
           name: 'unit',
-          include: [
-            'tests/unit/**/*.test.ts',
-            'tests/barcode/**/*.test.ts',
-            'tests/compliance/**/*.test.ts',
-            'tests/image/**/*.test.ts',
-            'tests/layout/**/*.test.ts',
-            'tests/browser/**/*.test.ts',
-          ],
+          include: ['tests/unit/**/*.test.ts'],
           retry: FLAKE_RETRY,
           benchmark: {
-            include: ['tests/benchmarks/**/*.bench.ts', 'tests/image/**/*.bench.ts'],
+            include: ['tests/benchmarks/**/*.bench.ts'],
           },
         },
       },

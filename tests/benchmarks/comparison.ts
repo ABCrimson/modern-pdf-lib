@@ -5,11 +5,11 @@
  * throughput and latency differences.
  *
  * Run: pnpm run bench (standalone tinybench runner, tests/benchmarks/run.ts).
- * Not named *.bench.ts on purpose: it registers through benchHarness.ts, so
+ * Not named *.bench.ts on purpose: it registers through bench-harness.ts, so
  * `vitest bench` has no test suite to collect from it.
  */
 
-import { describe, bench, beforeAll } from './benchHarness.js';
+import { describe, bench, beforeAll } from './bench-harness.js';
 
 // ── modern-pdf-lib imports ──────────────────────────────────────────────────
 import {

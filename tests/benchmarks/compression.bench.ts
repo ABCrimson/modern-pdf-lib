@@ -4,7 +4,7 @@
  * Measures fflate compress/decompress at various levels and data sizes.
  */
 
-import { describe, bench } from './vitestBench.js';
+import { describe, bench } from './vitest-bench.js';
 import { compressSync, decompressSync } from '../../src/codecs/internal/fflateAdapter.js';
 
 // ---------------------------------------------------------------------------

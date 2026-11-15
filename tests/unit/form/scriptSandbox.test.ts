@@ -1,7 +1,7 @@
 /**
  * Tests for FormScriptSandbox. Since 0.40.5 execute() throws
  * ScriptExecutionDisabledError (evaluation disabled); the state methods still
- * work. Escape and endless-loop cases live in tests/adversarial/formScript.test.ts.
+ * work. Escape and endless-loop cases live in tests/adversarial/form-script.test.ts.
  */
 import { describe, expect, it } from 'vitest';
 import { ScriptExecutionDisabledError } from '../../../src/errors.js';

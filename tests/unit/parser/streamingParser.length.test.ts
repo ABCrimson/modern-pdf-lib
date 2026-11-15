@@ -5,7 +5,7 @@
  */
 import { describe, expect, it } from 'vitest';
 import { StreamingPdfParser } from '../../../src/parser/streamingParser.js';
-import { CONTENT, LENGTH_CASES, contentPdf, latin1 } from '../../helpers/streamLengthFixtures.js';
+import { CONTENT, LENGTH_CASES, contentPdf, latin1 } from '../../helpers/stream-length-fixtures.js';
 
 async function pageContent(bytes: Uint8Array): Promise<Uint8Array> {
   const parser = new StreamingPdfParser();

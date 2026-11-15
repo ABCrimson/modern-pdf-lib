@@ -1639,7 +1639,7 @@
       "area": "tests-unit-annotation",
       "severity": "high",
       "status": "confirmed",
-      "path": "tests/unit/annotation/fileAttachmentAnnotation.test.ts",
+      "path": "tests/unit/annotation/types/fileAttachmentAnnotation.test.ts",
       "target": "0.44.1",
       "summary": "File attachment annotations are serialised without their file specification."
     },
@@ -1648,7 +1648,7 @@
       "area": "tests-unit-annotation",
       "severity": "high",
       "status": "confirmed",
-      "path": "tests/unit/annotation/linkAnnotation.test.ts",
+      "path": "tests/unit/annotation/types/linkAnnotation.test.ts",
       "target": "0.44.1",
       "summary": "Link annotation destinations use a page index where a page reference is required."
     },

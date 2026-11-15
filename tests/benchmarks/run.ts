@@ -7,6 +7,6 @@
  */
 
 import './comparison.js';
-import { runRegisteredBenchmarks } from './benchHarness.js';
+import { runRegisteredBenchmarks } from './bench-harness.js';
 
 await runRegisteredBenchmarks();

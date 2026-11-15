@@ -1,7 +1,7 @@
 {
   "extends": "./tsconfig.tests.json",
   "include": [
-    "tests/adversarial/formScript.test.ts",
+    "tests/adversarial/form-script.test.ts",
     "tests/oracle/redaction-leak.test.ts",
     "tests/unit/signature/trust-anchors.test.ts",
     "tests/unit/core/encryption-guard.test.ts",

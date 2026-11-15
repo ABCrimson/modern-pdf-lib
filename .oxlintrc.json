@@ -27,7 +27,7 @@
     },
     {
       // The standalone benchmark runner prints its results to the console by design.
-      "files": ["tests/benchmarks/benchHarness.ts"],
+      "files": ["tests/benchmarks/bench-harness.ts"],
       "rules": {
         "no-console": "off"
       }

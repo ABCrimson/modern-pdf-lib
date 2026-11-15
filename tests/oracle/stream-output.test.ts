@@ -1,6 +1,6 @@
 /**
  * saveAsStream() against outside readers, replacing the self-referential checks of
- * tests/integration/streamOutput.test.ts.
+ * tests/integration/stream-output.test.ts.
  *
  * For a text document, an image document and a multi-page document,
  * the bytes of `saveAsStream()` equal the bytes of `save()` of a document built alike (fixed

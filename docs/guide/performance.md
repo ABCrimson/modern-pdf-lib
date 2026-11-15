@@ -436,12 +436,12 @@ pnpm exec vitest bench tests/benchmarks/
 
 | Suite | File | What It Measures |
 |:---|:---|:---|
-| Full document | `tests/benchmarks/fullDocument.bench.ts` | End-to-end PDF creation: page creation, text drawing, serialization |
+| Full document | `tests/benchmarks/full-document.bench.ts` | End-to-end PDF creation: page creation, text drawing, serialization |
 | Compression | `tests/benchmarks/compression.bench.ts` | fflate compress/decompress at various levels and data sizes |
-| Font parsing | `tests/benchmarks/fontParsing.bench.ts` | Standard font lookup speed and text measurement throughput |
-| Image optimization | `tests/benchmarks/imageOptimize.bench.ts` | Image optimization throughput |
+| Font parsing | `tests/benchmarks/font-parsing.bench.ts` | Standard font lookup speed and text measurement throughput |
+| Image optimization | `tests/benchmarks/image-optimize.bench.ts` | Image optimization throughput |
 
-The `*.bench.ts` files use the `bench` fixture of vitest 5.1 (5.1.0, pinned in `package.json`) through `tests/benchmarks/vitestBench.ts`. The head-to-head comparison against `pdf-lib` (a devDependency, pinned in `package.json`) lives in `tests/benchmarks/comparison.ts` and runs on a standalone tinybench harness:
+The `*.bench.ts` files use the `bench` fixture of vitest 5.1 (5.1.0, pinned in `package.json`) through `tests/benchmarks/vitest-bench.ts`. The head-to-head comparison against `pdf-lib` (a devDependency, pinned in `package.json`) lives in `tests/benchmarks/comparison.ts` and runs on a standalone tinybench harness:
 
 ```bash
 pnpm run bench

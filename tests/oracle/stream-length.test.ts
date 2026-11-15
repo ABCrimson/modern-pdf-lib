@@ -18,8 +18,8 @@ import { PdfRef, PdfStream } from '../../src/core/pdfObjects.js';
 import { extractText, loadPdf, parseContentStream } from '../../src/index.js';
 import { pdfjsText } from '../helpers/oracle/pdfjs.js';
 import { QPDF_BIN, requireQpdf } from '../helpers/oracle/qpdf.js';
-import { LENGTH_CASES } from '../helpers/streamLengthFixtures.js';
-import type { LengthCase } from '../helpers/streamLengthFixtures.js';
+import { LENGTH_CASES } from '../helpers/stream-length-fixtures.js';
+import type { LengthCase } from '../helpers/stream-length-fixtures.js';
 
 /** qpdf's raw stream data of object `objNum` (`--show-object --raw-stream-data`). */
 function qpdfRawStream(bytes: Uint8Array, objNum: number): Uint8Array {

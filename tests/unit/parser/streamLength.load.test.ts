@@ -21,7 +21,7 @@ import {
   contentPdf,
   indirectLengthInObjectStream,
   latin1,
-} from '../../helpers/streamLengthFixtures.js';
+} from '../../helpers/stream-length-fixtures.js';
 
 const fixtureRoot = fileURLToPath(new URL('../../fixtures/', import.meta.url));
 

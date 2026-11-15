@@ -210,7 +210,7 @@ all four, and `pnpm run test:<project>` runs one.
 
 | Project | Files | What it holds | Retries |
 |---|---|---|---|
-| `unit` | `tests/unit`, `tests/barcode`, `tests/compliance`, `tests/image`, `tests/layout`, `tests/browser` (339 files) | Module tests; it also owns the benchmark files | 2 |
+| `unit` | `tests/unit` (339 files) | Module tests; it also owns the benchmark files | 2 |
 | `integration` | `tests/integration` (3 files) | Cross-module document flows | 2 |
 | `oracle` | `tests/oracle` (17 files) | The library's output judged by tools outside it (qpdf, pdf.js, an independent hash port), the real-world corpus, the API snapshot | 0 |
 | `adversarial` | `tests/adversarial` (14 files) | Form-script escape probes, and inputs that must end in their error inside the budget of `tests/helpers/budget.ts` | 0 |
@@ -240,10 +240,9 @@ slower and vary from run to run. The memory budget is never scaled.
 
 | Directory | Contents | Count |
 |---|---|---|
-| `tests/unit/` | Per-module unit tests mirroring `src/` | 320 files |
-| `tests/layout/` | Table, header/footer, and text-layout behaviour | 11 files |
-| `tests/image/` | An image-optimization benchmark (`optimization.bench.ts`) | — |
-| `tests/browser/` | Browser-surface APIs under a simulated DOM | 8 files |
+| `tests/unit/` | Per-module unit tests mirroring `src/`; the scenario tests of one domain sit at the root of its mirror (the two rows below) | 339 files |
+| `tests/unit/layout/` | Table, header/footer, and text-layout behaviour | 11 files |
+| `tests/unit/browser/` | Browser-surface APIs under a simulated DOM | 8 files |
 | `tests/integration/` | Cross-module end-to-end document flows | 3 files |
 | `tests/oracle/` | Outside oracles: the writer matrix (qpdf and pdf.js on each writer path); AES and RC4 in both directions, with the PDF 2.0 password hash checked against qpdf-generated cases; `saveAsStream()` output; a 10,000-field document; the qpdf cross-check of encrypted saves; the read-old gates over the 0.40.3 and 0.26.0 fixtures; the comparison of decrypted objects with `qpdf --decrypt --qdf` object by object (`encrypted-qdf.test.ts`); the recovery of streams with a wrong, missing or late `/Length` (`stream-length.test.ts`); redaction leaks (pdf.js and a raw byte search); the corpus; the capability evidence; the zlib form of every `/FlateDecode` stream the writers and image encoders produce, judged by node:zlib, qpdf and pdf.js; the limits headroom over every corpus, legacy and fixture file; the byte-for-byte copy of JPX and JBIG2 streams on save, merge and copy, judged by qpdf; and `packaging/` (the API snapshot `exports.api.json` and its test) | 17 files |
 | `tests/adversarial/` | Form-script escape probes against `FormScriptSandbox`; the `<name>.test.ts` and `<name>.bodies.ts` pairs that run decode, parse and render inputs under the budget runner | 14 files |
