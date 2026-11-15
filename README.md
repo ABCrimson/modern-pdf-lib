@@ -15,7 +15,7 @@ Create, parse, fill, merge, sign, and manipulate PDF documents<br />in Node 26.4
 
 [![npm version](https://img.shields.io/npm/v/modern-pdf-lib?style=flat-square&color=cb3837)](https://www.npmjs.com/package/modern-pdf-lib)
 [![createPdf bundle](https://img.shields.io/badge/createPdf_bundle-101_KiB_gzip-blue?style=flat-square)](#install)
-[![tests](https://img.shields.io/badge/tests-9%2C087_passing-brightgreen?style=flat-square)](https://github.com/ABCrimson/modern-pdf-lib/actions/workflows/ci.yml)
+[![tests](https://img.shields.io/badge/tests-8%2C853_passing-brightgreen?style=flat-square)](https://github.com/ABCrimson/modern-pdf-lib/actions/workflows/ci.yml)
 [![TypeScript](https://img.shields.io/badge/TypeScript-7.1_dev-3178c6?style=flat-square&logo=typescript&logoColor=white)](./tsconfig.json)
 [![License: MIT](https://img.shields.io/badge/license-MIT-yellow?style=flat-square)](LICENSE)
 
@@ -677,7 +677,7 @@ modern-pdf-lib/
     plugins/        Plugin manager & hooks
     wasm/           Rust crate sources (6 modules)
     cli/            CLI tool (modern-pdf optimize)
-  tests/            9,136 tests in 382 files (projects unit, integration, oracle, adversarial)
+  tests/            8,902 tests in 373 files (projects unit, integration, oracle, adversarial)
   audit/            open-highs.json: the public ledger of open audit findings
   docs/             VitePress documentation
 ```
@@ -690,7 +690,7 @@ modern-pdf-lib/
 git clone https://github.com/ABCrimson/modern-pdf-lib.git
 cd modern-pdf-lib
 pnpm install
-pnpm test          # 382 files, 9,136 tests: with qpdf 9,087 pass, 49 expected failures; without qpdf 8,718 pass, 11 expected failures, 407 skip
+pnpm test          # 373 files, 8,902 tests: with qpdf 8,853 pass, 49 expected failures; without qpdf 8,484 pass, 11 expected failures, 407 skip
 pnpm run typecheck # TypeScript 7.1 dev build: src, cli, scripts, tests, security-tests
 pnpm run build     # ESM + CJS + declarations + IIFE
 ```

@@ -139,31 +139,6 @@ export function extractPngChunks(data: Uint8Array): Array<{ type: string; data: 
   return chunks;
 }
 
-/**
- * Extract concatenated IDAT data from a PNG.
- *
- * @param data  The raw PNG file bytes.
- * @returns     The concatenated IDAT payload.
- */
-export function extractPngIdatData(data: Uint8Array): Uint8Array {
-  const chunks = extractPngChunks(data);
-  const idatChunks = chunks.filter((c) => c.type === 'IDAT');
-
-  if (idatChunks.length === 0) {
-    throw new Error('Invalid PNG: no IDAT chunks found');
-  }
-
-  // Concatenate all IDAT chunks
-  const totalLength = idatChunks.reduce((sum, c) => sum + c.data.length, 0);
-  const result = new Uint8Array(totalLength);
-  let pos = 0;
-  for (const chunk of idatChunks) {
-    result.set(chunk.data, pos);
-    pos += chunk.data.length;
-  }
-  return result;
-}
-
 // ---------------------------------------------------------------------------
 // JPEG helpers
 // ---------------------------------------------------------------------------

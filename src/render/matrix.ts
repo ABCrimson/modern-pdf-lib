@@ -49,11 +49,6 @@ export function translation(tx: number, ty: number): Matrix {
   return [1, 0, 0, 1, tx, ty];
 }
 
-/** A pure scale transform. */
-export function scaling(sx: number, sy: number): Matrix {
-  return [sx, 0, 0, sy, 0, 0];
-}
-
 /**
  * The magnitude by which `m` scales lengths — the geometric mean of the
  * x- and y-axis scale factors (`sqrt(|det|)`). Used to map a user-space line

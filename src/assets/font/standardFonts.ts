@@ -595,25 +595,3 @@ export function standardFontHeight(fontName: StandardFontName, fontSize: number)
   }
   return ((font.ascender - font.descender) / 1000) * fontSize;
 }
-
-/**
- * Create a standard font object compatible with the drawing API's
- * expectations for width lookups and metrics queries.
- *
- * This produces an object that can be used by the PDF embedding
- * pipeline to emit the correct `/Font` dictionary entries and
- * measure text for layout.
- *
- * @param fontName - One of the 14 standard font names.
- * @returns A StandardFont object with all metrics.
- * @throws If the font name is not one of the 14 standard fonts.
- */
-export function createStandardFont(fontName: StandardFontName): StandardFont {
-  const font = STANDARD_FONTS.get(fontName);
-  if (!font) {
-    throw new Error(
-      `"${fontName}" is not a standard PDF font.  Valid names: ${STANDARD_FONT_NAMES.join(', ')}`,
-    );
-  }
-  return font;
-}

@@ -1581,9 +1581,6 @@ export type {
   VariableFontInfo,
 } from './assets/font/variableFont.js';
 export { parseColorFont, getColorGlyphLayers } from './assets/font/colorFont.js';
-// NB: colorFont's internal `ColorStop` (gid + paletteIndex) is intentionally not
-// re-exported — `ColorStop` is already the gradient-stop type at the root, and
-// the color-font public API surfaces layers via `ColorGlyphLayer`, not `ColorStop`.
 export type { ColorGlyphLayer, CpalPalette, ColorFontInfo } from './assets/font/colorFont.js';
 
 // ---------------------------------------------------------------------------

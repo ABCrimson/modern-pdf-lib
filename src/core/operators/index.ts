@@ -109,7 +109,6 @@ export {
   degrees,
   radians,
   toRadians,
-  toDegrees,
   degreesToRadians,
   radiansToDegrees,
 } from './state.js';

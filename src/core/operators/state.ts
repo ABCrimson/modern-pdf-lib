@@ -62,13 +62,6 @@ export function toRadians(angle: Angle): number {
   return angle.type === 'radians' ? angle.value : (angle.value * Math.PI) / 180;
 }
 
-/**
- * Convert any {@link Angle} to degrees.
- */
-export function toDegrees(angle: Angle): number {
-  return angle.type === 'degrees' ? angle.value : (angle.value * 180) / Math.PI;
-}
-
 // ---------------------------------------------------------------------------
 // Graphics state operators
 // ---------------------------------------------------------------------------

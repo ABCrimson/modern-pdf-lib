@@ -64,17 +64,6 @@ const FOREGROUND_PALETTE_INDEX = 0xffff;
 // ---------------------------------------------------------------------------
 
 /**
- * A single COLR layer expressed in its rawest form: the layer's outline glyph
- * id plus the CPAL palette-entry index used to color it.
- */
-export interface ColorStop {
-  /** The glyph id of the outline drawn for this layer. */
-  gid: number;
-  /** The CPAL palette-entry index used to color this layer. */
-  paletteIndex: number;
-}
-
-/**
  * A resolved COLR layer: the outline glyph id, the CPAL palette-entry index,
  * and the RGBA color (0..255 per channel) that index resolves to in the
  * selected palette.

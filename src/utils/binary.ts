@@ -108,17 +108,6 @@ export function readUint16BE(data: Uint8Array, offset: number): number {
   return view.getUint16(offset, false);
 }
 
-/**
- * Read a 16-bit **signed** integer in big-endian byte order.
- *
- * @param data    Source buffer.
- * @param offset  Byte offset to start reading from.
- */
-export function readInt16BE(data: Uint8Array, offset: number): number {
-  const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
-  return view.getInt16(offset, false);
-}
-
 // ---------------------------------------------------------------------------
 // Text <-> bytes
 // ---------------------------------------------------------------------------
@@ -203,7 +192,7 @@ const DEFAULT_INITIAL_CAPACITY = 1024;
  * This is the hot-path allocation helper used by the PDF serializer.
  *
  * ```ts
- * const buf = createGrowableBuffer(4096);
+ * const buf = new GrowableBuffer(4096);
  * buf.writeString('%PDF-1.7\n');
  * buf.write(someBytes);
  * const result = buf.toUint8Array();
@@ -301,13 +290,4 @@ export class GrowableBuffer {
   reset(): void {
     this._length = 0;
   }
-}
-
-/**
- * Factory function that creates a {@link GrowableBuffer}.
- *
- * @param initial  Optional initial capacity in bytes.
- */
-export function createGrowableBuffer(initial?: number): GrowableBuffer {
-  return new GrowableBuffer(initial);
 }
