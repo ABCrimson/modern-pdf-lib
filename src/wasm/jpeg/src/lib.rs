@@ -11,7 +11,6 @@
 //! - `decode_jpeg(data)` — Decode JPEG bytes to raw pixels.  Returns a flat
 //!   byte array with layout: `[width_u32_le, height_u32_le, channels_u8, ...pixels]`.
 
-use std::io::Read;
 use wasm_bindgen::prelude::*;
 
 // ---------------------------------------------------------------------------
@@ -185,8 +184,8 @@ fn decode_jpeg_inner(data: &[u8]) -> Result<Vec<u8>, String> {
                 Vec::with_capacity(9 + pixel_count);
 
             // Header: width(4) + height(4) + channels(1)
-            result.extend_from_slice(&info.width.to_le_bytes());
-            result.extend_from_slice(&info.height.to_le_bytes());
+            result.extend_from_slice(&u32::from(info.width).to_le_bytes());
+            result.extend_from_slice(&u32::from(info.height).to_le_bytes());
             result.push(1);
 
             // Convert 16-bit to 8-bit
@@ -205,8 +204,8 @@ fn decode_jpeg_inner(data: &[u8]) -> Result<Vec<u8>, String> {
                 Vec::with_capacity(9 + pixel_count * 3);
 
             // Header
-            result.extend_from_slice(&info.width.to_le_bytes());
-            result.extend_from_slice(&info.height.to_le_bytes());
+            result.extend_from_slice(&u32::from(info.width).to_le_bytes());
+            result.extend_from_slice(&u32::from(info.height).to_le_bytes());
             result.push(3);
 
             // Convert CMYK to RGB (inverted CMYK, Adobe convention)
@@ -233,8 +232,8 @@ fn decode_jpeg_inner(data: &[u8]) -> Result<Vec<u8>, String> {
     let mut result = Vec::with_capacity(9 + pixels.len());
 
     // Header: width(4) + height(4) + channels(1)
-    result.extend_from_slice(&info.width.to_le_bytes());
-    result.extend_from_slice(&info.height.to_le_bytes());
+    result.extend_from_slice(&u32::from(info.width).to_le_bytes());
+    result.extend_from_slice(&u32::from(info.height).to_le_bytes());
     result.push(channels);
 
     // Pixel data

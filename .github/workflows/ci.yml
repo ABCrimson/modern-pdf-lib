@@ -513,8 +513,9 @@ jobs:
   # ---------------------------------------------------------------------------
   # Rust checks (per crate)
   # ---------------------------------------------------------------------------
-  # Known red until P3 makes the Rust tier gating: continue-on-error keeps it from
-  # failing the workflow while it still reports clippy and test results per crate.
+  # For each of the six crates under src/wasm: `cargo clippy --target wasm32-unknown-unknown`
+  # and the native `cargo test`. `continue-on-error` keeps the job from failing the workflow;
+  # it reports clippy and test results per crate.
   rust-checks:
     name: Rust (${{ matrix.crate }})
     runs-on: ubuntu-latest
