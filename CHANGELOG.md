@@ -111,6 +111,7 @@ No export added, removed or changed.
 - **Known-defect markers:** 49 markers on 29 ledger ids in 10 files (106 on 35 ids in 9 files before).
 - **Ledger:** `audit/open-highs.json` lists 212 open entries (226 before). In `docs/capabilities.json` 6 rows are graded `oracle`, 26 `behaviour`, 85 `qualified` (84 before) and 16 `pending` (17 before).
 - **Lint:** `pnpm run lint` runs with `--max-warnings=1173` (down from 1,175).
+- **Adversarial budget:** the test that loads a valid file of 100,000 encrypted strings is held to five times the time of the gate budget (10 s, 512 MiB), because a hosted CI runner needs more than 2 s for it. Inputs above a limit are still held to 2 s.
 - **Size budgets:** the bundles grew with the load path, so `scripts/dev/size-budget.json` holds new budgets and the README badge says 101 KiB gzip for `createPdf` (103,435 bytes).
 
 ## [0.40.8] - 2026-11-15

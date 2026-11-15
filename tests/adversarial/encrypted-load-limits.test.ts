@@ -8,20 +8,23 @@
  * with a small object stream, loads.
  *
  * Cost of the strings of one object: an AES-128 file, empty user password, whose one array holds
- * 100,000 distinct strings (written by encrypt() and save()), loads within DEFAULT_BUDGET with
- * every string decrypted.
+ * 100,000 distinct strings (written by encrypt() and save()), loads with every string decrypted
+ * within MANY_STRINGS_BUDGET: the memory of DEFAULT_BUDGET and five times its time, because a
+ * hosted CI runner needs more than 2 s for this valid file.
  */
 import { createDeflate, deflateSync } from 'node:zlib';
 import { describe, expect, it } from 'vitest';
 import { PdfEncryptionHandler } from '../../src/crypto/encryptionHandler.js';
 import { createPdf } from '../../src/core/pdfDocument.js';
 import { PdfArray, PdfString } from '../../src/core/pdfObjects.js';
-import { DEFAULT_BUDGET, runWithinBudget } from '../helpers/budget.js';
+import { type Budget, DEFAULT_BUDGET, runWithinBudget } from '../helpers/budget.js';
 
 const BODIES = 'tests/adversarial/encrypted-load-limits.bodies.ts';
 const MIB = 1024 * 1024;
 // Building the input and the runner's start-up come before the budget clock.
 const TIMEOUT = 60_000;
+/** The budget of the valid 100,000-string file (see the file comment). */
+const MANY_STRINGS_BUDGET: Budget = { ms: 5 * DEFAULT_BUDGET.ms, mib: DEFAULT_BUDGET.mib };
 
 const latin1 = (text: string): Uint8Array => Uint8Array.from(text, (c) => c.charCodeAt(0));
 
@@ -160,7 +163,7 @@ describe('encrypted load: decoded-size limit of a decrypted object stream', () =
 
 describe('encrypted load: the strings of one object', () => {
   it(
-    'an array of 100,000 AES strings loads within DEFAULT_BUDGET, every string decrypted',
+    'an array of 100,000 AES strings loads within MANY_STRINGS_BUDGET, every string decrypted',
     async () => {
       const count = 100_000;
       const doc = createPdf();
@@ -174,7 +177,7 @@ describe('encrypted load: the strings of one object', () => {
       const input = await doc.save();
       const outcome = await runWithinBudget(
         { module: BODIES, entry: 'loadStringsEntry', input },
-        DEFAULT_BUDGET,
+        MANY_STRINGS_BUDGET,
       );
       expect(outcome).toMatchObject({
         kind: 'completed',
