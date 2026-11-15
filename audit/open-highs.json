@@ -793,7 +793,7 @@
       "area": "fonts-text",
       "severity": "high",
       "status": "confirmed",
-      "path": "src/assets/font/ttfSubset.ts",
+      "path": "src/assets/font/internal/ttfSubset.ts",
       "target": "0.41.6",
       "summary": "CFF-based OpenType fonts are not subset and are written with a wrong font program."
     },
@@ -883,7 +883,7 @@
       "area": "images",
       "severity": "medium",
       "status": "confirmed",
-      "path": "src/assets/image/deduplicateImages.ts",
+      "path": "src/assets/image/optimize/deduplicateImages.ts",
       "target": "0.41.2",
       "summary": "deduplicateImages merges images whose data match but whose image dictionaries differ, for example in /Decode or /ColorSpace."
     },
@@ -901,7 +901,7 @@
       "area": "images",
       "severity": "high",
       "status": "confirmed",
-      "path": "src/assets/image/jpegEmbed.ts",
+      "path": "src/assets/image/jpeg/jpegEmbed.ts",
       "target": "0.41.7",
       "summary": "CMYK JPEGs with an Adobe marker are embedded without the inversion they need."
     },
@@ -910,7 +910,7 @@
       "area": "images",
       "severity": "high",
       "status": "confirmed",
-      "path": "src/assets/image/pngEmbed.ts",
+      "path": "src/assets/image/internal/pngEmbed.ts",
       "target": "0.41.7",
       "summary": "PNG images with 1, 2 or 4 bits per sample are decoded with a wrong row length."
     },
@@ -919,7 +919,7 @@
       "area": "images",
       "severity": "high",
       "status": "confirmed",
-      "path": "src/assets/image/tiffDecode.ts",
+      "path": "src/assets/image/tiff/tiffDecode.ts",
       "target": "0.48.2",
       "summary": "TIFF LZW images are decoded with the wrong bit order."
     },
@@ -928,7 +928,7 @@
       "area": "images",
       "severity": "high",
       "status": "confirmed",
-      "path": "src/assets/image/tiffDecode.ts",
+      "path": "src/assets/image/tiff/tiffDecode.ts",
       "target": "0.48.2",
       "summary": "TIFF predictor and planar configuration tags are not read, so such images decode wrongly."
     },
@@ -937,7 +937,7 @@
       "area": "images",
       "severity": "high",
       "status": "confirmed",
-      "path": "src/assets/image/tiffDirectEmbed.ts",
+      "path": "src/assets/image/tiff/tiffDirectEmbed.ts",
       "target": "0.48.2",
       "summary": "Inline SHORT tag values of big-endian TIFFs are read from the wrong half of the field."
     },
@@ -946,7 +946,7 @@
       "area": "images",
       "severity": "high",
       "status": "confirmed",
-      "path": "src/assets/image/tiffDirectEmbed.ts",
+      "path": "src/assets/image/tiff/tiffDirectEmbed.ts",
       "target": "0.48.2",
       "summary": "TIFF Deflate pass-through joins independently compressed strips into one stream, producing invalid image data."
     },
@@ -955,7 +955,7 @@
       "area": "images",
       "severity": "high",
       "status": "confirmed",
-      "path": "src/assets/image/webpDecode.ts",
+      "path": "src/assets/image/webp/webpDecode.ts",
       "target": "0.48.3",
       "summary": "The lossless WebP decoder skips the format's transforms and decodes images wrongly."
     },
@@ -964,7 +964,7 @@
       "area": "images",
       "severity": "high",
       "status": "confirmed",
-      "path": "src/assets/image/webpDecode.ts",
+      "path": "src/assets/image/webp/webpDecode.ts",
       "target": "0.48.3",
       "summary": "The lossless WebP decoder uses wrong length and distance prefix tables."
     },
@@ -973,7 +973,7 @@
       "area": "images",
       "severity": "high",
       "status": "confirmed",
-      "path": "src/assets/image/webpOptimize.ts",
+      "path": "src/assets/image/webp/webpOptimize.ts",
       "target": "0.48.4",
       "summary": "The JPEG encoder used for WebP optimisation computes a wrong DCT."
     },
@@ -982,7 +982,7 @@
       "area": "images",
       "severity": "high",
       "status": "confirmed",
-      "path": "src/assets/image/webpOptimize.ts",
+      "path": "src/assets/image/webp/webpOptimize.ts",
       "target": "0.48.4",
       "summary": "The JPEG encoder used for WebP optimisation writes quantisation tables in the wrong order."
     },
@@ -1657,7 +1657,7 @@
       "area": "tests-unit-assets",
       "severity": "high",
       "status": "confirmed",
-      "path": "src/assets/image/tiffDecode.ts",
+      "path": "src/assets/image/tiff/tiffDecode.ts",
       "target": "0.48.2",
       "summary": "TIFF LZW images are decoded with the wrong bit order and code-width rule."
     },
@@ -1666,7 +1666,7 @@
       "area": "tests-unit-assets",
       "severity": "high",
       "status": "confirmed",
-      "path": "src/assets/image/tiffDirectEmbed.ts",
+      "path": "src/assets/image/tiff/tiffDirectEmbed.ts",
       "target": "0.48.2",
       "summary": "Out-of-line TIFF tag values such as BitsPerSample are read as offsets."
     },
@@ -1675,7 +1675,7 @@
       "area": "tests-unit-assets",
       "severity": "high",
       "status": "confirmed",
-      "path": "src/assets/image/webpDecode.ts",
+      "path": "src/assets/image/webp/webpDecode.ts",
       "target": "0.48.3",
       "summary": "The lossless WebP decoder deviates from the specification, and its test fixture matches the deviation."
     },
@@ -1693,7 +1693,7 @@
       "area": "tests-unit-assets",
       "severity": "high",
       "status": "missed",
-      "path": "src/assets/image/tiffDirectEmbed.ts",
+      "path": "src/assets/image/tiff/tiffDirectEmbed.ts",
       "target": "0.48.2",
       "summary": "Big-endian TIFFs lose single SHORT tag values."
     },

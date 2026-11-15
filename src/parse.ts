@@ -41,12 +41,12 @@ export type { ImageInfo } from './assets/image/imageExtract.js';
 // Image analysis
 // ---------------------------------------------------------------------------
 
-export { analyzeImages } from './assets/image/compressionAnalysis.js';
+export { analyzeImages } from './assets/image/optimize/compressionAnalysis.js';
 export type {
   ImageAnalysis,
   AnalysisReport,
   AnalyzeImagesOptions,
-} from './assets/image/compressionAnalysis.js';
+} from './assets/image/optimize/compressionAnalysis.js';
 
 // ---------------------------------------------------------------------------
 // Low-level objects (needed to inspect parsed PDFs)

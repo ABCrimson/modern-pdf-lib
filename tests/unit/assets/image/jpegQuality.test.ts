@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { estimateJpegQuality } from '../../../../src/assets/image/imageOptimize.js';
+import { estimateJpegQuality } from '../../../../src/assets/image/optimize/imageOptimize.js';
 
 // ---------------------------------------------------------------------------
 // Helpers — minimal JPEG with DQT builder

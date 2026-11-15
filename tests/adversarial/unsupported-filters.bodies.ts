@@ -5,7 +5,7 @@
  * the lossless WebP path; the entries of the first kind return nothing because they throw.
  */
 import { PdfDict, PdfName } from '../../src/core/pdfObjects.js';
-import { decodeWebP } from '../../src/assets/image/webpDecode.js';
+import { decodeWebP } from '../../src/assets/image/webp/webpDecode.js';
 import { decodeJBIG2, decodeJBIG2Async } from '../../src/codecs/jbig2/jbig2Decode.js';
 import { decodeJpeg2000 } from '../../src/codecs/jpeg2000/jpeg2000Decode.js';
 import {

@@ -48,16 +48,16 @@
         "src/codecs/streamDecode.ts",
         "src/parser/internal/lexer.ts",
         // Image pixel and bitstream loops
-        "src/assets/image/webpDecode.ts",
-        "src/assets/image/webpOptimize.ts",
-        "src/assets/image/pngEmbed.ts",
-        "src/assets/image/tiffDecode.ts",
-        "src/assets/image/imageOptimize.ts",
-        "src/assets/image/grayscaleDetect.ts",
+        "src/assets/image/webp/webpDecode.ts",
+        "src/assets/image/webp/webpOptimize.ts",
+        "src/assets/image/internal/pngEmbed.ts",
+        "src/assets/image/tiff/tiffDecode.ts",
+        "src/assets/image/optimize/imageOptimize.ts",
+        "src/assets/image/optimize/grayscaleDetect.ts",
         "src/assets/image/svgFilters.ts",
         // Text and font tables
         "src/text/bidi.ts",
-        "src/assets/font/ttfSubset.ts",
+        "src/assets/font/internal/ttfSubset.ts",
         // Crypto block and key loops
         "src/crypto/md5.ts",
         "src/crypto/rc4.ts",

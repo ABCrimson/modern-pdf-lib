@@ -6,8 +6,8 @@
 
 import { inflateSync } from 'node:zlib';
 import { describe, expect, it } from 'vitest';
-import { recompressImage } from '../../../../src/assets/image/imageOptimize.js';
-import type { RawImageData } from '../../../../src/assets/image/imageOptimize.js';
+import { recompressImage } from '../../../../src/assets/image/optimize/imageOptimize.js';
+import type { RawImageData } from '../../../../src/assets/image/optimize/imageOptimize.js';
 
 const PHRASE = 'the quick brown fox jumps over the lazy dog ';
 

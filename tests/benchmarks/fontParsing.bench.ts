@@ -10,7 +10,7 @@ import {
   measureStandardText,
   standardFontHeight,
   STANDARD_FONT_NAMES,
-} from '../../src/assets/font/standardFonts.js';
+} from '../../src/assets/font/internal/standardFonts.js';
 
 // Bind once: Vitest's module runner adds a getter call to every imported-binding access.
 const measureText = measureStandardText;

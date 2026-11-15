@@ -22,7 +22,7 @@ import {
   tagTableDataCell,
   tagTableHeaderCell,
 } from '../../../src/accessibility/taggingHelpers.js';
-import { optimizeAllImages } from '../../../src/assets/image/batchOptimize.js';
+import { optimizeAllImages } from '../../../src/assets/image/optimize/batchOptimize.js';
 import { resetWarningsForTesting } from '../../../src/internal/warnings.js';
 
 const TYPE = 'ModernPdfLibWarning';

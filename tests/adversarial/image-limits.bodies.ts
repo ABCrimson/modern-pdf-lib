@@ -7,9 +7,13 @@
  */
 import { zlibSync } from 'fflate';
 import { decodeWoff } from '../../src/assets/font/woff.js';
-import { embedPng } from '../../src/assets/image/pngEmbed.js';
-import { embedTiffDirect } from '../../src/assets/image/tiffDirectEmbed.js';
-import { decodeTiff, decodeTiffAll, getTiffPageCount } from '../../src/assets/image/tiffDecode.js';
+import { embedPng } from '../../src/assets/image/internal/pngEmbed.js';
+import { embedTiffDirect } from '../../src/assets/image/tiff/tiffDirectEmbed.js';
+import {
+  decodeTiff,
+  decodeTiffAll,
+  getTiffPageCount,
+} from '../../src/assets/image/tiff/tiffDecode.js';
 import { PdfDict, PdfNumber } from '../../src/core/pdfObjects.js';
 import { createPdf } from '../../src/index.js';
 import { decodeStream } from '../../src/codecs/streamDecode.js';

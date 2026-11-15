@@ -9,7 +9,7 @@
 
 import { readFile, writeFile } from 'node:fs/promises';
 import type { ChromaSubsampling } from '../wasm/jpeg/bridge.js';
-import type { ProgressInfo } from '../assets/image/batchOptimize.js';
+import type { ProgressInfo } from '../assets/image/optimize/batchOptimize.js';
 
 /**
  * Parse and execute the optimize command.
@@ -33,8 +33,8 @@ export async function optimizeCommand(args: string[]): Promise<void> {
     await Promise.all([
       import('../index.js'),
       import('../wasm/jpeg/bridge.js'),
-      import('../assets/image/batchOptimize.js'),
-      import('../assets/image/deduplicateImages.js'),
+      import('../assets/image/optimize/batchOptimize.js'),
+      import('../assets/image/optimize/deduplicateImages.js'),
     ]);
 
   // Read input PDF

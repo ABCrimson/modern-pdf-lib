@@ -240,10 +240,10 @@ slower and vary from run to run. The memory budget is never scaled.
 
 | Directory | Contents | Count |
 |---|---|---|
-| `tests/unit/` | Per-module unit tests mirroring `src/` | 293 files |
+| `tests/unit/` | Per-module unit tests mirroring `src/` | 302 files |
 | `tests/layout/` | Table, header/footer, and text-layout behaviour | 11 files |
 | `tests/barcode/` | Symbology encoders (QR, Code 128, EAN, PDF417, …) | 10 files |
-| `tests/image/` | Image decoders and embedding | 9 files |
+| `tests/image/` | An image-optimization benchmark (`optimization.bench.ts`) | — |
 | `tests/browser/` | Browser-surface APIs under a simulated DOM | 8 files |
 | `tests/compliance/` | PDF/A, PDF/X, PDF/UA, e-invoicing conformance | 8 files |
 | `tests/integration/` | Cross-module end-to-end document flows | 3 files |

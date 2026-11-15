@@ -7,15 +7,15 @@
 import { zlibSync } from 'fflate';
 import { describe, expect, it } from 'vitest';
 import { decodeWoff } from '../../../../src/assets/font/woff.js';
-import { embedPng } from '../../../../src/assets/image/pngEmbed.js';
+import { embedPng } from '../../../../src/assets/image/internal/pngEmbed.js';
 import {
   decodeTiff,
   decodeTiffAll,
   decodeTiffPage,
   getTiffPageCount,
   parseTiffIfd,
-} from '../../../../src/assets/image/tiffDecode.js';
-import { embedTiffDirect } from '../../../../src/assets/image/tiffDirectEmbed.js';
+} from '../../../../src/assets/image/tiff/tiffDecode.js';
+import { embedTiffDirect } from '../../../../src/assets/image/tiff/tiffDirectEmbed.js';
 import { INTERNAL_LIMITS } from '../../../../src/internal/limits.js';
 import { PdfDict, PdfNumber } from '../../../../src/core/pdfObjects.js';
 import { ResourceLimitError } from '../../../../src/errors.js';

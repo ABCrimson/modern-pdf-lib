@@ -285,7 +285,7 @@ export async function initWasm(options?: string | URL | InitWasmOptions): Promis
   if (options.png || options.pngWasm) {
     inits.push(
       (async () => {
-        const { initPngWasm } = await import('./assets/image/pngEmbed.js');
+        const { initPngWasm } = await import('./assets/image/internal/pngEmbed.js');
         await initPngWasm(options.pngWasm);
       })(),
     );
@@ -873,14 +873,14 @@ export {
   recompressImage,
   optimizeImage,
   estimateJpegQuality,
-} from './assets/image/imageOptimize.js';
+} from './assets/image/optimize/imageOptimize.js';
 export type {
   DownscaleOptions,
   RecompressOptions,
   ImageOptimizeOptions,
   RawImageData,
   OptimizeResult,
-} from './assets/image/imageOptimize.js';
+} from './assets/image/optimize/imageOptimize.js';
 
 export {
   initJpegWasm,
@@ -893,18 +893,18 @@ export type { ChromaSubsampling, JpegDecodeResult, JpegWasmModule } from './wasm
 export { extractImages, decodeImageStream } from './assets/image/imageExtract.js';
 export type { ImageInfo } from './assets/image/imageExtract.js';
 
-export { optimizeAllImages } from './assets/image/batchOptimize.js';
+export { optimizeAllImages } from './assets/image/optimize/batchOptimize.js';
 export type {
   BatchOptimizeOptions,
   ImageOptimizeEntry,
   OptimizationReport,
   ProgressInfo,
-} from './assets/image/batchOptimize.js';
+} from './assets/image/optimize/batchOptimize.js';
 
-export { deduplicateImages } from './assets/image/deduplicateImages.js';
-export type { DeduplicationReport } from './assets/image/deduplicateImages.js';
+export { deduplicateImages } from './assets/image/optimize/deduplicateImages.js';
+export type { DeduplicationReport } from './assets/image/optimize/deduplicateImages.js';
 
-export { isGrayscaleImage, convertToGrayscale } from './assets/image/grayscaleDetect.js';
+export { isGrayscaleImage, convertToGrayscale } from './assets/image/optimize/grayscaleDetect.js';
 
 export {
   extractIccProfile,
@@ -914,18 +914,18 @@ export {
 } from './assets/image/iccProfile.js';
 export type { IccProfile } from './assets/image/iccProfile.js';
 
-export { computeImageDpi, computeTargetDimensions } from './assets/image/dpiAnalyze.js';
-export type { ImageDpi } from './assets/image/dpiAnalyze.js';
+export { computeImageDpi, computeTargetDimensions } from './assets/image/optimize/dpiAnalyze.js';
+export type { ImageDpi } from './assets/image/optimize/dpiAnalyze.js';
 
-export { analyzeImages } from './assets/image/compressionAnalysis.js';
+export { analyzeImages } from './assets/image/optimize/compressionAnalysis.js';
 export type {
   ImageAnalysis,
   AnalysisReport,
   AnalyzeImagesOptions,
-} from './assets/image/compressionAnalysis.js';
+} from './assets/image/optimize/compressionAnalysis.js';
 
-export { analyzeJpegMarkers } from './assets/image/jpegMarkers.js';
-export type { JpegMarkerInfo } from './assets/image/jpegMarkers.js';
+export { analyzeJpegMarkers } from './assets/image/jpeg/jpegMarkers.js';
+export type { JpegMarkerInfo } from './assets/image/jpeg/jpegMarkers.js';
 
 export { extractJpegMetadata, injectJpegMetadata } from './assets/image/imageMetadata.js';
 export type { JpegMetadata } from './assets/image/imageMetadata.js';
@@ -934,8 +934,8 @@ export type { JpegMetadata } from './assets/image/imageMetadata.js';
 // TIFF CMYK support
 // ---------------------------------------------------------------------------
 
-export { convertTiffCmykToRgb, embedTiffCmyk, isCmykTiff } from './assets/image/tiffCmyk.js';
-export type { TiffIfdEntry, TiffCmykEmbedResult } from './assets/image/tiffCmyk.js';
+export { convertTiffCmykToRgb, embedTiffCmyk, isCmykTiff } from './assets/image/tiff/tiffCmyk.js';
+export type { TiffIfdEntry, TiffCmykEmbedResult } from './assets/image/tiff/tiffCmyk.js';
 
 // ---------------------------------------------------------------------------
 // Image format detection
@@ -957,21 +957,21 @@ export {
   webpToJpeg,
   webpToPng,
   encodePngFromPixels,
-} from './assets/image/webpOptimize.js';
+} from './assets/image/webp/webpOptimize.js';
 
 // ---------------------------------------------------------------------------
 // TIFF direct embedding
 // ---------------------------------------------------------------------------
 
-export { embedTiffDirect, canDirectEmbed } from './assets/image/tiffDirectEmbed.js';
-export type { DirectEmbedOptions, DirectEmbedResult } from './assets/image/tiffDirectEmbed.js';
+export { embedTiffDirect, canDirectEmbed } from './assets/image/tiff/tiffDirectEmbed.js';
+export type { DirectEmbedOptions, DirectEmbedResult } from './assets/image/tiff/tiffDirectEmbed.js';
 
 // ---------------------------------------------------------------------------
 // WebP decoding
 // ---------------------------------------------------------------------------
 
-export { decodeWebP, isWebP, isWebPLossless } from './assets/image/webpDecode.js';
-export type { WebPImage } from './assets/image/webpDecode.js';
+export { decodeWebP, isWebP, isWebPLossless } from './assets/image/webp/webpDecode.js';
+export type { WebPImage } from './assets/image/webp/webpDecode.js';
 
 // ---------------------------------------------------------------------------
 // TIFF decoding
@@ -984,8 +984,8 @@ export {
   getTiffPageCount,
   parseTiffIfd,
   isTiff,
-} from './assets/image/tiffDecode.js';
-export type { TiffImage, TiffDecodeOptions, IfdEntry } from './assets/image/tiffDecode.js';
+} from './assets/image/tiff/tiffDecode.js';
+export type { TiffImage, TiffDecodeOptions, IfdEntry } from './assets/image/tiff/tiffDecode.js';
 
 // ---------------------------------------------------------------------------
 // WASM loader (streaming compilation, runtime detection, configuration)

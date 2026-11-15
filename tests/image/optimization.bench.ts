@@ -12,8 +12,8 @@ import {
   downscaleImage,
   recompressImage,
   optimizeImage,
-} from '../../src/assets/image/imageOptimize.js';
-import type { RawImageData } from '../../src/assets/image/imageOptimize.js';
+} from '../../src/assets/image/optimize/imageOptimize.js';
+import type { RawImageData } from '../../src/assets/image/optimize/imageOptimize.js';
 
 // Bind once: Vitest's module runner adds a getter call to every imported-binding access.
 const downscale = downscaleImage;

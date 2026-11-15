@@ -56,10 +56,10 @@ import type { ResourceLimitName } from '../../src/internal/limits.js';
 import { decodeWoff, isWoff } from '../../src/assets/font/woff.js';
 import { decodeStream, getStreamFilters } from '../../src/codecs/streamDecode.js';
 import { parseToUnicodeCMap } from '../../src/parser/text/textExtractor.js';
-import { embedPng } from '../../src/assets/image/pngEmbed.js';
-import { embedJpeg } from '../../src/assets/image/jpegEmbed.js';
-import { decodeWebP, isWebP } from '../../src/assets/image/webpDecode.js';
-import { getTiffPageCount, isTiff } from '../../src/assets/image/tiffDecode.js';
+import { embedPng } from '../../src/assets/image/internal/pngEmbed.js';
+import { embedJpeg } from '../../src/assets/image/jpeg/jpegEmbed.js';
+import { decodeWebP, isWebP } from '../../src/assets/image/webp/webpDecode.js';
+import { getTiffPageCount, isTiff } from '../../src/assets/image/tiff/tiffDecode.js';
 import { parseDerTlv } from '../../src/signature/pkcs7.js';
 import type { Asn1Node } from '../../src/signature/pkcs7.js';
 

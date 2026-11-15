@@ -20,8 +20,14 @@ import {
   estimateJpegQuality,
   PageSizes,
 } from '../../src/index.js';
-import { isGrayscaleImage, convertToGrayscale } from '../../src/assets/image/grayscaleDetect.js';
-import { computeImageDpi, computeTargetDimensions } from '../../src/assets/image/dpiAnalyze.js';
+import {
+  isGrayscaleImage,
+  convertToGrayscale,
+} from '../../src/assets/image/optimize/grayscaleDetect.js';
+import {
+  computeImageDpi,
+  computeTargetDimensions,
+} from '../../src/assets/image/optimize/dpiAnalyze.js';
 
 // Bind once: Vitest's module runner adds a getter call to every imported-binding access.
 const isGray = isGrayscaleImage;

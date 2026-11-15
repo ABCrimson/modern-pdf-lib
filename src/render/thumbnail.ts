@@ -11,7 +11,7 @@
 
 import { rasterize, type RenderOptions } from './rasterizer.js';
 import { interpretPage } from './interpreter.js';
-import { encodePngFromPixels } from '../assets/image/webpOptimize.js';
+import { encodePngFromPixels } from '../assets/image/webp/webpOptimize.js';
 import type { PdfPage } from '../core/pdfPage.js';
 
 /** Options for {@link generateThumbnail}. */

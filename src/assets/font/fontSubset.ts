@@ -19,7 +19,7 @@
  * No require() — ESM import only.
  */
 
-import { subsetTtf } from './ttfSubset.js';
+import { subsetTtf } from './internal/ttfSubset.js';
 
 // ---------------------------------------------------------------------------
 // Public interfaces

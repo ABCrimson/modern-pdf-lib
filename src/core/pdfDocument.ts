@@ -54,19 +54,19 @@ import {
   getStandardFont,
   measureStandardText,
   standardFontHeight,
-} from '../assets/font/standardFonts.js';
-import type { StandardFontName as StdFontName } from '../assets/font/standardFonts.js';
+} from '../assets/font/internal/standardFonts.js';
+import type { StandardFontName as StdFontName } from '../assets/font/internal/standardFonts.js';
 import type { EmbeddedFont } from '../assets/font/fontEmbed.js';
 import { embedFont as embedTtfFont } from '../assets/font/fontEmbed.js';
 import { subsetFont, buildSubsetCmap } from '../assets/font/fontSubset.js';
 import { warnOnce } from '../internal/warnings.js';
 import { isOpenTypeCFF } from '../assets/font/otfDetect.js';
-import { findTable } from '../assets/font/cffEmbed.js';
-import { embedPng as decodePng } from '../assets/image/pngEmbed.js';
+import { findTable } from '../assets/font/internal/cffEmbed.js';
+import { embedPng as decodePng } from '../assets/image/internal/pngEmbed.js';
 import { detectImageFormat } from '../assets/image/formatDetect.js';
-import { decodeWebP } from '../assets/image/webpDecode.js';
-import { decodeTiff } from '../assets/image/tiffDecode.js';
-import type { TiffDecodeOptions } from '../assets/image/tiffDecode.js';
+import { decodeWebP } from '../assets/image/webp/webpDecode.js';
+import { decodeTiff } from '../assets/image/tiff/tiffDecode.js';
+import type { TiffDecodeOptions } from '../assets/image/tiff/tiffDecode.js';
 import { flateEncode } from '../codecs/internal/pdfFlate.js';
 import type { LoadPdfOptions } from '../parser/documentParser.js';
 import { loadPdf } from '../parser/documentParser.js';
