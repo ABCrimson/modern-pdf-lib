@@ -1,5 +1,5 @@
 /**
- * @module form/documentScripts
+ * @module form/internal/documentScripts
  *
  * Utilities for managing document-level JavaScript actions in a PDF.
  *
@@ -17,7 +17,7 @@
  *            §12.6.4.2 (JavaScript Actions), §7.7.4 (Name Trees).
  */
 
-import type { PdfDocument } from '../core/pdfDocument.js';
+import type { PdfDocument } from '../../core/pdfDocument.js';
 
 // ---------------------------------------------------------------------------
 // Types

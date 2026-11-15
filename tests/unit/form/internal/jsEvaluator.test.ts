@@ -16,7 +16,7 @@ import {
   evaluateExpression,
   parseCalculationScript,
   cleanNumber,
-} from '../../../src/form/jsEvaluator.js';
+} from '../../../../src/form/internal/jsEvaluator.js';
 
 // ---------------------------------------------------------------------------
 // cleanNumber

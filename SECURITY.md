@@ -155,7 +155,7 @@ These areas are security-sensitive. A report against any of them is in scope.
 | WASM modules | `crates/` | Rust crates for deflate, PNG, TTF, shaping, JBIG2, and JPEG |
 
 > [!NOTE]
-> The form calculation evaluator (`src/form/jsEvaluator.ts`) is a purpose-built
+> The form calculation evaluator (`src/form/internal/jsEvaluator.ts`) is a purpose-built
 > arithmetic parser — it handles `AFSimple_Calculate` and simple arithmetic over
 > field references. It is **not** a JavaScript engine and does not call `eval()`
 > or `new Function()` on document-supplied script text.

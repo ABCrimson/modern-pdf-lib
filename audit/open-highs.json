@@ -1837,7 +1837,7 @@
       "area": "tests-unit-form",
       "severity": "high",
       "status": "missed",
-      "path": "src/form/documentScripts.ts",
+      "path": "src/form/internal/documentScripts.ts",
       "target": "0.41.4",
       "summary": "Document close, print and save actions are also registered as document-level scripts."
     },

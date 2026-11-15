@@ -22,7 +22,7 @@ import { PageSizes } from '../../../src/core/pdfPage.js';
 import {
   addDocumentOpenAction,
   addDocumentCloseAction,
-} from '../../../src/form/documentScripts.js';
+} from '../../../src/form/internal/documentScripts.js';
 import { scanPdfThreats } from '../../../src/security/threatScanner.js';
 import type { ThreatReport, ThreatFinding } from '../../../src/security/threatScanner.js';
 

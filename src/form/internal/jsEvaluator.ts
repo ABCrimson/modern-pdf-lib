@@ -1,5 +1,5 @@
 /**
- * @module form/jsEvaluator
+ * @module form/internal/jsEvaluator
  *
  * Purpose-built evaluator for PDF form calculation scripts.
  *

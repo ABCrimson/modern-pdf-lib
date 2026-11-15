@@ -1,5 +1,5 @@
 /**
- * @module form/calculationOrder
+ * @module form/internal/calculationOrder
  *
  * Manages the field calculation order (/CO array) in a PDF AcroForm.
  *
@@ -17,11 +17,11 @@
  *            Table 218 (/CO entry).
  */
 
-import { PdfDict, PdfString } from '../core/pdfObjects.js';
+import { PdfDict, PdfString } from '../../core/pdfObjects.js';
 
-import type { PdfForm } from './pdfForm.js';
-import type { PdfField } from './pdfField.js';
-import { strVal } from './pdfField.js';
+import type { PdfForm } from '../pdfForm.js';
+import type { PdfField } from '../pdfField.js';
+import { strVal } from '../pdfField.js';
 import { evaluateExpression, parseCalculationScript } from './jsEvaluator.js';
 
 // ---------------------------------------------------------------------------

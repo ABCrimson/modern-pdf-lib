@@ -6,7 +6,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { createPdf } from '../../../src/index.js';
+import { createPdf } from '../../../../src/index.js';
 import {
   getDocumentScripts,
   addDocumentOpenAction,
@@ -14,7 +14,7 @@ import {
   addDocumentPrintAction,
   addDocumentSaveAction,
   removeDocumentScript,
-} from '../../../src/form/documentScripts.js';
+} from '../../../../src/form/internal/documentScripts.js';
 
 // ---------------------------------------------------------------------------
 // getDocumentScripts

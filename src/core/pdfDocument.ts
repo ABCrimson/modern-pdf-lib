@@ -102,7 +102,7 @@ import { addWatermark as addWatermarkImpl } from './watermark.js';
 import { applyRedactions as applyRedactionsImpl } from './redaction.js';
 import type { SignatureVerificationResult } from '../signature/pades/signatureVerifier.js';
 import { PdfForm } from '../form/pdfForm.js';
-import { getDocumentActionState } from '../form/documentScripts.js';
+import { getDocumentActionState } from '../form/internal/documentScripts.js';
 import type { EmbeddedPdfPage, EmbedPageOptions } from './pdfEmbed.js';
 import { embedPageAsFormXObject } from './pdfEmbed.js';
 import { buildToUnicodeCmap, parseJpegDimensions } from './internal/pdfDocumentEmbed.js';

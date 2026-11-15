@@ -84,16 +84,20 @@ export {
   addDocumentPrintAction,
   addDocumentSaveAction,
   removeDocumentScript,
-} from './documentScripts.js';
-export type { DocumentScript, PrintActionOptions, SaveActionOptions } from './documentScripts.js';
+} from './internal/documentScripts.js';
+export type {
+  DocumentScript,
+  PrintActionOptions,
+  SaveActionOptions,
+} from './internal/documentScripts.js';
 
 // Form script sandbox (evaluation disabled since 0.40.5; execute() throws)
 export { FormScriptSandbox, createSandbox } from './scriptSandbox.js';
 export type { SandboxOptions, SandboxResult } from './scriptSandbox.js';
 
 // JavaScript expression evaluator for form calculations
-export { evaluateExpression, parseCalculationScript } from './jsEvaluator.js';
-export type { CalculationInfo } from './jsEvaluator.js';
+export { evaluateExpression, parseCalculationScript } from './internal/jsEvaluator.js';
+export type { CalculationInfo } from './internal/jsEvaluator.js';
 
 // Field calculation order
 export {
@@ -102,7 +106,7 @@ export {
   executeCalculations,
   buildDependencyGraph,
   topologicalSort,
-} from './calculationOrder.js';
+} from './internal/calculationOrder.js';
 
 // Acrobat number formatting/validation built-ins
 export {

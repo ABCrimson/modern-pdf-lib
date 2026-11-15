@@ -10,8 +10,8 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { PdfDict, PdfName, PdfString, PdfArray } from '../../../src/core/pdfObjects.js';
-import { PdfForm, type RefResolver } from '../../../src/form/pdfForm.js';
+import { PdfDict, PdfName, PdfString, PdfArray } from '../../../../src/core/pdfObjects.js';
+import { PdfForm, type RefResolver } from '../../../../src/form/pdfForm.js';
 
 import {
   getCalculationOrder,
@@ -19,7 +19,7 @@ import {
   executeCalculations,
   buildDependencyGraph,
   topologicalSort,
-} from '../../../src/form/calculationOrder.js';
+} from '../../../../src/form/internal/calculationOrder.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
