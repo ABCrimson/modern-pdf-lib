@@ -60,37 +60,6 @@ export type {
 } from './jpeg2000Decode.js';
 
 // ---------------------------------------------------------------------------
-// JPEG2000 codestream / JP2 container parsing
-// ---------------------------------------------------------------------------
-
-export {
-  isJpeg2000Codestream,
-  isJp2Container,
-  isJpeg2000,
-  extractCodestream,
-  parseJp2Boxes,
-  findBox,
-  findAllBoxes,
-  parseImageHeader,
-  JP2_BOX_TYPES,
-} from './jpeg2000Codestream.js';
-export type { Jp2Box } from './jpeg2000Codestream.js';
-
-// ---------------------------------------------------------------------------
-// JPEG2000 alpha channel handling
-// ---------------------------------------------------------------------------
-
-export {
-  hasAlphaChannel,
-  getAlphaChannelIndex,
-  separateAlpha,
-  premultiplyAlpha,
-  extractAlphaChannel,
-  parseChannelDefinitions,
-} from './jpeg2000Alpha.js';
-export type { ChannelDefinition, SeparatedImage } from './jpeg2000Alpha.js';
-
-// ---------------------------------------------------------------------------
 // JPEG2000 to JPEG transcoding
 // ---------------------------------------------------------------------------
 

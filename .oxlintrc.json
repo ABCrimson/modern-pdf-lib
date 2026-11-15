@@ -39,9 +39,7 @@
       // Map.get or optional properties stay on until those sites are rewritten.
       "files": [
         // Parser codecs and byte-level stream readers
-        "src/parser/jpeg2000Alpha.ts",
         "src/parser/jpeg2000BitDepth.ts",
-        "src/parser/jpeg2000Codestream.ts",
         "src/parser/jpeg2000Decode.ts",
         "src/parser/jpeg2000Tiles.ts",
         "src/parser/jpeg2000Transcode.ts",
