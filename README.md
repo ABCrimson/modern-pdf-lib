@@ -676,6 +676,7 @@ modern-pdf-lib/
     outline/        Bookmarks / document outline
     metadata/       XMP metadata, viewer preferences
     plugins/        Plugin manager & hooks
+    utils/          Base64, PDF value helpers, code frames
     internal/       Resource limits and runtime warnings shared by every domain
     wasm/           WASM loader and the TypeScript side of the crates
     cli/            CLI tool (modern-pdf optimize)
