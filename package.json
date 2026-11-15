@@ -124,14 +124,14 @@
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "0.18.5",
-    "@playwright/test": "1.66.0-alpha-2026-11-12",
+    "@playwright/test": "1.66.0-alpha-1794252756000",
     "@types/node": "26.6.6",
     "@vitest/coverage-v8": "5.1.0",
     "esbuild": "0.28.2",
     "oxc-parser": "0.158.0",
     "oxfmt": "0.78.0",
     "oxlint": "1.93.0",
-    "oxlint-tsgolint": "7.0.2006",
+    "oxlint-tsgolint": "7.0.2007",
     "pdf-lib": "1.17.1",
     "pdfjs-dist": "6.5.438",
     "publint": "0.3.25",
@@ -142,7 +142,7 @@
     "vite": "8.3.8",
     "vitepress": "2.0.0-alpha.21",
     "vitest": "5.1.0",
-    "vue": "3.6.0-rc.14",
+    "vue": "3.6.0-rc.15",
     "wasm-pack": "0.15.1"
   },
   "keywords": [
