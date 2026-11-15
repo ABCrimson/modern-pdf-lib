@@ -58,7 +58,7 @@ jobs:
       # into .cache/binaryen and verifies its SHA-256; the key reads that variable.
       - name: Read binaryen version
         id: binaryen
-        run: echo "version=$(sed -n 's/^BINARYEN_VERSION=//p' scripts/build-wasm.sh)" >> "$GITHUB_OUTPUT"
+        run: echo "version=$(sed -n 's/^BINARYEN_VERSION=//p' scripts/build/build-wasm.sh)" >> "$GITHUB_OUTPUT"
 
       - name: Cache binaryen
         uses: actions/cache@v6.1.0

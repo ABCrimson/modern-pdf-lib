@@ -3,7 +3,7 @@
  * scripts/conformance/summarize.ts. The nightly workflow (.github/workflows/conformance.yml) calls
  * it on the input set of scripts/conformance/generate.ts; it is also the local entry point.
  *
- *   node scripts/verapdf-validate.ts [--verapdf <path>] [--out <dir>]
+ *   node scripts/conformance/verapdf-validate.ts [--verapdf <path>] [--out <dir>]
  *     (--manifest <manifest.json> | [--flavour <flavour>] <dir-or-file>...)
  *
  * The veraPDF launcher comes from `--verapdf` or the `VERAPDF` variable (as the qpdf tests read
@@ -42,7 +42,7 @@ import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 
 const usage =
-  'usage: node scripts/verapdf-validate.ts [--verapdf <path>] [--out <dir>] ' +
+  'usage: node scripts/conformance/verapdf-validate.ts [--verapdf <path>] [--out <dir>] ' +
   '(--manifest <manifest.json> | [--flavour <flavour>] <dir-or-file>...)';
 
 /** Longest a single veraPDF run may take. */
@@ -195,7 +195,7 @@ for (const [flavour, files] of groups) {
 }
 process.stderr.write(`reports in ${out}\n`);
 
-const summarizeScript = fileURLToPath(new URL('conformance/summarize.ts', import.meta.url));
+const summarizeScript = fileURLToPath(new URL('summarize.ts', import.meta.url));
 const summarizeArgs = [
   summarizeScript,
   'verapdf',

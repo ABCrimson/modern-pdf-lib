@@ -1,8 +1,8 @@
 {
-  "about": "Raw stream data digests of the fixtures as loaded with ignoreEncryption: the base section is what 0.40.8 read, the added section is new in 0.40.9. Written by scripts/oracle/stream-digests.ts, checked by --check.",
+  "about": "Raw stream data digests of the fixtures as loaded with ignoreEncryption: the base section is what 0.40.8 read, the added section is new in 0.40.9. Written by scripts/fixtures/stream-digests.ts, checked by --check.",
   "qpdf": "qpdf version 12.4.2",
   "base": {
-    "about": "What 0.40.8 read from the fixtures that existed then, recorded by running scripts/oracle/stream-digests.ts --write-base against that version. Only --write-base changes it.",
+    "about": "What 0.40.8 read from the fixtures that existed then, recorded by running scripts/fixtures/stream-digests.ts --write-base against that version. Only --write-base changes it.",
     "files": {
       "corpus/irs-fw4.pdf": {
         "loads": true,
@@ -2959,7 +2959,7 @@
     }
   },
   "added": {
-    "about": "New in 0.40.9: fixtures that 0.40.8 never read, recorded from the code current at scripts/oracle/stream-digests.ts --write.",
+    "about": "New in 0.40.9: fixtures that 0.40.8 never read, recorded from the code current at scripts/fixtures/stream-digests.ts --write.",
     "files": {
       "encrypted/extra/aes-256-r5.pdf": {
         "loads": true,

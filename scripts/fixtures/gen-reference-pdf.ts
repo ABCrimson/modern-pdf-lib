@@ -1,7 +1,7 @@
 /**
  * Generate a reference "Hello, World!" PDF for testing.
  *
- * Run with: pnpm exec tsx scripts/gen-reference-pdf.ts
+ * Run with: pnpm exec tsx scripts/fixtures/gen-reference-pdf.ts
  *
  * The PDF contains:
  * - An A4 page
@@ -15,11 +15,11 @@
 import { writeFile, mkdir } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
-import { createPdf, PageSizes, StandardFonts, rgb } from '../src/index.js';
+import { createPdf, PageSizes, StandardFonts, rgb } from '../../src/index.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const outputDir = resolve(__dirname, '../tests/fixtures/expected');
+const outputDir = resolve(__dirname, '../../tests/fixtures/expected');
 const outputPath = resolve(outputDir, 'hello-world.pdf');
 
 async function main(): Promise<void> {

@@ -10,7 +10,7 @@
  *   - Basic object structure
  *
  * Usage:
- *   node scripts/validate-pdf.ts <file.pdf>
+ *   node scripts/dev/validate-pdf.ts <file.pdf>
  *   pnpm run validate-pdf <file.pdf>
  *
  * Exit codes:

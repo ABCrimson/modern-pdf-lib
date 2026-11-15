@@ -5,7 +5,7 @@
  *   node scripts/conformance/summarize.ts <verapdf|pyhanko> <reports-dir>
  *     [--manifest <manifest.json>] [--expected <expected.json>] [--json <summary.json>]
  *
- * Inputs: for `verapdf`, the `verapdf-<flavour>.json` files that scripts/verapdf-validate.ts writes
+ * Inputs: for `verapdf`, the `verapdf-<flavour>.json` files that scripts/conformance/verapdf-validate.ts writes
  * (veraPDF's own `--format json` output, one file per flavour group) and its optional `tools.json`;
  * for `pyhanko`, the per-file JSON reports of scripts/conformance/hanko-report.py. The manifest of
  * scripts/conformance/generate.ts, when given, supplies the writer call of each veraPDF row.

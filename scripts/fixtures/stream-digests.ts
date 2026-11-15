@@ -2,9 +2,9 @@
  * Records, and checks, the raw data of every stream object this library reads from the PDFs under
  * tests/fixtures, in tests/fixtures/expected/stream-digests.json.
  *
- *   pnpm exec tsx scripts/oracle/stream-digests.ts --write-base   record the base section
- *   pnpm exec tsx scripts/oracle/stream-digests.ts --write        record the section of new fixtures
- *   pnpm exec tsx scripts/oracle/stream-digests.ts --check        exit 1 on any difference
+ *   pnpm exec tsx scripts/fixtures/stream-digests.ts --write-base   record the base section
+ *   pnpm exec tsx scripts/fixtures/stream-digests.ts --write        record the section of new fixtures
+ *   pnpm exec tsx scripts/fixtures/stream-digests.ts --check        exit 1 on any difference
  *
  * The record has two sections. `base` is what 0.40.8 read from the fixtures that existed then:
  * per file whether it loads, per stream object the data length and the SHA-256 of
@@ -128,7 +128,7 @@ function parserState(parser: PdfDocumentParserInstance): ParserState {
   if (!(state.xrefEntries instanceof Map) || !(state.objectCache instanceof Map)) {
     throw new Error(
       'PdfDocumentParser no longer holds xrefEntries and objectCache maps; ' +
-        'update scripts/oracle/stream-digests.ts to read the loaded objects another way',
+        'update scripts/fixtures/stream-digests.ts to read the loaded objects another way',
     );
   }
   return state as ParserState;
@@ -269,10 +269,10 @@ function saveRecord(record: DigestFile): void {
 
 const BASE_ABOUT =
   'What 0.40.8 read from the fixtures that existed then, recorded by running ' +
-  'scripts/oracle/stream-digests.ts --write-base against that version. Only --write-base changes it.';
+  'scripts/fixtures/stream-digests.ts --write-base against that version. Only --write-base changes it.';
 const ADDED_ABOUT =
   'New in 0.40.9: fixtures that 0.40.8 never read, recorded from the code current at ' +
-  'scripts/oracle/stream-digests.ts --write.';
+  'scripts/fixtures/stream-digests.ts --write.';
 
 /** Records the base section from the tree under `STREAM_DIGESTS_ROOT`; empties `added`. */
 async function writeBase(): Promise<void> {
@@ -282,7 +282,7 @@ async function writeBase(): Promise<void> {
     about:
       'Raw stream data digests of the fixtures as loaded with ignoreEncryption: the base section ' +
       'is what 0.40.8 read, the added section is new in 0.40.9. Written by ' +
-      'scripts/oracle/stream-digests.ts, checked by --check.',
+      'scripts/fixtures/stream-digests.ts, checked by --check.',
     qpdf,
     base: { about: BASE_ABOUT, files },
     added: { about: ADDED_ABOUT, files: {} },

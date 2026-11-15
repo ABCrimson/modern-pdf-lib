@@ -1,8 +1,8 @@
 /**
  * Regenerates tests/fixtures/legacy-0.40.3 with the PUBLISHED modern-pdf-lib@0.40.3.
  *
- *   node scripts/legacy-0.40.3/generate.ts           write the fixtures and manifest.json
- *   node scripts/legacy-0.40.3/generate.ts --check   regenerate into a temp dir and exit 1 unless
+ *   node scripts/fixtures/legacy-0.40.3/generate.ts           write the fixtures and manifest.json
+ *   node scripts/fixtures/legacy-0.40.3/generate.ts --check   regenerate into a temp dir and exit 1 unless
  *                                                    every sha256 equals the committed manifest
  *
  * The library is installed from npm into a temp directory outside the repo and verified against
@@ -45,7 +45,7 @@ const UTF8_SUBJECT = 'Übersicht äöü';
 const UTF8_PAGE = 'Café naïve été';
 const FORM_VALUES = { name: 'Ada Lovelace', agree: true, colour: 'green' } as const;
 
-const repoRoot = fileURLToPath(new URL('../../', import.meta.url));
+const repoRoot = fileURLToPath(new URL('../../../', import.meta.url));
 const fixtureDir = join(repoRoot, 'tests/fixtures/legacy-0.40.3');
 const signerPath = fileURLToPath(new URL('test-signer.json', import.meta.url));
 
@@ -370,7 +370,7 @@ async function generate(libDir: string, outDir: string): Promise<ManifestEntry[]
           pageText: pages,
           signature: { fieldName: FIELD_NAME, subFilter: SUB_FILTER },
         },
-        'Self-signed test certificate, key in scripts/legacy-0.40.3/test-signer.json; one incremental update, no /AcroForm in the updated catalog.',
+        'Self-signed test certificate, key in scripts/fixtures/legacy-0.40.3/test-signer.json; one incremental update, no /AcroForm in the updated catalog.',
       );
     }
     writeFileSync(join(outDir, 'manifest.json'), `${JSON.stringify(manifest, null, 2)}\n`);

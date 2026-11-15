@@ -108,7 +108,7 @@ Run each as `pnpm run <name>`.
 | `typecheck:security-tests` | `tsc` over `tsconfig.security-tests.json` only (the files it lists: the 0.40.5 security tests, the qpdf cross-check of encrypted saves, the known-defect helper tests, and `tests/helpers`) |
 | `fixtures:legacy` | Rebuild `tests/fixtures/legacy-0.40.3/` from the published 0.40.3 tarball |
 | `fixtures:legacy:check` | Check that those fixtures regenerate byte for byte |
-| `node scripts/legacy-0.26.0/generate.ts` (`--check` to verify; no package script) | Rebuild `tests/fixtures/legacy-0.26.0/` from the published 0.26.0 tarball, or check that it regenerates byte for byte |
+| `node scripts/fixtures/legacy-0.26.0/generate.ts` (`--check` to verify; no package script) | Rebuild `tests/fixtures/legacy-0.26.0/` from the published 0.26.0 tarball, or check that it regenerates byte for byte |
 | `fixtures:encrypted` | Write `tests/fixtures/encrypted/`: a source PDF and five copies encrypted by qpdf 12.4.2, and the `extra/` and `load/` sets the encrypted-load tests read |
 | `fixtures:encrypted:check` | Regenerate them in a temp directory and fail on any difference (needs qpdf) |
 | `fixtures:streams:check` | Check the raw data of every stream that the parser reads from `tests/fixtures` against the record `tests/fixtures/expected/stream-digests.json` (needs qpdf 12.4.2) |
@@ -147,7 +147,7 @@ pnpm run build:wasm --debug
 ```
 
 Output lands in `crates/<crate>/pkg/` (git-ignored). `pnpm run copy:wasm` stages
-those artifacts into `dist/wasm/<crate>/` for publishing. `scripts/build-wasm.sh`
+those artifacts into `dist/wasm/<crate>/` for publishing. `scripts/build/build-wasm.sh`
 takes its `wasm-opt` from a checksum-pinned binaryen (`version_133`, cached in
 `.cache/binaryen`).
 
@@ -249,20 +249,21 @@ slower and vary from run to run. The memory budget is never scaled.
 | `tests/helpers/` | `budget.ts`, `budget-child.ts` and `budget-worker.ts` (the budget runner: `runWithinBudget()`, `DEFAULT_BUDGET`, `AT_LIMIT_BUDGET`), `known-defect.ts` (the known-defect marker), `oracle/` (the qpdf and pdf.js wrappers, the setup file that fails an oracle test whose saved PDF did not go through qpdf, and the independent hash port) and the signature-trust fixtures (no tests of its own) | — |
 | `tests/e2e/` | Playwright specs (`*.spec.ts`) driven through Vite | 1 spec |
 | `tests/benchmarks/` | Benchmark suites (`pnpm run bench`, `pnpm run test:bench`) | — |
-| `tests/fixtures/` | Shared sample PDFs and generated inputs; `legacy-0.40.3/` holds eight PDFs written by the published 0.40.3 and a `manifest.json` of their hashes (generator: `scripts/legacy-0.40.3/generate.ts`; regenerate with `pnpm run fixtures:legacy`, never edit by hand); `legacy-0.26.0/` holds one AES-256 PDF written by the published 0.26.0 with its `manifest.json` (generator: `scripts/legacy-0.26.0/generate.ts`, never edit by hand); `expected/stream-digests.json` records the stream data of every fixture (check it with `pnpm run fixtures:streams:check`) | — |
+| `tests/fixtures/` | Shared sample PDFs and generated inputs; `legacy-0.40.3/` holds eight PDFs written by the published 0.40.3 and a `manifest.json` of their hashes (generator: `scripts/fixtures/legacy-0.40.3/generate.ts`; regenerate with `pnpm run fixtures:legacy`, never edit by hand); `legacy-0.26.0/` holds one AES-256 PDF written by the published 0.26.0 with its `manifest.json` (generator: `scripts/fixtures/legacy-0.26.0/generate.ts`, never edit by hand); `expected/stream-digests.json` records the stream data of every fixture (check it with `pnpm run fixtures:streams:check`) | — |
 | `tests/fixtures/corpus/` | Unmodified PDF files written by other producers, with `manifest.json` (source, licence, SHA-256, contact-data result, admission values), `LICENSES/` and a README of its rules; add a file only with `node scripts/dev/corpus.ts --add` | 33 PDF files |
 | `tests/fixtures/flate/` | Two PDFs written by qpdf 12.4.2 whose cross-reference streams, object streams and content streams hold zlib data, with a README of how they were made; `tests/unit/parser/flateRead.test.ts` loads them | 2 PDF files |
 | `tests/fixtures/encrypted/` | A source PDF and five copies encrypted by qpdf 12.4.2, with `manifest.json` (`pnpm run fixtures:encrypted`); `extra/` holds two more AES-256 copies (revision 5, and revision 6 with a password that SASLprep changes), and `load/` holds the files the encrypted-load tests read: copies with object streams, an empty user password, crypt filter and signature-shaped variants (listed in `manifest.json`) | 25 PDF files |
-| `tests/fixtures/pdf20-hash/` | `cases.json`: 512 PDF 2.0 password hash cases from 256 documents qpdf encrypted (`node scripts/oracle/pdf20-hash-cases.ts`) | — |
+| `tests/fixtures/pdf20-hash/` | `cases.json`: 512 PDF 2.0 password hash cases from 256 documents qpdf encrypted (`node scripts/fixtures/pdf20-hash-cases.ts`) | — |
 
 Supporting directories of the test suite:
 
 | Directory | Contents |
 |---|---|
 | `audit/` | `open-highs.json`, the public ledger of open audit findings (schema `open-highs.schema.json`, described in `audit/README.md`) |
-| `scripts/dev/` | The checks and gates: `test-projects.ts`, `known-defects.ts`, `corpus.ts`, `surface-gate.ts`, `capability-gate.ts`, `size-gate.ts` (budgets in `size-budget.json`) and `api-snapshot.ts` |
-| `scripts/oracle/` | The generators of the qpdf fixture sets: `encrypted-fixtures.ts` and `pdf20-hash-cases.ts`; and `stream-digests.ts`, which records and checks the stream data of every fixture |
-| `scripts/conformance/` | The nightly conformance workflow: `generate.ts` (inputs), `summarize.ts` (tables and comparison), `hanko-report.py` (pyHanko reports) and `expected.json` (the expected results); `scripts/verapdf-validate.ts` runs veraPDF |
+| `scripts/build/` | The build steps: `build-iife.ts`, `smoke-dist.mjs`, `build-wasm.sh`, `copy-wasm.mjs`, `check-pack.mjs`, `generate-inline-wasm.ts`, and `sanitize-api-docs.ts` (the `docs:api` step) |
+| `scripts/dev/` | The checks and gates: `test-projects.ts`, `known-defects.ts`, `corpus.ts`, `surface-gate.ts`, `capability-gate.ts`, `size-gate.ts` (budgets in `size-budget.json`) and `api-snapshot.ts`; and `validate-pdf.ts`, the structural validation of a generated PDF |
+| `scripts/fixtures/` | The generators of `tests/fixtures/`: the qpdf fixture sets (`encrypted-fixtures.ts` and `pdf20-hash-cases.ts`), the fixtures written by published versions (`legacy-0.26.0/` and `legacy-0.40.3/`), `gen-fixtures.ts` and `gen-reference-pdf.ts`; and `stream-digests.ts`, which records and checks the stream data of every fixture |
+| `scripts/conformance/` | The nightly conformance workflow: `generate.ts` (inputs), `summarize.ts` (tables and comparison), `hanko-report.py` (pyHanko reports) and `expected.json` (the expected results); `scripts/conformance/verapdf-validate.ts` runs veraPDF |
 
 Naming: `*.test.ts` for Vitest, `*.spec.ts` for Playwright. Place new tests in
 the directory that matches the area under test, mirroring the `src/` layout,
@@ -281,7 +282,7 @@ the corpus, and the unit tests that compare with qpdf) use qpdf 12.x from
 the `QPDF` environment variable, then `PATH`.
 Locally, without qpdf, each such test skips with a reason, and `corpus:check`
 also counts the encrypted corpus entries as unconfirmed; when `CI` is set, a
-missing qpdf fails the test. The fixture generators under `scripts/oracle/`
+missing qpdf fails the test. The qpdf fixture generators under `scripts/fixtures/`
 need qpdf 12.4.2 and refuse any other version. In CI the unit-test job and the
 oracle job install the checksum-pinned qpdf and export `QPDF`. The API snapshot test needs
 `dist/` and `dist/wasm/` (`pnpm run build`, `pnpm run copy:wasm`) and the
@@ -423,7 +424,7 @@ Supporting directories:
 | `crates/` | The six Rust crates built to WebAssembly, one Cargo root each (see [Building the WASM crates](#building-the-wasm-crates)) |
 | `tests/` | The full test suite (see [Testing](#testing)) |
 | `audit/` | The public ledger of open audit findings (see [Testing](#testing)) |
-| `scripts/` | Build, codegen, fixture, and validation scripts; `scripts/dev/`, `scripts/oracle/` and `scripts/conformance/` hold the test gates and fixture generators |
+| `scripts/` | Build, codegen, fixture, and validation scripts, one folder per purpose: `scripts/build/`, `scripts/dev/` (gates and checks), `scripts/fixtures/` (fixture generators) and `scripts/conformance/` |
 | `tools/docs/` | Isolated TypeScript 6 sidecar for TypeDoc (a pnpm workspace member; no TS 7 path yet) |
 | `docs/` | VitePress site source and guides; `docs/api/` is generated and git-ignored |
 | `.github/` | CI, conformance, release, and docs workflows; the pins of the conformance tools (`conformance/`); issue and PR templates |

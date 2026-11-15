@@ -13,7 +13,7 @@
  * It also asserts that every `exports` / `bin` / `main` / `module` / `types`
  * target of package.json exists and that `modern-pdf --help` runs.
  *
- * Usage: `pnpm run smoke` (`node scripts/smoke-dist.mjs`, run after
+ * Usage: `pnpm run smoke` (`node scripts/build/smoke-dist.mjs`, run after
  * `pnpm run build`). Exits non-zero if any check fails.
  */
 import { execFileSync } from 'node:child_process';

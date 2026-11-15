@@ -6,8 +6,8 @@
  * salt in bytes 32-39 of /O and the 48-byte /U as udata, whose hash is bytes 0-31 of /O.
  * tests/oracle/aes.test.ts holds the oracle port tests/helpers/oracle/pdf20-hash.ts to all 512.
  *
- *   node scripts/oracle/pdf20-hash-cases.ts           encrypt 256 empty documents and write cases.json
- *   node scripts/oracle/pdf20-hash-cases.ts --check   exit 1 unless qpdf accepts every committed case
+ *   node scripts/fixtures/pdf20-hash-cases.ts           encrypt 256 empty documents and write cases.json
+ *   node scripts/fixtures/pdf20-hash-cases.ts --check   exit 1 unless qpdf accepts every committed case
  *
  * Each document is `qpdf --empty --encrypt --user-password=<u> --owner-password=<o> --bits=256 --
  * <out>`. The passwords come from a seeded generator, so they are the same on every run; qpdf

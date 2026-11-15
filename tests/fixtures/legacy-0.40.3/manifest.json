@@ -196,6 +196,6 @@
         "subFilter": "adbe.pkcs7.detached"
       }
     },
-    "notes": "Self-signed test certificate, key in scripts/legacy-0.40.3/test-signer.json; one incremental update, no /AcroForm in the updated catalog."
+    "notes": "Self-signed test certificate, key in scripts/fixtures/legacy-0.40.3/test-signer.json; one incremental update, no /AcroForm in the updated catalog."
   }
 ]

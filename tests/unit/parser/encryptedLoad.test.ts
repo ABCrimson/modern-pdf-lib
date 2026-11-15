@@ -2,7 +2,7 @@
  * loadPdf of encrypted files: every object comes back decrypted, once.
  *
  * The fixtures are tests/fixtures/encrypted (qpdf 12.4.2 copies of source.pdf, and R4 AESV2 and
- * RC4 files built by scripts/oracle/encrypted-fixtures.ts). Their plaintext is source.pdf: one page
+ * RC4 files built by scripts/fixtures/encrypted-fixtures.ts). Their plaintext is source.pdf: one page
  * whose content is `BT /F1 24 Tf 72 720 Td (Oracle text) Tj ET`, Info /Title `Oracle fixture`
  * and an XMP stream holding the same title; the built files add a catalog /Lang `en-US` (hex
  * string) and an Info /Author `Author (lit)` (literal string of octal escapes).

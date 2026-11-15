@@ -1,7 +1,7 @@
 /**
  * Read-old gate for the earliest AES-256 (revision 6) writer: the file in
  * tests/fixtures/legacy-0.26.0 was written by the published modern-pdf-lib@0.26.0
- * (scripts/legacy-0.26.0/generate.ts, never this tree), with the key derivation 0.26.0 to 0.40.8
+ * (scripts/fixtures/legacy-0.26.0/generate.ts, never this tree), with the key derivation 0.26.0 to 0.40.8
  * wrote, which qpdf and pdf.js refuse.
  *
  * The current reader opens it with its user and with its owner password, reads its Info strings

@@ -19,8 +19,8 @@
  * /Metadata stream and a page /Metadata stream; one copy encrypts everything, the other is made
  * with `--cleartext-metadata`.
  *
- *   node scripts/oracle/encrypted-fixtures.ts           write every file and manifest.json
- *   node scripts/oracle/encrypted-fixtures.ts --check   regenerate into a temp dir and exit 1 on
+ *   node scripts/fixtures/encrypted-fixtures.ts           write every file and manifest.json
+ *   node scripts/fixtures/encrypted-fixtures.ts --check   regenerate into a temp dir and exit 1 on
  *                                                       any difference from what is committed
  *
  * qpdf is `QPDF` when that variable is set, else `qpdf` on PATH. Any version other than 12.4.2
@@ -568,7 +568,7 @@ function generate(outDir: string, workDir: string, keepFrom?: string): Manifest 
       file: SOURCE,
       sha256: sha256(source),
       bytes: source.length,
-      made: 'literals in scripts/oracle/encrypted-fixtures.ts',
+      made: 'literals in scripts/fixtures/encrypted-fixtures.ts',
       check: 'sha256',
     },
   ];
@@ -630,7 +630,7 @@ function generate(outDir: string, workDir: string, keepFrom?: string): Manifest 
           file: spec.file,
           sha256: sha256(bytes),
           bytes: bytes.length,
-          made: `built by scripts/oracle/encrypted-fixtures.ts: ${parts.join(', ')}`,
+          made: `built by scripts/fixtures/encrypted-fixtures.ts: ${parts.join(', ')}`,
           check: 'sha256',
           encryption: showEncryption(join(outDir, spec.file), USER_PASSWORD),
         };
@@ -642,7 +642,7 @@ function generate(outDir: string, workDir: string, keepFrom?: string): Manifest 
           file: spec.file,
           sha256: sha256(bytes),
           bytes: bytes.length,
-          made: `built by scripts/oracle/encrypted-fixtures.ts: ${spec.cfm === 'AESV2' ? '/V 4 /R 4 /CFM /AESV2' : '/V 2 /R 3 RC4'}, content stream /Length in a later object stream, ${spec.eol.length} EOL before endstream`,
+          made: `built by scripts/fixtures/encrypted-fixtures.ts: ${spec.cfm === 'AESV2' ? '/V 4 /R 4 /CFM /AESV2' : '/V 2 /R 3 RC4'}, content stream /Length in a later object stream, ${spec.eol.length} EOL before endstream`,
           check: 'sha256',
           encryption: showEncryption(join(outDir, spec.file), USER_PASSWORD),
         };

@@ -3,8 +3,8 @@
  * version of the range 0.26.0 to 0.40.8 whose AES-256 (revision 6) key derivation the reader
  * still accepts with a warning.
  *
- *   node scripts/legacy-0.26.0/generate.ts           write the fixture and manifest.json
- *   node scripts/legacy-0.26.0/generate.ts --check   regenerate into a temp dir and exit 1 unless
+ *   node scripts/fixtures/legacy-0.26.0/generate.ts           write the fixture and manifest.json
+ *   node scripts/fixtures/legacy-0.26.0/generate.ts --check   regenerate into a temp dir and exit 1 unless
  *                                                    every sha256 equals the committed manifest
  *
  * The test suite never runs this script. The library is installed from npm into a temp directory
@@ -44,7 +44,7 @@ const AUTHOR = 'legacy-0.26.0 generator';
 const TITLE = 'aes-256';
 const PAGES = ['Encrypted R6 page'] as const;
 
-const repoRoot = fileURLToPath(new URL('../../', import.meta.url));
+const repoRoot = fileURLToPath(new URL('../../../', import.meta.url));
 const fixtureDir = join(repoRoot, 'tests/fixtures/legacy-0.26.0');
 
 interface PdfLike {

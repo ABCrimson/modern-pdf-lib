@@ -15,7 +15,7 @@ jpeg-encoder = "=0.7.1"
 jpeg-decoder = { version = "=0.3.2", default-features = false }
 
 [package.metadata.wasm-pack.profile.release]
-# wasm-pack skips wasm-opt (its bundled binaryen is version_130); scripts/build-wasm.sh
+# wasm-pack skips wasm-opt (its bundled binaryen is version_130); scripts/build/build-wasm.sh
 # runs the pinned newest binaryen on pkg/*_bg.wasm instead.
 wasm-opt = false
 

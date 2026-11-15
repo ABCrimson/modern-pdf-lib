@@ -298,7 +298,7 @@ describe('write direction: a password that SASLprep changes', () => {
 // Read direction: standard first, legacy last
 // ---------------------------------------------------------------------------
 
-/** qpdf 12.4.2 copies of tests/fixtures/encrypted/source.pdf (scripts/oracle/encrypted-fixtures.ts). */
+/** qpdf 12.4.2 copies of tests/fixtures/encrypted/source.pdf (scripts/fixtures/encrypted-fixtures.ts). */
 const R5 = 'encrypted/extra/aes-256-r5.pdf';
 const NFKC = 'encrypted/extra/aes-256-r6-nfkc.pdf';
 /** The user password of NFKC as typed: U+FB01 x U+00AD A U+FF21. qpdf hashed its raw UTF-8. */

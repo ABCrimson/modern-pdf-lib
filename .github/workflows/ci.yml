@@ -91,7 +91,7 @@ jobs:
         id: wasm-cache
         with:
           path: crates/*/pkg
-          key: wasm-pkg-${{ runner.os }}-${{ env.RUST_TOOLCHAIN }}-${{ hashFiles('crates/*/src/**/*.rs', 'crates/*/Cargo.toml', 'crates/*/Cargo.lock', 'scripts/build-wasm.sh', 'rust-toolchain.toml', 'package.json') }}
+          key: wasm-pkg-${{ runner.os }}-${{ env.RUST_TOOLCHAIN }}-${{ hashFiles('crates/*/src/**/*.rs', 'crates/*/Cargo.toml', 'crates/*/Cargo.lock', 'scripts/build/build-wasm.sh', 'rust-toolchain.toml', 'package.json') }}
 
       # Each crate is its own Cargo root until the workspace migration, so each
       # gets its own cache entry.
@@ -112,7 +112,7 @@ jobs:
       # variable so the two cannot drift.
       - name: Read binaryen version
         id: binaryen
-        run: echo "version=$(sed -n 's/^BINARYEN_VERSION=//p' scripts/build-wasm.sh)" >> "$GITHUB_OUTPUT"
+        run: echo "version=$(sed -n 's/^BINARYEN_VERSION=//p' scripts/build/build-wasm.sh)" >> "$GITHUB_OUTPUT"
 
       - name: Cache binaryen
         if: steps.wasm-cache.outputs.cache-hit != 'true'
@@ -320,7 +320,7 @@ jobs:
       # The oracle project, the corpus gate and the fixture checks below run qpdf; with CI set,
       # the oracle tests fail when it is missing instead of skipping. The release is pinned by the
       # SHA-256 of its x86_64 AppImage (taken from the release's qpdf-<version>.sha256 asset);
-      # QPDF_VERSION and QPDF_SHA256 move together, and the scripts under scripts/oracle/ refuse
+      # QPDF_VERSION and QPDF_SHA256 move together, and the qpdf generators in scripts/fixtures/ refuse
       # any other qpdf version. The AppImage is extracted, so no FUSE is needed.
       - name: Install qpdf
         env:
@@ -360,11 +360,11 @@ jobs:
 
       - name: Encrypted fixtures equal a fresh qpdf run
         if: ${{ !cancelled() }}
-        run: node scripts/oracle/encrypted-fixtures.ts --check
+        run: node scripts/fixtures/encrypted-fixtures.ts --check
 
       - name: qpdf accepts every PDF 2.0 password hash case
         if: ${{ !cancelled() }}
-        run: node scripts/oracle/pdf20-hash-cases.ts --check
+        run: node scripts/fixtures/pdf20-hash-cases.ts --check
 
       # corpus.ts --check runs tests/oracle/corpus.test.ts again (retry 0, its own JSON report) to
       # build the per-file summary, so that file runs twice in this job: in the oracle project

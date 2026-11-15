@@ -9,7 +9,7 @@
       "file": "source.pdf",
       "sha256": "e7f1ed8f67dea9ad0bf5d289e931f1dce025dad7997e987042490a8cc857eccb",
       "bytes": 1191,
-      "made": "literals in scripts/oracle/encrypted-fixtures.ts",
+      "made": "literals in scripts/fixtures/encrypted-fixtures.ts",
       "check": "sha256"
     },
     {
@@ -442,7 +442,7 @@
       "file": "load/cons-r4-control.pdf",
       "sha256": "2e838e6c0f8f7ad781d8e9f2c695f71b4f6452871c90b0ae81f18a2adc50c6d3",
       "bytes": 1384,
-      "made": "built by scripts/oracle/encrypted-fixtures.ts: /StmF /StdCF /StrF /StdCF",
+      "made": "built by scripts/fixtures/encrypted-fixtures.ts: /StmF /StdCF /StrF /StdCF",
       "check": "sha256",
       "encryption": {
         "R": "4",
@@ -466,7 +466,7 @@
       "file": "load/cons-r4-stmf-identity.pdf",
       "sha256": "f7c9415546d59c2a352b3787bf9ed4f44d3bcac55e20f90b8888ea6025740ade",
       "bytes": 1365,
-      "made": "built by scripts/oracle/encrypted-fixtures.ts: /StmF /Identity /StrF /StdCF",
+      "made": "built by scripts/fixtures/encrypted-fixtures.ts: /StmF /Identity /StrF /StdCF",
       "check": "sha256",
       "encryption": {
         "R": "4",
@@ -490,7 +490,7 @@
       "file": "load/cons-r4-strf-identity.pdf",
       "sha256": "25d9d1c82765d98477f2ac81bed95a09c2b6c1311a76f790b0fd400a8f4e7c2e",
       "bytes": 1216,
-      "made": "built by scripts/oracle/encrypted-fixtures.ts: /StmF /StdCF /StrF /Identity",
+      "made": "built by scripts/fixtures/encrypted-fixtures.ts: /StmF /StdCF /StrF /Identity",
       "check": "sha256",
       "encryption": {
         "R": "4",
@@ -514,7 +514,7 @@
       "file": "load/cons-r4-crypt-identity-stream.pdf",
       "sha256": "a73e58ee9bbcc8a0d9846331551087e3c791ba8545a2e436e4a595850f5488d8",
       "bytes": 1446,
-      "made": "built by scripts/oracle/encrypted-fixtures.ts: /StmF /StdCF /StrF /StdCF, content stream /Crypt /Identity",
+      "made": "built by scripts/fixtures/encrypted-fixtures.ts: /StmF /StdCF /StrF /StdCF, content stream /Crypt /Identity",
       "check": "sha256",
       "encryption": {
         "R": "4",
@@ -538,7 +538,7 @@
       "file": "load/cons-r4-title-c1.pdf",
       "sha256": "1f01af5ed923edfc6e63c3e80907185bf570fc4dd4a6f43aa59b35066ba2ccc3",
       "bytes": 1448,
-      "made": "built by scripts/oracle/encrypted-fixtures.ts: /StmF /StdCF /StrF /StdCF, Title bytes 808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9f",
+      "made": "built by scripts/fixtures/encrypted-fixtures.ts: /StmF /StdCF /StrF /StdCF, Title bytes 808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9f",
       "check": "sha256",
       "encryption": {
         "R": "4",
@@ -562,7 +562,7 @@
       "file": "load/cons-r4-title-utf16.pdf",
       "sha256": "9d89f234d63bdcc18161c78ab1873658a8c68e58472359587cd62e1fcc3f953f",
       "bytes": 1384,
-      "made": "built by scripts/oracle/encrypted-fixtures.ts: /StmF /StdCF /StrF /StdCF, Title bytes feff004120140095",
+      "made": "built by scripts/fixtures/encrypted-fixtures.ts: /StmF /StdCF /StrF /StdCF, Title bytes feff004120140095",
       "check": "sha256",
       "encryption": {
         "R": "4",
@@ -586,7 +586,7 @@
       "file": "load/cons-r4-length-in-objstm.pdf",
       "sha256": "830a872c3daee2a4d7d161563366db7757311ffb87daf7474b87481f935f4fe9",
       "bytes": 1109,
-      "made": "built by scripts/oracle/encrypted-fixtures.ts: /V 4 /R 4 /CFM /AESV2, content stream /Length in a later object stream, 1 EOL before endstream",
+      "made": "built by scripts/fixtures/encrypted-fixtures.ts: /V 4 /R 4 /CFM /AESV2, content stream /Length in a later object stream, 1 EOL before endstream",
       "check": "sha256",
       "encryption": {
         "R": "4",
@@ -610,7 +610,7 @@
       "file": "load/cons-r4-length-in-objstm-2eol.pdf",
       "sha256": "e8b35a8a40710ae8cf854f13d1f8f5ff1985c36fa2541f362c994b21713fb329",
       "bytes": 1110,
-      "made": "built by scripts/oracle/encrypted-fixtures.ts: /V 4 /R 4 /CFM /AESV2, content stream /Length in a later object stream, 2 EOL before endstream",
+      "made": "built by scripts/fixtures/encrypted-fixtures.ts: /V 4 /R 4 /CFM /AESV2, content stream /Length in a later object stream, 2 EOL before endstream",
       "check": "sha256",
       "encryption": {
         "R": "4",
@@ -634,7 +634,7 @@
       "file": "load/cons-r3-rc4-length-in-objstm-2eol.pdf",
       "sha256": "4481ed31d8a80e941f2329f8a5f39b6e6d9a5f5ec47406ebcee24a3bbce8db9a",
       "bytes": 969,
-      "made": "built by scripts/oracle/encrypted-fixtures.ts: /V 2 /R 3 RC4, content stream /Length in a later object stream, 2 EOL before endstream",
+      "made": "built by scripts/fixtures/encrypted-fixtures.ts: /V 2 /R 3 RC4, content stream /Length in a later object stream, 2 EOL before endstream",
       "check": "sha256",
       "encryption": {
         "R": "3",

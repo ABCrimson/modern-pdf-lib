@@ -2,7 +2,7 @@
 
 Read by `tests/oracle/aes.test.ts` (G-AES, read direction). Never edit them by hand: `manifest.json` holds the SHA-256 of every file, and the test fails on any difference.
 
-- `source.pdf` is written byte for byte by `scripts/oracle/encrypted-fixtures.ts` from literals in that script: one page showing `Oracle text` in Helvetica, the Info Title `Oracle fixture` and an XMP metadata stream with the same title.
+- `source.pdf` is written byte for byte by `scripts/fixtures/encrypted-fixtures.ts` from literals in that script: one page showing `Oracle text` in Helvetica, the Info Title `Oracle fixture` and an XMP metadata stream with the same title.
 - The other five files are `source.pdf` encrypted by qpdf 12.4.2 with user password `user` and owner password `owner`: `rc4-40-r2.pdf` (R2, 40-bit RC4), `rc4-128-r3.pdf` (R3, 128-bit RC4), `aes-128-r4.pdf` (R4, AESv2), `aes-128-r4-nometa.pdf` (R4, AESv2, `/EncryptMetadata false`, so the XMP stream stays in cleartext) and `aes-256-r6.pdf` (R6, AESv3). The exact qpdf command line of each file is in `manifest.json` (`made`), with qpdf's `--show-encryption` output (`encryption`).
 - `extra/` holds two more AES-256 copies of `source.pdf` by qpdf 12.4.2, read by `tests/unit/crypto/r6-derivation.test.ts` and listed under `extra` in `manifest.json` (the five files above are the set `tests/oracle/aes.test.ts` counts): `extra/aes-256-r5.pdf` (revision 5, `--force-R5`, passwords `user` and `owner`) and `extra/aes-256-r6-nfkc.pdf` (R6, owner password `owner`, user password U+FB01 x U+00AD A U+FF21, recorded as `userPasswordCodePoints`). SASLprep maps that user password to `fixAA`; qpdf hashed the typed form, so the file opens only with the typed password.
 

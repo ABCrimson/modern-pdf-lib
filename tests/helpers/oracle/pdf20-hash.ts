@@ -4,7 +4,7 @@
  * library's own algorithm2B to it. Its own correctness is pinned by an outside tool:
  * tests/oracle/aes.test.ts checks it against the /U and /O hashes of 256 empty documents qpdf
  * 12.4.2 encrypted under varied passwords (512 cases, tests/fixtures/pdf20-hash/cases.json, from
- * scripts/oracle/pdf20-hash-cases.ts) and of tests/fixtures/encrypted/aes-256-r6.pdf. The same
+ * scripts/fixtures/pdf20-hash-cases.ts) and of tests/fixtures/encrypted/aes-256-r6.pdf. The same
  * test file also holds it to three known answers with salt 0102030405060708; those answers are
  * not published values but this port's own output, and qpdf's hashes are the outside check.
  *

@@ -5,7 +5,7 @@
  * with **lazy decoding** and **GC-friendly caching**.
  *
  * This module is the runtime companion to the build-time code generation
- * script `scripts/generate-inline-wasm.ts`. It imports the generated
+ * script `scripts/build/generate-inline-wasm.ts`. It imports the generated
  * constants from `inlineWasm.generated.ts` and exposes functions that
  * decode a module's base64 string into a `Uint8Array` on demand.
  *

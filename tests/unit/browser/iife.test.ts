@@ -9,18 +9,18 @@ describe('IIFE bundle', () => {
   });
 
   it('build script reference is valid', () => {
-    const exists = existsSync(resolve('scripts/build-iife.ts'));
+    const exists = existsSync(resolve('scripts/build/build-iife.ts'));
     expect(exists).toBe(true);
   });
 
   it('esbuild script outputs correct filename', () => {
-    const script = readFileSync(resolve('scripts/build-iife.ts'), 'utf-8');
+    const script = readFileSync(resolve('scripts/build/build-iife.ts'), 'utf-8');
     expect(script).toContain('modern-pdf-lib.iife.js');
     expect(script).toContain("globalName: 'ModernPdf'");
   });
 
   it('esbuild script uses browser.ts entry', () => {
-    const script = readFileSync(resolve('scripts/build-iife.ts'), 'utf-8');
+    const script = readFileSync(resolve('scripts/build/build-iife.ts'), 'utf-8');
     expect(script).toContain('src/browser.ts');
   });
 

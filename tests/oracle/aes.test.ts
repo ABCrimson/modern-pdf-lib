@@ -9,7 +9,7 @@
  * - Read direction: tests/fixtures/encrypted holds a plain source, five copies encrypted by qpdf
  *   12.4.2 and, under extra/ and load/, further copies (R5, an R6 password that SASLprep changes,
  *   object streams, RC4 under V4, an empty user password) and built files
- *   (scripts/oracle/encrypted-fixtures.ts; each user password is in manifest.json). qpdf and
+ *   (scripts/fixtures/encrypted-fixtures.ts; each user password is in manifest.json). qpdf and
  *   pdf.js read each copy of the source with its user password (which pins the fixture), then the
  *   library must read the same text. A document decrypted on load is not saved without encrypt():
  *   a bare save() throws UnsupportedEncryptionError.
@@ -18,7 +18,7 @@
  *   /U and /O hashes (user password with the /U salt; owner password with the /O salt and /U)
  *   of 256 empty documents qpdf 12.4.2 encrypted with `qpdf --empty --encrypt
  *   --user-password=<user> --owner-password=<owner> --bits=256 -- <out>` under seeded varied
- *   passwords (scripts/oracle/pdf20-hash-cases.ts; its --check has qpdf accept every committed
+ *   passwords (scripts/fixtures/pdf20-hash-cases.ts; its --check has qpdf accept every committed
  *   case again). It must also reproduce the /U and /O of the R6 fixture and three known answers
  *   with salt 0102030405060708, which are its own output, not published values. The library's
  *   algorithm2B is then held to the known answers.
@@ -121,7 +121,7 @@ interface CaseFile {
   readonly O: string;
 }
 /**
- * The Algorithm 2.B cases qpdf 12.4.2 wrote (scripts/oracle/pdf20-hash-cases.ts): from each file
+ * The Algorithm 2.B cases qpdf 12.4.2 wrote (scripts/fixtures/pdf20-hash-cases.ts): from each file
  * the user password with the /U salt, and the owner password with the /O salt and /U as udata.
  */
 const QPDF_CASES = (

@@ -2,9 +2,9 @@
 # build-wasm.sh — Build all WASM modules with wasm-pack, then optimise each with wasm-opt
 #
 # Usage:
-#   ./scripts/build-wasm.sh              # Release build (default)
-#   ./scripts/build-wasm.sh --release    # Release build (explicit)
-#   ./scripts/build-wasm.sh --debug      # Debug build (unoptimized, faster compile)
+#   ./scripts/build/build-wasm.sh              # Release build (default)
+#   ./scripts/build/build-wasm.sh --release    # Release build (explicit)
+#   ./scripts/build/build-wasm.sh --debug      # Debug build (unoptimized, faster compile)
 #
 # wasm-opt decision: wasm-pack 0.15.1 downloads its own binaryen (version_130),
 # which lags the newest release. Each crate sets
@@ -20,7 +20,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 WASM_DIR="$PROJECT_ROOT/crates"
 
 # Keep in sync with the CI binaryen cache key (it keys on this variable).

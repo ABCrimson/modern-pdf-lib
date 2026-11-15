@@ -4,7 +4,7 @@
 # Report-only. The workflow never runs on pull requests, no required status check names its jobs,
 # and release.yml does not wait for it, so it can neither block a merge nor delay a publish. A
 # tool's exit code never decides a job: veraPDF exits 1 for a non-compliant file and 7 for a file it
-# cannot parse, and pyHanko exits 0 when it finds no signature. scripts/verapdf-validate.ts ignores
+# cannot parse, and pyHanko exits 0 when it finds no signature. scripts/conformance/verapdf-validate.ts ignores
 # veraPDF's exit code and scripts/conformance/hanko-report.py runs with continue-on-error; both feed
 # scripts/conformance/summarize.ts, which compares every row with scripts/conformance/expected.json
 # (as expected, better, worse) and exits 1 only when it finds no report at all, so a broken harness
@@ -140,7 +140,7 @@ jobs:
       # summarize.ts's code, which is 1 only when no report was written.
       - name: Validate with veraPDF and summarize
         run: >-
-          node scripts/verapdf-validate.ts --verapdf "$VERAPDF"
+          node scripts/conformance/verapdf-validate.ts --verapdf "$VERAPDF"
           --manifest "$RUNNER_TEMP/conformance/manifest.json"
           --out "$RUNNER_TEMP/verapdf-report"
 

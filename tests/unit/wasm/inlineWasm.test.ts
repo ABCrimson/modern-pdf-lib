@@ -65,7 +65,7 @@ function toBase64(data: Uint8Array): string {
 
 /**
  * Build a mock generated module that simulates the output of
- * `scripts/generate-inline-wasm.ts`.
+ * `scripts/build/generate-inline-wasm.ts`.
  */
 function createMockGeneratedModule(
   moduleNames: readonly string[],

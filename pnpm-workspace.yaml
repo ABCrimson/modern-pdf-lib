@@ -26,7 +26,7 @@ minimumReleaseAgeExclude:
 
 # Dependency build scripts are reviewed, not trusted: unlisted packages fail the install.
 strictDepBuilds: true
-# esbuild: native-binary postinstall (scripts/build-iife.ts); wasm-pack: postinstall downloads the 0.15.1 binary.
+# esbuild: native-binary postinstall (scripts/build/build-iife.ts); wasm-pack: postinstall downloads the 0.15.1 binary.
 allowBuilds:
   esbuild: true
   wasm-pack: true

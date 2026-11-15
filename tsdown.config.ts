@@ -8,7 +8,7 @@ import { defineConfig } from 'tsdown';
  * typescript peer accepts 7.1 dev builds) on 2026-11-10 that `dts: true` in the
  * same pass does not leak type-only re-exports into the runtime graph (the
  * v0.28.0 `Export 'X' is not defined in module` link failure).
- * `scripts/smoke-dist.mjs` (part of `pnpm run build`) links every built entry and
+ * `scripts/build/smoke-dist.mjs` (part of `pnpm run build`) links every built entry and
  * guards that class of bug; if it ever fails again, split the declarations into
  * a second config rather than ship it.
  *
@@ -37,7 +37,7 @@ export default defineConfig({
   // unminified and readable; shipping them doubled the tarball). `false` is not an option:
   // tsdown and rolldown-plugin-dts force source maps on while tsconfig.json sets
   // `declarationMap: true`, and then every bundle would carry a comment pointing at an
-  // unshipped map. `scripts/check-pack.mjs` fails on any dangling map URL.
+  // unshipped map. `scripts/build/check-pack.mjs` fails on any dangling map URL.
   sourcemap: 'hidden',
   // `isolatedDeclarations` is on in tsconfig.json, so rolldown-plugin-dts would
   // pick oxc anyway. The explicit pin keeps the generator from silently switching
