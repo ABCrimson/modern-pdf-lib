@@ -58,11 +58,15 @@ export interface JpegDecodeResult {
 // ---------------------------------------------------------------------------
 
 /**
- * Initialize the JPEG WASM module.
+ * Try to enable the JPEG WASM module. The function never throws.
  *
- * @param wasmSource - The WASM binary as `Uint8Array`, URL, `Response`,
- *                     or a pre-built wasm-bindgen module.  When omitted,
- *                     the function uses the universal WASM loader.
+ * A pre-built wasm-bindgen module (an object with `encode_jpeg`) is used as given. Any other
+ * argument is not read: the function loads the shipped build and tries to instantiate it
+ * without imports, which fails for that build, so the module stays unavailable and
+ * `isJpegWasmReady()` returns `false`.
+ *
+ * @param wasmSource - A pre-built wasm-bindgen module. Bytes, a URL, a string or a
+ *                     `Response` are accepted and not read.
  */
 export async function initJpegWasm(
   wasmSource?: JpegWasmModule | Uint8Array | URL | string | Response,
