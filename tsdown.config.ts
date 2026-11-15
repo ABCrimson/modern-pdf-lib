@@ -16,10 +16,9 @@ import { defineConfig } from 'tsdown';
  * `.js`, which the package.json `exports` map does not point at. On the default
  * `node` platform tsdown externalizes Node built-ins: the static `node:fs/promises`
  * import in src/cli and the dynamic `import('node:fs/promises')` in
- * src/wasm/loader.ts stay external in dist/. src/runtime/node.ts and
- * src/parser/streamingParser.ts load `node:fs`, `node:fs/promises` and
- * `node:worker_threads` through `Function`-built dynamic imports that the
- * bundler never sees.
+ * src/wasm/loader.ts stay external in dist/. src/parser/streamingParser.ts
+ * loads `node:fs` through a `Function`-built dynamic import that the bundler
+ * never sees.
  */
 export default defineConfig({
   entry: [

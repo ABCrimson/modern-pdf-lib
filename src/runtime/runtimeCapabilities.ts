@@ -10,8 +10,7 @@
  *
  * - **No feature is ever assumed.** Every probe feature-detects and is wrapped
  *   so a missing global or a host that throws on access degrades to `false`
- *   rather than crashing. This mirrors the defensive `try/catch` style of the
- *   sibling {@link module:runtime/detect} module.
+ *   rather than crashing.
  * - **No fake acceleration.** Detection reports only what the host *could*
  *   execute. It does **not** imply modern-pdf-lib's bundled WASM is built with
  *   SIMD/threads — it is not (see {@link SIMD_NOTE}). A `true` here means a

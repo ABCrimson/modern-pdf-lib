@@ -186,7 +186,7 @@ rule is named so you know where it comes from.
 > `pnpm run typecheck` catches this.
 
 The `typescript/no-implied-eval` and `no-new-func` rules are off for the
-streaming parser and `src/runtime/*.ts`, and
+streaming parser, and
 `no-console` is off for `src/cli/**` and the benchmark harness, via `overrides`
 in `.oxlintrc.json`.
 `typescript/no-non-null-assertion` is a warning that is off in `tests/**` and in
@@ -409,7 +409,7 @@ Version numbers follow the project's own scheme — see [VERSIONING.md](./VERSIO
 | `src/layers/` | Optional content groups (OCG layers) |
 | `src/batch/` | Batch document processing |
 | `src/plugins/` | Plugin system and built-in plugins |
-| `src/runtime/` | Runtime detection, server adapters, capability probing, memory budget |
+| `src/runtime/` | Server adapters, capability probing, memory budget |
 | `src/browser/` | Browser helpers: download, Web Worker, service worker |
 | `src/jsx/` | JSX runtime and the `renderJsxToPdf` component renderer |
 | `src/text/` | BiDi (UAX #9) text ordering |
