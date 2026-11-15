@@ -14,7 +14,7 @@ import {
   appendIncrementalUpdate,
   saveIncrementalWithSignaturePreservation,
 } from '../../../src/signature/pades/incrementalSave.js';
-import { buildPdfX6OutputIntent } from '../../../src/compliance/pdfX6.js';
+import { buildPdfX6OutputIntent } from '../../../src/compliance/pdfx/pdfX6.js';
 import { applyTablePreset } from '../../../src/layout/presets.js';
 import { PdfStructureTree } from '../../../src/accessibility/structureTree.js';
 import {

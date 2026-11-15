@@ -50,7 +50,7 @@ import {
   decryptStringBytes,
   embeddedFileFilterName,
 } from '../crypto/encryptionHandler.js';
-import { contentsLeftAsStored } from '../crypto/signatureContents.js';
+import { contentsLeftAsStored } from '../crypto/internal/signatureContents.js';
 import { PdfParseError } from './parseError.js';
 import { ResourceLimitError, UnsupportedEncryptionError } from '../errors.js';
 import { assertWithinLimit } from '../internal/limits.js';

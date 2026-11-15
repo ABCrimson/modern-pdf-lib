@@ -1366,14 +1366,19 @@ export {
   buildGtsPdfxVersion,
   validateBoxGeometry,
   buildBoxDict,
-} from './compliance/pdfX6.js';
-export type { PdfX6Variant, PdfX6Options, PdfRect, BoxGeometry } from './compliance/pdfX6.js';
+} from './compliance/pdfx/pdfX6.js';
+export type { PdfX6Variant, PdfX6Options, PdfRect, BoxGeometry } from './compliance/pdfx/pdfX6.js';
 
 // ---------------------------------------------------------------------------
 // Factur-X / ZUGFeRD CII e-invoice XML (0.33.2)
 // ---------------------------------------------------------------------------
-export { generateCiiXml } from './compliance/facturX.js';
-export type { FacturXProfile, Invoice, InvoiceParty, InvoiceLine } from './compliance/facturX.js';
+export { generateCiiXml } from './compliance/einvoice/facturX.js';
+export type {
+  FacturXProfile,
+  Invoice,
+  InvoiceParty,
+  InvoiceLine,
+} from './compliance/einvoice/facturX.js';
 
 // ---------------------------------------------------------------------------
 // Developer-experience helpers — code frames + did-you-mean
@@ -1390,19 +1395,19 @@ export type { FunctionShadingOptions } from './graphics/shadingFunction.js';
 // ---------------------------------------------------------------------------
 // PDF/A-4 conformance metadata (0.32.1 / 0.32.2)
 // ---------------------------------------------------------------------------
-export { buildPdfA4Xmp, pdfA4Rules } from './compliance/pdfA4.js';
+export { buildPdfA4Xmp, pdfA4Rules } from './compliance/pdfa/pdfA4.js';
 export type {
   PdfA4Level,
   PdfA4Options,
   PdfA4ExtensionSchema,
   PdfA4ExtensionProperty,
-} from './compliance/pdfA4.js';
+} from './compliance/pdfa/pdfA4.js';
 
 // ---------------------------------------------------------------------------
 // XRechnung / Order-X e-document profiles (0.33.4)
 // ---------------------------------------------------------------------------
-export { generateXRechnungCii, generateOrderX } from './compliance/xRechnung.js';
-export type { XRechnungOptions, OrderXType } from './compliance/xRechnung.js';
+export { generateXRechnungCii, generateOrderX } from './compliance/einvoice/xRechnung.js';
+export type { XRechnungOptions, OrderXType } from './compliance/einvoice/xRechnung.js';
 
 // ---------------------------------------------------------------------------
 // Font fallback chains (0.36.7)
@@ -1503,7 +1508,11 @@ export {
 // ---------------------------------------------------------------------------
 // PDF/X validation & enforcement (docs/guide/pdfx.md)
 // ---------------------------------------------------------------------------
-export { validatePdfX, enforcePdfX, buildPdfXOutputIntent } from './compliance/pdfxCompliance.js';
+export {
+  validatePdfX,
+  enforcePdfX,
+  buildPdfXOutputIntent,
+} from './compliance/pdfx/pdfxCompliance.js';
 
 // ---------------------------------------------------------------------------
 // Advanced text-layout primitives (docs/guide/text-layout.md)
@@ -1751,8 +1760,8 @@ export type { TileOptions, TileGrid } from './render/tiles.js';
 // Requirements, and PieceInfo shipped in 0.28.0.)
 // ---------------------------------------------------------------------------
 export { attachAssociatedFiles, registerEmbeddedFile } from './compliance/afAttach.js';
-export { attachOutputIntents, buildPageOutputIntent } from './compliance/pageOutputIntent.js';
-export type { PageOutputIntentOptions } from './compliance/pageOutputIntent.js';
+export { attachOutputIntents, buildPageOutputIntent } from './compliance/pdfx/pageOutputIntent.js';
+export type { PageOutputIntentOptions } from './compliance/pdfx/pageOutputIntent.js';
 export { buildEncryptedPayload, buildUnencryptedWrapper } from './compliance/encryptedPayload.js';
 export type {
   EncryptedPayloadOptions,
@@ -1796,13 +1805,13 @@ export type { AutoTagOptions, AutoTagResult } from './accessibility/autoTag.js';
 // WTPDF / PDF/R identification markers. (PDF/A-4, PDF/X-6, PDF/VT, and the
 // SARIF validation report shipped earlier.)
 // ---------------------------------------------------------------------------
-export { preflightPdfA, convertPdfAConformanceXmp } from './compliance/profileConvert.js';
-export type { PreflightIssue } from './compliance/profileConvert.js';
+export { preflightPdfA, convertPdfAConformanceXmp } from './compliance/pdfa/profileConvert.js';
+export type { PreflightIssue } from './compliance/pdfa/profileConvert.js';
 export {
   buildWtpdfIdentificationXmp,
   buildPdfRIdentificationXmp,
-} from './compliance/rasterProfile.js';
-export type { ProfileXmpOptions } from './compliance/rasterProfile.js';
+} from './compliance/xmp/rasterProfile.js';
+export type { ProfileXmpOptions } from './compliance/xmp/rasterProfile.js';
 
 // ---------------------------------------------------------------------------
 // E-invoicing & document assembly (0.33.x): the Factur-X / ZUGFeRD round-trip
@@ -1810,12 +1819,12 @@ export type { ProfileXmpOptions } from './compliance/rasterProfile.js';
 // EN16931 business-rule validator, and an inbound CII reader. (The outbound
 // CII generator + typed Invoice model shipped earlier in `facturX`.)
 // ---------------------------------------------------------------------------
-export { assembleFacturX, buildFacturXXmp } from './compliance/facturXAssemble.js';
-export type { FacturXAssembleOptions } from './compliance/facturXAssemble.js';
-export { validateEn16931 } from './compliance/eInvoiceValidate.js';
+export { assembleFacturX, buildFacturXXmp } from './compliance/einvoice/facturXAssemble.js';
+export type { FacturXAssembleOptions } from './compliance/einvoice/facturXAssemble.js';
+export { validateEn16931 } from './compliance/einvoice/eInvoiceValidate.js';
 export type {
   EInvoiceIssue,
   DeclaredInvoiceTotals,
   ValidatableInvoice,
-} from './compliance/eInvoiceValidate.js';
-export { parseCiiXml, detectFacturXProfile } from './compliance/ciiReader.js';
+} from './compliance/einvoice/eInvoiceValidate.js';
+export { parseCiiXml, detectFacturXProfile } from './compliance/einvoice/ciiReader.js';

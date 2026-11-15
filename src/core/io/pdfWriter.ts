@@ -47,7 +47,7 @@ import {
 import type { PdfObject, RegistryEntry } from '../pdfObjects.js';
 import type { DocumentStructure } from '../pdfCatalog.js';
 import type { PdfEncryptionHandler } from '../../crypto/encryptionHandler.js';
-import { contentsLeftAsStored } from '../../crypto/signatureContents.js';
+import { contentsLeftAsStored } from '../../crypto/internal/signatureContents.js';
 import { UnsupportedEncryptionError } from '../../errors.js';
 
 // ---------------------------------------------------------------------------

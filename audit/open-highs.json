@@ -316,7 +316,7 @@
       "area": "compliance",
       "severity": "high",
       "status": "confirmed",
-      "path": "src/compliance/pdfxCompliance.ts",
+      "path": "src/compliance/pdfx/pdfxCompliance.ts",
       "target": "0.41.1",
       "summary": "enforcePdfX rewrites the file through a text round trip that damages binary content."
     },
@@ -325,7 +325,7 @@
       "area": "compliance",
       "severity": "high",
       "status": "confirmed",
-      "path": "src/compliance/transparencyFlattener.ts",
+      "path": "src/compliance/pdfa/transparencyFlattener.ts",
       "target": "0.41.1",
       "summary": "flattenTransparency rewrites the file through a text round trip that damages binary content."
     },
@@ -334,7 +334,7 @@
       "area": "compliance",
       "severity": "high",
       "status": "confirmed",
-      "path": "src/compliance/stripProhibited.ts",
+      "path": "src/compliance/pdfa/stripProhibited.ts",
       "target": "0.41.1",
       "summary": "stripProhibitedFeatures rewrites the file through a text round trip that damages binary content."
     },
@@ -343,7 +343,7 @@
       "area": "compliance",
       "severity": "high",
       "status": "confirmed",
-      "path": "src/compliance/transparencyFlattener.ts",
+      "path": "src/compliance/pdfa/transparencyFlattener.ts",
       "target": "0.46.0",
       "summary": "Transparency flattening rewrites an indirect /SMask reference into a malformed dictionary entry."
     },
@@ -352,7 +352,7 @@
       "area": "compliance",
       "severity": "high",
       "status": "confirmed",
-      "path": "src/compliance/enforcePdfAv2.ts",
+      "path": "src/compliance/pdfa/enforcePdfAv2.ts",
       "target": "0.41.1",
       "summary": "PDF/A enforcement inserts metadata without updating the cross-reference data, so the output has wrong offsets."
     },
@@ -685,7 +685,7 @@
       "area": "docs-guide-2",
       "severity": "high",
       "status": "confirmed",
-      "path": "src/compliance/pdfA.ts",
+      "path": "src/compliance/pdfa/pdfA.ts",
       "target": "0.41.1",
       "summary": "enforcePdfA() inserts content without updating cross-reference offsets."
     },
@@ -694,7 +694,7 @@
       "area": "docs-guide-2",
       "severity": "high",
       "status": "confirmed",
-      "path": "src/compliance/stripProhibited.ts",
+      "path": "src/compliance/pdfa/stripProhibited.ts",
       "target": "0.41.1",
       "summary": "stripProhibitedFeatures() and flattenTransparency() damage binary content through a text round trip."
     },
@@ -703,7 +703,7 @@
       "area": "docs-guide-2",
       "severity": "high",
       "status": "confirmed",
-      "path": "src/compliance/pdfxCompliance.ts",
+      "path": "src/compliance/pdfx/pdfxCompliance.ts",
       "target": "0.41.1",
       "summary": "enforcePdfX() always rewrites the file through a text round trip, damaging binary content."
     },
@@ -712,7 +712,7 @@
       "area": "docs-guide-2",
       "severity": "high",
       "status": "confirmed",
-      "path": "src/compliance/pdfxCompliance.ts",
+      "path": "src/compliance/pdfx/pdfxCompliance.ts",
       "target": "0.46.4",
       "summary": "PDF/X validation and enforcement neither check nor write the PDF/X version identification."
     },
@@ -1000,7 +1000,7 @@
       "area": "oracle-gates",
       "severity": "medium",
       "status": "confirmed",
-      "path": "src/compliance/pdfA.ts",
+      "path": "src/compliance/pdfa/pdfA.ts",
       "target": "0.41.1",
       "summary": "enforcePdfA writes the XMP metadata it adds outside the file's cross-reference data, so qpdf --check does not find a valid cross-reference table in its output."
     },
@@ -1558,7 +1558,7 @@
       "area": "tests-suites-compliance-barcode-browser",
       "severity": "high",
       "status": "missed",
-      "path": "src/compliance/enforcePdfAv2.ts",
+      "path": "src/compliance/pdfa/enforcePdfAv2.ts",
       "target": "0.41.1",
       "summary": "enforcePdfAFull reports full compliance for output with broken cross-reference data."
     },
@@ -1567,7 +1567,7 @@
       "area": "tests-suites-compliance-barcode-browser",
       "severity": "high",
       "status": "missed",
-      "path": "tests/compliance/associatedFiles.test.ts",
+      "path": "tests/unit/compliance/associatedFiles.test.ts",
       "target": "0.41.1",
       "summary": "A test asserts the double-escaped embedded-file MIME subtype."
     },
@@ -1702,7 +1702,7 @@
       "area": "tests-unit-compliance",
       "severity": "high",
       "status": "confirmed",
-      "path": "src/compliance/transparencyFlattener.ts",
+      "path": "src/compliance/pdfa/transparencyFlattener.ts",
       "target": "0.41.1",
       "summary": "flattenTransparency damages binary content through a text round trip."
     },
@@ -1711,7 +1711,7 @@
       "area": "tests-unit-compliance",
       "severity": "high",
       "status": "confirmed",
-      "path": "src/compliance/transparencyFlattener.ts",
+      "path": "src/compliance/pdfa/transparencyFlattener.ts",
       "target": "0.46.0",
       "summary": "Transparency flattening leaves an unbalanced dictionary when /SMask is a direct dictionary."
     },
@@ -1720,7 +1720,7 @@
       "area": "tests-unit-compliance",
       "severity": "high",
       "status": "confirmed",
-      "path": "src/compliance/enforcePdfAv2.ts",
+      "path": "src/compliance/pdfa/enforcePdfAv2.ts",
       "target": "0.41.1",
       "summary": "enforcePdfAFull inserts content without updating the cross-reference table."
     },
@@ -1729,7 +1729,7 @@
       "area": "tests-unit-compliance",
       "severity": "high",
       "status": "missed",
-      "path": "src/compliance/pdfxCompliance.ts",
+      "path": "src/compliance/pdfx/pdfxCompliance.ts",
       "target": "0.41.1",
       "summary": "enforcePdfX always rewrites the file through a text round trip, even when nothing is altered."
     },
@@ -1918,7 +1918,7 @@
       "area": "tests-suites-compliance-barcode-browser",
       "severity": "high",
       "status": "confirmed",
-      "path": "src/compliance/stripProhibited.ts",
+      "path": "src/compliance/pdfa/stripProhibited.ts",
       "target": "0.41.1",
       "summary": "stripProhibitedFeatures damages binary streams through a text round trip."
     },
@@ -1927,7 +1927,7 @@
       "area": "tests-suites-compliance-barcode-browser",
       "severity": "high",
       "status": "confirmed",
-      "path": "tests/compliance/associatedFiles.test.ts",
+      "path": "tests/unit/compliance/associatedFiles.test.ts",
       "target": "0.46.2",
       "summary": "Associated-files tests cover no edge-case input such as invalid dates or non-ASCII names."
     },

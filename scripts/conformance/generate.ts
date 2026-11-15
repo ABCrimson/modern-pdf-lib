@@ -232,7 +232,7 @@ async function writeVeraPdfInputs(): Promise<void> {
     );
   }
 
-  // enforcePdfAFull flattens transparency only for part 1 (src/compliance/enforcePdfAv2.ts), so
+  // enforcePdfAFull flattens transparency only for part 1 (src/compliance/pdfa/enforcePdfAv2.ts), so
   // the soft-masked image goes through level 1b to reach the transparency flattener.
   {
     const doc = textDocument('Soft-masked image');

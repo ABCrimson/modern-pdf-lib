@@ -4,11 +4,11 @@
  * PDF/A and PDF/X compliance validation and enforcement — barrel export.
  */
 
-export { validatePdfA, enforcePdfA } from './pdfA.js';
-export type { PdfALevel, PdfAValidationResult, PdfAIssue } from './pdfA.js';
+export { validatePdfA, enforcePdfA } from './pdfa/pdfA.js';
+export type { PdfALevel, PdfAValidationResult, PdfAIssue } from './pdfa/pdfA.js';
 
-export { detectTransparency, flattenTransparency } from './transparencyFlattener.js';
-export type { TransparencyInfo, TransparencyFinding } from './transparencyFlattener.js';
+export { detectTransparency, flattenTransparency } from './pdfa/transparencyFlattener.js';
+export type { TransparencyInfo, TransparencyFinding } from './pdfa/transparencyFlattener.js';
 
 export { generateSrgbIccProfile, SRGB_ICC_PROFILE } from './srgbIccProfile.js';
 export { buildOutputIntent } from './outputIntent.js';
@@ -19,17 +19,17 @@ export {
   generateSymbolToUnicodeCmap,
   generateZapfDingbatsToUnicodeCmap,
   getToUnicodeCmap,
-} from './toUnicodeCmap.js';
+} from './pdfa/toUnicodeCmap.js';
 
-export { getProfile, getSupportedLevels, isValidLevel } from './pdfAProfiles.js';
-export type { PdfAProfile } from './pdfAProfiles.js';
+export { getProfile, getSupportedLevels, isValidLevel } from './pdfa/pdfAProfiles.js';
+export type { PdfAProfile } from './pdfa/pdfAProfiles.js';
 
 export {
   extractXmpMetadata,
   parseXmpMetadata as parseXmpPdfAMetadata,
   validateXmpMetadata,
-} from './xmpValidator.js';
-export type { XmpValidationResult, XmpIssue, ParsedXmpMetadata } from './xmpValidator.js';
+} from './xmp/xmpValidator.js';
+export type { XmpValidationResult, XmpIssue, ParsedXmpMetadata } from './xmp/xmpValidator.js';
 
 export { createAssociatedFile, buildAfArray } from './associatedFiles.js';
 export type {
@@ -38,20 +38,24 @@ export type {
   AssociatedFileResult,
 } from './associatedFiles.js';
 
-export { stripProhibitedFeatures, countOccurrences } from './stripProhibited.js';
-export type { StripResult, StrippedFeature, StripOptions } from './stripProhibited.js';
+export { stripProhibitedFeatures, countOccurrences } from './pdfa/stripProhibited.js';
+export type { StripResult, StrippedFeature, StripOptions } from './pdfa/stripProhibited.js';
 
-export { generatePdfAXmp, generatePdfAXmpBytes } from './xmpGenerator.js';
-export type { PdfAXmpOptions } from './xmpGenerator.js';
+export { generatePdfAXmp, generatePdfAXmpBytes } from './xmp/xmpGenerator.js';
+export type { PdfAXmpOptions } from './xmp/xmpGenerator.js';
 
-export { enforcePdfAFull } from './enforcePdfAv2.js';
-export type { EnforcePdfAOptions, EnforcePdfAResult, EnforcementAction } from './enforcePdfAv2.js';
+export { enforcePdfAFull } from './pdfa/enforcePdfAv2.js';
+export type {
+  EnforcePdfAOptions,
+  EnforcePdfAResult,
+  EnforcementAction,
+} from './pdfa/enforcePdfAv2.js';
 
-export { validatePdfX, enforcePdfX, buildPdfXOutputIntent } from './pdfxCompliance.js';
+export { validatePdfX, enforcePdfX, buildPdfXOutputIntent } from './pdfx/pdfxCompliance.js';
 export type {
   PdfXLevel,
   PdfXValidationResult,
   PdfXIssue,
   PdfXOptions,
   OutputIntentConfig,
-} from './pdfxCompliance.js';
+} from './pdfx/pdfxCompliance.js';

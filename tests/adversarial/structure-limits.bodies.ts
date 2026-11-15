@@ -7,7 +7,7 @@ import { PdfArray, PdfDict, PdfName, PdfRef, PdfString } from '../../src/core/pd
 import type { PdfObject } from '../../src/core/pdfObjects.js';
 import { PdfOutlineTree } from '../../src/outline/pdfOutline.js';
 import { PdfStructureTree } from '../../src/accessibility/structureTree.js';
-import { GrowableBuffer } from '../../src/utils/binary.js';
+import { GrowableBuffer } from '../../src/compliance/internal/binary.js';
 import { parseSvgPath } from '../../src/assets/svg/svgParser.js';
 import type { JsonValue } from '../helpers/budget.js';
 

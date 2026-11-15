@@ -23,7 +23,7 @@ import { describe, it, expect } from 'vitest';
 import {
   detectTransparency,
   flattenTransparency,
-} from '../../../src/compliance/transparencyFlattener.js';
+} from '../../../src/compliance/pdfa/transparencyFlattener.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
