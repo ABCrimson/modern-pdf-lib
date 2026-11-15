@@ -1,0 +1,92 @@
+[
+  {
+    "name": "EncryptedPdfError",
+    "decision": "throw",
+    "where": "src/parser/documentParser.ts when a password is required or wrong; src/crypto/keyDerivation.ts for the incorrect-password checks"
+  },
+  {
+    "name": "FontNotEmbeddedError",
+    "decision": "throw",
+    "where": "src/core/pdfPage.ts drawText, when a font reference made by the library belongs to another document"
+  },
+  {
+    "name": "ForeignPageError",
+    "decision": "remove",
+    "where": "adding a page of another document is a supported, tested route, so no condition is left to throw on"
+  },
+  {
+    "name": "RemovePageFromEmptyDocumentError",
+    "decision": "throw",
+    "where": "src/core/pdfDocument.ts removePage on a document with no page"
+  },
+  {
+    "name": "NoSuchFieldError",
+    "decision": "throw",
+    "where": "src/form/pdfForm.ts getTextField and the other typed getters, when the name is not a field"
+  },
+  {
+    "name": "UnexpectedFieldTypeError",
+    "decision": "throw",
+    "where": "src/form/pdfForm.ts getTextField and the other typed getters, when the field has another type"
+  },
+  {
+    "name": "MissingOnValueCheckError",
+    "decision": "throw",
+    "where": "src/form/fields/checkboxField.ts check(), when the appearance has no on state and the value is absent or Off"
+  },
+  {
+    "name": "FieldAlreadyExistsError",
+    "decision": "throw",
+    "where": "src/form/pdfForm.ts createFieldDict, when a field of that name exists"
+  },
+  {
+    "name": "InvalidFieldNamePartError",
+    "decision": "throw",
+    "where": "src/form/pdfForm.ts createFieldDict, when the name is empty or contains a period"
+  },
+  {
+    "name": "FieldExistsAsNonTerminalError",
+    "decision": "remove",
+    "where": "created fields are flat and loaded field trees are not built yet, so no condition is left to throw on"
+  },
+  {
+    "name": "RichTextFieldReadError",
+    "decision": "remove",
+    "where": "its only throw sites sit inside a catch-all in src/form/formFlatten.ts, so no caller ever sees the class"
+  },
+  {
+    "name": "CombedTextLayoutError",
+    "decision": "throw",
+    "where": "src/form/fields/textField.ts setText, on a comb field with more characters than /MaxLen"
+  },
+  {
+    "name": "ExceededMaxLengthError",
+    "decision": "throw",
+    "where": "src/form/fields/textField.ts setText, on a field with more characters than /MaxLen"
+  },
+  {
+    "name": "InvalidPageSizeError",
+    "decision": "throw",
+    "where": "src/core/pdfDocument.ts addPage and insertPage, when the size is not finite or not positive"
+  },
+  {
+    "name": "InvalidColorError",
+    "decision": "throw",
+    "where": "src/core/operators/color.ts rgb, cmyk and grayscale, when a component is outside 0..1"
+  },
+  {
+    "name": "PluginError",
+    "decision": "throw",
+    "where": "src/plugins/pluginSystem.ts register, when a plugin of the same name is already registered"
+  },
+  {
+    "name": "StreamingParseError",
+    "decision": "throw",
+    "where": "src/parser/streamingParser.ts, in place of the PdfParseError throws of the streaming parse"
+  },
+  {
+    "name": "BatchProcessingError",
+    "decision": "throw",
+    "where": "src/batch/batchProcessor.ts, errorStrategy collect, in place of the AggregateError"
+  }
+]

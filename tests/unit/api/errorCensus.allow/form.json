@@ -1,0 +1,76 @@
+[
+  {
+    "file": "src/form/formFlatten.ts",
+    "kind": "Error",
+    "message": "Empty rich text value",
+    "target": "MalformedInputError"
+  },
+  {
+    "file": "src/form/formFlatten.ts",
+    "kind": "Error",
+    "message": "Form field \"${}\" not found.",
+    "target": "NoSuchFieldError",
+    "count": 2
+  },
+  {
+    "file": "src/form/formFlatten.ts",
+    "kind": "Error",
+    "message": "No parseable content in rich text value",
+    "target": "MalformedInputError"
+  },
+  {
+    "file": "src/form/internal/calculationOrder.ts",
+    "kind": "Error",
+    "message": "Cannot set calculation order: field \"${}\" not found.",
+    "target": "NoSuchFieldError"
+  },
+  {
+    "file": "src/form/pdfForm.ts",
+    "kind": "Error",
+    "message": "Form field \"${}\" is a ${} field, not a button.",
+    "target": "UnexpectedFieldTypeError"
+  },
+  {
+    "file": "src/form/pdfForm.ts",
+    "kind": "Error",
+    "message": "Form field \"${}\" is a ${} field, not a checkbox.",
+    "target": "UnexpectedFieldTypeError"
+  },
+  {
+    "file": "src/form/pdfForm.ts",
+    "kind": "Error",
+    "message": "Form field \"${}\" is a ${} field, not a dropdown.",
+    "target": "UnexpectedFieldTypeError"
+  },
+  {
+    "file": "src/form/pdfForm.ts",
+    "kind": "Error",
+    "message": "Form field \"${}\" is a ${} field, not a listbox.",
+    "target": "UnexpectedFieldTypeError"
+  },
+  {
+    "file": "src/form/pdfForm.ts",
+    "kind": "Error",
+    "message": "Form field \"${}\" is a ${} field, not a radio group.",
+    "target": "UnexpectedFieldTypeError"
+  },
+  {
+    "file": "src/form/pdfForm.ts",
+    "kind": "Error",
+    "message": "Form field \"${}\" is a ${} field, not a signature field.",
+    "target": "UnexpectedFieldTypeError"
+  },
+  {
+    "file": "src/form/pdfForm.ts",
+    "kind": "Error",
+    "message": "Form field \"${}\" is a ${} field, not a text field.",
+    "target": "UnexpectedFieldTypeError"
+  },
+  {
+    "file": "src/form/pdfForm.ts",
+    "kind": "Error",
+    "message": "Form field \"${}\" not found.",
+    "target": "NoSuchFieldError",
+    "count": 9
+  }
+]

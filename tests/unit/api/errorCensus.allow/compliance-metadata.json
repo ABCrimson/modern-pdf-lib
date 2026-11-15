@@ -1,0 +1,26 @@
+[
+  {
+    "file": "src/compliance/einvoice/ciiReader.ts",
+    "kind": "Error",
+    "message": "ciiReader: not a CrossIndustryInvoice document (no <CrossIndustryInvoice> root element found).",
+    "target": "MalformedInputError"
+  },
+  {
+    "file": "src/compliance/internal/binary.ts",
+    "kind": "RangeError",
+    "message": "GrowableBuffer: initial capacity must be a finite number",
+    "target": "InvalidArgumentError"
+  },
+  {
+    "file": "src/compliance/pdfa/pdfA.ts",
+    "kind": "Error",
+    "message": "Cannot enforce PDF/A: document contains JavaScript. Remove it first.",
+    "target": "InvalidStateError"
+  },
+  {
+    "file": "src/compliance/pdfx/pdfxCompliance.ts",
+    "kind": "Error",
+    "message": "Cannot enforce PDF/X: document contains JavaScript. Remove it first.",
+    "target": "InvalidStateError"
+  }
+]

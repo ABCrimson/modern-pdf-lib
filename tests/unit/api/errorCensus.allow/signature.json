@@ -1,0 +1,346 @@
+[
+  {
+    "file": "src/signature/cms/cadesAttributes.ts",
+    "kind": "Error",
+    "message": "Unsupported hash algorithm: ${}",
+    "target": "UnsupportedFeatureError"
+  },
+  {
+    "file": "src/signature/cms/counterSignature.ts",
+    "kind": "Error",
+    "message": "No signatures found in the PDF",
+    "target": "InvalidArgumentError"
+  },
+  {
+    "file": "src/signature/cms/counterSignature.ts",
+    "kind": "Error",
+    "message": "Signature index ${} out of range (0–${})",
+    "target": "InvalidArgumentError"
+  },
+  {
+    "file": "src/signature/cms/counterSignature.ts",
+    "kind": "Error",
+    "message": "Unsupported hash algorithm: ${}",
+    "target": "UnsupportedFeatureError"
+  },
+  {
+    "file": "src/signature/cms/counterSignature.ts",
+    "kind": "Error",
+    "message": "Unsupported hash for ECDSA: ${}",
+    "target": "UnsupportedFeatureError"
+  },
+  {
+    "file": "src/signature/cms/counterSignature.ts",
+    "kind": "Error",
+    "message": "Unsupported hash for RSA: ${}",
+    "target": "UnsupportedFeatureError"
+  },
+  {
+    "file": "src/signature/cms/counterSignature.ts",
+    "kind": "Error",
+    "message": "Unsupported key algorithm: ${}",
+    "target": "UnsupportedFeatureError"
+  },
+  {
+    "file": "src/signature/cms/pkcs7.ts",
+    "kind": "Error",
+    "message": "DER: indefinite length is not supported",
+    "target": "UnsupportedFeatureError"
+  },
+  {
+    "file": "src/signature/cms/pkcs7.ts",
+    "kind": "Error",
+    "message": "DER: length bytes run past the end of the data",
+    "target": "MalformedInputError"
+  },
+  {
+    "file": "src/signature/cms/pkcs7.ts",
+    "kind": "Error",
+    "message": "DER: length runs past the end of the data",
+    "target": "MalformedInputError"
+  },
+  {
+    "file": "src/signature/cms/pkcs7.ts",
+    "kind": "Error",
+    "message": "DER: more than 4 length bytes",
+    "target": "MalformedInputError"
+  },
+  {
+    "file": "src/signature/cms/pkcs7.ts",
+    "kind": "Error",
+    "message": "Invalid OID: ${}",
+    "target": "MalformedInputError"
+  },
+  {
+    "file": "src/signature/cms/pkcs7.ts",
+    "kind": "Error",
+    "message": "Unexpected end of DER data",
+    "target": "MalformedInputError",
+    "count": 2
+  },
+  {
+    "file": "src/signature/cms/pkcs7.ts",
+    "kind": "Error",
+    "message": "Unsupported hash algorithm: ${}",
+    "target": "UnsupportedFeatureError"
+  },
+  {
+    "file": "src/signature/cms/pkcs7.ts",
+    "kind": "Error",
+    "message": "Unsupported hash for ECDSA: ${}",
+    "target": "UnsupportedFeatureError"
+  },
+  {
+    "file": "src/signature/cms/pkcs7.ts",
+    "kind": "Error",
+    "message": "Unsupported hash for RSA-PSS: ${}",
+    "target": "UnsupportedFeatureError",
+    "count": 3
+  },
+  {
+    "file": "src/signature/cms/pkcs7.ts",
+    "kind": "Error",
+    "message": "Unsupported hash for RSA: ${}",
+    "target": "UnsupportedFeatureError"
+  },
+  {
+    "file": "src/signature/cms/pkcs7.ts",
+    "kind": "Error",
+    "message": "Unsupported key algorithm: ${}",
+    "target": "UnsupportedFeatureError"
+  },
+  {
+    "file": "src/signature/cms/pkcs7.ts",
+    "kind": "Error",
+    "message": "Web Crypto API (crypto.subtle) is not available. Requires Node.js 18+, a modern browser, Deno, or Bun.",
+    "target": "EnvironmentError"
+  },
+  {
+    "file": "src/signature/cms/timestamp.ts",
+    "kind": "Error",
+    "message": "${}",
+    "target": "EnvironmentError"
+  },
+  {
+    "file": "src/signature/cms/timestamp.ts",
+    "kind": "Error",
+    "message": "Invalid TimeStampResp: empty SEQUENCE",
+    "target": "MalformedInputError"
+  },
+  {
+    "file": "src/signature/cms/timestamp.ts",
+    "kind": "RangeError",
+    "message": "Timestamp nonce must not be empty",
+    "target": "InvalidArgumentError"
+  },
+  {
+    "file": "src/signature/cms/timestamp.ts",
+    "kind": "Error",
+    "message": "TimeStampResp contains no TimeStampToken",
+    "target": "MalformedInputError"
+  },
+  {
+    "file": "src/signature/cms/timestamp.ts",
+    "kind": "Error",
+    "message": "TSA request failed: HTTP ${} ${}",
+    "target": "EnvironmentError"
+  },
+  {
+    "file": "src/signature/cms/timestamp.ts",
+    "kind": "Error",
+    "message": "Unsupported hash algorithm for timestamp: ${}",
+    "target": "UnsupportedFeatureError"
+  },
+  {
+    "file": "src/signature/internal/deltaCrl.ts",
+    "kind": "Error",
+    "message": "Invalid CRL: empty SEQUENCE",
+    "target": "MalformedInputError"
+  },
+  {
+    "file": "src/signature/internal/deltaCrl.ts",
+    "kind": "Error",
+    "message": "Not a delta CRL: missing Delta CRL Indicator extension",
+    "target": "MalformedInputError"
+  },
+  {
+    "file": "src/signature/internal/ocspStaple.ts",
+    "kind": "Error",
+    "message": "Invalid PKCS#7 ContentInfo: expected at least 2 children",
+    "target": "MalformedInputError"
+  },
+  {
+    "file": "src/signature/internal/ocspStaple.ts",
+    "kind": "Error",
+    "message": "Invalid PKCS#7 SignedData: no signerInfos SET found",
+    "target": "MalformedInputError"
+  },
+  {
+    "file": "src/signature/internal/ocspStaple.ts",
+    "kind": "Error",
+    "message": "Invalid PKCS#7: missing SignedData",
+    "target": "MalformedInputError"
+  },
+  {
+    "file": "src/signature/internal/ocspStaple.ts",
+    "kind": "Error",
+    "message": "No SignerInfo found in SignedData",
+    "target": "MalformedInputError"
+  },
+  {
+    "file": "src/signature/ltv/docTimeStamp.ts",
+    "kind": "RangeError",
+    "message": "contentsSize must be a positive integer, got ${}",
+    "target": "InvalidArgumentError"
+  },
+  {
+    "file": "src/signature/pades/byteRange.ts",
+    "kind": "Error",
+    "message": "Cannot find /ByteRange placeholder in prepared PDF",
+    "target": "MalformedInputError"
+  },
+  {
+    "file": "src/signature/pades/byteRange.ts",
+    "kind": "Error",
+    "message": "Cannot find /Contents placeholder in prepared PDF",
+    "target": "MalformedInputError"
+  },
+  {
+    "file": "src/signature/pades/byteRange.ts",
+    "kind": "Error",
+    "message": "Cannot find /Root in PDF trailer",
+    "target": "MalformedInputError"
+  },
+  {
+    "file": "src/signature/pades/byteRange.ts",
+    "kind": "Error",
+    "message": "Cannot find /Size in PDF trailer",
+    "target": "MalformedInputError"
+  },
+  {
+    "file": "src/signature/pades/byteRange.ts",
+    "kind": "Error",
+    "message": "Cannot find end of /Contents hex string",
+    "target": "MalformedInputError"
+  },
+  {
+    "file": "src/signature/pades/byteRange.ts",
+    "kind": "Error",
+    "message": "Cannot find startxref in PDF — file may be corrupted",
+    "target": "MalformedInputError"
+  },
+  {
+    "file": "src/signature/pades/byteRange.ts",
+    "kind": "Error",
+    "message": "Cannot parse xref offset from startxref",
+    "target": "MalformedInputError"
+  },
+  {
+    "file": "src/signature/pades/byteRange.ts",
+    "kind": "Error",
+    "message": "Signature (${} bytes) exceeds placeholder capacity (${} bytes). Increase placeholderSize.",
+    "target": "InvalidArgumentError"
+  },
+  {
+    "file": "src/signature/pades/byteRange.ts",
+    "kind": "Error",
+    "message": "Web Crypto API (crypto.subtle) is not available. Requires Node.js 18+, a modern browser, Deno, or Bun.",
+    "target": "EnvironmentError"
+  },
+  {
+    "file": "src/signature/pades/documentDiff.ts",
+    "kind": "Error",
+    "message": "Signature index ${} out of range (0–${})",
+    "target": "InvalidArgumentError"
+  },
+  {
+    "file": "src/signature/pades/fieldLock.ts",
+    "kind": "Error",
+    "message": "Field lock action \"${}\" requires at least one field name",
+    "target": "InvalidArgumentError"
+  },
+  {
+    "file": "src/signature/pades/incrementalSave.ts",
+    "kind": "Error",
+    "message": "Cannot find /Root in PDF trailer",
+    "target": "MalformedInputError"
+  },
+  {
+    "file": "src/signature/pades/incrementalSave.ts",
+    "kind": "Error",
+    "message": "Cannot find /Size in PDF trailer",
+    "target": "MalformedInputError"
+  },
+  {
+    "file": "src/signature/pades/incrementalSave.ts",
+    "kind": "Error",
+    "message": "Cannot find startxref in PDF — file may be corrupted",
+    "target": "MalformedInputError"
+  },
+  {
+    "file": "src/signature/pades/incrementalSave.ts",
+    "kind": "Error",
+    "message": "Cannot parse xref offset from startxref",
+    "target": "MalformedInputError"
+  },
+  {
+    "file": "src/signature/pades/incrementalSave.ts",
+    "kind": "Error",
+    "message": "Existing signature byte ranges are invalid — cannot perform incremental save",
+    "target": "MalformedInputError"
+  },
+  {
+    "file": "src/signature/pki/certPathBuilder.ts",
+    "kind": "Error",
+    "message": "Malformed certificate: missing issuer",
+    "target": "MalformedInputError"
+  },
+  {
+    "file": "src/signature/pki/certPathBuilder.ts",
+    "kind": "Error",
+    "message": "Malformed certificate: missing subject",
+    "target": "MalformedInputError"
+  },
+  {
+    "file": "src/signature/pki/certPathBuilder.ts",
+    "kind": "Error",
+    "message": "Malformed certificate: missing TBSCertificate",
+    "target": "MalformedInputError"
+  },
+  {
+    "file": "src/signature/pki/crl.ts",
+    "kind": "Error",
+    "message": "CRL download failed: HTTP ${} ${}",
+    "target": "EnvironmentError"
+  },
+  {
+    "file": "src/signature/pki/crl.ts",
+    "kind": "Error",
+    "message": "Invalid CRL: empty SEQUENCE",
+    "target": "MalformedInputError"
+  },
+  {
+    "file": "src/signature/pki/ocsp.ts",
+    "kind": "Error",
+    "message": "Invalid OCSP response: empty SEQUENCE",
+    "target": "MalformedInputError"
+  },
+  {
+    "file": "src/signature/pki/ocsp.ts",
+    "kind": "Error",
+    "message": "OCSP request failed: HTTP ${} ${}",
+    "target": "EnvironmentError"
+  },
+  {
+    "file": "src/signature/pki/ocsp.ts",
+    "kind": "Error",
+    "message": "OCSP response contains no responseBytes",
+    "target": "MalformedInputError"
+  },
+  {
+    "file": "src/signature/pki/ocsp.ts",
+    "kind": "Error",
+    "message": "OCSP response error: ${}",
+    "target": "MalformedInputError"
+  }
+]

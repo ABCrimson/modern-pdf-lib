@@ -1,0 +1,125 @@
+[
+  {
+    "file": "src/assets/font/fontEmbed.ts",
+    "kind": "Error",
+    "message": "Font data too small — expected at least 12 bytes for the table directory",
+    "target": "MalformedInputError",
+    "count": 2
+  },
+  {
+    "file": "src/core/io/incrementalWriter.ts",
+    "kind": "Error",
+    "message": "Incremental save: could not find \"startxref\" in the original PDF. The file may be corrupted.",
+    "target": "MalformedInputError"
+  },
+  {
+    "file": "src/core/io/incrementalWriter.ts",
+    "kind": "Error",
+    "message": "Incremental save: could not find /Size in the original trailer.",
+    "target": "MalformedInputError"
+  },
+  {
+    "file": "src/core/io/incrementalWriter.ts",
+    "kind": "Error",
+    "message": "Incremental save: could not parse xref offset after \"startxref\".",
+    "target": "MalformedInputError"
+  },
+  {
+    "file": "src/core/operators/color.ts",
+    "kind": "Error",
+    "message": "colorToHex: DeviceN colours have no single hex representation",
+    "target": "UnsupportedFeatureError"
+  },
+  {
+    "file": "src/core/operators/color.ts",
+    "kind": "Error",
+    "message": "componentsToColor: expected 1, 3, or 4 components, got ${}",
+    "target": "InvalidArgumentError"
+  },
+  {
+    "file": "src/core/operators/color.ts",
+    "kind": "Error",
+    "message": "deviceNColor: colorants length (${}) must match tints length (${})",
+    "target": "InvalidArgumentError"
+  },
+  {
+    "file": "src/core/operators/color.ts",
+    "kind": "Error",
+    "message": "hexToColor: invalid hex colour '${}'",
+    "target": "InvalidArgumentError",
+    "count": 2
+  },
+  {
+    "file": "src/core/pdfDocument.ts",
+    "kind": "RangeError",
+    "message": "embedPdf: page index ${} out of range [0, ${}]",
+    "target": "InvalidArgumentError"
+  },
+  {
+    "file": "src/core/pdfDocument.ts",
+    "kind": "Error",
+    "message": "Image data too short to detect format",
+    "target": "MalformedInputError"
+  },
+  {
+    "file": "src/core/pdfDocument.ts",
+    "kind": "RangeError",
+    "message": "insertPage: index ${} out of range [0, ${}]",
+    "target": "InvalidArgumentError"
+  },
+  {
+    "file": "src/core/pdfDocument.ts",
+    "kind": "RangeError",
+    "message": "movePage: fromIndex ${} out of range [0, ${}]",
+    "target": "InvalidArgumentError"
+  },
+  {
+    "file": "src/core/pdfDocument.ts",
+    "kind": "RangeError",
+    "message": "movePage: toIndex ${} out of range [0, ${}]",
+    "target": "InvalidArgumentError"
+  },
+  {
+    "file": "src/core/pdfDocument.ts",
+    "kind": "Error",
+    "message": "No CFF table found in font data. Is this a CFF-based OpenType font?",
+    "target": "MalformedInputError"
+  },
+  {
+    "file": "src/core/pdfDocument.ts",
+    "kind": "RangeError",
+    "message": "Page index ${} out of range [0, ${}]",
+    "target": "InvalidArgumentError",
+    "count": 2
+  },
+  {
+    "file": "src/core/pdfDocument.ts",
+    "kind": "RangeError",
+    "message": "removePage: index ${} out of range [0, ${}]",
+    "target": "InvalidArgumentError"
+  },
+  {
+    "file": "src/core/pdfDocument.ts",
+    "kind": "Error",
+    "message": "Unsupported image format. Expected PNG, JPEG, WebP, or TIFF, got ${}.",
+    "target": "UnsupportedFeatureError"
+  },
+  {
+    "file": "src/core/pdfPage.ts",
+    "kind": "Error",
+    "message": "Annotation is not on this page",
+    "target": "InvalidStateError"
+  },
+  {
+    "file": "src/core/pdfPage.ts",
+    "kind": "Error",
+    "message": "No transparency group to end — call beginTransparencyGroup() first",
+    "target": "InvalidStateError"
+  },
+  {
+    "file": "src/parser/streamingParser.ts",
+    "kind": "RangeError",
+    "message": "StreamingPdfParser: maxBufferSize must be a number",
+    "target": "InvalidArgumentError"
+  }
+]
