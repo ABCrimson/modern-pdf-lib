@@ -18,7 +18,7 @@
  * Encrypted input is not changed: it throws `UnsupportedEncryptionError` (code `unsupported-encryption-path`).
  */
 
-import { assertUnencryptedInput } from '../core/incrementalWriter.js';
+import { assertUnencryptedInput } from '../core/io/incrementalWriter.js';
 
 // ---------------------------------------------------------------------------
 // Public types

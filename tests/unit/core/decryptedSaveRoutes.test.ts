@@ -29,9 +29,12 @@ import { createPdf } from '../../../src/core/pdfDocument.js';
 import type { PdfDocument } from '../../../src/core/pdfDocument.js';
 import { copyPages, mergePdfs, splitPdf } from '../../../src/core/documentMerge.js';
 import { embedPageAsFormXObject } from '../../../src/core/pdfEmbed.js';
-import { PdfWriter, serializePdf } from '../../../src/core/pdfWriter.js';
-import { PdfStreamWriter } from '../../../src/core/pdfStream.js';
-import { saveDocumentIncremental, saveIncremental } from '../../../src/core/incrementalWriter.js';
+import { PdfWriter, serializePdf } from '../../../src/core/io/pdfWriter.js';
+import { PdfStreamWriter } from '../../../src/core/io/pdfStream.js';
+import {
+  saveDocumentIncremental,
+  saveIncremental,
+} from '../../../src/core/io/incrementalWriter.js';
 import type { DocumentStructure } from '../../../src/core/pdfCatalog.js';
 import {
   PdfArray,
@@ -44,7 +47,7 @@ import {
   PdfStream,
   PdfString,
 } from '../../../src/core/pdfObjects.js';
-import { isDecryptedFromEncryptedFile } from '../../../src/core/flateStream.js';
+import { isDecryptedFromEncryptedFile } from '../../../src/core/internal/flateStream.js';
 import { sanitizePdf } from '../../../src/security/sanitize.js';
 import type { EncryptAlgorithm } from '../../../src/crypto/encryptionHandler.js';
 import { UnsupportedEncryptionError } from '../../../src/errors.js';
@@ -467,9 +470,9 @@ describe('copy() of a decrypted document and plugin hooks', () => {
 
 describe('the records of decrypted content are shared by every loaded copy of the module', () => {
   it('a registry and an object recorded by one copy are seen by another', async () => {
-    const first = await import('../../../src/core/flateStream.js');
+    const first = await import('../../../src/core/internal/flateStream.js');
     vi.resetModules();
-    const second = await import('../../../src/core/flateStream.js');
+    const second = await import('../../../src/core/internal/flateStream.js');
     expect(second).not.toBe(first);
     const registry = new PdfObjectRegistry();
     first.markDecryptedFromEncryptedFile(registry);
@@ -481,7 +484,7 @@ describe('the records of decrypted content are shared by every loaded copy of th
 
   for (const lock of ['preventExtensions', 'freeze'] as const) {
     it(`a globalThis made ${lock === 'freeze' ? 'frozen' : 'non-extensible'} before the module loads: a module-level set, no throw`, () => {
-      const moduleUrl = new URL('../../../src/core/flateStream.ts', import.meta.url).href;
+      const moduleUrl = new URL('../../../src/core/internal/flateStream.ts', import.meta.url).href;
       const objectsUrl = new URL('../../../src/core/pdfObjects.ts', import.meta.url).href;
       const script = `
         Object.${lock}(globalThis);

@@ -39,9 +39,9 @@ import {
 } from './pdfObjects.js';
 import type { DocumentMetadata, PageEntry } from './pdfCatalog.js';
 import { buildDocumentStructure } from './pdfCatalog.js';
-import { serializePdf, serializePdfForCopy } from './pdfWriter.js';
-import type { PdfSaveOptions } from './pdfWriter.js';
-import { PdfStreamWriter } from './pdfStream.js';
+import { serializePdf, serializePdfForCopy } from './io/pdfWriter.js';
+import type { PdfSaveOptions } from './io/pdfWriter.js';
+import { PdfStreamWriter } from './io/pdfStream.js';
 import { UnsupportedEncryptionError } from '../errors.js';
 import {
   assertSavableDecryptedContent,
@@ -49,7 +49,7 @@ import {
   holdsDecryptedObject,
   isDecryptedFromEncryptedFile,
   recordDecryptedContent,
-} from './flateStream.js';
+} from './internal/flateStream.js';
 import {
   getStandardFont,
   measureStandardText,
@@ -105,7 +105,7 @@ import { PdfForm } from '../form/pdfForm.js';
 import { getDocumentActionState } from '../form/documentScripts.js';
 import type { EmbeddedPdfPage, EmbedPageOptions } from './pdfEmbed.js';
 import { embedPageAsFormXObject } from './pdfEmbed.js';
-import { buildToUnicodeCmap, parseJpegDimensions } from './pdfDocumentEmbed.js';
+import { buildToUnicodeCmap, parseJpegDimensions } from './internal/pdfDocumentEmbed.js';
 import { getPageLabelEntries, styleToPdf } from './pageLabels.js';
 import { PdfPluginManager } from '../plugins/pluginSystem.js';
 import type { PdfPlugin } from '../plugins/pluginSystem.js';

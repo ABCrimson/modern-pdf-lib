@@ -28,7 +28,7 @@ import {
 } from '../../../src/core/pdfObjects.js';
 import { buildDocumentStructure } from '../../../src/core/pdfCatalog.js';
 import type { PageEntry } from '../../../src/core/pdfCatalog.js';
-import { serializePdf } from '../../../src/core/pdfWriter.js';
+import { serializePdf } from '../../../src/core/io/pdfWriter.js';
 import {
   algorithm2B,
   generateUserKeyV5,

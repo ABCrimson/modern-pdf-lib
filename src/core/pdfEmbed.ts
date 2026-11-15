@@ -35,7 +35,7 @@ import {
   holdsDecryptedObject,
   recordCloneOfDecrypted,
   recordDecryptedObject,
-} from './flateStream.js';
+} from './internal/flateStream.js';
 
 // ---------------------------------------------------------------------------
 // EmbeddedPdfPage interface
@@ -151,7 +151,7 @@ class CloneContext {
 /**
  * Deep-clone a PdfObject, remapping all PdfRef references from the source
  * to the target registry. The copy of a string or stream decrypted on load
- * is recorded as decrypted too (`recordCloneOfDecrypted` in core/flateStream).
+ * is recorded as decrypted too (`recordCloneOfDecrypted` in core/internal/flateStream).
  */
 function deepClone(obj: PdfObject, ctx: CloneContext): PdfObject {
   switch (obj.kind) {

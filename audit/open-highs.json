@@ -361,7 +361,7 @@
       "area": "core-document",
       "severity": "high",
       "status": "confirmed",
-      "path": "src/core/pdfWriter.ts",
+      "path": "src/core/io/pdfWriter.ts",
       "target": "0.41.0",
       "summary": "Non-ASCII text in document strings such as the Info title is written in the wrong encoding."
     },
@@ -406,7 +406,7 @@
       "area": "core-document",
       "severity": "high",
       "status": "confirmed",
-      "path": "src/core/pdfWriter.ts",
+      "path": "src/core/io/pdfWriter.ts",
       "target": "0.41.2",
       "summary": "Since 0.40.5, a save that combines encryption with objectStreamThreshold throws UnsupportedEncryptionError (covered by the 0.40.5 security advisory on encrypted saving); encrypted object streams are not supported."
     },
@@ -460,7 +460,7 @@
       "area": "core-document",
       "severity": "high",
       "status": "confirmed",
-      "path": "src/core/incrementalWriter.ts",
+      "path": "src/core/io/incrementalWriter.ts",
       "target": "0.41.2",
       "summary": "saveDocumentIncremental writes a new catalog and page tree instead of a true incremental update."
     },
@@ -478,7 +478,7 @@
       "area": "core-graphics",
       "severity": "high",
       "status": "confirmed",
-      "path": "src/core/shadingFunction.ts",
+      "path": "src/graphics/shadingFunction.ts",
       "target": "0.42.1",
       "summary": "Function-based shadings of types 0, 3 and 4 are written as invalid function objects."
     },
@@ -487,7 +487,7 @@
       "area": "core-graphics",
       "severity": "high",
       "status": "confirmed",
-      "path": "src/core/patterns.ts",
+      "path": "src/graphics/patterns.ts",
       "target": "0.42.1",
       "summary": "Gradient stop offsets are ignored or misapplied."
     },
@@ -496,7 +496,7 @@
       "area": "core-graphics",
       "severity": "high",
       "status": "confirmed",
-      "path": "src/core/linearization.ts",
+      "path": "src/core/io/linearization.ts",
       "target": "0.42.6",
       "summary": "Linearization assigns every object to the first page in multi-page documents."
     },
@@ -505,7 +505,7 @@
       "area": "core-graphics",
       "severity": "high",
       "status": "confirmed",
-      "path": "src/core/linearization.ts",
+      "path": "src/core/io/linearization.ts",
       "target": "0.42.6",
       "summary": "Linearization hint tables do not follow the layout ISO 32000 specifies."
     },
@@ -514,7 +514,7 @@
       "area": "core-graphics",
       "severity": "high",
       "status": "confirmed",
-      "path": "src/core/linearization.ts",
+      "path": "src/core/io/linearization.ts",
       "target": "0.42.6",
       "summary": "Linearized output lacks the first-page cross-reference section."
     },
@@ -523,7 +523,7 @@
       "area": "core-graphics",
       "severity": "high",
       "status": "confirmed",
-      "path": "src/core/linearization.ts",
+      "path": "src/core/io/linearization.ts",
       "target": "0.42.6",
       "summary": "linearizePdf and delinearizePdf drop every trailer entry except /Size, /Root and /Info, including /ID, from the file they rewrite; since 0.40.5 they refuse encrypted input instead of dropping /Encrypt."
     },
@@ -586,7 +586,7 @@
       "area": "corpus",
       "severity": "medium",
       "status": "confirmed",
-      "path": "src/core/pdfWriter.ts",
+      "path": "src/core/io/pdfWriter.ts",
       "target": "0.41.0",
       "summary": "A save of a loaded PDF copies its Flate streams that already hold zlib data byte for byte, so qpdf --check warns on the output about the same damaged streams it warns on in the input."
     },
@@ -1009,7 +1009,7 @@
       "area": "oracle-gates",
       "severity": "medium",
       "status": "confirmed",
-      "path": "src/core/pdfStream.ts",
+      "path": "src/core/io/pdfStream.ts",
       "target": "0.41.2",
       "summary": "saveAsStream() ignores the objectStreamThreshold save option, so its bytes differ from those save() writes for the same document and options."
     },
@@ -1738,7 +1738,7 @@
       "area": "tests-unit-core-a",
       "severity": "high",
       "status": "confirmed",
-      "path": "tests/unit/core/linearization.test.ts",
+      "path": "tests/unit/core/io/linearization.test.ts",
       "target": "0.42.6",
       "summary": "Linearization tests assert a hint-table layout that does not follow ISO 32000."
     },
@@ -1765,7 +1765,7 @@
       "area": "tests-unit-core-b",
       "severity": "high",
       "status": "confirmed",
-      "path": "src/core/shadingFunction.ts",
+      "path": "src/graphics/shadingFunction.ts",
       "target": "0.42.1",
       "summary": "Function-based shadings are written as invalid function objects."
     },
@@ -1774,7 +1774,7 @@
       "area": "tests-unit-core-b",
       "severity": "high",
       "status": "missed",
-      "path": "src/core/pdfWriter.ts",
+      "path": "src/core/io/pdfWriter.ts",
       "target": "0.41.0",
       "summary": "The writer encodes strings as UTF-8 where the format needs bytes, so non-ASCII literals are altered."
     },

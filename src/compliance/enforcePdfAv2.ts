@@ -26,7 +26,7 @@ import {
 } from './transparencyFlattener.js';
 import { concatBytes } from '../utils/binary.js';
 import { UnsupportedEncryptionError } from '../errors.js';
-import { assertUnencryptedInput } from '../core/incrementalWriter.js';
+import { assertUnencryptedInput } from '../core/io/incrementalWriter.js';
 
 // ---------------------------------------------------------------------------
 // Public types

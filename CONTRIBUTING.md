@@ -404,6 +404,7 @@ Version numbers follow the project's own scheme — see [VERSIONING.md](./VERSIO
 | `src/barcode/` | QR, Code 128, Code 39, EAN, ITF, PDF417, Data Matrix |
 | `src/codecs/` | The stream filter pipeline (`streamDecode.ts`; JPEG 2000 and JBIG2 data throws `UnsupportedFilterError`), the JPEG 2000 and JBIG2 entry modules; under `internal/`, the CCITT decoder and Deflate: the `/FlateDecode` codec (`pdfFlate.ts`: zlib out; zlib, or raw DEFLATE as a fallback, in), the fflate adapter and the libdeflate WASM bridge |
 | `src/color/` | Color-space conversion and ICC transforms |
+| `src/graphics/` | Halftones, image and soft masks, mesh shadings, patterns, shading and PDF functions |
 | `src/metadata/` | XMP metadata, document info, viewer preferences |
 | `src/outline/` | Bookmark / outline tree |
 | `src/layers/` | Optional content groups (OCG layers) |

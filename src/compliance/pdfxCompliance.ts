@@ -20,7 +20,7 @@
 
 import { concatBytes } from '../utils/binary.js';
 import { UnsupportedEncryptionError } from '../errors.js';
-import { assertUnencryptedInput } from '../core/incrementalWriter.js';
+import { assertUnencryptedInput } from '../core/io/incrementalWriter.js';
 import { PdfDict, PdfName, PdfString, PdfNumber, PdfStream } from '../core/pdfObjects.js';
 import type { PdfObjectRegistry, PdfRef } from '../core/pdfObjects.js';
 

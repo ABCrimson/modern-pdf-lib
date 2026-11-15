@@ -27,7 +27,7 @@ import {
 import type { PdfObject, PdfObjectRegistry } from './pdfObjects.js';
 import { PdfPage } from './pdfPage.js';
 import { PdfDocument, createPdf } from './pdfDocument.js';
-import { carryDecryptedFromEncryptedFile, recordCloneOfDecrypted } from './flateStream.js';
+import { carryDecryptedFromEncryptedFile, recordCloneOfDecrypted } from './internal/flateStream.js';
 
 // ---------------------------------------------------------------------------
 // Bucket hashing for stream deduplication
@@ -178,7 +178,7 @@ function streamDictsEqual(a: PdfDict, b: PdfDict): boolean {
  *
  * For PdfStream objects, the stream data is also cloned. The copy of a string
  * or stream decrypted on load is recorded as decrypted too
- * (`recordCloneOfDecrypted` in core/flateStream). A stream reached
+ * (`recordCloneOfDecrypted` in core/internal/flateStream). A stream reached
  * through an indirect reference reuses an earlier copy (in remapRef) only
  * when its bytes and dictionary compare equal to that copy's source.
  *

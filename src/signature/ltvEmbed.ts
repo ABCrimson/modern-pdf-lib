@@ -20,7 +20,7 @@
  */
 
 import { findSignatures } from './byteRange.js';
-import { assertUnencryptedInput } from '../core/incrementalWriter.js';
+import { assertUnencryptedInput } from '../core/io/incrementalWriter.js';
 import { parseDerTlv } from './pkcs7.js';
 
 // ---------------------------------------------------------------------------

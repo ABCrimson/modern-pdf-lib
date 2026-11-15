@@ -29,7 +29,7 @@
 import type { PdfPage, PageSize, FontRef, ImageRef } from './pdfPage.js';
 import { PdfDocument } from './pdfDocument.js';
 import type { SetTitleOptions } from './pdfDocument.js';
-import type { PdfSaveOptions } from './pdfWriter.js';
+import type { PdfSaveOptions } from './io/pdfWriter.js';
 import type { EncryptOptions } from '../crypto/encryptionHandler.js';
 import type { LoadPdfOptions } from '../parser/documentParser.js';
 import type { PageLabelRange } from './pageLabels.js';

@@ -20,7 +20,7 @@
 import { describe, it, expect } from 'vitest';
 import { createPdf } from '../../../src/core/pdfDocument.js';
 import { loadPdf } from '../../../src/parser/documentParser.js';
-import { serializePdf } from '../../../src/core/pdfWriter.js';
+import { serializePdf } from '../../../src/core/io/pdfWriter.js';
 import { buildInfoDict } from '../../../src/core/pdfCatalog.js';
 import { renderPageToImage } from '../../../src/render/rasterizer.js';
 import { PdfDict, PdfName, PdfString, PdfRef } from '../../../src/core/pdfObjects.js';

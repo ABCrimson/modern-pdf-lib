@@ -52,7 +52,7 @@
  *
  * > **Note on Lab white point.** This module's `rgbToLab` / `labToRgb` use the
  * > **D65** PCS that matches the sRGB→XYZ pipeline, per this module's spec.
- * > That differs from {@link module:core/colorSpacesCIE}'s `labToRgb`, which
+ * > That differs from {@link module:color/colorSpacesCIE}'s `labToRgb`, which
  * > targets the **D50** ICC profile-connection-space convention. The two are
  * > intentionally distinct and should not be confused.
  *

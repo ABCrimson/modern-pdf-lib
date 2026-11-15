@@ -11,7 +11,7 @@
  * to remove or flatten it for PDF/A-1 compliance.
  */
 
-import { assertUnencryptedInput } from '../core/incrementalWriter.js';
+import { assertUnencryptedInput } from '../core/io/incrementalWriter.js';
 
 // ---------------------------------------------------------------------------
 // Public types

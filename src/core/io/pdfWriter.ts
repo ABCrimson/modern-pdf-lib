@@ -1,0 +1,952 @@
+/**
+ * @module core/io/pdfWriter
+ *
+ * Binary serialization of a PDF document to a single `Uint8Array`.
+ *
+ * Produces a valid PDF 1.7 (or 2.0 when encryption V=5) file:
+ *
+ * 1. `%PDF-1.7` (or `%PDF-2.0`) header + binary comment
+ * 2. Indirect-object bodies (optionally encrypted)
+ * 3. Cross-reference table
+ * 4. Trailer dictionary (`/Size`, `/Root`, `/Info`, `/Encrypt`, `/ID`)
+ * 5. `startxref` pointer
+ * 6. `%%EOF`
+ *
+ * Supports optional FlateDecode compression for streams (zlib data, through
+ * `core/internal/flateStream`) and optional encryption via a
+ * {@link PdfEncryptionHandler}. A loaded `/FlateDecode` stream that holds
+ * raw DEFLATE data is written back as zlib data in both compress modes,
+ * except in a document loaded with `ignoreEncryption: true` from a file
+ * whose trailer has `/Encrypt`, whose stream data is still encrypted and is
+ * written as loaded. A registry that holds content decrypted from an
+ * encrypted file is refused with `UnsupportedEncryptionError` unless the
+ * writer is given an encryption handler; when it is, the `/Contents` of a
+ * signature dictionary is written as stored, as the reader left it. Without
+ * an encryption handler, an object body that holds a string or stream the
+ * decrypt pass of a load produced is refused too, whatever registry it now
+ * sits in (`assertNoDecryptedObject` in core/internal/flateStream).
+ */
+
+import {
+  assertNoDecryptedObject,
+  assertSavableDecryptedContent,
+  compressPdfStream,
+  isLoadedFromEncryptedFile,
+  rewrapLegacyStream,
+} from '../internal/flateStream.js';
+import type { PdfRef, ByteWriter } from '../pdfObjects.js';
+import {
+  PdfObjectRegistry,
+  PdfNumber,
+  PdfName,
+  PdfDict,
+  PdfArray,
+  PdfString,
+  PdfStream,
+} from '../pdfObjects.js';
+import type { PdfObject, RegistryEntry } from '../pdfObjects.js';
+import type { DocumentStructure } from '../pdfCatalog.js';
+import type { PdfEncryptionHandler } from '../../crypto/encryptionHandler.js';
+import { contentsLeftAsStored } from '../../crypto/signatureContents.js';
+import { UnsupportedEncryptionError } from '../../errors.js';
+
+// ---------------------------------------------------------------------------
+// Save options
+// ---------------------------------------------------------------------------
+
+/** Options that control how the PDF is written. */
+export interface PdfSaveOptions {
+  /** Apply FlateDecode compression to streams.  Default: `true`. */
+  compress?: boolean | undefined;
+  /**
+   * Compression level for FlateDecode (1–9).  Default: `6`.
+   * Ignored when `compress` is `false`.
+   */
+  compressionLevel?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | undefined;
+  /**
+   * When `true`, streams are compressed with the WASM deflate module if
+   * `initWasm()` instantiated one from caller-supplied `deflateWasm` bytes,
+   * and with fflate otherwise.  No WASM build the package ships can be
+   * enabled this way.  Default: `false`.
+   *
+   * `saveIncremental()` does not use WASM: there `true` has no effect and
+   * emits a one-time `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`).
+   */
+  useWasm?: boolean | undefined;
+  /**
+   * Minimum number of non-stream indirect objects before object streams
+   * are used.  When the count exceeds this threshold, objects are packed
+   * into compressed object streams and a cross-reference stream replaces
+   * the traditional xref table.
+   *
+   * Set to `Infinity` to disable object streams (traditional xref).
+   * A useful value for size reduction is `100`.
+   * Any other value combined with encryption (`doc.encrypt()`) throws
+   * `UnsupportedEncryptionError`.
+   *
+   * Has no effect in `saveAsStream()` and `saveIncremental()`, which write
+   * no object streams.
+   *
+   * Default: `Infinity` (disabled for backward compatibility).
+   */
+  objectStreamThreshold?: number | undefined;
+  /** Add a blank page if the document has no pages. Default: `true`. */
+  addDefaultPage?: boolean | undefined;
+  /** Regenerate form field appearances before saving. Default: `true`. */
+  updateFieldAppearances?: boolean | undefined;
+}
+
+// ---------------------------------------------------------------------------
+// Internal byte buffer
+// ---------------------------------------------------------------------------
+
+/**
+ * Growable byte buffer used during serialization.  All writes go
+ * through this so that we can track the current byte offset for the
+ * cross-reference table.
+ */
+class ByteBuffer {
+  private chunks: Uint8Array[] = [];
+  private _offset = 0;
+
+  /** Current byte offset (total bytes written so far). */
+  get offset(): number {
+    return this._offset;
+  }
+
+  /** Append raw bytes. */
+  write(data: Uint8Array): void {
+    this.chunks.push(data);
+    this._offset += data.length;
+  }
+
+  /** Append an ASCII string. */
+  writeString(str: string): void {
+    this.write(encoder.encode(str));
+  }
+
+  /** Concatenate all chunks into a single Uint8Array. */
+  toUint8Array(): Uint8Array {
+    const result = new Uint8Array(this._offset);
+    let pos = 0;
+    for (const chunk of this.chunks) {
+      result.set(chunk, pos);
+      pos += chunk.length;
+    }
+    return result;
+  }
+}
+
+const encoder = new TextEncoder();
+
+/**
+ * The writers {@link serializePdfForCopy} made: they skip both checks for decrypted content (of
+ * the registry and of each object body).
+ */
+const copyWriters = new WeakSet<PdfWriter>();
+
+// ---------------------------------------------------------------------------
+// PdfWriter
+// ---------------------------------------------------------------------------
+
+/**
+ * Serialize a PDF document to a `Uint8Array`.
+ *
+ * ```ts
+ * const writer = new PdfWriter(registry, structure, options);
+ * const bytes = await writer.write();
+ * ```
+ */
+export class PdfWriter {
+  private readonly buf = new ByteBuffer();
+  private readonly xrefOffsets: number[] = [];
+  private readonly compress: boolean;
+  private readonly compressionLevel: number;
+  private readonly useWasm: boolean;
+  private readonly objectStreamThreshold: number;
+  private readonly encryptionHandler: PdfEncryptionHandler | undefined;
+
+  /** The caller's registry. */
+  private readonly source: PdfObjectRegistry;
+
+  /**
+   * The registry the writer serializes.  Without encryption it is the
+   * caller's registry (streams are compressed in place).  With an
+   * encryption handler, write() serializes a private copy taken when it
+   * starts, so compression, encryption and the /Encrypt registration never
+   * change the caller's objects and a later save encrypts nothing twice.
+   */
+  private registry: PdfObjectRegistry;
+
+  /**
+   * When encryption is active, the /Encrypt dict is registered as an
+   * indirect object in the writer's private copy of the registry.  Its
+   * reference is stored here for the trailer.
+   */
+  private encryptDictRef: PdfRef | undefined;
+
+  constructor(
+    /** All indirect objects. */
+    registry: PdfObjectRegistry,
+    /** Document structure references. */
+    private readonly structure: DocumentStructure,
+    options?: PdfSaveOptions,
+    encryptionHandler?: PdfEncryptionHandler,
+  ) {
+    this.compress = options?.compress ?? true;
+    this.compressionLevel = options?.compressionLevel ?? 6;
+    this.useWasm = options?.useWasm ?? false;
+    this.objectStreamThreshold = options?.objectStreamThreshold ?? Infinity;
+    this.encryptionHandler = encryptionHandler;
+    this.source = registry;
+    this.registry = registry;
+  }
+
+  // -----------------------------------------------------------------------
+  // Public API
+  // -----------------------------------------------------------------------
+
+  /**
+   * Produce the complete PDF file as a `Uint8Array`.
+   *
+   * When an encryption handler is present, every string (inside
+   * dictionaries, arrays and stream dictionaries, and indirect strings)
+   * and all stream data are encrypted, except the /Encrypt dictionary
+   * itself, and the /Encrypt dictionary + /ID array are added to the
+   * trailer.  All of that happens on a private copy of the registry taken
+   * when write() starts; the caller's registry is left as it was. The
+   * `/Contents` of a signature dictionary is not encrypted.
+   *
+   * @throws {UnsupportedEncryptionError} When the registry holds content
+   *         decrypted from an encrypted PDF, or an object body holds a string
+   *         or stream decrypted on load, and no encryption handler is
+   *         present. Also when an encryption handler is present and
+   *         `objectStreamThreshold` is not `Infinity`.
+   */
+  async write(): Promise<Uint8Array> {
+    if (!copyWriters.has(this)) {
+      assertSavableDecryptedContent(this.source, this.encryptionHandler !== undefined, 'PdfWriter');
+    }
+    // Fail-closed guard: object streams are not encrypted, so an encrypted document with them is refused here.
+    if (this.encryptionHandler !== undefined && this.objectStreamThreshold !== Infinity) {
+      throw new UnsupportedEncryptionError(
+        'objectStreamThreshold cannot be combined with encryption; objects packed into an object stream would not be encrypted. Omit objectStreamThreshold for an encrypted document.',
+      );
+    }
+    this.registry = this.encryptionHandler ? copyRegistryForWrite(this.source) : this.source;
+
+    // If encryption is configured, register the /Encrypt dict as an
+    // indirect object so we can reference it from the trailer.
+    if (this.encryptionHandler) {
+      const encDict = this.encryptionHandler.buildEncryptDict();
+      this.encryptDictRef = this.registry.register(encDict);
+    }
+
+    this.writeHeader();
+
+    if (this.objectStreamThreshold !== Infinity) {
+      // PDF 1.5+ path: try object streams + cross-reference stream
+      const useObjStreams = await this.writeBodyWithObjectStreams(this.objectStreamThreshold);
+      if (useObjStreams) {
+        return this.buf.toUint8Array();
+      }
+      // If below threshold, fall through — but body is already written
+      // by writeBodyWithObjectStreams (it writes normally when below threshold).
+      const xrefOffset = this.writeXref();
+      this.writeTrailer(xrefOffset);
+    } else {
+      await this.writeBody();
+      const xrefOffset = this.writeXref();
+      this.writeTrailer(xrefOffset);
+    }
+
+    return this.buf.toUint8Array();
+  }
+
+  // -----------------------------------------------------------------------
+  // Header
+  // -----------------------------------------------------------------------
+
+  private writeHeader(): void {
+    // PDF version header — use 2.0 for AES-256 (V=5 R=6), 1.7 otherwise
+    const version =
+      this.encryptionHandler && this.encryptionHandler.getVersion() === 5 ? '2.0' : '1.7';
+    this.buf.writeString(`%PDF-${version}\n`);
+    // Binary comment — four bytes > 127 to signal binary content to
+    // transfer programs.
+    this.buf.write(
+      new Uint8Array([0x25, 0xe2, 0xe3, 0xcf, 0xd3, 0x0a]), // %âãÏÓ\n
+    );
+  }
+
+  // -----------------------------------------------------------------------
+  // Body — indirect object definitions
+  // -----------------------------------------------------------------------
+
+  private async writeBody(): Promise<void> {
+    // Pre-allocate xref entries.  Index 0 is reserved for the free
+    // head entry; actual objects start at index 1.
+    // We'll record offsets indexed by object number.
+
+    for (const entry of this.registry) {
+      await this.writeIndirectObject(entry);
+    }
+  }
+
+  private async writeIndirectObject(entry: RegistryEntry): Promise<void> {
+    if (this.encryptionHandler === undefined && !copyWriters.has(this)) {
+      assertNoDecryptedObject(entry.object, 'PdfWriter');
+    }
+    // Write raw DEFLATE /FlateDecode data back as zlib data (not for a
+    // document loaded with ignoreEncryption from an encrypted file, whose
+    // stream data is still encrypted), then optionally compress
+    // stream data (both before encryption — per the spec, compression is
+    // applied first, then encryption)
+    if (entry.object.kind === 'stream') {
+      if (!isLoadedFromEncryptedFile(this.source)) rewrapLegacyStream(entry.object);
+      if (this.compress) this.compressStream(entry.object);
+    }
+
+    // Encrypt if handler is present and this is not the /Encrypt dict itself
+    const isEncryptDict =
+      this.encryptDictRef && entry.ref.objectNumber === this.encryptDictRef.objectNumber;
+
+    if (this.encryptionHandler && !isEncryptDict) {
+      await this.encryptEntry(entry);
+    }
+
+    // Record byte offset
+    const objNum = entry.ref.objectNumber;
+    // Ensure the array is big enough
+    while (this.xrefOffsets.length <= objNum) {
+      this.xrefOffsets.push(0);
+    }
+    this.xrefOffsets[objNum] = this.buf.offset;
+
+    // N G obj\n
+    this.buf.writeString(`${entry.ref.toObjectHeader()}\n`);
+
+    // Serialize the object value
+    entry.object.serialize(this.buf);
+
+    // \nendobj\n
+    this.buf.writeString(`\n${entry.ref.toObjectFooter()}\n`);
+  }
+
+  /**
+   * Encrypt all encryptable data within an indirect object.
+   *
+   * Per the PDF spec:
+   * - Strings inside the object are encrypted with the per-object key.
+   * - Stream data is encrypted with the per-object key.
+   * - The /Encrypt dictionary itself is never encrypted.
+   * - String values in the trailer /ID array are never encrypted.
+   */
+  private async encryptEntry(entry: RegistryEntry): Promise<void> {
+    const handler = this.encryptionHandler!;
+    const objNum = entry.ref.objectNumber;
+    const genNum = entry.ref.generationNumber;
+
+    if (entry.object.kind === 'stream') {
+      const stream = entry.object as PdfStream;
+      // Encrypt all strings inside the stream dictionary
+      await this.encryptDictStrings(stream.dict, objNum, genNum);
+      // Encrypt the stream data itself
+      stream.data = await handler.encryptObject(objNum, genNum, stream.data);
+      stream.syncLength();
+    } else if (entry.object.kind === 'dict') {
+      await this.encryptDictStrings(entry.object, objNum, genNum);
+    } else if (entry.object.kind === 'array') {
+      await this.encryptArrayStrings(entry.object, objNum, genNum);
+    } else if (entry.object.kind === 'string') {
+      entry.object = await handler.encryptString(objNum, genNum, entry.object);
+    }
+  }
+
+  /**
+   * Recursively encrypt all PdfString values inside a PdfDict, except the
+   * `/Contents` of a signature dictionary ({@link contentsLeftAsStored}).
+   */
+  private async encryptDictStrings(dict: PdfDict, objNum: number, genNum: number): Promise<void> {
+    const handler = this.encryptionHandler!;
+    const signature = contentsLeftAsStored(dict);
+
+    for (const [key, value] of dict) {
+      if (value.kind === 'string') {
+        if (signature && key === '/Contents') continue;
+        const encrypted = await handler.encryptString(objNum, genNum, value as PdfString);
+        dict.set(key, encrypted);
+      } else if (value.kind === 'dict') {
+        await this.encryptDictStrings(value as PdfDict, objNum, genNum);
+      } else if (value.kind === 'array') {
+        await this.encryptArrayStrings(value as PdfArray, objNum, genNum);
+      }
+    }
+  }
+
+  /**
+   * Recursively encrypt all PdfString values inside a PdfArray.
+   */
+  private async encryptArrayStrings(arr: PdfArray, objNum: number, genNum: number): Promise<void> {
+    const handler = this.encryptionHandler!;
+    const items = arr.items;
+
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i]!;
+      if (item.kind === 'string') {
+        items[i] = await handler.encryptString(objNum, genNum, item as PdfString);
+      } else if (item.kind === 'dict') {
+        await this.encryptDictStrings(item as PdfDict, objNum, genNum);
+      } else if (item.kind === 'array') {
+        await this.encryptArrayStrings(item as PdfArray, objNum, genNum);
+      }
+    }
+  }
+
+  /**
+   * Apply FlateDecode compression (zlib data) to a stream that has no
+   * filter yet, when the compressed form is shorter.
+   */
+  private compressStream(stream: PdfStream): void {
+    compressPdfStream(stream, this.compressionLevel, this.useWasm);
+  }
+
+  // -----------------------------------------------------------------------
+  // Object streams (PDF 1.5+)
+  // -----------------------------------------------------------------------
+
+  /**
+   * Set of object numbers that must NOT be placed inside an object
+   * stream.  This includes the catalog, info dict, pages root, and
+   * any stream objects (which by definition cannot nest in an ObjStm).
+   */
+  private protectedObjectNumbers(): Set<number> {
+    return new Set<number>([
+      this.structure.catalogRef.objectNumber,
+      this.structure.infoRef.objectNumber,
+      this.structure.pagesRef.objectNumber,
+    ]);
+  }
+
+  /**
+   * Write the document body using object streams when the number of
+   * eligible non-stream objects exceeds `threshold`.
+   *
+   * @returns `true` if object streams (and a cross-reference stream)
+   *          were used and the PDF is complete.  `false` if the
+   *          threshold was not met — in that case the body has been
+   *          written in traditional format and the caller must still
+   *          emit the classic xref table and trailer.
+   */
+  async writeBodyWithObjectStreams(threshold: number): Promise<boolean> {
+    const protectedNums = this.protectedObjectNumbers();
+
+    // Partition entries into:
+    //   - streamEntries: PdfStream objects (must be written as normal indirect objects)
+    //   - protectedEntries: catalog, info, pages (must be normal indirect objects)
+    //   - packableEntries: everything else (eligible for object stream packing)
+    const streamEntries: RegistryEntry[] = [];
+    const protectedEntries: RegistryEntry[] = [];
+    const packableEntries: RegistryEntry[] = [];
+
+    for (const entry of this.registry) {
+      if (entry.object.kind === 'stream') {
+        streamEntries.push(entry);
+      } else if (protectedNums.has(entry.ref.objectNumber)) {
+        protectedEntries.push(entry);
+      } else {
+        packableEntries.push(entry);
+      }
+    }
+
+    // If packable count is below threshold, write everything traditionally
+    if (packableEntries.length < threshold) {
+      await this.writeBody();
+      return false;
+    }
+
+    // --- Object-stream path ---
+
+    // 1. Write stream objects and protected objects as normal indirect objects
+    for (const entry of streamEntries) {
+      await this.writeIndirectObject(entry);
+    }
+    for (const entry of protectedEntries) {
+      await this.writeIndirectObject(entry);
+    }
+
+    // 2. Pack packable objects into object streams.
+    //    We group them into chunks of up to 200 objects per ObjStm.
+    const OBJS_PER_STREAM = 200;
+    // xrefEntries will collect info for the cross-reference stream:
+    //   Map<objectNumber, { type: 1|2, field2: number, field3: number }>
+    //   type 1 = normal (field2=offset, field3=gen)
+    //   type 2 = in objstm (field2=objstm objnum, field3=index in objstm)
+    const xrefEntries = new Map<number, { type: number; field2: number; field3: number }>();
+
+    // Record already-written normal objects
+    for (let i = 0; i < this.xrefOffsets.length; i++) {
+      const off = this.xrefOffsets[i];
+      if (off !== undefined && off > 0) {
+        xrefEntries.set(i, { type: 1, field2: off, field3: 0 });
+      }
+    }
+
+    // Pack packable entries into object streams
+    for (let i = 0; i < packableEntries.length; i += OBJS_PER_STREAM) {
+      const chunk = packableEntries.slice(i, i + OBJS_PER_STREAM);
+      this.writeObjectStream(chunk, xrefEntries);
+    }
+
+    // 3. Write the cross-reference stream
+    // The total /Size must account for all objects plus the xref stream object itself.
+    // We'll allocate the xref stream object number first.
+    const xrefStreamObjNum = this.registry.nextNumber;
+    // Size = xrefStreamObjNum + 1  (objects 0 .. xrefStreamObjNum)
+    const size = xrefStreamObjNum + 1;
+
+    const xrefStreamOffset = this.buf.offset;
+
+    this.writeXrefStream(xrefStreamObjNum, size, xrefEntries);
+
+    // 4. startxref + %%EOF
+    this.buf.writeString('startxref\n');
+    this.buf.writeString(`${xrefStreamOffset}\n`);
+    this.buf.writeString('%%EOF\n');
+
+    return true;
+  }
+
+  /**
+   * Serialize a group of non-stream objects into a single object stream
+   * (`/Type /ObjStm`) and record xref entries for them.
+   */
+  private writeObjectStream(
+    entries: RegistryEntry[],
+    xrefEntries: Map<number, { type: number; field2: number; field3: number }>,
+  ): void {
+    // Build the object stream content:
+    //   "objNum1 offset1 objNum2 offset2 ... <serialized objects>"
+    //
+    // The header part lists each object number and the byte offset of its
+    // serialized form relative to the start of the data section (after /First).
+
+    // First, serialize each object to find its bytes
+    const serializedObjects: Uint8Array[] = [];
+
+    for (const entry of entries) {
+      if (this.encryptionHandler === undefined && !copyWriters.has(this)) {
+        assertNoDecryptedObject(entry.object, 'PdfWriter');
+      }
+      const objWriter = new StringByteWriter();
+      entry.object.serialize(objWriter);
+      serializedObjects.push(objWriter.toUint8Array());
+    }
+
+    // Build header string: "objNum1 offset1 objNum2 offset2 ..."
+    const headerParts: string[] = [];
+    let dataOffset = 0;
+    for (let i = 0; i < entries.length; i++) {
+      headerParts.push(`${entries[i]!.ref.objectNumber} ${dataOffset}`);
+      dataOffset += serializedObjects[i]!.length;
+      // Add a space separator between objects in the data section
+      if (i < entries.length - 1) {
+        dataOffset += 1; // for the space between serialized objects
+      }
+    }
+    const headerStr = headerParts.join(' ');
+
+    // Encode header
+    const headerBytes = encoder.encode(headerStr + ' ');
+    const firstOffset = headerBytes.length;
+
+    // Build the complete stream data
+    let totalDataLen = firstOffset;
+    for (let i = 0; i < serializedObjects.length; i++) {
+      totalDataLen += serializedObjects[i]!.length;
+      if (i < serializedObjects.length - 1) totalDataLen += 1; // space separator
+    }
+
+    const streamData = new Uint8Array(totalDataLen);
+    streamData.set(headerBytes, 0);
+    let pos = firstOffset;
+    for (let i = 0; i < serializedObjects.length; i++) {
+      streamData.set(serializedObjects[i]!, pos);
+      pos += serializedObjects[i]!.length;
+      if (i < serializedObjects.length - 1) {
+        streamData[pos] = 0x20; // space
+        pos += 1;
+      }
+    }
+
+    // Build the ObjStm dictionary
+    const objStmDict = new PdfDict();
+    objStmDict.set('/Type', PdfName.of('ObjStm'));
+    objStmDict.set('/N', PdfNumber.of(entries.length));
+    objStmDict.set('/First', PdfNumber.of(firstOffset));
+    objStmDict.set('/Length', PdfNumber.of(streamData.length));
+
+    // Create the PdfStream and optionally compress it
+    const objStm: PdfStream = {
+      kind: 'stream',
+      dict: objStmDict,
+      data: streamData,
+      syncLength() {
+        this.dict.set('/Length', PdfNumber.of(this.data.length));
+      },
+      serialize(w: ByteWriter) {
+        this.syncLength();
+        this.dict.serialize(w);
+        w.writeString('\nstream\n');
+        w.write(this.data);
+        w.writeString('\nendstream');
+      },
+    };
+
+    if (this.compress) {
+      this.compressStream(objStm);
+    }
+
+    // Allocate an object number for this ObjStm
+    const objStmRef = this.registry.allocate();
+    const objStmObjNum = objStmRef.objectNumber;
+
+    // Record byte offset of the ObjStm indirect object
+    while (this.xrefOffsets.length <= objStmObjNum) {
+      this.xrefOffsets.push(0);
+    }
+    this.xrefOffsets[objStmObjNum] = this.buf.offset;
+
+    // Write the ObjStm as an indirect object
+    this.buf.writeString(`${objStmObjNum} 0 obj\n`);
+    objStm.serialize(this.buf);
+    this.buf.writeString(`\nendobj\n`);
+
+    // Record xref entry for the ObjStm itself (type 1, normal)
+    xrefEntries.set(objStmObjNum, { type: 1, field2: this.xrefOffsets[objStmObjNum]!, field3: 0 });
+
+    // Record xref entries for each packed object (type 2, in ObjStm)
+    for (let i = 0; i < entries.length; i++) {
+      xrefEntries.set(entries[i]!.ref.objectNumber, {
+        type: 2,
+        field2: objStmObjNum,
+        field3: i,
+      });
+    }
+  }
+
+  /**
+   * Write a cross-reference stream (PDF 1.5+) that replaces the
+   * traditional xref table and trailer.
+   */
+  private writeXrefStream(
+    xrefObjNum: number,
+    size: number,
+    xrefEntries: Map<number, { type: number; field2: number; field3: number }>,
+  ): void {
+    // Determine field widths (W array).
+    // W = [w0, w1, w2] where:
+    //   w0 = bytes for type field (1 byte is sufficient: 0, 1, 2)
+    //   w1 = bytes for field 2 (offset or objstm number)
+    //   w2 = bytes for field 3 (gen or index)
+
+    // Find the maximum values to determine byte widths
+    const allEntries = xrefEntries.values().toArray();
+    const maxField2 = allEntries.reduce((max, e) => Math.max(max, e.field2), 0);
+    let maxField3 = allEntries.reduce((max, e) => Math.max(max, e.field3), 0);
+    // Also consider the offset of this xref stream itself for free entry linking
+    // (the free entry at 0 has field2=0, field3=65535)
+    maxField3 = Math.max(maxField3, 65535);
+
+    const w0 = 1;
+    const w1 = bytesNeeded(maxField2);
+    const w2 = bytesNeeded(maxField3);
+
+    // Build binary xref data
+    // Entry for object 0: free, next=0, gen=65535
+    // Entries for objects 1..size-1 (including the xref stream object)
+    const entrySize = w0 + w1 + w2;
+    const data = new Uint8Array(size * entrySize);
+    let offset = 0;
+
+    // Object 0: free entry
+    writeIntBE(data, offset, w0, 0);
+    offset += w0; // type=0 (free)
+    writeIntBE(data, offset, w1, 0);
+    offset += w1; // next free=0
+    writeIntBE(data, offset, w2, 65535);
+    offset += w2; // gen=65535
+
+    // Objects 1 .. size-1
+    for (let i = 1; i < size; i++) {
+      const entry = xrefEntries.get(i);
+      if (entry) {
+        writeIntBE(data, offset, w0, entry.type);
+        offset += w0;
+        writeIntBE(data, offset, w1, entry.field2);
+        offset += w1;
+        writeIntBE(data, offset, w2, entry.field3);
+        offset += w2;
+      } else {
+        // Free entry
+        writeIntBE(data, offset, w0, 0);
+        offset += w0;
+        writeIntBE(data, offset, w1, 0);
+        offset += w1;
+        writeIntBE(data, offset, w2, 0);
+        offset += w2;
+      }
+    }
+
+    // Build the xref stream dictionary
+    const xrefDict = new PdfDict();
+    xrefDict.set('/Type', PdfName.of('XRef'));
+    xrefDict.set('/Size', PdfNumber.of(size));
+    xrefDict.set('/W', PdfArray.of([PdfNumber.of(w0), PdfNumber.of(w1), PdfNumber.of(w2)]));
+    xrefDict.set('/Root', this.structure.catalogRef);
+    xrefDict.set('/Info', this.structure.infoRef);
+    xrefDict.set('/Length', PdfNumber.of(data.length));
+
+    // Create the stream and optionally compress
+    const xrefStream: PdfStream = {
+      kind: 'stream',
+      dict: xrefDict,
+      data: data,
+      syncLength() {
+        this.dict.set('/Length', PdfNumber.of(this.data.length));
+      },
+      serialize(w: ByteWriter) {
+        this.syncLength();
+        this.dict.serialize(w);
+        w.writeString('\nstream\n');
+        w.write(this.data);
+        w.writeString('\nendstream');
+      },
+    };
+
+    if (this.compress) {
+      this.compressStream(xrefStream);
+    }
+
+    // Write as indirect object
+    this.buf.writeString(`${xrefObjNum} 0 obj\n`);
+    xrefStream.serialize(this.buf);
+    this.buf.writeString(`\nendobj\n`);
+  }
+
+  // -----------------------------------------------------------------------
+  // Cross-reference table (classic format)
+  // -----------------------------------------------------------------------
+
+  private writeXref(): number {
+    const xrefStart = this.buf.offset;
+
+    // Total entries = highest object number + 1 (including obj 0)
+    const size = this.registry.nextNumber;
+
+    this.buf.writeString('xref\n');
+    this.buf.writeString(`0 ${size}\n`);
+
+    // Entry 0: free head — always present
+    this.buf.writeString('0000000000 65535 f \n');
+
+    // Entries 1 … size-1
+    for (let i = 1; i < size; i++) {
+      const offset = this.xrefOffsets[i];
+      if (offset !== undefined && offset > 0) {
+        this.buf.writeString(`${offset.toString().padStart(10, '0')} 00000 n \n`);
+      } else {
+        // Missing object — mark as free
+        this.buf.writeString('0000000000 00000 f \n');
+      }
+    }
+
+    return xrefStart;
+  }
+
+  // -----------------------------------------------------------------------
+  // Trailer
+  // -----------------------------------------------------------------------
+
+  private writeTrailer(xrefOffset: number): void {
+    const size = this.registry.nextNumber;
+
+    this.buf.writeString('trailer\n');
+    this.buf.writeString('<<\n');
+    this.buf.writeString(`/Size ${size}\n`);
+
+    // /Root — the catalog
+    this.buf.writeString(
+      `/Root ${this.structure.catalogRef.objectNumber} ${this.structure.catalogRef.generationNumber} R\n`,
+    );
+
+    // /Info — document information
+    this.buf.writeString(
+      `/Info ${this.structure.infoRef.objectNumber} ${this.structure.infoRef.generationNumber} R\n`,
+    );
+
+    // /Encrypt and /ID — when encryption is active
+    if (this.encryptionHandler && this.encryptDictRef) {
+      this.buf.writeString(
+        `/Encrypt ${this.encryptDictRef.objectNumber} ${this.encryptDictRef.generationNumber} R\n`,
+      );
+
+      // /ID array — two identical hex strings based on the file ID
+      const fileIdHex = this.encryptionHandler.getFileId().toHex();
+      this.buf.writeString(`/ID [<${fileIdHex}> <${fileIdHex}>]\n`);
+    }
+
+    this.buf.writeString('>>\n');
+    this.buf.writeString('startxref\n');
+    this.buf.writeString(`${xrefOffset}\n`);
+    this.buf.writeString('%%EOF\n');
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Helpers for object streams
+// ---------------------------------------------------------------------------
+
+/**
+ * A minimal ByteWriter that collects output into a Uint8Array.
+ * Used to serialize individual objects for inclusion in object streams.
+ */
+class StringByteWriter implements ByteWriter {
+  private chunks: Uint8Array[] = [];
+  private _length = 0;
+
+  write(data: Uint8Array): void {
+    this.chunks.push(data);
+    this._length += data.length;
+  }
+
+  writeString(str: string): void {
+    this.write(encoder.encode(str));
+  }
+
+  toUint8Array(): Uint8Array {
+    const result = new Uint8Array(this._length);
+    let pos = 0;
+    for (const chunk of this.chunks) {
+      result.set(chunk, pos);
+      pos += chunk.length;
+    }
+    return result;
+  }
+}
+
+/**
+ * Compute the minimum number of bytes needed to represent `value`
+ * as a big-endian unsigned integer.
+ */
+function bytesNeeded(value: number): number {
+  if (value <= 0) return 1;
+  if (value <= 0xff) return 1;
+  if (value <= 0xffff) return 2;
+  if (value <= 0xffffff) return 3;
+  return 4;
+}
+
+/**
+ * Write a big-endian unsigned integer of `width` bytes into `buf`
+ * at the given `offset`.
+ */
+function writeIntBE(buf: Uint8Array, offset: number, width: number, value: number): void {
+  for (let i = width - 1; i >= 0; i--) {
+    buf[offset + i] = value & 0xff;
+    value = value >>> 8;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Private registry copy for encrypted writes
+// ---------------------------------------------------------------------------
+
+/**
+ * Copy containers (dicts, arrays, streams) so that encryption never writes
+ * into the caller's objects.  Strings, names, numbers, booleans, null and
+ * refs are immutable and shared.  Stream `data` buffers are shared too: the
+ * writer only ever replaces `stream.data`, it never writes into the buffer.
+ */
+function copyObject(obj: PdfObject): PdfObject {
+  switch (obj.kind) {
+    case 'dict':
+      return copyDict(obj);
+    case 'array':
+      return new PdfArray(obj.items.map(copyObject));
+    case 'stream':
+      return new PdfStream(copyDict(obj.dict), obj.data);
+    default:
+      return obj;
+  }
+}
+
+function copyDict(dict: PdfDict): PdfDict {
+  return new PdfDict([...dict].map(([key, value]) => [key, copyObject(value)] as const));
+}
+
+/**
+ * Copy a registry for one encrypted write.  Replaying the entries with
+ * `registerWithRef` keeps their order and any repeated object numbers;
+ * the `allocate()` loop restores numbers that were allocated but never
+ * assigned, so `/Size` and the /Encrypt object number match the source.
+ */
+function copyRegistryForWrite(source: PdfObjectRegistry): PdfObjectRegistry {
+  const copy = new PdfObjectRegistry();
+  for (const entry of source) {
+    copy.registerWithRef(entry.ref, copyObject(entry.object));
+  }
+  while (copy.nextNumber < source.nextNumber) {
+    copy.allocate();
+  }
+  return copy;
+}
+
+// ---------------------------------------------------------------------------
+// Convenience: one-shot serialization
+// ---------------------------------------------------------------------------
+
+/**
+ * Serialize a complete PDF from a registry and structure refs.
+ *
+ * @param registry            All registered indirect objects.
+ * @param structure           Catalog / Info / Pages references.
+ * @param options             Save options.
+ * @param encryptionHandler   Optional encryption handler for encrypting
+ *                            all objects and adding /Encrypt + /ID to
+ *                            the trailer.
+ * @returns                   The raw PDF bytes.
+ * @throws {UnsupportedEncryptionError} When the registry holds content
+ *         decrypted from an encrypted PDF, or an object body holds a string
+ *         or stream decrypted on load, and no `encryptionHandler` is
+ *         given. Also when `encryptionHandler` is given together with an
+ *         `objectStreamThreshold` other than `Infinity`.
+ */
+export async function serializePdf(
+  registry: PdfObjectRegistry,
+  structure: DocumentStructure,
+  options?: PdfSaveOptions,
+  encryptionHandler?: PdfEncryptionHandler,
+): Promise<Uint8Array> {
+  return new PdfWriter(registry, structure, options, encryptionHandler).write();
+}
+
+/**
+ * {@link serializePdf} for `PdfDocument.copy()`, which loads the bytes
+ * straight back into a document recorded as holding decrypted content.
+ * Only the one writer it makes skips the checks for decrypted content, so a
+ * write of the same registry that runs meanwhile is still refused. No
+ * package entry exports it.
+ *
+ * @internal
+ */
+export async function serializePdfForCopy(
+  registry: PdfObjectRegistry,
+  structure: DocumentStructure,
+  options?: PdfSaveOptions,
+  encryptionHandler?: PdfEncryptionHandler,
+): Promise<Uint8Array> {
+  const writer = new PdfWriter(registry, structure, options, encryptionHandler);
+  copyWriters.add(writer);
+  return writer.write();
+}

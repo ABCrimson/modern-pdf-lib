@@ -77,13 +77,13 @@ import type { SvgRenderOptions } from '../assets/svg/svgToPdf.js';
 import { drawSvgOnPage } from '../assets/svg/svgToPdf.js';
 import { parseSvgPath } from '../assets/svg/svgParser.js';
 import type { PdfLayer } from '../layers/optionalContent.js';
-import { svgCommandsToPdfOps } from './pdfPageSvg.js';
+import { svgCommandsToPdfOps } from './internal/pdfPageSvg.js';
 import { beginLayerContent, endLayerContent } from '../layers/optionalContent.js';
 import type { RedactionOptions } from './redaction.js';
 import { markForRedaction } from './redaction.js';
 import type { EmbeddedPdfPage, DrawPageOptions } from './pdfEmbed.js';
-import type { GradientFill, PatternFill } from './patterns.js';
-import { buildGradientObjects, buildPatternObjects } from './patterns.js';
+import type { GradientFill, PatternFill } from '../graphics/patterns.js';
+import { buildGradientObjects, buildPatternObjects } from '../graphics/patterns.js';
 import { encodeQrCode, qrCodeToOperators } from '../barcode/qr.js';
 import type { ErrorCorrectionLevel } from '../barcode/qr.js';
 import { renderTable } from '../layout/table.js';
@@ -561,8 +561,8 @@ export interface ImageRef {
 // Text wrapping (re-exported from pdfPageText for backward compatibility)
 // ---------------------------------------------------------------------------
 
-export { wrapText, breakWord } from './pdfPageText.js';
-import { wrapText } from './pdfPageText.js';
+export { wrapText, breakWord } from './internal/pdfPageText.js';
+import { wrapText } from './internal/pdfPageText.js';
 
 // ---------------------------------------------------------------------------
 // Transparency types

@@ -11,7 +11,7 @@ import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vite
 import type { MockInstance } from 'vitest';
 import { createPdf } from '../../../src/index.js';
 import { StreamingPdfParser } from '../../../src/parser/streamingParser.js';
-import { saveIncremental } from '../../../src/core/incrementalWriter.js';
+import { saveIncremental } from '../../../src/core/io/incrementalWriter.js';
 import {
   PdfArray,
   PdfDict,

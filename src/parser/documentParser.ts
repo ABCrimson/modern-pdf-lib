@@ -36,7 +36,7 @@ import {
   markLoadedFromEncryptedFile,
   recordDecryptedContent,
   recordDecryptedObject,
-} from '../core/flateStream.js';
+} from '../core/internal/flateStream.js';
 import { PdfPage } from '../core/pdfPage.js';
 import { PdfLexer } from './internal/lexer.js';
 import { PdfObjectParser } from './internal/objectParser.js';

@@ -37,8 +37,8 @@
  */
 
 import { loadPdf } from '../parser/documentParser.js';
-import { serializePdf } from '../core/pdfWriter.js';
-import type { PdfSaveOptions } from '../core/pdfWriter.js';
+import { serializePdf } from '../core/io/pdfWriter.js';
+import type { PdfSaveOptions } from '../core/io/pdfWriter.js';
 import type { DocumentStructure } from '../core/pdfCatalog.js';
 import { buildInfoDict } from '../core/pdfCatalog.js';
 import type { DocumentMetadata } from '../core/pdfCatalog.js';

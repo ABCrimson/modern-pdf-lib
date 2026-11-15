@@ -97,7 +97,7 @@ export {
 // Save options
 // ---------------------------------------------------------------------------
 
-export type { PdfSaveOptions } from './core/pdfWriter.js';
+export type { PdfSaveOptions } from './core/io/pdfWriter.js';
 
 // ---------------------------------------------------------------------------
 // Page manipulation
@@ -147,7 +147,7 @@ export {
   tilingPattern,
   buildGradientObjects,
   buildPatternObjects,
-} from './core/patterns.js';
+} from './graphics/patterns.js';
 export type {
   ColorStop,
   LinearGradientOptions,
@@ -157,7 +157,7 @@ export type {
   PatternFill,
   RadialGradientFill,
   NormalizedStop,
-} from './core/patterns.js';
+} from './graphics/patterns.js';
 
 // ---------------------------------------------------------------------------
 // Document metadata types

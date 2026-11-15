@@ -94,7 +94,7 @@ export {
   tilingPattern,
   buildGradientObjects,
   buildPatternObjects,
-} from './core/patterns.js';
+} from './graphics/patterns.js';
 export type {
   ColorStop,
   LinearGradientOptions,
@@ -104,7 +104,7 @@ export type {
   PatternFill,
   RadialGradientFill,
   NormalizedStop,
-} from './core/patterns.js';
+} from './graphics/patterns.js';
 
 // ---------------------------------------------------------------------------
 // Angle helpers
@@ -143,7 +143,7 @@ export {
 // Save options
 // ---------------------------------------------------------------------------
 
-export type { PdfSaveOptions } from './core/pdfWriter.js';
+export type { PdfSaveOptions } from './core/io/pdfWriter.js';
 
 // ---------------------------------------------------------------------------
 // Page manipulation + Merge/Split
@@ -193,8 +193,8 @@ export {
   saveIncremental,
   saveDocumentIncremental,
   ChangeTracker,
-} from './core/incrementalWriter.js';
-export type { IncrementalSaveResult } from './core/incrementalWriter.js';
+} from './core/io/incrementalWriter.js';
+export type { IncrementalSaveResult } from './core/io/incrementalWriter.js';
 
 // ---------------------------------------------------------------------------
 // WASM initialisation
@@ -445,8 +445,8 @@ export {
 } from './core/pdfObjects.js';
 export type { ByteWriter, PdfObject, RegistryEntry } from './core/pdfObjects.js';
 
-export { PdfWriter, serializePdf } from './core/pdfWriter.js';
-export { PdfStreamWriter } from './core/pdfStream.js';
+export { PdfWriter, serializePdf } from './core/io/pdfWriter.js';
+export { PdfStreamWriter } from './core/io/pdfStream.js';
 
 export {
   buildCatalog,
@@ -774,8 +774,8 @@ export {
   isLinearized,
   delinearizePdf,
   getLinearizationInfo,
-} from './core/linearization.js';
-export type { LinearizationOptions, LinearizationInfo } from './core/linearization.js';
+} from './core/io/linearization.js';
+export type { LinearizationOptions, LinearizationInfo } from './core/io/linearization.js';
 
 // ---------------------------------------------------------------------------
 // PDF/A compliance
@@ -1294,8 +1294,8 @@ export type {
 // ---------------------------------------------------------------------------
 // CIE device-independent color spaces (0.37.1)
 // ---------------------------------------------------------------------------
-export { buildCalGray, buildCalRGB, buildLab, labToRgb } from './core/colorSpacesCIE.js';
-export type { CalGrayParams, CalRGBParams, LabParams } from './core/colorSpacesCIE.js';
+export { buildCalGray, buildCalRGB, buildLab, labToRgb } from './color/colorSpacesCIE.js';
+export type { CalGrayParams, CalRGBParams, LabParams } from './color/colorSpacesCIE.js';
 
 // ---------------------------------------------------------------------------
 // Standalone document timestamp (0.34.6)
@@ -1335,14 +1335,14 @@ export type { MarkdownToPdfOptions } from './assets/markdown/markdownToPdf.js';
 // ---------------------------------------------------------------------------
 // PDF function objects + evaluator (0.37.0)
 // ---------------------------------------------------------------------------
-export { evaluateFunction } from './core/pdfFunctions.js';
+export { evaluateFunction } from './graphics/pdfFunctions.js';
 export type {
   SampledFunction,
   ExponentialFunction,
   StitchingFunction,
   PostScriptFunction,
   PdfFunctionDef,
-} from './core/pdfFunctions.js';
+} from './graphics/pdfFunctions.js';
 
 // ---------------------------------------------------------------------------
 // Halftone dictionaries + transfer functions (0.38.7)
@@ -1355,8 +1355,8 @@ export {
   buildSampledTransferFunction,
   nameHalftone,
   STANDARD_SPOT_FUNCTIONS,
-} from './core/halftone.js';
-export type { Type1Halftone } from './core/halftone.js';
+} from './graphics/halftone.js';
+export type { Type1Halftone } from './graphics/halftone.js';
 
 // ---------------------------------------------------------------------------
 // PDF/X-6 print-production conformance (0.32.4)
@@ -1384,8 +1384,8 @@ export type { CodeFrameOptions } from './utils/codeframe.js';
 // ---------------------------------------------------------------------------
 // Function-based shading (0.37.3)
 // ---------------------------------------------------------------------------
-export { buildFunctionShading, sampleShadingColor } from './core/shadingFunction.js';
-export type { FunctionShadingOptions } from './core/shadingFunction.js';
+export { buildFunctionShading, sampleShadingColor } from './graphics/shadingFunction.js';
+export type { FunctionShadingOptions } from './graphics/shadingFunction.js';
 
 // ---------------------------------------------------------------------------
 // PDF/A-4 conformance metadata (0.32.1 / 0.32.2)
@@ -1594,7 +1594,7 @@ export {
   buildLatticeFormGouraudShading,
   buildCoonsPatchShading,
   buildTensorPatchShading,
-} from './core/meshShading.js';
+} from './graphics/meshShading.js';
 export type {
   BitsPerCoordinate,
   BitsPerComponent,
@@ -1608,11 +1608,11 @@ export type {
   LatticeFormGouraudOptions,
   CoonsPatchOptions,
   TensorPatchOptions,
-} from './core/meshShading.js';
+} from './graphics/meshShading.js';
 export { parseIccTransform, deviceRgbToXyz, xyzToLab } from './color/iccTransform.js';
 export type { IccTransformInfo } from './color/iccTransform.js';
 // NB: `cmykToRgb`/`rgbToCmyk` (core/operators/color) and `labToRgb`
-// (core/colorSpacesCIE) are already exported at the root with identical
+// (color/colorSpacesCIE) are already exported at the root with identical
 // plain-number semantics, so colorConvert only contributes the new conversions
 // (HSL/HSV, sRGB↔XYZ, RGB→Lab). The duplicates stay in colorConvert for internal
 // use but are not re-exported here to avoid a name clash.
@@ -1758,14 +1758,14 @@ export type {
   EncryptedPayloadOptions,
   WrapperPayloadOptions,
 } from './compliance/encryptedPayload.js';
-export { buildSoftMaskGroupExtGState, buildSoftMaskNone } from './core/softMask.js';
-export type { SoftMaskGroupOptions } from './core/softMask.js';
+export { buildSoftMaskGroupExtGState, buildSoftMaskNone } from './graphics/softMask.js';
+export type { SoftMaskGroupOptions } from './graphics/softMask.js';
 export {
   buildStencilMask,
   buildColorKeyMask,
   buildImageSoftMask,
   buildBlackPointCompensationExtGState,
-} from './core/imageMask.js';
+} from './graphics/imageMask.js';
 
 // ---------------------------------------------------------------------------
 // Tagged PDF & accessibility (0.31.x): high-level structure-tagging helpers,

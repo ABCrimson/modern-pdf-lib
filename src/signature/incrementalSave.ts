@@ -19,7 +19,7 @@
  * @packageDocumentation
  */
 
-import { assertUnencryptedInput } from '../core/incrementalWriter.js';
+import { assertUnencryptedInput } from '../core/io/incrementalWriter.js';
 import { warnOnce } from '../internal/warnings.js';
 
 // ---------------------------------------------------------------------------

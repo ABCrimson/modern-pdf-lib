@@ -665,6 +665,7 @@ modern-pdf-lib/
     assets/         Font metrics/embed/subset, image embed, SVG
     text/           BiDi (UAX #9) text ordering
     color/          Color conversion & ICC transforms
+    graphics/       Halftones, image and soft masks, mesh shadings, patterns, PDF functions
     barcode/        QR, Code 128, EAN, UPC, Code 39, ITF, PDF417, Data Matrix
     layout/         Tables, headers/footers, Knuth-Plass text layout, hyphenation
     jsx/            JSX runtime + renderJsxToPdf component renderer
