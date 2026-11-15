@@ -415,7 +415,6 @@ Version numbers follow the project's own scheme — see [VERSIONING.md](./VERSIO
 | `src/text/` | BiDi (UAX #9) text ordering |
 | `src/cli/` | The `modern-pdf` CLI binary |
 | `src/utils/` | Binary helpers, base64, PDF value helpers, code frames, runtime warnings |
-| `src/types/` | Shared type declarations (geometry, options, PDF primitives) |
 | `src/wasm/` | Rust crates + the universal WASM loader and inline-bytes cache |
 
 Supporting directories:
