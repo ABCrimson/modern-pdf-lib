@@ -5,7 +5,7 @@ node_modules/
 dist/
 
 # WASM build output
-src/wasm/*/pkg/
+crates/*/pkg/
 
 # Test coverage
 coverage/

@@ -66,7 +66,7 @@ export interface SubsetCmap {
 // ---------------------------------------------------------------------------
 
 /**
- * WASM subsetter is not available — the TTF WASM module (`src/wasm/ttf`)
+ * WASM subsetter is not available — the TTF WASM module (`crates/ttf`)
  * provides `parse_font()` for metric extraction but does NOT include a
  * `subset_font()` export. The pure JS subsetter (`ttfSubset.ts`) is
  * the primary subsetting path for all runtimes.

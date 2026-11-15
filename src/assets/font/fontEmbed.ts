@@ -35,7 +35,7 @@ import type { SubsetResult, SubsetCmap } from './fontSubset.js';
 /**
  * Interface for the wasm-bindgen FontInfo result from the TTF WASM module.
  *
- * Matches the `FontInfo` struct exported by `src/wasm/ttf/src/lib.rs`.
+ * Matches the `FontInfo` struct exported by `crates/ttf/src/lib.rs`.
  * Getters return LE byte arrays for glyph widths and cmap entries.
  *
  * @internal

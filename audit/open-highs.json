@@ -1162,7 +1162,7 @@
       "area": "rust-crates",
       "severity": "high",
       "status": "confirmed",
-      "path": "src/wasm/jbig2/src/lib.rs",
+      "path": "crates/jbig2/src/lib.rs",
       "target": "0.47.0",
       "summary": "The JBIG2 WASM arithmetic decoder is wrong, so arithmetic-coded images decode wrongly."
     },
@@ -1171,7 +1171,7 @@
       "area": "rust-crates",
       "severity": "high",
       "status": "confirmed",
-      "path": "src/wasm/jbig2/src/lib.rs",
+      "path": "crates/jbig2/src/lib.rs",
       "target": "0.47.0",
       "summary": "The JBIG2 WASM crate reads generic-region flags from the wrong byte."
     },
@@ -1180,7 +1180,7 @@
       "area": "rust-crates",
       "severity": "high",
       "status": "confirmed",
-      "path": "src/wasm/jbig2/src/lib.rs",
+      "path": "crates/jbig2/src/lib.rs",
       "target": "0.47.0",
       "summary": "The JBIG2 WASM crate does not implement symbol dictionaries and text regions."
     },
@@ -1189,7 +1189,7 @@
       "area": "rust-crates",
       "severity": "high",
       "status": "confirmed",
-      "path": "src/wasm/jbig2/src/lib.rs",
+      "path": "crates/jbig2/src/lib.rs",
       "target": "0.47.0",
       "summary": "The JBIG2 WASM MMR run-length tables are wrong and incomplete."
     },
@@ -1198,7 +1198,7 @@
       "area": "rust-crates",
       "severity": "high",
       "status": "confirmed",
-      "path": "src/wasm/jpeg/src/lib.rs",
+      "path": "crates/jpeg/src/lib.rs",
       "target": "0.47.0",
       "summary": "The JPEG WASM crate writes its image header in a different layout than the TypeScript bridge reads."
     },

@@ -2,7 +2,7 @@
  * @module scripts/generate-inline-wasm
  *
  * Build-time code generation script that reads each WASM module's compiled
- * binary from `src/wasm/<name>/pkg/*.wasm`, base64-encodes it, and writes
+ * binary from `crates/<name>/pkg/*.wasm`, base64-encodes it, and writes
  * a generated TypeScript file at `src/wasm/inlineWasm.generated.ts`.
  *
  * The generated file exports:
@@ -93,7 +93,7 @@ async function main(): Promise<void> {
   const skipped: string[] = [];
 
   for (const mod of WASM_MODULES) {
-    const wasmPath = join(WASM_SRC_DIR, mod.name, 'pkg', mod.filename);
+    const wasmPath = join(ROOT_DIR, 'crates', mod.name, 'pkg', mod.filename);
 
     if (!(await fileExists(wasmPath))) {
       skipped.push(mod.name);

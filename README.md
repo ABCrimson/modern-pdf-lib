@@ -675,8 +675,9 @@ modern-pdf-lib/
     outline/        Bookmarks / document outline
     metadata/       XMP metadata, viewer preferences
     plugins/        Plugin manager & hooks
-    wasm/           Rust crate sources (6 modules)
+    wasm/           WASM loader and the TypeScript side of the crates
     cli/            CLI tool (modern-pdf optimize)
+  crates/           Rust crates built to WebAssembly (6 crates, one Cargo root each)
   tests/            8,902 tests in 373 files (projects unit, integration, oracle, adversarial)
   audit/            open-highs.json: the public ledger of open audit findings
   docs/             VitePress documentation

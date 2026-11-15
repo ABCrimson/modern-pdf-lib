@@ -3,7 +3,7 @@
  * the published tarball ships it (`files: ["dist/wasm/**"]`, exports
  * `"./wasm/*": "./dist/wasm/*"`).
  *
- * Input:  src/wasm/<crate>/pkg/modern_pdf_<crate>{.js,.d.ts,_bg.wasm,_bg.wasm.d.ts}
+ * Input:  crates/<crate>/pkg/modern_pdf_<crate>{.js,.d.ts,_bg.wasm,_bg.wasm.d.ts}
  * Output: dist/wasm/<crate>/<same files>
  *
  * Usage: `pnpm run copy:wasm` (after `pnpm run build:wasm` and `pnpm run build`;
@@ -16,11 +16,11 @@ import { join } from 'node:path';
 const CRATES = ['libdeflate', 'png', 'ttf', 'shaping', 'jbig2', 'jpeg'];
 
 const missing = CRATES.filter(
-  (crate) => !existsSync(join('src', 'wasm', crate, 'pkg', `modern_pdf_${crate}_bg.wasm`)),
+  (crate) => !existsSync(join('crates', crate, 'pkg', `modern_pdf_${crate}_bg.wasm`)),
 );
 if (missing.length > 0) {
   console.error(
-    `copy-wasm: missing src/wasm/<crate>/pkg/modern_pdf_<crate>_bg.wasm for: ${missing.join(', ')}. ` +
+    `copy-wasm: missing crates/<crate>/pkg/modern_pdf_<crate>_bg.wasm for: ${missing.join(', ')}. ` +
       'Run `pnpm run build:wasm` first.',
   );
   process.exit(1);
@@ -28,7 +28,7 @@ if (missing.length > 0) {
 
 let files = 0;
 for (const crate of CRATES) {
-  const from = join('src', 'wasm', crate, 'pkg');
+  const from = join('crates', crate, 'pkg');
   const to = join('dist', 'wasm', crate);
   mkdirSync(to, { recursive: true });
   for (const name of readdirSync(from)) {

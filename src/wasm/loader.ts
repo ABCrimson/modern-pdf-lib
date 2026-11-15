@@ -297,7 +297,8 @@ function resolveModulePath(name: string, config: WasmLoaderConfig, runtime: Runt
     case 'node':
     case 'bun': {
       // Try to resolve relative to this module's location.
-      // In dev (src/wasm/loader.ts), the path is ../wasm/<name>/pkg/<file>.
+      // In dev, wasm-pack writes crates/<name>/pkg/<file>; the dev fallbacks below and in the
+      // deno case still name the older src/wasm/<name>/pkg/ folder (new URL() does not throw, so they are not reached).
       // In dist (dist/loader-*.mjs), the path is ./wasm/<name>/<file>.
       // We try the dist layout first (npm consumers), then fall back to dev.
       try {

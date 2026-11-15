@@ -39,12 +39,12 @@ pnpm test
 |---|---|---|
 | Node.js | **>= 26.4** (`engines.node`); `devEngines` pins `28.0.0-nightly20261111e8c1160d20`, which pnpm can download | Everything |
 | pnpm | **12.21.0** (`packageManager`) | Dependency install, all scripts |
-| Rust + `wasm32-unknown-unknown` | `nightly-2026-11-15` (`rust-toolchain.toml`; rustup picks it up) | Only for `src/wasm/**` changes |
-| `wasm-pack` | 0.15.1, a devDependency (no global install) | Only for `src/wasm/**` changes |
+| Rust + `wasm32-unknown-unknown` | `nightly-2026-11-15` (`rust-toolchain.toml`; rustup picks it up) | Only for `crates/**` changes |
+| `wasm-pack` | 0.15.1, a devDependency (no global install) | Only for `crates/**` changes |
 | Bash | Git Bash on Windows | `build:wasm` (shell script) |
 
 > [!TIP]
-> Skip Rust entirely unless you are touching `src/wasm/`. Tests, type-checking,
+> Skip Rust entirely unless you are touching `crates/`. Tests, type-checking,
 > linting, and the TypeScript build all run without a WASM toolchain.
 
 ---
@@ -132,7 +132,7 @@ Run each as `pnpm run <name>`.
 
 ### Building the WASM crates
 
-Only needed when you change Rust sources under `src/wasm/`.
+Only needed when you change Rust sources under `crates/`.
 
 ```bash
 # One-time toolchain setup
@@ -146,7 +146,7 @@ pnpm run build:wasm
 pnpm run build:wasm --debug
 ```
 
-Output lands in `src/wasm/<crate>/pkg/` (git-ignored). `pnpm run copy:wasm` stages
+Output lands in `crates/<crate>/pkg/` (git-ignored). `pnpm run copy:wasm` stages
 those artifacts into `dist/wasm/<crate>/` for publishing. `scripts/build-wasm.sh`
 takes its `wasm-opt` from a checksum-pinned binaryen (`version_133`, cached in
 `.cache/binaryen`).
@@ -415,12 +415,13 @@ Version numbers follow the project's own scheme — see [VERSIONING.md](./VERSIO
 | `src/text/` | BiDi (UAX #9) text ordering |
 | `src/cli/` | The `modern-pdf` CLI binary |
 | `src/utils/` | Binary helpers, base64, PDF value helpers, code frames, runtime warnings |
-| `src/wasm/` | Rust crates + the universal WASM loader and inline-bytes cache |
+| `src/wasm/` | The universal WASM loader, the inline-bytes cache and the TypeScript side of the crates in `crates/` |
 
 Supporting directories:
 
 | Directory | Contents |
 |---|---|
+| `crates/` | The six Rust crates built to WebAssembly, one Cargo root each (see [Building the WASM crates](#building-the-wasm-crates)) |
 | `tests/` | The full test suite (see [Testing](#testing)) |
 | `audit/` | The public ledger of open audit findings (see [Testing](#testing)) |
 | `scripts/` | Build, codegen, fixture, and validation scripts; `scripts/dev/`, `scripts/oracle/` and `scripts/conformance/` hold the test gates and fixture generators |

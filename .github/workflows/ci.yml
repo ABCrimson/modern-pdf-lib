@@ -90,8 +90,8 @@ jobs:
         uses: actions/cache@v6.1.0
         id: wasm-cache
         with:
-          path: src/wasm/*/pkg
-          key: wasm-pkg-${{ runner.os }}-${{ env.RUST_TOOLCHAIN }}-${{ hashFiles('src/wasm/*/src/**/*.rs', 'src/wasm/*/Cargo.toml', 'src/wasm/*/Cargo.lock', 'scripts/build-wasm.sh', 'rust-toolchain.toml', 'package.json') }}
+          path: crates/*/pkg
+          key: wasm-pkg-${{ runner.os }}-${{ env.RUST_TOOLCHAIN }}-${{ hashFiles('crates/*/src/**/*.rs', 'crates/*/Cargo.toml', 'crates/*/Cargo.lock', 'scripts/build-wasm.sh', 'rust-toolchain.toml', 'package.json') }}
 
       # Each crate is its own Cargo root until the workspace migration, so each
       # gets its own cache entry.
@@ -100,12 +100,12 @@ jobs:
         uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
           workspaces: |
-            src/wasm/libdeflate -> target
-            src/wasm/png -> target
-            src/wasm/ttf -> target
-            src/wasm/shaping -> target
-            src/wasm/jbig2 -> target
-            src/wasm/jpeg -> target
+            crates/libdeflate -> target
+            crates/png -> target
+            crates/ttf -> target
+            crates/shaping -> target
+            crates/jbig2 -> target
+            crates/jpeg -> target
 
       # build-wasm.sh downloads the binaryen release named by its BINARYEN_VERSION
       # into .cache/binaryen and verifies its SHA-256; the cache key reads that
@@ -129,7 +129,7 @@ jobs:
         uses: actions/upload-artifact@v7.0.2
         with:
           name: wasm-modules
-          path: src/wasm/*/pkg
+          path: crates/*/pkg
           retention-days: 1
 
   # ---------------------------------------------------------------------------
@@ -155,7 +155,7 @@ jobs:
         uses: actions/download-artifact@v8.0.2
         with:
           name: wasm-modules
-          path: src/wasm
+          path: crates
 
       # tsdown + IIFE bundle + ESM/CJS smoke of every built entry.
       - name: Build (tsdown, IIFE, smoke)
@@ -247,7 +247,7 @@ jobs:
         uses: actions/download-artifact@v8.0.2
         with:
           name: wasm-modules
-          path: src/wasm
+          path: crates
 
       # Unit tests of the encrypted load path compare with qpdf, so this job installs the same
       # checksum-pinned qpdf as job test-oracle (QPDF_VERSION and QPDF_SHA256 move together in
@@ -315,7 +315,7 @@ jobs:
         uses: actions/download-artifact@v8.0.2
         with:
           name: wasm-modules
-          path: src/wasm
+          path: crates
 
       # The oracle project, the corpus gate and the fixture checks below run qpdf; with CI set,
       # the oracle tests fail when it is missing instead of skipping. The release is pinned by the
@@ -431,7 +431,7 @@ jobs:
         uses: actions/download-artifact@v8.0.2
         with:
           name: wasm-modules
-          path: src/wasm
+          path: crates
 
       - name: Install Playwright browsers
         run: pnpm exec playwright install --with-deps
@@ -477,7 +477,7 @@ jobs:
         uses: actions/download-artifact@v8.0.2
         with:
           name: wasm-modules
-          path: src/wasm
+          path: crates
 
       - name: Run benchmarks (standalone tinybench harness, tests/benchmarks/run.ts)
         run: pnpm run bench
@@ -518,7 +518,7 @@ jobs:
   # ---------------------------------------------------------------------------
   # Rust checks (per crate)
   # ---------------------------------------------------------------------------
-  # For each of the six crates under src/wasm: `cargo clippy --target wasm32-unknown-unknown`
+  # For each of the six crates under crates/: `cargo clippy --target wasm32-unknown-unknown`
   # and the native `cargo test`. `continue-on-error` keeps the job from failing the workflow;
   # it reports clippy and test results per crate.
   rust-checks:
@@ -532,7 +532,7 @@ jobs:
         crate: [libdeflate, png, ttf, shaping, jbig2, jpeg]
     defaults:
       run:
-        working-directory: src/wasm/${{ matrix.crate }}
+        working-directory: crates/${{ matrix.crate }}
     steps:
       - uses: actions/checkout@v7.0.1
         with:
@@ -547,7 +547,7 @@ jobs:
 
       - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
-          workspaces: src/wasm/${{ matrix.crate }} -> target
+          workspaces: crates/${{ matrix.crate }} -> target
 
       - name: Clippy (wasm32-unknown-unknown)
         run: cargo clippy --target wasm32-unknown-unknown

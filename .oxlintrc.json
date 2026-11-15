@@ -87,5 +87,5 @@
       }
     }
   ],
-  "ignorePatterns": ["dist/**", "node_modules/**", "src/wasm/*/pkg/**", "docs/**", "coverage/**"]
+  "ignorePatterns": ["dist/**", "node_modules/**", "docs/**", "coverage/**"]
 }

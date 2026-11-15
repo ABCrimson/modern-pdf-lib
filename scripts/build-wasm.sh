@@ -21,7 +21,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-WASM_DIR="$PROJECT_ROOT/src/wasm"
+WASM_DIR="$PROJECT_ROOT/crates"
 
 # Keep in sync with the CI binaryen cache key (it keys on this variable).
 BINARYEN_VERSION=133
@@ -167,7 +167,7 @@ for crate in "${CRATES[@]}"; do
   echo "[$CURRENT/$TOTAL] BUILD $crate"
 
   # The default relative out-dir (<crate>/pkg) is used on purpose: an absolute
-  # --out-dir left stray src/wasm/<crate>/src/wasm/<crate>/pkg trees on Windows.
+  # --out-dir left stray crates/<crate>/crates/<crate>/pkg trees on Windows.
   if wasm-pack build "$CRATE_DIR" \
     --target web \
     "$BUILD_PROFILE" \

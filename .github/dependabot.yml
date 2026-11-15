@@ -45,12 +45,12 @@ updates:
   # so shared crates (wasm-bindgen, js-sys) move in lockstep.
   - package-ecosystem: cargo
     directories:
-      - /src/wasm/libdeflate
-      - /src/wasm/png
-      - /src/wasm/ttf
-      - /src/wasm/shaping
-      - /src/wasm/jbig2
-      - /src/wasm/jpeg
+      - /crates/libdeflate
+      - /crates/png
+      - /crates/ttf
+      - /crates/shaping
+      - /crates/jbig2
+      - /crates/jpeg
     schedule:
       interval: weekly
     cooldown:

@@ -47,12 +47,12 @@ jobs:
         uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
           workspaces: |
-            src/wasm/libdeflate -> target
-            src/wasm/png -> target
-            src/wasm/ttf -> target
-            src/wasm/shaping -> target
-            src/wasm/jbig2 -> target
-            src/wasm/jpeg -> target
+            crates/libdeflate -> target
+            crates/png -> target
+            crates/ttf -> target
+            crates/shaping -> target
+            crates/jbig2 -> target
+            crates/jpeg -> target
 
       # build-wasm.sh downloads the binaryen release named by its BINARYEN_VERSION
       # into .cache/binaryen and verifies its SHA-256; the key reads that variable.
@@ -79,7 +79,7 @@ jobs:
       - name: Verify WASM binaries
         run: |
           for crate in libdeflate png ttf shaping jbig2 jpeg; do
-            if ! ls src/wasm/${crate}/pkg/*.wasm 1>/dev/null 2>&1; then
+            if ! ls crates/${crate}/pkg/*.wasm 1>/dev/null 2>&1; then
               echo "::error::WASM binary missing for crate: ${crate}"
               exit 1
             fi
@@ -124,7 +124,7 @@ jobs:
         uses: actions/upload-artifact@v7.0.2
         with:
           name: wasm-modules
-          path: src/wasm/*/pkg
+          path: crates/*/pkg
 
   # ---------------------------------------------------------------------------
   # Require CI (full test + coverage suite) to be green on THIS commit before

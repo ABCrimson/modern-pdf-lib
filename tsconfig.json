@@ -27,5 +27,5 @@
     "types": []
   },
   "include": ["src/**/*.ts"],
-  "exclude": ["node_modules", "dist", "tests", "docs", "scripts", "src/wasm/*/pkg", "src/cli"]
+  "exclude": ["node_modules", "dist", "tests", "docs", "scripts", "src/cli"]
 }

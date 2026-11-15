@@ -31,7 +31,7 @@
 /**
  * The set of all WASM module names supported by the library.
  *
- * These correspond to the crate directories under `src/wasm/`.
+ * These correspond to the crate directories under `crates/`.
  */
 export const WASM_MODULE_NAMES = ['libdeflate', 'png', 'ttf', 'shaping', 'jbig2', 'jpeg'] as const;
 

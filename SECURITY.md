@@ -152,7 +152,7 @@ These areas are security-sensitive. A report against any of them is in scope.
 | PDF parsing | `src/parser/` | Document parser and image decoders (CCITT; JBIG2 and JPEG 2000 throw `UnsupportedFilterError`), with internal limits that throw `ResourceLimitError` — the primary untrusted-input surface |
 | Form scripting | `src/form/` | Arithmetic calculation evaluator and script attachment; script execution is disabled (`createSandbox().execute()` throws `ScriptExecutionDisabledError`, code `script-execution-disabled`) |
 | Security tooling | `src/security/` | Threat scanner, sanitizer, redaction verifier, encryption inspector |
-| WASM modules | `src/wasm/` | Rust crates for deflate, PNG, TTF, shaping, JBIG2, and JPEG |
+| WASM modules | `crates/` | Rust crates for deflate, PNG, TTF, shaping, JBIG2, and JPEG |
 
 > [!NOTE]
 > The form calculation evaluator (`src/form/jsEvaluator.ts`) is a purpose-built
