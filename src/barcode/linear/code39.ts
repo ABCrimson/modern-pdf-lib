@@ -1,5 +1,5 @@
 /**
- * @module barcode/code39
+ * @module barcode/linear/code39
  *
  * Code 39 (Code 3 of 9) barcode encoding with optional modulo-43
  * check digit calculation and native PDF vector rendering.
@@ -19,10 +19,10 @@
  * Reference: ISO/IEC 16388:2007
  */
 
-import type { Color } from '../core/operators/color.js';
-import { applyFillColor } from '../core/operators/color.js';
-import type { BarcodeMatrix } from './types.js';
-import { warnOnce } from '../internal/warnings.js';
+import type { Color } from '../../core/operators/color.js';
+import { applyFillColor } from '../../core/operators/color.js';
+import type { BarcodeMatrix } from '../types.js';
+import { warnOnce } from '../../internal/warnings.js';
 
 export type { BarcodeMatrix };
 

@@ -3,7 +3,7 @@
  *
  * Build-time code generation script that reads each WASM module's compiled
  * binary from `crates/<name>/pkg/*.wasm`, base64-encodes it, and writes
- * a generated TypeScript file at `src/wasm/inlineWasm.generated.ts`.
+ * a generated TypeScript file at `src/wasm/internal/inlineWasm.generated.ts`.
  *
  * The generated file exports:
  * - Individual per-module constants (tree-shakeable by bundlers)
@@ -39,7 +39,7 @@ const WASM_MODULES: ReadonlyArray<{ name: string; filename: string }> = [
 
 const ROOT_DIR = resolve(import.meta.dirname!, '..');
 const WASM_SRC_DIR = join(ROOT_DIR, 'src', 'wasm');
-const OUTPUT_FILE = join(WASM_SRC_DIR, 'inlineWasm.generated.ts');
+const OUTPUT_FILE = join(WASM_SRC_DIR, 'internal', 'inlineWasm.generated.ts');
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -123,7 +123,7 @@ async function main(): Promise<void> {
 
   const lines: string[] = [
     '/**',
-    ' * @module wasm/inlineWasm.generated',
+    ' * @module wasm/internal/inlineWasm.generated',
     ' *',
     ' * AUTO-GENERATED FILE -- DO NOT EDIT MANUALLY.',
     ' *',
@@ -153,7 +153,7 @@ async function main(): Promise<void> {
     '// support tree-shaking (Rollup, esbuild, webpack 5+) will exclude',
     '// unused modules from the final bundle. Import only what you need:',
     '//',
-    '//   import { WASM_LIBDEFLATE_BASE64 } from "./inlineWasm.generated.js";',
+    '//   import { WASM_LIBDEFLATE_BASE64 } from "./internal/inlineWasm.generated.js";',
     '//',
     '// If you import the INLINE_WASM_MODULES map, all modules will be included.',
     '',

@@ -66,8 +66,8 @@
         "src/render/rasterizer.ts",
         "src/render/diff.ts",
         // Barcode Galois-field and placement loops
-        "src/barcode/qr.ts",
-        "src/barcode/dataMatrix.ts"
+        "src/barcode/matrix/qr.ts",
+        "src/barcode/matrix/dataMatrix.ts"
       ],
       "rules": {
         "typescript/no-non-null-assertion": "off"

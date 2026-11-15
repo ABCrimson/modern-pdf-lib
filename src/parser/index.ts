@@ -45,7 +45,11 @@ export { decodeStream } from '../codecs/streamDecode.js';
 // ---------------------------------------------------------------------------
 
 export { decodeJBIG2Async } from '../codecs/jbig2/jbig2Decode.js';
-export { initJBIG2Wasm, isJBIG2WasmAvailable, disposeJBIG2Wasm } from './jbig2WasmBridge.js';
+export {
+  initJBIG2Wasm,
+  isJBIG2WasmAvailable,
+  disposeJBIG2Wasm,
+} from '../wasm/internal/jbig2WasmBridge.js';
 
 // ---------------------------------------------------------------------------
 // JPEG2000 (JPXDecode) decoding

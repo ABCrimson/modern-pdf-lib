@@ -5,8 +5,8 @@ import {
   calculateEanCheckDigit,
   ean13ToOperators,
   ean8ToOperators,
-} from '../../src/barcode/ean.js';
-import { rgb } from '../../src/core/operators/color.js';
+} from '../../../../src/barcode/linear/ean.js';
+import { rgb } from '../../../../src/core/operators/color.js';
 
 // ---------------------------------------------------------------------------
 // EAN check-digit calculation

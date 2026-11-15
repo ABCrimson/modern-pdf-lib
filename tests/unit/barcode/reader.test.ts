@@ -9,10 +9,10 @@ import {
   readEan8,
   readCode39,
   readBarcode,
-} from '../../src/barcode/reader.js';
-import { encodeCode128 } from '../../src/barcode/code128.js';
-import { encodeEan13, encodeEan8 } from '../../src/barcode/ean.js';
-import { encodeCode39 } from '../../src/barcode/code39.js';
+} from '../../../src/barcode/reader.js';
+import { encodeCode128 } from '../../../src/barcode/linear/code128.js';
+import { encodeEan13, encodeEan8 } from '../../../src/barcode/linear/ean.js';
+import { encodeCode39 } from '../../../src/barcode/linear/code39.js';
 
 describe('Barcode Reader', () => {
   // -----------------------------------------------------------------------

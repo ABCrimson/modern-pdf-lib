@@ -7,8 +7,8 @@ import {
   encodeCode39,
   computeCode39CheckDigit,
   code39ToOperators,
-} from '../../src/barcode/code39.js';
-import { rgb } from '../../src/core/operators/color.js';
+} from '../../../../src/barcode/linear/code39.js';
+import { rgb } from '../../../../src/core/operators/color.js';
 
 // ---------------------------------------------------------------------------
 // Encoding tests

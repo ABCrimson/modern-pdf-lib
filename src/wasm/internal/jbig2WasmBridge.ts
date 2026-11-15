@@ -1,5 +1,5 @@
 /**
- * @module parser/jbig2WasmBridge
+ * @module wasm/internal/jbig2WasmBridge
  *
  * WASM-backed JBIG2 decoder using a Rust-compiled module.
  *
@@ -106,7 +106,7 @@ export async function initJBIG2Wasm(wasmBytes?: Uint8Array): Promise<void> {
     if (wasmBytes) {
       bytes = wasmBytes;
     } else {
-      const { loadWasmModule } = await import('../wasm/loader.js');
+      const { loadWasmModule } = await import('../loader.js');
       bytes = await loadWasmModule('jbig2');
     }
 

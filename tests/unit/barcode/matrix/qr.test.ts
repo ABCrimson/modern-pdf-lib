@@ -3,10 +3,10 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { encodeQrCode, qrCodeToOperators } from '../../src/barcode/qr.js';
+import { encodeQrCode, qrCodeToOperators } from '../../../../src/barcode/matrix/qr.js';
 
-import { rgb } from '../../src/core/operators/color.js';
-import { createPdf } from '../../src/core/pdfDocument.js';
+import { rgb } from '../../../../src/core/operators/color.js';
+import { createPdf } from '../../../../src/core/pdfDocument.js';
 
 describe('QR Code Encoder', () => {
   // -----------------------------------------------------------------------

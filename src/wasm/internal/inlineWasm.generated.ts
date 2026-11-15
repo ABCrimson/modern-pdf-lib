@@ -1,5 +1,5 @@
 /**
- * @module wasm/inlineWasm.generated
+ * @module wasm/internal/inlineWasm.generated
  *
  * AUTO-GENERATED FILE -- DO NOT EDIT MANUALLY.
  *

@@ -3,8 +3,8 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { encodeItf, itfToOperators } from '../../src/barcode/itf.js';
-import { rgb } from '../../src/core/operators/color.js';
+import { encodeItf, itfToOperators } from '../../../../src/barcode/linear/itf.js';
+import { rgb } from '../../../../src/core/operators/color.js';
 
 // ---------------------------------------------------------------------------
 // Encoding tests

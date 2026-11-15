@@ -1,5 +1,5 @@
 /**
- * @module barcode/dataMatrix
+ * @module barcode/matrix/dataMatrix
  *
  * Data Matrix ECC200 2D barcode encoder (ISO/IEC 16022).
  *
@@ -20,10 +20,10 @@
  * @packageDocumentation
  */
 
-import type { Color } from '../core/operators/color.js';
-import { applyFillColor } from '../core/operators/color.js';
-import { saveState, restoreState } from '../core/operators/state.js';
-import { rectangle, fill } from '../core/operators/graphics.js';
+import type { Color } from '../../core/operators/color.js';
+import { applyFillColor } from '../../core/operators/color.js';
+import { saveState, restoreState } from '../../core/operators/state.js';
+import { rectangle, fill } from '../../core/operators/graphics.js';
 
 // ---------------------------------------------------------------------------
 // Public types

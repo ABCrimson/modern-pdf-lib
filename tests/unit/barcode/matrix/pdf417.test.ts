@@ -3,9 +3,9 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { encodePdf417, pdf417ToOperators } from '../../src/barcode/pdf417.js';
+import { encodePdf417, pdf417ToOperators } from '../../../../src/barcode/matrix/pdf417.js';
 
-import { rgb } from '../../src/core/operators/color.js';
+import { rgb } from '../../../../src/core/operators/color.js';
 
 describe('PDF417 Encoder', () => {
   // -----------------------------------------------------------------------

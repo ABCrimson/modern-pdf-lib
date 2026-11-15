@@ -3,12 +3,12 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { renderStyledBarcode, calculateBarcodeDimensions } from '../../src/barcode/style.js';
+import { renderStyledBarcode, calculateBarcodeDimensions } from '../../../src/barcode/style.js';
 
-import { encodeCode128 } from '../../src/barcode/code128.js';
-import { encodeEan13 } from '../../src/barcode/ean.js';
-import type { BarcodeMatrix } from '../../src/barcode/types.js';
-import { rgb } from '../../src/core/operators/color.js';
+import { encodeCode128 } from '../../../src/barcode/linear/code128.js';
+import { encodeEan13 } from '../../../src/barcode/linear/ean.js';
+import type { BarcodeMatrix } from '../../../src/barcode/types.js';
+import { rgb } from '../../../src/core/operators/color.js';
 
 // Helper: create a simple test matrix
 function testMatrix(): BarcodeMatrix {

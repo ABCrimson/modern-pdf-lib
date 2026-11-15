@@ -190,7 +190,7 @@
       "area": "barcode",
       "severity": "high",
       "status": "confirmed",
-      "path": "src/barcode/code128.ts",
+      "path": "src/barcode/linear/code128.ts",
       "target": "0.42.3",
       "summary": "Code 128 symbols use wrong start patterns, so scanners cannot decode them."
     },
@@ -199,7 +199,7 @@
       "area": "barcode",
       "severity": "high",
       "status": "confirmed",
-      "path": "src/barcode/qr.ts",
+      "path": "src/barcode/matrix/qr.ts",
       "target": "0.42.4",
       "summary": "QR codes of version 7 and above reserve the wrong area for version information, so some data cells are misplaced."
     },
@@ -208,7 +208,7 @@
       "area": "barcode",
       "severity": "high",
       "status": "confirmed",
-      "path": "src/barcode/qr.ts",
+      "path": "src/barcode/matrix/qr.ts",
       "target": "0.42.4",
       "summary": "QR codes of versions 35 to 40 carry blank version information and are invalid."
     },
@@ -217,7 +217,7 @@
       "area": "barcode",
       "severity": "high",
       "status": "confirmed",
-      "path": "src/barcode/qr.ts",
+      "path": "src/barcode/matrix/qr.ts",
       "target": "0.42.4",
       "summary": "QR codes of versions 20 to 22 at some error-correction levels use wrong block sizes."
     },
@@ -226,7 +226,7 @@
       "area": "barcode",
       "severity": "high",
       "status": "confirmed",
-      "path": "src/barcode/dataMatrix.ts",
+      "path": "src/barcode/matrix/dataMatrix.ts",
       "target": "0.42.5",
       "summary": "Data Matrix error-correction codewords are computed wrongly, so symbols do not decode."
     },
@@ -235,7 +235,7 @@
       "area": "barcode",
       "severity": "high",
       "status": "confirmed",
-      "path": "src/barcode/dataMatrix.ts",
+      "path": "src/barcode/matrix/dataMatrix.ts",
       "target": "0.42.5",
       "summary": "Data Matrix symbols are written vertically mirrored."
     },
@@ -244,7 +244,7 @@
       "area": "barcode",
       "severity": "high",
       "status": "confirmed",
-      "path": "src/barcode/pdf417.ts",
+      "path": "src/barcode/matrix/pdf417.ts",
       "target": "0.42.5",
       "summary": "PDF417 symbols use codeword tables that do not match ISO/IEC 15438."
     },
@@ -253,7 +253,7 @@
       "area": "barcode",
       "severity": "high",
       "status": "confirmed",
-      "path": "src/barcode/pdf417.ts",
+      "path": "src/barcode/matrix/pdf417.ts",
       "target": "0.42.5",
       "summary": "The PDF417 error-correction generator does not match ISO/IEC 15438."
     },
@@ -262,7 +262,7 @@
       "area": "barcode",
       "severity": "high",
       "status": "confirmed",
-      "path": "src/barcode/pdf417.ts",
+      "path": "src/barcode/matrix/pdf417.ts",
       "target": "0.42.5",
       "summary": "PDF417 text compaction encodes mixed-mode characters and mode switches wrongly."
     },
@@ -271,7 +271,7 @@
       "area": "barcode",
       "severity": "high",
       "status": "confirmed",
-      "path": "tests/barcode/qr.test.ts",
+      "path": "tests/unit/barcode/matrix/qr.test.ts",
       "target": "0.42.5",
       "summary": "No test reads generated barcodes with an independent decoder."
     },
@@ -280,7 +280,7 @@
       "area": "barcode",
       "severity": "high",
       "status": "missed",
-      "path": "src/barcode/pdf417.ts",
+      "path": "src/barcode/matrix/pdf417.ts",
       "target": "0.42.5",
       "summary": "PDF417 punctuation sub-mode assigns wrong values to '(', ')' and '*'."
     },
@@ -1216,7 +1216,7 @@
       "area": "rust-crates",
       "severity": "high",
       "status": "confirmed",
-      "path": "src/parser/jbig2WasmBridge.ts",
+      "path": "src/wasm/internal/jbig2WasmBridge.ts",
       "target": "0.47.0",
       "summary": "WASM modules are instantiated without the imports they need and cannot link."
     },
@@ -1846,7 +1846,7 @@
       "area": "tests-unit-parser-a",
       "severity": "high",
       "status": "confirmed",
-      "path": "src/parser/jbig2WasmBridge.ts",
+      "path": "src/wasm/internal/jbig2WasmBridge.ts",
       "target": "0.47.0",
       "summary": "The JBIG2 WASM bridge cannot instantiate its module."
     },

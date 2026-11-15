@@ -9,10 +9,13 @@ import {
   initJBIG2Wasm,
   isJBIG2WasmAvailable,
   disposeJBIG2Wasm,
-} from '../../../src/parser/jbig2WasmBridge.js';
-import { decodeJBIG2Async, resetJBIG2WasmBridge } from '../../../src/codecs/jbig2/jbig2Decode.js';
-import { PdfDict } from '../../../src/core/pdfObjects.js';
-import { UnsupportedFilterError } from '../../../src/errors.js';
+} from '../../../../src/wasm/internal/jbig2WasmBridge.js';
+import {
+  decodeJBIG2Async,
+  resetJBIG2WasmBridge,
+} from '../../../../src/codecs/jbig2/jbig2Decode.js';
+import { PdfDict } from '../../../../src/core/pdfObjects.js';
+import { UnsupportedFilterError } from '../../../../src/errors.js';
 
 // ---------------------------------------------------------------------------
 // Reset state between tests

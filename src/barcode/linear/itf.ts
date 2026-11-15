@@ -1,5 +1,5 @@
 /**
- * @module barcode/itf
+ * @module barcode/linear/itf
  *
  * ITF (Interleaved 2 of 5) barcode encoding with optional bearer bars
  * and native PDF vector rendering.
@@ -16,10 +16,10 @@
  * Reference: ISO/IEC 16390:2007, ANSI/AIM BC2-1995
  */
 
-import type { Color } from '../core/operators/color.js';
-import { applyFillColor } from '../core/operators/color.js';
-import type { BarcodeMatrix } from './types.js';
-import { warnOnce } from '../internal/warnings.js';
+import type { Color } from '../../core/operators/color.js';
+import { applyFillColor } from '../../core/operators/color.js';
+import type { BarcodeMatrix } from '../types.js';
+import { warnOnce } from '../../internal/warnings.js';
 
 export type { BarcodeMatrix };
 

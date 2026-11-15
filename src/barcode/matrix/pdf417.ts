@@ -1,5 +1,5 @@
 /**
- * @module barcode/pdf417
+ * @module barcode/matrix/pdf417
  *
  * PDF417 2D stacked barcode encoder with text and byte compaction modes,
  * Reed-Solomon error correction over GF(929), and native PDF vector rendering.
@@ -18,11 +18,11 @@
  * Reference: ISO/IEC 15438:2006
  */
 
-import type { Color } from '../core/operators/color.js';
-import { applyFillColor } from '../core/operators/color.js';
-import { saveState, restoreState } from '../core/operators/state.js';
-import { fill } from '../core/operators/graphics.js';
-import { warnOnce } from '../internal/warnings.js';
+import type { Color } from '../../core/operators/color.js';
+import { applyFillColor } from '../../core/operators/color.js';
+import { saveState, restoreState } from '../../core/operators/state.js';
+import { fill } from '../../core/operators/graphics.js';
+import { warnOnce } from '../../internal/warnings.js';
 
 // ---------------------------------------------------------------------------
 // Public types

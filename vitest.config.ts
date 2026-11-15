@@ -97,9 +97,17 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       include: ['src/**/*.ts'],
-      // Exclude generated WASM bindings (their sourcemaps confuse the v8
-      // remapper) and all declaration files from coverage instrumentation.
-      exclude: ['src/wasm/**', '**/*.d.ts', '**/*.wasm.*'],
+      // Exclude the TypeScript side of the WASM modules under src/wasm (the
+      // loader, the inline-bytes cache, the generated inline module and the
+      // JPEG bridge) and all declaration files from coverage instrumentation;
+      // the JBIG2 bridge in src/wasm/internal/ stays measured.
+      exclude: [
+        'src/wasm/*.ts',
+        'src/wasm/jpeg/**',
+        'src/wasm/internal/inlineWasm.generated.ts',
+        '**/*.d.ts',
+        '**/*.wasm.*',
+      ],
       // Honest floors set just below the measured baseline (statements 78%,
       // branches 69%, functions 87%, lines 79%) — they catch regressions
       // without false-failing on the current state.

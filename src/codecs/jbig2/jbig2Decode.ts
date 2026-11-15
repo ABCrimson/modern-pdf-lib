@@ -34,7 +34,8 @@ async function tryLoadJBIG2Wasm(): Promise<boolean> {
   wasmAttempted = true;
 
   try {
-    const { initJBIG2Wasm, isJBIG2WasmAvailable } = await import('../../parser/jbig2WasmBridge.js');
+    const { initJBIG2Wasm, isJBIG2WasmAvailable } =
+      await import('../../wasm/internal/jbig2WasmBridge.js');
     await initJBIG2Wasm();
     wasmAvailable = isJBIG2WasmAvailable();
     return wasmAvailable;
@@ -91,7 +92,7 @@ export async function decodeJBIG2Async(
   // Try WASM first
   if (await tryLoadJBIG2Wasm()) {
     try {
-      const { decodeJBIG2Wasm } = await import('../../parser/jbig2WasmBridge.js');
+      const { decodeJBIG2Wasm } = await import('../../wasm/internal/jbig2WasmBridge.js');
       const result = decodeJBIG2Wasm(data, globalsData);
       return result.bitmapData;
     } catch {

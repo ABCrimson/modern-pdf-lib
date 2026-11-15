@@ -1,5 +1,5 @@
 /**
- * @module barcode/code128
+ * @module barcode/linear/code128
  *
  * Code 128 barcode encoding with automatic A/B/C code-set switching,
  * modulo-103 check digit calculation, and native PDF vector rendering.
@@ -15,10 +15,10 @@
  * Reference: ISO/IEC 15417:2007
  */
 
-import type { Color } from '../core/operators/color.js';
-import { applyFillColor } from '../core/operators/color.js';
-import type { BarcodeMatrix } from './types.js';
-import { warnOnce } from '../internal/warnings.js';
+import type { Color } from '../../core/operators/color.js';
+import { applyFillColor } from '../../core/operators/color.js';
+import type { BarcodeMatrix } from '../types.js';
+import { warnOnce } from '../../internal/warnings.js';
 
 // ---------------------------------------------------------------------------
 // Code 128 bar patterns (107 symbols: values 0-106)
@@ -178,8 +178,8 @@ export interface Code128Options {
   readonly fontSize?: number;
 }
 
-// BarcodeMatrix is imported from ./types.js
-export type { BarcodeMatrix } from './types.js';
+// BarcodeMatrix is imported from ../types.js
+export type { BarcodeMatrix } from '../types.js';
 
 // ---------------------------------------------------------------------------
 // Code set helpers

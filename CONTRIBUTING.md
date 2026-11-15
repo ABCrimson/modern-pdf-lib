@@ -124,7 +124,7 @@ Run each as `pnpm run <name>`.
 | `dev` | Vite dev server |
 | `docs:dev` / `docs:build` | VitePress site |
 | `docs:api` | Regenerate the TypeDoc API reference + VitePress sanitizer |
-| `generate:wasm-inline` | Regenerate `src/wasm/inlineWasm.generated.ts` |
+| `generate:wasm-inline` | Regenerate `src/wasm/internal/inlineWasm.generated.ts` |
 | `validate-pdf` | Structural validation of a generated PDF |
 | `clean` | Remove `dist/` and `coverage/` |
 
@@ -240,9 +240,8 @@ slower and vary from run to run. The memory budget is never scaled.
 
 | Directory | Contents | Count |
 |---|---|---|
-| `tests/unit/` | Per-module unit tests mirroring `src/` | 310 files |
+| `tests/unit/` | Per-module unit tests mirroring `src/` | 320 files |
 | `tests/layout/` | Table, header/footer, and text-layout behaviour | 11 files |
-| `tests/barcode/` | Symbology encoders (QR, Code 128, EAN, PDF417, …) | 10 files |
 | `tests/image/` | An image-optimization benchmark (`optimization.bench.ts`) | — |
 | `tests/browser/` | Browser-surface APIs under a simulated DOM | 8 files |
 | `tests/integration/` | Cross-module end-to-end document flows | 3 files |

@@ -1,5 +1,5 @@
 /**
- * @module barcode/upc
+ * @module barcode/linear/upc
  *
  * UPC-A barcode encoding and PDF operator generation.
  *
@@ -16,10 +16,10 @@ import {
   matrixToOperators,
   warnIgnoredTextOptions,
 } from './ean.js';
-import type { BarcodeMatrix, BarcodeOptions } from './types.js';
+import type { BarcodeMatrix, BarcodeOptions } from '../types.js';
 
 // Re-export the options type under a UPC-specific alias.
-export type { BarcodeOptions as UpcOptions } from './types.js';
+export type { BarcodeOptions as UpcOptions } from '../types.js';
 
 // ---------------------------------------------------------------------------
 // Check-digit calculation

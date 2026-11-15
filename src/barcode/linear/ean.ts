@@ -1,5 +1,5 @@
 /**
- * @module barcode/ean
+ * @module barcode/linear/ean
  *
  * EAN-13 and EAN-8 barcode encoding and PDF operator generation.
  *
@@ -9,16 +9,16 @@
  * Reference: GS1 General Specifications, Section 5.2.
  */
 
-import { rectangle } from '../core/operators/graphics.js';
-import { fill } from '../core/operators/graphics.js';
-import { saveState, restoreState } from '../core/operators/state.js';
-import { applyFillColor } from '../core/operators/color.js';
-import type { Color } from '../core/operators/color.js';
-import type { BarcodeMatrix, BarcodeOptions } from './types.js';
-import { warnOnce } from '../internal/warnings.js';
+import { rectangle } from '../../core/operators/graphics.js';
+import { fill } from '../../core/operators/graphics.js';
+import { saveState, restoreState } from '../../core/operators/state.js';
+import { applyFillColor } from '../../core/operators/color.js';
+import type { Color } from '../../core/operators/color.js';
+import type { BarcodeMatrix, BarcodeOptions } from '../types.js';
+import { warnOnce } from '../../internal/warnings.js';
 
 // Re-export the options type under an EAN-specific alias for convenience.
-export type { BarcodeOptions as EanOptions } from './types.js';
+export type { BarcodeOptions as EanOptions } from '../types.js';
 
 // ---------------------------------------------------------------------------
 // Encoding tables

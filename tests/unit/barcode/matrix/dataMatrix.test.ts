@@ -3,9 +3,12 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { encodeDataMatrix, dataMatrixToOperators } from '../../src/barcode/dataMatrix.js';
+import {
+  encodeDataMatrix,
+  dataMatrixToOperators,
+} from '../../../../src/barcode/matrix/dataMatrix.js';
 
-import { rgb } from '../../src/core/operators/color.js';
+import { rgb } from '../../../../src/core/operators/color.js';
 
 describe('Data Matrix ECC200', () => {
   // -----------------------------------------------------------------------

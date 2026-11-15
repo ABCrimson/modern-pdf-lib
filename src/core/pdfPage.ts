@@ -84,8 +84,8 @@ import { markForRedaction } from './redaction.js';
 import type { EmbeddedPdfPage, DrawPageOptions } from './pdfEmbed.js';
 import type { GradientFill, PatternFill } from '../graphics/patterns.js';
 import { buildGradientObjects, buildPatternObjects } from '../graphics/patterns.js';
-import { encodeQrCode, qrCodeToOperators } from '../barcode/qr.js';
-import type { ErrorCorrectionLevel } from '../barcode/qr.js';
+import { encodeQrCode, qrCodeToOperators } from '../barcode/matrix/qr.js';
+import type { ErrorCorrectionLevel } from '../barcode/matrix/qr.js';
 import { renderTable } from '../layout/table.js';
 import type { DrawTableOptions, TableRenderResult } from '../layout/table.js';
 

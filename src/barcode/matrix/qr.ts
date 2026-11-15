@@ -1,5 +1,5 @@
 /**
- * @module barcode/qr
+ * @module barcode/matrix/qr
  *
  * Full QR code encoder (ISO 18004) that generates native PDF vector graphics.
  * Supports versions 1-40, all 4 error correction levels, and auto-detects
@@ -9,11 +9,11 @@
  * dark module, producing resolution-independent vector barcodes.
  */
 
-import type { Color } from '../core/operators/color.js';
-import { applyFillColor } from '../core/operators/color.js';
-import { saveState, restoreState } from '../core/operators/state.js';
-import { rectangle, fill } from '../core/operators/graphics.js';
-import { warnOnce } from '../internal/warnings.js';
+import type { Color } from '../../core/operators/color.js';
+import { applyFillColor } from '../../core/operators/color.js';
+import { saveState, restoreState } from '../../core/operators/state.js';
+import { rectangle, fill } from '../../core/operators/graphics.js';
+import { warnOnce } from '../../internal/warnings.js';
 
 // ---------------------------------------------------------------------------
 // Public types

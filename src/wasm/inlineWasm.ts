@@ -323,7 +323,7 @@ function getBase64Data(name: string): string {
 export async function loadInlineWasmModule(): Promise<void> {
   if (generatedModule) return;
 
-  const mod = (await import('./inlineWasm.generated.js')) as GeneratedModule;
+  const mod = (await import('./internal/inlineWasm.generated.js')) as GeneratedModule;
   generatedModule = mod;
 }
 
@@ -334,7 +334,7 @@ export async function loadInlineWasmModule(): Promise<void> {
  * has already been imported statically:
  *
  * ```ts
- * import * as generated from './inlineWasm.generated.js';
+ * import * as generated from './internal/inlineWasm.generated.js';
  * provideInlineWasmModule(generated);
  * ```
  *

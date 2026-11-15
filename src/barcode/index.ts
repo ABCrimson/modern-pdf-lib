@@ -16,16 +16,16 @@ export {
   encodeCode128Values,
   valuesToModules,
   code128ToOperators,
-} from './code128.js';
-export type { Code128Options } from './code128.js';
+} from './linear/code128.js';
+export type { Code128Options } from './linear/code128.js';
 
 // Code 39
-export { encodeCode39, computeCode39CheckDigit, code39ToOperators } from './code39.js';
-export type { Code39Options } from './code39.js';
+export { encodeCode39, computeCode39CheckDigit, code39ToOperators } from './linear/code39.js';
+export type { Code39Options } from './linear/code39.js';
 
 // ITF (Interleaved 2 of 5)
-export { encodeItf, itfToOperators } from './itf.js';
-export type { ItfOptions } from './itf.js';
+export { encodeItf, itfToOperators } from './linear/itf.js';
+export type { ItfOptions } from './linear/itf.js';
 
 // EAN-13 / EAN-8
 export {
@@ -34,24 +34,24 @@ export {
   calculateEanCheckDigit,
   ean13ToOperators,
   ean8ToOperators,
-} from './ean.js';
-export type { EanOptions } from './ean.js';
+} from './linear/ean.js';
+export type { EanOptions } from './linear/ean.js';
 
 // UPC-A
-export { encodeUpcA, calculateUpcCheckDigit, upcAToOperators } from './upc.js';
-export type { UpcOptions } from './upc.js';
+export { encodeUpcA, calculateUpcCheckDigit, upcAToOperators } from './linear/upc.js';
+export type { UpcOptions } from './linear/upc.js';
 
 // QR Code (ISO 18004)
-export { encodeQrCode, qrCodeToOperators } from './qr.js';
-export type { QrCodeOptions, QrCodeMatrix, ErrorCorrectionLevel } from './qr.js';
+export { encodeQrCode, qrCodeToOperators } from './matrix/qr.js';
+export type { QrCodeOptions, QrCodeMatrix, ErrorCorrectionLevel } from './matrix/qr.js';
 
 // Data Matrix (ISO/IEC 16022 ECC200)
-export { encodeDataMatrix, dataMatrixToOperators } from './dataMatrix.js';
-export type { DataMatrixOptions, DataMatrixResult } from './dataMatrix.js';
+export { encodeDataMatrix, dataMatrixToOperators } from './matrix/dataMatrix.js';
+export type { DataMatrixOptions, DataMatrixResult } from './matrix/dataMatrix.js';
 
 // PDF417 (ISO/IEC 15438)
-export { encodePdf417, pdf417ToOperators } from './pdf417.js';
-export type { Pdf417Options, Pdf417Matrix } from './pdf417.js';
+export { encodePdf417, pdf417ToOperators } from './matrix/pdf417.js';
+export type { Pdf417Options, Pdf417Matrix } from './matrix/pdf417.js';
 
 // Barcode styling
 export { renderStyledBarcode, calculateBarcodeDimensions } from './style.js';

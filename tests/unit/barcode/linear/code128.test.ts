@@ -8,9 +8,9 @@ import {
   encodeCode128Values,
   valuesToModules,
   code128ToOperators,
-} from '../../src/barcode/code128.js';
+} from '../../../../src/barcode/linear/code128.js';
 
-import { rgb } from '../../src/core/operators/color.js';
+import { rgb } from '../../../../src/core/operators/color.js';
 
 // ---------------------------------------------------------------------------
 // Helper: manually compute the check digit from symbol values

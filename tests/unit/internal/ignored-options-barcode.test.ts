@@ -6,18 +6,18 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { MockInstance } from 'vitest';
-import { code128ToOperators, encodeCode128 } from '../../../src/barcode/code128.js';
-import { code39ToOperators, encodeCode39 } from '../../../src/barcode/code39.js';
-import { encodeItf, itfToOperators } from '../../../src/barcode/itf.js';
+import { code128ToOperators, encodeCode128 } from '../../../src/barcode/linear/code128.js';
+import { code39ToOperators, encodeCode39 } from '../../../src/barcode/linear/code39.js';
+import { encodeItf, itfToOperators } from '../../../src/barcode/linear/itf.js';
 import {
   ean13ToOperators,
   ean8ToOperators,
   encodeEan13,
   encodeEan8,
-} from '../../../src/barcode/ean.js';
-import { encodeUpcA, upcAToOperators } from '../../../src/barcode/upc.js';
-import { encodeQrCode, qrCodeToOperators } from '../../../src/barcode/qr.js';
-import { encodePdf417, pdf417ToOperators } from '../../../src/barcode/pdf417.js';
+} from '../../../src/barcode/linear/ean.js';
+import { encodeUpcA, upcAToOperators } from '../../../src/barcode/linear/upc.js';
+import { encodeQrCode, qrCodeToOperators } from '../../../src/barcode/matrix/qr.js';
+import { encodePdf417, pdf417ToOperators } from '../../../src/barcode/matrix/pdf417.js';
 import { resetWarningsForTesting } from '../../../src/internal/warnings.js';
 
 const TYPE = 'ModernPdfLibWarning';
