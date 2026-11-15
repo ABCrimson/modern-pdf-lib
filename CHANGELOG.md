@@ -57,6 +57,7 @@ No export added, removed or changed.
 - **Corpus:** of the 33 corpus files, 29 load (25 before) and 19 pass every check (8 before).
 - **Known-defect markers:** 106 markers on 35 ledger ids in 9 files (173 before). 70 became plain tests: 28 on the raw DEFLATE output, 35 on loading cross-reference streams and object streams, 6 on default re-saves through `qpdf --check` and 1 on PNG stream data. 19 are keyed to another open entry with the failure they now show (the revision-6 key derivation, or text extraction), and the 3 checks of `pyhanko-aes256.pdf` that passed before are markers of the revision-6 key derivation.
 - **Ledger:** `audit/open-highs.json` closes the 9 entries this release fixes; it lists 253 open entries (262 before) and 71 closed. In `docs/capabilities.json` 6 rows are now graded `oracle` (none before), 26 `behaviour`, 84 `qualified` and 17 `pending`.
+- **CI test timeout:** under `CI` a test may run 60 seconds (5 locally): on the hosted runners the test that re-wraps a stream of just under 64 MiB needs more than 5 seconds.
 
 ### Documentation
 

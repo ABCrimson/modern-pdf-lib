@@ -26,12 +26,14 @@ const NO_BENCHMARKS = { include: [] };
 // directories. `node scripts/dev/test-projects.ts --check` fails when a
 // tests/**/*.test.ts file matches no project or more than one.
 // `extends: true` (the Vitest 5.1 default, written out) gives every project
-// the root options below: pool, execArgv and the CI worker cap.
+// the root options below: pool, execArgv, the CI test timeout and the CI worker cap.
 export default defineConfig({
   test: {
     pool: 'forks',
     execArgv: [`--max-old-space-size=${WORKER_HEAP_MB}`],
-    ...(process.env.CI ? { maxWorkers: 3 } : {}),
+    // The hosted runners are slower than a developer machine, and coverage slows the heaviest
+    // tests further: under CI a test may run 60 s (Vitest's default is 5 s).
+    ...(process.env.CI ? { maxWorkers: 3, testTimeout: 60_000 } : {}),
     projects: [
       {
         extends: true,
