@@ -210,7 +210,7 @@ all four, and `pnpm run test:<project>` runs one.
 
 | Project | Files | What it holds | Retries |
 |---|---|---|---|
-| `unit` | `tests/unit`, `tests/barcode`, `tests/compliance`, `tests/image`, `tests/layout`, `tests/browser` (346 files) | Module tests; it also owns the benchmark files | 2 |
+| `unit` | `tests/unit`, `tests/barcode`, `tests/compliance`, `tests/image`, `tests/layout`, `tests/browser` (347 files) | Module tests; it also owns the benchmark files | 2 |
 | `integration` | `tests/integration` (4 files) | Cross-module document flows | 2 |
 | `oracle` | `tests/oracle` (17 files) | The library's output judged by tools outside it (qpdf, pdf.js, an independent hash port), the real-world corpus, the API snapshot | 0 |
 | `adversarial` | `tests/adversarial` (14 files) | Form-script escape probes, and inputs that must end in their error inside the budget of `tests/helpers/budget.ts` | 0 |
@@ -240,7 +240,7 @@ slower and vary from run to run. The memory budget is never scaled.
 
 | Directory | Contents | Count |
 |---|---|---|
-| `tests/unit/` | Per-module unit tests mirroring `src/` | 300 files |
+| `tests/unit/` | Per-module unit tests mirroring `src/` | 301 files |
 | `tests/layout/` | Table, header/footer, and text-layout behaviour | 11 files |
 | `tests/barcode/` | Symbology encoders (QR, Code 128, EAN, PDF417, …) | 10 files |
 | `tests/image/` | Image decoders and embedding | 9 files |
@@ -290,9 +290,9 @@ oracle job install the checksum-pinned qpdf and export `QPDF`. The API snapshot 
 `dist/` and `dist/wasm/` (`pnpm run build`, `pnpm run copy:wasm`) and the
 release tags: locally it skips without them, and in CI it fails.
 
-With qpdf and a built `dist/`, `pnpm test` reports 381 files and 9,135
-tests: 9,086 passed and 49 expected failures (the markers). Without qpdf,
-8,717 pass, 11 are expected failures and 407 skip.
+With qpdf and a built `dist/`, `pnpm test` reports 382 files and 9,136
+tests: 9,087 passed and 49 expected failures (the markers). Without qpdf,
+8,718 pass, 11 are expected failures and 407 skip.
 
 ---
 
