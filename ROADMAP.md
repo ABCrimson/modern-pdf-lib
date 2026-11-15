@@ -1,6 +1,6 @@
 # modern-pdf-lib — Roadmap to 1.0.0
 
-> Feature plan from **0.28.0** through **1.0.0** (current: **0.40.9**). The per-patch rows are the plan as first written; the CHANGELOG says what each release contains. 0.40.4 to 0.40.9 were toolchain, testing, security and correctness releases. From 0.41.0, releases first close the 212 open findings in `audit/open-highs.json`, each at the release its entry names (0.41.0 to 0.49.4; strings above 0x7F in 0.41.0, encrypted incremental and streamed saves in 0.41.2).
+> Feature plan from **0.28.0** through **1.0.0** (current: **0.40.9**). The per-patch rows are the plan as first written; the CHANGELOG says what each release contains. 0.40.4 to 0.40.9 were toolchain, testing, security and correctness releases. From 0.41.0, releases first close the 215 open findings in `audit/open-highs.json`, each at the release its entry names (0.41.0 to 0.49.4; strings above 0x7F in 0.41.0, encrypted incremental and streamed saves in 0.41.2).
 > Versioning follows [`VERSIONING.md`](https://github.com/ABCrimson/modern-pdf-lib/blob/master/VERSIONING.md): patch `.0–.9`, then roll to the next minor.
 > Effort key: **S** ≤1 day · **M** a few days · **L** ~1–2 weeks · **XL** multi-week.
 

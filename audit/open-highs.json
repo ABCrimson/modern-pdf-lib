@@ -1,13 +1,13 @@
 {
   "$schema": "./open-highs.schema.json",
   "release": "0.40.9",
-  "generated": "2026-11-12",
-  "source": "audit of 0.40.3 (2026-10/11) plus the 0.40.6 re-check and the 2026-11-12 re-check",
+  "generated": "2026-11-15",
+  "source": "audit of 0.40.3 (2026-10/11) plus the 0.40.6 re-check, the 2026-11-12 re-check and the findings added on 2026-11-15",
   "counts": {
-    "open": 212,
+    "open": 215,
     "closedThisRelease": 15,
     "byTarget": {
-      "0.41.0": 16,
+      "0.41.0": 19,
       "0.41.1": 18,
       "0.41.2": 14,
       "0.41.3": 5,
@@ -184,6 +184,15 @@
       "path": "src/codecs/internal/libdeflateWasm.ts",
       "target": "0.47.0",
       "summary": "initDeflateWasm cannot instantiate the shipped deflate WASM module and always rejects."
+    },
+    {
+      "id": "api-surface-utils-M03",
+      "area": "api-surface-utils",
+      "severity": "high",
+      "status": "missed",
+      "path": "src/wasm/loader.ts",
+      "target": "0.41.0",
+      "summary": "On Windows under Node, loadWasmModule builds the file path of a packaged WASM file from the module URL with .pathname, which gives /C:/... and then C:\\C:\\..., so the file is not found and the module does not load."
     },
     {
       "id": "barcode-01",
@@ -1068,6 +1077,15 @@
       "summary": "Fonts and images added to a loaded page can reuse resource names already in use."
     },
     {
+      "id": "parser-syntax-M05",
+      "area": "parser-syntax",
+      "severity": "high",
+      "status": "missed",
+      "path": "src/parser/internal/lexer.ts",
+      "target": "0.41.0",
+      "summary": "A hexadecimal string of 200,000 bytes or more fails to parse, so a file that holds one in its catalog or a page dictionary does not load, and one in the information dictionary silently loses its metadata."
+    },
+    {
       "id": "parser-text-01",
       "area": "parser-text",
       "severity": "high",
@@ -1354,6 +1372,15 @@
       "path": "src/signature/cms/timestamp.ts",
       "target": "0.45.0",
       "summary": "parseTimestampResponse and requestTimestamp return a timestampToken cut from the response at a wrong offset, so the returned bytes are not the token the response holds."
+    },
+    {
+      "id": "signature-cms-M02",
+      "area": "signature-cms",
+      "severity": "high",
+      "status": "missed",
+      "path": "src/signature/pades/byteRange.ts",
+      "target": "0.41.0",
+      "summary": "prepareForSigning writes the signature field name into the widget's /T string without escaping, so a name with a closing parenthesis ends the string early and a backslash alters the name."
     },
     {
       "id": "signature-pki-01",
