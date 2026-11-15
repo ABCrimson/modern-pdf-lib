@@ -1,5 +1,5 @@
 /**
- * @module parser/objectParser
+ * @module parser/internal/objectParser
  *
  * Converts a token stream produced by {@link PdfLexer} into instances of the
  * PDF object model defined in `core/pdfObjects`.
@@ -13,9 +13,9 @@
 
 import type { PdfLexer, Token } from './lexer.js';
 import { TokenType } from './lexer.js';
-import { PdfParseError } from './parseError.js';
+import { PdfParseError } from '../parseError.js';
 import { KeywordIndex, frameStreamData } from './streamFraming.js';
-import { ResourceLimitError } from '../errors.js';
+import { ResourceLimitError } from '../../errors.js';
 import {
   type PdfObject,
   PdfNull,
@@ -28,7 +28,7 @@ import {
   PdfStream,
   PdfRef,
   type PdfObjectRegistry,
-} from '../core/pdfObjects.js';
+} from '../../core/pdfObjects.js';
 
 /** Most `/Length` targets that are resolved inside one another before the next one is refused. */
 const MAX_LENGTH_DEPTH = 8;

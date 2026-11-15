@@ -1,5 +1,5 @@
 /**
- * @module parser/streamFraming
+ * @module parser/internal/streamFraming
  *
  * The one rule that decides where the data of a stream object ends. Both the object parser and
  * the streaming parser frame stream data through {@link frameStreamData}.

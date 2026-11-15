@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
-import type { TextItem } from '../../../src/parser/textExtractor.js';
-import { reconstructLines, reconstructParagraphs } from '../../../src/parser/textReconstruct.js';
+import type { TextItem } from '../../../../src/parser/text/textExtractor.js';
+import {
+  reconstructLines,
+  reconstructParagraphs,
+} from '../../../../src/parser/text/textReconstruct.js';
 
 /** Helper to build a TextItem with sensible defaults. */
 function item(text: string, x: number, y: number, width: number, fontSize = 10): TextItem {

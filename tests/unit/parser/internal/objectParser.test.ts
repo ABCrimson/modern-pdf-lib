@@ -9,9 +9,9 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { PdfLexer } from '../../../src/parser/lexer.js';
-import { PdfObjectParser } from '../../../src/parser/objectParser.js';
-import { ResourceLimitError } from '../../../src/errors.js';
+import { PdfLexer } from '../../../../src/parser/internal/lexer.js';
+import { PdfObjectParser } from '../../../../src/parser/internal/objectParser.js';
+import { ResourceLimitError } from '../../../../src/errors.js';
 import {
   PdfNull,
   PdfBool,
@@ -23,8 +23,8 @@ import {
   PdfStream,
   PdfRef,
   PdfObjectRegistry,
-} from '../../../src/core/pdfObjects.js';
-import type { PdfObject } from '../../../src/core/pdfObjects.js';
+} from '../../../../src/core/pdfObjects.js';
+import type { PdfObject } from '../../../../src/core/pdfObjects.js';
 
 // ---------------------------------------------------------------------------
 // Helpers

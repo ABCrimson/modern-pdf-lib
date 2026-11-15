@@ -21,7 +21,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { MockInstance } from 'vitest';
 import { extractText, loadPdf, parseContentStream } from '../../../src/index.js';
 import type { PdfDocument } from '../../../src/index.js';
-import { XrefParser } from '../../../src/parser/xrefParser.js';
+import { XrefParser } from '../../../src/parser/internal/xrefParser.js';
 
 // ---------------------------------------------------------------------------
 // Helpers

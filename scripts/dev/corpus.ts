@@ -606,7 +606,7 @@ async function admitChild(file: string, password: string | undefined): Promise<v
   // this program; the child always runs under tsx, which compiles the .ts sources.
   const lib = (await import(pathToFileURL(join(REPO, 'src/index.ts')).href)) as Library;
   const { XrefParser } = (await import(
-    pathToFileURL(join(REPO, 'src/parser/xrefParser.ts')).href
+    pathToFileURL(join(REPO, 'src/parser/internal/xrefParser.ts')).href
   )) as {
     XrefParser: ScanTarget;
   };

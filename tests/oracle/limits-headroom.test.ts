@@ -55,7 +55,7 @@ import { INTERNAL_LIMITS } from '../../src/internal/limits.js';
 import type { ResourceLimitName } from '../../src/internal/limits.js';
 import { decodeWoff, isWoff } from '../../src/assets/font/woff.js';
 import { decodeStream, getStreamFilters } from '../../src/codecs/streamDecode.js';
-import { parseToUnicodeCMap } from '../../src/parser/textExtractor.js';
+import { parseToUnicodeCMap } from '../../src/parser/text/textExtractor.js';
 import { embedPng } from '../../src/assets/image/pngEmbed.js';
 import { embedJpeg } from '../../src/assets/image/jpegEmbed.js';
 import { decodeWebP, isWebP } from '../../src/assets/image/webpDecode.js';

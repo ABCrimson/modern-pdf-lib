@@ -8,7 +8,7 @@
  * per stream, and its cost grows with the number of streams times the object's size.
  */
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { PdfObjectParser } from '../../../src/parser/objectParser.js';
+import { PdfObjectParser } from '../../../src/parser/internal/objectParser.js';
 import { loadPdf } from '../../../src/index.js';
 import { PdfRef } from '../../../src/core/pdfObjects.js';
 import type { PdfStream } from '../../../src/core/pdfObjects.js';

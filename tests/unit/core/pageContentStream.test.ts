@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { PdfDocument } from '../../../src/core/pdfDocument.js';
 import { parseContentStream } from '../../../src/parser/contentStreamParser.js';
-import { extractText } from '../../../src/parser/textExtractor.js';
+import { extractText } from '../../../src/parser/text/textExtractor.js';
 
 /**
  * Public text-extraction bridge: `PdfPage.getContentStream()` must return the

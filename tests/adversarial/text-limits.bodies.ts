@@ -4,7 +4,7 @@
  * short string, a font is a few hundred bytes of tables (see {@link buildCmapFont}).
  */
 import type { JsonValue } from '../helpers/budget.js';
-import { parseToUnicodeCMap } from '../../src/parser/textExtractor.js';
+import { parseToUnicodeCMap } from '../../src/parser/text/textExtractor.js';
 import { extractMetrics } from '../../src/assets/font/fontMetrics.js';
 
 /** One cmap format 12 group, or one format 4 segment (`glyph` is the idDelta-based start glyph). */

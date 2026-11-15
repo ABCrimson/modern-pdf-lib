@@ -1,5 +1,5 @@
 /**
- * @module parser/xrefParser
+ * @module parser/internal/xrefParser
  *
  * Cross-reference table parser for PDF documents.
  *
@@ -15,7 +15,7 @@
  * @packageDocumentation
  */
 
-import type { PdfObject } from '../core/pdfObjects.js';
+import type { PdfObject } from '../../core/pdfObjects.js';
 import {
   PdfRef,
   PdfDict,
@@ -24,11 +24,11 @@ import {
   PdfArray,
   PdfStream,
   PdfString,
-} from '../core/pdfObjects.js';
+} from '../../core/pdfObjects.js';
 import type { PdfObjectParser } from './objectParser.js';
-import { decodeFlateOnly, firstFilterName } from '../codecs/streamDecode.js';
-import { PdfParseError } from './parseError.js';
-import { ResourceLimitError } from '../errors.js';
+import { decodeFlateOnly, firstFilterName } from '../../codecs/streamDecode.js';
+import { PdfParseError } from '../parseError.js';
+import { ResourceLimitError } from '../../errors.js';
 
 // ---------------------------------------------------------------------------
 // Public interfaces

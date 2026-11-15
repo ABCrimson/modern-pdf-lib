@@ -1,5 +1,5 @@
 /**
- * @module parser/textSearch
+ * @module parser/text/textSearch
  *
  * In-page text search with bounding-box hit-rectangles (ISO 32000-2 reading).
  *

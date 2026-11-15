@@ -1,5 +1,5 @@
 /**
- * @module parser/lexer
+ * @module parser/internal/lexer
  *
  * PDF tokenizer / lexer that operates on raw `Uint8Array` input.
  *
@@ -11,7 +11,7 @@
  * Reference: PDF 1.7 specification, SS 7.2 (Lexical Conventions).
  */
 
-import { PdfParseError } from './parseError.js';
+import { PdfParseError } from '../parseError.js';
 
 // ---------------------------------------------------------------------------
 // Token types

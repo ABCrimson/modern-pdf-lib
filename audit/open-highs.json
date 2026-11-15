@@ -1072,7 +1072,7 @@
       "area": "parser-text",
       "severity": "high",
       "status": "confirmed",
-      "path": "src/parser/textExtractor.ts",
+      "path": "src/parser/text/textExtractor.ts",
       "target": "0.41.6",
       "summary": "Text extraction ignores fonts given as indirect references, so their ToUnicode maps are not applied."
     },
@@ -1081,7 +1081,7 @@
       "area": "parser-text",
       "severity": "high",
       "status": "confirmed",
-      "path": "src/parser/textExtractor.ts",
+      "path": "src/parser/text/textExtractor.ts",
       "target": "0.41.6",
       "summary": "Text extraction reads compressed ToUnicode streams without decompressing them."
     },
@@ -1090,7 +1090,7 @@
       "area": "parser-text",
       "severity": "high",
       "status": "confirmed",
-      "path": "src/parser/tableExtract.ts",
+      "path": "src/parser/text/tableExtract.ts",
       "target": "0.43.5",
       "summary": "Table extraction does not detect tables as documented."
     },
@@ -1792,7 +1792,7 @@
       "area": "tests-unit-core-b",
       "severity": "high",
       "status": "missed",
-      "path": "src/parser/objectParser.ts",
+      "path": "src/parser/internal/objectParser.ts",
       "target": "0.41.0",
       "summary": "Hex strings are written back with different bytes after a load and save."
     },

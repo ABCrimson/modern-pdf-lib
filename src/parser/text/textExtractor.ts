@@ -1,5 +1,5 @@
 /**
- * @module parser/textExtractor
+ * @module parser/text/textExtractor
  *
  * Extract text content from parsed PDF content streams.  Supports both
  * simple text extraction (concatenated strings) and position-aware
@@ -18,10 +18,10 @@
  * @packageDocumentation
  */
 
-import { assertWithinLimit } from '../internal/limits.js';
-import { PdfDict, PdfName, PdfNumber, PdfStream } from '../core/pdfObjects.js';
-import { ResourceLimitError } from '../errors.js';
-import type { ContentStreamOperator, Operand } from './contentStreamParser.js';
+import { assertWithinLimit } from '../../internal/limits.js';
+import { PdfDict, PdfName, PdfNumber, PdfStream } from '../../core/pdfObjects.js';
+import { ResourceLimitError } from '../../errors.js';
+import type { ContentStreamOperator, Operand } from '../contentStreamParser.js';
 
 // ---------------------------------------------------------------------------
 // Public types

@@ -1,5 +1,5 @@
 /**
- * Tests for parser/tableExtract — whitespace-based table extraction from
+ * Tests for parser/text/tableExtract — whitespace-based table extraction from
  * positioned text items.
  *
  * Coverage:
@@ -14,9 +14,16 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { extractTables, tableToCsv, tableToJson } from '../../../src/parser/tableExtract.js';
-import type { ExtractedTable, TableExtractOptions } from '../../../src/parser/tableExtract.js';
-import type { TextItem } from '../../../src/parser/textExtractor.js';
+import {
+  extractTables,
+  tableToCsv,
+  tableToJson,
+} from '../../../../src/parser/text/tableExtract.js';
+import type {
+  ExtractedTable,
+  TableExtractOptions,
+} from '../../../../src/parser/text/tableExtract.js';
+import type { TextItem } from '../../../../src/parser/text/textExtractor.js';
 
 /** Build a TextItem with sensible defaults for the geometric fields. */
 function item(text: string, x: number, y: number, overrides: Partial<TextItem> = {}): TextItem {

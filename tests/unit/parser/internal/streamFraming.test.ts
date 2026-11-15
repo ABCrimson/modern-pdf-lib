@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { KeywordIndex, frameStreamData } from '../../../src/parser/streamFraming.js';
-import { latin1 } from '../../helpers/streamLengthFixtures.js';
+import { KeywordIndex, frameStreamData } from '../../../../src/parser/internal/streamFraming.js';
+import { latin1 } from '../../../helpers/streamLengthFixtures.js';
 
 const text = (bytes: Uint8Array): string => String.fromCharCode(...bytes);
 

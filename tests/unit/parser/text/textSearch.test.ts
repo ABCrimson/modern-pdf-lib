@@ -5,8 +5,8 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { searchTextItems } from '../../../src/parser/textSearch.js';
-import type { TextItem } from '../../../src/parser/textExtractor.js';
+import { searchTextItems } from '../../../../src/parser/text/textSearch.js';
+import type { TextItem } from '../../../../src/parser/text/textExtractor.js';
 
 const items: TextItem[] = [
   { text: 'Hello', x: 10, y: 700, width: 50, height: 12, fontSize: 12, fontName: '/F1' },

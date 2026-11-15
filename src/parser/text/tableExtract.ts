@@ -1,5 +1,5 @@
 /**
- * @module parser/tableExtract
+ * @module parser/text/tableExtract
  *
  * Table extraction from positioned text (roadmap 0.28.6).
  *

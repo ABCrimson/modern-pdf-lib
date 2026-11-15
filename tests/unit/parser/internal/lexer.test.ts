@@ -9,9 +9,9 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { PdfLexer, TokenType } from '../../../src/parser/lexer.js';
-import type { Token } from '../../../src/parser/lexer.js';
-import { PdfParseError } from '../../../src/parser/parseError.js';
+import { PdfLexer, TokenType } from '../../../../src/parser/internal/lexer.js';
+import type { Token } from '../../../../src/parser/internal/lexer.js';
+import { PdfParseError } from '../../../../src/parser/parseError.js';
 
 // ---------------------------------------------------------------------------
 // Helpers

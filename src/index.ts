@@ -1250,8 +1250,8 @@ export type { AccessibilityPluginOptions } from './plugins/index.js';
 // ---------------------------------------------------------------------------
 // Reading & extraction (0.28.6) — table extraction
 // ---------------------------------------------------------------------------
-export { extractTables, tableToCsv, tableToJson } from './parser/tableExtract.js';
-export type { ExtractedTable, TableExtractOptions } from './parser/tableExtract.js';
+export { extractTables, tableToCsv, tableToJson } from './parser/text/tableExtract.js';
+export type { ExtractedTable, TableExtractOptions } from './parser/text/tableExtract.js';
 
 // ---------------------------------------------------------------------------
 // PDF 2.0 core (0.30.0 / 0.30.5 / 0.30.9)
@@ -1309,12 +1309,12 @@ export type { DocTimeStampOptions } from './signature/docTimeStamp.js';
 // ---------------------------------------------------------------------------
 // Word/line/paragraph reconstruction (0.28.3)
 // ---------------------------------------------------------------------------
-export { reconstructLines, reconstructParagraphs } from './parser/textReconstruct.js';
+export { reconstructLines, reconstructParagraphs } from './parser/text/textReconstruct.js';
 export type {
   Line as TextLine,
   Paragraph as TextParagraph,
   ReconstructOptions,
-} from './parser/textReconstruct.js';
+} from './parser/text/textReconstruct.js';
 
 // ---------------------------------------------------------------------------
 // PDF Portfolios / Collections (0.33.7)

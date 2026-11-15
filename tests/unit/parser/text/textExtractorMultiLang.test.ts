@@ -16,9 +16,9 @@ import {
   extractText,
   extractTextWithPositions,
   parseToUnicodeCMap,
-} from '../../../src/parser/textExtractor.js';
-import type { ContentStreamOperator } from '../../../src/parser/contentStreamParser.js';
-import { PdfDict, PdfName, PdfStream } from '../../../src/core/pdfObjects.js';
+} from '../../../../src/parser/text/textExtractor.js';
+import type { ContentStreamOperator } from '../../../../src/parser/contentStreamParser.js';
+import { PdfDict, PdfName, PdfStream } from '../../../../src/core/pdfObjects.js';
 
 // ---------------------------------------------------------------------------
 // Helpers

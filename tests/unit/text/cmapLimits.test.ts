@@ -14,7 +14,7 @@ import {
   extractText,
   extractTextWithPositions,
   parseToUnicodeCMap,
-} from '../../../src/parser/textExtractor.js';
+} from '../../../src/parser/text/textExtractor.js';
 import { bfcharCMap, bfrangeCMap, buildCmapFont } from '../../adversarial/text-limits.bodies.js';
 import type { CmapFontSpec, CmapRange } from '../../adversarial/text-limits.bodies.js';
 

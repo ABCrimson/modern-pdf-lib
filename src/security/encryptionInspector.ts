@@ -55,11 +55,11 @@ import {
 } from '../core/pdfObjects.js';
 import type { PdfRef } from '../core/pdfObjects.js';
 import { PdfObjectRegistry } from '../core/pdfObjects.js';
-import { PdfLexer } from '../parser/lexer.js';
-import { PdfObjectParser } from '../parser/objectParser.js';
-import { XrefParser } from '../parser/xrefParser.js';
+import { PdfLexer } from '../parser/internal/lexer.js';
+import { PdfObjectParser } from '../parser/internal/objectParser.js';
+import { XrefParser } from '../parser/internal/xrefParser.js';
 import { ResourceLimitError } from '../errors.js';
-import type { XrefEntry } from '../parser/xrefParser.js';
+import type { XrefEntry } from '../parser/internal/xrefParser.js';
 import { verifyUserPassword } from '../crypto/keyDerivation.js';
 import type { EncryptDictValues } from '../crypto/keyDerivation.js';
 

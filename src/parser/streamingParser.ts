@@ -29,7 +29,7 @@
 
 import { PdfParseError } from './parseError.js';
 import { warnOnce } from '../internal/warnings.js';
-import { frameStreamData, keywordIndexFor } from './streamFraming.js';
+import { frameStreamData, keywordIndexFor } from './internal/streamFraming.js';
 
 // ---------------------------------------------------------------------------
 // Public interfaces

@@ -14,10 +14,10 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { XrefParser } from '../../../src/parser/xrefParser.js';
-import { PdfLexer } from '../../../src/parser/lexer.js';
-import { PdfObjectParser } from '../../../src/parser/objectParser.js';
-import { PdfObjectRegistry } from '../../../src/core/pdfObjects.js';
+import { XrefParser } from '../../../../src/parser/internal/xrefParser.js';
+import { PdfLexer } from '../../../../src/parser/internal/lexer.js';
+import { PdfObjectParser } from '../../../../src/parser/internal/objectParser.js';
+import { PdfObjectRegistry } from '../../../../src/core/pdfObjects.js';
 
 // ---------------------------------------------------------------------------
 // Helpers

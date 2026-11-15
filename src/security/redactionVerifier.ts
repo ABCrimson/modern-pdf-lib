@@ -17,7 +17,7 @@
  * 1. The page's content stream is decoded
  *    (`PdfPage.getContentStream()`) and parsed (`parseContentStream`).
  * 2. `extractTextWithPositions` replays the text/graphics-state machine and
- *    yields one positioned {@link import('../parser/textExtractor.js').TextItem}
+ *    yields one positioned {@link import('../parser/text/textExtractor.js').TextItem}
  *    per shown text run, with its page-space origin and size.
  * 3. Every text item whose bounding box intersects a region rectangle is
  *    reported as a leak.  `clean` is always false: finding no text is not a
@@ -41,7 +41,7 @@
  *   intersection testing tolerates this by treating any overlap as a leak.
  * - **Text decoding:** strings are decoded by `extractTextWithPositions` using
  *   the font's `/ToUnicode` CMap when present, else WinAnsiEncoding (1-byte) or
- *   2-byte Identity-H for CID fonts — see `../parser/textExtractor.js`.
+ *   2-byte Identity-H for CID fonts — see `../parser/text/textExtractor.js`.
  *
  * ## Region auto-detection is intentionally NOT performed
  *
@@ -63,8 +63,8 @@
 
 import { loadPdf } from '../parser/documentParser.js';
 import { parseContentStream } from '../parser/contentStreamParser.js';
-import { extractTextWithPositions } from '../parser/textExtractor.js';
-import type { TextItem } from '../parser/textExtractor.js';
+import { extractTextWithPositions } from '../parser/text/textExtractor.js';
+import type { TextItem } from '../parser/text/textExtractor.js';
 
 // ---------------------------------------------------------------------------
 // Public types

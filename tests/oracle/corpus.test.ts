@@ -51,7 +51,7 @@ import {
   UnsupportedEncryptionError,
 } from '../../src/index.js';
 import type { PdfDocument } from '../../src/index.js';
-import { XrefParser } from '../../src/parser/xrefParser.js';
+import { XrefParser } from '../../src/parser/internal/xrefParser.js';
 import { defectKey, knownDefect } from '../helpers/known-defect.js';
 import type { DefectKey } from '../helpers/known-defect.js';
 import { expectQpdfClean, qpdfDecryptQdf, requireQpdf } from '../helpers/oracle/qpdf.js';

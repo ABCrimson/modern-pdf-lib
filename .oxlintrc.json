@@ -46,7 +46,7 @@
         "src/codecs/jbig2/jbig2Decode.ts",
         "src/codecs/internal/ccittDecode.ts",
         "src/codecs/streamDecode.ts",
-        "src/parser/lexer.ts",
+        "src/parser/internal/lexer.ts",
         // Image pixel and bitstream loops
         "src/assets/image/webpDecode.ts",
         "src/assets/image/webpOptimize.ts",

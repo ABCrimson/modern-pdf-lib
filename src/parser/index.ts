@@ -22,10 +22,10 @@ export type { LoadPdfOptions } from './documentParser.js';
 // Text extraction
 // ---------------------------------------------------------------------------
 
-export { extractText, extractTextWithPositions } from './textExtractor.js';
-export type { TextItem, TextExtractionOptions } from './textExtractor.js';
-export { searchTextItems } from './textSearch.js';
-export type { TextMatch, SearchRect, SearchOptions } from './textSearch.js';
+export { extractText, extractTextWithPositions } from './text/textExtractor.js';
+export type { TextItem, TextExtractionOptions } from './text/textExtractor.js';
+export { searchTextItems } from './text/textSearch.js';
+export type { TextMatch, SearchRect, SearchOptions } from './text/textSearch.js';
 
 // ---------------------------------------------------------------------------
 // Content stream parsing

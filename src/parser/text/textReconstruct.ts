@@ -1,5 +1,5 @@
 /**
- * @module parser/textReconstruct
+ * @module parser/text/textReconstruct
  *
  * Reconstruct words, lines and paragraphs from positioned text items.
  *

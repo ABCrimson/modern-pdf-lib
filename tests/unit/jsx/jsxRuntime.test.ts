@@ -10,7 +10,7 @@ import { describe, it, expect } from 'vitest';
 import { PdfDocument } from '../../../src/core/pdfDocument.js';
 import { PageSizes } from '../../../src/core/pdfPage.js';
 import { parseContentStream } from '../../../src/parser/contentStreamParser.js';
-import { extractText } from '../../../src/parser/textExtractor.js';
+import { extractText } from '../../../src/parser/text/textExtractor.js';
 import { h, jsx, jsxs, Fragment, renderToPdf, type PdfNode } from '../../../src/jsx/jsxRuntime.js';
 
 /** Load rendered bytes and return the extracted text of every page. */
@@ -103,7 +103,7 @@ describe('jsxRuntime — renderToPdf', () => {
 
     const doc = await PdfDocument.load(bytes);
     const page = doc.getPage(0);
-    const { extractTextWithPositions } = await import('../../../src/parser/textExtractor.js');
+    const { extractTextWithPositions } = await import('../../../src/parser/text/textExtractor.js');
     const ops = parseContentStream(page.getContentStream());
     const items = extractTextWithPositions(ops, page.getOriginalResources());
     const anchored = items.find((i) => i.text.includes('Anchored'));

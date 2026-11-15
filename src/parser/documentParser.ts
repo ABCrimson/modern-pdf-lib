@@ -38,10 +38,10 @@ import {
   recordDecryptedObject,
 } from '../core/flateStream.js';
 import { PdfPage } from '../core/pdfPage.js';
-import { PdfLexer } from './lexer.js';
-import { PdfObjectParser } from './objectParser.js';
-import { XrefParser } from './xrefParser.js';
-import type { XrefEntry, ParsedTrailer } from './xrefParser.js';
+import { PdfLexer } from './internal/lexer.js';
+import { PdfObjectParser } from './internal/objectParser.js';
+import { XrefParser } from './internal/xrefParser.js';
+import type { XrefEntry, ParsedTrailer } from './internal/xrefParser.js';
 import { decodeFlateOnly } from '../codecs/streamDecode.js';
 import { base64Decode } from '../utils/base64.js';
 import {
