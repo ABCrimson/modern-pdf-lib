@@ -10,7 +10,12 @@
 import { deflateSync } from 'node:zlib';
 import { describe, expect, it } from 'vitest';
 import { INTERNAL_LIMITS } from '../../src/core/limits.js';
-import { AT_LIMIT_BUDGET, DEFAULT_BUDGET, runWithinBudget } from '../helpers/budget.js';
+import {
+  AT_LIMIT_BUDGET,
+  DEFAULT_BUDGET,
+  runWithinBudget,
+  timeLimitMs,
+} from '../helpers/budget.js';
 import type { BudgetOutcome, JsonValue } from '../helpers/budget.js';
 import { lzwEncode } from './filter-limits.bodies.js';
 
@@ -27,7 +32,7 @@ const run = (
 ): Promise<BudgetOutcome> => runWithinBudget({ module: BODIES, entry, input, args });
 
 const expectInBudget = (outcome: BudgetOutcome): void => {
-  expect(outcome.ms).toBeLessThan(DEFAULT_BUDGET.ms);
+  expect(outcome.ms).toBeLessThan(timeLimitMs(DEFAULT_BUDGET));
   expect(outcome.mib).toBeLessThanOrEqual(DEFAULT_BUDGET.mib);
 };
 
@@ -205,7 +210,7 @@ describe('predictor parameters under the budget', () => {
 
 /** The check of {@link expectInBudget} against AT_LIMIT_BUDGET, for an input at or just under a limit. */
 const expectInAtLimitBudget = (outcome: BudgetOutcome): void => {
-  expect(outcome.ms).toBeLessThan(AT_LIMIT_BUDGET.ms);
+  expect(outcome.ms).toBeLessThan(timeLimitMs(AT_LIMIT_BUDGET));
   expect(outcome.mib).toBeLessThanOrEqual(AT_LIMIT_BUDGET.mib);
 };
 

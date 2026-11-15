@@ -7,7 +7,12 @@
  * cannot be decoded is decoded once per call. Images above the size limits are skipped.
  */
 import { describe, expect, it } from 'vitest';
-import { AT_LIMIT_BUDGET, DEFAULT_BUDGET, runWithinBudget } from '../helpers/budget.js';
+import {
+  AT_LIMIT_BUDGET,
+  DEFAULT_BUDGET,
+  runWithinBudget,
+  timeLimitMs,
+} from '../helpers/budget.js';
 import { INTERNAL_LIMITS } from '../../src/core/limits.js';
 
 const BODIES = 'tests/adversarial/render-limits.bodies.ts';
@@ -25,7 +30,7 @@ describe('page interpretation under the budget', () => {
         args: { calls },
       });
       expect(outcome).toMatchObject({ kind: 'completed', result: { items: 1 } });
-      expect(outcome.ms).toBeLessThan(DEFAULT_BUDGET.ms);
+      expect(outcome.ms).toBeLessThan(timeLimitMs(DEFAULT_BUDGET));
       expect(outcome.mib).toBeLessThanOrEqual(DEFAULT_BUDGET.mib);
     },
     TIMEOUT,
@@ -41,7 +46,7 @@ describe('page interpretation under the budget', () => {
         args: { calls: 10 },
       });
       expect(outcome).toMatchObject({ kind: 'completed', result: { items: 11 } });
-      expect(outcome.ms).toBeLessThan(DEFAULT_BUDGET.ms);
+      expect(outcome.ms).toBeLessThan(timeLimitMs(DEFAULT_BUDGET));
       expect(outcome.mib).toBeLessThanOrEqual(DEFAULT_BUDGET.mib);
     },
     TIMEOUT,
@@ -63,7 +68,7 @@ describe('page interpretation under the budget', () => {
         limit: 'maxFormOperators',
         message: `Input exceeds the internal limit maxFormOperators (${INTERNAL_LIMITS.maxFormOperators} operators).`,
       });
-      expect(outcome.ms).toBeLessThan(DEFAULT_BUDGET.ms);
+      expect(outcome.ms).toBeLessThan(timeLimitMs(DEFAULT_BUDGET));
       expect(outcome.mib).toBeLessThanOrEqual(DEFAULT_BUDGET.mib);
     },
     TIMEOUT,
@@ -79,7 +84,7 @@ describe('page interpretation under the budget', () => {
         args: { depth: 6, calls: 10 },
       });
       expect(outcome).toMatchObject({ kind: 'completed', result: { items: 100_000 } });
-      expect(outcome.ms).toBeLessThan(DEFAULT_BUDGET.ms);
+      expect(outcome.ms).toBeLessThan(timeLimitMs(DEFAULT_BUDGET));
       expect(outcome.mib).toBeLessThanOrEqual(DEFAULT_BUDGET.mib);
     },
     TIMEOUT,
@@ -153,7 +158,7 @@ describe('page interpretation under the budget', () => {
         name: 'ResourceLimitError',
         limit: 'maxFormOperators',
       });
-      expect(outcome.ms).toBeLessThan(DEFAULT_BUDGET.ms);
+      expect(outcome.ms).toBeLessThan(timeLimitMs(DEFAULT_BUDGET));
       expect(outcome.mib).toBeLessThanOrEqual(DEFAULT_BUDGET.mib);
     },
     TIMEOUT,
@@ -172,7 +177,7 @@ describe('page interpretation under the budget', () => {
         AT_LIMIT_BUDGET,
       );
       expect(outcome).toMatchObject({ kind: 'completed', result: { items: 0 } });
-      expect(outcome.ms).toBeLessThan(AT_LIMIT_BUDGET.ms);
+      expect(outcome.ms).toBeLessThan(timeLimitMs(AT_LIMIT_BUDGET));
       expect(outcome.mib).toBeLessThanOrEqual(AT_LIMIT_BUDGET.mib);
     },
     TIMEOUT,
@@ -188,7 +193,7 @@ describe('page interpretation under the budget', () => {
         args: { mib: 32, k: 40 },
       });
       expect(outcome).toMatchObject({ kind: 'completed', result: { items: 0 } });
-      expect(outcome.ms).toBeLessThan(DEFAULT_BUDGET.ms);
+      expect(outcome.ms).toBeLessThan(timeLimitMs(DEFAULT_BUDGET));
       expect(outcome.mib).toBeLessThanOrEqual(DEFAULT_BUDGET.mib);
     },
     TIMEOUT,
@@ -204,7 +209,7 @@ describe('page interpretation under the budget', () => {
         args: { w: 16_384, data: 1 },
       });
       expect(outcome).toMatchObject({ kind: 'completed', result: { images: 0 } });
-      expect(outcome.ms).toBeLessThan(DEFAULT_BUDGET.ms);
+      expect(outcome.ms).toBeLessThan(timeLimitMs(DEFAULT_BUDGET));
       expect(outcome.mib).toBeLessThanOrEqual(DEFAULT_BUDGET.mib);
     },
     TIMEOUT,
@@ -237,7 +242,7 @@ describe('page interpretation under the budget', () => {
         AT_LIMIT_BUDGET,
       );
       expect(outcome).toMatchObject({ kind: 'completed', result: { images: 1 } });
-      expect(outcome.ms).toBeLessThan(AT_LIMIT_BUDGET.ms);
+      expect(outcome.ms).toBeLessThan(timeLimitMs(AT_LIMIT_BUDGET));
       expect(outcome.mib).toBeLessThanOrEqual(AT_LIMIT_BUDGET.mib);
     },
     TIMEOUT,

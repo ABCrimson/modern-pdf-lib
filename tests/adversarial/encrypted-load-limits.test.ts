@@ -17,7 +17,7 @@ import { describe, expect, it } from 'vitest';
 import { PdfEncryptionHandler } from '../../src/crypto/encryptionHandler.js';
 import { createPdf } from '../../src/core/pdfDocument.js';
 import { PdfArray, PdfString } from '../../src/core/pdfObjects.js';
-import { type Budget, DEFAULT_BUDGET, runWithinBudget } from '../helpers/budget.js';
+import { type Budget, DEFAULT_BUDGET, runWithinBudget, timeLimitMs } from '../helpers/budget.js';
 
 const BODIES = 'tests/adversarial/encrypted-load-limits.bodies.ts';
 const MIB = 1024 * 1024;
@@ -155,7 +155,7 @@ describe('encrypted load: decoded-size limit of a decrypted object stream', () =
         name: 'ResourceLimitError',
         limit: 'maxDecodedStreamBytes',
       });
-      expect(outcome.ms).toBeLessThan(DEFAULT_BUDGET.ms);
+      expect(outcome.ms).toBeLessThan(timeLimitMs(DEFAULT_BUDGET));
     },
     TIMEOUT,
   );

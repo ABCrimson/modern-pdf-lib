@@ -9,7 +9,12 @@
  */
 import { constants, createDeflate, deflateSync } from 'node:zlib';
 import { beforeAll, describe, expect, it } from 'vitest';
-import { AT_LIMIT_BUDGET, DEFAULT_BUDGET, runWithinBudget } from '../helpers/budget.js';
+import {
+  AT_LIMIT_BUDGET,
+  DEFAULT_BUDGET,
+  runWithinBudget,
+  timeLimitMs,
+} from '../helpers/budget.js';
 import type { BudgetOutcome } from '../helpers/budget.js';
 
 const BODIES = 'tests/adversarial/flate-limits.bodies.ts';
@@ -120,7 +125,7 @@ describe('flate limits', () => {
     async () => {
       const outcome = await run('inflateFlateEntry', big);
       expect(outcome).toMatchObject(LIMIT_ERROR);
-      expect(outcome.ms).toBeLessThan(DEFAULT_BUDGET.ms);
+      expect(outcome.ms).toBeLessThan(timeLimitMs(DEFAULT_BUDGET));
     },
     TIMEOUT,
   );
@@ -130,7 +135,7 @@ describe('flate limits', () => {
     async () => {
       const outcome = await run('inflateRawEntry', big);
       expect(outcome).toMatchObject(LIMIT_ERROR);
-      expect(outcome.ms).toBeLessThan(DEFAULT_BUDGET.ms);
+      expect(outcome.ms).toBeLessThan(timeLimitMs(DEFAULT_BUDGET));
     },
     TIMEOUT,
   );
@@ -140,7 +145,7 @@ describe('flate limits', () => {
     async () => {
       const outcome = await run('decodeFlateOnlyEntry', big);
       expect(outcome).toMatchObject(LIMIT_ERROR);
-      expect(outcome.ms).toBeLessThan(DEFAULT_BUDGET.ms);
+      expect(outcome.ms).toBeLessThan(timeLimitMs(DEFAULT_BUDGET));
     },
     TIMEOUT,
   );
@@ -150,7 +155,7 @@ describe('flate limits', () => {
     async () => {
       const outcome = await run('decodeChainEntry', nested);
       expect(outcome).toMatchObject(LIMIT_ERROR);
-      expect(outcome.ms).toBeLessThan(DEFAULT_BUDGET.ms);
+      expect(outcome.ms).toBeLessThan(timeLimitMs(DEFAULT_BUDGET));
     },
     TIMEOUT,
   );
@@ -160,7 +165,7 @@ describe('flate limits', () => {
     async () => {
       const outcome = await run('loadedPageStreamEntry', pdfWithContentStream(big));
       expect(outcome).toMatchObject(LIMIT_ERROR);
-      expect(outcome.ms).toBeLessThan(DEFAULT_BUDGET.ms);
+      expect(outcome.ms).toBeLessThan(timeLimitMs(DEFAULT_BUDGET));
     },
     TIMEOUT,
   );
@@ -184,7 +189,7 @@ describe('flate limits', () => {
       async () => {
         const outcome = await run('inflateFlateEntry', await zlibOfZeros(256), AT_LIMIT_BUDGET);
         expect(outcome).toMatchObject({ kind: 'completed', result: { length: LIMIT } });
-        expect(outcome.ms).toBeLessThan(AT_LIMIT_BUDGET.ms);
+        expect(outcome.ms).toBeLessThan(timeLimitMs(AT_LIMIT_BUDGET));
         expect(outcome.mib).toBeLessThan(AT_LIMIT_BUDGET.mib);
       },
       TIMEOUT,
@@ -200,7 +205,7 @@ describe('flate limits', () => {
         );
         // getContentStream ends each content stream with a newline.
         expect(outcome).toMatchObject({ kind: 'completed', result: { length: LIMIT + 1 } });
-        expect(outcome.ms).toBeLessThan(AT_LIMIT_BUDGET.ms);
+        expect(outcome.ms).toBeLessThan(timeLimitMs(AT_LIMIT_BUDGET));
         expect(outcome.mib).toBeLessThan(AT_LIMIT_BUDGET.mib);
       },
       TIMEOUT,
@@ -224,7 +229,7 @@ describe('flate limits', () => {
         // DEFLATE then ends in whatever those bytes happen to decode to. The control asserts that
         // the call ends by itself, not what it returns.
         expect(['completed', 'threw']).toContain(outcome.kind);
-        expect(outcome.ms).toBeLessThan(AT_LIMIT_BUDGET.ms);
+        expect(outcome.ms).toBeLessThan(timeLimitMs(AT_LIMIT_BUDGET));
         expect(outcome.mib).toBeLessThan(AT_LIMIT_BUDGET.mib);
       },
       TIMEOUT,

@@ -336,7 +336,12 @@ jobs:
           "./$appimage" --appimage-extract > /dev/null
           echo "QPDF=$RUNNER_TEMP/qpdf/squashfs-root/AppRun" >> "$GITHUB_ENV"
 
+      # The time budgets of tests/helpers/budget.ts are calibrated on a developer machine; a hosted
+      # runner is several times slower and varies from run to run, so the runner's time limit is
+      # multiplied by 4 here. The memory budget is never scaled.
       - name: Run the adversarial project
+        env:
+          MPL_BUDGET_TIME_SCALE: 4
         run: pnpm exec vitest run --project adversarial
 
       # The JSON report feeds the marker list and the capability gate below.

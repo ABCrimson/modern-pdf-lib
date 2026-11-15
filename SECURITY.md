@@ -167,7 +167,8 @@ These areas are security-sensitive. A report against any of them is in scope.
 - Memory-exhaustion or infinite-loop denial of service reachable from a crafted PDF.
   In particular, a decode, parse or render call that, on one input above a limit
   or one malformed, runs longer than 2 s or uses more than 512 MiB of memory
-  without throwing `ResourceLimitError` (the budget of the adversarial tests); an input whose
+  without throwing `ResourceLimitError` (the budget of the adversarial tests on a developer
+  machine; CI multiplies only its time, by 4, on its slower runners); an input whose
   size is known only by decoding can use the memory of a decode at the limit before the error
   (see Input limits).
 - A signature that verifies when it should not (chain, revocation, or byte-range confusion).

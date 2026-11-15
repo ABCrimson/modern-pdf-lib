@@ -17,6 +17,13 @@
  * the child writes, never from its exit code; a stdout line that is not one of the child's protocol
  * lines is kept with stderr, and a second `ready` is ignored. A module that cannot be loaded, or a worker not ready after
  * 30 s, rejects the promise: that is a fault of the test, not an outcome of the input.
+ *
+ * Time scale: the budgets below are calibrated on a developer machine. A slower or shared machine
+ * (a hosted CI runner, which is several times slower and varies from run to run) sets
+ * `MPL_BUDGET_TIME_SCALE` to a number of at least 1, read once into {@link BUDGET_TIME_SCALE}; the
+ * runner then ends a run after `budget.ms` times the scale ({@link timeLimitMs}). The scale never
+ * loosens the memory budget, and the reported `ms` stays the measured time; every outcome carries
+ * the time limit that applied as `limitMs`.
  */
 import { spawn } from 'node:child_process';
 import { mkdtemp, rm, writeFile } from 'node:fs/promises';
@@ -51,18 +58,23 @@ export interface Budget {
   readonly mib: number;
 }
 
-/** How the run ended. `ms` and `mib` are measured as in {@link Budget}. */
+/**
+ * How the run ended. `ms` and `mib` are measured as in {@link Budget}; `limitMs` is the time limit
+ * the runner enforced, the budget's `ms` times the time scale ({@link timeLimitMs}).
+ */
 export type BudgetOutcome =
   | {
       readonly kind: 'completed';
       readonly ms: number;
       readonly mib: number;
+      readonly limitMs: number;
       readonly result: JsonValue;
     }
   | {
       readonly kind: 'threw';
       readonly ms: number;
       readonly mib: number;
+      readonly limitMs: number;
       readonly name: string;
       readonly code?: string;
       readonly limit?: string;
@@ -73,10 +85,41 @@ export type BudgetOutcome =
       readonly reason: 'time' | 'memory' | 'crash';
       readonly ms: number;
       readonly mib: number;
+      readonly limitMs: number;
       readonly detail: string;
     };
 
-/** The gate's budget: 2000 ms and 512 MiB of resident-memory growth. */
+/**
+ * Reads a value of `MPL_BUDGET_TIME_SCALE`: absent is 1; otherwise a finite number of at least 1.
+ *
+ * @throws Error for any other value, so a typo cannot silently change the gate.
+ */
+export function parseBudgetTimeScale(raw: string | undefined): number {
+  if (raw === undefined) return 1;
+  const scale = Number(raw);
+  if (raw.trim() === '' || !Number.isFinite(scale) || scale < 1) {
+    throw new Error(
+      `MPL_BUDGET_TIME_SCALE must be a finite number of at least 1 (or unset for 1), not ${JSON.stringify(raw)}`,
+    );
+  }
+  return scale;
+}
+
+/**
+ * The factor every budget's time is multiplied by, read once from `MPL_BUDGET_TIME_SCALE` when this
+ * module loads (see the file comment). CI sets it on its slower runners; it never scales memory.
+ */
+export const BUDGET_TIME_SCALE: number = parseBudgetTimeScale(process.env.MPL_BUDGET_TIME_SCALE);
+
+/** The time limit the runner enforces for `budget`: its `ms` times `scale`, rounded to 1 ms. */
+export function timeLimitMs(budget: Budget, scale: number = BUDGET_TIME_SCALE): number {
+  return Math.round(budget.ms * scale);
+}
+
+/**
+ * The gate's budget on the developer machine it is calibrated on: 2000 ms (times
+ * {@link BUDGET_TIME_SCALE}) and 512 MiB of resident-memory growth.
+ */
 export const DEFAULT_BUDGET: Budget = Object.freeze({ ms: 2000, mib: 512 });
 
 /**
@@ -115,26 +158,38 @@ interface ChildLine {
 }
 
 /**
- * Runs `task` once under `budget` (default {@link DEFAULT_BUDGET}).
+ * Runs `task` once under `budget` (default {@link DEFAULT_BUDGET}), ending it after
+ * {@link timeLimitMs}`(budget, timeScale)`. `timeScale` defaults to {@link BUDGET_TIME_SCALE};
+ * only the runner's self-test passes another.
  *
  * @returns The outcome; rejects only when the module cannot be loaded or the child cannot start.
  */
 export async function runWithinBudget(
   task: BudgetTask,
   budget: Budget = DEFAULT_BUDGET,
+  timeScale: number = BUDGET_TIME_SCALE,
 ): Promise<BudgetOutcome> {
-  if (typeof task.input === 'string') return runChild(task, resolve(ROOT, task.input), budget);
+  const limits: Limits = { budget, scale: timeScale, ms: timeLimitMs(budget, timeScale) };
+  if (typeof task.input === 'string') return runChild(task, resolve(ROOT, task.input), limits);
   const dir = await mkdtemp(join(tmpdir(), 'mpdf-budget-'));
   try {
     const inputPath = join(dir, 'input.bin');
     await writeFile(inputPath, task.input);
-    return await runChild(task, inputPath, budget);
+    return await runChild(task, inputPath, limits);
   } finally {
     await rm(dir, { recursive: true, force: true });
   }
 }
 
-function runChild(task: BudgetTask, inputPath: string, budget: Budget): Promise<BudgetOutcome> {
+/** The budget of one run, its time scale and the time limit they give. */
+interface Limits {
+  readonly budget: Budget;
+  readonly scale: number;
+  readonly ms: number;
+}
+
+function runChild(task: BudgetTask, inputPath: string, limits: Limits): Promise<BudgetOutcome> {
+  const { budget } = limits;
   const config = {
     moduleUrl: pathToFileURL(resolve(ROOT, task.module)).href,
     entry: task.entry,
@@ -183,7 +238,7 @@ function runChild(task: BudgetTask, inputPath: string, budget: Budget): Promise<
         timer = setTimeout(() => {
           timedOut = true;
           child.kill('SIGKILL');
-        }, budget.ms);
+        }, limits.ms);
       } else if (line.t === 'peak') {
         peakMib = Math.max(peakMib, line.mib ?? 0);
       } else if (outcome === undefined) {
@@ -224,7 +279,7 @@ function runChild(task: BudgetTask, inputPath: string, budget: Budget): Promise<
         );
         return;
       }
-      settle(classify(outcome, { timedOut, ended, peakMib, exit, tail, budget }));
+      settle(classify(outcome, { timedOut, ended, peakMib, exit, tail, limits }));
     });
   });
 }
@@ -237,9 +292,10 @@ function classify(
     peakMib: number;
     exit: string;
     tail: string;
-    budget: Budget;
+    limits: Limits;
   },
 ): BudgetOutcome {
+  const { budget, scale, ms: limitMs } = run.limits;
   if (outcome === undefined) {
     return run.timedOut
       ? {
@@ -247,13 +303,15 @@ function classify(
           reason: 'time',
           ms: run.ended,
           mib: run.peakMib,
-          detail: `ended by the runner after ${run.budget.ms} ms`,
+          limitMs,
+          detail: `ended by the runner after ${limitMs} ms (a budget of ${budget.ms} ms times the time scale ${scale})`,
         }
       : {
           kind: 'killed',
           reason: 'crash',
           ms: run.ended,
           mib: run.peakMib,
+          limitMs,
           detail: `the child ended without an outcome (${run.exit}) ${run.tail}`.trim(),
         };
   }
@@ -261,12 +319,13 @@ function classify(
   const mib = line.mib ?? run.peakMib;
   switch (line.t) {
     case 'completed':
-      return { kind: 'completed', ms, mib, result: line.result ?? null };
+      return { kind: 'completed', ms, mib, limitMs, result: line.result ?? null };
     case 'threw':
       return {
         kind: 'threw',
         ms,
         mib,
+        limitMs,
         name: line.name ?? 'unknown',
         ...(line.code === undefined ? {} : { code: line.code }),
         ...(line.limit === undefined ? {} : { limit: line.limit }),
@@ -278,9 +337,17 @@ function classify(
         reason: 'memory',
         ms,
         mib,
-        detail: `resident memory grew by ${mib} MiB, above the budget of ${run.budget.mib} MiB`,
+        limitMs,
+        detail: `resident memory grew by ${mib} MiB, above the budget of ${budget.mib} MiB`,
       };
     default:
-      return { kind: 'killed', reason: 'crash', ms, mib, detail: line.detail ?? run.exit };
+      return {
+        kind: 'killed',
+        reason: 'crash',
+        ms,
+        mib,
+        limitMs,
+        detail: line.detail ?? run.exit,
+      };
   }
 }

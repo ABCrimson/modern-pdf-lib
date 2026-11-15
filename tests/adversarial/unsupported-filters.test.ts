@@ -6,7 +6,7 @@
  * ResourceLimitError (`maxImageBytes`) before any buffer is sized from it.
  */
 import { describe, expect, it } from 'vitest';
-import { DEFAULT_BUDGET, runWithinBudget } from '../helpers/budget.js';
+import { DEFAULT_BUDGET, runWithinBudget, timeLimitMs } from '../helpers/budget.js';
 import type { BudgetOutcome, JsonValue } from '../helpers/budget.js';
 
 const BODIES = 'tests/adversarial/unsupported-filters.bodies.ts';
@@ -121,7 +121,7 @@ const UNSUPPORTED = (filter: string): Record<string, unknown> => ({
 });
 
 function expectInBudget(outcome: BudgetOutcome): void {
-  expect(outcome.ms).toBeLessThan(DEFAULT_BUDGET.ms);
+  expect(outcome.ms).toBeLessThan(timeLimitMs(DEFAULT_BUDGET));
   expect(outcome.mib).toBeLessThanOrEqual(DEFAULT_BUDGET.mib);
 }
 

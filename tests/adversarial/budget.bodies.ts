@@ -1,14 +1,22 @@
 /**
  * Harmless bodies for the budgeted runner's self-test (budget.test.ts). The runner loads this
  * module in a worker and calls one named export with the input bytes and the task's args. None of
- * them reads the library's decoders: each one returns, throws, prints, spins or allocates.
+ * them reads the library's decoders: each one returns, waits, throws, prints, spins or allocates.
  */
+import { setTimeout as sleep } from 'node:timers/promises';
 import type { JsonValue } from '../helpers/budget.js';
 import { assertWithinLimit } from '../../src/core/limits.js';
 
 /** Returns the input length and the args it was given. */
 export function returns(bytes: Uint8Array, args: JsonValue): JsonValue {
   return { bytes: bytes.length, args };
+}
+
+/** Waits `args.ms` milliseconds on a timer, without using the CPU, then returns `{ waited }`. */
+export async function waits(_bytes: Uint8Array, args: JsonValue): Promise<JsonValue> {
+  const ms = (args as { ms: number }).ms;
+  await sleep(ms);
+  return { waited: ms };
 }
 
 /** Throws ResourceLimitError: asks for one pixel more than the image pixel limit allows. */

@@ -235,12 +235,14 @@ describe('runKnownDefect', () => {
   });
 
   it('returns before the test timeout when the body never settles', async () => {
-    const { ctx, annotations } = fakeContext(200);
+    // The marker gives up at 90% of the test timeout: 900 ms here, which leaves 100 ms for a late
+    // timer on a loaded runner.
+    const { ctx, annotations } = fakeContext(1_000);
     const started = performance.now();
     await expect(
       runKnownDefect(KEY, /anything/, () => new Promise<void>(() => {}), ctx),
     ).resolves.toBeUndefined();
-    expect(performance.now() - started).toBeLessThan(200);
+    expect(performance.now() - started).toBeLessThan(1_000);
     expect(annotations[0]?.message).toMatch(/did not settle within \d+ ms/);
   });
 });

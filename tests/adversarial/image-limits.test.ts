@@ -8,7 +8,12 @@
  */
 import { createDeflate } from 'node:zlib';
 import { describe, expect, it } from 'vitest';
-import { AT_LIMIT_BUDGET, DEFAULT_BUDGET, runWithinBudget } from '../helpers/budget.js';
+import {
+  AT_LIMIT_BUDGET,
+  DEFAULT_BUDGET,
+  runWithinBudget,
+  timeLimitMs,
+} from '../helpers/budget.js';
 import type { Budget, BudgetOutcome } from '../helpers/budget.js';
 import {
   buildPng,
@@ -44,7 +49,7 @@ function expectCompleted(
   budget: Budget = DEFAULT_BUDGET,
 ): void {
   expect(outcome).toMatchObject({ kind: 'completed', result });
-  expect(outcome.ms).toBeLessThan(budget.ms);
+  expect(outcome.ms).toBeLessThan(timeLimitMs(budget));
   expect(outcome.mib).toBeLessThan(budget.mib);
 }
 
@@ -57,13 +62,13 @@ function expectLimit(outcome: BudgetOutcome, limit: string, max: number): void {
     limit,
   });
   expect((outcome as { message: string }).message).toContain(`(${max} `);
-  expect(outcome.ms).toBeLessThan(DEFAULT_BUDGET.ms);
+  expect(outcome.ms).toBeLessThan(timeLimitMs(DEFAULT_BUDGET));
   expect(outcome.mib).toBeLessThan(DEFAULT_BUDGET.mib);
 }
 
 function expectError(outcome: BudgetOutcome, message: string): void {
   expect(outcome).toMatchObject({ kind: 'threw', name: 'Error', message });
-  expect(outcome.ms).toBeLessThan(DEFAULT_BUDGET.ms);
+  expect(outcome.ms).toBeLessThan(timeLimitMs(DEFAULT_BUDGET));
   expect(outcome.mib).toBeLessThan(DEFAULT_BUDGET.mib);
 }
 
@@ -405,7 +410,7 @@ describe('image and font decoders stay within the internal limits', () => {
       // 1040 bytes is ignored and never inflated: the image is embedded, inside the budget.
       const outcome = await run('pngEntry', buildPng(16, 16, 6, await zlibOfZeros(400)));
       expect(outcome).toMatchObject({ kind: 'completed', result: { width: 16, height: 16 } });
-      expect(outcome.ms).toBeLessThan(DEFAULT_BUDGET.ms);
+      expect(outcome.ms).toBeLessThan(timeLimitMs(DEFAULT_BUDGET));
       expect(outcome.mib).toBeLessThan(DEFAULT_BUDGET.mib);
       // The same image with exactly the data it needs decodes.
       expect(await run('pngEntry', buildPng(16, 16, 6, zlibOfZeroBytes(1040)))).toMatchObject({

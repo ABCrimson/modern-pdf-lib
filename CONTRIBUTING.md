@@ -232,7 +232,11 @@ resident memory and reports `completed`, `threw` (error name, code and limit) or
 resident-memory growth: an input above a limit, and a malformed input, must end
 in its error inside it (a page whose content streams pass the limit only together is held to `AT_LIMIT_BUDGET`). `AT_LIMIT_BUDGET` (5000 ms, 1536 MiB) is for an input at
 or just under a limit, which is accepted and must complete; a regression in the
-cost of a decode at a limit fails there.
+cost of a decode at a limit fails there. Both budgets are calibrated on a
+developer machine. On a slower machine, set `MPL_BUDGET_TIME_SCALE` (a number of
+at least 1; any other value fails at import) and the runner multiplies every
+time budget by it; CI sets 4 for its hosted runners, which are several times
+slower and vary from run to run. The memory budget is never scaled.
 
 | Directory | Contents | Count |
 |---|---|---|
@@ -286,9 +290,9 @@ oracle job install the checksum-pinned qpdf and export `QPDF`. The API snapshot 
 `dist/` and `dist/wasm/` (`pnpm run build`, `pnpm run copy:wasm`) and the
 release tags: locally it skips without them, and in CI it fails.
 
-With qpdf and a built `dist/`, `pnpm test` reports 381 files and 9,133
-tests: 9,084 passed and 49 expected failures (the markers). Without qpdf,
-8,715 pass, 11 are expected failures and 407 skip.
+With qpdf and a built `dist/`, `pnpm test` reports 381 files and 9,135
+tests: 9,086 passed and 49 expected failures (the markers). Without qpdf,
+8,717 pass, 11 are expected failures and 407 skip.
 
 ---
 

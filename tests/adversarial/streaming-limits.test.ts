@@ -4,7 +4,7 @@
  * runner (2 s, 512 MiB of resident-memory growth).
  */
 import { describe, expect, it } from 'vitest';
-import { DEFAULT_BUDGET, runWithinBudget } from '../helpers/budget.js';
+import { DEFAULT_BUDGET, runWithinBudget, timeLimitMs } from '../helpers/budget.js';
 
 const BODIES = 'tests/adversarial/streaming-limits.bodies.ts';
 const MIB = 1024 * 1024;
@@ -22,7 +22,7 @@ describe('streaming parser under the budget', () => {
         args: { mib: 64, chunk: 4096, maxBufferSize: 64 * MIB },
       });
       expect(outcome).toMatchObject({ kind: 'completed', result: { read: 64 * MIB } });
-      expect(outcome.ms).toBeLessThan(DEFAULT_BUDGET.ms);
+      expect(outcome.ms).toBeLessThan(timeLimitMs(DEFAULT_BUDGET));
       expect(outcome.mib).toBeLessThanOrEqual(DEFAULT_BUDGET.mib);
     },
     TIMEOUT,
@@ -42,7 +42,7 @@ describe('streaming parser under the budget', () => {
         name: 'PdfParseError',
         message: expect.stringContaining(`maximum size of ${16 * MIB} bytes`),
       });
-      expect(outcome.ms).toBeLessThan(DEFAULT_BUDGET.ms);
+      expect(outcome.ms).toBeLessThan(timeLimitMs(DEFAULT_BUDGET));
     },
     TIMEOUT,
   );

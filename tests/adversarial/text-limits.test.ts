@@ -5,7 +5,7 @@
  * (text-limits.bodies.ts).
  */
 import { describe, expect, it } from 'vitest';
-import { DEFAULT_BUDGET, runWithinBudget } from '../helpers/budget.js';
+import { DEFAULT_BUDGET, runWithinBudget, timeLimitMs } from '../helpers/budget.js';
 import type { BudgetOutcome, JsonValue } from '../helpers/budget.js';
 import { INTERNAL_LIMITS } from '../../src/core/limits.js';
 import {
@@ -36,13 +36,13 @@ function expectLimit(outcome: BudgetOutcome, limit: string, max: number, unit: s
     limit,
     message: `Input exceeds the internal limit ${limit} (${max} ${unit}).`,
   });
-  expect(outcome.ms).toBeLessThan(DEFAULT_BUDGET.ms);
+  expect(outcome.ms).toBeLessThan(timeLimitMs(DEFAULT_BUDGET));
   expect(outcome.mib).toBeLessThan(DEFAULT_BUDGET.mib);
 }
 
 function expectCompleted(outcome: BudgetOutcome, result: JsonValue): void {
   expect(outcome).toMatchObject({ kind: 'completed', result });
-  expect(outcome.ms).toBeLessThan(DEFAULT_BUDGET.ms);
+  expect(outcome.ms).toBeLessThan(timeLimitMs(DEFAULT_BUDGET));
   expect(outcome.mib).toBeLessThan(DEFAULT_BUDGET.mib);
 }
 

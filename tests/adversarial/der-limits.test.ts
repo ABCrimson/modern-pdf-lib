@@ -8,7 +8,7 @@ import { INTERNAL_LIMITS } from '../../src/core/limits.js';
 import { findSignatures } from '../../src/signature/byteRange.js';
 import { signPdf } from '../../src/signature/signatureHandler.js';
 import { createMinimalPdf, generateTestCert } from '../helpers/signature-trust-fixtures.js';
-import { DEFAULT_BUDGET, runWithinBudget } from '../helpers/budget.js';
+import { DEFAULT_BUDGET, runWithinBudget, timeLimitMs } from '../helpers/budget.js';
 import type { BudgetOutcome } from '../helpers/budget.js';
 
 const BODIES = 'tests/adversarial/der-limits.bodies.ts';
@@ -23,7 +23,7 @@ const run = (
 
 function expectParseError(outcome: BudgetOutcome, message: string): void {
   expect(outcome).toMatchObject({ kind: 'threw', name: 'Error', message });
-  expect(outcome.ms).toBeLessThan(DEFAULT_BUDGET.ms);
+  expect(outcome.ms).toBeLessThan(timeLimitMs(DEFAULT_BUDGET));
   expect(outcome.mib).toBeLessThan(DEFAULT_BUDGET.mib);
 }
 
@@ -119,7 +119,7 @@ describe('der limits', () => {
         limit: 'maxDerDepth',
         message: `Input exceeds the internal limit maxDerDepth (${INTERNAL_LIMITS.maxDerDepth} levels).`,
       });
-      expect(outcome.ms).toBeLessThan(DEFAULT_BUDGET.ms);
+      expect(outcome.ms).toBeLessThan(timeLimitMs(DEFAULT_BUDGET));
     },
     TIMEOUT,
   );
@@ -151,7 +151,7 @@ describe('der limits', () => {
     async () => {
       const outcome = await run('parseLarge', new Uint8Array(0), { size: 64 * 1024 * 1024 });
       expect(outcome).toMatchObject({ kind: 'completed', result: { length: 64 * 1024 * 1024 } });
-      expect(outcome.ms).toBeLessThan(DEFAULT_BUDGET.ms);
+      expect(outcome.ms).toBeLessThan(timeLimitMs(DEFAULT_BUDGET));
     },
     TIMEOUT,
   );
@@ -185,7 +185,7 @@ describe('der limits', () => {
         const outcome = await run('verifyDocument', refusedDoc);
         const reference = await run('verifyDocument', unparsableDoc);
         expect(outcome.kind).toBe('completed');
-        expect(outcome.ms).toBeLessThan(DEFAULT_BUDGET.ms);
+        expect(outcome.ms).toBeLessThan(timeLimitMs(DEFAULT_BUDGET));
         expect(outcome.mib).toBeLessThan(DEFAULT_BUDGET.mib);
         const results = (outcome as Extract<BudgetOutcome, { kind: 'completed' }>).result as Array<
           Record<string, unknown>
@@ -211,7 +211,7 @@ describe('der limits', () => {
       );
       const outcome = await run('verifyDocument', pdf);
       expect(outcome.kind).toBe('completed');
-      expect(outcome.ms).toBeLessThan(DEFAULT_BUDGET.ms);
+      expect(outcome.ms).toBeLessThan(timeLimitMs(DEFAULT_BUDGET));
       expect(outcome.mib).toBeLessThan(DEFAULT_BUDGET.mib);
       const results = (outcome as Extract<BudgetOutcome, { kind: 'completed' }>).result as Array<
         Record<string, unknown>
