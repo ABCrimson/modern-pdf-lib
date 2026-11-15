@@ -60,19 +60,6 @@ export type {
 } from './jpeg2000Decode.js';
 
 // ---------------------------------------------------------------------------
-// JPEG2000 WASM acceleration
-// ---------------------------------------------------------------------------
-
-export {
-  initJpeg2000Wasm,
-  isJpeg2000WasmReady,
-  decodeJpeg2000Wasm,
-  decodeJpeg2000WithFallback,
-  disposeJpeg2000Wasm,
-} from './jpeg2000WasmBridge.js';
-export type { Jpeg2000WasmExports, Jpeg2000DecodeResult } from './jpeg2000WasmBridge.js';
-
-// ---------------------------------------------------------------------------
 // JPEG2000 codestream / JP2 container parsing
 // ---------------------------------------------------------------------------
 
