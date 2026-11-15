@@ -64,10 +64,13 @@ export interface PdfSaveOptions {
    */
   compressionLevel?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | undefined;
   /**
-   * When `true`, attempt to use WASM-accelerated compression if the
-   * WASM module has been initialized.  Default: `false`.
+   * When `true`, streams are compressed with the WASM deflate module if
+   * `initWasm()` instantiated one from caller-supplied `deflateWasm` bytes,
+   * and with fflate otherwise.  No WASM build the package ships can be
+   * enabled this way.  Default: `false`.
    *
-   * Has no effect in `saveIncremental()`, which does not use WASM.
+   * `saveIncremental()` does not use WASM: there `true` has no effect and
+   * emits a one-time `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`).
    */
   useWasm?: boolean | undefined;
   /**

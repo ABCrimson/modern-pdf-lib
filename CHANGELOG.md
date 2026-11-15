@@ -80,6 +80,7 @@ No export added, removed or changed.
 - **Version strings:** `docs/plans/ROADMAP.md`, `docs/.vitepress/config.ts`, `VERSIONING.md` and `package.json` carry the version 0.40.9.
 - **CI:** the `pnpm/setup` action is pinned to v3.2.0 in the four workflows. The unit-test job installs the checksum-pinned qpdf, which the unit tests of the encrypted load path compare with.
 - **Tooling pins:** pnpm 12.20.0 (`packageManager`; 12.19.0 before), oxlint-tsgolint 7.0.2007 (7.0.2006 before), TypeScript 7.1.0-dev.20261113.1, Playwright 1.66.0-alpha-2026-11-13 and Rust `nightly-2026-11-13` (`rust-toolchain.toml` and the `RUST_TOOLCHAIN` value of `ci.yml` and `release.yml`). pnpm 12.21.0 was younger than the 24-hour `minimumReleaseAge` on 2026-11-13 and is held in `.peak-modern-holds.json`; the TypeScript and Playwright builds are listed in `minimumReleaseAgeExclude` until they are 24 hours old.
+- **Documentation:** the README, the image-optimization guide and `docs/capabilities.json` write the CLI as `npx modern-pdf-lib optimize`: without a local install, `npx modern-pdf` fetches the unrelated npm package `modern-pdf`, while `npx modern-pdf-lib` runs this package's single `bin` entry. The supported-versions table of `SECURITY.md` lists only 0.40.9 as supported and names the advisories that affect each older 0.40 release. The header of `docs/plans/ROADMAP.md` says that its per-patch rows are the original plan, that `VERSIONING.md` caps only the patch digit, and that the releases from 0.41.0 first close the open findings of `audit/open-highs.json`. The Bun and Safari minimums are 1.1.31 and 18.4, the first versions with the iterator helpers the library calls without a guard (MDN browser-compat-data). The `initWasm()` JSDoc, the field comments of `InitWasmOptions` and the JSDoc of `PdfSaveOptions.useWasm` in `src/core/pdfWriter.ts` say that no shipped WASM build is enabled, so compression runs in fflate unless the caller supplies the bytes of a deflate module. The bundle-size table of the performance guide gives the sizes `pnpm run gate:size` measures, and `CONTRIBUTING.md` says that the unit-test job of CI installs qpdf. The docs site's favicon link carries the `/modern-pdf-lib/` base path.
 
 ### Compatibility
 
@@ -110,7 +111,7 @@ No export added, removed or changed.
 - **Known-defect markers:** 49 markers on 29 ledger ids in 10 files (106 on 35 ids in 9 files before).
 - **Ledger:** `audit/open-highs.json` lists 212 open entries (226 before). In `docs/capabilities.json` 6 rows are graded `oracle`, 26 `behaviour`, 85 `qualified` (84 before) and 16 `pending` (17 before).
 - **Lint:** `pnpm run lint` runs with `--max-warnings=1173` (down from 1,175).
-- **Size budgets:** the bundles grew with the load path, so `scripts/dev/size-budget.json` holds new budgets and the README badge says 100 KiB gzip for `createPdf`.
+- **Size budgets:** the bundles grew with the load path, so `scripts/dev/size-budget.json` holds new budgets and the README badge says 101 KiB gzip for `createPdf` (103,435 bytes).
 
 ## [0.40.8] - 2026-11-15
 

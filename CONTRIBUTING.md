@@ -102,7 +102,7 @@ Run each as `pnpm run <name>`.
 | `test:e2e` | Playwright browser E2E (`tests/e2e`) |
 | `test:bench` | `vitest bench` over the benchmark files |
 | `bench` | Benchmark suite via the tinybench harness |
-| `lint` / `lint:fix` | oxlint, type-aware; `lint` fails above 1,175 warnings |
+| `lint` / `lint:fix` | oxlint, type-aware; `lint` fails above 1,173 warnings |
 | `format` / `format:check` | oxfmt over `src`, `tests` and `scripts` |
 | `typecheck` | `tsc` over the root, `tsconfig.cli.json`, `tsconfig.scripts.json`, `tsconfig.tests.json` and `tsconfig.security-tests.json` projects |
 | `typecheck:security-tests` | `tsc` over `tsconfig.security-tests.json` only (the files it lists: the 0.40.5 security tests, the qpdf cross-check of encrypted saves, the known-defect helper tests, and `tests/helpers`) |
@@ -276,12 +276,13 @@ of `audit/open-highs.json` whose target equals `until` (`pnpm run gate:surface`)
 The fixing commit replaces the marker with a plain test.
 
 The qpdf-backed tests (the oracle project, which `corpus:check` also runs for
-the corpus) use qpdf 12.x from the `QPDF` environment variable, then `PATH`.
+the corpus, and the unit tests that compare with qpdf) use qpdf 12.x from
+the `QPDF` environment variable, then `PATH`.
 Locally, without qpdf, each such test skips with a reason, and `corpus:check`
 also counts the encrypted corpus entries as unconfirmed; when `CI` is set, a
 missing qpdf fails the test. The fixture generators under `scripts/oracle/`
-need qpdf 12.4.2 and refuse any other version. In CI the oracle job installs
-the checksum-pinned qpdf and exports `QPDF`. The API snapshot test needs
+need qpdf 12.4.2 and refuse any other version. In CI the unit-test job and the
+oracle job install the checksum-pinned qpdf and export `QPDF`. The API snapshot test needs
 `dist/` and `dist/wasm/` (`pnpm run build`, `pnpm run copy:wasm`) and the
 release tags: locally it skips without them, and in CI it fails.
 
@@ -294,7 +295,7 @@ tests: 9,084 passed and 49 expected failures (the markers). Without qpdf,
 ## Continuous Integration
 
 Every push and pull request against `master` runs [`.github/workflows/ci.yml`](.github/workflows/ci.yml).
-All gating jobs must be green before a PR can merge; the Rust per-crate job and the Node 24 and `devEngines` unit-test legs report without failing the workflow.
+Merging does not wait for CI (master has no branch protection); `release.yml` publishes a tag only after `ci.yml` succeeded on that commit. The Rust per-crate job and the Node 24 and `devEngines` unit-test legs report without failing the workflow.
 
 ```mermaid
 flowchart LR
@@ -323,7 +324,7 @@ waits on WASM, so style and type failures surface first.
 
 | Job | Gate |
 |---|---|
-| Lint & Type-check | `pnpm run typecheck` (five projects), `pnpm run lint` (type-aware oxlint, 0 errors, at most 1,175 warnings), `pnpm run check:test-projects` and `pnpm run check:known-defects` |
+| Lint & Type-check | `pnpm run typecheck` (five projects), `pnpm run lint` (type-aware oxlint, 0 errors, at most 1,173 warnings), `pnpm run check:test-projects` and `pnpm run check:known-defects` |
 | Build WASM | All six crates compile for `wasm32-unknown-unknown` |
 | Build TypeScript | `pnpm run build` succeeds and `dist/` imports as ESM **and** CJS |
 | Pack Check | `pnpm run check:pack`: the tarball lists six WASM builds and the IIFE bundle and passes publint and attw |

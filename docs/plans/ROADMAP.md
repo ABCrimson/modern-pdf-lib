@@ -1,12 +1,12 @@
 # modern-pdf-lib — Roadmap to 1.0.0
 
-> Granular, per-patch release plan from **0.28.0** through **1.0.0** (current: **0.40.9**; see the CHANGELOG for what each release contains).
+> Feature plan from **0.28.0** through **1.0.0** (current: **0.40.9**). The per-patch rows are the plan as first written; the CHANGELOG says what each release contains. 0.40.4 to 0.40.9 were toolchain, testing, security and correctness releases. From 0.41.0, releases first close the 212 open findings in `audit/open-highs.json`, each at the release its entry names (0.41.0 to 0.49.4; strings above 0x7F in 0.41.0, encrypted incremental and streamed saves in 0.41.2).
 > Versioning follows [`VERSIONING.md`](https://github.com/ABCrimson/modern-pdf-lib/blob/master/VERSIONING.md): patch `.0–.9`, then roll to the next minor.
 > Effort key: **S** ≤1 day · **M** a few days · **L** ~1–2 weeks · **XL** multi-week.
 
 **Within each minor:** `.0` lays the load-bearing foundation, `.1–.8` ship individually-releasable sub-features that progressively complete the theme, and `.9` is stabilization (edge-cases, performance, tests, docs, benchmarks) before rolling to the next minor.
 
-**1.0.0 reconciliation:** `VERSIONING.md` allows minors up to `0.99` before `1.0.0`. That's *headroom*, not a mandate — `1.0.0` ships when the library is **ISO 32000-2 feature-complete with a frozen, semver-guaranteed public API** (reached after `0.50.x` below). Recommend amending the policy to make 1.0.0 milestone-driven rather than mechanically gated on `0.99.9`.
+**1.0.0 reconciliation:** `VERSIONING.md` caps only the patch digit; the minor is not capped, and `1.0.0` freezes the public API. `1.0.0` ships when the library is **ISO 32000-2 feature-complete with a frozen, semver-guaranteed public API** (reached after `0.50.x` below), not at a fixed minor.
 
 ---
 
@@ -58,7 +58,7 @@ The bleeding-edge toolchain migration + code modernization.
 | **0.29.5** | Embedded font extraction → TTF/OTF/CFF | `extractFonts()` rebuilding standalone font files from FontFile/2/3 + Encoding/ToUnicode. | L |
 | **0.29.6** | Visual page diff (pixel + SSIM) | `comparePages()` → difference heatmap, changed-pixel count, SSIM score for visual regression. | M |
 | **0.29.7** | Pluggable OCR hook → invisible text | `OcrEngine` interface writing results as invisible Tr 3 overlay (§9.3.3); scanned PDFs become searchable. | L |
-| **0.29.8** | True text redaction by content removal | `redactRegions()` deletes underlying text/image operators in rects — not a black box overlay. | L |
+| **0.29.8** | True text redaction by content removal | `redactRegions()` deletes underlying text/image operators in rects — not a black box overlay (withdrawn in 0.40.5: `redactRegions()` throws `RedactionIncompleteError`). | L |
 | **0.29.9** | Render caching, tiling & stabilization | Tile-based rendering of huge pages + LRU cache; MediaBox/CropBox/blend-mode edge cases; benchmarks + docs. | L |
 
 ---
@@ -225,7 +225,7 @@ The bleeding-edge toolchain migration + code modernization.
 
 ---
 
-## 0.40.x — Developer Experience & Ecosystem *(shipped in 0.40.0)*
+## 0.40.x — Developer Experience & Ecosystem *(0.40.0 shipped the JSX renderer, schema-driven forms and server adapters; 0.40.1–0.40.9 shipped other work, see the CHANGELOG)*
 | Version | Title | Detail | Effort |
 |---|---|---|---|
 | **0.40.0** | Declarative VDOM-to-PDF core | Framework-agnostic reconciler: Document/Page/View/Text/Image → content streams. | XL |

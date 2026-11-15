@@ -32,13 +32,13 @@ deno add npm:modern-pdf-lib
 |---|---|---|
 | Node.js | 26.4+ | Unit tests gate on Node 26 in CI |
 | Deno | 2.5+ | Via the `npm:` specifier; not tested in CI |
-| Bun | 1.1.22+ | Not tested in CI |
+| Bun | 1.1.31+ | Not tested in CI |
 | Cloudflare Workers | current workerd (V8 14.0+) | Streaming output, no file system; not tested in CI |
 | Chrome / Edge | 140+ | End-to-end tests run in Chromium |
 | Firefox | 133+ | End-to-end tests run in Firefox |
-| Safari | 18.2+ | End-to-end tests run in WebKit |
+| Safari | 18.4+ | End-to-end tests run in WebKit |
 
-The Deno, Bun and browser minimums are the first versions with `Uint8Array.prototype.toBase64`/`toHex` and `Uint8Array.fromBase64`/`fromHex`, which the library calls without a guard (MDN browser-compat-data, read 2026-11-11).
+The Deno, Bun and browser minimums are the first versions with both the `Uint8Array` base64/hex methods (`Uint8Array.prototype.toBase64`/`toHex`, `Uint8Array.fromBase64`/`fromHex`) and the iterator helpers (`Iterator.from`, `.map`, `.toArray`), which the library calls without a guard (MDN browser-compat-data, read 2026-11-15).
 :::
 
 ## Your First PDF

@@ -139,7 +139,7 @@ p1.drawText('3. Multi-line Text', {
 y -= 24;
 
 p1.drawText(
-  'Line 1: ESM-only, no CommonJS\nLine 2: Uint8Array everywhere, no Buffer\nLine 3: Async-first, streaming output\nLine 4: WASM-accelerated compression',
+  'Line 1: ESM-only, no CommonJS\nLine 2: Uint8Array everywhere, no Buffer\nLine 3: Async-first, streaming output\nLine 4: FlateDecode compression in JavaScript (fflate)',
   { x: 70, y, font: helvetica, size: 10, color: rgb(0.2, 0.2, 0.2), lineHeight: 14 },
 );
 

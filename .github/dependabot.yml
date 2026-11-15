@@ -3,7 +3,7 @@ version: 2
 # Every ecosystem waits one day before proposing a release, matching pnpm's
 # minimumReleaseAge of 1440 minutes in pnpm-workspace.yaml. Security updates are
 # not delayed by `cooldown`.
-# The labels below (dependencies, ci, wasm) are created by the repo-settings phase.
+# The labels below (dependencies, ci, wasm) exist in the repository.
 updates:
   # pnpm 12 via the `npm` ecosystem; this root entry also covers the tools/docs workspace package.
   - package-ecosystem: npm

@@ -154,7 +154,6 @@
     "text-extraction",
     "pdf-forms",
     "pdf-signature",
-    "wasm",
     "typescript",
     "esm",
     "cloudflare-workers",

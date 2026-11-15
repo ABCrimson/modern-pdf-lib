@@ -84,12 +84,14 @@ jobs:
           cache: true
           require-lockfile: true
 
+      # The key hashes package.json, which pins wasm-pack, so a wasm-pack
+      # version change misses the cache and rebuilds the crates.
       - name: Cache WASM output
         uses: actions/cache@v6.1.0
         id: wasm-cache
         with:
           path: src/wasm/*/pkg
-          key: wasm-pkg-${{ runner.os }}-${{ env.RUST_TOOLCHAIN }}-${{ hashFiles('src/wasm/*/src/**/*.rs', 'src/wasm/*/Cargo.toml', 'src/wasm/*/Cargo.lock', 'scripts/build-wasm.sh', 'rust-toolchain.toml') }}
+          key: wasm-pkg-${{ runner.os }}-${{ env.RUST_TOOLCHAIN }}-${{ hashFiles('src/wasm/*/src/**/*.rs', 'src/wasm/*/Cargo.toml', 'src/wasm/*/Cargo.lock', 'scripts/build-wasm.sh', 'rust-toolchain.toml', 'package.json') }}
 
       # Each crate is its own Cargo root until the workspace migration, so each
       # gets its own cache entry.

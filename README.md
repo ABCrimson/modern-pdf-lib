@@ -179,7 +179,7 @@ For a plain `<script>` tag without `type="module"`, use the IIFE bundle, which e
 - Service Worker & Web Worker support
 - Batch processing with memory pressure handling
 - Spot colors (Separation) & DeviceN
-- CLI: `npx modern-pdf optimize`
+- CLI: `npx modern-pdf-lib optimize`
 
 </td>
 </tr>
@@ -358,7 +358,7 @@ For a plain `<script>` tag without `type="module"`, use the IIFE bundle, which e
 
 <!-- capabilities:end -->
 
-The browser, Deno and Bun minimums are the first versions with both the Uint8Array base64/hex methods (`Uint8Array.prototype.toBase64`/`toHex`, `Uint8Array.fromBase64`/`fromHex`) and the iterator helpers (`Iterator.from`, `.map`, `.toArray`), which the library calls without a guard (MDN browser-compat-data, read 2026-11-11). The Node minimum is the `engines` range in package.json.
+The browser, Deno and Bun minimums are the first versions with both the Uint8Array base64/hex methods (`Uint8Array.prototype.toBase64`/`toHex`, `Uint8Array.fromBase64`/`fromHex`) and the iterator helpers (`Iterator.from`, `.map`, `.toArray`), which the library calls without a guard (MDN browser-compat-data, read 2026-11-15). The Node minimum is the `engines` range in package.json.
 
 <br />
 
@@ -542,7 +542,7 @@ In this release `initWasm({ jpeg: true })` does not initialise the JPEG WASM enc
 
 **CLI:**
 ```sh
-npx modern-pdf optimize report.pdf report-opt.pdf --quality 60 --grayscale --dedup -v
+npx modern-pdf-lib optimize report.pdf report-opt.pdf --quality 60 --grayscale --dedup -v
 ```
 </details>
 

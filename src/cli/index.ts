@@ -5,8 +5,8 @@
  * CLI entry point for modern-pdf-lib.
  *
  * Usage:
- *   npx modern-pdf optimize input.pdf output.pdf [options]
- *   npx modern-pdf --help
+ *   npx modern-pdf-lib optimize input.pdf output.pdf [options]
+ *   npx modern-pdf-lib --help
  */
 
 import { optimizeCommand } from './optimize.js';

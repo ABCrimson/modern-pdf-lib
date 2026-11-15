@@ -207,50 +207,56 @@ let wasmInitialized = false;
  * Options for WASM module initialization.
  */
 export interface InitWasmOptions {
-  /** Initialize the deflate/inflate WASM module. Default: `false`. */
+  /**
+   * Try the deflate WASM module. Without `deflateWasm` bytes the call
+   * rejects. Default: `false`.
+   */
   deflate?: boolean | undefined;
-  /** Initialize the PNG decoding WASM module. Default: `false`. */
+  /** Accepted; PNG decoding runs in JavaScript. Default: `false`. */
   png?: boolean | undefined;
-  /** Initialize the font subsetting WASM module. Default: `false`. */
+  /** Accepted and does nothing; font subsetting runs in JavaScript. Default: `false`. */
   fonts?: boolean | undefined;
   /**
    * Pre-loaded WASM bytes for the deflate module.
    * When provided, the module is instantiated directly from these bytes.
    */
   deflateWasm?: Uint8Array | undefined;
-  /**
-   * Pre-loaded WASM bytes for the PNG decoding module.
-   */
+  /** WASM bytes for PNG decoding. Accepted; PNG decoding runs in JavaScript. */
   pngWasm?: Uint8Array | undefined;
-  /**
-   * Pre-loaded WASM bytes for the font subsetting module.
-   */
+  /** WASM bytes for font subsetting. Accepted and not used. */
   fontWasm?: Uint8Array | undefined;
-  /** Initialize the JPEG encoding/decoding WASM module. Default: `false`. */
+  /** Accepted; the JPEG encoder is not enabled. Default: `false`. */
   jpeg?: boolean | undefined;
-  /**
-   * Pre-loaded WASM bytes for the JPEG encoding/decoding module.
-   */
+  /** WASM bytes for JPEG encoding. Accepted and not used. */
   jpegWasm?: Uint8Array | undefined;
 }
 
 /**
- * Initialize the optional WASM acceleration modules.
+ * Kept for compatibility. In this release it enables none of the WASM
+ * builds the package ships: compression runs in JavaScript (fflate), and
+ * PNG decoding, font subsetting and JPEG handling run in JavaScript.
  *
- * Call this once before `save()` if you want WASM-accelerated
- * compression, PNG decoding, or font subsetting.  It is safe to call
- * multiple times -- subsequent calls are no-ops.
+ * - With no argument, a string or a URL (the legacy `wasmUrl`), it returns
+ *   at once.
+ * - `deflate: true` rejects: no shipped deflate build loads and instantiates
+ *   here (a later call does not retry and resolves). `deflateWasm` bytes are
+ *   instantiated with no imports, so the shipped build, which needs the
+ *   imports of its wasm-bindgen glue, rejects as well. Bytes of a module that
+ *   needs no imports enable WASM deflate: when the module exports `memory`,
+ *   `alloc`, `dealloc` and `compress`, `save({ useWasm: true })` compresses
+ *   with it; with any other such module that save throws.
+ * - `png` or `pngWasm` resolves; PNG decoding stays in JavaScript.
+ * - `jpeg` resolves without enabling the JPEG encoder (`jpegWasm` bytes are
+ *   not used), so JPEG recompression leaves images unchanged.
+ * - `fonts` or `fontWasm` does nothing.
  *
- * If not called, the library falls back to pure-JS implementations
- * (fflate for compression, JS for PNG decoding).
+ * Once a call with an options object has resolved, later calls return at
+ * once.
  *
- * @param options  Configuration for which WASM modules to load,
- *                 and optionally pre-loaded WASM binary bytes.
- *                 When a string or URL is passed, it is treated as
- *                 a legacy `wasmUrl` parameter (ignored for backward
- *                 compatibility).
- * @returns        A promise that resolves when all requested modules
- *                 are ready.
+ * @param options  Which modules to try, and optional WASM bytes; a string or
+ *                 URL is ignored.
+ * @returns        A promise that resolves when the selected attempts finish,
+ *                 and rejects when the deflate module cannot be instantiated.
  */
 export async function initWasm(options?: string | URL | InitWasmOptions): Promise<void> {
   // Handle legacy signature: initWasm(wasmUrl)

@@ -13,12 +13,14 @@ files should still run each file under operating-system limits on time and memor
 
 ## Supported Versions
 
-Only the latest minor line receives security fixes. There are no long-term
-support branches while the project is pre-1.0.
+Security fixes ship only in a new release of the latest line; there are no backports.
 
 | Version | Supported |
 |---|---|
-| 0.40.x | :white_check_mark: |
+| 0.40.9 (latest) | :white_check_mark: |
+| 0.40.8 | :x: (upgrade) |
+| 0.40.5 – 0.40.7 | :x: (affected by the advisory published with 0.40.8; upgrade) |
+| 0.40.0 – 0.40.4 | :x: (affected by the advisories published with 0.40.5 and 0.40.8; upgrade) |
 | < 0.40.0 | :x: |
 
 If you are on an older release, upgrade before filing — the issue may already be

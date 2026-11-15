@@ -353,17 +353,17 @@ The package ships WebAssembly builds of six Rust crates under `dist/wasm/`, but 
 
 ## Browser Compatibility
 
-The code calls `Uint8Array.prototype.toBase64()`, `toHex()`, `Uint8Array.fromBase64()` and `fromHex()` without a fallback, along with `Promise.withResolvers` and `Set.prototype.union`; the `Uint8Array` methods are the newest of these. Minimums from MDN browser-compat-data (read 2026-11-11):
+The code calls `Uint8Array.prototype.toBase64()`, `toHex()`, `Uint8Array.fromBase64()` and `fromHex()` without a fallback, along with `Promise.withResolvers`, `Set.prototype.union` and the iterator helpers (`.map`, `.toArray`); the newest are the `Uint8Array` methods (Chrome, Firefox) and the iterator helpers (Safari 18.4). Minimums from MDN browser-compat-data (read 2026-11-15):
 
 | Browser | Minimum version |
 |---|---|
 | Chrome | 140 |
 | Edge | 140 (Chromium) |
 | Firefox | 133 |
-| Safari | 18.2 |
-| iOS Safari | 18.2 |
+| Safari | 18.4 |
+| iOS Safari | 18.4 |
 | Android Chrome | 140 |
 
-**Required browser features:** ES2022 (the IIFE bundle's build target), `Promise.withResolvers`, `Set.prototype.union`, `Uint8Array` base64 and hex methods, TextEncoder, Blob, URL.createObjectURL
+**Required browser features:** ES2022 (the IIFE bundle's build target), `Promise.withResolvers`, `Set.prototype.union`, `Uint8Array` base64 and hex methods, iterator helpers (`Iterator.from`, `.map`, `.toArray`), TextEncoder, Blob, URL.createObjectURL
 
 CI runs the Playwright end-to-end suite on Chromium, Firefox and WebKit.

@@ -153,7 +153,7 @@ if (target.downscaled) {
 Optimize images from the command line:
 
 ```sh
-npx modern-pdf optimize input.pdf output.pdf [options]
+npx modern-pdf-lib optimize input.pdf output.pdf [options]
 ```
 
 `modern-pdf optimize` runs `optimizeAllImages()` without loading the JPEG encoder, so it recompresses no image; `--dedup` still removes duplicate images.
@@ -174,13 +174,13 @@ npx modern-pdf optimize input.pdf output.pdf [options]
 
 ```sh
 # Basic optimization
-npx modern-pdf optimize report.pdf report-opt.pdf
+npx modern-pdf-lib optimize report.pdf report-opt.pdf
 
 # Aggressive optimization with verbose output
-npx modern-pdf optimize scan.pdf scan-opt.pdf --quality 60 --grayscale --dedup -v
+npx modern-pdf-lib optimize scan.pdf scan-opt.pdf --quality 60 --grayscale --dedup -v
 
 # High-quality progressive JPEG
-npx modern-pdf optimize photo-book.pdf out.pdf --quality 90 --progressive --chroma 4:4:4
+npx modern-pdf-lib optimize photo-book.pdf out.pdf --quality 90 --progressive --chroma 4:4:4
 ```
 
 ## Architecture

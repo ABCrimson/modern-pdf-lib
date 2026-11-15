@@ -1,14 +1,7 @@
 /**
  * @module types/options
  *
- * Public option interfaces for the modern-pdf API.
- *
- * These types are re-exported from the package root so that consumers
- * can import them for annotation purposes:
- *
- * ```ts
- * import type { PdfSaveOptions, DrawTextOptions } from 'modern-pdf-lib';
- * ```
+ * Not exported and imported by no module; the public option types live in src/core/pdfWriter.ts and src/core/pdfPage.ts.
  *
  * Every optional field uses the `T | undefined` union with
  * `exactOptionalPropertyTypes` to be explicit about intent.
@@ -35,8 +28,10 @@ export interface PdfSaveOptions {
    */
   compressionLevel?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | undefined;
   /**
-   * When `true`, prefer WASM-accelerated compression if the WASM
-   * module has been initialized via `initWasm()`.  Default: `false`.
+   * When `true`, compression uses the WASM deflate module if `initWasm()`
+   * instantiated one from caller-supplied `deflateWasm` bytes, and fflate
+   * otherwise. No shipped WASM build can be enabled this way.
+   * `saveIncremental()` ignores it and warns once.  Default: `false`.
    */
   useWasm?: boolean | undefined;
   /**

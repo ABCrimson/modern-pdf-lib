@@ -635,7 +635,7 @@
       "id": "cap-feat-cli",
       "region": "readme-features",
       "doc": "README.md",
-      "text": "CLI: npx modern-pdf optimize",
+      "text": "CLI: npx modern-pdf-lib optimize",
       "grade": "qualified",
       "tests": [
         "cap-cli"
@@ -1554,7 +1554,7 @@
       "id": "cap-ts-rt-bun",
       "region": "guide-troubleshooting-runtimes",
       "doc": "docs/guide/troubleshooting.md",
-      "text": "Bun | 1.1.22 | No",
+      "text": "Bun | 1.1.31 | No",
       "grade": "behaviour",
       "tests": [
         "cap-ci-runtimes"
@@ -1576,7 +1576,7 @@
       "id": "cap-ts-rt-browsers",
       "region": "guide-troubleshooting-runtimes",
       "doc": "docs/guide/troubleshooting.md",
-      "text": "Browsers | Chrome 140, Firefox 133, Safari 18.2 (see the Browser guide) | Playwright E2E on Chromium, Firefox and WebKit",
+      "text": "Browsers | Chrome 140, Firefox 133, Safari 18.4 (see the Browser guide) | Playwright E2E on Chromium, Firefox and WebKit",
       "grade": "behaviour",
       "tests": [
         "cap-ci-runtimes"

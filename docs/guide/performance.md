@@ -377,7 +377,7 @@ const caps = detectRuntimeCapabilities();
 
 ## Cross-Runtime Performance
 
-`modern-pdf-lib` targets Node.js (`engines` `>=26.4`), browsers, Deno, Bun and Cloudflare Workers. The library calls `Uint8Array` base64 and hex methods without a guard; MDN browser-compat-data (read 2026-11-11) lists them from Node.js 25.0.0, Deno 2.5.0, Bun 1.1.22, Chrome 140, Firefox 133 and Safari 18.2.
+`modern-pdf-lib` targets Node.js (`engines` `>=26.4`), browsers, Deno, Bun and Cloudflare Workers. The library calls `Uint8Array` base64 and hex methods without a guard; MDN browser-compat-data (read 2026-11-15) lists them from Node.js 25.0.0, Deno 2.5.0, Bun 1.1.22, Chrome 140, Firefox 133 and Safari 18.2; the iterator helpers it also calls need Bun 1.1.31 and Safari 18.4.
 
 <!-- capabilities:begin guide-performance-runtimes -->
 
@@ -400,12 +400,12 @@ const caps = detectRuntimeCapabilities();
 
 ### Bundle Size Breakdown
 
-Measured 2026-11-12 from the built `dist/` with esbuild 0.28.2 (`--bundle --minify`) and gzip level 9:
+Measured 2026-11-15 by `pnpm run gate:size` (`scripts/dev/size-gate.ts`) from the built `dist/`: the minimal document is an esbuild 0.28.2 bundle (bundle, minify, format esm, platform neutral, `node:*` external), the IIFE file is measured as shipped, and both are gzipped at level 9 with `node:zlib` of the `devEngines` runtime, Node.js 28.0.0-nightly20261111e8c1160d20:
 
 | Scenario | Size (minified + gzipped) |
 |:---|:---:|
-| Minimal document (`export { createPdf } from 'modern-pdf-lib'`, `node:*` external) | ~96 KB (98,217 B) |
-| Entire library (`dist/modern-pdf-lib.iife.js`) | ~249 KB (255,259 B) |
+| Minimal document (`export { createPdf } from 'modern-pdf-lib'`, `node:*` external) | ~101 KiB (103,435 B) |
+| Entire library (`dist/modern-pdf-lib.iife.js`) | ~256 KiB (261,753 B) |
 
 ### Minimizing Bundle Size
 

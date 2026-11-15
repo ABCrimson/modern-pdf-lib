@@ -103,7 +103,7 @@ export default defineConfig({
   base: '/modern-pdf-lib/',
 
   head: [
-    ['link', { rel: 'icon', type: 'image/svg+xml', href: '/logo.svg' }],
+    ['link', { rel: 'icon', type: 'image/svg+xml', href: '/modern-pdf-lib/logo.svg' }],
     ['meta', { name: 'theme-color', content: '#7C3AED' }],
     [
       'meta',
