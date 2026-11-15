@@ -216,7 +216,7 @@
     "file": "src/plugins/pluginSystem.ts",
     "kind": "Error",
     "message": "Plugin \"${}\" is already registered",
-    "target": "InvalidStateError"
+    "target": "PluginError"
   },
   {
     "file": "src/plugins/pluginSystem.ts",

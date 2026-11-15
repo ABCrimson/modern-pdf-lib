@@ -52,7 +52,7 @@
   {
     "name": "RichTextFieldReadError",
     "decision": "remove",
-    "where": "its only throw sites sit inside a catch-all in src/form/formFlatten.ts, so no caller ever sees the class"
+    "where": "the only failures of a rich text read (the generic throws of parseRichTextXhtml in src/form/formFlatten.ts) are swallowed by a catch-all there, so no caller could ever see the class"
   },
   {
     "name": "CombedTextLayoutError",

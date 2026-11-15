@@ -3,10 +3,11 @@
  * the allowlists in `errorCensus.allow/`:
  *
  * 1. Every `throw` that builds a native error (`new Error(...)`, `new RangeError(...)`, ...) is
- *    one row of an allowlist, keyed by file, constructor and message (never by line), with the
- *    typed class that should replace it. A new generic throw fails the test, and so does a row
+ *    counted by one allowlist row, keyed by file, constructor and message (never by line);
+ *    throws that share a key share a row with their `count`. The row names the typed class that
+ *    should replace the throw. A new generic throw fails the test, and so does a row
  *    whose throw is gone: whoever converts a throw deletes its row, so the lists only shrink.
- * 2. Every exported error class (a class with a super class, in `src/errors.ts`,
+ * 2. Every exported error class (a concrete class with a super class, in `src/errors.ts`,
  *    `src/parser/parseError.ts` and `src/runtime/memoryBudget.ts`) has a `throw` that names it,
  *    or a row in `classes.json` saying why it has none yet. The work that gives a class a throw
  *    site deletes its row.
@@ -28,7 +29,8 @@
  * | leaves.json                | `src/layout`, `barcode`, `render`, `assets/svg`                   |
  * | assets.json                | the rest of `src/assets`                                          |
  * | runtime-misc.json          | every other folder (codecs, color, runtime, wasm, ...)           |
- * | limits.json                | rows of any file the limits work takes over; empty today          |
+ * | limits.json                | the entry files `src/index.ts`, `browser`, `create`, `parse`,     |
+ * |                            | `forms`, and rows of any file the limits work takes over          |
  * | classes.json               | the classes with no throw site (check 2)                          |
  */
 import { readdirSync, readFileSync } from 'node:fs';
@@ -52,10 +54,12 @@ const TARGET_CLASSES: ReadonlySet<string> = new Set([
   'PdfParseError',
   'UnsupportedFilterError',
   'BatchProcessingError',
+  'PluginError',
 ]);
 
 /** The group a source file belongs to: the basename (without `.json`) of its allowlist file. */
 function groupOf(file: string): string {
+  if (/^src\/(index|browser|create|parse|forms)\.ts$/.test(file)) return 'limits';
   if (
     [
       'src/core/pdfDocument.ts',

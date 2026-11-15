@@ -6,7 +6,8 @@
  *   `SyntaxError`, `ReferenceError`, `EvalError`, `URIError`, `AggregateError`) rather than one of
  *   the library's own classes? A `throw` whose argument is a conditional or a logical
  *   expression counts through each branch (`throw e instanceof Error ? e : new Error(String(e))`).
- *   A rethrow of a caught identifier builds nothing and is not a site.
+ *   A rethrow of a caught identifier builds nothing and is not a site. A native error stored in a
+ *   variable and thrown later (`const e = new Error(); throw e`) is not followed.
  * - Which classes does `src` throw? The census records every class a `throw` statement constructs,
  *   and lists the exported error classes (a concrete class with a `super` class) of the files that
  *   declare them, so a test can ask for the ones no `throw` names.
@@ -35,7 +36,7 @@ const NATIVE_ERRORS: ReadonlySet<string> = new Set([
 ]);
 
 /** The files whose exported error classes the census lists. */
-export const ERROR_CLASS_FILES: readonly string[] = [
+const ERROR_CLASS_FILES: readonly string[] = [
   'src/errors.ts',
   'src/parser/parseError.ts',
   'src/runtime/memoryBudget.ts',
@@ -78,8 +79,48 @@ function thrownBranches(node: Expression): Expression[] {
     case 'TSSatisfiesExpression':
     case 'TSNonNullExpression':
       return thrownBranches(node.expression);
+    case 'CallExpression': {
+      // `throw Object.assign(new Error(...), { ... })` throws its first argument.
+      const [target] = node.arguments;
+      const { callee } = node;
+      if (
+        callee.type === 'MemberExpression' &&
+        !callee.computed &&
+        callee.object.type === 'Identifier' &&
+        callee.object.name === 'Object' &&
+        callee.property.type === 'Identifier' &&
+        callee.property.name === 'assign' &&
+        target !== undefined &&
+        target.type !== 'SpreadElement'
+      ) {
+        return thrownBranches(target);
+      }
+      return [node];
+    }
     default:
       return [node];
+  }
+}
+
+/** The global objects a `throw` can name a native constructor through: `globalThis.Error`. */
+const GLOBAL_OBJECTS: ReadonlySet<string> = new Set(['globalThis', 'self', 'window']);
+
+/** The constructor a callee names: `Error`, `(Error)` or `globalThis.Error`; undefined otherwise. */
+function calleeName(callee: Expression): string | undefined {
+  switch (callee.type) {
+    case 'Identifier':
+      return callee.name;
+    case 'ParenthesizedExpression':
+      return calleeName(callee.expression);
+    case 'MemberExpression':
+      return !callee.computed &&
+        callee.object.type === 'Identifier' &&
+        GLOBAL_OBJECTS.has(callee.object.name) &&
+        callee.property.type === 'Identifier'
+        ? callee.property.name
+        : undefined;
+    default:
+      return undefined;
   }
 }
 
@@ -108,7 +149,7 @@ function lineOf(text: string, offset: number): number {
 }
 
 /** The `src` files (relative to the repository root) the census reads, sorted. */
-export function sourceFiles(): string[] {
+function sourceFiles(): string[] {
   return globSync('**/*.ts', { cwd: SRC_DIR })
     .map((f) => `src/${f.replaceAll('\\', '/')}`)
     .sort();
@@ -142,13 +183,9 @@ export function runCensus(): ErrorCensus {
     new Visitor({
       ThrowStatement(statement: ThrowStatement) {
         for (const branch of thrownBranches(statement.argument)) {
-          if (
-            (branch.type !== 'NewExpression' && branch.type !== 'CallExpression') ||
-            branch.callee.type !== 'Identifier'
-          ) {
-            continue;
-          }
-          const kind = branch.callee.name;
+          if (branch.type !== 'NewExpression' && branch.type !== 'CallExpression') continue;
+          const kind = calleeName(branch.callee);
+          if (kind === undefined) continue;
           const files = thrown.get(kind) ?? new Set<string>();
           files.add(file);
           thrown.set(kind, files);
