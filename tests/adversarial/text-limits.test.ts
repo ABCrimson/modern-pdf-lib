@@ -7,7 +7,7 @@
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_BUDGET, runWithinBudget, timeLimitMs } from '../helpers/budget.js';
 import type { BudgetOutcome, JsonValue } from '../helpers/budget.js';
-import { INTERNAL_LIMITS } from '../../src/core/limits.js';
+import { INTERNAL_LIMITS } from '../../src/internal/limits.js';
 import {
   bfcharCMap,
   bfrangeCMap,

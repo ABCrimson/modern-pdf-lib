@@ -15,7 +15,7 @@
  */
 
 import type { PdfPlugin, PluginDocument } from '../pluginSystem.js';
-import { warnOnce } from '../../utils/warnings.js';
+import { warnOnce } from '../../internal/warnings.js';
 
 /** Options for the metadata plugin. */
 export interface MetadataPluginOptions {

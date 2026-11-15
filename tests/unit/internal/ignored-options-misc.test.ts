@@ -23,7 +23,7 @@ import {
   tagTableHeaderCell,
 } from '../../../src/accessibility/taggingHelpers.js';
 import { optimizeAllImages } from '../../../src/assets/image/batchOptimize.js';
-import { resetWarningsForTesting } from '../../../src/utils/warnings.js';
+import { resetWarningsForTesting } from '../../../src/internal/warnings.js';
 
 const TYPE = 'ModernPdfLibWarning';
 const CODE = 'MPL_IGNORED_OPTION';

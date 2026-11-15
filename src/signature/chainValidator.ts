@@ -37,7 +37,7 @@ import {
   getSubtle,
 } from './pkcs7.js';
 import type { Asn1Node } from './pkcs7.js';
-import { warnOnce } from '../utils/warnings.js';
+import { warnOnce } from '../internal/warnings.js';
 
 // ---------------------------------------------------------------------------
 // Types

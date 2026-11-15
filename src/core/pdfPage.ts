@@ -64,7 +64,7 @@ import {
   PdfObjectRegistry,
 } from './pdfObjects.js';
 import { decodeStreamData } from '../parser/streamDecode.js';
-import { assertWithinLimit } from './limits.js';
+import { assertWithinLimit } from '../internal/limits.js';
 import type { StructureType } from '../accessibility/structureTree.js';
 import {
   wrapInMarkedContent,

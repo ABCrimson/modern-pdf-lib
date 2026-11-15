@@ -26,7 +26,7 @@
  */
 
 import { flateEncode, inflateFlateUpTo } from '../../compression/pdfFlate.js';
-import { assertWithinLimit } from '../../core/limits.js';
+import { assertWithinLimit } from '../../internal/limits.js';
 
 // ---------------------------------------------------------------------------
 // Public interfaces

@@ -7,7 +7,7 @@
 import { readFileSync } from 'node:fs';
 import { runInNewContext } from 'node:vm';
 import { describe, expect, it } from 'vitest';
-import { INTERNAL_LIMITS } from '../../../src/core/limits.js';
+import { INTERNAL_LIMITS } from '../../../src/internal/limits.js';
 import { ResourceLimitError } from '../../../src/errors.js';
 import { findSignatures } from '../../../src/signature/byteRange.js';
 import { verifySignatureDetailed } from '../../../src/signature/detailedVerifier.js';

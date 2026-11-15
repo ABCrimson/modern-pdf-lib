@@ -14,7 +14,7 @@ import { MdpPermission, setCertificationLevel } from '../../../src/signature/mdp
 import { verifySignatureDetailed } from '../../../src/signature/detailedVerifier.js';
 import { validateCertificateChain } from '../../../src/signature/chainValidator.js';
 import type { SignOptions } from '../../../src/signature/signatureHandler.js';
-import { resetWarningsForTesting } from '../../../src/utils/warnings.js';
+import { resetWarningsForTesting } from '../../../src/internal/warnings.js';
 import { generateTestCert } from '../../helpers/signature-trust-fixtures.js';
 
 const TYPE = 'ModernPdfLibWarning';

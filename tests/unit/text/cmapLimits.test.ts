@@ -5,7 +5,7 @@
  * are unchanged. The hostile-input budget cases are in tests/adversarial/text-limits.test.ts.
  */
 import { describe, expect, it } from 'vitest';
-import { INTERNAL_LIMITS } from '../../../src/core/limits.js';
+import { INTERNAL_LIMITS } from '../../../src/internal/limits.js';
 import { ResourceLimitError } from '../../../src/errors.js';
 import { extractMetrics } from '../../../src/assets/font/fontMetrics.js';
 import { PdfDict, PdfName, PdfStream } from '../../../src/core/pdfObjects.js';

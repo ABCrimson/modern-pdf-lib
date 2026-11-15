@@ -11,7 +11,7 @@
  */
 
 import type { PdfDocument } from '../../core/pdfDocument.js';
-import { warnOnce } from '../../utils/warnings.js';
+import { warnOnce } from '../../internal/warnings.js';
 import { PdfArray, PdfName } from '../../core/pdfObjects.js';
 import { ResourceLimitError, UnsupportedFilterError } from '../../errors.js';
 import { extractImages, decodeImageStream } from './imageExtract.js';

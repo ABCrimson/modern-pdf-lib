@@ -10,7 +10,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { loadPdf } from '../../../src/index.js';
-import { resetWarningsForTesting } from '../../../src/utils/warnings.js';
+import { resetWarningsForTesting } from '../../../src/internal/warnings.js';
 import { pdf20Hash } from '../../helpers/oracle/pdf20-hash.js';
 import { QPDF_BIN, requireQpdf } from '../../helpers/oracle/qpdf.js';
 

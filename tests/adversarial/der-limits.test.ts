@@ -4,7 +4,7 @@
  * result, and none is ended by the runner.
  */
 import { describe, expect, it } from 'vitest';
-import { INTERNAL_LIMITS } from '../../src/core/limits.js';
+import { INTERNAL_LIMITS } from '../../src/internal/limits.js';
 import { findSignatures } from '../../src/signature/byteRange.js';
 import { signPdf } from '../../src/signature/signatureHandler.js';
 import { createMinimalPdf, generateTestCert } from '../helpers/signature-trust-fixtures.js';

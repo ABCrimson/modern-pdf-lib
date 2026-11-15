@@ -18,7 +18,7 @@
  * @packageDocumentation
  */
 
-import { assertWithinLimit } from '../core/limits.js';
+import { assertWithinLimit } from '../internal/limits.js';
 import { PdfDict, PdfName, PdfNumber, PdfStream } from '../core/pdfObjects.js';
 import { ResourceLimitError } from '../errors.js';
 import type { ContentStreamOperator, Operand } from './contentStreamParser.js';

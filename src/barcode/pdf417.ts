@@ -22,7 +22,7 @@ import type { Color } from '../core/operators/color.js';
 import { applyFillColor } from '../core/operators/color.js';
 import { saveState, restoreState } from '../core/operators/state.js';
 import { fill } from '../core/operators/graphics.js';
-import { warnOnce } from '../utils/warnings.js';
+import { warnOnce } from '../internal/warnings.js';
 
 // ---------------------------------------------------------------------------
 // Public types

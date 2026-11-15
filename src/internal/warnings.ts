@@ -1,5 +1,5 @@
 /**
- * @module utils/warnings
+ * @module internal/warnings
  *
  * The library's one runtime warning channel. Every warning carries the type
  * {@link WARNING_TYPE} and a stable {@link WarningCode}, and each key is

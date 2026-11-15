@@ -10,7 +10,7 @@
  * Magic bytes: 52 49 46 46 (RIFF) + offset 8-11: 57 45 42 50 (WEBP)
  */
 
-import { assertWithinLimit } from '../../core/limits.js';
+import { assertWithinLimit } from '../../internal/limits.js';
 import { UnsupportedFilterError } from '../../errors.js';
 
 // ---------------------------------------------------------------------------

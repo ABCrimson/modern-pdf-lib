@@ -28,7 +28,7 @@
  */
 
 import { PdfParseError } from './parseError.js';
-import { warnOnce } from '../utils/warnings.js';
+import { warnOnce } from '../internal/warnings.js';
 import { frameStreamData, keywordIndexFor } from './streamFraming.js';
 
 // ---------------------------------------------------------------------------

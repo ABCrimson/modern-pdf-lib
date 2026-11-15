@@ -389,7 +389,7 @@ Version numbers follow the project's own scheme — see [VERSIONING.md](./VERSIO
 
 | Module | Responsibility |
 |---|---|
-| `src/core/` | Document model, pages, object registry, writer, incremental save, merging, the internal limits (`limits.ts`) |
+| `src/core/` | Document model, pages, object registry, writer, incremental save, merging |
 | `src/parser/` | PDF parser, streaming parser, stream filters and the CCITT decoder (JPEG 2000 and JBIG2 data throws `UnsupportedFilterError`) |
 | `src/assets/` | Font, image, SVG, Markdown, and virtual-DOM embedding |
 | `src/render/` | Content-stream interpreter, display list, rasterizer, Canvas adapter, OCR, diff |
@@ -414,7 +414,8 @@ Version numbers follow the project's own scheme — see [VERSIONING.md](./VERSIO
 | `src/jsx/` | JSX runtime and the `renderJsxToPdf` component renderer |
 | `src/text/` | BiDi (UAX #9) text ordering |
 | `src/cli/` | The `modern-pdf` CLI binary |
-| `src/utils/` | Binary helpers, base64, PDF value helpers, code frames, runtime warnings |
+| `src/utils/` | Binary helpers, base64, PDF value helpers, code frames |
+| `src/internal/` | The resource limits (`limits.ts`) and the runtime warnings (`warnings.ts`) that every domain uses; no package entry exports them |
 | `src/wasm/` | The universal WASM loader, the inline-bytes cache and the TypeScript side of the crates in `crates/` |
 
 Supporting directories:

@@ -59,7 +59,7 @@ import type { StandardFontName as StdFontName } from '../assets/font/standardFon
 import type { EmbeddedFont } from '../assets/font/fontEmbed.js';
 import { embedFont as embedTtfFont } from '../assets/font/fontEmbed.js';
 import { subsetFont, buildSubsetCmap } from '../assets/font/fontSubset.js';
-import { warnOnce } from '../utils/warnings.js';
+import { warnOnce } from '../internal/warnings.js';
 import { isOpenTypeCFF } from '../assets/font/otfDetect.js';
 import { findTable } from '../assets/font/cffEmbed.js';
 import { embedPng as decodePng } from '../assets/image/pngEmbed.js';

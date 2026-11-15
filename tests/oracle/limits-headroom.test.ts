@@ -1,7 +1,7 @@
 /**
  * G-HEADROOM: every file under tests/fixtures goes through the decode paths the internal limits
  * guard, and the largest value of each limited quantity stays at or below a quarter of its field
- * in INTERNAL_LIMITS (src/core/limits.ts).
+ * in INTERNAL_LIMITS (src/internal/limits.ts).
  *
  * Why it exists: the corpus gate (tests/oracle/corpus.test.ts) loads files and extracts text but
  * decodes no image, parses no font and interprets no Form XObject, so it cannot show that a limit
@@ -51,8 +51,8 @@ import {
   verifySignatures,
 } from '../../src/index.js';
 import type { PdfDocument, PdfObject, PdfObjectRegistry, PdfRef } from '../../src/index.js';
-import { INTERNAL_LIMITS } from '../../src/core/limits.js';
-import type { ResourceLimitName } from '../../src/core/limits.js';
+import { INTERNAL_LIMITS } from '../../src/internal/limits.js';
+import type { ResourceLimitName } from '../../src/internal/limits.js';
 import { decodeWoff, isWoff } from '../../src/assets/font/woff.js';
 import { decodeStream, getStreamFilters } from '../../src/parser/streamDecode.js';
 import { parseToUnicodeCMap } from '../../src/parser/textExtractor.js';

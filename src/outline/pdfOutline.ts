@@ -30,7 +30,7 @@ import {
   PdfNull,
 } from '../core/pdfObjects.js';
 import type { PdfObject, PdfObjectRegistry } from '../core/pdfObjects.js';
-import { assertWithinLimit } from '../core/limits.js';
+import { assertWithinLimit } from '../internal/limits.js';
 
 // ---------------------------------------------------------------------------
 // Destination types

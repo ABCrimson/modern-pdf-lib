@@ -26,7 +26,7 @@ import {
 } from './pkcs7.js';
 import type { Asn1Node } from './pkcs7.js';
 import type { RevocationCache } from './revocationCache.js';
-import { warnOnce } from '../utils/warnings.js';
+import { warnOnce } from '../internal/warnings.js';
 
 // ---------------------------------------------------------------------------
 // Types

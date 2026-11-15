@@ -33,7 +33,7 @@ import type { DocumentStructure } from './pdfCatalog.js';
 import type { PdfSaveOptions } from './pdfWriter.js';
 import type { PdfDocument } from './pdfDocument.js';
 import { UnsupportedEncryptionError } from '../errors.js';
-import { warnOnce } from '../utils/warnings.js';
+import { warnOnce } from '../internal/warnings.js';
 
 // ---------------------------------------------------------------------------
 // Encrypted-input guard

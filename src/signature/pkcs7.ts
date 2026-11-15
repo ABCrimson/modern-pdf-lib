@@ -38,7 +38,7 @@
  * @packageDocumentation
  */
 
-import { assertWithinLimit } from '../core/limits.js';
+import { assertWithinLimit } from '../internal/limits.js';
 import { ResourceLimitError } from '../errors.js';
 import { buildSigningCertificateV2Attribute } from './cadesAttributes.js';
 

@@ -1,5 +1,5 @@
 /**
- * @module core/limits
+ * @module internal/limits
  *
  * The internal limits on what one input may make the library allocate or
  * walk. Each field is the largest value accepted: a value equal to it is

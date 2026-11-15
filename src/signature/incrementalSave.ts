@@ -20,7 +20,7 @@
  */
 
 import { assertUnencryptedInput } from '../core/incrementalWriter.js';
-import { warnOnce } from '../utils/warnings.js';
+import { warnOnce } from '../internal/warnings.js';
 
 // ---------------------------------------------------------------------------
 // Types

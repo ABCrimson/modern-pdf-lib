@@ -19,8 +19,8 @@
 
 import { PdfArray, PdfDict, PdfName, PdfNumber, PdfRef, PdfString } from '../core/pdfObjects.js';
 import type { PdfObject, PdfObjectRegistry } from '../core/pdfObjects.js';
-import { assertWithinLimit } from '../core/limits.js';
-import { warnOnce } from '../utils/warnings.js';
+import { assertWithinLimit } from '../internal/limits.js';
+import { warnOnce } from '../internal/warnings.js';
 
 // ---------------------------------------------------------------------------
 // Structure type

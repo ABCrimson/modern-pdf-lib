@@ -15,7 +15,7 @@ import { saveState, restoreState } from '../core/operators/state.js';
 import { applyFillColor } from '../core/operators/color.js';
 import type { Color } from '../core/operators/color.js';
 import type { BarcodeMatrix, BarcodeOptions } from './types.js';
-import { warnOnce } from '../utils/warnings.js';
+import { warnOnce } from '../internal/warnings.js';
 
 // Re-export the options type under an EAN-specific alias for convenience.
 export type { BarcodeOptions as EanOptions } from './types.js';

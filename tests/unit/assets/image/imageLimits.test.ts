@@ -16,7 +16,7 @@ import {
   parseTiffIfd,
 } from '../../../../src/assets/image/tiffDecode.js';
 import { embedTiffDirect } from '../../../../src/assets/image/tiffDirectEmbed.js';
-import { INTERNAL_LIMITS } from '../../../../src/core/limits.js';
+import { INTERNAL_LIMITS } from '../../../../src/internal/limits.js';
 import { PdfDict, PdfNumber } from '../../../../src/core/pdfObjects.js';
 import { ResourceLimitError } from '../../../../src/errors.js';
 import { decodeCCITT } from '../../../../src/parser/ccittDecode.js';

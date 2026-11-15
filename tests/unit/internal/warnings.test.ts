@@ -1,5 +1,5 @@
 /**
- * Tests for the runtime warning channel (src/utils/warnings.ts): once per key per realm, the
+ * Tests for the runtime warning channel (src/internal/warnings.ts): once per key per realm, the
  * `process.emitWarning` sink with the library's warning type and a stable code, the
  * `console.warn` fallback, the guarded sinks, and the test-only reset.
  */
@@ -8,7 +8,7 @@ import { spawnSync } from 'node:child_process';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { PdfStructureTree } from '../../../src/accessibility/structureTree.js';
 import { tagTableHeaderCell } from '../../../src/accessibility/taggingHelpers.js';
-import { resetWarningsForTesting, WARNING_TYPE, warnOnce } from '../../../src/utils/warnings.js';
+import { resetWarningsForTesting, WARNING_TYPE, warnOnce } from '../../../src/internal/warnings.js';
 
 const REGISTRY = Symbol.for('modern-pdf-lib.warnings');
 
@@ -64,7 +64,7 @@ describe('warnOnce', () => {
     expect((registry as Set<string>).has('shared')).toBe(true);
 
     vi.resetModules();
-    const fresh = await import('../../../src/utils/warnings.js');
+    const fresh = await import('../../../src/internal/warnings.js');
     expect(fresh.warnOnce('shared', 'MPL_IGNORED_OPTION', 'm')).toBe(false);
     expect(emit).toHaveBeenCalledTimes(1);
   });
@@ -144,7 +144,7 @@ describe('warnOnce', () => {
 
 describe('warnOnce on a global object that cannot take the shared set', () => {
   it('never throws and still warns once when globalThis is not extensible', () => {
-    const moduleUrl = new URL('../../../src/utils/warnings.ts', import.meta.url).href;
+    const moduleUrl = new URL('../../../src/internal/warnings.ts', import.meta.url).href;
     const script = `
       const { warnOnce } = await import(${JSON.stringify(moduleUrl)});
       process.emitWarning = () => {};

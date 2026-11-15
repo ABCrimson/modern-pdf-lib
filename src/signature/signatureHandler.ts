@@ -19,7 +19,7 @@ import {
 } from './byteRange.js';
 import type { PrepareAppearanceOptions } from './byteRange.js';
 import { assertUnencryptedInput } from '../core/incrementalWriter.js';
-import { warnOnce } from '../utils/warnings.js';
+import { warnOnce } from '../internal/warnings.js';
 import { buildPkcs7Signature, extractIssuerAndSerial, parseDerTlv } from './pkcs7.js';
 import type { SignatureOptions } from './pkcs7.js';
 

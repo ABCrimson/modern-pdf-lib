@@ -18,7 +18,7 @@
 import type { Color } from '../core/operators/color.js';
 import { applyFillColor } from '../core/operators/color.js';
 import type { BarcodeMatrix } from './types.js';
-import { warnOnce } from '../utils/warnings.js';
+import { warnOnce } from '../internal/warnings.js';
 
 // ---------------------------------------------------------------------------
 // Code 128 bar patterns (107 symbols: values 0-106)

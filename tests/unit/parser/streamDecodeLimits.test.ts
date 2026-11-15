@@ -7,7 +7,7 @@
 import { createHash } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
 import { zlibSync } from 'fflate';
-import { INTERNAL_LIMITS } from '../../../src/core/limits.js';
+import { INTERNAL_LIMITS } from '../../../src/internal/limits.js';
 import { PdfArray, PdfDict, PdfName, PdfNumber, PdfStream } from '../../../src/core/pdfObjects.js';
 import { ResourceLimitError } from '../../../src/errors.js';
 import { decodeFlateOnly, decodeStream } from '../../../src/parser/streamDecode.js';

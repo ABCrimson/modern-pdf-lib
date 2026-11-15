@@ -13,7 +13,7 @@
  *            hmtx, cmap, OS/2, maxp, name, post.
  */
 
-import { assertWithinLimit } from '../../core/limits.js';
+import { assertWithinLimit } from '../../internal/limits.js';
 
 // ---------------------------------------------------------------------------
 // Public interfaces

@@ -9,7 +9,7 @@
  */
 import { deflateSync } from 'node:zlib';
 import { describe, expect, it } from 'vitest';
-import { INTERNAL_LIMITS } from '../../src/core/limits.js';
+import { INTERNAL_LIMITS } from '../../src/internal/limits.js';
 import {
   AT_LIMIT_BUDGET,
   DEFAULT_BUDGET,

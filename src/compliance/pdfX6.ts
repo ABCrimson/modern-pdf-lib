@@ -22,7 +22,7 @@
  */
 
 import { PdfArray, PdfDict, PdfName, PdfNumber, PdfString } from '../core/pdfObjects.js';
-import { warnOnce } from '../utils/warnings.js';
+import { warnOnce } from '../internal/warnings.js';
 
 // ---------------------------------------------------------------------------
 // Public types

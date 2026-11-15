@@ -33,7 +33,7 @@
  */
 
 import { Inflate, zlibSync } from 'fflate';
-import { INTERNAL_LIMITS, assertWithinLimit } from '../core/limits.js';
+import { INTERNAL_LIMITS, assertWithinLimit } from '../internal/limits.js';
 
 // ---------------------------------------------------------------------------
 // Levels

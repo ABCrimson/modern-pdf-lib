@@ -19,7 +19,7 @@ import {
 import type { PdfPage } from '../../src/core/pdfPage.js';
 import { extractFonts } from '../../src/render/fontExtract.js';
 import { extractImages } from '../../src/render/imageExtract.js';
-import { INTERNAL_LIMITS } from '../../src/core/limits.js';
+import { INTERNAL_LIMITS } from '../../src/internal/limits.js';
 import { ResourceLimitError, UnsupportedFilterError } from '../../src/errors.js';
 
 const encoder = new TextEncoder();

@@ -13,7 +13,7 @@ import {
   runWithinBudget,
   timeLimitMs,
 } from '../helpers/budget.js';
-import { INTERNAL_LIMITS } from '../../src/core/limits.js';
+import { INTERNAL_LIMITS } from '../../src/internal/limits.js';
 
 const BODIES = 'tests/adversarial/render-limits.bodies.ts';
 // Start-up (child process, worker, tsx import) comes before the budget clock.

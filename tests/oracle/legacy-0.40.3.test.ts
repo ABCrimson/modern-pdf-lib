@@ -45,7 +45,7 @@ import {
   verifySignatures,
 } from '../../src/index.js';
 import type { PdfDocument } from '../../src/index.js';
-import { resetWarningsForTesting } from '../../src/utils/warnings.js';
+import { resetWarningsForTesting } from '../../src/internal/warnings.js';
 import { defectKey, knownDefect } from '../helpers/known-defect.js';
 import type { DefectKey } from '../helpers/known-defect.js';
 import { pdfjsText } from '../helpers/oracle/pdfjs.js';

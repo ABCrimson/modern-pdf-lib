@@ -13,7 +13,7 @@
  */
 
 import { inflateFlate, inflateRaw } from '../compression/pdfFlate.js';
-import { INTERNAL_LIMITS, assertWithinLimit } from '../core/limits.js';
+import { INTERNAL_LIMITS, assertWithinLimit } from '../internal/limits.js';
 import { UnsupportedFilterError } from '../errors.js';
 import type { PdfObject, PdfStream } from '../core/pdfObjects.js';
 import { PdfDict, PdfName, PdfArray, PdfNumber } from '../core/pdfObjects.js';

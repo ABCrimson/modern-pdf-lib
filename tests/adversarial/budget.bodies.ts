@@ -5,7 +5,7 @@
  */
 import { setTimeout as sleep } from 'node:timers/promises';
 import type { JsonValue } from '../helpers/budget.js';
-import { assertWithinLimit } from '../../src/core/limits.js';
+import { assertWithinLimit } from '../../src/internal/limits.js';
 
 /** Returns the input length and the args it was given. */
 export function returns(bytes: Uint8Array, args: JsonValue): JsonValue {

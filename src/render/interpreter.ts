@@ -40,7 +40,7 @@ import {
 } from '../core/pdfObjects.js';
 import { parseContentStream, parseContentStreamCounted } from '../parser/contentStreamParser.js';
 import { decodeStreamData } from '../parser/streamDecode.js';
-import { assertWithinLimit } from '../core/limits.js';
+import { assertWithinLimit } from '../internal/limits.js';
 import { ResourceLimitError } from '../errors.js';
 import type { PdfPage } from '../core/pdfPage.js';
 

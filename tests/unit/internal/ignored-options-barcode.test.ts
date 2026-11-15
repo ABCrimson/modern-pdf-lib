@@ -18,7 +18,7 @@ import {
 import { encodeUpcA, upcAToOperators } from '../../../src/barcode/upc.js';
 import { encodeQrCode, qrCodeToOperators } from '../../../src/barcode/qr.js';
 import { encodePdf417, pdf417ToOperators } from '../../../src/barcode/pdf417.js';
-import { resetWarningsForTesting } from '../../../src/utils/warnings.js';
+import { resetWarningsForTesting } from '../../../src/internal/warnings.js';
 
 const TYPE = 'ModernPdfLibWarning';
 const CODE = 'MPL_IGNORED_OPTION';

@@ -14,7 +14,7 @@
  * @packageDocumentation
  */
 
-import { assertWithinLimit } from '../core/limits.js';
+import { assertWithinLimit } from '../internal/limits.js';
 import type { PdfDict } from '../core/pdfObjects.js';
 import { PdfNumber, PdfBool } from '../core/pdfObjects.js';
 

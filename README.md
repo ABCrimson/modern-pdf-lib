@@ -675,6 +675,7 @@ modern-pdf-lib/
     outline/        Bookmarks / document outline
     metadata/       XMP metadata, viewer preferences
     plugins/        Plugin manager & hooks
+    internal/       Resource limits and runtime warnings shared by every domain
     wasm/           WASM loader and the TypeScript side of the crates
     cli/            CLI tool (modern-pdf optimize)
   crates/           Rust crates built to WebAssembly (6 crates, one Cargo root each)

@@ -10,7 +10,7 @@
 
 import type { DrawTableOptions } from './table.js';
 import type { Color } from '../core/operators/color.js';
-import { warnOnce } from '../utils/warnings.js';
+import { warnOnce } from '../internal/warnings.js';
 
 // ---------------------------------------------------------------------------
 // Public types

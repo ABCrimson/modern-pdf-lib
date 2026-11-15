@@ -53,7 +53,7 @@ import {
 import { contentsLeftAsStored } from '../crypto/signatureContents.js';
 import { PdfParseError } from './parseError.js';
 import { ResourceLimitError, UnsupportedEncryptionError } from '../errors.js';
-import { assertWithinLimit } from '../core/limits.js';
+import { assertWithinLimit } from '../internal/limits.js';
 
 // ---------------------------------------------------------------------------
 // Public interfaces

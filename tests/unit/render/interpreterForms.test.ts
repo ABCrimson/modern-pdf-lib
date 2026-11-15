@@ -9,7 +9,7 @@ import { interpretContentStream } from '../../../src/render/interpreter.js';
 import { PdfDict, PdfName, PdfStream } from '../../../src/core/pdfObjects.js';
 import { PdfNumber, PdfArray } from '../../../src/core/pdfObjects.js';
 import { ResourceLimitError } from '../../../src/errors.js';
-import { INTERNAL_LIMITS } from '../../../src/core/limits.js';
+import { INTERNAL_LIMITS } from '../../../src/internal/limits.js';
 
 const ops = (s: string) => parseContentStream(new TextEncoder().encode(s));
 

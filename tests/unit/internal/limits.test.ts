@@ -1,11 +1,11 @@
 /**
- * The internal limits object (src/core/limits.ts), its assertWithinLimit helper, and the two error
+ * The internal limits object (src/internal/limits.ts), its assertWithinLimit helper, and the two error
  * classes the root entry exports for refused input: ResourceLimitError and UnsupportedFilterError.
  */
 import { describe, expect, it } from 'vitest';
 import * as root from '../../../src/index.js';
-import { INTERNAL_LIMITS, LIMIT_UNITS, assertWithinLimit } from '../../../src/core/limits.js';
-import type { ResourceLimitName } from '../../../src/core/limits.js';
+import { INTERNAL_LIMITS, LIMIT_UNITS, assertWithinLimit } from '../../../src/internal/limits.js';
+import type { ResourceLimitName } from '../../../src/internal/limits.js';
 import { ResourceLimitError, UnsupportedFilterError } from '../../../src/errors.js';
 
 const names = Object.keys(INTERNAL_LIMITS) as ResourceLimitName[];

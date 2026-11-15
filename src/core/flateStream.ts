@@ -56,7 +56,7 @@ import {
   isAvailable as isWasmDeflateAvailable,
   deflateSync as wasmDeflateSync,
 } from '../compression/libdeflateWasm.js';
-import { INTERNAL_LIMITS } from './limits.js';
+import { INTERNAL_LIMITS } from '../internal/limits.js';
 import { UnsupportedEncryptionError } from '../errors.js';
 import { PdfName } from './pdfObjects.js';
 import type { PdfObject, PdfObjectRegistry, PdfStream, PdfString } from './pdfObjects.js';
@@ -66,7 +66,7 @@ const encryptedSources = new WeakSet<PdfObjectRegistry>();
 
 /**
  * The set stored on `globalThis` under `Symbol.for(name)`, created there on first use, so the
- * ESM, CJS and IIFE builds loaded into one realm share it, as in utils/warnings. Where
+ * ESM, CJS and IIFE builds loaded into one realm share it, as in internal/warnings. Where
  * `globalThis` is frozen or not extensible, the set this call creates stays this module's own.
  */
 function sharedWeakSet<T extends object>(name: string): WeakSet<T> {
@@ -82,7 +82,7 @@ function sharedWeakSet<T extends object>(name: string): WeakSet<T> {
 
 /**
  * Registries that hold content decrypted from a file whose trailer has `/Encrypt`. Shared by
- * the ESM, CJS and IIFE builds through `globalThis`, as in utils/warnings ({@link sharedWeakSet}).
+ * the ESM, CJS and IIFE builds through `globalThis`, as in internal/warnings ({@link sharedWeakSet}).
  */
 const decryptedSources = sharedWeakSet<PdfObjectRegistry>('modern-pdf-lib.decryptedSources');
 

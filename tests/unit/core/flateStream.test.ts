@@ -23,7 +23,7 @@ import { describe, expect, it } from 'vitest';
 import { deflateSync as fflateRaw } from 'fflate';
 import { compressPdfStream, rewrapLegacyStream } from '../../../src/core/flateStream.js';
 import { UnsupportedEncryptionError } from '../../../src/errors.js';
-import { INTERNAL_LIMITS } from '../../../src/core/limits.js';
+import { INTERNAL_LIMITS } from '../../../src/internal/limits.js';
 import { PdfArray, PdfDict, PdfName, PdfNumber, PdfStream } from '../../../src/core/pdfObjects.js';
 import { loadPdf } from '../../../src/index.js';
 

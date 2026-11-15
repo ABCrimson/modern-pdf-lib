@@ -21,7 +21,7 @@ import {
   isZlibHeader,
   wrapRawDeflate,
 } from '../../../src/compression/pdfFlate.js';
-import { INTERNAL_LIMITS } from '../../../src/core/limits.js';
+import { INTERNAL_LIMITS } from '../../../src/internal/limits.js';
 import { ResourceLimitError } from '../../../src/errors.js';
 
 // ---------------------------------------------------------------------------

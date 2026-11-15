@@ -38,7 +38,7 @@ import {
   generatePermsV5,
 } from './keyDerivation.js';
 import type { EncryptDictValues } from './keyDerivation.js';
-import { warnOnce } from '../utils/warnings.js';
+import { warnOnce } from '../internal/warnings.js';
 import { UnsupportedEncryptionError } from '../errors.js';
 
 // ---------------------------------------------------------------------------

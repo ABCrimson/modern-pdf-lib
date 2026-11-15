@@ -19,7 +19,7 @@
  */
 
 import type { SignOptions } from './signatureHandler.js';
-import { warnOnce } from '../utils/warnings.js';
+import { warnOnce } from '../internal/warnings.js';
 
 // ---------------------------------------------------------------------------
 // Types
