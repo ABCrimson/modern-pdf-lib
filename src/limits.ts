@@ -39,8 +39,8 @@ export type PdfLimits = { readonly [K in LimitName]?: number | undefined };
 export type ResolvedLimits = { readonly [K in LimitName]: number };
 
 /**
- * The default limits, frozen. Each per-stream value is at least 4 times the
- * largest the test corpus needs.
+ * The default limits, frozen. Each value is at least 4 times the largest the
+ * test corpus needs, the four totals included.
  */
 export const DEFAULT_LIMITS: ResolvedLimits = Object.freeze({
   /** Decoded bytes one stream filter may output (bytes): 2^28, 256 MiB. */
@@ -73,6 +73,6 @@ export const DEFAULT_LIMITS: ResolvedLimits = Object.freeze({
   maxTotalCMapMappings: 2 ** 22,
   /** Decoded sample bytes over the frames or images of one call (bytes): 2^30, 1 GiB. */
   maxTotalImageBytes: 2 ** 30,
-  /** Operators and operand elements of one page interpretation, its forms included (operators): 2^24. */
+  /** Operators of one page interpretation, one each, those inside its Form XObjects included (operators): 2^24. */
   maxPageOperators: 2 ** 24,
 });

@@ -35,7 +35,7 @@
  *
  * Measured through public or module-level entry points only: decoded lengths come from this
  * file's own decode calls, the CMap count from the CMap text (bfchar pairs plus range spans,
- * which is what parseToUnicodeCMap counts), the font cmap size from the parsed map (see
+ * an upper bound of what parseToUnicodeCMap counts), the font cmap size from the parsed map (see
  * FONT_CMAP below), the form operator cost from a walk that mirrors the interpreter's weighted rule (operatorCost
  * below), the predictor sample count from the sub-byte /Predictor 2 geometry of each stream.
  */
@@ -141,6 +141,12 @@ const mismatches: string[] = [];
 /** Files skipped, with the reason. */
 const skipped: string[] = [];
 const counts = { pdfs: 0, loaded: 0, pages: 0, streams: 0, decodes: 0, unsupported: 0, steps: 0 };
+/** The largest leastLimit result per searched total; 1 is what a call that sums nothing gives. */
+const searched = { decoded: 0, cmap: 0 };
+/** The chain of filters, over the whole corpus, whose outputs sum to the most; decodeStream is run on it again. */
+let longestChain:
+  | { total: number; data: Uint8Array; filters: string[]; parms: (PdfDict | null)[]; file: string }
+  | undefined;
 
 function note(id: string, value: number, file: string): void {
   const best = maxima.get(id);
@@ -355,7 +361,7 @@ function treeDepth(items: readonly { children: readonly unknown[] }[], level = 1
   return deepest;
 }
 
-/** The codes a ToUnicode CMap names: bfchar pairs plus bfrange spans (what the parser counts). */
+/** The codes a ToUnicode CMap names: bfchar pairs plus bfrange spans (at least what the parser counts). */
 function cmapMappings(text: string): number {
   let count = 0;
   for (const section of text.matchAll(/beginbfchar\s*([\s\S]*?)\s*endbfchar/g)) {
@@ -636,6 +642,15 @@ async function measurePdf(path: string, id: string, password: string | undefined
       decoded = next;
     }
     if (decoded === undefined) continue;
+    if (longestChain === undefined || chainTotal > longestChain.total) {
+      longestChain = {
+        total: chainTotal,
+        data: object.data,
+        filters,
+        parms: decodeParms,
+        file: id,
+      };
+    }
 
     // A ToUnicode CMap is recognised by its sections, as the calibration did.
     const head = new TextDecoder('latin1').decode(
@@ -665,7 +680,10 @@ async function measurePdf(path: string, id: string, password: string | undefined
           extractText(ops, readable, { limits });
         }),
       );
-      if (mappings !== undefined) note('totalCmap', mappings, id);
+      if (mappings !== undefined) {
+        note('totalCmap', mappings, id);
+        searched.cmap = Math.max(searched.cmap, mappings);
+      }
       const walk = step(id, 'form operator walk', () =>
         formOperators(ops, resources, resolve, decode),
       );
@@ -685,6 +703,7 @@ async function measurePdf(path: string, id: string, password: string | undefined
     note('totalImage', pageImageBytes, id);
     counted.image = Math.max(counted.image, pageImageBytes);
     step(id, 'page interpretation', () => interpretPage(page));
+    step(id, 'font extraction', () => extractFonts(page));
   }
 
   // loadPdf and the page calls of the loaded document, each under its own total.
@@ -697,7 +716,10 @@ async function measurePdf(path: string, id: string, password: string | undefined
       ]),
     ),
   );
-  if (decodedTotal !== undefined) note('totalDecoded', decodedTotal, id);
+  if (decodedTotal !== undefined) {
+    note('totalDecoded', decodedTotal, id);
+    searched.decoded = Math.max(searched.decoded, decodedTotal);
+  }
   await stepAsync(id, 'counted totals', () => confirmTotals(id, bytes, password, counted));
 
   // The catalog's outline and structure roots, read through the public fromDict.
@@ -782,12 +804,6 @@ async function measureFontFile(path: string, id: string): Promise<void> {
   if (isWoff(data)) {
     const sfnt = step(id, 'WOFF decode', () => decodeWoff(data));
     if (sfnt === undefined) return;
-    const total = await stepAsync(id, 'WOFF total', () =>
-      leastLimit('maxTotalDecodedBytes', (limits) => {
-        decodeWoff(data, { limits });
-      }),
-    );
-    if (total !== undefined) note('totalDecoded', total, id);
     data = sfnt;
   }
   note('fontBytes', data.length, id);
@@ -863,6 +879,21 @@ describe('limits headroom over tests/fixtures', () => {
     expect(mismatches).toEqual([]);
   });
 
+  test('decodeStream sums the outputs of the filters of the longest chain', () => {
+    // The chain sums above come from this file's own decode calls, so the library's sum is held here:
+    // the whole chain passes at its sum and a limit one below it throws.
+    const chain = longestChain!;
+    expect(chain, 'no stream was decoded').toBeDefined();
+    const decodeUnder = (maxTotalDecodedBytes: number) =>
+      decodeStream(chain.data, chain.filters, chain.parms as PdfDict[], {
+        limits: { maxTotalDecodedBytes },
+      });
+    expect(() => decodeUnder(chain.total), chain.file).not.toThrow();
+    expect(() => decodeUnder(chain.total - 1), chain.file).toThrow(
+      expect.objectContaining({ limit: 'maxTotalDecodedBytes' }),
+    );
+  });
+
   test('the walk measured something', () => {
     // A walk whose steps all failed would pass the two checks below for nothing.
     expect(counts.loaded).toBeGreaterThanOrEqual(pdfs.length - LOAD_DEFECTS.size);
@@ -888,6 +919,9 @@ describe('limits headroom over tests/fixtures', () => {
     ]) {
       expect(maxima.get(id)!.value, `${id} was never measured`).toBeGreaterThan(0);
     }
+    // leastLimit gives 1 when the call adds nothing to the total: a total the library stopped summing.
+    expect(searched.decoded, 'no loadPdf or page call summed decoded bytes').toBeGreaterThan(1);
+    expect(searched.cmap, 'no text extraction summed ToUnicode mappings').toBeGreaterThan(1);
   });
 
   test.each(QUANTITIES.map((q) => [q.label, q] as const))(
