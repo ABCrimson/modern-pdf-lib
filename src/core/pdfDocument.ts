@@ -2590,6 +2590,8 @@ export class PdfDocument {
    * Ideal for streaming responses in edge/serverless environments.
    * The stream writer does not encrypt, so a document with encryption
    * configured is refused before anything is changed or written.
+   * The `onBeforeSave` and `onAfterSave` plugin hooks do not run, so `metadataPlugin` writes no
+   * default title or author here; `onBuildCatalog` and `onBuildPageDict` do run.
    *
    * @param options  Compression and serialization options. The stream writer writes no
    *         object streams, so a finite `objectStreamThreshold` is refused.
