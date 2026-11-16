@@ -346,7 +346,7 @@ fn decode_iaid_bit(
 
 /// Decode a bitmap using MMR (Modified Modified READ / CCITT Group 4).
 fn decode_mmr(data: &[u8], offset: usize, width: u32, height: u32) -> Result<Vec<u8>, String> {
-    let row_bytes = ((width + 7) / 8) as usize;
+    let row_bytes = width.div_ceil(8) as usize;
     let mut bitmap = vec![0u8; row_bytes * height as usize];
 
     let mut bit_pos = offset * 8;
@@ -854,12 +854,9 @@ fn read_black_code(data: &[u8], bit_pos: &mut usize) -> i32 {
     }
 
     let v5 = peek_bits(data, *bit_pos, 5);
-    match v5 {
-        0b00011 => {
-            *bit_pos += 5;
-            return 7;
-        }
-        _ => {}
+    if v5 == 0b00011 {
+        *bit_pos += 5;
+        return 7;
     }
 
     let v6 = peek_bits(data, *bit_pos, 6);
@@ -916,7 +913,7 @@ fn read_black_code(data: &[u8], bit_pos: &mut usize) -> i32 {
 
 /// Create a new bitmap filled with a default pixel value.
 fn new_bitmap(width: u32, height: u32, default_pixel: u8) -> Vec<u8> {
-    let row_bytes = ((width + 7) / 8) as usize;
+    let row_bytes = width.div_ceil(8) as usize;
     let fill = if default_pixel != 0 { 0xFF } else { 0x00 };
     vec![fill; row_bytes * height as usize]
 }
@@ -930,6 +927,25 @@ fn set_pixel(bitmap: &mut [u8], row_bytes: usize, x: u32, y: u32, value: u8) {
             bitmap[byte_idx] |= 1 << bit_idx;
         } else {
             bitmap[byte_idx] &= !(1 << bit_idx);
+        }
+    }
+}
+
+/// The geometry of a packed bitmap: bytes per row, width and height in pixels.
+#[derive(Clone, Copy)]
+struct BitmapShape {
+    row_bytes: usize,
+    width: u32,
+    height: u32,
+}
+
+impl BitmapShape {
+    /// The shape of a bitmap `width` by `height` pixels, with rows padded to whole bytes.
+    fn new(width: u32, height: u32) -> Self {
+        Self {
+            row_bytes: width.div_ceil(8) as usize,
+            width,
+            height,
         }
     }
 }
@@ -958,42 +974,38 @@ fn get_bitmap_pixel(
 /// Composite (OR) a region bitmap onto the page bitmap.
 fn composite_bitmap(
     page: &mut [u8],
-    page_row_bytes: usize,
-    page_width: u32,
-    page_height: u32,
+    page_shape: BitmapShape,
     region: &[u8],
-    region_row_bytes: usize,
-    region_width: u32,
-    region_height: u32,
+    region_shape: BitmapShape,
     x_offset: u32,
     y_offset: u32,
     combination_operator: u8,
 ) {
-    for ry in 0..region_height {
+    for ry in 0..region_shape.height {
         let py = y_offset + ry;
-        if py >= page_height {
+        if py >= page_shape.height {
             break;
         }
-        for rx in 0..region_width {
+        for rx in 0..region_shape.width {
             let px = x_offset + rx;
-            if px >= page_width {
+            if px >= page_shape.width {
                 break;
             }
             let region_pixel = get_bitmap_pixel(
                 region,
-                region_row_bytes,
+                region_shape.row_bytes,
                 rx as i32,
                 ry as i32,
-                region_width,
-                region_height,
+                region_shape.width,
+                region_shape.height,
             );
             let page_pixel = get_bitmap_pixel(
                 page,
-                page_row_bytes,
+                page_shape.row_bytes,
                 px as i32,
                 py as i32,
-                page_width,
-                page_height,
+                page_shape.width,
+                page_shape.height,
             );
 
             let result = match combination_operator {
@@ -1005,7 +1017,7 @@ fn composite_bitmap(
                 _ => region_pixel | page_pixel,        // Default: OR
             };
 
-            set_pixel(page, page_row_bytes, px, py, result);
+            set_pixel(page, page_shape.row_bytes, px, py, result);
         }
     }
 }
@@ -1023,7 +1035,8 @@ fn decode_generic_region_arith(
     typical_prediction: bool,
     at_offsets: &[(i8, i8)],
 ) -> Vec<u8> {
-    let row_bytes = ((width + 7) / 8) as usize;
+    let shape = BitmapShape::new(width, height);
+    let row_bytes = shape.row_bytes;
     let mut bitmap = vec![0u8; row_bytes * height as usize];
 
     // Context size depends on template
@@ -1056,9 +1069,8 @@ fn decode_generic_region_arith(
         }
 
         for x in 0..width {
-            let context = build_generic_context(
-                &bitmap, row_bytes, x as i32, y as i32, width, height, template, at_offsets,
-            );
+            let context =
+                build_generic_context(&bitmap, shape, x as i32, y as i32, template, at_offsets);
 
             let pixel = decoder.decode_bit(&mut contexts[context as usize]);
             if pixel != 0 {
@@ -1073,16 +1085,21 @@ fn decode_generic_region_arith(
 /// Build the context value for generic region arithmetic decoding.
 fn build_generic_context(
     bitmap: &[u8],
-    row_bytes: usize,
+    shape: BitmapShape,
     x: i32,
     y: i32,
-    width: u32,
-    height: u32,
     template: u8,
     at_offsets: &[(i8, i8)],
 ) -> u32 {
     let p = |dx: i32, dy: i32| -> u32 {
-        get_bitmap_pixel(bitmap, row_bytes, x + dx, y + dy, width, height) as u32
+        get_bitmap_pixel(
+            bitmap,
+            shape.row_bytes,
+            x + dx,
+            y + dy,
+            shape.width,
+            shape.height,
+        ) as u32
     };
 
     match template {
@@ -1141,8 +1158,8 @@ fn build_generic_context(
                 | (p(at_x, at_y) << 2)
                 | (p(-1, 0) << 1)
         }
-        3 | _ => {
-            // 10-bit context (template 3)
+        _ => {
+            // 10-bit context (template 3, and the fallback for any other template value)
             let at_x = at_offsets.first().map(|a| a.0 as i32).unwrap_or(-1);
             let at_y = at_offsets.first().map(|a| a.1 as i32).unwrap_or(-1);
 
@@ -1385,7 +1402,7 @@ impl Jbig2Decoder {
                 self.process_text_region(data)?;
             }
             // Immediate generic region (38, 39, 40)
-            38 | 39 | 40 => {
+            38..=40 => {
                 self.process_generic_region(data)?;
             }
             // Page information
@@ -1483,17 +1500,13 @@ impl Jbig2Decoder {
 
         // Composite onto page
         if self.has_page_info {
-            let region_row_bytes = ((width + 7) / 8) as usize;
-            let page_row_bytes = ((self.page_width + 7) / 8) as usize;
+            let region_shape = BitmapShape::new(width, height);
+            let page_shape = BitmapShape::new(self.page_width, self.page_height);
             composite_bitmap(
                 &mut self.page_bitmap,
-                page_row_bytes,
-                self.page_width,
-                self.page_height,
+                page_shape,
                 &region_bitmap,
-                region_row_bytes,
-                width,
-                height,
+                region_shape,
                 x_offset,
                 y_offset,
                 combination_op,
@@ -1540,20 +1553,16 @@ impl Jbig2Decoder {
         let combination_op = flags & 0x03;
 
         // For text regions without symbol dictionaries, create an empty bitmap
-        let region_row_bytes = ((width + 7) / 8) as usize;
-        let region_bitmap = vec![0u8; region_row_bytes * height as usize];
+        let region_shape = BitmapShape::new(width, height);
+        let region_bitmap = vec![0u8; region_shape.row_bytes * height as usize];
 
         if self.has_page_info {
-            let page_row_bytes = ((self.page_width + 7) / 8) as usize;
+            let page_shape = BitmapShape::new(self.page_width, self.page_height);
             composite_bitmap(
                 &mut self.page_bitmap,
-                page_row_bytes,
-                self.page_width,
-                self.page_height,
+                page_shape,
                 &region_bitmap,
-                region_row_bytes,
-                width,
-                height,
+                region_shape,
                 x_offset,
                 y_offset,
                 combination_op,
@@ -1688,7 +1697,8 @@ mod tests {
         let mut region = new_bitmap(8, 1, 0);
         set_pixel(&mut region, 1, 1, 0, 1);
 
-        composite_bitmap(&mut page, 1, 8, 1, &region, 1, 8, 1, 0, 0, 0);
+        let shape = BitmapShape::new(8, 1);
+        composite_bitmap(&mut page, shape, &region, shape, 0, 0, 0);
 
         // Both pixels should be set (OR)
         assert_eq!(get_bitmap_pixel(&page, 1, 0, 0, 8, 1), 1);
@@ -1700,7 +1710,8 @@ mod tests {
         let mut page = new_bitmap(8, 1, 1); // all black
         let region = new_bitmap(8, 1, 0); // all white
 
-        composite_bitmap(&mut page, 1, 8, 1, &region, 1, 8, 1, 0, 0, 4);
+        let shape = BitmapShape::new(8, 1);
+        composite_bitmap(&mut page, shape, &region, shape, 0, 0, 4);
 
         // Should be all white (REPLACE)
         assert_eq!(page, vec![0x00]);

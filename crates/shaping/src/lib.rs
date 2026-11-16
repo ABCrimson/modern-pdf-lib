@@ -161,17 +161,17 @@ fn shape_text_with_features_impl(
     buffer.set_direction(parse_direction(direction));
 
     // Set script tag if provided
-    if !script.is_empty() {
-        if let Some(tag) = parse_script_tag(script) {
-            buffer.set_script(tag);
-        }
+    if !script.is_empty()
+        && let Some(tag) = parse_script_tag(script)
+    {
+        buffer.set_script(tag);
     }
 
     // Set language tag if provided
-    if !language.is_empty() {
-        if let Some(lang) = parse_language_tag(language) {
-            buffer.set_language(lang);
-        }
+    if !language.is_empty()
+        && let Some(lang) = parse_language_tag(language)
+    {
+        buffer.set_language(lang);
     }
 
     // Perform shaping

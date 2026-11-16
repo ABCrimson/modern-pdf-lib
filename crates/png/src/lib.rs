@@ -118,15 +118,6 @@ impl PngDecodeResult {
     }
 }
 
-// ---------------------------------------------------------------------------
-// Error helper
-// ---------------------------------------------------------------------------
-
-/// Convert a Rust error into a JsValue for wasm-bindgen.
-fn to_js_err<E: std::fmt::Display>(err: E) -> JsValue {
-    JsValue::from_str(&format!("modern-pdf-png: {}", err))
-}
-
 /// Map a `png` crate ColorType to the PNG spec integer code.
 fn color_type_to_u8(ct: png::ColorType) -> u8 {
     match ct {
