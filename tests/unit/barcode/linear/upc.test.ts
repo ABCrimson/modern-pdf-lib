@@ -121,16 +121,46 @@ describe('upcAToOperators', () => {
 });
 
 const CASES = [
-  ['a check digit of text with a letter', () => calculateUpcCheckDigit('0360002914a'), 'data'],
-  ['a check digit of 5 digits', () => calculateUpcCheckDigit('12345'), 'data'],
-  ['a UPC-A with a wrong check digit', () => encodeUpcA('036000291450'), 'data'],
-  ['a UPC-A of 3 digits', () => encodeUpcA('123'), 'data'],
-  ['a UPC-A with a letter', () => encodeUpcA('0360002914a'), 'data'],
+  [
+    'a check digit of text with a letter',
+    () => calculateUpcCheckDigit('0360002914a'),
+    'data',
+    'UPC-A data must contain only digits: "0360002914a"',
+  ],
+  [
+    'a check digit of 5 digits',
+    () => calculateUpcCheckDigit('12345'),
+    'data',
+    'UPC-A check digit calculation requires 11 digits, got 5',
+  ],
+  [
+    'a UPC-A with a wrong check digit',
+    () => encodeUpcA('036000291450'),
+    'data',
+    'EAN-13 check digit mismatch: expected 2, got 0',
+  ],
+  [
+    'a UPC-A of 3 digits',
+    () => encodeUpcA('123'),
+    'data',
+    'UPC-A data must be 11 or 12 digits, got 3',
+  ],
+  [
+    'a UPC-A with a letter',
+    () => encodeUpcA('0360002914a'),
+    'data',
+    'UPC-A data must contain only digits: "0360002914a"',
+  ],
 ] as const;
 
 describe('typed errors', () => {
-  it.each(CASES)('%s throws InvalidArgumentError naming the argument', (_label, call, argument) => {
-    expect(call).toThrow(InvalidArgumentError);
-    expect(call).toThrow(expect.objectContaining({ code: 'invalid-argument', argument }));
-  });
+  it.each(CASES)(
+    '%s throws InvalidArgumentError naming the argument',
+    (_label, call, argument, message) => {
+      expect(call).toThrow(InvalidArgumentError);
+      expect(call).toThrow(
+        expect.objectContaining({ code: 'invalid-argument', argument, message }),
+      );
+    },
+  );
 });

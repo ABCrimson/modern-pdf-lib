@@ -141,7 +141,7 @@ export function calculateEanCheckDigit(data: string): number {
  *              are given the last digit is validated as the correct check.
  * @returns     A {@link BarcodeMatrix} with 95 modules (the standard EAN-13
  *              symbol width without quiet zones).
- * @throws      {@link InvalidArgumentError} if the input is not 12 or 13 numeric digits, or if a
+ * @throws      {InvalidArgumentError} If the input is not 12 or 13 numeric digits, or if a
  *              provided check digit does not match.
  */
 export function encodeEan13(data: string): BarcodeMatrix {
@@ -198,7 +198,7 @@ export function encodeEan13(data: string): BarcodeMatrix {
  *              the check digit is calculated and appended.  If 8 digits
  *              are given the last digit is validated.
  * @returns     A {@link BarcodeMatrix} with 67 modules.
- * @throws      {@link InvalidArgumentError} if the input is invalid.
+ * @throws      {InvalidArgumentError} If the input is invalid.
  */
 export function encodeEan8(data: string): BarcodeMatrix {
   validateNumeric(data, 'EAN-8');

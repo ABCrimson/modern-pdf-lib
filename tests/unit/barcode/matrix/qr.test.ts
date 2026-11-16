@@ -302,12 +302,22 @@ describe('QR Code Encoder', () => {
 });
 
 const CASES = [
-  ['data past version 40', () => encodeQrCode('A'.repeat(5000), 'H'), 'data'],
+  [
+    'data past version 40',
+    () => encodeQrCode('A'.repeat(5000), 'H'),
+    'data',
+    'Data too long for QR code (max version 40 with EC level H)',
+  ],
 ] as const;
 
 describe('typed errors', () => {
-  it.each(CASES)('%s throws InvalidArgumentError naming the argument', (_label, call, argument) => {
-    expect(call).toThrow(InvalidArgumentError);
-    expect(call).toThrow(expect.objectContaining({ code: 'invalid-argument', argument }));
-  });
+  it.each(CASES)(
+    '%s throws InvalidArgumentError naming the argument',
+    (_label, call, argument, message) => {
+      expect(call).toThrow(InvalidArgumentError);
+      expect(call).toThrow(
+        expect.objectContaining({ code: 'invalid-argument', argument, message }),
+      );
+    },
+  );
 });

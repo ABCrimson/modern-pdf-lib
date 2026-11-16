@@ -260,7 +260,7 @@ function chooseBestStart(data: string): CodeSet {
  *
  * @param data  The string to encode.
  * @returns     Array of symbol values (0-106).
- * @throws      {@link InvalidArgumentError} if the data contains characters that cannot be encoded.
+ * @throws      {InvalidArgumentError} If the data is empty or contains characters that cannot be encoded.
  */
 export function encodeCode128Values(data: string): readonly number[] {
   if (data.length === 0) {
@@ -388,6 +388,7 @@ export function encodeCode128Values(data: string): readonly number[] {
  *
  * @param values  Array of symbol values as returned by {@link encodeCode128Values}.
  * @returns       A {@link BarcodeMatrix} with the module array and total width.
+ * @throws        {InvalidArgumentError} If a value is not a Code 128 symbol value (0-106).
  */
 export function valuesToModules(values: readonly number[]): BarcodeMatrix {
   const modules: boolean[] = [];
@@ -420,7 +421,7 @@ export function valuesToModules(values: readonly number[]): BarcodeMatrix {
  *
  * @param data  The string to encode (ASCII 0-127).
  * @returns     A {@link BarcodeMatrix} with the module pattern.
- * @throws      {@link InvalidArgumentError} if the data is empty or contains non-encodable characters.
+ * @throws      {InvalidArgumentError} If the data is empty or contains non-encodable characters.
  */
 export function encodeCode128(data: string): BarcodeMatrix {
   const values = encodeCode128Values(data);

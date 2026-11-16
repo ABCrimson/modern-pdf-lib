@@ -1362,7 +1362,7 @@ function computePenalty(matrix: Int8Array, size: number): number {
  * @param data              The string to encode.
  * @param errorCorrection   Error correction level (default: `'M'`).
  * @returns                 A {@link QrCodeMatrix} with the encoded data.
- * @throws                  {@link InvalidArgumentError} if the data does not fit version 40
+ * @throws                  {InvalidArgumentError} If the data does not fit version 40
  *                          at the error correction level.
  */
 export function encodeQrCode(

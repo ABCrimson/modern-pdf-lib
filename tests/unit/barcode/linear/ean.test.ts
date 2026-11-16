@@ -267,17 +267,52 @@ describe('ean8ToOperators', () => {
 });
 
 const CASES = [
-  ['an EAN-13 with a wrong check digit', () => encodeEan13('5901234123450'), 'data'],
-  ['an EAN-13 of 3 digits', () => encodeEan13('123'), 'data'],
-  ['an EAN-13 with a letter', () => encodeEan13('59012341234a'), 'data'],
-  ['an EAN-8 with a wrong check digit', () => encodeEan8('96385070'), 'data'],
-  ['an EAN-8 of 3 digits', () => encodeEan8('123'), 'data'],
-  ['an EAN-8 with a letter', () => encodeEan8('963850a'), 'data'],
+  [
+    'an EAN-13 with a wrong check digit',
+    () => encodeEan13('5901234123450'),
+    'data',
+    'EAN-13 check digit mismatch: expected 7, got 0',
+  ],
+  [
+    'an EAN-13 of 3 digits',
+    () => encodeEan13('123'),
+    'data',
+    'EAN-13 data must be 12 or 13 digits, got 3',
+  ],
+  [
+    'an EAN-13 with a letter',
+    () => encodeEan13('59012341234a'),
+    'data',
+    'EAN-13 data must contain only digits: "59012341234a"',
+  ],
+  [
+    'an EAN-8 with a wrong check digit',
+    () => encodeEan8('96385070'),
+    'data',
+    'EAN-8 check digit mismatch: expected 4, got 0',
+  ],
+  [
+    'an EAN-8 of 3 digits',
+    () => encodeEan8('123'),
+    'data',
+    'EAN-8 data must be 7 or 8 digits, got 3',
+  ],
+  [
+    'an EAN-8 with a letter',
+    () => encodeEan8('963850a'),
+    'data',
+    'EAN-8 data must contain only digits: "963850a"',
+  ],
 ] as const;
 
 describe('typed errors', () => {
-  it.each(CASES)('%s throws InvalidArgumentError naming the argument', (_label, call, argument) => {
-    expect(call).toThrow(InvalidArgumentError);
-    expect(call).toThrow(expect.objectContaining({ code: 'invalid-argument', argument }));
-  });
+  it.each(CASES)(
+    '%s throws InvalidArgumentError naming the argument',
+    (_label, call, argument, message) => {
+      expect(call).toThrow(InvalidArgumentError);
+      expect(call).toThrow(
+        expect.objectContaining({ code: 'invalid-argument', argument, message }),
+      );
+    },
+  );
 });

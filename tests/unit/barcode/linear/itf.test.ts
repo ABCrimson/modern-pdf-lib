@@ -236,14 +236,29 @@ describe('itfToOperators', () => {
 });
 
 const CASES = [
-  ['a letter', () => encodeItf('12A4'), 'data'],
-  ['empty data', () => encodeItf(''), 'data'],
-  ['a wideToNarrowRatio below 2', () => encodeItf('12', 1), 'wideToNarrowRatio'],
+  [
+    'a letter',
+    () => encodeItf('12A4'),
+    'data',
+    "ITF: invalid character 'A' at index 2. Only digits 0-9 are allowed.",
+  ],
+  ['empty data', () => encodeItf(''), 'data', 'ITF: input data must not be empty'],
+  [
+    'a wideToNarrowRatio below 2',
+    () => encodeItf('12', 1),
+    'wideToNarrowRatio',
+    'ITF: wideToNarrowRatio must be >= 2, got 1',
+  ],
 ] as const;
 
 describe('typed errors', () => {
-  it.each(CASES)('%s throws InvalidArgumentError naming the argument', (_label, call, argument) => {
-    expect(call).toThrow(InvalidArgumentError);
-    expect(call).toThrow(expect.objectContaining({ code: 'invalid-argument', argument }));
-  });
+  it.each(CASES)(
+    '%s throws InvalidArgumentError naming the argument',
+    (_label, call, argument, message) => {
+      expect(call).toThrow(InvalidArgumentError);
+      expect(call).toThrow(
+        expect.objectContaining({ code: 'invalid-argument', argument, message }),
+      );
+    },
+  );
 });

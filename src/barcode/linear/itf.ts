@@ -106,7 +106,8 @@ export interface ItfOptions {
  *
  * @param data  A string of digits (0-9 only).
  * @returns     A {@link BarcodeMatrix} with the module pattern.
- * @throws      {@link InvalidArgumentError} if the data contains non-digit characters.
+ * @throws      {InvalidArgumentError} If the data is empty or contains non-digit characters, or if
+ *              `wideToNarrowRatio` is below 2.
  */
 export function encodeItf(data: string, wideToNarrowRatio: number = 3): BarcodeMatrix {
   // Validate: digits only

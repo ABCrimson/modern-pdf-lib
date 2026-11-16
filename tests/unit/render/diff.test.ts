@@ -69,12 +69,18 @@ const CASES = [
     'images of different sizes',
     () => compareImages(solid(4, 4, [0, 0, 0]), solid(5, 4, [0, 0, 0])),
     'b',
+    'compareImages: size mismatch (4×4 vs 5×4); render both at the same scale',
   ],
 ] as const;
 
 describe('typed errors', () => {
-  it.each(CASES)('%s throws InvalidArgumentError naming the argument', (_label, call, argument) => {
-    expect(call).toThrow(InvalidArgumentError);
-    expect(call).toThrow(expect.objectContaining({ code: 'invalid-argument', argument }));
-  });
+  it.each(CASES)(
+    '%s throws InvalidArgumentError naming the argument',
+    (_label, call, argument, message) => {
+      expect(call).toThrow(InvalidArgumentError);
+      expect(call).toThrow(
+        expect.objectContaining({ code: 'invalid-argument', argument, message }),
+      );
+    },
+  );
 });

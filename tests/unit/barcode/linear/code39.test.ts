@@ -232,15 +232,40 @@ describe('code39ToOperators', () => {
 });
 
 const CASES = [
-  ['a lower-case letter', () => encodeCode39('abc'), 'data'],
-  ['the start/stop asterisk', () => encodeCode39('A*B'), 'data'],
-  ['a wideToNarrowRatio below 2', () => encodeCode39('A', false, 1), 'wideToNarrowRatio'],
-  ['a check digit of text outside the set', () => computeCode39CheckDigit('abc'), 'data'],
+  [
+    'a lower-case letter',
+    () => encodeCode39('abc'),
+    'data',
+    "Code 39: invalid character 'a' at index 0. Valid characters: 0-9, A-Z, space, - . $ / + %",
+  ],
+  [
+    'the start/stop asterisk',
+    () => encodeCode39('A*B'),
+    'data',
+    'Code 39: asterisk (*) is the start/stop character and must not appear in data (index 1)',
+  ],
+  [
+    'a wideToNarrowRatio below 2',
+    () => encodeCode39('A', false, 1),
+    'wideToNarrowRatio',
+    'Code 39: wideToNarrowRatio must be >= 2, got 1',
+  ],
+  [
+    'a check digit of text outside the set',
+    () => computeCode39CheckDigit('abc'),
+    'data',
+    "Code 39: invalid character 'a' at index 0. Valid characters: 0-9, A-Z, space, - . $ / + %",
+  ],
 ] as const;
 
 describe('typed errors', () => {
-  it.each(CASES)('%s throws InvalidArgumentError naming the argument', (_label, call, argument) => {
-    expect(call).toThrow(InvalidArgumentError);
-    expect(call).toThrow(expect.objectContaining({ code: 'invalid-argument', argument }));
-  });
+  it.each(CASES)(
+    '%s throws InvalidArgumentError naming the argument',
+    (_label, call, argument, message) => {
+      expect(call).toThrow(InvalidArgumentError);
+      expect(call).toThrow(
+        expect.objectContaining({ code: 'invalid-argument', argument, message }),
+      );
+    },
+  );
 });

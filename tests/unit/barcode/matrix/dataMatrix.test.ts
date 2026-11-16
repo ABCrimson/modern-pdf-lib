@@ -260,12 +260,22 @@ describe('Data Matrix ECC200', () => {
 });
 
 const CASES = [
-  ['data past the largest symbol', () => encodeDataMatrix('A'.repeat(4000)), 'data'],
+  [
+    'data past the largest symbol',
+    () => encodeDataMatrix('A'.repeat(4000)),
+    'data',
+    'Data too long for Data Matrix: 4000 codewords exceed maximum capacity of 1558',
+  ],
 ] as const;
 
 describe('typed errors', () => {
-  it.each(CASES)('%s throws InvalidArgumentError naming the argument', (_label, call, argument) => {
-    expect(call).toThrow(InvalidArgumentError);
-    expect(call).toThrow(expect.objectContaining({ code: 'invalid-argument', argument }));
-  });
+  it.each(CASES)(
+    '%s throws InvalidArgumentError naming the argument',
+    (_label, call, argument, message) => {
+      expect(call).toThrow(InvalidArgumentError);
+      expect(call).toThrow(
+        expect.objectContaining({ code: 'invalid-argument', argument, message }),
+      );
+    },
+  );
 });

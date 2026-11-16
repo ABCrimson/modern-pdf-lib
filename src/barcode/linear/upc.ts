@@ -31,6 +31,7 @@ export type { BarcodeOptions as UpcOptions } from '../types.js';
  *
  * @param data  11-digit numeric string (without check digit).
  * @returns     The single check digit (0-9).
+ * @throws      {InvalidArgumentError} If the data is not exactly 11 digits.
  */
 export function calculateUpcCheckDigit(data: string): number {
   if (!/^\d+$/.test(data)) {
@@ -63,7 +64,7 @@ export function calculateUpcCheckDigit(data: string): number {
  *              the check digit is calculated and appended.  If 12 digits
  *              are given the last digit is validated.
  * @returns     A {@link BarcodeMatrix} with 95 modules.
- * @throws      {@link InvalidArgumentError} if the input is not 11 or 12 numeric digits, or if a
+ * @throws      {InvalidArgumentError} If the input is not 11 or 12 numeric digits, or if a
  *              provided check digit does not match.
  */
 export function encodeUpcA(data: string): BarcodeMatrix {

@@ -770,7 +770,7 @@ function buildSymbol(symbolSize: SymbolSize, mappingMatrix: Int8Array): boolean[
  *
  * @param data  The string to encode (ASCII characters supported).
  * @returns     A {@link DataMatrixResult} with the encoded symbol.
- * @throws      {@link InvalidArgumentError} if the data exceeds maximum capacity.
+ * @throws      {InvalidArgumentError} If the data exceeds maximum capacity.
  */
 export function encodeDataMatrix(data: string): DataMatrixResult {
   // Step 1: Encode data in ASCII mode

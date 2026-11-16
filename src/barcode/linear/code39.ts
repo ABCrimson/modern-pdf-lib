@@ -172,7 +172,7 @@ function expandWidths(widths: readonly number[], ratio: number): boolean[] {
  *
  * @param data  Uppercase data string (without start/stop `*`).
  * @returns     The check digit character.
- * @throws      {@link InvalidArgumentError} if the data contains characters not in the Code 39 set.
+ * @throws      {InvalidArgumentError} If the data contains characters not in the Code 39 set.
  */
 export function computeCode39CheckDigit(data: string): string {
   let sum = 0;
@@ -204,8 +204,8 @@ export function computeCode39CheckDigit(data: string): string {
  * @param wideToNarrowRatio  Wide-to-narrow ratio for module expansion.
  *                           Default: `3`.
  * @returns                  A {@link BarcodeMatrix} with the module pattern.
- * @throws                   {@link InvalidArgumentError} if the data contains invalid characters (lowercase,
- *                           `*`, or characters outside the Code 39 set).
+ * @throws                   {InvalidArgumentError} If `wideToNarrowRatio` is below 2, or the data contains
+ *                           invalid characters (lowercase, `*`, or characters outside the Code 39 set).
  */
 export function encodeCode39(
   data: string,

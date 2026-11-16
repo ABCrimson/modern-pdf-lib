@@ -279,14 +279,29 @@ describe('Code 128 Barcode', () => {
 });
 
 const CASES = [
-  ['empty data', () => encodeCode128(''), 'data'],
-  ['a character above 127', () => encodeCode128('éclair'), 'data'],
-  ['an unknown symbol value', () => valuesToModules([200]), 'values'],
+  ['empty data', () => encodeCode128(''), 'data', 'Code 128: input data must not be empty'],
+  [
+    'a character above 127',
+    () => encodeCode128('éclair'),
+    'data',
+    'Code 128: character at index 0 (U+00e9) is outside the encodable range (0-127)',
+  ],
+  [
+    'an unknown symbol value',
+    () => valuesToModules([200]),
+    'values',
+    'Code 128: invalid symbol value 200',
+  ],
 ] as const;
 
 describe('typed errors', () => {
-  it.each(CASES)('%s throws InvalidArgumentError naming the argument', (_label, call, argument) => {
-    expect(call).toThrow(InvalidArgumentError);
-    expect(call).toThrow(expect.objectContaining({ code: 'invalid-argument', argument }));
-  });
+  it.each(CASES)(
+    '%s throws InvalidArgumentError naming the argument',
+    (_label, call, argument, message) => {
+      expect(call).toThrow(InvalidArgumentError);
+      expect(call).toThrow(
+        expect.objectContaining({ code: 'invalid-argument', argument, message }),
+      );
+    },
+  );
 });

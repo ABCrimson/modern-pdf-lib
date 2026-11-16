@@ -43,7 +43,7 @@ function luma(data: Uint8Array, i: number): number {
 /**
  * Compare two equally-sized raster images.
  *
- * @throws {@link InvalidArgumentError} if the images differ in size.
+ * @throws {InvalidArgumentError} If the images differ in size (argument `b`).
  */
 export function compareImages(
   a: RasterImage,
@@ -134,7 +134,12 @@ function meanSsim(a: RasterImage, b: RasterImage, W: number, H: number): number 
   return count ? total / count : 1;
 }
 
-/** Rasterize two pages at the same scale and compare them. */
+/**
+ * Rasterize two pages at the same scale and compare them.
+ *
+ * @throws {InvalidArgumentError} If the two pages render at different sizes (argument `b`, from
+ *         {@link compareImages}).
+ */
 export async function comparePages(
   pageA: PdfPage,
   pageB: PdfPage,

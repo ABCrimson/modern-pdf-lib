@@ -233,13 +233,23 @@ describe('PDF417 Encoder', () => {
 });
 
 const CASES = [
-  ['empty data', () => encodePdf417(''), 'data'],
-  ['data past the codeword limit', () => encodePdf417('A'.repeat(5000)), 'data'],
+  ['empty data', () => encodePdf417(''), 'data', 'PDF417: input data must not be empty'],
+  [
+    'data past the codeword limit',
+    () => encodePdf417('A'.repeat(5000)),
+    'data',
+    'PDF417: data too long (2500 codewords, max 925)',
+  ],
 ] as const;
 
 describe('typed errors', () => {
-  it.each(CASES)('%s throws InvalidArgumentError naming the argument', (_label, call, argument) => {
-    expect(call).toThrow(InvalidArgumentError);
-    expect(call).toThrow(expect.objectContaining({ code: 'invalid-argument', argument }));
-  });
+  it.each(CASES)(
+    '%s throws InvalidArgumentError naming the argument',
+    (_label, call, argument, message) => {
+      expect(call).toThrow(InvalidArgumentError);
+      expect(call).toThrow(
+        expect.objectContaining({ code: 'invalid-argument', argument, message }),
+      );
+    },
+  );
 });

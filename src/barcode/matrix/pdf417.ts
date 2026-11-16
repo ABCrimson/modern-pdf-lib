@@ -676,7 +676,7 @@ function patternToModules(pattern: readonly number[]): boolean[] {
  * @param data     The string to encode.
  * @param options  Encoding options (columns, error level).
  * @returns        A {@link Pdf417Matrix} with the encoded barcode.
- * @throws         {@link InvalidArgumentError} if the data is empty or too long to encode.
+ * @throws         {InvalidArgumentError} If the data is empty or too long to encode.
  */
 export function encodePdf417(
   data: string,
