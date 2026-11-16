@@ -6,14 +6,17 @@
  * numbers. Up to 0.40.9 every writer wrote each entry, so a re-saved file carried a dead copy of
  * most of its objects before the copy its cross-reference data names (qpdf-form-acrobat.pdf:
  * 176 object definitions for 91 object numbers). An object packed into an object stream counts
- * as defined by its container's header.
+ * as one definition of its own number.
  */
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { createPdf, PageSizes } from '../../../../src/index.js';
 import { loadPdf } from '../../../../src/parser/documentParser.js';
-import { saveIncremental } from '../../../../src/core/io/incrementalWriter.js';
+import {
+  saveDocumentIncremental,
+  saveIncremental,
+} from '../../../../src/core/io/incrementalWriter.js';
 import { PdfRef } from '../../../../src/core/pdfObjects.js';
 import type { PdfDocument } from '../../../../src/core/pdfDocument.js';
 import { objectStreamMembers, repeatedDefinitions } from '../../../helpers/objectDefinitions.js';
@@ -79,6 +82,15 @@ describe.each(Object.entries(SOURCES))('a loaded document (%s)', (_name, source)
     const { bytes } = saveIncremental(original, doc.getRegistry(), structure, changed);
     expect(repeatedDefinitions(bytes.subarray(original.length))).toEqual([]);
   });
+
+  it('saveDocumentIncremental() after a save() appends each object number once', async () => {
+    const original = await source();
+    const doc = await loadPdf(original);
+    doc.addPage(PageSizes.A4).drawText('Added', { x: 72, y: 720, size: 12 });
+    await doc.save();
+    const { bytes } = await saveDocumentIncremental(original, doc);
+    expect(repeatedDefinitions(bytes.subarray(original.length))).toEqual([]);
+  });
 });
 
 describe('a document made with createPdf', () => {
@@ -87,5 +99,18 @@ describe('a document made with createPdf', () => {
     doc.addPage(PageSizes.A4).drawText('Saved twice', { x: 72, y: 720, size: 18 });
     expect(repeatedDefinitions(await doc.save())).toEqual([]);
     expect(repeatedDefinitions(await doc.save())).toEqual([]);
+  });
+
+  it('the second save() writes the page dictionaries that save built', async () => {
+    const doc = createPdf();
+    doc.addPage(PageSizes.A4).drawText('Saved twice', { x: 72, y: 720, size: 18 });
+    await doc.save({ compress: false });
+    const bytes = await doc.save({ compress: false });
+    const text = new TextDecoder('latin1').decode(bytes);
+    const root = trailerRef(bytes, 'Root').objectNumber;
+    const catalog = new RegExp(String.raw`(?<=^|[\r\n])${root} 0 obj\b[^]*?endobj`).exec(text)![0];
+    const pages = /\/Pages (\d+) 0 R/.exec(catalog)![1];
+    const parents = [...text.matchAll(/\/Type \/Page\b[^]*?\/Parent (\d+) 0 R/g)].map((m) => m[1]);
+    expect(parents).toEqual([pages]);
   });
 });
