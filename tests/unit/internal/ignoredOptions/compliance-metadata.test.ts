@@ -56,6 +56,12 @@ describe.each(ROWS)('$entry option $option', (row) => {
     expect(() => row.invoke({ [row.option]: undefined })).not.toThrow();
   });
 
+  it('throws for a null option, as 0.40.9 warned for it', () => {
+    expect(thrownBy(() => row.invoke({ [row.option]: null }))).toBeInstanceOf(
+      UnsupportedOptionError,
+    );
+  });
+
   it('names no caller value in the message', () => {
     const error = thrownBy(() => row.invoke({ [row.option]: row.value })) as Error;
     expect(error.message).toBe(row.message);
@@ -72,10 +78,7 @@ describe('results stay the same', () => {
       outputConditionIdentifier: 'Custom',
       ...({ variant: undefined } as Record<string, unknown>),
     });
-    for (const key of ['/Type', '/S', '/OutputConditionIdentifier']) {
-      expect(undefinedVariant.has(key)).toBe(true);
-      expect(without.has(key)).toBe(true);
-    }
+    expect([...undefinedVariant].map(([key]) => key)).toEqual([...without].map(([key]) => key));
     expect(undefinedVariant.has('/Variant')).toBe(false);
   });
 });
