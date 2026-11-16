@@ -620,6 +620,44 @@
       "limits": []
     },
     {
+      "id": "cap-feat-typed-errors",
+      "region": "readme-features",
+      "doc": "README.md",
+      "text": "Typed errors (every error class derives from PdfError and carries a stable code, and the package entries export the classes their calls can throw; some exported classes have no throw site yet, and many errors are still plain Error, RangeError or TypeError)",
+      "grade": "qualified",
+      "tests": [],
+      "limits": [
+        "api-surface-utils-25"
+      ],
+      "stated": true,
+      "exports": [
+        "CombedTextLayoutError",
+        "EncryptedPdfError",
+        "EnvironmentError",
+        "ExceededMaxLengthError",
+        "FieldAlreadyExistsError",
+        "FontNotEmbeddedError",
+        "InvalidArgumentError",
+        "InvalidColorError",
+        "InvalidFieldNamePartError",
+        "InvalidPageSizeError",
+        "InvalidStateError",
+        "MalformedInputError",
+        "MissingOnValueCheckError",
+        "NoSuchFieldError",
+        "PdfError",
+        "PdfParseError",
+        "PluginError",
+        "RedactionIncompleteError",
+        "RemovePageFromEmptyDocumentError",
+        "ScriptExecutionDisabledError",
+        "UnencodableTextError",
+        "UnexpectedFieldTypeError",
+        "UnsupportedFeatureError",
+        "UnsupportedOptionError"
+      ]
+    },
+    {
       "id": "cap-feat-spot-colors",
       "region": "readme-features",
       "doc": "README.md",

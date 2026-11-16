@@ -178,6 +178,7 @@ For a plain `<script>` tag without `type="module"`, use the IIFE bundle, which e
 - Browser helpers (download, blob, data URL)
 - Service Worker & Web Worker support
 - Batch processing with memory pressure handling
+- Typed errors (every error class derives from `PdfError` and carries a stable `code`, and the package entries export the classes their calls can throw; some exported classes have no throw site yet, and many errors are still plain `Error`, `RangeError` or `TypeError`)
 - Spot colors (Separation) & DeviceN
 - CLI: `npx modern-pdf-lib optimize`
 
