@@ -87,7 +87,7 @@ export class PdfCheckboxField extends PdfField {
   /**
    * The "on" name with the bytes the file holds: the first /AP /N key other than /Off, else a
    * /V other than /Off, else /Yes; `undefined` when /AP /N is a dictionary that holds no key
-   * other than /Off and /V names no other state, so the field has no on state.
+   * other than /Off and /V is absent or /Off, so the field has no on state.
    */
   private onStateName(): PdfName | undefined {
     const ap = this.widgetDict.get('/AP');
@@ -95,7 +95,10 @@ export class PdfCheckboxField extends PdfField {
     if (fromAppearance !== undefined) return fromAppearance;
     const v = this.dict.get('/V');
     if (v instanceof PdfName && v.value !== '/Off') return v;
-    if (ap instanceof PdfDict && ap.get('/N') instanceof PdfDict) return undefined;
+    // Here a /V that is a name is /Off; a /V of another type is neither absent nor /Off.
+    const valueAbsentOrOff = v === undefined || v instanceof PdfName;
+    if (valueAbsentOrOff && ap instanceof PdfDict && ap.get('/N') instanceof PdfDict)
+      return undefined;
     return PdfName.of('Yes');
   }
 

@@ -265,6 +265,22 @@ describe('check() of a check box whose appearance has no on state', () => {
     expect(field.getDict().get('/V')).toEqual(PdfName.of('Yes'));
   });
 
+  it('keeps the /Yes default when /V is not a name', () => {
+    const field = checkbox(['Off']);
+    field.getDict().set('/V', PdfString.fromText('Yes'));
+    field.check();
+    expect(field.getDict().get('/AS')).toEqual(PdfName.of('Yes'));
+  });
+
+  it('keeps the /Yes default when /AP /N is a stream, not a dictionary', () => {
+    const field = checkbox(undefined);
+    const ap = new PdfDict();
+    ap.set('/N', PdfStream.fromString(''));
+    field.getDict().set('/AP', ap);
+    field.check();
+    expect(field.getDict().get('/V')).toEqual(PdfName.of('Yes'));
+  });
+
   it('uses the on state of the appearance', () => {
     const field = checkbox(['Off', 'Ja']);
     field.check();
