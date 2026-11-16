@@ -194,10 +194,9 @@ export async function applyOcr(
     // Font size approximates the word's height so the (invisible) glyph metrics
     // roughly track the underlying scanned text.
     const size = word.height > 0 ? word.height : 1;
-    fragment +=
-      `BT 3 Tr /${fontName} ${num(size)} Tf ${num(word.x)} ${num(word.y)} Td ` + `${shown} Tj ET\n`;
+    fragment += `BT 3 Tr /${fontName} ${num(size)} Tf ${num(word.x)} ${num(word.y)} Td ${shown} Tj ET\n`;
   }
-  if (fragment !== '') page.pushOperators(fragment);
+  page.pushOperators(fragment);
 
   if (skipped > 0) {
     warnOnce(

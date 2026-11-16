@@ -1040,6 +1040,11 @@ describe('svgToPdfOperators — text encoding', () => {
     expect(() => svgToPdfOperators(el)).toThrow(UnencodableTextError);
   });
 
+  it('collapses the line breaks and tabs inside a <text> to single spaces', () => {
+    const el = parseSvg('<svg width="200" height="100"><text x="10" y="50">a\n\tb</text></svg>');
+    expect(svgToPdfOperators(el)).toContain('(a b) Tj\n');
+  });
+
   it('shows the codes in the content stream of a page', () => {
     const page = new PdfPage(200, 100, new PdfObjectRegistry());
     drawSvgOnPage(page, '<svg width="200" height="100"><text x="10" y="50">naïve</text></svg>');

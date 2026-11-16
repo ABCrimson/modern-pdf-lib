@@ -637,7 +637,9 @@ function renderGradientFill(gradient: SvgGradient, _el: SvgElement): string {
  */
 function renderTextElement(el: SvgElement): string {
   // Collect text content from direct content or __text attribute
-  const text = el.textContent ?? el.attributes['__text'] ?? '';
+  // White space of xml:space="default" (SVG 1.1 10.15, as browsers render it): each run of
+  // tab, CR, LF and space characters is one space.
+  const text = (el.textContent ?? el.attributes['__text'] ?? '').replace(/[\t\n\r ]+/g, ' ');
   if (!text) return '';
 
   let ops = '';

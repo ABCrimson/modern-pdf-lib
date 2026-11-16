@@ -311,8 +311,8 @@ function tokenize(
     const fn = fontNameOf(span.font, defaultFontName);
     const fs = span.fontSize ?? defaultFontSize;
 
-    // Split on newlines first, then on spaces
-    const paragraphs = span.text.split('\n');
+    // Split on line ends first (CRLF, CR and LF, as drawText does), then on spaces
+    const paragraphs = span.text.split(/\r\n|\r|\n/);
 
     for (let pi = 0; pi < paragraphs.length; pi++) {
       // Insert a paragraph break marker (except before the first paragraph)

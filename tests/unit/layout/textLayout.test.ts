@@ -704,4 +704,10 @@ describe('layoutParagraph — word text encoding', () => {
       UnencodableTextError,
     );
   });
+
+  it('breaks paragraphs on CRLF and CR as on LF', () => {
+    const lf = layoutParagraph('one\ntwo', STD_FRAME, {}, fixedMeasure).operators;
+    expect(layoutParagraph('one\r\ntwo', STD_FRAME, {}, fixedMeasure).operators).toBe(lf);
+    expect(layoutParagraph('one\rtwo', STD_FRAME, {}, fixedMeasure).operators).toBe(lf);
+  });
 });
