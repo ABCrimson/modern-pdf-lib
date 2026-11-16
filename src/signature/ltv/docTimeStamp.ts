@@ -118,7 +118,7 @@ export function buildDocTimeStampDict(options?: DocTimeStampOptions): PdfDict {
   // i.e. 2 * contentsSize hex digits.  Built without intermediate
   // per-byte allocations.
   const hexZeros = '0'.repeat(contentsSize * 2);
-  dict.set('/Contents', PdfString.hex(hexZeros));
+  dict.set('/Contents', PdfString.fromHex(hexZeros));
 
   if (options?.reason !== undefined) {
     dict.set('/Reason', PdfString.literal(options.reason));

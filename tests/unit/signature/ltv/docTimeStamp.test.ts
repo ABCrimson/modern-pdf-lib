@@ -3,7 +3,7 @@
  * (ISO 32000-2 §12.8.5, subtype ETSI.RFC3161).
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 
 import {
   buildDocTimeStampDict,
@@ -96,6 +96,18 @@ describe('buildDocTimeStampDict', () => {
     const contents = dict.get('/Contents');
     expect(contents).toBeInstanceOf(PdfString);
     expect((contents as PdfString).hex).toBe(true);
+  });
+
+  it('builds /Contents from hex digits without the deprecated hex factory', () => {
+    const hex = vi.spyOn(PdfString, 'hex');
+    try {
+      const contents = buildDocTimeStampDict({ contentsSize: 16 }).get('/Contents') as PdfString;
+      expect(hex).not.toHaveBeenCalled();
+      expect(contents.hex).toBe(true);
+      expect(contents.equals(PdfString.fromBytes(new Uint8Array(16)))).toBe(true);
+    } finally {
+      hex.mockRestore();
+    }
   });
 
   it('defaults the /Contents placeholder to the documented size', () => {
