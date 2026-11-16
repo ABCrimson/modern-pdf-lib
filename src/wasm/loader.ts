@@ -8,8 +8,8 @@
  *
  * - **Browser**: Uses `fetch()` to load from a URL.
  * - **Node.js**: Uses `fs/promises` via dynamic import to read from disk.
- * - **Deno**: Uses `Deno.readFile()` or `fetch()` for local/remote files.
- * - **Bun**: Uses `Bun.file()` for local files or `fetch()` for URLs.
+ * - **Deno**: Uses `fetch()`; a packaged module is the `file:` URL next to the loader.
+ * - **Bun**: Uses `fetch()`; a packaged module is the `file:` URL next to the loader.
  * - **Cloudflare Workers / Edge**: Must provide WASM bytes directly
  *   (no filesystem access), or use bundled imports.
  *
@@ -41,7 +41,7 @@ export interface WasmLoaderConfig {
    * Base path or URL for WASM modules.
    *
    * - In browsers, this should be a URL path (e.g. `/wasm/`).
-   * - In Node.js, this should be a filesystem path.
+   * - In Node.js, this should be a filesystem path or a `file:` URL.
    * - If not set, the loader attempts to resolve relative to the
    *   package installation.
    */
@@ -240,6 +240,8 @@ async function loadViaFetch(url: string): Promise<Uint8Array> {
  * @param filename - Default file name of the module (e.g. `'modern_pdf_deflate_bg.wasm'`).
  * @param base     - URL of the loader module, the default being this module's own.
  * @returns          The URL of the module's `.wasm` file.
+ * @throws {EnvironmentError} If `base` is not a URL: the IIFE script build has no module URL
+ *                            (its `import.meta` is an empty object).
  *
  * @internal
  */
@@ -248,6 +250,14 @@ export function packagedModuleUrl(
   filename: string,
   base: string = import.meta.url,
 ): string {
+  if (!URL.canParse(base)) {
+    throw new EnvironmentError(
+      `Cannot locate the packaged WASM module "${name}": this build has no module URL. ` +
+        `Provide its location via configureWasmLoader({ modulePaths: { ${name}: path } }) ` +
+        `or its bytes via configureWasmLoader({ moduleBytes: { ${name}: bytes } }).`,
+      { reason: 'wasm' },
+    );
+  }
   return new URL(`./wasm/${name}/${filename}`, base).href;
 }
 

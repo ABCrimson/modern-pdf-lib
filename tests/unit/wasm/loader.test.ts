@@ -158,6 +158,12 @@ describe('loadWasmModule', () => {
         new URL('../../../src/wasm/wasm/libdeflate/modern_pdf_deflate_bg.wasm', import.meta.url),
       );
       expect(((error as Error).cause as NodeJS.ErrnoException).path).toBe(expected);
+      // The location stays a URL until the read: on a POSIX path without escapes `.pathname` and
+      // the converted path are equal, so only the URL in the message tells them apart there.
+      expect((error as Error).message).toContain(
+        new URL('../../../src/wasm/wasm/libdeflate/modern_pdf_deflate_bg.wasm', import.meta.url)
+          .href,
+      );
     });
 
     it('rejects a file URL that names no file with an EnvironmentError (wasm) caused by the conversion', async () => {
@@ -230,6 +236,15 @@ describe('packagedModuleUrl', () => {
         'file:///C:/Users/J%C3%BCrgen/my%20app/dist/loader.mjs',
       ),
     ).toBe(`file:///C:/Users/J%C3%BCrgen/my%20app/dist/wasm/libdeflate/${FILE}`);
+  });
+
+  it('refuses a loader without a module URL (the IIFE build) with an EnvironmentError (wasm)', () => {
+    expect(() => packagedModuleUrl('libdeflate', FILE, '')).toThrow(EnvironmentError);
+    try {
+      packagedModuleUrl('libdeflate', FILE, '');
+    } catch (error) {
+      expect(error).toMatchObject({ code: 'environment-unavailable', reason: 'wasm' });
+    }
   });
 });
 
