@@ -19,7 +19,15 @@ import {
   PdfObjectRegistry,
 } from '../core/pdfObjects.js';
 import type { PdfObject } from '../core/pdfObjects.js';
-import { PdfField, FieldFlags, nameVal, strVal, numVal, resolveIfRef } from './pdfField.js';
+import {
+  PdfField,
+  FieldFlags,
+  nameVal,
+  strVal,
+  numVal,
+  resolveIfRef,
+  textName,
+} from './pdfField.js';
 import type { FieldType } from './pdfField.js';
 import { PdfTextField } from './fields/textField.js';
 import { PdfCheckboxField } from './fields/checkboxField.js';
@@ -561,8 +569,11 @@ export class PdfForm {
    *                 positioning in the low-level dict, but reserved
    *                 for future page-level annotation linking).
    * @param rects    Array of widget rectangles `{x, y, width, height}`.
-   * @param options  Optional option labels (one per rect).
+   * @param options  Optional option labels (one per rect), each written as
+   *                 the on-state name of its UTF-8 bytes.
    * @returns        The newly created radio group.
+   * @throws {InvalidArgumentError} When an option holds U+0000 (argument
+   *                 `bytes`).
    */
   createRadioGroup(
     name: string,
@@ -592,9 +603,9 @@ export class PdfForm {
       widgetDict.set('/AS', PdfName.of('Off'));
       widgetDict.set('/Parent', fieldDict);
 
-      // Build /AP /N with the option name as key
+      // Build /AP /N with the option name as key: the name of its UTF-8 bytes
       const nDict = new PdfDict();
-      nDict.set(`/${optName}`, new PdfStream(new PdfDict(), new Uint8Array(0)));
+      nDict.set(textName(optName).value, new PdfStream(new PdfDict(), new Uint8Array(0)));
       nDict.set('/Off', new PdfStream(new PdfDict(), new Uint8Array(0)));
       const apDict = new PdfDict();
       apDict.set('/N', nDict);

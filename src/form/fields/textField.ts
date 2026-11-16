@@ -15,7 +15,7 @@ import {
   PdfStream,
   PdfRef,
 } from '../../core/pdfObjects.js';
-import { PdfField, FieldFlags, numVal, strVal } from '../pdfField.js';
+import { PdfField, FieldFlags, byteStrVal, numVal, strVal } from '../pdfField.js';
 import type { FieldType } from '../pdfField.js';
 import { generateTextAppearance } from '../fieldAppearance.js';
 
@@ -81,7 +81,7 @@ export class PdfTextField extends PdfField {
    * Returns 0 if the font size is not specified or is auto.
    */
   getFontSize(): number {
-    const da = strVal(this.dict.get('/DA'));
+    const da = byteStrVal(this.dict.get('/DA'));
     if (da === undefined) return 0;
     // DA format: "/FontName size Tf [color ops]"
     const match = da.match(/\/(\w+)\s+([\d.]+)\s+Tf/);
@@ -106,7 +106,7 @@ export class PdfTextField extends PdfField {
    * Returns "Helv" (Helvetica) as default.
    */
   getFontName(): string {
-    const da = strVal(this.dict.get('/DA'));
+    const da = byteStrVal(this.dict.get('/DA'));
     if (da === undefined) return 'Helv';
     const match = da.match(/\/(\w+)\s+[\d.]+\s+Tf/);
     return match?.[1] ?? 'Helv';

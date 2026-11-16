@@ -69,13 +69,13 @@ export class PdfDropdownField extends PdfField {
 
     for (const item of arr.items) {
       if (item.kind === 'string') {
-        options.push((item as PdfString).value);
+        options.push((item as PdfString).toText());
       } else if (item.kind === 'array') {
         // Two-element array: [exportValue, displayValue]
         const subArr = item as PdfArray;
         const display = subArr.items[1] ?? subArr.items[0];
         if (display !== undefined && display.kind === 'string') {
-          options.push((display as PdfString).value);
+          options.push((display as PdfString).toText());
         }
       }
     }

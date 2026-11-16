@@ -17,8 +17,10 @@ import {
   PdfArray,
   PdfStream,
   PdfRef,
+  pdfNameFromByteString,
 } from '../core/pdfObjects.js';
 import type { PdfObject } from '../core/pdfObjects.js';
+import { latin1String } from '../internal/latin1.js';
 
 // ---------------------------------------------------------------------------
 // Minimal page interface (avoids circular dependency with PdfPage)
@@ -135,24 +137,61 @@ export function numVal(obj: PdfObject | undefined): number | undefined {
 }
 
 /**
- * Extract a string value from a PdfObject.
+ * The text of a PdfString: a PDF text string such as /T, /V, /CA or /JS, decoded by its byte
+ * order mark (ISO 32000-2 7.9.2.2).
  */
 export function strVal(obj: PdfObject | undefined): string | undefined {
   if (obj !== undefined && obj.kind === 'string') {
-    return (obj as PdfString).value;
+    return (obj as PdfString).toText();
   }
   return undefined;
 }
 
 /**
- * Extract a name value (without leading `/`) from a PdfObject.
+ * The bytes of a PdfString as a PDF byte string, one code unit per byte: for /DA, which holds
+ * content-stream operators, not text.
+ */
+export function byteStrVal(obj: PdfObject | undefined): string | undefined {
+  if (obj !== undefined && obj.kind === 'string') {
+    return latin1String((obj as PdfString).toBytes());
+  }
+  return undefined;
+}
+
+/**
+ * The text of a name, without the leading `/`: its bytes decoded as UTF-8 (ISO 32000-2 7.3.5),
+ * so an on-state or a radio option written by {@link textName} reads back as its text.
  */
 export function nameVal(obj: PdfObject | undefined): string | undefined {
   if (obj !== undefined && obj.kind === 'name') {
-    const val = (obj as PdfName).value;
-    return val.startsWith('/') ? val.slice(1) : val;
+    return (obj as PdfName).toText();
   }
   return undefined;
+}
+
+/**
+ * The name whose bytes are the UTF-8 encoding of `text`: an on-state of a check box or a radio
+ * button given as text. {@link PdfName.of} refuses text above U+00FF.
+ *
+ * @throws {InvalidArgumentError} When `text` holds U+0000 (argument `bytes`).
+ */
+export function textName(text: string): PdfName {
+  return PdfName.fromBytes(new TextEncoder().encode(text));
+}
+
+/**
+ * The on-state names of an appearance dictionary (/AP), in key order: the keys of its /N
+ * subdictionary other than /Off. The names keep the bytes of the keys.
+ */
+export function onStateNames(ap: PdfObject | undefined): PdfName[] {
+  if (ap === undefined || ap.kind !== 'dict') return [];
+  const n = (ap as PdfDict).get('/N');
+  if (n === undefined || n.kind !== 'dict') return [];
+  const names: PdfName[] = [];
+  for (const [key] of n as PdfDict) {
+    if (key !== '/Off') names.push(pdfNameFromByteString(key));
+  }
+  return names;
 }
 
 // ---------------------------------------------------------------------------

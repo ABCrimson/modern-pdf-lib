@@ -39,14 +39,14 @@ export class PdfListboxField extends PdfField {
     if (v === undefined) return [];
 
     if (v.kind === 'string') {
-      return [(v as PdfString).value];
+      return [(v as PdfString).toText()];
     }
 
     if (v.kind === 'array') {
       const arr = v as PdfArray;
       return arr.items
         .filter((item): item is PdfString => item.kind === 'string')
-        .map((item) => item.value);
+        .map((item) => item.toText());
     }
 
     return [];
@@ -91,12 +91,12 @@ export class PdfListboxField extends PdfField {
 
     for (const item of arr.items) {
       if (item.kind === 'string') {
-        options.push((item as PdfString).value);
+        options.push((item as PdfString).toText());
       } else if (item.kind === 'array') {
         const subArr = item as PdfArray;
         const display = subArr.items[1] ?? subArr.items[0];
         if (display !== undefined && display.kind === 'string') {
-          options.push((display as PdfString).value);
+          options.push((display as PdfString).toText());
         }
       }
     }

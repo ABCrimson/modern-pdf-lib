@@ -17,7 +17,7 @@
 
 import { PdfDict, PdfName, PdfString, PdfArray, PdfStream } from '../core/pdfObjects.js';
 import type { PdfField } from './pdfField.js';
-import { FieldFlags, numVal } from './pdfField.js';
+import { FieldFlags, byteStrVal, numVal } from './pdfField.js';
 import type { PdfForm } from './pdfForm.js';
 
 // ---------------------------------------------------------------------------
@@ -852,7 +852,7 @@ function tryRichTextAppearance(field: PdfField): PdfStream | undefined {
   // /RV should be a string
   let rvString: string | undefined;
   if (rvObj.kind === 'string') {
-    rvString = (rvObj as PdfString).value;
+    rvString = (rvObj as PdfString).toText();
   }
   if (rvString === undefined || rvString.trim().length === 0) return undefined;
 
@@ -866,9 +866,8 @@ function tryRichTextAppearance(field: PdfField): PdfStream | undefined {
 
     // Get default font size from /DA
     let defaultFontSize = 0;
-    const daObj = dict.get('/DA');
-    if (daObj !== undefined && daObj.kind === 'string') {
-      const da = (daObj as PdfString).value;
+    const da = byteStrVal(dict.get('/DA'));
+    if (da !== undefined) {
       const sizeMatch = da.match(/\/\w+\s+([\d.]+)\s+Tf/);
       if (sizeMatch) {
         defaultFontSize = parseFloat(sizeMatch[1]!);

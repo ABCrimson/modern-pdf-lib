@@ -6,8 +6,8 @@
  * Reference: PDF 1.7 spec, SS12.7.4.2.1 (Check Boxes).
  */
 
-import { PdfDict, PdfName, PdfStream } from '../../core/pdfObjects.js';
-import { PdfField, nameVal } from '../pdfField.js';
+import { PdfName, PdfStream } from '../../core/pdfObjects.js';
+import { PdfField, nameVal, onStateNames } from '../pdfField.js';
 import type { FieldType } from '../pdfField.js';
 import { generateCheckboxAppearance } from '../fieldAppearance.js';
 
@@ -45,9 +45,9 @@ export class PdfCheckboxField extends PdfField {
 
   /** Check the checkbox (set to the "on" value). */
   check(): void {
-    const onValue = this.getOnValue();
-    this.dict.set('/V', PdfName.of(onValue));
-    this.widgetDict.set('/AS', PdfName.of(onValue));
+    const onState = this.onStateName();
+    this.dict.set('/V', onState);
+    this.widgetDict.set('/AS', onState);
     this.widgetDict.delete('/AP');
   }
 
@@ -68,34 +68,25 @@ export class PdfCheckboxField extends PdfField {
   }
 
   /**
-   * Get the "on" value name for this checkbox.
+   * Get the "on" value name for this checkbox, as text (the name bytes decoded as UTF-8).
    *
-   * Examines the /AP /N dictionary for a key that is not "/Off".
-   * Falls back to "Yes" if no appearance dictionary is found.
+   * Examines the /AP /N dictionary for a key that is not "/Off", then /V.
+   * Falls back to "Yes" if neither holds one.
    */
   getOnValue(): string {
-    // Look in the /AP /N dict for a key that isn't "Off"
-    const ap = this.widgetDict.get('/AP');
-    if (ap !== undefined && ap.kind === 'dict') {
-      const apDict = ap as PdfDict;
-      const nObj = apDict.get('/N');
-      if (nObj !== undefined && nObj.kind === 'dict') {
-        const nDict = nObj as PdfDict;
-        for (const [key] of nDict) {
-          const cleanKey = key.startsWith('/') ? key.slice(1) : key;
-          if (cleanKey !== 'Off') {
-            return cleanKey;
-          }
-        }
-      }
-    }
+    return this.onStateName().toText();
+  }
 
-    // Check /V for a non-Off value
-    const v = nameVal(this.dict.get('/V'));
-    if (v !== undefined && v !== 'Off') return v;
-
-    // Default
-    return 'Yes';
+  /**
+   * The "on" name with the bytes the file holds: the first /AP /N key other than /Off, else a
+   * /V other than /Off, else /Yes.
+   */
+  private onStateName(): PdfName {
+    const [fromAppearance] = onStateNames(this.widgetDict.get('/AP'));
+    if (fromAppearance !== undefined) return fromAppearance;
+    const v = this.dict.get('/V');
+    if (v instanceof PdfName && v.value !== '/Off') return v;
+    return PdfName.of('Yes');
   }
 
   /** Get the value: "Yes"/"Off" as boolean for convenience. */

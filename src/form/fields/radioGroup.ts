@@ -11,7 +11,7 @@
  */
 
 import { PdfDict, PdfName, PdfStream } from '../../core/pdfObjects.js';
-import { PdfField, nameVal } from '../pdfField.js';
+import { PdfField, nameVal, onStateNames, textName } from '../pdfField.js';
 import type { FieldType, WidgetAnnotationHost } from '../pdfField.js';
 import { generateRadioAppearance } from '../fieldAppearance.js';
 
@@ -80,22 +80,25 @@ export class PdfRadioGroup extends PdfField {
   }
 
   /**
-   * Select an option by its name.
+   * Select an option by its name, given as text.
    *
    * Sets /V on the field and updates /AS on each widget to
-   * show the correct appearance state.
+   * show the correct appearance state. The name written is the on-state
+   * of the widget whose option reads as `optionName`, with the bytes the
+   * file holds; for an option no widget has, the UTF-8 bytes of
+   * `optionName`.
+   *
+   * @throws {InvalidArgumentError} When `optionName` holds U+0000 and no
+   *   widget has it (argument `bytes`).
    */
   select(optionName: string): void {
-    this.dict.set('/V', PdfName.of(optionName));
+    const states = this.widgets.map((widget) => this.widgetOnState(widget));
+    const selected = states.find((state) => state?.toText() === optionName) ?? textName(optionName);
+    this.dict.set('/V', selected);
 
     // Update each widget's /AS to match
-    for (const widget of this.widgets) {
-      const widgetOption = this.getWidgetOptionName(widget);
-      if (widgetOption === optionName) {
-        widget.set('/AS', PdfName.of(optionName));
-      } else {
-        widget.set('/AS', PdfName.of('Off'));
-      }
+    for (const [i, widget] of this.widgets.entries()) {
+      widget.set('/AS', states[i] === selected ? selected : PdfName.of('Off'));
       widget.delete('/AP');
     }
   }
@@ -136,23 +139,16 @@ export class PdfRadioGroup extends PdfField {
   // -----------------------------------------------------------------------
 
   /**
-   * Get the option name for a widget annotation.
+   * Get the option name for a widget annotation, as text.
    * Looks in the /AP /N dictionary for a key that is not "Off".
    */
   private getWidgetOptionName(widget: PdfDict): string | undefined {
-    const ap = widget.get('/AP');
-    if (ap !== undefined && ap.kind === 'dict') {
-      const apDict = ap as PdfDict;
-      const nObj = apDict.get('/N');
-      if (nObj !== undefined && nObj.kind === 'dict') {
-        const nDict = nObj as PdfDict;
-        for (const [key] of nDict) {
-          const cleanKey = key.startsWith('/') ? key.slice(1) : key;
-          if (cleanKey !== 'Off') return cleanKey;
-        }
-      }
-    }
-    return undefined;
+    return this.widgetOnState(widget)?.toText();
+  }
+
+  /** The on-state name of a widget: its first /AP /N key other than /Off, bytes kept. */
+  private widgetOnState(widget: PdfDict): PdfName | undefined {
+    return onStateNames(widget.get('/AP'))[0];
   }
 
   // -----------------------------------------------------------------------
