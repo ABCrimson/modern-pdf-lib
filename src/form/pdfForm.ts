@@ -20,6 +20,12 @@ import {
 } from '../core/pdfObjects.js';
 import type { PdfObject } from '../core/pdfObjects.js';
 import {
+  FieldAlreadyExistsError,
+  InvalidFieldNamePartError,
+  NoSuchFieldError,
+  UnexpectedFieldTypeError,
+} from '../errors.js';
+import {
   PdfField,
   FieldFlags,
   nameVal,
@@ -279,105 +285,119 @@ export class PdfForm {
 
   /**
    * Get a text field by name.
-   * Throws if the field is not found or is not a text field.
+   *
+   * @throws {NoSuchFieldError} When no field has the name.
+   * @throws {UnexpectedFieldTypeError} When the field is not a text field.
    */
   getTextField(name: string): PdfTextField {
     const field = this.getField(name);
     if (field === undefined) {
-      throw new Error(`Form field "${name}" not found.`);
+      throw new NoSuchFieldError(name);
     }
     if (field.fieldType !== 'text') {
-      throw new Error(`Form field "${name}" is a ${field.fieldType} field, not a text field.`);
+      throw new UnexpectedFieldTypeError(name, 'text', field.fieldType);
     }
     return field as PdfTextField;
   }
 
   /**
    * Get a checkbox field by name.
-   * Throws if the field is not found or is not a checkbox.
+   *
+   * @throws {NoSuchFieldError} When no field has the name.
+   * @throws {UnexpectedFieldTypeError} When the field is not a checkbox.
    */
   getCheckbox(name: string): PdfCheckboxField {
     const field = this.getField(name);
     if (field === undefined) {
-      throw new Error(`Form field "${name}" not found.`);
+      throw new NoSuchFieldError(name);
     }
     if (field.fieldType !== 'checkbox') {
-      throw new Error(`Form field "${name}" is a ${field.fieldType} field, not a checkbox.`);
+      throw new UnexpectedFieldTypeError(name, 'checkbox', field.fieldType);
     }
     return field as PdfCheckboxField;
   }
 
   /**
    * Get a radio group by name.
-   * Throws if the field is not found or is not a radio group.
+   *
+   * @throws {NoSuchFieldError} When no field has the name.
+   * @throws {UnexpectedFieldTypeError} When the field is not a radio group.
    */
   getRadioGroup(name: string): PdfRadioGroup {
     const field = this.getField(name);
     if (field === undefined) {
-      throw new Error(`Form field "${name}" not found.`);
+      throw new NoSuchFieldError(name);
     }
     if (field.fieldType !== 'radio') {
-      throw new Error(`Form field "${name}" is a ${field.fieldType} field, not a radio group.`);
+      throw new UnexpectedFieldTypeError(name, 'radio', field.fieldType);
     }
     return field as PdfRadioGroup;
   }
 
   /**
    * Get a dropdown field by name.
-   * Throws if the field is not found or is not a dropdown.
+   *
+   * @throws {NoSuchFieldError} When no field has the name.
+   * @throws {UnexpectedFieldTypeError} When the field is not a dropdown.
    */
   getDropdown(name: string): PdfDropdownField {
     const field = this.getField(name);
     if (field === undefined) {
-      throw new Error(`Form field "${name}" not found.`);
+      throw new NoSuchFieldError(name);
     }
     if (field.fieldType !== 'dropdown') {
-      throw new Error(`Form field "${name}" is a ${field.fieldType} field, not a dropdown.`);
+      throw new UnexpectedFieldTypeError(name, 'dropdown', field.fieldType);
     }
     return field as PdfDropdownField;
   }
 
   /**
    * Get a listbox field by name.
-   * Throws if the field is not found or is not a listbox.
+   *
+   * @throws {NoSuchFieldError} When no field has the name.
+   * @throws {UnexpectedFieldTypeError} When the field is not a listbox.
    */
   getListbox(name: string): PdfListboxField {
     const field = this.getField(name);
     if (field === undefined) {
-      throw new Error(`Form field "${name}" not found.`);
+      throw new NoSuchFieldError(name);
     }
     if (field.fieldType !== 'listbox') {
-      throw new Error(`Form field "${name}" is a ${field.fieldType} field, not a listbox.`);
+      throw new UnexpectedFieldTypeError(name, 'listbox', field.fieldType);
     }
     return field as PdfListboxField;
   }
 
   /**
    * Get a button field by name.
-   * Throws if the field is not found or is not a button.
+   *
+   * @throws {NoSuchFieldError} When no field has the name.
+   * @throws {UnexpectedFieldTypeError} When the field is not a button.
    */
   getButton(name: string): PdfButtonField {
     const field = this.getField(name);
     if (field === undefined) {
-      throw new Error(`Form field "${name}" not found.`);
+      throw new NoSuchFieldError(name);
     }
     if (field.fieldType !== 'button') {
-      throw new Error(`Form field "${name}" is a ${field.fieldType} field, not a button.`);
+      throw new UnexpectedFieldTypeError(name, 'button', field.fieldType);
     }
     return field as PdfButtonField;
   }
 
   /**
    * Get a signature field by name.
-   * Throws if the field is not found or is not a signature field.
+   *
+   * @throws {NoSuchFieldError} When no field has the name.
+   * @throws {UnexpectedFieldTypeError} When the field is not a signature field.
    */
   getSignatureField(name: string): PdfSignatureField {
     const field = this.getField(name);
     if (field === undefined) {
-      throw new Error(`Form field "${name}" not found.`);
+      throw new NoSuchFieldError(name);
     }
     if (field.fieldType !== 'signature') {
-      throw new Error(`Form field "${name}" is a ${field.fieldType} field, not a signature field.`);
+      throw new UnexpectedFieldTypeError(name, 'signature', field.fieldType);
     }
     return field as PdfSignatureField;
   }
@@ -394,13 +414,13 @@ export class PdfForm {
    * booleans map to checkbox checked states.
    *
    * @param values  A mapping of field name to value.
-   * @throws        If a field name is not found.
+   * @throws {NoSuchFieldError} When a name is not a field; the values before it are set.
    */
   fill(values: Record<string, string | boolean>): void {
     for (const [name, value] of Object.entries(values)) {
       const field = this.getField(name);
       if (field === undefined) {
-        throw new Error(`Form field "${name}" not found.`);
+        throw new NoSuchFieldError(name);
       }
       field.setValue(value);
     }
@@ -489,6 +509,8 @@ export class PdfForm {
    * @param page  Page index (zero-based) where the widget appears.
    * @param rect  Widget rectangle [x1, y1, x2, y2].
    * @returns     The newly created text field.
+   * @throws {InvalidFieldNamePartError} When `name` is empty or holds a period.
+   * @throws {FieldAlreadyExistsError} When a field of the form has the name `name`.
    */
   createTextField(
     name: string,
@@ -512,6 +534,8 @@ export class PdfForm {
    * @param page  Page index (zero-based).
    * @param rect  Widget rectangle [x1, y1, x2, y2].
    * @returns     The newly created checkbox field.
+   * @throws {InvalidFieldNamePartError} When `name` is empty or holds a period.
+   * @throws {FieldAlreadyExistsError} When a field of the form has the name `name`.
    */
   createCheckbox(
     name: string,
@@ -537,6 +561,8 @@ export class PdfForm {
    * @param rect     Widget rectangle [x1, y1, x2, y2].
    * @param options  The list of option strings.
    * @returns        The newly created dropdown field.
+   * @throws {InvalidFieldNamePartError} When `name` is empty or holds a period.
+   * @throws {FieldAlreadyExistsError} When a field of the form has the name `name`.
    */
   createDropdown(
     name: string,
@@ -572,6 +598,8 @@ export class PdfForm {
    * @param options  Optional option labels (one per rect), each written as
    *                 the on-state name of its UTF-8 bytes.
    * @returns        The newly created radio group.
+   * @throws {InvalidFieldNamePartError} When `name` is empty or holds a period.
+   * @throws {FieldAlreadyExistsError} When a field of the form has the name `name`.
    * @throws {InvalidArgumentError} When an option holds U+0000 (argument
    *                 `bytes`).
    */
@@ -581,6 +609,7 @@ export class PdfForm {
     rects: Array<{ x: number; y: number; width: number; height: number }>,
     options?: string[],
   ): PdfRadioGroup {
+    this.assertNewFieldName(name);
     // Build the parent field dictionary (no widget merged in)
     const fieldDict = new PdfDict();
     fieldDict.set('/FT', PdfName.of('Btn'));
@@ -633,6 +662,8 @@ export class PdfForm {
    * @param rect   Widget rectangle `{x, y, width, height}`.
    * @param label  Optional button caption.
    * @returns      The newly created button field.
+   * @throws {InvalidFieldNamePartError} When `name` is empty or holds a period.
+   * @throws {FieldAlreadyExistsError} When a field of the form has the name `name`.
    */
   createButton(
     name: string,
@@ -673,6 +704,8 @@ export class PdfForm {
    * @param rect     Widget rectangle `{x, y, width, height}`.
    * @param options  The list of option strings.
    * @returns        The newly created listbox field.
+   * @throws {InvalidFieldNamePartError} When `name` is empty or holds a period.
+   * @throws {FieldAlreadyExistsError} When a field of the form has the name `name`.
    */
   createListbox(
     name: string,
@@ -705,12 +738,12 @@ export class PdfForm {
    * and the /Fields array in the AcroForm dictionary.
    *
    * @param name  The field name (partial or fully-qualified).
-   * @throws      If no field with the given name exists.
+   * @throws {NoSuchFieldError} When no field has the name.
    */
   removeField(name: string): void {
     const field = this.fieldsByName.get(name);
     if (field === undefined) {
-      throw new Error(`Form field "${name}" not found.`);
+      throw new NoSuchFieldError(name);
     }
 
     // Remove from internal fields array
@@ -771,13 +804,27 @@ export class PdfForm {
   // -----------------------------------------------------------------------
 
   /**
+   * Refuse `name` as the name of a new field: a name part holds no period
+   * (ISO 32000-2 12.7.4.2) and is not empty, and two fields of a form do not
+   * share a name.
+   */
+  private assertNewFieldName(name: string): void {
+    if (name === '' || name.includes('.')) throw new InvalidFieldNamePartError(name);
+    if (this.fieldsByName.has(name)) throw new FieldAlreadyExistsError(name);
+  }
+
+  /**
    * Create a basic field dictionary with common entries.
+   *
+   * @throws {InvalidFieldNamePartError} When `name` is empty or holds a period.
+   * @throws {FieldAlreadyExistsError} When a field of the form has the name `name`.
    */
   private createFieldDict(
     name: string,
     fieldType: string,
     rect: [number, number, number, number],
   ): PdfDict {
+    this.assertNewFieldName(name);
     const dict = new PdfDict();
     dict.set('/Type', PdfName.of('Annot'));
     dict.set('/Subtype', PdfName.of('Widget'));

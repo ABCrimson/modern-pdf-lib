@@ -6,7 +6,8 @@
  * Reference: PDF 1.7 spec, SS12.7.4.2.1 (Check Boxes).
  */
 
-import { PdfName, PdfStream } from '../../core/pdfObjects.js';
+import { PdfDict, PdfName, PdfStream } from '../../core/pdfObjects.js';
+import { MissingOnValueCheckError } from '../../errors.js';
 import { PdfField, nameText, nameVal, onStateNames } from '../pdfField.js';
 import type { FieldType } from '../pdfField.js';
 import { generateCheckboxAppearance } from '../fieldAppearance.js';
@@ -43,9 +44,15 @@ export class PdfCheckboxField extends PdfField {
     return as !== undefined && as !== 'Off';
   }
 
-  /** Check the checkbox (set to the "on" value). */
+  /**
+   * Check the checkbox (set to the "on" value).
+   *
+   * @throws {MissingOnValueCheckError} When /AP /N is a dictionary with no key
+   *   other than /Off and /V is absent or /Off: the field has no on state to set.
+   */
   check(): void {
     const onState = this.onStateName();
+    if (onState === undefined) throw new MissingOnValueCheckError(this.getFullName());
     this.dict.set('/V', onState);
     this.widgetDict.set('/AS', onState);
     this.widgetDict.delete('/AP');
@@ -74,18 +81,21 @@ export class PdfCheckboxField extends PdfField {
    * Falls back to "Yes" if neither holds one.
    */
   getOnValue(): string {
-    return nameText(this.onStateName());
+    return nameText(this.onStateName() ?? PdfName.of('Yes'));
   }
 
   /**
    * The "on" name with the bytes the file holds: the first /AP /N key other than /Off, else a
-   * /V other than /Off, else /Yes.
+   * /V other than /Off, else /Yes; `undefined` when /AP /N is a dictionary that holds no key
+   * other than /Off and /V names no other state, so the field has no on state.
    */
-  private onStateName(): PdfName {
-    const [fromAppearance] = onStateNames(this.widgetDict.get('/AP'));
+  private onStateName(): PdfName | undefined {
+    const ap = this.widgetDict.get('/AP');
+    const [fromAppearance] = onStateNames(ap);
     if (fromAppearance !== undefined) return fromAppearance;
     const v = this.dict.get('/V');
     if (v instanceof PdfName && v.value !== '/Off') return v;
+    if (ap instanceof PdfDict && ap.get('/N') instanceof PdfDict) return undefined;
     return PdfName.of('Yes');
   }
 

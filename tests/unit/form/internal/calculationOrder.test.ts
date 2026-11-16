@@ -12,6 +12,7 @@
 import { describe, it, expect } from 'vitest';
 import { PdfDict, PdfName, PdfString, PdfArray } from '../../../../src/core/pdfObjects.js';
 import { PdfForm, type RefResolver } from '../../../../src/form/pdfForm.js';
+import { NoSuchFieldError } from '../../../../src/errors.js';
 
 import {
   getCalculationOrder,
@@ -100,7 +101,7 @@ describe('setCalculationOrder', () => {
   it('throws for unknown field names', () => {
     const form = buildForm([makeTextField('a', '10')]);
     expect(() => setCalculationOrder(form, ['nonexistent'])).toThrow(
-      'field "nonexistent" not found',
+      new NoSuchFieldError('nonexistent'),
     );
   });
 

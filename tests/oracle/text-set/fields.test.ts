@@ -123,11 +123,10 @@ describe('text field values read back by pdf.js and qpdf', () => {
     },
   );
 
-  // The class of this throw is due to change with the typed errors; its message is not.
   knownDefect(
     defectKey('forms-34', '0.41.5'),
     'loaded form: a text field of qpdf-form-acrobat.pdf set with setText reads back as set',
-    { failsWith: /^\w*Error: Form field "Text Box 1" not found\.$/ },
+    { failsWith: /^NoSuchFieldError: No form field named "Text Box 1" exists in this document\.$/ },
     async () => {
       const doc = await loadPdf(new Uint8Array(readFileSync(FORM_FILE)));
       doc.getForm().getTextField('Text Box 1').setText(INPUTS.latin);

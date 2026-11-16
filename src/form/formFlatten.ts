@@ -16,6 +16,7 @@
  */
 
 import { PdfDict, PdfName, PdfString, PdfArray, PdfStream } from '../core/pdfObjects.js';
+import { MalformedInputError, NoSuchFieldError } from '../errors.js';
 import type { PdfField } from './pdfField.js';
 import { FieldFlags, byteStrVal, numVal } from './pdfField.js';
 import type { PdfForm } from './pdfForm.js';
@@ -453,11 +454,11 @@ function textAlignToQuadding(align: string | undefined): number {
  * This is a lightweight regex-based parser — not a full XML parser —
  * suitable for the simple XHTML subset used in PDF /RV values.
  *
- * @throws If the input is empty or cannot be parsed at all.
+ * @throws {MalformedInputError} If the input is empty or cannot be parsed at all.
  */
 function parseRichTextXhtml(xhtml: string): RichTextParseResult {
   if (xhtml.trim().length === 0) {
-    throw new Error('Empty rich text value');
+    throw new MalformedInputError('Empty rich text value');
   }
 
   const paragraphs: RichTextParagraph[] = [];
@@ -504,7 +505,7 @@ function parseRichTextXhtml(xhtml: string): RichTextParseResult {
   }
 
   if (paragraphs.length === 0) {
-    throw new Error('No parseable content in rich text value');
+    throw new MalformedInputError('No parseable content in rich text value');
   }
 
   return { paragraphs };
@@ -997,7 +998,7 @@ export function flattenForm(form: PdfForm, options: FlattenOptions = {}): Flatte
  * @param fieldName  The name of the field to flatten (partial or fully-qualified).
  * @param options    Optional flatten options.
  * @returns An object describing the flatten operations performed.
- * @throws If the field is not found.
+ * @throws {NoSuchFieldError} If no field has the name.
  */
 export function flattenField(
   form: PdfForm,
@@ -1006,7 +1007,7 @@ export function flattenField(
 ): FlattenFormResult {
   const field = form.getField(fieldName);
   if (field === undefined) {
-    throw new Error(`Form field "${fieldName}" not found.`);
+    throw new NoSuchFieldError(fieldName);
   }
   return flattenFieldList(form, [field], options, false);
 }
@@ -1018,7 +1019,7 @@ export function flattenField(
  * @param fieldNames  Array of field names to flatten.
  * @param options     Optional flatten options.
  * @returns An object describing the flatten operations performed.
- * @throws If any field name is not found.
+ * @throws {NoSuchFieldError} If a name is not a field; nothing is flattened.
  */
 export function flattenFields(
   form: PdfForm,
@@ -1029,7 +1030,7 @@ export function flattenFields(
   for (const name of fieldNames) {
     const field = form.getField(name);
     if (field === undefined) {
-      throw new Error(`Form field "${name}" not found.`);
+      throw new NoSuchFieldError(name);
     }
     fields.push(field);
   }

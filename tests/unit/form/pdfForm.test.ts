@@ -22,6 +22,7 @@ import { PdfListboxField } from '../../../src/form/fields/listboxField.js';
 import { PdfButtonField } from '../../../src/form/fields/buttonField.js';
 import { PdfSignatureField } from '../../../src/form/fields/signatureField.js';
 import { FieldFlags } from '../../../src/form/pdfField.js';
+import { NoSuchFieldError, UnexpectedFieldTypeError } from '../../../src/errors.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -218,12 +219,14 @@ describe('PdfForm', () => {
 
     it('getTextField throws for wrong type', () => {
       const form = buildForm([makeCheckboxDict('agree', true)]);
-      expect(() => form.getTextField('agree')).toThrow('not a text field');
+      expect(() => form.getTextField('agree')).toThrow(
+        new UnexpectedFieldTypeError('agree', 'text', 'checkbox'),
+      );
     });
 
     it('getTextField throws for unknown field', () => {
       const form = buildForm([]);
-      expect(() => form.getTextField('missing')).toThrow('not found');
+      expect(() => form.getTextField('missing')).toThrow(new NoSuchFieldError('missing'));
     });
 
     it('getCheckbox returns PdfCheckboxField', () => {
@@ -235,7 +238,9 @@ describe('PdfForm', () => {
 
     it('getCheckbox throws for wrong type', () => {
       const form = buildForm([makeTextFieldDict('name')]);
-      expect(() => form.getCheckbox('name')).toThrow('not a checkbox');
+      expect(() => form.getCheckbox('name')).toThrow(
+        new UnexpectedFieldTypeError('name', 'checkbox', 'text'),
+      );
     });
 
     it('getDropdown returns PdfDropdownField', () => {
@@ -289,7 +294,7 @@ describe('PdfForm', () => {
 
     it('throws for unknown field name', () => {
       const form = buildForm([makeTextFieldDict('name')]);
-      expect(() => form.fill({ missing: 'value' })).toThrow('not found');
+      expect(() => form.fill({ missing: 'value' })).toThrow(new NoSuchFieldError('missing'));
     });
   });
 

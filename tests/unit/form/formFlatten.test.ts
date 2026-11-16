@@ -14,6 +14,7 @@ import {
 import { PdfForm, type RefResolver } from '../../../src/form/pdfForm.js';
 
 import { FieldFlags } from '../../../src/form/pdfField.js';
+import { NoSuchFieldError } from '../../../src/errors.js';
 import {
   flattenForm,
   flattenField,
@@ -330,7 +331,7 @@ describe('formFlatten', () => {
     it('throws when field is not found', () => {
       const form = buildForm([makeTextFieldDict('name', 'Test')]);
 
-      expect(() => flattenField(form, 'nonexistent')).toThrow('Form field "nonexistent" not found');
+      expect(() => flattenField(form, 'nonexistent')).toThrow(new NoSuchFieldError('nonexistent'));
     });
 
     it('respects preserveReadOnly option', () => {
@@ -381,7 +382,7 @@ describe('formFlatten', () => {
       const form = buildForm([makeTextFieldDict('existing', 'val')]);
 
       expect(() => flattenFields(form, ['existing', 'missing'])).toThrow(
-        'Form field "missing" not found',
+        new NoSuchFieldError('missing'),
       );
     });
 

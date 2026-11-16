@@ -15,6 +15,7 @@ import {
   PdfStream,
   PdfRef,
 } from '../../core/pdfObjects.js';
+import { CombedTextLayoutError, ExceededMaxLengthError } from '../../errors.js';
 import { PdfField, FieldFlags, byteStrVal, numVal, strVal } from '../pdfField.js';
 import type { FieldType } from '../pdfField.js';
 import { generateTextAppearance } from '../fieldAppearance.js';
@@ -22,6 +23,12 @@ import { generateTextAppearance } from '../fieldAppearance.js';
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
+
+/**
+ * The Comb flag of a text field (bit 25 of /Ff, ISO 32000-1 Table 228): the box is
+ * divided into /MaxLen cells, one character in each.
+ */
+const COMB_FLAG = 1 << 24;
 
 /** Format a number for PDF content stream output. */
 function n(value: number): string {
@@ -55,8 +62,22 @@ export class PdfTextField extends PdfField {
   /**
    * Set the text value of this field.
    * Also updates /V and removes /AP to force regeneration.
+   *
+   * @throws {CombedTextLayoutError} When the field is a comb field and `value`
+   *   has more code points than /MaxLen; the value is not changed.
+   * @throws {ExceededMaxLengthError} When the field has /MaxLen, is not a comb
+   *   field, and `value` has more code points than /MaxLen; the value is not changed.
    */
   setText(value: string): void {
+    const maxLength = this.getMaxLength();
+    if (maxLength !== undefined) {
+      // oxlint-disable-next-line typescript/no-misused-spread -- /MaxLen is counted in code points, so the split into code points is the count wanted
+      const length = [...value].length;
+      if (length > maxLength) {
+        if (this.hasFlag(COMB_FLAG)) throw new CombedTextLayoutError(length, maxLength);
+        throw new ExceededMaxLengthError(length, maxLength, this.getFullName());
+      }
+    }
     this.dict.set('/V', PdfString.fromText(value));
     // Remove existing appearance so a new one is generated
     this.widgetDict.delete('/AP');
@@ -67,7 +88,7 @@ export class PdfTextField extends PdfField {
     return this.getText();
   }
 
-  /** Alias for setText(). */
+  /** Alias for setText(), with the same throws. */
   setValue(value: string | boolean | string[]): void {
     this.setText(typeof value === 'string' ? value : String(value));
   }

@@ -18,48 +18,6 @@
     "files": ["src/core/pdfDocument.ts"]
   },
   {
-    "name": "NoSuchFieldError",
-    "decision": "throw",
-    "where": "src/form/pdfForm.ts getTextField and the other typed getters, when the name is not a field",
-    "files": ["src/form/pdfForm.ts"]
-  },
-  {
-    "name": "UnexpectedFieldTypeError",
-    "decision": "throw",
-    "where": "src/form/pdfForm.ts getTextField and the other typed getters, when the field has another type",
-    "files": ["src/form/pdfForm.ts"]
-  },
-  {
-    "name": "MissingOnValueCheckError",
-    "decision": "throw",
-    "where": "src/form/fields/checkboxField.ts check(), when the appearance has no on state and the value is absent or Off",
-    "files": ["src/form/fields/checkboxField.ts"]
-  },
-  {
-    "name": "FieldAlreadyExistsError",
-    "decision": "throw",
-    "where": "src/form/pdfForm.ts createFieldDict, when a field of that name exists",
-    "files": ["src/form/pdfForm.ts"]
-  },
-  {
-    "name": "InvalidFieldNamePartError",
-    "decision": "throw",
-    "where": "src/form/pdfForm.ts createFieldDict, when the name is empty or contains a period",
-    "files": ["src/form/pdfForm.ts"]
-  },
-  {
-    "name": "CombedTextLayoutError",
-    "decision": "throw",
-    "where": "src/form/fields/textField.ts setText, on a comb field with more characters than /MaxLen",
-    "files": ["src/form/fields/textField.ts"]
-  },
-  {
-    "name": "ExceededMaxLengthError",
-    "decision": "throw",
-    "where": "src/form/fields/textField.ts setText, on a field with more characters than /MaxLen",
-    "files": ["src/form/fields/textField.ts"]
-  },
-  {
     "name": "InvalidPageSizeError",
     "decision": "throw",
     "where": "src/core/pdfDocument.ts addPage and insertPage, when the size is not finite or not positive",
@@ -93,11 +51,6 @@
     "name": "InvalidStateError",
     "decision": "throw",
     "where": "the generic throws whose allowlist row names InvalidStateError, as they are converted"
-  },
-  {
-    "name": "MalformedInputError",
-    "decision": "throw",
-    "where": "the generic throws whose allowlist row names MalformedInputError, as they are converted"
   },
   {
     "name": "UnsupportedFeatureError",

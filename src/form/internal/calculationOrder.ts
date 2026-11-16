@@ -18,6 +18,7 @@
  */
 
 import { PdfDict, PdfString } from '../../core/pdfObjects.js';
+import { NoSuchFieldError } from '../../errors.js';
 
 import type { PdfForm } from '../pdfForm.js';
 import type { PdfField } from '../pdfField.js';
@@ -98,13 +99,14 @@ export function getCalculationOrder(form: PdfForm): string[] {
  *
  * @param form        The PdfForm instance.
  * @param fieldNames  The ordered list of field names to calculate.
+ * @throws {NoSuchFieldError} When a name is not a field; no order is set.
  */
 export function setCalculationOrder(form: PdfForm, fieldNames: string[]): void {
   // Validate that all field names exist
   for (const name of fieldNames) {
     const field = form.getField(name);
     if (field === undefined) {
-      throw new Error(`Cannot set calculation order: field "${name}" not found.`);
+      throw new NoSuchFieldError(name);
     }
   }
 
