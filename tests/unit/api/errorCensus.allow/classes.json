@@ -115,12 +115,6 @@
     "where": "the generic throws whose allowlist row names EnvironmentError, as they are converted"
   },
   {
-    "name": "UnencodableTextError",
-    "decision": "throw",
-    "where": "the text writers (drawText, the low-level text operators, the font encoders), on a character the font or the byte string cannot encode",
-    "files": ["src/core/pdfPage.ts", "src/core/operators/text.ts", "src/assets/font/fontEmbed.ts"]
-  },
-  {
     "name": "UnsupportedOptionError",
     "decision": "throw",
     "where": "the calls that pass an option this release does not carry out, in place of the ignored-option warning",

@@ -27,16 +27,7 @@ import type { PdfStream as PdfStreamObj } from '../pdfObjects.js';
 import { PdfObjectRegistry } from '../pdfObjects.js';
 import type { DocumentStructure } from '../pdfCatalog.js';
 import type { PdfSaveOptions } from './pdfWriter.js';
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-const encoder = new TextEncoder();
-
-function encode(str: string): Uint8Array {
-  return encoder.encode(str);
-}
+import { latin1Bytes } from '../../internal/latin1.js';
 
 // ---------------------------------------------------------------------------
 // Streaming serializer
@@ -56,8 +47,9 @@ class StreamByteCounter {
     this.offset += data.length;
   }
 
+  /** Write a PDF byte string: each code unit 0x00-0xFF is one byte ({@link latin1Bytes}). */
   async writeString(str: string): Promise<void> {
-    await this.write(encode(str));
+    await this.write(latin1Bytes(str));
   }
 }
 
@@ -257,8 +249,9 @@ class ObjectByteBuffer {
     this.totalLength += data.length;
   }
 
+  /** Append a PDF byte string: each code unit 0x00-0xFF is one byte ({@link latin1Bytes}). */
   writeString(str: string): void {
-    this.write(encode(str));
+    this.write(latin1Bytes(str));
   }
 
   toUint8Array(): Uint8Array {

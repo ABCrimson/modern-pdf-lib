@@ -34,6 +34,7 @@ import type { PdfSaveOptions } from './pdfWriter.js';
 import type { PdfDocument } from '../pdfDocument.js';
 import { UnsupportedEncryptionError } from '../../errors.js';
 import { warnOnce } from '../../internal/warnings.js';
+import { latin1Bytes } from '../../internal/latin1.js';
 
 // ---------------------------------------------------------------------------
 // Encrypted-input guard
@@ -209,8 +210,6 @@ export class ChangeTracker {
 // Internal helpers
 // ---------------------------------------------------------------------------
 
-const encoder = new TextEncoder();
-
 /**
  * Growable byte buffer for building the incremental appendix.
  */
@@ -227,8 +226,9 @@ class ByteBuffer {
     this._offset += data.length;
   }
 
+  /** Append a PDF byte string: each code unit 0x00-0xFF is one byte ({@link latin1Bytes}). */
   writeString(str: string): void {
-    this.write(encoder.encode(str));
+    this.write(latin1Bytes(str));
   }
 
   toUint8Array(): Uint8Array {

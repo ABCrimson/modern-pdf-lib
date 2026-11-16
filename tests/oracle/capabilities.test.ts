@@ -234,22 +234,17 @@ describe('writer rows judged by qpdf and pdf.js', () => {
     },
   );
 
-  // The Info /Title is written as a literal string with no PDF text-string encoding (no UTF-16BE
-  // byte order mark), so pdf.js decodes its bytes as PDFDocEncoding.
-  knownDefect(
-    defectKey('tests-unit-core-b-M02', '0.41.0'),
-    'a non-ASCII title: pdf.js reads the Info title as set',
-    { failsWith: /^AssertionError: expected 'RÃ©sumÃ©' to be 'Résumé'/ },
-    async () => {
-      const doc = textDoc('Title page');
-      doc.setTitle('Résumé');
-      const info = await withPdfjs(
-        await cleanSave(doc),
-        async (pdf) => (await pdf.getMetadata()).info as Record<string, unknown>,
-      );
-      expect(info['Title']).toBe('Résumé');
-    },
-  );
+  // The Info /Title is a literal string written as one Latin-1 byte per character: é is 0xE9,
+  // which PDFDocEncoding decodes to the same character, so pdf.js reads the title as set.
+  test('a non-ASCII title: pdf.js reads the Info title as set', async () => {
+    const doc = textDoc('Title page');
+    doc.setTitle('Résumé');
+    const info = await withPdfjs(
+      await cleanSave(doc),
+      async (pdf) => (await pdf.getMetadata()).info as Record<string, unknown>,
+    );
+    expect(info['Title']).toBe('Résumé');
+  });
 
   // loadPdf does not read /Lang or /ViewerPreferences, so a full save of the loaded document
   // writes neither.

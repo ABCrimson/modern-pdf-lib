@@ -48,6 +48,7 @@ import type { PdfObject, RegistryEntry } from '../pdfObjects.js';
 import type { DocumentStructure } from '../pdfCatalog.js';
 import type { PdfEncryptionHandler } from '../../crypto/encryptionHandler.js';
 import { contentsLeftAsStored } from '../../crypto/internal/signatureContents.js';
+import { latin1Bytes } from '../../internal/latin1.js';
 import { UnsupportedEncryptionError } from '../../errors.js';
 
 // ---------------------------------------------------------------------------
@@ -120,9 +121,9 @@ class ByteBuffer {
     this._offset += data.length;
   }
 
-  /** Append an ASCII string. */
+  /** Append a PDF byte string: each code unit 0x00-0xFF is one byte ({@link latin1Bytes}). */
   writeString(str: string): void {
-    this.write(encoder.encode(str));
+    this.write(latin1Bytes(str));
   }
 
   /** Concatenate all chunks into a single Uint8Array. */
@@ -136,8 +137,6 @@ class ByteBuffer {
     return result;
   }
 }
-
-const encoder = new TextEncoder();
 
 /**
  * The writers {@link serializePdfForCopy} made: they skip both checks for decrypted content (of
@@ -557,7 +556,7 @@ export class PdfWriter {
     const headerStr = headerParts.join(' ');
 
     // Encode header
-    const headerBytes = encoder.encode(headerStr + ' ');
+    const headerBytes = latin1Bytes(headerStr + ' ');
     const firstOffset = headerBytes.length;
 
     // Build the complete stream data
@@ -821,7 +820,7 @@ class StringByteWriter implements ByteWriter {
   }
 
   writeString(str: string): void {
-    this.write(encoder.encode(str));
+    this.write(latin1Bytes(str));
   }
 
   toUint8Array(): Uint8Array {

@@ -21,6 +21,7 @@
 
 import { assertUnencryptedInput } from '../../core/io/incrementalWriter.js';
 import { warnOnce } from '../../internal/warnings.js';
+import { latin1Bytes } from '../../internal/latin1.js';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -98,7 +99,6 @@ export interface TrailerInfo {
 // Internal helpers
 // ---------------------------------------------------------------------------
 
-const encoder = new TextEncoder();
 const decoder = new TextDecoder('latin1');
 
 /**
@@ -129,8 +129,9 @@ class ByteBuffer {
     this._offset += data.length;
   }
 
+  /** Append a PDF byte string: each code unit 0x00-0xFF is one byte ({@link latin1Bytes}). */
   writeString(str: string): void {
-    this.write(encoder.encode(str));
+    this.write(latin1Bytes(str));
   }
 
   toUint8Array(): Uint8Array {
