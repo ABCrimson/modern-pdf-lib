@@ -29,6 +29,7 @@
  */
 
 import type { PdfDocument } from './pdfDocument.js';
+import { InvalidArgumentError } from '../errors.js';
 import { PdfOutlineItem } from '../outline/pdfOutline.js';
 import type { OutlineDestination, OutlineItemOptions } from '../outline/pdfOutline.js';
 
@@ -175,7 +176,7 @@ export function getBookmarks(doc: PdfDocument): readonly BookmarkNode[] {
  *
  * @param doc  The document to modify.
  * @param ref  The handle of the bookmark to remove.
- * @throws     If the bookmark is not found in the tree.
+ * @throws {InvalidArgumentError} If the bookmark is not found in the tree.
  */
 export function removeBookmark(doc: PdfDocument, ref: BookmarkRef): void {
   const tree = doc.getOutlines();
@@ -193,7 +194,7 @@ export function removeBookmark(doc: PdfDocument, ref: BookmarkRef): void {
     return;
   }
 
-  throw new Error('Bookmark not found in the outline tree');
+  throw new InvalidArgumentError('Bookmark not found in the outline tree', { argument: 'ref' });
 }
 
 /**

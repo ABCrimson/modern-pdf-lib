@@ -35,6 +35,7 @@ import {
   readU32BE,
 } from '../../../../src/core/io/linearization.js';
 import { createPdf } from '../../../../src/core/pdfDocument.js';
+import { MalformedInputError } from '../../../../src/errors.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -450,6 +451,7 @@ describe('linearizePdf', () => {
   it('should throw for data without startxref', async () => {
     const badPdf = encoder.encode('%PDF-1.7\ngarbage\n');
     await expect(linearizePdf(badPdf)).rejects.toThrow('no startxref');
+    await expect(linearizePdf(badPdf)).rejects.toBeInstanceOf(MalformedInputError);
   });
 
   it('should throw for invalid xref table', async () => {
@@ -457,6 +459,32 @@ describe('linearizePdf', () => {
       '%PDF-1.7\n1 0 obj\n<< >>\nendobj\nxref_broken\nstartxref\n100\n%%EOF\n',
     );
     await expect(linearizePdf(badPdf)).rejects.toThrow();
+    await expect(linearizePdf(badPdf)).rejects.toBeInstanceOf(MalformedInputError);
+  });
+
+  it.each([
+    ['/Root 1 0 R', '/Root 9 0 R', 'Cannot linearize: catalog object not found'],
+    ['/Pages 2 0 R', '/Pagez 2 0 R', 'Cannot linearize: /Pages not found in catalog'],
+    ['/Kids [3 0 R]', '/Kids []    ', 'Cannot linearize: no pages found'],
+  ])(
+    'throws a MalformedInputError of the pdf format when %s is damaged',
+    async (original, damaged, message) => {
+      // Same-length replacements keep every xref offset valid.
+      const text = decoder.decode(makeMinimalPdf(1));
+      expect(text).toContain(original);
+      const result = linearizePdf(encoder.encode(text.replace(original, damaged)));
+      await expect(result).rejects.toThrow(message);
+      await expect(result).rejects.toMatchObject({ code: 'malformed-input', format: 'pdf' });
+    },
+  );
+
+  it('throws a MalformedInputError for a cross-reference table with no object', async () => {
+    const badPdf = encoder.encode(
+      '%PDF-1.7\nxref\n0 1\n0000000000 65535 f \ntrailer\n<< /Size 1 /Root 1 0 R >>\nstartxref\n9\n%%EOF\n',
+    );
+    const result = linearizePdf(badPdf);
+    await expect(result).rejects.toThrow('Cannot linearize: no objects found');
+    await expect(result).rejects.toBeInstanceOf(MalformedInputError);
   });
 });
 

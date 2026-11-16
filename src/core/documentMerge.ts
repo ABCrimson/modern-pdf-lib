@@ -28,6 +28,7 @@ import type { PdfObject, PdfObjectRegistry } from './pdfObjects.js';
 import { PdfPage } from './pdfPage.js';
 import { PdfDocument, createPdf } from './pdfDocument.js';
 import { carryDecryptedFromEncryptedFile, recordCloneOfDecrypted } from './internal/flateStream.js';
+import { InvalidArgumentError } from '../errors.js';
 
 // ---------------------------------------------------------------------------
 // Bucket hashing for stream deduplication
@@ -330,6 +331,7 @@ function remapRef(sourceRef: PdfRef, context: CopyContext): PdfRef {
  * @param targetDoc   The target document.
  * @param indices     Zero-based page indices to copy from the source.
  * @returns           Array of new PdfPage objects added to the target.
+ * @throws {InvalidArgumentError} If an index is outside the source document.
  *
  * @internal
  */
@@ -345,7 +347,10 @@ export function copyPagesToTarget(
   // Validate indices
   for (const index of indices) {
     if (index < 0 || index >= sourcePages.length) {
-      throw new RangeError(`copyPages: index ${index} out of range [0, ${sourcePages.length - 1}]`);
+      throw new InvalidArgumentError(
+        `copyPages: index ${index} out of range [0, ${sourcePages.length - 1}]`,
+        { argument: 'indices' },
+      );
     }
   }
 
@@ -547,6 +552,7 @@ export type PageRange = [start: number, end: number];
  * @param document  The source document to split.
  * @param ranges    Array of `[start, end]` ranges (zero-based, inclusive).
  * @returns         Array of new PdfDocument objects, one per range.
+ * @throws {InvalidArgumentError} If a range starts or ends outside the document, or ends before it starts.
  *
  * @example
  * ```ts
@@ -563,10 +569,16 @@ export async function splitPdf(document: PdfDocument, ranges: PageRange[]): Prom
   // Validate ranges
   for (const [start, end] of ranges) {
     if (start < 0 || start >= pageCount) {
-      throw new RangeError(`splitPdf: start index ${start} out of range [0, ${pageCount - 1}]`);
+      throw new InvalidArgumentError(
+        `splitPdf: start index ${start} out of range [0, ${pageCount - 1}]`,
+        { argument: 'ranges' },
+      );
     }
     if (end < start || end >= pageCount) {
-      throw new RangeError(`splitPdf: end index ${end} out of range [${start}, ${pageCount - 1}]`);
+      throw new InvalidArgumentError(
+        `splitPdf: end index ${end} out of range [${start}, ${pageCount - 1}]`,
+        { argument: 'ranges' },
+      );
     }
   }
 

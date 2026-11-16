@@ -35,6 +35,7 @@
  * Reference: PDF 1.7 spec, Appendix F (Linearized PDF).
  */
 
+import { MalformedInputError } from '../../errors.js';
 import { assertUnencryptedInput } from './incrementalWriter.js';
 
 // ---------------------------------------------------------------------------
@@ -1044,14 +1045,17 @@ export async function linearizePdf(
   // Parse the existing xref to understand the document structure
   const startXref = findStartXref(pdfBytes);
   if (startXref < 0) {
-    throw new Error('Cannot linearize: no startxref found');
+    throw new MalformedInputError('Cannot linearize: no startxref found', { format: 'pdf' });
   }
 
   let xrefResult: ReturnType<typeof parseXrefTable>;
   try {
     xrefResult = parseXrefTable(pdfBytes, startXref);
-  } catch {
-    throw new Error('Cannot linearize: failed to parse xref table');
+  } catch (error) {
+    throw new MalformedInputError('Cannot linearize: failed to parse xref table', {
+      format: 'pdf',
+      cause: error,
+    });
   }
 
   const { entries, trailer } = xrefResult;
@@ -1065,14 +1069,14 @@ export async function linearizePdf(
   }
 
   if (objects.size === 0) {
-    throw new Error('Cannot linearize: no objects found');
+    throw new MalformedInputError('Cannot linearize: no objects found', { format: 'pdf' });
   }
 
   // Find catalog and pages tree
   const rootObjNum = trailer.rootObjNum;
   const catalogBytes = objects.get(rootObjNum);
   if (!catalogBytes) {
-    throw new Error('Cannot linearize: catalog object not found');
+    throw new MalformedInputError('Cannot linearize: catalog object not found', { format: 'pdf' });
   }
 
   // Find the /Pages reference in the catalog
@@ -1081,7 +1085,9 @@ export async function linearizePdf(
   const pagesObjNum = pagesMatch ? parseInt(pagesMatch[1]!, 10) : 0;
 
   if (pagesObjNum === 0) {
-    throw new Error('Cannot linearize: /Pages not found in catalog');
+    throw new MalformedInputError('Cannot linearize: /Pages not found in catalog', {
+      format: 'pdf',
+    });
   }
 
   // Find all page object numbers
@@ -1089,7 +1095,7 @@ export async function linearizePdf(
   const pageCount = pageObjNums.length;
 
   if (pageCount === 0) {
-    throw new Error('Cannot linearize: no pages found');
+    throw new MalformedInputError('Cannot linearize: no pages found', { format: 'pdf' });
   }
 
   // Validate firstPage index

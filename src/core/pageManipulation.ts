@@ -13,6 +13,7 @@
 import type { PageSize } from './pdfPage.js';
 import { PdfPage, PageSizes } from './pdfPage.js';
 import type { PdfDocument } from './pdfDocument.js';
+import { InvalidArgumentError } from '../errors.js';
 
 // ---------------------------------------------------------------------------
 // Size resolution helper
@@ -45,11 +46,20 @@ function resolveSize(size: PageSize | undefined): [number, number] {
  * @param index      The index to validate.
  * @param pageCount  The total number of pages.
  * @param operation  A description of the operation for error messages.
- * @throws RangeError if the index is out of bounds.
+ * @param argument   The name of the argument that holds the index, carried by the error.
+ * @throws {InvalidArgumentError} If the index is out of bounds.
  */
-function validateIndex(index: number, pageCount: number, operation: string): void {
+function validateIndex(
+  index: number,
+  pageCount: number,
+  operation: string,
+  argument = 'index',
+): void {
   if (!Number.isInteger(index) || index < 0 || index >= pageCount) {
-    throw new RangeError(`${operation}: index ${index} out of range [0, ${pageCount - 1}]`);
+    throw new InvalidArgumentError(
+      `${operation}: index ${index} out of range [0, ${pageCount - 1}]`,
+      { argument },
+    );
   }
 }
 
@@ -59,11 +69,13 @@ function validateIndex(index: number, pageCount: number, operation: string): voi
  * @param index      The index to validate.
  * @param pageCount  The total number of pages.
  * @param operation  A description of the operation for error messages.
- * @throws RangeError if the index is out of bounds.
+ * @throws {InvalidArgumentError} If the index is out of bounds.
  */
 function validateInsertIndex(index: number, pageCount: number, operation: string): void {
   if (!Number.isInteger(index) || index < 0 || index > pageCount) {
-    throw new RangeError(`${operation}: index ${index} out of range [0, ${pageCount}]`);
+    throw new InvalidArgumentError(`${operation}: index ${index} out of range [0, ${pageCount}]`, {
+      argument: 'index',
+    });
   }
 }
 
@@ -71,11 +83,13 @@ function validateInsertIndex(index: number, pageCount: number, operation: string
  * Validate that a rotation angle is a multiple of 90.
  *
  * @param angle  The rotation angle in degrees.
- * @throws Error if the angle is not a valid rotation.
+ * @throws {InvalidArgumentError} If the angle is not a valid rotation.
  */
 function validateRotation(angle: number): void {
   if (angle % 90 !== 0) {
-    throw new Error(`rotatePage: angle must be a multiple of 90, got ${angle}`);
+    throw new InvalidArgumentError(`rotatePage: angle must be a multiple of 90, got ${angle}`, {
+      argument: 'angle',
+    });
   }
 }
 
@@ -146,7 +160,7 @@ export function insertPage(doc: PdfDocument, index: number, size?: PageSize): Pd
  *
  * @param doc    The PdfDocument to modify.
  * @param index  Zero-based index of the page to remove.
- * @throws       RangeError if the index is out of bounds.
+ * @throws {InvalidArgumentError} If the index is out of bounds.
  *
  * @example
  * ```ts
@@ -169,7 +183,7 @@ export function removePage(doc: PdfDocument, index: number): void {
  * @param fromIndex  Current zero-based index of the page to move.
  * @param toIndex    Target zero-based index. Must be in range
  *                   `[0, pageCount - 1]` after removal.
- * @throws           RangeError if either index is out of bounds.
+ * @throws {InvalidArgumentError} If either index is out of bounds.
  *
  * @example
  * ```ts
@@ -178,7 +192,7 @@ export function removePage(doc: PdfDocument, index: number): void {
  */
 export function movePage(doc: PdfDocument, fromIndex: number, toIndex: number): void {
   const pages = doc.getInternalPages();
-  validateIndex(fromIndex, pages.length, 'movePage (fromIndex)');
+  validateIndex(fromIndex, pages.length, 'movePage (fromIndex)', 'fromIndex');
 
   // Remove the page
   const [page] = pages.splice(fromIndex, 1);
@@ -187,7 +201,10 @@ export function movePage(doc: PdfDocument, fromIndex: number, toIndex: number): 
   if (toIndex < 0 || toIndex > pages.length) {
     // Re-insert the page to restore state before throwing
     pages.splice(fromIndex, 0, page!);
-    throw new RangeError(`movePage (toIndex): index ${toIndex} out of range [0, ${pages.length}]`);
+    throw new InvalidArgumentError(
+      `movePage (toIndex): index ${toIndex} out of range [0, ${pages.length}]`,
+      { argument: 'toIndex' },
+    );
   }
 
   // Insert at new position
@@ -205,8 +222,8 @@ export function movePage(doc: PdfDocument, fromIndex: number, toIndex: number): 
  * @param index  Zero-based index of the page to rotate.
  * @param angle  Rotation angle in degrees. Must be a multiple of 90.
  *               Common values: 90, 180, 270, -90.
- * @throws       RangeError if the index is out of bounds.
- * @throws       Error if the angle is not a multiple of 90.
+ * @throws       {InvalidArgumentError} If the index is out of bounds or the angle is not a
+ *               multiple of 90.
  *
  * @example
  * ```ts
@@ -236,7 +253,7 @@ export function rotatePage(doc: PdfDocument, index: number, angle: number): void
  * @param doc      The PdfDocument to modify.
  * @param index    Zero-based index of the page.
  * @param cropBox  The crop box rectangle.
- * @throws         RangeError if the index is out of bounds.
+ * @throws {InvalidArgumentError} If the index is out of bounds.
  *
  * @example
  * ```ts
@@ -310,14 +327,14 @@ export function reversePages(doc: PdfDocument): void {
  *
  * @param doc      The PdfDocument to modify.
  * @param indices  Array of zero-based page indices to remove.
- * @throws         RangeError if any index is out of bounds.
+ * @throws {InvalidArgumentError} If any index is out of bounds.
  */
 export function removePages(doc: PdfDocument, indices: number[]): void {
   const pages = doc.getInternalPages();
 
   // Validate all indices first
   for (const index of indices) {
-    validateIndex(index, pages.length, 'removePages');
+    validateIndex(index, pages.length, 'removePages', 'indices');
   }
 
   // Deduplicate and sort descending to avoid index shifting during removal
@@ -335,6 +352,7 @@ export function removePages(doc: PdfDocument, indices: number[]): void {
  *
  * @param doc    The PdfDocument to modify.
  * @param angle  Rotation angle in degrees (must be a multiple of 90).
+ * @throws {InvalidArgumentError} If the angle is not a multiple of 90.
  */
 export function rotateAllPages(doc: PdfDocument, angle: number): void {
   validateRotation(angle);

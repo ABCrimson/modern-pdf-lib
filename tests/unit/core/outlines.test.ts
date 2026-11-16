@@ -25,6 +25,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { createPdf } from '../../../src/core/pdfDocument.js';
+import { InvalidArgumentError } from '../../../src/errors.js';
 import {
   addBookmark,
   getBookmarks,
@@ -543,6 +544,10 @@ describe('removeBookmark', () => {
     const foreign = addBookmark(doc2, { title: 'Foreign', pageIndex: 0 });
 
     expect(() => removeBookmark(doc, foreign)).toThrow('Bookmark not found in the outline tree');
+    expect(() => removeBookmark(doc, foreign)).toThrow(InvalidArgumentError);
+    expect(() => removeBookmark(doc, foreign)).toThrow(
+      expect.objectContaining({ argument: 'ref' }),
+    );
   });
 });
 

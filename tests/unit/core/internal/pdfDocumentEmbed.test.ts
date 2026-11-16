@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { MalformedInputError } from '../../../../src/errors.js';
 import {
   buildToUnicodeCmap,
   validatePngSignature,
@@ -108,11 +109,15 @@ describe('pdfDocumentEmbed', () => {
     it('throws for data that is too short', () => {
       const data = new Uint8Array([0x89, 0x50, 0x4e, 0x47]);
       expect(() => validatePngSignature(data)).toThrow('Invalid PNG: file too short');
+      expect(() => validatePngSignature(data)).toThrow(
+        expect.objectContaining({ name: 'MalformedInputError', format: 'png' }),
+      );
     });
 
     it('throws for invalid signature bytes', () => {
       const data = new Uint8Array(24).fill(0);
       expect(() => validatePngSignature(data)).toThrow('Invalid PNG: bad signature');
+      expect(() => validatePngSignature(data)).toThrow(MalformedInputError);
     });
   });
 
@@ -236,6 +241,9 @@ describe('pdfDocumentEmbed', () => {
     it('throws for invalid SOI marker', () => {
       const data = new Uint8Array([0x00, 0x00]);
       expect(() => validateJpegSignature(data)).toThrow('Invalid JPEG: bad SOI marker');
+      expect(() => validateJpegSignature(data)).toThrow(
+        expect.objectContaining({ name: 'MalformedInputError', format: 'jpeg' }),
+      );
     });
   });
 
@@ -270,6 +278,24 @@ describe('pdfDocumentEmbed', () => {
     it('throws for invalid JPEG data', () => {
       const data = new Uint8Array([0x00, 0x00]);
       expect(() => parseJpegDimensions(data)).toThrow('Invalid JPEG');
+      expect(() => parseJpegDimensions(data)).toThrow(MalformedInputError);
+    });
+
+    it('throws for a segment that does not start with a marker', () => {
+      const data = new Uint8Array([0xff, 0xd8, 0x00, 0x00]);
+      expect(() => parseJpegDimensions(data)).toThrow('Invalid JPEG: expected marker');
+      expect(() => parseJpegDimensions(data)).toThrow(
+        expect.objectContaining({ name: 'MalformedInputError', format: 'jpeg' }),
+      );
+    });
+
+    it('throws for a file with no SOF marker', () => {
+      // SOI, then one APP0 segment of length 2 (no payload), then the end of the data.
+      const data = new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x02]);
+      expect(() => parseJpegDimensions(data)).toThrow('Invalid JPEG: SOF marker not found');
+      expect(() => parseJpegDimensions(data)).toThrow(
+        expect.objectContaining({ name: 'MalformedInputError', format: 'jpeg' }),
+      );
     });
   });
 });

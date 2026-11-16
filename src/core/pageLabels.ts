@@ -25,6 +25,7 @@
  */
 
 import type { PdfDocument } from './pdfDocument.js';
+import { InvalidArgumentError } from '../errors.js';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -118,29 +119,35 @@ const pageLabelStore = new WeakMap<PdfDocument, PageLabelRange[]>();
  *
  * @param doc     The document to set page labels on.
  * @param labels  An array of label range definitions.
- * @throws        If `labels` is empty or ranges are not sorted.
+ * @throws {InvalidArgumentError} If `labels` is empty, a `startPage` or `start` is negative,
+ *         or the ranges are not sorted.
  */
 export function setPageLabels(doc: PdfDocument, labels: readonly PageLabelRange[]): void {
   if (labels.length === 0) {
-    throw new Error('Page labels array must not be empty');
+    throw new InvalidArgumentError('Page labels array must not be empty', { argument: 'labels' });
   }
 
   // Validate individual ranges
   for (const range of labels) {
     if (range.startPage < 0) {
-      throw new RangeError(`startPage must be non-negative, got ${range.startPage}`);
+      throw new InvalidArgumentError(`startPage must be non-negative, got ${range.startPage}`, {
+        argument: 'labels',
+      });
     }
     if (range.start !== undefined && range.start < 0) {
-      throw new RangeError(`start must be non-negative, got ${range.start}`);
+      throw new InvalidArgumentError(`start must be non-negative, got ${range.start}`, {
+        argument: 'labels',
+      });
     }
   }
 
   // Validate sorting
   for (let i = 1; i < labels.length; i++) {
     if (labels[i]!.startPage <= labels[i - 1]!.startPage) {
-      throw new Error(
+      throw new InvalidArgumentError(
         `Page label ranges must be sorted by startPage in ascending order. ` +
           `Got startPage ${labels[i]!.startPage} after ${labels[i - 1]!.startPage}.`,
+        { argument: 'labels' },
       );
     }
   }

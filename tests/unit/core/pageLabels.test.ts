@@ -26,6 +26,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { createPdf } from '../../../src/core/pdfDocument.js';
+import { InvalidArgumentError } from '../../../src/errors.js';
 import {
   setPageLabels,
   getPageLabels,
@@ -38,6 +39,16 @@ import type { PageLabelRange, PageLabelStyle } from '../../../src/core/pageLabel
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
+
+/** The error `fn` throws; fails the test when it does not throw. */
+function thrownBy(fn: () => unknown): unknown {
+  try {
+    fn();
+  } catch (error) {
+    return error;
+  }
+  throw new Error('expected the call to throw');
+}
 
 function createDocWithPages(n: number) {
   const doc = createPdf();
@@ -140,6 +151,7 @@ describe('setPageLabels', () => {
   it('throws on empty labels array', () => {
     const doc = createDocWithPages(1);
     expect(() => setPageLabels(doc, [])).toThrow('Page labels array must not be empty');
+    expect(() => setPageLabels(doc, [])).toThrow(InvalidArgumentError);
   });
 
   it('throws on unsorted ranges', () => {
@@ -150,6 +162,12 @@ describe('setPageLabels', () => {
         { startPage: 0, style: 'roman' },
       ]),
     ).toThrow('sorted by startPage');
+    expect(() =>
+      setPageLabels(doc, [
+        { startPage: 4, style: 'decimal' },
+        { startPage: 0, style: 'roman' },
+      ]),
+    ).toThrow(InvalidArgumentError);
   });
 
   it('throws on duplicate startPage values', () => {
@@ -168,25 +186,33 @@ describe('setPageLabels', () => {
 // ---------------------------------------------------------------------------
 
 describe('setPageLabels validation', () => {
-  it('throws RangeError on negative startPage', () => {
+  it('throws InvalidArgumentError on negative startPage', () => {
     const doc = createDocWithPages(5);
-    expect(() => setPageLabels(doc, [{ startPage: -1, style: 'decimal' }])).toThrow(RangeError);
+    expect(() => setPageLabels(doc, [{ startPage: -1, style: 'decimal' }])).toThrow(
+      InvalidArgumentError,
+    );
     expect(() => setPageLabels(doc, [{ startPage: -1, style: 'decimal' }])).toThrow(
       'startPage must be non-negative',
     );
+    expect(thrownBy(() => setPageLabels(doc, [{ startPage: -1, style: 'decimal' }]))).toMatchObject(
+      {
+        code: 'invalid-argument',
+        argument: 'labels',
+      },
+    );
   });
 
-  it('throws RangeError on negative start value', () => {
+  it('throws InvalidArgumentError on negative start value', () => {
     const doc = createDocWithPages(5);
     expect(() => setPageLabels(doc, [{ startPage: 0, style: 'decimal', start: -5 }])).toThrow(
-      RangeError,
+      InvalidArgumentError,
     );
     expect(() => setPageLabels(doc, [{ startPage: 0, style: 'decimal', start: -5 }])).toThrow(
       'start must be non-negative',
     );
   });
 
-  it('throws RangeError on negative startPage in a later range', () => {
+  it('throws InvalidArgumentError on negative startPage in a later range', () => {
     const doc = createDocWithPages(5);
     expect(() =>
       setPageLabels(doc, [

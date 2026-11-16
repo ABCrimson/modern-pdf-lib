@@ -6,6 +6,8 @@
  * PdfDocument class focused on high-level document management.
  */
 
+import { MalformedInputError } from '../../errors.js';
+
 // ---------------------------------------------------------------------------
 // ToUnicode CMap builder
 // ---------------------------------------------------------------------------
@@ -76,16 +78,16 @@ export function buildToUnicodeCmap(cmapTable: ReadonlyMap<number, number>): stri
  * Validate a PNG file signature.
  *
  * @param data  The raw file bytes.
- * @throws      If the data is too short or the signature is invalid.
+ * @throws {MalformedInputError} If the data is too short or the signature is invalid.
  */
 export function validatePngSignature(data: Uint8Array): void {
   if (data.length < 24) {
-    throw new Error('Invalid PNG: file too short');
+    throw new MalformedInputError('Invalid PNG: file too short', { format: 'png' });
   }
   const sig = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
   for (let i = 0; i < 8; i++) {
     if (data[i] !== sig[i]) {
-      throw new Error('Invalid PNG: bad signature');
+      throw new MalformedInputError('Invalid PNG: bad signature', { format: 'png' });
     }
   }
 }
@@ -147,11 +149,11 @@ export function extractPngChunks(data: Uint8Array): Array<{ type: string; data: 
  * Validate a JPEG file signature (SOI marker).
  *
  * @param data  The raw file bytes.
- * @throws      If the data is too short or the SOI marker is invalid.
+ * @throws {MalformedInputError} If the data is too short or the SOI marker is invalid.
  */
 export function validateJpegSignature(data: Uint8Array): void {
   if (data.length < 2 || data[0] !== 0xff || data[1] !== 0xd8) {
-    throw new Error('Invalid JPEG: bad SOI marker');
+    throw new MalformedInputError('Invalid JPEG: bad SOI marker', { format: 'jpeg' });
   }
 }
 
@@ -160,6 +162,7 @@ export function validateJpegSignature(data: Uint8Array): void {
  *
  * @param data  The raw JPEG file bytes.
  * @returns     Width, height, and number of color components.
+ * @throws {MalformedInputError} If the data is not a JPEG or holds no SOF marker.
  */
 export function parseJpegDimensions(data: Uint8Array): {
   width: number;
@@ -173,7 +176,7 @@ export function parseJpegDimensions(data: Uint8Array): {
 
   while (offset < data.length - 1) {
     if (data[offset] !== 0xff) {
-      throw new Error('Invalid JPEG: expected marker');
+      throw new MalformedInputError('Invalid JPEG: expected marker', { format: 'jpeg' });
     }
 
     const marker = data[offset + 1]!;
@@ -197,5 +200,5 @@ export function parseJpegDimensions(data: Uint8Array): {
     offset += 2 + segmentLength;
   }
 
-  throw new Error('Invalid JPEG: SOF marker not found');
+  throw new MalformedInputError('Invalid JPEG: SOF marker not found', { format: 'jpeg' });
 }

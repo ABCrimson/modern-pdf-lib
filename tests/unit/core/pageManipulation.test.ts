@@ -19,6 +19,7 @@ import {
   removePages,
   rotateAllPages,
 } from '../../../src/core/pageManipulation.js';
+import { InvalidArgumentError } from '../../../src/errors.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -78,9 +79,9 @@ describe('insertPage', () => {
 
   it('throws on invalid index', () => {
     const doc = createDocWithPages(2);
-    expect(() => insertPage(doc, -1)).toThrow(RangeError);
-    expect(() => insertPage(doc, 3)).toThrow(RangeError);
-    expect(() => insertPage(doc, 1.5)).toThrow(RangeError);
+    expect(() => insertPage(doc, -1)).toThrow(InvalidArgumentError);
+    expect(() => insertPage(doc, 3)).toThrow(InvalidArgumentError);
+    expect(() => insertPage(doc, 1.5)).toThrow(InvalidArgumentError);
   });
 
   it('inserts into an empty document', () => {
@@ -126,9 +127,9 @@ describe('removePage', () => {
 
   it('throws on invalid index', () => {
     const doc = createDocWithPages(2);
-    expect(() => removePage(doc, -1)).toThrow(RangeError);
-    expect(() => removePage(doc, 2)).toThrow(RangeError);
-    expect(() => removePage(doc, 0.5)).toThrow(RangeError);
+    expect(() => removePage(doc, -1)).toThrow(InvalidArgumentError);
+    expect(() => removePage(doc, 2)).toThrow(InvalidArgumentError);
+    expect(() => removePage(doc, 0.5)).toThrow(InvalidArgumentError);
   });
 });
 
@@ -168,14 +169,16 @@ describe('movePage', () => {
 
   it('throws on invalid fromIndex', () => {
     const doc = createDocWithPages(3);
-    expect(() => movePage(doc, -1, 0)).toThrow(RangeError);
-    expect(() => movePage(doc, 3, 0)).toThrow(RangeError);
+    expect(() => movePage(doc, -1, 0)).toThrow(InvalidArgumentError);
+    expect(() => movePage(doc, 3, 0)).toThrow(InvalidArgumentError);
+    expect(() => movePage(doc, 3, 0)).toThrow(expect.objectContaining({ argument: 'fromIndex' }));
   });
 
   it('throws on invalid toIndex', () => {
     const doc = createDocWithPages(3);
-    expect(() => movePage(doc, 0, -1)).toThrow(RangeError);
-    expect(() => movePage(doc, 0, 3)).toThrow(RangeError);
+    expect(() => movePage(doc, 0, -1)).toThrow(InvalidArgumentError);
+    expect(() => movePage(doc, 0, 3)).toThrow(InvalidArgumentError);
+    expect(() => movePage(doc, 0, 3)).toThrow(expect.objectContaining({ argument: 'toIndex' }));
   });
 });
 
@@ -227,12 +230,14 @@ describe('rotatePage', () => {
     const doc = createDocWithPages(1);
     expect(() => rotatePage(doc, 0, 45)).toThrow(/multiple of 90/);
     expect(() => rotatePage(doc, 0, 30)).toThrow(/multiple of 90/);
+    expect(() => rotatePage(doc, 0, 30)).toThrow(InvalidArgumentError);
+    expect(() => rotatePage(doc, 0, 30)).toThrow(expect.objectContaining({ argument: 'angle' }));
   });
 
   it('throws on invalid index', () => {
     const doc = createDocWithPages(1);
-    expect(() => rotatePage(doc, 1, 90)).toThrow(RangeError);
-    expect(() => rotatePage(doc, -1, 90)).toThrow(RangeError);
+    expect(() => rotatePage(doc, 1, 90)).toThrow(InvalidArgumentError);
+    expect(() => rotatePage(doc, -1, 90)).toThrow(InvalidArgumentError);
   });
 
   it('rotation is preserved in saved output', async () => {
@@ -266,7 +271,9 @@ describe('cropPage', () => {
 
   it('throws on invalid index', () => {
     const doc = createDocWithPages(1);
-    expect(() => cropPage(doc, 1, { x: 0, y: 0, width: 100, height: 100 })).toThrow(RangeError);
+    expect(() => cropPage(doc, 1, { x: 0, y: 0, width: 100, height: 100 })).toThrow(
+      InvalidArgumentError,
+    );
   });
 
   it('crop box appears in saved output', async () => {
@@ -298,7 +305,7 @@ describe('getPageSize', () => {
 
   it('throws on invalid index', () => {
     const doc = createDocWithPages(1);
-    expect(() => getPageSize(doc, 1)).toThrow(RangeError);
+    expect(() => getPageSize(doc, 1)).toThrow(InvalidArgumentError);
   });
 });
 
@@ -375,7 +382,7 @@ describe('removePages', () => {
 
   it('throws if any index is out of range', () => {
     const doc = createDocWithPages(3);
-    expect(() => removePages(doc, [0, 5])).toThrow(RangeError);
+    expect(() => removePages(doc, [0, 5])).toThrow(InvalidArgumentError);
   });
 });
 
@@ -396,5 +403,6 @@ describe('rotateAllPages', () => {
   it('throws on non-multiple of 90', () => {
     const doc = createDocWithPages(1);
     expect(() => rotateAllPages(doc, 45)).toThrow(/multiple of 90/);
+    expect(() => rotateAllPages(doc, 45)).toThrow(InvalidArgumentError);
   });
 });

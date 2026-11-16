@@ -14,6 +14,7 @@ import {
   PdfRef,
   PdfString,
 } from '../../../src/index.js';
+import { InvalidArgumentError } from '../../../src/errors.js';
 import { mergePdfs, splitPdf, copyPages } from '../../../src/core/documentMerge.js';
 
 // ---------------------------------------------------------------------------
@@ -184,14 +185,18 @@ describe('splitPdf', () => {
 
   it('throws on invalid start index', async () => {
     const doc = createDocWithContent(3);
-    await expect(splitPdf(doc, [[-1, 1]])).rejects.toThrow(RangeError);
-    await expect(splitPdf(doc, [[3, 3]])).rejects.toThrow(RangeError);
+    await expect(splitPdf(doc, [[-1, 1]])).rejects.toThrow(InvalidArgumentError);
+    await expect(splitPdf(doc, [[3, 3]])).rejects.toThrow(InvalidArgumentError);
   });
 
   it('throws on invalid end index', async () => {
     const doc = createDocWithContent(3);
-    await expect(splitPdf(doc, [[0, 3]])).rejects.toThrow(RangeError);
-    await expect(splitPdf(doc, [[2, 1]])).rejects.toThrow(RangeError);
+    await expect(splitPdf(doc, [[0, 3]])).rejects.toThrow(InvalidArgumentError);
+    await expect(splitPdf(doc, [[2, 1]])).rejects.toThrow(InvalidArgumentError);
+    await expect(splitPdf(doc, [[2, 1]])).rejects.toMatchObject({
+      code: 'invalid-argument',
+      argument: 'ranges',
+    });
   });
 
   it('produces valid PDFs that can be saved', async () => {
@@ -278,8 +283,11 @@ describe('copyPages', () => {
     const source = createDocWithContent(2);
     const target = createPdf();
 
-    expect(() => copyPages(source, target, [0, 5])).toThrow(RangeError);
-    expect(() => copyPages(source, target, [-1])).toThrow(RangeError);
+    expect(() => copyPages(source, target, [0, 5])).toThrow(InvalidArgumentError);
+    expect(() => copyPages(source, target, [-1])).toThrow(InvalidArgumentError);
+    expect(() => copyPages(source, target, [-1])).toThrow(
+      expect.objectContaining({ argument: 'indices' }),
+    );
   });
 
   it('copies pages with rotation', () => {
