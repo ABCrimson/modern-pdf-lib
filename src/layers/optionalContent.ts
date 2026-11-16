@@ -72,7 +72,7 @@ export class PdfLayer {
 
     const dict = new PdfDict();
     dict.set('/Type', PdfName.of('OCG'));
-    dict.set('/Name', PdfString.literal(this.name));
+    dict.set('/Name', PdfString.fromText(this.name));
 
     // Intent: /View means the layer is for viewing, /Design for editing
     dict.set('/Intent', PdfName.of('View'));
@@ -189,7 +189,7 @@ export class PdfLayerManager {
 
     // /D — default viewing configuration
     const defaultConfig = new PdfDict();
-    defaultConfig.set('/Name', PdfString.literal('Default'));
+    defaultConfig.set('/Name', PdfString.fromText('Default'));
     defaultConfig.set('/BaseState', PdfName.of('ON'));
 
     // /ON — layers that are visible by default

@@ -138,3 +138,17 @@ describe('buildNamespacesArray', () => {
     expect(arr.length).toBe(0);
   });
 });
+
+describe('buildNamespace text strings', () => {
+  it('writes /NS and /Schema as text strings', () => {
+    const dict = buildNamespace({
+      ns: 'http://example.com/ns/\u00fc',
+      schema: 'Gr\u00f6\u00dfe.xml',
+    });
+
+    expect((dict.get('/NS') as PdfString).toText()).toBe('http://example.com/ns/\u00fc');
+    expect([...(dict.get('/Schema') as PdfString).toBytes()]).toEqual([
+      0x47, 0x72, 0xf6, 0xdf, 0x65, 0x2e, 0x78, 0x6d, 0x6c,
+    ]);
+  });
+});

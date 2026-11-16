@@ -667,3 +667,74 @@ describe('PdfStructureTree.fromDict text strings', () => {
     expect(options.id).toBe('Abschnitt-\u00fc');
   });
 });
+
+// ---------------------------------------------------------------------------
+// Text strings written by the structure tree (ISO 32000-2 7.9.2.2)
+// ---------------------------------------------------------------------------
+
+describe('structure tree text strings written', () => {
+  /** The PdfString an entry holds, or a failure that names the entry. */
+  const stringAt = (dict: PdfDict, key: string): PdfString => {
+    const value = dict.get(key);
+    if (!(value instanceof PdfString)) throw new Error(`${key} is not a string`);
+    return value;
+  };
+
+  it('writes /T, /Alt, /ActualText, /Lang and /ID of an element as text strings', () => {
+    const elem = new PdfStructureElement('Figure', {
+      title: 'Titel \u65e5\u672c',
+      altText: 'Gr\u00f6\u00dfe',
+      actualText: 'Gr\u00f6\u00dfe \u20ac',
+      language: 'de-CH',
+      id: 'Abschnitt-\u00fc',
+    });
+
+    const { dict } = elem.toDict(new PdfObjectRegistry(), PdfRef.of(1), []);
+
+    // Text in PDFDocEncoding is one byte per character; other text is UTF-16BE after FE FF.
+    expect([...stringAt(dict, '/Alt').toBytes()]).toEqual([0x47, 0x72, 0xf6, 0xdf, 0x65]);
+    expect(stringAt(dict, '/T').toBytes().subarray(0, 2)).toEqual(Uint8Array.of(0xfe, 0xff));
+    expect(stringAt(dict, '/T').toText()).toBe('Titel \u65e5\u672c');
+    expect(stringAt(dict, '/Alt').toText()).toBe('Gr\u00f6\u00dfe');
+    expect(stringAt(dict, '/ActualText').toText()).toBe('Gr\u00f6\u00dfe \u20ac');
+    expect(stringAt(dict, '/Lang').toText()).toBe('de-CH');
+    expect(stringAt(dict, '/ID').toText()).toBe('Abschnitt-\u00fc');
+  });
+
+  it('writes /Alt of a parent tree entry as a text string', () => {
+    const tree = new PdfStructureTree();
+    tree.assignMcid(tree.addElement(null, 'Figure', { altText: 'Gr\u00f6\u00dfe \u65e5' }), 0);
+
+    const registry = new PdfObjectRegistry();
+    const { dict } = tree.toDict(registry, []);
+    const parentTree = registry.resolve(dict.get('/ParentTree') as PdfRef) as PdfDict;
+    const nums = parentTree.get('/Nums') as PdfArray;
+    const entry = registry.resolve(nums.items[1] as PdfRef) as PdfDict;
+
+    expect(stringAt(entry, '/Alt').toText()).toBe('Gr\u00f6\u00dfe \u65e5');
+  });
+
+  it('writes the /IDTree keys and /ID entries as text strings sorted by their bytes', () => {
+    const tree = new PdfStructureTree();
+    for (const id of ['b', '\u00c9cole', 'a', 'Z', '\u65e5']) {
+      tree.addElement(null, 'P', { id });
+    }
+
+    const registry = new PdfObjectRegistry();
+    const { dict } = tree.toDict(registry, []);
+    const idTree = registry.resolve(dict.get('/IDTree') as PdfRef) as PdfDict;
+    const names = (idTree.get('/Names') as PdfArray).items;
+    const keys = names.filter((_, index) => index % 2 === 0) as PdfString[];
+
+    // Byte order (7.9.6): "Z" 5A, "a" 61, "b" 62, E-acute C9 (PDFDocEncoding), then FE FF for U+65E5.
+    expect(keys.map((key) => key.toText())).toEqual(['Z', 'a', 'b', '\u00c9cole', '\u65e5']);
+    for (let i = 1; i < keys.length; i++) {
+      expect(PdfString.compare(keys[i - 1]!, keys[i]!)).toBeLessThan(0);
+    }
+    const entries = names.filter((_, index) => index % 2 === 1) as PdfRef[];
+    for (const [index, ref] of entries.entries()) {
+      const elemDict = registry.resolve(ref) as PdfDict;
+      expect(stringAt(elemDict, '/ID').equals(keys[index]!)).toBe(true);
+    }
+  });
+});

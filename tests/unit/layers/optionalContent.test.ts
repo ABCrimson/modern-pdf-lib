@@ -272,3 +272,23 @@ describe('PdfLayer.fromDict text string', () => {
     expect(PdfLayer.fromDict(dict).getName()).toBe('Gr\u00f6\u00dfe');
   });
 });
+
+describe('layer names written as text strings', () => {
+  it('writes the /Name of an OCG so that fromDict reads it back', () => {
+    const registry = new PdfObjectRegistry();
+    const layer = new PdfLayer('Ebene \u00fc \u65e5\u672c');
+
+    const dict = registry.resolve(layer.toDict(registry)) as PdfDict;
+    const name = dict.get('/Name') as PdfString;
+
+    expect(name.textEncoding).toBe('utf-16be');
+    expect(PdfLayer.fromDict(dict).getName()).toBe('Ebene \u00fc \u65e5\u672c');
+  });
+
+  it('writes a Latin-1 layer name in PDFDocEncoding', () => {
+    const registry = new PdfObjectRegistry();
+    const dict = registry.resolve(new PdfLayer('Gr\u00f6\u00dfe').toDict(registry)) as PdfDict;
+
+    expect([...(dict.get('/Name') as PdfString).toBytes()]).toEqual([0x47, 0x72, 0xf6, 0xdf, 0x65]);
+  });
+});

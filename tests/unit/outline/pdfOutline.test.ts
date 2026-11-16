@@ -802,3 +802,30 @@ describe('PdfOutlineTree.fromDict text strings', () => {
     expect(tree.items[0]!.destination).toEqual({ type: 'named', namedDestination: 'caf\u00e9' });
   });
 });
+
+describe('PdfOutlineTree.toDict text strings', () => {
+  it('writes /Title and a named /Dest as text strings that fromDict reads back', () => {
+    const tree = new PdfOutlineTree();
+    tree.addItem('Gr\u00f6\u00dfe \u20ac \u65e5', {
+      type: 'named',
+      namedDestination: 'caf\u00e9-\u65e5',
+    });
+    const registry = new PdfObjectRegistry();
+    const outlinesRef = tree.toDict(registry, []);
+    const outlinesDict = registry.resolve(outlinesRef) as PdfDict;
+    const itemDict = registry.resolve(outlinesDict.get('/First') as PdfRef) as PdfDict;
+
+    const title = itemDict.get('/Title') as PdfString;
+    expect(title.textEncoding).toBe('utf-16be');
+    expect(title.toText()).toBe('Gr\u00f6\u00dfe \u20ac \u65e5');
+    expect((itemDict.get('/Dest') as PdfString).toText()).toBe('caf\u00e9-\u65e5');
+
+    const parsed = PdfOutlineTree.fromDict(
+      outlinesDict,
+      (ref: PdfRef): PdfObject | undefined => registry.resolve(ref),
+      new Map(),
+    );
+    expect(parsed.items[0]!.title).toBe('Gr\u00f6\u00dfe \u20ac \u65e5');
+    expect(parsed.items[0]!.destination.namedDestination).toBe('caf\u00e9-\u65e5');
+  });
+});

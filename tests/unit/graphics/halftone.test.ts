@@ -307,3 +307,14 @@ describe('nameHalftone()', () => {
     expect(ht.has('/HalftoneName')).toBe(false);
   });
 });
+
+describe('nameHalftone() text string', () => {
+  it('writes /HalftoneName as a text string', () => {
+    const ht = buildType1Halftone({ frequency: 60, angle: 45, spotFunction: 'Round' });
+    nameHalftone(ht, 'Raster \u00fc \u65e5');
+
+    const name = ht.get('/HalftoneName') as PdfString;
+    expect(name.textEncoding).toBe('utf-16be');
+    expect(name.toText()).toBe('Raster \u00fc \u65e5');
+  });
+});

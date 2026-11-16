@@ -2,13 +2,9 @@
  * Outline titles (ISO 32000-2 12.3.3 /Title): one top-level outline item per input text is
  * added with `getOutlines().addItem`, the file is saved, and pdf.js (`getOutline()` titles, in
  * order) and qpdf `--json=2` (the /Title of every outline item) each report the texts given.
- *
- * The writer stores /Title as a byte string, one byte per character, so the input texts above
- * U+00FF cannot be saved.
  */
 import { beforeEach, describe, expect, test } from 'vitest';
 import { createPdf } from '../../../src/index.js';
-import { defectKey, knownDefect } from '../../helpers/known-defect.js';
 import { withPdfjs } from '../../helpers/oracle/pdfjs.js';
 import { requireQpdf } from '../../helpers/oracle/qpdf.js';
 import { cleanSave, INPUTS, qpdfObjects, qpdfText } from './setup.js';
@@ -43,15 +39,7 @@ describe('outline titles read back by pdf.js and qpdf', () => {
     await expectTitlesReadBack([INPUTS.ascii]);
   });
 
-  knownDefect(
-    defectKey('core-document-01', '0.41.0'),
-    'text above U+00FF: pdf.js and qpdf read each outline title as set',
-    {
-      failsWith:
-        /^UnencodableTextError: A PDF byte string cannot encode "–" \(U\+2013\) at index 5:/,
-    },
-    async () => {
-      await expectTitlesReadBack([INPUTS.latin, INPUTS.cjk, INPUTS.astral]);
-    },
-  );
+  test('text above U+00FF: pdf.js and qpdf read each outline title as set', async () => {
+    await expectTitlesReadBack([INPUTS.latin, INPUTS.cjk, INPUTS.astral]);
+  });
 });

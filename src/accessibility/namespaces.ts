@@ -80,10 +80,10 @@ export interface NamespaceDef {
 export function buildNamespace(def: NamespaceDef): PdfDict {
   const dict = new PdfDict();
   dict.set('/Type', PdfName.of('Namespace'));
-  dict.set('/NS', PdfString.literal(def.ns));
+  dict.set('/NS', PdfString.fromText(def.ns));
 
   if (def.schema !== undefined) {
-    dict.set('/Schema', PdfString.literal(def.schema));
+    dict.set('/Schema', PdfString.fromText(def.schema));
   }
 
   const roleMap = def.roleMap;

@@ -363,7 +363,7 @@ export class PdfOutlineTree {
       const itemDict = new PdfDict();
 
       // /Title — required
-      itemDict.set('/Title', PdfString.literal(item.title));
+      itemDict.set('/Title', PdfString.fromText(item.title));
 
       // /Parent — required
       itemDict.set('/Parent', parentRef);
@@ -442,7 +442,7 @@ export class PdfOutlineTree {
     if (dest.type === 'named') {
       // Named destination — use a string
       if (dest.namedDestination !== undefined) {
-        dict.set('/Dest', PdfString.literal(dest.namedDestination));
+        dict.set('/Dest', PdfString.fromText(dest.namedDestination));
       }
       return;
     }

@@ -368,27 +368,27 @@ export class PdfStructureElement {
 
     // /T — title
     if (this.options.title !== undefined) {
-      dict.set('/T', PdfString.literal(this.options.title));
+      dict.set('/T', PdfString.fromText(this.options.title));
     }
 
     // /Alt — alt text
     if (this.options.altText !== undefined) {
-      dict.set('/Alt', PdfString.literal(this.options.altText));
+      dict.set('/Alt', PdfString.fromText(this.options.altText));
     }
 
     // /ActualText — actual text
     if (this.options.actualText !== undefined) {
-      dict.set('/ActualText', PdfString.literal(this.options.actualText));
+      dict.set('/ActualText', PdfString.fromText(this.options.actualText));
     }
 
     // /Lang — language
     if (this.options.language !== undefined) {
-      dict.set('/Lang', PdfString.literal(this.options.language));
+      dict.set('/Lang', PdfString.fromText(this.options.language));
     }
 
     // /ID — unique identifier
     if (this.options.id !== undefined) {
-      dict.set('/ID', PdfString.literal(this.options.id));
+      dict.set('/ID', PdfString.fromText(this.options.id));
     }
 
     // /K — kids: can be integer (MCID), dict (child), or array of mixed
@@ -602,7 +602,7 @@ export class PdfStructureTree {
       elemDict.set('/Type', PdfName.of('StructElem'));
       elemDict.set('/S', PdfName.of(elem.type));
       if (elem.options.altText !== undefined) {
-        elemDict.set('/Alt', PdfString.literal(elem.options.altText));
+        elemDict.set('/Alt', PdfString.fromText(elem.options.altText));
       }
       if (elem.pageIndex !== undefined && pageRefs[elem.pageIndex]) {
         elemDict.set('/Pg', pageRefs[elem.pageIndex]!);
@@ -634,20 +634,22 @@ export class PdfStructureTree {
 
     if (elementsWithId.length === 0) return undefined;
 
-    // Sort by ID
-    elementsWithId.sort((a, b) => (a.options.id ?? '').localeCompare(b.options.id ?? ''));
+    // Name tree keys sort by their bytes (ISO 32000-2 7.9.6), not by locale.
+    const keyed = elementsWithId.map((elem) => ({
+      elem,
+      key: PdfString.fromText(elem.options.id!),
+    }));
+    keyed.sort((a, b) => PdfString.compare(a.key, b.key));
 
     // Build /Names array: [name1, ref1, name2, ref2, ...]
     const namesArray = new PdfArray();
-    for (const elem of elementsWithId) {
-      namesArray.push(PdfString.literal(elem.options.id!));
+    for (const { elem, key } of keyed) {
+      namesArray.push(key);
       const elemRef = registry.allocate();
       const elemDict = new PdfDict();
       elemDict.set('/Type', PdfName.of('StructElem'));
       elemDict.set('/S', PdfName.of(elem.type));
-      if (elem.options.id !== undefined) {
-        elemDict.set('/ID', PdfString.literal(elem.options.id));
-      }
+      elemDict.set('/ID', key);
       registry.assign(elemRef, elemDict);
       namesArray.push(elemRef);
     }

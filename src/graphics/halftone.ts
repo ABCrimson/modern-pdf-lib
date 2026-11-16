@@ -212,12 +212,12 @@ export function buildSampledTransferFunction(samples: Uint8Array): PdfStream {
  * pairing a halftone with an optional `/HalftoneName`.
  *
  * Emits the supplied halftone unchanged when `name` is omitted; otherwise
- * sets `/HalftoneName` (a literal string) on it and returns it. This is a
+ * sets `/HalftoneName` (a text string) on it and returns it. This is a
  * convenience for naming a halftone for caching by conforming readers.
  */
 export function nameHalftone(halftone: PdfDict, name?: string): PdfDict {
   if (name !== undefined) {
-    halftone.set('/HalftoneName', PdfString.literal(name));
+    halftone.set('/HalftoneName', PdfString.fromText(name));
   }
   return halftone;
 }
