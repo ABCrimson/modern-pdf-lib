@@ -31,7 +31,8 @@
 
 import { inflateFlateUpTo } from '../../codecs/internal/pdfFlate.js';
 import { MalformedInputError, UnsupportedFeatureError } from '../../errors.js';
-import { assertWithinLimit } from '../../internal/limits.js';
+import { assertLimit, beginCall, resolveLimits, type LimitContext } from '../../internal/limits.js';
+import type { PdfLimits } from '../../limits.js';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -173,17 +174,30 @@ export function readWoffHeader(data: Uint8Array): WoffInfo {
  * standard sfnt: a 12-byte offset table, 16-byte table records sorted by
  * tag, and 4-byte-aligned table data.
  *
- * @param data - The WOFF1 (or WOFF2) container bytes.
+ * @param data    - The WOFF1 (or WOFF2) container bytes.
+ * @param options - `limits`: the limits this call decodes under, over `DEFAULT_LIMITS`;
+ *   checked as the `limits` option of every call is.
  * @returns The reconstructed raw sfnt bytes.
+ * @throws {InvalidArgumentError} Argument `limits` or `limits.<name>` when `options.limits` is not
+ *   a valid `limits` value; nothing is read.
  * @throws {UnsupportedFeatureError} `'WOFF2 decode not yet supported'` for WOFF2 input.
  * @throws {MalformedInputError} Format `woff`, when a WOFF1 container is malformed;
  *         `'WOFF1: table data overlaps'` when the stored data of two tables
  *         overlaps, thrown before any table is inflated.
  * @throws {ResourceLimitError} `maxFontBytes` when the table lengths the
- *         directory states, or `totalSfntSize`, are above 128 MiB; thrown
- *         before any table is inflated.
+ *         directory states, or `totalSfntSize`, are above 128 MiB (the default,
+ *         which `options.limits` sets over); thrown before any table is inflated.
+ * @throws {ResourceLimitError} `maxDecodedStreamBytes` when the length the directory
+ *         states for one table is above that limit (256 MiB by default); thrown
+ *         before that table is inflated. A table length at most `maxFontBytes` can
+ *         reach it only when `options.limits` sets `maxDecodedStreamBytes` below
+ *         `maxFontBytes`.
  */
-export function decodeWoff(data: Uint8Array): Uint8Array {
+export function decodeWoff(
+  data: Uint8Array,
+  options?: { readonly limits?: PdfLimits | undefined },
+): Uint8Array {
+  const ctx = beginCall(resolveLimits(options?.limits));
   if (isWoff2(data)) {
     throw new UnsupportedFeatureError('WOFF2 decode not yet supported');
   }
@@ -227,11 +241,12 @@ export function decodeWoff(data: Uint8Array): Uint8Array {
   }
 
   // The sizes the file states are checked before any table is inflated.
-  assertWithinLimit(
+  assertLimit(
+    ctx,
     'maxFontBytes',
     entries.reduce((sum, entry) => sum + entry.origLength, 0),
   );
-  assertWithinLimit('maxFontBytes', header.totalSfntSize);
+  assertLimit(ctx, 'maxFontBytes', header.totalSfntSize);
 
   // Decode each table's data (inflate when compressed, else copy).
   const tableData: Uint8Array[] = [];
@@ -251,7 +266,7 @@ export function decodeWoff(data: Uint8Array): Uint8Array {
       // Stored uncompressed.
       decoded = raw;
     } else {
-      decoded = inflateZlib(raw, entry.origLength);
+      decoded = inflateZlib(ctx, raw, entry.origLength);
       if (decoded.length !== entry.origLength) {
         throw new MalformedInputError('WOFF1: inflated table size mismatch', { format: 'woff' });
       }
@@ -274,16 +289,14 @@ export function decodeWoff(data: Uint8Array): Uint8Array {
  * @throws {MalformedInputError} Format `woff`, `WOFF1: failed to inflate table data`
  *   when the data inflates neither way.
  * @throws {ResourceLimitError} `maxDecodedStreamBytes` when `origLength` is
- *   above it; not reachable from `decodeWoff`, which refuses such a length
- *   first.
+ *   above that limit of `ctx`.
  */
-function inflateZlib(data: Uint8Array, origLength: number): Uint8Array {
-  // `decodeWoff` has checked the table lengths against `maxFontBytes`, which is below the
-  // decoded-stream limit; checking here keeps a limit error out of the catch below.
-  assertWithinLimit('maxDecodedStreamBytes', origLength);
+function inflateZlib(ctx: LimitContext, data: Uint8Array, origLength: number): Uint8Array {
+  // Checked here, ahead of the read, so that a limit error stays out of the catch below.
+  assertLimit(ctx, 'maxDecodedStreamBytes', origLength);
   let inflated: ReturnType<typeof inflateFlateUpTo>;
   try {
-    inflated = inflateFlateUpTo(data, origLength);
+    inflated = inflateFlateUpTo(data, origLength, ctx);
   } catch {
     throw new MalformedInputError('WOFF1: failed to inflate table data', { format: 'woff' });
   }

@@ -16,7 +16,14 @@
  */
 
 import { inflateFlateUpTo } from '../../../codecs/internal/pdfFlate.js';
-import { assertWithinLimit } from '../../../internal/limits.js';
+import {
+  addToTotal,
+  assertLimit,
+  beginCall,
+  resolveLimits,
+  type LimitContext,
+} from '../../../internal/limits.js';
+import type { PdfLimits } from '../../../limits.js';
 import {
   InvalidArgumentError,
   MalformedInputError,
@@ -45,6 +52,12 @@ export interface TiffImage {
 export interface TiffDecodeOptions {
   /** Page index for multi-page TIFFs (0-based). Default: 0. */
   page?: number | undefined;
+  /**
+   * Limits of the call, set over the defaults (`DEFAULT_LIMITS`): the image
+   * size limits, `maxImageFrames` for the IFD walk, and `maxTotalImageBytes`
+   * for the decoded bytes. Checked as the `limits` option of every call is.
+   */
+  limits?: PdfLimits | undefined;
 }
 
 /** A single IFD entry (tag). */
@@ -262,6 +275,7 @@ type PageArgument = 'options.page' | 'pageIndex';
  *   more than 4,096 IFDs.
  */
 function findIfdAtPage(
+  ctx: LimitContext,
   data: Uint8Array,
   littleEndian: boolean,
   firstIfdOffset: number,
@@ -271,7 +285,7 @@ function findIfdAtPage(
   let offset = firstIfdOffset;
   const seen = new Set<number>([offset]);
   for (let i = 0; i < pageIndex; i++) {
-    assertWithinLimit('maxImageFrames', i + 2);
+    assertLimit(ctx, 'maxImageFrames', i + 2);
     offset = getNextIfdOffset(data, offset, littleEndian);
     if (offset === 0) {
       throw new InvalidArgumentError(
@@ -475,10 +489,15 @@ function decompressLzw(input: Uint8Array, expectedLength: number): Uint8Array {
  * checked. A strip without the zlib wrapper is read as raw DEFLATE. At most
  * `expectedLength` bytes are returned: the read stops once a 16 KiB step of
  * input decodes past them, so data past the strip's implied size is ignored
- * and the rest of it is not inflated.
+ * and the rest of it is not inflated. `expectedLength` is held to the
+ * `maxDecodedStreamBytes` of `ctx`.
  */
-function decompressDeflate(input: Uint8Array, expectedLength: number): Uint8Array {
-  return inflateFlateUpTo(input, Math.max(0, expectedLength)).data;
+function decompressDeflate(
+  input: Uint8Array,
+  expectedLength: number,
+  ctx: LimitContext,
+): Uint8Array {
+  return inflateFlateUpTo(input, Math.max(0, expectedLength), ctx).data;
 }
 
 // ---------------------------------------------------------------------------
@@ -595,8 +614,8 @@ function decodeJpegStrip(
 /**
  * Get the number of pages in a multi-page TIFF.
  *
- * Each IFD offset is read once, and at most `INTERNAL_LIMITS.maxImageFrames`
- * (4,096) IFDs are read.
+ * Each IFD offset is read once, and at most `maxImageFrames` (4,096) IFDs are
+ * read.
  *
  * @param data  Raw TIFF bytes.
  * @returns     Number of IFDs (pages).
@@ -606,6 +625,11 @@ function decodeJpegStrip(
  *   4,096 IFDs.
  */
 export function getTiffPageCount(data: Uint8Array): number {
+  return countPages(beginCall(resolveLimits(undefined)), data);
+}
+
+/** {@link getTiffPageCount} under the limits of the context `ctx`. */
+function countPages(ctx: LimitContext, data: Uint8Array): number {
   if (!isTiff(data)) {
     throw new MalformedInputError('TIFF: invalid TIFF header', { format: 'tiff' });
   }
@@ -623,7 +647,7 @@ export function getTiffPageCount(data: Uint8Array): number {
       });
     }
     seen.add(offset);
-    assertWithinLimit('maxImageFrames', count + 1);
+    assertLimit(ctx, 'maxImageFrames', count + 1);
     count++;
     offset = getNextIfdOffset(data, offset, littleEndian);
   }
@@ -636,24 +660,46 @@ export function getTiffPageCount(data: Uint8Array): number {
  *
  * @param data       Raw TIFF bytes.
  * @param pageIndex  0-based page index.
+ * @param options    `limits`: the limits this call decodes under, over
+ *                   `DEFAULT_LIMITS`; see {@link decodeTiff} for the errors
+ *                   they raise.
  * @returns          Decoded image.
- * @throws {InvalidArgumentError} Argument `pageIndex`, when the file has no page at that index.
+ * @throws {InvalidArgumentError} Argument `pageIndex`, when the file has no page at that index;
+ *   argument `limits` or `limits.<name>` when `options.limits` is not a valid `limits` value.
  */
-export function decodeTiffPage(data: Uint8Array, pageIndex: number): TiffImage {
-  return decodeTiffAt(data, pageIndex, 'pageIndex');
+export function decodeTiffPage(
+  data: Uint8Array,
+  pageIndex: number,
+  options?: { readonly limits?: PdfLimits | undefined },
+): TiffImage {
+  return decodeTiffAt(beginCall(resolveLimits(options?.limits)), data, pageIndex, 'pageIndex');
 }
 
 /**
  * Decode all pages from a multi-page TIFF.
  *
- * @param data  Raw TIFF bytes.
- * @returns     Array of decoded images.
+ * The frames of one call are held to the limits together: the decoded bytes
+ * of all of them add up to `maxTotalImageBytes` (1 GiB by default).
+ *
+ * @param data     Raw TIFF bytes.
+ * @param options  `limits`: the limits this call decodes under, over
+ *                 `DEFAULT_LIMITS`; see {@link decodeTiff} for the errors
+ *                 they raise.
+ * @returns        Array of decoded images.
+ * @throws {InvalidArgumentError} Argument `limits` or `limits.<name>` when `options.limits` is not
+ *   a valid `limits` value; nothing is decoded.
+ * @throws {ResourceLimitError} `maxTotalImageBytes` when the frames together decode to more
+ *   bytes than that limit.
  */
-export function decodeTiffAll(data: Uint8Array): TiffImage[] {
-  const pageCount = getTiffPageCount(data);
+export function decodeTiffAll(
+  data: Uint8Array,
+  options?: { readonly limits?: PdfLimits | undefined },
+): TiffImage[] {
+  const ctx = beginCall(resolveLimits(options?.limits));
+  const pageCount = countPages(ctx, data);
   const images: TiffImage[] = [];
   for (let i = 0; i < pageCount; i++) {
-    images.push(decodeTiffPage(data, i));
+    images.push(decodeTiffAt(ctx, data, i, 'pageIndex'));
   }
   return images;
 }
@@ -662,12 +708,16 @@ export function decodeTiffAll(data: Uint8Array): TiffImage[] {
  * Decode a TIFF image.
  *
  * @param data     Raw TIFF bytes.
- * @param options  Decode options (page selection).
+ * @param options  Decode options (page selection, `limits`).
  * @returns        Decoded image data.
+ * @throws {InvalidArgumentError} Argument `limits` or `limits.<name>` when `options.limits` is not
+ *   a valid `limits` value; nothing is decoded.
  * @throws {ResourceLimitError} `maxImageDimension` when the width or height
  *   is above 65,536; `maxImagePixels` when width times height is above 2^28;
  *   `maxImageBytes` when the decoded samples are above 256 MiB; `maxImageFrames`
- *   when the IFD chain walked to the page is longer than 4,096.
+ *   when the IFD chain walked to the page is longer than 4,096;
+ *   `maxTotalImageBytes` when the decoded samples are above 1 GiB (the values
+ *   are the defaults, which `options.limits` sets over).
  * @throws {MalformedInputError} `TIFF: the IFD chain repeats offset N` when the chain walked
  *   to the page revisits an offset.
  * @throws {MalformedInputError} `TIFF: negative ImageWidth, ImageLength or sample size` when
@@ -679,11 +729,24 @@ export function decodeTiffAll(data: Uint8Array): TiffImage[] {
  * @throws {InvalidArgumentError} Argument `options.page`, when the file has no page at that index.
  */
 export function decodeTiff(data: Uint8Array, options?: TiffDecodeOptions): TiffImage {
-  return decodeTiffAt(data, options?.page ?? 0, 'options.page');
+  return decodeTiffAt(
+    beginCall(resolveLimits(options?.limits)),
+    data,
+    options?.page ?? 0,
+    'options.page',
+  );
 }
 
-/** Decode the page at `pageIndex`; `argument` names the caller's page parameter in errors. */
-function decodeTiffAt(data: Uint8Array, pageIndex: number, argument: PageArgument): TiffImage {
+/**
+ * Decode the page at `pageIndex` under the context `ctx`, whose image total the
+ * page adds to; `argument` names the caller's page parameter in errors.
+ */
+function decodeTiffAt(
+  ctx: LimitContext,
+  data: Uint8Array,
+  pageIndex: number,
+  argument: PageArgument,
+): TiffImage {
   if (!isTiff(data)) {
     throw new MalformedInputError(
       'TIFF: invalid TIFF header (expected II or MM byte order marker + 42)',
@@ -696,7 +759,7 @@ function decodeTiffAt(data: Uint8Array, pageIndex: number, argument: PageArgumen
   const firstIfdOffset = reader.u32(4);
 
   // Find the IFD for the requested page
-  const ifdOffset = findIfdAtPage(data, littleEndian, firstIfdOffset, pageIndex, argument);
+  const ifdOffset = findIfdAtPage(ctx, data, littleEndian, firstIfdOffset, pageIndex, argument);
   const entries = parseTiffIfd(data, ifdOffset, littleEndian);
 
   // Read required tags
@@ -743,10 +806,11 @@ function decodeTiffAt(data: Uint8Array, pageIndex: number, argument: PageArgumen
       format: 'tiff',
     });
   }
-  assertWithinLimit('maxImageDimension', width);
-  assertWithinLimit('maxImageDimension', height);
-  assertWithinLimit('maxImagePixels', width * height);
-  assertWithinLimit('maxImageBytes', height * bytesPerRow);
+  assertLimit(ctx, 'maxImageDimension', width);
+  assertLimit(ctx, 'maxImageDimension', height);
+  assertLimit(ctx, 'maxImagePixels', width * height);
+  assertLimit(ctx, 'maxImageBytes', height * bytesPerRow);
+  addToTotal(ctx, 'maxTotalImageBytes', height * bytesPerRow);
 
   // Read and decompress all strips
   const rawData = new Uint8Array(height * bytesPerRow);
@@ -785,7 +849,7 @@ function decodeTiffAt(data: Uint8Array, pageIndex: number, argument: PageArgumen
         deflateBytesRead += stripByteCount;
         if (deflateBytesRead > data.length)
           throw new MalformedInputError('TIFF: strip data overlaps', { format: 'tiff' });
-        decompressed = decompressDeflate(compressedData, expectedStripBytes);
+        decompressed = decompressDeflate(compressedData, expectedStripBytes, ctx);
         break;
       case COMPRESS_JPEG:
       case COMPRESS_JPEG_OLD:

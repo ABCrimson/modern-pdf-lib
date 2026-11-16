@@ -21,7 +21,13 @@
  * No require() — ESM import only.
  */
 
-import { assertWithinLimit } from '../../../internal/limits.js';
+import {
+  assertLimit,
+  beginCall,
+  resolveLimits,
+  type LimitContext,
+} from '../../../internal/limits.js';
+import type { PdfLimits } from '../../../limits.js';
 import {
   InvalidArgumentError,
   MalformedInputError,
@@ -99,6 +105,12 @@ const COMPRESSION_OLD_JPEG = 6;
 export interface DirectEmbedOptions {
   /** Page index for multi-page TIFFs (0-based). Default: 0. */
   page?: number | undefined;
+  /**
+   * Limits of the call, set over the defaults (`DEFAULT_LIMITS`): the image
+   * size limits and `maxImageBytes` for the strips or tiles. Checked as the
+   * `limits` option of every call is.
+   */
+  limits?: PdfLimits | undefined;
 }
 
 /**
@@ -383,18 +395,21 @@ export function canDirectEmbed(data: Uint8Array): boolean {
  * - **JPEG-in-TIFF**: JPEG data extracted and used as DCTDecode.
  *
  * @param data     Raw TIFF file bytes.
- * @param options  Optional settings (page index for multi-page TIFFs).
+ * @param options  Optional settings (page index for multi-page TIFFs, `limits`).
  * @returns        The embedding result with all data needed for a PDF image XObject.
  * @throws {UnsupportedFeatureError} `TIFF JPEG with multiple tiles is not supported for direct embedding`
  *   for a JPEG-compressed TIFF of more than one tile.
  * @throws {InvalidArgumentError} Argument `options.page`, when the file has no page at that index.
+ * @throws {InvalidArgumentError} Argument `limits` or `limits.<name>` when `options.limits` is not
+ *   a valid `limits` value; nothing is read.
  * @throws {ResourceLimitError} `maxImageDimension` when the width or height is above 65,536;
  *   `maxImagePixels` when width times height is above 2^28; `maxImageBytes` when the strips or
- *   tiles together are above 256 MiB.
+ *   tiles together are above 256 MiB (the values are the defaults, which `options.limits` sets over).
  * @throws {MalformedInputError} `TIFF: tile width and length must be positive multiples of 16` for a tiled
  *   image whose tile sides are not.
  */
 export function embedTiffDirect(data: Uint8Array, options?: DirectEmbedOptions): DirectEmbedResult {
+  const ctx = beginCall(resolveLimits(options?.limits));
   if (data.length < 8) {
     throw new MalformedInputError('TIFF data too short', { format: 'tiff' });
   }
@@ -423,15 +438,15 @@ export function embedTiffDirect(data: Uint8Array, options?: DirectEmbedOptions):
   }
 
   // The sizes the tags state are checked before anything is allocated or looped over from them.
-  assertWithinLimit('maxImageDimension', width);
-  assertWithinLimit('maxImageDimension', height);
-  assertWithinLimit('maxImagePixels', width * height);
+  assertLimit(ctx, 'maxImageDimension', width);
+  assertLimit(ctx, 'maxImageDimension', height);
+  assertLimit(ctx, 'maxImagePixels', width * height);
 
   const colorSpace = getColorSpace(photometric, samplesPerPixel);
 
   // Handle JPEG-in-TIFF
   if (compression === COMPRESSION_JPEG || compression === COMPRESSION_OLD_JPEG) {
-    return embedJpegInTiff(data, entries, le, width, height, bitsPerSample, colorSpace);
+    return embedJpegInTiff(ctx, data, entries, le, width, height, bitsPerSample, colorSpace);
   }
 
   // Handle strip-based or tile-based images
@@ -441,9 +456,18 @@ export function embedTiffDirect(data: Uint8Array, options?: DirectEmbedOptions):
   let imageData: Uint8Array;
 
   if (isTiled) {
-    imageData = extractTiles(data, entries, le, width, height, samplesPerPixel, bitsPerSample);
+    imageData = extractTiles(ctx, data, entries, le, width, height, samplesPerPixel, bitsPerSample);
   } else {
-    imageData = extractStrips(data, entries, le, width, height, samplesPerPixel, bitsPerSample);
+    imageData = extractStrips(
+      ctx,
+      data,
+      entries,
+      le,
+      width,
+      height,
+      samplesPerPixel,
+      bitsPerSample,
+    );
   }
 
   // Determine filter
@@ -471,6 +495,7 @@ export function embedTiffDirect(data: Uint8Array, options?: DirectEmbedOptions):
  * @internal
  */
 function extractStrips(
+  ctx: LimitContext,
   data: Uint8Array,
   entries: IfdEntry[],
   le: boolean,
@@ -495,7 +520,7 @@ function extractStrips(
     throw new MalformedInputError('TIFF strip offset/count mismatch', { format: 'tiff' });
   }
 
-  const result = new Uint8Array(sumStripBytes(data, offsets, counts));
+  const result = new Uint8Array(sumStripBytes(ctx, data, offsets, counts));
   let pos = 0;
 
   for (let i = 0; i < offsets.length; i++) {
@@ -517,7 +542,12 @@ function extractStrips(
  * @throws {ResourceLimitError} `maxImageBytes` when the total is above 256 MiB.
  * @internal
  */
-function sumStripBytes(data: Uint8Array, offsets: number[], counts: number[]): number {
+function sumStripBytes(
+  ctx: LimitContext,
+  data: Uint8Array,
+  offsets: number[],
+  counts: number[],
+): number {
   let total = 0;
   for (let i = 0; i < offsets.length; i++) {
     const count = counts[i] ?? 0;
@@ -525,7 +555,7 @@ function sumStripBytes(data: Uint8Array, offsets: number[], counts: number[]): n
       throw new MalformedInputError('TIFF: strip data out of bounds', { format: 'tiff' });
     }
     total += count;
-    assertWithinLimit('maxImageBytes', total);
+    assertLimit(ctx, 'maxImageBytes', total);
   }
   return total;
 }
@@ -535,6 +565,7 @@ function sumStripBytes(data: Uint8Array, offsets: number[], counts: number[]): n
  * @internal
  */
 function extractTiles(
+  ctx: LimitContext,
   data: Uint8Array,
   entries: IfdEntry[],
   le: boolean,
@@ -573,7 +604,7 @@ function extractTiles(
     if (offsets.length !== counts.length) {
       throw new MalformedInputError('TIFF tile offset/count mismatch', { format: 'tiff' });
     }
-    const result = new Uint8Array(sumStripBytes(data, offsets, counts));
+    const result = new Uint8Array(sumStripBytes(ctx, data, offsets, counts));
     let pos = 0;
     for (let i = 0; i < offsets.length; i++) {
       const offset = offsets[i]!;
@@ -587,7 +618,7 @@ function extractTiles(
   // Uncompressed tiles: reassemble into scanline order
   const bytesPerPixel = Math.ceil((samplesPerPixel * bitsPerSample) / 8);
   const rowBytes = width * bytesPerPixel;
-  assertWithinLimit('maxImageBytes', height * rowBytes);
+  assertLimit(ctx, 'maxImageBytes', height * rowBytes);
   const result = new Uint8Array(height * rowBytes);
 
   const tilesAcross = Math.ceil(width / tileWidth);
@@ -623,6 +654,7 @@ function extractTiles(
  * @internal
  */
 function embedJpegInTiff(
+  ctx: LimitContext,
   data: Uint8Array,
   entries: IfdEntry[],
   le: boolean,
@@ -718,7 +750,7 @@ function embedJpegInTiff(
   if (offsets.length !== counts.length) {
     throw new MalformedInputError('TIFF strip offset/count mismatch', { format: 'tiff' });
   }
-  const jpegData = new Uint8Array(sumStripBytes(data, offsets, counts));
+  const jpegData = new Uint8Array(sumStripBytes(ctx, data, offsets, counts));
   let pos = 0;
   for (let i = 0; i < offsets.length; i++) {
     const offset = offsets[i]!;

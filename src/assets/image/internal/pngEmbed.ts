@@ -26,7 +26,13 @@
  */
 
 import { flateEncode, inflateFlateUpTo } from '../../../codecs/internal/pdfFlate.js';
-import { assertWithinLimit } from '../../../internal/limits.js';
+import {
+  addToTotal,
+  assertLimit,
+  beginCall,
+  resolveLimits,
+  type LimitContext,
+} from '../../../internal/limits.js';
 import { MalformedInputError, UnsupportedFeatureError } from '../../../errors.js';
 
 // ---------------------------------------------------------------------------
@@ -325,6 +331,7 @@ export function isPngWasmReady(): boolean {
  * needs. The Adler-32 trailer is not checked, and data without a zlib header
  * is read as raw DEFLATE.
  *
+ * @param ctx - The context of the call, whose `maxDecodedStreamBytes` holds `expected`.
  * @throws {ResourceLimitError} `maxDecodedStreamBytes` when `expected` is
  *   above that limit (the filter bytes of an image at the `maxImageBytes`
  *   limit can take it past).
@@ -332,8 +339,8 @@ export function isPngWasmReady(): boolean {
  *   does not inflate.
  * @internal
  */
-function decompressZlib(compressed: Uint8Array, expected: number): Uint8Array {
-  return inflateFlateUpTo(compressed, expected).data;
+function decompressZlib(compressed: Uint8Array, expected: number, ctx: LimitContext): Uint8Array {
+  return inflateFlateUpTo(compressed, expected, ctx).data;
 }
 
 /**
@@ -562,12 +569,16 @@ function compressForPdf(data: Uint8Array): Uint8Array {
  * dictionary.
  *
  * @param pngData - The raw PNG file as a Uint8Array.
+ * @param ctx     - The context of the call, which holds the limits it runs under and the
+ *   image total it adds to; a context over the default limits when it is left out.
  * @returns The embedding result with all data needed for a PDF image XObject.
  * @throws {ResourceLimitError} `maxImageDimension` when the width or height is
  *   above 65,536; `maxImagePixels` when width times height is above 2^28;
- *   `maxImageBytes` when the decoded bytes are above 256 MiB; and
+ *   `maxImageBytes` when the decoded bytes are above 256 MiB;
  *   `maxDecodedStreamBytes` when the scanlines the header implies are above
- *   256 MiB. All of them are thrown before the bytes are allocated. Image
+ *   256 MiB; and `maxTotalImageBytes` when the decoded bytes take the total of
+ *   the call above 1 GiB (the values are the defaults, which the limits of
+ *   `ctx` replace). All of them are thrown before the bytes are allocated. Image
  *   data that inflates to more bytes than the header implies is not an
  *   error: the extra bytes are ignored and are not inflated.
  *
@@ -587,7 +598,10 @@ function compressForPdf(data: Uint8Array): Uint8Array {
  * // If result.smaskData is defined, create a second XObject for the SMask.
  * ```
  */
-export function embedPng(pngData: Uint8Array): PngEmbedResult {
+export function embedPng(
+  pngData: Uint8Array,
+  ctx: LimitContext = beginCall(resolveLimits(undefined)),
+): PngEmbedResult {
   // 1. Validate signature
   validatePngSignature(pngData);
 
@@ -600,13 +614,12 @@ export function embedPng(pngData: Uint8Array): PngEmbedResult {
   // 3. Parse IHDR
   const ihdr = parseIhdr(chunks[0]!);
   // The IHDR sizes are checked before any inflate or allocation sized from them.
-  assertWithinLimit('maxImageDimension', ihdr.width);
-  assertWithinLimit('maxImageDimension', ihdr.height);
-  assertWithinLimit('maxImagePixels', ihdr.width * ihdr.height);
-  assertWithinLimit(
-    'maxImageBytes',
-    ihdr.height * ihdr.width * bytesPerPixel(ihdr.colorType, ihdr.bitDepth),
-  );
+  const decodedBytes = ihdr.height * ihdr.width * bytesPerPixel(ihdr.colorType, ihdr.bitDepth);
+  assertLimit(ctx, 'maxImageDimension', ihdr.width);
+  assertLimit(ctx, 'maxImageDimension', ihdr.height);
+  assertLimit(ctx, 'maxImagePixels', ihdr.width * ihdr.height);
+  assertLimit(ctx, 'maxImageBytes', decodedBytes);
+  addToTotal(ctx, 'maxTotalImageBytes', decodedBytes);
 
   // 4. Concatenate IDAT data
   const idatData = concatenateIdatChunks(chunks);
@@ -631,15 +644,15 @@ export function embedPng(pngData: Uint8Array): PngEmbedResult {
   // compatible (one byte per pixel for 8-bit indexed).
 
   if (ihdr.colorType === PngColorType.Indexed && !isInterlaced && ihdr.bitDepth === 8) {
-    return embedIndexedPng(ihdr, idatData, palette, transparency);
+    return embedIndexedPng(ctx, ihdr, idatData, palette, transparency);
   }
 
   if (!hasAlpha && !isInterlaced && ihdr.bitDepth === 8) {
-    return embedDirectPng(ihdr, idatData, transparency);
+    return embedDirectPng(ctx, ihdr, idatData, transparency);
   }
 
   // Full decompression path for alpha images or interlaced images
-  return embedComplexPng(ihdr, idatData, palette, transparency);
+  return embedComplexPng(ctx, ihdr, idatData, palette, transparency);
 }
 
 // ---------------------------------------------------------------------------
@@ -651,6 +664,7 @@ export function embedPng(pngData: Uint8Array): PngEmbedResult {
  * @internal
  */
 function embedIndexedPng(
+  ctx: LimitContext,
   ihdr: IhdrData,
   idatData: Uint8Array,
   palette: Uint8Array | undefined,
@@ -683,7 +697,7 @@ function embedIndexedPng(
   }
 
   // Slow path: transparency requires decompression to build SMask
-  const decompressed = decompressZlib(idatData, expectedIdatLength(ihdr));
+  const decompressed = decompressZlib(idatData, expectedIdatLength(ihdr), ctx);
   const bpp = bytesPerPixel(ihdr.colorType, ihdr.bitDepth);
   const pixels = reconstructFilters(decompressed, ihdr.width, ihdr.height, bpp);
   const imageData = compressForPdf(pixels);
@@ -720,6 +734,7 @@ function embedIndexedPng(
  * @internal
  */
 function embedDirectPng(
+  ctx: LimitContext,
   ihdr: IhdrData,
   idatData: Uint8Array,
   transparency: Uint8Array | undefined,
@@ -749,7 +764,7 @@ function embedDirectPng(
   }
 
   // Slow path: transparency requires decompression to build SMask
-  const decompressed = decompressZlib(idatData, expectedIdatLength(ihdr));
+  const decompressed = decompressZlib(idatData, expectedIdatLength(ihdr), ctx);
   const bpp = bytesPerPixel(ihdr.colorType, ihdr.bitDepth);
   const pixels = reconstructFilters(decompressed, ihdr.width, ihdr.height, bpp);
   const imageData = compressForPdf(pixels);
@@ -804,13 +819,14 @@ function embedDirectPng(
  * @internal
  */
 function embedComplexPng(
+  ctx: LimitContext,
   ihdr: IhdrData,
   idatData: Uint8Array,
   palette: Uint8Array | undefined,
   transparency: Uint8Array | undefined,
 ): PngEmbedResult {
   // Decompress IDAT
-  const decompressed = decompressZlib(idatData, expectedIdatLength(ihdr));
+  const decompressed = decompressZlib(idatData, expectedIdatLength(ihdr), ctx);
 
   const bpp = bytesPerPixel(ihdr.colorType, ihdr.bitDepth);
 

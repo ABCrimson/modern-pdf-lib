@@ -365,6 +365,41 @@ describe('decodeWebP — VP8L (lossless)', () => {
     expect(caught).toMatchObject({ code: 'resource-limit-exceeded', limit: 'maxImageBytes' });
   });
 
+  it('decodes under the limits of the call: 10 x 10 at maxImagePixels 100, not at 99', () => {
+    const webp = buildMinimalWebP_VP8L(10, 10, 1, 2, 3);
+    expect(() => decodeWebP(webp, { limits: { maxImagePixels: 99 } })).toThrow(
+      expect.objectContaining({
+        name: 'ResourceLimitError',
+        limit: 'maxImagePixels',
+        max: 99,
+        actual: 100,
+        source: 'option',
+      }),
+    );
+    expect(decodeWebP(webp, { limits: { maxImagePixels: 100 } })).toMatchObject({
+      width: 10,
+      height: 10,
+    });
+  });
+
+  it.each([
+    ['maxImageDimension', 9, 10],
+    ['maxImageBytes', 399, 400],
+    ['maxTotalImageBytes', 399, 400],
+  ] as const)('refuses %s above %i and decodes at the value of the image', (limit, below, at) => {
+    const webp = buildMinimalWebP_VP8L(10, 10, 1, 2, 3);
+    expect(() => decodeWebP(webp, { limits: { [limit]: below } })).toThrow(
+      expect.objectContaining({ limit, max: below, actual: at, source: 'option' }),
+    );
+    expect(decodeWebP(webp, { limits: { [limit]: at } }).width).toBe(10);
+  });
+
+  it('checks the limits option before reading the file', () => {
+    expect(() => decodeWebP(new Uint8Array(0), { limits: { maxImagePixels: 0 } })).toThrow(
+      expect.objectContaining({ name: 'InvalidArgumentError', argument: 'limits.maxImagePixels' }),
+    );
+  });
+
   it('decodes a VP8L image at 8192 x 1 inside the limits', () => {
     expect(decodeWebP(buildMinimalWebP_VP8L(8192, 1, 1, 2, 3)).width).toBe(8192);
   });

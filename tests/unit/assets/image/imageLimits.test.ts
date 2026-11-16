@@ -2,7 +2,9 @@
  * Size and count limits of the image and font decoders: CCITT /Columns and /Rows, the TIFF IFD
  * chain, TIFF sizes (decode and direct embed), PNG sizes and inflate, WOFF table sizes. Every
  * input is built in code (tests/adversarial/image-limits.bodies.ts); each refusal happens before
- * the allocation it guards, so these tests allocate nothing large.
+ * the allocation it guards, so these tests allocate nothing large. The last blocks run each
+ * standalone decoder under the `limits` option of the call: the TIFF decoders, the direct TIFF
+ * embed, WOFF and the font metrics here, WebP in tests/unit/assets/image/webp/webpDecode.test.ts.
  */
 import { zlibSync } from 'fflate';
 import { describe, expect, it } from 'vitest';
@@ -16,8 +18,14 @@ import {
   parseTiffIfd,
 } from '../../../../src/assets/image/tiff/tiffDecode.js';
 import { embedTiffDirect } from '../../../../src/assets/image/tiff/tiffDirectEmbed.js';
-import { INTERNAL_LIMITS, beginCall } from '../../../../src/internal/limits.js';
-import { DEFAULT_LIMITS } from '../../../../src/limits.js';
+import { extractMetrics } from '../../../../src/assets/font/fontMetrics.js';
+import {
+  INTERNAL_LIMITS,
+  beginCall,
+  resolveLimits,
+  type LimitContext,
+} from '../../../../src/internal/limits.js';
+import { DEFAULT_LIMITS, type LimitName, type PdfLimits } from '../../../../src/limits.js';
 import { PdfDict, PdfNumber } from '../../../../src/core/pdfObjects.js';
 import { MalformedInputError, ResourceLimitError } from '../../../../src/errors.js';
 import { decodeCCITT } from '../../../../src/codecs/internal/ccittDecode.js';
@@ -31,6 +39,7 @@ import {
   buildWoffSharedBlob,
   zlibOfZeroBytes,
 } from '../../../adversarial/image-limits.bodies.js';
+import { buildCmapFont } from '../../../adversarial/text-limits.bodies.js';
 
 /** The error `fn` throws, so a test can inspect its fields. */
 function thrown(fn: () => unknown): unknown {
@@ -625,5 +634,382 @@ describe('TIFF negative sizes', () => {
     expect(error).not.toBeInstanceOf(ResourceLimitError);
     expect(error).toBeInstanceOf(Error);
     expect(error.message).toBe('TIFF: negative ImageWidth, ImageLength or sample size');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// The limits option of the standalone decoders
+// ---------------------------------------------------------------------------
+
+/** What a refusal under a limit the caller set carries: the limit, the value it was set to, and `source` "option". */
+function expectOptionLimit(fn: () => unknown, limit: LimitName, max: number, actual: number): void {
+  expect(thrown(fn)).toMatchObject({
+    name: 'ResourceLimitError',
+    code: 'resource-limit-exceeded',
+    limit,
+    max,
+    actual,
+    source: 'option',
+  });
+}
+
+/** A context over the limits `overrides` set, as the public decoders start one. */
+const under = (overrides: PdfLimits): LimitContext => beginCall(resolveLimits(overrides));
+
+/** A 10 x 10 gray TIFF, one strip of 100 bytes. */
+const gray10 = (): Uint8Array => buildTiffImage(10, 10, 1, new Uint8Array(100).fill(7));
+
+/** A little-endian 8-bit gray TIFF of `frames` frames of 10 x 10, frame i filled with the byte i + 1. */
+function buildGrayFrames(frames: number): Uint8Array {
+  const entries = 7;
+  const ifdSize = 2 + entries * 12 + 4;
+  const frameSize = ifdSize + 100;
+  const out = new Uint8Array(8 + frames * frameSize);
+  const view = new DataView(out.buffer);
+  out.set([0x49, 0x49], 0);
+  view.setUint16(2, 42, true);
+  view.setUint32(4, 8, true);
+  for (let i = 0; i < frames; i++) {
+    const at = 8 + i * frameSize;
+    view.setUint16(at, entries, true);
+    const tags: ReadonlyArray<readonly [tag: number, type: number, value: number]> = [
+      [256, 4, 10],
+      [257, 4, 10],
+      [258, 3, 8],
+      [262, 3, 1],
+      [273, 4, at + ifdSize],
+      [277, 3, 1],
+      [279, 4, 100],
+    ];
+    tags.forEach(([tag, type, value], t) => {
+      const entry = at + 2 + t * 12;
+      view.setUint16(entry, tag, true);
+      view.setUint16(entry + 2, type, true);
+      view.setUint32(entry + 4, 1, true);
+      view.setUint32(entry + 8, value, true);
+    });
+    view.setUint32(at + 2 + entries * 12, i === frames - 1 ? 0 : at + frameSize, true);
+    out.fill(i + 1, at + ifdSize, at + frameSize);
+  }
+  return out;
+}
+
+describe('TIFF decode runs under the limits of the call', () => {
+  it('refuses 10 x 10 at maxImagePixels 99 and decodes it at 100', () => {
+    expectOptionLimit(
+      () => decodeTiff(gray10(), { limits: { maxImagePixels: 99 } }),
+      'maxImagePixels',
+      99,
+      100,
+    );
+    const image = decodeTiff(gray10(), { limits: { maxImagePixels: 100 } });
+    expect(image).toMatchObject({ width: 10, height: 10, channels: 1 });
+    expect(image.pixels.length).toBe(100);
+  });
+
+  it('applies the option with a page index, and to maxImageDimension and maxImageBytes', () => {
+    const tiff = buildGrayFrames(2);
+    expect(decodeTiff(tiff, { page: 1, limits: { maxImagePixels: 100 } }).pixels[0]).toBe(2);
+    expectOptionLimit(
+      () => decodeTiff(tiff, { page: 1, limits: { maxImagePixels: 99 } }),
+      'maxImagePixels',
+      99,
+      100,
+    );
+    expectOptionLimit(
+      () => decodeTiff(gray10(), { limits: { maxImageDimension: 9 } }),
+      'maxImageDimension',
+      9,
+      10,
+    );
+    expect(decodeTiff(gray10(), { limits: { maxImageDimension: 10 } }).width).toBe(10);
+    expectOptionLimit(
+      () => decodeTiff(gray10(), { limits: { maxImageBytes: 99 } }),
+      'maxImageBytes',
+      99,
+      100,
+    );
+    expect(decodeTiff(gray10(), { limits: { maxImageBytes: 100 } }).pixels.length).toBe(100);
+  });
+
+  it('refuses the IFD walk to the page at maxImageFrames', () => {
+    const tiff = buildGrayFrames(3);
+    expectOptionLimit(
+      () => decodeTiff(tiff, { page: 2, limits: { maxImageFrames: 2 } }),
+      'maxImageFrames',
+      2,
+      3,
+    );
+    expect(decodeTiff(tiff, { page: 2, limits: { maxImageFrames: 3 } }).pixels[0]).toBe(3);
+  });
+
+  it('counts the bytes of the image toward maxTotalImageBytes', () => {
+    expectOptionLimit(
+      () => decodeTiff(gray10(), { limits: { maxTotalImageBytes: 99 } }),
+      'maxTotalImageBytes',
+      99,
+      100,
+    );
+    expect(decodeTiff(gray10(), { limits: { maxTotalImageBytes: 100 } }).pixels.length).toBe(100);
+  });
+
+  it('keeps the defaults when the option sets nothing, and checks the option first', () => {
+    expect(decodeTiff(gray10(), { limits: {} }).width).toBe(10);
+    expect(thrown(() => decodeTiff(gray10(), { limits: { maxImagePixels: 0 } }))).toMatchObject({
+      name: 'InvalidArgumentError',
+      argument: 'limits.maxImagePixels',
+    });
+    expect(
+      thrown(() => decodeTiff(new Uint8Array(8), { limits: { nope: 1 } as PdfLimits })),
+    ).toMatchObject({ name: 'InvalidArgumentError', argument: 'limits.nope' });
+  });
+
+  it('does not carry a limit from one call to the next', () => {
+    expect(() => decodeTiff(gray10(), { limits: { maxImagePixels: 99 } })).toThrow(
+      ResourceLimitError,
+    );
+    expect(decodeTiff(gray10()).width).toBe(10);
+  });
+});
+
+describe('decodeTiffPage and decodeTiffAll run under the limits of the call', () => {
+  it('decodeTiffPage refuses 10 x 10 at maxImagePixels 99 and decodes it at 100', () => {
+    const tiff = buildGrayFrames(2);
+    expectOptionLimit(
+      () => decodeTiffPage(tiff, 1, { limits: { maxImagePixels: 99 } }),
+      'maxImagePixels',
+      99,
+      100,
+    );
+    expect(decodeTiffPage(tiff, 1, { limits: { maxImagePixels: 100 } }).pixels[0]).toBe(2);
+  });
+
+  it('decodeTiffAll refuses when the frames together are above maxTotalImageBytes', () => {
+    const tiff = buildGrayFrames(3);
+    // Each frame is 100 bytes, within maxImageBytes; the three together are 300.
+    expectOptionLimit(
+      () => decodeTiffAll(tiff, { limits: { maxTotalImageBytes: 299 } }),
+      'maxTotalImageBytes',
+      299,
+      300,
+    );
+    const images = decodeTiffAll(tiff, { limits: { maxTotalImageBytes: 300 } });
+    expect(images.map((image) => image.pixels[0])).toEqual([1, 2, 3]);
+  });
+
+  it('decodeTiffAll keeps the total of one call apart from the total of another', () => {
+    const tiff = buildGrayFrames(3);
+    const limits = { maxTotalImageBytes: 300 };
+    expect(decodeTiffAll(tiff, { limits })).toHaveLength(3);
+    expect(decodeTiffAll(tiff, { limits })).toHaveLength(3);
+  });
+
+  it('decodeTiffAll applies the per-image limits and the frame limit', () => {
+    const tiff = buildGrayFrames(3);
+    expectOptionLimit(
+      () => decodeTiffAll(tiff, { limits: { maxImagePixels: 99 } }),
+      'maxImagePixels',
+      99,
+      100,
+    );
+    expectOptionLimit(
+      () => decodeTiffAll(tiff, { limits: { maxImageFrames: 2 } }),
+      'maxImageFrames',
+      2,
+      3,
+    );
+    expect(decodeTiffAll(tiff, { limits: { maxImageFrames: 3 } })).toHaveLength(3);
+  });
+
+  it('check the option before reading the file', () => {
+    for (const fn of [
+      () => decodeTiffAll(new Uint8Array(0), { limits: { maxImageFrames: 1.5 } }),
+      () => decodeTiffPage(new Uint8Array(0), 0, { limits: { maxImageFrames: 1.5 } }),
+    ]) {
+      expect(thrown(fn)).toMatchObject({
+        name: 'InvalidArgumentError',
+        argument: 'limits.maxImageFrames',
+      });
+    }
+  });
+});
+
+describe('TIFF direct embed runs under the limits of the call', () => {
+  it('refuses 10 x 10 at maxImagePixels 99 and embeds it at 100', () => {
+    expectOptionLimit(
+      () => embedTiffDirect(gray10(), { limits: { maxImagePixels: 99 } }),
+      'maxImagePixels',
+      99,
+      100,
+    );
+    expect(embedTiffDirect(gray10(), { limits: { maxImagePixels: 100 } })).toMatchObject({
+      width: 10,
+      height: 10,
+    });
+  });
+
+  it('applies the option with a page index, and to maxImageDimension', () => {
+    expect(
+      embedTiffDirect(buildGrayFrames(2), { page: 1, limits: { maxImagePixels: 100 } }).data[0],
+    ).toBe(2);
+    expectOptionLimit(
+      () => embedTiffDirect(gray10(), { limits: { maxImageDimension: 9 } }),
+      'maxImageDimension',
+      9,
+      10,
+    );
+  });
+
+  it('refuses strips above maxImageBytes and tiles above it', () => {
+    expectOptionLimit(
+      () => embedTiffDirect(gray10(), { limits: { maxImageBytes: 99 } }),
+      'maxImageBytes',
+      99,
+      100,
+    );
+    expect(embedTiffDirect(gray10(), { limits: { maxImageBytes: 100 } }).data.length).toBe(100);
+    const tiled = buildTiff(
+      [
+        [256, 4, 1, 32],
+        [257, 4, 1, 32],
+        [258, 3, 1, 8],
+        [262, 3, 1, 1],
+        [277, 3, 1, 1],
+        [322, 4, 1, 16],
+        [323, 4, 1, 16],
+        [324, 4, 1, 0],
+        [325, 4, 1, 16],
+      ],
+      new Uint8Array(1024),
+    );
+    // 32 x 32 samples of one byte: 1,024 bytes.
+    expectOptionLimit(
+      () => embedTiffDirect(tiled, { limits: { maxImageBytes: 1023 } }),
+      'maxImageBytes',
+      1023,
+      1024,
+    );
+    expect(embedTiffDirect(tiled, { limits: { maxImageBytes: 1024 } })).toMatchObject({
+      width: 32,
+    });
+  });
+
+  it('checks the option before reading the file', () => {
+    expect(
+      thrown(() => embedTiffDirect(new Uint8Array(0), { limits: { maxImagePixels: -1 } })),
+    ).toMatchObject({ name: 'InvalidArgumentError', argument: 'limits.maxImagePixels' });
+  });
+});
+
+describe('PNG embed runs under the limits of its context', () => {
+  /** A 10 x 10 RGB PNG: 300 decoded sample bytes, passed through as stored. */
+  const rgb10 = (): Uint8Array => buildPng(10, 10, 2, zlibOfZeroBytes(310));
+
+  it('refuses 10 x 10 at maxImagePixels 99 and embeds it at 100', () => {
+    expectOptionLimit(
+      () => embedPng(rgb10(), under({ maxImagePixels: 99 })),
+      'maxImagePixels',
+      99,
+      100,
+    );
+    expect(embedPng(rgb10(), under({ maxImagePixels: 100 }))).toMatchObject({
+      width: 10,
+      height: 10,
+    });
+  });
+
+  it('applies maxImageDimension, maxImageBytes and maxTotalImageBytes', () => {
+    expectOptionLimit(
+      () => embedPng(rgb10(), under({ maxImageDimension: 9 })),
+      'maxImageDimension',
+      9,
+      10,
+    );
+    expectOptionLimit(
+      () => embedPng(rgb10(), under({ maxImageBytes: 299 })),
+      'maxImageBytes',
+      299,
+      300,
+    );
+    expect(embedPng(rgb10(), under({ maxImageBytes: 300 })).width).toBe(10);
+    expectOptionLimit(
+      () => embedPng(rgb10(), under({ maxTotalImageBytes: 299 })),
+      'maxTotalImageBytes',
+      299,
+      300,
+    );
+    expect(embedPng(rgb10(), under({ maxTotalImageBytes: 300 })).width).toBe(10);
+  });
+
+  it('keeps the default limits without a context', () => {
+    expect(embedPng(rgb10()).width).toBe(10);
+  });
+});
+
+describe('WOFF decode runs under the limits of the call', () => {
+  const table = (origLength: number) => [
+    { tag: 'glyf', stored: zlibOfZeroBytes(origLength), origLength },
+  ];
+
+  it('refuses table lengths above maxFontBytes and accepts them at it', () => {
+    // One table of 64 bytes; the sfnt is 12 + 16 + 64 = 92 bytes.
+    expectOptionLimit(
+      () => decodeWoff(buildWoff(table(64)), { limits: { maxFontBytes: 63 } }),
+      'maxFontBytes',
+      63,
+      64,
+    );
+    expectOptionLimit(
+      () => decodeWoff(buildWoff(table(64)), { limits: { maxFontBytes: 91 } }),
+      'maxFontBytes',
+      91,
+      92,
+    );
+    expect(decodeWoff(buildWoff(table(64)), { limits: { maxFontBytes: 92 } }).length).toBe(92);
+  });
+
+  it('refuses a table above maxDecodedStreamBytes before inflating it', () => {
+    expectOptionLimit(
+      () => decodeWoff(buildWoff(table(64)), { limits: { maxDecodedStreamBytes: 63 } }),
+      'maxDecodedStreamBytes',
+      63,
+      64,
+    );
+    expect(decodeWoff(buildWoff(table(64)), { limits: { maxDecodedStreamBytes: 64 } }).length).toBe(
+      92,
+    );
+  });
+
+  it('checks the option first and keeps the defaults without one', () => {
+    expect(
+      thrown(() => decodeWoff(new Uint8Array(0), { limits: { maxFontBytes: 0 } })),
+    ).toMatchObject({ name: 'InvalidArgumentError', argument: 'limits.maxFontBytes' });
+    expect(decodeWoff(buildWoff(table(64))).length).toBe(92);
+  });
+});
+
+describe('extractMetrics runs under the limits of the call', () => {
+  it.each([4, 12] as const)(
+    'refuses a format %i cmap of 95 codes at maxFontCmapMappings 94 and reads it at 95',
+    (format) => {
+      const font = buildCmapFont({ format, numGlyphs: 600, ranges: [[0x20, 0x7e, 1]] });
+      expectOptionLimit(
+        () => extractMetrics(font, { limits: { maxFontCmapMappings: 94 } }),
+        'maxFontCmapMappings',
+        94,
+        95,
+      );
+      expect(extractMetrics(font, { limits: { maxFontCmapMappings: 95 } }).cmapTable.size).toBe(95);
+    },
+  );
+
+  it('checks the option first and keeps the defaults without one', () => {
+    expect(
+      thrown(() =>
+        extractMetrics(new Uint8Array(0), { limits: { maxFontCmapMappings: 0x110001 } }),
+      ),
+    ).toMatchObject({ name: 'InvalidArgumentError', argument: 'limits.maxFontCmapMappings' });
+    const font = buildCmapFont({ format: 12, numGlyphs: 600, ranges: [[0x20, 0x7e, 1]] });
+    expect(extractMetrics(font).cmapTable.size).toBe(95);
   });
 });

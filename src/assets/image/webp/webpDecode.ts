@@ -10,7 +10,14 @@
  * Magic bytes: 52 49 46 46 (RIFF) + offset 8-11: 57 45 42 50 (WEBP)
  */
 
-import { assertWithinLimit } from '../../../internal/limits.js';
+import {
+  addToTotal,
+  assertLimit,
+  beginCall,
+  resolveLimits,
+  type LimitContext,
+} from '../../../internal/limits.js';
+import type { PdfLimits } from '../../../limits.js';
 import {
   MalformedInputError,
   UnsupportedFeatureError,
@@ -103,19 +110,31 @@ function parseRiffChunks(data: Uint8Array): RiffChunk[] {
  *
  * A lossy (VP8) image chunk, with or without an ALPH chunk, throws
  * {@link UnsupportedFilterError} (filter 'VP8') before any of its bytes are read.
- * Images above the internal size limits throw {@link ResourceLimitError}.
+ * Images above the size limits throw {@link ResourceLimitError}:
+ * `maxImageDimension` (65,536) for the width or height, `maxImagePixels` (2^28)
+ * for their product, `maxImageBytes` (256 MiB) for the RGBA bytes and
+ * `maxTotalImageBytes` (1 GiB) for the same bytes as the total of the call; the
+ * values are the defaults, which `options.limits` sets over.
  *
- * @param data  Raw WebP file bytes.
- * @returns     Decoded image with width, height, and pixel data.
+ * @param data     Raw WebP file bytes.
+ * @param options  `limits`: the limits this call decodes under, over
+ *                 `DEFAULT_LIMITS`; checked as the `limits` option of every call is.
+ * @returns        Decoded image with width, height, and pixel data.
+ * @throws {InvalidArgumentError} Argument `limits` or `limits.<name>` when `options.limits` is not
+ *   a valid `limits` value; nothing is read.
  */
-export function decodeWebP(data: Uint8Array): WebPImage {
+export function decodeWebP(
+  data: Uint8Array,
+  options?: { readonly limits?: PdfLimits | undefined },
+): WebPImage {
+  const ctx = beginCall(resolveLimits(options?.limits));
   const chunks = parseRiffChunks(data);
 
   const vp8lChunk = chunks.find((c) => c.fourcc === 'VP8L');
 
   if (vp8lChunk) {
     // VP8L lossless
-    return decodeVP8L(vp8lChunk.data);
+    return decodeVP8L(ctx, vp8lChunk.data);
   }
 
   if (chunks.some((c) => c.fourcc === 'VP8 ')) {
@@ -304,9 +323,9 @@ function readCodeLengths(
 }
 
 /**
- * Decode a VP8L (lossless) bitstream.
+ * Decode a VP8L (lossless) bitstream under the context `ctx`.
  */
-function decodeVP8L(data: Uint8Array): WebPImage {
+function decodeVP8L(ctx: LimitContext, data: Uint8Array): WebPImage {
   if (data.length < 5) {
     throw new MalformedInputError('WebP VP8L: data too short', { format: 'webp' });
   }
@@ -331,9 +350,10 @@ function decodeVP8L(data: Uint8Array): WebPImage {
   }
 
   // Refuse an image above the size limits before any buffer is sized from the header.
-  assertWithinLimit('maxImageDimension', Math.max(width, height));
-  assertWithinLimit('maxImagePixels', width * height);
-  assertWithinLimit('maxImageBytes', width * height * 4);
+  assertLimit(ctx, 'maxImageDimension', Math.max(width, height));
+  assertLimit(ctx, 'maxImagePixels', width * height);
+  assertLimit(ctx, 'maxImageBytes', width * height * 4);
+  addToTotal(ctx, 'maxTotalImageBytes', width * height * 4);
 
   // Read transforms
   const transforms: Array<{ type: number; data: unknown }> = [];

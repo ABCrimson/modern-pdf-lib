@@ -13,7 +13,8 @@
  *            hmtx, cmap, OS/2, maxp, name, post.
  */
 
-import { assertWithinLimit } from '../../internal/limits.js';
+import { assertLimit, beginCall, resolveLimits, type LimitContext } from '../../internal/limits.js';
+import type { PdfLimits } from '../../limits.js';
 import { MalformedInputError } from '../../errors.js';
 
 // ---------------------------------------------------------------------------
@@ -318,6 +319,7 @@ function parseHmtx(
  * the first subtable found on platform 0 or 3.
  */
 function parseCmap(
+  ctx: LimitContext,
   data: Uint8Array,
   cmapTableOffset: number,
   cmapTableLength: number,
@@ -359,7 +361,7 @@ function parseCmap(
   if (format12Offset !== -1) {
     const fmt = view.getUint16(format12Offset, false);
     if (fmt === 12) {
-      return parseCmapFormat12(view, format12Offset, numGlyphs);
+      return parseCmapFormat12(ctx, view, format12Offset, numGlyphs);
     }
   }
 
@@ -367,7 +369,7 @@ function parseCmap(
   if (format4Offset !== -1) {
     const fmt = view.getUint16(format4Offset, false);
     if (fmt === 4) {
-      return parseCmapFormat4(view, format4Offset, numGlyphs);
+      return parseCmapFormat4(ctx, view, format4Offset, numGlyphs);
     }
   }
 
@@ -375,10 +377,10 @@ function parseCmap(
   if (fallbackOffset !== -1) {
     const fmt = view.getUint16(fallbackOffset, false);
     if (fmt === 4) {
-      return parseCmapFormat4(view, fallbackOffset, numGlyphs);
+      return parseCmapFormat4(ctx, view, fallbackOffset, numGlyphs);
     }
     if (fmt === 12) {
-      return parseCmapFormat12(view, fallbackOffset, numGlyphs);
+      return parseCmapFormat12(ctx, view, fallbackOffset, numGlyphs);
     }
   }
 
@@ -391,10 +393,15 @@ function parseCmap(
  *
  * This handles the BMP (codepoints 0x0000–0xFFFF). Glyph ids at or above
  * `numGlyphs` are not stored; the codes the segments name count toward
- * `INTERNAL_LIMITS.maxFontCmapMappings` (0x110000), and a subtable that names
+ * `maxFontCmapMappings` of `ctx` (0x110000 by default), and a subtable that names
  * more is refused with `ResourceLimitError`.
  */
-function parseCmapFormat4(view: DataView, offset: number, numGlyphs: number): Map<number, number> {
+function parseCmapFormat4(
+  ctx: LimitContext,
+  view: DataView,
+  offset: number,
+  numGlyphs: number,
+): Map<number, number> {
   const map = new Map<number, number>();
   let named = 0;
 
@@ -420,7 +427,7 @@ function parseCmapFormat4(view: DataView, offset: number, numGlyphs: number): Ma
     // The codes a segment names count before any is stored, so overlapping segments reach the
     // limit without a walk over every code.
     named += endCode - startCode + 1;
-    assertWithinLimit('maxFontCmapMappings', named);
+    assertLimit(ctx, 'maxFontCmapMappings', named);
 
     for (let code = startCode; code <= endCode; code++) {
       let glyphId: number;
@@ -457,10 +464,15 @@ function parseCmapFormat4(view: DataView, offset: number, numGlyphs: number): Ma
  * Reads at most the groups that fit between the subtable's start and the end
  * of the cmap table, ends each group at 0x10FFFF, skips a group whose start is
  * past its end, and stores no glyph id at or above `numGlyphs`. The codes the
- * groups name count toward `INTERNAL_LIMITS.maxFontCmapMappings` (0x110000), and
- * a subtable that names more is refused with `ResourceLimitError`.
+ * groups name count toward the `maxFontCmapMappings` of `ctx` (0x110000 by default),
+ * and a subtable that names more is refused with `ResourceLimitError`.
  */
-function parseCmapFormat12(view: DataView, offset: number, numGlyphs: number): Map<number, number> {
+function parseCmapFormat12(
+  ctx: LimitContext,
+  view: DataView,
+  offset: number,
+  numGlyphs: number,
+): Map<number, number> {
   const map = new Map<number, number>();
   let named = 0;
 
@@ -486,7 +498,7 @@ function parseCmapFormat12(view: DataView, offset: number, numGlyphs: number): M
     if (startCharCode > endCharCode) continue;
 
     named += endCharCode - startCharCode + 1;
-    assertWithinLimit('maxFontCmapMappings', named);
+    assertLimit(ctx, 'maxFontCmapMappings', named);
 
     for (let code = startCharCode; code <= endCharCode; code++) {
       const glyphId = startGlyphId + (code - startCharCode);
@@ -628,10 +640,20 @@ function estimateStemV(usWeightClass: number): number {
  * and `post` tables to produce a complete {@link FontMetrics} object.
  *
  * @param fontData - The raw TTF or OTF file as a Uint8Array.
+ * @param options  - `limits`: the limits this call parses under, over `DEFAULT_LIMITS`;
+ *   checked as the `limits` option of every call is.
  * @returns Parsed font metrics.
+ * @throws {InvalidArgumentError} Argument `limits` or `limits.<name>` when `options.limits` is not
+ *   a valid `limits` value; nothing is read.
  * @throws {MalformedInputError} Format `sfnt`, if required tables are missing or the data is corrupt.
+ * @throws {ResourceLimitError} `maxFontCmapMappings` when a cmap subtable names more codes
+ *   than that limit (0x110000 by default).
  */
-export function extractMetrics(fontData: Uint8Array): FontMetrics {
+export function extractMetrics(
+  fontData: Uint8Array,
+  options?: { readonly limits?: PdfLimits | undefined },
+): FontMetrics {
+  const ctx = beginCall(resolveLimits(options?.limits));
   const tables = parseTableDirectory(fontData);
 
   // Required tables
@@ -666,7 +688,7 @@ export function extractMetrics(fontData: Uint8Array): FontMetrics {
   // Parse cmap
   const cmapEntry = tables.get('cmap');
   const cmapTable = cmapEntry
-    ? parseCmap(fontData, cmapEntry.offset, cmapEntry.length, numGlyphs)
+    ? parseCmap(ctx, fontData, cmapEntry.offset, cmapEntry.length, numGlyphs)
     : new Map<number, number>();
 
   // Parse name table
