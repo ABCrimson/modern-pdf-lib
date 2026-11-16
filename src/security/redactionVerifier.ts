@@ -61,6 +61,7 @@
  * @packageDocumentation
  */
 
+import { InvalidArgumentError } from '../errors.js';
 import { loadPdf } from '../parser/documentParser.js';
 import { parseContentStream } from '../parser/contentStreamParser.js';
 import { extractTextWithPositions } from '../parser/text/textExtractor.js';
@@ -198,7 +199,8 @@ function intersects(
  *                 `(x, y)` is the lower-left corner.
  * @returns        A report listing every leak found; `clean` is always `false`
  *                 and `warnings` holds the standing sentence.
- * @throws         `TypeError` if `regions` is omitted or empty.
+ * @throws {InvalidArgumentError} If `regions` is omitted or empty (argument `regions`), or a
+ *         region names a page that does not exist (argument `regions[i].page`).
  *
  * @example
  * ```ts
@@ -216,13 +218,14 @@ export async function verifyRedactions(
   regions?: readonly RedactionRegion[],
 ): Promise<RedactionVerificationReport> {
   if (regions === undefined || regions.length === 0) {
-    throw new TypeError(
+    throw new InvalidArgumentError(
       'verifyRedactions requires an explicit, non-empty `regions` array. ' +
         'Automatic redaction-region detection is not performed: black-filled ' +
         'rectangles are indistinguishable from legitimate graphics, and a ' +
         "loaded page's original /Redact annotations are not exposed through a " +
         'stable public API. Pass the regions you redacted (PDF points, ' +
         'bottom-left origin, y-up).',
+      { argument: 'regions' },
     );
   }
 
@@ -241,14 +244,15 @@ export async function verifyRedactions(
   // an uninspected page can never be mistaken for an inspected one. A
   // degenerate (zero-area) region is normally skipped later, but its page is
   // validated here too so a bad index can't hide behind a zero-area region.
-  for (const region of regions) {
+  for (const [index, region] of regions.entries()) {
     const { page } = region;
     if (!Number.isInteger(page) || page < 0 || page >= pageCount) {
-      throw new RangeError(
+      throw new InvalidArgumentError(
         `verifyRedactions: region page index ${page} is out of range. ` +
           `The document has ${pageCount} page(s) (valid indices 0..${pageCount - 1}). ` +
           'Every region must name a real, inspectable page — an out-of-range page ' +
           'cannot be inspected and must not be silently skipped.',
+        { argument: `regions[${index}].page` },
       );
     }
   }

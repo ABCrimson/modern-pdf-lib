@@ -19,7 +19,7 @@
 import { describe, it, expect } from 'vitest';
 import { createPdf } from '../../../src/core/pdfDocument.js';
 import { redactRegions } from '../../../src/render/redactContent.js';
-import { RedactionIncompleteError } from '../../../src/errors.js';
+import { InvalidArgumentError, PdfError, RedactionIncompleteError } from '../../../src/errors.js';
 import { verifyRedactions, type RedactionRegion } from '../../../src/security/redactionVerifier.js';
 
 const STANDING_WARNING =
@@ -202,6 +202,17 @@ describe('verifyRedactions() — required regions', () => {
     await expect(verifyRedactions(bytes, [])).rejects.toThrow(/region/i);
   });
 
+  it.each([
+    ['omitted', undefined],
+    ['an empty array', []],
+  ] as const)('names the `regions` argument when it is %s', async (_name, regions) => {
+    const bytes = await pdfWithTextAt('SECRET', 50, 550);
+    const error: unknown = await verifyRedactions(bytes, regions).catch((e: unknown) => e);
+    expect(error).toBeInstanceOf(InvalidArgumentError);
+    expect(PdfError.is(error, 'invalid-argument')).toBe(true);
+    expect((error as InvalidArgumentError).argument).toBe('regions');
+  });
+
   it('reports no leaks for a document without text, and still not clean', async () => {
     const doc = createPdf();
     doc.addPage([400, 600]); // page with no text at all
@@ -235,21 +246,34 @@ describe('verifyRedactions() — page-range validation', () => {
     // inspected, so reporting no leak for it would be a false-negative.
     await expect(
       verifyRedactions(bytes, [{ page: 1, x: 0, y: 0, width: 400, height: 600 }]),
-    ).rejects.toThrow(RangeError);
+    ).rejects.toThrow(InvalidArgumentError);
+  });
+
+  it('names the region whose page index is out of range', async () => {
+    const bytes = await pdfWithTextAt('SECRET', 50, 550);
+    const error: unknown = await verifyRedactions(bytes, [
+      { page: 0, x: 45, y: 545, width: 120, height: 25 },
+      { page: 3, x: 0, y: 0, width: 10, height: 10 },
+    ]).catch((e: unknown) => e);
+    expect(error).toBeInstanceOf(InvalidArgumentError);
+    expect((error as InvalidArgumentError).argument).toBe('regions[1].page');
+    expect((error as InvalidArgumentError).message).toMatch(
+      /^verifyRedactions: region page index 3 is out of range\. The document has 1 page\(s\)/,
+    );
   });
 
   it('throws when a region names a negative page index', async () => {
     const bytes = await pdfWithTextAt('SECRET', 50, 550);
     await expect(
       verifyRedactions(bytes, [{ page: -1, x: 0, y: 0, width: 400, height: 600 }]),
-    ).rejects.toThrow(RangeError);
+    ).rejects.toThrow(InvalidArgumentError);
   });
 
   it('throws when a region names a non-integer page index', async () => {
     const bytes = await pdfWithTextAt('SECRET', 50, 550);
     await expect(
       verifyRedactions(bytes, [{ page: 0.5, x: 0, y: 0, width: 400, height: 600 }]),
-    ).rejects.toThrow(RangeError);
+    ).rejects.toThrow(InvalidArgumentError);
   });
 
   it('rejects the whole call if ANY region is out of range (even a degenerate one)', async () => {
@@ -263,6 +287,6 @@ describe('verifyRedactions() — page-range validation', () => {
         { page: 0, x: 45, y: 545, width: 120, height: 25 },
         { page: 99, x: 0, y: 0, width: 0, height: 0 },
       ]),
-    ).rejects.toThrow(RangeError);
+    ).rejects.toThrow(InvalidArgumentError);
   });
 });

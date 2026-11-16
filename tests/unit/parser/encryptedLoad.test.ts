@@ -37,8 +37,7 @@ import { PdfRef } from '../../../src/core/pdfObjects.js';
 import type { PdfDict, PdfObject, PdfStream, PdfString } from '../../../src/core/pdfObjects.js';
 import { decodeStreamData } from '../../../src/codecs/streamDecode.js';
 import { extractText, parseContentStream } from '../../../src/index.js';
-import { PdfParseError } from '../../../src/parser/parseError.js';
-import { UnsupportedEncryptionError } from '../../../src/errors.js';
+import { EncryptedPdfError, UnsupportedEncryptionError } from '../../../src/errors.js';
 import { qpdfDecryptQdf, requireQpdf } from '../../helpers/oracle/qpdf.js';
 
 const DIR = join(import.meta.dirname, '../../fixtures/encrypted');
@@ -303,14 +302,14 @@ describe('/EncryptMetadata false leaves only the document-level metadata stream 
 });
 
 describe('errors', () => {
-  it('a missing password and a wrong one keep their PdfParseError', async () => {
+  it('a missing password and a wrong one throw EncryptedPdfError', async () => {
     await expect(loadPdf(fixture('aes-128-r4.pdf'))).rejects.toThrow(
       /This PDF is encrypted and requires a password\./,
     );
     await expect(loadPdf(fixture('aes-128-r4.pdf'), { password: 'nope' })).rejects.toThrow(
       /Failed to decrypt PDF: the provided password is incorrect\./,
     );
-    await expect(loadPdf(fixture('aes-128-r4.pdf'))).rejects.toBeInstanceOf(PdfParseError);
+    await expect(loadPdf(fixture('aes-128-r4.pdf'))).rejects.toBeInstanceOf(EncryptedPdfError);
   });
 
   it('a security handler other than /Standard is refused, not reported as a wrong password', async () => {

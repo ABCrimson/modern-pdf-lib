@@ -6,8 +6,9 @@
  * - RFC 6234
  */
 
-import { describe, it, expect } from 'vitest';
+import { afterEach, describe, it, expect, vi } from 'vitest';
 import { sha256, sha384, sha512 } from '../../../src/crypto/sha256.js';
+import { EnvironmentError, PdfError } from '../../../src/errors.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -252,6 +253,29 @@ describe('sha512', () => {
     // Should match sha512('abc')
     expect(hexFromBytes(hash)).toBe(
       'ddaf35a193617abacc417349ae20413112e6fa4e89a97ea20a9eeee64b55d39a2192992a274fc1a836ba3c23a3feebbd454d4423643ce80e2a9ac94fa54ca49f',
+    );
+  });
+});
+
+describe('sha256: typed errors', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('a runtime without Web Crypto is an EnvironmentError with reason "web-crypto"', async () => {
+    vi.stubGlobal('crypto', {});
+    let error: unknown;
+    try {
+      await sha256(new Uint8Array(0));
+    } catch (e) {
+      error = e;
+    }
+    expect(error).toBeInstanceOf(EnvironmentError);
+    expect(PdfError.is(error, 'environment-unavailable')).toBe(true);
+    expect((error as EnvironmentError).reason).toBe('web-crypto');
+    expect((error as Error).message).toBe(
+      'Web Crypto API (crypto.subtle) is not available in this runtime. ' +
+        'SHA hashing requires Node.js 18+, a modern browser, Deno, or Bun.',
     );
   });
 });

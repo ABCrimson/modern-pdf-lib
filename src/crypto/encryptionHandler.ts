@@ -39,7 +39,7 @@ import {
 } from './keyDerivation.js';
 import type { EncryptDictValues } from './keyDerivation.js';
 import { warnOnce } from '../internal/warnings.js';
-import { UnsupportedEncryptionError } from '../errors.js';
+import { MalformedInputError, UnsupportedEncryptionError } from '../errors.js';
 
 // ---------------------------------------------------------------------------
 // Public types
@@ -440,7 +440,9 @@ export class PdfEncryptionHandler {
    *         `/Standard`, `/V` is not 1, 2, 4 or 5, a `/CF` entry has a `/CFM` other than
    *         `/None`, `/V2`, `/AESV2` and `/AESV3`, or `/StmF`, `/StrF` or `/EFF` names no `/CF`
    *         entry and is not `/Identity`.
-   * @throws          If the password is incorrect or the dict is invalid.
+   * @throws {MalformedInputError} Before any password is tried, when `/O` or `/U` is missing.
+   * @throws {EncryptedPdfError} With reason `'incorrect-password'` when the password opens
+   *         neither the user nor the owner entry.
    */
   static async fromEncryptDict(
     dict: PdfDict,
@@ -471,7 +473,9 @@ export class PdfEncryptionHandler {
     const userKey = getStringBytes(dict, '/U');
 
     if (!ownerKey || !userKey) {
-      throw new Error('Invalid /Encrypt dictionary: missing /O or /U values');
+      throw new MalformedInputError('Invalid /Encrypt dictionary: missing /O or /U values', {
+        format: 'pdf',
+      });
     }
 
     const encryptMetadata = getBool(dict, '/EncryptMetadata') ?? true;

@@ -2,8 +2,14 @@
  * Tests for AES-CBC encryption/decryption via Web Crypto API.
  */
 
-import { describe, it, expect } from 'vitest';
+import { afterEach, describe, it, expect, vi } from 'vitest';
 import { aesEncryptCBC, aesDecryptCBC } from '../../../src/crypto/aes.js';
+import {
+  EnvironmentError,
+  InvalidArgumentError,
+  MalformedInputError,
+  PdfError,
+} from '../../../src/errors.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -159,5 +165,66 @@ describe('aesEncryptCBC / aesDecryptCBC', () => {
     const encrypted = await aesEncryptCBC(key, plaintext);
     const decrypted = await aesDecryptCBC(key, encrypted);
     expect(decrypted).toEqual(plaintext);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Typed errors
+// ---------------------------------------------------------------------------
+
+/** What `promise` rejects with; fails when it resolves. */
+async function rejection(promise: Promise<unknown>): Promise<unknown> {
+  try {
+    await promise;
+  } catch (error) {
+    return error;
+  }
+  throw new Error('the promise resolved');
+}
+
+describe('aes: typed errors', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('a key of the wrong size is an InvalidArgumentError', async () => {
+    const error = await rejection(aesEncryptCBC(randomBytes(24), new Uint8Array(1)));
+    expect(error).toBeInstanceOf(InvalidArgumentError);
+    expect(PdfError.is(error, 'invalid-argument')).toBe(true);
+    expect((error as Error).message).toBe(
+      'AES key must be 16 bytes (AES-128) or 32 bytes (AES-256), got 24',
+    );
+  });
+
+  it('an IV of the wrong size is an InvalidArgumentError', async () => {
+    const error = await rejection(
+      aesEncryptCBC(randomBytes(16), new Uint8Array(1), randomBytes(8)),
+    );
+    expect(error).toBeInstanceOf(InvalidArgumentError);
+    expect((error as Error).message).toBe('AES-CBC IV must be 16 bytes, got 8');
+  });
+
+  it.each([
+    [16, 'AES-CBC ciphertext must be at least 32 bytes (16-byte IV + 16-byte minimum block)'],
+    [33, 'AES-CBC ciphertext length (17) must be a multiple of 16'],
+  ])('ciphertext of %i bytes is a MalformedInputError', async (length, message) => {
+    const error = await rejection(aesDecryptCBC(randomBytes(16), randomBytes(length)));
+    expect(error).toBeInstanceOf(MalformedInputError);
+    expect(PdfError.is(error, 'malformed-input')).toBe(true);
+    expect((error as Error).message).toBe(message);
+  });
+
+  it('a runtime without Web Crypto is an EnvironmentError with reason "web-crypto"', async () => {
+    const key = randomBytes(16);
+    const data = randomBytes(32);
+    vi.stubGlobal('crypto', {});
+    const error = await rejection(aesDecryptCBC(key, data));
+    expect(error).toBeInstanceOf(EnvironmentError);
+    expect(PdfError.is(error, 'environment-unavailable')).toBe(true);
+    expect((error as EnvironmentError).reason).toBe('web-crypto');
+    expect((error as Error).message).toBe(
+      'Web Crypto API (crypto.subtle) is not available in this runtime. ' +
+        'AES encryption requires Node.js 18+, a modern browser, Deno, or Bun.',
+    );
   });
 });

@@ -8,6 +8,7 @@ import { describe, it, expect } from 'vitest';
 import { PdfEncryptionHandler } from '../../../src/crypto/encryptionHandler.js';
 import type { EncryptOptions } from '../../../src/crypto/encryptionHandler.js';
 import { PdfString, PdfName, PdfNumber } from '../../../src/core/pdfObjects.js';
+import { EncryptedPdfError, MalformedInputError, PdfError } from '../../../src/errors.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -498,5 +499,48 @@ describe('PdfEncryptionHandler — permissions on encrypt dict', () => {
     expect(perms.copying).toBe(true);
     expect(perms.modifying).toBe(false);
     expect(perms.fillingForms).toBe(true);
+  });
+});
+
+describe('PdfEncryptionHandler: typed errors', () => {
+  it('a wrong password for AES-256 (R=6) is an EncryptedPdfError with reason "incorrect-password"', async () => {
+    const fileId = randomBytes(16);
+    const original = await PdfEncryptionHandler.create(
+      { userPassword: 'user', ownerPassword: 'owner', algorithm: 'aes-256' },
+      fileId,
+    );
+    const dict = original.buildEncryptDict();
+
+    let error: unknown;
+    try {
+      await PdfEncryptionHandler.fromEncryptDict(dict, fileId, 'wrong');
+    } catch (e) {
+      error = e;
+    }
+    expect(error).toBeInstanceOf(EncryptedPdfError);
+    expect(PdfError.is(error, 'encrypted-pdf')).toBe(true);
+    expect((error as EncryptedPdfError).reason).toBe('incorrect-password');
+    expect((error as Error).message).toBe('Incorrect password for R=6 encryption');
+  });
+
+  it('an /Encrypt dictionary without /O and /U is a MalformedInputError of format "pdf"', async () => {
+    const fileId = randomBytes(16);
+    const original = await PdfEncryptionHandler.create(
+      { userPassword: 'user', ownerPassword: 'owner', algorithm: 'rc4-128' },
+      fileId,
+    );
+    const dict = original.buildEncryptDict();
+    dict.delete('/O');
+
+    let error: unknown;
+    try {
+      await PdfEncryptionHandler.fromEncryptDict(dict, fileId, 'user');
+    } catch (e) {
+      error = e;
+    }
+    expect(error).toBeInstanceOf(MalformedInputError);
+    expect(PdfError.is(error, 'malformed-input')).toBe(true);
+    expect((error as MalformedInputError).format).toBe('pdf');
+    expect((error as Error).message).toBe('Invalid /Encrypt dictionary: missing /O or /U values');
   });
 });

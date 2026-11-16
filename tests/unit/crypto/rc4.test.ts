@@ -5,6 +5,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
+import { InvalidArgumentError, PdfError } from '../../../src/errors.js';
 import { rc4 } from '../../../src/crypto/rc4.js';
 
 // ---------------------------------------------------------------------------
@@ -134,5 +135,19 @@ describe('rc4', () => {
 
     const decrypted = rc4(key, encrypted);
     expect(decrypted).toEqual(data);
+  });
+});
+
+describe('rc4: typed errors', () => {
+  it.each([0, 257])('a key of %i bytes is an InvalidArgumentError', (length) => {
+    let error: unknown;
+    try {
+      rc4(new Uint8Array(length), new Uint8Array([1]));
+    } catch (e) {
+      error = e;
+    }
+    expect(error).toBeInstanceOf(InvalidArgumentError);
+    expect(PdfError.is(error, 'invalid-argument')).toBe(true);
+    expect((error as Error).message).toBe('RC4 key length must be 1-256 bytes');
   });
 });

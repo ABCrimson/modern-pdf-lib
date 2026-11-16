@@ -13,6 +13,8 @@
  * here solely for backward compatibility with older PDF files.
  */
 
+import { InvalidArgumentError } from '../errors.js';
+
 // ---------------------------------------------------------------------------
 // Public API
 // ---------------------------------------------------------------------------
@@ -29,7 +31,7 @@
 export function rc4(key: Uint8Array, data: Uint8Array): Uint8Array {
   const keyLen = key.length;
   if (keyLen === 0 || keyLen > 256) {
-    throw new RangeError('RC4 key length must be 1-256 bytes');
+    throw new InvalidArgumentError('RC4 key length must be 1-256 bytes', { argument: 'key' });
   }
 
   // --- Key Scheduling Algorithm (KSA) ---

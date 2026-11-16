@@ -52,7 +52,7 @@ import {
 } from '../crypto/encryptionHandler.js';
 import { contentsLeftAsStored } from '../crypto/internal/signatureContents.js';
 import { PdfParseError } from './parseError.js';
-import { ResourceLimitError, UnsupportedEncryptionError } from '../errors.js';
+import { EncryptedPdfError, ResourceLimitError, UnsupportedEncryptionError } from '../errors.js';
 import { assertWithinLimit } from '../internal/limits.js';
 
 // ---------------------------------------------------------------------------
@@ -454,7 +454,9 @@ export class PdfDocumentParser {
    * @throws {UnsupportedEncryptionError} When the handler or a crypt filter is not supported
    *         (before any password is tried).
    * @throws {ResourceLimitError} When an internal limit is exceeded.
-   * @throws          PdfParseError when no password opens the file.
+   * @throws {EncryptedPdfError} When no password opens the file: reason `'incorrect-password'`
+   *         when `password` was given, `'password-required'` when it was not; `cause` is the
+   *         error of the last derivation.
    * @returns         The handler, also kept as the parser's encryption handler.
    */
   private async setupDecryption(password?: string): Promise<PdfEncryptionHandler> {
@@ -515,25 +517,16 @@ export class PdfDocumentParser {
 
     // All password attempts failed
     if (password !== undefined) {
-      throw new PdfParseError({
-        message: `Failed to decrypt PDF: the provided password is incorrect. ${lastError?.message ?? ''}`,
-        offset: 0,
-        expected: 'valid decryption password',
-        actual: 'incorrect password',
-        data: this.data,
-        cause: lastError,
-      });
-    } else {
-      throw new PdfParseError({
-        message:
-          'This PDF is encrypted and requires a password. ' +
-          'Pass { password: "..." } in the options to decrypt it.',
-        offset: 0,
-        expected: 'unencrypted PDF or password option',
-        actual: 'encrypted PDF without password',
-        data: this.data,
-      });
+      throw new EncryptedPdfError(
+        `Failed to decrypt PDF: the provided password is incorrect. ${lastError?.message ?? ''}`,
+        { reason: 'incorrect-password', cause: lastError },
+      );
     }
+    throw new EncryptedPdfError(
+      'This PDF is encrypted and requires a password. ' +
+        'Pass { password: "..." } in the options to decrypt it.',
+      { reason: 'password-required', cause: lastError },
+    );
   }
 
   /** Parse the in-use object `ref` with a parser whose registry is not the document's. */
@@ -1251,7 +1244,7 @@ export class PdfDocumentParser {
         this.objectCache.set(objEntry.objNum, parsedObj);
       } catch (err) {
         if (this.throwOnInvalidObject) {
-          throw err instanceof Error ? err : new Error(String(err));
+          throw err;
         }
         // Skip unparseable objects within the stream
         streamObjects.set(i, PdfNull.instance);
@@ -1328,7 +1321,7 @@ export class PdfDocumentParser {
       infoObj = this.resolveRef(this.trailer.infoRef);
     } catch (err) {
       if (this.throwOnInvalidObject || err instanceof ResourceLimitError) {
-        throw err instanceof Error ? err : new Error(String(err));
+        throw err;
       }
       return metadata; // Info dict not parseable
     }
@@ -1407,7 +1400,7 @@ export class PdfDocumentParser {
           }
         } catch (err) {
           if (this.throwOnInvalidObject || err instanceof ResourceLimitError) {
-            throw err instanceof Error ? err : new Error(String(err));
+            throw err;
           }
           // Skip objects that fail to resolve
         }
@@ -1733,6 +1726,9 @@ function parsePdfDate(dateStr: string): Date | undefined {
  *                 Base64-encoded string.
  * @param options  Optional loading options.
  * @returns        A fully parsed PdfDocument.
+ * @throws {EncryptedPdfError} When the file is encrypted and neither the empty password nor
+ *         `options.password` opens it: `reason` is `'password-required'` when no password was
+ *         given and `'incorrect-password'` when one was.
  *
  * @example
  * ```ts

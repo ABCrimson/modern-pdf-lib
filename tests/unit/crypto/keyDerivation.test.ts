@@ -6,6 +6,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
+import { EncryptedPdfError, InvalidArgumentError, PdfError } from '../../../src/errors.js';
 import {
   computeEncryptionKeyR2R4,
   computeOwnerPasswordValue,
@@ -427,5 +428,51 @@ describe('saslprep', () => {
 
   it('handles mixed script password', () => {
     expect(saslprep('пароль123')).toBe('пароль123');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Typed errors
+// ---------------------------------------------------------------------------
+
+describe('key derivation: typed errors', () => {
+  it('a wrong password for R=3 is an EncryptedPdfError with reason "incorrect-password"', async () => {
+    const fileId = hexToBytes('12345678901234567890123456789012');
+    const dict: EncryptDictValues = {
+      version: 2,
+      revision: 3,
+      keyLength: 128,
+      ownerKey: computeOwnerPasswordValue('owner', 'user', 3, 128),
+      userKey: new Uint8Array(32),
+      permissions: encodePermissions({}),
+      encryptMetadata: true,
+    };
+    dict.userKey = computeUserPasswordHash('user', dict, fileId);
+
+    let error: unknown;
+    try {
+      await computeFileEncryptionKey('completely-wrong', dict, fileId);
+    } catch (e) {
+      error = e;
+    }
+    expect(error).toBeInstanceOf(EncryptedPdfError);
+    expect(PdfError.is(error, 'encrypted-pdf')).toBe(true);
+    expect((error as EncryptedPdfError).reason).toBe('incorrect-password');
+    expect((error as Error).message).toBe('Incorrect password');
+  });
+
+  it('a prohibited code point in a password is an InvalidArgumentError naming the password', () => {
+    let error: unknown;
+    try {
+      saslprep('pass\x00word');
+    } catch (e) {
+      error = e;
+    }
+    expect(error).toBeInstanceOf(InvalidArgumentError);
+    expect(PdfError.is(error, 'invalid-argument')).toBe(true);
+    expect((error as InvalidArgumentError).argument).toBe('password');
+    expect((error as Error).message).toBe(
+      'Password contains prohibited character U+0000 (SASLprep)',
+    );
   });
 });

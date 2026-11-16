@@ -15,6 +15,7 @@
  *            ISO 32000-2:2020 SS7.6.3.
  */
 
+import { EncryptedPdfError, EnvironmentError, InvalidArgumentError } from '../errors.js';
 import { md5 } from './md5.js';
 import { rc4 } from './rc4.js';
 // Note: aesDecryptCBC is NOT used here -- V=5 key unwrapping uses
@@ -98,8 +99,9 @@ function saslprep(input: string): string {
   // Step 3: Prohibited characters -- reject if any are present
   const cp = firstProhibited(normalized);
   if (cp !== undefined) {
-    throw new Error(
+    throw new InvalidArgumentError(
       `Password contains prohibited character U+${cp.toString(16).toUpperCase().padStart(4, '0')} (SASLprep)`,
+      { argument: 'password' },
     );
   }
   return normalized;
@@ -793,7 +795,7 @@ async function aesEncryptCBCNoPad(
 ): Promise<Uint8Array> {
   const subtle = globalThis.crypto?.subtle;
   if (!subtle) {
-    throw new Error('Web Crypto API not available');
+    throw new EnvironmentError('Web Crypto API not available', { reason: 'web-crypto' });
   }
 
   // Ensure plain ArrayBuffer for Web Crypto API compatibility
@@ -829,7 +831,7 @@ async function aesDecryptCBCNoPad(
 ): Promise<Uint8Array> {
   const subtle = globalThis.crypto?.subtle;
   if (!subtle) {
-    throw new Error('Web Crypto API not available');
+    throw new EnvironmentError('Web Crypto API not available', { reason: 'web-crypto' });
   }
 
   const keyBuf = key.buffer.slice(key.byteOffset, key.byteOffset + key.byteLength) as ArrayBuffer;
@@ -958,7 +960,8 @@ async function buildCacheKey(
  * @param dict      Encryption dictionary values.
  * @param fileId    The first element of the /ID array (unused for R>=5).
  * @returns         The file encryption key and its derivation.
- * @throws          If the password is incorrect.
+ * @throws {EncryptedPdfError} With reason `'incorrect-password'` when the password opens neither
+ *         the user nor the owner entry.
  * @internal
  */
 export async function deriveFileEncryptionKey(
@@ -976,7 +979,10 @@ export async function deriveFileEncryptionKey(
   if (dict.revision >= 5) {
     const found = await deriveFileKeyV5(password, dict);
     if (found === null) {
-      throw new Error(`Incorrect password for R=${dict.revision === 5 ? 5 : 6} encryption`);
+      throw new EncryptedPdfError(
+        `Incorrect password for R=${dict.revision === 5 ? 5 : 6} encryption`,
+        { reason: 'incorrect-password' },
+      );
     }
     result = found;
   } else {
@@ -991,7 +997,7 @@ export async function deriveFileEncryptionKey(
         derivation: 'iso',
       };
     } else {
-      throw new Error('Incorrect password');
+      throw new EncryptedPdfError('Incorrect password', { reason: 'incorrect-password' });
     }
   }
 
@@ -1020,7 +1026,8 @@ export async function deriveFileEncryptionKey(
  * @param dict      Encryption dictionary values.
  * @param fileId    The first element of the /ID array (unused for R>=5).
  * @returns         The file encryption key.
- * @throws          If the password is incorrect.
+ * @throws {EncryptedPdfError} With reason `'incorrect-password'` when the password opens neither
+ *         the user nor the owner entry.
  */
 export async function computeFileEncryptionKey(
   password: string,

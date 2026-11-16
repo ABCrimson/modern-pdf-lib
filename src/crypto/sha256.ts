@@ -9,6 +9,8 @@
  * Reference: FIPS 180-4 (Secure Hash Standard).
  */
 
+import { EnvironmentError } from '../errors.js';
+
 // ---------------------------------------------------------------------------
 // Internal helper
 // ---------------------------------------------------------------------------
@@ -27,9 +29,10 @@ function toBuffer(data: Uint8Array): ArrayBuffer {
 function getSubtle(): SubtleCrypto {
   const subtle = globalThis.crypto?.subtle;
   if (!subtle) {
-    throw new Error(
+    throw new EnvironmentError(
       'Web Crypto API (crypto.subtle) is not available in this runtime. ' +
         'SHA hashing requires Node.js 18+, a modern browser, Deno, or Bun.',
+      { reason: 'web-crypto' },
     );
   }
   return subtle;
