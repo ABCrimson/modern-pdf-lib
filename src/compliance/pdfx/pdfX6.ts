@@ -22,7 +22,7 @@
  */
 
 import { PdfArray, PdfDict, PdfName, PdfNumber, PdfString } from '../../core/pdfObjects.js';
-import { warnOnce } from '../../internal/warnings.js';
+import { UNSUPPORTED_OPTIONS, rejectOption } from '../../internal/options.js';
 
 // ---------------------------------------------------------------------------
 // Public types
@@ -31,16 +31,13 @@ import { warnOnce } from '../../internal/warnings.js';
 /** The supported PDF/X-6 conformance variants. */
 export type PdfX6Variant = 'PDF/X-6' | 'PDF/X-6p' | 'PDF/X-6n';
 
-/** Options describing the PDF/X-6 output intent and conformance. */
+/**
+ * Options describing the PDF/X-6 output intent and conformance.
+ *
+ * The `variant` option was removed in 0.41.0: pass the variant to `buildGtsPdfxVersion()`. The
+ * runtime refusal of it is removed in 0.50.0.
+ */
 export interface PdfX6Options {
-  /**
-   * Conformance variant.
-   *
-   * Has no effect in this version in `buildPdfX6OutputIntent()`, which does not record it in the
-   * output intent; passing it there emits a one-time `ModernPdfLibWarning` (code
-   * `MPL_IGNORED_OPTION`). `buildGtsPdfxVersion()` takes the variant as its own argument.
-   */
-  readonly variant?: PdfX6Variant | undefined;
   /**
    * Output condition identifier — a registered name (e.g. a registry
    * reference such as `'FOGRA51'`) or `'Custom'` for an embedded profile.
@@ -69,6 +66,11 @@ export interface BoxGeometry {
 // Output intent
 // ---------------------------------------------------------------------------
 
+/** The options `buildPdfX6OutputIntent()` refuses: the rows of the option rule table for it. */
+const REFUSED_OPTIONS = UNSUPPORTED_OPTIONS.filter(
+  (rule) => rule.entry === 'buildPdfX6OutputIntent()',
+);
+
 /**
  * Build a PDF/X-6 output-intent dictionary.
  *
@@ -79,15 +81,16 @@ export interface BoxGeometry {
  *
  * @param options - Output-intent identification.
  * @returns A freshly-built `/Type /OutputIntent` dictionary.
+ * @throws {UnsupportedOptionError} If `options` has a `variant`, which was removed in 0.41.0.
  * @throws {UnencodableTextError} For an identifier, condition or registry name with a character no text string holds (a lone surrogate or U+001B).
  */
 export function buildPdfX6OutputIntent(options: PdfX6Options): PdfDict {
-  if (options.variant !== undefined) {
-    warnOnce(
-      'ignored-option:buildPdfX6OutputIntent variant',
-      'MPL_IGNORED_OPTION',
-      '`buildPdfX6OutputIntent()`: the option `variant` has no effect in this version.',
-    );
+  // The removed option is not in the type; a JavaScript caller or a cast can still pass it. This
+  // guard is removed in 0.50.0.
+  for (const rule of REFUSED_OPTIONS) {
+    if (rule.option !== undefined && Reflect.get(options, rule.option) !== undefined) {
+      rejectOption(rule);
+    }
   }
   const dict = new PdfDict();
   dict.set('/Type', PdfName.of('/OutputIntent'));

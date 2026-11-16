@@ -1,93 +1,81 @@
 /**
- * `buildPdfX6OutputIntent` accepts an option and does not act on it, so it warns once with the code
- * `MPL_IGNORED_OPTION`. Each row checks the first call, the second call, the absent and undefined
- * option, and that the message names no caller value.
+ * `buildPdfX6OutputIntent` used to accept the option `variant` and not act on it. 0.41.0 removed it:
+ * a caller who still passes it gets an `UnsupportedOptionError`, whose message is fixed text and
+ * names no caller value. An absent or undefined option builds the output intent as before.
  */
 
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { MockInstance } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { buildPdfX6OutputIntent } from '../../../../src/compliance/pdfx/pdfX6.js';
-import { resetWarningsForTesting } from '../../../../src/internal/warnings.js';
-import { CODE, TYPE, ignoredOptionMessage as message } from '../../../helpers/ignoredOptions.js';
-
-let emit: MockInstance<typeof process.emitWarning>;
-
-beforeEach(() => {
-  resetWarningsForTesting();
-  emit = vi.spyOn(process, 'emitWarning').mockImplementation(() => {});
-});
-
-afterEach(() => {
-  vi.restoreAllMocks();
-  resetWarningsForTesting();
-});
+import { UnsupportedOptionError } from '../../../../src/errors.js';
 
 interface Row {
   readonly entry: string;
-  /** The subject as it appears in the message, with `()` for a function. */
-  readonly subject: string;
   readonly option: string;
-  /** The value passed to trigger the warning. */
+  /** The value passed to trigger the refusal. */
   readonly value: unknown;
-  /** Values that change nothing and must not warn. */
-  readonly quiet?: readonly unknown[];
+  /** The message, word for word. */
+  readonly message: string;
   readonly invoke: (extra: Record<string, unknown>) => unknown;
 }
 
 const ROWS: readonly Row[] = [
   {
-    entry: 'buildPdfX6OutputIntent',
-    subject: 'buildPdfX6OutputIntent()',
+    entry: 'buildPdfX6OutputIntent()',
     option: 'variant',
     value: 'PDF/X-6p',
+    message:
+      '`buildPdfX6OutputIntent()`: the option `variant` was removed in 0.41.0. Pass the variant to buildGtsPdfxVersion() instead.',
     invoke: (extra) => buildPdfX6OutputIntent({ outputConditionIdentifier: 'Custom', ...extra }),
   },
 ];
 
-function ignoredCalls(): unknown[][] {
-  return emit.mock.calls.filter(([, options]) => (options as { code?: string }).code === CODE);
+function thrownBy(call: () => unknown): unknown {
+  try {
+    call();
+  } catch (error) {
+    return error;
+  }
+  return undefined;
 }
 
 describe.each(ROWS)('$entry option $option', (row) => {
-  it('warns once on the first call and not on the second', async () => {
-    await row.invoke({ [row.option]: row.value });
-    expect(ignoredCalls()).toHaveLength(1);
-    expect(emit).toHaveBeenCalledWith(message(row.subject, row.option), { type: TYPE, code: CODE });
-
-    await row.invoke({ [row.option]: row.value });
-    expect(ignoredCalls()).toHaveLength(1);
+  it('throws UnsupportedOptionError on every call', () => {
+    for (let call = 0; call < 2; call++) {
+      const error = thrownBy(() => row.invoke({ [row.option]: row.value }));
+      expect(error).toBeInstanceOf(UnsupportedOptionError);
+      const thrown = error as UnsupportedOptionError;
+      expect(thrown.code).toBe('unsupported-option');
+      expect(thrown.entry).toBe(row.entry);
+      expect(thrown.option).toBe(row.option);
+      expect(thrown.plannedFor).toBeUndefined();
+    }
   });
 
-  it('does not warn when the option is absent or undefined', async () => {
-    await row.invoke({});
-    await row.invoke({ [row.option]: undefined });
-    expect(ignoredCalls()).toHaveLength(0);
+  it('does not throw when the option is absent or undefined', () => {
+    expect(() => row.invoke({})).not.toThrow();
+    expect(() => row.invoke({ [row.option]: undefined })).not.toThrow();
   });
 
-  it('does not warn for a value that changes nothing', async () => {
-    for (const quiet of row.quiet ?? []) await row.invoke({ [row.option]: quiet });
-    expect(ignoredCalls()).toHaveLength(0);
-  });
-
-  it('names no caller value in the message', async () => {
-    await row.invoke({ [row.option]: row.value });
-    const [text] = ignoredCalls()[0] as [string];
-    expect(text).toBe(message(row.subject, row.option));
+  it('names no caller value in the message', () => {
+    const error = thrownBy(() => row.invoke({ [row.option]: row.value })) as Error;
+    expect(error.message).toBe(row.message);
     if (typeof row.value === 'string' || typeof row.value === 'number') {
-      expect(text).not.toContain(String(row.value));
+      expect(error.message).not.toContain(String(row.value));
     }
   });
 });
 
 describe('results stay the same', () => {
-  it('buildPdfX6OutputIntent builds the same keys with and without variant', () => {
-    const withVariant = buildPdfX6OutputIntent({
+  it('buildPdfX6OutputIntent builds the same keys with an undefined variant as without it', () => {
+    const without = buildPdfX6OutputIntent({ outputConditionIdentifier: 'Custom' });
+    const undefinedVariant = buildPdfX6OutputIntent({
       outputConditionIdentifier: 'Custom',
-      variant: 'PDF/X-6n',
+      ...({ variant: undefined } as Record<string, unknown>),
     });
     for (const key of ['/Type', '/S', '/OutputConditionIdentifier']) {
-      expect(withVariant.has(key)).toBe(true);
+      expect(undefinedVariant.has(key)).toBe(true);
+      expect(without.has(key)).toBe(true);
     }
-    expect(withVariant.has('/Variant')).toBe(false);
+    expect(undefinedVariant.has('/Variant')).toBe(false);
   });
 });

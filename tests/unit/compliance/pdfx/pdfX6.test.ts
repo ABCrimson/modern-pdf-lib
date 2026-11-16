@@ -93,7 +93,6 @@ describe('buildPdfX6OutputIntent', () => {
 
   it('includes optional output condition and registry name when supplied', () => {
     const dict = buildPdfX6OutputIntent({
-      variant: 'PDF/X-6p',
       outputConditionIdentifier: 'FOGRA51',
       outputCondition: 'Coated FOGRA51 (PSO Coated v3)',
       registryName: 'http://www.color.org',
