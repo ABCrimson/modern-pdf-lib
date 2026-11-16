@@ -92,7 +92,7 @@
     "test:e2e": "playwright test",
     "test:bench": "vitest bench",
     "bench": "tsx tests/benchmarks/run.ts",
-    "lint": "oxlint --max-warnings=1169 src tests",
+    "lint": "oxlint --max-warnings=1168 src tests",
     "lint:fix": "oxlint --fix src tests",
     "format": "oxfmt src tests scripts",
     "format:check": "oxfmt --check src tests scripts",
