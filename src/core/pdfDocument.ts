@@ -200,6 +200,16 @@ export function keepLoadedInfo(
   loadedInfoOf.set(doc, new Map(entries));
 }
 
+/**
+ * Sets the loaded /Info entries of `doc` that no setter has changed into `info`, the /Info
+ * dictionary a save has built from the getters' values; see {@link loadedInfoOf}.
+ *
+ * @internal Exported from no package entry.
+ */
+export function applyLoadedInfo(doc: PdfDocument, info: PdfDict): void {
+  for (const [key, value] of loadedInfoOf.get(doc) ?? []) info.set(key, value);
+}
+
 /** The row of the option table that refuses `features` of embedFont(), removed in 0.41.0. */
 const REFUSED_EMBED_FONT_OPTIONS = /* @__PURE__ */ UNSUPPORTED_OPTIONS.filter(
   (rule) => rule.entry === 'embedFont()',
@@ -2692,16 +2702,13 @@ export class PdfDocument {
     // Finalize each page → produces content streams and page dicts
     const pageEntries: PageEntry[] = this.pages.map((p) => p.finalize());
 
-    const loadedInfo = loadedInfoOf.get(this);
     // Set the modification date unless one is set or kept as loaded (also one no date parses from).
-    if (loadedInfo?.has('/ModDate') !== true) this.meta.modDate ??= new Date();
+    if (loadedInfoOf.get(this)?.has('/ModDate') !== true) this.meta.modDate ??= new Date();
 
     const structure = buildDocumentStructure(pageEntries, this.meta, this.registry);
     const info = this.registry.resolve(structure.infoRef);
     // The loaded entries no setter changed replace the ones written from the getters' values.
-    if (info instanceof PdfDict && loadedInfo !== undefined) {
-      for (const [key, value] of loadedInfo) info.set(key, value);
-    }
+    if (info instanceof PdfDict) applyLoadedInfo(this, info);
     // This dict holds the decrypted /Info strings of a loaded document, or text decoded from them.
     if (info !== undefined && isDecryptedFromEncryptedFile(this.registry)) {
       recordDecryptedContent(info);
