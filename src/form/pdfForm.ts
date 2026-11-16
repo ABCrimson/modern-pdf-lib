@@ -496,7 +496,7 @@ export class PdfForm {
     rect: [number, number, number, number],
   ): PdfTextField {
     const dict = this.createFieldDict(name, 'Tx', rect);
-    dict.set('/DA', PdfString.literal('/Helv 0 Tf 0 g'));
+    dict.set('/DA', PdfString.fromAscii('/Helv 0 Tf 0 g'));
 
     const field = new PdfTextField(name, dict, dict);
     this.fields.push(field);
@@ -546,8 +546,8 @@ export class PdfForm {
   ): PdfDropdownField {
     const dict = this.createFieldDict(name, 'Ch', rect);
     dict.set('/Ff', PdfNumber.of(FieldFlags.Combo));
-    dict.set('/Opt', PdfArray.of(options.map((o) => PdfString.literal(o))));
-    dict.set('/DA', PdfString.literal('/Helv 0 Tf 0 g'));
+    dict.set('/Opt', PdfArray.of(options.map((o) => PdfString.fromText(o))));
+    dict.set('/DA', PdfString.fromAscii('/Helv 0 Tf 0 g'));
 
     const field = new PdfDropdownField(name, dict, dict);
     this.fields.push(field);
@@ -585,7 +585,7 @@ export class PdfForm {
     const fieldDict = new PdfDict();
     fieldDict.set('/FT', PdfName.of('Btn'));
     fieldDict.set('/Ff', PdfNumber.of(FieldFlags.Radio | FieldFlags.NoToggleToOff));
-    fieldDict.set('/T', PdfString.literal(name));
+    fieldDict.set('/T', PdfString.fromText(name));
     fieldDict.set('/V', PdfName.of('Off'));
 
     const widgets: PdfDict[] = [];
@@ -651,7 +651,7 @@ export class PdfForm {
 
     if (label !== undefined) {
       const mk = new PdfDict();
-      mk.set('/CA', PdfString.literal(label));
+      mk.set('/CA', PdfString.fromText(label));
       dict.set('/MK', mk);
     }
 
@@ -688,8 +688,8 @@ export class PdfForm {
     ];
     const dict = this.createFieldDict(name, 'Ch', pdfRect);
     // No Combo flag → listbox (not dropdown)
-    dict.set('/Opt', PdfArray.of(options.map((o) => PdfString.literal(o))));
-    dict.set('/DA', PdfString.literal('/Helv 0 Tf 0 g'));
+    dict.set('/Opt', PdfArray.of(options.map((o) => PdfString.fromText(o))));
+    dict.set('/DA', PdfString.fromAscii('/Helv 0 Tf 0 g'));
 
     const field = new PdfListboxField(name, dict, dict);
     this.fields.push(field);
@@ -782,7 +782,7 @@ export class PdfForm {
     dict.set('/Type', PdfName.of('Annot'));
     dict.set('/Subtype', PdfName.of('Widget'));
     dict.set('/FT', PdfName.of(fieldType));
-    dict.set('/T', PdfString.literal(name));
+    dict.set('/T', PdfString.fromText(name));
     dict.set('/Rect', PdfArray.fromNumbers(rect));
     return dict;
   }

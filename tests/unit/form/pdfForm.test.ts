@@ -384,4 +384,78 @@ describe('PdfForm', () => {
       expect(result.has('/DR')).toBe(true);
     });
   });
+
+  // -------------------------------------------------------------------------
+  // Field strings written as PDF text strings (ISO 32000-2 7.9.2.2)
+  // -------------------------------------------------------------------------
+
+  describe('field strings written as text strings', () => {
+    const rect = { x: 0, y: 0, width: 100, height: 20 };
+
+    function emptyForm(): PdfForm {
+      return new PdfForm([], new PdfDict());
+    }
+
+    /** The encoding and text of a string entry. */
+    function textOf(obj: unknown): [string, string] {
+      const s = obj as PdfString;
+      return [s.textEncoding, s.toText()];
+    }
+
+    it('writes the /T of a new field as a text string', () => {
+      const form = emptyForm();
+      const tf = form.createTextField('名前', 0, [0, 0, 100, 20]);
+      expect(textOf(tf.getDict().get('/T'))).toEqual(['utf-16be', '名前']);
+      const group = form.createRadioGroup('Größe €', 0, [rect]);
+      expect(textOf(group.getDict().get('/T'))).toEqual(['pdfdoc', 'Größe €']);
+    });
+
+    it('writes dropdown and list box options as text strings', () => {
+      const form = emptyForm();
+      const dd = form.createDropdown('dd', 0, [0, 0, 100, 20], ['日本', '– x']);
+      expect((dd.getDict().get('/Opt') as PdfArray).items.map(textOf)).toEqual([
+        ['utf-16be', '日本'],
+        ['pdfdoc', '– x'],
+      ]);
+      const lb = form.createListbox('lb', 0, rect, ['日本', '€']);
+      expect((lb.getDict().get('/Opt') as PdfArray).items.map(textOf)).toEqual([
+        ['utf-16be', '日本'],
+        ['pdfdoc', '€'],
+      ]);
+    });
+
+    it('writes /DA as the same ASCII bytes', () => {
+      const form = emptyForm();
+      const tf = form.createTextField('t', 0, [0, 0, 100, 20]);
+      const da = tf.getDict().get('/DA') as PdfString;
+      expect(new TextDecoder().decode(da.toBytes())).toBe('/Helv 0 Tf 0 g');
+    });
+
+    it('writes list box selections as text strings', () => {
+      const lb = emptyForm().createListbox('lb', 0, rect, ['日本', '€', 'x']);
+      lb.select(['日本']);
+      expect(textOf(lb.getDict().get('/V'))).toEqual(['utf-16be', '日本']);
+      lb.select(['€', '日本']);
+      expect((lb.getDict().get('/V') as PdfArray).items.map(textOf)).toEqual([
+        ['pdfdoc', '€'],
+        ['utf-16be', '日本'],
+      ]);
+      lb.setOptions(['✓', 'ok']);
+      expect(lb.getOptions()).toEqual(['✓', 'ok']);
+      expect(textOf((lb.getDict().get('/Opt') as PdfArray).items[0])).toEqual(['utf-16be', '✓']);
+    });
+
+    it('writes button captions as text strings', () => {
+      const form = emptyForm();
+      const button = form.createButton('b', 0, rect, '送信');
+      const mk = button.getDict().get('/MK') as PdfDict;
+      expect(textOf(mk.get('/CA'))).toEqual(['utf-16be', '送信']);
+      button.setCaption('Größe €');
+      expect(textOf((button.getWidgetDict().get('/MK') as PdfDict).get('/CA'))).toEqual([
+        'pdfdoc',
+        'Größe €',
+      ]);
+      expect(button.getCaption()).toBe('Größe €');
+    });
+  });
 });

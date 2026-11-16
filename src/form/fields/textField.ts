@@ -57,7 +57,7 @@ export class PdfTextField extends PdfField {
    * Also updates /V and removes /AP to force regeneration.
    */
   setText(value: string): void {
-    this.dict.set('/V', PdfString.literal(value));
+    this.dict.set('/V', PdfString.fromText(value));
     // Remove existing appearance so a new one is generated
     this.widgetDict.delete('/AP');
   }
@@ -97,7 +97,7 @@ export class PdfTextField extends PdfField {
    */
   setFontSize(size: number): void {
     const fontName = this.getFontName();
-    this.dict.set('/DA', PdfString.literal(`/${fontName} ${size} Tf 0 g`));
+    this.dict.set('/DA', PdfString.fromAscii(`/${fontName} ${size} Tf 0 g`));
     this.widgetDict.delete('/AP');
   }
 

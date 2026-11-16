@@ -220,7 +220,7 @@ function createAcroFormWiringPlugin(
         acroFormDict.set('/DR', resources);
       }
       if (!acroFormDict.has('/DA')) {
-        acroFormDict.set('/DA', PdfString.literal('/Helv 0 Tf 0 g'));
+        acroFormDict.set('/DA', PdfString.fromAscii('/Helv 0 Tf 0 g'));
       }
       // Let the viewer build field appearances from the field values.
       acroFormDict.set('/NeedAppearances', PdfBool.TRUE);

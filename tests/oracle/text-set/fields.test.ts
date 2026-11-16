@@ -104,10 +104,10 @@ describe('text field values read back by pdf.js and qpdf', () => {
     defectKey('forms-35', '0.41.4'),
     'form API: createTextField and setText values read back as set',
     {
-      // The field writer builds the value as a byte string, which refuses the en dash at index 5
-      // of the first text that holds one.
+      // setText writes each value as a text string, but save() writes no field the form API
+      // created, so pdf.js reports none of them.
       failsWith:
-        /^UnencodableTextError: A PDF byte string cannot encode "–" \(U\+2013\) at index 5:/,
+        /^AssertionError: pdf\.js: expected \[ undefined, undefined, …\(2\) \] to deeply equal/,
     },
     async () => {
       const doc = createPdf();

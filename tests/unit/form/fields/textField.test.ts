@@ -325,4 +325,34 @@ describe('PdfTextField', () => {
       expect(tf.getRect()).toEqual([0, 0, 0, 0]);
     });
   });
+
+  // -------------------------------------------------------------------------
+  // Values written as PDF text strings (ISO 32000-2 7.9.2.2)
+  // -------------------------------------------------------------------------
+
+  describe('setText writes /V as a text string', () => {
+    it('writes text that PDFDocEncoding holds one byte per character', () => {
+      const tf = makeTextField('name');
+      tf.setText('Größe €');
+      const v = tf.getDict().get('/V') as PdfString;
+      expect(v.textEncoding).toBe('pdfdoc');
+      // ö and ß as in Latin-1; € is 0xA0 in PDFDocEncoding.
+      expect(v.toBytes()).toEqual(new Uint8Array([0x47, 0x72, 0xf6, 0xdf, 0x65, 0x20, 0xa0]));
+    });
+
+    it('writes text outside PDFDocEncoding as UTF-16BE that reads back as set', () => {
+      const tf = makeTextField('name');
+      tf.setText('日本語 – ✓');
+      const v = tf.getDict().get('/V') as PdfString;
+      expect(v.textEncoding).toBe('utf-16be');
+      expect(tf.getText()).toBe('日本語 – ✓');
+    });
+
+    it('keeps the /DA font name when setFontSize rewrites the size', () => {
+      const tf = makeTextField('name', { da: '/Cour 12 Tf 0 g' });
+      tf.setFontSize(9);
+      const da = tf.getDict().get('/DA') as PdfString;
+      expect(new TextDecoder().decode(da.toBytes())).toBe('/Cour 9 Tf 0 g');
+    });
+  });
 });

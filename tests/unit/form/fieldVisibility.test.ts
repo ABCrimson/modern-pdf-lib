@@ -197,6 +197,17 @@ describe('addVisibilityAction', () => {
     expect((js as PdfString).value).toContain('yes');
   });
 
+  it('writes /JS as a text string, so a script naming text outside Latin-1 reads back as built', () => {
+    const field = makeTextField('target');
+    addVisibilityAction(field, '状態', { operator: 'equals', value: '有効 – €' });
+
+    const js = ((field.getWidgetDict().get('/AA') as PdfDict).get('/V') as PdfDict).get(
+      '/JS',
+    ) as PdfString;
+    expect(js.textEncoding).toBe('utf-16be');
+    expect(js.toText()).toContain('this.getField("状態").value == "有効 – €"');
+  });
+
   it('generates correct script for "equals" condition', () => {
     const field = makeTextField('target');
     addVisibilityAction(field, 'status', { operator: 'equals', value: 'active' });

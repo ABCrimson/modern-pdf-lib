@@ -41,7 +41,7 @@ const total = form.createTextField('total', 0, [100, 600, 200, 624]);
 
 const calcAction = new PdfDict();
 calcAction.set('/S', PdfName.of('JavaScript'));
-calcAction.set('/JS', PdfString.literal('AFSimple_Calculate("SUM", ["item1", "item2", "item3"]);'));
+calcAction.set('/JS', PdfString.fromText('AFSimple_Calculate("SUM", ["item1", "item2", "item3"]);'));
 const aa = new PdfDict();
 aa.set('/C', calcAction);
 total.getWidgetDict().set('/AA', aa);
@@ -61,7 +61,7 @@ import type { PdfField } from 'modern-pdf-lib';
 function setFieldScript(field: PdfField, key: '/C' | '/F' | '/V' | '/K', js: string) {
   const action = new PdfDict();
   action.set('/S', PdfName.of('JavaScript'));
-  action.set('/JS', PdfString.literal(js));
+  action.set('/JS', PdfString.fromText(js));
 
   const widget = field.getWidgetDict();
   let aa = widget.get('/AA');
@@ -289,7 +289,7 @@ const sameAsBilling = form.createCheckbox('sameAsBilling', 0, [100, 100, 116, 11
 // A checkbox runs its activation action (/A) when clicked.
 const onClick = new PdfDict();
 onClick.set('/S', PdfName.of('JavaScript'));
-onClick.set('/JS', PdfString.literal(`
+onClick.set('/JS', PdfString.fromText(`
   var same = getField("sameAsBilling").value === "Yes";
   var billing = getField("billingAddress").value;
   if (same) {
@@ -467,7 +467,7 @@ import type { PdfField } from 'modern-pdf-lib';
 function setFieldScript(field: PdfField, key: '/C' | '/F' | '/V' | '/K', js: string) {
   const action = new PdfDict();
   action.set('/S', PdfName.of('JavaScript'));
-  action.set('/JS', PdfString.literal(js));
+  action.set('/JS', PdfString.fromText(js));
   const widget = field.getWidgetDict();
   let aa = widget.get('/AA');
   if (aa === undefined || aa.kind !== 'dict') {

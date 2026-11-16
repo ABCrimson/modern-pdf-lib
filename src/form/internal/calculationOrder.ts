@@ -134,7 +134,7 @@ export function setCalculationOrder(form: PdfForm, fieldNames: string[]): void {
     const cDict = c as PdfDict;
 
     // Mark the calculation order index
-    cDict.set('/CO_Index', PdfString.literal(String(i)));
+    cDict.set('/CO_Index', PdfString.fromAscii(String(i)));
   }
 }
 

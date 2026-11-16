@@ -62,7 +62,7 @@ export class PdfButtonField extends PdfField {
       mk = new PdfDict();
       this.widgetDict.set('/MK', mk);
     }
-    (mk as PdfDict).set('/CA', PdfString.literal(caption));
+    (mk as PdfDict).set('/CA', PdfString.fromText(caption));
     this.widgetDict.delete('/AP');
   }
 

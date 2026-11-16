@@ -155,7 +155,7 @@ export function addVisibilityAction(
 
   const jsDict = new PdfDict();
   jsDict.set('/S', PdfName.of('JavaScript'));
-  jsDict.set('/JS', PdfString.literal(script));
+  jsDict.set('/JS', PdfString.fromText(script));
 
   const widgetDict = field.getWidgetDict();
   let aaDict = widgetDict.get('/AA');

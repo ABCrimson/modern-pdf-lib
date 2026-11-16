@@ -55,9 +55,9 @@ export class PdfListboxField extends PdfField {
   /** Select one or more values. */
   select(values: string[]): void {
     if (values.length === 1) {
-      this.dict.set('/V', PdfString.literal(values[0]!));
+      this.dict.set('/V', PdfString.fromText(values[0]!));
     } else {
-      const arr = PdfArray.of(values.map((v) => PdfString.literal(v)));
+      const arr = PdfArray.of(values.map((v) => PdfString.fromText(v)));
       this.dict.set('/V', arr);
     }
     this.widgetDict.delete('/AP');
@@ -106,7 +106,7 @@ export class PdfListboxField extends PdfField {
 
   /** Set the list of options. */
   setOptions(options: string[]): void {
-    const arr = PdfArray.of(options.map((o) => PdfString.literal(o)));
+    const arr = PdfArray.of(options.map((o) => PdfString.fromText(o)));
     this.dict.set('/Opt', arr);
     this.widgetDict.delete('/AP');
   }

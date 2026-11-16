@@ -35,7 +35,7 @@ export class PdfDropdownField extends PdfField {
 
   /** Select a value from the options. */
   select(value: string): void {
-    this.dict.set('/V', PdfString.literal(value));
+    this.dict.set('/V', PdfString.fromText(value));
     this.widgetDict.delete('/AP');
   }
 
@@ -85,7 +85,7 @@ export class PdfDropdownField extends PdfField {
 
   /** Set the list of options. */
   setOptions(options: string[]): void {
-    const arr = PdfArray.of(options.map((o) => PdfString.literal(o)));
+    const arr = PdfArray.of(options.map((o) => PdfString.fromText(o)));
     this.dict.set('/Opt', arr);
     this.widgetDict.delete('/AP');
   }

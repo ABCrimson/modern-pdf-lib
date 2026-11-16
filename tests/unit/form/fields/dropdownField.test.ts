@@ -209,4 +209,30 @@ describe('PdfDropdownField', () => {
       expect(dd.getOptions()).toEqual(['United States', 'United Kingdom']);
     });
   });
+
+  // -------------------------------------------------------------------------
+  // Values and options written as PDF text strings (ISO 32000-2 7.9.2.2)
+  // -------------------------------------------------------------------------
+
+  describe('text strings written', () => {
+    it('select writes /V as a text string that reads back as set', () => {
+      const dd = makeDropdown('test', []);
+      dd.setOptions(['日本', 'Größe €']);
+      dd.select('日本');
+      expect((dd.getDict().get('/V') as PdfString).textEncoding).toBe('utf-16be');
+      expect(dd.getSelected()).toBe('日本');
+      dd.select('Größe €');
+      expect((dd.getDict().get('/V') as PdfString).toBytes()).toEqual(
+        new Uint8Array([0x47, 0x72, 0xf6, 0xdf, 0x65, 0x20, 0xa0]),
+      );
+    });
+
+    it('setOptions writes each option as a text string', () => {
+      const dd = makeDropdown('test', []);
+      dd.setOptions(['日本', '– dash']);
+      const opt = dd.getDict().get('/Opt') as PdfArray;
+      expect(opt.items.map((o) => (o as PdfString).textEncoding)).toEqual(['utf-16be', 'pdfdoc']);
+      expect(dd.getOptions()).toEqual(['日本', '– dash']);
+    });
+  });
 });
