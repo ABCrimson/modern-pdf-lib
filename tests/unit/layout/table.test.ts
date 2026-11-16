@@ -6,6 +6,8 @@
  * integration.
  */
 
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { describe, it, expect } from 'vitest';
 import { renderTable } from '../../../src/layout/table.js';
 import type { DrawTableOptions, TableCell, NestedTableContent } from '../../../src/layout/table.js';
@@ -14,6 +16,17 @@ import { PdfObjectRegistry } from '../../../src/core/pdfObjects.js';
 import type { Color } from '../../../src/core/operators/color.js';
 import { UnencodableTextError } from '../../../src/errors.js';
 import { createPdf, StandardFonts } from '../../../src/index.js';
+import { showTextHex } from '../../../src/core/operators/text.js';
+
+/** Liberation Sans Regular as pdfjs-dist ships it (tests/fixtures holds no TrueType file). */
+const LIBERATION_SANS = new Uint8Array(
+  readFileSync(
+    join(
+      import.meta.dirname,
+      '../../../node_modules/pdfjs-dist/standard_fonts/LiberationSans-Regular.ttf',
+    ),
+  ),
+);
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -833,7 +846,21 @@ describe('drawTable shows text in the fonts registered on its page', () => {
     expect(ops).toContain(`/${symbol.name} 12 Tf\n(a) Tj\n`);
   });
 
-  it('encodes a name no font on the page carries as before: by standard font name, else WinAnsi', () => {
+  it('writes the codes of an embedded font as a hex string', async () => {
+    const doc = createPdf();
+    const page = doc.addPage();
+    const font = await doc.embedFont(LIBERATION_SANS);
+    page.drawTable({
+      x: 50,
+      y: 700,
+      width: 300,
+      fontName: font.name,
+      rows: [{ cells: ['Ωmega'] }],
+    });
+    expect(page.getContentStreamData()).toContain(showTextHex(font.encodeText('Ωmega')));
+  });
+
+  it('encodes a name no font on the page carries by standard font name, else WinAnsi', () => {
     const page = new PdfPage(PageSizes.A4[0], PageSizes.A4[1], new PdfObjectRegistry());
     page.drawTable({ x: 0, y: 700, width: 200, fontName: 'Symbol', rows: [{ cells: ['αβ'] }] });
     page.drawTable({ x: 0, y: 500, width: 200, fontName: 'F9', rows: [{ cells: ['é'] }] });
