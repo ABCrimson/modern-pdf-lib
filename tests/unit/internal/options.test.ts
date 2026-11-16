@@ -3,7 +3,8 @@
  * with an UnsupportedOptionError instead of ignoring it. The call sites refuse through
  * `rejectOption`; this file pins the table itself completely: every row, the fixed message of
  * every row, the error `rejectOption` throws, and the tie of each planned release to the open
- * target of its ledger ids in audit/open-highs.json.
+ * target of its ledger ids in audit/open-highs.json. The ledger ids are held here, row by row:
+ * the table itself carries none, because nothing reads them at run time.
  */
 import { readFileSync } from 'node:fs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -13,9 +14,11 @@ import { UNSUPPORTED_OPTIONS, rejectOption } from '../../../src/internal/options
 import type { UnsupportedOptionRule } from '../../../src/internal/options.js';
 import { resetWarningsForTesting, WARNING_TYPE, warnOnce } from '../../../src/internal/warnings.js';
 
-/** One expected row: the rule's fields and the exact message of the error it throws. */
+/** One expected row: the rule's fields, its ledger ids and the exact message of the error it throws. */
 interface ExpectedRule {
   readonly rule: UnsupportedOptionRule;
+  /** The ids of audit/open-highs.json whose open target must equal the release the rule names. */
+  readonly ledger: readonly string[];
   readonly message: string;
 }
 
@@ -28,8 +31,8 @@ function planned(
   message: string,
 ): ExpectedRule {
   return {
-    rule:
-      option === undefined ? { entry, plannedFor, ledger } : { entry, option, plannedFor, ledger },
+    rule: option === undefined ? { entry, plannedFor } : { entry, option, plannedFor },
+    ledger,
     message,
   };
 }
@@ -42,7 +45,8 @@ function removed(
   message: string,
 ): ExpectedRule {
   return {
-    rule: hint === undefined ? { entry, option, ledger: [] } : { entry, option, ledger: [], hint },
+    rule: hint === undefined ? { entry, option } : { entry, option, hint },
+    ledger: [],
     message,
   };
 }
@@ -337,6 +341,11 @@ function isLater(version: string, than: string): boolean {
   return false;
 }
 
+/** The ledger ids of each row of the table, by the entry and option the row names. */
+const LEDGER_IDS: ReadonlyMap<string, readonly string[]> = new Map(
+  EXPECTED.map(({ rule, ledger }) => [`${rule.entry} ${rule.option ?? '(call)'}`, ledger]),
+);
+
 describe('planned releases against the ledger', () => {
   const open = openTargets();
 
@@ -344,8 +353,10 @@ describe('planned releases against the ledger', () => {
     for (const rule of UNSUPPORTED_OPTIONS) {
       if (rule.plannedFor === undefined) continue;
       const label = `${rule.entry} ${rule.option ?? '(call)'}`;
-      expect(rule.ledger.length, label).toBeGreaterThan(0);
-      for (const id of rule.ledger) {
+      const ledger = LEDGER_IDS.get(label);
+      expect(ledger, `${label}: ledger ids held in this test`).toBeDefined();
+      expect(ledger?.length, label).toBeGreaterThan(0);
+      for (const id of ledger ?? []) {
         expect(open.has(id), `${label}: ${id} is open`).toBe(true);
         expect(open.get(id), `${label}: target of ${id}`).toBe(rule.plannedFor);
       }
@@ -355,9 +366,12 @@ describe('planned releases against the ledger', () => {
   it('lets a removed option name no id that is still open for a later release', () => {
     for (const rule of UNSUPPORTED_OPTIONS) {
       if (rule.plannedFor !== undefined) continue;
-      for (const id of rule.ledger) {
+      const row = `${rule.entry} ${rule.option ?? '(call)'}`;
+      const ledger = LEDGER_IDS.get(row);
+      expect(ledger, `${row}: ledger ids held in this test`).toBeDefined();
+      for (const id of ledger ?? []) {
         const target = open.get(id);
-        const label = `${rule.entry} ${rule.option ?? '(call)'}: ${id}`;
+        const label = `${row}: ${id}`;
         expect(target === undefined || !isLater(target, '0.41.0'), label).toBe(true);
       }
     }

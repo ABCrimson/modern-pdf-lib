@@ -56,7 +56,7 @@ describe('optimizeAllImages option maxDpi', () => {
     expect(row).toBeDefined();
     let fromTable: unknown;
     try {
-      rejectOption(row ?? { entry: 'missing row', ledger: [] });
+      rejectOption(row ?? { entry: 'missing row' });
     } catch (err) {
       fromTable = err;
     }
