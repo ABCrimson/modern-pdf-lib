@@ -24,6 +24,7 @@
  */
 
 import { MalformedInputError, UnencodableTextError } from '../../errors.js';
+import type { PdfLimits } from '../../limits.js';
 import type { FontMetrics } from './fontMetrics.js';
 import { extractMetrics, getGlyphId, getGlyphWidth } from './fontMetrics.js';
 import { subsetFont, buildSubsetCmap, computeSubsetTag } from './fontSubset.js';
@@ -670,8 +671,11 @@ export function generateToUnicodeCmap(
  * {@link EmbeddedFont} that tracks glyph usage for subsetting.
  *
  * @param fontBytes - The raw TTF or OTF file as a Uint8Array.
+ * @param limits - The limits the pure-JS parser reads the font under, set over `DEFAULT_LIMITS`; the
+ *   WASM parser, when initialized, does not take them.
  * @returns A promise resolving to an EmbeddedFont instance.
  * @throws {MalformedInputError} When `fontBytes` is shorter than the table directory.
+ * @throws {ResourceLimitError} When the font is above a limit; see {@link extractMetrics}.
  *
  * @example
  * ```ts
@@ -685,7 +689,7 @@ export function generateToUnicodeCmap(
  * const embedding = font.buildEmbedding();
  * ```
  */
-export async function embedFont(fontBytes: Uint8Array): Promise<EmbeddedFont> {
+export async function embedFont(fontBytes: Uint8Array, limits?: PdfLimits): Promise<EmbeddedFont> {
   // Validate minimum size
   if (fontBytes.length < 12) {
     throw new MalformedInputError(
@@ -695,7 +699,9 @@ export async function embedFont(fontBytes: Uint8Array): Promise<EmbeddedFont> {
   }
 
   // Use WASM-accelerated parsing when available, pure JS otherwise
-  const metrics = fontParserWasm ? extractMetricsWasm(fontBytes) : extractMetrics(fontBytes);
+  const metrics = fontParserWasm
+    ? extractMetricsWasm(fontBytes)
+    : extractMetrics(fontBytes, { limits });
 
   return new EmbeddedFont(fontBytes, metrics);
 }

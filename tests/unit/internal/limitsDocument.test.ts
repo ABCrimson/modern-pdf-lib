@@ -22,6 +22,12 @@ import { PdfDict, PdfName, PdfStream } from '../../../src/core/pdfObjects.js';
 import { parseContentStream } from '../../../src/parser/contentStreamParser.js';
 import { StreamingPdfParser } from '../../../src/parser/streamingParser.js';
 import { extractText, extractTextWithPositions } from '../../../src/parser/text/textExtractor.js';
+import {
+  buildPng,
+  buildTiffImage,
+  zlibOfZeroBytes,
+} from '../../adversarial/image-limits.bodies.js';
+import { buildCmapFont } from '../../adversarial/text-limits.bodies.js';
 
 const OBJSTM_FILE = new URL('../../fixtures/corpus/qpdf-objstm-xref.pdf', import.meta.url);
 /** The decoded size of object 1, the object stream of qpdf-objstm-xref.pdf (qpdf). */
@@ -428,5 +434,49 @@ describe('text extraction limits', () => {
       source: 'option',
     });
     expect(extractText(operators, resources, { limits: { maxTotalCMapMappings: 12 } })).toBe('A');
+  });
+});
+
+describe('image and font embedding limits', () => {
+  /** A lossless 10 x 10 WebP file (100 pixels). */
+  const webp10 = Uint8Array.fromHex(
+    '524946461e000000574542505650384c110000002f0940020016103820e08181ffff07000000',
+  );
+  /** Each embed call, run as a promise: embedPng is async, embedWebP and embedTiff are not. */
+  const embedsOf: ReadonlyArray<readonly [string, (doc: PdfDocument) => Promise<unknown>]> = [
+    ['embedPng', async (doc) => doc.embedPng(buildPng(10, 10, 2, zlibOfZeroBytes(310)))],
+    ['embedWebP', async (doc) => doc.embedWebP(webp10)],
+    ['embedTiff', async (doc) => doc.embedTiff(buildTiffImage(10, 10, 1, new Uint8Array(100)))],
+  ];
+
+  it.each(embedsOf)(
+    '%s decodes a 10 x 10 image under maxImagePixels of the document',
+    async (_name, embed) => {
+      await expect(embed(createPdf({ limits: { maxImagePixels: 99 } }))).rejects.toMatchObject({
+        name: 'ResourceLimitError',
+        limit: 'maxImagePixels',
+        max: 99,
+        actual: 100,
+        source: 'option',
+      });
+      await expect(embed(createPdf({ limits: { maxImagePixels: 100 } }))).resolves.toBeDefined();
+      await expect(embed(createPdf())).resolves.toBeDefined();
+    },
+  );
+
+  it('embedFont reads the cmap of a font under maxFontCmapMappings of the document', async () => {
+    const font = buildCmapFont({ format: 12, numGlyphs: 600, ranges: [[0x20, 0x7e, 1]] });
+    await expect(
+      createPdf({ limits: { maxFontCmapMappings: 94 } }).embedFont(font),
+    ).rejects.toMatchObject({
+      name: 'ResourceLimitError',
+      limit: 'maxFontCmapMappings',
+      max: 94,
+      actual: 95,
+      source: 'option',
+    });
+    await expect(
+      createPdf({ limits: { maxFontCmapMappings: 95 } }).embedFont(font),
+    ).resolves.toBeDefined();
   });
 });

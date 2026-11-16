@@ -62,7 +62,7 @@ import type { EmbeddedFont } from '../assets/font/fontEmbed.js';
 import { embedFont as embedTtfFont } from '../assets/font/fontEmbed.js';
 import { subsetFont, buildSubsetCmap } from '../assets/font/fontSubset.js';
 import { UNSUPPORTED_OPTIONS, rejectOption } from '../internal/options.js';
-import { resolveLimits } from '../internal/limits.js';
+import { beginCall, resolveLimits } from '../internal/limits.js';
 import type { PdfLimits } from '../limits.js';
 import { isOpenTypeCFF } from '../assets/font/otfDetect.js';
 import { findTable } from '../assets/font/internal/cffEmbed.js';
@@ -70,7 +70,6 @@ import { embedPng as decodePng } from '../assets/image/internal/pngEmbed.js';
 import { detectImageFormat } from '../assets/image/formatDetect.js';
 import { decodeWebP } from '../assets/image/webp/webpDecode.js';
 import { decodeTiff } from '../assets/image/tiff/tiffDecode.js';
-import type { TiffDecodeOptions } from '../assets/image/tiff/tiffDecode.js';
 import { flateEncode } from '../codecs/internal/pdfFlate.js';
 import type { LoadPdfOptions } from '../parser/documentParser.js';
 import { loadPdf } from '../parser/documentParser.js';
@@ -815,7 +814,7 @@ export class PdfDocument {
     options?: EmbedFontOptions,
   ): Promise<FontRef> {
     // Parse metrics and create EmbeddedFont
-    const embeddedFont = await embedTtfFont(fontData);
+    const embeddedFont = await embedTtfFont(fontData, this.registry.limits);
     const metrics = embeddedFont.metrics;
     const psName =
       options?.customName ?? metrics.postScriptName ?? metrics.familyName ?? 'CustomFont';
@@ -976,7 +975,7 @@ export class PdfDocument {
    */
   private async embedCffFont(fontData: Uint8Array, options?: EmbedFontOptions): Promise<FontRef> {
     // Parse metrics using the same embedFont pipeline (works for both TTF and OTF)
-    const embeddedFont = await embedTtfFont(fontData);
+    const embeddedFont = await embedTtfFont(fontData, this.registry.limits);
     const metrics = embeddedFont.metrics;
     const psName = options?.customName ?? metrics.postScriptName ?? metrics.familyName ?? 'CFFFont';
 
@@ -1162,7 +1161,7 @@ export class PdfDocument {
   #embedPngBytes(pngData: Uint8Array | ArrayBuffer): ImageRef {
     const data = pngData instanceof ArrayBuffer ? new Uint8Array(pngData) : pngData;
     // Decode PNG: decompress IDAT, reconstruct filters, separate alpha
-    const result = decodePng(data);
+    const result = decodePng(data, beginCall(this.registry.limits));
 
     this.imageCounter++;
     const resourceName = `Im${this.imageCounter}`;
@@ -1304,7 +1303,7 @@ export class PdfDocument {
    */
   embedWebP(webpData: Uint8Array | ArrayBuffer): ImageRef {
     const data = webpData instanceof ArrayBuffer ? new Uint8Array(webpData) : webpData;
-    const decoded = decodeWebP(data);
+    const decoded = decodeWebP(data, { limits: this.registry.limits });
 
     this.imageCounter++;
     const resourceName = `Im${this.imageCounter}`;
@@ -1417,9 +1416,7 @@ export class PdfDocument {
    */
   embedTiff(tiffData: Uint8Array | ArrayBuffer, options?: { page?: number | undefined }): ImageRef {
     const data = tiffData instanceof ArrayBuffer ? new Uint8Array(tiffData) : tiffData;
-    const tiffOptions: TiffDecodeOptions | undefined =
-      options?.page !== undefined ? { page: options.page } : undefined;
-    const decoded = decodeTiff(data, tiffOptions);
+    const decoded = decodeTiff(data, { page: options?.page, limits: this.registry.limits });
 
     this.imageCounter++;
     const resourceName = `Im${this.imageCounter}`;
