@@ -67,7 +67,7 @@ Rust per-crate job.
 
 ```bash
 pnpm run typecheck   # tsc over the root, cli, scripts, tests and security-tests projects
-pnpm run lint        # oxlint + tsgolint, type-aware, --max-warnings=1167
+pnpm run lint        # oxlint + tsgolint, type-aware, --max-warnings=1154
 pnpm test            # vitest run: all four test projects
 pnpm run build       # tsdown + IIFE bundle + dist smoke test
 ```
@@ -102,7 +102,7 @@ Run each as `pnpm run <name>`.
 | `test:e2e` | Playwright browser E2E (`tests/e2e`) |
 | `test:bench` | `vitest bench` over the benchmark files |
 | `bench` | Benchmark suite via the tinybench harness |
-| `lint` / `lint:fix` | oxlint, type-aware; `lint` fails above 1,167 warnings |
+| `lint` / `lint:fix` | oxlint, type-aware; `lint` fails above 1,154 warnings |
 | `format` / `format:check` | oxfmt over `src`, `tests` and `scripts` |
 | `typecheck` | `tsc` over the root, `src/cli/tsconfig.json`, `scripts/tsconfig.json`, `tests/tsconfig.json` and `tests/tsconfig.security.json` projects |
 | `typecheck:security-tests` | `tsc` over `tests/tsconfig.security.json` only (the files it lists: the 0.40.5 security tests, the qpdf cross-check of encrypted saves, the known-defect helper tests, and `tests/helpers`) |
@@ -328,7 +328,7 @@ waits on WASM, so style and type failures surface first.
 
 | Job | Gate |
 |---|---|
-| Lint & Type-check | `pnpm run typecheck` (five projects), `pnpm run lint` (type-aware oxlint, 0 errors, at most 1,167 warnings), `pnpm run check:test-projects`, `pnpm run check:known-defects`, `pnpm run gate:layout` and `pnpm run check:docs` |
+| Lint & Type-check | `pnpm run typecheck` (five projects), `pnpm run lint` (type-aware oxlint, 0 errors, at most 1,154 warnings), `pnpm run check:test-projects`, `pnpm run check:known-defects`, `pnpm run gate:layout` and `pnpm run check:docs` |
 | Build WASM | All six crates compile for `wasm32-unknown-unknown` |
 | Build TypeScript | `pnpm run build` succeeds and `dist/` imports as ESM **and** CJS |
 | Pack Check | `pnpm run check:pack`: the tarball lists six WASM builds and the IIFE bundle and passes publint and attw |
