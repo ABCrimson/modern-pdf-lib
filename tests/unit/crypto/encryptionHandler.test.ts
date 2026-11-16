@@ -238,6 +238,22 @@ describe('PdfEncryptionHandler — encryptString', () => {
     expect(encrypted.hex).toBe(true);
     expect(encrypted.value).not.toBe(original.value);
   });
+
+  const allBytes = Uint8Array.from({ length: 256 }, (_, i) => i);
+  for (const algorithm of ['rc4-40', 'rc4-128', 'aes-128', 'aes-256'] as const) {
+    it(`encrypts the bytes of a string, which decryptObject gives back (${algorithm})`, async () => {
+      const handler = await PdfEncryptionHandler.create({
+        userPassword: 'user',
+        ownerPassword: 'owner',
+        algorithm,
+      });
+      for (const form of ['literal', 'hex'] as const) {
+        const encrypted = await handler.encryptString(7, 0, PdfString.fromBytes(allBytes, form));
+        expect(encrypted.hex).toBe(true);
+        expect(await handler.decryptObject(7, 0, encrypted.toBytes())).toEqual(allBytes);
+      }
+    });
+  }
 });
 
 // ---------------------------------------------------------------------------
@@ -440,6 +456,23 @@ describe('PdfEncryptionHandler — fromEncryptDict round-trip', () => {
     const encrypted = await original.encryptObject(1, 0, plaintext);
     const decrypted = await restored.decryptObject(1, 0, encrypted);
     expect(decrypted).toEqual(plaintext);
+  });
+
+  it('reads a hex /O whose bytes are all hex-digit characters as those bytes', async () => {
+    const fileId = randomBytes(16);
+    const original = await PdfEncryptionHandler.create(
+      { userPassword: 'user256', ownerPassword: 'owner256', algorithm: 'aes-256' },
+      fileId,
+    );
+    const dict = original.buildEncryptDict();
+    // 48 bytes of "A": the length of an R6 /O, every byte a hex-digit character.
+    const ownerKey = new Uint8Array(48).fill(0x41);
+    dict.set('/O', PdfString.fromBytes(ownerKey, 'hex'));
+
+    // The user password of R6 is checked against /U alone, so the handler opens.
+    const restored = await PdfEncryptionHandler.fromEncryptDict(dict, fileId, 'user256');
+
+    expect((restored.buildEncryptDict().get('/O') as PdfString).toBytes()).toEqual(ownerKey);
   });
 });
 

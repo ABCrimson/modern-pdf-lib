@@ -748,3 +748,49 @@ describe('re-encrypting a decrypted signed document', () => {
     });
   }
 });
+
+/**
+ * The bytes, as hex, of each /Title and /Author string of an unencrypted file. The catalog /Lang
+ * is left out: a load does not read it, so a save drops it (tests-unit-accessibility-M01).
+ */
+async function textStringBytes(bytes: Uint8Array): Promise<Record<string, string>> {
+  const found: Record<string, string> = {};
+  for (const { object } of (await loadPdf(bytes)).getRegistry()) {
+    if (object.kind !== 'dict') continue;
+    for (const key of ['/Title', '/Author']) {
+      const value = object.get(key);
+      if (value?.kind === 'string') found[key] = value.toBytes().toHex();
+    }
+  }
+  return found;
+}
+
+/** Encrypted sources (user password `user`) and the bytes of their Info /Title. */
+const STRING_SOURCES = [
+  { file: 'rc4-40-r2.pdf', title: new TextEncoder().encode('Oracle fixture').toHex() },
+  { file: 'load/rc4-128-r4.pdf', title: new TextEncoder().encode('Oracle fixture').toHex() },
+  {
+    file: 'load/cons-r4-title-c1.pdf',
+    title: Uint8Array.from({ length: 32 }, (_, i) => 0x80 + i).toHex(),
+  },
+  { file: 'load/cons-r4-title-utf16.pdf', title: 'feff004120140095' },
+  { file: 'aes-256-r6.pdf', title: new TextEncoder().encode('Oracle fixture').toHex() },
+] as const;
+
+describe('re-encrypting a decrypted document keeps its strings byte for byte', () => {
+  for (const { file, title } of STRING_SOURCES) {
+    for (const algorithm of ALGORITHMS) {
+      it(`${file} saved with ${algorithm}`, async (ctx: TestContext) => {
+        requireQpdf(ctx);
+        const before = await textStringBytes(qpdfDecryptQdf(fixture(file), 'user'));
+        expect(before['/Title']).toBe(title);
+
+        const doc = await loadPdf(fixture(file), { password: 'user' });
+        await doc.encrypt({ ...NEW_PASSWORDS, algorithm });
+        const after = await textStringBytes(qpdfDecryptQdf(await doc.save(), 'u2'));
+
+        for (const [key, hex] of Object.entries(before)) expect(after[key], key).toBe(hex);
+      });
+    }
+  }
+});

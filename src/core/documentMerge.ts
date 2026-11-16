@@ -126,7 +126,7 @@ function pdfValuesEqual(a: PdfObject, b: PdfObject, depth: number): boolean {
     case 'name':
       return a.value === (b as PdfName).value;
     case 'string':
-      return a.value === (b as PdfString).value && a.hex === (b as PdfString).hex;
+      return a.equals(b as PdfString) && a.hex === (b as PdfString).hex;
     case 'ref':
       return (
         a.objectNumber === (b as PdfRef).objectNumber &&

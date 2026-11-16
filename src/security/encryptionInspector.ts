@@ -45,14 +45,7 @@
  *   These bit numbers match the constants in `crypto/permissions.ts`.
  */
 
-import {
-  PdfBool,
-  PdfDict,
-  PdfName,
-  PdfNumber,
-  PdfString,
-  type PdfObject,
-} from '../core/pdfObjects.js';
+import { PdfBool, PdfDict, PdfName, PdfNumber, type PdfObject } from '../core/pdfObjects.js';
 import type { PdfRef } from '../core/pdfObjects.js';
 import { PdfObjectRegistry } from '../core/pdfObjects.js';
 import { PdfLexer } from '../parser/internal/lexer.js';
@@ -444,27 +437,10 @@ function getBool(dict: PdfDict, key: string): boolean | undefined {
 }
 
 /**
- * Read raw bytes from a `/String` entry.
- *
- * Hex strings whose value is still raw hex digits (e.g. produced by
- * `PdfString.hexFromBytes`) are decoded from hex pairs; otherwise the
- * character codes are treated as raw Latin-1 bytes.  Mirrors the decoding
- * used by `crypto/encryptionHandler.fromEncryptDict` so the /U validation
- * sees the same /O, /U, /OE, /UE, /Perms bytes.
+ * The bytes of a string entry, whatever its written form: the /O, /U, /OE, /UE and /Perms bytes
+ * that `crypto/encryptionHandler.fromEncryptDict` reads.
  */
 function getStringBytes(dict: PdfDict, key: string): Uint8Array | undefined {
   const obj = dict.get(key);
-  if (obj === undefined || obj.kind !== 'string') return undefined;
-
-  const str = obj as PdfString;
-  if (str.hex && /^[\da-fA-F\s]*$/.test(str.value)) {
-    const clean = str.value.replace(/\s/g, '');
-    return Uint8Array.fromHex(clean.length % 2 === 0 ? clean : clean + '0');
-  }
-
-  const bytes = new Uint8Array(str.value.length);
-  for (let i = 0; i < str.value.length; i++) {
-    bytes[i] = str.value.charCodeAt(i) & 0xff;
-  }
-  return bytes;
+  return obj?.kind === 'string' ? obj.toBytes() : undefined;
 }

@@ -128,20 +128,6 @@ function refVal(obj: PdfObject | undefined): PdfRef | undefined {
 }
 
 /**
- * Convert a string of character codes (Latin-1 range 0-255) to a
- * Uint8Array. Unlike TextEncoder (which produces UTF-8 and may emit
- * multi-byte sequences for codes >= 128), this preserves each char
- * code as a single byte.
- */
-function stringToLatin1Bytes(str: string): Uint8Array {
-  const bytes = new Uint8Array(str.length);
-  for (let i = 0; i < str.length; i++) {
-    bytes[i] = str.charCodeAt(i) & 0xff;
-  }
-  return bytes;
-}
-
-/**
  * Extract trailer fields from a PdfDict (works for both traditional
  * trailers and xref stream dictionaries).
  */
@@ -202,7 +188,7 @@ function extractTrailer(dict: PdfDict): ParsedTrailer {
       ) {
         const s0 = id0 as PdfString;
         const s1 = id1 as PdfString;
-        trailer.id = [stringToLatin1Bytes(s0.value), stringToLatin1Bytes(s1.value)];
+        trailer.id = [s0.toBytes(), s1.toBytes()];
       }
     }
   }

@@ -629,21 +629,16 @@ export class PdfEncryptionHandler {
   }
 
   /**
-   * Encrypt a PdfString value.
-   *
-   * Converts the string value to bytes, encrypts, and returns a new
-   * hex-encoded PdfString.
+   * Encrypt the bytes of a PdfString.
    *
    * @param objNum  Object number.
    * @param genNum  Generation number.
    * @param str     The string to encrypt.
-   * @returns       An encrypted PdfString (hex-encoded).
+   * @returns       A PdfString of the encrypted bytes, in hex form.
    */
   async encryptString(objNum: number, genNum: number, str: PdfString): Promise<PdfString> {
-    const encoder = new TextEncoder();
-    const plaintext = encoder.encode(str.value);
-    const encrypted = await this.encryptObject(objNum, genNum, plaintext);
-    return PdfString.hexFromBytes(encrypted);
+    const encrypted = await this.encryptObject(objNum, genNum, str.toBytes());
+    return PdfString.fromBytes(encrypted, 'hex');
   }
 
   /**
@@ -922,35 +917,9 @@ function getBool(dict: PdfDict, key: string): boolean | undefined {
 }
 
 /**
- * Extract bytes from a PdfString entry in a dict.
- *
- * For hex strings, decodes the hex pairs to bytes.
- * For literal strings, encodes the character codes as bytes.
+ * The bytes of a PdfString entry in a dict, whatever its written form.
  */
 function getStringBytes(dict: PdfDict, key: string): Uint8Array | undefined {
   const obj = dict.get(key);
-  if (!obj || obj.kind !== 'string') return undefined;
-
-  const str = obj as PdfString;
-  if (str.hex && /^[\da-fA-F\s]*$/.test(str.value)) {
-    // Hex string whose value is still raw hex digits (e.g. from
-    // PdfString.hexFromBytes). Decode hex pairs to bytes.
-    return hexToBytes(str.value);
-  }
-
-  // Literal string or a hex string whose value has already been decoded
-  // by the parser (character codes represent raw bytes in Latin-1).
-  const bytes = new Uint8Array(str.value.length);
-  for (let i = 0; i < str.value.length; i++) {
-    bytes[i] = str.value.charCodeAt(i) & 0xff;
-  }
-  return bytes;
-}
-
-/**
- * Convert a hex string to bytes.
- */
-function hexToBytes(hex: string): Uint8Array {
-  const clean = hex.replace(/\s/g, '');
-  return Uint8Array.fromHex(clean.length % 2 === 0 ? clean : clean + '0');
+  return obj?.kind === 'string' ? obj.toBytes() : undefined;
 }
