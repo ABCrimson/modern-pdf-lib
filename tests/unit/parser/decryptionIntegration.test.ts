@@ -288,7 +288,7 @@ function serializeEncryptDict(dict: PdfDict, objNum: number): string {
     } else if (value.kind === 'string') {
       const str = value as PdfString;
       if (str.hex) {
-        result += `<${str.value}>`;
+        result += `<${str.toBytes().toHex()}>`;
       } else {
         result += `(${str.value})`;
       }
@@ -318,7 +318,7 @@ function serializeNestedDict(dict: PdfDict): string {
     } else if (value.kind === 'string') {
       const str = value as PdfString;
       if (str.hex) {
-        result += `<${str.value}>`;
+        result += `<${str.toBytes().toHex()}>`;
       } else {
         result += `(${str.value})`;
       }

@@ -443,7 +443,14 @@ export {
   PdfRef,
   PdfObjectRegistry,
 } from './core/pdfObjects.js';
-export type { ByteWriter, PdfObject, RegistryEntry } from './core/pdfObjects.js';
+export type {
+  ByteWriter,
+  PdfObject,
+  PdfStringForm,
+  PdfTextEncoding,
+  PdfTextWriteEncoding,
+  RegistryEntry,
+} from './core/pdfObjects.js';
 
 export { PdfWriter, serializePdf } from './core/io/pdfWriter.js';
 export { PdfStreamWriter } from './core/io/pdfStream.js';

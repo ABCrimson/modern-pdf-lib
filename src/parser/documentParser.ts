@@ -18,7 +18,7 @@
  * @packageDocumentation
  */
 
-import type { PdfObject } from '../core/pdfObjects.js';
+import type { PdfObject, PdfString } from '../core/pdfObjects.js';
 import {
   PdfRef,
   PdfDict,
@@ -26,7 +26,7 @@ import {
   PdfNumber,
   PdfArray,
   PdfStream,
-  PdfString,
+  pdfStringFromByteString,
   PdfNull,
   PdfObjectRegistry,
 } from '../core/pdfObjects.js';
@@ -792,7 +792,7 @@ export class PdfDocumentParser {
     if (str.value.length === 0) return str;
     const encrypted = Uint8Array.from(str.value, (c) => c.charCodeAt(0) & 0xff);
     const plain = latin1String(await decryptStringBytes(handler, objNum, genNum, encrypted));
-    const decrypted = str.hex ? PdfString.hex(plain) : PdfString.literal(plain);
+    const decrypted = pdfStringFromByteString(plain, str.hex);
     recordDecryptedObject(decrypted);
     return decrypted;
   }

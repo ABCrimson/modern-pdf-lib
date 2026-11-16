@@ -70,7 +70,7 @@ describe('annotation contents and author read back by pdf.js and qpdf', () => {
     'text above U+00FF: pdf.js and qpdf read /Contents and /T of a Text, a FreeText and a Square annotation as set',
     {
       failsWith:
-        /^UnencodableTextError: A PDF byte string cannot encode "–" \(U\+2013\) at index \d+:/,
+        /^UnencodableTextError: A PDF byte string cannot encode "–" \(U\+2013\) at index 5:/,
     },
     async () => {
       for (const text of [INPUTS.latin, INPUTS.cjk, INPUTS.astral]) {

@@ -67,8 +67,7 @@ async function encryptedWithObjectStream(objStm: Uint8Array, first: number): Pro
   const encrypted = await handler.encryptObject(5, 0, objStm);
   const dict = handler.buildEncryptDict();
   const hexOf = (key: string): string => {
-    const value = dict.get(key) as { value: string };
-    return value.value;
+    return (dict.get(key) as PdfString).toBytes().toHex();
   };
   const encryptBody = `<< /Filter /Standard /V 4 /R 4 /Length 128 /P ${handler.getPermissionsValue()} /CF << /StdCF << /CFM /AESV2 /AuthEvent /DocOpen /Length 16 >> >> /StmF /StdCF /StrF /StdCF /O <${hexOf('/O')}> /U <${hexOf('/U')}> >>`;
 

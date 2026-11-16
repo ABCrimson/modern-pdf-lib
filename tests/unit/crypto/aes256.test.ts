@@ -190,7 +190,7 @@ describe('AES-256 string encryption', () => {
     const encrypted = await h.encryptString(1, 0, original);
 
     // The encrypted value is hex-encoded ciphertext. Decode it.
-    const cipherBytes = Uint8Array.fromHex(encrypted.value);
+    const cipherBytes = encrypted.toBytes();
     const plainBytes = await h.decryptObject(1, 0, cipherBytes);
     expect(dec.decode(plainBytes)).toBe(originalText);
   });
@@ -256,25 +256,25 @@ describe('AES-256 /Encrypt dictionary', () => {
     // /O and /U are 48 bytes each (hash + valSalt + keySalt)
     const oStr = dict.get('/O') as PdfString;
     expect(oStr).toBeDefined();
-    expect(Uint8Array.fromHex(oStr.value).length).toBe(48);
+    expect(oStr.toBytes().length).toBe(48);
 
     const uStr = dict.get('/U') as PdfString;
     expect(uStr).toBeDefined();
-    expect(Uint8Array.fromHex(uStr.value).length).toBe(48);
+    expect(uStr.toBytes().length).toBe(48);
 
     // /OE and /UE are 32 bytes each (encrypted file key)
     const oeStr = dict.get('/OE') as PdfString;
     expect(oeStr).toBeDefined();
-    expect(Uint8Array.fromHex(oeStr.value).length).toBe(32);
+    expect(oeStr.toBytes().length).toBe(32);
 
     const ueStr = dict.get('/UE') as PdfString;
     expect(ueStr).toBeDefined();
-    expect(Uint8Array.fromHex(ueStr.value).length).toBe(32);
+    expect(ueStr.toBytes().length).toBe(32);
 
     // /Perms is 16 bytes (one AES block)
     const permsStr = dict.get('/Perms') as PdfString;
     expect(permsStr).toBeDefined();
-    expect(Uint8Array.fromHex(permsStr.value).length).toBe(16);
+    expect(permsStr.toBytes().length).toBe(16);
   });
 
   it('has /P permission value', async () => {
@@ -678,11 +678,11 @@ describe('AES-256 password verification via keyDerivation', () => {
       version: 5,
       revision: 6,
       keyLength: 256,
-      ownerKey: Uint8Array.fromHex((dict.get('/O') as PdfString).value),
-      userKey: Uint8Array.fromHex((dict.get('/U') as PdfString).value),
-      ownerEncryptionKey: Uint8Array.fromHex((dict.get('/OE') as PdfString).value),
-      userEncryptionKey: Uint8Array.fromHex((dict.get('/UE') as PdfString).value),
-      perms: Uint8Array.fromHex((dict.get('/Perms') as PdfString).value),
+      ownerKey: (dict.get('/O') as PdfString).toBytes(),
+      userKey: (dict.get('/U') as PdfString).toBytes(),
+      ownerEncryptionKey: (dict.get('/OE') as PdfString).toBytes(),
+      userEncryptionKey: (dict.get('/UE') as PdfString).toBytes(),
+      perms: (dict.get('/Perms') as PdfString).toBytes(),
       permissions: (dict.get('/P') as PdfNumber).value,
       encryptMetadata: true,
     };
@@ -703,11 +703,11 @@ describe('AES-256 password verification via keyDerivation', () => {
       version: 5,
       revision: 6,
       keyLength: 256,
-      ownerKey: Uint8Array.fromHex((dict.get('/O') as PdfString).value),
-      userKey: Uint8Array.fromHex((dict.get('/U') as PdfString).value),
-      ownerEncryptionKey: Uint8Array.fromHex((dict.get('/OE') as PdfString).value),
-      userEncryptionKey: Uint8Array.fromHex((dict.get('/UE') as PdfString).value),
-      perms: Uint8Array.fromHex((dict.get('/Perms') as PdfString).value),
+      ownerKey: (dict.get('/O') as PdfString).toBytes(),
+      userKey: (dict.get('/U') as PdfString).toBytes(),
+      ownerEncryptionKey: (dict.get('/OE') as PdfString).toBytes(),
+      userEncryptionKey: (dict.get('/UE') as PdfString).toBytes(),
+      perms: (dict.get('/Perms') as PdfString).toBytes(),
       permissions: (dict.get('/P') as PdfNumber).value,
       encryptMetadata: true,
     };
@@ -734,11 +734,11 @@ describe('computeFileEncryptionKey for R=6', () => {
       version: 5,
       revision: 6,
       keyLength: 256,
-      ownerKey: Uint8Array.fromHex((dict.get('/O') as PdfString).value),
-      userKey: Uint8Array.fromHex((dict.get('/U') as PdfString).value),
-      ownerEncryptionKey: Uint8Array.fromHex((dict.get('/OE') as PdfString).value),
-      userEncryptionKey: Uint8Array.fromHex((dict.get('/UE') as PdfString).value),
-      perms: Uint8Array.fromHex((dict.get('/Perms') as PdfString).value),
+      ownerKey: (dict.get('/O') as PdfString).toBytes(),
+      userKey: (dict.get('/U') as PdfString).toBytes(),
+      ownerEncryptionKey: (dict.get('/OE') as PdfString).toBytes(),
+      userEncryptionKey: (dict.get('/UE') as PdfString).toBytes(),
+      perms: (dict.get('/Perms') as PdfString).toBytes(),
       permissions: (dict.get('/P') as PdfNumber).value,
       encryptMetadata: true,
     };
@@ -760,11 +760,11 @@ describe('computeFileEncryptionKey for R=6', () => {
       version: 5,
       revision: 6,
       keyLength: 256,
-      ownerKey: Uint8Array.fromHex((dict.get('/O') as PdfString).value),
-      userKey: Uint8Array.fromHex((dict.get('/U') as PdfString).value),
-      ownerEncryptionKey: Uint8Array.fromHex((dict.get('/OE') as PdfString).value),
-      userEncryptionKey: Uint8Array.fromHex((dict.get('/UE') as PdfString).value),
-      perms: Uint8Array.fromHex((dict.get('/Perms') as PdfString).value),
+      ownerKey: (dict.get('/O') as PdfString).toBytes(),
+      userKey: (dict.get('/U') as PdfString).toBytes(),
+      ownerEncryptionKey: (dict.get('/OE') as PdfString).toBytes(),
+      userEncryptionKey: (dict.get('/UE') as PdfString).toBytes(),
+      perms: (dict.get('/Perms') as PdfString).toBytes(),
       permissions: (dict.get('/P') as PdfNumber).value,
       encryptMetadata: true,
     };
@@ -786,11 +786,11 @@ describe('computeFileEncryptionKey for R=6', () => {
       version: 5,
       revision: 6,
       keyLength: 256,
-      ownerKey: Uint8Array.fromHex((dict.get('/O') as PdfString).value),
-      userKey: Uint8Array.fromHex((dict.get('/U') as PdfString).value),
-      ownerEncryptionKey: Uint8Array.fromHex((dict.get('/OE') as PdfString).value),
-      userEncryptionKey: Uint8Array.fromHex((dict.get('/UE') as PdfString).value),
-      perms: Uint8Array.fromHex((dict.get('/Perms') as PdfString).value),
+      ownerKey: (dict.get('/O') as PdfString).toBytes(),
+      userKey: (dict.get('/U') as PdfString).toBytes(),
+      ownerEncryptionKey: (dict.get('/OE') as PdfString).toBytes(),
+      userEncryptionKey: (dict.get('/UE') as PdfString).toBytes(),
+      perms: (dict.get('/Perms') as PdfString).toBytes(),
       permissions: (dict.get('/P') as PdfNumber).value,
       encryptMetadata: true,
     };
@@ -994,7 +994,7 @@ describe('AES-256 known-structure test', () => {
     //   byte 8: 'T' (0x54) for encryptMetadata=true
     //   bytes 9-11: 'adb'
     const dict = h.buildEncryptDict();
-    const permsEncrypted = Uint8Array.fromHex((dict.get('/Perms') as PdfString).value);
+    const permsEncrypted = (dict.get('/Perms') as PdfString).toBytes();
     expect(permsEncrypted.length).toBe(16);
 
     // Decrypt with file key (AES-256-ECB = CBC with zero IV, one block)
@@ -1691,11 +1691,11 @@ describe('AES-256 owner vs user password validation', () => {
       version: 5,
       revision: 6,
       keyLength: 256,
-      ownerKey: Uint8Array.fromHex((dict.get('/O') as PdfString).value),
-      userKey: Uint8Array.fromHex((dict.get('/U') as PdfString).value),
-      ownerEncryptionKey: Uint8Array.fromHex((dict.get('/OE') as PdfString).value),
-      userEncryptionKey: Uint8Array.fromHex((dict.get('/UE') as PdfString).value),
-      perms: Uint8Array.fromHex((dict.get('/Perms') as PdfString).value),
+      ownerKey: (dict.get('/O') as PdfString).toBytes(),
+      userKey: (dict.get('/U') as PdfString).toBytes(),
+      ownerEncryptionKey: (dict.get('/OE') as PdfString).toBytes(),
+      userEncryptionKey: (dict.get('/UE') as PdfString).toBytes(),
+      perms: (dict.get('/Perms') as PdfString).toBytes(),
       permissions: (dict.get('/P') as PdfNumber).value,
       encryptMetadata: true,
     };
@@ -1746,11 +1746,11 @@ describe('AES-256 owner vs user password validation', () => {
       version: 5,
       revision: 6,
       keyLength: 256,
-      ownerKey: Uint8Array.fromHex((dict.get('/O') as PdfString).value),
-      userKey: Uint8Array.fromHex((dict.get('/U') as PdfString).value),
-      ownerEncryptionKey: Uint8Array.fromHex((dict.get('/OE') as PdfString).value),
-      userEncryptionKey: Uint8Array.fromHex((dict.get('/UE') as PdfString).value),
-      perms: Uint8Array.fromHex((dict.get('/Perms') as PdfString).value),
+      ownerKey: (dict.get('/O') as PdfString).toBytes(),
+      userKey: (dict.get('/U') as PdfString).toBytes(),
+      ownerEncryptionKey: (dict.get('/OE') as PdfString).toBytes(),
+      userEncryptionKey: (dict.get('/UE') as PdfString).toBytes(),
+      perms: (dict.get('/Perms') as PdfString).toBytes(),
       permissions: (dict.get('/P') as PdfNumber).value,
       encryptMetadata: true,
     };
@@ -1929,11 +1929,11 @@ describe('AES-256 key derivation cache behavior', () => {
       version: 5,
       revision: 6,
       keyLength: 256,
-      ownerKey: Uint8Array.fromHex((dict.get('/O') as PdfString).value),
-      userKey: Uint8Array.fromHex((dict.get('/U') as PdfString).value),
-      ownerEncryptionKey: Uint8Array.fromHex((dict.get('/OE') as PdfString).value),
-      userEncryptionKey: Uint8Array.fromHex((dict.get('/UE') as PdfString).value),
-      perms: Uint8Array.fromHex((dict.get('/Perms') as PdfString).value),
+      ownerKey: (dict.get('/O') as PdfString).toBytes(),
+      userKey: (dict.get('/U') as PdfString).toBytes(),
+      ownerEncryptionKey: (dict.get('/OE') as PdfString).toBytes(),
+      userEncryptionKey: (dict.get('/UE') as PdfString).toBytes(),
+      perms: (dict.get('/Perms') as PdfString).toBytes(),
       permissions: (dict.get('/P') as PdfNumber).value,
       encryptMetadata: true,
     };

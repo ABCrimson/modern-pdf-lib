@@ -34,13 +34,6 @@ const TEXTS = Object.values(INPUTS);
 const NAMES = TEXTS.map((_, i) => `text${i + 1}`);
 const FORM_FILE = new URL('../../fixtures/corpus/qpdf-form-acrobat.pdf', import.meta.url);
 
-/**
- * `PdfString.fromText`, the text-string factory of the byte model. PdfString has no such member
- * yet, so the call throws a TypeError; the cast only lets the call compile until it exists.
- */
-const fromText = (text: string): PdfString =>
-  (PdfString as unknown as { fromText(text: string): PdfString }).fromText(text);
-
 beforeEach((ctx) => {
   requireQpdf(ctx);
 });
@@ -102,24 +95,19 @@ describe('text field values read back by pdf.js and qpdf', () => {
     await expectFieldValues(await cleanSave(catalogFieldDoc(values)), NAMES, TEXTS);
   });
 
-  // Passes as soon as PdfString.fromText exists: the change that adds fromText turns this marker
-  // into a plain test (no field writer is on this route).
-  knownDefect(
-    defectKey('core-document-01', '0.41.0'),
-    'dictionary level: field values made with PdfString.fromText read back as set',
-    { failsWith: /^TypeError: \S*PdfString\.fromText is not a function$/ },
-    async () => {
-      const values = TEXTS.map((text) => fromText(text));
-      await expectFieldValues(await cleanSave(catalogFieldDoc(values)), NAMES, TEXTS);
-    },
-  );
+  test('dictionary level: field values made with PdfString.fromText read back as set', async () => {
+    const values = TEXTS.map((text) => PdfString.fromText(text));
+    await expectFieldValues(await cleanSave(catalogFieldDoc(values)), NAMES, TEXTS);
+  });
 
   knownDefect(
     defectKey('forms-35', '0.41.4'),
     'form API: createTextField and setText values read back as set',
     {
+      // The field writer builds the value as a byte string, which refuses the en dash at index 5
+      // of the first text that holds one.
       failsWith:
-        /^AssertionError: pdf\.js: expected \[ undefined, undefined, …\(2\) \] to deeply equal/,
+        /^UnencodableTextError: A PDF byte string cannot encode "–" \(U\+2013\) at index 5:/,
     },
     async () => {
       const doc = createPdf();

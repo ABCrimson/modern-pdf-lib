@@ -14,7 +14,7 @@
  * @packageDocumentation
  */
 
-import type { PdfObject } from './pdfObjects.js';
+import type { PdfObject, PdfString } from './pdfObjects.js';
 import {
   PdfDict,
   PdfArray,
@@ -22,7 +22,7 @@ import {
   PdfRef,
   PdfName,
   PdfNumber,
-  PdfString,
+  pdfStringFromByteString,
   PdfBool,
   PdfNull,
 } from './pdfObjects.js';
@@ -166,7 +166,7 @@ function deepClone(obj: PdfObject, ctx: CloneContext): PdfObject {
 
     case 'string': {
       const s = obj as PdfString;
-      const clonedString = s.hex ? PdfString.hex(s.value) : PdfString.literal(s.value);
+      const clonedString = pdfStringFromByteString(s.value, s.hex);
       recordCloneOfDecrypted(s, clonedString);
       return clonedString;
     }

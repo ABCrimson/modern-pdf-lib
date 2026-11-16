@@ -94,4 +94,9 @@ export {
   PdfStream,
   PdfRef,
 } from './core/pdfObjects.js';
-export type { PdfObject } from './core/pdfObjects.js';
+export type {
+  PdfObject,
+  PdfStringForm,
+  PdfTextEncoding,
+  PdfTextWriteEncoding,
+} from './core/pdfObjects.js';

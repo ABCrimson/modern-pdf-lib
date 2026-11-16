@@ -21,12 +21,12 @@ import {
   PdfNull,
   PdfBool,
   PdfNumber,
-  PdfString,
-  PdfName,
   PdfArray,
   PdfDict,
   PdfStream,
   PdfRef,
+  pdfNameFromByteString,
+  pdfStringFromByteString,
   type PdfObjectRegistry,
 } from '../../core/pdfObjects.js';
 
@@ -272,13 +272,13 @@ export class PdfObjectParser {
         return this.parseNumberOrRef(token);
 
       case TokenType.LiteralString:
-        return PdfString.literal(token.value as string);
+        return pdfStringFromByteString(token.value as string, false);
 
       case TokenType.HexString:
-        return PdfString.hex(token.value as string);
+        return pdfStringFromByteString(token.value as string, true);
 
       case TokenType.Name:
-        return PdfName.of(token.value as string);
+        return pdfNameFromByteString(token.value as string);
 
       case TokenType.ArrayStart:
         return this.parseArray();

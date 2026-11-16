@@ -179,6 +179,35 @@ describe('PdfObjectParser - hex string', () => {
     expect(obj.kind).toBe('string');
     expect((obj as PdfString).value).toBe('');
   });
+
+  it('keeps the bytes and the form: <4142> is written back as <4142>, (AB) as (AB)', () => {
+    const hex = parse('<4142>') as PdfString;
+    expect(hex.toBytes()).toEqual(new Uint8Array([0x41, 0x42]));
+    expect(serialized(hex)).toBe('<4142>');
+    expect(serialized(parse('(AB)'))).toBe('(AB)');
+  });
+});
+
+/** The bytes `serialize` writes, one code unit per byte. */
+function serialized(obj: PdfObject): string {
+  let out = '';
+  obj.serialize({
+    write: (data) => {
+      out += String.fromCharCode(...data);
+    },
+    writeString: (str) => {
+      out += str;
+    },
+  });
+  return out;
+}
+
+describe('PdfObjectParser - names holding NUL', () => {
+  it('loads /A#00B as a key and as a value and writes both back as /A#00B', () => {
+    const dict = parse('<< /A#00B /A#00B >>') as PdfDict;
+    expect((dict.get('/A\u0000B') as PdfName).value).toBe('/A\u0000B');
+    expect(serialized(dict)).toBe('<<\n/A#00B /A#00B\n>>');
+  });
 });
 
 // ---------------------------------------------------------------------------

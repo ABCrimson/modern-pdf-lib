@@ -102,16 +102,16 @@ describe('buildDocTimeStampDict', () => {
     const dict = buildDocTimeStampDict();
     const contents = dict.get('/Contents') as PdfString;
     // 2 hex digits per byte.
-    expect(contents.value.length).toBe(DEFAULT_DOC_TIMESTAMP_CONTENTS_SIZE * 2);
+    expect(contents.toBytes().toHex().length).toBe(DEFAULT_DOC_TIMESTAMP_CONTENTS_SIZE * 2);
     expect(DEFAULT_DOC_TIMESTAMP_CONTENTS_SIZE).toBe(8192);
   });
 
   it('honors a custom contentsSize', () => {
     const dict = buildDocTimeStampDict({ contentsSize: 4096 });
     const contents = dict.get('/Contents') as PdfString;
-    expect(contents.value.length).toBe(4096 * 2);
+    expect(contents.toBytes().toHex().length).toBe(4096 * 2);
     // Placeholder is all-zero hex digits.
-    expect(/^0+$/.test(contents.value)).toBe(true);
+    expect(/^0+$/.test(contents.toBytes().toHex())).toBe(true);
   });
 
   it('does not add /Reason by default', () => {
@@ -177,7 +177,7 @@ describe('buildDocTimeStampDict', () => {
       reason: 'archival',
     };
     const dict = buildDocTimeStampDict(options);
-    expect((dict.get('/Contents') as PdfString).value.length).toBe(2048 * 2);
+    expect((dict.get('/Contents') as PdfString).toBytes().toHex().length).toBe(2048 * 2);
     expect((dict.get('/Reason') as PdfString).value).toBe('archival');
   });
 });

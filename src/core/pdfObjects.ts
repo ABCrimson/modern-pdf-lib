@@ -9,6 +9,10 @@
  * Reference: PDF 1.7 spec, §7.3 (Objects).
  */
 
+import { InvalidArgumentError } from '../errors.js';
+import { latin1Bytes } from '../internal/latin1.js';
+import { decodeTextString, encodeTextString, textStringEncoding } from './internal/textString.js';
+
 // ---------------------------------------------------------------------------
 // Byte writer interface
 // ---------------------------------------------------------------------------
@@ -21,7 +25,11 @@
 export interface ByteWriter {
   /** Append raw bytes. */
   write(data: Uint8Array): void;
-  /** Append an ASCII / Latin-1 string — callers guarantee all chars < 0x100. */
+  /**
+   * Append a PDF byte string: code units 0x00-0xFF, one byte each. The library's writers throw
+   * UnencodableTextError (encoding `PDF byte string`) above 0xFF; a custom ByteWriter keeps its
+   * own rule.
+   */
   writeString(str: string): void;
 }
 
@@ -30,6 +38,21 @@ export interface ByteWriter {
 // ---------------------------------------------------------------------------
 
 const encoder = new TextEncoder();
+
+/** Code units per String.fromCharCode call, well below every engine's argument limit. */
+const BYTE_STRING_CHUNK = 0x2000;
+
+/** The bytes as a byte string, one code unit per byte, built in chunks so any length fits. */
+function byteStringOf(bytes: Uint8Array): string {
+  let out = '';
+  for (let i = 0; i < bytes.length; i += BYTE_STRING_CHUNK) {
+    out += String.fromCharCode(...bytes.subarray(i, i + BYTE_STRING_CHUNK));
+  }
+  return out;
+}
+
+/** PDF white space (ISO 32000-2 Table 1): NUL, TAB, LF, FF, CR and SPACE. */
+const PDF_WHITE_SPACE = /[\0\t\n\f\r ]/g;
 
 /** Format a number for PDF output (no trailing zeros). */
 function formatNumber(value: number): string {
@@ -129,50 +152,212 @@ export class PdfNumber {
 // PdfString
 // ---------------------------------------------------------------------------
 
+/** Encoding of a text string as read (ISO 32000-2 7.9.2.2). `"utf-16le"` is read only (pdf.js reads it). */
+export type PdfTextEncoding = 'pdfdoc' | 'utf-16be' | 'utf-16le' | 'utf-8';
+
+/** Encodings {@link PdfString.fromText} may write. `"auto"` never picks `"utf-8"` (the output is PDF 1.7). */
+export type PdfTextWriteEncoding = 'auto' | 'pdfdoc' | 'utf-16be' | 'utf-8';
+
+/** The written form of a PDF string: `"literal"` for `(…)`, `"hex"` for `<…>`. */
+export type PdfStringForm = 'literal' | 'hex';
+
+/** Builds a PdfString from a byte string without a check; bound in PdfString's static block. */
+let makePdfString: (byteString: string, hex: boolean) => PdfString;
+
+/** Builds an interned PdfName from its value without a check; bound in PdfName's static block. */
+let makePdfName: (value: string) => PdfName;
+
 /**
- * A PDF string — either literal `(…)` or hexadecimal `<…>`.
+ * A PdfString of a byte string (one code unit per byte, 0x00-0xFF), unchecked: for the parser,
+ * whose tokens are such byte strings, and for the copiers of loaded strings.
  *
- * By default the constructor produces a literal string.  Use the static
- * helpers for explicit control.
+ * @internal Exported from no package entry.
+ */
+export function pdfStringFromByteString(byteString: string, hex: boolean): PdfString {
+  return makePdfString(byteString, hex);
+}
+
+/**
+ * The interned PdfName of a value ("/" + the name bytes, one code unit per byte), unchecked: for
+ * the parser and for PdfDict keys, so a name holding NUL (`/A#00B`) loads and saves.
+ *
+ * @internal Exported from no package entry.
+ */
+export function pdfNameFromByteString(value: string): PdfName {
+  return makePdfName(value);
+}
+
+/**
+ * A PDF string (ISO 32000-2 7.3.4): a sequence of bytes, plus the form it is written in,
+ * literal `(…)` or hexadecimal `<…>`. Text is a view of the bytes ({@link toText}); the form
+ * never changes the bytes.
+ *
+ * - {@link fromText} for a text string, {@link fromAscii} for an ASCII string,
+ *   {@link fromBytes} and {@link fromHex} for a byte string.
+ * - {@link toBytes} and {@link toText} read it.
  */
 export class PdfString {
   /** @internal */
   readonly kind = 'string' as const;
 
+  static {
+    makePdfString = (byteString, hex) => new PdfString(byteString, hex);
+  }
+
   private constructor(
-    /** The raw string content (unescaped). */
-    public readonly value: string,
-    /** When `true` the string is serialized in hexadecimal form `<…>`. */
+    /** The bytes, one code unit per byte (0x00-0xFF). */
+    private readonly byteString: string,
+    /** The written form: `true` for `<…>`. Kept from the file on load; never guessed. */
     public readonly hex: boolean,
   ) {}
 
-  /** Create a literal string `(…)`. */
-  static literal(value: string): PdfString {
-    return new PdfString(value, false);
+  /**
+   * A text string (ISO 32000-2 7.9.2.2), in literal form. `"auto"` (the default) writes
+   * PDFDocEncoding when every character is encodable there and the bytes do not begin with
+   * FE FF, FF FE or EF BB BF, else UTF-16BE with FE FF.
+   *
+   * @throws {UnencodableTextError} For a lone surrogate, or a character the requested encoding
+   *   lacks (encoding `PDF text string`; `index` is its UTF-16 index in `text`).
+   * @throws {InvalidArgumentError} For `"utf-16le"` (read only) or an unknown encoding
+   *   (argument `encoding`).
+   */
+  static fromText(text: string, encoding: PdfTextWriteEncoding = 'auto'): PdfString {
+    return new PdfString(byteStringOf(encodeTextString(text, encoding)), false);
   }
 
-  /** Create a hexadecimal string `<…>` from a plain string. */
-  static hex(value: string): PdfString {
-    return new PdfString(value, true);
+  /**
+   * An ASCII string (dates, /Registry, /Ordering, a percent-encoded /URI), in literal form.
+   *
+   * @throws {InvalidArgumentError} For a character above U+007F (argument `text`).
+   */
+  static fromAscii(text: string): PdfString {
+    for (let i = 0; i < text.length; i++) {
+      if (text.charCodeAt(i) > 0x7f) {
+        throw new InvalidArgumentError(
+          `An ASCII string holds only U+0000 to U+007F; found "${text.charAt(i)}" at index ${i}`,
+          { argument: 'text' },
+        );
+      }
+    }
+    return new PdfString(text, false);
   }
 
-  /** Create a hexadecimal string from raw bytes. */
-  static hexFromBytes(data: Uint8Array): PdfString {
-    return new PdfString(bytesToHex(data), true);
+  /**
+   * A byte string; the bytes are copied.
+   *
+   * @throws {InvalidArgumentError} For a form other than `"literal"` or `"hex"` (argument `form`).
+   */
+  static fromBytes(bytes: Uint8Array, form: PdfStringForm = 'literal'): PdfString {
+    if (form !== 'literal' && form !== 'hex') {
+      throw new InvalidArgumentError(
+        `Unknown PDF string form "${String(form)}"; write "literal" or "hex"`,
+        { argument: 'form' },
+      );
+    }
+    return new PdfString(byteStringOf(bytes), form === 'hex');
   }
 
+  /**
+   * A byte string from hex digits, in hex form: white space is ignored and an odd count is
+   * padded with 0 (ISO 32000-2 7.3.4.3).
+   *
+   * @throws {InvalidArgumentError} For any other character (argument `hexDigits`).
+   */
+  static fromHex(digits: string): PdfString {
+    const compact = digits.replace(PDF_WHITE_SPACE, '');
+    if (!/^[\da-fA-F]*$/.test(compact)) {
+      throw new InvalidArgumentError(
+        'Hex digits hold only 0-9, A-F, a-f and white space; for text use PdfString.fromText',
+        { argument: 'hexDigits' },
+      );
+    }
+    const even = compact.length % 2 === 0 ? compact : `${compact}0`;
+    return new PdfString(byteStringOf(Uint8Array.fromHex(even)), true);
+  }
+
+  /** The unsigned byte order of the two byte sequences, as name-tree keys sort (7.9.6). */
+  static compare(a: PdfString, b: PdfString): number {
+    // Code units 0x00-0xFF compare as the unsigned bytes they stand for.
+    return a.byteString < b.byteString ? -1 : a.byteString > b.byteString ? 1 : 0;
+  }
+
+  /**
+   * A byte string, one byte per code unit, in literal form.
+   *
+   * @deprecated Since 0.41.0, removed in 0.50.0. Use {@link fromText} for text or
+   *   {@link fromBytes} for bytes.
+   * @throws {UnencodableTextError} For the first code unit above 0xFF (encoding
+   *   `PDF byte string`; `index` is its index in `byteString`).
+   */
+  static literal(byteString: string): PdfString {
+    latin1Bytes(byteString); // throws at the first code unit above 0xFF
+    return new PdfString(byteString, false);
+  }
+
+  /**
+   * Same as {@link fromHex}.
+   *
+   * @deprecated Since 0.41.0, removed in 0.50.0. Use {@link fromHex}.
+   */
+  static hex(hexDigits: string): PdfString {
+    return PdfString.fromHex(hexDigits);
+  }
+
+  /**
+   * Same as `fromBytes(bytes, "hex")`.
+   *
+   * @deprecated Since 0.41.0, removed in 0.50.0. Use {@link fromBytes} with `"hex"`.
+   */
+  static hexFromBytes(bytes: Uint8Array): PdfString {
+    return PdfString.fromBytes(bytes, 'hex');
+  }
+
+  /** The number of bytes. */
+  get byteLength(): number {
+    return this.byteString.length;
+  }
+
+  /** A new array holding the bytes; changing it leaves the string unchanged. */
+  toBytes(): Uint8Array<ArrayBuffer> {
+    return latin1Bytes(this.byteString);
+  }
+
+  /** The encoding the bytes name: FE FF utf-16be, FF FE utf-16le, EF BB BF utf-8, else pdfdoc. */
+  get textEncoding(): PdfTextEncoding {
+    return textStringEncoding(this.toBytes());
+  }
+
+  /**
+   * The bytes decoded as a text string (ISO 32000-2 7.9.2.2). After a byte order mark the
+   * decoder never switches encoding; an odd trailing byte of a UTF-16 string is dropped; an
+   * ill-formed sequence decodes to U+FFFD; language escapes (U+001B … U+001B) are removed.
+   */
+  toText(): string {
+    return decodeTextString(this.toBytes());
+  }
+
+  /** True when both hold the same bytes; the form is not compared. */
+  equals(other: PdfString): boolean {
+    return this.byteString === other.byteString;
+  }
+
+  /**
+   * The bytes, one code unit per byte: what 0.40.x returned for every loaded string.
+   *
+   * @deprecated Since 0.41.0, removed in 0.50.0. Use {@link toText} for text or
+   *   {@link toBytes} for bytes.
+   */
+  get value(): string {
+    return this.byteString;
+  }
+
+  /** Writes `(…)` with `\\`, `\(`, `\)`, `\r` and `\n` escaped, or `<…>` in lower-case hex. */
   serialize(writer: ByteWriter): void {
     if (this.hex) {
-      // If value is already hex digits (from hexFromBytes), use directly;
-      // otherwise encode the string bytes to hex.
-      if (/^[\da-fA-F]*$/.test(this.value)) {
-        writer.writeString(`<${this.value}>`);
-      } else {
-        const bytes = encoder.encode(this.value);
-        writer.writeString(`<${bytesToHex(bytes)}>`);
-      }
+      writer.writeString(`<${bytesToHex(this.toBytes())}>`);
     } else {
-      writer.writeString(`(${escapeLiteralString(this.value)})`);
+      // write(), not writeString(): a custom ByteWriter may encode writeString differently.
+      writer.write(latin1Bytes(`(${escapeLiteralString(this.byteString)})`));
     }
   }
 }
@@ -182,48 +367,108 @@ export class PdfString {
 // ---------------------------------------------------------------------------
 
 /**
- * A PDF name object — e.g. `/Type`, `/Page`.
- *
- * The leading `/` is stored and serialized.  Characters outside the
- * printable ASCII range (33–126) and `#` are encoded as `#XX`.
+ * True for the bytes a name holds as is: 0x21-0x7E but `#` and the delimiters
+ * `( ) < > [ ] { } / %` (ISO 32000-2 7.3.5).
+ */
+const NAME_REGULAR: Uint8Array = /* @__PURE__ */ (() => {
+  const regular = new Uint8Array(256);
+  regular.fill(1, 0x21, 0x7f);
+  for (const c of '#()<>[]{}/%') regular[c.charCodeAt(0)] = 0;
+  return regular;
+})();
+
+/**
+ * A PDF name object (ISO 32000-2 7.3.5), such as `/Type`: a sequence of bytes other than NUL,
+ * written with `#xx` escapes. Names are interned: one object per name.
  */
 export class PdfName {
   /** @internal */
   readonly kind = 'name' as const;
 
-  /** Cache for frequently used names. */
+  /** One object per value. */
   private static readonly cache = new Map<string, PdfName>();
 
+  static {
+    makePdfName = (value) => {
+      let cached = PdfName.cache.get(value);
+      if (cached === undefined) {
+        cached = new PdfName(value);
+        PdfName.cache.set(value, cached);
+      }
+      return cached;
+    };
+  }
+
   private constructor(
-    /** The name value *including* the leading `/`. */
+    /** "/" + the name bytes, one code unit per byte, # escapes resolved: the PdfDict key form. */
     public readonly value: string,
   ) {}
 
-  /** Create or retrieve a cached `PdfName`. */
+  /**
+   * The name of a byte string (one code unit per byte), the leading "/" optional.
+   *
+   * @throws {InvalidArgumentError} For NUL or a code unit above 0xFF (argument `name`).
+   */
   static of(name: string): PdfName {
-    // Ensure the leading slash
-    const normalized = name.startsWith('/') ? name : `/${name}`;
-    let cached = PdfName.cache.get(normalized);
-    if (!cached) {
-      cached = new PdfName(normalized);
-      PdfName.cache.set(normalized, cached);
-    }
-    return cached;
-  }
-
-  serialize(writer: ByteWriter): void {
-    // Encode the name: the leading '/' is literal, then each character
-    // is either passed through (printable ASCII except '#') or encoded.
-    const parts: string[] = ['/'];
-    for (let i = 1; i < this.value.length; i++) {
-      const code = this.value.charCodeAt(i);
-      if (code >= 33 && code <= 126 && code !== 0x23 /* # */) {
-        parts.push(this.value[i]!);
-      } else {
-        parts.push('#' + code.toString(16).padStart(2, '0'));
+    const value = name.startsWith('/') ? name : `/${name}`;
+    for (let i = 1; i < value.length; i++) {
+      const unit = value.charCodeAt(i);
+      if (unit === 0 || unit > 0xff) {
+        throw new InvalidArgumentError(
+          `A PDF name holds bytes 0x01-0xFF, one code unit each; found U+${unit.toString(16).toUpperCase().padStart(4, '0')} in "${name}". For text, use PdfName.fromBytes(new TextEncoder().encode(text))`,
+          { argument: 'name' },
+        );
       }
     }
-    writer.writeString(parts.join(''));
+    return makePdfName(value);
+  }
+
+  /**
+   * The name of the bytes, without the leading "/".
+   *
+   * @throws {InvalidArgumentError} For a NUL byte (argument `bytes`).
+   */
+  static fromBytes(bytes: Uint8Array): PdfName {
+    if (bytes.includes(0)) {
+      throw new InvalidArgumentError('A PDF name cannot hold the byte 0x00', {
+        argument: 'bytes',
+      });
+    }
+    return makePdfName(`/${byteStringOf(bytes)}`);
+  }
+
+  /** A new array holding the name bytes, without the leading "/". */
+  toBytes(): Uint8Array<ArrayBuffer> {
+    return latin1Bytes(this.value.slice(1));
+  }
+
+  /** The name bytes decoded as UTF-8, U+FFFD for a malformed sequence. */
+  toText(): string {
+    return new TextDecoder().decode(this.toBytes());
+  }
+
+  /**
+   * Writes "/" and then each byte as is when it is 0x21-0x7E and not one of
+   * `# ( ) < > [ ] { } / %`, else as `#xx` in lower case (the form qpdf 12.4.2 writes); NUL is
+   * written `#00`.
+   *
+   * @throws {InvalidArgumentError} For a code unit above 0xFF, which only a PdfDict key set from
+   *   code can hold (argument `name`).
+   */
+  serialize(writer: ByteWriter): void {
+    let out = '/';
+    for (let i = 1; i < this.value.length; i++) {
+      const unit = this.value.charCodeAt(i);
+      if (unit > 0xff) {
+        throw new InvalidArgumentError(
+          `A PDF name holds bytes, one code unit each; the name "${this.value}" holds U+${unit.toString(16).toUpperCase().padStart(4, '0')}`,
+          { argument: 'name' },
+        );
+      }
+      out +=
+        NAME_REGULAR[unit] === 1 ? this.value.charAt(i) : `#${unit.toString(16).padStart(2, '0')}`;
+    }
+    writer.writeString(out);
   }
 }
 
@@ -328,7 +573,7 @@ export class PdfDict {
     writer.writeString('<<');
     for (const [key, value] of this.entries) {
       writer.writeString('\n');
-      PdfName.of(key).serialize(writer);
+      pdfNameFromByteString(key).serialize(writer);
       writer.writeString(' ');
       value.serialize(writer);
     }

@@ -49,6 +49,7 @@ export type {
 export {
   PdfError,
   InvalidArgumentError,
+  UnencodableTextError,
   MalformedInputError,
   UnsupportedFeatureError,
   ScriptExecutionDisabledError,

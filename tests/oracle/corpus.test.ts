@@ -133,16 +133,6 @@ const INDIRECT_FONTS: Known = {
   failsWith: TEXT_MISSING,
 };
 
-// A name that holds a delimiter (the /Subtype /text/plain of an embedded file) is written
-// without escaping it, so qpdf ends the dictionary early and warns.
-const UNESCAPED_NAME = defectKey('tests-unit-core-b-22', '0.41.0');
-const DICTIONARY_ENDED =
-  /WARNING: in\.pdf \(object \d+ 0, offset \d+\): dictionary ended prematurely; using null as value for last key/;
-const UNESCAPED_NAME_SAVED: Known = {
-  key: UNESCAPED_NAME,
-  failsWith: qpdfFindsOnly(3, DICTIONARY_ENDED),
-};
-
 const KNOWN: Readonly<Record<string, Partial<Record<Check, Known>>>> = {
   'irs-p1-chinese': { text: INDIRECT_FONTS },
   'pdfjs-cid-truetype': { text: INDIRECT_FONTS },
@@ -151,16 +141,6 @@ const KNOWN: Readonly<Record<string, Partial<Record<Check, Known>>>> = {
   // sync flush. Both saves write them back as complete zlib data, so qpdf passes the output.
   'qpdf-form-acrobat': { text: INDIRECT_FONTS },
   'qpdf-form-odt': { text: INDIRECT_FONTS },
-  'qpdf-r6-attachments': {
-    qpdf: UNESCAPED_NAME_SAVED,
-    qpdfDefault: UNESCAPED_NAME_SAVED,
-    plaintext: {
-      key: UNESCAPED_NAME,
-      failsWith: new RegExp(
-        `^QpdfError: qpdf --decrypt exit 3: (?:(?:${DICTIONARY_ENDED.source}) \\| )+qpdf: operation succeeded with warnings; resulting file may have some problems$`,
-      ),
-    },
-  },
 };
 
 // ---------------------------------------------------------------------------------------------

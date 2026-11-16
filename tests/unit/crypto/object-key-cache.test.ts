@@ -106,7 +106,7 @@ describe('seeded R2, R3 and R4 encryption output', () => {
     const digest = createHash('sha256');
     for (const key of ['/O', '/U']) {
       const value = dict.get(key);
-      digest.update(value?.kind === 'string' ? value.value : 'missing');
+      digest.update(value?.kind === 'string' ? value.toBytes().toHex() : 'missing');
     }
     for (const [obj, gen] of [
       [1, 0],

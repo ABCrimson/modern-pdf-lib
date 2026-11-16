@@ -11,8 +11,8 @@
  * refuses to save.
  * Pages, embedded pages and metadata carry the record into the document they are brought into.
  * After `encrypt()`, the `/Contents` of a signature dictionary is written unencrypted (ISO
- * 32000-2:2020, 7.6.1); its bytes equal the source's only once hex strings are written back
- * byte for byte, which the marker below tracks.
+ * 32000-2:2020, 7.6.1), and its bytes equal the source's: hex strings are written back byte for
+ * byte.
  *
  * Sources: tests/fixtures/encrypted/aes-128-r4.pdf (user password `user`),
  * load/aes-128-r4.empty.pdf (empty user password, opened without one), load/signed-aes-128.pdf
@@ -51,7 +51,6 @@ import { isDecryptedFromEncryptedFile } from '../../../src/core/internal/flateSt
 import { sanitizePdf } from '../../../src/security/sanitize.js';
 import type { EncryptAlgorithm } from '../../../src/crypto/encryptionHandler.js';
 import { UnsupportedEncryptionError } from '../../../src/errors.js';
-import { defectKey, knownDefect } from '../../helpers/known-defect.js';
 import { expectQpdfClean, qpdfDecryptQdf, requireQpdf } from '../../helpers/oracle/qpdf.js';
 
 const DIR = join(import.meta.dirname, '../../fixtures/encrypted');
@@ -738,19 +737,14 @@ describe('re-encrypting a decrypted signed document', () => {
       );
     });
 
-    knownDefect(
-      defectKey('core-document-02', '0.41.0'),
-      `the signature /Contents bytes are unchanged after encrypt() and save (${algorithm})`,
-      { failsWith: /expected .* to deeply equal/ },
-      async (ctx) => {
-        requireQpdf(ctx);
-        const out = await reEncryptedSigned(algorithm);
-        const before = await signatureContents(
-          qpdfDecryptQdf(fixture('load/signed-aes-128.pdf'), 'user'),
-        );
-        expect([...before.subarray(0, 4)]).toEqual([0x30, 0x82, 0x05, 0x3e]);
-        expect(await signatureContents(qpdfDecryptQdf(out, 'u2'))).toEqual(before);
-      },
-    );
+    it(`keeps the signature /Contents bytes unchanged after encrypt() and save (${algorithm})`, async (ctx: TestContext) => {
+      requireQpdf(ctx);
+      const out = await reEncryptedSigned(algorithm);
+      const before = await signatureContents(
+        qpdfDecryptQdf(fixture('load/signed-aes-128.pdf'), 'user'),
+      );
+      expect([...before.subarray(0, 4)]).toEqual([0x30, 0x82, 0x05, 0x3e]);
+      expect(await signatureContents(qpdfDecryptQdf(out, 'u2'))).toEqual(before);
+    });
   }
 });

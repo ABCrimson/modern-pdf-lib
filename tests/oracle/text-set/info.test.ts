@@ -104,7 +104,7 @@ describe('document information text read back by pdf.js and qpdf', () => {
     'text above U+00FF: pdf.js, qpdf and the reloaded document read the six information keys as set',
     {
       failsWith:
-        /^UnencodableTextError: A PDF byte string cannot encode "–" \(U\+2013\) at index \d+:/,
+        /^UnencodableTextError: A PDF byte string cannot encode "–" \(U\+2013\) at index 5:/,
     },
     async () => {
       for (const text of WIDE_TEXTS) await expectInfoReadBack(text);

@@ -1,8 +1,9 @@
 /**
  * The library's writers write a string handed to `writeString` as a PDF byte string: each code
- * unit 0x00-0xFF is one byte, and a code unit above 0xFF throws UnencodableTextError. The Info
- * /Title is a literal string whose characters reach the writer as they were set, so a title
- * of "é" shows which bytes each writer emits for U+00E9. The Info dictionary is never packed into
+ * unit 0x00-0xFF is one byte, and a code unit above 0xFF throws UnencodableTextError. A title of
+ * "é" shows which bytes each writer emits for U+00E9. No library object hands a writer a code unit
+ * above 0xFF (a PdfString refuses one when it is built), so the refusal of the object stream and
+ * stream writers is shown with a stand-in object that calls `writeString` itself. The Info dictionary is never packed into
  * an object stream, so the object stream writer is shown by a registered dictionary holding /T (é).
  *
  * The document-level writes of `saveAsStream()` (header, object headers, xref table, trailer) and
@@ -18,7 +19,7 @@ import {
   saveDocumentIncremental,
   UnencodableTextError,
 } from '../../../../src/index.js';
-import type { PdfDocument } from '../../../../src/index.js';
+import type { ByteWriter, PdfDocument } from '../../../../src/index.js';
 
 /** `/Title (é)` with é as the one Latin-1 byte 0xE9. */
 const TITLE_LATIN1 = Uint8Array.of(...new TextEncoder().encode('/Title ('), 0xe9, 0x29);
@@ -44,6 +45,16 @@ function titled(title: string): PdfDocument {
   const doc = createPdf();
   doc.addPage();
   doc.setTitle(title);
+  return doc;
+}
+
+/**
+ * Registers a stand-in object whose serialize() hands the writer `(日)` through writeString; the
+ * writers call nothing else on an object, so the cast to PdfString is safe here.
+ */
+function withRawText(doc: PdfDocument): PdfDocument {
+  const raw = { kind: 'string', serialize: (writer: ByteWriter) => writer.writeString('(日)') };
+  doc.getRegistry().register(raw as unknown as PdfString);
   return doc;
 }
 
@@ -98,14 +109,15 @@ describe('the writers refuse a code unit above 0xFF', () => {
   test('save() with object streams', async () => {
     const doc = createPdf();
     doc.addPage();
-    doc.getRegistry().register(new PdfDict([['T', PdfString.literal('日')]]));
-    await expect(doc.save({ compress: false, objectStreamThreshold: 1 })).rejects.toMatchObject(
-      unencodable,
-    );
+    await expect(
+      withRawText(doc).save({ compress: false, objectStreamThreshold: 1 }),
+    ).rejects.toMatchObject(unencodable);
   });
 
   test('saveAsStream()', async () => {
-    await expect(readAll(titled('日').saveAsStream({ compress: false }))).rejects.toMatchObject(
+    const doc = createPdf();
+    doc.addPage();
+    await expect(readAll(withRawText(doc).saveAsStream({ compress: false }))).rejects.toMatchObject(
       unencodable,
     );
   });
