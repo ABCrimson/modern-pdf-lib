@@ -13,10 +13,10 @@
   },
   "create": {
     "gzip": 107520,
-    "brotli": 90112
+    "brotli": 91136
   },
   "parse": {
-    "gzip": 110592,
+    "gzip": 111616,
     "brotli": 94208
   },
   "forms": {
