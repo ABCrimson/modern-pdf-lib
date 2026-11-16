@@ -157,4 +157,11 @@ describe('PdfRedactAnnotation overlay text', () => {
 
     expect(PdfRedactAnnotation.fromDict(dict).getOverlayText()).toBe('Vertraulich 日本語');
   });
+
+  it('writes /OverlayText as a text string that reads back as given', () => {
+    const annot = PdfRedactAnnotation.create({ rect: [0, 0, 100, 20] });
+    annot.setOverlayText('Größe 😀');
+    expect(annot.getOverlayText()).toBe('Größe 😀');
+    expect((annot.getDict().get('/OverlayText') as PdfString).textEncoding).toBe('utf-16be');
+  });
 });

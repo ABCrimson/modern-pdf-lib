@@ -20,6 +20,19 @@ import type { AnnotationOptions } from '../pdfAnnotation.js';
 export type LinkHighlightMode = 'None' | 'Invert' | 'Outline' | 'Push';
 
 // ---------------------------------------------------------------------------
+// URI
+// ---------------------------------------------------------------------------
+
+/**
+ * The /URI string of a URL: ASCII only. The URL parser percent-encodes the
+ * characters above U+007F as UTF-8 (and the host as punycode); a URL that is
+ * ASCII already is written as given, so relative references stay valid.
+ */
+function uriString(url: string): PdfString {
+  return PdfString.fromAscii(/[^\p{ASCII}]/u.test(url) ? new URL(url).href : url);
+}
+
+// ---------------------------------------------------------------------------
 // PdfLinkAnnotation
 // ---------------------------------------------------------------------------
 
@@ -135,11 +148,20 @@ export class PdfLinkAnnotation extends PdfAnnotation {
     return undefined;
   }
 
-  /** Set the URL (creates a /URI action). */
+  /**
+   * Set the URL (creates a /URI action).
+   *
+   * The value of /URI is an ASCII string (ISO 32000-2 12.6.4.8): a URL with
+   * characters above U+007F is written percent-encoded as UTF-8, an
+   * internationalised host name as punycode.
+   *
+   * @throws {TypeError} If the URL has such a character and is not an
+   *   absolute URL, which the URL parser needs to encode it.
+   */
   setUrl(url: string): void {
     const action = new PdfDict();
     action.set('/S', PdfName.of('URI'));
-    action.set('/URI', PdfString.literal(url));
+    action.set('/URI', uriString(url));
     this.dict.set('/A', action);
   }
 

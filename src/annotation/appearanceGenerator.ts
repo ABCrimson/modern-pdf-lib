@@ -11,6 +11,11 @@
  */
 
 import { PdfDict, PdfArray, PdfName, PdfNumber, PdfStream } from '../core/pdfObjects.js';
+import {
+  encodeStandardText,
+  standardEncodingOf,
+} from '../assets/font/internal/standardEncoding.js';
+import { isStandardFont, type StandardFontName } from '../assets/font/internal/standardFonts.js';
 import type { PdfAnnotation } from './pdfAnnotation.js';
 
 // ---------------------------------------------------------------------------
@@ -513,6 +518,46 @@ export function generateInkAppearance(annot: PdfAnnotation): PdfStream {
 // ---------------------------------------------------------------------------
 
 /**
+ * The font resource names of AcroForm default resources (ISO 32000-2 12.7.3.3)
+ * that a /DA string names, and the standard font each stands for.
+ */
+const DA_FONT_ALIASES: ReadonlyMap<string, StandardFontName> = new Map([
+  ['Helv', 'Helvetica'],
+  ['HeBo', 'Helvetica-Bold'],
+  ['HeOb', 'Helvetica-Oblique'],
+  ['HeBO', 'Helvetica-BoldOblique'],
+  ['TiRo', 'Times-Roman'],
+  ['TiBo', 'Times-Bold'],
+  ['TiIt', 'Times-Italic'],
+  ['TiBI', 'Times-BoldItalic'],
+  ['Cour', 'Courier'],
+  ['CoBo', 'Courier-Bold'],
+  ['CoOb', 'Courier-Oblique'],
+  ['CoBO', 'Courier-BoldOblique'],
+  ['Symb', 'Symbol'],
+  ['ZaDb', 'ZapfDingbats'],
+]);
+
+/**
+ * A literal string `(…)` that shows the codes, in ASCII only: parentheses and
+ * the backslash are escaped, every code outside 0x20-0x7E is a three-digit
+ * octal escape.
+ */
+function literalString(codes: Uint8Array): string {
+  let body = '';
+  for (const code of codes) {
+    if (code === 0x28 || code === 0x29 || code === 0x5c) {
+      body += `\\${String.fromCharCode(code)}`;
+    } else if (code >= 0x20 && code <= 0x7e) {
+      body += String.fromCharCode(code);
+    } else {
+      body += `\\${code.toString(8).padStart(3, '0')}`;
+    }
+  }
+  return `(${body})`;
+}
+
+/**
  * Generate appearance stream for a FreeText annotation.
  *
  * This requires access to the annotation's text, default appearance
@@ -542,12 +587,23 @@ export function generateFreeTextAppearance(annot: PdfAnnotation): PdfStream {
     align = qObj.value;
   }
 
-  // Parse font size from DA
+  // Parse font name and size from DA
   let fontSize = 12;
-  const fsMatch = /\/\w+\s+([\d.]+)\s+Tf/.exec(da);
-  if (fsMatch?.[1]) {
-    fontSize = parseFloat(fsMatch[1]);
+  const tfMatch = /\/([^\s/]+)\s+([\d.]+)\s+Tf/.exec(da);
+  if (tfMatch?.[2]) {
+    fontSize = parseFloat(tfMatch[2]);
   }
+
+  // The text is encoded for the standard font the DA names; a font name that is
+  // neither an alias nor a standard font name is encoded as WinAnsi, the
+  // encoding of the Helvetica entry that the resources define under /Helv.
+  const daName = tfMatch?.[1];
+  const daFont =
+    daName === undefined
+      ? undefined
+      : (DA_FONT_ALIASES.get(daName) ?? (isStandardFont(daName) ? daName : undefined));
+  const font = daFont ?? 'Helvetica';
+  const fontKey = daFont === undefined ? '/Helv' : `/${daName}`;
 
   // Build content stream
   let ops = '';
@@ -569,19 +625,24 @@ export function generateFreeTextAppearance(annot: PdfAnnotation): PdfStream {
     ops += `${n(margin)} ${n(textY)} Td\n`;
   }
 
-  // Escape text for PDF string
-  const escapedText = text.replace(/\\/g, '\\\\').replace(/\(/g, '\\(').replace(/\)/g, '\\)');
-  ops += `(${escapedText}) Tj\n`;
+  // One operator per line; a line break moves down by 1.2 times the font size.
+  text.split(/\r\n|\r|\n/).forEach((line, i) => {
+    if (i > 0) ops += `0 ${n(-1.2 * fontSize)} Td\n`;
+    ops += `${literalString(encodeStandardText(font, line))} Tj\n`;
+  });
   ops += 'ET\n';
 
-  // Build resources with Helv font reference
+  // Build resources with the font reference the DA names
   const resources = new PdfDict();
   const fontDict = new PdfDict();
-  const helvetica = new PdfDict();
-  helvetica.set('/Type', PdfName.of('Font'));
-  helvetica.set('/Subtype', PdfName.of('Type1'));
-  helvetica.set('/BaseFont', PdfName.of('Helvetica'));
-  fontDict.set('/Helv', helvetica);
+  const fontEntry = new PdfDict();
+  fontEntry.set('/Type', PdfName.of('Font'));
+  fontEntry.set('/Subtype', PdfName.of('Type1'));
+  fontEntry.set('/BaseFont', PdfName.of(font));
+  if (standardEncodingOf(font) === 'WinAnsiEncoding') {
+    fontEntry.set('/Encoding', PdfName.of('WinAnsiEncoding'));
+  }
+  fontDict.set(fontKey, fontEntry);
   resources.set('/Font', fontDict);
 
   return buildAppearanceStream(ops, [0, 0, w, h], resources);

@@ -22,6 +22,7 @@ import { PdfHighlightAnnotation } from '../../../src/annotation/types/markupAnno
 import { PdfInkAnnotation } from '../../../src/annotation/types/inkAnnotation.js';
 import { PdfFreeTextAnnotation } from '../../../src/annotation/types/freeTextAnnotation.js';
 import { PdfDict, PdfName, PdfStream } from '../../../src/core/pdfObjects.js';
+import { UnencodableTextError } from '../../../src/errors.js';
 
 // Helper to decode stream content
 function streamContent(stream: PdfStream): string {
@@ -231,6 +232,88 @@ describe('generateFreeTextAppearance', () => {
     const content = streamContent(generateFreeTextAppearance(annot));
     expect(content).toContain('\\(test\\)');
     expect(content).toContain('\\\\');
+  });
+});
+
+describe('generateFreeTextAppearance text encoding', () => {
+  /** The font entry of the appearance stream under `alias`. */
+  function fontEntry(ap: PdfStream, alias: string): PdfDict {
+    const resources = ap.dict.get('/Resources') as PdfDict;
+    return (resources.get('/Font') as PdfDict).get(alias) as PdfDict;
+  }
+
+  it('shows text of the Helv font as WinAnsi codes in an ASCII literal string', () => {
+    const annot = PdfFreeTextAnnotation.create({ rect: [0, 0, 200, 30], text: 'José € (1)' });
+    const ap = generateFreeTextAppearance(annot);
+
+    // é is code 0xE9 (octal 351) and the euro sign is code 0x80 (octal 200).
+    expect(streamContent(ap)).toContain('(Jos\\351 \\200 \\(1\\)) Tj');
+    expect(ap.data.every((byte) => byte < 0x80)).toBe(true);
+    const helv = fontEntry(ap, '/Helv');
+    expect((helv.get('/BaseFont') as PdfName).value).toBe('/Helvetica');
+    expect((helv.get('/Encoding') as PdfName).value).toBe('/WinAnsiEncoding');
+  });
+
+  it('encodes through the standard font that the alias of the DA names', () => {
+    const annot = PdfFreeTextAnnotation.create({
+      rect: [0, 0, 200, 30],
+      text: 'α',
+      defaultAppearance: '0 g /Symb 12 Tf',
+    });
+    const ap = generateFreeTextAppearance(annot);
+
+    // alpha is code 0x61 of the built-in encoding of Symbol.
+    expect(streamContent(ap)).toContain('(a) Tj');
+    const symb = fontEntry(ap, '/Symb');
+    expect((symb.get('/BaseFont') as PdfName).value).toBe('/Symbol');
+    expect(symb.has('/Encoding')).toBe(false);
+  });
+
+  it('defines the font of a Times alias with WinAnsiEncoding', () => {
+    const annot = PdfFreeTextAnnotation.create({
+      rect: [0, 0, 200, 30],
+      text: 'Ünal',
+      defaultAppearance: '0 g /TiRo 12 Tf',
+    });
+    const ap = generateFreeTextAppearance(annot);
+
+    expect(streamContent(ap)).toContain('(\\334nal) Tj');
+    const tiro = fontEntry(ap, '/TiRo');
+    expect((tiro.get('/BaseFont') as PdfName).value).toBe('/Times-Roman');
+    expect((tiro.get('/Encoding') as PdfName).value).toBe('/WinAnsiEncoding');
+  });
+
+  it('encodes as WinAnsi for a font name that is no alias', () => {
+    const annot = PdfFreeTextAnnotation.create({
+      rect: [0, 0, 200, 30],
+      text: 'José',
+      defaultAppearance: '0 g /F1 12 Tf',
+    });
+
+    expect(streamContent(generateFreeTextAppearance(annot))).toContain('(Jos\\351) Tj');
+  });
+
+  it('shows each line of the text with its own operator', () => {
+    const annot = PdfFreeTextAnnotation.create({
+      rect: [0, 0, 200, 60],
+      text: 'one\r\ntwo\nthree\rfour',
+      fontSize: 10,
+    });
+    const content = streamContent(generateFreeTextAppearance(annot));
+
+    expect(content.match(/\((one|two|three|four)\) Tj/g)).toEqual([
+      '(one) Tj',
+      '(two) Tj',
+      '(three) Tj',
+      '(four) Tj',
+    ]);
+    expect(content.match(/ Td\n/g)).toHaveLength(4);
+  });
+
+  it('throws UnencodableTextError for text the font cannot encode', () => {
+    const annot = PdfFreeTextAnnotation.create({ rect: [0, 0, 200, 30], text: '日本語' });
+
+    expect(() => generateFreeTextAppearance(annot)).toThrow(UnencodableTextError);
   });
 });
 

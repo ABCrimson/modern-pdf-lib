@@ -190,4 +190,19 @@ describe('PdfFileAttachmentAnnotation text strings', () => {
     const annot = withFileSpec({ '/F': PdfString.fromBytes(Uint8Array.of(0x61, 0x80)) });
     expect(annot.getFileName()).toBe('a\u2022');
   });
+
+  it('writes /F, /UF and /Desc so that they read back as the text given', () => {
+    const annot = PdfFileAttachmentAnnotation.create({
+      rect: [0, 0, 20, 20],
+      file: new Uint8Array([1, 2, 3]),
+      fileName: 'Größe 日本語.txt',
+      description: 'Beschreibung 日本語',
+    });
+    const registry = new PdfObjectRegistry();
+    const fsRef = annot.buildFileSpec(registry).get('/FS') as PdfRef;
+    const fs = registry.resolve(fsRef) as PdfDict;
+    expect((fs.get('/F') as PdfString).toText()).toBe('Größe 日本語.txt');
+    expect((fs.get('/UF') as PdfString).toText()).toBe('Größe 日本語.txt');
+    expect((fs.get('/Desc') as PdfString).toText()).toBe('Beschreibung 日本語');
+  });
 });

@@ -182,17 +182,17 @@ export function buildAnnotationDict(type: AnnotationType, options: AnnotationOpt
   dict.set('/Rect', PdfArray.fromNumbers(options.rect));
 
   // Unique name
-  dict.set('/NM', PdfString.literal(generateUniqueName()));
+  dict.set('/NM', PdfString.fromText(generateUniqueName()));
 
   // Optional entries
   if (options.contents !== undefined) {
-    dict.set('/Contents', PdfString.literal(options.contents));
+    dict.set('/Contents', PdfString.fromText(options.contents));
   }
   if (options.author !== undefined) {
-    dict.set('/T', PdfString.literal(options.author));
+    dict.set('/T', PdfString.fromText(options.author));
   }
   if (options.modificationDate !== undefined) {
-    dict.set('/M', PdfString.literal(formatPdfDate(options.modificationDate)));
+    dict.set('/M', PdfString.fromAscii(formatPdfDate(options.modificationDate)));
   }
   if (options.color !== undefined) {
     dict.set('/C', PdfArray.fromNumbers([options.color.r, options.color.g, options.color.b]));
@@ -301,7 +301,7 @@ export class PdfAnnotation {
 
   /** Set the text contents. */
   setContents(contents: string): void {
-    this.dict.set('/Contents', PdfString.literal(contents));
+    this.dict.set('/Contents', PdfString.fromText(contents));
   }
 
   // -----------------------------------------------------------------------
@@ -319,7 +319,7 @@ export class PdfAnnotation {
 
   /** Set the author. */
   setAuthor(author: string): void {
-    this.dict.set('/T', PdfString.literal(author));
+    this.dict.set('/T', PdfString.fromText(author));
   }
 
   // -----------------------------------------------------------------------

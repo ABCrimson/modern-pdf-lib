@@ -3,13 +3,9 @@
  * Square annotation are added with the same `contents` and `author`, the file is saved, and
  * pdf.js (`getAnnotations()`: `contentsObj.str`, `titleObj.str`) and qpdf `--json=2` (the
  * annotation dictionaries) each report that text for both entries of all three.
- *
- * The writer stores both entries as byte strings, one byte per character, so the input texts
- * above U+00FF cannot be saved.
  */
 import { beforeEach, describe, expect, test } from 'vitest';
 import { createPdf } from '../../../src/index.js';
-import { defectKey, knownDefect } from '../../helpers/known-defect.js';
 import { withPdfjs } from '../../helpers/oracle/pdfjs.js';
 import { requireQpdf } from '../../helpers/oracle/qpdf.js';
 import { cleanSave, INPUTS, qpdfObjects, qpdfText } from './setup.js';
@@ -65,17 +61,11 @@ describe('annotation contents and author read back by pdf.js and qpdf', () => {
     await expectAnnotationsReadBack(INPUTS.ascii);
   });
 
-  knownDefect(
-    defectKey('core-document-01', '0.41.0'),
-    'text above U+00FF: pdf.js and qpdf read /Contents and /T of a Text, a FreeText and a Square annotation as set',
-    {
-      failsWith:
-        /^UnencodableTextError: A PDF byte string cannot encode "–" \(U\+2013\) at index 5:/,
-    },
-    async () => {
-      for (const text of [INPUTS.latin, INPUTS.cjk, INPUTS.astral]) {
-        await expectAnnotationsReadBack(text);
-      }
-    },
-  );
+  test.each([
+    ['Latin text with characters of PDFDocEncoding and WinAnsiEncoding', INPUTS.latin],
+    ['CJK text, which needs UTF-16BE', INPUTS.cjk],
+    ['a character outside the Basic Multilingual Plane', INPUTS.astral],
+  ])('%s: pdf.js and qpdf read /Contents and /T of each annotation as set', async (_kind, text) => {
+    await expectAnnotationsReadBack(text);
+  });
 });

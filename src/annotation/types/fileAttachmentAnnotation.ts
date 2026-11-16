@@ -169,11 +169,11 @@ export class PdfFileAttachmentAnnotation extends PdfAnnotation {
     // Build the file spec dictionary
     const fsDict = new PdfDict();
     fsDict.set('/Type', PdfName.of('Filespec'));
-    fsDict.set('/F', PdfString.literal(this.fileName));
-    fsDict.set('/UF', PdfString.literal(this.fileName));
+    fsDict.set('/F', PdfString.fromText(this.fileName));
+    fsDict.set('/UF', PdfString.fromText(this.fileName));
     fsDict.set('/EF', efDict);
     if (this.fileDescription) {
-      fsDict.set('/Desc', PdfString.literal(this.fileDescription));
+      fsDict.set('/Desc', PdfString.fromText(this.fileDescription));
     }
 
     const fsRef = registry.register(fsDict);

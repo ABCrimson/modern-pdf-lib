@@ -348,4 +348,33 @@ describe('text strings of a loaded annotation', () => {
 
     expect(annotationFromDict(dict).getContents()).toBe('日本語');
   });
+
+  it('writes /Contents and /T through setters that read back the same text', () => {
+    const annot = createAnnotation('Text', { rect: [0, 0, 20, 20] });
+    annot.setContents('Größe 日本語 😀');
+    annot.setAuthor('Ünal');
+    expect(annot.getContents()).toBe('Größe 日本語 😀');
+    expect(annot.getAuthor()).toBe('Ünal');
+    expect((annot.getDict().get('/Contents') as PdfString).textEncoding).toBe('utf-16be');
+    expect((annot.getDict().get('/T') as PdfString).textEncoding).toBe('pdfdoc');
+  });
+
+  it('writes the options contents and author as text strings', () => {
+    const dict = buildAnnotationDict('Text', {
+      rect: [0, 0, 20, 20],
+      contents: 'Größe 日本語',
+      author: 'Ünal',
+    });
+    expect((dict.get('/Contents') as PdfString).toText()).toBe('Größe 日本語');
+    expect((dict.get('/T') as PdfString).toText()).toBe('Ünal');
+  });
+
+  it('writes /NM as a text string and /M as an ASCII date', () => {
+    const dict = buildAnnotationDict('Text', {
+      rect: [0, 0, 20, 20],
+      modificationDate: new Date(Date.UTC(2026, 10, 15, 12, 30, 45)),
+    });
+    expect((dict.get('/NM') as PdfString).textEncoding).toBe('pdfdoc');
+    expect((dict.get('/M') as PdfString).toText()).toMatch(/^D:20261115123045/);
+  });
 });

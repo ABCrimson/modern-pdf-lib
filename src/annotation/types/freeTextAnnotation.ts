@@ -159,9 +159,13 @@ export class PdfFreeTextAnnotation extends PdfAnnotation {
     return '0 0 0 rg /Helv 12 Tf';
   }
 
-  /** Set the default appearance string. */
+  /**
+   * Set the default appearance string (/DA, an ASCII byte string).
+   *
+   * @throws {InvalidArgumentError} If the string has a character above U+007F.
+   */
   setDefaultAppearance(da: string): void {
-    this.dict.set('/DA', PdfString.literal(da));
+    this.dict.set('/DA', PdfString.fromAscii(da));
   }
 
   // -----------------------------------------------------------------------

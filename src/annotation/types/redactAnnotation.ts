@@ -75,7 +75,7 @@ export class PdfRedactAnnotation extends PdfAnnotation {
 
   /** Set the overlay text. */
   setOverlayText(text: string): void {
-    this.dict.set('/OverlayText', PdfString.literal(text));
+    this.dict.set('/OverlayText', PdfString.fromText(text));
   }
 
   // -----------------------------------------------------------------------

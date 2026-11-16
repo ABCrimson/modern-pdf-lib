@@ -160,4 +160,30 @@ describe('PdfLinkAnnotation strings', () => {
     expect(PdfLinkAnnotation.fromDict(dict).getDestination()).toBe('chapter2');
     expect(PdfLinkAnnotation.fromDict(other).getUrl()).toBe('https://x.org');
   });
+
+  it('writes an ASCII URL unchanged', () => {
+    const annot = PdfLinkAnnotation.create({ rect: [0, 0, 100, 20] });
+    annot.setUrl('https://example.com/a b?x=1&y=(2)');
+    expect(annot.getUrl()).toBe('https://example.com/a b?x=1&y=(2)');
+  });
+
+  it('writes a URL with non-ASCII characters percent-encoded as UTF-8', () => {
+    const annot = PdfLinkAnnotation.create({ rect: [0, 0, 100, 20] });
+    annot.setUrl('https://example.com/ü/日本?q=ü#é');
+    const uri = (annot.getDict().get('/A') as PdfDict).get('/URI') as PdfString;
+    expect(uri.toText()).toBe('https://example.com/%C3%BC/%E6%97%A5%E6%9C%AC?q=%C3%BC#%C3%A9');
+    expect(uri.toBytes().every((byte) => byte < 0x80)).toBe(true);
+    expect(annot.getUrl()).toBe(uri.toText());
+  });
+
+  it('writes the host of a URL with non-ASCII characters as punycode', () => {
+    const annot = PdfLinkAnnotation.create({ rect: [0, 0, 100, 20] });
+    annot.setUrl('https://bücher.example/');
+    expect(annot.getUrl()).toBe('https://xn--bcher-kva.example/');
+  });
+
+  it('creates a link whose URL has non-ASCII characters through the options', () => {
+    const annot = PdfLinkAnnotation.create({ rect: [0, 0, 100, 20], url: 'https://example.com/ü' });
+    expect(annot.getUrl()).toBe('https://example.com/%C3%BC');
+  });
 });
