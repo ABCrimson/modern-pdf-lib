@@ -3,7 +3,7 @@
  * with an UnsupportedOptionError instead of ignoring it. The table is not wired into the call
  * sites yet, so this file pins it completely: every row, the fixed message of every row, the
  * error `rejectOption` throws, and the tie of each planned release to the open target of its
- * ledger ids in audit/open-highs.json (T-LEDGER).
+ * ledger ids in audit/open-highs.json.
  */
 import { readFileSync } from 'node:fs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -49,7 +49,7 @@ function removed(
 
 const SHOW_TEXT_HINT = 'Use renderStyledBarcode() to draw the text.';
 
-/** Section "the option rule table", row by row, in the order of the table. */
+/** The rule table of src/internal/options.ts, row by row, in its order. */
 const EXPECTED: readonly ExpectedRule[] = [
   planned(
     'signPdf()',
@@ -129,8 +129,8 @@ const EXPECTED: readonly ExpectedRule[] = [
   removed(
     'saveIncremental()',
     'objectStreamThreshold',
-    'Pass it to save() instead.',
-    '`saveIncremental()`: the option `objectStreamThreshold` was removed in 0.41.0. Pass it to save() instead.',
+    undefined,
+    '`saveIncremental()`: the option `objectStreamThreshold` was removed in 0.41.0.',
   ),
   removed(
     'saveIncrementalWithSignaturePreservation()',
@@ -337,7 +337,7 @@ function isLater(version: string, than: string): boolean {
   return false;
 }
 
-describe('T-LEDGER: planned releases against the ledger', () => {
+describe('planned releases against the ledger', () => {
   const open = openTargets();
 
   it('ties every planned release to the open target of each of its ledger ids', () => {

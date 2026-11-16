@@ -36,7 +36,6 @@ export {
   UnsupportedFilterError,
   UnsupportedEncryptionError,
   InvalidArgumentError,
-  UnsupportedOptionError,
   InvalidStateError,
   UnencodableTextError,
   InvalidPageSizeError,

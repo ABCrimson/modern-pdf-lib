@@ -86,12 +86,7 @@ export const UNSUPPORTED_OPTIONS: readonly UnsupportedOptionRule[] = [
   },
   { entry: 'new StreamingPdfParser()', option: 'parseContentStreams', ledger: [] },
   { entry: 'embedFont()', option: 'features', ledger: [] },
-  {
-    entry: 'saveIncremental()',
-    option: 'objectStreamThreshold',
-    ledger: [],
-    hint: 'Pass it to save() instead.',
-  },
+  { entry: 'saveIncremental()', option: 'objectStreamThreshold', ledger: [] },
   { entry: 'saveIncrementalWithSignaturePreservation()', option: 'compress', ledger: [] },
   { entry: 'appendIncrementalUpdate()', option: 'compress', ledger: [] },
   { entry: 'code128ToOperators()', option: 'showText', ledger: [], hint: DRAW_TEXT },

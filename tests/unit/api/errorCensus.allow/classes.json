@@ -113,32 +113,5 @@
     "name": "EnvironmentError",
     "decision": "throw",
     "where": "the generic throws whose allowlist row names EnvironmentError, as they are converted"
-  },
-  {
-    "name": "UnsupportedOptionError",
-    "decision": "throw",
-    "where": "the calls that pass an option this release does not carry out, in place of the ignored-option warning",
-    "files": [
-      "src/accessibility/structureTree.ts",
-      "src/assets/image/optimize/batchOptimize.ts",
-      "src/barcode/linear/code128.ts",
-      "src/barcode/linear/code39.ts",
-      "src/barcode/linear/ean.ts",
-      "src/barcode/linear/itf.ts",
-      "src/barcode/matrix/pdf417.ts",
-      "src/barcode/matrix/qr.ts",
-      "src/compliance/pdfx/pdfX6.ts",
-      "src/core/io/incrementalWriter.ts",
-      "src/core/pdfDocument.ts",
-      "src/layout/presets.ts",
-      "src/parser/streamingParser.ts",
-      "src/plugins/builtins/metadataPlugin.ts",
-      "src/signature/pades/detailedVerifier.ts",
-      "src/signature/pades/fieldLock.ts",
-      "src/signature/pades/incrementalSave.ts",
-      "src/signature/pades/mdpPolicy.ts",
-      "src/signature/pades/signatureHandler.ts",
-      "src/signature/pki/chainValidator.ts"
-    ]
   }
 ]
