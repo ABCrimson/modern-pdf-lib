@@ -29,13 +29,13 @@ import { formatPdfDate } from './pdfCatalog.js';
 
 /** Describes a file to attach to (or already attached to) a PDF. */
 export interface EmbeddedFile {
-  /** Filename. */
+  /** Filename; written as a PDF text string in `/F`, `/UF` and the name tree key. */
   name: string;
   /** File data. */
   data: Uint8Array;
   /** MIME type (e.g. `"application/pdf"`, `"text/plain"`). */
   mimeType: string;
-  /** Optional description. */
+  /** Optional description, written as a PDF text string. */
   description?: string | undefined;
   /** Optional creation date. */
   creationDate?: Date | undefined;
@@ -72,10 +72,10 @@ export function attachFile(registry: PdfObjectRegistry, file: EmbeddedFile): Pdf
   const params = new PdfDict();
   params.set('/Size', PdfNumber.of(file.data.length));
   if (file.creationDate !== undefined) {
-    params.set('/CreationDate', PdfString.literal(formatPdfDate(file.creationDate)));
+    params.set('/CreationDate', PdfString.fromAscii(formatPdfDate(file.creationDate)));
   }
   if (file.modificationDate !== undefined) {
-    params.set('/ModDate', PdfString.literal(formatPdfDate(file.modificationDate)));
+    params.set('/ModDate', PdfString.fromAscii(formatPdfDate(file.modificationDate)));
   }
   efDict.set('/Params', params);
 
@@ -90,12 +90,13 @@ export function attachFile(registry: PdfObjectRegistry, file: EmbeddedFile): Pdf
   // 3. Build the filespec dictionary
   const filespec = new PdfDict();
   filespec.set('/Type', PdfName.of('Filespec'));
-  filespec.set('/F', PdfString.literal(file.name));
-  filespec.set('/UF', PdfString.literal(file.name));
+  const fileName = PdfString.fromText(file.name);
+  filespec.set('/F', fileName);
+  filespec.set('/UF', fileName);
   filespec.set('/EF', efRefDict);
 
   if (file.description !== undefined) {
-    filespec.set('/Desc', PdfString.literal(file.description));
+    filespec.set('/Desc', PdfString.fromText(file.description));
   }
 
   // AFRelationship (PDF 2.0 / PDF/A-3)
@@ -237,6 +238,9 @@ export function getAttachments(
 /**
  * Build an `/EmbeddedFiles` name tree dictionary.
  *
+ * Each name is written as a PDF text string and the pairs are sorted by the
+ * bytes of those keys (ISO 32000-2 §7.9.6); a file keeps its own name.
+ *
  * @param files     Array of indirect references to filespec dictionaries.
  * @param names     Corresponding file names (same order as `files`).
  * @param registry  The PDF object registry.
@@ -248,10 +252,13 @@ export function buildEmbeddedFilesNameTree(
   _registry: PdfObjectRegistry,
 ): PdfDict {
   // Build the /Names array: [name1 ref1 name2 ref2 ...]
+  const entries = files
+    .map((file, i) => ({ key: PdfString.fromText(names[i]!), file }))
+    .toSorted((a, b) => PdfString.compare(a.key, b.key));
   const namesArray = new PdfArray();
-  for (let i = 0; i < files.length; i++) {
-    namesArray.push(PdfString.literal(names[i]!));
-    namesArray.push(files[i]!);
+  for (const { key, file } of entries) {
+    namesArray.push(key);
+    namesArray.push(file);
   }
 
   const nameTree = new PdfDict();

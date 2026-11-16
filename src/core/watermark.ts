@@ -13,6 +13,7 @@ import type { PdfDocument } from './pdfDocument.js';
 import type { PdfPage } from './pdfPage.js';
 import type { PdfObjectRegistry } from './pdfObjects.js';
 import { PdfDict, PdfName, PdfNumber } from './pdfObjects.js';
+import { encodeStandardText } from '../assets/font/internal/standardEncoding.js';
 
 // ---------------------------------------------------------------------------
 // Public types
@@ -44,6 +45,21 @@ function n(value: number): string {
   return s === '-0' ? '0' : s;
 }
 
+/**
+ * The literal string operand `(…)` of single-byte codes, written in ASCII: the backslash and the
+ * parentheses are escaped and every code above 0x7E is a three-digit octal escape, so the content
+ * stream bytes do not depend on how the stream is turned into bytes.
+ */
+function literalOperand(codes: Uint8Array): string {
+  let body = '';
+  for (const code of codes) {
+    if (code === 0x5c || code === 0x28 || code === 0x29) body += `\\${String.fromCharCode(code)}`;
+    else if (code > 0x7e) body += `\\${code.toString(8).padStart(3, '0')}`;
+    else body += String.fromCharCode(code);
+  }
+  return `(${body})`;
+}
+
 // ---------------------------------------------------------------------------
 // Implementation
 // ---------------------------------------------------------------------------
@@ -53,11 +69,14 @@ function n(value: number): string {
  *
  * The watermark is drawn using the Helvetica standard font (no
  * embedding required).  The text is rendered with the specified
- * rotation, opacity, and colour.
+ * rotation, opacity, and colour.  The text is encoded as WinAnsi codes
+ * (NFC first), the encoding of the font dictionary {@link addWatermark}
+ * registers.
  *
  * @param page      The page to watermark.
  * @param options   Watermark options.
  * @param registry  The PDF object registry (for ExtGState).
+ * @throws {UnencodableTextError} For a character WinAnsi has no code for.
  */
 export function addWatermarkToPage(
   page: PdfPage,
@@ -142,10 +161,7 @@ export function addWatermarkToPage(
 
   ops += `${n(a)} ${n(b)} ${n(c)} ${n(d)} ${n(tx)} ${n(ty)} Tm\n`;
 
-  // Escape text for PDF string
-  const escaped = text.replaceAll('\\', '\\\\').replaceAll('(', '\\(').replaceAll(')', '\\)');
-
-  ops += `(${escaped}) Tj\n`;
+  ops += `${literalOperand(encodeStandardText('Helvetica', text))} Tj\n`;
   ops += 'ET\n';
 
   // Restore graphics state

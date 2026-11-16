@@ -62,9 +62,9 @@ describe('buildPieceInfo', () => {
     const lastModified = dataDict.get('/LastModified');
     if (!(lastModified instanceof PdfString)) throw new Error('expected string');
 
-    expect(lastModified.value.startsWith('D:')).toBe(true);
+    expect(lastModified.toText().startsWith('D:')).toBe(true);
     // D:YYYYMMDDHHmmSSZ — UTC components from the fixed date.
-    expect(lastModified.value).toBe('D:20240308134509Z');
+    expect(lastModified.toText()).toBe('D:20240308134509Z');
   });
 
   it('defaults /LastModified to the current time when omitted', () => {
@@ -77,11 +77,11 @@ describe('buildPieceInfo', () => {
     const lastModified = dataDict.get('/LastModified');
     if (!(lastModified instanceof PdfString)) throw new Error('expected string');
 
-    expect(lastModified.value.startsWith('D:')).toBe(true);
+    expect(lastModified.toText().startsWith('D:')).toBe(true);
 
     // Parse D:YYYYMMDDHHmmSSZ back to a UTC timestamp and verify it falls
     // within the call window (with a 1s slack on each side for rounding).
-    const m = /^D:(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})Z$/.exec(lastModified.value);
+    const m = /^D:(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})Z$/.exec(lastModified.toText());
     expect(m).not.toBeNull();
     if (m === null) throw new Error('unexpected date format');
     const [, y, mo, d, h, mi, s] = m;

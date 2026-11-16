@@ -76,7 +76,7 @@ function numberOf(value: unknown): number {
 /** Read a /String dictionary entry's value. */
 function stringOf(value: unknown): string {
   expect(value).toBeInstanceOf(PdfString);
-  return (value as PdfString).value;
+  return (value as PdfString).toText();
 }
 
 // ---------------------------------------------------------------------------
@@ -182,5 +182,18 @@ describe('buildDPartRoot', () => {
     buildDPartRoot([{ startPage: 0, endPage: 0, metadata: meta }]);
     expect(Object.keys(meta)).toEqual(['A']);
     expect(meta.A).toBe('1');
+  });
+});
+
+describe('buildDPartRoot text strings', () => {
+  it('writes a metadata value as a PDF text string', () => {
+    const root = buildDPartRoot([
+      { startPage: 0, endPage: 0, metadata: { Recipient: 'Größe 日本語 😀' } },
+    ]);
+    const part = asDict(asArray(asDict(root.get('/DPartRootNode')).get('/DParts')).items[0]);
+    const value = asDict(part.get('/DPM')).get('/Recipient') as PdfString;
+
+    expect(value.toBytes()).toEqual(PdfString.fromText('Größe 日本語 😀').toBytes());
+    expect(stringOf(value)).toBe('Größe 日本語 😀');
   });
 });

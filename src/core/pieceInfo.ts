@@ -43,7 +43,7 @@ export function buildPieceInfo(
   lastModified?: Date,
 ): PdfDict {
   const dataDict = new PdfDict();
-  dataDict.set('/LastModified', PdfString.literal(formatPdfDate(lastModified ?? new Date())));
+  dataDict.set('/LastModified', PdfString.fromAscii(formatPdfDate(lastModified ?? new Date())));
   dataDict.set('/Private', privateData);
 
   const pieceInfo = new PdfDict();

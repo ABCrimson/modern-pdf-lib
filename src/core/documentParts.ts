@@ -37,7 +37,7 @@ export interface DocumentPart {
   readonly endPage: number;
   /**
    * Optional Document Part Metadata.  Each key/value pair is emitted as a
-   * PDF name → literal-string entry inside the part's `/DPM` dictionary.
+   * PDF name → text-string entry inside the part's `/DPM` dictionary.
    */
   readonly metadata?: Readonly<Record<string, string>> | undefined;
 }
@@ -48,12 +48,12 @@ export interface DocumentPart {
 
 /**
  * Build the `/DPM` (Document Part Metadata) dictionary for a single part.
- * Keys become PDF names; values become PDF literal strings.
+ * Keys become PDF names; values become PDF text strings.
  */
 function buildDpm(metadata: Readonly<Record<string, string>>): PdfDict {
   const dpm = new PdfDict();
   for (const [key, value] of Object.entries(metadata)) {
-    dpm.set(PdfName.of(key).value, PdfString.literal(value));
+    dpm.set(PdfName.of(key).value, PdfString.fromText(value));
   }
   return dpm;
 }

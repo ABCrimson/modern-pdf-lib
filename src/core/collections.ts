@@ -71,7 +71,7 @@ export interface CollectionOptions {
   readonly sortKeys?: readonly string[] | undefined;
   /**
    * Name (in the `EmbeddedFiles` name tree) of the file to present first
-   * (`/D`).
+   * (`/D`), written as a PDF text string like the name tree keys.
    */
   readonly initialDocument?: string | undefined;
 }
@@ -88,7 +88,7 @@ function buildSchemaField(field: CollectionSchemaField): PdfDict {
   const dict = new PdfDict();
   dict.set('/Type', PdfName.of('/CollectionField'));
   dict.set('/Subtype', PdfName.of(`/${field.fieldType}`));
-  dict.set('/N', PdfString.literal(field.label));
+  dict.set('/N', PdfString.fromText(field.label));
   if (field.order !== undefined) {
     dict.set('/O', PdfNumber.of(field.order));
   }
@@ -140,7 +140,7 @@ export function buildCollection(options: CollectionOptions = {}): PdfDict {
 
   const initialDocument = options.initialDocument;
   if (initialDocument !== undefined) {
-    const value: PdfObject = PdfString.literal(initialDocument);
+    const value: PdfObject = PdfString.fromText(initialDocument);
     collection.set('/D', value);
   }
 

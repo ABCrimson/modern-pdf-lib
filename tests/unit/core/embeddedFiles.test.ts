@@ -74,7 +74,7 @@ describe('attachFile', () => {
     const fObj = dict.get('/F');
     expect(fObj).toBeDefined();
     expect(fObj!.kind).toBe('string');
-    expect((fObj as PdfString).value).toBe('report.pdf');
+    expect((fObj as PdfString).toText()).toBe('report.pdf');
   });
 
   it('should include optional description', () => {
@@ -91,7 +91,7 @@ describe('attachFile', () => {
     const dict = obj as PdfDict;
     const descObj = dict.get('/Desc');
     expect(descObj).toBeDefined();
-    expect((descObj as PdfString).value).toBe('Test data file');
+    expect((descObj as PdfString).toText()).toBe('Test data file');
   });
 
   it('should set /AFRelationship', () => {
@@ -203,14 +203,13 @@ describe('getAttachments', () => {
     const attachments = getAttachments(catalog, resolver);
     expect(attachments).toHaveLength(2);
 
-    // Check first file
-    expect(attachments[0]!.name).toBe('hello.txt');
-    expect(new TextDecoder().decode(attachments[0]!.data)).toBe('Hello!');
-    expect(attachments[0]!.description).toBe('A greeting');
+    // The name tree is sorted by key (ISO 32000-2 7.9.6): data.json comes before hello.txt.
+    expect(attachments[0]!.name).toBe('data.json');
+    expect(new TextDecoder().decode(attachments[0]!.data)).toBe('{"key": "value"}');
 
-    // Check second file
-    expect(attachments[1]!.name).toBe('data.json');
-    expect(new TextDecoder().decode(attachments[1]!.data)).toBe('{"key": "value"}');
+    expect(attachments[1]!.name).toBe('hello.txt');
+    expect(new TextDecoder().decode(attachments[1]!.data)).toBe('Hello!');
+    expect(attachments[1]!.description).toBe('A greeting');
   });
 });
 
@@ -276,5 +275,87 @@ describe('getAttachments reads text strings as text', () => {
     const [attachment] = getAttachments(catalog, resolveIn(registry));
 
     expect(attachment!.name).toBe('Größe.txt');
+  });
+});
+
+describe('attachFile writes text strings and ASCII dates', () => {
+  function filespecOf(file: EmbeddedFile): PdfDict {
+    const registry = new PdfObjectRegistry();
+    return registry.resolve(attachFile(registry, file)) as PdfDict;
+  }
+
+  it('writes /F, /UF and /Desc as PDF text strings', () => {
+    const filespec = filespecOf({
+      ...makeFile('日本語 €.txt', 'x'),
+      description: 'Größe 😀',
+    });
+
+    expect((filespec.get('/F') as PdfString).toBytes()).toEqual(
+      PdfString.fromText('日本語 €.txt').toBytes(),
+    );
+    expect((filespec.get('/UF') as PdfString).toBytes()).toEqual(
+      PdfString.fromText('日本語 €.txt').toBytes(),
+    );
+    expect((filespec.get('/UF') as PdfString).toText()).toBe('日本語 €.txt');
+    expect((filespec.get('/Desc') as PdfString).toBytes()).toEqual(
+      PdfString.fromText('Größe 😀').toBytes(),
+    );
+  });
+
+  it('writes a name of PDFDocEncoding characters as one byte each', () => {
+    const filespec = filespecOf(makeFile('Größe.txt', 'x'));
+
+    expect([...(filespec.get('/UF') as PdfString).toBytes()]).toEqual([
+      0x47, 0x72, 0xf6, 0xdf, 0x65, 0x2e, 0x74, 0x78, 0x74,
+    ]);
+  });
+
+  it('writes the dates as ASCII strings', () => {
+    const registry = new PdfObjectRegistry();
+    const filespec = registry.resolve(
+      attachFile(registry, {
+        ...makeFile('d.txt', 'x'),
+        creationDate: new Date(Date.UTC(2024, 2, 8, 13, 45, 9)),
+        modificationDate: new Date(Date.UTC(2025, 0, 2, 3, 4, 5)),
+      }),
+    ) as PdfDict;
+    const efRefDict = filespec.get('/EF') as PdfDict;
+    const stream = registry.resolve(efRefDict.get('/F') as PdfRef) as PdfStream;
+    const params = stream.dict.get('/Params') as PdfDict;
+
+    expect((params.get('/CreationDate') as PdfString).toText()).toBe('D:20240308134509Z');
+    expect((params.get('/ModDate') as PdfString).toText()).toBe('D:20250102030405Z');
+  });
+});
+
+describe('buildEmbeddedFilesNameTree keys', () => {
+  const registry = new PdfObjectRegistry();
+  const refs = ['a', 'b', 'c', 'd'].map((n) => attachFile(registry, makeFile(`${n}.bin`, n)));
+
+  function keysOf(names: string[]): PdfString[] {
+    const tree = buildEmbeddedFilesNameTree(refs.slice(0, names.length), names, registry);
+    const items = (tree.get('/Names') as PdfArray).items;
+    return items.filter((_, i) => i % 2 === 0) as PdfString[];
+  }
+
+  it('writes each key as a PDF text string', () => {
+    const [key] = keysOf(['日本語.txt']);
+
+    expect(key!.toBytes()).toEqual(PdfString.fromText('日本語.txt').toBytes());
+    expect(key!.toText()).toBe('日本語.txt');
+  });
+
+  it('sorts the keys by their bytes and keeps each file with its key', () => {
+    // PDFDocEncoding: the euro sign is byte 0xA0, "é" is 0xE9, "日" starts the UTF-16BE mark 0xFE 0xFF.
+    const names = ['日.txt', 'é.txt', 'b.txt', '€.txt'];
+    const tree = buildEmbeddedFilesNameTree(refs, names, registry);
+    const items = (tree.get('/Names') as PdfArray).items;
+
+    const keys = items.filter((_, i) => i % 2 === 0) as PdfString[];
+    expect(keys.map((k) => k.toText())).toEqual(['b.txt', '€.txt', 'é.txt', '日.txt']);
+    expect(items.filter((_, i) => i % 2 === 1)).toEqual([refs[2], refs[3], refs[1], refs[0]]);
+    for (let i = 1; i < keys.length; i++) {
+      expect(PdfString.compare(keys[i - 1]!, keys[i]!)).toBeLessThan(0);
+    }
   });
 });

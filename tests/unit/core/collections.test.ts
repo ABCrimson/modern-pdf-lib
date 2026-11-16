@@ -67,12 +67,12 @@ describe('buildCollection', () => {
     const nameField = asDict(schemaDict.get('/Name'));
     expect((nameField.get('/Type') as PdfName).value).toBe('/CollectionField');
     expect((nameField.get('/Subtype') as PdfName).value).toBe('/S');
-    expect((nameField.get('/N') as PdfString).value).toBe('File Name');
+    expect((nameField.get('/N') as PdfString).toText()).toBe('File Name');
     expect((nameField.get('/O') as PdfNumber).value).toBe(0);
 
     const sizeField = asDict(schemaDict.get('/Size'));
     expect((sizeField.get('/Subtype') as PdfName).value).toBe('/N');
-    expect((sizeField.get('/N') as PdfString).value).toBe('Size (bytes)');
+    expect((sizeField.get('/N') as PdfString).toText()).toBe('Size (bytes)');
     expect((sizeField.get('/O') as PdfNumber).value).toBe(1);
 
     // /Sort present, single key serialized as a name.
@@ -113,7 +113,7 @@ describe('buildCollection', () => {
     const col = buildCollection({ initialDocument: 'report.pdf' });
     const d = col.get('/D');
     expect(d).toBeInstanceOf(PdfString);
-    expect((d as PdfString).value).toBe('report.pdf');
+    expect((d as PdfString).toText()).toBe('report.pdf');
     expect((d as PdfString).hex).toBe(false);
   });
 
@@ -160,5 +160,25 @@ describe('buildCollection', () => {
     expect(out).toContain('/CollectionSchema');
     expect(out).toContain('/CollectionSort');
     expect(out).toContain('(first.pdf)');
+  });
+});
+
+describe('buildCollection text strings', () => {
+  it('writes a field label as a PDF text string', () => {
+    const col = buildCollection({
+      schema: [{ key: 'Name', label: '名前 €', fieldType: 'S' }],
+    });
+    const label = asDict(asDict(col.get('/Schema')).get('/Name')).get('/N') as PdfString;
+
+    expect(label.toBytes()).toEqual(PdfString.fromText('名前 €').toBytes());
+    expect(label.toText()).toBe('名前 €');
+  });
+
+  it('writes the initial document as the PDF text string the name tree key uses', () => {
+    const col = buildCollection({ initialDocument: 'Größe 日本.pdf' });
+    const d = col.get('/D') as PdfString;
+
+    expect(d.toBytes()).toEqual(PdfString.fromText('Größe 日本.pdf').toBytes());
+    expect(d.toText()).toBe('Größe 日本.pdf');
   });
 });

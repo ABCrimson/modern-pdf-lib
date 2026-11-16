@@ -15,6 +15,7 @@ import { addWatermarkToPage, addWatermark } from '../../../src/core/watermark.js
 import { PdfPage } from '../../../src/core/pdfPage.js';
 import { PdfObjectRegistry } from '../../../src/core/pdfObjects.js';
 import { createPdf } from '../../../src/core/pdfDocument.js';
+import { UnencodableTextError } from '../../../src/errors.js';
 
 // ---------------------------------------------------------------------------
 // addWatermarkToPage
@@ -190,5 +191,47 @@ describe('addWatermark', () => {
     const content = pages[0]!.getContentStreamData();
     expect(content).toContain('(SAMPLE) Tj\n');
     expect(content).toContain('/Helvetica 80 Tf\n');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Text encoding
+// ---------------------------------------------------------------------------
+
+describe('watermark text is written as WinAnsi codes', () => {
+  function contentOf(text: string): string {
+    const registry = new PdfObjectRegistry();
+    const page = new PdfPage(595, 842, registry);
+    addWatermarkToPage(page, { text }, registry);
+    return page.getContentStreamData();
+  }
+
+  it('writes a character above 0x7F as an octal escape of its WinAnsi code', () => {
+    // WinAnsi: © is 0xA9 = \251, the euro sign is 0x80 = \200, "é" is 0xE9 = \351.
+    expect(contentOf('Entwurf ©')).toContain('(Entwurf \\251) Tj\n');
+    expect(contentOf('€ é')).toContain('(\\200 \\351) Tj\n');
+  });
+
+  it('keeps the backslash and the parentheses escaped', () => {
+    expect(contentOf('a\\b(c)')).toContain('(a\\\\b\\(c\\)) Tj\n');
+  });
+
+  it('writes only ASCII, so the stream bytes do not depend on the text encoder', () => {
+    const content = contentOf('Entwurf © €');
+    // One UTF-8 byte per character holds exactly when every character is ASCII.
+    expect(new TextEncoder().encode(content).length).toBe(content.length);
+  });
+
+  it('throws UnencodableTextError for a character WinAnsi has no code for', () => {
+    expect(() => contentOf('Entwurf 日本')).toThrow(UnencodableTextError);
+  });
+
+  it('throws UnencodableTextError for a TAB or a line break', () => {
+    expect(() => contentOf('a\tb')).toThrow(UnencodableTextError);
+    expect(() => contentOf('a\nb')).toThrow(UnencodableTextError);
+  });
+
+  it('normalises to NFC first', () => {
+    expect(contentOf('e\u0301')).toContain('(\\351) Tj\n');
   });
 });
