@@ -2388,6 +2388,7 @@ export class PdfDocument {
    * Add a text watermark to all pages in the document.
    *
    * @param options  Watermark appearance options.
+   * @throws {UnencodableTextError} For a character WinAnsi has no code for (the watermark is drawn in Helvetica).
    */
   addWatermark(options: WatermarkOptions): void {
     addWatermarkImpl(this, options);

@@ -72,8 +72,7 @@ export interface PdfSaveOptions {
    * and with fflate otherwise.  No WASM build the package ships can be
    * enabled this way.  Default: `false`.
    *
-   * `saveIncremental()` does not use WASM: there `true` has no effect and
-   * emits a one-time `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`).
+   * `saveIncremental()` honours it the same way for the streams it appends.
    */
   useWasm?: boolean | undefined;
   /**
@@ -87,8 +86,10 @@ export interface PdfSaveOptions {
    * Any other value combined with encryption (`doc.encrypt()`) throws
    * `UnsupportedEncryptionError`.
    *
-   * Has no effect in `saveAsStream()` and `saveIncremental()`, which write
-   * no object streams.
+   * `saveAsStream()` and `saveIncremental()` write no object streams and
+   * throw `UnsupportedOptionError` for a value other than `Infinity`
+   * (`saveAsStream()`: planned for 0.41.2; `saveIncremental()`: removed in
+   * 0.41.0).
    *
    * Default: `Infinity` (disabled for backward compatibility).
    */
