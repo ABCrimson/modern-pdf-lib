@@ -23,6 +23,9 @@
  * encrypted-r6.pdf is AES-256 with the key derivation 0.40.3 wrote: opening it emits exactly one
  * MPL_LEGACY_R6_KEY warning per realm, and no other fixture emits one.
  *
+ * utf8-strings.pdf holds UTF-8 bytes in its Info strings and its page text. Files written by 0.40.x
+ * stay as written, so its checks pin what a reader reads from those bytes (READ_AS_WRITTEN).
+ *
  * A check that fails today because of a known open defect is a knownDefect marker
  * (tests/helpers/known-defect.ts): a `test.fails` whose title starts with the defect id and the
  * release that fixes it, and which passes only while the check fails with the error KNOWN names.
@@ -48,7 +51,7 @@ import type { PdfDocument } from '../../src/index.js';
 import { resetWarningsForTesting } from '../../src/internal/warnings.js';
 import { defectKey, knownDefect } from '../helpers/known-defect.js';
 import type { DefectKey } from '../helpers/known-defect.js';
-import { pdfjsText } from '../helpers/oracle/pdfjs.js';
+import { pdfjsText, withPdfjs } from '../helpers/oracle/pdfjs.js';
 import { expectQpdfClean, qpdfDecryptQdf, requireQpdf } from '../helpers/oracle/qpdf.js';
 
 type Check =
@@ -108,12 +111,6 @@ interface Known {
   readonly key: DefectKey;
   readonly failsWith: RegExp;
 }
-// Each pattern names the labelled assertion it comes from (the second argument of expect()).
-const TITLE_DIFFERS = /^AssertionError: Info Title: expected .* to be '/;
-const TEXT_DIFFERS =
-  /^AssertionError: page \d+ text \((?:library|pdf\.js)\): expected .* to contain '/;
-const UTF8_INFO: Known = { key: defectKey('core-document-01', '0.41.0'), failsWith: TITLE_DIFFERS };
-const UTF8_TEXT: Known = { key: defectKey('core-page-01', '0.41.0'), failsWith: TEXT_DIFFERS };
 const KNOWN: Readonly<Record<string, Partial<Record<Check, Known>>>> = {
   'signed.pdf': {
     signatureFieldName: {
@@ -127,13 +124,28 @@ const KNOWN: Readonly<Record<string, Partial<Record<Check, Known>>>> = {
       failsWith: /^AssertionError: hasForm\(\): expected false to be true/,
     },
   },
+};
+
+/**
+ * What a reader reads from a file version 0.40.3 wrote with UTF-8 bytes and no byte order mark in
+ * its Info strings and its content stream. Files written by 0.40.x stay as written: loading and
+ * saving them does not repair the bytes (regenerate such a file with the current version), so the
+ * library and pdf.js agree on the characters those bytes stand for in the encodings the file
+ * declares. An Info string is a PDF text string without a byte order mark, so each byte is one
+ * PDFDocEncoding character (ISO 32000-2 Table D.2): the two bytes of "é" (0xC3 0xA9) read "Ã©", and
+ * the three bytes of "—" (0xE2 0x80 0x94) read "â", a bullet and the "fl" ligature. The page text is
+ * shown in WinAnsiEncoding, where the same two bytes read "Ã©". The manifest keeps the text the
+ * generator set; the "utf8-strings.pdf: pdf.js reads ..." test below proves these literals against
+ * pdf.js itself, so they are a reading, not a guess.
+ */
+const READ_AS_WRITTEN: Readonly<Record<string, Pick<LegacyExpect, 'info' | 'pageText'>>> = {
   'utf8-strings.pdf': {
-    info: UTF8_INFO,
-    text: UTF8_TEXT,
-    resaveInfo: UTF8_INFO,
-    resaveText: UTF8_TEXT,
-    // compress: false passes qpdf; pdf.js then shows the UTF-8 bytes as WinAnsi characters.
-    resaveOracles: UTF8_TEXT,
+    info: {
+      Title: 'CafÃ© â•ﬂ æŠ¥æœ¬èªž âœﬁ',
+      Author: 'legacy-0.40.3 generator',
+      Subject: 'Ãœbersicht Ã¤Ã¶Ã¼',
+    },
+    pageText: ['CafÃ© naÃ¯ve Ã©tÃ©'],
   },
 };
 
@@ -248,6 +260,32 @@ describe('legacy-0.40.3 fixture set', () => {
     expect(latin1(bytesOf('utf8-strings.pdf'))).toContain(literal);
   });
 
+  test('utf8-strings.pdf: pdf.js reads the Info strings and the page text the pins name', async () => {
+    const want = READ_AS_WRITTEN['utf8-strings.pdf'];
+    const bytes = bytesOf('utf8-strings.pdf');
+    const info = await withPdfjs(
+      bytes,
+      async (pdf) => (await pdf.getMetadata()).info as Record<string, unknown>,
+    );
+    expect(info['Title']).toBe(want?.info?.Title);
+    expect(info['Author']).toBe(want?.info?.Author);
+    expect(info['Subject']).toBe(want?.info?.Subject);
+    const [text] = await pdfjsText(bytes);
+    expect(text).toContain(want?.pageText[0]);
+  });
+
+  test('utf8-strings.pdf: a re-save keeps the UTF-8 bytes as written (no repair on load)', async (ctx) => {
+    requireQpdf(ctx);
+    const entry = entryOf('utf8-strings.pdf');
+    const out = await resave(entry, { compress: false });
+    expectQpdfClean(out);
+    const written = latin1(out);
+    const utf8AsLatin1 = (text: string | undefined): string =>
+      Buffer.from(text ?? '', 'utf8').toString('latin1');
+    expect(written).toContain(utf8AsLatin1(`/Title (${entry.expect.info?.Title})`));
+    expect(written).toContain(utf8AsLatin1(`(${entry.expect.pageText[0]}) Tj`));
+  });
+
   test('forms.pdf holds the field values (independent reader)', async () => {
     const entry = entryOf('forms.pdf');
     const pdf = await PDFDocument.load(bytesOf('forms.pdf'), { updateMetadata: false });
@@ -258,7 +296,8 @@ describe('legacy-0.40.3 fixture set', () => {
   });
 
   for (const entry of manifest) {
-    const { file, expect: want } = entry;
+    const { file } = entry;
+    const want: LegacyExpect = { ...entry.expect, ...READ_AS_WRITTEN[file] };
     describe(file, () => {
       test(`${file} loads with the current reader`, async () => {
         await expect(load(entry)).resolves.toBeDefined();

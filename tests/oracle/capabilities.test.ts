@@ -234,8 +234,8 @@ describe('writer rows judged by qpdf and pdf.js', () => {
     },
   );
 
-  // The Info /Title is a literal string written as one Latin-1 byte per character: é is 0xE9,
-  // which PDFDocEncoding decodes to the same character, so pdf.js reads the title as set.
+  // The Info /Title is a PDF text string: PDFDocEncoding when every character is in it (é is
+  // 0xE9), UTF-16BE with a byte order mark otherwise, so pdf.js reads the title as set.
   test('a non-ASCII title: pdf.js reads the Info title as set', async () => {
     const doc = textDoc('Title page');
     doc.setTitle('Résumé');
