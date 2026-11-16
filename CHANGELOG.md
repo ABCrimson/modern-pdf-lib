@@ -133,6 +133,32 @@ The breaking minor of the 0.41 line. This section lists what has landed so far.
 - **`PdfError` hierarchy:** every error class of the library derives from the abstract `PdfError`, which carries a `code` that is stable across releases and identical in every build. Five kind classes sit under it (`InvalidArgumentError`, `InvalidStateError`, `MalformedInputError`, `UnsupportedFeatureError`, `EnvironmentError`), and `UnencodableTextError` and `UnsupportedOptionError` are new. The existing classes keep their names, constructors and messages. `instanceof` also holds for an error made by another copy of the library (the ESM and CJS builds, or the IIFE build in another realm). The types `PdfErrorCode`, `TextEncodingName` and `PdfLibVersion` are exported from `.` and `./browser`.
 - **Error exports per entry:** `modern-pdf-lib/create`, `modern-pdf-lib/parse` and `modern-pdf-lib/forms` export the error classes their calls can throw, each with its parent classes (the API block lists them). `.` and `./browser` export every class.
 
+### Changed
+
+- **Source layout:** the Rust crates moved from `src/wasm/<crate>/` to `crates/<crate>/`, and the TypeScript modules into folders by purpose (`src/codecs/`, `src/core/io/`, `src/parser/text/`, per-domain `internal/` folders, and others); the tests mirror `src`. Moves and deletions only: no behaviour and no export changed through them.
+- **Dead code removed:** the unreachable runtime adapters, `src/types`, unused utils modules, the JPEG 2000 WASM bridge and codestream parsers, unreferenced scripts and seven unused declarations. No package entry exported any of them. The 234 tests that covered only that code went with it. The lint budget is 1,169 warnings (1,173 before).
+- **Package metadata:** `homepage` is the documentation site.
+- **CI:** the Node 24 unit-test leg is removed (`engines` requires Node 26.4 or later, so it failed by design). The release workflow marks each GitHub release as the latest one. The lint job runs `pnpm run gate:layout`, which checks the internal-folder rule of the source layout against the exports, and `pnpm run check:docs`, which checks that every repository path a document, config, script or code comment names exists.
+
+### Fixed
+
+- **JPEG WASM decoder header:** `decode_jpeg` wrote the width and height as 16-bit values, which made its header 5 bytes. It now writes the 32-bit little-endian values that its documentation and `decodeJpegWasm` define (a 9-byte header). The library's JavaScript does not run this module, so no released behaviour changes.
+
+### Tests
+
+- **Native Rust tests:** the tests of the `jpeg` and `libdeflate` crates check the error paths without building a `JsValue` on a non-WASM target. The exported functions return the same errors as before.
+- **Adversarial time budget:** `MPL_BUDGET_TIME_SCALE` multiplies the time of each budget (CI sets 4; unset means 1, and a value below 1 or not a number fails at import). Memory budgets are never scaled.
+
+### Documentation
+
+- **README samples:** the page-size sample uses `PageSizes.Letter`, and the QR code sample uses `moduleSize`.
+- **SECURITY.md:** the supported-versions row for versions before 0.40.0 names the advisories.
+- **Findings ledger:** three findings are open and planned for 0.41.0: `api-surface-utils-M03` (`loadWasmModule` builds a wrong file path from the module URL on Windows under Node), `parser-syntax-M05` (a hexadecimal string of 200,000 bytes or more fails to parse) and `signature-cms-M02` (`prepareForSigning` writes the signature field name into `/T` without escaping).
+
+### Notes
+
+- Several error classes have no throw site yet. The error census gate (`tests/unit/api/errorCensus.test.ts`) lists them until a call throws each one.
+
 ## [0.40.9] - 2026-11-15
 
 **Load path.** AES-256 files now follow the key derivation of ISO 32000-2 (Algorithm 2.B): files this library writes with AES-256 open in qpdf and pdf.js, and AES-256 files written by qpdf open here. `loadPdf()` of an encrypted file now returns decrypted objects, and a stream whose `/Length` is wrong, missing or defined later in the file keeps its data. This is a patch release that contains breaking changes: AES-256 output bytes change, a document decrypted on load cannot be written until `encrypt()` is called on the document being saved, and a file whose security handler this library cannot honour now throws `UnsupportedEncryptionError`. Each change is listed under Breaking. Options that are accepted and have no effect now emit a warning, once each per process (listed under Changed). No export is added, removed or changed. Read Compatibility before you mix 0.40.9 output with earlier versions of this library.
