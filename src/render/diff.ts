@@ -8,6 +8,7 @@
  * @packageDocumentation
  */
 
+import { InvalidArgumentError } from '../errors.js';
 import { rasterize, type RasterImage, type RenderOptions } from './rasterizer.js';
 import { interpretPage } from './interpreter.js';
 import type { PdfPage } from '../core/pdfPage.js';
@@ -39,15 +40,20 @@ function luma(data: Uint8Array, i: number): number {
   return 0.299 * data[i]! + 0.587 * data[i + 1]! + 0.114 * data[i + 2]!;
 }
 
-/** Compare two equally-sized raster images. */
+/**
+ * Compare two equally-sized raster images.
+ *
+ * @throws {@link InvalidArgumentError} if the images differ in size.
+ */
 export function compareImages(
   a: RasterImage,
   b: RasterImage,
   opts: CompareOptions = {},
 ): DiffResult {
   if (a.width !== b.width || a.height !== b.height) {
-    throw new Error(
+    throw new InvalidArgumentError(
       `compareImages: size mismatch (${a.width}×${a.height} vs ${b.width}×${b.height}); render both at the same scale`,
+      { argument: 'b' },
     );
   }
   const W = a.width;

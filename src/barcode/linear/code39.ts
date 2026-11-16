@@ -22,6 +22,7 @@
 import type { Color } from '../../core/operators/color.js';
 import { applyFillColor } from '../../core/operators/color.js';
 import type { BarcodeMatrix } from '../types.js';
+import { InvalidArgumentError } from '../../errors.js';
 import { warnOnce } from '../../internal/warnings.js';
 
 export type { BarcodeMatrix };
@@ -171,16 +172,17 @@ function expandWidths(widths: readonly number[], ratio: number): boolean[] {
  *
  * @param data  Uppercase data string (without start/stop `*`).
  * @returns     The check digit character.
- * @throws      If the data contains characters not in the Code 39 set.
+ * @throws      {@link InvalidArgumentError} if the data contains characters not in the Code 39 set.
  */
 export function computeCode39CheckDigit(data: string): string {
   let sum = 0;
   for (let i = 0; i < data.length; i++) {
     const idx = CHAR_TO_INDEX.get(data[i]!);
     if (idx === undefined) {
-      throw new Error(
+      throw new InvalidArgumentError(
         `Code 39: invalid character '${data[i]}' at index ${i}. ` +
           'Valid characters: 0-9, A-Z, space, - . $ / + %',
+        { argument: 'data' },
       );
     }
     sum += idx;
@@ -202,7 +204,7 @@ export function computeCode39CheckDigit(data: string): string {
  * @param wideToNarrowRatio  Wide-to-narrow ratio for module expansion.
  *                           Default: `3`.
  * @returns                  A {@link BarcodeMatrix} with the module pattern.
- * @throws                   If the data contains invalid characters (lowercase,
+ * @throws                   {@link InvalidArgumentError} if the data contains invalid characters (lowercase,
  *                           `*`, or characters outside the Code 39 set).
  */
 export function encodeCode39(
@@ -211,22 +213,27 @@ export function encodeCode39(
   wideToNarrowRatio: number = 3,
 ): BarcodeMatrix {
   if (wideToNarrowRatio < 2) {
-    throw new Error(`Code 39: wideToNarrowRatio must be >= 2, got ${wideToNarrowRatio}`);
+    throw new InvalidArgumentError(
+      `Code 39: wideToNarrowRatio must be >= 2, got ${wideToNarrowRatio}`,
+      { argument: 'wideToNarrowRatio' },
+    );
   }
 
   // Validate input
   for (let i = 0; i < data.length; i++) {
     const ch = data[i]!;
     if (ch === '*') {
-      throw new Error(
+      throw new InvalidArgumentError(
         'Code 39: asterisk (*) is the start/stop character and must not ' +
           `appear in data (index ${i})`,
+        { argument: 'data' },
       );
     }
     if (!CHAR_TO_INDEX.has(ch)) {
-      throw new Error(
+      throw new InvalidArgumentError(
         `Code 39: invalid character '${ch}' at index ${i}. ` +
           'Valid characters: 0-9, A-Z, space, - . $ / + %',
+        { argument: 'data' },
       );
     }
   }

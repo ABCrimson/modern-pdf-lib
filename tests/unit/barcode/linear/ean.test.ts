@@ -7,6 +7,7 @@ import {
   ean8ToOperators,
 } from '../../../../src/barcode/linear/ean.js';
 import { rgb } from '../../../../src/core/operators/color.js';
+import { InvalidArgumentError } from '../../../../src/errors.js';
 
 // ---------------------------------------------------------------------------
 // EAN check-digit calculation
@@ -262,5 +263,21 @@ describe('ean8ToOperators', () => {
     expect(ops).toContain('Q\n');
     expect(ops).toContain('re\n');
     expect(ops).toContain('f\n');
+  });
+});
+
+const CASES = [
+  ['an EAN-13 with a wrong check digit', () => encodeEan13('5901234123450'), 'data'],
+  ['an EAN-13 of 3 digits', () => encodeEan13('123'), 'data'],
+  ['an EAN-13 with a letter', () => encodeEan13('59012341234a'), 'data'],
+  ['an EAN-8 with a wrong check digit', () => encodeEan8('96385070'), 'data'],
+  ['an EAN-8 of 3 digits', () => encodeEan8('123'), 'data'],
+  ['an EAN-8 with a letter', () => encodeEan8('963850a'), 'data'],
+] as const;
+
+describe('typed errors', () => {
+  it.each(CASES)('%s throws InvalidArgumentError naming the argument', (_label, call, argument) => {
+    expect(call).toThrow(InvalidArgumentError);
+    expect(call).toThrow(expect.objectContaining({ code: 'invalid-argument', argument }));
   });
 });

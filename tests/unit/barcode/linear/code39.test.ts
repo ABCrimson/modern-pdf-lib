@@ -9,6 +9,7 @@ import {
   code39ToOperators,
 } from '../../../../src/barcode/linear/code39.js';
 import { rgb } from '../../../../src/core/operators/color.js';
+import { InvalidArgumentError } from '../../../../src/errors.js';
 
 // ---------------------------------------------------------------------------
 // Encoding tests
@@ -227,5 +228,19 @@ describe('code39ToOperators', () => {
     const matrix = encodeCode39('A');
     const ops = code39ToOperators(matrix, 0, 0);
     expect(ops).toContain('0 g\n'); // grayscale black
+  });
+});
+
+const CASES = [
+  ['a lower-case letter', () => encodeCode39('abc'), 'data'],
+  ['the start/stop asterisk', () => encodeCode39('A*B'), 'data'],
+  ['a wideToNarrowRatio below 2', () => encodeCode39('A', false, 1), 'wideToNarrowRatio'],
+  ['a check digit of text outside the set', () => computeCode39CheckDigit('abc'), 'data'],
+] as const;
+
+describe('typed errors', () => {
+  it.each(CASES)('%s throws InvalidArgumentError naming the argument', (_label, call, argument) => {
+    expect(call).toThrow(InvalidArgumentError);
+    expect(call).toThrow(expect.objectContaining({ code: 'invalid-argument', argument }));
   });
 });

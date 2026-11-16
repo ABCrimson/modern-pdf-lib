@@ -24,6 +24,7 @@ import type { Color } from '../../core/operators/color.js';
 import { applyFillColor } from '../../core/operators/color.js';
 import { saveState, restoreState } from '../../core/operators/state.js';
 import { rectangle, fill } from '../../core/operators/graphics.js';
+import { InvalidArgumentError } from '../../errors.js';
 
 // ---------------------------------------------------------------------------
 // Public types
@@ -485,8 +486,9 @@ function selectSymbolSize(dataLength: number): SymbolSize {
       return size;
     }
   }
-  throw new Error(
+  throw new InvalidArgumentError(
     `Data too long for Data Matrix: ${dataLength} codewords exceed maximum capacity of ${SYMBOL_SIZES[SYMBOL_SIZES.length - 1]!.dataCodewords}`,
+    { argument: 'data' },
   );
 }
 
@@ -768,7 +770,7 @@ function buildSymbol(symbolSize: SymbolSize, mappingMatrix: Int8Array): boolean[
  *
  * @param data  The string to encode (ASCII characters supported).
  * @returns     A {@link DataMatrixResult} with the encoded symbol.
- * @throws      If the data exceeds maximum capacity.
+ * @throws      {@link InvalidArgumentError} if the data exceeds maximum capacity.
  */
 export function encodeDataMatrix(data: string): DataMatrixResult {
   // Step 1: Encode data in ASCII mode

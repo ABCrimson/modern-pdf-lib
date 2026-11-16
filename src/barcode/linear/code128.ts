@@ -18,6 +18,7 @@
 import type { Color } from '../../core/operators/color.js';
 import { applyFillColor } from '../../core/operators/color.js';
 import type { BarcodeMatrix } from '../types.js';
+import { InvalidArgumentError } from '../../errors.js';
 import { warnOnce } from '../../internal/warnings.js';
 
 // ---------------------------------------------------------------------------
@@ -259,19 +260,20 @@ function chooseBestStart(data: string): CodeSet {
  *
  * @param data  The string to encode.
  * @returns     Array of symbol values (0-106).
- * @throws      If the data contains characters that cannot be encoded.
+ * @throws      {@link InvalidArgumentError} if the data contains characters that cannot be encoded.
  */
 export function encodeCode128Values(data: string): readonly number[] {
   if (data.length === 0) {
-    throw new Error('Code 128: input data must not be empty');
+    throw new InvalidArgumentError('Code 128: input data must not be empty', { argument: 'data' });
   }
 
   // Validate all characters are encodable
   for (let i = 0; i < data.length; i++) {
     const ch = data.charCodeAt(i);
     if (ch > 127) {
-      throw new Error(
+      throw new InvalidArgumentError(
         `Code 128: character at index ${i} (U+${ch.toString(16).padStart(4, '0')}) is outside the encodable range (0-127)`,
+        { argument: 'data' },
       );
     }
   }
@@ -393,7 +395,9 @@ export function valuesToModules(values: readonly number[]): BarcodeMatrix {
   for (const value of values) {
     const pattern = CODE128_PATTERNS[value];
     if (!pattern) {
-      throw new Error(`Code 128: invalid symbol value ${value}`);
+      throw new InvalidArgumentError(`Code 128: invalid symbol value ${value}`, {
+        argument: 'values',
+      });
     }
     for (let i = 0; i < pattern.length; i++) {
       const width = pattern[i]!;
@@ -416,7 +420,7 @@ export function valuesToModules(values: readonly number[]): BarcodeMatrix {
  *
  * @param data  The string to encode (ASCII 0-127).
  * @returns     A {@link BarcodeMatrix} with the module pattern.
- * @throws      If the data is empty or contains non-encodable characters.
+ * @throws      {@link InvalidArgumentError} if the data is empty or contains non-encodable characters.
  */
 export function encodeCode128(data: string): BarcodeMatrix {
   const values = encodeCode128Values(data);

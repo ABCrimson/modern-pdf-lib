@@ -5,6 +5,7 @@
 import { describe, it, expect } from 'vitest';
 import { encodeItf, itfToOperators } from '../../../../src/barcode/linear/itf.js';
 import { rgb } from '../../../../src/core/operators/color.js';
+import { InvalidArgumentError } from '../../../../src/errors.js';
 
 // ---------------------------------------------------------------------------
 // Encoding tests
@@ -231,5 +232,18 @@ describe('itfToOperators', () => {
     const matrix = encodeItf('12');
     const ops = itfToOperators(matrix, 0, 0);
     expect(ops).toContain('0 g\n'); // grayscale black
+  });
+});
+
+const CASES = [
+  ['a letter', () => encodeItf('12A4'), 'data'],
+  ['empty data', () => encodeItf(''), 'data'],
+  ['a wideToNarrowRatio below 2', () => encodeItf('12', 1), 'wideToNarrowRatio'],
+] as const;
+
+describe('typed errors', () => {
+  it.each(CASES)('%s throws InvalidArgumentError naming the argument', (_label, call, argument) => {
+    expect(call).toThrow(InvalidArgumentError);
+    expect(call).toThrow(expect.objectContaining({ code: 'invalid-argument', argument }));
   });
 });

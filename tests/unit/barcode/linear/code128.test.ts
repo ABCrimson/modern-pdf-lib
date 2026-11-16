@@ -11,6 +11,7 @@ import {
 } from '../../../../src/barcode/linear/code128.js';
 
 import { rgb } from '../../../../src/core/operators/color.js';
+import { InvalidArgumentError } from '../../../../src/errors.js';
 
 // ---------------------------------------------------------------------------
 // Helper: manually compute the check digit from symbol values
@@ -274,5 +275,18 @@ describe('Code 128 Barcode', () => {
     expect(matrix.modules.some((m) => m === false)).toBe(true);
     // First module should be a bar (all Code 128 symbols start with a bar)
     expect(matrix.modules[0]).toBe(true);
+  });
+});
+
+const CASES = [
+  ['empty data', () => encodeCode128(''), 'data'],
+  ['a character above 127', () => encodeCode128('éclair'), 'data'],
+  ['an unknown symbol value', () => valuesToModules([200]), 'values'],
+] as const;
+
+describe('typed errors', () => {
+  it.each(CASES)('%s throws InvalidArgumentError naming the argument', (_label, call, argument) => {
+    expect(call).toThrow(InvalidArgumentError);
+    expect(call).toThrow(expect.objectContaining({ code: 'invalid-argument', argument }));
   });
 });

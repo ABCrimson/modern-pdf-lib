@@ -6,6 +6,7 @@ import {
 } from '../../../../src/barcode/linear/upc.js';
 import { encodeEan13 } from '../../../../src/barcode/linear/ean.js';
 import { rgb } from '../../../../src/core/operators/color.js';
+import { InvalidArgumentError } from '../../../../src/errors.js';
 
 // ---------------------------------------------------------------------------
 // UPC-A check-digit calculation
@@ -116,5 +117,20 @@ describe('upcAToOperators', () => {
       quietZone: 5,
     });
     expect(ops).toContain('75 re');
+  });
+});
+
+const CASES = [
+  ['a check digit of text with a letter', () => calculateUpcCheckDigit('0360002914a'), 'data'],
+  ['a check digit of 5 digits', () => calculateUpcCheckDigit('12345'), 'data'],
+  ['a UPC-A with a wrong check digit', () => encodeUpcA('036000291450'), 'data'],
+  ['a UPC-A of 3 digits', () => encodeUpcA('123'), 'data'],
+  ['a UPC-A with a letter', () => encodeUpcA('0360002914a'), 'data'],
+] as const;
+
+describe('typed errors', () => {
+  it.each(CASES)('%s throws InvalidArgumentError naming the argument', (_label, call, argument) => {
+    expect(call).toThrow(InvalidArgumentError);
+    expect(call).toThrow(expect.objectContaining({ code: 'invalid-argument', argument }));
   });
 });

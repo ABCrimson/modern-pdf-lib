@@ -19,6 +19,7 @@
 import type { Color } from '../../core/operators/color.js';
 import { applyFillColor } from '../../core/operators/color.js';
 import type { BarcodeMatrix } from '../types.js';
+import { InvalidArgumentError } from '../../errors.js';
 import { warnOnce } from '../../internal/warnings.js';
 
 export type { BarcodeMatrix };
@@ -105,25 +106,31 @@ export interface ItfOptions {
  *
  * @param data  A string of digits (0-9 only).
  * @returns     A {@link BarcodeMatrix} with the module pattern.
- * @throws      If the data contains non-digit characters.
+ * @throws      {@link InvalidArgumentError} if the data contains non-digit characters.
  */
 export function encodeItf(data: string, wideToNarrowRatio: number = 3): BarcodeMatrix {
   // Validate: digits only
   for (let i = 0; i < data.length; i++) {
     const ch = data.charCodeAt(i);
     if (ch < 48 || ch > 57) {
-      throw new Error(
+      throw new InvalidArgumentError(
         `ITF: invalid character '${data[i]}' at index ${i}. Only digits 0-9 are allowed.`,
+        { argument: 'data' },
       );
     }
   }
 
   if (data.length === 0) {
-    throw new Error('ITF: input data must not be empty');
+    throw new InvalidArgumentError('ITF: input data must not be empty', { argument: 'data' });
   }
 
   if (wideToNarrowRatio < 2) {
-    throw new Error(`ITF: wideToNarrowRatio must be >= 2, got ${wideToNarrowRatio}`);
+    throw new InvalidArgumentError(
+      `ITF: wideToNarrowRatio must be >= 2, got ${wideToNarrowRatio}`,
+      {
+        argument: 'wideToNarrowRatio',
+      },
+    );
   }
 
   // Prepend 0 if odd length

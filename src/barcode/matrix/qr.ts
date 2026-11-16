@@ -13,6 +13,7 @@ import type { Color } from '../../core/operators/color.js';
 import { applyFillColor } from '../../core/operators/color.js';
 import { saveState, restoreState } from '../../core/operators/state.js';
 import { rectangle, fill } from '../../core/operators/graphics.js';
+import { InvalidArgumentError } from '../../errors.js';
 import { warnOnce } from '../../internal/warnings.js';
 
 // ---------------------------------------------------------------------------
@@ -726,7 +727,10 @@ function selectVersion(data: string, mode: EncodingMode, ecLevel: ErrorCorrectio
     }
   }
 
-  throw new Error(`Data too long for QR code (max version 40 with EC level ${ecLevel})`);
+  throw new InvalidArgumentError(
+    `Data too long for QR code (max version 40 with EC level ${ecLevel})`,
+    { argument: 'data' },
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -1358,6 +1362,8 @@ function computePenalty(matrix: Int8Array, size: number): number {
  * @param data              The string to encode.
  * @param errorCorrection   Error correction level (default: `'M'`).
  * @returns                 A {@link QrCodeMatrix} with the encoded data.
+ * @throws                  {@link InvalidArgumentError} if the data does not fit version 40
+ *                          at the error correction level.
  */
 export function encodeQrCode(
   data: string,

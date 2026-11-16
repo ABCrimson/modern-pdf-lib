@@ -6,6 +6,7 @@ import { describe, it, expect } from 'vitest';
 import { encodeQrCode, qrCodeToOperators } from '../../../../src/barcode/matrix/qr.js';
 
 import { rgb } from '../../../../src/core/operators/color.js';
+import { InvalidArgumentError } from '../../../../src/errors.js';
 import { createPdf } from '../../../../src/core/pdfDocument.js';
 
 describe('QR Code Encoder', () => {
@@ -297,5 +298,16 @@ describe('QR Code Encoder', () => {
     // Default: background is white (1 g), foreground is black (0 g)
     expect(ops).toContain('1 g\n'); // white background
     expect(ops).toContain('0 g\n'); // black foreground
+  });
+});
+
+const CASES = [
+  ['data past version 40', () => encodeQrCode('A'.repeat(5000), 'H'), 'data'],
+] as const;
+
+describe('typed errors', () => {
+  it.each(CASES)('%s throws InvalidArgumentError naming the argument', (_label, call, argument) => {
+    expect(call).toThrow(InvalidArgumentError);
+    expect(call).toThrow(expect.objectContaining({ code: 'invalid-argument', argument }));
   });
 });

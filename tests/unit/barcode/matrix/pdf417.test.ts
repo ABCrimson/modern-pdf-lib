@@ -6,6 +6,7 @@ import { describe, it, expect } from 'vitest';
 import { encodePdf417, pdf417ToOperators } from '../../../../src/barcode/matrix/pdf417.js';
 
 import { rgb } from '../../../../src/core/operators/color.js';
+import { InvalidArgumentError } from '../../../../src/errors.js';
 
 describe('PDF417 Encoder', () => {
   // -----------------------------------------------------------------------
@@ -228,5 +229,17 @@ describe('PDF417 Encoder', () => {
     const matrix = encodePdf417('1234567890');
     expect(matrix.rows).toBeGreaterThanOrEqual(3);
     expect(matrix.modules.length).toBe(matrix.rows * matrix.moduleWidth);
+  });
+});
+
+const CASES = [
+  ['empty data', () => encodePdf417(''), 'data'],
+  ['data past the codeword limit', () => encodePdf417('A'.repeat(5000)), 'data'],
+] as const;
+
+describe('typed errors', () => {
+  it.each(CASES)('%s throws InvalidArgumentError naming the argument', (_label, call, argument) => {
+    expect(call).toThrow(InvalidArgumentError);
+    expect(call).toThrow(expect.objectContaining({ code: 'invalid-argument', argument }));
   });
 });

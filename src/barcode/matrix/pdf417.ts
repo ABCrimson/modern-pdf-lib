@@ -22,6 +22,7 @@ import type { Color } from '../../core/operators/color.js';
 import { applyFillColor } from '../../core/operators/color.js';
 import { saveState, restoreState } from '../../core/operators/state.js';
 import { fill } from '../../core/operators/graphics.js';
+import { InvalidArgumentError } from '../../errors.js';
 import { warnOnce } from '../../internal/warnings.js';
 
 // ---------------------------------------------------------------------------
@@ -675,14 +676,14 @@ function patternToModules(pattern: readonly number[]): boolean[] {
  * @param data     The string to encode.
  * @param options  Encoding options (columns, error level).
  * @returns        A {@link Pdf417Matrix} with the encoded barcode.
- * @throws         If the data is empty or too long to encode.
+ * @throws         {@link InvalidArgumentError} if the data is empty or too long to encode.
  */
 export function encodePdf417(
   data: string,
   options?: { columns?: number; errorLevel?: number },
 ): Pdf417Matrix {
   if (data.length === 0) {
-    throw new Error('PDF417: input data must not be empty');
+    throw new InvalidArgumentError('PDF417: input data must not be empty', { argument: 'data' });
   }
 
   const ecLevel = Math.max(0, Math.min(8, options?.errorLevel ?? 2));
@@ -691,8 +692,9 @@ export function encodePdf417(
   const dataCodewords = encodeDataCodewords(data);
 
   if (dataCodewords.length > MAX_DATA_CODEWORDS) {
-    throw new Error(
+    throw new InvalidArgumentError(
       `PDF417: data too long (${dataCodewords.length} codewords, max ${MAX_DATA_CODEWORDS})`,
+      { argument: 'data' },
     );
   }
 

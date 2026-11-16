@@ -15,6 +15,7 @@ import { saveState, restoreState } from '../../core/operators/state.js';
 import { applyFillColor } from '../../core/operators/color.js';
 import type { Color } from '../../core/operators/color.js';
 import type { BarcodeMatrix, BarcodeOptions } from '../types.js';
+import { InvalidArgumentError } from '../../errors.js';
 import { warnOnce } from '../../internal/warnings.js';
 
 // Re-export the options type under an EAN-specific alias for convenience.
@@ -140,7 +141,7 @@ export function calculateEanCheckDigit(data: string): number {
  *              are given the last digit is validated as the correct check.
  * @returns     A {@link BarcodeMatrix} with 95 modules (the standard EAN-13
  *              symbol width without quiet zones).
- * @throws      If the input is not 12 or 13 numeric digits, or if a
+ * @throws      {@link InvalidArgumentError} if the input is not 12 or 13 numeric digits, or if a
  *              provided check digit does not match.
  */
 export function encodeEan13(data: string): BarcodeMatrix {
@@ -151,10 +152,15 @@ export function encodeEan13(data: string): BarcodeMatrix {
   } else if (data.length === 13) {
     const expected = calculateEanCheckDigit(data.slice(0, 12));
     if (Number(data[12]) !== expected) {
-      throw new Error(`EAN-13 check digit mismatch: expected ${expected}, got ${data[12]}`);
+      throw new InvalidArgumentError(
+        `EAN-13 check digit mismatch: expected ${expected}, got ${data[12]}`,
+        { argument: 'data' },
+      );
     }
   } else {
-    throw new Error(`EAN-13 data must be 12 or 13 digits, got ${data.length}`);
+    throw new InvalidArgumentError(`EAN-13 data must be 12 or 13 digits, got ${data.length}`, {
+      argument: 'data',
+    });
   }
 
   const firstDigit = Number(data[0]);
@@ -192,7 +198,7 @@ export function encodeEan13(data: string): BarcodeMatrix {
  *              the check digit is calculated and appended.  If 8 digits
  *              are given the last digit is validated.
  * @returns     A {@link BarcodeMatrix} with 67 modules.
- * @throws      If the input is invalid.
+ * @throws      {@link InvalidArgumentError} if the input is invalid.
  */
 export function encodeEan8(data: string): BarcodeMatrix {
   validateNumeric(data, 'EAN-8');
@@ -202,10 +208,15 @@ export function encodeEan8(data: string): BarcodeMatrix {
   } else if (data.length === 8) {
     const expected = calculateEanCheckDigit(data.slice(0, 7));
     if (Number(data[7]) !== expected) {
-      throw new Error(`EAN-8 check digit mismatch: expected ${expected}, got ${data[7]}`);
+      throw new InvalidArgumentError(
+        `EAN-8 check digit mismatch: expected ${expected}, got ${data[7]}`,
+        { argument: 'data' },
+      );
     }
   } else {
-    throw new Error(`EAN-8 data must be 7 or 8 digits, got ${data.length}`);
+    throw new InvalidArgumentError(`EAN-8 data must be 7 or 8 digits, got ${data.length}`, {
+      argument: 'data',
+    });
   }
 
   let bits = START_END_GUARD; // 3 modules
@@ -313,7 +324,9 @@ export function ean8ToOperators(
  */
 function validateNumeric(data: string, label: string): void {
   if (!/^\d+$/.test(data)) {
-    throw new Error(`${label} data must contain only digits: "${data}"`);
+    throw new InvalidArgumentError(`${label} data must contain only digits: "${data}"`, {
+      argument: 'data',
+    });
   }
 }
 

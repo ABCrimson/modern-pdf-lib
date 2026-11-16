@@ -17,6 +17,7 @@ import {
   warnIgnoredTextOptions,
 } from './ean.js';
 import type { BarcodeMatrix, BarcodeOptions } from '../types.js';
+import { InvalidArgumentError } from '../../errors.js';
 
 // Re-export the options type under a UPC-specific alias.
 export type { BarcodeOptions as UpcOptions } from '../types.js';
@@ -33,10 +34,15 @@ export type { BarcodeOptions as UpcOptions } from '../types.js';
  */
 export function calculateUpcCheckDigit(data: string): number {
   if (!/^\d+$/.test(data)) {
-    throw new Error(`UPC-A data must contain only digits: "${data}"`);
+    throw new InvalidArgumentError(`UPC-A data must contain only digits: "${data}"`, {
+      argument: 'data',
+    });
   }
   if (data.length !== 11) {
-    throw new Error(`UPC-A check digit calculation requires 11 digits, got ${data.length}`);
+    throw new InvalidArgumentError(
+      `UPC-A check digit calculation requires 11 digits, got ${data.length}`,
+      { argument: 'data' },
+    );
   }
   // UPC-A is EAN-13 with a leading 0, so the check digit is the same
   // as for the 12-digit EAN-13 prefix "0" + data.
@@ -57,12 +63,14 @@ export function calculateUpcCheckDigit(data: string): number {
  *              the check digit is calculated and appended.  If 12 digits
  *              are given the last digit is validated.
  * @returns     A {@link BarcodeMatrix} with 95 modules.
- * @throws      If the input is not 11 or 12 numeric digits, or if a
+ * @throws      {@link InvalidArgumentError} if the input is not 11 or 12 numeric digits, or if a
  *              provided check digit does not match.
  */
 export function encodeUpcA(data: string): BarcodeMatrix {
   if (!/^\d+$/.test(data)) {
-    throw new Error(`UPC-A data must contain only digits: "${data}"`);
+    throw new InvalidArgumentError(`UPC-A data must contain only digits: "${data}"`, {
+      argument: 'data',
+    });
   }
 
   if (data.length === 11) {
@@ -72,7 +80,9 @@ export function encodeUpcA(data: string): BarcodeMatrix {
     // Prepend '0' to get 13-digit EAN-13, let encodeEan13 validate check
     return encodeEan13('0' + data);
   } else {
-    throw new Error(`UPC-A data must be 11 or 12 digits, got ${data.length}`);
+    throw new InvalidArgumentError(`UPC-A data must be 11 or 12 digits, got ${data.length}`, {
+      argument: 'data',
+    });
   }
 }
 

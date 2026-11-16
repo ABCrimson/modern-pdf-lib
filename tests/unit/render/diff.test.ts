@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { compareImages, comparePages } from '../../../src/render/diff.js';
 import type { RasterImage } from '../../../src/render/rasterizer.js';
 import { PdfDocument } from '../../../src/core/pdfDocument.js';
+import { InvalidArgumentError } from '../../../src/errors.js';
 
 function solid(w: number, h: number, c: [number, number, number]): RasterImage {
   const data = new Uint8Array(w * h * 4);
@@ -60,5 +61,20 @@ describe('compareImages — pixel diff + SSIM', () => {
     expect(r.width).toBe(100);
     expect(r.changedPixels).toBeGreaterThan(0);
     expect(r.ssim).toBeLessThan(1);
+  });
+});
+
+const CASES = [
+  [
+    'images of different sizes',
+    () => compareImages(solid(4, 4, [0, 0, 0]), solid(5, 4, [0, 0, 0])),
+    'b',
+  ],
+] as const;
+
+describe('typed errors', () => {
+  it.each(CASES)('%s throws InvalidArgumentError naming the argument', (_label, call, argument) => {
+    expect(call).toThrow(InvalidArgumentError);
+    expect(call).toThrow(expect.objectContaining({ code: 'invalid-argument', argument }));
   });
 });

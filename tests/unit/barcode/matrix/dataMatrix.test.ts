@@ -9,6 +9,7 @@ import {
 } from '../../../../src/barcode/matrix/dataMatrix.js';
 
 import { rgb } from '../../../../src/core/operators/color.js';
+import { InvalidArgumentError } from '../../../../src/errors.js';
 
 describe('Data Matrix ECC200', () => {
   // -----------------------------------------------------------------------
@@ -255,5 +256,16 @@ describe('Data Matrix ECC200', () => {
     // Neither should dominate completely (some reasonable fraction)
     expect(darkCount).toBeLessThan(result.modules.length);
     expect(lightCount).toBeLessThan(result.modules.length);
+  });
+});
+
+const CASES = [
+  ['data past the largest symbol', () => encodeDataMatrix('A'.repeat(4000)), 'data'],
+] as const;
+
+describe('typed errors', () => {
+  it.each(CASES)('%s throws InvalidArgumentError naming the argument', (_label, call, argument) => {
+    expect(call).toThrow(InvalidArgumentError);
+    expect(call).toThrow(expect.objectContaining({ code: 'invalid-argument', argument }));
   });
 });
