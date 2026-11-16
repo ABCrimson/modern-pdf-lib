@@ -17,11 +17,11 @@
   },
   "parse": {
     "gzip": 110592,
-    "brotli": 92160
+    "brotli": 94208
   },
   "forms": {
-    "gzip": 7168,
-    "brotli": 6144
+    "gzip": 8192,
+    "brotli": 7168
   },
   "browser": {
     "gzip": 268288,
