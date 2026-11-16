@@ -1,7 +1,7 @@
 /**
  * G-HEADROOM: every file under tests/fixtures goes through the decode paths the limits
  * guard, and the largest value of each limited quantity stays at or below a quarter of its field
- * in INTERNAL_LIMITS (src/internal/limits.ts).
+ * in DEFAULT_LIMITS (src/limits.ts).
  *
  * Why it exists: the corpus gate (tests/oracle/corpus.test.ts) loads files and extracts text but
  * decodes no image, parses no font and interprets no Form XObject, so it cannot show that a limit
@@ -11,7 +11,8 @@
  *     font program's decoded length;
  *   - reads each page's text, extracts its images, and interprets it (Form XObjects included);
  *   - reads the outline tree and the structure tree through their public `fromDict`;
- *   - verifies signatures and measures the DER nesting of each signature's /Contents.
+ *   - verifies signatures and measures the DER nesting of each signature's /Contents;
+ *   - measures the four totals of a call (see TOTALS below).
  * Each PNG and JPEG under tests/fixtures goes through its embed entry point, and any font, TIFF
  * or WebP file there through its decoder (the tree holds none today: the walk covers them when
  * one is added).
@@ -21,6 +22,16 @@
  * known load defect, UnsupportedFilterError for JPX and JBIG2) is counted and printed, never
  * silent; the sanity test fails when too few steps measured anything. One table line per
  * quantity is printed: measured maximum, limit, ratio and the file that holds the maximum.
+ *
+ * The four totals sum over one call, so each is measured per call: the least value of the limit
+ * under which the call still succeeds (leastLimit), found by running the real call under a
+ * `limits` option, or, where the call takes a context, the total it read off the context.
+ * maxTotalDecodedBytes is the largest of the chain of one stream (the outputs of its filters
+ * summed), loadPdf, and a document's page calls (getContentStream, interpretPage and
+ * extractFonts, each under the limits of the loaded document); maxTotalCMapMappings is that of one
+ * extractText call; maxTotalImageBytes the pixels extractPageImages returns for one page; and
+ * maxPageOperators the operators interpretPage runs for one page, counted by the walk of
+ * formOperators and confirmed per document against the real calls (confirmTotals).
  *
  * Measured through public or module-level entry points only: decoded lengths come from this
  * file's own decode calls, the CMap count from the CMap text (bfchar pairs plus range spans,
@@ -33,6 +44,7 @@ import { extname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { afterAll, describe, expect, test } from 'vitest';
 import {
+  extractFonts,
   extractMetrics,
   extractPageImages,
   extractText,
@@ -51,16 +63,16 @@ import {
   verifySignatures,
 } from '../../src/index.js';
 import type { PdfDocument, PdfObject, PdfObjectRegistry, PdfRef } from '../../src/index.js';
-import { INTERNAL_LIMITS, beginCall } from '../../src/internal/limits.js';
+import { beginCall } from '../../src/internal/limits.js';
 import { DEFAULT_LIMITS } from '../../src/limits.js';
-import type { ResourceLimitName } from '../../src/internal/limits.js';
+import type { LimitName, PdfLimits } from '../../src/limits.js';
 import { decodeWoff, isWoff } from '../../src/assets/font/woff.js';
 import { decodeStream, getStreamFilters } from '../../src/codecs/streamDecode.js';
 import { parseToUnicodeCMap } from '../../src/parser/text/textExtractor.js';
 import { embedPng } from '../../src/assets/image/internal/pngEmbed.js';
 import { embedJpeg } from '../../src/assets/image/jpeg/jpegEmbed.js';
 import { decodeWebP, isWebP } from '../../src/assets/image/webp/webpDecode.js';
-import { getTiffPageCount, isTiff } from '../../src/assets/image/tiff/tiffDecode.js';
+import { decodeTiffAll, getTiffPageCount, isTiff } from '../../src/assets/image/tiff/tiffDecode.js';
 import { parseDerTlv } from '../../src/signature/cms/pkcs7.js';
 import type { Asn1Node } from '../../src/signature/cms/pkcs7.js';
 
@@ -89,7 +101,7 @@ const FONT_CMAP = 'size of the parsed cmap map';
 
 interface Quantity {
   readonly id: string;
-  readonly limit: ResourceLimitName;
+  readonly limit: LimitName;
   readonly label: string;
 }
 
@@ -108,6 +120,10 @@ const QUANTITIES: readonly Quantity[] = [
   { id: 'imageBytes', limit: 'maxImageBytes', label: 'image sample bytes' },
   { id: 'frames', limit: 'maxImageFrames', label: 'TIFF frames' },
   { id: 'fontBytes', limit: 'maxFontBytes', label: 'font program bytes' },
+  { id: 'totalDecoded', limit: 'maxTotalDecodedBytes', label: 'decoded bytes per call' },
+  { id: 'totalCmap', limit: 'maxTotalCMapMappings', label: 'ToUnicode mappings per extraction' },
+  { id: 'totalImage', limit: 'maxTotalImageBytes', label: 'image bytes per call' },
+  { id: 'pageOps', limit: 'maxPageOperators', label: 'operators per page interpretation' },
 ];
 
 interface Best {
@@ -120,6 +136,8 @@ const maxima = new Map<string, Best>(QUANTITIES.map((q) => [q.id, { value: 0, fi
 const limitErrors: string[] = [];
 /** Steps that threw something else, by step and error name: the count and the files. */
 const otherErrors = new Map<string, { n: number; files: Set<string> }>();
+/** Counted totals the real calls do not confirm (confirmTotals). */
+const mismatches: string[] = [];
 /** Files skipped, with the reason. */
 const skipped: string[] = [];
 const counts = { pdfs: 0, loaded: 0, pages: 0, streams: 0, decodes: 0, unsupported: 0, steps: 0 };
@@ -170,6 +188,41 @@ async function stepAsync<T>(
     record(error, file, name);
     return undefined;
   }
+}
+
+/** How many times leastLimit follows the partial sums a failing run reports before it doubles. */
+const JUMPS = 12;
+
+/**
+ * The least value of the limit `name`, from 1, under which `run` does not throw that limit's
+ * ResourceLimitError: the total the call sums (1 stands for 0 and 1). A run that fails reports the
+ * partial sum that crossed the limit, and the whole sum is at least that, so the next try is that
+ * sum (JUMPS times, then the value doubles); a run that succeeds fixes the upper bound, and the
+ * range between the two bounds is halved. Any other error ends the search.
+ */
+async function leastLimit(
+  name: LimitName,
+  run: (limits: PdfLimits) => void | Promise<void>,
+): Promise<number> {
+  let below = 0; // the run fails at this value
+  let above = 0; // the run passes at this value; 0 until one is found
+  let next = 1;
+  let jumps = 0;
+  const attempt = async (value: number): Promise<void> => {
+    try {
+      await run({ [name]: value });
+      above = value;
+    } catch (error) {
+      if (!(error instanceof ResourceLimitError) || error.limit !== name) throw error;
+      if (error.actual === undefined) throw error;
+      // The call needs at least error.actual, so it fails at error.actual - 1 too.
+      below = Math.max(value, error.actual - 1);
+      next = jumps++ < JUMPS ? error.actual : Math.max(error.actual, value * 2);
+    }
+  };
+  while (above === 0) await attempt(next);
+  while (above - below > 1) await attempt(below + Math.floor((above - below) / 2));
+  return above;
 }
 
 // ---------------------------------------------------------------------------
@@ -318,6 +371,31 @@ function cmapMappings(text: string): number {
 
 type Ops = ReturnType<typeof parseContentStream>;
 
+/**
+ * The page resources with each font and its /ToUnicode CMap resolved into direct objects, the CMap
+ * decoded: extractText reads a ToUnicode only from a font dictionary and a stream it is handed, and
+ * the resources of a loaded page hold references.
+ */
+function withResolvedFonts(
+  resources: PdfDict,
+  resolve: (o: PdfObject | undefined) => PdfObject | undefined,
+  decode: (s: PdfStream) => Uint8Array,
+): PdfDict {
+  const fonts = resolve(resources.get('/Font'));
+  if (!(fonts instanceof PdfDict)) return resources;
+  const resolvedFonts = new PdfDict();
+  for (const [name, entry] of fonts) {
+    const font = resolve(entry);
+    if (!(font instanceof PdfDict)) continue;
+    const copy = new PdfDict(font);
+    const toUnicode = resolve(font.get('/ToUnicode'));
+    if (toUnicode instanceof PdfStream)
+      copy.set('/ToUnicode', PdfStream.fromBytes(decode(toUnicode)));
+    resolvedFonts.set(name, copy);
+  }
+  return new PdfDict([...resources].map(([k, v]) => [k, k === '/Font' ? resolvedFonts : v]));
+}
+
 /** What an operand adds to its operator's cost: string length, or elements plus theirs (recursive). */
 function operandCost(operand: Ops[number]['operands'][number]): number {
   if (typeof operand === 'string') return operand.length;
@@ -341,9 +419,10 @@ function operatorCost(operator: Ops[number]): number {
 }
 
 /**
- * The weighted operator cost the interpreter charges inside Form XObjects for one page: every `Do`
- * of a form adds that form's cost (operatorCost summed over its operators), a form already being
- * interpreted is not entered, and the nesting stops at FORM_DEPTH (mirrors doXObject in
+ * What the interpreter charges inside Form XObjects for one page: `cost` is the weighted operator
+ * cost of maxFormOperators (every `Do` of a form adds that form's operatorCost summed over its
+ * operators) and `count` the operators run, one each, that add to maxPageOperators. A form already
+ * being interpreted is not entered, and the nesting stops at FORM_DEPTH (mirrors doXObject in
  * src/render/interpreter.ts).
  */
 function formOperators(
@@ -351,10 +430,11 @@ function formOperators(
   resources: PdfDict | undefined,
   resolve: (o: PdfObject | undefined) => PdfObject | undefined,
   decode: (s: PdfStream) => Uint8Array,
-): number {
+): { cost: number; count: number } {
   const parsed = new Map<PdfStream, Ops>();
   const active = new Set<PdfStream>();
   let total = 0;
+  let count = 0;
   const visit = (list: Ops, res: PdfDict | undefined, depth: number): void => {
     for (const op of list) {
       if (op.operator !== 'Do' || depth >= FORM_DEPTH || total > 100_000_000) continue;
@@ -374,13 +454,88 @@ function formOperators(
         parsed.set(form, formOps);
       }
       for (const formOp of formOps) total += operatorCost(formOp);
+      count += formOps.length;
       const own = resolve(form.dict.get('/Resources'));
       visit(formOps, own instanceof PdfDict ? own : res, depth + 1);
       active.delete(form);
     }
   };
   visit(ops, resources, 0);
-  return total;
+  return { cost: total, count };
+}
+
+type Page = ReturnType<PdfDocument['getPage']>;
+
+/**
+ * Loads the document under `limits` and runs `calls` on each of its pages. The first limit error
+ * ends the run; any other failure is counted by the steps of measurePdf.
+ */
+async function documentCalls(
+  bytes: Uint8Array,
+  password: string | undefined,
+  limits: PdfLimits,
+  calls: readonly ((page: Page) => unknown)[],
+): Promise<void> {
+  const doc = await loadPdf(bytes, password === undefined ? { limits } : { password, limits });
+  for (let i = 0; i < doc.getPageCount(); i++) {
+    const page = doc.getPage(i);
+    for (const call of calls) {
+      try {
+        call(page);
+      } catch (error) {
+        if (error instanceof ResourceLimitError) throw error;
+      }
+    }
+  }
+}
+
+/** The largest total of one page of a document, for the two totals that measurePdf counts. */
+interface PageTotals {
+  pageOps: number;
+  image: number;
+}
+
+/**
+ * Confirms the two counted totals of a document against the real calls: they pass when each limit
+ * is set to the counted maximum and fail, with that limit's error, one below it.
+ */
+async function confirmTotals(
+  id: string,
+  bytes: Uint8Array,
+  password: string | undefined,
+  counted: PageTotals,
+): Promise<void> {
+  const calls = [(page: Page) => interpretPage(page), (page: Page) => extractPageImages(page)];
+  // A limit is at least 1; a document with no operator or no image has nothing to confirm.
+  const each = (
+    [
+      ['maxPageOperators', counted.pageOps],
+      ['maxTotalImageBytes', counted.image],
+    ] satisfies [LimitName, number][]
+  ).filter(([, value]) => value > 0);
+  if (each.length === 0) return;
+  const at: PdfLimits = Object.fromEntries(each);
+  try {
+    await documentCalls(bytes, password, at, calls);
+  } catch (error) {
+    mismatches.push(
+      `${id}: the calls fail at the counted maxima ${JSON.stringify(at)}: ${String(error)}`,
+    );
+    return;
+  }
+  for (const [name, value] of each) {
+    if (value < 2) continue;
+    try {
+      await documentCalls(bytes, password, { ...at, [name]: value - 1 }, calls);
+      mismatches.push(`${id}: the calls pass one below the counted ${name} ${value}`);
+    } catch (error) {
+      if (!(error instanceof ResourceLimitError) || error.limit !== name) {
+        mismatches.push(
+          `${id}: one below the counted ${name} ${value} fails with ${String(error)}`,
+        );
+      }
+    }
+  }
 }
 
 async function measurePdf(path: string, id: string, password: string | undefined): Promise<void> {
@@ -451,6 +606,7 @@ async function measurePdf(path: string, id: string, password: string | undefined
     // One filter at a time, so each filter's own output is measured.
     let data = object.data;
     let decoded: Uint8Array | undefined;
+    let chainTotal = 0;
     for (let i = 0; i < filters.length; i++) {
       const next = step(id, `decode ${filters[i]}`, () =>
         decodeStream(data, [filters[i]!], [decodeParms[i] ?? null] as PdfDict[]),
@@ -461,6 +617,9 @@ async function measurePdf(path: string, id: string, password: string | undefined
       }
       counts.decodes++;
       note('decoded', next.length, id);
+      // One decodeStream call adds the output of every filter of the chain to its decoded total.
+      chainTotal += next.length;
+      note('totalDecoded', chainTotal, id);
       // Sub-byte /Predictor 2 visits every sample (rows * columns * colors): see applyTiffPredictor2.
       const parms = decodeParms[i];
       if ((filters[i] === 'FlateDecode' || filters[i] === 'LZWDecode') && parms) {
@@ -490,24 +649,56 @@ async function measurePdf(path: string, id: string, password: string | undefined
 
   const pages = doc.getPageCount();
   counts.pages += pages;
+  const counted: PageTotals = { pageOps: 0, image: 0 };
   for (let i = 0; i < pages; i++) {
     const page = doc.getPage(i);
     const resources = page.getOriginalResources();
     const ops = step(id, 'page content parse', () => parseContentStream(page.getContentStream()));
     if (ops !== undefined) {
       step(id, 'text extraction', () => extractText(ops, resources));
-      note(
-        'formOps',
-        step(id, 'form operator walk', () => formOperators(ops, resources, resolve, decode)) ?? 0,
-        id,
+      const readable =
+        resources === undefined
+          ? undefined
+          : step(id, 'font resolution', () => withResolvedFonts(resources, resolve, decode));
+      const mappings = await stepAsync(id, 'CMap total', () =>
+        leastLimit('maxTotalCMapMappings', (limits) => {
+          extractText(ops, readable, { limits });
+        }),
       );
+      if (mappings !== undefined) note('totalCmap', mappings, id);
+      const walk = step(id, 'form operator walk', () =>
+        formOperators(ops, resources, resolve, decode),
+      );
+      note('formOps', walk?.cost ?? 0, id);
+      // interpretPage runs every operator of the page's content stream and of its forms.
+      const run = ops.length + (walk?.count ?? 0);
+      note('pageOps', run, id);
+      counted.pageOps = Math.max(counted.pageOps, run);
     }
+    let pageImageBytes = 0;
     for (const image of step(id, 'image extraction', () => extractPageImages(page)) ?? []) {
       note('imageBytes', image.pixels.length, id);
       note('pixels', image.width * image.height, id);
+      pageImageBytes += image.pixels.length;
     }
+    // extractPageImages adds the pixels of every image it returns to one total.
+    note('totalImage', pageImageBytes, id);
+    counted.image = Math.max(counted.image, pageImageBytes);
     step(id, 'page interpretation', () => interpretPage(page));
   }
+
+  // loadPdf and the page calls of the loaded document, each under its own total.
+  const decodedTotal = await stepAsync(id, 'decoded total', () =>
+    leastLimit('maxTotalDecodedBytes', (limits) =>
+      documentCalls(bytes, password, limits, [
+        (page) => page.getContentStream(),
+        (page) => interpretPage(page),
+        (page) => extractFonts(page),
+      ]),
+    ),
+  );
+  if (decodedTotal !== undefined) note('totalDecoded', decodedTotal, id);
+  await stepAsync(id, 'counted totals', () => confirmTotals(id, bytes, password, counted));
 
   // The catalog's outline and structure roots, read through the public fromDict.
   let catalog: PdfDict | undefined;
@@ -546,12 +737,15 @@ async function measurePdf(path: string, id: string, password: string | undefined
   }
 }
 
-function measureImageFile(path: string, id: string): void {
+async function measureImageFile(path: string, id: string): Promise<void> {
   const data = new Uint8Array(readFileSync(path));
   const ext = extname(path).toLowerCase();
   if (ext === '.png') {
-    const r = step(id, 'PNG embed', () => embedPng(data, beginCall(DEFAULT_LIMITS)));
+    const ctx = beginCall(DEFAULT_LIMITS);
+    const r = step(id, 'PNG embed', () => embedPng(data, ctx));
     if (r === undefined) return;
+    note('totalImage', ctx.totals.imageBytes, id);
+    note('totalDecoded', ctx.totals.decodedBytes, id);
     note('width', r.width, id);
     note('height', r.height, id);
     note('pixels', r.width * r.height, id);
@@ -570,17 +764,30 @@ function measureImageFile(path: string, id: string): void {
     note('height', r.height, id);
     note('pixels', r.width * r.height, id);
     note('imageBytes', r.width * r.height * 4, id);
+    note('totalImage', r.width * r.height * 4, id);
   } else if ((ext === '.tif' || ext === '.tiff') && isTiff(data)) {
     const frames = step(id, 'TIFF page count', () => getTiffPageCount(data));
     if (frames !== undefined) note('frames', frames, id);
+    const total = await stepAsync(id, 'TIFF total', () =>
+      leastLimit('maxTotalImageBytes', (limits) => {
+        decodeTiffAll(data, { limits });
+      }),
+    );
+    if (total !== undefined) note('totalImage', total, id);
   }
 }
 
-function measureFontFile(path: string, id: string): void {
+async function measureFontFile(path: string, id: string): Promise<void> {
   let data: Uint8Array = new Uint8Array(readFileSync(path));
   if (isWoff(data)) {
     const sfnt = step(id, 'WOFF decode', () => decodeWoff(data));
     if (sfnt === undefined) return;
+    const total = await stepAsync(id, 'WOFF total', () =>
+      leastLimit('maxTotalDecodedBytes', (limits) => {
+        decodeWoff(data, { limits });
+      }),
+    );
+    if (total !== undefined) note('totalDecoded', total, id);
     data = sfnt;
   }
   note('fontBytes', data.length, id);
@@ -607,7 +814,7 @@ describe('limits headroom over tests/fixtures', () => {
   afterAll(() => {
     const lines = QUANTITIES.map((q) => {
       const best = maxima.get(q.id)!;
-      const limit = INTERNAL_LIMITS[q.limit];
+      const limit = DEFAULT_LIMITS[q.limit];
       return `${q.label.padEnd(46)} max ${String(best.value).padStart(10)}  limit ${String(limit).padStart(10)}  ratio ${(best.value / limit).toExponential(2)}  (${best.file})`;
     });
     const summary = `${counts.pdfs} PDFs (${counts.loaded} loaded, ${counts.pages} pages, ${counts.streams} streams, ${counts.decodes} filter outputs), ${imageFiles.length} image files, ${fontFiles.length} font files, ${counts.steps} steps, ${counts.unsupported} UnsupportedFilterError`;
@@ -637,19 +844,23 @@ describe('limits headroom over tests/fixtures', () => {
   });
 
   describe.each(imageFiles.map((p) => [rel(p), p] as const))('%s', (id, path) => {
-    test('decodes within the limits', () => {
-      measureImageFile(path, id);
-    });
+    test('decodes within the limits', async () => {
+      await measureImageFile(path, id);
+    }, 60_000);
   });
 
   describe.each(fontFiles.map((p) => [rel(p), p] as const))('%s', (id, path) => {
-    test('parses within the limits', () => {
-      measureFontFile(path, id);
-    });
+    test('parses within the limits', async () => {
+      await measureFontFile(path, id);
+    }, 60_000);
   });
 
   test('no step threw ResourceLimitError', () => {
     expect(limitErrors).toEqual([]);
+  });
+
+  test('the real calls confirm the counted totals', () => {
+    expect(mismatches).toEqual([]);
   });
 
   test('the walk measured something', () => {
@@ -670,6 +881,10 @@ describe('limits headroom over tests/fixtures', () => {
       'pixels',
       'imageBytes',
       'fontBytes',
+      'totalDecoded',
+      'totalCmap',
+      'totalImage',
+      'pageOps',
     ]) {
       expect(maxima.get(id)!.value, `${id} was never measured`).toBeGreaterThan(0);
     }
@@ -680,7 +895,7 @@ describe('limits headroom over tests/fixtures', () => {
     (_label, q) => {
       const best = maxima.get(q.id)!;
       expect(best.value, `${q.label}: ${best.value} in ${best.file}`).toBeLessThanOrEqual(
-        INTERNAL_LIMITS[q.limit] / HEADROOM,
+        DEFAULT_LIMITS[q.limit] / HEADROOM,
       );
     },
   );
