@@ -10,7 +10,7 @@
  */
 
 import { InvalidArgumentError, UnencodableTextError } from '../errors.js';
-import { latin1Bytes } from '../internal/latin1.js';
+import { latin1Bytes, latin1String } from '../internal/latin1.js';
 import { decodeTextString, encodeTextString, textStringEncoding } from './internal/textString.js';
 
 // ---------------------------------------------------------------------------
@@ -38,18 +38,6 @@ export interface ByteWriter {
 // ---------------------------------------------------------------------------
 
 const encoder = new TextEncoder();
-
-/** Code units per String.fromCharCode call, well below every engine's argument limit. */
-const BYTE_STRING_CHUNK = 0x2000;
-
-/** The bytes as a byte string, one code unit per byte, built in chunks so any length fits. */
-function byteStringOf(bytes: Uint8Array): string {
-  let out = '';
-  for (let i = 0; i < bytes.length; i += BYTE_STRING_CHUNK) {
-    out += String.fromCharCode(...bytes.subarray(i, i + BYTE_STRING_CHUNK));
-  }
-  return out;
-}
 
 /** PDF white space (ISO 32000-2 Table 1): NUL, TAB, LF, FF, CR and SPACE. */
 const PDF_WHITE_SPACE = /[\0\t\n\f\r ]/g;
@@ -222,7 +210,7 @@ export class PdfString {
    *   `"pdfdoc"` text whose bytes would begin with FE FF, FF FE or EF BB BF (argument `encoding`).
    */
   static fromText(text: string, encoding: PdfTextWriteEncoding = 'auto'): PdfString {
-    return new PdfString(byteStringOf(encodeTextString(text, encoding)), false);
+    return new PdfString(latin1String(encodeTextString(text, encoding)), false);
   }
 
   /**
@@ -254,7 +242,7 @@ export class PdfString {
         { argument: 'form' },
       );
     }
-    return new PdfString(byteStringOf(bytes), form === 'hex');
+    return new PdfString(latin1String(bytes), form === 'hex');
   }
 
   /**
@@ -272,7 +260,7 @@ export class PdfString {
       );
     }
     const even = compact.length % 2 === 0 ? compact : `${compact}0`;
-    return new PdfString(byteStringOf(Uint8Array.fromHex(even)), true);
+    return new PdfString(latin1String(Uint8Array.fromHex(even)), true);
   }
 
   /** The unsigned byte order of the two byte sequences, as name-tree keys sort (7.9.6). */
@@ -434,7 +422,7 @@ export class PdfName {
         argument: 'bytes',
       });
     }
-    return makePdfName(`/${byteStringOf(bytes)}`);
+    return makePdfName(`/${latin1String(bytes)}`);
   }
 
   /** A new array holding the name bytes, without the leading "/". */

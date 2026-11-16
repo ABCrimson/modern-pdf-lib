@@ -36,3 +36,22 @@ export function latin1Bytes(str: string): Uint8Array<ArrayBuffer> {
   }
   return bytes;
 }
+
+/** Code units per `String.fromCharCode` call, well below every engine's argument limit. */
+const CHUNK = 0x2000;
+
+/**
+ * The PDF byte string of some bytes: each byte is one code unit of the same
+ * value, so `latin1String(Uint8Array.of(0xE9))` is `'é'`. The inverse of
+ * {@link latin1Bytes}. The string is built in chunks, so any length fits.
+ *
+ * @param bytes - The bytes; a view covers only the part of its buffer it spans.
+ * @returns     A string of `bytes.length` code units, each U+0000 to U+00FF.
+ */
+export function latin1String(bytes: Uint8Array): string {
+  let out = '';
+  for (let i = 0; i < bytes.length; i += CHUNK) {
+    out += String.fromCharCode(...bytes.subarray(i, i + CHUNK));
+  }
+  return out;
+}

@@ -12,6 +12,7 @@
  */
 
 import { PdfParseError } from '../parseError.js';
+import { latin1String } from '../../internal/latin1.js';
 
 // ---------------------------------------------------------------------------
 // Token types
@@ -180,18 +181,6 @@ const hexVal: Int8Array = /* @__PURE__ */ (() => {
   }
   return t;
 })();
-
-/** Code units per String.fromCharCode call, well below every engine's argument limit. */
-const BYTE_STRING_CHUNK = 0x2000;
-
-/** The bytes as a byte string, one code unit per byte, built in chunks so any length fits. */
-function byteString(bytes: Uint8Array): string {
-  let out = '';
-  for (let i = 0; i < bytes.length; i += BYTE_STRING_CHUNK) {
-    out += String.fromCharCode(...bytes.subarray(i, i + BYTE_STRING_CHUNK));
-  }
-  return out;
-}
 
 // ---------------------------------------------------------------------------
 // PdfLexer
@@ -727,7 +716,7 @@ export class PdfLexer {
     this.position = pos;
     return {
       type: TokenType.HexString,
-      value: byteString(bytes.subarray(0, count)),
+      value: latin1String(bytes.subarray(0, count)),
       offset: startPos,
     };
   }

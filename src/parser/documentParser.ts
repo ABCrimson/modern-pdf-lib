@@ -54,6 +54,7 @@ import { contentsLeftAsStored } from '../crypto/internal/signatureContents.js';
 import { PdfParseError } from './parseError.js';
 import { ResourceLimitError, UnsupportedEncryptionError } from '../errors.js';
 import { assertWithinLimit } from '../internal/limits.js';
+import { latin1String } from '../internal/latin1.js';
 
 // ---------------------------------------------------------------------------
 // Public interfaces
@@ -141,15 +142,6 @@ function numVal(obj: PdfObject | undefined): number | undefined {
     return (obj as PdfNumber).value;
   }
   return undefined;
-}
-
-/** Bytes as a string of one code unit per byte (the form the lexer gives string values). */
-function latin1String(bytes: Uint8Array): string {
-  let out = '';
-  for (let i = 0; i < bytes.length; i += 0x2000) {
-    out += String.fromCharCode(...bytes.subarray(i, i + 0x2000));
-  }
-  return out;
 }
 
 /** How many strings of one object the decryption pass decrypts at a time. */
