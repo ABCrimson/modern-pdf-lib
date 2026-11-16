@@ -29,7 +29,7 @@ import type { PdfObjectParser } from './objectParser.js';
 import { decodeFlateOnly, firstFilterName } from '../../codecs/streamDecode.js';
 import { PdfParseError } from '../parseError.js';
 import { ResourceLimitError } from '../../errors.js';
-import { beginCall, resolveLimits, type LimitContext } from '../../internal/limits.js';
+import { legacyContext, type LimitContext } from '../../internal/limits.js';
 
 // ---------------------------------------------------------------------------
 // Public interfaces
@@ -235,7 +235,7 @@ export class XrefParser {
   constructor(
     data: Uint8Array,
     objectParser: PdfObjectParser,
-    ctx: LimitContext = beginCall(resolveLimits(undefined)),
+    ctx: LimitContext = legacyContext(),
   ) {
     this.data = data;
     this.objectParser = objectParser;

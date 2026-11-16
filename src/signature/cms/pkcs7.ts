@@ -38,7 +38,7 @@
  * @packageDocumentation
  */
 
-import { assertLimit, beginCall, resolveLimits, type LimitContext } from '../../internal/limits.js';
+import { assertLimit, legacyContext, type LimitContext } from '../../internal/limits.js';
 import {
   EnvironmentError,
   InvalidArgumentError,
@@ -540,7 +540,7 @@ interface Asn1Node {
  * @param offset  Where the value's tag byte is.
  */
 function parseDerTlv(data: Uint8Array, offset: number): Asn1Node {
-  return parseDerTlvAt(beginCall(resolveLimits(undefined)), data, offset, 0);
+  return parseDerTlvAt(legacyContext(), data, offset, 0);
 }
 
 /**
