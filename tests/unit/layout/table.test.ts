@@ -860,6 +860,63 @@ describe('drawTable shows text in the fonts registered on its page', () => {
     expect(page.getContentStreamData()).toContain(showTextHex(font.encodeText('Ωmega')));
   });
 
+  it('aligns a cell by the widths of the font registered under its fontName', async () => {
+    const doc = createPdf();
+    const page = doc.addPage();
+    const helv = await doc.embedFont(StandardFonts.Helvetica);
+    page.drawTable({
+      x: 50,
+      y: 700,
+      width: 100,
+      fontName: helv.name,
+      rows: [{ cells: [{ content: 'WWWW', align: 'right' }] }],
+    });
+    const td = /(\S+) \S+ Td\n/.exec(page.getContentStreamData());
+    expect(Number(td?.[1])).toBeCloseTo(50 + 100 - 4 - helv.widthOfTextAtSize('WWWW', 12), 5);
+  });
+
+  it('aligns text runs by the widths of the fonts their fontName names', async () => {
+    const doc = createPdf();
+    const page = doc.addPage();
+    const helv = await doc.embedFont(StandardFonts.Helvetica);
+    page.drawTable({
+      x: 50,
+      y: 700,
+      width: 100,
+      rows: [
+        {
+          cells: [
+            {
+              content: [
+                { text: 'WW', fontName: helv.name },
+                { text: 'WW', fontName: helv.name },
+              ],
+              align: 'right',
+            },
+          ],
+        },
+      ],
+    });
+    const td = /(\S+) \S+ Td\n/.exec(page.getContentStreamData());
+    expect(Number(td?.[1])).toBeCloseTo(50 + 100 - 4 - 2 * helv.widthOfTextAtSize('WW', 12), 5);
+  });
+
+  it('wraps a cell at the widths of the font registered under its fontName', async () => {
+    const doc = createPdf();
+    const page = doc.addPage();
+    const helv = await doc.embedFont(StandardFonts.Helvetica);
+    // 9 characters estimate to 54 pt; the glyphs are about 94 pt, past the 92 pt of content.
+    const result = page.drawTable({
+      x: 50,
+      y: 700,
+      width: 100,
+      fontName: helv.name,
+      rows: [{ cells: [{ content: 'WWWW WWWW', overflow: 'wrap' }] }],
+    });
+    expect(page.getContentStreamData().match(/\(WWWW\) Tj\n/g)).toHaveLength(2);
+    expect(result.rowHeights[0]).toBeCloseTo(4 + 4 + 2 * 12 * 1.2, 5);
+  });
+
   it('encodes a name no font on the page carries by standard font name, else WinAnsi', () => {
     const page = new PdfPage(PageSizes.A4[0], PageSizes.A4[1], new PdfObjectRegistry());
     page.drawTable({ x: 0, y: 700, width: 200, fontName: 'Symbol', rows: [{ cells: ['αβ'] }] });

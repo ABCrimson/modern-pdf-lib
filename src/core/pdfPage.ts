@@ -2329,6 +2329,11 @@ export class PdfPage {
    * encodes as the standard font of that name (`Helvetica`, or an AcroForm
    * alias such as `ZaDb`), any other name in WinAnsiEncoding.
    *
+   * Alignment, wrapping, ellipsis and shrinking measure text with the
+   * widths of the font registered under its name; a name of no font on
+   * this page is measured at an estimate of half the font size per
+   * character. Column widths are sized on that estimate for every font.
+   *
    * @param options  Table configuration: position, size, rows, columns,
    *                 fonts, colours, borders, and padding.
    * @returns        A {@link TableRenderResult} with the computed
@@ -2351,11 +2356,16 @@ export class PdfPage {
    * ```
    */
   drawTable(options: DrawTableOptions): TableRenderResult {
-    const { ops, result } = renderTableWithFonts(options, (fontName, text) => {
-      const registered = this.fontEncoders.get(fontName);
-      if (registered === undefined) return showText(encodeTextForFontName(fontName, text));
-      const codes = registered.font.encodeText(text);
-      return registered.hexOperands ? showTextHex(codes) : showText(codes);
+    const { ops, result } = renderTableWithFonts(options, {
+      show: (fontName, text) => {
+        const registered = this.fontEncoders.get(fontName);
+        if (registered === undefined) return showText(encodeTextForFontName(fontName, text));
+        const codes = registered.font.encodeText(text);
+        return registered.hexOperands ? showTextHex(codes) : showText(codes);
+      },
+      width: (fontName, text, size) =>
+        this.fontEncoders.get(fontName)?.font.widthOfTextAtSize(text, size) ??
+        text.length * size * 0.5,
     });
     this.ops += ops;
     return result;

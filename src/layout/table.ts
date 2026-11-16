@@ -346,9 +346,9 @@ export function resolveColumnWidths(options: DrawTableOptions): number[] {
 function computeNestedTableHeight(
   nested: NestedTableContent,
   width: number,
-  show: ShowTextInFont,
+  fonts: TableFonts,
 ): number {
-  const { result } = renderTableWithFonts({ ...nested.table, x: 0, y: 0, width }, show);
+  const { result } = renderTableWithFonts({ ...nested.table, x: 0, y: 0, width }, fonts);
   return result.height;
 }
 
@@ -356,16 +356,22 @@ function computeNestedTableHeight(
 // Text overflow helpers
 // ---------------------------------------------------------------------------
 
-function wrapTextInternal(text: string, maxWidth: number, fontSize: number): string[] {
-  const charWidth = fontSize * 0.5;
-  const maxChars = Math.max(1, Math.floor(maxWidth / charWidth));
+/** The width of `text` at `size` points in one font. */
+type TextWidth = (text: string, size: number) => number;
+
+function wrapTextInternal(
+  text: string,
+  maxWidth: number,
+  fontSize: number,
+  width: TextWidth,
+): string[] {
   const lines: string[] = [];
   const words = text.split(' ');
   let currentLine = '';
 
   for (const word of words) {
     const candidate = currentLine ? currentLine + ' ' + word : word;
-    if (candidate.length > maxChars && currentLine) {
+    if (currentLine && width(candidate, fontSize) > maxWidth) {
       lines.push(currentLine);
       currentLine = word;
     } else {
@@ -376,18 +382,26 @@ function wrapTextInternal(text: string, maxWidth: number, fontSize: number): str
   return lines.length > 0 ? lines : [''];
 }
 
-function truncateWithEllipsis(text: string, maxWidth: number, fontSize: number): string {
-  const charWidth = fontSize * 0.5;
-  const maxChars = Math.max(1, Math.floor(maxWidth / charWidth));
-  if (text.length <= maxChars) return text;
-  const cutoff = Math.max(0, maxChars - 3);
+function truncateWithEllipsis(
+  text: string,
+  maxWidth: number,
+  fontSize: number,
+  width: TextWidth,
+): string {
+  if (width(text, fontSize) <= maxWidth) return text;
+  let cutoff = text.length;
+  while (cutoff > 0 && width(text.slice(0, cutoff) + '...', fontSize) > maxWidth) cutoff--;
   return text.slice(0, cutoff) + '...';
 }
 
-function shrinkFontSize(text: string, maxWidth: number, fontSize: number): number {
-  const textWidth = text.length * fontSize * 0.5;
-  if (textWidth <= maxWidth || text.length === 0) return fontSize;
-  const needed = maxWidth / (text.length * 0.5);
+function shrinkFontSize(
+  text: string,
+  maxWidth: number,
+  fontSize: number,
+  width: TextWidth,
+): number {
+  if (text.length === 0 || width(text, fontSize) <= maxWidth) return fontSize;
+  const needed = maxWidth / width(text, 1);
   return Math.max(4, Math.min(fontSize, needed));
 }
 
@@ -396,8 +410,9 @@ function resolveRowHeights(
   fontSize: number,
   defaultPadding: number,
   colWidths: readonly number[],
-  show: ShowTextInFont,
+  fonts: TableFonts,
 ): number[] {
+  const tableFontName = options.fontName ?? 'Helvetica';
   return options.rows.map((row) => {
     if (row.height) return row.height;
     let maxHeight = defaultPadding * 2 + fontSize;
@@ -415,7 +430,7 @@ function resolveRowHeights(
 
       if (isNestedTable(c.content)) {
         const nestedWidth = cellWidth - p.left - p.right;
-        const nestedHeight = computeNestedTableHeight(c.content, Math.max(0, nestedWidth), show);
+        const nestedHeight = computeNestedTableHeight(c.content, Math.max(0, nestedWidth), fonts);
         const h = p.top + p.bottom + nestedHeight;
         if (h > maxHeight) maxHeight = h;
       } else {
@@ -424,7 +439,9 @@ function resolveRowHeights(
 
         if (c.overflow === 'wrap' && contentText) {
           const contentWidth = cellWidth - p.left - p.right;
-          const lines = wrapTextInternal(contentText, contentWidth, cellFontSize);
+          const lines = wrapTextInternal(contentText, contentWidth, cellFontSize, (text, size) =>
+            fonts.width(tableFontName, text, size),
+          );
           const lineHeight = cellFontSize * 1.2;
           const h = p.top + p.bottom + lines.length * lineHeight;
           if (h > maxHeight) maxHeight = h;
@@ -508,7 +525,7 @@ function renderPlainTextOps(
   cellWidth: number,
   cellHeight: number,
   fontName: string,
-  show: ShowTextInFont,
+  fonts: TableFonts,
   fontSize: number,
   padding: { top: number; right: number; bottom: number; left: number },
   textColor: Color,
@@ -521,9 +538,10 @@ function renderPlainTextOps(
   const verticalAlign = cell.verticalAlign ?? 'top';
   const contentWidth = cellWidth - padding.left - padding.right;
   const overflow = cell.overflow ?? 'truncate';
+  const width: TextWidth = (t, size) => fonts.width(fontName, t, size);
 
   if (overflow === 'wrap') {
-    const lines = wrapTextInternal(text, contentWidth, cellFontSize);
+    const lines = wrapTextInternal(text, contentWidth, cellFontSize, width);
     const lineHeight = cellFontSize * 1.2;
 
     let startY: number;
@@ -540,12 +558,12 @@ function renderPlainTextOps(
     ops += applyFillColor(cellTextColor);
     for (let li = 0; li < lines.length; li++) {
       const line = lines[li]!;
-      const approxLineWidth = line.length * cellFontSize * 0.5;
+      const lineWidth = width(line, cellFontSize);
       let textX: number;
       if (align === 'center') {
-        textX = cellX + padding.left + Math.max(0, contentWidth - approxLineWidth) / 2;
+        textX = cellX + padding.left + Math.max(0, contentWidth - lineWidth) / 2;
       } else if (align === 'right') {
-        textX = cellX + cellWidth - padding.right - approxLineWidth;
+        textX = cellX + cellWidth - padding.right - lineWidth;
       } else {
         textX = cellX + padding.left;
       }
@@ -553,7 +571,7 @@ function renderPlainTextOps(
       ops += beginText();
       ops += setFont(fontName, cellFontSize);
       ops += moveText(textX, textY);
-      ops += show(fontName, line);
+      ops += fonts.show(fontName, line);
       ops += endText();
     }
     ops += restoreState();
@@ -561,18 +579,18 @@ function renderPlainTextOps(
     let displayText = text;
 
     if (overflow === 'ellipsis') {
-      displayText = truncateWithEllipsis(text, contentWidth, cellFontSize);
+      displayText = truncateWithEllipsis(text, contentWidth, cellFontSize, width);
     } else if (overflow === 'shrink') {
-      cellFontSize = shrinkFontSize(text, contentWidth, cellFontSize);
+      cellFontSize = shrinkFontSize(text, contentWidth, cellFontSize, width);
     }
 
-    const approxTextWidth = displayText.length * cellFontSize * 0.5;
+    const textWidth = width(displayText, cellFontSize);
 
     let textX: number;
     if (align === 'center') {
-      textX = cellX + padding.left + Math.max(0, contentWidth - approxTextWidth) / 2;
+      textX = cellX + padding.left + Math.max(0, contentWidth - textWidth) / 2;
     } else if (align === 'right') {
-      textX = cellX + cellWidth - padding.right - approxTextWidth;
+      textX = cellX + cellWidth - padding.right - textWidth;
     } else {
       textX = cellX + padding.left;
     }
@@ -598,7 +616,7 @@ function renderPlainTextOps(
     ops += beginText();
     ops += setFont(fontName, cellFontSize);
     ops += moveText(textX, textY);
-    ops += show(fontName, displayText);
+    ops += fonts.show(fontName, displayText);
     ops += endText();
     ops += restoreState();
   }
@@ -613,7 +631,7 @@ function renderCellOps(
   cellWidth: number,
   cellHeight: number,
   fontName: string,
-  show: ShowTextInFont,
+  fonts: TableFonts,
   fontSize: number,
   defaultPadding: number,
   borderWidth: number,
@@ -653,7 +671,7 @@ function renderCellOps(
         y: nestedY,
         width: Math.max(0, nestedWidth),
       },
-      show,
+      fonts,
     );
     ops += nestedOps;
   } else if (isTextRunArray(content)) {
@@ -662,14 +680,17 @@ function renderCellOps(
       const cellFontSize = cell.fontSize ?? fontSize;
       const align = cell.align ?? colDef?.align ?? 'left';
       const verticalAlign = cell.verticalAlign ?? 'top';
-      const approxTextWidth = estimateContentWidth(content, cellFontSize);
+      let textWidth = 0;
+      for (const run of content) {
+        textWidth += fonts.width(run.fontName ?? fontName, run.text, run.fontSize ?? cellFontSize);
+      }
       const contentWidth = cellWidth - padding.left - padding.right;
 
       let textXPos: number;
       if (align === 'center') {
-        textXPos = cellX + padding.left + Math.max(0, contentWidth - approxTextWidth) / 2;
+        textXPos = cellX + padding.left + Math.max(0, contentWidth - textWidth) / 2;
       } else if (align === 'right') {
-        textXPos = cellX + cellWidth - padding.right - approxTextWidth;
+        textXPos = cellX + cellWidth - padding.right - textWidth;
       } else {
         textXPos = cellX + padding.left;
       }
@@ -690,7 +711,7 @@ function renderCellOps(
         ops += applyFillColor(run.color ?? cellTextColor);
         const runFont = run.fontName ?? fontName;
         ops += setFont(runFont, run.fontSize ?? cellFontSize);
-        ops += show(runFont, run.text);
+        ops += fonts.show(runFont, run.text);
       }
       ops += endText();
       ops += restoreState();
@@ -706,7 +727,7 @@ function renderCellOps(
         cellWidth,
         cellHeight,
         fontName,
-        show,
+        fonts,
         fontSize,
         padding,
         textColor,
@@ -722,25 +743,32 @@ function renderCellOps(
 // Core renderer
 // ---------------------------------------------------------------------------
 
-/**
- * Writes the operator that shows `text` in the font with the resource name
- * `fontName`, with its line end.
- */
-export type ShowTextInFont = (fontName: string, text: string) => string;
+/** The fonts of a table, known by resource name. */
+export interface TableFonts {
+  /** The operator that shows `text` in the font `fontName`, with its line end. */
+  show(fontName: string, text: string): string;
+  /** The width of `text` at `size` points in the font `fontName`. */
+  width(fontName: string, text: string, size: number): number;
+}
 
 /**
- * Shows text in the font its name stands for, without a font object: a
- * standard font name or AcroForm alias in the encoding of that font, any
- * other name in WinAnsiEncoding.
+ * The fonts of a table without font objects: text in the font its name
+ * stands for (a standard font name or AcroForm alias in the encoding of
+ * that font, any other name in WinAnsiEncoding), measured at an estimate of
+ * half the font size per character.
  */
-const showByFontName: ShowTextInFont = (fontName, text) =>
-  showText(encodeTextForFontName(fontName, text));
+const byName: TableFonts = {
+  show: (fontName, text) => showText(encodeTextForFontName(fontName, text)),
+  width: (_fontName, text, size) => text.length * size * 0.5,
+};
 
 /**
  * Render a table as content-stream operators. Its fonts are known by name
  * only: `fontName` and the `fontName` of a text run encode as a standard
- * font name or AcroForm alias does, any other name in WinAnsiEncoding.
- * `PdfPage.drawTable` encodes through the fonts registered on its page.
+ * font name or AcroForm alias does, any other name in WinAnsiEncoding, and
+ * text is measured at an estimate of half the font size per character.
+ * `PdfPage.drawTable` encodes and measures through the fonts registered on
+ * its page.
  *
  * @throws {UnencodableTextError} At the first character of a cell that its
  *   font cannot encode.
@@ -749,16 +777,17 @@ export function renderTable(options: DrawTableOptions): {
   ops: string;
   result: TableRenderResult;
 } {
-  return renderTableWithFonts(options, showByFontName);
+  return renderTableWithFonts(options, byName);
 }
 
 /**
- * {@link renderTable} with the text shown through `show`, which knows the
- * fonts of a page by resource name. No package entry exports it.
+ * {@link renderTable} with the text shown and measured through `fonts`,
+ * which knows the fonts of a page by resource name. Column widths stay on
+ * the estimate of {@link resolveColumnWidths}. No package entry exports it.
  */
 export function renderTableWithFonts(
   options: DrawTableOptions,
-  show: ShowTextInFont,
+  fonts: TableFonts,
 ): {
   ops: string;
   result: TableRenderResult;
@@ -773,7 +802,7 @@ export function renderTableWithFonts(
   const headerRows = options.headerRows ?? 0;
   const colWidths = resolveColumnWidths(options);
   const numCols = colWidths.length;
-  const rowHeights = resolveRowHeights(options, fontSize, defaultPadding, colWidths, show);
+  const rowHeights = resolveRowHeights(options, fontSize, defaultPadding, colWidths, fonts);
   const grid = buildOccupationGrid(options.rows, numCols);
 
   let ops = saveState();
@@ -829,7 +858,7 @@ export function renderTableWithFonts(
         cellWidth,
         cellHeight,
         fontName,
-        show,
+        fonts,
         fontSize,
         defaultPadding,
         borderWidth,
@@ -879,12 +908,12 @@ export function renderMultiPageTable(
   const borderColor: Color = options.borderColor ?? ({ type: 'grayscale', gray: 0 } as const);
   const textColor: Color = options.textColor ?? ({ type: 'grayscale', gray: 0 } as const);
   const fontName = options.fontName ?? 'Helvetica';
-  const show = showByFontName;
+  const fonts = byName;
   const headerRowCount = options.headerRows ?? 0;
 
   const colWidths = resolveColumnWidths(options);
   const numCols = colWidths.length;
-  const rowHeights = resolveRowHeights(options, fontSize, defaultPadding, colWidths, show);
+  const rowHeights = resolveRowHeights(options, fontSize, defaultPadding, colWidths, fonts);
   const grid = buildOccupationGrid(options.rows, numCols);
 
   const pages: PageContent[] = [];
@@ -926,7 +955,7 @@ export function renderMultiPageTable(
           cellWidth,
           cellHeight,
           fontName,
-          show,
+          fonts,
           fontSize,
           defaultPadding,
           borderWidth,
@@ -988,7 +1017,7 @@ export function renderMultiPageTable(
         cellWidth,
         cellHeight,
         fontName,
-        show,
+        fonts,
         fontSize,
         defaultPadding,
         borderWidth,
