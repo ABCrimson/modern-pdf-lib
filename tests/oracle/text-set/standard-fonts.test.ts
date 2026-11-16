@@ -8,7 +8,10 @@
  * end of a line is moved one place inward.
  *
  * The first test writes the codes of the fixture with the `<hex> Tj` operator and so checks the
- * stated readings against pdf.js; the second writes the same lines with `drawText`.
+ * stated readings against pdf.js; the second writes the same lines with `drawText`. pdf.js reads a
+ * ZapfDingbats code as the character of the same number, so neither test checks the Unicode
+ * column of zapfDingbatsEncoding in annex-d.json; that column is checked against Adobe's glyph list
+ * for the font in tests/unit/assets/font/internal/zapfDingbatsGlyphList.test.ts.
  */
 import { readFileSync } from 'node:fs';
 import { beforeEach, describe, expect, test } from 'vitest';
