@@ -35,7 +35,7 @@
  * Reference: PDF 1.7 spec, Appendix F (Linearized PDF).
  */
 
-import { MalformedInputError } from '../../errors.js';
+import { MalformedInputError, UnsupportedFeatureError } from '../../errors.js';
 import { assertUnencryptedInput } from './incrementalWriter.js';
 
 // ---------------------------------------------------------------------------
@@ -1025,6 +1025,9 @@ function serializationPass(
  * @throws {UnsupportedEncryptionError} When the input's bytes contain the name
  *   `/Encrypt`: the output would have no
  *   `/Encrypt` entry while its objects stayed encrypted.
+ * @throws {MalformedInputError} When the bytes have no `startxref`, no object, no catalog, no
+ *   `/Pages` entry in the catalog or no page (`format` is `'pdf'`).
+ * @throws {UnsupportedFeatureError} When the cross-reference data of the file is a stream.
  */
 export async function linearizePdf(
   pdfBytes: Uint8Array,
@@ -1046,6 +1049,14 @@ export async function linearizePdf(
   const startXref = findStartXref(pdfBytes);
   if (startXref < 0) {
     throw new MalformedInputError('Cannot linearize: no startxref found', { format: 'pdf' });
+  }
+
+  // A cross-reference stream (ISO 32000-2 7.5.8) starts with "N G obj"; only a table is read.
+  const atStartXref = decoder.decode(pdfBytes.subarray(startXref, startXref + 32));
+  if (/^\d+\s+\d+\s+obj\b/.test(atStartXref)) {
+    throw new UnsupportedFeatureError(
+      'Cannot linearize: the file uses a cross-reference stream, which linearizePdf does not read',
+    );
   }
 
   let xrefResult: ReturnType<typeof parseXrefTable>;

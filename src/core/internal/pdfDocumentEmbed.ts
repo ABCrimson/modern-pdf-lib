@@ -189,13 +189,17 @@ export function parseJpegDimensions(data: Uint8Array): {
       (marker >= 0xcd && marker <= 0xcf)
     ) {
       // SOF data: length (2), precision (1), height (2), width (2), components (1)
+      if (offset + 10 > data.length) {
+        throw new MalformedInputError('Invalid JPEG: SOF marker not found', { format: 'jpeg' });
+      }
       const height = view.getUint16(offset + 5, false);
       const width = view.getUint16(offset + 7, false);
       const components = data[offset + 9]!;
       return { width, height, components };
     }
 
-    // Skip this marker segment
+    // Skip this marker segment; a segment cut off before its length ends the search.
+    if (offset + 4 > data.length) break;
     const segmentLength = view.getUint16(offset + 2, false);
     offset += 2 + segmentLength;
   }

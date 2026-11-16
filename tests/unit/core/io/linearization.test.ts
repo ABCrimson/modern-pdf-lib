@@ -35,7 +35,7 @@ import {
   readU32BE,
 } from '../../../../src/core/io/linearization.js';
 import { createPdf } from '../../../../src/core/pdfDocument.js';
-import { MalformedInputError } from '../../../../src/errors.js';
+import { MalformedInputError, UnsupportedFeatureError } from '../../../../src/errors.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -451,7 +451,11 @@ describe('linearizePdf', () => {
   it('should throw for data without startxref', async () => {
     const badPdf = encoder.encode('%PDF-1.7\ngarbage\n');
     await expect(linearizePdf(badPdf)).rejects.toThrow('no startxref');
-    await expect(linearizePdf(badPdf)).rejects.toBeInstanceOf(MalformedInputError);
+    await expect(linearizePdf(badPdf)).rejects.toMatchObject({
+      name: 'MalformedInputError',
+      code: 'malformed-input',
+      format: 'pdf',
+    });
   });
 
   it('should throw for invalid xref table', async () => {
@@ -484,7 +488,18 @@ describe('linearizePdf', () => {
     );
     const result = linearizePdf(badPdf);
     await expect(result).rejects.toThrow('Cannot linearize: no objects found');
-    await expect(result).rejects.toBeInstanceOf(MalformedInputError);
+    await expect(result).rejects.toMatchObject({
+      name: 'MalformedInputError',
+      code: 'malformed-input',
+      format: 'pdf',
+    });
+  });
+
+  it('throws an UnsupportedFeatureError for a file with a cross-reference stream', async () => {
+    const pdf = encoder.encode(
+      '%PDF-1.7\n1 0 obj\n<< /Type /XRef /Size 2 /W [1 1 1] /Length 0 >>\nstream\n\nendstream\nendobj\nstartxref\n9\n%%EOF\n',
+    );
+    await expect(linearizePdf(pdf)).rejects.toBeInstanceOf(UnsupportedFeatureError);
   });
 });
 

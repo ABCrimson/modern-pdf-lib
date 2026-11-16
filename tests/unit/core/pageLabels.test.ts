@@ -40,16 +40,6 @@ import type { PageLabelRange, PageLabelStyle } from '../../../src/core/pageLabel
 // Helpers
 // ---------------------------------------------------------------------------
 
-/** The error `fn` throws; fails the test when it does not throw. */
-function thrownBy(fn: () => unknown): unknown {
-  try {
-    fn();
-  } catch (error) {
-    return error;
-  }
-  throw new Error('expected the call to throw');
-}
-
 function createDocWithPages(n: number) {
   const doc = createPdf();
   for (let i = 0; i < n; i++) {
@@ -194,11 +184,8 @@ describe('setPageLabels validation', () => {
     expect(() => setPageLabels(doc, [{ startPage: -1, style: 'decimal' }])).toThrow(
       'startPage must be non-negative',
     );
-    expect(thrownBy(() => setPageLabels(doc, [{ startPage: -1, style: 'decimal' }]))).toMatchObject(
-      {
-        code: 'invalid-argument',
-        argument: 'labels',
-      },
+    expect(() => setPageLabels(doc, [{ startPage: -1, style: 'decimal' }])).toThrow(
+      expect.objectContaining({ code: 'invalid-argument', argument: 'labels' }),
     );
   });
 
@@ -209,6 +196,9 @@ describe('setPageLabels validation', () => {
     );
     expect(() => setPageLabels(doc, [{ startPage: 0, style: 'decimal', start: -5 }])).toThrow(
       'start must be non-negative',
+    );
+    expect(() => setPageLabels(doc, [{ startPage: 0, style: 'decimal', start: -5 }])).toThrow(
+      expect.objectContaining({ code: 'invalid-argument', argument: 'labels' }),
     );
   });
 

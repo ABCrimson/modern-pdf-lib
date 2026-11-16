@@ -82,6 +82,7 @@ describe('insertPage', () => {
     expect(() => insertPage(doc, -1)).toThrow(InvalidArgumentError);
     expect(() => insertPage(doc, 3)).toThrow(InvalidArgumentError);
     expect(() => insertPage(doc, 1.5)).toThrow(InvalidArgumentError);
+    expect(() => insertPage(doc, 3)).toThrow(expect.objectContaining({ argument: 'index' }));
   });
 
   it('inserts into an empty document', () => {
@@ -130,6 +131,7 @@ describe('removePage', () => {
     expect(() => removePage(doc, -1)).toThrow(InvalidArgumentError);
     expect(() => removePage(doc, 2)).toThrow(InvalidArgumentError);
     expect(() => removePage(doc, 0.5)).toThrow(InvalidArgumentError);
+    expect(() => removePage(doc, 2)).toThrow(expect.objectContaining({ argument: 'index' }));
   });
 });
 
@@ -383,6 +385,9 @@ describe('removePages', () => {
   it('throws if any index is out of range', () => {
     const doc = createDocWithPages(3);
     expect(() => removePages(doc, [0, 5])).toThrow(InvalidArgumentError);
+    expect(() => removePages(doc, [0, 5])).toThrow(
+      expect.objectContaining({ argument: 'indices' }),
+    );
   });
 });
 

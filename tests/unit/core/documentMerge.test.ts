@@ -187,6 +187,10 @@ describe('splitPdf', () => {
     const doc = createDocWithContent(3);
     await expect(splitPdf(doc, [[-1, 1]])).rejects.toThrow(InvalidArgumentError);
     await expect(splitPdf(doc, [[3, 3]])).rejects.toThrow(InvalidArgumentError);
+    await expect(splitPdf(doc, [[3, 3]])).rejects.toMatchObject({
+      code: 'invalid-argument',
+      argument: 'ranges',
+    });
   });
 
   it('throws on invalid end index', async () => {

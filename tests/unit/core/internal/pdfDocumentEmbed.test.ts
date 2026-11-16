@@ -117,7 +117,9 @@ describe('pdfDocumentEmbed', () => {
     it('throws for invalid signature bytes', () => {
       const data = new Uint8Array(24).fill(0);
       expect(() => validatePngSignature(data)).toThrow('Invalid PNG: bad signature');
-      expect(() => validatePngSignature(data)).toThrow(MalformedInputError);
+      expect(() => validatePngSignature(data)).toThrow(
+        expect.objectContaining({ name: 'MalformedInputError', format: 'png' }),
+      );
     });
   });
 
@@ -294,6 +296,15 @@ describe('pdfDocumentEmbed', () => {
       const data = new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x02]);
       expect(() => parseJpegDimensions(data)).toThrow('Invalid JPEG: SOF marker not found');
       expect(() => parseJpegDimensions(data)).toThrow(
+        expect.objectContaining({ name: 'MalformedInputError', format: 'jpeg' }),
+      );
+    });
+
+    it.each([
+      ['SOI then EOI', [0xff, 0xd8, 0xff, 0xd9]],
+      ['a cut-off SOF segment', [0xff, 0xd8, 0xff, 0xc0, 0x00, 0x11, 0x08]],
+    ])('throws a MalformedInputError for %s', (_label, bytes) => {
+      expect(() => parseJpegDimensions(new Uint8Array(bytes))).toThrow(
         expect.objectContaining({ name: 'MalformedInputError', format: 'jpeg' }),
       );
     });

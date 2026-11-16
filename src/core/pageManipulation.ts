@@ -127,6 +127,7 @@ export interface CropBox {
  *               Must be in the range `[0, pageCount]`.
  * @param size   Optional page size. Defaults to A4.
  * @returns      The newly created PdfPage.
+ * @throws {InvalidArgumentError} If the index is not an integer in `[0, pageCount]`.
  *
  * @example
  * ```ts
@@ -222,8 +223,8 @@ export function movePage(doc: PdfDocument, fromIndex: number, toIndex: number): 
  * @param index  Zero-based index of the page to rotate.
  * @param angle  Rotation angle in degrees. Must be a multiple of 90.
  *               Common values: 90, 180, 270, -90.
- * @throws       {InvalidArgumentError} If the index is out of bounds or the angle is not a
- *               multiple of 90.
+ * @throws {InvalidArgumentError} If the index is out of bounds or the angle is not a
+ *         multiple of 90.
  *
  * @example
  * ```ts
@@ -278,6 +279,7 @@ export function cropPage(doc: PdfDocument, index: number, cropBox: CropBox): voi
  * @param doc    The PdfDocument.
  * @param index  Zero-based page index.
  * @returns      A `{ width, height }` object in PDF points.
+ * @throws {InvalidArgumentError} If the index is out of bounds.
  */
 export function getPageSize(doc: PdfDocument, index: number): { width: number; height: number } {
   const pages = doc.getInternalPages();
@@ -296,6 +298,7 @@ export function getPageSize(doc: PdfDocument, index: number): { width: number; h
  * @param doc    The PdfDocument to modify.
  * @param index  Zero-based page index.
  * @param size   New page size.
+ * @throws {InvalidArgumentError} If the index is out of bounds.
  */
 export function resizePage(doc: PdfDocument, index: number, size: PageSize): void {
   const pages = doc.getInternalPages();
