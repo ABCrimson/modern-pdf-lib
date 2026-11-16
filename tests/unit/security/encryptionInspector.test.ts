@@ -14,6 +14,10 @@ import { ResourceLimitError } from '../../../src/errors.js';
 import { encryptedFileWithXrefStream, zlibOf } from '../../adversarial/load-limits.bodies.js';
 import { createPdf } from '../../../src/core/pdfDocument.js';
 import {
+  computeEncryptionKeyR2R4,
+  computeUserPasswordR3R4,
+} from '../../../src/crypto/keyDerivation.js';
+import {
   inspectEncryption,
   type EncryptionReport,
 } from '../../../src/security/encryptionInspector.js';
@@ -213,4 +217,47 @@ describe('inspectEncryption — internal limits', () => {
     expect(error).toBeInstanceOf(ResourceLimitError);
     expect(error).toMatchObject({ limit: 'maxDecodedStreamBytes', max: 256 * 1024 * 1024 });
   }, 60_000);
+});
+
+// ---------------------------------------------------------------------------
+// String bytes
+// ---------------------------------------------------------------------------
+
+describe('inspectEncryption — string bytes', () => {
+  // A hex /O whose bytes are all hex-digit characters (32 "A" bytes, written <4141...>) is
+  // those 32 bytes, not 16 bytes of 0xAA read from the characters a second time. The /U is
+  // computed for the empty user password from the 32 bytes, so only the right reading matches.
+  it('reads a hex /O whose bytes are hex-digit characters as those bytes', async () => {
+    const id = new Uint8Array(16).fill(0x11);
+    const ownerKey = new Uint8Array(32).fill(0x41);
+    const values = {
+      version: 2,
+      revision: 3,
+      keyLength: 128,
+      ownerKey,
+      userKey: new Uint8Array(32),
+      permissions: -4,
+      encryptMetadata: true,
+    };
+    const userKey = computeUserPasswordR3R4(computeEncryptionKeyR2R4('', values, id), id);
+    const objects = [
+      '1 0 obj\n<</Type/Catalog/Pages 2 0 R>>\nendobj\n',
+      '2 0 obj\n<</Type/Pages/Kids[]/Count 0>>\nendobj\n',
+      `3 0 obj\n<</Filter/Standard/V 2/R 3/Length 128/P -4/O <${ownerKey.toHex()}>/U <${userKey.toHex()}>>>\nendobj\n`,
+    ];
+    const header = '%PDF-1.7\n';
+    const offsets: number[] = [];
+    let offset = header.length;
+    for (const object of objects) {
+      offsets.push(offset);
+      offset += object.length;
+    }
+    const xref = `xref\n0 4\n0000000000 65535 f \n${offsets.map((o) => `${String(o).padStart(10, '0')} 00000 n \n`).join('')}`;
+    const trailer = `trailer\n<</Size 4/Root 1 0 R/Encrypt 3 0 R/ID[<${id.toHex()}><${id.toHex()}>]>>\nstartxref\n${offset}\n%%EOF\n`;
+    const file = new TextEncoder().encode(header + objects.join('') + xref + trailer);
+
+    const report = await inspectEncryption(file);
+    expect(report.revision).toBe(3);
+    expect(report.emptyUserPassword).toBe(true);
+  });
 });

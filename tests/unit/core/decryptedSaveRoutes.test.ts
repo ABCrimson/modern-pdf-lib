@@ -17,7 +17,9 @@
  * Sources: tests/fixtures/encrypted/aes-128-r4.pdf (user password `user`),
  * load/aes-128-r4.empty.pdf (empty user password, opened without one), load/signed-aes-128.pdf
  * (qpdf's AESV2 copy of the signed corpus file, user password `user`) and source.pdf (the
- * unencrypted plaintext of the first two).
+ * unencrypted plaintext of the first two). The string-bytes test also reads rc4-40-r2.pdf,
+ * load/rc4-128-r4.pdf, load/cons-r4-title-c1.pdf, load/cons-r4-title-utf16.pdf and
+ * aes-256-r6.pdf (user password `user` each).
  */
 import { spawnSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
@@ -750,8 +752,9 @@ describe('re-encrypting a decrypted signed document', () => {
 });
 
 /**
- * The bytes, as hex, of each /Title and /Author string of an unencrypted file. The catalog /Lang
- * is left out: a load does not read it, so a save drops it (tests-unit-accessibility-M01).
+ * The bytes, as hex, of the last /Title and the last /Author string found in the registry of an
+ * unencrypted file. The catalog /Lang is left out: a load does not read it, so a save drops it
+ * (tests-unit-accessibility-M01).
  */
 async function textStringBytes(bytes: Uint8Array): Promise<Record<string, string>> {
   const found: Record<string, string> = {};
