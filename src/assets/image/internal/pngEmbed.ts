@@ -29,8 +29,7 @@ import { flateEncode, inflateFlateUpTo } from '../../../codecs/internal/pdfFlate
 import {
   addToTotal,
   assertLimit,
-  beginCall,
-  resolveLimits,
+  legacyContext,
   type LimitContext,
 } from '../../../internal/limits.js';
 import { MalformedInputError, UnsupportedFeatureError } from '../../../errors.js';
@@ -598,10 +597,7 @@ function compressForPdf(data: Uint8Array): Uint8Array {
  * // If result.smaskData is defined, create a second XObject for the SMask.
  * ```
  */
-export function embedPng(
-  pngData: Uint8Array,
-  ctx: LimitContext = beginCall(resolveLimits(undefined)),
-): PngEmbedResult {
+export function embedPng(pngData: Uint8Array, ctx: LimitContext = legacyContext()): PngEmbedResult {
   // 1. Validate signature
   validatePngSignature(pngData);
 
