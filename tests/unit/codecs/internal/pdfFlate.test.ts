@@ -43,6 +43,20 @@ function bytes(view: Uint8Array): Uint8Array {
   return Uint8Array.from(view);
 }
 
+/**
+ * Assert that a read of `inputLength` bytes, whose DEFLATE data ends in its first step, stopped on
+ * the idle-step rule: the step that decodes the data, eight steps that decode nothing and the one
+ * byte that ends the input are 10 pushes, and far fewer bytes than the input holds.
+ */
+function expectReadStopsEarly(
+  push: { readonly mock: { readonly calls: readonly (readonly [Uint8Array, ...unknown[]])[] } },
+  inputLength: number,
+): void {
+  expect(push.mock.calls.length).toBeLessThanOrEqual(10);
+  const pushed = push.mock.calls.reduce((sum, [chunk]) => sum + chunk.length, 0);
+  expect(pushed).toBeLessThan(inputLength / 16);
+}
+
 /** A content stream of the size and shape a page usually carries. */
 function contentStream(lines: number): Uint8Array {
   let text = '';
@@ -290,15 +304,17 @@ describe('inflateRawBounded', () => {
     expect(inflateRawBounded(withEol, 1 << 20)).toEqual(bytes(inflateRawSync(raw)));
   });
 
-  it('reads raw DEFLATE data followed by 16 MiB of other bytes in less than a second', () => {
+  it('reads raw DEFLATE data followed by 16 MiB of other bytes without reading the 16 MiB', () => {
     const raw = bytes(deflateRawSync(encoder.encode('hello world')));
     const data = new Uint8Array(raw.length + 16 * 1024 * 1024).fill(0x41);
     data.set(raw);
-    const start = performance.now();
-    const result = inflateRawBounded(data, 64 * 1024 * 1024);
-    const elapsed = performance.now() - start;
-    expect(result).toEqual(encoder.encode('hello world'));
-    expect(elapsed).toBeLessThan(1000);
+    const push = vi.spyOn(Inflate.prototype, 'push');
+    try {
+      expect(inflateRawBounded(data, 64 * 1024 * 1024)).toEqual(encoder.encode('hello world'));
+      expectReadStopsEarly(push, data.length);
+    } finally {
+      push.mockRestore();
+    }
   });
 
   it('returns undefined when the input starts with 1 MB of empty stored blocks', () => {
@@ -590,7 +606,7 @@ describe('decoded-size limit', () => {
     expect(inflateFlate(cut)).toEqual(bytes(inflateRawSync(cut.subarray(2))));
   });
 
-  it('stops reading at the final block and ignores 16 MiB of bytes after it, in less than a second', () => {
+  it('stops reading at the final block and ignores 16 MiB of bytes after it', () => {
     const zlib = bytes(deflateSync(encoder.encode('hello world')));
     const raw = bytes(deflateRawSync(encoder.encode('hello world')));
     for (const [call, stream] of [
@@ -600,11 +616,13 @@ describe('decoded-size limit', () => {
     ] as const) {
       const data = new Uint8Array(stream.length + 16 * 1024 * 1024).fill(0x41);
       data.set(stream);
-      const start = performance.now();
-      const result = call(data);
-      const elapsed = performance.now() - start;
-      expect(result).toEqual(encoder.encode('hello world'));
-      expect(elapsed).toBeLessThan(1000);
+      const push = vi.spyOn(Inflate.prototype, 'push');
+      try {
+        expect(call(data)).toEqual(encoder.encode('hello world'));
+        expectReadStopsEarly(push, data.length);
+      } finally {
+        push.mockRestore();
+      }
     }
   });
 
@@ -690,15 +708,18 @@ describe('inflateFlateUpTo', () => {
     }
   });
 
-  it('ignores 16 MiB of bytes after the final block, in less than a second', () => {
+  it('ignores 16 MiB of bytes after the final block without reading them', () => {
     const zlib = bytes(deflateSync(encoder.encode('hello world')));
     const data = new Uint8Array(zlib.length + 16 * 1024 * 1024).fill(0x41);
     data.set(zlib);
-    const start = performance.now();
-    const result = inflateFlateUpTo(data, 1024 * 1024);
-    const elapsed = performance.now() - start;
-    expect(result).toEqual({ data: encoder.encode('hello world'), truncated: false });
-    expect(elapsed).toBeLessThan(1000);
+    const push = vi.spyOn(Inflate.prototype, 'push');
+    try {
+      const result = inflateFlateUpTo(data, 1024 * 1024);
+      expect(result).toEqual({ data: encoder.encode('hello world'), truncated: false });
+      expectReadStopsEarly(push, data.length);
+    } finally {
+      push.mockRestore();
+    }
   });
 
   it('refuses a bound above maxDecodedStreamBytes, or not a number, with ResourceLimitError', () => {

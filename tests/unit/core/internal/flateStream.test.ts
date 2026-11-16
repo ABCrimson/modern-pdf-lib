@@ -206,11 +206,18 @@ describe('rewrapLegacyStream', () => {
     const data = new Uint8Array(raw.length + 16 * 1024 * 1024).fill(0x41);
     data.set(raw);
     const stream = streamOf(data, PdfName.of('FlateDecode'));
-    const start = performance.now();
-    rewrapLegacyStream(stream);
-    const elapsed = performance.now() - start;
+    const push = vi.spyOn(Inflate.prototype, 'push');
+    try {
+      rewrapLegacyStream(stream);
+      // The read stops on its idle-step rule: the step that decodes "hello world", eight steps
+      // that decode nothing and the one byte that ends the input, not the 16 MiB (1,025 steps).
+      expect(push.mock.calls.length).toBeLessThanOrEqual(10);
+      const pushed = push.mock.calls.reduce((sum, [chunk]) => sum + chunk.length, 0);
+      expect(pushed).toBeLessThan(1024 * 1024);
+    } finally {
+      push.mockRestore();
+    }
     expect(new Uint8Array(inflateSync(stream.data))).toEqual(encoder.encode('hello world'));
-    expect(elapsed).toBeLessThan(1000);
   });
 });
 
