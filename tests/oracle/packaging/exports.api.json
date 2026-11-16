@@ -4,7 +4,7 @@
   "entries": {
     ".": {
       "runtime": 730,
-      "typeOnly": 420,
+      "typeOnly": 423,
       "names": {
         "AFDate_FormatEx": {
           "kind": "function",
@@ -1260,7 +1260,7 @@
         },
         "PdfName": {
           "kind": "class",
-          "decl": "sha256:0b566e46bd77"
+          "decl": "sha256:115784adcd38"
         },
         "PdfNode": {
           "kind": "type",
@@ -1380,7 +1380,11 @@
         },
         "PdfString": {
           "kind": "class",
-          "decl": "sha256:fcb57daf1819"
+          "decl": "sha256:4b7de422fb46"
+        },
+        "PdfStringForm": {
+          "kind": "type",
+          "decl": "sha256:794af95bc2e1"
         },
         "PdfStructureElement": {
           "kind": "class",
@@ -1394,9 +1398,17 @@
           "kind": "class",
           "decl": "sha256:eeec709ef033"
         },
+        "PdfTextEncoding": {
+          "kind": "type",
+          "decl": "sha256:875b248eedd2"
+        },
         "PdfTextField": {
           "kind": "class",
           "decl": "sha256:7128d9531111"
+        },
+        "PdfTextWriteEncoding": {
+          "kind": "type",
+          "decl": "sha256:d93c82852300"
         },
         "PdfUa2Issue": {
           "kind": "interface",
@@ -5100,7 +5112,7 @@
     },
     "./parse": {
       "runtime": 43,
-      "typeOnly": 10,
+      "typeOnly": 13,
       "names": {
         "AnalysisReport": {
           "kind": "interface",
@@ -5204,7 +5216,7 @@
         },
         "PdfName": {
           "kind": "class",
-          "decl": "sha256:0b566e46bd77"
+          "decl": "sha256:115784adcd38"
         },
         "PdfNull": {
           "kind": "class",
@@ -5232,7 +5244,19 @@
         },
         "PdfString": {
           "kind": "class",
-          "decl": "sha256:fcb57daf1819"
+          "decl": "sha256:4b7de422fb46"
+        },
+        "PdfStringForm": {
+          "kind": "type",
+          "decl": "sha256:794af95bc2e1"
+        },
+        "PdfTextEncoding": {
+          "kind": "type",
+          "decl": "sha256:875b248eedd2"
+        },
+        "PdfTextWriteEncoding": {
+          "kind": "type",
+          "decl": "sha256:d93c82852300"
         },
         "PluginError": {
           "kind": "class",
@@ -5317,7 +5341,7 @@
       }
     },
     "./forms": {
-      "runtime": 29,
+      "runtime": 30,
       "typeOnly": 11,
       "names": {
         "AppearanceProviderFor": {
@@ -5440,6 +5464,10 @@
           "kind": "interface",
           "decl": "sha256:f0bff377a03e"
         },
+        "UnencodableTextError": {
+          "kind": "class",
+          "decl": "sha256:c09906625626"
+        },
         "UnexpectedFieldTypeError": {
           "kind": "class",
           "decl": "sha256:1681d80b65cd"
@@ -5484,7 +5512,7 @@
     },
     "./browser": {
       "runtime": 737,
-      "typeOnly": 420,
+      "typeOnly": 423,
       "names": {
         "AFDate_FormatEx": {
           "kind": "function",
@@ -6740,7 +6768,7 @@
         },
         "PdfName": {
           "kind": "class",
-          "decl": "sha256:0b566e46bd77"
+          "decl": "sha256:115784adcd38"
         },
         "PdfNode": {
           "kind": "type",
@@ -6860,7 +6888,11 @@
         },
         "PdfString": {
           "kind": "class",
-          "decl": "sha256:fcb57daf1819"
+          "decl": "sha256:4b7de422fb46"
+        },
+        "PdfStringForm": {
+          "kind": "type",
+          "decl": "sha256:794af95bc2e1"
         },
         "PdfStructureElement": {
           "kind": "class",
@@ -6874,9 +6906,17 @@
           "kind": "class",
           "decl": "sha256:eeec709ef033"
         },
+        "PdfTextEncoding": {
+          "kind": "type",
+          "decl": "sha256:875b248eedd2"
+        },
         "PdfTextField": {
           "kind": "class",
           "decl": "sha256:7128d9531111"
+        },
+        "PdfTextWriteEncoding": {
+          "kind": "type",
+          "decl": "sha256:d93c82852300"
         },
         "PdfUa2Issue": {
           "kind": "interface",
