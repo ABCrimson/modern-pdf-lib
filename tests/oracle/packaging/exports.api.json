@@ -3,8 +3,8 @@
   "package": "modern-pdf-lib",
   "entries": {
     ".": {
-      "runtime": 730,
-      "typeOnly": 423,
+      "runtime": 731,
+      "typeOnly": 426,
       "names": {
         "AFDate_FormatEx": {
           "kind": "function",
@@ -313,6 +313,10 @@
         "DEFAULT_DOC_TIMESTAMP_CONTENTS_SIZE": {
           "kind": "const",
           "decl": "sha256:6f31cfee81d6"
+        },
+        "DEFAULT_LIMITS": {
+          "kind": "const",
+          "decl": "sha256:b2e36956ebc7"
         },
         "DEFAULT_SARIF_TOOL_NAME": {
           "kind": "const",
@@ -846,6 +850,10 @@
           "kind": "interface",
           "decl": "sha256:ec26cea751fa"
         },
+        "LimitName": {
+          "kind": "type",
+          "decl": "sha256:cc6cb409adbd"
+        },
         "LineCapStyle": {
           "kind": "const",
           "decl": "sha256:b89d95324b64"
@@ -1242,6 +1250,10 @@
           "kind": "type",
           "decl": "sha256:fafcc6ca1a0d"
         },
+        "PdfLimits": {
+          "kind": "type",
+          "decl": "sha256:ae1c43432720"
+        },
         "PdfLineAnnotation": {
           "kind": "class",
           "decl": "sha256:75b83312a8c5"
@@ -1634,9 +1646,13 @@
           "kind": "type",
           "decl": "sha256:f2e017048b37"
         },
+        "ResolvedLimits": {
+          "kind": "type",
+          "decl": "sha256:bb5d5701b75e"
+        },
         "ResourceLimitError": {
           "kind": "class",
-          "decl": "sha256:097c4dd66087"
+          "decl": "sha256:f66d5cad7a6e"
         },
         "RgbColor": {
           "kind": "interface",
@@ -4621,8 +4637,8 @@
       }
     },
     "./create": {
-      "runtime": 75,
-      "typeOnly": 47,
+      "runtime": 76,
+      "typeOnly": 50,
       "names": {
         "Angle": {
           "kind": "type",
@@ -4659,6 +4675,10 @@
         "CropBox": {
           "kind": "interface",
           "decl": "sha256:5a301582764a"
+        },
+        "DEFAULT_LIMITS": {
+          "kind": "const",
+          "decl": "sha256:b2e36956ebc7"
         },
         "Degrees": {
           "kind": "interface",
@@ -4804,6 +4824,10 @@
           "kind": "interface",
           "decl": "sha256:ec26cea751fa"
         },
+        "LimitName": {
+          "kind": "type",
+          "decl": "sha256:cc6cb409adbd"
+        },
         "LineCapStyle": {
           "kind": "const",
           "decl": "sha256:b89d95324b64"
@@ -4856,6 +4880,10 @@
           "kind": "class",
           "decl": "sha256:78c6e91d871a"
         },
+        "PdfLimits": {
+          "kind": "type",
+          "decl": "sha256:ae1c43432720"
+        },
         "PdfPage": {
           "kind": "class",
           "decl": "sha256:4f85a2b36963"
@@ -4892,9 +4920,13 @@
           "kind": "class",
           "decl": "sha256:7ba072f5f8d8"
         },
+        "ResolvedLimits": {
+          "kind": "type",
+          "decl": "sha256:bb5d5701b75e"
+        },
         "ResourceLimitError": {
           "kind": "class",
-          "decl": "sha256:097c4dd66087"
+          "decl": "sha256:f66d5cad7a6e"
         },
         "RgbColor": {
           "kind": "interface",
@@ -5115,8 +5147,8 @@
       }
     },
     "./parse": {
-      "runtime": 44,
-      "typeOnly": 13,
+      "runtime": 45,
+      "typeOnly": 16,
       "names": {
         "AnalysisReport": {
           "kind": "interface",
@@ -5133,6 +5165,10 @@
         "ContentStreamOperator": {
           "kind": "interface",
           "decl": "sha256:53b997700f0a"
+        },
+        "DEFAULT_LIMITS": {
+          "kind": "const",
+          "decl": "sha256:b2e36956ebc7"
         },
         "EncryptedPdfError": {
           "kind": "class",
@@ -5182,6 +5218,10 @@
           "kind": "class",
           "decl": "sha256:fb300c34a28d"
         },
+        "LimitName": {
+          "kind": "type",
+          "decl": "sha256:cc6cb409adbd"
+        },
         "LoadPdfOptions": {
           "kind": "interface",
           "decl": "sha256:4cfd23660273"
@@ -5217,6 +5257,10 @@
         "PdfError": {
           "kind": "class",
           "decl": "sha256:78c6e91d871a"
+        },
+        "PdfLimits": {
+          "kind": "type",
+          "decl": "sha256:ae1c43432720"
         },
         "PdfName": {
           "kind": "class",
@@ -5274,9 +5318,13 @@
           "kind": "class",
           "decl": "sha256:7ba072f5f8d8"
         },
+        "ResolvedLimits": {
+          "kind": "type",
+          "decl": "sha256:bb5d5701b75e"
+        },
         "ResourceLimitError": {
           "kind": "class",
-          "decl": "sha256:097c4dd66087"
+          "decl": "sha256:f66d5cad7a6e"
         },
         "TextExtractionOptions": {
           "kind": "interface",
@@ -5519,8 +5567,8 @@
       }
     },
     "./browser": {
-      "runtime": 737,
-      "typeOnly": 423,
+      "runtime": 738,
+      "typeOnly": 426,
       "names": {
         "AFDate_FormatEx": {
           "kind": "function",
@@ -5829,6 +5877,10 @@
         "DEFAULT_DOC_TIMESTAMP_CONTENTS_SIZE": {
           "kind": "const",
           "decl": "sha256:6f31cfee81d6"
+        },
+        "DEFAULT_LIMITS": {
+          "kind": "const",
+          "decl": "sha256:b2e36956ebc7"
         },
         "DEFAULT_SARIF_TOOL_NAME": {
           "kind": "const",
@@ -6362,6 +6414,10 @@
           "kind": "interface",
           "decl": "sha256:ec26cea751fa"
         },
+        "LimitName": {
+          "kind": "type",
+          "decl": "sha256:cc6cb409adbd"
+        },
         "LineCapStyle": {
           "kind": "const",
           "decl": "sha256:b89d95324b64"
@@ -6758,6 +6814,10 @@
           "kind": "type",
           "decl": "sha256:fafcc6ca1a0d"
         },
+        "PdfLimits": {
+          "kind": "type",
+          "decl": "sha256:ae1c43432720"
+        },
         "PdfLineAnnotation": {
           "kind": "class",
           "decl": "sha256:75b83312a8c5"
@@ -7150,9 +7210,13 @@
           "kind": "type",
           "decl": "sha256:f2e017048b37"
         },
+        "ResolvedLimits": {
+          "kind": "type",
+          "decl": "sha256:bb5d5701b75e"
+        },
         "ResourceLimitError": {
           "kind": "class",
-          "decl": "sha256:097c4dd66087"
+          "decl": "sha256:f66d5cad7a6e"
         },
         "RgbColor": {
           "kind": "interface",
