@@ -50,6 +50,8 @@ export {
   PdfError,
   InvalidArgumentError,
   MalformedInputError,
+  UnsupportedFeatureError,
+  ScriptExecutionDisabledError,
   NoSuchFieldError,
   UnexpectedFieldTypeError,
   MissingOnValueCheckError,

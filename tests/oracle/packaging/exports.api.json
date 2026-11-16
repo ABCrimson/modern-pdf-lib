@@ -4617,7 +4617,7 @@
       }
     },
     "./create": {
-      "runtime": 61,
+      "runtime": 75,
       "typeOnly": 47,
       "names": {
         "Angle": {
@@ -4643,6 +4643,10 @@
         "ColorStop": {
           "kind": "interface",
           "decl": "sha256:314040362dd3"
+        },
+        "CombedTextLayoutError": {
+          "kind": "class",
+          "decl": "sha256:1e8dcb7393bb"
         },
         "ComputeFontSizeOptions": {
           "kind": "interface",
@@ -4716,6 +4720,22 @@
           "kind": "interface",
           "decl": "sha256:ad5d39f6697e"
         },
+        "EncryptedPdfError": {
+          "kind": "class",
+          "decl": "sha256:0fb964f37258"
+        },
+        "EnvironmentError": {
+          "kind": "class",
+          "decl": "sha256:29ab36212baa"
+        },
+        "ExceededMaxLengthError": {
+          "kind": "class",
+          "decl": "sha256:8304e54a8ee1"
+        },
+        "FieldAlreadyExistsError": {
+          "kind": "class",
+          "decl": "sha256:ac9135582e9c"
+        },
         "FontNotEmbeddedError": {
           "kind": "class",
           "decl": "sha256:a26d18efd4b8"
@@ -4747,6 +4767,10 @@
         "InvalidColorError": {
           "kind": "class",
           "decl": "sha256:25515ef6a67f"
+        },
+        "InvalidFieldNamePartError": {
+          "kind": "class",
+          "decl": "sha256:1f8e5fc27597"
         },
         "InvalidPageSizeError": {
           "kind": "class",
@@ -4792,6 +4816,14 @@
           "kind": "class",
           "decl": "sha256:c9515f5219b3"
         },
+        "MissingOnValueCheckError": {
+          "kind": "class",
+          "decl": "sha256:b7999b70cc71"
+        },
+        "NoSuchFieldError": {
+          "kind": "class",
+          "decl": "sha256:c5785639c8ee"
+        },
         "NormalizedStop": {
           "kind": "interface",
           "decl": "sha256:7a7ec5f8d043"
@@ -4824,9 +4856,17 @@
           "kind": "class",
           "decl": "sha256:bc54bbb91065"
         },
+        "PdfParseError": {
+          "kind": "class",
+          "decl": "sha256:5c0d8f43aff1"
+        },
         "PdfSaveOptions": {
           "kind": "interface",
           "decl": "sha256:262ad058c573"
+        },
+        "PluginError": {
+          "kind": "class",
+          "decl": "sha256:17528157016f"
         },
         "RadialGradientFill": {
           "kind": "type",
@@ -4839,6 +4879,10 @@
         "Radians": {
           "kind": "interface",
           "decl": "sha256:c212f2f1b975"
+        },
+        "RedactionIncompleteError": {
+          "kind": "class",
+          "decl": "sha256:a154abd1987e"
         },
         "RemovePageFromEmptyDocumentError": {
           "kind": "class",
@@ -4892,9 +4936,21 @@
           "kind": "class",
           "decl": "sha256:c09906625626"
         },
+        "UnexpectedFieldTypeError": {
+          "kind": "class",
+          "decl": "sha256:1681d80b65cd"
+        },
+        "UnsupportedEncryptionError": {
+          "kind": "class",
+          "decl": "sha256:d958483d9f27"
+        },
         "UnsupportedFeatureError": {
           "kind": "class",
           "decl": "sha256:aed4166146f8"
+        },
+        "UnsupportedFilterError": {
+          "kind": "class",
+          "decl": "sha256:c9420fbcc487"
         },
         "UnsupportedOptionError": {
           "kind": "class",
@@ -5055,7 +5111,7 @@
       }
     },
     "./parse": {
-      "runtime": 28,
+      "runtime": 44,
       "typeOnly": 10,
       "names": {
         "AnalysisReport": {
@@ -5066,6 +5122,10 @@
           "kind": "interface",
           "decl": "sha256:8ba835bfad25"
         },
+        "CombedTextLayoutError": {
+          "kind": "class",
+          "decl": "sha256:1e8dcb7393bb"
+        },
         "ContentStreamOperator": {
           "kind": "interface",
           "decl": "sha256:53b997700f0a"
@@ -5073,6 +5133,22 @@
         "EncryptedPdfError": {
           "kind": "class",
           "decl": "sha256:0fb964f37258"
+        },
+        "EnvironmentError": {
+          "kind": "class",
+          "decl": "sha256:29ab36212baa"
+        },
+        "ExceededMaxLengthError": {
+          "kind": "class",
+          "decl": "sha256:8304e54a8ee1"
+        },
+        "FieldAlreadyExistsError": {
+          "kind": "class",
+          "decl": "sha256:ac9135582e9c"
+        },
+        "FontNotEmbeddedError": {
+          "kind": "class",
+          "decl": "sha256:a26d18efd4b8"
         },
         "ImageAnalysis": {
           "kind": "interface",
@@ -5086,6 +5162,22 @@
           "kind": "class",
           "decl": "sha256:b816bc1a9c75"
         },
+        "InvalidColorError": {
+          "kind": "class",
+          "decl": "sha256:25515ef6a67f"
+        },
+        "InvalidFieldNamePartError": {
+          "kind": "class",
+          "decl": "sha256:1f8e5fc27597"
+        },
+        "InvalidPageSizeError": {
+          "kind": "class",
+          "decl": "sha256:a0c8a07b4f55"
+        },
+        "InvalidStateError": {
+          "kind": "class",
+          "decl": "sha256:fb300c34a28d"
+        },
         "LoadPdfOptions": {
           "kind": "interface",
           "decl": "sha256:4cfd23660273"
@@ -5093,6 +5185,14 @@
         "MalformedInputError": {
           "kind": "class",
           "decl": "sha256:c9515f5219b3"
+        },
+        "MissingOnValueCheckError": {
+          "kind": "class",
+          "decl": "sha256:b7999b70cc71"
+        },
+        "NoSuchFieldError": {
+          "kind": "class",
+          "decl": "sha256:c5785639c8ee"
         },
         "Operand": {
           "kind": "type",
@@ -5146,6 +5246,18 @@
           "kind": "class",
           "decl": "sha256:fcb57daf1819"
         },
+        "PluginError": {
+          "kind": "class",
+          "decl": "sha256:17528157016f"
+        },
+        "RedactionIncompleteError": {
+          "kind": "class",
+          "decl": "sha256:a154abd1987e"
+        },
+        "RemovePageFromEmptyDocumentError": {
+          "kind": "class",
+          "decl": "sha256:7ba072f5f8d8"
+        },
         "ResourceLimitError": {
           "kind": "class",
           "decl": "sha256:097c4dd66087"
@@ -5157,6 +5269,14 @@
         "TextItem": {
           "kind": "interface",
           "decl": "sha256:eba0859a73f7"
+        },
+        "UnencodableTextError": {
+          "kind": "class",
+          "decl": "sha256:c09906625626"
+        },
+        "UnexpectedFieldTypeError": {
+          "kind": "class",
+          "decl": "sha256:1681d80b65cd"
         },
         "UnsupportedEncryptionError": {
           "kind": "class",
@@ -5213,7 +5333,7 @@
       }
     },
     "./forms": {
-      "runtime": 27,
+      "runtime": 29,
       "typeOnly": 11,
       "names": {
         "AppearanceProviderFor": {
@@ -5324,6 +5444,10 @@
           "kind": "type",
           "decl": "sha256:d5f98335e491"
         },
+        "ScriptExecutionDisabledError": {
+          "kind": "class",
+          "decl": "sha256:7a18ed087147"
+        },
         "SignatureAppearanceOptions": {
           "kind": "interface",
           "decl": "sha256:63434b2a321f"
@@ -5335,6 +5459,10 @@
         "UnexpectedFieldTypeError": {
           "kind": "class",
           "decl": "sha256:1681d80b65cd"
+        },
+        "UnsupportedFeatureError": {
+          "kind": "class",
+          "decl": "sha256:aed4166146f8"
         },
         "WidgetAnnotationHost": {
           "kind": "interface",

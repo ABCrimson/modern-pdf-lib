@@ -2,23 +2,20 @@
  * Every package entry exports the error classes its own calls can throw, and the parents of each.
  *
  * The root and browser entries export every error class of the library. The narrow entries
- * (create, parse and forms) export the classes of {@link NARROW_ENTRIES}: what their calls throw
- * (create: `removePage`, `drawText`, `embedFont`, image decoding; parse: `loadPdf`,
- * `decodeStream`; forms: the field getters, `setText`, the create methods).
+ * (create, parse and forms) export the classes the census reaches from them, with their parents.
  *
- * A narrow list is not left to memory. Each class of it must be one the census can reach from
- * the entry: a class that `src` throws in a file the entry loads, or that an allowlist of
- * tests/unit/api/errorCensus.allow still promises for such a file (the target of a generic-throw
- * row, the `files` of a class row). The import closure of an entry is coarse, because
- * `loadPdf` builds a `PdfDocument` and so loads the whole library, so it bounds the list from
- * above and does not decide it.
+ * The narrow lists are derived, never written by hand. A class is reached from an entry when
+ * `src` throws it in a file the entry loads, or when an allowlist of
+ * tests/unit/api/errorCensus.allow still promises it for such a file (the target of a
+ * generic-throw row, the `files` of a class row). The import closure is the unit: `loadPdf`
+ * builds a `PdfDocument` and so loads most of the library, so the lists of create and parse are
+ * long. A narrow entry exports exactly the classes so derived.
  */
 import { globSync, readFileSync } from 'node:fs';
 import { dirname, posix } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseSync, Visitor } from 'oxc-parser';
 import { beforeAll, describe, expect, it } from 'vitest';
-import * as errors from '../../../src/errors.js';
 import { PdfError } from '../../../src/errors.js';
 import { runCensus } from '../../helpers/errorCensus.js';
 import type { ErrorCensus } from '../../helpers/errorCensus.js';
@@ -35,49 +32,9 @@ const ENTRIES = {
   './forms': { file: 'src/forms.ts', load: () => import('../../../src/forms.js') },
 } as const;
 type EntryName = keyof typeof ENTRIES;
-type NarrowEntryName = Exclude<EntryName, '.' | './browser'>;
 
-/** The error classes of each narrow entry, parents included. */
-const NARROW_ENTRIES: Readonly<Record<NarrowEntryName, readonly string[]>> = {
-  './create': [
-    'PdfError',
-    'InvalidArgumentError',
-    'InvalidStateError',
-    'MalformedInputError',
-    'UnsupportedFeatureError',
-    'UnencodableTextError',
-    'UnsupportedOptionError',
-    'ResourceLimitError',
-    'InvalidPageSizeError',
-    'InvalidColorError',
-    'RemovePageFromEmptyDocumentError',
-    'FontNotEmbeddedError',
-  ],
-  './parse': [
-    'PdfError',
-    'MalformedInputError',
-    'PdfParseError',
-    'EncryptedPdfError',
-    'ResourceLimitError',
-    'UnsupportedFeatureError',
-    'UnsupportedFilterError',
-    'UnsupportedEncryptionError',
-    'InvalidArgumentError',
-    'UnsupportedOptionError',
-  ],
-  './forms': [
-    'PdfError',
-    'InvalidArgumentError',
-    'MalformedInputError',
-    'NoSuchFieldError',
-    'UnexpectedFieldTypeError',
-    'MissingOnValueCheckError',
-    'FieldAlreadyExistsError',
-    'InvalidFieldNamePartError',
-    'CombedTextLayoutError',
-    'ExceededMaxLengthError',
-  ],
-};
+/** The narrow entries: each exports the error classes the census reaches from it. */
+const NARROW = ['./create', './parse', './forms'] as const;
 
 /** The classes the library removed: no entry exports them and `src/errors.ts` does not declare them. */
 const REMOVED = ['ForeignPageError', 'FieldExistsAsNonTerminalError', 'RichTextFieldReadError'];
@@ -212,28 +169,25 @@ describe('error exports of the package entries', () => {
     }).toEqual({ missing: [], surplus: [] });
   });
 
-  it.each(Object.keys(NARROW_ENTRIES) as NarrowEntryName[])(
-    '%s exports the error classes of its calls',
+  it.each(NARROW)(
+    '%s exports the error classes the census reaches from it, with their parents',
     (entry) => {
-      const exported = [...exportedBy(entry).keys()].sort();
-      expect(exported).toEqual([...NARROW_ENTRIES[entry]].sort());
+      const root = exportedBy('.');
+      const derived = [...reachableErrors(ENTRIES[entry].file, census, root)]
+        .filter((n) => root.has(n))
+        .sort();
+      expect([...exportedBy(entry).keys()].sort()).toEqual(derived);
     },
   );
 
-  it.each(Object.keys(NARROW_ENTRIES) as NarrowEntryName[])(
-    '%s exports only classes its census can reach, and no class without its parents',
-    (entry) => {
-      const classes = exportedErrorClasses(errors);
-      const reached = reachableErrors(ENTRIES[entry].file, census, classes);
-      const exported = exportedBy(entry);
-      const unreachable = [...exported.keys()].filter((n) => !reached.has(n));
-      const orphans = [...exported]
-        .map(([name, cls]) => [name, parentName(cls)] as const)
-        .filter(([, parent]) => parent !== undefined && !exported.has(parent))
-        .map(([name, parent]) => `${name} extends ${parent}`);
-      expect({ unreachable, orphans }).toEqual({ unreachable: [], orphans: [] });
-    },
-  );
+  it.each(NARROW)('%s exports no class without its parents', (entry) => {
+    const exported = exportedBy(entry);
+    const orphans = [...exported]
+      .map(([name, cls]) => [name, parentName(cls)] as const)
+      .filter(([, parent]) => parent !== undefined && !exported.has(parent))
+      .map(([name, parent]) => `${name} extends ${parent}`);
+    expect(orphans).toEqual([]);
+  });
 
   it('an entry exports each class under its own name, and the class of `.`', () => {
     const root = exportedBy('.');

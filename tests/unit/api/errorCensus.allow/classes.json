@@ -126,7 +126,6 @@
     "where": "the calls that pass an option this release does not carry out, in place of the ignored-option warning",
     "files": [
       "src/accessibility/structureTree.ts",
-      "src/accessibility/taggingHelpers.ts",
       "src/assets/image/optimize/batchOptimize.ts",
       "src/barcode/linear/code128.ts",
       "src/barcode/linear/code39.ts",
@@ -136,7 +135,6 @@
       "src/barcode/matrix/qr.ts",
       "src/compliance/pdfx/pdfX6.ts",
       "src/core/io/incrementalWriter.ts",
-      "src/core/io/pdfWriter.ts",
       "src/core/pdfDocument.ts",
       "src/layout/presets.ts",
       "src/parser/streamingParser.ts",

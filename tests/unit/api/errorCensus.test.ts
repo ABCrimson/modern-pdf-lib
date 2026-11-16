@@ -31,7 +31,8 @@
  * | runtime-misc.json          | every other folder (codecs, color, runtime, wasm, ...)           |
  * | limits.json                | the entry files `src/index.ts`, `browser`, `create`, `parse`,     |
  * |                            | `forms`, and rows of any file the limits work takes over          |
- * | classes.json               | the classes with no throw site (check 2)                          |
+ * | classes.json               | the classes with no throw site (check 2); a row's `files` names   |
+ * |                            | where its throw will land                                         |
  */
 import { readdirSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -105,6 +106,8 @@ interface ClassRow {
   /** `throw`: gets a throw site; `remove`: the class is removed from the library. */
   readonly decision: 'throw' | 'remove';
   readonly where: string;
+  /** The src files that will throw the class (read by entryErrors.test.ts). */
+  readonly files?: readonly string[];
 }
 
 interface AllowFile<Row> {
