@@ -31,7 +31,7 @@ import {
 } from '../cms/pkcs7.js';
 import type { Asn1Node } from '../cms/pkcs7.js';
 import type { RevocationCache } from '../internal/revocationCache.js';
-import { warnOnce } from '../../internal/warnings.js';
+import { UNSUPPORTED_OPTIONS, rejectOption } from '../../internal/options.js';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -112,10 +112,9 @@ export interface DetailedVerifyOptions {
   /**
    * Trusted root certificates (DER-encoded) for chain validation.
    *
-   * Has no effect in this version: `verifySignatureDetailed()` validates no
-   * chain, and listing certificates only drops one result warning. Passing a
-   * non-empty array emits a one-time `ModernPdfLibWarning` (code
-   * `MPL_IGNORED_OPTION`).
+   * Not supported in this release: `verifySignatureDetailed()` validates no
+   * chain, so a non-empty array throws an `UnsupportedOptionError` (planned
+   * for 0.45.0). An empty array asks for nothing and is accepted.
    */
   trustedCerts?: Uint8Array[] | undefined;
   /** Revocation cache for OCSP/CRL responses. */
@@ -123,8 +122,8 @@ export interface DetailedVerifyOptions {
   /**
    * Timeout in milliseconds for network operations.
    *
-   * Has no effect in this version: nothing reads it. Passing it emits a
-   * one-time `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`).
+   * Not supported in this release: the function makes no network request, so
+   * passing it throws an `UnsupportedOptionError` (planned for 0.45.0).
    */
   timeout?: number | undefined;
 }
@@ -135,6 +134,11 @@ export interface DetailedVerifyOptions {
 
 const decoder = new TextDecoder('latin1');
 const textDecoder = new TextDecoder('utf-8');
+
+/** The rows of the option table that `verifySignatureDetailed()` refuses. */
+const REFUSED_OPTIONS = /* @__PURE__ */ UNSUPPORTED_OPTIONS.filter(
+  (rule) => rule.entry === 'verifySignatureDetailed()',
+);
 
 /**
  * Cut decoded bytes to the length the outer DER header states, or return
@@ -599,6 +603,8 @@ async function verifyCryptoSignature(
  * @param pdf      The PDF file bytes.
  * @param options  Verification options.
  * @returns        Array of detailed verification results.
+ * @throws {UnsupportedOptionError} When `options.timeout` is passed or
+ *         `options.trustedCerts` is not empty (planned for 0.45.0).
  *
  * @example
  * ```ts
@@ -618,16 +624,14 @@ export async function verifySignatureDetailed(
   options?: DetailedVerifyOptions,
 ): Promise<DetailedVerificationResult[]> {
   const opts = options ?? {};
-  for (const [name, passed] of [
-    ['timeout', opts.timeout !== undefined],
-    ['trustedCerts', (opts.trustedCerts?.length ?? 0) > 0],
-  ] as const) {
-    if (passed) {
-      warnOnce(
-        `ignored-option:verifySignatureDetailed ${name}`,
-        'MPL_IGNORED_OPTION',
-        `\`verifySignatureDetailed()\`: the option \`${name}\` has no effect in this version.`,
-      );
+  const passed = {
+    timeout: opts.timeout !== undefined,
+    // An empty list asks for nothing.
+    trustedCerts: (opts.trustedCerts?.length ?? 0) > 0,
+  };
+  for (const rule of REFUSED_OPTIONS) {
+    if (rule.option !== undefined && Reflect.get(passed, rule.option) === true) {
+      rejectOption(rule);
     }
   }
   const pdfStr = decoder.decode(pdf);

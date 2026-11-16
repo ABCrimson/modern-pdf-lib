@@ -21,7 +21,7 @@
 import { readStringEntry } from './byteRange.js';
 import { InvalidArgumentError } from '../../errors.js';
 import type { SignOptions } from './signatureHandler.js';
-import { warnOnce } from '../../internal/warnings.js';
+import { UNSUPPORTED_OPTIONS, rejectOption } from '../../internal/options.js';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -55,6 +55,11 @@ export interface FieldLockInfo {
 
 const decoder = new TextDecoder('latin1');
 
+/** The row of the option table that refuses {@link addFieldLock} as a whole call. */
+const REFUSED_CALL = /* @__PURE__ */ UNSUPPORTED_OPTIONS.filter(
+  (rule) => rule.entry === 'addFieldLock()',
+);
+
 /**
  * Escape a string for use in a PDF name.
  */
@@ -69,24 +74,26 @@ function escapePdfString(str: string): string {
 /**
  * Add a field lock dictionary to sign options.
  *
- * Has no effect in this version: `signPdf()` does not write a /Lock
- * dictionary. Calling this function emits a one-time `ModernPdfLibWarning`
- * (code `MPL_IGNORED_OPTION`) after the lock has been validated.
+ * Not supported in this release: `signPdf()` does not write a /Lock
+ * dictionary, so a call with a valid lock throws an `UnsupportedOptionError`
+ * (planned for 0.45.0) and leaves `options` unchanged.
  *
- * @param options  The sign options to modify (mutated in place).
+ * @param options  The sign options the lock is meant for.
  * @param lock     The field lock configuration.
+ * @throws {InvalidArgumentError}  When an `Include` or `Exclude` lock lists
+ *         no field (argument `lock.fields`); this check comes first.
+ * @throws {UnsupportedOptionError}  For every valid lock, in this release.
  *
  * @example
  * ```ts
- * const options: SignOptions = {
- *   certificate: certDer,
- *   privateKey: keyDer,
- * };
- * addFieldLock(options, {
- *   action: 'Include',
- *   fields: ['Name', 'Address', 'Amount'],
- * });
- * const signedPdf = await signPdf(pdfBytes, 'ApprovalSig', options); // writes no /Lock
+ * import { UnsupportedOptionError } from 'modern-pdf-lib';
+ *
+ * try {
+ *   addFieldLock(options, { action: 'Include', fields: ['Name', 'Address', 'Amount'] });
+ * } catch (error) {
+ *   if (!(error instanceof UnsupportedOptionError)) throw error;
+ *   // error.plannedFor === '0.45.0'
+ * }
  * ```
  */
 export function addFieldLock(options: SignOptions, lock: FieldLockOptions): void {
@@ -96,14 +103,7 @@ export function addFieldLock(options: SignOptions, lock: FieldLockOptions): void
       { argument: 'lock.fields' },
     );
   }
-
-  warnOnce(
-    'ignored-option:addFieldLock',
-    'MPL_IGNORED_OPTION',
-    '`addFieldLock()` has no effect in this version: `signPdf()` does not write a /Lock dictionary.',
-  );
-  // Stored on the options object; nothing reads it.
-  (options as SignOptions & { fieldLock: FieldLockOptions }).fieldLock = lock;
+  for (const rule of REFUSED_CALL) rejectOption(rule);
 }
 
 /**

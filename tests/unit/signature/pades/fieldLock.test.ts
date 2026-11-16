@@ -8,6 +8,7 @@ import {
   getFieldLocks,
   buildFieldLockDict,
 } from '../../../../src/signature/pades/fieldLock.js';
+import type { FieldLockOptions } from '../../../../src/signature/pades/fieldLock.js';
 import { prepareForSigning } from '../../../../src/signature/pades/byteRange.js';
 import type { SignOptions } from '../../../../src/signature/pades/signatureHandler.js';
 
@@ -55,43 +56,25 @@ function createMockSignOptions(): SignOptions {
 // ---------------------------------------------------------------------------
 
 describe('addFieldLock', () => {
-  it('should set field lock with "All" action', () => {
-    const options = createMockSignOptions();
-    addFieldLock(options, { action: 'All' });
-
-    const extended = options as SignOptions & {
-      fieldLock: { action: string };
-    };
-    expect(extended.fieldLock.action).toBe('All');
-  });
-
-  it('should set field lock with "Include" action and fields', () => {
-    const options = createMockSignOptions();
-    addFieldLock(options, {
-      action: 'Include',
-      fields: ['Name', 'Address'],
-    });
-
-    const extended = options as SignOptions & {
-      fieldLock: { action: string; fields: string[] };
-    };
-    expect(extended.fieldLock.action).toBe('Include');
-    expect(extended.fieldLock.fields).toEqual(['Name', 'Address']);
-  });
-
-  it('should set field lock with "Exclude" action and fields', () => {
-    const options = createMockSignOptions();
-    addFieldLock(options, {
-      action: 'Exclude',
-      fields: ['Notes'],
-    });
-
-    const extended = options as SignOptions & {
-      fieldLock: { action: string; fields: string[] };
-    };
-    expect(extended.fieldLock.action).toBe('Exclude');
-    expect(extended.fieldLock.fields).toEqual(['Notes']);
-  });
+  // signature-pki-10: signPdf() writes no /Lock dictionary, so a valid lock is refused (0.45.0).
+  it.each<FieldLockOptions>([
+    { action: 'All' },
+    { action: 'Include', fields: ['Name', 'Address'] },
+    { action: 'Exclude', fields: ['Notes'] },
+  ])(
+    'throws UnsupportedOptionError for a valid $action lock and leaves the options unchanged',
+    (lock) => {
+      const options = createMockSignOptions();
+      expect(() => addFieldLock(options, lock)).toThrow(
+        expect.objectContaining({
+          name: 'UnsupportedOptionError',
+          entry: 'addFieldLock()',
+          plannedFor: '0.45.0',
+        }),
+      );
+      expect(options).toStrictEqual(createMockSignOptions());
+    },
+  );
 
   it('should throw for "Include" without fields', () => {
     const options = createMockSignOptions();
@@ -111,23 +94,11 @@ describe('addFieldLock', () => {
     );
   });
 
-  it('should not throw for "All" without fields', () => {
+  it('accepts "All" without fields as a valid lock, so the refusal follows', () => {
     const options = createMockSignOptions();
-    expect(() => addFieldLock(options, { action: 'All' })).not.toThrow();
-  });
-
-  it('should overwrite previous field lock', () => {
-    const options = createMockSignOptions();
-    addFieldLock(options, { action: 'All' });
-    addFieldLock(options, {
-      action: 'Include',
-      fields: ['Field1'],
-    });
-
-    const extended = options as SignOptions & {
-      fieldLock: { action: string };
-    };
-    expect(extended.fieldLock.action).toBe('Include');
+    expect(() => addFieldLock(options, { action: 'All' })).toThrow(
+      expect.objectContaining({ name: 'UnsupportedOptionError' }),
+    );
   });
 });
 

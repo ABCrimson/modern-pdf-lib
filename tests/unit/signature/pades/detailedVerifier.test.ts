@@ -351,18 +351,22 @@ describe('verifySignatureDetailed — warnings', () => {
     expect(trustWarning).toBeDefined();
   });
 
-  it('should not warn about trusted roots when they are provided', async () => {
+  // signature-cms-05: no chain is validated, so listed roots are refused (0.45.0).
+  it('refuses trusted roots, which it would not validate against', async () => {
     const { certificate, privateKey } = await generateSelfSignedCert();
     const pdf = buildMinimalPdf();
     const signedPdf = await signPdf(pdf, 'Sig1', { certificate, privateKey });
 
-    const results = await verifySignatureDetailed(signedPdf, {
-      trustedCerts: [certificate],
-    });
-    const result = results[0]!;
-
-    const trustWarning = result.warnings.find((w) => w.includes('trusted root'));
-    expect(trustWarning).toBeUndefined();
+    await expect(
+      verifySignatureDetailed(signedPdf, { trustedCerts: [certificate] }),
+    ).rejects.toThrow(
+      expect.objectContaining({
+        name: 'UnsupportedOptionError',
+        entry: 'verifySignatureDetailed()',
+        option: 'trustedCerts',
+        plannedFor: '0.45.0',
+      }),
+    );
   });
 });
 

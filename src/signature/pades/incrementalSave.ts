@@ -21,8 +21,18 @@
 
 import { assertUnencryptedInput } from '../../core/io/incrementalWriter.js';
 import { MalformedInputError } from '../../errors.js';
-import { warnOnce } from '../../internal/warnings.js';
+import { UNSUPPORTED_OPTIONS, rejectOption } from '../../internal/options.js';
 import { latin1Bytes } from '../../internal/latin1.js';
+
+/** The row of the option table that refuses `compress` of saveIncrementalWithSignaturePreservation(). */
+const REFUSED_SAVE_OPTIONS = /* @__PURE__ */ UNSUPPORTED_OPTIONS.filter(
+  (rule) => rule.entry === 'saveIncrementalWithSignaturePreservation()',
+);
+
+/** The row of the option table that refuses `compress` of appendIncrementalUpdate(). */
+const REFUSED_APPEND_OPTIONS = /* @__PURE__ */ UNSUPPORTED_OPTIONS.filter(
+  (rule) => rule.entry === 'appendIncrementalUpdate()',
+);
 
 // ---------------------------------------------------------------------------
 // Types
@@ -44,28 +54,19 @@ export interface SignatureByteRange {
  * Options for incremental save with signature preservation.
  */
 export interface IncrementalSaveOptions {
-  /**
-   * Apply FlateDecode compression to new stream objects.
-   *
-   * Has no effect in this version: the appended objects are written as they
-   * are. Passing `true` emits a one-time `ModernPdfLibWarning` (code
-   * `MPL_IGNORED_OPTION`).
-   */
-  compress?: boolean | undefined;
   /** Preserve existing signatures by verifying byte ranges. Default: true. */
   preserveSignatures?: boolean | undefined;
 }
 
 /**
- * Options for pure append-only incremental updates.
+ * Options that {@link appendIncrementalUpdate} took as its third parameter
+ * until 0.40.9. The parameter was removed in 0.41.0; a third argument with
+ * `compress: true` throws an `UnsupportedOptionError`.
  */
 export interface AppendOptions {
   /**
-   * Apply FlateDecode compression.
-   *
-   * Has no effect in this version: the appended objects are written as they
-   * are. Passing `true` emits a one-time `ModernPdfLibWarning` (code
-   * `MPL_IGNORED_OPTION`).
+   * Apply FlateDecode compression. Removed in 0.41.0 with the parameter: the
+   * appended objects are written as they are.
    */
   compress?: boolean | undefined;
 }
@@ -340,6 +341,8 @@ export function parseExistingTrailer(pdf: Uint8Array): TrailerInfo {
  * @throws {UnsupportedEncryptionError} When `originalPdf` is an encrypted
  *         PDF (its bytes contain the name `/Encrypt`): the
  *         appended objects and trailer would not be encrypted.
+ * @throws {UnsupportedOptionError} When `options` carries `compress: true`,
+ *         an option removed in 0.41.0.
  */
 export function saveIncrementalWithSignaturePreservation(
   originalPdf: Uint8Array,
@@ -347,12 +350,10 @@ export function saveIncrementalWithSignaturePreservation(
   options?: IncrementalSaveOptions,
 ): Uint8Array {
   assertUnencryptedInput(originalPdf, 'saveIncrementalWithSignaturePreservation()');
-  if (options?.compress === true) {
-    warnOnce(
-      'ignored-option:saveIncrementalWithSignaturePreservation compress',
-      'MPL_IGNORED_OPTION',
-      '`saveIncrementalWithSignaturePreservation()`: the option `compress` has no effect in this version.',
-    );
+  // The removed option is not in the type; a JavaScript caller or a cast can still pass it. This
+  // guard is removed in 0.50.0.
+  if ((options as { compress?: unknown } | undefined)?.compress === true) {
+    for (const rule of REFUSED_SAVE_OPTIONS) rejectOption(rule);
   }
   const preserveSignatures = options?.preserveSignatures ?? true;
 
@@ -450,25 +451,22 @@ function parseObjectBodies(pdf: Uint8Array): Map<number, { gen: number; data: Ui
  *
  * @param originalPdf  The original PDF bytes.
  * @param newObjects   Objects to append (new or modified).
- * @param options      Options for the append operation.
  * @returns            The updated PDF bytes.
  * @throws {UnsupportedEncryptionError} When `originalPdf` is an encrypted
  *         PDF (its bytes contain the name `/Encrypt`) and
  *         `newObjects` is not empty: the appended objects and trailer would
  *         not be encrypted.
+ * @throws {UnsupportedOptionError} When a third argument carries
+ *         `compress: true`: the options parameter was removed in 0.41.0.
  */
 export function appendIncrementalUpdate(
   originalPdf: Uint8Array,
   newObjects: IncrementalObject[],
-  _options?: AppendOptions,
 ): Uint8Array {
-  // The declared parameter names are part of the declared API, so `_options` keeps its name.
-  if (_options?.compress === true) {
-    warnOnce(
-      'ignored-option:appendIncrementalUpdate compress',
-      'MPL_IGNORED_OPTION',
-      '`appendIncrementalUpdate()`: the option `compress` has no effect in this version.',
-    );
+  // The removed third parameter is not in the signature; a JavaScript caller or a cast can still
+  // pass it, so it is read through `arguments`. This guard is removed in 0.50.0.
+  if ((arguments[2] as AppendOptions | null | undefined)?.compress === true) {
+    for (const rule of REFUSED_APPEND_OPTIONS) rejectOption(rule);
   }
   if (newObjects.length === 0) {
     return originalPdf;

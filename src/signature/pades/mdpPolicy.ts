@@ -19,7 +19,7 @@
  */
 
 import type { SignOptions } from './signatureHandler.js';
-import { warnOnce } from '../../internal/warnings.js';
+import { UNSUPPORTED_OPTIONS, rejectOption } from '../../internal/options.js';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -46,6 +46,11 @@ export enum MdpPermission {
 
 const decoder = new TextDecoder('latin1');
 
+/** The row of the option table that refuses {@link setCertificationLevel} as a whole call. */
+const REFUSED_CALL = /* @__PURE__ */ UNSUPPORTED_OPTIONS.filter(
+  (rule) => rule.entry === 'setCertificationLevel()',
+);
+
 // ---------------------------------------------------------------------------
 // Public API
 // ---------------------------------------------------------------------------
@@ -53,32 +58,29 @@ const decoder = new TextDecoder('latin1');
 /**
  * Set the certification level (MDP permission) on sign options.
  *
- * Has no effect in this version: `signPdf()` does not write a DocMDP
- * certification, so the signature carries no /DocMDP transform method.
- * Calling this function emits a one-time `ModernPdfLibWarning` (code
- * `MPL_IGNORED_OPTION`).
+ * Not supported in this release: `signPdf()` does not write a DocMDP
+ * certification, so every call throws an `UnsupportedOptionError` (planned
+ * for 0.45.0) and leaves `options` unchanged.
  *
- * @param options  The sign options to modify (mutated in place).
- * @param level    The MDP permission level to set.
+ * @param options  The sign options the level is meant for.
+ * @param level    The MDP permission level.
+ * @throws {UnsupportedOptionError}  Always, in this release.
  *
  * @example
  * ```ts
- * const options: SignOptions = {
- *   certificate: certDer,
- *   privateKey: keyDer,
- * };
- * setCertificationLevel(options, MdpPermission.FormFillAndSign); // has no effect
- * const signedPdf = await signPdf(pdfBytes, 'CertSig', options);
+ * import { UnsupportedOptionError } from 'modern-pdf-lib';
+ *
+ * try {
+ *   setCertificationLevel(options, MdpPermission.FormFillAndSign);
+ * } catch (error) {
+ *   if (!(error instanceof UnsupportedOptionError)) throw error;
+ *   // error.plannedFor === '0.45.0'
+ * }
  * ```
  */
+// oxlint-disable-next-line no-unused-vars -- the parameter names are part of the declared API
 export function setCertificationLevel(options: SignOptions, level: MdpPermission): void {
-  warnOnce(
-    'ignored-option:setCertificationLevel',
-    'MPL_IGNORED_OPTION',
-    '`setCertificationLevel()` has no effect in this version: `signPdf()` does not write a DocMDP certification.',
-  );
-  // Stored on the options object; nothing reads it.
-  (options as SignOptions & { mdpPermission: MdpPermission }).mdpPermission = level;
+  for (const rule of REFUSED_CALL) rejectOption(rule);
 }
 
 /**

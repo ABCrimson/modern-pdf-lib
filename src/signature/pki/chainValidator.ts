@@ -37,7 +37,7 @@ import {
   getSubtle,
 } from '../cms/pkcs7.js';
 import type { Asn1Node } from '../cms/pkcs7.js';
-import { warnOnce } from '../../internal/warnings.js';
+import { UNSUPPORTED_OPTIONS, rejectOption } from '../../internal/options.js';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -61,10 +61,10 @@ export interface ChainValidationOptions {
   trustedCerts?: Uint8Array[] | undefined;
   /**
    * Reserved for revocation checking via OCSP/CRL. `validateCertificateChain`
-   * does not read it and performs no revocation check.
+   * performs no revocation check.
    *
-   * Has no effect in this version; passing `true` emits a one-time
-   * `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`).
+   * Not supported in this release: `true` throws an `UnsupportedOptionError`
+   * (planned for 0.45.0); `false` asks for nothing and is accepted.
    */
   checkRevocation?: boolean | undefined;
   /** The point in time for validity checking. Default: current time. */
@@ -126,6 +126,11 @@ export interface ChainValidationResult {
 // ---------------------------------------------------------------------------
 
 const OID_BASIC_CONSTRAINTS = '2.5.29.19';
+
+/** The row of the option table that refuses `checkRevocation: true` of `validateCertificateChain()`. */
+const REFUSED_OPTIONS = /* @__PURE__ */ UNSUPPORTED_OPTIONS.filter(
+  (rule) => rule.entry === 'validateCertificateChain()' && rule.option === 'checkRevocation',
+);
 
 const OID_SHA256_WITH_RSA = '1.2.840.113549.1.1.11';
 const OID_SHA384_WITH_RSA = '1.2.840.113549.1.1.12';
@@ -593,17 +598,15 @@ export function buildCertificateChain(
  * @param chain     Ordered array of DER-encoded certificates (leaf first, root last).
  * @param options   Validation options.
  * @returns         Validation result with per-certificate status.
+ * @throws {UnsupportedOptionError} When `options.checkRevocation` is `true`
+ *         (planned for 0.45.0).
  */
 export async function validateCertificateChain(
   chain: Uint8Array[],
   options?: ChainValidationOptions,
 ): Promise<ChainValidationResult> {
   if (options?.checkRevocation === true) {
-    warnOnce(
-      'ignored-option:validateCertificateChain checkRevocation',
-      'MPL_IGNORED_OPTION',
-      '`validateCertificateChain()`: the option `checkRevocation` has no effect in this version.',
-    );
+    for (const rule of REFUSED_OPTIONS) rejectOption(rule);
   }
   const validationTime = options?.validationTime ?? new Date();
   const trustedCerts = options?.trustedCerts ?? [];

@@ -74,37 +74,21 @@ describe('MdpPermission', () => {
 // ---------------------------------------------------------------------------
 
 describe('setCertificationLevel', () => {
-  it('should set MDP permission on sign options', () => {
+  // signature-pki-09: signPdf() writes no DocMDP certification, so the call is refused (0.45.0).
+  it.each([
+    MdpPermission.NoChanges,
+    MdpPermission.FormFillAndSign,
+    MdpPermission.FormFillSignAnnotate,
+  ])('throws UnsupportedOptionError for level %i and leaves the options unchanged', (level) => {
     const options = createMockSignOptions();
-    setCertificationLevel(options, MdpPermission.NoChanges);
-
-    const extended = options as SignOptions & { mdpPermission: MdpPermission };
-    expect(extended.mdpPermission).toBe(MdpPermission.NoChanges);
-  });
-
-  it('should set FormFillAndSign level', () => {
-    const options = createMockSignOptions();
-    setCertificationLevel(options, MdpPermission.FormFillAndSign);
-
-    const extended = options as SignOptions & { mdpPermission: MdpPermission };
-    expect(extended.mdpPermission).toBe(2);
-  });
-
-  it('should set FormFillSignAnnotate level', () => {
-    const options = createMockSignOptions();
-    setCertificationLevel(options, MdpPermission.FormFillSignAnnotate);
-
-    const extended = options as SignOptions & { mdpPermission: MdpPermission };
-    expect(extended.mdpPermission).toBe(3);
-  });
-
-  it('should overwrite previous MDP setting', () => {
-    const options = createMockSignOptions();
-    setCertificationLevel(options, MdpPermission.NoChanges);
-    setCertificationLevel(options, MdpPermission.FormFillSignAnnotate);
-
-    const extended = options as SignOptions & { mdpPermission: MdpPermission };
-    expect(extended.mdpPermission).toBe(3);
+    expect(() => setCertificationLevel(options, level)).toThrow(
+      expect.objectContaining({
+        name: 'UnsupportedOptionError',
+        entry: 'setCertificationLevel()',
+        plannedFor: '0.45.0',
+      }),
+    );
+    expect(options).toStrictEqual(createMockSignOptions());
   });
 });
 

@@ -20,6 +20,7 @@ import {
 } from './byteRange.js';
 import type { PrepareAppearanceOptions } from './byteRange.js';
 import { assertUnencryptedInput } from '../../core/io/incrementalWriter.js';
+import { UNSUPPORTED_OPTIONS, rejectOption } from '../../internal/options.js';
 import { warnOnce } from '../../internal/warnings.js';
 import { buildPkcs7Signature, extractIssuerAndSerial, parseDerTlv } from '../cms/pkcs7.js';
 import type { SignatureOptions } from '../cms/pkcs7.js';
@@ -96,8 +97,9 @@ export interface SignOptions {
   /**
    * RFC 3161 TSA URL for timestamping.
    *
-   * Has no effect in this version: no timestamp request is made. Passing it
-   * emits a one-time `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`).
+   * Not supported in this release: `signPdf()` requests and embeds no
+   * timestamp, so passing it throws an `UnsupportedOptionError` (planned for
+   * 0.45.0) before anything is signed.
    */
   timestampUrl?: string | undefined;
   /**
@@ -136,6 +138,11 @@ export interface PdfSignatureInfo {
 
 const decoder = new TextDecoder('latin1');
 
+/** The rows of the option table that `signPdf()` refuses. */
+const REFUSED_OPTIONS = /* @__PURE__ */ UNSUPPORTED_OPTIONS.filter(
+  (rule) => rule.entry === 'signPdf()',
+);
+
 /** Warn once per option that `signPdf` accepts and does not act on. */
 function warnIgnoredSignOptions(options: SignOptions): void {
   const warn = (name: string): void => {
@@ -145,7 +152,6 @@ function warnIgnoredSignOptions(options: SignOptions): void {
       `\`signPdf()\`: the option \`${name}\` has no effect in this version.`,
     );
   };
-  if (options.timestampUrl !== undefined) warn('timestampUrl');
   // `reason` and `location` are read when a visible appearance builds its own text.
   // `signPdf` tests the appearance by truthiness, so a `null` appearance is absent here too.
   const shownInAppearance = options.appearance ? !options.appearance.text : false;
@@ -321,6 +327,8 @@ function parsePkcs7ForCert(pkcs7Bytes: Uint8Array): {
  *         box (`appearance.text`, or the generated "Signed by:", "Reason:"
  *         and "Location:" lines) holds a character that WinAnsiEncoding
  *         (Helvetica) has no code for.
+ * @throws {UnsupportedOptionError} When `options.timestampUrl` is passed
+ *         (planned for 0.45.0); nothing is signed.
  *
  * @example
  * ```ts
@@ -338,6 +346,11 @@ export async function signPdf(
   options: SignOptions,
 ): Promise<Uint8Array> {
   assertUnencryptedInput(pdfBytes, 'signPdf()');
+  for (const rule of REFUSED_OPTIONS) {
+    if (rule.option !== undefined && Reflect.get(options, rule.option) !== undefined) {
+      rejectOption(rule);
+    }
+  }
   warnIgnoredSignOptions(options);
   const hashAlgorithm = options.hashAlgorithm ?? 'SHA-256';
 
