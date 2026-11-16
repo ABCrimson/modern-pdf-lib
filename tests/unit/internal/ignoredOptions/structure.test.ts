@@ -1,40 +1,19 @@
 /**
- * Entries that accept an option and do not act on it warn once per option with the code
- * `MPL_IGNORED_OPTION`: `metadataPlugin`, `appendIncrementalUpdate`,
- * `saveIncrementalWithSignaturePreservation`, `buildPdfX6OutputIntent`, `applyTablePreset`,
- * structure elements and `optimizeAllImages`. Each row checks the first call, the second call,
+ * Structure elements accept options (`scope`, `rowSpan`) and do not act on them, so they warn once
+ * per option with the code `MPL_IGNORED_OPTION`. Each row checks the first call, the second call,
  * the absent and undefined option, and that the message names no caller value.
  */
 
-import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { MockInstance } from 'vitest';
-import { createPdf } from '../../../src/index.js';
-import { metadataPlugin } from '../../../src/plugins/builtins/metadataPlugin.js';
-import {
-  appendIncrementalUpdate,
-  saveIncrementalWithSignaturePreservation,
-} from '../../../src/signature/pades/incrementalSave.js';
-import { buildPdfX6OutputIntent } from '../../../src/compliance/pdfx/pdfX6.js';
-import { applyTablePreset } from '../../../src/layout/presets.js';
-import { PdfStructureTree } from '../../../src/accessibility/structureTree.js';
+import { PdfStructureTree } from '../../../../src/accessibility/structureTree.js';
 import {
   tagParagraph,
   tagTableDataCell,
   tagTableHeaderCell,
-} from '../../../src/accessibility/taggingHelpers.js';
-import { optimizeAllImages } from '../../../src/assets/image/optimize/batchOptimize.js';
-import { resetWarningsForTesting } from '../../../src/internal/warnings.js';
-
-const TYPE = 'ModernPdfLibWarning';
-const CODE = 'MPL_IGNORED_OPTION';
-
-let pdf: Uint8Array;
-
-beforeAll(async () => {
-  const doc = createPdf();
-  doc.addPage();
-  pdf = await doc.save();
-});
+} from '../../../../src/accessibility/taggingHelpers.js';
+import { resetWarningsForTesting } from '../../../../src/internal/warnings.js';
+import { CODE, TYPE, ignoredOptionMessage as message } from '../../../helpers/ignoredOptions.js';
 
 let emit: MockInstance<typeof process.emitWarning>;
 
@@ -60,52 +39,10 @@ interface Row {
   readonly invoke: (extra: Record<string, unknown>) => unknown;
 }
 
-const OBJECT = {
-  objectNumber: 90,
-  generationNumber: 0,
-  data: new TextEncoder().encode('<< /Type /Probe >>'),
-};
 const structure = (extra: Record<string, unknown>): unknown =>
   new PdfStructureTree().addElement(null, 'TD', extra);
 
 const ROWS: readonly Row[] = [
-  ...(['creator', 'defaultTitle', 'defaultAuthor'] as const).map((option): Row => ({
-    entry: 'metadataPlugin',
-    subject: 'metadataPlugin()',
-    option,
-    value: 'SECRET-TEXT',
-    invoke: (extra) => metadataPlugin(extra),
-  })),
-  {
-    entry: 'appendIncrementalUpdate',
-    subject: 'appendIncrementalUpdate()',
-    option: 'compress',
-    value: true,
-    quiet: [false],
-    invoke: (extra) => appendIncrementalUpdate(pdf, [OBJECT], extra),
-  },
-  {
-    entry: 'saveIncrementalWithSignaturePreservation',
-    subject: 'saveIncrementalWithSignaturePreservation()',
-    option: 'compress',
-    value: true,
-    quiet: [false],
-    invoke: (extra) => saveIncrementalWithSignaturePreservation(pdf, pdf, extra),
-  },
-  {
-    entry: 'buildPdfX6OutputIntent',
-    subject: 'buildPdfX6OutputIntent()',
-    option: 'variant',
-    value: 'PDF/X-6p',
-    invoke: (extra) => buildPdfX6OutputIntent({ outputConditionIdentifier: 'Custom', ...extra }),
-  },
-  {
-    entry: 'applyTablePreset',
-    subject: 'applyTablePreset()',
-    option: 'hasHeader',
-    value: false,
-    invoke: (extra) => applyTablePreset('striped', extra),
-  },
   {
     entry: 'PdfStructureElement',
     subject: 'PdfStructureElement',
@@ -120,17 +57,7 @@ const ROWS: readonly Row[] = [
     value: 4747,
     invoke: structure,
   },
-  {
-    entry: 'optimizeAllImages',
-    subject: 'optimizeAllImages()',
-    option: 'maxDpi',
-    value: 4747,
-    invoke: async (extra) => optimizeAllImages(createPdf(), extra),
-  },
 ];
-
-const message = (subject: string, option: string): string =>
-  `\`${subject}\`: the option \`${option}\` has no effect in this version.`;
 
 function ignoredCalls(): unknown[][] {
   return emit.mock.calls.filter(([, options]) => (options as { code?: string }).code === CODE);
@@ -168,41 +95,6 @@ describe.each(ROWS)('$entry option $option', (row) => {
 });
 
 describe('results stay the same', () => {
-  it('appendIncrementalUpdate writes the same bytes with and without compress', () => {
-    expect(appendIncrementalUpdate(pdf, [OBJECT], { compress: true })).toEqual(
-      appendIncrementalUpdate(pdf, [OBJECT]),
-    );
-  });
-
-  it('saveIncrementalWithSignaturePreservation returns the same bytes with and without compress', () => {
-    expect(saveIncrementalWithSignaturePreservation(pdf, pdf, { compress: true })).toEqual(
-      saveIncrementalWithSignaturePreservation(pdf, pdf),
-    );
-  });
-
-  it('buildPdfX6OutputIntent builds the same keys with and without variant', () => {
-    const withVariant = buildPdfX6OutputIntent({
-      outputConditionIdentifier: 'Custom',
-      variant: 'PDF/X-6n',
-    });
-    for (const key of ['/Type', '/S', '/OutputConditionIdentifier']) {
-      expect(withVariant.has(key)).toBe(true);
-    }
-    expect(withVariant.has('/Variant')).toBe(false);
-  });
-
-  it('applyTablePreset returns the same preset with and without hasHeader', () => {
-    expect(applyTablePreset('bordered', { hasHeader: false })).toEqual(
-      applyTablePreset('bordered'),
-    );
-  });
-
-  it('optimizeAllImages reports the same with and without maxDpi', async () => {
-    expect(await optimizeAllImages(createPdf(), { maxDpi: 72 })).toEqual(
-      await optimizeAllImages(createPdf()),
-    );
-  });
-
   it('a structure element keeps the options it was given', () => {
     const element = new PdfStructureTree().addElement(null, 'TH', { scope: 'Row', rowSpan: 2 });
     expect(element.options).toEqual({ scope: 'Row', rowSpan: 2 });

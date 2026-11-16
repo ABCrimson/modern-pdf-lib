@@ -9,9 +9,9 @@
 
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { MockInstance } from 'vitest';
-import { createPdf } from '../../../src/index.js';
-import { StreamingPdfParser } from '../../../src/parser/streamingParser.js';
-import { saveIncremental } from '../../../src/core/io/incrementalWriter.js';
+import { createPdf } from '../../../../src/index.js';
+import { StreamingPdfParser } from '../../../../src/parser/streamingParser.js';
+import { saveIncremental } from '../../../../src/core/io/incrementalWriter.js';
 import {
   PdfArray,
   PdfDict,
@@ -19,11 +19,9 @@ import {
   PdfNumber,
   PdfObjectRegistry,
   PdfString,
-} from '../../../src/core/pdfObjects.js';
-import { resetWarningsForTesting } from '../../../src/internal/warnings.js';
-
-const TYPE = 'ModernPdfLibWarning';
-const CODE = 'MPL_IGNORED_OPTION';
+} from '../../../../src/core/pdfObjects.js';
+import { resetWarningsForTesting } from '../../../../src/internal/warnings.js';
+import { CODE, TYPE, ignoredOptionMessage } from '../../../helpers/ignoredOptions.js';
 
 let pdf: Uint8Array;
 
@@ -134,8 +132,7 @@ const ROWS: readonly Row[] = [
   },
 ];
 
-const message = (subject: string, option: string): string =>
-  `\`${subject}\`: the option \`${option}\` has no effect in this version.`;
+const message = ignoredOptionMessage;
 
 function ignoredCalls(): unknown[][] {
   return emit.mock.calls.filter(([, options]) => (options as { code?: string }).code === CODE);

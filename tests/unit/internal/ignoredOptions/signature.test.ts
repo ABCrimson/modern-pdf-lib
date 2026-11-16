@@ -1,24 +1,28 @@
 /**
  * Signature entries that accept an option and do not act on it warn once per option with the
- * code `MPL_IGNORED_OPTION`: `signPdf`, `setCertificationLevel`, `addFieldLock`,
- * `verifySignatureDetailed` and `validateCertificateChain`. Each row checks the first call, the
+ * code `MPL_IGNORED_OPTION`: `appendIncrementalUpdate`, `saveIncrementalWithSignaturePreservation`,
+ * `signPdf`, `setCertificationLevel`, `addFieldLock`, `verifySignatureDetailed` and
+ * `validateCertificateChain`. Each row checks the first call, the
  * second call, the absent and undefined option, and that the message names no caller value.
  */
 
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { MockInstance } from 'vitest';
-import { createPdf } from '../../../src/index.js';
-import { signPdf } from '../../../src/signature/pades/signatureHandler.js';
-import { addFieldLock } from '../../../src/signature/pades/fieldLock.js';
-import { MdpPermission, setCertificationLevel } from '../../../src/signature/pades/mdpPolicy.js';
-import { verifySignatureDetailed } from '../../../src/signature/pades/detailedVerifier.js';
-import { validateCertificateChain } from '../../../src/signature/pki/chainValidator.js';
-import type { SignOptions } from '../../../src/signature/pades/signatureHandler.js';
-import { resetWarningsForTesting } from '../../../src/internal/warnings.js';
-import { generateTestCert } from '../../helpers/signature-trust-fixtures.js';
+import { createPdf } from '../../../../src/index.js';
+import { signPdf } from '../../../../src/signature/pades/signatureHandler.js';
+import { addFieldLock } from '../../../../src/signature/pades/fieldLock.js';
+import { MdpPermission, setCertificationLevel } from '../../../../src/signature/pades/mdpPolicy.js';
+import { verifySignatureDetailed } from '../../../../src/signature/pades/detailedVerifier.js';
+import { validateCertificateChain } from '../../../../src/signature/pki/chainValidator.js';
+import type { SignOptions } from '../../../../src/signature/pades/signatureHandler.js';
+import {
+  appendIncrementalUpdate,
+  saveIncrementalWithSignaturePreservation,
+} from '../../../../src/signature/pades/incrementalSave.js';
+import { resetWarningsForTesting } from '../../../../src/internal/warnings.js';
+import { CODE, TYPE, ignoredOptionMessage } from '../../../helpers/ignoredOptions.js';
+import { generateTestCert } from '../../../helpers/signature-trust-fixtures.js';
 
-const TYPE = 'ModernPdfLibWarning';
-const CODE = 'MPL_IGNORED_OPTION';
 const latin1 = new TextDecoder('latin1');
 
 let pdf: Uint8Array;
@@ -56,7 +60,27 @@ interface Row {
 const sign = (extra: Record<string, unknown>): Promise<unknown> =>
   signPdf(pdf, 'Signature1', { ...signer, ...extra } as SignOptions);
 
+const OBJECT = {
+  objectNumber: 90,
+  generationNumber: 0,
+  data: new TextEncoder().encode('<< /Type /Probe >>'),
+};
+
 const ROWS: readonly Row[] = [
+  {
+    entry: 'appendIncrementalUpdate',
+    option: 'compress',
+    value: true,
+    quiet: [false],
+    invoke: async (extra) => appendIncrementalUpdate(pdf, [OBJECT], extra),
+  },
+  {
+    entry: 'saveIncrementalWithSignaturePreservation',
+    option: 'compress',
+    value: true,
+    quiet: [false],
+    invoke: async (extra) => saveIncrementalWithSignaturePreservation(pdf, pdf, extra),
+  },
   {
     entry: 'signPdf',
     option: 'timestampUrl',
@@ -89,7 +113,7 @@ const ROWS: readonly Row[] = [
 ];
 
 const message = (entry: string, option: string): string =>
-  `\`${entry}()\`: the option \`${option}\` has no effect in this version.`;
+  ignoredOptionMessage(`${entry}()`, option);
 
 function ignoredCalls(): unknown[][] {
   return emit.mock.calls.filter(([, options]) => (options as { code?: string }).code === CODE);
@@ -125,6 +149,20 @@ describe.each(ROWS)('$entry option $option', (row) => {
       expect(text).not.toContain(String(row.value));
     }
     expect(text).toBe(message(row.entry, row.option));
+  });
+});
+
+describe('results stay the same', () => {
+  it('appendIncrementalUpdate writes the same bytes with and without compress', () => {
+    expect(appendIncrementalUpdate(pdf, [OBJECT], { compress: true })).toEqual(
+      appendIncrementalUpdate(pdf, [OBJECT]),
+    );
+  });
+
+  it('saveIncrementalWithSignaturePreservation returns the same bytes with and without compress', () => {
+    expect(saveIncrementalWithSignaturePreservation(pdf, pdf, { compress: true })).toEqual(
+      saveIncrementalWithSignaturePreservation(pdf, pdf),
+    );
   });
 });
 
