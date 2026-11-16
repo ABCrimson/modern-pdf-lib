@@ -23,9 +23,10 @@
  *   chance. The loader records such a document's registry with
  *   {@link markLoadedFromEncryptedFile}, and the writers skip
  *   {@link rewrapLegacyStream} and {@link rewriteSyncFlushedStream} when
- *   {@link isLoadedFromEncryptedFile} says so. A document whose objects the loader decrypted holds plaintext and is
- *   re-wrapped like any other, as is a document that was created or loaded
- *   from a file without `/Encrypt`, also when `encrypt()` is called on it.
+ *   {@link isLoadedFromEncryptedFile} says so. A document whose objects the
+ *   loader decrypted holds plaintext and is re-wrapped and rewritten like any other, as is a
+ *   document that was created or loaded from a file without `/Encrypt`, also
+ *   when `encrypt()` is called on it.
  * - A document whose objects were decrypted on load is recorded with
  *   {@link markDecryptedFromEncryptedFile}; so is a document that pages,
  *   embedded pages, metadata or a copy of such a document were brought into
@@ -364,15 +365,16 @@ export function rewrapLegacyStream(stream: PdfStream): void {
  * Applies when the stream's `/Filter` is `/FlateDecode`, or an array whose
  * first entry is `/FlateDecode`, and its data starts with a zlib header and
  * ends with `00 00 ff ff` (`inflateSyncFlushedZlib`). When the data has not
- * reached its final block and inflates to at most
+ * reached its final block, ends at a block boundary and inflates to at most
  * {@link INTERNAL_LIMITS}.maxRewrapDecodedBytes (64 MiB), the bytes decoded up
  * to the sync flush, which a reader decodes from the data as loaded, are
  * compressed again as zlib data at level 6 and replace the data, and
  * `/Length` is updated. `/DecodeParms` stays as it is.
  *
- * Complete zlib data is never rewritten. Data that does not inflate, data that
- * decodes to more than {@link INTERNAL_LIMITS}.maxRewrapDecodedBytes bytes
- * (inflating stops once the decoded size passes it), and data in which
+ * Complete zlib data is never rewritten. Data that does not inflate, data cut
+ * short inside a block, data that decodes to more than
+ * {@link INTERNAL_LIMITS}.maxRewrapDecodedBytes bytes (inflating stops once
+ * the decoded size passes it), and data in which
  * 128 KiB of input in a row decode to no bytes are left alone, and no error is
  * thrown.
  *

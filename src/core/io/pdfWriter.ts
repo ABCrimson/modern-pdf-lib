@@ -16,7 +16,8 @@
  * `core/internal/flateStream`) and optional encryption via a
  * {@link PdfEncryptionHandler}. A loaded `/FlateDecode` stream that holds
  * raw DEFLATE data, or zlib data cut short at a sync flush, is written back
- * as complete zlib data in both compress modes, except in a document loaded with `ignoreEncryption: true` from a file
+ * as complete zlib data in both compress modes, except in a document loaded
+ * with `ignoreEncryption: true` from a file
  * whose trailer has `/Encrypt`, whose stream data is still encrypted and is
  * written as loaded. A registry that holds content decrypted from an
  * encrypted file is refused with `UnsupportedEncryptionError` unless the

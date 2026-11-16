@@ -404,6 +404,14 @@ describe('inflateSyncFlushedZlib', () => {
     expect(inflateSyncFlushedZlib(damaged, 1 << 20)).toBeUndefined();
   });
 
+  it('returns undefined for data cut inside a stored block that ends with 00 00 ff ff', () => {
+    const content = new Uint8Array(50).fill(0x41);
+    content.set([0x00, 0x00, 0xff, 0xff], 46);
+    const data = new Uint8Array([0x78, 0x9c, 0x00, 100, 0, 0xff - 100, 0xff, ...content]);
+    expect(nodeRead(data).length).toBe(50);
+    expect(inflateSyncFlushedZlib(data, 1 << 20)).toBeUndefined();
+  });
+
   it('returns the data when the decoded size equals the bound, and undefined above it', () => {
     const data = syncFlushed(LONG);
     expect(inflateSyncFlushedZlib(data, LONG.length)).toEqual(new Uint8Array(LONG));
