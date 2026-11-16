@@ -7,13 +7,21 @@
 import { describe, bench } from './vitest-bench.js';
 import {
   getStandardFont,
-  measureStandardText,
   standardFontHeight,
   STANDARD_FONT_NAMES,
 } from '../../src/assets/font/internal/standardFonts.js';
+import type { StandardFontName } from '../../src/assets/font/internal/standardFonts.js';
+import {
+  encodeStandardText,
+  measureStandardCodes,
+} from '../../src/assets/font/internal/standardEncoding.js';
 
 // Bind once: Vitest's module runner adds a getter call to every imported-binding access.
-const measureText = measureStandardText;
+const encodeText = encodeStandardText;
+const measureCodes = measureStandardCodes;
+/** Text measurement as drawText and widthOfTextAtSize do it: encode, then sum the code widths. */
+const measureText = (text: string, font: StandardFontName, size: number): number =>
+  measureCodes(font, encodeText(font, text), size);
 const fontHeight = standardFontHeight;
 const getFont = getStandardFont;
 const fontNames = STANDARD_FONT_NAMES;
@@ -60,23 +68,23 @@ describe('standard font lookup', () => {
 // ---------------------------------------------------------------------------
 
 describe('text measurement', () => {
-  bench('measureStandardText short (13 chars)', () => {
+  bench('measure text short (13 chars)', () => {
     measureText(shortText, 'Helvetica', 12);
   });
 
-  bench('measureStandardText medium (86 chars)', () => {
+  bench('measure text medium (86 chars)', () => {
     measureText(mediumText, 'Helvetica', 12);
   });
 
-  bench('measureStandardText long (~1720 chars)', () => {
+  bench('measure text long (~1720 chars)', () => {
     measureText(longText, 'Helvetica', 12);
   });
 
-  bench('measureStandardText Courier (monospace)', () => {
+  bench('measure text Courier (monospace)', () => {
     measureText(mediumText, 'Courier', 12);
   });
 
-  bench('measureStandardText Times-Roman', () => {
+  bench('measure text Times-Roman', () => {
     measureText(mediumText, 'Times-Roman', 12);
   });
 

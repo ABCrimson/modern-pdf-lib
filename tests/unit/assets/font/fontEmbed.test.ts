@@ -9,10 +9,24 @@ import { describe, it, expect } from 'vitest';
 import {
   getStandardFont,
   isStandardFont,
-  measureStandardText,
   standardFontHeight,
   STANDARD_FONT_NAMES,
 } from '../../../../src/assets/font/internal/standardFonts.js';
+import type { StandardFontName } from '../../../../src/assets/font/internal/standardFonts.js';
+import {
+  encodeStandardText,
+  measureStandardCodes,
+} from '../../../../src/assets/font/internal/standardEncoding.js';
+
+/** The width of `text` in a standard font, measured as drawText and widthOfTextAtSize measure it. */
+function measure(text: string, font: StandardFontName, size: number): number {
+  return measureStandardCodes(font, encodeStandardText(font, text), size);
+}
+
+/** Text each standard font can encode: Symbol and ZapfDingbats have no Latin letters. */
+function sampleFor(font: StandardFontName): string {
+  return font === 'Symbol' ? 'αβγ' : font === 'ZapfDingbats' ? '✓✔' : 'Test';
+}
 
 // ---------------------------------------------------------------------------
 // Tests
@@ -20,11 +34,11 @@ import {
 
 describe('Standard font metrics', () => {
   // -------------------------------------------------------------------------
-  // widthOfTextAtSize (via measureStandardText)
+  // widthOfTextAtSize (via measureStandardCodes)
   // -------------------------------------------------------------------------
 
   it('standard font widthOfTextAtSize returns positive number', () => {
-    const width = measureStandardText('Hello, World!', 'Helvetica', 12);
+    const width = measure('Hello, World!', 'Helvetica', 12);
     expect(width).toBeGreaterThan(0);
     expect(typeof width).toBe('number');
     expect(Number.isFinite(width)).toBe(true);
@@ -32,7 +46,7 @@ describe('Standard font metrics', () => {
 
   it('all 14 standard fonts return positive width for ASCII text', () => {
     for (const name of STANDARD_FONT_NAMES) {
-      const width = measureStandardText('Test', name, 12);
+      const width = measure(sampleFor(name), name, 12);
       expect(width).toBeGreaterThan(0);
     }
   });
@@ -79,7 +93,7 @@ describe('Standard font metrics', () => {
   it('Helvetica "Hello" width at 12pt matches expected value', () => {
     // H=722, e=556, l=222, l=222, o=556 = 2278 in 1000-units
     // At 12pt: 2278 * 12/1000 = 27.336
-    const width = measureStandardText('Hello', 'Helvetica', 12);
+    const width = measure('Hello', 'Helvetica', 12);
     expect(width).toBeCloseTo(27.336, 1);
   });
 
@@ -107,8 +121,8 @@ describe('Standard font metrics', () => {
   });
 
   it('Courier text width is proportional to string length', () => {
-    const width5 = measureStandardText('Hello', 'Courier', 12);
-    const width10 = measureStandardText('HelloHello', 'Courier', 12);
+    const width5 = measure('Hello', 'Courier', 12);
+    const width10 = measure('HelloHello', 'Courier', 12);
     expect(width10).toBeCloseTo(width5 * 2, 5);
   });
 
@@ -117,13 +131,13 @@ describe('Standard font metrics', () => {
   // -------------------------------------------------------------------------
 
   it('empty string has zero width', () => {
-    const width = measureStandardText('', 'Helvetica', 12);
+    const width = measure('', 'Helvetica', 12);
     expect(width).toBe(0);
   });
 
   it('empty string has zero width for all standard fonts', () => {
     for (const name of STANDARD_FONT_NAMES) {
-      expect(measureStandardText('', name, 12)).toBe(0);
+      expect(measure('', name, 12)).toBe(0);
     }
   });
 
@@ -134,9 +148,9 @@ describe('Standard font metrics', () => {
   it('text measurement scales linearly with font size', () => {
     const text = 'Scaling test';
 
-    const w12 = measureStandardText(text, 'Helvetica', 12);
-    const w24 = measureStandardText(text, 'Helvetica', 24);
-    const w6 = measureStandardText(text, 'Helvetica', 6);
+    const w12 = measure(text, 'Helvetica', 12);
+    const w24 = measure(text, 'Helvetica', 24);
+    const w6 = measure(text, 'Helvetica', 6);
 
     expect(w24).toBeCloseTo(w12 * 2, 5);
     expect(w6).toBeCloseTo(w12 / 2, 5);

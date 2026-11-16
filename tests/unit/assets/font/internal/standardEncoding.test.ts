@@ -17,7 +17,6 @@ import {
 import {
   STANDARD_FONT_NAMES,
   getStandardFont,
-  measureStandardText,
   type StandardFontName,
 } from '../../../../../src/assets/font/internal/standardFonts.js';
 
@@ -271,9 +270,6 @@ describe('measureStandardCodes', () => {
     expect(measureStandardCodes('Helvetica', codes, 12)).toBeCloseTo(
       ((722 + 556 + 222 + 222 + 556) * 12) / 1000,
       10,
-    );
-    expect(measureStandardCodes('Helvetica', codes, 12)).toBe(
-      measureStandardText('Hello', 'Helvetica', 12),
     );
   });
 

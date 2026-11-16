@@ -556,40 +556,6 @@ export function isStandardFont(name: string): name is StandardFontName {
 }
 
 /**
- * Measure the width of a text string using a standard font.
- *
- * Characters outside the WinAnsiEncoding range are measured as the
- * width of the space character.
- *
- * @param text     - The text to measure.
- * @param fontName - The standard font name.
- * @param fontSize - The font size in points.
- * @returns The total advance width in points.
- */
-export function measureStandardText(
-  text: string,
-  fontName: StandardFontName,
-  fontSize: number,
-): number {
-  const font = STANDARD_FONTS.get(fontName);
-  if (!font) {
-    throw new InvalidArgumentError(`Unknown standard font: ${fontName}`, { argument: 'fontName' });
-  }
-
-  const scale = fontSize / 1000;
-  let totalWidth = 0;
-
-  for (let i = 0; i < text.length; i++) {
-    const code = text.charCodeAt(i);
-    // WinAnsiEncoding only covers 0–255
-    const width = code < 256 ? (font.widths[code] ?? 0) : (font.widths[32] ?? 0);
-    totalWidth += width;
-  }
-
-  return totalWidth * scale;
-}
-
-/**
  * Compute the height of the font at a given size.
  *
  * @param fontName - The standard font name.
