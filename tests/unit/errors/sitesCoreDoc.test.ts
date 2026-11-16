@@ -54,6 +54,21 @@ interface Site {
 
 const latin1 = (text: string): Uint8Array => Uint8Array.from(text, (c) => c.charCodeAt(0));
 
+/**
+ * The message of a streaming parse error: the first line with its offset, then the expected and
+ * found values, as 0.40.9 wrote them; `context` adds the hex dump of the data around the offset.
+ */
+function streamingMessage(
+  first: string,
+  offset: number,
+  expected: string,
+  actual: string,
+  context = false,
+): string | RegExp {
+  const lines = `${first} (at byte offset ${offset})\n  Expected: ${expected}\n  Got: ${actual}`;
+  return context ? new RegExp(`^${RegExp.escape(lines)}\\n  Context:\\n.*\\[`, 's') : lines;
+}
+
 function docWithPages(count: number) {
   const doc = createPdf();
   for (let i = 0; i < count; i++) doc.addPage();
@@ -400,7 +415,14 @@ const SITES: readonly Site[] = [
     code: 'streaming-parse',
     fields: {
       offset: 0,
-      message: 'Streaming parser buffer exceeded maximum size of 4 bytes (at byte offset 0)',
+      expected: 'data within 4 bytes',
+      actual: '5 bytes',
+      message: streamingMessage(
+        'Streaming parser buffer exceeded maximum size of 4 bytes',
+        0,
+        'data within 4 bytes',
+        '5 bytes',
+      ),
     },
   },
   {
@@ -414,7 +436,14 @@ const SITES: readonly Site[] = [
     code: 'streaming-parse',
     fields: {
       offset: 0,
-      message: 'Invalid PDF: data too short to contain a valid PDF header. (at byte offset 0)',
+      expected: 'at least 8 bytes',
+      actual: '4 bytes',
+      message: streamingMessage(
+        'Invalid PDF: data too short to contain a valid PDF header.',
+        0,
+        'at least 8 bytes',
+        '4 bytes',
+      ),
     },
   },
   {
@@ -428,7 +457,15 @@ const SITES: readonly Site[] = [
     code: 'streaming-parse',
     fields: {
       offset: 0,
-      message: 'Invalid PDF: file does not contain a "%PDF-" header. (at byte offset 0)',
+      expected: '"%PDF-" header',
+      actual: 'no header found',
+      message: streamingMessage(
+        'Invalid PDF: file does not contain a "%PDF-" header.',
+        0,
+        '"%PDF-" header',
+        'no header found',
+        true,
+      ),
     },
   },
   {
@@ -442,7 +479,15 @@ const SITES: readonly Site[] = [
     code: 'streaming-parse',
     fields: {
       offset: 0,
-      message: 'Invalid PDF: could not parse version from header. (at byte offset 0)',
+      expected: '"%PDF-X.Y" version string',
+      actual: '"%PDF-x.y a"',
+      message: streamingMessage(
+        'Invalid PDF: could not parse version from header.',
+        0,
+        '"%PDF-X.Y" version string',
+        '"%PDF-x.y a"',
+        true,
+      ),
     },
   },
   {
@@ -456,8 +501,15 @@ const SITES: readonly Site[] = [
     code: 'streaming-parse',
     fields: {
       offset: 0,
-      message:
-        'Invalid PDF: could not find "startxref" marker in the last 2048 bytes. (at byte offset 0)',
+      expected: '"startxref" near end of file',
+      actual: 'no "startxref" found',
+      message: streamingMessage(
+        'Invalid PDF: could not find "startxref" marker in the last 2048 bytes.',
+        0,
+        '"startxref" near end of file',
+        'no "startxref" found',
+        true,
+      ),
     },
   },
   {
@@ -471,7 +523,15 @@ const SITES: readonly Site[] = [
     code: 'streaming-parse',
     fields: {
       offset: 9,
-      message: 'Invalid PDF: no valid offset after "startxref". (at byte offset 9)',
+      expected: 'decimal offset after "startxref"',
+      actual: '"x\n%%EOF"',
+      message: streamingMessage(
+        'Invalid PDF: no valid offset after "startxref".',
+        9,
+        'decimal offset after "startxref"',
+        '"x\n%%EOF"',
+        true,
+      ),
     },
   },
   {
@@ -481,7 +541,14 @@ const SITES: readonly Site[] = [
     code: 'streaming-parse',
     fields: {
       offset: 0,
-      message: 'Cannot get page content before calling end(). (at byte offset 0)',
+      expected: 'end() called before getPageContent()',
+      actual: 'end() not yet called',
+      message: streamingMessage(
+        'Cannot get page content before calling end().',
+        0,
+        'end() called before getPageContent()',
+        'end() not yet called',
+      ),
     },
   },
   {
@@ -494,7 +561,17 @@ const SITES: readonly Site[] = [
     },
     Class: StreamingParseError,
     code: 'streaming-parse',
-    fields: { offset: 0, message: 'Page index 1 is out of range (0-0). (at byte offset 0)' },
+    fields: {
+      offset: 0,
+      expected: 'page index in [0, 1)',
+      actual: '1',
+      message: streamingMessage(
+        'Page index 1 is out of range (0-0).',
+        0,
+        'page index in [0, 1)',
+        '1',
+      ),
+    },
   },
 ];
 

@@ -464,6 +464,24 @@ describe('fields of the kind classes and the new classes', () => {
     expect(Object.hasOwn(new StreamingParseError('x'), 'cause')).toBe(false);
   });
 
+  it('StreamingParseError carries expected, actual and the data around the offset', () => {
+    const data = Uint8Array.from('%PDF-1.7 trailer', (c) => c.charCodeAt(0));
+    const err = new StreamingParseError('Unexpected EOF', 9, {
+      expected: '"startxref"',
+      actual: '"trailer"',
+      data,
+    });
+    expect(err.offset).toBe(9);
+    expect(err.expected).toBe('"startxref"');
+    expect(err.actual).toBe('"trailer"');
+    expect(err.hexContext).toContain('Error at offset 9');
+    expect(err.message).toBe(
+      'Unexpected EOF (at byte offset 9)\n  Expected: "startxref"\n  Got: "trailer"\n  Context:\n' +
+        err.hexContext,
+    );
+    expect(Object.hasOwn(err, 'cause')).toBe(false);
+  });
+
   it('code is typed as the literal of a leaf and the subtree union of a parent', () => {
     expectTypeOf(new NoSuchFieldError('f').code).toEqualTypeOf<'no-such-field'>();
     expectTypeOf(new PdfParseError({ message: 'x', offset: 0 }).code).toEqualTypeOf<

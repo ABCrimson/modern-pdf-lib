@@ -732,10 +732,29 @@ export class StreamingParseError extends PdfParseError {
 
   override readonly name = 'StreamingParseError';
   override readonly code = 'streaming-parse' as const;
-  constructor(message: string, offset?: number, options?: ErrorOptions) {
+  /**
+   * @param message - The first line of the message; ` (at byte offset N)` follows it when
+   *   `offset` is given.
+   * @param offset  - The byte offset of the error, if known.
+   * @param options - A `cause`; `expected` and `actual` add the lines `Expected:` and `Got:` to
+   *   the message, and `data` with an offset adds a hex dump of the bytes around it, as for a
+   *   {@link PdfParseError}.
+   */
+  constructor(
+    message: string,
+    offset?: number,
+    options?: ErrorOptions & {
+      expected?: string | undefined;
+      actual?: string | undefined;
+      data?: Uint8Array | undefined;
+    },
+  ) {
     super({
       message: offset !== undefined ? `${message} (at byte offset ${offset})` : message,
       offset,
+      expected: options?.expected,
+      actual: options?.actual,
+      data: options?.data,
     });
     // ErrorOptions installs any cause, as the Error constructor does; the parent takes only an Error.
     if (options !== undefined && 'cause' in options) {

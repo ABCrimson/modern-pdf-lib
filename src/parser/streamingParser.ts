@@ -617,6 +617,7 @@ export class StreamingPdfParser {
       throw new StreamingParseError(
         `Streaming parser buffer exceeded maximum size of ${this.options.maxBufferSize} bytes`,
         this.totalBytesRead,
+        { expected: `data within ${this.options.maxBufferSize} bytes`, actual: `${needed} bytes` },
       );
     }
 
@@ -651,6 +652,7 @@ export class StreamingPdfParser {
       throw new StreamingParseError(
         'Invalid PDF: data too short to contain a valid PDF header.',
         0,
+        { expected: 'at least 8 bytes', actual: `${data.length} bytes` },
       );
     }
 
@@ -764,6 +766,7 @@ export class StreamingPdfParser {
         'StreamingPdfParser.fromFile() requires Node.js, Deno, or Bun runtime. ' +
           'Use fromStream() with a ReadableStream in browsers.',
         0,
+        { expected: 'Node.js, Deno, or Bun runtime', actual: 'unsupported runtime' },
       );
     }
   }
@@ -784,13 +787,17 @@ export class StreamingPdfParser {
    */
   async getPageContent(pageIndex: number): Promise<Uint8Array> {
     if (!this.fullData) {
-      throw new StreamingParseError('Cannot get page content before calling end().', 0);
+      throw new StreamingParseError('Cannot get page content before calling end().', 0, {
+        expected: 'end() called before getPageContent()',
+        actual: 'end() not yet called',
+      });
     }
 
     if (pageIndex < 0 || pageIndex >= this.pages.length) {
       throw new StreamingParseError(
         `Page index ${pageIndex} is out of range (0-${this.pages.length - 1}).`,
         0,
+        { expected: `page index in [0, ${this.pages.length})`, actual: `${pageIndex}` },
       );
     }
 
@@ -817,12 +824,20 @@ export class StreamingPdfParser {
         message: 'No %PDF- header found',
         offset: 0,
       });
-      throw new StreamingParseError('Invalid PDF: file does not contain a "%PDF-" header.', 0);
+      throw new StreamingParseError('Invalid PDF: file does not contain a "%PDF-" header.', 0, {
+        expected: '"%PDF-" header',
+        actual: 'no header found',
+        data,
+      });
     }
 
     const versionMatch = headerText.slice(pdfIdx).match(/%PDF-(\d+\.\d+)/);
     if (!versionMatch) {
-      throw new StreamingParseError('Invalid PDF: could not parse version from header.', pdfIdx);
+      throw new StreamingParseError('Invalid PDF: could not parse version from header.', pdfIdx, {
+        expected: '"%PDF-X.Y" version string',
+        actual: `"${headerText.slice(pdfIdx, pdfIdx + 10)}"`,
+        data,
+      });
     }
 
     this.version = versionMatch[1]!;
@@ -862,6 +877,7 @@ export class StreamingPdfParser {
       throw new StreamingParseError(
         'Invalid PDF: could not find "startxref" marker in the last 2048 bytes.',
         startPos,
+        { expected: '"startxref" near end of file', actual: 'no "startxref" found', data },
       );
     }
 
@@ -871,7 +887,11 @@ export class StreamingPdfParser {
     ).trim();
     const match = afterKeyword.match(/^(\d+)/);
     if (!match) {
-      throw new StreamingParseError('Invalid PDF: no valid offset after "startxref".', idx);
+      throw new StreamingParseError('Invalid PDF: no valid offset after "startxref".', idx, {
+        expected: 'decimal offset after "startxref"',
+        actual: `"${afterKeyword.slice(0, 20)}"`,
+        data,
+      });
     }
 
     return parseInt(match[1]!, 10);
