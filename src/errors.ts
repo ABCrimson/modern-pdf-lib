@@ -100,8 +100,12 @@ const BRAND: unique symbol = Symbol.for('modern-pdf-lib.errorClass');
  * prototype property.  Every error class of the library calls it once, from
  * a static block, with its own name.
  *
+ * Marked `@__NO_SIDE_EFFECTS__`: the call changes only the class it receives, so
+ * a bundler may drop it together with a class that nothing uses.
+ *
  * @internal Used by the error classes outside this module; no package entry exports it.
  */
+/* @__NO_SIDE_EFFECTS__ */
 export function brandErrorClass(
   cls: abstract new (...args: never[]) => PdfError,
   name: string,
