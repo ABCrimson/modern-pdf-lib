@@ -273,6 +273,56 @@ describe('scanPdfThreats — indirect-reference evasion', () => {
 });
 
 // ---------------------------------------------------------------------------
+// Strings read as text or as bytes
+// ---------------------------------------------------------------------------
+
+// A file name is a text string (ISO 32000-2 7.11.2, 7.9.2.2): a writer may store it as UTF-16BE,
+// so "payload.exe" is 0xFE 0xFF and two bytes per letter. A scanner that took those bytes as one
+// character each saw "\0p\0a..." and found no ".exe".
+describe('scanPdfThreats — strings read as text or as bytes', () => {
+  /** The bytes of `text` in UTF-16BE with a byte order mark, as PDF hex digits. */
+  const utf16beHex = (text: string): string =>
+    `<FEFF${Array.from(text, (c) => c.charCodeAt(0).toString(16).padStart(4, '0')).join('')}>`;
+
+  it('flags an embedded executable whose /UF is a UTF-16BE string, and names it', async () => {
+    const pdf = buildRawPdf(
+      [
+        '1 0 obj\n<</Type/Catalog/Pages 2 0 R/Names 5 0 R>>\nendobj',
+        '2 0 obj\n<</Type/Pages/Kids[]/Count 0>>\nendobj',
+        `3 0 obj\n<</Type/Filespec/UF${utf16beHex('payload.exe')}/EF<</F 6 0 R>>>>\nendobj`,
+        '5 0 obj\n<</EmbeddedFiles<</Names[(payload.exe) 3 0 R]>>>>\nendobj',
+        '6 0 obj\n<</Type/EmbeddedFile/Length 4>>\nstream\nMZ\x90\x00\nendstream\nendobj',
+      ],
+      1,
+    );
+
+    const fileFindings = byCategory(await scanPdfThreats(pdf), 'EmbeddedFile');
+    expect(fileFindings.length).toBeGreaterThanOrEqual(1);
+    for (const finding of fileFindings) {
+      expect(finding.severity).toBe('high');
+      expect(finding.detail).toContain('"payload.exe"');
+    }
+  });
+
+  it('names the target of a URI action byte for byte', async () => {
+    const pdf = buildRawPdf(
+      [
+        '1 0 obj\n<</Type/Catalog/Pages 2 0 R/OpenAction 3 0 R>>\nendobj',
+        '2 0 obj\n<</Type/Pages/Kids[]/Count 0>>\nendobj',
+        '3 0 obj\n<</Type/Action/S/URI/URI(https://example.com/a?b=1&c=\\(2\\))>>\nendobj',
+      ],
+      1,
+    );
+
+    const uriFindings = byCategory(await scanPdfThreats(pdf), 'URI');
+    expect(uriFindings.length).toBeGreaterThanOrEqual(1);
+    for (const finding of uriFindings) {
+      expect(finding.detail).toContain('"https://example.com/a?b=1&c=(2)"');
+    }
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Internal limits
 // ---------------------------------------------------------------------------
 

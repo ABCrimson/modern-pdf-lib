@@ -68,6 +68,7 @@ import { PdfDict, PdfName, PdfStream, PdfString, PdfRef } from '../core/pdfObjec
 import type { PdfObjectRegistry } from '../core/pdfObjects.js';
 import { loadPdf } from '../parser/documentParser.js';
 import { ResourceLimitError } from '../errors.js';
+import { latin1String } from '../internal/latin1.js';
 
 // ---------------------------------------------------------------------------
 // Public types
@@ -211,13 +212,29 @@ function nameValue(obj: PdfObject | undefined, registry: PdfObjectRegistry): str
 }
 
 /**
- * Read a `PdfString` value from a dict entry, resolving an indirect reference
- * through the registry first.
+ * Read a `PdfString` from a dict entry as text ({@link PdfString.toText}), resolving an
+ * indirect reference through the registry first: a file name (/UF, /F) is a text string.
  */
-function stringValue(obj: PdfObject | undefined, registry: PdfObjectRegistry): string | undefined {
+function textValue(obj: PdfObject | undefined, registry: PdfObjectRegistry): string | undefined {
   const resolved = resolveRef(obj, registry);
   if (resolved !== undefined && resolved.kind === 'string') {
-    return (resolved as PdfString).value;
+    return (resolved as PdfString).toText();
+  }
+  return undefined;
+}
+
+/**
+ * Read a `PdfString` from a dict entry as a byte string, one character per byte, resolving an
+ * indirect reference through the registry first: a URI is 7-bit ASCII (ISO 32000-2 12.6.4.7),
+ * so a byte above 0x7F stays visible as it was written.
+ */
+function byteStringValue(
+  obj: PdfObject | undefined,
+  registry: PdfObjectRegistry,
+): string | undefined {
+  const resolved = resolveRef(obj, registry);
+  if (resolved !== undefined && resolved.kind === 'string') {
+    return latin1String((resolved as PdfString).toBytes());
   }
   return undefined;
 }
@@ -458,8 +475,7 @@ function inspectDict(
   // it. High. We only inspect filespec dicts (key /EF or /Type /Filespec).
   const isFilespec = nameValue(dict.get('/Type'), registry) === 'Filespec' || dict.has('/EF');
   if (isFilespec) {
-    const fileName =
-      stringValue(dict.get('/UF'), registry) ?? stringValue(dict.get('/F'), registry);
+    const fileName = textValue(dict.get('/UF'), registry) ?? textValue(dict.get('/F'), registry);
     if (fileName !== undefined) {
       const ext = extensionOf(fileName);
       if (ext !== '' && EXECUTABLE_EXTENSIONS.has(ext)) {
@@ -580,7 +596,7 @@ function inspectActionSubtype(
 
 /** Append the target URL of a /URI action to the detail string, if present. */
 function describeUri(dict: PdfDict, registry: PdfObjectRegistry): string {
-  const uri = stringValue(dict.get('/URI'), registry);
+  const uri = byteStringValue(dict.get('/URI'), registry);
   return uri !== undefined ? `→ "${uri}"` : '';
 }
 

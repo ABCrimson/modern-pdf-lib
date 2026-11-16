@@ -18,7 +18,7 @@
  * @packageDocumentation
  */
 
-import type { PdfObject, PdfString } from '../core/pdfObjects.js';
+import type { PdfObject } from '../core/pdfObjects.js';
 import {
   PdfRef,
   PdfDict,
@@ -26,7 +26,7 @@ import {
   PdfNumber,
   PdfArray,
   PdfStream,
-  pdfStringFromByteString,
+  PdfString,
   PdfNull,
   PdfObjectRegistry,
 } from '../core/pdfObjects.js';
@@ -54,7 +54,6 @@ import { contentsLeftAsStored } from '../crypto/internal/signatureContents.js';
 import { PdfParseError } from './parseError.js';
 import { ResourceLimitError, UnsupportedEncryptionError } from '../errors.js';
 import { assertWithinLimit } from '../internal/limits.js';
-import { latin1String } from '../internal/latin1.js';
 
 // ---------------------------------------------------------------------------
 // Public interfaces
@@ -771,9 +770,8 @@ export class PdfDocumentParser {
   /**
    * Decrypt a PdfString with the string filter and return a new PdfString of the same form.
    *
-   * The lexer stores a string's bytes as one code unit per byte, for hex and literal strings
-   * alike, so the bytes are the code units; the plaintext is rebuilt the same way, byte for
-   * byte.
+   * The ciphertext is the string's bytes, whichever form it was written in; the plaintext is
+   * rebuilt as a byte string of the same form, byte for byte.
    */
   private async decryptString(
     handler: PdfEncryptionHandler,
@@ -781,10 +779,9 @@ export class PdfDocumentParser {
     objNum: number,
     genNum: number,
   ): Promise<PdfString> {
-    if (str.value.length === 0) return str;
-    const encrypted = Uint8Array.from(str.value, (c) => c.charCodeAt(0) & 0xff);
-    const plain = latin1String(await decryptStringBytes(handler, objNum, genNum, encrypted));
-    const decrypted = pdfStringFromByteString(plain, str.hex);
+    if (str.byteLength === 0) return str;
+    const plain = await decryptStringBytes(handler, objNum, genNum, str.toBytes());
+    const decrypted = PdfString.fromBytes(plain, str.hex ? 'hex' : 'literal');
     recordDecryptedObject(decrypted);
     return decrypted;
   }
@@ -1347,7 +1344,7 @@ export class PdfDocumentParser {
       if (obj === undefined) return undefined;
       const resolved = this.resolveObject(obj);
       if (resolved.kind === 'string') {
-        return (resolved as PdfString).value;
+        return (resolved as PdfString).toText();
       }
       return undefined;
     };

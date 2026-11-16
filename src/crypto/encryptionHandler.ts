@@ -675,8 +675,8 @@ export class PdfEncryptionHandler {
     }
 
     // /O and /U values
-    dict.set('/O', PdfString.hexFromBytes(this.ownerKey));
-    dict.set('/U', PdfString.hexFromBytes(this.userKey));
+    dict.set('/O', PdfString.fromBytes(this.ownerKey, 'hex'));
+    dict.set('/U', PdfString.fromBytes(this.userKey, 'hex'));
 
     if (this.version === 4) {
       // V=4: requires /CF, /StmF, /StrF
@@ -716,13 +716,13 @@ export class PdfEncryptionHandler {
       dict.set('/StrF', PdfName.of('StdCF'));
 
       if (this.ownerEncryptionKey) {
-        dict.set('/OE', PdfString.hexFromBytes(this.ownerEncryptionKey));
+        dict.set('/OE', PdfString.fromBytes(this.ownerEncryptionKey, 'hex'));
       }
       if (this.userEncryptionKey) {
-        dict.set('/UE', PdfString.hexFromBytes(this.userEncryptionKey));
+        dict.set('/UE', PdfString.fromBytes(this.userEncryptionKey, 'hex'));
       }
       if (this.perms) {
-        dict.set('/Perms', PdfString.hexFromBytes(this.perms));
+        dict.set('/Perms', PdfString.fromBytes(this.perms, 'hex'));
       }
 
       if (!this.encryptMetadata) {

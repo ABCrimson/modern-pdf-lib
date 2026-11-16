@@ -100,13 +100,13 @@ function asDict(obj: PdfObject | undefined, registry: PdfObjectRegistry): PdfDic
   return resolved instanceof PdfDict ? resolved : undefined;
 }
 
-/** Read a {@link PdfString} value, resolving an indirect reference if needed. */
-function asStringValue(
-  obj: PdfObject | undefined,
-  registry: PdfObjectRegistry,
-): string | undefined {
+/**
+ * Read a text string ({@link PdfString.toText}) of the /Info dictionary, resolving an indirect
+ * reference if needed.
+ */
+function asTextValue(obj: PdfObject | undefined, registry: PdfObjectRegistry): string | undefined {
   const resolved = resolve(obj, registry);
-  return resolved instanceof PdfString ? resolved.value : undefined;
+  return resolved instanceof PdfString ? resolved.toText() : undefined;
 }
 
 // ---------------------------------------------------------------------------
@@ -280,17 +280,17 @@ function readInfoMetadata(
 ): DocumentMetadata {
   const meta: DocumentMetadata = {};
   if (info === undefined) return meta;
-  const title = asStringValue(info.get('/Title'), registry);
+  const title = asTextValue(info.get('/Title'), registry);
   if (title !== undefined) meta.title = title;
-  const author = asStringValue(info.get('/Author'), registry);
+  const author = asTextValue(info.get('/Author'), registry);
   if (author !== undefined) meta.author = author;
-  const subject = asStringValue(info.get('/Subject'), registry);
+  const subject = asTextValue(info.get('/Subject'), registry);
   if (subject !== undefined) meta.subject = subject;
-  const keywords = asStringValue(info.get('/Keywords'), registry);
+  const keywords = asTextValue(info.get('/Keywords'), registry);
   if (keywords !== undefined) meta.keywords = keywords;
-  const creator = asStringValue(info.get('/Creator'), registry);
+  const creator = asTextValue(info.get('/Creator'), registry);
   if (creator !== undefined) meta.creator = creator;
-  const producer = asStringValue(info.get('/Producer'), registry);
+  const producer = asTextValue(info.get('/Producer'), registry);
   if (producer !== undefined) meta.producer = producer;
   return meta;
 }

@@ -135,6 +135,46 @@ async function buildOpenActionPdf(): Promise<Uint8Array> {
   return serializePdf(registry, { catalogRef, infoRef, pagesRef });
 }
 
+/**
+ * Build a one-page PDF whose /Info /Title and /Author are UTF-16BE strings in hex form, as a
+ * writer other than this library stores them (ISO 32000-2 7.9.2.2): the registry of a loaded
+ * file holds the strings, and the file is re-serialized verbatim.
+ */
+async function buildUtf16InfoPdf(title: string, author: string): Promise<Uint8Array> {
+  const base = await createPdf().save();
+  const loaded = await loadPdf(base);
+  const registry = loaded.getRegistry();
+  const utf16be = (text: string): PdfString => {
+    const bytes = new Uint8Array(2 + text.length * 2);
+    bytes.set([0xfe, 0xff]);
+    for (let i = 0; i < text.length; i++) {
+      new DataView(bytes.buffer).setUint16(2 + i * 2, text.charCodeAt(i));
+    }
+    return PdfString.fromBytes(bytes, 'hex');
+  };
+
+  let catalogRef: PdfRef | undefined;
+  let pagesRef: PdfObject | undefined;
+  let infoRef: PdfRef | undefined;
+  for (const { ref, object } of registry) {
+    if (!(object instanceof PdfDict)) continue;
+    const type = object.get('/Type');
+    if (type instanceof PdfName && type.value === '/Catalog') {
+      catalogRef = ref;
+      pagesRef = object.get('/Pages');
+    } else if (object.has('/Producer')) {
+      // The typeless dictionary that carries /Producer is the one /Info names.
+      object.set('/Title', utf16be(title));
+      object.set('/Author', utf16be(author));
+      infoRef = ref;
+    }
+  }
+  if (!catalogRef || !infoRef || !(pagesRef instanceof PdfRef)) {
+    throw new Error('test fixture: catalog, pages or info not found');
+  }
+  return serializePdf(registry, { catalogRef, infoRef, pagesRef });
+}
+
 // ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
@@ -298,6 +338,18 @@ describe('sanitizePdf', () => {
     const reloaded = await loadPdf(pdf);
     expect(reloaded.getTitle()).toBe('Confidential Title');
     expect(reloaded.getAuthor()).toBe('Mallory');
+  });
+
+  it('preserves UTF-16BE descriptive metadata as text when metadata is disabled', async () => {
+    // Text a PDFDocEncoding byte string holds, so the rebuilt /Info reads back the same text.
+    const src = await buildUtf16InfoPdf('Résumé (1)', 'Zoë');
+
+    const { pdf, report } = await sanitizePdf(src, { metadata: false });
+
+    expect(report.removed).not.toContain('metadata');
+    const reloaded = await loadPdf(pdf);
+    expect(reloaded.getTitle()).toBe('Résumé (1)');
+    expect(reloaded.getAuthor()).toBe('Zoë');
   });
 
   it('does not list a class that was not present', async () => {
