@@ -106,7 +106,7 @@ export function structureChain(_bytes: Uint8Array, args: JsonValue): JsonValue {
   return readStructure(objects);
 }
 
-/** A non-finite initial capacity: throws RangeError. */
+/** A non-finite initial capacity: throws InvalidArgumentError. */
 export function growableNonFinite(_bytes: Uint8Array, args: JsonValue): JsonValue {
   const capacity = args === 'NaN' ? Number.NaN : args === 'Infinity' ? Infinity : -Infinity;
   const buffer = new GrowableBuffer(capacity);
