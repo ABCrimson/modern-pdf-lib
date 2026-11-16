@@ -11,7 +11,7 @@
  */
 
 import type { PdfDocument } from '../../../core/pdfDocument.js';
-import { rejectOption } from '../../../internal/options.js';
+import { UNSUPPORTED_OPTIONS, rejectOption } from '../../../internal/options.js';
 import { PdfArray, PdfName } from '../../../core/pdfObjects.js';
 import { ResourceLimitError, UnsupportedFilterError } from '../../../errors.js';
 import { extractImages, decodeImageStream } from '../imageExtract.js';
@@ -208,6 +208,9 @@ async function processWithConcurrency<T>(
 // Public API
 // ---------------------------------------------------------------------------
 
+/** The rows of the option table for `optimizeAllImages()`: its options removed in 0.41.0. */
+const REFUSED_OPTIONS = UNSUPPORTED_OPTIONS.filter((rule) => rule.entry === 'optimizeAllImages()');
+
 /**
  * Optimize all images in a PDF document by recompressing them as JPEG.
  *
@@ -222,6 +225,7 @@ async function processWithConcurrency<T>(
  * @param doc     - A parsed `PdfDocument` (from `loadPdf()`).
  * @param options - Optimization settings.
  * @returns A report summarizing the optimization results.
+ * @throws {UnsupportedOptionError} If `options` has a `maxDpi`, which was removed in 0.41.0.
  *
  * @example
  * ```ts
@@ -244,8 +248,10 @@ export async function optimizeAllImages(
 ): Promise<OptimizationReport> {
   // `maxDpi` left the type in 0.41.0 (images were never downscaled): this refuses it for a caller
   // the type does not stop, a JavaScript caller or a cast. Removed in 0.50.0 with the other guards.
-  if ((options as { readonly maxDpi?: unknown }).maxDpi !== undefined) {
-    rejectOption({ entry: 'optimizeAllImages()', option: 'maxDpi', ledger: [] });
+  for (const rule of REFUSED_OPTIONS) {
+    if (rule.option !== undefined && Reflect.get(options, rule.option) !== undefined) {
+      rejectOption(rule);
+    }
   }
   const quality = options.quality ?? 80;
   const minSavingsPercent = options.minSavingsPercent ?? 10;

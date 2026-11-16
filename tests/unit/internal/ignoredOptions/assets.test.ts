@@ -11,7 +11,7 @@ import { createPdf } from '../../../../src/index.js';
 import { optimizeAllImages } from '../../../../src/assets/image/optimize/batchOptimize.js';
 import type { BatchOptimizeOptions } from '../../../../src/assets/image/optimize/batchOptimize.js';
 import { UnsupportedOptionError } from '../../../../src/errors.js';
-import { UNSUPPORTED_OPTIONS } from '../../../../src/internal/options.js';
+import { UNSUPPORTED_OPTIONS, rejectOption } from '../../../../src/internal/options.js';
 
 let emit: MockInstance<typeof process.emitWarning>;
 
@@ -49,17 +49,18 @@ describe('optimizeAllImages option maxDpi', () => {
     expect(error.message).toBe('`optimizeAllImages()`: the option `maxDpi` was removed in 0.41.0.');
   });
 
-  it('rejects with the row of the option table', async () => {
+  it('rejects with the error its row of the option table builds', async () => {
     const row = UNSUPPORTED_OPTIONS.find(
       (rule) => rule.entry === 'optimizeAllImages()' && rule.option === 'maxDpi',
     );
-    const error = await rejectionOf(withMaxDpi(72));
     expect(row).toBeDefined();
-    expect([error.entry, error.option, error.plannedFor]).toEqual([
-      row?.entry,
-      row?.option,
-      row?.plannedFor,
-    ]);
+    let fromTable: unknown;
+    try {
+      rejectOption(row ?? { entry: 'missing row', ledger: [] });
+    } catch (err) {
+      fromTable = err;
+    }
+    expect(await rejectionOf(withMaxDpi(72))).toStrictEqual(fromTable);
   });
 
   it('rejects on every call, not once per process', async () => {
