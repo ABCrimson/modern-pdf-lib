@@ -372,7 +372,7 @@
         },
         "DirectEmbedOptions": {
           "kind": "interface",
-          "decl": "sha256:693e72b68a23"
+          "decl": "sha256:cd0ce5e236d9"
         },
         "DirectEmbedResult": {
           "kind": "interface",
@@ -2016,7 +2016,7 @@
         },
         "TiffDecodeOptions": {
           "kind": "interface",
-          "decl": "sha256:44100f8621d2"
+          "decl": "sha256:79260e81f761"
         },
         "TiffIfdEntry": {
           "kind": "interface",
@@ -2884,11 +2884,11 @@
         },
         "decodeTiffAll": {
           "kind": "function",
-          "decl": "sha256:fd3d90886c03"
+          "decl": "sha256:0bcf09c7224c"
         },
         "decodeTiffPage": {
           "kind": "function",
-          "decl": "sha256:0368cbd39c8f"
+          "decl": "sha256:4eac2358df2f"
         },
         "decodeTile": {
           "kind": "function",
@@ -2900,11 +2900,11 @@
         },
         "decodeWebP": {
           "kind": "function",
-          "decl": "sha256:13ed6b47ad81"
+          "decl": "sha256:92a0a4d06af6"
         },
         "decodeWoff": {
           "kind": "function",
-          "decl": "sha256:20945742ba11"
+          "decl": "sha256:afc27abd5d03"
         },
         "deduplicateImages": {
           "kind": "function",
@@ -3208,7 +3208,7 @@
         },
         "extractMetrics": {
           "kind": "function",
-          "decl": "sha256:eca0dc913a49"
+          "decl": "sha256:8333a8fd8980"
         },
         "extractOcspUrl": {
           "kind": "function",
@@ -5944,7 +5944,7 @@
         },
         "DirectEmbedOptions": {
           "kind": "interface",
-          "decl": "sha256:693e72b68a23"
+          "decl": "sha256:cd0ce5e236d9"
         },
         "DirectEmbedResult": {
           "kind": "interface",
@@ -7588,7 +7588,7 @@
         },
         "TiffDecodeOptions": {
           "kind": "interface",
-          "decl": "sha256:44100f8621d2"
+          "decl": "sha256:79260e81f761"
         },
         "TiffIfdEntry": {
           "kind": "interface",
@@ -8460,11 +8460,11 @@
         },
         "decodeTiffAll": {
           "kind": "function",
-          "decl": "sha256:fd3d90886c03"
+          "decl": "sha256:0bcf09c7224c"
         },
         "decodeTiffPage": {
           "kind": "function",
-          "decl": "sha256:0368cbd39c8f"
+          "decl": "sha256:4eac2358df2f"
         },
         "decodeTile": {
           "kind": "function",
@@ -8476,11 +8476,11 @@
         },
         "decodeWebP": {
           "kind": "function",
-          "decl": "sha256:13ed6b47ad81"
+          "decl": "sha256:92a0a4d06af6"
         },
         "decodeWoff": {
           "kind": "function",
-          "decl": "sha256:20945742ba11"
+          "decl": "sha256:afc27abd5d03"
         },
         "deduplicateImages": {
           "kind": "function",
@@ -8784,7 +8784,7 @@
         },
         "extractMetrics": {
           "kind": "function",
-          "decl": "sha256:eca0dc913a49"
+          "decl": "sha256:8333a8fd8980"
         },
         "extractOcspUrl": {
           "kind": "function",
