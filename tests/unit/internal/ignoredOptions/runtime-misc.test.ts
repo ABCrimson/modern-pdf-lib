@@ -1,8 +1,8 @@
 /**
  * `metadataPlugin` carries out its options `creator`, `defaultTitle` and `defaultAuthor`, so it
- * no longer warns with the code `MPL_IGNORED_OPTION`. Each row checks that the first call emits
- * no warning, and that the option takes effect: `creator` when the plugin registers, the two
- * defaults at save and only where the document has no title or author.
+ * no longer warns (0.40.9 warned once per option). Each row checks that the first call emits
+ * no library warning, and that the option takes effect: `creator` when the plugin registers, the
+ * two defaults at save and only where the document has no title or author.
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -10,9 +10,7 @@ import type { MockInstance } from 'vitest';
 import { createPdf } from '../../../../src/core/pdfDocument.js';
 import type { PdfDocument } from '../../../../src/core/pdfDocument.js';
 import { metadataPlugin } from '../../../../src/plugins/builtins/metadataPlugin.js';
-import { resetWarningsForTesting } from '../../../../src/internal/warnings.js';
-
-const IGNORED_OPTION = 'MPL_IGNORED_OPTION';
+import { resetWarningsForTesting, WARNING_TYPE } from '../../../../src/internal/warnings.js';
 
 let emit: MockInstance<typeof process.emitWarning>;
 
@@ -56,9 +54,9 @@ const ROWS: readonly Row[] = [
   ...DEFAULT_ROWS,
 ];
 
-function ignoredCalls(): unknown[][] {
+function libraryWarnings(): unknown[][] {
   return emit.mock.calls.filter(
-    ([, options]) => (options as { code?: string } | undefined)?.code === IGNORED_OPTION,
+    ([, options]) => (options as { type?: string } | undefined)?.type === WARNING_TYPE,
   );
 }
 
@@ -66,7 +64,7 @@ describe.each(ROWS)('metadataPlugin option $option', (row) => {
   it('emits no warning, on the first call or the second', () => {
     metadataPlugin({ [row.option]: 'VALUE' });
     metadataPlugin({ [row.option]: 'VALUE' });
-    expect(ignoredCalls()).toHaveLength(0);
+    expect(libraryWarnings()).toHaveLength(0);
   });
 
   it.each([

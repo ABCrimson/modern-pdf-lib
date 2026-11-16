@@ -1,6 +1,7 @@
 /**
  * The options of the document, font, streaming-parser and incremental-save entries that 0.40.9
- * accepted, ignored and warned about (`MPL_IGNORED_OPTION`), each with its 0.41.0 fate:
+ * accepted, ignored and warned about (with a warning code that 0.41.0 removed), each with its
+ * 0.41.0 fate:
  *
  * - Refused with an UnsupportedOptionError: `parseContentStreams: true` of `StreamingPdfParser`
  *   and `features` of `embedFont()` (removed in 0.41.0, and gone from their types); a finite
@@ -14,7 +15,7 @@
  *
  * Each refused row checks the error, that the absent and undefined option and the values that
  * change nothing are accepted, and that the message names no caller value. No call emits a
- * `MPL_IGNORED_OPTION` warning.
+ * library warning.
  */
 
 import { inflateSync } from 'node:zlib';
@@ -37,7 +38,7 @@ import {
   PdfStream,
   PdfString,
 } from '../../../../src/core/pdfObjects.js';
-import { resetWarningsForTesting } from '../../../../src/internal/warnings.js';
+import { resetWarningsForTesting, WARNING_TYPE } from '../../../../src/internal/warnings.js';
 
 /** The WASM deflate module, replaced so that a test can mark it initialized and see its calls. */
 const wasmDeflate = vi.hoisted(() => ({ ready: false, levels: [] as number[] }));
@@ -72,12 +73,12 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  const ignored = emit.mock.calls.filter(
-    ([, options]) => (options as { code?: string } | undefined)?.code === 'MPL_IGNORED_OPTION',
+  const emitted = emit.mock.calls.filter(
+    ([, options]) => (options as { type?: string } | undefined)?.type === WARNING_TYPE,
   );
   vi.restoreAllMocks();
   resetWarningsForTesting();
-  expect(ignored, 'MPL_IGNORED_OPTION warnings').toEqual([]);
+  expect(emitted, 'library warnings').toEqual([]);
 });
 
 /** A registry with an Info dict, an empty page tree and a content stream long enough to compress. */

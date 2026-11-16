@@ -22,7 +22,7 @@ afterEach(() => {
 });
 
 describe('warnOnce', () => {
-  it('takes the code of a warning that is still emitted, not MPL_IGNORED_OPTION', () => {
+  it('takes only the codes of the warnings that are still emitted', () => {
     // Since 0.41.0 an option the library cannot honour throws UnsupportedOptionError, so no code
     // for "an option was ignored" is left.
     expectTypeOf<Parameters<typeof warnOnce>[1]>().toEqualTypeOf<
