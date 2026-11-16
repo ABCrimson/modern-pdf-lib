@@ -1,27 +1,27 @@
 {
   "createPdf": {
-    "gzip": 105472,
-    "brotli": 88064
+    "gzip": 107520,
+    "brotli": 90112
   },
   "loadPdf": {
-    "gzip": 105472,
-    "brotli": 88064
+    "gzip": 107520,
+    "brotli": 90112
   },
   "root": {
     "gzip": 262144,
     "brotli": 207872
   },
   "create": {
-    "gzip": 107520,
-    "brotli": 91136
+    "gzip": 110592,
+    "brotli": 92160
   },
   "parse": {
-    "gzip": 111616,
+    "gzip": 113664,
     "brotli": 94208
   },
   "forms": {
-    "gzip": 8192,
-    "brotli": 7168
+    "gzip": 10240,
+    "brotli": 9216
   },
   "browser": {
     "gzip": 268288,
