@@ -53,10 +53,10 @@ import {
 } from './internal/flateStream.js';
 import { getStandardFont, standardFontHeight } from '../assets/font/internal/standardFonts.js';
 import {
+  encodeTextForFontName,
   measureStandardCodes,
   standardCharacterSet,
 } from '../assets/font/internal/standardEncoding.js';
-import { encodeTextForFontName } from './internal/pdfPageText.js';
 import type { StandardFontName as StdFontName } from '../assets/font/internal/standardFonts.js';
 import type { EmbeddedFont } from '../assets/font/fontEmbed.js';
 import { embedFont as embedTtfFont } from '../assets/font/fontEmbed.js';

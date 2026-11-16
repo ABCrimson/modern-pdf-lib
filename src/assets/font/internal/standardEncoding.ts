@@ -12,7 +12,7 @@
  */
 
 import { UnencodableTextError, type TextEncodingName } from '../../../errors.js';
-import { STANDARD_FONTS, type StandardFontName } from './standardFonts.js';
+import { STANDARD_FONTS, isStandardFont, type StandardFontName } from './standardFonts.js';
 
 /** The encoding a standard font writes its text in. */
 export type StandardEncodingName = Extract<
@@ -208,6 +208,67 @@ export function encodeStandardText(font: StandardFontName, text: string): Uint8A
     }
   }
   return Uint8Array.from(out);
+}
+
+/**
+ * The resource names an AcroForm default appearance gives the 14 standard
+ * fonts (`/Helv`, `/ZaDb`, ...; the names Acrobat writes in the /DR of a
+ * form), each with the standard font it stands for.
+ */
+const ACROFORM_FONT_ALIASES: ReadonlyMap<string, StandardFontName> = new Map([
+  ['Helv', 'Helvetica'],
+  ['HeBo', 'Helvetica-Bold'],
+  ['HeOb', 'Helvetica-Oblique'],
+  ['HeBO', 'Helvetica-BoldOblique'],
+  ['TiRo', 'Times-Roman'],
+  ['TiBo', 'Times-Bold'],
+  ['TiIt', 'Times-Italic'],
+  ['TiBI', 'Times-BoldItalic'],
+  ['Cour', 'Courier'],
+  ['CoBo', 'Courier-Bold'],
+  ['CoOb', 'Courier-Oblique'],
+  ['CoBO', 'Courier-BoldOblique'],
+  ['Symb', 'Symbol'],
+  ['ZaDb', 'ZapfDingbats'],
+]);
+
+/**
+ * The standard font that `name` stands for: the font of that name, or the
+ * font of an AcroForm alias (`Helv`, `ZaDb`, ...); undefined for any other
+ * name.
+ */
+export function standardFontForName(name: string): StandardFontName | undefined {
+  return isStandardFont(name) ? name : ACROFORM_FONT_ALIASES.get(name);
+}
+
+/**
+ * Encodes `text` for a font known only by its name, such as the resource
+ * name of a /DA string or of a layout: one of the 14 standard font names or
+ * an AcroForm alias (`Helv`, `ZaDb`, ...) in the encoding of that standard
+ * font, any other name in WinAnsiEncoding (a font with no font object is
+ * written in WinAnsiEncoding). Text is normalised to NFC first.
+ *
+ * @param name  A standard font name, an AcroForm alias or a font resource name.
+ * @param text  The text to encode.
+ * @returns     One byte per character.
+ * @throws {UnencodableTextError} At the first character the encoding has no
+ *   code for; its `fontName` is the standard font for a standard name or
+ *   alias, and `name` for any other name.
+ */
+export function encodeTextForFontName(name: string, text: string): Uint8Array {
+  const standard = standardFontForName(name);
+  if (standard !== undefined) return encodeStandardText(standard, text);
+  try {
+    // The 12 Latin standard fonts share WinAnsiEncoding.
+    return encodeStandardText('Helvetica', text);
+  } catch (error) {
+    if (!(error instanceof UnencodableTextError)) throw error;
+    const { character, index, encoding } = error;
+    throw new UnencodableTextError(
+      { character, index, fontName: name, encoding },
+      { cause: error },
+    );
+  }
 }
 
 /** The Unicode code points a standard font encodes, ascending: 218 for each Latin font, 189 for Symbol, 202 for ZapfDingbats. */

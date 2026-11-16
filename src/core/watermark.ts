@@ -14,6 +14,7 @@ import type { PdfPage } from './pdfPage.js';
 import type { PdfObjectRegistry } from './pdfObjects.js';
 import { PdfDict, PdfName, PdfNumber } from './pdfObjects.js';
 import { encodeStandardText } from '../assets/font/internal/standardEncoding.js';
+import { showText } from './operators/text.js';
 
 // ---------------------------------------------------------------------------
 // Public types
@@ -43,21 +44,6 @@ function n(value: number): string {
   if (Number.isInteger(value)) return value.toString();
   const s = value.toFixed(6).replace(/\.?0+$/, '');
   return s === '-0' ? '0' : s;
-}
-
-/**
- * The literal string operand `(…)` of single-byte codes, written in ASCII: the backslash and the
- * parentheses are escaped and every code above 0x7E is a three-digit octal escape, so the content
- * stream bytes do not depend on how the stream is turned into bytes.
- */
-function literalOperand(codes: Uint8Array): string {
-  let body = '';
-  for (const code of codes) {
-    if (code === 0x5c || code === 0x28 || code === 0x29) body += `\\${String.fromCharCode(code)}`;
-    else if (code > 0x7e) body += `\\${code.toString(8).padStart(3, '0')}`;
-    else body += String.fromCharCode(code);
-  }
-  return `(${body})`;
 }
 
 // ---------------------------------------------------------------------------
@@ -161,7 +147,7 @@ export function addWatermarkToPage(
 
   ops += `${n(a)} ${n(b)} ${n(c)} ${n(d)} ${n(tx)} ${n(ty)} Tm\n`;
 
-  ops += `${literalOperand(encodeStandardText('Helvetica', text))} Tj\n`;
+  ops += showText(encodeStandardText('Helvetica', text));
   ops += 'ET\n';
 
   // Restore graphics state

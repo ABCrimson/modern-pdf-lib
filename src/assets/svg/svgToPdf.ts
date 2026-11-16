@@ -23,7 +23,8 @@
 import type { SvgElement, SvgDrawCommand, SvgGradient } from './svgParser.js';
 import { parseSvg } from './svgParser.js';
 import type { PdfPage } from '../../core/pdfPage.js';
-import { encodeTextForFontName, showEncodedText } from '../../internal/standardText.js';
+import { showText } from '../../core/operators/text.js';
+import { encodeTextForFontName } from '../font/internal/standardEncoding.js';
 
 // ---------------------------------------------------------------------------
 // Public types
@@ -668,7 +669,7 @@ function renderTextElement(el: SvgElement): string {
   ops += `${n(posX)} ${n(posY)} Td\n`;
 
   // Show text
-  ops += showEncodedText(encodeTextForFontName(fontName, text));
+  ops += showText(encodeTextForFontName(fontName, text));
 
   // End text object
   ops += 'ET\n';

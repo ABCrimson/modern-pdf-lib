@@ -12,8 +12,8 @@ import type { Color } from '../core/operators/color.js';
 import { applyFillColor, applyStrokeColor } from '../core/operators/color.js';
 import { saveState, restoreState } from '../core/operators/state.js';
 import { rectangle, fill, stroke, setLineWidth } from '../core/operators/graphics.js';
-import { beginText, endText, setFont, moveText } from '../core/operators/text.js';
-import { encodeTextForFontName, showEncodedText } from '../internal/standardText.js';
+import { beginText, endText, setFont, moveText, showText } from '../core/operators/text.js';
+import { encodeTextForFontName } from '../assets/font/internal/standardEncoding.js';
 import type { BarcodeMatrix } from './types.js';
 
 // ---------------------------------------------------------------------------
@@ -197,7 +197,7 @@ export function renderStyledBarcode(
     ops += setFont(fontName, fontSize);
     ops += applyFillColor(textColor);
     ops += moveText(textX, textY);
-    ops += showEncodedText(encodeTextForFontName(fontName, text));
+    ops += showText(encodeTextForFontName(fontName, text));
     ops += endText();
   }
 

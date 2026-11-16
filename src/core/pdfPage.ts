@@ -569,7 +569,8 @@ export interface ImageRef {
 // ---------------------------------------------------------------------------
 
 export { wrapText, breakWord } from './internal/pdfPageText.js';
-import { encodeLines, encodeTextForFontName, wrapText } from './internal/pdfPageText.js';
+import { encodeLines, wrapText } from './internal/pdfPageText.js';
+import { encodeTextForFontName } from '../assets/font/internal/standardEncoding.js';
 import { latin1Bytes } from '../internal/latin1.js';
 
 // ---------------------------------------------------------------------------

@@ -42,7 +42,8 @@ import type { PdfPage } from '../core/pdfPage.js';
 import { PdfDict, PdfName } from '../core/pdfObjects.js';
 import { UnencodableTextError } from '../errors.js';
 import { warnOnce } from '../internal/warnings.js';
-import { encodedStringLiteral, encodeTextForFontName } from '../internal/standardText.js';
+import { showText } from '../core/operators/text.js';
+import { encodeTextForFontName } from '../assets/font/internal/standardEncoding.js';
 import { rasterize } from './rasterizer.js';
 import { interpretPage } from './interpreter.js';
 
@@ -185,7 +186,8 @@ export async function applyOcr(
   for (const word of words) {
     let shown: string;
     try {
-      shown = encodedStringLiteral(encodeTextForFontName(OVERLAY_FONT, word.text));
+      // The `Tj` operator without its line end, so each word stays one line.
+      shown = showText(encodeTextForFontName(OVERLAY_FONT, word.text)).trimEnd();
     } catch (error) {
       if (!(error instanceof UnencodableTextError)) throw error;
       skipped++;
@@ -194,7 +196,7 @@ export async function applyOcr(
     // Font size approximates the word's height so the (invisible) glyph metrics
     // roughly track the underlying scanned text.
     const size = word.height > 0 ? word.height : 1;
-    fragment += `BT 3 Tr /${fontName} ${num(size)} Tf ${num(word.x)} ${num(word.y)} Td ${shown} Tj ET\n`;
+    fragment += `BT 3 Tr /${fontName} ${num(size)} Tf ${num(word.x)} ${num(word.y)} Td ${shown} ET\n`;
   }
   page.pushOperators(fragment);
 

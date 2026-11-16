@@ -8,6 +8,7 @@ import { InvalidArgumentError, UnencodableTextError } from '../../../../../src/e
 import {
   STANDARD_CODE_TO_UNICODE,
   encodeStandardText,
+  encodeTextForFontName,
   measureStandardCodes,
   standardCharacterSet,
   standardEncodingOf,
@@ -304,5 +305,70 @@ describe('the width tables of the standard fonts', () => {
     expect(getStandardFont('ZapfDingbats')!.widths.slice(0x80, 0x8f)).toEqual([
       390, 390, 317, 317, 276, 276, 509, 509, 410, 410, 234, 234, 334, 334, 0,
     ]);
+  });
+});
+
+describe('encodeTextForFontName', () => {
+  const caught = (run: () => unknown): unknown => {
+    try {
+      run();
+    } catch (error) {
+      return error;
+    }
+    throw new Error('expected a throw');
+  };
+
+  it('encodes "Größe €" for a Latin standard font name in WinAnsiEncoding', () => {
+    for (const name of ['Helvetica', 'Times-Roman', 'Courier-BoldOblique']) {
+      expect([...encodeTextForFontName(name, 'Größe €')]).toEqual([
+        0x47, 0x72, 0xf6, 0xdf, 0x65, 0x20, 0x80,
+      ]);
+    }
+  });
+
+  it('encodes Symbol and ZapfDingbats text in their own encodings, by name and by AcroForm alias', () => {
+    expect([...encodeTextForFontName('Symbol', 'αβγ')]).toEqual([0x61, 0x62, 0x67]);
+    expect([...encodeTextForFontName('Symb', 'αβγ')]).toEqual([0x61, 0x62, 0x67]);
+    expect([...encodeTextForFontName('ZapfDingbats', '✓')]).toEqual([0x33]);
+    expect([...encodeTextForFontName('ZaDb', '✓')]).toEqual([0x33]);
+  });
+
+  it('takes each of the 12 Latin AcroForm aliases to WinAnsiEncoding', () => {
+    const aliases = ['Helv', 'HeBo', 'HeOb', 'HeBO', 'TiRo', 'TiBo', 'TiIt', 'TiBI'];
+    for (const alias of [...aliases, 'Cour', 'CoBo', 'CoOb', 'CoBO']) {
+      expect([...encodeTextForFontName(alias, 'é€')]).toEqual([0xe9, 0x80]);
+    }
+  });
+
+  it('normalises the text to NFC', () => {
+    expect([...encodeTextForFontName('Helvetica', 'cafe\u0301')]).toEqual([0x63, 0x61, 0x66, 0xe9]);
+  });
+
+  it('encodes any other name in WinAnsiEncoding and names it when a character has no code', () => {
+    expect([...encodeTextForFontName('F1', 'Größe €')]).toEqual([
+      0x47, 0x72, 0xf6, 0xdf, 0x65, 0x20, 0x80,
+    ]);
+    expect([...encodeTextForFontName('', 'é')]).toEqual([0xe9]);
+    const error = caught(() => encodeTextForFontName('F9', 'a日'));
+    expect(error).toBeInstanceOf(UnencodableTextError);
+    expect(error).toMatchObject({
+      character: '日',
+      index: 1,
+      fontName: 'F9',
+      encoding: 'WinAnsiEncoding',
+    });
+  });
+
+  it('names the standard font when a standard font name or alias cannot encode a character', () => {
+    expect(caught(() => encodeTextForFontName('Helvetica', 'ab日'))).toMatchObject({
+      character: '日',
+      index: 2,
+      fontName: 'Helvetica',
+      encoding: 'WinAnsiEncoding',
+    });
+    expect(caught(() => encodeTextForFontName('Symb', 'a'))).toMatchObject({
+      fontName: 'Symbol',
+      encoding: 'SymbolEncoding',
+    });
   });
 });
