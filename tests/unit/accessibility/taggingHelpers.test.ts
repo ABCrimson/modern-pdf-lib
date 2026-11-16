@@ -26,6 +26,7 @@ import {
   LIST_NUMBERING_KEY,
 } from '../../../src/accessibility/taggingHelpers.js';
 import type { ListNumbering } from '../../../src/accessibility/taggingHelpers.js';
+import { UnsupportedOptionError } from '../../../src/errors.js';
 
 // ---------------------------------------------------------------------------
 // tagHeading
@@ -273,18 +274,18 @@ describe('tagTableHeaderCell', () => {
     const tree = new PdfStructureTree();
     const table = tagTable(tree, null);
     const row = tagTableRow(tree, table);
-    const th = tagTableHeaderCell(tree, row, 'Column');
+    const th = tagTableHeaderCell(tree, row);
     expect(th.type).toBe('TH');
     expect(th.parent).toBe(row);
     expect(th.options.scope).toBe('Column');
   });
 
-  it('creates a TH with Row scope', () => {
+  it('refuses an explicit scope until it is written as an attribute', () => {
     const tree = new PdfStructureTree();
     const table = tagTable(tree, null);
     const row = tagTableRow(tree, table);
-    const th = tagTableHeaderCell(tree, row, 'Row');
-    expect(th.options.scope).toBe('Row');
+    expect(() => tagTableHeaderCell(tree, row, 'Row')).toThrow(UnsupportedOptionError);
+    expect(row.children).toHaveLength(0);
   });
 
   it('defaults scope to Column when omitted', () => {
@@ -299,8 +300,8 @@ describe('tagTableHeaderCell', () => {
     const tree = new PdfStructureTree();
     const table = tagTable(tree, null);
     const row = tagTableRow(tree, table);
-    const th = tagTableHeaderCell(tree, row, 'Both', { colSpan: 2 });
-    expect(th.options.scope).toBe('Both');
+    const th = tagTableHeaderCell(tree, row, undefined, { colSpan: 2 });
+    expect(th.options.scope).toBe('Column');
     expect(th.options.colSpan).toBe(2);
   });
 });
@@ -316,12 +317,20 @@ describe('tagTableDataCell', () => {
     expect(row.children).toContain(td);
   });
 
-  it('forwards options (rowSpan)', () => {
+  it('forwards options (colSpan)', () => {
     const tree = new PdfStructureTree();
     const table = tagTable(tree, null);
     const row = tagTableRow(tree, table);
-    const td = tagTableDataCell(tree, row, { rowSpan: 3 });
-    expect(td.options.rowSpan).toBe(3);
+    const td = tagTableDataCell(tree, row, { colSpan: 3 });
+    expect(td.options.colSpan).toBe(3);
+  });
+
+  it('refuses a rowSpan until it is written as an attribute', () => {
+    const tree = new PdfStructureTree();
+    const table = tagTable(tree, null);
+    const row = tagTableRow(tree, table);
+    expect(() => tagTableDataCell(tree, row, { rowSpan: 3 })).toThrow(UnsupportedOptionError);
+    expect(row.children).toHaveLength(0);
   });
 });
 
@@ -335,8 +344,8 @@ describe('end-to-end table construction', () => {
     const table = tagTable(tree, null);
 
     const headerRow = tagTableRow(tree, table);
-    const th1 = tagTableHeaderCell(tree, headerRow, 'Column');
-    const th2 = tagTableHeaderCell(tree, headerRow, 'Column');
+    const th1 = tagTableHeaderCell(tree, headerRow);
+    const th2 = tagTableHeaderCell(tree, headerRow);
 
     const dataRow = tagTableRow(tree, table);
     const td1 = tagTableDataCell(tree, dataRow);

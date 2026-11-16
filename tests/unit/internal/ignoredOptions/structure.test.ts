@@ -1,19 +1,23 @@
 /**
- * Structure elements accept options (`scope`, `rowSpan`) and do not act on them, so they warn once
- * per option with the code `MPL_IGNORED_OPTION`. Each row checks the first call, the second call,
- * the absent and undefined option, and that the message names no caller value.
+ * Structure elements refuse the options `scope` and `rowSpan` with an `UnsupportedOptionError`
+ * that names the release carrying them (0.46.0), because no attribute dictionary is written for
+ * them yet. Each row checks the refusal, the absent and undefined option, that the message names no
+ * caller value, and that nothing reaches the tree when the call throws.
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { MockInstance } from 'vitest';
-import { PdfStructureTree } from '../../../../src/accessibility/structureTree.js';
+import {
+  PdfStructureElement,
+  PdfStructureTree,
+} from '../../../../src/accessibility/structureTree.js';
 import {
   tagParagraph,
   tagTableDataCell,
   tagTableHeaderCell,
 } from '../../../../src/accessibility/taggingHelpers.js';
+import { UnsupportedFeatureError, UnsupportedOptionError } from '../../../../src/errors.js';
 import { resetWarningsForTesting } from '../../../../src/internal/warnings.js';
-import { CODE, TYPE, ignoredOptionMessage as message } from '../../../helpers/ignoredOptions.js';
 
 let emit: MockInstance<typeof process.emitWarning>;
 
@@ -27,77 +31,90 @@ afterEach(() => {
   resetWarningsForTesting();
 });
 
+/** The error `run` throws, or `undefined` when it does not throw. */
+function thrownBy(run: () => unknown): unknown {
+  try {
+    run();
+  } catch (error) {
+    return error;
+  }
+  return undefined;
+}
+
 interface Row {
-  readonly entry: string;
-  /** The subject as it appears in the message, with `()` for a function. */
-  readonly subject: string;
   readonly option: string;
-  /** The value passed to trigger the warning. */
+  /** The value passed to trigger the refusal. */
   readonly value: unknown;
-  /** Values that change nothing and must not warn. */
-  readonly quiet?: readonly unknown[];
   readonly invoke: (extra: Record<string, unknown>) => unknown;
 }
 
-const structure = (extra: Record<string, unknown>): unknown =>
+const element = (extra: Record<string, unknown>): unknown => new PdfStructureElement('TD', extra);
+const treeElement = (extra: Record<string, unknown>): unknown =>
   new PdfStructureTree().addElement(null, 'TD', extra);
+const child = (extra: Record<string, unknown>): unknown =>
+  new PdfStructureElement('Table').addChild('TD', extra);
 
 const ROWS: readonly Row[] = [
-  {
-    entry: 'PdfStructureElement',
-    subject: 'PdfStructureElement',
-    option: 'scope',
-    value: 'Both',
-    invoke: structure,
-  },
-  {
-    entry: 'PdfStructureElement',
-    subject: 'PdfStructureElement',
-    option: 'rowSpan',
-    value: 4747,
-    invoke: structure,
-  },
+  { option: 'scope', value: 'Both', invoke: element },
+  { option: 'scope', value: 'Both', invoke: treeElement },
+  { option: 'scope', value: 'Both', invoke: child },
+  { option: 'rowSpan', value: 4747, invoke: element },
+  { option: 'rowSpan', value: 4747, invoke: treeElement },
+  { option: 'rowSpan', value: 4747, invoke: child },
 ];
 
-function ignoredCalls(): unknown[][] {
-  return emit.mock.calls.filter(([, options]) => (options as { code?: string }).code === CODE);
-}
+const messageOf = (option: string): string =>
+  `\`new PdfStructureElement()\`: the option \`${option}\` is not supported in this release; it is planned for 0.46.0.`;
 
-describe.each(ROWS)('$entry option $option', (row) => {
-  it('warns once on the first call and not on the second', async () => {
-    await row.invoke({ [row.option]: row.value });
-    expect(ignoredCalls()).toHaveLength(1);
-    expect(emit).toHaveBeenCalledWith(message(row.subject, row.option), { type: TYPE, code: CODE });
-
-    await row.invoke({ [row.option]: row.value });
-    expect(ignoredCalls()).toHaveLength(1);
+describe.each(ROWS)('option $option through $invoke.name', (row) => {
+  it('throws an UnsupportedOptionError that names the release', () => {
+    const error = thrownBy(() => row.invoke({ [row.option]: row.value }));
+    expect(error).toBeInstanceOf(UnsupportedOptionError);
+    expect(error).toBeInstanceOf(UnsupportedFeatureError);
+    expect(error).toMatchObject({
+      code: 'unsupported-option',
+      entry: 'new PdfStructureElement()',
+      option: row.option,
+      plannedFor: '0.46.0',
+      message: messageOf(row.option),
+    });
   });
 
-  it('does not warn when the option is absent or undefined', async () => {
-    await row.invoke({});
-    await row.invoke({ [row.option]: undefined });
-    expect(ignoredCalls()).toHaveLength(0);
+  it('does not throw when the option is absent or undefined', () => {
+    expect(() => row.invoke({})).not.toThrow();
+    expect(() => row.invoke({ [row.option]: undefined })).not.toThrow();
   });
 
-  it('does not warn for a value that changes nothing', async () => {
-    for (const quiet of row.quiet ?? []) await row.invoke({ [row.option]: quiet });
-    expect(ignoredCalls()).toHaveLength(0);
+  it('names no caller value in the message', () => {
+    const error = thrownBy(() => row.invoke({ [row.option]: row.value })) as Error;
+    expect(error.message).not.toContain(String(row.value));
   });
 
-  it('names no caller value in the message', async () => {
-    await row.invoke({ [row.option]: row.value });
-    const [text] = ignoredCalls()[0] as [string];
-    expect(text).toBe(message(row.subject, row.option));
-    if (typeof row.value === 'string' || typeof row.value === 'number') {
-      expect(text).not.toContain(String(row.value));
-    }
+  it('emits no warning', () => {
+    thrownBy(() => row.invoke({ [row.option]: row.value }));
+    expect(emit).not.toHaveBeenCalled();
+  });
+});
+
+describe('a refused element does not reach the tree', () => {
+  it('addElement leaves the root without a child', () => {
+    const tree = new PdfStructureTree();
+    thrownBy(() => tree.addElement(null, 'TD', { rowSpan: 2 }));
+    expect(tree.root.children).toHaveLength(0);
+  });
+
+  it('addChild leaves the parent without a child', () => {
+    const parent = new PdfStructureElement('Table');
+    thrownBy(() => parent.addChild('TD', { scope: 'Row' }));
+    expect(parent.children).toHaveLength(0);
   });
 });
 
 describe('results stay the same', () => {
   it('a structure element keeps the options it was given', () => {
-    const element = new PdfStructureTree().addElement(null, 'TH', { scope: 'Row', rowSpan: 2 });
-    expect(element.options).toEqual({ scope: 'Row', rowSpan: 2 });
+    const options = { colSpan: 2, altText: 'cell', language: 'en' };
+    const created = new PdfStructureTree().addElement(null, 'TH', options);
+    expect(created.options).toEqual(options);
   });
 });
 
@@ -106,31 +123,42 @@ describe('tagTableHeaderCell', () => {
     const tree = new PdfStructureTree();
     const table = tree.addElement(null, 'Table');
     const row = tree.addElement(table, 'TR');
-    return tagTableHeaderCell(tree, row, scope, options);
+    return { row, header: () => tagTableHeaderCell(tree, row, scope, options) };
   };
 
-  it('records the default scope without a warning', () => {
-    expect(build().options.scope).toBe('Column');
-    expect(ignoredCalls()).toHaveLength(0);
+  it('records the default scope without an error', () => {
+    expect(build().header().options.scope).toBe('Column');
+    expect(emit).not.toHaveBeenCalled();
   });
 
-  it('warns for a scope the caller passes', () => {
-    expect(build('Row').options.scope).toBe('Row');
-    expect(ignoredCalls()).toHaveLength(1);
+  it.each(['Row', 'Column', 'Both'] as const)('refuses the scope %s a caller passes', (scope) => {
+    const { row, header } = build(scope);
+    const error = thrownBy(header);
+    expect(error).toBeInstanceOf(UnsupportedOptionError);
+    expect(error).toMatchObject({ option: 'scope', plannedFor: '0.46.0' });
+    expect(row.children).toHaveLength(0);
   });
 
-  it('warns for a rowSpan the caller passes, and keeps the default scope', () => {
-    const header = build(undefined, { rowSpan: 3 });
-    expect(header.options).toEqual({ rowSpan: 3, scope: 'Column' });
-    expect(ignoredCalls()).toHaveLength(1);
-    expect(emit).toHaveBeenCalledWith(message('PdfStructureElement', 'rowSpan'), {
-      type: TYPE,
-      code: CODE,
-    });
+  it('refuses a rowSpan the caller passes, also with the default scope', () => {
+    const { row, header } = build(undefined, { rowSpan: 3 });
+    const error = thrownBy(header);
+    expect(error).toBeInstanceOf(UnsupportedOptionError);
+    expect(error).toMatchObject({ option: 'rowSpan', plannedFor: '0.46.0' });
+    expect(row.children).toHaveLength(0);
   });
 });
 
-describe('a null or primitive options argument is accepted as it was before the warnings', () => {
+describe('tagTableDataCell', () => {
+  it('refuses a rowSpan the caller passes', () => {
+    const tree = new PdfStructureTree();
+    const row = tree.addElement(tree.addElement(null, 'Table'), 'TR');
+    const error = thrownBy(() => tagTableDataCell(tree, row, { rowSpan: 3 }));
+    expect(error).toBeInstanceOf(UnsupportedOptionError);
+    expect(error).toMatchObject({ option: 'rowSpan' });
+  });
+});
+
+describe('a null or primitive options argument is accepted as it was before the refusals', () => {
   const NON_OBJECTS: readonly [string, unknown][] = [
     ['null', null],
     ['undefined', undefined],

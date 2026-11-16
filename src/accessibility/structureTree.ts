@@ -21,7 +21,7 @@ import { PdfArray, PdfDict, PdfName, PdfNumber, PdfRef, PdfString } from '../cor
 import type { PdfObject, PdfObjectRegistry } from '../core/pdfObjects.js';
 import { InvalidArgumentError, InvalidStateError } from '../errors.js';
 import { assertWithinLimit } from '../internal/limits.js';
-import { warnOnce } from '../internal/warnings.js';
+import { UNSUPPORTED_OPTIONS, rejectOption } from '../internal/options.js';
 
 const utf8 = new TextEncoder();
 
@@ -109,6 +109,11 @@ export type StructureType =
 // Structure element options
 // ---------------------------------------------------------------------------
 
+/** The options a structure element refuses: the rows of the option rule table for its constructor. */
+const REFUSED_OPTIONS = UNSUPPORTED_OPTIONS.filter(
+  (rule) => rule.entry === 'new PdfStructureElement()',
+);
+
 /**
  * Optional attributes for a structure element.
  */
@@ -138,9 +143,9 @@ export interface StructureElementOptions {
   /**
    * Header scope for TH cells (`"Row"`, `"Column"`, or `"Both"`).
    *
-   * Has no effect in this version: no attribute dictionary is written and
-   * no validator reads it. Passing it emits a one-time
-   * `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`).
+   * Not supported until 0.46.0, which writes it as a structure attribute:
+   * passing it throws an `UnsupportedOptionError` (code `unsupported-option`,
+   * `plannedFor` `0.46.0`).
    */
   scope?: 'Row' | 'Column' | 'Both' | undefined;
   /**
@@ -151,9 +156,9 @@ export interface StructureElementOptions {
   /**
    * Number of rows this cell spans (for TH/TD elements).
    *
-   * Has no effect in this version: no attribute dictionary is written and
-   * no validator reads it. Passing it emits a one-time
-   * `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`).
+   * Not supported until 0.46.0, which writes it as a structure attribute:
+   * passing it throws an `UnsupportedOptionError` (code `unsupported-option`,
+   * `plannedFor` `0.46.0`).
    */
   rowSpan?: number | undefined;
 }
@@ -239,23 +244,15 @@ export class PdfStructureElement {
   /**
    * @param type     The structure type (e.g. `"P"`, `"H1"`, `"Figure"`).
    * @param options  Optional attributes for the element.
+   * @throws {UnsupportedOptionError}  If `options` has a `scope` or a `rowSpan`.
    */
   constructor(type: StructureType, options: StructureElementOptions = {}) {
     // Copy first: a `null` argument spreads to `{}`, so the checks read the copy.
     const copy: StructureElementOptions = { ...options };
-    if (copy.scope !== undefined) {
-      warnOnce(
-        'ignored-option:PdfStructureElement scope',
-        'MPL_IGNORED_OPTION',
-        '`PdfStructureElement`: the option `scope` has no effect in this version.',
-      );
-    }
-    if (copy.rowSpan !== undefined) {
-      warnOnce(
-        'ignored-option:PdfStructureElement rowSpan',
-        'MPL_IGNORED_OPTION',
-        '`PdfStructureElement`: the option `rowSpan` has no effect in this version.',
-      );
+    for (const rule of REFUSED_OPTIONS) {
+      if (rule.option !== undefined && Reflect.get(copy, rule.option) !== undefined) {
+        rejectOption(rule);
+      }
     }
     this.type = type;
     this.options = copy;
@@ -267,6 +264,7 @@ export class PdfStructureElement {
    * @param type     The child's structure type.
    * @param options  Optional attributes for the child.
    * @returns        The newly created child element.
+   * @throws {UnsupportedOptionError}  If `options` has a `scope` or a `rowSpan`.
    */
   addChild(type: StructureType, options?: StructureElementOptions): PdfStructureElement {
     const child = new PdfStructureElement(type, options);
@@ -469,6 +467,7 @@ export class PdfStructureTree {
    * @param type     The structure type of the new element.
    * @param options  Optional attributes for the element.
    * @returns        The newly created element.
+   * @throws {UnsupportedOptionError}  If `options` has a `scope` or a `rowSpan`.
    */
   addElement(
     parent: PdfStructureElement | null,

@@ -292,17 +292,17 @@ export function tagTableRow(
 /**
  * Tag a table header cell (`TH`) under a row, recording its scope.
  *
- * The `scope` (one of `Row`, `Column`, or `Both`) is stored in the element's
- * options. It has no effect in this version: no attribute dictionary is
- * written and no validator reads it. Passing a `scope` (or `options.scope`)
- * emits a one-time `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`); the
+ * The element records the default scope `Column` in its options. No
+ * attribute dictionary is written for a scope until 0.46.0, so passing a
+ * `scope` (or `options.scope`) throws an `UnsupportedOptionError`; the
  * default does not.
  *
  * @param tree    The structure tree to add the element to.
  * @param row     The parent `TR` element.
- * @param scope   The header scope (default `'Column'`).
- * @param options Optional additional attributes (e.g. colSpan/rowSpan).
+ * @param scope   The header scope (default `'Column'`); any value passed throws.
+ * @param options Optional additional attributes (e.g. colSpan); `rowSpan` throws.
  * @returns       The newly created `TH` element with `scope` set.
+ * @throws {UnsupportedOptionError}  If `scope` or `options.scope` is passed, or `options.rowSpan` is set.
  */
 export function tagTableHeaderCell(
   tree: PdfStructureTree,
@@ -328,7 +328,7 @@ export function tagTableHeaderCell(
  *
  * @param tree    The structure tree to add the element to.
  * @param row     The parent `TR` element.
- * @param options Optional attributes (e.g. colSpan/rowSpan).
+ * @param options Optional attributes (e.g. colSpan); `rowSpan` throws.
  * @returns       The newly created `TD` element.
  */
 export function tagTableDataCell(
