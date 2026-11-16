@@ -1771,7 +1771,9 @@ export class PdfDocument {
   // -----------------------------------------------------------------------
 
   // Of a loaded document, each getter returns the decoded text of its key (PDFDocEncoding,
-  // UTF-16BE, UTF-16LE or UTF-8 with its byte order mark), or the date that text holds.
+  // UTF-16BE, UTF-16LE or UTF-8 with its byte order mark), or the date that text holds; when no
+  // date parses from a loaded /CreationDate or /ModDate, getCreationDate() returns the time the
+  // document object was made, getModDate() returns undefined, and save writes the key as loaded.
 
   /** Get the document title, or `undefined` if not set. */
   getTitle(): string | undefined {

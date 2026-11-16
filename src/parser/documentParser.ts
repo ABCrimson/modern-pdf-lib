@@ -74,8 +74,8 @@ export interface LoadPdfOptions {
   /** When true, skip decryption even if the PDF is encrypted. */
   ignoreEncryption?: boolean;
   /**
-   * When true, update the /ModDate in the /Info dictionary to the
-   * current time when saving. Defaults to true.
+   * When true, save() writes the current time as /ModDate, also when the file was loaded with
+   * one. Defaults to false: a loaded /ModDate is written as loaded.
    */
   updateMetadata?: boolean;
   /**
