@@ -501,7 +501,7 @@ try {
 A load, decode, text-extraction, rendering or embedding call throws `ResourceLimitError` (code `resource-limit-exceeded`):
 
 ```
-ResourceLimitError: Input exceeds the internal limit maxImageDimension (65536 pixels).
+ResourceLimitError: Input exceeds the limit maxImageDimension (65536 pixels).
 ```
 
 Or a decode call throws `UnsupportedFilterError` (code `unsupported-filter`):
@@ -510,18 +510,18 @@ Or a decode call throws `UnsupportedFilterError` (code `unsupported-filter`):
 UnsupportedFilterError: JPEG 2000 (JPXDecode) image data is not decoded in this release.
 ```
 
-`ResourceLimitError` carries `limit` (the name of the limit), `max` (its value) and `actual` (the size the input needed, or `undefined` when that is not a finite number). `UnsupportedFilterError` carries `filter`, which is `'JPXDecode'`, `'JBIG2Decode'` or `'VP8'`.
+`ResourceLimitError` carries `limit` (the name of the limit), `max` (its value), `actual` (the size the input needed, or `undefined` when that is not a finite number) and `source` (`'option'` when a `limits` option set the limit to a value other than its default, `'default'` otherwise). `UnsupportedFilterError` carries `filter`, which is `'JPXDecode'`, `'JBIG2Decode'` or `'VP8'`.
 
 Two calls do not throw for these errors: signature verification reports the one signature as not valid and still checks the others, and `extractPageImages()` skips the one image it cannot decode. Rendering draws no images in this release.
 
 ### Why it happens
 
-- **`ResourceLimitError`:** the input needs more than one of the library's internal limits allows. The limits bound one stream, one table or one call, they are fixed in this version, and every file of the test corpus stays at or below a quarter of each of them. The values are listed under [Input limits](./performance.md#input-limits).
+- **`ResourceLimitError`:** the input needs more than one of the library's limits allows. Twelve limits bound one item (a stream, a table, a tree, an image, a font) and four bound a sum over one call; every file of the test corpus stays at or below a quarter of each default. The names and defaults (`DEFAULT_LIMITS`) are listed under [Input limits](./performance.md#input-limits).
 - **`UnsupportedFilterError`:** the data uses a format this release does not decode: JPEG 2000 (`/JPXDecode`), JBIG2 (`/JBIG2Decode`) or lossy WebP (VP8). The error is thrown before any of the data is read, so no wrong pixels are returned.
 
 ### How to fix it
 
-The limits cannot be changed in this version. Treat a file that throws `ResourceLimitError` as one this version does not process: reject it, or hand it to a tool that does. For an image above the size limits, scale it down before you embed it. Do not retry the same call on the same bytes.
+If `error.source` is `'default'`, the input is above a default limit: reject the file, hand it to a tool that does process it, or, for a file you trust, load it with a higher limit (see [The `limits` option](./performance.md#the-limits-option); the two depth limits can only be lowered, so a file above one of them stays refused). If `error.source` is `'option'`, a limit you set is the one that refused it: raise it, or treat the file as refused. For an image above the size limits, scale it down before you embed it. Do not retry the same call on the same bytes with the same limits.
 
 ```ts
 import { loadPdf, ResourceLimitError, UnsupportedFilterError } from 'modern-pdf-lib';
@@ -546,7 +546,7 @@ For `UnsupportedFilterError`:
 - **A PDF that holds JPEG 2000 or JBIG2 images:** the file still loads, saves, merges and copies, and those streams are written back unchanged. `extractImages()` returns such images with their encoded bytes, which a dedicated decoder can read. `decodeImageStream()` and `decodeStream()` throw for them.
 
 > [!WARNING]
-> The limits keep one call bounded; they do not bound a process, and nothing caps the total over many streams or files. For untrusted files, run each one in a worker or child process with its own time and memory limit.
+> The limits keep one call bounded; they do not bound a process, and nothing caps the sum over many calls or many files. For untrusted files, run each one in a worker or child process with its own time and memory limit.
 
 ## 11. UnsupportedEncryptionError when saving a loaded document
 

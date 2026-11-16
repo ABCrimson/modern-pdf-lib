@@ -258,9 +258,11 @@ Image handling varies significantly by format:
 
 ## Input limits
 
-Decode, parse and render paths refuse input above internal limits with `ResourceLimitError` (code `resource-limit-exceeded`). The error carries `limit` (the name of the limit), `max` (its value) and `actual` (the size the input needed, or `undefined` when that is not a finite number). A value equal to a limit is accepted; only a value above it is refused. See the security advisory published with 0.40.8 on the [advisories page](https://github.com/ABCrimson/modern-pdf-lib/security/advisories).
+Decode, parse and render paths refuse input above a limit with `ResourceLimitError` (code `resource-limit-exceeded`). The error carries `limit` (the name of the limit, a `LimitName`), `max` (its value), `actual` (the size the input needed, or `undefined` when that is not a finite number) and `source` (`'option'` when a `limits` option set the limit to a value other than its default, `'default'` otherwise). A value equal to a limit is accepted; only a value above it is refused. See the security advisory published with 0.40.8 on the [advisories page](https://github.com/ABCrimson/modern-pdf-lib/security/advisories).
 
-| Limit (`error.limit`) | Value | Bounds | Where it throws |
+Sixteen limits are in force. Twelve bound one item of the input (a stream, a table, a tree, an image, a font, the forms of one page) and four bound a sum over one call. `DEFAULT_LIMITS`, exported frozen from `modern-pdf-lib`, `modern-pdf-lib/parse` and `modern-pdf-lib/create`, holds the defaults below, and a `limits` option changes them (see [The `limits` option](#the-limits-option)).
+
+| Limit (`error.limit`) | Default | Bounds | Where it throws |
 |:---|---:|:---|:---|
 | `maxDecodedStreamBytes` | 268,435,456 bytes (256 MiB) | The decoded output of one stream filter stage; the decoded content streams of one page together; one predictor row | `loadPdf()`, `decodeStream()`, `decodeImageStream()`, text extraction, rendering, `getContentStream()`, `analyzeImages()` |
 | `maxRewrapDecodedBytes` | 67,108,864 bytes (64 MiB) | The decoded size up to which `save()`, `saveAsStream()` and `saveIncremental()` rewrite a raw DEFLATE or sync-flushed `/FlateDecode` stream as zlib data; a document whose `maxDecodedStreamBytes` is smaller uses that | Nothing: a larger stream is saved as loaded |
@@ -275,19 +277,34 @@ Decode, parse and render paths refuse input above internal limits with `Resource
 | `maxImageBytes` | 268,435,456 bytes (256 MiB) | The decoded sample bytes of one image | The same calls |
 | `maxImageFrames` | 4,096 frames | The frames (TIFF IFDs) read from one file | `decodeTiff()`, `decodeTiffAll()`, `getTiffPageCount()` |
 | `maxFontBytes` | 134,217,728 bytes (128 MiB) | The decoded bytes of one font program, such as the tables of a WOFF file | `decodeWoff()` |
+| `maxTotalDecodedBytes` | 1,073,741,824 bytes (1 GiB) | The output of every filter stage of every stream that one call decodes: all the filters of one `decodeStream()` call, the object and cross-reference streams of one `loadPdf()`, the streams that one call on a document decodes | `loadPdf()`, `decodeStream()`, `decodeImageStream()`, `getContentStream()`, rendering, `extractFonts()`; `extractPageImages()` skips an image that takes the sum above it |
+| `maxTotalCMapMappings` | 4,194,304 mappings | The mappings of the ToUnicode CMaps of all the fonts that one text extraction reads | `extractText()`, `extractTextWithPositions()` |
+| `maxTotalImageBytes` | 1,073,741,824 bytes (1 GiB) | The decoded sample bytes of the images that one call returns or decodes: the pixels of the images of one page, the frames of one TIFF file | `extractPageImages()`, `decodeTiff()`, `decodeTiffPage()`, `decodeTiffAll()`, `decodeWebP()` |
+| `maxPageOperators` | 16,777,216 operators | The operators that one page interpretation runs, one each, those of the content stream and those inside its Form XObjects | Rendering, `interpretPage()`, `autoTagPage()` |
 
-The limits are fixed in this version: no option changes them, and the names in the first column are not a stable API, so test for `error.code` or `instanceof ResourceLimitError` and not for a name. No file of the test corpus uses more than a quarter of any limit.
+`maxRewrapDecodedBytes` is not a limit of the option: it is fixed. Each default is at least four times the largest value any file of the test corpus needs, and the corpus gate (`tests/oracle/limits-headroom.test.ts`) fails when one is not. The largest value per call of the four totals in the corpus is 1,052,700 decoded bytes, 1,322 CMap mappings, 8,415,000 image bytes and 133,272 operators.
+
+### The `limits` option
+
+A `limits` option is an object of type `PdfLimits` that names the limits to set; a limit left out keeps its default. A name that is not in the table, or a value that is not a whole number from 1 up to the ceiling of its limit, throws `InvalidArgumentError` (`argument` `"limits.<name>"`) before anything is read. `maxDerDepth` and `maxTreeDepth` can only be lowered (to at most 128 and 256, because the readers that walk them recurse) and `maxFontCmapMappings` is at most 0x110000; every other limit can be raised up to `Number.MAX_SAFE_INTEGER`.
+
+These calls take the option: `loadPdf()` and `PdfDocument.load()` (`LoadPdfOptions.limits`), `createPdf()` and `PdfDocument.create()` (`CreatePdfOptions.limits`), `new StreamingPdfParser()` (only `maxTreeDepth` applies), `decodeStream()`, `decodeImageStream()`, `extractText()` and `extractTextWithPositions()` (`TextExtractionOptions.limits`), `decodeTiff()` and `embedTiffDirect()`, `decodeTiffPage()`, `decodeTiffAll()`, `decodeWebP()`, `decodeWoff()` and `extractMetrics()`. `embedFont()` takes the limits as its second argument, for the pure-JS font parser only.
+
+A document keeps the limits it is loaded or created with, and every later call on it runs under them: `getContentStream()`, `interpretPage()`, `extractPageImages()`, `extractFonts()`, `embedPage()`, `embedPdf()`, `copy()`, and `embedPng()`, `embedWebP()`, `embedTiff()` and `embedFont()` of the document. A stream decodes under the limits of the document that owns it, also when a page of that document is embedded into another one. These calls take no `limits` of their own. `scanPdfThreats()` and `inspectEncryption()` run under `DEFAULT_LIMITS` and take none either.
 
 ```ts
 import { loadPdf, ResourceLimitError } from 'modern-pdf-lib';
 
 try {
-  const doc = await loadPdf(bytes);
+  // Tighter than the defaults, for files from untrusted uploads.
+  const doc = await loadPdf(bytes, {
+    limits: { maxDecodedStreamBytes: 2 ** 24, maxTotalDecodedBytes: 2 ** 26, maxPageOperators: 2 ** 20 },
+  });
   // ... work with doc ...
 } catch (err) {
   if (err instanceof ResourceLimitError) {
-    // The file needs more than `err.limit` allows (`err.max`); treat it as a file this version does not process.
-    console.error(err.code, err.limit, err.max, err.actual);
+    // The file needs more than `err.limit` allows (`err.max`); `err.source` is 'option' for a limit you set.
+    console.error(err.code, err.limit, err.max, err.actual, err.source);
   } else {
     throw err;
   }
@@ -296,7 +313,7 @@ try {
 
 ### What the limits bound
 
-- **Each limit bounds one stream, one table or one call.** A limit is not a total over a file or a process.
+- **Twelve limits bound one item, four bound one call.** The totals add up what one call reads (a `decodeStream()` call, a load, a text extraction, one call on a page); each call starts at zero. No limit is a total over a file's lifetime, over many calls or over a process.
 - **A decode at a limit costs what a decode of that size costs.** Input at or just under a limit is accepted, and the memory it takes is larger than the decoded size: a Flate stream that decodes to exactly 256 MiB can use about 2.5 times that (roughly 640 MiB of resident memory), and a large RGBA PNG about four times its decoded size. Input above a limit ends in the error, but when its size is known only by decoding it can already have used as much memory as a decode at the limit by then.
 - **Which calls throw.** `loadPdf()`, text extraction, rendering, `inspectEncryption()`, `scanPdfThreats()` and `autoTagPage()` let a `ResourceLimitError` through. Signature verification reports the one signature as not valid and still checks the others (`verifySignatureDetailed()` puts the refusal in its `errors`). `extractPageImages()` skips the one image it cannot decode.
 - **Run untrusted files under operating-system limits.** The limits keep one call bounded, but they do not bound a process. A service that handles untrusted files should run each file in a worker or a child process with its own wall-clock and memory limit, and end it when either runs out. A promise timeout cannot do this: it cannot stop synchronous work that is already running (see [Batch Processing](./batch-processing.md#best-practices)).
@@ -309,7 +326,7 @@ JPEG 2000 (`/JPXDecode`), JBIG2 (`/JBIG2Decode`) and lossy WebP (VP8) data throw
 
 ### Memory budget (caller accounting)
 
-`MemoryBudget` is an accounting helper for your own code: you report the size you are about to allocate, and it throws `MemoryBudgetExceededError` before you go over a ceiling. It does not measure real memory, and the library's decoders do not use it: they stop at their own internal limits and throw `ResourceLimitError` (see [Input limits](#input-limits)).
+`MemoryBudget` is an accounting helper for your own code: you report the size you are about to allocate, and it throws `MemoryBudgetExceededError` before you go over a ceiling. It does not measure real memory, and the library's decoders do not use it: they stop at their limits and throw `ResourceLimitError` (see [Input limits](#input-limits)).
 
 ```ts
 import { createMemoryBudget, MemoryBudgetExceededError } from 'modern-pdf-lib';

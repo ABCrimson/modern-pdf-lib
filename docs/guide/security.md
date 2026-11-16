@@ -23,11 +23,13 @@ while text stayed in the file.
 
 > [!NOTE]
 > `scanPdfThreats` and `inspectEncryption` throw `ResourceLimitError` (code
-> `resource-limit-exceeded`) for a file that an internal limit refuses, because a
-> refused file is not a file without findings: treat it as rejected. The limits
-> bound one stream, table or call, not a process, so run each untrusted file in a
-> worker or child process with its own time and memory limit. The values are
-> listed under [Input limits](./performance.md#input-limits).
+> `resource-limit-exceeded`) for a file that one of the library's limits refuses,
+> because a refused file is not a file without findings: treat it as rejected.
+> Both run under the default limits and take no `limits` option. The limits bound
+> one item of the input or one call, not a process, so run each untrusted file in a
+> worker or child process with its own time and memory limit. The defaults, and the
+> `limits` option that changes them for `loadPdf()`, are listed under
+> [Input limits](./performance.md#input-limits).
 
 ## Threat scanning
 
