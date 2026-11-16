@@ -170,3 +170,22 @@ export type { DocumentMetadata, CatalogOptions } from './core/pdfCatalog.js';
 // ---------------------------------------------------------------------------
 
 export { asPDFName, asPDFNumber, asNumber } from './utils/pdfValueHelpers.js';
+
+// ---------------------------------------------------------------------------
+// Errors that the calls above can throw
+// ---------------------------------------------------------------------------
+
+export {
+  PdfError,
+  InvalidArgumentError,
+  InvalidStateError,
+  MalformedInputError,
+  UnsupportedFeatureError,
+  UnencodableTextError,
+  UnsupportedOptionError,
+  ResourceLimitError,
+  InvalidPageSizeError,
+  InvalidColorError,
+  RemovePageFromEmptyDocumentError,
+  FontNotEmbeddedError,
+} from './errors.js';

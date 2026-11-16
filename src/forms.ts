@@ -41,3 +41,20 @@ export type {
   ButtonAppearanceOptions,
   SignatureAppearanceOptions,
 } from './form/index.js';
+
+// ---------------------------------------------------------------------------
+// Errors that the calls above can throw
+// ---------------------------------------------------------------------------
+
+export {
+  PdfError,
+  InvalidArgumentError,
+  MalformedInputError,
+  NoSuchFieldError,
+  UnexpectedFieldTypeError,
+  MissingOnValueCheckError,
+  FieldAlreadyExistsError,
+  InvalidFieldNamePartError,
+  CombedTextLayoutError,
+  ExceededMaxLengthError,
+} from './errors.js';

@@ -2,92 +2,92 @@
   {
     "name": "EncryptedPdfError",
     "decision": "throw",
-    "where": "src/parser/documentParser.ts when a password is required or wrong; src/crypto/keyDerivation.ts for the incorrect-password checks"
+    "where": "src/parser/documentParser.ts when a password is required or wrong; src/crypto/keyDerivation.ts for the incorrect-password checks",
+    "files": ["src/parser/documentParser.ts", "src/crypto/keyDerivation.ts"]
   },
   {
     "name": "FontNotEmbeddedError",
     "decision": "throw",
-    "where": "src/core/pdfPage.ts drawText, when a font reference made by the library belongs to another document"
-  },
-  {
-    "name": "ForeignPageError",
-    "decision": "remove",
-    "where": "adding a page of another document is a supported, tested route, so no condition is left to throw on"
+    "where": "src/core/pdfPage.ts drawText, when a font reference made by the library belongs to another document",
+    "files": ["src/core/pdfPage.ts"]
   },
   {
     "name": "RemovePageFromEmptyDocumentError",
     "decision": "throw",
-    "where": "src/core/pdfDocument.ts removePage on a document with no page"
+    "where": "src/core/pdfDocument.ts removePage on a document with no page",
+    "files": ["src/core/pdfDocument.ts"]
   },
   {
     "name": "NoSuchFieldError",
     "decision": "throw",
-    "where": "src/form/pdfForm.ts getTextField and the other typed getters, when the name is not a field"
+    "where": "src/form/pdfForm.ts getTextField and the other typed getters, when the name is not a field",
+    "files": ["src/form/pdfForm.ts"]
   },
   {
     "name": "UnexpectedFieldTypeError",
     "decision": "throw",
-    "where": "src/form/pdfForm.ts getTextField and the other typed getters, when the field has another type"
+    "where": "src/form/pdfForm.ts getTextField and the other typed getters, when the field has another type",
+    "files": ["src/form/pdfForm.ts"]
   },
   {
     "name": "MissingOnValueCheckError",
     "decision": "throw",
-    "where": "src/form/fields/checkboxField.ts check(), when the appearance has no on state and the value is absent or Off"
+    "where": "src/form/fields/checkboxField.ts check(), when the appearance has no on state and the value is absent or Off",
+    "files": ["src/form/fields/checkboxField.ts"]
   },
   {
     "name": "FieldAlreadyExistsError",
     "decision": "throw",
-    "where": "src/form/pdfForm.ts createFieldDict, when a field of that name exists"
+    "where": "src/form/pdfForm.ts createFieldDict, when a field of that name exists",
+    "files": ["src/form/pdfForm.ts"]
   },
   {
     "name": "InvalidFieldNamePartError",
     "decision": "throw",
-    "where": "src/form/pdfForm.ts createFieldDict, when the name is empty or contains a period"
-  },
-  {
-    "name": "FieldExistsAsNonTerminalError",
-    "decision": "remove",
-    "where": "created fields are flat and loaded field trees are not built yet, so no condition is left to throw on"
-  },
-  {
-    "name": "RichTextFieldReadError",
-    "decision": "remove",
-    "where": "the only failures of a rich text read (the generic throws of parseRichTextXhtml in src/form/formFlatten.ts) are swallowed by a catch-all there, so no caller could ever see the class"
+    "where": "src/form/pdfForm.ts createFieldDict, when the name is empty or contains a period",
+    "files": ["src/form/pdfForm.ts"]
   },
   {
     "name": "CombedTextLayoutError",
     "decision": "throw",
-    "where": "src/form/fields/textField.ts setText, on a comb field with more characters than /MaxLen"
+    "where": "src/form/fields/textField.ts setText, on a comb field with more characters than /MaxLen",
+    "files": ["src/form/fields/textField.ts"]
   },
   {
     "name": "ExceededMaxLengthError",
     "decision": "throw",
-    "where": "src/form/fields/textField.ts setText, on a field with more characters than /MaxLen"
+    "where": "src/form/fields/textField.ts setText, on a field with more characters than /MaxLen",
+    "files": ["src/form/fields/textField.ts"]
   },
   {
     "name": "InvalidPageSizeError",
     "decision": "throw",
-    "where": "src/core/pdfDocument.ts addPage and insertPage, when the size is not finite or not positive"
+    "where": "src/core/pdfDocument.ts addPage and insertPage, when the size is not finite or not positive",
+    "files": ["src/core/pdfDocument.ts"]
   },
   {
     "name": "InvalidColorError",
     "decision": "throw",
-    "where": "src/core/operators/color.ts rgb, cmyk and grayscale, when a component is outside 0..1"
+    "where": "src/core/operators/color.ts rgb, cmyk and grayscale, when a component is outside 0..1",
+    "files": ["src/core/operators/color.ts"]
   },
   {
     "name": "PluginError",
     "decision": "throw",
-    "where": "src/plugins/pluginSystem.ts register, when a plugin of the same name is already registered"
+    "where": "src/plugins/pluginSystem.ts register, when a plugin of the same name is already registered",
+    "files": ["src/plugins/pluginSystem.ts"]
   },
   {
     "name": "StreamingParseError",
     "decision": "throw",
-    "where": "src/parser/streamingParser.ts, in place of the PdfParseError throws of the streaming parse"
+    "where": "src/parser/streamingParser.ts, in place of the PdfParseError throws of the streaming parse",
+    "files": ["src/parser/streamingParser.ts"]
   },
   {
     "name": "BatchProcessingError",
     "decision": "throw",
-    "where": "src/batch/batchProcessor.ts, errorStrategy collect, in place of the AggregateError"
+    "where": "src/batch/batchProcessor.ts, errorStrategy collect, in place of the AggregateError",
+    "files": ["src/batch/batchProcessor.ts"]
   },
   {
     "name": "InvalidArgumentError",
@@ -117,11 +117,36 @@
   {
     "name": "UnencodableTextError",
     "decision": "throw",
-    "where": "the text writers (drawText, the low-level text operators, the font encoders), on a character the font or the byte string cannot encode"
+    "where": "the text writers (drawText, the low-level text operators, the font encoders), on a character the font or the byte string cannot encode",
+    "files": ["src/core/pdfPage.ts", "src/core/operators/text.ts", "src/assets/font/fontEmbed.ts"]
   },
   {
     "name": "UnsupportedOptionError",
     "decision": "throw",
-    "where": "the calls that pass an option this release does not carry out, in place of the ignored-option warning"
+    "where": "the calls that pass an option this release does not carry out, in place of the ignored-option warning",
+    "files": [
+      "src/accessibility/structureTree.ts",
+      "src/accessibility/taggingHelpers.ts",
+      "src/assets/image/optimize/batchOptimize.ts",
+      "src/barcode/linear/code128.ts",
+      "src/barcode/linear/code39.ts",
+      "src/barcode/linear/ean.ts",
+      "src/barcode/linear/itf.ts",
+      "src/barcode/matrix/pdf417.ts",
+      "src/barcode/matrix/qr.ts",
+      "src/compliance/pdfx/pdfX6.ts",
+      "src/core/io/incrementalWriter.ts",
+      "src/core/io/pdfWriter.ts",
+      "src/core/pdfDocument.ts",
+      "src/layout/presets.ts",
+      "src/parser/streamingParser.ts",
+      "src/plugins/builtins/metadataPlugin.ts",
+      "src/signature/pades/detailedVerifier.ts",
+      "src/signature/pades/fieldLock.ts",
+      "src/signature/pades/incrementalSave.ts",
+      "src/signature/pades/mdpPolicy.ts",
+      "src/signature/pades/signatureHandler.ts",
+      "src/signature/pki/chainValidator.ts"
+    ]
   }
 ]

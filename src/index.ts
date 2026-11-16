@@ -1130,17 +1130,22 @@ export type {
 // ---------------------------------------------------------------------------
 
 export {
+  PdfError,
+  InvalidArgumentError,
+  InvalidStateError,
+  MalformedInputError,
+  UnsupportedFeatureError,
+  EnvironmentError,
+  UnencodableTextError,
+  UnsupportedOptionError,
   EncryptedPdfError,
   FontNotEmbeddedError,
-  ForeignPageError,
   RemovePageFromEmptyDocumentError,
   NoSuchFieldError,
   UnexpectedFieldTypeError,
   MissingOnValueCheckError,
   FieldAlreadyExistsError,
   InvalidFieldNamePartError,
-  FieldExistsAsNonTerminalError,
-  RichTextFieldReadError,
   CombedTextLayoutError,
   ExceededMaxLengthError,
   InvalidPageSizeError,
@@ -1155,7 +1160,12 @@ export {
   ResourceLimitError,
   UnsupportedFilterError,
 } from './errors.js';
-export type { RedactionIncompleteReason } from './errors.js';
+export type {
+  PdfErrorCode,
+  PdfLibVersion,
+  RedactionIncompleteReason,
+  TextEncodingName,
+} from './errors.js';
 
 // ---------------------------------------------------------------------------
 // Form flattening

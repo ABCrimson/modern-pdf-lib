@@ -5,6 +5,134 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 See [VERSIONING.md](./VERSIONING.md) for this project's versioning policy.
 
+## [0.41.0] (unreleased)
+
+The breaking minor of the 0.41 line. This section lists what has landed so far.
+
+### Removed
+
+- **`ForeignPageError`:** nothing ever threw it, and adding a page of another document is a supported route (`addPage()` accepts it), so no condition is left to throw on.
+- **`FieldExistsAsNonTerminalError`:** nothing ever threw it. Fields the library creates are flat, and the field tree of a loaded file is not built yet.
+- **`RichTextFieldReadError`:** its only throws sat inside a `try` whose catch-all swallowed every error, so no caller could ever see it.
+
+### API
+
+<!-- api-diff:begin -->
+```
++ . EnvironmentError (class)
+- . FieldExistsAsNonTerminalError (class)
+- . ForeignPageError (class)
++ . InvalidArgumentError (class)
++ . InvalidStateError (class)
++ . MalformedInputError (class)
++ . PdfError (class)
++ . PdfErrorCode (type)
++ . PdfLibVersion (type)
+- . RichTextFieldReadError (class)
++ . TextEncodingName (type)
++ . UnencodableTextError (class)
++ . UnsupportedFeatureError (class)
++ . UnsupportedOptionError (class)
++ ./browser EnvironmentError (class)
+- ./browser FieldExistsAsNonTerminalError (class)
+- ./browser ForeignPageError (class)
++ ./browser InvalidArgumentError (class)
++ ./browser InvalidStateError (class)
++ ./browser MalformedInputError (class)
++ ./browser PdfError (class)
++ ./browser PdfErrorCode (type)
++ ./browser PdfLibVersion (type)
+- ./browser RichTextFieldReadError (class)
++ ./browser TextEncodingName (type)
++ ./browser UnencodableTextError (class)
++ ./browser UnsupportedFeatureError (class)
++ ./browser UnsupportedOptionError (class)
++ ./create FontNotEmbeddedError (class)
++ ./create InvalidArgumentError (class)
++ ./create InvalidColorError (class)
++ ./create InvalidPageSizeError (class)
++ ./create InvalidStateError (class)
++ ./create MalformedInputError (class)
++ ./create PdfError (class)
++ ./create RemovePageFromEmptyDocumentError (class)
++ ./create ResourceLimitError (class)
++ ./create UnencodableTextError (class)
++ ./create UnsupportedFeatureError (class)
++ ./create UnsupportedOptionError (class)
++ ./forms CombedTextLayoutError (class)
++ ./forms ExceededMaxLengthError (class)
++ ./forms FieldAlreadyExistsError (class)
++ ./forms InvalidArgumentError (class)
++ ./forms InvalidFieldNamePartError (class)
++ ./forms MalformedInputError (class)
++ ./forms MissingOnValueCheckError (class)
++ ./forms NoSuchFieldError (class)
++ ./forms PdfError (class)
++ ./forms UnexpectedFieldTypeError (class)
++ ./parse EncryptedPdfError (class)
++ ./parse InvalidArgumentError (class)
++ ./parse MalformedInputError (class)
++ ./parse PdfError (class)
++ ./parse ResourceLimitError (class)
++ ./parse UnsupportedEncryptionError (class)
++ ./parse UnsupportedFeatureError (class)
++ ./parse UnsupportedFilterError (class)
++ ./parse UnsupportedOptionError (class)
+~ . BatchProcessingError (class, declaration changed)
+~ . CombedTextLayoutError (class, declaration changed)
+~ . EncryptedPdfError (class, declaration changed)
+~ . ExceededMaxLengthError (class, declaration changed)
+~ . FieldAlreadyExistsError (class, declaration changed)
+~ . FontNotEmbeddedError (class, declaration changed)
+~ . InvalidColorError (class, declaration changed)
+~ . InvalidFieldNamePartError (class, declaration changed)
+~ . InvalidPageSizeError (class, declaration changed)
+~ . MemoryBudgetExceededError (class, declaration changed)
+~ . MissingOnValueCheckError (class, declaration changed)
+~ . NoSuchFieldError (class, declaration changed)
+~ . PdfParseError (class, declaration changed)
+~ . PluginError (class, declaration changed)
+~ . RedactionIncompleteError (class, declaration changed)
+~ . RemovePageFromEmptyDocumentError (class, declaration changed)
+~ . ResourceLimitError (class, declaration changed)
+~ . ScriptExecutionDisabledError (class, declaration changed)
+~ . StreamingParseError (class, declaration changed)
+~ . TimestampVerificationError (class, declaration changed)
+~ . UnexpectedFieldTypeError (class, declaration changed)
+~ . UnsupportedEncryptionError (class, declaration changed)
+~ . UnsupportedFilterError (class, declaration changed)
+~ ./browser BatchProcessingError (class, declaration changed)
+~ ./browser CombedTextLayoutError (class, declaration changed)
+~ ./browser EncryptedPdfError (class, declaration changed)
+~ ./browser ExceededMaxLengthError (class, declaration changed)
+~ ./browser FieldAlreadyExistsError (class, declaration changed)
+~ ./browser FontNotEmbeddedError (class, declaration changed)
+~ ./browser InvalidColorError (class, declaration changed)
+~ ./browser InvalidFieldNamePartError (class, declaration changed)
+~ ./browser InvalidPageSizeError (class, declaration changed)
+~ ./browser MemoryBudgetExceededError (class, declaration changed)
+~ ./browser MissingOnValueCheckError (class, declaration changed)
+~ ./browser NoSuchFieldError (class, declaration changed)
+~ ./browser PdfParseError (class, declaration changed)
+~ ./browser PluginError (class, declaration changed)
+~ ./browser RedactionIncompleteError (class, declaration changed)
+~ ./browser RemovePageFromEmptyDocumentError (class, declaration changed)
+~ ./browser ResourceLimitError (class, declaration changed)
+~ ./browser ScriptExecutionDisabledError (class, declaration changed)
+~ ./browser StreamingParseError (class, declaration changed)
+~ ./browser TimestampVerificationError (class, declaration changed)
+~ ./browser UnexpectedFieldTypeError (class, declaration changed)
+~ ./browser UnsupportedEncryptionError (class, declaration changed)
+~ ./browser UnsupportedFilterError (class, declaration changed)
+~ ./parse PdfParseError (class, declaration changed)
+```
+<!-- api-diff:end -->
+
+### Added
+
+- **`PdfError` hierarchy:** every error class of the library derives from the abstract `PdfError`, which carries a `code` that is stable across releases and identical in every build. Five kind classes sit under it (`InvalidArgumentError`, `InvalidStateError`, `MalformedInputError`, `UnsupportedFeatureError`, `EnvironmentError`), and `UnencodableTextError` and `UnsupportedOptionError` are new. The existing classes keep their names, constructors and messages. `instanceof` also holds for an error made by another copy of the library (the ESM and CJS builds, or the IIFE build in another realm). The types `PdfErrorCode`, `TextEncodingName` and `PdfLibVersion` are exported from `.` and `./browser`.
+- **Error exports per entry:** `modern-pdf-lib/create`, `modern-pdf-lib/parse` and `modern-pdf-lib/forms` export the error classes their calls can throw, each with its parent classes (the API block lists them). `.` and `./browser` export every class.
+
 ## [0.40.9] - 2026-11-15
 
 **Load path.** AES-256 files now follow the key derivation of ISO 32000-2 (Algorithm 2.B): files this library writes with AES-256 open in qpdf and pdf.js, and AES-256 files written by qpdf open here. `loadPdf()` of an encrypted file now returns decrypted objects, and a stream whose `/Length` is wrong, missing or defined later in the file keeps its data. This is a patch release that contains breaking changes: AES-256 output bytes change, a document decrypted on load cannot be written until `encrypt()` is called on the document being saved, and a file whose security handler this library cannot honour now throws `UnsupportedEncryptionError`. Each change is listed under Breaking. Options that are accepted and have no effect now emit a warning, once each per process (listed under Changed). No export is added, removed or changed. Read Compatibility before you mix 0.40.9 output with earlier versions of this library.

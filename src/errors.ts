@@ -1,8 +1,7 @@
 /**
  * @module errors
  *
- * The error classes of modern-pdf-lib. Every class except ForeignPageError,
- * FieldExistsAsNonTerminalError and RichTextFieldReadError derives from the
+ * The error classes of modern-pdf-lib. Every class derives from the
  * abstract {@link PdfError}, which carries a machine-readable `code`. Five
  * kind classes sit under it ({@link InvalidArgumentError}, {@link InvalidStateError},
  * {@link MalformedInputError}, {@link UnsupportedFeatureError},
@@ -404,21 +403,6 @@ export class FontNotEmbeddedError extends InvalidStateError {
 // ---------------------------------------------------------------------------
 
 /**
- * Thrown when attempting to use a page from a different document without
- * first copying it.
- */
-export class ForeignPageError extends Error {
-  override readonly name = 'ForeignPageError';
-  constructor(options?: ErrorOptions) {
-    super(
-      'The page belongs to a different document. Use doc.copyPages() to ' +
-        'import pages from another document before adding them.',
-      options,
-    );
-  }
-}
-
-/**
  * Thrown when attempting to remove a page from a document that has no pages.
  */
 export class RemovePageFromEmptyDocumentError extends InvalidArgumentError {
@@ -520,40 +504,6 @@ export class InvalidFieldNamePartError extends InvalidArgumentError {
   override readonly code = 'invalid-field-name-part' as const;
   constructor(namePart: string, options?: ErrorOptions) {
     super(`Invalid field name part: "${namePart}".`, options);
-  }
-}
-
-/**
- * Thrown when attempting to create a terminal field but a non-terminal
- * node (a field with /Kids but no /FT) already uses the same name.
- */
-export class FieldExistsAsNonTerminalError extends Error {
-  override readonly name = 'FieldExistsAsNonTerminalError';
-  constructor(fieldName: string, options?: ErrorOptions) {
-    super(
-      `A non-terminal field node named "${fieldName}" already exists. ` +
-        'Cannot create a terminal field with the same name.',
-      options,
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Rich text
-// ---------------------------------------------------------------------------
-
-/**
- * Thrown when attempting to read the rich text value (/RV) of a field
- * that does not support it or whose rich text is malformed.
- */
-export class RichTextFieldReadError extends Error {
-  override readonly name = 'RichTextFieldReadError';
-  constructor(fieldName: string, options?: ErrorOptions) {
-    super(
-      `Cannot read the rich text value of field "${fieldName}". ` +
-        'Rich text reading is not currently supported.',
-      options,
-    );
   }
 }
 

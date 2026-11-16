@@ -22,6 +22,22 @@ export {
   PdfParseError,
   formatHexContext,
 } from './parser/index.js';
+
+// ---------------------------------------------------------------------------
+// Errors that the calls above can throw
+// ---------------------------------------------------------------------------
+
+export {
+  PdfError,
+  MalformedInputError,
+  EncryptedPdfError,
+  ResourceLimitError,
+  UnsupportedFeatureError,
+  UnsupportedFilterError,
+  UnsupportedEncryptionError,
+  InvalidArgumentError,
+  UnsupportedOptionError,
+} from './errors.js';
 export type {
   LoadPdfOptions,
   TextItem,

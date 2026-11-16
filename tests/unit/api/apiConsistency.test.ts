@@ -25,17 +25,20 @@ import {
   degrees,
   radians,
   // Error classes (existing)
+  PdfError,
+  InvalidArgumentError,
+  InvalidStateError,
+  MalformedInputError,
+  UnsupportedFeatureError,
+  EnvironmentError,
   EncryptedPdfError,
   FontNotEmbeddedError,
-  ForeignPageError,
   RemovePageFromEmptyDocumentError,
   NoSuchFieldError,
   UnexpectedFieldTypeError,
   MissingOnValueCheckError,
   FieldAlreadyExistsError,
   InvalidFieldNamePartError,
-  FieldExistsAsNonTerminalError,
-  RichTextFieldReadError,
   CombedTextLayoutError,
   ExceededMaxLengthError,
   // Value helpers
@@ -127,15 +130,12 @@ describe('error classes — existing', () => {
   const errorCases: Array<[string, Error]> = [
     ['EncryptedPdfError', new EncryptedPdfError()],
     ['FontNotEmbeddedError', new FontNotEmbeddedError()],
-    ['ForeignPageError', new ForeignPageError()],
     ['RemovePageFromEmptyDocumentError', new RemovePageFromEmptyDocumentError()],
     ['NoSuchFieldError', new NoSuchFieldError('test')],
     ['UnexpectedFieldTypeError', new UnexpectedFieldTypeError('f', 'text', 'checkbox')],
     ['MissingOnValueCheckError', new MissingOnValueCheckError('cb1')],
     ['FieldAlreadyExistsError', new FieldAlreadyExistsError('f1')],
     ['InvalidFieldNamePartError', new InvalidFieldNamePartError('')],
-    ['FieldExistsAsNonTerminalError', new FieldExistsAsNonTerminalError('node')],
-    ['RichTextFieldReadError', new RichTextFieldReadError('rt')],
     ['CombedTextLayoutError', new CombedTextLayoutError(10, 5)],
     ['ExceededMaxLengthError', new ExceededMaxLengthError(20, 10, 'field')],
   ];
@@ -164,9 +164,6 @@ describe('error classes — existing', () => {
         case 'FontNotEmbeddedError':
           chained = new FontNotEmbeddedError('f', { cause });
           break;
-        case 'ForeignPageError':
-          chained = new ForeignPageError({ cause });
-          break;
         case 'RemovePageFromEmptyDocumentError':
           chained = new RemovePageFromEmptyDocumentError({ cause });
           break;
@@ -184,12 +181,6 @@ describe('error classes — existing', () => {
           break;
         case 'InvalidFieldNamePartError':
           chained = new InvalidFieldNamePartError('p', { cause });
-          break;
-        case 'FieldExistsAsNonTerminalError':
-          chained = new FieldExistsAsNonTerminalError('f', { cause });
-          break;
-        case 'RichTextFieldReadError':
-          chained = new RichTextFieldReadError('f', { cause });
           break;
         case 'CombedTextLayoutError':
           chained = new CombedTextLayoutError(5, 3, { cause });
@@ -512,17 +503,20 @@ describe('error class hierarchy', () => {
     // Existing
     new EncryptedPdfError(),
     new FontNotEmbeddedError(),
-    new ForeignPageError(),
     new RemovePageFromEmptyDocumentError(),
     new NoSuchFieldError('f'),
     new UnexpectedFieldTypeError('f', 'a', 'b'),
     new MissingOnValueCheckError('f'),
     new FieldAlreadyExistsError('f'),
     new InvalidFieldNamePartError('p'),
-    new FieldExistsAsNonTerminalError('f'),
-    new RichTextFieldReadError('f'),
     new CombedTextLayoutError(1, 1),
     new ExceededMaxLengthError(1, 1, 'f'),
+    // Kinds
+    new InvalidArgumentError('m'),
+    new InvalidStateError('m'),
+    new MalformedInputError('m'),
+    new UnsupportedFeatureError('m'),
+    new EnvironmentError('m', { reason: 'runtime-api' }),
     // New
     new InvalidPageSizeError(0, 0),
     new InvalidColorError('bad'),
@@ -534,6 +528,12 @@ describe('error class hierarchy', () => {
   it('all error classes extend Error', () => {
     for (const err of allErrors) {
       expect(err).toBeInstanceOf(Error);
+    }
+  });
+
+  it('all error classes derive from PdfError', () => {
+    for (const err of allErrors) {
+      expect(err).toBeInstanceOf(PdfError);
     }
   });
 
