@@ -410,8 +410,15 @@ function parseTstInfo(contentInfo: ReturnType<typeof parseDerTlv>): {
  *                       The token's CMS signature and the TSA certificate
  *                       are not verified in this release.
  * @throws               {@link EnvironmentError} (reason `'network'`) if
- *                       the HTTP request fails or the TSA returns an
- *                       error status.
+ *                       the TSA answers with an HTTP error status or a
+ *                       PKIStatus other than granted or grantedWithMods.
+ *                       A request that cannot connect rejects with the
+ *                       `TypeError` of `fetch`.
+ * @throws               {@link MalformedInputError} (format `'der'`) if
+ *                       the answer breaks DER or holds no status or no
+ *                       TimeStampToken.
+ * @throws               {@link UnsupportedFeatureError} if
+ *                       `hashAlgorithm` is not SHA-256, SHA-384 or SHA-512.
  * @throws               {@link TimestampVerificationError} if the TSTInfo
  *                       cannot be parsed, or its messageImprint or nonce
  *                       differs from the request.

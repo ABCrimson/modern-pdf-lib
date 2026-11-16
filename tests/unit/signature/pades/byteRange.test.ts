@@ -475,4 +475,17 @@ describe('typed errors', () => {
       }),
     );
   });
+
+  it.each([
+    ['%PDF-1.7\nstartxref\nx\n%%EOF', 'Cannot parse xref offset from startxref'],
+    [
+      '%PDF-1.7\ntrailer\n<< /Root 1 0 R >>\nstartxref\n9\n%%EOF',
+      'Cannot find /Size in PDF trailer',
+    ],
+    ['%PDF-1.7\ntrailer\n<< /Size 2 >>\nstartxref\n9\n%%EOF', 'Cannot find /Root in PDF trailer'],
+  ])('refuses a trailer it cannot read as a malformed PDF: %j', (text, message) => {
+    expect(() => prepareForSigning(new TextEncoder().encode(text), 'Sig1')).toThrow(
+      expect.objectContaining({ name: 'MalformedInputError', format: 'pdf', message }),
+    );
+  });
 });

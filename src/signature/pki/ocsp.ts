@@ -781,7 +781,9 @@ function findMatchingSingleResponse(responses: Asn1Node, certId: CertIdFields): 
  * @param issuerCert  DER-encoded issuer certificate.
  * @param ocspUrl     URL of the OCSP responder.
  * @returns           The OCSP status result.
- * @throws {EnvironmentError} When the HTTP request fails (reason `'network'`).
+ * @throws {EnvironmentError} When the responder answers with an HTTP error status (reason
+ *                    `'network'`). A request that cannot connect rejects with the `TypeError` of
+ *                    `fetch`.
  * @throws {MalformedInputError} When the responder returns an error status or the
  *                    response is not a well-formed OCSPResponse (format `'der'`).
  */
