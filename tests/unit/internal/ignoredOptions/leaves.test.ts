@@ -2,8 +2,8 @@
  * Barcode operator functions take an already encoded matrix, so options that belong to the
  * encoders (or to text drawing) have no effect there. Each (entry, option) pair warns once with
  * the code `MPL_IGNORED_OPTION`, and the operators stay identical with and without the option.
- * `applyTablePreset` (layout) is the one other entry of these source folders that ignores an
- * option; its row sits at the end.
+ * `applyTablePreset` (src/layout/presets.ts) is the only entry in the layout, render and SVG sources
+ * that ignores an option; its row sits at the end.
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';

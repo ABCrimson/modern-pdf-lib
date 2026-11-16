@@ -21,7 +21,7 @@ import {
   PdfString,
 } from '../../../../src/core/pdfObjects.js';
 import { resetWarningsForTesting } from '../../../../src/internal/warnings.js';
-import { CODE, TYPE, ignoredOptionMessage } from '../../../helpers/ignoredOptions.js';
+import { CODE, TYPE, ignoredOptionMessage as message } from '../../../helpers/ignoredOptions.js';
 
 let pdf: Uint8Array;
 
@@ -131,8 +131,6 @@ const ROWS: readonly Row[] = [
     invoke: incremental,
   },
 ];
-
-const message = ignoredOptionMessage;
 
 function ignoredCalls(): unknown[][] {
   return emit.mock.calls.filter(([, options]) => (options as { code?: string }).code === CODE);
