@@ -103,8 +103,8 @@ export interface LoadPdfOptions {
    * Limits on what the file may make the library allocate or walk, set over
    * the defaults (`DEFAULT_LIMITS`). The document keeps them: the load itself
    * and every later call on the document (getContentStream, interpretPage,
-   * image and font extraction, embedPage into another document) decode and
-   * walk under them. A key that is not a limit name, or a value that is not a
+   * image and font extraction, embedPage into another document, embedPdf,
+   * copy) decode and walk under them. A key that is not a limit name, or a value that is not a
    * whole number from 1 to the ceiling of its limit, makes the load throw
    * `InvalidArgumentError`.
    */

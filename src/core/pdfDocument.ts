@@ -1635,7 +1635,8 @@ export class PdfDocument {
    * can be painted onto any page via `page.drawPage()`.  The source PDF's
    * content streams are decoded and concatenated, and all referenced
    * resources (fonts, images, etc.) are deep-cloned into this document's
-   * registry.
+   * registry. The source PDF is loaded, and its content decoded, under the
+   * limits of this document.
    *
    * @param data         Raw PDF bytes (Uint8Array or ArrayBuffer).
    * @param pageIndices  Zero-based page indices to embed.  Defaults to
@@ -1655,7 +1656,7 @@ export class PdfDocument {
     options?: EmbedPageOptions,
   ): Promise<EmbeddedPdfPage[]> {
     const bytes = data instanceof Uint8Array ? data : new Uint8Array(data);
-    const sourceDoc = await loadPdf(bytes);
+    const sourceDoc = await loadPdf(bytes, { limits: this.registry.limits });
     const sourceRegistry = sourceDoc.getRegistry();
     const sourcePages = sourceDoc.getInternalPages();
 
@@ -1700,6 +1701,7 @@ export class PdfDocument {
    * @param page     The PdfPage to embed.
    * @param options  Optional bounding box / transformation matrix.
    * @returns        An {@link EmbeddedPdfPage} handle.
+   * @throws {ResourceLimitError} When the page's content is refused by a limit of the page's own document as it decodes.
    */
   embedPage(page: PdfPage, options?: EmbedPageOptions): EmbeddedPdfPage {
     const sourceRegistry = page.getRegistry();
@@ -2530,7 +2532,8 @@ export class PdfDocument {
    * `onAfterSave` hooks of plugins do not run when such a document is
    * copied, so they never receive its bytes in clear.
    *
-   * @returns  A new `PdfDocument` that is a deep copy of this one.
+   * @returns  A new `PdfDocument` that is a deep copy of this one, loaded
+   *           under the limits of this one and keeping them.
    *
    * @example
    * ```ts
@@ -2548,7 +2551,7 @@ export class PdfDocument {
     savingForCopy.delete(this);
     const bytes = await pending;
     const holdsDecrypted = registryHoldsDecryptedObject(this.registry);
-    const clone = await PdfDocument.load(bytes);
+    const clone = await PdfDocument.load(bytes, { limits: this.registry.limits });
     carryDecryptedFromEncryptedFile(this.registry, clone.registry);
     if (holdsDecrypted) {
       for (const { object } of clone.registry) recordDecryptedContent(object);
@@ -3079,8 +3082,8 @@ export interface CreatePdfOptions {
    * Limits on what the document may make the library allocate or walk, set
    * over the defaults (`DEFAULT_LIMITS`). The document keeps them: every
    * later call on it (getContentStream, interpretPage, image and font
-   * extraction, embedPage of one of its pages into another document) runs
-   * under them.
+   * extraction, embedPage of one of its pages into another document, embedPdf,
+   * copy) runs under them.
    */
   readonly limits?: PdfLimits | undefined;
 }

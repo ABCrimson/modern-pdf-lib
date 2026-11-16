@@ -22,9 +22,12 @@
  * `TJ` of many strings or a `Tj` of a long string costs what it holds); the
  * operands count as they are parsed, whether or not an operator follows. A form
  * whose data cannot be decoded or parsed counts as empty and is read once per
- * call. Operators of the page's own content stream are not counted. Forms
- * decode and count under the limits of the document of `registry` (the
- * `limits` option of `loadPdf` or `createPdf`), or the defaults without one.
+ * call. Operators of the page's own content stream are not counted. Every
+ * operator interpreted, of the content stream and of its forms, counts one
+ * toward `maxPageOperators` (2^24 by default); past it the call throws
+ * `ResourceLimitError`. Forms decode and count under the limits of the
+ * document of `registry` (the `limits` option of `loadPdf` or `createPdf`), or
+ * the defaults without one; `maxPageOperators` is counted under them too.
  *
  * @packageDocumentation
  */
@@ -42,7 +45,13 @@ import {
 } from '../core/pdfObjects.js';
 import { parseContentStream, parseContentStreamCounted } from '../parser/contentStreamParser.js';
 import { decodeStreamData } from '../codecs/streamDecode.js';
-import { assertLimit, beginCall, resolveLimits, type LimitContext } from '../internal/limits.js';
+import {
+  addToTotal,
+  assertLimit,
+  beginCall,
+  resolveLimits,
+  type LimitContext,
+} from '../internal/limits.js';
 import { ResourceLimitError } from '../errors.js';
 import type { PdfPage } from '../core/pdfPage.js';
 
@@ -276,6 +285,7 @@ function interpretInto(
   };
 
   for (const { operator, operands } of operators) {
+    addToTotal(run.ctx, 'maxPageOperators', 1);
     switch (operator) {
       // --- graphics state ---
       case 'q':

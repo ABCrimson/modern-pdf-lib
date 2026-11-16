@@ -717,7 +717,8 @@ export class PdfObjectRegistry {
    *   the `limits` option of `loadPdf` or `createPdf`. The calls that decode or
    *   walk the document's objects (getContentStream, interpretPage, image and
    *   font extraction, embedPage of one of its pages into another document)
-   *   run under them. The defaults when left out.
+   *   run under them. The defaults when left out. The value is not checked;
+   *   set limits through the `limits` option of `loadPdf` or `createPdf`.
    */
   constructor(readonly limits: ResolvedLimits = DEFAULT_LIMITS) {}
 

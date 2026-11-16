@@ -11,9 +11,12 @@
  * content (object 7) decodes to 44 bytes.
  */
 import { readFile } from 'node:fs/promises';
+import { deflateSync } from 'node:zlib';
 import { describe, expect, it } from 'vitest';
 import { createPdf, loadPdf, PdfDocument } from '../../../src/index.js';
 import { interpretPage } from '../../../src/render/interpreter.js';
+import { extractImages } from '../../../src/render/imageExtract.js';
+import { extractFonts } from '../../../src/render/fontExtract.js';
 import { InvalidArgumentError, ResourceLimitError } from '../../../src/errors.js';
 import { PdfDict, PdfName, PdfStream } from '../../../src/core/pdfObjects.js';
 import { parseContentStream } from '../../../src/parser/contentStreamParser.js';
@@ -50,6 +53,66 @@ async function contentHeavyFile(): Promise<{ bytes: Uint8Array; contentSize: num
   const contentSize = (await loadPdf(bytes)).getPage(0).getContentStream().length - 1;
   return { bytes, contentSize };
 }
+
+/** The error `run` throws, or `undefined` when it returns. */
+function thrownBy(run: () => unknown): unknown {
+  try {
+    run();
+  } catch (err) {
+    return err;
+  }
+  return undefined;
+}
+
+/** One indirect object of {@link buildPdf}: a dictionary, or a stream written with /FlateDecode. */
+type PdfSourceObject = string | { readonly dict: string; readonly data: string };
+
+/** The text of a stream object holding `data` compressed with /FlateDecode, one character per byte. */
+function flateStream({ dict, data }: { readonly dict: string; readonly data: string }): string {
+  const deflated = String.fromCharCode(...deflateSync(new TextEncoder().encode(data)));
+  return `<< ${dict} /Filter /FlateDecode /Length ${deflated.length} >>\nstream\n${deflated}\nendstream`;
+}
+
+/**
+ * A classic-xref PDF of `objects`, numbered from 1; object 1 is the catalog.
+ * Each stream's ASCII `data` is compressed with /FlateDecode, so that
+ * decoding it checks `maxDecodedStreamBytes`.
+ */
+function buildPdf(objects: readonly PdfSourceObject[]): Uint8Array {
+  let body = '%PDF-1.7\n';
+  const offsets: number[] = [];
+  objects.forEach((obj, i) => {
+    offsets.push(body.length);
+    body += `${i + 1} 0 obj\n${typeof obj === 'string' ? obj : flateStream(obj)}\nendobj\n`;
+  });
+  const xrefAt = body.length;
+  body += `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n`;
+  for (const at of offsets) body += `${String(at).padStart(10, '0')} 00000 n \n`;
+  body += `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xrefAt}\n%%EOF\n`;
+  // Latin-1: one byte per character, so the compressed bytes are written unchanged.
+  return Uint8Array.from(body, (c) => c.charCodeAt(0));
+}
+
+/** A one-page PDF (objects 1 to 3) whose page has `resources` and the content `content`. */
+function onePagePdf(
+  resources: string,
+  content: string,
+  rest: readonly PdfSourceObject[],
+): Uint8Array {
+  return buildPdf([
+    '<< /Type /Catalog /Pages 2 0 R >>',
+    '<< /Type /Pages /Kids [3 0 R] /Count 1 >>',
+    `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 100 100] /Resources ${resources} /Contents 4 0 R >>`,
+    { dict: '', data: content },
+    ...rest,
+  ]);
+}
+
+/** A 10 x 10 /DeviceGray image XObject: 100 bytes of pixels. */
+const GRAY_IMAGE_10: PdfSourceObject = {
+  dict: '/Type /XObject /Subtype /Image /Width 10 /Height 10 /ColorSpace /DeviceGray /BitsPerComponent 8',
+  data: 'A'.repeat(100),
+};
 
 describe('loadPdf limits', () => {
   it('refuses an object stream one byte above maxDecodedStreamBytes, with source "option"', async () => {
@@ -127,6 +190,110 @@ describe('embedding decodes under the limits of the source document', () => {
     const target = createPdf({ limits: { maxDecodedStreamBytes: contentSize - 1 } });
     expect(target.embedPage(source.getPage(0)).name).toBe('XF1');
   });
+
+  it('embedPdf loads the file it embeds under the limits of the document it embeds into', async () => {
+    const { bytes, contentSize } = await contentHeavyFile();
+    const low = createPdf({ limits: { maxDecodedStreamBytes: contentSize - 1 } });
+    await expect(low.embedPdf(bytes)).rejects.toMatchObject({
+      name: 'ResourceLimitError',
+      limit: 'maxDecodedStreamBytes',
+      max: contentSize - 1,
+      source: 'option',
+    });
+    const equal = createPdf({ limits: { maxDecodedStreamBytes: contentSize } });
+    expect((await equal.embedPdf(bytes)).map((page) => page.name)).toEqual(['XF1']);
+  });
+});
+
+describe('copy keeps the limits', () => {
+  it('gives the copy the limits of the document it copies', async () => {
+    const doc = await loadPdf(nestedPageTreePdf(1), { limits: { maxDecodedStreamBytes: 100 } });
+    const copy = await doc.copy();
+    expect(copy.getRegistry().limits.maxDecodedStreamBytes).toBe(100);
+    drawRectangles(copy.getPage(0), 10);
+    expectOptionLimit(() => copy.getPage(0).getContentStream(), 100);
+  });
+});
+
+describe('interpretPage limits', () => {
+  /** The number of operators of the content `drawRectangles(page, 3)` writes. */
+  function operatorCount(): number {
+    const page = createPdf().addPage([200, 200]);
+    drawRectangles(page, 3);
+    return parseContentStream(page.getContentStream()).length;
+  }
+
+  it('counts the operators of the page toward maxPageOperators', () => {
+    const count = operatorCount();
+    const low = createPdf({ limits: { maxPageOperators: count - 1 } }).addPage([200, 200]);
+    drawRectangles(low, 3);
+    expect(thrownBy(() => interpretPage(low))).toMatchObject({
+      name: 'ResourceLimitError',
+      limit: 'maxPageOperators',
+      max: count - 1,
+      actual: count,
+      source: 'option',
+    });
+    const equal = createPdf({ limits: { maxPageOperators: count } }).addPage([200, 200]);
+    drawRectangles(equal, 3);
+    expect(interpretPage(equal).items.length).toBeGreaterThan(0);
+  });
+
+  it('decodes a Form XObject of the page under the limits of the document', async () => {
+    const form = {
+      dict: '/Type /XObject /Subtype /Form /BBox [0 0 100 100]',
+      data: '0 0 m 10 10 l S\n'.repeat(20),
+    };
+    const bytes = onePagePdf('<< /XObject << /Fm1 5 0 R >> >>', '/Fm1 Do', [form]);
+    const low = (await loadPdf(bytes, { limits: { maxDecodedStreamBytes: 100 } })).getPage(0);
+    // The page content itself is under the limit; the form decodes to 320 bytes.
+    expect(low.getContentStream().length).toBeLessThan(100);
+    expectOptionLimit(() => interpretPage(low), 100);
+    expect(interpretPage((await loadPdf(bytes)).getPage(0)).items.length).toBeGreaterThan(0);
+  });
+});
+
+describe('extractImages limits', () => {
+  /** A page holding two 10 x 10 gray images, Im1 and Im2. */
+  const twoImages = onePagePdf('<< /XObject << /Im1 5 0 R /Im2 6 0 R >> >>', '', [
+    GRAY_IMAGE_10,
+    GRAY_IMAGE_10,
+  ]);
+
+  it('skips an image above maxImagePixels of the document and keeps one equal to it', async () => {
+    const bytes = onePagePdf('<< /XObject << /Im1 5 0 R >> >>', '', [GRAY_IMAGE_10]);
+    const low = await loadPdf(bytes, { limits: { maxImagePixels: 99 } });
+    expect(extractImages(low.getPage(0))).toEqual([]);
+    const equal = await loadPdf(bytes, { limits: { maxImagePixels: 100 } });
+    expect(extractImages(equal.getPage(0)).map((image) => image.name)).toEqual(['Im1']);
+  });
+
+  it('adds the pixels of every image of the call to maxTotalImageBytes', async () => {
+    const low = await loadPdf(twoImages, { limits: { maxTotalImageBytes: 199 } });
+    expect(thrownBy(() => extractImages(low.getPage(0)))).toMatchObject({
+      name: 'ResourceLimitError',
+      limit: 'maxTotalImageBytes',
+      max: 199,
+      actual: 200,
+      source: 'option',
+    });
+    const equal = await loadPdf(twoImages, { limits: { maxTotalImageBytes: 200 } });
+    expect(extractImages(equal.getPage(0)).map((image) => image.name)).toEqual(['Im1', 'Im2']);
+  });
+});
+
+describe('extractFonts limits', () => {
+  it('decodes a font file under the limits of the document', async () => {
+    const bytes = onePagePdf('<< /Font << /F1 5 0 R >> >>', '', [
+      '<< /Type /Font /Subtype /TrueType /BaseFont /Probe /FontDescriptor 6 0 R >>',
+      '<< /Type /FontDescriptor /FontName /Probe /Flags 32 /FontFile2 7 0 R >>',
+      { dict: '/Length1 200', data: 'F'.repeat(200) },
+    ]);
+    const low = await loadPdf(bytes, { limits: { maxDecodedStreamBytes: 199 } });
+    expectOptionLimit(() => extractFonts(low.getPage(0)), 199);
+    const equal = await loadPdf(bytes, { limits: { maxDecodedStreamBytes: 200 } });
+    expect(extractFonts(equal.getPage(0)).map((font) => font.data.length)).toEqual([200]);
+  });
 });
 
 describe('createPdf limits', () => {
@@ -201,15 +368,17 @@ describe('StreamingPdfParser limits', () => {
   });
 });
 
-/** Resources with one font /F1 whose ToUnicode CMap maps `count` codes in one bfrange. */
-function resourcesWithCMap(count: number): PdfDict {
+/** Resources with fonts /F1, /F2 and on, one per count, whose ToUnicode CMap maps `count` codes in one bfrange. */
+function resourcesWithCMap(...counts: number[]): PdfDict {
   const hex = (n: number): string => n.toString(16).padStart(4, '0');
-  const cmap = `begincmap\n1 beginbfrange\n<0000> <${hex(count - 1)}> <0041>\nendbfrange\nendcmap\n`;
-  const font = new PdfDict();
-  font.set('/Subtype', PdfName.of('/Type0'));
-  font.set('/ToUnicode', PdfStream.fromBytes(new TextEncoder().encode(cmap)));
   const fonts = new PdfDict();
-  fonts.set('/F1', font);
+  counts.forEach((count, i) => {
+    const cmap = `begincmap\n1 beginbfrange\n<0000> <${hex(count - 1)}> <0041>\nendbfrange\nendcmap\n`;
+    const font = new PdfDict();
+    font.set('/Subtype', PdfName.of('/Type0'));
+    font.set('/ToUnicode', PdfStream.fromBytes(new TextEncoder().encode(cmap)));
+    fonts.set(`/F${i + 1}`, font);
+  });
   const resources = new PdfDict();
   resources.set('/Font', fonts);
   return resources;
@@ -245,5 +414,19 @@ describe('text extraction limits', () => {
       source: 'option',
     });
     expect(extractText(operators, resources, { limits: { maxTotalCMapMappings: 10 } })).toBe('A');
+  });
+
+  it('shares maxTotalCMapMappings across the fonts of the call', () => {
+    const resources = resourcesWithCMap(6, 6);
+    expect(
+      thrownBy(() => extractText(operators, resources, { limits: { maxTotalCMapMappings: 11 } })),
+    ).toMatchObject({
+      name: 'ResourceLimitError',
+      limit: 'maxTotalCMapMappings',
+      max: 11,
+      actual: 12,
+      source: 'option',
+    });
+    expect(extractText(operators, resources, { limits: { maxTotalCMapMappings: 12 } })).toBe('A');
   });
 });

@@ -18,11 +18,13 @@
  *   interpreted by `/ColorSpace` (`/DeviceRGB`, `/DeviceGray`,
  *   `/DeviceCMYK`, `/Indexed`) and `/BitsPerComponent`.
  *
- * Images that cannot be decoded here are skipped — this function never throws:
- * a JPEG when the WASM decoder is not ready, `JPXDecode` and `JBIG2Decode`
- * images (the stream filters throw `UnsupportedFilterError`, which is caught
- * per image), images above the internal size limits (`ResourceLimitError`,
- * caught per image), and malformed data.
+ * Images that cannot be decoded here are skipped: a JPEG when the WASM
+ * decoder is not ready, `JPXDecode` and `JBIG2Decode` images (the stream
+ * filters throw `UnsupportedFilterError`, which is caught per image), images
+ * above the size limits of the page's document (`ResourceLimitError`,
+ * caught per image), and malformed data. The pixels of the decoded images add
+ * to `maxTotalImageBytes` of the call; past it the call throws
+ * `ResourceLimitError`.
  *
  * No Buffer — uses Uint8Array exclusively.
  */
@@ -40,7 +42,8 @@ import {
   PdfObjectRegistry,
 } from '../core/pdfObjects.js';
 import { decodeStreamData, getStreamFilters } from '../codecs/streamDecode.js';
-import { assertLimit, beginCall, type LimitContext } from '../internal/limits.js';
+import { addToTotal, assertLimit, beginCall, type LimitContext } from '../internal/limits.js';
+import { ResourceLimitError } from '../errors.js';
 import { cmykToRgb } from '../core/operators/color.js';
 import { decodeJpegWasm } from '../wasm/jpeg/bridge.js';
 
@@ -88,6 +91,8 @@ export interface ExtractedImage {
  *          other unsupported filters or colour spaces, missing WASM, images
  *          above the size limits of the page's document, malformed data) are
  *          skipped silently.
+ * @throws {ResourceLimitError} When the pixels of the decoded images add up to
+ *   more than `maxTotalImageBytes` of the page's document.
  *
  * @example
  * ```ts
@@ -123,10 +128,15 @@ export function extractImages(page: PdfPage): ExtractedImage[] {
 
     try {
       const extracted = decodeImage(name, stream, registry, ctx);
-      if (extracted) out.push(extracted);
-    } catch {
-      // Skip images that cannot be decoded, including JPXDecode / JBIG2Decode
-      // (UnsupportedFilterError) and images above a limit.
+      if (extracted) {
+        addToTotal(ctx, 'maxTotalImageBytes', extracted.pixels.length);
+        out.push(extracted);
+      }
+    } catch (err) {
+      // The total of the call leaves it; any other image that cannot be decoded is
+      // skipped, including JPXDecode / JBIG2Decode (UnsupportedFilterError) and
+      // images above a limit of their own.
+      if (err instanceof ResourceLimitError && err.limit === 'maxTotalImageBytes') throw err;
       continue;
     }
   }
