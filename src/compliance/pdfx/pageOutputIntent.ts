@@ -139,11 +139,11 @@ export function buildPageOutputIntent(
     if (options.outputConditionIdentifier !== undefined) {
       intentDict.set(
         '/OutputConditionIdentifier',
-        PdfString.literal(options.outputConditionIdentifier),
+        PdfString.fromText(options.outputConditionIdentifier),
       );
     }
     if (options.info !== undefined) {
-      intentDict.set('/Info', PdfString.literal(options.info));
+      intentDict.set('/Info', PdfString.fromText(options.info));
     }
   }
 

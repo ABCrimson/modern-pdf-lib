@@ -46,13 +46,13 @@ export type AFRelationship =
 export interface AssociatedFileOptions {
   /** The file data bytes. */
   readonly data: Uint8Array;
-  /** The filename. */
+  /** The filename, stored as a text string in `/F` and `/UF`. */
   readonly filename: string;
   /** MIME type of the file (e.g. `"text/xml"`, `"application/pdf"`). */
   readonly mimeType: string;
   /** Relationship to the PDF document. */
   readonly relationship: AFRelationship;
-  /** Optional description of the file. */
+  /** Optional description of the file, stored as a text string. */
   readonly description?: string | undefined;
   /** Optional creation date (ISO 8601 string, stored as PDF date). */
   readonly creationDate?: string | undefined;
@@ -85,6 +85,8 @@ export interface AssociatedFileResult {
  * @param registry  The PDF object registry.
  * @param options   Associated file configuration.
  * @returns         References to the created objects.
+ * @throws {UnencodableTextError} For a file name or description with a character no text string holds (a lone surrogate or U+001B).
+ * @throws {InvalidArgumentError} For a date with a character above U+007F (argument `text`).
  */
 export function createAssociatedFile(
   registry: PdfObjectRegistry,
@@ -99,10 +101,10 @@ export function createAssociatedFile(
   const params = new PdfDict();
   params.set('/Size', PdfNumber.of(options.data.length));
   if (options.creationDate) {
-    params.set('/CreationDate', PdfString.literal(`D:${options.creationDate}`));
+    params.set('/CreationDate', PdfString.fromAscii(`D:${options.creationDate}`));
   }
   if (options.modificationDate) {
-    params.set('/ModDate', PdfString.literal(`D:${options.modificationDate}`));
+    params.set('/ModDate', PdfString.fromAscii(`D:${options.modificationDate}`));
   }
   streamDict.set('/Params', params);
 
@@ -116,13 +118,13 @@ export function createAssociatedFile(
 
   const fileSpec = new PdfDict();
   fileSpec.set('/Type', PdfName.of('Filespec'));
-  fileSpec.set('/F', PdfString.literal(options.filename));
-  fileSpec.set('/UF', PdfString.literal(options.filename));
+  fileSpec.set('/F', PdfString.fromText(options.filename));
+  fileSpec.set('/UF', PdfString.fromText(options.filename));
   fileSpec.set('/EF', efDict);
   fileSpec.set('/AFRelationship', PdfName.of(options.relationship));
 
   if (options.description) {
-    fileSpec.set('/Desc', PdfString.literal(options.description));
+    fileSpec.set('/Desc', PdfString.fromText(options.description));
   }
 
   const fileSpecRef = registry.register(fileSpec);

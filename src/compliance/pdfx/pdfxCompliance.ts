@@ -491,6 +491,7 @@ export function enforcePdfX(pdfBytes: Uint8Array, options: PdfXOptions): Uint8Ar
  * @param registry  The PDF object registry to register objects into.
  * @param config    The output intent configuration.
  * @returns         An indirect reference to the OutputIntent dictionary.
+ * @throws {UnencodableTextError} For a condition, registry name or info text with a character no text string holds (a lone surrogate or U+001B).
  */
 export function buildPdfXOutputIntent(
   registry: PdfObjectRegistry,
@@ -500,14 +501,14 @@ export function buildPdfXOutputIntent(
   const intentDict = new PdfDict();
   intentDict.set('/Type', PdfName.of('/OutputIntent'));
   intentDict.set('/S', PdfName.of('/GTS_PDFX'));
-  intentDict.set('/OutputConditionIdentifier', PdfString.literal(config.condition));
+  intentDict.set('/OutputConditionIdentifier', PdfString.fromText(config.condition));
 
   if (config.registryName !== undefined) {
-    intentDict.set('/RegistryName', PdfString.literal(config.registryName));
+    intentDict.set('/RegistryName', PdfString.fromText(config.registryName));
   }
 
   if (config.info !== undefined) {
-    intentDict.set('/Info', PdfString.literal(config.info));
+    intentDict.set('/Info', PdfString.fromText(config.info));
   }
 
   if (config.iccProfile !== undefined) {

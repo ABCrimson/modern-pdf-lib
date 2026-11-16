@@ -27,6 +27,7 @@ import {
   PdfArray,
   PdfRef,
 } from '../../../src/core/pdfObjects.js';
+import { InvalidArgumentError } from '../../../src/errors.js';
 import { createAssociatedFile, buildAfArray } from '../../../src/compliance/associatedFiles.js';
 import type {
   AFRelationship,
@@ -308,4 +309,45 @@ describe('AFRelationship values', () => {
       expect(rel.value).toBe(`/${relationship}`);
     },
   );
+});
+
+describe('createAssociatedFile text and ASCII strings', () => {
+  it('writes the file name and the description as text strings', () => {
+    const registry = makeRegistry();
+    const result = createAssociatedFile(
+      registry,
+      makeOptions({ filename: 'Größe – Übersicht.xml', description: 'Größe €' }),
+    );
+    const fileSpec = registry.resolve(result.fileSpecRef) as PdfDict;
+
+    for (const key of ['/F', '/UF']) {
+      const name = fileSpec.get(key) as PdfString;
+      expect(name.toText()).toBe('Größe – Übersicht.xml');
+      expect(name.textEncoding).toBe('pdfdoc');
+    }
+    const desc = fileSpec.get('/Desc') as PdfString;
+    expect(desc.toText()).toBe('Größe €');
+    // G r ö ß e, a space, then the euro sign, which is code 0xA0 of PDFDocEncoding.
+    expect(Array.from(desc.toBytes())).toEqual([0x47, 0x72, 0xf6, 0xdf, 0x65, 0x20, 0xa0]);
+  });
+
+  it('writes a file name outside PDFDocEncoding as UTF-16BE', () => {
+    const registry = makeRegistry();
+    const result = createAssociatedFile(registry, makeOptions({ filename: '請求書.xml' }));
+    const fileSpec = registry.resolve(result.fileSpecRef) as PdfDict;
+
+    const uf = fileSpec.get('/UF') as PdfString;
+    expect(uf.textEncoding).toBe('utf-16be');
+    expect(uf.toText()).toBe('請求書.xml');
+  });
+
+  it('refuses a date outside ASCII', () => {
+    const registry = makeRegistry();
+    expect(() => createAssociatedFile(registry, makeOptions({ creationDate: '２０２６' }))).toThrow(
+      InvalidArgumentError,
+    );
+    expect(() =>
+      createAssociatedFile(registry, makeOptions({ modificationDate: '2026–03' })),
+    ).toThrow(InvalidArgumentError);
+  });
 });

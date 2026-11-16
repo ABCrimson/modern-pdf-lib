@@ -105,6 +105,7 @@ export interface OutputIntentOptions {
  * @param registry  The PDF object registry to register objects into.
  * @param options   Configuration for the output intent.
  * @returns         An indirect reference to the OutputIntent dictionary.
+ * @throws {UnencodableTextError} For an output condition, identifier or registry name with a character no text string holds (a lone surrogate or U+001B).
  *
  * @example
  * ```ts
@@ -140,12 +141,12 @@ export function buildOutputIntent(
   const intentDict = new PdfDict([
     ['/Type', PdfName.of('/OutputIntent')],
     ['/S', PdfName.of(normalizedSubtype)],
-    ['/OutputCondition', PdfString.literal(options.outputCondition ?? 'sRGB')],
+    ['/OutputCondition', PdfString.fromText(options.outputCondition ?? 'sRGB')],
     [
       '/OutputConditionIdentifier',
-      PdfString.literal(options.outputConditionIdentifier ?? 'sRGB IEC61966-2.1'),
+      PdfString.fromText(options.outputConditionIdentifier ?? 'sRGB IEC61966-2.1'),
     ],
-    ['/RegistryName', PdfString.literal(options.registryName ?? 'http://www.color.org')],
+    ['/RegistryName', PdfString.fromText(options.registryName ?? 'http://www.color.org')],
     ['/DestOutputProfile', profileRef],
   ]);
 

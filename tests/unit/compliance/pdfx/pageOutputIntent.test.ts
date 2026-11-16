@@ -170,6 +170,34 @@ describe('buildPageOutputIntent', () => {
     expect(dict.has('/Info')).toBe(false);
   });
 
+  it('reads /Info "Fogra 39 – Größe" back as text', () => {
+    const registry = new PdfObjectRegistry();
+    const ref = buildPageOutputIntent(registry, {
+      outputConditionIdentifier: 'Fogra 39 – Größe',
+      info: 'Fogra 39 – Größe',
+    });
+    const dict = registry.resolve(ref) as PdfDict;
+
+    for (const key of ['/Info', '/OutputConditionIdentifier']) {
+      const text = dict.get(key) as PdfString;
+      expect(text.toText()).toBe('Fogra 39 – Größe');
+      expect(text.textEncoding).toBe('pdfdoc');
+      // The en dash is code 0x85 of PDFDocEncoding; ö and ß are 0xF6 and 0xDF.
+      expect(Array.from(text.toBytes().subarray(9))).toEqual([
+        0x85, 0x20, 0x47, 0x72, 0xf6, 0xdf, 0x65,
+      ]);
+    }
+  });
+
+  it('writes /Info outside PDFDocEncoding as UTF-16BE', () => {
+    const registry = new PdfObjectRegistry();
+    const ref = buildPageOutputIntent(registry, { info: '日本' });
+    const info = (registry.resolve(ref) as PdfDict).get('/Info') as PdfString;
+
+    expect(info.textEncoding).toBe('utf-16be');
+    expect(info.toText()).toBe('日本');
+  });
+
   it('honours a custom ICC profile and component count', () => {
     const registry = new PdfObjectRegistry();
     const custom = new Uint8Array([1, 2, 3, 4]);

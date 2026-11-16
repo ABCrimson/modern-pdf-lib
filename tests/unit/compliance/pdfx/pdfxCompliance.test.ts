@@ -16,7 +16,13 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { validatePdfX, enforcePdfX } from '../../../../src/compliance/pdfx/pdfxCompliance.js';
+import {
+  validatePdfX,
+  enforcePdfX,
+  buildPdfXOutputIntent,
+} from '../../../../src/compliance/pdfx/pdfxCompliance.js';
+import { PdfObjectRegistry } from '../../../../src/core/pdfObjects.js';
+import type { PdfDict, PdfString } from '../../../../src/core/pdfObjects.js';
 import type { PdfXLevel, PdfXOptions } from '../../../../src/compliance/pdfx/pdfxCompliance.js';
 
 // ---------------------------------------------------------------------------
@@ -773,6 +779,41 @@ describe('enforcePdfX — auto-enforcement', () => {
     // After enforcement — fewer errors
     const afterResult = validatePdfX(enforced, 'X-3:2003');
     expect(afterResult.errors.length).toBeLessThan(errorCountBefore);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// buildPdfXOutputIntent text strings
+// ---------------------------------------------------------------------------
+
+describe('buildPdfXOutputIntent text strings', () => {
+  it('writes the condition, the registry and /Info as text strings', () => {
+    const registry = new PdfObjectRegistry();
+    const ref = buildPdfXOutputIntent(registry, {
+      condition: 'Fogra 39 – Größe',
+      registryName: 'http://www.color.org',
+      info: 'Größe €',
+    });
+    const dict = registry.resolve(ref) as PdfDict;
+
+    const condition = dict.get('/OutputConditionIdentifier') as PdfString;
+    expect(condition.toText()).toBe('Fogra 39 – Größe');
+    expect(condition.textEncoding).toBe('pdfdoc');
+    // The en dash is code 0x85 of PDFDocEncoding.
+    expect(Array.from(condition.toBytes().subarray(9, 11))).toEqual([0x85, 0x20]);
+    expect((dict.get('/RegistryName') as PdfString).toText()).toBe('http://www.color.org');
+    const info = dict.get('/Info') as PdfString;
+    expect(info.toText()).toBe('Größe €');
+    expect(Array.from(info.toBytes())).toEqual([0x47, 0x72, 0xf6, 0xdf, 0x65, 0x20, 0xa0]);
+  });
+
+  it('writes /Info outside PDFDocEncoding as UTF-16BE', () => {
+    const registry = new PdfObjectRegistry();
+    const ref = buildPdfXOutputIntent(registry, { condition: 'FOGRA39', info: '日本' });
+    const info = (registry.resolve(ref) as PdfDict).get('/Info') as PdfString;
+
+    expect(info.textEncoding).toBe('utf-16be');
+    expect(info.toText()).toBe('日本');
   });
 });
 

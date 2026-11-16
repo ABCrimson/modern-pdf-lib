@@ -139,6 +139,23 @@ describe('buildVtDpm', () => {
     expect(out).toContain('/RecordID (X1)');
     expect(out).toContain('/K (V)');
   });
+
+  it('writes the record id and the field values as text strings', () => {
+    const dpm = buildVtDpm({
+      startPage: 0,
+      endPage: 0,
+      recordId: 'Größe-€',
+      fields: { Recipient: 'Zoë – Müller' },
+    });
+
+    const recordId = dpm.get('/RecordID') as PdfString;
+    expect(recordId.toText()).toBe('Größe-€');
+    expect(recordId.textEncoding).toBe('pdfdoc');
+    const recipient = dpm.get('/Recipient') as PdfString;
+    expect(recipient.toText()).toBe('Zoë – Müller');
+    // Z o ë, a space, then the en dash, which is code 0x85 of PDFDocEncoding.
+    expect(Array.from(recipient.toBytes().subarray(0, 5))).toEqual([0x5a, 0x6f, 0xeb, 0x20, 0x85]);
+  });
 });
 
 // ---------------------------------------------------------------------------

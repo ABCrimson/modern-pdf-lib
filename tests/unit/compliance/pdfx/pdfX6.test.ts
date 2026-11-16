@@ -75,6 +75,22 @@ describe('buildPdfX6OutputIntent', () => {
     expect(dict.has('/RegistryName')).toBe(false);
   });
 
+  it('writes the identifier, the condition and the registry as text strings', () => {
+    const dict = buildPdfX6OutputIntent({
+      outputConditionIdentifier: 'Fogra 39 – Größe',
+      outputCondition: 'Größe €',
+      registryName: 'http://www.color.org',
+    });
+
+    const identifier = dict.get('/OutputConditionIdentifier') as PdfString;
+    expect(identifier.toText()).toBe('Fogra 39 – Größe');
+    expect(identifier.textEncoding).toBe('pdfdoc');
+    // The en dash is code 0x85 of PDFDocEncoding.
+    expect(Array.from(identifier.toBytes().subarray(9, 11))).toEqual([0x85, 0x20]);
+    expect((dict.get('/OutputCondition') as PdfString).toText()).toBe('Größe €');
+    expect((dict.get('/RegistryName') as PdfString).toText()).toBe('http://www.color.org');
+  });
+
   it('includes optional output condition and registry name when supplied', () => {
     const dict = buildPdfX6OutputIntent({
       variant: 'PDF/X-6p',

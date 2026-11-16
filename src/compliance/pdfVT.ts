@@ -51,7 +51,7 @@ export interface RecordMetadata {
   readonly recordId: string;
   /**
    * Optional per-record production fields.  Each key/value pair is emitted as
-   * a PDF name → literal-string entry inside the record's `/DPM` dictionary.
+   * a PDF name → text-string entry inside the record's `/DPM` dictionary.
    */
   readonly fields?: Readonly<Record<string, string>> | undefined;
 }
@@ -66,8 +66,8 @@ export interface RecordMetadata {
  * The dictionary carries:
  *  - `/Type /DPM`
  *  - `/S /VT` — selects the VT (variable / transactional) metadata namespace
- *  - `/RecordID` — the record's stable identifier (literal string)
- *  - one literal-string entry per {@link RecordMetadata.fields} pair
+ *  - `/RecordID` — the record's stable identifier (text string)
+ *  - one text-string entry per {@link RecordMetadata.fields} pair
  *
  * @param record - The record whose metadata to encode.
  * @returns A spec-shaped VT `/DPM` {@link PdfDict}.
@@ -76,12 +76,12 @@ export function buildVtDpm(record: RecordMetadata): PdfDict {
   const dpm = new PdfDict();
   dpm.set('/Type', PdfName.of('DPM'));
   dpm.set('/S', PdfName.of('VT'));
-  dpm.set('/RecordID', PdfString.literal(record.recordId));
+  dpm.set('/RecordID', PdfString.fromText(record.recordId));
 
   const fields = record.fields;
   if (fields !== undefined) {
     for (const [key, value] of Object.entries(fields)) {
-      dpm.set(PdfName.of(key).value, PdfString.literal(value));
+      dpm.set(PdfName.of(key).value, PdfString.fromText(value));
     }
   }
 

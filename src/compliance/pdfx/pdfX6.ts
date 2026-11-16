@@ -91,12 +91,12 @@ export function buildPdfX6OutputIntent(options: PdfX6Options): PdfDict {
   const dict = new PdfDict();
   dict.set('/Type', PdfName.of('/OutputIntent'));
   dict.set('/S', PdfName.of('/GTS_PDFX'));
-  dict.set('/OutputConditionIdentifier', PdfString.literal(options.outputConditionIdentifier));
+  dict.set('/OutputConditionIdentifier', PdfString.fromText(options.outputConditionIdentifier));
   if (options.outputCondition !== undefined) {
-    dict.set('/OutputCondition', PdfString.literal(options.outputCondition));
+    dict.set('/OutputCondition', PdfString.fromText(options.outputCondition));
   }
   if (options.registryName !== undefined) {
-    dict.set('/RegistryName', PdfString.literal(options.registryName));
+    dict.set('/RegistryName', PdfString.fromText(options.registryName));
   }
   return dict;
 }

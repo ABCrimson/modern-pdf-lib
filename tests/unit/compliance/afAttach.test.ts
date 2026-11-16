@@ -229,4 +229,26 @@ describe('registerEmbeddedFile', () => {
       refZ,
     ]);
   });
+
+  it('writes a name outside Latin-1 as a text string and sorts the keys by their bytes', () => {
+    const registry = new PdfObjectRegistry();
+    const names = ['zebra.xml', 'Größe – Übersicht.xml', '中.xml', 'apple.xml'];
+    const catalog = new PdfDict();
+    for (const name of names) {
+      registerEmbeddedFile(catalog, name, makeFileSpec(registry, 'data.xml'));
+    }
+
+    const leaf = asArray(asDict(asDict(catalog.get('/Names')).get('/EmbeddedFiles')).get('/Names'));
+    const keys = [0, 2, 4, 6].map((i) => leaf.items[i] as PdfString);
+    // The PDFDocEncoding bytes sort before the FE FF mark of the UTF-16BE key.
+    expect(keys.map((key) => key.toText())).toEqual([
+      'Größe – Übersicht.xml',
+      'apple.xml',
+      'zebra.xml',
+      '中.xml',
+    ]);
+    expect(keys.map((key) => key.textEncoding)).toEqual(['pdfdoc', 'pdfdoc', 'pdfdoc', 'utf-16be']);
+    // The en dash is code 0x85 of PDFDocEncoding.
+    expect(Array.from(keys[0]!.toBytes().subarray(6, 8))).toEqual([0x85, 0x20]);
+  });
 });

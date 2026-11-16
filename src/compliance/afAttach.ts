@@ -96,7 +96,7 @@ function ensureEmbeddedFilesNames(catalog: PdfDict): PdfArray {
  */
 function insertNamePairSorted(leaf: PdfArray, name: string, fileSpecRef: PdfRef): void {
   const items = leaf.items;
-  const key = PdfString.literal(name);
+  const key = PdfString.fromText(name);
   // Find the first existing key (at even indices) whose bytes sort after the new key's bytes
   // (ISO 32000-2 7.9.6); an entry that is not a string never does.
   let insertAt = items.length;
@@ -116,7 +116,7 @@ function insertNamePairSorted(leaf: PdfArray, name: string, fileSpecRef: PdfRef)
  * level*.
  *
  * Two things happen:
- *  1. The pair `[PdfString.literal(name), fileSpecRef]` is added to the
+ *  1. The pair `[PdfString.fromText(name), fileSpecRef]` is added to the
  *     catalog's `/Names` → `/EmbeddedFiles` → `/Names` array, keeping the
  *     array's name/value pairs sorted by name (as required for a name tree).
  *     The intermediate dictionaries and the leaf array are created on demand

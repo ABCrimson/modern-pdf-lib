@@ -325,4 +325,32 @@ describe('buildOutputIntent', () => {
     const nValue = profileStream.dict.get('/N') as PdfNumber;
     expect(nValue.value).toBe(3);
   });
+
+  it('writes the condition and the identifier as text strings', () => {
+    const registry = new PdfObjectRegistry();
+    const ref = buildOutputIntent(registry, {
+      outputCondition: 'Größe €',
+      outputConditionIdentifier: 'Fogra 39 – Größe',
+    });
+    const dict = registry.resolve(ref) as PdfDict;
+
+    const condition = dict.get('/OutputCondition') as PdfString;
+    expect(condition.toText()).toBe('Größe €');
+    expect(condition.textEncoding).toBe('pdfdoc');
+    const identifier = dict.get('/OutputConditionIdentifier') as PdfString;
+    expect(identifier.toText()).toBe('Fogra 39 – Größe');
+    // The en dash is code 0x85 of PDFDocEncoding; ö and ß are 0xF6 and 0xDF.
+    expect(Array.from(identifier.toBytes().subarray(9))).toEqual([
+      0x85, 0x20, 0x47, 0x72, 0xf6, 0xdf, 0x65,
+    ]);
+  });
+
+  it('writes a condition outside PDFDocEncoding as UTF-16BE', () => {
+    const registry = new PdfObjectRegistry();
+    const ref = buildOutputIntent(registry, { outputCondition: '日本' });
+    const condition = (registry.resolve(ref) as PdfDict).get('/OutputCondition') as PdfString;
+
+    expect(condition.textEncoding).toBe('utf-16be');
+    expect(condition.toText()).toBe('日本');
+  });
 });
