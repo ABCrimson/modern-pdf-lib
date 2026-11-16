@@ -85,7 +85,7 @@ export class PdfLinkAnnotation extends PdfAnnotation {
     const obj = this.dict.get('/Dest');
     if (!obj) return undefined;
     if (obj.kind === 'string') {
-      return obj.value;
+      return obj.toText();
     }
     if (obj.kind === 'array' && obj.items.length >= 2) {
       const fitObj = obj.items[1];
@@ -129,7 +129,7 @@ export class PdfLinkAnnotation extends PdfAnnotation {
     if (action && action.kind === 'dict') {
       const uri = action.get('/URI');
       if (uri && uri.kind === 'string') {
-        return uri.value;
+        return uri.toText();
       }
     }
     return undefined;

@@ -68,7 +68,7 @@ export class PdfRedactAnnotation extends PdfAnnotation {
   getOverlayText(): string | undefined {
     const obj = this.dict.get('/OverlayText');
     if (obj && obj.kind === 'string') {
-      return obj.value;
+      return obj.toText();
     }
     return undefined;
   }

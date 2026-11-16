@@ -321,3 +321,31 @@ describe('buildAnnotationDict', () => {
     expect(dict.has('/NM')).toBe(true);
   });
 });
+
+// ---------------------------------------------------------------------------
+// Text strings read from a loaded annotation (ISO 32000-2 7.9.2.2)
+// ---------------------------------------------------------------------------
+
+describe('text strings of a loaded annotation', () => {
+  it('reads /Contents as UTF-16BE text and /T as PDFDocEncoding text', () => {
+    const dict = new PdfDict();
+    dict.set('/Subtype', PdfName.of('Text'));
+    dict.set('/Rect', PdfArray.fromNumbers([0, 0, 20, 20]));
+    dict.set('/Contents', PdfString.fromText('Größe 日本語'));
+    // 0x80 is the bullet of PDFDocEncoding.
+    dict.set('/T', PdfString.fromBytes(Uint8Array.of(0x41, 0x80)));
+
+    const annot = annotationFromDict(dict);
+    expect(annot.getContents()).toBe('Größe 日本語');
+    expect(annot.getAuthor()).toBe('A\u2022');
+  });
+
+  it('reads a hex-form text string like a literal one', () => {
+    const dict = new PdfDict();
+    dict.set('/Subtype', PdfName.of('Text'));
+    dict.set('/Rect', PdfArray.fromNumbers([0, 0, 20, 20]));
+    dict.set('/Contents', PdfString.fromBytes(PdfString.fromText('日本語').toBytes(), 'hex'));
+
+    expect(annotationFromDict(dict).getContents()).toBe('日本語');
+  });
+});

@@ -532,7 +532,7 @@ export function generateFreeTextAppearance(annot: PdfAnnotation): PdfStream {
   let da = '0 0 0 rg /Helv 12 Tf';
   const daObj = dict.get('/DA');
   if (daObj && daObj.kind === 'string') {
-    da = daObj.value;
+    da = daObj.toText();
   }
 
   // Get alignment

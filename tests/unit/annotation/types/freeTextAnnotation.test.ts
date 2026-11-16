@@ -186,3 +186,22 @@ describe('PdfFreeTextAnnotation', () => {
     });
   });
 });
+
+describe('PdfFreeTextAnnotation text strings', () => {
+  it('reads /Contents as a text string', () => {
+    const dict = new PdfDict();
+    dict.set('/Subtype', PdfName.of('FreeText'));
+    dict.set('/Rect', PdfArray.fromNumbers([0, 0, 100, 20]));
+    dict.set('/Contents', PdfString.fromText('Größe 日本語'));
+    expect(PdfFreeTextAnnotation.fromDict(dict).getContents()).toBe('Größe 日本語');
+  });
+
+  it('reads a /DA given in hex form', () => {
+    const da = '0 0 1 rg /Helv 14 Tf';
+    const dict = new PdfDict();
+    dict.set('/Subtype', PdfName.of('FreeText'));
+    dict.set('/Rect', PdfArray.fromNumbers([0, 0, 100, 20]));
+    dict.set('/DA', PdfString.fromHex(new TextEncoder().encode(da).toHex()));
+    expect(PdfFreeTextAnnotation.fromDict(dict).getDefaultAppearance()).toBe(da);
+  });
+});

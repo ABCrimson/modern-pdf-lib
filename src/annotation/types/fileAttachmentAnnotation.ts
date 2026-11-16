@@ -129,9 +129,9 @@ export class PdfFileAttachmentAnnotation extends PdfAnnotation {
     const fs = this.dict.get('/FS');
     if (fs && fs.kind === 'dict') {
       const uf = fs.get('/UF');
-      if (uf && uf.kind === 'string') return uf.value;
+      if (uf && uf.kind === 'string') return uf.toText();
       const f = fs.get('/F');
-      if (f && f.kind === 'string') return f.value;
+      if (f && f.kind === 'string') return f.toText();
     }
     return this.fileName;
   }

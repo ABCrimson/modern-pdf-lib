@@ -154,7 +154,7 @@ export class PdfFreeTextAnnotation extends PdfAnnotation {
   getDefaultAppearance(): string {
     const obj = this.dict.get('/DA');
     if (obj && obj.kind === 'string') {
-      return obj.value;
+      return obj.toText();
     }
     return '0 0 0 rg /Helv 12 Tf';
   }

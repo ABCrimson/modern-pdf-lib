@@ -5,7 +5,7 @@
 import { describe, it, expect } from 'vitest';
 import { PdfFileAttachmentAnnotation } from '../../../../src/annotation/types/fileAttachmentAnnotation.js';
 import { PdfDict, PdfName, PdfString, PdfArray, PdfRef } from '../../../../src/core/pdfObjects.js';
-import type { PdfObject, PdfObjectRegistry } from '../../../../src/core/pdfObjects.js';
+import { PdfObjectRegistry, type PdfObject } from '../../../../src/core/pdfObjects.js';
 
 // ---------------------------------------------------------------------------
 // Mock registry for buildFileSpec
@@ -164,5 +164,30 @@ describe('PdfFileAttachmentAnnotation', () => {
       // No /FS should be added since there's no file data
       expect(result.get('/FS')).toBeUndefined();
     });
+  });
+});
+
+describe('PdfFileAttachmentAnnotation text strings', () => {
+  function withFileSpec(entries: Record<string, PdfString>): PdfFileAttachmentAnnotation {
+    const fsDict = new PdfDict();
+    fsDict.set('/Type', PdfName.of('Filespec'));
+    for (const [key, value] of Object.entries(entries)) fsDict.set(key, value);
+    const dict = new PdfDict();
+    dict.set('/Type', PdfName.of('Annot'));
+    dict.set('/Subtype', PdfName.of('FileAttachment'));
+    dict.set('/Rect', PdfArray.fromNumbers([0, 0, 20, 20]));
+    dict.set('/FS', fsDict);
+    return PdfFileAttachmentAnnotation.fromDict(dict);
+  }
+
+  it('reads /UF as a text string', () => {
+    const annot = withFileSpec({ '/UF': PdfString.fromText('Bericht 日本語.pdf') });
+    expect(annot.getFileName()).toBe('Bericht 日本語.pdf');
+  });
+
+  it('reads /F as a text string when /UF is absent', () => {
+    // 0x80 is the bullet of PDFDocEncoding.
+    const annot = withFileSpec({ '/F': PdfString.fromBytes(Uint8Array.of(0x61, 0x80)) });
+    expect(annot.getFileName()).toBe('a\u2022');
   });
 });

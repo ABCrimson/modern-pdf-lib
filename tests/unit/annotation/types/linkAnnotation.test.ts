@@ -142,3 +142,22 @@ describe('PdfLinkAnnotation', () => {
     });
   });
 });
+
+describe('PdfLinkAnnotation strings', () => {
+  it('reads a named destination and a URI given in hex form', () => {
+    const dict = new PdfDict();
+    dict.set('/Subtype', PdfName.of('Link'));
+    dict.set('/Rect', PdfArray.fromNumbers([0, 0, 100, 20]));
+    dict.set('/Dest', PdfString.fromHex('6368617074657232'));
+    const action = new PdfDict();
+    action.set('/S', PdfName.of('URI'));
+    action.set('/URI', PdfString.fromHex('68747470733a2f2f782e6f7267'));
+    const other = new PdfDict();
+    other.set('/Subtype', PdfName.of('Link'));
+    other.set('/Rect', PdfArray.fromNumbers([0, 0, 100, 20]));
+    other.set('/A', action);
+
+    expect(PdfLinkAnnotation.fromDict(dict).getDestination()).toBe('chapter2');
+    expect(PdfLinkAnnotation.fromDict(other).getUrl()).toBe('https://x.org');
+  });
+});

@@ -146,3 +146,15 @@ describe('PdfRedactAnnotation', () => {
     });
   });
 });
+
+describe('PdfRedactAnnotation overlay text', () => {
+  it('reads /OverlayText as a text string', () => {
+    const dict = new PdfDict();
+    dict.set('/Type', PdfName.of('Annot'));
+    dict.set('/Subtype', PdfName.of('Redact'));
+    dict.set('/Rect', PdfArray.fromNumbers([0, 0, 100, 20]));
+    dict.set('/OverlayText', PdfString.fromText('Vertraulich 日本語'));
+
+    expect(PdfRedactAnnotation.fromDict(dict).getOverlayText()).toBe('Vertraulich 日本語');
+  });
+});

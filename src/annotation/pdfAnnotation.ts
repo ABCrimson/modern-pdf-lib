@@ -294,7 +294,7 @@ export class PdfAnnotation {
   getContents(): string | undefined {
     const obj = this.dict.get('/Contents');
     if (obj && obj.kind === 'string') {
-      return obj.value;
+      return obj.toText();
     }
     return undefined;
   }
@@ -312,7 +312,7 @@ export class PdfAnnotation {
   getAuthor(): string | undefined {
     const obj = this.dict.get('/T');
     if (obj && obj.kind === 'string') {
-      return obj.value;
+      return obj.toText();
     }
     return undefined;
   }
