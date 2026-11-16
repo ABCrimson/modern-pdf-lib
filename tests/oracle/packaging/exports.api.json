@@ -1176,7 +1176,7 @@
         },
         "PdfDocument": {
           "kind": "class",
-          "decl": "sha256:11a79ab28a99"
+          "decl": "sha256:1d376a49b9c8"
         },
         "PdfDocumentBuilder": {
           "kind": "class",
@@ -4850,7 +4850,7 @@
         },
         "PdfDocument": {
           "kind": "class",
-          "decl": "sha256:11a79ab28a99"
+          "decl": "sha256:1d376a49b9c8"
         },
         "PdfError": {
           "kind": "class",
@@ -6692,7 +6692,7 @@
         },
         "PdfDocument": {
           "kind": "class",
-          "decl": "sha256:11a79ab28a99"
+          "decl": "sha256:1d376a49b9c8"
         },
         "PdfDocumentBuilder": {
           "kind": "class",
