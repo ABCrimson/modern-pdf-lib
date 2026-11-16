@@ -527,14 +527,15 @@ jobs:
   # ---------------------------------------------------------------------------
   # Rust checks (per crate)
   # ---------------------------------------------------------------------------
-  # For each of the six crates under crates/: `cargo clippy --target wasm32-unknown-unknown`
-  # and the native `cargo test`. `continue-on-error` keeps the job from failing the workflow;
-  # it reports clippy and test results per crate.
+  # For each of the six crates under crates/, in this order: `cargo fmt --check`, `cargo clippy`
+  # on the wasm32-unknown-unknown target with every warning denied, and the native `cargo test`.
+  # Cargo.lock is tracked, so clippy and the tests run `--locked`. Every step fails the job (and
+  # with it the workflow, which release.yml waits for) when a crate is unformatted, warns or
+  # fails a test.
   rust-checks:
     name: Rust (${{ matrix.crate }})
     runs-on: ubuntu-latest
     timeout-minutes: 45
-    continue-on-error: true
     strategy:
       fail-fast: false
       matrix:
@@ -552,14 +553,17 @@ jobs:
         with:
           toolchain: ${{ env.RUST_TOOLCHAIN }}
           targets: wasm32-unknown-unknown
-          components: clippy
+          components: clippy, rustfmt
 
       - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
           workspaces: crates/${{ matrix.crate }} -> target
 
-      - name: Clippy (wasm32-unknown-unknown)
-        run: cargo clippy --target wasm32-unknown-unknown
+      - name: Format (rustfmt)
+        run: cargo fmt --check
+
+      - name: Clippy (wasm32-unknown-unknown, warnings denied)
+        run: cargo clippy --locked --target wasm32-unknown-unknown -- -D warnings
 
       - name: Native tests
-        run: cargo test
+        run: cargo test --locked

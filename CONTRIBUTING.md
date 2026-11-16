@@ -62,8 +62,9 @@ pnpm test
 Run these before pushing. They cover the type-check and lint steps of the Lint &
 Type-check job, the Build TypeScript job and the tests of the unit-test and
 oracle jobs; CI also runs the WASM build, Pack Check, E2E, benchmark and
-bundle-size jobs, the gates of the lint and oracle jobs, and the reporting-only
-Rust per-crate job.
+bundle-size jobs, the gates of the lint and oracle jobs, and the Rust per-crate
+job (formatting, clippy and tests of the six crates; see
+[Building the WASM crates](#building-the-wasm-crates)).
 
 ```bash
 pnpm run typecheck   # tsc over the root, cli, scripts, tests and security-tests projects
@@ -161,6 +162,17 @@ takes its `wasm-opt` from a checksum-pinned binaryen (`version_133`, cached in
 | `shaping` | `modern-pdf-shaping` | Complex-script text shaping |
 | `jbig2` | `modern-pdf-jbig2` | JBIG2 image decoding |
 | `jpeg` | `modern-pdf-jpeg` | JPEG encode/decode |
+
+Each crate is its own Cargo root and CI runs three checks in every one of them,
+so run them from the crate folder before you push a change under `crates/`
+(`rust-toolchain.toml` supplies the `rustfmt` and `clippy` components):
+
+```bash
+cd crates/<crate>
+cargo fmt --check    # `cargo fmt` rewrites the files
+cargo clippy --locked --target wasm32-unknown-unknown -- -D warnings
+cargo test --locked
+```
 
 ---
 
@@ -299,7 +311,7 @@ tests: 8,853 passed and 49 expected failures (the markers). Without qpdf,
 ## Continuous Integration
 
 Every push and pull request against `master` runs [`.github/workflows/ci.yml`](.github/workflows/ci.yml).
-Merging does not wait for CI (master has no branch protection); `release.yml` publishes a tag only after `ci.yml` succeeded on that commit. The Rust per-crate job and the `devEngines` unit-test leg report without failing the workflow.
+Merging does not wait for CI (master has no branch protection); `release.yml` publishes a tag only after `ci.yml` succeeded on that commit. The `devEngines` unit-test leg and the capability gate report without failing the workflow.
 
 ```mermaid
 flowchart LR
@@ -312,7 +324,7 @@ flowchart LR
   E["E2E Tests<br/>Playwright"]
   B["Benchmarks"]
   S["Bundle Size<br/>size gate"]
-  R["Rust per crate<br/>clippy, cargo test"]
+  R["Rust per crate<br/>rustfmt, clippy, cargo test"]
 
   W --> T
   T --> P
@@ -337,7 +349,7 @@ waits on WASM, so style and type failures surface first.
 | E2E Tests | Playwright specs green in a real browser |
 | Benchmarks | The benchmark harness runs without error |
 | Bundle Size | The size gate: the `createPdf`, `loadPdf`, root, per-entry and IIFE bundles stay within their gzip and brotli budgets in `scripts/dev/size-budget.json`, and the README badge states the `createPdf` figure |
-| Rust (per crate) | Clippy and `cargo test` per crate; reports only (`continue-on-error`) |
+| Rust (per crate) | For each of the six crates: `cargo fmt --check`, `cargo clippy --locked --target wasm32-unknown-unknown -- -D warnings` and `cargo test --locked`; every step fails the job |
 
 The conformance workflow [`.github/workflows/conformance.yml`](.github/workflows/conformance.yml)
 runs veraPDF and pyHanko over inputs written by the public writers, nightly, on
