@@ -12,6 +12,7 @@ import { rgb } from '../../../src/core/operators/color.js';
 import { degrees } from '../../../src/core/operators/state.js';
 import { createPdf, StandardFonts } from '../../../src/index.js';
 import { UnencodableTextError } from '../../../src/errors.js';
+import { buildCmapFont } from '../../adversarial/text-limits.bodies.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -475,6 +476,22 @@ describe('PdfPage', () => {
     expect(page.getContentStreamData()).toContain('(\\351) Tj');
     expect(font.encodeText('€ é')).toEqual(Uint8Array.of(0x80, 0x20, 0xe9));
     expect(font.widthOfTextAtSize('€', 1000)).toBe(556);
+  });
+
+  it('drawText writes the 2-byte glyph ids of an embedded font as a hex string', async () => {
+    const doc = createPdf();
+    const before = doc.addPage();
+    // "A" to "C" map to glyphs 1 to 3; every other code point has glyph 0.
+    const font = await doc.embedFont(
+      buildCmapFont({ format: 4, numGlyphs: 4, ranges: [[0x41, 0x43, 1]] }),
+    );
+    const after = doc.addPage();
+    before.drawText('ABC', { x: 50, y: 700, font, size: 12 });
+    after.drawText('CA', { x: 50, y: 700, font: font.name, size: 12 });
+
+    expect(before.getContentStreamData()).toContain('<000100020003> Tj');
+    expect(after.getContentStreamData()).toContain('<00030001> Tj');
+    expect(() => after.drawText('AZ', { font })).toThrow(UnencodableTextError);
   });
 
   // -------------------------------------------------------------------------

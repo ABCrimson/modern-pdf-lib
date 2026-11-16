@@ -459,6 +459,15 @@ describe('PdfStream', () => {
     expect(result).toContain(`/Length ${expectedLength}`);
   });
 
+  it('fromString takes a PDF byte string: "é" is the byte E9 and "日" throws', () => {
+    const stream = PdfStream.fromString('(café) Tj');
+    expect(stream.data).toEqual(
+      Uint8Array.of(0x28, 0x63, 0x61, 0x66, 0xe9, 0x29, 0x20, 0x54, 0x6a),
+    );
+    expect(serialize(stream.dict)).toContain('/Length 9');
+    expect(() => PdfStream.fromString('(日) Tj')).toThrow(UnencodableTextError);
+  });
+
   it('fromBytes creates stream from Uint8Array', () => {
     const data = new Uint8Array([1, 2, 3, 4, 5]);
     const stream = PdfStream.fromBytes(data);
