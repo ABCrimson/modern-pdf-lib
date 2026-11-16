@@ -149,7 +149,7 @@ empty `leaks` means only that no text was found.
 
 `verifyRedactions` throws an `InvalidArgumentError` when `regions` is missing or
 empty (`argument` is `"regions"`), and when a region names a page that does not
-exist (`argument` is `"regions[i].page"`).
+exist (`argument` is `"regions[i].page"`, where `i` is the index of the region).
 
 ::: tip `regions` is required
 You must pass the regions to check. Auto-detecting redaction rectangles from a

@@ -95,8 +95,10 @@ encryption dropped or doubled on save.
   throw `TimestampVerificationError` (code `timestamp-unverified`) when the
   TSTInfo in the response cannot be parsed or its message imprint or nonce
   does not match the request (for `parseTimestampResponse`, the `expected`
-  values passed to it). A malformed response, an error status from the
-  timestamp authority or a response without a token throws a plain `Error`.
+  values passed to it). A malformed response or a response without a token
+  throws `MalformedInputError` (code `malformed-input`), and an HTTP error
+  status or an error status from the timestamp authority throws
+  `EnvironmentError` (code `environment-unavailable`).
 - **Encryption on save.** For an encrypted document, `saveAsStream()`, a
   save with an `objectStreamThreshold` other than `Infinity` (the default)
   and `saveDocumentIncremental()` throw `UnsupportedEncryptionError` (code
