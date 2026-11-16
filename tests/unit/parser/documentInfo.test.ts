@@ -5,14 +5,33 @@
  *
  * The files are built by hand, so each key holds the exact bytes a writer other than this library
  * chose. `loadPdf` decodes them with the rule of `PdfString.toText`: `getTitle` and the other
- * getters return the text, not the bytes as one character each. The saved file keeps the text:
- * qpdf `--json=2` reads the same text from the written /Title.
+ * getters return the text, not the bytes as one character each.
+ *
+ * Saving a loaded file writes every /Info value that no setter changed with the bytes and the form
+ * (literal or hex) it was loaded with, on every save route, also after decryption and
+ * re-encryption; a value a setter changed is written anew as a text string. qpdf `--json=2` is the
+ * oracle of the bytes: it prints a string as "u:" text or "b:" hex, both exact.
  */
+import { spawnSync } from 'node:child_process';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { beforeEach, describe, expect, it } from 'vitest';
+import { createPdf } from '../../../src/core/pdfDocument.js';
+import type { PdfDocument } from '../../../src/core/pdfDocument.js';
+import { PdfRef, PdfString } from '../../../src/core/pdfObjects.js';
+import type { PdfDict } from '../../../src/core/pdfObjects.js';
 import { loadPdf } from '../../../src/parser/documentParser.js';
 import { latin1String } from '../../../src/internal/latin1.js';
-import { expectQpdfClean, requireQpdf } from '../../helpers/oracle/qpdf.js';
+import {
+  expectQpdfClean,
+  QPDF_BIN,
+  QpdfError,
+  qpdfDecryptQdf,
+  requireQpdf,
+} from '../../helpers/oracle/qpdf.js';
 import { qpdfObjects, qpdfText } from '../../oracle/text-set/setup.js';
+import type { QpdfDict } from '../../oracle/text-set/setup.js';
 
 /** The bytes of `text` in UTF-16BE with the FE FF byte order mark, as PDF hex digits. */
 function utf16beHex(text: string): string {
@@ -36,7 +55,7 @@ function infoPdf(entries: Readonly<Record<string, string>>): Uint8Array {
   const objects = [
     '<</Type/Catalog/Pages 2 0 R>>',
     '<</Type/Pages/Kids[3 0 R]/Count 1>>',
-    '<</Type/Page/Parent 2 0 R/MediaBox[0 0 200 200]>>',
+    '<</Type/Page/Parent 2 0 R/MediaBox[0 0 200 200]/Resources<<>>>>',
     `<<${Object.entries(entries)
       .map(([key, syntax]) => `/${key}${syntax}`)
       .join('')}>>`,
@@ -98,28 +117,184 @@ describe('loadPdf: the information dictionary is text', () => {
     expect(doc.getCreationDate()?.toISOString()).toBe('2024-01-02T03:04:05.000Z');
     expect(doc.getModDate()?.toISOString()).toBe('2024-01-02T03:04:05.000Z');
   });
+
+  it('reads a UTF-16LE string (FF FE) as text', async () => {
+    const doc = await loadPdf(infoPdf({ Title: '(\xFF\xFEA\x00\xE9\x00)' }));
+    expect(doc.getTitle()).toBe('Aé');
+  });
 });
 
-describe('loadPdf then save: the information text is kept', () => {
+/** PDFDocEncoding bytes 0x80 to 0xFF, one each, in literal form (0x9F and 0xAD have no character). */
+const HIGH_BYTES = `(${String.fromCharCode(...Array.from({ length: 128 }, (_, i) => 0x80 + i))})`;
+
+/** An /Info that a writer other than this library wrote, with every encoding and both forms. */
+const SOURCE = infoPdf({
+  Title: HIGH_BYTES,
+  Author: utf16beHex('日本 €'),
+  Subject: utf8Literal('Résumé 日本語 😀'),
+  // "Résumé" in PDFDocEncoding, in hex form.
+  Keywords: '<52E973756DE9>',
+  // UTF-16LE, which a reader decodes and no writer writes.
+  Creator: '(\xFF\xFEA\x00b\x00)',
+  Producer: '(Other writer 1.0)',
+  CreationDate: "(D:20200102030405+02'00')",
+  ModDate: "(D:20210102030405-05'00')",
+  Trapped: '/False',
+  Custom: '(caf\xE9)',
+});
+
+/** The /Info dictionary of an unencrypted file, as qpdf `--json=2` reads it. */
+function qpdfInfo(bytes: Uint8Array): QpdfDict {
+  const objects = qpdfObjects(bytes);
+  const info = objects.get(`obj:${String(objects.get('trailer')?.['/Info'])}`);
+  expect(info, 'the trailer names an /Info dictionary').toBeDefined();
+  return info ?? {};
+}
+
+/** The /Info dictionary of an unencrypted file as loadPdf reads it, found by the trailer qpdf reads. */
+async function loadedInfo(bytes: Uint8Array): Promise<PdfDict> {
+  const [objectNumber = 0, generation = 0] = String(qpdfObjects(bytes).get('trailer')?.['/Info'])
+    .split(' ')
+    .map(Number);
+  const info = (await loadPdf(bytes)).getRegistry().resolve(PdfRef.of(objectNumber, generation));
+  return info?.kind === 'dict' ? info : expect.unreachable('the trailer names an /Info dictionary');
+}
+
+/** The written form of each string of the /Info of `bytes`: true for hex. */
+async function infoForms(bytes: Uint8Array): Promise<Record<string, boolean>> {
+  const forms: Record<string, boolean> = {};
+  for (const [key, value] of await loadedInfo(bytes)) {
+    if (value.kind === 'string') forms[key] = value.hex;
+  }
+  return forms;
+}
+
+/** `bytes` encrypted by qpdf with AES-256 and the user password "user". */
+function qpdfEncrypted(bytes: Uint8Array): Uint8Array {
+  const dir = mkdtempSync(join(tmpdir(), 'document-info-'));
+  try {
+    const input = join(dir, 'in.pdf');
+    const output = join(dir, 'out.pdf');
+    writeFileSync(input, bytes);
+    const result = spawnSync(
+      QPDF_BIN,
+      [
+        '--encrypt',
+        '--user-password=user',
+        '--owner-password=owner',
+        '--bits=256',
+        '--',
+        input,
+        output,
+      ],
+      { encoding: 'utf8' },
+    );
+    if (result.status !== 0)
+      throw new QpdfError(`qpdf --encrypt exit ${result.status}: ${result.stderr}`);
+    return new Uint8Array(readFileSync(output));
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+}
+
+const readStream = async (stream: ReadableStream<Uint8Array>): Promise<Uint8Array> =>
+  new Uint8Array(await new Response(stream).arrayBuffer());
+
+/** A save route: how the document is loaded, and how its saved bytes are turned into clear text. */
+interface Route {
+  readonly load: () => Promise<PdfDocument>;
+  readonly write: (doc: PdfDocument) => Promise<Uint8Array>;
+  /** False for a route whose file qpdf decrypts first; its form is the writer's, not the source's. */
+  readonly clear: boolean;
+}
+
+const NEW_PASSWORDS = { userPassword: 'u2', ownerPassword: 'o2' } as const;
+
+const ROUTES: Readonly<Record<string, Route>> = {
+  'save()': { load: () => loadPdf(SOURCE), write: (doc) => doc.save(), clear: true },
+  'save({ compress: false })': {
+    load: () => loadPdf(SOURCE),
+    write: (doc) => doc.save({ compress: false }),
+    clear: true,
+  },
+  'saveAsStream()': {
+    load: () => loadPdf(SOURCE),
+    write: (doc) => readStream(doc.saveAsStream()),
+    clear: true,
+  },
+  'copy() then save()': {
+    load: () => loadPdf(SOURCE),
+    write: async (doc) => (await doc.copy()).save(),
+    clear: true,
+  },
+  'encrypt() then save()': {
+    load: () => loadPdf(SOURCE),
+    write: async (doc) => {
+      await doc.encrypt({ ...NEW_PASSWORDS, algorithm: 'aes-256' });
+      return qpdfDecryptQdf(await doc.save(), 'u2');
+    },
+    clear: false,
+  },
+  'decrypted on load, re-encrypted': {
+    load: () => loadPdf(qpdfEncrypted(SOURCE), { password: 'user' }),
+    write: async (doc) => {
+      await doc.encrypt({ ...NEW_PASSWORDS, algorithm: 'rc4-128' });
+      return qpdfDecryptQdf(await doc.save(), 'u2');
+    },
+    clear: false,
+  },
+};
+
+describe('loadPdf then save: each /Info value no setter changed keeps its bytes', () => {
   beforeEach((ctx) => {
     requireQpdf(ctx);
   });
 
-  // The titles are text a Latin-1 byte string can hold once decoded: saving text above U+00FF
-  // follows the library's text writers, which this reader does not change.
-  it.each([
-    ['UTF-16BE', utf16beHex('Résumé (1)')],
-    ['UTF-8', utf8Literal('Résumé (1)')],
-    ['PDFDocEncoding', '(R\xE9sum\xE9 \\(1\\))'],
-  ])('writes the text of a %s title, read by qpdf', async (_name, syntax) => {
-    const doc = await loadPdf(infoPdf({ Title: syntax }));
-    expect(doc.getTitle()).toBe('Résumé (1)');
-
-    const saved = await doc.save();
+  it.each(Object.entries(ROUTES))('%s writes the loaded /Info unchanged', async (_name, route) => {
+    const saved = await route.write(await route.load());
     expectQpdfClean(saved);
-    const objects = qpdfObjects(saved);
-    const info = objects.get(`obj:${String(objects.get('trailer')?.['/Info'])}`);
-    expect(qpdfText(info?.['/Title'])).toBe('Résumé (1)');
-    expect((await loadPdf(saved)).getTitle()).toBe('Résumé (1)');
+    expect(qpdfInfo(saved)).toEqual(qpdfInfo(SOURCE));
+    if (route.clear) expect(await infoForms(saved)).toEqual(await infoForms(SOURCE));
+  });
+
+  it.each(Object.entries(ROUTES))(
+    '%s after setTitle writes only /Title anew',
+    async (_name, route) => {
+      const doc = await route.load();
+      doc.setTitle('Neu 日');
+      expect(qpdfInfo(await route.write(doc))).toEqual({
+        ...qpdfInfo(SOURCE),
+        '/Title': 'u:Neu 日',
+      });
+    },
+  );
+
+  it('setting a key to the text its getter returned writes that text anew', async () => {
+    const doc = await loadPdf(SOURCE);
+    const title = doc.getTitle() ?? '';
+    const keywords = doc.getKeywords() ?? '';
+    doc.setTitle(title);
+    doc.setKeywords(keywords);
+    const saved = await doc.save();
+
+    const info = await loadedInfo(saved);
+    const written = (key: string): string | undefined => {
+      const value = info.get(key);
+      return value?.kind === 'string' ? value.toBytes().toHex() : undefined;
+    };
+    expect(written('/Title')).toBe(PdfString.fromText(title).toBytes().toHex());
+    expect(written('/Keywords')).toBe(PdfString.fromText(keywords).toBytes().toHex());
+    expect((await infoForms(saved))['/Keywords'], 'written anew in literal form').toBe(false);
+    expect(qpdfText(qpdfInfo(saved)['/Title'])).toBe(title);
+  });
+
+  it('a loaded title saved again reads back as set, whatever its encoding', async () => {
+    for (const title of ['日本 €', 'Preis €', 'Résumé', 'þÿab']) {
+      const doc = createPdf();
+      doc.addPage();
+      doc.setTitle(title);
+      const again = await (await loadPdf(await doc.save())).save();
+      expect((await loadPdf(again)).getTitle(), title).toBe(title);
+    }
   });
 });

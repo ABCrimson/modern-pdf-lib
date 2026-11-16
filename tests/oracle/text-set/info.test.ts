@@ -13,13 +13,12 @@
  * with FE FF, which qpdf prints as "u:" text. qpdf prints PDFDocEncoding text that holds a byte
  * outside ASCII text, such as 0x18 (breve) or 0x80 and above, as "b:" hex, which qpdfText
  * (./setup.ts) decodes with the library's own decoder, so pdf.js is the independent reader of such
- * text. The getters of a loaded document still return such a key one byte per character, so only
- * Latin-1 text that does not begin like a byte order mark reads back through them.
+ * text. The getters of a loaded document return the decoded text of each key, so every text reads
+ * back through them.
  */
 import { beforeEach, describe, expect, test } from 'vitest';
 import { createPdf, loadPdf } from '../../../src/index.js';
 import type { PdfDocument } from '../../../src/index.js';
-import { defectKey, knownDefect } from '../../helpers/known-defect.js';
 import { withPdfjs } from '../../helpers/oracle/pdfjs.js';
 import { requireQpdf } from '../../helpers/oracle/qpdf.js';
 import { cleanSave, INPUTS, qpdfObjects, qpdfText } from './setup.js';
@@ -127,14 +126,7 @@ describe('document information text read back by pdf.js and qpdf', () => {
     for (const text of MARK_TEXTS) await expectInfoWritten(text);
   });
 
-  knownDefect(
-    defectKey('core-document-01', '0.41.0'),
-    'text above U+00FF and text that begins like a byte order mark: the reloaded document reads the six information keys as set',
-    { failsWith: /^AssertionError: reloaded "日本語 €": expected \{ …\(6\) \} to deeply equal/ },
-    async () => {
-      for (const text of ['日本語 €', ...WIDE_TEXTS, ...MARK_TEXTS]) {
-        await expectInfoReadBack(text);
-      }
-    },
-  );
+  test('text above U+00FF and text that begins like a byte order mark: the reloaded document reads the six keys as set', async () => {
+    for (const text of ['日本語 €', ...WIDE_TEXTS, ...MARK_TEXTS]) await expectInfoReadBack(text);
+  });
 });

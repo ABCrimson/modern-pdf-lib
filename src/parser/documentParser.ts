@@ -30,7 +30,7 @@ import {
   PdfNull,
   PdfObjectRegistry,
 } from '../core/pdfObjects.js';
-import { PdfDocument } from '../core/pdfDocument.js';
+import { keepLoadedInfo, PdfDocument } from '../core/pdfDocument.js';
 import {
   markDecryptedFromEncryptedFile,
   markLoadedFromEncryptedFile,
@@ -1305,7 +1305,8 @@ export class PdfDocumentParser {
   // -----------------------------------------------------------------------
 
   /**
-   * Extract document metadata from the /Info dictionary.
+   * Extract document metadata from the /Info dictionary: the decoded text of each text string
+   * (PdfString.toText), the dates that text holds, and the dictionary itself.
    */
   private extractMetadata(): {
     title?: string;
@@ -1316,6 +1317,7 @@ export class PdfDocumentParser {
     producer?: string;
     creationDate?: Date;
     modDate?: Date;
+    info?: PdfDict;
   } {
     const metadata: {
       title?: string;
@@ -1326,6 +1328,7 @@ export class PdfDocumentParser {
       producer?: string;
       creationDate?: Date;
       modDate?: Date;
+      info?: PdfDict;
     } = {};
 
     if (this.trailer.infoRef === undefined) {
@@ -1347,6 +1350,7 @@ export class PdfDocumentParser {
     }
 
     const info = infoObj as PdfDict;
+    metadata.info = info;
 
     const getString = (key: string): string | undefined => {
       const obj = info.get(key);
@@ -1442,8 +1446,16 @@ export class PdfDocumentParser {
     if (metadata.creator !== undefined) doc.setCreator(metadata.creator);
     if (metadata.producer !== undefined) doc.setProducer(metadata.producer);
     if (metadata.creationDate !== undefined) doc.setCreationDate(metadata.creationDate);
-    if (metadata.modDate !== undefined && options?.updateMetadata !== true) {
+    const keepModDate = options?.updateMetadata !== true;
+    if (metadata.modDate !== undefined && keepModDate) {
       doc.setModDate(metadata.modDate);
+    }
+    // After the setters: save writes each /Info entry no later setter changes as loaded.
+    if (metadata.info !== undefined) {
+      keepLoadedInfo(
+        doc,
+        keepModDate ? metadata.info : [...metadata.info].filter(([key]) => key !== '/ModDate'),
+      );
     }
 
     // Track highest resource name indices so new names don't collide

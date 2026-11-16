@@ -30,6 +30,7 @@ import {
   PdfBool,
   PdfRef,
 } from './pdfObjects.js';
+import type { PdfObject } from './pdfObjects.js';
 import type { DocumentMetadata, PageEntry } from './pdfCatalog.js';
 import { buildDocumentStructure } from './pdfCatalog.js';
 import { serializePdf, serializePdfForCopy } from './io/pdfWriter.js';
@@ -176,6 +177,28 @@ export interface SetTitleOptions {
  * list (part of its declaration) unchanged.
  */
 const savingForCopy = new WeakSet<PdfDocument>();
+
+/**
+ * The entries of the /Info dictionary a document was loaded with that no setter has changed
+ * since, in file order. Save writes each of them as loaded, the bytes and the form of a string
+ * included, and keys the library does not model (such as /Trapped) too; a setter takes its key
+ * out, so that key is written anew. A module-level map, as `savingForCopy`, keeps the class's
+ * member list unchanged.
+ */
+const loadedInfoOf = new WeakMap<PdfDocument, Map<string, PdfObject>>();
+
+/**
+ * Keeps the entries of the /Info dictionary `doc` was loaded with, for `loadPdf` after it has
+ * called the setters; see {@link loadedInfoOf}.
+ *
+ * @internal Exported from no package entry.
+ */
+export function keepLoadedInfo(
+  doc: PdfDocument,
+  entries: Iterable<readonly [string, PdfObject]>,
+): void {
+  loadedInfoOf.set(doc, new Map(entries));
+}
 
 /** The row of the option table that refuses `features` of embedFont(), removed in 0.41.0. */
 const REFUSED_EMBED_FONT_OPTIONS = /* @__PURE__ */ UNSUPPORTED_OPTIONS.filter(
@@ -1679,9 +1702,13 @@ export class PdfDocument {
   // Metadata setters
   // -----------------------------------------------------------------------
 
+  // A setter writes its key anew on save: as a PDF text string (PDFDocEncoding, else UTF-16BE),
+  // a date as an ASCII string, even when the value equals the one the document was loaded with.
+
   /** Set the document title. */
   setTitle(title: string, options?: SetTitleOptions): void {
     this.meta.title = title;
+    loadedInfoOf.get(this)?.delete('/Title');
     if (options?.showInWindowTitleBar) {
       this.getViewerPreferences().setDisplayDocTitle(true);
     }
@@ -1690,41 +1717,51 @@ export class PdfDocument {
   /** Set the document author. */
   setAuthor(author: string): void {
     this.meta.author = author;
+    loadedInfoOf.get(this)?.delete('/Author');
   }
 
   /** Set the document subject. */
   setSubject(subject: string): void {
     this.meta.subject = subject;
+    loadedInfoOf.get(this)?.delete('/Subject');
   }
 
   /** Set the document keywords. */
   setKeywords(keywords: string | string[]): void {
     this.meta.keywords = Array.isArray(keywords) ? keywords.join(', ') : keywords;
+    loadedInfoOf.get(this)?.delete('/Keywords');
   }
 
   /** Set the creator application name. */
   setCreator(creator: string): void {
     this.meta.creator = creator;
+    loadedInfoOf.get(this)?.delete('/Creator');
   }
 
-  /** Set the producer string (defaults to `"modern-pdf"`). */
+  /** Set the producer string (defaults to `"modern-pdf-lib"`). */
   setProducer(producer: string): void {
     this.meta.producer = producer;
+    loadedInfoOf.get(this)?.delete('/Producer');
   }
 
   /** Set the document creation date. */
   setCreationDate(date: Date): void {
     this.meta.creationDate = date;
+    loadedInfoOf.get(this)?.delete('/CreationDate');
   }
 
   /** Set the document modification date. */
   setModDate(date: Date): void {
     this.meta.modDate = date;
+    loadedInfoOf.get(this)?.delete('/ModDate');
   }
 
   // -----------------------------------------------------------------------
   // Metadata getters
   // -----------------------------------------------------------------------
+
+  // Of a loaded document, each getter returns the decoded text of its key (PDFDocEncoding,
+  // UTF-16BE, UTF-16LE or UTF-8 with its byte order mark), or the date that text holds.
 
   /** Get the document title, or `undefined` if not set. */
   getTitle(): string | undefined {
@@ -2653,14 +2690,19 @@ export class PdfDocument {
     // Finalize each page → produces content streams and page dicts
     const pageEntries: PageEntry[] = this.pages.map((p) => p.finalize());
 
-    // Set modification date if not already set
-    this.meta.modDate ??= new Date();
+    const loadedInfo = loadedInfoOf.get(this);
+    // Set the modification date unless one is set or kept as loaded (also one no date parses from).
+    if (loadedInfo?.has('/ModDate') !== true) this.meta.modDate ??= new Date();
 
     const structure = buildDocumentStructure(pageEntries, this.meta, this.registry);
-    // loadPdf passes the decrypted /Info strings to the setters, so this dict holds copies of them.
-    if (isDecryptedFromEncryptedFile(this.registry)) {
-      const info = this.registry.resolve(structure.infoRef);
-      if (info !== undefined) recordDecryptedContent(info);
+    const info = this.registry.resolve(structure.infoRef);
+    // The loaded entries no setter changed replace the ones written from the getters' values.
+    if (info instanceof PdfDict && loadedInfo !== undefined) {
+      for (const [key, value] of loadedInfo) info.set(key, value);
+    }
+    // This dict holds the decrypted /Info strings of a loaded document, or text decoded from them.
+    if (info !== undefined && isDecryptedFromEncryptedFile(this.registry)) {
+      recordDecryptedContent(info);
     }
 
     // Post-process the catalog to add outlines, XMP metadata, and

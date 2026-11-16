@@ -2,15 +2,17 @@
  * The library's writers write a string handed to `writeString` as a PDF byte string: each code
  * unit 0x00-0xFF is one byte, and a code unit above 0xFF throws UnencodableTextError. A title of
  * "é" shows which bytes each writer emits for U+00E9. No library object hands a writer a code unit
- * above 0xFF (a PdfString refuses one when it is built), so the refusal of the object stream and
- * stream writers is shown with a stand-in object that calls `writeString` itself. The Info dictionary is never packed into
- * an object stream, so the object stream writer is shown by a registered dictionary holding /T (é).
+ * above 0xFF (a PdfString refuses one when it is built), so the refusal of every writer is shown
+ * with a stand-in object that calls `writeString` itself. A title above U+00FF is a PDF text
+ * string, which the writers get as the bytes of UTF-16BE; qpdf reads it back. The Info dictionary
+ * is never packed into an object stream, so the object stream writer is shown by a registered
+ * dictionary holding /T (é).
  *
  * The document-level writes of `saveAsStream()` (header, object headers, xref table, trailer) and
  * of `appendIncrementalUpdate()` hold only ASCII, so no public call hands those two writers a
  * character above U+007F; the files they write are covered by tests/oracle/writer-matrix.test.ts.
  */
-import { describe, expect, test } from 'vitest';
+import { beforeEach, describe, expect, test } from 'vitest';
 import {
   createPdf,
   loadPdf,
@@ -20,6 +22,8 @@ import {
   UnencodableTextError,
 } from '../../../../src/index.js';
 import type { ByteWriter, PdfDocument } from '../../../../src/index.js';
+import { requireQpdf } from '../../../helpers/oracle/qpdf.js';
+import { qpdfObjects } from '../../../oracle/text-set/setup.js';
 
 /** `/Title (é)` with é as the one Latin-1 byte 0xE9. */
 const TITLE_LATIN1 = Uint8Array.of(...new TextEncoder().encode('/Title ('), 0xe9, 0x29);
@@ -97,11 +101,37 @@ describe('the writers write writeString("é") as the byte 0xE9', () => {
   });
 });
 
+describe('a title above U+00FF is a text string, not a byte string handed to writeString', () => {
+  beforeEach((ctx) => {
+    requireQpdf(ctx);
+  });
+
+  /** The /Title of the trailer's /Info as qpdf `--json=2` prints it. */
+  const qpdfTitle = (bytes: Uint8Array): unknown => {
+    const objects = qpdfObjects(bytes);
+    return objects.get(`obj:${String(objects.get('trailer')?.['/Info'])}`)?.['/Title'];
+  };
+
+  test('save() writes it as UTF-16BE, which qpdf reads back', async () => {
+    expect(qpdfTitle(await titled('日').save({ compress: false }))).toBe('u:日');
+  });
+
+  test('saveDocumentIncremental() writes it as UTF-16BE, which qpdf reads back', async () => {
+    const original = await createPdf().save();
+    const doc = await loadPdf(original);
+    doc.setTitle('日');
+    const { bytes } = await saveDocumentIncremental(original, doc, { compress: false });
+    expect(qpdfTitle(bytes)).toBe('u:日');
+  });
+});
+
 describe('the writers refuse a code unit above 0xFF', () => {
   const unencodable = { character: '日', codePoint: 0x65e5, encoding: 'PDF byte string' };
 
   test('save()', async () => {
-    const saving = titled('日').save({ compress: false });
+    const doc = createPdf();
+    doc.addPage();
+    const saving = withRawText(doc).save({ compress: false });
     await expect(saving).rejects.toBeInstanceOf(UnencodableTextError);
     await expect(saving).rejects.toMatchObject(unencodable);
   });
@@ -123,6 +153,10 @@ describe('the writers refuse a code unit above 0xFF', () => {
   });
 
   test('saveDocumentIncremental()', async () => {
-    await expect(incrementalOf('日')).rejects.toMatchObject(unencodable);
+    const original = await createPdf().save();
+    const doc = withRawText(await loadPdf(original));
+    await expect(saveDocumentIncremental(original, doc, { compress: false })).rejects.toMatchObject(
+      unencodable,
+    );
   });
 });
