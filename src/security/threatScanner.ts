@@ -213,7 +213,8 @@ function nameValue(obj: PdfObject | undefined, registry: PdfObjectRegistry): str
 
 /**
  * Read a `PdfString` from a dict entry as text ({@link PdfString.toText}), resolving an
- * indirect reference through the registry first: a file name (/UF, /F) is a text string.
+ * indirect reference through the registry first: /UF is a text string, and /F, a file specification
+ * string (7.11.2), is decoded by the same rule, as pdf.js reads it.
  */
 function textValue(obj: PdfObject | undefined, registry: PdfObjectRegistry): string | undefined {
   const resolved = resolveRef(obj, registry);
@@ -225,8 +226,8 @@ function textValue(obj: PdfObject | undefined, registry: PdfObjectRegistry): str
 
 /**
  * Read a `PdfString` from a dict entry as a byte string, one character per byte, resolving an
- * indirect reference through the registry first: a URI is 7-bit ASCII (ISO 32000-2 12.6.4.7),
- * so a byte above 0x7F stays visible as it was written.
+ * indirect reference through the registry first: a URI is an ASCII string (ISO 32000-1 12.6.4.7,
+ * ISO 32000-2 12.6.4.8), so a byte above 0x7F stays visible as it was written.
  */
 function byteStringValue(
   obj: PdfObject | undefined,

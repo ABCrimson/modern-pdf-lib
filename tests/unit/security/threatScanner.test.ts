@@ -320,6 +320,24 @@ describe('scanPdfThreats — strings read as text or as bytes', () => {
       expect(finding.detail).toContain('"https://example.com/a?b=1&c=(2)"');
     }
   });
+
+  it('names a URI byte above 0x7F as the byte, not as PDFDocEncoding text', async () => {
+    const pdf = buildRawPdf(
+      [
+        '1 0 obj\n<</Type/Catalog/Pages 2 0 R/OpenAction 3 0 R>>\nendobj',
+        '2 0 obj\n<</Type/Pages/Kids[]/Count 0>>\nendobj',
+        '3 0 obj\n<</Type/Action/S/URI/URI<68747470733A2F2F612E6578616D706C652F80>>>\nendobj',
+      ],
+      1,
+    );
+
+    const uriFindings = byCategory(await scanPdfThreats(pdf), 'URI');
+    expect(uriFindings.length).toBeGreaterThanOrEqual(1);
+    for (const finding of uriFindings) {
+      expect(finding.detail).toContain('"https://a.example/\u0080"');
+      expect(finding.detail).not.toContain('\u2022');
+    }
+  });
 });
 
 // ---------------------------------------------------------------------------
