@@ -83,6 +83,12 @@ page.drawText('Line one\nLine two\nLine three', {
 > [!TIP]
 > When `lineHeight` is omitted, a default of `size * 1.2` is used — this works well for most body text.
 
+`\n`, `\r\n` and `\r` each break a line. A tab or any other control character throws `UnencodableTextError`, so replace tabs before drawing:
+
+```ts
+page.drawText('Name:\tAda'.replaceAll('\t', '    '), { x: 50, y: 650, size: 14, font: helvetica });
+```
+
 ## Text Measurement
 
 Use `font.widthOfTextAtSize()` to measure the width of a string before drawing it. This is useful for right-aligning text or centering it on the page:
@@ -162,6 +168,15 @@ page.drawText('Standard font text', {
 
 The returned `FontRef` also gives you metrics (`widthOfTextAtSize`, `heightAtSize`) backed by the built-in AFM data, so measurement works exactly as with embedded fonts.
 
+The 12 Latin standard fonts write their text in WinAnsiEncoding, one byte per character, after normalizing it to Unicode form NFC. That covers ASCII, Latin-1 and extras such as `€` and `—`, so accented text just works:
+
+```ts
+page.drawText('Größe: 12 € — café', { x: 50, y: 650, size: 14, font: helvetica });
+page.drawText('cafe\u0301', { x: 50, y: 630, size: 14, font: helvetica }); // decomposed input is drawn as "café"
+```
+
+A character the font cannot encode, such as `'東京'`, makes `drawText()` throw `UnencodableTextError`; its `character`, `codePoint`, `index`, `fontName` and `encoding` fields name the character and the font, and nothing of the text is drawn. Symbol and ZapfDingbats take Unicode text (`'αβγ'`, `'✓'`) and write their own codes. [How Text Is Encoded](/guide/fonts#how-text-is-encoded) has the table of fonts and encodings.
+
 Available standard fonts:
 
 | Font Name | Identifier |
@@ -183,7 +198,7 @@ Available standard fonts:
 
 ### Custom Fonts
 
-For full Unicode support and precise typography, embed a TrueType or OpenType font:
+To draw any script and to control the typography, embed a TrueType or OpenType font. Text is written as 2 bytes per glyph (Identity-H) through the font `cmap`, with no normalization and no shaping, and `drawText()` throws `UnencodableTextError` for a character the font has no glyph for (it no longer draws the missing-glyph box):
 
 ```ts
 const fontBytes = await fetch('/fonts/Inter-Regular.ttf')
@@ -192,7 +207,7 @@ const fontBytes = await fetch('/fonts/Inter-Regular.ttf')
 
 const font = await pdf.embedFont(fontBytes);
 
-page.drawText('Custom font text with Unicode: cafe\u0301', {
+page.drawText('Custom font text with Unicode: café 日本語', {
   x: 50,
   y: 700,
   font,
@@ -201,7 +216,32 @@ page.drawText('Custom font text with Unicode: cafe\u0301', {
 });
 ```
 
+The sample assumes the font has glyphs for `日本語`; `font.getCharacterSet()` lists the code points it has.
+
 See the [Fonts guide](/guide/fonts) for details on subsetting, bidirectional text, and font metrics.
+
+## Document Text
+
+Text that is not drawn on a page, such as the title, author, subject, keywords, creator and producer of the document information, the title of an outline entry, and the contents and author of an annotation, is written as a PDF text string: PDFDocEncoding when every character is in it, otherwise UTF-16BE with a byte order mark. `getTitle()` and the other getters give the characters back:
+
+```ts
+import { createPdf, loadPdf } from 'modern-pdf-lib';
+
+const doc = createPdf();
+doc.addPage();
+doc.setTitle('日本語 €'); // written as UTF-16BE
+doc.setAuthor('Zoë'); // written as PDFDocEncoding, one byte per character
+doc.addOutline('Kapitel 1 — Einführung', 0);
+
+const reloaded = await loadPdf(await doc.save());
+console.log(reloaded.getTitle(), reloaded.getAuthor()); // 日本語 € Zoë
+```
+
+A character no text string can hold (U+001B, for example) makes `save()` throw `UnencodableTextError` with the encoding `'PDF text string'`.
+
+## Files Written by 0.40.x
+
+Version 0.40.x wrote non-ASCII text as UTF-8 bytes, in the content stream and in the document information. Every reader shows those files with text such as `CafÃ©` for `Café`, and loading and saving them does not change that: files written by 0.40.x stay as written. Draw the text again with the current version to get a file that reads correctly.
 
 ## Options Reference
 
@@ -211,7 +251,7 @@ See the [Fonts guide](/guide/fonts) for details on subsetting, bidirectional tex
 | `x` | `number` | Cursor position (initially `0`) | Horizontal position in points |
 | `y` | `number` | Cursor position (initially `0`) | Vertical position in points (from bottom) |
 | `size` | `number` | `12` (or page default) | Font size in points |
-| `font` | `FontRef \| string` | `page.setFont()` value, else resource `F1` (the first embedded font) | Font to use — a `FontRef` from `embedFont()`, or a raw font resource name string |
+| `font` | `FontRef \| string` | `page.setFont()` value, else resource `F1` (the first embedded font) | Font to use — a `FontRef` from `embedFont()`, or a raw font resource name string (its text is encoded as WinAnsi) |
 | `color` | `Color` | Black | Text color |
 | `rotate` | `Angle` | `degrees(0)` | Rotation angle |
 | `lineHeight` | `number` | `size * 1.2` | Vertical spacing for multi-line text |

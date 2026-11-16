@@ -8,6 +8,7 @@ Find your symptom, jump to the fix:
 |---|---|
 | `EncryptedPdfError` on `loadPdf()` | [1. EncryptedPdfError](#_1-encryptedpdferror) |
 | The PDF opens but the text is invisible | [2. Text Doesn't Render](#_2-text-doesn-t-render-missing-font) |
+| `UnencodableTextError` from `drawText()` or `widthOfTextAtSize()` | [Text that throws UnencodableTextError](#text-that-throws-unencodabletexterror) |
 | Content lands upside down or off the page | [3. Coordinate Confusion](#_3-coordinate-confusion) |
 | WASM fails to load or initialize | [4. WASM Initialization Errors](#_4-wasm-initialization-errors) |
 | Out-of-memory on a large document | [5. Large PDF Memory Issues](#_5-large-pdf-memory-issues) |
@@ -134,7 +135,26 @@ const bytes = await doc.save();
 ```
 
 > [!WARNING]
-> Standard fonts only support the WinAnsi (Latin-1) character set. If your text contains characters outside this set (CJK, Arabic, Cyrillic, emoji, etc.), you **must** embed a custom TrueType or OpenType font that contains those glyphs; `drawText()` throws `UnencodableTextError` for such a character (0.40.9 wrote the wrong glyphs), and for a character an embedded font has no glyph for. See the [Fonts guide](./fonts.md) for details.
+> The 12 Latin standard fonts take only the characters of WinAnsiEncoding (ASCII, Latin-1 and extras such as `€` and `—`). If your text contains characters outside it (CJK, Arabic, Cyrillic, emoji, etc.), embed a custom TrueType or OpenType font that contains those glyphs; otherwise `drawText()` throws `UnencodableTextError` (see below). See the [Fonts guide](./fonts.md) for details.
+
+### Text that throws UnencodableTextError
+
+`drawText()` or `widthOfTextAtSize()` throws `UnencodableTextError`, for example `Helvetica (WinAnsiEncoding) cannot encode "日" (U+65E5) at index 0; embed a font that has this character: doc.embedFont(fontBytes)`.
+
+**Why:** the font cannot encode a character of the text. A standard font encodes its text through its own encoding (WinAnsiEncoding for the 12 Latin fonts; Symbol and ZapfDingbats take Unicode text) after normalizing it to NFC, and an embedded font needs a glyph in its `cmap`. Nothing of the text is drawn. Earlier versions wrote the wrong glyphs for a standard font and the missing-glyph box for an embedded one.
+
+**Fix:** the error names the character (`character`, `codePoint`, `index`) and the font (`fontName`, `encoding`). Embed a font that has that character, or draw the text that needs it in its own font. A tab or another control character throws the same error: replace it, for example with `text.replaceAll('\t', '    ')`.
+
+```ts
+import { UnencodableTextError } from 'modern-pdf-lib';
+
+try {
+  page.drawText('東京', { x: 50, y: 700, size: 16, font: helvetica });
+} catch (error) {
+  if (!(error instanceof UnencodableTextError)) throw error;
+  console.log(error.codePoint.toString(16), error.encoding); // '6771' 'WinAnsiEncoding'
+}
+```
 
 ## 3. Coordinate Confusion
 
@@ -358,11 +378,12 @@ await Bun.write('output.pdf', bytes);
 
 ### Why it happens
 
-There are three common causes:
+There are four common causes:
 
 1. **The PDF is encrypted and no password was provided.** Encrypted streams yield raw cipher bytes, which cannot be decoded into meaningful text.
 2. **The font has no ToUnicode CMap.** Many PDFs use custom encodings (especially with subsetted fonts). Without a `/ToUnicode` mapping, the library cannot translate glyph IDs to Unicode characters.
 3. **The PDF is image-only (scanned document).** The pages contain raster images of text, not actual text operators. There is no text to extract.
+4. **The file was written by 0.40.x with non-ASCII text.** Version 0.40.x wrote such text as UTF-8 bytes, in the page content and in the document information, so every reader shows `Café` as `CafÃ©`. The bytes are what is in the file: loading and saving a file does not change them (files written by 0.40.x stay as written).
 
 ### How to fix it
 
@@ -383,6 +404,8 @@ console.log(text);
 ```
 
 **For missing ToUnicode CMaps:** there is no automatic fix. The text may partially decode using the font's built-in encoding, but unmapped glyphs will appear as replacement characters. This is a limitation of the source PDF, not the library.
+
+**For a file written by 0.40.x:** draw the text again with the current version. 0.41.0 and later write text through the font's own encoding (WinAnsiEncoding for the Latin standard fonts, or glyph ids for an embedded font) and the document information as PDF text strings, so the new file reads as set.
 
 **For scanned (image-only) PDFs:** text extraction is not possible. You need an OCR engine (such as Tesseract) to convert the images to text before processing.
 

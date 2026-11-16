@@ -52,11 +52,11 @@ page.drawText('Courier text', {
 | ZapfDingbats | `ZapfDingbats` | — | — | — |
 
 > [!WARNING]
-> Standard fonts only support the Latin-1 (WinAnsi) character set. For Unicode text, CJK characters, or any non-Latin script, you must embed a custom font: `drawText()` throws `UnencodableTextError` for a character the font has no code for, and does so for an embedded font that has no glyph for it as well. Symbol and ZapfDingbats take Unicode text (`'αβγ'`, `'✓'`) and write their own codes.
+> The 12 Latin standard fonts take only the characters of WinAnsiEncoding (ASCII, Latin-1 and a few more, such as `€` and `—`). For CJK characters or any other script, embed a custom font that has the glyphs: `drawText()` throws `UnencodableTextError` for a character the font cannot encode, and does so for an embedded font that has no glyph for it as well. Symbol and ZapfDingbats take Unicode text (`'αβγ'`, `'✓'`) and write their own codes. [How Text Is Encoded](#how-text-is-encoded) has the details.
 
 ## Custom Font Embedding
 
-Embed TrueType (`.ttf`) or OpenType (`.otf`) fonts for full Unicode coverage:
+Embed TrueType (`.ttf`) or OpenType (`.otf`) fonts to draw every character the font has a glyph for:
 
 ```ts
 import { readFile } from 'node:fs/promises';
@@ -104,6 +104,70 @@ page.drawText('This is italic text.', {
   x: 50, y: 650, font: italic, size: 14, color: rgb(0, 0, 0),
 });
 ```
+
+## How Text Is Encoded
+
+A content stream holds bytes, not characters, so `drawText()` turns each string into the bytes its font expects. The `FontRef` that `embedFont()` returns does that in `encodeText()`:
+
+| Font | Encoding | Characters it takes | Bytes written |
+|---|---|---|---|
+| The 12 Latin standard fonts (Helvetica, Times and Courier families) | `WinAnsiEncoding` | the 218 characters of WinAnsi: ASCII, Latin-1, and extras such as `€`, `—` and `“` | 1 per character |
+| Symbol | `SymbolEncoding` | Unicode text such as `'αβγ'` (189 characters) | 1 per character |
+| ZapfDingbats | `ZapfDingbatsEncoding` | Unicode text such as `'✓'` (202 characters) | 1 per character |
+| An embedded TrueType or OpenType font | `Identity-H` | every character that has a glyph in the font `cmap` | 2 per glyph |
+
+```ts
+const helvetica = await pdf.embedFont(StandardFonts.Helvetica);
+const symbol = await pdf.embedFont(StandardFonts.Symbol);
+
+helvetica.encodeText('Größe €'); // Uint8Array of 7 bytes: 'ß' is 0xDF, '€' is 0x80
+helvetica.getCharacterSet().length; // 218
+helvetica.widthOfTextAtSize('€', 1000); // 556, the width of the byte that is written
+
+page.drawText('αβγ', { x: 50, y: 600, size: 16, font: symbol });
+```
+
+A standard font takes its text in Unicode normalization form NFC, so the decomposed `'cafe\u0301'` is written as the four characters of `'café'`. An embedded font writes the code points it is given, with no normalization and no shaping.
+
+### A Character the Font Cannot Encode
+
+`drawText()` and `widthOfTextAtSize()` throw `UnencodableTextError` for the first character the font cannot encode, and nothing of that text is drawn. An embedded font throws it for a character with no glyph, where it used to draw the missing-glyph box. The error carries `character`, `codePoint` (a surrogate pair stays one character), `index` (UTF-16 index in the string), `fontName` (the `BaseFont`) and `encoding` (`'WinAnsiEncoding'`, `'SymbolEncoding'`, `'ZapfDingbatsEncoding'` or `'Identity-H'`). It is an `InvalidArgumentError` with the code `unencodable-text`:
+
+```ts
+import { UnencodableTextError } from 'modern-pdf-lib';
+
+try {
+  page.drawText('Tokyo 東京', { x: 50, y: 700, size: 16, font: helvetica });
+} catch (error) {
+  if (!(error instanceof UnencodableTextError)) throw error;
+  console.log(error.character, error.codePoint, error.index); // '東' 26481 6
+  console.log(error.fontName, error.encoding); // 'Helvetica' 'WinAnsiEncoding'
+}
+```
+
+The library never swaps in a different font by itself. Embed a font that covers the text, or draw each script in its own font.
+
+### Your Own `FontRef`
+
+`FontRef` is an interface, so you can wrap one, for example to replace the characters a font lacks. `encodeText(text)` is required of every `FontRef`, since `drawText()` writes what it returns: a wrapper adds its own `encodeText` and keeps `widthOfTextAtSize` in step with it. A JavaScript object without `encodeText` makes `drawText()` throw `TypeError: fontRef.encodeText is not a function`.
+
+```ts
+import type { FontRef } from 'modern-pdf-lib';
+
+const known = new Set(helvetica.getCharacterSet());
+const substitute = (text: string): string =>
+  Array.from(text.normalize('NFC'), (ch) => (known.has(ch.codePointAt(0) ?? 0) ? ch : '?')).join('');
+
+const lenient: FontRef = {
+  ...helvetica,
+  widthOfTextAtSize: (text, size) => helvetica.widthOfTextAtSize(substitute(text), size),
+  encodeText: (text) => helvetica.encodeText(substitute(text)),
+};
+
+page.drawText('Tokyo 東京', { x: 50, y: 650, size: 16, font: lenient }); // draws "Tokyo ??"
+```
+
+To write the bytes yourself, pass `font.encodeText(text)` to a text operator: `showTextOp`, `showTextHex`, `showTextArray`, `showTextNextLine` and `showTextWithSpacing` take the bytes as a `Uint8Array` (or a string of byte values).
 
 ## Font Subsetting
 
@@ -233,6 +297,8 @@ const font = await pdf.embedFont(fontBytes);
 const width = font.widthOfTextAtSize('Hello, world!', 16);
 console.log(`Text width: ${width} points`);
 ```
+
+The width is that of the glyphs `encodeText()` writes, so the same text that `drawText()` refuses makes `widthOfTextAtSize()` throw `UnencodableTextError`.
 
 ### Calculating Text Height
 

@@ -102,6 +102,8 @@ page.drawText('中文内容',     { x: 50, y: 670, font: cjkFont,   size: 12 });
 page.drawText('نص عربي',      { x: 50, y: 640, font: arabicFont, size: 12 });
 ```
 
+`drawText()` throws `UnencodableTextError` for a character that its font has no glyph for, instead of drawing the font's missing-glyph box, so a font that does not cover the text is found while you build the document.
+
 ## Color and Contrast
 
 Ensure sufficient color contrast for visual accessibility:
@@ -159,7 +161,7 @@ PDF/UA (ISO 14289) defines requirements for universally accessible PDFs. The lib
 
 Document language: loading a PDF does not read its `/Lang` entry, so `getLanguage()` returns `undefined` for a loaded document and the validators judge it as having no language; call `setLanguage()` on it before you validate or save it.
 
-Document title: `setTitle()` writes a title with characters outside ASCII in the wrong encoding, and loading a PDF does not read its `DisplayDocTitle` viewer preference, so call `setTitle(title, { showInWindowTitleBar: true })` again on a loaded document.
+Document title: `setTitle()` writes the title as a PDF text string (PDFDocEncoding, or UTF-16BE with a byte order mark when a character is outside it), so a title such as `'日本語 €'` shows as set in every viewer. Loading a PDF does not read its `DisplayDocTitle` viewer preference, so call `setTitle(title, { showInWindowTitleBar: true })` again on a loaded document.
 
 ## XMP Metadata
 
