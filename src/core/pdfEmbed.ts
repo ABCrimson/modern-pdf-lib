@@ -30,6 +30,7 @@ import type { PdfObjectRegistry } from './pdfObjects.js';
 import type { PdfPage } from './pdfPage.js';
 import type { Angle } from './operators/state.js';
 import { decodeStreamData } from '../codecs/streamDecode.js';
+import { latin1Bytes } from '../internal/latin1.js';
 import {
   carryDecryptedFromEncryptedFile,
   holdsDecryptedObject,
@@ -295,8 +296,8 @@ export function embedPageAsFormXObject(
   // New operators added via drawText/drawImage/etc.
   const newOps = page.getContentStreamData();
   if (newOps.length > 0) {
-    const encoder = new TextEncoder();
-    contentChunks.push(encoder.encode(newOps));
+    // Page operators are a PDF byte string, as PdfPage writes them on save.
+    contentChunks.push(latin1Bytes(newOps));
   }
 
   // Concatenate all content with newline separators

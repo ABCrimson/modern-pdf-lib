@@ -5,6 +5,10 @@
  * deep cloning of resources, round-trip embedding.
  */
 
+import { spawnSync } from 'node:child_process';
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { describe, it, expect } from 'vitest';
 import {
   createPdf,
@@ -19,6 +23,8 @@ import {
   PdfString,
   embedPageAsFormXObject,
 } from '../../../src/index.js';
+import { latin1String } from '../../../src/internal/latin1.js';
+import { expectQpdfClean, QPDF_BIN, requireQpdf } from '../../helpers/oracle/qpdf.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -521,5 +527,61 @@ describe('embedPageAsFormXObject strings', () => {
     expect(hex.hex).toBe(true);
     expect((copy.get('/Text') as PdfString).toText()).toBe('日本語 €');
     expect(copy.get('/Literal')).not.toBe(marks.get('/Literal'));
+  });
+});
+
+// ---------------------------------------------------------------------------
+// operators added on the page
+// ---------------------------------------------------------------------------
+
+describe('embedPage of a page with operators added', () => {
+  /** The decoded data of every stream of `pdf`, as qpdf reads it (`--json`, data inline). */
+  function qpdfStreams(pdf: Uint8Array): Uint8Array[] {
+    const dir = mkdtempSync(join(tmpdir(), 'embed-qpdf-'));
+    try {
+      const input = join(dir, 'in.pdf');
+      writeFileSync(input, pdf);
+      const result = spawnSync(
+        QPDF_BIN,
+        ['--json=2', '--json-stream-data=inline', '--decode-level=generalized', input],
+        { encoding: 'utf8', maxBuffer: 1 << 26 },
+      );
+      expect(result.status, result.stderr).toBe(0);
+      const json = JSON.parse(result.stdout) as {
+        qpdf: [unknown, Record<string, { stream?: { data?: string } }>];
+      };
+      return Object.values(json.qpdf[1]).flatMap(({ stream }) =>
+        stream?.data === undefined ? [] : [Uint8Array.fromBase64(stream.data)],
+      );
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  }
+
+  /** The streams of `pdf` whose data holds the bytes of `needle`. */
+  function streamsHolding(pdf: Uint8Array, needle: Uint8Array): Uint8Array[] {
+    const pattern = latin1String(needle);
+    return qpdfStreams(pdf).filter((data) => latin1String(data).includes(pattern));
+  }
+
+  it('writes the bytes of the page operators, as the page does on save (qpdf)', async (ctx) => {
+    requireQpdf(ctx);
+    // 0xE9 is a byte of the PDF byte string the page operators are, not a character to encode.
+    const operators = 'BT /F1 12 Tf 50 700 Td (café) Tj ET\n';
+    const sourceDoc = createPdf();
+    const sourcePage = sourceDoc.addPage(PageSizes.A4);
+    sourcePage.pushOperators(operators);
+    const targetDoc = createPdf();
+    targetDoc.addPage(PageSizes.A4).drawPage(targetDoc.embedPage(sourcePage));
+
+    const sourceSaved = await sourceDoc.save();
+    const targetSaved = await targetDoc.save();
+    expectQpdfClean(sourceSaved);
+    expectQpdfClean(targetSaved);
+
+    const latin1 = Uint8Array.of(0x28, 0x63, 0x61, 0x66, 0xe9, 0x29);
+    expect(streamsHolding(sourceSaved, latin1)).toHaveLength(1);
+    expect(streamsHolding(targetSaved, latin1)).toHaveLength(1);
+    expect(streamsHolding(targetSaved, new TextEncoder().encode('(café)'))).toEqual([]);
   });
 });
