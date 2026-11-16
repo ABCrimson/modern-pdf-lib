@@ -6,9 +6,9 @@
 
 ## Files kept here
 
-| File               | Source                                                                                                                              | Retrieved  | Licence                                                                                                 | sha256                                                             |
-| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------- | ---------- | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
-| `zapfdingbats.txt` | https://raw.githubusercontent.com/adobe-type-tools/agl-aglfn/master/zapfdingbats.txt (ITC Zapf Dingbats Glyph List 2.0, 2002-09-20) | 2026-11-16 | BSD-3-Clause, Copyright 2002-2019 Adobe; the licence text is the header of the file, which is unchanged | `f6394e3cb8a447e84a1dad75d4baaf2aa7f45dc104faf369f4720e1a774ef2dc` |
+| File               | Source                                                                                                                                                                                                 | Retrieved  | Licence                                                                                                 | sha256                                                             |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------- | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| `zapfdingbats.txt` | https://raw.githubusercontent.com/adobe-type-tools/agl-aglfn/4036a9ca80a62f64f9de4f7321a9a045ad0ecfd6/zapfdingbats.txt (the head of master on retrieval; ITC Zapf Dingbats Glyph List 2.0, 2002-09-20) | 2026-11-16 | BSD-3-Clause, Copyright 2002-2019 Adobe; the licence text is the header of the file, which is unchanged | `f6394e3cb8a447e84a1dad75d4baaf2aa7f45dc104faf369f4720e1a774ef2dc` |
 
 The list has 201 lines `glyph;XXXX`, one per ZapfDingbats glyph name but `space`.
 

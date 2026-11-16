@@ -27,9 +27,10 @@ const rows = (JSON.parse(read('annex-d.json')) as { zapfDingbatsEncoding: readon
 const adobe = new Map<string, string>();
 for (const line of read('zapfdingbats.txt').split('\n')) {
   if (line === '' || line.startsWith('#')) continue;
-  const match = /^([A-Za-z0-9]+);([0-9A-F]{4})$/.exec(line);
-  if (match === null) throw new Error(`unreadable line in zapfdingbats.txt: ${line}`);
-  const [, glyph, hex] = match as unknown as [string, string, string];
+  const { glyph, hex } = /^(?<glyph>[A-Za-z0-9]+);(?<hex>[0-9A-F]{4})$/.exec(line)?.groups ?? {};
+  if (glyph === undefined || hex === undefined) {
+    throw new Error(`unreadable line in zapfdingbats.txt: ${line}`);
+  }
   adobe.set(glyph, `U+${hex}`);
 }
 
