@@ -14,9 +14,11 @@
  * The public part (DEFAULT_LIMITS, LimitName, PdfLimits, ResolvedLimits) lives in src/limits.ts, which the package entries export.
  * {@link resolveLimits} checks a `limits` option once and applies it, and a
  * {@link LimitContext} carries the result and the totals of one call to every
- * check; nothing here keeps a limit or a total in module state. Every module
- * takes the context of its call as a parameter: only this module and
- * src/limits.ts name the defaults.
+ * check; nothing here keeps a limit or a total in module state. An entry point
+ * begins the context of its call, over its `limits` option or over the limits
+ * of the document's registry, and every module below it takes that context as
+ * a parameter. Only this module, src/limits.ts and the registry default in
+ * src/core/pdfObjects.ts name the defaults.
  *
  * @packageDocumentation
  */

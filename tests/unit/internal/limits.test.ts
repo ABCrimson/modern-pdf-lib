@@ -1,7 +1,8 @@
 /**
- * The limits core (src/limits.ts and src/internal/limits.ts): DEFAULT_LIMITS, resolveLimits and the checks it makes on a
- * `limits` option, the per-call LimitContext and its totals, assertLimit, the entries that export the public part, and the two error classes the root entry exports
- * for refused input: ResourceLimitError and UnsupportedFilterError.
+ * The limits core (src/limits.ts and src/internal/limits.ts): DEFAULT_LIMITS, resolveLimits and
+ * the checks it makes on a `limits` option, the per-call LimitContext and its totals, assertLimit,
+ * the entries that export the public part, and the two error classes the root entry exports for
+ * refused input: ResourceLimitError and UnsupportedFilterError.
  */
 import { describe, expect, expectTypeOf, it } from 'vitest';
 import * as root from '../../../src/index.js';

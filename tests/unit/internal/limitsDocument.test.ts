@@ -18,7 +18,8 @@ import { interpretPage } from '../../../src/render/interpreter.js';
 import { extractImages } from '../../../src/render/imageExtract.js';
 import { extractFonts } from '../../../src/render/fontExtract.js';
 import { InvalidArgumentError, ResourceLimitError } from '../../../src/errors.js';
-import { PdfDict, PdfName, PdfStream } from '../../../src/core/pdfObjects.js';
+import { PdfDict, PdfName, PdfRef, PdfStream } from '../../../src/core/pdfObjects.js';
+import { saveIncremental } from '../../../src/core/io/incrementalWriter.js';
 import { parseContentStream } from '../../../src/parser/contentStreamParser.js';
 import { StreamingPdfParser } from '../../../src/parser/streamingParser.js';
 import { extractText, extractTextWithPositions } from '../../../src/parser/text/textExtractor.js';
@@ -511,5 +512,24 @@ describe('save rewraps under the limits of the document', () => {
   it('writes a stream that decodes to exactly maxDecodedStreamBytes back as zlib data', async () => {
     const equal = await loadPdf(RAW_FILE, { limits: { maxDecodedStreamBytes: DECODED } });
     expect(hasZlibStream(await equal.save())).toBe(true);
+  });
+
+  it('applies the limits of the document in saveAsStream()', async () => {
+    const streamed = async (limit: number): Promise<Uint8Array> => {
+      const doc = await loadPdf(RAW_FILE, { limits: { maxDecodedStreamBytes: limit } });
+      return new Uint8Array(await new Response(doc.saveAsStream()).arrayBuffer());
+    };
+    expect(hasZlibStream(await streamed(DECODED - 1))).toBe(false);
+    expect(hasZlibStream(await streamed(DECODED))).toBe(true);
+  });
+
+  it('applies the limits of the document in saveIncremental()', async () => {
+    const structure = { catalogRef: PdfRef.of(1), pagesRef: PdfRef.of(2), infoRef: PdfRef.of(1) };
+    const appended = async (limit: number): Promise<Uint8Array> => {
+      const doc = await loadPdf(RAW_FILE, { limits: { maxDecodedStreamBytes: limit } });
+      return saveIncremental(RAW_FILE, doc.getRegistry(), structure, new Set([4])).bytes;
+    };
+    expect(hasZlibStream(await appended(DECODED - 1))).toBe(false);
+    expect(hasZlibStream(await appended(DECODED))).toBe(true);
   });
 });

@@ -263,7 +263,7 @@ Decode, parse and render paths refuse input above internal limits with `Resource
 | Limit (`error.limit`) | Value | Bounds | Where it throws |
 |:---|---:|:---|:---|
 | `maxDecodedStreamBytes` | 268,435,456 bytes (256 MiB) | The decoded output of one stream filter stage; the decoded content streams of one page together; one predictor row | `loadPdf()`, `decodeStream()`, `decodeImageStream()`, text extraction, rendering, `getContentStream()`, `analyzeImages()` |
-| `maxRewrapDecodedBytes` | 67,108,864 bytes (64 MiB) | The decoded size up to which `save()` rewrites a raw DEFLATE `/FlateDecode` stream as zlib data | Nothing: a larger stream is saved as loaded |
+| `maxRewrapDecodedBytes` | 67,108,864 bytes (64 MiB) | The decoded size up to which `save()`, `saveAsStream()` and `saveIncremental()` rewrite a raw DEFLATE or sync-flushed `/FlateDecode` stream as zlib data; a document whose `maxDecodedStreamBytes` is smaller uses that | Nothing: a larger stream is saved as loaded |
 | `maxCMapMappings` | 1,048,576 mappings | The codes one ToUnicode CMap names | `extractText()`, `extractTextWithPositions()` |
 | `maxFontCmapMappings` | 1,114,112 entries | The codes one font cmap subtable names | Font parsing, such as `embedFont()` with TrueType or OpenType data |
 | `maxDerDepth` | 128 levels | The nesting of constructed DER values in a signature | `verifySignatures()` and `verifySignatureDetailed()` report that signature as not valid (the error is not thrown) |

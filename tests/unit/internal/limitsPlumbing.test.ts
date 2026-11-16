@@ -10,13 +10,14 @@
  *    the limits of a document (`src/core/pdfObjects.ts`, whose constructor defaults to it) and by
  *    the `export { ... }` lists of the package entries that re-export it; `INTERNAL_LIMITS` only
  *    by `src/internal/limits.ts`. Every other module gets limits through a context.
- * 3. No file that imports a value from a limits module holds a module-level `let` or `var`: a
- *    limit or a total kept in a module variable would be shared by every call. A type import and
- *    a re-export give a file no limits to keep. The variables of ALLOWED_MODULE_STATE are not
- *    limit state; each carries its reason, and the list may only shrink: an entry whose variable
- *    is gone fails.
+ * 3. No file that imports from a limits module, a type import included, holds a module-level
+ *    `let` or `var`: a limit, a total or a context kept in a module variable would be shared by
+ *    every call. A re-export gives a file no limits to keep. The variables of
+ *    ALLOWED_MODULE_STATE are not limit state; each carries its reason, and the list may only
+ *    shrink: an entry whose variable is gone fails.
  * 4. `assertLimit` and `addToTotal` take a context that is passed down: the first argument is
- *    neither built in the call nor a module-level binding.
+ *    neither built in the call nor a module-level binding, and no `beginCall` runs outside a
+ *    function, where its context and totals would be shared by every call.
  *
  * The scanner is checked on source snippets first, so a clean scan of `src` means the rules can
  * fire, not that they look at nothing.
@@ -46,6 +47,10 @@ const LIMITS_MODULES: ReadonlySet<string> = new Set(['src/internal/limits.ts', '
  * variable name, each with what it holds.
  */
 const ALLOWED_MODULE_STATE: ReadonlyMap<string, ReadonlyMap<string, string>> = new Map([
+  [
+    'src/assets/font/fontEmbed.ts',
+    new Map([['fontParserWasm', 'the loaded font parser WASM module, set once when it loads']]),
+  ],
   [
     'src/assets/image/internal/pngEmbed.ts',
     new Map([['pngWasmInstance', 'the loaded PNG WASM module, set once by initPngWasm']]),
@@ -107,11 +112,7 @@ function scanSource(file: string, text: string, usedState?: Set<string>): string
   let importsLimits = false;
   for (const statement of program.body) {
     if (statement.type === 'ImportDeclaration') {
-      const fromLimits = LIMITS_MODULES.has(resolveImport(file, statement.source.value));
-      const hasValue = statement.specifiers.some(
-        (s) => s.type !== 'ImportSpecifier' || s.importKind !== 'type',
-      );
-      if (fromLimits && statement.importKind !== 'type' && hasValue) importsLimits = true;
+      if (LIMITS_MODULES.has(resolveImport(file, statement.source.value))) importsLimits = true;
       for (const specifier of statement.specifiers) moduleBindings.add(specifier.local.name);
       continue;
     }
@@ -142,7 +143,21 @@ function scanSource(file: string, text: string, usedState?: Set<string>): string
 
   // The names an `export { ... }` list holds are the re-exports of the package entries.
   const exportListNames = new Set<number>();
+  // How many functions enclose the node visited: a `beginCall` at depth 0 runs once per module.
+  let functionDepth = 0;
+  const enterFunction = (): void => {
+    functionDepth++;
+  };
+  const exitFunction = (): void => {
+    functionDepth--;
+  };
   new Visitor({
+    FunctionDeclaration: enterFunction,
+    'FunctionDeclaration:exit': exitFunction,
+    FunctionExpression: enterFunction,
+    'FunctionExpression:exit': exitFunction,
+    ArrowFunctionExpression: enterFunction,
+    'ArrowFunctionExpression:exit': exitFunction,
     ExportSpecifier(node) {
       exportListNames.add(node.local.start);
       exportListNames.add(node.exported.start);
@@ -158,7 +173,12 @@ function scanSource(file: string, text: string, usedState?: Set<string>): string
       }
     },
     CallExpression(node) {
-      if (node.callee.type !== 'Identifier' || !CONTEXT_CHECKS.has(node.callee.name)) return;
+      if (node.callee.type !== 'Identifier') return;
+      if (node.callee.name === 'beginCall' && functionDepth === 0) {
+        report(node.start, 'beginCall runs at module level; its context is shared by every call');
+        return;
+      }
+      if (!CONTEXT_CHECKS.has(node.callee.name)) return;
       const context = node.arguments[0];
       if (
         context?.type === 'CallExpression' ||
@@ -174,6 +194,7 @@ function scanSource(file: string, text: string, usedState?: Set<string>): string
   return [...found];
 }
 
+// metrics: synthetic paths start
 describe('the scanner', () => {
   it.each([
     ['a removed helper', "import { assertWithinLimit } from '../internal/limits.js';", 'removed'],
@@ -200,6 +221,16 @@ describe('the scanner', () => {
       'builds its context',
     ],
     [
+      'a context begun at module level',
+      "import { beginCall, resolveLimits } from '../internal/limits.js';\nconst shared = beginCall(resolveLimits(undefined));",
+      'beginCall runs at module level',
+    ],
+    [
+      'a module-level let next to a type import of the limits',
+      "import { type LimitContext } from '../internal/limits.js';\nlet cached: LimitContext | undefined;",
+      'module-level let cached',
+    ],
+    [
       'a check against a module binding',
       "import { assertLimit, beginCall } from '../internal/limits.js';\nconst shared = beginCall(x);\nexport function f() { assertLimit(shared, 'maxDerDepth', 1); }",
       'module binding shared',
@@ -217,10 +248,6 @@ describe('the scanner', () => {
     ],
     ['a re-export of the defaults from an entry', "export { DEFAULT_LIMITS } from '../limits.js';"],
     ['a let in a file that imports no limits', 'let cache = 0;\nexport const a = 1;'],
-    [
-      'a let in a file that imports the limits as types only',
-      "import type { PdfLimits } from '../limits.js';\nimport { type LimitContext } from '../internal/limits.js';\nlet cache = 0;",
-    ],
     [
       'a let in a file that only re-exports the limits',
       "export { DEFAULT_LIMITS } from '../limits.js';\nlet cache = 0;",
@@ -246,6 +273,7 @@ describe('the scanner', () => {
     expect(scanSource('src/assets/image/internal/other.ts', text)).not.toEqual([]);
   });
 });
+// metrics: synthetic paths end
 
 describe('src', () => {
   // The scan parses every file of `src`; the hosted runners are slower than a laptop, so the
