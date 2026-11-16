@@ -299,7 +299,7 @@ describe('verifiers and DER failures', () => {
       'nesting above the DER depth limit',
       // The leaf does not end in a zero byte: the verifiers trim trailing zeros of /Contents.
       () => wrap(Uint8Array.of(0x04, 0x01, 0x09), INTERNAL_LIMITS.maxDerDepth + 1),
-      new ResourceLimitError('maxDerDepth', INTERNAL_LIMITS.maxDerDepth, 'levels').message,
+      `Input exceeds the limit maxDerDepth (${INTERNAL_LIMITS.maxDerDepth} levels).`,
     ],
   ];
 
