@@ -375,6 +375,11 @@ describe('PdfError.is', () => {
     expect(PdfError.is('invalid-argument')).toBe(false);
     expect(PdfError.is(null)).toBe(false);
   });
+
+  it('rejects an object that is not an error, even when it carries a known code', () => {
+    expect(PdfError.is({ code: 'invalid-argument' })).toBe(false);
+    expect(PdfError.is({ code: 'invalid-argument' }, 'invalid-argument')).toBe(false);
+  });
 });
 
 describe('fields of the kind classes and the new classes', () => {

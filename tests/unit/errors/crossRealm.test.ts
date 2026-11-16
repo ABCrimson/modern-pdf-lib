@@ -107,4 +107,11 @@ describe('the realm boundary', () => {
     expect(err instanceof Error).toBe(false);
     expect(err instanceof outer.PdfParseError).toBe(true);
   });
+
+  it('does not stop PdfError.is, which accepts an error of the other realm', () => {
+    const [, vmCopy] = copies[1]!;
+    const err = new vmCopy.PdfParseError({ message: 'x', offset: 0 });
+    expect(outer.PdfError.is(err, 'malformed-pdf')).toBe(true);
+    expect(outer.PdfError.is(err)).toBe(true);
+  });
 });

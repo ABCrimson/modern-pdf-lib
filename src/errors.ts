@@ -1,20 +1,22 @@
 /**
  * @module errors
  *
- * The error classes of modern-pdf-lib. Every class derives from the abstract
- * {@link PdfError}, which carries a machine-readable `code`. Five kind classes
- * sit under it ({@link InvalidArgumentError}, {@link InvalidStateError},
+ * The error classes of modern-pdf-lib. Every class except ForeignPageError,
+ * FieldExistsAsNonTerminalError and RichTextFieldReadError derives from the
+ * abstract {@link PdfError}, which carries a machine-readable `code`. Five
+ * kind classes sit under it ({@link InvalidArgumentError}, {@link InvalidStateError},
  * {@link MalformedInputError}, {@link UnsupportedFeatureError},
  * {@link EnvironmentError}); the named classes sit under a kind or directly
  * under `PdfError`. Class names follow pdf-lib where pdf-lib has the class.
  *
  * `code` and `name` are the contract: stable across releases, identical in
- * every build, never minified. `instanceof` with any class of this module
- * also holds for an error made by another copy of the library (the ESM and
- * CJS builds of one install, an IIFE in another realm): see the static
- * `[Symbol.hasInstance]` of {@link PdfError}.
+ * every build, never minified. `instanceof` with any class of this module that
+ * derives from PdfError also holds for an error made by another copy of the
+ * library (the ESM and CJS builds of one install, an IIFE in another realm):
+ * see the static `[Symbol.hasInstance]` of {@link PdfError}.
  *
- * All constructors accept the standard `ErrorOptions` (`{ cause }`).
+ * Every constructor takes a `cause`: through `ErrorOptions`, or for
+ * PdfParseError through the `cause` field of its options.
  */
 
 // ---------------------------------------------------------------------------
@@ -148,10 +150,11 @@ export abstract class PdfError extends Error {
    * check, or, for an error made by another copy of the library (another
    * build, another realm), when some prototype of `value` carries the same
    * brand as this class.  Each class of this module stores its name as its
-   * brand under `Symbol.for("modern-pdf-lib.errorClass")`.  The check reads
-   * the brand of the class it is called on, so a sibling class never
-   * matches, and a subclass made outside the library (which has no brand of
-   * its own) matches only by the ordinary check.
+   * brand under `Symbol.for("modern-pdf-lib.errorClass")`, except the three
+   * classes that still extend Error.  The check reads the brand of the class
+   * it is called on, so a sibling class never matches, and a subclass made
+   * outside the library (which has no brand of its own) matches only by the
+   * ordinary check.
    */
   static override [Symbol.hasInstance](value: unknown): boolean {
     if (Function.prototype[Symbol.hasInstance].call(this, value)) return true;
@@ -169,15 +172,18 @@ export abstract class PdfError extends Error {
   }
 
   /**
-   * True when `value` is an object whose `code` is a {@link PdfErrorCode},
-   * and equals `code` when one is given.  It reads only the code, so it also
-   * accepts an error of an older copy of the library that carries a code.
+   * True when `value` is an error, of this realm or another, whose `code` is
+   * a {@link PdfErrorCode}, and equals `code` when one is given.  Past that
+   * it reads only the code, so it also accepts an error of an older copy of
+   * the library that carries a code.
    */
   static is<C extends PdfErrorCode>(
     value: unknown,
     code?: C,
   ): value is PdfError & { readonly code: C } {
     if (typeof value !== 'object' || value === null || !('code' in value)) return false;
+    if (!(value instanceof Error) && Object.prototype.toString.call(value) !== '[object Error]')
+      return false;
     const actual = value.code;
     if (code !== undefined) return actual === code;
     return typeof actual === 'string' && Object.hasOwn(KNOWN_CODES, actual);
@@ -694,8 +700,9 @@ export class PdfParseError extends MalformedInputError {
   override readonly name: 'PdfParseError' | 'StreamingParseError' = 'PdfParseError';
   override readonly code: 'malformed-pdf' | 'streaming-parse' = 'malformed-pdf';
   /**
-   * Byte offset of the error.  Always a number for a PdfParseError;
-   * `undefined` only for a {@link StreamingParseError} made without one.
+   * Byte offset of the error.  Every PdfParseError the library throws has one;
+   * `undefined` when none was given, as for a {@link StreamingParseError}
+   * made without one.
    */
   readonly offset: number | undefined;
   readonly expected: string;
