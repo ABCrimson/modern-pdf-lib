@@ -18,6 +18,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
+import { UnencodableTextError } from '../../../../src/errors.js';
 import { svgToPdfOperators, drawSvgOnPage } from '../../../../src/assets/svg/svgToPdf.js';
 import { parseSvg } from '../../../../src/assets/svg/svgParser.js';
 import { PdfPage } from '../../../../src/core/pdfPage.js';
@@ -1014,5 +1015,34 @@ describe('svgToPdfOperators — gradient fills', () => {
     expect(stopsMatch).toBeDefined();
     const stopParts = stopsMatch![1]!.split(';');
     expect(stopParts).toHaveLength(3);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Text is written as the codes of the font
+// ---------------------------------------------------------------------------
+
+describe('svgToPdfOperators — text encoding', () => {
+  it('writes "naïve" as WinAnsi codes in an ASCII-only operator', () => {
+    const el = parseSvg('<svg width="200" height="100"><text x="10" y="50">naïve</text></svg>');
+    const ops = svgToPdfOperators(el);
+    expect(ops).toContain('(na\\357ve) Tj\n');
+    expect(ops).toMatch(/^[\x20-\x7e\n]*$/);
+  });
+
+  it('writes the euro sign as the WinAnsi code 0x80', () => {
+    const el = parseSvg('<svg width="200" height="100"><text x="10" y="50">5 €</text></svg>');
+    expect(svgToPdfOperators(el)).toContain('(5 \\200) Tj\n');
+  });
+
+  it('throws UnencodableTextError for text the font cannot encode', () => {
+    const el = parseSvg('<svg width="200" height="100"><text x="10" y="50">日本</text></svg>');
+    expect(() => svgToPdfOperators(el)).toThrow(UnencodableTextError);
+  });
+
+  it('shows the codes in the content stream of a page', () => {
+    const page = new PdfPage(200, 100, new PdfObjectRegistry());
+    drawSvgOnPage(page, '<svg width="200" height="100"><text x="10" y="50">naïve</text></svg>');
+    expect(page.getContentStreamData()).toContain('(na\\357ve) Tj\n');
   });
 });

@@ -22,7 +22,8 @@ import {
   clip,
   endPath,
 } from '../core/operators/graphics.js';
-import { beginText, endText, setFont, moveText, showText } from '../core/operators/text.js';
+import { beginText, endText, setFont, moveText } from '../core/operators/text.js';
+import { encodeTextForFontName, showEncodedText } from '../internal/standardText.js';
 import { applyFillColor, applyStrokeColor } from '../core/operators/color.js';
 import type { Color } from '../core/operators/color.js';
 
@@ -546,7 +547,7 @@ function renderPlainTextOps(
       ops += beginText();
       ops += setFont(fontName, cellFontSize);
       ops += moveText(textX, textY);
-      ops += showText(line);
+      ops += showEncodedText(encodeTextForFontName(fontName, line));
       ops += endText();
     }
     ops += restoreState();
@@ -591,7 +592,7 @@ function renderPlainTextOps(
     ops += beginText();
     ops += setFont(fontName, cellFontSize);
     ops += moveText(textX, textY);
-    ops += showText(displayText);
+    ops += showEncodedText(encodeTextForFontName(fontName, displayText));
     ops += endText();
     ops += restoreState();
   }
@@ -677,8 +678,9 @@ function renderCellOps(
       ops += moveText(textXPos, textYPos);
       for (const run of content) {
         ops += applyFillColor(run.color ?? cellTextColor);
-        ops += setFont(run.fontName ?? fontName, run.fontSize ?? cellFontSize);
-        ops += showText(run.text);
+        const runFont = run.fontName ?? fontName;
+        ops += setFont(runFont, run.fontSize ?? cellFontSize);
+        ops += showEncodedText(encodeTextForFontName(runFont, run.text));
       }
       ops += endText();
       ops += restoreState();

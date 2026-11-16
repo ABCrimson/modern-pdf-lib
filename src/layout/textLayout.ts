@@ -22,14 +22,8 @@
  */
 
 import { saveState, restoreState } from '../core/operators/state.js';
-import {
-  beginText,
-  endText,
-  setFont,
-  moveText,
-  showText,
-  setWordSpacing,
-} from '../core/operators/text.js';
+import { beginText, endText, setFont, moveText, setWordSpacing } from '../core/operators/text.js';
+import { encodeTextForFontName, showEncodedText } from '../internal/standardText.js';
 import {
   moveTo,
   lineTo,
@@ -660,7 +654,7 @@ function renderLine(
       currentX += spaceWidth;
     }
 
-    ops += showText(word.text);
+    ops += showEncodedText(encodeTextForFontName(fn, word.text));
     currentX += word.width;
 
     // Underline decoration

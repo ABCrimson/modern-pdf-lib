@@ -1,4 +1,5 @@
-import { describe, it, expect } from 'vitest';
+import { afterEach, beforeEach, describe, it, expect, vi } from 'vitest';
+import { resetWarningsForTesting, WARNING_TYPE } from '../../../src/internal/warnings.js';
 import { applyOcr } from '../../../src/render/ocr.js';
 import type { OcrEngine, OcrWord } from '../../../src/render/ocr.js';
 import { createPdf } from '../../../src/core/pdfDocument.js';
@@ -114,5 +115,74 @@ describe('applyOcr — invisible OCR text overlay', () => {
     const ops = parseContentStream(page.getContentStream());
     expect(tjStrings(ops)).toContain('zoom');
     expect(trModes(ops)).toContain(3);
+  });
+});
+
+describe('applyOcr — words the overlay font cannot encode', () => {
+  beforeEach(() => {
+    resetWarningsForTesting();
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+    resetWarningsForTesting();
+  });
+
+  it('writes a word as WinAnsi codes in an ASCII-only fragment', async () => {
+    const doc = createPdf();
+    const page = doc.addPage([200, 200]);
+    const word: OcrWord = { text: 'Größe €', x: 10, y: 20, width: 50, height: 10 };
+
+    await applyOcr(page, stubEngine([word]));
+
+    const content = page.getContentStreamData();
+    expect(content).toContain('Td (Gr\\366\\337e \\200) Tj ET\n');
+    expect(content).toMatch(/^[\x20-\x7e\n]*$/);
+  });
+
+  it('skips the words it cannot encode, keeps the others and warns once with the count', async () => {
+    const emit = vi.spyOn(process, 'emitWarning').mockImplementation(() => {});
+    const doc = createPdf();
+    const page = doc.addPage([200, 200]);
+    const words: OcrWord[] = [
+      { text: 'before', x: 10, y: 20, width: 40, height: 10 },
+      { text: '日本', x: 10, y: 40, width: 40, height: 10 },
+      { text: 'a\tb', x: 10, y: 60, width: 40, height: 10 },
+      { text: 'after', x: 10, y: 80, width: 40, height: 10 },
+    ];
+
+    const returned = await applyOcr(page, stubEngine(words));
+
+    expect(returned).toEqual(words);
+    const content = page.getContentStreamData();
+    expect(content).toContain('(before) Tj ET\n');
+    expect(content).toContain('(after) Tj ET\n');
+    expect(content.match(/ Tj ET\n/g)).toHaveLength(2);
+    expect(emit).toHaveBeenCalledTimes(1);
+    expect(emit).toHaveBeenCalledWith(expect.stringContaining('2 recognized words'), {
+      type: WARNING_TYPE,
+      code: 'MPL_OCR_UNENCODABLE',
+    });
+  });
+
+  it('does not warn when every word can be encoded', async () => {
+    const emit = vi.spyOn(process, 'emitWarning').mockImplementation(() => {});
+    const doc = createPdf();
+    const page = doc.addPage([200, 200]);
+
+    await applyOcr(page, stubEngine([{ text: 'hello', x: 10, y: 20, width: 40, height: 10 }]));
+
+    expect(emit).not.toHaveBeenCalled();
+  });
+
+  it('leaves the page content alone when no word can be encoded', async () => {
+    vi.spyOn(process, 'emitWarning').mockImplementation(() => {});
+    const doc = createPdf();
+    const page = doc.addPage([200, 200]);
+    const before = page.getContentStreamData();
+
+    await applyOcr(page, stubEngine([{ text: '日本', x: 10, y: 20, width: 40, height: 10 }]));
+
+    expect(page.getContentStreamData()).toBe(before);
   });
 });

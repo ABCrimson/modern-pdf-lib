@@ -23,6 +23,7 @@
 import type { SvgElement, SvgDrawCommand, SvgGradient } from './svgParser.js';
 import { parseSvg } from './svgParser.js';
 import type { PdfPage } from '../../core/pdfPage.js';
+import { encodeTextForFontName, showEncodedText } from '../../internal/standardText.js';
 
 // ---------------------------------------------------------------------------
 // Public types
@@ -50,23 +51,6 @@ function n(value: number): string {
   if (Number.isInteger(value)) return value.toString();
   const s = value.toFixed(6).replace(/\.?0+$/, '');
   return s === '-0' ? '0' : s;
-}
-
-// ---------------------------------------------------------------------------
-// PDF string escaping
-// ---------------------------------------------------------------------------
-
-/**
- * Escape a string for use inside a PDF literal string `(...)`.
- */
-function escapePdfString(text: string): string {
-  return text
-    .replace(/\\/g, '\\\\')
-    .replace(/\(/g, '\\(')
-    .replace(/\)/g, '\\)')
-    .replace(/\r/g, '\\r')
-    .replace(/\n/g, '\\n')
-    .replace(/\t/g, '\\t');
 }
 
 // ---------------------------------------------------------------------------
@@ -682,7 +666,7 @@ function renderTextElement(el: SvgElement): string {
   ops += `${n(posX)} ${n(posY)} Td\n`;
 
   // Show text
-  ops += `(${escapePdfString(text)}) Tj\n`;
+  ops += showEncodedText(encodeTextForFontName(fontName, text));
 
   // End text object
   ops += 'ET\n';

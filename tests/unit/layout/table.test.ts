@@ -12,6 +12,7 @@ import type { DrawTableOptions, TableCell, NestedTableContent } from '../../../s
 import { PdfPage, PageSizes } from '../../../src/core/pdfPage.js';
 import { PdfObjectRegistry } from '../../../src/core/pdfObjects.js';
 import type { Color } from '../../../src/core/operators/color.js';
+import { UnencodableTextError } from '../../../src/errors.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -735,5 +736,53 @@ describe('PdfPage.drawTable', () => {
     const content = page.getContentStreamData();
     expect(content).toContain('(First) Tj');
     expect(content).toContain('(Second) Tj');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Cell text is written as the codes of the font
+// ---------------------------------------------------------------------------
+
+describe('renderTable – cell text encoding', () => {
+  // "Größe €" in WinAnsiEncoding: G r 0xF6 0xDF e space 0x80
+  const ENCODED = '(Gr\\366\\337e \\200) Tj\n';
+
+  it('writes a truncated cell as WinAnsi codes in an ASCII-only operator', () => {
+    const { ops } = renderTable(simpleTable({ rows: [{ cells: ['Größe €'] }] }));
+    expect(ops).toContain(ENCODED);
+    expect(ops).toMatch(/^[\x20-\x7e\n]*$/);
+  });
+
+  it('writes each line of a wrapped cell as WinAnsi codes', () => {
+    const { ops } = renderTable(
+      simpleTable({ rows: [{ cells: [{ content: 'Größe €', overflow: 'wrap' }] }] }),
+    );
+    expect(ops).toContain(ENCODED);
+    expect(ops).toMatch(/^[\x20-\x7e\n]*$/);
+  });
+
+  it('writes a text run in the encoding of its own font', () => {
+    const { ops } = renderTable(
+      simpleTable({
+        rows: [
+          {
+            cells: [
+              {
+                content: [{ text: 'Größe €' }, { text: 'αβ', fontName: 'Symbol' }],
+              },
+            ],
+          },
+        ],
+      }),
+    );
+    expect(ops).toContain(ENCODED);
+    // Symbol takes Unicode: alpha and beta are its codes 0x61 and 0x62.
+    expect(ops).toContain('(ab) Tj\n');
+  });
+
+  it('throws UnencodableTextError for text the font cannot encode', () => {
+    expect(() => renderTable(simpleTable({ rows: [{ cells: ['日本'] }] }))).toThrow(
+      UnencodableTextError,
+    );
   });
 });

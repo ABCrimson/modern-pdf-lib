@@ -7,6 +7,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
+import { UnencodableTextError } from '../../../src/errors.js';
 import {
   layoutParagraph,
   layoutColumns,
@@ -673,5 +674,34 @@ describe('layoutParagraph — PDF operator output', () => {
     const result = layoutParagraph('Test', STD_FRAME, {}, fixedMeasure);
     // Font names in PDF operators have a leading slash
     expect(result.operators).toMatch(/\/\w+ \d+(\.\d+)? Tf/);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Word text is written as the codes of the font
+// ---------------------------------------------------------------------------
+
+describe('layoutParagraph — word text encoding', () => {
+  it('writes each word as WinAnsi codes in an ASCII-only operator', () => {
+    const { operators } = layoutParagraph('Größe €', STD_FRAME, {}, fixedMeasure);
+    expect(operators).toContain('(Gr\\366\\337e) Tj\n');
+    expect(operators).toContain('(\\200) Tj\n');
+    expect(operators).toMatch(/^[\x20-\x7e\n]*$/);
+  });
+
+  it('writes a span in the encoding of its own font', () => {
+    const { operators } = layoutParagraph(
+      [{ text: 'αβ', font: 'Symbol' }],
+      STD_FRAME,
+      {},
+      fixedMeasure,
+    );
+    expect(operators).toContain('(ab) Tj\n');
+  });
+
+  it('throws UnencodableTextError for a word the font cannot encode', () => {
+    expect(() => layoutParagraph('日本', STD_FRAME, {}, fixedMeasure)).toThrow(
+      UnencodableTextError,
+    );
   });
 });

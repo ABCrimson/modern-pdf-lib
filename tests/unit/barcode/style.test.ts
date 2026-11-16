@@ -3,6 +3,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
+import { UnencodableTextError } from '../../../src/errors.js';
 import { renderStyledBarcode, calculateBarcodeDimensions } from '../../../src/barcode/style.js';
 
 import { encodeCode128 } from '../../../src/barcode/linear/code128.js';
@@ -244,5 +245,28 @@ describe('Barcode Styling', () => {
     expect(ops).toMatch(/Q\n$/);
     expect(ops).toContain('BT\n');
     expect(ops).toContain('(5901234123457) Tj\n');
+  });
+});
+
+describe('Barcode Styling — human-readable text encoding', () => {
+  it('writes the text below the bars as WinAnsi codes in an ASCII-only operator', () => {
+    const ops = renderStyledBarcode(testMatrix(), 10, 20, 'Größe €', { showText: true });
+    expect(ops).toContain('(Gr\\366\\337e \\200) Tj\n');
+    expect(ops).toMatch(/^[\x20-\x7e\n]*$/);
+  });
+
+  it('keeps the text of plain ASCII as it is', () => {
+    const ops = renderStyledBarcode(testMatrix(), 10, 20, 'TEST (1)', { showText: true });
+    expect(ops).toContain('(TEST \\(1\\)) Tj\n');
+  });
+
+  it('throws UnencodableTextError for text the font cannot encode', () => {
+    expect(() => renderStyledBarcode(testMatrix(), 10, 20, '日本', { showText: true })).toThrow(
+      UnencodableTextError,
+    );
+  });
+
+  it('does not encode the text when it is not shown', () => {
+    expect(() => renderStyledBarcode(testMatrix(), 10, 20, '日本')).not.toThrow();
   });
 });

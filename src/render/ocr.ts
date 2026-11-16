@@ -40,6 +40,9 @@
 
 import type { PdfPage } from '../core/pdfPage.js';
 import { PdfDict, PdfName } from '../core/pdfObjects.js';
+import { UnencodableTextError } from '../errors.js';
+import { warnOnce } from '../internal/warnings.js';
+import { encodedStringLiteral, encodeTextForFontName } from '../internal/standardText.js';
 import { rasterize } from './rasterizer.js';
 import { interpretPage } from './interpreter.js';
 
@@ -98,14 +101,8 @@ export interface ApplyOcrOptions {
   fontResourceName?: string | undefined;
 }
 
-/**
- * Escape a string for use inside a PDF literal string `(…)`.
- * Backslash and both parentheses must be escaped so the content stream
- * remains well-formed.
- */
-function escapePdfLiteral(text: string): string {
-  return text.replaceAll('\\', '\\\\').replaceAll('(', '\\(').replaceAll(')', '\\)');
-}
+/** The font of the overlay: its words are written in the encoding of this standard font. */
+const OVERLAY_FONT = 'Helvetica';
 
 /**
  * Format a number for PDF output: at most 4 decimal places, trailing zeros
@@ -130,7 +127,7 @@ function ensureOverlayFont(page: PdfPage, resourceName: string): void {
   const fontDict = new PdfDict();
   fontDict.set('/Type', PdfName.of('Font'));
   fontDict.set('/Subtype', PdfName.of('Type1'));
-  fontDict.set('/BaseFont', PdfName.of('Helvetica'));
+  fontDict.set('/BaseFont', PdfName.of(OVERLAY_FONT));
   fontDict.set('/Encoding', PdfName.of('WinAnsiEncoding'));
   const ref = registry.register(fontDict);
   page.registerFont(resourceName, ref);
@@ -144,12 +141,18 @@ function ensureOverlayFont(page: PdfPage, resourceName: string): void {
  * and each returned word is written back as a content-stream fragment:
  *
  * ```text
- * BT 3 Tr /<font> <size> Tf <x> <y> Td (<escaped text>) Tj ET
+ * BT 3 Tr /<font> <size> Tf <x> <y> Td (<text codes>) Tj ET
  * ```
  *
  * where `<size> ≈ word.height` and `<x> <y>` is the word's lower-left corner
  * in page space.  Render mode `3` makes the text invisible (no fill, no
  * stroke) while keeping it part of the document's text content.
+ *
+ * The overlay font is Helvetica in WinAnsiEncoding, so a word is written as
+ * the codes of that encoding.  A word with a character outside it (for
+ * example CJK text) is left out of the overlay and counted; one
+ * `MPL_OCR_UNENCODABLE` warning reports the count, and the returned words
+ * still include it.
  *
  * @param page    The page to OCR and annotate.
  * @param engine  The OCR backend.
@@ -178,16 +181,32 @@ export async function applyOcr(
 
   // 4. Emit one invisible text run per word.
   let fragment = '';
+  let skipped = 0;
   for (const word of words) {
+    let shown: string;
+    try {
+      shown = encodedStringLiteral(encodeTextForFontName(OVERLAY_FONT, word.text));
+    } catch (error) {
+      if (!(error instanceof UnencodableTextError)) throw error;
+      skipped++;
+      continue;
+    }
     // Font size approximates the word's height so the (invisible) glyph metrics
     // roughly track the underlying scanned text.
     const size = word.height > 0 ? word.height : 1;
-    const escaped = escapePdfLiteral(word.text);
     fragment +=
-      `BT 3 Tr /${fontName} ${num(size)} Tf ` +
-      `${num(word.x)} ${num(word.y)} Td (${escaped}) Tj ET\n`;
+      `BT 3 Tr /${fontName} ${num(size)} Tf ${num(word.x)} ${num(word.y)} Td ` + `${shown} Tj ET\n`;
   }
-  page.pushOperators(fragment);
+  if (fragment !== '') page.pushOperators(fragment);
+
+  if (skipped > 0) {
+    warnOnce(
+      'ocr-unencodable',
+      'MPL_OCR_UNENCODABLE',
+      `applyOcr left ${skipped} recognized ${skipped === 1 ? 'word' : 'words'} out of the ` +
+        'overlay: the text has a character that the overlay font (WinAnsiEncoding) cannot encode.',
+    );
+  }
 
   return words;
 }
