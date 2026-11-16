@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { createPdf, PageSizes, PdfDocument } from '../../../src/index.js';
+import { createPdf, InvalidArgumentError, PageSizes, PdfDocument } from '../../../src/index.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -35,8 +35,8 @@ describe('PdfDocument.insertPage', () => {
 
   it('throws on out-of-range index', () => {
     const doc = createDocWithPages(2);
-    expect(() => doc.insertPage(-1)).toThrow(RangeError);
-    expect(() => doc.insertPage(3)).toThrow(RangeError);
+    expect(() => doc.insertPage(-1)).toThrow(InvalidArgumentError);
+    expect(() => doc.insertPage(3)).toThrow(InvalidArgumentError);
   });
 });
 
@@ -53,8 +53,8 @@ describe('PdfDocument.removePage', () => {
 
   it('throws on out-of-range index', () => {
     const doc = createDocWithPages(2);
-    expect(() => doc.removePage(-1)).toThrow(RangeError);
-    expect(() => doc.removePage(2)).toThrow(RangeError);
+    expect(() => doc.removePage(-1)).toThrow(InvalidArgumentError);
+    expect(() => doc.removePage(2)).toThrow(InvalidArgumentError);
   });
 });
 
@@ -73,7 +73,7 @@ describe('PdfDocument.movePage', () => {
 
   it('throws on invalid fromIndex', () => {
     const doc = createDocWithPages(2);
-    expect(() => doc.movePage(-1, 0)).toThrow(RangeError);
-    expect(() => doc.movePage(2, 0)).toThrow(RangeError);
+    expect(() => doc.movePage(-1, 0)).toThrow(InvalidArgumentError);
+    expect(() => doc.movePage(2, 0)).toThrow(InvalidArgumentError);
   });
 });

@@ -384,7 +384,11 @@ describe('StreamingPdfParser', () => {
 
     it('refuses a maxBufferSize that is not a number', () => {
       expect(() => new StreamingPdfParser({ maxBufferSize: Number.NaN })).toThrow(
-        new RangeError('StreamingPdfParser: maxBufferSize must be a number'),
+        expect.objectContaining({
+          name: 'InvalidArgumentError',
+          argument: 'options.maxBufferSize',
+          message: 'StreamingPdfParser: maxBufferSize must be a number',
+        }),
       );
     });
   });

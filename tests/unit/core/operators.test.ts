@@ -17,7 +17,11 @@ import {
   showTextWithSpacing,
   moveText,
 } from '../../../src/core/operators/text.js';
-import { InvalidArgumentError, UnencodableTextError } from '../../../src/errors.js';
+import {
+  InvalidArgumentError,
+  InvalidColorError,
+  UnencodableTextError,
+} from '../../../src/errors.js';
 import {
   rectangle,
   moveTo,
@@ -227,11 +231,9 @@ describe('Color operators', () => {
     expect(color.b).toBe(0);
   });
 
-  it('rgb() clamps values to [0, 1]', () => {
-    const color = rgb(2, -1, 0.5);
-    expect(color.r).toBe(1);
-    expect(color.g).toBe(0);
-    expect(color.b).toBe(0.5);
+  it('rgb() refuses a component outside [0, 1]', () => {
+    expect(() => rgb(2, 0, 0.5)).toThrow(InvalidColorError);
+    expect(() => rgb(0, -1, 0.5)).toThrow('RGB component out of range: g=-1');
   });
 });
 

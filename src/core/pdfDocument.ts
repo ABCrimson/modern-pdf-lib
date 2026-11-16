@@ -18,7 +18,7 @@
  */
 
 import type { PageSize, FontRef, ImageRef, SoftMaskRef, SoftMaskBuilder } from './pdfPage.js';
-import { PdfPage, PageSizes } from './pdfPage.js';
+import { PdfPage, PageSizes, recordFontOwner } from './pdfPage.js';
 import {
   PdfObjectRegistry,
   PdfDict,
@@ -35,7 +35,14 @@ import { buildDocumentStructure } from './pdfCatalog.js';
 import { serializePdf, serializePdfForCopy } from './io/pdfWriter.js';
 import type { PdfSaveOptions } from './io/pdfWriter.js';
 import { PdfStreamWriter } from './io/pdfStream.js';
-import { UnsupportedEncryptionError } from '../errors.js';
+import {
+  InvalidArgumentError,
+  InvalidPageSizeError,
+  MalformedInputError,
+  RemovePageFromEmptyDocumentError,
+  UnsupportedEncryptionError,
+  UnsupportedFeatureError,
+} from '../errors.js';
 import {
   assertSavableDecryptedContent,
   carryDecryptedFromEncryptedFile,
@@ -175,6 +182,15 @@ const savingForCopy = new WeakSet<PdfDocument>();
 function registryHoldsDecryptedObject(registry: PdfObjectRegistry): boolean {
   for (const { object } of registry) if (holdsDecryptedObject(object)) return true;
   return false;
+}
+
+/** The width and height of `size`, each a finite positive number, else InvalidPageSizeError. */
+function pageDimensions(size: PageSize): [number, number] {
+  const [width, height] = 'width' in size ? [size.width, size.height] : size;
+  if (!(Number.isFinite(width) && width > 0 && Number.isFinite(height) && height > 0)) {
+    throw new InvalidPageSizeError(width, height);
+  }
+  return [width, height];
 }
 
 /**
@@ -330,6 +346,8 @@ export class PdfDocument {
    *                    {@link PageSizes} constants, or an existing
    *                    {@link PdfPage} instance.  Defaults to A4.
    * @returns           The {@link PdfPage} that was added.
+   * @throws {InvalidPageSizeError} When a dimension of the size is not a
+   *   finite positive number.
    */
   addPage(sizeOrPage?: PageSize | PdfPage): PdfPage {
     // If the argument is an existing PdfPage, insert it directly.
@@ -356,12 +374,7 @@ export class PdfDocument {
       resolved = this.pluginManager.executeOnBeforeAddPage(resolved);
     }
 
-    const [w, h] = Array.isArray(resolved)
-      ? resolved
-      : [
-          (resolved as { readonly width: number; readonly height: number }).width,
-          (resolved as { readonly width: number; readonly height: number }).height,
-        ];
+    const [w, h] = pageDimensions(resolved);
     const page = new PdfPage(w, h, this.registry);
 
     // Auto-register all currently embedded fonts on the new page
@@ -382,11 +395,14 @@ export class PdfDocument {
    *
    * @param index  Zero-based page index.
    * @returns      The {@link PdfPage} at the given index.
-   * @throws       If the index is out of range.
+   * @throws {InvalidArgumentError} If the index is out of range.
    */
   getPage(index: number): PdfPage {
     if (index < 0 || index >= this.pages.length) {
-      throw new RangeError(`Page index ${index} out of range [0, ${this.pages.length - 1}]`);
+      throw new InvalidArgumentError(
+        `Page index ${index} out of range [0, ${this.pages.length - 1}]`,
+        { argument: 'index' },
+      );
     }
     return this.pages[index]!;
   }
@@ -493,19 +509,19 @@ export class PdfDocument {
    * @param index  Zero-based position (0 to pageCount inclusive).
    * @param size   Optional page size. Defaults to A4.
    * @returns      The newly created PdfPage.
+   * @throws {InvalidPageSizeError} When a dimension of the size is not a
+   *   finite positive number.
+   * @throws {InvalidArgumentError} If the index is out of bounds.
    */
   insertPage(index: number, size?: PageSize): PdfPage {
     // Inline implementation to avoid circular dependency
-    const resolved = size ?? PageSizes.A4;
-    const [w, h] = Array.isArray(resolved)
-      ? resolved
-      : [
-          (resolved as { readonly width: number; readonly height: number }).width,
-          (resolved as { readonly width: number; readonly height: number }).height,
-        ];
+    const [w, h] = pageDimensions(size ?? PageSizes.A4);
 
     if (!Number.isInteger(index) || index < 0 || index > this.pages.length) {
-      throw new RangeError(`insertPage: index ${index} out of range [0, ${this.pages.length}]`);
+      throw new InvalidArgumentError(
+        `insertPage: index ${index} out of range [0, ${this.pages.length}]`,
+        { argument: 'index' },
+      );
     }
 
     const page = new PdfPage(w, h, this.registry);
@@ -518,11 +534,16 @@ export class PdfDocument {
    * Remove a page by its zero-based index.
    *
    * @param index  Zero-based page index to remove.
-   * @throws       RangeError if the index is out of bounds.
+   * @throws {RemovePageFromEmptyDocumentError} If the document has no page.
+   * @throws {InvalidArgumentError} If the index is out of bounds.
    */
   removePage(index: number): void {
+    if (this.pages.length === 0) throw new RemovePageFromEmptyDocumentError();
     if (!Number.isInteger(index) || index < 0 || index >= this.pages.length) {
-      throw new RangeError(`removePage: index ${index} out of range [0, ${this.pages.length - 1}]`);
+      throw new InvalidArgumentError(
+        `removePage: index ${index} out of range [0, ${this.pages.length - 1}]`,
+        { argument: 'index' },
+      );
     }
     this.pages.splice(index, 1);
   }
@@ -532,11 +553,13 @@ export class PdfDocument {
    *
    * @param fromIndex  Current zero-based index of the page.
    * @param toIndex    Target zero-based index (after removal).
+   * @throws {InvalidArgumentError} If either index is out of bounds.
    */
   movePage(fromIndex: number, toIndex: number): void {
     if (!Number.isInteger(fromIndex) || fromIndex < 0 || fromIndex >= this.pages.length) {
-      throw new RangeError(
+      throw new InvalidArgumentError(
         `movePage: fromIndex ${fromIndex} out of range [0, ${this.pages.length - 1}]`,
+        { argument: 'fromIndex' },
       );
     }
 
@@ -545,7 +568,10 @@ export class PdfDocument {
     if (toIndex < 0 || toIndex > this.pages.length) {
       // Restore the page before throwing
       this.pages.splice(fromIndex, 0, page!);
-      throw new RangeError(`movePage: toIndex ${toIndex} out of range [0, ${this.pages.length}]`);
+      throw new InvalidArgumentError(
+        `movePage: toIndex ${toIndex} out of range [0, ${this.pages.length}]`,
+        { argument: 'toIndex' },
+      );
     }
 
     this.pages.splice(toIndex, 0, page!);
@@ -706,6 +732,7 @@ export class PdfDocument {
       },
     };
 
+    recordFontOwner(fontRef, this.registry);
     this.embeddedFonts.set(fontName, fontRef);
 
     // Register on all existing pages
@@ -850,6 +877,7 @@ export class PdfDocument {
       },
     };
 
+    recordFontOwner(fontRef, this.registry);
     this.embeddedFonts.set(`__ttf__${psName}`, fontRef);
     this.ttfFonts.set(resourceName, {
       embeddedFont,
@@ -895,7 +923,10 @@ export class PdfDocument {
     // Extract the raw CFF table from the OTF file
     const cffTable = findTable(fontData, 'CFF ');
     if (!cffTable) {
-      throw new Error('No CFF table found in font data. Is this a CFF-based OpenType font?');
+      throw new MalformedInputError(
+        'No CFF table found in font data. Is this a CFF-based OpenType font?',
+        { format: 'sfnt' },
+      );
     }
     const cffData = fontData.slice(cffTable.offset, cffTable.offset + cffTable.length);
 
@@ -1004,6 +1035,7 @@ export class PdfDocument {
       },
     };
 
+    recordFontOwner(fontRef, this.registry);
     this.embeddedFonts.set(`__cff__${psName}`, fontRef);
     this.ttfFonts.set(resourceName, {
       embeddedFont,
@@ -1424,7 +1456,9 @@ export class PdfDocument {
    *
    * @param imageData  Raw image file bytes (PNG, JPEG, WebP, or TIFF).
    * @returns          An {@link ImageRef} to pass to `page.drawImage()`.
-   * @throws           If the image format cannot be detected.
+   * @throws {MalformedInputError} If the data is too short to detect a format.
+   * @throws {UnsupportedFeatureError} If the format is none of PNG, JPEG,
+   *   WebP and TIFF.
    *
    * @example
    * ```ts
@@ -1436,7 +1470,7 @@ export class PdfDocument {
   async embedImage(imageData: Uint8Array | ArrayBuffer): Promise<ImageRef> {
     let data = imageData instanceof ArrayBuffer ? new Uint8Array(imageData) : imageData;
     if (data.length < 4) {
-      throw new Error('Image data too short to detect format');
+      throw new MalformedInputError('Image data too short to detect format');
     }
 
     // Plugin hook: onBeforeEmbedImage — allow plugins to transform image data
@@ -1456,7 +1490,7 @@ export class PdfDocument {
       case 'tiff':
         return this.embedTiff(data);
       default:
-        throw new Error(
+        throw new UnsupportedFeatureError(
           'Unsupported image format. Expected PNG, JPEG, WebP, or TIFF, ' +
             `got ${data.subarray(0, 4).toHex().match(/.{2}/g)?.join(' ') ?? ''}.`,
         );
@@ -1551,8 +1585,9 @@ export class PdfDocument {
     // Validate indices
     for (const index of indices) {
       if (index < 0 || index >= sourcePages.length) {
-        throw new RangeError(
+        throw new InvalidArgumentError(
           `embedPdf: page index ${index} out of range [0, ${sourcePages.length - 1}]`,
+          { argument: 'pageIndices' },
         );
       }
     }
@@ -1794,7 +1829,10 @@ export class PdfDocument {
    */
   addSignatureField(pageIndex: number, rect: [number, number, number, number], name: string): void {
     if (pageIndex < 0 || pageIndex >= this.pages.length) {
-      throw new RangeError(`Page index ${pageIndex} out of range [0, ${this.pages.length - 1}]`);
+      throw new InvalidArgumentError(
+        `Page index ${pageIndex} out of range [0, ${this.pages.length - 1}]`,
+        { argument: 'pageIndex' },
+      );
     }
     // Store the signature field info for later use in sign()
     // The actual PDF structures are created during the signing process

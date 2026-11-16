@@ -64,6 +64,7 @@ import {
   PdfObjectRegistry,
 } from './pdfObjects.js';
 import { decodeStreamData } from '../codecs/streamDecode.js';
+import { FontNotEmbeddedError, InvalidStateError } from '../errors.js';
 import { assertWithinLimit } from '../internal/limits.js';
 import type { StructureType } from '../accessibility/structureTree.js';
 import {
@@ -521,6 +522,20 @@ export interface FontRef {
    * @throws {UnencodableTextError} When the font cannot encode a character of `text`.
    */
   encodeText(text: string): Uint8Array;
+}
+
+/**
+ * The object registry of the document that made each font reference the
+ * library returned; a {@link FontRef} the caller builds has no entry.
+ */
+const fontOwners = new WeakMap<FontRef, PdfObjectRegistry>();
+
+/**
+ * @internal Record that `font` was made by the document whose objects live
+ * in `registry`, so that `drawText` on a page of another document refuses it.
+ */
+export function recordFontOwner(font: FontRef, registry: PdfObjectRegistry): void {
+  fontOwners.set(font, registry);
 }
 
 /** Opaque handle for an image that has been embedded in the document. */
@@ -1100,6 +1115,8 @@ export class PdfPage {
    * @param options  Position, font, size, colour, rotation.
    * @throws {UnencodableTextError} When the font cannot encode a character
    *   of `text`, such as TAB or another C0 control; nothing is drawn.
+   * @throws {FontNotEmbeddedError} When the font is a {@link FontRef} that
+   *   another document embedded; nothing is drawn.
    */
   drawText(text: string, options: DrawTextOptions = {}): void {
     const x = options.x ?? this._cursorX;
@@ -1121,6 +1138,11 @@ export class PdfPage {
     let hexOperands: boolean;
     if (typeof effectiveFont === 'object') {
       const fontRef = effectiveFont;
+      // A font of another document: its ref numbers an object of that document's registry.
+      const owner = fontOwners.get(fontRef);
+      if (owner !== undefined && owner !== this.registry) {
+        throw new FontNotEmbeddedError(fontRef.name);
+      }
       fontName = fontRef.name;
       const registered = this.fontEncoders.get(fontName);
       hexOperands = registered?.font === fontRef && registered.hexOperands;
@@ -2083,7 +2105,7 @@ export class PdfPage {
   removeAnnotation(annotation: PdfAnnotation): void {
     const idx = this.annotations.indexOf(annotation);
     if (idx === -1) {
-      throw new Error('Annotation is not on this page');
+      throw new InvalidStateError('Annotation is not on this page');
     }
     this.annotations.splice(idx, 1);
   }
@@ -2445,12 +2467,14 @@ export class PdfPage {
    * End the current transparency group and composite it onto the page
    * as a Form XObject.
    *
-   * @throws {Error} If there is no matching {@link beginTransparencyGroup}.
+   * @throws {InvalidStateError} If there is no matching {@link beginTransparencyGroup}.
    */
   endTransparencyGroup(): void {
     const group = this.transparencyGroupStack.pop();
     if (!group) {
-      throw new Error('No transparency group to end — call beginTransparencyGroup() first');
+      throw new InvalidStateError(
+        'No transparency group to end — call beginTransparencyGroup() first',
+      );
     }
 
     // Extract the operators generated within the group

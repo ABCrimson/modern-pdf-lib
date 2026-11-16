@@ -34,7 +34,7 @@ import type { DocumentStructure } from '../pdfCatalog.js';
 import { liveEntries } from './pdfWriter.js';
 import type { PdfSaveOptions } from './pdfWriter.js';
 import type { PdfDocument } from '../pdfDocument.js';
-import { UnsupportedEncryptionError } from '../../errors.js';
+import { MalformedInputError, UnsupportedEncryptionError } from '../../errors.js';
 import { warnOnce } from '../../internal/warnings.js';
 import { latin1Bytes } from '../../internal/latin1.js';
 
@@ -256,7 +256,7 @@ class ByteBuffer {
  *
  * @param data  The original PDF bytes.
  * @returns     The byte offset of the original cross-reference section.
- * @throws      Error if `startxref` is not found.
+ * @throws {MalformedInputError} If `startxref` or the offset after it is not found.
  */
 function findOriginalXrefOffset(data: Uint8Array): number {
   const decoder = new TextDecoder('latin1');
@@ -267,9 +267,10 @@ function findOriginalXrefOffset(data: Uint8Array): number {
   const idx = tail.lastIndexOf('startxref');
 
   if (idx === -1) {
-    throw new Error(
+    throw new MalformedInputError(
       'Incremental save: could not find "startxref" in the original PDF. ' +
         'The file may be corrupted.',
+      { format: 'pdf' },
     );
   }
 
@@ -278,7 +279,10 @@ function findOriginalXrefOffset(data: Uint8Array): number {
   const match = afterStartxref.match(/^(\d+)/);
 
   if (!match) {
-    throw new Error('Incremental save: could not parse xref offset after "startxref".');
+    throw new MalformedInputError(
+      'Incremental save: could not parse xref offset after "startxref".',
+      { format: 'pdf' },
+    );
   }
 
   return parseInt(match[1]!, 10);
@@ -289,6 +293,7 @@ function findOriginalXrefOffset(data: Uint8Array): number {
  *
  * @param data  The original PDF bytes.
  * @returns     The /Size value from the trailer.
+ * @throws {MalformedInputError} If the trailer holds no /Size.
  */
 function findOriginalTrailerSize(data: Uint8Array): number {
   const decoder = new TextDecoder('latin1');
@@ -302,7 +307,9 @@ function findOriginalTrailerSize(data: Uint8Array): number {
   }
 
   // Default — could not find
-  throw new Error('Incremental save: could not find /Size in the original trailer.');
+  throw new MalformedInputError('Incremental save: could not find /Size in the original trailer.', {
+    format: 'pdf',
+  });
 }
 
 // ---------------------------------------------------------------------------

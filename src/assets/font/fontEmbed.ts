@@ -23,7 +23,7 @@
  * No require() — ESM import only.
  */
 
-import { UnencodableTextError } from '../../errors.js';
+import { MalformedInputError, UnencodableTextError } from '../../errors.js';
 import type { FontMetrics } from './fontMetrics.js';
 import { extractMetrics, getGlyphId, getGlyphWidth } from './fontMetrics.js';
 import { subsetFont, buildSubsetCmap, computeSubsetTag } from './fontSubset.js';
@@ -671,6 +671,7 @@ export function generateToUnicodeCmap(
  *
  * @param fontBytes - The raw TTF or OTF file as a Uint8Array.
  * @returns A promise resolving to an EmbeddedFont instance.
+ * @throws {MalformedInputError} When `fontBytes` is shorter than the table directory.
  *
  * @example
  * ```ts
@@ -687,7 +688,10 @@ export function generateToUnicodeCmap(
 export async function embedFont(fontBytes: Uint8Array): Promise<EmbeddedFont> {
   // Validate minimum size
   if (fontBytes.length < 12) {
-    throw new Error('Font data too small — expected at least 12 bytes for the table directory');
+    throw new MalformedInputError(
+      'Font data too small — expected at least 12 bytes for the table directory',
+      { format: 'sfnt' },
+    );
   }
 
   // Use WASM-accelerated parsing when available, pure JS otherwise
@@ -705,10 +709,14 @@ export async function embedFont(fontBytes: Uint8Array): Promise<EmbeddedFont> {
  *
  * @param fontBytes - The raw TTF or OTF file as a Uint8Array.
  * @returns An EmbeddedFont instance.
+ * @throws {MalformedInputError} When `fontBytes` is shorter than the table directory.
  */
 export function embedFontSync(fontBytes: Uint8Array): EmbeddedFont {
   if (fontBytes.length < 12) {
-    throw new Error('Font data too small — expected at least 12 bytes for the table directory');
+    throw new MalformedInputError(
+      'Font data too small — expected at least 12 bytes for the table directory',
+      { format: 'sfnt' },
+    );
   }
 
   const metrics = extractMetrics(fontBytes);

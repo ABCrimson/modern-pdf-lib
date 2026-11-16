@@ -7,6 +7,8 @@
  * Reference: PDF 1.7 spec, §8.6 (Colour Spaces).
  */
 
+import { InvalidArgumentError, InvalidColorError, UnsupportedFeatureError } from '../../errors.js';
+
 // ---------------------------------------------------------------------------
 // Colour value types
 // ---------------------------------------------------------------------------
@@ -69,9 +71,11 @@ export type Color = RgbColor | CmykColor | GrayscaleColor | SpotColor | DeviceNC
  * @param r  Red component `[0, 1]`.
  * @param g  Green component `[0, 1]`.
  * @param b  Blue component `[0, 1]`.
+ * @throws {InvalidColorError} When a component is outside `[0, 1]` or not a number.
  */
 export function rgb(r: number, g: number, b: number): RgbColor {
-  return { type: 'rgb', r: clamp01(r), g: clamp01(g), b: clamp01(b) };
+  assertComponents('RGB', { r, g, b });
+  return { type: 'rgb', r, g, b };
 }
 
 /**
@@ -81,24 +85,31 @@ export function rgb(r: number, g: number, b: number): RgbColor {
  * @param m  Magenta component `[0, 1]`.
  * @param y  Yellow component `[0, 1]`.
  * @param k  Black component `[0, 1]`.
+ * @throws {InvalidColorError} When a component is outside `[0, 1]` or not a number.
  */
 export function cmyk(c: number, m: number, y: number, k: number): CmykColor {
-  return {
-    type: 'cmyk',
-    c: clamp01(c),
-    m: clamp01(m),
-    y: clamp01(y),
-    k: clamp01(k),
-  };
+  assertComponents('CMYK', { c, m, y, k });
+  return { type: 'cmyk', c, m, y, k };
 }
 
 /**
  * Create a grayscale colour.
  *
  * @param gray  Gray level `[0, 1]` where 0 = black, 1 = white.
+ * @throws {InvalidColorError} When `gray` is outside `[0, 1]` or not a number.
  */
 export function grayscale(gray: number): GrayscaleColor {
-  return { type: 'grayscale', gray: clamp01(gray) };
+  assertComponents('Grayscale', { gray });
+  return { type: 'grayscale', gray };
+}
+
+/** Throw for the first component of `components` outside `[0, 1]`; NaN is outside. */
+function assertComponents(space: string, components: Readonly<Record<string, number>>): void {
+  for (const [name, value] of Object.entries(components)) {
+    if (!(value >= 0 && value <= 1)) {
+      throw new InvalidColorError(`${space} component out of range: ${name}=${value}`);
+    }
+  }
 }
 
 /**
@@ -132,8 +143,9 @@ export function deviceNColor(
   tints: number[],
 ): DeviceNColor {
   if (colorants.length !== tints.length) {
-    throw new Error(
+    throw new InvalidArgumentError(
       `deviceNColor: colorants length (${colorants.length}) must match tints length (${tints.length})`,
+      { argument: 'tints' },
     );
   }
   return {
@@ -219,7 +231,9 @@ export function colorToHex(color: Color): string {
     case 'spot':
       return colorToHex(color.alternateColor);
     case 'devicen':
-      throw new Error('colorToHex: DeviceN colours have no single hex representation');
+      throw new UnsupportedFeatureError(
+        'colorToHex: DeviceN colours have no single hex representation',
+      );
   }
 }
 
@@ -237,7 +251,7 @@ export function hexToColor(hex: string): RgbColor {
   }
 
   if (h.length !== 6) {
-    throw new Error(`hexToColor: invalid hex colour '${hex}'`);
+    throw new InvalidArgumentError(`hexToColor: invalid hex colour '${hex}'`, { argument: 'hex' });
   }
 
   const ri = Number.parseInt(h.slice(0, 2), 16);
@@ -245,7 +259,7 @@ export function hexToColor(hex: string): RgbColor {
   const bi = Number.parseInt(h.slice(4, 6), 16);
 
   if (Number.isNaN(ri) || Number.isNaN(gi) || Number.isNaN(bi)) {
-    throw new Error(`hexToColor: invalid hex colour '${hex}'`);
+    throw new InvalidArgumentError(`hexToColor: invalid hex colour '${hex}'`, { argument: 'hex' });
   }
 
   return rgb(ri / 255, gi / 255, bi / 255);
@@ -460,7 +474,8 @@ export function deviceNResourceName(colorants: string[]): string {
  * - 4 components → CMYK
  *
  * @param components  Array of color component values `[0, 1]`.
- * @throws If the array length is not 1, 3, or 4.
+ * @throws {InvalidArgumentError} If the array length is not 1, 3, or 4.
+ * @throws {InvalidColorError} If a component is outside `[0, 1]`.
  */
 export function componentsToColor(components: number[]): Color {
   switch (components.length) {
@@ -471,8 +486,9 @@ export function componentsToColor(components: number[]): Color {
     case 4:
       return cmyk(components[0]!, components[1]!, components[2]!, components[3]!);
     default:
-      throw new Error(
+      throw new InvalidArgumentError(
         `componentsToColor: expected 1, 3, or 4 components, got ${components.length}`,
+        { argument: 'components' },
       );
   }
 }
