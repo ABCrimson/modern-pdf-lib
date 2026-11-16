@@ -208,7 +208,7 @@ function isColorStop(stop: Color | ColorStop): stop is ColorStop {
 function normalizeStops(stops: readonly (Color | ColorStop)[]): NormalizedStop[] {
   if (stops.length < 2) {
     throw new InvalidArgumentError('Gradient requires at least 2 colour stops', {
-      argument: 'stops',
+      argument: 'options.stops',
     });
   }
 

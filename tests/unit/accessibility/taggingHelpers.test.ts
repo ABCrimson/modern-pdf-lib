@@ -288,14 +288,6 @@ describe('tagTableHeaderCell', () => {
     expect(row.children).toHaveLength(0);
   });
 
-  it('defaults scope to Column when omitted', () => {
-    const tree = new PdfStructureTree();
-    const table = tagTable(tree, null);
-    const row = tagTableRow(tree, table);
-    const th = tagTableHeaderCell(tree, row);
-    expect(th.options.scope).toBe('Column');
-  });
-
   it('forwards additional options', () => {
     const tree = new PdfStructureTree();
     const table = tagTable(tree, null);

@@ -237,7 +237,9 @@ describe('linearGradient', () => {
         stops: [],
       }),
     ).toThrow(
-      new InvalidArgumentError('Gradient requires at least 2 colour stops', { argument: 'stops' }),
+      new InvalidArgumentError('Gradient requires at least 2 colour stops', {
+        argument: 'options.stops',
+      }),
     );
   });
 

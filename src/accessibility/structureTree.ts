@@ -110,7 +110,7 @@ export type StructureType =
 // ---------------------------------------------------------------------------
 
 /** The options a structure element refuses: the rows of the option rule table for its constructor. */
-const REFUSED_OPTIONS = UNSUPPORTED_OPTIONS.filter(
+const REFUSED_OPTIONS = /* @__PURE__ */ UNSUPPORTED_OPTIONS.filter(
   (rule) => rule.entry === 'new PdfStructureElement()',
 );
 
