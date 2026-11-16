@@ -30,12 +30,15 @@ interface Row {
   readonly option: 'creator' | 'defaultTitle' | 'defaultAuthor';
   /** The document member that shows the option took effect. */
   readonly read: (doc: PdfDocument) => string | undefined;
-  /** The document member that sets the value the option is the default for, if there is one. */
-  readonly set?: (doc: PdfDocument, value: string) => void;
 }
 
-const ROWS: readonly Row[] = [
-  { option: 'creator', read: (doc) => doc.getCreator() },
+interface DefaultRow extends Row {
+  readonly option: 'defaultTitle' | 'defaultAuthor';
+  /** The document member that sets the value the option is the default for. */
+  readonly set: (doc: PdfDocument, value: string) => void;
+}
+
+const DEFAULT_ROWS: readonly DefaultRow[] = [
   {
     option: 'defaultTitle',
     read: (doc) => doc.getTitle(),
@@ -46,6 +49,11 @@ const ROWS: readonly Row[] = [
     read: (doc) => doc.getAuthor(),
     set: (doc, value) => doc.setAuthor(value),
   },
+];
+
+const ROWS: readonly Row[] = [
+  { option: 'creator', read: (doc) => doc.getCreator() },
+  ...DEFAULT_ROWS,
 ];
 
 function ignoredCalls(): unknown[][] {
@@ -77,19 +85,21 @@ describe.each(ROWS)('metadataPlugin option $option', (row) => {
     await doc.save();
     expect(row.read(doc)).toBe('VALUE');
   });
+});
 
-  it.runIf(row.set !== undefined)('leaves a value the document already has', async () => {
+describe.each(DEFAULT_ROWS)('metadataPlugin option $option as a default', (row) => {
+  it('leaves a value the document already has', async () => {
     const doc = createPdf();
-    row.set?.(doc, 'SET BEFORE');
+    row.set(doc, 'SET BEFORE');
     doc.use(metadataPlugin({ [row.option]: 'VALUE' }));
     await doc.save();
     expect(row.read(doc)).toBe('SET BEFORE');
   });
 
-  it.runIf(row.set !== undefined)('fills an empty value at save and not before', async () => {
+  it('fills an empty value at save and not before', async () => {
     const doc = createPdf();
     doc.use(metadataPlugin({ [row.option]: 'VALUE' }));
-    row.set?.(doc, '');
+    row.set(doc, '');
     expect(row.read(doc)).toBe('');
     await doc.save();
     expect(row.read(doc)).toBe('VALUE');
@@ -119,6 +129,14 @@ describe('metadataPlugin defaults', () => {
     const doc = createPdf();
     doc.use(metadataPlugin({ defaultTitle: '', defaultAuthor: '' }));
     await doc.save();
+    expect(doc.getTitle()).toBeUndefined();
+    expect(doc.getAuthor()).toBeUndefined();
+  });
+
+  it('are not applied by saveAsStream(), which runs no plugin hook', async () => {
+    const doc = createPdf();
+    doc.use(metadataPlugin({ defaultTitle: 'Invoice', defaultAuthor: 'Billing' }));
+    await new Response(doc.saveAsStream()).arrayBuffer();
     expect(doc.getTitle()).toBeUndefined();
     expect(doc.getAuthor()).toBeUndefined();
   });
