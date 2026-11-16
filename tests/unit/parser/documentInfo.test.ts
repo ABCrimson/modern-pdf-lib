@@ -298,3 +298,50 @@ describe('loadPdf then save: each /Info value no setter changed keeps its bytes'
     }
   });
 });
+
+/** Each setter of a loaded document, the key it writes and the value qpdf reads after save. */
+const SETTERS: readonly (readonly [string, (doc: PdfDocument) => void, string])[] = [
+  ['/Author', (doc) => doc.setAuthor('Neu 日'), 'u:Neu 日'],
+  ['/Subject', (doc) => doc.setSubject('Neu 日'), 'u:Neu 日'],
+  ['/Keywords', (doc) => doc.setKeywords(['Neu', '日']), 'u:Neu, 日'],
+  ['/Creator', (doc) => doc.setCreator('Neu 日'), 'u:Neu 日'],
+  ['/Producer', (doc) => doc.setProducer('Neu 日'), 'u:Neu 日'],
+  [
+    '/CreationDate',
+    (doc) => doc.setCreationDate(new Date(Date.UTC(2024, 0, 2, 3, 4, 5))),
+    'u:D:20240102030405Z',
+  ],
+  [
+    '/ModDate',
+    (doc) => doc.setModDate(new Date(Date.UTC(2024, 0, 2, 3, 4, 5))),
+    'u:D:20240102030405Z',
+  ],
+];
+
+describe('loadPdf then a setter: only that key is written anew', () => {
+  beforeEach((ctx) => {
+    requireQpdf(ctx);
+  });
+
+  it.each(SETTERS)('save() after the setter of %s', async (key, set, written) => {
+    const doc = await loadPdf(SOURCE);
+    set(doc);
+    expect(qpdfInfo(await doc.save())).toEqual({ ...qpdfInfo(SOURCE), [key]: written });
+  });
+
+  it('loadPdf with updateMetadata: true writes /ModDate anew and keeps the other keys', async () => {
+    const { '/ModDate': savedModDate, ...saved } = qpdfInfo(
+      await (await loadPdf(SOURCE, { updateMetadata: true })).save(),
+    );
+    const { '/ModDate': sourceModDate, ...source } = qpdfInfo(SOURCE);
+    expect(saved).toEqual(source);
+    expect(savedModDate).not.toBe(sourceModDate);
+    expect(savedModDate).toMatch(/^u:D:\d{14}Z$/);
+  });
+
+  it('a loaded /ModDate that holds no date is kept, and getModDate() stays undefined', async () => {
+    const doc = await loadPdf(infoPdf({ ModDate: '(no date)' }));
+    expect(qpdfInfo(await doc.save())['/ModDate']).toBe('u:no date');
+    expect(doc.getModDate()).toBeUndefined();
+  });
+});
