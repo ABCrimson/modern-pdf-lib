@@ -56,7 +56,7 @@ const RAW_TITLES: readonly (readonly [
   ['T01', 'PDFDocEncoding: empty', ''],
   ['T02', 'PDFDocEncoding: TAB, LF, CR (0x09, 0x0A, 0x0D)', '6109620A630D64'],
   ['T03', 'PDFDocEncoding: diacritics 0x18-0x1A, 0x1C-0x1F', '18191A1C1D1E1F'],
-  ['T04', 'PDFDocEncoding: dotaccent 0x1B', '611B62'],
+  ['T04', 'PDFDocEncoding: 0x1B opens a language escape', '611B62'],
   ['T05', 'PDFDocEncoding: ASCII 0x20-0x7E', Uint8Array.from(run(0x20, 0x7e)).toHex()],
   ['T06', 'PDFDocEncoding: literal form with escapes', '', String.raw`(Plain \(ASCII\) \\ 1)`],
   ['T07', 'PDFDocEncoding: typographic marks 0x80-0x8F', Uint8Array.from(run(0x80, 0x8f)).toHex()],
@@ -115,8 +115,6 @@ const TITLES: readonly Entry[] = RAW_TITLES.map(([key, about, digits, literal]) 
 /** The reasons, shared by several rows. */
 const PDFJS_FALLBACK =
   'ill-formed after a byte order mark: ours decodes the sequence to U+FFFD and keeps the encoding the mark names; pdf.js decodes the whole string, mark included, as PDFDocEncoding';
-const PDFJS_DOTACCENT =
-  'Table D.2 makes 0x1B dotaccent (U+02D9) and no PDFDocEncoding code is U+001B; pdf.js removes 0x1B up to the next 0x1B or the end as a language escape in PDFDocEncoding too';
 const QPDF_ESCAPE = 'qpdf keeps the language escape in its text; ours removes it (7.9.2.2)';
 const QPDF_SURROGATE = 'qpdf drops or misreads a lone surrogate; ours decodes each to U+FFFD';
 
@@ -127,7 +125,6 @@ const DISAGREEMENTS: readonly {
   readonly theirs: string;
   readonly reason: string;
 }[] = [
-  { key: 'T04', reader: 'pdf.js', theirs: 'a', reason: PDFJS_DOTACCENT },
   { key: 'T25', reader: 'qpdf', theirs: '\u001b\u656e\u001bCafé', reason: QPDF_ESCAPE },
   { key: 'T26', reader: 'qpdf', theirs: '\u001b\u656e\u5553\u001bHi', reason: QPDF_ESCAPE },
   { key: 'T27', reader: 'qpdf', theirs: 'A\u001b\u656e', reason: QPDF_ESCAPE },
@@ -252,7 +249,10 @@ describe('decodeTextString against pdf.js and qpdf: 40 hand-built /Info strings'
   });
 });
 
-/** Texts for the encoder leg, with the encoding asked for. */
+/**
+ * Texts for the encoder leg, with the encoding asked for. E01 is every character "auto" writes in
+ * PDFDocEncoding: Table D.2 but dotaccent, which "auto" writes in UTF-16BE (E12).
+ */
 const ANNEX_D = PDF_DOC_ENCODING.filter((u): u is number => u !== undefined && u !== 0x02d9)
   .map((u) => String.fromCodePoint(u))
   .join('');
@@ -272,7 +272,7 @@ const WRITTEN: readonly (readonly [
   ['E09', 'Café', 'utf-16be'],
   ['E10', 'Plain ASCII (1)', 'auto'],
   ['E11', '', 'auto'],
-  ['E12', 'a\u02d9b', 'pdfdoc'],
+  ['E12', 'a\u02d9b', 'auto'],
 ];
 const ENCODED = WRITTEN.map(([key, text, encoding]): Entry => ({
   key,
@@ -282,13 +282,15 @@ const ENCODED = WRITTEN.map(([key, text, encoding]): Entry => ({
 const ENCODED_PDF = handBuilt(ENCODED);
 
 describe('encodeTextString output read back by pdf.js and qpdf', () => {
-  test('pdf.js reads the text given, but for dotaccent written as PDFDocEncoding 0x1B', async () => {
+  test('E01 is written in PDFDocEncoding, E12 in UTF-16BE', () => {
+    expect(textStringEncoding(ENCODED[0]?.bytes ?? new Uint8Array())).toBe('pdfdoc');
+    expect(textStringEncoding(ENCODED[11]?.bytes ?? new Uint8Array())).toBe('utf-16be');
+  });
+
+  test('pdf.js reads the text given', async () => {
     const info = await pdfjsInfo(ENCODED_PDF);
     const got = WRITTEN.map(([key]) => [key, info.get(key)]);
-    // E12: the T04 disagreement (PDFJS_DOTACCENT). "auto" writes 0x1B for U+02D9 as well, since
-    // dotaccent is in Table D.2.
-    const want = WRITTEN.map(([key, text]) => [key, key === 'E12' ? 'a' : text]);
-    expect(got).toEqual(want);
+    expect(got).toEqual(WRITTEN.map(([key, text]) => [key, text]));
   });
 
   test('qpdf "u:" text is the text given; "b:" is the bytes written', (ctx) => {

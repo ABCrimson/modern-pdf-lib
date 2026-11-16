@@ -10,13 +10,15 @@
  * - {@link decodeTextString} decodes the bytes in that encoding and never switches encoding after
  *   a byte order mark: an odd trailing byte of a UTF-16 string is dropped, an ill-formed UTF-16
  *   or UTF-8 sequence decodes to U+FFFD, and language escapes (U+001B, language code, U+001B;
- *   an unclosed one runs to the end) are removed. PDFDocEncoding has no code for U+001B (0x1B is
- *   dotaccent), so its text holds none to remove. A code that Table D.2 leaves undefined decodes
- *   to U+0000 plus the code, as pdf.js reads it.
+ *   an unclosed one runs to the end) are removed in every branch; in PDFDocEncoding the escape is
+ *   byte 0x1B (which Table D.2 makes dotaccent), as pdf.js reads it, so `"auto"` writes dotaccent
+ *   in UTF-16BE and `"pdfdoc"` refuses it. A code that Table D.2 leaves undefined decodes to
+ *   U+0000 plus the code, as pdf.js reads it.
  * - {@link encodeTextString} writes PDFDocEncoding, UTF-16BE or UTF-8, each of the last two with
- *   its byte order mark. `"auto"` writes PDFDocEncoding when every character is in Table D.2 and
- *   the bytes do not begin with FE FF, FF FE or EF BB BF (they would read back as a byte order
- *   mark), else UTF-16BE; it never writes UTF-8, which needs PDF 2.0.
+ *   its byte order mark. `"auto"` writes PDFDocEncoding when every character is in Table D.2 but
+ *   dotaccent and the bytes do not begin with FE FF, FF FE or EF BB BF (they would read back as a
+ *   byte order mark), else UTF-16BE; it never writes UTF-8, which needs PDF 2.0. No encoding
+ *   writes U+001B, which would read back as a language escape.
  * - {@link PDF_DOC_ENCODING} is ISO 32000-2 Annex D Table D.2 for PDFDocEncoding.
  */
 
@@ -96,14 +98,22 @@ export const PDF_DOC_ENCODING: readonly (number | undefined)[] = Object.freeze(
   ),
 );
 
-/** Code to the text it decodes to: its Table D.2 character, else U+0000 plus the code. */
+/** 0x1B: Table D.2 makes it dotaccent, but in a text string it opens a language escape, as pdf.js reads it. */
+const ESCAPE = 0x1b;
+
+/**
+ * Code to the text it decodes to: U+001B for 0x1B (removed with its language escape), else its
+ * Table D.2 character, else U+0000 plus the code.
+ */
 const PDF_DOC_DECODE: readonly string[] = PDF_DOC_ENCODING.map((unicode, code) =>
-  String.fromCodePoint(unicode ?? code),
+  String.fromCodePoint(code === ESCAPE ? ESCAPE : (unicode ?? code)),
 );
 
-/** Unicode code point to its PDFDocEncoding code. */
+/** Unicode code point to its PDFDocEncoding code; dotaccent has none, since 0x1B is the escape. */
 const PDF_DOC_ENCODE: ReadonlyMap<number, number> = new Map(
-  PDF_DOC_ENCODING.flatMap((unicode, code) => (unicode === undefined ? [] : [[unicode, code]])),
+  PDF_DOC_ENCODING.flatMap((unicode, code) =>
+    unicode === undefined || code === ESCAPE ? [] : [[unicode, code]],
+  ),
 );
 
 const WRITE_ENCODINGS: ReadonlySet<string> = new Set<TextStringWriteEncoding>([
@@ -139,7 +149,7 @@ export function decodeTextString(bytes: Uint8Array): string {
     case 'pdfdoc': {
       let text = '';
       for (const code of bytes) text += PDF_DOC_DECODE[code];
-      return text;
+      return removeLanguageEscapes(text);
     }
   }
 }
@@ -177,10 +187,10 @@ function removeLanguageEscapes(text: string): string {
 
 /**
  * The bytes of a text string holding `text` (see the module header for `"auto"`). A lone
- * surrogate, or with `"pdfdoc"` a character Table D.2 lacks, throws UnencodableTextError
- * (encoding `"PDF text string"`; a lone surrogate is reported first); `"utf-16le"` (read only) or
- * an unknown encoding throws InvalidArgumentError (argument `"encoding"`). With `"pdfdoc"` the
- * bytes are written as asked even when they begin like a byte order mark.
+ * surrogate or U+001B, or with `"pdfdoc"` a character Table D.2 lacks or dotaccent, throws
+ * UnencodableTextError (encoding `"PDF text string"`; a lone surrogate or U+001B is reported
+ * first); `"utf-16le"` (read only), an unknown encoding, or `"pdfdoc"` bytes that would begin with
+ * a byte order mark throw InvalidArgumentError (argument `"encoding"`).
  */
 export function encodeTextString(
   text: string,
@@ -195,23 +205,28 @@ export function encodeTextString(
       { argument: 'encoding' },
     );
   }
-  assertWellFormed(text);
+  assertEncodable(text);
   if (encoding === 'pdfdoc' || encoding === 'auto') {
     const pdfDoc = encodePdfDoc(text, encoding === 'pdfdoc');
-    if (pdfDoc !== undefined && (encoding === 'pdfdoc' || textStringEncoding(pdfDoc) === 'pdfdoc'))
-      return pdfDoc;
+    if (pdfDoc !== undefined && textStringEncoding(pdfDoc) === 'pdfdoc') return pdfDoc;
+    if (pdfDoc !== undefined && encoding === 'pdfdoc') {
+      throw new InvalidArgumentError(
+        'The PDFDocEncoding bytes of this text begin with FE FF, FF FE or EF BB BF and would read back as a byte order mark; write "auto" or "utf-16be"',
+        { argument: 'encoding' },
+      );
+    }
   }
   return encoding === 'utf-8' ? encodeUtf8(text) : encodeUtf16be(text);
 }
 
-/** Throws UnencodableTextError at the first lone surrogate of `text`. */
-function assertWellFormed(text: string): void {
-  if (text.isWellFormed()) return;
+/** Throws UnencodableTextError at the first lone surrogate or U+001B of `text`. */
+function assertEncodable(text: string): void {
+  if (text.isWellFormed() && !text.includes('\u001b')) return;
   for (let i = 0; i < text.length; i++) {
     const unit = text.charCodeAt(i);
-    if (unit < 0xd800 || unit > 0xdfff) continue;
+    if (unit !== ESCAPE && (unit < 0xd800 || unit > 0xdfff)) continue;
     const next = text.charCodeAt(i + 1);
-    if (unit <= 0xdbff && next >= 0xdc00 && next <= 0xdfff) i++;
+    if (unit >= 0xd800 && unit <= 0xdbff && next >= 0xdc00 && next <= 0xdfff) i++;
     else {
       throw new UnencodableTextError({
         character: text.charAt(i),
@@ -224,8 +239,8 @@ function assertWellFormed(text: string): void {
 }
 
 /**
- * The PDFDocEncoding bytes of `text`; at a character Table D.2 lacks, UnencodableTextError when
- * `strict`, else `undefined`.
+ * The PDFDocEncoding bytes of `text`; at a character Table D.2 lacks, or dotaccent,
+ * UnencodableTextError when `strict`, else `undefined`.
  */
 function encodePdfDoc(text: string, strict: boolean): Uint8Array<ArrayBuffer> | undefined {
   // Every Table D.2 character is one UTF-16 code unit, so the bytes are as many as the units.

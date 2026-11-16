@@ -88,6 +88,15 @@ const ANNEX_D_TEXT = [...DEFINED]
   .map(([, unicode]) => String.fromCodePoint(unicode))
   .join('');
 
+/** 0x1B: Table D.2 makes it dotaccent, but in a text string it opens a language escape. */
+const ESCAPE = 0x1b;
+
+/** The defined codes a text string reads and writes as their Table D.2 character: all but 0x1B. */
+const PDF_DOC_TEXT_CODES = new Map([...DEFINED].filter(([code]) => code !== ESCAPE));
+
+/** Every character "pdfdoc" writes: Table D.2 but dotaccent, in code order. */
+const PDF_DOC_TEXT = ANNEX_D_TEXT.replace('˙', '');
+
 function range(first: number, last: number): number[] {
   return Array.from({ length: last - first + 1 }, (_, i) => first + i);
 }
@@ -154,8 +163,8 @@ describe('textStringEncoding', () => {
 });
 
 describe('decodeTextString: PDFDocEncoding', () => {
-  test('decodes every defined code to its Table D.2 character', () => {
-    for (const [code, unicode] of DEFINED) {
+  test('decodes every defined code but 0x1B to its Table D.2 character', () => {
+    for (const [code, unicode] of PDF_DOC_TEXT_CODES) {
       expect(decodeTextString(bytes(code)), `code 0x${code.toString(16)}`).toBe(
         String.fromCodePoint(unicode),
       );
@@ -168,8 +177,10 @@ describe('decodeTextString: PDFDocEncoding', () => {
     }
   });
 
-  test('reads 0x1B as dotaccent, not as a language escape (no PDFDocEncoding code is U+001B)', () => {
-    expect(decodeTextString(bytes(0x61, 0x1b, 0x65, 0x6e, 0x1b, 0x62))).toBe('a˙en˙b');
+  test('reads 0x1B as a language escape, as pdf.js does', () => {
+    expect(decodeTextString(bytes(0x61, 0x1b, 0x65, 0x6e, 0x1b, 0x62))).toBe('ab');
+    expect(decodeTextString(bytes(0x61, 0x1b, 0x62))).toBe('a');
+    expect(decodeTextString(bytes(0x1b, 0x61, 0x1b, 0x62))).toBe('b');
   });
 
   test('decodes the empty string and bytes that only begin like a byte order mark', () => {
@@ -244,23 +255,41 @@ describe('decodeTextString: UTF-16BE, UTF-16LE and UTF-8', () => {
 });
 
 describe('encodeTextString', () => {
-  test('"pdfdoc" writes the Table D.2 code of every defined character', () => {
-    for (const [code, unicode] of DEFINED) {
+  test('"pdfdoc" writes the Table D.2 code of every defined character but dotaccent', () => {
+    for (const [code, unicode] of PDF_DOC_TEXT_CODES) {
       expect(hex(encodeTextString(String.fromCodePoint(unicode), 'pdfdoc'))).toBe(hex(bytes(code)));
     }
   });
 
-  test('every character of Annex D round-trips through each write encoding', () => {
+  test('every character of Annex D round-trips through each write encoding ("pdfdoc": but dotaccent)', () => {
     const encodings: readonly TextStringWriteEncoding[] = ['auto', 'pdfdoc', 'utf-16be', 'utf-8'];
     for (const encoding of encodings) {
-      for (const unicode of DEFINED.values()) {
+      const table = encoding === 'pdfdoc' ? PDF_DOC_TEXT_CODES : DEFINED;
+      for (const unicode of table.values()) {
         const text = `x${String.fromCodePoint(unicode)}y`;
         expect(decodeTextString(encodeTextString(text, encoding)), `${encoding} ${text}`).toBe(
           text,
         );
       }
-      expect(decodeTextString(encodeTextString(ANNEX_D_TEXT, encoding))).toBe(ANNEX_D_TEXT);
+      const all = encoding === 'pdfdoc' ? PDF_DOC_TEXT : ANNEX_D_TEXT;
+      expect(decodeTextString(encodeTextString(all, encoding))).toBe(all);
     }
+  });
+
+  test('"auto" writes dotaccent in UTF-16BE, since PDFDocEncoding 0x1B reads as a language escape', () => {
+    expect(hex(encodeTextString('˙'))).toBe('FEFF02D9');
+    expect(hex(encodeTextString('a˙b'))).toBe('FEFF006102D90062');
+  });
+
+  test('"pdfdoc" throws UnencodableTextError at the index of dotaccent', () => {
+    const error = thrownBy(() => encodeTextString('Ab˙c', 'pdfdoc'));
+    expect(error).toBeInstanceOf(UnencodableTextError);
+    expect(error).toMatchObject({
+      character: '˙',
+      codePoint: 0x02d9,
+      index: 2,
+      encoding: 'PDF text string',
+    });
   });
 
   test('"auto" (the default) writes PDFDocEncoding when every character is in Table D.2', () => {
@@ -273,7 +302,7 @@ describe('encodeTextString', () => {
     );
     expect(hex(encodeTextString('a\tb\nc\rd'))).toBe('6109620A630D64');
     expect(hex(encodeTextString(''))).toBe('');
-    expect(hex(encodeTextString(ANNEX_D_TEXT))).toBe(hex(encodeTextString(ANNEX_D_TEXT, 'pdfdoc')));
+    expect(hex(encodeTextString(PDF_DOC_TEXT))).toBe(hex(encodeTextString(PDF_DOC_TEXT, 'pdfdoc')));
   });
 
   test('"auto" writes UTF-16BE when the PDFDocEncoding bytes would begin with a byte order mark', () => {
@@ -333,6 +362,33 @@ describe('encodeTextString', () => {
         });
       }
     }
+  });
+
+  test('U+001B throws UnencodableTextError ("PDF text string") in every encoding, since it reads back as a language escape', () => {
+    const encodings: readonly TextStringWriteEncoding[] = ['auto', 'pdfdoc', 'utf-16be', 'utf-8'];
+    for (const encoding of encodings) {
+      for (const [text, character, index] of [
+        ['a\u001bb', '\u001b', 1],
+        ['\u001b', '\u001b', 0],
+        ['日\u001b\ud800', '\u001b', 1],
+        ['\ud800\u001b', '\ud800', 0],
+      ] as const) {
+        const error = thrownBy(() => encodeTextString(text, encoding));
+        expect(error, `${encoding} ${index}`).toBeInstanceOf(UnencodableTextError);
+        expect(error).toMatchObject({ character, index, encoding: 'PDF text string' });
+      }
+    }
+  });
+
+  test('"pdfdoc" throws InvalidArgumentError when its bytes would begin with a byte order mark', () => {
+    for (const text of ['þÿ', 'þÿab', 'ÿþ', 'ï»¿', 'ï»¿x']) {
+      const error = thrownBy(() => encodeTextString(text, 'pdfdoc'));
+      expect(error, text).toBeInstanceOf(InvalidArgumentError);
+      expect(error).toMatchObject({ code: 'invalid-argument', argument: 'encoding' });
+      expect((error as Error).message).toContain('byte order mark');
+    }
+    expect(hex(encodeTextString('aþÿ', 'pdfdoc'))).toBe('61FEFF');
+    expect(hex(encodeTextString('ï»', 'pdfdoc'))).toBe('EFBB');
   });
 
   test('"pdfdoc" throws UnencodableTextError at the first character outside Table D.2', () => {
