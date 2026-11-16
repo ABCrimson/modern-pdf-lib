@@ -208,8 +208,9 @@ function extractFieldInfo(
   const fieldName = readStringEntry(region, 'T') ?? 'Signature';
 
   const result: { fieldName: string; reason?: string } = { fieldName };
-  const reasonMatch = region.match(/\/Reason\s*\(([^)]*)\)/);
-  if (reasonMatch && reasonMatch[1] !== undefined) result.reason = reasonMatch[1];
+  // Literal or hex form: signPdf() writes /Reason as a hex text string.
+  const reason = readStringEntry(region, 'Reason');
+  if (reason !== undefined) result.reason = reason;
 
   return result;
 }

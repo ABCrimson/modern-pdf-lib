@@ -7,7 +7,8 @@
  * the removed third parameter of `appendIncrementalUpdate` was removed in 0.41.0. Each row checks
  * the error and its message, the absent and undefined option, the values that ask for nothing,
  * and that the message names no caller value. `signPdf` `reason`, `location` and `contactInfo`
- * still warn once per option with the code `MPL_IGNORED_OPTION`.
+ * are carried out: they are written into the signature dictionary as text strings. No entry
+ * warns any more.
  */
 
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -27,7 +28,6 @@ import {
   saveIncrementalWithSignaturePreservation,
 } from '../../../../src/signature/pades/incrementalSave.js';
 import { resetWarningsForTesting } from '../../../../src/internal/warnings.js';
-import { CODE, TYPE, ignoredOptionMessage } from '../../../helpers/ignoredOptions.js';
 import { generateTestCert } from '../../../helpers/signature-trust-fixtures.js';
 
 const latin1 = new TextDecoder('latin1');
@@ -245,63 +245,52 @@ describe('calls refused as a whole', () => {
   });
 });
 
-describe('signPdf reason, location and contactInfo', () => {
-  const ignoredCalls = (): unknown[][] =>
-    emit.mock.calls.filter(([, options]) => (options as { code?: string }).code === CODE);
+describe('signPdf reason, location and contactInfo are written', () => {
+  // Text strings in hex form: "Approved" is ASCII, "München" PDFDocEncoding (ü is 0xFC), and
+  // "日本" UTF-16BE after FE FF. tests/oracle/signature-text-entries.test.ts reads them with qpdf.
+  const APPROVED = '<417070726f766564>';
+  const MUENCHEN = '<4dfc6e6368656e>';
+  const NIHON = '<feff65e5672c>';
 
-  for (const option of ['reason', 'location', 'contactInfo']) {
-    it(`warns once for ${option} and not for an absent or undefined ${option}`, async () => {
-      await sign({});
-      await sign({ [option]: undefined });
-      expect(ignoredCalls()).toHaveLength(0);
-      await sign({ [option]: `SECRET-${option}` });
-      await sign({ [option]: `SECRET-${option}` });
-      expect(ignoredCalls()).toHaveLength(1);
-      expect(emit).toHaveBeenCalledWith(ignoredOptionMessage('signPdf()', option), {
-        type: TYPE,
-        code: CODE,
-      });
-    });
-  }
-
-  it('writes none of them', async () => {
+  it('writes each passed option into the signature dictionary and warns nothing', async () => {
     const text = latin1.decode(
-      await signPdf(pdf, 'Signature1', {
-        ...signer,
-        reason: 'SECRET-REASON',
-        location: 'SECRET-LOCATION',
-        contactInfo: 'SECRET-CONTACT',
-      }),
+      (await sign({ reason: 'Approved', location: 'München', contactInfo: '日本' })) as Uint8Array,
     );
-    for (const value of ['SECRET-REASON', 'SECRET-LOCATION', 'SECRET-CONTACT']) {
-      expect(text).not.toContain(value);
-    }
-    expect(ignoredCalls()).toHaveLength(3);
+    expect(text).toContain(
+      `/Reason ${APPROVED} /Location ${MUENCHEN} /ContactInfo ${NIHON} /ByteRange [`,
+    );
+    expect(emit).not.toHaveBeenCalled();
   });
 
-  it('does not warn for reason and location that a visible appearance shows', async () => {
-    const signed = await signPdf(pdf, 'Signature1', {
-      ...signer,
-      reason: 'Shown reason',
-      location: 'Shown location',
-      appearance: { rect: [50, 50, 250, 100] },
-    });
+  it('writes no entry for an absent or undefined option', async () => {
+    for (const extra of [{}, { reason: undefined, location: undefined, contactInfo: undefined }]) {
+      const text = latin1.decode((await sign(extra)) as Uint8Array);
+      for (const key of ['/Reason', '/Location', '/ContactInfo']) {
+        expect(text).not.toContain(key);
+      }
+    }
+  });
+
+  it('writes reason and location that a visible appearance also shows', async () => {
+    const text = latin1.decode(
+      (await sign({
+        reason: 'Approved',
+        location: 'München',
+        appearance: { rect: [50, 50, 250, 100] },
+      })) as Uint8Array,
+    );
     // ASCII text, so its WinAnsiEncoding codes are its ASCII bytes, shown as a hex string.
-    const shown = new TextEncoder().encode('Reason: Shown reason').toHex();
-    expect(latin1.decode(signed)).toContain(`<${shown}> Tj`);
-    expect(ignoredCalls()).toHaveLength(0);
+    expect(text).toContain(`<${new TextEncoder().encode('Reason: Approved').toHex()}> Tj`);
+    expect(text).toContain(`/Reason ${APPROVED} /Location ${MUENCHEN} /ByteRange [`);
+    expect(emit).not.toHaveBeenCalled();
   });
 
   it.each([null, undefined])(
-    'signs with appearance %s and warns for reason',
+    'signs with appearance %s and writes the reason',
     async (appearance) => {
-      const signed = await signPdf(pdf, 'Signature1', {
-        ...signer,
-        reason: 'r',
-        appearance,
-      } as unknown as SignOptions);
-      expect(signed.length).toBeGreaterThan(pdf.length);
-      expect(ignoredCalls()).toHaveLength(1);
+      const text = latin1.decode((await sign({ reason: 'Approved', appearance })) as Uint8Array);
+      expect(text).toContain(`/Reason ${APPROVED} /ByteRange [`);
+      expect(emit).not.toHaveBeenCalled();
     },
   );
 });

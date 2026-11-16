@@ -467,14 +467,15 @@ function extractFieldInfo(
     fieldName,
   };
 
-  const reasonMatch = region.match(/\/Reason\s*\(([^)]*)\)/);
-  if (reasonMatch && reasonMatch[1] !== undefined) result.reason = reasonMatch[1];
+  // Literal or hex form: signPdf() writes the three entries as hex text strings.
+  const reason = readStringEntry(region, 'Reason');
+  if (reason !== undefined) result.reason = reason;
 
-  const locationMatch = region.match(/\/Location\s*\(([^)]*)\)/);
-  if (locationMatch && locationMatch[1] !== undefined) result.location = locationMatch[1];
+  const location = readStringEntry(region, 'Location');
+  if (location !== undefined) result.location = location;
 
-  const contactMatch = region.match(/\/ContactInfo\s*\(([^)]*)\)/);
-  if (contactMatch && contactMatch[1] !== undefined) result.contactInfo = contactMatch[1];
+  const contactInfo = readStringEntry(region, 'ContactInfo');
+  if (contactInfo !== undefined) result.contactInfo = contactInfo;
 
   return result;
 }

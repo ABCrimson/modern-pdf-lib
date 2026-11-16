@@ -102,6 +102,8 @@ export function readStringEntry(region: string, key: string): string | undefined
  * - /Type /Sig
  * - /Filter /Adobe.PPKLite
  * - /SubFilter /adbe.pkcs7.detached
+ * - /Reason, /Location and /ContactInfo, each a text string in hex form,
+ *   when `entries` holds it
  * - /ByteRange [placeholder]
  * - /Contents <zeroes>
  *
@@ -110,7 +112,7 @@ export function readStringEntry(region: string, key: string): string | undefined
  */
 function buildSignatureDictString(
   placeholderSize: number,
-  fieldName: string,
+  entries: SignatureTextEntries,
   signingDate?: Date,
   mdpReference?: string,
 ): string {
@@ -122,6 +124,15 @@ function buildSignatureDictString(
   dict += '<< /Type /Sig';
   dict += ' /Filter /Adobe.PPKLite';
   dict += ' /SubFilter /adbe.pkcs7.detached';
+  // Before /Contents: the readers of this module search a window that ends shortly after the
+  // start of /Contents, and the placeholder alone is longer than that window.
+  for (const [key, text] of [
+    ['Reason', entries.reason],
+    ['Location', entries.location],
+    ['ContactInfo', entries.contactInfo],
+  ] as const) {
+    if (text !== undefined) dict += ` /${key} ${pdfStringSyntax(PdfString.fromText(text))}`;
+  }
   dict += ` /ByteRange [${byteRangePlaceholder}]`;
   dict += ` /Contents <${contentsHex}>`;
 
@@ -324,6 +335,50 @@ export function prepareForSigning(
   mdpPermission?: number,
   fieldLock?: { action: 'All' | 'Include' | 'Exclude'; fields?: string[] | undefined },
 ): { preparedPdf: Uint8Array; byteRange: ByteRangeResult } {
+  return prepareSignatureUpdate(
+    pdfBytes,
+    signatureFieldName,
+    placeholderSize,
+    appearance,
+    mdpPermission,
+    fieldLock,
+    {},
+  );
+}
+
+/**
+ * The text entries of a signature dictionary (ISO 32000-2 12.8.1, the signature dictionary), each
+ * written as a PDF text string when it is present.
+ *
+ * @internal
+ */
+export interface SignatureTextEntries {
+  /** The reason for signing: `/Reason`. */
+  readonly reason?: string | undefined;
+  /** The place of signing: `/Location`. */
+  readonly location?: string | undefined;
+  /** How to reach the signer: `/ContactInfo`. */
+  readonly contactInfo?: string | undefined;
+}
+
+/**
+ * {@link prepareForSigning} that also writes the text entries of the signature dictionary, in
+ * hex form so the appended update stays ASCII. The entries sit before `/ByteRange`, inside the
+ * signed byte range.
+ *
+ * @throws {UnencodableTextError} When an entry holds a lone surrogate or U+001B, besides the
+ *         cases of {@link prepareForSigning}.
+ * @internal
+ */
+export function prepareSignatureUpdate(
+  pdfBytes: Uint8Array,
+  signatureFieldName: string,
+  placeholderSize: number,
+  appearance: PrepareAppearanceOptions | undefined,
+  mdpPermission: number | undefined,
+  fieldLock: { action: 'All' | 'Include' | 'Exclude'; fields?: string[] | undefined } | undefined,
+  entries: SignatureTextEntries,
+): { preparedPdf: Uint8Array; byteRange: ByteRangeResult } {
   assertUnencryptedInput(pdfBytes, 'prepareForSigning()');
   // Step 1: Find the original trailer/xref info
   const pdfStr = decoder.decode(pdfBytes);
@@ -383,12 +438,7 @@ export function prepareForSigning(
       ` /TransformParams << /Type /TransformParams /P ${mdpPermission} /V /1.2 >> >>]`;
   }
 
-  const sigDictStr = buildSignatureDictString(
-    placeholderSize,
-    signatureFieldName,
-    undefined,
-    mdpReference,
-  );
+  const sigDictStr = buildSignatureDictString(placeholderSize, entries, undefined, mdpReference);
 
   // Build rect string
   let rectStr = '0 0 0 0';

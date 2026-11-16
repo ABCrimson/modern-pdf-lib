@@ -12,7 +12,7 @@
  */
 
 import {
-  prepareForSigning,
+  prepareSignatureUpdate,
   computeSignatureHash,
   embedSignature,
   findSignatures,
@@ -21,7 +21,6 @@ import {
 import type { PrepareAppearanceOptions } from './byteRange.js';
 import { assertUnencryptedInput } from '../../core/io/incrementalWriter.js';
 import { UNSUPPORTED_OPTIONS, rejectOption } from '../../internal/options.js';
-import { warnOnce } from '../../internal/warnings.js';
 import { buildPkcs7Signature, extractIssuerAndSerial, parseDerTlv } from '../cms/pkcs7.js';
 import type { SignatureOptions } from '../cms/pkcs7.js';
 
@@ -70,28 +69,20 @@ export interface SignOptions {
   /** Hash algorithm. Default: 'SHA-256'. */
   hashAlgorithm?: 'SHA-256' | 'SHA-384' | 'SHA-512' | undefined;
   /**
-   * Reason for signing. The signature dictionary does not carry it. It only
-   * appears in the text of a visible appearance that has no `text` of its own.
-   *
-   * Has no effect in this version; passing it emits a one-time
-   * `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`) unless it is shown in
-   * that appearance text.
+   * Reason for signing, written to the signature dictionary as `/Reason`, a
+   * PDF text string (PDFDocEncoding, or UTF-16BE when a character is outside
+   * it). A visible appearance that has no `text` of its own also shows it.
    */
   reason?: string | undefined;
   /**
-   * Location of signing. The signature dictionary does not carry it. It only
-   * appears in the text of a visible appearance that has no `text` of its own.
-   *
-   * Has no effect in this version; passing it emits a one-time
-   * `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`) unless it is shown in
-   * that appearance text.
+   * Location of signing, written to the signature dictionary as `/Location`,
+   * a PDF text string. A visible appearance that has no `text` of its own
+   * also shows it.
    */
   location?: string | undefined;
   /**
-   * Contact information.
-   *
-   * Has no effect in this version; passing it emits a one-time
-   * `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`).
+   * Contact information of the signer, written to the signature dictionary
+   * as `/ContactInfo`, a PDF text string.
    */
   contactInfo?: string | undefined;
   /**
@@ -143,23 +134,6 @@ const REFUSED_OPTIONS = /* @__PURE__ */ UNSUPPORTED_OPTIONS.filter(
   (rule) => rule.entry === 'signPdf()',
 );
 
-/** Warn once per option that `signPdf` accepts and does not act on. */
-function warnIgnoredSignOptions(options: SignOptions): void {
-  const warn = (name: string): void => {
-    warnOnce(
-      `ignored-option:signPdf ${name}`,
-      'MPL_IGNORED_OPTION',
-      `\`signPdf()\`: the option \`${name}\` has no effect in this version.`,
-    );
-  };
-  // `reason` and `location` are read when a visible appearance builds its own text.
-  // `signPdf` tests the appearance by truthiness, so a `null` appearance is absent here too.
-  const shownInAppearance = options.appearance ? !options.appearance.text : false;
-  if (options.reason !== undefined && !shownInAppearance) warn('reason');
-  if (options.location !== undefined && !shownInAppearance) warn('location');
-  if (options.contactInfo !== undefined) warn('contactInfo');
-}
-
 /**
  * Extract the field name from the signature dictionary context.
  */
@@ -187,14 +161,15 @@ function extractSigDictStrings(
   const result: { reason?: string; location?: string; contactInfo?: string; signingDate?: Date } =
     {};
 
-  const reasonMatch = region.match(/\/Reason\s*\(([^)]*)\)/);
-  if (reasonMatch && reasonMatch[1] !== undefined) result.reason = reasonMatch[1];
+  // Literal or hex form: signPdf() writes the three entries as hex text strings.
+  const reason = readStringEntry(region, 'Reason');
+  if (reason !== undefined) result.reason = reason;
 
-  const locationMatch = region.match(/\/Location\s*\(([^)]*)\)/);
-  if (locationMatch && locationMatch[1] !== undefined) result.location = locationMatch[1];
+  const location = readStringEntry(region, 'Location');
+  if (location !== undefined) result.location = location;
 
-  const contactMatch = region.match(/\/ContactInfo\s*\(([^)]*)\)/);
-  if (contactMatch && contactMatch[1] !== undefined) result.contactInfo = contactMatch[1];
+  const contactInfo = readStringEntry(region, 'ContactInfo');
+  if (contactInfo !== undefined) result.contactInfo = contactInfo;
 
   // Parse /M (signing date)
   const dateMatch = region.match(/\/M\s*\(D:(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})/);
@@ -322,7 +297,8 @@ function parsePkcs7ForCert(pkcs7Bytes: Uint8Array): {
  * @throws {UnsupportedEncryptionError} When `pdfBytes` is an encrypted PDF
  *         (its bytes contain the name `/Encrypt`): the
  *         appended signature objects and trailer would not be encrypted.
- * @throws {UnencodableTextError} When `fieldName` holds a lone surrogate
+ * @throws {UnencodableTextError} When `fieldName`, `options.reason`,
+ *         `options.location` or `options.contactInfo` holds a lone surrogate
  *         or U+001B, or a line of a visible appearance that fits in its
  *         box (`appearance.text`, or the generated "Signed by:", "Reason:"
  *         and "Location:" lines) holds a character that WinAnsiEncoding
@@ -351,7 +327,6 @@ export async function signPdf(
       rejectOption(rule);
     }
   }
-  warnIgnoredSignOptions(options);
   const hashAlgorithm = options.hashAlgorithm ?? 'SHA-256';
 
   // Build appearance options if visible signature requested
@@ -385,11 +360,14 @@ export async function signPdf(
   }
 
   // Step 1: Prepare the PDF with a signature placeholder
-  const { preparedPdf, byteRange } = prepareForSigning(
+  const { preparedPdf, byteRange } = prepareSignatureUpdate(
     pdfBytes,
     fieldName,
     8192, // 8 KB placeholder for PKCS#7 signature
     prepareAppearance,
+    undefined,
+    undefined,
+    { reason: options.reason, location: options.location, contactInfo: options.contactInfo },
   );
 
   // Step 2: Hash the PDF content (excluding the placeholder)

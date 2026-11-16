@@ -257,11 +257,9 @@ describe('verifySignatures', () => {
     expect(result.signingDate).toBeInstanceOf(Date);
   });
 
-  it('should return reason as undefined when not in PDF signature dict', async () => {
-    // The verifier extracts /Reason from the PDF signature dictionary text.
-    // prepareForSigning does not write /Reason into the PDF dict, so the
-    // verifier correctly returns undefined for reason even if it was passed
-    // to signPdf (it goes into PKCS#7 signed attributes instead).
+  it('returns the reason that signPdf wrote into the signature dictionary', async () => {
+    // signPdf writes /Reason as a hex text string; tests/oracle/signature-text-entries.test.ts
+    // shows qpdf reading the same text.
     const { certificate, privateKey } = await generateTestCert();
     const pdfBytes = createMinimalPdf();
 
@@ -272,11 +270,15 @@ describe('verifySignatures', () => {
     });
 
     const results = await verifySignatures(signedPdf);
-    const result = results[0]!;
+    expect(results[0]!.reason).toBe('Document approval');
+  });
 
-    // Reason is not written to the PDF signature dictionary by prepareForSigning,
-    // so extractFieldInfo will not find it in the PDF text.
-    expect(result.reason).toBeUndefined();
+  it('returns reason as undefined when the signature dictionary has none', async () => {
+    const { certificate, privateKey } = await generateTestCert();
+    const signedPdf = await signPdf(createMinimalPdf(), 'ReasonSig', { certificate, privateKey });
+
+    const results = await verifySignatures(signedPdf);
+    expect(results[0]!.reason).toBeUndefined();
   });
 });
 
