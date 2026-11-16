@@ -264,16 +264,11 @@ export function extractImages(doc: PdfDocument): ImageInfo[] {
  * @param options   - `limits`: the limits the decode runs under, over
  *                    `DEFAULT_LIMITS`, as for `decodeStream()`.
  * @returns The decoded stream data.
- * @throws {InvalidArgumentError} When the image has a filter and `options.limits` is not a
- *   valid `limits` value.
+ * @throws {InvalidArgumentError} When options.limits is not a valid limits value; nothing is decoded.
  */
 export function decodeImageStream(
   imageInfo: ImageInfo,
   options?: { readonly limits?: PdfLimits | undefined },
 ): Uint8Array {
-  if (imageInfo.filters.length === 0) {
-    return imageInfo.stream.data;
-  }
-
   return decodeStream(imageInfo.stream.data, imageInfo.filters as string[], null, options);
 }

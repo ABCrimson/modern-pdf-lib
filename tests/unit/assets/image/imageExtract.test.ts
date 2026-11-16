@@ -13,7 +13,9 @@ import {
   loadPdf,
   extractImages,
   decodeImageStream,
+  InvalidArgumentError,
   PageSizes,
+  ResourceLimitError,
 } from '../../../../src/index.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -180,5 +182,24 @@ describe('decodeImageStream', () => {
     // Should start with JPEG SOI marker
     expect(decoded[0]).toBe(0xff);
     expect(decoded[1]).toBe(0xd8);
+  });
+
+  it('decodes under its limits option and checks the option on an unfiltered image too', async () => {
+    const doc = createPdf();
+    const img = await doc.embedJpeg(
+      new Uint8Array(await readFile(resolve(fixturesDir, 'sample.jpg'))),
+    );
+    doc.addPage(PageSizes.A4).drawImage(img, { x: 0, y: 0 });
+    const [info] = extractImages(await loadPdf(await doc.save()));
+    const size = info!.stream.data.length;
+    expect(decodeImageStream(info!, { limits: { maxDecodedStreamBytes: size } })).toHaveLength(
+      size,
+    );
+    expect(() => decodeImageStream(info!, { limits: { maxDecodedStreamBytes: size - 1 } })).toThrow(
+      ResourceLimitError,
+    );
+    expect(() =>
+      decodeImageStream({ ...info!, filters: [] }, { limits: { maxDecodedStreamBytes: 0 } }),
+    ).toThrow(InvalidArgumentError);
   });
 });
