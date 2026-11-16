@@ -380,6 +380,17 @@ describe('fieldAppearance', () => {
       );
     });
 
+    it('throws UnencodableTextError for a CR or LF in a single-line value', () => {
+      for (const [value, character] of [
+        ['a\nb', '\n'],
+        ['a\rb', '\r'],
+      ] as const) {
+        expect(() => generateTextAppearance({ value, rect })).toThrow(
+          expect.objectContaining({ name: 'UnencodableTextError', character, index: 1 }),
+        );
+      }
+    });
+
     it('encodes list box items and button captions', () => {
       const listbox = streamContent(
         generateListboxAppearance({
