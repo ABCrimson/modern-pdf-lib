@@ -385,7 +385,9 @@ export function canDirectEmbed(data: Uint8Array): boolean {
  * @param data     Raw TIFF file bytes.
  * @param options  Optional settings (page index for multi-page TIFFs).
  * @returns        The embedding result with all data needed for a PDF image XObject.
- * @throws {UnsupportedFeatureError} If the TIFF format does not support direct embedding.
+ * @throws {UnsupportedFeatureError} `TIFF JPEG with multiple tiles is not supported for direct embedding`
+ *   for a JPEG-compressed TIFF of more than one tile.
+ * @throws {InvalidArgumentError} Argument `options.page`, when the file has no page at that index.
  * @throws {ResourceLimitError} `maxImageDimension` when the width or height is above 65,536;
  *   `maxImagePixels` when width times height is above 2^28; `maxImageBytes` when the strips or
  *   tiles together are above 256 MiB.

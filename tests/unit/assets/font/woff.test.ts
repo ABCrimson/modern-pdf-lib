@@ -321,6 +321,22 @@ describe('decodeWoff typed errors', () => {
     });
   });
 
+  it('throws MalformedInputError for a table whose data lies past the end of the file', () => {
+    const data = new Uint8Array(WOFF_HEADER_SIZE + WOFF1_DIR_ENTRY_SIZE);
+    const view = new DataView(data.buffer);
+    view.setUint32(0, tagToUint32('wOFF'), false);
+    view.setUint16(12, 1, false);
+    view.setUint32(WOFF_HEADER_SIZE + 4, 1000, false); // table offset
+    view.setUint32(WOFF_HEADER_SIZE + 8, 8, false); // compressed length
+    view.setUint32(WOFF_HEADER_SIZE + 12, 8, false); // original length
+    const error = caught(() => decodeWoff(data));
+    expect(error).toBeInstanceOf(MalformedInputError);
+    expect(error).toMatchObject({
+      format: 'woff',
+      message: 'WOFF1: table data out of bounds',
+    });
+  });
+
   it('throws MalformedInputError for a header cut short and for a bad signature', () => {
     const tooSmall = caught(() => readWoffHeader(new Uint8Array(10)));
     expect(tooSmall).toBeInstanceOf(MalformedInputError);

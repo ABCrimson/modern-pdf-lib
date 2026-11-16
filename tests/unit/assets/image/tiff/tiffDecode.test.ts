@@ -1060,6 +1060,12 @@ describe('TIFF decoder typed errors', () => {
     expect(error).toMatchObject({ code: 'unsupported-feature' });
   });
 
+  it('throws InvalidArgumentError naming options.page when decodeTiff is asked for a missing page', () => {
+    const error = caught(() => decodeTiff(buildTiff(BASE_TAGS, new Uint8Array(4)), { page: 5 }));
+    expect(error).toBeInstanceOf(InvalidArgumentError);
+    expect(error).toMatchObject({ code: 'invalid-argument', argument: 'options.page' });
+  });
+
   it('throws InvalidArgumentError naming pageIndex for a page that does not exist', () => {
     const error = caught(() => decodeTiffPage(buildTiff(BASE_TAGS, new Uint8Array(4)), 5));
     expect(error).toBeInstanceOf(InvalidArgumentError);

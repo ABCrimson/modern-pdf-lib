@@ -241,17 +241,20 @@ describe('isCmykTiff', () => {
 
 describe('TIFF CMYK typed errors', () => {
   it.each([
-    ['convertTiffCmykToRgb', () => convertTiffCmykToRgb(new Uint8Array(4), 2, 2)],
-    ['embedTiffCmyk', () => embedTiffCmyk(new Uint8Array(4), 2, 2)],
-  ])('%s throws InvalidArgumentError for a pixel buffer of the wrong length', (_name, call) => {
-    let error: unknown;
-    try {
-      call();
-    } catch (thrown) {
-      error = thrown;
-    }
-    expect(error).toBeInstanceOf(InvalidArgumentError);
-    expect(error).toMatchObject({ code: 'invalid-argument' });
-    expect((error as InvalidArgumentError).message).toContain('length mismatch');
-  });
+    ['convertTiffCmykToRgb', () => convertTiffCmykToRgb(new Uint8Array(4), 2, 2), 'cmykPixels'],
+    ['embedTiffCmyk', () => embedTiffCmyk(new Uint8Array(4), 2, 2), 'pixels'],
+  ])(
+    '%s throws InvalidArgumentError for a pixel buffer of the wrong length',
+    (_name, call, argument) => {
+      let error: unknown;
+      try {
+        call();
+      } catch (thrown) {
+        error = thrown;
+      }
+      expect(error).toBeInstanceOf(InvalidArgumentError);
+      expect(error).toMatchObject({ code: 'invalid-argument', argument });
+      expect((error as InvalidArgumentError).message).toContain('length mismatch');
+    },
+  );
 });

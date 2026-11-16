@@ -439,4 +439,16 @@ describe('embedPng typed errors', () => {
     expect(error).toBeInstanceOf(UnsupportedFeatureError);
     expect(error).toMatchObject({ code: 'unsupported-feature' });
   });
+
+  it('throws MalformedInputError of format png for an unknown scanline filter type', () => {
+    // 16-bit grey takes the full decode path; the scanline starts with filter type 9.
+    const png = pngFromRows(1, 1, 16, 0, new Uint8Array([9, 0, 0]));
+    const error = caught(() => decodePng(png));
+    expect(error).toBeInstanceOf(MalformedInputError);
+    expect(error).toMatchObject({
+      code: 'malformed-input',
+      format: 'png',
+      message: 'Unknown PNG filter type: 9',
+    });
+  });
 });

@@ -19,6 +19,7 @@ import {
 import {
   MalformedInputError,
   ResourceLimitError,
+  UnsupportedFeatureError,
   UnsupportedFilterError,
 } from '../../../../../src/errors.js';
 
@@ -502,5 +503,27 @@ describe('decodeWebP typed errors', () => {
     const error = caught(() => decodeWebP(data));
     expect(error).toBeInstanceOf(MalformedInputError);
     expect(error).toMatchObject({ format: 'webp', message: 'WebP: no VP8 or VP8L chunk found' });
+  });
+
+  it('throws MalformedInputError of format webp for a VP8L stream with a wrong signature byte', () => {
+    const data = buildMinimalWebP_VP8L(1, 1, 10, 20, 30);
+    data[20] = 0x00; // the VP8L chunk payload starts after the 12-byte RIFF header and 8-byte chunk header
+    const error = caught(() => decodeWebP(data));
+    expect(error).toBeInstanceOf(MalformedInputError);
+    expect(error).toMatchObject({
+      format: 'webp',
+      message: 'WebP VP8L: invalid signature byte (expected 0x2F)',
+    });
+  });
+
+  it('throws UnsupportedFeatureError for a VP8L stream with a version other than 0', () => {
+    const data = buildMinimalWebP_VP8L(1, 1, 10, 20, 30);
+    data[24] = data[24]! | 0x20; // the 3 version bits are the top bits of the fifth header byte
+    const error = caught(() => decodeWebP(data));
+    expect(error).toBeInstanceOf(UnsupportedFeatureError);
+    expect(error).toMatchObject({
+      code: 'unsupported-feature',
+      message: 'WebP VP8L: unsupported version 1',
+    });
   });
 });

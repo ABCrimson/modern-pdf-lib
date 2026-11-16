@@ -247,9 +247,15 @@ function getNextIfdOffset(
   return reader.u32(nextOffset);
 }
 
+/** The name of the page parameter a public decoder reports in its errors. */
+type PageArgument = 'options.page' | 'pageIndex';
+
 /**
  * Find the IFD at a given page index by following the IFD chain.
  *
+ * `argument` names the page parameter of the public caller in the error.
+ *
+ * @throws {InvalidArgumentError} When the file has no page at that index.
  * @throws {MalformedInputError} `TIFF: the IFD chain repeats offset N` when the walk
  *   reaches an offset it has already read.
  * @throws {ResourceLimitError} `maxImageFrames` when the walk would read
@@ -260,6 +266,7 @@ function findIfdAtPage(
   littleEndian: boolean,
   firstIfdOffset: number,
   pageIndex: number,
+  argument: PageArgument,
 ): number {
   let offset = firstIfdOffset;
   const seen = new Set<number>([offset]);
@@ -269,7 +276,7 @@ function findIfdAtPage(
     if (offset === 0) {
       throw new InvalidArgumentError(
         `TIFF: page index ${pageIndex} out of range (only ${i + 1} pages)`,
-        { argument: 'pageIndex' },
+        { argument },
       );
     }
     if (seen.has(offset)) {
@@ -630,9 +637,10 @@ export function getTiffPageCount(data: Uint8Array): number {
  * @param data       Raw TIFF bytes.
  * @param pageIndex  0-based page index.
  * @returns          Decoded image.
+ * @throws {InvalidArgumentError} Argument `pageIndex`, when the file has no page at that index.
  */
 export function decodeTiffPage(data: Uint8Array, pageIndex: number): TiffImage {
-  return decodeTiff(data, { page: pageIndex });
+  return decodeTiffAt(data, pageIndex, 'pageIndex');
 }
 
 /**
@@ -668,8 +676,14 @@ export function decodeTiffAll(data: Uint8Array): TiffImage[] {
  *   are longer than the file.
  * @throws {MalformedInputError} `TIFF: tag data overlaps` when the entries of an IFD together
  *   hold more values than twice the file length.
+ * @throws {InvalidArgumentError} Argument `options.page`, when the file has no page at that index.
  */
 export function decodeTiff(data: Uint8Array, options?: TiffDecodeOptions): TiffImage {
+  return decodeTiffAt(data, options?.page ?? 0, 'options.page');
+}
+
+/** Decode the page at `pageIndex`; `argument` names the caller's page parameter in errors. */
+function decodeTiffAt(data: Uint8Array, pageIndex: number, argument: PageArgument): TiffImage {
   if (!isTiff(data)) {
     throw new MalformedInputError(
       'TIFF: invalid TIFF header (expected II or MM byte order marker + 42)',
@@ -680,10 +694,9 @@ export function decodeTiff(data: Uint8Array, options?: TiffDecodeOptions): TiffI
   const littleEndian = data[0] === 0x49; // 'I' = little-endian
   const reader = new TiffReader(data, littleEndian);
   const firstIfdOffset = reader.u32(4);
-  const pageIndex = options?.page ?? 0;
 
   // Find the IFD for the requested page
-  const ifdOffset = findIfdAtPage(data, littleEndian, firstIfdOffset, pageIndex);
+  const ifdOffset = findIfdAtPage(data, littleEndian, firstIfdOffset, pageIndex, argument);
   const entries = parseTiffIfd(data, ifdOffset, littleEndian);
 
   // Read required tags
