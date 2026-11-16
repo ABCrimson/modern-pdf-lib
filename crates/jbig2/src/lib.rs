@@ -1831,4 +1831,21 @@ mod tests {
         assert_eq!(line[0], 0x3C);
         assert_eq!(line[1], 0x00);
     }
+
+    #[test]
+    fn composite_clips_region_to_page_with_padded_rows() {
+        // A 10 by 2 page and a 12 by 3 region both pad their rows to 2 bytes.
+        let page_shape = BitmapShape::new(10, 2);
+        let region_shape = BitmapShape::new(12, 3);
+        assert_eq!(page_shape.row_bytes, 2);
+        assert_eq!(region_shape.row_bytes, 2);
+
+        let mut page = new_bitmap(10, 2, 0);
+        let region = new_bitmap(12, 3, 1);
+        composite_bitmap(&mut page, page_shape, &region, region_shape, 4, 1, 0);
+
+        // Row 0 is untouched; row 1 is set from x = 4 to x = 9, and the region is
+        // clipped at the page's right and bottom edges.
+        assert_eq!(page, vec![0x00, 0x00, 0x0F, 0xC0]);
+    }
 }

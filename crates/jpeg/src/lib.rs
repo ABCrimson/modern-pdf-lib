@@ -351,9 +351,6 @@ mod tests {
         let decoded = decode_jpeg(&jpeg).unwrap();
 
         // Parse header
-        let width = u16::from_le_bytes([decoded[0], decoded[1]]) as u32;
-        let height = u16::from_le_bytes([decoded[2], decoded[3]]) as u32;
-        // Note: width is u16 le in first 4 bytes (as le u32, low 2 bytes)
         let w = u32::from_le_bytes([decoded[0], decoded[1], decoded[2], decoded[3]]);
         let h = u32::from_le_bytes([decoded[4], decoded[5], decoded[6], decoded[7]]);
         let ch = decoded[8];
@@ -383,7 +380,7 @@ mod tests {
         assert_eq!(ch, 1);
 
         let pixel_data = &decoded[9..];
-        assert_eq!(pixel_data.len(), 2 * 2 * 1);
+        assert_eq!(pixel_data.len(), 2 * 2); // one gray channel
     }
 
     #[test]

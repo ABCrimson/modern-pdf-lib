@@ -637,7 +637,7 @@ mod tests {
 
         // Find 'A' (U+0041)
         let mut found_a = false;
-        for chunk in info.cmap_entries.chunks_exact(6) {
+        for chunk in info.cmap_entries.as_chunks::<6>().0 {
             let cp = u32::from_le_bytes([chunk[0], chunk[1], chunk[2], chunk[3]]);
             let gid = u16::from_le_bytes([chunk[4], chunk[5]]);
             if cp == 0x0041 {
