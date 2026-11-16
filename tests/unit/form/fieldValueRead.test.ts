@@ -204,25 +204,48 @@ function nameBytes(dict: PdfDict, key: string): Uint8Array | undefined {
 }
 
 describe('on-state names of loaded fields keep their bytes', () => {
-  test('a radio option that is not UTF-8 reads with U+FFFD and select writes its own bytes', () => {
-    const latin1Key = `/Gr${String.fromCharCode(0xf6, 0xdf)}e`;
-    const states = new PdfDict();
-    states.set(latin1Key, new PdfStream(new PdfDict(), new Uint8Array(0)));
-    states.set('/Off', new PdfStream(new PdfDict(), new Uint8Array(0)));
-    const ap = new PdfDict();
-    ap.set('/N', states);
-    const widget = new PdfDict();
-    widget.set('/AP', ap);
+  test('radio options that are not UTF-8 read one character per byte and select writes the bytes of the one given', () => {
+    const latin1 = (text: string): Uint8Array => Uint8Array.from(text, (c) => c.charCodeAt(0));
+    const widgets = ['Größe', 'Grüße'].map((option) => {
+      const states = new PdfDict();
+      states.set(
+        PdfName.fromBytes(latin1(option)).value,
+        new PdfStream(new PdfDict(), new Uint8Array(0)),
+      );
+      states.set('/Off', new PdfStream(new PdfDict(), new Uint8Array(0)));
+      const ap = new PdfDict();
+      ap.set('/N', states);
+      const widget = new PdfDict();
+      widget.set('/AP', ap);
+      return widget;
+    });
     const field = new PdfDict();
     field.set('/FT', PdfName.of('Btn'));
     field.set('/Ff', PdfNumber.of(FieldFlags.Radio));
     field.set('/T', PdfString.fromText('size'));
-    field.set('/Kids', PdfArray.of([widget]));
+    field.set('/Kids', PdfArray.of(widgets));
     const group = formOf(field).getRadioGroup('size');
-    expect(group.getOptions()).toEqual(['Gr��e']);
-    group.select('Gr��e');
-    expect(nameBytes(field, '/V')).toEqual(Uint8Array.of(0x47, 0x72, 0xf6, 0xdf, 0x65));
-    expect(nameBytes(widget, '/AS')).toEqual(Uint8Array.of(0x47, 0x72, 0xf6, 0xdf, 0x65));
+    expect(group.getOptions()).toEqual(['Größe', 'Grüße']);
+    group.select('Grüße');
+    expect(nameBytes(field, '/V')).toEqual(latin1('Grüße'));
+    expect(widgets.map((widget) => nameBytes(widget, '/AS'))).toEqual([
+      utf8('Off'),
+      latin1('Grüße'),
+    ]);
+  });
+
+  test('a check box whose /AP /N lists /Off first takes the other key as its on-state', () => {
+    const states = new PdfDict();
+    states.set('/Off', new PdfStream(new PdfDict(), new Uint8Array(0)));
+    states.set('/Ja', new PdfStream(new PdfDict(), new Uint8Array(0)));
+    const ap = new PdfDict();
+    ap.set('/N', states);
+    const box = formOf(fieldDict('Btn', PdfString.fromText('agree'))).getCheckbox('agree');
+    box.getWidgetDict().set('/AP', ap);
+    expect(box.getOnValue()).toBe('Ja');
+    box.check();
+    expect(nameBytes(box.getDict(), '/V')).toEqual(utf8('Ja'));
+    expect(nameBytes(box.getWidgetDict(), '/AS')).toEqual(utf8('Ja'));
   });
 });
 

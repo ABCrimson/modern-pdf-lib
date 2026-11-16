@@ -11,7 +11,7 @@
  */
 
 import { PdfDict, PdfName, PdfStream } from '../../core/pdfObjects.js';
-import { PdfField, nameVal, onStateNames, textName } from '../pdfField.js';
+import { PdfField, nameText, nameVal, onStateNames, textName } from '../pdfField.js';
 import type { FieldType, WidgetAnnotationHost } from '../pdfField.js';
 import { generateRadioAppearance } from '../fieldAppearance.js';
 
@@ -93,7 +93,9 @@ export class PdfRadioGroup extends PdfField {
    */
   select(optionName: string): void {
     const states = this.widgets.map((widget) => this.widgetOnState(widget));
-    const selected = states.find((state) => state?.toText() === optionName) ?? textName(optionName);
+    const selected =
+      states.find((state) => state !== undefined && nameText(state) === optionName) ??
+      textName(optionName);
     this.dict.set('/V', selected);
 
     // Update each widget's /AS to match
@@ -143,7 +145,8 @@ export class PdfRadioGroup extends PdfField {
    * Looks in the /AP /N dictionary for a key that is not "Off".
    */
   private getWidgetOptionName(widget: PdfDict): string | undefined {
-    return this.widgetOnState(widget)?.toText();
+    const state = this.widgetOnState(widget);
+    return state === undefined ? undefined : nameText(state);
   }
 
   /** The on-state name of a widget: its first /AP /N key other than /Off, bytes kept. */

@@ -7,7 +7,7 @@
  */
 
 import { PdfName, PdfStream } from '../../core/pdfObjects.js';
-import { PdfField, nameVal, onStateNames } from '../pdfField.js';
+import { PdfField, nameText, nameVal, onStateNames } from '../pdfField.js';
 import type { FieldType } from '../pdfField.js';
 import { generateCheckboxAppearance } from '../fieldAppearance.js';
 
@@ -68,13 +68,13 @@ export class PdfCheckboxField extends PdfField {
   }
 
   /**
-   * Get the "on" value name for this checkbox, as text (the name bytes decoded as UTF-8).
+   * Get the "on" value name for this checkbox, as text ({@link nameText}).
    *
    * Examines the /AP /N dictionary for a key that is not "/Off", then /V.
    * Falls back to "Yes" if neither holds one.
    */
   getOnValue(): string {
-    return this.onStateName().toText();
+    return nameText(this.onStateName());
   }
 
   /**

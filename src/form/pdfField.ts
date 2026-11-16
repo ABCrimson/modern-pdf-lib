@@ -22,6 +22,9 @@ import {
 import type { PdfObject } from '../core/pdfObjects.js';
 import { latin1String } from '../internal/latin1.js';
 
+/** UTF-8 decoder that throws on bytes that are not UTF-8, for {@link nameText}. */
+const UTF8_STRICT = new TextDecoder('utf-8', { fatal: true });
+
 // ---------------------------------------------------------------------------
 // Minimal page interface (avoids circular dependency with PdfPage)
 // ---------------------------------------------------------------------------
@@ -159,12 +162,28 @@ export function byteStrVal(obj: PdfObject | undefined): string | undefined {
 }
 
 /**
- * The text of a name, without the leading `/`: its bytes decoded as UTF-8 (ISO 32000-2 7.3.5),
- * so an on-state or a radio option written by {@link textName} reads back as its text.
+ * The text of a name: its bytes decoded as UTF-8 (ISO 32000-2 7.3.5), or, for bytes that are
+ * not UTF-8, one character per byte (the way pdf.js reads every name), so a name written by a
+ * PDF 1.x writer or by 0.40.x, such as `/Gr#f6#dfe`, reads as "Größe" and two such names never
+ * read as the same text.
+ */
+export function nameText(name: PdfName): string {
+  const bytes = name.toBytes();
+  try {
+    return UTF8_STRICT.decode(bytes);
+  } catch {
+    // A fatal TextDecoder throws a TypeError for bytes that are not UTF-8.
+    return latin1String(bytes);
+  }
+}
+
+/**
+ * The text of a name, without the leading `/` ({@link nameText}), so an on-state or a radio
+ * option written by {@link textName} reads back as its text.
  */
 export function nameVal(obj: PdfObject | undefined): string | undefined {
   if (obj !== undefined && obj.kind === 'name') {
-    return (obj as PdfName).toText();
+    return nameText(obj as PdfName);
   }
   return undefined;
 }
