@@ -45,6 +45,14 @@ describe('latin1Bytes', () => {
     );
   });
 
+  test('throws at U+0100, the first code unit above 0xFF', () => {
+    expect(caught(() => latin1Bytes('ÿĀ'))).toMatchObject({
+      character: 'Ā',
+      codePoint: 0x100,
+      index: 1,
+    });
+  });
+
   test('reports a surrogate pair as one whole character', () => {
     expect(caught(() => latin1Bytes('é😀'))).toMatchObject({
       character: '😀',

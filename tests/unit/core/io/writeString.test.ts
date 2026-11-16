@@ -2,16 +2,23 @@
  * The library's writers write a string handed to `writeString` as a PDF byte string: each code
  * unit 0x00-0xFF is one byte, and a code unit above 0xFF throws UnencodableTextError. The Info
  * /Title is a literal string whose characters reach the writer as they were set, so a title
- * of "é" shows which bytes each writer emits for U+00E9.
+ * of "é" shows which bytes each writer emits for U+00E9. The Info dictionary is never packed into
+ * an object stream, so the object stream writer is shown by a registered dictionary holding /T (é).
  *
  * The document-level writes of `saveAsStream()` (header, object headers, xref table, trailer) and
  * of `appendIncrementalUpdate()` hold only ASCII, so no public call hands those two writers a
  * character above U+007F; the files they write are covered by tests/oracle/writer-matrix.test.ts.
  */
 import { describe, expect, test } from 'vitest';
-import { createPdf, loadPdf, UnencodableTextError } from '../../../../src/index.js';
+import {
+  createPdf,
+  loadPdf,
+  PdfDict,
+  PdfString,
+  saveDocumentIncremental,
+  UnencodableTextError,
+} from '../../../../src/index.js';
 import type { PdfDocument } from '../../../../src/index.js';
-import { saveDocumentIncremental } from '../../../../src/core/io/incrementalWriter.js';
 
 /** `/Title (é)` with é as the one Latin-1 byte 0xE9. */
 const TITLE_LATIN1 = Uint8Array.of(...new TextEncoder().encode('/Title ('), 0xe9, 0x29);
@@ -59,9 +66,15 @@ describe('the writers write writeString("é") as the byte 0xE9', () => {
   });
 
   test('save() with object streams: the object stream writer', async () => {
-    const bytes = await titled('é').save({ compress: false, objectStreamThreshold: 1 });
+    const doc = titled('é');
+    // The Info dictionary is never packed into an object stream; this dictionary is.
+    doc.getRegistry().register(new PdfDict([['T', PdfString.literal('é')]]));
+    const bytes = await doc.save({ compress: false, objectStreamThreshold: 1 });
     expect(indexOfBytes(bytes, new TextEncoder().encode('/Type /ObjStm'))).not.toBe(-1);
-    expectLatin1Title(bytes);
+    expect(
+      indexOfBytes(bytes, Uint8Array.of(...new TextEncoder().encode('/T ('), 0xe9, 0x29)),
+    ).not.toBe(-1);
+    expect(indexOfBytes(bytes, E_ACUTE_UTF8)).toBe(-1);
   });
 
   test('saveAsStream(): the object writer of the stream writer', async () => {
@@ -83,9 +96,12 @@ describe('the writers refuse a code unit above 0xFF', () => {
   });
 
   test('save() with object streams', async () => {
-    await expect(
-      titled('日').save({ compress: false, objectStreamThreshold: 1 }),
-    ).rejects.toMatchObject(unencodable);
+    const doc = createPdf();
+    doc.addPage();
+    doc.getRegistry().register(new PdfDict([['T', PdfString.literal('日')]]));
+    await expect(doc.save({ compress: false, objectStreamThreshold: 1 })).rejects.toMatchObject(
+      unencodable,
+    );
   });
 
   test('saveAsStream()', async () => {
