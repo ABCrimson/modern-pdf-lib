@@ -14,6 +14,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { validatePdfA, enforcePdfA } from '../../../../src/compliance/pdfa/pdfA.js';
+import { InvalidStateError } from '../../../../src/errors.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -378,7 +379,15 @@ describe('enforcePdfA', () => {
 
   it('should throw for PDFs with JavaScript', async () => {
     const pdf = buildPdf({ javascript: true });
-    await expect(enforcePdfA(pdf, '2b')).rejects.toThrow('JavaScript');
+    const error = await enforcePdfA(pdf, '2b').then(
+      () => undefined,
+      (thrown: unknown) => thrown,
+    );
+    expect(error).toBeInstanceOf(InvalidStateError);
+    expect((error as InvalidStateError).code).toBe('invalid-state');
+    expect((error as InvalidStateError).message).toBe(
+      'Cannot enforce PDF/A: document contains JavaScript. Remove it first.',
+    );
   });
 
   it('should return as-is if already valid', async () => {

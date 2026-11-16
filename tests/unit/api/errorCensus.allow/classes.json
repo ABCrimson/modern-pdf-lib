@@ -48,11 +48,6 @@
     "files": ["src/batch/batchProcessor.ts"]
   },
   {
-    "name": "InvalidStateError",
-    "decision": "throw",
-    "where": "the generic throws whose allowlist row names InvalidStateError, as they are converted"
-  },
-  {
     "name": "UnsupportedFeatureError",
     "decision": "throw",
     "where": "the generic throws whose allowlist row names UnsupportedFeatureError, as they are converted"

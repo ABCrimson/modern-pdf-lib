@@ -21,7 +21,7 @@
  */
 
 import { concatBytes } from '../internal/binary.js';
-import { UnsupportedEncryptionError } from '../../errors.js';
+import { InvalidStateError, UnsupportedEncryptionError } from '../../errors.js';
 import { assertUnencryptedInput } from '../../core/io/incrementalWriter.js';
 
 // ---------------------------------------------------------------------------
@@ -324,6 +324,7 @@ function checkTransparency(data: Uint8Array): boolean {
  * @param level     The target PDF/A conformance level.
  * @returns         The modified PDF bytes.
  * @throws {UnsupportedEncryptionError} If the PDF is encrypted.
+ * @throws {InvalidStateError} If the PDF contains JavaScript.
  */
 export async function enforcePdfA(pdfBytes: Uint8Array, level: PdfALevel): Promise<Uint8Array> {
   // Validate first to see what's needed
@@ -339,7 +340,9 @@ export async function enforcePdfA(pdfBytes: Uint8Array, level: PdfALevel): Promi
       );
     }
     if (issue.code === 'PDFA-004') {
-      throw new Error('Cannot enforce PDF/A: document contains JavaScript. Remove it first.');
+      throw new InvalidStateError(
+        'Cannot enforce PDF/A: document contains JavaScript. Remove it first.',
+      );
     }
   }
 

@@ -8,6 +8,7 @@
 
 import { describe, expect, it } from 'vitest';
 
+import { MalformedInputError } from '../../../../src/errors.js';
 import {
   generateCiiXml,
   type FacturXProfile,
@@ -142,7 +143,20 @@ describe('parseCiiXml', () => {
   });
 
   it('throws on input without a CrossIndustryInvoice root', () => {
-    expect(() => parseCiiXml('<not-an-invoice/>')).toThrow();
+    let thrown: unknown;
+    try {
+      parseCiiXml('<not-an-invoice/>');
+    } catch (error) {
+      thrown = error;
+    }
+    expect(thrown).toBeInstanceOf(MalformedInputError);
+    const error = thrown as MalformedInputError;
+    expect(error.code).toBe('malformed-input');
+    expect(error.format).toBe('other');
+    expect(error.message).toBe(
+      'ciiReader: not a CrossIndustryInvoice document ' +
+        '(no <CrossIndustryInvoice> root element found).',
+    );
   });
 });
 

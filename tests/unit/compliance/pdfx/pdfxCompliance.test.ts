@@ -22,6 +22,7 @@ import {
   buildPdfXOutputIntent,
 } from '../../../../src/compliance/pdfx/pdfxCompliance.js';
 import { PdfObjectRegistry } from '../../../../src/core/pdfObjects.js';
+import { InvalidStateError } from '../../../../src/errors.js';
 import type { PdfDict, PdfString } from '../../../../src/core/pdfObjects.js';
 import type { PdfXLevel, PdfXOptions } from '../../../../src/compliance/pdfx/pdfxCompliance.js';
 
@@ -739,7 +740,17 @@ describe('enforcePdfX — auto-enforcement', () => {
 
   it('should throw for PDFs with JavaScript', () => {
     const pdf = buildPdf({ javascript: true, trimBox: true, trapped: 'False' });
-    expect(() => enforcePdfX(pdf, defaultOptions)).toThrow('JavaScript');
+    let thrown: unknown;
+    try {
+      enforcePdfX(pdf, defaultOptions);
+    } catch (error) {
+      thrown = error;
+    }
+    expect(thrown).toBeInstanceOf(InvalidStateError);
+    expect((thrown as InvalidStateError).code).toBe('invalid-state');
+    expect((thrown as InvalidStateError).message).toBe(
+      'Cannot enforce PDF/X: document contains JavaScript. Remove it first.',
+    );
   });
 
   it('should set /Trapped /True when specified', () => {

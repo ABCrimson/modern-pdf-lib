@@ -36,6 +36,7 @@
  * - Factur-X 1.0 / ZUGFeRD 2.x specification
  */
 
+import { MalformedInputError } from '../../errors.js';
 import type { FacturXProfile, Invoice, InvoiceLine, InvoiceParty } from './facturX.js';
 
 // ---------------------------------------------------------------------------
@@ -212,12 +213,12 @@ function parseLine(fragment: string): InvoiceLine {
  *
  * @param xml - The CII XML document.
  * @returns The parsed {@link Invoice}.
- * @throws If the input does not contain a `CrossIndustryInvoice` root.
+ * @throws {MalformedInputError} If the input does not contain a `CrossIndustryInvoice` root.
  */
 export function parseCiiXml(xml: string): Invoice {
   const root = firstFragment(xml, 'CrossIndustryInvoice');
   if (root === undefined) {
-    throw new Error(
+    throw new MalformedInputError(
       'ciiReader: not a CrossIndustryInvoice document ' +
         '(no <CrossIndustryInvoice> root element found).',
     );

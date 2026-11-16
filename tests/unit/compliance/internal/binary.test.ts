@@ -7,6 +7,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
+import { InvalidArgumentError } from '../../../../src/errors.js';
 import {
   concatBytes,
   writeUint32BE,
@@ -191,9 +192,17 @@ describe('bytesToHex / hexToBytes', () => {
 describe('GrowableBuffer initial capacity', () => {
   it('refuses a non-finite initial capacity', () => {
     for (const capacity of [Number.NaN, Infinity, -Infinity]) {
-      expect(() => new GrowableBuffer(capacity)).toThrow(
-        new RangeError('GrowableBuffer: initial capacity must be a finite number'),
-      );
+      let thrown: unknown;
+      try {
+        new GrowableBuffer(capacity);
+      } catch (error) {
+        thrown = error;
+      }
+      expect(thrown).toBeInstanceOf(InvalidArgumentError);
+      const error = thrown as InvalidArgumentError;
+      expect(error.code).toBe('invalid-argument');
+      expect(error.argument).toBe('initialCapacity');
+      expect(error.message).toBe('GrowableBuffer: initial capacity must be a finite number');
     }
   });
 
