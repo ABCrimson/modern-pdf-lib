@@ -13,6 +13,8 @@
  * No require() — ESM import only.
  */
 
+import { InvalidArgumentError } from '../../../errors.js';
+
 // ---------------------------------------------------------------------------
 // Public interfaces
 // ---------------------------------------------------------------------------
@@ -67,7 +69,7 @@ const TAG_INK_SET = 332;
  * @param width       Image width in pixels.
  * @param height      Image height in pixels.
  * @returns           Flat array of RGB pixel data (3 bytes per pixel: R, G, B).
- * @throws            If the input array length does not match width * height * 4.
+ * @throws {InvalidArgumentError} If the input array length does not match width * height * 4.
  */
 export function convertTiffCmykToRgb(
   cmykPixels: Uint8Array,
@@ -78,9 +80,10 @@ export function convertTiffCmykToRgb(
   const expectedLength = pixelCount * 4;
 
   if (cmykPixels.length !== expectedLength) {
-    throw new Error(
+    throw new InvalidArgumentError(
       `CMYK pixel data length mismatch: expected ${expectedLength} bytes ` +
         `(${width}x${height}x4), got ${cmykPixels.length}`,
+      { argument: 'cmykPixels' },
     );
   }
 
@@ -115,7 +118,7 @@ export function convertTiffCmykToRgb(
  * @param width   Image width in pixels.
  * @param height  Image height in pixels.
  * @returns       Embedding result with colorSpace, data, and bitsPerComponent.
- * @throws        If the input array length does not match width * height * 4.
+ * @throws {InvalidArgumentError} If the input array length does not match width * height * 4.
  */
 export function embedTiffCmyk(
   pixels: Uint8Array,
@@ -125,9 +128,10 @@ export function embedTiffCmyk(
   const expectedLength = width * height * 4;
 
   if (pixels.length !== expectedLength) {
-    throw new Error(
+    throw new InvalidArgumentError(
       `CMYK pixel data length mismatch: expected ${expectedLength} bytes ` +
         `(${width}x${height}x4), got ${pixels.length}`,
+      { argument: 'pixels' },
     );
   }
 

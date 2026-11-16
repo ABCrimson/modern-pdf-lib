@@ -18,6 +18,7 @@ import {
   type DecodedRasterImage,
   type ImageDecoder,
 } from '../../../../src/assets/image/imageDecoderRegistry.js';
+import { MalformedInputError, UnsupportedFeatureError } from '../../../../src/errors.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -178,5 +179,24 @@ describe('decodeRegisteredImage', () => {
       rgba: [255, 0, 0, 255] as unknown as Uint8Array,
     }));
     await expect(decodeRegisteredImage('avif', new Uint8Array([0]))).rejects.toThrow();
+  });
+});
+
+describe('decodeRegisteredImage typed errors', () => {
+  it('throws UnsupportedFeatureError for a format with no registered decoder', async () => {
+    const error: unknown = await decodeRegisteredImage('heic', new Uint8Array([0])).catch(
+      (thrown: unknown) => thrown,
+    );
+    expect(error).toBeInstanceOf(UnsupportedFeatureError);
+    expect(error).toMatchObject({ code: 'unsupported-feature' });
+  });
+
+  it('throws MalformedInputError when the decoder returns a malformed result', async () => {
+    registerImageDecoder('avif', () => ({ width: 2, height: 2, rgba: new Uint8Array(4) }));
+    const error: unknown = await decodeRegisteredImage('avif', new Uint8Array([0])).catch(
+      (thrown: unknown) => thrown,
+    );
+    expect(error).toBeInstanceOf(MalformedInputError);
+    expect(error).toMatchObject({ code: 'malformed-input', format: 'other' });
   });
 });

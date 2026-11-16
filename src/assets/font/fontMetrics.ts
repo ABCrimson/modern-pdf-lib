@@ -14,6 +14,7 @@
  */
 
 import { assertWithinLimit } from '../../internal/limits.js';
+import { MalformedInputError } from '../../errors.js';
 
 // ---------------------------------------------------------------------------
 // Public interfaces
@@ -118,7 +119,7 @@ function parseTableDirectory(data: Uint8Array): Map<string, TableEntry> {
 function getTableView(data: Uint8Array, tables: Map<string, TableEntry>, tag: string): DataView {
   const entry = tables.get(tag);
   if (!entry) {
-    throw new Error(`Required TrueType table '${tag}' not found`);
+    throw new MalformedInputError(`Required TrueType table '${tag}' not found`, { format: 'sfnt' });
   }
   return new DataView(data.buffer, data.byteOffset + entry.offset, entry.length);
 }
@@ -628,7 +629,7 @@ function estimateStemV(usWeightClass: number): number {
  *
  * @param fontData - The raw TTF or OTF file as a Uint8Array.
  * @returns Parsed font metrics.
- * @throws If required tables are missing or the data is corrupt.
+ * @throws {MalformedInputError} Format `sfnt`, if required tables are missing or the data is corrupt.
  */
 export function extractMetrics(fontData: Uint8Array): FontMetrics {
   const tables = parseTableDirectory(fontData);

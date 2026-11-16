@@ -18,6 +18,8 @@
  * No external dependencies. No Buffer — uses Uint8Array and DataView.
  */
 
+import { MalformedInputError } from '../../../errors.js';
+
 // ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
@@ -50,7 +52,7 @@ function parseTableDir(data: Uint8Array): Map<string, TableRecord> {
 
   const requiredLen = 12 + numTables * 16;
   if (data.length < requiredLen) {
-    throw new RangeError('Font data too small for table directory');
+    throw new MalformedInputError('Font data too small for table directory', { format: 'sfnt' });
   }
 
   for (let i = 0; i < numTables; i++) {

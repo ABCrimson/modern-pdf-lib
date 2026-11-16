@@ -17,6 +17,11 @@
 
 import { inflateFlateUpTo } from '../../../codecs/internal/pdfFlate.js';
 import { assertWithinLimit } from '../../../internal/limits.js';
+import {
+  InvalidArgumentError,
+  MalformedInputError,
+  UnsupportedFeatureError,
+} from '../../../errors.js';
 
 // ---------------------------------------------------------------------------
 // Public interfaces
@@ -152,7 +157,7 @@ export function isTiff(data: Uint8Array): boolean {
  * @param offset        Byte offset to the IFD.
  * @param littleEndian  Whether the TIFF uses little-endian byte order.
  * @returns             Array of IFD entries.
- * @throws {Error} `TIFF: tag data overlaps` when the entries together hold
+ * @throws {MalformedInputError} `TIFF: tag data overlaps` when the entries together hold
  *   more values than twice the file length.
  */
 export function parseTiffIfd(data: Uint8Array, offset: number, littleEndian: boolean): IfdEntry[] {
@@ -185,7 +190,8 @@ export function parseTiffIfd(data: Uint8Array, offset: number, littleEndian: boo
     for (let j = 0; j < count; j++) {
       const pos = valueOffset + j * typeSize;
       if (pos + readSize > data.length) break;
-      if (++valuesRead > 2 * data.length) throw new Error('TIFF: tag data overlaps');
+      if (++valuesRead > 2 * data.length)
+        throw new MalformedInputError('TIFF: tag data overlaps', { format: 'tiff' });
 
       switch (type) {
         case 1: // BYTE
@@ -244,7 +250,7 @@ function getNextIfdOffset(
 /**
  * Find the IFD at a given page index by following the IFD chain.
  *
- * @throws {Error} `TIFF: the IFD chain repeats offset N` when the walk
+ * @throws {MalformedInputError} `TIFF: the IFD chain repeats offset N` when the walk
  *   reaches an offset it has already read.
  * @throws {ResourceLimitError} `maxImageFrames` when the walk would read
  *   more than 4,096 IFDs.
@@ -261,10 +267,15 @@ function findIfdAtPage(
     assertWithinLimit('maxImageFrames', i + 2);
     offset = getNextIfdOffset(data, offset, littleEndian);
     if (offset === 0) {
-      throw new Error(`TIFF: page index ${pageIndex} out of range (only ${i + 1} pages)`);
+      throw new InvalidArgumentError(
+        `TIFF: page index ${pageIndex} out of range (only ${i + 1} pages)`,
+        { argument: 'pageIndex' },
+      );
     }
     if (seen.has(offset)) {
-      throw new Error(`TIFF: the IFD chain repeats offset ${offset}`);
+      throw new MalformedInputError(`TIFF: the IFD chain repeats offset ${offset}`, {
+        format: 'tiff',
+      });
     }
     seen.add(offset);
   }
@@ -564,7 +575,7 @@ function decodeJpegStrip(
   // handles TIFF container parsing, we provide a simplified extraction.
   // For full JPEG decoding, the caller should use the JPEG module.
   // Here we throw a descriptive error.
-  throw new Error(
+  throw new UnsupportedFeatureError(
     'TIFF JPEG-in-TIFF compression: JPEG strip decoding requires a JPEG decoder. ' +
       'This is supported when running with the JPEG WASM module initialized.',
   );
@@ -582,14 +593,14 @@ function decodeJpegStrip(
  *
  * @param data  Raw TIFF bytes.
  * @returns     Number of IFDs (pages).
- * @throws {Error} `TIFF: the IFD chain repeats offset N` when an IFD points
+ * @throws {MalformedInputError} `TIFF: the IFD chain repeats offset N` when an IFD points
  *   back to an offset already read.
  * @throws {ResourceLimitError} `maxImageFrames` when the chain has more than
  *   4,096 IFDs.
  */
 export function getTiffPageCount(data: Uint8Array): number {
   if (!isTiff(data)) {
-    throw new Error('TIFF: invalid TIFF header');
+    throw new MalformedInputError('TIFF: invalid TIFF header', { format: 'tiff' });
   }
 
   const littleEndian = data[0] === 0x49;
@@ -600,7 +611,9 @@ export function getTiffPageCount(data: Uint8Array): number {
 
   while (offset !== 0 && offset < data.length) {
     if (seen.has(offset)) {
-      throw new Error(`TIFF: the IFD chain repeats offset ${offset}`);
+      throw new MalformedInputError(`TIFF: the IFD chain repeats offset ${offset}`, {
+        format: 'tiff',
+      });
     }
     seen.add(offset);
     assertWithinLimit('maxImageFrames', count + 1);
@@ -647,18 +660,21 @@ export function decodeTiffAll(data: Uint8Array): TiffImage[] {
  *   is above 65,536; `maxImagePixels` when width times height is above 2^28;
  *   `maxImageBytes` when the decoded samples are above 256 MiB; `maxImageFrames`
  *   when the IFD chain walked to the page is longer than 4,096.
- * @throws {Error} `TIFF: the IFD chain repeats offset N` when the chain walked
+ * @throws {MalformedInputError} `TIFF: the IFD chain repeats offset N` when the chain walked
  *   to the page revisits an offset.
- * @throws {Error} `TIFF: negative ImageWidth, ImageLength or sample size` when
+ * @throws {MalformedInputError} `TIFF: negative ImageWidth, ImageLength or sample size` when
  *   a tag stated as a signed type holds a negative value.
- * @throws {Error} `TIFF: strip data overlaps` when the Deflate strips together
+ * @throws {MalformedInputError} `TIFF: strip data overlaps` when the Deflate strips together
  *   are longer than the file.
- * @throws {Error} `TIFF: tag data overlaps` when the entries of an IFD together
+ * @throws {MalformedInputError} `TIFF: tag data overlaps` when the entries of an IFD together
  *   hold more values than twice the file length.
  */
 export function decodeTiff(data: Uint8Array, options?: TiffDecodeOptions): TiffImage {
   if (!isTiff(data)) {
-    throw new Error('TIFF: invalid TIFF header (expected II or MM byte order marker + 42)');
+    throw new MalformedInputError(
+      'TIFF: invalid TIFF header (expected II or MM byte order marker + 42)',
+      { format: 'tiff' },
+    );
   }
 
   const littleEndian = data[0] === 0x49; // 'I' = little-endian
@@ -682,11 +698,13 @@ export function decodeTiff(data: Uint8Array, options?: TiffDecodeOptions): TiffI
   const stripByteCounts = getTagValues(entries, TAG_STRIP_BYTE_COUNTS);
 
   if (width === undefined || height === undefined) {
-    throw new Error('TIFF: missing ImageWidth or ImageHeight tag');
+    throw new MalformedInputError('TIFF: missing ImageWidth or ImageHeight tag', {
+      format: 'tiff',
+    });
   }
 
   if (!stripOffsets || stripOffsets.length === 0) {
-    throw new Error('TIFF: missing StripOffsets tag');
+    throw new MalformedInputError('TIFF: missing StripOffsets tag', { format: 'tiff' });
   }
 
   // JPEG tables (for JPEG-in-TIFF)
@@ -708,7 +726,9 @@ export function decodeTiff(data: Uint8Array, options?: TiffDecodeOptions): TiffI
 
   // The sizes the tags state are checked before anything is allocated from them.
   if (width < 0 || height < 0 || bytesPerRow < 0) {
-    throw new Error('TIFF: negative ImageWidth, ImageLength or sample size');
+    throw new MalformedInputError('TIFF: negative ImageWidth, ImageLength or sample size', {
+      format: 'tiff',
+    });
   }
   assertWithinLimit('maxImageDimension', width);
   assertWithinLimit('maxImageDimension', height);
@@ -750,7 +770,8 @@ export function decodeTiff(data: Uint8Array, options?: TiffDecodeOptions): TiffI
         break;
       case COMPRESS_DEFLATE:
         deflateBytesRead += stripByteCount;
-        if (deflateBytesRead > data.length) throw new Error('TIFF: strip data overlaps');
+        if (deflateBytesRead > data.length)
+          throw new MalformedInputError('TIFF: strip data overlaps', { format: 'tiff' });
         decompressed = decompressDeflate(compressedData, expectedStripBytes);
         break;
       case COMPRESS_JPEG:
@@ -764,7 +785,7 @@ export function decodeTiff(data: Uint8Array, options?: TiffDecodeOptions): TiffI
         );
         break;
       default:
-        throw new Error(`TIFF: unsupported compression type ${compression}`);
+        throw new UnsupportedFeatureError(`TIFF: unsupported compression type ${compression}`);
     }
 
     // Copy decompressed data to output
@@ -796,7 +817,7 @@ export function decodeTiff(data: Uint8Array, options?: TiffDecodeOptions): TiffI
       }
     }
   } else {
-    throw new Error(`TIFF: unsupported BitsPerSample ${bitsPerSample}`);
+    throw new UnsupportedFeatureError(`TIFF: unsupported BitsPerSample ${bitsPerSample}`);
   }
 
   const channels =

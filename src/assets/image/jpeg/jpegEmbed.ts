@@ -25,6 +25,8 @@
  * No require() — ESM import only.
  */
 
+import { MalformedInputError, UnsupportedFeatureError } from '../../../errors.js';
+
 // ---------------------------------------------------------------------------
 // Public interfaces
 // ---------------------------------------------------------------------------
@@ -132,11 +134,13 @@ interface JpegSofData {
  *
  * @param data - Raw JPEG file bytes.
  * @returns Parsed SOF data.
- * @throws If the data is not a valid JPEG or no SOF marker is found.
+ * @throws {MalformedInputError} Format `jpeg`, if the data is not a valid JPEG or no SOF marker is found.
  */
 function parseJpegSof(data: Uint8Array): JpegSofData {
   if (data.length < 2 || data[0] !== 0xff || data[1] !== SOI) {
-    throw new Error('Invalid JPEG: missing SOI marker (expected 0xFFD8)');
+    throw new MalformedInputError('Invalid JPEG: missing SOI marker (expected 0xFFD8)', {
+      format: 'jpeg',
+    });
   }
 
   const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
@@ -191,7 +195,7 @@ function parseJpegSof(data: Uint8Array): JpegSofData {
     offset += segmentLength;
   }
 
-  throw new Error('Invalid JPEG: no SOF marker found');
+  throw new MalformedInputError('Invalid JPEG: no SOF marker found', { format: 'jpeg' });
 }
 
 /**
@@ -362,7 +366,7 @@ export function embedJpeg(jpegData: Uint8Array): JpegEmbedResult {
       colorSpace = 'DeviceCMYK';
       break;
     default:
-      throw new Error(`Unsupported JPEG component count: ${sof.componentCount}`);
+      throw new UnsupportedFeatureError(`Unsupported JPEG component count: ${sof.componentCount}`);
   }
 
   return {

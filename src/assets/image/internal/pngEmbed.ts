@@ -27,6 +27,7 @@
 
 import { flateEncode, inflateFlateUpTo } from '../../../codecs/internal/pdfFlate.js';
 import { assertWithinLimit } from '../../../internal/limits.js';
+import { MalformedInputError, UnsupportedFeatureError } from '../../../errors.js';
 
 // ---------------------------------------------------------------------------
 // Public interfaces
@@ -142,15 +143,18 @@ interface PngChunk {
  * Validate the PNG signature.
  *
  * @param data - The raw PNG bytes.
- * @throws If the signature does not match.
+ * @throws {MalformedInputError} Format `png`, if the signature does not match.
  */
 function validatePngSignature(data: Uint8Array): void {
   if (data.length < 8) {
-    throw new Error('PNG data too small — expected at least 8 bytes for the signature');
+    throw new MalformedInputError(
+      'PNG data too small — expected at least 8 bytes for the signature',
+      { format: 'png' },
+    );
   }
   for (let i = 0; i < 8; i++) {
     if (data[i] !== PNG_SIGNATURE[i]) {
-      throw new Error('Invalid PNG signature');
+      throw new MalformedInputError('Invalid PNG signature', { format: 'png' });
     }
   }
 }
@@ -194,7 +198,9 @@ function parseChunks(data: Uint8Array): PngChunk[] {
  */
 function parseIhdr(chunk: PngChunk): IhdrData {
   if (chunk.type !== 'IHDR' || chunk.data.length < 13) {
-    throw new Error('Invalid PNG: missing or malformed IHDR chunk');
+    throw new MalformedInputError('Invalid PNG: missing or malformed IHDR chunk', {
+      format: 'png',
+    });
   }
 
   const view = new DataView(chunk.data.buffer, chunk.data.byteOffset, chunk.data.byteLength);
@@ -216,7 +222,7 @@ function parseIhdr(chunk: PngChunk): IhdrData {
 function concatenateIdatChunks(chunks: PngChunk[]): Uint8Array {
   const idatChunks = chunks.filter((c) => c.type === 'IDAT');
   if (idatChunks.length === 0) {
-    throw new Error('Invalid PNG: no IDAT chunks found');
+    throw new MalformedInputError('Invalid PNG: no IDAT chunks found', { format: 'png' });
   }
 
   const totalLength = idatChunks.reduce((sum, c) => sum + c.data.length, 0);
@@ -421,7 +427,9 @@ function reconstructFilters(
           reconstructed = (raw + paethPredictor(a, b, c)) & 0xff;
           break;
         default:
-          throw new Error(`Unknown PNG filter type: ${filterType}`);
+          throw new MalformedInputError(`Unknown PNG filter type: ${filterType}`, {
+            format: 'png',
+          });
       }
 
       result[dstOffset + x] = reconstructed;
@@ -586,7 +594,7 @@ export function embedPng(pngData: Uint8Array): PngEmbedResult {
   // 2. Parse chunks
   const chunks = parseChunks(pngData);
   if (chunks.length === 0) {
-    throw new Error('Invalid PNG: no chunks found');
+    throw new MalformedInputError('Invalid PNG: no chunks found', { format: 'png' });
   }
 
   // 3. Parse IHDR
@@ -649,7 +657,9 @@ function embedIndexedPng(
   transparency: Uint8Array | undefined,
 ): PngEmbedResult {
   if (!palette) {
-    throw new Error('Invalid PNG: indexed color type requires PLTE chunk');
+    throw new MalformedInputError('Invalid PNG: indexed color type requires PLTE chunk', {
+      format: 'png',
+    });
   }
 
   // Fast path: no transparency — pass IDAT data directly to PDF.
@@ -905,7 +915,9 @@ function embedComplexPng(
 
     case PngColorType.Indexed: {
       if (!palette) {
-        throw new Error('Invalid PNG: indexed color type requires PLTE chunk');
+        throw new MalformedInputError('Invalid PNG: indexed color type requires PLTE chunk', {
+          format: 'png',
+        });
       }
       imageData = compressForPdf(pixels);
       colorSpace = 'Indexed';
@@ -914,7 +926,7 @@ function embedComplexPng(
     }
 
     default:
-      throw new Error(`Unsupported PNG color type: ${ihdr.colorType}`);
+      throw new UnsupportedFeatureError(`Unsupported PNG color type: ${ihdr.colorType}`);
   }
 
   return {

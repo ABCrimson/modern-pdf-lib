@@ -30,6 +30,7 @@
  */
 
 import { inflateFlateUpTo } from '../../codecs/internal/pdfFlate.js';
+import { MalformedInputError, UnsupportedFeatureError } from '../../errors.js';
 import { assertWithinLimit } from '../../internal/limits.js';
 
 // ---------------------------------------------------------------------------
@@ -120,11 +121,12 @@ export const isWoff2: (data: Uint8Array) => boolean = (data) =>
  *
  * @param data - The font container bytes.
  * @returns A {@link WoffInfo} describing the container.
- * @throws If the data is too small or carries an unrecognised signature.
+ * @throws {MalformedInputError} Format `woff`, when the data is too small or carries an
+ *   unrecognised signature.
  */
 export function readWoffHeader(data: Uint8Array): WoffInfo {
   if (data.length < WOFF_HEADER_SIZE) {
-    throw new RangeError('WOFF: data too small for header');
+    throw new MalformedInputError('WOFF: data too small for header', { format: 'woff' });
   }
 
   const sig = readUint32(data, 0);
@@ -134,7 +136,9 @@ export function readWoffHeader(data: Uint8Array): WoffInfo {
   } else if (sig === SIGNATURE_WOFF2) {
     signature = 'wOF2';
   } else {
-    throw new Error('WOFF: not a WOFF/WOFF2 file (bad signature)');
+    throw new MalformedInputError('WOFF: not a WOFF/WOFF2 file (bad signature)', {
+      format: 'woff',
+    });
   }
 
   // Header layout (shared by WOFF1 and WOFF2):
@@ -171,20 +175,22 @@ export function readWoffHeader(data: Uint8Array): WoffInfo {
  *
  * @param data - The WOFF1 (or WOFF2) container bytes.
  * @returns The reconstructed raw sfnt bytes.
- * @throws `'WOFF2 decode not yet supported'` for WOFF2 input, or a
- *         descriptive error when a WOFF1 container is malformed.
- * @throws `'WOFF1: table data overlaps'` when the stored data of two tables
- *         overlaps; thrown before any table is inflated.
+ * @throws {UnsupportedFeatureError} `'WOFF2 decode not yet supported'` for WOFF2 input.
+ * @throws {MalformedInputError} Format `woff`, when a WOFF1 container is malformed;
+ *         `'WOFF1: table data overlaps'` when the stored data of two tables
+ *         overlaps, thrown before any table is inflated.
  * @throws {ResourceLimitError} `maxFontBytes` when the table lengths the
  *         directory states, or `totalSfntSize`, are above 128 MiB; thrown
  *         before any table is inflated.
  */
 export function decodeWoff(data: Uint8Array): Uint8Array {
   if (isWoff2(data)) {
-    throw new Error('WOFF2 decode not yet supported');
+    throw new UnsupportedFeatureError('WOFF2 decode not yet supported');
   }
   if (!isWoff(data)) {
-    throw new Error('decodeWoff: not a WOFF1 file (bad signature)');
+    throw new MalformedInputError('decodeWoff: not a WOFF1 file (bad signature)', {
+      format: 'woff',
+    });
   }
 
   const header = readWoffHeader(data);
@@ -193,7 +199,7 @@ export function decodeWoff(data: Uint8Array): Uint8Array {
   const dirStart = WOFF_HEADER_SIZE;
   const dirEnd = dirStart + numTables * WOFF1_DIR_ENTRY_SIZE;
   if (data.length < dirEnd) {
-    throw new RangeError('WOFF1: data too small for table directory');
+    throw new MalformedInputError('WOFF1: data too small for table directory', { format: 'woff' });
   }
 
   // Read the table directory.
@@ -205,7 +211,7 @@ export function decodeWoff(data: Uint8Array): Uint8Array {
     const compLength = readUint32(data, off + 8);
     const origLength = readUint32(data, off + 12);
     if (tag < 0 || tableOffset < 0 || compLength < 0 || origLength < 0) {
-      throw new RangeError('WOFF1: malformed table directory entry');
+      throw new MalformedInputError('WOFF1: malformed table directory entry', { format: 'woff' });
     }
     entries.push({ tag, offset: tableOffset, compLength, origLength });
   }
@@ -215,7 +221,8 @@ export function decodeWoff(data: Uint8Array): Uint8Array {
   const byOffset = entries.filter((e) => e.compLength > 0).sort((a, b) => a.offset - b.offset);
   let storedEnd = 0;
   for (const entry of byOffset) {
-    if (entry.offset < storedEnd) throw new Error('WOFF1: table data overlaps');
+    if (entry.offset < storedEnd)
+      throw new MalformedInputError('WOFF1: table data overlaps', { format: 'woff' });
     storedEnd = entry.offset + entry.compLength;
   }
 
@@ -231,11 +238,11 @@ export function decodeWoff(data: Uint8Array): Uint8Array {
   for (let i = 0; i < numTables; i++) {
     const entry = entries[i];
     if (entry === undefined) {
-      throw new RangeError('WOFF1: missing table entry');
+      throw new MalformedInputError('WOFF1: missing table entry', { format: 'woff' });
     }
     const sliceEnd = entry.offset + entry.compLength;
     if (sliceEnd > data.length) {
-      throw new RangeError('WOFF1: table data out of bounds');
+      throw new MalformedInputError('WOFF1: table data out of bounds', { format: 'woff' });
     }
     const raw = data.subarray(entry.offset, sliceEnd);
 
@@ -246,7 +253,7 @@ export function decodeWoff(data: Uint8Array): Uint8Array {
     } else {
       decoded = inflateZlib(raw, entry.origLength);
       if (decoded.length !== entry.origLength) {
-        throw new Error('WOFF1: inflated table size mismatch');
+        throw new MalformedInputError('WOFF1: inflated table size mismatch', { format: 'woff' });
       }
     }
     tableData.push(decoded);
@@ -262,10 +269,10 @@ export function decodeWoff(data: Uint8Array): Uint8Array {
  * inflating the rest. The Adler-32 trailer is not checked, and data without
  * the zlib header is read as raw DEFLATE.
  *
- * @throws {Error} `WOFF1: inflated table size mismatch` when the data
- *   inflates to more than `origLength` bytes.
- * @throws {Error} `WOFF1: failed to inflate table data` when the data
- *   inflates neither way.
+ * @throws {MalformedInputError} Format `woff`, `WOFF1: inflated table size mismatch`
+ *   when the data inflates to more than `origLength` bytes.
+ * @throws {MalformedInputError} Format `woff`, `WOFF1: failed to inflate table data`
+ *   when the data inflates neither way.
  * @throws {ResourceLimitError} `maxDecodedStreamBytes` when `origLength` is
  *   above it; not reachable from `decodeWoff`, which refuses such a length
  *   first.
@@ -278,10 +285,10 @@ function inflateZlib(data: Uint8Array, origLength: number): Uint8Array {
   try {
     inflated = inflateFlateUpTo(data, origLength);
   } catch {
-    throw new Error('WOFF1: failed to inflate table data');
+    throw new MalformedInputError('WOFF1: failed to inflate table data', { format: 'woff' });
   }
   if (inflated.truncated) {
-    throw new Error('WOFF1: inflated table size mismatch');
+    throw new MalformedInputError('WOFF1: inflated table size mismatch', { format: 'woff' });
   }
   return inflated.data;
 }
@@ -305,7 +312,7 @@ function buildSfnt(
     const entry = entries[i];
     const decoded = tableData[i];
     if (entry === undefined || decoded === undefined) {
-      throw new RangeError('WOFF1: table/data length mismatch');
+      throw new MalformedInputError('WOFF1: table/data length mismatch', { format: 'woff' });
     }
     ordered.push({ tag: entry.tag, data: decoded });
   }
@@ -316,7 +323,7 @@ function buildSfnt(
   for (let i = 0; i < ordered.length; i++) {
     const item = ordered[i];
     if (item === undefined) {
-      throw new RangeError('WOFF1: missing ordered table');
+      throw new MalformedInputError('WOFF1: missing ordered table', { format: 'woff' });
     }
     total += align4(item.data.length);
   }
@@ -338,7 +345,7 @@ function buildSfnt(
   for (let i = 0; i < ordered.length; i++) {
     const item = ordered[i];
     if (item === undefined) {
-      throw new RangeError('WOFF1: missing ordered table');
+      throw new MalformedInputError('WOFF1: missing ordered table', { format: 'woff' });
     }
     const len = item.data.length;
 

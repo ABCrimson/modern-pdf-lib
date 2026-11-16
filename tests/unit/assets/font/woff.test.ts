@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { MalformedInputError, UnsupportedFeatureError } from '../../../../src/errors.js';
 import { deflateRawSync, deflateSync } from 'node:zlib';
 import { zlibSync } from 'fflate';
 import { isWoff, isWoff2, readWoffHeader, decodeWoff } from '../../../../src/assets/font/woff.js';
@@ -288,5 +289,54 @@ describe('decodeWoff (WOFF1)', () => {
   it('throws for non-WOFF input', () => {
     const ttf = new Uint8Array([0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]);
     expect(() => decodeWoff(ttf)).toThrow();
+  });
+});
+
+describe('decodeWoff typed errors', () => {
+  function caught(fn: () => unknown): unknown {
+    try {
+      fn();
+    } catch (error) {
+      return error;
+    }
+    return undefined;
+  }
+
+  /** A WOFF1 header that claims `numTables` tables and carries no directory. */
+  function woffHeader(signature: string, numTables: number): Uint8Array {
+    const data = new Uint8Array(WOFF_HEADER_SIZE);
+    const view = new DataView(data.buffer);
+    view.setUint32(0, tagToUint32(signature), false);
+    view.setUint16(12, numTables, false);
+    return data;
+  }
+
+  it('throws MalformedInputError for a WOFF1 file cut inside its table directory', () => {
+    const error = caught(() => decodeWoff(woffHeader('wOFF', 3)));
+    expect(error).toBeInstanceOf(MalformedInputError);
+    expect(error).toMatchObject({
+      code: 'malformed-input',
+      format: 'woff',
+      message: 'WOFF1: data too small for table directory',
+    });
+  });
+
+  it('throws MalformedInputError for a header cut short and for a bad signature', () => {
+    const tooSmall = caught(() => readWoffHeader(new Uint8Array(10)));
+    expect(tooSmall).toBeInstanceOf(MalformedInputError);
+    expect(tooSmall).toMatchObject({ format: 'woff', message: 'WOFF: data too small for header' });
+
+    const badSignature = caught(() => decodeWoff(new Uint8Array(WOFF_HEADER_SIZE)));
+    expect(badSignature).toBeInstanceOf(MalformedInputError);
+    expect(badSignature).toMatchObject({ format: 'woff' });
+  });
+
+  it('throws UnsupportedFeatureError for WOFF2', () => {
+    const error = caught(() => decodeWoff(woffHeader('wOF2', 0)));
+    expect(error).toBeInstanceOf(UnsupportedFeatureError);
+    expect(error).toMatchObject({
+      code: 'unsupported-feature',
+      message: 'WOFF2 decode not yet supported',
+    });
   });
 });

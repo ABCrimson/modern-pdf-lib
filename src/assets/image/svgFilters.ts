@@ -41,6 +41,8 @@
  * No Buffer — Uint8Array exclusively. No fs. ESM only.
  */
 
+import { InvalidArgumentError } from '../../errors.js';
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -79,8 +81,9 @@ function allocBuffer(width: number, height: number): RasterBuffer {
 /** Throw if two buffers differ in dimensions (an op needs them equal). */
 function assertSameSize(a: RasterBuffer, b: RasterBuffer): void {
   if (a.width !== b.width || a.height !== b.height) {
-    throw new Error(
+    throw new InvalidArgumentError(
       `svgFilters: buffer size mismatch (${a.width}x${a.height} vs ${b.width}x${b.height})`,
+      { argument: 'b' },
     );
   }
 }
@@ -148,7 +151,9 @@ export function feFlood(
   rgba: [number, number, number, number],
 ): RasterBuffer {
   if (width <= 0 || height <= 0 || !Number.isInteger(width) || !Number.isInteger(height)) {
-    throw new Error(`svgFilters.feFlood: invalid dimensions ${width}x${height}`);
+    throw new InvalidArgumentError(`svgFilters.feFlood: invalid dimensions ${width}x${height}`, {
+      argument: width > 0 && Number.isInteger(width) ? 'height' : 'width',
+    });
   }
   const out = allocBuffer(width, height);
   const r = clamp8(rgba[0]);
@@ -190,11 +195,14 @@ export function feFlood(
  * @param src    Source buffer.
  * @param matrix Exactly 20 numbers (4 rows × 5 columns).
  * @returns      A new buffer with the matrix applied.
- * @throws If `matrix` does not contain exactly 20 values.
+ * @throws {InvalidArgumentError} If `matrix` does not contain exactly 20 values.
  */
 export function feColorMatrix(src: RasterBuffer, matrix: number[]): RasterBuffer {
   if (matrix.length !== 20) {
-    throw new Error(`svgFilters.feColorMatrix: matrix must have 20 values, got ${matrix.length}`);
+    throw new InvalidArgumentError(
+      `svgFilters.feColorMatrix: matrix must have 20 values, got ${matrix.length}`,
+      { argument: 'matrix' },
+    );
   }
   const m = matrix;
   const out = allocBuffer(src.width, src.height);
@@ -449,14 +457,15 @@ function threeBoxBlurAxis(
  * @param stdDevX Standard deviation along X (>= 0).
  * @param stdDevY Standard deviation along Y; defaults to `stdDevX`.
  * @returns       A new, blurred buffer of the same size.
- * @throws If either standard deviation is negative.
+ * @throws {InvalidArgumentError} If either standard deviation is negative.
  */
 export function feGaussianBlur(src: RasterBuffer, stdDevX: number, stdDevY?: number): RasterBuffer {
   const sx = stdDevX;
   const sy = stdDevY ?? stdDevX;
   if (sx < 0 || sy < 0 || Number.isNaN(sx) || Number.isNaN(sy)) {
-    throw new Error(
+    throw new InvalidArgumentError(
       `svgFilters.feGaussianBlur: standard deviation must be >= 0 (got ${sx}, ${sy})`,
+      { argument: sx >= 0 ? 'stdDevY' : 'stdDevX' },
     );
   }
   if (sx === 0 && sy === 0) {
@@ -509,7 +518,7 @@ export type CompositeOp = 'over' | 'in' | 'out' | 'atop' | 'xor';
  * @param b  Destination (background) buffer.
  * @param op Porter-Duff operator.
  * @returns  A new composited buffer of the same size.
- * @throws If the buffers differ in size.
+ * @throws {InvalidArgumentError} If the buffers differ in size.
  */
 export function feComposite(a: RasterBuffer, b: RasterBuffer, op: CompositeOp): RasterBuffer {
   assertSameSize(a, b);
@@ -552,7 +561,12 @@ export function feComposite(a: RasterBuffer, b: RasterBuffer, op: CompositeOp): 
         break;
       default: {
         const never: never = op;
-        throw new Error(`svgFilters.feComposite: unknown operator ${String(never)}`);
+        throw new InvalidArgumentError(
+          `svgFilters.feComposite: unknown operator ${String(never)}`,
+          {
+            argument: 'op',
+          },
+        );
       }
     }
 
@@ -604,7 +618,7 @@ export type BlendMode = 'normal' | 'multiply' | 'screen' | 'darken' | 'lighten';
  * @param b    Destination (bottom) buffer.
  * @param mode Blend mode.
  * @returns    A new blended buffer of the same size.
- * @throws If the buffers differ in size.
+ * @throws {InvalidArgumentError} If the buffers differ in size.
  */
 export function feBlend(a: RasterBuffer, b: RasterBuffer, mode: BlendMode): RasterBuffer {
   assertSameSize(a, b);
@@ -641,7 +655,9 @@ export function feBlend(a: RasterBuffer, b: RasterBuffer, mode: BlendMode): Rast
           break;
         default: {
           const never: never = mode;
-          throw new Error(`svgFilters.feBlend: unknown mode ${String(never)}`);
+          throw new InvalidArgumentError(`svgFilters.feBlend: unknown mode ${String(never)}`, {
+            argument: 'mode',
+          });
         }
       }
 

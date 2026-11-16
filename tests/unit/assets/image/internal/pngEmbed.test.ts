@@ -12,6 +12,7 @@ import { crc32, deflateSync as zlibDeflateSync, inflateSync } from 'node:zlib';
 import { embedJpeg, isJpeg, getJpegInfo } from '../../../../../src/assets/image/jpeg/jpegEmbed.js';
 import { embedPng as decodePng } from '../../../../../src/assets/image/internal/pngEmbed.js';
 import { createPdf } from '../../../../../src/index.js';
+import { MalformedInputError, UnsupportedFeatureError } from '../../../../../src/errors.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -410,5 +411,32 @@ describe('PNG stream data for /FlateDecode', () => {
     const result = decodePng(pngFromRows(2, 1, 16, 4, rows));
     expect([...inflateSync(result.imageData)]).toEqual([0x11, 0x33]);
     expect([...inflateSync(result.smaskData ?? new Uint8Array(0))]).toEqual([0x22, 0x44]);
+  });
+});
+
+describe('embedPng typed errors', () => {
+  function caught(fn: () => unknown): unknown {
+    try {
+      fn();
+    } catch (error) {
+      return error;
+    }
+    return undefined;
+  }
+
+  it('throws MalformedInputError of format png for a bad signature and a short file', () => {
+    for (const data of [new Uint8Array(8), new Uint8Array(4)]) {
+      const error = caught(() => decodePng(data));
+      expect(error).toBeInstanceOf(MalformedInputError);
+      expect(error).toMatchObject({ code: 'malformed-input', format: 'png' });
+    }
+  });
+
+  it('throws UnsupportedFeatureError for an unknown PNG colour type', () => {
+    // Colour type 1 is not defined by the PNG specification; 16-bit depth takes the full decode path.
+    const png = pngFromRows(1, 1, 16, 1, new Uint8Array(3));
+    const error = caught(() => decodePng(png));
+    expect(error).toBeInstanceOf(UnsupportedFeatureError);
+    expect(error).toMatchObject({ code: 'unsupported-feature' });
   });
 });

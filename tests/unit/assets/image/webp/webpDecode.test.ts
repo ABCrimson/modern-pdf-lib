@@ -16,7 +16,11 @@ import {
   isWebP,
   isWebPLossless,
 } from '../../../../../src/assets/image/webp/webpDecode.js';
-import { ResourceLimitError, UnsupportedFilterError } from '../../../../../src/errors.js';
+import {
+  MalformedInputError,
+  ResourceLimitError,
+  UnsupportedFilterError,
+} from '../../../../../src/errors.js';
 
 // ---------------------------------------------------------------------------
 // Helpers — minimal valid WebP construction
@@ -470,5 +474,33 @@ describe('WebPImage interface', () => {
     const webp = buildMinimalWebP_VP8L(1, 1, 0, 0, 0);
     const img = decodeWebP(webp);
     expect(img.pixels.length).toBe(img.width * img.height * img.channels);
+  });
+});
+
+describe('decodeWebP typed errors', () => {
+  function caught(fn: () => unknown): unknown {
+    try {
+      fn();
+    } catch (error) {
+      return error;
+    }
+    return undefined;
+  }
+
+  it('throws MalformedInputError of format webp for a bad RIFF header', () => {
+    const error = caught(() => decodeWebP(new Uint8Array(20)));
+    expect(error).toBeInstanceOf(MalformedInputError);
+    expect(error).toMatchObject({ code: 'malformed-input', format: 'webp' });
+  });
+
+  it('throws MalformedInputError of format webp for a RIFF file with no VP8 or VP8L chunk', () => {
+    const unknownChunk = chunk('UNKN', new Uint8Array(4));
+    const fileSize = 12 + unknownChunk.length;
+    const data = new Uint8Array(fileSize);
+    data.set(riffHeader(fileSize), 0);
+    data.set(unknownChunk, 12);
+    const error = caught(() => decodeWebP(data));
+    expect(error).toBeInstanceOf(MalformedInputError);
+    expect(error).toMatchObject({ format: 'webp', message: 'WebP: no VP8 or VP8L chunk found' });
   });
 });

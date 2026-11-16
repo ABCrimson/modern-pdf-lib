@@ -11,6 +11,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
+import { InvalidArgumentError } from '../../../../src/errors.js';
 import {
   feColorMatrix,
   feColorMatrixSaturate,
@@ -328,5 +329,29 @@ describe('feBlend', () => {
     const a = feFlood(1, 1, [255, 0, 0, 255]);
     const b = feFlood(2, 1, [0, 0, 255, 255]);
     expect(() => feBlend(a, b, 'normal')).toThrow();
+  });
+});
+
+describe('svgFilters typed errors', () => {
+  function caught(fn: () => unknown): unknown {
+    try {
+      fn();
+    } catch (error) {
+      return error;
+    }
+    return undefined;
+  }
+
+  it.each([
+    ['feColorMatrix', 'matrix', () => feColorMatrix(makeBuffer(1, 1), [1, 2, 3])],
+    ['feGaussianBlur', 'stdDevX', () => feGaussianBlur(makeBuffer(1, 1), -1)],
+    ['feFlood', 'width', () => feFlood(0, 1, [0, 0, 0, 255])],
+    ['feFlood', 'height', () => feFlood(1, 1.5, [0, 0, 0, 255])],
+    ['feComposite', 'b', () => feComposite(makeBuffer(1, 1), makeBuffer(2, 1), 'over')],
+    ['feBlend', 'b', () => feBlend(makeBuffer(1, 1), makeBuffer(1, 2), 'normal')],
+  ])('%s throws InvalidArgumentError naming %s', (_name, argument, call) => {
+    const error = caught(call);
+    expect(error).toBeInstanceOf(InvalidArgumentError);
+    expect(error).toMatchObject({ code: 'invalid-argument', argument });
   });
 });

@@ -11,7 +11,11 @@
  */
 
 import { assertWithinLimit } from '../../../internal/limits.js';
-import { UnsupportedFilterError } from '../../../errors.js';
+import {
+  MalformedInputError,
+  UnsupportedFeatureError,
+  UnsupportedFilterError,
+} from '../../../errors.js';
 
 // ---------------------------------------------------------------------------
 // Public interfaces
@@ -65,7 +69,7 @@ interface RiffChunk {
 
 function parseRiffChunks(data: Uint8Array): RiffChunk[] {
   if (!isWebP(data)) {
-    throw new Error('WebP: invalid RIFF/WEBP header');
+    throw new MalformedInputError('WebP: invalid RIFF/WEBP header', { format: 'webp' });
   }
 
   const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
@@ -118,7 +122,7 @@ export function decodeWebP(data: Uint8Array): WebPImage {
     throw new UnsupportedFilterError('VP8');
   }
 
-  throw new Error('WebP: no VP8 or VP8L chunk found');
+  throw new MalformedInputError('WebP: no VP8 or VP8L chunk found', { format: 'webp' });
 }
 
 // ---------------------------------------------------------------------------
@@ -248,10 +252,12 @@ function readSymbol(reader: VP8LBitReader, tree: HuffmanNode): number {
   while (node.symbol === undefined) {
     const bit = reader.readBit();
     if (bit === 0) {
-      if (!node.left) throw new Error('WebP VP8L: invalid Huffman code');
+      if (!node.left)
+        throw new MalformedInputError('WebP VP8L: invalid Huffman code', { format: 'webp' });
       node = node.left;
     } else {
-      if (!node.right) throw new Error('WebP VP8L: invalid Huffman code');
+      if (!node.right)
+        throw new MalformedInputError('WebP VP8L: invalid Huffman code', { format: 'webp' });
       node = node.right;
     }
   }
@@ -302,12 +308,14 @@ function readCodeLengths(
  */
 function decodeVP8L(data: Uint8Array): WebPImage {
   if (data.length < 5) {
-    throw new Error('WebP VP8L: data too short');
+    throw new MalformedInputError('WebP VP8L: data too short', { format: 'webp' });
   }
 
   // VP8L signature byte
   if (data[0] !== 0x2f) {
-    throw new Error('WebP VP8L: invalid signature byte (expected 0x2F)');
+    throw new MalformedInputError('WebP VP8L: invalid signature byte (expected 0x2F)', {
+      format: 'webp',
+    });
   }
 
   const reader = new VP8LBitReader(data, 1);
@@ -319,7 +327,7 @@ function decodeVP8L(data: Uint8Array): WebPImage {
   const versionBits = reader.readBits(3);
 
   if (versionBits !== 0) {
-    throw new Error(`WebP VP8L: unsupported version ${versionBits}`);
+    throw new UnsupportedFeatureError(`WebP VP8L: unsupported version ${versionBits}`);
   }
 
   // Refuse an image above the size limits before any buffer is sized from the header.

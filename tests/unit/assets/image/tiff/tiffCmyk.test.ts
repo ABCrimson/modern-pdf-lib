@@ -6,6 +6,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
+import { InvalidArgumentError } from '../../../../../src/errors.js';
 import {
   convertTiffCmykToRgb,
   embedTiffCmyk,
@@ -235,5 +236,22 @@ describe('isCmykTiff', () => {
       { tag: 332, value: 1 }, // InkSet = CMYK
     ];
     expect(isCmykTiff(entries)).toBe(true);
+  });
+});
+
+describe('TIFF CMYK typed errors', () => {
+  it.each([
+    ['convertTiffCmykToRgb', () => convertTiffCmykToRgb(new Uint8Array(4), 2, 2)],
+    ['embedTiffCmyk', () => embedTiffCmyk(new Uint8Array(4), 2, 2)],
+  ])('%s throws InvalidArgumentError for a pixel buffer of the wrong length', (_name, call) => {
+    let error: unknown;
+    try {
+      call();
+    } catch (thrown) {
+      error = thrown;
+    }
+    expect(error).toBeInstanceOf(InvalidArgumentError);
+    expect(error).toMatchObject({ code: 'invalid-argument' });
+    expect((error as InvalidArgumentError).message).toContain('length mismatch');
   });
 });

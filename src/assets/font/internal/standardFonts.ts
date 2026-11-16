@@ -18,6 +18,8 @@
  *   src/assets/font/internal/standardEncoding.ts (ISO 32000 Annex D)
  */
 
+import { InvalidArgumentError } from '../../../errors.js';
+
 // ---------------------------------------------------------------------------
 // Public interface
 // ---------------------------------------------------------------------------
@@ -571,7 +573,7 @@ export function measureStandardText(
 ): number {
   const font = STANDARD_FONTS.get(fontName);
   if (!font) {
-    throw new Error(`Unknown standard font: ${fontName}`);
+    throw new InvalidArgumentError(`Unknown standard font: ${fontName}`, { argument: 'fontName' });
   }
 
   const scale = fontSize / 1000;
@@ -597,7 +599,7 @@ export function measureStandardText(
 export function standardFontHeight(fontName: StandardFontName, fontSize: number): number {
   const font = STANDARD_FONTS.get(fontName);
   if (!font) {
-    throw new Error(`Unknown standard font: ${fontName}`);
+    throw new InvalidArgumentError(`Unknown standard font: ${fontName}`, { argument: 'fontName' });
   }
   return ((font.ascender - font.descender) / 1000) * fontSize;
 }

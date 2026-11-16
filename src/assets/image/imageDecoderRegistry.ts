@@ -31,6 +31,8 @@
  * No require() — ESM import only.
  */
 
+import { MalformedInputError, UnsupportedFeatureError } from '../../errors.js';
+
 // ---------------------------------------------------------------------------
 // Public types
 // ---------------------------------------------------------------------------
@@ -147,7 +149,7 @@ export function getImageDecoder(format: string): ImageDecoder | undefined {
  */
 function validateDecodedResult(format: string, result: unknown): DecodedRasterImage {
   if (result === null || typeof result !== 'object') {
-    throw new Error(
+    throw new MalformedInputError(
       `Image decoder for format "${format}" returned a malformed result: ` +
         `expected an object with { width, height, rgba }, got ${typeof result}.`,
     );
@@ -156,21 +158,21 @@ function validateDecodedResult(format: string, result: unknown): DecodedRasterIm
   const { width, height, rgba } = result as Record<string, unknown>;
 
   if (typeof width !== 'number' || !Number.isInteger(width) || width <= 0) {
-    throw new Error(
+    throw new MalformedInputError(
       `Image decoder for format "${format}" returned a malformed result: ` +
         `width must be a positive integer, got ${String(width)}.`,
     );
   }
 
   if (typeof height !== 'number' || !Number.isInteger(height) || height <= 0) {
-    throw new Error(
+    throw new MalformedInputError(
       `Image decoder for format "${format}" returned a malformed result: ` +
         `height must be a positive integer, got ${String(height)}.`,
     );
   }
 
   if (!(rgba instanceof Uint8Array)) {
-    throw new Error(
+    throw new MalformedInputError(
       `Image decoder for format "${format}" returned a malformed result: ` +
         `rgba must be a Uint8Array, got ${rgba === null ? 'null' : typeof rgba}.`,
     );
@@ -178,7 +180,7 @@ function validateDecodedResult(format: string, result: unknown): DecodedRasterIm
 
   const expected = width * height * 4;
   if (rgba.length !== expected) {
-    throw new Error(
+    throw new MalformedInputError(
       `Image decoder for format "${format}" returned a malformed result: ` +
         `rgba length ${rgba.length} does not match width*height*4 = ` +
         `${width}*${height}*4 = ${expected}.`,
@@ -203,8 +205,8 @@ function validateDecodedResult(format: string, result: unknown): DecodedRasterIm
  * @param format  Format key, e.g. `'avif'`; normalized before lookup.
  * @param bytes   Raw, encoded image bytes, forwarded verbatim to the decoder.
  * @returns       A validated {@link DecodedRasterImage}.
- * @throws        If no decoder is registered for the format, or if the
- *                registered decoder returns a malformed result.
+ * @throws {UnsupportedFeatureError} If no decoder is registered for the format.
+ * @throws {MalformedInputError} If the registered decoder returns a malformed result.
  */
 export async function decodeRegisteredImage(
   format: string,
@@ -214,7 +216,7 @@ export async function decodeRegisteredImage(
   const decoder = registry.get(normalized);
 
   if (decoder === undefined) {
-    throw new Error(
+    throw new UnsupportedFeatureError(
       `No image decoder registered for format "${normalized}". ` +
         `This library does not bundle a decoder for this format; supply one ` +
         `with registerImageDecoder(${JSON.stringify(normalized)}, decoder), ` +

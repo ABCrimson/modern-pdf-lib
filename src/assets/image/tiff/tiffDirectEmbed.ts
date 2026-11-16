@@ -22,6 +22,11 @@
  */
 
 import { assertWithinLimit } from '../../../internal/limits.js';
+import {
+  InvalidArgumentError,
+  MalformedInputError,
+  UnsupportedFeatureError,
+} from '../../../errors.js';
 
 // ---------------------------------------------------------------------------
 // TIFF tag and compression constants
@@ -210,7 +215,7 @@ function readTagValue(data: Uint8Array, entry: IfdEntry, _le: boolean): number {
 /**
  * Read an array of offset values (LONG or SHORT) from a tag.
  *
- * @throws {Error} `TIFF: tag data out of bounds` when a tag with more than
+ * @throws {MalformedInputError} `TIFF: tag data out of bounds` when a tag with more than
  *   one value stores them past the end of the file.
  * @internal
  */
@@ -232,7 +237,7 @@ function readOffsetArray(data: Uint8Array, entry: IfdEntry, le: boolean): number
 
   // The whole array must lie inside the file; its length is read before the values are.
   if (offset + entry.count * elementSize > data.length) {
-    throw new Error('TIFF: tag data out of bounds');
+    throw new MalformedInputError('TIFF: tag data out of bounds', { format: 'tiff' });
   }
 
   for (let i = 0; i < entry.count; i++) {
@@ -256,16 +261,24 @@ function findIfdOffset(data: Uint8Array, le: boolean, page: number): number {
 
   for (let i = 0; i < page; i++) {
     if (ifdOffset === 0 || ifdOffset + 2 > data.length) {
-      throw new Error(`TIFF page ${page} not found (only ${i} pages available)`);
+      throw new InvalidArgumentError(`TIFF page ${page} not found (only ${i} pages available)`, {
+        argument: 'options.page',
+      });
     }
     const entryCount = readU16(data, ifdOffset, le);
     const nextIfdOffset = ifdOffset + 2 + entryCount * 12;
     if (nextIfdOffset + 4 > data.length) {
-      throw new Error(`TIFF page ${page} not found (only ${i + 1} pages available)`);
+      throw new InvalidArgumentError(
+        `TIFF page ${page} not found (only ${i + 1} pages available)`,
+        { argument: 'options.page' },
+      );
     }
     ifdOffset = readU32(data, nextIfdOffset, le);
     if (ifdOffset === 0) {
-      throw new Error(`TIFF page ${page} not found (only ${i + 1} pages available)`);
+      throw new InvalidArgumentError(
+        `TIFF page ${page} not found (only ${i + 1} pages available)`,
+        { argument: 'options.page' },
+      );
     }
   }
 
@@ -372,23 +385,23 @@ export function canDirectEmbed(data: Uint8Array): boolean {
  * @param data     Raw TIFF file bytes.
  * @param options  Optional settings (page index for multi-page TIFFs).
  * @returns        The embedding result with all data needed for a PDF image XObject.
- * @throws         If the TIFF format does not support direct embedding.
+ * @throws {UnsupportedFeatureError} If the TIFF format does not support direct embedding.
  * @throws {ResourceLimitError} `maxImageDimension` when the width or height is above 65,536;
  *   `maxImagePixels` when width times height is above 2^28; `maxImageBytes` when the strips or
  *   tiles together are above 256 MiB.
- * @throws {Error} `TIFF: tile width and length must be positive multiples of 16` for a tiled
+ * @throws {MalformedInputError} `TIFF: tile width and length must be positive multiples of 16` for a tiled
  *   image whose tile sides are not.
  */
 export function embedTiffDirect(data: Uint8Array, options?: DirectEmbedOptions): DirectEmbedResult {
   if (data.length < 8) {
-    throw new Error('TIFF data too short');
+    throw new MalformedInputError('TIFF data too short', { format: 'tiff' });
   }
 
   // Validate header
   const le = isLittleEndian(data);
   const magic = readU16(data, 2, le);
   if (magic !== 42) {
-    throw new Error('Invalid TIFF: bad magic number');
+    throw new MalformedInputError('Invalid TIFF: bad magic number', { format: 'tiff' });
   }
 
   const page = options?.page ?? 0;
@@ -404,7 +417,7 @@ export function embedTiffDirect(data: Uint8Array, options?: DirectEmbedOptions):
   const samplesPerPixel = getTag(entries, TAG_SAMPLES_PER_PIXEL, data, le) ?? 1;
 
   if (width === undefined || height === undefined) {
-    throw new Error('Invalid TIFF: missing width or height tags');
+    throw new MalformedInputError('Invalid TIFF: missing width or height tags', { format: 'tiff' });
   }
 
   // The sizes the tags state are checked before anything is allocated or looped over from them.
@@ -468,14 +481,16 @@ function extractStrips(
   const countEntry = getTagEntry(entries, TAG_STRIP_BYTE_COUNTS);
 
   if (!offsetEntry || !countEntry) {
-    throw new Error('Invalid TIFF: missing StripOffsets or StripByteCounts tags');
+    throw new MalformedInputError('Invalid TIFF: missing StripOffsets or StripByteCounts tags', {
+      format: 'tiff',
+    });
   }
 
   const offsets = readOffsetArray(data, offsetEntry, le);
   const counts = readOffsetArray(data, countEntry, le);
 
   if (offsets.length !== counts.length) {
-    throw new Error('TIFF strip offset/count mismatch');
+    throw new MalformedInputError('TIFF strip offset/count mismatch', { format: 'tiff' });
   }
 
   const result = new Uint8Array(sumStripBytes(data, offsets, counts));
@@ -495,7 +510,7 @@ function extractStrips(
  * Checks every strip or tile against the file and returns the total bytes.
  * Called before the output buffer exists.
  *
- * @throws {Error} `TIFF: strip data out of bounds` when a strip or tile
+ * @throws {MalformedInputError} `TIFF: strip data out of bounds` when a strip or tile
  *   extends past the end of the file.
  * @throws {ResourceLimitError} `maxImageBytes` when the total is above 256 MiB.
  * @internal
@@ -505,7 +520,7 @@ function sumStripBytes(data: Uint8Array, offsets: number[], counts: number[]): n
   for (let i = 0; i < offsets.length; i++) {
     const count = counts[i] ?? 0;
     if ((offsets[i] ?? 0) + count > data.length) {
-      throw new Error('TIFF: strip data out of bounds');
+      throw new MalformedInputError('TIFF: strip data out of bounds', { format: 'tiff' });
     }
     total += count;
     assertWithinLimit('maxImageBytes', total);
@@ -532,13 +547,15 @@ function extractTiles(
   const tileHeight = getTag(entries, TAG_TILE_LENGTH, data, le);
 
   if (!offsetEntry || !countEntry || tileWidth === undefined || tileHeight === undefined) {
-    throw new Error('Invalid TIFF: missing tile tags');
+    throw new MalformedInputError('Invalid TIFF: missing tile tags', { format: 'tiff' });
   }
 
   // TIFF 6.0 requires the tile sides to be multiples of 16; a side of 0 or a small one would make
   // the tile loop below copy the image a row, or a pixel, at a time.
   if (!(tileWidth >= 16 && tileHeight >= 16 && tileWidth % 16 === 0 && tileHeight % 16 === 0)) {
-    throw new Error('TIFF: tile width and length must be positive multiples of 16');
+    throw new MalformedInputError('TIFF: tile width and length must be positive multiples of 16', {
+      format: 'tiff',
+    });
   }
 
   const offsets = readOffsetArray(data, offsetEntry, le);
@@ -552,7 +569,7 @@ function extractTiles(
   if (compression === COMPRESSION_DEFLATE || compression === COMPRESSION_DEFLATE_PKZIP) {
     // Concatenate compressed tiles
     if (offsets.length !== counts.length) {
-      throw new Error('TIFF tile offset/count mismatch');
+      throw new MalformedInputError('TIFF tile offset/count mismatch', { format: 'tiff' });
     }
     const result = new Uint8Array(sumStripBytes(data, offsets, counts));
     let pos = 0;
@@ -618,7 +635,7 @@ function embedJpegInTiff(
 
   if (jpegOffset !== undefined && jpegLength !== undefined && jpegLength > 0) {
     if (jpegOffset + jpegLength > data.length) {
-      throw new Error('TIFF JPEG data extends beyond file');
+      throw new MalformedInputError('TIFF JPEG data extends beyond file', { format: 'tiff' });
     }
 
     const jpegData = data.subarray(jpegOffset, jpegOffset + jpegLength);
@@ -643,7 +660,9 @@ function embedJpegInTiff(
     const tileCountEntry = getTagEntry(entries, TAG_TILE_BYTE_COUNTS);
 
     if (!tileOffsetEntry || !tileCountEntry) {
-      throw new Error('TIFF JPEG: cannot find strip or tile data');
+      throw new MalformedInputError('TIFF JPEG: cannot find strip or tile data', {
+        format: 'tiff',
+      });
     }
 
     const offsets = readOffsetArray(data, tileOffsetEntry, le);
@@ -653,7 +672,9 @@ function embedJpegInTiff(
       const offset = offsets[0]!;
       const count = counts[0]!;
       if (offset + count > data.length) {
-        throw new Error('TIFF JPEG tile data extends beyond file');
+        throw new MalformedInputError('TIFF JPEG tile data extends beyond file', {
+          format: 'tiff',
+        });
       }
       return {
         width,
@@ -665,7 +686,9 @@ function embedJpegInTiff(
       };
     }
 
-    throw new Error('TIFF JPEG with multiple tiles is not supported for direct embedding');
+    throw new UnsupportedFeatureError(
+      'TIFF JPEG with multiple tiles is not supported for direct embedding',
+    );
   }
 
   const offsets = readOffsetArray(data, offsetEntry, le);
@@ -676,7 +699,7 @@ function embedJpegInTiff(
     const offset = offsets[0]!;
     const count = counts[0]!;
     if (offset + count > data.length) {
-      throw new Error('TIFF JPEG strip data extends beyond file');
+      throw new MalformedInputError('TIFF JPEG strip data extends beyond file', { format: 'tiff' });
     }
 
     return {
@@ -691,7 +714,7 @@ function embedJpegInTiff(
 
   // Multiple JPEG strips — concatenate (each strip should be a complete JPEG scan)
   if (offsets.length !== counts.length) {
-    throw new Error('TIFF strip offset/count mismatch');
+    throw new MalformedInputError('TIFF strip offset/count mismatch', { format: 'tiff' });
   }
   const jpegData = new Uint8Array(sumStripBytes(data, offsets, counts));
   let pos = 0;

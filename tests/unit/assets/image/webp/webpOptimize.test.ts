@@ -6,6 +6,7 @@
 
 import { crc32, inflateSync } from 'node:zlib';
 import { describe, it, expect } from 'vitest';
+import { InvalidArgumentError } from '../../../../../src/errors.js';
 import {
   recompressWebP,
   encodePngFromPixels,
@@ -270,5 +271,18 @@ describe('encodePngFromPixels IDAT data', () => {
     for (const c of chunks) {
       expect(c.crc).toBe(crc32(new Uint8Array([...new TextEncoder().encode(c.type), ...c.data])));
     }
+  });
+});
+
+describe('recompressWebP typed errors', () => {
+  it('throws InvalidArgumentError naming pixels for a pixel buffer of the wrong length', () => {
+    let error: unknown;
+    try {
+      recompressWebP(new Uint8Array(100), 8, 8);
+    } catch (thrown) {
+      error = thrown;
+    }
+    expect(error).toBeInstanceOf(InvalidArgumentError);
+    expect(error).toMatchObject({ code: 'invalid-argument', argument: 'pixels' });
   });
 });

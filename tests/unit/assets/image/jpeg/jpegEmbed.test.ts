@@ -8,6 +8,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { embedJpeg, isJpeg, getJpegInfo } from '../../../../../src/assets/image/jpeg/jpegEmbed.js';
+import { MalformedInputError, UnsupportedFeatureError } from '../../../../../src/errors.js';
 
 // ---------------------------------------------------------------------------
 // Helpers — JPEG builders
@@ -543,5 +544,34 @@ describe('JpegEmbedResult interface', () => {
       const result = embedJpeg(jpeg);
       expect(validColorSpaces).toContain(result.colorSpace);
     }
+  });
+});
+
+describe('embedJpeg typed errors', () => {
+  function caught(fn: () => unknown): unknown {
+    try {
+      fn();
+    } catch (error) {
+      return error;
+    }
+    return undefined;
+  }
+
+  it('throws MalformedInputError of format jpeg for data that does not start with SOI', () => {
+    const error = caught(() => embedJpeg(new Uint8Array([0x00, 0x01])));
+    expect(error).toBeInstanceOf(MalformedInputError);
+    expect(error).toMatchObject({ code: 'malformed-input', format: 'jpeg' });
+  });
+
+  it('throws MalformedInputError of format jpeg for a JPEG with no SOF marker', () => {
+    const error = caught(() => embedJpeg(new Uint8Array([0xff, 0xd8, 0xff, 0xd9])));
+    expect(error).toBeInstanceOf(MalformedInputError);
+    expect(error).toMatchObject({ format: 'jpeg', message: 'Invalid JPEG: no SOF marker found' });
+  });
+
+  it('throws UnsupportedFeatureError for a JPEG with two components', () => {
+    const error = caught(() => embedJpeg(buildMinimalJpeg(1, 1, 2)));
+    expect(error).toBeInstanceOf(UnsupportedFeatureError);
+    expect(error).toMatchObject({ code: 'unsupported-feature' });
   });
 });

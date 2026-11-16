@@ -18,6 +18,11 @@
 
 import { describe, it, expect } from 'vitest';
 import {
+  InvalidArgumentError,
+  MalformedInputError,
+  UnsupportedFeatureError,
+} from '../../../../../src/errors.js';
+import {
   decodeTiff,
   decodeTiffPage,
   decodeTiffAll,
@@ -1005,5 +1010,59 @@ describe('TiffImage interface', () => {
     const tiff = buildRgbTiff(5, 3, 0, 0, 0);
     const result = decodeTiff(tiff);
     expect(result.pixels.length).toBe(result.width * result.height * result.channels);
+  });
+});
+
+describe('TIFF decoder typed errors', () => {
+  const BASE_TAGS: TiffTag[] = [
+    { tag: 256, type: 3, values: [2] },
+    { tag: 257, type: 3, values: [2] },
+    { tag: 258, type: 3, values: [8] },
+    { tag: 259, type: 3, values: [1] },
+    { tag: 262, type: 3, values: [1] },
+    { tag: 273, type: 4, values: [0] },
+    { tag: 277, type: 3, values: [1] },
+    { tag: 278, type: 4, values: [2] },
+    { tag: 279, type: 4, values: [4] },
+  ];
+
+  function caught(fn: () => unknown): unknown {
+    try {
+      fn();
+    } catch (error) {
+      return error;
+    }
+    return undefined;
+  }
+
+  it('throws MalformedInputError of format tiff for a bad header', () => {
+    for (const call of [
+      () => decodeTiff(new Uint8Array(10)),
+      () => getTiffPageCount(new Uint8Array(10)),
+    ]) {
+      const error = caught(call);
+      expect(error).toBeInstanceOf(MalformedInputError);
+      expect(error).toMatchObject({ code: 'malformed-input', format: 'tiff' });
+    }
+  });
+
+  it('throws MalformedInputError of format tiff when the strip offsets are missing', () => {
+    const tags = BASE_TAGS.filter((t) => t.tag !== 273);
+    const error = caught(() => decodeTiff(buildTiff(tags, new Uint8Array(4))));
+    expect(error).toBeInstanceOf(MalformedInputError);
+    expect(error).toMatchObject({ format: 'tiff', message: 'TIFF: missing StripOffsets tag' });
+  });
+
+  it('throws UnsupportedFeatureError for an unknown compression type', () => {
+    const tags = BASE_TAGS.map((t) => (t.tag === 259 ? { ...t, values: [99] } : t));
+    const error = caught(() => decodeTiff(buildTiff(tags, new Uint8Array(4))));
+    expect(error).toBeInstanceOf(UnsupportedFeatureError);
+    expect(error).toMatchObject({ code: 'unsupported-feature' });
+  });
+
+  it('throws InvalidArgumentError naming pageIndex for a page that does not exist', () => {
+    const error = caught(() => decodeTiffPage(buildTiff(BASE_TAGS, new Uint8Array(4)), 5));
+    expect(error).toBeInstanceOf(InvalidArgumentError);
+    expect(error).toMatchObject({ code: 'invalid-argument', argument: 'pageIndex' });
   });
 });

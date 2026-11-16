@@ -18,6 +18,7 @@
  */
 
 import { flateEncode } from '../../../codecs/internal/pdfFlate.js';
+import { InvalidArgumentError } from '../../../errors.js';
 
 // ---------------------------------------------------------------------------
 // Internal: minimal JPEG encoder (baseline, quality-scaled quantization)
@@ -701,9 +702,10 @@ export function recompressWebP(
   } else if (pixels.length === pixelCount) {
     channels = 1;
   } else {
-    throw new Error(
+    throw new InvalidArgumentError(
       `WebP pixel data length mismatch: got ${pixels.length} bytes ` +
         `for ${width}x${height} image (expected ${pixelCount * 4}, ${pixelCount * 3}, or ${pixelCount})`,
+      { argument: 'pixels' },
     );
   }
 

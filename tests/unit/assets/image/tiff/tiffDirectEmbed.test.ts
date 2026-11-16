@@ -6,6 +6,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
+import { InvalidArgumentError, MalformedInputError } from '../../../../../src/errors.js';
 import {
   canDirectEmbed,
   embedTiffDirect,
@@ -433,5 +434,32 @@ describe('embedTiffDirect', () => {
     const pixelData = new Uint8Array(2 * 2 * 3);
     const tiff = buildUncompressedTiff(2, 2, pixelData);
     expect(() => embedTiffDirect(tiff, { page: 5 })).toThrow('page 5 not found');
+  });
+});
+
+describe('embedTiffDirect typed errors', () => {
+  function caught(fn: () => unknown): unknown {
+    try {
+      fn();
+    } catch (error) {
+      return error;
+    }
+    return undefined;
+  }
+
+  it('throws MalformedInputError of format tiff for data that is too short or has a bad magic', () => {
+    const badMagic = new Uint8Array([0x49, 0x49, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00]);
+    for (const data of [new Uint8Array(4), badMagic]) {
+      const error = caught(() => embedTiffDirect(data));
+      expect(error).toBeInstanceOf(MalformedInputError);
+      expect(error).toMatchObject({ code: 'malformed-input', format: 'tiff' });
+    }
+  });
+
+  it('throws InvalidArgumentError naming options.page for a page that does not exist', () => {
+    const tiff = buildUncompressedTiff(2, 2, new Uint8Array(2 * 2 * 3));
+    const error = caught(() => embedTiffDirect(tiff, { page: 5 }));
+    expect(error).toBeInstanceOf(InvalidArgumentError);
+    expect(error).toMatchObject({ code: 'invalid-argument', argument: 'options.page' });
   });
 });
