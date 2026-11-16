@@ -35,8 +35,16 @@ import { liveEntries } from './pdfWriter.js';
 import type { PdfSaveOptions } from './pdfWriter.js';
 import type { PdfDocument } from '../pdfDocument.js';
 import { MalformedInputError, UnsupportedEncryptionError } from '../../errors.js';
-import { warnOnce } from '../../internal/warnings.js';
+import { UNSUPPORTED_OPTIONS, rejectOption } from '../../internal/options.js';
 import { latin1Bytes } from '../../internal/latin1.js';
+
+/**
+ * The row of the option table that refuses a finite `objectStreamThreshold`, removed from
+ * saveIncremental() in 0.41.0 (PdfSaveOptions keeps the member because save() honours it).
+ */
+const REFUSED_OPTIONS = /* @__PURE__ */ UNSUPPORTED_OPTIONS.filter(
+  (rule) => rule.entry === 'saveIncremental()',
+);
 
 // ---------------------------------------------------------------------------
 // Encrypted-input guard
@@ -331,11 +339,13 @@ function findOriginalTrailerSize(data: Uint8Array): number {
  *                       (original + new/modified).
  * @param structure      Document structure references (catalog, info, pages).
  * @param changedObjects Set of object numbers that are new or modified.
- * @param options        Optional save options (`compress` and `compressionLevel`). The
- *                       incremental writer writes no object streams and does not use WASM, so
- *                       a finite `objectStreamThreshold` and `useWasm: true` have no effect and
- *                       each emits a one-time `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`).
+ * @param options        Optional save options: `compress`, `compressionLevel`, and `useWasm`
+ *                       (the appended streams are compressed with the WASM deflate module when
+ *                       it has been initialized). The incremental writer writes no object
+ *                       streams, so a finite `objectStreamThreshold` is refused.
  * @returns              The complete incremental save result.
+ * @throws {UnsupportedOptionError} When `options.objectStreamThreshold` is finite: the option
+ *         was removed from saveIncremental() in 0.41.0.
  * @throws {UnsupportedEncryptionError} When `originalBytes` is an encrypted
  *         PDF (its bytes contain the name `/Encrypt`): the
  *         appended objects and trailer would not be encrypted. Also when the
@@ -358,18 +368,15 @@ export function saveIncremental(
 ): IncrementalSaveResult {
   assertSavableDecryptedContent(registry, false, 'saveIncremental()');
   assertUnencryptedInput(originalBytes, 'saveIncremental()');
-  for (const name of ['objectStreamThreshold', 'useWasm'] as const) {
-    const value = options?.[name];
-    if (name === 'useWasm' ? value === true : value !== undefined && value !== Infinity) {
-      warnOnce(
-        `ignored-option:saveIncremental ${name}`,
-        'MPL_IGNORED_OPTION',
-        `\`saveIncremental()\`: the option \`${name}\` has no effect in this version.`,
-      );
-    }
+  // PdfSaveOptions is shared with save(), so the type keeps the member; this guard is removed in
+  // 0.50.0.
+  const threshold = options?.objectStreamThreshold;
+  if (threshold !== undefined && threshold !== Infinity) {
+    for (const rule of REFUSED_OPTIONS) rejectOption(rule);
   }
   const compress = options?.compress ?? true;
   const compressionLevel = options?.compressionLevel ?? 6;
+  const useWasm = options?.useWasm ?? false;
 
   // Find the original xref offset (for the /Prev pointer)
   const prevXrefOffset = findOriginalXrefOffset(originalBytes);
@@ -408,7 +415,7 @@ export function saveIncremental(
         rewrapLegacyStream(entry.object);
         rewriteSyncFlushedStream(entry.object);
       }
-      if (compress) compressPdfStream(entry.object, compressionLevel);
+      if (compress) compressPdfStream(entry.object, compressionLevel, useWasm);
     }
 
     // Record the byte offset (relative to the start of the appendix,

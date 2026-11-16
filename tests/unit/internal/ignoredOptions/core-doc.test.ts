@@ -1,15 +1,27 @@
 /**
- * Entries that accept an option and do not act on it warn once per option with the code
- * `MPL_IGNORED_OPTION`: `StreamingPdfParser` (`parseContentStreams`), `embedFont()` (`subset`,
- * `features`), `saveAsStream()` (`objectStreamThreshold`) and `saveIncremental()`
- * (`objectStreamThreshold`, `useWasm`). Each row checks the first call, the second call, the
- * absent and undefined option, the values that change nothing, and that the message names no
- * caller value. A second block checks that the results do not change with the option.
+ * The options of the document, font, streaming-parser and incremental-save entries that 0.40.9
+ * accepted, ignored and warned about (`MPL_IGNORED_OPTION`), each with its 0.41.0 fate:
+ *
+ * - Refused with an UnsupportedOptionError: `parseContentStreams: true` of `StreamingPdfParser`
+ *   and `features` of `embedFont()` (removed in 0.41.0, and gone from their types); a finite
+ *   `objectStreamThreshold` of `saveIncremental()` (removed in 0.41.0; PdfSaveOptions keeps the
+ *   member because `save()` honours it); a finite `objectStreamThreshold` of `saveAsStream()`
+ *   (planned for 0.41.2).
+ * - Carried out: `subset: false` of `embedFont()` embeds the font program whole
+ *   (tests/oracle/embed-font-full.test.ts reads the output with qpdf and pdf.js), and
+ *   `useWasm: true` of `saveIncremental()` is passed to the stream compressor.
+ *
+ * Each refused row checks the error, that the absent and undefined option and the values that
+ * change nothing are accepted, and that the message names no caller value. No call emits a
+ * `MPL_IGNORED_OPTION` warning.
  */
 
+import { inflateSync } from 'node:zlib';
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { MockInstance } from 'vitest';
 import { createPdf } from '../../../../src/index.js';
+import { UnsupportedOptionError } from '../../../../src/errors.js';
+import type { PdfLibVersion } from '../../../../src/errors.js';
 import { StreamingPdfParser } from '../../../../src/parser/streamingParser.js';
 import { saveIncremental } from '../../../../src/core/io/incrementalWriter.js';
 import {
@@ -18,10 +30,10 @@ import {
   PdfName,
   PdfNumber,
   PdfObjectRegistry,
+  PdfStream,
   PdfString,
 } from '../../../../src/core/pdfObjects.js';
 import { resetWarningsForTesting } from '../../../../src/internal/warnings.js';
-import { CODE, TYPE, ignoredOptionMessage as message } from '../../../helpers/ignoredOptions.js';
 
 let pdf: Uint8Array;
 
@@ -39,14 +51,19 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  const ignored = emit.mock.calls.filter(
+    ([, options]) => (options as { code?: string } | undefined)?.code === 'MPL_IGNORED_OPTION',
+  );
   vi.restoreAllMocks();
   resetWarningsForTesting();
+  expect(ignored, 'MPL_IGNORED_OPTION warnings').toEqual([]);
 });
 
+/** A registry with an Info dict, an empty page tree and a content stream long enough to compress. */
 function incrementalInputs() {
   const registry = new PdfObjectRegistry();
   const info = new PdfDict();
-  info.set('/Title', PdfString.literal('Updated'));
+  info.set('/Title', PdfString.fromText('Updated'));
   const infoRef = registry.register(info);
   const pages = new PdfDict();
   pages.set('/Type', PdfName.of('Pages'));
@@ -57,10 +74,13 @@ function incrementalInputs() {
   catalog.set('/Type', PdfName.of('Catalog'));
   catalog.set('/Pages', pagesRef);
   const catalogRef = registry.register(catalog);
+  const content = registry.register(
+    PdfStream.fromString('BT /F1 12 Tf 50 700 Td (Incremental) Tj ET\n'.repeat(40)),
+  );
   return {
     registry,
     structure: { catalogRef, infoRef, pagesRef },
-    changed: new Set([infoRef.objectNumber]),
+    changed: new Set([infoRef.objectNumber, content.objectNumber]),
   };
 }
 
@@ -69,152 +89,146 @@ const incremental = (extra: Record<string, unknown>) => {
   return saveIncremental(pdf, registry, structure, changed, extra);
 };
 
-interface Row {
+/** A refused option: the call throws UnsupportedOptionError with the row's fields and message. */
+interface Refused {
   readonly entry: string;
-  /** The subject as it appears in the message, with `()` for a function. */
-  readonly subject: string;
   readonly option: string;
-  /** The value passed to trigger the warning. */
+  /** A value that is refused. */
   readonly value: unknown;
-  /** Values that change nothing and must not warn. */
-  readonly quiet?: readonly unknown[];
+  /** Values that change nothing and are accepted. */
+  readonly quiet: readonly unknown[];
+  readonly plannedFor?: PdfLibVersion;
+  readonly message: string;
   readonly invoke: (extra: Record<string, unknown>) => unknown;
 }
 
-const ROWS: readonly Row[] = [
+const REFUSED: readonly Refused[] = [
   {
-    entry: 'StreamingPdfParser',
-    subject: 'StreamingPdfParser',
+    entry: 'new StreamingPdfParser()',
     option: 'parseContentStreams',
     value: true,
     quiet: [false],
+    message: '`new StreamingPdfParser()`: the option `parseContentStreams` was removed in 0.41.0.',
     invoke: (extra) => new StreamingPdfParser(extra),
   },
   {
-    entry: 'embedFont',
-    subject: 'embedFont()',
-    option: 'subset',
-    value: false,
-    quiet: [true],
-    invoke: (extra) => createPdf().embedFont('Helvetica', extra),
-  },
-  {
-    entry: 'embedFont',
-    subject: 'embedFont()',
+    entry: 'embedFont()',
     option: 'features',
     value: { kern: true },
     quiet: [],
+    message: '`embedFont()`: the option `features` was removed in 0.41.0.',
     invoke: (extra) => createPdf().embedFont('Helvetica', extra),
   },
   {
-    entry: 'saveAsStream',
-    subject: 'saveAsStream()',
+    entry: 'saveAsStream()',
     option: 'objectStreamThreshold',
     value: 4747,
     quiet: [Infinity],
+    plannedFor: '0.41.2',
+    message:
+      '`saveAsStream()`: the option `objectStreamThreshold` is not supported in this release; it is planned for 0.41.2.',
     invoke: (extra) => createPdf().saveAsStream(extra),
   },
   {
-    entry: 'saveIncremental',
-    subject: 'saveIncremental()',
+    entry: 'saveIncremental()',
     option: 'objectStreamThreshold',
     value: 4747,
     quiet: [Infinity],
-    invoke: incremental,
-  },
-  {
-    entry: 'saveIncremental',
-    subject: 'saveIncremental()',
-    option: 'useWasm',
-    value: true,
-    quiet: [false],
+    message: '`saveIncremental()`: the option `objectStreamThreshold` was removed in 0.41.0.',
     invoke: incremental,
   },
 ];
 
-function ignoredCalls(): unknown[][] {
-  return emit.mock.calls.filter(([, options]) => (options as { code?: string }).code === CODE);
-}
+/** Runs `row.invoke` so that a synchronous throw and a rejected promise both reject. */
+const run = async (row: Refused, extra: Record<string, unknown>): Promise<unknown> =>
+  row.invoke(extra);
 
-describe.each(ROWS)('$entry option $option', (row) => {
-  it('warns once on the first call and not on the second', async () => {
-    await row.invoke({ [row.option]: row.value });
-    expect(ignoredCalls()).toHaveLength(1);
-    expect(emit).toHaveBeenCalledWith(message(row.subject, row.option), { type: TYPE, code: CODE });
-
-    await row.invoke({ [row.option]: row.value });
-    expect(ignoredCalls()).toHaveLength(1);
-  });
-
-  it('does not warn when the option is absent or undefined', async () => {
-    await row.invoke({});
-    await row.invoke({ [row.option]: undefined });
-    expect(ignoredCalls()).toHaveLength(0);
-  });
-
-  it('does not warn for a value that changes nothing', async () => {
-    for (const quiet of row.quiet ?? []) await row.invoke({ [row.option]: quiet });
-    expect(ignoredCalls()).toHaveLength(0);
-  });
-
-  it('names no caller value in the message', async () => {
-    await row.invoke({ [row.option]: row.value });
-    const [text] = ignoredCalls()[0] as [string];
-    expect(text).toBe(message(row.subject, row.option));
+describe.each(REFUSED)('$entry option $option', (row) => {
+  it('throws UnsupportedOptionError with the fixed message', async () => {
+    const error: unknown = await run(row, { [row.option]: row.value }).catch((e: unknown) => e);
+    expect(error).toBeInstanceOf(UnsupportedOptionError);
+    expect(error).toMatchObject({
+      code: 'unsupported-option',
+      entry: row.entry,
+      option: row.option,
+      plannedFor: row.plannedFor,
+      message: row.message,
+    });
     if (typeof row.value === 'number') {
-      expect(text).not.toContain(String(row.value));
+      expect((error as Error).message).not.toContain(String(row.value));
     }
+  });
+
+  it('accepts the option absent, undefined and with a value that changes nothing', async () => {
+    await run(row, {});
+    await run(row, { [row.option]: undefined });
+    for (const quiet of row.quiet) await run(row, { [row.option]: quiet });
   });
 });
 
-async function readAll(stream: ReadableStream<Uint8Array>): Promise<Uint8Array> {
-  const chunks: Uint8Array[] = [];
-  for await (const chunk of stream) chunks.push(chunk);
-  const out = new Uint8Array(chunks.reduce((n, c) => n + c.length, 0));
-  let at = 0;
-  for (const c of chunks) {
-    out.set(c, at);
-    at += c.length;
+describe('refused before anything is changed', () => {
+  it('saveAsStream() adds no default page', () => {
+    const doc = createPdf();
+    expect(() => doc.saveAsStream({ objectStreamThreshold: 1 })).toThrow(UnsupportedOptionError);
+    expect(doc.getPageCount()).toBe(0);
+  });
+
+  it('embedFont() registers no font', async () => {
+    const doc = createPdf();
+    await expect(
+      doc.embedFont('Helvetica', { features: { kern: true } } as Record<string, unknown>),
+    ).rejects.toThrow(UnsupportedOptionError);
+    expect((await doc.embedFont('Courier')).name).toBe('F1');
+  });
+});
+
+/** The data of every /FlateDecode stream of a file whose streams carry a direct /Length. */
+function flateStreams(bytes: Uint8Array): Uint8Array[] {
+  const text = new TextDecoder('latin1').decode(bytes);
+  const found: Uint8Array[] = [];
+  for (const m of text.matchAll(/(?<!end)stream\r?\n/g)) {
+    const header = text.slice(text.lastIndexOf(' obj', m.index), m.index);
+    if (!header.includes('/FlateDecode')) continue;
+    const start = m.index + m[0].length;
+    found.push(bytes.subarray(start, start + Number(/\/Length (\d+)/.exec(header)?.[1])));
   }
-  return out;
+  return found;
 }
 
-describe('results stay the same', () => {
-  it('StreamingPdfParser returns the same result with and without parseContentStreams', () => {
-    const run = (options?: { parseContentStreams: boolean }) => {
+describe('options carried out', () => {
+  it('embedFont() with subset: false and true returns the standard font as without it', async () => {
+    const plain = await createPdf().embedFont('Helvetica');
+    for (const subset of [false, true]) {
+      const font = await createPdf().embedFont('Helvetica', { subset });
+      expect(font.name).toBe(plain.name);
+      expect(font.widthOfTextAtSize('Subset', 12)).toBe(plain.widthOfTextAtSize('Subset', 12));
+    }
+  });
+
+  it('saveIncremental() with useWasm: true writes zlib data that node:zlib inflates', () => {
+    const { bytes } = incremental({ useWasm: true });
+    const appended = bytes.subarray(pdf.length);
+    const streams = flateStreams(appended);
+    expect(streams).toHaveLength(1);
+    expect(new TextDecoder('latin1').decode(inflateSync(streams[0] ?? new Uint8Array()))).toBe(
+      'BT /F1 12 Tf 50 700 Td (Incremental) Tj ET\n'.repeat(40),
+    );
+  });
+
+  it('saveIncremental() with useWasm: true and the WASM deflate module not initialized writes the bytes of useWasm: false', () => {
+    expect(incremental({ useWasm: true }).bytes).toEqual(incremental({ useWasm: false }).bytes);
+  });
+
+  it('saveIncremental() with Infinity as objectStreamThreshold writes the bytes of the option absent', () => {
+    expect(incremental({ objectStreamThreshold: Infinity }).bytes).toEqual(incremental({}).bytes);
+  });
+
+  it('StreamingPdfParser with parseContentStreams: false returns the result of the option absent', () => {
+    const parse = (options?: Record<string, unknown>) => {
       const parser = new StreamingPdfParser(options);
       parser.feed(pdf);
       return parser.end();
     };
-    expect(run({ parseContentStreams: true })).toEqual(run());
-  });
-
-  it('embedFont returns the same font with and without subset and features', async () => {
-    const plain = await createPdf().embedFont('Helvetica');
-    const withOptions = await createPdf().embedFont('Helvetica', {
-      subset: false,
-      features: { kern: true },
-    });
-    expect(withOptions.name).toBe(plain.name);
-  });
-
-  it('saveAsStream writes the same bytes with and without objectStreamThreshold and has no object stream', async () => {
-    const build = () => {
-      const doc = createPdf();
-      doc.addPage();
-      return doc;
-    };
-    const plain = await readAll(build().saveAsStream({ compress: false }));
-    const withOption = await readAll(
-      build().saveAsStream({ compress: false, objectStreamThreshold: 1 }),
-    );
-    expect(withOption.length).toBe(plain.length);
-    expect(new TextDecoder('latin1').decode(withOption)).not.toContain('/ObjStm');
-  });
-
-  it('saveIncremental writes the same bytes with and without objectStreamThreshold and useWasm', () => {
-    expect(incremental({ objectStreamThreshold: 1, useWasm: true }).bytes).toEqual(
-      incremental({}).bytes,
-    );
+    expect(parse({ parseContentStreams: false })).toEqual(parse());
   });
 });

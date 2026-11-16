@@ -60,7 +60,7 @@ import type { StandardFontName as StdFontName } from '../assets/font/internal/st
 import type { EmbeddedFont } from '../assets/font/fontEmbed.js';
 import { embedFont as embedTtfFont } from '../assets/font/fontEmbed.js';
 import { subsetFont, buildSubsetCmap } from '../assets/font/fontSubset.js';
-import { warnOnce } from '../internal/warnings.js';
+import { UNSUPPORTED_OPTIONS, rejectOption } from '../internal/options.js';
 import { isOpenTypeCFF } from '../assets/font/otfDetect.js';
 import { findTable } from '../assets/font/internal/cffEmbed.js';
 import { embedPng as decodePng } from '../assets/image/internal/pngEmbed.js';
@@ -143,15 +143,13 @@ export type StandardFontName = (typeof StandardFonts)[keyof typeof StandardFonts
  */
 export interface EmbedFontOptions {
   /**
-   * Has no effect in this version: a font is subset at save time whatever this says, and
-   * passing `false` emits a one-time `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`).
+   * Whether the program of a TrueType or CFF-based OpenType font is subset when the document is
+   * saved. Default `true`: the program is reduced to the glyphs the document draws. `false`
+   * embeds the program whole, and the font is then embedded whole even when another
+   * `embedFont()` call for the same font passed `true` or left the option out. A standard font
+   * embeds no program, so the option changes nothing for it.
    */
   subset?: boolean | undefined;
-  /**
-   * Has no effect in this version: embedding applies no OpenType feature flags, and passing a
-   * value emits a one-time `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`).
-   */
-  features?: Record<string, boolean> | undefined;
   /** Custom name to use in the font dictionary's /BaseFont instead of the font's PostScript name. */
   customName?: string | undefined;
 }
@@ -177,6 +175,24 @@ export interface SetTitleOptions {
  * list (part of its declaration) unchanged.
  */
 const savingForCopy = new WeakSet<PdfDocument>();
+
+/** The row of the option table that refuses `features` of embedFont(), removed in 0.41.0. */
+const REFUSED_EMBED_FONT_OPTIONS = /* @__PURE__ */ UNSUPPORTED_OPTIONS.filter(
+  (rule) => rule.entry === 'embedFont()',
+);
+
+/** The row of the option table that refuses a finite `objectStreamThreshold` of saveAsStream(). */
+const REFUSED_SAVE_AS_STREAM_OPTIONS = /* @__PURE__ */ UNSUPPORTED_OPTIONS.filter(
+  (rule) => rule.entry === 'saveAsStream()',
+);
+
+/** Marks an embedded font to be written whole when an `embedFont()` call passed `subset: false`. */
+function keepWhole(
+  entry: { subset: boolean } | undefined,
+  options: EmbedFontOptions | undefined,
+): void {
+  if (entry !== undefined && options?.subset === false) entry.subset = false;
+}
 
 /** True when an object of `registry` is or holds a string or stream decrypted on load. */
 function registryHoldsDecryptedObject(registry: PdfObjectRegistry): boolean {
@@ -616,6 +632,8 @@ export class PdfDocument {
       toUnicodeStream: PdfStream;
       /** The CIDFont dict — its `/W` array is updated at save time. */
       cidFontDict: PdfDict;
+      /** False when an `embedFont()` call passed `subset: false`: the program is written whole. */
+      subset: boolean;
     }
   >();
 
@@ -633,21 +651,20 @@ export class PdfDocument {
    * `heightAtSize()` methods for text measurement.
    *
    * @param fontNameOrData  Base font name string or raw TTF/OTF bytes.
-   * @param options         Optional embedding options (subset, OpenType features).
+   * @param options         Optional embedding options (`subset`, `customName`).
    * @returns               A {@link FontRef} to pass to drawing methods.
+   * @throws {UnsupportedOptionError} When `options` has a `features` value: the option was
+   *         removed in 0.41.0 (embedding applies no OpenType feature flags).
    */
   async embedFont(
     fontNameOrData: string | Uint8Array,
     options?: EmbedFontOptions,
   ): Promise<FontRef> {
-    for (const name of ['subset', 'features'] as const) {
-      const value = options?.[name];
-      if (name === 'subset' ? value === false : value !== undefined) {
-        warnOnce(
-          `ignored-option:embedFont ${name}`,
-          'MPL_IGNORED_OPTION',
-          `\`embedFont()\`: the option \`${name}\` has no effect in this version.`,
-        );
+    // The removed option is not in the type; a JavaScript caller or a cast can still pass it. This
+    // guard is removed in 0.50.0.
+    for (const rule of REFUSED_EMBED_FONT_OPTIONS) {
+      if (rule.option !== undefined && options !== undefined) {
+        if (Reflect.get(options, rule.option) !== undefined) rejectOption(rule);
       }
     }
     if (typeof fontNameOrData === 'string') {
@@ -759,7 +776,10 @@ export class PdfDocument {
 
     // De-duplicate by PostScript name
     const existing = this.embeddedFonts.get(`__ttf__${psName}`);
-    if (existing) return existing;
+    if (existing) {
+      keepWhole(this.ttfFonts.get(existing.name), options);
+      return existing;
+    }
 
     this.fontCounter++;
     this.ttfCounter++;
@@ -886,6 +906,7 @@ export class PdfDocument {
       fontFileDict,
       toUnicodeStream,
       cidFontDict,
+      subset: options?.subset !== false,
     });
 
     // Register the font and its Identity-H encoder on all existing pages
@@ -914,7 +935,10 @@ export class PdfDocument {
 
     // De-duplicate by PostScript name
     const existing = this.embeddedFonts.get(`__cff__${psName}`);
-    if (existing) return existing;
+    if (existing) {
+      keepWhole(this.ttfFonts.get(existing.name), options);
+      return existing;
+    }
 
     this.fontCounter++;
     this.ttfCounter++;
@@ -1044,6 +1068,7 @@ export class PdfDocument {
       fontFileDict,
       toUnicodeStream,
       cidFontDict,
+      subset: options?.subset !== false,
     });
 
     // Register the font and its Identity-H encoder on all existing pages
@@ -2520,9 +2545,10 @@ export class PdfDocument {
    * The stream writer does not encrypt, so a document with encryption
    * configured is refused before anything is changed or written.
    *
-   * @param options  Compression and serialization options. `objectStreamThreshold` has
-   *         no effect here (the stream writer writes no object streams), and a finite
-   *         value emits a one-time `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`).
+   * @param options  Compression and serialization options. The stream writer writes no
+   *         object streams, so a finite `objectStreamThreshold` is refused.
+   * @throws {UnsupportedOptionError} When `options.objectStreamThreshold` is finite: object
+   *         streams in the stream writer are planned for 0.41.2.
    * @throws {UnsupportedEncryptionError} When encryption is configured
    *         (`encrypt()` was called); use `save()` instead. Also when the
    *         document holds content decrypted from an encrypted PDF, which
@@ -2543,11 +2569,7 @@ export class PdfDocument {
       options?.objectStreamThreshold !== undefined &&
       options.objectStreamThreshold !== Infinity
     ) {
-      warnOnce(
-        'ignored-option:saveAsStream objectStreamThreshold',
-        'MPL_IGNORED_OPTION',
-        '`saveAsStream()`: the option `objectStreamThreshold` has no effect in this version.',
-      );
+      for (const rule of REFUSED_SAVE_AS_STREAM_OPTIONS) rejectOption(rule);
     }
     if ((options?.addDefaultPage ?? true) && this.getPageCount() === 0) {
       this.addPage();
@@ -2898,6 +2920,8 @@ export class PdfDocument {
     const encoder = new TextEncoder();
 
     for (const [, entry] of this.ttfFonts) {
+      // `subset: false`: keep the whole program and the /W and /ToUnicode written at embed time.
+      if (!entry.subset) continue;
       const { embeddedFont, fontFileStream, fontFileDict, toUnicodeStream, cidFontDict } = entry;
       const metrics = embeddedFont.metrics;
       const usedGlyphs = embeddedFont.getUsedGlyphs();

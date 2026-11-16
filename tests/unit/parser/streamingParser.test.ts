@@ -895,10 +895,12 @@ describe('StreamingPdfParser', () => {
     it('exports StreamingParserOptions interface', () => {
       const opts: StreamingParserOptions = {
         maxBufferSize: 1024,
-        parseContentStreams: true,
         pageRange: { start: 0, end: 5 },
       };
       expect(opts.maxBufferSize).toBe(1024);
+      // @ts-expect-error -- `parseContentStreams` was removed from StreamingParserOptions in 0.41.0
+      const removed: StreamingParserOptions = { parseContentStreams: true };
+      expect(removed).toBeDefined();
     });
 
     it('exports StreamingParseResult interface', () => {

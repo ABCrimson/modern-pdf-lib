@@ -28,8 +28,13 @@
  */
 
 import { InvalidArgumentError, StreamingParseError } from '../errors.js';
-import { warnOnce } from '../internal/warnings.js';
+import { UNSUPPORTED_OPTIONS, rejectOption } from '../internal/options.js';
 import { frameStreamData, keywordIndexFor } from './internal/streamFraming.js';
+
+/** The row of the option table that refuses `parseContentStreams`, removed in 0.41.0. */
+const REFUSED_OPTIONS = /* @__PURE__ */ UNSUPPORTED_OPTIONS.filter(
+  (rule) => rule.entry === 'new StreamingPdfParser()',
+);
 
 // ---------------------------------------------------------------------------
 // Public interfaces
@@ -46,11 +51,6 @@ export interface StreamingParserOptions {
    * @throws {InvalidArgumentError} The constructor throws when this is `NaN`.
    */
   maxBufferSize?: number;
-  /**
-   * Has no effect in this version: the parser never reads content streams, and passing `true`
-   * emits a one-time `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`).
-   */
-  parseContentStreams?: boolean;
   /** Pages to parse (for selective loading). Default: all. */
   pageRange?: { start?: number; end?: number };
 }
@@ -541,6 +541,8 @@ export class StreamingPdfParser {
 
   /**
    * @throws {InvalidArgumentError} When `options.maxBufferSize` is `NaN`.
+   * @throws {UnsupportedOptionError} When `options.parseContentStreams` is `true`: the option was
+   *         removed in 0.41.0 (the parser never read content streams).
    */
   constructor(options?: StreamingParserOptions) {
     const maxBufferSize = options?.maxBufferSize ?? 64 * 1024 * 1024;
@@ -549,16 +551,16 @@ export class StreamingPdfParser {
         argument: 'options.maxBufferSize',
       });
     }
-    if (options?.parseContentStreams === true) {
-      warnOnce(
-        'ignored-option:StreamingPdfParser parseContentStreams',
-        'MPL_IGNORED_OPTION',
-        '`StreamingPdfParser`: the option `parseContentStreams` has no effect in this version.',
-      );
+    // The removed option is not in the type; a JavaScript caller or a cast can still pass it. This
+    // guard is removed in 0.50.0.
+    for (const rule of REFUSED_OPTIONS) {
+      if (rule.option !== undefined && options !== undefined) {
+        // Only `true` was ignored in 0.40.9; `false` was the default and stays accepted.
+        if (Reflect.get(options, rule.option) === true) rejectOption(rule);
+      }
     }
     this.options = {
       maxBufferSize,
-      parseContentStreams: options?.parseContentStreams ?? false,
       pageRange: options?.pageRange ?? {},
     };
   }
