@@ -67,7 +67,7 @@ const SYMBOL_ROWS: readonly number[] = [
 ];
 
 // The built-in encoding of ZapfDingbats, codes 0x20-0xFF: the 188 codes of
-// Annex D.6 plus 0x80-0x8D (a89 to a96, a205, a206) of the font's own encoding.
+// Annex D.6 plus 0x80-0x8D (a85 to a96, a205 and a206) of the font's own encoding.
 // Unicode values are those of Adobe's zdingbat.txt, which maps those 14 codes
 // to the Private Use Area.
 // One row of 16 codes per line.
@@ -110,7 +110,7 @@ export const STANDARD_CODE_TO_UNICODE: Readonly<
 /**
  * Code points that also encode, besides the value of the table: the other
  * Unicode values Adobe's symbol.txt and zdingbat.txt list for a code, and the
- * values the Adobe Glyph List for ZapfDingbats gives a89 to a96, a205, a206.
+ * values the Adobe Glyph List for ZapfDingbats gives a85 to a96, a205 and a206.
  * U+2126 OHM SIGN (Omega) needs none: NFC turns it into U+03A9.
  */
 const ALIASES: Readonly<Record<StandardEncodingName, ReadonlyArray<readonly [number, number]>>> = {

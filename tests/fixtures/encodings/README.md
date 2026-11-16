@@ -45,4 +45,4 @@ sha256 of the files compared: `glyphlist.txt` `a3b2f61ced9f3644cc0d4ecde5c59df34
 - 189 Symbol codes, from 0x20 to 0xFE.
 - 202 ZapfDingbats codes: the 188 of D.6 and 0x80 to 0x8D.
 
-Never edit this file by hand: a change is a new transcription, checked again against every source above.
+A change to this file is a new transcription, checked again against every source above.

@@ -256,6 +256,12 @@ describe('UnencodableTextError from encodeStandardText', () => {
     const error = unencodable('Helvetica', 'é日');
     expect([error.character, error.index]).toEqual(['日', 2]);
   });
+
+  it('gives the index of the cluster when NFC changes the cluster that holds the character', () => {
+    // NFC turns e + U+0301 + U+0302 into U+00E9 + U+0302, and U+0302 has no code.
+    const error = unencodable('Times-Roman', 'abé̂');
+    expect([error.character, error.codePoint, error.index]).toEqual(['̂', 0x0302, 2]);
+  });
 });
 
 describe('measureStandardCodes', () => {
