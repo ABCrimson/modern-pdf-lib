@@ -149,6 +149,9 @@ export function setCalculationOrder(form: PdfForm, fieldNames: string[]): void {
  * 3. Update the field's value with the result
  *
  * @param form  The PdfForm instance.
+ * @throws The errors of a calculated field's `setValue()`, such as `ExceededMaxLengthError`
+ *   when a result has more code points than the field's /MaxLen; the fields calculated
+ *   before it keep their new values.
  */
 export function executeCalculations(form: PdfForm): void {
   const order = getCalculationOrder(form);

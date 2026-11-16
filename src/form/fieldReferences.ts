@@ -112,7 +112,9 @@ export function getFieldValue(form: PdfForm, fieldName: string): string | null {
  * @param form      - The PdfForm to search.
  * @param fieldName - The field name.
  * @param value     - The value to set.
- * @returns `true` if the field was found and the value was set, `false` otherwise.
+ * @returns `true` if the field was found and the value was set, `false` if no field has the name.
+ * @throws The errors of the field's `setValue()`, such as `ExceededMaxLengthError` for a text
+ *   field and `MissingOnValueCheckError` for a check box; the field is then left as it was.
  */
 export function setFieldValue(form: PdfForm, fieldName: string, value: string): boolean {
   const field = form.getField(fieldName);

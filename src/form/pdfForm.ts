@@ -415,6 +415,11 @@ export class PdfForm {
    *
    * @param values  A mapping of field name to value.
    * @throws {NoSuchFieldError} When a name is not a field; the values before it are set.
+   * @throws {ExceededMaxLengthError} When a text value has more code points than the /MaxLen
+   *   of its field ({@link PdfTextField.setText}); the values before it are set.
+   * @throws {CombedTextLayoutError} The same for a comb field.
+   * @throws {MissingOnValueCheckError} When `true` (or a string other than "Off", "false", "0"
+   *   and "") checks a check box that has no on state ({@link PdfCheckboxField.check}).
    */
   fill(values: Record<string, string | boolean>): void {
     for (const [name, value] of Object.entries(values)) {
