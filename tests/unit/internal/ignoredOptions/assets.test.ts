@@ -1,89 +1,91 @@
 /**
- * `optimizeAllImages` accepts an option and does not act on it, so it warns once with the code
- * `MPL_IGNORED_OPTION`. Each row checks the first call, the second call, the absent and undefined
- * option, and that the message names no caller value.
+ * `optimizeAllImages` no longer has a `maxDpi` option: it never downscaled an image, so the option
+ * was removed in 0.41.0. A caller that still passes it (a JavaScript caller, a spread object or a
+ * cast) gets an `UnsupportedOptionError` that names the call and the option, never the value. The
+ * error is thrown on every call, before any image is read.
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { MockInstance } from 'vitest';
 import { createPdf } from '../../../../src/index.js';
 import { optimizeAllImages } from '../../../../src/assets/image/optimize/batchOptimize.js';
-import { resetWarningsForTesting } from '../../../../src/internal/warnings.js';
-import { CODE, TYPE, ignoredOptionMessage as message } from '../../../helpers/ignoredOptions.js';
+import type { BatchOptimizeOptions } from '../../../../src/assets/image/optimize/batchOptimize.js';
+import { UnsupportedOptionError } from '../../../../src/errors.js';
+import { UNSUPPORTED_OPTIONS } from '../../../../src/internal/options.js';
 
 let emit: MockInstance<typeof process.emitWarning>;
 
 beforeEach(() => {
-  resetWarningsForTesting();
   emit = vi.spyOn(process, 'emitWarning').mockImplementation(() => {});
 });
 
 afterEach(() => {
   vi.restoreAllMocks();
-  resetWarningsForTesting();
 });
 
-interface Row {
-  readonly entry: string;
-  /** The subject as it appears in the message, with `()` for a function. */
-  readonly subject: string;
-  readonly option: string;
-  /** The value passed to trigger the warning. */
-  readonly value: unknown;
-  /** Values that change nothing and must not warn. */
-  readonly quiet?: readonly unknown[];
-  readonly invoke: (extra: Record<string, unknown>) => unknown;
+/** The options of a caller that still passes the removed `maxDpi`; the type no longer has it. */
+function withMaxDpi(value: unknown): BatchOptimizeOptions {
+  return { maxDpi: value } as BatchOptimizeOptions;
 }
 
-const ROWS: readonly Row[] = [
-  {
-    entry: 'optimizeAllImages',
-    subject: 'optimizeAllImages()',
-    option: 'maxDpi',
-    value: 4747,
-    invoke: async (extra) => optimizeAllImages(createPdf(), extra),
-  },
-];
-
-function ignoredCalls(): unknown[][] {
-  return emit.mock.calls.filter(([, options]) => (options as { code?: string }).code === CODE);
+/** The error `optimizeAllImages` rejects with for `options`; fails the test when it resolves. */
+async function rejectionOf(options: BatchOptimizeOptions): Promise<UnsupportedOptionError> {
+  try {
+    await optimizeAllImages(createPdf(), options);
+  } catch (err) {
+    expect(err).toBeInstanceOf(UnsupportedOptionError);
+    return err as UnsupportedOptionError;
+  }
+  throw new Error('expected optimizeAllImages to reject');
 }
 
-describe.each(ROWS)('$entry option $option', (row) => {
-  it('warns once on the first call and not on the second', async () => {
-    await row.invoke({ [row.option]: row.value });
-    expect(ignoredCalls()).toHaveLength(1);
-    expect(emit).toHaveBeenCalledWith(message(row.subject, row.option), { type: TYPE, code: CODE });
-
-    await row.invoke({ [row.option]: row.value });
-    expect(ignoredCalls()).toHaveLength(1);
+describe('optimizeAllImages option maxDpi', () => {
+  it('rejects with an UnsupportedOptionError that says the option was removed', async () => {
+    const error = await rejectionOf(withMaxDpi(4747));
+    expect(error.code).toBe('unsupported-option');
+    expect(error.entry).toBe('optimizeAllImages()');
+    expect(error.option).toBe('maxDpi');
+    expect(error.plannedFor).toBeUndefined();
+    expect(error.message).toBe('`optimizeAllImages()`: the option `maxDpi` was removed in 0.41.0.');
   });
 
-  it('does not warn when the option is absent or undefined', async () => {
-    await row.invoke({});
-    await row.invoke({ [row.option]: undefined });
-    expect(ignoredCalls()).toHaveLength(0);
+  it('rejects with the row of the option table', async () => {
+    const row = UNSUPPORTED_OPTIONS.find(
+      (rule) => rule.entry === 'optimizeAllImages()' && rule.option === 'maxDpi',
+    );
+    const error = await rejectionOf(withMaxDpi(72));
+    expect(row).toBeDefined();
+    expect([error.entry, error.option, error.plannedFor]).toEqual([
+      row?.entry,
+      row?.option,
+      row?.plannedFor,
+    ]);
   });
 
-  it('does not warn for a value that changes nothing', async () => {
-    for (const quiet of row.quiet ?? []) await row.invoke({ [row.option]: quiet });
-    expect(ignoredCalls()).toHaveLength(0);
+  it('rejects on every call, not once per process', async () => {
+    await rejectionOf(withMaxDpi(72));
+    await rejectionOf(withMaxDpi(72));
+  });
+
+  it('rejects for any value that is not undefined', async () => {
+    for (const value of [0, 72, Number.NaN, null, '150', {}]) {
+      await rejectionOf(withMaxDpi(value));
+    }
   });
 
   it('names no caller value in the message', async () => {
-    await row.invoke({ [row.option]: row.value });
-    const [text] = ignoredCalls()[0] as [string];
-    expect(text).toBe(message(row.subject, row.option));
-    if (typeof row.value === 'string' || typeof row.value === 'number') {
-      expect(text).not.toContain(String(row.value));
-    }
+    const error = await rejectionOf(withMaxDpi(4747));
+    expect(error.message).not.toContain('4747');
   });
-});
 
-describe('results stay the same', () => {
-  it('optimizeAllImages reports the same with and without maxDpi', async () => {
-    expect(await optimizeAllImages(createPdf(), { maxDpi: 72 })).toEqual(
-      await optimizeAllImages(createPdf()),
-    );
+  it('does not reject when the option is absent or undefined', async () => {
+    await expect(optimizeAllImages(createPdf())).resolves.toBeDefined();
+    await expect(optimizeAllImages(createPdf(), {})).resolves.toBeDefined();
+    await expect(optimizeAllImages(createPdf(), withMaxDpi(undefined))).resolves.toBeDefined();
+  });
+
+  it('emits no process warning', async () => {
+    await rejectionOf(withMaxDpi(72));
+    expect(emit).not.toHaveBeenCalled();
   });
 });

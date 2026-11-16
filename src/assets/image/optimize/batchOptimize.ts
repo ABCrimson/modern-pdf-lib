@@ -11,7 +11,7 @@
  */
 
 import type { PdfDocument } from '../../../core/pdfDocument.js';
-import { warnOnce } from '../../../internal/warnings.js';
+import { rejectOption } from '../../../internal/options.js';
 import { PdfArray, PdfName } from '../../../core/pdfObjects.js';
 import { ResourceLimitError, UnsupportedFilterError } from '../../../errors.js';
 import { extractImages, decodeImageStream } from '../imageExtract.js';
@@ -54,13 +54,6 @@ export interface BatchOptimizeOptions {
    * Default: `80`.
    */
   readonly quality?: number;
-  /**
-   * Maximum DPI for images.
-   *
-   * Has no effect in this version: images are not downscaled. Passing it
-   * emits a one-time `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`).
-   */
-  readonly maxDpi?: number;
   /**
    * Encode as progressive JPEG.
    *
@@ -249,12 +242,10 @@ export async function optimizeAllImages(
   doc: PdfDocument,
   options: BatchOptimizeOptions = {},
 ): Promise<OptimizationReport> {
-  if (options.maxDpi !== undefined) {
-    warnOnce(
-      'ignored-option:optimizeAllImages maxDpi',
-      'MPL_IGNORED_OPTION',
-      '`optimizeAllImages()`: the option `maxDpi` has no effect in this version.',
-    );
+  // `maxDpi` left the type in 0.41.0 (images were never downscaled): this refuses it for a caller
+  // the type does not stop, a JavaScript caller or a cast. Removed in 0.50.0 with the other guards.
+  if ((options as { readonly maxDpi?: unknown }).maxDpi !== undefined) {
+    rejectOption({ entry: 'optimizeAllImages()', option: 'maxDpi', ledger: [] });
   }
   const quality = options.quality ?? 80;
   const minSavingsPercent = options.minSavingsPercent ?? 10;
