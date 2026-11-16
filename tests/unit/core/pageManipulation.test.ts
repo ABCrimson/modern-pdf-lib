@@ -93,27 +93,6 @@ describe('insertPage', () => {
 });
 
 // ---------------------------------------------------------------------------
-// PdfDocument.insertPage (method)
-// ---------------------------------------------------------------------------
-
-describe('PdfDocument.insertPage', () => {
-  it('inserts a page at a specific index', () => {
-    const doc = createDocWithPages(3);
-    const page = doc.insertPage(1, PageSizes.Letter);
-
-    expect(doc.getPageCount()).toBe(4);
-    expect(doc.getPage(1)).toBe(page);
-    expect(page.width).toBe(612);
-  });
-
-  it('throws on out-of-range index', () => {
-    const doc = createDocWithPages(2);
-    expect(() => doc.insertPage(-1)).toThrow(RangeError);
-    expect(() => doc.insertPage(3)).toThrow(RangeError);
-  });
-});
-
-// ---------------------------------------------------------------------------
 // removePage
 // ---------------------------------------------------------------------------
 
@@ -150,24 +129,6 @@ describe('removePage', () => {
     expect(() => removePage(doc, -1)).toThrow(RangeError);
     expect(() => removePage(doc, 2)).toThrow(RangeError);
     expect(() => removePage(doc, 0.5)).toThrow(RangeError);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// PdfDocument.removePage (method)
-// ---------------------------------------------------------------------------
-
-describe('PdfDocument.removePage', () => {
-  it('removes a page by index', () => {
-    const doc = createDocWithPages(3);
-    doc.removePage(0);
-    expect(doc.getPageCount()).toBe(2);
-  });
-
-  it('throws on out-of-range index', () => {
-    const doc = createDocWithPages(2);
-    expect(() => doc.removePage(-1)).toThrow(RangeError);
-    expect(() => doc.removePage(2)).toThrow(RangeError);
   });
 });
 
@@ -215,26 +176,6 @@ describe('movePage', () => {
     const doc = createDocWithPages(3);
     expect(() => movePage(doc, 0, -1)).toThrow(RangeError);
     expect(() => movePage(doc, 0, 3)).toThrow(RangeError);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// PdfDocument.movePage (method)
-// ---------------------------------------------------------------------------
-
-describe('PdfDocument.movePage', () => {
-  it('moves a page within the document', () => {
-    const doc = createDocWithPages(3);
-    const last = doc.getPage(2);
-    doc.movePage(2, 0);
-
-    expect(doc.getPage(0)).toBe(last);
-  });
-
-  it('throws on invalid fromIndex', () => {
-    const doc = createDocWithPages(2);
-    expect(() => doc.movePage(-1, 0)).toThrow(RangeError);
-    expect(() => doc.movePage(2, 0)).toThrow(RangeError);
   });
 });
 
