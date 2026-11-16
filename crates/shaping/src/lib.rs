@@ -244,11 +244,7 @@ fn shape_text_with_features_impl(
 /// console.log(`Shaped ${result.glyph_count} glyphs`);
 /// ```
 #[wasm_bindgen]
-pub fn shape_text(
-    font_data: &[u8],
-    text: &str,
-    direction: u8,
-) -> Result<ShapingResult, JsValue> {
+pub fn shape_text(font_data: &[u8], text: &str, direction: u8) -> Result<ShapingResult, JsValue> {
     shape_text_with_features(font_data, text, direction, "", "")
 }
 
@@ -349,11 +345,26 @@ mod tests {
 
     #[test]
     fn parse_direction_values() {
-        assert!(matches!(parse_direction(0), rustybuzz::Direction::LeftToRight));
-        assert!(matches!(parse_direction(1), rustybuzz::Direction::RightToLeft));
-        assert!(matches!(parse_direction(2), rustybuzz::Direction::TopToBottom));
-        assert!(matches!(parse_direction(3), rustybuzz::Direction::BottomToTop));
-        assert!(matches!(parse_direction(99), rustybuzz::Direction::LeftToRight));
+        assert!(matches!(
+            parse_direction(0),
+            rustybuzz::Direction::LeftToRight
+        ));
+        assert!(matches!(
+            parse_direction(1),
+            rustybuzz::Direction::RightToLeft
+        ));
+        assert!(matches!(
+            parse_direction(2),
+            rustybuzz::Direction::TopToBottom
+        ));
+        assert!(matches!(
+            parse_direction(3),
+            rustybuzz::Direction::BottomToTop
+        ));
+        assert!(matches!(
+            parse_direction(99),
+            rustybuzz::Direction::LeftToRight
+        ));
     }
 
     #[test]

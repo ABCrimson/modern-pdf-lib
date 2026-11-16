@@ -180,8 +180,7 @@ fn decode_jpeg_inner(data: &[u8]) -> Result<Vec<u8>, String> {
         jpeg_decoder::PixelFormat::L16 => {
             // 16-bit grayscale — convert to 8-bit by taking high byte
             let pixel_count = (info.width as usize) * (info.height as usize);
-            let mut result =
-                Vec::with_capacity(9 + pixel_count);
+            let mut result = Vec::with_capacity(9 + pixel_count);
 
             // Header: width(4) + height(4) + channels(1)
             result.extend_from_slice(&u32::from(info.width).to_le_bytes());
@@ -200,8 +199,7 @@ fn decode_jpeg_inner(data: &[u8]) -> Result<Vec<u8>, String> {
         jpeg_decoder::PixelFormat::CMYK32 => {
             // CMYK → RGB conversion
             let pixel_count = (info.width as usize) * (info.height as usize);
-            let mut result =
-                Vec::with_capacity(9 + pixel_count * 3);
+            let mut result = Vec::with_capacity(9 + pixel_count * 3);
 
             // Header
             result.extend_from_slice(&u32::from(info.width).to_le_bytes());
@@ -329,7 +327,10 @@ mod tests {
         let pixels = vec![255, 0]; // too short for 2x2 RGB
         let result = encode_jpeg_inner(&pixels, 2, 2, 3, 80, false, 0);
         let message = result.expect_err("a short pixel buffer must be rejected");
-        assert!(message.contains("does not match 2x2x3=12"), "unexpected message: {message}");
+        assert!(
+            message.contains("does not match 2x2x3=12"),
+            "unexpected message: {message}"
+        );
     }
 
     #[test]
@@ -337,7 +338,10 @@ mod tests {
         let pixels = vec![0; 2 * 2 * 2]; // 2 channels
         let result = encode_jpeg_inner(&pixels, 2, 2, 2, 80, false, 0);
         let message = result.expect_err("two channels must be rejected");
-        assert!(message.contains("unsupported channel count 2"), "unexpected message: {message}");
+        assert!(
+            message.contains("unsupported channel count 2"),
+            "unexpected message: {message}"
+        );
     }
 
     #[test]
@@ -386,7 +390,10 @@ mod tests {
     fn decode_invalid_data() {
         let result = decode_jpeg_inner(&[0, 1, 2, 3]);
         let message = result.expect_err("invalid JPEG data must fail to decode");
-        assert!(message.starts_with("modern-pdf-jpeg: "), "unexpected message: {message}");
+        assert!(
+            message.starts_with("modern-pdf-jpeg: "),
+            "unexpected message: {message}"
+        );
     }
 
     #[test]
@@ -436,11 +443,7 @@ mod tests {
         // Both should decode to same dimensions
         let dec_b = decode_jpeg(&baseline).unwrap();
         let dec_p = decode_jpeg(&progressive).unwrap();
-        assert_eq!(
-            &dec_b[0..9],
-            &dec_p[0..9],
-            "headers should match",
-        );
+        assert_eq!(&dec_b[0..9], &dec_p[0..9], "headers should match",);
     }
 
     #[test]

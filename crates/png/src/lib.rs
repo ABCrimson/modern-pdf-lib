@@ -147,7 +147,9 @@ fn color_type_to_u8(ct: png::ColorType) -> u8 {
 fn decode_png_impl(data: &[u8]) -> Result<PngDecodeResult, String> {
     let cursor = Cursor::new(data);
     let decoder = png::Decoder::new(cursor);
-    let mut reader = decoder.read_info().map_err(|e| format!("modern-pdf-png: {}", e))?;
+    let mut reader = decoder
+        .read_info()
+        .map_err(|e| format!("modern-pdf-png: {}", e))?;
 
     let info = reader.info();
     let width = info.width;
@@ -169,12 +171,14 @@ fn decode_png_impl(data: &[u8]) -> Result<PngDecodeResult, String> {
     };
 
     // Allocate output buffer for pixel data
-    let output_size = reader.output_buffer_size()
+    let output_size = reader
+        .output_buffer_size()
         .ok_or_else(|| "modern-pdf-png: could not determine output buffer size".to_string())?;
     let mut pixel_data = vec![0u8; output_size];
 
     // Read the image frame
-    let frame_info = reader.next_frame(&mut pixel_data)
+    let frame_info = reader
+        .next_frame(&mut pixel_data)
         .map_err(|e| format!("modern-pdf-png: {}", e))?;
 
     // Trim the pixel data to the actual frame size
@@ -239,7 +243,13 @@ mod tests {
 
     /// Create a minimal valid PNG file programmatically.
     /// Uses the `png` crate's encoder to create test data.
-    fn build_png(width: u32, height: u32, color_type: png::ColorType, bit_depth: png::BitDepth, pixels: &[u8]) -> Vec<u8> {
+    fn build_png(
+        width: u32,
+        height: u32,
+        color_type: png::ColorType,
+        bit_depth: png::BitDepth,
+        pixels: &[u8],
+    ) -> Vec<u8> {
         let mut buf = Vec::new();
         {
             let mut encoder = png::Encoder::new(&mut buf, width, height);
@@ -282,7 +292,13 @@ mod tests {
     #[test]
     fn decode_1x1_grayscale() {
         let pixels = [127u8]; // Mid-gray
-        let png_data = build_png(1, 1, png::ColorType::Grayscale, png::BitDepth::Eight, &pixels);
+        let png_data = build_png(
+            1,
+            1,
+            png::ColorType::Grayscale,
+            png::BitDepth::Eight,
+            &pixels,
+        );
 
         let result = decode_png_impl(&png_data).expect("should decode grayscale PNG");
         assert_eq!(result.width, 1);
@@ -296,8 +312,8 @@ mod tests {
     fn decode_2x2_rgb() {
         // 2x2 image: red, green, blue, white
         let pixels = [
-            255, 0, 0,    0, 255, 0,     // row 1
-            0, 0, 255,    255, 255, 255,  // row 2
+            255, 0, 0, 0, 255, 0, // row 1
+            0, 0, 255, 255, 255, 255, // row 2
         ];
         let png_data = build_png(2, 2, png::ColorType::Rgb, png::BitDepth::Eight, &pixels);
 
@@ -312,7 +328,13 @@ mod tests {
     #[test]
     fn decode_grayscale_alpha() {
         let pixels = [200u8, 128]; // Gray with alpha
-        let png_data = build_png(1, 1, png::ColorType::GrayscaleAlpha, png::BitDepth::Eight, &pixels);
+        let png_data = build_png(
+            1,
+            1,
+            png::ColorType::GrayscaleAlpha,
+            png::BitDepth::Eight,
+            &pixels,
+        );
 
         let result = decode_png_impl(&png_data).expect("should decode grayscale+alpha PNG");
         assert_eq!(result.color_type, 4); // GrayscaleAlpha

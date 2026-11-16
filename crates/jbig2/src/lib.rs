@@ -141,10 +141,10 @@ impl CxState {
 struct ArithmeticDecoder<'a> {
     data: &'a [u8],
     pos: usize,
-    c_reg: u32,   // C register
-    a_reg: u32,   // A register (interval)
-    ct: i32,      // bit counter
-    b: u8,        // current byte
+    c_reg: u32, // C register
+    a_reg: u32, // A register (interval)
+    ct: i32,    // bit counter
+    b: u8,      // current byte
 }
 
 impl<'a> ArithmeticDecoder<'a> {
@@ -260,7 +260,6 @@ impl<'a> ArithmeticDecoder<'a> {
             }
         }
     }
-
 }
 
 // ---------------------------------------------------------------------------
@@ -331,7 +330,12 @@ fn decode_integer(decoder: &mut ArithmeticDecoder, contexts: &mut [CxState]) -> 
 }
 
 #[allow(dead_code)]
-fn decode_iaid_bit(decoder: &mut ArithmeticDecoder, contexts: &mut [CxState], _prev: &mut u32, cx_idx: usize) -> u8 {
+fn decode_iaid_bit(
+    decoder: &mut ArithmeticDecoder,
+    contexts: &mut [CxState],
+    _prev: &mut u32,
+    cx_idx: usize,
+) -> u8 {
     let idx = cx_idx.min(contexts.len() - 1);
     decoder.decode_bit(&mut contexts[idx])
 }
@@ -393,7 +397,9 @@ fn decode_mmr_row(
         match mode {
             MmrMode::Pass => {
                 // a0 moves to b2
-                if a0 < 0 { a0 = 0; }
+                if a0 < 0 {
+                    a0 = 0;
+                }
                 // Fill with current color from a0 to b2
                 if color == 1 {
                     set_bits(cur_line, a0 as u32, b2.min(w) as u32);
@@ -413,7 +419,9 @@ fn decode_mmr_row(
                     read_white_run(data, bit_pos)
                 };
 
-                if a0 < 0 { a0 = 0; }
+                if a0 < 0 {
+                    a0 = 0;
+                }
                 let a1 = (a0 + run1).min(w);
                 let a2 = (a1 + run2).min(w);
 
@@ -430,7 +438,9 @@ fn decode_mmr_row(
             }
             MmrMode::Vertical(offset) => {
                 let a1 = b1 + offset;
-                if a0 < 0 { a0 = 0; }
+                if a0 < 0 {
+                    a0 = 0;
+                }
 
                 if color == 1 {
                     set_bits(cur_line, a0 as u32, a1.max(0).min(w) as u32);
@@ -649,60 +659,150 @@ fn read_white_code(data: &[u8], bit_pos: &mut usize) -> i32 {
     // 4-bit codes
     let v4 = peek_bits(data, *bit_pos, 4);
     match v4 {
-        0b0010 => { *bit_pos += 4; return 3; }
-        0b0011 => { *bit_pos += 4; return 2; }
-        0b1000 => { *bit_pos += 4; return 5; }
-        0b1011 => { *bit_pos += 4; return 4; }
-        0b1100 => { *bit_pos += 4; return 6; }
-        0b1110 => { *bit_pos += 4; return 7; }
-        0b1111 => { *bit_pos += 4; return 1; }
+        0b0010 => {
+            *bit_pos += 4;
+            return 3;
+        }
+        0b0011 => {
+            *bit_pos += 4;
+            return 2;
+        }
+        0b1000 => {
+            *bit_pos += 4;
+            return 5;
+        }
+        0b1011 => {
+            *bit_pos += 4;
+            return 4;
+        }
+        0b1100 => {
+            *bit_pos += 4;
+            return 6;
+        }
+        0b1110 => {
+            *bit_pos += 4;
+            return 7;
+        }
+        0b1111 => {
+            *bit_pos += 4;
+            return 1;
+        }
         _ => {}
     }
 
     // 5-bit codes
     let v5 = peek_bits(data, *bit_pos, 5);
     match v5 {
-        0b10011 => { *bit_pos += 5; return 8; }
-        0b10100 => { *bit_pos += 5; return 9; }
-        0b00111 => { *bit_pos += 5; return 10; }
-        0b01000 => { *bit_pos += 5; return 11; }
+        0b10011 => {
+            *bit_pos += 5;
+            return 8;
+        }
+        0b10100 => {
+            *bit_pos += 5;
+            return 9;
+        }
+        0b00111 => {
+            *bit_pos += 5;
+            return 10;
+        }
+        0b01000 => {
+            *bit_pos += 5;
+            return 11;
+        }
         _ => {}
     }
 
     // 6-bit codes
     let v6 = peek_bits(data, *bit_pos, 6);
     match v6 {
-        0b000111 => { *bit_pos += 6; return 12; }
-        0b000100 => { *bit_pos += 6; return 14; }
-        0b000011 => { *bit_pos += 6; return 13; }
-        0b100111 => { *bit_pos += 6; return 1; } // alternate
+        0b000111 => {
+            *bit_pos += 6;
+            return 12;
+        }
+        0b000100 => {
+            *bit_pos += 6;
+            return 14;
+        }
+        0b000011 => {
+            *bit_pos += 6;
+            return 13;
+        }
+        0b100111 => {
+            *bit_pos += 6;
+            return 1;
+        } // alternate
         _ => {}
     }
 
     // 7-bit codes
     let v7 = peek_bits(data, *bit_pos, 7);
     match v7 {
-        0b0001000 => { *bit_pos += 7; return 15; }
-        0b0010111 => { *bit_pos += 7; return 16; }
-        0b0000011 => { *bit_pos += 7; return 17; }
-        0b0000100 => { *bit_pos += 7; return 18; }
+        0b0001000 => {
+            *bit_pos += 7;
+            return 15;
+        }
+        0b0010111 => {
+            *bit_pos += 7;
+            return 16;
+        }
+        0b0000011 => {
+            *bit_pos += 7;
+            return 17;
+        }
+        0b0000100 => {
+            *bit_pos += 7;
+            return 18;
+        }
         _ => {}
     }
 
     // 8-bit codes
     let v8 = peek_bits(data, *bit_pos, 8);
     match v8 {
-        0b00101000 => { *bit_pos += 8; return 19; }
-        0b00100111 => { *bit_pos += 8; return 20; }
-        0b00110100 => { *bit_pos += 8; return 21; }
-        0b00110101 => { *bit_pos += 8; return 22; }
-        0b00110010 => { *bit_pos += 8; return 23; }
-        0b00110011 => { *bit_pos += 8; return 24; }
-        0b00010010 => { *bit_pos += 8; return 25; }
-        0b00010011 => { *bit_pos += 8; return 26; }
-        0b00101010 => { *bit_pos += 8; return 27; }
-        0b00101011 => { *bit_pos += 8; return 28; }
-        0b00010100 => { *bit_pos += 8; return 0; }
+        0b00101000 => {
+            *bit_pos += 8;
+            return 19;
+        }
+        0b00100111 => {
+            *bit_pos += 8;
+            return 20;
+        }
+        0b00110100 => {
+            *bit_pos += 8;
+            return 21;
+        }
+        0b00110101 => {
+            *bit_pos += 8;
+            return 22;
+        }
+        0b00110010 => {
+            *bit_pos += 8;
+            return 23;
+        }
+        0b00110011 => {
+            *bit_pos += 8;
+            return 24;
+        }
+        0b00010010 => {
+            *bit_pos += 8;
+            return 25;
+        }
+        0b00010011 => {
+            *bit_pos += 8;
+            return 26;
+        }
+        0b00101010 => {
+            *bit_pos += 8;
+            return 27;
+        }
+        0b00101011 => {
+            *bit_pos += 8;
+            return 28;
+        }
+        0b00010100 => {
+            *bit_pos += 8;
+            return 0;
+        }
         _ => {}
     }
 
@@ -716,50 +816,92 @@ fn read_black_code(data: &[u8], bit_pos: &mut usize) -> i32 {
     // Black terminating codes
     let v2 = peek_bits(data, *bit_pos, 2);
     match v2 {
-        0b11 => { *bit_pos += 2; return 2; }
-        0b10 => { *bit_pos += 2; return 3; }
+        0b11 => {
+            *bit_pos += 2;
+            return 2;
+        }
+        0b10 => {
+            *bit_pos += 2;
+            return 3;
+        }
         _ => {}
     }
 
     let v3 = peek_bits(data, *bit_pos, 3);
     match v3 {
-        0b010 => { *bit_pos += 3; return 1; }
-        0b011 => { *bit_pos += 3; return 4; }
+        0b010 => {
+            *bit_pos += 3;
+            return 1;
+        }
+        0b011 => {
+            *bit_pos += 3;
+            return 4;
+        }
         _ => {}
     }
 
     let v4 = peek_bits(data, *bit_pos, 4);
     match v4 {
-        0b0011 => { *bit_pos += 4; return 5; }
-        0b0010 => { *bit_pos += 4; return 6; }
+        0b0011 => {
+            *bit_pos += 4;
+            return 5;
+        }
+        0b0010 => {
+            *bit_pos += 4;
+            return 6;
+        }
         _ => {}
     }
 
     let v5 = peek_bits(data, *bit_pos, 5);
     match v5 {
-        0b00011 => { *bit_pos += 5; return 7; }
+        0b00011 => {
+            *bit_pos += 5;
+            return 7;
+        }
         _ => {}
     }
 
     let v6 = peek_bits(data, *bit_pos, 6);
     match v6 {
-        0b000101 => { *bit_pos += 6; return 8; }
-        0b000100 => { *bit_pos += 6; return 9; }
+        0b000101 => {
+            *bit_pos += 6;
+            return 8;
+        }
+        0b000100 => {
+            *bit_pos += 6;
+            return 9;
+        }
         _ => {}
     }
 
     let v7 = peek_bits(data, *bit_pos, 7);
     match v7 {
-        0b0000100 => { *bit_pos += 7; return 10; }
-        0b0000101 => { *bit_pos += 7; return 11; }
-        0b0000111 => { *bit_pos += 7; return 12; }
+        0b0000100 => {
+            *bit_pos += 7;
+            return 10;
+        }
+        0b0000101 => {
+            *bit_pos += 7;
+            return 11;
+        }
+        0b0000111 => {
+            *bit_pos += 7;
+            return 12;
+        }
         _ => {}
     }
 
     let v8 = peek_bits(data, *bit_pos, 8);
     match v8 {
-        0b00000100 => { *bit_pos += 8; return 13; }
-        0b00000111 => { *bit_pos += 8; return 14; }
+        0b00000100 => {
+            *bit_pos += 8;
+            return 13;
+        }
+        0b00000111 => {
+            *bit_pos += 8;
+            return 14;
+        }
         _ => {}
     }
 
@@ -793,7 +935,14 @@ fn set_pixel(bitmap: &mut [u8], row_bytes: usize, x: u32, y: u32, value: u8) {
 }
 
 /// Get a pixel from a packed bitmap.
-fn get_bitmap_pixel(bitmap: &[u8], row_bytes: usize, x: i32, y: i32, width: u32, height: u32) -> u8 {
+fn get_bitmap_pixel(
+    bitmap: &[u8],
+    row_bytes: usize,
+    x: i32,
+    y: i32,
+    width: u32,
+    height: u32,
+) -> u8 {
     if x < 0 || y < 0 || x >= width as i32 || y >= height as i32 {
         return 0;
     }
@@ -830,16 +979,30 @@ fn composite_bitmap(
             if px >= page_width {
                 break;
             }
-            let region_pixel = get_bitmap_pixel(region, region_row_bytes, rx as i32, ry as i32, region_width, region_height);
-            let page_pixel = get_bitmap_pixel(page, page_row_bytes, px as i32, py as i32, page_width, page_height);
+            let region_pixel = get_bitmap_pixel(
+                region,
+                region_row_bytes,
+                rx as i32,
+                ry as i32,
+                region_width,
+                region_height,
+            );
+            let page_pixel = get_bitmap_pixel(
+                page,
+                page_row_bytes,
+                px as i32,
+                py as i32,
+                page_width,
+                page_height,
+            );
 
             let result = match combination_operator {
-                0 => region_pixel | page_pixel,   // OR
-                1 => region_pixel & page_pixel,   // AND
-                2 => region_pixel ^ page_pixel,   // XOR
+                0 => region_pixel | page_pixel,        // OR
+                1 => region_pixel & page_pixel,        // AND
+                2 => region_pixel ^ page_pixel,        // XOR
                 3 => !(region_pixel | page_pixel) & 1, // XNOR
-                4 => region_pixel,                // REPLACE
-                _ => region_pixel | page_pixel,   // Default: OR
+                4 => region_pixel,                     // REPLACE
+                _ => region_pixel | page_pixel,        // Default: OR
             };
 
             set_pixel(page, page_row_bytes, px, py, result);
@@ -894,8 +1057,7 @@ fn decode_generic_region_arith(
 
         for x in 0..width {
             let context = build_generic_context(
-                &bitmap, row_bytes, x as i32, y as i32,
-                width, height, template, at_offsets,
+                &bitmap, row_bytes, x as i32, y as i32, width, height, template, at_offsets,
             );
 
             let pixel = decoder.decode_bit(&mut contexts[context as usize]);
@@ -944,7 +1106,7 @@ fn build_generic_context(
                 | (p(-2, 0) << 3)
                 | (p(-1, 0) << 2)
                 | (p(at_x, at_y) << 1)
-                // bit 0 reserved for the current pixel (always 0 during decode)
+            // bit 0 reserved for the current pixel (always 0 during decode)
         }
         1 => {
             // 13-bit context
@@ -1085,16 +1247,20 @@ impl Jbig2Decoder {
         0 // No file header (embedded in PDF)
     }
 
-    fn parse_segments(&mut self, data: &[u8], mut pos: usize, is_globals: bool) -> Result<(), String> {
+    fn parse_segments(
+        &mut self,
+        data: &[u8],
+        mut pos: usize,
+        is_globals: bool,
+    ) -> Result<(), String> {
         while pos < data.len() {
             if data.len() - pos < 6 {
                 break; // Not enough for a segment header
             }
 
             // Parse segment header
-            let segment_number = u32::from_be_bytes([
-                data[pos], data[pos + 1], data[pos + 2], data[pos + 3],
-            ]);
+            let segment_number =
+                u32::from_be_bytes([data[pos], data[pos + 1], data[pos + 2], data[pos + 3]]);
             pos += 4;
 
             let flags = data[pos];
@@ -1126,7 +1292,12 @@ impl Jbig2Decoder {
                     let ref_num = match ref_size {
                         1 => data[pos] as u32,
                         2 => u16::from_be_bytes([data[pos], data[pos + 1]]) as u32,
-                        _ => u32::from_be_bytes([data[pos], data[pos + 1], data[pos + 2], data[pos + 3]]),
+                        _ => u32::from_be_bytes([
+                            data[pos],
+                            data[pos + 1],
+                            data[pos + 2],
+                            data[pos + 3],
+                        ]),
                     };
                     referred_segments.push(ref_num);
                     pos += ref_size;
@@ -1146,7 +1317,8 @@ impl Jbig2Decoder {
                 break;
             }
             let _page_assoc = if page_association_size == 4 {
-                let v = u32::from_be_bytes([data[pos], data[pos + 1], data[pos + 2], data[pos + 3]]);
+                let v =
+                    u32::from_be_bytes([data[pos], data[pos + 1], data[pos + 2], data[pos + 3]]);
                 pos += 4;
                 v
             } else {
@@ -1159,9 +1331,8 @@ impl Jbig2Decoder {
             if pos + 4 > data.len() {
                 break;
             }
-            let data_length = u32::from_be_bytes([
-                data[pos], data[pos + 1], data[pos + 2], data[pos + 3],
-            ]);
+            let data_length =
+                u32::from_be_bytes([data[pos], data[pos + 1], data[pos + 2], data[pos + 3]]);
             pos += 4;
 
             // End of file
@@ -1444,7 +1615,10 @@ pub fn decode_jbig2(data: &[u8]) -> Result<Jbig2DecodeResult, JsValue> {
 ///
 /// A `Jbig2DecodeResult` containing the decoded bilevel bitmap.
 #[wasm_bindgen]
-pub fn decode_jbig2_with_globals(data: &[u8], globals: &[u8]) -> Result<Jbig2DecodeResult, JsValue> {
+pub fn decode_jbig2_with_globals(
+    data: &[u8],
+    globals: &[u8],
+) -> Result<Jbig2DecodeResult, JsValue> {
     decode_jbig2_impl(data, Some(globals)).map_err(to_js_err)
 }
 
@@ -1524,7 +1698,7 @@ mod tests {
     #[test]
     fn composite_replace() {
         let mut page = new_bitmap(8, 1, 1); // all black
-        let region = new_bitmap(8, 1, 0);   // all white
+        let region = new_bitmap(8, 1, 0); // all white
 
         composite_bitmap(&mut page, 1, 8, 1, &region, 1, 8, 1, 0, 0, 4);
 
@@ -1551,24 +1725,24 @@ mod tests {
         // Segment header: segment number (4), flags (1), ref count (1),
         // page assoc (1), data length (4)
         data.extend_from_slice(&[0, 0, 0, 0]); // segment number 0
-        data.push(48);  // flags: type 48 (page info), no deferred, no large page assoc
-        data.push(0);   // referred-to count: 0
-        data.push(1);   // page association: page 1
+        data.push(48); // flags: type 48 (page info), no deferred, no large page assoc
+        data.push(0); // referred-to count: 0
+        data.push(1); // page association: page 1
         data.extend_from_slice(&[0, 0, 0, 19]); // data length: 19
 
         // Page information data (19 bytes)
-        data.extend_from_slice(&[0, 0, 0, 32]);  // width: 32
-        data.extend_from_slice(&[0, 0, 0, 16]);  // height: 16
-        data.extend_from_slice(&[0, 0, 0, 72]);  // x resolution
-        data.extend_from_slice(&[0, 0, 0, 72]);  // y resolution
-        data.push(0);   // flags: default pixel = 0, combination op = OR
-        data.extend_from_slice(&[0, 0]);  // striping info
+        data.extend_from_slice(&[0, 0, 0, 32]); // width: 32
+        data.extend_from_slice(&[0, 0, 0, 16]); // height: 16
+        data.extend_from_slice(&[0, 0, 0, 72]); // x resolution
+        data.extend_from_slice(&[0, 0, 0, 72]); // y resolution
+        data.push(0); // flags: default pixel = 0, combination op = OR
+        data.extend_from_slice(&[0, 0]); // striping info
 
         // End of page segment
         data.extend_from_slice(&[0, 0, 0, 1]); // segment number 1
-        data.push(49);  // type: end of page
-        data.push(0);   // referred-to count: 0
-        data.push(1);   // page association
+        data.push(49); // type: end of page
+        data.push(0); // referred-to count: 0
+        data.push(1); // page association
         data.extend_from_slice(&[0, 0, 0, 0]); // data length: 0
 
         let mut decoder = Jbig2Decoder::new();

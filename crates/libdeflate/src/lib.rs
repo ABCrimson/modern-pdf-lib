@@ -67,10 +67,8 @@ pub fn compress(data: &[u8], level: u32) -> Result<Vec<u8>, JsValue> {
     // input, but we allocate input size as a starting point.  The encoder
     // will grow the Vec if needed.
     let estimated_size = data.len();
-    let mut encoder = flate2::write::DeflateEncoder::new(
-        Vec::with_capacity(estimated_size),
-        compression,
-    );
+    let mut encoder =
+        flate2::write::DeflateEncoder::new(Vec::with_capacity(estimated_size), compression);
 
     encoder.write_all(data).map_err(to_js_err)?;
     let compressed = encoder.finish().map_err(to_js_err)?;
@@ -187,7 +185,10 @@ mod tests {
         // a JsValue error cannot be built natively.
         let message = decompress_inner(&compressed, 100)
             .expect_err("output above the limit must be rejected");
-        assert!(message.contains("exceeds max_output_size (100)"), "unexpected message: {message}");
+        assert!(
+            message.contains("exceeds max_output_size (100)"),
+            "unexpected message: {message}"
+        );
     }
 
     #[test]

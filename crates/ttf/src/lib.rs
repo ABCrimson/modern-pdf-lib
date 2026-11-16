@@ -164,8 +164,7 @@ fn to_js_err<E: std::fmt::Display>(err: E) -> JsValue {
 /// Internal parsing logic that returns a standard Rust `Result`.
 /// Used by the wasm-bindgen wrapper and by native tests.
 fn parse_font_impl(data: &[u8]) -> Result<FontInfo, String> {
-    let face = ttf_parser::Face::parse(data, 0)
-        .map_err(|e| format!("modern-pdf-ttf: {}", e))?;
+    let face = ttf_parser::Face::parse(data, 0).map_err(|e| format!("modern-pdf-ttf: {}", e))?;
 
     // -- Global metrics --
     let units_per_em = face.units_per_em();
@@ -361,7 +360,12 @@ mod tests {
         let mut sum: u32 = 0;
         let mut i = 0;
         while i + 3 < data.len() {
-            sum = sum.wrapping_add(u32::from_be_bytes([data[i], data[i+1], data[i+2], data[i+3]]));
+            sum = sum.wrapping_add(u32::from_be_bytes([
+                data[i],
+                data[i + 1],
+                data[i + 2],
+                data[i + 3],
+            ]));
             i += 4;
         }
         if i < data.len() {
@@ -482,7 +486,7 @@ mod tests {
 
         // Fill in subtable length
         let subtable_len = (t.len() - subtable_start) as u16;
-        t[length_pos..length_pos+2].copy_from_slice(&subtable_len.to_be_bytes());
+        t[length_pos..length_pos + 2].copy_from_slice(&subtable_len.to_be_bytes());
 
         t
     }
@@ -610,8 +614,8 @@ mod tests {
         let font = build_minimal_ttf();
         let info = parse_font_impl(&font).expect("should parse");
         assert_eq!(info.glyph_widths.len(), 2);
-        assert_eq!(info.glyph_widths[0], 0);   // .notdef
-        assert_eq!(info.glyph_widths[1], 600);  // glyph for 'A'
+        assert_eq!(info.glyph_widths[0], 0); // .notdef
+        assert_eq!(info.glyph_widths[1], 600); // glyph for 'A'
     }
 
     #[test]
@@ -633,7 +637,11 @@ mod tests {
         let info = parse_font_impl(&font).expect("should parse");
         // cmap_entries is packed as [codepoint_u32_le, glyph_id_u16_le, ...]
         assert!(!info.cmap_entries.is_empty(), "cmap should have entries");
-        assert_eq!(info.cmap_entries.len() % 6, 0, "entries should be 6 bytes each");
+        assert_eq!(
+            info.cmap_entries.len() % 6,
+            0,
+            "entries should be 6 bytes each"
+        );
 
         // Find 'A' (U+0041)
         let mut found_a = false;
