@@ -31,3 +31,5 @@ f7403dd9ff7821bce5160293a133adf4a0ec22d3
 9eaeb2b3787c27048baf97e4811a0538c16bc47b
 # move: docs/plans/ROADMAP.md to the repository root
 fd54b50483a4a177f34ffd5b4ced678a3bfb2e51
+# style: format the six Rust crates with rustfmt
+989b6873b64970844dacf6d17c27e34395a968c2
