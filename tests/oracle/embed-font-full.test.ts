@@ -98,6 +98,21 @@ describe('embedFont() with subset: false', () => {
     await expectPdfjsText(bytes, [TEXT]);
   });
 
+  test('subset: false passed after a save() embeds the font whole at the next save()', async () => {
+    const doc = createPdf();
+    const page = doc.addPage();
+    page.drawText(TEXT, { x: 50, y: 700, size: 18, font: await doc.embedFont(FONT) });
+    expectQpdfClean(await doc.save());
+    await doc.embedFont(FONT, { subset: false });
+    const bytes = await doc.save();
+    const files = fontFiles(bytes);
+    expect(files).toHaveLength(1);
+    expect(files[0]?.length1, '/Length1').toBe(FONT.length);
+    expect(sameBytes(files[0]?.data), 'inflated /FontFile2 equals the input').toBe(true);
+    expectQpdfClean(bytes);
+    await expectPdfjsText(bytes, [TEXT]);
+  });
+
   test('without the option the font is written as a subset', async () => {
     const bytes = await save(undefined);
     const files = fontFiles(bytes);

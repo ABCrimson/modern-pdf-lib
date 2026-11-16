@@ -143,11 +143,12 @@ export type StandardFontName = (typeof StandardFonts)[keyof typeof StandardFonts
  */
 export interface EmbedFontOptions {
   /**
-   * Whether the program of a TrueType or CFF-based OpenType font is subset when the document is
-   * saved. Default `true`: the program is reduced to the glyphs the document draws. `false`
-   * embeds the program whole, and the font is then embedded whole even when another
-   * `embedFont()` call for the same font passed `true` or left the option out. A standard font
-   * embeds no program, so the option changes nothing for it.
+   * Whether the program of a TrueType font is subset when the document is saved. Default `true`:
+   * the saved program keeps the outlines of the glyphs the document draws. `false` embeds the
+   * program whole, with the widths and /ToUnicode entries of every glyph, and the font is then
+   * embedded whole even when another `embedFont()` call for the same font passed `true` or left
+   * the option out. For a CFF-based OpenType font, `false` keeps the CFF program as it was
+   * embedded. A standard font embeds no program, so the option changes nothing for it.
    */
   subset?: boolean | undefined;
   /** Custom name to use in the font dictionary's /BaseFont instead of the font's PostScript name. */
@@ -634,6 +635,12 @@ export class PdfDocument {
       cidFontDict: PdfDict;
       /** False when an `embedFont()` call passed `subset: false`: the program is written whole. */
       subset: boolean;
+      /** The program, /W array and /ToUnicode data written at embed time: the whole font. */
+      whole: {
+        readonly program: Uint8Array;
+        readonly widths: PdfArray;
+        readonly toUnicode: Uint8Array;
+      };
     }
   >();
 
@@ -663,8 +670,8 @@ export class PdfDocument {
     // The removed option is not in the type; a JavaScript caller or a cast can still pass it. This
     // guard is removed in 0.50.0.
     for (const rule of REFUSED_EMBED_FONT_OPTIONS) {
-      if (rule.option !== undefined && options !== undefined) {
-        if (Reflect.get(options, rule.option) !== undefined) rejectOption(rule);
+      if (rule.option !== undefined && Reflect.get(options ?? {}, rule.option) !== undefined) {
+        rejectOption(rule);
       }
     }
     if (typeof fontNameOrData === 'string') {
@@ -907,6 +914,7 @@ export class PdfDocument {
       toUnicodeStream,
       cidFontDict,
       subset: options?.subset !== false,
+      whole: { program: fontFileStream.data, widths: wArray, toUnicode: toUnicodeStream.data },
     });
 
     // Register the font and its Identity-H encoder on all existing pages
@@ -1069,6 +1077,7 @@ export class PdfDocument {
       toUnicodeStream,
       cidFontDict,
       subset: options?.subset !== false,
+      whole: { program: fontFileStream.data, widths: wArray, toUnicode: toUnicodeStream.data },
     });
 
     // Register the font and its Identity-H encoder on all existing pages
@@ -2920,8 +2929,23 @@ export class PdfDocument {
     const encoder = new TextEncoder();
 
     for (const [, entry] of this.ttfFonts) {
-      // `subset: false`: keep the whole program and the /W and /ToUnicode written at embed time.
-      if (!entry.subset) continue;
+      if (!entry.subset) {
+        // `subset: false`: write the program, /W and /ToUnicode of embed time again, since a save()
+        // before the `subset: false` call may have replaced them with a subset.
+        const { fontFileStream, fontFileDict, toUnicodeStream, cidFontDict, whole } = entry;
+        // save() compresses these streams in place: the restored data is unfiltered again.
+        fontFileDict.delete('/Filter');
+        fontFileStream.data = whole.program;
+        fontFileStream.syncLength();
+        if (fontFileDict.has('/Length1')) {
+          fontFileDict.set('/Length1', PdfNumber.of(whole.program.length));
+        }
+        cidFontDict.set('/W', whole.widths);
+        toUnicodeStream.dict.delete('/Filter');
+        toUnicodeStream.data = whole.toUnicode;
+        toUnicodeStream.syncLength();
+        continue;
+      }
       const { embeddedFont, fontFileStream, fontFileDict, toUnicodeStream, cidFontDict } = entry;
       const metrics = embeddedFont.metrics;
       const usedGlyphs = embeddedFont.getUsedGlyphs();

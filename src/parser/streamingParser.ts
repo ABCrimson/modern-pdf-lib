@@ -554,9 +554,9 @@ export class StreamingPdfParser {
     // The removed option is not in the type; a JavaScript caller or a cast can still pass it. This
     // guard is removed in 0.50.0.
     for (const rule of REFUSED_OPTIONS) {
-      if (rule.option !== undefined && options !== undefined) {
-        // Only `true` was ignored in 0.40.9; `false` was the default and stays accepted.
-        if (Reflect.get(options, rule.option) === true) rejectOption(rule);
+      // Only `true` was ignored in 0.40.9; `false` was the default and stays accepted.
+      if (rule.option !== undefined && Reflect.get(options ?? {}, rule.option) === true) {
+        rejectOption(rule);
       }
     }
     this.options = {

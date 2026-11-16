@@ -46,6 +46,18 @@ const REFUSED_OPTIONS = /* @__PURE__ */ UNSUPPORTED_OPTIONS.filter(
   (rule) => rule.entry === 'saveIncremental()',
 );
 
+/**
+ * Refuses a finite `objectStreamThreshold`: the incremental writer writes no object streams.
+ * PdfSaveOptions is shared with save(), so the type keeps the member; this guard is removed in
+ * 0.50.0.
+ */
+function refuseObjectStreamThreshold(options: PdfSaveOptions | undefined): void {
+  const threshold = options?.objectStreamThreshold;
+  if (threshold !== undefined && threshold !== Infinity) {
+    for (const rule of REFUSED_OPTIONS) rejectOption(rule);
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Encrypted-input guard
 // ---------------------------------------------------------------------------
@@ -368,12 +380,7 @@ export function saveIncremental(
 ): IncrementalSaveResult {
   assertSavableDecryptedContent(registry, false, 'saveIncremental()');
   assertUnencryptedInput(originalBytes, 'saveIncremental()');
-  // PdfSaveOptions is shared with save(), so the type keeps the member; this guard is removed in
-  // 0.50.0.
-  const threshold = options?.objectStreamThreshold;
-  if (threshold !== undefined && threshold !== Infinity) {
-    for (const rule of REFUSED_OPTIONS) rejectOption(rule);
-  }
+  refuseObjectStreamThreshold(options);
   const compress = options?.compress ?? true;
   const compressionLevel = options?.compressionLevel ?? 6;
   const useWasm = options?.useWasm ?? false;
@@ -580,6 +587,9 @@ function buildXrefSubsections(
  * @param doc            The modified PdfDocument.
  * @param options        Optional save options.
  * @returns              The incremental save result.
+ * @throws {UnsupportedOptionError} When `options.objectStreamThreshold` is finite, before the
+ *         document is changed: the option was removed from saveIncremental() in 0.41.0, and the
+ *         error names that function.
  * @throws {UnsupportedEncryptionError} When encryption is configured
  *         (`encrypt()` was called), or when `originalBytes` is an encrypted
  *         PDF: the incremental writer does not encrypt and would append
@@ -601,6 +611,7 @@ export async function saveDocumentIncremental(
   }
   assertSavableDecryptedContent(doc.getRegistry(), false, 'saveDocumentIncremental()');
   assertUnencryptedInput(originalBytes, 'saveDocumentIncremental()');
+  refuseObjectStreamThreshold(options);
   // Import buildDocumentStructure to get the structure
   const { buildDocumentStructure } = await import('../pdfCatalog.js');
 

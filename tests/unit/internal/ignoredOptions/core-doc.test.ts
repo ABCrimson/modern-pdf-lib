@@ -4,8 +4,9 @@
  *
  * - Refused with an UnsupportedOptionError: `parseContentStreams: true` of `StreamingPdfParser`
  *   and `features` of `embedFont()` (removed in 0.41.0, and gone from their types); a finite
- *   `objectStreamThreshold` of `saveIncremental()` (removed in 0.41.0; PdfSaveOptions keeps the
- *   member because `save()` honours it); a finite `objectStreamThreshold` of `saveAsStream()`
+ *   `objectStreamThreshold` of `saveIncremental()` and `saveDocumentIncremental()` (removed in
+ *   0.41.0; PdfSaveOptions keeps the member because `save()` honours it; both refuse it before the
+ *   document is changed); a finite `objectStreamThreshold` of `saveAsStream()`
  *   (planned for 0.41.2).
  * - Carried out: `subset: false` of `embedFont()` embeds the font program whole
  *   (tests/oracle/embed-font-full.test.ts reads the output with qpdf and pdf.js), and
@@ -19,11 +20,14 @@
 import { inflateSync } from 'node:zlib';
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { MockInstance } from 'vitest';
-import { createPdf } from '../../../../src/index.js';
+import { createPdf, loadPdf } from '../../../../src/index.js';
 import { UnsupportedOptionError } from '../../../../src/errors.js';
 import type { PdfLibVersion } from '../../../../src/errors.js';
 import { StreamingPdfParser } from '../../../../src/parser/streamingParser.js';
-import { saveIncremental } from '../../../../src/core/io/incrementalWriter.js';
+import {
+  saveDocumentIncremental,
+  saveIncremental,
+} from '../../../../src/core/io/incrementalWriter.js';
 import {
   PdfArray,
   PdfDict,
@@ -34,6 +38,23 @@ import {
   PdfString,
 } from '../../../../src/core/pdfObjects.js';
 import { resetWarningsForTesting } from '../../../../src/internal/warnings.js';
+
+/** The WASM deflate module, replaced so that a test can mark it initialized and see its calls. */
+const wasmDeflate = vi.hoisted(() => ({ ready: false, levels: [] as number[] }));
+
+vi.mock('../../../../src/codecs/internal/libdeflateWasm.js', async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import('../../../../src/codecs/internal/libdeflateWasm.js')>();
+  const { deflateRawSync } = await import('node:zlib');
+  return {
+    ...actual,
+    isAvailable: () => wasmDeflate.ready,
+    deflateSync: (input: Uint8Array, level = 6) => {
+      wasmDeflate.levels.push(level);
+      return new Uint8Array(deflateRawSync(input, { level }));
+    },
+  };
+});
 
 let pdf: Uint8Array;
 
@@ -173,6 +194,15 @@ describe('refused before anything is changed', () => {
     expect(doc.getPageCount()).toBe(0);
   });
 
+  it('saveDocumentIncremental() refuses a finite objectStreamThreshold before it changes the document', async () => {
+    const doc = await loadPdf(pdf);
+    const before = [...doc.getRegistry()].length;
+    await expect(saveDocumentIncremental(pdf, doc, { objectStreamThreshold: 5 })).rejects.toThrow(
+      UnsupportedOptionError,
+    );
+    expect([...doc.getRegistry()].length).toBe(before);
+  });
+
   it('embedFont() registers no font', async () => {
     const doc = createPdf();
     await expect(
@@ -195,6 +225,15 @@ function flateStreams(bytes: Uint8Array): Uint8Array[] {
   return found;
 }
 
+describe('null as the options, accepted as in 0.40.9', () => {
+  it('embedFont() and new StreamingPdfParser() accept null', async () => {
+    await expect(createPdf().embedFont('Helvetica', null as never)).resolves.toMatchObject({
+      name: 'F1',
+    });
+    expect(() => new StreamingPdfParser(null as never)).not.toThrow();
+  });
+});
+
 describe('options carried out', () => {
   it('embedFont() with subset: false and true returns the standard font as without it', async () => {
     const plain = await createPdf().embedFont('Helvetica');
@@ -213,6 +252,24 @@ describe('options carried out', () => {
     expect(new TextDecoder('latin1').decode(inflateSync(streams[0] ?? new Uint8Array()))).toBe(
       'BT /F1 12 Tf 50 700 Td (Incremental) Tj ET\n'.repeat(40),
     );
+  });
+
+  it('saveIncremental() with useWasm: true and the WASM deflate module initialized compresses with it', () => {
+    wasmDeflate.ready = true;
+    wasmDeflate.levels.length = 0;
+    try {
+      const { bytes } = incremental({ useWasm: true, compressionLevel: 7 });
+      expect(wasmDeflate.levels, 'levels passed to the WASM deflate module').toEqual([7]);
+      const streams = flateStreams(bytes.subarray(pdf.length));
+      expect(streams).toHaveLength(1);
+      expect(new TextDecoder('latin1').decode(inflateSync(streams[0] ?? new Uint8Array()))).toBe(
+        'BT /F1 12 Tf 50 700 Td (Incremental) Tj ET\n'.repeat(40),
+      );
+      incremental({ useWasm: false });
+      expect(wasmDeflate.levels, 'useWasm: false does not call the WASM module').toEqual([7]);
+    } finally {
+      wasmDeflate.ready = false;
+    }
   });
 
   it('saveIncremental() with useWasm: true and the WASM deflate module not initialized writes the bytes of useWasm: false', () => {
