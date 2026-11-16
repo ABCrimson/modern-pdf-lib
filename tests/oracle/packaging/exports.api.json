@@ -4,7 +4,7 @@
   "entries": {
     ".": {
       "runtime": 731,
-      "typeOnly": 426,
+      "typeOnly": 427,
       "names": {
         "AFDate_FormatEx": {
           "kind": "function",
@@ -305,6 +305,10 @@
         "CpalPalette": {
           "kind": "interface",
           "decl": "sha256:a1c74619e2b8"
+        },
+        "CreatePdfOptions": {
+          "kind": "interface",
+          "decl": "sha256:2b7cda9b72ae"
         },
         "CropBox": {
           "kind": "interface",
@@ -892,7 +896,7 @@
         },
         "LoadPdfOptions": {
           "kind": "interface",
-          "decl": "sha256:4cfd23660273"
+          "decl": "sha256:b1a48919dca0"
         },
         "LtvOptions": {
           "kind": "interface",
@@ -1184,7 +1188,7 @@
         },
         "PdfDocument": {
           "kind": "class",
-          "decl": "sha256:1d376a49b9c8"
+          "decl": "sha256:fe96cab1787a"
         },
         "PdfDocumentBuilder": {
           "kind": "class",
@@ -1288,7 +1292,7 @@
         },
         "PdfObjectRegistry": {
           "kind": "class",
-          "decl": "sha256:eb171eaef3c0"
+          "decl": "sha256:786108881d67"
         },
         "PdfOutlineItem": {
           "kind": "class",
@@ -1840,11 +1844,11 @@
         },
         "StreamingParserOptions": {
           "kind": "interface",
-          "decl": "sha256:aedfa448912e"
+          "decl": "sha256:5895087e9f2f"
         },
         "StreamingPdfParser": {
           "kind": "class",
-          "decl": "sha256:c61e3573ef1a"
+          "decl": "sha256:a2cefbd4d4cc"
         },
         "StripOptions": {
           "kind": "interface",
@@ -1968,7 +1972,7 @@
         },
         "TextExtractionOptions": {
           "kind": "interface",
-          "decl": "sha256:5f1a35bf3a8a"
+          "decl": "sha256:b371612c2bd8"
         },
         "TextItem": {
           "kind": "interface",
@@ -2808,7 +2812,7 @@
         },
         "createPdf": {
           "kind": "function",
-          "decl": "sha256:e2d469f93de5"
+          "decl": "sha256:9ed2723e7ffe"
         },
         "createRangeFetcher": {
           "kind": "function",
@@ -3228,7 +3232,7 @@
         },
         "extractTextWithPositions": {
           "kind": "function",
-          "decl": "sha256:9ab9af4eabc4"
+          "decl": "sha256:7f03b9ebc65b"
         },
         "extractXmpMetadata": {
           "kind": "function",
@@ -4638,7 +4642,7 @@
     },
     "./create": {
       "runtime": 76,
-      "typeOnly": 50,
+      "typeOnly": 51,
       "names": {
         "Angle": {
           "kind": "type",
@@ -4671,6 +4675,10 @@
         "ComputeFontSizeOptions": {
           "kind": "interface",
           "decl": "sha256:326cf3d6b8ba"
+        },
+        "CreatePdfOptions": {
+          "kind": "interface",
+          "decl": "sha256:2b7cda9b72ae"
         },
         "CropBox": {
           "kind": "interface",
@@ -4874,7 +4882,7 @@
         },
         "PdfDocument": {
           "kind": "class",
-          "decl": "sha256:1d376a49b9c8"
+          "decl": "sha256:fe96cab1787a"
         },
         "PdfError": {
           "kind": "class",
@@ -5034,7 +5042,7 @@
         },
         "createPdf": {
           "kind": "function",
-          "decl": "sha256:e2d469f93de5"
+          "decl": "sha256:9ed2723e7ffe"
         },
         "cropPage": {
           "kind": "function",
@@ -5224,7 +5232,7 @@
         },
         "LoadPdfOptions": {
           "kind": "interface",
-          "decl": "sha256:4cfd23660273"
+          "decl": "sha256:b1a48919dca0"
         },
         "MalformedInputError": {
           "kind": "class",
@@ -5328,7 +5336,7 @@
         },
         "TextExtractionOptions": {
           "kind": "interface",
-          "decl": "sha256:5f1a35bf3a8a"
+          "decl": "sha256:b371612c2bd8"
         },
         "TextItem": {
           "kind": "interface",
@@ -5380,7 +5388,7 @@
         },
         "extractTextWithPositions": {
           "kind": "function",
-          "decl": "sha256:9ab9af4eabc4"
+          "decl": "sha256:7f03b9ebc65b"
         },
         "formatHexContext": {
           "kind": "function",
@@ -5568,7 +5576,7 @@
     },
     "./browser": {
       "runtime": 738,
-      "typeOnly": 426,
+      "typeOnly": 427,
       "names": {
         "AFDate_FormatEx": {
           "kind": "function",
@@ -5869,6 +5877,10 @@
         "CpalPalette": {
           "kind": "interface",
           "decl": "sha256:a1c74619e2b8"
+        },
+        "CreatePdfOptions": {
+          "kind": "interface",
+          "decl": "sha256:2b7cda9b72ae"
         },
         "CropBox": {
           "kind": "interface",
@@ -6456,7 +6468,7 @@
         },
         "LoadPdfOptions": {
           "kind": "interface",
-          "decl": "sha256:4cfd23660273"
+          "decl": "sha256:b1a48919dca0"
         },
         "LtvOptions": {
           "kind": "interface",
@@ -6748,7 +6760,7 @@
         },
         "PdfDocument": {
           "kind": "class",
-          "decl": "sha256:1d376a49b9c8"
+          "decl": "sha256:fe96cab1787a"
         },
         "PdfDocumentBuilder": {
           "kind": "class",
@@ -6852,7 +6864,7 @@
         },
         "PdfObjectRegistry": {
           "kind": "class",
-          "decl": "sha256:eb171eaef3c0"
+          "decl": "sha256:786108881d67"
         },
         "PdfOutlineItem": {
           "kind": "class",
@@ -7404,11 +7416,11 @@
         },
         "StreamingParserOptions": {
           "kind": "interface",
-          "decl": "sha256:aedfa448912e"
+          "decl": "sha256:5895087e9f2f"
         },
         "StreamingPdfParser": {
           "kind": "class",
-          "decl": "sha256:c61e3573ef1a"
+          "decl": "sha256:a2cefbd4d4cc"
         },
         "StripOptions": {
           "kind": "interface",
@@ -7532,7 +7544,7 @@
         },
         "TextExtractionOptions": {
           "kind": "interface",
-          "decl": "sha256:5f1a35bf3a8a"
+          "decl": "sha256:b371612c2bd8"
         },
         "TextItem": {
           "kind": "interface",
@@ -8372,7 +8384,7 @@
         },
         "createPdf": {
           "kind": "function",
-          "decl": "sha256:e2d469f93de5"
+          "decl": "sha256:9ed2723e7ffe"
         },
         "createPdfResponse": {
           "kind": "function",
@@ -8796,7 +8808,7 @@
         },
         "extractTextWithPositions": {
           "kind": "function",
-          "decl": "sha256:9ab9af4eabc4"
+          "decl": "sha256:7f03b9ebc65b"
         },
         "extractXmpMetadata": {
           "kind": "function",
