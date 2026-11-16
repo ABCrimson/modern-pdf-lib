@@ -6,8 +6,12 @@
  * control, and mixed styled spans.
  */
 
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { describe, it, expect } from 'vitest';
+import { showText } from '../../../src/core/operators/text.js';
 import { UnencodableTextError } from '../../../src/errors.js';
+import { createPdf, StandardFonts } from '../../../src/index.js';
 import {
   layoutParagraph,
   layoutColumns,
@@ -27,6 +31,16 @@ import type { TextFrame, TextSpan, MultiColumnOptions } from '../../../src/layou
 function fixedMeasure(text: string, _font: string, _size: number): number {
   return text.length * 6;
 }
+
+/** Liberation Sans Regular as pdfjs-dist ships it (tests/fixtures holds no TrueType file). */
+const LIBERATION_SANS = new Uint8Array(
+  readFileSync(
+    join(
+      import.meta.dirname,
+      '../../../node_modules/pdfjs-dist/standard_fonts/LiberationSans-Regular.ttf',
+    ),
+  ),
+);
 
 /** Standard test frame: 200 pts wide, 200 pts tall. */
 const STD_FRAME: TextFrame = { x: 50, y: 700, width: 200, height: 200 };
@@ -697,6 +711,30 @@ describe('layoutParagraph — word text encoding', () => {
       fixedMeasure,
     );
     expect(operators).toContain('(ab) Tj\n');
+  });
+
+  it('writes a span whose font is a Symbol FontRef in SymbolEncoding, under its resource name', async () => {
+    const symbol = await createPdf().embedFont(StandardFonts.Symbol);
+    const { operators } = layoutParagraph([{ text: 'αβ', font: symbol }], STD_FRAME, {});
+    expect(operators).toContain(`/${symbol.name} 12 Tf`);
+    expect(operators).toContain('(ab) Tj\n');
+  });
+
+  it('writes a span in an embedded font as the codes of that font', async () => {
+    const font = await createPdf().embedFont(LIBERATION_SANS);
+    const { operators } = layoutParagraph([{ text: 'Привет Ω', font }], STD_FRAME, {});
+    expect(operators).toContain(showText(font.encodeText('Привет')));
+    expect(operators).toContain(showText(font.encodeText('Ω')));
+    expect(operators).toMatch(/^[\x20-\x7e\n]*$/);
+  });
+
+  it('measures a FontRef span through the font when no measure function is given', async () => {
+    const symbol = await createPdf().embedFont(StandardFonts.Symbol);
+    const { operators } = layoutParagraph([{ text: 'αβ', font: symbol }], STD_FRAME, {
+      alignment: 'right',
+    });
+    const [, startX] = /\n([\d.]+) [\d.]+ Td\n/.exec(operators) ?? [];
+    expect(Number(startX)).toBeCloseTo(50 + 200 - symbol.widthOfTextAtSize('αβ', 12), 5);
   });
 
   it('throws UnencodableTextError for a word the font cannot encode', () => {

@@ -87,7 +87,7 @@ import type { GradientFill, PatternFill } from '../graphics/patterns.js';
 import { buildGradientObjects, buildPatternObjects } from '../graphics/patterns.js';
 import { encodeQrCode, qrCodeToOperators } from '../barcode/matrix/qr.js';
 import type { ErrorCorrectionLevel } from '../barcode/matrix/qr.js';
-import { renderTable } from '../layout/table.js';
+import { renderTableWithFonts } from '../layout/table.js';
 import type { DrawTableOptions, TableRenderResult } from '../layout/table.js';
 
 // ---------------------------------------------------------------------------
@@ -2322,10 +2322,19 @@ export class PdfPage {
    * borders, and text operators).  The top-left corner of the table is
    * at `(options.x, options.y)` and rows extend downward.
    *
+   * The text of a cell is encoded as {@link drawText} encodes a font
+   * resource name: through the font registered on this page under
+   * `fontName` (or the `fontName` of a text run), such as one
+   * {@link PdfDocument.embedFont} returned; a name of no font on this page
+   * encodes as the standard font of that name (`Helvetica`, or an AcroForm
+   * alias such as `ZaDb`), any other name in WinAnsiEncoding.
+   *
    * @param options  Table configuration: position, size, rows, columns,
    *                 fonts, colours, borders, and padding.
    * @returns        A {@link TableRenderResult} with the computed
    *                 dimensions and layout metrics.
+   * @throws {UnencodableTextError} When the font of a cell cannot encode a
+   *   character of its text; nothing is drawn.
    *
    * @example
    * ```ts
@@ -2342,7 +2351,12 @@ export class PdfPage {
    * ```
    */
   drawTable(options: DrawTableOptions): TableRenderResult {
-    const { ops, result } = renderTable(options);
+    const { ops, result } = renderTableWithFonts(options, (fontName, text) => {
+      const registered = this.fontEncoders.get(fontName);
+      if (registered === undefined) return showText(encodeTextForFontName(fontName, text));
+      const codes = registered.font.encodeText(text);
+      return registered.hexOperands ? showTextHex(codes) : showText(codes);
+    });
     this.ops += ops;
     return result;
   }

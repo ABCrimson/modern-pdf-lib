@@ -343,8 +343,12 @@ export function resolveColumnWidths(options: DrawTableOptions): number[] {
   return widths;
 }
 
-function computeNestedTableHeight(nested: NestedTableContent, width: number): number {
-  const { result } = renderTable({ ...nested.table, x: 0, y: 0, width });
+function computeNestedTableHeight(
+  nested: NestedTableContent,
+  width: number,
+  show: ShowTextInFont,
+): number {
+  const { result } = renderTableWithFonts({ ...nested.table, x: 0, y: 0, width }, show);
   return result.height;
 }
 
@@ -392,6 +396,7 @@ function resolveRowHeights(
   fontSize: number,
   defaultPadding: number,
   colWidths: readonly number[],
+  show: ShowTextInFont,
 ): number[] {
   return options.rows.map((row) => {
     if (row.height) return row.height;
@@ -410,7 +415,7 @@ function resolveRowHeights(
 
       if (isNestedTable(c.content)) {
         const nestedWidth = cellWidth - p.left - p.right;
-        const nestedHeight = computeNestedTableHeight(c.content, Math.max(0, nestedWidth));
+        const nestedHeight = computeNestedTableHeight(c.content, Math.max(0, nestedWidth), show);
         const h = p.top + p.bottom + nestedHeight;
         if (h > maxHeight) maxHeight = h;
       } else {
@@ -503,6 +508,7 @@ function renderPlainTextOps(
   cellWidth: number,
   cellHeight: number,
   fontName: string,
+  show: ShowTextInFont,
   fontSize: number,
   padding: { top: number; right: number; bottom: number; left: number },
   textColor: Color,
@@ -547,7 +553,7 @@ function renderPlainTextOps(
       ops += beginText();
       ops += setFont(fontName, cellFontSize);
       ops += moveText(textX, textY);
-      ops += showText(encodeTextForFontName(fontName, line));
+      ops += show(fontName, line);
       ops += endText();
     }
     ops += restoreState();
@@ -592,7 +598,7 @@ function renderPlainTextOps(
     ops += beginText();
     ops += setFont(fontName, cellFontSize);
     ops += moveText(textX, textY);
-    ops += showText(encodeTextForFontName(fontName, displayText));
+    ops += show(fontName, displayText);
     ops += endText();
     ops += restoreState();
   }
@@ -607,6 +613,7 @@ function renderCellOps(
   cellWidth: number,
   cellHeight: number,
   fontName: string,
+  show: ShowTextInFont,
   fontSize: number,
   defaultPadding: number,
   borderWidth: number,
@@ -639,12 +646,15 @@ function renderCellOps(
     const nestedWidth = cellWidth - padding.left - padding.right;
     const nestedX = cellX + padding.left;
     const nestedY = cellY - padding.top;
-    const { ops: nestedOps } = renderTable({
-      ...content.table,
-      x: nestedX,
-      y: nestedY,
-      width: Math.max(0, nestedWidth),
-    });
+    const { ops: nestedOps } = renderTableWithFonts(
+      {
+        ...content.table,
+        x: nestedX,
+        y: nestedY,
+        width: Math.max(0, nestedWidth),
+      },
+      show,
+    );
     ops += nestedOps;
   } else if (isTextRunArray(content)) {
     if (content.length > 0) {
@@ -680,7 +690,7 @@ function renderCellOps(
         ops += applyFillColor(run.color ?? cellTextColor);
         const runFont = run.fontName ?? fontName;
         ops += setFont(runFont, run.fontSize ?? cellFontSize);
-        ops += showText(encodeTextForFontName(runFont, run.text));
+        ops += show(runFont, run.text);
       }
       ops += endText();
       ops += restoreState();
@@ -696,6 +706,7 @@ function renderCellOps(
         cellWidth,
         cellHeight,
         fontName,
+        show,
         fontSize,
         padding,
         textColor,
@@ -711,7 +722,44 @@ function renderCellOps(
 // Core renderer
 // ---------------------------------------------------------------------------
 
+/**
+ * Writes the operator that shows `text` in the font with the resource name
+ * `fontName`, with its line end.
+ */
+export type ShowTextInFont = (fontName: string, text: string) => string;
+
+/**
+ * Shows text in the font its name stands for, without a font object: a
+ * standard font name or AcroForm alias in the encoding of that font, any
+ * other name in WinAnsiEncoding.
+ */
+const showByFontName: ShowTextInFont = (fontName, text) =>
+  showText(encodeTextForFontName(fontName, text));
+
+/**
+ * Render a table as content-stream operators. Its fonts are known by name
+ * only: `fontName` and the `fontName` of a text run encode as a standard
+ * font name or AcroForm alias does, any other name in WinAnsiEncoding.
+ * `PdfPage.drawTable` encodes through the fonts registered on its page.
+ *
+ * @throws {UnencodableTextError} At the first character of a cell that its
+ *   font cannot encode.
+ */
 export function renderTable(options: DrawTableOptions): {
+  ops: string;
+  result: TableRenderResult;
+} {
+  return renderTableWithFonts(options, showByFontName);
+}
+
+/**
+ * {@link renderTable} with the text shown through `show`, which knows the
+ * fonts of a page by resource name. No package entry exports it.
+ */
+export function renderTableWithFonts(
+  options: DrawTableOptions,
+  show: ShowTextInFont,
+): {
   ops: string;
   result: TableRenderResult;
 } {
@@ -725,7 +773,7 @@ export function renderTable(options: DrawTableOptions): {
   const headerRows = options.headerRows ?? 0;
   const colWidths = resolveColumnWidths(options);
   const numCols = colWidths.length;
-  const rowHeights = resolveRowHeights(options, fontSize, defaultPadding, colWidths);
+  const rowHeights = resolveRowHeights(options, fontSize, defaultPadding, colWidths, show);
   const grid = buildOccupationGrid(options.rows, numCols);
 
   let ops = saveState();
@@ -781,6 +829,7 @@ export function renderTable(options: DrawTableOptions): {
         cellWidth,
         cellHeight,
         fontName,
+        show,
         fontSize,
         defaultPadding,
         borderWidth,
@@ -830,11 +879,12 @@ export function renderMultiPageTable(
   const borderColor: Color = options.borderColor ?? ({ type: 'grayscale', gray: 0 } as const);
   const textColor: Color = options.textColor ?? ({ type: 'grayscale', gray: 0 } as const);
   const fontName = options.fontName ?? 'Helvetica';
+  const show = showByFontName;
   const headerRowCount = options.headerRows ?? 0;
 
   const colWidths = resolveColumnWidths(options);
   const numCols = colWidths.length;
-  const rowHeights = resolveRowHeights(options, fontSize, defaultPadding, colWidths);
+  const rowHeights = resolveRowHeights(options, fontSize, defaultPadding, colWidths, show);
   const grid = buildOccupationGrid(options.rows, numCols);
 
   const pages: PageContent[] = [];
@@ -876,6 +926,7 @@ export function renderMultiPageTable(
           cellWidth,
           cellHeight,
           fontName,
+          show,
           fontSize,
           defaultPadding,
           borderWidth,
@@ -937,6 +988,7 @@ export function renderMultiPageTable(
         cellWidth,
         cellHeight,
         fontName,
+        show,
         fontSize,
         defaultPadding,
         borderWidth,

@@ -60,6 +60,11 @@ export type TextAlignment = 'left' | 'right' | 'center' | 'justify';
 /** A span of text with optional styling overrides. */
 export interface TextSpan {
   text: string;
+  /**
+   * The font: a FontRef, whose own encoding the text is written in, or a
+   * font resource name, which encodes as a standard font name or AcroForm
+   * alias does (any other name in WinAnsiEncoding). Default: `Helvetica`.
+   */
   font?: FontRef | string;
   fontSize?: number;
   color?: Color;
@@ -291,6 +296,13 @@ function normalizeSpans(input: TextSpan[] | string): TextSpan[] {
     return [{ text: input }];
   }
   return input;
+}
+
+/** The FontRef objects among the fonts of `spans`, by resource name. */
+function fontRefsOf(spans: readonly TextSpan[]): Map<string, FontRef> {
+  const fonts = new Map<string, FontRef>();
+  for (const { font } of spans) if (typeof font === 'object') fonts.set(font.name, font);
+  return fonts;
 }
 
 /**
@@ -589,7 +601,8 @@ function calculateJustifySpacing(
 // ---------------------------------------------------------------------------
 
 /**
- * Render a single laid-out line to PDF operators.
+ * Render a single laid-out line to PDF operators. A word whose font name is
+ * that of a FontRef in `fonts` is written in the codes of that font.
  */
 function renderLine(
   line: LayoutLine,
@@ -600,6 +613,7 @@ function renderLine(
   measure: (text: string, font: string, size: number) => number,
   defaultFontName: string,
   defaultFontSize: number,
+  fonts: ReadonlyMap<string, FontRef>,
 ): string {
   let ops = '';
 
@@ -661,7 +675,7 @@ function renderLine(
       currentX += spaceWidth;
     }
 
-    ops += showText(encodeTextForFontName(fn, word.text));
+    ops += showText(fonts.get(fn)?.encodeText(word.text) ?? encodeTextForFontName(fn, word.text));
     currentX += word.width;
 
     // Underline decoration
@@ -751,9 +765,13 @@ function applyWidowOrphanControl(
  * @param spans      The text content, as a plain string or styled spans.
  * @param frame      The rectangular frame to lay text into.
  * @param options    Paragraph layout options (alignment, hyphenation, etc.).
- * @param measureFn  Optional text measurement function. If omitted, a
- *                   character-count heuristic is used.
+ * @param measureFn  Optional text measurement function. If omitted, a span
+ *                   whose font is a FontRef is measured through the font
+ *                   (`widthOfTextAtSize`), any other with a character-count
+ *                   heuristic.
  * @returns          A {@link TextLayoutResult} with operators and overflow.
+ * @throws {UnencodableTextError} At the first character of a word that its
+ *   font cannot encode.
  */
 export function layoutParagraph(
   spans: TextSpan[] | string,
@@ -762,7 +780,12 @@ export function layoutParagraph(
   measureFn?: (text: string, font: string, size: number) => number,
 ): TextLayoutResult {
   const opts = options ?? {};
-  const measure = measureFn ?? defaultMeasure;
+  const normalizedSpans = normalizeSpans(spans);
+  const fonts = fontRefsOf(normalizedSpans);
+  const measure =
+    measureFn ??
+    ((text: string, font: string, size: number): number =>
+      fonts.get(font)?.widthOfTextAtSize(text, size) ?? defaultMeasure(text, font, size));
   const alignment = opts.alignment ?? 'left';
   const lineHeightMultiplier = opts.lineHeight ?? 1.2;
   const paragraphSpacing = opts.paragraphSpacing ?? 0;
@@ -773,8 +796,6 @@ export function layoutParagraph(
 
   const defaultFontName = 'Helvetica';
   const defaultFontSize = 12;
-
-  const normalizedSpans = normalizeSpans(spans);
 
   // Handle empty input
   if (normalizedSpans.length === 0 || normalizedSpans.every((s) => s.text === '')) {
@@ -847,6 +868,7 @@ export function layoutParagraph(
       measure,
       defaultFontName,
       defaultFontSize,
+      fonts,
     );
 
     linesRendered++;

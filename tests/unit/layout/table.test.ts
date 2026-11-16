@@ -13,6 +13,7 @@ import { PdfPage, PageSizes } from '../../../src/core/pdfPage.js';
 import { PdfObjectRegistry } from '../../../src/core/pdfObjects.js';
 import type { Color } from '../../../src/core/operators/color.js';
 import { UnencodableTextError } from '../../../src/errors.js';
+import { createPdf, StandardFonts } from '../../../src/index.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -784,5 +785,60 @@ describe('renderTable – cell text encoding', () => {
     expect(() => renderTable(simpleTable({ rows: [{ cells: ['日本'] }] }))).toThrow(
       UnencodableTextError,
     );
+  });
+});
+
+describe('drawTable shows text in the fonts registered on its page', () => {
+  it('writes a cell, a text run and a nested cell in a Symbol font in SymbolEncoding', async () => {
+    const doc = createPdf();
+    const page = doc.addPage();
+    const symbol = await doc.embedFont(StandardFonts.Symbol);
+    page.drawTable({
+      x: 50,
+      y: 700,
+      width: 300,
+      fontName: symbol.name,
+      rows: [
+        { cells: ['αβ', { content: [{ text: 'γ' }] }] },
+        {
+          cells: [
+            {
+              content: {
+                type: 'table',
+                table: { width: 100, fontName: symbol.name, rows: [{ cells: ['Σ'] }] },
+              },
+            },
+          ],
+        },
+      ],
+    });
+    const ops = page.getContentStreamData();
+    expect(ops).toContain('(ab) Tj\n');
+    expect(ops).toContain('(g) Tj\n');
+    expect(ops).toContain('(S) Tj\n');
+  });
+
+  it('writes a text run in the font its own fontName names', async () => {
+    const doc = createPdf();
+    const page = doc.addPage();
+    const symbol = await doc.embedFont(StandardFonts.Symbol);
+    page.drawTable({
+      x: 50,
+      y: 700,
+      width: 300,
+      rows: [{ cells: [{ content: [{ text: 'é ' }, { text: 'α', fontName: symbol.name }] }] }],
+    });
+    const ops = page.getContentStreamData();
+    expect(ops).toContain('(\\351 ) Tj\n');
+    expect(ops).toContain(`/${symbol.name} 12 Tf\n(a) Tj\n`);
+  });
+
+  it('encodes a name no font on the page carries as before: by standard font name, else WinAnsi', () => {
+    const page = new PdfPage(PageSizes.A4[0], PageSizes.A4[1], new PdfObjectRegistry());
+    page.drawTable({ x: 0, y: 700, width: 200, fontName: 'Symbol', rows: [{ cells: ['αβ'] }] });
+    page.drawTable({ x: 0, y: 500, width: 200, fontName: 'F9', rows: [{ cells: ['é'] }] });
+    const ops = page.getContentStreamData();
+    expect(ops).toContain('(ab) Tj\n');
+    expect(ops).toContain('(\\351) Tj\n');
   });
 });
