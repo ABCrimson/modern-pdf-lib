@@ -19,6 +19,7 @@ import { PdfDict, PdfName, PdfString, PdfArray, PdfStream } from '../core/pdfObj
 import type { PdfField } from './pdfField.js';
 import { FieldFlags, byteStrVal, numVal } from './pdfField.js';
 import type { PdfForm } from './pdfForm.js';
+import { showTextInFont } from './internal/appearanceText.js';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -41,7 +42,8 @@ export interface FlattenOptions {
    * Rich text (/RV) is an XHTML string containing formatting such as
    * bold, italic, font-size, color, and font-family. When enabled,
    * the flattener parses the XHTML and generates an appearance stream
-   * that preserves the rich text styling. If parsing fails, the
+   * that preserves the rich text styling. If parsing fails, or a font
+   * of the rich text has no code for one of its characters, the
    * flattener falls back to the plain text /V value.
    *
    * Default: `true`.
@@ -270,14 +272,15 @@ interface RichTextParseResult {
   paragraphs: RichTextParagraph[];
 }
 
-/** Escape a string for use in a PDF literal string. */
-function escapePdf(text: string): string {
-  return text
-    .replaceAll('\\', '\\\\')
-    .replaceAll('(', '\\(')
-    .replaceAll(')', '\\)')
-    .replaceAll('\r', '\\r')
-    .replaceAll('\n', '\\n');
+/**
+ * A `Tj` operator that shows `text` in the codes of the base font the
+ * resources of the stream give `fontShortName` (Helvetica for a name
+ * PDF_FONT_BASE lacks).
+ *
+ * @throws {UnencodableTextError} When that font has no code for a character.
+ */
+function showSpanText(fontShortName: string, text: string): string {
+  return showTextInFont(PDF_FONT_BASE.get(fontShortName) ?? 'Helvetica', text);
 }
 
 /**
@@ -693,7 +696,7 @@ function generateRichTextAppearance(
           ops += `/${styledFont} ${n(sz)} Tf\n`;
           ops += span.color.length > 0 ? `${cssColorToPdfOps(span.color)}\n` : '0 g\n';
           ops += `${n(cursorX)} ${n(cursorY)} Td\n`;
-          ops += `(${escapePdf(span.text)}) Tj\n`;
+          ops += showSpanText(styledFont, span.text);
 
           cursorX += span.text.length * sz * 0.5;
           // Reset Td base point
@@ -738,7 +741,7 @@ function generateRichTextAppearance(
         ops += `/${styledFont} ${n(sz)} Tf\n`;
         ops += span.color.length > 0 ? `${cssColorToPdfOps(span.color)}\n` : '0 g\n';
         ops += `${n(cursorX)} ${n(ty)} Td\n`;
-        ops += `(${escapePdf(span.text)}) Tj\n`;
+        ops += showSpanText(styledFont, span.text);
 
         cursorX += span.text.length * sz * 0.5;
         // Reset Td base point
@@ -838,8 +841,8 @@ function flattenSpansRemovingNewlines(spans: RichTextSpan[]): RichTextSpan[] {
  *
  * Reads the /RV entry from the field dictionary, parses the XHTML,
  * and generates an appearance stream that reflects the rich text
- * formatting. Returns `undefined` if the field has no /RV or if
- * parsing fails.
+ * formatting. Returns `undefined` if the field has no /RV, if
+ * parsing fails, or if a font of the rich text cannot encode its text.
  */
 function tryRichTextAppearance(field: PdfField): PdfStream | undefined {
   const widgetDict = field.getWidgetDict();
@@ -876,7 +879,8 @@ function tryRichTextAppearance(field: PdfField): PdfStream | undefined {
 
     return generateRichTextAppearance(parsed, rect, multiline, defaultFontSize);
   } catch {
-    // Parsing failed — fall back to /V
+    // Parsing failed, or a font of the rich text has no code for one of its
+    // characters (UnencodableTextError): fall back to the appearance of /V
     return undefined;
   }
 }
@@ -917,15 +921,14 @@ function flattenSingleField(field: PdfField, options: FlattenOptions = {}): Flat
     richTextAppearance = tryRichTextAppearance(field);
   }
 
-  // Ensure appearance is generated (fallback)
-  const generatedAppearance = field.generateAppearance();
-
   // Try to get an existing appearance stream from the widget dict first
   const widgetDict = field.getWidgetDict();
   const existingAppearance = getAppearanceStream(widgetDict);
 
-  // Priority: rich text > existing appearance > generated appearance
-  const appearance = richTextAppearance ?? existingAppearance ?? generatedAppearance;
+  // Priority: rich text > existing appearance > generated appearance. The
+  // appearance is generated only when needed, so a value its /DA font cannot
+  // encode does not throw while the field has an appearance of its own.
+  const appearance = richTextAppearance ?? existingAppearance ?? field.generateAppearance();
 
   const rect = getWidgetRect(widgetDict);
 

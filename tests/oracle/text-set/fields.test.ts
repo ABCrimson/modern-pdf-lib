@@ -104,10 +104,11 @@ describe('text field values read back by pdf.js and qpdf', () => {
     defectKey('forms-35', '0.41.4'),
     'form API: createTextField and setText values read back as set',
     {
-      // setText writes each value as a text string, but save() writes no field the form API
-      // created, so pdf.js reports none of them.
+      // setText writes each value as a text string, but save() regenerates the field
+      // appearances in Helv, whose WinAnsi encoding refuses the first character of the CJK
+      // text; past that, save() writes no field the form API created.
       failsWith:
-        /^AssertionError: pdf\.js: expected \[ undefined, undefined, …\(2\) \] to deeply equal/,
+        /^UnencodableTextError: Helvetica \(WinAnsiEncoding\) cannot encode "日" \(U\+65E5\) at index 0;/,
     },
     async () => {
       const doc = createPdf();

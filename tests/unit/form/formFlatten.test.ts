@@ -545,6 +545,38 @@ describe('formFlatten', () => {
       expect(content).toContain('Bold Text');
     });
 
+    it('writes rich text in the WinAnsi codes of its fonts, é as \\351', () => {
+      const dict = makeTextFieldDict('latin_field');
+      dict.set('/V', PdfString.fromText('José Größe €'));
+      dict.set('/RV', PdfString.fromText('<body><p>José <i>Größe €</i></p></body>'));
+      const result = flattenForm(buildForm([dict]));
+
+      const content = new TextDecoder().decode(result.xObjects[0]!.stream.data);
+      expect(content).toContain('(Jos\\351 ) Tj');
+      expect(content).toContain('/HeIt');
+      expect(content).toContain('(Gr\\366\\337e \\200) Tj');
+    });
+
+    it('falls back to the existing appearance when the fonts of the rich text cannot encode it', () => {
+      const dict = makeTextFieldWithAppearance('cjk_field', 'Kept');
+      dict.set('/RV', PdfString.fromText('<body><p>日本</p></body>'));
+      const result = flattenForm(buildForm([dict]));
+
+      const content = new TextDecoder().decode(result.xObjects[0]!.stream.data);
+      expect(content).toBe('BT /Helv 12 Tf (Kept) Tj ET');
+    });
+
+    it('flattens a field whose existing appearance shows a value its /DA font cannot encode', () => {
+      const dict = makeTextFieldWithAppearance('cjk_value', 'Kept');
+      dict.set('/V', PdfString.fromText('日本'));
+      const result = flattenForm(buildForm([dict]));
+
+      expect(result.flattenedFields).toContain('cjk_value');
+      expect(new TextDecoder().decode(result.xObjects[0]!.stream.data)).toBe(
+        'BT /Helv 12 Tf (Kept) Tj ET',
+      );
+    });
+
     it('uses /RV with mixed bold and italic text', () => {
       const rv = '<body><p><b>Bold</b> and <i>Italic</i></p></body>';
       const dict = makeRichTextFieldDict('mixed_field', 'Bold and Italic', rv);

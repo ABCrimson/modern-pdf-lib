@@ -12,6 +12,7 @@
 
 import { PdfDict, PdfName, PdfArray, PdfStream } from '../core/pdfObjects.js';
 import type { FieldType } from './pdfField.js';
+import { showTextInFont } from './internal/appearanceText.js';
 
 // ---------------------------------------------------------------------------
 // AppearanceProviderFor — typed appearance function per field type
@@ -56,16 +57,6 @@ function n(value: number): string {
   return s === '-0' ? '0' : s;
 }
 
-/** Escape a string for use in a PDF literal string. */
-function escapePdf(text: string): string {
-  return text
-    .replaceAll('\\', '\\\\')
-    .replaceAll('(', '\\(')
-    .replaceAll(')', '\\)')
-    .replaceAll('\r', '\\r')
-    .replaceAll('\n', '\\n');
-}
-
 // ---------------------------------------------------------------------------
 // Text field appearance
 // ---------------------------------------------------------------------------
@@ -92,8 +83,15 @@ export interface TextAppearanceOptions {
  * Generate the appearance stream for a text field.
  *
  * The stream renders the text value within the widget rectangle,
- * using Tf/Td/Tj operators. Handles single-line and multiline,
- * alignment (quadding), and auto font-size calculation.
+ * using Tf/Td/Tj operators. Handles single-line and multiline (lines
+ * split at CR LF, CR or LF), alignment (quadding), and auto font-size
+ * calculation. The text is written in the codes of the font `fontName`
+ * names: a standard font name or an Acrobat resource name of one (Helv,
+ * TiRo, Cour, Symb, ZaDb and their bold and oblique forms) encodes
+ * through that font, any other name through WinAnsiEncoding.
+ *
+ * @throws {UnencodableTextError} When the encoding has no code for a
+ *   character of the value.
  */
 export function generateTextAppearance(options: TextAppearanceOptions): PdfStream {
   const {
@@ -135,8 +133,8 @@ export function generateTextAppearance(options: TextAppearanceOptions): PdfStrea
   ops += `0 g\n`; // Black text
 
   if (multiline) {
-    // Split text into lines and render each
-    const lines = value.split('\n');
+    // Split text into lines at CR LF, CR or LF and render each
+    const lines = value.split(/\r\n|\r|\n/);
     const lineHeight = fontSize * 1.2;
     const startY = height - padding - fontSize;
 
@@ -147,7 +145,7 @@ export function generateTextAppearance(options: TextAppearanceOptions): PdfStrea
       if (ty < padding) break; // Clip at bottom
 
       ops += `${n(tx + padding)} ${n(ty)} Td\n`;
-      ops += `(${escapePdf(line)}) Tj\n`;
+      ops += showTextInFont(fontName, line);
 
       // Reset position for next line (Td is relative)
       if (i < lines.length - 1) {
@@ -159,7 +157,7 @@ export function generateTextAppearance(options: TextAppearanceOptions): PdfStrea
     const tx = computeAlignmentOffset(value, fontSize, width - 2 * padding, alignment);
     const ty = (height - fontSize) / 2;
     ops += `${n(tx + padding)} ${n(ty)} Td\n`;
-    ops += `(${escapePdf(value)}) Tj\n`;
+    ops += showTextInFont(fontName, value);
   }
 
   ops += `ET\n`;
@@ -308,7 +306,10 @@ export interface DropdownAppearanceOptions {
 
 /**
  * Generate the appearance stream for a dropdown (combo box).
- * Renders the selected value text, similar to a text field.
+ * Renders the selected value text, encoded as for a text field.
+ *
+ * @throws {UnencodableTextError} When the encoding of the font has no code
+ *   for a character of the value.
  */
 export function generateDropdownAppearance(options: DropdownAppearanceOptions): PdfStream {
   return generateTextAppearance({
@@ -341,7 +342,11 @@ export interface ListboxAppearanceOptions {
 
 /**
  * Generate the appearance stream for a listbox.
- * Renders visible options with highlighting for selected items.
+ * Renders visible options with highlighting for selected items, encoded
+ * as for a text field.
+ *
+ * @throws {UnencodableTextError} When the encoding of the font has no code
+ *   for a character of a visible option.
  */
 export function generateListboxAppearance(options: ListboxAppearanceOptions): PdfStream {
   const { options: items, selected, rect, fontName = 'Helv', fontSize = 10 } = options;
@@ -380,7 +385,7 @@ export function generateListboxAppearance(options: ListboxAppearanceOptions): Pd
     ops += `BT\n`;
     ops += `/${fontName} ${n(fontSize)} Tf\n`;
     ops += `${n(padding)} ${n(y + lineHeight * 0.25)} Td\n`;
-    ops += `(${escapePdf(item)}) Tj\n`;
+    ops += showTextInFont(fontName, item);
     ops += `ET\n`;
   }
 
@@ -407,7 +412,11 @@ export interface ButtonAppearanceOptions {
 
 /**
  * Generate the appearance stream for a pushbutton.
- * Renders a 3D-ish raised button with centered caption text.
+ * Renders a 3D-ish raised button with centered caption text, encoded as
+ * for a text field.
+ *
+ * @throws {UnencodableTextError} When the encoding of the font has no code
+ *   for a character of the caption.
  */
 export function generateButtonAppearance(options: ButtonAppearanceOptions): PdfStream {
   const { caption, rect, fontName = 'Helv', fontSize: requestedSize = 0 } = options;
@@ -438,7 +447,7 @@ export function generateButtonAppearance(options: ButtonAppearanceOptions): PdfS
   ops += `/${fontName} ${n(fontSize)} Tf\n`;
   ops += `0 g\n`;
   ops += `${n(tx)} ${n(ty)} Td\n`;
-  ops += `(${escapePdf(caption)}) Tj\n`;
+  ops += showTextInFont(fontName, caption);
   ops += `ET\n`;
 
   return buildAppearanceStream(ops, width, height);

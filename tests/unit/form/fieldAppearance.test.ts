@@ -306,4 +306,85 @@ describe('fieldAppearance', () => {
       expect(content).toContain('S'); // stroke
     });
   });
+
+  // -------------------------------------------------------------------------
+  // Text encoded through the font the /DA string names
+  // -------------------------------------------------------------------------
+
+  describe('text encoding', () => {
+    const rect: [number, number, number, number] = [0, 0, 200, 30];
+
+    it('writes "José" in Helv as its WinAnsi codes, é as \\351', () => {
+      const content = streamContent(
+        generateTextAppearance({ value: 'José', rect, fontName: 'Helv' }),
+      );
+      expect(content).toContain('(Jos\\351) Tj');
+    });
+
+    it('writes every line of a multiline value in WinAnsi codes', () => {
+      const content = streamContent(
+        generateTextAppearance({ value: 'Größe\n€ 5', rect: [0, 0, 200, 60], multiline: true }),
+      );
+      expect(content).toContain('(Gr\\366\\337e) Tj');
+      expect(content).toContain('(\\200 5) Tj');
+    });
+
+    it('breaks multiline values at CR LF, CR and LF', () => {
+      const content = streamContent(
+        generateTextAppearance({ value: 'a\r\nb\rc\nd', rect: [0, 0, 200, 90], multiline: true }),
+      );
+      expect(content.match(/\((.)\) Tj/g)).toEqual(['(a) Tj', '(b) Tj', '(c) Tj', '(d) Tj']);
+    });
+
+    it('writes only ASCII bytes into the stream', () => {
+      const stream = generateTextAppearance({ value: 'Ça coûte 5 € – “oui”', rect });
+      expect(stream.data.every((byte) => byte >= 0x0a && byte <= 0x7e)).toBe(true);
+    });
+
+    it('encodes through Symbol and ZapfDingbats for Symb, ZaDb and the standard names', () => {
+      expect(
+        streamContent(generateTextAppearance({ value: 'αΩ', rect, fontName: 'Symb' })),
+      ).toContain('(aW) Tj');
+      expect(
+        streamContent(generateTextAppearance({ value: '✓', rect, fontName: 'ZaDb' })),
+      ).toContain('(3) Tj');
+      expect(
+        streamContent(generateTextAppearance({ value: 'α', rect, fontName: 'Symbol' })),
+      ).toContain('(a) Tj');
+    });
+
+    it('encodes WinAnsi for a font name that is no alias and no standard font', () => {
+      expect(streamContent(generateTextAppearance({ value: 'é', rect, fontName: 'F1' }))).toContain(
+        '(\\351) Tj',
+      );
+    });
+
+    it('throws UnencodableTextError for text the font cannot encode', () => {
+      expect(() => generateTextAppearance({ value: 'Name: 日本', rect })).toThrow(
+        expect.objectContaining({
+          name: 'UnencodableTextError',
+          character: '日',
+          index: 6,
+          fontName: 'Helvetica',
+          encoding: 'WinAnsiEncoding',
+        }),
+      );
+      expect(() => generateTextAppearance({ value: 'é', rect, fontName: 'ZaDb' })).toThrow(
+        expect.objectContaining({ name: 'UnencodableTextError', encoding: 'ZapfDingbatsEncoding' }),
+      );
+    });
+
+    it('encodes list box items and button captions', () => {
+      const listbox = streamContent(
+        generateListboxAppearance({
+          options: ['Café', 'Bar'],
+          selected: ['Café'],
+          rect: [0, 0, 100, 60],
+        }),
+      );
+      expect(listbox).toContain('(Caf\\351) Tj');
+      const button = streamContent(generateButtonAppearance({ caption: 'Prüfen €', rect }));
+      expect(button).toContain('(Pr\\374fen \\200) Tj');
+    });
+  });
 });
