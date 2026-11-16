@@ -252,6 +252,13 @@ describe.each(ROWS)('$entry option $option', (row) => {
     }
   });
 
+  it('throws for 0 and null when only undefined passes, as the warning of 0.40.9 did', () => {
+    if (row.quiet !== undefined) return;
+    for (const falsy of [0, null]) {
+      expect(() => row.render({ [row.option]: falsy })).toThrow(UnsupportedOptionError);
+    }
+  });
+
   it('names no caller value in the message', () => {
     const error = thrownBy(() => row.render({ [row.option]: row.value })) as Error;
     if (typeof row.value === 'string' || typeof row.value === 'number') {
@@ -260,15 +267,28 @@ describe.each(ROWS)('$entry option $option', (row) => {
   });
 });
 
-describe('an entry that refuses two options names the first one passed', () => {
-  it('code128ToOperators with showText and fontSize', () => {
+describe('an entry that refuses two options', () => {
+  it('names the first in the order of the option table, not the first one passed', () => {
     const error = thrownBy(() =>
       code128ToOperators(code128, 0, 0, {
-        showText: true,
         fontSize: 9,
+        showText: true,
       } as Record<string, unknown>),
     ) as UnsupportedOptionError;
     expect(error.option).toBe('showText');
+  });
+});
+
+describe('an options argument that is not an object carries no option', () => {
+  it.each([5, 'H'])('%j', (value) => {
+    expect(() => code128ToOperators(code128, 0, 0, value as never)).not.toThrow();
+    expect(() => qrCodeToOperators(qr, 0, 0, value as never)).not.toThrow();
+    expect(() => applyTablePreset('striped', value as never)).not.toThrow();
+  });
+
+  it('null', () => {
+    expect(() => code128ToOperators(code128, 0, 0, null as never)).not.toThrow();
+    expect(() => applyTablePreset('striped', null as never)).not.toThrow();
   });
 });
 

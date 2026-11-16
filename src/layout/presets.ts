@@ -167,7 +167,7 @@ export function applyTablePreset(
 ): Partial<DrawTableOptions> {
   // `hasHeader` left the type in 0.41.0 (no preset ever read it): this refuses it for a caller
   // the type does not stop, a JavaScript caller or a cast. Removed in 0.50.0 with the other guards.
-  if (options !== undefined && options !== null) {
+  if (typeof options === 'object' && options !== null) {
     for (const rule of REFUSED_OPTIONS) {
       if (rule.option !== undefined && Reflect.get(options, rule.option) !== undefined) {
         rejectOption(rule);

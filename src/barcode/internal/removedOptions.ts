@@ -26,11 +26,12 @@ const FLAGS: ReadonlySet<string> = new Set(['showText', 'includeCheckDigit']);
  * Removed in 0.50.0 with the other guards of removed options.
  *
  * @param entry    The function, as the option table spells it: `code128ToOperators()`.
- * @param options  The options object of the call.
+ * @param options  The options argument of the call; a value that is not an object carries no
+ *                 option and passes, as in 0.40.9.
  * @throws {UnsupportedOptionError}  When `options` carries a removed option of `entry`.
  */
-export function rejectRemovedOptions(entry: string, options: object | null | undefined): void {
-  if (options === undefined || options === null) return;
+export function rejectRemovedOptions(entry: string, options: unknown): void {
+  if (typeof options !== 'object' || options === null) return;
   for (const rule of RULES_BY_ENTRY.get(entry) ?? []) {
     if (rule.option === undefined) continue;
     const value: unknown = Reflect.get(options, rule.option);

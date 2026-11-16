@@ -29,7 +29,7 @@ import { rejectRemovedOptions } from '../internal/removedOptions.js';
 // Public types
 // ---------------------------------------------------------------------------
 
-/** Options for encoding a PDF417 barcode. */
+/** Options for rendering a PDF417 barcode to PDF operators. */
 export interface Pdf417Options {
   /** Row height in PDF points. Default: `8`. */
   readonly rowHeight?: number;
