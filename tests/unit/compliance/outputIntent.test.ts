@@ -331,6 +331,7 @@ describe('buildOutputIntent', () => {
     const ref = buildOutputIntent(registry, {
       outputCondition: 'Größe €',
       outputConditionIdentifier: 'Fogra 39 – Größe',
+      registryName: 'Größe – Register',
     });
     const dict = registry.resolve(ref) as PdfDict;
 
@@ -343,6 +344,9 @@ describe('buildOutputIntent', () => {
     expect(Array.from(identifier.toBytes().subarray(9))).toEqual([
       0x85, 0x20, 0x47, 0x72, 0xf6, 0xdf, 0x65,
     ]);
+    const registryName = dict.get('/RegistryName') as PdfString;
+    expect(registryName.toText()).toBe('Größe – Register');
+    expect(Array.from(registryName.toBytes().subarray(5, 7))).toEqual([0x20, 0x85]);
   });
 
   it('writes a condition outside PDFDocEncoding as UTF-16BE', () => {

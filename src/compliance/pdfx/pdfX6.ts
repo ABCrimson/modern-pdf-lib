@@ -79,6 +79,7 @@ export interface BoxGeometry {
  *
  * @param options - Output-intent identification.
  * @returns A freshly-built `/Type /OutputIntent` dictionary.
+ * @throws {UnencodableTextError} For an identifier, condition or registry name with a character no text string holds (a lone surrogate or U+001B).
  */
 export function buildPdfX6OutputIntent(options: PdfX6Options): PdfDict {
   if (options.variant !== undefined) {

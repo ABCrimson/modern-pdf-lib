@@ -71,6 +71,7 @@ export interface RecordMetadata {
  *
  * @param record - The record whose metadata to encode.
  * @returns A spec-shaped VT `/DPM` {@link PdfDict}.
+ * @throws {UnencodableTextError} For a record id or field value with a character no text string holds (a lone surrogate or U+001B).
  */
 export function buildVtDpm(record: RecordMetadata): PdfDict {
   const dpm = new PdfDict();

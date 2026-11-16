@@ -114,6 +114,7 @@ export interface PageOutputIntentOptions {
  * @param registry  The PDF object registry to register objects into.
  * @param options   Output-intent configuration.
  * @returns         An indirect reference to the `/OutputIntent` dictionary.
+ * @throws {UnencodableTextError} For an identifier or info text with a character no text string holds (a lone surrogate or U+001B).
  */
 export function buildPageOutputIntent(
   registry: PdfObjectRegistry,

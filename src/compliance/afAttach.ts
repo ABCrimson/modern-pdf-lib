@@ -127,6 +127,7 @@ function insertNamePairSorted(leaf: PdfArray, name: string, fileSpecRef: PdfRef)
  * @param catalog      The document catalog dictionary.
  * @param name         The name under which the file is registered in the tree.
  * @param fileSpecRef  Indirect reference to the file-specification dictionary.
+ * @throws {UnencodableTextError} For a name with a character no text string holds (a lone surrogate or U+001B).
  */
 export function registerEmbeddedFile(catalog: PdfDict, name: string, fileSpecRef: PdfRef): void {
   const leaf = ensureEmbeddedFilesNames(catalog);

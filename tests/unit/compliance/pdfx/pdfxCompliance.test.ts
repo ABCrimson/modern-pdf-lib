@@ -791,7 +791,7 @@ describe('buildPdfXOutputIntent text strings', () => {
     const registry = new PdfObjectRegistry();
     const ref = buildPdfXOutputIntent(registry, {
       condition: 'Fogra 39 – Größe',
-      registryName: 'http://www.color.org',
+      registryName: 'Größe – Register',
       info: 'Größe €',
     });
     const dict = registry.resolve(ref) as PdfDict;
@@ -801,7 +801,7 @@ describe('buildPdfXOutputIntent text strings', () => {
     expect(condition.textEncoding).toBe('pdfdoc');
     // The en dash is code 0x85 of PDFDocEncoding.
     expect(Array.from(condition.toBytes().subarray(9, 11))).toEqual([0x85, 0x20]);
-    expect((dict.get('/RegistryName') as PdfString).toText()).toBe('http://www.color.org');
+    expect((dict.get('/RegistryName') as PdfString).toText()).toBe('Größe – Register');
     const info = dict.get('/Info') as PdfString;
     expect(info.toText()).toBe('Größe €');
     expect(Array.from(info.toBytes())).toEqual([0x47, 0x72, 0xf6, 0xdf, 0x65, 0x20, 0xa0]);

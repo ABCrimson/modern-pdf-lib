@@ -27,7 +27,7 @@ import {
   PdfArray,
   PdfRef,
 } from '../../../src/core/pdfObjects.js';
-import { InvalidArgumentError } from '../../../src/errors.js';
+import { InvalidArgumentError, UnencodableTextError } from '../../../src/errors.js';
 import { createAssociatedFile, buildAfArray } from '../../../src/compliance/associatedFiles.js';
 import type {
   AFRelationship,
@@ -349,5 +349,20 @@ describe('createAssociatedFile text and ASCII strings', () => {
     expect(() =>
       createAssociatedFile(registry, makeOptions({ modificationDate: '2026–03' })),
     ).toThrow(InvalidArgumentError);
+  });
+
+  it('refuses a Latin-1 date character that a byte string would hold', () => {
+    const registry = makeRegistry();
+    for (const date of ['2026é', '2026 ']) {
+      let caught: unknown;
+      try {
+        createAssociatedFile(registry, makeOptions({ creationDate: date }));
+      } catch (error) {
+        caught = error;
+      }
+      expect(caught).toBeInstanceOf(InvalidArgumentError);
+      expect(caught).not.toBeInstanceOf(UnencodableTextError);
+      expect((caught as InvalidArgumentError).argument).toBe('text');
+    }
   });
 });

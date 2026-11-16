@@ -79,7 +79,7 @@ describe('buildPdfX6OutputIntent', () => {
     const dict = buildPdfX6OutputIntent({
       outputConditionIdentifier: 'Fogra 39 – Größe',
       outputCondition: 'Größe €',
-      registryName: 'http://www.color.org',
+      registryName: 'Größe – Register',
     });
 
     const identifier = dict.get('/OutputConditionIdentifier') as PdfString;
@@ -88,7 +88,7 @@ describe('buildPdfX6OutputIntent', () => {
     // The en dash is code 0x85 of PDFDocEncoding.
     expect(Array.from(identifier.toBytes().subarray(9, 11))).toEqual([0x85, 0x20]);
     expect((dict.get('/OutputCondition') as PdfString).toText()).toBe('Größe €');
-    expect((dict.get('/RegistryName') as PdfString).toText()).toBe('http://www.color.org');
+    expect((dict.get('/RegistryName') as PdfString).toText()).toBe('Größe – Register');
   });
 
   it('includes optional output condition and registry name when supplied', () => {

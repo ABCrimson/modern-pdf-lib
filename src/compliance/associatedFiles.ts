@@ -54,9 +54,9 @@ export interface AssociatedFileOptions {
   readonly relationship: AFRelationship;
   /** Optional description of the file, stored as a text string. */
   readonly description?: string | undefined;
-  /** Optional creation date (ISO 8601 string, stored as PDF date). */
+  /** Optional creation date: the part of a PDF date after `D:` (ISO 32000-2 7.9.4), such as `20260301120000Z`; ASCII only. */
   readonly creationDate?: string | undefined;
-  /** Optional modification date (ISO 8601 string, stored as PDF date). */
+  /** Optional modification date: the part of a PDF date after `D:` (ISO 32000-2 7.9.4), such as `20260301120000Z`; ASCII only. */
   readonly modificationDate?: string | undefined;
 }
 
