@@ -11,7 +11,7 @@
  * Reference: ISO 32000-2:2020 §7.11.4 (doc-level) and §14.13 (object-level).
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { attachAssociatedFiles, registerEmbeddedFile } from '../../../src/compliance/afAttach.js';
 import { createAssociatedFile } from '../../../src/compliance/associatedFiles.js';
 import {
@@ -197,5 +197,36 @@ describe('registerEmbeddedFile', () => {
       asDict(asDict(catalog.get('/Names')).get('/EmbeddedFiles')).get('/Names'),
     );
     expect(efNames.length).toBe(4);
+  });
+
+  it('orders the keys by their bytes without reading the deprecated value', () => {
+    const registry = new PdfObjectRegistry();
+    const refB = makeFileSpec(registry, 'b.xml');
+    const refZ = makeFileSpec(registry, 'z.xml');
+    const refNew = makeFileSpec(registry, 'm.xml');
+
+    // The existing keys: a hex string of the bytes 0x62 0x2E and a literal string of the byte 0xE9.
+    const catalog = new PdfDict();
+    const leaf = new PdfArray([
+      PdfString.fromBytes(Uint8Array.of(0x62, 0x2e), 'hex'),
+      refB,
+      PdfString.fromBytes(Uint8Array.of(0xe9)),
+      refZ,
+    ]);
+    catalog.set('/Names', new PdfDict([['/EmbeddedFiles', new PdfDict([['/Names', leaf]])]]));
+
+    const read = vi.spyOn(PdfString.prototype, 'value', 'get');
+    try {
+      registerEmbeddedFile(catalog, 'm.xml', refNew);
+      expect(read).not.toHaveBeenCalled();
+    } finally {
+      read.mockRestore();
+    }
+
+    expect(leaf.items.filter((item) => item === refB || item === refNew || item === refZ)).toEqual([
+      refB,
+      refNew,
+      refZ,
+    ]);
   });
 });

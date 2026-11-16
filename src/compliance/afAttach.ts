@@ -96,17 +96,18 @@ function ensureEmbeddedFilesNames(catalog: PdfDict): PdfArray {
  */
 function insertNamePairSorted(leaf: PdfArray, name: string, fileSpecRef: PdfRef): void {
   const items = leaf.items;
-  // Find the first existing name (at even indices) that sorts after `name`.
+  const key = PdfString.literal(name);
+  // Find the first existing key (at even indices) whose bytes sort after the new key's bytes
+  // (ISO 32000-2 7.9.6); an entry that is not a string never does.
   let insertAt = items.length;
   for (let i = 0; i < items.length; i += 2) {
     const entry = items[i];
-    const entryName = entry instanceof PdfString ? entry.value : '';
-    if (entryName > name) {
+    if (entry instanceof PdfString && PdfString.compare(entry, key) > 0) {
       insertAt = i;
       break;
     }
   }
-  items.splice(insertAt, 0, PdfString.literal(name), fileSpecRef);
+  items.splice(insertAt, 0, key, fileSpecRef);
 }
 
 /**
