@@ -18,7 +18,7 @@ import {
 import { embedTiffDirect } from '../../../../src/assets/image/tiff/tiffDirectEmbed.js';
 import { INTERNAL_LIMITS } from '../../../../src/internal/limits.js';
 import { PdfDict, PdfNumber } from '../../../../src/core/pdfObjects.js';
-import { ResourceLimitError } from '../../../../src/errors.js';
+import { MalformedInputError, ResourceLimitError } from '../../../../src/errors.js';
 import { decodeCCITT } from '../../../../src/codecs/internal/ccittDecode.js';
 import {
   buildPng,
@@ -65,12 +65,13 @@ function ccitt(k: number, columns: number, rows?: number): Uint8Array {
 }
 
 describe('CCITTFaxDecode checks /Columns and /Rows first', () => {
-  it('rejects /Columns below 1 with a RangeError', () => {
+  it('rejects /Columns below 1 with a MalformedInputError', () => {
     for (const columns of [0, -1]) {
       for (const k of [-1, 0, 1]) {
         const err = thrown(() => ccitt(k, columns));
-        expect(err).toBeInstanceOf(RangeError);
-        expect((err as RangeError).message).toBe(
+        expect(err).toBeInstanceOf(MalformedInputError);
+        expect(err).toMatchObject({ code: 'malformed-input', format: 'other' });
+        expect((err as MalformedInputError).message).toBe(
           'CCITTFaxDecode: /Columns must be an integer of at least 1',
         );
       }
@@ -108,7 +109,8 @@ describe('TIFF page count reads each IFD once', () => {
       () => decodeTiffPage(cycle, 5),
     ]) {
       expect(thrown(fn)).toMatchObject({
-        name: 'Error',
+        name: 'MalformedInputError',
+        code: 'malformed-input',
         message: 'TIFF: the IFD chain repeats offset 8',
       });
     }
@@ -183,7 +185,8 @@ describe('TIFF direct embed checks strip sizes against the file', () => {
   it('refuses a strip that runs past the end of the file', () => {
     const tiff = stripTags({ count: 1, at: 0 }, { count: 1, at: 0x7fffffff });
     expect(thrown(() => embedTiffDirect(tiff))).toMatchObject({
-      name: 'Error',
+      name: 'MalformedInputError',
+      code: 'malformed-input',
       message: 'TIFF: strip data out of bounds',
     });
   });
@@ -194,7 +197,8 @@ describe('TIFF direct embed checks strip sizes against the file', () => {
       stripTags({ count: 1, at: 100 }, { count: 0x10000000, at: 100 }),
     ]) {
       expect(thrown(() => embedTiffDirect(tiff))).toMatchObject({
-        name: 'Error',
+        name: 'MalformedInputError',
+        code: 'malformed-input',
         message: 'TIFF: tag data out of bounds',
       });
     }
@@ -252,7 +256,8 @@ describe('TIFF entries read at most twice as many values as the file has bytes',
     'refuses entries of type %i that together hold more values than twice the file length',
     (type) => {
       expect(thrown(() => decodeTiff(manyEntries(type)))).toMatchObject({
-        name: 'Error',
+        name: 'MalformedInputError',
+        code: 'malformed-input',
         message: 'TIFF: tag data overlaps',
       });
     },
@@ -291,7 +296,8 @@ describe('TIFF direct embed checks the image and tile sizes', () => {
       [16, 100],
     ] as const) {
       expect(thrown(() => embedTiffDirect(tiled(64, 64, tile)))).toMatchObject({
-        name: 'Error',
+        name: 'MalformedInputError',
+        code: 'malformed-input',
         message: 'TIFF: tile width and length must be positive multiples of 16',
       });
     }
@@ -340,7 +346,8 @@ describe('TIFF direct embed of JPEG strips checks the strips against the file', 
       new Uint8Array(64),
     );
     expect(thrown(() => embedTiffDirect(tiff))).toMatchObject({
-      name: 'Error',
+      name: 'MalformedInputError',
+      code: 'malformed-input',
       message: 'TIFF: strip data out of bounds',
     });
   });
@@ -427,7 +434,8 @@ describe('TIFF decode of Deflate strips', () => {
       blob,
     );
     expect(thrown(() => decodeTiff(tiff))).toMatchObject({
-      name: 'Error',
+      name: 'MalformedInputError',
+      code: 'malformed-input',
       message: 'TIFF: strip data overlaps',
     });
   });
@@ -496,7 +504,8 @@ describe('WOFF decode inflates each table only up to its stated length', () => {
   it('refuses a table that inflates past its stated length', () => {
     const woff = buildWoff([{ tag: 'glyf', stored: zlibOfZeroBytes(4097), origLength: 4096 }]);
     expect(thrown(() => decodeWoff(woff))).toMatchObject({
-      name: 'Error',
+      name: 'MalformedInputError',
+      code: 'malformed-input',
       message: 'WOFF1: inflated table size mismatch',
     });
   });
@@ -518,7 +527,8 @@ describe('WOFF decode refuses table data that overlaps', () => {
   it('refuses tables that point at the same data', () => {
     const woff = buildWoffSharedBlob(3, zlibOfZeroBytes(1), 1);
     expect(thrown(() => decodeWoff(woff))).toMatchObject({
-      name: 'Error',
+      name: 'MalformedInputError',
+      code: 'malformed-input',
       message: 'WOFF1: table data overlaps',
     });
   });

@@ -22,7 +22,12 @@ const run = (
 ) => runWithinBudget({ module: BODIES, entry, input, ...(args === undefined ? {} : { args }) });
 
 function expectParseError(outcome: BudgetOutcome, message: string): void {
-  expect(outcome).toMatchObject({ kind: 'threw', name: 'Error', message });
+  expect(outcome).toMatchObject({
+    kind: 'threw',
+    name: 'MalformedInputError',
+    code: 'malformed-input',
+    message,
+  });
   expect(outcome.ms).toBeLessThan(timeLimitMs(DEFAULT_BUDGET));
   expect(outcome.mib).toBeLessThan(DEFAULT_BUDGET.mib);
 }

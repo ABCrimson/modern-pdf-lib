@@ -64,7 +64,8 @@ describe('structure limits', () => {
       for (const value of ['NaN', 'Infinity', '-Infinity']) {
         expect(await run('growableNonFinite', value)).toMatchObject({
           kind: 'threw',
-          name: 'RangeError',
+          name: 'InvalidArgumentError',
+          code: 'invalid-argument',
           message: 'GrowableBuffer: initial capacity must be a finite number',
         });
       }

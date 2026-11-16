@@ -171,7 +171,12 @@ describe('predictor parameters under the budget', () => {
         `throws the predictor error for ${title} (${path})`,
         async () => {
           const outcome = await run('predictorOnZeros', { path, ...parms });
-          expect(outcome).toMatchObject({ kind: 'threw', name: 'Error', message });
+          expect(outcome).toMatchObject({
+            kind: 'threw',
+            name: 'UnsupportedFeatureError',
+            code: 'unsupported-feature',
+            message,
+          });
           expectInBudget(outcome);
         },
         TIMEOUT,

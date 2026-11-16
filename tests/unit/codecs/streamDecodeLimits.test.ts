@@ -9,7 +9,7 @@ import { describe, expect, it } from 'vitest';
 import { zlibSync } from 'fflate';
 import { INTERNAL_LIMITS } from '../../../src/internal/limits.js';
 import { PdfArray, PdfDict, PdfName, PdfNumber, PdfStream } from '../../../src/core/pdfObjects.js';
-import { ResourceLimitError } from '../../../src/errors.js';
+import { ResourceLimitError, UnsupportedFeatureError } from '../../../src/errors.js';
 import { decodeFlateOnly, decodeStream } from '../../../src/codecs/streamDecode.js';
 import {
   controlStreams,
@@ -156,22 +156,26 @@ describe('predictor parameters', () => {
       for (const [title, extra, expected] of REFUSED) {
         it(`${title} with /Predictor ${predictor}`, () => {
           const parms = makeParms({ '/Predictor': predictor, ...extra });
-          expect(() => decodeStream(data, 'FlateDecode', parms)).toThrow(new Error(expected));
+          expect(() => decodeStream(data, 'FlateDecode', parms)).toThrow(
+            new UnsupportedFeatureError(expected),
+          );
           const stream = flateStream(data, { '/Predictor': predictor, ...extra });
-          expect(() => decodeFlateOnly(stream)).toThrow(new Error(expected));
+          expect(() => decodeFlateOnly(stream)).toThrow(new UnsupportedFeatureError(expected));
         });
       }
     }
 
     it('with a /Predictor above 15 in a stream read with decodeFlateOnly', () => {
       const stream = flateStream(data, { '/Predictor': 20, '/Columns': 0 });
-      expect(() => decodeFlateOnly(stream)).toThrow(new Error(message(0, 1, 8)));
+      expect(() => decodeFlateOnly(stream)).toThrow(new UnsupportedFeatureError(message(0, 1, 8)));
     });
 
     it('in an LZWDecode stream', () => {
       const lzw = lzwEncode(new Uint8Array(40));
       const parms = makeParms({ '/Predictor': 2, '/Columns': 0 });
-      expect(() => decodeStream(lzw, 'LZWDecode', parms)).toThrow(new Error(message(0, 1, 8)));
+      expect(() => decodeStream(lzw, 'LZWDecode', parms)).toThrow(
+        new UnsupportedFeatureError(message(0, 1, 8)),
+      );
     });
   });
 

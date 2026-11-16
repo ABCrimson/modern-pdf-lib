@@ -39,7 +39,8 @@ describe('streaming parser under the budget', () => {
       });
       expect(outcome).toMatchObject({
         kind: 'threw',
-        name: 'PdfParseError',
+        name: 'StreamingParseError',
+        code: 'streaming-parse',
         message: expect.stringContaining(`maximum size of ${16 * MIB} bytes`),
       });
       expect(outcome.ms).toBeLessThan(timeLimitMs(DEFAULT_BUDGET));

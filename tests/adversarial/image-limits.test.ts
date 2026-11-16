@@ -67,7 +67,12 @@ function expectLimit(outcome: BudgetOutcome, limit: string, max: number): void {
 }
 
 function expectError(outcome: BudgetOutcome, message: string): void {
-  expect(outcome).toMatchObject({ kind: 'threw', name: 'Error', message });
+  expect(outcome).toMatchObject({
+    kind: 'threw',
+    name: 'MalformedInputError',
+    code: 'malformed-input',
+    message,
+  });
   expect(outcome.ms).toBeLessThan(timeLimitMs(DEFAULT_BUDGET));
   expect(outcome.mib).toBeLessThan(DEFAULT_BUDGET.mib);
 }
@@ -121,7 +126,8 @@ describe('image and font decoders stay within the internal limits', () => {
       );
       expect(await run('ccittEntry', ones(64), { k: 0, columns: 0 })).toMatchObject({
         kind: 'threw',
-        name: 'RangeError',
+        name: 'MalformedInputError',
+        code: 'malformed-input',
         message: 'CCITTFaxDecode: /Columns must be an integer of at least 1',
       });
       // No /Rows: one coded bit per white row, so 4096 bytes would decode 32768 rows of 65536 pixels.
