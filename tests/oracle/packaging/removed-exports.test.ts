@@ -21,7 +21,7 @@ import { ROOT } from '../../../scripts/dev/api-snapshot.js';
 const REMOVED = ['webpToJpeg', 'webpToPng'] as const;
 const KEPT = ['decodeWebP', 'recompressWebP', 'encodePngFromPixels'] as const;
 
-/** The package entries and the barrel of the signature folder, each of which listed `AppendOptions`. */
+/** The package entries and the barrel of the signature folder; only `src/index.ts` and the barrel listed `AppendOptions`, and `src/browser.ts` re-exports `src/index.ts` with `export *`. */
 const ENTRY_SOURCES = [
   'src/index.ts',
   'src/browser.ts',
@@ -34,7 +34,7 @@ const ENTRY_SOURCES = [
 const exportName = (name: ModuleExportName): string =>
   name.type === 'Identifier' ? name.name : name.value;
 
-/** The names a source file exports with an `export { ... }` list or an exported declaration. */
+/** The names a source file exports with an `export { ... }` list or an exported interface or type alias. */
 function exportedNames(path: string): string[] {
   const text = readFileSync(join(ROOT, path), 'utf8');
   const { program, errors } = parseSync(path, text, { lang: 'ts', sourceType: 'module' });
