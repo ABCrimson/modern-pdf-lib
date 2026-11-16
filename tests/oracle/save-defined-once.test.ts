@@ -17,7 +17,6 @@ import { describe, expect, test } from 'vitest';
 import type { TestContext } from 'vitest';
 import { loadPdf } from '../../src/index.js';
 import type { PdfSaveOptions } from '../../src/index.js';
-import { defectKey, knownDefect } from '../helpers/known-defect.js';
 import { objectDefinitions, repeatedDefinitions } from '../helpers/objectDefinitions.js';
 import { expectQpdfClean, QPDF_BIN, QpdfError, requireQpdf } from '../helpers/oracle/qpdf.js';
 
@@ -86,17 +85,6 @@ const ROUTES: readonly { readonly name: string; readonly options: PdfSaveOptions
   { name: 'save({ objectStreamThreshold: 1 })', options: { objectStreamThreshold: 1 } },
 ];
 
-// A name that holds a delimiter (the /Subtype /text/plain of an embedded file) is written
-// without escaping it, so qpdf ends the dictionary early and warns.
-const UNESCAPED_NAME = {
-  key: defectKey('tests-unit-core-b-22', '0.41.0'),
-  failsWith:
-    /^QpdfError: qpdf --check exit 3: .*WARNING: in\.pdf \(object \d+ 0, offset \d+\): dictionary ended prematurely; using null as value for last key/,
-};
-const KNOWN: Readonly<Record<string, typeof UNESCAPED_NAME>> = {
-  'qpdf-r6-attachments': UNESCAPED_NAME,
-};
-
 describe('a save of a loaded corpus file defines each object number once', () => {
   for (const entry of manifest) {
     for (const route of ROUTES) {
@@ -131,9 +119,7 @@ describe('a save of a loaded corpus file defines each object number once', () =>
         expect(read.root, 'trailer /Root').toMatchObject({ '/Type': '/Catalog' });
         expectQpdfClean(saved, password === undefined ? {} : { password });
       };
-      const known = KNOWN[entry.id];
-      if (known === undefined) test(title, body);
-      else knownDefect(known.key, title, { failsWith: known.failsWith }, body);
+      test(title, body);
     }
   }
 });
