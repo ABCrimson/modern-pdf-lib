@@ -60,7 +60,7 @@ doc.use(metadataPlugin({
 }));
 ```
 
-`creator` is written to `/Creator` when the plugin registers. `defaultTitle` and `defaultAuthor` are written to `/Title` and `/Author` by `save()` (and `saveAsBlob()`, `saveAsBase64()`, `copy()`; `saveAsStream()` runs no plugin hook and writes no default), and only where the document has none (or an empty one): a title or author set before or after `.use()` is kept. Because the producer is set again in `onBeforeSave`, a producer set on the document after `.use()` is overwritten at save.
+`creator` is written to `/Creator` when the plugin registers. `defaultTitle` and `defaultAuthor` are written to `/Title` and `/Author` by `save()` (and `saveAsBlob()`, `saveAsBase64()`, `copy()`; `saveAsStream()` runs no `onBeforeSave` hook and writes no default), and only where the document has none (or an empty one): a title or author set before or after `.use()` is kept. Because the producer is set again in `onBeforeSave`, a producer set on the document after `.use()` is overwritten at save.
 
 ### accessibilityPlugin
 

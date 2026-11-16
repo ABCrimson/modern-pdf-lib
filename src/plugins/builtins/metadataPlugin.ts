@@ -5,7 +5,7 @@
  * registered, re-affirms the producer before every save, and fills in a
  * default title and author at save when the document has none. A save is
  * `save()` and the calls built on it (`saveAsBlob()`, `saveAsBase64()`,
- * `copy()`); `saveAsStream()` runs no plugin hook, so it writes the
+ * `copy()`); `saveAsStream()` runs no `onBeforeSave` hook, so it writes the
  * producer and creator set at registration and no default title or author.
  *
  * Usage:
@@ -38,7 +38,7 @@ export interface MetadataPluginOptions {
   /**
    * Title to use when the document has none (or an empty one) at `save()`
    * (and `saveAsBlob()`, `saveAsBase64()`, `copy()`; `saveAsStream()` runs
-   * no plugin hook and writes no default). The title is set on the
+   * no `onBeforeSave` hook and writes no default). The title is set on the
    * document, so `getTitle()` returns it after that call. A title the
    * caller set, before or after registering the plugin, is kept. An empty
    * string writes nothing.
@@ -48,7 +48,7 @@ export interface MetadataPluginOptions {
   /**
    * Author to use when the document has none (or an empty one) at `save()`
    * (and `saveAsBlob()`, `saveAsBase64()`, `copy()`; `saveAsStream()` runs
-   * no plugin hook and writes no default). The author is set on the
+   * no `onBeforeSave` hook and writes no default). The author is set on the
    * document, so `getAuthor()` returns it after that call. An author the
    * caller set, before or after registering the plugin, is kept. An empty
    * string writes nothing.
