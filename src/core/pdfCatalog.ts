@@ -67,30 +67,30 @@ export function buildInfoDict(meta: DocumentMetadata, registry: PdfObjectRegistr
   const dict = new PdfDict();
 
   if (meta.title !== undefined) {
-    dict.set('/Title', PdfString.literal(meta.title));
+    dict.set('/Title', PdfString.fromText(meta.title));
   }
   if (meta.author !== undefined) {
-    dict.set('/Author', PdfString.literal(meta.author));
+    dict.set('/Author', PdfString.fromText(meta.author));
   }
   if (meta.subject !== undefined) {
-    dict.set('/Subject', PdfString.literal(meta.subject));
+    dict.set('/Subject', PdfString.fromText(meta.subject));
   }
   if (meta.keywords !== undefined) {
-    dict.set('/Keywords', PdfString.literal(meta.keywords));
+    dict.set('/Keywords', PdfString.fromText(meta.keywords));
   }
   if (meta.creator !== undefined) {
-    dict.set('/Creator', PdfString.literal(meta.creator));
+    dict.set('/Creator', PdfString.fromText(meta.creator));
   }
 
   // Producer — always set a default if not provided
   const producer = meta.producer ?? 'modern-pdf-lib';
-  dict.set('/Producer', PdfString.literal(producer));
+  dict.set('/Producer', PdfString.fromText(producer));
 
   if (meta.creationDate !== undefined) {
-    dict.set('/CreationDate', PdfString.literal(formatPdfDate(meta.creationDate)));
+    dict.set('/CreationDate', PdfString.fromAscii(formatPdfDate(meta.creationDate)));
   }
   if (meta.modDate !== undefined) {
-    dict.set('/ModDate', PdfString.literal(formatPdfDate(meta.modDate)));
+    dict.set('/ModDate', PdfString.fromAscii(formatPdfDate(meta.modDate)));
   }
 
   return registry.register(dict);
@@ -280,7 +280,7 @@ export function buildCatalog(
     catalog.set('/PageMode', PdfName.of(options.pageMode));
   }
   if (options?.lang !== undefined) {
-    catalog.set('/Lang', PdfString.literal(options.lang));
+    catalog.set('/Lang', PdfString.fromText(options.lang));
   }
 
   return registry.register(catalog);

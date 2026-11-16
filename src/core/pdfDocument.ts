@@ -774,8 +774,8 @@ export class PdfDocument {
 
     // 3. CIDSystemInfo dictionary
     const cidSysInfoDict = new PdfDict();
-    cidSysInfoDict.set('/Registry', PdfString.literal('Adobe'));
-    cidSysInfoDict.set('/Ordering', PdfString.literal('Identity'));
+    cidSysInfoDict.set('/Registry', PdfString.fromAscii('Adobe'));
+    cidSysInfoDict.set('/Ordering', PdfString.fromAscii('Identity'));
     cidSysInfoDict.set('/Supplement', PdfNumber.of(0));
 
     // 4. Build /W (widths) array for CIDFont
@@ -933,8 +933,8 @@ export class PdfDocument {
 
     // 3. CIDSystemInfo dictionary
     const cidSysInfoDict = new PdfDict();
-    cidSysInfoDict.set('/Registry', PdfString.literal('Adobe'));
-    cidSysInfoDict.set('/Ordering', PdfString.literal('Identity'));
+    cidSysInfoDict.set('/Registry', PdfString.fromAscii('Adobe'));
+    cidSysInfoDict.set('/Ordering', PdfString.fromAscii('Identity'));
     cidSysInfoDict.set('/Supplement', PdfNumber.of(0));
 
     // 4. Build /W (widths) array for CIDFont — same as TrueType
@@ -1075,7 +1075,7 @@ export class PdfDocument {
           PdfName.of('Indexed'),
           PdfName.of('DeviceRGB'),
           PdfNumber.of(maxIndex),
-          PdfString.hexFromBytes(result.palette),
+          PdfString.fromBytes(result.palette, 'hex'),
         ]),
       );
     } else {
@@ -2633,7 +2633,7 @@ export class PdfDocument {
 
       // Document language
       if (this.documentLanguage !== undefined) {
-        catalogObj.set('/Lang', PdfString.literal(this.documentLanguage));
+        catalogObj.set('/Lang', PdfString.fromText(this.documentLanguage));
       }
 
       // Structure tree (tagged PDF)
@@ -2675,15 +2675,20 @@ export class PdfDocument {
           // Document-level JavaScript
           if (hasJavaScript) {
             const jsNamesArray = new PdfArray();
-            for (const [jsName, jsScript] of this.javaScripts) {
+            // A name tree lists its keys in the byte order of the strings (ISO 32000-2 7.9.6).
+            const entries = Array.from(this.javaScripts, ([jsName, jsScript]) => ({
+              key: PdfString.fromText(jsName),
+              script: jsScript,
+            })).toSorted((a, b) => PdfString.compare(a.key, b.key));
+            for (const { key, script } of entries) {
               // Build a JavaScript action dictionary
               const actionDict = new PdfDict();
               actionDict.set('/Type', PdfName.of('Action'));
               actionDict.set('/S', PdfName.of('JavaScript'));
-              actionDict.set('/JS', PdfString.literal(jsScript));
+              actionDict.set('/JS', PdfString.fromText(script));
               const actionRef = this.registry.register(actionDict);
 
-              jsNamesArray.push(PdfString.literal(jsName));
+              jsNamesArray.push(key);
               jsNamesArray.push(actionRef);
             }
             const jsNameTree = new PdfDict();
@@ -2710,7 +2715,7 @@ export class PdfDocument {
           const openActionDict = new PdfDict();
           openActionDict.set('/Type', PdfName.of('Action'));
           openActionDict.set('/S', PdfName.of('JavaScript'));
-          openActionDict.set('/JS', PdfString.literal(actionState.openAction));
+          openActionDict.set('/JS', PdfString.fromText(actionState.openAction));
           const openActionRef = this.registry.register(openActionDict);
           catalogObj.set('/OpenAction', openActionRef);
         }
@@ -2730,7 +2735,7 @@ export class PdfDocument {
             const d = new PdfDict();
             d.set('/Type', PdfName.of('Action'));
             d.set('/S', PdfName.of('JavaScript'));
-            d.set('/JS', PdfString.literal(actionState.closeAction));
+            d.set('/JS', PdfString.fromText(actionState.closeAction));
             const ref = this.registry.register(d);
             aaDict.set('/WC', ref);
           }
@@ -2738,7 +2743,7 @@ export class PdfDocument {
             const d = new PdfDict();
             d.set('/Type', PdfName.of('Action'));
             d.set('/S', PdfName.of('JavaScript'));
-            d.set('/JS', PdfString.literal(actionState.beforePrint));
+            d.set('/JS', PdfString.fromText(actionState.beforePrint));
             const ref = this.registry.register(d);
             aaDict.set('/WP', ref);
           }
@@ -2746,7 +2751,7 @@ export class PdfDocument {
             const d = new PdfDict();
             d.set('/Type', PdfName.of('Action'));
             d.set('/S', PdfName.of('JavaScript'));
-            d.set('/JS', PdfString.literal(actionState.afterPrint));
+            d.set('/JS', PdfString.fromText(actionState.afterPrint));
             const ref = this.registry.register(d);
             aaDict.set('/DP', ref);
           }
@@ -2754,7 +2759,7 @@ export class PdfDocument {
             const d = new PdfDict();
             d.set('/Type', PdfName.of('Action'));
             d.set('/S', PdfName.of('JavaScript'));
-            d.set('/JS', PdfString.literal(actionState.beforeSave));
+            d.set('/JS', PdfString.fromText(actionState.beforeSave));
             const ref = this.registry.register(d);
             aaDict.set('/WS', ref);
           }
@@ -2762,7 +2767,7 @@ export class PdfDocument {
             const d = new PdfDict();
             d.set('/Type', PdfName.of('Action'));
             d.set('/S', PdfName.of('JavaScript'));
-            d.set('/JS', PdfString.literal(actionState.afterSave));
+            d.set('/JS', PdfString.fromText(actionState.afterSave));
             const ref = this.registry.register(d);
             aaDict.set('/DS', ref);
           }
@@ -2780,7 +2785,7 @@ export class PdfDocument {
           const labelDict = new PdfDict();
           labelDict.set('/S', PdfName.of(styleToPdf(range.style)));
           if (range.prefix !== undefined) {
-            labelDict.set('/P', PdfString.literal(range.prefix));
+            labelDict.set('/P', PdfString.fromText(range.prefix));
           }
           if (range.start !== undefined) {
             labelDict.set('/St', PdfNumber.of(range.start));

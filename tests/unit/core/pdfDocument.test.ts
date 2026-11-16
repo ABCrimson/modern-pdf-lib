@@ -10,12 +10,26 @@ import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import {
   createPdf,
+  loadPdf,
+  PdfArray,
+  PdfDict,
   PdfDocument,
+  PdfName,
+  PdfRef,
+  PdfString,
   StandardFonts,
   PageSizes,
   base64Encode,
   base64Decode,
+  setPageLabels,
 } from '../../../src/index.js';
+import type { PdfObject } from '../../../src/index.js';
+import {
+  addDocumentCloseAction,
+  addDocumentOpenAction,
+  addDocumentPrintAction,
+  addDocumentSaveAction,
+} from '../../../src/form/index.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -568,5 +582,113 @@ describe('PdfDocument', () => {
     expect(img.name).toMatch(/^Im\d+$/);
     expect(img.width).toBe(1);
     expect(img.height).toBe(1);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Strings the document writes, read back from the saved file
+// ---------------------------------------------------------------------------
+
+/** The objects of `doc` saved and loaded again: the catalog, the /Info dictionary and a resolver. */
+async function savedObjects(
+  doc: PdfDocument,
+): Promise<{ catalog: PdfDict; info: PdfDict; resolve: (obj: PdfObject | undefined) => unknown }> {
+  const registry = (await loadPdf(await doc.save())).getRegistry();
+  const resolve = (obj: PdfObject | undefined): unknown =>
+    obj instanceof PdfRef ? registry.resolve(obj) : obj;
+  const dicts = [...registry].flatMap(({ object }) => (object instanceof PdfDict ? [object] : []));
+  const catalog = dicts.find((d) => (d.get('/Type') as PdfName | undefined)?.value === '/Catalog');
+  const info = dicts.find((d) => d.has('/Producer'));
+  if (catalog === undefined || info === undefined) throw new Error('no catalog or /Info in file');
+  return { catalog, info, resolve };
+}
+
+/** The encoding and the text of a string object. */
+function textOf(obj: unknown): [encoding: string, text: string] {
+  expect(obj).toBeInstanceOf(PdfString);
+  const str = obj as PdfString;
+  return [str.textEncoding, str.toText()];
+}
+
+describe('PdfDocument strings are written by the type of their key', () => {
+  it('writes /Lang as a text string', async () => {
+    const doc = createPdf();
+    doc.addPage();
+    doc.setLanguage('x-日本');
+    const { catalog } = await savedObjects(doc);
+    expect(textOf(catalog.get('/Lang'))).toEqual(['utf-16be', 'x-日本']);
+  });
+
+  it('writes document JavaScript names and scripts as text strings', async () => {
+    const doc = createPdf();
+    doc.addPage();
+    doc.addJavaScript('Zähler €', 'app.alert("Größe – €");');
+    const { catalog, resolve } = await savedObjects(doc);
+    const names = resolve(catalog.get('/Names')) as PdfDict;
+    const tree = resolve(names.get('/JavaScript')) as PdfDict;
+    const [key, action] = (tree.get('/Names') as PdfArray).items;
+    expect(textOf(key)).toEqual(['pdfdoc', 'Zähler €']);
+    expect(textOf((resolve(action) as PdfDict).get('/JS'))).toEqual([
+      'pdfdoc',
+      'app.alert("Größe – €");',
+    ]);
+  });
+
+  it('sorts the JavaScript name tree by the bytes of its keys', async () => {
+    const doc = createPdf();
+    doc.addPage();
+    doc.addJavaScript('b', 'var b = 2;');
+    doc.addJavaScript('日本', 'var j = 3;');
+    doc.addJavaScript('a', 'var a = 1;');
+    const { catalog, resolve } = await savedObjects(doc);
+    const names = resolve(catalog.get('/Names')) as PdfDict;
+    const tree = resolve(names.get('/JavaScript')) as PdfDict;
+    const keys = (tree.get('/Names') as PdfArray).items.filter((_, i) => i % 2 === 0);
+    // FE FF, the mark of the UTF-16BE key, sorts after the PDFDocEncoding bytes of "a" and "b".
+    expect(keys.map((key) => textOf(key)[1])).toEqual(['a', 'b', '日本']);
+  });
+
+  it('writes the scripts of /OpenAction and /AA as text strings', async () => {
+    const doc = createPdf();
+    doc.addPage();
+    addDocumentOpenAction(doc, 'open("日")');
+    addDocumentCloseAction(doc, 'close("–")');
+    addDocumentPrintAction(doc, { beforePrint: 'wp("€")', afterPrint: 'dp("日")' });
+    addDocumentSaveAction(doc, { beforeSave: 'ws("—")', afterSave: 'ds("日")' });
+    const { catalog, resolve } = await savedObjects(doc);
+    const script = (obj: PdfObject | undefined): string =>
+      textOf((resolve(obj) as PdfDict).get('/JS'))[1];
+    expect(script(catalog.get('/OpenAction'))).toBe('open("日")');
+    const aa = resolve(catalog.get('/AA')) as PdfDict;
+    expect(['/WC', '/WP', '/DP', '/WS', '/DS'].map((key) => script(aa.get(key)))).toEqual([
+      'close("–")',
+      'wp("€")',
+      'dp("日")',
+      'ws("—")',
+      'ds("日")',
+    ]);
+  });
+
+  it('writes a page label prefix as a text string', async () => {
+    const doc = createPdf();
+    doc.addPage();
+    setPageLabels(doc, [{ startPage: 0, style: 'decimal', prefix: 'Anhang – 日 ' }]);
+    const { catalog, resolve } = await savedObjects(doc);
+    const labels = resolve(catalog.get('/PageLabels')) as PdfDict;
+    const range = resolve((labels.get('/Nums') as PdfArray).items[1]) as PdfDict;
+    expect(textOf(range.get('/P'))).toEqual(['utf-16be', 'Anhang – 日 ']);
+  });
+
+  it('writes the /Info dates as ASCII strings', async () => {
+    const doc = createPdf();
+    doc.addPage();
+    doc.setCreationDate(new Date(Date.UTC(2026, 0, 2, 3, 4, 5)));
+    doc.setModDate(new Date(Date.UTC(2026, 0, 2, 3, 4, 5)));
+    const { info } = await savedObjects(doc);
+    for (const key of ['/CreationDate', '/ModDate']) {
+      const bytes = (info.get(key) as PdfString).toBytes();
+      expect(bytes.every((byte) => byte < 0x80)).toBe(true);
+      expect(textOf(info.get(key))[1]).toMatch(/^D:20260102/);
+    }
   });
 });
