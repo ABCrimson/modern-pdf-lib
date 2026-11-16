@@ -500,8 +500,9 @@ describe('signatures and the CLI', () => {
     expect(await pdfjsText(bytes)).toEqual(['Signed page']);
   });
 
-  // The full save of the loaded signed file writes its signature dictionary twice (two
-  // /ByteRange entries), and the appended copy is what verifySignatures finds next to the original.
+  // saveIncrementalWithSignaturePreservation appends the whole re-saved file as one update, so the
+  // joined file holds two signature dictionaries (two /ByteRange entries), and verifySignatures
+  // finds the appended copy next to the original.
   knownDefect(
     defectKey('legacy-M01', '0.41.2'),
     'saveIncrementalWithSignaturePreservation: verifySignatures finds the one original signature, intact',

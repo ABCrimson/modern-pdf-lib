@@ -1,8 +1,9 @@
 /**
  * The object definitions of a PDF file, counted from its bytes: each `N G obj` header, and each
  * member listed by an object stream that the last cross-reference stream points into (an object
- * packed there is defined by its container). A file that defines an object number more than
- * once carries dead copies: a reader uses only the definition the cross-reference data names.
+ * packed there counts as one definition of its own number). A file that defines an object
+ * number more than once carries dead copies: a reader uses only the definition the
+ * cross-reference data names.
  *
  * Unencrypted streams only, with a direct /Length; enough for the files this library writes.
  */
