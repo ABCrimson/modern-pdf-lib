@@ -400,12 +400,12 @@ const caps = detectRuntimeCapabilities();
 
 ### Bundle Size Breakdown
 
-Measured 2026-11-15 by `pnpm run gate:size` (`scripts/dev/size-gate.ts`) from the built `dist/`: the minimal document is an esbuild 0.28.2 bundle (bundle, minify, format esm, platform neutral, `node:*` external), the IIFE file is measured as shipped, and both are gzipped at level 9 with `node:zlib` of the `devEngines` runtime, Node.js 28.0.0-nightly20261111e8c1160d20:
+Measured 2026-11-16 by `pnpm run gate:size` (`scripts/dev/size-gate.ts`) from the built `dist/`: the minimal document is an esbuild 0.28.2 bundle (bundle, minify, format esm, platform neutral, `node:*` external), the IIFE file is measured as shipped, and both are gzipped at level 9 with `node:zlib` of the `devEngines` runtime, Node.js 28.0.0-nightly20261111e8c1160d20:
 
 | Scenario | Size (minified + gzipped) |
 |:---|:---:|
-| Minimal document (`export { createPdf } from 'modern-pdf-lib'`, `node:*` external) | ~104 KiB (106,622 B) |
-| Entire library (`dist/modern-pdf-lib.iife.js`) | ~258 KiB (264,051 B) |
+| Minimal document (`export { createPdf } from 'modern-pdf-lib'`, `node:*` external) | ~109 KiB (112,019 B) |
+| Entire library (`dist/modern-pdf-lib.iife.js`) | ~262 KiB (268,416 B) |
 
 ### Minimizing Bundle Size
 

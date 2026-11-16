@@ -14,7 +14,7 @@ Create, parse, fill, merge, sign, and manipulate PDF documents<br />in Node 26.4
 <br />
 
 [![npm version](https://img.shields.io/npm/v/modern-pdf-lib?style=flat-square&color=cb3837)](https://www.npmjs.com/package/modern-pdf-lib)
-[![createPdf bundle](https://img.shields.io/badge/createPdf_bundle-104_KiB_gzip-blue?style=flat-square)](#install)
+[![createPdf bundle](https://img.shields.io/badge/createPdf_bundle-109_KiB_gzip-blue?style=flat-square)](#install)
 [![tests](https://img.shields.io/badge/tests-8%2C853_passing-brightgreen?style=flat-square)](https://github.com/ABCrimson/modern-pdf-lib/actions/workflows/ci.yml)
 [![TypeScript](https://img.shields.io/badge/TypeScript-7.1_dev-3178c6?style=flat-square&logo=typescript&logoColor=white)](./tsconfig.json)
 [![License: MIT](https://img.shields.io/badge/license-MIT-yellow?style=flat-square)](LICENSE)
