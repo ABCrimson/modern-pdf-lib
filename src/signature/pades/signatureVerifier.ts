@@ -20,7 +20,12 @@
  * @packageDocumentation
  */
 
-import { findSignatures, computeSignatureHash, byteRangeCoversWholeFile } from './byteRange.js';
+import {
+  findSignatures,
+  computeSignatureHash,
+  byteRangeCoversWholeFile,
+  readStringEntry,
+} from './byteRange.js';
 import {
   parseDerTlv,
   derRefusalMessage,
@@ -456,9 +461,7 @@ function extractFieldInfo(
   const searchEnd = Math.min(pdfStr.length, contentsOffset + 2000);
   const region = pdfStr.slice(searchStart, searchEnd);
 
-  let fieldName = 'Signature';
-  const tMatch = region.match(/\/T\s*\(([^)]*)\)/);
-  if (tMatch) fieldName = tMatch[1]!;
+  const fieldName = readStringEntry(region, 'T') ?? 'Signature';
 
   const result: { fieldName: string; reason?: string; location?: string; contactInfo?: string } = {
     fieldName,

@@ -141,6 +141,17 @@ describe('buildDocTimeStampDict', () => {
     expect(str.value).toBe('LTV timestamp');
   });
 
+  it('writes /Reason as a PDF text string', () => {
+    const latin = buildDocTimeStampDict({ reason: 'Prüfung' }).get('/Reason') as PdfString;
+    expect(latin.textEncoding).toBe('pdfdoc');
+    expect(latin.toText()).toBe('Prüfung');
+    const wide = buildDocTimeStampDict({ reason: 'Zeitstempel € 日本' }).get(
+      '/Reason',
+    ) as PdfString;
+    expect(wide.textEncoding).toBe('utf-16be');
+    expect(wide.toText()).toBe('Zeitstempel € 日本');
+  });
+
   it('adds /Reason even when it is an empty string', () => {
     const dict = buildDocTimeStampDict({ reason: '' });
     expect(dict.has('/Reason')).toBe(true);

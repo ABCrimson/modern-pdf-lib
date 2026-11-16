@@ -19,7 +19,7 @@
  * @packageDocumentation
  */
 
-import { findSignatures } from './byteRange.js';
+import { findSignatures, readStringEntry } from './byteRange.js';
 import { findExistingSignatures } from './incrementalSave.js';
 import { verifySignatures } from './signatureVerifier.js';
 
@@ -78,7 +78,7 @@ const decoder = new TextDecoder('latin1');
  *
  * Strategy: Find the sig value's object number N from the /ByteRange context,
  * then search the entire PDF for `/V N 0 R` which is in the widget annotation
- * that also contains `/T (fieldname)`.
+ * that also contains the field name as its `/T` string.
  */
 function extractFieldName(
   pdfStr: string,
@@ -106,8 +106,8 @@ function extractFieldName(
       const widgetStart = Math.max(0, vIdx - 500);
       const widgetEnd = Math.min(pdfStr.length, vIdx + 500);
       const widgetRegion = pdfStr.slice(widgetStart, widgetEnd);
-      const tMatch = widgetRegion.match(/\/T\s*\(([^)]*)\)/);
-      if (tMatch) return tMatch[1]!;
+      const fieldName = readStringEntry(widgetRegion, 'T');
+      if (fieldName !== undefined) return fieldName;
     }
   }
 
@@ -115,10 +115,7 @@ function extractFieldName(
   const searchStart = Math.max(0, sigOffset - 3000);
   const searchEnd = Math.min(pdfStr.length, sigOffset + 20000);
   const region = pdfStr.slice(searchStart, searchEnd);
-  const tMatch = region.match(/\/T\s*\(([^)]*)\)/);
-  if (tMatch) return tMatch[1]!;
-
-  return 'Signature';
+  return readStringEntry(region, 'T') ?? 'Signature';
 }
 
 /**

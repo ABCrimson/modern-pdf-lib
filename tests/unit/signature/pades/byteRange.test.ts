@@ -2,13 +2,29 @@
  * Tests for ByteRange calculation, hash computation, and signature embedding.
  */
 
+import { spawnSync } from 'node:child_process';
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { describe, it, expect } from 'vitest';
+import { createPdf } from '../../../../src/core/pdfDocument.js';
+import { UnencodableTextError } from '../../../../src/errors.js';
 import {
   prepareForSigning,
   computeSignatureHash,
   embedSignature,
   findSignatures,
+  readStringEntry,
+  stringEntryPattern,
+  stringEntryText,
 } from '../../../../src/signature/pades/byteRange.js';
+import {
+  signPdf,
+  type VisibleSignatureOptions,
+} from '../../../../src/signature/pades/signatureHandler.js';
+import { verifySignatures } from '../../../../src/signature/pades/signatureVerifier.js';
+import { expectQpdfClean, QPDF_BIN, QpdfError, requireQpdf } from '../../../helpers/oracle/qpdf.js';
+import { generateTestCert } from '../../../helpers/signature-trust-fixtures.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -88,13 +104,14 @@ describe('prepareForSigning', () => {
     expect(text).toContain('/SubFilter /adbe.pkcs7.detached');
   });
 
-  it('should include the signature field name', () => {
+  it('should include the signature field name as a hex text string', () => {
     const pdfBytes = createMinimalPdf();
     const { preparedPdf } = prepareForSigning(pdfBytes, 'MySignature');
 
     const decoder = new TextDecoder('latin1');
     const text = decoder.decode(preparedPdf);
-    expect(text).toContain('/T (MySignature)');
+    // "MySignature" in PDFDocEncoding; qpdf reads the hex form back below.
+    expect(text).toContain('/T <4d795369676e6174757265>');
   });
 
   it('should throw for invalid PDF (no startxref)', () => {
@@ -114,6 +131,109 @@ describe('prepareForSigning', () => {
     // Should have a new xref section
     expect(text).toContain('/Prev ');
     expect(text.lastIndexOf('%%EOF')).toBeGreaterThan(text.indexOf('%%EOF'));
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Tests: the strings prepareForSigning writes, read back by qpdf and verifySignatures
+// ---------------------------------------------------------------------------
+
+/** The /T of every /FT /Sig dictionary as qpdf `--json=2` reads it ("u:" marks a text string). */
+function qpdfSignatureFieldNames(bytes: Uint8Array): string[] {
+  const dir = mkdtempSync(join(tmpdir(), 'signature-field-names-'));
+  try {
+    const input = join(dir, 'in.pdf');
+    writeFileSync(input, bytes);
+    const result = spawnSync(QPDF_BIN, ['--json=2', '--json-key=qpdf', input], {
+      encoding: 'utf8',
+      maxBuffer: 1 << 30,
+    });
+    if (result.status !== 0) {
+      throw new QpdfError(`qpdf --json=2 exit ${result.status}: ${result.stderr}`);
+    }
+    const [, objects] = (
+      JSON.parse(result.stdout) as {
+        qpdf: [unknown, Record<string, { value?: Record<string, unknown> }>];
+      }
+    ).qpdf;
+    return Object.values(objects).flatMap(({ value }) =>
+      value?.['/FT'] === '/Sig' && typeof value['/T'] === 'string' ? [value['/T']] : [],
+    );
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+}
+
+/** A one-page document from the library writer, signed as `fieldName`. */
+async function signedDocument(
+  fieldName: string,
+  appearance?: VisibleSignatureOptions,
+): Promise<Uint8Array> {
+  const doc = createPdf();
+  doc.addPage();
+  const cert = await generateTestCert('Field Name Signer');
+  return signPdf(await doc.save({ compress: false }), fieldName, {
+    certificate: cert.certificate,
+    privateKey: cert.privateKey,
+    appearance,
+  });
+}
+
+describe('the strings prepareForSigning writes', () => {
+  // signature-cms-M02: the name was written into a literal string without escaping.
+  for (const fieldName of ['a) /F 0 (b', 'back\\slash (open', 'Unterschrift Müller 日本']) {
+    it(`signs the field name ${JSON.stringify(fieldName)}: qpdf --check is clean, /T reads back, the ByteRange is intact`, async (ctx) => {
+      requireQpdf(ctx);
+      const signed = await signedDocument(fieldName);
+      expectQpdfClean(signed);
+      expect(qpdfSignatureFieldNames(signed)).toEqual([`u:${fieldName}`]);
+      const results = await verifySignatures(signed);
+      expect(results).toHaveLength(1);
+      expect(results[0]?.integrityValid).toBe(true);
+      expect(results[0]?.coversWholeDocument).toBe(true);
+    });
+  }
+
+  it('reads a string entry in literal or hex form', () => {
+    expect(readStringEntry('<< /FT /Sig /T (Signature1) >>', 'T')).toBe('Signature1');
+    expect(readStringEntry('<< /FT /Sig /T <5369 67> >>', 'T')).toBe('Sig');
+    expect(readStringEntry('<< /T <feff65e5672c> >>', 'T')).toBe('日本');
+    expect(readStringEntry('<< /Type /Annot /TU (tip) >>', 'T')).toBeUndefined();
+    const names = [...'/T (a) /T <62> /T (c)'.matchAll(stringEntryPattern('T', 'g'))];
+    expect(names.map(stringEntryText)).toEqual(['a', 'b', 'c']);
+  });
+
+  it('writes the appearance text as WinAnsiEncoding codes of /F1 Helvetica', async (ctx) => {
+    requireQpdf(ctx);
+    const signed = await signedDocument('Signature1', {
+      rect: [50, 50, 200, 40],
+      text: ['Signé par José €'],
+    });
+    expectQpdfClean(signed);
+    const text = new TextDecoder('latin1').decode(signed);
+    expect(text).toContain('/BaseFont /Helvetica /Encoding /WinAnsiEncoding');
+    // Table D.2 WinAnsiEncoding: é is 0xE9, € is 0x80.
+    expect(text).toContain('<5369676ee920706172204a6f73e92080> Tj');
+    const results = await verifySignatures(signed);
+    expect(results[0]?.integrityValid).toBe(true);
+    expect(results[0]?.coversWholeDocument).toBe(true);
+  });
+
+  it('refuses appearance text that WinAnsiEncoding cannot encode', () => {
+    const prepare = (): unknown =>
+      prepareForSigning(createMinimalPdf(), 'Signature1', 8192, {
+        rect: [0, 0, 100, 40],
+        textLines: ['Signed 日本'],
+      });
+    expect(prepare).toThrow(UnencodableTextError);
+    expect(prepare).toThrow(
+      expect.objectContaining({
+        character: '日',
+        index: 7,
+        fontName: 'Helvetica',
+        encoding: 'WinAnsiEncoding',
+      }),
+    );
   });
 });
 
@@ -278,9 +398,11 @@ describe('findSignatures', () => {
     // Should have the Form XObject with BBox
     expect(text).toContain('/BBox [0 0 200 80]');
 
-    // Should have the text content in the appearance stream
-    expect(text).toContain('Signed by: Test User');
-    expect(text).toContain('Date: 2026-02-28');
+    // Should have the text content in the appearance stream: ASCII lines, so their
+    // WinAnsiEncoding codes are their ASCII bytes, shown as hex strings.
+    for (const line of ['Signed by: Test User', 'Date: 2026-02-28']) {
+      expect(text).toContain(`<${new TextEncoder().encode(line).toHex()}> Tj`);
+    }
   });
 
   it('should create invisible signature when no appearance is provided', () => {

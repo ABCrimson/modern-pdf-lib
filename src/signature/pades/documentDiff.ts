@@ -12,7 +12,7 @@
  * @packageDocumentation
  */
 
-import { findSignatures } from './byteRange.js';
+import { findSignatures, stringEntryPattern, stringEntryText } from './byteRange.js';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -132,11 +132,11 @@ function extractPageHashes(pdfBytes: Uint8Array): number[] {
 function extractFormFields(pdfText: string): Map<string, string> {
   const fields = new Map<string, string>();
   // Match field dictionaries containing /T and optionally /V
-  const fieldRegex = /\/T\s*\(([^)]*)\)/g;
+  const fieldRegex = stringEntryPattern('T', 'g');
   let match: RegExpExecArray | null;
 
   while ((match = fieldRegex.exec(pdfText)) !== null) {
-    const name = match[1]!;
+    const name = stringEntryText(match);
     // Search nearby for /V value
     const searchRegion = pdfText.slice(
       Math.max(0, match.index - 500),

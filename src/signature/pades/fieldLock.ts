@@ -18,6 +18,7 @@
  * @packageDocumentation
  */
 
+import { readStringEntry } from './byteRange.js';
 import type { SignOptions } from './signatureHandler.js';
 import { warnOnce } from '../../internal/warnings.js';
 
@@ -128,8 +129,7 @@ export function getFieldLocks(pdf: Uint8Array): FieldLockInfo[] {
     if (lockIdx === -1) continue;
 
     // Extract field name
-    const tMatch = fieldRegion.match(/\/T\s*\(([^)]*)\)/);
-    const fieldName = tMatch ? tMatch[1]! : 'Unknown';
+    const fieldName = readStringEntry(fieldRegion, 'T') ?? 'Unknown';
 
     // Extract lock action
     const actionMatch = fieldRegion.match(/\/Action\s*\/(All|Include|Exclude)/);

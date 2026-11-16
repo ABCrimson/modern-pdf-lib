@@ -25,7 +25,9 @@
  * @packageDocumentation
  */
 
+import { encodeStandardText } from '../../assets/font/internal/standardEncoding.js';
 import { assertUnencryptedInput } from '../../core/io/incrementalWriter.js';
+import { PdfString } from '../../core/pdfObjects.js';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -49,6 +51,46 @@ export interface ByteRangeResult {
 
 const encoder = new TextEncoder();
 const decoder = new TextDecoder('latin1');
+
+/**
+ * The PDF syntax of a string, always in hex form, so a dictionary built as text stays ASCII
+ * whatever bytes the string holds.
+ */
+function pdfStringSyntax(s: PdfString): string {
+  return `<${s.toBytes().toHex()}>`;
+}
+
+/**
+ * A regular expression for `/<key>` followed by a string: group 1 is the body of a literal
+ * string without nested parentheses, group 2 the digits of a hex string.
+ *
+ * @internal
+ */
+export function stringEntryPattern(key: string, flags: string = ''): RegExp {
+  return new RegExp(String.raw`\/${key}\s*(?:\(([^)]*)\)|<([\da-fA-F\s]*)>)`, flags);
+}
+
+/**
+ * The text of a {@link stringEntryPattern} match: the body of a literal string as it stands,
+ * hex digits decoded as a PDF text string (the form {@link prepareForSigning} writes /T in).
+ *
+ * @internal
+ */
+export function stringEntryText(match: RegExpMatchArray): string {
+  const hexDigits = match[2];
+  return hexDigits === undefined ? (match[1] ?? '') : PdfString.fromHex(hexDigits).toText();
+}
+
+/**
+ * The text of the first `/<key>` string entry in `region` ({@link stringEntryText}), or
+ * `undefined` when there is none.
+ *
+ * @internal
+ */
+export function readStringEntry(region: string, key: string): string | undefined {
+  const match = region.match(stringEntryPattern(key));
+  return match === null ? undefined : stringEntryText(match);
+}
 
 /**
  * Build a minimal signature dictionary string for embedding in a PDF.
@@ -143,8 +185,11 @@ function findStringForward(data: Uint8Array, needle: string, startOffset: number
  * Build a PDF content stream for a visible signature appearance.
  *
  * Renders a bordered rectangle with optional background color and
- * text lines rendered in Helvetica.
+ * text lines rendered in Helvetica, as WinAnsiEncoding codes written in
+ * hex strings, so the stream is ASCII.
  *
+ * @throws {UnencodableTextError} At the first character of a text line
+ *   that WinAnsiEncoding has no code for.
  * @internal
  */
 function buildSignatureAppearanceStream(options: PrepareAppearanceOptions): string {
@@ -191,7 +236,7 @@ function buildSignatureAppearanceStream(options: PrepareAppearanceOptions): stri
       const y = startY - i * lineHeight;
       if (y < margin) break; // Don't overflow the box
       ops.push(`${n(margin)} ${n(y)} Td`);
-      ops.push(`(${escapePdfString(lines[i]!)}) Tj`);
+      ops.push(`<${encodeStandardText('Helvetica', lines[i]!).toHex()}> Tj`);
       // Reset position for absolute positioning on next line
       ops.push(`${n(-margin)} ${n(-y)} Td`);
     }
@@ -257,12 +302,16 @@ export interface PrepareAppearanceOptions {
  * and the hash can be signed.
  *
  * @param pdfBytes           The original PDF file bytes.
- * @param signatureFieldName The name for the signature field.
+ * @param signatureFieldName The name for the signature field, written to
+ *                           `/T` as a PDF text string in hex form.
  * @param placeholderSize    Size in bytes for the signature. Default 8192.
  * @returns                  The prepared PDF and ByteRange info.
  * @throws {UnsupportedEncryptionError} When `pdfBytes` is an encrypted PDF
  *         (its bytes contain the name `/Encrypt`): the
  *         appended signature objects and trailer would not be encrypted.
+ * @throws {UnencodableTextError} When the field name holds a lone surrogate
+ *         or U+001B, or an appearance text line holds a character that
+ *         WinAnsiEncoding (Helvetica) has no code for.
  */
 export function prepareForSigning(
   pdfBytes: Uint8Array,
@@ -345,7 +394,7 @@ export function prepareForSigning(
 
   // Build field dict
   let sigFieldDict =
-    `<< /Type /Annot /Subtype /Widget /FT /Sig /T (${signatureFieldName})` +
+    `<< /Type /Annot /Subtype /Widget /FT /Sig /T ${pdfStringSyntax(PdfString.fromText(signatureFieldName))}` +
     ` /V ${sigValueObjNum} 0 R /F 132 /Rect [${rectStr}]`;
 
   if (appearance && apStreamObjNum >= 0) {
@@ -392,7 +441,7 @@ export function prepareForSigning(
     const [, , w, h] = appearance.rect;
     appendix += `${apStreamObjNum} 0 obj\n`;
     appendix += `<< /Type /XObject /Subtype /Form /BBox [0 0 ${w} ${h}]`;
-    appendix += ` /Resources << /Font << /F1 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >> >> >>`;
+    appendix += ` /Resources << /Font << /F1 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >> >> >>`;
     appendix += ` /Length ${apContent.length} >>\n`;
     appendix += `stream\n`;
     appendix += apContent;

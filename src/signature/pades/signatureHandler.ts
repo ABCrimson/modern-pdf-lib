@@ -16,6 +16,7 @@ import {
   computeSignatureHash,
   embedSignature,
   findSignatures,
+  readStringEntry,
 } from './byteRange.js';
 import type { PrepareAppearanceOptions } from './byteRange.js';
 import { assertUnencryptedInput } from '../../core/io/incrementalWriter.js';
@@ -159,10 +160,7 @@ function extractFieldName(pdfStr: string, sigDictOffset: number): string {
   const searchStart = Math.max(0, sigDictOffset - 2000);
   const searchRegion = pdfStr.slice(searchStart, sigDictOffset + 1000);
 
-  const tMatch = searchRegion.match(/\/T\s*\(([^)]*)\)/);
-  if (tMatch) return tMatch[1]!;
-
-  return 'Signature';
+  return readStringEntry(searchRegion, 'T') ?? 'Signature';
 }
 
 /**

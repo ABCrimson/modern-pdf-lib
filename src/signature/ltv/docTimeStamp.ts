@@ -79,7 +79,8 @@ export interface DocTimeStampOptions {
  * - `/SubFilter` `/ETSI.RFC3161`
  * - `/ByteRange` `[0 0 0 0]` — a placeholder to be patched during save
  * - `/Contents`  a zero-filled hex string of `contentsSize` bytes
- * - `/Reason`    (only when {@link DocTimeStampOptions.reason} is given)
+ * - `/Reason`    a text string (only when {@link DocTimeStampOptions.reason}
+ *                is given)
  *
  * The `/Contents` value is serialized as a hexadecimal string
  * (`<0000…>`); it occupies `contentsSize` bytes ⇒ `2 × contentsSize`
@@ -90,6 +91,8 @@ export interface DocTimeStampOptions {
  * @returns        The Document Timestamp signature dictionary.
  * @throws         {RangeError} when `contentsSize` is not a positive
  *                 integer.
+ * @throws         {UnencodableTextError} when `reason` holds a lone
+ *                 surrogate or U+001B.
  *
  * @example
  * ```ts
@@ -121,7 +124,7 @@ export function buildDocTimeStampDict(options?: DocTimeStampOptions): PdfDict {
   dict.set('/Contents', PdfString.fromHex(hexZeros));
 
   if (options?.reason !== undefined) {
-    dict.set('/Reason', PdfString.literal(options.reason));
+    dict.set('/Reason', PdfString.fromText(options.reason));
   }
 
   return dict;

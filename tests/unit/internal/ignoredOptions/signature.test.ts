@@ -191,7 +191,9 @@ describe('signPdf output does not change', () => {
       location: 'Shown location',
       appearance: { rect: [50, 50, 250, 100] },
     });
-    expect(latin1.decode(signed)).toContain('Shown reason');
+    // ASCII text, so its WinAnsiEncoding codes are its ASCII bytes, shown as a hex string.
+    const shown = new TextEncoder().encode('Reason: Shown reason').toHex();
+    expect(latin1.decode(signed)).toContain(`<${shown}> Tj`);
     expect(ignoredCalls()).toHaveLength(0);
   });
 });
