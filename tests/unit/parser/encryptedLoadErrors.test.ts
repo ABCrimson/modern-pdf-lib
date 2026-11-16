@@ -9,13 +9,16 @@
  * verdict from the library is compared with qpdf's for the same file and password.
  */
 import { spawnSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { TestContext } from 'vitest';
+import { latin1Bytes } from '../../../src/internal/latin1.js';
 import { loadPdf } from '../../../src/parser/documentParser.js';
 import {
   EncryptedPdfError,
+  EnvironmentError,
   MalformedInputError,
   PdfError,
   PdfParseError,
@@ -118,5 +121,59 @@ describe('the empty password', () => {
   it('is tried first: a file that opens with it never throws', async () => {
     const doc = await loadPdf(fixture('load/aes-128-r4.empty.pdf'));
     expect(doc.getPageCount()).toBe(1);
+  });
+});
+
+describe('an /Encrypt dictionary without /O', () => {
+  // The key /O renamed to /X (same length, so the xref offsets hold). qpdf 12.4.2 exits 2 on this file with
+  // every password: "some encryption dictionary parameters are missing or the wrong type".
+  const source = readFileSync(join(DIR, 'rc4-40-r2.pdf'), 'latin1').replace('/O <', '/X <');
+  const broken = (): Uint8Array => latin1Bytes(source);
+
+  it('qpdf reports the file as damaged, not as locked', (ctx: TestContext) => {
+    requireQpdf(ctx);
+    expect(source).toContain('/X <');
+    const dir = mkdtempSync(join(tmpdir(), 'encrypt-no-o-'));
+    try {
+      const path = join(dir, 'no-o.pdf');
+      writeFileSync(path, broken());
+      for (const password of [undefined, 'user']) {
+        const args = [
+          ...(password === undefined ? [] : [`--password=${password}`]),
+          '--requires-password',
+          path,
+        ];
+        expect(spawnSync(QPDF_BIN, args, { encoding: 'utf8' }).status).toBe(2);
+      }
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it.for([undefined, 'user', 'nope'])(
+    'throws MalformedInputError with password %s',
+    async (password) => {
+      const error = await loadPdf(broken(), password === undefined ? {} : { password }).catch(
+        (e: unknown) => e,
+      );
+      expect(error).toBeInstanceOf(MalformedInputError);
+      expect(error).not.toBeInstanceOf(EncryptedPdfError);
+      expect((error as MalformedInputError).format).toBe('pdf');
+      expect((error as Error).message).toBe('Invalid /Encrypt dictionary: missing /O or /U values');
+    },
+  );
+});
+
+describe('a runtime without Web Crypto', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('throws EnvironmentError for AES-256 even with the right password', async () => {
+    const bytes = fixture('aes-256-r6.pdf');
+    vi.stubGlobal('crypto', {});
+    const error = await loadPdf(bytes, { password: 'user' }).catch((e: unknown) => e);
+    expect(error).toBeInstanceOf(EnvironmentError);
+    expect((error as EnvironmentError).reason).toBe('web-crypto');
   });
 });

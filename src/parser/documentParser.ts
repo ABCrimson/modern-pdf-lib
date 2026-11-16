@@ -52,7 +52,13 @@ import {
 } from '../crypto/encryptionHandler.js';
 import { contentsLeftAsStored } from '../crypto/internal/signatureContents.js';
 import { PdfParseError } from './parseError.js';
-import { EncryptedPdfError, ResourceLimitError, UnsupportedEncryptionError } from '../errors.js';
+import {
+  EncryptedPdfError,
+  EnvironmentError,
+  MalformedInputError,
+  ResourceLimitError,
+  UnsupportedEncryptionError,
+} from '../errors.js';
 import { assertWithinLimit } from '../internal/limits.js';
 
 // ---------------------------------------------------------------------------
@@ -454,6 +460,9 @@ export class PdfDocumentParser {
    * @throws {UnsupportedEncryptionError} When the handler or a crypt filter is not supported
    *         (before any password is tried).
    * @throws {ResourceLimitError} When an internal limit is exceeded.
+   * @throws {MalformedInputError} When the /Encrypt dictionary has no /O or /U (before any password
+   *         is tried).
+   * @throws {EnvironmentError} When the runtime has no Web Crypto and the handler needs it.
    * @throws {EncryptedPdfError} When no password opens the file: reason `'incorrect-password'`
    *         when `password` was given, `'password-required'` when it was not; `cause` is the
    *         error of the last derivation.
@@ -508,7 +517,14 @@ export class PdfDocumentParser {
         );
         return this.encryptionHandler; // Authentication succeeded
       } catch (err) {
-        if (err instanceof UnsupportedEncryptionError || err instanceof ResourceLimitError) {
+        // These fail every password the same way: an unsupported handler, a limit, an /Encrypt
+        // dictionary without /O or /U, and a runtime without Web Crypto.
+        if (
+          err instanceof UnsupportedEncryptionError ||
+          err instanceof ResourceLimitError ||
+          err instanceof MalformedInputError ||
+          err instanceof EnvironmentError
+        ) {
           throw err;
         }
         lastError = err instanceof Error ? err : new Error(String(err));

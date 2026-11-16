@@ -190,6 +190,7 @@ describe('aes: typed errors', () => {
   it('a key of the wrong size is an InvalidArgumentError', async () => {
     const error = await rejection(aesEncryptCBC(randomBytes(24), new Uint8Array(1)));
     expect(error).toBeInstanceOf(InvalidArgumentError);
+    expect((error as InvalidArgumentError).argument).toBe('key');
     expect(PdfError.is(error, 'invalid-argument')).toBe(true);
     expect((error as Error).message).toBe(
       'AES key must be 16 bytes (AES-128) or 32 bytes (AES-256), got 24',
@@ -201,6 +202,7 @@ describe('aes: typed errors', () => {
       aesEncryptCBC(randomBytes(16), new Uint8Array(1), randomBytes(8)),
     );
     expect(error).toBeInstanceOf(InvalidArgumentError);
+    expect((error as InvalidArgumentError).argument).toBe('iv');
     expect((error as Error).message).toBe('AES-CBC IV must be 16 bytes, got 8');
   });
 

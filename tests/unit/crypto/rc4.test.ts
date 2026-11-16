@@ -147,6 +147,7 @@ describe('rc4: typed errors', () => {
       error = e;
     }
     expect(error).toBeInstanceOf(InvalidArgumentError);
+    expect((error as InvalidArgumentError).argument).toBe('key');
     expect(PdfError.is(error, 'invalid-argument')).toBe(true);
     expect((error as Error).message).toBe('RC4 key length must be 1-256 bytes');
   });
