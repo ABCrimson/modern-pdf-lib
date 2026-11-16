@@ -33,6 +33,7 @@ export {
   EncryptedPdfError,
   ResourceLimitError,
   UnsupportedFeatureError,
+  UnsupportedOptionError,
   UnsupportedFilterError,
   UnsupportedEncryptionError,
   InvalidArgumentError,

@@ -13,7 +13,9 @@
  *    site deletes its row.
  *
  * The files of `errorCensus.allow/` are named after the source folders whose throws they hold,
- * so one person converting one group of folders edits one file:
+ * so one person converting one group of folders edits one file. A throw file whose last row is
+ * gone may be deleted (`leaves.json` and `assets.json` are; the others hold `[]`); `classes.json`
+ * is always read and stays as `[]` once every class has a throw site:
  *
  * | file                       | rows for                                                          |
  * | -------------------------- | ----------------------------------------------------------------- |
@@ -26,8 +28,8 @@
  * | structure.json             | `src/accessibility`, `outline`, `layers`, `graphics`              |
  * | signature.json             | `src/signature`                                                   |
  * | compliance-metadata.json   | `src/compliance`, `src/metadata`                                  |
- * | leaves.json                | `src/layout`, `barcode`, `render`, `assets/svg`                   |
- * | assets.json                | the rest of `src/assets`                                          |
+ * | leaves.json (deleted)      | `src/layout`, `barcode`, `render`, `assets/svg`                   |
+ * | assets.json (deleted)      | the rest of `src/assets`                                          |
  * | runtime-misc.json          | every other folder (codecs, color, runtime, wasm, ...)           |
  * | limits.json                | the entry files `src/index.ts`, `browser`, `create`, `parse`,     |
  * |                            | `forms`, and rows of any file the limits work takes over          |

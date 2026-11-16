@@ -426,6 +426,7 @@ export {
   buildSeparationColorSpace,
   buildDeviceNColorSpace,
 } from './core/operators/index.js';
+export type { PdfTextOperand } from './core/operators/text.js';
 
 // ---------------------------------------------------------------------------
 // Low-level re-exports (for advanced users / plugins)

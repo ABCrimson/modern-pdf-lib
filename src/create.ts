@@ -181,6 +181,7 @@ export {
   InvalidStateError,
   MalformedInputError,
   UnsupportedFeatureError,
+  UnsupportedOptionError,
   UnencodableTextError,
   ResourceLimitError,
   InvalidPageSizeError,
