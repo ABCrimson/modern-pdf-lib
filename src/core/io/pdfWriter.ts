@@ -289,7 +289,7 @@ export class PdfWriter {
     // head entry; actual objects start at index 1.
     // We'll record offsets indexed by object number.
 
-    for (const entry of this.registry) {
+    for (const entry of liveEntries(this.registry)) {
       await this.writeIndirectObject(entry);
     }
   }
@@ -453,7 +453,7 @@ export class PdfWriter {
     const protectedEntries: RegistryEntry[] = [];
     const packableEntries: RegistryEntry[] = [];
 
-    for (const entry of this.registry) {
+    for (const entry of liveEntries(this.registry)) {
       if (entry.object.kind === 'stream') {
         streamEntries.push(entry);
       } else if (protectedNums.has(entry.ref.objectNumber)) {
@@ -890,14 +890,30 @@ function copyDict(dict: PdfDict): PdfDict {
 }
 
 /**
- * Copy a registry for one encrypted write.  Replaying the entries with
- * `registerWithRef` keeps their order and any repeated object numbers;
- * the `allocate()` loop restores numbers that were allocated but never
- * assigned, so `/Size` and the /Encrypt object number match the source.
+ * The entries a writer writes: for each object number, the entry
+ * registered last (the one `resolve()` returns), at its place in the
+ * registry's order.  A registry can hold an object number more than once:
+ * `registerWithRef` appends without replacing, the loader registers each
+ * object it parses and registers it again when it builds the document,
+ * and each save registers the page dictionaries again.  The entries
+ * registered before the last are dead copies, so a writer writes none of
+ * them.
+ */
+export function liveEntries(registry: PdfObjectRegistry): RegistryEntry[] {
+  const last = new Map<number, RegistryEntry>();
+  for (const entry of registry) last.set(entry.ref.objectNumber, entry);
+  return Array.from(registry).filter((entry) => last.get(entry.ref.objectNumber) === entry);
+}
+
+/**
+ * Copy a registry for one encrypted write.  Replaying the live entries
+ * with `registerWithRef` keeps their order; the `allocate()` loop restores
+ * numbers that were allocated but never assigned, so `/Size` and the
+ * /Encrypt object number match the source.
  */
 function copyRegistryForWrite(source: PdfObjectRegistry): PdfObjectRegistry {
   const copy = new PdfObjectRegistry();
-  for (const entry of source) {
+  for (const entry of liveEntries(source)) {
     copy.registerWithRef(entry.ref, copyObject(entry.object));
   }
   while (copy.nextNumber < source.nextNumber) {

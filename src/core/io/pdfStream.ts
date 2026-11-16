@@ -27,6 +27,7 @@ import {
 import type { PdfStream as PdfStreamObj } from '../pdfObjects.js';
 import { PdfObjectRegistry } from '../pdfObjects.js';
 import type { DocumentStructure } from '../pdfCatalog.js';
+import { liveEntries } from './pdfWriter.js';
 import type { PdfSaveOptions } from './pdfWriter.js';
 import { latin1Bytes } from '../../internal/latin1.js';
 
@@ -158,7 +159,7 @@ export class PdfStreamWriter {
   private async writeBody(w: StreamByteCounter): Promise<Map<number, number>> {
     const offsets = new Map<number, number>();
 
-    for (const entry of this.registry) {
+    for (const entry of liveEntries(this.registry)) {
       assertNoDecryptedObject(entry.object, 'PdfStreamWriter');
       // Write raw DEFLATE /FlateDecode data, and zlib data cut short at a
       // sync flush, back as complete zlib data (not for a document loaded

@@ -31,6 +31,7 @@ import {
 } from '../internal/flateStream.js';
 import { PdfObjectRegistry } from '../pdfObjects.js';
 import type { DocumentStructure } from '../pdfCatalog.js';
+import { liveEntries } from './pdfWriter.js';
 import type { PdfSaveOptions } from './pdfWriter.js';
 import type { PdfDocument } from '../pdfDocument.js';
 import { UnsupportedEncryptionError } from '../../errors.js';
@@ -385,7 +386,7 @@ export function saveIncremental(
   const xrefOffsets = new Map<number, number>();
 
   // Write each changed object
-  for (const entry of registry) {
+  for (const entry of liveEntries(registry)) {
     if (!changedObjects.has(entry.ref.objectNumber)) {
       continue;
     }

@@ -112,29 +112,20 @@ interface Known {
 const TITLE_DIFFERS = /^AssertionError: Info Title: expected .* to be '/;
 const TEXT_DIFFERS =
   /^AssertionError: page \d+ text \((?:library|pdf\.js)\): expected .* to contain '/;
-const DUPLICATE_OBJECTS: Known = {
-  key: defectKey('legacy-M01', '0.41.2'),
-  failsWith: /^AssertionError: distinct object numbers: expected \d+ to be \d+/,
-};
 const UTF8_INFO: Known = { key: defectKey('core-document-01', '0.41.0'), failsWith: TITLE_DIFFERS };
 const UTF8_TEXT: Known = { key: defectKey('core-page-01', '0.41.0'), failsWith: TEXT_DIFFERS };
 const KNOWN: Readonly<Record<string, Partial<Record<Check, Known>>>> = {
-  'raw-deflate.pdf': { resaveUniqueObjects: DUPLICATE_OBJECTS },
-  'raw-deflate-objstm.pdf': { resaveUniqueObjects: DUPLICATE_OBJECTS },
-  'linearized.pdf': { resaveUniqueObjects: DUPLICATE_OBJECTS },
   'signed.pdf': {
     signatureFieldName: {
       key: defectKey('signature-cms-38', '0.45.0'),
       failsWith: /^AssertionError: expected 'Signature' to be 'Signature1'/,
     },
-    resaveUniqueObjects: DUPLICATE_OBJECTS,
   },
   'forms.pdf': {
     fields: {
       key: defectKey('forms-34', '0.41.5'),
       failsWith: /^AssertionError: hasForm\(\): expected false to be true/,
     },
-    resaveUniqueObjects: DUPLICATE_OBJECTS,
   },
   'utf8-strings.pdf': {
     info: UTF8_INFO,
@@ -143,7 +134,6 @@ const KNOWN: Readonly<Record<string, Partial<Record<Check, Known>>>> = {
     resaveText: UTF8_TEXT,
     // compress: false passes qpdf; pdf.js then shows the UTF-8 bytes as WinAnsi characters.
     resaveOracles: UTF8_TEXT,
-    resaveUniqueObjects: DUPLICATE_OBJECTS,
   },
 };
 

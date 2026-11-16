@@ -7,15 +7,16 @@
  * and the save wrote each copy (irs-fw4.pdf: 45 containers, 874,040 bytes; one copy fewer of
  * each, 821,063 bytes). qpdf reads the same objects from both outputs.
  *
- * A save still defines a stream object read at a file offset more than once; the marker below
- * tracks that open defect.
+ * Up to 0.40.9 a save also defined most objects read at a file offset twice: the loader
+ * registers each of them twice, and the writer wrote both entries (irs-fw4.pdf: 3,714
+ * definitions of 3,600 object numbers, 821,063 bytes; once each, 610,004 bytes). It defines
+ * each object number once.
  */
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { loadPdf } from '../../../src/parser/documentParser.js';
 import type { PdfDict, PdfStream } from '../../../src/core/pdfObjects.js';
-import { defectKey, knownDefect } from '../../helpers/known-defect.js';
 
 const CORPUS = join(import.meta.dirname, '../../fixtures/corpus');
 
@@ -75,14 +76,9 @@ describe('save of a loaded file with object streams', () => {
     },
   );
 
-  knownDefect(
-    defectKey('legacy-M01', '0.41.2'),
-    'qpdf-objstm-xref.pdf (one revision): the save defines each object number once',
-    { failsWith: /expected .* to deeply equal/ },
-    async () => {
-      const { definitions } = await loadAndSave('qpdf-objstm-xref.pdf');
-      const repeated = [...definitions].filter(([, count]) => count > 1);
-      expect(repeated).toEqual([]);
-    },
-  );
+  it('qpdf-objstm-xref.pdf (one revision): the save defines each object number once', async () => {
+    const { definitions } = await loadAndSave('qpdf-objstm-xref.pdf');
+    const repeated = [...definitions].filter(([, count]) => count > 1);
+    expect(repeated).toEqual([]);
+  });
 });
