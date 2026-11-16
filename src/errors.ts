@@ -1039,6 +1039,7 @@ export class UnencodableTextError extends InvalidArgumentError {
     /**
      * A `cause`, and a `hint` that ends the message in place of the advice for the encoding
      * (for text that a caller can draw only by font name, where no embedded font helps).
+     * The hint is appended as given, so it starts with its separator (`; ` or `: `).
      */
     options?: ErrorOptions & { readonly hint?: string | undefined },
   ) {
