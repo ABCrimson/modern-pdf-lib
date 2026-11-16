@@ -738,3 +738,20 @@ describe('structure tree text strings written', () => {
     }
   });
 });
+
+describe('structure type names from text', () => {
+  it('writes a custom structure type as UTF-8 name bytes and reads it back as text', () => {
+    const tree = new PdfStructureTree();
+    tree.addElement(null, '\u898b\u51fa\u3057', {});
+    tree.addElement(null, '\u00dcberschrift', {});
+
+    const registry = new PdfObjectRegistry();
+    const { dict } = tree.toDict(registry, []);
+    const parsed = PdfStructureTree.fromDict(dict, (ref) => registry.resolve(ref));
+
+    expect(parsed.root.children.map((child) => child.type)).toEqual([
+      '\u898b\u51fa\u3057',
+      '\u00dcberschrift',
+    ]);
+  });
+});

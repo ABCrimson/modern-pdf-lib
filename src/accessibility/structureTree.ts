@@ -22,6 +22,8 @@ import type { PdfObject, PdfObjectRegistry } from '../core/pdfObjects.js';
 import { assertWithinLimit } from '../internal/limits.js';
 import { warnOnce } from '../internal/warnings.js';
 
+const utf8 = new TextEncoder();
+
 // ---------------------------------------------------------------------------
 // Structure type
 // ---------------------------------------------------------------------------
@@ -356,7 +358,7 @@ export class PdfStructureElement {
     dict.set('/Type', PdfName.of('StructElem'));
 
     // /S — structure type
-    dict.set('/S', PdfName.of(this.type));
+    dict.set('/S', PdfName.fromBytes(utf8.encode(this.type)));
 
     // /P — parent
     dict.set('/P', parentRef);
@@ -600,7 +602,7 @@ export class PdfStructureTree {
       const elemRef = registry.allocate();
       const elemDict = new PdfDict();
       elemDict.set('/Type', PdfName.of('StructElem'));
-      elemDict.set('/S', PdfName.of(elem.type));
+      elemDict.set('/S', PdfName.fromBytes(utf8.encode(elem.type)));
       if (elem.options.altText !== undefined) {
         elemDict.set('/Alt', PdfString.fromText(elem.options.altText));
       }
@@ -629,16 +631,13 @@ export class PdfStructureTree {
     registry: PdfObjectRegistry,
     _pageRefs: readonly PdfRef[],
   ): { ref: PdfRef; dict: PdfDict } | undefined {
-    const allElements = this.root.walk();
-    const elementsWithId = allElements.filter((e) => e.options.id !== undefined);
-
-    if (elementsWithId.length === 0) return undefined;
-
     // Name tree keys sort by their bytes (ISO 32000-2 7.9.6), not by locale.
-    const keyed = elementsWithId.map((elem) => ({
-      elem,
-      key: PdfString.fromText(elem.options.id!),
-    }));
+    const keyed = this.root
+      .walk()
+      .flatMap((elem) =>
+        elem.options.id === undefined ? [] : [{ elem, key: PdfString.fromText(elem.options.id) }],
+      );
+    if (keyed.length === 0) return undefined;
     keyed.sort((a, b) => PdfString.compare(a.key, b.key));
 
     // Build /Names array: [name1, ref1, name2, ref2, ...]
@@ -648,7 +647,7 @@ export class PdfStructureTree {
       const elemRef = registry.allocate();
       const elemDict = new PdfDict();
       elemDict.set('/Type', PdfName.of('StructElem'));
-      elemDict.set('/S', PdfName.of(elem.type));
+      elemDict.set('/S', PdfName.fromBytes(utf8.encode(elem.type)));
       elemDict.set('/ID', key);
       registry.assign(elemRef, elemDict);
       namesArray.push(elemRef);
@@ -725,8 +724,8 @@ export class PdfStructureTree {
         const sObj = resolved.get('/S');
         if (!sObj || sObj.kind !== 'name') return;
 
-        // Extract the type name (strip leading '/')
-        const typeName = sObj.value.startsWith('/') ? sObj.value.slice(1) : sObj.value;
+        // The name bytes as UTF-8 (7.3.5), the form toDict writes.
+        const typeName = sObj.toText();
 
         const elemOptions: StructureElementOptions = {};
 

@@ -27,6 +27,8 @@
 
 import { PdfArray, PdfDict, PdfName, PdfString } from '../core/pdfObjects.js';
 
+const utf8 = new TextEncoder();
+
 // ---------------------------------------------------------------------------
 // Common namespace identifiers
 // ---------------------------------------------------------------------------
@@ -92,7 +94,11 @@ export function buildNamespace(def: NamespaceDef): PdfDict {
     if (entries.length > 0) {
       const roleMapDict = new PdfDict();
       for (const [from, to] of entries) {
-        roleMapDict.set(`/${from}`, PdfName.of(to));
+        // Structure type names are user text; a name's bytes are UTF-8 (ISO 32000-2 7.3.5).
+        roleMapDict.set(
+          PdfName.fromBytes(utf8.encode(from)).value,
+          PdfName.fromBytes(utf8.encode(to)),
+        );
       }
       dict.set('/RoleMapNS', roleMapDict);
     }

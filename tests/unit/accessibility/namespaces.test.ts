@@ -142,13 +142,32 @@ describe('buildNamespacesArray', () => {
 describe('buildNamespace text strings', () => {
   it('writes /NS and /Schema as text strings', () => {
     const dict = buildNamespace({
-      ns: 'http://example.com/ns/\u00fc',
-      schema: 'Gr\u00f6\u00dfe.xml',
+      ns: 'http://example.com/ns/\u65e5',
+      schema: 'Gr\u00f6\u00dfe \u20ac.xml',
     });
 
-    expect((dict.get('/NS') as PdfString).toText()).toBe('http://example.com/ns/\u00fc');
+    const ns = dict.get('/NS') as PdfString;
+    expect(ns.textEncoding).toBe('utf-16be');
+    expect(ns.toText()).toBe('http://example.com/ns/\u65e5');
+    // PDFDocEncoding: one byte per character, U+20AC is 0xA0.
     expect([...(dict.get('/Schema') as PdfString).toBytes()]).toEqual([
-      0x47, 0x72, 0xf6, 0xdf, 0x65, 0x2e, 0x78, 0x6d, 0x6c,
+      0x47, 0x72, 0xf6, 0xdf, 0x65, 0x20, 0xa0, 0x2e, 0x78, 0x6d, 0x6c,
+    ]);
+  });
+
+  it('writes role map names from text as UTF-8 name bytes', () => {
+    const dict = buildNamespace({
+      ns: 'x',
+      roleMap: { '\u898b\u51fa\u3057': 'H1', Kopf: '\u00dcberschrift' },
+    });
+    const roleMap = dict.get('/RoleMapNS') as PdfDict;
+
+    const key = PdfName.fromBytes(new TextEncoder().encode('\u898b\u51fa\u3057')).value;
+    expect(roleMap.get(key)).toBe(PdfName.of('H1'));
+    const kopf = roleMap.get('/Kopf') as PdfName;
+    expect(kopf.toText()).toBe('\u00dcberschrift');
+    expect([...kopf.toBytes()]).toEqual([
+      0xc3, 0x9c, 0x62, 0x65, 0x72, 0x73, 0x63, 0x68, 0x72, 0x69, 0x66, 0x74,
     ]);
   });
 });

@@ -47,7 +47,10 @@ export interface OutlineDestination {
   type: 'page' | 'named';
   /** Zero-based page index (used when `type` is `'page'`). */
   pageIndex?: number | undefined;
-  /** Named destination string (used when `type` is `'named'`). */
+  /**
+   * Named destination string (used when `type` is `'named'`). Read and written as a PDF text
+   * string; a loaded byte string that is not valid text is not kept byte for byte.
+   */
   namedDestination?: string | undefined;
   /** Page fit mode — how the page should be displayed. */
   fit?: 'Fit' | 'FitH' | 'FitV' | 'FitB' | 'FitBH' | 'FitBV' | 'XYZ' | undefined;

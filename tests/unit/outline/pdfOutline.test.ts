@@ -829,3 +829,36 @@ describe('PdfOutlineTree.toDict text strings', () => {
     expect(parsed.items[0]!.destination.namedDestination).toBe('caf\u00e9-\u65e5');
   });
 });
+
+describe('PdfOutlineTree named destination round trip', () => {
+  it('does not keep the bytes of a loaded /Dest that is not valid text', () => {
+    const registry = new PdfObjectRegistry();
+    const itemDict = new PdfDict();
+    itemDict.set('/Title', PdfString.fromText('Item'));
+    // 0x7F and 0x01 are undefined in PDFDocEncoding: the string is read as text, not as bytes.
+    itemDict.set('/Dest', PdfString.fromBytes(Uint8Array.of(0x41, 0x9f, 0x7f, 0x01)));
+    const itemRef = registry.register(itemDict);
+    const outlinesDict = new PdfDict();
+    outlinesDict.set('/Type', PdfName.of('Outlines'));
+    outlinesDict.set('/First', itemRef);
+    outlinesDict.set('/Last', itemRef);
+
+    const loaded = PdfOutlineTree.fromDict(
+      outlinesDict,
+      (ref: PdfRef): PdfObject | undefined => registry.resolve(ref),
+      new Map(),
+    );
+    const text = loaded.items[0]!.destination.namedDestination!;
+
+    const writeRegistry = new PdfObjectRegistry();
+    const outlinesRef = loaded.toDict(writeRegistry, []);
+    const written = writeRegistry.resolve(outlinesRef) as PdfDict;
+    const rewritten = (writeRegistry.resolve(written.get('/First') as PdfRef) as PdfDict).get(
+      '/Dest',
+    ) as PdfString;
+
+    // The text survives; the bytes do not (a text string with a byte order mark replaces them).
+    expect(rewritten.toText()).toBe(text);
+    expect([...rewritten.toBytes()]).not.toEqual([0x41, 0x9f, 0x7f, 0x01]);
+  });
+});
