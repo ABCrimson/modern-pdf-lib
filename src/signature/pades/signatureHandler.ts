@@ -153,8 +153,14 @@ function extractSigDictStrings(
   pdfStr: string,
   byteRangeOffset: number,
 ): { reason?: string; location?: string; contactInfo?: string; signingDate?: Date } {
-  // Search around the ByteRange location
-  const searchStart = Math.max(0, byteRangeOffset - 1000);
+  // From the start of the object that holds /ByteRange, or 1,000 characters back when that is
+  // earlier: signPdf() writes /Reason, /Location and /ContactInfo before /ByteRange, and together
+  // they can be longer than 1,000 characters.
+  const objectStart = pdfStr.lastIndexOf(' obj', byteRangeOffset);
+  const searchStart = Math.max(
+    0,
+    objectStart === -1 ? byteRangeOffset - 1000 : Math.min(byteRangeOffset - 1000, objectStart),
+  );
   const searchEnd = Math.min(pdfStr.length, byteRangeOffset + 2000);
   const region = pdfStr.slice(searchStart, searchEnd);
 

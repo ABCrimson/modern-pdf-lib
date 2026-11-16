@@ -124,9 +124,8 @@ function buildSignatureDictString(
   dict += '<< /Type /Sig';
   dict += ' /Filter /Adobe.PPKLite';
   dict += ' /SubFilter /adbe.pkcs7.detached';
-  // Before /Contents: getSignatures(), verifySignatures() and verifySignatureDetailed() search a
-  // window that ends 2,000 characters after the start of /Contents, and the placeholder alone is
-  // longer than that.
+  // Before /ByteRange: getSignatures() and verifySignatures() search forward only 2,000 characters
+  // past /ByteRange or /Contents, and the placeholder alone is longer than that.
   for (const [key, text] of [
     ['Reason', entries.reason],
     ['Location', entries.location],

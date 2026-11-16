@@ -194,25 +194,15 @@ function hexToBytes(hex: string): Uint8Array {
 }
 
 /**
- * Extract field info from the PDF text near a signature.
+ * Extract the field name from the PDF text near a signature.
  * @internal
  */
-function extractFieldInfo(
-  pdfStr: string,
-  contentsOffset: number,
-): { fieldName: string; reason?: string } {
+function extractFieldInfo(pdfStr: string, contentsOffset: number): { fieldName: string } {
   const searchStart = Math.max(0, contentsOffset - 3000);
   const searchEnd = Math.min(pdfStr.length, contentsOffset + 2000);
   const region = pdfStr.slice(searchStart, searchEnd);
 
-  const fieldName = readStringEntry(region, 'T') ?? 'Signature';
-
-  const result: { fieldName: string; reason?: string } = { fieldName };
-  // Literal or hex form: signPdf() writes /Reason as a hex text string.
-  const reason = readStringEntry(region, 'Reason');
-  if (reason !== undefined) result.reason = reason;
-
-  return result;
+  return { fieldName: readStringEntry(region, 'T') ?? 'Signature' };
 }
 
 /**

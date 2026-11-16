@@ -456,26 +456,24 @@ function parseUtcTime(utcTime: string): Date {
 function extractFieldInfo(
   pdfStr: string,
   contentsOffset: number,
-): { fieldName: string; reason?: string; location?: string; contactInfo?: string } {
-  const searchStart = Math.max(0, contentsOffset - 3000);
+): { fieldName: string; reason?: string } {
+  // From the start of the object that holds /Contents, or 3,000 characters back when that is
+  // earlier: signPdf() writes /Reason before /ByteRange, and it can be longer than 3,000
+  // characters.
+  const objectStart = pdfStr.lastIndexOf(' obj', contentsOffset);
+  const searchStart = Math.max(
+    0,
+    objectStart === -1 ? contentsOffset - 3000 : Math.min(contentsOffset - 3000, objectStart),
+  );
   const searchEnd = Math.min(pdfStr.length, contentsOffset + 2000);
   const region = pdfStr.slice(searchStart, searchEnd);
 
   const fieldName = readStringEntry(region, 'T') ?? 'Signature';
 
-  const result: { fieldName: string; reason?: string; location?: string; contactInfo?: string } = {
-    fieldName,
-  };
-
-  // Literal or hex form: signPdf() writes the three entries as hex text strings.
+  const result: { fieldName: string; reason?: string } = { fieldName };
+  // Literal or hex form: signPdf() writes /Reason as a hex text string.
   const reason = readStringEntry(region, 'Reason');
   if (reason !== undefined) result.reason = reason;
-
-  const location = readStringEntry(region, 'Location');
-  if (location !== undefined) result.location = location;
-
-  const contactInfo = readStringEntry(region, 'ContactInfo');
-  if (contactInfo !== undefined) result.contactInfo = contactInfo;
 
   return result;
 }

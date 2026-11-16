@@ -120,4 +120,49 @@ describe('signPdf() writes /Reason, /Location and /ContactInfo as text strings',
     expectQpdfClean(signed);
     expect(qpdfSignatureEntries(signed)).toEqual([{ '/Reason': 'u:Approved' }]);
   });
+
+  const LONG_CASES: readonly {
+    readonly about: string;
+    readonly entries: {
+      readonly reason: string;
+      readonly location?: string;
+      readonly contactInfo?: string;
+    };
+  }[] = [
+    {
+      about: 'three entries of 401 characters',
+      entries: {
+        reason: `R${'B'.repeat(400)}`,
+        location: `L${'B'.repeat(400)}`,
+        contactInfo: `C${'B'.repeat(400)}`,
+      },
+    },
+    { about: 'a UTF-16BE reason of 800 characters', entries: { reason: '日'.repeat(800) } },
+  ];
+
+  for (const { about, entries } of LONG_CASES) {
+    test(`a long text entry is read back: ${about}`, async (ctx) => {
+      requireQpdf(ctx);
+      const cert = await generateTestCert('Text Entry Signer');
+      const signed = await signPdf(await plainDocument(), 'Signature1', {
+        certificate: cert.certificate,
+        privateKey: cert.privateKey,
+        ...entries,
+      });
+      expectQpdfClean(signed);
+      const { reason, location, contactInfo } = entries;
+      expect(qpdfSignatureEntries(signed)).toEqual([
+        {
+          '/Reason': `u:${reason}`,
+          ...(location === undefined ? {} : { '/Location': `u:${location}` }),
+          ...(contactInfo === undefined ? {} : { '/ContactInfo': `u:${contactInfo}` }),
+        },
+      ]);
+
+      expect(getSignatures(signed)).toMatchObject([entries]);
+      const [result] = await verifySignatures(signed);
+      expect(result?.reason).toBe(reason);
+      expect(result?.integrityValid).toBe(true);
+    });
+  }
 });
