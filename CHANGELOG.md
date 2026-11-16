@@ -199,6 +199,8 @@ The breaking minor of the 0.41 line. This section lists what has landed so far.
 ~ . UnsupportedFilterError (class, declaration changed)
 ~ . UpcOptions (interface, declaration changed)
 ~ . appendIncrementalUpdate (function, declaration changed)
+~ . decodeImageStream (function, declaration changed)
+~ . decodeStream (function, declaration changed)
 ~ . showTextArray (function, declaration changed)
 ~ . showTextHex (function, declaration changed)
 ~ . showTextNextLine (function, declaration changed)
@@ -252,6 +254,8 @@ The breaking minor of the 0.41 line. This section lists what has landed so far.
 ~ ./browser UnsupportedFilterError (class, declaration changed)
 ~ ./browser UpcOptions (interface, declaration changed)
 ~ ./browser appendIncrementalUpdate (function, declaration changed)
+~ ./browser decodeImageStream (function, declaration changed)
+~ ./browser decodeStream (function, declaration changed)
 ~ ./browser showTextArray (function, declaration changed)
 ~ ./browser showTextHex (function, declaration changed)
 ~ ./browser showTextNextLine (function, declaration changed)
@@ -268,6 +272,8 @@ The breaking minor of the 0.41 line. This section lists what has landed so far.
 ~ ./parse PdfName (class, declaration changed)
 ~ ./parse PdfParseError (class, declaration changed)
 ~ ./parse PdfString (class, declaration changed)
+~ ./parse decodeImageStream (function, declaration changed)
+~ ./parse decodeStream (function, declaration changed)
 ```
 <!-- api-diff:end -->
 

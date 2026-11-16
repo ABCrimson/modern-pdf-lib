@@ -2852,7 +2852,7 @@
         },
         "decodeImageStream": {
           "kind": "function",
-          "decl": "sha256:967e64cc6947"
+          "decl": "sha256:81b0d8e90bc1"
         },
         "decodeJpeg2000": {
           "kind": "function",
@@ -2872,7 +2872,7 @@
         },
         "decodeStream": {
           "kind": "function",
-          "decl": "sha256:a43ab72069fb"
+          "decl": "sha256:4a68bfe2d553"
         },
         "decodeTiff": {
           "kind": "function",
@@ -5364,11 +5364,11 @@
         },
         "decodeImageStream": {
           "kind": "function",
-          "decl": "sha256:967e64cc6947"
+          "decl": "sha256:81b0d8e90bc1"
         },
         "decodeStream": {
           "kind": "function",
-          "decl": "sha256:a43ab72069fb"
+          "decl": "sha256:4a68bfe2d553"
         },
         "extractImages": {
           "kind": "function",
@@ -8420,7 +8420,7 @@
         },
         "decodeImageStream": {
           "kind": "function",
-          "decl": "sha256:967e64cc6947"
+          "decl": "sha256:81b0d8e90bc1"
         },
         "decodeJpeg2000": {
           "kind": "function",
@@ -8440,7 +8440,7 @@
         },
         "decodeStream": {
           "kind": "function",
-          "decl": "sha256:a43ab72069fb"
+          "decl": "sha256:4a68bfe2d553"
         },
         "decodeTiff": {
           "kind": "function",
