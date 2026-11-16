@@ -254,7 +254,7 @@ describe('PdfString bytes', () => {
     expect(PdfString.fromHex('4142').equals(PdfString.fromText('AB'))).toBe(true);
     expect(PdfString.fromHex('4142').equals(PdfString.fromHex('4143'))).toBe(false);
     const sorted = ['80', '7f', '', '7f00', '00'].map((h) => PdfString.fromHex(h));
-    sorted.sort(PdfString.compare);
+    sorted.sort((a, b) => PdfString.compare(a, b));
     expect(sorted.map((s) => s.toBytes().toHex())).toEqual(['', '00', '7f', '7f00', '80']);
     expect(PdfString.compare(PdfString.fromHex('41'), PdfString.fromText('A'))).toBe(0);
   });
@@ -331,6 +331,17 @@ describe('PdfName', () => {
     }
     expect(error).toBeInstanceOf(InvalidArgumentError);
     expect((error as InvalidArgumentError).argument).toBe('bytes');
+  });
+
+  it('writing a PdfDict key above 0xFF throws UnencodableTextError at that code unit', () => {
+    let error: unknown;
+    try {
+      serialize(new PdfDict([['/A–', PdfNull.instance]]));
+    } catch (e) {
+      error = e;
+    }
+    expect(error).toBeInstanceOf(UnencodableTextError);
+    expect(error).toMatchObject({ character: '–', index: 2, encoding: 'PDF byte string' });
   });
 });
 

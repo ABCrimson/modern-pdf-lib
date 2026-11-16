@@ -9,7 +9,7 @@
  * Reference: PDF 1.7 spec, §7.3 (Objects).
  */
 
-import { InvalidArgumentError } from '../errors.js';
+import { InvalidArgumentError, UnencodableTextError } from '../errors.js';
 import { latin1Bytes } from '../internal/latin1.js';
 import { decodeTextString, encodeTextString, textStringEncoding } from './internal/textString.js';
 
@@ -216,10 +216,10 @@ export class PdfString {
    * PDFDocEncoding when every character is encodable there and the bytes do not begin with
    * FE FF, FF FE or EF BB BF, else UTF-16BE with FE FF.
    *
-   * @throws {UnencodableTextError} For a lone surrogate, or a character the requested encoding
-   *   lacks (encoding `PDF text string`; `index` is its UTF-16 index in `text`).
-   * @throws {InvalidArgumentError} For `"utf-16le"` (read only) or an unknown encoding
-   *   (argument `encoding`).
+   * @throws {UnencodableTextError} For a lone surrogate or U+001B, or a character the requested
+   *   encoding lacks (encoding `PDF text string`; `index` is its UTF-16 index in `text`).
+   * @throws {InvalidArgumentError} For `"utf-16le"` (read only), an unknown encoding, or
+   *   `"pdfdoc"` text whose bytes would begin with FE FF, FF FE or EF BB BF (argument `encoding`).
    */
   static fromText(text: string, encoding: PdfTextWriteEncoding = 'auto'): PdfString {
     return new PdfString(byteStringOf(encodeTextString(text, encoding)), false);
@@ -452,18 +452,21 @@ export class PdfName {
    * `# ( ) < > [ ] { } / %`, else as `#xx` in lower case (the form qpdf 12.4.2 writes); NUL is
    * written `#00`.
    *
-   * @throws {InvalidArgumentError} For a code unit above 0xFF, which only a PdfDict key set from
-   *   code can hold (argument `name`).
+   * @throws {UnencodableTextError} For a code unit above 0xFF, which only a PdfDict key set from
+   *   code can hold (encoding `PDF byte string`; `index` is its index in {@link value}).
    */
   serialize(writer: ByteWriter): void {
     let out = '/';
     for (let i = 1; i < this.value.length; i++) {
       const unit = this.value.charCodeAt(i);
       if (unit > 0xff) {
-        throw new InvalidArgumentError(
-          `A PDF name holds bytes, one code unit each; the name "${this.value}" holds U+${unit.toString(16).toUpperCase().padStart(4, '0')}`,
-          { argument: 'name' },
-        );
+        throw new UnencodableTextError({
+          // codePointAt is defined at an index inside value; `?? unit` only narrows its type.
+          character: String.fromCodePoint(this.value.codePointAt(i) ?? unit),
+          index: i,
+          fontName: undefined,
+          encoding: 'PDF byte string',
+        });
       }
       out +=
         NAME_REGULAR[unit] === 1 ? this.value.charAt(i) : `#${unit.toString(16).padStart(2, '0')}`;
