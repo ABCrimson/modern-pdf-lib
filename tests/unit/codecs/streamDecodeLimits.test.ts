@@ -430,6 +430,19 @@ describe('the limits option of decodeStream', () => {
     }
   });
 
+  it('checks the rows of a CCITTFaxDecode image without /Rows against the option', () => {
+    const parms = makeParms({ '/K': -1, '/Columns': 8 });
+    expectOptionLimit(
+      () =>
+        decodeStream(new Uint8Array(64).fill(0xff), 'CCITTFaxDecode', parms, {
+          limits: { maxImagePixels: 64 },
+        }),
+      'maxImagePixels',
+      64,
+      72,
+    );
+  });
+
   it('refuses a limits option that resolveLimits refuses, before decoding', () => {
     const options = { limits: { maxDecodedStreamBytes: 0 } };
     expect(thrown(() => decodeStream(new Uint8Array(1), 'DCTDecode', null, options))).toMatchObject(
@@ -461,7 +474,7 @@ describe('the decoded total of one call', () => {
     );
   });
 
-  it('stops a decoder at the part of the total left, not only at maxDecodedStreamBytes', () => {
+  it('refuses a chain whose last filter takes the total one past the limit', () => {
     // The hex stage outputs 1,000 of 1,024 bytes; the Flate stage may then decode 24, not 25.
     const flate = zlibSync(new Uint8Array(25));
     const digits = [...flate].map((b) => b.toString(16).padStart(2, '0')).join('');
@@ -472,6 +485,17 @@ describe('the decoded total of one call', () => {
     expect(
       thrown(() => decodeStream(hex, ['ASCIIHexDecode', 'FlateDecode'], null, options)),
     ).toMatchObject({ limit: 'maxTotalDecodedBytes', max: 1024, source: 'option' });
+  });
+
+  it('stops reading Flate input at the part of the decoded total the call has left', () => {
+    // Stored (level 0) zlib data: each 16 KiB step of input decodes to about 16 KiB.
+    const data = zlibSync(new Uint8Array(1 << 20), { level: 0 });
+    const ctx = contextOf({ maxTotalDecodedBytes: 1024 });
+    ctx.totals.decodedBytes = 1000;
+    const err = thrown(() => inflateFlate(data, ctx));
+    expect(err).toMatchObject({ limit: 'maxTotalDecodedBytes', max: 1024, source: 'option' });
+    // Decoding the whole 1 MiB first would report 1000 + 1,048,576.
+    expect((err as ResourceLimitError).actual).toBeLessThan(1000 + 64 * 1024);
   });
 
   it('sums the streams decoded under one context', () => {
