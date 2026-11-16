@@ -25,7 +25,6 @@ import {
   StandardFonts,
 } from '../../../src/index.js';
 import type { FontRef, PdfPage, StandardFontName } from '../../../src/index.js';
-import { defectKey, knownDefect } from '../../helpers/known-defect.js';
 import { requireQpdf } from '../../helpers/oracle/qpdf.js';
 import { cleanSave, pdfjsLines } from './setup.js';
 
@@ -212,10 +211,9 @@ describe('standard-font page text read back by pdf.js', () => {
     },
   );
 
-  knownDefect(
-    defectKey('core-page-01', '0.41.0'),
+  test(
     'drawText in each standard font: pdf.js reads every encodable character as stated',
-    { failsWith: /^AssertionError: Courier: expected \[/, timeout: 120_000 },
+    { timeout: 120_000 },
     async () => {
       await expectStandardFontLines((page, font, i, line) => {
         page.drawText(line, { x: 20, y: lineY(i), font, size: 10 });

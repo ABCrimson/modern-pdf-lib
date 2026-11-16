@@ -11,8 +11,13 @@ import {
   endText,
   setFont,
   showText,
+  showTextArray,
+  showTextHex,
+  showTextNextLine,
+  showTextWithSpacing,
   moveText,
 } from '../../../src/core/operators/text.js';
+import { InvalidArgumentError, UnencodableTextError } from '../../../src/errors.js';
 import {
   rectangle,
   moveTo,
@@ -69,6 +74,73 @@ describe('Text operators', () => {
 
   it('moveText(50, 700) returns "50 700 Td\\n"', () => {
     expect(moveText(50, 700)).toBe('50 700 Td\n');
+  });
+});
+
+describe('Text-showing operators take PDF byte strings and bytes', () => {
+  /** What `run` threw, as the fields of an UnencodableTextError, or the value itself otherwise. */
+  function thrownBy(run: () => unknown): unknown {
+    try {
+      run();
+    } catch (error) {
+      if (!(error instanceof UnencodableTextError)) return error;
+      const { character, codePoint, index, fontName, encoding } = error;
+      return { character, codePoint, index, fontName, encoding };
+    }
+    return undefined;
+  }
+
+  it('writes a code unit above U+007E as a 3-digit octal escape of its byte', () => {
+    expect(showText('é')).toBe('(\\351) Tj\n');
+    expect(showText('a\u0000b\u007fÿ')).toBe('(a\\000b\\177\\377) Tj\n');
+  });
+
+  it('takes a Uint8Array as the bytes of the string', () => {
+    expect(showText(Uint8Array.of(0x80))).toBe('(\\200) Tj\n');
+    expect(showText(Uint8Array.of(0x28, 0x5c, 0x29))).toBe('(\\(\\\\\\)) Tj\n');
+  });
+
+  it('writes CR, LF, TAB, BS and FF as their two-character escapes', () => {
+    expect(showText('\r\n\t\b\f')).toBe('(\\r\\n\\t\\b\\f) Tj\n');
+  });
+
+  it('throws UnencodableTextError for a code unit above U+00FF', () => {
+    const expected = {
+      character: '日',
+      codePoint: 0x65e5,
+      index: 1,
+      fontName: undefined,
+      encoding: 'PDF byte string',
+    };
+    expect(thrownBy(() => showText('a日'))).toEqual(expected);
+    expect(thrownBy(() => showTextArray(['a日']))).toEqual(expected);
+    expect(thrownBy(() => showTextNextLine('a日'))).toEqual(expected);
+    expect(thrownBy(() => showTextWithSpacing(1, 2, 'a日'))).toEqual(expected);
+  });
+
+  it('showTextHex writes bytes as hex digits and refuses a string that is not hex digits', () => {
+    expect(showTextHex(Uint8Array.of(0x00, 0x48, 0xe9))).toBe('<0048e9> Tj\n');
+    expect(showTextHex('0048E9')).toBe('<0048E9> Tj\n');
+    expect(() => showTextHex('zz')).toThrow(InvalidArgumentError);
+    expect(() => showTextHex('00> Tj (x')).toThrow(InvalidArgumentError);
+  });
+
+  it('every operator writes ASCII only for each of the 256 single-byte operands', () => {
+    for (let byte = 0; byte <= 0xff; byte++) {
+      const text = String.fromCharCode(byte);
+      const bytes = Uint8Array.of(byte);
+      const outputs = [
+        showText(text),
+        showText(bytes),
+        showTextArray([text, -20, bytes]),
+        showTextNextLine(text),
+        showTextNextLine(bytes),
+        showTextWithSpacing(1, 0.5, text),
+        showTextWithSpacing(1, 0.5, bytes),
+        showTextHex(bytes),
+      ];
+      for (const output of outputs) expect(output, `byte ${byte}`).toMatch(/^[\x20-\x7e\n]*$/);
+    }
   });
 });
 

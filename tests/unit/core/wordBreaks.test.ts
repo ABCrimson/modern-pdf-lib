@@ -18,6 +18,7 @@ function mockFont(charWidth: number): FontRef {
     heightAtSize: (size: number) => size * 1.2,
     sizeAtHeight: (height: number) => height / 1.2,
     getCharacterSet: () => [],
+    encodeText: (text: string) => Uint8Array.from(text, (c) => c.charCodeAt(0)),
   };
 }
 

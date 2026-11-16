@@ -176,7 +176,8 @@ export interface DrawTextOptions {
    * or a font resource name string (e.g. `'F1'`).
    *
    * When a `FontRef` is provided, its `name` property is used as the
-   * resource name and its CID encoder (if any) is used automatically.
+   * resource name and its `encodeText` encodes the text. A resource name
+   * encodes through the font registered under it on the page.
    */
   font?: FontRef | string | undefined;
   /** Font size in points. */
@@ -474,12 +475,14 @@ export interface FontRef {
   /** Indirect reference to the font dictionary. */
   readonly ref: PdfRef;
   /**
-   * Compute the width of a text string at the given font size (in points).
+   * Compute the width of a text string at the given font size (in points):
+   * the advance widths of the glyphs {@link FontRef.encodeText} writes.
    * Available for both standard and TrueType fonts.
    *
    * @param text  The text string to measure.
    * @param size  Font size in points.
    * @returns     Width of the text in points.
+   * @throws {UnencodableTextError} When the font cannot encode a character of `text`.
    */
   widthOfTextAtSize(text: string, size: number): number;
   /**
@@ -499,36 +502,25 @@ export interface FontRef {
    */
   sizeAtHeight(height: number): number;
   /**
-   * Return the set of Unicode codepoints supported by this font.
+   * Return the Unicode code points this font encodes.
    *
-   * For standard fonts, returns the WinAnsi character set.
-   * For embedded fonts, returns all codepoints in the cmap table.
+   * For the 12 Latin standard fonts, the 218 code points of WinAnsiEncoding;
+   * 189 for Symbol and 202 for ZapfDingbats (ISO 32000-2 Annex D).
+   * For embedded fonts, every code point of the cmap table.
    *
-   * @returns  Array of Unicode codepoint numbers.
+   * @returns  Array of Unicode code points.
    */
   getCharacterSet(): number[];
-}
-
-/**
- * Extended font reference with internal members used by the rendering
- * engine.  These members are implementation details and must not be
- * relied upon by external consumers.
- *
- * @internal
- */
-export interface FontRefInternal extends FontRef {
   /**
-   * Whether this font uses CID (Identity-H) encoding.
-   * When true, text must be encoded as hex glyph IDs in content streams.
-   * @internal
+   * The bytes this font writes for `text` in a content stream: 1 byte per
+   * character for the standard 14 fonts (after normalising the text to
+   * NFC), 2 bytes per glyph for an embedded font (Identity-H).
+   *
+   * @param text  The text to encode.
+   * @returns     The bytes of the string operand of `Tj`.
+   * @throws {UnencodableTextError} When the font cannot encode a character of `text`.
    */
-  readonly _isCIDFont?: boolean | undefined;
-  /**
-   * Encode text as a hex string of CID glyph IDs for content streams.
-   * Only present for CID (TrueType) fonts.
-   * @internal
-   */
-  _encodeText?(text: string): string;
+  encodeText(text: string): Uint8Array;
 }
 
 /** Opaque handle for an image that has been embedded in the document. */
@@ -562,7 +554,8 @@ export interface ImageRef {
 // ---------------------------------------------------------------------------
 
 export { wrapText, breakWord } from './internal/pdfPageText.js';
-import { wrapText } from './internal/pdfPageText.js';
+import { encodeLines, encodeTextForFontName, wrapText } from './internal/pdfPageText.js';
+import { latin1Bytes } from '../internal/latin1.js';
 
 // ---------------------------------------------------------------------------
 // Transparency types
@@ -643,11 +636,14 @@ export class PdfPage {
   private readonly fonts = new Map<string, PdfRef>();
 
   /**
-   * CID font text encoders — maps resource name → encode function.
-   * Only present for TrueType (CIDFont Type 2) fonts.
-   * @internal
+   * The font references behind resource names of {@link fonts}, which
+   * encode the text `drawText` writes in them, and whether their string
+   * operands are written in hex (the 2-byte codes of Identity-H).
    */
-  private readonly cidFontEncoders = new Map<string, (text: string) => string>();
+  private readonly fontEncoders = new Map<
+    string,
+    { readonly font: FontRef; readonly hexOperands: boolean }
+  >();
 
   /** XObjects (images) referenced by this page. */
   private readonly xObjects = new Map<string, PdfRef>();
@@ -876,18 +872,19 @@ export class PdfPage {
   // Resource registration (called by PdfDocument)
   // -----------------------------------------------------------------------
 
-  /** @internal Register a font resource on this page. */
-  registerFont(name: string, ref: PdfRef): void {
-    this.fonts.set(name, ref);
-  }
-
   /**
-   * @internal Register a CID font encoder for a font resource on this page.
-   * When drawText is called with this font, text will be encoded using the
-   * provided encoder function (producing hex glyph IDs) instead of literal strings.
+   * @internal Register a font resource on this page. With `font`, `drawText`
+   * given the resource name encodes through `font.encodeText`, and writes
+   * the bytes as a hex string when `hexOperands` is set; without it, the
+   * name encodes as a standard font name does.
    */
-  registerCIDFont(name: string, encoder: (text: string) => string): void {
-    this.cidFontEncoders.set(name, encoder);
+  registerFont(name: string, ref: PdfRef, font?: FontRef, hexOperands = false): void {
+    this.fonts.set(name, ref);
+    if (font === undefined) {
+      this.fontEncoders.delete(name);
+    } else {
+      this.fontEncoders.set(name, { font, hexOperands });
+    }
   }
 
   /** @internal Register an image XObject resource on this page. */
@@ -1094,8 +1091,15 @@ export class PdfPage {
   /**
    * Draw a text string at the specified position.
    *
+   * The text is encoded through its font ({@link FontRef.encodeText}); a
+   * resource name of no font registered on this page encodes as the
+   * standard font of that name (`Helvetica`, or an AcroForm alias such as
+   * `ZaDb`), any other name in WinAnsiEncoding. CRLF, CR and LF break lines.
+   *
    * @param text     The text to render.
    * @param options  Position, font, size, colour, rotation.
+   * @throws {UnencodableTextError} When the font cannot encode a character
+   *   of `text`, such as TAB or another C0 control; nothing is drawn.
    */
   drawText(text: string, options: DrawTextOptions = {}): void {
     const x = options.x ?? this._cursorX;
@@ -1113,22 +1117,47 @@ export class PdfPage {
 
     // Resolve font: accept FontRef object or string
     let fontName: string;
-    let fontRefEncoder: ((text: string) => string) | undefined;
-    if (effectiveFont && typeof effectiveFont === 'object' && 'name' in effectiveFont) {
-      // FontRef object
-      const fontRef = effectiveFont as FontRef;
+    let encode: (line: string) => Uint8Array;
+    let hexOperands: boolean;
+    if (typeof effectiveFont === 'object') {
+      const fontRef = effectiveFont;
       fontName = fontRef.name;
-      // Register the font on this page if it has a ref
-      if (fontRef.ref) {
-        this.registerFont(fontRef.name, fontRef.ref);
-      }
-      // Use the FontRef's CID encoder if available (internal interface)
-      const internal = fontRef as FontRefInternal;
-      if (internal._isCIDFont && internal._encodeText) {
-        fontRefEncoder = internal._encodeText;
-      }
+      const registered = this.fontEncoders.get(fontName);
+      hexOperands = registered?.font === fontRef && registered.hexOperands;
+      encode = (line) => fontRef.encodeText(line);
     } else {
-      fontName = (effectiveFont as string | undefined) ?? 'F1';
+      const name = effectiveFont ?? 'F1';
+      fontName = name;
+      const registered = this.fontEncoders.get(name);
+      hexOperands = registered?.hexOperands ?? false;
+      encode = registered
+        ? (line) => registered.font.encodeText(line)
+        : (line) => encodeTextForFontName(name, line);
+    }
+
+    // Split multi-line text at CRLF, CR and LF and encode every line before
+    // anything is written, so text the font cannot encode leaves the page
+    // as it was.
+    const { lines: rawLines, encoded } = encodeLines(text, encode);
+
+    // Apply word-wrapping when maxWidth is specified
+    let operands = encoded;
+    const { maxWidth } = options;
+    if (maxWidth !== undefined && maxWidth > 0) {
+      const fontForWrapping = effectiveFont ?? fontName;
+      operands = rawLines
+        .flatMap((rawLine) =>
+          wrapText(rawLine, maxWidth, fontForWrapping, size, options.wordBreaks),
+        )
+        .map(encode);
+    }
+
+    // Register a FontRef object on this page unless it is already there
+    if (
+      typeof effectiveFont === 'object' &&
+      this.fontEncoders.get(fontName)?.font !== effectiveFont
+    ) {
+      this.registerFont(fontName, effectiveFont.ref, effectiveFont);
     }
 
     this.ops += saveState();
@@ -1182,44 +1211,12 @@ export class PdfPage {
       this.ops += moveText(x, y);
     }
 
-    // Check if this font is CID-encoded (TrueType)
-    // Prefer the encoder from the FontRef object, fall back to registered CID encoders
-    const cidEncoder = fontRefEncoder ?? this.cidFontEncoders.get(fontName);
-
-    // Split multi-line text (respecting explicit newlines)
-    const rawLines = text.split('\n');
-
-    // Apply word-wrapping when maxWidth is specified
-    const lines: string[] = [];
-    if (options.maxWidth !== undefined && options.maxWidth > 0) {
-      const fontForWrapping =
-        effectiveFont && typeof effectiveFont === 'object' && 'name' in effectiveFont
-          ? (effectiveFont as FontRef)
-          : fontName;
-      for (const rawLine of rawLines) {
-        const wrapped = wrapText(
-          rawLine,
-          options.maxWidth,
-          fontForWrapping,
-          size,
-          options.wordBreaks,
-        );
-        lines.push(...wrapped);
-      }
-    } else {
-      lines.push(...rawLines);
-    }
-
-    for (let i = 0; i < lines.length; i++) {
+    for (const [i, operand] of operands.entries()) {
       if (i > 0) {
         this.ops += setLeading(lineHeight);
         this.ops += nextLine();
       }
-      if (cidEncoder) {
-        this.ops += showTextHex(cidEncoder(lines[i]!));
-      } else {
-        this.ops += showText(lines[i]!);
-      }
+      this.ops += hexOperands ? showTextHex(operand) : showText(operand);
     }
 
     this.ops += endText();
@@ -1672,9 +1669,16 @@ export class PdfPage {
   /**
    * Append raw PDF operator string(s) to the content stream.
    *
-   * Use with caution — no validation is performed.
+   * `operators` is a PDF byte string: each code unit U+0000 to U+00FF is
+   * one byte of the content stream, so `(café) Tj` writes the byte
+   * E9. Use with caution: the operators themselves are not checked.
+   *
+   * @throws {UnencodableTextError} For a code unit above U+00FF (encoding
+   *   `PDF byte string`); nothing is appended.
    */
   pushOperators(operators: string): void {
+    // Converted only to check it: the content stream is converted on save.
+    latin1Bytes(operators);
     this.ops += operators;
   }
 
@@ -2617,7 +2621,7 @@ export class PdfPage {
 
     // Operators added in-memory after load (or on a freshly created page).
     if (this.ops.length > 0) {
-      const added = new TextEncoder().encode(this.ops);
+      const added = latin1Bytes(this.ops);
       decodedTotal += added.length;
       assertWithinLimit('maxDecodedStreamBytes', decodedTotal);
       chunks.push(added);

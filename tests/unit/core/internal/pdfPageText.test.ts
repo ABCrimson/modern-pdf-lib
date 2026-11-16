@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { wrapText, breakWord } from '../../../../src/core/internal/pdfPageText.js';
+import {
+  breakWord,
+  encodeLines,
+  encodeTextForFontName,
+  wrapText,
+} from '../../../../src/core/internal/pdfPageText.js';
+import { UnencodableTextError } from '../../../../src/errors.js';
 import type { FontRef } from '../../../../src/core/pdfPage.js';
 import { PdfRef } from '../../../../src/core/pdfObjects.js';
 
@@ -23,8 +29,59 @@ function mockFont(charWidth: number = 6, baseFontSize: number = 12): FontRef {
     getCharacterSet(): number[] {
       return [];
     },
+    encodeText(text: string): Uint8Array {
+      return Uint8Array.from(text, (c) => c.charCodeAt(0));
+    },
   };
 }
+
+describe('encodeTextForFontName', () => {
+  it('encodes a standard font name or AcroForm alias in the encoding of that font', () => {
+    expect(encodeTextForFontName('Helvetica', '€é')).toEqual(Uint8Array.of(0x80, 0xe9));
+    expect(encodeTextForFontName('Helv', '€é')).toEqual(Uint8Array.of(0x80, 0xe9));
+    expect(encodeTextForFontName('Symbol', 'αβ')).toEqual(Uint8Array.of(0x61, 0x62));
+    expect(encodeTextForFontName('Symb', 'αβ')).toEqual(Uint8Array.of(0x61, 0x62));
+    expect(encodeTextForFontName('ZaDb', '✓')).toEqual(Uint8Array.of(0x33));
+  });
+
+  it('encodes any other name in WinAnsiEncoding and names it when a character has no code', () => {
+    expect(encodeTextForFontName('F9', 'Größe €')).toEqual(
+      Uint8Array.of(0x47, 0x72, 0xf6, 0xdf, 0x65, 0x20, 0x80),
+    );
+    let thrown: unknown;
+    try {
+      encodeTextForFontName('F9', 'a日');
+    } catch (error) {
+      thrown = error;
+    }
+    expect(thrown).toBeInstanceOf(UnencodableTextError);
+    const { character, index, fontName, encoding } = thrown as UnencodableTextError;
+    expect({ character, index, fontName, encoding }).toEqual({
+      character: '日',
+      index: 1,
+      fontName: 'F9',
+      encoding: 'WinAnsiEncoding',
+    });
+  });
+});
+
+describe('encodeLines', () => {
+  it('splits at CRLF, CR and LF and counts an error index in the whole text', () => {
+    const encode = (line: string): Uint8Array => encodeTextForFontName('Helvetica', line);
+    const { lines, encoded } = encodeLines('a\r\nb\rc\nd', encode);
+    expect(lines).toEqual(['a', 'b', 'c', 'd']);
+    expect(encoded).toEqual([0x61, 0x62, 0x63, 0x64].map((code) => Uint8Array.of(code)));
+
+    let thrown: unknown;
+    try {
+      encodeLines('ab\r\ncd\ne日', encode);
+    } catch (error) {
+      thrown = error;
+    }
+    expect(thrown).toBeInstanceOf(UnencodableTextError);
+    expect((thrown as UnencodableTextError).index).toBe(8);
+  });
+});
 
 describe('pdfPageText', () => {
   // -----------------------------------------------------------------------

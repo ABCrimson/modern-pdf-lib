@@ -227,6 +227,49 @@ describe('Standard font metrics', () => {
     expect(typeof height).toBe('number');
   });
 
+  it('EmbeddedFont.encodeText writes 2 bytes per glyph and throws on a code point with glyph 0', async () => {
+    const { EmbeddedFont } = await import('../../../../src/assets/font/fontEmbed.js');
+    const { extractMetrics } = await import('../../../../src/assets/font/fontMetrics.js');
+    const { UnencodableTextError } = await import('../../../../src/errors.js');
+
+    const ttf = buildMinimalTtf();
+    // The minimal font has no cmap; this one maps "A" to glyph 1 and U+1F600 to glyph 0x0102.
+    const metrics = {
+      ...extractMetrics(ttf),
+      postScriptName: 'Minimal-Regular',
+      cmapTable: new Map([
+        [0x41, 1],
+        [0x1f600, 0x0102],
+      ]),
+    };
+    const font = new EmbeddedFont(ttf, metrics);
+
+    expect(font.encodeText('A😀A')).toEqual(Uint8Array.of(0x00, 0x01, 0x01, 0x02, 0x00, 0x01));
+    expect([...font.getUsedGlyphs()].toSorted((a, b) => a - b)).toEqual([0, 1, 0x0102]);
+
+    const fresh = new EmbeddedFont(ttf, metrics);
+    let thrown: unknown;
+    try {
+      fresh.encodeText('AB');
+    } catch (error) {
+      thrown = error;
+    }
+    expect(thrown).toBeInstanceOf(UnencodableTextError);
+    const { character, codePoint, index, fontName, encoding } = thrown as InstanceType<
+      typeof UnencodableTextError
+    >;
+    expect({ character, codePoint, index, fontName, encoding }).toEqual({
+      character: 'B',
+      codePoint: 0x42,
+      index: 1,
+      fontName: 'Minimal-Regular',
+      encoding: 'Identity-H',
+    });
+    // Nothing of the text is recorded for subsetting when it cannot be encoded.
+    expect([...fresh.getUsedGlyphs()]).toEqual([0]);
+    expect(() => fresh.widthOfTextAtSize('AB', 12)).toThrow(UnencodableTextError);
+  });
+
   it('font subsetting (fallback) returns a SubsetResult with correct structure', async () => {
     const { subsetFont } = await import('../../../../src/assets/font/fontSubset.js');
 

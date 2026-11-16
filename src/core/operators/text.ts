@@ -6,24 +6,57 @@
  * (one or more PDF operators terminated by '\n').
  *
  * Reference: PDF 1.7 spec, §9.4 (Text Objects) & §9.3 (Text State).
+ *
+ * The text-showing operators take bytes (a {@link PdfTextOperand}) and write
+ * ASCII only, so a content stream holds the bytes the font encoding gave.
  */
+
+import { InvalidArgumentError } from '../../errors.js';
+import { latin1Bytes } from '../../internal/latin1.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
 /**
- * Escape a string for use inside a PDF literal string `(…)`.
- * Backslash, open-paren and close-paren must be escaped.
+ * The operand of a text-showing operator: the bytes of a PDF string, as a
+ * `Uint8Array` or as a PDF byte string (each code unit U+0000 to U+00FF is
+ * one byte). Text becomes these bytes through its font: `FontRef.encodeText`.
  */
-function escapePdfString(text: string): string {
-  return text
-    .replaceAll('\\', '\\\\')
-    .replaceAll('(', '\\(')
-    .replaceAll(')', '\\)')
-    .replaceAll('\r', '\\r')
-    .replaceAll('\n', '\\n')
-    .replaceAll('\t', '\\t');
+export type PdfTextOperand = string | Uint8Array;
+
+/** The two-character escapes of a literal string body (ISO 32000-2 Table 3). */
+const NAMED_ESCAPES: ReadonlyMap<number, string> = new Map([
+  [0x08, '\\b'],
+  [0x09, '\\t'],
+  [0x0a, '\\n'],
+  [0x0c, '\\f'],
+  [0x0d, '\\r'],
+  [0x28, '\\('],
+  [0x29, '\\)'],
+  [0x5c, '\\\\'],
+]);
+
+/**
+ * The body of a literal string `(…)` for the bytes of `operand`, in ASCII:
+ * bytes 0x20 to 0x7E stay but for `(`, `)` and the backslash, which are
+ * escaped; CR, LF, TAB, BS and FF take their two-character escapes; every
+ * other byte is a 3-digit octal escape.
+ *
+ * @throws {UnencodableTextError} For a string operand with a code unit above
+ *   0xFF (encoding `PDF byte string`).
+ */
+function literalBody(operand: PdfTextOperand): string {
+  const bytes = typeof operand === 'string' ? latin1Bytes(operand) : operand;
+  let body = '';
+  for (const byte of bytes) {
+    body +=
+      NAMED_ESCAPES.get(byte) ??
+      (byte >= 0x20 && byte <= 0x7e
+        ? String.fromCharCode(byte)
+        : `\\${byte.toString(8).padStart(3, '0')}`);
+  }
+  return body;
 }
 
 /**
@@ -209,69 +242,82 @@ export function nextLine(): string {
 // ---------------------------------------------------------------------------
 
 /**
- * Show a text string (`Tj`).
+ * Show a string (`Tj`), written as a literal string in ASCII.
  *
- * @param text  The text to display.  Special characters are escaped.
+ * @param text  The bytes to show; for text, the bytes of `font.encodeText(text)`.
+ * @throws {UnencodableTextError} For a string with a code unit above U+00FF
+ *   (encoding `PDF byte string`).
  */
-export function showText(text: string): string {
-  return `(${escapePdfString(text)}) Tj\n`;
+export function showText(text: PdfTextOperand): string {
+  return `(${literalBody(text)}) Tj\n`;
 }
 
 /**
- * Show a text string using a hex-encoded string (`<…> Tj`).
+ * Show a string written as a hex string (`<…> Tj`), as for the 2-byte glyph
+ * ids of an Identity-H font.
  *
- * Used for CIDFont Type 2 (TrueType) fonts where each character is
- * encoded as a 2-byte glyph ID in hexadecimal.
- *
- * @param hex  The hex-encoded glyph IDs (e.g. `"00480065006C006C006F"`).
+ * @param hex  The bytes to show, or hex digits (e.g. `"00480065006C"`),
+ *             written as given.
+ * @throws {InvalidArgumentError} For a string that holds anything but the hex
+ *   digits 0-9, A-F and a-f (argument `hex`).
  */
-export function showTextHex(hex: string): string {
+export function showTextHex(hex: string | Uint8Array): string {
+  if (typeof hex !== 'string') return `<${hex.toHex()}> Tj\n`;
+  if (!/^[\da-fA-F]*$/.test(hex)) {
+    throw new InvalidArgumentError(
+      'showTextHex takes bytes or the hex digits 0-9, A-F and a-f; for text write showTextHex(font.encodeText(text))',
+      { argument: 'hex' },
+    );
+  }
   return `<${hex}> Tj\n`;
 }
 
 /**
- * Show one or more text strings with individual glyph positioning (`TJ`).
+ * Show one or more strings with individual glyph positioning (`TJ`).
  *
  * Each element of `items` is either:
- * - a `string` — literal text to show, or
- * - a `number` — a horizontal adjustment in thousandths of a unit of text
+ * - a {@link PdfTextOperand}: the bytes of a string to show, or
+ * - a `number`: a horizontal adjustment in thousandths of a unit of text
  *   space (negative = move right, positive = move left).
  *
  * @param items  Array of strings and numeric adjustments.
+ * @throws {UnencodableTextError} For a string with a code unit above U+00FF
+ *   (encoding `PDF byte string`).
  */
-export function showTextArray(items: ReadonlyArray<string | number>): string {
+export function showTextArray(items: ReadonlyArray<PdfTextOperand | number>): string {
   const inner = items
-    .map((item) => {
-      if (typeof item === 'string') {
-        return `(${escapePdfString(item)})`;
-      }
-      return n(item);
-    })
+    .map((item) => (typeof item === 'number' ? n(item) : `(${literalBody(item)})`))
     .join(' ');
   return `[${inner}] TJ\n`;
 }
 
 /**
- * Show a text string and move to the next line (`'`).
+ * Show a string and move to the next line (`'`).
  *
  * Equivalent to `T*` followed by `string Tj`.
+ *
+ * @param text  The bytes to show.
+ * @throws {UnencodableTextError} For a string with a code unit above U+00FF
+ *   (encoding `PDF byte string`).
  */
-export function showTextNextLine(text: string): string {
-  return `(${escapePdfString(text)}) '\n`;
+export function showTextNextLine(text: PdfTextOperand): string {
+  return `(${literalBody(text)}) '\n`;
 }
 
 /**
- * Show a text string, set word and character spacing, and move to the
- * next line (`"`).
+ * Show a string, set word and character spacing, and move to the next line
+ * (`"`).
  *
  * @param wordSpacing  Word spacing.
  * @param charSpacing  Character spacing.
- * @param text         Text to show.
+ * @param text         The bytes to show.
+ * @throws {UnencodableTextError} For a string with a code unit above U+00FF
+ *   (encoding `PDF byte string`).
  */
 export function showTextWithSpacing(
   wordSpacing: number,
   charSpacing: number,
-  text: string,
+  text: PdfTextOperand,
 ): string {
-  return `${n(wordSpacing)} ${n(charSpacing)} (${escapePdfString(text)}) "\n`;
+  return `${n(wordSpacing)} ${n(charSpacing)} (${literalBody(text)}) "\n`;
 }

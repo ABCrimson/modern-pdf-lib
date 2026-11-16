@@ -28,6 +28,7 @@ function makeFontRef(name: string, objNum = 42): FontRef {
     heightAtSize: (size: number) => size,
     sizeAtHeight: (height: number) => height,
     getCharacterSet: () => [],
+    encodeText: (text: string) => Uint8Array.from(text, (c) => c.charCodeAt(0)),
   };
 }
 

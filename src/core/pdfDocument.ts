@@ -17,14 +17,7 @@
  * ```
  */
 
-import type {
-  PageSize,
-  FontRef,
-  FontRefInternal,
-  ImageRef,
-  SoftMaskRef,
-  SoftMaskBuilder,
-} from './pdfPage.js';
+import type { PageSize, FontRef, ImageRef, SoftMaskRef, SoftMaskBuilder } from './pdfPage.js';
 import { PdfPage, PageSizes } from './pdfPage.js';
 import {
   PdfObjectRegistry,
@@ -50,11 +43,12 @@ import {
   isDecryptedFromEncryptedFile,
   recordDecryptedContent,
 } from './internal/flateStream.js';
+import { getStandardFont, standardFontHeight } from '../assets/font/internal/standardFonts.js';
 import {
-  getStandardFont,
-  measureStandardText,
-  standardFontHeight,
-} from '../assets/font/internal/standardFonts.js';
+  measureStandardCodes,
+  standardCharacterSet,
+} from '../assets/font/internal/standardEncoding.js';
+import { encodeTextForFontName } from './internal/pdfPageText.js';
 import type { StandardFontName as StdFontName } from '../assets/font/internal/standardFonts.js';
 import type { EmbeddedFont } from '../assets/font/fontEmbed.js';
 import { embedFont as embedTtfFont } from '../assets/font/fontEmbed.js';
@@ -371,14 +365,7 @@ export class PdfDocument {
     const page = new PdfPage(w, h, this.registry);
 
     // Auto-register all currently embedded fonts on the new page
-    for (const fontRef of this.embeddedFonts.values()) {
-      page.registerFont(fontRef.name, fontRef.ref);
-    }
-
-    // Auto-register CID font encoders for TrueType fonts
-    for (const [resName, { embeddedFont }] of this.ttfFonts) {
-      page.registerCIDFont(resName, (text: string) => embeddedFont.encodeText(text));
-    }
+    this.registerFontsOnPage(page);
 
     this.pages.push(page);
 
@@ -443,15 +430,13 @@ export class PdfDocument {
   }
 
   /**
-   * @internal Register all currently embedded fonts and CID encoders
-   * on the given page. Used when inserting or copying pages.
+   * @internal Register all currently embedded fonts, with their encoders,
+   * on the given page. Used when adding, inserting or copying pages.
    */
   registerFontsOnPage(page: PdfPage): void {
     for (const fontRef of this.embeddedFonts.values()) {
-      page.registerFont(fontRef.name, fontRef.ref);
-    }
-    for (const [resName, { embeddedFont }] of this.ttfFonts) {
-      page.registerCIDFont(resName, (text: string) => embeddedFont.encodeText(text));
+      // Embedded font programs are written with Identity-H: hex operands.
+      page.registerFont(fontRef.name, fontRef.ref, fontRef, this.ttfFonts.has(fontRef.name));
     }
   }
 
@@ -690,12 +675,16 @@ export class PdfDocument {
     const fontRef: FontRef = {
       name: resourceName,
       ref,
+      encodeText(text: string): Uint8Array {
+        return encodeTextForFontName(fontName, text);
+      },
       widthOfTextAtSize(text: string, size: number): number {
+        const codes = encodeTextForFontName(fontName, text);
         if (stdFont) {
-          return measureStandardText(text, stdFontName, size);
+          return measureStandardCodes(stdFontName, codes, size);
         }
         // Fallback for unknown standard font names: rough estimate
-        return text.length * size * 0.5;
+        return codes.length * size * 0.5;
       },
       heightAtSize(size: number): number {
         if (stdFont) {
@@ -712,15 +701,8 @@ export class PdfDocument {
         return height;
       },
       getCharacterSet(): number[] {
-        // WinAnsi encoding covers codepoints 32-126 and 128-255 (with some gaps)
-        const codepoints: number[] = [];
-        for (let i = 32; i <= 255; i++) {
-          // Skip undefined positions in WinAnsi
-          if (i !== 127 && i !== 129 && i !== 141 && i !== 143 && i !== 144) {
-            codepoints.push(i);
-          }
-        }
-        return codepoints;
+        // An unknown name is written with WinAnsiEncoding, as Helvetica is.
+        return [...standardCharacterSet(stdFont ? stdFontName : 'Helvetica')];
       },
     };
 
@@ -728,7 +710,7 @@ export class PdfDocument {
 
     // Register on all existing pages
     for (const page of this.pages) {
-      page.registerFont(resourceName, ref);
+      page.registerFont(resourceName, ref, fontRef);
     }
 
     return fontRef;
@@ -846,11 +828,12 @@ export class PdfDocument {
     const type0Ref = this.registry.register(type0Dict);
 
     // Build the FontRef with measurement methods and CID encoding
-    const fontRef: FontRefInternal = {
+    const fontRef: FontRef = {
       name: resourceName,
       ref: type0Ref,
-      _isCIDFont: true,
-      _encodeText: (text: string) => embeddedFont.encodeText(text),
+      encodeText(text: string): Uint8Array {
+        return embeddedFont.encodeText(text);
+      },
       widthOfTextAtSize(text: string, size: number): number {
         return embeddedFont.widthOfTextAtSize(text, size);
       },
@@ -877,10 +860,9 @@ export class PdfDocument {
       cidFontDict,
     });
 
-    // Register font and CID encoder on all existing pages
+    // Register the font and its Identity-H encoder on all existing pages
     for (const page of this.pages) {
-      page.registerFont(resourceName, type0Ref);
-      page.registerCIDFont(resourceName, (text: string) => embeddedFont.encodeText(text));
+      page.registerFont(resourceName, type0Ref, fontRef, true);
     }
 
     return fontRef;
@@ -1000,11 +982,12 @@ export class PdfDocument {
     const type0Ref = this.registry.register(type0Dict);
 
     // Build the FontRef with measurement methods and CID encoding
-    const fontRef: FontRefInternal = {
+    const fontRef: FontRef = {
       name: resourceName,
       ref: type0Ref,
-      _isCIDFont: true,
-      _encodeText: (text: string) => embeddedFont.encodeText(text),
+      encodeText(text: string): Uint8Array {
+        return embeddedFont.encodeText(text);
+      },
       widthOfTextAtSize(text: string, size: number): number {
         return embeddedFont.widthOfTextAtSize(text, size);
       },
@@ -1031,10 +1014,9 @@ export class PdfDocument {
       cidFontDict,
     });
 
-    // Register font and CID encoder on all existing pages
+    // Register the font and its Identity-H encoder on all existing pages
     for (const page of this.pages) {
-      page.registerFont(resourceName, type0Ref);
-      page.registerCIDFont(resourceName, (text: string) => embeddedFont.encodeText(text));
+      page.registerFont(resourceName, type0Ref, fontRef, true);
     }
 
     return fontRef;

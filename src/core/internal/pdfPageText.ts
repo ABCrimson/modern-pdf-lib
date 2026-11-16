@@ -1,11 +1,96 @@
 /**
  * @module core/internal/pdfPageText
  *
- * Pure functions for text wrapping and word breaking.  Extracted from
- * {@link pdfPage} to keep the PdfPage class focused on drawing logic.
+ * Pure functions for text wrapping, word breaking and the encoding of text
+ * for a font known by name.  Extracted from {@link pdfPage} to keep the
+ * PdfPage class focused on drawing logic.
  */
 
+import { UnencodableTextError } from '../../errors.js';
+import { encodeStandardText } from '../../assets/font/internal/standardEncoding.js';
+import { isStandardFont } from '../../assets/font/internal/standardFonts.js';
+import type { StandardFontName } from '../../assets/font/internal/standardFonts.js';
 import type { FontRef } from '../pdfPage.js';
+
+// ---------------------------------------------------------------------------
+// Text encoding by font name
+// ---------------------------------------------------------------------------
+
+/** The standard font of each AcroForm default-appearance font name (the Acrobat set). */
+const FORM_FONT_ALIASES: ReadonlyMap<string, StandardFontName> = new Map([
+  ['Helv', 'Helvetica'],
+  ['HeBo', 'Helvetica-Bold'],
+  ['HeOb', 'Helvetica-Oblique'],
+  ['HeBO', 'Helvetica-BoldOblique'],
+  ['TiRo', 'Times-Roman'],
+  ['TiBo', 'Times-Bold'],
+  ['TiIt', 'Times-Italic'],
+  ['TiBI', 'Times-BoldItalic'],
+  ['Cour', 'Courier'],
+  ['CoBo', 'Courier-Bold'],
+  ['CoOb', 'Courier-Oblique'],
+  ['CoBO', 'Courier-BoldOblique'],
+  ['Symb', 'Symbol'],
+  ['ZaDb', 'ZapfDingbats'],
+]);
+
+/**
+ * Encodes `text` for a font known only by its name: one of the 14 standard
+ * font names or an AcroForm alias (`Helv`, `ZaDb`, ...) in the encoding of
+ * that standard font, any other name in WinAnsiEncoding.
+ *
+ * @param name  A standard font name or a font resource name.
+ * @param text  The text to encode.
+ * @returns     One byte per character, after NFC normalisation.
+ * @throws {UnencodableTextError} At the first character the encoding has no
+ *   code for; for a name that is no standard font, the error names `name`.
+ */
+export function encodeTextForFontName(name: string, text: string): Uint8Array {
+  const standard = isStandardFont(name) ? name : FORM_FONT_ALIASES.get(name);
+  if (standard !== undefined) return encodeStandardText(standard, text);
+  try {
+    // The 12 Latin standard fonts share WinAnsiEncoding.
+    return encodeStandardText('Helvetica', text);
+  } catch (error) {
+    if (!(error instanceof UnencodableTextError)) throw error;
+    const { character, index, encoding } = error;
+    throw new UnencodableTextError(
+      { character, index, fontName: name, encoding },
+      { cause: error },
+    );
+  }
+}
+
+/**
+ * Splits `text` into lines at CRLF, CR and LF and encodes each line.
+ *
+ * @param text    The text, possibly of several lines.
+ * @param encode  Encodes one line, such as `FontRef.encodeText`.
+ * @returns       The lines and their bytes, in order.
+ * @throws {UnencodableTextError} From `encode`, with `index` counted in `text`.
+ */
+export function encodeLines(
+  text: string,
+  encode: (line: string) => Uint8Array,
+): { readonly lines: string[]; readonly encoded: Uint8Array[] } {
+  const lines = text.split(/\r\n|\r|\n/);
+  const encoded: Uint8Array[] = [];
+  let offset = 0;
+  for (const line of lines) {
+    try {
+      encoded.push(encode(line));
+    } catch (error) {
+      if (!(error instanceof UnencodableTextError) || offset === 0) throw error;
+      const { character, index, fontName, encoding } = error;
+      throw new UnencodableTextError(
+        { character, index: offset + index, fontName, encoding },
+        { cause: error },
+      );
+    }
+    offset += line.length + (text.startsWith('\r\n', offset + line.length) ? 2 : 1);
+  }
+  return { lines, encoded };
+}
 
 // ---------------------------------------------------------------------------
 // Text wrapping

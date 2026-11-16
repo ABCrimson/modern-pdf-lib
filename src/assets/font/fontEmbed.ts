@@ -23,6 +23,7 @@
  * No require() — ESM import only.
  */
 
+import { UnencodableTextError } from '../../errors.js';
 import type { FontMetrics } from './fontMetrics.js';
 import { extractMetrics, getGlyphId, getGlyphWidth } from './fontMetrics.js';
 import { subsetFont, buildSubsetCmap, computeSubsetTag } from './fontSubset.js';
@@ -206,21 +207,46 @@ export class EmbeddedFont {
    * @param text     - The text string to measure.
    * @param fontSize - The font size in points.
    * @returns The total advance width in points.
+   * @throws {UnencodableTextError} At the first code point the font has no
+   *   glyph for (encoding `Identity-H`); nothing of the text is recorded.
    */
   widthOfTextAtSize(text: string, fontSize: number): number {
     const scale = fontSize / this.metrics.unitsPerEm;
     let totalWidth = 0;
 
-    for (const char of text) {
-      const codepoint = char.codePointAt(0)!;
-      const glyphId = getGlyphId(codepoint, this.metrics.cmapTable);
-      const advance = getGlyphWidth(glyphId, this.metrics.glyphWidths, this.metrics.defaultWidth);
-
+    for (const glyphId of this.glyphIdsOf(text)) {
       this.usedGlyphs.add(glyphId);
-      totalWidth += advance;
+      totalWidth += getGlyphWidth(glyphId, this.metrics.glyphWidths, this.metrics.defaultWidth);
     }
 
     return totalWidth * scale;
+  }
+
+  /**
+   * The glyph id of each code point of `text`, through the cmap; records nothing.
+   *
+   * @throws {UnencodableTextError} At the first code point the cmap gives no
+   *   glyph for (glyph 0, `.notdef`), with the encoding `Identity-H`.
+   */
+  private glyphIdsOf(text: string): number[] {
+    const glyphIds: number[] = [];
+    let index = 0;
+    for (const char of text) {
+      // A string iterator yields at least one code unit per step.
+      const codepoint = char.codePointAt(0) ?? 0;
+      const glyphId = getGlyphId(codepoint, this.metrics.cmapTable);
+      if (glyphId === 0) {
+        throw new UnencodableTextError({
+          character: char,
+          index,
+          fontName: this.metrics.postScriptName || this.metrics.familyName,
+          encoding: 'Identity-H',
+        });
+      }
+      glyphIds.push(glyphId);
+      index += char.length;
+    }
+    return glyphIds;
   }
 
   /**
@@ -326,33 +352,26 @@ export class EmbeddedFont {
   // -----------------------------------------------------------------------
 
   /**
-   * Encode a text string as hex-encoded CID bytes for use in PDF
-   * content stream `Tj` / `TJ` operators.
-   *
-   * For a CIDFont Type 2 with Identity-H encoding, each character is
-   * mapped to its glyph ID and encoded as a 2-byte big-endian value.
+   * Encode text as the bytes of a content-stream string (`Tj` / `TJ`
+   * operand) for this font written with Identity-H: each code point is
+   * mapped to its glyph id through the cmap and written as 2 bytes,
+   * big-endian. The glyphs are recorded for subsetting.
    *
    * @param text - The text to encode.
-   * @returns Hex string (e.g. `"00480065006C006C006F"` for "Hello").
+   * @returns 2 bytes per code point (e.g. `00 48 00 65` for "He" when the
+   *   glyph ids equal the codes).
+   * @throws {UnencodableTextError} At the first code point the font has no
+   *   glyph for (encoding `Identity-H`); nothing of the text is recorded.
    */
-  encodeText(text: string): string {
-    // Count codepoints first to pre-allocate
-    const chars = Array.from(text);
-    const bytes = new Uint8Array(chars.length * 2);
-    let offset = 0;
-
-    for (const char of chars) {
-      const codepoint = char.codePointAt(0) ?? 0;
-      const glyphId = getGlyphId(codepoint, this.metrics.cmapTable);
-
+  encodeText(text: string): Uint8Array {
+    const glyphIds = this.glyphIdsOf(text);
+    const bytes = new Uint8Array(glyphIds.length * 2);
+    for (const [i, glyphId] of glyphIds.entries()) {
       this.usedGlyphs.add(glyphId);
-
-      // 2-byte big-endian
-      bytes[offset++] = (glyphId >> 8) & 0xff;
-      bytes[offset++] = glyphId & 0xff;
+      bytes[2 * i] = glyphId >> 8;
+      bytes[2 * i + 1] = glyphId & 0xff;
     }
-
-    return bytes.toHex();
+    return bytes;
   }
 
   // -----------------------------------------------------------------------

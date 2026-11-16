@@ -37,8 +37,6 @@ export interface ByteWriter {
 // Helpers
 // ---------------------------------------------------------------------------
 
-const encoder = new TextEncoder();
-
 /** PDF white space (ISO 32000-2 Table 1): NUL, TAB, LF, FF, CR and SPACE. */
 const PDF_WHITE_SPACE = /[\0\t\n\f\r ]/g;
 
@@ -594,11 +592,15 @@ export class PdfStream {
   ) {}
 
   /**
-   * Create a stream from a plain UTF-8 string (e.g. content-stream
-   * operators).  Sets `/Length` automatically.
+   * Create a stream from a PDF byte string (e.g. content-stream operators):
+   * each code unit U+0000 to U+00FF is one byte.  Sets `/Length`
+   * automatically.
+   *
+   * @throws {UnencodableTextError} For a code unit above U+00FF (encoding
+   *   `PDF byte string`).
    */
   static fromString(content: string, extraEntries?: PdfDict): PdfStream {
-    const data = encoder.encode(content);
+    const data = latin1Bytes(content);
     const dict = extraEntries ?? new PdfDict();
     dict.set('/Length', PdfNumber.of(data.length));
     return new PdfStream(dict, data);

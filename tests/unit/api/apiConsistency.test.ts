@@ -62,7 +62,6 @@ import { asPdfName, asPdfNumber } from '../../../src/utils/pdfValueHelpers.js';
 
 import type {
   FontRef,
-  FontRefInternal,
   Point,
   DrawLineOptions,
   TransparencyGroupOptions,
@@ -343,7 +342,7 @@ describe('option types accept undefined', () => {
 // =========================================================================
 
 describe('FontRef interface', () => {
-  it('standard font has all required methods (sizeAtHeight, getCharacterSet)', async () => {
+  it('standard font has all required methods (sizeAtHeight, getCharacterSet, encodeText)', async () => {
     const doc = createPdf();
     const font = await doc.embedFont(StandardFonts.Helvetica);
 
@@ -352,6 +351,7 @@ describe('FontRef interface', () => {
     expect(typeof font.heightAtSize).toBe('function');
     expect(typeof font.sizeAtHeight).toBe('function');
     expect(typeof font.getCharacterSet).toBe('function');
+    expect(typeof font.encodeText).toBe('function');
   });
 
   it('sizeAtHeight returns a number', async () => {
@@ -369,6 +369,10 @@ describe('FontRef interface', () => {
     expect(Array.isArray(codepoints)).toBe(true);
     expect(codepoints.length).toBeGreaterThan(0);
     expect(codepoints.every((c: number) => typeof c === 'number')).toBe(true);
+    // Code points, not WinAnsiEncoding codes (ISO 32000-2 Table D.2): "€" is code 0x80.
+    expect(codepoints).toHaveLength(218);
+    expect(codepoints).toContain(0x20ac);
+    expect(codepoints).not.toContain(0x80);
   });
 
   it('sizeAtHeight is the inverse of heightAtSize', async () => {
@@ -379,36 +383,23 @@ describe('FontRef interface', () => {
     expect(recoveredSize).toBeCloseTo(12, 4);
   });
 
-  it('FontRef does not expose _isCIDFont or _encodeText on public interface', async () => {
+  it('encodeText of a standard font returns its WinAnsiEncoding codes', async () => {
     const doc = createPdf();
     const font = await doc.embedFont(StandardFonts.Helvetica);
-
-    // Standard fonts should not have these internal properties
-    expect('_isCIDFont' in font).toBe(false);
-    expect('_encodeText' in font).toBe(false);
+    expect(font.encodeText('A€')).toEqual(Uint8Array.of(0x41, 0x80));
   });
-});
 
-describe('FontRefInternal interface', () => {
-  it('FontRefInternal extends FontRef', () => {
-    // Type-level check: if a FontRefInternal satisfies FontRef, this compiles
-    const internal: FontRefInternal = {
+  it('a FontRef built by hand implements encodeText', () => {
+    const custom: FontRef = {
       name: 'F1',
       ref: PdfRef.of(1, 0),
       widthOfTextAtSize: () => 0,
       heightAtSize: () => 0,
       sizeAtHeight: () => 0,
-      getCharacterSet: () => [],
-      _isCIDFont: true,
-      _encodeText: () => '',
+      getCharacterSet: () => [0x41],
+      encodeText: (text) => Uint8Array.from(text, (c) => c.charCodeAt(0)),
     };
-
-    // FontRefInternal should be assignable to FontRef
-    const publicRef: FontRef = internal;
-    expect(publicRef.name).toBe('F1');
-    expect(typeof publicRef.widthOfTextAtSize).toBe('function');
-    expect(typeof publicRef.sizeAtHeight).toBe('function');
-    expect(typeof publicRef.getCharacterSet).toBe('function');
+    expect(custom.encodeText('A')).toEqual(Uint8Array.of(0x41));
   });
 });
 

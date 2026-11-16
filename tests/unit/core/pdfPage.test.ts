@@ -10,6 +10,8 @@ import { PdfPage, PageSizes, type FontRef, type ImageRef } from '../../../src/co
 import { PdfObjectRegistry, PdfRef } from '../../../src/core/pdfObjects.js';
 import { rgb } from '../../../src/core/operators/color.js';
 import { degrees } from '../../../src/core/operators/state.js';
+import { createPdf, StandardFonts } from '../../../src/index.js';
+import { UnencodableTextError } from '../../../src/errors.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -413,6 +415,68 @@ describe('PdfPage', () => {
     expect(ops).toContain('1 0 0 1 10 20 cm');
   });
 
+  it('pushOperators takes a PDF byte string: "é" is the byte E9, "日" throws and adds nothing', () => {
+    const { page } = makePage();
+    page.pushOperators('BT /F1 12 Tf (café) Tj ET\n');
+    const bytes = page.getContentStream();
+    expect(bytes.subarray(0, 26)).toEqual(
+      Uint8Array.from('BT /F1 12 Tf (café) Tj ET\n', (c) => c.charCodeAt(0)),
+    );
+
+    expect(() => page.pushOperators('(日) Tj\n')).toThrow(UnencodableTextError);
+    expect(page.getContentStreamData()).toBe('BT /F1 12 Tf (café) Tj ET\n');
+  });
+
+  // -------------------------------------------------------------------------
+  // drawText line breaks and characters outside the font
+  // -------------------------------------------------------------------------
+
+  it('drawText breaks lines at CRLF, CR and LF', async () => {
+    const doc = createPdf();
+    const page = doc.addPage();
+    const font = await doc.embedFont(StandardFonts.Helvetica);
+    page.drawText('a\r\nb\rc\nd', { x: 50, y: 700, font, size: 12 });
+
+    const ops = page.getContentStreamData();
+    expect(ops.match(/\((.)\) Tj/g)).toEqual(['(a) Tj', '(b) Tj', '(c) Tj', '(d) Tj']);
+    expect(ops.match(/T\*/g)).toHaveLength(3);
+    expect(ops).not.toContain('\\r');
+  });
+
+  it('drawText throws UnencodableTextError for TAB and writes nothing', async () => {
+    const doc = createPdf();
+    const page = doc.addPage();
+    const font = await doc.embedFont(StandardFonts.Helvetica);
+    page.drawText('kept', { x: 50, y: 700, font, size: 12 });
+    const before = page.getContentStreamData();
+
+    let thrown: unknown;
+    try {
+      page.drawText('ok\nA\tB', { x: 50, y: 680, font, size: 12 });
+    } catch (error) {
+      thrown = error;
+    }
+    expect(thrown).toBeInstanceOf(UnencodableTextError);
+    expect((thrown as UnencodableTextError).codePoint).toBe(0x09);
+    // The index counts in the text given, across the line break.
+    expect((thrown as UnencodableTextError).index).toBe(4);
+    expect(page.getContentStreamData()).toBe(before);
+  });
+
+  it('drawText encodes through the font: Helvetica writes "€" as the WinAnsiEncoding code 0x80', async () => {
+    const doc = createPdf();
+    const page = doc.addPage();
+    const font = await doc.embedFont(StandardFonts.Helvetica);
+    page.drawText('€ é', { x: 50, y: 700, font, size: 12 });
+    // A resource name of no font this page knows encodes WinAnsiEncoding.
+    page.drawText('é', { x: 50, y: 680, font: 'F9', size: 12 });
+
+    expect(page.getContentStreamData()).toContain('(\\200 \\351) Tj');
+    expect(page.getContentStreamData()).toContain('(\\351) Tj');
+    expect(font.encodeText('€ é')).toEqual(Uint8Array.of(0x80, 0x20, 0xe9));
+    expect(font.widthOfTextAtSize('€', 1000)).toBe(556);
+  });
+
   // -------------------------------------------------------------------------
   // drawText with FontRef object
   // -------------------------------------------------------------------------
@@ -427,6 +491,7 @@ describe('PdfPage', () => {
       heightAtSize: (size: number) => size,
       sizeAtHeight: (height: number) => height,
       getCharacterSet: () => [],
+      encodeText: (text: string) => Uint8Array.from(text, (c) => c.charCodeAt(0)),
     };
 
     page.drawText('FontRef test', { x: 100, y: 500, font: fontRef, size: 18 });
@@ -576,6 +641,7 @@ describe('PdfPage', () => {
       heightAtSize: (size: number) => size,
       sizeAtHeight: (height: number) => height,
       getCharacterSet: () => [],
+      encodeText: (text: string) => Uint8Array.from(text, (c) => c.charCodeAt(0)),
     };
 
     // "Hello World Test" is 16 chars => 16 * 6 = 96pt at size 12
@@ -613,6 +679,7 @@ describe('PdfPage', () => {
       heightAtSize: (size: number) => size,
       sizeAtHeight: (height: number) => height,
       getCharacterSet: () => [],
+      encodeText: (text: string) => Uint8Array.from(text, (c) => c.charCodeAt(0)),
     };
 
     // "ABCDEFGHIJ" = 10 chars at 10pt each = 100pt
@@ -645,6 +712,7 @@ describe('PdfPage', () => {
       heightAtSize: (size: number) => size,
       sizeAtHeight: (height: number) => height,
       getCharacterSet: () => [],
+      encodeText: (text: string) => Uint8Array.from(text, (c) => c.charCodeAt(0)),
     };
 
     // Long text without maxWidth should NOT be wrapped
