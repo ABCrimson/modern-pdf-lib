@@ -153,11 +153,10 @@ export abstract class PdfError extends Error {
    * check, or, for an error made by another copy of the library (another
    * build, another realm), when some prototype of `value` carries the same
    * brand as this class.  Each class of this module stores its name as its
-   * brand under `Symbol.for("modern-pdf-lib.errorClass")`, except the three
-   * classes that still extend Error.  The check reads the brand of the class
-   * it is called on, so a sibling class never matches, and a subclass made
-   * outside the library (which has no brand of its own) matches only by the
-   * ordinary check.
+   * brand under `Symbol.for("modern-pdf-lib.errorClass")`.  The check reads the
+   * brand of the class it is called on, so a sibling class never matches, and a
+   * subclass made outside the library (which has no brand of its own) matches
+   * only by the ordinary check.
    */
   static override [Symbol.hasInstance](value: unknown): boolean {
     if (Function.prototype[Symbol.hasInstance].call(this, value)) return true;
@@ -967,7 +966,7 @@ export type TextEncodingName =
   | 'Identity-H'
   /** A byte string, such as the operand of a low-level text operator: each character is U+0000 to U+00FF. */
   | 'PDF byte string'
-  /** A PDF text string (PDFDocEncoding or UTF-16BE): every Unicode scalar value. */
+  /** A PDF text string (PDFDocEncoding, UTF-16BE or UTF-8): every Unicode scalar value but U+001B. */
   | 'PDF text string';
 
 /** What the message of an {@link UnencodableTextError} adds after the character, per encoding. */
@@ -977,7 +976,8 @@ const UNENCODABLE_TEXT_HINTS: Readonly<Record<TextEncodingName, string>> = {
   ZapfDingbatsEncoding: '; embed a font that has this character: doc.embedFont(fontBytes)',
   'Identity-H': ': the font has no glyph for it',
   'PDF byte string': ': it holds only U+0000 to U+00FF',
-  'PDF text string': ': it holds only Unicode scalar values, not a lone surrogate',
+  'PDF text string':
+    ': it holds only Unicode scalar values (PDFDocEncoding: only the characters of ISO 32000-2 Table D.2 but dotaccent; any encoding: no U+001B)',
 };
 
 /**
@@ -1000,7 +1000,10 @@ export class UnencodableTextError extends InvalidArgumentError {
   readonly character: string;
   /** Its code point; a lone surrogate reports its own value (0xD800 to 0xDFFF). */
   readonly codePoint: number;
-  /** UTF-16 index of the character in the text given. */
+  /**
+   * UTF-16 index of the character in the text given; for standard-font text whose grapheme
+   * cluster NFC changes, the index of that cluster.
+   */
   readonly index: number;
   /** BaseFont of the font (`Helvetica`, the PostScript name of an embedded font); `undefined` for an operator. */
   readonly fontName: string | undefined;
