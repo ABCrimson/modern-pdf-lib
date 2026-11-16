@@ -284,6 +284,14 @@ const SITES: readonly Site[] = [
     fields: { message: 'RGB component out of range: g=NaN' },
   },
   {
+    call: 'rgb(null, 0, 0) from JavaScript',
+    // @ts-expect-error -- a JavaScript caller can pass a value that is not a number
+    run: () => rgb(null, 0, 0),
+    Class: InvalidColorError,
+    code: 'invalid-color',
+    fields: { message: 'RGB component out of range: r=null' },
+  },
+  {
     call: 'cmyk(0, 0, 0, -0.5)',
     run: () => cmyk(0, 0, 0, -0.5),
     Class: InvalidColorError,
@@ -521,5 +529,17 @@ describe('typed errors of the document, page, colour, font, incremental and stre
     expect(target.addPage(source.getPage(0))).toBe(source.getPage(0));
     expect(target.getPageCount()).toBe(1);
     await expect(target.save()).resolves.toBeInstanceOf(Uint8Array);
+  });
+
+  it('drawText takes a font of the document that added the page with addPage', async () => {
+    const source = docWithPages(1);
+    const target = createPdf();
+    const page = target.addPage(source.getPage(0));
+    const font = await target.embedFont(StandardFonts.Courier);
+    expect(() => page.drawText('Hello', { font })).not.toThrow();
+    const before = createPdf();
+    const early = await before.embedFont(StandardFonts.Courier);
+    const adopted = before.addPage(docWithPages(1).getPage(0));
+    expect(() => adopted.drawText('Hello', { font: early })).not.toThrow();
   });
 });

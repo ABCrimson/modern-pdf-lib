@@ -1116,7 +1116,8 @@ export class PdfPage {
    * @throws {UnencodableTextError} When the font cannot encode a character
    *   of `text`, such as TAB or another C0 control; nothing is drawn.
    * @throws {FontNotEmbeddedError} When the font is a {@link FontRef} that
-   *   another document embedded; nothing is drawn.
+   *   another document embedded, unless that document added this page with
+   *   `addPage(page)`; nothing is drawn.
    */
   drawText(text: string, options: DrawTextOptions = {}): void {
     const x = options.x ?? this._cursorX;
@@ -1138,9 +1139,14 @@ export class PdfPage {
     let hexOperands: boolean;
     if (typeof effectiveFont === 'object') {
       const fontRef = effectiveFont;
-      // A font of another document: its ref numbers an object of that document's registry.
+      // A font another document made, unless that document registered it on this page:
+      // addPage() of a page of another document registers the fonts of the adding document.
       const owner = fontOwners.get(fontRef);
-      if (owner !== undefined && owner !== this.registry) {
+      if (
+        owner !== undefined &&
+        owner !== this.registry &&
+        this.fontEncoders.get(fontRef.name)?.font !== fontRef
+      ) {
         throw new FontNotEmbeddedError(fontRef.name);
       }
       fontName = fontRef.name;

@@ -103,10 +103,10 @@ export function grayscale(gray: number): GrayscaleColor {
   return { type: 'grayscale', gray };
 }
 
-/** Throw for the first component of `components` outside `[0, 1]`; NaN is outside. */
+/** Throw for the first component of `components` that is not a number in `[0, 1]`; NaN is not. */
 function assertComponents(space: string, components: Readonly<Record<string, number>>): void {
   for (const [name, value] of Object.entries(components)) {
-    if (!(value >= 0 && value <= 1)) {
+    if (typeof value !== 'number' || !(value >= 0 && value <= 1)) {
       throw new InvalidColorError(`${space} component out of range: ${name}=${value}`);
     }
   }
