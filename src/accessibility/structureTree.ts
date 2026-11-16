@@ -19,6 +19,7 @@
 
 import { PdfArray, PdfDict, PdfName, PdfNumber, PdfRef, PdfString } from '../core/pdfObjects.js';
 import type { PdfObject, PdfObjectRegistry } from '../core/pdfObjects.js';
+import { InvalidArgumentError, InvalidStateError } from '../errors.js';
 import { assertWithinLimit } from '../internal/limits.js';
 import { warnOnce } from '../internal/warnings.js';
 
@@ -278,12 +279,12 @@ export class PdfStructureElement {
    * Remove a direct child element.
    *
    * @param element  The child to remove.
-   * @throws         If the element is not a direct child.
+   * @throws {InvalidStateError}  If the element is not a direct child.
    */
   removeChild(element: PdfStructureElement): void {
     const index = this.children.indexOf(element);
     if (index === -1) {
-      throw new Error('Element is not a direct child of this node');
+      throw new InvalidStateError('Element is not a direct child of this node');
     }
     this.children.splice(index, 1);
     element.parent = undefined;
@@ -482,14 +483,16 @@ export class PdfStructureTree {
    * Remove an element from the tree.
    *
    * @param element  The element to remove (must not be the root).
-   * @throws         If the element is the root or has no parent.
+   * @throws {InvalidArgumentError}  If the element is the root or has no parent.
    */
   removeElement(element: PdfStructureElement): void {
     if (element === this.root) {
-      throw new Error('Cannot remove the root element');
+      throw new InvalidArgumentError('Cannot remove the root element', { argument: 'element' });
     }
     if (!element.parent) {
-      throw new Error('Element has no parent — cannot remove');
+      throw new InvalidArgumentError('Element has no parent — cannot remove', {
+        argument: 'element',
+      });
     }
     element.parent.removeChild(element);
   }

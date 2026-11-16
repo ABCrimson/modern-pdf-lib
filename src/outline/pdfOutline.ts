@@ -30,6 +30,7 @@ import {
   PdfNull,
 } from '../core/pdfObjects.js';
 import type { PdfObject, PdfObjectRegistry } from '../core/pdfObjects.js';
+import { InvalidArgumentError, InvalidStateError } from '../errors.js';
 import { assertWithinLimit } from '../internal/limits.js';
 
 // ---------------------------------------------------------------------------
@@ -153,12 +154,12 @@ export class PdfOutlineItem {
    * Remove a child outline item.
    *
    * @param item  The child item to remove.
-   * @throws      If the item is not a direct child.
+   * @throws {InvalidStateError}  If the item is not a direct child.
    */
   removeChild(item: PdfOutlineItem): void {
     const index = this.children.indexOf(item);
     if (index === -1) {
-      throw new Error('Item is not a child of this outline item');
+      throw new InvalidStateError('Item is not a child of this outline item');
     }
     this.children.splice(index, 1);
   }
@@ -241,12 +242,12 @@ export class PdfOutlineTree {
    * Remove a top-level outline item.
    *
    * @param item  The item to remove.
-   * @throws      If the item is not in the tree.
+   * @throws {InvalidStateError}  If the item is not in the tree.
    */
   removeItem(item: PdfOutlineItem): void {
     const index = this.items.indexOf(item);
     if (index === -1) {
-      throw new Error('Item is not in the outline tree');
+      throw new InvalidStateError('Item is not in the outline tree');
     }
     this.items.splice(index, 1);
   }
@@ -454,8 +455,9 @@ export class PdfOutlineTree {
     const pageIndex = dest.pageIndex ?? 0;
     const pageRef = pageRefs[pageIndex];
     if (!pageRef) {
-      throw new RangeError(
+      throw new InvalidArgumentError(
         `Outline destination page index ${pageIndex} out of range [0, ${pageRefs.length - 1}]`,
+        { argument: 'pageIndex' },
       );
     }
 

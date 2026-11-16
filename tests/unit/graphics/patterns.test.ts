@@ -13,6 +13,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
+import { InvalidArgumentError } from '../../../src/errors.js';
 import {
   linearGradient,
   radialGradient,
@@ -223,7 +224,7 @@ describe('linearGradient', () => {
         y2: 0,
         stops: [rgb(1, 0, 0)],
       }),
-    ).toThrow('at least 2');
+    ).toThrow(InvalidArgumentError);
   });
 
   it('throws on empty stops array', () => {
@@ -235,7 +236,9 @@ describe('linearGradient', () => {
         y2: 0,
         stops: [],
       }),
-    ).toThrow('at least 2');
+    ).toThrow(
+      new InvalidArgumentError('Gradient requires at least 2 colour stops', { argument: 'stops' }),
+    );
   });
 
   it('sorts stops by offset when provided out of order', () => {

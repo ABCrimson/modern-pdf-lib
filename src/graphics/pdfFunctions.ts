@@ -27,6 +27,8 @@
  * object model.
  */
 
+import { MalformedInputError, UnsupportedFeatureError } from '../errors.js';
+
 // ---------------------------------------------------------------------------
 // Function definition interfaces
 // ---------------------------------------------------------------------------
@@ -368,7 +370,7 @@ function tokenizePostScript(source: string): PsToken[] {
 function popNum(stack: PsToken[]): number {
   const v = stack.pop();
   if (typeof v !== 'number') {
-    throw new Error('PostScript calculator: expected number on stack');
+    throw new MalformedInputError('PostScript calculator: expected number on stack');
   }
   return v;
 }
@@ -382,7 +384,7 @@ function popBool(stack: PsToken[]): boolean {
   if (typeof v === 'boolean') {
     return v;
   }
-  throw new Error('PostScript calculator: expected boolean on stack');
+  throw new MalformedInputError('PostScript calculator: expected boolean on stack');
 }
 
 /** Radians→degrees and degrees→radians factor for trig operators. */
@@ -501,7 +503,7 @@ function execPostScript(program: readonly PsToken[], stack: PsToken[]): void {
       case 'dup': {
         const v = stack[stack.length - 1];
         if (v === undefined) {
-          throw new Error('PostScript calculator: dup on empty stack');
+          throw new MalformedInputError('PostScript calculator: dup on empty stack');
         }
         stack.push(v);
         break;
@@ -513,7 +515,7 @@ function execPostScript(program: readonly PsToken[], stack: PsToken[]): void {
         const b = stack.pop();
         const a = stack.pop();
         if (a === undefined || b === undefined) {
-          throw new Error('PostScript calculator: exch underflow');
+          throw new MalformedInputError('PostScript calculator: exch underflow');
         }
         stack.push(b, a);
         break;
@@ -524,7 +526,7 @@ function execPostScript(program: readonly PsToken[], stack: PsToken[]): void {
         for (let c = 0; c < cnt; c++) {
           const v = stack[len - cnt + c];
           if (v === undefined) {
-            throw new Error('PostScript calculator: copy underflow');
+            throw new MalformedInputError('PostScript calculator: copy underflow');
           }
           stack.push(v);
         }
@@ -534,7 +536,7 @@ function execPostScript(program: readonly PsToken[], stack: PsToken[]): void {
         const idx = popNum(stack);
         const v = stack[stack.length - 1 - idx];
         if (v === undefined) {
-          throw new Error('PostScript calculator: index out of range');
+          throw new MalformedInputError('PostScript calculator: index out of range');
         }
         stack.push(v);
         break;
@@ -618,7 +620,7 @@ function execPostScript(program: readonly PsToken[], stack: PsToken[]): void {
         const proc = stack.pop();
         const cond = popBool(stack);
         if (!Array.isArray(proc)) {
-          throw new Error('PostScript calculator: if expects a procedure');
+          throw new MalformedInputError('PostScript calculator: if expects a procedure');
         }
         if (cond) {
           execPostScript(proc, stack);
@@ -630,14 +632,14 @@ function execPostScript(program: readonly PsToken[], stack: PsToken[]): void {
         const procTrue = stack.pop();
         const cond = popBool(stack);
         if (!Array.isArray(procTrue) || !Array.isArray(procFalse)) {
-          throw new Error('PostScript calculator: ifelse expects two procedures');
+          throw new MalformedInputError('PostScript calculator: ifelse expects two procedures');
         }
         execPostScript(cond ? procTrue : procFalse, stack);
         break;
       }
 
       default:
-        throw new Error(`PostScript calculator: unknown operator '${tok}'`);
+        throw new MalformedInputError(`PostScript calculator: unknown operator '${tok}'`);
     }
   }
 }
@@ -704,7 +706,7 @@ export function evaluateFunction(fn: PdfFunctionDef, inputs: readonly number[]):
     default: {
       // Exhaustiveness guard for future function types.
       const never: never = fn;
-      throw new Error(`Unsupported PDF function type: ${JSON.stringify(never)}`);
+      throw new UnsupportedFeatureError(`Unsupported PDF function type: ${JSON.stringify(never)}`);
     }
   }
 }

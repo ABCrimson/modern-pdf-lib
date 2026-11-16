@@ -22,6 +22,7 @@
  */
 
 import type { Color } from '../core/operators/color.js';
+import { InvalidArgumentError } from '../errors.js';
 import {
   PdfDict,
   PdfName,
@@ -206,7 +207,9 @@ function isColorStop(stop: Color | ColorStop): stop is ColorStop {
  */
 function normalizeStops(stops: readonly (Color | ColorStop)[]): NormalizedStop[] {
   if (stops.length < 2) {
-    throw new Error('Gradient requires at least 2 colour stops');
+    throw new InvalidArgumentError('Gradient requires at least 2 colour stops', {
+      argument: 'stops',
+    });
   }
 
   const result: NormalizedStop[] = [];

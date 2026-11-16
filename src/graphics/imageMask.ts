@@ -29,6 +29,7 @@
  *            (Black-point compensation).
  */
 
+import { InvalidArgumentError } from '../errors.js';
 import { PdfArray, PdfBool, PdfDict, PdfName, PdfNumber, PdfStream } from '../core/pdfObjects.js';
 import type { PdfObjectRegistry, PdfRef } from '../core/pdfObjects.js';
 
@@ -91,12 +92,13 @@ export function buildStencilMask(
  *
  * @param ranges - An even-length list of `[min, max]` integer pairs.
  * @returns A `/Mask` {@link PdfArray} of {@link PdfNumber}s.
- * @throws RangeError if `ranges` is empty or has an odd length.
+ * @throws {InvalidArgumentError} if `ranges` is empty or has an odd length.
  */
 export function buildColorKeyMask(ranges: readonly number[]): PdfArray {
   if (ranges.length === 0 || ranges.length % 2 !== 0) {
-    throw new RangeError(
+    throw new InvalidArgumentError(
       `colour-key mask requires a non-empty even number of values (min/max pairs); got ${ranges.length}`,
+      { argument: 'ranges' },
     );
   }
   return new PdfArray(ranges.map((v) => PdfNumber.of(v)));

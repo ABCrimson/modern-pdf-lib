@@ -13,6 +13,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
+import { InvalidArgumentError } from '../../../src/errors.js';
 import {
   buildType1Halftone,
   buildThresholdHalftone,
@@ -32,6 +33,16 @@ import {
   PdfString,
   type ByteWriter,
 } from '../../../src/core/pdfObjects.js';
+
+/** The error `run` throws, or `undefined` when it does not throw. */
+function thrownBy(run: () => unknown): unknown {
+  try {
+    run();
+  } catch (error) {
+    return error;
+  }
+  return undefined;
+}
 
 // ---------------------------------------------------------------------------
 // Serialization helper
@@ -275,7 +286,13 @@ describe('transfer functions', () => {
   });
 
   it('buildSampledTransferFunction() rejects an empty sample table', () => {
-    expect(() => buildSampledTransferFunction(new Uint8Array())).toThrow(RangeError);
+    const error = thrownBy(() => buildSampledTransferFunction(new Uint8Array()));
+    expect(error).toBeInstanceOf(InvalidArgumentError);
+    expect(error).toMatchObject({
+      code: 'invalid-argument',
+      argument: 'samples',
+      message: 'transfer function requires at least one sample',
+    });
   });
 });
 

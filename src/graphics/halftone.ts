@@ -23,6 +23,7 @@
  * Reference: ISO 32000-2:2020, §10.5 (Halftones), Tables 73–78.
  */
 
+import { InvalidArgumentError } from '../errors.js';
 import {
   PdfArray,
   PdfBool,
@@ -196,7 +197,9 @@ export function identityTransferFunction(): PdfName {
  */
 export function buildSampledTransferFunction(samples: Uint8Array): PdfStream {
   if (samples.length === 0) {
-    throw new RangeError('transfer function requires at least one sample');
+    throw new InvalidArgumentError('transfer function requires at least one sample', {
+      argument: 'samples',
+    });
   }
   const dict = new PdfDict();
   dict.set('/FunctionType', PdfNumber.of(0));

@@ -15,6 +15,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
+import { InvalidArgumentError } from '../../../src/errors.js';
 import {
   buildStencilMask,
   buildColorKeyMask,
@@ -32,6 +33,16 @@ import {
   PdfObjectRegistry,
   type ByteWriter,
 } from '../../../src/core/pdfObjects.js';
+
+/** The error `run` throws, or `undefined` when it does not throw. */
+function thrownBy(run: () => unknown): unknown {
+  try {
+    run();
+  } catch (error) {
+    return error;
+  }
+  return undefined;
+}
 
 // ---------------------------------------------------------------------------
 // Serialization helper
@@ -147,11 +158,17 @@ describe('buildColorKeyMask()', () => {
   });
 
   it('throws on an odd-length range list', () => {
-    expect(() => buildColorKeyMask([0, 0, 0])).toThrow(RangeError);
+    const error = thrownBy(() => buildColorKeyMask([0, 0, 0]));
+    expect(error).toBeInstanceOf(InvalidArgumentError);
+    expect(error).toMatchObject({
+      code: 'invalid-argument',
+      argument: 'ranges',
+      message: 'colour-key mask requires a non-empty even number of values (min/max pairs); got 3',
+    });
   });
 
   it('throws on an empty range list', () => {
-    expect(() => buildColorKeyMask([])).toThrow(RangeError);
+    expect(() => buildColorKeyMask([])).toThrow(InvalidArgumentError);
   });
 });
 

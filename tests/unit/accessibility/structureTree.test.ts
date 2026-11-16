@@ -4,6 +4,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { PdfStructureElement, PdfStructureTree } from '../../../src/accessibility/structureTree.js';
+import { InvalidArgumentError, InvalidStateError } from '../../../src/errors.js';
 import {
   PdfObjectRegistry,
   PdfRef,
@@ -14,6 +15,16 @@ import {
   PdfArray,
 } from '../../../src/core/pdfObjects.js';
 import type { PdfObject } from '../../../src/core/pdfObjects.js';
+
+/** The error `run` throws, or `undefined` when it does not throw. */
+function thrownBy(run: () => unknown): unknown {
+  try {
+    run();
+  } catch (error) {
+    return error;
+  }
+  return undefined;
+}
 
 // ---------------------------------------------------------------------------
 // PdfStructureElement
@@ -72,9 +83,12 @@ describe('PdfStructureElement', () => {
     const parent = new PdfStructureElement('Sect');
     const unrelated = new PdfStructureElement('P');
 
-    expect(() => parent.removeChild(unrelated)).toThrow(
-      'Element is not a direct child of this node',
-    );
+    const error = thrownBy(() => parent.removeChild(unrelated));
+    expect(error).toBeInstanceOf(InvalidStateError);
+    expect(error).toMatchObject({
+      code: 'invalid-state',
+      message: 'Element is not a direct child of this node',
+    });
   });
 
   it('walk returns all elements depth-first', () => {
@@ -233,7 +247,24 @@ describe('PdfStructureTree', () => {
 
   it('removeElement throws for the root', () => {
     const tree = new PdfStructureTree();
-    expect(() => tree.removeElement(tree.root)).toThrow('Cannot remove the root element');
+    const error = thrownBy(() => tree.removeElement(tree.root));
+    expect(error).toBeInstanceOf(InvalidArgumentError);
+    expect(error).toMatchObject({
+      code: 'invalid-argument',
+      argument: 'element',
+      message: 'Cannot remove the root element',
+    });
+  });
+
+  it('removeElement throws for an element that has no parent', () => {
+    const tree = new PdfStructureTree();
+    const error = thrownBy(() => tree.removeElement(new PdfStructureElement('P')));
+    expect(error).toBeInstanceOf(InvalidArgumentError);
+    expect(error).toMatchObject({
+      code: 'invalid-argument',
+      argument: 'element',
+      message: 'Element has no parent — cannot remove',
+    });
   });
 
   it('assignMcid assigns monotonically increasing MCIDs', () => {

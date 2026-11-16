@@ -5,6 +5,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
+import { MalformedInputError, UnsupportedFeatureError } from '../../../src/errors.js';
 
 import {
   evaluateFunction,
@@ -366,6 +367,37 @@ describe('evaluateFunction — type 4 (PostScript calculator)', () => {
   });
 
   it('throws on an unknown operator', () => {
-    expect(() => evaluateFunction(ps('{ frobnicate }'), [1])).toThrow();
+    expect(() => evaluateFunction(ps('{ frobnicate }'), [1])).toThrow(MalformedInputError);
+  });
+
+  it.each([
+    ['{ pop dup }', [1], 'dup on empty stack'],
+    ['{ exch }', [1], 'exch underflow'],
+    ['{ 5 copy }', [1], 'copy underflow'],
+    ['{ 9 index }', [1], 'index out of range'],
+    ['{ pop pop add }', [1], 'expected number on stack'],
+    ['{ pop pop { 1 } if }', [1], 'expected boolean on stack'],
+    ['{ 1 2 if }', [1], 'if expects a procedure'],
+    ['{ 1 { 1 } 2 ifelse }', [1], 'ifelse expects two procedures'],
+    ['{ frobnicate }', [1], "unknown operator 'frobnicate'"],
+  ])('%s is malformed input', (source, inputs, reason) => {
+    let error: unknown;
+    try {
+      evaluateFunction(ps(source), inputs);
+    } catch (caught) {
+      error = caught;
+    }
+    expect(error).toBeInstanceOf(MalformedInputError);
+    expect(error).toMatchObject({
+      code: 'malformed-input',
+      format: 'other',
+      message: `PostScript calculator: ${reason}`,
+    });
+  });
+
+  it('throws UnsupportedFeatureError for an unknown function type', () => {
+    const run = (): unknown => evaluateFunction({ functionType: 1 } as never, [0]);
+    expect(run).toThrow(UnsupportedFeatureError);
+    expect(run).toThrow('Unsupported PDF function type: {"functionType":1}');
   });
 });

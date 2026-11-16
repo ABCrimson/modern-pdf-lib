@@ -16,6 +16,7 @@
 import { describe, it, expect } from 'vitest';
 import { PdfOutlineItem, PdfOutlineTree } from '../../../src/outline/pdfOutline.js';
 import type { OutlineDestination } from '../../../src/outline/pdfOutline.js';
+import { InvalidArgumentError, InvalidStateError } from '../../../src/errors.js';
 import {
   PdfDict,
   PdfArray,
@@ -26,6 +27,16 @@ import {
   PdfObjectRegistry,
 } from '../../../src/core/pdfObjects.js';
 import type { ByteWriter, PdfObject } from '../../../src/core/pdfObjects.js';
+
+/** The error `run` throws, or `undefined` when it does not throw. */
+function thrownBy(run: () => unknown): unknown {
+  try {
+    run();
+  } catch (error) {
+    return error;
+  }
+  return undefined;
+}
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -125,7 +136,12 @@ describe('PdfOutlineItem', () => {
     const parent = new PdfOutlineItem('Parent', { type: 'page', pageIndex: 0 });
     const other = new PdfOutlineItem('Other', { type: 'page', pageIndex: 1 });
 
-    expect(() => parent.removeChild(other)).toThrow('Item is not a child');
+    const error = thrownBy(() => parent.removeChild(other));
+    expect(error).toBeInstanceOf(InvalidStateError);
+    expect(error).toMatchObject({
+      code: 'invalid-state',
+      message: 'Item is not a child of this outline item',
+    });
   });
 
   it('counts visible descendants correctly', () => {
@@ -176,7 +192,12 @@ describe('PdfOutlineTree', () => {
     const tree = new PdfOutlineTree();
     const other = new PdfOutlineItem('Other', { type: 'page', pageIndex: 0 });
 
-    expect(() => tree.removeItem(other)).toThrow('Item is not in the outline tree');
+    const error = thrownBy(() => tree.removeItem(other));
+    expect(error).toBeInstanceOf(InvalidStateError);
+    expect(error).toMatchObject({
+      code: 'invalid-state',
+      message: 'Item is not in the outline tree',
+    });
   });
 
   // -----------------------------------------------------------------------
@@ -471,7 +492,13 @@ describe('PdfOutlineTree', () => {
       const registry = new PdfObjectRegistry();
       const pageRefs = createPageRefs(3);
 
-      expect(() => tree.toDict(registry, pageRefs)).toThrow('out of range');
+      const error = thrownBy(() => tree.toDict(registry, pageRefs));
+      expect(error).toBeInstanceOf(InvalidArgumentError);
+      expect(error).toMatchObject({
+        code: 'invalid-argument',
+        argument: 'pageIndex',
+        message: 'Outline destination page index 99 out of range [0, 2]',
+      });
     });
   });
 
