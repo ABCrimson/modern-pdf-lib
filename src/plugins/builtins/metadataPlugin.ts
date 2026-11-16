@@ -1,8 +1,9 @@
 /**
  * @module plugins/builtins/metadataPlugin
  *
- * Built-in plugin that automatically sets the producer string and
- * validates document metadata before saving.
+ * Built-in plugin that sets the producer and creator strings when it is
+ * registered, re-affirms the producer before every save, and fills in a
+ * default title and author at save when the document has none.
  *
  * Usage:
  * ```ts
@@ -10,12 +11,11 @@
  * import { metadataPlugin } from 'modern-pdf-lib/plugins';
  *
  * const doc = createPdf();
- * doc.use(metadataPlugin({ producer: 'My App v2.0' }));
+ * doc.use(metadataPlugin({ producer: 'My App v2.0', defaultTitle: 'Invoice' }));
  * ```
  */
 
 import type { PdfPlugin, PluginDocument } from '../pluginSystem.js';
-import { warnOnce } from '../../internal/warnings.js';
 
 /** Options for the metadata plugin. */
 export interface MetadataPluginOptions {
@@ -26,28 +26,33 @@ export interface MetadataPluginOptions {
   producer?: string | undefined;
 
   /**
-   * Optional creator string (e.g. application name).
-   *
-   * Has no effect in this version; passing it emits a one-time
-   * `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`).
+   * Creator string (e.g. application name), written to the document's
+   * `/Creator` entry when the plugin is registered. Without it the
+   * plugin leaves the creator as it is.
    */
   creator?: string | undefined;
 
   /**
-   * Optional default title.
-   *
-   * Has no effect in this version; passing it emits a one-time
-   * `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`).
+   * Title to use when the document has none (or an empty one) at save.
+   * A title the caller set, before or after registering the plugin, is
+   * kept. An empty string writes nothing.
    */
   defaultTitle?: string | undefined;
 
   /**
-   * Optional default author.
-   *
-   * Has no effect in this version; passing it emits a one-time
-   * `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`).
+   * Author to use when the document has none (or an empty one) at save.
+   * An author the caller set, before or after registering the plugin, is
+   * kept. An empty string writes nothing.
    */
   defaultAuthor?: string | undefined;
+}
+
+/** True when `current` is absent or empty and `fallback` has text to put in its place. */
+function needsDefault(
+  current: string | undefined,
+  fallback: string | undefined,
+): fallback is string {
+  return (current === undefined || current === '') && fallback !== undefined && fallback !== '';
 }
 
 /**
@@ -57,16 +62,10 @@ export interface MetadataPluginOptions {
  * @returns        A {@link PdfPlugin} that manages document metadata.
  */
 export function metadataPlugin(options?: MetadataPluginOptions): PdfPlugin {
-  for (const name of ['creator', 'defaultTitle', 'defaultAuthor'] as const) {
-    if (options?.[name] !== undefined) {
-      warnOnce(
-        `ignored-option:metadataPlugin ${name}`,
-        'MPL_IGNORED_OPTION',
-        `\`metadataPlugin()\`: the option \`${name}\` has no effect in this version.`,
-      );
-    }
-  }
   const producer = options?.producer ?? 'modern-pdf-lib';
+  const creator = options?.creator;
+  const defaultTitle = options?.defaultTitle;
+  const defaultAuthor = options?.defaultAuthor;
 
   return {
     name: 'metadata',
@@ -74,11 +73,14 @@ export function metadataPlugin(options?: MetadataPluginOptions): PdfPlugin {
 
     onRegister(doc: PluginDocument): void {
       doc.setProducer(producer);
+      if (creator !== undefined) doc.setCreator(creator);
     },
 
     onBeforeSave(doc: PluginDocument): void {
       // Re-affirm producer in case it was overwritten
       doc.setProducer(producer);
+      if (needsDefault(doc.getTitle(), defaultTitle)) doc.setTitle(defaultTitle);
+      if (needsDefault(doc.getAuthor(), defaultAuthor)) doc.setAuthor(defaultAuthor);
     },
   };
 }

@@ -276,6 +276,33 @@ describe('PdfPluginManager', () => {
   });
 
   // -----------------------------------------------------------------------
+  // PluginDocument getters
+  // -----------------------------------------------------------------------
+
+  describe('PluginDocument getTitle and getAuthor', () => {
+    it('give a plugin the title and the author of the document, or undefined when it has none', async () => {
+      const seen: (readonly [string | undefined, string | undefined])[] = [];
+      const doc = createPdf();
+      doc.use({
+        name: 'reader',
+        onBeforeSave(pluginDoc) {
+          seen.push([pluginDoc.getTitle(), pluginDoc.getAuthor()]);
+        },
+      });
+
+      await doc.save();
+      doc.setTitle('Title');
+      doc.setAuthor('Author');
+      await doc.save();
+
+      expect(seen).toEqual([
+        [undefined, undefined],
+        ['Title', 'Author'],
+      ]);
+    });
+  });
+
+  // -----------------------------------------------------------------------
   // onBeforeSave / onAfterSave
   // -----------------------------------------------------------------------
 

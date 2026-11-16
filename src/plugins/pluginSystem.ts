@@ -32,7 +32,9 @@ import { InvalidArgumentError, PluginError } from '../errors.js';
 export interface PluginDocument {
   getPageCount(): number;
   getPages(): readonly PluginPage[];
+  getTitle(): string | undefined;
   setTitle(title: string): void;
+  getAuthor(): string | undefined;
   setAuthor(author: string): void;
   setSubject(subject: string): void;
   setKeywords(keywords: string | string[]): void;

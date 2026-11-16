@@ -1,14 +1,18 @@
 /**
- * `metadataPlugin` accepts options and does not act on them, so it warns once per option with the code
- * `MPL_IGNORED_OPTION`. Each row checks the first call, the second call, the absent and undefined
- * option, and that the message names no caller value.
+ * `metadataPlugin` carries out its options `creator`, `defaultTitle` and `defaultAuthor`, so it
+ * no longer warns with the code `MPL_IGNORED_OPTION`. Each row checks that the first call emits
+ * no warning, and that the option takes effect: `creator` when the plugin registers, the two
+ * defaults at save and only where the document has no title or author.
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { MockInstance } from 'vitest';
+import { createPdf } from '../../../../src/core/pdfDocument.js';
+import type { PdfDocument } from '../../../../src/core/pdfDocument.js';
 import { metadataPlugin } from '../../../../src/plugins/builtins/metadataPlugin.js';
 import { resetWarningsForTesting } from '../../../../src/internal/warnings.js';
-import { CODE, TYPE, ignoredOptionMessage as message } from '../../../helpers/ignoredOptions.js';
+
+const IGNORED_OPTION = 'MPL_IGNORED_OPTION';
 
 let emit: MockInstance<typeof process.emitWarning>;
 
@@ -23,58 +27,99 @@ afterEach(() => {
 });
 
 interface Row {
-  readonly entry: string;
-  /** The subject as it appears in the message, with `()` for a function. */
-  readonly subject: string;
-  readonly option: string;
-  /** The value passed to trigger the warning. */
-  readonly value: unknown;
-  /** Values that change nothing and must not warn. */
-  readonly quiet?: readonly unknown[];
-  readonly invoke: (extra: Record<string, unknown>) => unknown;
+  readonly option: 'creator' | 'defaultTitle' | 'defaultAuthor';
+  /** The document member that shows the option took effect. */
+  readonly read: (doc: PdfDocument) => string | undefined;
+  /** The document member that sets the value the option is the default for, if there is one. */
+  readonly set?: (doc: PdfDocument, value: string) => void;
 }
 
 const ROWS: readonly Row[] = [
-  ...(['creator', 'defaultTitle', 'defaultAuthor'] as const).map((option): Row => ({
-    entry: 'metadataPlugin',
-    subject: 'metadataPlugin()',
-    option,
-    value: 'SECRET-TEXT',
-    invoke: (extra) => metadataPlugin(extra),
-  })),
+  { option: 'creator', read: (doc) => doc.getCreator() },
+  {
+    option: 'defaultTitle',
+    read: (doc) => doc.getTitle(),
+    set: (doc, value) => doc.setTitle(value),
+  },
+  {
+    option: 'defaultAuthor',
+    read: (doc) => doc.getAuthor(),
+    set: (doc, value) => doc.setAuthor(value),
+  },
 ];
 
 function ignoredCalls(): unknown[][] {
-  return emit.mock.calls.filter(([, options]) => (options as { code?: string }).code === CODE);
+  return emit.mock.calls.filter(
+    ([, options]) => (options as { code?: string } | undefined)?.code === IGNORED_OPTION,
+  );
 }
 
-describe.each(ROWS)('$entry option $option', (row) => {
-  it('warns once on the first call and not on the second', async () => {
-    await row.invoke({ [row.option]: row.value });
-    expect(ignoredCalls()).toHaveLength(1);
-    expect(emit).toHaveBeenCalledWith(message(row.subject, row.option), { type: TYPE, code: CODE });
-
-    await row.invoke({ [row.option]: row.value });
-    expect(ignoredCalls()).toHaveLength(1);
-  });
-
-  it('does not warn when the option is absent or undefined', async () => {
-    await row.invoke({});
-    await row.invoke({ [row.option]: undefined });
+describe.each(ROWS)('metadataPlugin option $option', (row) => {
+  it('emits no warning, on the first call or the second', () => {
+    metadataPlugin({ [row.option]: 'VALUE' });
+    metadataPlugin({ [row.option]: 'VALUE' });
     expect(ignoredCalls()).toHaveLength(0);
   });
 
-  it('does not warn for a value that changes nothing', async () => {
-    for (const quiet of row.quiet ?? []) await row.invoke({ [row.option]: quiet });
-    expect(ignoredCalls()).toHaveLength(0);
+  it.each([
+    ['absent', {}],
+    ['undefined', { [row.option]: undefined }],
+  ])('does nothing to the document when the option is %s', async (_, options) => {
+    const doc = createPdf();
+    doc.use(metadataPlugin(options));
+    await doc.save();
+    expect(row.read(doc)).toBeUndefined();
   });
 
-  it('names no caller value in the message', async () => {
-    await row.invoke({ [row.option]: row.value });
-    const [text] = ignoredCalls()[0] as [string];
-    expect(text).toBe(message(row.subject, row.option));
-    if (typeof row.value === 'string' || typeof row.value === 'number') {
-      expect(text).not.toContain(String(row.value));
-    }
+  it('takes effect on a document that has no value', async () => {
+    const doc = createPdf();
+    doc.use(metadataPlugin({ [row.option]: 'VALUE' }));
+    await doc.save();
+    expect(row.read(doc)).toBe('VALUE');
+  });
+
+  it.runIf(row.set !== undefined)('leaves a value the document already has', async () => {
+    const doc = createPdf();
+    row.set?.(doc, 'SET BEFORE');
+    doc.use(metadataPlugin({ [row.option]: 'VALUE' }));
+    await doc.save();
+    expect(row.read(doc)).toBe('SET BEFORE');
+  });
+
+  it.runIf(row.set !== undefined)('fills an empty value at save and not before', async () => {
+    const doc = createPdf();
+    doc.use(metadataPlugin({ [row.option]: 'VALUE' }));
+    row.set?.(doc, '');
+    expect(row.read(doc)).toBe('');
+    await doc.save();
+    expect(row.read(doc)).toBe('VALUE');
+  });
+});
+
+describe('metadataPlugin creator', () => {
+  it('is set when the plugin registers, before any save', () => {
+    const doc = createPdf();
+    doc.use(metadataPlugin({ creator: 'Invoice app' }));
+    expect(doc.getCreator()).toBe('Invoice app');
+  });
+});
+
+describe('metadataPlugin defaults', () => {
+  it('are not applied when the plugin registers, only at save', async () => {
+    const doc = createPdf();
+    doc.use(metadataPlugin({ defaultTitle: 'Invoice', defaultAuthor: 'Billing' }));
+    expect(doc.getTitle()).toBeUndefined();
+    expect(doc.getAuthor()).toBeUndefined();
+    await doc.save();
+    expect(doc.getTitle()).toBe('Invoice');
+    expect(doc.getAuthor()).toBe('Billing');
+  });
+
+  it('an empty default writes nothing', async () => {
+    const doc = createPdf();
+    doc.use(metadataPlugin({ defaultTitle: '', defaultAuthor: '' }));
+    await doc.save();
+    expect(doc.getTitle()).toBeUndefined();
+    expect(doc.getAuthor()).toBeUndefined();
   });
 });
