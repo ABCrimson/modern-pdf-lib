@@ -231,14 +231,66 @@ async function loadViaFetch(url: string): Promise<Uint8Array> {
 }
 
 /**
+ * The URL of a packaged WASM module: the file `wasm/<name>/<file>` next to the loader.
+ *
+ * The URL keeps a space or a non-ASCII letter of the install directory as a percent-escape; a
+ * file system turns it into a path with {@link toFileSystemPath}, and `fetch` takes it as it is.
+ *
+ * @param name     - Module name (e.g. `'libdeflate'`).
+ * @param filename - Default file name of the module (e.g. `'modern_pdf_deflate_bg.wasm'`).
+ * @param base     - URL of the loader module, the default being this module's own.
+ * @returns          The URL of the module's `.wasm` file.
+ *
+ * @internal
+ */
+export function packagedModuleUrl(
+  name: string,
+  filename: string,
+  base: string = import.meta.url,
+): string {
+  return new URL(`./wasm/${name}/${filename}`, base).href;
+}
+
+/**
+ * The file system path that a location names, when the location is a `file:` URL; any other
+ * location (a path or an `http(s):` URL) comes back unchanged.
+ *
+ * `URL.pathname` is not a path: it keeps `%20` and the other escapes, starts a Windows path with a
+ * slash (`/C:/dir`) and drops the host of a UNC share. `fileURLToPath` of `node:url` decodes the
+ * escapes and gives `C:\dir`, `\\host\share\dir` or `/dir` for the platform that reads it.
+ *
+ * The module is imported on demand, so a browser bundle holds no Node built-in.
+ *
+ * @param location - A file path, or a `file:` or `http(s):` URL.
+ * @param options  - `windows` forces the Windows (`true`) or the POSIX (`false`) rules of the
+ *                   conversion instead of the rules of the running platform.
+ * @returns          The file system path, or `location` itself when it is not a `file:` URL.
+ * @throws {TypeError} If a `file:` URL names no path on the platform (an encoded slash, a host on POSIX).
+ *
+ * @internal
+ */
+export async function toFileSystemPath(
+  location: string,
+  options?: { windows?: boolean },
+): Promise<string> {
+  if (!/^file:/i.test(location)) return location;
+  // A variable specifier hides it from the static module resolution of TypeScript and of bundlers
+  const urlModule = 'node:url';
+  const { fileURLToPath } = (await import(/* @vite-ignore */ urlModule)) as {
+    fileURLToPath: (url: string, options?: { windows?: boolean }) => string;
+  };
+  return fileURLToPath(location, options);
+}
+
+/**
  * Load WASM bytes from the filesystem using Node.js `fs/promises`.
  *
  * Uses dynamic import to avoid top-level CJS dependency.
  *
- * @param filePath - Absolute or relative filesystem path.
+ * @param location - Absolute or relative filesystem path, or a `file:` URL.
  * @returns          The raw WASM bytes.
  */
-async function loadViaNodeFs(filePath: string): Promise<Uint8Array> {
+async function loadViaNodeFs(location: string): Promise<Uint8Array> {
   // Dynamic import of fs/promises to keep ESM-only
   try {
     // Use a variable to hide the specifier from TypeScript's static module resolution
@@ -246,13 +298,13 @@ async function loadViaNodeFs(filePath: string): Promise<Uint8Array> {
     const { readFile } = (await import(/* @vite-ignore */ fsModule)) as {
       readFile: (path: string) => Promise<Uint8Array>;
     };
-    const buffer = await readFile(filePath);
+    const buffer = await readFile(await toFileSystemPath(location));
     // Node's readFile returns a Buffer (which extends Uint8Array),
     // but we convert to a plain Uint8Array to avoid Buffer dependency
     return new Uint8Array(buffer.buffer, buffer.byteOffset, buffer.byteLength);
   } catch (err) {
     throw new EnvironmentError(
-      `Failed to load WASM module from filesystem: ${filePath} -- ${err instanceof Error ? err.message : String(err)}`,
+      `Failed to load WASM module from filesystem: ${location} -- ${err instanceof Error ? err.message : String(err)}`,
       { reason: 'wasm', cause: err },
     );
   }
@@ -299,37 +351,12 @@ function resolveModulePath(name: string, config: WasmLoaderConfig, runtime: Runt
       return `/wasm/${filename}`;
 
     case 'node':
-    case 'bun': {
-      // Try to resolve relative to this module's location.
-      // In dev, wasm-pack writes crates/<name>/pkg/<file>; the dev fallbacks below and in the
-      // deno case still name the older src/wasm/<name>/pkg/ folder (new URL() does not throw, so they are not reached).
-      // In dist (dist/loader-*.mjs), the path is ./wasm/<name>/<file>.
-      // We try the dist layout first (npm consumers), then fall back to dev.
-      try {
-        const distUrl = new URL(`./wasm/${name}/${filename}`, import.meta.url);
-        // Check if the dist path exists by trying it first
-        return distUrl.pathname;
-      } catch {
-        try {
-          return new URL(`../wasm/${name}/pkg/${filename}`, import.meta.url).pathname;
-        } catch {
-          return `./wasm/${name}/pkg/${filename}`;
-        }
-      }
-    }
-
-    case 'deno': {
-      // Deno supports file:// URLs — try dist layout first, then dev
-      try {
-        return new URL(`./wasm/${name}/${filename}`, import.meta.url).href;
-      } catch {
-        try {
-          return new URL(`../wasm/${name}/pkg/${filename}`, import.meta.url).href;
-        } catch {
-          return `./wasm/${name}/pkg/${filename}`;
-        }
-      }
-    }
+    case 'bun':
+    case 'deno':
+      // The packaged file next to this module: in dist (dist/loader-*.mjs) it is ./wasm/<name>/<file>.
+      // It stays a URL: Node turns it into a file path where it reads it (toFileSystemPath), and
+      // fetch() in Bun and Deno reads a file: URL as it is.
+      return packagedModuleUrl(name, filename);
 
     case 'workerd':
       throw new EnvironmentError(
