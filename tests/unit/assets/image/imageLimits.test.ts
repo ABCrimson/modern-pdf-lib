@@ -111,6 +111,7 @@ describe('TIFF page count reads each IFD once', () => {
       expect(thrown(fn)).toMatchObject({
         name: 'MalformedInputError',
         code: 'malformed-input',
+        format: 'tiff',
         message: 'TIFF: the IFD chain repeats offset 8',
       });
     }
@@ -187,6 +188,7 @@ describe('TIFF direct embed checks strip sizes against the file', () => {
     expect(thrown(() => embedTiffDirect(tiff))).toMatchObject({
       name: 'MalformedInputError',
       code: 'malformed-input',
+      format: 'tiff',
       message: 'TIFF: strip data out of bounds',
     });
   });
@@ -199,6 +201,7 @@ describe('TIFF direct embed checks strip sizes against the file', () => {
       expect(thrown(() => embedTiffDirect(tiff))).toMatchObject({
         name: 'MalformedInputError',
         code: 'malformed-input',
+        format: 'tiff',
         message: 'TIFF: tag data out of bounds',
       });
     }
@@ -258,6 +261,7 @@ describe('TIFF entries read at most twice as many values as the file has bytes',
       expect(thrown(() => decodeTiff(manyEntries(type)))).toMatchObject({
         name: 'MalformedInputError',
         code: 'malformed-input',
+        format: 'tiff',
         message: 'TIFF: tag data overlaps',
       });
     },
@@ -298,6 +302,7 @@ describe('TIFF direct embed checks the image and tile sizes', () => {
       expect(thrown(() => embedTiffDirect(tiled(64, 64, tile)))).toMatchObject({
         name: 'MalformedInputError',
         code: 'malformed-input',
+        format: 'tiff',
         message: 'TIFF: tile width and length must be positive multiples of 16',
       });
     }
@@ -348,6 +353,7 @@ describe('TIFF direct embed of JPEG strips checks the strips against the file', 
     expect(thrown(() => embedTiffDirect(tiff))).toMatchObject({
       name: 'MalformedInputError',
       code: 'malformed-input',
+      format: 'tiff',
       message: 'TIFF: strip data out of bounds',
     });
   });
@@ -436,6 +442,7 @@ describe('TIFF decode of Deflate strips', () => {
     expect(thrown(() => decodeTiff(tiff))).toMatchObject({
       name: 'MalformedInputError',
       code: 'malformed-input',
+      format: 'tiff',
       message: 'TIFF: strip data overlaps',
     });
   });
@@ -506,6 +513,7 @@ describe('WOFF decode inflates each table only up to its stated length', () => {
     expect(thrown(() => decodeWoff(woff))).toMatchObject({
       name: 'MalformedInputError',
       code: 'malformed-input',
+      format: 'woff',
       message: 'WOFF1: inflated table size mismatch',
     });
   });
@@ -529,6 +537,7 @@ describe('WOFF decode refuses table data that overlaps', () => {
     expect(thrown(() => decodeWoff(woff))).toMatchObject({
       name: 'MalformedInputError',
       code: 'malformed-input',
+      format: 'woff',
       message: 'WOFF1: table data overlaps',
     });
   });
