@@ -176,6 +176,22 @@ describe('resolveLimits', () => {
     ['Infinity', { maxImagePixels: Number.POSITIVE_INFINITY }, 'limits.maxImagePixels'],
     ['2^53', { maxTotalDecodedBytes: 2 ** 53 }, 'limits.maxTotalDecodedBytes'],
     ['a string', { maxImagePixels: '99' }, 'limits.maxImagePixels'],
+    [
+      'an object without a prototype',
+      { maxImagePixels: Object.create(null) },
+      'limits.maxImagePixels',
+    ],
+    [
+      'a value whose toString throws',
+      {
+        maxImagePixels: {
+          toString() {
+            throw new Error('x');
+          },
+        },
+      },
+      'limits.maxImagePixels',
+    ],
     ['maxDerDepth 129', { maxDerDepth: 129 }, 'limits.maxDerDepth'],
     ['maxTreeDepth 257', { maxTreeDepth: 257 }, 'limits.maxTreeDepth'],
     [

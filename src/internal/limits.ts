@@ -173,9 +173,10 @@ export function resolveLimits(
 ): ResolvedLimits {
   if (overrides === undefined) return base;
   if (typeof overrides !== 'object' || overrides === null) {
-    throw new InvalidArgumentError(`limits must be an object, got ${String(overrides)}`, {
-      argument: 'limits',
-    });
+    throw new InvalidArgumentError(
+      `limits must be an object, got ${overrides === null ? 'null' : typeof overrides}`,
+      { argument: 'limits' },
+    );
   }
   const set: Partial<Record<LimitName, number>> = {};
   for (const [key, value] of Object.entries(overrides)) {
@@ -187,7 +188,7 @@ export function resolveLimits(
     const ceiling = CEILINGS[name] ?? Number.MAX_SAFE_INTEGER;
     if (!Number.isSafeInteger(value) || value < 1 || value > ceiling) {
       throw new InvalidArgumentError(
-        `limits.${name} must be a whole number from 1 to ${ceiling}, got ${String(value)}`,
+        `limits.${name} must be a whole number from 1 to ${ceiling}, got ${typeof value === 'number' ? String(value) : typeof value}`,
         { argument: `limits.${name}` },
       );
     }
