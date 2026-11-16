@@ -4,6 +4,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { PdfLinkAnnotation } from '../../../../src/annotation/types/linkAnnotation.js';
+import { InvalidArgumentError } from '../../../../src/errors.js';
 import {
   PdfDict,
   PdfArray,
@@ -159,6 +160,23 @@ describe('PdfLinkAnnotation strings', () => {
 
     expect(PdfLinkAnnotation.fromDict(dict).getDestination()).toBe('chapter2');
     expect(PdfLinkAnnotation.fromDict(other).getUrl()).toBe('https://x.org');
+
+    dict.set('/Dest', PdfString.fromText('chapter2', 'utf-16be'));
+    action.set('/URI', PdfString.fromText('https://x.org', 'utf-16be'));
+    expect(PdfLinkAnnotation.fromDict(dict).getDestination()).toBe('chapter2');
+    expect(PdfLinkAnnotation.fromDict(other).getUrl()).toBe('https://x.org');
+  });
+
+  it('throws InvalidArgumentError for a non-ASCII URL that is not absolute', () => {
+    const annot = PdfLinkAnnotation.create({ rect: [0, 0, 100, 20] });
+    let err: unknown;
+    try {
+      annot.setUrl('docs/ü.html');
+    } catch (e) {
+      err = e;
+    }
+    expect(err).toBeInstanceOf(InvalidArgumentError);
+    expect(err).toMatchObject({ code: 'invalid-argument', argument: 'url' });
   });
 
   it('writes an ASCII URL unchanged', () => {

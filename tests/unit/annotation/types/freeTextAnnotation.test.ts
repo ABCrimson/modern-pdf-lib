@@ -4,6 +4,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { PdfFreeTextAnnotation } from '../../../../src/annotation/types/freeTextAnnotation.js';
+import { generateFreeTextAppearance } from '../../../../src/annotation/appearanceGenerator.js';
 import { InvalidArgumentError } from '../../../../src/errors.js';
 import {
   PdfDict,
@@ -204,6 +205,14 @@ describe('PdfFreeTextAnnotation text strings', () => {
     dict.set('/Rect', PdfArray.fromNumbers([0, 0, 100, 20]));
     dict.set('/DA', PdfString.fromHex(new TextEncoder().encode(da).toHex()));
     expect(PdfFreeTextAnnotation.fromDict(dict).getDefaultAppearance()).toBe(da);
+
+    dict.set('/DA', PdfString.fromText(da, 'utf-16be'));
+    expect(PdfFreeTextAnnotation.fromDict(dict).getDefaultAppearance()).toBe(da);
+    expect(
+      new TextDecoder().decode(
+        generateFreeTextAppearance(PdfFreeTextAnnotation.fromDict(dict)).data,
+      ),
+    ).toContain('/Helv 14 Tf');
   });
 
   it('writes /DA as an ASCII byte string', () => {

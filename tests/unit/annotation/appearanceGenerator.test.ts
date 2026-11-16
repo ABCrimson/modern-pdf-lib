@@ -290,7 +290,37 @@ describe('generateFreeTextAppearance text encoding', () => {
       defaultAppearance: '0 g /F1 12 Tf',
     });
 
-    expect(streamContent(generateFreeTextAppearance(annot))).toContain('(Jos\\351) Tj');
+    const ap = generateFreeTextAppearance(annot);
+    expect(streamContent(ap)).toContain('(Jos\\351) Tj');
+    const f1 = fontEntry(ap, '/F1');
+    expect((f1.get('/BaseFont') as PdfName).value).toBe('/Helvetica');
+    expect((f1.get('/Encoding') as PdfName).value).toBe('/WinAnsiEncoding');
+  });
+
+  it.each([
+    ['Helv', 'Helvetica'],
+    ['HeBo', 'Helvetica-Bold'],
+    ['HeOb', 'Helvetica-Oblique'],
+    ['HeBO', 'Helvetica-BoldOblique'],
+    ['TiRo', 'Times-Roman'],
+    ['TiBo', 'Times-Bold'],
+    ['TiIt', 'Times-Italic'],
+    ['TiBI', 'Times-BoldItalic'],
+    ['Cour', 'Courier'],
+    ['CoBo', 'Courier-Bold'],
+    ['CoOb', 'Courier-Oblique'],
+    ['CoBO', 'Courier-BoldOblique'],
+    ['Symb', 'Symbol'],
+    ['ZaDb', 'ZapfDingbats'],
+    ['Helvetica-Bold', 'Helvetica-Bold'],
+  ])('defines /%s as the standard font %s', (name, baseFont) => {
+    const annot = PdfFreeTextAnnotation.create({
+      rect: [0, 0, 200, 30],
+      text: '',
+      defaultAppearance: `0 g /${name} 12 Tf`,
+    });
+    const entry = fontEntry(generateFreeTextAppearance(annot), `/${name}`);
+    expect((entry.get('/BaseFont') as PdfName).value).toBe(`/${baseFont}`);
   });
 
   it('shows each line of the text with its own operator', () => {

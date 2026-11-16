@@ -11,6 +11,7 @@ import { PdfDict, PdfArray, PdfName, PdfNumber, PdfString } from '../../core/pdf
 import type { PdfObject, PdfRef } from '../../core/pdfObjects.js';
 import { PdfAnnotation, buildAnnotationDict } from '../pdfAnnotation.js';
 import type { AnnotationOptions } from '../pdfAnnotation.js';
+import { InvalidArgumentError } from '../../errors.js';
 
 // ---------------------------------------------------------------------------
 // Highlight mode
@@ -27,9 +28,20 @@ export type LinkHighlightMode = 'None' | 'Invert' | 'Outline' | 'Push';
  * The /URI string of a URL: ASCII only. The URL parser percent-encodes the
  * characters above U+007F as UTF-8 (and the host as punycode); a URL that is
  * ASCII already is written as given, so relative references stay valid.
+ *
+ * @throws {InvalidArgumentError} If the URL has a character above U+007F and
+ *   is not an absolute URL that the URL parser accepts (argument `url`).
  */
 function uriString(url: string): PdfString {
-  return PdfString.fromAscii(/[^\p{ASCII}]/u.test(url) ? new URL(url).href : url);
+  if (!/[^\p{ASCII}]/u.test(url)) return PdfString.fromAscii(url);
+  const parsed = URL.parse(url);
+  if (parsed === null) {
+    throw new InvalidArgumentError(
+      `A URL with characters above U+007F is percent-encoded, which needs an absolute URL; got "${url}"`,
+      { argument: 'url' },
+    );
+  }
+  return PdfString.fromAscii(parsed.href);
 }
 
 // ---------------------------------------------------------------------------
@@ -155,8 +167,8 @@ export class PdfLinkAnnotation extends PdfAnnotation {
    * characters above U+007F is written percent-encoded as UTF-8, an
    * internationalised host name as punycode.
    *
-   * @throws {TypeError} If the URL has such a character and is not an
-   *   absolute URL, which the URL parser needs to encode it.
+   * @throws {InvalidArgumentError} If the URL has such a character and is
+   *   not an absolute URL that the URL parser accepts (argument `url`).
    */
   setUrl(url: string): void {
     const action = new PdfDict();

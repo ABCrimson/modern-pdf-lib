@@ -518,8 +518,9 @@ export function generateInkAppearance(annot: PdfAnnotation): PdfStream {
 // ---------------------------------------------------------------------------
 
 /**
- * The font resource names of AcroForm default resources (ISO 32000-2 12.7.3.3)
- * that a /DA string names, and the standard font each stands for.
+ * The resource names under which AcroForm default resources conventionally
+ * define the standard fonts, as a /DA string names them, and the standard
+ * font each stands for.
  */
 const DA_FONT_ALIASES: ReadonlyMap<string, StandardFontName> = new Map([
   ['Helv', 'Helvetica'],
@@ -595,15 +596,15 @@ export function generateFreeTextAppearance(annot: PdfAnnotation): PdfStream {
   }
 
   // The text is encoded for the standard font the DA names; a font name that is
-  // neither an alias nor a standard font name is encoded as WinAnsi, the
-  // encoding of the Helvetica entry that the resources define under /Helv.
+  // neither an alias nor a standard font name is defined as Helvetica under
+  // that name and encoded as WinAnsi.
   const daName = tfMatch?.[1];
   const daFont =
     daName === undefined
       ? undefined
       : (DA_FONT_ALIASES.get(daName) ?? (isStandardFont(daName) ? daName : undefined));
   const font = daFont ?? 'Helvetica';
-  const fontKey = daFont === undefined ? '/Helv' : `/${daName}`;
+  const fontKey = `/${daName ?? 'Helv'}`;
 
   // Build content stream
   let ops = '';
