@@ -29,6 +29,7 @@ import { encodeStandardText } from '../../assets/font/internal/standardEncoding.
 import { assertUnencryptedInput } from '../../core/io/incrementalWriter.js';
 import { EnvironmentError, InvalidArgumentError, MalformedInputError } from '../../errors.js';
 import { PdfString } from '../../core/pdfObjects.js';
+import { pdfStringSyntax } from '../../core/internal/textString.js';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -52,14 +53,6 @@ export interface ByteRangeResult {
 
 const encoder = new TextEncoder();
 const decoder = new TextDecoder('latin1');
-
-/**
- * The PDF syntax of a string, always in hex form, so a dictionary built as text stays ASCII
- * whatever bytes the string holds.
- */
-function pdfStringSyntax(s: PdfString): string {
-  return `<${s.toBytes().toHex()}>`;
-}
 
 /**
  * A regular expression for `/<key>` followed by a string: group 1 is the body of a literal

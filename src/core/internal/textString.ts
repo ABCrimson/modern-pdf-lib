@@ -20,9 +20,11 @@
  *   byte order mark), else UTF-16BE; it never writes UTF-8, which needs PDF 2.0. No encoding
  *   writes U+001B, which would read back as a language escape.
  * - {@link PDF_DOC_ENCODING} is ISO 32000-2 Annex D Table D.2 for PDFDocEncoding.
+ * - {@link pdfStringSyntax} writes a string as PDF syntax for a dictionary built as text.
  */
 
 import { InvalidArgumentError, UnencodableTextError } from '../../errors.js';
+import type { PdfString } from '../pdfObjects.js';
 
 /** Encoding of a text string as read; `"utf-16le"` is read only. */
 export type TextStringEncoding = 'pdfdoc' | 'utf-16be' | 'utf-16le' | 'utf-8';
@@ -281,4 +283,13 @@ function encodeUtf8(text: string): Uint8Array<ArrayBuffer> {
   bytes.set([0xef, 0xbb, 0xbf]);
   bytes.set(body, 3);
   return bytes;
+}
+
+/**
+ * The PDF syntax of a string, always in hex form (ISO 32000-2 7.3.4.3), so a dictionary built as
+ * text, such as the signature dictionary and the signature widget that signing appends, stays
+ * ASCII whatever bytes the string holds.
+ */
+export function pdfStringSyntax(s: PdfString): string {
+  return `<${s.toBytes().toHex()}>`;
 }

@@ -14,9 +14,11 @@ import {
   decodeTextString,
   encodeTextString,
   PDF_DOC_ENCODING,
+  pdfStringSyntax,
   textStringEncoding,
 } from '../../../../src/core/internal/textString.js';
 import type { TextStringWriteEncoding } from '../../../../src/core/internal/textString.js';
+import { PdfString } from '../../../../src/core/pdfObjects.js';
 import { InvalidArgumentError, UnencodableTextError } from '../../../../src/errors.js';
 
 /** ISO 32000-2 Table D.2: the PDFDocEncoding codes whose character is not U+0000 plus the code. */
@@ -420,5 +422,19 @@ describe('encodeTextString', () => {
       expect(error).toMatchObject({ code: 'invalid-argument', argument: 'encoding' });
       expect((error as Error).message).toContain(JSON.stringify(encoding));
     }
+  });
+});
+
+describe('pdfStringSyntax', () => {
+  test('writes the bytes of a string in hex form, whatever form the string has', () => {
+    expect(pdfStringSyntax(PdfString.fromAscii('a) /F 0 (b'))).toBe('<6129202f462030202862>');
+    expect(pdfStringSyntax(PdfString.fromHex('00ff'))).toBe('<00ff>');
+    expect(pdfStringSyntax(PdfString.fromBytes(new Uint8Array()))).toBe('<>');
+  });
+
+  test('writes a text string with its byte order mark, in ASCII only', () => {
+    const syntax = pdfStringSyntax(PdfString.fromText('日本 €'));
+    expect(syntax).toBe('<feff65e5672c002020ac>');
+    expect(syntax).toMatch(/^<[0-9a-f]*>$/);
   });
 });
