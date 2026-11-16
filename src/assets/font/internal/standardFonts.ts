@@ -14,7 +14,8 @@
  * References:
  * - PDF 1.7 spec §9.6.2.2 (Standard Type 1 Fonts)
  * - Adobe Font Metrics (AFM) files for the Base-14 fonts
- * - WinAnsiEncoding: PDF 1.7 spec, Annex D, Table D.1
+ * - The encodings the widths are indexed by:
+ *   src/assets/font/internal/standardEncoding.ts (ISO 32000 Annex D)
  */
 
 // ---------------------------------------------------------------------------
@@ -125,7 +126,12 @@ const HELVETICA_BOLD_OBLIQUE_WIDTHS: readonly number[] = HELVETICA_BOLD_WIDTHS;
 // Width data — Courier family (all fixed-width 600)
 // ---------------------------------------------------------------------------
 
-const COURIER_WIDTHS: readonly number[] = Array.from({ length: 256 }, (_, i) => (i < 32 ? 0 : 600));
+/** The codes from 0x20 up that WinAnsiEncoding leaves without a glyph. */
+const WIN_ANSI_UNUSED: ReadonlySet<number> = new Set([0x7f, 0x81, 0x8d, 0x8f, 0x90, 0x9d]);
+
+const COURIER_WIDTHS: readonly number[] = Array.from({ length: 256 }, (_, i) =>
+  i < 32 || WIN_ANSI_UNUSED.has(i) ? 0 : 600,
+);
 
 const COURIER_BOLD_WIDTHS: readonly number[] = COURIER_WIDTHS;
 const COURIER_OBLIQUE_WIDTHS: readonly number[] = COURIER_WIDTHS;
@@ -233,7 +239,7 @@ const SYMBOL_WIDTHS: readonly number[] = [
   549, 521, 549, 603, 439, 576, 713, 686, 493, 686, 494, 480, 200, 480, 549, 0,
   0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
   0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-  250, 620, 247, 549, 167, 713, 500, 753, 753, 753, 753, 1042, 987, 603, 987, 603,
+  750, 620, 247, 549, 167, 713, 500, 753, 753, 753, 753, 1042, 987, 603, 987, 603,
   400, 549, 411, 549, 549, 713, 494, 460, 549, 549, 549, 549, 1000, 603, 1000, 658,
   823, 686, 795, 987, 768, 768, 823, 768, 768, 713, 713, 713, 713, 713, 713, 713,
   768, 713, 790, 790, 890, 823, 549, 250, 713, 603, 603, 1042, 987, 603, 987, 603,
@@ -252,9 +258,9 @@ const ZAPFDINGBATS_WIDTHS: readonly number[] = [
   923, 744, 723, 749, 790, 792, 695, 776, 768, 792, 759, 707, 708, 682, 701, 826,
   815, 789, 789, 707, 687, 696, 689, 786, 787, 713, 791, 785, 791, 873, 761, 762,
   762, 759, 759, 892, 892, 788, 784, 438, 138, 277, 415, 392, 392, 668, 668, 0,
-  0, 390, 390, 317, 317, 276, 276, 509, 509, 410, 410, 234, 234, 334, 334, 0,
+  390, 390, 317, 317, 276, 276, 509, 509, 410, 410, 234, 234, 334, 334, 0, 0,
   0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-  278, 732, 544, 544, 910, 667, 760, 760, 776, 595, 694, 626, 788, 788, 788, 788,
+  0, 732, 544, 544, 910, 667, 760, 760, 776, 595, 694, 626, 788, 788, 788, 788,
   788, 788, 788, 788, 788, 788, 788, 788, 788, 788, 788, 788, 788, 788, 788, 788,
   788, 788, 788, 788, 788, 788, 788, 788, 788, 788, 788, 788, 788, 788, 788, 788,
   788, 788, 788, 788, 894, 838, 1016, 458, 748, 924, 748, 918, 927, 928, 928, 834,
