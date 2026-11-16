@@ -186,8 +186,8 @@ function subsetJs(fontData: Uint8Array, usedGlyphIds: Set<number>): SubsetResult
  * Subset a TrueType font to include only the specified glyphs.
  *
  * Uses WASM-accelerated subsetting if available (via {@link initSubsetWasm}),
- * otherwise falls back to returning the full font with identity glyph
- * mappings.
+ * otherwise the pure-JavaScript subsetter, which keeps every glyph ID and
+ * empties the outlines of the glyphs that are not used.
  *
  * Glyph ID 0 (.notdef) is always included automatically.
  *

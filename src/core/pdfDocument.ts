@@ -2973,9 +2973,11 @@ export class PdfDocument {
    * 4. Rebuilds the `/W` (widths) array for the CIDFont dict
    * 5. Rebuilds the `/ToUnicode` CMap stream
    *
-   * Since WASM subsetting is not yet available, the fallback returns
-   * the full font unchanged.  But the /W array and /ToUnicode CMap
-   * are rebuilt to only include used glyphs, reducing PDF overhead.
+   * {@link subsetFont} keeps every glyph ID and empties the outlines of the glyphs
+   * the document does not draw (the pure-JavaScript subsetter, unless a WASM
+   * subsetter was initialised).  The /W array and /ToUnicode CMap are rebuilt to
+   * include only the used glyphs.  A font embedded with `subset: false` is
+   * written whole instead.
    *
    * @internal
    */

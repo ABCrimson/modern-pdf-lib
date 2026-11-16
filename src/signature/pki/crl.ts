@@ -289,6 +289,9 @@ export function parseCrl(data: Uint8Array): CrlData {
  *
  * @param url  URL of the CRL (typically an HTTP URL from CRL Distribution Points).
  * @returns    Parsed CRL data.
+ * @throws {EnvironmentError} When the server answers with an HTTP error status (reason
+ *   `'network'`); a request that cannot connect rejects with the `TypeError` of `fetch`.
+ * @throws {MalformedInputError} When the response is not a well-formed CRL (format `'der'`).
  */
 export async function downloadCrl(url: string): Promise<CrlData> {
   const response = await fetch(url, {
