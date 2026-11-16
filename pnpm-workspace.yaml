@@ -8,7 +8,7 @@ packages:
 minimumReleaseAge: 1440
 # Exact pins younger than 1440 min. Listed on 2026-11-16: the TypeScript 7.1 dev build
 # 7.1.0-dev.20261116.1 (published 2026-11-16 08:13Z) with its seven per-platform native
-# packages (published 08:07Z to 08:10Z), the Playwright 1.66.0-alpha-2026-11-16 trio
+# packages (published 08:06Z to 08:09Z), the Playwright 1.66.0-alpha-2026-11-16 trio
 # (@playwright/test 05:20Z, playwright 05:20Z, playwright-core 05:43Z) and vite 8.4.0-beta.1
 # (07:22Z). These entries go stale on the next bump; drop each one once its version is older than 24 h.
 minimumReleaseAgeExclude:
