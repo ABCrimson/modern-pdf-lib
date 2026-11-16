@@ -119,8 +119,8 @@ const pageLabelStore = new WeakMap<PdfDocument, PageLabelRange[]>();
  *
  * @param doc     The document to set page labels on.
  * @param labels  An array of label range definitions.
- * @throws {InvalidArgumentError} If `labels` is empty, a `startPage` or `start` is negative,
- *         or the ranges are not sorted.
+ * @throws {InvalidArgumentError} If `labels` is empty, a `startPage` or `start` is negative
+ *         or not a whole number, or the ranges are not sorted.
  */
 export function setPageLabels(doc: PdfDocument, labels: readonly PageLabelRange[]): void {
   if (labels.length === 0) {
@@ -129,8 +129,18 @@ export function setPageLabels(doc: PdfDocument, labels: readonly PageLabelRange[
 
   // Validate individual ranges
   for (const range of labels) {
+    if (!Number.isInteger(range.startPage)) {
+      throw new InvalidArgumentError(`startPage must be a whole number, got ${range.startPage}`, {
+        argument: 'labels',
+      });
+    }
     if (range.startPage < 0) {
       throw new InvalidArgumentError(`startPage must be non-negative, got ${range.startPage}`, {
+        argument: 'labels',
+      });
+    }
+    if (range.start !== undefined && !Number.isInteger(range.start)) {
+      throw new InvalidArgumentError(`start must be a whole number, got ${range.start}`, {
         argument: 'labels',
       });
     }

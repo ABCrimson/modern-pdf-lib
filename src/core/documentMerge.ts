@@ -346,7 +346,7 @@ export function copyPagesToTarget(
 
   // Validate indices
   for (const index of indices) {
-    if (index < 0 || index >= sourcePages.length) {
+    if (!Number.isInteger(index) || index < 0 || index >= sourcePages.length) {
       throw new InvalidArgumentError(
         `copyPages: index ${index} out of range [0, ${sourcePages.length - 1}]`,
         { argument: 'indices' },

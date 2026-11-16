@@ -448,7 +448,7 @@ export class PdfDocument {
    * @throws {InvalidArgumentError} If the index is out of range.
    */
   getPage(index: number): PdfPage {
-    if (index < 0 || index >= this.pages.length) {
+    if (!Number.isInteger(index) || index < 0 || index >= this.pages.length) {
       throw new InvalidArgumentError(
         `Page index ${index} out of range [0, ${this.pages.length - 1}]`,
         { argument: 'index' },
@@ -1651,7 +1651,7 @@ export class PdfDocument {
 
     // Validate indices
     for (const index of indices) {
-      if (index < 0 || index >= sourcePages.length) {
+      if (!Number.isInteger(index) || index < 0 || index >= sourcePages.length) {
         throw new InvalidArgumentError(
           `embedPdf: page index ${index} out of range [0, ${sourcePages.length - 1}]`,
           { argument: 'pageIndices' },
@@ -1911,7 +1911,7 @@ export class PdfDocument {
    * @param name       The signature field name (must be unique).
    */
   addSignatureField(pageIndex: number, rect: [number, number, number, number], name: string): void {
-    if (pageIndex < 0 || pageIndex >= this.pages.length) {
+    if (!Number.isInteger(pageIndex) || pageIndex < 0 || pageIndex >= this.pages.length) {
       throw new InvalidArgumentError(
         `Page index ${pageIndex} out of range [0, ${this.pages.length - 1}]`,
         { argument: 'pageIndex' },
