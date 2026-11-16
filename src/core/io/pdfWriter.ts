@@ -15,8 +15,8 @@
  * Supports optional FlateDecode compression for streams (zlib data, through
  * `core/internal/flateStream`) and optional encryption via a
  * {@link PdfEncryptionHandler}. A loaded `/FlateDecode` stream that holds
- * raw DEFLATE data is written back as zlib data in both compress modes,
- * except in a document loaded with `ignoreEncryption: true` from a file
+ * raw DEFLATE data, or zlib data cut short at a sync flush, is written back
+ * as complete zlib data in both compress modes, except in a document loaded with `ignoreEncryption: true` from a file
  * whose trailer has `/Encrypt`, whose stream data is still encrypted and is
  * written as loaded. A registry that holds content decrypted from an
  * encrypted file is refused with `UnsupportedEncryptionError` unless the
@@ -33,6 +33,7 @@ import {
   compressPdfStream,
   isLoadedFromEncryptedFile,
   rewrapLegacyStream,
+  rewriteSyncFlushedStream,
 } from '../internal/flateStream.js';
 import type { PdfRef, ByteWriter } from '../pdfObjects.js';
 import {
@@ -296,13 +297,16 @@ export class PdfWriter {
     if (this.encryptionHandler === undefined && !copyWriters.has(this)) {
       assertNoDecryptedObject(entry.object, 'PdfWriter');
     }
-    // Write raw DEFLATE /FlateDecode data back as zlib data (not for a
-    // document loaded with ignoreEncryption from an encrypted file, whose
-    // stream data is still encrypted), then optionally compress
-    // stream data (both before encryption — per the spec, compression is
-    // applied first, then encryption)
+    // Write raw DEFLATE /FlateDecode data, and zlib data cut short at a sync
+    // flush, back as complete zlib data (not for a document loaded with
+    // ignoreEncryption from an encrypted file, whose stream data is still
+    // encrypted), then optionally compress stream data (all before
+    // encryption — per the spec, compression is applied first, then encryption)
     if (entry.object.kind === 'stream') {
-      if (!isLoadedFromEncryptedFile(this.source)) rewrapLegacyStream(entry.object);
+      if (!isLoadedFromEncryptedFile(this.source)) {
+        rewrapLegacyStream(entry.object);
+        rewriteSyncFlushedStream(entry.object);
+      }
       if (this.compress) this.compressStream(entry.object);
     }
 

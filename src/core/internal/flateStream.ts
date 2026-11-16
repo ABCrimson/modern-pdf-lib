@@ -14,13 +14,16 @@
  *   so the decoded bytes do not change. A stream whose decoded data is
  *   larger than {@link INTERNAL_LIMITS}.maxRewrapDecodedBytes (64 MiB) is copied
  *   as loaded.
+ * - {@link rewriteSyncFlushedStream} writes a loaded `/FlateDecode` stream
+ *   whose zlib data ends at a sync flush, with no final DEFLATE block, back
+ *   as complete zlib data of the bytes decoded so far, under the same limit.
  * - A document loaded with `ignoreEncryption: true` from a file whose
- *   trailer has `/Encrypt` is never re-wrapped: its stream data is still
- *   encrypted, and encrypted data can inflate as raw DEFLATE by chance. The
- *   loader records such a document's registry with
+ *   trailer has `/Encrypt` is never re-wrapped or rewritten: its stream data
+ *   is still encrypted, and encrypted data can inflate as raw DEFLATE by
+ *   chance. The loader records such a document's registry with
  *   {@link markLoadedFromEncryptedFile}, and the writers skip
- *   {@link rewrapLegacyStream} when {@link isLoadedFromEncryptedFile} says
- *   so. A document whose objects the loader decrypted holds plaintext and is
+ *   {@link rewrapLegacyStream} and {@link rewriteSyncFlushedStream} when
+ *   {@link isLoadedFromEncryptedFile} says so. A document whose objects the loader decrypted holds plaintext and is
  *   re-wrapped like any other, as is a document that was created or loaded
  *   from a file without `/Encrypt`, also when `encrypt()` is called on it.
  * - A document whose objects were decrypted on load is recorded with
@@ -49,6 +52,7 @@
 import {
   flateEncode,
   inflateRawBounded,
+  inflateSyncFlushedZlib,
   isZlibHeader,
   wrapRawDeflate,
 } from '../../codecs/internal/pdfFlate.js';
@@ -95,8 +99,8 @@ const decryptedObjects = sharedWeakSet<PdfString | PdfStream>('modern-pdf-lib.de
 /**
  * Record that a registry holds the objects of a file whose trailer has
  * `/Encrypt`, as stored, without decryption (`ignoreEncryption: true`). The
- * writers then do not re-wrap its `/FlateDecode` stream data (see
- * {@link rewrapLegacyStream}).
+ * writers then do not re-wrap or rewrite its `/FlateDecode` stream data (see
+ * {@link rewrapLegacyStream} and {@link rewriteSyncFlushedStream}).
  *
  * @param registry - The registry the loader filled.
  */
@@ -348,6 +352,40 @@ export function rewrapLegacyStream(stream: PdfStream): void {
   } catch {
     return;
   }
+  if (plain === undefined) return;
+  stream.data = flateEncode(plain, 6);
+  stream.syncLength();
+}
+
+/**
+ * Write a `/FlateDecode` stream whose zlib data ends at a sync flush, with no
+ * final DEFLATE block, back as complete zlib data.
+ *
+ * Applies when the stream's `/Filter` is `/FlateDecode`, or an array whose
+ * first entry is `/FlateDecode`, and its data starts with a zlib header and
+ * ends with `00 00 ff ff` (`inflateSyncFlushedZlib`). When the data has not
+ * reached its final block and inflates to at most
+ * {@link INTERNAL_LIMITS}.maxRewrapDecodedBytes (64 MiB), the bytes decoded up
+ * to the sync flush, which a reader decodes from the data as loaded, are
+ * compressed again as zlib data at level 6 and replace the data, and
+ * `/Length` is updated. `/DecodeParms` stays as it is.
+ *
+ * Complete zlib data is never rewritten. Data that does not inflate, data that
+ * decodes to more than {@link INTERNAL_LIMITS}.maxRewrapDecodedBytes bytes
+ * (inflating stops once the decoded size passes it), and data in which
+ * 128 KiB of input in a row decode to no bytes are left alone, and no error is
+ * thrown.
+ *
+ * The writers call this next to {@link rewrapLegacyStream}, under the same
+ * guard: never for a document loaded without decryption from a file whose
+ * trailer has `/Encrypt` ({@link isLoadedFromEncryptedFile}), whose stream
+ * data is still encrypted.
+ *
+ * @param stream - The stream to update in place.
+ */
+export function rewriteSyncFlushedStream(stream: PdfStream): void {
+  if (!firstFilterIsFlate(stream)) return;
+  const plain = inflateSyncFlushedZlib(stream.data, INTERNAL_LIMITS.maxRewrapDecodedBytes);
   if (plain === undefined) return;
   stream.data = flateEncode(plain, 6);
   stream.syncLength();

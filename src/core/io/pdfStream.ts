@@ -22,6 +22,7 @@ import {
   compressPdfStream,
   isLoadedFromEncryptedFile,
   rewrapLegacyStream,
+  rewriteSyncFlushedStream,
 } from '../internal/flateStream.js';
 import type { PdfStream as PdfStreamObj } from '../pdfObjects.js';
 import { PdfObjectRegistry } from '../pdfObjects.js';
@@ -159,12 +160,16 @@ export class PdfStreamWriter {
 
     for (const entry of this.registry) {
       assertNoDecryptedObject(entry.object, 'PdfStreamWriter');
-      // Write raw DEFLATE /FlateDecode data back as zlib data (not for a
-      // document loaded with ignoreEncryption from an encrypted file, whose
-      // stream data is still encrypted), then optionally compress
-      // (the same bytes PdfWriter writes)
+      // Write raw DEFLATE /FlateDecode data, and zlib data cut short at a
+      // sync flush, back as complete zlib data (not for a document loaded
+      // with ignoreEncryption from an encrypted file, whose stream data is
+      // still encrypted), then optionally compress (the same bytes PdfWriter
+      // writes)
       if (entry.object.kind === 'stream') {
-        if (!isLoadedFromEncryptedFile(this.registry)) rewrapLegacyStream(entry.object);
+        if (!isLoadedFromEncryptedFile(this.registry)) {
+          rewrapLegacyStream(entry.object);
+          rewriteSyncFlushedStream(entry.object);
+        }
         if (this.compress) {
           this.compressStream(entry.object);
         }

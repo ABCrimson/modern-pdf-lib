@@ -98,10 +98,7 @@ const manifest = JSON.parse(
  * not extracted) keys nothing in 0.40.6: it is report-only, and every textSample in the manifest
  * comes from page content.
  */
-const PROVISIONAL_IDS: Readonly<Record<string, string>> = {
-  'corpus-P02':
-    'save copies Flate streams it read byte for byte, so qpdf warns on the output about input streams it already warned on',
-};
+const PROVISIONAL_IDS: Readonly<Record<string, string>> = {};
 
 interface Known {
   readonly key: DefectKey;
@@ -136,16 +133,6 @@ const INDIRECT_FONTS: Known = {
   failsWith: TEXT_MISSING,
 };
 
-// The saved file keeps an input stream that qpdf warns about unchanged (exit 3 is accepted only
-// for an input, never for this library's output).
-const COPIED_DAMAGED_STREAMS: Known = {
-  key: defectKey('corpus-P02', '0.41.0'),
-  failsWith: qpdfFindsOnly(
-    3,
-    /WARNING: in\.pdf \(offset \d+\): input stream is complete but output may still be valid/,
-  ),
-};
-
 // A name that holds a delimiter (the /Subtype /text/plain of an embedded file) is written
 // without escaping it, so qpdf ends the dictionary early and warns.
 const UNESCAPED_NAME = defectKey('tests-unit-core-b-22', '0.41.0');
@@ -160,13 +147,9 @@ const KNOWN: Readonly<Record<string, Partial<Record<Check, Known>>>> = {
   'irs-p1-chinese': { text: INDIRECT_FONTS },
   'pdfjs-cid-truetype': { text: INDIRECT_FONTS },
   'pyhanko-ua-and-a': { text: INDIRECT_FONTS },
-  // Category damaged (qpdf warns about its streams). Both saves keep the three Flate streams qpdf
-  // warns about in the input byte for byte, so qpdf warns on them in the output too.
-  'qpdf-form-acrobat': {
-    text: INDIRECT_FONTS,
-    qpdf: COPIED_DAMAGED_STREAMS,
-    qpdfDefault: COPIED_DAMAGED_STREAMS,
-  },
+  // Category damaged: qpdf warns about three Flate streams of the input whose zlib data ends at a
+  // sync flush. Both saves write them back as complete zlib data, so qpdf passes the output.
+  'qpdf-form-acrobat': { text: INDIRECT_FONTS },
   'qpdf-form-odt': { text: INDIRECT_FONTS },
   'qpdf-r6-attachments': {
     qpdf: UNESCAPED_NAME_SAVED,
@@ -336,7 +319,10 @@ describe('corpus', () => {
       'WARNING: in.pdf (offset 9): input stream is complete but output may still be valid';
     const other = 'WARNING: in.pdf (offset 7): xref not found';
     const tail = 'qpdf: operation succeeded with warnings';
-    const pattern = COPIED_DAMAGED_STREAMS.failsWith;
+    const pattern = qpdfFindsOnly(
+      3,
+      /WARNING: in\.pdf \(offset \d+\): input stream is complete but output may still be valid/,
+    );
     expect([head, named, named, tail].join(' | ')).toMatch(pattern);
     expect([head, named, other, tail].join(' | ')).not.toMatch(pattern);
     expect([head, other, named, tail].join(' | ')).not.toMatch(pattern);

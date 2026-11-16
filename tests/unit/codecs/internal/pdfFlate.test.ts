@@ -9,7 +9,14 @@
  */
 
 import { describe, it, expect, vi } from 'vitest';
-import { deflateRawSync, deflateSync, gzipSync, inflateRawSync, inflateSync } from 'node:zlib';
+import {
+  constants,
+  deflateRawSync,
+  deflateSync,
+  gzipSync,
+  inflateRawSync,
+  inflateSync,
+} from 'node:zlib';
 import { Inflate } from 'fflate';
 import {
   adler32,
@@ -18,6 +25,7 @@ import {
   inflateFlateUpTo,
   inflateRaw,
   inflateRawBounded,
+  inflateSyncFlushedZlib,
   isZlibHeader,
   wrapRawDeflate,
 } from '../../../../src/codecs/internal/pdfFlate.js';
@@ -309,6 +317,134 @@ describe('inflateRawBounded', () => {
     const text = encoder.encode('plain text, never compressed\n');
     expect(() => inflateRawBounded(text, 1 << 20)).toThrow(FAILURE);
     expect(() => inflateRawBounded(LONG_RAW.subarray(0, 40_000), 1 << 30)).toThrow(FAILURE);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// inflateSyncFlushedZlib
+// ---------------------------------------------------------------------------
+
+describe('inflateSyncFlushedZlib', () => {
+  /** Zlib data that ends at a sync flush: no final block and no Adler-32 trailer. */
+  const syncFlushed = (data: Uint8Array): Uint8Array =>
+    bytes(deflateSync(data, { finishFlush: constants.Z_SYNC_FLUSH }));
+  /** node:zlib's reading of such data: the bytes decoded up to the end of the input. */
+  const nodeRead = (data: Uint8Array): Uint8Array =>
+    bytes(inflateSync(data, { finishFlush: constants.Z_SYNC_FLUSH }));
+  const LONG = contentStream(12_000);
+
+  it('starts from data that node:zlib refuses as cut short and that ends with 00 00 ff ff', () => {
+    const data = syncFlushed(SAMPLE);
+    expect(() => inflateSync(data)).toThrow('unexpected end of file');
+    expect([...data.subarray(-4)]).toEqual([0x00, 0x00, 0xff, 0xff]);
+  });
+
+  it('returns the bytes decoded up to the sync flush, as node:zlib reads them', () => {
+    const data = syncFlushed(SAMPLE);
+    expect(inflateSyncFlushedZlib(data, 1 << 20)).toEqual(nodeRead(data));
+    expect(inflateSyncFlushedZlib(data, 1 << 20)).toEqual(new Uint8Array(SAMPLE));
+  });
+
+  it('reads data that spans several 16 KiB input steps', () => {
+    const data = syncFlushed(LONG);
+    expect(data.length).toBeGreaterThan(3 * 16 * 1024);
+    expect(inflateSyncFlushedZlib(data, LONG.length)).toEqual(new Uint8Array(LONG));
+  });
+
+  it('returns empty output for zlib data that holds a sync flush only', () => {
+    const data = Uint8Array.of(0x78, 0x9c, 0x00, 0x00, 0x00, 0xff, 0xff);
+    expect(nodeRead(data)).toEqual(new Uint8Array(0));
+    expect(inflateSyncFlushedZlib(data, 1 << 20)).toEqual(new Uint8Array(0));
+  });
+
+  it('returns undefined for complete zlib data, with or without its trailer', () => {
+    const complete = bytes(deflateSync(SAMPLE));
+    expect(inflateSyncFlushedZlib(complete, 1 << 20)).toBeUndefined();
+    expect(inflateSyncFlushedZlib(complete.subarray(0, -4), 1 << 20)).toBeUndefined();
+  });
+
+  it('returns undefined for complete zlib data followed by 00 00 ff ff', () => {
+    const complete = bytes(deflateSync(SAMPLE));
+    const data = new Uint8Array([...complete, 0x00, 0x00, 0xff, 0xff]);
+    expect(inflateSyncFlushedZlib(data, 1 << 20)).toBeUndefined();
+    // The same with the final block right after a sync flush (Z_SYNC_FLUSH, then Z_FINISH).
+    const finished = new Uint8Array([
+      ...syncFlushed(SAMPLE),
+      ...bytes(deflateRawSync(new Uint8Array(0))),
+      0x00,
+      0x00,
+      0xff,
+      0xff,
+    ]);
+    expect(inflateSyncFlushedZlib(finished, 1 << 20)).toBeUndefined();
+  });
+
+  it('returns undefined for data that is not zlib data', () => {
+    const raw = bytes(deflateRawSync(SAMPLE, { finishFlush: constants.Z_SYNC_FLUSH }));
+    expect(isZlibHeader(raw)).toBe(false);
+    expect(inflateSyncFlushedZlib(raw, 1 << 20)).toBeUndefined();
+    const text = new Uint8Array([...encoder.encode('plain text'), 0x00, 0x00, 0xff, 0xff]);
+    expect(inflateSyncFlushedZlib(text, 1 << 20)).toBeUndefined();
+    expect(inflateSyncFlushedZlib(new Uint8Array(0), 1 << 20)).toBeUndefined();
+  });
+
+  it('returns undefined for zlib data that is damaged in another way', () => {
+    const data = syncFlushed(LONG);
+    // Cut inside a block: the data does not end at a sync flush.
+    const cut = data.subarray(0, data.length >> 1);
+    expect([...cut.subarray(-4)]).not.toEqual([0x00, 0x00, 0xff, 0xff]);
+    expect(inflateSyncFlushedZlib(cut, LONG.length)).toBeUndefined();
+    // A block of the reserved type 3 after the header, then a sync flush.
+    const invalid = Uint8Array.of(0x78, 0x9c, 0x07, 0x00, 0x00, 0x00, 0xff, 0xff);
+    expect(() => nodeRead(invalid)).toThrow();
+    expect(inflateSyncFlushedZlib(invalid, 1 << 20)).toBeUndefined();
+    // Valid blocks, then bytes no DEFLATE decoder reads, then a sync flush.
+    const head = syncFlushed(SAMPLE);
+    const damaged = new Uint8Array([...head, 0x07, 0xff, 0x00, 0x00, 0x00, 0xff, 0xff]);
+    expect(inflateSyncFlushedZlib(damaged, 1 << 20)).toBeUndefined();
+  });
+
+  it('returns the data when the decoded size equals the bound, and undefined above it', () => {
+    const data = syncFlushed(LONG);
+    expect(inflateSyncFlushedZlib(data, LONG.length)).toEqual(new Uint8Array(LONG));
+    expect(inflateSyncFlushedZlib(data, LONG.length - 1)).toBeUndefined();
+  });
+
+  it('reads no further input once a step has decoded more than the bound', () => {
+    // 64 MiB of zeros: about 64 KB of zlib data, whose first 16 KiB step decodes to more than
+    // 1 MiB.
+    const zeros = syncFlushed(new Uint8Array(64 * 1024 * 1024));
+    expect(zeros.length).toBeGreaterThan(16 * 1024);
+    const push = vi.spyOn(Inflate.prototype, 'push');
+    try {
+      expect(inflateSyncFlushedZlib(zeros, 1024 * 1024)).toBeUndefined();
+      expect(push).toHaveBeenCalledTimes(1);
+    } finally {
+      push.mockRestore();
+    }
+  });
+
+  it('stops reading when 128 KiB of input in a row decode to no bytes', () => {
+    // Complete data, then 16 MiB of bytes that end with 00 00 ff ff: the inflater ignores
+    // bytes after the final block, so eight steps decode to nothing.
+    const complete = bytes(deflateSync(encoder.encode('hello world')));
+    const tail = new Uint8Array(complete.length + 16 * 1024 * 1024).fill(0x41);
+    tail.set(complete);
+    tail.set([0x00, 0x00, 0xff, 0xff], tail.length - 4);
+    // 1 MB of empty stored blocks after the header: no step decodes a byte.
+    const empty = new Uint8Array(2 + 200_000 * 5);
+    empty.set([0x78, 0x9c]);
+    for (let i = 0; i < 200_000; i++) empty.set([0, 0, 0, 0xff, 0xff], 2 + i * 5);
+    for (const data of [tail, empty]) {
+      const push = vi.spyOn(Inflate.prototype, 'push');
+      try {
+        expect(inflateSyncFlushedZlib(data, 64 * 1024 * 1024)).toBeUndefined();
+        // At most the step that decodes "hello world" and eight steps that decode nothing.
+        expect(push.mock.calls.length).toBeLessThanOrEqual(9);
+      } finally {
+        push.mockRestore();
+      }
+    }
   });
 });
 

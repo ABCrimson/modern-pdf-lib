@@ -14,16 +14,18 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import {
+  constants,
   deflateRawSync,
   deflateSync as zlibDeflateSync,
   inflateRawSync,
   inflateSync,
 } from 'node:zlib';
-import { describe, expect, it } from 'vitest';
-import { deflateSync as fflateRaw } from 'fflate';
+import { describe, expect, it, vi } from 'vitest';
+import { Inflate, deflateSync as fflateRaw } from 'fflate';
 import {
   compressPdfStream,
   rewrapLegacyStream,
+  rewriteSyncFlushedStream,
 } from '../../../../src/core/internal/flateStream.js';
 import { UnsupportedEncryptionError } from '../../../../src/errors.js';
 import { INTERNAL_LIMITS } from '../../../../src/internal/limits.js';
@@ -209,6 +211,134 @@ describe('rewrapLegacyStream', () => {
     const elapsed = performance.now() - start;
     expect(new Uint8Array(inflateSync(stream.data))).toEqual(encoder.encode('hello world'));
     expect(elapsed).toBeLessThan(1000);
+  });
+});
+
+/** Zlib data that ends at a sync flush: no final DEFLATE block and no Adler-32 trailer. */
+const syncFlushed = (data: Uint8Array): Uint8Array =>
+  new Uint8Array(zlibDeflateSync(data, { finishFlush: constants.Z_SYNC_FLUSH }));
+
+/** node:zlib's reading of data cut short: the bytes decoded up to the end of the input. */
+const decodedSoFar = (data: Uint8Array): Uint8Array =>
+  new Uint8Array(inflateSync(data, { finishFlush: constants.Z_SYNC_FLUSH }));
+
+/**
+ * Zlib data of `mib` MiB of zeros followed by `extra` zero bytes that ends at a sync flush: the
+ * zlib header, then the sync-flushed raw DEFLATE of one MiB of zeros `mib` times (each piece
+ * refers back only into its own output), then that of `extra` zeros.
+ */
+function syncFlushedZeros(mib: number, extra: number): { data: Uint8Array; piece: number } {
+  const flush = { finishFlush: constants.Z_SYNC_FLUSH };
+  const piece = new Uint8Array(deflateRawSync(new Uint8Array(1024 * 1024), flush));
+  const last = new Uint8Array(deflateRawSync(new Uint8Array(extra), flush));
+  const data = new Uint8Array(2 + mib * piece.length + last.length);
+  data.set([0x78, 0x9c]);
+  for (let i = 0; i < mib; i++) data.set(piece, 2 + i * piece.length);
+  data.set(last, 2 + mib * piece.length);
+  return { data, piece: piece.length };
+}
+
+describe('rewriteSyncFlushedStream', () => {
+  it('writes zlib data that ends at a sync flush back as zlib data that node:zlib inflates', () => {
+    const data = syncFlushed(TEXT);
+    expect(() => inflateSync(data)).toThrow('unexpected end of file');
+    const stream = streamOf(data, PdfName.of('FlateDecode'));
+    rewriteSyncFlushedStream(stream);
+    expect(new Uint8Array(inflateSync(stream.data))).toEqual(new Uint8Array(TEXT));
+    expect(new Uint8Array(inflateSync(stream.data))).toEqual(decodedSoFar(data));
+    expect(lengthOf(stream)).toBe(stream.data.length);
+    expect(stream.dict.get('/Filter')).toBe(PdfName.of('FlateDecode'));
+  });
+
+  it('rewrites when /FlateDecode is the first entry of a filter array, and keeps /DecodeParms', () => {
+    const data = syncFlushed(TEXT);
+    const filters = PdfArray.of([PdfName.of('FlateDecode'), PdfName.of('ASCIIHexDecode')]);
+    const stream = streamOf(data, filters);
+    const parms = new PdfDict();
+    parms.set('/Predictor', PdfNumber.of(12));
+    stream.dict.set('/DecodeParms', parms);
+    rewriteSyncFlushedStream(stream);
+    expect(new Uint8Array(inflateSync(stream.data))).toEqual(new Uint8Array(TEXT));
+    expect(stream.dict.get('/DecodeParms')).toBe(parms);
+    expect(stream.dict.get('/Filter')).toBe(filters);
+  });
+
+  it('never rewrites complete zlib data', () => {
+    const complete = new Uint8Array(zlibDeflateSync(TEXT));
+    const stream = streamOf(complete, PdfName.of('FlateDecode'));
+    rewriteSyncFlushedStream(stream);
+    expect(stream.data).toBe(complete);
+    // Complete data followed by the bytes a sync flush ends with.
+    const trailing = new Uint8Array([...complete, 0x00, 0x00, 0xff, 0xff]);
+    const after = streamOf(trailing, PdfName.of('FlateDecode'));
+    rewriteSyncFlushedStream(after);
+    expect(after.data).toBe(trailing);
+  });
+
+  it('leaves data that is damaged in another way, raw DEFLATE and other filters alone', () => {
+    const data = syncFlushed(TEXT);
+    const cut = data.subarray(0, data.length - 7);
+    const cutShort = streamOf(cut, PdfName.of('FlateDecode'));
+    rewriteSyncFlushedStream(cutShort);
+    expect(cutShort.data).toBe(cut);
+
+    const invalid = new Uint8Array([...data, 0x07, 0xff, 0x00, 0x00, 0x00, 0xff, 0xff]);
+    const damaged = streamOf(invalid, PdfName.of('FlateDecode'));
+    expect(() => rewriteSyncFlushedStream(damaged)).not.toThrow();
+    expect(damaged.data).toBe(invalid);
+
+    const raw = new Uint8Array(deflateRawSync(TEXT, { finishFlush: constants.Z_SYNC_FLUSH }));
+    const legacy = streamOf(raw, PdfName.of('FlateDecode'));
+    rewriteSyncFlushedStream(legacy);
+    expect(legacy.data).toBe(raw);
+
+    const second = streamOf(
+      data,
+      PdfArray.of([PdfName.of('ASCIIHexDecode'), PdfName.of('FlateDecode')]),
+    );
+    rewriteSyncFlushedStream(second);
+    expect(second.data).toBe(data);
+
+    const unfiltered = streamOf(data);
+    rewriteSyncFlushedStream(unfiltered);
+    expect(unfiltered.data).toBe(data);
+  });
+
+  // The pieces of zeros keep these inputs at about 1 KB per MiB decoded.
+  it('rewrites a stream whose decoded data is exactly 64 MiB', () => {
+    expect(INTERNAL_LIMITS.maxRewrapDecodedBytes).toBe(64 * 1024 * 1024);
+    const { data } = syncFlushedZeros(64, 0);
+    const stream = streamOf(data, PdfName.of('FlateDecode'));
+    rewriteSyncFlushedStream(stream);
+    const plain = new Uint8Array(inflateSync(stream.data));
+    expect(plain.length).toBe(INTERNAL_LIMITS.maxRewrapDecodedBytes);
+    expect(plain.every((b) => b === 0)).toBe(true);
+    expect(lengthOf(stream)).toBe(stream.data.length);
+  });
+
+  it('copies a stream whose decoded data is just over 64 MiB as loaded', () => {
+    const { data } = syncFlushedZeros(64, 1);
+    const stream = streamOf(data, PdfName.of('FlateDecode'));
+    rewriteSyncFlushedStream(stream);
+    expect(stream.data).toBe(data);
+    expect(lengthOf(stream)).toBe(data.length);
+  });
+
+  it('reads no input after the step that takes the decoded size past 64 MiB', () => {
+    // 1 GiB of zeros once decoded: about 1 MB of input.
+    const { data, piece } = syncFlushedZeros(1024, 0);
+    const push = vi.spyOn(Inflate.prototype, 'push');
+    try {
+      const stream = streamOf(data, PdfName.of('FlateDecode'));
+      rewriteSyncFlushedStream(stream);
+      expect(stream.data).toBe(data);
+      const read = push.mock.calls.reduce((sum, [chunk]) => sum + chunk.length, 0);
+      // 64 pieces decode to the limit; reading stops after the 16 KiB step that goes past it.
+      expect(read).toBeLessThanOrEqual(64 * piece + 2 * 16 * 1024);
+      expect(read).toBeLessThan(data.length / 8);
+    } finally {
+      push.mockRestore();
+    }
   });
 });
 
@@ -455,6 +585,72 @@ describe('save() of a document loaded from a file whose trailer has /Encrypt', (
     expect(saved.length).toBeGreaterThan(0);
     for (const data of saved) {
       expect(new Uint8Array(inflateSync(data))).toEqual(new Uint8Array(inflateRawSync(OPAQUE)));
+    }
+  });
+});
+
+describe('the writers on a loaded stream whose zlib data ends at a sync flush', () => {
+  const CUT = syncFlushed(TEXT);
+
+  it.each([true, false])(
+    'save() and saveAsStream() write the same complete zlib data (compress: %s)',
+    async (compress) => {
+      const saved = contentStreams(
+        await (await loadPdf(onePagePdf(CUT, { encrypt: 'none' }))).save({ compress }),
+      );
+      const streamed = contentStreams(
+        await readAll(
+          (await loadPdf(onePagePdf(CUT, { encrypt: 'none' }))).saveAsStream({ compress }),
+        ),
+      );
+      expect(saved.length).toBeGreaterThan(0);
+      for (const data of saved) {
+        expect(new Uint8Array(inflateSync(data))).toEqual(new Uint8Array(TEXT));
+      }
+      expect(streamed).toEqual(saved);
+    },
+  );
+
+  it.each([true, false])(
+    'writes such data byte for byte as loaded with ignoreEncryption from a file with /Encrypt (compress: %s)',
+    async (compress) => {
+      const load = { ignoreEncryption: true };
+      const doc = await loadPdf(onePagePdf(CUT, { encrypt: 'ref' }), load);
+      const saved = contentStreams(await doc.save({ compress }));
+      expect(saved.length).toBeGreaterThan(0);
+      for (const data of saved) expect(new Uint8Array(data)).toEqual(CUT);
+
+      const again = await loadPdf(onePagePdf(CUT, { encrypt: 'ref' }), load);
+      const streamed = contentStreams(await readAll(again.saveAsStream({ compress })));
+      expect(streamed.length).toBeGreaterThan(0);
+      for (const data of streamed) expect(new Uint8Array(data)).toEqual(CUT);
+    },
+  );
+
+  it('writes the three such streams of a corpus file as node:zlib decodes them', async () => {
+    const input = new Uint8Array(
+      readFileSync(join(import.meta.dirname, '../../../fixtures/corpus/qpdf-form-acrobat.pdf')),
+    );
+    const text = latin1.decode(input);
+    const saved = streamsByObject(await (await loadPdf(input)).save());
+    for (const [object, size] of [
+      ['83 0', 142],
+      ['84 0', 46],
+      ['85 0', 194_634],
+    ] as const) {
+      const at = text.indexOf(`\n${object} obj`);
+      const head = /\/Length (\d+)[^]*?stream\r?\n/.exec(text.slice(at));
+      if (head === null) throw new Error(`object ${object} not found`);
+      const start = at + head.index + head[0].length;
+      const loaded = input.subarray(start, start + Number(head[1]));
+      expect(() => inflateSync(loaded), `object ${object} of the input`).toThrow();
+      const written = saved.get(object)?.data ?? [];
+      expect(written.length, `object ${object} in the output`).toBeGreaterThan(0);
+      for (const data of written) {
+        const plain = new Uint8Array(inflateSync(data));
+        expect(plain.length).toBe(size);
+        expect(plain).toEqual(decodedSoFar(loaded));
+      }
     }
   });
 });

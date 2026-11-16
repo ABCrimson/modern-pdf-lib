@@ -27,6 +27,7 @@ import {
   compressPdfStream,
   isLoadedFromEncryptedFile,
   rewrapLegacyStream,
+  rewriteSyncFlushedStream,
 } from '../internal/flateStream.js';
 import { PdfObjectRegistry } from '../pdfObjects.js';
 import type { DocumentStructure } from '../pdfCatalog.js';
@@ -390,12 +391,15 @@ export function saveIncremental(
     }
     assertNoDecryptedObject(entry.object, 'saveIncremental()');
 
-    // Write raw DEFLATE /FlateDecode data back as zlib data (not for a
-    // document loaded with ignoreEncryption from an encrypted file, whose
-    // stream data is still encrypted), then optionally compress
-    // (only objects this update appends)
+    // Write raw DEFLATE /FlateDecode data, and zlib data cut short at a sync
+    // flush, back as complete zlib data (not for a document loaded with
+    // ignoreEncryption from an encrypted file, whose stream data is still
+    // encrypted), then optionally compress (only objects this update appends)
     if (entry.object.kind === 'stream') {
-      if (!isLoadedFromEncryptedFile(registry)) rewrapLegacyStream(entry.object);
+      if (!isLoadedFromEncryptedFile(registry)) {
+        rewrapLegacyStream(entry.object);
+        rewriteSyncFlushedStream(entry.object);
+      }
       if (compress) compressPdfStream(entry.object, compressionLevel);
     }
 

@@ -23,6 +23,10 @@
  *
  * All four read through one loop that hands fflate's `Inflate` steps of
  * 16 KiB of input and uses its public API only.
+ * - {@link inflateSyncFlushedZlib} reads zlib data that ends at a sync flush
+ *   with no final block, in the same steps and with the same API, and
+ *   returns the bytes decoded so far, up to a given bound; it returns
+ *   nothing for complete data.
  * - {@link isZlibHeader} is the RFC 1950 header test both halves share.
  * - {@link wrapRawDeflate} turns the output of a raw DEFLATE engine into
  *   zlib data.
@@ -393,4 +397,66 @@ export function inflateRawBounded(data: Uint8Array, maxSize: number): Uint8Array
   const read = inflateSteps(data, maxSize);
   if (read === undefined || read.over) return undefined;
   return joinChunks(read.chunks, read.size);
+}
+
+/** The bytes a zlib sync flush ends with: LEN and NLEN of an empty stored block (RFC 1951, 3.2.4). */
+const SYNC_FLUSH_END = [0x00, 0x00, 0xff, 0xff] as const;
+
+/**
+ * One byte pushed as the end of the input after the data: at a block boundary it starts a
+ * final block of the reserved type 3 (RFC 1951, 3.2.3), so an inflater that has not reached
+ * its final block throws on it, and one past its final block ignores it.
+ */
+const END_PROBE = Uint8Array.of(0x07);
+
+/**
+ * Inflate zlib data (RFC 1950) whose DEFLATE payload ends at a sync flush, with no final
+ * block and no Adler-32 trailer, as some producers write `/FlateDecode` data.
+ *
+ * Applies when the data starts with a zlib header ({@link isZlibHeader}) and ends with
+ * `00 00 ff ff`, the end of the empty stored block a sync flush writes. The payload is read
+ * in steps of 16 KiB of input without ending the input; then one byte that no inflater
+ * reads as data ends it. When the inflater refuses that end, the data was cut short, and the
+ * bytes decoded up to it are returned: the bytes zlib's `inflate` returns for that data with
+ * `Z_SYNC_FLUSH`.
+ *
+ * The result is `undefined` when the data does not start with a zlib header or does not end
+ * with `00 00 ff ff`; when it has reached its final block (complete zlib data, with or without
+ * its trailer, is never returned); when a step does not inflate; once the decoded size passes
+ * `maxSize`, reading no further input; and once 8 steps in a row (128 KiB of input) decode to
+ * no bytes, reading no further input. No error is thrown.
+ *
+ * @param data    - The stream data.
+ * @param maxSize - The largest decoded size returned.
+ * @returns         The bytes decoded up to the sync flush (possibly none), or `undefined`.
+ */
+export function inflateSyncFlushedZlib(data: Uint8Array, maxSize: number): Uint8Array | undefined {
+  if (!isZlibHeader(data) || SYNC_FLUSH_END.some((b, i) => data[data.length - 4 + i] !== b)) {
+    return undefined;
+  }
+  const payload = data.subarray(2);
+  const chunks: Uint8Array[] = [];
+  let size = 0;
+  const inflater = new Inflate((chunk) => {
+    size += chunk.length;
+    chunks.push(chunk);
+  });
+  try {
+    let idleSteps = 0;
+    for (let at = 0; at < payload.length; at += INFLATE_STEP) {
+      const before = size;
+      inflater.push(payload.subarray(at, at + INFLATE_STEP), false);
+      if (size > maxSize) return undefined;
+      idleSteps = size === before ? idleSteps + 1 : 0;
+      if (idleSteps === INFLATE_IDLE_STEPS) return undefined;
+    }
+  } catch {
+    return undefined;
+  }
+  try {
+    inflater.push(END_PROBE, true);
+  } catch {
+    return joinChunks(chunks, size);
+  }
+  return undefined;
 }

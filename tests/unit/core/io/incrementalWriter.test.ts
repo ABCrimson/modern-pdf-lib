@@ -5,7 +5,7 @@
  * xref subsection building, and integration with PDF structure.
  */
 
-import { deflateRawSync, inflateSync } from 'node:zlib';
+import { constants, deflateRawSync, deflateSync, inflateSync } from 'node:zlib';
 import { describe, it, expect } from 'vitest';
 import { createPdf, PageSizes, PdfDocument } from '../../../../src/index.js';
 import {
@@ -519,6 +519,39 @@ describe('incremental save writes zlib FlateDecode data', () => {
     const streamRef = registry.register(
       PdfStream.fromBytes(new Uint8Array(deflateRawSync(plain)), dict),
     );
+    const pagesDict = new PdfDict();
+    pagesDict.set('/Type', PdfName.of('Pages'));
+    const pagesRef = registry.register(pagesDict);
+    const catalogDict = new PdfDict();
+    catalogDict.set('/Type', PdfName.of('Catalog'));
+    const catalogRef = registry.register(catalogDict);
+    const infoRef = registry.register(new PdfDict());
+
+    for (const compress of [true, false]) {
+      const result = saveIncremental(
+        originalBytes,
+        registry,
+        { catalogRef, infoRef, pagesRef },
+        new Set([streamRef.objectNumber]),
+        { compress },
+      );
+      const streams = appendedFlateStreams(result.bytes, originalBytes.length);
+      expect(streams).toHaveLength(1);
+      expect(new Uint8Array(inflateSync(streams[0] ?? new Uint8Array(0)))).toEqual(
+        new Uint8Array(plain),
+      );
+    }
+  });
+
+  it('saveIncremental writes a changed stream whose zlib data ends at a sync flush back as complete zlib data', async () => {
+    const { bytes: originalBytes } = await createBasePdf();
+    const registry = new PdfObjectRegistry();
+    const plain = new TextEncoder().encode('BT /F1 12 Tf 50 700 Td (Cut short) Tj ET\n'.repeat(20));
+    const cut = new Uint8Array(deflateSync(plain, { finishFlush: constants.Z_SYNC_FLUSH }));
+    expect(() => inflateSync(cut)).toThrow('unexpected end of file');
+    const dict = new PdfDict();
+    dict.set('/Filter', PdfName.of('FlateDecode'));
+    const streamRef = registry.register(PdfStream.fromBytes(cut, dict));
     const pagesDict = new PdfDict();
     pagesDict.set('/Type', PdfName.of('Pages'));
     const pagesRef = registry.register(pagesDict);
