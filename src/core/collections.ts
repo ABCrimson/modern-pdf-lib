@@ -27,6 +27,7 @@
  */
 
 import { PdfDict, PdfName, PdfNumber, PdfString, PdfArray, type PdfObject } from './pdfObjects.js';
+import { embeddedFileKeyEncoding } from './embeddedFiles.js';
 
 /**
  * Collection view mode (ISO 32000-2, Table 43, `/View`):
@@ -71,7 +72,9 @@ export interface CollectionOptions {
   readonly sortKeys?: readonly string[] | undefined;
   /**
    * Name (in the `EmbeddedFiles` name tree) of the file to present first
-   * (`/D`), written as a PDF text string like the name tree keys.
+   * (`/D`), written as a PDF text string: printable ASCII as PDFDocEncoding,
+   * any other name as UTF-16BE. The name tree writes every key as UTF-16BE as
+   * soon as one name is not printable ASCII.
    */
   readonly initialDocument?: string | undefined;
 }
@@ -140,7 +143,10 @@ export function buildCollection(options: CollectionOptions = {}): PdfDict {
 
   const initialDocument = options.initialDocument;
   if (initialDocument !== undefined) {
-    const value: PdfObject = PdfString.fromText(initialDocument);
+    const value: PdfObject = PdfString.fromText(
+      initialDocument,
+      embeddedFileKeyEncoding([initialDocument]),
+    );
     collection.set('/D', value);
   }
 

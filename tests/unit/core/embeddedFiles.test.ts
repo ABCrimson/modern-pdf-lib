@@ -345,15 +345,31 @@ describe('buildEmbeddedFilesNameTree keys', () => {
     expect(key!.toText()).toBe('日本語.txt');
   });
 
+  it('keeps PDFDocEncoding for a tree of printable ASCII names only', () => {
+    const [ascii] = keysOf(['b.txt']);
+
+    expect(ascii!.toBytes()).toEqual(PdfString.fromText('b.txt', 'pdfdoc').toBytes());
+  });
+
+  it('writes every key as UTF-16BE once one name is not printable ASCII', () => {
+    const keys = keysOf(['Plain.txt', 'Café.txt']);
+
+    expect(keys.map((k) => k.toBytes())).toEqual([
+      PdfString.fromText('Café.txt', 'utf-16be').toBytes(),
+      PdfString.fromText('Plain.txt', 'utf-16be').toBytes(),
+    ]);
+  });
+
   it('sorts the keys by their bytes and keeps each file with its key', () => {
-    // PDFDocEncoding: the euro sign is byte 0xA0, "é" is 0xE9, "日" starts the UTF-16BE mark 0xFE 0xFF.
+    // One non-ASCII name makes every key UTF-16BE (FE FF), so "b" (00 62) sorts before "é" (00 E9),
+    // "€" (20 AC) and "日" (65 E5).
     const names = ['日.txt', 'é.txt', 'b.txt', '€.txt'];
     const tree = buildEmbeddedFilesNameTree(refs, names, registry);
     const items = (tree.get('/Names') as PdfArray).items;
 
     const keys = items.filter((_, i) => i % 2 === 0) as PdfString[];
-    expect(keys.map((k) => k.toText())).toEqual(['b.txt', '€.txt', 'é.txt', '日.txt']);
-    expect(items.filter((_, i) => i % 2 === 1)).toEqual([refs[2], refs[3], refs[1], refs[0]]);
+    expect(keys.map((k) => k.toText())).toEqual(['b.txt', 'é.txt', '€.txt', '日.txt']);
+    expect(items.filter((_, i) => i % 2 === 1)).toEqual([refs[2], refs[1], refs[3], refs[0]]);
     for (let i = 1; i < keys.length; i++) {
       expect(PdfString.compare(keys[i - 1]!, keys[i]!)).toBeLessThan(0);
     }

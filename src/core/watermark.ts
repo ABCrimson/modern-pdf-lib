@@ -175,6 +175,7 @@ export function addWatermarkToPage(
  *
  * @param doc      The PDF document.
  * @param options  Watermark options.
+ * @throws {UnencodableTextError} For a character WinAnsi has no code for.
  */
 export function addWatermark(doc: PdfDocument, options: WatermarkOptions): void {
   const registry = doc.getRegistry();

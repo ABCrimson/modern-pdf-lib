@@ -235,11 +235,27 @@ export function getAttachments(
 // Name tree builder
 // ---------------------------------------------------------------------------
 
+/** A name of printable ASCII characters only (U+0020 to U+007E). */
+const PRINTABLE_ASCII = /^[ -~]*$/;
+
+/**
+ * The encoding of the name-tree keys of `names`: PDFDocEncoding when every name is printable ASCII,
+ * otherwise UTF-16BE (FE FF) for all of them. Keys sort by their bytes (ISO 32000-2 7.9.6) and qpdf
+ * checks the order of the decoded text; one encoding for the whole tree makes the two orders the
+ * same, except for a name with a character above U+FFFF against one with a character from U+E000 to
+ * U+FFFF. Mixed encodings would not: "Plain" (50) sorts before "Café" (FE FF 00 43) by bytes, and
+ * PDFDocEncoding alone would not either: "€" (0xA0) sorts before "Ü" (0xDC).
+ */
+export function embeddedFileKeyEncoding(names: readonly string[]): 'pdfdoc' | 'utf-16be' {
+  return names.every((name) => PRINTABLE_ASCII.test(name)) ? 'pdfdoc' : 'utf-16be';
+}
+
 /**
  * Build an `/EmbeddedFiles` name tree dictionary.
  *
- * Each name is written as a PDF text string and the pairs are sorted by the
- * bytes of those keys (ISO 32000-2 §7.9.6); a file keeps its own name.
+ * Each name is written as a PDF text string in the encoding
+ * `embeddedFileKeyEncoding(names)` gives and the pairs are sorted by the bytes
+ * of those keys (ISO 32000-2 §7.9.6); a file keeps its own name.
  *
  * @param files     Array of indirect references to filespec dictionaries.
  * @param names     Corresponding file names (same order as `files`).
@@ -252,8 +268,9 @@ export function buildEmbeddedFilesNameTree(
   _registry: PdfObjectRegistry,
 ): PdfDict {
   // Build the /Names array: [name1 ref1 name2 ref2 ...]
+  const encoding = embeddedFileKeyEncoding(names);
   const entries = files
-    .map((file, i) => ({ key: PdfString.fromText(names[i]!), file }))
+    .map((file, i) => ({ key: PdfString.fromText(names[i]!, encoding), file }))
     .toSorted((a, b) => PdfString.compare(a.key, b.key));
   const namesArray = new PdfArray();
   for (const { key, file } of entries) {

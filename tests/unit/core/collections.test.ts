@@ -178,7 +178,13 @@ describe('buildCollection text strings', () => {
     const col = buildCollection({ initialDocument: 'Größe 日本.pdf' });
     const d = col.get('/D') as PdfString;
 
-    expect(d.toBytes()).toEqual(PdfString.fromText('Größe 日本.pdf').toBytes());
+    expect(d.toBytes()).toEqual(PdfString.fromText('Größe 日本.pdf', 'utf-16be').toBytes());
     expect(d.toText()).toBe('Größe 日本.pdf');
+  });
+
+  it('writes a non-ASCII initial document as UTF-16BE, like the keys of its name tree', () => {
+    const d = buildCollection({ initialDocument: 'Größe.pdf' }).get('/D') as PdfString;
+
+    expect(d.toBytes()).toEqual(PdfString.fromText('Größe.pdf', 'utf-16be').toBytes());
   });
 });

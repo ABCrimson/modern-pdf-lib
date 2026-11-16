@@ -56,4 +56,17 @@ describe('embedded file names read back by pdf.js and qpdf', () => {
       NAMES.map((n) => `Beschreibung ${n}`).toSorted(byCodeUnit),
     );
   });
+
+  test('a name tree of non-ASCII names passes qpdf --check', async () => {
+    const names = ['€-Rechnung.pdf', 'Übersicht.pdf', '– Notiz.txt', 'Ärger.txt', '日本語.txt'];
+    const doc = createPdf();
+    doc.addPage();
+    for (const name of names) doc.attachFile(name, new TextEncoder().encode(name), 'text/plain');
+    const bytes = await cleanSave(doc);
+
+    const keys = await withPdfjs(bytes, async (pdf) =>
+      [...((await pdf.getAttachments()) ?? [])].map(([key]) => key),
+    );
+    expect(keys.toSorted(byCodeUnit)).toEqual([...names].toSorted(byCodeUnit));
+  });
 });
