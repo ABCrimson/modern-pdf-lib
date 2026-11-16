@@ -22,6 +22,7 @@ import {
   UnencodableTextError,
 } from '../../../../src/index.js';
 import type { ByteWriter, PdfDocument } from '../../../../src/index.js';
+import { withPdfjs } from '../../../helpers/oracle/pdfjs.js';
 import { requireQpdf } from '../../../helpers/oracle/qpdf.js';
 import { qpdfObjects } from '../../../oracle/text-set/setup.js';
 
@@ -112,8 +113,11 @@ describe('a title above U+00FF is a text string, not a byte string handed to wri
     return objects.get(`obj:${String(objects.get('trailer')?.['/Info'])}`)?.['/Title'];
   };
 
-  test('save() writes it as UTF-16BE, which qpdf reads back', async () => {
-    expect(qpdfTitle(await titled('日').save({ compress: false }))).toBe('u:日');
+  test('save() writes it as UTF-16BE, which qpdf and pdf.js read back', async () => {
+    const bytes = await titled('日').save({ compress: false });
+    expect(qpdfTitle(bytes)).toBe('u:日');
+    const info = await withPdfjs(bytes, async (pdf) => (await pdf.getMetadata()).info);
+    expect(info).toMatchObject({ Title: '日' });
   });
 
   test('saveDocumentIncremental() writes it as UTF-16BE, which qpdf reads back', async () => {
