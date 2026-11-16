@@ -10,9 +10,11 @@
  *
  * The writer stores each of these keys as a PDF text string (ISO 32000-2 7.9.2.2): PDFDocEncoding
  * when every character is in it and the bytes do not begin like a byte order mark, else UTF-16BE
- * with FE FF, which qpdf prints as "u:" text. The getters of a loaded document still return such
- * a key one byte per character, so only Latin-1 text that does not begin like a byte order mark
- * reads back through them.
+ * with FE FF, which qpdf prints as "u:" text. qpdf prints PDFDocEncoding text that holds a byte
+ * outside ASCII text, such as 0x18 (breve) or 0x80 and above, as "b:" hex, which qpdfText
+ * (./setup.ts) decodes with the library's own decoder, so pdf.js is the independent reader of such
+ * text. The getters of a loaded document still return such a key one byte per character, so only
+ * Latin-1 text that does not begin like a byte order mark reads back through them.
  */
 import { beforeEach, describe, expect, test } from 'vitest';
 import { createPdf, loadPdf } from '../../../src/index.js';

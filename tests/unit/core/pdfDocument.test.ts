@@ -22,6 +22,8 @@ import {
   base64Encode,
   base64Decode,
   setPageLabels,
+  buildCatalog,
+  PdfObjectRegistry,
 } from '../../../src/index.js';
 import type { PdfObject } from '../../../src/index.js';
 import {
@@ -690,5 +692,27 @@ describe('PdfDocument strings are written by the type of their key', () => {
       expect(bytes.every((byte) => byte < 0x80)).toBe(true);
       expect(textOf(info.get(key))[1]).toMatch(/^D:20260102/);
     }
+  });
+
+  it('writes the lang option of buildCatalog as a text string', () => {
+    const registry = new PdfObjectRegistry();
+    const catalogRef = buildCatalog(registry.register(new PdfDict()), registry, { lang: 'x-日本' });
+    expect(textOf((registry.resolve(catalogRef) as PdfDict).get('/Lang'))).toEqual([
+      'utf-16be',
+      'x-日本',
+    ]);
+    const ascii = buildCatalog(registry.register(new PdfDict()), registry, { lang: 'de-DE' });
+    expect(textOf((registry.resolve(ascii) as PdfDict).get('/Lang'))).toEqual(['pdfdoc', 'de-DE']);
+  });
+
+  it('writes a PDFDocEncoding page label prefix in PDFDocEncoding', async () => {
+    const doc = createPdf();
+    doc.addPage();
+    setPageLabels(doc, [{ startPage: 0, style: 'decimal', prefix: 'Œ-' }]);
+    const { catalog, resolve } = await savedObjects(doc);
+    const labels = resolve(catalog.get('/PageLabels')) as PdfDict;
+    const range = resolve((labels.get('/Nums') as PdfArray).items[1]) as PdfDict;
+    expect(textOf(range.get('/P'))).toEqual(['pdfdoc', 'Œ-']);
+    expect((range.get('/P') as PdfString).toBytes()).toEqual(Uint8Array.of(0x96, 0x2d));
   });
 });
