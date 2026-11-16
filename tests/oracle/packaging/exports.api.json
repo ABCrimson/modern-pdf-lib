@@ -1476,7 +1476,7 @@
         },
         "PdfWriter": {
           "kind": "class",
-          "decl": "sha256:1761812b6c01"
+          "decl": "sha256:1546b46e8f6d"
         },
         "PdfX6Options": {
           "kind": "interface",
@@ -7048,7 +7048,7 @@
         },
         "PdfWriter": {
           "kind": "class",
-          "decl": "sha256:1761812b6c01"
+          "decl": "sha256:1546b46e8f6d"
         },
         "PdfX6Options": {
           "kind": "interface",
