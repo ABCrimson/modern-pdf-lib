@@ -30,7 +30,6 @@ const optimizedBytes = await doc.save();
 | Option | Type | Default | Description |
 |:---|:---|:---|:---|
 | `quality` | `number` | `80` | JPEG quality (1–100) |
-| `maxDpi` | `number` | — | Has no effect (images are never downscaled); passing it emits one `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`) per process |
 | `progressive` | `boolean` | `false` | Encode as progressive JPEG |
 | `chromaSubsampling` | `string` | `'4:2:0'` | Chroma subsampling: `'4:4:4'`, `'4:2:2'`, or `'4:2:0'` |
 | `skipSmallImages` | `boolean` | `false` | Skip images smaller than 10 KB |
@@ -42,6 +41,8 @@ const optimizedBytes = await doc.save();
 | `namePattern` | `RegExp` | — | Only optimize images whose resource name matches |
 | `concurrency` | `number` | `1` | Maximum number of images processed concurrently |
 | `onProgress` | `(info: ProgressInfo) => void` | — | Called once per image, in input order, after all images are processed |
+
+`optimizeAllImages()` does not downscale images; the option `maxDpi` was removed in 0.41.0 and a call that passes it throws `UnsupportedOptionError`. `analyzeImages()` still takes `maxDpi`.
 
 ### Report Structure
 

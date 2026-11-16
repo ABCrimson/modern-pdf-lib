@@ -167,7 +167,7 @@ const matrixCustom = encodeCode39('HELLO', false, 2.5);
 const checkChar = computeCode39CheckDigit('PART-A1234');
 ```
 
-The wide-to-narrow ratio belongs to the encoder: `encodeCode39(data, includeCheckDigit, wideToNarrowRatio)` takes it as its third argument, as in the example above. The `wideToNarrowRatio` and `includeCheckDigit` fields of `Code39Options` have no effect in this version, and neither has `showText`: passing `showText: true`, `includeCheckDigit: true` or a `wideToNarrowRatio` to `code39ToOperators()` emits one `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`) per option and process.
+The wide-to-narrow ratio belongs to the encoder: `encodeCode39(data, includeCheckDigit, wideToNarrowRatio)` takes it as its third argument, as in the example above. The `wideToNarrowRatio`, `includeCheckDigit` and `showText` fields of `Code39Options` were removed in 0.41.0, and `code39ToOperators()` throws `UnsupportedOptionError` if one is passed (`includeCheckDigit: false` and `showText: false` still pass).
 
 ### ITF (Interleaved 2 of 5)
 
@@ -315,13 +315,13 @@ const ops = renderStyledBarcode(matrix, 50, 600, 'SHIP-2026-0042', {
 page.pushOperators(ops);
 ```
 
-The `fontName` option is a page font **resource name**; when `showText` is enabled, pass the `.name` of a font embedded with `doc.embedFont()` so the text references a registered font. When `fontName` is omitted it defaults to the literal `Helvetica`, which is not a registered resource name, so always pass `fontName` together with `showText`. The text is centred with an estimate of 0.5 em per character rather than the font's metrics, so it can sit off-centre.
+The `fontName` option is a page font **resource name**; when `showText` is enabled, pass the `.name` of a font embedded with `doc.embedFont()` so the text references a registered font. When `fontName` is omitted it defaults to the literal `Helvetica`, which is not a registered resource name, so always pass `fontName` together with `showText`. The text is written in the encoding of that font (WinAnsiEncoding for the Latin standard fonts and for any name that is no standard font): a character outside it, such as a CJK character, or a tab or line break throws `UnencodableTextError`. The text is centred with an estimate of 0.5 em per character rather than the font's metrics, so it can sit off-centre.
 
 `calculateBarcodeDimensions(matrix, options)` returns the total rendered size for layout planning.
 
 ## Common Styling Options
 
-All 1D barcode renderers accept these options (except `showText` and `fontSize`, noted below) through their respective option types (`Code128Options`, `Code39Options`, `ItfOptions`, `BarcodeOptions`/`EanOptions`/`UpcOptions`):
+All 1D barcode renderers accept `height`, `moduleWidth`, `quietZone` and `color` through their respective option types (`Code128Options`, `Code39Options`, `ItfOptions`, `BarcodeOptions`/`EanOptions`/`UpcOptions`); `showText` and `fontSize` belong to `StyledBarcodeOptions` of `renderStyledBarcode` only:
 
 | Option | Type | Default | Description |
 |---|---|---|---|
@@ -332,9 +332,9 @@ All 1D barcode renderers accept these options (except `showText` and `fontSize`,
 | `showText` | `boolean` | `false` | Human-readable text below the barcode (`renderStyledBarcode` only) |
 | `fontSize` | `number` | `10` | Font size for human-readable text (`renderStyledBarcode` only) |
 
-The per-format `*ToOperators` renderers draw bars only; use `renderStyledBarcode` for human-readable text. Passing `showText: true` or a `fontSize` to `code128ToOperators()`, `code39ToOperators()`, `itfToOperators()`, `ean13ToOperators()`, `ean8ToOperators()` or `upcAToOperators()` has no effect and emits one `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`) per option and process. The same holds for `errorCorrection` in the options of `qrCodeToOperators()` (use the argument of `encodeQrCode()`) and for `columns` and `errorLevel` in the options of `pdf417ToOperators()` (use the options of `encodePdf417()`).
+The per-format `*ToOperators` renderers draw bars only; use `renderStyledBarcode` for human-readable text. Passing `showText: true`, `fontSize`, `includeCheckDigit: true`, `wideToNarrowRatio`, `errorCorrection`, `columns` or `errorLevel` to a `*ToOperators()` function throws `UnsupportedOptionError`; use `renderStyledBarcode` for text and the arguments of the encoders (`encodeCode39()`, `encodeItf()`, `encodeQrCode()`, `encodePdf417()`) for the rest.
 
-Code 39 and ITF take `wideToNarrowRatio` (default `3`) as an argument of `encodeCode39()` and `encodeItf()`; the field of the same name in the options of `code39ToOperators()` and `itfToOperators()` has no effect. ITF also supports `bearerBars` and `bearerBarWidth`.
+Code 39 and ITF take `wideToNarrowRatio` (default `3`) as an argument of `encodeCode39()` and `encodeItf()`; the field of the same name in the options of `code39ToOperators()` and `itfToOperators()` no longer exists. ITF also supports `bearerBars` and `bearerBarWidth`.
 
 QR codes use `QrCodeOptions` with `moduleSize` (default `2`), `quietZone` (default `4`), `color`, and `backgroundColor`.
 

@@ -52,7 +52,7 @@ page.drawText('Courier text', {
 | ZapfDingbats | `ZapfDingbats` | — | — | — |
 
 > [!WARNING]
-> Standard fonts only support the Latin-1 (WinAnsi) character set. For Unicode text, CJK characters, or any non-Latin script, you must embed a custom font.
+> Standard fonts only support the Latin-1 (WinAnsi) character set. For Unicode text, CJK characters, or any non-Latin script, you must embed a custom font: `drawText()` throws `UnencodableTextError` for a character the font has no code for, and does so for an embedded font that has no glyph for it as well. Symbol and ZapfDingbats take Unicode text (`'αβγ'`, `'✓'`) and write their own codes.
 
 ## Custom Font Embedding
 
@@ -128,7 +128,7 @@ The subsetter works at the TrueType level. It keeps every glyph ID (so `CIDToGID
 
 ### The `subset` Option
 
-`embedFont()` accepts `{ subset?: boolean }`, but the option has no effect: TrueType fonts are always subset when the document is saved, and `{ subset: false }` does not embed the full font. Passing `subset: false` emits one `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`) per process. The `features` option has no effect and warns the same way.
+`embedFont()` accepts `{ subset?: boolean }`. By default (`true`) a TrueType or CFF-based OpenType font is subset to the glyphs the document draws when it is saved. `{ subset: false }` embeds the whole font program, so every glyph is available to a later editor; the file grows by the size of the font. If several `embedFont()` calls embed the same font, one `subset: false` makes it whole. The `features` option was removed in 0.41.0: passing it throws `UnsupportedOptionError`.
 
 > [!TIP]
 > Dropping unused outlines usually removes most of a large font's size.

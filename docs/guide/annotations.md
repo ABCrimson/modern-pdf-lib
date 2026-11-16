@@ -32,6 +32,8 @@ annot.isPrintable();        // true
 annot.isLocked();           // false
 ```
 
+`contents` and `author` are written as PDF text strings: PDFDocEncoding when every character has a code there, else UTF-16BE, so text such as `日本語` is stored and `getContents()` and `getAuthor()` return the decoded text of a loaded annotation.
+
 ### Adding an annotation to a page
 
 An instance built with a typed `create()` is attached to a page with `addExistingAnnotation`. `page.addAnnotation(type, options)` builds a generic `PdfAnnotation` instead of the typed classes documented here.
@@ -87,6 +89,8 @@ pageLink.getDestination();       // [4, 'FitH']
 
 The destination is written as a page index in `/Dest` (`setDestination`, or the `pageIndex` option), not as an indirect page reference.
 
+A URL that holds characters above U+007F is written percent-encoded as UTF-8, with an internationalised host name as punycode (`https://example.com/ü` is written `https://example.com/%C3%BC`), and `getUrl()` returns the encoded form; a non-ASCII value that is not an absolute URL throws `InvalidArgumentError`.
+
 ## FreeText Annotations
 
 FreeText annotations display text directly on the page (no icon or popup):
@@ -105,6 +109,8 @@ freeText.getText();       // 'This is a visible text note'
 freeText.getFontSize();   // 14
 freeText.getAlignment();  // 'center'
 ```
+
+The appearance is drawn in the standard font that the font name of the `/DA` string names (Helvetica for a name that is neither an alias such as `Helv` nor a standard font name), in WinAnsiEncoding for the Latin fonts: text that font has no code for throws `UnencodableTextError` when the appearance is generated, so also from `save()`.
 
 ## Text Markup Annotations
 

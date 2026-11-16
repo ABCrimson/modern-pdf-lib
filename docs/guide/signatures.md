@@ -38,7 +38,7 @@ const signedPdf = await signPdf(pdfBytes, 'Signature1', {
 await writeFile('document-signed.pdf', signedPdf);
 ```
 
-The signature dictionary does not carry `reason`, `location` or `contactInfo`. `reason` and `location` appear only in the text of a visible signature whose `appearance` has no `text` of its own (see below); `contactInfo` appears nowhere. Passing one of them anywhere else has no effect in this version and emits one `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`) per option and process.
+`signPdf()` writes `reason`, `location` and `contactInfo` into the signature dictionary as `/Reason`, `/Location` and `/ContactInfo`, each a PDF text string (PDFDocEncoding, or UTF-16BE when a character is outside it) inside the signed byte range; `getSignatures()` reads all three back and `verifySignatures()` reads `reason`. `reason` and `location` also appear in the text of a visible signature whose `appearance` has no `text` of its own (see below).
 
 ### Visible Signature
 
@@ -73,6 +73,8 @@ appearance: {
   ],
 }
 ```
+
+The lines are drawn in Helvetica with WinAnsiEncoding. A character outside it, such as one of a Cyrillic or CJK name, throws `UnencodableTextError`; this applies to the certificate subject CN in the generated text too.
 
 ## Verifying Signatures
 
@@ -267,11 +269,11 @@ try {
 }
 ```
 
-`requestTimestamp()` sends a random nonce and checks that the TSTInfo in the answer carries the hash you sent and the same nonce. It throws `TimestampVerificationError` (code `timestamp-unverified`) when the TSTInfo cannot be parsed or its message imprint or nonce differs. It throws a plain `Error` when the request fails, the TSA reports an error status, or the answer carries no timestamp token; `parseTimestampResponse()` throws the same plain `Error` for an error status or a missing token. `parseTimestampResponse()` throws the same `TimestampVerificationError` when the TSTInfo cannot be parsed, or when its message imprint or nonce differs from the optional `expected` argument; without `expected` the token is parsed but not bound to a request.
+`requestTimestamp()` sends a random nonce and checks that the TSTInfo in the answer carries the hash you sent and the same nonce. It throws `TimestampVerificationError` (code `timestamp-unverified`) when the TSTInfo cannot be parsed or its message imprint or nonce differs. It throws `EnvironmentError` (code `environment-unavailable`, reason `'network'`) when the TSA answers with an HTTP error status or reports an error status (a request that cannot connect rejects with the `TypeError` of `fetch`), and `MalformedInputError` (code `malformed-input`, format `'der'`) when the answer carries no timestamp token; `parseTimestampResponse()` throws the same `EnvironmentError` for an error status and the same `MalformedInputError` for a missing token. `parseTimestampResponse()` throws the same `TimestampVerificationError` when the TSTInfo cannot be parsed, or when its message imprint or nonce differs from the optional `expected` argument; without `expected` the token is parsed but not bound to a request.
 
 The CMS signature of the token and the TSA certificate are not verified in this release. `signingTime` is the time written in the token; check the token yourself before relying on it as proof of time. The time a signer claims inside its own signature (`signingTime` on a verification result, `signingDate` on `verifySignatures()`) is not a timestamp: nothing attests it.
 
-The `timestampUrl` field of the `signPdf()` options has no effect in this version: `signPdf()` does not request or embed a timestamp, and passing the field emits one `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`) per process. A token from `requestTimestamp()` is not attached to a signature for you.
+`signPdf()` does not request or embed a timestamp in this release: passing `timestampUrl` throws `UnsupportedOptionError` (code `unsupported-option`, `plannedFor` `'0.45.0'`) and nothing is signed. A token from `requestTimestamp()` is not attached to a signature for you.
 
 ## Key Preparation
 

@@ -140,6 +140,8 @@ const words = await applyOcr(page, engine, { dpi: 150 });
 const out = await doc.save(); // the page is now searchable
 ```
 
+The overlay font is Helvetica in WinAnsiEncoding. A word with a character outside that encoding is left out of the invisible text layer, and one `MPL_OCR_UNENCODABLE` warning (once per process) gives the count of the words left out by the call that emits it; the returned array still lists every word the engine recognized.
+
 ## Redaction by content removal
 
 Not available in this release. `redactRegions(page, rects)` throws

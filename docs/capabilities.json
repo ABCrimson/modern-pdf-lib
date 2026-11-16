@@ -246,7 +246,7 @@
       "id": "cap-feat-signatures",
       "region": "readme-features",
       "doc": "README.md",
-      "text": "Digital signatures (PKCS#7, visible/invisible; requestTimestamp checks the response's hash and nonce against the request, but the token's signature and the TSA certificate are not verified, and signPdf does not embed a timestamp: its timestampUrl option has no effect)",
+      "text": "Digital signatures (PKCS#7, visible/invisible; requestTimestamp checks the response's hash and nonce against the request, but the token's signature and the TSA certificate are not verified, and signPdf does not embed a timestamp: its timestampUrl option throws UnsupportedOptionError (planned for 0.45.0))",
       "grade": "qualified",
       "tests": [],
       "limits": [
@@ -286,7 +286,7 @@
       "id": "cap-feat-multi-signature",
       "region": "readme-features",
       "doc": "README.md",
-      "text": "Multi-signature chains, MDP certification reading (setCertificationLevel has no effect: signPdf writes no DocMDP), LTV archival (a signature followed by a later update, such as a second signature or LTV data added with embedLtvData, reports valid: false with coversWholeDocument: false, and detectModifications reports a later signature as an unknown violation)",
+      "text": "Multi-signature chains, MDP certification reading (setCertificationLevel throws UnsupportedOptionError, planned for 0.45.0: signPdf writes no DocMDP), LTV archival (a signature followed by a later update, such as a second signature or LTV data added with embedLtvData, reports valid: false with coversWholeDocument: false, and detectModifications reports a later signature as an unknown violation)",
       "grade": "qualified",
       "tests": [],
       "limits": [
@@ -300,7 +300,7 @@
       "id": "cap-feat-counter-signatures",
       "region": "readme-features",
       "doc": "README.md",
-      "text": "Counter-signatures; field locks are read, not written (addFieldLock has no effect: signPdf writes no /Lock dictionary)",
+      "text": "Counter-signatures; field locks are read, not written (addFieldLock throws UnsupportedOptionError, planned for 0.45.0: signPdf writes no /Lock dictionary)",
       "grade": "qualified",
       "tests": [],
       "limits": [
@@ -623,7 +623,7 @@
       "id": "cap-feat-typed-errors",
       "region": "readme-features",
       "doc": "README.md",
-      "text": "Typed errors (every error class derives from PdfError and carries a stable code, and the package entries export the classes their calls can throw; some exported classes have no throw site yet, and many errors are still plain Error, RangeError or TypeError)",
+      "text": "Typed errors (every error class derives from PdfError and carries a stable code, and the package entries export the classes their calls can throw)",
       "grade": "qualified",
       "tests": [],
       "limits": [

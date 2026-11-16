@@ -37,6 +37,8 @@ const bytes = await doc.save();
 
 ::: warning Fonts
 Give every span a `font` from `embedFont()`. A span without one is drawn with the resource name `Helvetica`, which `embedFont()` never registers (fonts are registered as F1, F2, ...), so the text does not show. Text that overflows into the next column (`layoutColumns`) or frame (`layoutTextFlow`) is carried on as a plain string without its span's font, so only the first column or frame shows text. To flow text across frames, call `layoutParagraph` once per frame and wrap the previous result's overflow in a span: `layoutParagraph([{ text: prev.overflow, font: helvetica }], frame, options)`. The examples below assume `helvetica` is in scope.
+
+The words of a paragraph are written in the encoding of the font they name (WinAnsiEncoding for the Latin standard fonts and for any name that is no standard font). A word with a character outside it, such as CJK text, or with a tab or another C0 control character throws `UnencodableTextError`; `layoutParagraph` breaks paragraphs on CRLF and CR as on LF.
 :::
 
 ::: warning Word positions

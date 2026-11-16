@@ -166,7 +166,7 @@ const bpc = buildBlackPointCompensationExtGState('ON');       // ExtGState /UseB
 import { buildPieceInfo, PdfDict, PdfString } from 'modern-pdf-lib';
 
 const data = new PdfDict();
-data.set('/LayoutVersion', PdfString.literal('2.1'));
+data.set('/LayoutVersion', PdfString.fromAscii('2.1'));
 const pieceInfo = buildPieceInfo('MyApp', data, new Date());
 const ref = doc.getRegistry().register(pieceInfo);
 ```

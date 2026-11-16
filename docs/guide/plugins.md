@@ -47,17 +47,20 @@ doc.use(timestampPlugin({
 
 ### metadataPlugin
 
-Sets the producer string on register and again before every save:
+Sets the producer and creator strings on register, the producer again before every save, and a default title and author at save when the document has none:
 
 ```ts
 import { metadataPlugin } from 'modern-pdf-lib';
 
 doc.use(metadataPlugin({
   producer: 'My Application v3.0',   // Default: 'modern-pdf-lib'
+  creator: 'Invoice app',            // Written to /Creator on register
+  defaultTitle: 'Invoice',           // Written to /Title at save when the document has none
+  defaultAuthor: 'Billing',          // Written to /Author at save when the document has none
 }));
 ```
 
-`MetadataPluginOptions` also declares `creator`, `defaultTitle` and `defaultAuthor`, but the plugin does not apply them; only `producer` takes effect. Passing one of the three emits one `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`) per option and process. Because the producer is set again in `onBeforeSave`, a producer set on the document after `.use()` is overwritten at save.
+`creator` is written to `/Creator` when the plugin registers. `defaultTitle` and `defaultAuthor` are written to `/Title` and `/Author` by `save()` (and `saveAsBlob()`, `saveAsBase64()`, `copy()`; `saveAsStream()` runs no plugin hook and writes no default), and only where the document has none (or an empty one): a title or author set before or after `.use()` is kept. Because the producer is set again in `onBeforeSave`, a producer set on the document after `.use()` is overwritten at save.
 
 ### accessibilityPlugin
 
@@ -242,7 +245,7 @@ manager.unregister('timestamp');
 ```
 
 ::: warning Duplicate Names
-The plugin manager throws an error if you try to register two plugins with the same `name`. Each plugin must have a unique name string.
+The plugin manager throws a `PluginError` (code `plugin-failed`) if you try to register two plugins with the same `name`, and an `InvalidArgumentError` for an empty one. Each plugin must have a unique name string.
 :::
 
 ---

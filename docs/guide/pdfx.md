@@ -110,7 +110,7 @@ await writeFile('print-ready.pdf', compliant);
 - **RGB to CMYK conversion** -- cannot convert DeviceRGB to CMYK (X-1a will still fail validation)
 - **Font embedding** -- cannot embed fonts that are not already embedded
 - **Encryption** -- throws an error if the document is encrypted
-- **JavaScript** -- throws an error if the document contains JavaScript
+- **JavaScript** -- throws `InvalidStateError` (code `invalid-state`) if the document contains JavaScript
 
 Remove encryption and JavaScript before calling `enforcePdfX()`.
 :::

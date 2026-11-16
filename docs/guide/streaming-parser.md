@@ -85,8 +85,9 @@ const parser = new StreamingPdfParser({
 | Option | Type | Default | Description |
 |---|---|---|---|
 | `maxBufferSize` | `number` | `64 * 1024 * 1024` | Maximum bytes to buffer before throwing |
-| `parseContentStreams` | `boolean` | `false` | Has no effect; passing `true` emits one `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`) per process |
 | `pageRange` | `{ start?, end? }` | all pages | Restrict which pages to extract metadata for; `end` is exclusive. Pages outside the range still appear in `result.pages` with zero content offsets, and `pageCount` is the full count |
+
+`parseContentStreams` was removed in 0.41.0: `true` throws `UnsupportedOptionError`.
 
 ::: tip Selective Page Loading
 Use `pageRange` when you only need metadata for a subset of pages. This reduces the work done during the structure phase but does not reduce the amount of data that must be buffered (the full file is still needed to locate `startxref`).
@@ -197,7 +198,7 @@ const result = parser.end();
 
 ## Best Practices
 
-1. **Set `maxBufferSize` to the largest file you expect** -- the parser holds the whole file in memory until the instance is dropped, and `feed()` throws a `PdfParseError` once the bytes fed would pass `maxBufferSize` (default 64 MB). While chunks are fed, the buffer's capacity is up to twice the bytes fed, and `feed()` takes time linear in the bytes fed whatever the chunk size. Raising `maxBufferSize` raises the memory the parser may hold by the same amount, so a service that handles untrusted files should also run the parser under operating-system limits.
+1. **Set `maxBufferSize` to the largest file you expect** -- the parser holds the whole file in memory until the instance is dropped, and `feed()` throws a `StreamingParseError` (a `PdfParseError`) once the bytes fed would pass `maxBufferSize` (default 64 MB). While chunks are fed, the buffer's capacity is up to twice the bytes fed, and `feed()` takes time linear in the bytes fed whatever the chunk size. Raising `maxBufferSize` raises the memory the parser may hold by the same amount, so a service that handles untrusted files should also run the parser under operating-system limits.
 
 2. **Use `fromStream()` for network data** -- it handles the `ReadableStream` reader lifecycle automatically and is the most ergonomic API for `fetch` responses.
 

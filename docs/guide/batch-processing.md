@@ -111,9 +111,11 @@ The `errorStrategy` option controls how failures are handled:
 |---|---|
 | `'continue'` | Skip failed items and keep processing (default). Errors are collected in `result.errors`. |
 | `'fail-fast'` | Stop on the first error and reject with that error, without an item index. Items that have not started are cancelled; items already running finish and still call `onProgress`. |
-| `'collect'` | Process all items, then throw an `AggregateError` containing every failure. Each error's `message` is prefixed with `[Item #N] `. |
+| `'collect'` | Process all items, then throw a `BatchProcessingError` whose `failures` holds the index and error of every failed item. Each error's `message` is prefixed with `[Item #N] `. |
 
 ```ts
+import { BatchProcessingError } from 'modern-pdf-lib';
+
 // Fail on first error
 try {
   await processBatch(files, operation, { errorStrategy: 'fail-fast' });
@@ -125,10 +127,10 @@ try {
 try {
   await processBatch(files, operation, { errorStrategy: 'collect' });
 } catch (err) {
-  if (err instanceof AggregateError) {
-    console.error(`${err.errors.length} items failed:`);
-    for (const e of err.errors) {
-      console.error(` - ${e.message}`);
+  if (err instanceof BatchProcessingError) {
+    console.error(`${err.failures.length} items failed:`);
+    for (const { index, error } of err.failures) {
+      console.error(` - #${index}: ${error.message}`);
     }
   }
 }

@@ -13,12 +13,13 @@ Find your symptom, jump to the fix:
 | Out-of-memory on a large document | [5. Large PDF Memory Issues](#_5-large-pdf-memory-issues) |
 | Works in Node, breaks in Deno / Workers / the browser | [6. Cross-Runtime Quirks](#_6-cross-runtime-quirks) |
 | Extracted text is mojibake | [7. Text Extraction Garbage](#_7-text-extraction-garbage) |
-| `Form field "x" not found.` when filling a form | [8. Form Field Not Found](#_8-form-field-not-found) |
+| `NoSuchFieldError: No form field named "x" exists in this document.` when filling a form | [8. Form Field Not Found](#_8-form-field-not-found) |
 | A real-world PDF fails to parse | [9. Common Parsing Failures](#_9-common-parsing-failures) |
 | `ResourceLimitError` or `UnsupportedFilterError` is thrown | [10. ResourceLimitError and UnsupportedFilterError](#_10-resourcelimiterror-and-unsupportedfiltererror) |
 | `UnsupportedEncryptionError` on `save()` of a loaded encrypted document | [11. UnsupportedEncryptionError when saving a loaded document](#_11-unsupportedencryptionerror-when-saving-a-loaded-document) |
-| `ModernPdfLibWarning` in the console (`MPL_LEGACY_R6_KEY`, `MPL_IGNORED_OPTION`) | [12. ModernPdfLibWarning](#_12-modernpdflibwarning-mpl-legacy-r6-key-and-mpl-ignored-option) |
+| `ModernPdfLibWarning` in the console (`MPL_LEGACY_R6_KEY`, `MPL_OCR_UNENCODABLE`) | [12. ModernPdfLibWarning](#_12-modernpdflibwarning-mpl-legacy-r6-key-and-mpl-ocr-unencodable) |
 | `throwOnInvalidObject: true` throws on a file that loads otherwise | [13. Strict mode throws on a recovered stream](#_13-strict-mode-throws-on-a-recovered-stream) |
+| `UnsupportedOptionError` from a call that used to accept the option | [14. UnsupportedOptionError](#_14-unsupportedoptionerror) |
 
 ## 1. EncryptedPdfError
 
@@ -27,7 +28,7 @@ Find your symptom, jump to the fix:
 You call `loadPdf()` on a PDF file and get an error:
 
 ```
-EncryptedPdfError: The PDF is encrypted. Please provide a password.
+EncryptedPdfError: This PDF is encrypted and requires a password. Pass { password: "..." } in the options to decrypt it.
 ```
 
 ### Why it happens
@@ -51,7 +52,20 @@ console.log(`Loaded ${pages.length} pages from encrypted PDF`);
 ```
 
 > [!TIP]
-> If you only know the owner password (not the user password), pass it in the same `password` field. The parser tries both owner and user password verification automatically. A wrong password throws a `PdfParseError` ("Failed to decrypt PDF: the provided password is incorrect").
+> If you only know the owner password (not the user password), pass it in the same `password` field. The parser tries both owner and user password verification automatically. A wrong password throws an `EncryptedPdfError` too, with reason `"incorrect-password"` ("Failed to decrypt PDF: the provided password is incorrect"); a missing one has reason `"password-required"`.
+
+```ts
+import { loadPdf, EncryptedPdfError } from 'modern-pdf-lib';
+
+try {
+  await loadPdf(bytes, { password: 'secret123' });
+} catch (error) {
+  if (error instanceof EncryptedPdfError) {
+    console.error(error.reason); // 'password-required' or 'incorrect-password'
+  }
+  throw error;
+}
+```
 
 The loaded document holds decrypted objects. To write it, call `encrypt()` on it first (see [11. UnsupportedEncryptionError when saving a loaded document](#_11-unsupportedencryptionerror-when-saving-a-loaded-document)).
 
@@ -120,7 +134,7 @@ const bytes = await doc.save();
 ```
 
 > [!WARNING]
-> Standard fonts only support the WinAnsi (Latin-1) character set. If your text contains characters outside this set (CJK, Arabic, Cyrillic, emoji, etc.), you **must** embed a custom TrueType or OpenType font that contains those glyphs. See the [Fonts guide](./fonts.md) for details.
+> Standard fonts only support the WinAnsi (Latin-1) character set. If your text contains characters outside this set (CJK, Arabic, Cyrillic, emoji, etc.), you **must** embed a custom TrueType or OpenType font that contains those glyphs; `drawText()` throws `UnencodableTextError` for such a character (0.40.9 wrote the wrong glyphs), and for a character an embedded font has no glyph for. See the [Fonts guide](./fonts.md) for details.
 
 ## 3. Coordinate Confusion
 
@@ -382,7 +396,7 @@ console.log(text);
 You call `form.getTextField('fieldName')` and get:
 
 ```
-Error: Form field "fieldName" not found.
+NoSuchFieldError: No form field named "fieldName" exists in this document.
 ```
 
 ### Why it happens
@@ -571,7 +585,7 @@ For a merge or a copy, call `encrypt()` on the target document. After `encrypt()
 
 The same error type is thrown on load, instead of returning data that is still encrypted, for a security handler other than Standard, an unknown `/V` or crypt filter method, a crypt filter name the file does not define, an `/Encrypt` dictionary that cannot be honoured, and damaged AES data. No password fixes those files.
 
-## 12. ModernPdfLibWarning: MPL_LEGACY_R6_KEY and MPL_IGNORED_OPTION
+## 12. ModernPdfLibWarning: MPL_LEGACY_R6_KEY and MPL_OCR_UNENCODABLE
 
 ### What happens
 
@@ -579,19 +593,20 @@ Node prints a warning of type `ModernPdfLibWarning` once per process, for exampl
 
 ```
 (node:1234) [MPL_LEGACY_R6_KEY] ModernPdfLibWarning: The AES-256 key of this document was derived the way modern-pdf-lib 0.26.0 to 0.40.8 wrote it, which other PDF software does not accept. Call encrypt() and save to write it with the standard derivation.
-(node:1234) [MPL_IGNORED_OPTION] ModernPdfLibWarning: `embedFont()`: the option `features` has no effect in this version.
+(node:1234) [MPL_OCR_UNENCODABLE] ModernPdfLibWarning: applyOcr left 2 recognized words out of the overlay: the text has a character that the overlay font (WinAnsiEncoding) cannot encode.
 ```
 
 ### Why it happens
 
 - **`MPL_LEGACY_R6_KEY`:** the file is AES-256 and was written by modern-pdf-lib 0.26.0 to 0.40.8, whose password hash deviates from ISO 32000-2 Algorithm 2.B. The file opens with its passwords, but qpdf and pdf.js do not open it. The warning is emitted once per process, however many such files you load.
-- **`MPL_IGNORED_OPTION`:** you passed an option that the function accepts and does not act on in this version. The message names the function and the option, never the value. Each option warns once per process. The options are: `signPdf` (`timestampUrl`, `contactInfo`, and `reason` and `location` unless a visible appearance shows them), `setCertificationLevel()`, `addFieldLock()`, `verifySignatureDetailed` (`timeout`, a non-empty `trustedCerts`), `validateCertificateChain` (`checkRevocation: true`), `saveIncrementalWithSignaturePreservation` and `appendIncrementalUpdate` (`compress: true`), `saveIncremental` (`objectStreamThreshold`, `useWasm: true`), `saveAsStream` (a finite `objectStreamThreshold`), `embedFont` (`subset: false`, `features`), `StreamingPdfParser` (`parseContentStreams: true`), `optimizeAllImages` (`maxDpi`), `metadataPlugin` (`creator`, `defaultTitle`, `defaultAuthor`), `applyTablePreset` (`hasHeader`), `buildPdfX6OutputIntent` (`variant`), the structure elements of the accessibility helpers (`scope`, `rowSpan`), and the barcode renderers (`showText: true`, `fontSize`, `includeCheckDigit: true`, `wideToNarrowRatio`, `errorCorrection`, `columns` and `errorLevel` in the options of the `*ToOperators()` functions).
+- **`MPL_OCR_UNENCODABLE`:** `applyOcr()` writes each recognized word in WinAnsiEncoding (its overlay font is Helvetica), and a word with a character that encoding lacks, such as CJK text, is left out of the invisible text layer. One warning per process gives the number of words left out by the call that emits it; the array that `applyOcr()` returns still lists every word the engine recognized.
+- **`MPL_IGNORED_OPTION`:** no longer emitted. 0.40.9 used it for an option that a function accepted and did not act on; since 0.41.0 such an option throws [`UnsupportedOptionError`](#_14-unsupportedoptionerror) or works.
 
 ### How to fix it
 
 - For `MPL_LEGACY_R6_KEY`, call `encrypt()` on the loaded document and `save()` it (see [11](#_11-unsupportedencryptionerror-when-saving-a-loaded-document)). The new file uses the standard derivation.
-- For `MPL_IGNORED_OPTION`, remove the option from the call, or move it to the function that uses it (for example the encoder instead of the `*ToOperators()` renderer). The guide of the feature says what the option would have done.
-- To silence the warnings in Node, start the process with `--disable-warning=ModernPdfLibWarning` (every warning of the library), `--disable-warning=MPL_LEGACY_R6_KEY` or `--disable-warning=MPL_IGNORED_OPTION`, or put the flag in `NODE_OPTIONS`. The library has no hook of its own for them. In a runtime without `process.emitWarning` the message goes to `console.warn`.
+- For `MPL_OCR_UNENCODABLE`, nothing is damaged: the visible page is unchanged and the other words stay searchable. The words with characters outside WinAnsiEncoding are not added, because this release writes the overlay in Helvetica only.
+- To silence the warnings in Node, start the process with `--disable-warning=ModernPdfLibWarning` (every warning of the library), `--disable-warning=MPL_LEGACY_R6_KEY` or `--disable-warning=MPL_OCR_UNENCODABLE`, or put the flag in `NODE_OPTIONS`. The library has no hook of its own for them. In a runtime without `process.emitWarning` the message goes to `console.warn`.
 
 ## 13. Strict mode throws on a recovered stream
 
@@ -610,3 +625,27 @@ The `/Length` of a stream can be wrong, missing, or an indirect reference define
 ### How to fix it
 
 Use strict mode only to detect a malformed file. To read the file, load it without `throwOnInvalidObject` (the default). A well-formed file, where `/Length` is correct and followed by `endstream`, loads in both modes with the same stream data.
+
+## 14. UnsupportedOptionError
+
+### What happens
+
+A call that your code ran without a problem in 0.40.9 now throws before it changes anything:
+
+```
+UnsupportedOptionError: `signPdf()`: the option `timestampUrl` is not supported in this release; it is planned for 0.45.0.
+UnsupportedOptionError: `embedFont()`: the option `features` was removed in 0.41.0.
+```
+
+### Why it happens
+
+0.40.9 accepted some options and calls that did nothing, and warned about them once per process (`MPL_IGNORED_OPTION`). Since 0.41.0 an option or call that the library cannot honour is refused with `UnsupportedOptionError` (code `unsupported-option`), so a result can no longer differ silently from what the call asked for. The error carries `entry` (the function, as `signPdf()`), `option` (absent when the whole call is refused, as `setCertificationLevel()`) and `plannedFor`. The message is one of two forms, and it never shows the value you passed:
+
+- **Planned:** `` `entry`: the option `option` is not supported in this release; it is planned for 0.45.0. `` (`plannedFor` is the release). A whole call reads `` `entry` is not supported in this release; it is planned for 0.45.0. ``
+- **Removed:** `` `entry`: the option `option` was removed in 0.41.0. `` (`plannedFor` is `undefined`). Some of these messages end with a sentence that names the function to use instead, for example `Use renderStyledBarcode() to draw the text.`
+
+### How to fix it
+
+- For a planned option, remove it from the call. The release in the message carries it out: `timestampUrl`, `setCertificationLevel()`, `addFieldLock()`, a non-empty `trustedCerts` or a `timeout` of `verifySignatureDetailed()`, and `checkRevocation: true` of `validateCertificateChain()` in 0.45.0; a finite `objectStreamThreshold` of `saveAsStream()` in 0.41.2; `scope` and `rowSpan` of the structure elements in 0.46.0.
+- For a removed option, remove it as well, or use the function the message names: `renderStyledBarcode()` for the text of a barcode, the encoder (`encodeCode39()`, `encodeItf()`, `encodeQrCode()`, `encodePdf417()`) for the encoding options of the `*ToOperators()` functions, and `headerRows` instead of `hasHeader` of `applyTablePreset()`. The other removed options are `features` of `embedFont()`, `parseContentStreams` of `StreamingPdfParser`, `variant` of `buildPdfX6OutputIntent()`, `maxDpi` of `optimizeAllImages()`, `objectStreamThreshold` of `saveIncremental()`, and `compress` of `saveIncrementalWithSignaturePreservation()` and `appendIncrementalUpdate()`.
+- A TypeScript caller meets most of these as a type error first, because the removed members are gone from the option types; the runtime error is for JavaScript callers, spread objects and casts. The runtime refusal of a removed option is itself removed in 0.50.0.

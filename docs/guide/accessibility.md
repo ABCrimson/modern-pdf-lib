@@ -201,7 +201,7 @@ tagTableHeaderCell(tree, row);                            // TH
 tagTableDataCell(tree, row, { colSpan: 2 });              // TD
 ```
 
-A scope passed to `tagTableHeaderCell()` (`Row`, `Column` or `Both`), and the `scope` and `rowSpan` element options, have no effect in this version: no attribute dictionary is written, and passing one emits one `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`) per option and process.
+A scope passed to `tagTableHeaderCell()` (`Row`, `Column` or `Both`), and the `scope` and `rowSpan` element options, throw an `UnsupportedOptionError` (code `unsupported-option`, `plannedFor` `0.46.0`) until 0.46.0 writes them as structure attributes; `tagTableHeaderCell()` without a scope still records the default `Column`.
 
 The helpers create structure elements only; they do not link an element to page content. Each element that holds page content must own marked content (an MCID) on that page: assign one with `tree.assignMcid()` and draw the content between `beginMarkedContent()` and `endMarkedContentSequence()`:
 

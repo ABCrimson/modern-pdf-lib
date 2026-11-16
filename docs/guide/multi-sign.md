@@ -26,7 +26,7 @@ import {
 } from 'modern-pdf-lib';
 ```
 
-In this version `signPdf()` writes no DocMDP certification and no `/Lock` dictionary. `setCertificationLevel()` and `addFieldLock()` have no effect: each emits one `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`) per process, and the signature that follows carries no certification level and no locked fields. `getCertificationLevel()` and `getFieldLocks()` read what files from other producers hold. The `reason`, `location` and `contactInfo` options are not written into the signature dictionary either (see the [signature guide](./signatures.md)), so the signatures below set them only where a visible appearance shows them.
+In this version `signPdf()` writes no DocMDP certification and no `/Lock` dictionary. `setCertificationLevel()` and `addFieldLock()` throw `UnsupportedOptionError` (`plannedFor` `'0.45.0'`; `addFieldLock()` checks its lock first) and change nothing. `getCertificationLevel()` and `getFieldLocks()` read what files from other producers hold. The `reason`, `location` and `contactInfo` options are written into the signature dictionary (see the [signature guide](./signatures.md)).
 
 You will also need DER-encoded X.509 certificates and PKCS#8 private keys for each signer. These can be loaded from PEM files by stripping headers and base64-decoding.
 
@@ -70,7 +70,7 @@ This signature is not a certification signature: `signPdf()` has no option that 
 
 ### 3. Field Locks
 
-`signPdf()` writes no `/Lock` dictionary, so a signature cannot lock form fields in this version. `addFieldLock()` stores the lock on the sign options and nothing reads it (see [Field Locking](#field-locking)). Fields stay editable after the signature, and `detectModifications()` reports changes made after it.
+`signPdf()` writes no `/Lock` dictionary, so a signature cannot lock form fields in this version. `addFieldLock()` throws `UnsupportedOptionError` (see [Field Locking](#field-locking)). Fields stay editable after the signature, and `detectModifications()` reports changes made after it.
 
 ### 4. Signer B Counter-Signs
 
@@ -139,7 +139,7 @@ console.log('Has LTV data:', hasLtvData(archivedPdf));
 
 ## MDP Permission Levels
 
-The MDP (Modification Detection and Prevention) system of ISO 32000 controls what changes are allowed after a certification signature. `signPdf()` does not write one in this version, so a signature made here carries no level. `setCertificationLevel()` has no effect: it stores the level on the options object, nothing reads it, and it emits one `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`) per process.
+The MDP (Modification Detection and Prevention) system of ISO 32000 controls what changes are allowed after a certification signature. `signPdf()` does not write one in this version, so a signature made here carries no level. `setCertificationLevel()` throws `UnsupportedOptionError` (`plannedFor` `'0.45.0'`) and leaves the options unchanged.
 
 The levels, as they appear in files from other producers:
 
@@ -161,7 +161,7 @@ const level = getCertificationLevel(certifiedPdfBytes);
 
 ## Field Locking
 
-`signPdf()` writes no `/Lock` dictionary in this version. `addFieldLock()` validates its arguments, stores the lock on the options object, and emits one `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`) per process; nothing reads the stored lock, so no field is locked.
+`signPdf()` writes no `/Lock` dictionary in this version. `addFieldLock()` validates its arguments (an `Include` or `Exclude` lock without fields throws `InvalidArgumentError`) and then throws `UnsupportedOptionError` (`plannedFor` `'0.45.0'`); no field is locked.
 
 To read the field locks of a file that has them:
 

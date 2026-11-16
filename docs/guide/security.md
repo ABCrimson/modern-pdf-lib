@@ -147,8 +147,9 @@ prove a region free of text (it does not follow Form XObjects, patterns or
 annotation appearances), and `warnings` always holds one sentence saying so. An
 empty `leaks` means only that no text was found.
 
-`verifyRedactions` throws a `TypeError` when `regions` is missing or empty, and
-a `RangeError` when a region names a page that does not exist.
+`verifyRedactions` throws an `InvalidArgumentError` when `regions` is missing or
+empty (`argument` is `"regions"`), and when a region names a page that does not
+exist (`argument` is `"regions[i].page"`).
 
 ::: tip `regions` is required
 You must pass the regions to check. Auto-detecting redaction rectangles from a
@@ -205,7 +206,7 @@ The password rules:
 
 - Either the user password or the owner password opens a file. The owner password of a file whose `/U` entry is longer than 48 bytes is accepted.
 - For AES-256 the library writes the SASLprep form of a password. On reading it tries the SASLprep form first, then the raw UTF-8 bytes, which is what qpdf and pdf.js hash.
-- A wrong password throws a `PdfParseError` whose message says the password is incorrect.
+- A wrong password throws an `EncryptedPdfError` with `reason` `"incorrect-password"`; no password, on a file that needs one, throws it with `reason` `"password-required"`.
 
 ### What fails closed
 

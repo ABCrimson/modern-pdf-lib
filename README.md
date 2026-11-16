@@ -144,11 +144,11 @@ For a plain `<script>` tag without `type="module"`, use the IIFE bundle, which e
 
 **Secure & Compliant**
 - RC4, AES-128 and AES-256 (R6) encryption on `save()`; AES-256 files open in qpdf and pdf.js (`saveAsStream()`, `objectStreamThreshold` and `saveDocumentIncremental()` throw `UnsupportedEncryptionError`, code `unsupported-encryption-path`, for an encrypted document, and the functions that sign or append an incremental update to PDF bytes throw it for an encrypted file; a document loaded from an encrypted file cannot be written until `encrypt()` is called on it)
-- Digital signatures (PKCS#7, visible/invisible; `requestTimestamp` checks the response's hash and nonce against the request, but the token's signature and the TSA certificate are not verified, and `signPdf` does not embed a timestamp: its `timestampUrl` option has no effect)
+- Digital signatures (PKCS#7, visible/invisible; `requestTimestamp` checks the response's hash and nonce against the request, but the token's signature and the TSA certificate are not verified, and `signPdf` does not embed a timestamp: its `timestampUrl` option throws UnsupportedOptionError (planned for 0.45.0))
 - OCSP revocation checking (an answer that cannot be authenticated reports `unknown`), CRL lookup (a CRL's signature is not verified), certificate chain validation against `trustedCerts` (with none listed, no chain is valid)
 - Incremental save with signature preservation
-- Multi-signature chains, MDP certification reading (`setCertificationLevel` has no effect: `signPdf` writes no DocMDP), LTV archival (a signature followed by a later update, such as a second signature or LTV data added with `embedLtvData`, reports `valid: false` with `coversWholeDocument: false`, and `detectModifications` reports a later signature as an `unknown` violation)
-- Counter-signatures; field locks are read, not written (`addFieldLock` has no effect: `signPdf` writes no `/Lock` dictionary)
+- Multi-signature chains, MDP certification reading (`setCertificationLevel` throws UnsupportedOptionError, planned for 0.45.0: `signPdf` writes no DocMDP), LTV archival (a signature followed by a later update, such as a second signature or LTV data added with `embedLtvData`, reports `valid: false` with `coversWholeDocument: false`, and `detectModifications` reports a later signature as an `unknown` violation)
+- Counter-signatures; field locks are read, not written (`addFieldLock` throws UnsupportedOptionError, planned for 0.45.0: `signPdf` writes no `/Lock` dictionary)
 - PDF/A-1b through PDF/A-3u validation, PDF/A-4/4e/4f (output is not validated against veraPDF; `enforcePdfA` and `enforcePdfX` output has an invalid cross-reference offset)
 - PDF/X-6, PDF/VT, Factur-X / ZUGFeRD e-invoicing
 - Tagged PDF / PDF/UA-1 & PDF/UA-2 accessibility
@@ -178,7 +178,7 @@ For a plain `<script>` tag without `type="module"`, use the IIFE bundle, which e
 - Browser helpers (download, blob, data URL)
 - Service Worker & Web Worker support
 - Batch processing with memory pressure handling
-- Typed errors (every error class derives from `PdfError` and carries a stable `code`, and the package entries export the classes their calls can throw; some exported classes have no throw site yet, and many errors are still plain `Error`, `RangeError` or `TypeError`)
+- Typed errors (every error class derives from `PdfError` and carries a stable `code`, and the package entries export the classes their calls can throw)
 - Spot colors (Separation) & DeviceN
 - CLI: `npx modern-pdf-lib optimize`
 

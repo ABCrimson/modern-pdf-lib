@@ -56,6 +56,8 @@ const bytes = await doc.save();
 | `headerBackgroundColor` | `Color` | none | Header row background color |
 | `headerTextColor` | `Color` | none | Header row text color |
 
+Cell text is written in the encoding of the font named by `fontName` (WinAnsiEncoding for the Latin standard fonts and for any name that is no standard font). A cell with text of another script, such as CJK, or with a tab or line break throws `UnencodableTextError`.
+
 ::: warning Text measurement is approximate
 Cell text is measured with a `0.5 × fontSize` per character estimate, not font metrics, so alignment, wrap, truncate, ellipsis, shrink and `autoFit` are approximate. Proportional and bold fonts can run wider than estimated.
 :::
