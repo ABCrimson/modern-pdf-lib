@@ -352,6 +352,16 @@ describe('sanitizePdf', () => {
     expect(reloaded.getAuthor()).toBe('Zoë');
   });
 
+  it('preserves UTF-16BE descriptive metadata above U+00FF as text when metadata is disabled', async () => {
+    const src = await buildUtf16InfoPdf('日本語 😀', '李');
+
+    const { pdf } = await sanitizePdf(src, { metadata: false });
+
+    const reloaded = await loadPdf(pdf);
+    expect(reloaded.getTitle()).toBe('日本語 😀');
+    expect(reloaded.getAuthor()).toBe('李');
+  });
+
   it('does not list a class that was not present', async () => {
     // Clean doc → nothing should be reported even though all options default on.
     const src = await buildCleanPdf();
