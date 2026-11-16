@@ -57,6 +57,8 @@ const latin1 = (text: string): Uint8Array => Uint8Array.from(text, (c) => c.char
 /**
  * The message of a streaming parse error: the first line with its offset, then the expected and
  * found values, as 0.40.9 wrote them; `context` adds the hex dump of the data around the offset.
+ * The hex dump goes through `expect.stringMatching`: `toMatchObject` takes a bare RegExp for an
+ * object with no keys, which every value matches.
  */
 function streamingMessage(
   first: string,
@@ -64,9 +66,11 @@ function streamingMessage(
   expected: string,
   actual: string,
   context = false,
-): string | RegExp {
+): unknown {
   const lines = `${first} (at byte offset ${offset})\n  Expected: ${expected}\n  Got: ${actual}`;
-  return context ? new RegExp(`^${RegExp.escape(lines)}\\n  Context:\\n.*\\[`, 's') : lines;
+  return context
+    ? expect.stringMatching(new RegExp(`^${RegExp.escape(lines)}\\n  Context:\\n.*\\[`, 's'))
+    : lines;
 }
 
 function docWithPages(count: number) {
