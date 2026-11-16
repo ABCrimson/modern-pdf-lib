@@ -7,13 +7,31 @@
  * {@link decodeFlateOnly} applies `/FlateDecode` and its predictor only;
  * cross-reference streams and object streams are read with it.
  *
+ * Every decode runs under the limits of one call ({@link LimitContext}): the
+ * output of each filter is held to `maxDecodedStreamBytes`, and the outputs
+ * of every filter of every stream the call decodes are summed against
+ * `maxTotalDecodedBytes`.
+ *
  * Reference: PDF 1.7 spec, §7.4 (Filters).
  *
  * @packageDocumentation
  */
 
-import { inflateFlate, inflateRaw } from './internal/pdfFlate.js';
-import { INTERNAL_LIMITS, assertWithinLimit } from '../internal/limits.js';
+import {
+  assertDecodedOutput,
+  decodedOutputBound,
+  inflateFlate,
+  inflateRaw,
+} from './internal/pdfFlate.js';
+import {
+  addToTotal,
+  assertLimit,
+  beginCall,
+  legacyContext,
+  resolveLimits,
+  type LimitContext,
+} from '../internal/limits.js';
+import type { PdfLimits } from '../limits.js';
 import { MalformedInputError, UnsupportedFeatureError, UnsupportedFilterError } from '../errors.js';
 import type { PdfObject, PdfStream } from '../core/pdfObjects.js';
 import { PdfDict, PdfName, PdfArray, PdfNumber } from '../core/pdfObjects.js';
@@ -35,17 +53,39 @@ import { decodeJBIG2 } from './jbig2/jbig2Decode.js';
  *                      `["ASCIIHexDecode", "FlateDecode"]`).
  * @param decodeParms - Optional decode parameters — a single `PdfDict` or
  *                      an array of `PdfDict | null` parallel to `filters`.
+ * @param options     - `limits`: the limits this call decodes under, over
+ *                      `DEFAULT_LIMITS`; checked as the `limits` option of
+ *                      every call is.
  * @returns The fully decoded bytes.
+ * @throws {InvalidArgumentError} When `options.limits` is not a valid
+ *   `limits` value (argument `limits` or `limits.<name>`); nothing is decoded.
  * @throws {ResourceLimitError} `maxDecodedStreamBytes` when the output of any
- *   one filter of the chain is longer than 256 MiB (268,435,456 bytes); an
- *   output of exactly that length is accepted.
+ *   one filter of the chain is longer than that limit (256 MiB by default);
+ *   an output of exactly that length is accepted.
+ * @throws {ResourceLimitError} `maxTotalDecodedBytes` when the outputs of
+ *   all the filters of the chain add up to more than that limit (1 GiB by
+ *   default).
  * @throws {ResourceLimitError} `maxPredictorSamples` when a `/Predictor 2`
- *   with `/BitsPerComponent` 1, 2 or 4 covers more than 2^28 samples.
+ *   with `/BitsPerComponent` 1, 2 or 4 covers more samples than that limit
+ *   (2^28 by default).
+ * @throws {ResourceLimitError} `maxImageDimension` or `maxImagePixels` for
+ *   a `/CCITTFaxDecode` image larger than those limits.
  */
 export function decodeStream(
   data: Uint8Array,
   filters: string | string[],
   decodeParms?: PdfDict | PdfDict[] | null,
+  options?: { readonly limits?: PdfLimits | undefined },
+): Uint8Array {
+  return decodeFilters(beginCall(resolveLimits(options?.limits)), data, filters, decodeParms);
+}
+
+/** {@link decodeStream} under the context `ctx`, whose decoded total the outputs add to. */
+function decodeFilters(
+  ctx: LimitContext,
+  data: Uint8Array,
+  filters: string | string[],
+  decodeParms: PdfDict | PdfDict[] | null | undefined,
 ): Uint8Array {
   const filterList = Array.isArray(filters) ? filters : [filters];
   const parmsList = normalizeDecodeParms(decodeParms, filterList.length);
@@ -54,9 +94,10 @@ export function decodeStream(
   for (let i = 0; i < filterList.length; i++) {
     const filterName = normalizeFilterName(filterList[i]!);
     const parms = parmsList[i] ?? null;
-    result = applyFilter(filterName, result, parms);
-    // Each filter's output is held to the ceiling, so a chain's output is too.
-    assertWithinLimit('maxDecodedStreamBytes', result.length);
+    result = applyFilter(filterName, result, parms, ctx);
+    // Also a filter that passes its input on, so every filter's output is held to the limit.
+    assertLimit(ctx, 'maxDecodedStreamBytes', result.length);
+    addToTotal(ctx, 'maxTotalDecodedBytes', result.length);
   }
   return result;
 }
@@ -107,14 +148,21 @@ export function getStreamFilters(dict: PdfDict): {
  * when the stream has no filters.
  *
  * @param stream - The stream object to decode.
+ * @param ctx    - The context of the call, whose decoded total the outputs
+ *                 add to; a context over the default limits when it is left out.
  * @returns The fully decoded (uncompressed) bytes.
+ * @throws {ResourceLimitError} As {@link decodeStream} throws it, under the
+ *   limits of `ctx`.
  */
-export function decodeStreamData(stream: PdfStream): Uint8Array {
+export function decodeStreamData(
+  stream: PdfStream,
+  ctx: LimitContext = legacyContext(),
+): Uint8Array {
   const { filters, decodeParms } = getStreamFilters(stream.dict);
   if (filters.length === 0) {
     return stream.data;
   }
-  return decodeStream(stream.data, filters, decodeParms as PdfDict[]);
+  return decodeFilters(ctx, stream.data, filters, decodeParms as PdfDict[]);
 }
 
 /**
@@ -160,62 +208,83 @@ export function firstFilterName(dict: PdfDict): string | undefined {
  * 16 (each defaulting to 1, 1 and 8); `/Predictor 1` and the values 3 to 9
  * leave the data as inflated.
  *
+ * The decoded bytes are added to the decoded total of `ctx`.
+ *
  * @param stream - The stream to decode.
+ * @param ctx    - The context of the call; a context over the default limits
+ *                 when it is left out.
  * @returns The decoded bytes, or `undefined` for any other `/Filter`.
- * @throws {Error} `FlateDecode: failed to decompress data` when the data
+ * @throws {MalformedInputError} `FlateDecode: failed to decompress data` when the data
  *   does not inflate: neither as zlib nor as raw DEFLATE for the name and
  *   the one-entry array, and not as raw DEFLATE for a longer array.
- * @throws {Error} `Predictor: unsupported decode parameters (...)` when the
+ * @throws {UnsupportedFeatureError} `Predictor: unsupported decode parameters (...)` when the
  *   predictor's parameters are outside the ranges above.
  * @throws {ResourceLimitError} `maxDecodedStreamBytes` when the inflated
- *   data or one predictor row is longer than 256 MiB.
+ *   data or one predictor row is longer than that limit of `ctx`, and
+ *   `maxTotalDecodedBytes` when the inflated data takes the decoded total of
+ *   `ctx` above that limit.
  * @throws {ResourceLimitError} `maxPredictorSamples` when a `/Predictor 2`
- *   with `/BitsPerComponent` 1, 2 or 4 covers more than 2^28 samples.
+ *   with `/BitsPerComponent` 1, 2 or 4 covers more samples than that limit of `ctx`.
  */
-export function decodeFlateOnly(stream: PdfStream): Uint8Array | undefined {
+export function decodeFlateOnly(
+  stream: PdfStream,
+  ctx: LimitContext = legacyContext(),
+): Uint8Array | undefined {
   const filter = stream.dict.get('/Filter');
   if (filter === undefined) return stream.data;
   if (firstFilterName(stream.dict) !== '/FlateDecode') return undefined;
+  let decoded: Uint8Array;
   if (filter instanceof PdfArray && filter.length > 1) {
     // First of several filters: raw DEFLATE only; later entries are not applied
     const dictParms = stream.dict.get('/DecodeParms');
-    return applyFlateOnlyPredictor(
-      inflateRaw(stream.data),
+    decoded = applyFlateOnlyPredictor(
+      inflateRaw(stream.data, ctx),
       dictParms instanceof PdfDict ? dictParms : null,
+      ctx,
+    );
+  } else {
+    decoded = applyFlateOnlyPredictor(
+      inflateFlate(stream.data, ctx),
+      flateOnlyParms(filter, stream.dict),
+      ctx,
     );
   }
+  addToTotal(ctx, 'maxTotalDecodedBytes', decoded.length);
+  return decoded;
+}
 
-  const decodeParms = stream.dict.get('/DecodeParms');
-  let parms: PdfDict | null = null;
-  if (decodeParms instanceof PdfDict) {
-    parms = decodeParms;
-  } else if (
+/**
+ * The decode parameters of {@link decodeFlateOnly} for a `/Filter` that is the name
+ * `/FlateDecode` or a one-entry array: `/DecodeParms` when it is a dictionary, and, for the
+ * array, the first entry of a `/DecodeParms` array when that entry is a dictionary.
+ */
+function flateOnlyParms(filter: PdfObject, dict: PdfDict): PdfDict | null {
+  const decodeParms = dict.get('/DecodeParms');
+  if (decodeParms instanceof PdfDict) return decodeParms;
+  if (
     filter instanceof PdfArray &&
     decodeParms instanceof PdfArray &&
     decodeParms.items[0] instanceof PdfDict
   ) {
-    parms = decodeParms.items[0];
+    return decodeParms.items[0];
   }
-  return applyFlateOnlyPredictor(inflateFlate(stream.data), parms);
+  return null;
 }
-
-// ---------------------------------------------------------------------------
-// Internal: ceiling on one filter's output
-// ---------------------------------------------------------------------------
-
-/** The ceiling on the output of one filter: INTERNAL_LIMITS.maxDecodedStreamBytes. */
-const MAX_OUTPUT = INTERNAL_LIMITS.maxDecodedStreamBytes;
 
 /**
  * Undo the predictor of {@link decodeFlateOnly}: as `applyPredictor`, except that a `/Predictor`
  * above 15 is undone as a PNG predictor.
  */
-function applyFlateOnlyPredictor(data: Uint8Array, parms: PdfDict | null): Uint8Array {
+function applyFlateOnlyPredictor(
+  data: Uint8Array,
+  parms: PdfDict | null,
+  ctx: LimitContext,
+): Uint8Array {
   if (dictInt(parms, '/Predictor', 1) > 15) {
-    const { columns, colors, bpc } = readPredictorParms(parms);
+    const { columns, colors, bpc } = readPredictorParms(parms, ctx);
     return applyPngPredictors(data, columns, colors, bpc);
   }
-  return applyPredictor(data, parms);
+  return applyPredictor(data, parms, ctx);
 }
 
 // ---------------------------------------------------------------------------
@@ -290,25 +359,30 @@ function dictInt(dict: PdfDict | null, key: string, fallback: number): number {
 /**
  * Apply a single filter to the data.
  */
-function applyFilter(filterName: string, data: Uint8Array, parms: PdfDict | null): Uint8Array {
+function applyFilter(
+  filterName: string,
+  data: Uint8Array,
+  parms: PdfDict | null,
+  ctx: LimitContext,
+): Uint8Array {
   switch (filterName) {
     case 'FlateDecode':
-      return decodeFlateDecode(data, parms);
+      return decodeFlateDecode(data, parms, ctx);
     case 'ASCIIHexDecode':
-      return decodeASCIIHex(data);
+      return decodeASCIIHex(data, ctx);
     case 'ASCII85Decode':
-      return decodeASCII85(data);
+      return decodeASCII85(data, ctx);
     case 'LZWDecode':
-      return decodeLZW(data, parms);
+      return decodeLZW(data, parms, ctx);
     case 'RunLengthDecode':
-      return decodeRunLength(data);
+      return decodeRunLength(data, ctx);
     case 'DCTDecode':
       // JPEG — return as-is; decoded by image handler
       return data;
     case 'JPXDecode':
       return decodeJPX(data, parms);
     case 'CCITTFaxDecode':
-      return decodeCCITT(data, parms);
+      return decodeCCITT(data, parms, ctx);
     // JBIG2Decode: throws UnsupportedFilterError (see decodeJBIG2).
     case 'JBIG2Decode':
       return decodeJBIG2(data, parms);
@@ -334,8 +408,8 @@ function applyFilter(filterName: string, data: Uint8Array, parms: PdfDict | null
  * earlier wrote. It throws `FlateDecode: failed to decompress data` when
  * neither works.
  */
-function decodeFlateDecode(data: Uint8Array, parms: PdfDict | null): Uint8Array {
-  return applyPredictor(inflateFlate(data), parms);
+function decodeFlateDecode(data: Uint8Array, parms: PdfDict | null, ctx: LimitContext): Uint8Array {
+  return applyPredictor(inflateFlate(data, ctx), parms, ctx);
 }
 
 // ---------------------------------------------------------------------------
@@ -356,16 +430,16 @@ function decodeFlateDecode(data: Uint8Array, parms: PdfDict | null): Uint8Array 
  * function owns.  Every caller in this module passes such a buffer; the
  * result is `data` itself, or a view of it.
  */
-function applyPredictor(data: Uint8Array, parms: PdfDict | null): Uint8Array {
+function applyPredictor(data: Uint8Array, parms: PdfDict | null, ctx: LimitContext): Uint8Array {
   const predictor = dictInt(parms, '/Predictor', 1);
 
   if (predictor === 2) {
-    const { columns, colors, bpc } = readPredictorParms(parms);
-    return applyTiffPredictor2(data, columns, colors, bpc);
+    const { columns, colors, bpc } = readPredictorParms(parms, ctx);
+    return applyTiffPredictor2(data, columns, colors, bpc, ctx);
   }
 
   if (predictor >= 10 && predictor <= 15) {
-    const { columns, colors, bpc } = readPredictorParms(parms);
+    const { columns, colors, bpc } = readPredictorParms(parms, ctx);
     return applyPngPredictors(data, columns, colors, bpc);
   }
 
@@ -377,9 +451,12 @@ function applyPredictor(data: Uint8Array, parms: PdfDict | null): Uint8Array {
  * Read and validate the parameters of predictor 2 or 10 to 15 (and, for
  * decodeFlateOnly, any /Predictor above 15).
  *
- * A row longer than the decoded-size ceiling throws `ResourceLimitError`.
+ * A row longer than the `maxDecodedStreamBytes` of `ctx` throws `ResourceLimitError`.
  */
-function readPredictorParms(parms: PdfDict | null): {
+function readPredictorParms(
+  parms: PdfDict | null,
+  ctx: LimitContext,
+): {
   columns: number;
   colors: number;
   bpc: number;
@@ -400,7 +477,7 @@ function readPredictorParms(parms: PdfDict | null): {
       `Predictor: unsupported decode parameters (/Columns ${columns}, /Colors ${colors}, /BitsPerComponent ${bpc})`,
     );
   }
-  assertWithinLimit('maxDecodedStreamBytes', Math.ceil((columns * colors * bpc) / 8));
+  assertLimit(ctx, 'maxDecodedStreamBytes', Math.ceil((columns * colors * bpc) / 8));
   return { columns, colors, bpc };
 }
 
@@ -410,8 +487,8 @@ function readPredictorParms(parms: PdfDict | null): {
  * Each row's samples store the difference from the previous sample
  * (within the same row).  This reverses that encoding in place and returns
  * `data`, so the caller must pass a buffer its own decoder allocated.
- * Samples of 1, 2 or 4 bits are visited one by one; more than
- * `maxPredictorSamples` of them throw `ResourceLimitError` before the first
+ * Samples of 1, 2 or 4 bits are visited one by one; more than the
+ * `maxPredictorSamples` of `ctx` throw `ResourceLimitError` before the first
  * is read.
  */
 function applyTiffPredictor2(
@@ -419,6 +496,7 @@ function applyTiffPredictor2(
   columns: number,
   colors: number,
   bpc: number,
+  ctx: LimitContext,
 ): Uint8Array {
   if (bpc === 8) {
     const bytesPerPixel = colors;
@@ -458,7 +536,7 @@ function applyTiffPredictor2(
   const totalBitsPerRow = columns * colors * bpc;
   const rowBytes = Math.ceil(totalBitsPerRow / 8);
   const rows = Math.floor(data.length / rowBytes);
-  assertWithinLimit('maxPredictorSamples', rows * columns * colors);
+  assertLimit(ctx, 'maxPredictorSamples', rows * columns * colors);
   const prev = new Array<number>(colors);
 
   for (let row = 0; row < rows; row++) {
@@ -610,8 +688,8 @@ function paethPredictor(a: number, b: number, c: number): number {
  * end-of-data.  An odd trailing digit is padded with 0 on the right
  * (e.g. `A` becomes `A0`).
  */
-function decodeASCIIHex(data: Uint8Array): Uint8Array {
-  // One pass counts the digits, so the output is checked against the ceiling and
+function decodeASCIIHex(data: Uint8Array, ctx: LimitContext): Uint8Array {
+  // One pass counts the digits, so the output is checked against the limits and
   // allocated once at its exact size.
   let digits = 0;
   for (let i = 0; i < data.length; i++) {
@@ -620,7 +698,7 @@ function decodeASCIIHex(data: Uint8Array): Uint8Array {
     if (hexValue(ch) >= 0) digits++;
   }
   const size = Math.ceil(digits / 2);
-  assertWithinLimit('maxDecodedStreamBytes', size);
+  assertDecodedOutput(ctx, size);
   const result = new Uint8Array(size);
   let outPos = 0;
   let high: number | null = null;
@@ -672,9 +750,9 @@ function hexValue(ch: number): number {
  * four bytes.  The special character `z` represents four zero bytes.
  * `~>` marks end-of-data.
  */
-function decodeASCII85(data: Uint8Array): Uint8Array {
+function decodeASCII85(data: Uint8Array, ctx: LimitContext): Uint8Array {
   // One pass counts the digits and `z` characters, so the output is checked against the
-  // ceiling and allocated once at its exact size (a final group of n digits gives n - 1 bytes).
+  // limits and allocated once at its exact size (a final group of n digits gives n - 1 bytes).
   let zeroGroups = 0;
   let digits = 0;
   for (let i = 0; i < data.length; i++) {
@@ -685,7 +763,7 @@ function decodeASCII85(data: Uint8Array): Uint8Array {
   }
   const tail = digits % 5;
   const size = zeroGroups * 4 + Math.floor(digits / 5) * 4 + (tail >= 2 ? tail - 1 : 0);
-  assertWithinLimit('maxDecodedStreamBytes', size);
+  assertDecodedOutput(ctx, size);
 
   const out = new Uint8Array(size);
   let outPos = 0;
@@ -775,10 +853,10 @@ function decodeASCII85(data: Uint8Array): Uint8Array {
  *
  * After decompression, predictor post-processing is applied.
  */
-function decodeLZW(data: Uint8Array, parms: PdfDict | null): Uint8Array {
+function decodeLZW(data: Uint8Array, parms: PdfDict | null, ctx: LimitContext): Uint8Array {
   const earlyChange = dictInt(parms, '/EarlyChange', 1);
-  const decompressed = lzwDecompress(data, earlyChange);
-  return applyPredictor(decompressed, parms);
+  const decompressed = lzwDecompress(data, earlyChange, ctx);
+  return applyPredictor(decompressed, parms, ctx);
 }
 
 /**
@@ -787,10 +865,11 @@ function decodeLZW(data: Uint8Array, parms: PdfDict | null): Uint8Array {
  * Uses a flat pooled buffer for the code table instead of per-entry
  * Uint8Array allocations, and a pre-allocated output buffer with
  * manual growth instead of `number[]` + push. The output never grows past
- * the decoded-size ceiling (`ResourceLimitError` above it), and the code
- * table stops at 4096 entries.
+ * the bound of `ctx` (`decodedOutputBound`; `ResourceLimitError` above it),
+ * and the code table stops at 4096 entries.
  */
-function lzwDecompress(data: Uint8Array, earlyChange: number): Uint8Array {
+function lzwDecompress(data: Uint8Array, earlyChange: number, ctx: LimitContext): Uint8Array {
+  const maxOutput = decodedOutputBound(ctx);
   const CLEAR_TABLE = 256;
   const EOD = 257;
 
@@ -845,16 +924,14 @@ function lzwDecompress(data: Uint8Array, earlyChange: number): Uint8Array {
     codeSize = 9;
   }
 
-  // Output buffer with manual growth, never past the decoded-size ceiling
-  let out = new Uint8Array(Math.min(Math.max(data.length * 3, 4096), MAX_OUTPUT));
+  // Output buffer with manual growth, never past the bound of the call
+  let out = new Uint8Array(Math.min(Math.max(data.length * 3, 4096), maxOutput));
   let outPos = 0;
 
   function ensureOut(needed: number): void {
     if (outPos + needed > out.length) {
-      assertWithinLimit('maxDecodedStreamBytes', outPos + needed);
-      const newBuf = new Uint8Array(
-        Math.min(Math.max(out.length * 2, outPos + needed), MAX_OUTPUT),
-      );
+      assertDecodedOutput(ctx, outPos + needed);
+      const newBuf = new Uint8Array(Math.min(Math.max(out.length * 2, outPos + needed), maxOutput));
       newBuf.set(out.subarray(0, outPos));
       out = newBuf;
     }
@@ -958,11 +1035,11 @@ function lzwDecompress(data: Uint8Array, earlyChange: number): Uint8Array {
  * - 128: end of data
  * - 129-255: repeat the next single byte `257 - N` times
  */
-function decodeRunLength(data: Uint8Array): Uint8Array {
-  // The first pass sizes the output, which is checked against the ceiling and
+function decodeRunLength(data: Uint8Array, ctx: LimitContext): Uint8Array {
+  // The first pass sizes the output, which is checked against the limits and
   // allocated once; the second pass writes it.
   const size = runLengthPass(data, null);
-  assertWithinLimit('maxDecodedStreamBytes', size);
+  assertDecodedOutput(ctx, size);
   const out = new Uint8Array(size);
   runLengthPass(data, out);
   return out;

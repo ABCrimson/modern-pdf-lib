@@ -9,16 +9,14 @@
  * text back. The PNG encoder's IDAT data (encodePngFromPixels, renderPageToImage(),
  * generateThumbnail()) is judged the same way, and its rows, unfiltered in the test, equal the
  * input pixels. Inputs whose decoded samples the test knows by construction (16-bit PNGs, TIFFs
- * with Deflate strips, zlib data with a small output size hint) are compressed by node:zlib.
+ * with Deflate strips) are compressed by node:zlib.
  * qpdf comes from `QPDF`, then `PATH`; each test skips with a reason where qpdf is absent
  * locally and fails when `CI` is set.
  */
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { crc32, deflateRawSync, deflateSync as zlibDeflateSync, inflateSync } from 'node:zlib';
+import { crc32, deflateSync as zlibDeflateSync, inflateSync } from 'node:zlib';
 import { beforeEach, describe, expect, test } from 'vitest';
-import { decompress } from '../../src/codecs/internal/deflate.js';
-import { decompressSync } from '../../src/codecs/internal/fflateAdapter.js';
 import {
   createPdf,
   encodePngFromPixels,
@@ -355,19 +353,6 @@ describe('images the library compresses itself', () => {
       if (channels === 4) expect(decoded).toContainEqual([...alpha]);
     },
   );
-});
-
-describe('reading zlib data', () => {
-  // A text far longer than the hint, so a reader that stopped at the hint would cut it short.
-  const original = new TextEncoder().encode('zlib data read in full, '.repeat(200));
-  const zlib = new Uint8Array(zlibDeflateSync(original));
-  const raw = new Uint8Array(deflateRawSync(original));
-
-  test('an output size hint smaller than the data gives every byte of node:zlib data', async () => {
-    expect(decompressSync(raw, 100), 'raw DEFLATE (legacy data)').toEqual(original);
-    expect(decompressSync(zlib, 100)).toEqual(original);
-    expect(await decompress(zlib, 100, { preferEngine: 'fflate' })).toEqual(original);
-  });
 });
 
 /** The concatenated IDAT data of a PNG, checking each chunk's CRC with node:zlib. */

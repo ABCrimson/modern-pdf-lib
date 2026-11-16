@@ -13,8 +13,10 @@
  *   wrote under `/FlateDecode`. It never reads gzip.
  * - {@link inflateRaw} reads raw DEFLATE data only.
  *
- *   Both throw `ResourceLimitError` (`maxDecodedStreamBytes`, 256 MiB) once
- *   the output is larger than that, reading no further input.
+ *   Both decode under the limits of the call's {@link LimitContext}: they
+ *   throw `ResourceLimitError` once the output is larger than
+ *   `maxDecodedStreamBytes` or than the part of `maxTotalDecodedBytes` the
+ *   call has left ({@link decodedOutputBound}), reading no further input.
  * - {@link inflateFlateUpTo} reads as {@link inflateFlate} does but keeps at
  *   most a size the caller chooses, and says whether the data held more.
  * - {@link inflateRawBounded} reads raw DEFLATE data step by step and
@@ -38,7 +40,7 @@
  */
 
 import { Inflate, zlibSync } from 'fflate';
-import { INTERNAL_LIMITS, assertWithinLimit } from '../../internal/limits.js';
+import { assertLimit, legacyContext, type LimitContext } from '../../internal/limits.js';
 import { MalformedInputError } from '../../errors.js';
 
 // ---------------------------------------------------------------------------
@@ -276,9 +278,33 @@ function joinChunks(chunks: readonly Uint8Array[], take: number): Uint8Array {
   return out;
 }
 
-/** The read joined into the result, or the limit error when it went over `maxDecodedStreamBytes`. */
-function finishWithinLimit(read: StepRead): Uint8Array {
-  if (read.over) assertWithinLimit('maxDecodedStreamBytes', read.size);
+/**
+ * The most bytes one decoder may output in the call of `ctx`: `maxDecodedStreamBytes`, or the
+ * part of `maxTotalDecodedBytes` the call has left when that is smaller.
+ *
+ * @param ctx - The context of the call.
+ */
+export function decodedOutputBound(ctx: LimitContext): number {
+  const left = ctx.limits.maxTotalDecodedBytes - ctx.totals.decodedBytes;
+  return Math.max(0, Math.min(ctx.limits.maxDecodedStreamBytes, left));
+}
+
+/**
+ * Throws `ResourceLimitError` when one decoder's output of `size` bytes is above
+ * `maxDecodedStreamBytes`, or would take the call's decoded total above
+ * `maxTotalDecodedBytes`; it does not add to the total. Called before the output is allocated.
+ *
+ * @param ctx  - The context of the call.
+ * @param size - The size of the output.
+ */
+export function assertDecodedOutput(ctx: LimitContext, size: number): void {
+  assertLimit(ctx, 'maxDecodedStreamBytes', size);
+  assertLimit(ctx, 'maxTotalDecodedBytes', ctx.totals.decodedBytes + size);
+}
+
+/** The read joined into the result, or the limit error when it went over {@link decodedOutputBound}. */
+function finishWithinLimit(read: StepRead, ctx: LimitContext): Uint8Array {
+  if (read.over) assertDecodedOutput(ctx, read.size);
   return joinChunks(read.chunks, read.size);
 }
 
@@ -293,7 +319,7 @@ function finishWithinLimit(read: StepRead): Uint8Array {
  * Data without a zlib header, or whose payload does not inflate, is read
  * once more as raw DEFLATE: modern-pdf-lib 0.40.6 and earlier wrote raw
  * DEFLATE under `/FlateDecode`, and those files keep loading. A payload
- * that decodes to more than the `maxDecodedStreamBytes` limit is refused at
+ * that decodes to more than {@link decodedOutputBound} bytes is refused at
  * once and is not read again as raw DEFLATE.
  *
  * Raw DEFLATE whose first two bytes also form a valid zlib header is read
@@ -305,33 +331,38 @@ function finishWithinLimit(read: StepRead): Uint8Array {
  *
  * Gzip data is never accepted. Empty input gives empty output.
  *
+ * The output is not added to the call's decoded total; the caller adds it.
+ *
  * @param data - The stream data.
+ * @param ctx  - The context of the call.
  * @returns      The decompressed bytes.
- * @throws {ResourceLimitError} `maxDecodedStreamBytes` (256 MiB) when the
- *   output is larger than that; no more input is read once it is.
+ * @throws {ResourceLimitError} `maxDecodedStreamBytes` when the output is
+ *   larger than that limit, `maxTotalDecodedBytes` when it is larger than
+ *   the part of that total the call has left; no more input is read once it is.
  * @throws {MalformedInputError} `FlateDecode: failed to decompress data` when the data
  *   inflates neither as zlib nor as raw DEFLATE.
  */
-export function inflateFlate(data: Uint8Array): Uint8Array {
-  return finishWithinLimit(inflateZlibOrRaw(data, INTERNAL_LIMITS.maxDecodedStreamBytes));
+export function inflateFlate(data: Uint8Array, ctx: LimitContext): Uint8Array {
+  return finishWithinLimit(inflateZlibOrRaw(data, decodedOutputBound(ctx)), ctx);
 }
 
 /**
  * Inflate raw DEFLATE data (RFC 1951) only; data with a zlib wrapper is not
  * read as zlib. Bytes after the final block are ignored, and the input is
- * read as {@link inflateFlate} reads it.
+ * read, and the output bounded, as {@link inflateFlate} does it.
  *
  * @param data - Raw DEFLATE data.
+ * @param ctx  - The context of the call.
  * @returns The decoded bytes.
- * @throws {ResourceLimitError} `maxDecodedStreamBytes` (256 MiB) when the
- *   output is larger than that; no more input is read once it is.
+ * @throws {ResourceLimitError} `maxDecodedStreamBytes` or `maxTotalDecodedBytes`, as
+ *   {@link inflateFlate} throws them.
  * @throws {MalformedInputError} `FlateDecode: failed to decompress data` when the data is
  *   not raw DEFLATE or ends before its final block.
  */
-export function inflateRaw(data: Uint8Array): Uint8Array {
-  const read = inflateSteps(data, INTERNAL_LIMITS.maxDecodedStreamBytes);
+export function inflateRaw(data: Uint8Array, ctx: LimitContext): Uint8Array {
+  const read = inflateSteps(data, decodedOutputBound(ctx));
   if (read === undefined) throw new MalformedInputError(FLATE_FAILURE);
-  return finishWithinLimit(read);
+  return finishWithinLimit(read, ctx);
 }
 
 /** The result of {@link inflateFlateUpTo}. */
@@ -356,17 +387,23 @@ export interface InflatedPrefix {
  * `maxBytes` plus the output of one 16 KiB step of input.
  *
  * @param data     - The stream data.
- * @param maxBytes - The most decoded bytes to return; at most
- *   `maxDecodedStreamBytes` (256 MiB). A fraction is rounded down.
+ * @param maxBytes - The most decoded bytes to return; at most the
+ *   `maxDecodedStreamBytes` of `ctx`. A fraction is rounded down.
+ * @param ctx      - The context of the call; a context over the default
+ *   limits when it is left out.
  * @returns          The decoded bytes and whether the data held more.
  * @throws {ResourceLimitError} `maxDecodedStreamBytes` when `maxBytes` is
- *   above 256 MiB or is not a finite number.
+ *   above that limit or is not a finite number.
  * @throws {MalformedInputError} `FlateDecode: failed to decompress data` when the data
  *   inflates neither as zlib nor as raw DEFLATE, or ends before its final
  *   block while the decoded size is at most `maxBytes`.
  */
-export function inflateFlateUpTo(data: Uint8Array, maxBytes: number): InflatedPrefix {
-  assertWithinLimit('maxDecodedStreamBytes', maxBytes);
+export function inflateFlateUpTo(
+  data: Uint8Array,
+  maxBytes: number,
+  ctx: LimitContext = legacyContext(),
+): InflatedPrefix {
+  assertLimit(ctx, 'maxDecodedStreamBytes', maxBytes);
   const bound = Math.max(0, Math.floor(maxBytes));
   const read = inflateZlibOrRaw(data, bound);
   return { data: joinChunks(read.chunks, Math.min(read.size, bound)), truncated: read.over };

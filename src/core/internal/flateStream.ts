@@ -12,11 +12,12 @@
  *   holds raw DEFLATE data (as modern-pdf-lib 0.40.6 and earlier wrote it)
  *   back as zlib data: the data is inflated and compressed again at level 6,
  *   so the decoded bytes do not change. A stream whose decoded data is
- *   larger than {@link INTERNAL_LIMITS}.maxRewrapDecodedBytes (64 MiB) is copied
- *   as loaded.
+ *   larger than the re-wrap bound ({@link INTERNAL_LIMITS}.maxRewrapDecodedBytes,
+ *   64 MiB, or the `maxDecodedStreamBytes` of the call's limit context when
+ *   that is smaller) is copied as loaded.
  * - {@link rewriteSyncFlushedStream} writes a loaded `/FlateDecode` stream
  *   whose zlib data ends at a sync flush, with no final DEFLATE block, back
- *   as complete zlib data of the bytes decoded so far, under the same limit.
+ *   as complete zlib data of the bytes decoded so far, under the same bound.
  * - A document loaded with `ignoreEncryption: true` from a file whose
  *   trailer has `/Encrypt` is never re-wrapped or rewritten: its stream data
  *   is still encrypted, and encrypted data can inflate as raw DEFLATE by
@@ -61,7 +62,7 @@ import {
   isAvailable as isWasmDeflateAvailable,
   deflateSync as wasmDeflateSync,
 } from '../../codecs/internal/libdeflateWasm.js';
-import { INTERNAL_LIMITS } from '../../internal/limits.js';
+import { INTERNAL_LIMITS, legacyContext, type LimitContext } from '../../internal/limits.js';
 import { UnsupportedEncryptionError } from '../../errors.js';
 import { PdfName } from '../pdfObjects.js';
 import type { PdfObject, PdfObjectRegistry, PdfStream, PdfString } from '../pdfObjects.js';
@@ -306,6 +307,15 @@ export function compressPdfStream(stream: PdfStream, level: number, useWasm = fa
   }
 }
 
+/**
+ * The most decoded bytes a re-wrap or rewrite on save keeps: {@link INTERNAL_LIMITS}.maxRewrapDecodedBytes
+ * (64 MiB), or the `maxDecodedStreamBytes` of `ctx` when that is smaller, so a stream is never
+ * decoded past the limits of its call.
+ */
+function rewrapBound(ctx: LimitContext): number {
+  return Math.min(INTERNAL_LIMITS.maxRewrapDecodedBytes, ctx.limits.maxDecodedStreamBytes);
+}
+
 /** True when the stream's first decode filter is `/FlateDecode`. */
 function firstFilterIsFlate(stream: PdfStream): boolean {
   const filter = stream.dict.get('/Filter');
@@ -320,7 +330,7 @@ function firstFilterIsFlate(stream: PdfStream): boolean {
  * first entry is `/FlateDecode`, and its data does not start with a zlib
  * header. Such data is inflated as raw DEFLATE, step by step
  * (`inflateRawBounded`); when that succeeds with at most
- * {@link INTERNAL_LIMITS}.maxRewrapDecodedBytes (64 MiB) decoded bytes, they
+ * {@link rewrapBound} decoded bytes (64 MiB under the default limits), they
  * are compressed again as zlib data at level 6 and replace the data, and
  * `/Length` is updated.
  * Bytes after the final DEFLATE block (such as an end-of-line counted in
@@ -331,10 +341,10 @@ function firstFilterIsFlate(stream: PdfStream): boolean {
  * alone: raw DEFLATE can start with such a header only when its first
  * block is a stored block whose padding bits are not zero, which DEFLATE
  * encoders do not write. Data that does not inflate as raw DEFLATE, and
- * data that decodes to more than {@link INTERNAL_LIMITS}.maxRewrapDecodedBytes
- * bytes, and data in which 128 KiB of input in a row before its final block
- * decode to no bytes, is left alone too (inflating stops once the decoded
- * size passes it), and no error is thrown.
+ * data that decodes to more than {@link rewrapBound} bytes, and data in which
+ * 128 KiB of input in a row before its final block decode to no bytes, is
+ * left alone too (inflating stops once the decoded size passes it), and no
+ * error is thrown.
  *
  * The writers never call this for a document loaded without decryption
  * from a file whose trailer has `/Encrypt` ({@link isLoadedFromEncryptedFile}):
@@ -342,14 +352,16 @@ function firstFilterIsFlate(stream: PdfStream): boolean {
  * can inflate as raw DEFLATE by chance, which would replace it for good.
  *
  * @param stream - The stream to update in place.
+ * @param ctx    - The limit context of the save; a context over the default
+ *                 limits when it is left out.
  */
-export function rewrapLegacyStream(stream: PdfStream): void {
+export function rewrapLegacyStream(stream: PdfStream, ctx: LimitContext = legacyContext()): void {
   if (stream.data.length === 0 || !firstFilterIsFlate(stream)) return;
   if (isZlibHeader(stream.data)) return;
 
   let plain: Uint8Array | undefined;
   try {
-    plain = inflateRawBounded(stream.data, INTERNAL_LIMITS.maxRewrapDecodedBytes);
+    plain = inflateRawBounded(stream.data, rewrapBound(ctx));
   } catch {
     return;
   }
@@ -366,15 +378,14 @@ export function rewrapLegacyStream(stream: PdfStream): void {
  * first entry is `/FlateDecode`, and its data starts with a zlib header and
  * ends with `00 00 ff ff` (`inflateSyncFlushedZlib`). When the data has not
  * reached its final block, ends at a block boundary and inflates to at most
- * {@link INTERNAL_LIMITS}.maxRewrapDecodedBytes (64 MiB), the bytes decoded up
- * to the sync flush, which a reader decodes from the data as loaded, are
- * compressed again as zlib data at level 6 and replace the data, and
- * `/Length` is updated. `/DecodeParms` stays as it is.
+ * {@link rewrapBound} bytes (64 MiB under the default limits), the bytes
+ * decoded up to the sync flush, which a reader decodes from the data as
+ * loaded, are compressed again as zlib data at level 6 and replace the data,
+ * and `/Length` is updated. `/DecodeParms` stays as it is.
  *
  * Complete zlib data is never rewritten. Data that does not inflate, data cut
- * short inside a block, data that decodes to more than
- * {@link INTERNAL_LIMITS}.maxRewrapDecodedBytes bytes (inflating stops once
- * the decoded size passes it), and data in which
+ * short inside a block, data that decodes to more than {@link rewrapBound}
+ * bytes (inflating stops once the decoded size passes it), and data in which
  * 128 KiB of input in a row decode to no bytes are left alone, and no error is
  * thrown.
  *
@@ -384,10 +395,15 @@ export function rewrapLegacyStream(stream: PdfStream): void {
  * data is still encrypted.
  *
  * @param stream - The stream to update in place.
+ * @param ctx    - The limit context of the save; a context over the default
+ *                 limits when it is left out.
  */
-export function rewriteSyncFlushedStream(stream: PdfStream): void {
+export function rewriteSyncFlushedStream(
+  stream: PdfStream,
+  ctx: LimitContext = legacyContext(),
+): void {
   if (!firstFilterIsFlate(stream)) return;
-  const plain = inflateSyncFlushedZlib(stream.data, INTERNAL_LIMITS.maxRewrapDecodedBytes);
+  const plain = inflateSyncFlushedZlib(stream.data, rewrapBound(ctx));
   if (plain === undefined) return;
   stream.data = flateEncode(plain, 6);
   stream.syncLength();

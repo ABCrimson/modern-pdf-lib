@@ -21,15 +21,16 @@ import { Inflate } from 'fflate';
 import {
   adler32,
   flateEncode,
-  inflateFlate,
+  inflateFlate as inflateFlateIn,
   inflateFlateUpTo,
-  inflateRaw,
+  inflateRaw as inflateRawIn,
   inflateRawBounded,
   inflateSyncFlushedZlib,
   isZlibHeader,
   wrapRawDeflate,
 } from '../../../../src/codecs/internal/pdfFlate.js';
-import { INTERNAL_LIMITS } from '../../../../src/internal/limits.js';
+import { INTERNAL_LIMITS, beginCall } from '../../../../src/internal/limits.js';
+import { DEFAULT_LIMITS } from '../../../../src/limits.js';
 import { MalformedInputError, ResourceLimitError } from '../../../../src/errors.js';
 
 // ---------------------------------------------------------------------------
@@ -37,6 +38,13 @@ import { MalformedInputError, ResourceLimitError } from '../../../../src/errors.
 // ---------------------------------------------------------------------------
 
 const encoder = new TextEncoder();
+
+/** {@link inflateFlateIn} in a call of its own under the default limits. */
+const inflateFlate = (data: Uint8Array): Uint8Array =>
+  inflateFlateIn(data, beginCall(DEFAULT_LIMITS));
+
+/** {@link inflateRawIn} in a call of its own under the default limits. */
+const inflateRaw = (data: Uint8Array): Uint8Array => inflateRawIn(data, beginCall(DEFAULT_LIMITS));
 
 /** Copy any byte view (Buffer included) into a plain Uint8Array. */
 function bytes(view: Uint8Array): Uint8Array {

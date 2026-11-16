@@ -6,7 +6,8 @@
  * value above it is refused with {@link ResourceLimitError} (code
  * `'resource-limit-exceeded'`). Twelve limits bound one item of the input (a
  * stream, table, tree, image, font or the forms of one page); four totals
- * bound a sum over one call (no call adds to a total yet).
+ * bound a sum over one call (only the stream decoders of src/codecs add to
+ * one yet, to `maxTotalDecodedBytes`).
  *
  * The public part (DEFAULT_LIMITS, LimitName, PdfLimits, ResolvedLimits) lives in src/limits.ts, which the package entries export.
  * {@link resolveLimits} checks a `limits` option once and applies it, and a

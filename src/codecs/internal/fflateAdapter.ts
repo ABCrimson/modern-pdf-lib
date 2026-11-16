@@ -9,8 +9,8 @@
  * asynchronous variants.
  *
  * Compression writes zlib data (RFC 1950), the format `/FlateDecode`
- * requires. Decompression goes through the FlateDecode codec
- * (`./pdfFlate.ts`): it reads zlib data and, as a fallback, raw DEFLATE.
+ * requires. The adapter does not decompress: `/FlateDecode` data is read
+ * through the FlateDecode codec (`./pdfFlate.ts`).
  *
  * This adapter implements the {@link CompressionEngine} interface from
  * `./deflate.ts`, making it interchangeable with the WASM and browser
@@ -21,7 +21,7 @@
 
 import { zlib as zlibAsync } from 'fflate';
 import type { CompressionEngine } from './deflate.js';
-import { clampFlateLevel, flateEncode, inflateFlate } from './pdfFlate.js';
+import { clampFlateLevel, flateEncode } from './pdfFlate.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -72,30 +72,6 @@ export function compressSync(data: Uint8Array, level: number = 6): Uint8Array {
   return flateEncode(data, level);
 }
 
-/**
- * Synchronously decompress zlib data, or raw DEFLATE as a fallback.
- *
- * The data goes through the FlateDecode codec (`inflateFlate` in
- * `./pdfFlate.ts`), which reads zlib data (RFC 1950) and falls back to raw
- * DEFLATE, the data modern-pdf-lib 0.40.6 and earlier wrote.
- *
- * @param data        - Compressed bytes: zlib data or raw DEFLATE.
- * @param _outputSize - Ignored. Kept for signature compatibility: the
- *                      result always holds every decompressed byte, however
- *                      small the hint.
- * @returns             Decompressed bytes.
- * @throws {Error} `FlateDecode: failed to decompress data` when the data
- *   inflates neither as zlib nor as raw DEFLATE.
- *
- * @example
- * ```ts
- * const original = decompressSync(compressed);
- * ```
- */
-export function decompressSync(data: Uint8Array, _outputSize?: number): Uint8Array {
-  return inflateFlate(data);
-}
-
 // ---------------------------------------------------------------------------
 // Async API
 // ---------------------------------------------------------------------------
@@ -129,24 +105,6 @@ export async function compressAsync(data: Uint8Array, level: number = 6): Promis
   );
 }
 
-/**
- * Decompress zlib data, or raw DEFLATE as a fallback, behind a Promise.
- *
- * The work runs on the calling thread through the same FlateDecode codec
- * as {@link decompressSync}, so both functions accept and reject the same
- * data.
- *
- * @param data        - Compressed bytes: zlib data or raw DEFLATE.
- * @param _outputSize - Ignored. Kept for signature compatibility: the
- *                      result always holds every decompressed byte.
- * @returns             A Promise resolving to decompressed bytes; it rejects
- *   with `FlateDecode: failed to decompress data` when the data inflates
- *   neither as zlib nor as raw DEFLATE.
- */
-export async function decompressAsync(data: Uint8Array, _outputSize?: number): Promise<Uint8Array> {
-  return inflateFlate(data);
-}
-
 // ---------------------------------------------------------------------------
 // CompressionEngine implementation
 // ---------------------------------------------------------------------------
@@ -162,7 +120,6 @@ export async function decompressAsync(data: Uint8Array, _outputSize?: number): P
  * ```ts
  * const engine = new FflateEngine();
  * const compressed = await engine.compress(data, 6);
- * const original = await engine.decompress(compressed);
  * ```
  */
 export class FflateEngine implements CompressionEngine {
@@ -207,19 +164,6 @@ export class FflateEngine implements CompressionEngine {
       }
     }
     return compressSync(data, level);
-  }
-
-  /**
-   * Decompress zlib data, or raw DEFLATE as a fallback, through the
-   * FlateDecode codec ({@link decompressSync}). The `useAsync` option does
-   * not apply here: decompression always runs on the calling thread.
-   *
-   * @param data        - Compressed bytes: zlib data or raw DEFLATE.
-   * @param _outputSize - Ignored; the result always holds every byte.
-   * @returns             Decompressed bytes.
-   */
-  async decompress(data: Uint8Array, _outputSize?: number): Promise<Uint8Array> {
-    return decompressSync(data);
   }
 
   /**

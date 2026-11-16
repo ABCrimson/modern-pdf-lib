@@ -1,11 +1,15 @@
 /**
  * Benchmarks for compression performance.
  *
- * Measures fflate compress/decompress at various levels and data sizes.
+ * Measures fflate compression and FlateDecode decompression (the codec every read goes
+ * through) at various levels and data sizes.
  */
 
 import { describe, bench } from './vitest-bench.js';
-import { compressSync, decompressSync } from '../../src/codecs/internal/fflateAdapter.js';
+import { compressSync } from '../../src/codecs/internal/fflateAdapter.js';
+import { inflateFlate } from '../../src/codecs/internal/pdfFlate.js';
+import { beginCall } from '../../src/internal/limits.js';
+import { DEFAULT_LIMITS } from '../../src/limits.js';
 
 // ---------------------------------------------------------------------------
 // Test data generators
@@ -96,17 +100,17 @@ describe('fflate compress', () => {
 // Decompression benchmarks
 // ---------------------------------------------------------------------------
 
-describe('fflate decompress', () => {
+describe('FlateDecode decompress', () => {
   bench('1KB text', () => {
-    decompressSync(compressed1KB);
+    inflateFlate(compressed1KB, beginCall(DEFAULT_LIMITS));
   });
 
   bench('10KB text', () => {
-    decompressSync(compressed10KB);
+    inflateFlate(compressed10KB, beginCall(DEFAULT_LIMITS));
   });
 
   bench('100KB text', () => {
-    decompressSync(compressed100KB);
+    inflateFlate(compressed100KB, beginCall(DEFAULT_LIMITS));
   });
 });
 
@@ -139,7 +143,6 @@ describe('compression ratio comparison', () => {
 import {
   initDeflateWasm,
   deflateSync,
-  inflateSync,
   isAvailable,
 } from '../../src/codecs/internal/libdeflateWasm.js';
 
@@ -170,19 +173,5 @@ describe.skipIf(!wasmDeflateReady)('libdeflate WASM compress', () => {
 
   bench('10KB random data, level 6', () => {
     deflateSync(random10KB, 6);
-  });
-});
-
-describe.skipIf(!wasmDeflateReady)('libdeflate WASM decompress', () => {
-  bench('1KB text', () => {
-    inflateSync(compressed1KB, text1KB.length);
-  });
-
-  bench('10KB text', () => {
-    inflateSync(compressed10KB, text10KB.length);
-  });
-
-  bench('100KB text', () => {
-    inflateSync(compressed100KB, text100KB.length);
   });
 });

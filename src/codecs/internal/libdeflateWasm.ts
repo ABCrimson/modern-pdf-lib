@@ -11,18 +11,18 @@
  * The engine manages a shared memory region for data transfers between
  * JS and WASM, minimizing allocations on the hot path.
  *
- * The WASM module writes and reads raw DEFLATE (RFC 1951), and so do the
- * sync helpers {@link deflateSync} and {@link inflateSync}. The
+ * The WASM module writes raw DEFLATE (RFC 1951), and so does the sync
+ * helper {@link deflateSync}. The
  * {@link LibdeflateWasm} engine wraps its output as zlib data (RFC 1950),
- * the format `/FlateDecode` requires, and decompresses through the
- * FlateDecode codec (`./pdfFlate.ts`) without the WASM module.
+ * the format `/FlateDecode` requires. Nothing here decompresses: `/FlateDecode`
+ * data is read through the FlateDecode codec (`./pdfFlate.ts`).
  *
  * @packageDocumentation
  */
 
 import type { CompressionEngine } from './deflate.js';
-import { inflateFlate, wrapRawDeflate } from './pdfFlate.js';
-import { EnvironmentError, InvalidStateError, MalformedInputError } from '../../errors.js';
+import { wrapRawDeflate } from './pdfFlate.js';
+import { EnvironmentError, InvalidStateError } from '../../errors.js';
 
 // ---------------------------------------------------------------------------
 // WASM module interface
@@ -239,50 +239,6 @@ export function deflateSync(input: Uint8Array, level: number = 6): Uint8Array {
 }
 
 /**
- * Synchronously decompress raw deflate data using libdeflate WASM.
- *
- * @param input      - Compressed bytes (raw deflate).
- * @param outputSize - Maximum expected output size. Must be >= actual
- *                     decompressed size. Default: `input.length * 4`.
- * @returns            Decompressed bytes.
- * @throws {InvalidStateError} If WASM is not initialized.
- * @throws {MalformedInputError} If the data does not decompress.
- *
- * @example
- * ```ts
- * const original = inflateSync(compressed, knownOriginalSize);
- * ```
- */
-export function inflateSync(input: Uint8Array, outputSize: number = input.length * 4): Uint8Array {
-  if (!wasmExports) {
-    throw new InvalidStateError('libdeflate WASM not initialized. Call initDeflateWasm() first.');
-  }
-
-  const maxOutput = Math.max(outputSize, input.length * 2);
-
-  const inputPtr = wasmExports.alloc(input.length);
-  const outputPtr = wasmExports.alloc(maxOutput);
-
-  try {
-    copyToWasm(inputPtr, input);
-
-    const actualSize = wasmExports.decompress(inputPtr, input.length, outputPtr, maxOutput);
-
-    if (actualSize < 0) {
-      throw new MalformedInputError(
-        'libdeflate decompression failed. The input may be corrupt or ' +
-          'the output buffer may be too small.',
-      );
-    }
-
-    return copyFromWasm(outputPtr, actualSize);
-  } finally {
-    wasmExports.dealloc(inputPtr, input.length);
-    wasmExports.dealloc(outputPtr, maxOutput);
-  }
-}
-
-/**
  * Check whether the libdeflate WASM module is initialized and available.
  *
  * @returns `true` if WASM is ready for use.
@@ -342,19 +298,6 @@ export class LibdeflateWasm implements CompressionEngine {
     // The underlying implementation is synchronous, but we wrap it in
     // a Promise to conform to the CompressionEngine interface.
     return wrapRawDeflate(deflateSync(data, level), data);
-  }
-
-  /**
-   * Decompress zlib data, or raw DEFLATE as a fallback, through the
-   * FlateDecode codec. The WASM module is not used, so this works before
-   * {@link initDeflateWasm} has run.
-   *
-   * @param data        - Compressed bytes: zlib data or raw DEFLATE.
-   * @param _outputSize - Ignored; the result always holds every byte.
-   * @returns             Decompressed bytes.
-   */
-  async decompress(data: Uint8Array, _outputSize?: number): Promise<Uint8Array> {
-    return inflateFlate(data);
   }
 
   /**

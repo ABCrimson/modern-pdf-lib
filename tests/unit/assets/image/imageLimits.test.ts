@@ -16,7 +16,8 @@ import {
   parseTiffIfd,
 } from '../../../../src/assets/image/tiff/tiffDecode.js';
 import { embedTiffDirect } from '../../../../src/assets/image/tiff/tiffDirectEmbed.js';
-import { INTERNAL_LIMITS } from '../../../../src/internal/limits.js';
+import { INTERNAL_LIMITS, beginCall } from '../../../../src/internal/limits.js';
+import { DEFAULT_LIMITS } from '../../../../src/limits.js';
 import { PdfDict, PdfNumber } from '../../../../src/core/pdfObjects.js';
 import { MalformedInputError, ResourceLimitError } from '../../../../src/errors.js';
 import { decodeCCITT } from '../../../../src/codecs/internal/ccittDecode.js';
@@ -61,7 +62,7 @@ function ccitt(k: number, columns: number, rows?: number): Uint8Array {
   parms.set('/K', PdfNumber.of(k));
   parms.set('/Columns', PdfNumber.of(columns));
   if (rows !== undefined) parms.set('/Rows', PdfNumber.of(rows));
-  return decodeCCITT(new Uint8Array(64).fill(0xff), parms);
+  return decodeCCITT(new Uint8Array(64).fill(0xff), parms, beginCall(DEFAULT_LIMITS));
 }
 
 describe('CCITTFaxDecode checks /Columns and /Rows first', () => {

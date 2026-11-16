@@ -14,7 +14,7 @@
  * @packageDocumentation
  */
 
-import { assertWithinLimit } from '../../internal/limits.js';
+import { assertLimit, type LimitContext } from '../../internal/limits.js';
 import { MalformedInputError } from '../../errors.js';
 import type { PdfDict } from '../../core/pdfObjects.js';
 import { PdfNumber, PdfBool } from '../../core/pdfObjects.js';
@@ -28,24 +28,29 @@ import { PdfNumber, PdfBool } from '../../core/pdfObjects.js';
  *
  * @param data  - The CCITT-encoded bytes.
  * @param parms - Optional `/DecodeParms` dictionary with CCITT parameters.
+ * @param ctx   - The context of the call, whose limits apply.
  * @returns The decoded bilevel image data (one bit per pixel, packed into
  *          bytes, with rows padded to byte boundaries).
  * @throws {MalformedInputError} `CCITTFaxDecode: /Columns must be an integer of at
  *   least 1` when `/Columns` is below 1.
  * @throws {ResourceLimitError} `maxImageDimension` when `/Columns` or
- *   `/Rows` is above 65,536; `maxImagePixels` when `/Columns` times `/Rows`,
- *   or the pixels of the rows decoded so far when `/Rows` is absent, are
- *   above 2^28.
+ *   `/Rows` is above that limit (65,536 by default); `maxImagePixels` when
+ *   `/Columns` times `/Rows`, or the pixels of the rows decoded so far when
+ *   `/Rows` is absent, are above that limit (2^28 by default).
  */
-export function decodeCCITT(data: Uint8Array, parms: PdfDict | null): Uint8Array {
-  const params = readCCITTParams(parms);
+export function decodeCCITT(
+  data: Uint8Array,
+  parms: PdfDict | null,
+  ctx: LimitContext,
+): Uint8Array {
+  const params = readCCITTParams(parms, ctx);
 
   if (params.k < 0) {
-    return decodeGroup4(data, params);
+    return decodeGroup4(data, params, ctx);
   } else if (params.k === 0) {
-    return decodeGroup3_1D(data, params);
+    return decodeGroup3_1D(data, params, ctx);
   } else {
-    return decodeGroup3_2D(data, params);
+    return decodeGroup3_2D(data, params, ctx);
   }
 }
 
@@ -69,22 +74,22 @@ interface CCITTParams {
 }
 
 /**
- * Reads the parameters. `/Columns` and `/Rows` are checked against
- * `INTERNAL_LIMITS` before any row is decoded: `/Columns` below 1 throws
+ * Reads the parameters. `/Columns` and `/Rows` are checked against the
+ * limits of `ctx` before any row is decoded: `/Columns` below 1 throws
  * `MalformedInputError`; `/Columns` or `/Rows` above `maxImageDimension`, or
  * `/Columns` times `/Rows` above `maxImagePixels`, throws
  * `ResourceLimitError`. A `/Rows` below 1 means the row count is not given.
  */
-function readCCITTParams(parms: PdfDict | null): CCITTParams {
+function readCCITTParams(parms: PdfDict | null, ctx: LimitContext): CCITTParams {
   const columns = dictInt(parms, '/Columns', 1728);
   const rows = dictInt(parms, '/Rows', 0);
   if (!(columns >= 1)) {
     throw new MalformedInputError('CCITTFaxDecode: /Columns must be an integer of at least 1');
   }
-  assertWithinLimit('maxImageDimension', columns);
+  assertLimit(ctx, 'maxImageDimension', columns);
   if (rows > 0) {
-    assertWithinLimit('maxImageDimension', rows);
-    assertWithinLimit('maxImagePixels', columns * rows);
+    assertLimit(ctx, 'maxImageDimension', rows);
+    assertLimit(ctx, 'maxImagePixels', columns * rows);
   }
   return {
     k: dictInt(parms, '/K', 0),
@@ -119,19 +124,23 @@ function dictBool(dict: PdfDict | null, key: string, fallback: boolean): boolean
 /**
  * The packed rows decoded so far, in a `Uint8Array` that doubles when it
  * is full. Before a row is appended, the pixels of all rows including it
- * are checked against `maxImagePixels`, so the output never grows past
- * 2^28 pixels (32 MiB packed) whatever the data says.
+ * are checked against the `maxImagePixels` of the call, so the output never
+ * grows past that many pixels (2^28 pixels, 32 MiB packed, by default)
+ * whatever the data says.
  */
 class RowSink {
   private buffer = new Uint8Array(1 << 16);
   private used = 0;
   private rows = 0;
 
-  constructor(private readonly columns: number) {}
+  constructor(
+    private readonly columns: number,
+    private readonly ctx: LimitContext,
+  ) {}
 
   /** Appends one packed row. @throws {ResourceLimitError} `maxImagePixels`. */
   push(packed: Uint8Array): void {
-    assertWithinLimit('maxImagePixels', (this.rows + 1) * this.columns);
+    assertLimit(this.ctx, 'maxImagePixels', (this.rows + 1) * this.columns);
     const needed = this.used + packed.length;
     if (needed > this.buffer.length) {
       const grown = new Uint8Array(Math.max(needed, this.buffer.length * 2));
@@ -551,10 +560,10 @@ function readRunLength(reader: BitReader, tree: HuffmanNode): number {
 // Group 3 1D decoding (K = 0)
 // ---------------------------------------------------------------------------
 
-function decodeGroup3_1D(data: Uint8Array, params: CCITTParams): Uint8Array {
+function decodeGroup3_1D(data: Uint8Array, params: CCITTParams, ctx: LimitContext): Uint8Array {
   const { columns, rows, blackIs1, encodedByteAlign, endOfBlock } = params;
   const reader = new BitReader(data);
-  const output = new RowSink(columns);
+  const output = new RowSink(columns, ctx);
   let rowCount = 0;
   const maxRows = rows > 0 ? rows : 100000; // safety limit
 
@@ -621,12 +630,12 @@ function decodeGroup3Line(reader: BitReader, columns: number): Uint8Array | null
 // Group 3 2D decoding (K > 0)
 // ---------------------------------------------------------------------------
 
-function decodeGroup3_2D(data: Uint8Array, params: CCITTParams): Uint8Array {
+function decodeGroup3_2D(data: Uint8Array, params: CCITTParams, ctx: LimitContext): Uint8Array {
   // Group 3 2D alternates between 1D and 2D lines.
   // A tag bit before each line indicates: 1 = 1D, 0 = 2D.
   const { columns, rows, blackIs1, encodedByteAlign, endOfBlock } = params;
   const reader = new BitReader(data);
-  const output = new RowSink(columns);
+  const output = new RowSink(columns, ctx);
   let rowCount = 0;
   const maxRows = rows > 0 ? rows : 100000;
 
@@ -669,10 +678,10 @@ function decodeGroup3_2D(data: Uint8Array, params: CCITTParams): Uint8Array {
 // Group 4 decoding (K < 0)
 // ---------------------------------------------------------------------------
 
-function decodeGroup4(data: Uint8Array, params: CCITTParams): Uint8Array {
+function decodeGroup4(data: Uint8Array, params: CCITTParams, ctx: LimitContext): Uint8Array {
   const { columns, rows, blackIs1, encodedByteAlign, endOfBlock } = params;
   const reader = new BitReader(data);
-  const output = new RowSink(columns);
+  const output = new RowSink(columns, ctx);
   let rowCount = 0;
   const maxRows = rows > 0 ? rows : 100000;
 

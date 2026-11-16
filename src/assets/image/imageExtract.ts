@@ -12,6 +12,7 @@
 import type { PdfDocument } from '../../core/pdfDocument.js';
 import { PdfDict, PdfName, PdfNumber, PdfArray, PdfRef, PdfStream } from '../../core/pdfObjects.js';
 import { decodeStream, getStreamFilters } from '../../codecs/streamDecode.js';
+import type { PdfLimits } from '../../limits.js';
 
 // ---------------------------------------------------------------------------
 // Public interfaces
@@ -256,15 +257,23 @@ export function extractImages(doc: PdfDocument): ImageInfo[] {
  * For FlateDecode and other filters, fully decodes the stream.
  *
  * JPXDecode and JBIG2Decode images throw `UnsupportedFilterError`; images
- * above the internal size limits throw `ResourceLimitError`.
+ * above the limits of the call throw `ResourceLimitError`, as
+ * `decodeStream()` throws it.
  *
  * @param imageInfo - An `ImageInfo` from `extractImages()`.
+ * @param options   - `limits`: the limits the decode runs under, over
+ *                    `DEFAULT_LIMITS`, as for `decodeStream()`.
  * @returns The decoded stream data.
+ * @throws {InvalidArgumentError} When the image has a filter and `options.limits` is not a
+ *   valid `limits` value.
  */
-export function decodeImageStream(imageInfo: ImageInfo): Uint8Array {
+export function decodeImageStream(
+  imageInfo: ImageInfo,
+  options?: { readonly limits?: PdfLimits | undefined },
+): Uint8Array {
   if (imageInfo.filters.length === 0) {
     return imageInfo.stream.data;
   }
 
-  return decodeStream(imageInfo.stream.data, imageInfo.filters as string[], null);
+  return decodeStream(imageInfo.stream.data, imageInfo.filters as string[], null, options);
 }

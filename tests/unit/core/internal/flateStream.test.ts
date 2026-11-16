@@ -28,7 +28,7 @@ import {
   rewriteSyncFlushedStream,
 } from '../../../../src/core/internal/flateStream.js';
 import { UnsupportedEncryptionError } from '../../../../src/errors.js';
-import { INTERNAL_LIMITS } from '../../../../src/internal/limits.js';
+import { INTERNAL_LIMITS, beginCall, resolveLimits } from '../../../../src/internal/limits.js';
 import {
   PdfArray,
   PdfDict,
@@ -219,6 +219,22 @@ describe('rewrapLegacyStream', () => {
     }
     expect(new Uint8Array(inflateSync(stream.data))).toEqual(encoder.encode('hello world'));
   });
+
+  it('decodes under the maxDecodedStreamBytes of the context when it is below 64 MiB', () => {
+    const ctx = beginCall(resolveLimits({ maxDecodedStreamBytes: 1024 }));
+    const at = streamOf(
+      new Uint8Array(deflateRawSync(new Uint8Array(1024))),
+      PdfName.of('FlateDecode'),
+    );
+    rewrapLegacyStream(at, ctx);
+    expect(new Uint8Array(inflateSync(at.data))).toEqual(new Uint8Array(1024));
+    const data = new Uint8Array(deflateRawSync(new Uint8Array(1025)));
+    const over = streamOf(data, PdfName.of('FlateDecode'));
+    rewrapLegacyStream(over, ctx);
+    expect(over.data).toBe(data);
+    rewrapLegacyStream(over);
+    expect(new Uint8Array(inflateSync(over.data))).toEqual(new Uint8Array(1025));
+  });
 });
 
 /** Zlib data that ends at a sync flush: no final DEFLATE block and no Adler-32 trailer. */
@@ -329,6 +345,19 @@ describe('rewriteSyncFlushedStream', () => {
     rewriteSyncFlushedStream(stream);
     expect(stream.data).toBe(data);
     expect(lengthOf(stream)).toBe(data.length);
+  });
+
+  it('decodes under the maxDecodedStreamBytes of the context when it is below 64 MiB', () => {
+    const ctx = beginCall(resolveLimits({ maxDecodedStreamBytes: 1024 }));
+    const at = streamOf(syncFlushed(new Uint8Array(1024)), PdfName.of('FlateDecode'));
+    rewriteSyncFlushedStream(at, ctx);
+    expect(new Uint8Array(inflateSync(at.data))).toEqual(new Uint8Array(1024));
+    const data = syncFlushed(new Uint8Array(1025));
+    const over = streamOf(data, PdfName.of('FlateDecode'));
+    rewriteSyncFlushedStream(over, ctx);
+    expect(over.data).toBe(data);
+    rewriteSyncFlushedStream(over);
+    expect(new Uint8Array(inflateSync(over.data))).toEqual(new Uint8Array(1025));
   });
 
   it('reads no input after the step that takes the decoded size past 64 MiB', () => {

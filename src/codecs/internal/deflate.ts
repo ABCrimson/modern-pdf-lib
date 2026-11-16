@@ -3,23 +3,23 @@
  *
  * Unified compression interface for the modern-pdf library.
  *
- * Provides a single entry point for deflate compression/decompression
- * with automatic engine selection based on availability:
+ * Provides a single entry point for deflate compression with automatic
+ * engine selection based on availability:
  *
  * 1. **libdeflate WASM** -- fastest, levels 1-12
  * 2. **fflate** (pure JS) -- good fallback, levels 1-9
  * 3. **CompressionStream** (browser built-in) -- last resort, no level control
  *
  * Every engine compresses to zlib data (RFC 1950), the format
- * `/FlateDecode` requires, and decompresses through the FlateDecode codec
- * (`./pdfFlate.ts`): zlib data, or raw DEFLATE as a fallback.
+ * `/FlateDecode` requires. No engine decompresses: `/FlateDecode` data is
+ * read through the FlateDecode codec (`./pdfFlate.ts`), under the limits of
+ * the call that reads it.
  *
  * Usage:
  * ```ts
- * import { compress, decompress, getCompressor } from './deflate.js';
+ * import { compress, getCompressor } from './deflate.js';
  *
  * const compressed = await compress(data, { level: 6 });
- * const original   = await decompress(compressed);
  *
  * // Or get a reusable engine:
  * const engine = await getCompressor({ preferEngine: 'libdeflate' });
@@ -29,7 +29,6 @@
  * @packageDocumentation
  */
 
-import { inflateFlate } from './pdfFlate.js';
 import { EnvironmentError } from '../../errors.js';
 
 // ---------------------------------------------------------------------------
@@ -72,8 +71,8 @@ export interface CompressionOptions {
  * Abstract interface that all compression back-ends implement.
  *
  * Implementations must be stateless with respect to individual
- * compress/decompress calls (they may hold internal WASM instances
- * or cached state, but each call is independent).
+ * compress calls (they may hold internal WASM instances or cached
+ * state, but each call is independent).
  */
 export interface CompressionEngine {
   /** Human-readable engine name for diagnostics. */
@@ -93,18 +92,6 @@ export interface CompressionEngine {
    * @returns       Compressed bytes: zlib data (RFC 1950).
    */
   compress(data: Uint8Array, level?: number): Promise<Uint8Array>;
-
-  /**
-   * Decompress deflate-compressed data.
-   *
-   * @param data       - Compressed input bytes: zlib data (RFC 1950), or raw
-   *                     DEFLATE as a fallback.
-   * @param outputSize - Optional output size hint. The engines in this
-   *                     module ignore it: the result always holds every
-   *                     decompressed byte.
-   * @returns            Decompressed bytes.
-   */
-  decompress(data: Uint8Array, outputSize?: number): Promise<Uint8Array>;
 
   /**
    * Release any resources held by this engine (e.g. WASM memory).
@@ -135,9 +122,7 @@ let libdeflateAttempted = false;
  *
  * This is the lowest-priority fallback -- it does not support
  * compression levels and may not be available in all runtimes.
- * It compresses with `CompressionStream('deflate')` (zlib data) and
- * decompresses through the FlateDecode codec, which also reads raw
- * DEFLATE and zlib data whose Adler-32 trailer is missing or wrong.
+ * It compresses with `CompressionStream('deflate')` (zlib data).
  */
 class BrowserDeflateEngine implements CompressionEngine {
   readonly name = 'browser-compression-stream';
@@ -148,11 +133,6 @@ class BrowserDeflateEngine implements CompressionEngine {
   async compress(data: Uint8Array, _level?: number): Promise<Uint8Array> {
     const cs = new CompressionStream('deflate');
     return this.pipeThroughStream(cs, data);
-  }
-
-  /** @inheritdoc */
-  async decompress(data: Uint8Array, _outputSize?: number): Promise<Uint8Array> {
-    return inflateFlate(data);
   }
 
   /** @inheritdoc */
@@ -350,31 +330,6 @@ export async function compress(
   const engine = await getCompressor(options);
   const level = options?.level ?? 6;
   return engine.compress(data, level);
-}
-
-/**
- * Decompress deflate-compressed data using the best available engine.
- *
- * @param data       - Compressed bytes: zlib data (RFC 1950), or raw DEFLATE
- *                     as a fallback.
- * @param outputSize - Optional output size hint, passed to the engine. The
- *                     engines in this module ignore it: the result always
- *                     holds every decompressed byte.
- * @param options    - Engine preference.
- * @returns            Decompressed bytes.
- *
- * @example
- * ```ts
- * const original = await decompress(compressedData);
- * ```
- */
-export async function decompress(
-  data: Uint8Array,
-  outputSize?: number,
-  options?: CompressionOptions,
-): Promise<Uint8Array> {
-  const engine = await getCompressor(options);
-  return engine.decompress(data, outputSize);
 }
 
 /**

@@ -7,16 +7,18 @@ import { inflateFlate, inflateRaw } from '../../src/codecs/internal/pdfFlate.js'
 import { PdfDict, PdfName, PdfStream } from '../../src/core/pdfObjects.js';
 import { loadPdf } from '../../src/index.js';
 import { decodeFlateOnly, decodeStream } from '../../src/codecs/streamDecode.js';
+import { beginCall } from '../../src/internal/limits.js';
+import { DEFAULT_LIMITS } from '../../src/limits.js';
 import type { JsonValue } from '../helpers/budget.js';
 
-/** `inflateFlate` on zlib data. */
+/** `inflateFlate` on zlib data, under the default limits. */
 export function inflateFlateEntry(bytes: Uint8Array, _args: JsonValue): JsonValue {
-  return { length: inflateFlate(bytes).length };
+  return { length: inflateFlate(bytes, beginCall(DEFAULT_LIMITS)).length };
 }
 
-/** `inflateRaw` on the DEFLATE payload of zlib data (the two header bytes dropped). */
+/** `inflateRaw` on the DEFLATE payload of zlib data (the two header bytes dropped), under the default limits. */
 export function inflateRawEntry(bytes: Uint8Array, _args: JsonValue): JsonValue {
-  return { length: inflateRaw(bytes.subarray(2)).length };
+  return { length: inflateRaw(bytes.subarray(2), beginCall(DEFAULT_LIMITS)).length };
 }
 
 /** `decodeFlateOnly`, the xref-stream and object-stream decoder, on a stream whose /Filter is /FlateDecode. */

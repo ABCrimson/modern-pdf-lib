@@ -1,16 +1,29 @@
 /**
  * Tests for the limits of the stream filters: ordinary streams decode to the same bytes (SHA-256
  * controls), the decoded-size ceiling applies to each filter's output, the LZW table stops at 4096
- * entries, and predictor parameters are validated.
+ * entries, predictor parameters are validated, and every decoder of the codec path checks the
+ * limits of the call (a `limits` option, or a context) at the limit and one above it.
  */
 
 import { createHash } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
-import { zlibSync } from 'fflate';
-import { INTERNAL_LIMITS } from '../../../src/internal/limits.js';
+import { deflateSync, zlibSync } from 'fflate';
+import { INTERNAL_LIMITS, beginCall, resolveLimits } from '../../../src/internal/limits.js';
+import type { LimitContext } from '../../../src/internal/limits.js';
+import type { PdfLimits } from '../../../src/limits.js';
 import { PdfArray, PdfDict, PdfName, PdfNumber, PdfStream } from '../../../src/core/pdfObjects.js';
 import { ResourceLimitError, UnsupportedFeatureError } from '../../../src/errors.js';
-import { decodeFlateOnly, decodeStream } from '../../../src/codecs/streamDecode.js';
+import {
+  decodeFlateOnly,
+  decodeStream,
+  decodeStreamData,
+} from '../../../src/codecs/streamDecode.js';
+import {
+  inflateFlate,
+  inflateFlateUpTo,
+  inflateRaw,
+} from '../../../src/codecs/internal/pdfFlate.js';
+import { decodeCCITT } from '../../../src/codecs/internal/ccittDecode.js';
 import {
   controlStreams,
   lzwEncode,
@@ -293,5 +306,254 @@ describe('the sample limit of the sub-byte TIFF predictor', () => {
         40_000_000 - (40_000_000 % (1000 * 32 * (bpc / 8))),
       );
     }
+  });
+});
+
+/** The context of a call made with the `limits` option `limits`. */
+const contextOf = (limits: PdfLimits): LimitContext => beginCall(resolveLimits(limits));
+
+/** The error `call` throws; fails the test when it returns. */
+function thrown(call: () => unknown): unknown {
+  try {
+    call();
+  } catch (err) {
+    return err;
+  }
+  throw new Error('expected the call to throw');
+}
+
+/** Expects `call` to throw the ResourceLimitError of a limit an option set. */
+function expectOptionLimit(call: () => unknown, limit: string, max: number, actual: number): void {
+  const err = thrown(call);
+  expect(err).toBeInstanceOf(ResourceLimitError);
+  expect(err).toMatchObject({
+    code: 'resource-limit-exceeded',
+    limit,
+    max,
+    actual,
+    source: 'option',
+  });
+}
+
+const ascii = (text: string): Uint8Array => new TextEncoder().encode(text);
+
+/** RunLengthDecode data of `n` zero bytes: runs of 128, then one literal run for the rest. */
+function runLengthZeros(n: number): Uint8Array {
+  const out: number[] = [];
+  for (let left = n; left > 0;) {
+    if (left >= 128) {
+      out.push(129, 0);
+      left -= 128;
+    } else {
+      out.push(left - 1, ...new Array<number>(left).fill(0));
+      left = 0;
+    }
+  }
+  out.push(128);
+  return Uint8Array.from(out);
+}
+
+describe('the limits option of decodeStream', () => {
+  const at = { limits: { maxDecodedStreamBytes: 1024 } } as const;
+  const ENCODERS: readonly (readonly [string, (n: number) => Uint8Array])[] = [
+    ['FlateDecode', (n) => zlibSync(new Uint8Array(n))],
+    ['ASCIIHexDecode', (n) => ascii('00'.repeat(n))],
+    ['ASCII85Decode', (n) => ascii('z'.repeat(n >> 2) + ['', '!!', '!!!', '!!!!'][n & 3]!)],
+    ['LZWDecode', (n) => lzwEncode(new Uint8Array(n))],
+    ['RunLengthDecode', runLengthZeros],
+    ['DCTDecode', (n) => new Uint8Array(n)],
+  ];
+
+  for (const [filter, encode] of ENCODERS) {
+    it(`decodes ${filter} data of 1,024 bytes under maxDecodedStreamBytes 1024 and refuses 1,025`, () => {
+      expect(decodeStream(encode(1024), filter, null, at)).toEqual(new Uint8Array(1024));
+      const err = thrown(() => decodeStream(encode(1025), filter, null, at));
+      expect(err).toBeInstanceOf(ResourceLimitError);
+      expect(err).toMatchObject({ limit: 'maxDecodedStreamBytes', max: 1024, source: 'option' });
+    });
+  }
+
+  it('reports the bytes decoded when the limit is passed, and source "default" without the option', () => {
+    expectOptionLimit(
+      () => decodeStream(new Uint8Array(1025), 'DCTDecode', null, at),
+      'maxDecodedStreamBytes',
+      1024,
+      1025,
+    );
+    const over = new Uint8Array(INTERNAL_LIMITS.maxDecodedStreamBytes + 1);
+    expect(thrown(() => decodeStream(over, 'DCTDecode'))).toMatchObject({
+      limit: 'maxDecodedStreamBytes',
+      source: 'default',
+    });
+  });
+
+  it('checks a predictor row against the option', () => {
+    const data = zlibSync(new Uint8Array(10));
+    const row = (columns: number): PdfDict => makeParms({ '/Predictor': 12, '/Columns': columns });
+    expect(decodeStream(data, 'FlateDecode', row(1024), at)).toHaveLength(0);
+    expectOptionLimit(
+      () => decodeStream(data, 'FlateDecode', row(1025), at),
+      'maxDecodedStreamBytes',
+      1024,
+      1025,
+    );
+  });
+
+  it('checks the samples of the sub-byte TIFF predictor against the option', () => {
+    // Rows of one byte: 8 columns of 1 bit. 8 rows are 64 samples, 9 rows 72.
+    const parms = makeParms({ '/Predictor': 2, '/Columns': 8, '/BitsPerComponent': 1 });
+    const options = { limits: { maxPredictorSamples: 64 } };
+    expect(decodeStream(zlibSync(new Uint8Array(8)), 'FlateDecode', parms, options)).toHaveLength(
+      8,
+    );
+    expectOptionLimit(
+      () => decodeStream(zlibSync(new Uint8Array(9)), 'FlateDecode', parms, options),
+      'maxPredictorSamples',
+      64,
+      72,
+    );
+  });
+
+  it('checks the CCITTFaxDecode dimensions against the option', () => {
+    const parms = (columns: number): PdfDict =>
+      makeParms({ '/K': -1, '/Columns': columns, '/Rows': 1 });
+    const data = new Uint8Array(64).fill(0xff);
+    for (const limit of ['maxImagePixels', 'maxImageDimension'] as const) {
+      const options = { limits: { [limit]: 64 } };
+      expect(decodeStream(data, 'CCITTFaxDecode', parms(64), options)).toHaveLength(8);
+      expectOptionLimit(
+        () => decodeStream(data, 'CCITTFaxDecode', parms(65), options),
+        limit,
+        64,
+        65,
+      );
+    }
+  });
+
+  it('refuses a limits option that resolveLimits refuses, before decoding', () => {
+    const options = { limits: { maxDecodedStreamBytes: 0 } };
+    expect(thrown(() => decodeStream(new Uint8Array(1), 'DCTDecode', null, options))).toMatchObject(
+      {
+        name: 'InvalidArgumentError',
+        argument: 'limits.maxDecodedStreamBytes',
+      },
+    );
+  });
+});
+
+describe('the decoded total of one call', () => {
+  // 400 bytes of hex digits, then two filters that pass the data on: 3 outputs of 400 bytes.
+  const data = ascii('00'.repeat(400));
+  const chain = ['ASCIIHexDecode', 'Crypt', 'DCTDecode'];
+
+  it('accepts a 3-stage chain whose outputs sum to maxTotalDecodedBytes', () => {
+    const options = { limits: { maxTotalDecodedBytes: 1200 } };
+    expect(decodeStream(data, chain, null, options)).toHaveLength(400);
+  });
+
+  it('refuses a 3-stage chain whose stages each fit but whose outputs sum to one more', () => {
+    const options = { limits: { maxTotalDecodedBytes: 1199 } };
+    expectOptionLimit(
+      () => decodeStream(data, chain, null, options),
+      'maxTotalDecodedBytes',
+      1199,
+      1200,
+    );
+  });
+
+  it('stops a decoder at the part of the total left, not only at maxDecodedStreamBytes', () => {
+    // The hex stage outputs 1,000 of 1,024 bytes; the Flate stage may then decode 24, not 25.
+    const flate = zlibSync(new Uint8Array(25));
+    const digits = [...flate].map((b) => b.toString(16).padStart(2, '0')).join('');
+    const hex = ascii(digits + '00'.repeat(1000 - flate.length));
+    const options = { limits: { maxTotalDecodedBytes: 1024 } };
+    const ok = { limits: { maxTotalDecodedBytes: 1025 } };
+    expect(decodeStream(hex, ['ASCIIHexDecode', 'FlateDecode'], null, ok)).toHaveLength(25);
+    expect(
+      thrown(() => decodeStream(hex, ['ASCIIHexDecode', 'FlateDecode'], null, options)),
+    ).toMatchObject({ limit: 'maxTotalDecodedBytes', max: 1024, source: 'option' });
+  });
+
+  it('sums the streams decoded under one context', () => {
+    const ctx = contextOf({ maxTotalDecodedBytes: 2048 });
+    const dict = new PdfDict().set('/Filter', PdfName.of('FlateDecode'));
+    const stream = new PdfStream(dict, zlibSync(new Uint8Array(1024)));
+    expect(decodeStreamData(stream, ctx)).toHaveLength(1024);
+    expect(decodeFlateOnly(stream, ctx)).toHaveLength(1024);
+    expect(ctx.totals.decodedBytes).toBe(2048);
+    expect(thrown(() => decodeStreamData(stream, ctx))).toMatchObject({
+      limit: 'maxTotalDecodedBytes',
+      max: 2048,
+      source: 'option',
+    });
+  });
+});
+
+describe('the Flate decoders take the context of the call', () => {
+  const ctx = (): LimitContext => contextOf({ maxDecodedStreamBytes: 1024 });
+
+  it('inflateFlate decodes 1,024 bytes and refuses 1,025', () => {
+    expect(inflateFlate(zlibSync(new Uint8Array(1024)), ctx())).toHaveLength(1024);
+    expectOptionLimit(
+      () => inflateFlate(zlibSync(new Uint8Array(1025)), ctx()),
+      'maxDecodedStreamBytes',
+      1024,
+      1025,
+    );
+  });
+
+  it('inflateRaw decodes 1,024 bytes and refuses 1,025', () => {
+    expect(inflateRaw(deflateSync(new Uint8Array(1024)), ctx())).toHaveLength(1024);
+    expectOptionLimit(
+      () => inflateRaw(deflateSync(new Uint8Array(1025)), ctx()),
+      'maxDecodedStreamBytes',
+      1024,
+      1025,
+    );
+  });
+
+  it('inflateFlateUpTo takes a bound of 1,024 bytes and refuses 1,025', () => {
+    const data = zlibSync(new Uint8Array(4096));
+    const read = inflateFlateUpTo(data, 1024, ctx());
+    expect(read.truncated).toBe(true);
+    expect(read.data).toHaveLength(1024);
+    expectOptionLimit(
+      () => inflateFlateUpTo(data, 1025, ctx()),
+      'maxDecodedStreamBytes',
+      1024,
+      1025,
+    );
+  });
+
+  it('decodeFlateOnly decodes 1,024 bytes and refuses 1,025, as the only and as the first filter', () => {
+    const only = (n: number): PdfStream =>
+      new PdfStream(
+        new PdfDict().set('/Filter', PdfName.of('FlateDecode')),
+        zlibSync(new Uint8Array(n)),
+      );
+    const first = (n: number): PdfStream =>
+      new PdfStream(
+        new PdfDict().set(
+          '/Filter',
+          PdfArray.of([PdfName.of('FlateDecode'), PdfName.of('DCTDecode')]),
+        ),
+        deflateSync(new Uint8Array(n)),
+      );
+    for (const make of [only, first]) {
+      expect(decodeFlateOnly(make(1024), ctx())).toHaveLength(1024);
+      expect(thrown(() => decodeFlateOnly(make(1025), ctx()))).toMatchObject({
+        limit: 'maxDecodedStreamBytes',
+        max: 1024,
+        source: 'option',
+      });
+    }
+  });
+
+  it('decodeCCITT checks /Columns x /Rows against the context', () => {
+    const parms = (rows: number): PdfDict => makeParms({ '/K': -1, '/Columns': 8, '/Rows': rows });
+    const data = new Uint8Array(64).fill(0xff);
+    const pixels = (): LimitContext => contextOf({ maxImagePixels: 64 });
+    expect(() => decodeCCITT(data, parms(8), pixels())).not.toThrow();
+    expectOptionLimit(() => decodeCCITT(data, parms(9), pixels()), 'maxImagePixels', 64, 72);
   });
 });
