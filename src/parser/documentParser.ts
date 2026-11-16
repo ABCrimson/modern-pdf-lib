@@ -459,7 +459,7 @@ export class PdfDocumentParser {
    * @param password  Optional user/owner password.
    * @throws {UnsupportedEncryptionError} When the handler or a crypt filter is not supported
    *         (before any password is tried).
-   * @throws {ResourceLimitError} When an internal limit is exceeded.
+   * @throws {ResourceLimitError} When a limit is exceeded.
    * @throws {MalformedInputError} When the /Encrypt dictionary has no /O or /U (before any password
    *         is tried).
    * @throws {EnvironmentError} When the runtime has no Web Crypto and the handler needs it.

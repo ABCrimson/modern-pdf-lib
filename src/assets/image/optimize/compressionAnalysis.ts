@@ -236,7 +236,7 @@ export function analyzeImages(doc: PdfDocument, options?: AnalyzeImagesOptions):
     try {
       pixels = decodeImageStream(info);
     } catch (err) {
-      // An image refused by an internal limit is reported, not kept
+      // An image refused by a limit is reported, not kept
       if (err instanceof ResourceLimitError) throw err;
       // Decoding failed — can't analyze
       analyses.push({

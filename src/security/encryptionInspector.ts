@@ -136,8 +136,8 @@ const BIT_PRINT_HIGH_RES = 1 << 11; // bit 12
  * @returns    A {@link EncryptionReport}.  If the trailer has no
  *             `/Encrypt` entry (or the file is unparseable) the report is
  *             `{ encrypted: false }`.
- * @throws {ResourceLimitError} When the cross-reference data decodes past an
- *             internal limit: the file is refused, not reported as unencrypted.
+ * @throws {ResourceLimitError} When the cross-reference data decodes past a
+ *             limit: the file is refused, not reported as unencrypted.
  */
 export async function inspectEncryption(pdf: Uint8Array): Promise<EncryptionReport> {
   // ---- Locate the trailer and the /Encrypt dictionary --------------------

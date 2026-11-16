@@ -122,14 +122,14 @@ interface InferredLine {
  *
  * Never throws on an empty (or text-free) page — it returns all-zero
  * counts and leaves the structure tree untouched. A page that the
- * interpreter refuses because of an internal limit throws
+ * interpreter refuses because of a limit throws
  * {@link ResourceLimitError}; it is not tagged as a blank page.
  *
  * @param doc        The document containing the page.
  * @param pageIndex  Zero-based index of the page to tag.
  * @param options    Optional heuristic tuning ({@link AutoTagOptions}).
  * @returns          Counts of the elements that were added.
- * @throws {ResourceLimitError} When interpreting the page passes an internal limit.
+ * @throws {ResourceLimitError} When interpreting the page passes a limit.
  */
 export function autoTagPage(
   doc: PdfDocument,

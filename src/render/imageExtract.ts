@@ -123,7 +123,7 @@ export function extractImages(page: PdfPage): ExtractedImage[] {
       if (extracted) out.push(extracted);
     } catch {
       // Skip images that cannot be decoded, including JPXDecode / JBIG2Decode
-      // (UnsupportedFilterError) and images above an internal limit.
+      // (UnsupportedFilterError) and images above a limit.
       continue;
     }
   }
@@ -205,7 +205,7 @@ function decodeImage(
 }
 
 /**
- * Refuse an image whose declared size is above the internal limits, before anything is allocated.
+ * Refuse an image whose declared size is above the limits, before anything is allocated.
  * @throws {ResourceLimitError} A side above `maxImageDimension`, more than `maxImagePixels`
  *   pixels, or more than `maxImageBytes` bytes of output.
  * @internal

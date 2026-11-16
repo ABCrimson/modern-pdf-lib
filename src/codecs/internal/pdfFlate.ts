@@ -348,7 +348,7 @@ export interface InflatedPrefix {
  * The data is read as {@link inflateFlate} reads it: zlib data, or raw
  * DEFLATE as a fallback, the Adler-32 trailer unchecked, bytes after the
  * final block ignored. A size the data states itself (the implied size of a
- * PNG image, the original length of a WOFF table) is not an internal limit;
+ * PNG image, the original length of a WOFF table) is not a limit;
  * a caller that knows such a size reads that many bytes and learns whether
  * there were more. Once a step of the read has decoded more than
  * `maxBytes` bytes, no further input is read, the first `maxBytes` bytes

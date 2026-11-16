@@ -345,7 +345,7 @@ export class XrefParser {
           trailerDict = result.trailerDict;
         }
       } catch (err) {
-        // A decode refused by an internal limit is neither a damaged section nor a reason to scan
+        // A decode refused by a limit is neither a damaged section nor a reason to scan
         if (err instanceof ResourceLimitError) throw err;
         // If parsing this section fails but we already have a primary
         // trailer, stop following the chain
