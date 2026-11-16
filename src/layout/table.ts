@@ -758,7 +758,8 @@ export interface TableFonts {
  * half the font size per character.
  */
 const byName: TableFonts = {
-  show: (fontName, text) => showText(encodeTextForFontName(fontName, text)),
+  show: (fontName, text) =>
+    showText(encodeTextForFontName(fontName, text, { embeddedFontRoute: false })),
   width: (_fontName, text, size) => text.length * size * 0.5,
 };
 

@@ -669,7 +669,7 @@ function renderTextElement(el: SvgElement): string {
   ops += `${n(posX)} ${n(posY)} Td\n`;
 
   // Show text
-  ops += showText(encodeTextForFontName(fontName, text));
+  ops += showText(encodeTextForFontName(fontName, text, { embeddedFontRoute: false }));
 
   // End text object
   ops += 'ET\n';

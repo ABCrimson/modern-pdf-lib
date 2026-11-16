@@ -197,7 +197,7 @@ export function renderStyledBarcode(
     ops += setFont(fontName, fontSize);
     ops += applyFillColor(textColor);
     ops += moveText(textX, textY);
-    ops += showText(encodeTextForFontName(fontName, text));
+    ops += showText(encodeTextForFontName(fontName, text, { embeddedFontRoute: false }));
     ops += endText();
   }
 

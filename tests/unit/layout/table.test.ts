@@ -799,6 +799,12 @@ describe('renderTable – cell text encoding', () => {
       UnencodableTextError,
     );
   });
+
+  it('advises no embedded font, which renderTable cannot use', () => {
+    expect(() => renderTable(simpleTable({ rows: [{ cells: ['日本'] }] }))).toThrow(
+      /cannot encode "日" \(U\+65E5\) at index 0; use a font that has this character$/,
+    );
+  });
 });
 
 describe('drawTable shows text in the fonts registered on its page', () => {

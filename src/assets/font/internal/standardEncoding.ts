@@ -241,6 +241,9 @@ export function standardFontForName(name: string): StandardFontName | undefined 
   return isStandardFont(name) ? name : ACROFORM_FONT_ALIASES.get(name);
 }
 
+/** The end of the message of an error on a path that cannot draw text in an embedded font. */
+const NO_EMBEDDED_FONT_HINT = '; use a font that has this character';
+
 /**
  * Encodes `text` for a font known only by its name, such as the resource
  * name of a /DA string or of a layout: one of the 14 standard font names or
@@ -248,25 +251,33 @@ export function standardFontForName(name: string): StandardFontName | undefined 
  * font, any other name in WinAnsiEncoding (a font with no font object is
  * written in WinAnsiEncoding). Text is normalised to NFC first.
  *
- * @param name  A standard font name, an AcroForm alias or a font resource name.
- * @param text  The text to encode.
- * @returns     One byte per character.
+ * @param name     A standard font name, an AcroForm alias or a font resource name.
+ * @param text     The text to encode.
+ * @param options  `embeddedFontRoute: false` for a caller that can draw text
+ *   only by font name (SVG text, barcode labels, `renderTable`): its error then
+ *   advises a font that has the character instead of `doc.embedFont`.
+ * @returns        One byte per character.
  * @throws {UnencodableTextError} At the first character the encoding has no
  *   code for; its `fontName` is the standard font for a standard name or
  *   alias, and `name` for any other name.
  */
-export function encodeTextForFontName(name: string, text: string): Uint8Array {
+export function encodeTextForFontName(
+  name: string,
+  text: string,
+  options?: { readonly embeddedFontRoute?: boolean | undefined },
+): Uint8Array {
   const standard = standardFontForName(name);
-  if (standard !== undefined) return encodeStandardText(standard, text);
   try {
     // The 12 Latin standard fonts share WinAnsiEncoding.
-    return encodeStandardText('Helvetica', text);
+    return encodeStandardText(standard ?? 'Helvetica', text);
   } catch (error) {
     if (!(error instanceof UnencodableTextError)) throw error;
-    const { character, index, encoding } = error;
+    const embeddedFontRoute = options?.embeddedFontRoute ?? true;
+    if (standard !== undefined && embeddedFontRoute) throw error;
+    const { character, index, fontName, encoding } = error;
     throw new UnencodableTextError(
-      { character, index, fontName: name, encoding },
-      { cause: error },
+      { character, index, fontName: standard === undefined ? name : fontName, encoding },
+      { cause: error, hint: embeddedFontRoute ? undefined : NO_EMBEDDED_FONT_HINT },
     );
   }
 }

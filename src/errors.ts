@@ -1036,16 +1036,20 @@ export class UnencodableTextError extends InvalidArgumentError {
       readonly fontName: string | undefined;
       readonly encoding: TextEncodingName;
     },
-    options?: ErrorOptions,
+    /**
+     * A `cause`, and a `hint` that ends the message in place of the advice for the encoding
+     * (for text that a caller can draw only by font name, where no embedded font helps).
+     */
+    options?: ErrorOptions & { readonly hint?: string | undefined },
   ) {
     const codePoint = init.character.codePointAt(0) ?? Number.NaN;
     const hex = codePoint.toString(16).toUpperCase().padStart(4, '0');
     const writer =
       init.fontName === undefined ? `A ${init.encoding}` : `${init.fontName} (${init.encoding})`;
+    const { hint = UNENCODABLE_TEXT_HINTS[init.encoding], ...errorOptions } = options ?? {};
     super(
-      `${writer} cannot encode "${init.character}" (U+${hex}) at index ${init.index}` +
-        UNENCODABLE_TEXT_HINTS[init.encoding],
-      options,
+      `${writer} cannot encode "${init.character}" (U+${hex}) at index ${init.index}${hint}`,
+      options === undefined ? undefined : errorOptions,
     );
     this.character = init.character;
     this.codePoint = codePoint;

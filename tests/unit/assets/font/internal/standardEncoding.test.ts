@@ -264,6 +264,29 @@ describe('UnencodableTextError from encodeStandardText', () => {
   });
 });
 
+describe('encodeTextForFontName on a path with no embedded font', () => {
+  it.each(['Helvetica', 'Helv', 'F1'])(
+    'the error for %s advises a font that has the character, not doc.embedFont',
+    (name) => {
+      let error: unknown;
+      try {
+        encodeTextForFontName(name, 'ab日', { embeddedFontRoute: false });
+      } catch (thrown) {
+        error = thrown;
+      }
+      expect(error).toBeInstanceOf(UnencodableTextError);
+      expect(error).toMatchObject({ character: '日', index: 2, encoding: 'WinAnsiEncoding' });
+      expect((error as UnencodableTextError).message).toMatch(
+        /cannot encode "日" \(U\+65E5\) at index 2; use a font that has this character$/,
+      );
+    },
+  );
+
+  it('keeps the doc.embedFont advice where an embedded font can draw the text', () => {
+    expect(() => encodeTextForFontName('Helv', '日')).toThrow(/: doc\.embedFont\(fontBytes\)$/);
+  });
+});
+
 describe('measureStandardCodes', () => {
   it('sums the widths of the codes at the size', () => {
     const codes = encodeStandardText('Helvetica', 'Hello');

@@ -266,6 +266,12 @@ describe('Barcode Styling — human-readable text encoding', () => {
     );
   });
 
+  it('advises no embedded font, which a label cannot use', () => {
+    expect(() => renderStyledBarcode(testMatrix(), 10, 20, '日本', { showText: true })).toThrow(
+      /cannot encode "日" \(U\+65E5\) at index 0; use a font that has this character$/,
+    );
+  });
+
   it('does not encode the text when it is not shown', () => {
     expect(() => renderStyledBarcode(testMatrix(), 10, 20, '日本')).not.toThrow();
   });

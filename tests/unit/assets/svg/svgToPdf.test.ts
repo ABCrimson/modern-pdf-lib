@@ -1040,6 +1040,13 @@ describe('svgToPdfOperators — text encoding', () => {
     expect(() => svgToPdfOperators(el)).toThrow(UnencodableTextError);
   });
 
+  it('advises no embedded font, which SVG text cannot use', () => {
+    const el = parseSvg('<svg width="200" height="100"><text x="10" y="50">日本</text></svg>');
+    expect(() => svgToPdfOperators(el)).toThrow(
+      /cannot encode "日" \(U\+65E5\) at index 0; use a font that has this character$/,
+    );
+  });
+
   it('collapses the line breaks and tabs inside a <text> to single spaces', () => {
     const el = parseSvg('<svg width="200" height="100"><text x="10" y="50">a\n\tb</text></svg>');
     expect(svgToPdfOperators(el)).toContain('(a b) Tj\n');
