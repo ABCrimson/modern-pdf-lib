@@ -18,7 +18,7 @@
  * PdfParseError through the `cause` field of its options.
  */
 
-import type { LimitName } from './internal/limits.js';
+import type { LimitName } from './limits.js';
 
 // ---------------------------------------------------------------------------
 // The base class

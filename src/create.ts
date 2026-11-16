@@ -208,5 +208,5 @@ export {
 // Input limits
 // ---------------------------------------------------------------------------
 
-export { DEFAULT_LIMITS } from './internal/limits.js';
-export type { LimitName, PdfLimits, ResolvedLimits } from './internal/limits.js';
+export { DEFAULT_LIMITS } from './limits.js';
+export type { LimitName, PdfLimits, ResolvedLimits } from './limits.js';

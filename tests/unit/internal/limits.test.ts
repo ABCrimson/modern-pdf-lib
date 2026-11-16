@@ -1,5 +1,5 @@
 /**
- * The limits core (src/internal/limits.ts): DEFAULT_LIMITS, resolveLimits and the checks it makes on a
+ * The limits core (src/limits.ts and src/internal/limits.ts): DEFAULT_LIMITS, resolveLimits and the checks it makes on a
  * `limits` option, the per-call LimitContext and its totals, assertLimit and the assertWithinLimit
  * wrapper, the entries that export the public part, and the two error classes the root entry exports
  * for refused input: ResourceLimitError and UnsupportedFilterError.
@@ -11,8 +11,9 @@ import * as parseEntry from '../../../src/parse.js';
 import type * as RootTypes from '../../../src/index.js';
 import type * as CreateTypes from '../../../src/create.js';
 import type * as ParseTypes from '../../../src/parse.js';
+import { DEFAULT_LIMITS } from '../../../src/limits.js';
+import type { LimitName, PdfLimits, ResolvedLimits } from '../../../src/limits.js';
 import {
-  DEFAULT_LIMITS,
   INTERNAL_LIMITS,
   LIMIT_UNITS,
   addToTotal,
@@ -22,12 +23,7 @@ import {
   legacyContext,
   resolveLimits,
 } from '../../../src/internal/limits.js';
-import type {
-  LimitContext,
-  LimitName,
-  PdfLimits,
-  ResolvedLimits,
-} from '../../../src/internal/limits.js';
+import type { LimitContext } from '../../../src/internal/limits.js';
 import {
   InvalidArgumentError,
   ResourceLimitError,
