@@ -104,7 +104,6 @@ describe('the decoded-size limit', () => {
         limit: 'maxDecodedStreamBytes',
         max: LIMIT,
         actual: LIMIT + 1,
-        message: `Input exceeds the internal limit maxDecodedStreamBytes (${LIMIT} bytes).`,
       });
     }
   });
@@ -270,7 +269,6 @@ describe('the sample limit of the sub-byte TIFF predictor', () => {
         limit: 'maxPredictorSamples',
         max: SAMPLES,
         actual: 320_000_000,
-        message: `Input exceeds the internal limit maxPredictorSamples (${SAMPLES} samples).`,
       });
     }
     const stream = flateStream(zeros, {

@@ -1,6 +1,6 @@
 /**
  * Text limits under the budget of the runner (2000 ms, 512 MiB): ToUnicode CMaps and font cmap
- * subtables that name more mappings than the internal limits allow end in ResourceLimitError, and
+ * subtables that name more mappings than their limits allow end in ResourceLimitError, and
  * ordinary ones complete with the right size. Every input is built in code
  * (text-limits.bodies.ts).
  */
@@ -34,7 +34,7 @@ function expectLimit(outcome: BudgetOutcome, limit: string, max: number, unit: s
     name: 'ResourceLimitError',
     code: 'resource-limit-exceeded',
     limit,
-    message: `Input exceeds the internal limit ${limit} (${max} ${unit}).`,
+    message: `Input exceeds the limit ${limit} (${max} ${unit}).`,
   });
   expect(outcome.ms).toBeLessThan(timeLimitMs(DEFAULT_BUDGET));
   expect(outcome.mib).toBeLessThan(DEFAULT_BUDGET.mib);

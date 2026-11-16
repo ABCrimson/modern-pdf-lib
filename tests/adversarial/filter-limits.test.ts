@@ -41,7 +41,7 @@ const LIMIT_ERROR = {
   name: 'ResourceLimitError',
   code: 'resource-limit-exceeded',
   limit: 'maxDecodedStreamBytes',
-  message: `Input exceeds the internal limit maxDecodedStreamBytes (${LIMIT} bytes).`,
+  message: `Input exceeds the limit maxDecodedStreamBytes (${LIMIT} bytes).`,
 } as const;
 
 /** zlib data of `n` zero bytes. */
@@ -325,7 +325,7 @@ describe('TIFF predictor on large output', () => {
     name: 'ResourceLimitError',
     code: 'resource-limit-exceeded',
     limit: 'maxPredictorSamples',
-    message: `Input exceeds the internal limit maxPredictorSamples (${SAMPLE_LIMIT} samples).`,
+    message: `Input exceeds the limit maxPredictorSamples (${SAMPLE_LIMIT} samples).`,
   } as const;
 
   it(

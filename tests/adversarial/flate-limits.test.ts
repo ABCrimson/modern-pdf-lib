@@ -79,7 +79,7 @@ const LIMIT_ERROR = {
   name: 'ResourceLimitError',
   code: 'resource-limit-exceeded',
   limit: 'maxDecodedStreamBytes',
-  message: 'Input exceeds the internal limit maxDecodedStreamBytes (268435456 bytes).',
+  message: 'Input exceeds the limit maxDecodedStreamBytes (268435456 bytes).',
 } as const;
 
 const run = (entry: string, input: Uint8Array, budget = DEFAULT_BUDGET): Promise<BudgetOutcome> =>

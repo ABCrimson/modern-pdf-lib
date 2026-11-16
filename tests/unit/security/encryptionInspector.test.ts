@@ -196,10 +196,10 @@ describe('inspectEncryption — AES-128 & RC4', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Internal limits
+// Limits
 // ---------------------------------------------------------------------------
 
-describe('inspectEncryption — internal limits', () => {
+describe('inspectEncryption — limits', () => {
   // The newest section is a classic table whose trailer names /Encrypt; its /Prev is a
   // cross-reference stream. A file refused by a limit is not reported as unencrypted.
   it('reports an encrypted file whose older cross-reference stream is small', async () => {

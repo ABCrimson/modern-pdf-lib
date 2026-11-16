@@ -123,10 +123,10 @@ describe('autoTagPage', () => {
 });
 
 // ---------------------------------------------------------------------------
-// autoTagPage — internal limits
+// autoTagPage — limits
 // ---------------------------------------------------------------------------
 
-describe('autoTagPage — internal limits', () => {
+describe('autoTagPage — limits', () => {
   it('tags a page with text and no forms', async () => {
     const result = autoTagPage(await loadPdf(pageWithFormChain(0, 0)), 0);
     expect(result).toMatchObject({ paragraphs: 1, elements: 1 });

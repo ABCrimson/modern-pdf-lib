@@ -1,6 +1,6 @@
 /**
  * analyzeImages keeps an image it cannot decode ("keep" row), except when the decode is refused
- * by an internal limit: a ResourceLimitError is never turned into a row.
+ * by a limit: a ResourceLimitError is never turned into a row.
  */
 import { describe, expect, it, vi } from 'vitest';
 import type { PdfDocument } from '../../../../../src/core/pdfDocument.js';

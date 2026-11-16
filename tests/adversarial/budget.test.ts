@@ -100,7 +100,7 @@ describe('budgeted runner', () => {
         name: 'ResourceLimitError',
         code: 'resource-limit-exceeded',
         limit: 'maxImagePixels',
-        message: 'Input exceeds the internal limit maxImagePixels (268435456 pixels).',
+        message: 'Input exceeds the limit maxImagePixels (268435456 pixels).',
       });
     },
     TIMEOUT,

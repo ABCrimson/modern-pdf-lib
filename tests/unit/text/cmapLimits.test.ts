@@ -39,10 +39,7 @@ describe('text limits: ToUnicode CMap', () => {
       () => parseToUnicodeCMap(bfrangeCMap([[0, MAX_CMAP]])),
       'maxCMapMappings',
     );
-    expect(error.max).toBe(MAX_CMAP);
-    expect(error.message).toBe(
-      `Input exceeds the internal limit maxCMapMappings (${MAX_CMAP} mappings).`,
-    );
+    expect(error).toMatchObject({ code: 'resource-limit-exceeded', max: MAX_CMAP });
   });
 
   it('accepts a CMap that writes exactly the mapping limit', () => {
@@ -153,9 +150,7 @@ describe('text limits: font cmap', () => {
       () => cmapOf({ format: 12, numGlyphs: 0xffff, ranges: groups }),
       'maxFontCmapMappings',
     );
-    expect(error.message).toBe(
-      `Input exceeds the internal limit maxFontCmapMappings (${MAX_FONT} entries).`,
-    );
+    expect(error).toMatchObject({ code: 'resource-limit-exceeded', max: MAX_FONT });
   });
 
   it('refuses two groups that each run past the code space (each counts 0x110000 codes after clamping)', () => {

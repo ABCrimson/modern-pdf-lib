@@ -1,5 +1,5 @@
 /**
- * G-HEADROOM: every file under tests/fixtures goes through the decode paths the internal limits
+ * G-HEADROOM: every file under tests/fixtures goes through the decode paths the limits
  * guard, and the largest value of each limited quantity stays at or below a quarter of its field
  * in INTERNAL_LIMITS (src/internal/limits.ts).
  *

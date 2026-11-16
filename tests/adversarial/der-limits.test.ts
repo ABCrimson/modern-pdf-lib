@@ -122,7 +122,7 @@ describe('der limits', () => {
         name: 'ResourceLimitError',
         code: 'resource-limit-exceeded',
         limit: 'maxDerDepth',
-        message: `Input exceeds the internal limit maxDerDepth (${INTERNAL_LIMITS.maxDerDepth} levels).`,
+        message: `Input exceeds the limit maxDerDepth (${INTERNAL_LIMITS.maxDerDepth} levels).`,
       });
       expect(outcome.ms).toBeLessThan(timeLimitMs(DEFAULT_BUDGET));
     },

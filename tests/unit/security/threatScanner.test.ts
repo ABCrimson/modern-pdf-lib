@@ -341,10 +341,10 @@ describe('scanPdfThreats — strings read as text or as bytes', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Internal limits
+// Limits
 // ---------------------------------------------------------------------------
 
-describe('scanPdfThreats — internal limits', () => {
+describe('scanPdfThreats — limits', () => {
   // The JavaScript /OpenAction sits in one object stream; a second object stream is the one
   // that is over the limit. The raw-byte fallback cannot see inside the first, so the scan
   // refuses the file instead of reporting "nothing found".

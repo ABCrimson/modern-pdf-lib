@@ -749,7 +749,11 @@ describe('inflateFlateUpTo', () => {
       });
     }
     expect(() => inflateFlateUpTo(ZEROS, INTERNAL_LIMITS.maxDecodedStreamBytes + 1)).toThrow(
-      'Input exceeds the internal limit maxDecodedStreamBytes (268435456 bytes).',
+      expect.objectContaining({
+        code: 'resource-limit-exceeded',
+        limit: 'maxDecodedStreamBytes',
+        max: 268_435_456,
+      }),
     );
   });
 

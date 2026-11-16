@@ -100,7 +100,7 @@ async function zlibOfZeros(mib: number): Promise<Uint8Array> {
 
 const ones = (length: number): Uint8Array => new Uint8Array(length).fill(0xff);
 
-describe('image and font decoders stay within the internal limits', () => {
+describe('image and font decoders stay within their limits', () => {
   it(
     'CCITTFaxDecode checks /Columns and /Rows first',
     async () => {

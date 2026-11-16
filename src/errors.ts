@@ -18,6 +18,8 @@
  * PdfParseError through the `cause` field of its options.
  */
 
+import type { LimitName } from './internal/limits.js';
+
 // ---------------------------------------------------------------------------
 // The base class
 // ---------------------------------------------------------------------------
@@ -900,11 +902,12 @@ export class UnsupportedEncryptionError extends UnsupportedFeatureError {
 // ---------------------------------------------------------------------------
 
 /**
- * Thrown when input needs more than one of the library's internal limits
- * allows: more decoded bytes, mappings, nesting levels, operators, pixels,
- * frames or font bytes.  A value equal to the limit is accepted; only a value
- * above it (or a size that is not a finite number) is refused.  The limits
- * are fixed in this release; their names are not a stable API.
+ * Thrown when input needs more than one of the library's limits allows: more
+ * decoded bytes, mappings, nesting levels, operators, pixels, frames or font
+ * bytes, in one stream or summed over one call.  A value equal to the limit is
+ * accepted; only a value above it (or a size that is not a finite number) is
+ * refused.  `limit` is one of the names of {@link LimitName}, and
+ * `DEFAULT_LIMITS` holds the default values.
  */
 export class ResourceLimitError extends PdfError {
   static {
@@ -914,23 +917,33 @@ export class ResourceLimitError extends PdfError {
   override readonly name = 'ResourceLimitError';
   /** Machine-readable code, stable across releases. */
   override readonly code = 'resource-limit-exceeded' as const;
-  /** The name of the internal limit, such as `'maxDecodedStreamBytes'`. */
-  readonly limit: string;
+  /** The name of the limit, such as `'maxDecodedStreamBytes'`. */
+  readonly limit: LimitName;
   /** The value of that limit. */
   readonly max: number;
   /** The size the input needed, or `undefined` when it is not a finite number or not known. */
   readonly actual: number | undefined;
+  /** `'option'` when a `limits` option set the limit to a value other than its default, `'default'` otherwise. */
+  readonly source: 'default' | 'option';
   /**
-   * @param limit - The name of the internal limit.
+   * @param limit - The name of the limit.
    * @param max - The value of that limit.
    * @param unit - What the limit counts (`bytes`, `levels`, ...), for the message.
    * @param actual - The size the input needed, when known.
+   * @param options - The cause, and the `source` of the limit (`'default'` when left out).
    */
-  constructor(limit: string, max: number, unit: string, actual?: number, options?: ErrorOptions) {
-    super(`Input exceeds the internal limit ${limit} (${max} ${unit}).`, options);
+  constructor(
+    limit: LimitName,
+    max: number,
+    unit: string,
+    actual?: number,
+    options?: ErrorOptions & { source?: 'default' | 'option' | undefined },
+  ) {
+    super(`Input exceeds the limit ${limit} (${max} ${unit}).`, options);
     this.limit = limit;
     this.max = max;
     this.actual = actual;
+    this.source = options?.source ?? 'default';
   }
 }
 

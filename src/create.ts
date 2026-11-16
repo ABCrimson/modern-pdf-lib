@@ -203,3 +203,10 @@ export {
   CombedTextLayoutError,
   ExceededMaxLengthError,
 } from './errors.js';
+
+// ---------------------------------------------------------------------------
+// Input limits
+// ---------------------------------------------------------------------------
+
+export { DEFAULT_LIMITS } from './internal/limits.js';
+export type { LimitName, PdfLimits, ResolvedLimits } from './internal/limits.js';

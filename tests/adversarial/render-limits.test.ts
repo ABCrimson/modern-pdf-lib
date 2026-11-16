@@ -66,7 +66,7 @@ describe('page interpretation under the budget', () => {
         name: 'ResourceLimitError',
         code: 'resource-limit-exceeded',
         limit: 'maxFormOperators',
-        message: `Input exceeds the internal limit maxFormOperators (${INTERNAL_LIMITS.maxFormOperators} operators).`,
+        message: `Input exceeds the limit maxFormOperators (${INTERNAL_LIMITS.maxFormOperators} operators).`,
       });
       expect(outcome.ms).toBeLessThan(timeLimitMs(DEFAULT_BUDGET));
       expect(outcome.mib).toBeLessThanOrEqual(DEFAULT_BUDGET.mib);

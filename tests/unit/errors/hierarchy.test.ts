@@ -238,7 +238,7 @@ const rows: readonly Row[] = [
     parent: PdfError,
     code: 'resource-limit-exceeded',
     make: () => new ResourceLimitError('maxDecodedStreamBytes', 10, 'bytes', 11),
-    message: 'Input exceeds the internal limit maxDecodedStreamBytes (10 bytes).',
+    message: 'Input exceeds the limit maxDecodedStreamBytes (10 bytes).',
   },
   {
     cls: RedactionIncompleteError,
