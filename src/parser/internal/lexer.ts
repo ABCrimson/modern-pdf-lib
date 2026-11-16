@@ -181,6 +181,18 @@ const hexVal: Int8Array = /* @__PURE__ */ (() => {
   return t;
 })();
 
+/** Code units per String.fromCharCode call, well below every engine's argument limit. */
+const BYTE_STRING_CHUNK = 0x2000;
+
+/** The bytes as a byte string, one code unit per byte, built in chunks so any length fits. */
+function byteString(bytes: Uint8Array): string {
+  let out = '';
+  for (let i = 0; i < bytes.length; i += BYTE_STRING_CHUNK) {
+    out += String.fromCharCode(...bytes.subarray(i, i + BYTE_STRING_CHUNK));
+  }
+  return out;
+}
+
 // ---------------------------------------------------------------------------
 // PdfLexer
 // ---------------------------------------------------------------------------
@@ -665,7 +677,11 @@ export class PdfLexer {
   private readHexString(startPos: number): Token {
     const d = this._data;
     let pos = startPos + 1; // skip opening '<'
-    const bytes: number[] = [];
+    // Each byte takes two digits before the closing '>' (or the end of the input), so half
+    // that span, rounded up for an odd last digit, bounds the count.
+    const end = d.indexOf(CH_GT, pos);
+    const bytes = new Uint8Array(((end < 0 ? this.len : end) - pos + 1) >> 1);
+    let count = 0;
     let hi = -1;
 
     while (pos < this.len) {
@@ -697,7 +713,7 @@ export class PdfLexer {
       if (hi === -1) {
         hi = v;
       } else {
-        bytes.push((hi << 4) | v);
+        bytes[count++] = (hi << 4) | v;
         hi = -1;
       }
       pos++;
@@ -705,13 +721,13 @@ export class PdfLexer {
 
     // Odd number of hex digits: pad last nibble with 0
     if (hi !== -1) {
-      bytes.push(hi << 4);
+      bytes[count++] = hi << 4;
     }
 
     this.position = pos;
     return {
       type: TokenType.HexString,
-      value: String.fromCharCode(...bytes),
+      value: byteString(bytes.subarray(0, count)),
       offset: startPos,
     };
   }

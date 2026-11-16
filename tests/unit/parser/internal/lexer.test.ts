@@ -343,6 +343,15 @@ describe('PdfLexer - Hex string tokens', () => {
   it('throws on invalid hex digit', () => {
     expect(() => lexer('<GHIJ>').nextToken()).toThrow(/invalid hex digit/i);
   });
+
+  it('reads a hex string of 1,000,000 bytes, every byte value in order', () => {
+    const data = Uint8Array.from({ length: 1_000_000 }, (_, i) => i & 0xff);
+    const tok = lexer(`<${data.toHex()}>`).nextToken();
+    expect(tok.type).toBe(TokenType.HexString);
+    const value = tok.value as string;
+    expect(value.length).toBe(1_000_000);
+    expect(Uint8Array.from(value, (c) => c.charCodeAt(0)).toHex()).toBe(data.toHex());
+  });
 });
 
 // ---------------------------------------------------------------------------
