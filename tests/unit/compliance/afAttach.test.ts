@@ -20,6 +20,7 @@ import {
   PdfArray,
   PdfString,
   PdfRef,
+  PdfNumber,
 } from '../../../src/core/pdfObjects.js';
 import type { PdfObject } from '../../../src/core/pdfObjects.js';
 
@@ -271,5 +272,31 @@ describe('registerEmbeddedFile with non-ASCII names', () => {
     // One encoding for every key, so the byte order is the order of the text (qpdf checks the text).
     for (const key of keys) expect(key.toBytes().subarray(0, 2)).toEqual(Uint8Array.of(0xfe, 0xff));
     expect(keys.map((key) => key.toText())).toEqual(['plain', 'Übersicht', '€-Rechnung']);
+  });
+
+  it('keeps every key with its value beside a key that is not a string and a last key with no value', () => {
+    const leaf = PdfArray.of([
+      PdfString.fromText('b'),
+      PdfRef.of(1),
+      PdfNumber.of(7),
+      PdfRef.of(3),
+      PdfString.fromText('a'),
+    ]);
+    const embeddedFiles = new PdfDict();
+    embeddedFiles.set('/Names', leaf);
+    const names = new PdfDict();
+    names.set('/EmbeddedFiles', embeddedFiles);
+    const catalog = new PdfDict();
+    catalog.set('/Names', names);
+    registerEmbeddedFile(catalog, 'c', PdfRef.of(2));
+    expect(leaf.items).toEqual([
+      PdfString.fromText('b'),
+      PdfRef.of(1),
+      PdfString.fromText('c'),
+      PdfRef.of(2),
+      PdfNumber.of(7),
+      PdfRef.of(3),
+      PdfString.fromText('a'),
+    ]);
   });
 });

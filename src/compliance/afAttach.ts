@@ -98,8 +98,10 @@ function ensureEmbeddedFilesNames(catalog: PdfDict): PdfArray {
  * Every key is written in the one encoding `embeddedFileKeyEncoding` gives for
  * the names of the tree (a key already in the array is written again in it),
  * and the pairs are sorted by the bytes of their keys (ISO 32000-2 7.9.6), so
- * the byte order is the order of the text that qpdf checks. A pair whose key is
- * not a string keeps its place after the string keys.
+ * the byte order is the order of the text that qpdf checks (except for a name
+ * with a character above U+FFFF against one with a character from U+E000 to
+ * U+FFFF). A pair whose key is not a string moves after the string keys, in
+ * its order, and a last key with no value stays last.
  */
 function insertNamePairSorted(leaf: PdfArray, name: string, fileSpecRef: PdfRef): void {
   const items = leaf.items;
@@ -115,14 +117,16 @@ function insertNamePairSorted(leaf: PdfArray, name: string, fileSpecRef: PdfRef)
     if (pair.key instanceof PdfString) pair.key = PdfString.fromText(pair.key.toText(), encoding);
   }
   pairs.push({ key: PdfString.fromText(name, encoding), value: fileSpecRef });
-  const sorted = pairs.toSorted((a, b) =>
-    a.key instanceof PdfString
-      ? b.key instanceof PdfString
+  // String keys first, in byte order, then the pairs whose key is not a string; a last key with
+  // no value (an array of odd length) stays last, so every other key keeps its value.
+  const rank = ({ key, value }: (typeof pairs)[number]): number =>
+    value === undefined ? 2 : key instanceof PdfString ? 0 : 1;
+  const sorted = pairs.toSorted(
+    (a, b) =>
+      rank(a) - rank(b) ||
+      (a.key instanceof PdfString && b.key instanceof PdfString
         ? PdfString.compare(a.key, b.key)
-        : -1
-      : b.key instanceof PdfString
-        ? 1
-        : 0,
+        : 0),
   );
   items.splice(
     0,
