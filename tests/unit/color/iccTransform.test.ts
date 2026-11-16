@@ -19,6 +19,11 @@
 import { describe, it, expect } from 'vitest';
 import { parseIccTransform, deviceRgbToXyz, xyzToLab } from '../../../src/color/iccTransform.js';
 import { SRGB_ICC_PROFILE } from '../../../src/compliance/srgbIccProfile.js';
+import {
+  InvalidArgumentError,
+  MalformedInputError,
+  UnsupportedFeatureError,
+} from '../../../src/errors.js';
 
 // ---------------------------------------------------------------------------
 // Low-level ICC writer helpers (mirror the on-disk big-endian layout)
@@ -347,5 +352,163 @@ describe('error handling', () => {
       tags: [],
     });
     expect(() => deviceRgbToXyz(p, [1, 1, 1])).toThrow();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Typed errors
+// ---------------------------------------------------------------------------
+
+describe('typed errors', () => {
+  /** The error `fn` throws; fails the test when it does not throw. */
+  function thrownBy(fn: () => unknown): unknown {
+    try {
+      fn();
+    } catch (error) {
+      return error;
+    }
+    return expect.unreachable('the call did not throw');
+  }
+
+  /** A profile whose red TRC is a 'para' curve of the given function type. */
+  function paraProfile(funcType: number): Uint8Array {
+    const para = paraGammaTag(2.2);
+    writeU16(para, 8, funcType);
+    return buildProfile({
+      deviceClass: 'mntr',
+      colorSpace: 'RGB ',
+      pcs: 'XYZ ',
+      tags: [
+        { sig: 'rXYZ', data: xyzTag(0.4361, 0.2225, 0.0139) },
+        { sig: 'gXYZ', data: xyzTag(0.3851, 0.7169, 0.0971) },
+        { sig: 'bXYZ', data: xyzTag(0.1432, 0.0606, 0.7141) },
+        { sig: 'rTRC', data: para },
+        { sig: 'gTRC', data: curvGammaTag(2.2) },
+        { sig: 'bTRC', data: curvGammaTag(2.2) },
+      ],
+    });
+  }
+
+  it('throws MalformedInputError with format icc for a profile shorter than its header', () => {
+    const error = thrownBy(() => parseIccTransform(new Uint8Array(10)));
+    expect(error).toBeInstanceOf(MalformedInputError);
+    expect(error).toMatchObject({
+      code: 'malformed-input',
+      format: 'icc',
+      message: 'ICC profile too short: 10 bytes (need at least 128).',
+    });
+  });
+
+  it('throws MalformedInputError with format icc for a tag table that overruns the profile', () => {
+    const profile = new Uint8Array(132);
+    writeU32(profile, 128, 1000);
+    const error = thrownBy(() => deviceRgbToXyz(profile, [1, 1, 1]));
+    expect(error).toBeInstanceOf(MalformedInputError);
+    expect(error).toMatchObject({
+      code: 'malformed-input',
+      format: 'icc',
+      message: 'ICC tag table (1000 tags) overruns profile of 132 bytes.',
+    });
+  });
+
+  it('throws InvalidArgumentError naming the profile for a CMYK profile', () => {
+    const profile = buildProfile({
+      deviceClass: 'prtr',
+      colorSpace: 'CMYK',
+      pcs: 'XYZ ',
+      tags: [],
+    });
+    const error = thrownBy(() => deviceRgbToXyz(profile, [1, 1, 1]));
+    expect(error).toBeInstanceOf(InvalidArgumentError);
+    expect(error).toMatchObject({
+      code: 'invalid-argument',
+      argument: 'profile',
+      message: "deviceRgbToXyz supports 'RGB ' and 'GRAY' profiles; got 'CMYK'.",
+    });
+  });
+
+  it('throws MalformedInputError with format icc for a gray profile without kTRC', () => {
+    const profile = buildProfile({
+      deviceClass: 'mntr',
+      colorSpace: 'GRAY',
+      pcs: 'XYZ ',
+      tags: [{ sig: 'wtpt', data: xyzTag(0.9642, 1.0, 0.8249) }],
+    });
+    const error = thrownBy(() => deviceRgbToXyz(profile, [1, 1, 1]));
+    expect(error).toBeInstanceOf(MalformedInputError);
+    expect(error).toMatchObject({
+      code: 'malformed-input',
+      format: 'icc',
+      message: "Gray ICC profile lacks a 'kTRC' tag; not a matrix/TRC profile.",
+    });
+  });
+
+  it("throws MalformedInputError with format icc for a colorant that is not an 'XYZ ' tag", () => {
+    const profile = buildProfile({
+      deviceClass: 'mntr',
+      colorSpace: 'RGB ',
+      pcs: 'XYZ ',
+      tags: [
+        { sig: 'rXYZ', data: curvGammaTag(2.2) },
+        { sig: 'gXYZ', data: xyzTag(0.3851, 0.7169, 0.0971) },
+        { sig: 'bXYZ', data: xyzTag(0.1432, 0.0606, 0.7141) },
+        { sig: 'rTRC', data: curvGammaTag(2.2) },
+        { sig: 'gTRC', data: curvGammaTag(2.2) },
+        { sig: 'bTRC', data: curvGammaTag(2.2) },
+      ],
+    });
+    const error = thrownBy(() => deviceRgbToXyz(profile, [1, 1, 1]));
+    expect(error).toBeInstanceOf(MalformedInputError);
+    expect(error).toMatchObject({
+      code: 'malformed-input',
+      format: 'icc',
+      message: "Expected an 'XYZ ' colorant tag but found 'curv' (ICC.1:2010 §10.31).",
+    });
+  });
+
+  it('throws UnsupportedFeatureError for a parametric curve function type above 4', () => {
+    const error = thrownBy(() => deviceRgbToXyz(paraProfile(5), [1, 1, 1]));
+    expect(error).toBeInstanceOf(UnsupportedFeatureError);
+    expect(error).toMatchObject({
+      code: 'unsupported-feature',
+      message: 'Unsupported parametricCurveType function type 5 (ICC.1:2010 §10.18 defines 0–4).',
+    });
+  });
+
+  it('throws UnsupportedFeatureError for a TRC that is neither curv nor para', () => {
+    const profile = buildProfile({
+      deviceClass: 'mntr',
+      colorSpace: 'RGB ',
+      pcs: 'XYZ ',
+      tags: [
+        { sig: 'rXYZ', data: xyzTag(0.4361, 0.2225, 0.0139) },
+        { sig: 'gXYZ', data: xyzTag(0.3851, 0.7169, 0.0971) },
+        { sig: 'bXYZ', data: xyzTag(0.1432, 0.0606, 0.7141) },
+        { sig: 'rTRC', data: xyzTag(0, 0, 0) },
+        { sig: 'gTRC', data: curvGammaTag(2.2) },
+        { sig: 'bTRC', data: curvGammaTag(2.2) },
+      ],
+    });
+    const error = thrownBy(() => deviceRgbToXyz(profile, [1, 1, 1]));
+    expect(error).toBeInstanceOf(UnsupportedFeatureError);
+    expect(error).toMatchObject({
+      code: 'unsupported-feature',
+      message:
+        "Unsupported TRC tag type 'XYZ ': only 'curv' and 'para' are matrix/TRC curves (got a LUT/other type).",
+    });
+  });
+
+  it('throws UnsupportedFeatureError for a LUT-based RGB profile', () => {
+    const mft2 = new Uint8Array(52);
+    writeAscii(mft2, 0, 'mft2');
+    const profile = buildProfile({
+      deviceClass: 'prtr',
+      colorSpace: 'RGB ',
+      pcs: 'XYZ ',
+      tags: [{ sig: 'A2B0', data: mft2 }],
+    });
+    const error = thrownBy(() => deviceRgbToXyz(profile, [1, 1, 1]));
+    expect(error).toBeInstanceOf(UnsupportedFeatureError);
+    expect(error).toMatchObject({ code: 'unsupported-feature' });
   });
 });

@@ -18,6 +18,8 @@
  *   draining its queue, and sibling tasks continue to resolve normally.
  */
 
+import { InvalidArgumentError } from '../errors.js';
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -87,8 +89,8 @@ function resolveDefaultConcurrency(): number {
  * @param runner  - The async function invoked once per scheduled input.
  * @param options - Optional {@link WorkerPoolOptions}.
  * @returns A {@link WorkerPool}.
- * @throws If `options.concurrency` is provided but is not a positive
- *         integer.
+ * @throws {InvalidArgumentError} If `options.concurrency` is provided but is
+ *         not a positive integer.
  */
 export function createWorkerPool<I, O>(
   runner: TaskRunner<I, O>,
@@ -96,7 +98,10 @@ export function createWorkerPool<I, O>(
 ): WorkerPool<I, O> {
   const concurrency = options?.concurrency ?? resolveDefaultConcurrency();
   if (!Number.isInteger(concurrency) || concurrency <= 0) {
-    throw new Error(`workerPool: concurrency must be a positive integer, received ${concurrency}`);
+    throw new InvalidArgumentError(
+      `workerPool: concurrency must be a positive integer, received ${concurrency}`,
+      { argument: 'options.concurrency' },
+    );
   }
 
   /** A queued task awaiting a free execution slot. */

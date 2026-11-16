@@ -11,6 +11,7 @@ import { timestampPlugin } from '../../../src/plugins/builtins/timestampPlugin.j
 import { metadataPlugin } from '../../../src/plugins/builtins/metadataPlugin.js';
 import { accessibilityPlugin } from '../../../src/plugins/builtins/accessibilityPlugin.js';
 import { PdfDict, PdfName } from '../../../src/core/pdfObjects.js';
+import { InvalidArgumentError, PluginError } from '../../../src/errors.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -55,13 +56,33 @@ describe('PdfPluginManager', () => {
       const mgr = new PdfPluginManager();
       mgr.register(noopPlugin('dup'));
 
-      expect(() => mgr.register(noopPlugin('dup'))).toThrow('Plugin "dup" is already registered');
+      expect(() => mgr.register(noopPlugin('dup'))).toThrow('Plugin "dup": already registered');
+      expect(() => mgr.register(noopPlugin('dup'))).toThrow(PluginError);
+      try {
+        mgr.register(noopPlugin('dup'));
+        expect.unreachable('a second plugin of the same name was registered');
+      } catch (error) {
+        expect(error).toMatchObject({
+          name: 'PluginError',
+          code: 'plugin-failed',
+          pluginName: 'dup',
+        });
+      }
+      expect(mgr.list()).toHaveLength(1);
     });
 
     it('rejects plugins with empty names', () => {
       const mgr = new PdfPluginManager();
 
       expect(() => mgr.register(noopPlugin(''))).toThrow('Plugin must have a non-empty name');
+      try {
+        mgr.register(noopPlugin(''));
+        expect.unreachable('a plugin with an empty name was registered');
+      } catch (error) {
+        expect(error).toBeInstanceOf(InvalidArgumentError);
+        expect(error).toMatchObject({ code: 'invalid-argument', argument: 'plugin.name' });
+      }
+      expect(mgr.list()).toHaveLength(0);
     });
 
     it('registers multiple plugins in order', () => {

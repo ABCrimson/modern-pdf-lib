@@ -30,7 +30,7 @@ import {
   wrapRawDeflate,
 } from '../../../../src/codecs/internal/pdfFlate.js';
 import { INTERNAL_LIMITS } from '../../../../src/internal/limits.js';
-import { ResourceLimitError } from '../../../../src/errors.js';
+import { MalformedInputError, ResourceLimitError } from '../../../../src/errors.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -222,16 +222,27 @@ describe('inflateFlate', () => {
     expect(() => inflateFlate(text)).toThrow(FAILURE);
   });
 
-  it('throws a plain Error', () => {
-    let caught: unknown;
-    try {
-      inflateFlate(encoder.encode('plain text, never compressed\n'));
-    } catch (err) {
-      caught = err;
+  it('throws a MalformedInputError', () => {
+    const text = encoder.encode('plain text, never compressed\n');
+    for (const decode of [
+      () => inflateFlate(text),
+      () => inflateRaw(text),
+      () => inflateRawBounded(text, 1 << 20),
+    ]) {
+      let caught: unknown;
+      try {
+        decode();
+      } catch (err) {
+        caught = err;
+      }
+      expect(caught).toBeInstanceOf(MalformedInputError);
+      expect(caught).toMatchObject({
+        name: 'MalformedInputError',
+        code: 'malformed-input',
+        format: 'other',
+        message: 'FlateDecode: failed to decompress data',
+      });
     }
-    expect(caught).toBeInstanceOf(Error);
-    expect((caught as Error).name).toBe('Error');
-    expect((caught as Error).message).toBe('FlateDecode: failed to decompress data');
   });
 });
 

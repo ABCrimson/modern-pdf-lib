@@ -39,6 +39,7 @@
 
 import { Inflate, zlibSync } from 'fflate';
 import { INTERNAL_LIMITS, assertWithinLimit } from '../../internal/limits.js';
+import { MalformedInputError } from '../../errors.js';
 
 // ---------------------------------------------------------------------------
 // Levels
@@ -195,7 +196,7 @@ interface StepRead {
  * @returns       The chunks read, or `undefined` when 8 steps in a row
  *   decoded to no bytes before the end of the input and the data has not
  *   reached its final block.
- * @throws {Error} `FlateDecode: failed to decompress data` when the data is
+ * @throws {MalformedInputError} `FlateDecode: failed to decompress data` when the data is
  *   not raw DEFLATE or ends before its final block, unless the decoded size
  *   passes `bound` first or the idle rule ends the read first.
  */
@@ -228,7 +229,7 @@ function inflateSteps(data: Uint8Array, bound: number): StepRead | undefined {
       }
     } while (at < data.length);
   } catch {
-    throw new Error(FLATE_FAILURE);
+    throw new MalformedInputError(FLATE_FAILURE);
   }
   return { chunks, size, over: false };
 }
@@ -240,7 +241,7 @@ function inflateSteps(data: Uint8Array, bound: number): StepRead | undefined {
  * `bound` bytes is returned at once, flagged `over`, and is not read again
  * as raw DEFLATE.
  *
- * @throws {Error} `FlateDecode: failed to decompress data` when the data
+ * @throws {MalformedInputError} `FlateDecode: failed to decompress data` when the data
  *   inflates neither as zlib nor as raw DEFLATE.
  */
 function inflateZlibOrRaw(data: Uint8Array, bound: number): StepRead {
@@ -253,7 +254,7 @@ function inflateZlibOrRaw(data: Uint8Array, bound: number): StepRead {
     }
   }
   const read = inflateSteps(data, bound);
-  if (read === undefined) throw new Error(FLATE_FAILURE);
+  if (read === undefined) throw new MalformedInputError(FLATE_FAILURE);
   return read;
 }
 
@@ -308,7 +309,7 @@ function finishWithinLimit(read: StepRead): Uint8Array {
  * @returns      The decompressed bytes.
  * @throws {ResourceLimitError} `maxDecodedStreamBytes` (256 MiB) when the
  *   output is larger than that; no more input is read once it is.
- * @throws {Error} `FlateDecode: failed to decompress data` when the data
+ * @throws {MalformedInputError} `FlateDecode: failed to decompress data` when the data
  *   inflates neither as zlib nor as raw DEFLATE.
  */
 export function inflateFlate(data: Uint8Array): Uint8Array {
@@ -324,12 +325,12 @@ export function inflateFlate(data: Uint8Array): Uint8Array {
  * @returns The decoded bytes.
  * @throws {ResourceLimitError} `maxDecodedStreamBytes` (256 MiB) when the
  *   output is larger than that; no more input is read once it is.
- * @throws {Error} `FlateDecode: failed to decompress data` when the data is
+ * @throws {MalformedInputError} `FlateDecode: failed to decompress data` when the data is
  *   not raw DEFLATE or ends before its final block.
  */
 export function inflateRaw(data: Uint8Array): Uint8Array {
   const read = inflateSteps(data, INTERNAL_LIMITS.maxDecodedStreamBytes);
-  if (read === undefined) throw new Error(FLATE_FAILURE);
+  if (read === undefined) throw new MalformedInputError(FLATE_FAILURE);
   return finishWithinLimit(read);
 }
 
@@ -360,7 +361,7 @@ export interface InflatedPrefix {
  * @returns          The decoded bytes and whether the data held more.
  * @throws {ResourceLimitError} `maxDecodedStreamBytes` when `maxBytes` is
  *   above 256 MiB or is not a finite number.
- * @throws {Error} `FlateDecode: failed to decompress data` when the data
+ * @throws {MalformedInputError} `FlateDecode: failed to decompress data` when the data
  *   inflates neither as zlib nor as raw DEFLATE, or ends before its final
  *   block while the decoded size is at most `maxBytes`.
  */
@@ -390,7 +391,7 @@ export function inflateFlateUpTo(data: Uint8Array, maxBytes: number): InflatedPr
  * @returns         The decoded bytes, or `undefined` when they are more
  *   than `maxSize`, or when the data has not reached its final block after
  *   8 steps that decode to no bytes.
- * @throws {Error} `FlateDecode: failed to decompress data` when the data
+ * @throws {MalformedInputError} `FlateDecode: failed to decompress data` when the data
  *   is not raw DEFLATE or ends before its final block, unless the decoded
  *   size passes `maxSize` first or 8 steps in a row decode to no bytes
  *   before the end of the input.

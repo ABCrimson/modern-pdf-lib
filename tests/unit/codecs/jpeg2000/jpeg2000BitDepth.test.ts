@@ -22,6 +22,7 @@ import {
   summarizeBitDepth,
 } from '../../../../src/codecs/jpeg2000/jpeg2000BitDepth.js';
 import type { ComponentDepth } from '../../../../src/codecs/jpeg2000/jpeg2000BitDepth.js';
+import { InvalidArgumentError, MalformedInputError } from '../../../../src/errors.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -436,5 +437,73 @@ describe('summarizeBitDepth', () => {
     expect(result.bitsPerComponent).toBe(12);
     expect(result.isSigned).toBe(true);
     expect(result.components).toBe(1);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Typed errors
+// ---------------------------------------------------------------------------
+
+describe('JPEG2000 bit depth typed errors', () => {
+  /** The error `fn` throws; fails the test when it does not throw. */
+  function thrownBy(fn: () => unknown): unknown {
+    try {
+      fn();
+    } catch (error) {
+      return error;
+    }
+    return expect.unreachable('the call did not throw');
+  }
+
+  /** SOC and a SIZ marker whose 38 segment bytes are zero except the component count. */
+  function sizWithComponentCount(csiz: number): Uint8Array {
+    const data = new Uint8Array(4 + 38);
+    data.set([0xff, 0x4f, 0xff, 0x51]);
+    data[4 + 37] = csiz;
+    return data;
+  }
+
+  it.each([
+    [
+      'no SIZ marker',
+      new Uint8Array([0x00, 0x00, 0x00, 0x00]),
+      'JPEG2000 BitDepth: SIZ marker (0xFF51) not found',
+    ],
+    [
+      'a SIZ segment cut short',
+      new Uint8Array([0xff, 0x4f, 0xff, 0x51, 0x00, 0x08]),
+      'JPEG2000 BitDepth: SIZ marker segment is truncated',
+    ],
+    ['no components', sizWithComponentCount(0), 'JPEG2000 BitDepth: SIZ reports 0 components'],
+    [
+      'component entries cut short',
+      sizWithComponentCount(2),
+      'JPEG2000 BitDepth: SIZ marker truncated — expected 2 component entries',
+    ],
+  ])('getComponentDepths throws MalformedInputError for %s', (_name, data, message) => {
+    const error = thrownBy(() => getComponentDepths(data));
+    expect(error).toBeInstanceOf(MalformedInputError);
+    expect(error).toMatchObject({ code: 'malformed-input', format: 'other', message });
+  });
+
+  it('downscale16To8 throws InvalidArgumentError naming bitsPerComponent above 16 bits', () => {
+    const error = thrownBy(() => downscale16To8(new Uint8Array(3), 24));
+    expect(error).toBeInstanceOf(InvalidArgumentError);
+    expect(error).toMatchObject({ code: 'invalid-argument', argument: 'bitsPerComponent' });
+    expect((error as Error).message).toBe(
+      'JPEG2000 BitDepth: downscale16To8 supports up to 16 bits, got 24',
+    );
+  });
+
+  it('normalizeComponentDepth throws InvalidArgumentError naming the depth out of 1-16', () => {
+    const from = thrownBy(() => normalizeComponentDepth(new Uint8Array([0]), 0, 8));
+    expect(from).toBeInstanceOf(InvalidArgumentError);
+    expect(from).toMatchObject({ code: 'invalid-argument', argument: 'fromBits' });
+    const to = thrownBy(() => normalizeComponentDepth(new Uint8Array([0]), 8, 17));
+    expect(to).toBeInstanceOf(InvalidArgumentError);
+    expect(to).toMatchObject({ code: 'invalid-argument', argument: 'toBits' });
+    expect((to as Error).message).toBe(
+      'JPEG2000 BitDepth: normalizeComponentDepth supports 1–16 bits, got from=8 to=17',
+    );
   });
 });

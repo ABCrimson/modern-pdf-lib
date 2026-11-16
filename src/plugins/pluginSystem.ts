@@ -20,6 +20,7 @@
 import type { PdfDict } from '../core/pdfObjects.js';
 import type { PageSize } from '../core/pdfPage.js';
 import type { EmbedFontOptions } from '../core/pdfDocument.js';
+import { InvalidArgumentError, PluginError } from '../errors.js';
 
 // ---------------------------------------------------------------------------
 // Forward-reference types to avoid circular imports.
@@ -124,14 +125,17 @@ export class PdfPluginManager {
   /**
    * Register a plugin. Plugins execute in registration order.
    *
-   * @throws {Error} If a plugin with the same name is already registered.
+   * @throws {InvalidArgumentError} If the plugin name is empty (argument `plugin.name`).
+   * @throws {PluginError} If a plugin with the same name is already registered.
    */
   register(plugin: PdfPlugin): void {
     if (!plugin.name) {
-      throw new Error('Plugin must have a non-empty name');
+      throw new InvalidArgumentError('Plugin must have a non-empty name', {
+        argument: 'plugin.name',
+      });
     }
     if (this.plugins.some((p) => p.name === plugin.name)) {
-      throw new Error(`Plugin "${plugin.name}" is already registered`);
+      throw new PluginError(plugin.name, 'already registered');
     }
     this.plugins.push(plugin);
   }

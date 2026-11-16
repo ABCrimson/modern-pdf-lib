@@ -17,6 +17,8 @@
  * @packageDocumentation
  */
 
+import { EnvironmentError, InvalidStateError } from '../../errors.js';
+
 // ---------------------------------------------------------------------------
 // WASM module interface
 // ---------------------------------------------------------------------------
@@ -88,7 +90,7 @@ let available = false;
  *                    under `dist/wasm/jbig2` is loaded, but it needs
  *                    `wasm-bindgen` imports that this bridge does not
  *                    supply, so loading it without bytes throws.
- * @throws If the WASM module cannot be loaded or instantiated.
+ * @throws {EnvironmentError} If the WASM module cannot be loaded or instantiated.
  *
  * @example
  * ```ts
@@ -118,8 +120,9 @@ export async function initJBIG2Wasm(wasmBytes?: Uint8Array): Promise<void> {
   } catch (err) {
     wasmExports = null;
     available = false;
-    throw new Error(
+    throw new EnvironmentError(
       `Failed to initialize JBIG2 WASM: ${err instanceof Error ? err.message : String(err)}`,
+      { reason: 'wasm', cause: err },
     );
   }
 }
@@ -136,14 +139,15 @@ export async function initJBIG2Wasm(wasmBytes?: Uint8Array): Promise<void> {
  * @param data    - JBIG2-encoded stream bytes.
  * @param globals - Optional global segment data from `/JBIG2Globals`.
  * @returns The decoded bilevel bitmap data.
- * @throws If WASM is not initialized or decoding fails.
+ * @throws {InvalidStateError} If WASM is not initialized.
+ * @throws {EnvironmentError} If the WASM module fails to decode the data.
  */
 export function decodeJBIG2Wasm(
   data: Uint8Array,
   globals?: Uint8Array | null,
 ): { width: number; height: number; bitmapData: Uint8Array } {
   if (!wasmExports) {
-    throw new Error('JBIG2 WASM not initialized. Call initJBIG2Wasm() first.');
+    throw new InvalidStateError('JBIG2 WASM not initialized. Call initJBIG2Wasm() first.');
   }
 
   let result: Jbig2DecodeResultWasm;
@@ -166,8 +170,9 @@ export function decodeJBIG2Wasm(
 
     return output;
   } catch (err) {
-    throw new Error(
+    throw new EnvironmentError(
       `JBIG2 WASM decode failed: ${err instanceof Error ? err.message : String(err)}`,
+      { reason: 'wasm', cause: err },
     );
   }
 }

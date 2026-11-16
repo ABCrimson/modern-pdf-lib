@@ -12,7 +12,11 @@ import { describe, it, expect } from 'vitest';
 import { zlibSync, deflateSync } from 'fflate';
 import { decodeStream, getStreamFilters } from '../../../src/codecs/streamDecode.js';
 import { PdfDict, PdfName, PdfArray, PdfNumber } from '../../../src/core/pdfObjects.js';
-import { UnsupportedFilterError } from '../../../src/errors.js';
+import {
+  MalformedInputError,
+  UnsupportedFeatureError,
+  UnsupportedFilterError,
+} from '../../../src/errors.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -1029,5 +1033,50 @@ describe('getStreamFilters()', () => {
     dict.set('/Filter', PdfName.of('/FlateDecode'));
     const result = getStreamFilters(dict);
     expect(result.filters[0]).toBe('FlateDecode');
+  });
+});
+
+describe('decodeStream typed errors', () => {
+  /** The error `fn` throws; fails the test when it does not throw. */
+  function thrownBy(fn: () => unknown): unknown {
+    try {
+      fn();
+    } catch (error) {
+      return error;
+    }
+    return expect.unreachable('the call did not throw');
+  }
+
+  it('throws UnsupportedFeatureError, not UnsupportedFilterError, for a filter it does not know', () => {
+    const error = thrownBy(() => decodeStream(new Uint8Array([]), 'BogusDecode'));
+    expect(error).toBeInstanceOf(UnsupportedFeatureError);
+    expect(error).not.toBeInstanceOf(UnsupportedFilterError);
+    expect(error).toMatchObject({
+      code: 'unsupported-feature',
+      message: 'Unknown PDF stream filter: BogusDecode',
+    });
+  });
+
+  it('throws UnsupportedFeatureError for predictor parameters it does not decode', () => {
+    const data = zlibSync(new Uint8Array(40));
+    const parms = makeParms({ '/Predictor': 12, '/Columns': 0 });
+
+    const error = thrownBy(() => decodeStream(data, 'FlateDecode', parms));
+    expect(error).toBeInstanceOf(UnsupportedFeatureError);
+    expect(error).toMatchObject({
+      code: 'unsupported-feature',
+      message:
+        'Predictor: unsupported decode parameters (/Columns 0, /Colors 1, /BitsPerComponent 8)',
+    });
+  });
+
+  it('throws MalformedInputError for a "z" inside an ASCII85 group', () => {
+    const error = thrownBy(() => decodeStream(ascii('87z~>'), 'ASCII85Decode'));
+    expect(error).toBeInstanceOf(MalformedInputError);
+    expect(error).toMatchObject({
+      code: 'malformed-input',
+      format: 'other',
+      message: 'ASCII85Decode: "z" inside a group',
+    });
   });
 });

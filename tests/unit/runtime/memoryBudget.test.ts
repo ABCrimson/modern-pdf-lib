@@ -13,6 +13,7 @@ import {
   MemoryBudgetExceededError,
   createMemoryBudget,
 } from '../../../src/runtime/memoryBudget.js';
+import { InvalidArgumentError } from '../../../src/errors.js';
 
 // ---------------------------------------------------------------------------
 // createMemoryBudget — construction & validation
@@ -27,20 +28,20 @@ describe('createMemoryBudget', () => {
     expect(budget.remaining).toBe(1000);
   });
 
-  it('throws a TypeError for a zero limit', () => {
-    expect(() => createMemoryBudget(0)).toThrow(TypeError);
+  it('throws an InvalidArgumentError for a zero limit', () => {
+    expect(() => createMemoryBudget(0)).toThrow(InvalidArgumentError);
   });
 
-  it('throws a TypeError for a negative limit', () => {
-    expect(() => createMemoryBudget(-5)).toThrow(TypeError);
+  it('throws an InvalidArgumentError for a negative limit', () => {
+    expect(() => createMemoryBudget(-5)).toThrow(InvalidArgumentError);
   });
 
-  it('throws a TypeError for a NaN limit', () => {
-    expect(() => createMemoryBudget(Number.NaN)).toThrow(TypeError);
+  it('throws an InvalidArgumentError for a NaN limit', () => {
+    expect(() => createMemoryBudget(Number.NaN)).toThrow(InvalidArgumentError);
   });
 
-  it('throws a TypeError for an Infinity limit', () => {
-    expect(() => createMemoryBudget(Number.POSITIVE_INFINITY)).toThrow(TypeError);
+  it('throws an InvalidArgumentError for an Infinity limit', () => {
+    expect(() => createMemoryBudget(Number.POSITIVE_INFINITY)).toThrow(InvalidArgumentError);
   });
 });
 
@@ -116,19 +117,19 @@ describe('MemoryBudget#allocate', () => {
     });
   });
 
-  it('throws a TypeError for a negative allocation size', () => {
+  it('throws an InvalidArgumentError for a negative allocation size', () => {
     const budget = createMemoryBudget(1000);
-    expect(() => budget.allocate(-1)).toThrow(TypeError);
+    expect(() => budget.allocate(-1)).toThrow(InvalidArgumentError);
   });
 
-  it('throws a TypeError for a NaN allocation size', () => {
+  it('throws an InvalidArgumentError for a NaN allocation size', () => {
     const budget = createMemoryBudget(1000);
-    expect(() => budget.allocate(Number.NaN)).toThrow(TypeError);
+    expect(() => budget.allocate(Number.NaN)).toThrow(InvalidArgumentError);
   });
 
-  it('throws a TypeError for an Infinity allocation size', () => {
+  it('throws an InvalidArgumentError for an Infinity allocation size', () => {
     const budget = createMemoryBudget(1000);
-    expect(() => budget.allocate(Number.POSITIVE_INFINITY)).toThrow(TypeError);
+    expect(() => budget.allocate(Number.POSITIVE_INFINITY)).toThrow(InvalidArgumentError);
   });
 });
 
@@ -158,14 +159,14 @@ describe('MemoryBudget#tryAllocate', () => {
     expect(onExceed).not.toHaveBeenCalled();
   });
 
-  it('throws a TypeError for a negative size', () => {
+  it('throws an InvalidArgumentError for a negative size', () => {
     const budget = createMemoryBudget(1000);
-    expect(() => budget.tryAllocate(-1)).toThrow(TypeError);
+    expect(() => budget.tryAllocate(-1)).toThrow(InvalidArgumentError);
   });
 
-  it('throws a TypeError for a NaN size', () => {
+  it('throws an InvalidArgumentError for a NaN size', () => {
     const budget = createMemoryBudget(1000);
-    expect(() => budget.tryAllocate(Number.NaN)).toThrow(TypeError);
+    expect(() => budget.tryAllocate(Number.NaN)).toThrow(InvalidArgumentError);
   });
 });
 
@@ -190,14 +191,14 @@ describe('MemoryBudget#release', () => {
     expect(budget.remaining).toBe(1000);
   });
 
-  it('throws a TypeError for a negative release size', () => {
+  it('throws an InvalidArgumentError for a negative release size', () => {
     const budget = createMemoryBudget(1000);
-    expect(() => budget.release(-1)).toThrow(TypeError);
+    expect(() => budget.release(-1)).toThrow(InvalidArgumentError);
   });
 
-  it('throws a TypeError for a NaN release size', () => {
+  it('throws an InvalidArgumentError for a NaN release size', () => {
     const budget = createMemoryBudget(1000);
-    expect(() => budget.release(Number.NaN)).toThrow(TypeError);
+    expect(() => budget.release(Number.NaN)).toThrow(InvalidArgumentError);
   });
 });
 
@@ -259,5 +260,42 @@ describe('MemoryBudgetExceededError', () => {
     expect(err.requested).toBe(500);
     expect(err.used).toBe(600);
     expect(err.limit).toBe(1000);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// InvalidArgumentError: code and argument
+// ---------------------------------------------------------------------------
+
+describe('MemoryBudget argument errors', () => {
+  /** The error `fn` throws; fails the test when it does not throw. */
+  function thrownBy(fn: () => unknown): unknown {
+    try {
+      fn();
+    } catch (error) {
+      return error;
+    }
+    return expect.unreachable('the call did not throw');
+  }
+
+  it('names limitBytes for an invalid limit', () => {
+    const error = thrownBy(() => createMemoryBudget(0));
+    expect(error).toBeInstanceOf(InvalidArgumentError);
+    expect(error).toMatchObject({ code: 'invalid-argument', argument: 'limitBytes' });
+    expect((error as Error).message).toBe(
+      'MemoryBudget: limitBytes must be a finite number greater than 0, received 0.',
+    );
+  });
+
+  it('names bytes for an invalid size, with the method in the message', () => {
+    const budget = createMemoryBudget(1000);
+    for (const method of ['allocate', 'tryAllocate', 'release'] as const) {
+      const error = thrownBy(() => budget[method](-1));
+      expect(error, method).toBeInstanceOf(InvalidArgumentError);
+      expect(error, method).toMatchObject({ code: 'invalid-argument', argument: 'bytes' });
+      expect((error as Error).message).toBe(
+        `MemoryBudget.${method}: bytes must be a finite, non-negative number, received -1.`,
+      );
+    }
   });
 });

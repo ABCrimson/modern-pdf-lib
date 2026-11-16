@@ -15,7 +15,7 @@
  * @packageDocumentation
  */
 
-import { UnsupportedFilterError } from '../../errors.js';
+import { MalformedInputError, UnsupportedFilterError } from '../../errors.js';
 
 // ---------------------------------------------------------------------------
 // Public types
@@ -107,6 +107,8 @@ export function decodeJpeg2000(data: Uint8Array, params?: Jpeg2000DecodeParams):
  *
  * @param data - JP2 file bytes or raw J2K codestream bytes.
  * @returns Image metadata.
+ * @throws {MalformedInputError} If the codestream is too short, does not start with SOC, has
+ *   no JP2 codestream box, or lacks its SIZ or COD segment.
  */
 export function getJpeg2000Info(data: Uint8Array): Jpeg2000Info {
   let codestream: Uint8Array;
@@ -222,7 +224,7 @@ function parseJP2Boxes(data: Uint8Array): JP2BoxInfo {
   }
 
   if (result.codestream.length === 0) {
-    throw new Error('JPEG2000: no contiguous codestream box (jp2c) found');
+    throw new MalformedInputError('JPEG2000: no contiguous codestream box (jp2c) found');
   }
 
   return result;
@@ -321,11 +323,11 @@ function parseCodestream(data: Uint8Array): CodestreamInfo {
 
   // SOC marker
   if (data.length < 2) {
-    throw new Error('JPEG2000: codestream too short');
+    throw new MalformedInputError('JPEG2000: codestream too short');
   }
   const soc = readUint16BE(data, offset);
   if (soc !== MRK_SOC) {
-    throw new Error(
+    throw new MalformedInputError(
       `JPEG2000: expected SOC marker (0xFF4F), got 0x${soc.toString(16).padStart(4, '0')}`,
     );
   }
@@ -371,10 +373,10 @@ function parseCodestream(data: Uint8Array): CodestreamInfo {
   }
 
   if (!siz) {
-    throw new Error('JPEG2000: SIZ marker not found');
+    throw new MalformedInputError('JPEG2000: SIZ marker not found');
   }
   if (!cod) {
-    throw new Error('JPEG2000: COD marker not found');
+    throw new MalformedInputError('JPEG2000: COD marker not found');
   }
   return { siz, cod };
 }

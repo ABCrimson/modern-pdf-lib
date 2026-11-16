@@ -11,7 +11,7 @@
  *  - End-to-end: a real saved PDF flows through `pdfResponse` unchanged.
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import {
   pdfHeaders,
   pdfResponse,
@@ -20,6 +20,7 @@ import {
   type NodeServerResponseLike,
 } from '../../../src/runtime/serverAdapters.js';
 import { createPdf, PageSizes } from '../../../src/index.js';
+import { EnvironmentError } from '../../../src/errors.js';
 
 // ---------------------------------------------------------------------------
 // pdfHeaders
@@ -206,5 +207,38 @@ describe('serverAdapters end-to-end', () => {
     expect(roundTripped).toEqual(bytes);
     // The round-tripped bytes still start with the PDF magic.
     expect(new TextDecoder().decode(roundTripped.subarray(0, 5))).toBe('%PDF-');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Typed errors
+// ---------------------------------------------------------------------------
+
+describe('serverAdapters typed errors', () => {
+  /** The error `fn` throws; fails the test when it does not throw. */
+  function thrownBy(fn: () => unknown): unknown {
+    try {
+      fn();
+    } catch (error) {
+      return error;
+    }
+    return expect.unreachable('the call did not throw');
+  }
+
+  it('pdfResponse and pdfStreamResponse throw EnvironmentError (runtime-api) without Response', () => {
+    vi.stubGlobal('Response', undefined);
+    try {
+      for (const call of [
+        () => pdfResponse(new Uint8Array([1, 2, 3])),
+        () => pdfStreamResponse(new ReadableStream<Uint8Array>()),
+      ]) {
+        const error = thrownBy(call);
+        expect(error).toBeInstanceOf(EnvironmentError);
+        expect(error).toMatchObject({ code: 'environment-unavailable', reason: 'runtime-api' });
+        expect((error as Error).message).toContain('the Web-standard `Response` constructor');
+      }
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
 });

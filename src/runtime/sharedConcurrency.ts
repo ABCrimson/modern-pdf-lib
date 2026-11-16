@@ -35,6 +35,8 @@
  *   `value`, returning `'ok'`, `'timed-out'`, or `'not-equal'`.
  */
 
+import { EnvironmentError, InvalidArgumentError } from '../errors.js';
+
 // ---------------------------------------------------------------------------
 // Internal helpers (not exported — no isolatedDeclarations annotation needed)
 // ---------------------------------------------------------------------------
@@ -59,9 +61,10 @@ const SharedArrayBufferCtor: typeof SharedArrayBuffer | undefined = (
  */
 function allocShared(byteLength: number): SharedArrayBuffer {
   if (SharedArrayBufferCtor === undefined) {
-    throw new Error(
+    throw new EnvironmentError(
       'sharedConcurrency: SharedArrayBuffer is not available in this runtime. ' +
         'Call isSharedMemoryAvailable() before constructing these primitives.',
+      { reason: 'runtime-api' },
     );
   }
   return new SharedArrayBufferCtor(byteLength);
@@ -135,19 +138,24 @@ export class SharedCounter {
    * @param index  - Element index (in `Int32` units) of the counter slot.
    *                 Defaults to `0`. Must be a non-negative integer that
    *                 fits within `buffer`.
-   * @throws If shared memory is unavailable (when allocating), or if
-   *         `index` is out of range for the supplied `buffer`.
+   * @throws {EnvironmentError} If shared memory is unavailable (when allocating).
+   * @throws {InvalidArgumentError} If `index` is not a non-negative integer or is
+   *         out of range for the supplied `buffer`.
    */
   public constructor(buffer?: SharedArrayBuffer, index?: number) {
     const slot = index ?? 0;
     if (!Number.isInteger(slot) || slot < 0) {
-      throw new Error(`SharedCounter: index must be a non-negative integer, received ${slot}`);
+      throw new InvalidArgumentError(
+        `SharedCounter: index must be a non-negative integer, received ${slot}`,
+        { argument: 'index' },
+      );
     }
 
     const buf = buffer ?? allocShared(INT32_BYTES);
     if ((slot + 1) * INT32_BYTES > buf.byteLength) {
-      throw new Error(
+      throw new InvalidArgumentError(
         `SharedCounter: index ${slot} is out of range for a ${buf.byteLength}-byte buffer`,
+        { argument: 'index' },
       );
     }
 
@@ -244,14 +252,15 @@ export class SharedFlag {
    * @param buffer - Existing shared buffer to attach to (its first `Int32`
    *                 slot is used). When omitted, a fresh `4`-byte
    *                 `SharedArrayBuffer` is allocated, starting cleared.
-   * @throws If shared memory is unavailable when allocating, or `buffer`
-   *         is too small to hold one `Int32`.
+   * @throws {EnvironmentError} If shared memory is unavailable when allocating.
+   * @throws {InvalidArgumentError} If `buffer` is too small to hold one `Int32`.
    */
   public constructor(buffer?: SharedArrayBuffer) {
     const buf = buffer ?? allocShared(INT32_BYTES);
     if (buf.byteLength < INT32_BYTES) {
-      throw new Error(
+      throw new InvalidArgumentError(
         `SharedFlag: buffer must be at least ${INT32_BYTES} bytes, got ${buf.byteLength}`,
+        { argument: 'buffer' },
       );
     }
     this.buffer = buf;
@@ -415,13 +424,14 @@ export class SharedRingBuffer {
    *                        this already-allocated buffer instead of creating
    *                        a fresh one (used by {@link SharedRingBuffer.fromBuffer}).
    *                        Its data region must equal `capacityBytes`.
-   * @throws If `capacityBytes` is not a positive integer, or shared memory
-   *         is unavailable.
+   * @throws {InvalidArgumentError} If `capacityBytes` is not a positive integer.
+   * @throws {EnvironmentError} If shared memory is unavailable.
    */
   public constructor(capacityBytes: number, existingBuffer?: SharedArrayBuffer) {
     if (!Number.isInteger(capacityBytes) || capacityBytes <= 0) {
-      throw new Error(
+      throw new InvalidArgumentError(
         `SharedRingBuffer: capacityBytes must be a positive integer, received ${capacityBytes}`,
+        { argument: 'capacityBytes' },
       );
     }
     const buf = existingBuffer ?? allocShared(CONTROL_BYTES + capacityBytes);
@@ -440,11 +450,14 @@ export class SharedRingBuffer {
    * @param buffer - A `SharedArrayBuffer` previously created by a
    *                 `SharedRingBuffer` constructor.
    * @returns A `SharedRingBuffer` sharing `buffer`'s cursors and data.
-   * @throws If `buffer` is too small to contain the control region.
+   * @throws {InvalidArgumentError} If `buffer` is too small to contain the control region.
    */
   public static fromBuffer(buffer: SharedArrayBuffer): SharedRingBuffer {
     if (buffer.byteLength <= CONTROL_BYTES) {
-      throw new Error(`SharedRingBuffer.fromBuffer: buffer too small (${buffer.byteLength} bytes)`);
+      throw new InvalidArgumentError(
+        `SharedRingBuffer.fromBuffer: buffer too small (${buffer.byteLength} bytes)`,
+        { argument: 'buffer' },
+      );
     }
     const dataBytes = buffer.byteLength - CONTROL_BYTES;
     return new SharedRingBuffer(dataBytes, buffer);

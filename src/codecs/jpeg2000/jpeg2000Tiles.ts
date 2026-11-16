@@ -26,7 +26,7 @@
  * @packageDocumentation
  */
 
-import { UnsupportedFilterError } from '../../errors.js';
+import { MalformedInputError, UnsupportedFilterError } from '../../errors.js';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -164,7 +164,7 @@ function findCodestreamStart(data: Uint8Array): number {
  *
  * @param data - A JPEG2000 codestream (raw J2K) or JP2 file.
  * @returns The tile grid information.
- * @throws If the SIZ marker cannot be found or is truncated.
+ * @throws {MalformedInputError} If the SIZ marker cannot be found or is truncated.
  */
 export function parseTileInfo(data: Uint8Array): TileGridInfo {
   const csStart = findCodestreamStart(data);
@@ -179,12 +179,12 @@ export function parseTileInfo(data: Uint8Array): TileGridInfo {
   }
 
   if (sizOffset < 0) {
-    throw new Error('JPEG2000 Tiles: SIZ marker (0xFF51) not found');
+    throw new MalformedInputError('JPEG2000 Tiles: SIZ marker (0xFF51) not found');
   }
 
   const base = sizOffset + 2; // after the marker bytes
   if (base + 38 > data.length) {
-    throw new Error('JPEG2000 Tiles: SIZ marker segment is truncated');
+    throw new MalformedInputError('JPEG2000 Tiles: SIZ marker segment is truncated');
   }
 
   // Parse SIZ fields

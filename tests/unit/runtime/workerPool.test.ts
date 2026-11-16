@@ -8,6 +8,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { createWorkerPool, type TaskRunner } from '../../../src/runtime/workerPool.js';
+import { InvalidArgumentError } from '../../../src/errors.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -182,5 +183,33 @@ describe('createWorkerPool options', () => {
     const runner: TaskRunner<number, number> = (input) => Promise.resolve(input);
     const pool = createWorkerPool(runner, { concurrency: 2 });
     expect(await pool.runAll([])).toEqual([]);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Typed errors
+// ---------------------------------------------------------------------------
+
+describe('createWorkerPool typed errors', () => {
+  /** The error `fn` throws; fails the test when it does not throw. */
+  function thrownBy(fn: () => unknown): unknown {
+    try {
+      fn();
+    } catch (error) {
+      return error;
+    }
+    return expect.unreachable('the call did not throw');
+  }
+
+  it('throws InvalidArgumentError naming options.concurrency', () => {
+    const runner: TaskRunner<number, number> = (input) => Promise.resolve(input);
+    for (const concurrency of [0, -2, 1.5, Number.NaN]) {
+      const error = thrownBy(() => createWorkerPool(runner, { concurrency }));
+      expect(error, String(concurrency)).toBeInstanceOf(InvalidArgumentError);
+      expect(error).toMatchObject({ code: 'invalid-argument', argument: 'options.concurrency' });
+      expect((error as Error).message).toBe(
+        `workerPool: concurrency must be a positive integer, received ${concurrency}`,
+      );
+    }
   });
 });

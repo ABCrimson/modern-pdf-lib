@@ -15,6 +15,7 @@
  */
 
 import { assertWithinLimit } from '../../internal/limits.js';
+import { MalformedInputError } from '../../errors.js';
 import type { PdfDict } from '../../core/pdfObjects.js';
 import { PdfNumber, PdfBool } from '../../core/pdfObjects.js';
 
@@ -29,7 +30,7 @@ import { PdfNumber, PdfBool } from '../../core/pdfObjects.js';
  * @param parms - Optional `/DecodeParms` dictionary with CCITT parameters.
  * @returns The decoded bilevel image data (one bit per pixel, packed into
  *          bytes, with rows padded to byte boundaries).
- * @throws {RangeError} `CCITTFaxDecode: /Columns must be an integer of at
+ * @throws {MalformedInputError} `CCITTFaxDecode: /Columns must be an integer of at
  *   least 1` when `/Columns` is below 1.
  * @throws {ResourceLimitError} `maxImageDimension` when `/Columns` or
  *   `/Rows` is above 65,536; `maxImagePixels` when `/Columns` times `/Rows`,
@@ -70,7 +71,7 @@ interface CCITTParams {
 /**
  * Reads the parameters. `/Columns` and `/Rows` are checked against
  * `INTERNAL_LIMITS` before any row is decoded: `/Columns` below 1 throws
- * `RangeError`; `/Columns` or `/Rows` above `maxImageDimension`, or
+ * `MalformedInputError`; `/Columns` or `/Rows` above `maxImageDimension`, or
  * `/Columns` times `/Rows` above `maxImagePixels`, throws
  * `ResourceLimitError`. A `/Rows` below 1 means the row count is not given.
  */
@@ -78,7 +79,7 @@ function readCCITTParams(parms: PdfDict | null): CCITTParams {
   const columns = dictInt(parms, '/Columns', 1728);
   const rows = dictInt(parms, '/Rows', 0);
   if (!(columns >= 1)) {
-    throw new RangeError('CCITTFaxDecode: /Columns must be an integer of at least 1');
+    throw new MalformedInputError('CCITTFaxDecode: /Columns must be an integer of at least 1');
   }
   assertWithinLimit('maxImageDimension', columns);
   if (rows > 0) {

@@ -19,6 +19,7 @@
 import { describe, it, expect } from 'vitest';
 import { createPdf, PdfDocument } from '../../../src/core/pdfDocument.js';
 import { processBatch, batchMerge, batchFlatten } from '../../../src/batch/batchProcessor.js';
+import { BatchProcessingError, PdfError } from '../../../src/errors.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -276,7 +277,7 @@ describe('error strategies', () => {
   });
 
   describe('collect', () => {
-    it('throws AggregateError with all failures', async () => {
+    it('throws BatchProcessingError with all failures', async () => {
       const badPdf = new Uint8Array([0, 1, 2, 3]);
 
       try {
@@ -285,10 +286,13 @@ describe('error strategies', () => {
         });
         expect.unreachable('should have thrown');
       } catch (err) {
-        expect(err).toBeInstanceOf(AggregateError);
-        const agg = err as AggregateError;
-        expect(agg.errors).toHaveLength(3);
-        expect(agg.message).toContain('3 of 3');
+        expect(err).toBeInstanceOf(BatchProcessingError);
+        expect(err).toBeInstanceOf(PdfError);
+        expect(err).toMatchObject({ name: 'BatchProcessingError', code: 'batch-failed' });
+        const agg = err as BatchProcessingError;
+        expect(agg.failures).toHaveLength(3);
+        expect(agg.failures.map((f) => f.index)).toEqual([0, 1, 2]);
+        expect(agg.message).toBe('Batch processing failed for 3 of 3 items');
       }
     });
 
@@ -302,11 +306,13 @@ describe('error strategies', () => {
         });
         expect.unreachable('should have thrown');
       } catch (err) {
-        const agg = err as AggregateError;
-        expect(agg.errors).toHaveLength(2);
+        const agg = err as BatchProcessingError;
+        expect(agg.failures).toHaveLength(2);
+        // The failures are the bad items, in input order
+        expect(agg.failures.map((f) => f.index)).toEqual([1, 3]);
         // Each error message should contain the item index
-        for (const e of agg.errors) {
-          expect((e as Error).message).toMatch(/\[Item #\d+\]/);
+        for (const { index, error } of agg.failures) {
+          expect(error.message).toContain(`[Item #${index}]`);
         }
       }
     });
@@ -385,11 +391,11 @@ describe('per-item timeout', () => {
       );
       expect.unreachable('should have thrown');
     } catch (err) {
-      expect(err).toBeInstanceOf(AggregateError);
-      const agg = err as AggregateError;
-      expect(agg.errors).toHaveLength(2);
-      for (const e of agg.errors) {
-        expect((e as Error).message).toContain('timed out');
+      expect(err).toBeInstanceOf(BatchProcessingError);
+      const agg = err as BatchProcessingError;
+      expect(agg.failures).toHaveLength(2);
+      for (const { error } of agg.failures) {
+        expect(error.message).toContain('timed out');
       }
     }
   });
@@ -661,9 +667,10 @@ describe('edge cases', () => {
       });
       expect.unreachable('should have thrown');
     } catch (err) {
-      expect(err).toBeInstanceOf(AggregateError);
-      const agg = err as AggregateError;
-      expect(agg.errors).toHaveLength(1);
+      expect(err).toBeInstanceOf(BatchProcessingError);
+      const agg = err as BatchProcessingError;
+      expect(agg.failures).toHaveLength(1);
+      expect(agg.failures[0]?.index).toBe(1);
     }
 
     // Progress should still have been called for both items

@@ -6,12 +6,13 @@
  * synthetic 206 / 200 responses.
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import {
   createRangeFetcher,
   type FetchLike,
   type FetchLikeResponse,
 } from '../../../src/runtime/rangeFetch.js';
+import { EnvironmentError, InvalidArgumentError } from '../../../src/errors.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -276,5 +277,92 @@ describe('createRangeFetcher.supportsRanges', () => {
     });
 
     expect(await fetcher.supportsRanges()).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Typed errors
+// ---------------------------------------------------------------------------
+
+describe('createRangeFetcher typed errors', () => {
+  /** The error `fn` throws; fails the test when it does not throw. */
+  function thrownBy(fn: () => unknown): unknown {
+    try {
+      fn();
+    } catch (error) {
+      return error;
+    }
+    return expect.unreachable('the call did not throw');
+  }
+
+  /** The reason `promise` rejects with; fails the test when it resolves. */
+  async function rejectionOf(promise: Promise<unknown>): Promise<unknown> {
+    return promise.then(
+      () => expect.unreachable('the promise did not reject'),
+      (reason: unknown) => reason,
+    );
+  }
+
+  it('throws InvalidArgumentError naming start for an invalid start offset', async () => {
+    const { fetchImpl } = makeMockFetch(makeBody());
+    const fetcher = createRangeFetcher('https://example.com/doc.pdf', { fetchImpl });
+
+    const error = await rejectionOf(fetcher.fetchRange(-1, 5));
+    expect(error).toBeInstanceOf(InvalidArgumentError);
+    expect(error).toMatchObject({ code: 'invalid-argument', argument: 'start' });
+    expect((error as Error).message).toBe('rangeFetch: invalid start offset -1');
+  });
+
+  it('throws InvalidArgumentError naming end for an invalid end offset', async () => {
+    const { fetchImpl } = makeMockFetch(makeBody());
+    const fetcher = createRangeFetcher('https://example.com/doc.pdf', { fetchImpl });
+
+    const error = await rejectionOf(fetcher.fetchRange(5, 2));
+    expect(error).toBeInstanceOf(InvalidArgumentError);
+    expect(error).toMatchObject({ code: 'invalid-argument', argument: 'end' });
+    expect((error as Error).message).toBe('rangeFetch: invalid end offset 2 for start 5');
+  });
+
+  it('throws EnvironmentError (network) when the server does not answer 206', async () => {
+    const fetchImpl: FetchLike = () =>
+      Promise.resolve({
+        status: 200,
+        headers: makeHeaders({ 'Content-Length': '100' }),
+        arrayBuffer: () => Promise.resolve(new ArrayBuffer(100)),
+      });
+    const fetcher = createRangeFetcher('https://example.com/doc.pdf', { fetchImpl });
+
+    const error = await rejectionOf(fetcher.fetchRange(0, 9));
+    expect(error).toBeInstanceOf(EnvironmentError);
+    expect(error).toMatchObject({ code: 'environment-unavailable', reason: 'network' });
+    expect((error as Error).message).toBe('rangeFetch: expected 206 Partial Content, received 200');
+  });
+
+  it('throws EnvironmentError (network) when no header gives the resource length', async () => {
+    const fetchImpl: FetchLike = () =>
+      Promise.resolve({
+        status: 200,
+        headers: makeHeaders({}),
+        arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)),
+      });
+    const fetcher = createRangeFetcher('https://example.com/doc.pdf', { fetchImpl });
+
+    const error = await rejectionOf(fetcher.getLength());
+    expect(error).toBeInstanceOf(EnvironmentError);
+    expect(error).toMatchObject({ code: 'environment-unavailable', reason: 'network' });
+  });
+
+  it('throws EnvironmentError (runtime-api) when the runtime has no fetch and none is given', () => {
+    vi.stubGlobal('fetch', undefined);
+    try {
+      const error = thrownBy(() => createRangeFetcher('https://example.com/doc.pdf'));
+      expect(error).toBeInstanceOf(EnvironmentError);
+      expect(error).toMatchObject({ code: 'environment-unavailable', reason: 'runtime-api' });
+      expect((error as Error).message).toBe(
+        'rangeFetch: no fetch implementation available; pass options.fetchImpl',
+      );
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
 });

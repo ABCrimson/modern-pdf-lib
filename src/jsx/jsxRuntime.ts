@@ -75,6 +75,7 @@ import { createPdf } from '../core/pdfDocument.js';
 import type { PdfDocument } from '../core/pdfDocument.js';
 import type { PdfPage, PageSize, FontRef } from '../core/pdfPage.js';
 import { PageSizes } from '../core/pdfPage.js';
+import { InvalidStateError } from '../errors.js';
 import type { Color } from '../core/operators/color.js';
 
 // ---------------------------------------------------------------------------
@@ -306,7 +307,7 @@ class RenderContext {
     const f = bold ? this.bold : this.regular;
     if (f === undefined) {
       // Guarded for completeness: `init()` always runs before any drawing.
-      throw new Error('RenderContext.init() must be awaited before rendering.');
+      throw new InvalidStateError('RenderContext.init() must be awaited before rendering.');
     }
     return f;
   }

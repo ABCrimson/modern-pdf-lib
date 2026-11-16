@@ -9,6 +9,7 @@
 import { describe, it, expect } from 'vitest';
 import { decodeStream } from '../../../../src/codecs/streamDecode.js';
 import { PdfDict, PdfNumber, PdfBool } from '../../../../src/core/pdfObjects.js';
+import { MalformedInputError } from '../../../../src/errors.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -619,5 +620,30 @@ describe('CCITTFaxDecode edge cases', () => {
     expect(result.length).toBe(1);
     // Single white pixel, BlackIs1=true => bit 7 = 0
     expect(result[0]! & 0x80).toBe(0x00);
+  });
+});
+
+describe('CCITTFaxDecode parameter errors', () => {
+  it('throws MalformedInputError for /Columns below 1', () => {
+    for (const columns of [0, -1]) {
+      for (const k of [-1, 0, 1]) {
+        let caught: unknown;
+        try {
+          decodeStream(
+            new Uint8Array(8).fill(0xff),
+            'CCITTFaxDecode',
+            ccittParms({ '/K': k, '/Columns': columns }),
+          );
+        } catch (err) {
+          caught = err;
+        }
+        expect(caught).toBeInstanceOf(MalformedInputError);
+        expect(caught).toMatchObject({
+          code: 'malformed-input',
+          format: 'other',
+          message: 'CCITTFaxDecode: /Columns must be an integer of at least 1',
+        });
+      }
+    }
   });
 });

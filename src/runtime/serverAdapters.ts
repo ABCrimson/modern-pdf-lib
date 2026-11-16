@@ -41,6 +41,8 @@
  * minimal structural interface ({@link NodeServerResponseLike}).
  */
 
+import { EnvironmentError } from '../errors.js';
+
 // ---------------------------------------------------------------------------
 // Public option types
 // ---------------------------------------------------------------------------
@@ -347,14 +349,15 @@ export function pdfHeaders(
 /**
  * Feature-detect the Web-standard `Response` constructor.
  *
- * @throws Error when `Response` is not a constructor in the current runtime.
+ * @throws {EnvironmentError} When `Response` is not a constructor in the current runtime.
  */
 function assertResponseAvailable(): void {
   if (typeof Response !== 'function') {
-    throw new Error(
+    throw new EnvironmentError(
       'pdfResponse: the Web-standard `Response` constructor is not available in this runtime. ' +
         'Use `sendPdfToNodeResponse(res, bytes)` for a classic Node `http.ServerResponse`, ' +
         'or upgrade to a runtime with the Fetch API (Node >=18, Deno, Bun, Cloudflare Workers, browsers).',
+      { reason: 'runtime-api' },
     );
   }
 }
@@ -373,7 +376,7 @@ function assertResponseAvailable(): void {
  * @param bytes    The PDF body.
  * @param options  Optional response shaping (see {@link PdfResponseOptions}).
  * @returns        A `Response` with status `options.status ?? 200`.
- * @throws         If the runtime lacks the `Response` constructor.
+ * @throws {EnvironmentError} If the runtime lacks the `Response` constructor.
  */
 export function pdfResponse(bytes: Uint8Array, options?: PdfResponseOptions): Response {
   assertResponseAvailable();
@@ -404,7 +407,7 @@ export function pdfResponse(bytes: Uint8Array, options?: PdfResponseOptions): Re
  * @param stream   A readable stream of the PDF body.
  * @param options  Response shaping plus an optional known `byteLength`.
  * @returns        A streaming `Response`.
- * @throws         If the runtime lacks the `Response` constructor.
+ * @throws {EnvironmentError} If the runtime lacks the `Response` constructor.
  */
 export function pdfStreamResponse(
   stream: ReadableStream<Uint8Array>,

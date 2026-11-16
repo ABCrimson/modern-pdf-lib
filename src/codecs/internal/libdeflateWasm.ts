@@ -22,6 +22,7 @@
 
 import type { CompressionEngine } from './deflate.js';
 import { inflateFlate, wrapRawDeflate } from './pdfFlate.js';
+import { EnvironmentError, InvalidStateError, MalformedInputError } from '../../errors.js';
 
 // ---------------------------------------------------------------------------
 // WASM module interface
@@ -88,7 +89,7 @@ let available = false;
  * invalidates prior `Uint8Array` views.
  */
 function wasmMemory(): Uint8Array {
-  if (!wasmExports) throw new Error('libdeflate WASM not initialized');
+  if (!wasmExports) throw new InvalidStateError('libdeflate WASM not initialized');
   return new Uint8Array(wasmExports.memory.buffer);
 }
 
@@ -129,7 +130,7 @@ function copyFromWasm(ptr: number, len: number): Uint8Array {
  * @param wasmBytes - Optional pre-loaded WASM binary. When omitted,
  *                    the module is loaded via the universal WASM loader
  *                    (see `src/wasm/loader.ts`).
- * @throws If the WASM module cannot be loaded or instantiated.
+ * @throws {EnvironmentError} If the WASM module cannot be loaded or instantiated.
  *
  * @example
  * ```ts
@@ -165,8 +166,9 @@ export async function initDeflateWasm(wasmBytes?: Uint8Array): Promise<void> {
   } catch (err) {
     wasmExports = null;
     available = false;
-    throw new Error(
+    throw new EnvironmentError(
       `Failed to initialize libdeflate WASM: ${err instanceof Error ? err.message : String(err)}`,
+      { reason: 'wasm', cause: err },
     );
   }
 }
@@ -183,7 +185,8 @@ export async function initDeflateWasm(wasmBytes?: Uint8Array): Promise<void> {
  * @param input - Uncompressed bytes.
  * @param level - Compression level 1-12. Default: `6`.
  * @returns       Compressed bytes (raw deflate).
- * @throws If WASM is not initialized.
+ * @throws {InvalidStateError} If WASM is not initialized.
+ * @throws {EnvironmentError} If the WASM module reports no compressed output.
  *
  * @example
  * ```ts
@@ -193,7 +196,7 @@ export async function initDeflateWasm(wasmBytes?: Uint8Array): Promise<void> {
  */
 export function deflateSync(input: Uint8Array, level: number = 6): Uint8Array {
   if (!wasmExports) {
-    throw new Error('libdeflate WASM not initialized. Call initDeflateWasm() first.');
+    throw new InvalidStateError('libdeflate WASM not initialized. Call initDeflateWasm() first.');
   }
 
   // Clamp level to valid range
@@ -221,7 +224,9 @@ export function deflateSync(input: Uint8Array, level: number = 6): Uint8Array {
     );
 
     if (actualSize <= 0) {
-      throw new Error('libdeflate compression failed (returned zero or negative size)');
+      throw new EnvironmentError('libdeflate compression failed (returned zero or negative size)', {
+        reason: 'wasm',
+      });
     }
 
     // Copy result out of WASM memory
@@ -240,7 +245,8 @@ export function deflateSync(input: Uint8Array, level: number = 6): Uint8Array {
  * @param outputSize - Maximum expected output size. Must be >= actual
  *                     decompressed size. Default: `input.length * 4`.
  * @returns            Decompressed bytes.
- * @throws If WASM is not initialized or decompression fails.
+ * @throws {InvalidStateError} If WASM is not initialized.
+ * @throws {MalformedInputError} If the data does not decompress.
  *
  * @example
  * ```ts
@@ -249,7 +255,7 @@ export function deflateSync(input: Uint8Array, level: number = 6): Uint8Array {
  */
 export function inflateSync(input: Uint8Array, outputSize: number = input.length * 4): Uint8Array {
   if (!wasmExports) {
-    throw new Error('libdeflate WASM not initialized. Call initDeflateWasm() first.');
+    throw new InvalidStateError('libdeflate WASM not initialized. Call initDeflateWasm() first.');
   }
 
   const maxOutput = Math.max(outputSize, input.length * 2);
@@ -263,7 +269,7 @@ export function inflateSync(input: Uint8Array, outputSize: number = input.length
     const actualSize = wasmExports.decompress(inputPtr, input.length, outputPtr, maxOutput);
 
     if (actualSize < 0) {
-      throw new Error(
+      throw new MalformedInputError(
         'libdeflate decompression failed. The input may be corrupt or ' +
           'the output buffer may be too small.',
       );
@@ -329,7 +335,8 @@ export class LibdeflateWasm implements CompressionEngine {
    * @param data  - Uncompressed input bytes.
    * @param level - Compression level 1-12 (clamped). Default: `6`.
    * @returns       Compressed bytes: zlib data (RFC 1950).
-   * @throws If WASM is not initialized.
+   * @throws {InvalidStateError} If WASM is not initialized.
+   * @throws {EnvironmentError} If the WASM module reports no compressed output.
    */
   async compress(data: Uint8Array, level: number = 6): Promise<Uint8Array> {
     // The underlying implementation is synchronous, but we wrap it in

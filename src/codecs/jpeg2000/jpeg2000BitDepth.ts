@@ -17,6 +17,8 @@
  * @packageDocumentation
  */
 
+import { InvalidArgumentError, MalformedInputError } from '../../errors.js';
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -143,12 +145,12 @@ function findSizMarker(data: Uint8Array): number {
  *   segment.  May be a full JP2/J2K codestream — the SIZ is located
  *   automatically.
  * @returns An array of per-component depth descriptors.
- * @throws If the SIZ marker cannot be found or is truncated.
+ * @throws {MalformedInputError} If the SIZ marker cannot be found or is truncated.
  */
 export function getComponentDepths(sizMarker: Uint8Array): ComponentDepth[] {
   const sizOffset = findSizMarker(sizMarker);
   if (sizOffset < 0) {
-    throw new Error('JPEG2000 BitDepth: SIZ marker (0xFF51) not found');
+    throw new MalformedInputError('JPEG2000 BitDepth: SIZ marker (0xFF51) not found');
   }
 
   // SIZ marker structure (after the 2-byte marker code):
@@ -167,18 +169,20 @@ export function getComponentDepths(sizMarker: Uint8Array): ComponentDepth[] {
 
   const base = sizOffset + 2; // skip the 0xFF51 marker bytes
   if (base + 38 > sizMarker.length) {
-    throw new Error('JPEG2000 BitDepth: SIZ marker segment is truncated');
+    throw new MalformedInputError('JPEG2000 BitDepth: SIZ marker segment is truncated');
   }
 
   const csiz = (sizMarker[base + 36]! << 8) | sizMarker[base + 37]!;
   if (csiz === 0) {
-    throw new Error('JPEG2000 BitDepth: SIZ reports 0 components');
+    throw new MalformedInputError('JPEG2000 BitDepth: SIZ reports 0 components');
   }
 
   // Each component entry is 3 bytes: Ssiz(1) + XRsiz(1) + YRsiz(1)
   const componentStart = base + 38;
   if (componentStart + csiz * 3 > sizMarker.length) {
-    throw new Error(`JPEG2000 BitDepth: SIZ marker truncated — expected ${csiz} component entries`);
+    throw new MalformedInputError(
+      `JPEG2000 BitDepth: SIZ marker truncated — expected ${csiz} component entries`,
+    );
   }
 
   const depths: ComponentDepth[] = [];
@@ -215,8 +219,9 @@ export function downscale16To8(data: Uint8Array, bitsPerComponent: number): Uint
   }
 
   if (bitsPerComponent > 16) {
-    throw new Error(
+    throw new InvalidArgumentError(
       `JPEG2000 BitDepth: downscale16To8 supports up to 16 bits, got ${bitsPerComponent}`,
+      { argument: 'bitsPerComponent' },
     );
   }
 
@@ -279,8 +284,9 @@ export function normalizeComponentDepth(
   toBits: number,
 ): Uint8Array {
   if (fromBits < 1 || fromBits > 16 || toBits < 1 || toBits > 16) {
-    throw new Error(
+    throw new InvalidArgumentError(
       `JPEG2000 BitDepth: normalizeComponentDepth supports 1–16 bits, got from=${fromBits} to=${toBits}`,
+      { argument: fromBits < 1 || fromBits > 16 ? 'fromBits' : 'toBits' },
     );
   }
 

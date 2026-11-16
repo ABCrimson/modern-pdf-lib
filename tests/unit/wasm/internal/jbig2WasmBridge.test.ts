@@ -9,13 +9,18 @@ import {
   initJBIG2Wasm,
   isJBIG2WasmAvailable,
   disposeJBIG2Wasm,
+  decodeJBIG2Wasm,
 } from '../../../../src/wasm/internal/jbig2WasmBridge.js';
 import {
   decodeJBIG2Async,
   resetJBIG2WasmBridge,
 } from '../../../../src/codecs/jbig2/jbig2Decode.js';
 import { PdfDict } from '../../../../src/core/pdfObjects.js';
-import { UnsupportedFilterError } from '../../../../src/errors.js';
+import {
+  EnvironmentError,
+  InvalidStateError,
+  UnsupportedFilterError,
+} from '../../../../src/errors.js';
 
 // ---------------------------------------------------------------------------
 // Reset state between tests
@@ -228,5 +233,92 @@ describe('decodeJBIG2Async: the error carries its class, code and filter', () =>
       code: 'unsupported-filter',
       filter: 'JBIG2Decode',
     });
+  });
+});
+
+describe('JBIG2 WASM bridge: typed errors', () => {
+  /**
+   * A WebAssembly module whose only export is `decode_jbig2(i32): i32`, which traps at once:
+   * the smallest module the bridge accepts, for the path where the WASM side fails.
+   */
+  const TRAPPING_MODULE = new Uint8Array([
+    0x00,
+    0x61,
+    0x73,
+    0x6d,
+    0x01,
+    0x00,
+    0x00,
+    0x00, // magic, version
+    0x01,
+    0x06,
+    0x01,
+    0x60,
+    0x01,
+    0x7f,
+    0x01,
+    0x7f, // type section: (i32) -> i32
+    0x03,
+    0x02,
+    0x01,
+    0x00, // function section: one function of type 0
+    0x07,
+    0x10,
+    0x01,
+    0x0c, // export section: one export, a name of 12 bytes
+    0x64,
+    0x65,
+    0x63,
+    0x6f,
+    0x64,
+    0x65,
+    0x5f,
+    0x6a,
+    0x62,
+    0x69,
+    0x67,
+    0x32, // "decode_jbig2"
+    0x00,
+    0x00, // a function, number 0
+    0x0a,
+    0x05,
+    0x01,
+    0x03,
+    0x00,
+    0x00,
+    0x0b, // code section: no locals, unreachable, end
+  ]);
+
+  it('initJBIG2Wasm() rejects with EnvironmentError (wasm) caused by the compile error', async () => {
+    const error = await initJBIG2Wasm(new Uint8Array([0xde, 0xad, 0xbe, 0xef])).then(
+      () => expect.unreachable('invalid WASM bytes were accepted'),
+      (reason: unknown) => reason,
+    );
+    expect(error).toBeInstanceOf(EnvironmentError);
+    expect(error).toMatchObject({ code: 'environment-unavailable', reason: 'wasm' });
+    expect((error as Error).message).toContain('Failed to initialize JBIG2 WASM: ');
+    expect((error as Error).cause).toBeInstanceOf(Error);
+  });
+
+  it('decodeJBIG2Wasm() throws InvalidStateError before initJBIG2Wasm() ran', () => {
+    expect(() => decodeJBIG2Wasm(new Uint8Array([1]))).toThrow(InvalidStateError);
+    expect(() => decodeJBIG2Wasm(new Uint8Array([1]))).toThrow(
+      'JBIG2 WASM not initialized. Call initJBIG2Wasm() first.',
+    );
+  });
+
+  it('decodeJBIG2Wasm() throws EnvironmentError (wasm) caused by the trap of the WASM side', async () => {
+    await initJBIG2Wasm(TRAPPING_MODULE);
+    expect(isJBIG2WasmAvailable()).toBe(true);
+
+    try {
+      decodeJBIG2Wasm(new Uint8Array([1]));
+      expect.unreachable('the trapping module decoded');
+    } catch (error) {
+      expect(error).toBeInstanceOf(EnvironmentError);
+      expect(error).toMatchObject({ code: 'environment-unavailable', reason: 'wasm' });
+      expect((error as Error).message).toContain('JBIG2 WASM decode failed: ');
+      expect((error as Error).cause).toBeInstanceOf(WebAssembly.RuntimeError);
+    }
   });
 });

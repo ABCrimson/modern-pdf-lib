@@ -6,12 +6,13 @@
  * text via `parseContentStream(page.getContentStream())` + `extractText`.
  * Nothing is asserted by eyeballing the content stream string.
  */
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { PdfDocument } from '../../../src/core/pdfDocument.js';
 import { PageSizes } from '../../../src/core/pdfPage.js';
 import { parseContentStream } from '../../../src/parser/contentStreamParser.js';
 import { extractText } from '../../../src/parser/text/textExtractor.js';
 import { h, jsx, jsxs, Fragment, renderToPdf, type PdfNode } from '../../../src/jsx/jsxRuntime.js';
+import { InvalidStateError } from '../../../src/errors.js';
 
 /** Load rendered bytes and return the extracted text of every page. */
 async function pageTexts(bytes: Uint8Array): Promise<string[]> {
@@ -211,5 +212,27 @@ describe('jsxRuntime — renderToPdf', () => {
     const texts = await pageTexts(bytes);
     expect(texts[0]).toContain('A');
     expect(texts[1]).toContain('B');
+  });
+});
+
+describe('jsxRuntime — typed errors', () => {
+  it('throws InvalidStateError when a font is read before the render context embedded one', async () => {
+    // `init()` always embeds both fonts, so only a document that returns no font reaches the guard.
+    const embedFont = vi
+      .spyOn(PdfDocument.prototype, 'embedFont')
+      .mockResolvedValue(undefined as never);
+    try {
+      const error = await renderToPdf(h('page', null, h('text', null, 'Hello'))).then(
+        () => expect.unreachable('the render did not throw'),
+        (caught: unknown) => caught,
+      );
+      expect(error).toBeInstanceOf(InvalidStateError);
+      expect(error).toMatchObject({ code: 'invalid-state' });
+      expect((error as Error).message).toBe(
+        'RenderContext.init() must be awaited before rendering.',
+      );
+    } finally {
+      embedFont.mockRestore();
+    }
   });
 });

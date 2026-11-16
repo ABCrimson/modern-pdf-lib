@@ -19,6 +19,8 @@
  *   body.
  */
 
+import { EnvironmentError, InvalidArgumentError } from '../errors.js';
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -88,12 +90,15 @@ export interface RangeFetchOptions {
 /**
  * Resolve the default transport from the global scope.
  *
- * @throws If no `fetch` implementation is available in the environment.
+ * @throws {EnvironmentError} If no `fetch` implementation is available in the environment.
  */
 function resolveDefaultFetch(): FetchLike {
   const globalFetch = (globalThis as { fetch?: unknown }).fetch;
   if (typeof globalFetch !== 'function') {
-    throw new Error('rangeFetch: no fetch implementation available; pass options.fetchImpl');
+    throw new EnvironmentError(
+      'rangeFetch: no fetch implementation available; pass options.fetchImpl',
+      { reason: 'runtime-api' },
+    );
   }
   return (globalFetch as FetchLike).bind(globalThis);
 }
@@ -179,15 +184,22 @@ export function createRangeFetcher(url: string, options?: RangeFetchOptions): Ra
 
   async function fetchRange(start: number, end: number): Promise<Uint8Array> {
     if (!Number.isInteger(start) || start < 0) {
-      throw new Error(`rangeFetch: invalid start offset ${start}`);
+      throw new InvalidArgumentError(`rangeFetch: invalid start offset ${start}`, {
+        argument: 'start',
+      });
     }
     if (!Number.isInteger(end) || end < start) {
-      throw new Error(`rangeFetch: invalid end offset ${end} for start ${start}`);
+      throw new InvalidArgumentError(`rangeFetch: invalid end offset ${end} for start ${start}`, {
+        argument: 'end',
+      });
     }
 
     const response = await requestRange(start, end);
     if (response.status !== 206) {
-      throw new Error(`rangeFetch: expected 206 Partial Content, received ${response.status}`);
+      throw new EnvironmentError(
+        `rangeFetch: expected 206 Partial Content, received ${response.status}`,
+        { reason: 'network' },
+      );
     }
 
     const buffer = await response.arrayBuffer();
@@ -216,7 +228,10 @@ export function createRangeFetcher(url: string, options?: RangeFetchOptions): Ra
       return length;
     }
 
-    throw new Error('rangeFetch: unable to determine resource length from response headers');
+    throw new EnvironmentError(
+      'rangeFetch: unable to determine resource length from response headers',
+      { reason: 'network' },
+    );
   }
 
   async function supportsRanges(): Promise<boolean> {

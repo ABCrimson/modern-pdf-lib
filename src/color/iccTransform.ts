@@ -45,6 +45,8 @@
  * No Buffer — uses `Uint8Array` / `DataView` exclusively.
  */
 
+import { InvalidArgumentError, MalformedInputError, UnsupportedFeatureError } from '../errors.js';
+
 // ---------------------------------------------------------------------------
 // Public interfaces
 // ---------------------------------------------------------------------------
@@ -120,20 +122,24 @@ interface TagRecord {
 /**
  * Read the tag table into a `sig → {offset,size}` map.
  *
- * @throws if the profile is shorter than a header + tag count, or the tag
- *         table extends past the end of the data.
+ * @throws {MalformedInputError} (format `icc`) if the profile is shorter than a header + tag
+ *         count, or the tag table extends past the end of the data.
  */
 function readTagTable(data: Uint8Array): Map<string, TagRecord> {
   if (data.length < TAG_TABLE_OFFSET) {
-    throw new Error(
+    throw new MalformedInputError(
       `ICC profile too short: ${data.length} bytes (need at least ${TAG_TABLE_OFFSET}).`,
+      { format: 'icc' },
     );
   }
   const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
   const count = view.getUint32(TAG_COUNT_OFFSET, false);
   const tableEnd = TAG_TABLE_OFFSET + count * TAG_RECORD_SIZE;
   if (tableEnd > data.length) {
-    throw new Error(`ICC tag table (${count} tags) overruns profile of ${data.length} bytes.`);
+    throw new MalformedInputError(
+      `ICC tag table (${count} tags) overruns profile of ${data.length} bytes.`,
+      { format: 'icc' },
+    );
   }
   const table = new Map<string, TagRecord>();
   for (let i = 0; i < count; i++) {
@@ -156,7 +162,7 @@ function readTagTable(data: Uint8Array): Map<string, TagRecord> {
  *
  * @param profile - Raw ICC profile bytes.
  * @returns Parsed {@link IccTransformInfo}.
- * @throws if the profile is too short to contain a header and tag table.
+ * @throws {MalformedInputError} (format `icc`) if the profile is too short to contain a header and tag table.
  *
  * @example
  * ```ts
@@ -170,8 +176,9 @@ function readTagTable(data: Uint8Array): Map<string, TagRecord> {
  */
 export function parseIccTransform(profile: Uint8Array): IccTransformInfo {
   if (profile.length < HEADER_SIZE) {
-    throw new Error(
+    throw new MalformedInputError(
       `ICC profile too short: ${profile.length} bytes (need at least ${HEADER_SIZE}).`,
+      { format: 'icc' },
     );
   }
   const view = new DataView(profile.buffer, profile.byteOffset, profile.byteLength);
@@ -215,7 +222,8 @@ export function parseIccTransform(profile: Uint8Array): IccTransformInfo {
  *  - `para` (ICC.1:2010 §10.18): a u16 function type + s15Fixed16 parameters.
  *    Implements function types 0–4 from the spec.
  *
- * @throws if the tag type is neither `curv` nor `para`, or is truncated.
+ * @throws {UnsupportedFeatureError} if the tag type is neither `curv` nor `para`, or the
+ *         parametric function type is above 4.
  */
 function evalTrc(data: Uint8Array, tag: TagRecord, x: number): number {
   const start = tag.offset;
@@ -289,13 +297,13 @@ function evalTrc(data: Uint8Array, tag: TagRecord, x: number): number {
         return xi >= d ? (a * xi + b) ** g + e : c * xi + f;
       }
       default:
-        throw new Error(
+        throw new UnsupportedFeatureError(
           `Unsupported parametricCurveType function type ${funcType} (ICC.1:2010 §10.18 defines 0–4).`,
         );
     }
   }
 
-  throw new Error(
+  throw new UnsupportedFeatureError(
     `Unsupported TRC tag type '${type}': only 'curv' and 'para' are matrix/TRC curves (got a LUT/other type).`,
   );
 }
@@ -309,7 +317,10 @@ function readXyzTag(data: Uint8Array, tag: TagRecord): [number, number, number] 
   const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
   const type = readSig(data, tag.offset);
   if (type !== 'XYZ ') {
-    throw new Error(`Expected an 'XYZ ' colorant tag but found '${type}' (ICC.1:2010 §10.31).`);
+    throw new MalformedInputError(
+      `Expected an 'XYZ ' colorant tag but found '${type}' (ICC.1:2010 §10.31).`,
+      { format: 'icc' },
+    );
   }
   // sig(4) + reserved(4) then X,Y,Z s15Fixed16.
   return [
@@ -338,8 +349,11 @@ function readXyzTag(data: Uint8Array, tag: TagRecord): [number, number, number] 
  * @param rgb     - Device colour in `[0,1]`. For gray profiles only the first
  *                  component is used.
  * @returns PCS XYZ `[X, Y, Z]`, D50-relative.
- * @throws if the profile is **not** matrix/TRC (i.e. it is LUT-based —
- *         `mft1`/`mft2`/`mAB `/`mBA `), or its colour space is unsupported.
+ * @throws {UnsupportedFeatureError} if the profile is **not** matrix/TRC (i.e. it is LUT-based —
+ *         `mft1`/`mft2`/`mAB `/`mBA `) or a curve type is unsupported.
+ * @throws {InvalidArgumentError} (argument `profile`) if its colour space is neither `RGB ` nor `GRAY`.
+ * @throws {MalformedInputError} (format `icc`) if the profile is too short, its tag table overruns it,
+ *         a colorant tag is not an `XYZ ` tag, or a gray profile has no `kTRC` tag.
  *
  * @example
  * ```ts
@@ -359,7 +373,12 @@ export function deviceRgbToXyz(
   if (info.colorSpace === 'GRAY') {
     const kTrc = table.get('kTRC');
     if (!kTrc) {
-      throw new Error("Gray ICC profile lacks a 'kTRC' tag; not a matrix/TRC profile.");
+      throw new MalformedInputError(
+        "Gray ICC profile lacks a 'kTRC' tag; not a matrix/TRC profile.",
+        {
+          format: 'icc',
+        },
+      );
     }
     const lin = evalTrc(profile, kTrc, rgb[0]);
     const wtptRec = table.get('wtpt');
@@ -370,13 +389,14 @@ export function deviceRgbToXyz(
   }
 
   if (info.colorSpace !== 'RGB ') {
-    throw new Error(
+    throw new InvalidArgumentError(
       `deviceRgbToXyz supports 'RGB ' and 'GRAY' profiles; got '${info.colorSpace}'.`,
+      { argument: 'profile' },
     );
   }
 
   if (!info.hasMatrixTrc) {
-    throw new Error(
+    throw new UnsupportedFeatureError(
       'ICC profile is not matrix/TRC (LUT-based: mft1/mft2/mAB /mBA ); ' +
         'matrix/TRC transform cannot be applied. Use a CMM/LUT evaluator instead.',
     );

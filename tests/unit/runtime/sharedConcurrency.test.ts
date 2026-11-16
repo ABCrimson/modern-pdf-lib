@@ -8,13 +8,14 @@
  * instead test `SharedFlag` via its non-blocking `isSet`/`notify` surface.
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import {
   isSharedMemoryAvailable,
   SharedCounter,
   SharedFlag,
   SharedRingBuffer,
 } from '../../../src/runtime/sharedConcurrency.js';
+import { InvalidArgumentError } from '../../../src/errors.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -206,5 +207,90 @@ describe('SharedRingBuffer', () => {
   it('exposes its backing buffer as a SharedArrayBuffer', () => {
     const ring = new SharedRingBuffer(32);
     expect(ring.buffer).toBeInstanceOf(SharedArrayBuffer);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Typed errors
+// ---------------------------------------------------------------------------
+
+describe('sharedConcurrency typed errors', () => {
+  /** The error `fn` throws; fails the test when it does not throw. */
+  function thrownBy(fn: () => unknown): unknown {
+    try {
+      fn();
+    } catch (error) {
+      return error;
+    }
+    return expect.unreachable('the call did not throw');
+  }
+
+  it('SharedCounter throws InvalidArgumentError naming index', () => {
+    for (const index of [-1, 1.5]) {
+      const error = thrownBy(() => new SharedCounter(undefined, index));
+      expect(error, String(index)).toBeInstanceOf(InvalidArgumentError);
+      expect(error).toMatchObject({ code: 'invalid-argument', argument: 'index' });
+      expect((error as Error).message).toBe(
+        `SharedCounter: index must be a non-negative integer, received ${index}`,
+      );
+    }
+    const outOfRange = thrownBy(() => new SharedCounter(new SharedArrayBuffer(4), 1));
+    expect(outOfRange).toBeInstanceOf(InvalidArgumentError);
+    expect(outOfRange).toMatchObject({ code: 'invalid-argument', argument: 'index' });
+    expect((outOfRange as Error).message).toBe(
+      'SharedCounter: index 1 is out of range for a 4-byte buffer',
+    );
+  });
+
+  it('SharedFlag throws InvalidArgumentError naming buffer for a buffer under 4 bytes', () => {
+    const error = thrownBy(() => new SharedFlag(new SharedArrayBuffer(2)));
+    expect(error).toBeInstanceOf(InvalidArgumentError);
+    expect(error).toMatchObject({ code: 'invalid-argument', argument: 'buffer' });
+    expect((error as Error).message).toBe('SharedFlag: buffer must be at least 4 bytes, got 2');
+  });
+
+  it('SharedRingBuffer throws InvalidArgumentError naming capacityBytes', () => {
+    for (const capacityBytes of [0, -8, 2.5]) {
+      const error = thrownBy(() => new SharedRingBuffer(capacityBytes));
+      expect(error, String(capacityBytes)).toBeInstanceOf(InvalidArgumentError);
+      expect(error).toMatchObject({ code: 'invalid-argument', argument: 'capacityBytes' });
+      expect((error as Error).message).toBe(
+        `SharedRingBuffer: capacityBytes must be a positive integer, received ${capacityBytes}`,
+      );
+    }
+  });
+
+  it('SharedRingBuffer.fromBuffer throws InvalidArgumentError naming buffer when it is too small', () => {
+    const error = thrownBy(() => SharedRingBuffer.fromBuffer(new SharedArrayBuffer(8)));
+    expect(error).toBeInstanceOf(InvalidArgumentError);
+    expect(error).toMatchObject({ code: 'invalid-argument', argument: 'buffer' });
+    expect((error as Error).message).toBe(
+      'SharedRingBuffer.fromBuffer: buffer too small (8 bytes)',
+    );
+  });
+
+  it('allocating without SharedArrayBuffer throws EnvironmentError (runtime-api)', async () => {
+    // The constructor is captured when the module loads, so load a fresh copy of the module (and of
+    // the error classes it throws) while the global is hidden.
+    vi.resetModules();
+    vi.stubGlobal('SharedArrayBuffer', undefined);
+    try {
+      const fresh = await import('../../../src/runtime/sharedConcurrency.js');
+      const { EnvironmentError: FreshEnvironmentError } = await import('../../../src/errors.js');
+      expect(fresh.isSharedMemoryAvailable()).toBe(false);
+      for (const construct of [
+        () => new fresh.SharedCounter(),
+        () => new fresh.SharedFlag(),
+        () => new fresh.SharedRingBuffer(16),
+      ]) {
+        const error = thrownBy(construct);
+        expect(error).toBeInstanceOf(FreshEnvironmentError);
+        expect(error).toMatchObject({ code: 'environment-unavailable', reason: 'runtime-api' });
+        expect((error as Error).message).toContain('SharedArrayBuffer is not available');
+      }
+    } finally {
+      vi.unstubAllGlobals();
+      vi.resetModules();
+    }
   });
 });

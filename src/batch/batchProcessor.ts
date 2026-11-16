@@ -18,6 +18,7 @@
 import { PdfDocument, createPdf } from '../core/pdfDocument.js';
 import { mergePdfs } from '../core/documentMerge.js';
 import { detectRuntime } from '../wasm/loader.js';
+import { BatchProcessingError } from '../errors.js';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -47,7 +48,7 @@ export interface BatchOptions {
    * Error handling strategy:
    * - `'fail-fast'` — stop on first error and reject immediately
    * - `'continue'` — skip failed items and continue (default)
-   * - `'collect'` — collect all errors and throw an `AggregateError` at the end
+   * - `'collect'` — collect all errors and throw a `BatchProcessingError` at the end
    */
   errorStrategy?: BatchErrorStrategy | undefined;
 
@@ -324,17 +325,17 @@ export async function processBatch(
     throw failFastError;
   }
 
-  // Collect: throw AggregateError with all captured errors
+  // Collect: throw BatchProcessingError with the index and error of every failed item
   if (errorStrategy === 'collect' && errors.size > 0) {
-    const sortedErrors = [...errors.entries()]
+    const failures = [...errors.entries()]
       .sort(([a], [b]) => a - b)
-      .map(([idx, err]) => {
-        err.message = `[Item #${idx}] ${err.message}`;
-        return err;
+      .map(([index, error]) => {
+        error.message = `[Item #${index}] ${error.message}`;
+        return { index, error };
       });
-    throw new AggregateError(
-      sortedErrors,
+    throw new BatchProcessingError(
       `Batch processing failed for ${errors.size} of ${files.length} items`,
+      failures,
     );
   }
 

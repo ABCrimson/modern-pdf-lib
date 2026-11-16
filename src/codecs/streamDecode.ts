@@ -14,7 +14,7 @@
 
 import { inflateFlate, inflateRaw } from './internal/pdfFlate.js';
 import { INTERNAL_LIMITS, assertWithinLimit } from '../internal/limits.js';
-import { UnsupportedFilterError } from '../errors.js';
+import { MalformedInputError, UnsupportedFeatureError, UnsupportedFilterError } from '../errors.js';
 import type { PdfObject, PdfStream } from '../core/pdfObjects.js';
 import { PdfDict, PdfName, PdfArray, PdfNumber } from '../core/pdfObjects.js';
 import { decodeCCITT } from './internal/ccittDecode.js';
@@ -316,7 +316,7 @@ function applyFilter(filterName: string, data: Uint8Array, parms: PdfDict | null
       // Encryption filter — pass through (Phase 5 will handle)
       return data;
     default:
-      throw new Error(`Unknown PDF stream filter: ${filterName}`);
+      throw new UnsupportedFeatureError(`Unknown PDF stream filter: ${filterName}`);
   }
 }
 
@@ -396,7 +396,7 @@ function readPredictorParms(parms: PdfDict | null): {
     colors > 32 ||
     !(bpc === 1 || bpc === 2 || bpc === 4 || bpc === 8 || bpc === 16)
   ) {
-    throw new Error(
+    throw new UnsupportedFeatureError(
       `Predictor: unsupported decode parameters (/Columns ${columns}, /Colors ${colors}, /BitsPerComponent ${bpc})`,
     );
   }
@@ -724,7 +724,7 @@ function decodeASCII85(data: Uint8Array): Uint8Array {
     // 'z' shorthand for four zero bytes
     if (ch === 0x7a /* z */) {
       if (groupLen > 0) {
-        throw new Error('ASCII85Decode: "z" inside a group');
+        throw new MalformedInputError('ASCII85Decode: "z" inside a group');
       }
       out[outPos++] = 0;
       out[outPos++] = 0;

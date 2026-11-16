@@ -10,7 +10,7 @@
  * - Error handling for missing/invalid modules
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import {
   getInlineWasmBytes,
   isValidModuleName,
@@ -22,6 +22,7 @@ import {
   provideInlineWasmModule,
 } from '../../../src/wasm/inlineWasm.js';
 import type { WasmModuleName } from '../../../src/wasm/inlineWasm.js';
+import { EnvironmentError, InvalidArgumentError } from '../../../src/errors.js';
 
 // ---------------------------------------------------------------------------
 // Valid WASM header (first 8 bytes of any valid .wasm binary)
@@ -190,6 +191,16 @@ describe('inlineWasm -- getInlineWasmBytes', () => {
     expect(() => getInlineWasmBytes('nonexistent')).toThrow(/Unknown WASM module: "nonexistent"/);
   });
 
+  it('throws InvalidArgumentError naming the module for an unknown module name', () => {
+    try {
+      getInlineWasmBytes('nonexistent');
+      expect.unreachable('an unknown module name was accepted');
+    } catch (error) {
+      expect(error).toBeInstanceOf(InvalidArgumentError);
+      expect(error).toMatchObject({ code: 'invalid-argument', argument: 'name' });
+    }
+  });
+
   it('throws descriptive error mentioning valid module names', () => {
     expect(() => getInlineWasmBytes('invalid')).toThrow(
       /Valid modules: libdeflate, png, ttf, shaping, jbig2, jpeg/,
@@ -243,6 +254,49 @@ describe('inlineWasm -- getInlineWasmBytes', () => {
 
     // 'png' is a valid name but not in the generated data
     expect(() => getInlineWasmBytes('png')).toThrow(/not available in the generated inline data/);
+  });
+
+  it('throws EnvironmentError (wasm) that the loader wrapper passes on unchanged', () => {
+    provideInlineWasmModule(createMockGeneratedModule(['libdeflate']));
+
+    try {
+      getInlineWasmBytes('png');
+      expect.unreachable('a module missing from the generated data was returned');
+    } catch (error) {
+      expect(error).toBeInstanceOf(EnvironmentError);
+      expect(error).toMatchObject({ code: 'environment-unavailable', reason: 'wasm' });
+      // Not wrapped a second time as "Failed to load inline WASM data".
+      expect((error as Error).message).toBe(
+        'WASM module "png" is not available in the generated inline data. ' +
+          'Run `pnpm run generate:wasm-inline` to regenerate.',
+      );
+    }
+  });
+
+  it('wraps a generated module that was never loaded in an EnvironmentError caused by InvalidStateError', async () => {
+    // The generated module is module-level state, so read it from a fresh copy of the module
+    // (and of the error classes it throws) that nothing has provided it to.
+    vi.resetModules();
+    try {
+      const fresh = await import('../../../src/wasm/inlineWasm.js');
+      const freshErrors = await import('../../../src/errors.js');
+      let thrown: unknown;
+      try {
+        fresh.getInlineWasmBytes('png');
+      } catch (error) {
+        thrown = error;
+      }
+      expect(thrown).toBeInstanceOf(freshErrors.EnvironmentError);
+      expect(thrown).toMatchObject({ code: 'environment-unavailable', reason: 'wasm' });
+      expect((thrown as Error).message).toContain(
+        'Failed to load inline WASM data for module "png"',
+      );
+      expect((thrown as Error).message).toContain('Inline WASM data not loaded');
+      expect((thrown as Error).cause).toBeInstanceOf(freshErrors.InvalidStateError);
+      expect((thrown as Error).cause).toMatchObject({ code: 'invalid-state' });
+    } finally {
+      vi.resetModules();
+    }
   });
 
   it('correctly decodes larger binary data', () => {

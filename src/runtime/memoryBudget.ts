@@ -32,7 +32,7 @@
  * Cloudflare Workers, and browsers.
  */
 
-import { PdfError, brandErrorClass } from '../errors.js';
+import { InvalidArgumentError, PdfError, brandErrorClass } from '../errors.js';
 
 // ---------------------------------------------------------------------------
 // Error
@@ -90,7 +90,7 @@ export interface MemoryBudgetOptions {
   /**
    * The ceiling, in bytes, that tracked usage may not exceed. Must be a
    * finite number greater than `0`. `NaN`, negative values, and `Infinity`
-   * are all rejected with a {@link TypeError} (see {@link createMemoryBudget}).
+   * are all rejected with an {@link InvalidArgumentError} (see {@link createMemoryBudget}).
    */
   limitBytes: number;
   /**
@@ -112,13 +112,14 @@ export interface MemoryBudgetOptions {
  * Validate a configured limit. The limit must be a finite number strictly
  * greater than zero; `NaN`, negative values, and `Infinity` are rejected.
  *
- * @throws {TypeError} If the limit is not a finite number `> 0`.
+ * @throws {InvalidArgumentError} If the limit is not a finite number `> 0`.
  */
 function assertValidLimit(limitBytes: number): void {
   if (typeof limitBytes !== 'number' || !Number.isFinite(limitBytes) || limitBytes <= 0) {
-    throw new TypeError(
+    throw new InvalidArgumentError(
       `MemoryBudget: limitBytes must be a finite number greater than 0, ` +
         `received ${String(limitBytes)}.`,
+      { argument: 'limitBytes' },
     );
   }
 }
@@ -129,13 +130,14 @@ function assertValidLimit(limitBytes: number): void {
  * {@link MemoryBudget.withAllocation}. The size must be a finite,
  * non-negative number; `NaN`, negative values, and `Infinity` are rejected.
  *
- * @throws {TypeError} If the size is not a finite number `>= 0`.
+ * @throws {InvalidArgumentError} If the size is not a finite number `>= 0`.
  */
 function assertValidSize(bytes: number, method: string): void {
   if (typeof bytes !== 'number' || !Number.isFinite(bytes) || bytes < 0) {
-    throw new TypeError(
+    throw new InvalidArgumentError(
       `MemoryBudget.${method}: bytes must be a finite, non-negative number, ` +
         `received ${String(bytes)}.`,
+      { argument: 'bytes' },
     );
   }
 }
@@ -162,7 +164,7 @@ export class MemoryBudget {
   /**
    * @param options - The {@link MemoryBudgetOptions}. `limitBytes` must be a
    *                  finite number greater than `0`.
-   * @throws {TypeError} If `limitBytes` is not a finite number `> 0`.
+   * @throws {InvalidArgumentError} If `limitBytes` is not a finite number `> 0`.
    */
   constructor(options: MemoryBudgetOptions) {
     assertValidLimit(options.limitBytes);
@@ -193,7 +195,7 @@ export class MemoryBudget {
    * tracked usage is left unchanged in that case.
    *
    * @param bytes - The size to reserve. Must be a finite number `>= 0`.
-   * @throws {TypeError} If `bytes` is negative, `NaN`, or `Infinity`.
+   * @throws {InvalidArgumentError} If `bytes` is negative, `NaN`, or `Infinity`.
    * @throws {MemoryBudgetExceededError} If the allocation would exceed the limit.
    */
   allocate(bytes: number): void {
@@ -212,7 +214,7 @@ export class MemoryBudget {
    *
    * @param bytes - The size to reserve. Must be a finite number `>= 0`.
    * @returns `true` if reserved, `false` if it would exceed the limit.
-   * @throws {TypeError} If `bytes` is negative, `NaN`, or `Infinity`.
+   * @throws {InvalidArgumentError} If `bytes` is negative, `NaN`, or `Infinity`.
    */
   tryAllocate(bytes: number): boolean {
     assertValidSize(bytes, 'tryAllocate');
@@ -228,7 +230,7 @@ export class MemoryBudget {
    * (or releasing more than was reserved) never produces a negative value.
    *
    * @param bytes - The size to release. Must be a finite number `>= 0`.
-   * @throws {TypeError} If `bytes` is negative, `NaN`, or `Infinity`.
+   * @throws {InvalidArgumentError} If `bytes` is negative, `NaN`, or `Infinity`.
    */
   release(bytes: number): void {
     assertValidSize(bytes, 'release');
@@ -251,7 +253,7 @@ export class MemoryBudget {
    * @param bytes - The size to reserve for the duration of `fn`.
    * @param fn    - The work to run while the reservation is held.
    * @returns Whatever `fn` returns.
-   * @throws {TypeError} If `bytes` is negative, `NaN`, or `Infinity`.
+   * @throws {InvalidArgumentError} If `bytes` is negative, `NaN`, or `Infinity`.
    * @throws {MemoryBudgetExceededError} If the reservation would exceed the limit.
    */
   withAllocation<T>(bytes: number, fn: () => T): T {
@@ -272,13 +274,13 @@ export class MemoryBudget {
  * Create a {@link MemoryBudget} with the given ceiling.
  *
  * The limit must be a finite number strictly greater than `0`; `NaN`,
- * negative values, and `Infinity` are all rejected with a {@link TypeError}.
+ * negative values, and `Infinity` are all rejected with an {@link InvalidArgumentError}.
  * (An infinite budget is intentionally disallowed: the whole point is to cap
  * untrusted input, and `Infinity` would silently disable the guard.)
  *
  * @param limitBytes - The ceiling, in bytes. Must be finite and `> 0`.
  * @returns A new {@link MemoryBudget}.
- * @throws {TypeError} If `limitBytes` is not a finite number `> 0`.
+ * @throws {InvalidArgumentError} If `limitBytes` is not a finite number `> 0`.
  */
 export function createMemoryBudget(limitBytes: number): MemoryBudget {
   return new MemoryBudget({ limitBytes });

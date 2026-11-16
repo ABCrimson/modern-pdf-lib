@@ -7,7 +7,7 @@
  * truncate. node:zlib is the oracle for the format.
  */
 
-import { describe, it, expect, afterEach, vi } from 'vitest';
+import { describe, it, expect, afterEach, beforeEach, vi } from 'vitest';
 import { deflateRawSync, deflateSync, inflateSync } from 'node:zlib';
 import {
   compressSync,
@@ -24,7 +24,19 @@ import {
   clampLevel,
 } from '../../../../src/codecs/internal/deflate.js';
 import type { CompressionEngine } from '../../../../src/codecs/internal/deflate.js';
-import { LibdeflateWasm } from '../../../../src/codecs/internal/libdeflateWasm.js';
+import {
+  LibdeflateWasm,
+  deflateSync as libdeflateSync,
+  dispose as disposeLibdeflate,
+  inflateSync as libdeflateInflateSync,
+  initDeflateWasm,
+} from '../../../../src/codecs/internal/libdeflateWasm.js';
+import { configureWasmLoader } from '../../../../src/wasm/loader.js';
+import {
+  EnvironmentError,
+  InvalidStateError,
+  MalformedInputError,
+} from '../../../../src/errors.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -428,5 +440,234 @@ describe('an output size hint never truncates', () => {
   it('decompress() returns every byte when the hint is too small', async () => {
     const zlib = bytes(deflateSync(original));
     expect(await decompress(zlib, 100, { preferEngine: 'fflate' })).toEqual(original);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Typed errors
+// ---------------------------------------------------------------------------
+
+/**
+ * A WebAssembly module with the exports of the libdeflate wrapper (`alloc`, `dealloc`, `compress`,
+ * `decompress`, `memory`) whose `compress` returns 0 and whose `decompress` returns -1: the two
+ * failures the wrapper reports, without the compiled crate.
+ */
+const FAILING_LIBDEFLATE = new Uint8Array([
+  0x00,
+  0x61,
+  0x73,
+  0x6d,
+  0x01,
+  0x00,
+  0x00,
+  0x00, // magic, version
+  0x01,
+  0x1c,
+  0x04, // type section: four types
+  0x60,
+  0x01,
+  0x7f,
+  0x01,
+  0x7f, // (i32) -> i32
+  0x60,
+  0x02,
+  0x7f,
+  0x7f,
+  0x00, // (i32, i32) -> ()
+  0x60,
+  0x05,
+  0x7f,
+  0x7f,
+  0x7f,
+  0x7f,
+  0x7f,
+  0x01,
+  0x7f, // (i32 x5) -> i32
+  0x60,
+  0x04,
+  0x7f,
+  0x7f,
+  0x7f,
+  0x7f,
+  0x01,
+  0x7f, // (i32 x4) -> i32
+  0x03,
+  0x05,
+  0x04,
+  0x00,
+  0x01,
+  0x02,
+  0x03, // function section: types 0, 1, 2, 3
+  0x05,
+  0x03,
+  0x01,
+  0x00,
+  0x01, // memory section: one memory of one page
+  0x07,
+  0x34,
+  0x05, // export section: five exports
+  0x05,
+  0x61,
+  0x6c,
+  0x6c,
+  0x6f,
+  0x63,
+  0x00,
+  0x00, // "alloc": function 0
+  0x07,
+  0x64,
+  0x65,
+  0x61,
+  0x6c,
+  0x6c,
+  0x6f,
+  0x63,
+  0x00,
+  0x01, // "dealloc": function 1
+  0x08,
+  0x63,
+  0x6f,
+  0x6d,
+  0x70,
+  0x72,
+  0x65,
+  0x73,
+  0x73,
+  0x00,
+  0x02, // "compress": function 2
+  0x0a,
+  0x64,
+  0x65,
+  0x63,
+  0x6f,
+  0x6d,
+  0x70,
+  0x72,
+  0x65,
+  0x73,
+  0x73,
+  0x00,
+  0x03, // "decompress": 3
+  0x06,
+  0x6d,
+  0x65,
+  0x6d,
+  0x6f,
+  0x72,
+  0x79,
+  0x02,
+  0x00, // "memory": memory 0
+  0x0a,
+  0x14,
+  0x04, // code section: four bodies
+  0x05,
+  0x00,
+  0x41,
+  0x80,
+  0x08,
+  0x0b, // alloc: returns 1024
+  0x02,
+  0x00,
+  0x0b, // dealloc: does nothing
+  0x04,
+  0x00,
+  0x41,
+  0x00,
+  0x0b, // compress: returns 0
+  0x04,
+  0x00,
+  0x41,
+  0x7f,
+  0x0b, // decompress: returns -1
+]);
+
+describe('deflate typed errors', () => {
+  // A failed initDeflateWasm() is not retried until dispose(), so start every test from a clean module.
+  beforeEach(disposeLibdeflate);
+
+  afterEach(() => {
+    disposeLibdeflate();
+    configureWasmLoader({});
+    vi.unstubAllGlobals();
+  });
+
+  it('getCompressor({ preferEngine: "libdeflate" }) rejects with EnvironmentError (wasm) without the module', async () => {
+    configureWasmLoader({ disableWasm: true });
+
+    const error = await getCompressor({ preferEngine: 'libdeflate' }).then(
+      () => expect.unreachable('an engine was returned although WASM is disabled'),
+      (reason: unknown) => reason,
+    );
+    expect(error).toBeInstanceOf(EnvironmentError);
+    expect(error).toMatchObject({ code: 'environment-unavailable', reason: 'wasm' });
+    expect((error as Error).message).toBe(
+      'libdeflate WASM engine requested but not available. ' +
+        'Ensure the WASM module is built and accessible.',
+    );
+  });
+
+  it('getCompressor({ preferEngine: "browser" }) rejects with EnvironmentError (runtime-api) without CompressionStream', async () => {
+    vi.stubGlobal('CompressionStream', undefined);
+
+    const error = await getCompressor({ preferEngine: 'browser' }).then(
+      () => expect.unreachable('an engine was returned although CompressionStream is missing'),
+      (reason: unknown) => reason,
+    );
+    expect(error).toBeInstanceOf(EnvironmentError);
+    expect(error).toMatchObject({ code: 'environment-unavailable', reason: 'runtime-api' });
+    expect((error as Error).message).toBe(
+      'Browser CompressionStream requested but not available in this runtime.',
+    );
+  });
+
+  it('the libdeflate helpers throw InvalidStateError before initDeflateWasm() ran', () => {
+    for (const call of [
+      () => libdeflateSync(new Uint8Array([1, 2, 3])),
+      () => libdeflateInflateSync(new Uint8Array([1, 2, 3])),
+    ]) {
+      expect(call).toThrow(InvalidStateError);
+      expect(call).toThrow('libdeflate WASM not initialized. Call initDeflateWasm() first.');
+    }
+  });
+
+  it('initDeflateWasm() rejects with EnvironmentError (wasm) caused by the compile error', async () => {
+    const error = await initDeflateWasm(new Uint8Array([0xde, 0xad, 0xbe, 0xef])).then(
+      () => expect.unreachable('invalid WASM bytes were accepted'),
+      (reason: unknown) => reason,
+    );
+    expect(error).toBeInstanceOf(EnvironmentError);
+    expect(error).toMatchObject({ code: 'environment-unavailable', reason: 'wasm' });
+    expect((error as Error).message).toContain('Failed to initialize libdeflate WASM: ');
+    expect((error as Error).cause).toBeInstanceOf(Error);
+  });
+
+  it('a compress that reports no output throws EnvironmentError (wasm)', async () => {
+    await initDeflateWasm(FAILING_LIBDEFLATE);
+
+    try {
+      libdeflateSync(new Uint8Array([1, 2, 3]));
+      expect.unreachable('a failed compression returned data');
+    } catch (error) {
+      expect(error).toBeInstanceOf(EnvironmentError);
+      expect(error).toMatchObject({ code: 'environment-unavailable', reason: 'wasm' });
+      expect((error as Error).message).toBe(
+        'libdeflate compression failed (returned zero or negative size)',
+      );
+    }
+  });
+
+  it('a decompress that reports an error throws MalformedInputError', async () => {
+    await initDeflateWasm(FAILING_LIBDEFLATE);
+
+    try {
+      libdeflateInflateSync(new Uint8Array([1, 2, 3]));
+      expect.unreachable('a failed decompression returned data');
+    } catch (error) {
+      expect(error).toBeInstanceOf(MalformedInputError);
+      expect(error).toMatchObject({ code: 'malformed-input', format: 'other' });
+      expect((error as Error).message).toBe(
+        'libdeflate decompression failed. The input may be corrupt or the output buffer may be too small.',
+      );
+    }
   });
 });

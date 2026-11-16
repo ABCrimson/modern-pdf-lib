@@ -25,7 +25,7 @@ import {
   assembleTiles,
 } from '../../../../src/codecs/jpeg2000/jpeg2000Tiles.js';
 import type { TileGridInfo, TileData } from '../../../../src/codecs/jpeg2000/jpeg2000Tiles.js';
-import { UnsupportedFilterError } from '../../../../src/errors.js';
+import { MalformedInputError, UnsupportedFilterError } from '../../../../src/errors.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -556,5 +556,29 @@ describe('JPEG2000 tile entries: the error carries its class, code and filter', 
         filter: 'JPXDecode',
       }),
     );
+  });
+});
+
+describe('parseTileInfo: input that breaks the codestream rules is a MalformedInputError', () => {
+  it.each([
+    [
+      'no SIZ marker',
+      new Uint8Array([0xff, 0x4f, 0x00, 0x00]),
+      'JPEG2000 Tiles: SIZ marker (0xFF51) not found',
+    ],
+    [
+      'a SIZ segment cut short',
+      new Uint8Array([0xff, 0x4f, 0xff, 0x51, 0x00, 0x0a, 0x00, 0x00]),
+      'JPEG2000 Tiles: SIZ marker segment is truncated',
+    ],
+  ])('%s', (_name, data, message) => {
+    let caught: unknown;
+    try {
+      parseTileInfo(data);
+    } catch (err) {
+      caught = err;
+    }
+    expect(caught).toBeInstanceOf(MalformedInputError);
+    expect(caught).toMatchObject({ code: 'malformed-input', format: 'other', message });
   });
 });

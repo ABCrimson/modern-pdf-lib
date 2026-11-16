@@ -24,6 +24,8 @@
  * @packageDocumentation
  */
 
+import { EnvironmentError, InvalidArgumentError, InvalidStateError } from '../errors.js';
+
 // ---------------------------------------------------------------------------
 // Known module names
 // ---------------------------------------------------------------------------
@@ -74,8 +76,9 @@ const weakCache = new Map<string, WeakRef<Uint8Array>>();
  *
  * @param name  The WASM module name (e.g., `'libdeflate'`, `'png'`).
  * @returns     The decoded WASM binary as a `Uint8Array`.
- * @throws      If the module name is unknown or the generated file does
- *              not contain data for the requested module.
+ * @throws {InvalidArgumentError} If the module name is unknown.
+ * @throws {EnvironmentError} If the generated file is not loaded or does not
+ *              contain data for the requested module.
  *
  * @example
  * ```ts
@@ -86,8 +89,9 @@ const weakCache = new Map<string, WeakRef<Uint8Array>>();
 export function getInlineWasmBytes(name: string): Uint8Array {
   // 1. Validate the module name
   if (!isValidModuleName(name)) {
-    throw new Error(
+    throw new InvalidArgumentError(
       `Unknown WASM module: "${name}". ` + `Valid modules: ${WASM_MODULE_NAMES.join(', ')}`,
+      { argument: 'name' },
     );
   }
 
@@ -266,7 +270,7 @@ function requireGenerated(): GeneratedModule {
     // data module with no side effects.
     // We use a trick: the generated module is imported and cached
     // by the caller using dynamic import or a pre-loaded reference.
-    throw new Error(
+    throw new InvalidStateError(
       'Inline WASM data not loaded. ' +
         'Call loadInlineWasmModule() first, or run `pnpm run generate:wasm-inline`.',
     );
@@ -279,28 +283,30 @@ function requireGenerated(): GeneratedModule {
 /**
  * Extract the base64 string for a given module name from the generated data.
  *
- * @throws If the generated data is not loaded or does not contain the module.
+ * @throws {EnvironmentError} If the generated data is not loaded or does not contain the module.
  */
 function getBase64Data(name: string): string {
   try {
     const generated = requireGenerated();
     const moduleData = generated.INLINE_WASM_MODULES[name];
     if (!moduleData) {
-      throw new Error(
+      throw new EnvironmentError(
         `WASM module "${name}" is not available in the generated inline data. ` +
           `Run \`pnpm run generate:wasm-inline\` to regenerate.`,
+        { reason: 'wasm' },
       );
     }
     return moduleData;
   } catch (err) {
-    if (err instanceof Error && err.message.includes('is not available')) {
+    if (err instanceof EnvironmentError) {
       throw err;
     }
-    throw new Error(
+    throw new EnvironmentError(
       `Failed to load inline WASM data for module "${name}". ` +
         `The generated file may not exist. ` +
         `Run \`pnpm run generate:wasm-inline\` to generate it. ` +
         `Original error: ${err instanceof Error ? err.message : String(err)}`,
+      { reason: 'wasm', cause: err },
     );
   }
 }

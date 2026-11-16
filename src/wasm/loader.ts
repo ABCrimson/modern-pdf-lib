@@ -19,6 +19,7 @@
  */
 
 import { hasInlineWasmData, getInlineWasmBytes } from './inlineWasm.js';
+import { EnvironmentError, InvalidArgumentError } from '../errors.js';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -220,8 +221,9 @@ export function getWasmLoaderConfig(): Readonly<WasmLoaderConfig> {
 async function loadViaFetch(url: string): Promise<Uint8Array> {
   const response = await fetch(url);
   if (!response.ok) {
-    throw new Error(
+    throw new EnvironmentError(
       `Failed to fetch WASM module: ${response.status} ${response.statusText} (${url})`,
+      { reason: 'network' },
     );
   }
   const buffer = await response.arrayBuffer();
@@ -249,8 +251,9 @@ async function loadViaNodeFs(filePath: string): Promise<Uint8Array> {
     // but we convert to a plain Uint8Array to avoid Buffer dependency
     return new Uint8Array(buffer.buffer, buffer.byteOffset, buffer.byteLength);
   } catch (err) {
-    throw new Error(
+    throw new EnvironmentError(
       `Failed to load WASM module from filesystem: ${filePath} -- ${err instanceof Error ? err.message : String(err)}`,
+      { reason: 'wasm', cause: err },
     );
   }
 }
@@ -277,8 +280,9 @@ function resolveModulePath(name: string, config: WasmLoaderConfig, runtime: Runt
   // 2. Base path + default filename
   const filename = DEFAULT_FILENAMES[name];
   if (!filename) {
-    throw new Error(
+    throw new InvalidArgumentError(
       `Unknown WASM module: "${name}". Known modules: ${Object.keys(DEFAULT_FILENAMES).join(', ')}`,
+      { argument: 'name' },
     );
   }
 
@@ -328,10 +332,11 @@ function resolveModulePath(name: string, config: WasmLoaderConfig, runtime: Runt
     }
 
     case 'workerd':
-      throw new Error(
+      throw new EnvironmentError(
         `Cannot auto-resolve WASM path in Workers/Edge runtime. ` +
           `Provide WASM bytes via configureWasmLoader({ moduleBytes: { ${name}: bytes } }) ` +
           `or use modulePaths configuration.`,
+        { reason: 'wasm' },
       );
 
     default:
@@ -354,7 +359,8 @@ function resolveModulePath(name: string, config: WasmLoaderConfig, runtime: Runt
  *
  * @param name - Module name. One of: `'libdeflate'`, `'png'`, `'ttf'`, `'shaping'`, `'jbig2'`.
  * @returns      The raw WASM bytes.
- * @throws If the module cannot be loaded in the current runtime.
+ * @throws {InvalidArgumentError} If the module name is not one the loader knows.
+ * @throws {EnvironmentError} If the module cannot be loaded in the current runtime, or WASM is disabled.
  *
  * @example
  * ```ts
@@ -369,8 +375,9 @@ function resolveModulePath(name: string, config: WasmLoaderConfig, runtime: Runt
 export async function loadWasmModule(name: string): Promise<Uint8Array> {
   // 0. Check if WASM is globally disabled
   if (globalConfig.disableWasm) {
-    throw new Error(
+    throw new EnvironmentError(
       'WASM loading is disabled via configureWasmLoader({ disableWasm: true }). Using pure-JS fallbacks.',
+      { reason: 'wasm' },
     );
   }
 
@@ -422,9 +429,10 @@ export async function loadWasmModule(name: string): Promise<Uint8Array> {
 
     case 'workerd':
       // Should have been caught in resolveModulePath, but just in case
-      throw new Error(
+      throw new EnvironmentError(
         `WASM module "${name}" cannot be auto-loaded in Workers/Edge. ` +
           `Provide bytes via configureWasmLoader().`,
+        { reason: 'wasm' },
       );
 
     default:
@@ -458,8 +466,9 @@ export async function loadWasmModule(name: string): Promise<Uint8Array> {
 export async function loadWasmModuleStreaming(name: string): Promise<WebAssembly.Module> {
   // Check if WASM is globally disabled
   if (globalConfig.disableWasm) {
-    throw new Error(
+    throw new EnvironmentError(
       'WASM loading is disabled via configureWasmLoader({ disableWasm: true }). Using pure-JS fallbacks.',
+      { reason: 'wasm' },
     );
   }
 
@@ -515,8 +524,9 @@ export async function instantiateWasmModuleStreaming(
 ): Promise<WebAssembly.Instance> {
   // Check if WASM is globally disabled
   if (globalConfig.disableWasm) {
-    throw new Error(
+    throw new EnvironmentError(
       'WASM loading is disabled via configureWasmLoader({ disableWasm: true }). Using pure-JS fallbacks.',
+      { reason: 'wasm' },
     );
   }
 

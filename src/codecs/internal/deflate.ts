@@ -30,6 +30,7 @@
  */
 
 import { inflateFlate } from './pdfFlate.js';
+import { EnvironmentError } from '../../errors.js';
 
 // ---------------------------------------------------------------------------
 // Public interfaces
@@ -294,9 +295,10 @@ export async function getCompressor(options?: CompressionOptions): Promise<Compr
     case 'libdeflate': {
       const engine = await tryLoadLibdeflate();
       if (engine) return engine;
-      throw new Error(
+      throw new EnvironmentError(
         'libdeflate WASM engine requested but not available. ' +
           'Ensure the WASM module is built and accessible.',
+        { reason: 'wasm' },
       );
     }
 
@@ -307,7 +309,10 @@ export async function getCompressor(options?: CompressionOptions): Promise<Compr
       if (isBrowserCompressionAvailable()) {
         return new BrowserDeflateEngine();
       }
-      throw new Error('Browser CompressionStream requested but not available in this runtime.');
+      throw new EnvironmentError(
+        'Browser CompressionStream requested but not available in this runtime.',
+        { reason: 'runtime-api' },
+      );
     }
 
     case 'auto':

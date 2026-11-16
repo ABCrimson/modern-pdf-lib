@@ -14,7 +14,7 @@ import type {
   Jpeg2000Info,
 } from '../../../../src/codecs/jpeg2000/jpeg2000Decode.js';
 import { decodeStream } from '../../../../src/codecs/streamDecode.js';
-import { UnsupportedFilterError } from '../../../../src/errors.js';
+import { MalformedInputError, UnsupportedFilterError } from '../../../../src/errors.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -943,5 +943,40 @@ describe('decodeJpeg2000: the error carries its class, code and filter', () => {
         filter: 'JPXDecode',
       }),
     );
+  });
+});
+
+describe('getJpeg2000Info: input that breaks the codestream rules is a MalformedInputError', () => {
+  const soc = buildSOCMarker();
+  const eoc = buildEOCMarker();
+  const siz = buildSIZMarker(64, 64, 1, 8);
+
+  it.each([
+    ['a codestream of one byte', [0xff], 'JPEG2000: codestream too short'],
+    [
+      'a codestream that does not start with SOC',
+      [0x00, 0x00],
+      'JPEG2000: expected SOC marker (0xFF4F), got 0x0000',
+    ],
+    ['a codestream with no SIZ segment', [...soc, ...eoc], 'JPEG2000: SIZ marker not found'],
+    [
+      'a codestream with no COD segment',
+      [...soc, ...siz, ...eoc],
+      'JPEG2000: COD marker not found',
+    ],
+    [
+      'a JP2 file with no codestream box',
+      [...buildJP2Signature(), ...buildFileTypeBox()],
+      'JPEG2000: no contiguous codestream box (jp2c) found',
+    ],
+  ] as const)('%s', (_name, bytes, message) => {
+    let caught: unknown;
+    try {
+      getJpeg2000Info(new Uint8Array(bytes));
+    } catch (err) {
+      caught = err;
+    }
+    expect(caught).toBeInstanceOf(MalformedInputError);
+    expect(caught).toMatchObject({ code: 'malformed-input', format: 'other', message });
   });
 });
