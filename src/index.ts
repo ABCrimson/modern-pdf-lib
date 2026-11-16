@@ -952,12 +952,7 @@ export type { ImageFormat } from './assets/image/formatDetect.js';
 // WebP optimization (decode → JPEG/PNG re-encode)
 // ---------------------------------------------------------------------------
 
-export {
-  recompressWebP,
-  webpToJpeg,
-  webpToPng,
-  encodePngFromPixels,
-} from './assets/image/webp/webpOptimize.js';
+export { recompressWebP, encodePngFromPixels } from './assets/image/webp/webpOptimize.js';
 
 // ---------------------------------------------------------------------------
 // TIFF direct embedding

@@ -1,16 +1,13 @@
 /**
  * Tests for WebP optimization and conversion utilities.
  *
- * Covers recompressWebP(), webpToJpeg(), webpToPng(), and encodePngFromPixels()
- * from the webpOptimize module.
+ * Covers recompressWebP() and encodePngFromPixels() from the webpOptimize module.
  */
 
 import { crc32, inflateSync } from 'node:zlib';
 import { describe, it, expect } from 'vitest';
 import {
   recompressWebP,
-  webpToJpeg,
-  webpToPng,
   encodePngFromPixels,
 } from '../../../../../src/assets/image/webp/webpOptimize.js';
 
@@ -143,48 +140,6 @@ describe('recompressWebP', () => {
     // Quality 200 (clamped to 100)
     const veryHigh = recompressWebP(pixels, 8, 8, 200);
     expect(veryHigh[0]).toBe(0xff);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// webpToJpeg
-// ---------------------------------------------------------------------------
-
-describe('webpToJpeg', () => {
-  it('throws for invalid WebP data', () => {
-    const notWebP = new Uint8Array([0x00, 0x01, 0x02, 0x03]);
-    expect(() => webpToJpeg(notWebP)).toThrow('Invalid WebP');
-  });
-
-  it('throws for valid WebP header but requires decoder', () => {
-    // Valid WebP RIFF header but no actual decoder
-    const webpHeader = new Uint8Array([
-      0x52, 0x49, 0x46, 0x46, 0x00, 0x00, 0x00, 0x00, 0x57, 0x45, 0x42, 0x50,
-    ]);
-    expect(() => webpToJpeg(webpHeader)).toThrow('requires the WebP decoder module');
-  });
-
-  it('throws for too-short data', () => {
-    const short = new Uint8Array([0x52, 0x49, 0x46, 0x46]);
-    expect(() => webpToJpeg(short)).toThrow('Invalid WebP');
-  });
-});
-
-// ---------------------------------------------------------------------------
-// webpToPng
-// ---------------------------------------------------------------------------
-
-describe('webpToPng', () => {
-  it('throws for invalid WebP data', () => {
-    const notWebP = new Uint8Array([0xff, 0xd8, 0xff, 0xe0]);
-    expect(() => webpToPng(notWebP)).toThrow('Invalid WebP');
-  });
-
-  it('throws for valid WebP header but requires decoder', () => {
-    const webpHeader = new Uint8Array([
-      0x52, 0x49, 0x46, 0x46, 0x00, 0x00, 0x00, 0x00, 0x57, 0x45, 0x42, 0x50,
-    ]);
-    expect(() => webpToPng(webpHeader)).toThrow('requires the WebP decoder module');
   });
 });
 

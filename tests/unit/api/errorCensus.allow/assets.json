@@ -455,26 +455,7 @@
   {
     "file": "src/assets/image/webp/webpOptimize.ts",
     "kind": "Error",
-    "message": "Invalid WebP data: missing RIFF/WEBP header",
-    "target": "MalformedInputError",
-    "count": 2
-  },
-  {
-    "file": "src/assets/image/webp/webpOptimize.ts",
-    "kind": "Error",
     "message": "WebP pixel data length mismatch: got ${} bytes for ${}x${} image (expected ${}, ${}, or ${})",
     "target": "InvalidArgumentError"
-  },
-  {
-    "file": "src/assets/image/webp/webpOptimize.ts",
-    "kind": "Error",
-    "message": "webpToJpeg requires the WebP decoder module (webpDecode.ts). Use recompressWebP() with pre-decoded pixel data instead.",
-    "target": "UnsupportedFeatureError"
-  },
-  {
-    "file": "src/assets/image/webp/webpOptimize.ts",
-    "kind": "Error",
-    "message": "webpToPng requires the WebP decoder module (webpDecode.ts). Use the WebP decoder directly and then encodePngFromPixels().",
-    "target": "UnsupportedFeatureError"
   }
 ]
