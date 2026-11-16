@@ -914,12 +914,19 @@ export function layoutParagraph(
  * draws column rules (vertical lines between columns) and balances
  * column heights.
  *
+ * Text that runs past the first column is carried on as plain text: the
+ * next one lays it out in Helvetica at 12 points, without the fonts, sizes
+ * and colours of its spans, so a `FontRef` span whose text Helvetica cannot
+ * encode throws {@link UnencodableTextError} there.
+ *
  * @param spans           The text content.
  * @param frame           The outer frame containing all columns.
  * @param columnOptions   Number of columns, gap, rule, balancing.
  * @param paragraphOptions  Paragraph-level options.
  * @param measureFn       Optional text measurement function.
  * @returns               A combined {@link TextLayoutResult}.
+ * @throws {UnencodableTextError} At the first character of a word that its
+ *   font cannot encode.
  */
 export function layoutColumns(
   spans: TextSpan[] | string,
@@ -1054,11 +1061,18 @@ export function layoutColumns(
  * its own {@link TextLayoutResult}. Useful for flowing a long body of
  * text across multiple pages.
  *
+ * Text that runs past the first frame is carried on as plain text: the
+ * next one lays it out in Helvetica at 12 points, without the fonts, sizes
+ * and colours of its spans, so a `FontRef` span whose text Helvetica cannot
+ * encode throws {@link UnencodableTextError} there.
+ *
  * @param spans      The text content.
  * @param frames     Array of frames to fill in order.
  * @param options    Paragraph-level options.
  * @param measureFn  Optional text measurement function.
  * @returns          An array of results, one per frame used.
+ * @throws {UnencodableTextError} At the first character of a word that its
+ *   font cannot encode.
  */
 export function layoutTextFlow(
   spans: TextSpan[] | string,
