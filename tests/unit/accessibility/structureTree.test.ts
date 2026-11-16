@@ -179,7 +179,7 @@ describe('PdfStructureElement', () => {
     // Check /Alt
     const altVal = result.dict.get('/Alt');
     expect(altVal).toBeDefined();
-    expect((altVal as PdfString).value).toBe('Hello');
+    expect((altVal as PdfString).toText()).toBe('Hello');
 
     // Check /K (MCID)
     const kVal = result.dict.get('/K');
@@ -377,7 +377,7 @@ describe('PdfStructureTree', () => {
       const kidDict = new PdfDict();
       kidDict.set('/Type', PdfName.of('StructElem'));
       kidDict.set('/S', PdfName.of('P'));
-      kidDict.set('/Alt', PdfString.literal('Paragraph'));
+      kidDict.set('/Alt', PdfString.fromText('Paragraph'));
       kidDict.set('/K', PdfNumber.of(0));
 
       const rootDict = new PdfDict();
@@ -417,7 +417,7 @@ describe('PdfStructureTree', () => {
       const kidDict = new PdfDict();
       kidDict.set('/Type', PdfName.of('StructElem'));
       kidDict.set('/S', PdfName.of('Span'));
-      kidDict.set('/Lang', PdfString.literal('en'));
+      kidDict.set('/Lang', PdfString.fromText('en'));
 
       const kidRef = PdfRef.of(10);
 

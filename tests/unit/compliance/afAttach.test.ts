@@ -139,7 +139,7 @@ describe('registerEmbeddedFile', () => {
     expect(efNames.length).toBe(2);
     const nameEntry = efNames.items[0];
     expect(nameEntry).toBeInstanceOf(PdfString);
-    expect((nameEntry as PdfString).value).toBe('data.xml');
+    expect((nameEntry as PdfString).toText()).toBe('data.xml');
     expect(efNames.items[1]).toBe(ref);
   });
 
@@ -162,9 +162,9 @@ describe('registerEmbeddedFile', () => {
     expect(efNames.length).toBe(6);
 
     const sortedNames = [
-      (efNames.items[0] as PdfString).value,
-      (efNames.items[2] as PdfString).value,
-      (efNames.items[4] as PdfString).value,
+      (efNames.items[0] as PdfString).toText(),
+      (efNames.items[2] as PdfString).toText(),
+      (efNames.items[4] as PdfString).toText(),
     ];
     expect(sortedNames).toEqual(['apple.xml', 'mango.xml', 'zebra.xml']);
 

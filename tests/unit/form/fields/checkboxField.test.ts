@@ -28,7 +28,7 @@ function makeCheckbox(
   const onValue = options.onValue ?? 'Yes';
   const dict = new PdfDict();
   dict.set('/FT', PdfName.of('Btn'));
-  dict.set('/T', PdfString.literal(name));
+  dict.set('/T', PdfString.fromText(name));
   dict.set('/Rect', PdfArray.fromNumbers(options.rect ?? [0, 0, 20, 20]));
   dict.set('/V', PdfName.of(checked ? onValue : 'Off'));
   dict.set('/AS', PdfName.of(checked ? onValue : 'Off'));

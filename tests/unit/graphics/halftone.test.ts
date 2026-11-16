@@ -311,7 +311,7 @@ describe('nameHalftone()', () => {
     expect(named).toBe(ht);
     const hn = ht.get('/HalftoneName');
     expect(hn).toBeInstanceOf(PdfString);
-    expect((hn as PdfString).value).toBe('MyScreen');
+    expect((hn as PdfString).toText()).toBe('MyScreen');
   });
 
   it('leaves the halftone untouched when no name is given', () => {

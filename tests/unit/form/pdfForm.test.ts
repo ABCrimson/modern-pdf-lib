@@ -32,10 +32,10 @@ import { NoSuchFieldError, UnexpectedFieldTypeError } from '../../../src/errors.
 function makeTextFieldDict(name: string, value?: string): PdfDict {
   const dict = new PdfDict();
   dict.set('/FT', PdfName.of('Tx'));
-  dict.set('/T', PdfString.literal(name));
+  dict.set('/T', PdfString.fromText(name));
   dict.set('/Rect', PdfArray.fromNumbers([0, 0, 200, 30]));
   if (value !== undefined) {
-    dict.set('/V', PdfString.literal(value));
+    dict.set('/V', PdfString.fromText(value));
   }
   return dict;
 }
@@ -44,7 +44,7 @@ function makeTextFieldDict(name: string, value?: string): PdfDict {
 function makeCheckboxDict(name: string, checked: boolean): PdfDict {
   const dict = new PdfDict();
   dict.set('/FT', PdfName.of('Btn'));
-  dict.set('/T', PdfString.literal(name));
+  dict.set('/T', PdfString.fromText(name));
   dict.set('/Rect', PdfArray.fromNumbers([0, 0, 20, 20]));
   dict.set('/V', PdfName.of(checked ? 'Yes' : 'Off'));
   dict.set('/AS', PdfName.of(checked ? 'Yes' : 'Off'));
@@ -56,11 +56,11 @@ function makeDropdownDict(name: string, options: string[], selected?: string): P
   const dict = new PdfDict();
   dict.set('/FT', PdfName.of('Ch'));
   dict.set('/Ff', PdfNumber.of(FieldFlags.Combo));
-  dict.set('/T', PdfString.literal(name));
+  dict.set('/T', PdfString.fromText(name));
   dict.set('/Rect', PdfArray.fromNumbers([0, 0, 200, 30]));
-  dict.set('/Opt', PdfArray.of(options.map((o) => PdfString.literal(o))));
+  dict.set('/Opt', PdfArray.of(options.map((o) => PdfString.fromText(o))));
   if (selected !== undefined) {
-    dict.set('/V', PdfString.literal(selected));
+    dict.set('/V', PdfString.fromText(selected));
   }
   return dict;
 }
@@ -69,9 +69,9 @@ function makeDropdownDict(name: string, options: string[], selected?: string): P
 function makeListboxDict(name: string, options: string[]): PdfDict {
   const dict = new PdfDict();
   dict.set('/FT', PdfName.of('Ch'));
-  dict.set('/T', PdfString.literal(name));
+  dict.set('/T', PdfString.fromText(name));
   dict.set('/Rect', PdfArray.fromNumbers([0, 0, 200, 100]));
-  dict.set('/Opt', PdfArray.of(options.map((o) => PdfString.literal(o))));
+  dict.set('/Opt', PdfArray.of(options.map((o) => PdfString.fromText(o))));
   return dict;
 }
 
@@ -80,10 +80,10 @@ function makeButtonDict(name: string): PdfDict {
   const dict = new PdfDict();
   dict.set('/FT', PdfName.of('Btn'));
   dict.set('/Ff', PdfNumber.of(FieldFlags.Pushbutton));
-  dict.set('/T', PdfString.literal(name));
+  dict.set('/T', PdfString.fromText(name));
   dict.set('/Rect', PdfArray.fromNumbers([0, 0, 100, 30]));
   const mk = new PdfDict();
-  mk.set('/CA', PdfString.literal('Submit'));
+  mk.set('/CA', PdfString.fromText('Submit'));
   dict.set('/MK', mk);
   return dict;
 }
@@ -92,7 +92,7 @@ function makeButtonDict(name: string): PdfDict {
 function makeSignatureDict(name: string, signed: boolean): PdfDict {
   const dict = new PdfDict();
   dict.set('/FT', PdfName.of('Sig'));
-  dict.set('/T', PdfString.literal(name));
+  dict.set('/T', PdfString.fromText(name));
   dict.set('/Rect', PdfArray.fromNumbers([0, 0, 200, 50]));
   if (signed) {
     const sigDict = new PdfDict();

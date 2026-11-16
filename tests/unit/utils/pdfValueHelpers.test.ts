@@ -154,7 +154,7 @@ describe('asNumber', () => {
   });
 
   it('returns undefined for PdfString', () => {
-    const str = PdfString.literal('hello');
+    const str = PdfString.fromText('hello');
     expect(asNumber(str)).toBeUndefined();
   });
 });

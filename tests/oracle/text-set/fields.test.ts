@@ -45,7 +45,7 @@ function catalogFieldDoc(values: readonly PdfString[]): PdfDocument {
   const refs = values.map((value, i) => {
     const field = new PdfDict();
     field.set('/FT', PdfName.of('Tx'));
-    field.set('/T', PdfString.literal(NAMES[i] ?? ''));
+    field.set('/T', PdfString.fromText(NAMES[i] ?? ''));
     field.set('/V', value);
     field.set('/Type', PdfName.of('Annot'));
     field.set('/Subtype', PdfName.of('Widget'));
@@ -91,7 +91,7 @@ async function expectFieldValues(
 
 describe('text field values read back by pdf.js and qpdf', () => {
   test('dictionary level: field values written as PDF text strings read back through the catalog route', async () => {
-    const values = TEXTS.map((text) => PdfString.hexFromBytes(encodeTextString(text)));
+    const values = TEXTS.map((text) => PdfString.fromBytes(encodeTextString(text), 'hex'));
     await expectFieldValues(await cleanSave(catalogFieldDoc(values)), NAMES, TEXTS);
   });
 

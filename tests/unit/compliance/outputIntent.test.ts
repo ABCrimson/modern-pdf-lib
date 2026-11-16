@@ -223,7 +223,7 @@ describe('buildOutputIntent', () => {
 
     const oci = dict.get('/OutputConditionIdentifier');
     expect(oci).toBeInstanceOf(PdfString);
-    expect((oci as PdfString).value).toBe('sRGB IEC61966-2.1');
+    expect((oci as PdfString).toText()).toBe('sRGB IEC61966-2.1');
   });
 
   it('creates OutputIntent dict with default RegistryName', () => {
@@ -233,7 +233,7 @@ describe('buildOutputIntent', () => {
 
     const rn = dict.get('/RegistryName');
     expect(rn).toBeInstanceOf(PdfString);
-    expect((rn as PdfString).value).toBe('http://www.color.org');
+    expect((rn as PdfString).toText()).toBe('http://www.color.org');
   });
 
   it('creates OutputIntent dict with /DestOutputProfile reference', () => {
@@ -300,9 +300,9 @@ describe('buildOutputIntent', () => {
     const ref = buildOutputIntent(registry, options);
     const dict = registry.resolve(ref) as PdfDict;
 
-    expect((dict.get('/OutputCondition') as PdfString).value).toBe('FOGRA39');
-    expect((dict.get('/OutputConditionIdentifier') as PdfString).value).toBe('FOGRA39L');
-    expect((dict.get('/RegistryName') as PdfString).value).toBe('http://www.fogra.org');
+    expect((dict.get('/OutputCondition') as PdfString).toText()).toBe('FOGRA39');
+    expect((dict.get('/OutputConditionIdentifier') as PdfString).toText()).toBe('FOGRA39L');
+    expect((dict.get('/RegistryName') as PdfString).toText()).toBe('http://www.fogra.org');
   });
 
   it('normalizes subtype without leading slash', () => {

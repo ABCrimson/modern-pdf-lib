@@ -14,7 +14,7 @@ import type { JsonValue } from '../helpers/budget.js';
 /** An outline item with a title and optional /First and /Next links. */
 function item(first?: number, next?: number): PdfDict {
   const dict = new PdfDict();
-  dict.set('/Title', PdfString.literal('item'));
+  dict.set('/Title', PdfString.fromText('item'));
   if (first !== undefined) dict.set('/First', PdfRef.of(first));
   if (next !== undefined) dict.set('/Next', PdfRef.of(next));
   return dict;

@@ -34,12 +34,12 @@ function makeDropdown(
     ff |= FieldFlags.Edit;
   }
   dict.set('/Ff', PdfNumber.of(ff));
-  dict.set('/T', PdfString.literal(name));
+  dict.set('/T', PdfString.fromText(name));
   dict.set('/Rect', PdfArray.fromNumbers(opts.rect ?? [0, 0, 200, 30]));
-  dict.set('/Opt', PdfArray.of(options.map((o) => PdfString.literal(o))));
+  dict.set('/Opt', PdfArray.of(options.map((o) => PdfString.fromText(o))));
 
   if (opts.selected !== undefined) {
-    dict.set('/V', PdfString.literal(opts.selected));
+    dict.set('/V', PdfString.fromText(opts.selected));
   }
 
   return new PdfDropdownField(name, dict, dict);
@@ -69,7 +69,7 @@ describe('PdfDropdownField', () => {
       const dict = new PdfDict();
       dict.set('/FT', PdfName.of('Ch'));
       dict.set('/Ff', PdfNumber.of(FieldFlags.Combo));
-      dict.set('/T', PdfString.literal('test'));
+      dict.set('/T', PdfString.fromText('test'));
       dict.set('/Rect', PdfArray.fromNumbers([0, 0, 200, 30]));
       const dd = new PdfDropdownField('test', dict, dict);
       expect(dd.getOptions()).toEqual([]);
@@ -195,13 +195,13 @@ describe('PdfDropdownField', () => {
       const dict = new PdfDict();
       dict.set('/FT', PdfName.of('Ch'));
       dict.set('/Ff', PdfNumber.of(FieldFlags.Combo));
-      dict.set('/T', PdfString.literal('test'));
+      dict.set('/T', PdfString.fromText('test'));
       dict.set('/Rect', PdfArray.fromNumbers([0, 0, 200, 30]));
 
       // /Opt with two-element arrays [export, display]
       const opt = PdfArray.of([
-        PdfArray.of([PdfString.literal('us'), PdfString.literal('United States')]),
-        PdfArray.of([PdfString.literal('uk'), PdfString.literal('United Kingdom')]),
+        PdfArray.of([PdfString.fromText('us'), PdfString.fromText('United States')]),
+        PdfArray.of([PdfString.fromText('uk'), PdfString.fromText('United Kingdom')]),
       ]);
       dict.set('/Opt', opt);
 

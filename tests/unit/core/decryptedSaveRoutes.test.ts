@@ -478,7 +478,7 @@ describe('the records of decrypted content are shared by every loaded copy of th
     const registry = new PdfObjectRegistry();
     first.markDecryptedFromEncryptedFile(registry);
     expect(second.isDecryptedFromEncryptedFile(registry)).toBe(true);
-    const str = PdfString.literal('recorded');
+    const str = PdfString.fromText('recorded');
     first.recordDecryptedObject(str);
     expect(second.holdsDecryptedObject(str)).toBe(true);
   });
@@ -493,7 +493,7 @@ describe('the records of decrypted content are shared by every loaded copy of th
         const { PdfObjectRegistry, PdfString } = await import(${JSON.stringify(objectsUrl)});
         const registry = new PdfObjectRegistry();
         m.markDecryptedFromEncryptedFile(registry);
-        const str = PdfString.literal('x');
+        const str = PdfString.fromText('x');
         m.recordDecryptedObject(str);
         console.log(m.isDecryptedFromEncryptedFile(registry) + ' ' + m.holdsDecryptedObject(str) + ' ' + (Symbol.for('modern-pdf-lib.decryptedSources') in globalThis));
       `;
@@ -520,7 +520,7 @@ async function decryptedObjects(): Promise<{ stream: PdfStream; title: PdfString
     if (value?.kind === 'string') title = value;
   }
   expect(stream.kind).toBe('stream');
-  expect(title?.value).toBe('Oracle fixture');
+  expect(title?.toText()).toBe('Oracle fixture');
   return { stream, title: title! };
 }
 
@@ -539,7 +539,7 @@ function titleDictsNotIn(doc: PdfDocument, before: ReadonlySet<PdfObject>): PdfD
   for (const { object } of doc.getRegistry()) {
     if (before.has(object) || object.kind !== 'dict') continue;
     const title = object.get('/Title');
-    if (title?.kind === 'string' && title.value === 'Oracle fixture') out.push(object);
+    if (title?.kind === 'string' && title.toText() === 'Oracle fixture') out.push(object);
   }
   return out;
 }
@@ -694,7 +694,7 @@ describe('a string or stream decrypted on load is refused by every writer, in an
     const { stream, title } = await decryptedObjects();
     const { doc, base } = await freshSaved();
     doc.getRegistry().register(new PdfStream(new PdfDict(), new Uint8Array(stream.data)));
-    doc.getRegistry().register(holding(PdfString.literal(title.value)));
+    doc.getRegistry().register(holding(PdfString.fromBytes(title.toBytes())));
     const bytes = await doc.save({ compress: false });
     expect(latin1(bytes)).toContain('Oracle fixture');
     expect(latin1(await drain(doc.saveAsStream()))).toContain('%%EOF');
@@ -710,7 +710,7 @@ async function signatureContents(bytes: Uint8Array): Promise<Uint8Array> {
     const type = object.get('/Type');
     if (type?.kind === 'name' && type.value === '/Sig') {
       const contents = (object as PdfDict).get('/Contents') as PdfString;
-      return Uint8Array.from(contents.value, (c) => c.charCodeAt(0));
+      return contents.toBytes();
     }
   }
   throw new Error('no /Type /Sig dictionary');

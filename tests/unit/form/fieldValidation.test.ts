@@ -14,10 +14,10 @@ import { validateFieldValue, parseValidationScript } from '../../../src/form/fie
 function makeTextField(name: string, value?: string): PdfTextField {
   const dict = new PdfDict();
   dict.set('/FT', PdfName.of('Tx'));
-  dict.set('/T', PdfString.literal(name));
+  dict.set('/T', PdfString.fromText(name));
   dict.set('/Rect', PdfArray.fromNumbers([0, 0, 200, 30]));
   if (value !== undefined) {
-    dict.set('/V', PdfString.literal(value));
+    dict.set('/V', PdfString.fromText(value));
   }
   return new PdfTextField(name, dict, dict);
 }

@@ -84,7 +84,7 @@ describe('the writers write writeString("é") as the byte 0xE9', () => {
   test('save() with object streams: the object stream writer', async () => {
     const doc = titled('é');
     // The Info dictionary is never packed into an object stream; this dictionary is.
-    doc.getRegistry().register(new PdfDict([['T', PdfString.literal('é')]]));
+    doc.getRegistry().register(new PdfDict([['T', PdfString.fromText('é')]]));
     const bytes = await doc.save({ compress: false, objectStreamThreshold: 1 });
     expect(indexOfBytes(bytes, new TextEncoder().encode('/Type /ObjStm'))).not.toBe(-1);
     expect(

@@ -85,9 +85,9 @@ describe('PdfFreeTextAnnotation', () => {
       dict.set('/Type', PdfName.of('Annot'));
       dict.set('/Subtype', PdfName.of('FreeText'));
       dict.set('/Rect', PdfArray.fromNumbers([10, 20, 200, 50]));
-      dict.set('/DA', PdfString.literal('0 0 1 rg /Helv 14 Tf'));
+      dict.set('/DA', PdfString.fromAscii('0 0 1 rg /Helv 14 Tf'));
       dict.set('/Q', PdfNumber.of(1));
-      dict.set('/Contents', PdfString.literal('Parsed text'));
+      dict.set('/Contents', PdfString.fromText('Parsed text'));
 
       const annot = PdfFreeTextAnnotation.fromDict(dict);
       expect(annot.getType()).toBe('FreeText');

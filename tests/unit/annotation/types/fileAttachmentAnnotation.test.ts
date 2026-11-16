@@ -101,8 +101,8 @@ describe('PdfFileAttachmentAnnotation', () => {
     it('reads filename from /FS dict', () => {
       const fsDict = new PdfDict();
       fsDict.set('/Type', PdfName.of('Filespec'));
-      fsDict.set('/UF', PdfString.literal('report.pdf'));
-      fsDict.set('/F', PdfString.literal('report.pdf'));
+      fsDict.set('/UF', PdfString.fromText('report.pdf'));
+      fsDict.set('/F', PdfString.fromText('report.pdf'));
 
       const dict = new PdfDict();
       dict.set('/Type', PdfName.of('Annot'));

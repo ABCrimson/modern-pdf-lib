@@ -26,10 +26,10 @@ const NOVIEW = 1 << 5;
 function makeTextField(name: string, value?: string, parentNames?: string[]): PdfTextField {
   const dict = new PdfDict();
   dict.set('/FT', PdfName.of('Tx'));
-  dict.set('/T', PdfString.literal(name));
+  dict.set('/T', PdfString.fromText(name));
   dict.set('/Rect', PdfArray.fromNumbers([0, 0, 200, 30]));
   if (value !== undefined) {
-    dict.set('/V', PdfString.literal(value));
+    dict.set('/V', PdfString.fromText(value));
   }
   return new PdfTextField(name, dict, dict, parentNames);
 }
@@ -37,7 +37,7 @@ function makeTextField(name: string, value?: string, parentNames?: string[]): Pd
 function makeCheckbox(name: string, checked: boolean): PdfCheckboxField {
   const dict = new PdfDict();
   dict.set('/FT', PdfName.of('Btn'));
-  dict.set('/T', PdfString.literal(name));
+  dict.set('/T', PdfString.fromText(name));
   dict.set('/Rect', PdfArray.fromNumbers([0, 0, 20, 20]));
   dict.set('/V', PdfName.of(checked ? 'Yes' : 'Off'));
   dict.set('/AS', PdfName.of(checked ? 'Yes' : 'Off'));

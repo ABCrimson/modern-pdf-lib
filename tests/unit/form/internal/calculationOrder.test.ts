@@ -30,15 +30,15 @@ import {
 function makeTextField(name: string, value: string, calcScript?: string): PdfDict {
   const dict = new PdfDict();
   dict.set('/FT', PdfName.of('Tx'));
-  dict.set('/T', PdfString.literal(name));
-  dict.set('/V', PdfString.literal(value));
+  dict.set('/T', PdfString.fromText(name));
+  dict.set('/V', PdfString.fromText(value));
   dict.set('/Rect', PdfArray.fromNumbers([0, 0, 200, 30]));
-  dict.set('/DA', PdfString.literal('/Helv 0 Tf 0 g'));
+  dict.set('/DA', PdfString.fromAscii('/Helv 0 Tf 0 g'));
 
   if (calcScript !== undefined) {
     const jsDict = new PdfDict();
     jsDict.set('/S', PdfName.of('JavaScript'));
-    jsDict.set('/JS', PdfString.literal(calcScript));
+    jsDict.set('/JS', PdfString.fromText(calcScript));
 
     const aaDict = new PdfDict();
     aaDict.set('/C', jsDict);

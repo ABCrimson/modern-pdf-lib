@@ -220,7 +220,7 @@ export function indexedImage(_bytes: Uint8Array, args: JsonValue): JsonValue {
     PdfName.of('Indexed'),
     PdfName.of('DeviceRGB'),
     PdfNumber.of(1),
-    PdfString.hex('000000ffffff'),
+    PdfString.fromHex('000000ffffff'),
   ]);
   const dict = new PdfDict()
     .set('/Subtype', PdfName.of('Image'))

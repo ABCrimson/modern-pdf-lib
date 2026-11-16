@@ -86,7 +86,7 @@ describe('buildUnencryptedWrapper', () => {
     expect((rel as PdfName).value).toBe('/EncryptedPayload');
 
     // The filename round-trips.
-    expect((spec.get('/F') as PdfString).value).toBe('secret.pdf');
+    expect((spec.get('/F') as PdfString).toText()).toBe('secret.pdf');
 
     // The /EP entry is an /EncryptedPayload dict carrying the subtype.
     const ep = spec.get('/EP');
@@ -107,7 +107,7 @@ describe('buildUnencryptedWrapper', () => {
     });
 
     const spec = registry.resolve(ref) as PdfDict;
-    expect((spec.get('/Desc') as PdfString).value).toBe('Encrypted attachment');
+    expect((spec.get('/Desc') as PdfString).toText()).toBe('Encrypted attachment');
 
     const epDict = spec.get('/EP') as PdfDict;
     expect((epDict.get('/Version') as PdfName).value).toBe('/2');

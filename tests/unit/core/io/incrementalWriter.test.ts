@@ -114,8 +114,8 @@ describe('saveIncremental', () => {
     // Create a registry with a modified object
     const registry = new PdfObjectRegistry();
     const infoDict = new PdfDict();
-    infoDict.set('/Title', PdfString.literal('Modified Title'));
-    infoDict.set('/Producer', PdfString.literal('modern-pdf'));
+    infoDict.set('/Title', PdfString.fromText('Modified Title'));
+    infoDict.set('/Producer', PdfString.fromText('modern-pdf'));
     const infoRef = registry.register(infoDict);
 
     // Create minimal catalog and pages
@@ -147,8 +147,8 @@ describe('saveIncremental', () => {
 
     const registry = new PdfObjectRegistry();
     const infoDict = new PdfDict();
-    infoDict.set('/Title', PdfString.literal('Updated'));
-    infoDict.set('/Producer', PdfString.literal('modern-pdf'));
+    infoDict.set('/Title', PdfString.fromText('Updated'));
+    infoDict.set('/Producer', PdfString.fromText('modern-pdf'));
     const infoRef = registry.register(infoDict);
 
     const pagesDict = new PdfDict();
@@ -190,8 +190,8 @@ describe('saveIncremental', () => {
 
     const registry = new PdfObjectRegistry();
     const dict = new PdfDict();
-    dict.set('/Title', PdfString.literal('New Data'));
-    dict.set('/Producer', PdfString.literal('modern-pdf'));
+    dict.set('/Title', PdfString.fromText('New Data'));
+    dict.set('/Producer', PdfString.fromText('modern-pdf'));
     const infoRef = registry.register(dict);
 
     const pagesDict = new PdfDict();
@@ -220,7 +220,7 @@ describe('saveIncremental', () => {
 
     const registry = new PdfObjectRegistry();
     const dict = new PdfDict();
-    dict.set('/Producer', PdfString.literal('modern-pdf'));
+    dict.set('/Producer', PdfString.fromText('modern-pdf'));
     const infoRef = registry.register(dict);
 
     const pagesDict = new PdfDict();
@@ -258,20 +258,20 @@ describe('saveIncremental', () => {
 
     // Register multiple objects
     const dict1 = new PdfDict();
-    dict1.set('/Key1', PdfString.literal('Value1'));
+    dict1.set('/Key1', PdfString.fromText('Value1'));
     const ref1 = registry.register(dict1);
 
     const dict2 = new PdfDict();
-    dict2.set('/Key2', PdfString.literal('Value2'));
+    dict2.set('/Key2', PdfString.fromText('Value2'));
     registry.register(dict2);
 
     const dict3 = new PdfDict();
-    dict3.set('/Key3', PdfString.literal('Value3'));
+    dict3.set('/Key3', PdfString.fromText('Value3'));
     registry.register(dict3);
 
     // info + pages + catalog
     const infoDict = new PdfDict();
-    infoDict.set('/Producer', PdfString.literal('modern-pdf'));
+    infoDict.set('/Producer', PdfString.fromText('modern-pdf'));
     const infoRef = registry.register(infoDict);
 
     const pagesDict = new PdfDict();
@@ -310,15 +310,15 @@ describe('saveIncremental', () => {
     const registry = new PdfObjectRegistry();
 
     const dict1 = new PdfDict();
-    dict1.set('/First', PdfString.literal('Alpha'));
+    dict1.set('/First', PdfString.fromText('Alpha'));
     const ref1 = registry.register(dict1);
 
     const dict2 = new PdfDict();
-    dict2.set('/Second', PdfString.literal('Beta'));
+    dict2.set('/Second', PdfString.fromText('Beta'));
     const ref2 = registry.register(dict2);
 
     const infoDict = new PdfDict();
-    infoDict.set('/Producer', PdfString.literal('modern-pdf'));
+    infoDict.set('/Producer', PdfString.fromText('modern-pdf'));
     const infoRef = registry.register(infoDict);
 
     const pagesDict = new PdfDict();
@@ -350,7 +350,7 @@ describe('saveIncremental', () => {
 
     const registry = new PdfObjectRegistry();
     const dict = new PdfDict();
-    dict.set('/Producer', PdfString.literal('modern-pdf'));
+    dict.set('/Producer', PdfString.fromText('modern-pdf'));
     const infoRef = registry.register(dict);
 
     const pagesDict = new PdfDict();
@@ -389,7 +389,7 @@ describe('saveIncremental', () => {
     const streamRef = registry.register(stream);
 
     const infoDict = new PdfDict();
-    infoDict.set('/Producer', PdfString.literal('modern-pdf'));
+    infoDict.set('/Producer', PdfString.fromText('modern-pdf'));
     const infoRef = registry.register(infoDict);
 
     const pagesDict = new PdfDict();
@@ -427,8 +427,8 @@ describe('incremental save integration', () => {
 
     const registry = new PdfObjectRegistry();
     const infoDict = new PdfDict();
-    infoDict.set('/Title', PdfString.literal('Updated Document'));
-    infoDict.set('/Producer', PdfString.literal('modern-pdf'));
+    infoDict.set('/Title', PdfString.fromText('Updated Document'));
+    infoDict.set('/Producer', PdfString.fromText('modern-pdf'));
     const infoRef = registry.register(infoDict);
 
     const pagesDict = new PdfDict();

@@ -121,7 +121,7 @@ describe('every object of an encrypted file is decrypted', () => {
     // cons-r4-control.pdf numbers its objects 1 to 7; Info is object 6.
     const doc = await loadPdf(fixture('load/cons-r4-control.pdf'), { password: 'user' });
     const info = doc.getRegistry().resolve(PdfRef.of(6, 0)) as PdfDict;
-    expect((info.get('/Title') as PdfString).value).toBe(TITLE);
+    expect((info.get('/Title') as PdfString).toText()).toBe(TITLE);
   });
 
   /**
@@ -218,7 +218,7 @@ describe('strings, Identity filters and stream /Crypt filters', () => {
       expect(doc.getAuthor()).toBe('Author (lit)');
       const catalog = doc.getRegistry().resolve(PdfRef.of(1, 0)) as PdfDict;
       const lang = catalog.get('/Lang') as PdfString;
-      expect(lang.value).toBe('en-US');
+      expect(lang.toText()).toBe('en-US');
       expect(lang.hex).toBe(true);
       const info = doc.getRegistry().resolve(PdfRef.of(6, 0)) as PdfDict;
       expect((info.get('/Author') as PdfString).hex).toBe(false);
@@ -239,9 +239,7 @@ describe('strings, Identity filters and stream /Crypt filters', () => {
     const doc = await loadPdf(fixture('load/cons-r4-title-c1.pdf'), { password: 'user' });
     const info = doc.getRegistry().resolve(PdfRef.of(6, 0)) as PdfDict;
     const title = info.get('/Title') as PdfString;
-    expect(Array.from(title.value, (c) => c.charCodeAt(0))).toEqual(
-      Array.from({ length: 32 }, (_, i) => 0x80 + i),
-    );
+    expect(Array.from(title.toBytes())).toEqual(Array.from({ length: 32 }, (_, i) => 0x80 + i));
     expect(title.hex).toBe(true);
   });
 
@@ -249,9 +247,7 @@ describe('strings, Identity filters and stream /Crypt filters', () => {
     const doc = await loadPdf(fixture('load/cons-r4-title-utf16.pdf'), { password: 'user' });
     const info = doc.getRegistry().resolve(PdfRef.of(6, 0)) as PdfDict;
     const title = info.get('/Title') as PdfString;
-    expect(Array.from(title.value, (c) => c.charCodeAt(0))).toEqual([
-      0xfe, 0xff, 0x00, 0x41, 0x20, 0x14, 0x00, 0x95,
-    ]);
+    expect(Array.from(title.toBytes())).toEqual([0xfe, 0xff, 0x00, 0x41, 0x20, 0x14, 0x00, 0x95]);
   });
 
   it('the /Contents of a signature dictionary is left as it is; its other strings decrypt', async () => {
@@ -262,10 +258,12 @@ describe('strings, Identity filters and stream /Crypt filters', () => {
     const sigOf = (doc: PdfDocument): PdfDict => findByType(doc, '/Sig')[0]!.object as PdfDict;
     const a = sigOf(signed);
     const b = sigOf(source);
-    expect((a.get('/Contents') as PdfString).value).toBe((b.get('/Contents') as PdfString).value);
+    expect((a.get('/Contents') as PdfString).toBytes()).toEqual(
+      (b.get('/Contents') as PdfString).toBytes(),
+    );
     for (const [key, value] of b) {
       if (value.kind === 'string') {
-        expect((a.get(key) as PdfString).value, key).toBe((value as PdfString).value);
+        expect((a.get(key) as PdfString).toBytes(), key).toEqual((value as PdfString).toBytes());
       }
     }
   });

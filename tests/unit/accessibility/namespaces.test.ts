@@ -42,7 +42,7 @@ describe('buildNamespace', () => {
     const dict = buildNamespace({ ns: MATHML_NAMESPACE });
     const ns = dict.get('/NS');
     expect(ns).toBeInstanceOf(PdfString);
-    expect((ns as PdfString).value).toBe(MATHML_NAMESPACE);
+    expect((ns as PdfString).toText()).toBe(MATHML_NAMESPACE);
     expect((ns as PdfString).hex).toBe(false);
   });
 
@@ -61,7 +61,7 @@ describe('buildNamespace', () => {
     });
     const schema = dict.get('/Schema');
     expect(schema).toBeInstanceOf(PdfString);
-    expect((schema as PdfString).value).toBe('mathml-schema.xml');
+    expect((schema as PdfString).toText()).toBe('mathml-schema.xml');
     expect((schema as PdfString).hex).toBe(false);
   });
 
@@ -99,7 +99,7 @@ describe('buildNamespace', () => {
     expect(dict.has('/NS')).toBe(true);
     expect(dict.has('/Schema')).toBe(true);
     expect(dict.has('/RoleMapNS')).toBe(true);
-    expect((dict.get('/NS') as PdfString).value).toBe('http://example.com/ns');
+    expect((dict.get('/NS') as PdfString).toText()).toBe('http://example.com/ns');
   });
 
   it('returns a fresh dictionary on each call', () => {
@@ -128,8 +128,8 @@ describe('buildNamespacesArray', () => {
     const second = arr.items[1];
     expect(first).toBeInstanceOf(PdfDict);
     expect(second).toBeInstanceOf(PdfDict);
-    expect(((first as PdfDict).get('/NS') as PdfString).value).toBe(PDF2_NAMESPACE);
-    expect(((second as PdfDict).get('/NS') as PdfString).value).toBe(MATHML_NAMESPACE);
+    expect(((first as PdfDict).get('/NS') as PdfString).toText()).toBe(PDF2_NAMESPACE);
+    expect(((second as PdfDict).get('/NS') as PdfString).toText()).toBe(MATHML_NAMESPACE);
     expect(((first as PdfDict).get('/Type') as PdfName).value).toBe('/Namespace');
   });
 

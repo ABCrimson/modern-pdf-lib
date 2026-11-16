@@ -11,7 +11,7 @@ import { ResourceLimitError } from '../../../src/errors.js';
 
 function item(first?: number, next?: number): PdfDict {
   const dict = new PdfDict();
-  dict.set('/Title', PdfString.literal('item'));
+  dict.set('/Title', PdfString.fromText('item'));
   if (first !== undefined) dict.set('/First', PdfRef.of(first));
   if (next !== undefined) dict.set('/Next', PdfRef.of(next));
   return dict;
@@ -96,7 +96,7 @@ describe('outline read limits', () => {
 
     const notDict = chain(256);
     notDict.set(256, item(998));
-    notDict.set(998, PdfString.literal('not an item'));
+    notDict.set(998, PdfString.fromText('not an item'));
     expect(count(notDict)).toBe(256);
 
     const loop = chain(256);

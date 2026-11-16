@@ -177,16 +177,16 @@ describe('AES-256 encrypt/decrypt round-trips', () => {
 describe('AES-256 string encryption', () => {
   it('encrypts a PdfString to hex form', async () => {
     const h = await createAes256Handler();
-    const original = PdfString.literal('Secret text');
+    const original = PdfString.fromText('Secret text');
     const encrypted = await h.encryptString(1, 0, original);
     expect(encrypted.hex).toBe(true);
-    expect(encrypted.value).not.toBe(original.value);
+    expect(encrypted.toBytes()).not.toEqual(original.toBytes());
   });
 
   it('encrypted string can be decrypted back', async () => {
     const h = await createAes256Handler();
     const originalText = 'Round-trip string';
-    const original = PdfString.literal(originalText);
+    const original = PdfString.fromText(originalText);
     const encrypted = await h.encryptString(1, 0, original);
 
     // The encrypted value is hex-encoded ciphertext. Decode it.

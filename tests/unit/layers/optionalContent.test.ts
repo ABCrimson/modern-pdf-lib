@@ -75,7 +75,7 @@ describe('PdfLayer', () => {
   it('should parse from a dict with /Name', () => {
     const dict = new PdfDict();
     dict.set('/Type', PdfName.of('OCG'));
-    dict.set('/Name', PdfString.literal('Parsed Layer'));
+    dict.set('/Name', PdfString.fromText('Parsed Layer'));
 
     const layer = PdfLayer.fromDict(dict);
     expect(layer.getName()).toBe('Parsed Layer');

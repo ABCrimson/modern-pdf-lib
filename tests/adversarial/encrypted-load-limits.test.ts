@@ -170,7 +170,7 @@ describe('encrypted load: the strings of one object', () => {
       doc
         .getRegistry()
         .register(
-          new PdfArray(Array.from({ length: count }, (_, i) => PdfString.literal(`s${i}`))),
+          new PdfArray(Array.from({ length: count }, (_, i) => PdfString.fromText(`s${i}`))),
         );
       await doc.encrypt({ userPassword: '', ownerPassword: 'owner', algorithm: 'aes-128' });
       const input = await doc.save();

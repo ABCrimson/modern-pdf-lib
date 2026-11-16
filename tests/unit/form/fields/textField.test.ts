@@ -31,14 +31,14 @@ function makeTextField(
 ): PdfTextField {
   const dict = new PdfDict();
   dict.set('/FT', PdfName.of('Tx'));
-  dict.set('/T', PdfString.literal(name));
+  dict.set('/T', PdfString.fromText(name));
   dict.set('/Rect', PdfArray.fromNumbers(options.rect ?? [0, 0, 200, 30]));
 
   if (options.value !== undefined) {
-    dict.set('/V', PdfString.literal(options.value));
+    dict.set('/V', PdfString.fromText(options.value));
   }
   if (options.da !== undefined) {
-    dict.set('/DA', PdfString.literal(options.da));
+    dict.set('/DA', PdfString.fromAscii(options.da));
   }
   if (options.q !== undefined) {
     dict.set('/Q', PdfNumber.of(options.q));
@@ -268,7 +268,7 @@ describe('PdfTextField', () => {
     it('returns dotted name with parents', () => {
       const dict = new PdfDict();
       dict.set('/FT', PdfName.of('Tx'));
-      dict.set('/T', PdfString.literal('first'));
+      dict.set('/T', PdfString.fromText('first'));
       dict.set('/Rect', PdfArray.fromNumbers([0, 0, 200, 30]));
       const tf = new PdfTextField('first', dict, dict, ['person', 'name']);
       expect(tf.getFullName()).toBe('person.name.first');
@@ -320,7 +320,7 @@ describe('PdfTextField', () => {
     it('returns [0,0,0,0] when no /Rect', () => {
       const dict = new PdfDict();
       dict.set('/FT', PdfName.of('Tx'));
-      dict.set('/T', PdfString.literal('test'));
+      dict.set('/T', PdfString.fromText('test'));
       const tf = new PdfTextField('test', dict, dict);
       expect(tf.getRect()).toEqual([0, 0, 0, 0]);
     });

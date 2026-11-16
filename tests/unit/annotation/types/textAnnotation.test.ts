@@ -58,7 +58,7 @@ describe('PdfTextAnnotation', () => {
       dict.set('/Type', PdfName.of('Annot'));
       dict.set('/Subtype', PdfName.of('Text'));
       dict.set('/Rect', PdfArray.fromNumbers([10, 20, 30, 40]));
-      dict.set('/Contents', PdfString.literal('A sticky note'));
+      dict.set('/Contents', PdfString.fromText('A sticky note'));
       dict.set('/Name', PdfName.of('Help'));
       dict.set('/Open', PdfBool.of(true));
 

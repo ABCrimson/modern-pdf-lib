@@ -366,7 +366,7 @@ describe('repeated saves of an encrypted document', () => {
         ['/Pages', pagesRef],
       ]),
     );
-    const infoRef = registry.register(new PdfDict([['/Title', PdfString.literal('SecretTitle')]]));
+    const infoRef = registry.register(new PdfDict([['/Title', PdfString.fromText('SecretTitle')]]));
     registry.register(PdfStream.fromString('AttachmentSecret'));
     const structure = { catalogRef, infoRef, pagesRef };
     const handler = await PdfEncryptionHandler.create({
@@ -413,8 +413,8 @@ describe('repeated saves of an encrypted document', () => {
         ['/Count', PdfNumber.of(0)],
       ]),
     );
-    const arrayRef = registry.register(new PdfArray([PdfString.literal('ArraySecret')]));
-    const stringRef = registry.register(PdfString.literal('LoneSecret'));
+    const arrayRef = registry.register(new PdfArray([PdfString.fromText('ArraySecret')]));
+    const stringRef = registry.register(PdfString.fromText('LoneSecret'));
     const catalogRef = registry.register(
       new PdfDict([
         ['/Type', PdfName.of('Catalog')],
@@ -541,7 +541,7 @@ describe('incremental saves of an encrypted document', () => {
   it('saveIncremental() throws for encrypted original bytes', async () => {
     const encrypted = await (await buildRichDoc('rc4-128')).save();
     const registry = new PdfObjectRegistry();
-    const ref = registry.register(PdfString.literal('IncrementalSecret'));
+    const ref = registry.register(PdfString.fromText('IncrementalSecret'));
     expectGuardError(
       thrownBy(() =>
         saveIncremental(

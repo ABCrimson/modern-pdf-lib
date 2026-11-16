@@ -68,7 +68,7 @@ describe('PdfRedactAnnotation', () => {
       dict.set('/Type', PdfName.of('Annot'));
       dict.set('/Subtype', PdfName.of('Redact'));
       dict.set('/Rect', PdfArray.fromNumbers([0, 0, 200, 30]));
-      dict.set('/OverlayText', PdfString.literal('CONFIDENTIAL'));
+      dict.set('/OverlayText', PdfString.fromText('CONFIDENTIAL'));
       dict.set('/IC', PdfArray.fromNumbers([0.5, 0.5, 0.5]));
       dict.set('/QuadPoints', PdfArray.fromNumbers([0, 30, 200, 30, 200, 0, 0, 0]));
 

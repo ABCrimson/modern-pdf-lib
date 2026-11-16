@@ -470,7 +470,7 @@ describe('PdfOutlineTree', () => {
 
       const dest = itemDict.get('/Dest') as PdfString;
       expect(dest).toBeInstanceOf(PdfString);
-      expect(dest.value).toBe('chapter1');
+      expect(dest.toText()).toBe('chapter1');
     });
 
     it('defaults to /Fit when no fit mode specified', () => {
@@ -527,13 +527,13 @@ describe('PdfOutlineTree', () => {
 
       // Build item1 dict
       const item1Dict = new PdfDict();
-      item1Dict.set('/Title', PdfString.literal('Chapter 1'));
+      item1Dict.set('/Title', PdfString.fromText('Chapter 1'));
       item1Dict.set('/Dest', PdfArray.of([pageRef0, PdfName.of('Fit')]));
       const item1Ref = registry.register(item1Dict);
 
       // Build item2 dict
       const item2Dict = new PdfDict();
-      item2Dict.set('/Title', PdfString.literal('Chapter 2'));
+      item2Dict.set('/Title', PdfString.fromText('Chapter 2'));
       item2Dict.set('/Dest', PdfArray.of([pageRef1, PdfName.of('FitH'), PdfNumber.of(700)]));
       const item2Ref = registry.register(item2Dict);
 
@@ -573,13 +573,13 @@ describe('PdfOutlineTree', () => {
 
       // Child item
       const childDict = new PdfDict();
-      childDict.set('/Title', PdfString.literal('Section 1.1'));
+      childDict.set('/Title', PdfString.fromText('Section 1.1'));
       childDict.set('/Dest', PdfArray.of([pageRef1, PdfName.of('Fit')]));
       const childRef = registry.register(childDict);
 
       // Parent item
       const parentDict = new PdfDict();
-      parentDict.set('/Title', PdfString.literal('Chapter 1'));
+      parentDict.set('/Title', PdfString.fromText('Chapter 1'));
       parentDict.set('/Dest', PdfArray.of([pageRef0, PdfName.of('Fit')]));
       parentDict.set('/First', childRef);
       parentDict.set('/Last', childRef);
@@ -609,7 +609,7 @@ describe('PdfOutlineTree', () => {
       const pageRefToIndex = new Map([[100, 0]]);
 
       const itemDict = new PdfDict();
-      itemDict.set('/Title', PdfString.literal('Styled'));
+      itemDict.set('/Title', PdfString.fromText('Styled'));
       itemDict.set('/Dest', PdfArray.of([pageRef0, PdfName.of('Fit')]));
       itemDict.set('/C', PdfArray.of([PdfNumber.of(0.5), PdfNumber.of(0.25), PdfNumber.of(0.75)]));
       itemDict.set('/F', PdfNumber.of(3)); // italic + bold
@@ -635,12 +635,12 @@ describe('PdfOutlineTree', () => {
       const pageRefToIndex = new Map([[100, 0]]);
 
       const childDict = new PdfDict();
-      childDict.set('/Title', PdfString.literal('Child'));
+      childDict.set('/Title', PdfString.fromText('Child'));
       childDict.set('/Dest', PdfArray.of([pageRef0, PdfName.of('Fit')]));
       const childRef = registry.register(childDict);
 
       const itemDict = new PdfDict();
-      itemDict.set('/Title', PdfString.literal('Closed'));
+      itemDict.set('/Title', PdfString.fromText('Closed'));
       itemDict.set('/Dest', PdfArray.of([pageRef0, PdfName.of('Fit')]));
       itemDict.set('/Count', PdfNumber.of(-1));
       itemDict.set('/First', childRef);
@@ -666,8 +666,8 @@ describe('PdfOutlineTree', () => {
       const pageRefToIndex = new Map<number, number>();
 
       const itemDict = new PdfDict();
-      itemDict.set('/Title', PdfString.literal('Named'));
-      itemDict.set('/Dest', PdfString.literal('my-dest'));
+      itemDict.set('/Title', PdfString.fromText('Named'));
+      itemDict.set('/Dest', PdfString.fromAscii('my-dest'));
       const itemRef = registry.register(itemDict);
 
       const outlinesDict = new PdfDict();
@@ -688,7 +688,7 @@ describe('PdfOutlineTree', () => {
       const pageRefToIndex = new Map([[100, 0]]);
 
       const itemDict = new PdfDict();
-      itemDict.set('/Title', PdfString.literal('XYZ'));
+      itemDict.set('/Title', PdfString.fromText('XYZ'));
       itemDict.set(
         '/Dest',
         PdfArray.of([

@@ -119,14 +119,14 @@ async function buildOpenActionPdf(): Promise<Uint8Array> {
   const openAction = new PdfDict();
   openAction.set('/Type', PdfName.of('Action'));
   openAction.set('/S', PdfName.of('JavaScript'));
-  openAction.set('/JS', PdfString.literal('OPENACTION-PAYLOAD'));
+  openAction.set('/JS', PdfString.fromText('OPENACTION-PAYLOAD'));
   catalog.set('/OpenAction', registry.register(openAction));
 
   // /AA /WC → JavaScript close action (§12.6.3).
   const closeAction = new PdfDict();
   closeAction.set('/Type', PdfName.of('Action'));
   closeAction.set('/S', PdfName.of('JavaScript'));
-  closeAction.set('/JS', PdfString.literal('AA-CLOSE-PAYLOAD'));
+  closeAction.set('/JS', PdfString.fromText('AA-CLOSE-PAYLOAD'));
   const aa = new PdfDict();
   aa.set('/WC', registry.register(closeAction));
   catalog.set('/AA', aa);

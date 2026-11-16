@@ -75,7 +75,7 @@ function numberOf(value: unknown): number {
 /** Read a /String dictionary entry's value. */
 function stringOf(value: unknown): string {
   expect(value).toBeInstanceOf(PdfString);
-  return (value as PdfString).value;
+  return (value as PdfString).toText();
 }
 
 /** Fetch the i-th child /DPart node from a /DPartRoot dictionary. */

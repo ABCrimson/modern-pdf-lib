@@ -91,7 +91,7 @@ describe('PdfLinkAnnotation', () => {
 
       const action = new PdfDict();
       action.set('/S', PdfName.of('URI'));
-      action.set('/URI', PdfString.literal('https://parsed.com'));
+      action.set('/URI', PdfString.fromAscii('https://parsed.com'));
       dict.set('/A', action);
 
       const annot = PdfLinkAnnotation.fromDict(dict);
@@ -114,7 +114,7 @@ describe('PdfLinkAnnotation', () => {
       const dict = new PdfDict();
       dict.set('/Subtype', PdfName.of('Link'));
       dict.set('/Rect', PdfArray.fromNumbers([0, 0, 100, 20]));
-      dict.set('/Dest', PdfString.literal('chapter2'));
+      dict.set('/Dest', PdfString.fromAscii('chapter2'));
 
       const annot = PdfLinkAnnotation.fromDict(dict);
       expect(annot.getDestination()).toBe('chapter2');

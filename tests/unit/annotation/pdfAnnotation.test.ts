@@ -124,8 +124,8 @@ describe('annotationFromDict', () => {
     const dict = new PdfDict();
     dict.set('/Subtype', PdfName.of('Link'));
     dict.set('/Rect', PdfArray.fromNumbers([0, 0, 200, 30]));
-    dict.set('/Contents', PdfString.literal('Click here'));
-    dict.set('/T', PdfString.literal('Bob'));
+    dict.set('/Contents', PdfString.fromText('Click here'));
+    dict.set('/T', PdfString.fromText('Bob'));
     dict.set('/C', PdfArray.fromNumbers([0, 0.5, 1]));
     dict.set('/CA', PdfNumber.of(0.75));
     dict.set('/F', PdfNumber.of(AnnotationFlags.Print | AnnotationFlags.Locked));

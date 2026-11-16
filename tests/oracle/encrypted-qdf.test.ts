@@ -25,6 +25,7 @@ import { describe, expect, test } from 'vitest';
 import { PdfRef, extractText, loadPdf, parseContentStream } from '../../src/index.js';
 import type { PdfDict, PdfDocument, PdfString } from '../../src/index.js';
 import { compareWithQdf, qpdfDecryptQdfMapped } from '../helpers/oracle/qdf-compare.js';
+import { latin1String } from '../../src/internal/latin1.js';
 import { expectQpdfClean, qpdfDecryptQdf, requireQpdf } from '../helpers/oracle/qpdf.js';
 
 const DIR = join(import.meta.dirname, '../fixtures/encrypted');
@@ -74,7 +75,8 @@ function shapeObjects(doc: PdfDocument): Map<string, number> {
   const found = new Map<string, number>();
   for (const { ref, object } of doc.getRegistry()) {
     const name = object.kind === 'dict' ? (object as PdfDict).get('/Name') : undefined;
-    if (name?.kind === 'string' && name.value in SHAPES) found.set(name.value, ref.objectNumber);
+    if (name?.kind === 'string' && name.toText() in SHAPES)
+      found.set(name.toText(), ref.objectNumber);
   }
   return found;
 }
@@ -82,7 +84,7 @@ function shapeObjects(doc: PdfDocument): Map<string, number> {
 /** The /Contents bytes of object `num` of `doc`. */
 const contentsOf = (doc: PdfDocument, num: number): string => {
   const dict = doc.getRegistry().resolve(PdfRef.of(num, 0)) as PdfDict;
-  return (dict.get('/Contents') as PdfString).value;
+  return latin1String((dict.get('/Contents') as PdfString).toBytes());
 };
 
 describe('decrypted objects equal qpdf --decrypt --qdf, object by object', () => {

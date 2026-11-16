@@ -99,11 +99,11 @@ describe('createAssociatedFile', () => {
 
     const f = fileSpec.get('/F') as PdfString;
     expect(f).toBeInstanceOf(PdfString);
-    expect(f.value).toBe('invoice.xml');
+    expect(f.toText()).toBe('invoice.xml');
 
     const uf = fileSpec.get('/UF') as PdfString;
     expect(uf).toBeInstanceOf(PdfString);
-    expect(uf.value).toBe('invoice.xml');
+    expect(uf.toText()).toBe('invoice.xml');
   });
 
   it('embeds the correct data in the stream', () => {
@@ -126,7 +126,7 @@ describe('createAssociatedFile', () => {
     const fileSpec = registry.resolve(result.fileSpecRef) as PdfDict;
     const desc = fileSpec.get('/Desc') as PdfString;
     expect(desc).toBeInstanceOf(PdfString);
-    expect(desc.value).toBe('ZUGFeRD invoice data');
+    expect(desc.toText()).toBe('ZUGFeRD invoice data');
   });
 
   it('omits /Desc when description is not provided', () => {
@@ -147,7 +147,7 @@ describe('createAssociatedFile', () => {
 
     const creationDate = params.get('/CreationDate') as PdfString;
     expect(creationDate).toBeInstanceOf(PdfString);
-    expect(creationDate.value).toBe('D:20260301120000');
+    expect(creationDate.toText()).toBe('D:20260301120000');
   });
 
   it('handles modification date', () => {
@@ -163,7 +163,7 @@ describe('createAssociatedFile', () => {
 
     const modDate = params.get('/ModDate') as PdfString;
     expect(modDate).toBeInstanceOf(PdfString);
-    expect(modDate.value).toBe('D:20260307093000');
+    expect(modDate.toText()).toBe('D:20260307093000');
   });
 
   it('sets /Size in params to the data length', () => {
@@ -239,7 +239,7 @@ describe('createAssociatedFile', () => {
 
     // Verify description
     const desc = fileSpec.get('/Desc') as PdfString;
-    expect(desc.value).toBe('Factur-X invoice data (BASIC profile)');
+    expect(desc.toText()).toBe('Factur-X invoice data (BASIC profile)');
   });
 
   it('works with binary data', () => {

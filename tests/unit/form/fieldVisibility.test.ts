@@ -26,7 +26,7 @@ const NOVIEW = 1 << 5;
 function makeTextField(name: string, flags?: number): PdfTextField {
   const dict = new PdfDict();
   dict.set('/FT', PdfName.of('Tx'));
-  dict.set('/T', PdfString.literal(name));
+  dict.set('/T', PdfString.fromText(name));
   dict.set('/Rect', PdfArray.fromNumbers([0, 0, 200, 30]));
   if (flags !== undefined) {
     dict.set('/F', PdfNumber.of(flags));
@@ -193,8 +193,8 @@ describe('addVisibilityAction', () => {
 
     const js = vDict.get('/JS');
     expect(js).toBeDefined();
-    expect((js as PdfString).value).toContain('triggerField');
-    expect((js as PdfString).value).toContain('yes');
+    expect((js as PdfString).toText()).toContain('triggerField');
+    expect((js as PdfString).toText()).toContain('yes');
   });
 
   it('writes /JS as a text string, so a script naming text outside Latin-1 reads back as built', () => {
@@ -215,7 +215,7 @@ describe('addVisibilityAction', () => {
     const js = ((field.getWidgetDict().get('/AA') as PdfDict).get('/V') as PdfDict).get(
       '/JS',
     ) as PdfString;
-    expect(js.value).toContain('.value == "active"');
+    expect(js.toText()).toContain('.value == "active"');
   });
 
   it('generates correct script for "notEquals" condition', () => {
@@ -225,7 +225,7 @@ describe('addVisibilityAction', () => {
     const js = ((field.getWidgetDict().get('/AA') as PdfDict).get('/V') as PdfDict).get(
       '/JS',
     ) as PdfString;
-    expect(js.value).toContain('.value != "inactive"');
+    expect(js.toText()).toContain('.value != "inactive"');
   });
 
   it('generates correct script for "contains" condition', () => {
@@ -235,7 +235,7 @@ describe('addVisibilityAction', () => {
     const js = ((field.getWidgetDict().get('/AA') as PdfDict).get('/V') as PdfDict).get(
       '/JS',
     ) as PdfString;
-    expect(js.value).toContain('.includes("yes")');
+    expect(js.toText()).toContain('.includes("yes")');
   });
 
   it('generates correct script for "empty" condition', () => {
@@ -245,7 +245,7 @@ describe('addVisibilityAction', () => {
     const js = ((field.getWidgetDict().get('/AA') as PdfDict).get('/V') as PdfDict).get(
       '/JS',
     ) as PdfString;
-    expect(js.value).toContain('.value == ""');
+    expect(js.toText()).toContain('.value == ""');
   });
 
   it('generates correct script for "notEmpty" condition', () => {
@@ -255,7 +255,7 @@ describe('addVisibilityAction', () => {
     const js = ((field.getWidgetDict().get('/AA') as PdfDict).get('/V') as PdfDict).get(
       '/JS',
     ) as PdfString;
-    expect(js.value).toContain('.value != ""');
+    expect(js.toText()).toContain('.value != ""');
   });
 
   it('preserves existing /AA entries', () => {
@@ -266,7 +266,7 @@ describe('addVisibilityAction', () => {
     const existingAA = new PdfDict();
     const existingAction = new PdfDict();
     existingAction.set('/S', PdfName.of('JavaScript'));
-    existingAction.set('/JS', PdfString.literal('app.alert("hello");'));
+    existingAction.set('/JS', PdfString.fromText('app.alert("hello");'));
     existingAA.set('/K', existingAction);
     widgetDict.set('/AA', existingAA);
 

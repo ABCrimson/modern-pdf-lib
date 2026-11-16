@@ -18,6 +18,7 @@ import { PdfEncryptionHandler } from '../../../src/crypto/encryptionHandler.js';
 import type { EncryptAlgorithm } from '../../../src/crypto/encryptionHandler.js';
 import { PdfDict, PdfName, PdfNumber, PdfString, PdfBool } from '../../../src/core/pdfObjects.js';
 import { UnsupportedEncryptionError } from '../../../src/errors.js';
+import { latin1String } from '../../../src/internal/latin1.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -290,7 +291,7 @@ function serializeEncryptDict(dict: PdfDict, objNum: number): string {
       if (str.hex) {
         result += `<${str.toBytes().toHex()}>`;
       } else {
-        result += `(${str.value})`;
+        result += `(${latin1String(str.toBytes())})`;
       }
     } else if (value.kind === 'bool') {
       result += ` ${(value as PdfBool).value}`;
@@ -320,7 +321,7 @@ function serializeNestedDict(dict: PdfDict): string {
       if (str.hex) {
         result += `<${str.toBytes().toHex()}>`;
       } else {
-        result += `(${str.value})`;
+        result += `(${latin1String(str.toBytes())})`;
       }
     } else if (value.kind === 'bool') {
       result += ` ${(value as PdfBool).value}`;

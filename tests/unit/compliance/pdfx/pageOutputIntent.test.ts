@@ -147,7 +147,7 @@ describe('buildPageOutputIntent', () => {
 
     const oci = dict.get('/OutputConditionIdentifier');
     expect(oci).toBeInstanceOf(PdfString);
-    expect((oci as PdfString).value).toBe('FOGRA39L');
+    expect((oci as PdfString).toText()).toBe('FOGRA39L');
   });
 
   it('sets /Info when provided', () => {
@@ -160,7 +160,7 @@ describe('buildPageOutputIntent', () => {
 
     const info = dict.get('/Info');
     expect(info).toBeInstanceOf(PdfString);
-    expect((info as PdfString).value).toBe('sRGB IEC61966-2.1');
+    expect((info as PdfString).toText()).toBe('sRGB IEC61966-2.1');
   });
 
   it('omits /Info when not provided', () => {

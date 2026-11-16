@@ -233,11 +233,11 @@ describe('PdfEncryptionHandler — encryptString', () => {
       algorithm: 'rc4-128',
     });
 
-    const original = PdfString.literal('Hello');
+    const original = PdfString.fromText('Hello');
     const encrypted = await handler.encryptString(1, 0, original);
 
     expect(encrypted.hex).toBe(true);
-    expect(encrypted.value).not.toBe(original.value);
+    expect(encrypted.toBytes()).not.toEqual(original.toBytes());
   });
 
   const allBytes = Uint8Array.from({ length: 256 }, (_, i) => i);

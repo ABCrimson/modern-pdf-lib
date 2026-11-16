@@ -139,26 +139,26 @@ describe('PdfObjectParser - literal string', () => {
   it('parses a simple literal string', () => {
     const obj = parse('(Hello)');
     expect(obj.kind).toBe('string');
-    expect((obj as PdfString).value).toBe('Hello');
+    expect((obj as PdfString).toText()).toBe('Hello');
     expect((obj as PdfString).hex).toBe(false);
   });
 
   it('parses an empty literal string', () => {
     const obj = parse('()');
     expect(obj.kind).toBe('string');
-    expect((obj as PdfString).value).toBe('');
+    expect((obj as PdfString).toText()).toBe('');
   });
 
   it('parses a string with escape sequences', () => {
     const obj = parse('(line\\nbreak)');
     expect(obj.kind).toBe('string');
-    expect((obj as PdfString).value).toBe('line\nbreak');
+    expect((obj as PdfString).toText()).toBe('line\nbreak');
   });
 
   it('parses a string with nested parentheses', () => {
     const obj = parse('(outer(inner)text)');
     expect(obj.kind).toBe('string');
-    expect((obj as PdfString).value).toBe('outer(inner)text');
+    expect((obj as PdfString).toText()).toBe('outer(inner)text');
   });
 });
 
@@ -170,14 +170,14 @@ describe('PdfObjectParser - hex string', () => {
   it('parses a hex string', () => {
     const obj = parse('<48656C6C6F>');
     expect(obj.kind).toBe('string');
-    expect((obj as PdfString).value).toBe('Hello');
+    expect((obj as PdfString).toText()).toBe('Hello');
     expect((obj as PdfString).hex).toBe(true);
   });
 
   it('parses an empty hex string', () => {
     const obj = parse('<>');
     expect(obj.kind).toBe('string');
-    expect((obj as PdfString).value).toBe('');
+    expect((obj as PdfString).toText()).toBe('');
   });
 
   it('keeps the bytes and the form: <4142> is written back as <4142>, (AB) as (AB)', () => {
@@ -333,8 +333,8 @@ describe('PdfObjectParser - dictionary', () => {
   it('parses a dictionary with string values', () => {
     const obj = parse('<< /Author (John Doe) /Title (Test) >>');
     const dict = obj as PdfDict;
-    expect((dict.get('/Author') as PdfString).value).toBe('John Doe');
-    expect((dict.get('/Title') as PdfString).value).toBe('Test');
+    expect((dict.get('/Author') as PdfString).toText()).toBe('John Doe');
+    expect((dict.get('/Title') as PdfString).toText()).toBe('Test');
   });
 
   it('parses a dictionary with boolean values', () => {
@@ -456,7 +456,7 @@ describe('PdfObjectParser - indirect object definitions', () => {
     const { ref, object } = parser.parseIndirectObject();
     expect(ref.objectNumber).toBe(1);
     expect(object.kind).toBe('string');
-    expect((object as PdfString).value).toBe('Hello World');
+    expect((object as PdfString).toText()).toBe('Hello World');
   });
 
   it('parses an indirect object containing null', () => {
@@ -547,7 +547,7 @@ describe('PdfObjectParser - parseObjectAt / parseIndirectObjectAt', () => {
     const { ref, object } = parser.parseIndirectObjectAt(5);
     expect(ref.objectNumber).toBe(5);
     expect(object.kind).toBe('string');
-    expect((object as PdfString).value).toBe('Hello');
+    expect((object as PdfString).toText()).toBe('Hello');
 
     // Also should be registered
     expect(registry.resolve(ref)).toBe(object);
@@ -710,7 +710,7 @@ describe('PdfObjectParser - registry integration', () => {
     const resolved = registry.resolve(PdfRef.of(10, 0));
     expect(resolved).toBeDefined();
     expect(resolved!.kind).toBe('string');
-    expect((resolved as PdfString).value).toBe('test');
+    expect((resolved as PdfString).toText()).toBe('test');
   });
 
   it('registers multiple indirect objects', () => {
@@ -783,7 +783,7 @@ describe('PdfObjectParser - edge cases', () => {
     const dict = obj as PdfDict;
     const id = dict.get('/ID') as PdfString;
     expect(id.hex).toBe(true);
-    expect(id.value).toBe('Hello');
+    expect(id.toText()).toBe('Hello');
   });
 
   it('parses empty dict (no whitespace between delimiters)', () => {

@@ -60,7 +60,7 @@ describe('buildPdfX6OutputIntent', () => {
     });
     const id = dict.get('/OutputConditionIdentifier');
     expect(id).toBeInstanceOf(PdfString);
-    expect((id as PdfString).value).toBe('FOGRA51');
+    expect((id as PdfString).toText()).toBe('FOGRA51');
 
     const text = serialize(dict);
     expect(text).toContain('/S /GTS_PDFX');
@@ -100,11 +100,11 @@ describe('buildPdfX6OutputIntent', () => {
 
     const cond = dict.get('/OutputCondition');
     expect(cond).toBeInstanceOf(PdfString);
-    expect((cond as PdfString).value).toBe('Coated FOGRA51 (PSO Coated v3)');
+    expect((cond as PdfString).toText()).toBe('Coated FOGRA51 (PSO Coated v3)');
 
     const registry = dict.get('/RegistryName');
     expect(registry).toBeInstanceOf(PdfString);
-    expect((registry as PdfString).value).toBe('http://www.color.org');
+    expect((registry as PdfString).toText()).toBe('http://www.color.org');
   });
 });
 

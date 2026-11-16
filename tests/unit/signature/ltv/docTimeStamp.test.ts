@@ -138,7 +138,7 @@ describe('buildDocTimeStampDict', () => {
     expect(reason).toBeInstanceOf(PdfString);
     const str = reason as PdfString;
     expect(str.hex).toBe(false);
-    expect(str.value).toBe('LTV timestamp');
+    expect(str.toText()).toBe('LTV timestamp');
   });
 
   it('writes /Reason as a PDF text string', () => {
@@ -155,7 +155,7 @@ describe('buildDocTimeStampDict', () => {
   it('adds /Reason even when it is an empty string', () => {
     const dict = buildDocTimeStampDict({ reason: '' });
     expect(dict.has('/Reason')).toBe(true);
-    expect((dict.get('/Reason') as PdfString).value).toBe('');
+    expect((dict.get('/Reason') as PdfString).toText()).toBe('');
   });
 
   it('treats undefined options like no options', () => {
@@ -181,7 +181,7 @@ describe('buildDocTimeStampDict', () => {
     const a = buildDocTimeStampDict();
     const b = buildDocTimeStampDict();
     expect(a).not.toBe(b);
-    a.set('/Reason', PdfString.literal('mutated'));
+    a.set('/Reason', PdfString.fromText('mutated'));
     expect(b.has('/Reason')).toBe(false);
   });
 
@@ -219,6 +219,6 @@ describe('buildDocTimeStampDict', () => {
     };
     const dict = buildDocTimeStampDict(options);
     expect((dict.get('/Contents') as PdfString).toBytes().toHex().length).toBe(2048 * 2);
-    expect((dict.get('/Reason') as PdfString).value).toBe('archival');
+    expect((dict.get('/Reason') as PdfString).toText()).toBe('archival');
   });
 });

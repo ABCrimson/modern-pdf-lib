@@ -39,7 +39,7 @@ function makeRadioGroup(name: string, options: string[], selected?: string): Pdf
   const dict = new PdfDict();
   dict.set('/FT', PdfName.of('Btn'));
   dict.set('/Ff', PdfNumber.of(FieldFlags.Radio));
-  dict.set('/T', PdfString.literal(name));
+  dict.set('/T', PdfString.fromText(name));
 
   if (selected !== undefined) {
     dict.set('/V', PdfName.of(selected));
@@ -85,7 +85,7 @@ describe('PdfRadioGroup', () => {
       const dict = new PdfDict();
       dict.set('/FT', PdfName.of('Btn'));
       dict.set('/Ff', PdfNumber.of(FieldFlags.Radio));
-      dict.set('/T', PdfString.literal('empty'));
+      dict.set('/T', PdfString.fromText('empty'));
       dict.set('/Rect', PdfArray.fromNumbers([0, 0, 20, 20]));
       const widgetDict = new PdfDict();
       widgetDict.set('/Rect', PdfArray.fromNumbers([0, 0, 20, 20]));

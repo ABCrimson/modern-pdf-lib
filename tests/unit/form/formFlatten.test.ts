@@ -30,18 +30,18 @@ import {
 function makeTextFieldDict(name: string, value?: string, readOnly = false): PdfDict {
   const dict = new PdfDict();
   dict.set('/FT', PdfName.of('Tx'));
-  dict.set('/T', PdfString.literal(name));
+  dict.set('/T', PdfString.fromText(name));
   dict.set('/Rect', PdfArray.fromNumbers([50, 700, 250, 720]));
   dict.set('/Type', PdfName.of('Annot'));
   dict.set('/Subtype', PdfName.of('Widget'));
   if (value !== undefined) {
-    dict.set('/V', PdfString.literal(value));
+    dict.set('/V', PdfString.fromText(value));
   }
   if (readOnly) {
     dict.set('/Ff', PdfNumber.of(FieldFlags.ReadOnly));
   }
   // Add a default appearance for text rendering
-  dict.set('/DA', PdfString.literal('/Helv 12 Tf 0 g'));
+  dict.set('/DA', PdfString.fromAscii('/Helv 12 Tf 0 g'));
   return dict;
 }
 
@@ -49,7 +49,7 @@ function makeTextFieldDict(name: string, value?: string, readOnly = false): PdfD
 function makeCheckboxDict(name: string, checked: boolean): PdfDict {
   const dict = new PdfDict();
   dict.set('/FT', PdfName.of('Btn'));
-  dict.set('/T', PdfString.literal(name));
+  dict.set('/T', PdfString.fromText(name));
   dict.set('/Rect', PdfArray.fromNumbers([50, 680, 70, 700]));
   dict.set('/Type', PdfName.of('Annot'));
   dict.set('/Subtype', PdfName.of('Widget'));
@@ -63,14 +63,14 @@ function makeDropdownDict(name: string, options: string[], selected?: string): P
   const dict = new PdfDict();
   dict.set('/FT', PdfName.of('Ch'));
   dict.set('/Ff', PdfNumber.of(FieldFlags.Combo));
-  dict.set('/T', PdfString.literal(name));
+  dict.set('/T', PdfString.fromText(name));
   dict.set('/Rect', PdfArray.fromNumbers([50, 650, 250, 670]));
   dict.set('/Type', PdfName.of('Annot'));
   dict.set('/Subtype', PdfName.of('Widget'));
-  dict.set('/Opt', PdfArray.of(options.map((o) => PdfString.literal(o))));
-  dict.set('/DA', PdfString.literal('/Helv 12 Tf 0 g'));
+  dict.set('/Opt', PdfArray.of(options.map((o) => PdfString.fromText(o))));
+  dict.set('/DA', PdfString.fromAscii('/Helv 12 Tf 0 g'));
   if (selected !== undefined) {
-    dict.set('/V', PdfString.literal(selected));
+    dict.set('/V', PdfString.fromText(selected));
   }
   return dict;
 }
@@ -80,12 +80,12 @@ function makeButtonDict(name: string): PdfDict {
   const dict = new PdfDict();
   dict.set('/FT', PdfName.of('Btn'));
   dict.set('/Ff', PdfNumber.of(FieldFlags.Pushbutton));
-  dict.set('/T', PdfString.literal(name));
+  dict.set('/T', PdfString.fromText(name));
   dict.set('/Rect', PdfArray.fromNumbers([50, 620, 150, 640]));
   dict.set('/Type', PdfName.of('Annot'));
   dict.set('/Subtype', PdfName.of('Widget'));
   const mk = new PdfDict();
-  mk.set('/CA', PdfString.literal('Submit'));
+  mk.set('/CA', PdfString.fromText('Submit'));
   dict.set('/MK', mk);
   return dict;
 }
@@ -94,7 +94,7 @@ function makeButtonDict(name: string): PdfDict {
 function makeSignatureDict(name: string, signed: boolean): PdfDict {
   const dict = new PdfDict();
   dict.set('/FT', PdfName.of('Sig'));
-  dict.set('/T', PdfString.literal(name));
+  dict.set('/T', PdfString.fromText(name));
   dict.set('/Rect', PdfArray.fromNumbers([50, 590, 250, 640]));
   dict.set('/Type', PdfName.of('Annot'));
   dict.set('/Subtype', PdfName.of('Widget'));
@@ -111,12 +111,12 @@ function makeSignatureDict(name: string, signed: boolean): PdfDict {
 function makeListboxDict(name: string, options: string[]): PdfDict {
   const dict = new PdfDict();
   dict.set('/FT', PdfName.of('Ch'));
-  dict.set('/T', PdfString.literal(name));
+  dict.set('/T', PdfString.fromText(name));
   dict.set('/Rect', PdfArray.fromNumbers([50, 550, 250, 620]));
   dict.set('/Type', PdfName.of('Annot'));
   dict.set('/Subtype', PdfName.of('Widget'));
-  dict.set('/Opt', PdfArray.of(options.map((o) => PdfString.literal(o))));
-  dict.set('/DA', PdfString.literal('/Helv 10 Tf 0 g'));
+  dict.set('/Opt', PdfArray.of(options.map((o) => PdfString.fromText(o))));
+  dict.set('/DA', PdfString.fromAscii('/Helv 10 Tf 0 g'));
   return dict;
 }
 
@@ -415,9 +415,9 @@ describe('formFlatten', () => {
     it('handles a field with zero-size rectangle gracefully', () => {
       const dict = new PdfDict();
       dict.set('/FT', PdfName.of('Tx'));
-      dict.set('/T', PdfString.literal('zero_rect'));
+      dict.set('/T', PdfString.fromText('zero_rect'));
       dict.set('/Rect', PdfArray.fromNumbers([100, 100, 100, 100])); // zero area
-      dict.set('/DA', PdfString.literal('/Helv 12 Tf 0 g'));
+      dict.set('/DA', PdfString.fromAscii('/Helv 12 Tf 0 g'));
       const form = buildForm([dict]);
 
       const result = flattenForm(form);
@@ -483,10 +483,10 @@ describe('formFlatten', () => {
       // Create a simple text field with no /AP at all
       const dict = new PdfDict();
       dict.set('/FT', PdfName.of('Tx'));
-      dict.set('/T', PdfString.literal('no_ap'));
-      dict.set('/V', PdfString.literal('Some text'));
+      dict.set('/T', PdfString.fromText('no_ap'));
+      dict.set('/V', PdfString.fromText('Some text'));
       dict.set('/Rect', PdfArray.fromNumbers([0, 0, 200, 30]));
-      dict.set('/DA', PdfString.literal('/Helv 12 Tf 0 g'));
+      dict.set('/DA', PdfString.fromAscii('/Helv 12 Tf 0 g'));
 
       const form = buildForm([dict]);
       const result = flattenForm(form);
@@ -522,7 +522,7 @@ describe('formFlatten', () => {
       options?: { readOnly?: boolean; multiline?: boolean },
     ): PdfDict {
       const dict = makeTextFieldDict(name, plainValue, options?.readOnly);
-      dict.set('/RV', PdfString.literal(richValue));
+      dict.set('/RV', PdfString.fromText(richValue));
       if (options?.multiline) {
         const ff = (dict.get('/Ff') as PdfNumber | undefined)?.value ?? 0;
         dict.set('/Ff', PdfNumber.of(ff | FieldFlags.Multiline));
@@ -774,7 +774,7 @@ describe('formFlatten', () => {
 
     it('handles empty /RV string by falling back to /V', () => {
       const dict = makeTextFieldDict('empty_rv', 'Fallback');
-      dict.set('/RV', PdfString.literal(''));
+      dict.set('/RV', PdfString.fromText(''));
       const form = buildForm([dict]);
 
       const result = flattenForm(form);
