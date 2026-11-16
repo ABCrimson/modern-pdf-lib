@@ -11,6 +11,7 @@
 
 import { InvalidArgumentError, UnencodableTextError } from '../errors.js';
 import { latin1Bytes, latin1String } from '../internal/latin1.js';
+import { DEFAULT_LIMITS, type ResolvedLimits } from '../limits.js';
 import { decodeTextString, encodeTextString, textStringEncoding } from './internal/textString.js';
 
 // ---------------------------------------------------------------------------
@@ -710,6 +711,15 @@ export class PdfObjectRegistry {
   private nextObjectNumber = 1;
   private readonly entries: RegistryEntry[] = [];
   private readonly refMap = new Map<number, RegistryEntry>();
+
+  /**
+   * @param limits - The limits of the document that owns this registry, from
+   *   the `limits` option of `loadPdf` or `createPdf`. The calls that decode or
+   *   walk the document's objects (getContentStream, interpretPage, image and
+   *   font extraction, embedPage of one of its pages into another document)
+   *   run under them. The defaults when left out.
+   */
+  constructor(readonly limits: ResolvedLimits = DEFAULT_LIMITS) {}
 
   /**
    * Register a new object, allocate an object number, and return its

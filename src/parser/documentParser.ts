@@ -59,7 +59,8 @@ import {
   ResourceLimitError,
   UnsupportedEncryptionError,
 } from '../errors.js';
-import { assertWithinLimit } from '../internal/limits.js';
+import { assertLimit, beginCall, resolveLimits, type LimitContext } from '../internal/limits.js';
+import type { PdfLimits } from '../limits.js';
 
 // ---------------------------------------------------------------------------
 // Public interfaces
@@ -98,6 +99,16 @@ export interface LoadPdfOptions {
    * Default: `false`.
    */
   capNumbers?: boolean | undefined;
+  /**
+   * Limits on what the file may make the library allocate or walk, set over
+   * the defaults (`DEFAULT_LIMITS`). The document keeps them: the load itself
+   * and every later call on the document (getContentStream, interpretPage,
+   * image and font extraction, embedPage into another document) decode and
+   * walk under them. A key that is not a limit name, or a value that is not a
+   * whole number from 1 to the ceiling of its limit, makes the load throw
+   * `InvalidArgumentError`.
+   */
+  limits?: PdfLimits | undefined;
 }
 
 // ---------------------------------------------------------------------------
@@ -246,8 +257,11 @@ export class PdfDocumentParser {
   /** Flattened page dictionaries from the page tree. */
   private flattenedPages: FlattenedPage[] = [];
 
-  /** The object registry populated during parsing. */
-  private readonly registry = new PdfObjectRegistry();
+  /** The object registry populated during parsing; it holds the limits of the document. */
+  private registry!: PdfObjectRegistry;
+
+  /** The limit context of the load: the streams decoded while parsing add to its totals. */
+  private ctx!: LimitContext;
 
   /** Encryption handler for decrypting objects (set if the PDF is encrypted). */
   private encryptionHandler?: PdfEncryptionHandler | undefined;
@@ -297,6 +311,11 @@ export class PdfDocumentParser {
    * @throws         If the PDF is malformed or cannot be parsed.
    */
   async parse(options?: LoadPdfOptions): Promise<PdfDocument> {
+    // The limits of the document, checked before any work; the load runs under them.
+    const limits = resolveLimits(options?.limits);
+    this.registry = new PdfObjectRegistry(limits);
+    this.ctx = beginCall(limits);
+
     // Store load options for use in downstream methods
     this.throwOnInvalidObject = options?.throwOnInvalidObject === true;
     this.capNumbers = options?.capNumbers === true;
@@ -312,7 +331,7 @@ export class PdfDocumentParser {
     this.objectParser = new PdfObjectParser(this.lexer, this.registry, {
       recover: !this.throwOnInvalidObject,
     });
-    this.xrefParser = new XrefParser(this.data, this.objectParser);
+    this.xrefParser = new XrefParser(this.data, this.objectParser, this.ctx);
 
     // Step 3: Parse the cross-reference structure
     const xrefResult = await this.xrefParser.parseXref();
@@ -547,7 +566,7 @@ export class PdfDocumentParser {
 
   /** Parse the in-use object `ref` with a parser whose registry is not the document's. */
   private parseOutsideRegistry(ref: PdfRef, entry: XrefEntry): PdfObject {
-    const parser = new PdfObjectParser(this.lexer, new PdfObjectRegistry(), {
+    const parser = new PdfObjectParser(this.lexer, new PdfObjectRegistry(this.registry.limits), {
       recover: !this.throwOnInvalidObject,
     });
     try {
@@ -990,7 +1009,7 @@ export class PdfDocumentParser {
     visited: Set<number>,
     depth: number,
   ): void {
-    assertWithinLimit('maxTreeDepth', depth);
+    assertLimit(this.ctx, 'maxTreeDepth', depth);
 
     // Determine if this is a /Pages (intermediate) or /Page (leaf) node
     const typeObj = node.get('/Type');
@@ -1286,12 +1305,12 @@ export class PdfDocumentParser {
    * dictionary, and the later entries are not applied.
    * Returns the data unchanged when the stream has no filter, when
    * `/Filter` is anything else, and when the data does not inflate.
-   * A stream that decodes to more than the decoded-stream limit throws
-   * `ResourceLimitError`; it is not returned undecoded.
+   * A stream that decodes to more than the decoded-stream limit of the
+   * document throws `ResourceLimitError`; it is not returned undecoded.
    */
   private decompressStreamSync(stream: PdfStream): Uint8Array {
     try {
-      return decodeFlateOnly(stream) ?? stream.data;
+      return decodeFlateOnly(stream, this.ctx) ?? stream.data;
     } catch (err) {
       if (err instanceof ResourceLimitError) throw err;
       // If synchronous decompression fails, return raw data

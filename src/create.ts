@@ -14,7 +14,12 @@
 // ---------------------------------------------------------------------------
 
 export { createPdf, PdfDocument, StandardFonts } from './core/pdfDocument.js';
-export type { StandardFontName, EmbedFontOptions, SetTitleOptions } from './core/pdfDocument.js';
+export type {
+  StandardFontName,
+  EmbedFontOptions,
+  SetTitleOptions,
+  CreatePdfOptions,
+} from './core/pdfDocument.js';
 
 // ---------------------------------------------------------------------------
 // Page API

@@ -30,6 +30,7 @@ import type { PdfObjectRegistry } from './pdfObjects.js';
 import type { PdfPage } from './pdfPage.js';
 import type { Angle } from './operators/state.js';
 import { decodeStreamData } from '../codecs/streamDecode.js';
+import { beginCall } from '../internal/limits.js';
 import { latin1Bytes } from '../internal/latin1.js';
 import {
   carryDecryptedFromEncryptedFile,
@@ -253,7 +254,8 @@ function remapRef(sourceRef: PdfRef, ctx: CloneContext): PdfRef {
 /**
  * Embed a single page as a Form XObject in the target registry.
  *
- * The page's content stream(s) are decoded and concatenated.  The
+ * The page's content stream(s) are decoded, under the limits of the source
+ * document (`sourceRegistry.limits`), and concatenated.  The
  * page's resources are deep-cloned into the target registry.  The
  * result is a PdfStream of Subtype /Form registered in the target.
  *
@@ -277,7 +279,8 @@ export function embedPageAsFormXObject(
   const pageWidth = page.width;
   const pageHeight = page.height;
 
-  // --- 1. Collect and decode content streams ---
+  // --- 1. Collect and decode content streams, under the limits of the document that owns them ---
+  const limitCtx = beginCall(sourceRegistry.limits);
   const contentChunks: Uint8Array[] = [];
 
   // Original content streams from parsed PDF
@@ -288,7 +291,7 @@ export function embedPageAsFormXObject(
     const obj = sourceRegistry.resolve(ref);
     if (obj && obj.kind === 'stream') {
       if (holdsDecryptedObject(obj)) decryptedContent = true;
-      const decoded = decodeStreamData(obj as PdfStream);
+      const decoded = decodeStreamData(obj as PdfStream, limitCtx);
       contentChunks.push(decoded);
     }
   }

@@ -62,6 +62,8 @@ import type { EmbeddedFont } from '../assets/font/fontEmbed.js';
 import { embedFont as embedTtfFont } from '../assets/font/fontEmbed.js';
 import { subsetFont, buildSubsetCmap } from '../assets/font/fontSubset.js';
 import { UNSUPPORTED_OPTIONS, rejectOption } from '../internal/options.js';
+import { resolveLimits } from '../internal/limits.js';
+import type { PdfLimits } from '../limits.js';
 import { isOpenTypeCFF } from '../assets/font/otfDetect.js';
 import { findTable } from '../assets/font/internal/cffEmbed.js';
 import { embedPng as decodePng } from '../assets/image/internal/pngEmbed.js';
@@ -296,9 +298,13 @@ export class PdfDocument {
    * ```ts
    * const doc = PdfDocument.create();
    * ```
+   *
+   * @param options - The limits of the document; see {@link CreatePdfOptions}.
+   * @throws {InvalidArgumentError} When `options.limits` names an unknown limit
+   *   or sets a value that is not a whole number from 1 to the ceiling of its limit.
    */
-  static create(): PdfDocument {
-    return new PdfDocument();
+  static create(options?: CreatePdfOptions): PdfDocument {
+    return createPdf(options);
   }
 
   /** Object registry — allocates indirect references. */
@@ -3067,13 +3073,30 @@ export class PdfDocument {
 // Factory function
 // ---------------------------------------------------------------------------
 
+/** Options for {@link createPdf} and {@link PdfDocument.create}. */
+export interface CreatePdfOptions {
+  /**
+   * Limits on what the document may make the library allocate or walk, set
+   * over the defaults (`DEFAULT_LIMITS`). The document keeps them: every
+   * later call on it (getContentStream, interpretPage, image and font
+   * extraction, embedPage of one of its pages into another document) runs
+   * under them.
+   */
+  readonly limits?: PdfLimits | undefined;
+}
+
 /**
  * Create a new, empty PDF document.
  *
  * ```ts
  * const doc = createPdf();
+ * const strict = createPdf({ limits: { maxDecodedStreamBytes: 16 * 1024 * 1024 } });
  * ```
+ *
+ * @param options - The limits of the document; see {@link CreatePdfOptions}.
+ * @throws {InvalidArgumentError} When `options.limits` names an unknown limit
+ *   or sets a value that is not a whole number from 1 to the ceiling of its limit.
  */
-export function createPdf(): PdfDocument {
-  return new PdfDocument();
+export function createPdf(options?: CreatePdfOptions): PdfDocument {
+  return new PdfDocument(new PdfObjectRegistry(resolveLimits(options?.limits)));
 }

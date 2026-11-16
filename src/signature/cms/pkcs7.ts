@@ -38,7 +38,7 @@
  * @packageDocumentation
  */
 
-import { assertWithinLimit } from '../../internal/limits.js';
+import { assertLimit, beginCall, resolveLimits, type LimitContext } from '../../internal/limits.js';
 import {
   EnvironmentError,
   InvalidArgumentError,
@@ -534,20 +534,37 @@ interface Asn1Node {
  * lie inside `data`, and an indefinite length (0x80) is refused (X.690 10.1: DER uses the
  * definite form only). Each violation, and a value cut off before its tag or length byte, throws
  * {@link MalformedInputError} with format `'der'`. Nesting of constructed values deeper than
- * `INTERNAL_LIMITS.maxDerDepth` throws {@link ResourceLimitError}.
+ * `maxDerDepth` (128, the default limits) throws {@link ResourceLimitError}.
  *
  * @param data    The bytes holding the value.
  * @param offset  Where the value's tag byte is.
- * @param depth   Constructed values already open around this one (callers leave it at 0).
  */
-function parseDerTlv(data: Uint8Array, offset: number, depth = 0): Asn1Node {
+function parseDerTlv(data: Uint8Array, offset: number): Asn1Node {
+  return parseDerTlvAt(beginCall(resolveLimits(undefined)), data, offset, 0);
+}
+
+/**
+ * {@link parseDerTlv} under the limits of `ctx`, for a value nested in `depth`
+ * constructed values.
+ *
+ * @param ctx     The limit context of the read.
+ * @param data    The bytes holding the value.
+ * @param offset  Where the value's tag byte is.
+ * @param depth   Constructed values already open around this one.
+ */
+function parseDerTlvAt(
+  ctx: LimitContext,
+  data: Uint8Array,
+  offset: number,
+  depth: number,
+): Asn1Node {
   if (offset >= data.length) {
     throw new MalformedInputError('Unexpected end of DER data', { format: 'der' });
   }
 
   const tag = data[offset]!;
   const constructed = !!(tag & 0x20);
-  if (constructed) assertWithinLimit('maxDerDepth', depth + 1);
+  if (constructed) assertLimit(ctx, 'maxDerDepth', depth + 1);
   let pos = offset + 1;
 
   // Parse length
@@ -592,7 +609,7 @@ function parseDerTlv(data: Uint8Array, offset: number, depth = 0): Asn1Node {
   if (constructed) {
     let childOffset = 0;
     while (childOffset < nodeData.length) {
-      const child = parseDerTlv(nodeData, childOffset, depth + 1);
+      const child = parseDerTlvAt(ctx, nodeData, childOffset, depth + 1);
       children.push(child);
       childOffset += child.totalLength;
     }

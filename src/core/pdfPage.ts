@@ -65,7 +65,7 @@ import {
 } from './pdfObjects.js';
 import { decodeStreamData } from '../codecs/streamDecode.js';
 import { FontNotEmbeddedError, InvalidStateError } from '../errors.js';
-import { assertWithinLimit } from '../internal/limits.js';
+import { assertLimit, beginCall } from '../internal/limits.js';
 import type { StructureType } from '../accessibility/structureTree.js';
 import {
   wrapInMarkedContent,
@@ -2640,10 +2640,12 @@ export class PdfPage {
    * For a page parsed from a loaded PDF, the original (possibly compressed)
    * content stream(s) are resolved and decompressed; any operators added
    * afterwards (via {@link drawText}, {@link drawImage}, …) are appended.
-   * Multiple content streams are joined with newline separators. The decoded
-   * streams and the appended operators together may hold at most
-   * `maxDecodedStreamBytes` (256 MiB) bytes, not counting the separators; a
-   * page whose content decodes to more throws.
+   * Multiple content streams are joined with newline separators. The streams
+   * decode under the limits of the page's document (the `limits` option of
+   * `loadPdf` or `createPdf`), and the decoded streams and the appended
+   * operators together may hold at most its `maxDecodedStreamBytes` (256 MiB
+   * by default) bytes, not counting the separators; a page whose content
+   * decodes to more throws.
    *
    * This is the public entry point for the text-extraction pipeline:
    *
@@ -2656,10 +2658,12 @@ export class PdfPage {
    * ```
    *
    * @returns The decoded content-stream bytes (`Uint8Array`).
-   * @throws {ResourceLimitError} When the content streams of the page decode to
-   *   more than 256 MiB in total.
+   * @throws {ResourceLimitError} When the content of the page is more than the
+   *   `maxDecodedStreamBytes` of its document in total, or a stream is refused
+   *   by another limit of the document as it decodes.
    */
   getContentStream(): Uint8Array {
+    const ctx = beginCall(this.registry.limits);
     const chunks: Uint8Array[] = [];
     let decodedTotal = 0;
 
@@ -2667,9 +2671,9 @@ export class PdfPage {
     for (const ref of this._originalContentRefs) {
       const obj = this.registry.resolve(ref);
       if (obj && obj.kind === 'stream') {
-        const decoded = decodeStreamData(obj as PdfStream);
+        const decoded = decodeStreamData(obj as PdfStream, ctx);
         decodedTotal += decoded.length;
-        assertWithinLimit('maxDecodedStreamBytes', decodedTotal);
+        assertLimit(ctx, 'maxDecodedStreamBytes', decodedTotal);
         chunks.push(decoded);
       }
     }
@@ -2678,7 +2682,7 @@ export class PdfPage {
     if (this.ops.length > 0) {
       const added = latin1Bytes(this.ops);
       decodedTotal += added.length;
-      assertWithinLimit('maxDecodedStreamBytes', decodedTotal);
+      assertLimit(ctx, 'maxDecodedStreamBytes', decodedTotal);
       chunks.push(added);
     }
 

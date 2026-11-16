@@ -20,7 +20,7 @@
 import { PdfArray, PdfDict, PdfName, PdfNumber, PdfRef, PdfString } from '../core/pdfObjects.js';
 import type { PdfObject, PdfObjectRegistry } from '../core/pdfObjects.js';
 import { InvalidArgumentError, InvalidStateError } from '../errors.js';
-import { assertWithinLimit } from '../internal/limits.js';
+import { assertLimit, beginCall, resolveLimits } from '../internal/limits.js';
 import { UNSUPPORTED_OPTIONS, rejectOption } from '../internal/options.js';
 
 const utf8 = new TextEncoder();
@@ -683,7 +683,8 @@ export class PdfStructureTree {
     const kids = dict.get('/K');
     if (!kids) return tree;
 
-    // Each object is read once; nesting deeper than INTERNAL_LIMITS.maxTreeDepth throws.
+    // Each object is read once; nesting deeper than maxTreeDepth (the default limits) throws.
+    const ctx = beginCall(resolveLimits(undefined));
     const visited = new Set<number>();
 
     const parseElement = (obj: PdfObject, parent: PdfStructureElement, depth: number): void => {
@@ -761,7 +762,7 @@ export class PdfStructureTree {
           elemOptions.id = idObj.toText();
         }
 
-        assertWithinLimit('maxTreeDepth', depth);
+        assertLimit(ctx, 'maxTreeDepth', depth);
         const child = parent.addChild(typeName, elemOptions);
 
         // Parse /K of the child
@@ -778,7 +779,7 @@ export class PdfStructureTree {
       }
 
       if (resolved.kind === 'array') {
-        assertWithinLimit('maxTreeDepth', depth);
+        assertLimit(ctx, 'maxTreeDepth', depth);
         for (const item of resolved.items) {
           parseElement(item, parent, depth + 1);
         }

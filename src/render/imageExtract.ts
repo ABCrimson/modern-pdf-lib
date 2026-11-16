@@ -40,7 +40,7 @@ import {
   PdfObjectRegistry,
 } from '../core/pdfObjects.js';
 import { decodeStreamData, getStreamFilters } from '../codecs/streamDecode.js';
-import { assertWithinLimit } from '../internal/limits.js';
+import { assertLimit, beginCall, type LimitContext } from '../internal/limits.js';
 import { cmykToRgb } from '../core/operators/color.js';
 import { decodeJpegWasm } from '../wasm/jpeg/bridge.js';
 
@@ -86,7 +86,8 @@ export interface ExtractedImage {
  * @returns One {@link ExtractedImage} per successfully decoded image XObject.
  *          Images that cannot be decoded (JPXDecode and JBIG2Decode images,
  *          other unsupported filters or colour spaces, missing WASM, images
- *          above the internal size limits, malformed data) are skipped silently.
+ *          above the size limits of the page's document, malformed data) are
+ *          skipped silently.
  *
  * @example
  * ```ts
@@ -106,6 +107,8 @@ export function extractImages(page: PdfPage): ExtractedImage[] {
   if (!resources) return out;
 
   const registry = page.getRegistry();
+  // One call, under the limits of the page's document.
+  const ctx = beginCall(registry.limits);
 
   const xObjDict = resolveDict(resources.get('/XObject'), registry);
   if (!xObjDict) return out;
@@ -119,7 +122,7 @@ export function extractImages(page: PdfPage): ExtractedImage[] {
     if (!(subtype instanceof PdfName) || subtype.value !== '/Image') continue;
 
     try {
-      const extracted = decodeImage(name, stream, registry);
+      const extracted = decodeImage(name, stream, registry, ctx);
       if (extracted) out.push(extracted);
     } catch {
       // Skip images that cannot be decoded, including JPXDecode / JBIG2Decode
@@ -145,6 +148,7 @@ function decodeImage(
   name: string,
   stream: PdfStream,
   registry: PdfObjectRegistry,
+  ctx: LimitContext,
 ): ExtractedImage | undefined {
   const width = readInt(stream.dict.get('/Width'), 0);
   const height = readInt(stream.dict.get('/Height'), 0);
@@ -153,10 +157,10 @@ function decodeImage(
   const bitsPerComponent = readInt(stream.dict.get('/BitsPerComponent'), 8);
 
   // Resolve the colour space (handles ICCBased, Indexed, CalRGB, etc.).
-  const cs = resolveColorSpace(stream.dict.get('/ColorSpace'), registry);
+  const cs = resolveColorSpace(stream.dict.get('/ColorSpace'), registry, ctx);
 
   // The dictionary's size decides what is allocated below, whatever the data holds.
-  assertImageSize(width, height, cs.name === 'DeviceGray' || cs.name === 'CalGray' ? 1 : 3);
+  assertImageSize(ctx, width, height, cs.name === 'DeviceGray' || cs.name === 'CalGray' ? 1 : 3);
 
   const { filters } = getStreamFilters(stream.dict);
   const isJpeg = filters.includes('DCTDecode');
@@ -165,20 +169,20 @@ function decodeImage(
   let base: { pixels: Uint8Array; channels: number } | undefined;
 
   if (isJpeg) {
-    base = decodeJpegBase(stream, width, height);
+    base = decodeJpegBase(stream, width, height, ctx);
   } else {
     // FlateDecode / LZW / raw — decodeStreamData applies declared filters.
-    const raw = decodeStreamData(stream);
+    const raw = decodeStreamData(stream, ctx);
     base = interpretSamples(raw, width, height, bitsPerComponent, cs);
   }
 
   if (!base) return undefined;
 
   // --- Soft mask → alpha channel ---------------------------------------
-  const alpha = extractSoftMask(stream, registry, width, height);
+  const alpha = extractSoftMask(stream, registry, width, height, ctx);
 
   if (alpha) {
-    assertWithinLimit('maxImageBytes', width * height * 4);
+    assertLimit(ctx, 'maxImageBytes', width * height * 4);
     const pixels = compositeAlpha(base.pixels, base.channels, width, height, alpha);
     return {
       name: stripSlash(name),
@@ -210,11 +214,16 @@ function decodeImage(
  *   pixels, or more than `maxImageBytes` bytes of output.
  * @internal
  */
-function assertImageSize(width: number, height: number, outputChannels: number): void {
-  assertWithinLimit('maxImageDimension', width);
-  assertWithinLimit('maxImageDimension', height);
-  assertWithinLimit('maxImagePixels', width * height);
-  assertWithinLimit('maxImageBytes', width * height * outputChannels);
+function assertImageSize(
+  ctx: LimitContext,
+  width: number,
+  height: number,
+  outputChannels: number,
+): void {
+  assertLimit(ctx, 'maxImageDimension', width);
+  assertLimit(ctx, 'maxImageDimension', height);
+  assertLimit(ctx, 'maxImagePixels', width * height);
+  assertLimit(ctx, 'maxImageBytes', width * height * outputChannels);
 }
 
 /**
@@ -229,8 +238,9 @@ function decodeJpegBase(
   stream: PdfStream,
   width: number,
   height: number,
+  ctx: LimitContext,
 ): { pixels: Uint8Array; channels: number } | undefined {
-  const jpegBytes = decodeStreamData(stream);
+  const jpegBytes = decodeStreamData(stream, ctx);
   const decoded = decodeJpegWasm(jpegBytes);
   if (!decoded) return undefined; // WASM unavailable or decode failed.
 
@@ -444,6 +454,7 @@ function extractSoftMask(
   registry: PdfObjectRegistry,
   width: number,
   height: number,
+  ctx: LimitContext,
 ): Uint8Array | undefined {
   const smask = resolveStream(stream.dict.get('/SMask'), registry);
   if (!smask) return undefined;
@@ -451,7 +462,7 @@ function extractSoftMask(
   const mw = readInt(smask.dict.get('/Width'), 0);
   const mh = readInt(smask.dict.get('/Height'), 0);
   if (mw <= 0 || mh <= 0) return undefined;
-  assertImageSize(mw, mh, 1);
+  assertImageSize(ctx, mw, mh, 1);
 
   const mbpc = readInt(smask.dict.get('/BitsPerComponent'), 8);
 
@@ -459,11 +470,11 @@ function extractSoftMask(
   let maskData: Uint8Array;
   const { filters } = getStreamFilters(smask.dict);
   if (filters.includes('DCTDecode')) {
-    const decoded = decodeJpegWasm(decodeStreamData(smask));
+    const decoded = decodeJpegWasm(decodeStreamData(smask, ctx));
     if (!decoded) return undefined;
     maskData = decoded.pixels;
   } else {
-    const raw = decodeStreamData(smask);
+    const raw = decodeStreamData(smask, ctx);
     const samples = readComponentSamples(raw, mw * mh, mbpc);
     if (!samples) {
       // Try row-aligned unpack as a last resort.
@@ -538,6 +549,7 @@ function compositeAlpha(
 function resolveColorSpace(
   entry: PdfObject | undefined,
   registry: PdfObjectRegistry,
+  ctx: LimitContext,
 ): ResolvedColorSpace {
   const resolved = deref(entry, registry);
 
@@ -559,7 +571,7 @@ function resolveColorSpace(
       }
 
       if (head === 'Indexed' || head === 'I') {
-        const palette = readIndexedPalette(resolved, registry);
+        const palette = readIndexedPalette(resolved, registry, ctx);
         return { name: 'Indexed', components: 1, palette };
       }
 
@@ -604,14 +616,18 @@ function nameToColorSpace(rawName: string): ResolvedColorSpace {
  * stream.
  * @internal
  */
-function readIndexedPalette(arr: PdfArray, registry: PdfObjectRegistry): Uint8Array | undefined {
+function readIndexedPalette(
+  arr: PdfArray,
+  registry: PdfObjectRegistry,
+  ctx: LimitContext,
+): Uint8Array | undefined {
   const lookup = deref(arr.items[3], registry);
 
   // A hex or a literal string: the lookup table is its bytes.
   if (lookup instanceof PdfString) return lookup.toBytes();
 
   if (lookup instanceof PdfStream) {
-    return decodeStreamData(lookup);
+    return decodeStreamData(lookup, ctx);
   }
 
   return undefined;

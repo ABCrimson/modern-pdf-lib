@@ -18,7 +18,14 @@
  * @packageDocumentation
  */
 
-import { assertWithinLimit } from '../../internal/limits.js';
+import {
+  addToTotal,
+  assertLimit,
+  beginCall,
+  resolveLimits,
+  type LimitContext,
+} from '../../internal/limits.js';
+import type { PdfLimits } from '../../limits.js';
 import { PdfDict, PdfName, PdfNumber, PdfStream } from '../../core/pdfObjects.js';
 import { ResourceLimitError } from '../../errors.js';
 import type { ContentStreamOperator, Operand } from '../contentStreamParser.js';
@@ -56,6 +63,12 @@ export interface TextExtractionOptions {
    * Default: `false` for performance.
    */
   withPositions?: boolean | undefined;
+  /**
+   * Limits of the call, set over the defaults (`DEFAULT_LIMITS`): each
+   * ToUnicode CMap writes at most `maxCMapMappings` mappings, and the CMaps of
+   * all fonts of the call together at most `maxTotalCMapMappings`.
+   */
+  limits?: PdfLimits | undefined;
 }
 
 // ---------------------------------------------------------------------------
@@ -74,6 +87,10 @@ export interface TextExtractionOptions {
  *                    up font encodings and ToUnicode CMaps).
  * @param options   - Extraction options.
  * @returns The extracted text as a single string.
+ * @throws {InvalidArgumentError} When `options.limits` names an unknown limit
+ *   or sets a value that is not a whole number from 1 to the ceiling of its limit.
+ * @throws {ResourceLimitError} When a ToUnicode CMap is above `maxCMapMappings`,
+ *   or the CMaps of the call together above `maxTotalCMapMappings`.
  */
 export function extractText(
   operators: ContentStreamOperator[],
@@ -81,12 +98,12 @@ export function extractText(
   options?: TextExtractionOptions,
 ): string {
   if (options?.withPositions) {
-    return extractTextWithPositions(operators, resources)
+    return extractTextWithPositions(operators, resources, options)
       .map((item) => item.text)
       .join(' ');
   }
 
-  const state = new TextState(resources);
+  const state = new TextState(beginCall(resolveLimits(options?.limits)), resources);
   const parts: string[] = [];
   let lineHasContent = false;
 
@@ -259,13 +276,19 @@ export function extractText(
  *
  * @param operators - Parsed content-stream operators.
  * @param resources - Optional page `/Resources` dictionary.
+ * @param options   - Extraction options; only `limits` applies here.
  * @returns An array of positioned text items.
+ * @throws {InvalidArgumentError} When `options.limits` names an unknown limit
+ *   or sets a value that is not a whole number from 1 to the ceiling of its limit.
+ * @throws {ResourceLimitError} When a ToUnicode CMap is above `maxCMapMappings`,
+ *   or the CMaps of the call together above `maxTotalCMapMappings`.
  */
 export function extractTextWithPositions(
   operators: ContentStreamOperator[],
   resources?: PdfDict,
+  options?: TextExtractionOptions,
 ): TextItem[] {
-  const state = new TextState(resources);
+  const state = new TextState(beginCall(resolveLimits(options?.limits)), resources);
   const items: TextItem[] = [];
 
   for (const op of operators) {
@@ -465,25 +488,34 @@ export interface ToUnicodeCMap {
  * - `beginbfrange` / `endbfrange` — range-based mappings
  *
  * Each mapping written (one per bfchar entry, one per code of a bfrange, in
- * both range forms) counts toward `INTERNAL_LIMITS.maxCMapMappings` (2^20);
+ * both range forms) counts toward `maxCMapMappings` (2^20 by default);
  * the codes of a range are counted before the range is written.
  *
  * @param data - The raw CMap stream bytes (already decompressed).
  * @returns A parsed CMap.
  * @throws {ResourceLimitError} When the CMap writes more than 1,048,576
- *   mappings (limit `maxCMapMappings`).
+ *   mappings (the default of `maxCMapMappings`).
  */
 export function parseToUnicodeCMap(data: Uint8Array): ToUnicodeCMap {
+  return parseCMapUnder(beginCall(resolveLimits(undefined)), data);
+}
+
+/**
+ * {@link parseToUnicodeCMap} under the limits of `ctx`: the CMap writes at most
+ * its `maxCMapMappings` mappings, and they add to its `maxTotalCMapMappings`.
+ */
+function parseCMapUnder(ctx: LimitContext, data: Uint8Array): ToUnicodeCMap {
   const text = decodeText(data);
   const map = new Map<number, string>();
   const written = { count: 0 };
 
   // Parse beginbfchar / endbfchar sections
-  parseBfCharSections(text, map, written);
+  parseBfCharSections(ctx, text, map, written);
 
   // Parse beginbfrange / endbfrange sections
-  parseBfRangeSections(text, map, written);
+  parseBfRangeSections(ctx, text, map, written);
 
+  addToTotal(ctx, 'maxTotalCMapMappings', written.count);
   return { map };
 }
 
@@ -493,6 +525,7 @@ export function parseToUnicodeCMap(data: Uint8Array): ToUnicodeCMap {
  * of the text.
  */
 function parseBfCharSections(
+  ctx: LimitContext,
   text: string,
   map: Map<number, string>,
   written: { count: number },
@@ -513,8 +546,8 @@ function parseBfCharSections(
     while ((lineMatch = lineRegex.exec(body)) !== null) {
       const srcCode = parseInt(lineMatch[1]!, 16);
       const dstString = hexToUnicode(lineMatch[2]!);
-      // Each mapping written counts toward INTERNAL_LIMITS.maxCMapMappings.
-      assertWithinLimit('maxCMapMappings', ++written.count);
+      // Each mapping written counts toward maxCMapMappings.
+      assertLimit(ctx, 'maxCMapMappings', ++written.count);
       map.set(srcCode, dstString);
     }
   }
@@ -526,6 +559,7 @@ function parseBfCharSections(
  * of the text.
  */
 function parseBfRangeSections(
+  ctx: LimitContext,
   text: string,
   map: Map<number, string>,
   written: { count: number },
@@ -556,7 +590,7 @@ function parseBfRangeSections(
         // low code writes nothing.
         if (srcHigh >= srcLow) {
           written.count += srcHigh - srcLow + 1;
-          assertWithinLimit('maxCMapMappings', written.count);
+          assertLimit(ctx, 'maxCMapMappings', written.count);
         }
         let dstCode = parseInt(lineMatch[3], 16);
         for (let code = srcLow; code <= srcHigh; code++) {
@@ -570,7 +604,7 @@ function parseBfRangeSections(
         let code = srcLow;
 
         while ((arrMatch = arrRegex.exec(lineMatch[4])) !== null && code <= srcHigh) {
-          assertWithinLimit('maxCMapMappings', ++written.count);
+          assertLimit(ctx, 'maxCMapMappings', ++written.count);
           map.set(code, hexToUnicode(arrMatch[1]!));
           code++;
         }
@@ -751,7 +785,14 @@ class TextState {
   /** Cache of whether a font is a CID (2-byte) font. */
   private readonly cidFontCache = new Map<string, boolean>();
 
-  constructor(resources?: PdfDict) {
+  /**
+   * @param ctx - The limit context of the extraction call; the ToUnicode CMaps of its fonts parse under it.
+   * @param resources - The page `/Resources` dictionary, when there is one.
+   */
+  constructor(
+    private readonly ctx: LimitContext,
+    resources?: PdfDict,
+  ) {
     this.resources = resources;
     if (resources) {
       this.analyzeFonts(resources);
@@ -792,7 +833,7 @@ class TextState {
       const toUnicode = fontObj.get('/ToUnicode');
       if (toUnicode instanceof PdfStream) {
         try {
-          const cmap = parseToUnicodeCMap(toUnicode.data);
+          const cmap = parseCMapUnder(this.ctx, toUnicode.data);
           this.cmapCache.set(name, cmap);
         } catch (error) {
           // A limit error is never read as "no CMap"; any other error is.

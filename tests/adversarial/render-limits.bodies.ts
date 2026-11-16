@@ -13,6 +13,7 @@ import {
   PdfDict,
   PdfName,
   PdfNumber,
+  PdfObjectRegistry,
   PdfStream,
   PdfString,
 } from '../../src/core/pdfObjects.js';
@@ -169,11 +170,11 @@ function unreadable(dict: PdfDict, error: Error): PdfStream {
   return stream;
 }
 
-/** A page with the given resources and no indirect objects, as the extractors read it. */
+/** A page with the given resources and no indirect objects, under the default limits, as the extractors read it. */
 function pageOf(resources: PdfDict): PdfPage {
   return {
     getOriginalResources: () => resources,
-    getRegistry: () => ({ resolve: () => undefined }),
+    getRegistry: () => new PdfObjectRegistry(),
   } as unknown as PdfPage;
 }
 

@@ -22,6 +22,7 @@ import {
   PdfDict,
   PdfName,
   PdfNumber,
+  PdfObjectRegistry,
   PdfStream,
   PdfString,
 } from '../../../src/core/pdfObjects.js';
@@ -160,7 +161,8 @@ describe('extractImages — the palette of an Indexed colour space', () => {
     const resources = new PdfDict().set('/XObject', new PdfDict().set('/Im1', image));
     return {
       getOriginalResources: () => resources,
-      getRegistry: () => ({ resolve: () => undefined }),
+      // An empty registry: nothing resolves, and the image decodes under the default limits.
+      getRegistry: () => new PdfObjectRegistry(),
     } as unknown as PdfPage;
   }
 

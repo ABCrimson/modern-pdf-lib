@@ -15,14 +15,16 @@
  *
  * Form XObjects are bounded per call: a form already being interpreted is not
  * entered again, forms nest at most 12 deep, and the operators interpreted
- * inside forms count toward `maxFormOperators` (2^20); past it the call throws
+ * inside forms count toward `maxFormOperators` (2^20 by default); past it the call throws
  * `ResourceLimitError`, also while a single large form is still being parsed.
  * An operator counts one, plus one for each operand beyond six, plus the
  * length of each string operand and the elements of each array operand (so a
  * `TJ` of many strings or a `Tj` of a long string costs what it holds); the
  * operands count as they are parsed, whether or not an operator follows. A form
  * whose data cannot be decoded or parsed counts as empty and is read once per
- * call. Operators of the page's own content stream are not counted.
+ * call. Operators of the page's own content stream are not counted. Forms
+ * decode and count under the limits of the document of `registry` (the
+ * `limits` option of `loadPdf` or `createPdf`), or the defaults without one.
  *
  * @packageDocumentation
  */
@@ -40,7 +42,7 @@ import {
 } from '../core/pdfObjects.js';
 import { parseContentStream, parseContentStreamCounted } from '../parser/contentStreamParser.js';
 import { decodeStreamData } from '../codecs/streamDecode.js';
-import { assertWithinLimit } from '../internal/limits.js';
+import { assertLimit, beginCall, resolveLimits, type LimitContext } from '../internal/limits.js';
 import { ResourceLimitError } from '../errors.js';
 import type { PdfPage } from '../core/pdfPage.js';
 
@@ -54,7 +56,7 @@ export interface InterpretOptions {
   origin?: readonly [number, number] | undefined;
   /** Page `/Resources` dict, for `Do`/`Tf` resolution. */
   resources?: PdfDict | undefined;
-  /** Object registry, to resolve indirect resource refs. */
+  /** Object registry, to resolve indirect resource refs; forms decode under its limits. */
   registry?: PdfObjectRegistry | undefined;
 }
 
@@ -188,7 +190,12 @@ export function interpretContentStream(
 ): DisplayList {
   const items: DisplayItem[] = [];
   const origin = options.origin ?? [0, 0];
-  const run: FormRun = { formOperators: 0, active: new Set(), parsed: new WeakMap() };
+  const run: FormRun = {
+    ctx: beginCall(options.registry?.limits ?? resolveLimits(undefined)),
+    formOperators: 0,
+    active: new Set(),
+    parsed: new WeakMap(),
+  };
   interpretInto(items, operators, initialState(), options, 0, run);
   return { items, width: options.width, height: options.height, origin };
 }
@@ -197,6 +204,8 @@ const MAX_FORM_DEPTH = 12;
 
 /** State of the Form XObjects of one {@link interpretContentStream} call. */
 interface FormRun {
+  /** The limit context of the call: the limits of the document of the registry, or the defaults. */
+  readonly ctx: LimitContext;
   /** Cost of the forms interpreted so far (see the module header); it counts toward `maxFormOperators`. */
   formOperators: number;
   /** The forms being interpreted now: a form in this set is not entered again. */
@@ -692,10 +701,13 @@ function doXObject(
         // parsed draws nothing and is remembered as empty, so its data is read once per call.
         try {
           let cost = 0;
-          const operators = parseContentStreamCounted(decodeStreamData(stream), (running) => {
-            cost = running;
-            assertWithinLimit('maxFormOperators', run.formOperators + running);
-          });
+          const operators = parseContentStreamCounted(
+            decodeStreamData(stream, run.ctx),
+            (running) => {
+              cost = running;
+              assertLimit(run.ctx, 'maxFormOperators', run.formOperators + running);
+            },
+          );
           form = { operators, cost };
         } catch (err) {
           if (err instanceof ResourceLimitError) throw err;
@@ -705,7 +717,7 @@ function doXObject(
       }
       // Operators inside forms count toward maxFormOperators per interpretation.
       run.formOperators += form.cost;
-      assertWithinLimit('maxFormOperators', run.formOperators);
+      assertLimit(run.ctx, 'maxFormOperators', run.formOperators);
       const formState: GraphicsState = { ...gs, ctm: formCtm };
       interpretInto(
         items,

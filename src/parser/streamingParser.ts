@@ -29,6 +29,8 @@
 
 import { InvalidArgumentError, StreamingParseError } from '../errors.js';
 import { UNSUPPORTED_OPTIONS, rejectOption } from '../internal/options.js';
+import { assertLimit, beginCall, resolveLimits, type LimitContext } from '../internal/limits.js';
+import type { PdfLimits, ResolvedLimits } from '../limits.js';
 import { frameStreamData, keywordIndexFor } from './internal/streamFraming.js';
 
 /** The row of the option table that refuses `parseContentStreams`, removed in 0.41.0. */
@@ -53,6 +55,15 @@ export interface StreamingParserOptions {
   maxBufferSize?: number;
   /** Pages to parse (for selective loading). Default: all. */
   pageRange?: { start?: number; end?: number };
+  /**
+   * Limits of the parse, set over the defaults (`DEFAULT_LIMITS`): the page
+   * tree is walked at most `maxTreeDepth` levels deep (the root is level 1);
+   * a deeper page tree throws `ResourceLimitError`.
+   *
+   * @throws {InvalidArgumentError} The constructor throws for a key that is not
+   *   a limit name or a value that is not a whole number from 1 to the ceiling of its limit.
+   */
+  limits?: PdfLimits | undefined;
 }
 
 /**
@@ -516,7 +527,9 @@ type EventHandler = (event: StreamingParserEvent) => void;
  * ```
  */
 export class StreamingPdfParser {
-  private readonly options: Required<StreamingParserOptions>;
+  private readonly options: Required<Omit<StreamingParserOptions, 'limits'>>;
+  /** The limits of the parse, from `options.limits`. */
+  private readonly limits: ResolvedLimits;
   /** Backing store of the fed bytes; the first `totalBytesRead` bytes are valid. */
   private buffer: Uint8Array = new Uint8Array(0);
   private totalBytesRead = 0;
@@ -540,7 +553,9 @@ export class StreamingPdfParser {
   private fullData: Uint8Array | undefined;
 
   /**
-   * @throws {InvalidArgumentError} When `options.maxBufferSize` is `NaN`.
+   * @throws {InvalidArgumentError} When `options.maxBufferSize` is `NaN`, or `options.limits`
+   *         names an unknown limit or sets a value that is not a whole number from 1 to the
+   *         ceiling of its limit.
    * @throws {UnsupportedOptionError} When `options.parseContentStreams` is `true`: the option was
    *         removed in 0.41.0 (the parser never read content streams).
    */
@@ -563,6 +578,7 @@ export class StreamingPdfParser {
       maxBufferSize,
       pageRange: options?.pageRange ?? {},
     };
+    this.limits = resolveLimits(options?.limits);
   }
 
   // -----------------------------------------------------------------------
@@ -1219,7 +1235,7 @@ export class StreamingPdfParser {
     if (!pagesRef) return;
 
     // Traverse the page tree
-    this.traversePageTree(data, pagesRef.objNum, {}, new Set());
+    this.traversePageTree(beginCall(this.limits), data, pagesRef.objNum, {}, new Set(), 1);
   }
 
   /**
@@ -1260,9 +1276,11 @@ export class StreamingPdfParser {
   }
 
   /**
-   * Traverse the page tree recursively, collecting page metadata.
+   * Traverse the page tree recursively, collecting page metadata. A node at a
+   * level above the `maxTreeDepth` of `ctx` throws `ResourceLimitError`.
    */
   private traversePageTree(
+    ctx: LimitContext,
     data: Uint8Array,
     objNum: number,
     inherited: {
@@ -1271,8 +1289,10 @@ export class StreamingPdfParser {
       rotation?: number;
     },
     visited: Set<number>,
+    depth: number,
   ): void {
     if (visited.has(objNum)) return;
+    assertLimit(ctx, 'maxTreeDepth', depth);
     visited.add(objNum);
 
     const entry = this.xrefEntries.get(objNum);
@@ -1362,7 +1382,7 @@ export class StreamingPdfParser {
     // of numbers, but /Kids is an array of references. We parse it manually.
     const kidsRefs = this.parseKidsArray(data, dict, entry.offset);
     for (const kidObjNum of kidsRefs) {
-      this.traversePageTree(data, kidObjNum, currentInherited, visited);
+      this.traversePageTree(ctx, data, kidObjNum, currentInherited, visited, depth + 1);
     }
   }
 

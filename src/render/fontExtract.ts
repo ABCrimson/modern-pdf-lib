@@ -31,6 +31,7 @@ import {
   type PdfObjectRegistry,
 } from '../core/pdfObjects.js';
 import { decodeStreamData } from '../codecs/streamDecode.js';
+import { beginCall, type LimitContext } from '../internal/limits.js';
 import { ResourceLimitError } from '../errors.js';
 
 /** The on-disk format of an embedded font program. */
@@ -121,17 +122,18 @@ function findFontDescriptor(fontDict: PdfDict, registry: PdfObjectRegistry): Pdf
 function extractFromDescriptor(
   descriptor: PdfDict,
   registry: PdfObjectRegistry,
+  ctx: LimitContext,
 ): { format: FontFileFormat; data: Uint8Array } | undefined {
   // /FontFile — Type 1 (PostScript) program.
   const fontFile = resolveStream(descriptor, '/FontFile', registry);
   if (fontFile) {
-    return { format: 'type1', data: decodeStreamData(fontFile) };
+    return { format: 'type1', data: decodeStreamData(fontFile, ctx) };
   }
 
   // /FontFile2 — TrueType (glyf-based) sfnt program.
   const fontFile2 = resolveStream(descriptor, '/FontFile2', registry);
   if (fontFile2) {
-    return { format: 'truetype', data: decodeStreamData(fontFile2) };
+    return { format: 'truetype', data: decodeStreamData(fontFile2, ctx) };
   }
 
   // /FontFile3 — CFF or OpenType (CFF-flavoured sfnt) program.
@@ -142,7 +144,7 @@ function extractFromDescriptor(
     // → 'cff'.
     const subtype = nameValue(fontFile3.dict.get('/Subtype'), registry);
     const format: FontFileFormat = subtype === 'OpenType' ? 'opentype' : 'cff';
-    return { format, data: decodeStreamData(fontFile3) };
+    return { format, data: decodeStreamData(fontFile3, ctx) };
   }
 
   return undefined;
@@ -191,6 +193,8 @@ export function extractFonts(page: PdfPage): ExtractedFont[] {
   if (!resources) return [];
 
   const registry = page.getRegistry();
+  // One call, under the limits of the page's document.
+  const ctx = beginCall(registry.limits);
   const fontDict = resolveDict(resources, '/Font', registry);
   if (!fontDict) return [];
 
@@ -205,7 +209,7 @@ export function extractFonts(page: PdfPage): ExtractedFont[] {
 
     let extracted: { format: FontFileFormat; data: Uint8Array } | undefined;
     try {
-      extracted = extractFromDescriptor(descriptor, registry);
+      extracted = extractFromDescriptor(descriptor, registry, ctx);
     } catch (err) {
       // A limit error leaves the call; a malformed font file or filter is tolerated and skipped.
       if (err instanceof ResourceLimitError) throw err;

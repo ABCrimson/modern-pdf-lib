@@ -29,6 +29,7 @@ import type { PdfObjectParser } from './objectParser.js';
 import { decodeFlateOnly, firstFilterName } from '../../codecs/streamDecode.js';
 import { PdfParseError } from '../parseError.js';
 import { ResourceLimitError } from '../../errors.js';
+import { beginCall, resolveLimits, type LimitContext } from '../../internal/limits.js';
 
 // ---------------------------------------------------------------------------
 // Public interfaces
@@ -219,15 +220,26 @@ export class XrefParser {
   /** Object parser for reading indirect objects and trailer dicts. */
   private readonly objectParser: PdfObjectParser;
 
+  /** The limit context the cross-reference streams decode under. */
+  private readonly ctx: LimitContext;
+
   /**
    * Create a new XrefParser.
    *
    * @param data          The raw PDF file bytes.
    * @param objectParser  An object parser configured with the same data.
+   * @param ctx           The limit context of the load the cross-reference
+   *                      streams decode under; a context over the default
+   *                      limits when it is left out.
    */
-  constructor(data: Uint8Array, objectParser: PdfObjectParser) {
+  constructor(
+    data: Uint8Array,
+    objectParser: PdfObjectParser,
+    ctx: LimitContext = beginCall(resolveLimits(undefined)),
+  ) {
     this.data = data;
     this.objectParser = objectParser;
+    this.ctx = ctx;
   }
 
   // -----------------------------------------------------------------------
@@ -647,7 +659,7 @@ export class XrefParser {
     }
 
     // No filter, or /FlateDecode and its predictor; any other /Filter is not read
-    const decodedData = decodeFlateOnly(stream);
+    const decodedData = decodeFlateOnly(stream, this.ctx);
     if (decodedData === undefined) {
       const filterName = firstFilterName(dict) ?? 'unknown';
       throw new PdfParseError({
