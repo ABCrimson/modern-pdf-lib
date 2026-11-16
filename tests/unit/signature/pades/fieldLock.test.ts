@@ -95,7 +95,13 @@ describe('addFieldLock', () => {
 
   it('should throw for "Include" without fields', () => {
     const options = createMockSignOptions();
-    expect(() => addFieldLock(options, { action: 'Include' })).toThrow('at least one field name');
+    expect(() => addFieldLock(options, { action: 'Include' })).toThrow(
+      expect.objectContaining({
+        name: 'InvalidArgumentError',
+        argument: 'lock.fields',
+        message: 'Field lock action "Include" requires at least one field name',
+      }),
+    );
   });
 
   it('should throw for "Exclude" with empty fields', () => {

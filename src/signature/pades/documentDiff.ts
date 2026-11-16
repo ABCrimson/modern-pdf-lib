@@ -13,6 +13,7 @@
  */
 
 import { findSignatures, stringEntryPattern, stringEntryText } from './byteRange.js';
+import { InvalidArgumentError } from '../../errors.js';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -266,7 +267,10 @@ export async function diffSignedContent(
   const targetIdx = signatureIndex ?? signatures.length - 1;
 
   if (targetIdx < 0 || targetIdx >= signatures.length) {
-    throw new Error(`Signature index ${targetIdx} out of range (0–${signatures.length - 1})`);
+    throw new InvalidArgumentError(
+      `Signature index ${targetIdx} out of range (0–${signatures.length - 1})`,
+      { argument: 'signatureIndex' },
+    );
   }
 
   const sig = signatures[targetIdx]!;

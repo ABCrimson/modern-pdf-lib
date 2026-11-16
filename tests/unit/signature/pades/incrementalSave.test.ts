@@ -191,17 +191,35 @@ describe('parseExistingTrailer', () => {
 
   it('should throw for invalid PDF without startxref', () => {
     const badPdf = encoder.encode('%PDF-1.7\nsome garbage\n');
-    expect(() => parseExistingTrailer(badPdf)).toThrow('startxref');
+    expect(() => parseExistingTrailer(badPdf)).toThrow(
+      expect.objectContaining({
+        name: 'MalformedInputError',
+        format: 'pdf',
+        message: expect.stringContaining('Cannot find startxref in PDF'),
+      }),
+    );
   });
 
   it('should throw for PDF without /Size', () => {
     const badPdf = encoder.encode('%PDF-1.7\ntrailer\n<< /Root 1 0 R >>\nstartxref\n0\n%%EOF\n');
-    expect(() => parseExistingTrailer(badPdf)).toThrow('/Size');
+    expect(() => parseExistingTrailer(badPdf)).toThrow(
+      expect.objectContaining({
+        name: 'MalformedInputError',
+        format: 'pdf',
+        message: 'Cannot find /Size in PDF trailer',
+      }),
+    );
   });
 
   it('should throw for PDF without /Root', () => {
     const badPdf = encoder.encode('%PDF-1.7\ntrailer\n<< /Size 5 >>\nstartxref\n0\n%%EOF\n');
-    expect(() => parseExistingTrailer(badPdf)).toThrow('/Root');
+    expect(() => parseExistingTrailer(badPdf)).toThrow(
+      expect.objectContaining({
+        name: 'MalformedInputError',
+        format: 'pdf',
+        message: 'Cannot find /Root in PDF trailer',
+      }),
+    );
   });
 });
 

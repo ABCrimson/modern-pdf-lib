@@ -20,6 +20,7 @@
  */
 
 import { assertUnencryptedInput } from '../../core/io/incrementalWriter.js';
+import { MalformedInputError } from '../../errors.js';
 import { warnOnce } from '../../internal/warnings.js';
 import { latin1Bytes } from '../../internal/latin1.js';
 
@@ -278,20 +279,22 @@ export function parseExistingTrailer(pdf: Uint8Array): TrailerInfo {
   // Find startxref
   const startxrefIdx = text.lastIndexOf('startxref');
   if (startxrefIdx === -1) {
-    throw new Error('Cannot find startxref in PDF — file may be corrupted');
+    throw new MalformedInputError('Cannot find startxref in PDF — file may be corrupted', {
+      format: 'pdf',
+    });
   }
 
   const afterStartxref = text.slice(startxrefIdx + 9).trim();
   const xrefOffsetMatch = afterStartxref.match(/^(\d+)/);
   if (!xrefOffsetMatch) {
-    throw new Error('Cannot parse xref offset from startxref');
+    throw new MalformedInputError('Cannot parse xref offset from startxref', { format: 'pdf' });
   }
   const prevXrefOffset = parseInt(xrefOffsetMatch[1]!, 10);
 
   // Find the LAST /Size (in the most recent trailer)
   const sizeMatches = [...text.matchAll(/\/Size\s+(\d+)/g)];
   if (sizeMatches.length === 0) {
-    throw new Error('Cannot find /Size in PDF trailer');
+    throw new MalformedInputError('Cannot find /Size in PDF trailer', { format: 'pdf' });
   }
   const lastSizeMatch = sizeMatches[sizeMatches.length - 1]!;
   const size = parseInt(lastSizeMatch[1]!, 10);
@@ -299,7 +302,7 @@ export function parseExistingTrailer(pdf: Uint8Array): TrailerInfo {
   // Find /Root
   const rootMatch = text.match(/\/Root\s+(\d+\s+\d+\s+R)/);
   if (!rootMatch) {
-    throw new Error('Cannot find /Root in PDF trailer');
+    throw new MalformedInputError('Cannot find /Root in PDF trailer', { format: 'pdf' });
   }
   const rootRef = rootMatch[1]!;
 
@@ -359,8 +362,9 @@ export function saveIncrementalWithSignaturePreservation(
     if (existingSignatures.length > 0) {
       const valid = validateByteRangeIntegrity(originalPdf, existingSignatures);
       if (!valid) {
-        throw new Error(
+        throw new MalformedInputError(
           'Existing signature byte ranges are invalid — cannot perform incremental save',
+          { format: 'pdf' },
         );
       }
     }

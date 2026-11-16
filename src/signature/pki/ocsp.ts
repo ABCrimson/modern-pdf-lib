@@ -32,6 +32,7 @@ import {
   toBuffer,
 } from '../cms/pkcs7.js';
 import type { Asn1Node } from '../cms/pkcs7.js';
+import { EnvironmentError, MalformedInputError } from '../../errors.js';
 import { validateExtendedKeyUsage } from './certPolicy.js';
 import { verifySignedDer } from './chainValidator.js';
 
@@ -383,7 +384,7 @@ export function parseOcspResponse(response: Uint8Array): OcspResponse {
   const root = parseDerTlv(response, 0);
 
   if (root.children.length < 1) {
-    throw new Error('Invalid OCSP response: empty SEQUENCE');
+    throw new MalformedInputError('Invalid OCSP response: empty SEQUENCE', { format: 'der' });
   }
 
   // responseStatus ENUMERATED
@@ -399,13 +400,14 @@ export function parseOcspResponse(response: Uint8Array): OcspResponse {
       5: 'sigRequired',
       6: 'unauthorized',
     };
-    throw new Error(
+    throw new MalformedInputError(
       `OCSP response error: ${statusNames[responseStatus] ?? `status ${responseStatus}`}`,
+      { format: 'der' },
     );
   }
 
   if (root.children.length < 2) {
-    throw new Error('OCSP response contains no responseBytes');
+    throw new MalformedInputError('OCSP response contains no responseBytes', { format: 'der' });
   }
 
   // responseBytes [0] EXPLICIT
@@ -779,8 +781,9 @@ function findMatchingSingleResponse(responses: Asn1Node, certId: CertIdFields): 
  * @param issuerCert  DER-encoded issuer certificate.
  * @param ocspUrl     URL of the OCSP responder.
  * @returns           The OCSP status result.
- * @throws {Error}    When the HTTP request fails, the responder returns
- *                    an error status, or the response cannot be parsed.
+ * @throws {EnvironmentError} When the HTTP request fails (reason `'network'`).
+ * @throws {MalformedInputError} When the responder returns an error status or the
+ *                    response is not a well-formed OCSPResponse (format `'der'`).
  */
 export async function checkCertificateStatus(
   cert: Uint8Array,
@@ -802,7 +805,10 @@ export async function checkCertificateStatus(
   });
 
   if (!response.ok) {
-    throw new Error(`OCSP request failed: HTTP ${response.status} ${response.statusText}`);
+    throw new EnvironmentError(
+      `OCSP request failed: HTTP ${response.status} ${response.statusText}`,
+      { reason: 'network' },
+    );
   }
 
   const respBytes = new Uint8Array(await response.arrayBuffer());

@@ -186,7 +186,13 @@ describe('embedOcspResponse', () => {
     const invalid = new Uint8Array([0x30, 0x00]); // empty SEQUENCE
     const ocspResp = createMockOcspResponse();
 
-    expect(() => embedOcspResponse(invalid, ocspResp)).toThrow();
+    expect(() => embedOcspResponse(invalid, ocspResp)).toThrow(
+      expect.objectContaining({
+        name: 'MalformedInputError',
+        format: 'der',
+        message: 'Invalid PKCS#7 ContentInfo: expected at least 2 children',
+      }),
+    );
   });
 });
 

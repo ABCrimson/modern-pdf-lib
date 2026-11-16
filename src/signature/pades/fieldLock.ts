@@ -19,6 +19,7 @@
  */
 
 import { readStringEntry } from './byteRange.js';
+import { InvalidArgumentError } from '../../errors.js';
 import type { SignOptions } from './signatureHandler.js';
 import { warnOnce } from '../../internal/warnings.js';
 
@@ -90,7 +91,10 @@ function escapePdfString(str: string): string {
  */
 export function addFieldLock(options: SignOptions, lock: FieldLockOptions): void {
   if (lock.action !== 'All' && (!lock.fields || lock.fields.length === 0)) {
-    throw new Error(`Field lock action "${lock.action}" requires at least one field name`);
+    throw new InvalidArgumentError(
+      `Field lock action "${lock.action}" requires at least one field name`,
+      { argument: 'lock.fields' },
+    );
   }
 
   warnOnce(

@@ -2,9 +2,10 @@
  * Tests for CRL (Certificate Revocation List) parsing and revocation checking.
  */
 
-import { describe, it, expect } from 'vitest';
+import { afterEach, describe, it, expect, vi } from 'vitest';
 import {
   parseCrl,
+  downloadCrl,
   isCertificateRevoked,
   extractCrlUrls,
 } from '../../../../src/signature/pki/crl.js';
@@ -513,5 +514,35 @@ describe('extractCrlUrls', () => {
     const urls = extractCrlUrls(cert);
     expect(urls).toHaveLength(1);
     expect(urls[0]).toBe('https://crl.secure.example.com/revocations.crl');
+  });
+});
+
+describe('typed errors', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('refuses an empty CertificateList as malformed DER', () => {
+    expect(() => parseCrl(Uint8Array.of(0x30, 0x00))).toThrow(
+      expect.objectContaining({
+        name: 'MalformedInputError',
+        format: 'der',
+        message: 'Invalid CRL: empty SEQUENCE',
+      }),
+    );
+  });
+
+  it('reports an HTTP failure of the download as EnvironmentError', async () => {
+    vi.stubGlobal(
+      'fetch',
+      async () => new Response(null, { status: 404, statusText: 'Not Found' }),
+    );
+    await expect(downloadCrl('http://crl.invalid/ca.crl')).rejects.toThrow(
+      expect.objectContaining({
+        name: 'EnvironmentError',
+        reason: 'network',
+        message: 'CRL download failed: HTTP 404 Not Found',
+      }),
+    );
   });
 });

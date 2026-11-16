@@ -46,6 +46,7 @@
 
 import { parseDerTlv, decodeOidBytes } from '../cms/pkcs7.js';
 import type { Asn1Node } from '../cms/pkcs7.js';
+import { MalformedInputError } from '../../errors.js';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -121,7 +122,11 @@ function sliceChild(certDer: Uint8Array, parentNode: Asn1Node, child: Asn1Node):
 function tbsContext(certDer: Uint8Array): { tbs: Asn1Node; idx: number } {
   const cert = parseDerTlv(certDer, 0);
   const tbs = cert.children[0];
-  if (!tbs) throw new Error('Malformed certificate: missing TBSCertificate');
+  if (!tbs) {
+    throw new MalformedInputError('Malformed certificate: missing TBSCertificate', {
+      format: 'der',
+    });
+  }
   const first = tbs.children[0];
   const idx = first && first.tag === 0xa0 ? 1 : 0;
   return { tbs, idx };
@@ -131,7 +136,9 @@ function tbsContext(certDer: Uint8Array): { tbs: Asn1Node; idx: number } {
 function extractIssuerDer(certDer: Uint8Array): Uint8Array {
   const { tbs, idx } = tbsContext(certDer);
   const issuerNode = tbs.children[idx + 2];
-  if (!issuerNode) throw new Error('Malformed certificate: missing issuer');
+  if (!issuerNode) {
+    throw new MalformedInputError('Malformed certificate: missing issuer', { format: 'der' });
+  }
   return sliceChild(certDer, tbs, issuerNode);
 }
 
@@ -139,7 +146,9 @@ function extractIssuerDer(certDer: Uint8Array): Uint8Array {
 function extractSubjectDer(certDer: Uint8Array): Uint8Array {
   const { tbs, idx } = tbsContext(certDer);
   const subjectNode = tbs.children[idx + 4];
-  if (!subjectNode) throw new Error('Malformed certificate: missing subject');
+  if (!subjectNode) {
+    throw new MalformedInputError('Malformed certificate: missing subject', { format: 'der' });
+  }
   return sliceChild(certDer, tbs, subjectNode);
 }
 

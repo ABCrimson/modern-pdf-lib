@@ -31,6 +31,7 @@
  */
 
 import { PdfDict, PdfName, PdfArray, PdfString } from '../../core/pdfObjects.js';
+import { InvalidArgumentError } from '../../errors.js';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -89,7 +90,7 @@ export interface DocTimeStampOptions {
  *
  * @param options  Optional configuration.
  * @returns        The Document Timestamp signature dictionary.
- * @throws         {RangeError} when `contentsSize` is not a positive
+ * @throws         {InvalidArgumentError} when `contentsSize` is not a positive
  *                 integer.
  * @throws         {UnencodableTextError} when `reason` holds a lone
  *                 surrogate or U+001B.
@@ -106,7 +107,10 @@ export function buildDocTimeStampDict(options?: DocTimeStampOptions): PdfDict {
   const contentsSize = options?.contentsSize ?? DEFAULT_DOC_TIMESTAMP_CONTENTS_SIZE;
 
   if (!Number.isInteger(contentsSize) || contentsSize <= 0) {
-    throw new RangeError(`contentsSize must be a positive integer, got ${String(contentsSize)}`);
+    throw new InvalidArgumentError(
+      `contentsSize must be a positive integer, got ${String(contentsSize)}`,
+      { argument: 'options.contentsSize' },
+    );
   }
 
   const dict = new PdfDict();

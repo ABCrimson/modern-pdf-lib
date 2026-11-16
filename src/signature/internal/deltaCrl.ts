@@ -16,6 +16,7 @@
 
 import { parseDerTlv, decodeOidBytes } from '../cms/pkcs7.js';
 import type { Asn1Node } from '../cms/pkcs7.js';
+import { MalformedInputError } from '../../errors.js';
 import type { CrlData } from './revocationCache.js';
 
 // ---------------------------------------------------------------------------
@@ -305,12 +306,12 @@ export function isDeltaCrl(data: Uint8Array): boolean {
  *
  * @param data  DER-encoded delta CRL bytes.
  * @returns     Parsed delta CRL data.
- * @throws      Error if the data is not a valid delta CRL.
+ * @throws      {@link MalformedInputError} (format `'der'`) if the data is not a valid delta CRL.
  */
 export function parseDeltaCrl(data: Uint8Array): DeltaCrlData {
   const certList = parseDerTlv(data, 0);
   if (certList.children.length === 0) {
-    throw new Error('Invalid CRL: empty SEQUENCE');
+    throw new MalformedInputError('Invalid CRL: empty SEQUENCE', { format: 'der' });
   }
 
   const tbsData = certList.children[0]!;
@@ -348,7 +349,9 @@ export function parseDeltaCrl(data: Uint8Array): DeltaCrlData {
   }
 
   if (baseIndicator === -1) {
-    throw new Error('Not a delta CRL: missing Delta CRL Indicator extension');
+    throw new MalformedInputError('Not a delta CRL: missing Delta CRL Indicator extension', {
+      format: 'der',
+    });
   }
 
   if (deltaNumber === -1) {

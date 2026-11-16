@@ -186,12 +186,30 @@ describe('buildDocTimeStampDict', () => {
   });
 
   it('rejects a non-positive contentsSize', () => {
-    expect(() => buildDocTimeStampDict({ contentsSize: 0 })).toThrow(RangeError);
-    expect(() => buildDocTimeStampDict({ contentsSize: -1 })).toThrow(RangeError);
+    expect(() => buildDocTimeStampDict({ contentsSize: 0 })).toThrow(
+      expect.objectContaining({
+        name: 'InvalidArgumentError',
+        argument: 'options.contentsSize',
+        message: 'contentsSize must be a positive integer, got 0',
+      }),
+    );
+    expect(() => buildDocTimeStampDict({ contentsSize: -1 })).toThrow(
+      expect.objectContaining({
+        name: 'InvalidArgumentError',
+        argument: 'options.contentsSize',
+        message: 'contentsSize must be a positive integer, got -1',
+      }),
+    );
   });
 
   it('rejects a non-integer contentsSize', () => {
-    expect(() => buildDocTimeStampDict({ contentsSize: 1024.5 })).toThrow(RangeError);
+    expect(() => buildDocTimeStampDict({ contentsSize: 1024.5 })).toThrow(
+      expect.objectContaining({
+        name: 'InvalidArgumentError',
+        argument: 'options.contentsSize',
+        message: 'contentsSize must be a positive integer, got 1024.5',
+      }),
+    );
   });
 
   it('accepts an explicit options object typed as DocTimeStampOptions', () => {

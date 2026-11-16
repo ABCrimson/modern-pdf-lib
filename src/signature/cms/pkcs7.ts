@@ -39,7 +39,13 @@
  */
 
 import { assertWithinLimit } from '../../internal/limits.js';
-import { ResourceLimitError } from '../../errors.js';
+import {
+  EnvironmentError,
+  InvalidArgumentError,
+  MalformedInputError,
+  ResourceLimitError,
+  UnsupportedFeatureError,
+} from '../../errors.js';
 import { buildSigningCertificateV2Attribute } from './cadesAttributes.js';
 
 // ---------------------------------------------------------------------------
@@ -220,7 +226,7 @@ export function encodeSet(contents: Uint8Array[]): Uint8Array {
 export function encodeOID(oid: string): Uint8Array {
   const parts = oid.split('.').map(Number);
   if (parts.length < 2) {
-    throw new Error(`Invalid OID: ${oid}`);
+    throw new InvalidArgumentError(`Invalid OID: ${oid}`, { argument: 'oid' });
   }
 
   // First two components are encoded as: first * 40 + second
@@ -396,7 +402,7 @@ export function encodeContextTag(tag: number, contents: Uint8Array): Uint8Array 
 function encodeDigestAlgorithm(hashAlgo: string): Uint8Array {
   const oid = HASH_OID_MAP[hashAlgo];
   if (!oid) {
-    throw new Error(`Unsupported hash algorithm: ${hashAlgo}`);
+    throw new UnsupportedFeatureError(`Unsupported hash algorithm: ${hashAlgo}`);
   }
   // SHA-2 algorithms have NULL parameters
   return encodeSequence([encodeOID(oid), encodeTlv(TAG.NULL, new Uint8Array(0))]);
@@ -420,7 +426,7 @@ function encodeSignatureAlgorithm(keyAlgo: string, hashAlgo: string): Uint8Array
         oid = OID.sha512WithRSA;
         break;
       default:
-        throw new Error(`Unsupported hash for RSA: ${hashAlgo}`);
+        throw new UnsupportedFeatureError(`Unsupported hash for RSA: ${hashAlgo}`);
     }
     return encodeSequence([encodeOID(oid), encodeTlv(TAG.NULL, new Uint8Array(0))]);
   }
@@ -437,12 +443,12 @@ function encodeSignatureAlgorithm(keyAlgo: string, hashAlgo: string): Uint8Array
         oid = OID.ecdsaWithSHA512;
         break;
       default:
-        throw new Error(`Unsupported hash for ECDSA: ${hashAlgo}`);
+        throw new UnsupportedFeatureError(`Unsupported hash for ECDSA: ${hashAlgo}`);
     }
     return encodeSequence([encodeOID(oid)]);
   }
 
-  throw new Error(`Unsupported key algorithm: ${keyAlgo}`);
+  throw new UnsupportedFeatureError(`Unsupported key algorithm: ${keyAlgo}`);
 }
 
 /**
@@ -474,11 +480,11 @@ function encodeSignatureAlgorithm(keyAlgo: string, hashAlgo: string): Uint8Array
 function encodeRsaPssSignatureAlgorithm(hashAlgo: string): Uint8Array {
   const hashOid = HASH_OID_MAP[hashAlgo];
   if (!hashOid) {
-    throw new Error(`Unsupported hash for RSA-PSS: ${hashAlgo}`);
+    throw new UnsupportedFeatureError(`Unsupported hash for RSA-PSS: ${hashAlgo}`);
   }
   const saltLength = PSS_SALT_LENGTH[hashAlgo];
   if (saltLength === undefined) {
-    throw new Error(`Unsupported hash for RSA-PSS: ${hashAlgo}`);
+    throw new UnsupportedFeatureError(`Unsupported hash for RSA-PSS: ${hashAlgo}`);
   }
 
   // hashAlgorithm AlgorithmIdentifier = SEQUENCE { hashOid, NULL }
@@ -525,9 +531,9 @@ interface Asn1Node {
  * Parse a single DER TLV from a byte array at the given offset.
  *
  * Long-form lengths take 1 to 4 bytes and must fit in the data: the length bytes and the content
- * lie inside `data`, and an indefinite length (0x80) is refused. Each violation throws an `Error`
- * whose message starts with `DER: `, except a value cut off before its length byte, which throws
- * `Unexpected end of DER data`. Nesting of constructed values deeper than
+ * lie inside `data`, and an indefinite length (0x80) is refused (X.690 10.1: DER uses the
+ * definite form only). Each violation, and a value cut off before its tag or length byte, throws
+ * {@link MalformedInputError} with format `'der'`. Nesting of constructed values deeper than
  * `INTERNAL_LIMITS.maxDerDepth` throws {@link ResourceLimitError}.
  *
  * @param data    The bytes holding the value.
@@ -536,7 +542,7 @@ interface Asn1Node {
  */
 function parseDerTlv(data: Uint8Array, offset: number, depth = 0): Asn1Node {
   if (offset >= data.length) {
-    throw new Error('Unexpected end of DER data');
+    throw new MalformedInputError('Unexpected end of DER data', { format: 'der' });
   }
 
   const tag = data[offset]!;
@@ -546,7 +552,7 @@ function parseDerTlv(data: Uint8Array, offset: number, depth = 0): Asn1Node {
 
   // Parse length
   if (pos >= data.length) {
-    throw new Error('Unexpected end of DER data');
+    throw new MalformedInputError('Unexpected end of DER data', { format: 'der' });
   }
   let length: number;
   const firstLenByte = data[pos]!;
@@ -557,13 +563,15 @@ function parseDerTlv(data: Uint8Array, offset: number, depth = 0): Asn1Node {
   } else {
     const numLenBytes = firstLenByte & 0x7f;
     if (numLenBytes === 0) {
-      throw new Error('DER: indefinite length is not supported');
+      throw new MalformedInputError('DER: indefinite length is not supported', { format: 'der' });
     }
     if (numLenBytes > 4) {
-      throw new Error('DER: more than 4 length bytes');
+      throw new MalformedInputError('DER: more than 4 length bytes', { format: 'der' });
     }
     if (pos + numLenBytes > data.length) {
-      throw new Error('DER: length bytes run past the end of the data');
+      throw new MalformedInputError('DER: length bytes run past the end of the data', {
+        format: 'der',
+      });
     }
     length = 0;
     for (let i = 0; i < numLenBytes; i++) {
@@ -573,7 +581,7 @@ function parseDerTlv(data: Uint8Array, offset: number, depth = 0): Asn1Node {
   }
 
   if (pos + length > data.length) {
-    throw new Error('DER: length runs past the end of the data');
+    throw new MalformedInputError('DER: length runs past the end of the data', { format: 'der' });
   }
 
   const headerLength = pos - offset;
@@ -602,18 +610,15 @@ function parseDerTlv(data: Uint8Array, offset: number, depth = 0): Asn1Node {
 }
 
 /**
- * The message of an error that {@link parseDerTlv} throws for input it refuses (a length rule or
- * the depth limit), or `undefined` for any other error. Both verifiers report such a signature as
- * not valid, like an unparsable one; `verifySignatureDetailed` adds this message to `errors`.
+ * The message of an error that refuses DER input: a {@link MalformedInputError} with format
+ * `'der'` (what {@link parseDerTlv} throws for a length rule) or a {@link ResourceLimitError}
+ * (the depth limit); `undefined` for any other error. The check is by class and format, never by
+ * message text. Both verifiers report such a signature as not valid, like an unparsable one;
+ * `verifySignatureDetailed` adds this message to `errors`.
  */
 function derRefusalMessage(error: unknown): string | undefined {
   if (error instanceof ResourceLimitError) return error.message;
-  if (
-    error instanceof Error &&
-    (error.message.startsWith('DER: ') || error.message === 'Unexpected end of DER data')
-  ) {
-    return error.message;
-  }
+  if (error instanceof MalformedInputError && error.format === 'der') return error.message;
   return undefined;
 }
 
@@ -798,9 +803,10 @@ function toBuffer(data: Uint8Array): ArrayBuffer {
 function getSubtle(): SubtleCrypto {
   const subtle = globalThis.crypto?.subtle;
   if (!subtle) {
-    throw new Error(
+    throw new EnvironmentError(
       'Web Crypto API (crypto.subtle) is not available. ' +
         'Requires Node.js 18+, a modern browser, Deno, or Bun.',
+      { reason: 'web-crypto' },
     );
   }
   return subtle;
@@ -851,7 +857,7 @@ async function signData(
     if (rsaScheme === 'pss') {
       const saltLength = PSS_SALT_LENGTH[hashAlgorithm];
       if (saltLength === undefined) {
-        throw new Error(`Unsupported hash for RSA-PSS: ${hashAlgorithm}`);
+        throw new UnsupportedFeatureError(`Unsupported hash for RSA-PSS: ${hashAlgorithm}`);
       }
       // RFC 4055 / our params: salt length = hash output length.
       algorithm = { name: 'RSA-PSS', saltLength };

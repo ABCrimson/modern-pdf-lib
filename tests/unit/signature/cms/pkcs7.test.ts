@@ -2,7 +2,12 @@
  * Tests for PKCS#7/CMS signature building and ASN.1 DER encoding.
  */
 
-import { describe, it, expect } from 'vitest';
+import { afterEach, describe, it, expect, vi } from 'vitest';
+import {
+  EnvironmentError,
+  InvalidArgumentError,
+  MalformedInputError,
+} from '../../../../src/errors.js';
 import {
   encodeLength,
   encodeSequence,
@@ -16,6 +21,9 @@ import {
   encodeSigningTime,
   encodeContextTag,
   buildPkcs7Signature,
+  derRefusalMessage,
+  getSubtle,
+  parseDerTlv,
 } from '../../../../src/signature/cms/pkcs7.js';
 
 // ---------------------------------------------------------------------------
@@ -451,5 +459,73 @@ describe('buildPkcs7Signature', () => {
     const hex1 = new Uint8Array(sig1).toHex();
     const hex2 = new Uint8Array(sig2).toHex();
     expect(hex1).not.toBe(hex2);
+  });
+});
+
+describe('typed errors', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('refuses an OID of fewer than 2 components as an invalid argument', () => {
+    expect(() => encodeOID('1')).toThrow(InvalidArgumentError);
+    expect(() => encodeOID('1')).toThrow(
+      expect.objectContaining({
+        code: 'invalid-argument',
+        argument: 'oid',
+        message: 'Invalid OID: 1',
+      }),
+    );
+  });
+
+  it.each([
+    ['no tag byte', new Uint8Array(0), 'Unexpected end of DER data'],
+    ['no length byte', Uint8Array.of(0x30), 'Unexpected end of DER data'],
+    [
+      'an indefinite length',
+      Uint8Array.of(0x30, 0x80, 0x00, 0x00),
+      'DER: indefinite length is not supported',
+    ],
+    [
+      '5 length bytes',
+      Uint8Array.of(0x04, 0x85, 0, 0, 0, 0, 1, 0),
+      'DER: more than 4 length bytes',
+    ],
+    [
+      'cut-off length bytes',
+      Uint8Array.of(0x04, 0x82, 0x01),
+      'DER: length bytes run past the end of the data',
+    ],
+    [
+      'a length past the end',
+      Uint8Array.of(0x04, 0x05, 0x00),
+      'DER: length runs past the end of the data',
+    ],
+  ])('refuses %s as malformed DER', (_label, der, message) => {
+    expect(() => parseDerTlv(der, 0)).toThrow(MalformedInputError);
+    expect(() => parseDerTlv(der, 0)).toThrow(
+      expect.objectContaining({ code: 'malformed-input', format: 'der', message }),
+    );
+  });
+
+  it('recognises a refusal of the DER reader by class and format, not by message', () => {
+    expect(derRefusalMessage(new MalformedInputError('cut off', { format: 'der' }))).toBe(
+      'cut off',
+    );
+    expect(
+      derRefusalMessage(new MalformedInputError('DER: in a PDF', { format: 'pdf' })),
+    ).toBeUndefined();
+    expect(
+      derRefusalMessage(new Error('DER: length runs past the end of the data')),
+    ).toBeUndefined();
+    expect(derRefusalMessage(new Error('Unexpected end of DER data'))).toBeUndefined();
+  });
+
+  it('throws EnvironmentError when Web Crypto is missing', () => {
+    vi.stubGlobal('crypto', undefined);
+    expect(() => getSubtle()).toThrow(EnvironmentError);
+    expect(() => getSubtle()).toThrow(
+      expect.objectContaining({ code: 'environment-unavailable', reason: 'web-crypto' }),
+    );
   });
 });

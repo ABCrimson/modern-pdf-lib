@@ -511,7 +511,13 @@ describe('parseOcspResponse', () => {
 
   it('should throw for malformedRequest status', () => {
     const resp = buildMockOcspResponse(1);
-    expect(() => parseOcspResponse(resp)).toThrow('malformedRequest');
+    expect(() => parseOcspResponse(resp)).toThrow(
+      expect.objectContaining({
+        name: 'MalformedInputError',
+        format: 'der',
+        message: 'OCSP response error: malformedRequest',
+      }),
+    );
   });
 
   it('should throw for internalError status', () => {
@@ -907,5 +913,53 @@ describe('checkCertificateStatus', () => {
     const result = await checkCertificateStatus(leaf, ca.certificate, ocspUrl);
 
     expect(result.status).toBe('unknown');
+  });
+});
+
+describe('typed errors', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('refuses an empty OCSPResponse as malformed DER', () => {
+    expect(() => parseOcspResponse(Uint8Array.of(0x30, 0x00))).toThrow(
+      expect.objectContaining({
+        name: 'MalformedInputError',
+        format: 'der',
+        message: 'Invalid OCSP response: empty SEQUENCE',
+      }),
+    );
+  });
+
+  it('refuses a successful OCSPResponse without responseBytes as malformed DER', () => {
+    expect(() => parseOcspResponse(buildMockOcspResponse(0))).toThrow(
+      expect.objectContaining({
+        name: 'MalformedInputError',
+        format: 'der',
+        message: 'OCSP response contains no responseBytes',
+      }),
+    );
+  });
+
+  it('reports an HTTP failure of the responder as EnvironmentError', async () => {
+    const ocspUrl = 'http://ocsp.invalid/';
+    const ca = await fx.generateTestCertWithOcsp(ocspUrl);
+    const leaf = await fx.generateIssuedCert(
+      ca.certificate,
+      ca.keyPair,
+      'Subject',
+      Uint8Array.of(1),
+    );
+    vi.stubGlobal(
+      'fetch',
+      async () => new Response(null, { status: 500, statusText: 'Server Error' }),
+    );
+    await expect(checkCertificateStatus(leaf, ca.certificate, ocspUrl)).rejects.toThrow(
+      expect.objectContaining({
+        name: 'EnvironmentError',
+        reason: 'network',
+        message: 'OCSP request failed: HTTP 500 Server Error',
+      }),
+    );
   });
 });

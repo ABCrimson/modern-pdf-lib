@@ -286,11 +286,23 @@ describe('parseDeltaCrl', () => {
     });
     const crl = buildMockCrl(tbs);
 
-    expect(() => parseDeltaCrl(crl)).toThrow('Not a delta CRL');
+    expect(() => parseDeltaCrl(crl)).toThrow(
+      expect.objectContaining({
+        name: 'MalformedInputError',
+        format: 'der',
+        message: 'Not a delta CRL: missing Delta CRL Indicator extension',
+      }),
+    );
   });
 
   it('should throw for invalid data', () => {
-    expect(() => parseDeltaCrl(new Uint8Array([0x30, 0x00]))).toThrow();
+    expect(() => parseDeltaCrl(new Uint8Array([0x30, 0x00]))).toThrow(
+      expect.objectContaining({
+        name: 'MalformedInputError',
+        format: 'der',
+        message: 'Invalid CRL: empty SEQUENCE',
+      }),
+    );
   });
 
   it('should default deltaNumber to baseIndicator + 1 when no CRL Number', () => {

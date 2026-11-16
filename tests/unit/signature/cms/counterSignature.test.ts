@@ -132,7 +132,13 @@ describe('addCounterSignature', () => {
         certificate: new Uint8Array(100),
         privateKey: new Uint8Array(100),
       }),
-    ).rejects.toThrow('No signatures found');
+    ).rejects.toThrow(
+      expect.objectContaining({
+        name: 'InvalidArgumentError',
+        argument: 'pdf',
+        message: 'No signatures found in the PDF',
+      }),
+    );
   });
 
   it('should reject out-of-range signature index', async () => {
@@ -146,6 +152,12 @@ describe('addCounterSignature', () => {
         certificate: new Uint8Array(100),
         privateKey: new Uint8Array(100),
       }),
-    ).rejects.toThrow('out of range');
+    ).rejects.toThrow(
+      expect.objectContaining({
+        name: 'InvalidArgumentError',
+        argument: 'targetSignatureIndex',
+        message: expect.stringContaining('out of range'),
+      }),
+    );
   });
 });

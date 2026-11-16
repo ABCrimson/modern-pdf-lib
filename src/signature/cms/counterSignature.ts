@@ -17,6 +17,7 @@
  */
 
 import { findSignatures } from '../pades/byteRange.js';
+import { InvalidArgumentError, UnsupportedFeatureError } from '../../errors.js';
 import { assertUnencryptedInput } from '../../core/io/incrementalWriter.js';
 import {
   parseDerTlv,
@@ -122,7 +123,7 @@ function concat(...arrays: Uint8Array[]): Uint8Array {
  */
 function encodeDigestAlgorithm(hashAlgo: string): Uint8Array {
   const oid = HASH_OID_MAP[hashAlgo];
-  if (!oid) throw new Error(`Unsupported hash algorithm: ${hashAlgo}`);
+  if (!oid) throw new UnsupportedFeatureError(`Unsupported hash algorithm: ${hashAlgo}`);
   return encodeSequence([encodeOID(oid), new Uint8Array([0x05, 0x00])]);
 }
 
@@ -133,15 +134,15 @@ function encodeSignatureAlgorithm(keyAlgo: string, hashAlgo: string): Uint8Array
   let oid: string | undefined;
   if (keyAlgo === 'RSA' || keyAlgo === 'RSASSA-PKCS1-v1_5') {
     oid = RSA_SIG_OID_MAP[hashAlgo];
-    if (!oid) throw new Error(`Unsupported hash for RSA: ${hashAlgo}`);
+    if (!oid) throw new UnsupportedFeatureError(`Unsupported hash for RSA: ${hashAlgo}`);
     return encodeSequence([encodeOID(oid), new Uint8Array([0x05, 0x00])]);
   }
   if (keyAlgo === 'EC' || keyAlgo === 'ECDSA') {
     oid = ECDSA_SIG_OID_MAP[hashAlgo];
-    if (!oid) throw new Error(`Unsupported hash for ECDSA: ${hashAlgo}`);
+    if (!oid) throw new UnsupportedFeatureError(`Unsupported hash for ECDSA: ${hashAlgo}`);
     return encodeSequence([encodeOID(oid)]);
   }
-  throw new Error(`Unsupported key algorithm: ${keyAlgo}`);
+  throw new UnsupportedFeatureError(`Unsupported key algorithm: ${keyAlgo}`);
 }
 
 /**
@@ -260,12 +261,13 @@ export async function addCounterSignature(
   const signatures = findSignatures(pdf);
 
   if (signatures.length === 0) {
-    throw new Error('No signatures found in the PDF');
+    throw new InvalidArgumentError('No signatures found in the PDF', { argument: 'pdf' });
   }
 
   if (targetSignatureIndex < 0 || targetSignatureIndex >= signatures.length) {
-    throw new Error(
+    throw new InvalidArgumentError(
       `Signature index ${targetSignatureIndex} out of range (0–${signatures.length - 1})`,
+      { argument: 'targetSignatureIndex' },
     );
   }
 

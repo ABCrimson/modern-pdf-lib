@@ -23,6 +23,7 @@
 
 import { parseDerTlv, decodeOidBytes } from '../cms/pkcs7.js';
 import type { Asn1Node } from '../cms/pkcs7.js';
+import { EnvironmentError, MalformedInputError } from '../../errors.js';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -203,7 +204,7 @@ export function parseCrl(data: Uint8Array): CrlData {
   const root = parseDerTlv(data, 0);
 
   if (root.children.length < 1) {
-    throw new Error('Invalid CRL: empty SEQUENCE');
+    throw new MalformedInputError('Invalid CRL: empty SEQUENCE', { format: 'der' });
   }
 
   // TBSCertList
@@ -298,7 +299,10 @@ export async function downloadCrl(url: string): Promise<CrlData> {
   });
 
   if (!response.ok) {
-    throw new Error(`CRL download failed: HTTP ${response.status} ${response.statusText}`);
+    throw new EnvironmentError(
+      `CRL download failed: HTTP ${response.status} ${response.statusText}`,
+      { reason: 'network' },
+    );
   }
 
   let crlBytes = new Uint8Array(await response.arrayBuffer());

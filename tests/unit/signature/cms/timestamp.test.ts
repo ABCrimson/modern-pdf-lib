@@ -2,10 +2,11 @@
  * Tests for the RFC 3161 timestamp request/response building and parsing.
  */
 
-import { describe, it, expect } from 'vitest';
+import { afterEach, describe, it, expect, vi } from 'vitest';
 import {
   buildTimestampRequest,
   parseTimestampResponse,
+  requestTimestamp,
 } from '../../../../src/signature/cms/timestamp.js';
 import {
   encodeSequence,
@@ -162,7 +163,13 @@ describe('buildTimestampRequest', () => {
 
   it('should throw for unsupported hash algorithm', () => {
     const hash = new Uint8Array(32);
-    expect(() => buildTimestampRequest(hash, 'MD5')).toThrow('Unsupported');
+    expect(() => buildTimestampRequest(hash, 'MD5')).toThrow(
+      expect.objectContaining({
+        name: 'UnsupportedFeatureError',
+        code: 'unsupported-feature',
+        message: 'Unsupported hash algorithm for timestamp: MD5',
+      }),
+    );
   });
 
   it('should include version 1', () => {
@@ -209,7 +216,11 @@ describe('buildTimestampRequest', () => {
 
   it('rejects an empty caller nonce', () => {
     expect(() => buildTimestampRequest(new Uint8Array(32), 'SHA-256', new Uint8Array(0))).toThrow(
-      RangeError,
+      expect.objectContaining({
+        name: 'InvalidArgumentError',
+        argument: 'nonce',
+        message: 'Timestamp nonce must not be empty',
+      }),
     );
   });
 });
@@ -237,7 +248,13 @@ describe('parseTimestampResponse', () => {
   it('should throw for error status', () => {
     const resp = buildErrorTimestampResponse(2); // rejection
 
-    expect(() => parseTimestampResponse(resp)).toThrow('error status 2');
+    expect(() => parseTimestampResponse(resp)).toThrow(
+      expect.objectContaining({
+        name: 'EnvironmentError',
+        reason: 'network',
+        message: expect.stringContaining('error status 2'),
+      }),
+    );
   });
 
   it('should throw for status 3 (waiting)', () => {
@@ -275,3 +292,44 @@ function findByteSequence(data: Uint8Array, needle: number[]): number {
   }
   return -1;
 }
+
+describe('typed errors', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('refuses a response without a status as malformed DER', () => {
+    expect(() => parseTimestampResponse(Uint8Array.of(0x30, 0x00))).toThrow(
+      expect.objectContaining({
+        name: 'MalformedInputError',
+        format: 'der',
+        message: 'Invalid TimeStampResp: empty SEQUENCE',
+      }),
+    );
+  });
+
+  it('refuses a granted response without a token as malformed DER', () => {
+    const granted = Uint8Array.of(0x30, 0x05, 0x30, 0x03, 0x02, 0x01, 0x00);
+    expect(() => parseTimestampResponse(granted)).toThrow(
+      expect.objectContaining({
+        name: 'MalformedInputError',
+        format: 'der',
+        message: 'TimeStampResp contains no TimeStampToken',
+      }),
+    );
+  });
+
+  it('reports an HTTP failure of the TSA as EnvironmentError', async () => {
+    vi.stubGlobal(
+      'fetch',
+      async () => new Response(null, { status: 503, statusText: 'Service Unavailable' }),
+    );
+    await expect(requestTimestamp(new Uint8Array(32), 'http://tsa.invalid/')).rejects.toThrow(
+      expect.objectContaining({
+        name: 'EnvironmentError',
+        reason: 'network',
+        message: 'TSA request failed: HTTP 503 Service Unavailable',
+      }),
+    );
+  });
+});

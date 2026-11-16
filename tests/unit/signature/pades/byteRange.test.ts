@@ -6,7 +6,7 @@ import { spawnSync } from 'node:child_process';
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { describe, it, expect } from 'vitest';
+import { afterEach, describe, it, expect, vi } from 'vitest';
 import { createPdf } from '../../../../src/core/pdfDocument.js';
 import { UnencodableTextError } from '../../../../src/errors.js';
 import {
@@ -120,7 +120,13 @@ describe('prepareForSigning', () => {
     const encoder = new TextEncoder();
     const badPdf = encoder.encode('%PDF-1.7\nsome garbage\n');
 
-    expect(() => prepareForSigning(badPdf, 'Sig1')).toThrow('startxref');
+    expect(() => prepareForSigning(badPdf, 'Sig1')).toThrow(
+      expect.objectContaining({
+        name: 'MalformedInputError',
+        format: 'pdf',
+        message: expect.stringContaining('Cannot find startxref in PDF'),
+      }),
+    );
   });
 
   it('should produce valid xref in the incremental update', () => {
@@ -342,7 +348,13 @@ describe('embedSignature', () => {
     // Create a signature larger than the placeholder
     const largeSig = new Uint8Array(128);
 
-    expect(() => embedSignature(preparedPdf, largeSig, byteRange)).toThrow('placeholder');
+    expect(() => embedSignature(preparedPdf, largeSig, byteRange)).toThrow(
+      expect.objectContaining({
+        name: 'InvalidArgumentError',
+        argument: 'signatureBytes',
+        message: expect.stringContaining('exceeds placeholder capacity'),
+      }),
+    );
   });
 
   it('should pad remaining space with zeroes', () => {
@@ -445,5 +457,22 @@ describe('findSignatures', () => {
 
     const text = new TextDecoder('latin1').decode(preparedPdf);
     expect(text).toContain('0.95 0.95 0.95 rg');
+  });
+});
+
+describe('typed errors', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('throws EnvironmentError when Web Crypto is missing', async () => {
+    vi.stubGlobal('crypto', undefined);
+    await expect(computeSignatureHash(new Uint8Array(8), [0, 4, 4, 4])).rejects.toThrow(
+      expect.objectContaining({
+        name: 'EnvironmentError',
+        code: 'environment-unavailable',
+        reason: 'web-crypto',
+      }),
+    );
   });
 });

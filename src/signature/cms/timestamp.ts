@@ -25,7 +25,13 @@ import {
   parseDerTlv,
   decodeOidBytes,
 } from './pkcs7.js';
-import { TimestampVerificationError } from '../../errors.js';
+import {
+  EnvironmentError,
+  InvalidArgumentError,
+  MalformedInputError,
+  TimestampVerificationError,
+  UnsupportedFeatureError,
+} from '../../errors.js';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -172,7 +178,7 @@ function bytesEqual(a: Uint8Array, b: Uint8Array): boolean {
  *                       empty). When omitted, a random 8-byte nonce is
  *                       generated.
  * @returns              DER-encoded TimeStampReq.
- * @throws               RangeError if `nonce` is empty.
+ * @throws               {@link InvalidArgumentError} if `nonce` is empty.
  */
 export function buildTimestampRequest(
   dataHash: Uint8Array,
@@ -181,7 +187,7 @@ export function buildTimestampRequest(
 ): Uint8Array {
   const hashOid = HASH_OID_MAP[hashAlgorithm];
   if (!hashOid) {
-    throw new Error(`Unsupported hash algorithm for timestamp: ${hashAlgorithm}`);
+    throw new UnsupportedFeatureError(`Unsupported hash algorithm for timestamp: ${hashAlgorithm}`);
   }
 
   // version: 1
@@ -196,7 +202,7 @@ export function buildTimestampRequest(
 
   // Use the caller's nonce, or generate a random one (8 bytes)
   if (nonce !== undefined && nonce.length === 0) {
-    throw new RangeError('Timestamp nonce must not be empty');
+    throw new InvalidArgumentError('Timestamp nonce must not be empty', { argument: 'nonce' });
   }
   const nonceInteger = encodeInteger(nonce ?? generateNonce());
 
@@ -232,7 +238,10 @@ export function buildTimestampRequest(
  *                  with its hashAlgorithm OID, and `nonce` (INTEGER content
  *                  bytes) with the TSTInfo nonce; each only when supplied.
  * @returns         The parsed timestamp result.
- * @throws          Error if the TSA reported an error status.
+ * @throws          {@link EnvironmentError} (reason `'network'`) if the TSA
+ *                  reported an error status.
+ * @throws          {@link MalformedInputError} (format `'der'`) if the bytes
+ *                  break DER or hold no status or no TimeStampToken.
  * @throws          {@link TimestampVerificationError} if the TSTInfo cannot
  *                  be parsed, or its messageImprint or nonce differs from
  *                  `expected`.
@@ -248,7 +257,7 @@ export function parseTimestampResponse(
   const resp = parseDerTlv(response, 0);
 
   if (resp.children.length < 1) {
-    throw new Error('Invalid TimeStampResp: empty SEQUENCE');
+    throw new MalformedInputError('Invalid TimeStampResp: empty SEQUENCE', { format: 'der' });
   }
 
   // Parse PKIStatusInfo
@@ -269,12 +278,12 @@ export function parseTimestampResponse(
         // Ignore decoding error
       }
     }
-    throw new Error(errorMsg);
+    throw new EnvironmentError(errorMsg, { reason: 'network' });
   }
 
   // Extract the TimeStampToken (ContentInfo)
   if (resp.children.length < 2) {
-    throw new Error('TimeStampResp contains no TimeStampToken');
+    throw new MalformedInputError('TimeStampResp contains no TimeStampToken', { format: 'der' });
   }
 
   const tokenNode = resp.children[1]!;
@@ -400,8 +409,9 @@ function parseTstInfo(contentInfo: ReturnType<typeof parseDerTlv>): {
  *                       `dataHash` and its nonce equals the nonce sent.
  *                       The token's CMS signature and the TSA certificate
  *                       are not verified in this release.
- * @throws               Error if the request fails or the TSA returns
- *                       an error status.
+ * @throws               {@link EnvironmentError} (reason `'network'`) if
+ *                       the HTTP request fails or the TSA returns an
+ *                       error status.
  * @throws               {@link TimestampVerificationError} if the TSTInfo
  *                       cannot be parsed, or its messageImprint or nonce
  *                       differs from the request.
@@ -438,7 +448,10 @@ export async function requestTimestamp(
   });
 
   if (!response.ok) {
-    throw new Error(`TSA request failed: HTTP ${response.status} ${response.statusText}`);
+    throw new EnvironmentError(
+      `TSA request failed: HTTP ${response.status} ${response.statusText}`,
+      { reason: 'network' },
+    );
   }
 
   const contentType = response.headers.get('Content-Type');

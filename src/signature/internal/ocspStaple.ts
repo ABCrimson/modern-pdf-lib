@@ -28,6 +28,7 @@ import {
   decodeOidBytes,
 } from '../cms/pkcs7.js';
 import type { Asn1Node } from '../cms/pkcs7.js';
+import { MalformedInputError } from '../../errors.js';
 
 // ---------------------------------------------------------------------------
 // OID constants
@@ -121,14 +122,16 @@ export function embedOcspResponse(
   // Parse the outer ContentInfo
   const contentInfo = parseDerTlv(signatureBytes, 0);
   if (contentInfo.children.length < 2) {
-    throw new Error('Invalid PKCS#7 ContentInfo: expected at least 2 children');
+    throw new MalformedInputError('Invalid PKCS#7 ContentInfo: expected at least 2 children', {
+      format: 'der',
+    });
   }
 
   // The SignedData is inside [0] EXPLICIT
   const signedDataWrapper = contentInfo.children[1]!;
   const signedData = signedDataWrapper.children[0]!;
   if (!signedData) {
-    throw new Error('Invalid PKCS#7: missing SignedData');
+    throw new MalformedInputError('Invalid PKCS#7: missing SignedData', { format: 'der' });
   }
 
   // Find the signerInfos SET (last child of SignedData, tag 0x31)
@@ -141,12 +144,14 @@ export function embedOcspResponse(
   }
 
   if (signerInfosIdx === -1) {
-    throw new Error('Invalid PKCS#7 SignedData: no signerInfos SET found');
+    throw new MalformedInputError('Invalid PKCS#7 SignedData: no signerInfos SET found', {
+      format: 'der',
+    });
   }
 
   const signerInfosNode = signedData.children[signerInfosIdx]!;
   if (signerInfosNode.children.length === 0) {
-    throw new Error('No SignerInfo found in SignedData');
+    throw new MalformedInputError('No SignerInfo found in SignedData', { format: 'der' });
   }
 
   // Get the first SignerInfo

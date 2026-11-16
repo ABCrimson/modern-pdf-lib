@@ -27,6 +27,7 @@
 
 import { encodeStandardText } from '../../assets/font/internal/standardEncoding.js';
 import { assertUnencryptedInput } from '../../core/io/incrementalWriter.js';
+import { EnvironmentError, InvalidArgumentError, MalformedInputError } from '../../errors.js';
 import { PdfString } from '../../core/pdfObjects.js';
 
 // ---------------------------------------------------------------------------
@@ -330,13 +331,15 @@ export function prepareForSigning(
   // Find startxref offset
   const startxrefIdx = pdfStr.lastIndexOf('startxref');
   if (startxrefIdx === -1) {
-    throw new Error('Cannot find startxref in PDF — file may be corrupted');
+    throw new MalformedInputError('Cannot find startxref in PDF — file may be corrupted', {
+      format: 'pdf',
+    });
   }
 
   const afterStartxref = pdfStr.slice(startxrefIdx + 9).trim();
   const xrefOffsetMatch = afterStartxref.match(/^(\d+)/);
   if (!xrefOffsetMatch) {
-    throw new Error('Cannot parse xref offset from startxref');
+    throw new MalformedInputError('Cannot parse xref offset from startxref', { format: 'pdf' });
   }
   const prevXrefOffset = parseInt(xrefOffsetMatch[1]!, 10);
 
@@ -344,14 +347,14 @@ export function prepareForSigning(
   // there may be multiple trailers with /Size)
   const sizeMatches = [...pdfStr.matchAll(/\/Size\s+(\d+)/g)];
   if (sizeMatches.length === 0) {
-    throw new Error('Cannot find /Size in PDF trailer');
+    throw new MalformedInputError('Cannot find /Size in PDF trailer', { format: 'pdf' });
   }
   const originalSize = parseInt(sizeMatches[sizeMatches.length - 1]![1]!, 10);
 
   // Find /Root reference
   const rootMatch = pdfStr.match(/\/Root\s+(\d+)\s+(\d+)\s+R/);
   if (!rootMatch) {
-    throw new Error('Cannot find /Root in PDF trailer');
+    throw new MalformedInputError('Cannot find /Root in PDF trailer', { format: 'pdf' });
   }
   const rootObjNum = parseInt(rootMatch[1]!, 10);
   const rootGenNum = parseInt(rootMatch[2]!, 10);
@@ -487,7 +490,9 @@ export function prepareForSigning(
   const contentsMarker = '/Contents <';
   const contentsKeyOffset = findStringForward(preparedPdf, contentsMarker, pdfBytes.length);
   if (contentsKeyOffset === -1) {
-    throw new Error('Cannot find /Contents placeholder in prepared PDF');
+    throw new MalformedInputError('Cannot find /Contents placeholder in prepared PDF', {
+      format: 'pdf',
+    });
   }
 
   // The hex string starts at the `<` after `/Contents `
@@ -496,7 +501,7 @@ export function prepareForSigning(
   // Find the closing `>`
   const hexStringEnd = findStringForward(preparedPdf, '>', hexStringStart + 1);
   if (hexStringEnd === -1) {
-    throw new Error('Cannot find end of /Contents hex string');
+    throw new MalformedInputError('Cannot find end of /Contents hex string', { format: 'pdf' });
   }
 
   const contentsOffset = hexStringStart;
@@ -521,7 +526,9 @@ export function prepareForSigning(
   const byteRangeMarker = '/ByteRange [';
   const byteRangeKeyOffset = findStringForward(preparedPdf, byteRangeMarker, pdfBytes.length);
   if (byteRangeKeyOffset === -1) {
-    throw new Error('Cannot find /ByteRange placeholder in prepared PDF');
+    throw new MalformedInputError('Cannot find /ByteRange placeholder in prepared PDF', {
+      format: 'pdf',
+    });
   }
 
   const byteRangeValueStart = byteRangeKeyOffset + byteRangeMarker.length;
@@ -568,9 +575,10 @@ export async function computeSignatureHash(
   // Hash via Web Crypto
   const subtle = globalThis.crypto?.subtle;
   if (!subtle) {
-    throw new Error(
+    throw new EnvironmentError(
       'Web Crypto API (crypto.subtle) is not available. ' +
         'Requires Node.js 18+, a modern browser, Deno, or Bun.',
+      { reason: 'web-crypto' },
     );
   }
 
@@ -608,9 +616,10 @@ export function embedSignature(
   const maxSigBytes = Math.floor(maxHexLength / 2);
 
   if (signatureBytes.length > maxSigBytes) {
-    throw new Error(
+    throw new InvalidArgumentError(
       `Signature (${signatureBytes.length} bytes) exceeds placeholder capacity ` +
         `(${maxSigBytes} bytes). Increase placeholderSize.`,
+      { argument: 'signatureBytes' },
     );
   }
 

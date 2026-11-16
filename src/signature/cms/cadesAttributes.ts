@@ -56,6 +56,7 @@ import {
   getSubtle,
   toBuffer,
 } from './pkcs7.js';
+import { UnsupportedFeatureError } from '../../errors.js';
 
 // ---------------------------------------------------------------------------
 // OIDs (verified against RFC 5035 and NIST CSOR)
@@ -101,7 +102,7 @@ function hashNameToOid(hash: 'SHA-256' | 'SHA-384' | 'SHA-512'): string {
     default: {
       // Exhaustiveness guard — unreachable given the parameter type.
       const never: never = hash;
-      throw new Error(`Unsupported hash algorithm: ${String(never)}`);
+      throw new UnsupportedFeatureError(`Unsupported hash algorithm: ${String(never)}`);
     }
   }
 }
