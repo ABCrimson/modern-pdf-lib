@@ -5,7 +5,7 @@
  */
 
 import { spawnSync } from 'node:child_process';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, expectTypeOf, it, vi } from 'vitest';
 import { PdfStructureTree } from '../../../src/accessibility/structureTree.js';
 import { tagTableHeaderCell } from '../../../src/accessibility/taggingHelpers.js';
 import { resetWarningsForTesting, WARNING_TYPE, warnOnce } from '../../../src/internal/warnings.js';
@@ -22,16 +22,24 @@ afterEach(() => {
 });
 
 describe('warnOnce', () => {
+  it('takes the code of a warning that is still emitted, not MPL_IGNORED_OPTION', () => {
+    // Since 0.41.0 an option the library cannot honour throws UnsupportedOptionError, so no code
+    // for "an option was ignored" is left.
+    expectTypeOf<Parameters<typeof warnOnce>[1]>().toEqualTypeOf<
+      'MPL_LEGACY_R6_KEY' | 'MPL_OCR_UNENCODABLE'
+    >();
+  });
+
   it('emits once per key through process.emitWarning with the type and the code', () => {
     const emit = vi.spyOn(process, 'emitWarning').mockImplementation(() => {});
 
-    expect(warnOnce('k1', 'MPL_IGNORED_OPTION', 'm1')).toBe(true);
-    expect(warnOnce('k1', 'MPL_IGNORED_OPTION', 'm1')).toBe(false);
+    expect(warnOnce('k1', 'MPL_LEGACY_R6_KEY', 'm1')).toBe(true);
+    expect(warnOnce('k1', 'MPL_LEGACY_R6_KEY', 'm1')).toBe(false);
 
     expect(emit).toHaveBeenCalledTimes(1);
     expect(emit).toHaveBeenCalledWith('m1', {
       type: 'ModernPdfLibWarning',
-      code: 'MPL_IGNORED_OPTION',
+      code: 'MPL_LEGACY_R6_KEY',
     });
     expect(WARNING_TYPE).toBe('ModernPdfLibWarning');
   });
@@ -39,15 +47,15 @@ describe('warnOnce', () => {
   it('emits once for each of two keys', () => {
     const emit = vi.spyOn(process, 'emitWarning').mockImplementation(() => {});
 
-    warnOnce('k1', 'MPL_IGNORED_OPTION', 'm1');
+    warnOnce('k1', 'MPL_LEGACY_R6_KEY', 'm1');
     warnOnce('k2', 'MPL_LEGACY_R6_KEY', 'm2');
-    warnOnce('k1', 'MPL_IGNORED_OPTION', 'm1');
+    warnOnce('k1', 'MPL_LEGACY_R6_KEY', 'm1');
     warnOnce('k2', 'MPL_LEGACY_R6_KEY', 'm2');
 
     expect(emit).toHaveBeenCalledTimes(2);
     expect(emit).toHaveBeenNthCalledWith(1, 'm1', {
       type: 'ModernPdfLibWarning',
-      code: 'MPL_IGNORED_OPTION',
+      code: 'MPL_LEGACY_R6_KEY',
     });
     expect(emit).toHaveBeenNthCalledWith(2, 'm2', {
       type: 'ModernPdfLibWarning',
@@ -58,14 +66,14 @@ describe('warnOnce', () => {
   it('keeps the emitted keys in a realm-wide set that a fresh module instance shares', async () => {
     const emit = vi.spyOn(process, 'emitWarning').mockImplementation(() => {});
 
-    warnOnce('shared', 'MPL_IGNORED_OPTION', 'm');
+    warnOnce('shared', 'MPL_LEGACY_R6_KEY', 'm');
     const registry = (globalThis as Record<symbol, unknown>)[REGISTRY];
     expect(registry).toBeInstanceOf(Set);
     expect((registry as Set<string>).has('shared')).toBe(true);
 
     vi.resetModules();
     const fresh = await import('../../../src/internal/warnings.js');
-    expect(fresh.warnOnce('shared', 'MPL_IGNORED_OPTION', 'm')).toBe(false);
+    expect(fresh.warnOnce('shared', 'MPL_LEGACY_R6_KEY', 'm')).toBe(false);
     expect(emit).toHaveBeenCalledTimes(1);
   });
 
@@ -87,8 +95,8 @@ describe('warnOnce', () => {
     });
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
-    expect(warnOnce('k1', 'MPL_IGNORED_OPTION', 'm1')).toBe(true);
-    expect(warn).toHaveBeenCalledWith('ModernPdfLibWarning [MPL_IGNORED_OPTION]: m1');
+    expect(warnOnce('k1', 'MPL_LEGACY_R6_KEY', 'm1')).toBe(true);
+    expect(warn).toHaveBeenCalledWith('ModernPdfLibWarning [MPL_LEGACY_R6_KEY]: m1');
   });
 
   it('never throws when both sinks throw, and the key stays recorded', () => {
@@ -99,8 +107,8 @@ describe('warnOnce', () => {
       throw new Error('warn');
     });
 
-    expect(() => warnOnce('k1', 'MPL_IGNORED_OPTION', 'm1')).not.toThrow();
-    expect(warnOnce('k1', 'MPL_IGNORED_OPTION', 'm1')).toBe(false);
+    expect(() => warnOnce('k1', 'MPL_LEGACY_R6_KEY', 'm1')).not.toThrow();
+    expect(warnOnce('k1', 'MPL_LEGACY_R6_KEY', 'm1')).toBe(false);
     expect(emit).toHaveBeenCalledTimes(1);
     expect(warn).toHaveBeenCalledTimes(1);
   });
@@ -108,9 +116,9 @@ describe('warnOnce', () => {
   it('re-arms every key after resetWarningsForTesting', () => {
     const emit = vi.spyOn(process, 'emitWarning').mockImplementation(() => {});
 
-    warnOnce('k1', 'MPL_IGNORED_OPTION', 'm1');
+    warnOnce('k1', 'MPL_LEGACY_R6_KEY', 'm1');
     resetWarningsForTesting();
-    expect(warnOnce('k1', 'MPL_IGNORED_OPTION', 'm1')).toBe(true);
+    expect(warnOnce('k1', 'MPL_LEGACY_R6_KEY', 'm1')).toBe(true);
 
     expect(emit).toHaveBeenCalledTimes(2);
   });
@@ -126,7 +134,7 @@ describe('warnOnce', () => {
     };
     process.on('warning', listener);
     try {
-      warnOnce('k1', 'MPL_IGNORED_OPTION', 'm1');
+      warnOnce('k1', 'MPL_LEGACY_R6_KEY', 'm1');
       // Node fires 'warning' on the next tick.
       await new Promise<void>((resolve) => {
         process.nextTick(resolve);
@@ -137,7 +145,7 @@ describe('warnOnce', () => {
 
     expect(emit).toHaveBeenCalledTimes(1);
     expect(seen).toEqual([
-      { name: 'ModernPdfLibWarning', code: 'MPL_IGNORED_OPTION', message: 'm1' },
+      { name: 'ModernPdfLibWarning', code: 'MPL_LEGACY_R6_KEY', message: 'm1' },
     ]);
   });
 });
@@ -149,8 +157,8 @@ describe('warnOnce on a global object that cannot take the shared set', () => {
       const { warnOnce } = await import(${JSON.stringify(moduleUrl)});
       process.emitWarning = () => {};
       Object.preventExtensions(globalThis);
-      const first = warnOnce('frozen', 'MPL_IGNORED_OPTION', 'm');
-      const second = warnOnce('frozen', 'MPL_IGNORED_OPTION', 'm');
+      const first = warnOnce('frozen', 'MPL_LEGACY_R6_KEY', 'm');
+      const second = warnOnce('frozen', 'MPL_LEGACY_R6_KEY', 'm');
       console.log(String(first) + ' ' + String(second));
     `;
     const run = spawnSync(

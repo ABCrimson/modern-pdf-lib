@@ -25,13 +25,12 @@ export const WARNING_TYPE = 'ModernPdfLibWarning';
 /**
  * The stable warning codes. Node prints the code in brackets before the type.
  *
- * - `MPL_IGNORED_OPTION`: an option was passed that has no effect.
  * - `MPL_LEGACY_R6_KEY`: an AES-256 document was opened through the legacy
  *   key derivation.
  * - `MPL_OCR_UNENCODABLE`: OCR words that the font cannot encode were
  *   skipped and counted.
  */
-export type WarningCode = 'MPL_IGNORED_OPTION' | 'MPL_LEGACY_R6_KEY' | 'MPL_OCR_UNENCODABLE';
+export type WarningCode = 'MPL_LEGACY_R6_KEY' | 'MPL_OCR_UNENCODABLE';
 
 const EMITTED_KEYS = Symbol.for('modern-pdf-lib.warnings');
 
