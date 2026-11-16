@@ -240,15 +240,36 @@ describe('registerEmbeddedFile', () => {
 
     const leaf = asArray(asDict(asDict(catalog.get('/Names')).get('/EmbeddedFiles')).get('/Names'));
     const keys = [0, 2, 4, 6].map((i) => leaf.items[i] as PdfString);
-    // The PDFDocEncoding bytes sort before the FE FF mark of the UTF-16BE key.
+    // One name is not printable ASCII, so every key is UTF-16BE, sorted by its bytes.
     expect(keys.map((key) => key.toText())).toEqual([
       'Größe – Übersicht.xml',
       'apple.xml',
       'zebra.xml',
       '中.xml',
     ]);
-    expect(keys.map((key) => key.textEncoding)).toEqual(['pdfdoc', 'pdfdoc', 'pdfdoc', 'utf-16be']);
-    // The en dash is code 0x85 of PDFDocEncoding.
-    expect(Array.from(keys[0]!.toBytes().subarray(6, 8))).toEqual([0x85, 0x20]);
+    expect(keys.map((key) => key.textEncoding)).toEqual([
+      'utf-16be',
+      'utf-16be',
+      'utf-16be',
+      'utf-16be',
+    ]);
+    // The en dash (U+2013) after the byte order mark and six characters.
+    expect(Array.from(keys[0]!.toBytes().subarray(14, 16))).toEqual([0x20, 0x13]);
+  });
+});
+
+describe('registerEmbeddedFile with non-ASCII names', () => {
+  it('keeps every key of the tree in one encoding, sorted by its bytes', () => {
+    const registry = new PdfObjectRegistry();
+    const catalog = new PdfDict();
+    for (const name of ['€-Rechnung', 'Übersicht', 'plain']) {
+      registerEmbeddedFile(catalog, name, makeFileSpec(registry, name));
+    }
+    const embeddedFiles = asDict(asDict(catalog.get('/Names')).get('/EmbeddedFiles'));
+    const names = asArray(embeddedFiles.get('/Names')).items;
+    const keys = names.filter((_, index) => index % 2 === 0) as PdfString[];
+    // One encoding for every key, so the byte order is the order of the text (qpdf checks the text).
+    for (const key of keys) expect(key.toBytes().subarray(0, 2)).toEqual(Uint8Array.of(0xfe, 0xff));
+    expect(keys.map((key) => key.toText())).toEqual(['plain', 'Übersicht', '€-Rechnung']);
   });
 });

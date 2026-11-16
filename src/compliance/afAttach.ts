@@ -23,8 +23,9 @@
  * (associated files).
  */
 
+import { embeddedFileKeyEncoding } from '../core/embeddedFiles.js';
 import { PdfDict, PdfArray, PdfString } from '../core/pdfObjects.js';
-import type { PdfRef } from '../core/pdfObjects.js';
+import type { PdfObject, PdfRef } from '../core/pdfObjects.js';
 import { buildAfArray } from './associatedFiles.js';
 
 // ---------------------------------------------------------------------------
@@ -93,21 +94,41 @@ function ensureEmbeddedFilesNames(catalog: PdfDict): PdfArray {
  * Insert a `[name, fileSpecRef]` pair into an embedded-files name-tree `/Names`
  * array, keeping the array sorted by name.  The array is a flat sequence of
  * alternating key/value entries: `[ name0, ref0, name1, ref1, … ]`.
+ *
+ * Every key is written in the one encoding `embeddedFileKeyEncoding` gives for
+ * the names of the tree (a key already in the array is written again in it),
+ * and the pairs are sorted by the bytes of their keys (ISO 32000-2 7.9.6), so
+ * the byte order is the order of the text that qpdf checks. A pair whose key is
+ * not a string keeps its place after the string keys.
  */
 function insertNamePairSorted(leaf: PdfArray, name: string, fileSpecRef: PdfRef): void {
   const items = leaf.items;
-  const key = PdfString.fromText(name);
-  // Find the first existing key (at even indices) whose bytes sort after the new key's bytes
-  // (ISO 32000-2 7.9.6); an entry that is not a string never does.
-  let insertAt = items.length;
-  for (let i = 0; i < items.length; i += 2) {
-    const entry = items[i];
-    if (entry instanceof PdfString && PdfString.compare(entry, key) > 0) {
-      insertAt = i;
-      break;
-    }
+  const pairs: { key: PdfObject; value: PdfObject | undefined }[] = [];
+  for (const [i, key] of items.entries()) {
+    if (i % 2 === 0) pairs.push({ key, value: items[i + 1] });
   }
-  items.splice(insertAt, 0, key, fileSpecRef);
+  const encoding = embeddedFileKeyEncoding([
+    ...pairs.flatMap(({ key }) => (key instanceof PdfString ? [key.toText()] : [])),
+    name,
+  ]);
+  for (const pair of pairs) {
+    if (pair.key instanceof PdfString) pair.key = PdfString.fromText(pair.key.toText(), encoding);
+  }
+  pairs.push({ key: PdfString.fromText(name, encoding), value: fileSpecRef });
+  const sorted = pairs.toSorted((a, b) =>
+    a.key instanceof PdfString
+      ? b.key instanceof PdfString
+        ? PdfString.compare(a.key, b.key)
+        : -1
+      : b.key instanceof PdfString
+        ? 1
+        : 0,
+  );
+  items.splice(
+    0,
+    items.length,
+    ...sorted.flatMap(({ key, value }) => (value === undefined ? [key] : [key, value])),
+  );
 }
 
 /**
@@ -116,9 +137,10 @@ function insertNamePairSorted(leaf: PdfArray, name: string, fileSpecRef: PdfRef)
  * level*.
  *
  * Two things happen:
- *  1. The pair `[PdfString.fromText(name), fileSpecRef]` is added to the
- *     catalog's `/Names` → `/EmbeddedFiles` → `/Names` array, keeping the
- *     array's name/value pairs sorted by name (as required for a name tree).
+ *  1. The pair `[name, fileSpecRef]` is added to the catalog's `/Names` →
+ *     `/EmbeddedFiles` → `/Names` array, with every key of the array in one
+ *     text-string encoding and the pairs sorted by the bytes of their keys
+ *     (as required for a name tree).
  *     The intermediate dictionaries and the leaf array are created on demand
  *     and reused if already present.
  *  2. `fileSpecRef` is added to the catalog's `/AF` array (via
@@ -127,7 +149,8 @@ function insertNamePairSorted(leaf: PdfArray, name: string, fileSpecRef: PdfRef)
  * @param catalog      The document catalog dictionary.
  * @param name         The name under which the file is registered in the tree.
  * @param fileSpecRef  Indirect reference to the file-specification dictionary.
- * @throws {UnencodableTextError} For a name with a character no text string holds (a lone surrogate or U+001B).
+ * @throws {UnencodableTextError} For a name with a character no text string holds (a lone surrogate or U+001B),
+ *   and for a key of the tree whose text holds one.
  */
 export function registerEmbeddedFile(catalog: PdfDict, name: string, fileSpecRef: PdfRef): void {
   const leaf = ensureEmbeddedFilesNames(catalog);
