@@ -383,7 +383,7 @@ There are four common causes:
 1. **The PDF is encrypted and no password was provided.** Encrypted streams yield raw cipher bytes, which cannot be decoded into meaningful text.
 2. **The font has no ToUnicode CMap.** Many PDFs use custom encodings (especially with subsetted fonts). Without a `/ToUnicode` mapping, the library cannot translate glyph IDs to Unicode characters.
 3. **The PDF is image-only (scanned document).** The pages contain raster images of text, not actual text operators. There is no text to extract.
-4. **The file was written by 0.40.x with non-ASCII text.** Version 0.40.x wrote such text as UTF-8 bytes, in the page content and in the document information, so every reader shows `Café` as `CafÃ©`. The bytes are what is in the file: loading and saving a file does not change them (files written by 0.40.x stay as written).
+4. **The file was written by 0.40.x with non-ASCII text.** Version 0.40.x wrote non-ASCII text drawn in a standard font, and non-ASCII document information, as UTF-8 bytes with no byte order mark, so a reader such as pdf.js shows `Café` as `CafÃ©` (text drawn in an embedded font was written as glyph ids and reads correctly). The bytes are what is in the file: loading and saving a file does not change them (files written by 0.40.x stay as written).
 
 ### How to fix it
 

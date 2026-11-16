@@ -130,13 +130,13 @@ const KNOWN: Readonly<Record<string, Partial<Record<Check, Known>>>> = {
  * What a reader reads from a file version 0.40.3 wrote with UTF-8 bytes and no byte order mark in
  * its Info strings and its content stream. Files written by 0.40.x stay as written: loading and
  * saving them does not repair the bytes (regenerate such a file with the current version), so the
- * library and pdf.js agree on the characters those bytes stand for in the encodings the file
- * declares. An Info string is a PDF text string without a byte order mark, so each byte is one
- * PDFDocEncoding character (ISO 32000-2 Table D.2): the two bytes of "é" (0xC3 0xA9) read "Ã©", and
- * the three bytes of "—" (0xE2 0x80 0x94) read "â", a bullet and the "fl" ligature. The page text is
- * shown in WinAnsiEncoding, where the same two bytes read "Ã©". The manifest keeps the text the
- * generator set; the "utf8-strings.pdf: pdf.js reads ..." test below proves these literals against
- * pdf.js itself, so they are a reading, not a guess.
+ * library and pdf.js agree on the characters those bytes stand for. An Info string is a PDF text
+ * string without a byte order mark, so each byte is one PDFDocEncoding character (ISO 32000-2
+ * Table D.2): the two bytes of "é" (0xC3 0xA9) read "Ã©", and the three bytes of "—" (0xE2 0x80
+ * 0x94) read "â", a bullet and the "fl" ligature. The page text names a font /F1 that the page
+ * resources do not hold, so both readers fall back to WinAnsiEncoding, where the same two bytes
+ * read "Ã©". The manifest keeps the text the generator set; the "utf8-strings.pdf: pdf.js reads
+ * ..." test below proves these literals against pdf.js itself, so they are a reading, not a guess.
  */
 const READ_AS_WRITTEN: Readonly<Record<string, Pick<LegacyExpect, 'info' | 'pageText'>>> = {
   'utf8-strings.pdf': {

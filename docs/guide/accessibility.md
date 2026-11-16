@@ -161,7 +161,7 @@ PDF/UA (ISO 14289) defines requirements for universally accessible PDFs. The lib
 
 Document language: loading a PDF does not read its `/Lang` entry, so `getLanguage()` returns `undefined` for a loaded document and the validators judge it as having no language; call `setLanguage()` on it before you validate or save it.
 
-Document title: `setTitle()` writes the title as a PDF text string (PDFDocEncoding, or UTF-16BE with a byte order mark when a character is outside it), so a title such as `'日本語 €'` shows as set in every viewer. Loading a PDF does not read its `DisplayDocTitle` viewer preference, so call `setTitle(title, { showInWindowTitleBar: true })` again on a loaded document.
+Document title: `setTitle()` writes the title as a PDF text string (PDFDocEncoding, or UTF-16BE with a byte order mark when a character is outside it), so pdf.js and qpdf read a title such as `'日本語 €'` as set. Loading a PDF does not read its `DisplayDocTitle` viewer preference, so call `setTitle(title, { showInWindowTitleBar: true })` again on a loaded document.
 
 ## XMP Metadata
 

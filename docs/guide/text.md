@@ -241,7 +241,7 @@ A character no text string can hold (U+001B, for example) makes `save()` throw `
 
 ## Files Written by 0.40.x
 
-Version 0.40.x wrote non-ASCII text as UTF-8 bytes, in the content stream and in the document information. Every reader shows those files with text such as `CafÃ©` for `Café`, and loading and saving them does not change that: files written by 0.40.x stay as written. Draw the text again with the current version to get a file that reads correctly.
+Version 0.40.x wrote non-ASCII text drawn in a standard font, and non-ASCII document information, outline titles and annotation text, as UTF-8 bytes with no byte order mark (text drawn in an embedded font was written as glyph ids and is not affected). pdf.js reads those bytes as the characters of the font encoding or of PDFDocEncoding, for example `CafÃ©` for `Café`, and loading and saving such a file does not change that: files written by 0.40.x stay as written. Draw the text again with the current version to get a file that reads correctly.
 
 ## Options Reference
 
@@ -251,7 +251,7 @@ Version 0.40.x wrote non-ASCII text as UTF-8 bytes, in the content stream and in
 | `x` | `number` | Cursor position (initially `0`) | Horizontal position in points |
 | `y` | `number` | Cursor position (initially `0`) | Vertical position in points (from bottom) |
 | `size` | `number` | `12` (or page default) | Font size in points |
-| `font` | `FontRef \| string` | `page.setFont()` value, else resource `F1` (the first embedded font) | Font to use — a `FontRef` from `embedFont()`, or a raw font resource name string (its text is encoded as WinAnsi) |
+| `font` | `FontRef \| string` | `page.setFont()` value, else resource `F1` (the first embedded font) | Font to use — a `FontRef` from `embedFont()`, or a raw font resource name string (the text is encoded by the font registered on the page under that name; a name with no registered font encodes as the standard font of that name, such as `Symbol` or the AcroForm alias `ZaDb`, and any other name in WinAnsiEncoding) |
 | `color` | `Color` | Black | Text color |
 | `rotate` | `Angle` | `degrees(0)` | Rotation angle |
 | `lineHeight` | `number` | `size * 1.2` | Vertical spacing for multi-line text |

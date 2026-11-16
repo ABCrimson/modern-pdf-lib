@@ -149,7 +149,7 @@ The library never swaps in a different font by itself. Embed a font that covers 
 
 ### Your Own `FontRef`
 
-`FontRef` is an interface, so you can wrap one, for example to replace the characters a font lacks. `encodeText(text)` is required of every `FontRef`, since `drawText()` writes what it returns: a wrapper adds its own `encodeText` and keeps `widthOfTextAtSize` in step with it. A JavaScript object without `encodeText` makes `drawText()` throw `TypeError: fontRef.encodeText is not a function`.
+`FontRef` is an interface, so you can wrap one, for example to replace the characters a font lacks. `encodeText(text)` is required of every `FontRef`, since `drawText()` writes what it returns: a wrapper adds its own `encodeText` and keeps `widthOfTextAtSize` in step with it. A JavaScript object without `encodeText` makes `drawText()` throw a `TypeError`.
 
 ```ts
 import type { FontRef } from 'modern-pdf-lib';
@@ -167,7 +167,7 @@ const lenient: FontRef = {
 page.drawText('Tokyo 東京', { x: 50, y: 650, size: 16, font: lenient }); // draws "Tokyo ??"
 ```
 
-To write the bytes yourself, pass `font.encodeText(text)` to a text operator: `showTextOp`, `showTextHex`, `showTextArray`, `showTextNextLine` and `showTextWithSpacing` take the bytes as a `Uint8Array` (or a string of byte values).
+To write the bytes yourself, pass `font.encodeText(text)` to a text operator: `showTextOp`, `showTextArray`, `showTextNextLine` and `showTextWithSpacing` take the bytes as a `Uint8Array` or as a PDF byte string (one character per byte, U+0000 to U+00FF), and `showTextHex` takes a `Uint8Array` or a string of hex digits.
 
 ## Font Subsetting
 
