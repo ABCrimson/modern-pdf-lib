@@ -445,7 +445,7 @@ export class PdfDocument {
    *
    * @param index  Zero-based page index.
    * @returns      The {@link PdfPage} at the given index.
-   * @throws {InvalidArgumentError} If the index is out of range.
+   * @throws {InvalidArgumentError} If the index is not a whole number or is out of range.
    */
   getPage(index: number): PdfPage {
     if (!Number.isInteger(index) || index < 0 || index >= this.pages.length) {
@@ -615,7 +615,7 @@ export class PdfDocument {
 
     const [page] = this.pages.splice(fromIndex, 1);
 
-    if (toIndex < 0 || toIndex > this.pages.length) {
+    if (!Number.isInteger(toIndex) || toIndex < 0 || toIndex > this.pages.length) {
       // Restore the page before throwing
       this.pages.splice(fromIndex, 0, page!);
       throw new InvalidArgumentError(
@@ -1137,7 +1137,7 @@ export class PdfDocument {
    * @returns        A promise resolving to an {@link ImageRef} to pass to `page.drawImage()`.
    */
   async embedPng(pngData: Uint8Array | ArrayBuffer): Promise<ImageRef> {
-    return this.embedPngSync(pngData);
+    return this.#embedPngBytes(pngData);
   }
 
   /**
@@ -1149,6 +1149,11 @@ export class PdfDocument {
    * @returns        An {@link ImageRef} to pass to `page.drawImage()`.
    */
   embedPngSync(pngData: Uint8Array | ArrayBuffer): ImageRef {
+    return this.#embedPngBytes(pngData);
+  }
+
+  /** Decode a PNG and register its image XObject (and SMask) in this document. */
+  #embedPngBytes(pngData: Uint8Array | ArrayBuffer): ImageRef {
     const data = pngData instanceof ArrayBuffer ? new Uint8Array(pngData) : pngData;
     // Decode PNG: decompress IDAT, reconstruct filters, separate alpha
     const result = decodePng(data);
@@ -1630,6 +1635,7 @@ export class PdfDocument {
    * @param pageIndices  Zero-based page indices to embed.  Defaults to
    *                     `[0]` (first page only).
    * @returns            Array of {@link EmbeddedPdfPage} handles.
+   * @throws {InvalidArgumentError} If a page index is not a whole number or is out of range.
    *
    * @example
    * ```ts
@@ -1909,6 +1915,7 @@ export class PdfDocument {
    * @param pageIndex  Zero-based page index.
    * @param rect       Rectangle [x1, y1, x2, y2] for the visual appearance.
    * @param name       The signature field name (must be unique).
+   * @throws {InvalidArgumentError} If the page index is not a whole number or is out of range.
    */
   addSignatureField(pageIndex: number, rect: [number, number, number, number], name: string): void {
     if (!Number.isInteger(pageIndex) || pageIndex < 0 || pageIndex >= this.pages.length) {
@@ -3006,7 +3013,7 @@ export class PdfDocument {
       const metrics = embeddedFont.metrics;
       const usedGlyphs = embeddedFont.getUsedGlyphs();
 
-      // 1. Subset the font (or get full font back with identity mapping)
+      // 1. Subset the font (glyph IDs are kept)
       const subsetResult = subsetFont(embeddedFont.fontData, new Set(usedGlyphs));
 
       // 2. Update the /FontFile2 stream with (possibly subsetted) font data

@@ -292,16 +292,16 @@ describe('optimize argument parsing', () => {
     }
   });
 
-  it('--max-dpi is consumed without error', async () => {
+  it('--max-dpi is refused as an unknown option', async () => {
     const { optimizeCommand } = await import('../../../src/cli/optimize.js');
 
-    try {
-      await optimizeCommand(['input.pdf', 'output.pdf', '--max-dpi', '150']);
-    } catch (e) {
-      if (e instanceof ExitSentinel) {
-        throw new Error('Unexpected process.exit for --max-dpi flag');
-      }
-    }
+    await expect(optimizeCommand(['input.pdf', 'output.pdf', '--max-dpi', '150'])).rejects.toThrow(
+      ExitSentinel,
+    );
+
+    expect(spies.exitSpy).toHaveBeenCalledWith(1);
+    const errorOutput = spies.errorSpy.mock.calls.map((c) => String(c[0])).join('\n');
+    expect(errorOutput).toContain('Unknown option');
   });
 
   it('-v flag (verbose) is accepted without error', async () => {

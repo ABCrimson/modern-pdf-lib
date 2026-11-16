@@ -3,6 +3,7 @@
  * calls one named export with the input bytes and the task's args.
  */
 import { loadPdf } from '../../src/index.js';
+import type { PdfObject, PdfString } from '../../src/index.js';
 import type { JsonValue } from '../helpers/budget.js';
 
 /** Loads an encrypted PDF whose user password is empty and returns its page count. */
@@ -17,10 +18,12 @@ export async function loadEncryptedEntry(bytes: Uint8Array, _args: JsonValue): P
  */
 export async function loadStringsEntry(bytes: Uint8Array, _args: JsonValue): Promise<JsonValue> {
   const doc = await loadPdf(bytes);
-  let largest: readonly { kind: string; value?: unknown }[] = [];
+  let largest: readonly PdfObject[] = [];
   for (const { object } of doc.getRegistry()) {
     if (object.kind === 'array' && object.items.length > largest.length) largest = object.items;
   }
-  const matching = largest.filter((item, i) => item.kind === 'string' && item.value === `s${i}`);
+  const matching = largest.filter(
+    (item, i) => item.kind === 'string' && (item as PdfString).toText() === `s${i}`,
+  );
   return { items: largest.length, matching: matching.length };
 }

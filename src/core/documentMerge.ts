@@ -568,13 +568,13 @@ export async function splitPdf(document: PdfDocument, ranges: PageRange[]): Prom
 
   // Validate ranges
   for (const [start, end] of ranges) {
-    if (start < 0 || start >= pageCount) {
+    if (!Number.isInteger(start) || start < 0 || start >= pageCount) {
       throw new InvalidArgumentError(
         `splitPdf: start index ${start} out of range [0, ${pageCount - 1}]`,
         { argument: 'ranges' },
       );
     }
-    if (end < start || end >= pageCount) {
+    if (!Number.isInteger(end) || end < start || end >= pageCount) {
       throw new InvalidArgumentError(
         `splitPdf: end index ${end} out of range [${start}, ${pageCount - 1}]`,
         { argument: 'ranges' },

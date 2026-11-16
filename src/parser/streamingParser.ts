@@ -793,7 +793,7 @@ export class StreamingPdfParser {
       });
     }
 
-    if (pageIndex < 0 || pageIndex >= this.pages.length) {
+    if (!Number.isInteger(pageIndex) || pageIndex < 0 || pageIndex >= this.pages.length) {
       throw new StreamingParseError(
         `Page index ${pageIndex} is out of range (0-${this.pages.length - 1}).`,
         0,

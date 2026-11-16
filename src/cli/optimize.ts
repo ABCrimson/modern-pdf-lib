@@ -205,11 +205,6 @@ function parseArgs(args: string[]): ParsedArgs {
         }
         break;
 
-      case '--max-dpi':
-        // Consumed but not yet used in this version
-        i++;
-        break;
-
       case '--progressive':
         result.progressive = true;
         break;

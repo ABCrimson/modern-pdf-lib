@@ -359,7 +359,7 @@ describe('PdfArray', () => {
   it('serializes mixed types', () => {
     const arr = PdfArray.of([
       PdfNumber.of(42),
-      PdfString.literal('hello'),
+      PdfString.fromAscii('hello'),
       PdfBool.TRUE,
       PdfName.of('Type'),
     ]);
@@ -565,7 +565,7 @@ describe('PdfObjectRegistry', () => {
     const ref = registry.allocate();
     expect(ref.objectNumber).toBeGreaterThan(0);
 
-    const obj = PdfString.literal('deferred');
+    const obj = PdfString.fromAscii('deferred');
     registry.assign(ref, obj);
 
     expect(registry.resolve(ref)).toBe(obj);
@@ -603,7 +603,7 @@ describe('PdfObjectRegistry', () => {
 describe('Nested objects', () => {
   it('serialize correctly', () => {
     const inner = new PdfDict();
-    inner.set('/Name', PdfString.literal('value'));
+    inner.set('/Name', PdfString.fromAscii('value'));
 
     const arr = PdfArray.of([PdfNumber.of(1), inner, PdfBool.TRUE]);
     const result = serialize(arr);

@@ -32,6 +32,7 @@ import type {
   PdfObject,
   PdfObjectRegistry,
   PdfStream,
+  PdfString,
 } from '../../../src/core/pdfObjects.js';
 import { decodeStreamData } from '../../../src/codecs/streamDecode.js';
 import { QPDF_BIN, QpdfError } from './qpdf.js';
@@ -137,7 +138,15 @@ export function compareWithQdf(
       return;
     }
     switch (b.kind) {
-      case 'string':
+      case 'string': {
+        const libStr = a as PdfString;
+        const qpdfStr = b as PdfString;
+        if (!libStr.equals(qpdfStr))
+          out.push(
+            `${path}: library <${libStr.toBytes().toHex()}>, qpdf <${qpdfStr.toBytes().toHex()}>`,
+          );
+        return;
+      }
       case 'name':
       case 'bool':
       case 'number': {

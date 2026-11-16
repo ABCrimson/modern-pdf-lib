@@ -577,6 +577,28 @@ const SITES: readonly Site[] = [
       ),
     },
   },
+  {
+    call: 'getPageContent(1.5) of a file with 2 pages',
+    run: async () => {
+      const parser = new StreamingPdfParser();
+      parser.feed(await docWithPages(2).save());
+      parser.end();
+      return parser.getPageContent(1.5);
+    },
+    Class: StreamingParseError,
+    code: 'streaming-parse',
+    fields: {
+      offset: 0,
+      expected: 'page index in [0, 2)',
+      actual: '1.5',
+      message: streamingMessage(
+        'Page index 1.5 is out of range (0-1).',
+        0,
+        'page index in [0, 2)',
+        '1.5',
+      ),
+    },
+  },
 ];
 
 describe('typed errors of the document, page, colour, font, incremental and streaming calls', () => {
