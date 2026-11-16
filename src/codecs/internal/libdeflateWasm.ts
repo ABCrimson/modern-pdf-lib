@@ -54,13 +54,6 @@ interface DeflateWasmExports {
     level: number,
   ): number;
 
-  /**
-   * Decompress `inputLen` bytes at `inputPtr`.
-   * Writes output starting at `outputPtr` (must be at least `maxOutputSize` bytes).
-   * Returns actual decompressed length.
-   */
-  decompress(inputPtr: number, inputLen: number, outputPtr: number, maxOutputSize: number): number;
-
   /** WASM linear memory. */
   memory: WebAssembly.Memory;
 }
