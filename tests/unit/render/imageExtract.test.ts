@@ -16,6 +16,15 @@ import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import { createPdf, PdfDocument } from '../../../src/core/pdfDocument.js';
 import { extractImages } from '../../../src/render/imageExtract.js';
+import type { PdfPage } from '../../../src/core/pdfPage.js';
+import {
+  PdfArray,
+  PdfDict,
+  PdfName,
+  PdfNumber,
+  PdfStream,
+  PdfString,
+} from '../../../src/core/pdfObjects.js';
 import { initJpegWasm, isJpegWasmReady } from '../../../src/wasm/jpeg/bridge.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -126,5 +135,42 @@ describe('extractImages — page-level image XObject extraction', () => {
     const loaded = await PdfDocument.load(bytes);
     expect(() => extractImages(loaded.getPage(0))).not.toThrow();
     expect(extractImages(loaded.getPage(0))).toEqual([]);
+  });
+});
+
+describe('extractImages — the palette of an Indexed colour space', () => {
+  /** Three palette entries; every byte above 0x7F must come through unchanged. */
+  const PALETTE = Uint8Array.of(0xff, 0x00, 0x80, 0x01, 0xfe, 0x7f, 0xc3, 0xa9, 0x00);
+
+  /** A page that holds one 3 x 1 Indexed image (8 bits, indices 0, 1, 2) with the given lookup string. */
+  function pageWithIndexedImage(lookup: PdfString): PdfPage {
+    const space = PdfArray.of([
+      PdfName.of('Indexed'),
+      PdfName.of('DeviceRGB'),
+      PdfNumber.of(2),
+      lookup,
+    ]);
+    const dict = new PdfDict()
+      .set('/Subtype', PdfName.of('Image'))
+      .set('/Width', PdfNumber.of(3))
+      .set('/Height', PdfNumber.of(1))
+      .set('/BitsPerComponent', PdfNumber.of(8))
+      .set('/ColorSpace', space);
+    const image = PdfStream.fromBytes(Uint8Array.of(0, 1, 2), dict);
+    const resources = new PdfDict().set('/XObject', new PdfDict().set('/Im1', image));
+    return {
+      getOriginalResources: () => resources,
+      getRegistry: () => ({ resolve: () => undefined }),
+    } as unknown as PdfPage;
+  }
+
+  it.each([
+    ['a hex string', PdfString.fromBytes(PALETTE, 'hex')],
+    ['a literal string', PdfString.fromBytes(PALETTE)],
+    ['a hex string of digits', PdfString.fromHex('ff008001fe7fc3a900')],
+  ])('reads the lookup table from %s byte for byte', (_form, lookup) => {
+    const [image] = extractImages(pageWithIndexedImage(lookup));
+    expect(image?.colorSpace).toBe('Indexed');
+    expect([...(image?.pixels ?? [])]).toEqual([...PALETTE]);
   });
 });

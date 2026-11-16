@@ -607,13 +607,8 @@ function nameToColorSpace(rawName: string): ResolvedColorSpace {
 function readIndexedPalette(arr: PdfArray, registry: PdfObjectRegistry): Uint8Array | undefined {
   const lookup = deref(arr.items[3], registry);
 
-  if (lookup instanceof PdfString) {
-    // Parsed hex/literal strings store one byte per char code (latin1).
-    const value = lookup.value;
-    const bytes = new Uint8Array(value.length);
-    for (let i = 0; i < value.length; i++) bytes[i] = value.charCodeAt(i) & 0xff;
-    return bytes;
-  }
+  // A hex or a literal string: the lookup table is its bytes.
+  if (lookup instanceof PdfString) return lookup.toBytes();
 
   if (lookup instanceof PdfStream) {
     return decodeStreamData(lookup);
