@@ -1,9 +1,10 @@
 /**
  * @module internal/latin1
  *
- * PDF byte strings as bytes. A PDF byte string holds one code unit per byte,
- * U+0000 to U+00FF (ISO 8859-1, Latin-1): the form in which the library's
- * writers take the strings an object's `serialize()` hands them. No package
+ * PDF byte strings and their bytes. A PDF byte string holds one code unit per
+ * byte, U+0000 to U+00FF (ISO 8859-1, Latin-1): the form in which the library's
+ * writers take the strings an object's `serialize()` hands them, and in which
+ * the parsers and the object model hold string and name bytes. No package
  * entry exports this module.
  */
 

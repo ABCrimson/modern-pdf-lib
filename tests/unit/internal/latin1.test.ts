@@ -97,6 +97,14 @@ describe('latin1String', () => {
     }
   });
 
+  test('reads 1,000,000 bytes, more than one String.fromCharCode call can take', () => {
+    // V8 throws a RangeError from about 125,000 arguments: this is why the helper reads in chunks.
+    const bytes = Uint8Array.from({ length: 1_000_000 }, (_, i) => i % 256);
+    const text = latin1String(bytes);
+    expect(text).toHaveLength(1_000_000);
+    expect(text.charCodeAt(999_999)).toBe(999_999 % 256);
+  });
+
   test('reads a view onto the part of a buffer it covers, not the whole buffer', () => {
     const buffer = Uint8Array.from({ length: 20 }, (_, i) => 0xf0 + (i % 16));
     const view = buffer.subarray(5, 9);
