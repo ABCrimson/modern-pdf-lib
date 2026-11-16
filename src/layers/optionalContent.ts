@@ -90,12 +90,8 @@ export class PdfLayer {
   static fromDict(dict: PdfDict): PdfLayer {
     const nameObj = dict.get('/Name');
     let name = 'Unnamed Layer';
-    if (
-      nameObj &&
-      'value' in nameObj &&
-      typeof (nameObj as { value: unknown }).value === 'string'
-    ) {
-      name = (nameObj as { value: string }).value;
+    if (nameObj instanceof PdfString) {
+      name = nameObj.toText();
     }
 
     // Default visibility is determined by the /OCProperties /D /ON array,

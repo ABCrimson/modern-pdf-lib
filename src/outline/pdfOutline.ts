@@ -522,7 +522,7 @@ function parseOutlineItem(
   if (!titleObj) return undefined;
   let title: string;
   if (titleObj instanceof PdfString) {
-    title = titleObj.value;
+    title = titleObj.toText();
   } else {
     title = ''; // a non-string /Title is malformed; use an empty title
   }
@@ -632,7 +632,7 @@ function parseDestination(
   if (destObj instanceof PdfString) {
     return {
       type: 'named',
-      namedDestination: destObj.value,
+      namedDestination: destObj.toText(),
     };
   }
 

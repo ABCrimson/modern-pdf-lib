@@ -256,3 +256,19 @@ describe('PdfLayerManager.fromDict', () => {
     expect(parsed.getLayers()).toHaveLength(0);
   });
 });
+
+describe('PdfLayer.fromDict text string', () => {
+  it('reads a UTF-16BE /Name as text', () => {
+    const dict = new PdfDict();
+    dict.set('/Type', PdfName.of('OCG'));
+    // FE FF, then "Gr", o-umlaut, sharp s, "e" (UTF-16BE).
+    dict.set(
+      '/Name',
+      PdfString.fromBytes(
+        Uint8Array.of(0xfe, 0xff, 0x00, 0x47, 0x00, 0x72, 0x00, 0xf6, 0x00, 0xdf, 0x00, 0x65),
+      ),
+    );
+
+    expect(PdfLayer.fromDict(dict).getName()).toBe('Gr\u00f6\u00dfe');
+  });
+});

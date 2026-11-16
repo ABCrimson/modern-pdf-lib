@@ -731,31 +731,31 @@ export class PdfStructureTree {
         // /T — title
         const titleObj = resolved.get('/T');
         if (titleObj && titleObj.kind === 'string') {
-          elemOptions.title = titleObj.value;
+          elemOptions.title = titleObj.toText();
         }
 
         // /Alt — alt text
         const altObj = resolved.get('/Alt');
         if (altObj && altObj.kind === 'string') {
-          elemOptions.altText = altObj.value;
+          elemOptions.altText = altObj.toText();
         }
 
         // /ActualText
         const actualObj = resolved.get('/ActualText');
         if (actualObj && actualObj.kind === 'string') {
-          elemOptions.actualText = actualObj.value;
+          elemOptions.actualText = actualObj.toText();
         }
 
         // /Lang — language
         const langObj = resolved.get('/Lang');
         if (langObj && langObj.kind === 'string') {
-          elemOptions.language = langObj.value;
+          elemOptions.language = langObj.toText();
         }
 
         // /ID
         const idObj = resolved.get('/ID');
         if (idObj && idObj.kind === 'string') {
-          elemOptions.id = idObj.value;
+          elemOptions.id = idObj.toText();
         }
 
         assertWithinLimit('maxTreeDepth', depth);

@@ -625,3 +625,45 @@ describe('PdfStructureTree', () => {
     });
   });
 });
+
+// ---------------------------------------------------------------------------
+// Text strings read from a loaded structure element (ISO 32000-2 7.9.2.2)
+// ---------------------------------------------------------------------------
+
+describe('PdfStructureTree.fromDict text strings', () => {
+  /** FE FF then each UTF-16 code unit big-endian: how a conforming writer stores non-Latin text. */
+  const utf16be = (text: string): PdfString => {
+    const bytes = new Uint8Array(2 + text.length * 2);
+    bytes.set([0xfe, 0xff]);
+    for (let i = 0; i < text.length; i++) {
+      const unit = text.charCodeAt(i);
+      bytes[2 + i * 2] = unit >> 8;
+      bytes[3 + i * 2] = unit & 0xff;
+    }
+    return PdfString.fromBytes(bytes);
+  };
+
+  it('reads /T, /Alt, /ActualText, /Lang and /ID as text, whatever the encoding', () => {
+    const kidDict = new PdfDict();
+    kidDict.set('/Type', PdfName.of('StructElem'));
+    kidDict.set('/S', PdfName.of('Figure'));
+    kidDict.set('/T', utf16be('Titel \u65e5\u672c'));
+    kidDict.set('/Alt', utf16be('Gr\u00f6\u00dfe \u20ac'));
+    kidDict.set('/ActualText', PdfString.fromBytes(Uint8Array.of(0x43, 0x61, 0x66, 0xe9, 0xa0)));
+    kidDict.set('/Lang', PdfString.fromBytes(Uint8Array.of(0x64, 0x65)));
+    kidDict.set('/ID', utf16be('Abschnitt-\u00fc'));
+
+    const rootDict = new PdfDict();
+    rootDict.set('/Type', PdfName.of('StructTreeRoot'));
+    rootDict.set('/K', kidDict);
+
+    const options = PdfStructureTree.fromDict(rootDict, () => undefined).root.children[0]!.options;
+
+    expect(options.title).toBe('Titel \u65e5\u672c');
+    expect(options.altText).toBe('Gr\u00f6\u00dfe \u20ac');
+    // PDFDocEncoding: 0xE9 is e-acute and 0xA0 is the euro sign.
+    expect(options.actualText).toBe('Caf\u00e9\u20ac');
+    expect(options.language).toBe('de');
+    expect(options.id).toBe('Abschnitt-\u00fc');
+  });
+});

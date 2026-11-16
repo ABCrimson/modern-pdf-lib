@@ -750,3 +750,55 @@ describe('PdfOutlineTree', () => {
     });
   });
 });
+
+// ---------------------------------------------------------------------------
+// Text strings read from a loaded outline (ISO 32000-2 7.9.2.2)
+// ---------------------------------------------------------------------------
+
+describe('PdfOutlineTree.fromDict text strings', () => {
+  it('reads a UTF-16BE /Title and a PDFDocEncoding named destination as text', () => {
+    const registry = new PdfObjectRegistry();
+    const itemDict = new PdfDict();
+    // FE FF, then "Gr", o-umlaut, sharp s, "e", euro sign, U+65E5 (UTF-16BE).
+    itemDict.set(
+      '/Title',
+      PdfString.fromBytes(
+        Uint8Array.of(
+          0xfe,
+          0xff,
+          0x00,
+          0x47,
+          0x00,
+          0x72,
+          0x00,
+          0xf6,
+          0x00,
+          0xdf,
+          0x00,
+          0x65,
+          0x20,
+          0xac,
+          0x65,
+          0xe5,
+        ),
+      ),
+    );
+    // PDFDocEncoding: 0xE9 is e-acute.
+    itemDict.set('/Dest', PdfString.fromBytes(Uint8Array.of(0x63, 0x61, 0x66, 0xe9)));
+    const itemRef = registry.register(itemDict);
+
+    const outlinesDict = new PdfDict();
+    outlinesDict.set('/Type', PdfName.of('Outlines'));
+    outlinesDict.set('/First', itemRef);
+    outlinesDict.set('/Last', itemRef);
+
+    const tree = PdfOutlineTree.fromDict(
+      outlinesDict,
+      (ref: PdfRef): PdfObject | undefined => registry.resolve(ref),
+      new Map(),
+    );
+
+    expect(tree.items[0]!.title).toBe('Gr\u00f6\u00dfe\u20ac\u65e5');
+    expect(tree.items[0]!.destination).toEqual({ type: 'named', namedDestination: 'caf\u00e9' });
+  });
+});
