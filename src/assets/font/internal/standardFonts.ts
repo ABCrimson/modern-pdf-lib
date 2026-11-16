@@ -277,8 +277,10 @@ const ZAPFDINGBATS_WIDTHS: readonly number[] = [
 // ---------------------------------------------------------------------------
 
 /**
- * Marked `@__NO_SIDE_EFFECTS__`: the call only builds and returns a fresh object from its
- * arguments, so a call whose result is unused may be deleted.
+ * Free of side effects, as the annotation below the comment tells a bundler: the call only
+ * builds and returns a fresh object from its arguments, so a call whose result is unused may be
+ * deleted. The annotation is not named in this comment, because esbuild also reads it from a doc
+ * comment, and this comment ships in dist/.
  *
  * @internal
  */
@@ -321,7 +323,7 @@ function def(
  * Keys are the exact PostScript font names as they appear in PDF
  * `/BaseFont` entries.
  *
- * Marked `@__PURE__`: building the map reads only the `def()` results and the width tables above
+ * Marked pure: building the map reads only the `def()` results and the width tables above
  * and writes nothing else, so a bundler drops the map and its tables from an entry that never reads
  * it. Code that needs only the names reads {@link STANDARD_FONT_NAMES}, as {@link isStandardFont}
  * does.

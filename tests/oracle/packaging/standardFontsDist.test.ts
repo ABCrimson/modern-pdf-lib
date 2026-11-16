@@ -45,6 +45,9 @@ interface FormsEntry {
 /** The first 14 widths of the codes 0x60 up of Helvetica: no other table or entry holds this run. */
 const HELVETICA_WIDTH_RUN = '333,556,556,500,556,556,278,556,556,222,222,500,222,833';
 
+/** The Courier width callback as esbuild minifies it: only that table builder holds this text. */
+const COURIER_WIDTH_TEST = '?0:600';
+
 /** Skip locally, fail in CI, when dist/ is absent. */
 function requireDist(ctx: TestContext): void {
   if (existsSync(join(ROOT, 'dist/index.mjs'))) return;
@@ -122,10 +125,23 @@ describe('the forms entry', () => {
 
   it('keeps the width tables out of a consumer bundle of the forms entry, and in the others', async (ctx) => {
     requireDist(ctx);
-    // A boolean, not the text: a failure must not print the whole bundle.
-    const holdsWidths = async (entry: string): Promise<boolean> =>
-      (await bundleOf(entry)).includes(HELVETICA_WIDTH_RUN);
-    expect(await holdsWidths('forms'), 'forms bundle holds the Helvetica widths').toBe(false);
-    expect(await holdsWidths('create'), 'create bundle holds the Helvetica widths').toBe(true);
+    // Booleans, not the text: a failure must not print the whole bundle.
+    const widthTables = async (
+      entry: string,
+    ): Promise<{ readonly helvetica: boolean; readonly courier: boolean }> => {
+      const text = await bundleOf(entry);
+      return {
+        helvetica: text.includes(HELVETICA_WIDTH_RUN),
+        courier: text.includes(COURIER_WIDTH_TEST),
+      };
+    };
+    expect(await widthTables('forms'), 'width tables in the forms bundle').toEqual({
+      helvetica: false,
+      courier: false,
+    });
+    expect(await widthTables('create'), 'width tables in the create bundle').toEqual({
+      helvetica: true,
+      courier: true,
+    });
   });
 });
