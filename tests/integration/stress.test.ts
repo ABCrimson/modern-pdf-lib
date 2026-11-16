@@ -267,7 +267,15 @@ describe('Stress tests', () => {
 
     for (let i = 0; i < fonts.length; i++) {
       const page = doc.addPage(PageSizes.A4);
-      page.drawText(`This text uses ${fonts[i]!.label}`, {
+      const { label } = fonts[i]!;
+      // Symbol and ZapfDingbats have no Latin letters (ISO 32000-2, D.5 and D.6): each draws text it has.
+      const sample =
+        label === 'Symbol'
+          ? 'αβγ Σ'
+          : label === 'ZapfDingbats'
+            ? '✓ ✔ ✗'
+            : `This text uses ${label}`;
+      page.drawText(sample, {
         x: 50,
         y: 750,
         size: 16,

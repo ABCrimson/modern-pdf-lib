@@ -1,9 +1,9 @@
 /**
  * The option rule table (src/internal/options.ts): one row per option or call that 0.41.0 refuses
- * with an UnsupportedOptionError instead of ignoring it. The table is not wired into the call
- * sites yet, so this file pins it completely: every row, the fixed message of every row, the
- * error `rejectOption` throws, and the tie of each planned release to the open target of its
- * ledger ids in audit/open-highs.json.
+ * with an UnsupportedOptionError instead of ignoring it. The call sites refuse through
+ * `rejectOption`; this file pins the table itself completely: every row, the fixed message of
+ * every row, the error `rejectOption` throws, and the tie of each planned release to the open
+ * target of its ledger ids in audit/open-highs.json.
  */
 import { readFileSync } from 'node:fs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';

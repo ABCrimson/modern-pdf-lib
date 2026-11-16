@@ -6,9 +6,14 @@ import { extractFonts } from '../../../src/render/fontExtract.js';
 // Helper: build a minimal valid TrueType font binary.
 //
 // Produces a real sfnt with magic 0x00010000 and the tables required by
-// extractMetrics (head, hhea, maxp, hmtx).  This is the same fixture style
+// extractMetrics (head, hhea, maxp, hmtx) plus a cmap.  drawText refuses a
+// character the font has no glyph for, so the cmap maps the characters the
+// tests draw ("H", "i" and "x") to glyph 1.  This is the same fixture style
 // the font-embedding unit tests use.
 // ---------------------------------------------------------------------------
+
+/** The characters the cmap of the fixture font maps, all to glyph 1. */
+const MAPPED_CHARS = ['H', 'i', 'x'] as const;
 
 function writeTag(buf: Uint8Array, offset: number, tag: string): void {
   for (let i = 0; i < 4; i++) {
@@ -17,7 +22,7 @@ function writeTag(buf: Uint8Array, offset: number, tag: string): void {
 }
 
 function buildMinimalTtf(): Uint8Array {
-  const numTables = 4;
+  const numTables = 5;
   const headerSize = 12;
   const recordSize = 16;
   const tableRecordsSize = numTables * recordSize;
@@ -27,8 +32,14 @@ function buildMinimalTtf(): Uint8Array {
   const hheaSize = 36;
   const maxpSize = 6;
   const hmtxSize = 8;
+  // cmap header and one subtable record, then a format 4 subtable with one
+  // segment per mapped character and the 0xFFFF sentinel segment.
+  const segCount = MAPPED_CHARS.length + 1;
+  const cmapHeaderSize = 4 + 8;
+  const cmapFormat4Size = 16 + segCount * 8;
+  const cmapSize = cmapHeaderSize + cmapFormat4Size;
 
-  const totalSize = tablesStart + headSize + hheaSize + maxpSize + hmtxSize;
+  const totalSize = tablesStart + headSize + hheaSize + maxpSize + hmtxSize + cmapSize;
   const buf = new Uint8Array(totalSize);
   const view = new DataView(buf.buffer);
 
@@ -98,6 +109,46 @@ function buildMinimalTtf(): Uint8Array {
   view.setInt16(hmtxOffset + 2, 0, false);
   view.setUint16(hmtxOffset + 4, 600, false);
   view.setInt16(hmtxOffset + 6, 50, false);
+  dataOffset += hmtxSize;
+  recordOffset += recordSize;
+
+  // cmap: platform 3, encoding 1, format 4; each mapped character is its own
+  // segment whose idDelta sends it to glyph 1.
+  writeTag(buf, recordOffset, 'cmap');
+  view.setUint32(recordOffset + 4, 0, false);
+  view.setUint32(recordOffset + 8, dataOffset, false);
+  view.setUint32(recordOffset + 12, cmapSize, false);
+  const cmapOffset = dataOffset;
+  view.setUint16(cmapOffset, 0, false);
+  view.setUint16(cmapOffset + 2, 1, false);
+  view.setUint16(cmapOffset + 4, 3, false);
+  view.setUint16(cmapOffset + 6, 1, false);
+  view.setUint32(cmapOffset + 8, cmapHeaderSize, false);
+  const subtable = cmapOffset + cmapHeaderSize;
+  view.setUint16(subtable, 4, false);
+  view.setUint16(subtable + 2, cmapFormat4Size, false);
+  view.setUint16(subtable + 4, 0, false);
+  view.setUint16(subtable + 6, segCount * 2, false);
+  // searchRange, entrySelector and rangeShift for four segments.
+  view.setUint16(subtable + 8, 8, false);
+  view.setUint16(subtable + 10, 2, false);
+  view.setUint16(subtable + 12, 0, false);
+  const endCodes = subtable + 14;
+  const startCodes = endCodes + segCount * 2 + 2;
+  const idDeltas = startCodes + segCount * 2;
+  const idRangeOffsets = idDeltas + segCount * 2;
+  MAPPED_CHARS.forEach((char, i) => {
+    const code = char.charCodeAt(0);
+    view.setUint16(endCodes + i * 2, code, false);
+    view.setUint16(startCodes + i * 2, code, false);
+    view.setInt16(idDeltas + i * 2, 1 - code, false);
+    view.setUint16(idRangeOffsets + i * 2, 0, false);
+  });
+  const sentinel = MAPPED_CHARS.length;
+  view.setUint16(endCodes + sentinel * 2, 0xffff, false);
+  view.setUint16(startCodes + sentinel * 2, 0xffff, false);
+  view.setInt16(idDeltas + sentinel * 2, 1, false);
+  view.setUint16(idRangeOffsets + sentinel * 2, 0, false);
 
   return buf;
 }

@@ -5,6 +5,7 @@
 import { describe, it, expect } from 'vitest';
 import { PdfDict, PdfArray } from '../../../src/core/pdfObjects.js';
 import { PdfForm } from '../../../src/form/pdfForm.js';
+import { NoSuchFieldError } from '../../../src/errors.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -101,7 +102,7 @@ describe('PdfForm.removeField', () => {
 
   it('throws when removing a non-existent field', () => {
     const form = emptyForm();
-    expect(() => form.removeField('nonexistent')).toThrow('not found');
+    expect(() => form.removeField('nonexistent')).toThrow(new NoSuchFieldError('nonexistent'));
   });
 
   it('does not affect other fields when removing one', () => {
@@ -125,6 +126,6 @@ describe('PdfForm.removeField', () => {
     form.createTextField('name', 0, [10, 10, 200, 30]);
 
     form.removeField('name');
-    expect(() => form.getTextField('name')).toThrow('not found');
+    expect(() => form.getTextField('name')).toThrow(new NoSuchFieldError('name'));
   });
 });

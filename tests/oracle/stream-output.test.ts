@@ -9,13 +9,15 @@
  * stream the writer compresses. An encrypted document's `saveAsStream()` throws
  * UnsupportedEncryptionError (the 0.40.5 behaviour); the markers record what is still open: the
  * streamed output of an encrypted document, the save hooks of `doc.use()` plugins, and byte
- * equality with `save()` when `objectStreamThreshold` is set. qpdf comes from `QPDF`, then
- * `PATH`; each test skips with a reason where qpdf is absent locally and fails when `CI` is set.
+ * equality with `save()` when `objectStreamThreshold` is set; `saveAsStream()` refuses a finite
+ * `objectStreamThreshold` with UnsupportedOptionError (planned for 0.41.2). qpdf comes from
+ * `QPDF`, then `PATH`; each test skips with a reason where qpdf is absent locally and fails when
+ * `CI` is set.
  */
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { beforeEach, describe, expect, test } from 'vitest';
-import { createPdf, UnsupportedEncryptionError } from '../../src/index.js';
+import { createPdf, UnsupportedEncryptionError, UnsupportedOptionError } from '../../src/index.js';
 import type { PdfDocument, PdfSaveOptions } from '../../src/index.js';
 import { defectKey, knownDefect } from '../helpers/known-defect.js';
 import { expectPdfjsText } from '../helpers/oracle/pdfjs.js';
@@ -107,10 +109,11 @@ describe('saveAsStream() with objectStreamThreshold', () => {
     return doc;
   };
 
-  test('the streamed output passes qpdf and shows its text in pdf.js', async () => {
-    const streamed = await collect(build().saveAsStream(options));
-    expectQpdfClean(streamed);
-    await expectPdfjsText(streamed, ['Streamed object streams']);
+  test('a finite threshold is refused with UnsupportedOptionError, planned for 0.41.2', () => {
+    expect(() => build().saveAsStream(options)).toThrow(UnsupportedOptionError);
+    expect(() => build().saveAsStream(options)).toThrow(
+      expect.objectContaining({ code: 'unsupported-option', plannedFor: '0.41.2' }),
+    );
   });
 
   knownDefect(
@@ -118,7 +121,7 @@ describe('saveAsStream() with objectStreamThreshold', () => {
     'stream bytes equal the save() bytes of a document built alike when objectStreamThreshold is set',
     {
       failsWith:
-        /^AssertionError: stream bytes vs save\(\) bytes: expected Uint8Array\[.*\] to deeply equal Uint8Array\[/,
+        /^UnsupportedOptionError: `saveAsStream\(\)`: the option `objectStreamThreshold` is not supported in this release; it is planned for 0\.41\.2\.$/,
     },
     async () => {
       const saved = await build().save(options);
