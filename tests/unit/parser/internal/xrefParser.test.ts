@@ -15,6 +15,8 @@
 
 import { describe, it, expect } from 'vitest';
 import { XrefParser } from '../../../../src/parser/internal/xrefParser.js';
+import { beginCall } from '../../../../src/internal/limits.js';
+import { DEFAULT_LIMITS } from '../../../../src/limits.js';
 import { PdfLexer } from '../../../../src/parser/internal/lexer.js';
 import { PdfObjectParser } from '../../../../src/parser/internal/objectParser.js';
 import { PdfObjectRegistry } from '../../../../src/core/pdfObjects.js';
@@ -38,7 +40,7 @@ function makeParser(str: string): XrefParser {
   const lexer = new PdfLexer(data);
   const registry = new PdfObjectRegistry();
   const objectParser = new PdfObjectParser(lexer, registry);
-  return new XrefParser(data, objectParser);
+  return new XrefParser(data, objectParser, beginCall(DEFAULT_LIMITS));
 }
 
 /**

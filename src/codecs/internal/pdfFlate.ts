@@ -40,7 +40,7 @@
  */
 
 import { Inflate, zlibSync } from 'fflate';
-import { assertLimit, legacyContext, type LimitContext } from '../../internal/limits.js';
+import { assertLimit, type LimitContext } from '../../internal/limits.js';
 import { MalformedInputError } from '../../errors.js';
 
 // ---------------------------------------------------------------------------
@@ -389,8 +389,7 @@ export interface InflatedPrefix {
  * @param data     - The stream data.
  * @param maxBytes - The most decoded bytes to return; at most the
  *   `maxDecodedStreamBytes` of `ctx`. A fraction is rounded down.
- * @param ctx      - The context of the call; a context over the default
- *   limits when it is left out.
+ * @param ctx      - The context of the call.
  * @returns          The decoded bytes and whether the data held more.
  * @throws {ResourceLimitError} `maxDecodedStreamBytes` when `maxBytes` is
  *   above that limit or is not a finite number.
@@ -401,7 +400,7 @@ export interface InflatedPrefix {
 export function inflateFlateUpTo(
   data: Uint8Array,
   maxBytes: number,
-  ctx: LimitContext = legacyContext(),
+  ctx: LimitContext,
 ): InflatedPrefix {
   assertLimit(ctx, 'maxDecodedStreamBytes', maxBytes);
   const bound = Math.max(0, Math.floor(maxBytes));

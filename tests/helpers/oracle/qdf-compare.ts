@@ -35,6 +35,8 @@ import type {
   PdfString,
 } from '../../../src/core/pdfObjects.js';
 import { decodeStreamData } from '../../../src/codecs/streamDecode.js';
+import { beginCall } from '../../../src/internal/limits.js';
+import { DEFAULT_LIMITS } from '../../../src/limits.js';
 import { QPDF_BIN, QpdfError } from './qpdf.js';
 
 /** The QDF form of `bytes` and the original object number and generation of each QDF object. */
@@ -180,7 +182,7 @@ export function compareWithQdf(
           libraryData = as.data;
         } else {
           try {
-            libraryData = decodeStreamData(as);
+            libraryData = decodeStreamData(as, beginCall(DEFAULT_LIMITS));
           } catch (err) {
             out.push(`${path}: the library's data does not decode (${String(err)})`);
             return;

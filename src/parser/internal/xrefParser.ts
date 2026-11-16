@@ -29,7 +29,7 @@ import type { PdfObjectParser } from './objectParser.js';
 import { decodeFlateOnly, firstFilterName } from '../../codecs/streamDecode.js';
 import { PdfParseError } from '../parseError.js';
 import { ResourceLimitError } from '../../errors.js';
-import { legacyContext, type LimitContext } from '../../internal/limits.js';
+import type { LimitContext } from '../../internal/limits.js';
 
 // ---------------------------------------------------------------------------
 // Public interfaces
@@ -229,14 +229,9 @@ export class XrefParser {
    * @param data          The raw PDF file bytes.
    * @param objectParser  An object parser configured with the same data.
    * @param ctx           The limit context of the load the cross-reference
-   *                      streams decode under; a context over the default
-   *                      limits when it is left out.
+   *                      streams decode under.
    */
-  constructor(
-    data: Uint8Array,
-    objectParser: PdfObjectParser,
-    ctx: LimitContext = legacyContext(),
-  ) {
+  constructor(data: Uint8Array, objectParser: PdfObjectParser, ctx: LimitContext) {
     this.data = data;
     this.objectParser = objectParser;
     this.ctx = ctx;

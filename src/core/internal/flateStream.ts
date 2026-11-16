@@ -12,9 +12,9 @@
  *   holds raw DEFLATE data (as modern-pdf-lib 0.40.6 and earlier wrote it)
  *   back as zlib data: the data is inflated and compressed again at level 6,
  *   so the decoded bytes do not change. A stream whose decoded data is
- *   larger than the re-wrap bound ({@link INTERNAL_LIMITS}.maxRewrapDecodedBytes,
- *   64 MiB, or the `maxDecodedStreamBytes` of the call's limit context when
- *   that is smaller) is copied as loaded.
+ *   larger than the re-wrap bound ({@link rewrapBound}: 64 MiB, or the
+ *   `maxDecodedStreamBytes` of the call's limit context when that is smaller)
+ *   is copied as loaded.
  * - {@link rewriteSyncFlushedStream} writes a loaded `/FlateDecode` stream
  *   whose zlib data ends at a sync flush, with no final DEFLATE block, back
  *   as complete zlib data of the bytes decoded so far, under the same bound.
@@ -62,7 +62,7 @@ import {
   isAvailable as isWasmDeflateAvailable,
   deflateSync as wasmDeflateSync,
 } from '../../codecs/internal/libdeflateWasm.js';
-import { INTERNAL_LIMITS, legacyContext, type LimitContext } from '../../internal/limits.js';
+import { rewrapBound, type LimitContext } from '../../internal/limits.js';
 import { UnsupportedEncryptionError } from '../../errors.js';
 import { PdfName } from '../pdfObjects.js';
 import type { PdfObject, PdfObjectRegistry, PdfStream, PdfString } from '../pdfObjects.js';
@@ -307,15 +307,6 @@ export function compressPdfStream(stream: PdfStream, level: number, useWasm = fa
   }
 }
 
-/**
- * The most decoded bytes a re-wrap or rewrite on save keeps: {@link INTERNAL_LIMITS}.maxRewrapDecodedBytes
- * (64 MiB), or the `maxDecodedStreamBytes` of `ctx` when that is smaller, so a stream is never
- * decoded past the limits of its call.
- */
-function rewrapBound(ctx: LimitContext): number {
-  return Math.min(INTERNAL_LIMITS.maxRewrapDecodedBytes, ctx.limits.maxDecodedStreamBytes);
-}
-
 /** True when the stream's first decode filter is `/FlateDecode`. */
 function firstFilterIsFlate(stream: PdfStream): boolean {
   const filter = stream.dict.get('/Filter');
@@ -352,10 +343,9 @@ function firstFilterIsFlate(stream: PdfStream): boolean {
  * can inflate as raw DEFLATE by chance, which would replace it for good.
  *
  * @param stream - The stream to update in place.
- * @param ctx    - The limit context of the save; a context over the default
- *                 limits when it is left out.
+ * @param ctx    - The limit context of the save.
  */
-export function rewrapLegacyStream(stream: PdfStream, ctx: LimitContext = legacyContext()): void {
+export function rewrapLegacyStream(stream: PdfStream, ctx: LimitContext): void {
   if (stream.data.length === 0 || !firstFilterIsFlate(stream)) return;
   if (isZlibHeader(stream.data)) return;
 
@@ -395,13 +385,9 @@ export function rewrapLegacyStream(stream: PdfStream, ctx: LimitContext = legacy
  * data is still encrypted.
  *
  * @param stream - The stream to update in place.
- * @param ctx    - The limit context of the save; a context over the default
- *                 limits when it is left out.
+ * @param ctx    - The limit context of the save.
  */
-export function rewriteSyncFlushedStream(
-  stream: PdfStream,
-  ctx: LimitContext = legacyContext(),
-): void {
+export function rewriteSyncFlushedStream(stream: PdfStream, ctx: LimitContext): void {
   if (!firstFilterIsFlate(stream)) return;
   const plain = inflateSyncFlushedZlib(stream.data, rewrapBound(ctx));
   if (plain === undefined) return;

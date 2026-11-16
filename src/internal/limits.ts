@@ -14,9 +14,9 @@
  * The public part (DEFAULT_LIMITS, LimitName, PdfLimits, ResolvedLimits) lives in src/limits.ts, which the package entries export.
  * {@link resolveLimits} checks a `limits` option once and applies it, and a
  * {@link LimitContext} carries the result and the totals of one call to every
- * check; nothing here keeps a limit or a total in module state. {@link INTERNAL_LIMITS},
- * {@link assertWithinLimit} and {@link legacyContext} serve the modules that
- * do not take a context yet: they check against the defaults.
+ * check; nothing here keeps a limit or a total in module state. Every module
+ * takes the context of its call as a parameter: only this module and
+ * src/limits.ts name the defaults.
  *
  * @packageDocumentation
  */
@@ -200,18 +200,14 @@ export function addToTotal(ctx: LimitContext, total: TotalName, n: number): void
   assertLimit(ctx, total, sum);
 }
 
-/** A context over {@link DEFAULT_LIMITS}, new on every call, for the modules that do not take a context yet. */
-export function legacyContext(): LimitContext {
-  return beginCall(DEFAULT_LIMITS);
-}
-
 /**
- * {@link assertLimit} against the defaults, through {@link legacyContext}:
- * for the modules that do not take a context yet.
+ * The most decoded bytes a re-wrap or rewrite on save keeps:
+ * {@link INTERNAL_LIMITS}.maxRewrapDecodedBytes (64 MiB), or the
+ * `maxDecodedStreamBytes` of `ctx` when that is smaller, so a stream is never
+ * decoded past the limits of its call.
  *
- * @param limit - The limit to check against.
- * @param actual - The size the input needs.
+ * @param ctx - The context of the save.
  */
-export function assertWithinLimit(limit: LimitName, actual: number): void {
-  assertLimit(legacyContext(), limit, actual);
+export function rewrapBound(ctx: LimitContext): number {
+  return Math.min(INTERNAL_LIMITS.maxRewrapDecodedBytes, ctx.limits.maxDecodedStreamBytes);
 }

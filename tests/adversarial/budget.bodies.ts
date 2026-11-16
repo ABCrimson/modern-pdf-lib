@@ -5,7 +5,8 @@
  */
 import { setTimeout as sleep } from 'node:timers/promises';
 import type { JsonValue } from '../helpers/budget.js';
-import { assertWithinLimit } from '../../src/internal/limits.js';
+import { assertLimit, beginCall } from '../../src/internal/limits.js';
+import { DEFAULT_LIMITS } from '../../src/limits.js';
 
 /** Returns the input length and the args it was given. */
 export function returns(bytes: Uint8Array, args: JsonValue): JsonValue {
@@ -21,7 +22,7 @@ export async function waits(_bytes: Uint8Array, args: JsonValue): Promise<JsonVa
 
 /** Throws ResourceLimitError: asks for one pixel more than the image pixel limit allows. */
 export function throwsLimit(_bytes: Uint8Array, _args: JsonValue): JsonValue {
-  assertWithinLimit('maxImagePixels', 2 ** 28 + 1);
+  assertLimit(beginCall(DEFAULT_LIMITS), 'maxImagePixels', 2 ** 28 + 1);
   return null;
 }
 

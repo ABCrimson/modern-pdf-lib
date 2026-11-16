@@ -463,16 +463,32 @@ describe('PNG embed checks the IHDR size first', () => {
 
   it('refuses a width or height above maxImageDimension', () => {
     const above = INTERNAL_LIMITS.maxImageDimension + 1;
-    expectLimit(() => embedPng(buildPng(above, 1, 6, idat)), 'maxImageDimension', above);
-    expectLimit(() => embedPng(buildPng(1, above, 6, idat)), 'maxImageDimension', above);
+    expectLimit(
+      () => embedPng(buildPng(above, 1, 6, idat), beginCall(DEFAULT_LIMITS)),
+      'maxImageDimension',
+      above,
+    );
+    expectLimit(
+      () => embedPng(buildPng(1, above, 6, idat), beginCall(DEFAULT_LIMITS)),
+      'maxImageDimension',
+      above,
+    );
   });
 
   it('refuses width x height above maxImagePixels', () => {
-    expectLimit(() => embedPng(buildPng(20000, 20000, 2, idat)), 'maxImagePixels', 4e8);
+    expectLimit(
+      () => embedPng(buildPng(20000, 20000, 2, idat), beginCall(DEFAULT_LIMITS)),
+      'maxImagePixels',
+      4e8,
+    );
   });
 
   it('refuses decoded bytes above maxImageBytes', () => {
-    expectLimit(() => embedPng(buildPng(16384, 16384, 6, idat)), 'maxImageBytes', 2 ** 30);
+    expectLimit(
+      () => embedPng(buildPng(16384, 16384, 6, idat), beginCall(DEFAULT_LIMITS)),
+      'maxImageBytes',
+      2 ** 30,
+    );
   });
 });
 
@@ -491,29 +507,33 @@ describe('PNG embed inflates only the size the IHDR implies', () => {
   };
 
   it('decodes data of exactly the implied size', () => {
-    const image = embedPng(buildPng(16, 16, 6, zlibSync(pixels())));
+    const image = embedPng(buildPng(16, 16, 6, zlibSync(pixels())), beginCall(DEFAULT_LIMITS));
     expect(image).toMatchObject({ width: 16, height: 16, colorSpace: 'DeviceRGB' });
   });
 
   it('ignores data past the implied size: the pixels are those of a PNG without it', () => {
-    const control = embedPng(buildPng(16, 16, 6, zlibSync(pixels())));
+    const control = embedPng(buildPng(16, 16, 6, zlibSync(pixels())), beginCall(DEFAULT_LIMITS));
     for (const extra of [1, 1040, 100_000]) {
-      const image = embedPng(buildPng(16, 16, 6, zlibSync(withTrailing(extra))));
+      const image = embedPng(
+        buildPng(16, 16, 6, zlibSync(withTrailing(extra))),
+        beginCall(DEFAULT_LIMITS),
+      );
       expect(image.imageData).toEqual(control.imageData);
       expect(image.smaskData).toEqual(control.smaskData);
     }
   });
 
   it('ignores data past the implied size on the transparency path', () => {
-    const control = embedPng(buildPng(16, 16, 6, zlibSync(pixels())));
-    expect(embedPng(buildPng(16, 16, 6, zlibSync(withTrailing(5000)))).imageData).toEqual(
-      control.imageData,
-    );
+    const control = embedPng(buildPng(16, 16, 6, zlibSync(pixels())), beginCall(DEFAULT_LIMITS));
+    expect(
+      embedPng(buildPng(16, 16, 6, zlibSync(withTrailing(5000))), beginCall(DEFAULT_LIMITS))
+        .imageData,
+    ).toEqual(control.imageData);
   });
 
   it('passes the data of an RGB image without transparency through without inflating it', () => {
     const idat = zlibOfZeroBytes(10_000);
-    expect(embedPng(buildPng(8, 8, 2, idat)).imageData).toEqual(idat);
+    expect(embedPng(buildPng(8, 8, 2, idat), beginCall(DEFAULT_LIMITS)).imageData).toEqual(idat);
   });
 });
 
@@ -942,7 +962,7 @@ describe('PNG embed runs under the limits of its context', () => {
   });
 
   it('keeps the default limits without a context', () => {
-    expect(embedPng(rgb10()).width).toBe(10);
+    expect(embedPng(rgb10(), beginCall(DEFAULT_LIMITS)).width).toBe(10);
   });
 });
 

@@ -25,7 +25,9 @@ export function inflateRawEntry(bytes: Uint8Array, _args: JsonValue): JsonValue 
 export function decodeFlateOnlyEntry(bytes: Uint8Array, _args: JsonValue): JsonValue {
   const dict = new PdfDict();
   dict.set('/Filter', PdfName.of('FlateDecode'));
-  return { length: decodeFlateOnly(new PdfStream(dict, bytes))?.length ?? -1 };
+  return {
+    length: decodeFlateOnly(new PdfStream(dict, bytes), beginCall(DEFAULT_LIMITS))?.length ?? -1,
+  };
 }
 
 /** `decodeStream` with the filter chain [/FlateDecode /FlateDecode]. */

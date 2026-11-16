@@ -27,7 +27,6 @@ import {
   addToTotal,
   assertLimit,
   beginCall,
-  legacyContext,
   resolveLimits,
   type LimitContext,
 } from '../internal/limits.js';
@@ -149,15 +148,12 @@ export function getStreamFilters(dict: PdfDict): {
  *
  * @param stream - The stream object to decode.
  * @param ctx    - The context of the call, whose decoded total the outputs
- *                 add to; a context over the default limits when it is left out.
+ *                 add to.
  * @returns The fully decoded (uncompressed) bytes.
  * @throws {ResourceLimitError} As {@link decodeStream} throws it, under the
  *   limits of `ctx`.
  */
-export function decodeStreamData(
-  stream: PdfStream,
-  ctx: LimitContext = legacyContext(),
-): Uint8Array {
+export function decodeStreamData(stream: PdfStream, ctx: LimitContext): Uint8Array {
   const { filters, decodeParms } = getStreamFilters(stream.dict);
   if (filters.length === 0) {
     return stream.data;
@@ -211,8 +207,7 @@ export function firstFilterName(dict: PdfDict): string | undefined {
  * The decoded bytes are added to the decoded total of `ctx`.
  *
  * @param stream - The stream to decode.
- * @param ctx    - The context of the call; a context over the default limits
- *                 when it is left out.
+ * @param ctx    - The context of the call.
  * @returns The decoded bytes, or `undefined` for any other `/Filter`.
  * @throws {MalformedInputError} `FlateDecode: failed to decompress data` when the data
  *   does not inflate: neither as zlib nor as raw DEFLATE for the name and
@@ -226,10 +221,7 @@ export function firstFilterName(dict: PdfDict): string | undefined {
  * @throws {ResourceLimitError} `maxPredictorSamples` when a `/Predictor 2`
  *   with `/BitsPerComponent` 1, 2 or 4 covers more samples than that limit of `ctx`.
  */
-export function decodeFlateOnly(
-  stream: PdfStream,
-  ctx: LimitContext = legacyContext(),
-): Uint8Array | undefined {
+export function decodeFlateOnly(stream: PdfStream, ctx: LimitContext): Uint8Array | undefined {
   const filter = stream.dict.get('/Filter');
   if (filter === undefined) return stream.data;
   if (firstFilterName(stream.dict) !== '/FlateDecode') return undefined;

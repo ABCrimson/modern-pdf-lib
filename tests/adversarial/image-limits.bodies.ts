@@ -17,6 +17,8 @@ import {
 import { PdfDict, PdfNumber } from '../../src/core/pdfObjects.js';
 import { createPdf } from '../../src/index.js';
 import { decodeStream } from '../../src/codecs/streamDecode.js';
+import { beginCall } from '../../src/internal/limits.js';
+import { DEFAULT_LIMITS } from '../../src/limits.js';
 import type { JsonValue } from '../helpers/budget.js';
 
 // ---------------------------------------------------------------------------
@@ -62,7 +64,7 @@ export function tiffDirectEntry(bytes: Uint8Array, _args: JsonValue): JsonValue 
 
 /** `embedPng`. */
 export function pngEntry(bytes: Uint8Array, _args: JsonValue): JsonValue {
-  const image = embedPng(bytes);
+  const image = embedPng(bytes, beginCall(DEFAULT_LIMITS));
   return { width: image.width, height: image.height };
 }
 

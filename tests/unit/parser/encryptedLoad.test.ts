@@ -36,6 +36,8 @@ import { PdfEncryptionHandler } from '../../../src/crypto/encryptionHandler.js';
 import { PdfRef } from '../../../src/core/pdfObjects.js';
 import type { PdfDict, PdfObject, PdfStream, PdfString } from '../../../src/core/pdfObjects.js';
 import { decodeStreamData } from '../../../src/codecs/streamDecode.js';
+import { beginCall } from '../../../src/internal/limits.js';
+import { DEFAULT_LIMITS } from '../../../src/limits.js';
 import { extractText, parseContentStream } from '../../../src/index.js';
 import { EncryptedPdfError, UnsupportedEncryptionError } from '../../../src/errors.js';
 import { qpdfDecryptQdf, requireQpdf } from '../../helpers/oracle/qpdf.js';
@@ -80,7 +82,9 @@ function observe(doc: PdfDocument): {
     content,
     text: extractText(parseContentStream(doc.getPage(0).getContentStream())).trim(),
     title: doc.getTitle(),
-    xmp: metadata !== undefined && latin1(decodeStreamData(metadata)).includes(TITLE),
+    xmp:
+      metadata !== undefined &&
+      latin1(decodeStreamData(metadata, beginCall(DEFAULT_LIMITS))).includes(TITLE),
   };
 }
 
@@ -278,7 +282,7 @@ describe('/EncryptMetadata false leaves only the document-level metadata stream 
     const registry = doc.getRegistry();
     const streamOf = (holder: PdfDict): string => {
       const stream = registry.resolve(holder.get('/Metadata') as PdfRef) as PdfStream;
-      return latin1(decodeStreamData(stream));
+      return latin1(decodeStreamData(stream, beginCall(DEFAULT_LIMITS)));
     };
     return {
       catalog: streamOf(findByType(doc, '/Catalog')[0]!.object as PdfDict),

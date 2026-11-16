@@ -29,6 +29,7 @@ import {
   rewrapLegacyStream,
   rewriteSyncFlushedStream,
 } from '../internal/flateStream.js';
+import { beginCall } from '../../internal/limits.js';
 import { PdfDict, PdfObjectRegistry } from '../pdfObjects.js';
 import type { DocumentStructure } from '../pdfCatalog.js';
 import { liveEntries } from './pdfWriter.js';
@@ -406,7 +407,8 @@ export function saveIncremental(
   // Xref entries for changed objects: maps obj number -> byte offset
   const xrefOffsets = new Map<number, number>();
 
-  // Write each changed object
+  // Write each changed object, re-wrapping loaded streams under the limits of the document
+  const limitCtx = beginCall(registry.limits);
   for (const entry of liveEntries(registry)) {
     if (!changedObjects.has(entry.ref.objectNumber)) {
       continue;
@@ -419,8 +421,8 @@ export function saveIncremental(
     // encrypted), then optionally compress (only objects this update appends)
     if (entry.object.kind === 'stream') {
       if (!isLoadedFromEncryptedFile(registry)) {
-        rewrapLegacyStream(entry.object);
-        rewriteSyncFlushedStream(entry.object);
+        rewrapLegacyStream(entry.object, limitCtx);
+        rewriteSyncFlushedStream(entry.object, limitCtx);
       }
       if (compress) compressPdfStream(entry.object, compressionLevel, useWasm);
     }

@@ -1,7 +1,6 @@
 /**
  * The limits core (src/limits.ts and src/internal/limits.ts): DEFAULT_LIMITS, resolveLimits and the checks it makes on a
- * `limits` option, the per-call LimitContext and its totals, assertLimit and the assertWithinLimit
- * wrapper, the entries that export the public part, and the two error classes the root entry exports
+ * `limits` option, the per-call LimitContext and its totals, assertLimit, the entries that export the public part, and the two error classes the root entry exports
  * for refused input: ResourceLimitError and UnsupportedFilterError.
  */
 import { describe, expect, expectTypeOf, it } from 'vitest';
@@ -18,10 +17,9 @@ import {
   LIMIT_UNITS,
   addToTotal,
   assertLimit,
-  assertWithinLimit,
   beginCall,
-  legacyContext,
   resolveLimits,
+  rewrapBound,
 } from '../../../src/internal/limits.js';
 import type { LimitContext } from '../../../src/internal/limits.js';
 import {
@@ -345,27 +343,18 @@ describe('assertLimit', () => {
   });
 });
 
-describe('assertWithinLimit and legacyContext', () => {
-  it('gives a fresh context over the defaults on every call', () => {
-    const a = legacyContext();
-    const b = legacyContext();
-    expect(a).not.toBe(b);
-    expect(a.limits).toBe(DEFAULT_LIMITS);
-    expect(a.totals).toEqual({ decodedBytes: 0, cmapMappings: 0, imageBytes: 0, pageOperators: 0 });
+describe('rewrapBound', () => {
+  it('is the 64 MiB re-wrap bound under the default limits', () => {
+    expect(rewrapBound(beginCall(DEFAULT_LIMITS))).toBe(INTERNAL_LIMITS.maxRewrapDecodedBytes);
   });
 
-  it('checks against the defaults, as assertLimit does', () => {
-    expect(limitErrorOf(() => assertWithinLimit('maxPredictorSamples', 2 ** 28))).toBeUndefined();
-    expect(limitErrorOf(() => assertWithinLimit('maxPredictorSamples', 2 ** 28 + 1))).toMatchObject(
-      {
-        code: 'resource-limit-exceeded',
-        limit: 'maxPredictorSamples',
-        max: 2 ** 28,
-        actual: 2 ** 28 + 1,
-        source: 'default',
-        message: 'Input exceeds the limit maxPredictorSamples (268435456 samples).',
-      },
-    );
+  it('is the maxDecodedStreamBytes of the context when that is smaller', () => {
+    expect(rewrapBound(beginCall(resolveLimits({ maxDecodedStreamBytes: 1000 })))).toBe(1000);
+  });
+
+  it('stays at 64 MiB when the context allows more', () => {
+    const ctx = beginCall(resolveLimits({ maxDecodedStreamBytes: 2 ** 30 }));
+    expect(rewrapBound(ctx)).toBe(64 * 1024 * 1024);
   });
 });
 
@@ -396,8 +385,7 @@ describe('the package entries', () => {
       'beginCall',
       'assertLimit',
       'addToTotal',
-      'assertWithinLimit',
-      'legacyContext',
+      'rewrapBound',
     ]) {
       expect(Object.keys(root), name).not.toContain(name);
     }

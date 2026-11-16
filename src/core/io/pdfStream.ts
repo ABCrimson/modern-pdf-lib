@@ -24,6 +24,7 @@ import {
   rewrapLegacyStream,
   rewriteSyncFlushedStream,
 } from '../internal/flateStream.js';
+import { beginCall } from '../../internal/limits.js';
 import type { PdfStream as PdfStreamObj } from '../pdfObjects.js';
 import { PdfObjectRegistry } from '../pdfObjects.js';
 import type { DocumentStructure } from '../pdfCatalog.js';
@@ -158,6 +159,7 @@ export class PdfStreamWriter {
 
   private async writeBody(w: StreamByteCounter): Promise<Map<number, number>> {
     const offsets = new Map<number, number>();
+    const limitCtx = beginCall(this.registry.limits);
 
     for (const entry of liveEntries(this.registry)) {
       assertNoDecryptedObject(entry.object, 'PdfStreamWriter');
@@ -168,8 +170,8 @@ export class PdfStreamWriter {
       // writes)
       if (entry.object.kind === 'stream') {
         if (!isLoadedFromEncryptedFile(this.registry)) {
-          rewrapLegacyStream(entry.object);
-          rewriteSyncFlushedStream(entry.object);
+          rewrapLegacyStream(entry.object, limitCtx);
+          rewriteSyncFlushedStream(entry.object, limitCtx);
         }
         if (this.compress) {
           this.compressStream(entry.object);

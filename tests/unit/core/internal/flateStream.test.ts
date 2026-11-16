@@ -29,6 +29,7 @@ import {
 } from '../../../../src/core/internal/flateStream.js';
 import { UnsupportedEncryptionError } from '../../../../src/errors.js';
 import { INTERNAL_LIMITS, beginCall, resolveLimits } from '../../../../src/internal/limits.js';
+import { DEFAULT_LIMITS } from '../../../../src/limits.js';
 import {
   PdfArray,
   PdfDict,
@@ -115,7 +116,7 @@ describe('rewrapLegacyStream', () => {
   it('writes a raw DEFLATE /FlateDecode stream back as zlib data that node:zlib inflates', () => {
     const raw = new Uint8Array(deflateRawSync(TEXT));
     const stream = streamOf(raw, PdfName.of('FlateDecode'));
-    rewrapLegacyStream(stream);
+    rewrapLegacyStream(stream, beginCall(DEFAULT_LIMITS));
     expect(new Uint8Array(inflateSync(stream.data))).toEqual(new Uint8Array(TEXT));
     expect(lengthOf(stream)).toBe(stream.data.length);
     expect(stream.dict.get('/Filter')).toBe(PdfName.of('FlateDecode'));
@@ -127,7 +128,7 @@ describe('rewrapLegacyStream', () => {
     withEol.set(raw);
     withEol.set([0x0d, 0x0a], raw.length);
     const stream = streamOf(withEol, PdfName.of('FlateDecode'));
-    rewrapLegacyStream(stream);
+    rewrapLegacyStream(stream, beginCall(DEFAULT_LIMITS));
     expect(new Uint8Array(inflateSync(stream.data))).toEqual(new Uint8Array(TEXT));
     expect(lengthOf(stream)).toBe(stream.data.length);
   });
@@ -137,7 +138,7 @@ describe('rewrapLegacyStream', () => {
     const raw = new Uint8Array(deflateRawSync(hex));
     const filters = PdfArray.of([PdfName.of('FlateDecode'), PdfName.of('ASCIIHexDecode')]);
     const stream = streamOf(raw, filters);
-    rewrapLegacyStream(stream);
+    rewrapLegacyStream(stream, beginCall(DEFAULT_LIMITS));
     expect(new Uint8Array(inflateSync(stream.data))).toEqual(new Uint8Array(hex));
   });
 
@@ -145,7 +146,7 @@ describe('rewrapLegacyStream', () => {
     const raw = new Uint8Array(deflateRawSync(TEXT));
     const filters = PdfArray.of([PdfName.of('ASCIIHexDecode'), PdfName.of('FlateDecode')]);
     const stream = streamOf(raw, filters);
-    rewrapLegacyStream(stream);
+    rewrapLegacyStream(stream, beginCall(DEFAULT_LIMITS));
     expect(stream.data).toBe(raw);
   });
 
@@ -153,16 +154,16 @@ describe('rewrapLegacyStream', () => {
     const zlib = new Uint8Array(zlibDeflateSync(TEXT));
     const wrapped = streamOf(zlib, PdfName.of('FlateDecode'));
     const before = wrapped.data;
-    rewrapLegacyStream(wrapped);
+    rewrapLegacyStream(wrapped, beginCall(DEFAULT_LIMITS));
     expect(wrapped.data).toBe(before);
 
     const garbage = new Uint8Array([0xff, 0xff, 0xff, 0xff, 0x00, 0x13, 0x37]);
     const damaged = streamOf(garbage, PdfName.of('FlateDecode'));
-    expect(() => rewrapLegacyStream(damaged)).not.toThrow();
+    expect(() => rewrapLegacyStream(damaged, beginCall(DEFAULT_LIMITS))).not.toThrow();
     expect(damaged.data).toBe(garbage);
 
     const plain = streamOf(TEXT);
-    rewrapLegacyStream(plain);
+    rewrapLegacyStream(plain, beginCall(DEFAULT_LIMITS));
     expect(plain.data).toBe(TEXT);
   });
 
@@ -172,7 +173,7 @@ describe('rewrapLegacyStream', () => {
     const parms = new PdfDict();
     parms.set('/Predictor', PdfNumber.of(12));
     stream.dict.set('/DecodeParms', parms);
-    rewrapLegacyStream(stream);
+    rewrapLegacyStream(stream, beginCall(DEFAULT_LIMITS));
     expect(stream.dict.get('/DecodeParms')).toBe(parms);
   });
 
@@ -183,7 +184,7 @@ describe('rewrapLegacyStream', () => {
       deflateRawSync(new Uint8Array(INTERNAL_LIMITS.maxRewrapDecodedBytes - 1)),
     );
     const rewrapped = streamOf(under, PdfName.of('FlateDecode'));
-    rewrapLegacyStream(rewrapped);
+    rewrapLegacyStream(rewrapped, beginCall(DEFAULT_LIMITS));
     expect([rewrapped.data[0], rewrapped.data[1]]).toEqual([0x78, 0x9c]);
     const plain = new Uint8Array(inflateSync(rewrapped.data));
     expect(plain.length).toBe(INTERNAL_LIMITS.maxRewrapDecodedBytes - 1);
@@ -196,7 +197,7 @@ describe('rewrapLegacyStream', () => {
       deflateRawSync(new Uint8Array(INTERNAL_LIMITS.maxRewrapDecodedBytes + 1)),
     );
     const copied = streamOf(over, PdfName.of('FlateDecode'));
-    rewrapLegacyStream(copied);
+    rewrapLegacyStream(copied, beginCall(DEFAULT_LIMITS));
     expect(copied.data).toBe(over);
     expect(lengthOf(copied)).toBe(over.length);
   });
@@ -208,7 +209,7 @@ describe('rewrapLegacyStream', () => {
     const stream = streamOf(data, PdfName.of('FlateDecode'));
     const push = vi.spyOn(Inflate.prototype, 'push');
     try {
-      rewrapLegacyStream(stream);
+      rewrapLegacyStream(stream, beginCall(DEFAULT_LIMITS));
       // The read stops on its idle-step rule: the step that decodes "hello world", eight steps
       // that decode nothing and the one byte that ends the input, not the 16 MiB (1,025 steps).
       expect(push.mock.calls.length).toBeLessThanOrEqual(10);
@@ -232,7 +233,7 @@ describe('rewrapLegacyStream', () => {
     const over = streamOf(data, PdfName.of('FlateDecode'));
     rewrapLegacyStream(over, ctx);
     expect(over.data).toBe(data);
-    rewrapLegacyStream(over);
+    rewrapLegacyStream(over, beginCall(DEFAULT_LIMITS));
     expect(new Uint8Array(inflateSync(over.data))).toEqual(new Uint8Array(1025));
   });
 });
@@ -266,7 +267,7 @@ describe('rewriteSyncFlushedStream', () => {
     const data = syncFlushed(TEXT);
     expect(() => inflateSync(data)).toThrow('unexpected end of file');
     const stream = streamOf(data, PdfName.of('FlateDecode'));
-    rewriteSyncFlushedStream(stream);
+    rewriteSyncFlushedStream(stream, beginCall(DEFAULT_LIMITS));
     expect(new Uint8Array(inflateSync(stream.data))).toEqual(new Uint8Array(TEXT));
     expect(new Uint8Array(inflateSync(stream.data))).toEqual(decodedSoFar(data));
     expect(lengthOf(stream)).toBe(stream.data.length);
@@ -280,7 +281,7 @@ describe('rewriteSyncFlushedStream', () => {
     const parms = new PdfDict();
     parms.set('/Predictor', PdfNumber.of(12));
     stream.dict.set('/DecodeParms', parms);
-    rewriteSyncFlushedStream(stream);
+    rewriteSyncFlushedStream(stream, beginCall(DEFAULT_LIMITS));
     expect(new Uint8Array(inflateSync(stream.data))).toEqual(new Uint8Array(TEXT));
     expect(stream.dict.get('/DecodeParms')).toBe(parms);
     expect(stream.dict.get('/Filter')).toBe(filters);
@@ -289,12 +290,12 @@ describe('rewriteSyncFlushedStream', () => {
   it('never rewrites complete zlib data', () => {
     const complete = new Uint8Array(zlibDeflateSync(TEXT));
     const stream = streamOf(complete, PdfName.of('FlateDecode'));
-    rewriteSyncFlushedStream(stream);
+    rewriteSyncFlushedStream(stream, beginCall(DEFAULT_LIMITS));
     expect(stream.data).toBe(complete);
     // Complete data followed by the bytes a sync flush ends with.
     const trailing = new Uint8Array([...complete, 0x00, 0x00, 0xff, 0xff]);
     const after = streamOf(trailing, PdfName.of('FlateDecode'));
-    rewriteSyncFlushedStream(after);
+    rewriteSyncFlushedStream(after, beginCall(DEFAULT_LIMITS));
     expect(after.data).toBe(trailing);
   });
 
@@ -302,28 +303,28 @@ describe('rewriteSyncFlushedStream', () => {
     const data = syncFlushed(TEXT);
     const cut = data.subarray(0, data.length - 7);
     const cutShort = streamOf(cut, PdfName.of('FlateDecode'));
-    rewriteSyncFlushedStream(cutShort);
+    rewriteSyncFlushedStream(cutShort, beginCall(DEFAULT_LIMITS));
     expect(cutShort.data).toBe(cut);
 
     const invalid = new Uint8Array([...data, 0x07, 0xff, 0x00, 0x00, 0x00, 0xff, 0xff]);
     const damaged = streamOf(invalid, PdfName.of('FlateDecode'));
-    expect(() => rewriteSyncFlushedStream(damaged)).not.toThrow();
+    expect(() => rewriteSyncFlushedStream(damaged, beginCall(DEFAULT_LIMITS))).not.toThrow();
     expect(damaged.data).toBe(invalid);
 
     const raw = new Uint8Array(deflateRawSync(TEXT, { finishFlush: constants.Z_SYNC_FLUSH }));
     const legacy = streamOf(raw, PdfName.of('FlateDecode'));
-    rewriteSyncFlushedStream(legacy);
+    rewriteSyncFlushedStream(legacy, beginCall(DEFAULT_LIMITS));
     expect(legacy.data).toBe(raw);
 
     const second = streamOf(
       data,
       PdfArray.of([PdfName.of('ASCIIHexDecode'), PdfName.of('FlateDecode')]),
     );
-    rewriteSyncFlushedStream(second);
+    rewriteSyncFlushedStream(second, beginCall(DEFAULT_LIMITS));
     expect(second.data).toBe(data);
 
     const unfiltered = streamOf(data);
-    rewriteSyncFlushedStream(unfiltered);
+    rewriteSyncFlushedStream(unfiltered, beginCall(DEFAULT_LIMITS));
     expect(unfiltered.data).toBe(data);
   });
 
@@ -332,7 +333,7 @@ describe('rewriteSyncFlushedStream', () => {
     expect(INTERNAL_LIMITS.maxRewrapDecodedBytes).toBe(64 * 1024 * 1024);
     const { data } = syncFlushedZeros(64, 0);
     const stream = streamOf(data, PdfName.of('FlateDecode'));
-    rewriteSyncFlushedStream(stream);
+    rewriteSyncFlushedStream(stream, beginCall(DEFAULT_LIMITS));
     const plain = new Uint8Array(inflateSync(stream.data));
     expect(plain.length).toBe(INTERNAL_LIMITS.maxRewrapDecodedBytes);
     expect(plain.every((b) => b === 0)).toBe(true);
@@ -342,7 +343,7 @@ describe('rewriteSyncFlushedStream', () => {
   it('copies a stream whose decoded data is just over 64 MiB as loaded', () => {
     const { data } = syncFlushedZeros(64, 1);
     const stream = streamOf(data, PdfName.of('FlateDecode'));
-    rewriteSyncFlushedStream(stream);
+    rewriteSyncFlushedStream(stream, beginCall(DEFAULT_LIMITS));
     expect(stream.data).toBe(data);
     expect(lengthOf(stream)).toBe(data.length);
   });
@@ -356,7 +357,7 @@ describe('rewriteSyncFlushedStream', () => {
     const over = streamOf(data, PdfName.of('FlateDecode'));
     rewriteSyncFlushedStream(over, ctx);
     expect(over.data).toBe(data);
-    rewriteSyncFlushedStream(over);
+    rewriteSyncFlushedStream(over, beginCall(DEFAULT_LIMITS));
     expect(new Uint8Array(inflateSync(over.data))).toEqual(new Uint8Array(1025));
   });
 
@@ -366,7 +367,7 @@ describe('rewriteSyncFlushedStream', () => {
     const push = vi.spyOn(Inflate.prototype, 'push');
     try {
       const stream = streamOf(data, PdfName.of('FlateDecode'));
-      rewriteSyncFlushedStream(stream);
+      rewriteSyncFlushedStream(stream, beginCall(DEFAULT_LIMITS));
       expect(stream.data).toBe(data);
       const read = push.mock.calls.reduce((sum, [chunk]) => sum + chunk.length, 0);
       // 64 pieces decode to the limit; reading stops after the 16 KiB step that goes past it.

@@ -7,6 +7,8 @@
 import { zlibSync } from 'fflate';
 import { PdfArray, PdfDict, PdfName, PdfNumber, PdfStream } from '../../src/core/pdfObjects.js';
 import { decodeFlateOnly, decodeStream } from '../../src/codecs/streamDecode.js';
+import { beginCall } from '../../src/internal/limits.js';
+import { DEFAULT_LIMITS } from '../../src/limits.js';
 import type { JsonValue } from '../helpers/budget.js';
 
 const CLEAR = 256;
@@ -150,7 +152,9 @@ export function predictorOnZeros(_bytes: Uint8Array, args: JsonValue): JsonValue
   }
   const dict = new PdfDict().set('/Filter', PdfArray.of([PdfName.of('FlateDecode')]));
   dict.set('/DecodeParms', dictOf(parms));
-  return { length: decodeFlateOnly(new PdfStream(dict, data))?.length ?? -1 };
+  return {
+    length: decodeFlateOnly(new PdfStream(dict, data), beginCall(DEFAULT_LIMITS))?.length ?? -1,
+  };
 }
 
 // ---------------------------------------------------------------------------

@@ -673,7 +673,7 @@ describe('inflateFlateUpTo', () => {
   it('returns all the data and no stop flag when the decoded size is under or equals the bound', () => {
     for (const stream of [ZLIB, RAW]) {
       for (const bound of [VARIED.length, VARIED.length + 1, 64 * 1024 * 1024]) {
-        const result = inflateFlateUpTo(stream, bound);
+        const result = inflateFlateUpTo(stream, bound, beginCall(DEFAULT_LIMITS));
         expect(result.truncated).toBe(false);
         expect(result.data).toEqual(VARIED);
       }
@@ -683,7 +683,7 @@ describe('inflateFlateUpTo', () => {
   it('returns the first N bytes and the stop flag when the data decodes to more than N', () => {
     for (const stream of [ZLIB, RAW]) {
       for (const bound of [0, 1, 1000, VARIED.length - 1]) {
-        const result = inflateFlateUpTo(stream, bound);
+        const result = inflateFlateUpTo(stream, bound, beginCall(DEFAULT_LIMITS));
         expect(result.truncated).toBe(true);
         expect(result.data.length).toBe(bound);
         expect(result.data).toEqual(VARIED.subarray(0, bound));
@@ -693,7 +693,7 @@ describe('inflateFlateUpTo', () => {
 
   it('matches node:zlib on the prefix it returns, for zlib data with a missing trailer', () => {
     const cut = ZLIB.subarray(0, ZLIB.length - 4);
-    const result = inflateFlateUpTo(cut, 100_000);
+    const result = inflateFlateUpTo(cut, 100_000, beginCall(DEFAULT_LIMITS));
     expect(result.data).toEqual(bytes(inflateRawSync(cut.subarray(2))).subarray(0, 100_000));
   });
 
@@ -703,7 +703,7 @@ describe('inflateFlateUpTo', () => {
     const push = vi.spyOn(Inflate.prototype, 'push');
     try {
       expect(stream.length).toBeGreaterThan(16 * 1024);
-      expect(inflateFlateUpTo(stream, 1024).truncated).toBe(true);
+      expect(inflateFlateUpTo(stream, 1024, beginCall(DEFAULT_LIMITS)).truncated).toBe(true);
       // One push: the zlib read stopped, and the data was not read again as raw DEFLATE.
       expect(push).toHaveBeenCalledTimes(1);
     } finally {
@@ -718,7 +718,7 @@ describe('inflateFlateUpTo', () => {
     expect(isZlibHeader(zeros)).toBe(false);
     const push = vi.spyOn(Inflate.prototype, 'push');
     try {
-      const result = inflateFlateUpTo(zeros, 1024 * 1024);
+      const result = inflateFlateUpTo(zeros, 1024 * 1024, beginCall(DEFAULT_LIMITS));
       expect(result.truncated).toBe(true);
       expect(result.data.length).toBe(1024 * 1024);
       expect(push).toHaveBeenCalledTimes(1);
@@ -733,7 +733,7 @@ describe('inflateFlateUpTo', () => {
     data.set(zlib);
     const push = vi.spyOn(Inflate.prototype, 'push');
     try {
-      const result = inflateFlateUpTo(data, 1024 * 1024);
+      const result = inflateFlateUpTo(data, 1024 * 1024, beginCall(DEFAULT_LIMITS));
       expect(result).toEqual({ data: encoder.encode('hello world'), truncated: false });
       expectReadStopsEarly(push, data.length);
     } finally {
@@ -745,7 +745,7 @@ describe('inflateFlateUpTo', () => {
     for (const bound of [INTERNAL_LIMITS.maxDecodedStreamBytes + 1, Number.NaN, Infinity]) {
       let caught: unknown;
       try {
-        inflateFlateUpTo(ZEROS, bound);
+        inflateFlateUpTo(ZEROS, bound, beginCall(DEFAULT_LIMITS));
       } catch (err) {
         caught = err;
       }
@@ -756,7 +756,9 @@ describe('inflateFlateUpTo', () => {
         max: INTERNAL_LIMITS.maxDecodedStreamBytes,
       });
     }
-    expect(() => inflateFlateUpTo(ZEROS, INTERNAL_LIMITS.maxDecodedStreamBytes + 1)).toThrow(
+    expect(() =>
+      inflateFlateUpTo(ZEROS, INTERNAL_LIMITS.maxDecodedStreamBytes + 1, beginCall(DEFAULT_LIMITS)),
+    ).toThrow(
       expect.objectContaining({
         code: 'resource-limit-exceeded',
         limit: 'maxDecodedStreamBytes',
@@ -766,20 +768,27 @@ describe('inflateFlateUpTo', () => {
   });
 
   it('accepts a bound equal to maxDecodedStreamBytes', () => {
-    expect(inflateFlateUpTo(ZEROS, INTERNAL_LIMITS.maxDecodedStreamBytes).truncated).toBe(false);
+    expect(
+      inflateFlateUpTo(ZEROS, INTERNAL_LIMITS.maxDecodedStreamBytes, beginCall(DEFAULT_LIMITS))
+        .truncated,
+    ).toBe(false);
   });
 
   it('keeps the FlateDecode error for data that does not inflate, or is cut short', () => {
-    expect(() => inflateFlateUpTo(encoder.encode('plain text, never compressed\n'), 100)).toThrow(
-      FAILURE,
-    );
-    expect(() => inflateFlateUpTo(RAW.subarray(0, RAW.length >> 1), VARIED.length)).toThrow(
-      FAILURE,
-    );
+    expect(() =>
+      inflateFlateUpTo(
+        encoder.encode('plain text, never compressed\n'),
+        100,
+        beginCall(DEFAULT_LIMITS),
+      ),
+    ).toThrow(FAILURE);
+    expect(() =>
+      inflateFlateUpTo(RAW.subarray(0, RAW.length >> 1), VARIED.length, beginCall(DEFAULT_LIMITS)),
+    ).toThrow(FAILURE);
   });
 
   it('returns empty output for empty input', () => {
-    expect(inflateFlateUpTo(new Uint8Array(0), 10)).toEqual({
+    expect(inflateFlateUpTo(new Uint8Array(0), 10, beginCall(DEFAULT_LIMITS))).toEqual({
       data: new Uint8Array(0),
       truncated: false,
     });

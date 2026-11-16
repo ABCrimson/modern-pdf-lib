@@ -12,6 +12,8 @@ import { crc32, deflateSync as zlibDeflateSync, inflateSync } from 'node:zlib';
 import { embedJpeg, isJpeg, getJpegInfo } from '../../../../../src/assets/image/jpeg/jpegEmbed.js';
 import { embedPng as decodePng } from '../../../../../src/assets/image/internal/pngEmbed.js';
 import { createPdf } from '../../../../../src/index.js';
+import { beginCall } from '../../../../../src/internal/limits.js';
+import { DEFAULT_LIMITS } from '../../../../../src/limits.js';
 import { MalformedInputError, UnsupportedFeatureError } from '../../../../../src/errors.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -384,6 +386,7 @@ describe('PNG stream data for /FlateDecode', () => {
   it('compresses sample-rgba.png image and soft mask data as zlib data', async () => {
     const result = decodePng(
       new Uint8Array(await readFile(resolve(fixturesDir, 'sample-rgba.png'))),
+      beginCall(DEFAULT_LIMITS),
     );
     expect(result.smaskData).toBeDefined();
     expect(inflateSync(result.imageData)).toHaveLength(4 * 4 * 3);
@@ -392,14 +395,14 @@ describe('PNG stream data for /FlateDecode', () => {
 
   it('passes the IDAT data of sample.png through unchanged', async () => {
     const png = new Uint8Array(await readFile(resolve(fixturesDir, 'sample.png')));
-    expect(decodePng(png).imageData).toEqual(idatOf(png));
+    expect(decodePng(png, beginCall(DEFAULT_LIMITS)).imageData).toEqual(idatOf(png));
   });
 
   it('takes the high byte of each 16-bit sample of an RGBA PNG', () => {
     // 2x1 pixels; every sample has a distinct high byte and the low byte 0xee.
     const samples = [0x10, 0x20, 0x30, 0x40, 0x50, 0x60, 0x70, 0x80];
     const rows = new Uint8Array([0, ...samples.flatMap((s) => [s, 0xee])]);
-    const result = decodePng(pngFromRows(2, 1, 16, 6, rows));
+    const result = decodePng(pngFromRows(2, 1, 16, 6, rows), beginCall(DEFAULT_LIMITS));
     expect([...inflateSync(result.imageData)]).toEqual([0x10, 0x20, 0x30, 0x50, 0x60, 0x70]);
     expect([...inflateSync(result.smaskData ?? new Uint8Array(0))]).toEqual([0x40, 0x80]);
     expect(result.bitsPerComponent).toBe(8);
@@ -408,7 +411,7 @@ describe('PNG stream data for /FlateDecode', () => {
   it('takes the high byte of each 16-bit sample of a gray and alpha PNG', () => {
     const samples = [0x11, 0x22, 0x33, 0x44];
     const rows = new Uint8Array([0, ...samples.flatMap((s) => [s, 0xee])]);
-    const result = decodePng(pngFromRows(2, 1, 16, 4, rows));
+    const result = decodePng(pngFromRows(2, 1, 16, 4, rows), beginCall(DEFAULT_LIMITS));
     expect([...inflateSync(result.imageData)]).toEqual([0x11, 0x33]);
     expect([...inflateSync(result.smaskData ?? new Uint8Array(0))]).toEqual([0x22, 0x44]);
   });
@@ -426,7 +429,7 @@ describe('embedPng typed errors', () => {
 
   it('throws MalformedInputError of format png for a bad signature and a short file', () => {
     for (const data of [new Uint8Array(8), new Uint8Array(4)]) {
-      const error = caught(() => decodePng(data));
+      const error = caught(() => decodePng(data, beginCall(DEFAULT_LIMITS)));
       expect(error).toBeInstanceOf(MalformedInputError);
       expect(error).toMatchObject({ code: 'malformed-input', format: 'png' });
     }
@@ -435,7 +438,7 @@ describe('embedPng typed errors', () => {
   it('throws UnsupportedFeatureError for an unknown PNG colour type', () => {
     // Colour type 1 is not defined by the PNG specification; 16-bit depth takes the full decode path.
     const png = pngFromRows(1, 1, 16, 1, new Uint8Array(3));
-    const error = caught(() => decodePng(png));
+    const error = caught(() => decodePng(png, beginCall(DEFAULT_LIMITS)));
     expect(error).toBeInstanceOf(UnsupportedFeatureError);
     expect(error).toMatchObject({ code: 'unsupported-feature' });
   });
@@ -443,7 +446,7 @@ describe('embedPng typed errors', () => {
   it('throws MalformedInputError of format png for an unknown scanline filter type', () => {
     // 16-bit grey takes the full decode path; the scanline starts with filter type 9.
     const png = pngFromRows(1, 1, 16, 0, new Uint8Array([9, 0, 0]));
-    const error = caught(() => decodePng(png));
+    const error = caught(() => decodePng(png, beginCall(DEFAULT_LIMITS)));
     expect(error).toBeInstanceOf(MalformedInputError);
     expect(error).toMatchObject({
       code: 'malformed-input',

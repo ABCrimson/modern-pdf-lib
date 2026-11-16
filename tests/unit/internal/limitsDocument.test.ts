@@ -11,7 +11,7 @@
  * content (object 7) decodes to 44 bytes.
  */
 import { readFile } from 'node:fs/promises';
-import { deflateSync } from 'node:zlib';
+import { deflateRawSync, deflateSync } from 'node:zlib';
 import { describe, expect, it } from 'vitest';
 import { createPdf, loadPdf, PdfDocument } from '../../../src/index.js';
 import { interpretPage } from '../../../src/render/interpreter.js';
@@ -478,5 +478,38 @@ describe('image and font embedding limits', () => {
     await expect(
       createPdf({ limits: { maxFontCmapMappings: 95 } }).embedFont(font),
     ).resolves.toBeDefined();
+  });
+});
+
+describe('save rewraps under the limits of the document', () => {
+  const DECODED = 4000;
+  /** A catalog, a page tree, a page, and object 4: a raw DEFLATE /FlateDecode stream of 4,000 zero bytes. */
+  const RAW_FILE = ((): Uint8Array => {
+    const raw = String.fromCharCode(...deflateRawSync(new Uint8Array(DECODED)));
+    return buildPdf([
+      '<< /Type /Catalog /Pages 2 0 R >>',
+      '<< /Type /Pages /Kids [3 0 R] /Count 1 >>',
+      '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 100 100] >>',
+      `<< /Filter /FlateDecode /Length ${raw.length} >>\nstream\n${raw}\nendstream`,
+    ]);
+  })();
+
+  /** Whether the saved bytes hold a stream that starts with a zlib header (0x78 0x9c). */
+  function hasZlibStream(saved: Uint8Array): boolean {
+    return /stream\r?\n\x78\x9c/.test(String.fromCharCode(...saved));
+  }
+
+  it('writes the raw DEFLATE stream back as zlib data under the default limits', async () => {
+    expect(hasZlibStream(await (await loadPdf(RAW_FILE)).save())).toBe(true);
+  });
+
+  it('leaves a stream that decodes past maxDecodedStreamBytes of the document as loaded', async () => {
+    const low = await loadPdf(RAW_FILE, { limits: { maxDecodedStreamBytes: DECODED - 1 } });
+    expect(hasZlibStream(await low.save())).toBe(false);
+  });
+
+  it('writes a stream that decodes to exactly maxDecodedStreamBytes back as zlib data', async () => {
+    const equal = await loadPdf(RAW_FILE, { limits: { maxDecodedStreamBytes: DECODED } });
+    expect(hasZlibStream(await equal.save())).toBe(true);
   });
 });

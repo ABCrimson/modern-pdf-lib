@@ -10,7 +10,7 @@ import { describe, expect, it } from 'vitest';
 import { deflateSync, zlibSync } from 'fflate';
 import { INTERNAL_LIMITS, beginCall, resolveLimits } from '../../../src/internal/limits.js';
 import type { LimitContext } from '../../../src/internal/limits.js';
-import type { PdfLimits } from '../../../src/limits.js';
+import { DEFAULT_LIMITS, type PdfLimits } from '../../../src/limits.js';
 import { PdfArray, PdfDict, PdfName, PdfNumber, PdfStream } from '../../../src/core/pdfObjects.js';
 import { ResourceLimitError, UnsupportedFeatureError } from '../../../src/errors.js';
 import {
@@ -138,7 +138,7 @@ describe('the decoded-size limit', () => {
     const wide = makeParms({ '/Predictor': 2, '/Columns': 2 ** 40, '/Colors': 32 });
     expect(() => decodeStream(data, 'FlateDecode', wide)).toThrow(ResourceLimitError);
     const stream = flateStream(data, { '/Predictor': 20, '/Columns': 2_147_483_647 });
-    expect(() => decodeFlateOnly(stream)).toThrow(ResourceLimitError);
+    expect(() => decodeFlateOnly(stream, beginCall(DEFAULT_LIMITS))).toThrow(ResourceLimitError);
   });
 
   it('accepts a predictor row of exactly the limit when the data holds no full row', () => {
@@ -172,14 +172,18 @@ describe('predictor parameters', () => {
             new UnsupportedFeatureError(expected),
           );
           const stream = flateStream(data, { '/Predictor': predictor, ...extra });
-          expect(() => decodeFlateOnly(stream)).toThrow(new UnsupportedFeatureError(expected));
+          expect(() => decodeFlateOnly(stream, beginCall(DEFAULT_LIMITS))).toThrow(
+            new UnsupportedFeatureError(expected),
+          );
         });
       }
     }
 
     it('with a /Predictor above 15 in a stream read with decodeFlateOnly', () => {
       const stream = flateStream(data, { '/Predictor': 20, '/Columns': 0 });
-      expect(() => decodeFlateOnly(stream)).toThrow(new UnsupportedFeatureError(message(0, 1, 8)));
+      expect(() => decodeFlateOnly(stream, beginCall(DEFAULT_LIMITS))).toThrow(
+        new UnsupportedFeatureError(message(0, 1, 8)),
+      );
     });
 
     it('in an LZWDecode stream', () => {
@@ -241,9 +245,9 @@ describe("predictors work in place on the decoder's own buffer", () => {
     const encoded = zlibSync(pseudoRandomBytes(3, 20 * 22));
     const stream = flateStream(encoded, { '/Predictor': 15, '/Columns': 7, '/Colors': 3 });
     const before = sha256(stream.data);
-    const first = decodeFlateOnly(stream);
+    const first = decodeFlateOnly(stream, beginCall(DEFAULT_LIMITS));
     expect(sha256(stream.data)).toBe(before);
-    expect(decodeFlateOnly(stream)).toEqual(first);
+    expect(decodeFlateOnly(stream, beginCall(DEFAULT_LIMITS))).toEqual(first);
   });
 
   it('returns exactly the rows of a PNG-predicted stream that ends in a partial row', () => {
@@ -290,7 +294,7 @@ describe('the sample limit of the sub-byte TIFF predictor', () => {
       '/Colors': 32,
       '/BitsPerComponent': 1,
     });
-    expect(() => decodeFlateOnly(stream)).toThrow(ResourceLimitError);
+    expect(() => decodeFlateOnly(stream, beginCall(DEFAULT_LIMITS))).toThrow(ResourceLimitError);
   });
 
   it('does not apply to 8-bit and 16-bit samples, whose loop is per byte', () => {

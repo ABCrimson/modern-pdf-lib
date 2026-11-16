@@ -26,12 +26,7 @@
  */
 
 import { flateEncode, inflateFlateUpTo } from '../../../codecs/internal/pdfFlate.js';
-import {
-  addToTotal,
-  assertLimit,
-  legacyContext,
-  type LimitContext,
-} from '../../../internal/limits.js';
+import { addToTotal, assertLimit, type LimitContext } from '../../../internal/limits.js';
 import { MalformedInputError, UnsupportedFeatureError } from '../../../errors.js';
 
 // ---------------------------------------------------------------------------
@@ -569,7 +564,7 @@ function compressForPdf(data: Uint8Array): Uint8Array {
  *
  * @param pngData - The raw PNG file as a Uint8Array.
  * @param ctx     - The context of the call, which holds the limits it runs under and the
- *   image total it adds to; a context over the default limits when it is left out.
+ *   image total it adds to.
  * @returns The embedding result with all data needed for a PDF image XObject.
  * @throws {ResourceLimitError} `maxImageDimension` when the width or height is
  *   above 65,536; `maxImagePixels` when width times height is above 2^28;
@@ -597,7 +592,7 @@ function compressForPdf(data: Uint8Array): Uint8Array {
  * // If result.smaskData is defined, create a second XObject for the SMask.
  * ```
  */
-export function embedPng(pngData: Uint8Array, ctx: LimitContext = legacyContext()): PngEmbedResult {
+export function embedPng(pngData: Uint8Array, ctx: LimitContext): PngEmbedResult {
   // 1. Validate signature
   validatePngSignature(pngData);
 

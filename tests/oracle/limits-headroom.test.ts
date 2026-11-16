@@ -51,7 +51,8 @@ import {
   verifySignatures,
 } from '../../src/index.js';
 import type { PdfDocument, PdfObject, PdfObjectRegistry, PdfRef } from '../../src/index.js';
-import { INTERNAL_LIMITS } from '../../src/internal/limits.js';
+import { INTERNAL_LIMITS, beginCall } from '../../src/internal/limits.js';
+import { DEFAULT_LIMITS } from '../../src/limits.js';
 import type { ResourceLimitName } from '../../src/internal/limits.js';
 import { decodeWoff, isWoff } from '../../src/assets/font/woff.js';
 import { decodeStream, getStreamFilters } from '../../src/codecs/streamDecode.js';
@@ -549,7 +550,7 @@ function measureImageFile(path: string, id: string): void {
   const data = new Uint8Array(readFileSync(path));
   const ext = extname(path).toLowerCase();
   if (ext === '.png') {
-    const r = step(id, 'PNG embed', () => embedPng(data));
+    const r = step(id, 'PNG embed', () => embedPng(data, beginCall(DEFAULT_LIMITS)));
     if (r === undefined) return;
     note('width', r.width, id);
     note('height', r.height, id);

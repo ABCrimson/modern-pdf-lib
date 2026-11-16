@@ -36,6 +36,7 @@ import {
   rewrapLegacyStream,
   rewriteSyncFlushedStream,
 } from '../internal/flateStream.js';
+import { beginCall, type LimitContext } from '../../internal/limits.js';
 import type { PdfRef, ByteWriter } from '../pdfObjects.js';
 import {
   PdfObjectRegistry,
@@ -171,6 +172,9 @@ export class PdfWriter {
   /** The caller's registry. */
   private readonly source: PdfObjectRegistry;
 
+  /** The limits of the caller's document, which the re-wrap of loaded streams runs under. */
+  private readonly limitCtx: LimitContext;
+
   /**
    * The registry the writer serializes.  Without encryption it is the
    * caller's registry (streams are compressed in place).  With an
@@ -202,6 +206,7 @@ export class PdfWriter {
     this.encryptionHandler = encryptionHandler;
     this.source = registry;
     this.registry = registry;
+    this.limitCtx = beginCall(registry.limits);
   }
 
   // -----------------------------------------------------------------------
@@ -306,8 +311,8 @@ export class PdfWriter {
     // encryption — per the spec, compression is applied first, then encryption)
     if (entry.object.kind === 'stream') {
       if (!isLoadedFromEncryptedFile(this.source)) {
-        rewrapLegacyStream(entry.object);
-        rewriteSyncFlushedStream(entry.object);
+        rewrapLegacyStream(entry.object, this.limitCtx);
+        rewriteSyncFlushedStream(entry.object, this.limitCtx);
       }
       if (this.compress) this.compressStream(entry.object);
     }

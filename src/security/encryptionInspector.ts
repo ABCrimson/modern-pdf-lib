@@ -52,6 +52,7 @@ import { PdfLexer } from '../parser/internal/lexer.js';
 import { PdfObjectParser } from '../parser/internal/objectParser.js';
 import { XrefParser } from '../parser/internal/xrefParser.js';
 import { ResourceLimitError } from '../errors.js';
+import { beginCall } from '../internal/limits.js';
 import type { XrefEntry } from '../parser/internal/xrefParser.js';
 import { verifyUserPassword } from '../crypto/keyDerivation.js';
 import type { EncryptDictValues } from '../crypto/keyDerivation.js';
@@ -224,7 +225,7 @@ async function locateEncryptDict(pdf: Uint8Array): Promise<LocatedEncrypt | unde
     const lexer = new PdfLexer(pdf);
     const registry = new PdfObjectRegistry();
     objectParser = new PdfObjectParser(lexer, registry);
-    const xrefParser = new XrefParser(pdf, objectParser);
+    const xrefParser = new XrefParser(pdf, objectParser, beginCall(registry.limits));
     const { entries, trailer } = await xrefParser.parseXref();
 
     encryptRef = trailer.encryptRef;
