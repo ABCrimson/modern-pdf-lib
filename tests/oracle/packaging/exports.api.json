@@ -3,7 +3,7 @@
   "package": "modern-pdf-lib",
   "entries": {
     ".": {
-      "runtime": 732,
+      "runtime": 730,
       "typeOnly": 420,
       "names": {
         "AFDate_FormatEx": {
@@ -4590,14 +4590,6 @@
           "kind": "function",
           "decl": "sha256:649301614fd2"
         },
-        "webpToJpeg": {
-          "kind": "function",
-          "decl": "sha256:1dafbba0afb2"
-        },
-        "webpToPng": {
-          "kind": "function",
-          "decl": "sha256:8540e5428708"
-        },
         "wrapInMarkedContent": {
           "kind": "function",
           "decl": "sha256:c644aeea9ffd"
@@ -4617,7 +4609,7 @@
       }
     },
     "./create": {
-      "runtime": 75,
+      "runtime": 74,
       "typeOnly": 47,
       "names": {
         "Angle": {
@@ -4952,10 +4944,6 @@
           "kind": "class",
           "decl": "sha256:c9420fbcc487"
         },
-        "UnsupportedOptionError": {
-          "kind": "class",
-          "decl": "sha256:2ebb66a1b4df"
-        },
         "asNumber": {
           "kind": "function",
           "decl": "sha256:69224c489c47"
@@ -5111,7 +5099,7 @@
       }
     },
     "./parse": {
-      "runtime": 44,
+      "runtime": 43,
       "typeOnly": 10,
       "names": {
         "AnalysisReport": {
@@ -5289,10 +5277,6 @@
         "UnsupportedFilterError": {
           "kind": "class",
           "decl": "sha256:c9420fbcc487"
-        },
-        "UnsupportedOptionError": {
-          "kind": "class",
-          "decl": "sha256:2ebb66a1b4df"
         },
         "analyzeImages": {
           "kind": "function",
@@ -5499,7 +5483,7 @@
       }
     },
     "./browser": {
-      "runtime": 739,
+      "runtime": 737,
       "typeOnly": 420,
       "names": {
         "AFDate_FormatEx": {
@@ -10113,14 +10097,6 @@
         "verifyUserPassword": {
           "kind": "function",
           "decl": "sha256:649301614fd2"
-        },
-        "webpToJpeg": {
-          "kind": "function",
-          "decl": "sha256:1dafbba0afb2"
-        },
-        "webpToPng": {
-          "kind": "function",
-          "decl": "sha256:8540e5428708"
         },
         "wrapInMarkedContent": {
           "kind": "function",
