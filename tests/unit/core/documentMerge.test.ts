@@ -6,7 +6,14 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { createPdf, PdfDocument, PageSizes } from '../../../src/index.js';
+import {
+  createPdf,
+  PdfDocument,
+  PageSizes,
+  PdfDict,
+  PdfRef,
+  PdfString,
+} from '../../../src/index.js';
 import { mergePdfs, splitPdf, copyPages } from '../../../src/core/documentMerge.js';
 
 // ---------------------------------------------------------------------------
@@ -383,5 +390,37 @@ describe('edge cases', () => {
     const doc = createDocWithContent(3);
     const [copy] = await splitPdf(doc, [[0, 2]]);
     expect(copy!.getPageCount()).toBe(3);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// string bytes in copied resources
+// ---------------------------------------------------------------------------
+
+describe('copyPages strings', () => {
+  it('copies a literal and a hex string byte for byte, each in its own form', () => {
+    const allBytes = Uint8Array.from({ length: 256 }, (_, i) => i);
+    const source = createPdf();
+    const sourcePage = source.addPage(PageSizes.A4);
+    const marks = new PdfDict();
+    marks.set('/Literal', PdfString.fromBytes(allBytes));
+    marks.set('/Hex', PdfString.fromBytes(allBytes, 'hex'));
+    marks.set('/Text', PdfString.fromText('日本語 €'));
+    sourcePage.registerExtGState('GS1', source.getRegistry().register(marks));
+
+    const target = createPdf();
+    const [copied] = copyPages(source, target, [0]);
+
+    const states = copied!.buildResources().get('/ExtGState') as PdfDict;
+    const copy = target.getRegistry().resolve(states.get('/GS1') as PdfRef) as PdfDict;
+
+    const literal = copy.get('/Literal') as PdfString;
+    const hex = copy.get('/Hex') as PdfString;
+    expect(literal.toBytes()).toEqual(allBytes);
+    expect(literal.hex).toBe(false);
+    expect(hex.toBytes()).toEqual(allBytes);
+    expect(hex.hex).toBe(true);
+    expect((copy.get('/Text') as PdfString).toText()).toBe('日本語 €');
+    expect(copy.get('/Literal')).not.toBe(marks.get('/Literal'));
   });
 });

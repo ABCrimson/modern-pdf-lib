@@ -20,6 +20,7 @@ import {
   PdfDict,
   PdfArray,
   PdfString,
+  PdfStream,
   PdfRef,
 } from '../../../src/core/pdfObjects.js';
 
@@ -210,5 +211,70 @@ describe('getAttachments', () => {
     // Check second file
     expect(attachments[1]!.name).toBe('data.json');
     expect(new TextDecoder().decode(attachments[1]!.data)).toBe('{"key": "value"}');
+  });
+});
+
+describe('getAttachments reads text strings as text', () => {
+  /** A catalog holding one file, its filespec built by hand so each string is chosen exactly. */
+  function catalogWith(
+    key: PdfString,
+    specEntries: Record<string, PdfString>,
+    registry: PdfObjectRegistry,
+  ): PdfDict {
+    const efStream = PdfStream.fromBytes(encoder.encode('data'));
+    const efRefDict = new PdfDict();
+    efRefDict.set('/F', registry.register(efStream));
+    const spec = new PdfDict();
+    spec.set('/EF', efRefDict);
+    for (const [name, value] of Object.entries(specEntries)) spec.set(name, value);
+    const names = new PdfArray();
+    names.push(key);
+    names.push(registry.register(spec));
+    const tree = new PdfDict();
+    tree.set('/Names', names);
+    const namesDict = new PdfDict();
+    namesDict.set('/EmbeddedFiles', tree);
+    const catalog = new PdfDict();
+    catalog.set('/Names', namesDict);
+    return catalog;
+  }
+
+  const resolveIn = (registry: PdfObjectRegistry) => (ref: PdfRef) =>
+    registry.resolve(ref) ?? new PdfDict();
+
+  it('decodes a UTF-16BE /UF and /Desc', () => {
+    const registry = new PdfObjectRegistry();
+    const catalog = catalogWith(
+      PdfString.fromText('key'),
+      { '/UF': PdfString.fromText('日本語.txt'), '/Desc': PdfString.fromText('Größe €') },
+      registry,
+    );
+
+    const [attachment] = getAttachments(catalog, resolveIn(registry));
+
+    expect(attachment!.name).toBe('日本語.txt');
+    expect(attachment!.description).toBe('Größe €');
+  });
+
+  it('decodes the name-tree key when the filespec names no file', () => {
+    const registry = new PdfObjectRegistry();
+    const catalog = catalogWith(PdfString.fromText('Größe 日本.txt'), {}, registry);
+
+    const [attachment] = getAttachments(catalog, resolveIn(registry));
+
+    expect(attachment!.name).toBe('Größe 日本.txt');
+  });
+
+  it('falls back to /F when /UF is absent', () => {
+    const registry = new PdfObjectRegistry();
+    const catalog = catalogWith(
+      PdfString.fromText('key'),
+      { '/F': PdfString.fromText('Größe.txt') },
+      registry,
+    );
+
+    const [attachment] = getAttachments(catalog, resolveIn(registry));
+
+    expect(attachment!.name).toBe('Größe.txt');
   });
 });

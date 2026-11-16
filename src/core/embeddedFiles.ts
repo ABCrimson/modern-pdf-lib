@@ -164,7 +164,7 @@ export function getAttachments(
 
     let fileName = '';
     if (nameItem.kind === 'string') {
-      fileName = (nameItem as PdfString).value;
+      fileName = (nameItem as PdfString).toText();
     }
 
     let specDict: PdfDict | undefined;
@@ -203,7 +203,7 @@ export function getAttachments(
     const descObj = specDict.get('/Desc');
     let description: string | undefined;
     if (descObj && descObj.kind === 'string') {
-      description = (descObj as PdfString).value;
+      description = (descObj as PdfString).toText();
     }
 
     // Get MIME type from /Subtype
@@ -216,7 +216,7 @@ export function getAttachments(
     // Use filename from /UF or /F in the filespec, fall back to name tree key
     const ufObj = specDict.get('/UF') ?? specDict.get('/F');
     if (ufObj && ufObj.kind === 'string') {
-      fileName = (ufObj as PdfString).value;
+      fileName = (ufObj as PdfString).toText();
     }
 
     files.push({

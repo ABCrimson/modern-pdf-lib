@@ -16,6 +16,8 @@ import {
   PdfArray,
   PdfStream,
   PdfRef,
+  PdfString,
+  embedPageAsFormXObject,
 } from '../../../src/index.js';
 
 // ---------------------------------------------------------------------------
@@ -479,5 +481,45 @@ describe('integration', () => {
     const savedBytes = await doc.save();
     const reloaded = await PdfDocument.load(savedBytes);
     expect(reloaded.getPageCount()).toBe(2);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// string bytes in cloned resources
+// ---------------------------------------------------------------------------
+
+describe('embedPageAsFormXObject strings', () => {
+  it('copies a literal and a hex string byte for byte, each in its own form', () => {
+    const allBytes = Uint8Array.from({ length: 256 }, (_, i) => i);
+    const sourceDoc = createPdf();
+    const sourcePage = sourceDoc.addPage(PageSizes.A4);
+    const marks = new PdfDict();
+    marks.set('/Literal', PdfString.fromBytes(allBytes));
+    marks.set('/Hex', PdfString.fromBytes(allBytes, 'hex'));
+    marks.set('/Text', PdfString.fromText('日本語 €'));
+    sourcePage.registerExtGState('GS1', sourceDoc.getRegistry().register(marks));
+
+    const targetDoc = createPdf();
+    const targetRegistry = targetDoc.getRegistry();
+    const embedded = embedPageAsFormXObject(
+      sourcePage,
+      sourceDoc.getRegistry(),
+      targetRegistry,
+      'XF1',
+    );
+
+    const form = targetRegistry.resolve(embedded.ref) as PdfStream;
+    const resources = form.dict.get('/Resources') as PdfDict;
+    const states = resources.get('/ExtGState') as PdfDict;
+    const copy = targetRegistry.resolve(states.get('/GS1') as PdfRef) as PdfDict;
+
+    const literal = copy.get('/Literal') as PdfString;
+    const hex = copy.get('/Hex') as PdfString;
+    expect(literal.toBytes()).toEqual(allBytes);
+    expect(literal.hex).toBe(false);
+    expect(hex.toBytes()).toEqual(allBytes);
+    expect(hex.hex).toBe(true);
+    expect((copy.get('/Text') as PdfString).toText()).toBe('日本語 €');
+    expect(copy.get('/Literal')).not.toBe(marks.get('/Literal'));
   });
 });
