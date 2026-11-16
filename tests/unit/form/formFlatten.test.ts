@@ -557,6 +557,19 @@ describe('formFlatten', () => {
       expect(content).toContain('(Gr\\366\\337e \\200) Tj');
     });
 
+    it('declares WinAnsiEncoding on every font of a rich text appearance', () => {
+      const dict = makeTextFieldDict('enc_field');
+      dict.set('/V', PdfString.fromText('José'));
+      dict.set('/RV', PdfString.fromText('<body><p>José <b>x</b></p></body>'));
+      const stream = flattenForm(buildForm([dict])).xObjects[0]!.stream;
+      const fonts = (stream.dict.get('/Resources') as PdfDict).get('/Font') as PdfDict;
+
+      expect([...fonts].map(([key]) => key).toSorted()).toEqual(['/HeBo', '/Helv']);
+      for (const [, font] of fonts) {
+        expect((font as PdfDict).get('/Encoding')).toBe(PdfName.of('WinAnsiEncoding'));
+      }
+    });
+
     it('falls back to the existing appearance when the fonts of the rich text cannot encode it', () => {
       const dict = makeTextFieldWithAppearance('cjk_field', 'Kept');
       dict.set('/RV', PdfString.fromText('<body><p>日本</p></body>'));

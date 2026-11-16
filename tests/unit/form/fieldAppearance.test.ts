@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { PdfStream, PdfName, PdfArray } from '../../../src/core/pdfObjects.js';
+import { PdfDict, PdfStream, PdfName, PdfArray } from '../../../src/core/pdfObjects.js';
 import {
   generateTextAppearance,
   generateCheckboxAppearance,
@@ -319,6 +319,12 @@ describe('fieldAppearance', () => {
         generateTextAppearance({ value: 'José', rect, fontName: 'Helv' }),
       );
       expect(content).toContain('(Jos\\351) Tj');
+    });
+
+    it('declares WinAnsiEncoding on the Helv font of its resources', () => {
+      const stream = generateTextAppearance({ value: 'José', rect });
+      const fonts = (stream.dict.get('/Resources') as PdfDict).get('/Font') as PdfDict;
+      expect((fonts.get('/Helv') as PdfDict).get('/Encoding')).toBe(PdfName.of('WinAnsiEncoding'));
     });
 
     it('writes every line of a multiline value in WinAnsi codes', () => {

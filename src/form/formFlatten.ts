@@ -768,6 +768,7 @@ function generateRichTextAppearance(
     fontEntry.set('/Type', PdfName.of('Font'));
     fontEntry.set('/Subtype', PdfName.of('Type1'));
     fontEntry.set('/BaseFont', PdfName.of(baseFont));
+    fontEntry.set('/Encoding', PdfName.of('WinAnsiEncoding'));
     fontDict.set(`/${fontShortName}`, fontEntry);
   }
   // Always include default Helv
@@ -776,6 +777,7 @@ function generateRichTextAppearance(
     defaultFont.set('/Type', PdfName.of('Font'));
     defaultFont.set('/Subtype', PdfName.of('Type1'));
     defaultFont.set('/BaseFont', PdfName.of('Helvetica'));
+    defaultFont.set('/Encoding', PdfName.of('WinAnsiEncoding'));
     fontDict.set('/Helv', defaultFont);
   }
   resources.set('/Font', fontDict);

@@ -520,13 +520,14 @@ function buildAppearanceStream(operators: string, width: number, height: number)
   dict.set('/Subtype', PdfName.of('Form'));
   dict.set('/BBox', PdfArray.fromNumbers([0, 0, width, height]));
 
-  // Resources — include default Helvetica font
+  // Resources: Helvetica in WinAnsiEncoding, the encoding the shown text is written in
   const resources = new PdfDict();
   const fontDict = new PdfDict();
   const helvetica = new PdfDict();
   helvetica.set('/Type', PdfName.of('Font'));
   helvetica.set('/Subtype', PdfName.of('Type1'));
   helvetica.set('/BaseFont', PdfName.of('Helvetica'));
+  helvetica.set('/Encoding', PdfName.of('WinAnsiEncoding'));
   fontDict.set('/Helv', helvetica);
   resources.set('/Font', fontDict);
   dict.set('/Resources', resources);
