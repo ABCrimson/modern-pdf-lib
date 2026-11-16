@@ -20,8 +20,8 @@
     "brotli": 99328
   },
   "forms": {
-    "gzip": 15360,
-    "brotli": 13312
+    "gzip": 13312,
+    "brotli": 11264
   },
   "browser": {
     "gzip": 275456,

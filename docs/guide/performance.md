@@ -421,8 +421,8 @@ Measured 2026-11-16 by `pnpm run gate:size` (`scripts/dev/size-gate.ts`) from th
 
 | Scenario | Size (minified + gzipped) |
 |:---|:---:|
-| Minimal document (`export { createPdf } from 'modern-pdf-lib'`, `node:*` external) | ~109 KiB (112,019 B) |
-| Entire library (`dist/modern-pdf-lib.iife.js`) | ~262 KiB (268,416 B) |
+| Minimal document (`export { createPdf } from 'modern-pdf-lib'`, `node:*` external) | ~110 KiB (113,061 B) |
+| Entire library (`dist/modern-pdf-lib.iife.js`) | ~264 KiB (269,984 B) |
 
 ### Minimizing Bundle Size
 
