@@ -54,8 +54,9 @@ export interface TiffDecodeOptions {
   page?: number | undefined;
   /**
    * Limits of the call, set over the defaults (`DEFAULT_LIMITS`): the image
-   * size limits, `maxImageFrames` for the IFD walk, and `maxTotalImageBytes`
-   * for the decoded bytes. Checked as the `limits` option of every call is.
+   * size limits, `maxImageFrames` for the IFD walk, `maxDecodedStreamBytes`
+   * for each Deflate strip, and `maxTotalImageBytes` for the decoded bytes.
+   * Checked as the `limits` option of every call is.
    */
   limits?: PdfLimits | undefined;
 }
@@ -272,7 +273,7 @@ type PageArgument = 'options.page' | 'pageIndex';
  * @throws {MalformedInputError} `TIFF: the IFD chain repeats offset N` when the walk
  *   reaches an offset it has already read.
  * @throws {ResourceLimitError} `maxImageFrames` when the walk would read
- *   more than 4,096 IFDs.
+ *   more IFDs than the `maxImageFrames` of `ctx` (4,096 by default).
  */
 function findIfdAtPage(
   ctx: LimitContext,

@@ -4,7 +4,7 @@
  * input is built in code (tests/adversarial/image-limits.bodies.ts); each refusal happens before
  * the allocation it guards, so these tests allocate nothing large. The last blocks run each
  * standalone decoder under the `limits` option of the call: the TIFF decoders, the direct TIFF
- * embed, WOFF and the font metrics here, WebP in tests/unit/assets/image/webp/webpDecode.test.ts.
+ * embed, the PNG embed (under a context, as it takes no option), WOFF and the font metrics here, WebP in tests/unit/assets/image/webp/webpDecode.test.ts.
  */
 import { zlibSync } from 'fflate';
 import { describe, expect, it } from 'vitest';
@@ -1011,5 +1011,37 @@ describe('extractMetrics runs under the limits of the call', () => {
     ).toMatchObject({ name: 'InvalidArgumentError', argument: 'limits.maxFontCmapMappings' });
     const font = buildCmapFont({ format: 12, numGlyphs: 600, ranges: [[0x20, 0x7e, 1]] });
     expect(extractMetrics(font).cmapTable.size).toBe(95);
+  });
+});
+
+describe('the inflate steps run under the limits of the call', () => {
+  it('decodeTiff holds a Deflate strip to maxDecodedStreamBytes', () => {
+    const tiff = buildTiffImage(10, 10, 1, zlibSync(new Uint8Array(100).fill(7)), [[259, 3, 1, 8]]);
+    expectOptionLimit(
+      () => decodeTiff(tiff, { limits: { maxDecodedStreamBytes: 99 } }),
+      'maxDecodedStreamBytes',
+      99,
+      100,
+    );
+    expect(decodeTiff(tiff, { limits: { maxDecodedStreamBytes: 100 } }).pixels[0]).toBe(7);
+  });
+
+  it('embedPng holds the scanlines it inflates to maxDecodedStreamBytes', () => {
+    // 10 x 10 RGBA: 10 rows of a filter byte and 40 sample bytes, 410 bytes inflated.
+    const rgba10 = buildPng(10, 10, 6, zlibOfZeroBytes(410));
+    expectOptionLimit(
+      () => embedPng(rgba10, under({ maxDecodedStreamBytes: 409 })),
+      'maxDecodedStreamBytes',
+      409,
+      410,
+    );
+    expect(embedPng(rgba10, under({ maxDecodedStreamBytes: 410 })).width).toBe(10);
+  });
+
+  it('decodeTiffAll counts the pages under a maxImageFrames raised above the default', () => {
+    const frames = DEFAULT_LIMITS.maxImageFrames + 1;
+    expect(
+      decodeTiffAll(buildGrayFrames(frames), { limits: { maxImageFrames: frames } }),
+    ).toHaveLength(frames);
   });
 });
