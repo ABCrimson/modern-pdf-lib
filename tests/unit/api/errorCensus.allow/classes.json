@@ -90,11 +90,6 @@
     "files": ["src/batch/batchProcessor.ts"]
   },
   {
-    "name": "InvalidArgumentError",
-    "decision": "throw",
-    "where": "the generic throws whose allowlist row names InvalidArgumentError, as they are converted"
-  },
-  {
     "name": "InvalidStateError",
     "decision": "throw",
     "where": "the generic throws whose allowlist row names InvalidStateError, as they are converted"
