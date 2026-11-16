@@ -131,7 +131,9 @@ const HELVETICA_BOLD_OBLIQUE_WIDTHS: readonly number[] = HELVETICA_BOLD_WIDTHS;
 /** The codes from 0x20 up that WinAnsiEncoding leaves without a glyph. */
 const WIN_ANSI_UNUSED: ReadonlySet<number> = new Set([0x7f, 0x81, 0x8d, 0x8f, 0x90, 0x9d]);
 
-const COURIER_WIDTHS: readonly number[] = Array.from({ length: 256 }, (_, i) =>
+// Pure: the callback only reads `WIN_ANSI_UNUSED` and the call returns a fresh array, so a bundler
+// may drop it together with the table when no kept code reads the table.
+const COURIER_WIDTHS: readonly number[] = /* @__PURE__ */ Array.from({ length: 256 }, (_, i) =>
   i < 32 || WIN_ANSI_UNUSED.has(i) ? 0 : 600,
 );
 
@@ -274,7 +276,13 @@ const ZAPFDINGBATS_WIDTHS: readonly number[] = [
 // Font definitions
 // ---------------------------------------------------------------------------
 
-/** @internal */
+/**
+ * Marked `@__NO_SIDE_EFFECTS__`: the call only builds and returns a fresh object from its
+ * arguments, so a call whose result is unused may be deleted.
+ *
+ * @internal
+ */
+/* @__NO_SIDE_EFFECTS__ */
 function def(
   name: string,
   widths: readonly number[],
@@ -312,8 +320,16 @@ function def(
  *
  * Keys are the exact PostScript font names as they appear in PDF
  * `/BaseFont` entries.
+ *
+ * Marked `@__PURE__`: building the map reads only the `def()` results and the width tables above
+ * and writes nothing else, so a bundler drops the map and its tables from an entry that never reads
+ * it. Code that needs only the names reads {@link STANDARD_FONT_NAMES}, as {@link isStandardFont}
+ * does.
  */
-export const STANDARD_FONTS: ReadonlyMap<string, StandardFont> = new Map<string, StandardFont>([
+export const STANDARD_FONTS: ReadonlyMap<string, StandardFont> = /* @__PURE__ */ new Map<
+  string,
+  StandardFont
+>([
   [
     'Helvetica',
     def('Helvetica', HELVETICA_WIDTHS, 718, -207, 0, 718, 523, [-166, -225, 1000, 931], 88, 0, 32),
@@ -552,7 +568,7 @@ export function getStandardFont(name: string): StandardFont | undefined {
  * @returns `true` if it is a standard font.
  */
 export function isStandardFont(name: string): name is StandardFontName {
-  return STANDARD_FONTS.has(name);
+  return STANDARD_FONT_NAMES.some((known) => known === name);
 }
 
 /**
