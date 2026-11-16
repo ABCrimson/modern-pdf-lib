@@ -59,19 +59,6 @@ export interface IncrementalSaveOptions {
 }
 
 /**
- * Options that {@link appendIncrementalUpdate} took as its third parameter
- * until 0.40.9. The parameter was removed in 0.41.0; a third argument with
- * `compress: true` throws an `UnsupportedOptionError`.
- */
-export interface AppendOptions {
-  /**
-   * Apply FlateDecode compression. Removed in 0.41.0 with the parameter: the
-   * appended objects are written as they are.
-   */
-  compress?: boolean | undefined;
-}
-
-/**
  * An object to be appended in an incremental update.
  */
 export interface IncrementalObject {
@@ -465,7 +452,7 @@ export function appendIncrementalUpdate(
 ): Uint8Array {
   // The removed third parameter is not in the signature; a JavaScript caller or a cast can still
   // pass it, so it is read through `arguments`. This guard is removed in 0.50.0.
-  if ((arguments[2] as AppendOptions | null | undefined)?.compress === true) {
+  if ((arguments[2] as { compress?: unknown } | null | undefined)?.compress === true) {
     for (const rule of REFUSED_APPEND_OPTIONS) rejectOption(rule);
   }
   if (newObjects.length === 0) {

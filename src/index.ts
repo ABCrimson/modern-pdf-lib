@@ -726,7 +726,6 @@ export type {
   // Incremental save types
   SignatureByteRange,
   IncrementalSaveOptions,
-  AppendOptions,
   IncrementalObject,
   TrailerInfo,
   // Multi-signature chain types

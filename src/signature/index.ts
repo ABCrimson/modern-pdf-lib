@@ -188,7 +188,6 @@ export {
 export type {
   SignatureByteRange,
   IncrementalSaveOptions,
-  AppendOptions,
   IncrementalObject,
   TrailerInfo,
 } from './pades/incrementalSave.js';
