@@ -16,6 +16,7 @@
  */
 
 import { PdfName } from '../core/pdfObjects.js';
+import { latin1String } from '../internal/latin1.js';
 
 // ---------------------------------------------------------------------------
 // Public types
@@ -616,7 +617,7 @@ class ContentStreamLexer {
 
     return {
       type: TokenType.HexString,
-      value: String.fromCharCode(...bytes),
+      value: latin1String(Uint8Array.from(bytes)),
     };
   }
 

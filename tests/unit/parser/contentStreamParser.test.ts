@@ -6,6 +6,7 @@
  * and nested save/restore.
  */
 
+import { Buffer } from 'node:buffer';
 import { describe, it, expect } from 'vitest';
 import {
   parseContentStream,
@@ -804,5 +805,62 @@ describe('Counted parse', () => {
       }),
     ).toThrow('stop');
     expect(calls).toBe(11);
+  });
+});
+
+// ===========================================================================
+// Strings and inline image data of a million bytes
+// ===========================================================================
+
+describe('Very long strings and inline image data', () => {
+  // No time limit: the work is linear, and the CI runners are several times slower than a
+  // developer machine.
+  const LENGTH = 1_000_000;
+
+  /** `LENGTH` bytes from 0x80 up: no delimiter, no white space and no letter, whatever the cut. */
+  function highBytes(): Uint8Array {
+    const bytes = Uint8Array.from({ length: LENGTH }, (_, i) => 0x80 + (i % 128));
+    bytes[0] = 0xab;
+    bytes[LENGTH - 1] = 0xcd;
+    return bytes;
+  }
+
+  it('parses a hex string of 1,000,000 bytes', () => {
+    const bytes = highBytes();
+    const ops = parseContentStream(stream(`<${bytes.toHex()}> Tj`));
+    const value = ops[0]!.operands[0] as string;
+    expect(value).toHaveLength(LENGTH);
+    expect(value.charCodeAt(0)).toBe(0xab);
+    expect(value.charCodeAt(LENGTH - 1)).toBe(0xcd);
+    expect(value === Buffer.from(bytes).toString('latin1')).toBe(true);
+  });
+
+  it('parses a literal string of 1,000,000 bytes', () => {
+    const bytes = highBytes();
+    const data = new Uint8Array(LENGTH + 5);
+    data.set(stream('('), 0);
+    data.set(bytes, 1);
+    data.set(stream(') Tj'), LENGTH + 1);
+    const ops = parseContentStream(data);
+    const value = ops[0]!.operands[0] as string;
+    expect(value).toHaveLength(LENGTH);
+    expect(value.charCodeAt(0)).toBe(0xab);
+    expect(value.charCodeAt(LENGTH - 1)).toBe(0xcd);
+    expect(value === Buffer.from(bytes).toString('latin1')).toBe(true);
+  });
+
+  it('reads the data of an inline image of 1,000,000 bytes', () => {
+    const bytes = highBytes();
+    const prefix = stream('BI /W 1000 /H 1000 /BPC 8 /CS /G ID ');
+    const suffix = stream('\nEI Q');
+    const data = new Uint8Array(prefix.length + LENGTH + suffix.length);
+    data.set(prefix, 0);
+    data.set(bytes, prefix.length);
+    data.set(suffix, prefix.length + LENGTH);
+    const ops = parseContentStream(data);
+    const image = findOp(ops, 'BI')!.operands[0] as unknown as InlineImageData;
+    expect(image.data).toHaveLength(LENGTH);
+    expect(Buffer.compare(image.data, bytes)).toBe(0);
+    expect(findOp(ops, 'Q')).toBeDefined();
   });
 });
