@@ -62,12 +62,14 @@ function pdfStringSyntax(s: PdfString): string {
 
 /**
  * A regular expression for `/<key>` followed by a string: group 1 is the body of a literal
- * string without nested parentheses, group 2 the digits of a hex string.
+ * string without nested parentheses, group 2 the body of a hex string (hex digits and the PDF
+ * white-space characters NUL, TAB, LF, FF, CR and SPACE, ISO 32000-2 7.2.3), so a body that
+ * PdfString.fromHex refuses never matches.
  *
  * @internal
  */
 export function stringEntryPattern(key: string, flags: string = ''): RegExp {
-  return new RegExp(String.raw`\/${key}\s*(?:\(([^)]*)\)|<([\da-fA-F\s]*)>)`, flags);
+  return new RegExp(String.raw`\/${key}\s*(?:\(([^)]*)\)|<([\da-fA-F\x00\t\n\f\r ]*)>)`, flags);
 }
 
 /**
@@ -189,7 +191,7 @@ function findStringForward(data: Uint8Array, needle: string, startOffset: number
  * hex strings, so the stream is ASCII.
  *
  * @throws {UnencodableTextError} At the first character of a text line
- *   that WinAnsiEncoding has no code for.
+ *   that fits in the box and that WinAnsiEncoding has no code for.
  * @internal
  */
 function buildSignatureAppearanceStream(options: PrepareAppearanceOptions): string {
@@ -310,8 +312,8 @@ export interface PrepareAppearanceOptions {
  *         (its bytes contain the name `/Encrypt`): the
  *         appended signature objects and trailer would not be encrypted.
  * @throws {UnencodableTextError} When the field name holds a lone surrogate
- *         or U+001B, or an appearance text line holds a character that
- *         WinAnsiEncoding (Helvetica) has no code for.
+ *         or U+001B, or an appearance text line that fits in the box holds
+ *         a character that WinAnsiEncoding (Helvetica) has no code for.
  */
 export function prepareForSigning(
   pdfBytes: Uint8Array,

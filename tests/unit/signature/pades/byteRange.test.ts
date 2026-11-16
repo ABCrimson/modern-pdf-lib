@@ -18,6 +18,8 @@ import {
   stringEntryPattern,
   stringEntryText,
 } from '../../../../src/signature/pades/byteRange.js';
+import { diffSignedContent } from '../../../../src/signature/pades/documentDiff.js';
+import { validateSignatureChain } from '../../../../src/signature/pades/multiSignatureValidator.js';
 import {
   signPdf,
   type VisibleSignatureOptions,
@@ -201,6 +203,20 @@ describe('the strings prepareForSigning writes', () => {
     expect(readStringEntry('<< /Type /Annot /TU (tip) >>', 'T')).toBeUndefined();
     const names = [...'/T (a) /T <62> /T (c)'.matchAll(stringEntryPattern('T', 'g'))];
     expect(names.map(stringEntryText)).toEqual(['a', 'b', 'c']);
+  });
+
+  it('skips a hex /T holding a character that is not PDF white space', async () => {
+    const vt = String.fromCharCode(0x0b);
+    const nbsp = String.fromCharCode(0xa0);
+    expect(readStringEntry(`<< /T <41${vt}42> >>`, 'T')).toBeUndefined();
+    expect(readStringEntry(`<< /T <41${nbsp}42> >>`, 'T')).toBeUndefined();
+    expect(readStringEntry(`<< /T <41${String.fromCharCode(0)}42> >>`, 'T')).toBe('AB');
+    const signed = await signedDocument('AB');
+    const at = new TextDecoder('latin1').decode(signed).lastIndexOf('/T <4142>');
+    const damaged = signed.slice();
+    damaged[at + 5] = 0x0b; // the widget's /T becomes <VT 142>
+    expect((await validateSignatureChain(damaged)).signatures).toHaveLength(1);
+    await expect(diffSignedContent(damaged)).resolves.toBeDefined();
   });
 
   it('writes the appearance text as WinAnsiEncoding codes of /F1 Helvetica', async (ctx) => {

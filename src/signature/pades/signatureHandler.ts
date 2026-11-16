@@ -39,7 +39,9 @@ export interface VisibleSignatureOptions {
   /**
    * Text lines to display in the signature box.
    * Each string becomes a separate line. If omitted, auto-generates
-   * from the signer name, reason, location, and date.
+   * from the signer name, reason, location, and date. Lines are drawn in
+   * Helvetica with WinAnsiEncoding: a character outside it (or a TAB or
+   * other control character) throws UnencodableTextError.
    */
   text?: string[] | undefined;
   /** Font size for the text. Default: 10. */
@@ -314,6 +316,11 @@ function parsePkcs7ForCert(pkcs7Bytes: Uint8Array): {
  * @throws {UnsupportedEncryptionError} When `pdfBytes` is an encrypted PDF
  *         (its bytes contain the name `/Encrypt`): the
  *         appended signature objects and trailer would not be encrypted.
+ * @throws {UnencodableTextError} When `fieldName` holds a lone surrogate
+ *         or U+001B, or a line of a visible appearance that fits in its
+ *         box (`appearance.text`, or the generated "Signed by:", "Reason:"
+ *         and "Location:" lines) holds a character that WinAnsiEncoding
+ *         (Helvetica) has no code for.
  *
  * @example
  * ```ts
