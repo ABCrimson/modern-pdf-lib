@@ -29,7 +29,7 @@ import {
   rewrapLegacyStream,
   rewriteSyncFlushedStream,
 } from '../internal/flateStream.js';
-import { PdfObjectRegistry } from '../pdfObjects.js';
+import { PdfDict, PdfObjectRegistry } from '../pdfObjects.js';
 import type { DocumentStructure } from '../pdfCatalog.js';
 import { liveEntries } from './pdfWriter.js';
 import type { PdfSaveOptions } from './pdfWriter.js';
@@ -636,6 +636,10 @@ export async function saveDocumentIncremental(
     },
     registry,
   );
+  // The loaded /Info entries no setter changed replace the ones written from the getters' values.
+  const { applyLoadedInfo } = await import('../pdfDocument.js');
+  const info = registry.resolve(structure.infoRef);
+  if (info instanceof PdfDict) applyLoadedInfo(doc, info);
 
   // Determine which objects are changed
   // For simplicity, we consider ALL objects in the registry as potentially changed

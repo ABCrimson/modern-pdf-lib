@@ -21,6 +21,7 @@ import { createPdf } from '../../../src/core/pdfDocument.js';
 import type { PdfDocument } from '../../../src/core/pdfDocument.js';
 import { PdfRef, PdfString } from '../../../src/core/pdfObjects.js';
 import type { PdfDict } from '../../../src/core/pdfObjects.js';
+import { saveDocumentIncremental } from '../../../src/core/io/incrementalWriter.js';
 import { loadPdf } from '../../../src/parser/documentParser.js';
 import { latin1String } from '../../../src/internal/latin1.js';
 import {
@@ -225,6 +226,11 @@ const ROUTES: Readonly<Record<string, Route>> = {
   'copy() then save()': {
     load: () => loadPdf(SOURCE),
     write: async (doc) => (await doc.copy()).save(),
+    clear: true,
+  },
+  'saveDocumentIncremental()': {
+    load: () => loadPdf(SOURCE),
+    write: async (doc) => (await saveDocumentIncremental(SOURCE, doc)).bytes,
     clear: true,
   },
   'encrypt() then save()': {
