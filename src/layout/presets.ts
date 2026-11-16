@@ -10,7 +10,7 @@
 
 import type { DrawTableOptions } from './table.js';
 import type { Color } from '../core/operators/color.js';
-import { warnOnce } from '../internal/warnings.js';
+import { UNSUPPORTED_OPTIONS, rejectOption } from '../internal/options.js';
 
 // ---------------------------------------------------------------------------
 // Public types
@@ -145,14 +145,10 @@ export interface PresetOptions {
   readonly fontSize?: number;
   /** Primary color (used for headers, accents). */
   readonly primaryColor?: Color;
-  /**
-   * Whether table has header row(s).
-   *
-   * Has no effect in this version in `applyTablePreset`: no preset reads it; passing it emits a one-time
-   * `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`).
-   */
-  readonly hasHeader?: boolean;
 }
+
+/** The rows of the option table for `applyTablePreset()`: its options removed in 0.41.0. */
+const REFUSED_OPTIONS = UNSUPPORTED_OPTIONS.filter((rule) => rule.entry === 'applyTablePreset()');
 
 /**
  * Select a preset by name and optionally customise it.
@@ -162,17 +158,21 @@ export interface PresetOptions {
  *
  * @param preset   One of 'minimal', 'striped', 'bordered', 'professional'.
  * @param options  Optional overrides for font size and primary color.
+ * @throws {UnsupportedOptionError}  If `options` has a `hasHeader`, which was removed in 0.41.0;
+ *                 set `headerRows` in the table options instead.
  */
 export function applyTablePreset(
   preset: PresetName,
   options?: PresetOptions,
 ): Partial<DrawTableOptions> {
-  if (options?.hasHeader !== undefined) {
-    warnOnce(
-      'ignored-option:applyTablePreset hasHeader',
-      'MPL_IGNORED_OPTION',
-      '`applyTablePreset()`: the option `hasHeader` has no effect in this version.',
-    );
+  // `hasHeader` left the type in 0.41.0 (no preset ever read it): this refuses it for a caller
+  // the type does not stop, a JavaScript caller or a cast. Removed in 0.50.0 with the other guards.
+  if (options !== undefined && options !== null) {
+    for (const rule of REFUSED_OPTIONS) {
+      if (rule.option !== undefined && Reflect.get(options, rule.option) !== undefined) {
+        rejectOption(rule);
+      }
+    }
   }
   switch (preset) {
     case 'minimal':

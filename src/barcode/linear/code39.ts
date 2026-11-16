@@ -23,7 +23,7 @@ import type { Color } from '../../core/operators/color.js';
 import { applyFillColor } from '../../core/operators/color.js';
 import type { BarcodeMatrix } from '../types.js';
 import { InvalidArgumentError } from '../../errors.js';
-import { warnOnce } from '../../internal/warnings.js';
+import { rejectRemovedOptions } from '../internal/removedOptions.js';
 
 export type { BarcodeMatrix };
 
@@ -111,33 +111,10 @@ export interface Code39Options {
   readonly height?: number | undefined;
   /** Width of a narrow module in user-space units. Default: `1`. */
   readonly moduleWidth?: number | undefined;
-  /**
-   * Wide-to-narrow ratio. Must be >= 2.
-   *
-   * Has no effect in this version in `code39ToOperators()`, which takes an already-encoded
-   * matrix; passing it there emits a one-time `ModernPdfLibWarning` (code
-   * `MPL_IGNORED_OPTION`). `encodeCode39()` takes the value as its own argument.
-   */
-  readonly wideToNarrowRatio?: number | undefined;
   /** Quiet-zone width in narrow modules on each side. Default: `10`. */
   readonly quietZone?: number | undefined;
   /** Bar colour. Default: grayscale black. */
   readonly color?: Color | undefined;
-  /**
-   * Show human-readable text below the barcode. Default: `false`.
-   *
-   * Has no effect in this version: the text is not drawn; passing `true` emits a one-time
-   * `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`).
-   */
-  readonly showText?: boolean | undefined;
-  /**
-   * Include a modulo-43 check digit.
-   *
-   * Has no effect in this version in `code39ToOperators()`, which takes an already-encoded
-   * matrix; passing `true` there emits a one-time `ModernPdfLibWarning` (code
-   * `MPL_IGNORED_OPTION`). `encodeCode39()` takes the value as its own argument.
-   */
-  readonly includeCheckDigit?: boolean | undefined;
 }
 
 // ---------------------------------------------------------------------------
@@ -288,6 +265,9 @@ function n(value: number): string {
  * @param y        Y coordinate of the barcode origin (lower-left).
  * @param options  Rendering options.
  * @returns        A string of PDF content-stream operators.
+ * @throws {UnsupportedOptionError}  If `options` has a `showText` or `includeCheckDigit` of
+ *                 `true` or a `wideToNarrowRatio`, which were removed in 0.41.0; pass the last
+ *                 two to {@link encodeCode39}, and `renderStyledBarcode` draws the text.
  */
 export function code39ToOperators(
   matrix: BarcodeMatrix,
@@ -295,27 +275,7 @@ export function code39ToOperators(
   y: number,
   options?: Code39Options,
 ): string {
-  if (options?.showText === true) {
-    warnOnce(
-      'ignored-option:code39ToOperators showText',
-      'MPL_IGNORED_OPTION',
-      '`code39ToOperators()`: the option `showText` has no effect in this version.',
-    );
-  }
-  if (options?.includeCheckDigit === true) {
-    warnOnce(
-      'ignored-option:code39ToOperators includeCheckDigit',
-      'MPL_IGNORED_OPTION',
-      '`code39ToOperators()`: the option `includeCheckDigit` has no effect in this version.',
-    );
-  }
-  if (options?.wideToNarrowRatio !== undefined) {
-    warnOnce(
-      'ignored-option:code39ToOperators wideToNarrowRatio',
-      'MPL_IGNORED_OPTION',
-      '`code39ToOperators()`: the option `wideToNarrowRatio` has no effect in this version.',
-    );
-  }
+  rejectRemovedOptions('code39ToOperators()', options);
   const height = options?.height ?? 50;
   const moduleWidth = options?.moduleWidth ?? 1;
   const quietZone = options?.quietZone ?? 10;

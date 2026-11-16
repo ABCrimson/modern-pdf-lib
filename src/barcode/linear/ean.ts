@@ -16,7 +16,7 @@ import { applyFillColor } from '../../core/operators/color.js';
 import type { Color } from '../../core/operators/color.js';
 import type { BarcodeMatrix, BarcodeOptions } from '../types.js';
 import { InvalidArgumentError } from '../../errors.js';
-import { warnOnce } from '../../internal/warnings.js';
+import { rejectRemovedOptions } from '../internal/removedOptions.js';
 
 // Re-export the options type under an EAN-specific alias for convenience.
 export type { BarcodeOptions as EanOptions } from '../types.js';
@@ -249,29 +249,7 @@ const DEFAULTS = {
   height: 50,
   moduleWidth: 1,
   quietZone: 10,
-  fontSize: 10,
 } as const;
-
-/**
- * Warn once per entry and option that `showText` or `fontSize` was passed to
- * an entry that draws no text.
- *
- * @internal
- */
-export function warnIgnoredTextOptions(entry: string, options: BarcodeOptions | undefined): void {
-  for (const [name, passed] of [
-    ['showText', options?.showText === true],
-    ['fontSize', options?.fontSize !== undefined],
-  ] as const) {
-    if (passed) {
-      warnOnce(
-        `ignored-option:${entry} ${name}`,
-        'MPL_IGNORED_OPTION',
-        `\`${entry}()\`: the option \`${name}\` has no effect in this version.`,
-      );
-    }
-  }
-}
 
 /**
  * Generate PDF content-stream operators for an EAN-13 barcode.
@@ -285,6 +263,8 @@ export function warnIgnoredTextOptions(entry: string, options: BarcodeOptions | 
  * @param options  Rendering options.
  * @returns        A string of PDF operators ready to be appended to a
  *                 content stream.
+ * @throws {UnsupportedOptionError}  If `options` has a `showText` of `true` or a `fontSize`,
+ *                 which were removed in 0.41.0; `renderStyledBarcode` draws the text.
  */
 export function ean13ToOperators(
   matrix: BarcodeMatrix,
@@ -292,7 +272,7 @@ export function ean13ToOperators(
   y: number,
   options?: BarcodeOptions,
 ): string {
-  warnIgnoredTextOptions('ean13ToOperators', options);
+  rejectRemovedOptions('ean13ToOperators()', options);
   return matrixToOperators(matrix, x, y, options);
 }
 
@@ -304,6 +284,8 @@ export function ean13ToOperators(
  * @param y        Lower-left y coordinate.
  * @param options  Rendering options.
  * @returns        A string of PDF operators.
+ * @throws {UnsupportedOptionError}  If `options` has a `showText` of `true` or a `fontSize`,
+ *                 which were removed in 0.41.0; `renderStyledBarcode` draws the text.
  */
 export function ean8ToOperators(
   matrix: BarcodeMatrix,
@@ -311,7 +293,7 @@ export function ean8ToOperators(
   y: number,
   options?: BarcodeOptions,
 ): string {
-  warnIgnoredTextOptions('ean8ToOperators', options);
+  rejectRemovedOptions('ean8ToOperators()', options);
   return matrixToOperators(matrix, x, y, options);
 }
 

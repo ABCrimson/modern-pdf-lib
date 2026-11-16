@@ -14,7 +14,7 @@ import { applyFillColor } from '../../core/operators/color.js';
 import { saveState, restoreState } from '../../core/operators/state.js';
 import { rectangle, fill } from '../../core/operators/graphics.js';
 import { InvalidArgumentError } from '../../errors.js';
-import { warnOnce } from '../../internal/warnings.js';
+import { rejectRemovedOptions } from '../internal/removedOptions.js';
 
 // ---------------------------------------------------------------------------
 // Public types
@@ -25,14 +25,6 @@ export type ErrorCorrectionLevel = 'L' | 'M' | 'Q' | 'H';
 
 /** Options for rendering a QR code to PDF operators. */
 export interface QrCodeOptions {
-  /**
-   * Error correction level.
-   *
-   * Has no effect in this version in `qrCodeToOperators()`, which takes an already-encoded
-   * matrix; passing it there emits a one-time `ModernPdfLibWarning` (code
-   * `MPL_IGNORED_OPTION`). `encodeQrCode()` takes the value as its own argument.
-   */
-  readonly errorCorrection?: ErrorCorrectionLevel;
   /** Size of each module in PDF points. Default: `2`. */
   readonly moduleSize?: number;
   /** Number of quiet-zone modules around the code. Default: `4`. */
@@ -1436,6 +1428,8 @@ export function encodeQrCode(
  * @param y        Y position in PDF points.
  * @param options  Rendering options (module size, quiet zone, colours).
  * @returns        A string of PDF content-stream operators.
+ * @throws {UnsupportedOptionError}  If `options` has an `errorCorrection`, which was removed
+ *                 in 0.41.0; pass the level to {@link encodeQrCode}.
  */
 export function qrCodeToOperators(
   matrix: QrCodeMatrix,
@@ -1443,13 +1437,7 @@ export function qrCodeToOperators(
   y: number,
   options: QrCodeOptions = {},
 ): string {
-  if (options.errorCorrection !== undefined) {
-    warnOnce(
-      'ignored-option:qrCodeToOperators errorCorrection',
-      'MPL_IGNORED_OPTION',
-      '`qrCodeToOperators()`: the option `errorCorrection` has no effect in this version.',
-    );
-  }
+  rejectRemovedOptions('qrCodeToOperators()', options);
   const moduleSize = options.moduleSize ?? 2;
   const quietZone = options.quietZone ?? 4;
   const fgColor = options.color ?? { type: 'grayscale' as const, gray: 0 };

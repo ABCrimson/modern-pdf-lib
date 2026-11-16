@@ -19,7 +19,7 @@ import type { Color } from '../../core/operators/color.js';
 import { applyFillColor } from '../../core/operators/color.js';
 import type { BarcodeMatrix } from '../types.js';
 import { InvalidArgumentError } from '../../errors.js';
-import { warnOnce } from '../../internal/warnings.js';
+import { rejectRemovedOptions } from '../internal/removedOptions.js';
 
 // ---------------------------------------------------------------------------
 // Code 128 bar patterns (107 symbols: values 0-106)
@@ -163,20 +163,6 @@ export interface Code128Options {
   readonly quietZone?: number;
   /** Bar colour. Default: black (grayscale 0). */
   readonly color?: Color;
-  /**
-   * Show human-readable text below the barcode. Default: `false`.
-   *
-   * Has no effect in this version: the text is not drawn; passing `true` emits a one-time
-   * `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`).
-   */
-  readonly showText?: boolean;
-  /**
-   * Font size for the human-readable text.
-   *
-   * Has no effect in this version: no text is drawn; passing it emits a one-time
-   * `ModernPdfLibWarning` (code `MPL_IGNORED_OPTION`).
-   */
-  readonly fontSize?: number;
 }
 
 // BarcodeMatrix is imported from ../types.js
@@ -450,6 +436,8 @@ function n(value: number): string {
  * @param y        Y coordinate of the barcode origin (lower-left).
  * @param options  Rendering options.
  * @returns        A string of PDF content-stream operators.
+ * @throws {UnsupportedOptionError}  If `options` has a `showText` of `true` or a `fontSize`,
+ *                 which were removed in 0.41.0; `renderStyledBarcode` draws the text.
  */
 export function code128ToOperators(
   matrix: BarcodeMatrix,
@@ -457,20 +445,7 @@ export function code128ToOperators(
   y: number,
   options?: Code128Options,
 ): string {
-  if (options?.showText === true) {
-    warnOnce(
-      'ignored-option:code128ToOperators showText',
-      'MPL_IGNORED_OPTION',
-      '`code128ToOperators()`: the option `showText` has no effect in this version.',
-    );
-  }
-  if (options?.fontSize !== undefined) {
-    warnOnce(
-      'ignored-option:code128ToOperators fontSize',
-      'MPL_IGNORED_OPTION',
-      '`code128ToOperators()`: the option `fontSize` has no effect in this version.',
-    );
-  }
+  rejectRemovedOptions('code128ToOperators()', options);
   const height = options?.height ?? 50;
   const moduleWidth = options?.moduleWidth ?? 1;
   const quietZone = options?.quietZone ?? 10;

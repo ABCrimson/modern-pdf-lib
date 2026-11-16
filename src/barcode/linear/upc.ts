@@ -10,12 +10,8 @@
  * Reference: GS1 General Specifications, Section 5.2.
  */
 
-import {
-  encodeEan13,
-  calculateEanCheckDigit,
-  matrixToOperators,
-  warnIgnoredTextOptions,
-} from './ean.js';
+import { encodeEan13, calculateEanCheckDigit, matrixToOperators } from './ean.js';
+import { rejectRemovedOptions } from '../internal/removedOptions.js';
 import type { BarcodeMatrix, BarcodeOptions } from '../types.js';
 import { InvalidArgumentError } from '../../errors.js';
 
@@ -99,6 +95,8 @@ export function encodeUpcA(data: string): BarcodeMatrix {
  * @param y        Lower-left y coordinate.
  * @param options  Rendering options.
  * @returns        A string of PDF operators.
+ * @throws {UnsupportedOptionError}  If `options` has a `showText` of `true` or a `fontSize`,
+ *                 which were removed in 0.41.0; `renderStyledBarcode` draws the text.
  */
 export function upcAToOperators(
   matrix: BarcodeMatrix,
@@ -106,6 +104,6 @@ export function upcAToOperators(
   y: number,
   options?: BarcodeOptions,
 ): string {
-  warnIgnoredTextOptions('upcAToOperators', options);
+  rejectRemovedOptions('upcAToOperators()', options);
   return matrixToOperators(matrix, x, y, options);
 }
