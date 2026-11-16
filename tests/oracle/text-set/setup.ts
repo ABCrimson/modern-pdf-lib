@@ -2,11 +2,12 @@
  * Shared parts of the text oracle set: text the library writes through its public API, read
  * back by pdf.js 6.5 and qpdf 12.
  *
- * Every test file of tests/oracle/text-set writes one kind of text (document information,
- * annotations, form fields, outline titles, standard-font page text, table cells) and compares
- * what the two readers report with the text it was given. The input texts are the same four for
- * every file: ASCII, text that PDFDocEncoding and WinAnsiEncoding both hold, CJK text that needs
- * UTF-16BE, and a character outside the Basic Multilingual Plane (a surrogate pair).
+ * Each test file of tests/oracle/text-set writes one kind of text (document information,
+ * annotations, form fields, outline titles, standard-font page text, table cells) and compares what
+ * pdf.js, and for document strings qpdf, report with the text it was given. The files that write
+ * document strings share four input texts: ASCII, text that PDFDocEncoding and WinAnsiEncoding
+ * both hold, CJK text that needs UTF-16BE, and a character outside the Basic Multilingual Plane (a
+ * surrogate pair).
  *
  * pdf.js page text is read with `disableNormalization` and joined without collapsing
  * whitespace, so a lost or changed space shows (tests/helpers/oracle/pdfjs.ts collapses it).
@@ -25,7 +26,7 @@ import { decodeTextString } from '../../../src/core/internal/textString.js';
 import { withPdfjs } from '../../helpers/oracle/pdfjs.js';
 import { expectQpdfClean, QPDF_BIN, QpdfError } from '../../helpers/oracle/qpdf.js';
 
-/** The four input texts of every file of the set. */
+/** The four input texts of the files that write document strings. */
 export const INPUTS = {
   ascii: 'Plain ASCII (1)',
   latin: 'Café – € “x” Š',

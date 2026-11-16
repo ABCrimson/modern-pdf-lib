@@ -102,6 +102,8 @@ describe('text field values read back by pdf.js and qpdf', () => {
     await expectFieldValues(await cleanSave(catalogFieldDoc(values)), NAMES, TEXTS);
   });
 
+  // Passes as soon as PdfString.fromText exists: the change that adds fromText turns this marker
+  // into a plain test (no field writer is on this route).
   knownDefect(
     defectKey('core-document-01', '0.41.0'),
     'dictionary level: field values made with PdfString.fromText read back as set',

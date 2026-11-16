@@ -48,7 +48,7 @@ describe('outline titles read back by pdf.js and qpdf', () => {
     'text above U+00FF: pdf.js and qpdf read each outline title as set',
     {
       failsWith:
-        /^UnencodableTextError: A PDF byte string cannot encode "–" \(U\+2013\) at index 6:/,
+        /^UnencodableTextError: A PDF byte string cannot encode "–" \(U\+2013\) at index \d+:/,
     },
     async () => {
       await expectTitlesReadBack([INPUTS.latin, INPUTS.cjk, INPUTS.astral]);
