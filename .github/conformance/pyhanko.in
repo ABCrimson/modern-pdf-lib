@@ -1,6 +1,6 @@
 # Top-level pins of the pyHanko oracle in .github/workflows/conformance.yml.
 # pyhanko-requirements.txt is generated from this file with uv 0.13.7 (run locally, never in CI);
 # the exact command is the header of that file. Regenerate it whenever a pin here moves.
-pyhanko==0.38.1
+pyhanko==0.38.2
 pyhanko-cli==0.6.0
 pyhanko-certvalidator==0.33.0
